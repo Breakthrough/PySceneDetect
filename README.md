@@ -5,7 +5,7 @@ PySceneDetect
 A Python/OpenCV-Based Video Scene Cut Detector
 ----------------------------------------------------------
 
-PySceneDetect is a command-line tool which analyzes a video, looking for scene changes or cuts.  The output timecodes can then be used with antoher tool (e.g. `ffmpeg`, `mkvmerge`) to split the video up into individual clips.  Note that PySceneDetect is currently in alpha and under development (see Current Status below for details).
+PySceneDetect is a command-line tool which analyzes a video, looking for scene changes or cuts.  The output timecodes can then be used with another tool (e.g. `ffmpeg`, `mkvmerge`) to split the video up into individual clips.  Note that PySceneDetect is currently in alpha and under development (see Current Status below for details).
 
 
 Download & Requirements
@@ -47,6 +47,7 @@ As of version `0.1-alpha`, although fade in/outs are detected in videos, they ar
 
  - allow specification of an output file
  - export timecodes in multiple formats to match popular applications
+     - `mkvmerge` format: `HH:MM:SS.nnnnn`, comma-separated
  - interpolate between fade in/outs to determine approximate scene cut time
 
 ### Future Plans
