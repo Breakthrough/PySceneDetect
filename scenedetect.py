@@ -41,7 +41,7 @@ import cv2
 import numpy
 
 
-VERSION_STRING = '0.1.0-alpha'
+VERSION_STRING = '0.1-alpha'
 ABOUT_STRING   = """
 PySceneDetect %s
 -----------------------------------------------
@@ -59,7 +59,7 @@ THE SOFTWARE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, EXPRESS OR IMPLIED.
 """ % VERSION_STRING
 
 
-def analyze_video_threshold(cap, threshold, min_percent, block_size):
+def analyze_video_threshold(cap, threshold, min_percent, block_size, show_output = True):
     """ Performs threshold analysis on video to find fades in/out of scenes.
 
     Args:
@@ -69,10 +69,9 @@ def analyze_video_threshold(cap, threshold, min_percent, block_size):
                         to trigger a fade out (or over to trigger a fade in).
         block_size:     Number of rows to sum pixels of at once.  Can be tuned
                         for performance, depending on image size.
+        show_output:    True to print updates while detecting, False otherwise.
 
     Returns:
-        (TODO: fades currently printed to stdout.)
-
         A list of tuples in the form (fade type, time, frame number) where
         fade type is 0 for fade-out and 1 for fade-in, and time/frame number
         is the position of the fade in the video, in milliseconds/frames.
@@ -80,13 +79,16 @@ def analyze_video_threshold(cap, threshold, min_percent, block_size):
     print 'Performing threshold analysis (intensity %d, min %d%%)...' % (
         threshold, min_percent )
 
+    fade_list      = []
+    fade_names     = ("OUT", "IN ")
     min_percent    = min_percent / 100.0
     last_frame_amt = None
 
-    print ''
-    print '----------------------------------------'
-    print ' FADE TYPE |     TIME     |   FRAME #   '
-    print '----------------------------------------'
+    if show_output:
+        print ''
+        print '----------------------------------------'
+        print ' FADE TYPE |     TIME     |   FRAME #   '
+        print '----------------------------------------'
 
     while True:
         # Get next frame from video.
@@ -111,22 +113,30 @@ def analyze_video_threshold(cap, threshold, min_percent, block_size):
             last_frame_amt = curr_frame_amt
             continue
 
-        # Detect fade in from black.
-        if curr_frame_amt >= min_pixels and last_frame_amt < min_pixels:
-            print "  IN       | %9d ms | %10d" % (
-                cap.get(cv2.cv.CV_CAP_PROP_POS_MSEC),
-                cap.get(cv2.cv.CV_CAP_PROP_POS_FRAMES) )
+        fade_type = None
 
         # Detect fade out to black.
-        elif curr_frame_amt < min_pixels and last_frame_amt >= min_pixels:
-            print "  OUT      | %9d ms | %10d" % (
-                cap.get(cv2.cv.CV_CAP_PROP_POS_MSEC),
-                cap.get(cv2.cv.CV_CAP_PROP_POS_FRAMES) )
+        if curr_frame_amt < min_pixels and last_frame_amt >= min_pixels:
+            fade_type = 0
+        # Detect fade in from black.
+        elif curr_frame_amt >= min_pixels and last_frame_amt < min_pixels:
+            fade_type = 1
+
+        if not fade_type == None:
+            pos_msec   = cap.get(cv2.cv.CV_CAP_PROP_POS_MSEC)
+            pos_frames = cap.get(cv2.cv.CV_CAP_PROP_POS_FRAMES)
+            fade_list.append((fade_type, pos_msec, pos_frames))
+            if show_output:
+                print "  %s      | %9d ms | %10d" % (
+                    fade_names[fade_type], pos_msec, pos_frames )
 
         last_frame_amt = curr_frame_amt
 
-    print '-----------------------------------------'
-    print ''
+    if show_output:
+        print '-----------------------------------------'
+        print ''
+
+    return fade_list
 
 
 def int_type_check(min_val, max_val = None, metavar = None):
