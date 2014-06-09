@@ -1,0 +1,18 @@
+
+Parsing video ./testvideo.mp4...
+Video Resolution / Framerate: 1280 x 720 / 29.970 FPS
+Performing threshold analysis (intensity 8, min 95%)...
+
+----------------------------------------
+ FADE TYPE |     TIME     |   FRAME #   
+----------------------------------------
+  IN       |      1167 ms |         35
+  OUT      |      6172 ms |        185
+  IN       |      7240 ms |        217
+  OUT      |     12145 ms |        364
+  IN       |     13346 ms |        400
+  OUT      |     23256 ms |        697
+-----------------------------------------
+
+Read 719 frames in 2.12 seconds (avg. 338.9 FPS).
+
