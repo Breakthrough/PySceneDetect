@@ -41,7 +41,7 @@ import cv2
 import numpy
 
 
-VERSION_STRING = '0.1-alpha'
+VERSION_STRING = '0.1.0-alpha'
 ABOUT_STRING   = """
 PySceneDetect %s
 -----------------------------------------------

@@ -41,7 +41,7 @@ Detailed descriptions of the above parameters, as well as their default values, 
 Current Status / Known Issues
 -----------------------------
 
-As of version `0.1-alpha`, although fade in/outs are detected in videos, they are not interpolated into scenes.  In addition, the results are displayed to `stdout`, and not in any particular timecode format.  These issues will be addressed in the following version, before moving towards content-aware scene detection.
+As of version `0.1.0-alpha`, although fade in/outs are detected in videos, they are not interpolated into scenes.  In addition, the results are displayed to `stdout`, and not in any particular timecode format.  These issues will be addressed in the following version, before moving towards content-aware scene detection.
 
 ### Immediate Work
 
