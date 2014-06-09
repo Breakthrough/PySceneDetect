@@ -2,10 +2,12 @@
 
 PySceneDetect
 ==========================================================
-A Python/OpenCV-Based Video Scene Cut Detector
+Video Scene Detection and Analysis Tool
 ----------------------------------------------------------
 
-PySceneDetect is a command-line tool which analyzes a video, looking for scene changes or cuts.  The output timecodes can then be used with another tool (e.g. `ffmpeg`, `mkvmerge`) to split the video up into individual clips.  Note that PySceneDetect is currently in alpha and under development (see Current Status below for details).
+PySceneDetect is a command-line tool, written in Python and using OpenCV, which analyzes a video, looking for scene changes or cuts.  The output timecodes can then be used with another tool (e.g. `ffmpeg`, `mkvmerge`) to split the video into individual clips.  A frame-by-frame analysis can also be generated, to help with determining optimal threshold values or detecting patterns/other analysis methods for a particular video.
+
+Note that PySceneDetect is currently in alpha (see Current Status below for details).
 
 
 Download & Requirements
@@ -35,11 +37,15 @@ To perform threshold-based analysis, with a threshold intensity of 16, and a mat
 
     ./scenedetect.py --input myvideo.mp4 --threshold 16 --minpercent 90
 
-Detailed descriptions of the above parameters, as well as their default values, can be obtained by using the `--help` flag.
+Detailed descriptions of the above parameters, as well as their default values, can be obtained by using the `--help` flag.  Visual example of the parameters used in threshold mode:
+
+![parameters in threshold mode](https://github.com/Breakthrough/PySceneDetect/raw/resources/images/threshold-param-example.png)
+
+You can download the file `testvideo.mp4` as well as the expected output `testvideo-results.txt` [from here](https://github.com/Breakthrough/PySceneDetect/tree/resources/tests).
 
 
 Current Status / Known Issues
------------------------------
+----------------------------------------------------------
 
 As of version `0.1.0-alpha`, although fade in/outs are detected in videos, they are not interpolated into scenes.  In addition, the results are displayed to `stdout`, and not in any particular timecode format.  These issues will be addressed in the following version, before moving towards content-aware scene detection.
 
@@ -60,9 +66,11 @@ As of version `0.1.0-alpha`, although fade in/outs are detected in videos, they 
 You can find additional information regarding PySceneDetect at the following URL:
 http://www.bcastell.com/projects/pyscenedetect/
 
+
 ----------------------------------------------------------
 
 Licensed under BSD 2-Clause (see the `LICENSE` file for details).
 
 Copyright (C) 2013-2014 Brandon Castellano.
 All rights reserved.
+
