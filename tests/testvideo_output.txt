@@ -1,5 +1,4 @@
-
-Parsing video ./testvideo.mp4...
+Parsing video testvideo.mp4...
 Video Resolution / Framerate: 1280 x 720 / 29.970 FPS
 Performing threshold analysis (intensity 8, min 95%)...
 
@@ -14,5 +13,15 @@ Performing threshold analysis (intensity 8, min 95%)...
   OUT      |     23256 ms |        697
 -----------------------------------------
 
-Read 719 frames in 2.12 seconds (avg. 338.9 FPS).
+Read 719 frames in 2.08 seconds (avg. 346.1 FPS).
+
+----------------------------------------
+  SCENE #  |     TIME     |   FRAME #   
+----------------------------------------
+     0     |         0 ms |          0
+     1     |      6706 ms |        201
+     2     |     12746 ms |        382
+-----------------------------------------
+
+Detected 3 scenes in video.
 
