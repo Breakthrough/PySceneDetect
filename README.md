@@ -13,10 +13,10 @@ Note that PySceneDetect is currently in alpha (see Current Status below for deta
 Download & Requirements
 ----------------------------------------------------------
 
-You can download the latest release of [PySceneDetect from here](https://github.com/Breakthrough/PySceneDetect/releases).  To run PySceneDetect, you will need:
+You can download [PySceneDetect from here](https://github.com/Breakthrough/PySceneDetect/releases); to run it, you will need:
 
  - [Python 2 / 3](https://www.python.org/) (tested on 2.7.X, untested but should work on 3.X)
- - OpenCV-Python Bindings (can usually be found in Linux package repos already, Windows users can find [prebuilt binaries for Python 2.7 here](http://www.lfd.uci.edu/~gohlke/pythonlibs/#opencv))
+ - OpenCV Python Module (can usually be found in Linux package repos already, Windows users can find [prebuilt binaries for Python 2.7 here](http://www.lfd.uci.edu/~gohlke/pythonlibs/#opencv))
  - [Numpy](http://sourceforge.net/projects/numpy/)
 
 To ensure you have all the requirements, open a `python` interpreter, and ensure you can `import numpy` and `import cv2` without any errors.
@@ -29,9 +29,9 @@ To run PySceneDetect, you can invoke `python scenedetect.py` or `./scenedetect.p
 
     ./scenedetect.py --help
 
-To perform threshold-based analysis with the default parameters, on a video file named `myvideo.mp4`:
+To perform threshold-based analysis with the default parameters, on a video named `myvideo.mp4`, saving a list of scenes to `myvideo_scenes.csv` (they are also printed to the terminal):
 
-    ./scenedetect.py --input myvideo.mp4
+    ./scenedetect.py --input myvideo.mp4 --output myvideo_scenes.csv
 
 To perform threshold-based analysis, with a threshold intensity of 16, and a match percent of 90:
 
@@ -44,22 +44,26 @@ Detailed descriptions of the above parameters, as well as their default values, 
 You can download the file `testvideo.mp4` as well as the expected output `testvideo-results.txt` [from here](https://github.com/Breakthrough/PySceneDetect/tree/resources/tests).
 
 
-Current Status / Known Issues
+Current Status
 ----------------------------------------------------------
 
-As of version `0.1.0-alpha`, although fade in/outs are detected in videos, they are not interpolated into scenes.  In addition, the results are displayed to `stdout`, and not in any particular timecode format.  These issues will be addressed in the following version, before moving towards content-aware scene detection.
+See [the Releases page](https://github.com/Breakthrough/PySceneDetect/releases) for a list of all versions, changes, and download links.  The latest stable release of PySceneDetect is `v0.2.0-alpha`.
 
-### Immediate Work
+### Current Features
 
- - allow specification of an output file
+ - analyzes passed video file for changes in intensity/content (currently based on mean pixel value/brightness)
+ - detects fade-in and fade-out based on user-defined threshold
+ - exports list of scenes to .CSV file (both timecodes and frame numbers)
+
+### In Process
+
  - export timecodes in multiple formats to match popular applications
      - `mkvmerge` format: `HH:MM:SS.nnnnn`, comma-separated
- - interpolate between fade in/outs to determine approximate scene cut time
+ - adaptive or user-defined bias for fade in/out interpolation
 
-### Future Plans
+### Planned Features
 
  - export scenes in chapter/XML format
- - adaptive or user-defined bias for fade in/out interpolation
  - content-aware scene detection
 
 
