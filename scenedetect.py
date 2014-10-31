@@ -218,39 +218,6 @@ def int_type_check(min_val, max_val = None, metavar = None):
         ArgumentTypeError: Passed argument must be integer within proper range.
     """
     if metavar == None: metavar = 'value'
-    def _type_check(value):
-        value = int(value)
-        valid = True
-        msg   = ''
-        if (max_val == None):
-            if (value < min_val): valid = False
-            msg = 'invalid choice: %d (%s must be at least %d)' % (
-                value, metavar, min_val )
-        else:
-            if (value < min_val or value > max_val): valid = False
-            msg = 'invalid choice: %d (%s must be between %d and %d)' % (
-                value, metavar, min_val, max_val )
-        if not valid:
-            raise argparse.ArgumentTypeError(msg)
-        return value
-    return _type_check
-
-
-def int_type_check(min_val, max_val = None, metavar = None):
-    """ Creates an argparse type for a range-limited integer.
-
-    The passed argument is declared valid if it is a valid integer which
-    is greater than or equal to min_val, and if max_val is specified,
-    less than or equal to max_val.
-
-    Returns:
-        A function which can be passed as an argument type, when calling
-        add_argument on an ArgumentParser object
-
-    Raises:
-        ArgumentTypeError: Passed argument must be integer within proper range.
-    """
-    if metavar == None: metavar = 'value'
     def _type_checker(value):
         value = int(value)
         valid = True
