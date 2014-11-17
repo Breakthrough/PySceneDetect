@@ -1,4 +1,7 @@
-scene,timecode(ms),frame
-0,0.000000,0
-1,6706.700000,201
-2,12746.066667,382
+scene,timecode,frame,time (ms)
+0,00:00:00.0,0.000000,0
+1,00:00:06.706,201.000000,6706
+2,00:00:12.746,382.000000,12746
+
+Comma-separated timecode list (e.g. for use with mkvmerge):
+00:00:06.706,00:00:12.746
