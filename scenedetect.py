@@ -41,7 +41,7 @@ import cv2
 import numpy
 
 
-VERSION_STRING = '0.2.0-alpha'
+VERSION_STRING = '0.2.1-alpha'
 ABOUT_STRING   = """
 PySceneDetect %s
 -----------------------------------------------
@@ -83,12 +83,13 @@ def analyze_video_threshold(cap, threshold, min_percent, block_size, show_output
     fade_names     = ("OUT", "IN ")
     min_percent    = min_percent / 100.0
     last_frame_amt = None
+    h_rule         = '-----------------------------------------------------'
 
     if show_output:
         print ''
-        print '----------------------------------------'
-        print ' FADE TYPE |     TIME     |   FRAME #   '
-        print '----------------------------------------'
+        print h_rule
+        print ' FADE TYPE |     TIME      |   FRAME #  |  TIMECODE  '
+        print h_rule
 
     while True:
         # Get next frame from video.
@@ -127,17 +128,17 @@ def analyze_video_threshold(cap, threshold, min_percent, block_size, show_output
             pos_frames = cap.get(cv2.cv.CV_CAP_PROP_POS_FRAMES)
             fade_list.append((fade_type, pos_msec, pos_frames))
             if show_output:
-                print "  %s      | %9d ms | %10d" % (
-                    fade_names[fade_type], pos_msec, pos_frames )
+                pos_tc = get_timecode_string(pos_msec, False)
+                print "  %s      |  %9d ms | %10d |  %s  " % (
+                    fade_names[fade_type], pos_msec, pos_frames, pos_tc )
 
         last_frame_amt = curr_frame_amt
 
     if show_output:
-        print '-----------------------------------------'
+        print h_rule
         print ''
 
     return fade_list
-
 
 def generate_scene_list(cap, fade_list, csv_out = None, include_last = False, show_output = True):
     """ Creates a list of scenes from a sorted list of fades in/out.
@@ -156,14 +157,16 @@ def generate_scene_list(cap, fade_list, csv_out = None, include_last = False, sh
     Returns:
         A list of scenes as tuples in the form (time, frame number).
     """
+    h_rule = '------------------------------------------------------'
+
     if csv_out:
-        csv_out.write("scene,timecode(ms),frame\n")
+        csv_out.write("scene,timecode,frame,time (ms)\n")
 
     if show_output:
         print ''
-        print '----------------------------------------'
-        print '  SCENE #  |     TIME     |   FRAME #   '
-        print '----------------------------------------'
+        print h_rule
+        print '  SCENE #  |     TIME     |   FRAME #  |   TIMECODE   '
+        print h_rule
 
     scene_list = []
     scene_list.append((0,0))    # Scenes in form (timecode, frame number)
@@ -178,12 +181,13 @@ def generate_scene_list(cap, fade_list, csv_out = None, include_last = False, sh
                             cap.get(cv2.cv.CV_CAP_PROP_POS_FRAMES) ) )
 
     last_fade = None
+    tc_list = []
 
     for fade in fade_list:
         # We create a new scene for each fade-in we detect.
         if (fade[0] == 1 and last_fade):
             scene_list.append( ((fade[1] + last_fade[1]) / 2.0,
-                                (fade[2] + last_fade[2]) / 2  ) )
+                                (fade[2] + last_fade[2]) / 2.0 ) )
         last_fade = fade
 
     if include_last and last_fade[0] == 0:
@@ -191,17 +195,59 @@ def generate_scene_list(cap, fade_list, csv_out = None, include_last = False, sh
 
     if csv_out or show_output:
         for scene_idx in range(len(scene_list)):
+            pos_tc = get_timecode_string(scene_list[scene_idx][0])
             if csv_out:
-                csv_out.write("%d,%f,%d\n" % (
-                    scene_idx, scene_list[scene_idx][0], scene_list[scene_idx][1]) )
+                csv_out.write("%d,%s,%f,%d\n" % (
+                    scene_idx, pos_tc, scene_list[scene_idx][1], scene_list[scene_idx][0]) )
             if show_output:
-                    print "   %3d     | %9d ms | %10d" % (
-                        scene_idx, scene_list[scene_idx][0], scene_list[scene_idx][1] )
+                    print "   %3d     | %9d ms | %10d | %s" % (
+                        scene_idx, scene_list[scene_idx][0], scene_list[scene_idx][1], pos_tc )
+            if scene_idx > 0:
+                tc_list.append(pos_tc)
         if show_output:
-            print '-----------------------------------------'
+            print h_rule
             print ''
+            print 'Comma-separated timecode list (e.g. for use with mkvmerge):'
+            print ','.join(tc_list)
+            print ''
+        if csv_out:
+            csv_out.write("\nComma-separated timecode list (e.g. for use with mkvmerge):\n")
+            csv_out.write(','.join(tc_list))
+            csv_out.write('\n')
 
     return scene_list
+
+def get_timecode_string(time_msec, show_msec = True):
+    """ Formats a time, in ms, into a timecode of the form HH:MM:SS.nnnnn.
+
+    This is the default timecode format used by mkvmerge for splitting a video.
+
+    Args:
+        time_msec:      Integer representing milliseconds from start of video.
+        show_msec:      If False, omits the milliseconds part from the output.
+    Returns:
+        A string with a formatted timecode (HH:MM:SS.nnnnn).
+    """
+    out_nn, timecode_str = int(time_msec), ''
+
+    base_msec = 1000 * 60 * 60  # 1 hour in ms
+    out_HH = int(time_msec / base_msec)
+    out_nn -= out_HH * base_msec
+
+    base_msec = 1000 * 60       # 1 minute in ms
+    out_MM = int(time_msec / base_msec)
+    out_nn -= out_MM * base_msec
+
+    base_msec = 1000            # 1 second in ms
+    out_SS = int(time_msec / base_msec)
+    out_nn -= out_SS * base_msec
+
+    if show_msec:
+        timecode_str = "%02d:%02d:%02d.%d" % (out_HH, out_MM, out_SS, out_nn)
+    else:
+        timecode_str = "%02d:%02d:%02d" % (out_HH, out_MM, out_SS)
+
+    return timecode_str
 
 
 def int_type_check(min_val, max_val = None, metavar = None):
