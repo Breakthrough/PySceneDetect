@@ -41,7 +41,7 @@ import cv2
 import numpy
 
 
-VERSION_STRING = '0.2.1-alpha'
+VERSION_STRING = '0.2.2-alpha'
 ABOUT_STRING   = """
 PySceneDetect %s
 -----------------------------------------------
@@ -90,6 +90,7 @@ def analyze_video_threshold(cap, threshold, min_percent, block_size, show_output
         print h_rule
         print ' FADE TYPE |     TIME      |   FRAME #  |  TIMECODE  '
         print h_rule
+
 
     while True:
         # Get next frame from video.
@@ -231,15 +232,15 @@ def get_timecode_string(time_msec, show_msec = True):
     out_nn, timecode_str = int(time_msec), ''
 
     base_msec = 1000 * 60 * 60  # 1 hour in ms
-    out_HH = int(time_msec / base_msec)
+    out_HH = int(out_nn / base_msec)
     out_nn -= out_HH * base_msec
 
     base_msec = 1000 * 60       # 1 minute in ms
-    out_MM = int(time_msec / base_msec)
+    out_MM = int(out_nn / base_msec)
     out_nn -= out_MM * base_msec
 
     base_msec = 1000            # 1 second in ms
-    out_SS = int(time_msec / base_msec)
+    out_SS = int(out_nn / base_msec)
     out_nn -= out_SS * base_msec
 
     if show_msec:

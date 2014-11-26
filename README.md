@@ -13,7 +13,7 @@ Note that PySceneDetect is currently in alpha; see Current Features & Roadmap be
 Download & Requirements
 ----------------------------------------------------------
 
-The latest version of PySceneDetect (`v0.2.1-alpha`) can be [downloaded here](https://github.com/Breakthrough/PySceneDetect/releases); to run it, you will need:
+The latest version of PySceneDetect (`v0.2.2-alpha`) can be [downloaded here](https://github.com/Breakthrough/PySceneDetect/releases); to run it, you will need:
 
  - [Python 2 / 3](https://www.python.org/) (tested on 2.7.X, untested but should work on 3.X)
  - OpenCV Python Module (usually found in Linux package repos as `python-opencv`, Windows users can find [prebuilt binaries for Python 2.7 here](http://www.lfd.uci.edu/~gohlke/pythonlibs/#opencv))
@@ -63,12 +63,14 @@ Visit [the Releases page](https://github.com/Breakthrough/PySceneDetect/releases
  - add output-suppression mode for better automation with external scripts/programs
  - analysis mode to export frame-by-frame video metrics
  - adaptive or user-defined bias for fade in/out interpolation
+ - interactive/guided mode for learning parameters
 
 ### Planned Features
 
  - export scenes in chapter/XML format
  - content-aware scene detection
  - additional timecode formats
+ - graphical interface
 
 
 You can find additional information regarding PySceneDetect at the following URL:
