@@ -141,6 +141,44 @@ def analyze_video_threshold(cap, threshold, min_percent, block_size, show_output
 
     return fade_list
 
+
+def generate_video_stats(cap, stats_file = None):
+    """ Performs threshold analysis on video to find fades in/out of scenes.
+
+    Args:
+        cap:            An *opened* OpenCV VideoCapture object.
+        stats_file:     A file-like object to write the video statistics to.
+    """
+    print 'Generating statistics for video...'
+
+    stats_file.write('time,frame,avg. pixel value,%% delta vs prev. frame\n')
+
+    last_frame = None
+    while True:
+        # Get next frame from video.
+        (rv, im) = cap.read()
+        if not rv:   # im is a valid image if and only if rv is true
+            break
+
+        # Compute minimum number of pixels required to trigger a fade.
+        curr_frame_amt   = 0    # Current number of pixels above/below the threshold.
+        curr_frame_row   = 0    # Current row offset in frame being processed.
+        num_pixel_values = float(im.shape[0] * im.shape[1] * im.shape[2])
+
+        pos_msec = get_timecode_string(cap.get(cv2.cv.CV_CAP_PROP_POS_MSEC))
+        frame_avg = numpy.sum(im[:,:,:]) / num_pixel_values
+        frame_delta = 0
+        if not (last_frame is None):
+            frame_delta = numpy.sum(numpy.abs(im[:,:,:] - last_frame[:,:,:])) / num_pixel_values
+            
+        stats_file.write('%s,%d,%3.1f,%3.1f\n' % (
+            pos_msec, cap.get(cv2.cv.CV_CAP_PROP_POS_FRAMES), frame_avg, frame_delta) )
+
+        last_frame = im.copy()
+
+    print 'Video stats written to disk.'
+
+
 def generate_scene_list(cap, fade_list, csv_out = None, include_last = False, show_output = True):
     """ Creates a list of scenes from a sorted list of fades in/out.
 
@@ -321,15 +359,18 @@ def get_cli_parser():
     parser.add_argument('-o', '--output', metavar = 'SCENE_LIST',
         type = argparse.FileType('w'),
         help = 'File to store detected scenes in; comma-separated value format (.csv). Will be overwritten if exists.')
-    parser.add_argument('-t', '--threshold',  metavar = 'intensity',
+    parser.add_argument('-t', '--threshold', metavar = 'intensity',
         type = int_type_check(0, 255, 'intensity'), default = 8,
         help = '8-bit intensity value, from 0-255, to use as a fade in/out detection threshold.')
     parser.add_argument('-m', '--minpercent', metavar = 'percent',
         type = int_type_check(0, 100, 'percentage'), default = 95,
         help = 'Amount of pixels in a frame, from 0-100%%, that must fall under [intensity].')
-    parser.add_argument('-b', '--blocksize',  metavar = 'rows',
+    parser.add_argument('-b', '--blocksize', metavar = 'rows',
         type = int_type_check(1, None, 'number of rows'), default = 32,
         help = 'Number of rows in frame to check at once, can be tuned for performance.')
+    parser.add_argument('-s', '--statsfile', metavar = 'STATS_FILE',
+        type = argparse.FileType('w'),
+        help = 'File to store video statistics data, comma-separated value format (.csv). Will be overwritten if exists.')
     #parser.add_argument('-s', '--startindex', metavar = 'offset',
     #    type = int, default = 0,
     #    help = 'Starting index for chapter/scene output.')
@@ -361,42 +402,47 @@ def main():
     video_width  = cap.get(cv2.cv.CV_CAP_PROP_FRAME_WIDTH)
     video_height = cap.get(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT)
     video_fps    = cap.get(cv2.cv.CV_CAP_PROP_FPS)
-    print "Video Resolution / Framerate: %d x %d / %2.3f FPS" % (
+    print 'Video Resolution / Framerate: %d x %d / %2.3f FPS' % (
         video_width, video_height, video_fps )
 
     start_time = cv2.getTickCount()  # Record the time we started processing.
 
-    # Perform threshold analysis on video, get list of fades in/out.
-    fade_list = analyze_video_threshold( cap,
-        args.threshold, args.minpercent, args.blocksize )
+    if (args.statsfile):
+        # Only generate statistics, to help setting further parameters.
+        generate_video_stats(cap, args.statsfile)
 
-    # Get # of frames based on position of last frame we read.
-    frame_count = cap.get(cv2.cv.CV_CAP_PROP_POS_FRAMES)
-
-    # Compute & display number of frames, runtime, and average framerate.
-    total_runtime = float(cv2.getTickCount() - start_time) / cv2.getTickFrequency()
-    avg_framerate = float(frame_count) / total_runtime
-    print "Read %d frames in %4.2f seconds (avg. %4.1f FPS)." % (
-        frame_count, total_runtime, avg_framerate )
-
-    # Ensure we actually detected anything from the video file.
-    if not len(fade_list) > 0:
-        print "Error - no fades detected in video!"
     else:
+        # Perform threshold analysis on video, get list of fades in/out.
+        fade_list = analyze_video_threshold( cap,
+            args.threshold, args.minpercent, args.blocksize )
 
-        # Generate list of scenes from fades, writing to CSV output if specified.      
-        scene_list = generate_scene_list(cap, fade_list, args.output)   
-        if (args.output): args.output.close()   # Close the file if it was passed.
-        # 
+        # Get # of frames based on position of last frame we read.
+        frame_count = cap.get(cv2.cv.CV_CAP_PROP_POS_FRAMES)
 
+        # Compute & display number of frames, runtime, and average framerate.
+        total_runtime = float(cv2.getTickCount() - start_time) / cv2.getTickFrequency()
+        avg_framerate = float(frame_count) / total_runtime
+        print 'Read %d frames in %4.2f seconds (avg. %4.1f FPS).' % (
+            frame_count, total_runtime, avg_framerate )
+
+        # Ensure we actually detected anything from the video file.
+        if not len(fade_list) > 0:
+            print 'Error - no fades detected in video!'
+        else:
+            # Generate list of scenes from fades, writing to CSV output if specified.      
+            scene_list = generate_scene_list(cap, fade_list, args.output)   
+            print 'Detected %d scenes in video.' % len(scene_list)
+
+    # Cleanup (release all memory and close file handles).
     cap.release()
+    if (args.output): args.output.close()
+    if (args.statsfile): args.statsfile.close()
 
-    print "Detected %d scenes in video." % len(scene_list)
-    print ""
+    print ''
 
 
 #
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
 

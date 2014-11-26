@@ -43,7 +43,7 @@ Below is a visual example of the parameters used in threshold mode (click for fu
 
 [<img src="https://github.com/Breakthrough/PySceneDetect/raw/resources/images/threshold-param-example.png" alt="parameters in threshold mode" width="360" />](https://github.com/Breakthrough/PySceneDetect/raw/resources/images/threshold-param-example.png)
 
-You can download the file `testvideo.mp4`, as well as the expected output `testvideo-results.txt`, [from the resources branch](https://github.com/Breakthrough/PySceneDetect/tree/resources/tests), for testing the operation of the program.  Data for the above graph was obtained by running PySceneDetect on `testvideo.mp4` in analysis mode (coming soon).
+You can download the file `testvideo.mp4`, as well as the expected output `testvideo-results.txt`, [from the resources branch](https://github.com/Breakthrough/PySceneDetect/tree/resources/tests), for testing the operation of the program.  Data for the above graph was obtained by running PySceneDetect on `testvideo.mp4` in statistics mode (by specifying the `-s` argument).
 
 
 Current Features & Roadmap
@@ -55,22 +55,21 @@ Visit [the Releases page](https://github.com/Breakthrough/PySceneDetect/releases
 
  - analyzes passed video file for changes in intensity/content (currently based on mean pixel value/brightness)
  - detects fade-in and fade-out based on user-defined threshold
- - exports list of scenes to .CSV file (both timecodes and frame numbers)
+ - exports list of scenes to .CSV file (both timecodes and frame numbers) (`-o`)
  - exports timecodes in `mkvmerge` format: `HH:MM:SS.nnnnn`, comma-separated
+ - statistics/analysis mode to export frame-by-frame video metrics (`-s`)
 
 ### In Process
 
  - add output-suppression mode for better automation with external scripts/programs
- - analysis mode to export frame-by-frame video metrics
+ - content-aware scene detection
  - adaptive or user-defined bias for fade in/out interpolation
- - interactive/guided mode for learning parameters
 
 ### Planned Features
 
  - export scenes in chapter/XML format
- - content-aware scene detection
  - additional timecode formats
- - graphical interface
+ - interactive/guided mode, eventually moving to a graphical interface
 
 
 You can find additional information regarding PySceneDetect at the following URL:
