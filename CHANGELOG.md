@@ -3,10 +3,13 @@ PySceneDetect Changelog
 ==========================================================
 
 
-### 0.2.3-alpha (in progress)
+### 0.2.3-alpha-dev
 
- * major code refactor
  * preperation for beta release and content-aware analysis
+ * expanded output statistics to include HSV-colourspace information
+ * [wip] basic thumbnail generation support
+ * [wip] major code refactor
+ * [wip] content-aware scene detection 
 
 
 ### 0.2.2-alpha

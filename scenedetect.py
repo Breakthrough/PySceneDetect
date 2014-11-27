@@ -41,7 +41,7 @@ import cv2
 import numpy
 
 
-VERSION_STRING = '0.2.2-alpha'
+VERSION_STRING = '0.2.3-alpha-dev'
 ABOUT_STRING   = """
 PySceneDetect %s
 -----------------------------------------------
@@ -90,7 +90,6 @@ def analyze_video_threshold(cap, threshold, min_percent, block_size, show_output
         print h_rule
         print ' FADE TYPE |     TIME      |   FRAME #  |  TIMECODE  '
         print h_rule
-
 
     while True:
         # Get next frame from video.
@@ -151,9 +150,10 @@ def generate_video_stats(cap, stats_file = None):
     """
     print 'Generating statistics for video...'
 
-    stats_file.write('time,frame,avg. pixel value,%% delta vs prev. frame\n')
+    stats_file.write('time,frame,avg. pixel value, avg. pixel delta [RGB],avg. pixel delta [HSV],avg. delta h, avg. delta s, avg. delta l\n')
 
     last_frame = None
+    last_written = False
     while True:
         # Get next frame from video.
         (rv, im) = cap.read()
@@ -165,14 +165,34 @@ def generate_video_stats(cap, stats_file = None):
         curr_frame_row   = 0    # Current row offset in frame being processed.
         num_pixel_values = float(im.shape[0] * im.shape[1] * im.shape[2])
 
+        pos_frames = cap.get(cv2.cv.CV_CAP_PROP_POS_FRAMES)
         pos_msec = get_timecode_string(cap.get(cv2.cv.CV_CAP_PROP_POS_MSEC))
         frame_avg = numpy.sum(im[:,:,:]) / num_pixel_values
-        frame_delta = 0
+        frame_delta = -1
+        delta_hsv = [-1, -1, -1, -1]
         if not (last_frame is None):
-            frame_delta = numpy.sum(numpy.abs(im[:,:,:] - last_frame[:,:,:])) / num_pixel_values
+            frame_delta = numpy.sum(numpy.abs(im.astype(numpy.int32) - last_frame.astype(numpy.int32))) / num_pixel_values
+            last_hsv = cv2.split(cv2.cvtColor(last_frame, cv2.COLOR_BGR2HSV))
+            im_hsv = cv2.split(cv2.cvtColor(im, cv2.COLOR_BGR2HSV))
+            for i in range(3):
+                num_pixels = im_hsv[i].shape[0] * im_hsv[i].shape[1]
+                im_hsv[i] = im_hsv[i].astype(numpy.int32)
+                last_hsv[i] = last_hsv[i].astype(numpy.int32)
+                delta_hsv[i] = numpy.sum(numpy.abs(im_hsv[i] - last_hsv[i])) / float(num_pixels)
+            delta_hsv[3] = (delta_hsv[0] + delta_hsv[1] + delta_hsv[2]) / 3.0
+            #cv2.imshow('a', im_v)
+            #cv2.waitKey(0)
+            #if frame_delta > 80:
+            #    if not last_written:
+            #        cv2.imwrite('out%05d.png' % (pos_frames-1), last_frame)
+            #    cv2.imwrite('out%05d.png' % pos_frames, im)
+            #    last_written = True
+            #else:
+            #    last_written = False
             
-        stats_file.write('%s,%d,%3.1f,%3.1f\n' % (
-            pos_msec, cap.get(cv2.cv.CV_CAP_PROP_POS_FRAMES), frame_avg, frame_delta) )
+        stats_file.write('%s,%d,%3.1f,%3.1f,%3.1f,%3.1f,%3.1f,%3.1f\n' % (
+            pos_msec, pos_frames, frame_avg, frame_delta,
+            delta_hsv[3], delta_hsv[0], delta_hsv[1], delta_hsv[2]) )
 
         last_frame = im.copy()
 
