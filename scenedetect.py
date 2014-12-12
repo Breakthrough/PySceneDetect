@@ -59,6 +59,93 @@ THE SOFTWARE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, EXPRESS OR IMPLIED.
 """ % VERSION_STRING
 
 
+
+class SceneDetector(object):
+
+
+    def __init__(self, video_path):
+        self.last_frame = None
+        self.cap = None
+        self.fade_start = None
+        pass
+
+
+    def detect_scenes(self, fade_threshold, content_threshold):
+
+        # TODO: Open cap object first.
+
+        metrics = self.get_next_frame()  # Load first frame metrics.
+        scene_list = list()
+        scene_list.append((metrics['pos_frame'], metrics['pos_ms']))
+
+        ignore_fade = False
+
+        while True:
+
+            # If we already detected a fade-out, wait until the luma threshold is surpassed.
+            if not (self.fade_start is None) and metrics['avg_luma'] > fade_threshold:
+                # Add new scene half-way between fade-out and current position.
+                if not ignore_fade:
+                    pos_frame = (metrics['pos_frame'] + self.fade_start[0]) / 2
+                    pos_ms    = (metrics['pos_ms']    + self.fade_start[1]) / 2
+                    scene_list.append((pos_frame, pos_ms))
+                self.fade_start = None
+                ignore_fade = False
+            
+            # Otherwise, we check to see if there is a fade-out:
+            elif (self.fade_start is None) and metrics['avg_luma'] <= fade_threshold:
+                # Store current position to compute scene cut when the next fade-in is detected.
+                self.fade_start = (metrics['pos_frame'], metrics['pos_ms'])
+                # Ignore a fade-out at the beginning of the video.
+                if self.last_frame is None:
+                    ignore_fade = True
+            
+            # Lastly, we check for any large changes in content from the last frame.
+            elif not (self.last_frame is None):
+                delta_hsv_avg = (metrics['delta_hue'] + metrics['delta_sat'] + metrics['delta_luma']) / 3.0
+                if delta_hsv_avg >= content_threshold:
+                    # TODO: Check minimum scene length to avoid false positives.
+                    scene_list.append((metrics['pos_frame'], metrics['pos_ms']))
+                    pass
+
+            # Read metrics for next frame, exiting loop if we hit the end of the video.
+            metrics = self.get_next_frame()
+            if metrics is None:
+                break
+
+        return scene_list
+
+
+    def get_next_frame(self):
+        # Get next frame from video.
+        (rv, im) = self.cap.read()
+        if not rv:
+            return None
+
+        im_hsv = cv2.split(cv2.cvtColor(im, cv2.COLOR_BGR2HSV))
+        for i in range(3):
+            im_hsv[i] = im_hsv[i].astype(numpy.int32)
+
+        # Compute frame metrics, return as dict().
+        frame_metrics = dict()
+
+        num_pixels = float(im_hsv[0].shape[0] * im_hsv[0].shape[1])
+
+        frame_metrics['pos_ms']     = cap.get(cv2.cv.CV_CAP_PROP_POS_MSEC)
+        frame_metrics['pos_frame']  = cap.get(cv2.cv.CV_CAP_PROP_POS_FRAMES)
+        frame_metrics['avg_luma']   = numpy.sum(im_hsv[2]) / num_pixels
+
+        if not (self.last_frame is None):
+            frame_metrics['delta_hue']  = numpy.sum(numpy.abs(im_hsv[0] - self.last_frame[0])) / num_pixels
+            frame_metrics['delta_sat']  = numpy.sum(numpy.abs(im_hsv[1] - self.last_frame[1])) / num_pixels
+            frame_metrics['delta_luma'] = numpy.sum(numpy.abs(im_hsv[2] - self.last_frame[2])) / num_pixels
+        
+        self.last_frame = im_hsv
+
+        return frame_metrics
+
+
+
 def analyze_video_threshold(cap, threshold, min_percent, block_size, show_output = True):
     """ Performs threshold analysis on video to find fades in/out of scenes.
 
