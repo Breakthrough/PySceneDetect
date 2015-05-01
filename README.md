@@ -59,15 +59,16 @@ See [`CHANGELOG.md`](https://github.com/Breakthrough/PySceneDetect/blob/master/C
  - exports timecodes in `mkvmerge` format: `HH:MM:SS.nnnnn`, comma-separated
  - statistics/analysis mode to export frame-by-frame video metrics (`-s`)
 
-### In Process
+### In Progress
 
  - add output-suppression mode for better automation with external scripts/programs
- - content-aware scene detection
+ - content-aware scene detection based on changes in the HSV color space 
  - adaptive or user-defined bias for fade in/out interpolation
 
 ### Planned Features
 
  - export scenes in chapter/XML format
+ - improve robustness of content-aware detection by combining with edge detection (similar to [MATLAB-based scene change detector](http://www.mathworks.com/help/vision/examples/scene-change-detection.html))
  - additional timecode formats
  - interactive/guided mode, eventually moving to a graphical interface
 
