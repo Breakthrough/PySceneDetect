@@ -41,7 +41,7 @@ import cv2
 import numpy
 
 
-VERSION_STRING = '0.2.3-alpha-dev'
+VERSION_STRING = '0.2.3-alpha'
 ABOUT_STRING   = """
 PySceneDetect %s
 -----------------------------------------------
@@ -57,6 +57,15 @@ This software uses the following third-party components:
 THE SOFTWARE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, EXPRESS OR IMPLIED.
 
 """ % VERSION_STRING
+
+
+# Compatibility fix for OpenCV < 3.0
+if cv2.__version__ == '2':
+    cv2.CAP_PROP_FRAME_WIDTH = cv2.cv.CV_CAP_PROP_FRAME_WIDTH
+    cv2.CAP_PROP_FRAME_HEIGHT = cv2.cv.CV_CAP_PROP_FRAME_HEIGHT
+    cv2.CAP_PROP_FPS = cv2.cv.CV_CAP_PROP_FPS
+    cv2.CAP_PROP_POS_MSEC = cv2.cv.CV_CAP_PROP_POS_MSEC
+    cv2.CAP_PROP_POS_FRAMES = cv2.cv.CV_CAP_PROP_POS_FRAMES
 
 
 def analyze_video_threshold(cap, threshold, min_percent, block_size, show_output = True):
@@ -124,8 +133,8 @@ def analyze_video_threshold(cap, threshold, min_percent, block_size, show_output
             fade_type = 1
 
         if not fade_type == None:
-            pos_msec   = cap.get(cv2.cv.CV_CAP_PROP_POS_MSEC)
-            pos_frames = cap.get(cv2.cv.CV_CAP_PROP_POS_FRAMES)
+            pos_msec   = cap.get(cv2.CAP_PROP_POS_MSEC)
+            pos_frames = cap.get(cv2.CAP_PROP_POS_FRAMES)
             fade_list.append((fade_type, pos_msec, pos_frames))
             if show_output:
                 pos_tc = get_timecode_string(pos_msec, False)
@@ -165,8 +174,8 @@ def generate_video_stats(cap, stats_file = None):
         curr_frame_row   = 0    # Current row offset in frame being processed.
         num_pixel_values = float(im.shape[0] * im.shape[1] * im.shape[2])
 
-        pos_frames = cap.get(cv2.cv.CV_CAP_PROP_POS_FRAMES)
-        pos_msec = get_timecode_string(cap.get(cv2.cv.CV_CAP_PROP_POS_MSEC))
+        pos_frames = cap.get(cv2.CAP_PROP_POS_FRAMES)
+        pos_msec = get_timecode_string(cap.get(cv2.CAP_PROP_POS_MSEC))
         frame_avg = numpy.sum(im[:,:,:]) / num_pixel_values
         frame_delta = -1
         delta_hsv = [-1, -1, -1, -1]
@@ -233,11 +242,11 @@ def generate_scene_list(cap, fade_list, csv_out = None, include_last = False, sh
     # Ensure fade list starts on fade in and ends with fade out.
     # (fade type 0 == out, 1 == in)
     if not (fade_list[0][0] == 1):
-        fade_list.insert(0, ( 0, cap.get(cv2.cv.CV_CAP_PROP_POS_MSEC),
-                              cap.get(cv2.cv.CV_CAP_PROP_POS_FRAMES) ) )
+        fade_list.insert(0, ( 0, cap.get(cv2.CAP_PROP_POS_MSEC),
+                              cap.get(cv2.CAP_PROP_POS_FRAMES) ) )
     if not (fade_list[-1][0] == 0):
-        fade_list.append( ( 0, cap.get(cv2.cv.CV_CAP_PROP_POS_MSEC),
-                            cap.get(cv2.cv.CV_CAP_PROP_POS_FRAMES) ) )
+        fade_list.append( ( 0, cap.get(cv2.CAP_PROP_POS_MSEC),
+                            cap.get(cv2.CAP_PROP_POS_FRAMES) ) )
 
     last_fade = None
     tc_list = []
@@ -419,9 +428,9 @@ def main():
         print 'Parsing video %s...' % args.input.name
 
     # Print video parameters (resolution, FPS, etc...)
-    video_width  = cap.get(cv2.cv.CV_CAP_PROP_FRAME_WIDTH)
-    video_height = cap.get(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT)
-    video_fps    = cap.get(cv2.cv.CV_CAP_PROP_FPS)
+    video_width  = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
+    video_height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
+    video_fps    = cap.get(cv2.CAP_PROP_FPS)
     print 'Video Resolution / Framerate: %d x %d / %2.3f FPS' % (
         video_width, video_height, video_fps )
 
@@ -437,7 +446,7 @@ def main():
             args.threshold, args.minpercent, args.blocksize )
 
         # Get # of frames based on position of last frame we read.
-        frame_count = cap.get(cv2.cv.CV_CAP_PROP_POS_FRAMES)
+        frame_count = cap.get(cv2.CAP_PROP_POS_FRAMES)
 
         # Compute & display number of frames, runtime, and average framerate.
         total_runtime = float(cv2.getTickCount() - start_time) / cv2.getTickFrequency()
