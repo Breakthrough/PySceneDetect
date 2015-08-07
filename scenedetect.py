@@ -66,9 +66,9 @@ class SceneDetector(object):
 
     def detect(self, current_frame, last_frame):
         """Detect if the scene changed between the last_frame and current_frame.
-        Returns True if the scene changed, False otherwise."""
+        Returns tuple of change type if the scene changed, False otherwise."""
         # Prototype method, no actual detection, so we just return False.
-        return False
+        return False        # can also return 'cut', 'in', or 'out'
 
 
 class ThresholdDetector(SceneDetector):
@@ -101,3 +101,25 @@ class EdgeDetector(SceneDetector):
         # to detect changes to the scene's contents.
         return False
 
+#
+# Three types of 'cuts':  Scene CUT, IN, OUT
+#  -> technically only need CUT/IN, but what about fade bias?
+#  -> thus have each detector return a CUT, FADE_IN, or FADE_OUT
+#  -> allow fade bias to have 3 values - 'in', 'out', 'mid'
+#     so say fade out at 1s, fade in at 2s:
+#       for in, scene starts at @ 1s;  1.5s for mid;  2s for out
+#
+#  Logic for each case for FADES:
+#    -> start above threshold, Scene 1 starts at 0s (video_start)
+#    -> start below threshold, Scene 0 at 0s, Scene 1, bias between 0s and fade_in
+#    -> end below threshold, Scene N+1, bias new scene between fade_out and video_end
+#    -> end above threshold, Scene N
+#
+#  When reading from the statsfile:
+#    -> read only, but if needs updating, need to generate new statsfile
+#    -> make new with .new on end, rename & delete old when done
+#    -> keep frame metrics in memory for all frames incase of discrepency?
+#       or just recompute and restore the statsfile each time (to check for accuracy)?
+#
+#
+#
