@@ -60,7 +60,7 @@ THE SOFTWARE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, EXPRESS OR IMPLIED.
 
 
 # Compatibility fix for OpenCV < 3.0
-if cv2.__version__ == '2':
+if cv2.__version__[0] == '2':
     cv2.CAP_PROP_FRAME_WIDTH = cv2.cv.CV_CAP_PROP_FRAME_WIDTH
     cv2.CAP_PROP_FRAME_HEIGHT = cv2.cv.CV_CAP_PROP_FRAME_HEIGHT
     cv2.CAP_PROP_FPS = cv2.cv.CV_CAP_PROP_FPS
