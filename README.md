@@ -7,13 +7,13 @@ Video Scene Detection and Analysis Tool
 
 PySceneDetect is a command-line tool, written in Python and using OpenCV, which analyzes a video, looking for scene changes or cuts.  The output timecodes can then be used with another tool (e.g. `mkvmerge`, `ffmpeg`) to split the video into individual clips.  A frame-by-frame analysis can also be generated for a video, to help with determining optimal threshold values or detecting patterns/other analysis methods for a particular video.
 
-Note that PySceneDetect is currently in alpha; see Current Features & Roadmap below for details.  For help or other issues, you can visit #pyscenedetect on Freenode, or contact me on [my website](http://www.bcastell.com/about/).  Feel free to submit any bugs or feature requests to [the Issue Tracker](https://github.com/Breakthrough/PySceneDetect/issues) here on Github.  Development right now is a tad slow as I'm nearing the completion of my thesis, but should resume to a normal pace by fall of this year (September/October 2015).
+Note that PySceneDetect is currently in alpha; see Current Features & Roadmap below for details.  For help or other issues, you can visit #pyscenedetect on Freenode, or contact me on [my website](http://www.bcastell.com/about/).  Feel free to submit any bugs or feature requests to [the Issue Tracker](https://github.com/Breakthrough/PySceneDetect/issues) here on Github.  Development right now is a tad slow as I'm nearing the completion of my thesis, but should resume to a normal pace early in the new year (January 2016).
 
 
 Download & Requirements
 ----------------------------------------------------------
 
-The latest version of PySceneDetect (`v0.2.2-alpha`) can be [downloaded here](https://github.com/Breakthrough/PySceneDetect/releases); to run it, you will need:
+The latest version of PySceneDetect (`v0.2.4-alpha`) can be [downloaded here](https://github.com/Breakthrough/PySceneDetect/releases); to run it, you will need:
 
  - [Python 2 / 3](https://www.python.org/) (tested on 2.7.X, untested but should work on 3.X)
  - OpenCV Python Module (usually found in Linux package repos as `python-opencv`, Windows users can find [prebuilt binaries for Python 2.7 here](http://www.lfd.uci.edu/~gohlke/pythonlibs/#opencv))

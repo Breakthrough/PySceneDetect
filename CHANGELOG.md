@@ -10,9 +10,13 @@ PySceneDetect Changelog
  * [wip] thumbnail generation support
 
 
+### 0.2.4-alpha
+ * [bugfix] updated OpenCV compatibility with self-reported version on some Linux distributions
+
+
 ### 0.2.3-alpha
  * [bugfix]  updated PySceneDetect to work with latest OpenCV module (ver > 3.0)
- * [bugfix]  added compatibility
+ * [bugfix]  added compatibility/legacy code for older versions of OpenCV
  * [feature] statsfile generation includes expanded frame metrics
 
 
