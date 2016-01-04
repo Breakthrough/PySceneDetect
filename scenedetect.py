@@ -16,7 +16,7 @@
 # well as a list of optional arguments and descriptions).
 #
 #
-# Copyright (C) 2013-2014 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2013-2016 Brandon Castellano <http://www.bcastell.com>.
 #
 # PySceneDetect is licensed under the BSD 2-Clause License; see the
 # included LICENSE file or visit the following page for details:
@@ -48,12 +48,12 @@ PySceneDetect %s
 http://www.bcastell.com/projects/pyscenedetect
 https://github.com/Breakthrough/PySceneDetect
 -----------------------------------------------
-Copyright (C) 2013-2014 Brandon Castellano
+Copyright (C) 2013-2016 Brandon Castellano
 License: BSD 2-Clause (see the included LICENSE file for details, or
          visit < http://www.bcastell.com/projects/pyscenedetect >).
 This software uses the following third-party components:
   > NumPy    [Copyright (C) 2005-2013, Numpy Developers]
-  > OpenCV   [Copyright (C) 2014, Itseez]
+  > OpenCV   [Copyright (C) 2016, Itseez]
 THE SOFTWARE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, EXPRESS OR IMPLIED.
 
 """ % VERSION_STRING

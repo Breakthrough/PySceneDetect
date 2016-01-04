@@ -9,7 +9,7 @@ or any other material included in in distribution.
                 PySceneDetect License (BSD 2-Clause)
           < http://www.bcastell.com/projects/pyscenedetect >
 
-Copyright (C) 2013-2014, Brandon Castellano.
+Copyright (C) 2013-2016, Brandon Castellano.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -50,7 +50,7 @@ installing or using this software/tutorial, you agree to these terms.
     This software uses Numpy; see the LICENSE-NUMPY file
     or visit [ http://www.numpy.org/license.html ] for details.
 
-> OpenCV [Copyright (C) 2014, Itseez]:
+> OpenCV [Copyright (C) 2016, Itseez]:
     This software uses OpenCV; see the LICENSE-OPENCV file
     or visit [ http://opencv.org/license.html ] for details.
 

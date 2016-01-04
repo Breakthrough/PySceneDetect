@@ -7,7 +7,7 @@ Video Scene Detection and Analysis Tool
 
 PySceneDetect is a command-line tool, written in Python and using OpenCV, which analyzes a video, looking for scene changes or cuts.  The output timecodes can then be used with another tool (e.g. `mkvmerge`, `ffmpeg`) to split the video into individual clips.  A frame-by-frame analysis can also be generated for a video, to help with determining optimal threshold values or detecting patterns/other analysis methods for a particular video.
 
-Note that PySceneDetect is currently in alpha; see Current Features & Roadmap below for details.  For help or other issues, you can visit #pyscenedetect on Freenode, or contact me on [my website](http://www.bcastell.com/about/).  Feel free to submit any bugs or feature requests to [the Issue Tracker](https://github.com/Breakthrough/PySceneDetect/issues) here on Github.  Development right now is a tad slow as I'm nearing the completion of my thesis, but should resume to a normal pace early in the new year (January 2016).
+Note that PySceneDetect is currently in alpha; see Current Features & Roadmap below for details.  For help or other issues, you can visit #pyscenedetect on Freenode, or contact me on [my website](http://www.bcastell.com/about/).  Feel free to submit any bugs or feature requests to [the Issue Tracker](https://github.com/Breakthrough/PySceneDetect/issues) here on Github.  Development right now is a tad slow as I'm nearing the completion of my thesis, but should resume to a normal pace afterwards (mid-2016).
 
 
 Download & Requirements
@@ -81,6 +81,6 @@ http://www.bcastell.com/projects/pyscenedetect/
 
 Licensed under BSD 2-Clause (see the `LICENSE` file for details).
 
-Copyright (C) 2013-2014 Brandon Castellano.
+Copyright (C) 2013-2016 Brandon Castellano.
 All rights reserved.
 
