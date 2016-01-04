@@ -66,6 +66,7 @@ if (cv2.__version__[0] == '2') or (not cv2.__version__[0] == '3'):
     cv2.CAP_PROP_FPS = cv2.cv.CV_CAP_PROP_FPS
     cv2.CAP_PROP_POS_MSEC = cv2.cv.CV_CAP_PROP_POS_MSEC
     cv2.CAP_PROP_POS_FRAMES = cv2.cv.CV_CAP_PROP_POS_FRAMES
+    cv2.CAP_PROP_FRAME_COUNT = cv2.cv.CV_CAP_PROP_FRAME_COUNT
 
 
 class SceneDetector(object):
@@ -303,4 +304,58 @@ def get_cli_parser():
     #    help = 'Where the timecode/frame number for a given scene should start relative to the fades [in, mid, or out].')
 
     return parser
+
+
+
+def main():
+    """ Program entry point.
+
+    Handles high-level interfacing of video and scene detection / output.
+    """
+
+    # Parse CLI arguments and initialize VideoCapture object.
+    args = get_cli_parser().parse_args()
+    cap = cv2.VideoCapture()
+
+    # Attempt to open the passed input (video) file.
+    cap.open(args.input.name)
+    if not cap.isOpened():
+        print 'FATAL ERROR - could not open video %s.' % args.input.name
+        print 'cap.isOpened() is not True after calling cap.open(..)'
+        return
+    else:
+        print 'Parsing video %s...' % args.input.name
+
+
+    cv_frame_count = cap.get(cv2.CAP_PROP_FRAME_COUNT)
+
+    frames_read = 0
+    cap_closed = False
+
+    for f in xrange(cv_frame_count):
+        (rv, im) = cap.read()
+        if not rv:
+            cap_closed = True
+            break
+        frames_read += 1
+        # process frame
+
+    # Handle any errors in frames read.
+    if frames_read < cv_frame_count:
+        print 'Error - not all frames could be read from video.'
+    elif not cap_closed:
+        # continue parsing frames.
+        while True:
+            (rv, im) = cap.read()
+            if not rv:
+                cap_closed = True
+                break
+            frames_read += 1
+            # process frame
+
+
+
+if __name__ == '__main__':
+    main()
+
 
