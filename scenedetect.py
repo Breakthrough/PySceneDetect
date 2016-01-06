@@ -75,14 +75,14 @@ class SceneDetector(object):
         pass
 
 
-    def process_frame(self, current_frame, last_frame):
-        """Detect if the scene changed between the last_frame and current_frame.
-        Returns tuple of change type if the scene changed, False otherwise."""
-        # Prototype method, no actual detection, so we just return False.
-        return False        # can also return 'cut', 'in', or 'out'
+    def process_frame(self, frame_num, frame_img, frame_metrics, scene_list):
+        """Computes/stores metrics and detects any scene changes."""
+
+        # Prototype method, no actual detection.
+        return
 
 
-    def post_process():
+    def post_process(self, scene_list):
         pass
 
 
@@ -109,14 +109,25 @@ class ThresholdDetector(SceneDetector):
 #    -> end above threshold, Scene N
 ##
 
-    def __init__(self):
+    def __init__(self, threshold = 12):
         super(ThresholdDetector, self).__init__()
+        self.threshold = threshold
 
-    def process_frame(self, img):
+    def process_frame(self, frame_num, frame_img, frame_metrics, scene_list):
         # Compare average intensity of current_frame and last_frame.
         # If absolute value of pixel intensity delta is above the threshold,
         # then we trigger a new scene.
-        return False
+
+        frame_avg = 0.0
+
+        if frame_num in frame_metrics and 'frame_avg_rgb' in frame_metrics[frame_num]:
+            frame_avg = frame_metrics[frame_num]['frame_avg_rgb']
+        else:
+            num_pixel_values = frame_img.shape[0] * frame_img.shape[1] * frame_img.shape[2]
+            frame_avg = numpy.sum(frame_img[:,:,:]) / float(num_pixel_values)
+            frame_metrics[frame_num]['frame_avg_rgb'] = frame_avg_rgb
+            
+        return
 
 
 class HSVDetector(SceneDetector):
@@ -131,10 +142,23 @@ class HSVDetector(SceneDetector):
         super(HSVDetector, self).__init__()
         self.last_frame = None
 
-    def process_frame(self, img):
+    def process_frame(self, frame_num, frame_img, frame_metrics, scene_list):
         # Similar to ThresholdDetector, but using the HSV colour space DIFFERENCE instead
         # of single-frame RGB/grayscale intensity (thus cannot detect slow fades with this method).
-        return False
+        frame_delta = 0.0
+
+        if frame_num in frame_metrics and 'delta_hsv' in frame_metrics[frame_num]:
+            frame_delta = frame_metrics[frame_num]['delta_hsv']
+            pass
+ 
+        elif self.last_frame is not None:
+            frame_delta = numpy.sum( \
+                numpy.abs(frame_img.astype(numpy.int32) - self.last_frame.astype(numpy.int32)) )
+            frame_metrics[frame_num]['frame_delta'] = frame_delta
+            pass
+
+        self.last_frame = frame_img.clone()
+        return
 
 
 class EdgeDetector(SceneDetector):
@@ -147,10 +171,10 @@ class EdgeDetector(SceneDetector):
         super(EdgeDetector, self).__init__()
         self.last_result = None
 
-    def process_frame(self, img):
+    def process_frame(self, frame_num, frame_img, frame_metrics, scene_list):
         # Uses a high-pass filter to compare the current and last frames
         # to detect changes to the scene's contents.
-        return False
+        return
 
 
 class DissolveDetector(SceneDetector):
@@ -164,6 +188,9 @@ class DissolveDetector(SceneDetector):
         super(DissolveDetector, self).__init__()
         self.last_result = None
 
+
+    def process_frame(self, frame_num, frame_img, frame_metrics, scene_list):
+        return
 
 
 #
@@ -333,6 +360,12 @@ def main():
     cap_closed = False
 
     for f in xrange(cv_frame_count):
+
+        # Check if metrics required are computed first, store in a CSV.
+        # Load as a dict, pass to parsing functions.
+        # Read each frame even if stats exist, just don't process.
+
+
         (rv, im) = cap.read()
         if not rv:
             cap_closed = True
@@ -354,8 +387,12 @@ def main():
             # process frame
 
 
+    # Cleanup, release all objects and close file handles.
+    cap.release()
+
 
 if __name__ == '__main__':
     main()
+    print ''
 
 
