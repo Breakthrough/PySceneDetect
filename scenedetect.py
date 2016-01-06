@@ -112,22 +112,60 @@ class ThresholdDetector(SceneDetector):
     def __init__(self, threshold = 12):
         super(ThresholdDetector, self).__init__()
         self.threshold = threshold
+        self.fade_bias = 0.0
+        self.last_frame_avg = None
+        # Where the last fade (threshold crossing) was detected.
+        self.last_fade = { 
+            'frame': 0,         # frame number where the last detected fade is
+            'type': None        # type of fade, can be either 'in' or 'out'
+          }
+        return
 
     def process_frame(self, frame_num, frame_img, frame_metrics, scene_list):
         # Compare average intensity of current_frame and last_frame.
         # If absolute value of pixel intensity delta is above the threshold,
         # then we trigger a new scene.
-
         frame_avg = 0.0
-
         if frame_num in frame_metrics and 'frame_avg_rgb' in frame_metrics[frame_num]:
             frame_avg = frame_metrics[frame_num]['frame_avg_rgb']
         else:
             num_pixel_values = frame_img.shape[0] * frame_img.shape[1] * frame_img.shape[2]
             frame_avg = numpy.sum(frame_img[:,:,:]) / float(num_pixel_values)
             frame_metrics[frame_num]['frame_avg_rgb'] = frame_avg_rgb
-            
+
+        if self.last_frame_avg is not None:
+            if self.last_fade['type'] == 'in' and frame_avg <= self.threshold:
+                # Just faded out of a scene, wait for next fade in.
+                self.last_fade['type'] = 'out'
+                self.last_fade['frame'] = frame_num
+            elif self.last_fade['type'] == 'out' and frame_avg > self.threshold:
+                # Just faded into a new scene, compute timecode for the scene
+                # split based on the fade bias.
+                f_in = frame_num
+                f_out = self.last_fade['frame']
+                f_split = int((f_in + f_out + int(b * (f_in - f_out))) / 2)
+                scene_list.append(f_split)
+                self.last_fade['type'] = 'in'
+                self.last_fade['frame'] = frame_num
+        else:
+            self.last_fade['frame'] = 0
+            if frame_avg <= self.threshold:
+                self.last_fade['type'] = 'out'
+            else:
+                self.last_fade['type'] = 'in'
+        # Before returning, we keep track of the last frame average (can also
+        # be used to compute fades independently of the last fade type).
+        self.last_frame_avg = frame_avg
         return
+
+    def post_process(self, scene_list):
+        # If the last fade detected was a fade out, we add a corresponding new
+        # scene break to indicate the end of the scene.  This is only done for
+        # a fade out as scene breaks are computed during the scene's fade in.
+        if self.last_fade['type'] = 'out':
+            scene_list.append(self.last_fade['frame'])
+        return
+
 
 
 class HSVDetector(SceneDetector):
@@ -157,6 +195,7 @@ class HSVDetector(SceneDetector):
             frame_metrics[frame_num]['frame_delta'] = frame_delta
             pass
 
+        self.last_frame.release()
         self.last_frame = frame_img.clone()
         return
 
@@ -352,7 +391,6 @@ def main():
         return
     else:
         print 'Parsing video %s...' % args.input.name
-
 
     cv_frame_count = cap.get(cv2.CAP_PROP_FRAME_COUNT)
 
