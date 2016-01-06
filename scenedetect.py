@@ -74,13 +74,10 @@ class SceneDetector(object):
     def __init__(self):
         pass
 
-
     def process_frame(self, frame_num, frame_img, frame_metrics, scene_list):
-        """Computes/stores metrics and detects any scene changes."""
-
-        # Prototype method, no actual detection.
+        """Computes/stores metrics and detects any scene changes.
+        Prototype method, no actual detection."""
         return
-
 
     def post_process(self, scene_list):
         pass
@@ -91,56 +88,101 @@ class ThresholdDetector(SceneDetector):
 
     Detects both fast cuts and slow fades so long as an appropriate threshold
     is chosen (especially taking into account the minimum grey/black level).
+
+    Attributes:
+        threshold:   8-bit intensity value that each pixel value (R, G, and B)
+                     must be <= to in order to trigger a fade in/out.
+        min_percent: Float between 0.0 and 1.0 which represents the minimum
+                     percent of pixels in a frame that must meet the threshold
+                     value in order to trigger a fade in/out.
+        fade_bias:   Float between -1.0 and +1.0 representing the percentage of
+                     timecode skew for the start of a scene (-1.0 causing a
+                     cut at the fade-to-black, 0.0 in the middle, and +1.0
+                     causing the cut to be right when the threshold is passed).
+        add_final_scene: Boolean indicating if the video ends on a fade-out to
+                     generate an additional scene at this timecode.
+        block_size:  Number of rows in the image to sum per iteration (can be
+                     tuned to increase performance in some cases; should be
+                     computed programmatically in the future).
     """
 
-## Development Notes:
-#
-# Three types of 'cuts':  Scene CUT, IN, OUT
-#  -> technically only need CUT/IN, but what about fade bias?
-#  -> thus have each detector return a CUT, FADE_IN, or FADE_OUT
-#  -> allow fade bias to have 3 values - 'in', 'out', 'mid'
-#     so say fade out at 1s, fade in at 2s:
-#       for in, scene starts at @ 1s;  1.5s for mid;  2s for out
-#
-#  Logic for each case for FADES:
-#    -> start above threshold, Scene 1 starts at 0s (video_start)
-#    -> start below threshold, Scene 0 at 0s, Scene 1, bias between 0s and fade_in
-#    -> end below threshold, Scene N+1, bias new scene between fade_out and video_end
-#    -> end above threshold, Scene N
-##
-
-    def __init__(self, threshold = 12, fade_bias = 0.0):
+    def __init__(self, threshold = 12, min_percent = 0.95, fade_bias = 0.0, add_final_scene = False, block_size = 8):
         super(ThresholdDetector, self).__init__()
         self.threshold = threshold
         self.fade_bias = fade_bias
+        self.min_percent = min_percent
         self.last_frame_avg = None
+        # Whether to add an additional scene or not when ending on a fade out
+        # (as cuts are only added on fade ins; see post_process() for details).
+        self.add_final_scene = add_final_scene
         # Where the last fade (threshold crossing) was detected.
         self.last_fade = { 
             'frame': 0,         # frame number where the last detected fade is
             'type': None        # type of fade, can be either 'in' or 'out'
           }
+        self.block_size = block_size
         return
 
+    def compute_frame_average(self, frame):
+        num_pixel_values = float(frame.shape[0] * frame.shape[1] * frame.shape[2])
+        return numpy.sum(frame[:,:,:]) / num_pixel_values
+
+    def frame_under_threshold(self, frame):
+        """Check if the frame is below (true) or above (false) the threshold.
+
+        Instead of using the average, we check all pixel values (R, G, and B)
+        meet the given threshold (within the minimum percent).  This ensures
+        that the threshold is not exceeded while maintaining some tolerance for
+        compression and noise.
+
+        Returns true if the number of pixels whose RGB values are all <= the
+        threshold (within the minimum percent as a tolerance), or false if not.
+        """
+        # First we compute the minimum number of pixels that need to meet the
+        # threshold. Internally, we check for values greater than the threshold
+        # as it's more likely that a given frame contains actual content. This
+        # is done in blocks of rows, so in many cases we only have to check a
+        # small portion of the frame instead of inspecting every single pixel.
+        num_pixel_values = float(frame.shape[0] * frame.shape[1] * frame.shape[2])
+        min_pixels = int(num_pixel_values * (1.0 - self.min_percent))
+
+        curr_frame_amt = 0
+        curr_frame_row = 0
+
+        while curr_frame_row < frame.shape[0]:
+            curr_frame_amt += \
+                numpy.sum(frame[curr_frame_row : curr_frame_row + self.block_size,:,:] > self.threshold)
+            if curr_frame_amt > min_pixels:
+                return False
+            curr_frame_row += self.block_size
+        return True
+
+
     def process_frame(self, frame_num, frame_img, frame_metrics, scene_list):
-        # Compare average intensity of current_frame and last_frame.
+        # Compare the # of pixels under threshold in current_frame & last_frame.
         # If absolute value of pixel intensity delta is above the threshold,
-        # then we trigger a new scene.
+        # then we trigger a new scene cut/break.
+
+        # The metric used here to detect scene breaks is the percent of pixels
+        # less than or equal to the threshold; however, since this differs on
+        # user-supplied values, we supply the average pixel intensity as this
+        # frame metric instead (to assist with manually selecting a threshold).
+        frame_amt = 0.0
         frame_avg = 0.0
         if frame_num in frame_metrics and 'frame_avg_rgb' in frame_metrics[frame_num]:
             frame_avg = frame_metrics[frame_num]['frame_avg_rgb']
         else:
-            num_pixel_values = frame_img.shape[0] * frame_img.shape[1] * frame_img.shape[2]
-            frame_avg = numpy.sum(frame_img[:,:,:]) / float(num_pixel_values)
+            frame_avg = self.compute_frame_average(frame_img)
             if not frame_num in frame_metrics:
                 frame_metrics[frame_num] = dict()
             frame_metrics[frame_num]['frame_avg_rgb'] = frame_avg
 
         if self.last_frame_avg is not None:
-            if self.last_fade['type'] == 'in' and frame_avg <= self.threshold:
+            if self.last_fade['type'] == 'in' and self.frame_under_threshold(frame_img):
                 # Just faded out of a scene, wait for next fade in.
                 self.last_fade['type'] = 'out'
                 self.last_fade['frame'] = frame_num
-            elif self.last_fade['type'] == 'out' and frame_avg > self.threshold:
+            elif self.last_fade['type'] == 'out' and not self.frame_under_threshold(frame_img):
                 # Just faded into a new scene, compute timecode for the scene
                 # split based on the fade bias.
                 f_in = frame_num
@@ -151,7 +193,7 @@ class ThresholdDetector(SceneDetector):
                 self.last_fade['frame'] = frame_num
         else:
             self.last_fade['frame'] = 0
-            if frame_avg <= self.threshold:
+            if self.frame_under_threshold(frame_img):
                 self.last_fade['type'] = 'out'
             else:
                 self.last_fade['type'] = 'in'
@@ -164,7 +206,7 @@ class ThresholdDetector(SceneDetector):
         # If the last fade detected was a fade out, we add a corresponding new
         # scene break to indicate the end of the scene.  This is only done for
         # a fade out as scene breaks are computed during the scene's fade in.
-        if self.last_fade['type'] == 'out':
+        if self.last_fade['type'] == 'out' and self.add_final_scene:
             scene_list.append(self.last_fade['frame'])
         return
 
@@ -275,7 +317,7 @@ def get_timecode_string(time_msec, show_msec = True):
     out_nn -= out_SS * base_msec
 
     if show_msec:
-        timecode_str = "%02d:%02d:%02d.%d" % (out_HH, out_MM, out_SS, out_nn)
+        timecode_str = "%02d:%02d:%02d.%03d" % (out_HH, out_MM, out_SS, out_nn)
     else:
         timecode_str = "%02d:%02d:%02d" % (out_HH, out_MM, out_SS)
 
@@ -374,7 +416,6 @@ def get_cli_parser():
     return parser
 
 
-
 def main():
     """ Program entry point.
 
@@ -396,7 +437,7 @@ def main():
 
 
     # ### TESTING
-    detector = ThresholdDetector(8, 1.0)
+    detector = ThresholdDetector(8, 0.95, 0.0)
     frame_metrics = dict()
     scene_list = list()
     frames_read = 0
@@ -409,6 +450,11 @@ def main():
     detector.post_process(scene_list)
     print 'Finished! Scene list:'
     print scene_list
+    i = 0
+    for s in scene_list:
+        time_msec = (1000.0 * s) / 29.970
+        print 'Scene %02d: %s' %  (i, get_timecode_string(time_msec))
+        i += 1
     return
     # ### END TESTING
 
@@ -453,5 +499,3 @@ def main():
 if __name__ == '__main__':
     main()
     print ''
-
-
