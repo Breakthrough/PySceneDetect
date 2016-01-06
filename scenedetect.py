@@ -173,8 +173,6 @@ class ThresholdDetector(SceneDetector):
             frame_avg = frame_metrics[frame_num]['frame_avg_rgb']
         else:
             frame_avg = self.compute_frame_average(frame_img)
-            if not frame_num in frame_metrics:
-                frame_metrics[frame_num] = dict()
             frame_metrics[frame_num]['frame_avg_rgb'] = frame_avg
 
         if self.last_frame_avg is not None:
@@ -220,27 +218,60 @@ class HSVDetector(SceneDetector):
     content scenes still using HSV information, use the DissolveDetector.
     """
 
-    def __init__(self):
+    def __init__(self, threshold = 30.0, min_scene_len = 15):
         super(HSVDetector, self).__init__()
+        self.threshold = threshold
+        self.min_scene_len = min_scene_len  # minimum length of any given scene, in frames
         self.last_frame = None
+        self.last_scene_cut = None
 
     def process_frame(self, frame_num, frame_img, frame_metrics, scene_list):
         # Similar to ThresholdDetector, but using the HSV colour space DIFFERENCE instead
         # of single-frame RGB/grayscale intensity (thus cannot detect slow fades with this method).
-        frame_delta = 0.0
 
-        if frame_num in frame_metrics and 'delta_hsv' in frame_metrics[frame_num]:
-            frame_delta = frame_metrics[frame_num]['delta_hsv']
-            pass
- 
-        elif self.last_frame is not None:
-            frame_delta = numpy.sum( \
-                numpy.abs(frame_img.astype(numpy.int32) - self.last_frame.astype(numpy.int32)) )
-            frame_metrics[frame_num]['frame_delta'] = frame_delta
-            pass
+        if self.last_frame is not None:
+            # Change in average of HSV (hsv), (h)ue only, (s)aturation only, (l)uminance only.
+            delta_hsv_avg, delta_h, delta_s, delta_v = 0.0, 0.0, 0.0, 0.0
 
-        self.last_frame.release()
-        self.last_frame = frame_img.clone()
+            if frame_num in frame_metrics and 'delta_hsv_avg' in frame_metrics[frame_num]:
+                delta_hsv_avg = frame_metrics[frame_num]['delta_hsv_avg']
+                delta_h = frame_metrics[frame_num]['delta_hue']
+                delta_s = frame_metrics[frame_num]['delta_sat']
+                delta_v = frame_metrics[frame_num]['delta_lum']
+
+            else:
+                num_pixels = frame_img.shape[0] * frame_img.shape[1]
+                curr_hsv = cv2.split(cv2.cvtColor(frame_img, cv2.COLOR_BGR2HSV))
+                last_hsv = cv2.split(cv2.cvtColor(self.last_frame, cv2.COLOR_BGR2HSV))
+
+                delta_hsv = [-1, -1, -1]
+                for i in range(3):
+                    num_pixels = curr_hsv[i].shape[0] * curr_hsv[i].shape[1]
+                    curr_hsv[i] = curr_hsv[i].astype(numpy.int32)
+                    last_hsv[i] = last_hsv[i].astype(numpy.int32)
+                    delta_hsv[i] = numpy.sum(numpy.abs(curr_hsv[i] - last_hsv[i])) / float(num_pixels)
+                delta_hsv.append(sum(delta_hsv) / 3.0)
+
+                delta_h, delta_s, delta_v, delta_hsv_avg = delta_hsv
+
+                frame_metrics[frame_num]['delta_hsv_avg'] = delta_hsv_avg
+                frame_metrics[frame_num]['delta_hue'] = delta_h
+                frame_metrics[frame_num]['delta_sat'] = delta_s
+                frame_metrics[frame_num]['delta_lum'] = delta_v
+
+            if delta_hsv_avg >= self.threshold:
+                if self.last_scene_cut is None or \
+                  (frame_num - self.last_scene_cut) > self.min_scene_len:
+                    scene_list.append(frame_num)
+                    self.last_scene_cut = frame_num
+            
+            #self.last_frame.release()
+            del self.last_frame
+                
+        self.last_frame = frame_img.copy()
+        return
+
+    def post_process(self, scene_list):
         return
 
 
@@ -435,17 +466,26 @@ def main():
     else:
         print 'Parsing video %s...' % args.input.name
 
-
     # ### TESTING
-    detector = ThresholdDetector(8, 0.95, 0.0)
+    #detector = ThresholdDetector(8, 0.95, 0.0)
+    detector = HSVDetector()
     frame_metrics = dict()
     scene_list = list()
     frames_read = 0
+    if args.statsfile is not None:
+        args.statsfile.write("frame,delta_hsl_avg,delta_hue,delta_sat,delta_lum\n")
     while True:
         (rv, im) = cap.read()
         if not rv:
             break
+        if not frames_read in frame_metrics:
+            frame_metrics[frames_read] = dict()
         detector.process_frame(frames_read, im, frame_metrics, scene_list)
+
+        if args.statsfile is not None and 'delta_hsv_avg' in frame_metrics[frames_read]:
+            args.statsfile.write("%d,%3.2f,%3.2f,%3.2f,%3.2f\n" % (frames_read, frame_metrics[frames_read]['delta_hsv_avg'], \
+             frame_metrics[frames_read]['delta_hue'], frame_metrics[frames_read]['delta_sat'], frame_metrics[frames_read]['delta_lum']))
+
         frames_read += 1
     detector.post_process(scene_list)
     print 'Finished! Scene list:'
@@ -455,6 +495,8 @@ def main():
         time_msec = (1000.0 * s) / 29.970
         print 'Scene %02d: %s' %  (i, get_timecode_string(time_msec))
         i += 1
+    if args.statsfile is not None:
+        args.statsfile.close()
     return
     # ### END TESTING
 
