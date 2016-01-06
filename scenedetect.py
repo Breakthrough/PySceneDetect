@@ -109,10 +109,10 @@ class ThresholdDetector(SceneDetector):
 #    -> end above threshold, Scene N
 ##
 
-    def __init__(self, threshold = 12):
+    def __init__(self, threshold = 12, fade_bias = 0.0):
         super(ThresholdDetector, self).__init__()
         self.threshold = threshold
-        self.fade_bias = 0.0
+        self.fade_bias = fade_bias
         self.last_frame_avg = None
         # Where the last fade (threshold crossing) was detected.
         self.last_fade = { 
@@ -131,7 +131,9 @@ class ThresholdDetector(SceneDetector):
         else:
             num_pixel_values = frame_img.shape[0] * frame_img.shape[1] * frame_img.shape[2]
             frame_avg = numpy.sum(frame_img[:,:,:]) / float(num_pixel_values)
-            frame_metrics[frame_num]['frame_avg_rgb'] = frame_avg_rgb
+            if not frame_num in frame_metrics:
+                frame_metrics[frame_num] = dict()
+            frame_metrics[frame_num]['frame_avg_rgb'] = frame_avg
 
         if self.last_frame_avg is not None:
             if self.last_fade['type'] == 'in' and frame_avg <= self.threshold:
@@ -143,7 +145,7 @@ class ThresholdDetector(SceneDetector):
                 # split based on the fade bias.
                 f_in = frame_num
                 f_out = self.last_fade['frame']
-                f_split = int((f_in + f_out + int(b * (f_in - f_out))) / 2)
+                f_split = int((f_in + f_out + int(self.fade_bias * (f_in - f_out))) / 2)
                 scene_list.append(f_split)
                 self.last_fade['type'] = 'in'
                 self.last_fade['frame'] = frame_num
@@ -162,7 +164,7 @@ class ThresholdDetector(SceneDetector):
         # If the last fade detected was a fade out, we add a corresponding new
         # scene break to indicate the end of the scene.  This is only done for
         # a fade out as scene breaks are computed during the scene's fade in.
-        if self.last_fade['type'] = 'out':
+        if self.last_fade['type'] == 'out':
             scene_list.append(self.last_fade['frame'])
         return
 
@@ -391,6 +393,25 @@ def main():
         return
     else:
         print 'Parsing video %s...' % args.input.name
+
+
+    # ### TESTING
+    detector = ThresholdDetector(8, 1.0)
+    frame_metrics = dict()
+    scene_list = list()
+    frames_read = 0
+    while True:
+        (rv, im) = cap.read()
+        if not rv:
+            break
+        detector.process_frame(frames_read, im, frame_metrics, scene_list)
+        frames_read += 1
+    detector.post_process(scene_list)
+    print 'Finished! Scene list:'
+    print scene_list
+    return
+    # ### END TESTING
+
 
     cv_frame_count = cap.get(cv2.CAP_PROP_FRAME_COUNT)
 
