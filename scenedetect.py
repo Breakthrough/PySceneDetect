@@ -42,6 +42,8 @@ import numpy
 
 
 VERSION_STRING = '0.3-beta-dev'
+
+# About & copyright message shown for the -v / --version CLI argument.
 ABOUT_STRING   = """
 PySceneDetect %s
 -----------------------------------------------
@@ -58,6 +60,8 @@ THE SOFTWARE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, EXPRESS OR IMPLIED.
 
 """ % VERSION_STRING
 
+# Default value for -d / --detector CLI argument.
+SCENE_DETECTOR_DEFAULT = 'threshold'
 
 # Compatibility fix for OpenCV < 3.0
 if (cv2.__version__[0] == '2') or (not cv2.__version__[0] == '3'):
@@ -67,6 +71,21 @@ if (cv2.__version__[0] == '2') or (not cv2.__version__[0] == '3'):
     cv2.CAP_PROP_POS_MSEC = cv2.cv.CV_CAP_PROP_POS_MSEC
     cv2.CAP_PROP_POS_FRAMES = cv2.cv.CV_CAP_PROP_POS_FRAMES
     cv2.CAP_PROP_FRAME_COUNT = cv2.cv.CV_CAP_PROP_FRAME_COUNT
+
+
+def get_available_detectors():
+    """Returns a tuple of two dicts of the available/enabled scene detectors.
+
+    Returns:
+        A dictionary with the form {name (string): detector (SceneDetector)},
+        where name is the common name used via the command-line, and detector
+        is a reference to the object instantiator.
+    """
+    detector_dict = {
+        'threshold': ThresholdDetector,
+        'content': ContentDetector
+    }
+    return detector_dict
 
 
 class SceneDetector(object):
@@ -171,9 +190,9 @@ class ThresholdDetector(SceneDetector):
         while curr_frame_row < frame.shape[0]:
             # Add and total the number of individual pixel values (R, G, and B)
             # in the current row block that exceed the threshold. 
-            curr_frame_amt += \
+            curr_frame_amt += int(
                 numpy.sum(frame[curr_frame_row : 
-                    curr_frame_row + self.block_size,:,:] > self.threshold)
+                    curr_frame_row + self.block_size,:,:] > self.threshold))
             # If we've already exceeded the most pixels allowed to be above the
             # threshold, we can skip processing the rest of the pixels. 
             if curr_frame_amt > min_pixels:
@@ -238,8 +257,8 @@ class ThresholdDetector(SceneDetector):
         # If the last fade detected was a fade out, we add a corresponding new
         # scene break to indicate the end of the scene.  This is only done for
         # fade-outs, as a scene cut is already added when a fade-in is found.
-        if self.last_fade['type'] == 'out' and self.add_final_scene and \
-                (frame_num - self.last_scene_cut) >= self.min_scene_len:
+        if self.last_fade['type'] == 'out' and self.add_final_scene and (
+                (frame_num - self.last_scene_cut) >= self.min_scene_len):
             scene_list.append(self.last_fade['frame'])
         return
 
@@ -294,8 +313,8 @@ class ContentDetector(SceneDetector):
                 frame_metrics[frame_num]['delta_lum'] = delta_v
 
             if delta_hsv_avg >= self.threshold:
-                if self.last_scene_cut is None or \
-                  (frame_num - self.last_scene_cut) >= self.min_scene_len:
+                if self.last_scene_cut is None or (
+                  (frame_num - self.last_scene_cut) >= self.min_scene_len):
                     scene_list.append(frame_num)
                     self.last_scene_cut = frame_num
             
@@ -310,36 +329,48 @@ class ContentDetector(SceneDetector):
         return
 
 
-class EdgeDetector(SceneDetector):
-    """Detects fast cuts/slow fades by using edge detection on adjacent frames.
-
-    Detects both fast cuts and slow fades, although some parameters may need to
-    be modified for accurate slow fade detection.
-    """
-    def __init__(self):
-        super(EdgeDetector, self).__init__()
-        self.last_result = None
-
-    def process_frame(self, frame_num, frame_img, frame_metrics, scene_list):
-        # Uses a high-pass filter to compare the current and last frames
-        # to detect changes to the scene's contents.
-        return
-
-
-class DissolveDetector(SceneDetector):
-    """Detects slow fades (dissolve cuts) via changes in the HSV colour space.
-
-    Detects slow fades only; to detect fast cuts between content scenes, the
-    ContentDetector should be used instead.
-    """
-
-    def __init__(self):
-        super(DissolveDetector, self).__init__()
-        self.last_result = None
-
-
-    def process_frame(self, frame_num, frame_img, frame_metrics, scene_list):
-        return
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+#                                                                             #
+#          Detection Methods & Algorithms Planned or In Development           #
+#                                                                             #
+#
+# class EdgeDetector(SceneDetector):
+#    """Detects fast cuts/slow fades by using edge detection on adjacent frames.
+#
+#    Computes the difference image between subsequent frames after applying a
+#    Sobel filter (can also use a high-pass or other edge detection filters) and
+#    comparing the result with a set threshold (may be found using -stats mode).
+#    Detects both fast cuts and slow fades, although some parameters may need to
+#    be modified for accurate slow fade detection.
+#    """
+#    def __init__(self):
+#        super(EdgeDetector, self).__init__()
+#                                                                             #
+#                                                                             #
+# class DissolveDetector(SceneDetector):
+#    """Detects slow fades (dissolve cuts) via changes in the HSV colour space.
+#
+#    Detects slow fades only; to detect fast cuts between content scenes, the
+#    ContentDetector should be used instead.
+#    """
+#
+#    def __init__(self):
+#        super(DissolveDetector, self).__init__()
+#                                                                             #
+#                                                                             #
+# class HistogramDetector(SceneDetector):
+#    """Detects fast cuts via histogram changes between sequential frames.
+#
+#    Detects fast cuts between content (using histogram deltas, much like the
+#    ContentDetector uses HSV colourspace deltas), as well as both fades and
+#    cuts to/from black (using a threshold, much like the ThresholdDetector).
+#    """
+#
+#    def __init__(self):
+#        super(DissolveDetector, self).__init__()
+#                                                                             #
+#                                                                             #
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 
 def get_timecode_string(time_msec, show_msec = True):
@@ -348,8 +379,8 @@ def get_timecode_string(time_msec, show_msec = True):
     This is the default timecode format used by mkvmerge for splitting a video.
 
     Args:
-        time_msec:      Integer representing milliseconds from start of video.
-        show_msec:      If False, omits the milliseconds part from the output.
+        time_msec:  Integer representing milliseconds from start of video.
+        show_msec:  If False, omits the milliseconds part from the output.
     Returns:
         A string with a formatted timecode (HH:MM:SS.nnnn).
     """
@@ -402,6 +433,41 @@ def int_type_check(min_val, max_val = None, metavar = None):
             if (value < min_val or value > max_val): valid = False
             msg = 'invalid choice: %d (%s must be between %d and %d)' % (
                 value, metavar, min_val, max_val )
+        if not valid:
+            raise argparse.ArgumentTypeError(msg)
+        return value
+    return _type_checker
+
+
+def string_type_check(valid_strings, case_sensitive = True, metavar = None):
+    """ Creates an argparse type for a list of strings.
+
+    The passed argument is declared valid if it is a valid string which exists
+    in the passed list valid_strings.  If case_sensitive is False, all input 
+    strings and strings in valid_strings are processed as lowercase.  Leading
+    and trailing whitespace is ignored in all strings.
+
+    Returns:
+        A function which can be passed as an argument type, when calling
+        add_argument on an ArgumentParser object
+
+    Raises:
+        ArgumentTypeError: Passed argument must be string within valid list.
+    """
+    if metavar == None: metavar = 'value'
+    valid_strings = [x.strip() for x in valid_strings]
+    if not case_sensitive:
+        valid_strings = [x.lower() for x in valid_strings]
+    def _type_checker(value):
+        value = str(value)
+        valid = True
+        if not case_sensitive:
+            value = value.lower()
+        if not value in valid_strings:
+            valid = False
+            case_msg = ' (case sensitive)' if case_sensitive else ''
+            msg = 'invalid choice: %s (valid settings for %s%s are: %s)' % (
+                value, metavar, case_msg, valid_strings.__str__()[1:-1])
         if not valid:
             raise argparse.ArgumentTypeError(msg)
         return value
@@ -470,6 +536,13 @@ def get_cli_parser():
         type = argparse.FileType('w'),
         help = 'File to store video statistics data, comma-separated value '
                'format (.csv). Will be overwritten if exists.')
+    parser.add_argument(
+        '-d', '--detector', metavar = 'detector',
+        type = string_type_check(get_available_detectors().keys(),
+                                 False, 'detector'),
+        default = SCENE_DETECTOR_DEFAULT,
+        help = 'Type of scene detector to use, detectors available: %s.' % (
+            get_available_detectors().keys().__str__().replace("'","")))
     #parser.add_argument(
     #    '-s', '--startindex', metavar = 'offset',
     #    type = int, default = 0,
@@ -481,7 +554,6 @@ def get_cli_parser():
     #           'start relative to the fades [in, mid, or out].')
 
     return parser
-
 
 
 def detect_scenes(cap, scene_list, detector_list, stats_file = None):
@@ -557,7 +629,7 @@ def main():
         detector.process_frame(frames_read, im, frame_metrics, scene_list)
 
         if args.statsfile is not None and 'delta_hsv_avg' in frame_metrics[frames_read]:
-            args.statsfile.write("%d,%3.2f,%3.2f,%3.2f,%3.2f\n" % (frames_read, frame_metrics[frames_read]['delta_hsv_avg'], \
+            args.statsfile.write("%d,%3.2f,%3.2f,%3.2f,%3.2f\n" % (frames_read, frame_metrics[frames_read]['delta_hsv_avg'], 
              frame_metrics[frames_read]['delta_hue'], frame_metrics[frames_read]['delta_sat'], frame_metrics[frames_read]['delta_lum']))
 
         frames_read += 1
