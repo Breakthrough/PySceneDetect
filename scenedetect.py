@@ -16,7 +16,7 @@
 # well as a list of optional arguments and descriptions).
 #
 #
-# Copyright (C) 2013-2016 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2013-2015 Brandon Castellano <http://www.bcastell.com>.
 #
 # PySceneDetect is licensed under the BSD 2-Clause License; see the
 # included LICENSE file or visit the following page for details:
@@ -34,6 +34,7 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 #
 
+from __future__ import print_function
 import sys
 import argparse
 
@@ -41,23 +42,32 @@ import cv2
 import numpy
 
 
-VERSION_STRING = '0.2.4-alpha'
-ABOUT_STRING   = """
-PySceneDetect %s
+VERSION_STRING = 'v0.3-beta-dev'
+
+# About & copyright message shown for the -v / --version CLI argument.
+ABOUT_STRING   = """PySceneDetect %s
 -----------------------------------------------
-http://www.bcastell.com/projects/pyscenedetect
 https://github.com/Breakthrough/PySceneDetect
+http://www.bcastell.com/projects/pyscenedetect
 -----------------------------------------------
 Copyright (C) 2013-2016 Brandon Castellano
-License: BSD 2-Clause (see the included LICENSE file for details, or
-         visit < http://www.bcastell.com/projects/pyscenedetect >).
+License: BSD 2-Clause (see the included LICENSE file for details,
+  or visit < http://www.bcastell.com/projects/pyscenedetect >).
+
 This software uses the following third-party components:
-  > NumPy    [Copyright (C) 2005-2013, Numpy Developers]
-  > OpenCV   [Copyright (C) 2016, Itseez]
+  > NumPy [Copyright (C) 2005-2013, Numpy Developers]
+  > OpenCV [Copyright (C) 2016, Itseez]
+
 THE SOFTWARE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, EXPRESS OR IMPLIED.
 
 """ % VERSION_STRING
 
+# Default value for -d / --detector CLI argument (see get_available_detectors()
+# for a list of valid/enabled detection methods and their string equivalents).
+SCENE_DETECTOR_DEFAULT = 'threshold'
+# Default value for -f / --format-timecode CLI argument (see the
+# get_timecode_formats() function for a list of timecode formats and names).
+TIMECODE_FORMAT_DEFAULT = 'standard'
 
 # Compatibility fix for OpenCV < 3.0
 if (cv2.__version__[0] == '2') or (not cv2.__version__[0] == '3'):
@@ -66,235 +76,341 @@ if (cv2.__version__[0] == '2') or (not cv2.__version__[0] == '3'):
     cv2.CAP_PROP_FPS = cv2.cv.CV_CAP_PROP_FPS
     cv2.CAP_PROP_POS_MSEC = cv2.cv.CV_CAP_PROP_POS_MSEC
     cv2.CAP_PROP_POS_FRAMES = cv2.cv.CV_CAP_PROP_POS_FRAMES
+    cv2.CAP_PROP_FRAME_COUNT = cv2.cv.CV_CAP_PROP_FRAME_COUNT
 
 
-def analyze_video_threshold(cap, threshold, min_percent, block_size, show_output = True):
-    """ Performs threshold analysis on video to find fades in/out of scenes.
-
-    Args:
-        cap:            An *opened* OpenCV VideoCapture object.
-        threshold:      8-bit intensity threshold, from 0-255.
-        min_percent:    Minimum %% of pixels that must fall under the threshold
-                        to trigger a fade out (or over to trigger a fade in).
-        block_size:     Number of rows to sum pixels of at once.  Can be tuned
-                        for performance, depending on image size.
-        show_output:    True to print updates while detecting, False otherwise.
+def get_available_detectors():
+    """Returns a dictionary of the available/enabled scene detectors.
 
     Returns:
-        A list of tuples in the form (fade type, time, frame number) where
-        fade type is 0 for fade-out and 1 for fade-in, and time/frame number
-        is the position of the fade in the video, in milliseconds/frames.
+        A dictionary with the form {name (string): detector (SceneDetector)},
+        where name is the common name used via the command-line, and detector
+        is a reference to the object instantiator.
     """
-    print 'Performing threshold analysis (intensity %d, min %d%%)...' % (
-        threshold, min_percent )
+    detector_dict = {
+        'threshold': ThresholdDetector,
+        'content': ContentDetector
+    }
+    return detector_dict
 
-    fade_list      = []
-    fade_names     = ("OUT", "IN ")
-    min_percent    = min_percent / 100.0
-    last_frame_amt = None
-    h_rule         = '-----------------------------------------------------'
 
-    if show_output:
-        print ''
-        print h_rule
-        print ' FADE TYPE |     TIME      |   FRAME #  |  TIMECODE  '
-        print h_rule
+def get_timecode_formats():
+    """Returns a tuple of two dicts of the available/enabled scene detectors.
 
-    while True:
-        # Get next frame from video.
-        (rv, im) = cap.read()
-        if not rv:   # im is a valid image if and only if rv is true
-            break
+    In the future, timecode parsing will be moved to discrete objects like what
+    is done with the SceneDetector objects in get_available_detectors().
 
-        # Compute minimum number of pixels required to trigger a fade.
-        curr_frame_amt   = 0    # Current number of pixels above/below the threshold.
-        curr_frame_row   = 0    # Current row offset in frame being processed.
-        num_pixel_values = float(im.shape[0] * im.shape[1] * im.shape[2])
-        min_pixels       = int(num_pixel_values * (1.0 - min_percent))
+    Returns:
+        A dictionary with the form {name (string): description (string)},
+        where name is the common name used via the command-line, and
+        description is a human-readable description of the format.
+    """
+    timecode_format_dict = {
+        'standard': 'Cut times will be given in HH:MM:SS.nnnn format.',
+        'frames': 'Cut times will be given in frames (exact integers).',
+        'seconds': 'Cut times will be given in seconds (3 decimal places).'
+    }
+    return timecode_format_dict
 
-        while curr_frame_row < im.shape[0]:
-            curr_frame_amt += numpy.sum(
-                im[curr_frame_row : curr_frame_row + block_size,:,:] > threshold )
+
+class SceneDetector(object):
+    """Base SceneDetector class to implement a scene detection algorithm."""
+    def __init__(self):
+        pass
+
+    def process_frame(self, frame_num, frame_img, frame_metrics, scene_list):
+        """Computes/stores metrics and detects any scene changes.
+
+        Prototype method, no actual detection.
+        """
+        return
+
+    def post_process(self, scene_list):
+        pass
+
+
+class ThresholdDetector(SceneDetector):
+    """Detects fast cuts/slow fades in from and out to a given threshold level.
+
+    Detects both fast cuts and slow fades so long as an appropriate threshold
+    is chosen (especially taking into account the minimum grey/black level).
+
+    Attributes:
+        threshold:  8-bit intensity value that each pixel value (R, G, and B)
+            must be <= to in order to trigger a fade in/out.
+        min_percent:  Float between 0.0 and 1.0 which represents the minimum
+            percent of pixels in a frame that must meet the threshold value in
+            order to trigger a fade in/out.
+        min_scene_len:  Unsigned integer greater than 0 representing the
+            minimum length, in frames, of a scene (or subsequent scene cut).
+        fade_bias:  Float between -1.0 and +1.0 representing the percentage of
+            timecode skew for the start of a scene (-1.0 causing a cut at the
+            fade-to-black, 0.0 in the middle, and +1.0 causing the cut to be
+            right at the position where the threshold is passed).
+        add_final_scene:  Boolean indicating if the video ends on a fade-out to
+            generate an additional scene at this timecode.
+        block_size:  Number of rows in the image to sum per iteration (can be
+            tuned to increase performance in some cases; should be computed
+            programmatically in the future).
+    """
+    def __init__(self, threshold = 12, min_percent = 0.95, min_scene_len = 15,
+                 fade_bias = 0.0, add_final_scene = False, block_size = 8):
+        """Initializes threshold-based scene detector object."""
+        super(ThresholdDetector, self).__init__()
+        self.threshold = threshold
+        self.fade_bias = fade_bias
+        self.min_percent = min_percent
+        self.min_scene_len = min_scene_len
+        self.last_frame_avg = None
+        self.last_scene_cut = None
+        # Whether to add an additional scene or not when ending on a fade out
+        # (as cuts are only added on fade ins; see post_process() for details).
+        self.add_final_scene = add_final_scene
+        # Where the last fade (threshold crossing) was detected.
+        self.last_fade = { 
+            'frame': 0,         # frame number where the last detected fade is
+            'type': None        # type of fade, can be either 'in' or 'out'
+          }
+        self.block_size = block_size
+        return
+
+    def compute_frame_average(self, frame):
+        """Computes the average pixel value/intensity over the whole frame.
+
+        The value is computed by adding up the 8-bit R, G, and B values for
+        each pixel, and dividing by the number of pixels multiplied by 3.
+
+        Returns:
+            Floating point value representing average pixel intensity.
+        """
+        num_pixel_values = float(
+            frame.shape[0] * frame.shape[1] * frame.shape[2])
+        avg_pixel_value = numpy.sum(frame[:,:,:]) / num_pixel_values
+        return avg_pixel_value
+
+    def frame_under_threshold(self, frame):
+        """Check if the frame is below (true) or above (false) the threshold.
+
+        Instead of using the average, we check all pixel values (R, G, and B)
+        meet the given threshold (within the minimum percent).  This ensures
+        that the threshold is not exceeded while maintaining some tolerance for
+        compression and noise.
+
+        This is the algorithm used for absolute mode of the threshold detector.
+
+        Returns:
+            Boolean, True if the number of pixels whose R, G, and B values are
+            all <= the threshold is within min_percent pixels, or False if not.
+        """
+        # First we compute the minimum number of pixels that need to meet the
+        # threshold. Internally, we check for values greater than the threshold
+        # as it's more likely that a given frame contains actual content. This
+        # is done in blocks of rows, so in many cases we only have to check a
+        # small portion of the frame instead of inspecting every single pixel.
+        num_pixel_values = float(frame.shape[0] * frame.shape[1] * frame.shape[2])
+        min_pixels = int(num_pixel_values * (1.0 - self.min_percent))
+
+        curr_frame_amt = 0
+        curr_frame_row = 0
+
+        while curr_frame_row < frame.shape[0]:
+            # Add and total the number of individual pixel values (R, G, and B)
+            # in the current row block that exceed the threshold. 
+            curr_frame_amt += int(
+                numpy.sum(frame[curr_frame_row : 
+                    curr_frame_row + self.block_size,:,:] > self.threshold))
+            # If we've already exceeded the most pixels allowed to be above the
+            # threshold, we can skip processing the rest of the pixels. 
             if curr_frame_amt > min_pixels:
-                break
-            curr_frame_row += block_size
+                return False
+            curr_frame_row += self.block_size
+        return True
 
-        if last_frame_amt == None:
-            last_frame_amt = curr_frame_amt
-            continue
+    def process_frame(self, frame_num, frame_img, frame_metrics, scene_list):
+        # Compare the # of pixels under threshold in current_frame & last_frame.
+        # If absolute value of pixel intensity delta is above the threshold,
+        # then we trigger a new scene cut/break.
 
-        fade_type = None
+        # The metric used here to detect scene breaks is the percent of pixels
+        # less than or equal to the threshold; however, since this differs on
+        # user-supplied values, we supply the average pixel intensity as this
+        # frame metric instead (to assist with manually selecting a threshold).
+        frame_amt = 0.0
+        frame_avg = 0.0
+        if frame_num in frame_metrics and 'frame_avg_rgb' in frame_metrics[frame_num]:
+            frame_avg = frame_metrics[frame_num]['frame_avg_rgb']
+        else:
+            frame_avg = self.compute_frame_average(frame_img)
+            frame_metrics[frame_num]['frame_avg_rgb'] = frame_avg
 
-        # Detect fade out to black.
-        if curr_frame_amt < min_pixels and last_frame_amt >= min_pixels:
-            fade_type = 0
-        # Detect fade in from black.
-        elif curr_frame_amt >= min_pixels and last_frame_amt < min_pixels:
-            fade_type = 1
+        if self.last_frame_avg is not None:
+            if self.last_fade['type'] == 'in' and self.frame_under_threshold(frame_img):
+                # Just faded out of a scene, wait for next fade in.
+                self.last_fade['type'] = 'out'
+                self.last_fade['frame'] = frame_num
+            elif self.last_fade['type'] == 'out' and not self.frame_under_threshold(frame_img):
+                # Just faded into a new scene, compute timecode for the scene
+                # split based on the fade bias.
+                f_in = frame_num
+                f_out = self.last_fade['frame']
+                f_split = int((f_in + f_out + int(self.fade_bias * (f_in - f_out))) / 2)
+                # Only add the scene if min_scene_len frames have passed. 
+                if self.last_scene_cut is None or (
+                    (frame_num - self.last_scene_cut) >= self.min_scene_len):
+                    scene_list.append(f_split)
+                    self.last_scene_cut = frame_num
+                self.last_fade['type'] = 'in'
+                self.last_fade['frame'] = frame_num
+        else:
+            self.last_fade['frame'] = 0
+            if self.frame_under_threshold(frame_img):
+                self.last_fade['type'] = 'out'
+            else:
+                self.last_fade['type'] = 'in'
+        # Before returning, we keep track of the last frame average (can also
+        # be used to compute fades independently of the last fade type).
+        self.last_frame_avg = frame_avg
+        return
 
-        if not fade_type == None:
-            pos_msec   = cap.get(cv2.CAP_PROP_POS_MSEC)
-            pos_frames = cap.get(cv2.CAP_PROP_POS_FRAMES)
-            fade_list.append((fade_type, pos_msec, pos_frames))
-            if show_output:
-                pos_tc = get_timecode_string(pos_msec, False)
-                print "  %s      |  %9d ms | %10d |  %s  " % (
-                    fade_names[fade_type], pos_msec, pos_frames, pos_tc )
+    def post_process(self, scene_list):
+        """Writes a final scene cut if the last detected fade was a fade-out.
 
-        last_frame_amt = curr_frame_amt
+        Only writes the scene cut if add_final_scene is true, and the last fade
+        that was detected was a fade-out.  There is no bias applied to this cut
+        (since there is no corresponding fade-in) so it will be located at the
+        exact frame where the fade-out crossed the detection threshold.
+        """
 
-    if show_output:
-        print h_rule
-        print ''
+        # If the last fade detected was a fade out, we add a corresponding new
+        # scene break to indicate the end of the scene.  This is only done for
+        # fade-outs, as a scene cut is already added when a fade-in is found.
+        if self.last_fade['type'] == 'out' and self.add_final_scene and (
+            self.last_scene_cut is None or
+            (frame_num - self.last_scene_cut) >= self.min_scene_len):
+            scene_list.append(self.last_fade['frame'])
+        return
 
-    return fade_list
 
+class ContentDetector(SceneDetector):
+    """Detects fast cuts using changes in colour and intensity between frames.
 
-def generate_video_stats(cap, stats_file = None):
-    """ Performs threshold analysis on video to find fades in/out of scenes.
-
-    Args:
-        cap:            An *opened* OpenCV VideoCapture object.
-        stats_file:     A file-like object to write the video statistics to.
+    Since the difference between frames is used, unlike the ThresholdDetector,
+    only fast cuts are detected with this method.  To detect slow fades between
+    content scenes still using HSV information, use the DissolveDetector.
     """
-    print 'Generating statistics for video...'
 
-    stats_file.write('time,frame,avg. pixel value, avg. pixel delta [RGB],avg. pixel delta [HSV],avg. delta h, avg. delta s, avg. delta l\n')
+    def __init__(self, threshold = 30.0, min_scene_len = 15):
+        super(ContentDetector, self).__init__()
+        self.threshold = threshold
+        self.min_scene_len = min_scene_len  # minimum length of any given scene, in frames
+        self.last_frame = None
+        self.last_scene_cut = None
 
-    last_frame = None
-    last_written = False
-    while True:
-        # Get next frame from video.
-        (rv, im) = cap.read()
-        if not rv:   # im is a valid image if and only if rv is true
-            break
+    def process_frame(self, frame_num, frame_img, frame_metrics, scene_list):
+        # Similar to ThresholdDetector, but using the HSV colour space DIFFERENCE instead
+        # of single-frame RGB/grayscale intensity (thus cannot detect slow fades with this method).
 
-        # Compute minimum number of pixels required to trigger a fade.
-        curr_frame_amt   = 0    # Current number of pixels above/below the threshold.
-        curr_frame_row   = 0    # Current row offset in frame being processed.
-        num_pixel_values = float(im.shape[0] * im.shape[1] * im.shape[2])
+        if self.last_frame is not None:
+            # Change in average of HSV (hsv), (h)ue only, (s)aturation only, (l)uminance only.
+            delta_hsv_avg, delta_h, delta_s, delta_v = 0.0, 0.0, 0.0, 0.0
 
-        pos_frames = cap.get(cv2.CAP_PROP_POS_FRAMES)
-        pos_msec = get_timecode_string(cap.get(cv2.CAP_PROP_POS_MSEC))
-        frame_avg = numpy.sum(im[:,:,:]) / num_pixel_values
-        frame_delta = -1
-        delta_hsv = [-1, -1, -1, -1]
-        if not (last_frame is None):
-            frame_delta = numpy.sum(numpy.abs(im.astype(numpy.int32) - last_frame.astype(numpy.int32))) / num_pixel_values
-            last_hsv = cv2.split(cv2.cvtColor(last_frame, cv2.COLOR_BGR2HSV))
-            im_hsv = cv2.split(cv2.cvtColor(im, cv2.COLOR_BGR2HSV))
-            for i in range(3):
-                num_pixels = im_hsv[i].shape[0] * im_hsv[i].shape[1]
-                im_hsv[i] = im_hsv[i].astype(numpy.int32)
-                last_hsv[i] = last_hsv[i].astype(numpy.int32)
-                delta_hsv[i] = numpy.sum(numpy.abs(im_hsv[i] - last_hsv[i])) / float(num_pixels)
-            delta_hsv[3] = (delta_hsv[0] + delta_hsv[1] + delta_hsv[2]) / 3.0
-            #cv2.imshow('a', im_v)
-            #cv2.waitKey(0)
-            #if frame_delta > 80:
-            #    if not last_written:
-            #        cv2.imwrite('out%05d.png' % (pos_frames-1), last_frame)
-            #    cv2.imwrite('out%05d.png' % pos_frames, im)
-            #    last_written = True
-            #else:
-            #    last_written = False
+            if frame_num in frame_metrics and 'delta_hsv_avg' in frame_metrics[frame_num]:
+                delta_hsv_avg = frame_metrics[frame_num]['delta_hsv_avg']
+                delta_h = frame_metrics[frame_num]['delta_hue']
+                delta_s = frame_metrics[frame_num]['delta_sat']
+                delta_v = frame_metrics[frame_num]['delta_lum']
+
+            else:
+                num_pixels = frame_img.shape[0] * frame_img.shape[1]
+                curr_hsv = cv2.split(cv2.cvtColor(frame_img, cv2.COLOR_BGR2HSV))
+                last_hsv = cv2.split(cv2.cvtColor(self.last_frame, cv2.COLOR_BGR2HSV))
+
+                delta_hsv = [-1, -1, -1]
+                for i in range(3):
+                    num_pixels = curr_hsv[i].shape[0] * curr_hsv[i].shape[1]
+                    curr_hsv[i] = curr_hsv[i].astype(numpy.int32)
+                    last_hsv[i] = last_hsv[i].astype(numpy.int32)
+                    delta_hsv[i] = numpy.sum(numpy.abs(curr_hsv[i] - last_hsv[i])) / float(num_pixels)
+                delta_hsv.append(sum(delta_hsv) / 3.0)
+
+                delta_h, delta_s, delta_v, delta_hsv_avg = delta_hsv
+
+                frame_metrics[frame_num]['delta_hsv_avg'] = delta_hsv_avg
+                frame_metrics[frame_num]['delta_hue'] = delta_h
+                frame_metrics[frame_num]['delta_sat'] = delta_s
+                frame_metrics[frame_num]['delta_lum'] = delta_v
+
+            if delta_hsv_avg >= self.threshold:
+                if self.last_scene_cut is None or (
+                  (frame_num - self.last_scene_cut) >= self.min_scene_len):
+                    scene_list.append(frame_num)
+                    self.last_scene_cut = frame_num
             
-        stats_file.write('%s,%d,%3.1f,%3.1f,%3.1f,%3.1f,%3.1f,%3.1f\n' % (
-            pos_msec, pos_frames, frame_avg, frame_delta,
-            delta_hsv[3], delta_hsv[0], delta_hsv[1], delta_hsv[2]) )
+            #self.last_frame.release()
+            del self.last_frame
+                
+        self.last_frame = frame_img.copy()
+        return
 
-        last_frame = im.copy()
+    def post_process(self, scene_list):
+        """Not used for ContentDetector, as cuts are written as they are found."""
+        return
 
-    print 'Video stats written to disk.'
 
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+#                                                                             #
+#          Detection Methods & Algorithms Planned or In Development           #
+#                                                                             #
+#
+# class EdgeDetector(SceneDetector):
+#    """Detects fast cuts/slow fades by using edge detection on adjacent frames.
+#
+#    Computes the difference image between subsequent frames after applying a
+#    Sobel filter (can also use a high-pass or other edge detection filters) and
+#    comparing the result with a set threshold (may be found using -stats mode).
+#    Detects both fast cuts and slow fades, although some parameters may need to
+#    be modified for accurate slow fade detection.
+#    """
+#    def __init__(self):
+#        super(EdgeDetector, self).__init__()
+#                                                                             #
+#                                                                             #
+# class DissolveDetector(SceneDetector):
+#    """Detects slow fades (dissolve cuts) via changes in the HSV colour space.
+#
+#    Detects slow fades only; to detect fast cuts between content scenes, the
+#    ContentDetector should be used instead.
+#    """
+#
+#    def __init__(self):
+#        super(DissolveDetector, self).__init__()
+#                                                                             #
+#                                                                             #
+# class HistogramDetector(SceneDetector):
+#    """Detects fast cuts via histogram changes between sequential frames.
+#
+#    Detects fast cuts between content (using histogram deltas, much like the
+#    ContentDetector uses HSV colourspace deltas), as well as both fades and
+#    cuts to/from black (using a threshold, much like the ThresholdDetector).
+#    """
+#
+#    def __init__(self):
+#        super(DissolveDetector, self).__init__()
+#                                                                             #
+#                                                                             #
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-def generate_scene_list(cap, fade_list, csv_out = None, include_last = False, show_output = True):
-    """ Creates a list of scenes from a sorted list of fades in/out.
-
-    A new scene is created at the beginning of the video ("scene zero"), and
-    between each fade-out and fade-in in fade_list.
-
-    Args:
-        cap:            The (still open) VidCap object used to create fade_list.
-        fade_list:      A list of fades generated by analyze_video_threshold().
-        csv_out:        A file-like object to write the scene information to.
-        include_last:   If true, and if the last fade in fade_list is a fade-out,
-                        appends a final scene at the index of the fade-out.
-        show_output:    True to print updates while detecting, False otherwise.
-
-    Returns:
-        A list of scenes as tuples in the form (time, frame number).
-    """
-    h_rule = '------------------------------------------------------'
-
-    if csv_out:
-        csv_out.write("scene,timecode,frame,time (ms)\n")
-
-    if show_output:
-        print ''
-        print h_rule
-        print '  SCENE #  |     TIME     |   FRAME #  |   TIMECODE   '
-        print h_rule
-
-    scene_list = []
-    scene_list.append((0,0))    # Scenes in form (timecode, frame number)
-
-    # Ensure fade list starts on fade in and ends with fade out.
-    # (fade type 0 == out, 1 == in)
-    if not (fade_list[0][0] == 1):
-        fade_list.insert(0, ( 0, cap.get(cv2.CAP_PROP_POS_MSEC),
-                              cap.get(cv2.CAP_PROP_POS_FRAMES) ) )
-    if not (fade_list[-1][0] == 0):
-        fade_list.append( ( 0, cap.get(cv2.CAP_PROP_POS_MSEC),
-                            cap.get(cv2.CAP_PROP_POS_FRAMES) ) )
-
-    last_fade = None
-    tc_list = []
-
-    for fade in fade_list:
-        # We create a new scene for each fade-in we detect.
-        if (fade[0] == 1 and last_fade):
-            scene_list.append( ((fade[1] + last_fade[1]) / 2.0,
-                                (fade[2] + last_fade[2]) / 2.0 ) )
-        last_fade = fade
-
-    if include_last and last_fade[0] == 0:
-        scene_list.append((last_fade[1], last_fade[2]))
-
-    if csv_out or show_output:
-        for scene_idx in range(len(scene_list)):
-            pos_tc = get_timecode_string(scene_list[scene_idx][0])
-            if csv_out:
-                csv_out.write("%d,%s,%f,%d\n" % (
-                    scene_idx, pos_tc, scene_list[scene_idx][1], scene_list[scene_idx][0]) )
-            if show_output:
-                    print "   %3d     | %9d ms | %10d | %s" % (
-                        scene_idx, scene_list[scene_idx][0], scene_list[scene_idx][1], pos_tc )
-            if scene_idx > 0:
-                tc_list.append(pos_tc)
-        if show_output:
-            print h_rule
-            print ''
-            print 'Comma-separated timecode list (e.g. for use with mkvmerge):'
-            print ','.join(tc_list)
-            print ''
-        if csv_out:
-            csv_out.write("\nComma-separated timecode list (e.g. for use with mkvmerge):\n")
-            csv_out.write(','.join(tc_list))
-            csv_out.write('\n')
-
-    return scene_list
 
 def get_timecode_string(time_msec, show_msec = True):
-    """ Formats a time, in ms, into a timecode of the form HH:MM:SS.nnnnn.
+    """ Formats a time, in ms, into a timecode of the form HH:MM:SS.nnnn.
 
     This is the default timecode format used by mkvmerge for splitting a video.
 
     Args:
-        time_msec:      Integer representing milliseconds from start of video.
-        show_msec:      If False, omits the milliseconds part from the output.
+        time_msec:  Integer representing milliseconds from start of video.
+        show_msec:  If False, omits the milliseconds part from the output.
     Returns:
-        A string with a formatted timecode (HH:MM:SS.nnnnn).
+        A string with a formatted timecode (HH:MM:SS.nnnn).
     """
     out_nn, timecode_str = int(time_msec), ''
 
@@ -311,7 +427,7 @@ def get_timecode_string(time_msec, show_msec = True):
     out_nn -= out_SS * base_msec
 
     if show_msec:
-        timecode_str = "%02d:%02d:%02d.%d" % (out_HH, out_MM, out_SS, out_nn)
+        timecode_str = "%02d:%02d:%02d.%03d" % (out_HH, out_MM, out_SS, out_nn)
     else:
         timecode_str = "%02d:%02d:%02d" % (out_HH, out_MM, out_SS)
 
@@ -351,127 +467,250 @@ def int_type_check(min_val, max_val = None, metavar = None):
     return _type_checker
 
 
-class AboutAction(argparse.Action):
-    """ Custom argparse action for displaying raw About string. 
+def string_type_check(valid_strings, case_sensitive = True, metavar = None):
+    """ Creates an argparse type for a list of strings.
 
-    Based off of argparse's default VersionAction.
+    The passed argument is declared valid if it is a valid string which exists
+    in the passed list valid_strings.  If case_sensitive is False, all input 
+    strings and strings in valid_strings are processed as lowercase.  Leading
+    and trailing whitespace is ignored in all strings.
+
+    Returns:
+        A function which can be passed as an argument type, when calling
+        add_argument on an ArgumentParser object
+
+    Raises:
+        ArgumentTypeError: Passed argument must be string within valid list.
     """
-    def __init__( self, option_strings, version = None,
-                  dest = argparse.SUPPRESS, default = argparse.SUPPRESS,
-                  help = "show version number and license/copyright information"):
-        super(AboutAction, self).__init__( option_strings = option_strings,
-            dest = dest, default = default, nargs = 0, help = help )
+    if metavar == None: metavar = 'value'
+    valid_strings = [x.strip() for x in valid_strings]
+    if not case_sensitive:
+        valid_strings = [x.lower() for x in valid_strings]
+    def _type_checker(value):
+        value = str(value)
+        valid = True
+        if not case_sensitive:
+            value = value.lower()
+        if not value in valid_strings:
+            valid = False
+            case_msg = ' (case sensitive)' if case_sensitive else ''
+            msg = 'invalid choice: %s (valid settings for %s%s are: %s)' % (
+                value, metavar, case_msg, valid_strings.__str__()[1:-1])
+        if not valid:
+            raise argparse.ArgumentTypeError(msg)
+        return value
+    return _type_checker
+
+
+class AboutAction(argparse.Action):
+    """Custom argparse action for displaying the PySceneDetect ABOUT_STRING. 
+
+    Based off of the default VersionAction for displaying a string to the user.
+    """
+    def __init__(self, option_strings, version = None,
+                 dest = argparse.SUPPRESS, default = argparse.SUPPRESS,
+                 help = "show version number and license/copyright information"):
+        super(AboutAction, self).__init__(option_strings = option_strings,
+                                          dest = dest, default = default,
+                                          nargs = 0, help = help)
         self.version = version
 
-    def __call__(self, parser, namespace, values, option_string=None):
+    def __call__(self, parser, namespace, values, option_string = None):
         version = self.version
         if version is None:
             version = parser.version
         parser.exit(message = version)
 
 
-def get_cli_parser():
-    """ Creates the PySceneDetect argparse command-line interface.
+def get_cli_parser(scene_detectors_list, timecode_formats_list):
+    """Creates the PySceneDetect argparse command-line interface.
 
     Returns:
-        An ArgumentParser object, with which parse_args() can be called.
+        ArgumentParser object, which parse_args() can be called with.
     """
     parser = argparse.ArgumentParser(
         formatter_class = argparse.ArgumentDefaultsHelpFormatter)
     parser._optionals.title = 'arguments'
 
-    parser.add_argument('-v', '--version',
+    parser.add_argument(
+        '-v', '--version',
         action = AboutAction, version = ABOUT_STRING)
-    parser.add_argument('-i', '--input', metavar = 'VIDEO_FILE',
-        type = file, required = True,
+    parser.add_argument(
+        '-i', '--input', metavar = 'VIDEO_FILE',
+        required = True, type = file,
         help = '[REQUIRED] Path to input video.')
-    parser.add_argument('-o', '--output', metavar = 'SCENE_LIST',
+    parser.add_argument(
+        '-o', '--output', metavar = 'SCENE_LIST',
         type = argparse.FileType('w'),
-        help = 'File to store detected scenes in; comma-separated value format (.csv). Will be overwritten if exists.')
-    parser.add_argument('-t', '--threshold', metavar = 'intensity',
-        type = int_type_check(0, 255, 'intensity'), default = 8,
-        help = '8-bit intensity value, from 0-255, to use as a fade in/out detection threshold.')
-    parser.add_argument('-m', '--minpercent', metavar = 'percent',
+        help = ('File to store detected scenes in using the specified timecode'
+                'format as comma-separated values (.csv). '
+                'File will be overwritten if already exists.'))
+    parser.add_argument(
+        '-t', '--threshold', metavar = 'intensity', dest = 'threshold',
+        type = int_type_check(0, 255, 'intensity'), default = 12,
+        help = ('8-bit intensity value, from 0-255, to use as the black level'
+                ' in threshold detection mode, or as the change tolerance'
+                ' threshold in content-aware detection mode.'))
+    parser.add_argument(
+        '-m', '--min-scene-length', metavar = 'NUM_FRAMES', dest = 'min_scene_len',
+        type = int_type_check(1, None, 'NUM_FRAMES'), default = 15,
+        help = 'Minimum length, in frames, before another scene cut can be generated.')
+    parser.add_argument(
+        '-p', '--min-percent', metavar = 'percent', dest = 'min_percent',
         type = int_type_check(0, 100, 'percentage'), default = 95,
-        help = 'Amount of pixels in a frame, from 0-100%%, that must fall under [intensity].')
-    parser.add_argument('-b', '--blocksize', metavar = 'rows',
+        help = 'Amount of pixels in a frame, from 0-100%%, that must fall '
+               'under [intensity]. Only applies to threshold detection.')
+    parser.add_argument(
+        '-b', '--block-size', metavar = 'rows', dest = 'block_size',
         type = int_type_check(1, None, 'number of rows'), default = 32,
-        help = 'Number of rows in frame to check at once, can be tuned for performance.')
-    parser.add_argument('-s', '--statsfile', metavar = 'STATS_FILE',
+        help = 'Number of rows in frame to check at once, can be tuned for '
+               'performance. Only applies to threshold detection.')
+    parser.add_argument(
+        '-s', '--statsfile', metavar = 'STATS_FILE', dest = 'stats_file',
         type = argparse.FileType('w'),
-        help = 'File to store video statistics data, comma-separated value format (.csv). Will be overwritten if exists.')
-    #parser.add_argument('-s', '--startindex', metavar = 'offset',
+        help = 'File to store video statistics data, comma-separated value '
+               'format (.csv). Will be overwritten if exists.')
+    parser.add_argument(
+        '-d', '--detector', metavar = 'detection_method', dest = 'detection_method',
+        type = string_type_check(scene_detectors_list, False, 'detection_method'),
+        default = SCENE_DETECTOR_DEFAULT,
+        help = 'Type of scene detection method/algorithm to use; detectors available: %s.' % (
+            scene_detectors_list.__str__().replace("'","")))
+    #parser.add_argument(
+    #    '-f', '--format-timecode', metavar = 'timecode_format', dest = 'timecode_format',
+    #    type = string_type_check(timecode_formats_list, False, 'timecode_format'),
+    #    default = TIMECODE_FORMAT_DEFAULT,
+    #    help = 'Format to use for the output scene cut times; formats available: %s.' % (
+    #        timecode_formats_list.__str__().replace("'","")))
+    parser.add_argument(
+        '-l', '--list-scenes', dest = 'list_scenes',
+        action = 'store_true', default = False,
+        help = 'Output the final scene list in human-readable format as a table, in addition to CSV.')
+    parser.add_argument(
+        '-q', '--quiet', dest = 'quiet_mode',
+        action = 'store_true', default = False,
+        help = ('Suppress all output except for final comma-separated list of scene cuts.'
+                ' Useful for computing or piping output directly into other programs/scripts.'))
+    #parser.add_argument(
+    #    '-s', '--startindex', metavar = 'offset',
     #    type = int, default = 0,
     #    help = 'Starting index for chapter/scene output.')
-    #parser.add_argument('-p', '--startpos', metavar = 'position',
+    # Needs to be replaced with fade bias (-100% to +100%):
+    #parser.add_argument(
+    #    '-p', '--startpos', metavar = 'position',
     #    choices = [ 'in', 'mid', 'out' ], default = 'out',
-    #    help = 'Where the timecode/frame number for a given scene should start relative to the fades [in, mid, or out].')
+    #    help = 'Where the timecode/frame number for a given scene should '
+    #           'start relative to the fades [in, mid, or out].')
 
     return parser
 
 
+def detect_scenes(cap, scene_list, detector_list, stats_file = None,
+                  quiet_mode = False):
+    """Performs scene detection based on passed video and scene detectors.
+
+    Args:
+        cap:  An open cv2.VideoCapture object that is assumed to be at the
+            first frame.  Frames are read until cap.read() returns False, and
+            the cap object remains open (it can be closed with cap.release()).
+        scene_list:  List to append frame numbers of any detected scene cuts.
+        detector_list:  List of scene detection algorithms to run on the video.
+        stats_file:  Optional.  Handle to a file, open for writing, to save the
+            frame metrics computed by each detection algorithm, in CSV format.
+
+    Returns:
+        Unsigned, integer number of frames read from the passed cap object.
+    """
+    frames_read = 0
+    frame_metrics = {}
+    while True:
+        (rv, im) = cap.read()
+        if not rv:
+            break
+        if not frames_read in frame_metrics:
+            frame_metrics[frames_read] = dict()
+        for detector in detector_list:
+            detector.process_frame(frames_read, im, frame_metrics, scene_list)
+        if stats_file:
+            # write frame metrics to stats_file
+            pass
+        frames_read += 1
+    [detector.post_process(scene_list) for detector in detector_list]
+    return frames_read
+
+
 def main():
-    """ Program entry point.
+    """Program entry point.
 
     Handles high-level interfacing of video and scene detection / output.
     """
-    # Get command line arguments directly from the CLI parser defined above.
-    args = get_cli_parser().parse_args()
-    # Attempt to open the passed video file as an OpenCV VideoCapture object.
+
+    # Parse CLI arguments and initialize VideoCapture object.
+    scene_detectors = get_available_detectors()
+    timecode_formats = get_timecode_formats()
+    args = get_cli_parser(
+        scene_detectors.keys(), timecode_formats.keys()).parse_args()
     cap = cv2.VideoCapture()
+
+    # Attempt to open the passed input (video) file.
     cap.open(args.input.name)
     if not cap.isOpened():
-        print 'FATAL ERROR - could not open video %s.' % args.input.name
-        print 'cap.isOpened() is not True after calling cap.open(..)'
+        if not args.quiet_mode:
+            print('[PySceneDetect] FATAL ERROR - could not open video %s.' % 
+                args.input.name)
         return
-    else:
-        print 'Parsing video %s...' % args.input.name
+    elif not args.quiet_mode:
+        print('[PySceneDetect] Parsing video %s...' % args.input.name)
 
     # Print video parameters (resolution, FPS, etc...)
     video_width  = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
     video_height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
     video_fps    = cap.get(cv2.CAP_PROP_FPS)
-    print 'Video Resolution / Framerate: %d x %d / %2.3f FPS' % (
-        video_width, video_height, video_fps )
+    if not args.quiet_mode:
+        print('[PySceneDetect] Video Resolution / Framerate: %d x %d / %2.3f FPS' % (
+            video_width, video_height, video_fps ))
 
-    start_time = cv2.getTickCount()  # Record the time we started processing.
+    # Load SceneDetector with proper arguments based on passed detector (-d).
+    # TODO: Add minimum scene length as a variable argument.
+    detection_method = args.detection_method.lower()
+    detector = None
+    if (detection_method == 'content'):
+        detector = scene_detectors['content'](args.threshold, args.min_scene_len)
+    elif (detection_method == 'threshold'):
+        detector = scene_detectors['threshold'](
+            args.threshold, args.min_percent/100.0, args.min_scene_len,
+            block_size = args.block_size)
+    
+    # Perform scene detection using specified mode.
+    if not args.quiet_mode:
+        print('[PySceneDetect] Detecting scenes (%s mode)...' % detection_method)
+    scene_list = list()
+    frames_read = detect_scenes(cap, scene_list, [detector],
+                                args.stats_file, args.quiet_mode)
+    # Print scene list if requested.
+    if not args.quiet_mode:
+        print('[PySceneDetect] Processing complete, found %d scenes in video.' %
+            len(scene_list))
+        print('[PySceneDetect] List of detected scenes:')
+        if args.list_scenes:
+            print ('----------------------------------------------')
+            print ('    Scene #   |   Frame #                     ')
+            print ('----------------------------------------------')
+            for scene_idx, frame_num in enumerate(scene_list):
+                print ('      %3d     |   %8d' % (scene_idx, frame_num))
+            print ('----------------------------------------------')
+        print('[PySceneDetect] Comma-separated timecode output:')
 
-    if (args.statsfile):
-        # Only generate statistics, to help setting further parameters.
-        generate_video_stats(cap, args.statsfile)
+    # Print CSV separated timecode output.
+    scene_list_msec = [(1000.0 * x) / float(video_fps) for x in scene_list]
+    print([get_timecode_string(x) for x in scene_list_msec].__str__()[1:-1]
+        .replace("'","").replace(' ', ''))
 
-    else:
-        # Perform threshold analysis on video, get list of fades in/out.
-        fade_list = analyze_video_threshold( cap,
-            args.threshold, args.minpercent, args.blocksize )
-
-        # Get # of frames based on position of last frame we read.
-        frame_count = cap.get(cv2.CAP_PROP_POS_FRAMES)
-
-        # Compute & display number of frames, runtime, and average framerate.
-        total_runtime = float(cv2.getTickCount() - start_time) / cv2.getTickFrequency()
-        avg_framerate = float(frame_count) / total_runtime
-        print 'Read %d frames in %4.2f seconds (avg. %4.1f FPS).' % (
-            frame_count, total_runtime, avg_framerate )
-
-        # Ensure we actually detected anything from the video file.
-        if not len(fade_list) > 0:
-            print 'Error - no fades detected in video!'
-        else:
-            # Generate list of scenes from fades, writing to CSV output if specified.      
-            scene_list = generate_scene_list(cap, fade_list, args.output)   
-            print 'Detected %d scenes in video.' % len(scene_list)
-
-    # Cleanup (release all memory and close file handles).
+    # Cleanup, release all objects and close file handles.
     cap.release()
-    if (args.output): args.output.close()
-    if (args.statsfile): args.statsfile.close()
+    if args.stats_file: args.stats_file.close()
+    return
 
-    print ''
-
-
-#
 
 if __name__ == '__main__':
     main()
-
