@@ -13,10 +13,11 @@
 #   ./scenedetect.py [-h] -i VIDEO_FILE [optional args]
 #
 # Where -i denotes the input video, and -h shows the help message (as
-# well as a list of optional arguments and descriptions).
+# well as a list of optional arguments and descriptions).  See the
+# USAGE.md file for advanced usage details and examples.
 #
 #
-# Copyright (C) 2013-2015 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2013-2016 Brandon Castellano <http://www.bcastell.com>.
 #
 # PySceneDetect is licensed under the BSD 2-Clause License; see the
 # included LICENSE file or visit the following page for details:
@@ -42,7 +43,7 @@ import cv2
 import numpy
 
 
-VERSION_STRING = 'v0.3-beta-dev'
+VERSION_STRING = 'v0.3-beta'
 
 # About & copyright message shown for the -v / --version CLI argument.
 ABOUT_STRING   = """PySceneDetect %s
