@@ -76,7 +76,9 @@ class SceneDetector(object):
 
     def process_frame(self, frame_num, frame_img, frame_metrics, scene_list):
         """Computes/stores metrics and detects any scene changes.
-        Prototype method, no actual detection."""
+
+        Prototype method, no actual detection.
+        """
         return
 
     def post_process(self, scene_list):
@@ -90,22 +92,23 @@ class ThresholdDetector(SceneDetector):
     is chosen (especially taking into account the minimum grey/black level).
 
     Attributes:
-        threshold:   8-bit intensity value that each pixel value (R, G, and B)
-                     must be <= to in order to trigger a fade in/out.
-        min_percent: Float between 0.0 and 1.0 which represents the minimum
-                     percent of pixels in a frame that must meet the threshold
-                     value in order to trigger a fade in/out.
-        fade_bias:   Float between -1.0 and +1.0 representing the percentage of
-                     timecode skew for the start of a scene (-1.0 causing a
-                     cut at the fade-to-black, 0.0 in the middle, and +1.0
-                     causing the cut to be right when the threshold is passed).
-        add_final_scene: Boolean indicating if the video ends on a fade-out to
-                     generate an additional scene at this timecode.
+        threshold:  8-bit intensity value that each pixel value (R, G, and B)
+            must be <= to in order to trigger a fade in/out.
+        min_percent:  Float between 0.0 and 1.0 which represents the minimum
+            percent of pixels in a frame that must meet the threshold value in
+            order to trigger a fade in/out.
+        min_scene_len:  Unsigned integer greater than 0 representing the
+            minimum length, in frames, of a scene (or subsequent scene cut).
+        fade_bias:  Float between -1.0 and +1.0 representing the percentage of
+            timecode skew for the start of a scene (-1.0 causing a cut at the
+            fade-to-black, 0.0 in the middle, and +1.0 causing the cut to be
+            right at the position where the threshold is passed).
+        add_final_scene:  Boolean indicating if the video ends on a fade-out to
+            generate an additional scene at this timecode.
         block_size:  Number of rows in the image to sum per iteration (can be
-                     tuned to increase performance in some cases; should be
-                     computed programmatically in the future).
+            tuned to increase performance in some cases; should be computed
+            programmatically in the future).
     """
-
     def __init__(self, threshold = 12, min_percent = 0.95, min_scene_len = 15,
                  fade_bias = 0.0, add_final_scene = False, block_size = 8):
         """Initializes threshold-based scene detector object."""
@@ -113,7 +116,7 @@ class ThresholdDetector(SceneDetector):
         self.threshold = threshold
         self.fade_bias = fade_bias
         self.min_percent = min_percent
-        self.min_scene_len = min_scene_len  # minimum length of any given scene, in frames
+        self.min_scene_len = min_scene_len
         self.last_frame_avg = None
         # Whether to add an additional scene or not when ending on a fade out
         # (as cuts are only added on fade ins; see post_process() for details).
@@ -132,9 +135,13 @@ class ThresholdDetector(SceneDetector):
         The value is computed by adding up the 8-bit R, G, and B values for
         each pixel, and dividing by the number of pixels multiplied by 3.
 
-        Returns a floating point value representing average pixel intensity."""
-        num_pixel_values = float(frame.shape[0] * frame.shape[1] * frame.shape[2])
-        return numpy.sum(frame[:,:,:]) / num_pixel_values
+        Returns:
+            Floating point value representing average pixel intensity.
+        """
+        num_pixel_values = float(
+            frame.shape[0] * frame.shape[1] * frame.shape[2])
+        avg_pixel_value = numpy.sum(frame[:,:,:]) / num_pixel_values
+        return avg_pixel_value
 
     def frame_under_threshold(self, frame):
         """Check if the frame is below (true) or above (false) the threshold.
@@ -146,8 +153,9 @@ class ThresholdDetector(SceneDetector):
 
         This is the algorithm used for absolute mode of the threshold detector.
 
-        Returns true if the number of pixels whose RGB values are all <= the
-        threshold (within the minimum percent as a tolerance), or false if not.
+        Returns:
+            Boolean, True if the number of pixels whose R, G, and B values are
+            all <= the threshold is within min_percent pixels, or False if not.
         """
         # First we compute the minimum number of pixels that need to meet the
         # threshold. Internally, we check for values greater than the threshold
@@ -161,13 +169,17 @@ class ThresholdDetector(SceneDetector):
         curr_frame_row = 0
 
         while curr_frame_row < frame.shape[0]:
+            # Add and total the number of individual pixel values (R, G, and B)
+            # in the current row block that exceed the threshold. 
             curr_frame_amt += \
-                numpy.sum(frame[curr_frame_row : curr_frame_row + self.block_size,:,:] > self.threshold)
+                numpy.sum(frame[curr_frame_row : 
+                    curr_frame_row + self.block_size,:,:] > self.threshold)
+            # If we've already exceeded the most pixels allowed to be above the
+            # threshold, we can skip processing the rest of the pixels. 
             if curr_frame_amt > min_pixels:
                 return False
             curr_frame_row += self.block_size
         return True
-
 
     def process_frame(self, frame_num, frame_img, frame_metrics, scene_list):
         # Compare the # of pixels under threshold in current_frame & last_frame.
@@ -220,7 +232,8 @@ class ThresholdDetector(SceneDetector):
         Only writes the scene cut if add_final_scene is true, and the last fade
         that was detected was a fade-out.  There is no bias applied to this cut
         (since there is no corresponding fade-in) so it will be located at the
-        exact frame where the fade-out crossed the detection threshold."""
+        exact frame where the fade-out crossed the detection threshold.
+        """
 
         # If the last fade detected was a fade out, we add a corresponding new
         # scene break to indicate the end of the scene.  This is only done for
@@ -329,23 +342,8 @@ class DissolveDetector(SceneDetector):
         return
 
 
-#
-#  Ignore Cuts - Let the detector handle that.
-#                Can use a lastframe flag/method to assist implementation.
-
-#
-#  When reading from the statsfile:
-#    -> read only, but if needs updating, need to generate new statsfile
-#    -> make new with .new on end, rename & delete old when done
-#    -> keep frame metrics in memory for all frames incase of discrepency?
-#       or just recompute and restore the statsfile each time (to check for accuracy)?
-#
-#
-#
-
-
 def get_timecode_string(time_msec, show_msec = True):
-    """ Formats a time, in ms, into a timecode of the form HH:MM:SS.nnnnn.
+    """ Formats a time, in ms, into a timecode of the form HH:MM:SS.nnnn.
 
     This is the default timecode format used by mkvmerge for splitting a video.
 
@@ -353,7 +351,7 @@ def get_timecode_string(time_msec, show_msec = True):
         time_msec:      Integer representing milliseconds from start of video.
         show_msec:      If False, omits the milliseconds part from the output.
     Returns:
-        A string with a formatted timecode (HH:MM:SS.nnnnn).
+        A string with a formatted timecode (HH:MM:SS.nnnn).
     """
     out_nn, timecode_str = int(time_msec), ''
 
@@ -411,18 +409,19 @@ def int_type_check(min_val, max_val = None, metavar = None):
 
 
 class AboutAction(argparse.Action):
-    """ Custom argparse action for displaying raw About string. 
+    """Custom argparse action for displaying the PySceneDetect ABOUT_STRING. 
 
-    Based off of argparse's default VersionAction.
+    Based off of the default VersionAction for displaying a string to the user.
     """
-    def __init__( self, option_strings, version = None,
-                  dest = argparse.SUPPRESS, default = argparse.SUPPRESS,
-                  help = "show version number and license/copyright information"):
-        super(AboutAction, self).__init__( option_strings = option_strings,
-            dest = dest, default = default, nargs = 0, help = help )
+    def __init__(self, option_strings, version = None,
+                 dest = argparse.SUPPRESS, default = argparse.SUPPRESS,
+                 help = "show version number and license/copyright information"):
+        super(AboutAction, self).__init__(option_strings = option_strings,
+                                          dest = dest, default = default,
+                                          nargs = 0, help = help)
         self.version = version
 
-    def __call__(self, parser, namespace, values, option_string=None):
+    def __call__(self, parser, namespace, values, option_string = None):
         version = self.version
         if version is None:
             version = parser.version
@@ -430,47 +429,94 @@ class AboutAction(argparse.Action):
 
 
 def get_cli_parser():
-    """ Creates the PySceneDetect argparse command-line interface.
+    """Creates the PySceneDetect argparse command-line interface.
 
     Returns:
-        An ArgumentParser object, with which parse_args() can be called.
+        ArgumentParser object, which parse_args() can be called with.
     """
     parser = argparse.ArgumentParser(
         formatter_class = argparse.ArgumentDefaultsHelpFormatter)
     parser._optionals.title = 'arguments'
 
-    parser.add_argument('-v', '--version',
+    parser.add_argument(
+        '-v', '--version',
         action = AboutAction, version = ABOUT_STRING)
-    parser.add_argument('-i', '--input', metavar = 'VIDEO_FILE',
-        type = file, required = True,
+    parser.add_argument(
+        '-i', '--input', metavar = 'VIDEO_FILE',
+        required = True, type = file,
         help = '[REQUIRED] Path to input video.')
-    parser.add_argument('-o', '--output', metavar = 'SCENE_LIST',
+    parser.add_argument(
+        '-o', '--output', metavar = 'SCENE_LIST',
         type = argparse.FileType('w'),
-        help = 'File to store detected scenes in; comma-separated value format (.csv). Will be overwritten if exists.')
-    parser.add_argument('-t', '--threshold', metavar = 'intensity',
+        help = 'File to store detected scenes in; comma-separated value '
+               'format (.csv). Will be overwritten if exists.')
+    parser.add_argument(
+        '-t', '--threshold', metavar = 'intensity',
         type = int_type_check(0, 255, 'intensity'), default = 8,
-        help = '8-bit intensity value, from 0-255, to use as a fade in/out detection threshold.')
-    parser.add_argument('-m', '--minpercent', metavar = 'percent',
+        help = '8-bit intensity value, from 0-255, to use as a fade in/out'
+               'detection threshold.')
+    parser.add_argument(
+        '-m', '--minpercent', metavar = 'percent',
         type = int_type_check(0, 100, 'percentage'), default = 95,
-        help = 'Amount of pixels in a frame, from 0-100%%, that must fall under [intensity].')
-    parser.add_argument('-b', '--blocksize', metavar = 'rows',
+        help = 'Amount of pixels in a frame, from 0-100%%, that must fall '
+               'under [intensity].')
+    parser.add_argument(
+        '-b', '--blocksize', metavar = 'rows',
         type = int_type_check(1, None, 'number of rows'), default = 32,
-        help = 'Number of rows in frame to check at once, can be tuned for performance.')
-    parser.add_argument('-s', '--statsfile', metavar = 'STATS_FILE',
+        help = 'Number of rows in frame to check at once, can be tuned for '
+               'performance.')
+    parser.add_argument(
+        '-s', '--statsfile', metavar = 'STATS_FILE',
         type = argparse.FileType('w'),
-        help = 'File to store video statistics data, comma-separated value format (.csv). Will be overwritten if exists.')
-    #parser.add_argument('-s', '--startindex', metavar = 'offset',
+        help = 'File to store video statistics data, comma-separated value '
+               'format (.csv). Will be overwritten if exists.')
+    #parser.add_argument(
+    #    '-s', '--startindex', metavar = 'offset',
     #    type = int, default = 0,
     #    help = 'Starting index for chapter/scene output.')
-    #parser.add_argument('-p', '--startpos', metavar = 'position',
+    #parser.add_argument(
+    #    '-p', '--startpos', metavar = 'position',
     #    choices = [ 'in', 'mid', 'out' ], default = 'out',
-    #    help = 'Where the timecode/frame number for a given scene should start relative to the fades [in, mid, or out].')
+    #    help = 'Where the timecode/frame number for a given scene should '
+    #           'start relative to the fades [in, mid, or out].')
 
     return parser
 
 
+
+def detect_scenes(cap, scene_list, detector_list, stats_file = None):
+    """Performs scene detection based on passed video and scene detectors.
+
+    Args:
+        cap:  An open cv2.VideoCapture object that is assumed to be at the
+            first frame.  Frames are read until cap.read() returns False, and
+            the cap object remains open (it can be closed with cap.release()).
+        scene_list:  List to append frame numbers of any detected scene cuts.
+        detector_list:  List of scene detection algorithms to run on the video.
+        stats_file:  Optional.  Handle to a file, open for writing, to save the
+            frame metrics computed by each detection algorithm, in CSV format.
+
+    Returns:
+        Unsigned, integer number of frames read from the passed cap object.
+    """
+    while True:
+        (rv, im) = cap.read()
+        if not rv:
+            break
+        if not frames_read in frame_metrics:
+            frame_metrics[frames_read] = dict()
+        for detector in detector_list:
+            detector.process_frame(frames_read, im, frame_metrics, scene_list)
+        if args.statsfile is not None:
+            # write frame metrics to statsfile
+            pass
+        frames_read += 1
+    detector.post_process(scene_list)
+    pass
+
+
 def main():
-    """ Program entry point.
+    """Program entry point.
 
     Handles high-level interfacing of video and scene detection / output.
     """
