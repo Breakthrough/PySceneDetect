@@ -72,9 +72,7 @@ See [`CHANGELOG.md`](https://github.com/Breakthrough/PySceneDetect/blob/master/C
  - additional timecode formats
  - interactive/guided mode, eventually moving to a graphical interface
 
-
-You can find additional information regarding PySceneDetect at the following URL:
-http://www.bcastell.com/projects/pyscenedetect/
+Additional features being planned or in development can be found [here (tagged as `feature`) in the issue tracker](https://github.com/Breakthrough/PySceneDetect/issues?q=is%3Aissue+is%3Aopen+label%3Afeature).  You can also find additional information about PySceneDetect at [http://www.bcastell.com/projects/pyscenedetect/](http://www.bcastell.com/projects/pyscenedetect/).
 
 
 ----------------------------------------------------------
