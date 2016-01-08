@@ -34,6 +34,7 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 #
 
+from __future__ import print_function
 import sys
 import argparse
 
@@ -551,7 +552,11 @@ def get_cli_parser(scene_detectors_list, timecode_formats_list):
                 ' in threshold detection mode, or as the change tolerance'
                 ' threshold in content-aware detection mode.'))
     parser.add_argument(
-        '-m', '--min-percent', metavar = 'percent', dest = 'min_percent',
+        '-m', '--min-scene-length', metavar = 'NUM_FRAMES', dest = 'min_scene_len',
+        type = int_type_check(1, None, 'NUM_FRAMES'), default = 15,
+        help = 'Minimum length, in frames, before another scene cut can be generated.')
+    parser.add_argument(
+        '-p', '--min-percent', metavar = 'percent', dest = 'min_percent',
         type = int_type_check(0, 100, 'percentage'), default = 95,
         help = 'Amount of pixels in a frame, from 0-100%%, that must fall '
                'under [intensity]. Only applies to threshold detection.')
@@ -571,12 +576,12 @@ def get_cli_parser(scene_detectors_list, timecode_formats_list):
         default = SCENE_DETECTOR_DEFAULT,
         help = 'Type of scene detection method/algorithm to use; detectors available: %s.' % (
             scene_detectors_list.__str__().replace("'","")))
-    parser.add_argument(
-        '-f', '--format-timecode', metavar = 'timecode_format', dest = 'timecode_format',
-        type = string_type_check(timecode_formats_list, False, 'timecode_format'),
-        default = TIMECODE_FORMAT_DEFAULT,
-        help = 'Format to use for the output scene cut times; formats available: %s.' % (
-            timecode_formats_list.__str__().replace("'","")))
+    #parser.add_argument(
+    #    '-f', '--format-timecode', metavar = 'timecode_format', dest = 'timecode_format',
+    #    type = string_type_check(timecode_formats_list, False, 'timecode_format'),
+    #    default = TIMECODE_FORMAT_DEFAULT,
+    #    help = 'Format to use for the output scene cut times; formats available: %s.' % (
+    #        timecode_formats_list.__str__().replace("'","")))
     parser.add_argument(
         '-l', '--list-scenes', dest = 'list_scenes',
         action = 'store_true', default = False,
@@ -585,7 +590,7 @@ def get_cli_parser(scene_detectors_list, timecode_formats_list):
         '-q', '--quiet', dest = 'quiet_mode',
         action = 'store_true', default = False,
         help = ('Suppress all output except for final comma-separated list of scene cuts.'
-                ' Useful for computing or piping output directly into other programs/scripts.')
+                ' Useful for computing or piping output directly into other programs/scripts.'))
     #parser.add_argument(
     #    '-s', '--startindex', metavar = 'offset',
     #    type = int, default = 0,
@@ -600,7 +605,8 @@ def get_cli_parser(scene_detectors_list, timecode_formats_list):
     return parser
 
 
-def detect_scenes(cap, scene_list, detector_list, stats_file = None):
+def detect_scenes(cap, scene_list, detector_list, stats_file = None,
+                  quiet_mode = False):
     """Performs scene detection based on passed video and scene detectors.
 
     Args:
@@ -615,7 +621,8 @@ def detect_scenes(cap, scene_list, detector_list, stats_file = None):
     Returns:
         Unsigned, integer number of frames read from the passed cap object.
     """
-    scene_list = []
+    frames_read = 0
+    frame_metrics = {}
     while True:
         (rv, im) = cap.read()
         if not rv:
@@ -624,7 +631,7 @@ def detect_scenes(cap, scene_list, detector_list, stats_file = None):
             frame_metrics[frames_read] = dict()
         for detector in detector_list:
             detector.process_frame(frames_read, im, frame_metrics, scene_list)
-        if args.stats_file is not None:
+        if stats_file:
             # write frame metrics to stats_file
             pass
         frames_read += 1
@@ -648,111 +655,62 @@ def main():
     # Attempt to open the passed input (video) file.
     cap.open(args.input.name)
     if not cap.isOpened():
-        print '[PySceneDetect] FATAL ERROR - could not open video %s.' % args.input.name
+        if not args.quiet_mode:
+            print('[PySceneDetect] FATAL ERROR - could not open video %s.' % 
+                args.input.name)
         return
-    else:
-        print '[PySceneDetect] Parsing video %s...' % args.input.name
+    elif not args.quiet_mode:
+        print('[PySceneDetect] Parsing video %s...' % args.input.name)
 
     # Print video parameters (resolution, FPS, etc...)
     video_width  = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
     video_height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
     video_fps    = cap.get(cv2.CAP_PROP_FPS)
-    print '[PySceneDetect] Video Resolution / Framerate: %d x %d / %2.3f FPS' % (
-        video_width, video_height, video_fps )
+    if not args.quiet_mode:
+        print('[PySceneDetect] Video Resolution / Framerate: %d x %d / %2.3f FPS' % (
+            video_width, video_height, video_fps ))
 
-    # ### TESTING
-    #detector = ThresholdDetector(8, 0.95, 0.0)
-    #detector = ContentDetector()
-
-    #detector = scene_detectors[args.detector]()
-
-    # For now, have to manually add arguments.
-    detector = None
+    # Load SceneDetector with proper arguments based on passed detector (-d).
+    # TODO: Add minimum scene length as a variable argument.
     detection_method = args.detection_method.lower()
-
+    detector = None
     if (detection_method == 'content'):
-        detector = scene_detectors['content'](args.threshold)   # last arg is min_scene_len
+        detector = scene_detectors['content'](args.threshold, args.min_scene_len)
     elif (detection_method == 'threshold'):
         detector = scene_detectors['threshold'](
-            args.threshold, args.min_percent, block_size = args.block_size)
+            args.threshold, args.min_percent/100.0, args.min_scene_len,
+            block_size = args.block_size)
     
-
-    #def __init__(self, threshold = 12, min_percent = 0.95, min_scene_len = 15,
-    #             fade_bias = 0.0, add_final_scene = False, block_size = 8):
-
-    frame_metrics = dict()
+    # Perform scene detection using specified mode.
+    if not args.quiet_mode:
+        print('[PySceneDetect] Detecting scenes (%s mode)...' % detection_method)
     scene_list = list()
-    frames_read = 0
-    if args.stats_file is not None:
-        args.stats_file.write("frame,delta_hsl_avg,delta_hue,delta_sat,delta_lum\n")
-    while True:
-        (rv, im) = cap.read()
-        if not rv:
-            break
-        if not frames_read in frame_metrics:
-            frame_metrics[frames_read] = dict()
-        detector.process_frame(frames_read, im, frame_metrics, scene_list)
+    frames_read = detect_scenes(cap, scene_list, [detector],
+                                args.stats_file, args.quiet_mode)
+    # Print scene list if requested.
+    if not args.quiet_mode:
+        print('[PySceneDetect] Processing complete, found %d scenes in video.' %
+            len(scene_list))
+        print('[PySceneDetect] List of detected scenes:')
+        if args.list_scenes:
+            print ('----------------------------------------------')
+            print ('    Scene #   |   Frame #                     ')
+            print ('----------------------------------------------')
+            for scene_idx, frame_num in enumerate(scene_list):
+                print ('      %3d     |   %8d' % (scene_idx, frame_num))
+            print ('----------------------------------------------')
+        print('[PySceneDetect] Comma-separated timecode output:')
 
-        if args.stats_file is not None and 'delta_hsv_avg' in frame_metrics[frames_read]:
-            args.stats_file.write("%d,%3.2f,%3.2f,%3.2f,%3.2f\n" % (frames_read, frame_metrics[frames_read]['delta_hsv_avg'], 
-             frame_metrics[frames_read]['delta_hue'], frame_metrics[frames_read]['delta_sat'], frame_metrics[frames_read]['delta_lum']))
-
-        frames_read += 1
-    detector.post_process(scene_list)
-    print '[PySceneDetect] Complete.  Scene List:'
-    print scene_list
-    i = 0
-    for s in scene_list:
-        time_msec = (1000.0 * s) / 29.970
-        print 'Scene %02d: %s' %  (i, get_timecode_string(time_msec))
-        i += 1
-    if args.stats_file is not None:
-        args.stats_file.close()
-    return
-    # ### END TESTING
-
-
-    cv_frame_count = cap.get(cv2.CAP_PROP_FRAME_COUNT)
-
-    frames_read = 0
-    cap_closed = False
-
-    for f in xrange(cv_frame_count):
-
-        # Check if metrics required are computed first, store in a CSV.
-        # Load as a dict, pass to parsing functions.
-        # Read each frame even if stats exist, just don't process.
-
-        # For now, just write the stats_file if specified, worry about parsing
-        # afterwards since multiple algorithms might be executed at once.
-
-
-        (rv, im) = cap.read()
-        if not rv:
-            cap_closed = True
-            break
-        frames_read += 1
-        # process frame
-
-    # Handle any errors in frames read.
-    if frames_read < cv_frame_count:
-        print '[PySceneDetect] WARNING - could not read all frames reported in video (decoded %d frames, expected %d).' % (
-            frames_read, cv_frame_count)
-    elif not cap_closed:
-        # continue parsing frames.
-        while True:
-            (rv, im) = cap.read()
-            if not rv:
-                cap_closed = True
-                break
-            frames_read += 1
-            # process frame
-
+    # Print CSV separated timecode output.
+    scene_list_msec = [(1000.0 * x) / float(video_fps) for x in scene_list]
+    print([get_timecode_string(x) for x in scene_list_msec].__str__()[1:-1]
+        .replace("'","").replace(' ', ''))
 
     # Cleanup, release all objects and close file handles.
     cap.release()
+    if args.stats_file: args.stats_file.close()
+    return
 
 
 if __name__ == '__main__':
     main()
-    print ''
