@@ -106,11 +106,14 @@ class ThresholdDetector(SceneDetector):
                      computed programmatically in the future).
     """
 
-    def __init__(self, threshold = 12, min_percent = 0.95, fade_bias = 0.0, add_final_scene = False, block_size = 8):
+    def __init__(self, threshold = 12, min_percent = 0.95, min_scene_len = 15,
+                 fade_bias = 0.0, add_final_scene = False, block_size = 8):
+        """Initializes threshold-based scene detector object."""
         super(ThresholdDetector, self).__init__()
         self.threshold = threshold
         self.fade_bias = fade_bias
         self.min_percent = min_percent
+        self.min_scene_len = min_scene_len  # minimum length of any given scene, in frames
         self.last_frame_avg = None
         # Whether to add an additional scene or not when ending on a fade out
         # (as cuts are only added on fade ins; see post_process() for details).
@@ -124,6 +127,12 @@ class ThresholdDetector(SceneDetector):
         return
 
     def compute_frame_average(self, frame):
+        """Computes the average pixel value/intensity over the whole frame.
+
+        The value is computed by adding up the 8-bit R, G, and B values for
+        each pixel, and dividing by the number of pixels multiplied by 3.
+
+        Returns a floating point value representing average pixel intensity."""
         num_pixel_values = float(frame.shape[0] * frame.shape[1] * frame.shape[2])
         return numpy.sum(frame[:,:,:]) / num_pixel_values
 
@@ -134,6 +143,8 @@ class ThresholdDetector(SceneDetector):
         meet the given threshold (within the minimum percent).  This ensures
         that the threshold is not exceeded while maintaining some tolerance for
         compression and noise.
+
+        This is the algorithm used for absolute mode of the threshold detector.
 
         Returns true if the number of pixels whose RGB values are all <= the
         threshold (within the minimum percent as a tolerance), or false if not.
@@ -186,7 +197,10 @@ class ThresholdDetector(SceneDetector):
                 f_in = frame_num
                 f_out = self.last_fade['frame']
                 f_split = int((f_in + f_out + int(self.fade_bias * (f_in - f_out))) / 2)
-                scene_list.append(f_split)
+                # Only add the scene if min_scene_len frames have passed. 
+                if (frame_num - self.last_scene_cut) >= self.min_scene_len:
+                    scene_list.append(f_split)
+                    self.last_scene_cut = frame_num
                 self.last_fade['type'] = 'in'
                 self.last_fade['frame'] = frame_num
         else:
@@ -201,10 +215,18 @@ class ThresholdDetector(SceneDetector):
         return
 
     def post_process(self, scene_list):
+        """Writes a final scene cut if the last detected fade was a fade-out.
+
+        Only writes the scene cut if add_final_scene is true, and the last fade
+        that was detected was a fade-out.  There is no bias applied to this cut
+        (since there is no corresponding fade-in) so it will be located at the
+        exact frame where the fade-out crossed the detection threshold."""
+
         # If the last fade detected was a fade out, we add a corresponding new
         # scene break to indicate the end of the scene.  This is only done for
-        # a fade out as scene breaks are computed during the scene's fade in.
-        if self.last_fade['type'] == 'out' and self.add_final_scene:
+        # fade-outs, as a scene cut is already added when a fade-in is found.
+        if self.last_fade['type'] == 'out' and self.add_final_scene and \
+                (frame_num - self.last_scene_cut) >= self.min_scene_len:
             scene_list.append(self.last_fade['frame'])
         return
 
@@ -261,7 +283,7 @@ class HSVDetector(SceneDetector):
 
             if delta_hsv_avg >= self.threshold:
                 if self.last_scene_cut is None or \
-                  (frame_num - self.last_scene_cut) > self.min_scene_len:
+                  (frame_num - self.last_scene_cut) >= self.min_scene_len:
                     scene_list.append(frame_num)
                     self.last_scene_cut = frame_num
             
@@ -460,11 +482,17 @@ def main():
     # Attempt to open the passed input (video) file.
     cap.open(args.input.name)
     if not cap.isOpened():
-        print 'FATAL ERROR - could not open video %s.' % args.input.name
-        print 'cap.isOpened() is not True after calling cap.open(..)'
+        print '[PySceneDetect] FATAL ERROR - could not open video %s.' % args.input.name
         return
     else:
-        print 'Parsing video %s...' % args.input.name
+        print '[PySceneDetect] Parsing video %s...' % args.input.name
+
+    # Print video parameters (resolution, FPS, etc...)
+    video_width  = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
+    video_height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
+    video_fps    = cap.get(cv2.CAP_PROP_FPS)
+    print '[PySceneDetect] Video Resolution / Framerate: %d x %d / %2.3f FPS' % (
+        video_width, video_height, video_fps )
 
     # ### TESTING
     #detector = ThresholdDetector(8, 0.95, 0.0)
@@ -488,7 +516,7 @@ def main():
 
         frames_read += 1
     detector.post_process(scene_list)
-    print 'Finished! Scene list:'
+    print '[PySceneDetect] Complete.  Scene List:'
     print scene_list
     i = 0
     for s in scene_list:
@@ -512,6 +540,9 @@ def main():
         # Load as a dict, pass to parsing functions.
         # Read each frame even if stats exist, just don't process.
 
+        # For now, just write the statsfile if specified, worry about parsing
+        # afterwards since multiple algorithms might be executed at once.
+
 
         (rv, im) = cap.read()
         if not rv:
@@ -522,7 +553,8 @@ def main():
 
     # Handle any errors in frames read.
     if frames_read < cv_frame_count:
-        print 'Error - not all frames could be read from video.'
+        print '[PySceneDetect] WARNING - could not read all frames reported in video (decoded %d frames, expected %d).' % (
+            frames_read, cv_frame_count)
     elif not cap_closed:
         # continue parsing frames.
         while True:
