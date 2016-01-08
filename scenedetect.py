@@ -231,8 +231,7 @@ class ThresholdDetector(SceneDetector):
         return
 
 
-
-class HSVDetector(SceneDetector):
+class ContentDetector(SceneDetector):
     """Detects fast cuts using changes in colour and intensity between frames.
 
     Since the difference between frames is used, unlike the ThresholdDetector,
@@ -241,7 +240,7 @@ class HSVDetector(SceneDetector):
     """
 
     def __init__(self, threshold = 30.0, min_scene_len = 15):
-        super(HSVDetector, self).__init__()
+        super(ContentDetector, self).__init__()
         self.threshold = threshold
         self.min_scene_len = min_scene_len  # minimum length of any given scene, in frames
         self.last_frame = None
@@ -294,6 +293,7 @@ class HSVDetector(SceneDetector):
         return
 
     def post_process(self, scene_list):
+        """Not used for ContentDetector, as cuts are written as they are found."""
         return
 
 
@@ -317,7 +317,7 @@ class DissolveDetector(SceneDetector):
     """Detects slow fades (dissolve cuts) via changes in the HSV colour space.
 
     Detects slow fades only; to detect fast cuts between content scenes, the
-    HSVDetector should be used instead.
+    ContentDetector should be used instead.
     """
 
     def __init__(self):
@@ -496,7 +496,7 @@ def main():
 
     # ### TESTING
     #detector = ThresholdDetector(8, 0.95, 0.0)
-    detector = HSVDetector()
+    detector = ContentDetector()
     frame_metrics = dict()
     scene_list = list()
     frames_read = 0
