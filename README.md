@@ -1,9 +1,10 @@
-
-
+      
 PySceneDetect
 ==========================================================
-Video Scene Detection and Analysis Tool
+Video Scene Cut Detection and Analysis Tool
 ----------------------------------------------------------
+
+[![Documentation Status](https://readthedocs.org/projects/pyscenedetect/badge/?version=latest)](http://pyscenedetect.readthedocs.org/en/latest/?badge=latest)
 
 ### New Release: v0.3-beta (Jan. 8, 2016)!
 
