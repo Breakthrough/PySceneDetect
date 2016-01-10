@@ -51,4 +51,3 @@ PySceneDetect Changelog
 
  * initial release
  * [feature] threshold-based fade in/out detection
-

@@ -1,0 +1,21 @@
+site_name: PySceneDetect
+site_description: "Website and documentation for PySceneDetect, a program to automatically detect scene cuts and split videos.  Written in Python, and also provides Python API in addition to command-line interface for use within other programs."
+site_author: "Brandon Castellano"
+
+repo_url: https://github.com/Breakthrough
+repo_name: "PySceneDetect on Github"
+copyright: "Copyright &copy; 2013-2016 Brandon Castellano.  All rights reserved.<br>This document is part of PySceneDetect, licensed under the BSD 2-Clause license (see the LICENSE file for details)."
+
+#theme: mkdocs
+theme: readthedocs
+
+pages:
+- 'Overview': 'index.md'
+- 'Download': 'download.md'
+- 'Getting Started:':
+    - 'Basic Usage': 'examples/usage.md'
+    - 'Examples': 'examples/usage-example.md'
+    - 'Python API': 'examples/usage-python.md'
+- 'Versions and Changelog': 'changelog.md'
+
+markdown_extensions: [fenced_code]

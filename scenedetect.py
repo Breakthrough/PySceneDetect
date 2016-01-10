@@ -43,7 +43,7 @@ import cv2
 import numpy
 
 
-VERSION_STRING = 'v0.3-beta'
+VERSION_STRING = 'v0.3.1-beta'
 
 # About & copyright message shown for the -v / --version CLI argument.
 ABOUT_STRING   = """PySceneDetect %s
