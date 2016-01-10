@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 #
 #         PySceneDetect: Python-Based Video Scene Detector
-#    -----------------------------------------------------------
-#        [ http://www.bcastell.com/projects/pyscenedetect/ ]
-#        [ https://github.com/Breakthrough/PySceneDetect/  ]
+#   ---------------------------------------------------------------
+#     [  Site: http://www.bcastell.com/projects/pyscenedetect/   ]
+#     [  Github: https://github.com/Breakthrough/PySceneDetect/  ]
+#     [  Documentation: http://pyscenedetect.readthedocs.org/    ]
 #
 # This program implements an optimized threshold-based scene detection
 # algorithm, generating a list of scene/chapter timecodes (or frame)
@@ -17,14 +18,15 @@
 # USAGE.md file for advanced usage details and examples.
 #
 #
-# Copyright (C) 2013-2016 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2012-2016 Brandon Castellano <http://www.bcastell.com>.
 #
 # PySceneDetect is licensed under the BSD 2-Clause License; see the
-# included LICENSE file or visit the following page for details:
-# http://www.bcastell.com/projects/pyscenedetect
+# included LICENSE file or visit one of the following pages for details:
+#  - http://www.bcastell.com/projects/pyscenedetect/
+#  - https://github.com/Breakthrough/PySceneDetect/
 #
 # This software uses Numpy and OpenCV; see the LICENSE-NUMPY and
-# LICENSE-OPENCV files for details, or visit the above URL.
+# LICENSE-OPENCV files or visit one of above URLs for details.
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 # EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
@@ -35,23 +37,26 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 #
 
+# Standard Library Imports
 from __future__ import print_function
 import sys
 import argparse
 
+# Third-Party Library Imports
 import cv2
 import numpy
 
 
+# Used when printing the about & copyright message below.
 VERSION_STRING = 'v0.3.1-beta'
 
-# About & copyright message shown for the -v / --version CLI argument.
+# About & copyright message string shown for the -v / --version CLI argument.
 ABOUT_STRING   = """PySceneDetect %s
 -----------------------------------------------
 https://github.com/Breakthrough/PySceneDetect
 http://www.bcastell.com/projects/pyscenedetect
 -----------------------------------------------
-Copyright (C) 2013-2016 Brandon Castellano
+Copyright (C) 2012-2016 Brandon Castellano
 License: BSD 2-Clause (see the included LICENSE file for details,
   or visit < http://www.bcastell.com/projects/pyscenedetect >).
 
@@ -63,12 +68,15 @@ THE SOFTWARE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, EXPRESS OR IMPLIED.
 
 """ % VERSION_STRING
 
+
 # Default value for -d / --detector CLI argument (see get_available_detectors()
 # for a list of valid/enabled detection methods and their string equivalents).
 SCENE_DETECTOR_DEFAULT = 'threshold'
+
 # Default value for -f / --format-timecode CLI argument (see the
 # get_timecode_formats() function for a list of timecode formats and names).
 TIMECODE_FORMAT_DEFAULT = 'standard'
+
 
 # Compatibility fix for OpenCV < 3.0
 if (cv2.__version__[0] == '2') or (not cv2.__version__[0] == '3'):

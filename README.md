@@ -94,6 +94,6 @@ Additional features being planned or in development can be found [here (tagged a
 
 Licensed under BSD 2-Clause (see the `LICENSE` file for details).
 
-Copyright (C) 2013-2016 Brandon Castellano.
+Copyright (C) 2012-2016 Brandon Castellano.
 All rights reserved.
 
