@@ -4,18 +4,32 @@ site_author: "Brandon Castellano"
 
 repo_url: https://github.com/Breakthrough
 repo_name: "PySceneDetect on Github"
-copyright: "Copyright &copy; 2013-2016 Brandon Castellano.  All rights reserved.<br>This document is part of PySceneDetect, licensed under the BSD 2-Clause license (see the LICENSE file for details)."
+copyright: 'Copyright &copy; 2015-2016 Brandon Castellano.  All rights reserved.<br />Licensed under BSD 2-Clause (see the <a href="https://github.com/Breakthrough/PySceneDetect/blob/master/LICENSE" alt="link to latest LICENSE file on Github">LICENSE file</a> for details).'
 
 #theme: mkdocs
 theme: readthedocs
 
 pages:
-- 'Overview': 'index.md'
-- 'Download': 'download.md'
+- 'PySceneDetect':
+    - 'Introduction': 'index.md'
+    - 'Features & Roadmap': 'features.md'
+    - 'Download': 'download.md'
+    - 'Changelog': 'changelog.md'
+    - 'Bug Reports and Contributing': 'contributing.md'
+    - 'License & Copyright Information': 'copyright.md'
 - 'Getting Started:':
     - 'Basic Usage': 'examples/usage.md'
     - 'Examples': 'examples/usage-example.md'
-    - 'Python API': 'examples/usage-python.md'
-- 'Versions and Changelog': 'changelog.md'
+    - 'Python Interface': 'examples/usage-python.md'
+- 'Documentation & Reference:':
+    - 'Command-Line Parameters': 'reference/command-line-params.md'
+    - 'Scene Detection Method Details': 'reference/detection-methods.md'
+    - 'Python Interface & Integration With Other Applications': 'reference/python-usage.md'
+    - 'Python API Reference': 'reference/python-api.md'
+    - 'Creating New Scene Detection Methods': 'reference/creating-new-scene-detectors.md'
+- 'Other Links':
+    - 'Third-Party Tools & Utilities': 'other/thirdparty.md'
+    - 'Other Similar Programs': 'other/similar.md'
+    - 'Useful Resources & Reading Material': 'other/resources.md'
 
 markdown_extensions: [fenced_code]
