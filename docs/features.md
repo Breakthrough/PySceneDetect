@@ -29,5 +29,7 @@
  - export scenes in chapter/XML format
  - improve robustness of content-aware detection by combining with edge detection (similar to MATLAB-based scene ch
  - detector)
- - interactive/guided mode, eventually moving to a graphical interface
+ - GUI for easier previewing and threshold setting (will be GTK+ 3 based via PyGObject)
+ - automatic threshold detection for the current scene detection methods (can be done in pre-pass if necessary)
+ - standalone distribution/build for Windows (x86/64)
 
