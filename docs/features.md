@@ -30,3 +30,4 @@
  - improve robustness of content-aware detection by combining with edge detection (similar to MATLAB-based scene ch
  - detector)
  - interactive/guided mode, eventually moving to a graphical interface
+
