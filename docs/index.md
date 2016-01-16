@@ -23,8 +23,3 @@ Here are some of the things people are using PySceneDetect for:
 
 Of course, this is just a small slice of what you can do with PySceneDetect, so why not <a href="download/" alt="Download PySceneDetect">try it out for yourself</a>!  The timecode format used by default (`HH:MM:SS.nnnn`) is compatible with most popular video tools, so in most cases the output scene list from PySceneDetect can be directly copied and pasted into another tool of your choice (e.g. `ffmpeg`, `avconv` or the `mkvtoolnix` suite).
 
-
-
-
-<meta name="google-site-verification" content="KQZZzUYeED_aSqqDqS4vGj4V7X5pyDtcTgJEZSyuDxY" />
-
