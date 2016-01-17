@@ -21,10 +21,10 @@ class SceneDetector(object):
 Processing is done by calling the `process_frame(...)` function for all frames in the video, followed by `post_process(...)` (optional) after the final frame.  Scene cuts are detected and added to the passed list object in both cases.
 
 `process_frame(...)` is called for each frame in sequence, passing the following arguments:
- - `frame_num`: the number of the current frame being processed
- - `frame_img`: frame returned video file or stream (accessible as NumPy array)
- - `frame_metrics`: dictionary for memoizing results of detection algorithm calculations for quicker subsequent analyses (if possible)
- - `scene_list`: List containing the frame numbers where all scene cuts/breaks occur in the video.
 
+- `frame_num`: the number of the current frame being processed
+- `frame_img`: frame returned video file or stream (accessible as NumPy array)
+- `frame_metrics`: dictionary for memoizing results of detection algorithm calculations for quicker subsequent analyses (if possible)
+- `scene_list`: List containing the frame numbers where all scene cuts/breaks occur in the video.
 
-`post_process`(...)` is called ***after** the final frame has been processed, to allow for any stored scene cuts to be written *if required* (e.g. in the case of the `ThresholdDetector`).
+`post_process(...)` is called ***after** the final frame has been processed, to allow for any stored scene cuts to be written *if required* (e.g. in the case of the `ThresholdDetector`).
