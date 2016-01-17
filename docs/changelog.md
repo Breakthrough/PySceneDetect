@@ -3,20 +3,33 @@ PySceneDetect Changelog
 ==========================================================
 
 
-### 0.4-beta-dev [in development]
+## 0.4-beta-dev [in development]
+ * [feature]  graphical user interface (GTK+)
  * [enhance]  added configuration file to support more options and cleanup/remove some command-line arguments
  * [feature]  user-selectable fade bias when using threshold-based detection
  * [internal] preperation for automated splitting via integration with supported tools (ffmpeg, avconv, mkvmerge)
  * [internal] framework for edge-detection and dissolve/fade based scene cut algorithms for future versions
 
 
-### 0.3-beta
+----------------------------------------------------------------
+
+
+### 0.3.1-beta
+
+ * [feature] restored function of statistics generation mode (-s/--statsfile)
+
+
+## 0.3-beta
 
  * major release, includes improved detection algorithms and complete internal code refactor
  * [feature]  content-aware scene detection using HSV-colourspace based algorithm (use `-d content`)
  * [enhance]  added CLI flags to allow user changes to more algorithm properties
  * [internal] re-implemented threshold-based scene detection algorithm under new interface
  * [internal] major code refactor including standard detection algorithm interface and API
+ * [internal] remove statistics mode until update to new detection mode interface
+
+
+----------------------------------------------------------------
 
 
 ### 0.2.4-alpha
@@ -41,13 +54,17 @@ PySceneDetect Changelog
  * [enhance] one-line of CSV timecodes added for easy splitting with external tool
 
 
-### 0.2-alpha
+## 0.2-alpha
 
  * [enhance] now provides discrete scene list (in addition to fades)
  * [feature] ability to output to file (-o / --output flag)
 
 
-### 0.1-alpha
+----------------------------------------------------------------
+
+
+## 0.1-alpha
 
  * initial release
  * [feature] threshold-based fade in/out detection
+

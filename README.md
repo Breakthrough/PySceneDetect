@@ -8,7 +8,7 @@ Video Scene Cut Detection and Analysis Tool
 
 ### New Release: v0.3-beta (Jan. 8, 2016)!
 
-PySceneDetect is finally out of alpha, and is finally in the first beta release ([get it here!](https://github.com/Breakthrough/PySceneDetect/releases)).  This release brings a number of major changes, including the much awaited content-aware detection mode (see [`CHANGELOG.md`](https://github.com/Breakthrough/PySceneDetect/blob/master/CHANGELOG.md) or [the Releases page](https://github.com/Breakthrough/PySceneDetect/releases) for details.).  Also see [the new `USAGE.md` file](https://github.com/Breakthrough/PySceneDetect/blob/master/USAGE.md) for details on the new detection modes, default values/thresholds to try, and how to effectively choose the optimal detection parameters.
+PySceneDetect is finally out of alpha, and is finally in the first beta release ([get it here!](https://github.com/Breakthrough/PySceneDetect/releases)).  This release brings a number of major changes, including the much awaited content-aware detection mode (see [`docs/changelog.md`](https://github.com/Breakthrough/PySceneDetect/blob/master/docs/changelog.md) or [the Releases page](https://github.com/Breakthrough/PySceneDetect/releases) for details.).  Also see [the new `USAGE.md` file](https://github.com/Breakthrough/PySceneDetect/blob/master/USAGE.md) for details on the new detection modes, default values/thresholds to try, and how to effectively choose the optimal detection parameters.
 
 ----------------------------------------------------------
 
@@ -64,7 +64,7 @@ You can download the file `testvideo.mp4`, as well as the expected output `testv
 Current Features & Roadmap
 ----------------------------------------------------------
 
-See [`CHANGELOG.md`](https://github.com/Breakthrough/PySceneDetect/blob/master/CHANGELOG.md) for a list of changes in each version, or visit [the Releases page](https://github.com/Breakthrough/PySceneDetect/releases) to download a specific version.  Feel free to submit any bugs/issues or feature requests to [the Issue Tracker](https://github.com/Breakthrough/PySceneDetect/issues).
+See [`docs/changelog.md`](https://github.com/Breakthrough/PySceneDetect/blob/master/docs/changelog.md) for a list of changes in each version, or visit [the Releases page](https://github.com/Breakthrough/PySceneDetect/releases) to download a specific version.  Feel free to submit any bugs/issues or feature requests to [the Issue Tracker](https://github.com/Breakthrough/PySceneDetect/issues).
 
 ### Current Features
 
