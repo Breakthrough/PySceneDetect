@@ -10,11 +10,15 @@ Video Scene Cut Detection and Analysis Tool
 
 PySceneDetect is finally out of alpha, and is finally in the first beta release ([get it here!](https://github.com/Breakthrough/PySceneDetect/releases)).  This release brings a number of major changes, including the much awaited content-aware detection mode (see [`docs/changelog.md`](https://github.com/Breakthrough/PySceneDetect/blob/master/docs/changelog.md) or [the Releases page](https://github.com/Breakthrough/PySceneDetect/releases) for details.).  Also see [the new `USAGE.md` file](https://github.com/Breakthrough/PySceneDetect/blob/master/USAGE.md) for details on the new detection modes, default values/thresholds to try, and how to effectively choose the optimal detection parameters.
 
+More complete documentation, as well as a new main page for PySceneDetect can be found on Readthedocs at:
+
+http://pyscenedetect.readthedocs.org/
+
 ----------------------------------------------------------
 
 PySceneDetect is a command-line tool, written in Python and using OpenCV, which analyzes a video, looking for scene changes or cuts.  The output timecodes can then be used with another tool (e.g. `mkvmerge`, `ffmpeg`) to split the video into individual clips.  A frame-by-frame analysis can also be generated for a video, to help with determining optimal threshold values or detecting patterns/other analysis methods for a particular video.  See [the `USAGE.md` file](https://github.com/Breakthrough/PySceneDetect/blob/master/USAGE.md) for details.
 
-There are two main detection methods PySceneDetect uses: threshold (comparing each frame to a set black level, useful for detecting cuts and fades to/from black), and content (compares each frame sequentially looking for changes in content, useful for detecting fast cuts between video scenes, although slower to process).  Each mode has slightly different parameters, and is described in detail below.
+There are two main detection methods PySceneDetect uses: `threshold` (comparing each frame to a set black level, useful for detecting cuts and fades to/from black), and `content` (compares each frame sequentially looking for changes in content, useful for detecting fast cuts between video scenes, although slower to process).  Each mode has slightly different parameters, and is described in detail below.
 
 In general, use `threshold` mode if you want to detect scene boundaries using fades/cuts in/out to black.  If the video uses a lot of fast cuts between content, and has no well-defined scene boundaries, you should use the `content` mode.  Once you know what detection mode to use, you can try the parameters recommended below, or generate a statistics file (using the `-s` / `--statsfile` flag) in order to determine the correct paramters - specifically, the proper threshold value.
 
@@ -32,25 +36,33 @@ The latest version of PySceneDetect (`v0.3-beta`) can be [downloaded here](https
 
 To ensure you have all the requirements, open a `python` interpreter, and ensure you can `import numpy` and `import cv2` without any errors.  You can download a test video and view the expected output [from the resources branch](https://github.com/Breakthrough/PySceneDetect/tree/resources/tests) (see the end of the Usage section below for details).
 
+Once this is done, [downloaded](https://github.com/Breakthrough/PySceneDetect/releases) and extract PySceneDetect.  To install PySceneDetect and allow you to use it system wide, use the following command (may require root/`sudo`):
+
+    python setup.py install
+
+After installation, you can use PySceneDetect as the `scenedetect` command from any command line.  To verify the installation, run the following command to display what version of PySceneDetect you have installed:
+
+    scenedetect --version
+
 
 Usage
 ----------------------------------------------------------
 
-**There is now a dedicated [`USAGE.md` file (here)](https://github.com/Breakthrough/PySceneDetect/blob/master/USAGE.md) containing more detailed usage instructions.**  To run PySceneDetect, you can invoke `python scenedetect.py` or `./scenedetect.py` directly.  To display the help file, detailing usage parameters:
+**There is now a dedicated [`USAGE.md` file (here)](https://github.com/Breakthrough/PySceneDetect/blob/master/USAGE.md) containing more detailed usage instructions.**  To run PySceneDetect, use the `scenedetect` command if you have it installed to your system.  Otherwise, if you are running from source, you can invoke `python scenedetect.py` or `./scenedetect.py` (instead of `scenedetect` in the examples shown below and elsewhere).  To display the help file, detailing the command line parameters:
 
-    ./scenedetect.py --help
+    scenedetect --help
 
 To perform threshold-based analysis with the default parameters, on a video named `myvideo.mp4`, saving a list of scenes to `myvideo_scenes.csv` (they are also printed to the terminal):
 
-    ./scenedetect.py --input myvideo.mp4 --output myvideo_scenes.csv
+    scenedetect --input myvideo.mp4 --output myvideo_scenes.csv
 
 To perform content-based analysis, with a threshold intensity of 30:
 
-    ./scenedetect.py --input myvideo.mp4 --detector content --threshold 16
+    scenedetect --input myvideo.mp4 --detector content --threshold 16
 
 To perform threshold-based analysis, with a threshold intensity of 16 and a match percent of 90:
 
-    ./scenedetect.py --input myvideo.mp4 --detector threshold --threshold 16 --min-percent 90
+    scenedetect --input myvideo.mp4 --detector threshold --threshold 16 --min-percent 90
 
 Detailed descriptions of the above parameters, as well as their default values, can be obtained by using the `--help` flag.
 
@@ -64,28 +76,8 @@ You can download the file `testvideo.mp4`, as well as the expected output `testv
 Current Features & Roadmap
 ----------------------------------------------------------
 
+You can [view the latest features and version roadmap on Readthedocs](http://pyscenedetect.readthedocs.org/en/latest/features/).
 See [`docs/changelog.md`](https://github.com/Breakthrough/PySceneDetect/blob/master/docs/changelog.md) for a list of changes in each version, or visit [the Releases page](https://github.com/Breakthrough/PySceneDetect/releases) to download a specific version.  Feel free to submit any bugs/issues or feature requests to [the Issue Tracker](https://github.com/Breakthrough/PySceneDetect/issues).
-
-### Current Features
-
- - content-aware scene detection based on changes between frames in the HSV color space 
- - output-suppression (quiet) mode for better automation with external scripts/programs
- - threshold scene detection analyzes video for changes in average frame intensity/brightness
- - detects fade-in and fade-out based on user-defined threshold
- - exports list of scenes to .CSV file (both timecodes and frame numbers) (`-o`)
- - exports timecodes in `mkvmerge` format: `HH:MM:SS.nnnnn`, comma-separated
- - statistics/analysis mode to export frame-by-frame video metrics (`-s`)
-
-### In Progress
-
- - adaptive or user-defined bias for fade in/out interpolation
- - additional timecode formats
-
-### Planned Features
-
- - export scenes in chapter/XML format
- - improve robustness of content-aware detection by combining with edge detection (similar to [MATLAB-based scene change detector](http://www.mathworks.com/help/vision/examples/scene-change-detection.html))
- - interactive/guided mode, eventually moving to a graphical interface
 
 Additional features being planned or in development can be found [here (tagged as `feature`) in the issue tracker](https://github.com/Breakthrough/PySceneDetect/issues?q=is%3Aissue+is%3Aopen+label%3Afeature).  You can also find additional information about PySceneDetect at [http://www.bcastell.com/projects/pyscenedetect/](http://www.bcastell.com/projects/pyscenedetect/).
 
