@@ -8,6 +8,7 @@ copyright: 'Copyright &copy; 2012-2016 Brandon Castellano.  All rights reserved.
 
 #theme: mkdocs
 theme: readthedocs
+google_analytics: ['UA-72551323-1','auto']
 
 pages:
 - 'PySceneDetect':
