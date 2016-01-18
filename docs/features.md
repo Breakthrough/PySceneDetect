@@ -42,7 +42,7 @@
 ## Version Roadmap
 
 
-### Features in Development for Next Version (v0.3.1-beta)
+#### Features in Development for Next Version (v0.3.1-beta)
 
  - allow user-selectable frame skipping for improved performance
  - allow user-selectable subsampling for improved performance
@@ -50,14 +50,14 @@
  - additional API functions to remove requirement on passing OpenCV video objects, and allow just a file path instead
 
 
-### Features Starting Development for Following Version (v0.3.x-beta)
+#### Features Starting Development for Following Version (v0.3.x-beta)
 
  - statistics/analysis mode to export frame-by-frame video metrics (-s)
  - adaptive or user-defined bias for fade in/out interpolation
  - additional timecode formats
 
 
-### Planned Features for Future Releases (v0.4-beta)
+#### Planned Features for Future Releases (v0.4-beta)
 
  - export scenes in chapter/XML format
  - improve robustness of content-aware detection by combining with edge detection (similar to MATLAB-based scene change detector)
