@@ -6,9 +6,15 @@
 #     [  Github: https://github.com/Breakthrough/PySceneDetect/  ]
 #     [  Documentation: http://pyscenedetect.readthedocs.org/    ]
 #
-# This is a convenience/backwards-compatibility script, and simply provides an
-# alternative to running PySceneDetect from source (in addition to the standard
-# python -m scenedetect).
+# Provides functionality to run PySceneDetect directly as a Python module (in
+# addition to using in other scripts via `import scenedetect`) by running:
+#
+#   > python -m scenedetect
+#
+# Installing PySceneDetect (using `python setup.py install` in the parent
+# directory) will also add the `scenedetect` command to be used from anywhere,
+# e.g. `scenedetect -i myfile.mp4`.
+#
 #
 # Copyright (C) 2012-2016 Brandon Castellano <http://www.bcastell.com>.
 #
@@ -29,5 +35,7 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 #
 
-import scenedetect
-scenedetect.main()
+if __name__ == '__main__':
+    import scenedetect
+    scenedetect.main()
+
