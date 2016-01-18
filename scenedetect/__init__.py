@@ -43,7 +43,7 @@ import numpy
 
 
 # Used when printing the about & copyright message below.
-VERSION_STRING = 'v0.3.0-beta'
+VERSION_STRING = 'v0.3.1-beta-dev'
 
 # About & copyright message string shown for the -v / --version CLI argument.
 ABOUT_STRING   = """PySceneDetect %s
@@ -64,6 +64,61 @@ THE SOFTWARE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, EXPRESS OR IMPLIED.
 """ % VERSION_STRING
 
 
+def detect_scenes_file(path, scene_list, detector_list, stats_file = None,
+                  quiet_mode = False):
+    """Performs scene detection on passed file using given scene detectors.
+
+    Essentially wraps detect_scenes while handling all OpenCV interaction.
+
+    Args:
+        path:  A string containing the filename of the video to open.
+        scene_list:  List to append frame numbers of any detected scene cuts.
+        detector_list:  List of scene detection algorithms to run on the video.
+        stats_file:  Optional. Handle to a file, open for writing, to save the
+            frame metrics computed by each detection algorithm, in CSV format.
+        quiet_mode:  Optional. Suppresses any console output (inluding errors).
+
+    Returns:
+        Tuple containing (video_fps, frames_read), where video_fps is a float
+        of the video file's framerate, and frames_read is a positive, integer
+        number of frames read from the video file.  Both values are set to -1
+        if the file could not be opened.
+
+    """
+
+    cap = cv2.VideoCapture()
+    frames_read = -1
+    video_fps = -1
+
+    # Attempt to open the passed input (video) file.
+    cap.open(path)
+    if not cap.isOpened():
+        if not quiet_mode:
+            print('[PySceneDetect] FATAL ERROR - could not open video %s.' % 
+                path)
+        return frames_read
+    elif not quiet_mode:
+        print('[PySceneDetect] Parsing video %s...' % path)
+
+    # Print video parameters (resolution, FPS, etc...)
+    video_width  = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
+    video_height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
+    video_fps    = cap.get(cv2.CAP_PROP_FPS)
+    if not quiet_mode:
+        print('[PySceneDetect] Video Resolution / Framerate: %d x %d / %2.3f FPS' % (
+            video_width, video_height, video_fps ))
+        print('Verify that the above parameters are correct'
+            ' (especially framerate, use --force-fps to correct if required).')
+
+    # Perform scene detection on cap object (modifies scene_list).
+    frames_read = detect_scenes(
+        cap, scene_list, detector_list, stats_file, quiet_mode)
+
+    # Cleanup and return number of frames we read.
+    cap.release()
+    return (video_fps, frames_read)
+
+
 def detect_scenes(cap, scene_list, detector_list, stats_file = None,
                   quiet_mode = False):
     """Performs scene detection based on passed video and scene detectors.
@@ -74,8 +129,9 @@ def detect_scenes(cap, scene_list, detector_list, stats_file = None,
             the cap object remains open (it can be closed with cap.release()).
         scene_list:  List to append frame numbers of any detected scene cuts.
         detector_list:  List of scene detection algorithms to run on the video.
-        stats_file:  Optional.  Handle to a file, open for writing, to save the
+        stats_file:  Optional. Handle to a file, open for writing, to save the
             frame metrics computed by each detection algorithm, in CSV format.
+        quiet_mode:  Optional. Suppresses any console output (inluding errors).
 
     Returns:
         Unsigned, integer number of frames read from the passed cap object.
@@ -104,30 +160,11 @@ def main():
     Handles high-level interfacing of video and scene detection / output.
     """
 
-    # Parse CLI arguments and initialize VideoCapture object.
+    # Parse CLI arguments.
     scene_detectors = scenedetect.detectors.get_available()
     timecode_formats = scenedetect.timecodes.get_available()
     args = scenedetect.cli.get_cli_parser(
         scene_detectors.keys(), timecode_formats.keys()).parse_args()
-    cap = cv2.VideoCapture()
-
-    # Attempt to open the passed input (video) file.
-    cap.open(args.input.name)
-    if not cap.isOpened():
-        if not args.quiet_mode:
-            print('[PySceneDetect] FATAL ERROR - could not open video %s.' % 
-                args.input.name)
-        return
-    elif not args.quiet_mode:
-        print('[PySceneDetect] Parsing video %s...' % args.input.name)
-
-    # Print video parameters (resolution, FPS, etc...)
-    video_width  = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
-    video_height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
-    video_fps    = cap.get(cv2.CAP_PROP_FPS)
-    if not args.quiet_mode:
-        print('[PySceneDetect] Video Resolution / Framerate: %d x %d / %2.3f FPS' % (
-            video_width, video_height, video_fps ))
 
     # Load SceneDetector with proper arguments based on passed detector (-d).
     # TODO: Add minimum scene length as a variable argument.
@@ -144,7 +181,7 @@ def main():
     if not args.quiet_mode:
         print('[PySceneDetect] Detecting scenes (%s mode)...' % detection_method)
     scene_list = list()
-    frames_read = detect_scenes(cap, scene_list, [detector],
+    video_fps, frames_read = detect_scenes_file(args.input.name, scene_list, [detector],
                                 args.stats_file, args.quiet_mode)
     # Print scene list if requested.
     if not args.quiet_mode:
@@ -160,13 +197,15 @@ def main():
             print ('----------------------------------------------')
         print('[PySceneDetect] Comma-separated timecode output:')
 
-    # Print CSV separated timecode output.
+    # Create new list with scene cuts in milliseconds (original uses exact
+    # frame numbers) based on the video's framerate.
     scene_list_msec = [(1000.0 * x) / float(video_fps) for x in scene_list]
+
+    # Print CSV separated timecode output for use in other programs.
     print([scenedetect.timecodes.get_string(x) for x in scene_list_msec]
         .__str__()[1:-1].replace("'","").replace(' ', ''))
 
     # Cleanup, release all objects and close file handles.
-    cap.release()
     if args.stats_file: args.stats_file.close()
     return
 
