@@ -1,7 +1,7 @@
 
 # Obtaining PySceneDetect
 
-PySceneDetect is completely free software, and can be downloaded from the links below.  See the (license and copyright information](copyright.md) page for details.  PySceneDetect is written in a portable manner, and works cross-platform wherever a Python interpreter and OpenCV can run.  If you have problems running PySceneDetect, ensure that you have all the required dependencies listed in the System Requirements section below.
+PySceneDetect is completely free software, and can be downloaded from the links below.  See the [license and copyright information](copyright.md) page for details.  PySceneDetect is written in a portable manner, and works cross-platform wherever a Python interpreter and OpenCV can run.  If you have problems running PySceneDetect, ensure that you have all the required dependencies listed in the System Requirements section below.
 
 
 ## Download

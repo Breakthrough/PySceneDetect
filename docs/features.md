@@ -60,6 +60,7 @@ The following are features being planned or developed after the release of v0.3.
 
  - statistics/analysis mode to export frame-by-frame video metrics (-s)
  - adaptive or user-defined bias for fade in/out interpolation
+ - thumbnail generation for detected scenes
  - additional timecode formats
 
 <h3>Planned Features for Future Releases</h3>
