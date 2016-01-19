@@ -1,5 +1,5 @@
 
-## PySceneDetect Features
+## Overview of Features
 
 <div class="warning">
 <h3><span class="fa fa-eye"></span>&nbsp; Content-Aware Scene Detection</h3>
@@ -22,18 +22,22 @@
 </div>
 
 
-### Current Features List (v0.3-beta)
+----------------
+
+
+### Features in Current Release
 
  - output-suppression (quiet) mode for better automation with external scripts/programs
  - detects fade-in and fade-out based on user-defined threshold
  - exports list of scenes to .CSV file (both timecodes and frame numbers) (-o)
  - exports timecodes in mkvmerge format: HH:MM:SS.nnnnn, comma-separated
 
-
-#### Available Scene Detection Methods:
+### List of Scene Detection Methods
 
  - threshold scene detection analyzes video for changes in average frame intensity/brightness
  - content-aware scene detection based on changes between frames in the HSV color space
+
+For a detailed explanation of how a particular scene detection method/algorithm works, see the [Scene Detection Method Details Section](reference/detection-methods.md) in the Documentation & Reference.
 
 
 ----------------
@@ -41,23 +45,26 @@
 
 ## Version Roadmap
 
+<h3>Features in Development for Next Version</h3>
 
-#### Features in Development for Next Version (v0.3.1-beta)
+The following are features being developed for PySceneDetect **v0.3.1-beta** (completed features - those marked with <span class="fa fa-check"></span>&nbsp; - can be tested by [downloading the latest source code](https://github.com/Breakthrough/PySceneDetect/archive/master.zip) from the [Github page](https://github.com/Breakthrough/PySceneDetect), or cloning the repo).
 
- - allow user-selectable frame skipping for improved performance
- - allow user-selectable subsampling for improved performance
  - add ability to specify start/end time for scene detection
- - additional API functions to remove requirement on passing OpenCV video objects, and allow just a file path instead
+ - user-selectable frame skipping for improved performance
+ - user-selectable subsampling for improved performance
+ - <span class="fa fa-check"></span>&nbsp; additional API functions to remove requirement on passing OpenCV video objects, and allow just a file path instead
 
+<h3>Features Starting Development for Following Version</h3>
 
-#### Features Starting Development for Following Version (v0.3.x-beta)
+The following are features being planned or developed after the release of v0.3.1-beta.
 
  - statistics/analysis mode to export frame-by-frame video metrics (-s)
  - adaptive or user-defined bias for fade in/out interpolation
  - additional timecode formats
 
+<h3>Planned Features for Future Releases</h3>
 
-#### Planned Features for Future Releases (v0.4-beta)
+The following are features being planned or developed for the next major release of PySceneDetect, v0.4-beta.
 
  - export scenes in chapter/XML format
  - improve robustness of content-aware detection by combining with edge detection (similar to MATLAB-based scene change detector)
