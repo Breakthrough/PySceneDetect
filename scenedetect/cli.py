@@ -33,6 +33,28 @@ import argparse
 import scenedetect
 
 
+def timecode_type_check(metavar = None):
+    """ Creates an argparse type for a user-inputted timecode.
+
+    The passed argument is declared valid if it meets one of three valid forms:
+      1) Standard timecode; in form HH:MM:SS or HH:MM:SS.nnn
+      2) Number of seconds; type # of seconds, followed by s (e.g. 54s, 0.001s)
+      3) Exact number of frames; type # of frames (e.g. 54, 1000)
+     valid integer which
+    is greater than or equal to min_val, and if max_val is specified,
+    less than or equal to max_val.
+
+    Returns:
+        A function which can be passed as an argument type, when calling
+        add_argument on an ArgumentParser object
+
+    Raises:
+        ArgumentTypeError: Passed argument must be integer within proper range.
+    """
+    # TODO
+    return None
+
+
 def int_type_check(min_val, max_val = None, metavar = None):
     """ Creates an argparse type for a range-limited integer.
 
@@ -200,5 +222,23 @@ def get_cli_parser(scene_detectors_list, timecode_formats_list):
     #    choices = [ 'in', 'mid', 'out' ], default = 'out',
     #    help = 'Where the timecode/frame number for a given scene should '
     #           'start relative to the fades [in, mid, or out].')
+
+
+    #parser.add_argument(
+    #    '-st', '--start-time', metavar = 'TIME', dest = 'start_time',
+    #    type = timecode_type_check('TIME'), default = None,
+    #    help = '')
+
+    #parser.add_argument(
+    #    '-st', '--end-time', metavar = 'TIME', dest = 'end_time',
+    #    type = timecode_type_check('TIME'), default = None,
+    #    help = '')
+
+    #parser.add_argument(
+    #    '-dt', '--duration', metavar = 'TIME', dest = 'duration_time',
+    #    type = timecode_type_check('TIME'), default = None,
+    #    help = '')
+
+
 
     return parser
