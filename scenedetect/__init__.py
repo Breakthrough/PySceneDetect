@@ -211,7 +211,7 @@ def main():
         print('[PySceneDetect] Detecting scenes (%s mode)...' % detection_method)
     scene_list = list()
     video_fps, frames_read = detect_scenes_file(args.input.name, scene_list, [detector],
-                                args.stats_file, args.quiet_mode, 4)
+                                args.stats_file, args.quiet_mode)
     elapsed_time = time.time() - start_time
     perf_fps = float(frames_read) / elapsed_time
     # Print performance (average framerate), and scene list if requested.
