@@ -30,6 +30,7 @@
 from __future__ import print_function
 import sys
 import argparse
+import time
 
 # PySceneDetect Library Imports
 import scenedetect.platform
@@ -65,7 +66,7 @@ THE SOFTWARE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, EXPRESS OR IMPLIED.
 
 
 def detect_scenes_file(path, scene_list, detector_list, stats_file = None,
-                  quiet_mode = False):
+                  quiet_mode = False, perf_update_rate = -1):
     """Performs scene detection on passed file using given scene detectors.
 
     Essentially wraps detect_scenes while handling all OpenCV interaction.
@@ -77,7 +78,8 @@ def detect_scenes_file(path, scene_list, detector_list, stats_file = None,
         stats_file:  Optional. Handle to a file, open for writing, to save the
             frame metrics computed by each detection algorithm, in CSV format.
         quiet_mode:  Optional. Suppresses any console output (inluding errors).
-
+        perf_update_rate:  Optional. Prints updates every [perf_update_rate]
+            seconds with the current processing speed, in frames/second.
     Returns:
         Tuple containing (video_fps, frames_read), where video_fps is a float
         of the video file's framerate, and frames_read is a positive, integer
@@ -111,8 +113,8 @@ def detect_scenes_file(path, scene_list, detector_list, stats_file = None,
             ' (especially framerate, use --force-fps to correct if required).')
 
     # Perform scene detection on cap object (modifies scene_list).
-    frames_read = detect_scenes(
-        cap, scene_list, detector_list, stats_file, quiet_mode)
+    frames_read = detect_scenes(cap, scene_list, detector_list, stats_file,
+                                quiet_mode, perf_update_rate)
 
     # Cleanup and return number of frames we read.
     cap.release()
@@ -120,7 +122,7 @@ def detect_scenes_file(path, scene_list, detector_list, stats_file = None,
 
 
 def detect_scenes(cap, scene_list, detector_list, stats_file = None,
-                  quiet_mode = False):
+                  quiet_mode = False, perf_update_rate = -1):
     """Performs scene detection based on passed video and scene detectors.
 
     Args:
@@ -132,12 +134,24 @@ def detect_scenes(cap, scene_list, detector_list, stats_file = None,
         stats_file:  Optional. Handle to a file, open for writing, to save the
             frame metrics computed by each detection algorithm, in CSV format.
         quiet_mode:  Optional. Suppresses any console output (inluding errors).
+        perf_update_rate:  Optional. Prints updates every [perf_update_rate]
+            seconds with the current processing speed, in frames/second.
 
     Returns:
         Unsigned, integer number of frames read from the passed cap object.
     """
     frames_read = 0
     frame_metrics = {}
+
+    perf_show = True
+    perf_last_update_time = time.time()
+    perf_last_framecount = 0
+    perf_curr_rate = 0
+    if perf_update_rate > 0:
+        perf_update_rate = float(perf_update_rate)
+    else:
+        perf_show = False
+
     while True:
         (rv, im) = cap.read()
         if not rv:
@@ -150,6 +164,20 @@ def detect_scenes(cap, scene_list, detector_list, stats_file = None,
             # write frame metrics to stats_file
             pass
         frames_read += 1
+        # periodically show processing speed/performance
+        if not quiet_mode and perf_show:
+            curr_time = time.time()
+            if (curr_time - perf_last_update_time) > perf_update_rate:
+                delta_t = curr_time - perf_last_update_time
+                delta_f = frames_read - perf_last_framecount
+                if delta_t > 0: # and delta_f > 0: # delta_f will always be > 0
+                    perf_curr_rate = delta_f / delta_t
+                else:
+                    perf_curr_rate = 0.0
+                perf_last_update_time = curr_time
+                perf_last_framecount = frames_read
+                print("[PySceneDetect] Current Processing Speed: %3.1f FPS" % perf_curr_rate)
+
     [detector.post_process(scene_list) for detector in detector_list]
     return frames_read
 
@@ -178,15 +206,20 @@ def main():
             block_size = args.block_size)
     
     # Perform scene detection using specified mode.
+    start_time = time.time()
     if not args.quiet_mode:
         print('[PySceneDetect] Detecting scenes (%s mode)...' % detection_method)
     scene_list = list()
     video_fps, frames_read = detect_scenes_file(args.input.name, scene_list, [detector],
-                                args.stats_file, args.quiet_mode)
-    # Print scene list if requested.
+                                args.stats_file, args.quiet_mode, 4)
+    elapsed_time = time.time() - start_time
+    perf_fps = float(frames_read) / elapsed_time
+    # Print performance (average framerate), and scene list if requested.
     if not args.quiet_mode:
         print('[PySceneDetect] Processing complete, found %d scenes in video.' %
             len(scene_list))
+        print('[PySceneDetect] Processed %d frames in %3.1f secs (avg. %3.1f FPS).' % (
+            frames_read, elapsed_time, perf_fps))
         print('[PySceneDetect] List of detected scenes:')
         if args.list_scenes:
             print ('----------------------------------------------')

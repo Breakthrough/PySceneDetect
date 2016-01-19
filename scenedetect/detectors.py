@@ -30,6 +30,7 @@
 # Third-Party Library Imports
 import cv2
 import numpy
+import numexpr as ne
 
 
 # Default value for -d / --detector CLI argument (see get_available_detectors()
@@ -270,9 +271,12 @@ class ContentDetector(SceneDetector):
                     num_pixels = curr_hsv[i].shape[0] * curr_hsv[i].shape[1]
                     curr_hsv[i] = curr_hsv[i].astype(numpy.int32)
                     last_hsv[i] = last_hsv[i].astype(numpy.int32)
-                    delta_hsv[i] = numpy.sum(numpy.abs(curr_hsv[i] - last_hsv[i])) / float(num_pixels)
-                delta_hsv.append(sum(delta_hsv) / 3.0)
+                    #delta_hsv[i] = numpy.sum(numpy.abs(curr_hsv[i] - last_hsv[i])) / float(num_pixels)
 
+                    mat_curr, mat_last = curr_hsv[i], last_hsv[i]
+                    delta_hsv[i] = float(ne.evaluate("sum(abs(mat_curr - mat_last))")) / float(num_pixels)
+
+                delta_hsv.append(sum(delta_hsv) / 3.0)
                 delta_h, delta_s, delta_v, delta_hsv_avg = delta_hsv
 
                 frame_metrics[frame_num]['delta_hsv_avg'] = delta_hsv_avg
