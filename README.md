@@ -6,7 +6,7 @@ Video Scene Cut Detection and Analysis Tool
 
 [![Documentation Status](https://readthedocs.org/projects/pyscenedetect/badge/?version=latest)](http://pyscenedetect.readthedocs.org/en/latest/?badge=latest)
 
-### New Release: v0.3-beta (Jan. 8, 2016)!
+### New Release: v0.3.0.1-beta (January 20, 2016)
 
 PySceneDetect is finally out of alpha, and is finally in the first beta release ([get it here!](https://github.com/Breakthrough/PySceneDetect/releases)).  This release brings a number of major changes, including the much awaited content-aware detection mode (see [`docs/changelog.md`](https://github.com/Breakthrough/PySceneDetect/blob/master/docs/changelog.md) or [the Releases page](https://github.com/Breakthrough/PySceneDetect/releases) for details.).  Also see [the new `USAGE.md` file](https://github.com/Breakthrough/PySceneDetect/blob/master/USAGE.md) for details on the new detection modes, default values/thresholds to try, and how to effectively choose the optimal detection parameters.
 
@@ -25,22 +25,24 @@ In general, use `threshold` mode if you want to detect scene boundaries using fa
 Note that PySceneDetect is currently in beta; see Current Features & Roadmap below for details.  For help or other issues, you can contact me on [my website](http://www.bcastell.com/about/), or we can chat in #pyscenedetect on Freenode.  Feel free to submit any bugs or feature requests to [the Issue Tracker](https://github.com/Breakthrough/PySceneDetect/issues) here on Github.
 
 
-Download & Requirements
+Download & Installation
 ----------------------------------------------------------
 
-The latest version of PySceneDetect (`v0.3-beta`) can be [downloaded here](https://github.com/Breakthrough/PySceneDetect/releases); to run it, you will need:
+**Downloading:** The latest version of PySceneDetect (`v0.3.0.1-beta`) can be [downloaded here](https://github.com/Breakthrough/PySceneDetect/releases); to run it, you will need:
 
  - [Python 2 / 3](https://www.python.org/) (tested on 2.7.X, untested but should work on 3.X)
  - OpenCV Python Module (usually found in Linux package repos as `python-opencv`, Windows users can find [prebuilt binaries for Python 2.7 here](http://www.lfd.uci.edu/~gohlke/pythonlibs/#opencv))
  - [Numpy](http://sourceforge.net/projects/numpy/)
 
-To ensure you have all the requirements, open a `python` interpreter, and ensure you can `import numpy` and `import cv2` without any errors.  You can download a test video and view the expected output [from the resources branch](https://github.com/Breakthrough/PySceneDetect/tree/resources/tests) (see the end of the Usage section below for details).
+More complete documentation and installation instructions can be [found on Readthedocs](http://pyscenedetect.readthedocs.org/en/latest/download/), including a detailed guide on how to install the above dependencies.
 
-Once this is done, [downloaded](https://github.com/Breakthrough/PySceneDetect/releases) and extract PySceneDetect.  To install PySceneDetect and allow you to use it system wide, use the following command (may require root/`sudo`):
+To ensure you have all the system requirements installed, open a `python` interpreter/REPL, and ensure you can `import numpy` and `import cv2` without any errors.  You can download a test video and view the expected output [from the resources branch](https://github.com/Breakthrough/PySceneDetect/tree/resources/tests) (see the end of the Usage section below for details).
+
+**Installing:** Once you have all the system requirements, go to where you [downloaded PySceneDetect](https://github.com/Breakthrough/PySceneDetect/releases) and extract the archive.  To install PySceneDetect, run the following command in the folder containing the extracted files (the one containing `setup.py`):
 
     python setup.py install
 
-After installation, you can use PySceneDetect as the `scenedetect` command from any command line.  To verify the installation, run the following command to display what version of PySceneDetect you have installed:
+After installation, you can use PySceneDetect as the `scenedetect` command from any terminal/command prompt.  To verify the installation, run the following command to display what version of PySceneDetect you have installed:
 
     scenedetect --version
 
@@ -48,7 +50,9 @@ After installation, you can use PySceneDetect as the `scenedetect` command from 
 Usage
 ----------------------------------------------------------
 
-**There is now a dedicated [`USAGE.md` file (here)](https://github.com/Breakthrough/PySceneDetect/blob/master/USAGE.md) containing more detailed usage instructions.**  To run PySceneDetect, use the `scenedetect` command if you have it installed to your system.  Otherwise, if you are running from source, you can invoke `python scenedetect.py` or `./scenedetect.py` (instead of `scenedetect` in the examples shown below and elsewhere).  To display the help file, detailing the command line parameters:
+**There is now a dedicated [`USAGE.md` file (here)](https://github.com/Breakthrough/PySceneDetect/blob/master/USAGE.md) containing more detailed usage instructions.  Documentation is also being [added to Readthedocs](http://pyscenedetect.readthedocs.org/), which will eventually replace the content of this file (see the [PySceneDetect Quickstart Section](http://pyscenedetect.readthedocs.org/en/latest/examples/usage/) for details)..**
+
+To run PySceneDetect, use the `scenedetect` command if you have it installed to your system.  Otherwise, if you are running from source, you can invoke `python scenedetect.py` or `./scenedetect.py` (instead of `scenedetect` in the examples shown below and elsewhere).  To display the help file, detailing the command line parameters:
 
     scenedetect --help
 
