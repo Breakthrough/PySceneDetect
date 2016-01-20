@@ -3,36 +3,36 @@
 
 PySceneDetect is completely free software, and can be downloaded from the links below.  See the [license and copyright information](copyright.md) page for details.  PySceneDetect is written in a portable manner, and works cross-platform wherever a Python interpreter and OpenCV can run.  If you have problems running PySceneDetect, ensure that you have all the required dependencies listed in the System Requirements section below.
 
-
 ## Download
 
-### Source (All Platforms - Windows, Linux, Mac)
+###  (All Platforms - Windows, Linux, Mac)
 
 [**Click here**](https://github.com/Breakthrough/PySceneDetect/releases) to download the latest release of PySceneDetect.  The current stable version is `v0.3-beta`.
 
-Once you've downloaded the source files, extract them to a location of your choice.  You can run PySceneDetect locally from that folder (by calling `scenedetect.py`), or follow the instructions in the Installation section below so you can run `scenedetect` anywhere.
-
+Once you've downloaded the source files, extract them to a location of your choice, and make sure you obtain the following system requirements before installing PySceneDetect.
 
 ## System Requirements
 
-Currently, binaries are not provided for PySceneDetect, so you will need:
+PySceneDetect requires [Python 2 or 3](https://www.python.org/) (tested on 2.7.X, untested but should work on 3.X) and the following libraries ([quick install guide](http://breakthrough.github.io/Installing-OpenCV/)):
 
- - [Python 2 / 3](https://www.python.org/) (tested on 2.7.X, untested but should work on 3.X)
- - OpenCV Python Module (usually found in Linux package repos as `python-opencv`, Windows users can find [prebuilt binaries for Python 2.7 here](http://www.lfd.uci.edu/~gohlke/pythonlibs/#opencv))
- - [Numpy](http://sourceforge.net/projects/numpy/)
+ - [OpenCV](http://opencv.org/) (compatible with both 2.X or 3.X) and the Python module (`cv2`)
+ - [Numpy](http://sourceforge.net/projects/numpy/) Python module (`numpy`)
 
-To ensure you have all the requirements, open a `python` interpreter, and ensure you can `import numpy` and `import cv2` without any errors.  You can download a test video and view the expected output [from the resources branch](https://github.com/Breakthrough/PySceneDetect/tree/resources/tests) (see the end of the Usage section below for details).
+You can [click here](http://breakthrough.github.io/Installing-OpenCV/) for a quick guide (OpenCV + Numpy on Windows & Linux) on installing the latest versions of OpenCV/Numpy on [Windows (using pre-built binaries)](http://breakthrough.github.io/Installing-OpenCV/#installing-on-windows-pre-built-binaries) and [Linux (compiling from source)](http://breakthrough.github.io/Installing-OpenCV/#installing-on-linux-compiling-from-source).  If the Python module that comes with OpenCV on Windows is incompatible with your system architecture or Python version, [see this page](http://www.lfd.uci.edu/~gohlke/pythonlibs/#opencv) to obtain a pre-compiled (unofficial) module.
 
+Note that some Linux package managers provide out of date builds of OpenCV.  This is fine for the purposes of PySceneDetect, but you will need to [build and install OpenCV from source](http://breakthrough.github.io/Installing-OpenCV/#installing-on-linux-compiling-from-source) if you wish to obtain the latest version.  
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
+To ensure you have all the requirements installed, open a `python` interpreter, and ensure you can run `import numpy` and `import cv2` without any errors.  Once this is done, you're ready to instalL PySceneDetect!
 
 ## Installation
 
-Go to the folder you extracted PySceneDetect to, and run the following command (may require root):
+Go to the folder you extracted the PySceneDetect source code to, and run the following command (may require root):
 
 ```rst
 python setup.py install
 ```
 
-Once complete, PySceneDetect should be installed, and you should be able to run the `scenedetect` command.  To test it out, try calling:
+Once finished, PySceneDetect will be installed, and you should be able to run the `scenedetect` command.  To test it out, try calling:
 
 ```rst
 scenedetect --version
