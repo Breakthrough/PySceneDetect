@@ -5,11 +5,14 @@ PySceneDetect is completely free software, and can be downloaded from the links 
 
 ## Download
 
-###  (All Platforms - Windows, Linux, Mac)
+###  All Platforms &nbsp; <span class="fa fa-windows"></span> &nbsp; <span class="fa fa-linux"></span> &nbsp; <span class="fa fa-apple"></span>
 
-[**Click here**](https://github.com/Breakthrough/PySceneDetect/releases) to download the latest release of PySceneDetect.  The current stable version is `v0.3-beta`.
+<div class="danger">
+<h3><span class="fa fa-info-circle"></span>&nbsp; Latest Release: <b>v0.3-beta</b></h3>
+<a href="https://github.com/Breakthrough/PySceneDetect/releases" class="btn btn-success" role="button"><span class="fa fa-download"></span>&nbsp; Download</a> &nbsp;&nbsp;&nbsp;&nbsp; <a href="../changelog/" class="btn btn-info" role="button"><span class="fa fa-reorder"></span>&nbsp; Changelog</a> &nbsp;&nbsp;&nbsp;&nbsp; <span class="fa fa-calendar"></span>&nbsp; Release Date: January 8, 2016
+</div>
 
-Once you've downloaded the source files, extract them to a location of your choice, and make sure you obtain the following system requirements before installing PySceneDetect.
+Once you've downloaded the source files, extract them to a location of your choice, and make sure you obtain the following system requirements before installing PySceneDetect.  PySceneDetect can then be installed by calling `python setup.py install` from the location of the extracted files (see [the Installation section](#installation) below for details), after which you can call PySceneDetect from any terminal by typing `scenedetect`.  Try running `scenedetect --version` to verify that everything was installed correctly.
 
 ## System Requirements
 
@@ -32,7 +35,7 @@ Go to the folder you extracted the PySceneDetect source code to, and run the fol
 python setup.py install
 ```
 
-Once finished, PySceneDetect will be installed, and you should be able to run the `scenedetect` command.  To test it out, try calling:
+Once finished, PySceneDetect will be installed, and you should be able to run the `scenedetect` command.  To verify that everything was installed properly, try calling the following command:
 
 ```rst
 scenedetect --version

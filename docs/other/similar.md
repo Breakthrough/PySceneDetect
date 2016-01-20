@@ -7,5 +7,5 @@ The following is a list of programs or commands also performing scene cut analys
  - [Shotdetect](http://johmathe.name/shotdetect.html) - appears to be only for *NIX, content mode only
  - [Matlab Scene Change Detection](http://www.mathworks.com/help/vision/examples/scene-change-detection.html) - requires Matlab and Simulink/Computer Vision Toolbox, uses feature extraction and edge detection
 
-This list is not guaranteed to be complete, although [additions/contributions are most welcome](contributing.md).
+This list is not guaranteed to be complete, although [additions/contributions are most welcome](../contributing.md).
 
