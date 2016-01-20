@@ -8,10 +8,10 @@ PySceneDetect Changelog
  * [internal] additional API functions to remove requirement on passing OpenCV video objects, and allow just a file path instead
 
 
-## 0.3.0.1-beta (January 20, 2016) (Latest Stable Version)
+#### 0.3.0.1-beta (January 20, 2016) (Latest Stable Version)
 
  * [enhance]  added setup.py to allow for one-line installation (just run `python setup.py install` after downloading and extracting PySceneDetect)
- - [internal] additional API functions to remove requirement on passing OpenCV video objects, and allow just a file path instead
+ * [internal] additional API functions to remove requirement on passing OpenCV video objects, and allow just a file path instead
 
 
 ## 0.3-beta (January 8, 2016)
