@@ -1,7 +1,7 @@
 
 # Obtaining PySceneDetect
 
-PySceneDetect is completely free software, and can be downloaded from the links below.  See the [license and copyright information](copyright.md) page for details.  PySceneDetect is written in a portable manner, and works cross-platform wherever a Python interpreter and OpenCV can run.  If you have problems running PySceneDetect, ensure that you have all the required dependencies listed in the System Requirements section below.
+PySceneDetect is completely free software, and can be downloaded from the links below.  See the [license and copyright information](copyright.md) page for details.  If you have trouble running PySceneDetect, ensure that you have all the required dependencies listed in the [Installing Dependencies](#installing-dependencies) section below.
 
 ## Download
 
@@ -10,10 +10,13 @@ PySceneDetect is completely free software, and can be downloaded from the links 
 <div class="danger">
 <h3><span class="fa fa-forward"></span> Latest Release: <b>v0.3.0.1-beta</b></h3>
 <h4><span class="fa fa-calendar"></span>&nbsp; Release Date:&nbsp; <b>January 20, 2016</b></h4>
-<a href="https://github.com/Breakthrough/PySceneDetect/releases" class="btn btn-success" role="button"><span class="fa fa-download"></span>&nbsp; Download</a> &nbsp;&nbsp;&nbsp;&nbsp; <a href="../changelog/" class="btn btn-info" role="button"><span class="fa fa-reorder"></span>&nbsp; Changelog</a> &nbsp;&nbsp;&nbsp;&nbsp; <a href="#installation" class="btn btn-warning" role="button"><span class="fa fa-gear"></span>&nbsp; Installation Instructions</a>
+<a href="https://github.com/Breakthrough/PySceneDetect/releases" class="btn btn-success" role="button"><span class="fa fa-download"></span>&nbsp; Download</a> &nbsp;&nbsp;&nbsp;&nbsp; <a href="../changelog/" class="btn btn-info" role="button"><span class="fa fa-reorder"></span>&nbsp; Changelog</a> &nbsp;&nbsp;&nbsp;&nbsp; <a href="#installation" class="btn btn-warning" role="button"><span class="fa fa-gear"></span>&nbsp; Installation</a> &nbsp;&nbsp;&nbsp;&nbsp; <a href="../examples/usage/" class="btn btn-danger" role="button"><span class="fa fa-book"></span>&nbsp; Getting Started</a>
 </div>
 
 Once you've downloaded the source files, extract them to a location of your choice, and make sure you obtain the following system requirements before installing PySceneDetect.  PySceneDetect can then be installed by calling `python setup.py install` from the location of the extracted files (see [the Installation section](#installation) below for details), after which you can call PySceneDetect from any terminal by typing `scenedetect`.  Try running `scenedetect --version` to verify that everything was installed correctly.
+
+
+------------------------------------------------
 
 
 ## Installation

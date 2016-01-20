@@ -2,9 +2,10 @@
 <h1>PySceneDetect &nbsp;<span class="fa fa-film"></span></h1>
 
 <div class="important">
-<h3><span class="fa fa-info-circle"></span>&nbsp; Latest Release: <b>v0.3.0.1-beta</b></h3>
-&nbsp;<a href="download/" alt="Download PySceneDetect"><span class="fa fa-download"></span>&nbsp; Download</a> &nbsp;&nbsp;|&nbsp;&nbsp; <a href="changelog/" alt="PySceneDetect Changelog"><span class="fa fa-reorder"></span>&nbsp; Changelog</a> &nbsp;&nbsp;|&nbsp;&nbsp; <span class="fa fa-calendar"></span>&nbsp; Release Date: January 20, 2016
+<h3><span class="fa fa-info-circle"></span>&nbsp; Latest Release: <b>v0.3.0.1-beta</b> (January 20, 2016)</h3>
+<a href="download/" class="btn btn-success" role="button"><span class="fa fa-download"></span>&nbsp; Download</a> &nbsp;&nbsp;&nbsp;&nbsp; <a href="changelog/" class="btn btn-info" role="button"><span class="fa fa-reorder"></span>&nbsp; Changelog</a> &nbsp;&nbsp;&nbsp;&nbsp; <a href="download/#installation" class="btn btn-warning" role="button"><span class="fa fa-gear"></span>&nbsp; Installation</a> &nbsp;&nbsp;&nbsp;&nbsp; <a href="examples/usage/" class="btn btn-danger" role="button"><span class="fa fa-book"></span>&nbsp; Getting Started</a>
 </div>
+
 
 **PySceneDetect** is a command-line application and a Python library for **automatically detecting scene changes in video files**.  Not only is it free and open-source software (FOSS), but there are several detection methods available ([see Features](features.md)), from simple threshold-based fade in/out detection, to advanced content aware fast-cut detection.
 
