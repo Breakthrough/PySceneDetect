@@ -44,7 +44,7 @@ import numpy
 
 
 # Used when printing the about & copyright message below.
-VERSION_STRING = 'v0.3.1-beta-dev'
+VERSION_STRING = 'v0.3.0.1-beta'
 
 # About & copyright message string shown for the -v / --version CLI argument.
 ABOUT_STRING   = """PySceneDetect %s

@@ -17,7 +17,7 @@ if sys.version_info < (2, 6) or (3, 0) <= sys.version_info < (3, 3):
 
 def get_data_files():
     data_files = [
-        ('share/doc/PySceneDetect', ['LICENSE', 'LICENSE-NUMPY', 'LICENSE-OPENCV', 'README.md',
+        ('share/doc/scenedetect', ['LICENSE', 'LICENSE-NUMPY', 'LICENSE-OPENCV', 'README.md',
                                'docs/changelog.md', 'USAGE.md'])
     ]
     return data_files
@@ -32,7 +32,7 @@ def get_requires():
 
 setup(
     name='PySceneDetect',
-    version='0.3-beta',
+    version='0.3.0.1-beta',
     description="A cross-platform, OpenCV-based video scene detection program and Python library. ",
     long_description=open('README.md').read(),
     author='Brandon Castellano',

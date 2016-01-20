@@ -52,7 +52,6 @@ The following are features being developed for PySceneDetect **v0.3.1-beta** (co
  - add ability to specify start/end time for scene detection
  - user-selectable frame skipping for improved performance
  - user-selectable subsampling for improved performance
- - <span class="fa fa-check"></span>&nbsp; additional API functions to remove requirement on passing OpenCV video objects, and allow just a file path instead
 
 <h3>Features Starting Development for Following Version</h3>
 

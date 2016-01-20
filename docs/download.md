@@ -8,7 +8,7 @@ PySceneDetect is completely free software, and can be downloaded from the links 
 ###  All Platforms &nbsp; <span class="fa fa-windows"></span> &nbsp; <span class="fa fa-linux"></span> &nbsp; <span class="fa fa-apple"></span>
 
 <div class="danger">
-<h3><span class="fa fa-info-circle"></span>&nbsp; Latest Release: <b>v0.3-beta</b></h3>
+<h3><span class="fa fa-info-circle"></span>&nbsp; Latest Release: <b>v0.3.0.1-beta</b></h3>
 <a href="https://github.com/Breakthrough/PySceneDetect/releases" class="btn btn-success" role="button"><span class="fa fa-download"></span>&nbsp; Download</a> &nbsp;&nbsp;&nbsp;&nbsp; <a href="../changelog/" class="btn btn-info" role="button"><span class="fa fa-reorder"></span>&nbsp; Changelog</a> &nbsp;&nbsp;&nbsp;&nbsp; <span class="fa fa-calendar"></span>&nbsp; Release Date: January 8, 2016
 </div>
 
