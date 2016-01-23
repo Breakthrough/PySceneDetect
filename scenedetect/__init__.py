@@ -43,8 +43,8 @@ import cv2
 import numpy
 
 
-# Used when printing the about & copyright message below.
-VERSION_STRING = 'v0.3.1-beta'
+# Used for module identification and when printing copyright & version info.
+__version__ = 'v0.3.1-beta'
 
 # About & copyright message string shown for the -v / --version CLI argument.
 ABOUT_STRING   = """PySceneDetect %s
@@ -62,7 +62,7 @@ This software uses the following third-party components:
 
 THE SOFTWARE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, EXPRESS OR IMPLIED.
 
-""" % VERSION_STRING
+""" % __version__
 
 
 def detect_scenes_file(path, scene_list, detector_list, stats_file = None,
