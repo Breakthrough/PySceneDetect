@@ -6,11 +6,11 @@ PySceneDetect is completely free software, and can be downloaded from the links 
 
 ## Download
 
-<h3>Source (All Platforms) &nbsp; <span class="fa fa-windows"></span> &nbsp; <span class="fa fa-linux"></span> &nbsp; <span class="fa fa-apple"></span></h3>
+<h3>Source (All Platforms) &nbsp; <span class="wy-text-neutral"><span class="fa fa-windows"></span> &nbsp; <span class="fa fa-linux"></span> &nbsp; <span class="fa fa-apple"></span></span></h3>
 
 <div class="important">
-<h3><span class="fa fa-forward"></span> Latest Release: <b>v0.3.1-beta</b></h3>
-<h4><span class="fa fa-calendar"></span>&nbsp; Release Date:&nbsp; <b>January 23, 2016</b></h4>
+<h3 class="wy-text-neutral"><span class="fa fa-forward wy-text-info"></span> Latest Release: <b class="wy-text-neutral">v0.3.1-beta</b></h3>
+<h4 class="wy-text-neutral"><span class="fa fa-calendar wy-text-info"></span>&nbsp; Release Date:&nbsp; <b>January 23, 2016</b></h4>
 <a href="https://github.com/Breakthrough/PySceneDetect/archive/v0.3.1-beta.zip" class="btn btn-info" role="button"><span class="fa fa-download"></span>&nbsp; <b>Download</b>&nbsp;&nbsp;.zip</a> &nbsp;&nbsp;&nbsp;&nbsp; <a href="https://github.com/Breakthrough/PySceneDetect/archive/v0.3.1-beta.tar.gz" class="btn btn-info" role="button"><span class="fa fa-download"></span>&nbsp; <b>Download</b>&nbsp;&nbsp;.tar.gz</a> &nbsp;&nbsp;&nbsp;&nbsp; <a href="#installation" class="btn btn-warning" role="button"><span class="fa fa-gear"></span>&nbsp; <b>Installation</b></a> &nbsp;&nbsp;&nbsp;&nbsp; <a href="../examples/usage/" class="btn btn-danger" role="button"><span class="fa fa-book"></span>&nbsp; <b>Getting Started</b></a>
 </div>
 
