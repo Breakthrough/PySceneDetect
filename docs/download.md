@@ -6,11 +6,12 @@ PySceneDetect is completely free software, and can be downloaded from the links 
 
 ## Download
 
-<div class="important">
 <h3>Source (All Platforms) &nbsp; <span class="fa fa-windows"></span> &nbsp; <span class="fa fa-linux"></span> &nbsp; <span class="fa fa-apple"></span></h3>
-<h3><span class="fa fa-forward"></span> Latest Release: <b>v0.3.0.1-beta</b></h3>
-<h4><span class="fa fa-calendar"></span>&nbsp; Release Date:&nbsp; <b>January 20, 2016</b></h4>
-<a href="https://github.com/Breakthrough/PySceneDetect/releases" class="btn btn-success" role="button"><span class="fa fa-download"></span>&nbsp; Download</a> &nbsp;&nbsp;&nbsp;&nbsp; <a href="../changelog/" class="btn btn-info" role="button"><span class="fa fa-reorder"></span>&nbsp; Changelog</a> &nbsp;&nbsp;&nbsp;&nbsp; <a href="#installation" class="btn btn-warning" role="button"><span class="fa fa-gear"></span>&nbsp; Installation</a> &nbsp;&nbsp;&nbsp;&nbsp; <a href="../examples/usage/" class="btn btn-danger" role="button"><span class="fa fa-book"></span>&nbsp; Getting Started</a>
+
+<div class="important">
+<h3><span class="fa fa-forward"></span> Latest Release: <b>v0.3.1-beta</b></h3>
+<h4><span class="fa fa-calendar"></span>&nbsp; Release Date:&nbsp; <b>January 23, 2016</b></h4>
+<a href="https://github.com/Breakthrough/PySceneDetect/releases" class="btn btn-success" role="button"><span class="fa fa-download"></span>&nbsp; Download</a> &nbsp;&nbsp;&nbsp;&nbsp; <a href="../changelog/" class="btn btn-info btn-disabled" role="button"><span class="fa fa-reorder"></span>&nbsp; Changelog</a> &nbsp;&nbsp;&nbsp;&nbsp; <a href="#installation" class="btn btn-warning" role="button"><span class="fa fa-gear"></span>&nbsp; Installation</a> &nbsp;&nbsp;&nbsp;&nbsp; <a href="../examples/usage/" class="btn btn-danger" role="button"><span class="fa fa-book"></span>&nbsp; Getting Started</a>
 </div>
 
 Once you've downloaded the source archive, extract it to a location of your choice, and make sure you have the appropriate [system requirements](#installing-dependencies) installed before continuing.  PySceneDetect can be installed by calling `python setup.py install` from the location of the extracted files (see [the Installation section](#installation) below for details), after which you can call PySceneDetect from any terminal/command prompt by typing `scenedetect`.  Try running `scenedetect --version` to verify that everything was installed correctly.

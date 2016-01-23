@@ -2,8 +2,8 @@
 <h1>PySceneDetect &nbsp;<span class="fa fa-film"></span></h1>
 
 <div class="important">
-<h3><span class="fa fa-info-circle"></span>&nbsp; Latest Release: <b>v0.3.0.1-beta</b> (January 20, 2016)</h3>
-<a href="download/" class="btn btn-success" role="button"><span class="fa fa-download"></span>&nbsp; Download</a> &nbsp;&nbsp;&nbsp;&nbsp; <a href="changelog/" class="btn btn-info" role="button"><span class="fa fa-reorder"></span>&nbsp; Changelog</a> &nbsp;&nbsp;&nbsp;&nbsp; <a href="download/#installation" class="btn btn-warning" role="button"><span class="fa fa-gear"></span>&nbsp; Installation</a> &nbsp;&nbsp;&nbsp;&nbsp; <a href="examples/usage/" class="btn btn-danger" role="button"><span class="fa fa-book"></span>&nbsp; Getting Started</a>
+<h3><span class="fa fa-info-circle"></span>&nbsp; Latest Release: <b>v0.3.1-beta</b> (January 23, 2016)</h3>
+<a href="download/" class="btn btn-success" role="button"><span class="fa fa-download"></span>&nbsp; Download</a> &nbsp;&nbsp;&nbsp;&nbsp; <a href="changelog/" class="btn btn-info btn-disabled" role="button"><span class="fa fa-reorder"></span>&nbsp; Changelog</a> &nbsp;&nbsp;&nbsp;&nbsp; <a href="download/#installation" class="btn btn-warning btn-disabled" role="button"><span class="fa fa-gear"></span>&nbsp; Installation</a> &nbsp;&nbsp;&nbsp;&nbsp; <a href="examples/usage/" class="btn btn-danger" role="button"><span class="fa fa-book"></span>&nbsp; Getting Started</a>
 </div>
 
 
