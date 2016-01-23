@@ -284,7 +284,9 @@ class ContentDetector(SceneDetector):
                   (frame_num - self.last_scene_cut) >= self.min_scene_len):
                     scene_list.append(frame_num)
                     self.last_scene_cut = frame_num
-            
+                    cv2.imwrite('%08d.jpg' % (frame_num-1), self.last_frame)
+                    cv2.imwrite('%08d.jpg' % (frame_num), frame_img)
+
             #self.last_frame.release()
             del self.last_frame
                 

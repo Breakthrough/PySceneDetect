@@ -1,12 +1,15 @@
 
-Python API Usage
+Using PySceneDetect in Python
 ----------------------------------------------------------
 
 PySceneDetect can also be used from within other Python programs, or even the Python REPL itself.  PySceneDetect allows you to perform scene detection on a video file, yielding a list of scene cuts/breaks at the exact frame number where the scene boundaries occur.  Note: currently PySceneDetect requires the passed video stream to terminate, but support for live video stream segmentation is planned for the following version.
 
 The general usage workflow is to determine which detection method and threshold to use (this can even be done iteratively), using these values to create a `SceneDetector` object, the type of which depends on the detection method you want to use (e.g. `ThresholdDetector`, `ContentDetector`).  A list of `SceneDetector` objects is then passed with an open `VideoCapture` object and an empty list to the `scenedetect.detect_scenes()` function, which appends the frame numbers of any detected scene boundaries to the list (the function itself returns the number of frames read from the video file).
 
-The below code sample is incomplete, but shows the general usage style:
+
+### Example
+
+The following code sample illustrates the general workflow and usage of the `scenedetect` module to perform scene detection programmatically:
 
 ```python
 import scenedetect

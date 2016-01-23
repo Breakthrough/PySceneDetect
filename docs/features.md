@@ -31,6 +31,8 @@
  - detects fade-in and fade-out based on user-defined threshold
  - exports list of scenes to .CSV file (both timecodes and frame numbers) (-o)
  - exports timecodes in mkvmerge format: HH:MM:SS.nnnnn, comma-separated
+ - user-selectable frame skipping for improved performance
+ - user-selectable subsampling for improved performance
 
 ### List of Scene Detection Methods
 
@@ -47,11 +49,10 @@ For a detailed explanation of how a particular scene detection method/algorithm 
 
 <h3>Features in Development for Next Version</h3>
 
-The following are features being developed for PySceneDetect **v0.3.1-beta** (completed features - those marked with <span class="fa fa-check"></span>&nbsp; - can be tested by [downloading the latest source code](https://github.com/Breakthrough/PySceneDetect/archive/master.zip) from the [Github page](https://github.com/Breakthrough/PySceneDetect), or cloning the repo).
+The following are features being developed for PySceneDetect **v0.3.2-beta** (completed features - those marked with <span class="fa fa-check"></span>&nbsp; - can be tested by [downloading the latest development version](https://github.com/Breakthrough/PySceneDetect/archive/master.zip) of the PySceneDetect source code, or cloning the [Github repo](https://github.com/Breakthrough/PySceneDetect)).  
 
  - add ability to specify start/end time for scene detection
- - user-selectable frame skipping for improved performance
- - user-selectable subsampling for improved performance
+ - multithreaded implementation of existing scene detection methods/algorithms
 
 <h3>Features Starting Development for Following Version</h3>
 

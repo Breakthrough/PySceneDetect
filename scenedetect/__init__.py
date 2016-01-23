@@ -44,7 +44,7 @@ import numpy
 
 
 # Used when printing the about & copyright message below.
-VERSION_STRING = 'v0.3.0.1-beta'
+VERSION_STRING = 'v0.3.1-beta'
 
 # About & copyright message string shown for the -v / --version CLI argument.
 ABOUT_STRING   = """PySceneDetect %s
@@ -117,6 +117,9 @@ def detect_scenes_file(path, scene_list, detector_list, stats_file = None,
     if not quiet_mode:
         print('[PySceneDetect] Video Resolution / Framerate: %d x %d / %2.3f FPS' % (
             video_width, video_height, video_fps ))
+        if downscale_factor >= 2:
+            print('[PySceneDetect] Subsampling Enabled (%dx, Resolution = %d x %d)' % (
+                downscale_factor, video_width / downscale_factor, video_height / downscale_factor ))
         print('Verify that the above parameters are correct'
             ' (especially framerate, use --force-fps to correct if required).')
 
@@ -146,9 +149,11 @@ def detect_scenes(cap, scene_list, detector_list, stats_file = None,
         quiet_mode:  Optional. Suppresses any console output (inluding errors).
         perf_update_rate:  Optional. Prints updates every [perf_update_rate]
             seconds with the current processing speed, in frames/second.
-        downscale_factor:  Optional.  Number of pixels to skip in both x- and y
-            directions, downscaling the image for improved performance.
-            Integer number >= 2, otherwise disabled.
+        downscale_factor:  Optional. Indicates at what factor each frame will
+            be downscaled/reduced before processing (improves performance).
+            For example, if downscale_factor = 2, and the input is 1024 x 400,
+            each frame will be reduced to 512 x 200 ( = 1024/2 x 400/2).
+            Integer number >= 2, otherwise disabled (i.e. scale = 1).
         frame_skip:  Optional.  Number of frames to skip during each iteration,
             useful for higher FPS videos to improve performance.
             Unsigned integer number larger than zero, otherwise disabled.
@@ -243,8 +248,15 @@ def main():
     if not args.quiet_mode:
         print('[PySceneDetect] Detecting scenes (%s mode)...' % detection_method)
     scene_list = list()
-    video_fps, frames_read = detect_scenes_file(args.input.name, scene_list, [detector],
-                                stats_file = args.stats_file, quiet_mode = args.quiet_mode)
+    video_fps, frames_read = detect_scenes_file(
+                                path = args.input.name,
+                                scene_list = scene_list,
+                                detector_list = [detector],
+                                stats_file = args.stats_file,
+                                downscale_factor = args.downscale_factor,
+                                frame_skip = args.frame_skip,
+                                quiet_mode = args.quiet_mode
+                            )
     elapsed_time = time.time() - start_time
     perf_fps = float(frames_read) / elapsed_time
     # Print performance (average framerate), and scene list if requested.

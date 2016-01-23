@@ -3,12 +3,17 @@ PySceneDetect Changelog
 ==========================================================
 
 
-### 0.3.1-beta (In Development) &nbsp;<span class="fa fa-keyboard-o"></span>
-
- * [internal] additional API functions to remove requirement on passing OpenCV video objects, and allow just a file path instead
+### 0.3.2-beta (In Development) &nbsp;<span class="fa fa-keyboard-o"></span>
 
 
-#### 0.3.0.1-beta (January 20, 2016) &nbsp;<span class="fa fa-tags"></span>
+
+### 0.3.1-beta (In Development) &nbsp;<span class="fa fa-tags"></span>
+
+ * [feature] added downscaling/subsampling option (`-df` / `--downscale_factor`) to improve performance on higher resolution videos
+ * [feature] added frameskip option (`-fs` / `--frame_skip`) to improve performance on high framerate videos, at expense of frame accuracy and possible inaccurate scene cut prediction
+
+
+#### 0.3.0.1-beta (January 20, 2016)
 
  * [enhance]  added setup.py to allow for one-line installation (just run `python setup.py install` after downloading and extracting PySceneDetect)
  * [internal] additional API functions to remove requirement on passing OpenCV video objects, and allow just a file path instead

@@ -173,8 +173,8 @@ def get_cli_parser(scene_detectors_list, timecode_formats_list):
                 ' in threshold detection mode, or as the change tolerance'
                 ' threshold in content-aware detection mode.'))
     parser.add_argument(
-        '-m', '--min-scene-length', metavar = 'NUM_FRAMES', dest = 'min_scene_len',
-        type = int_type_check(1, None, 'NUM_FRAMES'), default = 15,
+        '-m', '--min-scene-length', metavar = 'num_frames', dest = 'min_scene_len',
+        type = int_type_check(1, None, 'num_frames'), default = 15,
         help = 'Minimum length, in frames, before another scene cut can be generated.')
     parser.add_argument(
         '-p', '--min-percent', metavar = 'percent', dest = 'min_percent',
@@ -238,6 +238,22 @@ def get_cli_parser(scene_detectors_list, timecode_formats_list):
     #    '-dt', '--duration', metavar = 'TIME', dest = 'duration_time',
     #    type = timecode_type_check('TIME'), default = None,
     #    help = '')
+
+
+    parser.add_argument(
+        '-df', '--downscale_factor', metavar = 'factor', dest = 'downscale_factor',
+        type = int_type_check(1, None, 'factor'), default = 1,
+        help = ('Factor to downscale (shrink) image before processing, to'
+                ' improve performance. For example, if input video resolution'
+                ' is 1024 x 400, and factor = 2, each frame is reduced to'
+                ' 1024/2 x 400/2 = 512 x 200 before processing.'))
+    parser.add_argument(
+        '-fs', '--frame_skip', metavar = 'num_frames', dest = 'frame_skip',
+        type = int_type_check(0, None, 'num_frames'), default = 0,
+        help = ('Number of frames to skip after processing a given frame.'
+                ' Improves performance at expense of frame accuracy, and may'
+                ' increase probability of inaccurate scene cut prediction.'
+                ' If required, values above 1 or 2 are not recommended.'))
 
 
 
