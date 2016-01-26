@@ -45,7 +45,7 @@ import numpy
 
 
 # Used for module identification and when printing copyright & version info.
-__version__ = 'v0.3.1-beta'
+__version__ = 'v0.3.2-beta-dev'
 
 # About & copyright message string shown for the -v / --version CLI argument.
 ABOUT_STRING   = """PySceneDetect %s
@@ -142,8 +142,8 @@ def detect_scenes(cap, scene_list, detector_list, stats_file = None,
         stats_file:  Optional. Handle to a file, open for writing, to save the
             frame metrics computed by each detection algorithm, in CSV format.
         quiet_mode:  Optional. Suppresses any console output (inluding errors).
-        perf_update_rate:  Optional. Prints updates every [perf_update_rate]
-            seconds with the current processing speed, in frames/second.
+        perf_update_rate:  Optional. Number of seconds between which to
+            continually prints updates with the current processing speed.
         downscale_factor:  Optional. Indicates at what factor each frame will
             be downscaled/reduced before processing (improves performance).
             For example, if downscale_factor = 2, and the input is 1024 x 400,

@@ -29,10 +29,12 @@
 
  - output-suppression (quiet) mode for better automation with external scripts/programs
  - detects fade-in and fade-out based on user-defined threshold
- - exports list of scenes to .CSV file (both timecodes and frame numbers) (-o)
+ - exports list of scenes to .CSV file (both timecodes and frame numbers) (`-o`)
  - exports timecodes in mkvmerge format: HH:MM:SS.nnnnn, comma-separated
  - user-selectable frame skipping for improved performance
  - user-selectable subsampling for improved performance
+ - save an image of the first and last frame of each detected scene
+ - ability to specify starting/ending times (`-st`/`-et`), and/or set duration for processing (`-dt`)
 
 ### List of Scene Detection Methods
 
@@ -49,18 +51,17 @@ For a detailed explanation of how a particular scene detection method/algorithm 
 
 <h3>Features in Development for Next Version</h3>
 
-The following are features being developed for PySceneDetect **v0.3.2-beta** (completed features - those marked with <span class="fa fa-check"></span>&nbsp; - can be tested by [downloading the latest development version](https://github.com/Breakthrough/PySceneDetect/archive/master.zip) of the PySceneDetect source code, or cloning the [Github repo](https://github.com/Breakthrough/PySceneDetect)).  
+The following are features being developed for PySceneDetect **v0.3.3-beta** (completed features - those marked with <span class="fa fa-check"></span>&nbsp; - can be tested by [downloading the latest development version](https://github.com/Breakthrough/PySceneDetect/archive/master.zip) of the PySceneDetect source code, or cloning the [Github repo](https://github.com/Breakthrough/PySceneDetect)).  
 
  - add ability to specify start/end time for scene detection
  - multithreaded implementation of existing scene detection methods/algorithms
 
 <h3>Features Starting Development for Following Version</h3>
 
-The following are features being planned or developed after the release of v0.3.1-beta.
+The following are features being planned or developed after the release of v0.3.3-beta.
 
  - statistics/analysis mode to export frame-by-frame video metrics (-s)
  - adaptive or user-defined bias for fade in/out interpolation
- - thumbnail generation for detected scenes
  - additional timecode formats
 
 <h3>Planned Features for Future Releases</h3>

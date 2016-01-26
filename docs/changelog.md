@@ -3,11 +3,14 @@ PySceneDetect Changelog
 ==========================================================
 
 
-### 0.3.2-beta (In Development) &nbsp;<span class="fa fa-keyboard-o"></span>
+### 0.3.2-beta (January 26, 2016) &nbsp;<span class="fa fa-tags"></span>
+
+ * [feature] added `-si` / `--save-images` flag to enable saving the first and last frames of each detected scene as an image, saved in the current working directory with the original video filename as the output prefix
+ * [feature] added command line options for setting start and end times for processing (`-st` and `-et`)
+ * [feature] added command line option to specify maximum duration to process (`-dt`, overrides `-et`)
 
 
-
-### 0.3.1-beta (In Development) &nbsp;<span class="fa fa-tags"></span>
+### 0.3.1-beta (January 23, 2016) 
 
  * [feature] added downscaling/subsampling option (`-df` / `--downscale_factor`) to improve performance on higher resolution videos
  * [feature] added frameskip option (`-fs` / `--frame_skip`) to improve performance on high framerate videos, at expense of frame accuracy and possible inaccurate scene cut prediction

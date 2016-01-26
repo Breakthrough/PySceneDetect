@@ -28,6 +28,7 @@
 from __future__ import print_function
 import sys
 import argparse
+import string
 
 # PySceneDetect Library Imports
 import scenedetect
@@ -51,8 +52,47 @@ def timecode_type_check(metavar = None):
     Raises:
         ArgumentTypeError: Passed argument must be integer within proper range.
     """
-    # TODO
-    return None
+    if metavar is None: metavar = 'timecode'
+    def _type_checker(value):
+        valid = False
+        value = str(value).lower().strip()
+
+        # Integer number of frames.
+        if value.isdigit():
+            # All characters in string are digits, just parse as integer.
+            frames = int(value)
+            if frames >= 0:
+                valid = True
+                value = frames
+
+        # Integer or real/floating-point number of seconds.
+        elif value.endswith('s'):
+            secs = value[:-1]
+            if secs.replace('.', '').isdigit():
+                secs = float(secs)
+                if secs >= 0.0:
+                    valid = True
+                    value = secs
+
+        # Timecode in HH:MM:SS[.nnn] format, convert to seconds internally.
+        elif ':' in value:
+            s = value.split(':')
+            if (len(s) == 3 and s[0].isdigit() and s[1].isdigit()
+                    and s[2].replace('.', '').isdigit()):
+                hrs, mins = int(s[0]), int(s[1])
+                secs = float(s[2]) if '.' in s[2] else int(s[2])
+                if (hrs >= 0 and mins >= 0 and secs >= 0 and mins < 60
+                        and secs < 60):
+                    valid = True
+                    value = float(hrs * 60 * 60) + float(mins * 60) + float(secs)
+
+        msg = ('invalid timecode: %s (timecode must conform to one of the'
+               ' formats the scenedetect --help message)' % value)
+
+        if not valid:
+            raise argparse.ArgumentTypeError(msg)
+        return value
+    return _type_checker
 
 
 def int_type_check(min_val, max_val = None, metavar = None):
@@ -69,7 +109,7 @@ def int_type_check(min_val, max_val = None, metavar = None):
     Raises:
         ArgumentTypeError: Passed argument must be integer within proper range.
     """
-    if metavar == None: metavar = 'value'
+    if metavar is None: metavar = 'value'
     def _type_checker(value):
         value = int(value)
         valid = True
@@ -236,20 +276,22 @@ def get_cli_parser(scene_detectors_list, timecode_formats_list):
     #    help = 'Where the timecode/frame number for a given scene should '
     #           'start relative to the fades [in, mid, or out].')
 
-    #parser.add_argument(
-    #    '-st', '--start-time', metavar = 'TIME', dest = 'start_time',
-    #    type = timecode_type_check('TIME'), default = None,
-    #    help = '')
+    parser.add_argument(
+        '-st', '--start-time', metavar = 'time', dest = 'start_time',
+        type = timecode_type_check('time'), default = None,
+        help = ('Time to seek to in video before performing detection.  Can be'
+                ' given in number of frames (12345), seconds (number followed'
+                ' by s, e.g. 123s or 123.45s), or timecode (HH:MM:SS[.nnn]).'))
 
-    #parser.add_argument(
-    #    '-st', '--end-time', metavar = 'TIME', dest = 'end_time',
-    #    type = timecode_type_check('TIME'), default = None,
-    #    help = '')
+    parser.add_argument(
+        '-dt', '--duration', metavar = 'time', dest = 'duration',
+        type = timecode_type_check('time'), default = None,
+        help = 'Time to limit scene detection to (see -st for time format).  Overrides -et.')
 
-    #parser.add_argument(
-    #    '-dt', '--duration', metavar = 'TIME', dest = 'duration_time',
-    #    type = timecode_type_check('TIME'), default = None,
-    #    help = '')
+    parser.add_argument(
+        '-et', '--end-time', metavar = 'time', dest = 'end_time',
+        type = timecode_type_check('time'), default = None,
+        help = 'Time to stop scene detection at (see -st for time format).')
 
     parser.add_argument(
         '-df', '--downscale-factor', metavar = 'factor', dest = 'downscale_factor',
