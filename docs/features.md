@@ -53,14 +53,13 @@ For a detailed explanation of how a particular scene detection method/algorithm 
 
 The following are features being developed for PySceneDetect **v0.3.3-beta** (completed features - those marked with <span class="fa fa-check"></span>&nbsp; - can be tested by [downloading the latest development version](https://github.com/Breakthrough/PySceneDetect/archive/master.zip) of the PySceneDetect source code, or cloning the [Github repo](https://github.com/Breakthrough/PySceneDetect)).  
 
- - add ability to specify start/end time for scene detection
+ - statistics/analysis mode to export frame-by-frame video metrics (-s)
  - multithreaded implementation of existing scene detection methods/algorithms
 
 <h3>Features Starting Development for Following Version</h3>
 
 The following are features being planned or developed after the release of v0.3.3-beta.
 
- - statistics/analysis mode to export frame-by-frame video metrics (-s)
  - adaptive or user-defined bias for fade in/out interpolation
  - additional timecode formats
 
