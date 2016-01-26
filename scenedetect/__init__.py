@@ -29,6 +29,7 @@
 # Standard Library Imports
 from __future__ import print_function
 import sys
+import os
 import argparse
 import time
 
@@ -67,26 +68,18 @@ THE SOFTWARE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, EXPRESS OR IMPLIED.
 
 def detect_scenes_file(path, scene_list, detector_list, stats_file = None,
                   downscale_factor = 0, frame_skip = 0, quiet_mode = False,
-                  perf_update_rate = -1):
+                  perf_update_rate = -1, save_images = False):
     """Performs scene detection on passed file using given scene detectors.
 
     Essentially wraps detect_scenes while handling all OpenCV interaction.
+    For descriptions of arguments that are just passed through, see the
+    detect_scenes(..) function documentation.
 
     Args:
         path:  A string containing the filename of the video to open.
         scene_list:  List to append frame numbers of any detected scene cuts.
         detector_list:  List of scene detection algorithms to run on the video.
-        stats_file:  Optional. Handle to a file, open for writing, to save the
-            frame metrics computed by each detection algorithm, in CSV format.
-        quiet_mode:  Optional. Suppresses any console output (inluding errors).
-        perf_update_rate:  Optional. Prints updates every [perf_update_rate]
-            seconds with the current processing speed, in frames/second.
-        downscale_factor:  Optional.  Number of pixels to skip in both x- and y
-            directions, downscaling the image for improved performance.
-            Integer number >= 2, otherwise disabled.
-        frame_skip:  Optional.  Number of frames to skip during each iteration,
-            useful for higher FPS videos to improve performance.
-            Unsigned integer number larger than zero, otherwise disabled.
+        See detect_scenes(..) function documentation for details of other args.
 
     Returns:
         Tuple containing (video_fps, frames_read), where video_fps is a float
@@ -102,13 +95,14 @@ def detect_scenes_file(path, scene_list, detector_list, stats_file = None,
 
     # Attempt to open the passed input (video) file.
     cap.open(path)
+    file_name = os.path.split(path)[1]
     if not cap.isOpened():
         if not quiet_mode:
             print('[PySceneDetect] FATAL ERROR - could not open video %s.' % 
                 path)
         return frames_read
     elif not quiet_mode:
-        print('[PySceneDetect] Parsing video %s...' % path)
+        print('[PySceneDetect] Parsing video %s...' % file_name)
 
     # Print video parameters (resolution, FPS, etc...)
     video_width  = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
@@ -126,7 +120,7 @@ def detect_scenes_file(path, scene_list, detector_list, stats_file = None,
     # Perform scene detection on cap object (modifies scene_list).
     frames_read = detect_scenes(cap, scene_list, detector_list, stats_file,
                                 downscale_factor, frame_skip, quiet_mode,
-                                perf_update_rate)
+                                perf_update_rate, save_images, file_name)
 
     # Cleanup and return number of frames we read.
     cap.release()
@@ -135,7 +129,8 @@ def detect_scenes_file(path, scene_list, detector_list, stats_file = None,
 
 def detect_scenes(cap, scene_list, detector_list, stats_file = None,
                   downscale_factor = 0, frame_skip = 0, quiet_mode = False,
-                  perf_update_rate = -1):
+                  perf_update_rate = -1, save_images = False,
+                  image_path_prefix = ''):
     """Performs scene detection based on passed video and scene detectors.
 
     Args:
@@ -157,12 +152,17 @@ def detect_scenes(cap, scene_list, detector_list, stats_file = None,
         frame_skip:  Optional.  Number of frames to skip during each iteration,
             useful for higher FPS videos to improve performance.
             Unsigned integer number larger than zero, otherwise disabled.
+        save_images:  Optional.  If True the first and last frame of each scene
+            is saved as an image in the current working directory, with the
+            same filename as the original video and scene/frame # appended.
+        image_path_prefix:  Optional.  Filename/path to write images to.
 
     Returns:
         Unsigned, integer number of frames read from the passed cap object.
     """
     frames_read = 0
     frame_metrics = {}
+    last_frame = None       # Holds previous frame if needed for save_images.
 
     perf_show = True
     perf_last_update_time = time.time()
@@ -190,19 +190,18 @@ def detect_scenes(cap, scene_list, detector_list, stats_file = None,
             break
         if not frames_read in frame_metrics:
             frame_metrics[frames_read] = dict()
+        im_scaled = im
+        if downscale_factor > 0:
+            im_scaled = im[::downscale_factor,::downscale_factor,:]
+        cut_found = False
         for detector in detector_list:
-            if downscale_factor > 0:
-                detector.process_frame(
-                    frames_read, im[::downscale_factor,::downscale_factor,:],
-                    frame_metrics, scene_list)
-            else:
-                detector.process_frame(
-                    frames_read, im, frame_metrics, scene_list)
+            cut_found = cut_found or detector.process_frame(
+                frames_read, im_scaled, frame_metrics, scene_list)
         if stats_file:
             # write frame metrics to stats_file
             pass
         frames_read += 1
-        # periodically show processing speed/performance
+        # periodically show processing speed/performance if requested
         if not quiet_mode and perf_show:
             curr_time = time.time()
             if (curr_time - perf_last_update_time) > perf_update_rate:
@@ -215,9 +214,26 @@ def detect_scenes(cap, scene_list, detector_list, stats_file = None,
                 perf_last_update_time = curr_time
                 perf_last_framecount = frames_read
                 print("[PySceneDetect] Current Processing Speed: %3.1f FPS" % perf_curr_rate)
+        # save images on scene cuts/breaks if requested (scaled if using -df)
+        if save_images and cut_found:
+            save_preview_images(
+                image_path_prefix, frames_read, im_scaled, last_frame, len(scene_list))
+
+        del last_frame
+        last_frame = im.copy()
 
     [detector.post_process(scene_list) for detector in detector_list]
     return frames_read
+
+
+def save_preview_images(image_path_prefix, frame_num, im_curr, im_last, num_scenes):
+    # Save the last/previous frame, or the OUT frame of the last scene.
+    output_name = '%s.Scene-%d-OUT.f%d.jpg' % (image_path_prefix, num_scenes, frame_num-1)
+    cv2.imwrite(output_name, im_last)
+    # Save the current frame, or the IN frame of the new scene.
+    output_name = '%s.Scene-%d-IN.f%d.jpg' % (image_path_prefix, num_scenes+1, frame_num)
+    cv2.imwrite(output_name, im_curr)
+
 
 
 def main():
@@ -248,6 +264,8 @@ def main():
     if not args.quiet_mode:
         print('[PySceneDetect] Detecting scenes (%s mode)...' % detection_method)
     scene_list = list()
+    # TODO: Large amount of arguments for below function, replace some with a
+    #       dictionary of values after pre-processing the CLI args.
     video_fps, frames_read = detect_scenes_file(
                                 path = args.input.name,
                                 scene_list = scene_list,
@@ -255,7 +273,8 @@ def main():
                                 stats_file = args.stats_file,
                                 downscale_factor = args.downscale_factor,
                                 frame_skip = args.frame_skip,
-                                quiet_mode = args.quiet_mode
+                                quiet_mode = args.quiet_mode,
+                                save_images = args.save_images
                             )
     elapsed_time = time.time() - start_time
     perf_fps = float(frames_read) / elapsed_time

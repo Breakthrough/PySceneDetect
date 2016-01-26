@@ -156,73 +156,85 @@ def get_cli_parser(scene_detectors_list, timecode_formats_list):
     parser.add_argument(
         '-v', '--version',
         action = AboutAction, version = scenedetect.ABOUT_STRING)
+
     parser.add_argument(
         '-i', '--input', metavar = 'VIDEO_FILE',
         required = True, type = file,
         help = '[REQUIRED] Path to input video.')
+
     parser.add_argument(
         '-o', '--output', metavar = 'SCENE_LIST',
         type = argparse.FileType('w'),
         help = ('File to store detected scenes in using the specified timecode'
                 'format as comma-separated values (.csv). '
                 'File will be overwritten if already exists.'))
+
     parser.add_argument(
         '-t', '--threshold', metavar = 'intensity', dest = 'threshold',
         type = int_type_check(0, 255, 'intensity'), default = 12,
         help = ('8-bit intensity value, from 0-255, to use as the black level'
                 ' in threshold detection mode, or as the change tolerance'
                 ' threshold in content-aware detection mode.'))
+
     parser.add_argument(
         '-m', '--min-scene-length', metavar = 'num_frames', dest = 'min_scene_len',
         type = int_type_check(1, None, 'num_frames'), default = 15,
         help = 'Minimum length, in frames, before another scene cut can be generated.')
+
     parser.add_argument(
         '-p', '--min-percent', metavar = 'percent', dest = 'min_percent',
         type = int_type_check(0, 100, 'percentage'), default = 95,
         help = 'Amount of pixels in a frame, from 0-100%%, that must fall '
                'under [intensity]. Only applies to threshold detection.')
+
     parser.add_argument(
         '-b', '--block-size', metavar = 'rows', dest = 'block_size',
         type = int_type_check(1, None, 'number of rows'), default = 32,
         help = 'Number of rows in frame to check at once, can be tuned for '
                'performance. Only applies to threshold detection.')
+
     parser.add_argument(
         '-s', '--statsfile', metavar = 'STATS_FILE', dest = 'stats_file',
         type = argparse.FileType('w'),
         help = 'File to store video statistics data, comma-separated value '
                'format (.csv). Will be overwritten if exists.')
+
     parser.add_argument(
         '-d', '--detector', metavar = 'detection_method', dest = 'detection_method',
         type = string_type_check(scene_detectors_list, False, 'detection_method'),
         default = scenedetect.detectors.DETECTOR_DEFAULT,
         help = 'Type of scene detection method/algorithm to use; detectors available: %s.' % (
             scene_detectors_list.__str__().replace("'","")))
+
     #parser.add_argument(
     #    '-f', '--format-timecode', metavar = 'timecode_format', dest = 'timecode_format',
     #    type = string_type_check(timecode_formats_list, False, 'timecode_format'),
     #    default = scenedetect.timecodes.FORMAT_DEFAULT,
     #    help = 'Format to use for the output scene cut times; formats available: %s.' % (
     #        timecode_formats_list.__str__().replace("'","")))
+
     parser.add_argument(
         '-l', '--list-scenes', dest = 'list_scenes',
         action = 'store_true', default = False,
         help = 'Output the final scene list in human-readable format as a table, in addition to CSV.')
+
     parser.add_argument(
         '-q', '--quiet', dest = 'quiet_mode',
         action = 'store_true', default = False,
         help = ('Suppress all output except for final comma-separated list of scene cuts.'
                 ' Useful for computing or piping output directly into other programs/scripts.'))
+
     #parser.add_argument(
     #    '-s', '--startindex', metavar = 'offset',
     #    type = int, default = 0,
     #    help = 'Starting index for chapter/scene output.')
+
     # Needs to be replaced with fade bias (-100% to +100%):
     #parser.add_argument(
     #    '-p', '--startpos', metavar = 'position',
     #    choices = [ 'in', 'mid', 'out' ], default = 'out',
     #    help = 'Where the timecode/frame number for a given scene should '
     #           'start relative to the fades [in, mid, or out].')
-
 
     #parser.add_argument(
     #    '-st', '--start-time', metavar = 'TIME', dest = 'start_time',
@@ -239,22 +251,28 @@ def get_cli_parser(scene_detectors_list, timecode_formats_list):
     #    type = timecode_type_check('TIME'), default = None,
     #    help = '')
 
-
     parser.add_argument(
-        '-df', '--downscale_factor', metavar = 'factor', dest = 'downscale_factor',
+        '-df', '--downscale-factor', metavar = 'factor', dest = 'downscale_factor',
         type = int_type_check(1, None, 'factor'), default = 1,
         help = ('Factor to downscale (shrink) image before processing, to'
                 ' improve performance. For example, if input video resolution'
                 ' is 1024 x 400, and factor = 2, each frame is reduced to'
                 ' 1024/2 x 400/2 = 512 x 200 before processing.'))
+
     parser.add_argument(
-        '-fs', '--frame_skip', metavar = 'num_frames', dest = 'frame_skip',
+        '-fs', '--frame-skip', metavar = 'num_frames', dest = 'frame_skip',
         type = int_type_check(0, None, 'num_frames'), default = 0,
         help = ('Number of frames to skip after processing a given frame.'
                 ' Improves performance at expense of frame accuracy, and may'
                 ' increase probability of inaccurate scene cut prediction.'
                 ' If required, values above 1 or 2 are not recommended.'))
 
-
+    parser.add_argument(
+        '-si', '--save-images', dest = 'save_images',
+        action = 'store_true', default = False,
+        help = ('If set, the first and last frames in each detected scene'
+                ' will be saved to disk. Images will saved in the current'
+                ' working directory, using the same filename as the input'
+                ' but with the scene and frame numbers appended.'))
 
     return parser

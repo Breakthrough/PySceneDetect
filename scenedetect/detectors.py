@@ -171,6 +171,9 @@ class ThresholdDetector(SceneDetector):
         # If absolute value of pixel intensity delta is above the threshold,
         # then we trigger a new scene cut/break.
 
+        # Value to return indiciating if a scene cut was found or not.
+        cut_detected = False
+
         # The metric used here to detect scene breaks is the percent of pixels
         # less than or equal to the threshold; however, since this differs on
         # user-supplied values, we supply the average pixel intensity as this
@@ -198,6 +201,7 @@ class ThresholdDetector(SceneDetector):
                 if self.last_scene_cut is None or (
                     (frame_num - self.last_scene_cut) >= self.min_scene_len):
                     scene_list.append(f_split)
+                    cut_detected = True
                     self.last_scene_cut = frame_num
                 self.last_fade['type'] = 'in'
                 self.last_fade['frame'] = frame_num
@@ -210,7 +214,7 @@ class ThresholdDetector(SceneDetector):
         # Before returning, we keep track of the last frame average (can also
         # be used to compute fades independently of the last fade type).
         self.last_frame_avg = frame_avg
-        return
+        return cut_detected
 
     def post_process(self, scene_list):
         """Writes a final scene cut if the last detected fade was a fade-out.
@@ -224,11 +228,13 @@ class ThresholdDetector(SceneDetector):
         # If the last fade detected was a fade out, we add a corresponding new
         # scene break to indicate the end of the scene.  This is only done for
         # fade-outs, as a scene cut is already added when a fade-in is found.
+        cut_detected = False
         if self.last_fade['type'] == 'out' and self.add_final_scene and (
             self.last_scene_cut is None or
             (frame_num - self.last_scene_cut) >= self.min_scene_len):
             scene_list.append(self.last_fade['frame'])
-        return
+            cut_detected = True
+        return cut_detected
 
 
 class ContentDetector(SceneDetector):
@@ -249,6 +255,9 @@ class ContentDetector(SceneDetector):
     def process_frame(self, frame_num, frame_img, frame_metrics, scene_list):
         # Similar to ThresholdDetector, but using the HSV colour space DIFFERENCE instead
         # of single-frame RGB/grayscale intensity (thus cannot detect slow fades with this method).
+
+        # Value to return indiciating if a scene cut was found or not.
+        cut_detected = False
 
         if self.last_frame is not None:
             # Change in average of HSV (hsv), (h)ue only, (s)aturation only, (l)uminance only.
@@ -284,14 +293,13 @@ class ContentDetector(SceneDetector):
                   (frame_num - self.last_scene_cut) >= self.min_scene_len):
                     scene_list.append(frame_num)
                     self.last_scene_cut = frame_num
-                    cv2.imwrite('%08d.jpg' % (frame_num-1), self.last_frame)
-                    cv2.imwrite('%08d.jpg' % (frame_num), frame_img)
+                    cut_detected = True
 
             #self.last_frame.release()
             del self.last_frame
                 
         self.last_frame = frame_img.copy()
-        return
+        return cut_detected
 
     def post_process(self, scene_list):
         """Not used for ContentDetector, as cuts are written as they are found."""
