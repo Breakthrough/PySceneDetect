@@ -6,6 +6,18 @@ PySceneDetect is completely free software, and can be downloaded from the links 
 
 ## Download
 
+### PyPI (All Platforms, Requires `pip`)
+
+Start by ensuring you have downloaded and installed all of the [system requirements](#installing-dependencies) (specifically the Python OpenCV `cv2` module).  Once this is done, you can get the latest version of [PySceneDetect on the Python Package Index](https://pypi.python.org/pypi/PySceneDetect) by running the following command:
+
+```md
+sudo pip install pyscenedetect
+```
+
+After installation, you can call PySceneDetect from any terminal/command prompt by typing `scenedetect` (try running `scenedetect --version` to verify that everything was installed correctly).  Alternatively, you can install PySceneDetect from the source archives below.
+
+
+
 <h3>Source (All Platforms) &nbsp; <span class="wy-text-neutral"><span class="fa fa-windows"></span> &nbsp; <span class="fa fa-linux"></span> &nbsp; <span class="fa fa-apple"></span></span></h3>
 
 <div class="important">
@@ -14,7 +26,13 @@ PySceneDetect is completely free software, and can be downloaded from the links 
 <a href="https://github.com/Breakthrough/PySceneDetect/archive/v0.3.2-beta.zip" class="btn btn-info" role="button"><span class="fa fa-download"></span>&nbsp; <b>Download</b>&nbsp;&nbsp;.zip</a> &nbsp;&nbsp;&nbsp;&nbsp; <a href="https://github.com/Breakthrough/PySceneDetect/archive/v0.3.2-beta.tar.gz" class="btn btn-info" role="button"><span class="fa fa-download"></span>&nbsp; <b>Download</b>&nbsp;&nbsp;.tar.gz</a> &nbsp;&nbsp;&nbsp;&nbsp; <a href="#installation" class="btn btn-warning" role="button"><span class="fa fa-gear"></span>&nbsp; <b>Installation</b></a> &nbsp;&nbsp;&nbsp;&nbsp; <a href="../examples/usage/" class="btn btn-danger" role="button"><span class="fa fa-book"></span>&nbsp; <b>Getting Started</b></a>
 </div>
 
-Once you've downloaded the source archive, extract it to a location of your choice, and make sure you have the appropriate [system requirements](#installing-dependencies) installed before continuing.  PySceneDetect can be installed by calling `python setup.py install` from the location of the extracted files (see [the Installation section](#installation) below for details), after which you can call PySceneDetect from any terminal/command prompt by typing `scenedetect`.  Try running `scenedetect --version` to verify that everything was installed correctly.
+Once you've downloaded the source archive, extract it to a location of your choice, and make sure you have the appropriate [system requirements](#installing-dependencies) installed before continuing.  PySceneDetect can be installed by running the following command in the location of the extracted files:
+
+```md
+sudo python setup.py install
+```
+
+After installation, you can call PySceneDetect from any terminal/command prompt by typing `scenedetect` (try running `scenedetect --version` to verify that everything was installed correctly).
 
 
 ------------------------------------------------
@@ -43,13 +61,13 @@ To ensure you have all the requirements installed, open a `python` interpreter, 
 
 Go to the folder you extracted the PySceneDetect source code to, and run the following command (may require root):
 
-```rst
+```md
 python setup.py install
 ```
 
 Once finished, PySceneDetect will be installed, and you should be able to run the `scenedetect` command.  To verify that everything was installed properly, try calling the following command:
 
-```rst
+```md
 scenedetect --version
 ```
 
