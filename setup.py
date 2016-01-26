@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# PySceneDetect setup.py, based off Glances' setup.py file.
+# PySceneDetect setup.py
 #
 
 
@@ -13,14 +13,6 @@ from setuptools import setup
 if sys.version_info < (2, 6) or (3, 0) <= sys.version_info < (3, 3):
     print('PySceneDetect requires at least Python 2.6 or 3.3 to run.')
     sys.exit(1)
-
-
-def get_data_files():
-    data_files = [
-        ('share/doc/scenedetect', ['LICENSE', 'LICENSE-NUMPY', 'LICENSE-OPENCV', 'README.md',
-                               'docs/changelog.md', 'USAGE.md'])
-    ]
-    return data_files
 
 
 def get_requires():
@@ -46,8 +38,7 @@ setup(
         #'VIDEOENC': ['moviepy']
     },
     packages=['scenedetect'],
-    include_package_data=True,
-    data_files=get_data_files(),
+    include_package_data = True,
     #test_suite="unitest.py",
     entry_points={"console_scripts": ["scenedetect=scenedetect:main"]},
     classifiers=[
