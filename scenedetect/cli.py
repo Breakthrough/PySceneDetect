@@ -74,7 +74,7 @@ def timecode_type_check(metavar = None):
                     valid = True
                     value = secs
 
-        # Timecode in HH:MM:SS[.nnn] format, convert to seconds internally.
+        # Timecode in HH:MM:SS[.nnn] format.
         elif ':' in value:
             s = value.split(':')
             if (len(s) == 3 and s[0].isdigit() and s[1].isdigit()
@@ -84,7 +84,7 @@ def timecode_type_check(metavar = None):
                 if (hrs >= 0 and mins >= 0 and secs >= 0 and mins < 60
                         and secs < 60):
                     valid = True
-                    value = float(hrs * 60 * 60) + float(mins * 60) + float(secs)
+                    value = [hrs, mins, secs]
 
         msg = ('invalid timecode: %s (timecode must conform to one of the'
                ' formats the scenedetect --help message)' % value)
