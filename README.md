@@ -6,7 +6,7 @@ Video Scene Cut Detection and Analysis Tool
 
 [![Documentation Status](https://readthedocs.org/projects/pyscenedetect/badge/?version=latest)](http://pyscenedetect.readthedocs.org/en/latest/?badge=latest)
 
-### New Release: v0.3.1-beta (January 23, 2016)
+### New Release: v0.3.2-beta (January 26, 2016)
 
 PySceneDetect is finally out of alpha, and is finally in the first beta release ([get it here!](https://github.com/Breakthrough/PySceneDetect/releases)).  This release brings a number of major changes, including the much awaited content-aware detection mode (see [`docs/changelog.md`](https://github.com/Breakthrough/PySceneDetect/blob/master/docs/changelog.md) or [the Releases page](https://github.com/Breakthrough/PySceneDetect/releases) for details.).  Also see [the new `USAGE.md` file](https://github.com/Breakthrough/PySceneDetect/blob/master/USAGE.md) for details on the new detection modes, default values/thresholds to try, and how to effectively choose the optimal detection parameters.
 
@@ -28,7 +28,7 @@ Note that PySceneDetect is currently in beta; see Current Features & Roadmap bel
 Download & Installation
 ----------------------------------------------------------
 
-**Downloading:** The latest version of PySceneDetect (`v0.3.0.1-beta`) can be [downloaded here](https://github.com/Breakthrough/PySceneDetect/releases); to run it, you will need:
+**Downloading:** The latest version of PySceneDetect (`v0.3.2-beta`) can be [downloaded here](https://github.com/Breakthrough/PySceneDetect/releases); to run it, you will need:
 
  - [Python 2 / 3](https://www.python.org/) (tested on 2.7.X, untested but should work on 3.X)
  - OpenCV Python Module (usually found in Linux package repos as `python-opencv`, Windows users can find [prebuilt binaries for Python 2.7 here](http://www.lfd.uci.edu/~gohlke/pythonlibs/#opencv))
