@@ -10,7 +10,7 @@ Video Scene Cut Detection and Analysis Tool
 
 Quick install; requires `numpy` and Python OpenCV `cv2` module, read [getting started guide](http://pyscenedetect.readthedocs.org/en/latest/examples/usage/) after install:
 
-    sudo pip install pyscenedetect
+    sudo pip install pyscenedetect --pre
     
 --------
 

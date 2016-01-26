@@ -11,7 +11,7 @@ PySceneDetect is completely free software, and can be downloaded from the links 
 Start by ensuring you have downloaded and installed all of the [system requirements](#installing-dependencies) (specifically the Python OpenCV `cv2` module).  Once this is done, you can get the latest version of [PySceneDetect on the Python Package Index](https://pypi.python.org/pypi/PySceneDetect) by running the following command:
 
 ```md
-sudo pip install pyscenedetect
+sudo pip install pyscenedetect --pre
 ```
 
 After installation, you can call PySceneDetect from any terminal/command prompt by typing `scenedetect` (try running `scenedetect --version` to verify that everything was installed correctly).  Alternatively, you can install PySceneDetect from the source archives below.
