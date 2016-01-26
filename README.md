@@ -4,7 +4,7 @@ PySceneDetect
 Video Scene Cut Detection and Analysis Tool
 ----------------------------------------------------------
 
-[![Documentation Status](https://readthedocs.org/projects/pyscenedetect/badge/?version=latest)](http://pyscenedetect.readthedocs.org/en/latest/?badge=latest) [![PyPI Version](https://img.shields.io/pypi/v/PySceneDetect.svg)](https://pypi.python.org/pypi/PySceneDetect/)  [![PyPI](https://img.shields.io/pypi/dm/PySceneDetect.svg)](https://pypi.python.org/pypi/PySceneDetect)  [![PyPI License](https://img.shields.io/pypi/l/PySceneDetect.svg)](http://pyscenedetect.readthedocs.org/en/latest/copyright/)
+[![Documentation Status](https://readthedocs.org/projects/pyscenedetect/badge/?version=latest)](http://pyscenedetect.readthedocs.org/en/latest/?badge=latest) [![PyPI Status](https://img.shields.io/pypi/status/PySceneDetect.svg)](https://pypi.python.org/pypi/PySceneDetect/) [![PyPI Version](https://img.shields.io/pypi/v/PySceneDetect.svg)](https://pypi.python.org/pypi/PySceneDetect/)  [![PyPI](https://img.shields.io/pypi/dm/PySceneDetect.svg)](https://pypi.python.org/pypi/PySceneDetect)  [![PyPI License](https://img.shields.io/pypi/l/PySceneDetect.svg)](http://pyscenedetect.readthedocs.org/en/latest/copyright/)
 
 ### New Release: v0.3.2-beta (January 26, 2016)
 
