@@ -203,10 +203,10 @@ def get_cli_parser(scene_detectors_list, timecode_formats_list):
         help = '[REQUIRED] Path to input video.')
 
     parser.add_argument(
-        '-o', '--output', metavar = 'SCENE_LIST',
+        '-o', '--output', metavar = 'OUTPUT_FILE',
         type = argparse.FileType('w'),
-        help = ('File to store detected scenes in using the specified timecode'
-                'format as comma-separated values (.csv). '
+        help = ('File to store detected scenes, comma-separated (.csv). Scenes'
+                'are written in both single-line and human-readable formats. '
                 'File will be overwritten if already exists.'))
 
     parser.add_argument(
@@ -256,7 +256,9 @@ def get_cli_parser(scene_detectors_list, timecode_formats_list):
     parser.add_argument(
         '-l', '--list-scenes', dest = 'list_scenes',
         action = 'store_true', default = False,
-        help = 'Output the final scene list in human-readable format as a table, in addition to CSV.')
+        help = ('Output the final scene list in human-readable format as a'
+                ' table, in addition to CSV.  This affects both console output'
+                ' and file output (-o).'))
 
     parser.add_argument(
         '-q', '--quiet', dest = 'quiet_mode',

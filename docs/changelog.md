@@ -3,6 +3,11 @@ PySceneDetect Changelog
 ==========================================================
 
 
+### 0.3.2.1-beta (In Development)
+
+ * [bugfix] output scenes are now correctly written to specified output file when using -o flag (fixes #11)
+
+
 ### 0.3.2-beta (January 26, 2016) &nbsp;<span class="fa fa-tags"></span>
 
  * [feature] added `-si` / `--save-images` flag to enable saving the first and last frames of each detected scene as an image, saved in the current working directory with the original video filename as the output prefix

@@ -32,6 +32,7 @@ import sys
 import os
 import argparse
 import time
+import csv
 
 # PySceneDetect Library Imports
 import scenedetect.platform
@@ -45,7 +46,7 @@ import numpy
 
 
 # Used for module identification and when printing copyright & version info.
-__version__ = 'v0.3.2-beta'
+__version__ = 'v0.3.2.1-beta-dev'
 
 # About & copyright message string shown for the -v / --version CLI argument.
 ABOUT_STRING   = """PySceneDetect %s
@@ -345,14 +346,28 @@ def main():
         print('[PySceneDetect] Comma-separated timecode output:')
 
     # Create new list with scene cuts in milliseconds (original uses exact
-    # frame numbers) based on the video's framerate.
+    # frame numbers) based on the video's framerate, and then timecodes.
     scene_list_msec = [(1000.0 * x) / float(video_fps) for x in scene_list]
+    scene_list_tc = [scenedetect.timecodes.get_string(x) for x in scene_list_msec]
 
     # Print CSV separated timecode output for use in other programs.
-    print([scenedetect.timecodes.get_string(x) for x in scene_list_msec]
-        .__str__()[1:-1].replace("'","").replace(' ', ''))
+    print(','.join(scene_list_tc))
+
+    # Output timecodes to CSV file if required.
+    if args.output:
+        csv_writer = csv.writer(args.output)
+        # Output timecode scene list
+        csv_writer.writerow(scene_list_tc)
+        # Output detailed, human-readable scene list.
+        csv_writer.writerow(["Scene Number", "Frame Number (Start)",
+                             "Timecode", "Time (seconds)"])
+        scene_list_sec = [(1.0 * x) / float(video_fps) for x in scene_list]
+        for i, scene in enumerate(scene_list):
+            csv_writer.writerow([str(i+1), str(scene_list[i]),
+                                 scene_list_tc[i], str(scene_list_sec[i])])
 
     # Cleanup, release all objects and close file handles.
     if args.stats_file: args.stats_file.close()
+    if args.output: args.output.close()
     return
 
