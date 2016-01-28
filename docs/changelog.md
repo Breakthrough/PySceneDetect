@@ -3,6 +3,11 @@ PySceneDetect Changelog
 ==========================================================
 
 
+### 0.3.4 (In Development)
+
+ * [enhance]  improved performance of content detection mode (approx. 2x faster)
+
+
 ### 0.3.3 (January 27, 2016) &nbsp;<span class="fa fa-tags"></span>
 
  * [bugfix]   output scenes are now correctly written to specified output file when using -o flag (fixes #11)

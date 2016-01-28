@@ -52,7 +52,6 @@ def get_available():
     return detector_dict
 
 
-
 class SceneDetector(object):
     """Base SceneDetector class to implement a scene detection algorithm."""
     def __init__(self):
@@ -251,6 +250,7 @@ class ContentDetector(SceneDetector):
         self.min_scene_len = min_scene_len  # minimum length of any given scene, in frames
         self.last_frame = None
         self.last_scene_cut = None
+        self.last_hsv = None
 
     def process_frame(self, frame_num, frame_img, frame_metrics, scene_list):
         # Similar to ThresholdDetector, but using the HSV colour space DIFFERENCE instead
@@ -272,7 +272,9 @@ class ContentDetector(SceneDetector):
             else:
                 num_pixels = frame_img.shape[0] * frame_img.shape[1]
                 curr_hsv = cv2.split(cv2.cvtColor(frame_img, cv2.COLOR_BGR2HSV))
-                last_hsv = cv2.split(cv2.cvtColor(self.last_frame, cv2.COLOR_BGR2HSV))
+                last_hsv = self.last_hsv
+                if not last_hsv:
+                    last_hsv = cv2.split(cv2.cvtColor(self.last_frame, cv2.COLOR_BGR2HSV))
 
                 delta_hsv = [-1, -1, -1]
                 for i in range(3):
@@ -286,7 +288,9 @@ class ContentDetector(SceneDetector):
                 frame_metrics[frame_num]['delta_hsv_avg'] = delta_hsv_avg
                 frame_metrics[frame_num]['delta_hue'] = delta_h
                 frame_metrics[frame_num]['delta_sat'] = delta_s
-                frame_metrics[frame_num]['delta_lum'] = delta_v                
+                frame_metrics[frame_num]['delta_lum'] = delta_v
+
+                self.last_hsv = curr_hsv
 
             if delta_hsv_avg >= self.threshold:
                 if self.last_scene_cut is None or (

@@ -46,7 +46,7 @@ import numpy
 
 
 # Used for module identification and when printing copyright & version info.
-__version__ = 'v0.3.3'
+__version__ = 'v0.3.4-dev'
 
 # About & copyright message string shown for the -v / --version CLI argument.
 ABOUT_STRING   = """PySceneDetect %s
