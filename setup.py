@@ -38,7 +38,8 @@ setup(
         #'VIDEOENC': ['moviepy']
     },
     packages=['scenedetect'],
-    include_package_data = True,
+    package_data={'': ['../LICENSE*', '../USAGE.md']},
+    #include_package_data = True,   # Only works with this line commented.
     #test_suite="unitest.py",
     entry_points={"console_scripts": ["scenedetect=scenedetect:main"]},
     classifiers=[
