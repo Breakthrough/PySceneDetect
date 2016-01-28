@@ -17,7 +17,6 @@ sudo pip install pyscenedetect
 After installation, you can call PySceneDetect from any terminal/command prompt by typing `scenedetect` (try running `scenedetect --version` to verify that everything was installed correctly).  Alternatively, you can install PySceneDetect from the source archives below.
 
 
-
 <h3>Source (All Platforms) &nbsp; <span class="wy-text-neutral"><span class="fa fa-windows"></span> &nbsp; <span class="fa fa-linux"></span> &nbsp; <span class="fa fa-apple"></span></span></h3>
 
 <div class="important">

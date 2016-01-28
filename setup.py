@@ -24,9 +24,9 @@ def get_requires():
 
 setup(
     name='PySceneDetect',
-    version='0.3.3',
+    version='0.3.3-0',
     description="A cross-platform, OpenCV-based video scene detection program and Python library. ",
-    long_description=open('README.md').read(),
+    long_description=open('package-info.rst').read(),
     author='Brandon Castellano',
     author_email='brandon248@gmail.com',
     url='https://github.com/Breakthrough/PySceneDetect',
@@ -38,7 +38,7 @@ setup(
         #'VIDEOENC': ['moviepy']
     },
     packages=['scenedetect'],
-    package_data={'': ['../LICENSE*', '../USAGE.md']},
+    package_data={'': ['../LICENSE*', '../USAGE.md', '../package-info.rst']},
     #include_package_data = True,   # Only works with this line commented.
     #test_suite="unitest.py",
     entry_points={"console_scripts": ["scenedetect=scenedetect:main"]},
