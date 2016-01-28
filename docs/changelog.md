@@ -3,10 +3,11 @@ PySceneDetect Changelog
 ==========================================================
 
 
-### 0.3.3-beta (January 27, 2016) &nbsp;<span class="fa fa-tags"></span>
+### 0.3.3 (January 27, 2016) &nbsp;<span class="fa fa-tags"></span>
 
  * [bugfix]   output scenes are now correctly written to specified output file when using -o flag (fixes #11)
  * [bugfix]   fix indexing exception when using multiple scene detectors and outputting statistics
+ * [internal] distribute package on PyPI, version move from beta to stable
  * [internal] add function to convert frame number to formatted timecode
  * [internal] move file and statistic output to Python `csv` module
 
