@@ -82,3 +82,16 @@ def get_string(time_msec, show_msec = True):
     return timecode_str
 
 
+def frame_to_timecode(frames, fps, show_msec = True):
+    """ Converts a given frame/FPS into a timecode of the form HH:MM:SS.nnnn.
+
+    Args:
+        frames:     Integer representing the frame number to get the time of.
+        fps:        Float representing framerate of the video.
+        show_msec:  If False, omits the milliseconds part from the output.
+    Returns:
+        A string with a formatted timecode (HH:MM:SS.nnnn).
+    """
+    time_msec = 1000.0 * float(frames) / fps
+    return get_string(time_msec, show_msec)
+

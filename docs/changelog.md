@@ -3,12 +3,15 @@ PySceneDetect Changelog
 ==========================================================
 
 
-### 0.3.3-beta (In Development)
+### 0.3.3-beta (January 27, 2016) &nbsp;<span class="fa fa-tags"></span>
 
- * [bugfix] output scenes are now correctly written to specified output file when using -o flag (fixes #11)
+ * [bugfix]   output scenes are now correctly written to specified output file when using -o flag (fixes #11)
+ * [bugfix]   fix indexing exception when using multiple scene detectors and outputting statistics
+ * [internal] add function to convert frame number to formatted timecode
+ * [internal] move file and statistic output to Python `csv` module
 
 
-### 0.3.2-beta (January 26, 2016) &nbsp;<span class="fa fa-tags"></span>
+### 0.3.2-beta (January 26, 2016)
 
  * [feature] added `-si` / `--save-images` flag to enable saving the first and last frames of each detected scene as an image, saved in the current working directory with the original video filename as the output prefix
  * [feature] added command line options for setting start and end times for processing (`-st` and `-et`)

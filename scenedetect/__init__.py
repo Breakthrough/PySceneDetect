@@ -67,7 +67,7 @@ THE SOFTWARE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, EXPRESS OR IMPLIED.
 """ % __version__
 
 
-def detect_scenes_file(path, scene_list, detector_list, stats_file = None,
+def detect_scenes_file(path, scene_list, detector_list, stats_writer = None,
                   downscale_factor = 0, frame_skip = 0, quiet_mode = False,
                   perf_update_rate = -1, save_images = False,
                   timecode_list = [0, 0, 0]):
@@ -137,7 +137,7 @@ def detect_scenes_file(path, scene_list, detector_list, stats_file = None,
         start_frame, end_frame, duration_frames = frames_list
 
     # Perform scene detection on cap object (modifies scene_list).
-    frames_read = detect_scenes(cap, scene_list, detector_list, stats_file,
+    frames_read = detect_scenes(cap, scene_list, detector_list, stats_writer,
                                 downscale_factor, frame_skip, quiet_mode,
                                 perf_update_rate, save_images, file_name,
                                 start_frame, end_frame, duration_frames)
@@ -147,7 +147,7 @@ def detect_scenes_file(path, scene_list, detector_list, stats_file = None,
     return (video_fps, frames_read)
 
 
-def detect_scenes(cap, scene_list, detector_list, stats_file = None,
+def detect_scenes(cap, scene_list, detector_list, stats_writer = None,
                   downscale_factor = 0, frame_skip = 0, quiet_mode = False,
                   perf_update_rate = -1, save_images = False,
                   image_path_prefix = '', start_frame = 0, end_frame = 0,
@@ -160,7 +160,7 @@ def detect_scenes(cap, scene_list, detector_list, stats_file = None,
             the cap object remains open (it can be closed with cap.release()).
         scene_list:  List to append frame numbers of any detected scene cuts.
         detector_list:  List of scene detection algorithms to run on the video.
-        stats_file:  Optional. Handle to a file, open for writing, to save the
+        stats_writer:  Optional. Handle to a csv.writer object to output the
             frame metrics computed by each detection algorithm, in CSV format.
         quiet_mode:  Optional. Suppresses any console output (inluding errors).
         perf_update_rate:  Optional. Number of seconds between which to
@@ -211,6 +211,9 @@ def detect_scenes(cap, scene_list, detector_list, stats_file = None,
         (rv, im) = cap.read()
         frames_read += 1
 
+    stats_file_keys = []
+    video_fps = cap.get(cv2.CAP_PROP_FPS)
+
     while True:
         # If we passed the end point, we stop processing now.
         if end_frame > 0 and frames_read >= end_frame:
@@ -234,11 +237,17 @@ def detect_scenes(cap, scene_list, detector_list, stats_file = None,
             im_scaled = im[::downscale_factor,::downscale_factor,:]
         cut_found = False
         for detector in detector_list:
-            cut_found = cut_found or detector.process_frame(
-                frames_read, im_scaled, frame_metrics, scene_list)
-        if stats_file:
-            # write frame metrics to stats_file
-            pass
+            cut_found = detector.process_frame(frames_read, im_scaled,
+                frame_metrics, scene_list) or cut_found
+        if stats_writer:
+            if not len(stats_file_keys) > 0:
+                stats_file_keys = frame_metrics[frames_read].keys()
+                if len(stats_file_keys) > 0:
+                    stats_writer.writerow(['Frame Number'] + ['Timecode'] + stats_file_keys)
+            if len(stats_file_keys) > 0:
+                stats_writer.writerow([str(frames_read)] +
+                    [scenedetect.timecodes.frame_to_timecode(frames_read, video_fps)] +
+                    [str(frame_metrics[frames_read][metric]) for metric in stats_file_keys])
         frames_read += 1
         # periodically show processing speed/performance if requested
         if not quiet_mode and perf_show:
@@ -307,6 +316,9 @@ def main():
         detector = scene_detectors['threshold'](
             args.threshold, args.min_percent/100.0, args.min_scene_len,
             block_size = args.block_size)
+
+    # Load CSV writer if required.
+    stats_writer = csv.writer(args.stats_file) if args.stats_file else None
     
     # Perform scene detection using specified mode.
     start_time = time.time()
@@ -320,7 +332,7 @@ def main():
                                 path = args.input.name,
                                 scene_list = scene_list,
                                 detector_list = [detector],
-                                stats_file = args.stats_file,
+                                stats_writer = stats_writer,
                                 downscale_factor = args.downscale_factor,
                                 frame_skip = args.frame_skip,
                                 quiet_mode = args.quiet_mode,
