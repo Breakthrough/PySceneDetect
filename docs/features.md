@@ -27,19 +27,19 @@
 
 ### Features in Current Release
 
- - output-suppression (quiet) mode for better automation with external scripts/programs
- - detects fade-in and fade-out based on user-defined threshold
- - exports list of scenes to .CSV file (both timecodes and frame numbers) (`-o`)
+ - exports list of scenes to .CSV file (both timecodes and frame numbers) (`-o scenelist.csv`)
  - exports timecodes in mkvmerge format: HH:MM:SS.nnnnn, comma-separated
- - user-selectable frame skipping for improved performance
- - user-selectable subsampling for improved performance
- - save an image of the first and last frame of each detected scene
+ - statistics/analysis mode to export frame-by-frame video metrics (`-s statsfile.csv`)
+ - output-suppression (quiet) mode for better automation with external scripts/programs
+ - user-selectable subsampling for improved performance (`-df`)
+ - user-selectable frame skipping for improved performance (`-fs`)
+ - save an image of the first and last frame of each detected scene (`-si`)
  - ability to specify starting/ending times (`-st`/`-et`), and/or set duration for processing (`-dt`)
 
 ### List of Scene Detection Methods
 
- - threshold scene detection analyzes video for changes in average frame intensity/brightness
- - content-aware scene detection based on changes between frames in the HSV color space
+ - **threshold scene detection** (`-d threshold`): analyzes video for changes in average frame intensity/brightness
+ - **content-aware scene detection** (`-d content`): based on changes between frames in the HSV color space
 
 For a detailed explanation of how a particular scene detection method/algorithm works, see the [Scene Detection Method Details Section](reference/detection-methods.md) in the Documentation & Reference.
 
@@ -51,21 +51,20 @@ For a detailed explanation of how a particular scene detection method/algorithm 
 
 <h3>Features in Development for Next Version</h3>
 
-The following are features being developed for PySceneDetect **v0.3.3-beta** (completed features - those marked with <span class="fa fa-check"></span>&nbsp; - can be tested by [downloading the latest development version](https://github.com/Breakthrough/PySceneDetect/archive/master.zip) of the PySceneDetect source code, or cloning the [Github repo](https://github.com/Breakthrough/PySceneDetect)).  
+The following are features being developed for PySceneDetect **v0.3.4** (completed features - those marked with <span class="fa fa-check"></span>&nbsp; - can be tested by [downloading the latest development version](https://github.com/Breakthrough/PySceneDetect/archive/master.zip) of the PySceneDetect source code, or cloning the [Github repo](https://github.com/Breakthrough/PySceneDetect)).  
 
- - statistics/analysis mode to export frame-by-frame video metrics (-s)
  - multithreaded implementation of existing scene detection methods/algorithms
 
 <h3>Features Starting Development for Following Version</h3>
 
-The following are features being planned or developed after the release of v0.3.3-beta.
+The following are features being planned or developed after the release of v0.3.4:
 
  - adaptive or user-defined bias for fade in/out interpolation
  - additional timecode formats
 
 <h3>Planned Features for Future Releases</h3>
 
-The following are features being planned or developed for the next major release of PySceneDetect, v0.4-beta.
+The following are features being planned or developed for future releases of PySceneDetect (v0.4 and onwards):
 
  - export scenes in chapter/XML format
  - improve robustness of content-aware detection by combining with edge detection (similar to MATLAB-based scene change detector)
