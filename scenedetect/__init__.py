@@ -341,42 +341,52 @@ def main():
                             )
     elapsed_time = time.time() - start_time
     perf_fps = float(frames_read) / elapsed_time
+
+    # Create new list with scene cuts in milliseconds (original uses exact
+    # frame numbers) based on the video's framerate, and then timecodes.
+    scene_list_msec = [(1000.0 * x) / float(video_fps) for x in scene_list]
+    scene_list_tc = [scenedetect.timecodes.get_string(x) for x in scene_list_msec]
+    # Create new lists with scene cuts in seconds, and the length of each scene.
+    scene_start_sec = [(1.0 * x) / float(video_fps) for x in scene_list]
+    scene_len_sec = []
+    if len(scene_list) > 0:
+        scene_len_sec = scene_list + [frames_read]
+        scene_len_sec = [(1.0 * x) / float(video_fps) for x in scene_len_sec]
+        scene_len_sec = [(y - x) for x, y in zip(scene_len_sec[:-1], scene_len_sec[1:])]
+
     # Print performance (average framerate), and scene list if requested.
     if not args.quiet_mode:
         print('[PySceneDetect] Processing complete, found %d scenes in video.' %
             len(scene_list))
         print('[PySceneDetect] Processed %d frames in %3.1f secs (avg. %3.1f FPS).' % (
             frames_read, elapsed_time, perf_fps))
-        print('[PySceneDetect] List of detected scenes:')
-        if args.list_scenes:
-            print ('----------------------------------------------')
-            print ('    Scene #   |   Frame #                     ')
-            print ('----------------------------------------------')
-            for scene_idx, frame_num in enumerate(scene_list):
-                print ('      %3d     |   %8d' % (scene_idx, frame_num))
-            print ('----------------------------------------------')
-        print('[PySceneDetect] Comma-separated timecode output:')
-
-    # Create new list with scene cuts in milliseconds (original uses exact
-    # frame numbers) based on the video's framerate, and then timecodes.
-    scene_list_msec = [(1000.0 * x) / float(video_fps) for x in scene_list]
-    scene_list_tc = [scenedetect.timecodes.get_string(x) for x in scene_list_msec]
+        if len(scene_list) > 0:
+            if args.list_scenes:
+                print('[PySceneDetect] List of detected scenes:')
+                print ('-------------------------------------------')
+                print ('  Scene #  |   Frame #   |    Timecode ')
+                print ('-------------------------------------------')
+                for scene_idx, frame_num in enumerate(scene_list):
+                    print ('    %3d    |  %9d  |  %s' % (
+                        scene_idx+1, frame_num, scene_list_tc[scene_idx]))
+                print ('-------------------------------------------')
+            print('[PySceneDetect] Comma-separated timecode output:')
 
     # Print CSV separated timecode output for use in other programs.
     print(','.join(scene_list_tc))
 
-    # Output timecodes to CSV file if required.
-    if args.output:
+    # Output timecodes to CSV file if required (and scenes were found).
+    if args.output and len(scene_list) > 0:
         csv_writer = csv.writer(args.output)
         # Output timecode scene list
         csv_writer.writerow(scene_list_tc)
         # Output detailed, human-readable scene list.
         csv_writer.writerow(["Scene Number", "Frame Number (Start)",
-                             "Timecode", "Time (seconds)"])
-        scene_list_sec = [(1.0 * x) / float(video_fps) for x in scene_list]
+                             "Timecode", "Start Time (seconds)", "Length (seconds)"])
         for i, scene in enumerate(scene_list):
             csv_writer.writerow([str(i+1), str(scene_list[i]),
-                                 scene_list_tc[i], str(scene_list_sec[i])])
+                                 scene_list_tc[i], str(scene_start_sec[i]),
+                                 str(scene_len_sec[i])])
 
     # Cleanup, release all objects and close file handles.
     if args.stats_file: args.stats_file.close()

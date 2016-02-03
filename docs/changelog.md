@@ -5,7 +5,9 @@ PySceneDetect Changelog
 
 ### 0.3.4 (In Development)
 
- * [enhance]  improved performance of content detection mode (approx. 2x faster)
+ * [enhance]  added scene length, in seconds, to output file (`-o`) for easier integration with `ffmpeg`/`libav`
+ * [enhance]  improved performance of content detection mode by caching intermediate HSV frames in memory (approx. 2x faster)
+ * [enhance]  show timecode values in terminal when using extended output (`-l`)
 
 
 ### 0.3.3 (January 27, 2016) &nbsp;<span class="fa fa-tags"></span>

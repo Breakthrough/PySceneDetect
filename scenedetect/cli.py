@@ -256,9 +256,8 @@ def get_cli_parser(scene_detectors_list, timecode_formats_list):
     parser.add_argument(
         '-l', '--list-scenes', dest = 'list_scenes',
         action = 'store_true', default = False,
-        help = ('Output the final scene list in human-readable format as a'
-                ' table, in addition to CSV.  This affects both console output'
-                ' and file output (-o).'))
+        help = ('Output the detected scenes to the terminal as a nicely'
+                ' formatted, human-readable table, in addition to CSV.'))
 
     parser.add_argument(
         '-q', '--quiet', dest = 'quiet_mode',
