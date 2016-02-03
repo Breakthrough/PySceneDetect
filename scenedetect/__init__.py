@@ -310,6 +310,10 @@ def main():
     # TODO: Add minimum scene length as a variable argument.
     detection_method = args.detection_method.lower()
     detector = None
+    
+    if not args.threshold:
+        args.threshold = 30.0 if detection_method == 'content' else 12
+
     if (detection_method == 'content'):
         detector = scene_detectors['content'](args.threshold, args.min_scene_len)
     elif (detection_method == 'threshold'):

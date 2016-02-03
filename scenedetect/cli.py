@@ -128,6 +128,40 @@ def int_type_check(min_val, max_val = None, metavar = None):
     return _type_checker
 
 
+def float_type_check(min_val, max_val = None, metavar = None, default_str = None):
+    """ Creates an argparse type for a range-limited float.
+
+    The passed argument is declared valid if it is a valid float which is
+    greater thanmin_val, and if max_val is specified, less than max_val.
+
+    Returns:
+        A function which can be passed as an argument type, when calling
+        add_argument on an ArgumentParser object
+
+    Raises:
+        ArgumentTypeError: Passed argument must be float within proper range.
+    """
+    if metavar is None: metavar = 'value'
+    def _type_checker(value):
+        if default_str and isinstance(value, str) and default_str == value:
+            return None
+        value = float(value)
+        valid = True
+        msg   = ''
+        if (max_val == None):
+            if (value < min_val): valid = False
+            msg = 'invalid choice: %3.1f (%s must be greater than %3.1f)' % (
+                value, metavar, min_val )
+        else:
+            if (value < min_val or value > max_val): valid = False
+            msg = 'invalid choice: %3.1f (%s must be between %3.1f and %3.1f)' % (
+                value, metavar, min_val, max_val )
+        if not valid:
+            raise argparse.ArgumentTypeError(msg)
+        return value
+    return _type_checker
+
+
 def string_type_check(valid_strings, case_sensitive = True, metavar = None):
     """ Creates an argparse type for a list of strings.
 
@@ -209,12 +243,15 @@ def get_cli_parser(scene_detectors_list, timecode_formats_list):
                 'are written in both single-line and human-readable formats. '
                 'File will be overwritten if already exists.'))
 
+    threshold_default_str = '12 for threshold mode, 30.0 for content mode'
     parser.add_argument(
-        '-t', '--threshold', metavar = 'intensity', dest = 'threshold',
-        type = int_type_check(0, 255, 'intensity'), default = 12,
-        help = ('8-bit intensity value, from 0-255, to use as the black level'
-                ' in threshold detection mode, or as the change tolerance'
-                ' threshold in content-aware detection mode.'))
+        '-t', '--threshold', metavar = 'value', dest = 'threshold',
+        #type = int_type_check(0, 255, 'intensity'),
+        type = float_type_check(0.0, None, 'value', threshold_default_str),
+        default = threshold_default_str,
+        help = ('Intensity value, from 0 - 255, to use as the 8-bit black level'
+                ' in threshold detection mode, or as the change sensitivity'
+                ' tolerance, greater than 0.0, in content detection mode.'))
 
     parser.add_argument(
         '-m', '--min-scene-length', metavar = 'num_frames', dest = 'min_scene_len',
