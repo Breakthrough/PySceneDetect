@@ -70,7 +70,7 @@ THE SOFTWARE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, EXPRESS OR IMPLIED.
 def detect_scenes_file(path, scene_list, detector_list, stats_writer = None,
                   downscale_factor = 0, frame_skip = 0, quiet_mode = False,
                   perf_update_rate = -1, save_images = False,
-                  timecode_list = [0, 0, 0]):
+                  timecode_list = None):
     """Performs scene detection on passed file using given scene detectors.
 
     Essentially wraps detect_scenes while handling all OpenCV interaction.
@@ -94,6 +94,8 @@ def detect_scenes_file(path, scene_list, detector_list, stats_writer = None,
     cap = cv2.VideoCapture()
     frames_read = -1
     video_fps = -1
+    if not timecode_list:
+        timecode_list = [0, 0, 0]
 
     # Attempt to open the passed input (video) file.
     cap.open(path)
@@ -122,11 +124,11 @@ def detect_scenes_file(path, scene_list, detector_list, stats_writer = None,
     # Convert timecode_list to absolute frames for detect_scenes() function.
     frames_list = []
     for tc in timecode_list:
-        if type(tc) == type(int()):
+        if isinstance(tc, int):
             frames_list.append(tc)
-        elif type(tc) == type(float()):
+        elif isinstance(tc, float):
             frames_list.append(int(tc * video_fps))
-        elif type(tc) == type(list()) and len(tc) == 3:
+        elif isinstance(tc, list) and len(tc) == 3:
             secs = float(tc[0] * 60 * 60) + float(tc[1] * 60) + float(tc[2])
             frames_list.append(int(secs * video_fps))
         else:
