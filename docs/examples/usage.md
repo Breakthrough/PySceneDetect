@@ -1,6 +1,9 @@
 
 # Getting Started
 
+This page outlines the most commonly used command-line options for using PySceneDetect.
+
+
 ## Usage (Command Line)
 
 Show help information and summary of command-line arguments:
@@ -9,13 +12,13 @@ Show help information and summary of command-line arguments:
 scenedetect --help
 ```
 
-Perform content-aware scene detection on a video `my_video.mp4`:
+Perform content-aware scene detection on a video `my_video.mp4` ([example](usage-example.md)):
 
 ```rst
 scenedetect -i my_video.mp4 -d content -t 30
 ```
 
-In order to effectively use PySceneDetect, you should become familiar with the basic command line options (especially the detection method `-d` / `--detector` and threshold value `-t` / `--threshold`).  Descriptions for all command-line arguments can be obtained by running PySceneDetect with the `-h` / `--help` flag.
+In order to effectively use PySceneDetect, you should become familiar with the basic command line options described below - especially the scene detection method/algorithm (`-d` / `--detector`) and the threshold/sensitivity value (`-t` / `--threshold`).  These are described in the following section with respect to each detection method (`content` and `threshold`).  Note that descriptions for all command-line arguments, as well as their default values, can be obtained by running PySceneDetect with the `-h` / `--help` flag.
 
 
 ## Detection Methods
@@ -77,9 +80,17 @@ scenedetect -i my_video.mp4 -st 9000 -et 99:99:99.999 -dt 2700
 This demonstrates the different timecode formats, interchanging end time with duration and vice-versa, and precedence of setting duration over end time.
 
 
-## Saving Images from Start/End of Scenes
+## Saving Image Previews of Detected Scenes
 
 PySceneDetect can automatically save the beginning and ending frame of each detected scene by using the `-si` (`--save-images`) flag.  If set, the first and last frames of each scene will be saved in the current working directory, using the filename of the input video.
 
 Files marked `IN` represent the starting frame of the scene, and those marked `OUT` represent the last frame (e.g. `testvideo.mp4.Scene-4-OUT.jpg`).  Note that frames are only saved on detected scene boundaries, thus there will be no `IN` frame for the first scene, and likewise, there will be no `OUT` frame for the last scene.
 
+
+## Improving Processing Speed/Performance
+
+Assuming the input video is of a high enough resolution, a significant performance gain can be achieved by sub-sampling (down-scaling) the input image by a specific integer factor (2x, 3x, 4x, 5x...).  This factor represents how many pixels are "skipped" in both the x- and y- directions, effectively down-scaling the image (using nearest-neighbor sampling) by the factor specified (the new resolution being `W/factor x H/factor` if the old resolution is `W x H`).
+
+Another method that can be used to gain a performance boost is frame skipping.  This method, however, reduces frame-accurate scene cuts, so it should only be used with high FPS material (ideally > 60 FPS), at low values (try not to exceed a value of `1` or `2` if using `--frameskip`), in cases where this is acceptable.  For example, if we skip every other frame (e.g. using `--frameskip 1`), the processing speed should roughly double.  When frame skipping is enabled, skipped frames are cached in memory so a precise scene boundary can still be computed.
+
+If set too large, enough frames may be skipped each time that the threshold is met during every iteration, continually triggering scene changes.  This is because frame skipping essentially raises the threshold between frames in the same scene (making them more likely to appear as *cuts*) while not affecting the threshold between frames of different scenes.  This makes the two harder to distinguish, and can cause additional false scene cuts to be detected.  While this can be compensated for by raising the threshold value, this increases the probability of missing a real/true scene cut.
