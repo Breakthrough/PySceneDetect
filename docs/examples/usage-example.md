@@ -3,9 +3,9 @@
 
 As a concrete example to become familiar with PySceneDetect, let's use the following short clip from the James Bond movie, GoldenEye (Copyright &copy; 1995 MGM):
 
-https://www.youtube.com/watch?v=OMgIPnCnlbQ
+[https://www.youtube.com/watch?v=OMgIPnCnlbQ](https://www.youtube.com/watch?v=OMgIPnCnlbQ)
 
-You can download the clip as a `.mp4` file from here; save the file in your working directory as `goldeneye.mp4`.  We will first demonstrate using the default parameters, then how to find the optimal threshold/sensitivity for a given video, and lastly, using the PySceneDetect output to split the video into individual scenes/clips.
+You can [download the clip from here](https://github.com/Breakthrough/PySceneDetect/raw/resources/tests/goldeneye/goldeneye.mp4) (may have to right-click and save-as, put the video in your working directory as `goldeneye.mp4`).  We will first demonstrate using the default parameters, then how to find the optimal threshold/sensitivity for a given video, and lastly, using the PySceneDetect output to split the video into individual scenes/clips.
 
 
 ## Content-Aware Detection with Default Parameters
