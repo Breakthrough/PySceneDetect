@@ -35,6 +35,7 @@
  - user-selectable frame skipping for improved performance (`-fs`)
  - save an image of the first and last frame of each detected scene (`-si`)
  - ability to specify starting/ending times (`-st`/`-et`), and/or set duration for processing (`-dt`)
+ - user-definable fade bias (`-fb`) to shift scenes between fade in/out points (threshold mode only)
 
 ### List of Scene Detection Methods
 
@@ -51,16 +52,11 @@ For a detailed explanation of how a particular scene detection method/algorithm 
 
 <h3>Features in Development for Next Version</h3>
 
-The following are features being developed for PySceneDetect **v0.3.4** (completed features - those marked with <span class="fa fa-check"></span>&nbsp; - can be tested by [downloading the latest development version](https://github.com/Breakthrough/PySceneDetect/archive/master.zip) of the PySceneDetect source code, or cloning the [Github repo](https://github.com/Breakthrough/PySceneDetect)).  
+The following are features being planned or developed after the release of v0.3.5:
 
- - multithreaded implementation of existing scene detection methods/algorithms
-
-<h3>Features Starting Development for Following Version</h3>
-
-The following are features being planned or developed after the release of v0.3.4:
-
- - adaptive or user-defined bias for fade in/out interpolation
  - additional timecode formats
+ - adaptive bias for fade in/out interpolation
+ - multithreaded implementation of detection algorithms for improved performance
 
 <h3>Planned Features for Future Releases</h3>
 

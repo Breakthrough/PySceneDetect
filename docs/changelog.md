@@ -3,7 +3,7 @@ PySceneDetect Changelog
 ==========================================================
 
 
-### 0.3.4 (In Development)
+### 0.3.4 (February 8, 2016) &nbsp;<span class="fa fa-tags"></span>
 
  * [enhance] added scene length, in seconds, to output file (`-o`) for easier integration with `ffmpeg`/`libav`
  * [enhance] improved performance of content detection mode by caching intermediate HSV frames in memory (approx. 2x faster)
@@ -11,7 +11,7 @@ PySceneDetect Changelog
  * [feature] add fade bias option (`-fb` / `--fade-bias`) to command line (threshold mode only)
 
 
-### 0.3.3 (January 27, 2016) &nbsp;<span class="fa fa-tags"></span>
+### 0.3.3 (January 27, 2016)
 
  * [bugfix]   output scenes are now correctly written to specified output file when using -o flag (fixes #11)
  * [bugfix]   fix indexing exception when using multiple scene detectors and outputting statistics
