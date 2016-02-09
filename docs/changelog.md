@@ -5,9 +5,10 @@ PySceneDetect Changelog
 
 ### 0.3.4 (In Development)
 
- * [enhance]  added scene length, in seconds, to output file (`-o`) for easier integration with `ffmpeg`/`libav`
- * [enhance]  improved performance of content detection mode by caching intermediate HSV frames in memory (approx. 2x faster)
- * [enhance]  show timecode values in terminal when using extended output (`-l`)
+ * [enhance] added scene length, in seconds, to output file (`-o`) for easier integration with `ffmpeg`/`libav`
+ * [enhance] improved performance of content detection mode by caching intermediate HSV frames in memory (approx. 2x faster)
+ * [enhance] show timecode values in terminal when using extended output (`-l`)
+ * [feature] add fade bias option (`-fb` / `--fade-bias`) to command line (threshold mode only)
 
 
 ### 0.3.3 (January 27, 2016) &nbsp;<span class="fa fa-tags"></span>
@@ -28,8 +29,8 @@ PySceneDetect Changelog
 
 ### 0.3.1-beta (January 23, 2016) 
 
- * [feature] added downscaling/subsampling option (`-df` / `--downscale_factor`) to improve performance on higher resolution videos
- * [feature] added frameskip option (`-fs` / `--frame_skip`) to improve performance on high framerate videos, at expense of frame accuracy and possible inaccurate scene cut prediction
+ * [feature] added downscaling/subsampling option (`-df` / `--downscale-factor`) to improve performance on higher resolution videos
+ * [feature] added frameskip option (`-fs` / `--frame-skip`) to improve performance on high framerate videos, at expense of frame accuracy and possible inaccurate scene cut prediction
  * [enhance]  added setup.py to allow for one-line installation (just run `python setup.py install` after downloading and extracting PySceneDetect)
  * [internal] additional API functions to remove requirement on passing OpenCV video objects, and allow just a file path instead
 

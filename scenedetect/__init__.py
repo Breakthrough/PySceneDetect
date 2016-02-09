@@ -321,7 +321,7 @@ def main():
     elif (detection_method == 'threshold'):
         detector = scene_detectors['threshold'](
             args.threshold, args.min_percent/100.0, args.min_scene_len,
-            block_size = args.block_size)
+            block_size = args.block_size, fade_bias = args.fade_bias/100.0)
 
     # Load CSV writer if required.
     stats_writer = csv.writer(args.stats_file) if args.stats_file else None

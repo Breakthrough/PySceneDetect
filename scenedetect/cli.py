@@ -267,8 +267,16 @@ def get_cli_parser(scene_detectors_list, timecode_formats_list):
     parser.add_argument(
         '-b', '--block-size', metavar = 'rows', dest = 'block_size',
         type = int_type_check(1, None, 'number of rows'), default = 32,
-        help = 'Number of rows in frame to check at once, can be tuned for '
-               'performance. Only applies to threshold detection.')
+        help = '[Threshold Mode Only] Number of rows in frame to check at once,'
+               ' can be tuned for performance.')
+
+    parser.add_argument(
+        '-fb', '--fade-bias', metavar = 'percent', dest = 'fade_bias',
+        type = int_type_check(-100, 100, 'percent'), default = 0,
+        help = '[Threshold Mode Only] Bias amount for setting scene cut'
+               ' position with respect to the fade out/in, as a percentage. At'
+               ' -100, cut will be at fade-out, and at +100 will be at fade-in'
+               ' (with 0 placing the cut in the middle).')
 
     parser.add_argument(
         '-s', '--statsfile', metavar = 'STATS_FILE', dest = 'stats_file',
