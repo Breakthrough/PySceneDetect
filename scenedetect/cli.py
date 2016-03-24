@@ -233,7 +233,7 @@ def get_cli_parser(scene_detectors_list, timecode_formats_list):
 
     parser.add_argument(
         '-i', '--input', metavar = 'VIDEO_FILE',
-        required = True, type = file,
+        required = True, type = argparse.FileType('r'),
         help = '[REQUIRED] Path to input video.')
 
     parser.add_argument(
