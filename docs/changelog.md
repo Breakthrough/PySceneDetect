@@ -3,6 +3,11 @@ PySceneDetect Changelog
 ==========================================================
 
 
+### 0.3.5 (August 2, 2016)
+
+ * [bugfix]   fixed unrelated exception thrown when video could not be loaded 
+
+
 ### 0.3.4 (February 8, 2016) &nbsp;<span class="fa fa-tags"></span>
 
  * [enhance] added scene length, in seconds, to output file (`-o`) for easier integration with `ffmpeg`/`libav`
