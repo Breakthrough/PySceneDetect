@@ -2,15 +2,16 @@
 PySceneDetect Changelog
 ==========================================================
 
+### 0.3.5 (August 2, 2016) &nbsp;<span class="fa fa-tags"></span>
 
-### 0.3.5 (August 2, 2016)
+ * [enhance]  initial release of portable build for Windows (64-bit only), including all dependencies
+ * [bugfix]   fix unrelated exception thrown when video could not be loaded
+ * [internal] fix variable name typo in API documentation
 
- * [bugfix]   fixed unrelated exception thrown when video could not be loaded 
 
+### 0.3.4 (February 8, 2016)
 
-### 0.3.4 (February 8, 2016) &nbsp;<span class="fa fa-tags"></span>
-
- * [enhance] added scene length, in seconds, to output file (`-o`) for easier integration with `ffmpeg`/`libav`
+ * [enhance] add scene length, in seconds, to output file (`-o`) for easier integration with `ffmpeg`/`libav`
  * [enhance] improved performance of content detection mode by caching intermediate HSV frames in memory (approx. 2x faster)
  * [enhance] show timecode values in terminal when using extended output (`-l`)
  * [feature] add fade bias option (`-fb` / `--fade-bias`) to command line (threshold mode only)
