@@ -4,11 +4,11 @@ PySceneDetect
 Video Scene Cut Detection and Analysis Tool
 ----------------------------------------------------------
 
-[![Documentation Status](https://readthedocs.org/projects/pyscenedetect/badge/?version=latest)](http://pyscenedetect.readthedocs.org/en/latest/?badge=latest) [![PyPI Status](https://img.shields.io/pypi/status/PySceneDetect.svg)](https://pypi.python.org/pypi/PySceneDetect/) [![PyPI Version](https://img.shields.io/pypi/v/PySceneDetect.svg)](https://pypi.python.org/pypi/PySceneDetect/)  [![PyPI](https://img.shields.io/pypi/dm/PySceneDetect.svg)](https://pypi.python.org/pypi/PySceneDetect)  [![PyPI License](https://img.shields.io/pypi/l/PySceneDetect.svg)](http://pyscenedetect.readthedocs.org/en/latest/copyright/)
+[![Documentation Status](https://readthedocs.org/projects/pyscenedetect/badge/?version=latest)](http://pyscenedetect.readthedocs.org/en/latest/?badge=latest) [![PyPI Status](https://img.shields.io/pypi/status/PySceneDetect.svg)](https://pypi.python.org/pypi/PySceneDetect/) [![PyPI Version](https://img.shields.io/pypi/v/PySceneDetect.svg)](https://pypi.python.org/pypi/PySceneDetect/)  [![PyPI License](https://img.shields.io/pypi/l/PySceneDetect.svg)](http://pyscenedetect.readthedocs.org/en/latest/copyright/)
 
 ### Latest Release: v0.3.5 (August 2, 2016)
 
-**New**: Releases now include a stand-alone/portable version, for Windows users without a Python environment, or for those who prefer a dedicated executable/release (*64-bit only!*).  Note that this is not an installer, so you need to add the folder to your `%PATH%` environment variable if you want to run the `scenedetect` command from any given working directory.
+**New**: Releases now include a stand-alone/portable version, for Windows users without a Python environment, or for those who prefer a dedicated executable/release (*64-bit only!*).  Grab it from [the Releases page](https://github.com/Breakthrough/PySceneDetect/releases) (standalone releases end in `-win64.zip`).  Note that this is not an installer, so you need to add the folder to your `%PATH%` environment variable if you want to run the `scenedetect` command from any given working directory.
 
 --------
 
