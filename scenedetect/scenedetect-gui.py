@@ -264,7 +264,7 @@ class StackWindow(Gtk.Window):
 
     def on_checkbutton_state_change(self, widget, name):
         if name == "2" and widget.get_active():
-            print 'on'
+            print('on')
         else:
             pass
 
