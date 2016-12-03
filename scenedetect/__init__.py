@@ -210,7 +210,7 @@ def detect_scenes(cap, scene_list, detector_list, stats_writer = None,
     # If start_frame is set, we drop the required number of frames first.
     # (seeking doesn't work very well, if at all, with OpenCV...)
     while (frames_read < start_frame):
-        (rv, im) = cap.read()
+        rv = cap.grab()
         frames_read += 1
 
     stats_file_keys = []
@@ -224,7 +224,7 @@ def detect_scenes(cap, scene_list, detector_list, stats_writer = None,
         # If frameskip is set, we drop the required number of frames first.
         if frame_skip > 0:
             for i in range(frame_skip):
-                (rv, im) = cap.read()
+                rv = cap.grab()
                 if not rv:
                     break
                 frames_read += 1
