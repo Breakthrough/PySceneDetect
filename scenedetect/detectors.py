@@ -310,6 +310,73 @@ class ContentDetector(SceneDetector):
         return
 
 
+class MotionDetector(SceneDetector):
+    """Detects motion events in scenes containing a static background.
+
+    Uses background subtraction followed by noise removal (via morphological
+    opening) to generate a frame score compared against the set threshold.
+
+    Attributes:
+        threshold:  floating point value compared to each frame's score, which
+            represents average intensity change per pixel (lower values are
+            more sensitive to motion changes).  Default 0.5, must be > 0.0.
+        num_frames_post_scene:  Number of frames to include in each motion
+            event after the frame score falls below the threshold, adding any
+            subsequent motion events to the same scene.
+        kernel_size:  Size of morphological opening kernel for noise removal.
+            Default value is 3 for standard-definition videos, higher values
+            may be required for HD.  Must be an odd integer >= 3.
+    """
+    def __init__(self, threshold = 0.50, num_frames_post_scene = 30,
+                 kernel_size = 3):
+        """Initializes motion-based scene detector object."""
+        super(MotionDetector, self).__init__()
+        self.threshold = float(threshold)
+        self.num_frames_post_scene = int(num_frames_post_scene)
+        self.kernel_size = int(kernel_size)
+
+
+        self.bg_subtractor = cv2.createBackgroundSubtractorMOG2( 
+            detectShadows = False )
+
+        self.last_frame_score = 0.0
+
+        self.in_motion_event = False
+        self.first_motion_frame_index = -1
+        self.last_motion_frame_index = -1
+        return
+
+    def process_frame(self, frame_num, frame_img, frame_metrics, scene_list):
+
+        # Value to return indiciating if a scene cut was found or not.
+        cut_detected = False
+
+        frame_grayscale = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        masked_frame = self.bg_subtractor.apply(frame_grayscale)
+
+        kernel = np.ones((self.kernel_size, self.kernel_size), np.uint8)
+        filtered_frame = cv2.morphologyEx(fgmask, cv2.MORPH_OPEN, kernel)
+
+        frame_score = np.sum(filtered_frame) / float( 
+            filtered_frame.shape[0] * filtered_frame.shape[1] )
+
+        return cut_detected
+
+    def post_process(self, scene_list):
+        """Writes the last scene if the video ends while in a motion event.
+        """
+
+        # If the last fade detected was a fade out, we add a corresponding new
+        # scene break to indicate the end of the scene.  This is only done for
+        # fade-outs, as a scene cut is already added when a fade-in is found.
+
+        if self.in_motion_event:
+            # Write new scene based on first and last motion event frames.
+            pass
+        return self.in_motion_event
+
+
+
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 #                                                                             #
 #          Detection Methods & Algorithms Planned or In Development           #
