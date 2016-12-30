@@ -84,15 +84,16 @@ def detect_scenes_file(path, scene_list, detector_list, stats_writer = None,
         See detect_scenes(..) function documentation for details of other args.
 
     Returns:
-        Tuple containing (video_fps, frames_read), where video_fps is a float
-        of the video file's framerate, and frames_read is a positive, integer
-        number of frames read from the video file.  Both values are set to -1
-        if the file could not be opened.
-
+        Tuple containing (video_fps, frames_read, frames_processed), where
+        video_fps is a float of the video file's framerate, frames_read is a
+        positive, integer number of frames read from the video file, and
+        frames_processed is the actual number of frames used.  All values
+        are set to -1 if the file could not be opened.
     """
 
     cap = cv2.VideoCapture()
     frames_read = -1
+    frames_processed = -1
     video_fps = -1
     if not timecode_list:
         timecode_list = [0, 0, 0]
@@ -139,14 +140,14 @@ def detect_scenes_file(path, scene_list, detector_list, stats_writer = None,
         start_frame, end_frame, duration_frames = frames_list
 
     # Perform scene detection on cap object (modifies scene_list).
-    frames_read = detect_scenes(cap, scene_list, detector_list, stats_writer,
-                                downscale_factor, frame_skip, quiet_mode,
-                                perf_update_rate, save_images, file_name,
-                                start_frame, end_frame, duration_frames)
+    frames_read, frames_processed = detect_scenes(
+        cap, scene_list, detector_list, stats_writer, downscale_factor,
+        frame_skip, quiet_mode, perf_update_rate, save_images, file_name,
+        start_frame, end_frame, duration_frames)
 
-    # Cleanup and return number of frames we read.
+    # Cleanup and return number of frames we read/processed.
     cap.release()
-    return (video_fps, frames_read)
+    return (video_fps, frames_read, frames_processed)
 
 
 def detect_scenes(cap, scene_list, detector_list, stats_writer = None,
@@ -185,9 +186,11 @@ def detect_scenes(cap, scene_list, detector_list, stats_writer = None,
             overrides end_frame if the two values are conflicting.
 
     Returns:
-        Unsigned, integer number of frames read from the passed cap object.
+        Tuple of integers of number of frames read, and number of frames
+        actually processed/used for scene detection.
     """
     frames_read = 0
+    frames_processed = 0
     frame_metrics = {}
     last_frame = None       # Holds previous frame if needed for save_images.
 
@@ -251,6 +254,7 @@ def detect_scenes(cap, scene_list, detector_list, stats_writer = None,
                     [scenedetect.timecodes.frame_to_timecode(frames_read, video_fps)] +
                     [str(frame_metrics[frames_read][metric]) for metric in stats_file_keys])
         frames_read += 1
+        frames_processed += 1
         # periodically show processing speed/performance if requested
         if not quiet_mode and perf_show:
             curr_time = time.time()
@@ -274,7 +278,7 @@ def detect_scenes(cap, scene_list, detector_list, stats_writer = None,
 
     [detector.post_process(scene_list) for detector in detector_list]
     if start_frame > 0: frames_read = frames_read - start_frame
-    return frames_read
+    return (frames_read, frames_processed)
 
 
 def save_preview_images(image_path_prefix, frame_num, im_curr, im_last, num_scenes):
@@ -334,17 +338,17 @@ def main():
     timecode_list = [args.start_time, args.end_time, args.duration]
     # TODO: Large amount of arguments for below function, replace some with a
     #       dictionary of values after pre-processing the CLI args.
-    video_fps, frames_read = detect_scenes_file(
-                                path = args.input.name,
-                                scene_list = scene_list,
-                                detector_list = [detector],
-                                stats_writer = stats_writer,
-                                downscale_factor = args.downscale_factor,
-                                frame_skip = args.frame_skip,
-                                quiet_mode = args.quiet_mode,
-                                save_images = args.save_images,
-                                timecode_list = timecode_list
-                            )
+    video_fps, frames_read, frames_processed = detect_scenes_file(
+        path = args.input.name,
+        scene_list = scene_list,
+        detector_list = [detector],
+        stats_writer = stats_writer,
+        downscale_factor = args.downscale_factor,
+        frame_skip = args.frame_skip,
+        quiet_mode = args.quiet_mode,
+        save_images = args.save_images,
+        timecode_list = timecode_list
+    )
     elapsed_time = time.time() - start_time
     perf_fps = float(frames_read) / elapsed_time
 
@@ -363,10 +367,10 @@ def main():
     if frames_read >= 0:
         # Print performance (average framerate), and scene list if requested.
         if not args.quiet_mode:
-            print('[PySceneDetect] Processing complete, found %d scenes in video.' %
-                len(scene_list))
-            print('[PySceneDetect] Processed %d frames in %3.1f secs (avg. %3.1f FPS).' % (
-                frames_read, elapsed_time, perf_fps))
+            print('[PySceneDetect] Processing complete, found %d scenes in video.' % (
+                len(scene_list)))
+            print('[PySceneDetect] Processed %d / %d frames read in %3.1f secs (avg. %3.1f FPS).' % (
+                frames_processed, frames_read, elapsed_time, perf_fps))
             if len(scene_list) > 0:
                 if args.list_scenes:
                     print('[PySceneDetect] List of detected scenes:')
