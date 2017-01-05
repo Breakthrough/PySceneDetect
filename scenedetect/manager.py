@@ -46,26 +46,41 @@ import numpy
 
 class SceneManager(object):
 
-    def __init__(self, args):
+    def __init__(self, args, scene_detectors):
         self.scene_list = list()
-        self.detector_list = list()
+        self.args = args
+
+        # Load SceneDetector with proper arguments based on passed detector (-d).
+        self.detector = None
+        self.detection_method = args.detection_method.lower()
+        if not args.threshold:
+            args.threshold = 30.0 if self.detection_method == 'content' else 12
+        if (self.detection_method == 'content'):
+            self.detector = scene_detectors['content'](args.threshold, args.min_scene_len)
+        elif (self.detection_method == 'threshold'):
+            self.detector = scene_detectors['threshold'](
+                args.threshold, args.min_percent/100.0, args.min_scene_len,
+                block_size = args.block_size, fade_bias = args.fade_bias/100.0)
+        self.detector_list = [ self.detector ]
+
         self.cap = None
 
-        self.downscale_factor = 0
-        self.frame_skip = 0
-        self.save_images = False
+        self.downscale_factor = args.downscale_factor
+        self.frame_skip = args.frame_skip
+        self.save_images = args.save_images
         self.save_image_prefix = ''
 
-        self.start_frame = args.start_time
-        self.end_frame = args.end_time
-        self.duration_frames = args.duration
+        self.timecode_list = [args.start_time, args.end_time, args.duration]
+        #self.start_frame = args.start_time
+        #self.end_frame = args.end_time
+        #self.duration_frames = args.duration
 
         self.quiet_mode = args.quiet_mode
         self.perf_update_rate = -1
         
         self.stats_writer = None
-        #if args.stats_file:
-        #    self.stats_writer = csv.writer(args.stats_file)
+        if args.stats_file:
+            self.stats_writer = csv.writer(args.stats_file)
             
 
 

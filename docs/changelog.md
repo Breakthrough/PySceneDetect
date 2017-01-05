@@ -6,9 +6,9 @@ PySceneDetect Changelog
 
  * major release, includes new motion detection algorithm and updated internal structure to allow for sparse scene detection algorithms
  * [enhance]  speed improvement when using `--frameskip` option
- * [feature]  added new motion detection algorithm (`-d motion`) for extracting parts of a static scene that contain motion above a certain threshold (e.g. security camera footage)
- * [internal] changed scene time structure to allow for non-contiguous outputs, to support a wider variety of detection algorithms/methods (e.g. motion detection)
- * [internal] moved application state and shared objects to consistent interface
+ * [internal] moved application state and shared objects to a consistent interface (the `SceneManager` object) to greatly reduce the number of required arguments for certain API functions
+ * [WIP] [feature]  added new motion detection algorithm (`-d motion`) for extracting parts of a static scene that contain motion above a certain threshold (e.g. security camera footage)
+ * [WIP] [internal] changed scene time structure to allow for non-contiguous outputs, to support a wider variety of detection algorithms/methods (e.g. motion detection)
 
 
 ### 0.3.5 (August 2, 2016) &nbsp;<span class="fa fa-tags"></span>

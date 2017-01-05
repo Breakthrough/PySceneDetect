@@ -68,21 +68,17 @@ THE SOFTWARE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, EXPRESS OR IMPLIED.
 """ % __version__
 
 
-def detect_scenes_file(path, scene_list, detector_list, stats_writer = None,
-                  downscale_factor = 0, frame_skip = 0, quiet_mode = False,
-                  perf_update_rate = -1, save_images = False,
-                  timecode_list = None):
+def detect_scenes_file(path, scene_manager):
     """Performs scene detection on passed file using given scene detectors.
 
-    Essentially wraps detect_scenes while handling all OpenCV interaction.
-    For descriptions of arguments that are just passed through, see the
-    detect_scenes(..) function documentation.
+    Essentially wraps detect_scenes() while handling all OpenCV interaction.
+    For descriptions of arguments and return values that are just passed to
+    this function, see the detect_scenes() documentation directly.
 
     Args:
         path:  A string containing the filename of the video to open.
-        scene_list:  List to append frame numbers of any detected scene cuts.
-        detector_list:  List of scene detection algorithms to run on the video.
-        See detect_scenes(..) function documentation for details of other args.
+        scene_manager:  SceneManager interface to scene/detector list and other
+            parts of the application state (including user-defined options).
 
     Returns:
         Tuple containing (video_fps, frames_read, frames_processed), where
@@ -96,54 +92,54 @@ def detect_scenes_file(path, scene_list, detector_list, stats_writer = None,
     frames_read = -1
     frames_processed = -1
     video_fps = -1
-    if not timecode_list:
-        timecode_list = [0, 0, 0]
+    if not scene_manager.timecode_list:
+        scene_manager.timecode_list = [0, 0, 0]
 
     # Attempt to open the passed input (video) file.
     cap.open(path)
     file_name = os.path.split(path)[1]
     if not cap.isOpened():
-        if not quiet_mode:
-            print('[PySceneDetect] FATAL ERROR - could not open video %s.' % 
-                path)
+        if not scene_manager.quiet_mode:
+            print('[PySceneDetect] FATAL ERROR - could not open video %s.' % path)
         return (video_fps, frames_read)
-    elif not quiet_mode:
+    elif not scene_manager.quiet_mode:
         print('[PySceneDetect] Parsing video %s...' % file_name)
 
     # Print video parameters (resolution, FPS, etc...)
     video_width  = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
     video_height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
     video_fps    = cap.get(cv2.CAP_PROP_FPS)
-    if not quiet_mode:
+    if not scene_manager.quiet_mode:
         print('[PySceneDetect] Video Resolution / Framerate: %d x %d / %2.3f FPS' % (
-            video_width, video_height, video_fps ))
-        if downscale_factor >= 2:
+            video_width, video_height, video_fps))
+        if scene_manager.downscale_factor >= 2:
             print('[PySceneDetect] Subsampling Enabled (%dx, Resolution = %d x %d)' % (
-                downscale_factor, video_width / downscale_factor, video_height / downscale_factor ))
+                scene_manager.downscale_factor,
+                video_width / scene_manager.downscale_factor,
+                video_height / scene_manager.downscale_factor))
         print('Verify that the above parameters are correct'
-            ' (especially framerate, use --force-fps to correct if required).')
+              ' (especially framerate, use --force-fps to correct if required).')
 
     # Convert timecode_list to absolute frames for detect_scenes() function.
     frames_list = []
-    for tc in timecode_list:
-        if isinstance(tc, int):
-            frames_list.append(tc)
-        elif isinstance(tc, float):
-            frames_list.append(int(tc * video_fps))
-        elif isinstance(tc, list) and len(tc) == 3:
-            secs = float(tc[0] * 60 * 60) + float(tc[1] * 60) + float(tc[2])
+    for timecode in scene_manager.timecode_list:
+        if isinstance(timecode, int):
+            frames_list.append(timecode)
+        elif isinstance(timecode, float):
+            frames_list.append(int(timecode * video_fps))
+        elif isinstance(timecode, list) and len(timecode) == 3:
+            secs = float(timecode[0] * 60 * 60) + float(timecode[1] * 60) + float(timecode[2])
             frames_list.append(int(secs * video_fps))
         else:
             frames_list.append(0)
 
     start_frame, end_frame, duration_frames = 0, 0, 0
     if len(frames_list) == 3:
-        start_frame, end_frame, duration_frames = frames_list
+        start_frame, end_frame, duration_frames = (
+            frames_list[0], frames_list[1], frames_list[2])
 
     # Perform scene detection on cap object (modifies scene_list).
-    frames_read, frames_processed = detect_scenes(
-        cap, scene_list, detector_list, stats_writer, downscale_factor,
-        frame_skip, quiet_mode, perf_update_rate, save_images, file_name,
+    frames_read, frames_processed = detect_scenes(cap, scene_manager, file_name,
         start_frame, end_frame, duration_frames)
 
     # Cleanup and return number of frames we read/processed.
@@ -151,35 +147,16 @@ def detect_scenes_file(path, scene_list, detector_list, stats_writer = None,
     return (video_fps, frames_read, frames_processed)
 
 
-def detect_scenes(cap, scene_list, detector_list, stats_writer = None,
-                  downscale_factor = 0, frame_skip = 0, quiet_mode = False,
-                  perf_update_rate = -1, save_images = False,
-                  image_path_prefix = '', start_frame = 0, end_frame = 0,
-                  duration_frames = 0):
+def detect_scenes(cap, scene_manager, image_path_prefix = '', start_frame = 0,
+                  end_frame = 0, duration_frames = 0):
     """Performs scene detection based on passed video and scene detectors.
 
     Args:
         cap:  An open cv2.VideoCapture object that is assumed to be at the
             first frame.  Frames are read until cap.read() returns False, and
             the cap object remains open (it can be closed with cap.release()).
-        scene_list:  List to append frame numbers of any detected scene cuts.
-        detector_list:  List of scene detection algorithms to run on the video.
-        stats_writer:  Optional. Handle to a csv.writer object to output the
-            frame metrics computed by each detection algorithm, in CSV format.
-        quiet_mode:  Optional. Suppresses any console output (inluding errors).
-        perf_update_rate:  Optional. Number of seconds between which to
-            continually prints updates with the current processing speed.
-        downscale_factor:  Optional. Indicates at what factor each frame will
-            be downscaled/reduced before processing (improves performance).
-            For example, if downscale_factor = 2, and the input is 1024 x 400,
-            each frame will be reduced to 512 x 200 ( = 1024/2 x 400/2).
-            Integer number >= 2, otherwise disabled (i.e. scale = 1).
-        frame_skip:  Optional.  Number of frames to skip during each iteration,
-            useful for higher FPS videos to improve performance.
-            Unsigned integer number larger than zero, otherwise disabled.
-        save_images:  Optional.  If True the first and last frame of each scene
-            is saved as an image in the current working directory, with the
-            same filename as the original video and scene/frame # appended.
+        scene_manager:  SceneManager interface to scene/detector list and other
+            parts of the application state (including user-defined options).
         image_path_prefix:  Optional.  Filename/path to write images to.
         start_frame:  Optional.  Integer frame number to start processing at.
         end_frame:  Optional.  Integer frame number to stop processing at.
@@ -199,13 +176,15 @@ def detect_scenes(cap, scene_list, detector_list, stats_writer = None,
     perf_last_update_time = time.time()
     perf_last_framecount = 0
     perf_curr_rate = 0
-    if perf_update_rate > 0:
-        perf_update_rate = float(perf_update_rate)
+    if scene_manager.perf_update_rate > 0:
+        perf_update_rate = float(scene_manager.perf_update_rate)
     else:
         perf_show = False
 
-    if not downscale_factor >= 2: downscale_factor = 0
-    if not frame_skip > 0: frame_skip = 0
+    if not scene_manager.downscale_factor >= 2:
+        scene_manager.downscale_factor = 0
+    if not scene_manager.frame_skip > 0:
+        scene_manager.frame_skip = 0
 
     # set the end frame if duration_frames is set (overrides end_frame if set)
     if duration_frames > 0:
@@ -226,8 +205,8 @@ def detect_scenes(cap, scene_list, detector_list, stats_writer = None,
             break
 
         # If frameskip is set, we drop the required number of frames first.
-        if frame_skip > 0:
-            for i in range(frame_skip):
+        if scene_manager.frame_skip > 0:
+            for i in range(scene_manager.frame_skip):
                 rv = cap.grab()
                 if not rv:
                     break
@@ -239,25 +218,26 @@ def detect_scenes(cap, scene_list, detector_list, stats_writer = None,
         if not frames_read in frame_metrics:
             frame_metrics[frames_read] = dict()
         im_scaled = im
-        if downscale_factor > 0:
-            im_scaled = im[::downscale_factor,::downscale_factor,:]
+        if scene_manager.downscale_factor > 0:
+            im_scaled = im[::scene_manager.downscale_factor,::scene_manager.downscale_factor,:]
         cut_found = False
-        for detector in detector_list:
+        for detector in scene_manager.detector_list:
             cut_found = detector.process_frame(frames_read, im_scaled,
-                frame_metrics, scene_list) or cut_found
-        if stats_writer:
+                frame_metrics, scene_manager.scene_list) or cut_found
+        if scene_manager.stats_writer:
             if not len(stats_file_keys) > 0:
                 stats_file_keys = frame_metrics[frames_read].keys()
                 if len(stats_file_keys) > 0:
-                    stats_writer.writerow(['Frame Number'] + ['Timecode'] + stats_file_keys)
+                    scene_manager.stats_writer.writerow(
+                        ['Frame Number'] + ['Timecode'] + stats_file_keys)
             if len(stats_file_keys) > 0:
-                stats_writer.writerow([str(frames_read)] +
+                scene_manager.stats_writer.writerow([str(frames_read)] +
                     [scenedetect.timecodes.frame_to_timecode(frames_read, video_fps)] +
                     [str(frame_metrics[frames_read][metric]) for metric in stats_file_keys])
         frames_read += 1
         frames_processed += 1
         # periodically show processing speed/performance if requested
-        if not quiet_mode and perf_show:
+        if not scene_manager.quiet_mode and perf_show:
             curr_time = time.time()
             if (curr_time - perf_last_update_time) > perf_update_rate:
                 delta_t = curr_time - perf_last_update_time
@@ -270,15 +250,16 @@ def detect_scenes(cap, scene_list, detector_list, stats_writer = None,
                 perf_last_framecount = frames_read
                 print("[PySceneDetect] Current Processing Speed: %3.1f FPS" % perf_curr_rate)
         # save images on scene cuts/breaks if requested (scaled if using -df)
-        if save_images and cut_found:
+        if scene_manager.save_images and cut_found:
             save_preview_images(
-                image_path_prefix, frames_read, im, last_frame, len(scene_list))
+                image_path_prefix, frames_read, im, last_frame, len(scene_manager.scene_list))
 
         del last_frame
         last_frame = im.copy()
 
-    [detector.post_process(scene_list) for detector in detector_list]
-    if start_frame > 0: frames_read = frames_read - start_frame
+    [detector.post_process(scene_manager.scene_list) for detector in scene_manager.detector_list]
+    if start_frame > 0:
+        frames_read = frames_read - start_frame
     return (frames_read, frames_processed)
 
 
@@ -307,62 +288,35 @@ def main():
     Handles high-level interfacing of video and scene detection / output.
     """
 
-    # Parse CLI arguments.
+    # Load available detection modes and timecode formats.
     scene_detectors = scenedetect.detectors.get_available()
     timecode_formats = scenedetect.timecodes.get_available()
+    # Parse CLI arguments.
     args = scenedetect.cli.get_cli_parser(
         scene_detectors.keys(), timecode_formats.keys()).parse_args()
-    smgr = scenedetect.manager.SceneManager(args)
-
-    # Load SceneDetector with proper arguments based on passed detector (-d).
-    # TODO: Add minimum scene length as a variable argument.
-    detection_method = args.detection_method.lower()
-    detector = None
-    
-    if not args.threshold:
-        args.threshold = 30.0 if detection_method == 'content' else 12
-
-    if (detection_method == 'content'):
-        detector = scene_detectors['content'](args.threshold, args.min_scene_len)
-    elif (detection_method == 'threshold'):
-        detector = scene_detectors['threshold'](
-            args.threshold, args.min_percent/100.0, args.min_scene_len,
-            block_size = args.block_size, fade_bias = args.fade_bias/100.0)
-
-    # Load CSV writer if required.
-    stats_writer = csv.writer(args.stats_file) if args.stats_file else None
+    # Use above to initialize scene manager.
+    smgr = scenedetect.manager.SceneManager(args, scene_detectors)
     
     # Perform scene detection using specified mode.
     start_time = time.time()
     if not args.quiet_mode:
-        print('[PySceneDetect] Detecting scenes (%s mode)...' % detection_method)
-    scene_list = list()
-    timecode_list = [args.start_time, args.end_time, args.duration]
+        print('[PySceneDetect] Detecting scenes (%s mode)...' % smgr.detection_method)
     # TODO: Large amount of arguments for below function, replace some with a
     #       dictionary of values after pre-processing the CLI args.
     video_fps, frames_read, frames_processed = detect_scenes_file(
-        path = args.input.name,
-        scene_list = scene_list,
-        detector_list = [detector],
-        stats_writer = stats_writer,
-        downscale_factor = args.downscale_factor,
-        frame_skip = args.frame_skip,
-        quiet_mode = args.quiet_mode,
-        save_images = args.save_images,
-        timecode_list = timecode_list
-    )
+        path = args.input.name, scene_manager = smgr)
     elapsed_time = time.time() - start_time
     perf_fps = float(frames_read) / elapsed_time
 
     # Create new list with scene cuts in milliseconds (original uses exact
     # frame numbers) based on the video's framerate, and then timecodes.
-    scene_list_msec = [(1000.0 * x) / float(video_fps) for x in scene_list]
+    scene_list_msec = [(1000.0 * x) / float(video_fps) for x in smgr.scene_list]
     scene_list_tc = [scenedetect.timecodes.get_string(x) for x in scene_list_msec]
     # Create new lists with scene cuts in seconds, and the length of each scene.
-    scene_start_sec = [(1.0 * x) / float(video_fps) for x in scene_list]
+    scene_start_sec = [(1.0 * x) / float(video_fps) for x in smgr.scene_list]
     scene_len_sec = []
-    if len(scene_list) > 0:
-        scene_len_sec = scene_list + [frames_read]
+    if len(smgr.scene_list) > 0:
+        scene_len_sec = smgr.scene_list + [frames_read]
         scene_len_sec = [(1.0 * x) / float(video_fps) for x in scene_len_sec]
         scene_len_sec = [(y - x) for x, y in zip(scene_len_sec[:-1], scene_len_sec[1:])]
 
@@ -370,16 +324,16 @@ def main():
         # Print performance (average framerate), and scene list if requested.
         if not args.quiet_mode:
             print('[PySceneDetect] Processing complete, found %d scenes in video.' % (
-                len(scene_list)))
+                len(smgr.scene_list)))
             print('[PySceneDetect] Processed %d / %d frames read in %3.1f secs (avg. %3.1f FPS).' % (
                 frames_processed, frames_read, elapsed_time, perf_fps))
-            if len(scene_list) > 0:
+            if len(smgr.scene_list) > 0:
                 if args.list_scenes:
                     print('[PySceneDetect] List of detected scenes:')
                     print ('-------------------------------------------')
                     print ('  Scene #  |   Frame #   |    Timecode ')
                     print ('-------------------------------------------')
-                    for scene_idx, frame_num in enumerate(scene_list):
+                    for scene_idx, frame_num in enumerate(smgr.scene_list):
                         print ('    %3d    |  %9d  |  %s' % (
                             scene_idx+1, frame_num, scene_list_tc[scene_idx]))
                     print ('-------------------------------------------')
@@ -389,20 +343,22 @@ def main():
         print(','.join(scene_list_tc))
 
         # Output timecodes to CSV file if required (and scenes were found).
-        if args.output and len(scene_list) > 0:
+        if args.output and len(smgr.scene_list) > 0:
             csv_writer = csv.writer(args.output)
             # Output timecode scene list
             csv_writer.writerow(scene_list_tc)
             # Output detailed, human-readable scene list.
             csv_writer.writerow(["Scene Number", "Frame Number (Start)",
                                  "Timecode", "Start Time (seconds)", "Length (seconds)"])
-            for i, scene in enumerate(scene_list):
-                csv_writer.writerow([str(i+1), str(scene_list[i]),
+            for i, scene in enumerate(smgr.scene_list):
+                csv_writer.writerow([str(i+1), str(smgr.scene_list[i]),
                                      scene_list_tc[i], str(scene_start_sec[i]),
                                      str(scene_len_sec[i])])
 
     # Cleanup, release all objects and close file handles.
-    if args.stats_file: args.stats_file.close()
-    if args.output: args.output.close()
+    if args.stats_file:
+        args.stats_file.close()
+    if args.output:
+        args.output.close()
     return
 
