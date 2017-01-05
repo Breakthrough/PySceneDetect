@@ -181,11 +181,6 @@ def detect_scenes(cap, scene_manager, image_path_prefix = '', start_frame = 0,
     else:
         perf_show = False
 
-    if not scene_manager.downscale_factor >= 2:
-        scene_manager.downscale_factor = 0
-    if not scene_manager.frame_skip > 0:
-        scene_manager.frame_skip = 0
-
     # set the end frame if duration_frames is set (overrides end_frame if set)
     if duration_frames > 0:
         end_frame = start_frame + duration_frames
@@ -193,7 +188,7 @@ def detect_scenes(cap, scene_manager, image_path_prefix = '', start_frame = 0,
     # If start_frame is set, we drop the required number of frames first.
     # (seeking doesn't work very well, if at all, with OpenCV...)
     while (frames_read < start_frame):
-        rv = cap.grab()
+        ret_val = cap.grab()
         frames_read += 1
 
     stats_file_keys = []
@@ -207,19 +202,19 @@ def detect_scenes(cap, scene_manager, image_path_prefix = '', start_frame = 0,
         # If frameskip is set, we drop the required number of frames first.
         if scene_manager.frame_skip > 0:
             for i in range(scene_manager.frame_skip):
-                rv = cap.grab()
-                if not rv:
+                ret_val = cap.grab()
+                if not ret_val:
                     break
                 frames_read += 1
 
-        (rv, im) = cap.read()
-        if not rv:
+        (ret_val, im_cap) = cap.read()
+        if not ret_val:
             break
         if not frames_read in frame_metrics:
             frame_metrics[frames_read] = dict()
-        im_scaled = im
+        im_scaled = im_cap
         if scene_manager.downscale_factor > 0:
-            im_scaled = im[::scene_manager.downscale_factor,::scene_manager.downscale_factor,:]
+            im_scaled = im_cap[::scene_manager.downscale_factor,::scene_manager.downscale_factor,:]
         cut_found = False
         for detector in scene_manager.detector_list:
             cut_found = detector.process_frame(frames_read, im_scaled,
@@ -252,10 +247,10 @@ def detect_scenes(cap, scene_manager, image_path_prefix = '', start_frame = 0,
         # save images on scene cuts/breaks if requested (scaled if using -df)
         if scene_manager.save_images and cut_found:
             save_preview_images(
-                image_path_prefix, frames_read, im, last_frame, len(scene_manager.scene_list))
+                image_path_prefix, frames_read, im_cap, last_frame, len(scene_manager.scene_list))
 
         del last_frame
-        last_frame = im.copy()
+        last_frame = im_cap.copy()
 
     [detector.post_process(scene_manager.scene_list) for detector in scene_manager.detector_list]
     if start_frame > 0:

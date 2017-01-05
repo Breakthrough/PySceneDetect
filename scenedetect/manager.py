@@ -63,10 +63,14 @@ class SceneManager(object):
                 block_size = args.block_size, fade_bias = args.fade_bias/100.0)
         self.detector_list = [ self.detector ]
 
-        self.cap = None
-
         self.downscale_factor = args.downscale_factor
+        if self.downscale_factor < 2:
+            self.downscale_factor = 0
+
         self.frame_skip = args.frame_skip
+        if self.frame_skip <= 0:
+            self.frame_skip = 0
+
         self.save_images = args.save_images
         self.save_image_prefix = ''
 
@@ -81,6 +85,8 @@ class SceneManager(object):
         self.stats_writer = None
         if args.stats_file:
             self.stats_writer = csv.writer(args.stats_file)
+
+        self.cap = None
             
 
 
