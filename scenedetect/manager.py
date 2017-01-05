@@ -9,7 +9,7 @@
 # consistent interface to the application state, including the current
 # scene list, user-defined options, and any shared objects.
 #
-# Copyright (C) 2012-2016 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2012-2017 Brandon Castellano <http://www.bcastell.com>.
 #
 # PySceneDetect is licensed under the BSD 2-Clause License; see the
 # included LICENSE file or visit one of the following pages for details:

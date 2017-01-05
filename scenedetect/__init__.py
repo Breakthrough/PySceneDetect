@@ -7,7 +7,7 @@
 #
 # This file contains all code for the main `scenedetect` module. 
 #
-# Copyright (C) 2012-2016 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2012-2017 Brandon Castellano <http://www.bcastell.com>.
 #
 # PySceneDetect is licensed under the BSD 2-Clause License; see the
 # included LICENSE file or visit one of the following pages for details:
@@ -50,21 +50,20 @@ import numpy
 __version__ = 'v0.4-dev'
 
 # About & copyright message string shown for the -v / --version CLI argument.
-ABOUT_STRING   = """PySceneDetect %s
------------------------------------------------
-https://github.com/Breakthrough/PySceneDetect
-http://www.bcastell.com/projects/pyscenedetect
------------------------------------------------
-Copyright (C) 2012-2016 Brandon Castellano
-License: BSD 2-Clause (see the included LICENSE file for details,
-  or visit < http://www.bcastell.com/projects/pyscenedetect >).
+ABOUT_STRING   = """----------------------------------------------------
+PySceneDetect %s
+----------------------------------------------------
+Site/Updates: https://github.com/Breakthrough/PySceneDetect/
+Documentation: http://pyscenedetect.readthedocs.org/
 
+Copyright (C) 2012-2017 Brandon Castellano. All rights reserved.
+
+PySceneDetect is released under the BSD 2-Clause license. See the
+included LICENSE file or visit the PySceneDetect website for details.
 This software uses the following third-party components:
-  > NumPy [Copyright (C) 2005-2013, Numpy Developers]
-  > OpenCV [Copyright (C) 2016, Itseez]
-
+  > NumPy [Copyright (C) 2005-2016, Numpy Developers]
+  > OpenCV [Copyright (C) 2017, Itseez]
 THE SOFTWARE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, EXPRESS OR IMPLIED.
-
 """ % __version__
 
 

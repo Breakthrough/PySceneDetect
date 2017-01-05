@@ -8,7 +8,7 @@
 # other detection method objects are based, which can be used as templates for
 # implementing custom/application-specific scene detection methods.
 #
-# Copyright (C) 2012-2016 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2012-2017 Brandon Castellano <http://www.bcastell.com>.
 #
 # PySceneDetect is licensed under the BSD 2-Clause License; see the
 # included LICENSE file or visit one of the following pages for details:
@@ -339,7 +339,7 @@ class MotionDetector(SceneDetector):
             # Set kernel size when process_frame first runs based on
             # video resolution (480p = 3x3, 720p = 5x5, 1080p = 7x7).
             pass
-            
+
         self.bg_subtractor = cv2.createBackgroundSubtractorMOG2( 
             detectShadows = False )
 

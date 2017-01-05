@@ -6,7 +6,7 @@
                 PySceneDetect License (BSD 2-Clause)
           < http://www.bcastell.com/projects/pyscenedetect >
 
-Copyright (C) 2012-2016, Brandon Castellano.
+Copyright (C) 2012-2017, Brandon Castellano.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -41,11 +41,11 @@ This section contains the license agreements for all third-party software librar
 
 ### NumPy License
 
- - Copyright (C) 2005-2013, NumPy Developers.
+ - Copyright (C) 2005-2016, NumPy Developers.
  - URL: <a href="http://www.numpy.org/license.html" alt="NumPy License">http://www.numpy.org/license.html</a>
 
 ```md
-Copyright (C) 2005-2013, NumPy Developers.
+Copyright (C) 2005-2016, NumPy Developers.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -76,7 +76,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ### OpenCV License
 
- - Copyright (C) 2016, Itseez.
+ - Copyright (C) 2017, Itseez.
  - URL: <a href="http://opencv.org/license.html" alt="OpenCV License">http://opencv.org/license.html</a>
 
 ```md
