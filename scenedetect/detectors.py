@@ -324,18 +324,22 @@ class MotionDetector(SceneDetector):
             event after the frame score falls below the threshold, adding any
             subsequent motion events to the same scene.
         kernel_size:  Size of morphological opening kernel for noise removal.
-            Default value is 3 for standard-definition videos, higher values
-            may be required for HD.  Must be an odd integer >= 3.
+            Setting to -1 (default) will auto-compute based on video resolution
+            (typically 3 for SD, 5-7 for HD). Must be an odd integer > 1.
     """
     def __init__(self, threshold = 0.50, num_frames_post_scene = 30,
-                 kernel_size = 3):
+                 kernel_size = -1):
         """Initializes motion-based scene detector object."""
         super(MotionDetector, self).__init__()
         self.threshold = float(threshold)
         self.num_frames_post_scene = int(num_frames_post_scene)
+
         self.kernel_size = int(kernel_size)
-
-
+        if self.kernel_size < 0:
+            # Set kernel size when process_frame first runs based on
+            # video resolution (480p = 3x3, 720p = 5x5, 1080p = 7x7).
+            pass
+            
         self.bg_subtractor = cv2.createBackgroundSubtractorMOG2( 
             detectShadows = False )
 
@@ -354,10 +358,10 @@ class MotionDetector(SceneDetector):
         frame_grayscale = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         masked_frame = self.bg_subtractor.apply(frame_grayscale)
 
-        kernel = np.ones((self.kernel_size, self.kernel_size), np.uint8)
+        kernel = numpy.ones((self.kernel_size, self.kernel_size), numpy.uint8)
         filtered_frame = cv2.morphologyEx(fgmask, cv2.MORPH_OPEN, kernel)
 
-        frame_score = np.sum(filtered_frame) / float( 
+        frame_score = numpy.sum(filtered_frame) / float( 
             filtered_frame.shape[0] * filtered_frame.shape[1] )
 
         return cut_detected

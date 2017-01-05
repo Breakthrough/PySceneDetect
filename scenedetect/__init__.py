@@ -38,6 +38,7 @@ import csv
 import scenedetect.platform
 import scenedetect.detectors
 import scenedetect.timecodes
+import scenedetect.manager
 import scenedetect.cli
 
 # Third-Party Library Imports
@@ -311,6 +312,7 @@ def main():
     timecode_formats = scenedetect.timecodes.get_available()
     args = scenedetect.cli.get_cli_parser(
         scene_detectors.keys(), timecode_formats.keys()).parse_args()
+    smgr = scenedetect.manager.SceneManager(args)
 
     # Load SceneDetector with proper arguments based on passed detector (-d).
     # TODO: Add minimum scene length as a variable argument.
