@@ -73,3 +73,10 @@ Now the missing scene (scene number 18, in this case) has been detected properly
 
 ## Splitting/Cutting Video into Clips
 
+
+The recommended tool for splitting a video into clips is `mkvmerge` (or `mkvtoolnix-gui`).  Once you have mkvmerge, you can use the comma-separated timecode list PySceneDetect outputs with the `--split` option:
+
+    mkvmerge -o output_scene.mkv --split timecodes:00:45:00.000,01:20:00.250,[...] input_file.avi
+
+See [this section](https://mkvtoolnix.download/doc/mkvmerge.html#mkvmerge.description.split) of the mkvmerge docs for more information on the `--split` flag.  If using `mkvtoolnix-gui`, simply add the video in the input section, and in the "File Splitting" options, select the timecode option, and copy-and-paste the timecode list from the PySceneDetect output.  This will split the output video at those timecodes during muxing.
+
