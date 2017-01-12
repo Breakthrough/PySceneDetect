@@ -6,21 +6,25 @@ Video Scene Cut Detection and Analysis Tool
 
 [![Documentation Status](https://readthedocs.org/projects/pyscenedetect/badge/?version=latest)](http://pyscenedetect.readthedocs.org/en/latest/?badge=latest) [![PyPI Status](https://img.shields.io/pypi/status/PySceneDetect.svg)](https://pypi.python.org/pypi/PySceneDetect/) [![PyPI Version](https://img.shields.io/pypi/v/PySceneDetect.svg)](https://pypi.python.org/pypi/PySceneDetect/)  [![PyPI License](https://img.shields.io/pypi/l/PySceneDetect.svg)](http://pyscenedetect.readthedocs.org/en/latest/copyright/)
 
-### Latest Release: v0.3.5 (August 2, 2016)
 
-**New**: Releases now include a stand-alone/portable version, for Windows users without a Python environment, or for those who prefer a dedicated executable/release (*64-bit only!*).  Grab it from [the Releases page](https://github.com/Breakthrough/PySceneDetect/releases) (standalone releases end in `-win64.zip`).  Note that this is not an installer, so you need to add the folder to your `%PATH%` environment variable if you want to run the `scenedetect` command from any given working directory.
+### Latest Release: v0.3.6 (January 12, 2016)
+
+**New**: There is now an installer for Windows that automatically installs all dependencies and the `scenedetect` command system wide (64-bit only currently).  This is the recommended installation method for Windows users now, and it can be found on [the Releases page](https://github.com/Breakthrough/PySceneDetect/releases).  The Windows builds do not require an existing Python environment, nor any other prerequisites.  There is also a portable .zip version available.
+
+It is still recommended that both Linux and Mac users download the source distribution, following the installation instructions below.  
 
 --------
 
-Quick install; requires `numpy` and Python OpenCV `cv2` module, see [getting started guide](http://pyscenedetect.readthedocs.org/en/latest/examples/usage/) after install:
+Quick install; requires `numpy` and Python OpenCV `cv2` module, see [getting started guide](http://pyscenedetect.readthedocs.org/en/latest/examples/usage/) after install.  After installing the prerequisites, download the latest source distribution from [the Releases page](https://github.com/Breakthrough/PySceneDetect/releases), extract the archive, and in a terminal/command prompt in the location of the extracted files, run:
 
-    sudo pip install pyscenedetect
+    sudo python setup.py install
 
-Updating existing install (the last option makes sure *only* PySceneDetect is updated if you installed the other modules without pip):
+To test if you have the required prerequisites, open a `python` prompt, and run the following:
 
-    sudo pip install pyscenedetect --upgrade --no-dependencies
+    import numpy
+    import cv2
 
-See [the new `USAGE.md` file](https://github.com/Breakthrough/PySceneDetect/blob/master/USAGE.md) for details on the new detection modes, default values/thresholds to try, and how to effectively choose the optimal detection parameters.  Full documentation for PySceneDetect can be found on Readthedocs at http://pyscenedetect.readthedocs.org/
+If both of those commands execute without any problems, you should be able to install PySceneDetect without any issues.  See [the new `USAGE.md` file](https://github.com/Breakthrough/PySceneDetect/blob/master/USAGE.md) for details on the new detection modes, default values/thresholds to try, and how to effectively choose the optimal detection parameters.  Full documentation for PySceneDetect can be found on Readthedocs at http://pyscenedetect.readthedocs.org/
 
 ----------------------------------------------------------
 
@@ -36,13 +40,13 @@ Note that PySceneDetect is currently in beta; see Current Features & Roadmap bel
 Download & Installation
 ----------------------------------------------------------
 
-**Downloading:** The latest version of PySceneDetect (`v0.3.5`) can be [downloaded here](https://github.com/Breakthrough/PySceneDetect/releases); to run it, you will need:
+**Downloading:** The latest version of PySceneDetect (`v0.3.6`) can be [downloaded here](https://github.com/Breakthrough/PySceneDetect/releases); to run it, you will need:
 
  - [Python 2 / 3](https://www.python.org/) (tested on 2.7.X, untested but should work on 3.X)
  - OpenCV Python Module (usually found in Linux package repos as `python-opencv`, Windows users can find [prebuilt binaries for Python 2.7 here](http://www.lfd.uci.edu/~gohlke/pythonlibs/#opencv))
  - [Numpy](http://sourceforge.net/projects/numpy/)
 
-More complete documentation and installation instructions can be [found on Readthedocs](http://pyscenedetect.readthedocs.org/en/latest/download/), including a detailed guide on how to install the above dependencies.
+More complete documentation and installation instructions can be [found on Readthedocs](http://pyscenedetect.readthedocs.org/en/latest/download/), including a detailed guide on how to install the above dependencies.  Note that in some cases the Windows version may require an additional `opencv_ffmpeg.dll` file for the specific version of OpenCV installed.
 
 To ensure you have all the system requirements installed, open a `python` interpreter/REPL, and ensure you can `import numpy` and `import cv2` without any errors.  You can download a test video and view the expected output [from the resources branch](https://github.com/Breakthrough/PySceneDetect/tree/resources/tests) (see the end of the Usage section below for details).
 

@@ -24,7 +24,7 @@ def get_requires():
 
 setup(
     name='PySceneDetect',
-    version='0.3.4',
+    version='0.3.6',
     description="A cross-platform, OpenCV-based video scene detection program and Python library. ",
     long_description=open('package-info.rst').read(),
     author='Brandon Castellano',
@@ -52,11 +52,11 @@ setup(
         'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent',
         'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
         'Topic :: Multimedia :: Video',
         'Topic :: Multimedia :: Video :: Conversion',
         'Topic :: Multimedia :: Video :: Non-Linear Editor',
