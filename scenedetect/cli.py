@@ -232,12 +232,20 @@ def get_cli_parser(scene_detectors_list, timecode_formats_list):
         action = AboutAction, version = scenedetect.ABOUT_STRING)
 
     parser.add_argument(
-        '-i', '--input', metavar = 'VIDEO_FILE',
+        '-i', '--input', metavar = 'VIDEO_FILE', dest = 'input',
         required = True, type = argparse.FileType('r'),
         help = '[REQUIRED] Path to input video.')
 
     parser.add_argument(
-        '-o', '--output', metavar = 'OUTPUT_FILE',
+        '-o', '--output', metavar = 'OUTFILE.mkv', dest = 'output',
+        type = str,
+        help = ('If specified, splits input video using mkvmerge, using'
+                ' this filename for the first scene (must end in .mkv).'
+                ' Each scene will be written to a new file in sequence,'
+                ' starting with OUTFILE-001.mkv.'))
+
+    parser.add_argument(
+        '-co', '--csv-output', metavar = 'OUTPUT.csv', dest = 'csv_out',
         type = argparse.FileType('w'),
         help = ('File to store detected scenes, comma-separated (.csv). Scenes'
                 'are written in both single-line and human-readable formats. '

@@ -33,6 +33,7 @@ import os
 import argparse
 import time
 import csv
+import subprocess
 
 # PySceneDetect Library Imports
 import scenedetect.platform
@@ -47,7 +48,7 @@ import numpy
 
 
 # Used for module identification and when printing copyright & version info.
-__version__ = 'v0.3.6'
+__version__ = 'v0.4'
 
 # About & copyright message string shown for the -v / --version CLI argument.
 ABOUT_STRING   = """----------------------------------------------------
@@ -63,6 +64,7 @@ included LICENSE file or visit the PySceneDetect website for details.
 This software uses the following third-party components:
   > NumPy [Copyright (C) 2005-2016, Numpy Developers]
   > OpenCV [Copyright (C) 2017, Itseez]
+  > mkvmerge [Copyright (C) 2005-2016, Matroska]
 THE SOFTWARE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, EXPRESS OR IMPLIED.
 """ % __version__
 
@@ -333,25 +335,61 @@ def main():
                 print('[PySceneDetect] Comma-separated timecode output:')
 
         # Print CSV separated timecode output for use in other programs.
-        print(','.join(scene_list_tc))
+        timecode_list_str = ','.join(scene_list_tc)
+        print(timecode_list_str)
 
-        # Output timecodes to CSV file if required (and scenes were found).
+        # Output CSV file containing timecode string and list of scene timecodes.
+        if args.csv_out:
+            output_scene_list(args.csv_out, smgr, scene_list_tc,
+                              scene_start_sec, scene_len_sec)
+
         if args.output and len(smgr.scene_list) > 0:
-            csv_writer = csv.writer(args.output)
-            # Output timecode scene list
-            csv_writer.writerow(scene_list_tc)
-            # Output detailed, human-readable scene list.
-            csv_writer.writerow(["Scene Number", "Frame Number (Start)",
-                                 "Timecode", "Start Time (seconds)", "Length (seconds)"])
-            for i, _ in enumerate(smgr.scene_list):
-                csv_writer.writerow([str(i+1), str(smgr.scene_list[i]),
-                                     scene_list_tc[i], str(scene_start_sec[i]),
-                                     str(scene_len_sec[i])])
-
+            split_input_video(args.input.name, args.output, timecode_list_str)
     # Cleanup, release all objects and close file handles.
     if args.stats_file:
         args.stats_file.close()
-    if args.output:
-        args.output.close()
+    if args.csv_out:
+        args.csv_out.close()
     return
 
+
+def split_input_video(input_path, output_path, timecode_list_str):
+    """ Calls the mkvmerge command on the input video, splitting it at the
+    passed timecodes, where each scene is written in sequence from 001."""
+    #args.output.close()
+    print('[PySceneDetect] Splitting video into clips...')
+    ret_val = None
+    try:
+        ret_val = subprocess.call(
+            ['mkvmerge',
+             '-o', output_path,
+             '--split', 'timecodes:%s' % timecode_list_str,
+             input_path])
+    except FileNotFoundError:
+        print('[PySceneDetect] Error: mkvmerge could not be found on the system.'
+              ' Please install mkvmerge to enable video output support.')
+    if ret_val is not None:
+        if ret_val != 0:
+            print('[PySceneDetect] Error splitting video '
+                  '(mkvmerge returned %d).' % ret_val)
+        else:
+            print('[PySceneDetect] Finished writing scenes to output.')
+
+
+def output_scene_list(csv_file, smgr, scene_list_tc, scene_start_sec,
+                      scene_len_sec):
+    ''' Outputs the list of scenes in human-readable format to a CSV file
+        for further analysis. '''
+    # Output timecodes to CSV file if required (and scenes were found).
+    #if args.output and len(smgr.scene_list) > 0:
+    if csv_file and len(smgr.scene_list) > 0:
+        csv_writer = csv.writer(csv_file) #args.output)
+        # Output timecode scene list
+        csv_writer.writerow(scene_list_tc)
+        # Output detailed, human-readable scene list.
+        csv_writer.writerow(["Scene Number", "Frame Number (Start)",
+                             "Timecode", "Start Time (seconds)", "Length (seconds)"])
+        for i, _ in enumerate(smgr.scene_list):
+            csv_writer.writerow([str(i+1), str(smgr.scene_list[i]),
+                                 scene_list_tc[i], str(scene_start_sec[i]),
+                                 str(scene_len_sec[i])])
