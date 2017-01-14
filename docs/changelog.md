@@ -2,7 +2,14 @@
 PySceneDetect Changelog
 ==========================================================
 
-### 0.3.6 (January 12, 2017) &nbsp;<span class="fa fa-tags"></span>
+## 0.4 (January 14, 2017) &nbsp;<span class="fa fa-tags"></span>
+
+ * major release, includes integrated scene splitting via mkvmerge, changes meaning of `-o` / `--output` option
+ * [feature] specifying `-o OUTPUT_FILE.mkv` will now automatically split the input video, generating a new video clip for each detected scene in sequence, starting with `OUTPUT_FILE-001.mkv`
+ * [enhance] CSV file output is now specified with the `-co` / `--csv-output` option (*note, used to be `-o` in versions of PySceneDetect < 0.4*)
+
+
+### 0.3.6 (January 12, 2017)
 
  * [enhance]  speed improvement when using `--frameskip` option
  * [internal] moved application state and shared objects to a consistent interface (the `SceneManager` object) to greatly reduce the number of required arguments for certain API functions
