@@ -12,10 +12,16 @@ Show help information and summary of command-line arguments:
 scenedetect --help
 ```
 
-Perform content-aware scene detection on a video `my_video.mp4` ([example](usage-example.md)):
+Perform content-aware scene detection on a video `my_video.mp4` ([example](usage-example.md)), and display a list of detected scenes:
 
 ```rst
 scenedetect -i my_video.mp4 -d content -t 30
+```
+
+Same as above, but also split the input video into individual clips (starting from `output_scene-001.mkv`): 
+
+```rst
+scenedetect -i my_video.mp4 -d content -t 30 -o output_scene.mkv
 ```
 
 In order to effectively use PySceneDetect, you should become familiar with the basic command line options described below - especially the scene detection method/algorithm (`-d` / `--detector`) and the threshold/sensitivity value (`-t` / `--threshold`).  These are described in the following section with respect to each detection method (`content` and `threshold`).  Note that descriptions for all command-line arguments, as well as their default values, can be obtained by running PySceneDetect with the `-h` / `--help` flag.

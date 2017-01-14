@@ -73,10 +73,19 @@ Now the missing scene (scene number 18, in this case) has been detected properly
 
 ## Splitting/Cutting Video into Clips
 
+The last step to automatically split the input file into clips is to specify the `-o` / `--output` option.  This will pass a list of the detected scene timecodes to `mkvmerge`, if installed, splitting the input video into scenes.  To generate a sequence of files `goldeneye-scene-001.mkv`, `goldeneye-scene-002.mkv`, `goldeneye-scene-003.mkv`..., our full command becomes:
 
-The recommended tool for splitting a video into clips is `mkvmerge` (or `mkvtoolnix-gui`).  Once you have mkvmerge, you can use the comma-separated timecode list PySceneDetect outputs with the `--split` option:
+```rst
+scenedetect -i goldeneye.mp4 -o scenes_list.csv -d content -si -df 4 -o goldeneye-scene.mkv
+```
 
-    mkvmerge -o output_scene.mkv --split timecodes:00:45:00.000,01:20:00.250,[...] input_file.avi
+The scene number `-001` will be added to the output filename automatically.
+
+Note that this method of splitting doesn't perform any re-encoding or modification of the original video/audio streams, and thus sometimes may not be time-accurate (see the [mkvmerge documentation]([this section](https://mkvtoolnix.download/doc/mkvmerge.html#mkvmerge.description.split) for details).  The video is simply remuxed, with no changes to the original codec or video/audio streams.  Essentially, PySceneDetect calls the following command when an output file is specified:
+
+    mkvmerge -o output_file.mkv --split timecodes:00:45:00.000,01:20:00.250,[...] input_file.avi
 
 See [this section](https://mkvtoolnix.download/doc/mkvmerge.html#mkvmerge.description.split) of the mkvmerge docs for more information on the `--split` flag.  If using `mkvtoolnix-gui`, simply add the video in the input section, and in the "File Splitting" options, select the timecode option, and copy-and-paste the timecode list from the PySceneDetect output.  This will split the output video at those timecodes during muxing.
+
+If the actual scene boundaries in the output files are too heavily skewed from the detected timecodes, you may want to consider using an external tool to actually re-encode the input video (e.g. `ffmpeg`), and use the timecode list obtained from the PySceneDetect output to indicate the start/end times of each output file.
 

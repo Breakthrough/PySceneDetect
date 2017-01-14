@@ -12,10 +12,19 @@ arguments:
   -v, --version         show version number and license/copyright information
   -i VIDEO_FILE, --input VIDEO_FILE
                         [REQUIRED] Path to input video. (default: None)
-  -o SCENE_LIST, --output SCENE_LIST
+  -o SCENE_LIST, --output VIDEO_FILE
+                        If specified, splits input video using mkvmerge, using
+                        this filename for the first scene (must end in .mkv).
+                        Each scene will be written to a new file in sequence,
+                        starting with VIDEO_FILE-001.mkv (default: None)
+  -co SCENE_LIST, --csv_output SCENE_LIST
                         File to store detected scenes in using the specified
                         timecodeformat as comma-separated values (.csv). File
                         will be overwritten if already exists. (default: None)
+  -d detection_method, --detector detection_method
+                        Type of scene detection method/algorithm to use;
+                        detectors available: [threshold, content]. (default:
+                        threshold)
   -t intensity, --threshold intensity
                         8-bit intensity value, from 0-255, to use as the black
                         level in threshold detection mode, or as the change
@@ -36,10 +45,6 @@ arguments:
                         File to store video statistics data, comma-separated
                         value format (.csv). Will be overwritten if exists.
                         (default: None)
-  -d detection_method, --detector detection_method
-                        Type of scene detection method/algorithm to use;
-                        detectors available: [threshold, content]. (default:
-                        threshold)
   -l, --list-scenes     Output the final scene list in human-readable format
                         as a table, in addition to CSV. (default: False)
   -q, --quiet           Suppress all output except for final comma-separated

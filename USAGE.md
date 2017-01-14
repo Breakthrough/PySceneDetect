@@ -20,7 +20,13 @@ Unlike threshold mode, content-aware mode looks at the *difference* between each
 scenedetect -i my_video.mp4 -d content -t 30
 ```
 
-The optimal threshold can be determined by generating a statsfile (`-s`), opening it with a spreadsheet editor (e.g. Excel), and examining the `delta_hsv_avg` column.  This value should be very small between similar frames, and grow large when a big change in content is noticed (look at the values near frame numbers/times where you know a scene change occurs).  The threshold value should be set so that most scenes fall below the threshold value, and scenes where changes occur should *exceed* the threshold value (thus triggering a scene change).  
+The optimal threshold can be determined by generating a statsfile (`-s`), opening it with a spreadsheet editor (e.g. Excel), and examining the `delta_hsv_avg` column.  This value should be very small between similar frames, and grow large when a big change in content is noticed (look at the values near frame numbers/times where you know a scene change occurs).  The threshold value should be set so that most scenes fall below the threshold value, and scenes where changes occur should *exceed* the threshold value (thus triggering a scene change).
+
+Automatically splitting video based on detected scenes (will save starting from `output_scene-001.mkv`):
+
+```rst
+scenedetect -i my_video.mp4 -d content -t 30 -o output_scene.mkv
+```
 
 
 ### Threshold-Based Detection Mode
