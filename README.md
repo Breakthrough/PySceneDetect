@@ -73,7 +73,7 @@ To run PySceneDetect, use the `scenedetect` command if you have it installed to 
 
 To perform threshold-based analysis with the default parameters, on a video named `myvideo.mp4`, saving a list of scenes to `myvideo_scenes.csv` (they are also printed to the terminal):
 
-    scenedetect --input myvideo.mp4 --output myvideo_scenes.csv
+    scenedetect --input myvideo.mp4 --csv-output myvideo_scenes.csv
 
 To perform content-based analysis, with a threshold intensity of 30:
 
