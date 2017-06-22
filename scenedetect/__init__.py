@@ -365,7 +365,7 @@ def split_input_video(input_path, output_path, timecode_list_str):
              '-o', output_path,
              '--split', 'timecodes:%s' % timecode_list_str,
              input_path])
-    except FileNotFoundError:
+    except OSError:
         print('[PySceneDetect] Error: mkvmerge could not be found on the system.'
               ' Please install mkvmerge to enable video output support.')
     if ret_val is not None:
