@@ -272,10 +272,10 @@ def save_preview_images(image_path_prefix, im_curr, im_last, num_scenes):
         num_scenes: The index of the current/new scene (the IN frame).
     """
     # Save the last/previous frame, or the OUT frame of the last scene.
-    output_name = '%s.Scene-%d-OUT.jpg' % (image_path_prefix, num_scenes)
+    output_name = '%s.Scene-%03d-OUT.jpg' % (image_path_prefix, num_scenes)
     cv2.imwrite(output_name, im_last)
     # Save the current frame, or the IN frame of the new scene.
-    output_name = '%s.Scene-%d-IN.jpg' % (image_path_prefix, num_scenes+1)
+    output_name = '%s.Scene-%03d-IN.jpg' % (image_path_prefix, num_scenes+1)
     cv2.imwrite(output_name, im_curr)
 
 
