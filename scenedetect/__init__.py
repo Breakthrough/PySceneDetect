@@ -148,6 +148,12 @@ def detect_scenes_file(path, scene_manager):
     return (video_fps, frames_read, frames_processed)
 
 
+#
+# Move this function into the SceneManager class as a method, as part of the
+# new API changes to improve usability.
+#
+# Consider moving the `cap` argument into the manager class as well.
+#
 def detect_scenes(cap, scene_manager, image_path_prefix = '', start_frame = 0,
                   end_frame = 0, duration_frames = 0):
     """Performs scene detection based on passed video and scene detectors.

@@ -30,22 +30,42 @@
 
 # Standard Library Imports
 from __future__ import print_function
-import sys
-import os
-import argparse
-import time
 import csv
-
-# PySceneDetect Library Imports
-import scenedetect
-
-# Third-Party Library Imports
-import cv2
-import numpy
 
 
 class SceneManager(object):
 
+    # pylint: disable = too-few-public-methods, too-many-instance-attributes
+    #
+    # todo: this needs to take some high-level classes (to be defined) instead
+    #       of just the CLI arguments.  then move the current __init__ method below
+    #       to the cli.py file as a function to generate the appropriate classes
+    #       to invoke the new constructor.
+    #
+
+    class VideoParams(object):
+        def __init__(self, downscale_factor = None, frame_skip = None, file_path = None):
+            self.downscale_factor = downscale_factor if downscale_factor is not None else 1
+            self.frame_skip = frame_skip if frame_skip is not None else 0
+            # add video path (and capture obj?)
+            self.file_path = file_path
+            #self.cap = None
+            # path yes, cap no - only generate VideoCapture object when required,
+            # in actual detect_scenes function (no need for keeping it in memory
+            # as a property, the file path (or device ID) is all that is required).
+            
+
+    #
+    # The argument `scene_detectors` can be replaced with a reference directly
+    # to the scenedetect.detectors (or perhaps make it just a default argument).
+    #
+    # Need to modify this to allow passing multiple detection methods as a list,
+    # as opposed to just choosing a single one (based on the passed argument)
+    # from the scene_detectors argument.  This will be unsupported at first,
+    # but allowing a list of detectors to be passed instead of a single one
+    # does make sense (and may work fine with properly designed detection
+    # algorithm/method classes).
+    #
     def __init__(self, args, scene_detectors):
         self.scene_list = list()
         self.args = args
@@ -81,15 +101,11 @@ class SceneManager(object):
 
         self.quiet_mode = args.quiet_mode
         self.perf_update_rate = -1
-        
+
         self.stats_writer = None
         if args.stats_file:
             self.stats_writer = csv.writer(args.stats_file)
 
         self.cap = None
-            
-
-
-
 
 
