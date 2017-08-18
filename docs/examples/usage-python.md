@@ -1,4 +1,11 @@
 
+
+<div class="warning">
+<h3><span class="fa wy-text-warning"></span>&nbsp; Note that the Python API is undergoing major changes.</h3>
+This documentation refers to the API as of PySceneDetect v0.3.x and before (corresponding to the older version on pip).  You can also see the Github releases page to download a specific version of PySceneDetect.  The next major release (v0.5) will include a stable API with a much more intuitive workflow for Python users while retaining full command-line usability as a front-end program.
+</div>
+
+
 # PySceneDetect Python Interface
 
 In addition to being used from the command line, or through the GUI, PySceneDetect can be used in Python directly - allowing easy integration into other applications/scripts, or interactive use through a Python REPL/notebook.
