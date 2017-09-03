@@ -7,7 +7,7 @@ Video Scene Cut Detection and Analysis Tool
 [![Documentation Status](https://readthedocs.org/projects/pyscenedetect/badge/?version=latest)](http://pyscenedetect.readthedocs.org/en/latest/?badge=latest) [![PyPI Status](https://img.shields.io/pypi/status/PySceneDetect.svg)](https://pypi.python.org/pypi/PySceneDetect/) [![PyPI Version](https://img.shields.io/pypi/v/PySceneDetect.svg)](https://pypi.python.org/pypi/PySceneDetect/)  [![PyPI License](https://img.shields.io/pypi/l/PySceneDetect.svg)](http://pyscenedetect.readthedocs.org/en/latest/copyright/)
 
 
-### Latest Release: v0.4 (January 14, 2016)
+### Latest Release: v0.4 (January 14, 2017)
 
 **New**: The latest version integrates with `mkvmerge` to automatically split the input video into individual clips.
 
