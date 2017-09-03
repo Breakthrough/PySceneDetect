@@ -41,6 +41,10 @@ import scenedetect.detectors
 import scenedetect.timecodes
 import scenedetect.manager
 import scenedetect.cli
+# Commonly used classes for easier use directly from the scenedetect namespace.
+from scenedetect.manager import SceneManager
+from scenedetect.timecodes import FrameTimecode
+#from scenedetect.detectors import ThresholdDetector, ContentDetector
 
 # Third-Party Library Imports
 import cv2
@@ -94,6 +98,7 @@ def detect_scenes_file(path, scene_manager):
     frames_processed = -1
     video_fps = -1
     if not scene_manager.timecode_list:
+        # TODO: Replace below list items with FrameTimecode object instances.
         scene_manager.timecode_list = [0, 0, 0]
 
     # Attempt to open the passed input (video) file.
@@ -121,6 +126,12 @@ def detect_scenes_file(path, scene_manager):
         print('Verify that the above parameters are correct'
               ' (especially framerate, use --force-fps to correct if required).')
 
+
+    # TODO: Change below processing code to use FrameTimecode objects, which
+    #       automatically deals with each instance type.  Note this will
+    #       require additional changes in the detect_scenes method, when the
+    #       actual scene timecode list is being updated.
+    
     # Convert timecode_list to absolute frames for detect_scenes() function.
     frames_list = []
     for timecode in scene_manager.timecode_list:
