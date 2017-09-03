@@ -76,12 +76,12 @@ class SceneManager(object):
         self.quiet_mode = False
 
         if self.args is not None:
-            self.parse_args()
+            self._parse_args()
 
         self.detector_list = [ self.detector ]
 
 
-    def parse_args(self):
+    def _parse_args(self):
         
         args = self.args
 
@@ -120,11 +120,22 @@ class SceneManager(object):
             self.stats_writer = csv.writer(args.stats_file)
 
 
+    def clear(self):
+        pass
+
 
     def detect_scenes(self, input_video = None):
         # need to move from __init__.py to this class.
         # if input_video is not specified, assume it was
         # set by the parse_cli_args method, and if not,
         # then throw an error.  (property is self.input_video)
+
+        #
+        # subsequent calls to this function should simply append the results to the existing
+        # detected scene list, respecting the start/stop/seek times mentioned. it would be a
+        # good idea to keep track of the number of frames processed (or current location timecode)
+        # for subsequent calls to this function to keep track of the current "location" in a
+        # stack of appended video files.
+        #
         pass
 
