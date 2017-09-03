@@ -48,7 +48,7 @@ import numpy
 
 
 # Used for module identification and when printing copyright & version info.
-__version__ = 'v0.4'
+__version__ = 'v0.5-dev'
 
 # About & copyright message string shown for the -v / --version CLI argument.
 ABOUT_STRING   = """----------------------------------------------------
@@ -298,7 +298,7 @@ def main():
     args = scenedetect.cli.get_cli_parser(
         scene_detectors.keys(), timecode_formats.keys()).parse_args()
     # Use above to initialize scene manager.
-    smgr = scenedetect.manager.SceneManager(args, scene_detectors)
+    smgr = scenedetect.manager.SceneManager(args = args)
 
     # Perform scene detection using specified mode.
     start_time = time.time()

@@ -32,6 +32,8 @@
 from __future__ import print_function
 import csv
 
+import scenedetect.detectors
+
 
 class SceneManager(object):
 
@@ -41,19 +43,7 @@ class SceneManager(object):
     #       of just the CLI arguments.  then move the current __init__ method below
     #       to the cli.py file as a function to generate the appropriate classes
     #       to invoke the new constructor.
-    #
-
-    class VideoParams(object):
-        def __init__(self, downscale_factor = None, frame_skip = None, file_path = None):
-            self.downscale_factor = downscale_factor if downscale_factor is not None else 1
-            self.frame_skip = frame_skip if frame_skip is not None else 0
-            # add video path (and capture obj?)
-            self.file_path = file_path
-            #self.cap = None
-            # path yes, cap no - only generate VideoCapture object when required,
-            # in actual detect_scenes function (no need for keeping it in memory
-            # as a property, the file path (or device ID) is all that is required).
-            
+    
 
     #
     # The argument `scene_detectors` can be replaced with a reference directly
@@ -66,13 +56,39 @@ class SceneManager(object):
     # does make sense (and may work fine with properly designed detection
     # algorithm/method classes).
     #
-    def __init__(self, args, scene_detectors):
+    #def __init__(self, args, scene_detectors):
+    def __init__(self, scene_detectors = None, args = None, detector = None,
+                 stats_writer = None, downscale_factor = 1, frame_skip = 0,
+                 save_images = False, start_time = None, end_time =  None,
+                 duration = None, quiet_mode = False):
+
         self.scene_list = list()
         self.args = args
+        self.detector = detector
+        self.cap = None
+        self.perf_update_rate = -1
 
-        # Load SceneDetector with proper arguments based on passed detector (-d).
+        self.stats_writer = stats_writer
+        self.downscale_factor = downscale_factor
+        self.frame_skip = frame_skip
+        self.save_images = save_images
+        self.timecode_list = [start_time, end_time, duration]
+        self.quiet_mode = False
+
+        if self.args is not None:
+            self.parse_args()
+
+        self.detector_list = [ self.detector ]
+
+
+    def parse_args(self):
+        
+        args = self.args
+
+        # Load SceneDetector with proper arguments based on passed detector (-d) if not specified.
         self.detector = None
         self.detection_method = args.detection_method.lower()
+        scene_detectors = scenedetect.detectors.get_available()
         if not args.threshold:
             args.threshold = 30.0 if self.detection_method == 'content' else 12
         if (self.detection_method == 'content'):
@@ -81,7 +97,6 @@ class SceneManager(object):
             self.detector = scene_detectors['threshold'](
                 args.threshold, args.min_percent/100.0, args.min_scene_len,
                 block_size = args.block_size, fade_bias = args.fade_bias/100.0)
-        self.detector_list = [ self.detector ]
 
         self.downscale_factor = args.downscale_factor
         if self.downscale_factor < 2:
@@ -100,12 +115,16 @@ class SceneManager(object):
         #self.duration_frames = args.duration
 
         self.quiet_mode = args.quiet_mode
-        self.perf_update_rate = -1
 
-        self.stats_writer = None
         if args.stats_file:
             self.stats_writer = csv.writer(args.stats_file)
 
-        self.cap = None
 
+
+    def detect_scenes(self, input_video = None):
+        # need to move from __init__.py to this class.
+        # if input_video is not specified, assume it was
+        # set by the parse_cli_args method, and if not,
+        # then throw an error.  (property is self.input_video)
+        pass
 
