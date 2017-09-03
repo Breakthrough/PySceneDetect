@@ -60,13 +60,13 @@ class SceneManager(object):
     def __init__(self, scene_detectors = None, args = None, detector = None,
                  stats_writer = None, downscale_factor = 1, frame_skip = 0,
                  save_images = False, start_time = None, end_time =  None,
-                 duration = None, quiet_mode = False):
+                 duration = None, quiet_mode = False, perf_update_rate = -1):
 
         self.scene_list = list()
         self.args = args
         self.detector = detector
         self.cap = None
-        self.perf_update_rate = -1
+        self.perf_update_rate = perf_update_rate
 
         self.stats_writer = stats_writer
         self.downscale_factor = downscale_factor
@@ -115,6 +115,8 @@ class SceneManager(object):
         #self.duration_frames = args.duration
 
         self.quiet_mode = args.quiet_mode
+
+        self.perf_update_rate = args.perf_update_rate
 
         if args.stats_file:
             self.stats_writer = csv.writer(args.stats_file)

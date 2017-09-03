@@ -364,6 +364,14 @@ def get_cli_parser(scene_detectors_list, timecode_formats_list):
                 ' If required, values above 1 or 2 are not recommended.'))
 
     parser.add_argument(
+        '-ur', '--update-rate', metavar = 'update_rate', dest = 'perf_update_rate',
+        type = int_type_check(-1, None, 'update_rate'), default = 10,
+        help = ('Number of seconds between updates displaying the current'
+                ' processing speed (in frames/sec). Useful if one wants to'
+                ' monitor the processing performance/status. Set to -1 to'
+                ' disable displaying performance/framerate messages.'))
+
+    parser.add_argument(
         '-si', '--save-images', dest = 'save_images',
         action = 'store_true', default = False,
         help = ('If set, the first and last frames in each detected scene'
