@@ -78,11 +78,16 @@ class SceneManager(object):
         if self.args is not None:
             self._parse_args()
 
+        # The detector is stored in a list, to support the ability of combining
+        # detection algorithms/classes in the future.
         self.detector_list = [ self.detector ]
 
 
     def _parse_args(self):
-        
+        """ Parses a command-line vector (from argparse) into the appropriate
+        class properties.  Called only if args is passed to the constructor.
+        """
+
         args = self.args
 
         # Load SceneDetector with proper arguments based on passed detector (-d) if not specified.
