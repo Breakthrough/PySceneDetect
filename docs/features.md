@@ -52,7 +52,7 @@ For a detailed explanation of how a particular scene detection method/algorithm 
 
 <h3>Features in Development for Next Version</h3>
 
-The following are features being planned or developed after the release of v0.3.5:
+The following are features being planned or developed after the release of v0.5:
 
  - additional timecode formats
  - adaptive bias for fade in/out interpolation

@@ -2,6 +2,16 @@
 PySceneDetect Changelog
 ==========================================================
 
+## 0.5 (In Development)
+
+ * under development currently, release planned for late 2017, can be tested via latest Github commit (warning, may be unstable)
+ * major release, includes stable Python API with examples and updated documentation
+ * [enhance] image filename numbers are now consistent with those of split video scenes (thanks [@e271828-](https://github.com/e271828-))
+ * [enhance] 5-10% improvement in processing performance due to reduced memory copy operations (thanks [@elcombato](https://github.com/elcombato))
+ * [internal] updated exception handling to raise proper standard exceptions (thanks [@talkain](https://github.com/talkain))
+ * several fixes to the documentation, including improper dates and outdated CLI arguments (thanks [@elcombato](https://github.com/elcombato) and [@colelawrence](https://github.com/colelawrence))
+
+
 ## 0.4 (January 14, 2017) &nbsp;<span class="fa fa-tags"></span>
 
  * major release, includes integrated scene splitting via mkvmerge, changes meaning of `-o` / `--output` option
