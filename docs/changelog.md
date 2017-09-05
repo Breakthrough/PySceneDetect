@@ -6,10 +6,10 @@ PySceneDetect Changelog
 
  * under development currently, release planned for late 2017, can be tested via latest Github commit (warning, may be unstable)
  * major release, includes stable Python API with examples and updated documentation
- * [enhance] image filename numbers are now consistent with those of split video scenes (thanks [@e271828-](https://github.com/e271828-))
- * [enhance] 5-10% improvement in processing performance due to reduced memory copy operations (thanks [@elcombato](https://github.com/elcombato))
- * [internal] updated exception handling to raise proper standard exceptions (thanks [@talkain](https://github.com/talkain))
- * several fixes to the documentation, including improper dates and outdated CLI arguments (thanks [@elcombato](https://github.com/elcombato) and [@colelawrence](https://github.com/colelawrence))
+ * [enhance] image filename numbers are now consistent with those of split video scenes (PR #39, thanks [@e271828-](https://github.com/Breakthrough/PySceneDetect/pull/39))
+ * [enhance] 5-10% improvement in processing performance due to reduced memory copy operations (PR #40, thanks [@elcombato](https://github.com/Breakthrough/PySceneDetect/pull/40))
+ * [internal] updated exception handling to raise proper standard exceptions (PR #37, thanks [@talkain](https://github.com/Breakthrough/PySceneDetect/pull/37))
+ * several fixes to the documentation, including improper dates and outdated CLI arguments (PR #26 and #, thanks [@elcombato](https://github.com/Breakthrough/PySceneDetect/pull/26), and [@colelawrence](https://github.com/Breakthrough/PySceneDetect/pull/33))
 
 
 ## 0.4 (January 14, 2017) &nbsp;<span class="fa fa-tags"></span>
