@@ -21,7 +21,7 @@ PySceneDetect Changelog
 
 ### 0.3.6 (January 12, 2017)
 
- * [enhance]  speed improvement when using `--frameskip` option
+ * [enhance]  performance improvement when using `--frameskip` option (thanks [@marcelluzs](https://github.com/marcelluzs))
  * [internal] moved application state and shared objects to a consistent interface (the `SceneManager` object) to greatly reduce the number of required arguments for certain API functions
  * [enhance]  added installer for Windows builds (64-bit only currently)
 
@@ -29,7 +29,7 @@ PySceneDetect Changelog
 ### 0.3.5 (August 2, 2016)
 
  * [enhance]  initial release of portable build for Windows (64-bit only), including all dependencies
- * [bugfix]   fix unrelated exception thrown when video could not be loaded
+ * [bugfix]   fix unrelated exception thrown when video could not be loaded (thanks [@marcelluzs](https://github.com/marcelluzs))
  * [internal] fix variable name typo in API documentation
 
 
