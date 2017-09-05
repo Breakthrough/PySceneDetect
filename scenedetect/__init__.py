@@ -264,12 +264,13 @@ def detect_scenes(cap, scene_manager, image_path_prefix = '', start_frame = 0,
                 perf_last_framecount = frames_read
                 print("[PySceneDetect] Current Processing Speed: %3.1f FPS" % perf_curr_rate)
         # save images on scene cuts/breaks if requested (scaled if using -df)
-        if scene_manager.save_images and cut_found:
-            save_preview_images(
-                image_path_prefix, im_cap, last_frame, len(scene_manager.scene_list))
+        if scene_manager.save_images:
+            if cut_found:
+                save_preview_images(
+                    image_path_prefix, im_cap, last_frame, len(scene_manager.scene_list))
 
-        del last_frame
-        last_frame = im_cap.copy()
+            del last_frame
+            last_frame = im_cap.copy()
     # perform any post-processing required by the detectors being used
     for detector in scene_manager.detector_list:
         detector.post_process(scene_manager.scene_list)
