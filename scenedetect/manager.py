@@ -37,7 +37,7 @@ import scenedetect.detectors
 
 class SceneManager(object):
 
-    # pylint: disable = too-few-public-methods, too-many-instance-attributes
+    # pylint: disable = too-many-instance-attributes
     #
     # todo: this needs to take some high-level classes (to be defined) instead
     #       of just the CLI arguments.  then move the current __init__ method below
@@ -59,8 +59,8 @@ class SceneManager(object):
     #def __init__(self, args, scene_detectors):
     def __init__(self, scene_detectors = None, args = None, detector = None,
                  stats_writer = None, downscale_factor = 1, frame_skip = 0,
-                 save_images = False, start_time = None, end_time =  None,
-                 duration = None, quiet_mode = False, perf_update_rate = -1):
+                 save_images = False, start_time = 0, end_time =  0,
+                 duration = 0, quiet_mode = False, perf_update_rate = -1):
 
         self.scene_list = list()
         self.args = args

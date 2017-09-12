@@ -126,33 +126,16 @@ def detect_scenes_file(path, scene_manager):
         print('Verify that the above parameters are correct'
               ' (especially framerate, use --force-fps to correct if required).')
 
+    if not len(scene_manager.timecode_list) == 3:
+        raise RuntimeError("Malformed timecode_list property in SceneManager instance!")
 
-    # TODO: Change below processing code to use FrameTimecode objects, which
-    #       automatically deals with each instance type.  Note this will
-    #       require additional changes in the detect_scenes method, when the
-    #       actual scene timecode list is being updated.
-    
-    # Convert timecode_list to absolute frames for detect_scenes() function.
-    frames_list = []
-    for timecode in scene_manager.timecode_list:
-        if isinstance(timecode, int):
-            frames_list.append(timecode)
-        elif isinstance(timecode, float):
-            frames_list.append(int(timecode * video_fps))
-        elif isinstance(timecode, list) and len(timecode) == 3:
-            secs = float(timecode[0] * 60 * 60) + float(timecode[1] * 60) + float(timecode[2])
-            frames_list.append(int(secs * video_fps))
-        else:
-            frames_list.append(0)
-
-    start_frame, end_frame, duration_frames = 0, 0, 0
-    if len(frames_list) == 3:
-        start_frame, end_frame, duration_frames = (
-            frames_list[0], frames_list[1], frames_list[2])
+    start_frame = FrameTimecode(timecode = scene_manager.timecode_list[0], fps = video_fps)
+    end_frame = FrameTimecode(timecode = scene_manager.timecode_list[1], fps = video_fps)
+    duration_frames = FrameTimecode(timecode = scene_manager.timecode_list[2], fps = video_fps)
 
     # Perform scene detection on cap object (modifies scene_list).
     frames_read, frames_processed = detect_scenes(
-        cap, scene_manager, file_name, start_frame, end_frame, duration_frames)
+        cap, scene_manager, start_frame, end_frame, duration_frames, file_name)
 
     # Cleanup and return number of frames we read/processed.
     cap.release()
@@ -165,8 +148,8 @@ def detect_scenes_file(path, scene_manager):
 #
 # Consider moving the `cap` argument into the manager class as well.
 #
-def detect_scenes(cap, scene_manager, image_path_prefix = '', start_frame = 0,
-                  end_frame = 0, duration_frames = 0):
+def detect_scenes(cap, scene_manager, start_frame,
+                  end_frame, duration_frames, image_path_prefix = ''):
     """Performs scene detection based on passed video and scene detectors.
 
     Args:
@@ -175,11 +158,11 @@ def detect_scenes(cap, scene_manager, image_path_prefix = '', start_frame = 0,
             the cap object remains open (it can be closed with cap.release()).
         scene_manager:  SceneManager interface to scene/detector list and other
             parts of the application state (including user-defined options).
-        image_path_prefix:  Optional.  Filename/path to write images to.
-        start_frame:  Optional.  Integer frame number to start processing at.
-        end_frame:  Optional.  Integer frame number to stop processing at.
-        duration_frames:  Optional.  Integer number of frames to process;
+        start_frame:  Frametimecode representing frame to start processing at.
+        end_frame:  Frametimecode representing to stop processing at.
+        duration_frames:  FrameTimecode representing frames to process;
             overrides end_frame if the two values are conflicting.
+        image_path_prefix:  Optional.  Filename/path to write images to.
 
     Returns:
         Tuple of integers of number of frames read, and number of frames
@@ -200,12 +183,12 @@ def detect_scenes(cap, scene_manager, image_path_prefix = '', start_frame = 0,
         perf_show = False
 
     # set the end frame if duration_frames is set (overrides end_frame if set)
-    if duration_frames > 0:
+    if duration_frames.get_frames() > 0:
         end_frame = start_frame + duration_frames
 
     # If start_frame is set, we drop the required number of frames first.
     # (seeking doesn't work very well, if at all, with OpenCV...)
-    while (frames_read < start_frame):
+    while (frames_read < start_frame.get_frames()):
         ret_val = cap.grab()
         frames_read += 1
 
@@ -214,7 +197,8 @@ def detect_scenes(cap, scene_manager, image_path_prefix = '', start_frame = 0,
 
     while True:
         # If we passed the end point, we stop processing now.
-        if end_frame > 0 and frames_read >= end_frame:
+        # Note that end_frame is set by the duration and/or the end_frame property itself.
+        if end_frame.get_frames() > 0 and frames_read >= end_frame.get_frames():
             break
 
         # If frameskip is set, we drop the required number of frames first.
@@ -273,10 +257,10 @@ def detect_scenes(cap, scene_manager, image_path_prefix = '', start_frame = 0,
             last_frame = im_cap.copy()
     # perform any post-processing required by the detectors being used
     for detector in scene_manager.detector_list:
-        detector.post_process(scene_manager.scene_list)
+        detector.post_process(scene_manager.scene_list, frames_read)
 
-    if start_frame > 0:
-        frames_read = frames_read - start_frame
+    if start_frame.get_frames() > 0:
+        frames_read -= start_frame.get_frames()
     return (frames_read, frames_processed)
 
 

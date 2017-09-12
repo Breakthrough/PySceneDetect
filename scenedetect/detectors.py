@@ -64,7 +64,7 @@ class SceneDetector(object):
         """
         return
 
-    def post_process(self, scene_list):
+    def post_process(self, scene_list, frame_num):
         pass
 
 
@@ -215,7 +215,7 @@ class ThresholdDetector(SceneDetector):
         self.last_frame_avg = frame_avg
         return cut_detected
 
-    def post_process(self, scene_list):
+    def post_process(self, scene_list, frame_num):
         """Writes a final scene cut if the last detected fade was a fade-out.
 
         Only writes the scene cut if add_final_scene is true, and the last fade
@@ -305,7 +305,7 @@ class ContentDetector(SceneDetector):
         self.last_frame = frame_img.copy()
         return cut_detected
 
-    def post_process(self, scene_list):
+    def post_process(self, scene_list, frame_num):
         """Not used for ContentDetector, as cuts are written as they are found."""
         return
 
@@ -366,7 +366,7 @@ class MotionDetector(SceneDetector):
 
         return cut_detected
 
-    def post_process(self, scene_list):
+    def post_process(self, scene_list, frame_num):
         """Writes the last scene if the video ends while in a motion event.
         """
 

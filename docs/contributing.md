@@ -21,4 +21,4 @@ Note that PySceneDetect is released under the BSD 2-Clause license, and submitte
 The following people have made significant contributions to the PySceneDetect project.  Their Github usernames are shown below, with a link to their profile.  Note that the following list is maintained in no particular order.
 
  * [@elcombato](https://github.com/elcombato) - improvement of video processing performance due to reduced memory copy operations
- * [@marcelluzs](https://github.com/marcelluzs)) - improvement of video processing performance when using the frame-skipping feature
+ * [@marcelluzs](https://github.com/marcelluzs) - improvement of video processing performance when using the frame-skipping feature
