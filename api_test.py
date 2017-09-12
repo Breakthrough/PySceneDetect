@@ -32,7 +32,7 @@ def main():
     print("Detected %d scenes in video (algorithm = content, threshold = 27)." % (len(smgr.scene_list)))
 
     threshold = scenedetect.detectors.ThresholdDetector(threshold = 100)
-    smgr = scenedetect.manager.SceneManager(detector = threshold)
+    smgr = scenedetect.manager.SceneManager(detector = threshold, perf_update_rate = 5)
     scenedetect.detect_scenes_file("goldeneye.mp4", smgr)
     print("Detected %d scenes in video (algorithm = threshold, threshold = 100)." % (len(smgr.scene_list)))
 

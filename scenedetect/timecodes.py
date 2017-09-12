@@ -110,6 +110,8 @@ class FrameTimecode(object):
         elif isinstance(timecode, str):
             # The _parse_timecode_string method handles the three time formats.
             self.frame_num = self._parse_timecode_string(timecode)
+        elif timecode is None:
+            raise TypeError('Timecode/frame number must be specified!')
 
         else:
             raise TypeError('Timecode format unrecognized.')

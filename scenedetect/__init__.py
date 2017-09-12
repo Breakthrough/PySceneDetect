@@ -97,9 +97,6 @@ def detect_scenes_file(path, scene_manager):
     frames_read = -1
     frames_processed = -1
     video_fps = -1
-    if not scene_manager.timecode_list:
-        # TODO: Replace below list items with FrameTimecode object instances.
-        scene_manager.timecode_list = [0, 0, 0]
 
     # Attempt to open the passed input (video) file.
     cap.open(path)

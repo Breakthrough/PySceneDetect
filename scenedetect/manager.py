@@ -43,21 +43,9 @@ class SceneManager(object):
     #       of just the CLI arguments.  then move the current __init__ method below
     #       to the cli.py file as a function to generate the appropriate classes
     #       to invoke the new constructor.
-    
 
-    #
-    # The argument `scene_detectors` can be replaced with a reference directly
-    # to the scenedetect.detectors (or perhaps make it just a default argument).
-    #
-    # Need to modify this to allow passing multiple detection methods as a list,
-    # as opposed to just choosing a single one (based on the passed argument)
-    # from the scene_detectors argument.  This will be unsupported at first,
-    # but allowing a list of detectors to be passed instead of a single one
-    # does make sense (and may work fine with properly designed detection
-    # algorithm/method classes).
-    #
     #def __init__(self, args, scene_detectors):
-    def __init__(self, scene_detectors = None, args = None, detector = None,
+    def __init__(self, args = None, detector = None,
                  stats_writer = None, downscale_factor = 1, frame_skip = 0,
                  save_images = False, start_time = 0, end_time =  0,
                  duration = 0, quiet_mode = False, perf_update_rate = -1):

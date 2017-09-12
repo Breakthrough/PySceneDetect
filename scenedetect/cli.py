@@ -332,19 +332,19 @@ def get_cli_parser(scene_detectors_list, timecode_formats_list):
 
     parser.add_argument(
         '-st', '--start-time', metavar = 'time', dest = 'start_time',
-        type = timecode_type_check('time'), default = None,
+        type = timecode_type_check('time'), default = 0,
         help = ('Time to seek to in video before performing detection.  Can be'
                 ' given in number of frames (12345), seconds (number followed'
                 ' by s, e.g. 123s or 123.45s), or timecode (HH:MM:SS[.nnn]).'))
 
     parser.add_argument(
         '-dt', '--duration', metavar = 'time', dest = 'duration',
-        type = timecode_type_check('time'), default = None,
+        type = timecode_type_check('time'), default = 0,
         help = 'Time to limit scene detection to (see -st for time format).  Overrides -et.')
 
     parser.add_argument(
         '-et', '--end-time', metavar = 'time', dest = 'end_time',
-        type = timecode_type_check('time'), default = None,
+        type = timecode_type_check('time'), default = 0,
         help = 'Time to stop scene detection at (see -st for time format).')
 
     parser.add_argument(

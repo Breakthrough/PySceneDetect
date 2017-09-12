@@ -258,7 +258,7 @@ class ContentDetector(SceneDetector):
 
         # Value to return indiciating if a scene cut was found or not.
         cut_detected = False
-    
+
         if self.last_frame is not None:
             # Change in average of HSV (hsv), (h)ue only, (s)aturation only, (l)uminance only.
             delta_hsv_avg, delta_h, delta_s, delta_v = 0.0, 0.0, 0.0, 0.0
