@@ -5,7 +5,7 @@
 #     [  Github: https://github.com/Breakthrough/PySceneDetect/  ]
 #     [  Documentation: http://pyscenedetect.readthedocs.org/    ]
 #
-# This file contains all code for the main `scenedetect` module. 
+# This file contains all code for the main `scenedetect` module.
 #
 # Copyright (C) 2012-2017 Brandon Castellano <http://www.bcastell.com>.
 #
@@ -343,7 +343,10 @@ def main():
                               scene_start_sec, scene_len_sec)
 
         if args.output and len(smgr.scene_list) > 0:
-            split_input_video(args.input.name, args.output, timecode_list_str)
+            if args.precision:
+                split_input_video_precision(args.input.name, args.output, timecode_list_str)
+            else:
+                split_input_video(args.input.name, args.output, timecode_list_str)
     # Cleanup, release all objects and close file handles.
     if args.stats_file:
         args.stats_file.close()
@@ -374,6 +377,36 @@ def split_input_video(input_path, output_path, timecode_list_str):
         else:
             print('[PySceneDetect] Finished writing scenes to output.')
 
+def split_input_video_precision(input_path, output_path, timecode_list_str):
+    """ Calls the ffmpeg command on the input video, splitting it at the
+    passed timecodes, where each scene is written in sequence from 001."""
+    #args.output.close()
+    print('[PySceneDetect] Splitting video into clips...')
+    ret_val = None
+    cut_times =  timecode_list_str.split(",")
+    last_cut = '00:00:00'
+    scene = 0
+    for cut_time in cut_times:
+        print(input_path+'_scene_'+str(scene)+'.mp4')
+        try:
+            ret_val = subprocess.call(
+                ['ffmpeg',
+                 '-i', input_path,
+                 '-ss', last_cut,
+                 '-to', cut_time,
+                 '-c', 'copy', input_path+'_scene_'+str(scene)+'.mp4'])
+        except OSError:
+            print('[PySceneDetect] Error: mkvmerge could not be found on the system.'
+                  ' Please install mkvmerge to enable video output support.')
+        if ret_val is not None:
+            if ret_val != 0:
+                print('[PySceneDetect] Error splitting video '
+                      '(mkvmerge returned %d).' % ret_val)
+            else:
+                print('[PySceneDetect] Finished cutting scene ' + str(scene) +'.')
+                scene += 1
+                last_cut = cut_time
+    print('[PySceneDetect] Finished writing scenes to output.')
 
 def output_scene_list(csv_file, smgr, scene_list_tc, scene_start_sec,
                       scene_len_sec):

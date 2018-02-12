@@ -166,7 +166,7 @@ def string_type_check(valid_strings, case_sensitive = True, metavar = None):
     """ Creates an argparse type for a list of strings.
 
     The passed argument is declared valid if it is a valid string which exists
-    in the passed list valid_strings.  If case_sensitive is False, all input 
+    in the passed list valid_strings.  If case_sensitive is False, all input
     strings and strings in valid_strings are processed as lowercase.  Leading
     and trailing whitespace is ignored in all strings.
 
@@ -198,7 +198,7 @@ def string_type_check(valid_strings, case_sensitive = True, metavar = None):
 
 
 class AboutAction(argparse.Action):
-    """Custom argparse action for displaying the PySceneDetect ABOUT_STRING. 
+    """Custom argparse action for displaying the PySceneDetect ABOUT_STRING.
 
     Based off of the default VersionAction for displaying a string to the user.
     """
@@ -378,5 +378,10 @@ def get_cli_parser(scene_detectors_list, timecode_formats_list):
                 ' will be saved to disk. Images will saved in the current'
                 ' working directory, using the same filename as the input'
                 ' but with the scene and frame numbers appended.'))
+
+    parser.add_argument(
+        '-pr', '--precision', dest = 'precision',
+        action = 'store_true', default = False,
+        help = ('If set, generated video will be cut precisely.'))
 
     return parser

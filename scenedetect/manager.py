@@ -48,7 +48,7 @@ class SceneManager(object):
     def __init__(self, args = None, detector = None,
                  stats_writer = None, downscale_factor = 1, frame_skip = 0,
                  save_images = False, start_time = 0, end_time =  0,
-                 duration = 0, quiet_mode = False, perf_update_rate = -1):
+                 duration = 0, quiet_mode = False, perf_update_rate = -1, precision = False):
 
         self.scene_list = list()
         self.args = args
@@ -62,6 +62,7 @@ class SceneManager(object):
         self.save_images = save_images
         self.timecode_list = [start_time, end_time, duration]
         self.quiet_mode = False
+        self.precision = False
 
         if self.args is not None:
             self._parse_args()
@@ -111,6 +112,8 @@ class SceneManager(object):
 
         self.perf_update_rate = args.perf_update_rate
 
+        self.precision = args.precision
+
         if args.stats_file:
             self.stats_writer = csv.writer(args.stats_file)
 
@@ -133,4 +136,3 @@ class SceneManager(object):
         # stack of appended video files.
         #
         pass
-
