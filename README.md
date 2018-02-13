@@ -1,4 +1,4 @@
-      
+
 PySceneDetect
 ==========================================================
 Video Scene Cut Detection and Analysis Tool
@@ -48,6 +48,7 @@ Download & Installation
  - OpenCV Python Module (usually found in Linux package repos as `python-opencv`, Windows users can find [prebuilt binaries for Python 2.7 here](http://www.lfd.uci.edu/~gohlke/pythonlibs/#opencv))
  - [Numpy](http://sourceforge.net/projects/numpy/)
  - [mkvmerge](https://mkvtoolnix.download/downloads.html) (usually found in package managers, part of mkvtoolnix)
+ - [ffmpeg](https://www.ffmpeg.org/download.html)(optional, in case you want more precision when splitting videos)
 
 More complete documentation and installation instructions can be [found on Readthedocs](http://pyscenedetect.readthedocs.org/en/latest/download/), including a detailed guide on how to install the above dependencies.  Note that in some cases the Windows version may require an additional `opencv_ffmpeg.dll` file for the specific version of OpenCV installed.
 
@@ -107,4 +108,3 @@ Licensed under BSD 2-Clause (see the `LICENSE` file for details).
 
 Copyright (C) 2012-2017 Brandon Castellano.
 All rights reserved.
-
