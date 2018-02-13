@@ -385,27 +385,44 @@ def split_input_video_precision(input_path, output_path, timecode_list_str):
     ret_val = None
     cut_times =  timecode_list_str.split(",")
     last_cut = '00:00:00'
+    final_cut = '00:00:00'
     scene = 0
     for cut_time in cut_times:
         print(input_path+'_scene_'+str(scene)+'.mp4')
         try:
             ret_val = subprocess.call(
-                ['ffmpeg',
+                ['ffmpeg', '-y',
                  '-i', input_path,
                  '-ss', last_cut,
                  '-to', cut_time,
-                 '-c', 'copy', input_path+'_scene_'+str(scene)+'.mp4'])
+                 '-c', 'copy', output_path+'_scene_'+str(scene)+'.mp4'])
         except OSError:
-            print('[PySceneDetect] Error: mkvmerge could not be found on the system.'
-                  ' Please install mkvmerge to enable video output support.')
+            print('[PySceneDetect] Error: ffmpeg could not be found on the system.'
+                  ' Please install ffmpeg to enable video output support.')
         if ret_val is not None:
             if ret_val != 0:
                 print('[PySceneDetect] Error splitting video '
-                      '(mkvmerge returned %d).' % ret_val)
+                      '(ffmpeg returned %d).' % ret_val)
             else:
                 print('[PySceneDetect] Finished cutting scene ' + str(scene) +'.')
                 scene += 1
                 last_cut = cut_time
+    try:
+        ret_val = subprocess.call(
+            ['ffmpeg', '-y',
+             '-i', input_path,
+             '-ss', last_cut,
+             '-c', 'copy', output_path+'_scene_'+str(scene)+'.mp4'])
+    except OSError:
+        print('[PySceneDetect] Error: ffmpeg could not be found on the system.'
+              ' Please install ffmpeg to enable video output support.')
+    if ret_val is not None:
+        if ret_val != 0:
+            print('[PySceneDetect] Error splitting video '
+                  '(ffmpeg returned %d).' % ret_val)
+        else:
+            print('[PySceneDetect] Finished cutting scene ' + str(scene) +'.')
+
     print('[PySceneDetect] Finished writing scenes to output.')
 
 def output_scene_list(csv_file, smgr, scene_list_tc, scene_start_sec,
