@@ -93,7 +93,7 @@ class SceneManager(object):
 
         self.downscale_factor = args.downscale_factor
         if self.downscale_factor < 2:
-            self.downscale_factor = 0
+            self.downscale_factor = 1
 
         self.frame_skip = args.frame_skip
         if self.frame_skip <= 0:
