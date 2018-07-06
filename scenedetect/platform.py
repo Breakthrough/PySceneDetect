@@ -6,7 +6,7 @@
 # This file contains all platform/library/OS-specific code, intended to improve
 # compatibility of PySceneDetect with a wider array of software versions.
 #
-# Copyright (C) 2012-2017 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2012-2018 Brandon Castellano <http://www.bcastell.com>.
 #
 # PySceneDetect is licensed under the BSD 2-Clause License; see the
 # included LICENSE file or visit one of the following pages for details:
@@ -25,14 +25,28 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 #
 
+
+# Standard Library Imports
+from __future__ import print_function
+import sys
+
 # Third-Party Library Imports
 import cv2
 
-# Compatibility fix for OpenCV < 3.0
-if (cv2.__version__[0] == '2') or (not cv2.__version__[0] == '3'):
+# Queue library
+# pylint: disable=unused-import
+if sys.version_info[0] == 2:
+    import Queue as queue
+else:
+    import queue
+
+# Compatibility fix for OpenCV < 3.0 (this may break on 4.0+...)
+# pylint: disable=c-extension-no-member
+if cv2.__version__[0] == '2' or cv2.__version__[0] != '3':
     cv2.CAP_PROP_FRAME_WIDTH = cv2.cv.CV_CAP_PROP_FRAME_WIDTH
     cv2.CAP_PROP_FRAME_HEIGHT = cv2.cv.CV_CAP_PROP_FRAME_HEIGHT
     cv2.CAP_PROP_FPS = cv2.cv.CV_CAP_PROP_FPS
     cv2.CAP_PROP_POS_MSEC = cv2.cv.CV_CAP_PROP_POS_MSEC
     cv2.CAP_PROP_POS_FRAMES = cv2.cv.CV_CAP_PROP_POS_FRAMES
     cv2.CAP_PROP_FRAME_COUNT = cv2.cv.CV_CAP_PROP_FRAME_COUNT
+
