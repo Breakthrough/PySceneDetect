@@ -8,7 +8,7 @@
 # other detection method objects are based, which can be used as templates for
 # implementing custom/application-specific scene detection methods.
 #
-# Copyright (C) 2012-2017 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2012-2018 Brandon Castellano <http://www.bcastell.com>.
 #
 # PySceneDetect is licensed under the BSD 2-Clause License; see the
 # included LICENSE file or visit one of the following pages for details:
@@ -56,6 +56,10 @@ class SceneDetector(object):
     """Base SceneDetector class to implement a scene detection algorithm."""
     def __init__(self):
         pass
+
+    def register_metrics(self, stats_manager):
+        # type: (StatsManager) -> bool
+        return False
 
     def process_frame(self, frame_num, frame_img, frame_metrics, scene_list):
         """Computes/stores metrics and detects any scene changes.

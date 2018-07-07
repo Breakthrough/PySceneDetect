@@ -7,7 +7,7 @@
 #
 # This file contains all code for the main `scenedetect` module. 
 #
-# Copyright (C) 2012-2017 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2012-2018 Brandon Castellano <http://www.bcastell.com>.
 #
 # PySceneDetect is licensed under the BSD 2-Clause License; see the
 # included LICENSE file or visit one of the following pages for details:
@@ -37,14 +37,16 @@ import subprocess
 
 # PySceneDetect Library Imports
 import scenedetect.platform
-import scenedetect.detectors
-import scenedetect.timecodes
-import scenedetect.manager
+import scenedetect.scene_detectors
+import scenedetect.frame_timecode
+import scenedetect.scene_manager
+import scenedetect.video_manager
 import scenedetect.cli
 # Commonly used classes for easier use directly from the scenedetect namespace.
-from scenedetect.manager import SceneManager
-from scenedetect.timecodes import FrameTimecode
-#from scenedetect.detectors import ThresholdDetector, ContentDetector
+from scenedetect.scene_manager import SceneManager
+from scenedetect.frame_timecode import FrameTimecode
+from scenedetect.video_manager import VideoManager
+#from scenedetect.scene_detectors import ThresholdDetector, ContentDetector
 
 # Third-Party Library Imports
 import cv2
@@ -61,14 +63,14 @@ PySceneDetect %s
 Site/Updates: https://github.com/Breakthrough/PySceneDetect/
 Documentation: http://pyscenedetect.readthedocs.org/
 
-Copyright (C) 2012-2017 Brandon Castellano. All rights reserved.
+Copyright (C) 2012-2018 Brandon Castellano. All rights reserved.
 
 PySceneDetect is released under the BSD 2-Clause license. See the
 included LICENSE file or visit the PySceneDetect website for details.
 This software uses the following third-party components:
-  > NumPy [Copyright (C) 2005-2016, Numpy Developers]
-  > OpenCV [Copyright (C) 2017, Itseez]
-  > mkvmerge [Copyright (C) 2005-2016, Matroska]
+  > NumPy [Copyright (C) 2018, Numpy Developers]
+  > OpenCV [Copyright (C) 2018, OpenCV Team]
+  > mkvmerge [Copyright (C) 2005-2018, Matroska]
 THE SOFTWARE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, EXPRESS OR IMPLIED.
 """ % __version__
 
@@ -227,7 +229,7 @@ def detect_scenes(cap, scene_manager, start_frame,
             if len(stats_file_keys) > 0:
                 scene_manager.stats_writer.writerow(
                     [str(frames_read)] +
-                    [scenedetect.timecodes.frame_to_timecode(frames_read, video_fps)] +
+                    [scenedetect.timecode.frame_to_timecode(frames_read, video_fps)] +
                     [str(frame_metrics[frames_read][metric]) for metric in stats_file_keys])
         frames_read += 1
         frames_processed += 1
@@ -285,13 +287,13 @@ def main():
     """
 
     # Load available detection modes and timecode formats.
-    scene_detectors = scenedetect.detectors.get_available()
-    timecode_formats = scenedetect.timecodes.get_available()
+    scene_detectors = scenedetect.scene_detectors.get_available()
+    timecode_formats = scenedetect.timecode.get_available()
     # Parse CLI arguments.
     args = scenedetect.cli.get_cli_parser(
         scene_detectors.keys(), timecode_formats.keys()).parse_args()
     # Use above to initialize scene manager.
-    smgr = scenedetect.manager.SceneManager(args = args)
+    smgr = scenedetect.scene_manager.SceneManager(args = args)
 
     # Perform scene detection using specified mode.
     start_time = time.time()
@@ -305,7 +307,7 @@ def main():
     # Create new list with scene cuts in milliseconds (original uses exact
     # frame numbers) based on the video's framerate, and then timecodes.
     scene_list_msec = [(1000.0 * x) / float(video_fps) for x in smgr.scene_list]
-    scene_list_tc = [scenedetect.timecodes.get_string(x) for x in scene_list_msec]
+    scene_list_tc = [scenedetect.timecode.get_string(x) for x in scene_list_msec]
     # Create new lists with scene cuts in seconds, and the length of each scene.
     scene_start_sec = [(1.0 * x) / float(video_fps) for x in smgr.scene_list]
     scene_len_sec = []
