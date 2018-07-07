@@ -6,10 +6,6 @@
 #     [  Github: https://github.com/Breakthrough/PySceneDetect/  ]
 #     [  Documentation: http://pyscenedetect.readthedocs.org/    ]
 #
-# This file contains the StatsManager class, which provides a
-# consistent interface to loading/saving a key-value store of
-# metrics/statistics that SceneDetectors can use to cache values.
-#
 # Copyright (C) 2012-2018 Brandon Castellano <http://www.bcastell.com>.
 #
 # PySceneDetect is licensed under the BSD 2-Clause License; see the
@@ -29,12 +25,29 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 #
 
+""" PySceneDetect scenedetect.stats_manager Module
+
+This file contains the StatsManager class, which provides a key-value store for
+each SceneDetector to read/write the metrics calculated for each frame.
+The StatsManager must be registered to a SceneManager by passing it to the
+SceneManager's constructor.
+
+The entire StatsManager can be saved to and loaded from a human-readable CSV file,
+also allowing both precise determination of the threshold or other optimal values
+for video files.
+
+The StatsManager can also be used to cache the calculation results of the scene
+detectors being used, speeding up subsequent scene detection runs using the
+same pair of SceneManager/StatsManager objects.
+"""
+
 # Standard Library Imports
 from __future__ import print_function
 import csv
 
-import scenedetect.frame_timecode
+# PySceneDetect Library Imports
 from scenedetect.frame_timecode import FrameTimecode
+from scenedetect.frame_timecode import MINIMUM_FRAMES_PER_SECOND_FLOAT
 
 
 COLUMN_NAME_FPS = "Frame Rate:"
@@ -82,6 +95,17 @@ class NoMetricsSet(Exception):
 
 
 
+def get_stats_reader(file_handle):
+    # type: (File) -> csv.reader
+    return csv.reader(file_handle, lineterminator='\n')
+    
+
+def get_stats_writer(file_handle):
+    # type: (File) -> csv.writer
+    return csv.writer(file_handle, lineterminator='\n')
+
+
+
 class StatsManager(object):
 
     def __init__(self):
@@ -122,15 +146,17 @@ class StatsManager(object):
     def metrics_exist(self, frame_number, metric_keys):
         # type: (int, List[str]) -> bool
         return all([self._metric_exists(frame_number, metric_key) for metric_key in metric_keys])
-
     
-    def save_to_csv(self, csv_writer, base_timecode, force_save=False):
-        # type: (csv.writer, FrameTimecode, bool) -> None
-        if (self._metrics_updated or force_save) and (
-            self._registered_metrics and self._frame_metrics):
+    def is_save_required(self):
+        return self._registered_metrics and self._frame_metrics
+
+    def save_to_csv(self, csv_file, base_timecode, force_save=False):
+        # type: (File [w], FrameTimecode, bool) -> None
+        csv_writer = get_stats_writer(csv_file)
+        if (self._metrics_updated or force_save) and self.is_save_required():
             # Header rows.
             metric_keys = list(self._registered_metrics)
-            csv_writer.writerow([COLUMN_NAME_FPS, base_timecode.get_framerate()])
+            csv_writer.writerow([COLUMN_NAME_FPS, '%.10f' % base_timecode.get_framerate()])
             csv_writer.writerow(
                 [COLUMN_NAME_FRAME_NUMBER, COLUMN_NAME_TIMECODE] + metric_keys)
             frame_keys = sorted(self._frame_metrics.keys())
@@ -147,18 +173,31 @@ class StatsManager(object):
                 raise NoMetricsSet()
             
 
-    def load_from_csv(self, csv_reader, base_timecode = None) -> None:
+    def load_from_csv(self, csv_file, base_timecode = None):
+        # type: (File [r], Optional[FrameTimecode]) -> None
+        csv_reader = get_stats_reader(csv_file)
         num_cols = None
         num_metrics = None
         # First row: Framerate, [video_framerate]
-        row = csv_reader.next()
-        if not row or not len(row) == 2 or not row[0] == COLUMN_NAME_FPS:
+        try:
+            row = next(csv_reader)
+        except StopIteration:
+            # If the file is blank or we couldn't decode anything, assume the file was empty.
+            return
+        # First Row (FPS = [...]) and ensure framerate equals base_timecode if set.
+        if not len(row) == 2 or not row[0] == COLUMN_NAME_FPS:
             raise StatsFileCorrupt()
         stats_file_framerate = float(row[1])
+        if stats_file_framerate < MINIMUM_FRAMES_PER_SECOND_FLOAT:
+            raise StatsFileCorrupt("Invalid framerate detected in CSV stats file "
+                                   "(decoded FPS: %f)." % stats_file_framerate)
         if base_timecode is not None and not base_timecode.equal_framerate(stats_file_framerate):
             raise StatsFileFramerateMismatch(base_timecode.get_framerate(), stats_file_framerate)
-        # Second row: Frame Num, Timecode, [metrics...]
-        row = csv_reader.next()
+        # Second Row: Frame Num, Timecode, [metrics...]
+        try:
+            row = next(csv_reader)
+        except StopIteration:
+            raise StatsFileCorrupt("Header row(s) missing.")
         if not row or not len(row) >= 2:
             raise StatsFileCorrupt()
         if row[0] != COLUMN_NAME_FRAME_NUMBER or row[1] != COLUMN_NAME_TIMECODE:
