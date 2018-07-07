@@ -7,6 +7,17 @@ Video Scene Cut Detection and Analysis Tool
 [![Documentation Status](https://readthedocs.org/projects/pyscenedetect/badge/?version=latest)](http://pyscenedetect.readthedocs.org/en/latest/?badge=latest) [![PyPI Status](https://img.shields.io/pypi/status/PySceneDetect.svg)](https://pypi.python.org/pypi/PySceneDetect/) [![PyPI Version](https://img.shields.io/pypi/v/PySceneDetect.svg)](https://pypi.python.org/pypi/PySceneDetect/)  [![PyPI License](https://img.shields.io/pypi/l/PySceneDetect.svg)](http://pyscenedetect.readthedocs.org/en/latest/copyright/)
 
 
+### News Upcoming v0.5 Release
+
+--------
+
+The next release of PySceneDetect will be v0.5, and should be released sometime this month.  The entire project has been refactored, new modules have been created, and unit tests will be provided in order to support the Python API first and foremost (as the current design was not modular enough, and became structured mostly around the CLI functionality).
+
+Furthermore, the CLI itself has been drastically changed with the concept of *commands*, which is necessary in order to support the ever-growing list of options and flags.  This will be a major update to both the CLI and API, and **breaks existing code/scripts**.  However, it is necessary to bring the project forwards to a more stable point (thanks [@Hellowlol](https://github.com/Hellowlol) for the feedback).
+
+Once these changes have been released, the focus of development will be on better integration with ffmpeg for more precise video cuts (thanks [@martinDRD](https://github.com/martinDRD) for the pull request), and then, focusing on performance improvements (with the possibility of implementing some detection algorithms in C++).  Lastly, thank you everyone for using PySceneDetect, as well as supporting the project by submitting issues and pull requests, and providing your feedback, support, and patience.
+
+
 ### Latest Release: v0.4 (January 14, 2017)
 
 **New**: The latest version integrates with `mkvmerge` to automatically split the input video into individual clips.
@@ -14,6 +25,7 @@ Video Scene Cut Detection and Analysis Tool
 There is also now an installer for Windows that automatically installs all dependencies and the `scenedetect` command system wide (64-bit only currently).  This is the recommended installation method for Windows users now, and it can be found on [the Releases page](https://github.com/Breakthrough/PySceneDetect/releases).  The Windows builds do not require an existing Python environment, nor any other prerequisites.  There is also a portable .zip version available.
 
 It is still recommended that both Linux and Mac users download the source distribution, following the installation instructions below.  
+
 
 --------
 
@@ -105,6 +117,6 @@ Additional features being planned or in development can be found [here (tagged a
 
 Licensed under BSD 2-Clause (see the `LICENSE` file for details).
 
-Copyright (C) 2012-2017 Brandon Castellano.
+Copyright (C) 2012-2018 Brandon Castellano.
 All rights reserved.
 
