@@ -3,9 +3,6 @@
 #   ---------------------------------------------------------------
 #     [  Documentation: http://pyscenedetect.readthedocs.org/    ]
 #
-# This file contains all platform/library/OS-specific code, intended to improve
-# compatibility of PySceneDetect with a wider array of software versions.
-#
 # Copyright (C) 2012-2018 Brandon Castellano <http://www.bcastell.com>.
 #
 # PySceneDetect is licensed under the BSD 2-Clause License; see the
@@ -25,6 +22,17 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 #
 
+""" PySceneDetect scenedetect.platform Module
+
+This file contains all platform/library/OS-specific code, intended to improve
+compatibility of PySceneDetect with a wider array of software versions.
+
+Specifically, this module adds compatibility wrappers for Python's Queue/queue
+(Python 2/3, respectively) as scenedetect.platform.queue, and for OpenCV 2.x,
+copies the OpenCV VideoCapture property constants from the cv2.cv namespace
+directly to the cv2 namespace.  This ensures that the cv2 API is consistent
+with those changes made to it in OpenCV 3.0 and above.
+"""
 
 # Standard Library Imports
 from __future__ import print_function
@@ -39,14 +47,17 @@ if sys.version_info[0] == 2:
     import Queue as queue
 else:
     import queue
+# pylint: enable=unused-import
 
-# Compatibility fix for OpenCV < 3.0 (this may break on 4.0+...)
+# Compatibility fix for OpenCV v3.0+:
 # pylint: disable=c-extension-no-member
-if cv2.__version__[0] == '2' or cv2.__version__[0] != '3':
+if cv2.__version__[0] == '2' or not (
+        cv2.__version__[0].isdigit() and int(cv2.__version__[0]) >= 3):
     cv2.CAP_PROP_FRAME_WIDTH = cv2.cv.CV_CAP_PROP_FRAME_WIDTH
     cv2.CAP_PROP_FRAME_HEIGHT = cv2.cv.CV_CAP_PROP_FRAME_HEIGHT
     cv2.CAP_PROP_FPS = cv2.cv.CV_CAP_PROP_FPS
     cv2.CAP_PROP_POS_MSEC = cv2.cv.CV_CAP_PROP_POS_MSEC
     cv2.CAP_PROP_POS_FRAMES = cv2.cv.CV_CAP_PROP_POS_FRAMES
     cv2.CAP_PROP_FRAME_COUNT = cv2.cv.CV_CAP_PROP_FRAME_COUNT
+# pylint: enable=c-extension-no-member
 
