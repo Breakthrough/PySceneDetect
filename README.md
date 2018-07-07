@@ -15,6 +15,8 @@ The next release of PySceneDetect will be v0.5, and should be released sometime 
 
 Furthermore, the CLI itself has been drastically changed with the concept of *commands*, which is necessary in order to support the ever-growing list of options and flags.  This will be a major update to both the CLI and API, and **breaks existing code/scripts**.  However, it is necessary to bring the project forwards to a more stable point (thanks [@Hellowlol](https://github.com/Hellowlol) for the feedback).
 
+A sample of the new API can be seen in [api_test.py (in branch v0.5-dev)](https://github.com/Breakthrough/PySceneDetect/blob/v0.5-dev/api_test.py), and a sample of the new CLI [can be found here](https://github.com/Breakthrough/PySceneDetect/issues/57#issuecomment-402585664).  Any feedback or suggestions regarding these changes may be brought up [here (#57)](https://github.com/Breakthrough/PySceneDetect/issues/57).
+
 Once these changes have been released, the focus of development will be on better integration with ffmpeg for more precise video cuts (thanks [@martinDRD](https://github.com/martinDRD) for the pull request), and then, focusing on performance improvements (with the possibility of implementing some detection algorithms in C++).  Lastly, thank you everyone for using PySceneDetect, as well as supporting the project by submitting issues and pull requests, and providing your feedback, support, and patience.
 
 
