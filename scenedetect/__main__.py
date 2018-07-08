@@ -6,16 +6,6 @@
 #     [  Github: https://github.com/Breakthrough/PySceneDetect/  ]
 #     [  Documentation: http://pyscenedetect.readthedocs.org/    ]
 #
-# Provides functionality to run PySceneDetect directly as a Python module (in
-# addition to using in other scripts via `import scenedetect`) by running:
-#
-#   > python -m scenedetect
-#
-# Installing PySceneDetect (using `python setup.py install` in the parent
-# directory) will also add the `scenedetect` command to be used from anywhere,
-# e.g. `scenedetect -i myfile.mp4`.
-#
-#
 # Copyright (C) 2012-2018 Brandon Castellano <http://www.bcastell.com>.
 #
 # PySceneDetect is licensed under the BSD 2-Clause License; see the
@@ -35,7 +25,31 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 #
 
-if __name__ == '__main__':
-    import scenedetect
-    scenedetect.main()
+""" PySceneDetect scenedetect.__main__ Module
 
+Provides functionality to run PySceneDetect directly as a Python module (in
+addition to using in other scripts via `import scenedetect`) by running:
+
+  > python -m scenedetect
+
+This module provides a high-level main() function, utilizing the scenedetect.cli
+module, itself based on the click library, to provide command-line interface (CLI)
+parsing functionality.  Also note that a convenience script scenedetect.py is also
+included for development purposes (allows ./scenedetect.py vs python -m scenedetect)
+
+Installing PySceneDetect (using `python setup.py install` in the parent directory)
+will also add the `scenedetect` command to %PATH% be used from anywhere.
+"""
+
+
+def main():
+
+    import scenedetect.cli
+    from scenedetect.cli import CliContext
+
+    cli_ctx = CliContext()
+    # pylint: disable=unexpected-keyword-arg, no-value-for-parameter
+    scenedetect.cli.cli.main(obj=cli_ctx)
+
+if __name__ == '__main__':
+    main()

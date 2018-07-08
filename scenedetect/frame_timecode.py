@@ -4,9 +4,6 @@
 #   ---------------------------------------------------------------
 #     [  Documentation: http://pyscenedetect.readthedocs.org/    ]
 #
-# This file contains all code related to timecode formats, interpreting,
-# parsing, and conversion.
-#
 # Copyright (C) 2012-2018 Brandon Castellano <http://www.bcastell.com>.
 #
 # PySceneDetect is licensed under the BSD 2-Clause License; see the
@@ -14,8 +11,8 @@
 #  - http://www.bcastell.com/projects/pyscenedetect/
 #  - https://github.com/Breakthrough/PySceneDetect/
 #
-# This software uses Numpy and OpenCV; see the LICENSE-NUMPY and
-# LICENSE-OPENCV files or visit one of above URLs for details.
+# This software uses Numpy, OpenCV, and click; see the included LICENSE-
+# files for copyright information, or visit one of the above URLs.
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 # EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
@@ -70,6 +67,7 @@ will wrap at 0.  For example, calling t.get_frame() in this case will return 0:
 Unit tests for the FrameTimecode object can be found in tests/test_timecode.py.
 """
 
+# Standard Library Imports
 import math
 
 
@@ -324,7 +322,7 @@ class FrameTimecode(object):
 
     def __add__(self, other):
         # type: (Union[int, float, str, FrameTimecode]) -> FrameTimecode
-        to_return = FrameTimecode(timecode = self)
+        to_return = FrameTimecode(timecode=self)
         to_return += other
         return to_return
 
@@ -348,7 +346,7 @@ class FrameTimecode(object):
 
     def __sub__(self, other):
         # type: (Union[int, float, str, FrameTimecode]) -> FrameTimecode
-        to_return = FrameTimecode(timecode = self)
+        to_return = FrameTimecode(timecode=self)
         to_return -= other
         return to_return
 
@@ -364,7 +362,8 @@ class FrameTimecode(object):
             if self.equal_framerate(other.framerate):
                 return self.frame_num == other.frame_num
             else:
-                raise TypeError('FrameTimecode objects must have the same framerate to be compared.')
+                raise TypeError(
+                    'FrameTimecode objects must have the same framerate to be compared.')
         elif other is None:
             return False
         else:
@@ -383,7 +382,8 @@ class FrameTimecode(object):
             if self.equal_framerate(other.framerate):
                 return self.frame_num < other.frame_num
             else:
-                raise TypeError('FrameTimecode objects must have the same framerate to be compared.')
+                raise TypeError(
+                    'FrameTimecode objects must have the same framerate to be compared.')
         #elif other is None:
         #    return False
         else:
@@ -402,7 +402,8 @@ class FrameTimecode(object):
             if self.equal_framerate(other.framerate):
                 return self.frame_num <= other.frame_num
             else:
-                raise TypeError('FrameTimecode objects must have the same framerate to be compared.')
+                raise TypeError(
+                    'FrameTimecode objects must have the same framerate to be compared.')
         #elif other is None:
         #    return False
         else:
@@ -421,7 +422,8 @@ class FrameTimecode(object):
             if self.equal_framerate(other.framerate):
                 return self.frame_num > other.frame_num
             else:
-                raise TypeError('FrameTimecode objects must have the same framerate to be compared.')
+                raise TypeError(
+                    'FrameTimecode objects must have the same framerate to be compared.')
         #elif other is None:
         #    return False
         else:
@@ -441,7 +443,8 @@ class FrameTimecode(object):
             if self.equal_framerate(other.framerate):
                 return self.frame_num >= other.frame_num
             else:
-                raise TypeError('FrameTimecode objects must have the same framerate to be compared.')
+                raise TypeError(
+                    'FrameTimecode objects must have the same framerate to be compared.')
         #elif other is None:
         #    return False
         else:

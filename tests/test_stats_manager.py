@@ -75,6 +75,8 @@ TEST_STATS_FILES = ['TEST_STATS_FILE'] * 4
 TEST_STATS_FILES = ['%s_%012d.csv' % (stats_file, random.randint(0, 10**12))
     for stats_file in TEST_STATS_FILES]
 
+# pylint: disable=protected-access
+
 class TestStatsManager(unittest.TestCase):
     """ SceneManager Unit Test Cases
 
@@ -316,7 +318,7 @@ class TestStatsManager(unittest.TestCase):
             [os.remove(stats_file) for stats_file in TEST_STATS_FILES]
 
 
-    def test_load_created_stats(self):
+    def test_load_hardcoded_stats(self):
 
         from scenedetect.stats_manager import COLUMN_NAME_FPS
         from scenedetect.stats_manager import COLUMN_NAME_FRAME_NUMBER

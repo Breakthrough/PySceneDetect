@@ -18,8 +18,8 @@
 #  - http://www.bcastell.com/projects/pyscenedetect/
 #  - https://github.com/Breakthrough/PySceneDetect/
 #
-# This software uses Numpy and OpenCV; see the LICENSE-NUMPY and
-# LICENSE-OPENCV files or visit one of above URLs for details.
+# This software uses Numpy, OpenCV, and click; see the included LICENSE-
+# files for copyright information, or visit one of the above URLs.
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 # EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
@@ -50,10 +50,11 @@ class SceneResult(object):
         self.end_frame = end_frame
         # Need to add 1 frame to duration, e.g. for a 1-frame scene where
         # start_frame and end_frame are the same, duration should be 1.
+        
         self.duration = end_frame - start_frame + 1
-
-        self.start_frame_im = start_frame_im
-        self.end_frame_im = end_frame_im
+        # Don't store frame_im's, do a second pass to generate thumbnails.
+        #self.start_frame_im = start_frame_im
+        #self.end_frame_im = end_frame_im
 
 
 

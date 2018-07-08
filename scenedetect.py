@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+
 #
 #         PySceneDetect: Python-Based Video Scene Detector
 #   ---------------------------------------------------------------
@@ -29,5 +29,7 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 #
 
-import scenedetect
-scenedetect.main()
+if __name__ == "__main__":
+    # pylint: disable=no-name-in-module
+    from scenedetect.__main__ import main
+    main()

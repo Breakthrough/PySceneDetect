@@ -17,8 +17,8 @@
 #  - http://www.bcastell.com/projects/pyscenedetect/
 #  - https://github.com/Breakthrough/PySceneDetect/
 #
-# This software uses Numpy and OpenCV; see the LICENSE-NUMPY and
-# LICENSE-OPENCV files or visit one of above URLs for details.
+# This software uses Numpy, OpenCV, and click; see the included LICENSE-
+# files for copyright information, or visit one of the above URLs.
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 # EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
@@ -53,6 +53,7 @@ from scenedetect.frame_timecode import FrameTimecode
 
 import scenedetect.video_manager
 from scenedetect.video_manager import VideoManager
+from scenedetect.video_manager_async import compute_queue_size
 
 import scenedetect.stats_manager
 from scenedetect.stats_manager import StatsManager
@@ -71,19 +72,6 @@ class SceneManager(object):
         self._stats_manager = stats_manager
         self._base_timecode = None
 
-    def add_cut(self, frame_num):
-        # type: (int) -> None
-        # Adds a cut to the cutting list.
-        self._cutting_list.append(frame_num)
-
-    def clear_cutting_list(self):
-        # type: () -> None
-        self._cutting_list.clear()
-
-    def get_cutting_list(self):
-        # type: () -> list
-        return sorted(self._cutting_list)
-
     def add_detector(self, detector):
         # type: (SceneDetector) -> None
         self._detector_list.append(detector)
@@ -91,9 +79,30 @@ class SceneManager(object):
             self._stats_manager.register_metrics(detector.get_metrics())
 
 
+    def clear(self):
+        # type: () -> None
+        """ Clear All Scenes/Cuts """
+        self._cutting_list.clear()
+
     def clear_detectors(self):
         # type: () -> None
         self._detector_list.clear()
+
+
+    def add_cut(self, frame_num):
+        # type: (int) -> None
+        # Adds a cut to the cutting list.
+        self._cutting_list.append(frame_num)
+
+
+    def get_scene_list(self):
+        # Need to go through all cuts & cutting list frames
+        raise NotImplementedError()
+
+
+    def _get_cutting_list(self):
+        # type: () -> list
+        return sorted(self._cutting_list)
 
 
     def process_frame(self, frame_num, frame_im):
@@ -107,8 +116,9 @@ class SceneManager(object):
                 self.add_cut(cut_frame)
 
         
-    def detect_scenes(self, frame_source, end_frame=None):
-        # type: (VideoManager, Optional[int]) -> int
+    def detect_scenes(self, frame_source, start_time=0, end_time=None):
+        # type: (VideoManager, Union[int, FrameTimecode],
+        #        Optional[Union[int, FrameTimecode]]) -> int
         """ Perform scene detection using passed video(s) in frame_source and
         detector(s) in detector_list.  Blocks until all frames in the frame_source
         have been processed.  Returns tuple of (frames processed, scenes detected).
@@ -119,7 +129,9 @@ class SceneManager(object):
                 frames to process (using frame_source.read() as in VideoCapture).
                 VideoManager is preferred as it allows concatenation of multiple videos
                 as well as seeking, by defining start time and end time/duration.
-            max_frames (int or FrameTimecode): Maximum number of frames to detect
+            start_time (int or FrameTimecode): Time/frame the passed frame_source object
+                is currently at in time (i.e. the frame # read() will return next).
+            end_time (int or FrameTimecode): Maximum number of frames to detect
                 (set to None to detect all available frames).
         Returns:
             Tuple of (# frames processed, # scenes detected).
@@ -127,24 +139,33 @@ class SceneManager(object):
             ValueError
         """
 
-        num_frames = 0
-        
-        if isinstance(end_frame, FrameTimecode):
-            end_frame = end_frame.get_frames()
+        start_frame = 0
+        curr_frame = 0
+        end_frame = None
 
-        #time.sleep(5)
+        if isinstance(start_time, FrameTimecode):
+            start_frame = start_time.get_frames()
+        elif start_time is not None:
+            start_frame = int(start_time)
+
+        curr_frame = start_frame
+
+        if isinstance(end_time, FrameTimecode):
+            end_frame = end_time.get_frames()
+        elif end_time is not None:
+            end_frame = int(end_time)
+
         while True:
-            if end_frame is not None and num_frames >= end_frame:
+            if end_frame is not None and curr_frame > end_frame:
                 break
             ret_val, frame_im = frame_source.read()
             if not ret_val:
                 break
-            num_frames += 1
-            frame_num = num_frames - 1
-
-            self.process_frame(frame_num, frame_im)
+            self.process_frame(curr_frame, frame_im)
+            curr_frame += 1
 
 
+        num_frames = curr_frame - start_frame
 
         print(" ")
         print(" ")

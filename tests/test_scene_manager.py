@@ -32,15 +32,22 @@ the SceneManager object, used to coordinate using SceneDetector objects on video
 capture/frame sources like the scenedetect.video_decoder.VideoManager object, or
 a cv2.VideoCapture object).
 
+In addition to the SceneManager class, these tests also require the PySceneDetect
+FrameTimecode, VideoManager, and VideoManagerAsync objects, and the OpenCV
+VideoCapture object.
+
 These tests rely on the testvideo.mp4 test video file, available by checking out the
 PySceneDetect git repository "resources" branch, or the following URL to download it
 directly:  https://github.com/Breakthrough/PySceneDetect/tree/resources/tests
+Alternatively, the TEST_VIDEO_FILE constant can be replaced with any valid video file.
 """
 
+# Standard Library Imports
 import unittest
 import time
 import os
 
+# PySceneDetect Library Imports
 import scenedetect
 
 from scenedetect.scene_manager import SceneManager
@@ -49,10 +56,9 @@ from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.video_manager import VideoManager
 from scenedetect.video_manager_async import VideoManagerAsync
 
-from scenedetect.stats_manager import StatsManager
-
-
+# Third-Party Library Imports
 import cv2
+
 
 TEST_VIDEO_FILE = 'testvideo.mp4'
 
@@ -86,6 +92,8 @@ class TestSceneManager(unittest.TestCase):
             duration = FrameTimecode('00:00:05', video_fps)
             
             vm.set_duration(start_time = start_time, end_time = duration)
+
+            
             vm.start()
             sm.detect_scenes(frame_source = vm)
 
@@ -135,7 +143,7 @@ class TestSceneManager(unittest.TestCase):
             video_fps = cap.get(cv2.CAP_PROP_FPS)
             duration = FrameTimecode('00:00:05', video_fps)
 
-            sm.detect_scenes(frame_source = cap, end_frame = duration)
+            sm.detect_scenes(frame_source = cap, end_time = duration)
 
             if print_runtime:
                 print("Ran in %.1f seconds." % (time.time() - t0))

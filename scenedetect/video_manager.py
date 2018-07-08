@@ -6,9 +6,6 @@
 #     [  Github: https://github.com/Breakthrough/PySceneDetect/  ]
 #     [  Documentation: http://pyscenedetect.readthedocs.org/    ]
 #
-# This file contains the VideoManager class, which provides a
-# consistent interface to reading videos (synchronously).
-#
 # Copyright (C) 2012-2018 Brandon Castellano <http://www.bcastell.com>.
 #
 # PySceneDetect is licensed under the BSD 2-Clause License; see the
@@ -16,8 +13,8 @@
 #  - http://www.bcastell.com/projects/pyscenedetect/
 #  - https://github.com/Breakthrough/PySceneDetect/
 #
-# This software uses Numpy and OpenCV; see the LICENSE-NUMPY and
-# LICENSE-OPENCV files or visit one of above URLs for details.
+# This software uses Numpy, OpenCV, and click; see the included LICENSE-
+# files for copyright information, or visit one of the above URLs.
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 # EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
@@ -29,6 +26,9 @@
 #
 
 """ PySceneDetect scenedetect.video_manager Module
+
+This file contains the VideoManager class, which provides a consistent
+interface to reading videos.
 
 This module includes both single-threaded (VideoManager) and asynchronous
 (VideoManagerAsync) video manager classes, which can be used to pass a
