@@ -60,7 +60,8 @@ class CliContext(object):
         self.stats_manager = None
         self.scene_manager = None
 
-    def _cleanup(self):
+    def cleanup(self):
+        logging.debug('CliContext: Cleaning up.')
         if self.video_manager is not None:
             try:
                 self.video_manager.stop()
@@ -72,7 +73,6 @@ class CliContext(object):
     def process_input(self):
         logging.debug('CliContext: Processing video(s)...')
 
-        self._cleanup()
 
 
 

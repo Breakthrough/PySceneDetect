@@ -56,8 +56,11 @@ def main():
     """
 
     cli_ctx = CliContext()  # CliContext object passed between CLI commands.
-    # pylint: disable=unexpected-keyword-arg, no-value-for-parameter
-    cli.main(obj=cli_ctx)   # Parse CLI arguments with registered callbacks.
+    try:
+        # pylint: disable=unexpected-keyword-arg, no-value-for-parameter
+        cli.main(obj=cli_ctx)   # Parse CLI arguments with registered callbacks.
+    finally:
+        cli_ctx.cleanup()
 
 if __name__ == '__main__':
     main()

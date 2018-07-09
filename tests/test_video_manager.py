@@ -40,6 +40,9 @@ import unittest
 import time
 import os
 
+import pytest
+import cv2
+
 from scenedetect.video_manager import VideoManager
 from scenedetect.video_manager_async import VideoManagerAsync
 from scenedetect.video_manager import VideoOpenFailure
@@ -49,7 +52,6 @@ from scenedetect.video_manager import VideoDecodingInProgress
 from scenedetect.video_manager import VideoDecoderProcessStarted
 from scenedetect.video_manager import VideoDecoderProcessNotStarted
 
-import cv2
 
 TEST_VIDEO_FILE = 'testvideo.mp4'
 
@@ -72,9 +74,8 @@ class TestVideoManager(unittest.TestCase):
         video_manager = VideoManager([TEST_VIDEO_FILE] * 2)
         try:
             cap = cv2.VideoCapture(TEST_VIDEO_FILE)
-            self.assertTrue(cap.isOpened())
-            self.assertAlmostEqual(
-                cap.get(cv2.CAP_PROP_FPS), video_manager.get_framerate())
+            assert cap.isOpened()
+            assert video_manager.get_framerate() == pytest.approx(cap.get(cv2.CAP_PROP_FPS))
             self.assertEqual(
                 (cap.get(cv2.CAP_PROP_FRAME_WIDTH), cap.get(cv2.CAP_PROP_FRAME_HEIGHT)),
                 video_manager.get_framesize())
