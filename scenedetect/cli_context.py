@@ -33,6 +33,7 @@ state/context and logic to run the PySceneDetect CLI.
 from __future__ import print_function
 import sys
 import string
+import logging
 
 # Third-Party Library Imports
 import cv2
@@ -56,14 +57,36 @@ class CliContext(object):
     def __init__(self):
         self.video_manager = None
         self.framerate = None
+        self.stats_manager = None
+        self.scene_manager = None
 
-    def cleanup(self):
+    def _cleanup(self):
         if self.video_manager is not None:
             try:
                 self.video_manager.stop()
             finally:
                 self.video_manager.release()
 
+
+
+    def process_input(self):
+        logging.debug('CliContext: Processing video(s)...')
+
+        self._cleanup()
+
+
+
+    def check_input_open(self):
+        if self.video_manager is None or not self.video_manager._cap_list:
+            error_strs = ["no input video(s) specified.",
+                          "Make sure 'input -i VIDEO' is at the start of the command."]
+            logging.error('\n'.join(error_strs))
+            raise click.BadParameter('\n'.join(error_strs), param_hint='input video')
+
+    def input_stats(self, stats_file_path):
+        if stats_file_path is not None:
+            self.stats_file_path = stats_file_path
+            logging.info('Stats File: %s.' % (stats_file_path))
 
     def input_videos(self, input_list, framerate=None):
         # type: List[str], Optional[float] -> bool
@@ -72,17 +95,24 @@ class CliContext(object):
         #click.echo('fps=%s' % framerate)
         video_manager_initialized = False
         try:
+            print(input_list)
             self.video_manager = VideoManager(
                 video_files=input_list, framerate=framerate)
             video_manager_initialized = True
+            self.framerate = self.video_manager.get_framerate()
         except VideoOpenFailure as ex:
-            click.echo('Failed to open video file(s):')
-            [click.echo('  %s' % file_name[0]) for file_name in ex.file_list]
+            error_strs = ['could not open video(s).', 'Failed to open video file(s):']
+            error_strs += ['  %s' % file_name[0] for file_name in ex.file_list]
+            logging.error('\n'.join(error_strs))
+            raise click.BadParameter('\n'.join(error_strs), param_hint='input video')
         except VideoFramerateUnavailable as ex:
-            click.echo('Failed to obtain framerate for video file %s.' % ex.file_name)
-            click.echo('Specify framerate manually with the -f / --framerate option.')
+            error_strs = ['could not get framerate from video(s)',
+                          'Failed to obtain framerate for video file %s.' % ex.file_name]
+            error_strs.append('Specify framerate manually with the -f / --framerate option.')
+            logging.error('\n'.join(error_strs))
+            raise click.BadParameter('\n'.join(error_strs), param_hint='input video')
         except VideoParameterMismatch as ex:
-            click.echo('The following video parameters do not match:')
+            error_strs = ['video parameters do not match.', 'List of mismatched parameters:']
             for param in ex.file_list:
                 if param[0] == cv2.CAP_PROP_FPS:
                     param_name = 'FPS'
@@ -90,12 +120,16 @@ class CliContext(object):
                     param_name = 'Frame width'
                 if param[0] == cv2.CAP_PROP_FRAME_HEIGHT:
                     param_name = 'Frame height'
-                click.echo('  %s mismatch in video %s (got %.2f, expected %.2f)' % (
+                error_strs.append('  %s mismatch in video %s (got %.2f, expected %.2f)' % (
                     param_name, param[3], param[1], param[2]))
-            click.echo('Specify parameter override with -p / --param-override to disable this check.')
+            error_strs.append(
+                'Multiple videos may only be specified if they have the same framerate and'
+                ' resolution. -f / --framerate may be specified to override the framerate.')
+            logging.error('\n'.join(error_strs))
+            raise click.BadParameter('\n'.join(error_strs), param_hint='input videos')
         
         if not video_manager_initialized:
             self.video_manager = None
+            logging.info('CliContext: VideoManager not initialized.')
 
         return self.video_manager is None
-    

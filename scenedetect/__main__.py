@@ -27,8 +27,9 @@
 
 """ PySceneDetect scenedetect.__main__ Module
 
-Provides functionality to run PySceneDetect directly as a Python module (in
-addition to using in other scripts via `import scenedetect`) by running:
+Provides entry point for PySceneDetect's command-line interface (CLI)
+functionality (in addition to using in other scripts via `import scenedetect`)
+by installing the module and running the `scenedetect` command, or by calling:
 
   > python -m scenedetect
 
@@ -41,15 +42,22 @@ Installing PySceneDetect (using `python setup.py install` in the parent director
 will also add the `scenedetect` command to %PATH% be used from anywhere.
 """
 
+import logging
+
+# PySceneDetect Library Imports
+from scenedetect.cli import CliContext
+from scenedetect.cli import scenedetect_cli as cli
 
 def main():
+    """ Main: PySceneDetect command-line interface (CLI) entry point.
 
-    import scenedetect.cli
-    from scenedetect.cli import CliContext
+    Passes control flow to the CLI parser (using the click library), whose
+    entry point is the decorated scenedetect.cli.scenedetect_cli function.
+    """
 
-    cli_ctx = CliContext()
+    cli_ctx = CliContext()  # CliContext object passed between CLI commands.
     # pylint: disable=unexpected-keyword-arg, no-value-for-parameter
-    scenedetect.cli.cli.main(obj=cli_ctx)
+    cli.main(obj=cli_ctx)   # Parse CLI arguments with registered callbacks.
 
 if __name__ == '__main__':
     main()

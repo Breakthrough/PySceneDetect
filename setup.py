@@ -16,15 +16,13 @@ if sys.version_info < (2, 6) or (3, 0) <= sys.version_info < (3, 3):
 
 
 def get_requires():
-    requires = ['numpy']
-    if sys.version_info == (2, 6):
-        requires += ['argparse']
+    requires = ['numpy', 'click']
     return requires
 
 
 setup(
     name='PySceneDetect',
-    version='0.3.6',
+    version='0.4.1',
     description="A cross-platform, OpenCV-based video scene detection program and Python library. ",
     long_description=open('package-info.rst').read(),
     author='Brandon Castellano',

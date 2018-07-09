@@ -38,9 +38,6 @@ with those changes made to it in OpenCV 3.0 and above.
 from __future__ import print_function
 import sys
 
-# Third-Party Library Imports
-import cv2
-
 # Queue library
 # pylint: disable=unused-import
 if sys.version_info[0] == 2:
@@ -48,6 +45,18 @@ if sys.version_info[0] == 2:
 else:
     import queue
 # pylint: enable=unused-import
+
+# String Types
+# pylint: disable=E0602
+if sys.version_info[0] == 2:
+    STR = unicode
+else:
+    STR = str
+# pylint: enable=unused-import
+
+
+# Third-Party Library Imports
+import cv2
 
 # Compatibility fix for OpenCV v3.0+:
 # pylint: disable=c-extension-no-member

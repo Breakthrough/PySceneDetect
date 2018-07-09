@@ -45,14 +45,16 @@ respect to a SceneManager object.
 from __future__ import print_function
 import os
 import math
+import logging
 
 # PySceneDetect Library Imports
-import scenedetect.platform
+from scenedetect.platform import STR
 import scenedetect.frame_timecode
 from scenedetect.frame_timecode import FrameTimecode
 
 # Third-Party Library Imports
 import cv2
+import click
 
 
 class VideoOpenFailure(Exception):
@@ -137,7 +139,7 @@ def open_captures(video_files, framerate=None, validate_parameters=True):
         elif video_files[0] < 0:
             raise ValueError("Invalid/negative device ID specified.")
         is_device = True
-    elif not all([isinstance(video_file, str) for video_file in video_files]):
+    elif not all([isinstance(video_file, (str, STR)) for video_file in video_files]):
         raise ValueError("Unexpected element type in video_files list (expected str(s)/int).")
     elif framerate is not None and not isinstance(framerate, float):
         raise TypeError("Expected type float for parameter framerate.")
@@ -263,6 +265,11 @@ class VideoManager(object):
         self._curr_time = FrameTimecode(0, self.get_framerate())
         self._last_frame = None
         self._curr_cap, self._curr_cap_idx = None, None
+        logging.info(
+            'VideoManager: Loaded %d video%s, framerate: %.2f FPS, resolution: %d x %d.',
+            len(self._cap_list), 's' if len(self._cap_list) > 1 else '',
+            self.get_framerate(), *self.get_framesize())
+
 
     def get_framerate(self):
         # type: () -> float
@@ -322,6 +329,11 @@ class VideoManager(object):
             self._end_time = end_time
         elif duration is not None:
             self._end_time = start_time + duration
+        
+        logging.info('CliContex: VideoManager duration set, start: %s, duration: %s, end: %s.',
+                     start_time.get_timecode() if start_time is not None else start_time,
+                     duration.get_timecode() if duration is not None else duration,
+                     end_time.get_timecode() if end_time is not None else end_time)
 
     def start(self):
         # type: () -> None

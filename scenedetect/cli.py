@@ -25,13 +25,15 @@
 """ PySceneDetect scenedetect.cli Module
 
 This file contains the implementation of the PySceneDetect command-line
-interface (CLI) parser, which uses the click library.
+interface (CLI) parser, which uses the click library.  The main CLI
+entry-point function is the scenedetect_cli command group.
 """
 
 # Standard Library Imports
 from __future__ import print_function
 import sys
 import string
+import logging
 
 # Third-Party Library Imports
 import click
@@ -46,7 +48,7 @@ from scenedetect.video_manager import VideoManager
 
 # Preface/intro help message shown at the beginning of the help command.
 def get_help_command_preface(command_name='scenedetect'):
-    command_name = (command_name,) * 5
+    command_name = (command_name,) * 4
     return """
 The PySceneDetect command-line interface is grouped into commands which
 can be combined together, each containing its own set of arguments:
@@ -67,61 +69,102 @@ command after the 'input' command:
 
  > %s input -i vid0001.mp4 -f 29.97 detect_content --threshold 20
 
-A list of all commands is printed below, followed by help information
-for all commands, including the options/arguments that they take.
-The help message for individual commands can be printed by passing the
---help/-h option to the command (i.e. '%s [command] --help').
+A list of all commands is printed below. Help for a particular command
+can be printed by specifying 'help [command]', or 'help all' to print
+the help information for every command.
 
 Lastly, there are several commands used for displaying application
-help, version, and copyright information (e.g. %s about):
+version and copyright information (e.g. %s about):
 
-    help:    Displays this message, a list of commands, and the help
-             text for each command.
     version: Displays the version of PySceneDetect being used.
     about:   Displays PySceneDetect license and copyright information.
 """ % command_name
-
 
 
 CLICK_CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
 COMMAND_LIST = []
 
-@click.group(chain=True, context_settings=CLICK_CONTEXT_SETTINGS)
-@click.pass_context
-def cli(ctx):
-    ctx.call_on_close(ctx.obj.cleanup)
 
 
-def add_cli_command(command):
+def add_cli_command(cli, command):
     cli.add_command(command)
     COMMAND_LIST.append(command)
 
+def get_command(command_name):
+    command_ref = None
+    for command in COMMAND_LIST:
+        if command.name == command_name:
+            command_ref = command
+            break
+    return command_ref
 
-@click.command('help')
-@click.pass_context
-def help_command(ctx):
-    click.echo(click.style('----------------------------------------------------', fg='yellow'))
-    click.echo(click.style(' PySceneDetect %s Help' % scenedetect.__version__, fg='yellow'))
-    click.echo(click.style('----------------------------------------------------', fg='yellow'))
-    click.echo(get_help_command_preface(ctx.parent.info_name))
+def validate_timecode(ctx, value):
+    if value is None:
+        return value
+    try:
+        timecode = FrameTimecode(
+            timecode=value, fps=ctx.obj.video_manager.get_framerate())
+        return timecode
+    except (ValueError, TypeError):
+        raise click.BadParameter(
+            'timecode must be in frames (1234), seconds (123.4s), or HH:MM:SS (00:02:03.400)')
 
+def print_command_help(ctx, command):
+    ctx_name = ctx.info_name
+    ctx.info_name = command.name
+    click.echo(click.style('PySceneDetect %s Command' % command.name, fg='cyan'))
+    click.echo(click.style('----------------------------------------------------', fg='cyan'))
+    click.echo(command.get_help(ctx))
+    click.echo('')
+    ctx.info_name = ctx_name
+
+def print_command_list():
     click.echo(click.style('PySceneDetect Command List:', fg='green'))
     click.echo(click.style('----------------------------------------------------', fg='green'))
     click.echo('  %s' % ', '.join([command.name for command in COMMAND_LIST]))
     click.echo('')
 
-    ctx_name = ctx.info_name
-    for command in COMMAND_LIST:
-        ctx.info_name = command.name
-        click.echo(click.style('PySceneDetect %s Command' % command.name, fg='cyan'))
-        click.echo(click.style('----------------------------------------------------', fg='cyan'))
-        click.echo(command.get_help(ctx))
-        click.echo('')
-    ctx.info_name = ctx_name
+
+
+@click.group(chain=True, context_settings=CLICK_CONTEXT_SETTINGS)
+@click.pass_context
+def scenedetect_cli(ctx):
+    ctx.call_on_close(ctx.obj.process_input)
+
+
+
+@click.command('help', add_help_option=False)
+@click.argument('command_name', required=False, type=click.STRING)
+@click.pass_context
+def help_command(ctx, command_name):
+    if command_name is not None:
+        if command_name.lower() == 'all':
+            click.echo('')
+            print_command_list()
+            for command in COMMAND_LIST:
+                print_command_help(ctx, command)
+        else:
+            command = get_command(command_name)
+            if command is None:
+                error_strs = [
+                    'unknown command.', 'List of valid commands:',
+                    '  %s' % ', '.join([command.name for command in COMMAND_LIST]) ]
+                raise click.BadParameter('\n'.join(error_strs), param_hint='command name')
+            click.echo('')
+            print_command_help(ctx, command)
+    else:
+        click.echo(click.style('----------------------------------------------------', fg='yellow'))
+        click.echo(click.style(' PySceneDetect %s Help' % scenedetect.__version__, fg='yellow'))
+        click.echo(click.style('----------------------------------------------------', fg='yellow'))
+        click.echo(get_help_command_preface(ctx.parent.info_name))
+        print_command_list()
+        click.echo("Type '%s help [command]' for usage of [command]" % ctx.parent.info_name)
+        click.echo("(e.g. '%s help input'), or '%s help all'" % ((ctx.parent.info_name,)*2))
+        click.echo("to list the usage information for all commands.")
     ctx.exit()
 
-@click.command('about')
+@click.command('about', add_help_option=False)
 @click.pass_context
 def about_command(ctx):
     click.echo(click.style('----------------------------------------------------', fg='cyan'))
@@ -130,37 +173,134 @@ def about_command(ctx):
     click.echo(scenedetect.ABOUT_STRING)
     ctx.exit()
 
-@click.command('version')
+@click.command('version', add_help_option=False)
 @click.pass_context
 def version_command(ctx):
     click.echo(click.style('PySceneDetect %s' % scenedetect.__version__, fg='yellow'))
     ctx.exit()
 
 
-@click.command('input')
-@click.option('--input', '-i', multiple=True, type=click.Path(
-    exists=True, file_okay=True, readable=True, resolve_path=True))
-@click.option('--framerate', '-f', type=float, default=None)
+@click.command('input', add_help_option=False)
+@click.option(
+    '--input', '-i',
+    multiple=True, required=True, metavar='VIDEO',
+    type=click.Path(exists=True, file_okay=True, readable=True, resolve_path=True), help=
+    'Input video file. May be specified multiple times to concatenate several videos together.')
+@click.option(
+    '--framerate', '-f', metavar='FPS',
+    type=click.FLOAT, default=None, help=
+    '[Optional] Force framerate, in frames/sec (e.g. -f 29.97). Disables check to ensure that all '
+    ' input video framerates are equal.')
+@click.option(
+    '--stats', '-s', metavar='CSV',
+    type=click.Path(exists=False, file_okay=True, readable=True, resolve_path=True), help=
+    '[Optional] Path to stats file (.csv) for writing frame metrics to. If the file exists, any'
+    ' metrics will be processed, otherwise a new file will be created. Can be used to determine'
+    ' optimal values for various scene detector options, and to cache frame calculations in order'
+    ' to speed up multiple detection runs.')
+@click.option(
+    '--info-level', '-il', metavar='LEVEL',
+    type=click.Choice([ 'debug', 'info', 'warning', 'error']), default=None, help=
+    '[Optional] Level of debug/info/error information to show.')
+@click.option(
+    '--logfile', '-l', metavar='LOG',
+    type=click.Path(exists=False, file_okay=True, writable=True, resolve_path=True), help=
+    '[Optional] Path to log file for writing application logging information (debug/errors).')
 @click.pass_context
-def input_command(ctx, input, framerate):
+def input_command(ctx, input, framerate, stats, info_level, logfile):
+    """ 
+    input --input a.mp4 --statsfile a.csv
+
+    input --input a.mp4 --input b.mp4 --framerate 29.97
+    """
+    logging.disable(logging.NOTSET)
+    if logfile is not None:
+        logging.basicConfig(filename='example.log', filemode='w+',
+        level=getattr(logging, info_level.upper()) if info_level is not None else info_level)
+    else:
+        if info_level is not None:
+            logging.basicConfig(level=getattr(logging, info_level.upper()))
+        else:
+            logging.disable(logging.CRITICAL)
+
     ctx.obj.input_videos(input, framerate)
+    ctx.obj.input_stats(stats)
 
 
-    click.echo('Loaded %d videos, framerate = %.2f FPS.' % (
-        len(ctx.obj.video_manager._cap_list), ctx.obj.video_manager.get_framerate()))
+@click.command('time', add_help_option=False)
+@click.option(
+    '--start', '-s', metavar='TIMECODE',
+    type=click.STRING, default='0', show_default=True, help=
+    '[Optional] Time in video to begin detecting scenes. TIMECODE can be specified as exact'
+    ' number of frames (-s 100 to start at frame 100), time in seconds followed by s'
+    ' (-s 100s to start at 100 seconds), or a timecode in the format HH:MM:SS or HH:MM:SS.nnn'
+    ' (-s 00:01:40 to start at 1m40s).')
+@click.option(
+    '--duration', '-d', metavar='TIMECODE',
+    type=click.STRING, default=None, help=
+    '[Optional] Maximum time in video to process. TIMECODE format is the same as other'
+    ' arguments. Mutually exclusive with --end / -e.')
+@click.option(
+    '--end', '-e', metavar='TIMECODE',
+    type=click.STRING, default=None, help=
+    '[Optional] Time in video to end detecting scenes. TIMECODE format is the same as other'
+    ' arguments. Mutually exclusive with --duration / -d.')
+@click.pass_context
+def time_command(ctx, start, duration, end):
+    """ 
+    time --start 00:01:00 --duration 100s
+
+    time --start 0 --end 1000
+    """
+    ctx.obj.check_input_open()
+
+    if duration is not None and end is not None:
+        raise click.BadParameter(
+            'Only one of --duration/-d or --end/-e can be specified, not both.', param_hint='time')
+
+    start = validate_timecode(ctx, start)
+    duration = validate_timecode(ctx, duration)
+    end = validate_timecode(ctx, end)
+
+    ctx.obj.video_manager.set_duration(start_time=start, duration=duration, end_time=end)
 
 
-@click.command('output')
+
+@click.command('detect-content', add_help_option=False)
+@click.option(
+    '--threshold', '-t', metavar='VAL',
+    type=click.FLOAT, default=30.0, show_default=True, help=
+    '[Optional] Threshold value the delta_hsv frame metric must exceed to trigger a new scene.')
+@click.pass_context
+def detect_content_command(ctx, threshold):
+    """ 
+    detect-content
+
+    detect-content --threshold 30
+    """
+
+
+    click.echo('detect_content, threshold: %s' % threshold)
+    pass
+
+
+
+
+
+@click.command('output', add_help_option=False)
 @click.option('--output-option', '-oo')
 @click.pass_context
 def output_command(ctx, output_option):
-    click.echo('Output: %s' % output_option)
+    click.echo('output, output_option: %s' % output_option)
+    pass
 
 # Info/Terminating Commands:
-cli.add_command(help_command)
-cli.add_command(about_command)
-cli.add_command(version_command)
+scenedetect_cli.add_command(help_command)
+scenedetect_cli.add_command(about_command)
+scenedetect_cli.add_command(version_command)
 
 # Commands Added To Help List:
-add_cli_command(input_command)
-add_cli_command(output_command)
+add_cli_command(scenedetect_cli, input_command)
+add_cli_command(scenedetect_cli, time_command)
+add_cli_command(scenedetect_cli, detect_content_command)
+add_cli_command(scenedetect_cli, output_command)
