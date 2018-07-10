@@ -44,6 +44,7 @@ same pair of SceneManager/StatsManager objects.
 # Standard Library Imports
 from __future__ import print_function
 import csv
+import logging
 
 # PySceneDetect Library Imports
 from scenedetect.frame_timecode import FrameTimecode
@@ -84,8 +85,8 @@ class StatsFileFramerateMismatch(Exception):
         # type: (str, str)
         # Pass message string to base Exception class.
         super(StatsFileFramerateMismatch, self).__init__(message)
-        self._base_timecode_fps = base_timecode_fps
-        self._stats_file_fps = stats_file_fps
+        self.base_timecode_fps = base_timecode_fps
+        self.stats_file_fps = stats_file_fps
 
 class NoMetricsRegistered(Exception):
     pass
@@ -174,10 +175,11 @@ class StatsManager(object):
             
 
     def load_from_csv(self, csv_file, base_timecode = None):
-        # type: (File [r], Optional[FrameTimecode]) -> None
+        # type: (File [r], Optional[FrameTimecode]) -> int
         csv_reader = get_stats_reader(csv_file)
         num_cols = None
         num_metrics = None
+        num_frames = None
         # First row: Framerate, [video_framerate]
         try:
             row = next(csv_reader)
@@ -207,11 +209,15 @@ class StatsManager(object):
         if not num_metrics > 0:
             raise StatsFileCorrupt('No metrics defined in CSV file.')
         metric_keys = row[2:]
+        num_frames = 0
         for row in csv_reader:
             metric_dict = {}
             for i, metric_str in enumerate(row[2:]):
                 metric_dict[metric_keys[i]] = float(metric_str)
             self.set_metrics(int(row[0]), metric_dict)
+            num_frames += 1
+        logging.info('StatsManager: Parsed %d metrics for %d frames.', num_metrics, num_frames)
+        return num_frames
 
 
     def _get_metric(self, frame_number, metric_key):

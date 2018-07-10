@@ -270,6 +270,15 @@ class VideoManager(object):
             len(self._cap_list), 's' if len(self._cap_list) > 1 else '',
             self.get_framerate(), *self.get_framesize())
 
+    def get_num_videos(self):
+        # type: () -> int
+        """ Get Number of Videos - returns the length of the capture list (self._cap_list),
+        representing the number of videos the VideoManager has opened.
+        Returns:
+            (int) Number of videos, equal to length of capture list.
+        """
+        return len(self._cap_list)
+
 
     def get_framerate(self):
         # type: () -> float

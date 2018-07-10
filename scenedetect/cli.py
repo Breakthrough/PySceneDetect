@@ -99,7 +99,7 @@ def get_command(command_name):
             break
     return command_ref
 
-def validate_timecode(ctx, value):
+def parse_timecode(ctx, value):
     if value is None:
         return value
     try:
@@ -193,7 +193,7 @@ def version_command(ctx):
     ' input video framerates are equal.')
 @click.option(
     '--stats', '-s', metavar='CSV',
-    type=click.Path(exists=False, file_okay=True, readable=True, resolve_path=True), help=
+    type=click.Path(exists=False, file_okay=True, writable=True, resolve_path=False), help=
     '[Optional] Path to stats file (.csv) for writing frame metrics to. If the file exists, any'
     ' metrics will be processed, otherwise a new file will be created. Can be used to determine'
     ' optimal values for various scene detector options, and to cache frame calculations in order'
@@ -224,7 +224,7 @@ def input_command(ctx, input, framerate, stats, info_level, logfile):
             logging.disable(logging.CRITICAL)
 
     ctx.obj.input_videos(input, framerate)
-    ctx.obj.input_stats(stats)
+    ctx.obj.stats_file_path = stats
 
 
 @click.command('time', add_help_option=False)
@@ -252,17 +252,11 @@ def time_command(ctx, start, duration, end):
 
     time --start 0 --end 1000
     """
-    ctx.obj.check_input_open()
+    start = parse_timecode(ctx, start)
+    duration = parse_timecode(ctx, duration)
+    end = parse_timecode(ctx, end)
 
-    if duration is not None and end is not None:
-        raise click.BadParameter(
-            'Only one of --duration/-d or --end/-e can be specified, not both.', param_hint='time')
-
-    start = validate_timecode(ctx, start)
-    duration = validate_timecode(ctx, duration)
-    end = validate_timecode(ctx, end)
-
-    ctx.obj.video_manager.set_duration(start_time=start, duration=duration, end_time=end)
+    ctx.obj.time_command(start, duration, end)
 
 
 

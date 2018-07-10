@@ -131,8 +131,11 @@ class SceneManager(object):
                 as well as seeking, by defining start time and end time/duration.
             start_time (int or FrameTimecode): Time/frame the passed frame_source object
                 is currently at in time (i.e. the frame # read() will return next).
+                Must be passed if the frame_source has been seeked past frame 0
+                (i.e. calling set_duration on a VideoManager or seeking a VideoCapture).
             end_time (int or FrameTimecode): Maximum number of frames to detect
-                (set to None to detect all available frames).
+                (set to None to detect all available frames). Only needed for OpenCV
+                VideoCapture objects, as VideoManager allows set_duration.
         Returns:
             Tuple of (# frames processed, # scenes detected).
         Raises:

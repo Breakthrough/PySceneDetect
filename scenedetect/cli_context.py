@@ -34,6 +34,7 @@ from __future__ import print_function
 import sys
 import string
 import logging
+import os
 
 # Third-Party Library Imports
 import cv2
@@ -43,6 +44,12 @@ import click
 import scenedetect
 
 from scenedetect.frame_timecode import FrameTimecode
+
+from scenedetect.scene_manager import SceneManager
+
+from scenedetect.stats_manager import StatsManager
+from scenedetect.stats_manager import StatsFileCorrupt
+from scenedetect.stats_manager import StatsFileFramerateMismatch
 
 from scenedetect.video_manager import VideoManager
 from scenedetect.video_manager import VideoOpenFailure
@@ -55,10 +62,17 @@ from scenedetect.video_manager import VideoDecoderProcessNotStarted
 
 class CliContext(object):
     def __init__(self):
-        self.video_manager = None
-        self.framerate = None
-        self.stats_manager = None
         self.scene_manager = None
+        self.video_manager = None
+        self.base_timecode = None
+        self.start_frame = 0
+
+        self.stats_manager = StatsManager()
+        self.stats_file_path = None
+        self.stats_file = None
+
+        self.output_directory = None
+        
 
     def cleanup(self):
         logging.debug('CliContext: Cleaning up.')
@@ -70,27 +84,77 @@ class CliContext(object):
 
 
 
+    def _open_stats_file(self):
+        
+        if self.stats_file_path is not None:
+            # If an output directory is defined and the stats file path is a single
+            # filename (i.e. not an absolute/relative path), open the file handle
+            # in the output directory instead of the working directory.
+            if self.output_directory is not None and os.path.split(self.stats_file_path)[0]:
+                self.stats_file_path = os.path.join(
+                    self.output_directory, self.stats_file_path)
+            if os.path.exists(self.stats_file_path):
+                logging.info('CliContext: Found stats file %s, loading frame metrics.',
+                    os.path.basename(self.stats_file_path))
+                try:
+                    self.stats_file = open(self.stats_file_path, 'r')
+                    self.stats_manager.load_from_csv(self.stats_file, self.base_timecode)
+                except StatsFileCorrupt:
+                    error_strs = [
+                        'could not load stats file.', 'Failed to parse stats file:',
+                        'Could not load frame metrics from stats file, file is corrupt or not a'
+                        ' valid PySceneDetect stats file. If the file exists, ensure that it is'
+                        ' a valid stats file CSV, otherwise delete it and run PySceneDetect again'
+                        ' to re-generate the stats file.']
+                    logging.error('\n'.join(error_strs))
+                    raise click.BadParameter('\n'.join(error_strs), param_hint='input stats file')
+                except StatsFileFramerateMismatch as ex:
+                    error_strs = [
+                        'could not load stats file.', 'Failed to parse stats file:',
+                        'Framerate differs between stats file (%.2f FPS) and input'
+                        ' video%s (%.2f FPS)' % (
+                            ex.stats_file_fps,
+                            's' if self.video_manager.get_num_videos() > 1 else '',
+                            ex.base_timecode_fps),
+                        'Ensure the correct stats file path was given, or delete and re-generate'
+                        ' the stats file.']
+                    logging.error('\n'.join(error_strs))
+                    raise click.BadParameter('\n'.join(error_strs), param_hint='input stats file')
+                finally:
+                    if self.stats_file is not None:
+                        self.stats_file.close()
+
+
+
     def process_input(self):
+
+        self.check_input_open()
+
+        self._open_stats_file()
+        
         logging.debug('CliContext: Processing video(s)...')
 
+        # Run SceneManager here (cleanup [stop/release] happens even if except. thrown).
+        self.scene_manager = SceneManager(self.stats_manager)
+        self.scene_manager.add_detector(scenedetect.scene_manager.ContentDetectorNew())
 
+        self.video_manager.start()
+        self.scene_manager.detect_scenes(
+            frame_source=self.video_manager, start_time=self.start_frame)
+
+    
 
 
     def check_input_open(self):
-        if self.video_manager is None or not self.video_manager._cap_list:
+        if self.video_manager is None or not self.video_manager.get_num_videos() > 0:
             error_strs = ["no input video(s) specified.",
                           "Make sure 'input -i VIDEO' is at the start of the command."]
             logging.error('\n'.join(error_strs))
             raise click.BadParameter('\n'.join(error_strs), param_hint='input video')
 
-    def input_stats(self, stats_file_path):
-        if stats_file_path is not None:
-            self.stats_file_path = stats_file_path
-            logging.info('Stats File: %s.' % (stats_file_path))
-
     def input_videos(self, input_list, framerate=None):
         # type: List[str], Optional[float] -> bool
-        self.framerate = framerate
+        self.base_timecode = None
         #click.echo(input_list)
         #click.echo('fps=%s' % framerate)
         video_manager_initialized = False
@@ -99,7 +163,7 @@ class CliContext(object):
             self.video_manager = VideoManager(
                 video_files=input_list, framerate=framerate)
             video_manager_initialized = True
-            self.framerate = self.video_manager.get_framerate()
+            self.base_timecode = self.video_manager.get_base_timecode()
         except VideoOpenFailure as ex:
             error_strs = ['could not open video(s).', 'Failed to open video file(s):']
             error_strs += ['  %s' % file_name[0] for file_name in ex.file_list]
@@ -133,3 +197,18 @@ class CliContext(object):
             logging.info('CliContext: VideoManager not initialized.')
 
         return self.video_manager is None
+
+    def time_command(self, start=None, duration=None, end=None):
+        
+        self.check_input_open()
+
+        if duration is not None and end is not None:
+            raise click.BadParameter(
+                'Only one of --duration/-d or --end/-e can be specified, not both.',
+                param_hint='time')
+
+        self.video_manager.set_duration(start_time=start, duration=duration, end_time=end)
+        
+        if start is not None:
+            self.start_frame = start.get_frames()
+
