@@ -53,6 +53,8 @@ import scenedetect
 from scenedetect.scene_manager import SceneManager
 from scenedetect.frame_timecode import FrameTimecode
 
+from scenedetect.scene_detectors import ContentDetector
+
 from scenedetect.video_manager import VideoManager
 from scenedetect.video_manager_async import VideoManagerAsync
 
@@ -82,7 +84,7 @@ class TestSceneManager(unittest.TestCase):
         
         vm = VideoManager([TEST_VIDEO_FILE])
         sm = SceneManager()
-        sm.add_detector(scenedetect.scene_manager.ContentDetectorNew())
+        sm.add_detector(ContentDetector())
         
         try:
             t0 = time.time()
@@ -109,7 +111,7 @@ class TestSceneManager(unittest.TestCase):
         
         vm = VideoManagerAsync([TEST_VIDEO_FILE])
         sm = SceneManager()
-        sm.add_detector(scenedetect.scene_manager.ContentDetectorNew())
+        sm.add_detector(ContentDetector())
 
         try:
             t0 = time.time()
@@ -135,7 +137,7 @@ class TestSceneManager(unittest.TestCase):
         
         cap = cv2.VideoCapture(TEST_VIDEO_FILE)
         sm = SceneManager()
-        sm.add_detector(scenedetect.scene_manager.ContentDetectorNew())
+        sm.add_detector(ContentDetector())
         
         try:
             t0 = time.time()

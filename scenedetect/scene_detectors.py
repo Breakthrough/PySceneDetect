@@ -55,21 +55,22 @@ def get_available():
 class SceneDetector(object):
     """Base SceneDetector class to implement a scene detection algorithm."""
     def __init__(self):
-        pass
+        self.stats_manager = None
 
-    def register_metrics(self, stats_manager):
-        # type: (StatsManager) -> bool
-        return False
-
-    def process_frame(self, frame_num, frame_img, frame_metrics, scene_list):
-        """Computes/stores metrics and detects any scene changes.
+    def process_frame(self, frame_num, frame_img):
+        # type: (int, numpy.ndarray) -> bool, Optional[int]
+        """ Process Frame: Computes/stores metrics and detects any scene changes.
 
         Prototype method, no actual detection.
         """
-        return
+        raise NotImplementedError()
 
     def post_process(self, scene_list, frame_num):
-        pass
+        """ Post Process: Performs any 
+
+        Prototype method, no actual detection.
+        """
+        raise NotImplementedError()
 
 
 class ThresholdDetector(SceneDetector):
@@ -99,7 +100,10 @@ class ThresholdDetector(SceneDetector):
     def __init__(self, threshold = 12, min_percent = 0.95, min_scene_len = 15,
                  fade_bias = 0.0, add_final_scene = False, block_size = 8):
         """Initializes threshold-based scene detector object."""
-        super(ThresholdDetector, self).__init__()
+
+        # Requires porting to v0.5 API.
+        raise NotImplementedError()
+
         self.threshold = int(threshold)
         self.fade_bias = fade_bias
         self.min_percent = min_percent
@@ -249,29 +253,41 @@ class ContentDetector(SceneDetector):
     """
 
     def __init__(self, threshold = 30.0, min_scene_len = 15):
-        super(ContentDetector, self).__init__()
         self.threshold = threshold
         self.min_scene_len = min_scene_len  # minimum length of any given scene, in frames
         self.last_frame = None
         self.last_scene_cut = None
         self.last_hsv = None
+        self._metric_keys = ['delta_hsv_avg', 'delta_hue', 'delta_sat', 'delta_lum']
 
-    def process_frame(self, frame_num, frame_img, frame_metrics, scene_list):
+    def get_metrics(self):
+        # type: () -> List[str]
+        """ Get Metrics:  Get a list of all metric names/keys used by the detector.
+        
+        Returns:
+            A List[str] of the frame metric key names that will be used by
+            the detector when a StatsManager is passed to process_frame.
+        """
+        return self._metric_keys
+
+    def process_frame(self, frame_num, frame_img):
+        # type: (int, numpy.ndarray) -> bool, Optional[int]
         # Similar to ThresholdDetector, but using the HSV colour space DIFFERENCE instead
         # of single-frame RGB/grayscale intensity (thus cannot detect slow fades with this method).
 
         # Value to return indiciating if a scene cut was found or not.
         cut_detected = False
+        cut_frame = None
+        metric_keys = self._metric_keys
 
         if self.last_frame is not None:
             # Change in average of HSV (hsv), (h)ue only, (s)aturation only, (l)uminance only.
             delta_hsv_avg, delta_h, delta_s, delta_v = 0.0, 0.0, 0.0, 0.0
-
-            if frame_num in frame_metrics and 'delta_hsv_avg' in frame_metrics[frame_num]:
-                delta_hsv_avg = frame_metrics[frame_num]['delta_hsv_avg']
-                delta_h = frame_metrics[frame_num]['delta_hue']
-                delta_s = frame_metrics[frame_num]['delta_sat']
-                delta_v = frame_metrics[frame_num]['delta_lum']
+            
+            if (self.stats_manager is not None and
+                self.stats_manager.metrics_exist(frame_num, metric_keys)):
+                delta_hsv_avg, delta_h, delta_s, delta_v = self.stats_manager.get_metrics(
+                    frame_num, metric_keys)
 
             else:
                 num_pixels = frame_img.shape[0] * frame_img.shape[1]
@@ -280,34 +296,35 @@ class ContentDetector(SceneDetector):
                 if not last_hsv:
                     last_hsv = cv2.split(cv2.cvtColor(self.last_frame, cv2.COLOR_BGR2HSV))
 
-                delta_hsv = [-1, -1, -1]
+                delta_hsv = [0, 0, 0, 0]
                 for i in range(3):
                     num_pixels = curr_hsv[i].shape[0] * curr_hsv[i].shape[1]
                     curr_hsv[i] = curr_hsv[i].astype(numpy.int32)
                     last_hsv[i] = last_hsv[i].astype(numpy.int32)
                     delta_hsv[i] = numpy.sum(numpy.abs(curr_hsv[i] - last_hsv[i])) / float(num_pixels)
-                delta_hsv.append(sum(delta_hsv) / 3.0)
+                delta_hsv[3] = sum(delta_hsv[0:3]) / 3.0
                 delta_h, delta_s, delta_v, delta_hsv_avg = delta_hsv
 
-                frame_metrics[frame_num]['delta_hsv_avg'] = delta_hsv_avg
-                frame_metrics[frame_num]['delta_hue'] = delta_h
-                frame_metrics[frame_num]['delta_sat'] = delta_s
-                frame_metrics[frame_num]['delta_lum'] = delta_v
+                if self.stats_manager is not None:
+                    self.stats_manager.set_metrics(frame_num, {
+                        metric_keys[0]: delta_hsv_avg, metric_keys[1]: delta_h,
+                        metric_keys[2]: delta_s, metric_keys[3]: delta_v })
 
                 self.last_hsv = curr_hsv
 
             if delta_hsv_avg >= self.threshold:
                 if self.last_scene_cut is None or (
                   (frame_num - self.last_scene_cut) >= self.min_scene_len):
-                    scene_list.append(frame_num)
-                    self.last_scene_cut = frame_num
+                    #scene_manager.add_cut(frame_num)   # Returning True will do the same now.
                     cut_detected = True
+                    cut_frame = frame_num
+                    self.last_scene_cut = frame_num
 
             #self.last_frame.release()
             del self.last_frame
                 
         self.last_frame = frame_img.copy()
-        return cut_detected
+        return cut_detected, cut_frame
 
     def post_process(self, scene_list, frame_num):
         """Not used for ContentDetector, as cuts are written as they are found."""
@@ -334,7 +351,9 @@ class MotionDetector(SceneDetector):
     def __init__(self, threshold = 0.50, num_frames_post_scene = 30,
                  kernel_size = -1):
         """Initializes motion-based scene detector object."""
-        super(MotionDetector, self).__init__()
+        # Requires porting to v0.5 API.
+        raise NotImplementedError()
+
         self.threshold = float(threshold)
         self.num_frames_post_scene = int(num_frames_post_scene)
 

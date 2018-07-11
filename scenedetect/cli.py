@@ -47,7 +47,7 @@ from scenedetect.video_manager import VideoManager
 
 # Preface/intro help message shown at the beginning of the help command.
 def get_help_command_preface(command_name='scenedetect'):
-    command_name = (command_name,) * 3
+    command_name = (command_name,) * 4
     return """
 The PySceneDetect command-line interface is grouped into commands which
 can be combined together, each containing its own set of arguments:
@@ -55,7 +55,9 @@ can be combined together, each containing its own set of arguments:
  > %s ([options]) [command] ([options]) ([...other command(s)...])
 
 Where [command] is the name of the command, and ([options]) are the
-arguments/options associated with the command, if any. The order of
+arguments/options associated with the command, if any. Options
+associated with the %s command below (e.g. --input,
+--framerate) must be specified before any commands. The order of
 commands is not strict, but each command should only be specified once.
 
 Commands can also be combined, for example, running the 'detect_threshold'

@@ -50,8 +50,10 @@ import random
 
 import scenedetect
 
-from scenedetect.scene_manager import SceneManager
 from scenedetect.frame_timecode import FrameTimecode
+
+from scenedetect.scene_manager import SceneManager
+from scenedetect.scene_detectors import ContentDetector
 
 from scenedetect.video_manager import VideoManager
 from scenedetect.video_manager_async import VideoManagerAsync
@@ -129,7 +131,7 @@ class TestStatsManager(unittest.TestCase):
         base_timecode = video_manager.get_base_timecode()
 
         self.assertEqual(len(stats_manager._registered_metrics), 0)
-        scene_manager.add_detector(scenedetect.scene_manager.ContentDetectorNew())
+        scene_manager.add_detector(ContentDetector())
         # add_detector should trigger register_metrics in the StatsManager.
         self.assertGreater(len(stats_manager._registered_metrics), 0)
         
@@ -168,7 +170,7 @@ class TestStatsManager(unittest.TestCase):
 
         base_timecode = video_manager.get_base_timecode()
 
-        scene_manager.add_detector(scenedetect.scene_manager.ContentDetectorNew())
+        scene_manager.add_detector(ContentDetector())
         
         try:
             video_fps = video_manager.get_framerate()
@@ -196,7 +198,7 @@ class TestStatsManager(unittest.TestCase):
 
         base_timecode = video_manager.get_base_timecode()
 
-        scene_manager.add_detector(scenedetect.scene_manager.ContentDetectorNew())
+        scene_manager.add_detector(ContentDetector())
         
         try:
             video_fps = video_manager.get_framerate()

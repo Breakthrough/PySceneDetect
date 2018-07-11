@@ -74,6 +74,7 @@ class SceneManager(object):
 
     def add_detector(self, detector):
         # type: (SceneDetector) -> None
+        detector.stats_manager = self._stats_manager
         self._detector_list.append(detector)
         if self._stats_manager is not None:
             self._stats_manager.register_metrics(detector.get_metrics())
@@ -109,8 +110,7 @@ class SceneManager(object):
         # type(int, numpy.ndarray) -> None
         cut_detected = False
         for detector in self._detector_list:
-            cut_detected, cut_frame = detector.process_frame(
-                frame_num, frame_im, self._stats_manager)
+            cut_detected, cut_frame = detector.process_frame(frame_num, frame_im)
             if cut_detected:
                 cut_detected = True
                 self.add_cut(cut_frame)
@@ -181,91 +181,3 @@ class SceneManager(object):
         return num_frames
 
 
-
-class ContentDetectorNew(scenedetect.scene_detectors.SceneDetector):
-    """Detects fast cuts using changes in colour and intensity between frames.
-
-    Since the difference between frames is used, unlike the ThresholdDetector,
-    only fast cuts are detected with this method.  To detect slow fades between
-    content scenes still using HSV information, use the DissolveDetector.
-    """
-
-    def __init__(self, threshold = 30.0, min_scene_len = 15):
-        super(ContentDetectorNew, self).__init__()
-        self.threshold = threshold
-        self.min_scene_len = min_scene_len  # minimum length of any given scene, in frames
-        self.last_frame = None
-        self.last_scene_cut = None
-        self.last_hsv = None
-        self._metric_keys = ['delta_hsv_avg', 'delta_hue', 'delta_sat', 'delta_lum']
-
-
-    def get_metrics(self):
-        # type: () -> List[str]
-        """ Get Metrics:  Get a list of all metric names/keys used by the detector.
-        
-        Returns:
-            A List[str] of the frame metric key names that will be used by
-            the detector when a StatsManager is passed to process_frame.
-        """
-        return self._metric_keys
-
-
-    def process_frame(self, frame_num, frame_img, stats_manager=None):
-        # type: (int, numpy.ndarray, Optional[StatsManager]) -> bool, Optional[int]
-        # Similar to ThresholdDetector, but using the HSV colour space DIFFERENCE instead
-        # of single-frame RGB/grayscale intensity (thus cannot detect slow fades with this method).
-
-        # Value to return indiciating if a scene cut was found or not.
-        cut_detected = False
-        cut_frame = None
-        metric_keys = self._metric_keys
-
-        if self.last_frame is not None:
-            # Change in average of HSV (hsv), (h)ue only, (s)aturation only, (l)uminance only.
-            delta_hsv_avg, delta_h, delta_s, delta_v = 0.0, 0.0, 0.0, 0.0
-
-            if stats_manager is not None and stats_manager.metrics_exist(frame_num, metric_keys):
-                delta_hsv_avg, delta_h, delta_s, delta_v = stats_manager.get_metrics(
-                    frame_num, metric_keys)
-
-            else:
-                num_pixels = frame_img.shape[0] * frame_img.shape[1]
-                curr_hsv = cv2.split(cv2.cvtColor(frame_img, cv2.COLOR_BGR2HSV))
-                last_hsv = self.last_hsv
-                if not last_hsv:
-                    last_hsv = cv2.split(cv2.cvtColor(self.last_frame, cv2.COLOR_BGR2HSV))
-
-                delta_hsv = [0, 0, 0, 0]
-                for i in range(3):
-                    num_pixels = curr_hsv[i].shape[0] * curr_hsv[i].shape[1]
-                    curr_hsv[i] = curr_hsv[i].astype(numpy.int32)
-                    last_hsv[i] = last_hsv[i].astype(numpy.int32)
-                    delta_hsv[i] = numpy.sum(numpy.abs(curr_hsv[i] - last_hsv[i])) / float(num_pixels)
-                delta_hsv[3] = sum(delta_hsv[0:3]) / 3.0
-                delta_h, delta_s, delta_v, delta_hsv_avg = delta_hsv
-
-                if stats_manager is not None:
-                    stats_manager.set_metrics(frame_num, {
-                        metric_keys[0]: delta_hsv_avg, metric_keys[1]: delta_h,
-                        metric_keys[2]: delta_s, metric_keys[3]: delta_v })
-
-                self.last_hsv = curr_hsv
-
-            if delta_hsv_avg >= self.threshold:
-                if self.last_scene_cut is None or (
-                  (frame_num - self.last_scene_cut) >= self.min_scene_len):
-                    #scene_manager.add_cut(frame_num)   # Returning True will do the same now.
-                    cut_detected = True
-                    cut_frame = frame_num
-                    self.last_scene_cut = frame_num
-
-            #self.last_frame.release()
-            del self.last_frame
-                
-        self.last_frame = frame_img.copy()
-        return cut_detected, cut_frame
-
-    def post_process(self, scene_list, frame_num):
-        """Not used for ContentDetector, as cuts are written as they are found."""
-        return

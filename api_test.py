@@ -15,8 +15,7 @@ from scenedetect.video_manager import VideoManager
 from scenedetect.scene_manager import SceneManager
 from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.stats_manager import StatsManager
-#from scenedetect.scene_detectors import ContentDetector
-from scenedetect.scene_manager import ContentDetectorNew as ContentDetector
+from scenedetect.scene_detectors import ContentDetector
 
 
 def main():
