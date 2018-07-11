@@ -72,6 +72,7 @@ class CliContext(object):
         self.stats_file = None
 
         self.output_directory = None
+        self.process_input_flag = True
         
 
     def cleanup(self):
@@ -127,12 +128,17 @@ class CliContext(object):
 
 
     def process_input(self):
+        
+        logging.debug('CliContext: Processing input...')
+
+        if not self.process_input_flag:
+            logging.debug('CliContext: Input processing skipped.')
+            return
 
         self.check_input_open()
 
         self._open_stats_file()
         
-        logging.debug('CliContext: Processing video(s)...')
 
         # Run SceneManager here (cleanup [stop/release] happens even if except. thrown).
         self.scene_manager = SceneManager(self.stats_manager)
@@ -142,24 +148,24 @@ class CliContext(object):
         self.scene_manager.detect_scenes(
             frame_source=self.video_manager, start_time=self.start_frame)
 
-    
-
-
     def check_input_open(self):
         if self.video_manager is None or not self.video_manager.get_num_videos() > 0:
             error_strs = ["no input video(s) specified.",
-                          "Make sure 'input -i VIDEO' is at the start of the command."]
-            logging.error('\n'.join(error_strs))
-            raise click.BadParameter('\n'.join(error_strs), param_hint='input video')
+                          "Make sure '--input VIDEO' is specified at the start of the command."]
+            error_str = '\n'.join(error_strs)
+            logging.error('CliContext: %s' % error_str)
+            raise click.BadParameter(error_str, param_hint='input video')
 
     def input_videos(self, input_list, framerate=None):
+        if not input_list and framerate is None:
+            return False
+        logging.debug('CliContext: Opening input list, initializing VideoManager...')
         # type: List[str], Optional[float] -> bool
         self.base_timecode = None
         #click.echo(input_list)
         #click.echo('fps=%s' % framerate)
         video_manager_initialized = False
         try:
-            print(input_list)
             self.video_manager = VideoManager(
                 video_files=input_list, framerate=framerate)
             video_manager_initialized = True
@@ -195,11 +201,15 @@ class CliContext(object):
         if not video_manager_initialized:
             self.video_manager = None
             logging.info('CliContext: VideoManager not initialized.')
+        logging.debug('CliContext: VideoManager initialized.')
 
         return self.video_manager is None
 
     def time_command(self, start=None, duration=None, end=None):
         
+        logging.debug('CliContext: Setting video time:\n    start: %s, duration: %s, end: %s',
+            start, duration, end)
+
         self.check_input_open()
 
         if duration is not None and end is not None:
