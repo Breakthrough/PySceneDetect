@@ -13,10 +13,10 @@ You can [download the clip from here](https://github.com/Breakthrough/PySceneDet
 In this case, we want to split this clip up into each individual scene - at each location where a fast cut occurs.  This means we need to use content-aware detecton mode (`-d content`).  Using the following command, let's run PySceneDetect on the video using the default threshold/sensitivity:
 
 ```rst
-scenedetect -i goldeneye.mp4 -o scenes_list.csv -d content -si -df 4
+scenedetect --input goldeneye.mp4 --downscale 4 detect-content output --scene-list --thumbnails
 ```
 
-The `-si` flag is to save a thumbnail/preview image of each scene, and `-df 4` downscales the video internally, by a factor of 4, to improve detection performance.  Assuming the other paramters are left at the default values, the following scenes should be obtained:
+Running the above command, in the working directory, you should see a file `goldeneye.scenes.csv`, as well as thumbnails for the start/middle/end of each scene as `goldeneye-XXXX-START/MID/END.jpg` (the output directory can be specified with the `--directory` option after the `output` command).  The results should appear as follows:
 
 
 |   Scene #    |  Start Time   |    Preview    |
@@ -52,9 +52,15 @@ We now know that a threshold of `30` does not work in all cases for our video, a
 
 <img src="https://raw.githubusercontent.com/Breakthrough/PySceneDetect/resources/tests/goldeneye/d-content-t-30/ge-scene-17.jpg" width="720" /> 
 
-We can determine the proper threshold in this case by generating a statistics file (`-s` / `--statsfile`) for the video `goldeneye.mp4`, and looking at the behaviour of the values where we expect the scene break/cut to occur in scene 17.
+We can determine the proper threshold in this case by generating a statistics file (with the `-s` / `--stats` option) for the video `goldeneye.mp4`, and looking at the behaviour of the values where we expect the scene break/cut to occur in scene 17:
 
-Finally, our updated scene list appears as follows (similar entries skipped for brevity):
+scenedetect --input goldeneye.mp4 --stats goldeneye.stats.csv --downscale 4 detect-content output --scene-list --thumbnails
+
+After examining the file and determining an optimal value of 27 for `detect-content`, we can set the threshold for the detector via:
+
+scenedetect --input goldeneye.mp4 --stats goldeneye.stats.csv --downscale 4 detect-content --threshold 27 output --scene-list --thumbnails
+
+Note that specifying the same `--stats` file again will make parsing the scenes much quicker, as some of the frame metrics stored in this file are re-used as a cache instead of computing them again. Finally, our updated scene list appears as follows (similar entries skipped for brevity):
 
 
 |   Scene #    |  Start Time   |    Preview    |
@@ -72,6 +78,8 @@ Now the missing scene (scene number 18, in this case) has been detected properly
 
 
 ## Splitting/Cutting Video into Clips
+
+**This section is out of date, and needs to be updated to reflect the changes in v0.5.**
 
 The last step to automatically split the input file into clips is to specify the `-o` / `--output` option.  This will pass a list of the detected scene timecodes to `mkvmerge`, if installed, splitting the input video into scenes.  To generate a sequence of files `goldeneye-scene-001.mkv`, `goldeneye-scene-002.mkv`, `goldeneye-scene-003.mkv`..., our full command becomes:
 
