@@ -22,7 +22,7 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 #
 
-""" PySceneDetect scenedetect.cli_context Module
+""" PySceneDetect scenedetect.cli.context Module
 
 This file contains the implementation of the PySceneDetect command-line
 interface (CLI) context class CliContext, used for the main application

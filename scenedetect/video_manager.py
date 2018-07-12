@@ -346,7 +346,7 @@ class VideoManager(object):
 
     def start(self):
         # type: () -> None
-        """ Start - starts video decoding/frame queuing thread/process.  Raises
+        """ Start - starts video decoding and seeks to start time.  Raises
         exception VideoDecoderProcessStarted if the method is called after the
         decoder process has already been started.
 

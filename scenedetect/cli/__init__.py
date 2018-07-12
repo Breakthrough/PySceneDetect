@@ -40,7 +40,7 @@ import click
 
 # PySceneDetect Library Imports
 import scenedetect
-from scenedetect.cli_context import CliContext
+from scenedetect.cli.context import CliContext
 from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.video_manager import VideoManager
 
@@ -262,14 +262,24 @@ def time_command(ctx, start, duration, end):
 @click.option(
     '--threshold', '-t', metavar='VAL',
     type=click.FLOAT, default=30.0, show_default=True, help=
-    '[Optional] Threshold value the delta_hsv frame metric must exceed to trigger a new scene.')
+    '[Optional] Threshold value the delta_hsv frame metric must exceed to trigger a new scene.'
+    ' Refers to frame metric delta_hsv_avg in stats file.')
+@click.option(
+    '--intensity-cutoff', '-i', metavar='VAL',
+    type=click.FLOAT, default=None, show_default=True, help=
+    '[Optional] Intensity cutoff threshold to disable scene cut detection. Useful for avoiding.'
+    ' scene changes triggered by flashes. Refers to frame metric delta_lum in stats file.')
 @click.pass_context
-def detect_content_command(ctx, threshold):
+def detect_content_command(ctx, threshold, intensity_cutoff):
     """ 
     detect-content
 
     detect-content --threshold 30
     """
+
+    if intensity_cutoff is not None:
+        raise NotImplementedError()
+
     click.echo('detect_content, threshold: %s' % threshold)
     # Initialize detector and add to scene manager.
     # Need to ensure that a detector is not added twice, or will cause

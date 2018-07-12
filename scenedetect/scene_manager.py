@@ -42,25 +42,10 @@ to the associated SceneDetectors for caching of frame metrics.
 
 # Standard Library Imports
 from __future__ import print_function
-import time
 
 # PySceneDetect Library Imports
-import scenedetect.platform
-import scenedetect.scene_detectors
-
-import scenedetect.frame_timecode
 from scenedetect.frame_timecode import FrameTimecode
 
-import scenedetect.video_manager
-from scenedetect.video_manager import VideoManager
-from scenedetect.video_manager_async import compute_queue_size
-
-import scenedetect.stats_manager
-from scenedetect.stats_manager import StatsManager
-
-# Third-Party Library Imports
-import cv2
-import numpy
 
 
 class SceneManager(object):
@@ -95,6 +80,11 @@ class SceneManager(object):
         # Adds a cut to the cutting list.
         self._cutting_list.append(frame_num)
 
+    def add_cuts(self, cut_list):
+        # type: (List[int]) -> None
+        # Adds a list of cuts to the cutting list.
+        self._cutting_list += cut_list
+
 
     def get_scene_list(self):
         # Need to go through all cuts & cutting list frames
@@ -106,14 +96,15 @@ class SceneManager(object):
         return sorted(self._cutting_list)
 
 
-    def process_frame(self, frame_num, frame_im):
+    def _process_frame(self, frame_num, frame_im):
         # type(int, numpy.ndarray) -> None
-        cut_detected = False
         for detector in self._detector_list:
-            cut_detected, cut_frame = detector.process_frame(frame_num, frame_im)
-            if cut_detected:
-                cut_detected = True
-                self.add_cut(cut_frame)
+            self.add_cuts(detector.process_frame(frame_num, frame_im))
+
+    def _post_process(self, frame_num):
+        # type(int, numpy.ndarray) -> None
+        for detector in self._detector_list:
+            self.add_cuts(detector.post_process(frame_num))
 
         
     def detect_scenes(self, frame_source, start_time=0, end_time=None):
@@ -164,9 +155,10 @@ class SceneManager(object):
             ret_val, frame_im = frame_source.read()
             if not ret_val:
                 break
-            self.process_frame(curr_frame, frame_im)
+            self._process_frame(curr_frame, frame_im)
             curr_frame += 1
-
+        
+        self._post_process(curr_frame)
 
         num_frames = curr_frame - start_frame
 

@@ -53,10 +53,9 @@ import scenedetect
 from scenedetect.scene_manager import SceneManager
 from scenedetect.frame_timecode import FrameTimecode
 
-from scenedetect.scene_detectors import ContentDetector
+from scenedetect.detectors import ContentDetector
 
 from scenedetect.video_manager import VideoManager
-from scenedetect.video_manager_async import VideoManagerAsync
 
 # Third-Party Library Imports
 import cv2
@@ -97,32 +96,6 @@ class TestSceneManager(unittest.TestCase):
 
             
             vm.start()
-            sm.detect_scenes(frame_source = vm)
-
-            if print_runtime:
-                print("Ran in %.1f seconds." % (time.time() - t0))
-
-        finally:
-            vm.stop()
-            vm.release()
-
-
-    def test_content_detect_asynchronous(self, print_runtime=True):
-        
-        vm = VideoManagerAsync([TEST_VIDEO_FILE])
-        sm = SceneManager()
-        sm.add_detector(ContentDetector())
-
-        try:
-            t0 = time.time()
-
-            video_fps = vm.get_framerate()
-            start_time = FrameTimecode('00:00:00', video_fps)
-            duration = FrameTimecode('00:00:05', video_fps)
-
-            vm.set_duration(start_time = start_time, end_time = duration)
-            vm.start()
-
             sm.detect_scenes(frame_source = vm)
 
             if print_runtime:

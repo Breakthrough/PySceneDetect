@@ -53,10 +53,9 @@ import scenedetect
 from scenedetect.frame_timecode import FrameTimecode
 
 from scenedetect.scene_manager import SceneManager
-from scenedetect.scene_detectors import ContentDetector
+from scenedetect.detectors import ContentDetector
 
 from scenedetect.video_manager import VideoManager
-from scenedetect.video_manager_async import VideoManagerAsync
 
 from scenedetect.stats_manager import StatsManager
 from scenedetect.stats_manager import get_stats_reader
@@ -123,7 +122,7 @@ class TestStatsManager(unittest.TestCase):
             stats.get_metrics(frame_key, metric_keys), [metric_values[metric_key] for metric_key in metric_keys])
 
 
-    def test_stat_metrics(self):
+    def test_detector_metrics(self):
         
         video_manager = VideoManager([TEST_VIDEO_FILE])
         stats_manager = StatsManager()
@@ -162,35 +161,65 @@ class TestStatsManager(unittest.TestCase):
             video_manager.release()
 
 
-    def test_save_stats(self):
-        
-        video_manager = VideoManager([TEST_VIDEO_FILE])
-        stats_manager = StatsManager()
-        scene_manager = SceneManager(stats_manager)
+    def test_load_empty_stats(self):
 
-        base_timecode = video_manager.get_base_timecode()
-
-        scene_manager.add_detector(ContentDetector())
-        
         try:
-            video_fps = video_manager.get_framerate()
-            start_time = FrameTimecode('00:00:00', video_fps)
-            duration = FrameTimecode('00:00:20', video_fps)
-            
-            video_manager.set_duration(start_time=start_time, end_time=duration)
-            video_manager.start()
-            scene_manager.detect_scenes(frame_source=video_manager)
+            stats_file = open(TEST_STATS_FILES[0], 'w')
 
-            with open(TEST_STATS_FILES[0], 'w') as stats_file:
-                stats_manager.save_to_csv(stats_file, base_timecode)
+            stats_file.close()
+            stats_file = open(TEST_STATS_FILES[0], 'r')
+
+            stats_manager = StatsManager()
+            
+            stats_reader = get_stats_reader(stats_file)
+            stats_manager.load_from_csv(stats_reader)
 
         finally:
+            stats_file.close()
+
             os.remove(TEST_STATS_FILES[0])
-            video_manager.stop()
-            video_manager.release()
 
 
-    def test_save_load_stats(self):
+    def test_load_hardcoded_file(self):
+
+        from scenedetect.stats_manager import COLUMN_NAME_FPS
+        from scenedetect.stats_manager import COLUMN_NAME_FRAME_NUMBER
+        from scenedetect.stats_manager import COLUMN_NAME_TIMECODE
+
+        stats_manager = StatsManager()
+        stats_file = open(TEST_STATS_FILES[0], 'w')
+
+        try:
+            stats_writer = get_stats_writer(stats_file)
+
+            some_metric_key = 'some_metric'
+            some_metric_value = 1.2
+            some_frame_key = 100
+            base_timecode = FrameTimecode(0, 29.97)
+            some_frame_timecode = base_timecode + some_frame_key
+
+            # Write out a valid file.
+            stats_writer.writerow([COLUMN_NAME_FPS, '%.10f' % base_timecode.get_framerate()])
+            stats_writer.writerow(
+                [COLUMN_NAME_FRAME_NUMBER, COLUMN_NAME_TIMECODE, some_metric_key])
+            stats_writer.writerow(
+                [some_frame_key, some_frame_timecode.get_timecode(), str(some_metric_value)])
+
+            stats_file.close()
+
+            stats_file = open(TEST_STATS_FILES[0], 'r')
+            stats_manager.load_from_csv(csv_file=stats_file, base_timecode=base_timecode)
+
+            # Check that we decoded the correct values.
+            self.assertTrue(stats_manager.metrics_exist(some_frame_key, [some_metric_key]))
+            self.assertAlmostEqual(stats_manager.get_metrics(some_frame_key, [some_metric_key])[0], some_metric_value)
+            
+        finally:
+            stats_file.close()
+            os.remove(TEST_STATS_FILES[0])
+
+
+    def test_save_load_from_video(self):
 
         video_manager = VideoManager([TEST_VIDEO_FILE])
         stats_manager = StatsManager()
@@ -233,25 +262,6 @@ class TestStatsManager(unittest.TestCase):
 
             video_manager.stop()
             video_manager.release()
-
-
-    def test_load_empty_stats(self):
-
-        try:
-            stats_file = open(TEST_STATS_FILES[0], 'w')
-
-            stats_file.close()
-            stats_file = open(TEST_STATS_FILES[0], 'r')
-
-            stats_manager = StatsManager()
-            
-            stats_reader = get_stats_reader(stats_file)
-            stats_manager.load_from_csv(stats_reader)
-
-        finally:
-            stats_file.close()
-
-            os.remove(TEST_STATS_FILES[0])
 
 
     def test_load_corrupt_stats(self):
@@ -318,42 +328,3 @@ class TestStatsManager(unittest.TestCase):
         finally:
             [stats_file.close() for stats_file in stats_files]
             [os.remove(stats_file) for stats_file in TEST_STATS_FILES]
-
-
-    def test_load_hardcoded_stats(self):
-
-        from scenedetect.stats_manager import COLUMN_NAME_FPS
-        from scenedetect.stats_manager import COLUMN_NAME_FRAME_NUMBER
-        from scenedetect.stats_manager import COLUMN_NAME_TIMECODE
-
-        stats_manager = StatsManager()
-        stats_file = open(TEST_STATS_FILES[0], 'w')
-
-        try:
-            stats_writer = get_stats_writer(stats_file)
-
-            some_metric_key = 'some_metric'
-            some_metric_value = 1.2
-            some_frame_key = 100
-            base_timecode = FrameTimecode(0, 29.97)
-            some_frame_timecode = base_timecode + some_frame_key
-
-            # Write out a valid file.
-            stats_writer.writerow([COLUMN_NAME_FPS, '%.10f' % base_timecode.get_framerate()])
-            stats_writer.writerow(
-                [COLUMN_NAME_FRAME_NUMBER, COLUMN_NAME_TIMECODE, some_metric_key])
-            stats_writer.writerow(
-                [some_frame_key, some_frame_timecode.get_timecode(), str(some_metric_value)])
-
-            stats_file.close()
-
-            stats_file = open(TEST_STATS_FILES[0], 'r')
-            stats_manager.load_from_csv(csv_file=stats_file, base_timecode=base_timecode)
-
-            # Check that we decoded the correct values.
-            self.assertTrue(stats_manager.metrics_exist(some_frame_key, [some_metric_key]))
-            self.assertAlmostEqual(stats_manager.get_metrics(some_frame_key, [some_metric_key])[0], some_metric_value)
-            
-        finally:
-            stats_file.close()
-            os.remove(TEST_STATS_FILES[0])
