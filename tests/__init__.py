@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #
 #         PySceneDetect: Python-Based Video Scene Detector
 #   ---------------------------------------------------------------
@@ -7,28 +8,27 @@
 #
 # Copyright (C) 2012-2018 Brandon Castellano <http://www.bcastell.com>.
 #
-# PySceneDetect is licensed under the BSD 2-Clause License; see the
-# included LICENSE file or visit one of the following pages for details:
-#  - http://www.bcastell.com/projects/pyscenedetect/
+# PySceneDetect is licensed under the BSD 2-Clause License; see the included
+# LICENSE file, or visit one of the following pages for details:
 #  - https://github.com/Breakthrough/PySceneDetect/
+#  - http://www.bcastell.com/projects/pyscenedetect/
 #
-# This software uses Numpy, OpenCV, and click; see the included LICENSE-
-# files for copyright information, or visit one of the above URLs.
+# This software uses Numpy, OpenCV, click, pytest, mkvmerge, and ffmpeg. See
+# the included LICENSE-* files, or one of the above URLs for more information.
 #
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-# IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR
-# OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
-# ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
-# OTHER DEALINGS IN THE SOFTWARE.
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+# AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
+# ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+# WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-
 
 """ PySceneDetect Unit Test Suite
 
-To run all available tests run `python -m unittest discover -v` from the parent
-directory (i.e. the root project folder of PySceneDetect containing the
-scenedetect/ and tests/ folders).  This will automatically find and run all
-of the test cases in the tests/ folder and display the results.
+To run all available tests run `pytest -v` from the parent directory
+(i.e. the root project folder of PySceneDetect containing the scenedetect/
+and tests/ folders).  This will automatically find and run all of the
+test cases in the tests/ folder and display the results.
 """
+

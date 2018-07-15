@@ -1,25 +1,27 @@
+# -*- coding: utf-8 -*-
 #
 #         PySceneDetect: Python-Based Video Scene Detector
 #   ---------------------------------------------------------------
+#     [  Site: http://www.bcastell.com/projects/pyscenedetect/   ]
+#     [  Github: https://github.com/Breakthrough/PySceneDetect/  ]
 #     [  Documentation: http://pyscenedetect.readthedocs.org/    ]
 #
 # Copyright (C) 2012-2018 Brandon Castellano <http://www.bcastell.com>.
 #
-# PySceneDetect is licensed under the BSD 2-Clause License; see the
-# included LICENSE file or visit one of the following pages for details:
-#  - http://www.bcastell.com/projects/pyscenedetect/
+# PySceneDetect is licensed under the BSD 2-Clause License; see the included
+# LICENSE file, or visit one of the following pages for details:
 #  - https://github.com/Breakthrough/PySceneDetect/
+#  - http://www.bcastell.com/projects/pyscenedetect/
 #
-# This software uses Numpy, OpenCV, and click; see the included LICENSE-
-# files for copyright information, or visit one of the above URLs.
+# This software uses Numpy, OpenCV, click, pytest, mkvmerge, and ffmpeg. See
+# the included LICENSE-* files, or one of the above URLs for more information.
 #
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-# IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR
-# OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
-# ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
-# OTHER DEALINGS IN THE SOFTWARE.
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+# AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
+# ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+# WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
 """ PySceneDetect scenedetect.cli.context Module
@@ -41,7 +43,7 @@ import cv2
 import click
 
 # PySceneDetect Library Imports
-import scenedetect
+import scenedetect.detectors
 
 from scenedetect.frame_timecode import FrameTimecode
 
@@ -56,19 +58,23 @@ from scenedetect.video_manager import VideoOpenFailure
 from scenedetect.video_manager import VideoFramerateUnavailable
 from scenedetect.video_manager import VideoParameterMismatch
 from scenedetect.video_manager import VideoDecodingInProgress
-from scenedetect.video_manager import VideoDecoderProcessStarted
-from scenedetect.video_manager import VideoDecoderProcessNotStarted
+from scenedetect.video_manager import VideoDecoderNotStarted
 
 
 class CliContext(object):
     def __init__(self):
+        # Optional[SceneManager]: SceneManager to manage storing of detected cuts in a video,
+        #                         and convert them 
         self.scene_manager = None
+        # Optional[VideoManager]: VideoManager to manage decoding of video(s).
         self.video_manager = None
+        # Optional[FrameTimecode]: FrameTimecode time base, also holds framerate (e.g. by
+        #                          calling self.base_timecode.get_framerate()).
         self.base_timecode = None
         self.start_frame = 0
 
         self.stats_manager = StatsManager()
-        self.stats_file_path = None
+        self.stats_file_path = None # Optional[str]: Path to stats file.
         self.stats_file = None
 
         self.output_directory = None
@@ -76,13 +82,11 @@ class CliContext(object):
         
 
     def cleanup(self):
-        logging.debug('CliContext: Cleaning up.')
-        if self.video_manager is not None:
-            try:
-                self.video_manager.stop()
-            finally:
+        try:
+            logging.debug('CliContext: Cleaning up.')
+        finally:
+            if self.video_manager is not None:
                 self.video_manager.release()
-
 
 
     def _open_stats_file(self):
@@ -126,7 +130,6 @@ class CliContext(object):
                         self.stats_file.close()
 
 
-
     def process_input(self):
         
         logging.debug('CliContext: Processing input...')
@@ -135,18 +138,16 @@ class CliContext(object):
             logging.debug('CliContext: Input processing skipped.')
             return
 
-        self.check_input_open()
-
-        self._open_stats_file()
-        
+        self.check_input_open()       
 
         # Run SceneManager here (cleanup [stop/release] happens even if except. thrown).
         self.scene_manager = SceneManager(self.stats_manager)
-        self.scene_manager.add_detector(scenedetect.scene_manager.ContentDetectorNew())
+        self.scene_manager.add_detector(scenedetect.detectors.ContentDetector())
 
         self.video_manager.start()
         self.scene_manager.detect_scenes(
             frame_source=self.video_manager, start_time=self.start_frame)
+
 
     def check_input_open(self):
         if self.video_manager is None or not self.video_manager.get_num_videos() > 0:
@@ -156,14 +157,20 @@ class CliContext(object):
             logging.error('CliContext: %s' % error_str)
             raise click.BadParameter(error_str, param_hint='input video')
 
-    def input_videos(self, input_list, framerate=None):
+
+    def parse_options(self, input_list, output_dir, framerate, stats_file_path):
+        """ Parse Options: Parses all CLI arguments passed to scenedetect [options]. """
         if not input_list and framerate is None:
             return False
-        logging.debug('CliContext: Opening input list, initializing VideoManager...')
-        # type: List[str], Optional[float] -> bool
+
+        logging.debug('CliContext: Parsing program options.')
+
+        self.output_directory = output_dir
+        
+        self.stats_file_path = stats_file_path
         self.base_timecode = None
-        #click.echo(input_list)
-        #click.echo('fps=%s' % framerate)
+        
+        logging.debug('CliContext: Initializing VideoManager.')
         video_manager_initialized = False
         try:
             self.video_manager = VideoManager(
@@ -198,12 +205,18 @@ class CliContext(object):
             logging.error('\n'.join(error_strs))
             raise click.BadParameter('\n'.join(error_strs), param_hint='input videos')
         
+        # Ensure VideoManager is initialized, and open StatsManager if --stats is specified.
         if not video_manager_initialized:
             self.video_manager = None
             logging.info('CliContext: VideoManager not initialized.')
-        logging.debug('CliContext: VideoManager initialized.')
+        else:
+            logging.debug('CliContext: VideoManager initialized.')
+            if self.stats_file_path is not None:
+                self.check_input_open()
+                self._open_stats_file()
 
         return self.video_manager is None
+
 
     def time_command(self, start=None, duration=None, end=None):
         

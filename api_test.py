@@ -29,7 +29,7 @@ def main():
     video_manager = VideoManager(['SOME_VIDEO_FILE.mp4'])
     stats_manager = StatsManager()
     scene_manager = SceneManager(stats_manager)
-    # Add ContentDetector algorithm (constructor takes algorithm options).
+    # Add ContentDetector algorithm (constructor takes detector options like threshold).
     scene_manager.add_detector(ContentDetector())
     base_timecode = video_manager.get_base_timecode()
 
@@ -52,7 +52,6 @@ def main():
             stats_manager.save_to_csv(stats_file, base_timecode)
 
     finally:
-        video_manager.stop()
         video_manager.release()
 
 if __name__ == "__main__":

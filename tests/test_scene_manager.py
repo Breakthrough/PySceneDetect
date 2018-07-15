@@ -8,21 +8,20 @@
 #
 # Copyright (C) 2012-2018 Brandon Castellano <http://www.bcastell.com>.
 #
-# PySceneDetect is licensed under the BSD 2-Clause License; see the
-# included LICENSE file or visit one of the following pages for details:
-#  - http://www.bcastell.com/projects/pyscenedetect/
+# PySceneDetect is licensed under the BSD 2-Clause License; see the included
+# LICENSE file, or visit one of the following pages for details:
 #  - https://github.com/Breakthrough/PySceneDetect/
+#  - http://www.bcastell.com/projects/pyscenedetect/
 #
-# This software uses Numpy and OpenCV; see the LICENSE-NUMPY and
-# LICENSE-OPENCV files or visit one of above URLs for details.
+# This software uses Numpy, OpenCV, click, pytest, mkvmerge, and ffmpeg. See
+# the included LICENSE-* files, or one of the above URLs for more information.
 #
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-# IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR
-# OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
-# ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
-# OTHER DEALINGS IN THE SOFTWARE.
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+# AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
+# ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+# WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
 """ PySceneDetect scenedetect.scene_manager Tests
@@ -36,20 +35,30 @@ In addition to the SceneManager class, these tests also require the PySceneDetec
 FrameTimecode, VideoManager, and VideoManagerAsync objects, and the OpenCV
 VideoCapture object.
 
+These unit tests test the VideoManager object with respect to object construction,
+testing argument format/limits, opening videos and grabbing frames, and appending
+multiple videos together.
+
 These tests rely on the testvideo.mp4 test video file, available by checking out the
 PySceneDetect git repository "resources" branch, or the following URL to download it
 directly:  https://github.com/Breakthrough/PySceneDetect/tree/resources/tests
 Alternatively, the TEST_VIDEO_FILE constant can be replaced with any valid video file.
+
 """
 
+# Standard project pylint disables for unit tests using pytest.
+# pylint: disable=no-self-use, protected-access, multiple-statements, invalid-name
+# pylint: disable=redefined-outer-name
+
+
 # Standard Library Imports
-import unittest
-import time
 import os
 
-# PySceneDetect Library Imports
-import scenedetect
+# Third-Party Library Imports
+import pytest
+import cv2
 
+# PySceneDetect Library Imports
 from scenedetect.scene_manager import SceneManager
 from scenedetect.frame_timecode import FrameTimecode
 
@@ -57,74 +66,57 @@ from scenedetect.detectors import ContentDetector
 
 from scenedetect.video_manager import VideoManager
 
-# Third-Party Library Imports
-import cv2
-
 
 TEST_VIDEO_FILE = 'testvideo.mp4'
 
-class TestSceneManager(unittest.TestCase):
-    """ SceneManager Unit Test Cases
 
-    These unit tests test the VideoDecoder object with respect to object construction,
-    testing argument format/limits, opening videos and grabbing frames, and appending
-    multiple videos together.  These tests rely on testvideo.mp4, available in the
-    PySceneDetect git repository "resources" branch.
+@pytest.fixture
+def test_video_file():
+    # type: () -> str
+    """ Fixture for test video file path (ensures file exists).
+    
+    Access in test case by adding a test_video_file argument to obtain the path.
     """
+    if not os.path.exists(TEST_VIDEO_FILE):
+        raise FileNotFoundError(
+            'Test video file (%s) must be present to run test cases' % TEST_VIDEO_FILE)
+    return TEST_VIDEO_FILE
 
-    @classmethod
-    def setUpClass(cls):
-        if not os.path.exists(TEST_VIDEO_FILE):
-            raise FileNotFoundError(
-                'Test video file (%s) must be present to run test cases' % TEST_VIDEO_FILE)
 
-    # Change print_runtime to False for release.
-    def test_content_detect(self, print_runtime=True):
+# Change print_runtime to False for release.
+def test_content_detect(test_video_file):
+    """ Test SceneManager with VideoManager and ContentDetector. """
+    vm = VideoManager([test_video_file])
+    sm = SceneManager()
+    sm.add_detector(ContentDetector())
+    
+    try:
+        video_fps = vm.get_framerate()
+        start_time = FrameTimecode('00:00:00', video_fps)
+        duration = FrameTimecode('00:00:05', video_fps)
         
-        vm = VideoManager([TEST_VIDEO_FILE])
-        sm = SceneManager()
-        sm.add_detector(ContentDetector())
+        vm.set_duration(start_time = start_time, end_time = duration)
+
         
-        try:
-            t0 = time.time()
+        vm.start()
+        sm.detect_scenes(frame_source = vm)
 
-            video_fps = vm.get_framerate()
-            start_time = FrameTimecode('00:00:00', video_fps)
-            duration = FrameTimecode('00:00:05', video_fps)
-            
-            vm.set_duration(start_time = start_time, end_time = duration)
-
-            
-            vm.start()
-            sm.detect_scenes(frame_source = vm)
-
-            if print_runtime:
-                print("Ran in %.1f seconds." % (time.time() - t0))
-
-        finally:
-            vm.stop()
-            vm.release()
+    finally:
+        vm.release()
 
 
-    def test_content_detect_opencv_videocap(self, print_runtime=True):
-        
-        cap = cv2.VideoCapture(TEST_VIDEO_FILE)
-        sm = SceneManager()
-        sm.add_detector(ContentDetector())
-        
-        try:
-            t0 = time.time()
+def test_content_detect_opencv_videocap(test_video_file):
+    """ Test SceneManager with cv2.VideoCapture and ContentDetector. """
+    cap = cv2.VideoCapture(test_video_file)
+    sm = SceneManager()
+    sm.add_detector(ContentDetector())
+    
+    try:
+        video_fps = cap.get(cv2.CAP_PROP_FPS)
+        duration = FrameTimecode('00:00:05', video_fps)
 
-            video_fps = cap.get(cv2.CAP_PROP_FPS)
-            duration = FrameTimecode('00:00:05', video_fps)
+        sm.detect_scenes(frame_source = cap, end_time = duration)
 
-            sm.detect_scenes(frame_source = cap, end_time = duration)
-
-            if print_runtime:
-                print("Ran in %.1f seconds." % (time.time() - t0))
-
-        finally:
-            cap.release()
-
-
+    finally:
+        cap.release()
 

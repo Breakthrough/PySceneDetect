@@ -1,55 +1,41 @@
+# -*- coding: utf-8 -*-
 #
 #         PySceneDetect: Python-Based Video Scene Detector
 #   ---------------------------------------------------------------
+#     [  Site: http://www.bcastell.com/projects/pyscenedetect/   ]
+#     [  Github: https://github.com/Breakthrough/PySceneDetect/  ]
 #     [  Documentation: http://pyscenedetect.readthedocs.org/    ]
-#
-# This file contains all of the detection methods/algorithms that can be used
-# in PySceneDetect.  This includes a base object (SceneDetector) upon which all
-# other detection method objects are based, which can be used as templates for
-# implementing custom/application-specific scene detection methods.
 #
 # Copyright (C) 2012-2018 Brandon Castellano <http://www.bcastell.com>.
 #
-# PySceneDetect is licensed under the BSD 2-Clause License; see the
-# included LICENSE file or visit one of the following pages for details:
-#  - http://www.bcastell.com/projects/pyscenedetect/
+# PySceneDetect is licensed under the BSD 2-Clause License; see the included
+# LICENSE file, or visit one of the following pages for details:
 #  - https://github.com/Breakthrough/PySceneDetect/
+#  - http://www.bcastell.com/projects/pyscenedetect/
 #
-# This software uses Numpy, OpenCV, and click; see the included LICENSE-
-# files for copyright information, or visit one of the above URLs.
+# This software uses Numpy, OpenCV, click, pytest, mkvmerge, and ffmpeg. See
+# the included LICENSE-* files, or one of the above URLs for more information.
 #
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-# IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR
-# OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
-# ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
-# OTHER DEALINGS IN THE SOFTWARE.
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+# AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
+# ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+# WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
+
+""" PySceneDetect scenedetect.scene_detector Module
+
+This module implements the base SceneDetector class, from which all scene
+detectors in the scenedetect.dectectors module are derived from.
+
+The SceneDetector class represents the interface which detection algorithms
+are expected to provide in order to be compatible with PySceneDetect.
+"""
 
 # Third-Party Library Imports
 import cv2
 import numpy
-
-
-# Default value for -d / --detector CLI argument (see get_available_detectors()
-# for a list of valid/enabled detection methods and their string equivalents).
-DETECTOR_DEFAULT = 'threshold'
-
-
-def get_available():
-    """Returns a dictionary of the available/enabled scene detectors.
-
-    Returns:
-        A dictionary with the form {name (string): detector (SceneDetector)},
-        where name is the common name used via the command-line, and detector
-        is a reference to the object instantiator.
-    """
-    detector_dict = {
-        'threshold': ThresholdDetector,
-        'content': ContentDetector
-    }
-    return detector_dict
 
 
 class SceneDetector(object):

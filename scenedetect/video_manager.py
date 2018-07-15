@@ -8,21 +8,20 @@
 #
 # Copyright (C) 2012-2018 Brandon Castellano <http://www.bcastell.com>.
 #
-# PySceneDetect is licensed under the BSD 2-Clause License; see the
-# included LICENSE file or visit one of the following pages for details:
-#  - http://www.bcastell.com/projects/pyscenedetect/
+# PySceneDetect is licensed under the BSD 2-Clause License; see the included
+# LICENSE file, or visit one of the following pages for details:
 #  - https://github.com/Breakthrough/PySceneDetect/
+#  - http://www.bcastell.com/projects/pyscenedetect/
 #
-# This software uses Numpy, OpenCV, and click; see the included LICENSE-
-# files for copyright information, or visit one of the above URLs.
+# This software uses Numpy, OpenCV, click, pytest, mkvmerge, and ffmpeg. See
+# the included LICENSE-* files, or one of the above URLs for more information.
 #
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-# IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR
-# OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
-# ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
-# OTHER DEALINGS IN THE SOFTWARE.
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+# AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
+# ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+# WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
 """ PySceneDetect scenedetect.video_manager Module
@@ -47,17 +46,18 @@ import os
 import math
 import logging
 
+# Third-Party Library Imports
+import cv2
+
 # PySceneDetect Library Imports
-from scenedetect.platform import STR
+from scenedetect.platform import STRING_TYPE
 import scenedetect.frame_timecode
 from scenedetect.frame_timecode import FrameTimecode
 
-# Third-Party Library Imports
-import cv2
-import click
-
 
 class VideoOpenFailure(Exception):
+    """ VideoOpenFailure: Raised when an OpenCV VideoCapture object fails to open (i.e. calling
+    the isOpened() method returns a non True value). """
     def __init__(self, file_list=None, message=
                  "OpenCV VideoCapture object failed to return True when calling isOpened()."):
         # type: (Iterable[(str, str)], str)
@@ -66,7 +66,10 @@ class VideoOpenFailure(Exception):
         # list of (filename: str, filepath: str)
         self.file_list = file_list
 
+
 class VideoFramerateUnavailable(Exception):
+    """ VideoFramerateUnavailable: Raised when the framerate cannot be determined from the video,
+    and the framerate has not been overriden/forced in the VideoManager. """
     def __init__(self, file_name=None, file_path=None, message=
                  "OpenCV VideoCapture object failed to return framerate when calling "
                  "get(cv2.CAP_PROP_FPS)."):
@@ -77,7 +80,10 @@ class VideoFramerateUnavailable(Exception):
         self.file_name = file_name
         self.file_path = file_path
 
+
 class VideoParameterMismatch(Exception):
+    """ VideoParameterMismatch: Raised when opening multiple videos with a VideoManager, and some 
+    of the video parameters (frame height, frame width, and framerate/FPS) do not match. """
     def __init__(self, file_list=None, message=
                  "OpenCV VideoCapture object parameters do not match."):
         # type: (Iterable[Tuple[int, float, float, str, str]], str)
@@ -88,17 +94,22 @@ class VideoParameterMismatch(Exception):
         # where param_mismatch_type is an OpenCV CAP_PROP (e.g. CAP_PROP_FPS).
         self.file_list = file_list
 
+
 class VideoDecodingInProgress(RuntimeError):
+    """ VideoDecodingInProgress: Raised when attempting to call certain VideoManager methods that
+    must be called *before* start() has been called. """
     pass
 
-class VideoDecoderProcessStarted(RuntimeError):
+
+class VideoDecoderNotStarted(RuntimeError):
+    """ VideoDecodingInProgress: Raised when attempting to call certain VideoManager methods that
+    must be called *after* start() has been called. """
     pass
 
-class VideoDecoderProcessNotStarted(RuntimeError):
-    pass
 
 def get_video_name(video_file):
     # type: (str) -> Tuple[str, str]
+    """ Get Video Name: Returns a string representing the video file/device name. """
     if isinstance(video_file, int):
         return ('Device %d' % video_file, video_file)
     return (os.path.split(video_file)[1], video_file)
@@ -139,7 +150,7 @@ def open_captures(video_files, framerate=None, validate_parameters=True):
         elif video_files[0] < 0:
             raise ValueError("Invalid/negative device ID specified.")
         is_device = True
-    elif not all([isinstance(video_file, (str, STR)) for video_file in video_files]):
+    elif not all([isinstance(video_file, (str, STRING_TYPE)) for video_file in video_files]):
         raise ValueError("Unexpected element type in video_files list (expected str(s)/int).")
     elif framerate is not None and not isinstance(framerate, float):
         raise TypeError("Expected type float for parameter framerate.")
@@ -178,18 +189,28 @@ def open_captures(video_files, framerate=None, validate_parameters=True):
 
     return (cap_list, cap_framerate, cap_frame_size)
 
+
 def release_captures(cap_list):
     # type: (Iterable[VideoCapture]) -> None
+    """ Close Captures:  Calls the release() method on every capture in cap_list. """
     for cap in cap_list:
         cap.release()
 
+
 def close_captures(cap_list):
     # type: (Iterable[VideoCapture]) -> None
+    """ Close Captures:  Calls the close() method on every capture in cap_list. """
     for cap in cap_list:
         cap.close()
 
+
 def validate_capture_framerate(video_names, cap_framerates, framerate=None):
     # type: (List[Tuple[str, str]], List[float], Optional[float]) -> Tuple[float, bool]
+    """ Validate Capture Framerate: Ensures that the passed capture framerates are valid and equal.
+    
+    Raises:
+        ValueError, TypeError, VideoFramerateUnavailable
+    """
     check_framerate = True
     cap_framerate = cap_framerates[0]
     if framerate is not None:
@@ -208,9 +229,16 @@ def validate_capture_framerate(video_names, cap_framerates, framerate=None):
             raise VideoFramerateUnavailable(unavailable_framerates)
     return (cap_framerate, check_framerate)
 
+
 def validate_capture_parameters(video_names, cap_frame_sizes, check_framerate=False,
                                 cap_framerates=None):
     # type: (List[Tuple[str, str]], List[Tuple[int, int]], Optional[bool], Optional[List[float]]) -> None
+    """ Validate Capture Parameters: Ensures that all passed capture frame sizes and (optionally)
+    framerates are equal.  Raises VideoParameterMismatch if there is a mismatch.
+    
+    Raises:
+        VideoParameterMismatch
+    """
     bad_params = []
     max_framerate_delta = scenedetect.frame_timecode.MINIMUM_FRAMES_PER_SECOND_FLOAT
     # Check heights/widths match.
@@ -230,8 +258,6 @@ def validate_capture_parameters(video_names, cap_frame_sizes, check_framerate=Fa
 
     if bad_params:
         raise VideoParameterMismatch(bad_params)
-
-
 
 
 class VideoManager(object):
@@ -260,15 +286,18 @@ class VideoManager(object):
         self._cap_list, self._cap_framerate, self._cap_framesize = open_captures(
             video_files=video_files, framerate=framerate)
         self._end_of_video = False
-        self._start_time = FrameTimecode(0, self.get_framerate())
+        self._start_time = self.get_base_timecode()
         self._end_time = None
-        self._curr_time = FrameTimecode(0, self.get_framerate())
+        self._curr_time = self.get_base_timecode()
         self._last_frame = None
         self._curr_cap, self._curr_cap_idx = None, None
+        self._video_file_paths = video_files
         logging.info(
             'VideoManager: Loaded %d video%s, framerate: %.2f FPS, resolution: %d x %d.',
             len(self._cap_list), 's' if len(self._cap_list) > 1 else '',
             self.get_framerate(), *self.get_framesize())
+        self._started = False
+
 
     def get_num_videos(self):
         # type: () -> int
@@ -290,14 +319,26 @@ class VideoManager(object):
         """
         return self._cap_framerate
 
+
     def get_base_timecode(self):
         # type: () -> FrameTimecode
         """ Get Base Timecode - returns a FrameTimecode object at frame 0 (i.e. time 00:00:00).
 
         Returns:
-            (FrameTimecode) FrameTimecode with video framerate set to frame 0 (time 00:00:00).
+            FrameTimecode object set to frame 0/time 00:00:00 with the video(s) framerate.
         """
         return FrameTimecode(timecode=0, fps=self.get_framerate())
+
+
+    def get_current_timecode(self):
+        # type: () -> FrameTimecode
+        """ Get Current Timecode - returns a FrameTimecode object at current VideoManager position.
+
+        Returns:
+            FrameTimecode object at the current VideoManager position with the video(s) framerate.
+        """
+        return self._curr_time
+
 
     def get_framesize(self):
         # type: () -> Tuple[int, int]
@@ -310,6 +351,7 @@ class VideoManager(object):
         """
         return self._cap_framesize
 
+
     def set_duration(self, duration=None, start_time=None, end_time=None):
         # type: (Optional[FrameTimecode], Optional[FrameTimecode], Optional[FrameTimecode]) -> None
         """ Set Duration - sets the duration/length of the video(s) to decode, as well as
@@ -320,6 +362,9 @@ class VideoManager(object):
         Raises:
             VideoDecodingInProgress
         """
+        if self._started:
+            raise VideoDecodingInProgress()
+
         # Ensure any passed timecodes have the proper framerate.
         if ((duration is not None and not duration.equal_framerate(self._cap_framerate)) or
                 (start_time is not None and not start_time.equal_framerate(self._cap_framerate)) or
@@ -339,25 +384,40 @@ class VideoManager(object):
         elif duration is not None:
             self._end_time = start_time + duration
         
-        logging.info('CliContex: VideoManager duration set, start: %s, duration: %s, end: %s.',
+        logging.info('VideoManager: Duration set, start: %s, duration: %s, end: %s.',
                      start_time.get_timecode() if start_time is not None else start_time,
                      duration.get_timecode() if duration is not None else duration,
                      end_time.get_timecode() if end_time is not None else end_time)
 
+
     def start(self):
         # type: () -> None
         """ Start - starts video decoding and seeks to start time.  Raises
-        exception VideoDecoderProcessStarted if the method is called after the
+        exception VideoDecodingInProgress if the method is called after the
         decoder process has already been started.
 
         Raises:
-            VideoDecoderProcessStarted
+            VideoDecodingInProgress
         """
+        if self._started:
+            raise VideoDecodingInProgress()
+            
+        self._started = True
         self._get_next_cap()
         self.seek(self._start_time)
 
+
     def seek(self, timecode):
         # type: (FrameTimecode) -> None
+        """ Seek - seeks forwards to the passed timecode.
+
+        Only supports seeking forwards (i.e. timecode must be greater than the current
+        VideoManager position).
+        
+        Arguments:
+            timecode:   FrameTimecode object representing frame/timecode to seek
+                        to in input video(s).
+        """
 
         while timecode < self._curr_time:
             # Seek to required time.
@@ -367,20 +427,32 @@ class VideoManager(object):
                 if not self._get_next_cap():
                     break
 
-    def stop(self, timeout=None):
-        # type: (Optional[float]) -> None
-        """ Stop - not required for synchronous version of VideoManager. """
-        pass
 
     def release(self):
         # type: () -> None
-        """ Release (cv2.VideoCapture method), releases all open capture(s).
-
-        Raises:
-            VideoDecoderProcessStarted
-        """
+        """ Release (cv2.VideoCapture method), releases all open capture(s). """
         release_captures(self._cap_list)
         del self._cap_list[:]
+        self._started = False
+
+
+    def reset(self):
+        # type: () -> None
+        """ Reset - Reopens captures passed to the constructor of the VideoManager.
+
+        Can only be called after the release method has been called.
+
+        Raises:
+            VideoDecodingInProgress
+        """
+        if self._started:
+            raise VideoDecodingInProgress()
+
+        self._started = False
+        self._curr_time = self.get_base_timecode()
+        self._cap_list, self._cap_framerate, self._cap_framesize = open_captures(
+            video_files=self._video_file_paths, framerate=self._curr_time.get_framerate())
+
 
     def get(self, property, index=0):
         # type: (int, Optional[int]) -> float
@@ -400,13 +472,18 @@ class VideoManager(object):
         return self._cap_list[index].get(property)
 
 
-
     def grab(self):
         # type: () -> bool
         """ Grab (cv2.VideoCapture method) - retrieves a frame but does not return it.
         Returns:
             True if a frame was grabbed, False otherwise.
+
+        Raises:
+            VideoDecoderNotStarted
         """
+        if not self._started:
+            raise VideoDecoderNotStarted()
+
         grabbed = False
         if self._curr_cap is not None and self._end_of_video != True:
             while not grabbed:
@@ -428,7 +505,13 @@ class VideoManager(object):
         Returns:
             Tuple of (True, frame_image) where frame_image is the frame from the last
             call to grab(), returns (False, None) otherwise (i.e. no more frames).
+
+        Raises:
+            VideoDecoderNotStarted
         """
+        if not self._started:
+            raise VideoDecoderNotStarted()
+
         retrieved = False
         if self._curr_cap is not None and self._end_of_video != True:
             while not retrieved:
@@ -440,6 +523,7 @@ class VideoManager(object):
             self._last_frame = None
         return (retrieved, self._last_frame)
 
+
     def read(self):
         # type: () -> Tuple[bool, Union[None, numpy.ndarray]]
         """ Read (cv2.VideoCapture method) - retrieves and returns a frame.
@@ -447,7 +531,13 @@ class VideoManager(object):
         Returns:
             Tuple of (True, frame_image) if a frame was grabbed,
             (False, None) otherwise.
+
+        Raises:
+            VideoDecoderNotStarted
         """
+        if not self._started:
+            raise VideoDecoderNotStarted()
+
         read_frame = False
         if self._curr_cap is not None and self._end_of_video != True:
             while not read_frame:
@@ -476,3 +566,4 @@ class VideoManager(object):
             self._curr_cap_idx += 1
             self._curr_cap = self._cap_list[self._curr_cap_idx]
             return True
+

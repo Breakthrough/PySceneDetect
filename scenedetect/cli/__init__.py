@@ -1,25 +1,27 @@
+# -*- coding: utf-8 -*-
 #
 #         PySceneDetect: Python-Based Video Scene Detector
 #   ---------------------------------------------------------------
+#     [  Site: http://www.bcastell.com/projects/pyscenedetect/   ]
+#     [  Github: https://github.com/Breakthrough/PySceneDetect/  ]
 #     [  Documentation: http://pyscenedetect.readthedocs.org/    ]
 #
 # Copyright (C) 2012-2018 Brandon Castellano <http://www.bcastell.com>.
 #
-# PySceneDetect is licensed under the BSD 2-Clause License; see the
-# included LICENSE file or visit one of the following pages for details:
-#  - http://www.bcastell.com/projects/pyscenedetect/
+# PySceneDetect is licensed under the BSD 2-Clause License; see the included
+# LICENSE file, or visit one of the following pages for details:
 #  - https://github.com/Breakthrough/PySceneDetect/
+#  - http://www.bcastell.com/projects/pyscenedetect/
 #
-# This software uses Numpy, OpenCV, and click; see the included LICENSE-
-# files for copyright information, or visit one of the above URLs.
+# This software uses Numpy, OpenCV, click, pytest, mkvmerge, and ffmpeg. See
+# the included LICENSE-* files, or one of the above URLs for more information.
 #
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-# IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR
-# OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
-# ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
-# OTHER DEALINGS IN THE SOFTWARE.
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+# AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
+# ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+# WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
 """ PySceneDetect scenedetect.cli Module
@@ -28,6 +30,7 @@ This file contains the implementation of the PySceneDetect command-line
 interface (CLI) parser, which uses the click library.  The main CLI
 entry-point function is the scenedetect_cli command group.
 """
+
 
 # Standard Library Imports
 from __future__ import print_function
@@ -47,34 +50,33 @@ from scenedetect.video_manager import VideoManager
 
 # Preface/intro help message shown at the beginning of the help command.
 def get_help_command_preface(command_name='scenedetect'):
-    command_name = (command_name,) * 4
     return """
 The PySceneDetect command-line interface is grouped into commands which
 can be combined together, each containing its own set of arguments:
 
- > %s ([options]) [command] ([options]) ([...other command(s)...])
+ > {command_name} ([options]) [command] ([options]) ([...other command(s)...])
 
 Where [command] is the name of the command, and ([options]) are the
 arguments/options associated with the command, if any. Options
-associated with the %s command below (e.g. --input,
+associated with the {command_name} command below (e.g. --input,
 --framerate) must be specified before any commands. The order of
 commands is not strict, but each command should only be specified once.
 
 Commands can also be combined, for example, running the 'detect_threshold'
 and 'detect_content' (specifying options for the latter):
 
- > %s input -i vid0001.mp4 detect_threshold detect_content --threshold 20
+ > {command_name} input -i vid0001.mp4 detect_threshold detect_content --threshold 20
 
 A list of all commands is printed below. Help for a particular command
 can be printed by specifying 'help [command]', or 'help all' to print
 the help information for every command.
 
 Lastly, there are several commands used for displaying application
-version and copyright information (e.g. %s about):
+version and copyright information (e.g. {command_name} about):
 
     version: Displays the version of PySceneDetect being used.
     about:   Displays PySceneDetect license and copyright information.
-""" % command_name
+""".format(**{'command_name': command_name})
 
 
 CLICK_CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
@@ -131,12 +133,20 @@ def print_help_header():
     click.echo(click.style('----------------------------------------------------', fg='yellow'))
 
 
-@click.group(chain=True, context_settings=CLICK_CONTEXT_SETTINGS)
+@click.group(
+    chain=True, context_settings=CLICK_CONTEXT_SETTINGS, help="""
+No input specified. For help/usage information, specify the help command ('scenedetect help').
+""")
 @click.option(
     '--input', '-i',
     multiple=True, required=False, metavar='VIDEO',
     type=click.Path(exists=True, file_okay=True, readable=True, resolve_path=True), help=
     'Input video file. May be specified multiple times to concatenate several videos together.')
+@click.option(
+    '--output', '-o',
+    multiple=False, required=False, metavar='DIR',
+    type=click.Path(exists=False, dir_okay=True, writable=True, resolve_path=True), help=
+    'Output directory. May be specified multiple times to concatenate several videos together.')
 @click.option(
     '--framerate', '-f', metavar='FPS',
     type=click.FLOAT, default=None, help=
@@ -158,7 +168,7 @@ def print_help_header():
     type=click.Path(exists=False, file_okay=True, writable=True, resolve_path=True), help=
     '[Optional] Path to log file for writing application logging information (debug/errors).')
 @click.pass_context
-def scenedetect_cli(ctx, input, framerate, stats, info_level, logfile):
+def scenedetect_cli(ctx, input, output, framerate, stats, info_level, logfile):
     ctx.call_on_close(ctx.obj.process_input)
     
     logging.disable(logging.NOTSET)
@@ -171,8 +181,8 @@ def scenedetect_cli(ctx, input, framerate, stats, info_level, logfile):
         else:
             logging.disable(logging.CRITICAL)
     
-    ctx.obj.input_videos(input, framerate)
-    ctx.obj.stats_file_path = stats
+    ctx.obj.parse_options(
+        input_list=input, output_dir=output, framerate=framerate, stats_file_path=stats)
 
 
 @click.command('help', add_help_option=False)

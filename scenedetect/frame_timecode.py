@@ -2,25 +2,26 @@
 #
 #         PySceneDetect: Python-Based Video Scene Detector
 #   ---------------------------------------------------------------
+#     [  Site: http://www.bcastell.com/projects/pyscenedetect/   ]
+#     [  Github: https://github.com/Breakthrough/PySceneDetect/  ]
 #     [  Documentation: http://pyscenedetect.readthedocs.org/    ]
 #
 # Copyright (C) 2012-2018 Brandon Castellano <http://www.bcastell.com>.
 #
-# PySceneDetect is licensed under the BSD 2-Clause License; see the
-# included LICENSE file or visit one of the following pages for details:
-#  - http://www.bcastell.com/projects/pyscenedetect/
+# PySceneDetect is licensed under the BSD 2-Clause License; see the included
+# LICENSE file, or visit one of the following pages for details:
 #  - https://github.com/Breakthrough/PySceneDetect/
+#  - http://www.bcastell.com/projects/pyscenedetect/
 #
-# This software uses Numpy, OpenCV, and click; see the included LICENSE-
-# files for copyright information, or visit one of the above URLs.
+# This software uses Numpy, OpenCV, click, pytest, mkvmerge, and ffmpeg. See
+# the included LICENSE-* files, or one of the above URLs for more information.
 #
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-# IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR
-# OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
-# ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
-# OTHER DEALINGS IN THE SOFTWARE.
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+# AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
+# ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+# WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
 """ PySceneDetect Frame Timecode Module
@@ -71,13 +72,12 @@ Unit tests for the FrameTimecode object can be found in tests/test_timecode.py.
 import math
 
 # PySceneDetect Library Imports
-from scenedetect.platform import STR
+from scenedetect.platform import STRING_TYPE
 
 MINIMUM_FRAMES_PER_SECOND_FLOAT = 1.0 / 1000.0
 MINIMUM_FRAMES_PER_SECOND_DELTA_FLOAT = 1.0 / 100000
 
 
-# New class for maintaining a consistent API for frame-accurate timecode objects.
 class FrameTimecode(object):
     """ Object for frame-based timecodes, using the video framerate
     to compute back and forth between frame number and second/timecode formats.
@@ -109,7 +109,7 @@ class FrameTimecode(object):
         TypeError, ValueError
     """
 
-    def __init__(self, timecode = None, fps = None, new_time = None):
+    def __init__(self, timecode=None, fps=None, new_time=None):
         # type: (Union[int, float, str, FrameTimecode], float,
         #        Union[int, float, str, FrameTimecode])
         # The following two properties are what is used to keep track of time
@@ -141,12 +141,12 @@ class FrameTimecode(object):
             if not isinstance(fps, (int, float)):
                 raise TypeError('Framerate must be of type int/float.')
             elif (isinstance(fps, int) and not fps > 0) or (
-                  isinstance(fps, float) and not fps >= MINIMUM_FRAMES_PER_SECOND_FLOAT):
-                    raise ValueError('Framerate must be positive and greater than zero.')
+                    isinstance(fps, float) and not fps >= MINIMUM_FRAMES_PER_SECOND_FLOAT):
+                raise ValueError('Framerate must be positive and greater than zero.')
             self.framerate = float(fps)
 
         # Process the timecode value, storing it as an exact number of frames.
-        if isinstance(timecode, (str, STR)):
+        if isinstance(timecode, (str, STRING_TYPE)):
             self.frame_num = self._parse_timecode_string(timecode)
         else:
             self.frame_num = self._parse_timecode_number(timecode)
@@ -177,13 +177,32 @@ class FrameTimecode(object):
         """
         return int(self.frame_num)
 
+
     def get_framerate(self):
         # type: () -> float
+        """ Get Framerate: Returns the framerate used by the FrameTimecode object.
+
+        Returns:
+            Framerate (float) of the current FrameTimecode object, in frames per second.
+        """
         return self.framerate
+
 
     def equal_framerate(self, fps):
         # type: (float) -> bool
+        """ Equal Framerate: Determines if the passed framerate is equal to that of the
+        FrameTimecode object.
+
+        Arguments:
+            fps:    Framerate (float) to compare against within the precision constant
+                    MINIMUM_FRAMES_PER_SECOND_DELTA_FLOAT defined in this module.
+
+        Returns:
+            True if passed fps matches the FrameTimecode object's framerate, False otherwise.
+
+        """
         return math.fabs(self.framerate - fps) < MINIMUM_FRAMES_PER_SECOND_DELTA_FLOAT
+
 
     def get_seconds(self):
         # type: () -> float
@@ -194,7 +213,8 @@ class FrameTimecode(object):
         """
         return float(self.frame_num) / self.framerate
 
-    def get_timecode(self, precision = 3, use_rounding = True):
+
+    def get_timecode(self, precision=3, use_rounding=True):
         # type: (int, bool) -> str
         """ Get a formatted timecode string of the form HH:MM:SS[.nnn].
 
@@ -225,7 +245,6 @@ class FrameTimecode(object):
         return '%02d:%02d:%s' % (hrs, mins, secs)
 
 
-
     def _seconds_to_frames(self, seconds):
         # type: (float) -> int
         """ Converts the passed value seconds to the nearest number of frames using
@@ -236,6 +255,7 @@ class FrameTimecode(object):
             the current FrameTimecode's framerate property.
         """
         return int(seconds * self.framerate)
+
 
     def _parse_timecode_number(self, timecode):
         # type: (Union[int, float]) -> int
@@ -304,6 +324,7 @@ class FrameTimecode(object):
             secs += (((hrs * 60.0) + mins) * 60.0)
             return int(secs * self.framerate)
 
+
     def __iadd__(self, other):
         # type: (Union[int, float, str, FrameTimecode]) -> FrameTimecode
         if isinstance(other, int):
@@ -322,11 +343,13 @@ class FrameTimecode(object):
             self.frame_num = 0
         return self
 
+
     def __add__(self, other):
         # type: (Union[int, float, str, FrameTimecode]) -> FrameTimecode
         to_return = FrameTimecode(timecode=self)
         to_return += other
         return to_return
+
 
     def __isub__(self, other):
         # type: (Union[int, float, str, FrameTimecode]) -> FrameTimecode
@@ -346,11 +369,13 @@ class FrameTimecode(object):
             self.frame_num = 0
         return self
 
+
     def __sub__(self, other):
         # type: (Union[int, float, str, FrameTimecode]) -> FrameTimecode
         to_return = FrameTimecode(timecode=self)
         to_return -= other
         return to_return
+
 
     def __eq__(self, other):
         # type: (Union[int, float, str, FrameTimecode]) -> bool
@@ -370,6 +395,11 @@ class FrameTimecode(object):
             return False
         else:
             raise TypeError('Unsupported type for performing == with FrameTimecode.')
+
+
+    def __ne__(self, other):
+        # type: (Union[int, float, str, FrameTimecode]) -> bool
+        return not self == other
 
 
     def __lt__(self, other):
@@ -430,7 +460,7 @@ class FrameTimecode(object):
         #    return False
         else:
             raise TypeError('Unsupported type (%s) for performing > with FrameTimecode.' %
-                type(other).__name__)
+                            type(other).__name__)
 
 
     def __ge__(self, other):
