@@ -356,9 +356,12 @@ class VideoManager(object):
         # type: (Optional[FrameTimecode], Optional[FrameTimecode], Optional[FrameTimecode]) -> None
         """ Set Duration - sets the duration/length of the video(s) to decode, as well as
         the start/end times.  Must be called before start() is called, otherwise a
-        VideoDecodingInProgress exception will be thrown.
+        VideoDecodingInProgress exception will be thrown.  May be called after reset()
+        as well.
 
         Arguments:
+
+
         Raises:
             VideoDecodingInProgress
         """
@@ -382,7 +385,7 @@ class VideoManager(object):
                 raise ValueError("end_time is before start_time in time.")
             self._end_time = end_time
         elif duration is not None:
-            self._end_time = start_time + duration
+            self._end_time = self._start_time + duration
         
         logging.info('VideoManager: Duration set, start: %s, duration: %s, end: %s.',
                      start_time.get_timecode() if start_time is not None else start_time,
@@ -411,15 +414,21 @@ class VideoManager(object):
         # type: (FrameTimecode) -> None
         """ Seek - seeks forwards to the passed timecode.
 
-        Only supports seeking forwards (i.e. timecode must be greater than the current
-        VideoManager position).
-        
+        Only supports seeking forwards (i.e. timecode must be greater than the
+        current VideoManager position).  Can only be used after the start()
+        method has been called.
+
         Arguments:
             timecode:   FrameTimecode object representing frame/timecode to seek
                         to in input video(s).
-        """
 
-        while timecode < self._curr_time:
+        Raises:
+            VideoDecoderNotStarted
+        """
+        if not self._started:
+            raise VideoDecoderNotStarted()
+
+        while self._curr_time < timecode:
             # Seek to required time.
             if self._curr_cap.grab():
                 self._curr_time += 1
@@ -432,7 +441,7 @@ class VideoManager(object):
         # type: () -> None
         """ Release (cv2.VideoCapture method), releases all open capture(s). """
         release_captures(self._cap_list)
-        del self._cap_list[:]
+        self._cap_list = []
         self._started = False
 
 

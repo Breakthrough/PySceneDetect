@@ -144,3 +144,132 @@ def test_video_open_failure():
     with pytest.raises(VideoOpenFailure): VideoManager([120])
     with pytest.raises(VideoOpenFailure): VideoManager([255])
 
+
+def test_grab_retrieve(test_video_file):
+    """ Test VideoManager grab/retrieve methods. """
+    video_manager = VideoManager([test_video_file] * 2)
+    base_timecode = video_manager.get_base_timecode()
+    try:
+        video_manager.start()
+        assert video_manager.get_current_timecode() == base_timecode
+        for i in range(1, 10):
+            # VideoManager.grab() -> bool
+            ret_val = video_manager.grab()
+            assert ret_val
+            assert video_manager.get_current_timecode() == base_timecode + i
+            # VideoManager.retrieve() -> Tuple[bool, numpy.ndarray]
+            ret_val, frame_image = video_manager.retrieve()
+            assert ret_val
+            assert frame_image.shape[0] > 0
+            assert video_manager.get_current_timecode() == base_timecode + i
+    finally:
+        video_manager.release()
+
+
+def test_read(test_video_file):
+    """ Test VideoManager read method. """
+    video_manager = VideoManager([test_video_file] * 2)
+    base_timecode = video_manager.get_base_timecode()
+    try:
+        video_manager.start()
+        assert video_manager.get_current_timecode() == base_timecode
+        for i in range(1, 10):
+            # VideoManager.read() -> Tuple[bool, numpy.ndarray]
+            ret_val, frame_image = video_manager.read()
+            assert ret_val
+            assert frame_image.shape[0] > 0
+            assert video_manager.get_current_timecode() == base_timecode + i
+    finally:
+        video_manager.release()
+
+
+def test_seek(test_video_file):
+    """ Test VideoManager seek method. """
+    video_manager = VideoManager([test_video_file] * 2)
+    base_timecode = video_manager.get_base_timecode()
+    try:
+        video_manager.start()
+        assert video_manager.get_current_timecode() == base_timecode
+        ret_val, frame_image = video_manager.read()
+        assert ret_val
+        assert frame_image.shape[0] > 0
+        assert video_manager.get_current_timecode() == base_timecode + 1
+
+        video_manager.seek(base_timecode + 10)
+        assert video_manager.get_current_timecode() == base_timecode + 10
+        ret_val, frame_image = video_manager.read()
+        assert ret_val
+        assert frame_image.shape[0] > 0
+        assert video_manager.get_current_timecode() == base_timecode + 11
+
+    finally:
+        video_manager.release()
+
+
+def test_reset(test_video_file):
+    """ Test VideoManager reset method. """
+    video_manager = VideoManager([test_video_file] * 2)
+    base_timecode = video_manager.get_base_timecode()
+    try:
+        video_manager.start()
+        assert video_manager.get_current_timecode() == base_timecode
+        ret_val, frame_image = video_manager.read()
+        assert ret_val
+        assert frame_image.shape[0] > 0
+        assert video_manager.get_current_timecode() == base_timecode + 1
+
+        video_manager.release()
+        video_manager.reset()
+
+        video_manager.start()
+        assert video_manager.get_current_timecode() == base_timecode
+        ret_val, frame_image = video_manager.read()
+        assert ret_val
+        assert frame_image.shape[0] > 0
+        assert video_manager.get_current_timecode() == base_timecode + 1
+
+    finally:
+        video_manager.release()
+
+
+def test_multiple_videos(test_video_file):
+    """ Test VideoManager handling decoding frames across video boundaries. """
+
+    NUM_FRAMES = 10
+    NUM_VIDEOS = 3
+    # Open VideoManager and get base timecode.
+    video_manager = VideoManager([test_video_file] * NUM_VIDEOS)
+    base_timecode = video_manager.get_base_timecode()
+
+    # List of NUM_VIDEOS VideoManagers pointing to test_video_file.
+    vm_list = [
+        VideoManager([test_video_file]),
+        VideoManager([test_video_file]),
+        VideoManager([test_video_file])]
+
+    # Set duration of all VideoManagers in vm_list to NUM_FRAMES frames.
+    [vm.set_duration(duration=base_timecode+NUM_FRAMES) for vm in vm_list]
+    # (FOR TESTING PURPOSES ONLY) Manually override _cap_list with the
+    # duration-limited VideoManager objects in vm_list
+    video_manager._cap_list = vm_list
+
+    try:
+        [vm.start() for vm in vm_list]
+        video_manager.start()
+        assert video_manager.get_current_timecode() == base_timecode
+
+        curr_time = video_manager.get_base_timecode()
+        while True:
+            ret_val, frame_image = video_manager.read()
+            if not ret_val:
+                break
+            assert frame_image.shape[0] > 0
+            curr_time += 1
+
+        assert curr_time == base_timecode + (NUM_FRAMES * NUM_VIDEOS)
+
+    finally:
+        # Will release the VideoManagers in vm_list as well.
+        video_manager.release()
+
+
