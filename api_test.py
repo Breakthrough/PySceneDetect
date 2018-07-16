@@ -54,10 +54,14 @@ def main():
         # Perform scene detection on video_manager.
         num_frames = scene_manager.detect_scenes(frame_source=video_manager,
                                                  start_time=start_time)
-        end_time = start_time + num_frames
 
         # Obtain scene list:
-        scene_list = scene_manager.get_scene_list(start_time, end_time)
+        scene_list = scene_manager.get_scene_list(base_timecode)
+
+        # The returned scene list is also sortable, should it become unsorted.
+
+        print(scene_list)
+        
         print('List of scenes obtained:')
         for i, scene in enumerate(scene_list):
             print('    Scene %2d: Start %s / Frame %d, End %s / Frame %d' % (

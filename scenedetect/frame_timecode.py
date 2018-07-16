@@ -485,10 +485,14 @@ class FrameTimecode(object):
 
 
     def __int__(self):
-        return self.get_frames()
+        return self.frame_num
+
+    def __float__(self):
+        return self.get_seconds()
 
     def __str__(self):
         return self.get_timecode()
 
-    def __float__(self):
-        return self.get_seconds()
+    def __repr__(self):
+        return 'FrameTimecode(frame=%d, fps=%f)' % (self.frame_num, self.framerate)
+

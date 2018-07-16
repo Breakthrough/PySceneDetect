@@ -80,7 +80,6 @@ def test_video_file():
     return TEST_VIDEO_FILE
 
 
-# Change print_runtime to False for release.
 def test_content_detect(test_video_file):
     """ Test SceneManager with VideoManager and ContentDetector. """
     vm = VideoManager([test_video_file])
@@ -90,12 +89,14 @@ def test_content_detect(test_video_file):
     try:
         video_fps = vm.get_framerate()
         start_time = FrameTimecode('00:00:00', video_fps)
-        duration = FrameTimecode('00:00:05', video_fps)
+        end_time = FrameTimecode('00:00:05', video_fps)
 
-        vm.set_duration(start_time=start_time, end_time=duration)
+        vm.set_duration(start_time=start_time, end_time=end_time)
 
         vm.start()
-        sm.detect_scenes(frame_source=vm)
+        num_frames = sm.detect_scenes(frame_source=vm)
+
+        assert num_frames == end_time.get_frames()
 
     finally:
         vm.release()
@@ -111,8 +112,41 @@ def test_content_detect_opencv_videocap(test_video_file):
         video_fps = cap.get(cv2.CAP_PROP_FPS)
         duration = FrameTimecode('00:00:05', video_fps)
 
-        sm.detect_scenes(frame_source=cap, end_time=duration)
+        num_frames = sm.detect_scenes(frame_source=cap, end_time=duration)
+
+        assert num_frames == duration.get_frames()
 
     finally:
         cap.release()
+
+
+def test_scene_list(test_video_file):
+    """ Test SceneManager get_scene_list method with VideoManager/ContentDetector. """
+    vm = VideoManager([test_video_file])
+    sm = SceneManager()
+    sm.add_detector(ContentDetector())
+
+    try:
+        base_timecode = vm.get_base_timecode()
+        video_fps = vm.get_framerate()
+        start_time = FrameTimecode('00:00:00', video_fps)
+        end_time = FrameTimecode('00:00:10', video_fps)
+
+        vm.set_duration(start_time=start_time, end_time=end_time)
+
+        vm.start()
+        num_frames = sm.detect_scenes(frame_source=vm)
+
+        assert num_frames == end_time.get_frames()
+
+        scene_list = sm.get_scene_list(base_timecode)
+
+        for i, _ in enumerate(scene_list):
+            if i > 0:
+                # Ensure frame list is sorted (i.e. end time plus 1 frame of
+                # of one scene is equal to the start time of the next).
+                assert scene_list[i-1][1] + 1 == scene_list[i][0]
+
+    finally:
+        vm.release()
 

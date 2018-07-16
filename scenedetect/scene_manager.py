@@ -50,6 +50,8 @@ class SceneManager(object):
         self._cutting_list = []
         self._detector_list = []
         self._stats_manager = stats_manager
+        self._num_frames = 0
+        self._start_frame = 0
 
     def add_detector(self, detector):
         # type: (SceneDetector) -> None
@@ -63,6 +65,8 @@ class SceneManager(object):
         # type: () -> None
         """ Clear All Scenes/Cuts """
         self._cutting_list.clear()
+        self._num_frames = 0
+        self._start_frame = 0
 
     def clear_detectors(self):
         # type: () -> None
@@ -80,18 +84,19 @@ class SceneManager(object):
         self._cutting_list += cut_list
 
 
-    def get_scene_list(self, start_time, end_time):
+    def get_scene_list(self, base_timecode): #, end_time):
         # Scene list, where scenes are tuples of (Start FrameTimecode, End FrameTimecode)
         scene_list = []
         if not self._cutting_list:
             return scene_list
-        cut_list = [FrameTimecode(timecode=start_time, new_time=cut)
+        cut_list = [FrameTimecode(timecode=base_timecode, new_time=cut)
                     for cut in sorted(self._cutting_list)]
-        last_cut = FrameTimecode(start_time)
+        last_cut = base_timecode + self._start_frame
         for cut in cut_list:
             scene_list.append((last_cut, cut - 1))
             last_cut = cut
-        scene_list.append((last_cut, end_time))
+        #scene_list.append((last_cut, end_time))
+        scene_list.append((last_cut, base_timecode + self._num_frames))
 
         return scene_list
 
@@ -147,6 +152,7 @@ class SceneManager(object):
             start_frame = start_time.get_frames()
         elif start_time is not None:
             start_frame = int(start_time)
+        self._start_frame = start_frame
 
         curr_frame = start_frame
 
@@ -156,13 +162,14 @@ class SceneManager(object):
             end_frame = int(end_time)
 
         while True:
-            if end_frame is not None and curr_frame > end_frame:
+            if end_frame is not None and curr_frame >= end_frame:
                 break
             ret_val, frame_im = frame_source.read()
             if not ret_val:
                 break
             self._process_frame(curr_frame, frame_im)
             curr_frame += 1
+            self._num_frames += 1
         
         self._post_process(curr_frame)
 

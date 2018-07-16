@@ -54,8 +54,21 @@ installing or using this software/tutorial, you agree to these terms.
     This software uses OpenCV; see the LICENSE-OPENCV file
     or visit [ http://opencv.org/license.html ] for details.
 
+> click [Copyright (C) 2017, Armin Ronacher]:
+    This software uses OpenCV; see the LICENSE-CLICK file
+    or visit [ http://click.pocoo.org/license/ ] for details.
+
+> pytest [Copyright (C) 2004-2017, Holger Krekel and others]:
+    This software uses pytest; see the LICENSE-PYTEST file
+    or visit [ https://docs.pytest.org/en/latest/license.html ] for details.
+
 > mkvmerge [Copyright (C) 2005-2016, Matroska]:
     This software uses mkvmerge; see the LICENSE-MKVMERGE file
     or visit the following URL for details:
     [ https://github.com/mbunkus/mkvtoolnix/blob/master/COPYING ]
+
+> FFmpeg [Copyright (C) 2000-2017, the FFmpeg developers]:
+    This software uses FFmpeg; see the LICENSE-FFMPEG file
+    or visit the following URL for details:
+    [ https://github.com/FFmpeg/FFmpeg/blob/master/COPYING.LGPLv3 ]
 
