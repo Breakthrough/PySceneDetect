@@ -9,6 +9,7 @@
 #
 
 from __future__ import print_function
+import os
 
 import scenedetect
 from scenedetect.video_manager import VideoManager
@@ -17,6 +18,7 @@ from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.stats_manager import StatsManager
 from scenedetect.detectors import ContentDetector
 
+STATS_FILE_PATH = 'api_test_statsfile.csv'
 
 def main():
 
@@ -24,9 +26,11 @@ def main():
 
     print("PySceneDetect version being used: %s" % str(scenedetect.__version__))
 
-    # Create a video_manager point to video file SOME_VIDEO_FILE.mp4
-    # (can append multiple files with the same framerate as well).
-    video_manager = VideoManager(['SOME_VIDEO_FILE.mp4'])
+    # Create a video_manager point to video file testvideo.mp4. Note that multiple
+    # videos can be appended by simply specifying more file paths in the list
+    # passed to the VideoManager constructor. Note that appending multiple videos
+    # requires that they all have the same frame size, and optionally, framerate.
+    video_manager = VideoManager(['testvideo.mp4'])
     stats_manager = StatsManager()
     scene_manager = SceneManager(stats_manager)
     # Add ContentDetector algorithm (constructor takes detector options like threshold).
@@ -34,21 +38,36 @@ def main():
     base_timecode = video_manager.get_base_timecode()
 
     try:
-        start_time = base_timecode          # 00:00:00
-        duration = base_timecode + 20.0     # 00:00:20
+        # If stats file exists, load it.
+        if os.path.exists(STATS_FILE_PATH):
+            # Read stats from CSV file opened in read mode:
+            with open(STATS_FILE_PATH, 'r') as stats_file:
+                stats_manager.load_from_csv(stats_file, base_timecode)
+
+        start_time = base_timecode + 20     # 00:00:00.667
+        end_time = base_timecode + 20.0     # 00:00:20.000
         # Set video_manager duration to read frames from 00:00:00 to 00:00:20.
-        video_manager.set_duration(start_time=start_time, end_time=duration)
+        video_manager.set_duration(start_time=start_time, end_time=end_time)
         # Start video_manager.
         video_manager.start()
 
         # Perform scene detection on video_manager.
-        scene_manager.detect_scenes(frame_source=video_manager, start_time=start_time)
+        num_frames = scene_manager.detect_scenes(frame_source=video_manager,
+                                                 start_time=start_time)
+        end_time = start_time + num_frames
 
         # Obtain scene list:
-        scene_manager.get_scene_list()
+        scene_list = scene_manager.get_scene_list(start_time, end_time)
+        print('List of scenes obtained:')
+        for i, scene in enumerate(scene_list):
+            print('    Scene %2d: Start %s / Frame %d, End %s / Frame %d' % (
+                i+1,
+                scene[0].get_timecode(), scene[0].get_frames(),
+                scene[1].get_timecode(), scene[1].get_frames(),))
 
-        # Write stats to CSV file for reading:
-        with open('output_stats_file.csv', 'w') as stats_file:
+
+        # Write stats to CSV file opened in write mode:
+        with open(STATS_FILE_PATH, 'w') as stats_file:
             stats_manager.save_to_csv(stats_file, base_timecode)
 
     finally:

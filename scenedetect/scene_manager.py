@@ -50,7 +50,6 @@ class SceneManager(object):
         self._cutting_list = []
         self._detector_list = []
         self._stats_manager = stats_manager
-        self._base_timecode = None
 
     def add_detector(self, detector):
         # type: (SceneDetector) -> None
@@ -70,20 +69,31 @@ class SceneManager(object):
         self._detector_list.clear()
 
 
-    def add_cut(self, frame_num):
+    def _add_cut(self, frame_num):
         # type: (int) -> None
         # Adds a cut to the cutting list.
         self._cutting_list.append(frame_num)
 
-    def add_cuts(self, cut_list):
+    def _add_cuts(self, cut_list):
         # type: (List[int]) -> None
         # Adds a list of cuts to the cutting list.
         self._cutting_list += cut_list
 
 
-    def get_scene_list(self):
-        # Need to go through all cuts & cutting list frames
-        raise NotImplementedError()
+    def get_scene_list(self, start_time, end_time):
+        # Scene list, where scenes are tuples of (Start FrameTimecode, End FrameTimecode)
+        scene_list = []
+        if not self._cutting_list:
+            return scene_list
+        cut_list = [FrameTimecode(timecode=start_time, new_time=cut)
+                    for cut in sorted(self._cutting_list)]
+        last_cut = FrameTimecode(start_time)
+        for cut in cut_list:
+            scene_list.append((last_cut, cut - 1))
+            last_cut = cut
+        scene_list.append((last_cut, end_time))
+
+        return scene_list
 
 
     def _get_cutting_list(self):
@@ -94,12 +104,13 @@ class SceneManager(object):
     def _process_frame(self, frame_num, frame_im):
         # type(int, numpy.ndarray) -> None
         for detector in self._detector_list:
-            self.add_cuts(detector.process_frame(frame_num, frame_im))
+            cut_found, cut_list = detector.process_frame(frame_num, frame_im)
+            if cut_found: self._add_cuts(cut_list)
 
     def _post_process(self, frame_num):
         # type(int, numpy.ndarray) -> None
         for detector in self._detector_list:
-            self.add_cuts(detector.post_process(frame_num))
+            self._add_cuts(detector.post_process(frame_num))
 
         
     def detect_scenes(self, frame_source, start_time=0, end_time=None):

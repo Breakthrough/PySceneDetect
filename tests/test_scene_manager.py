@@ -43,7 +43,6 @@ These tests rely on the testvideo.mp4 test video file, available by checking out
 PySceneDetect git repository "resources" branch, or the following URL to download it
 directly:  https://github.com/Breakthrough/PySceneDetect/tree/resources/tests
 Alternatively, the TEST_VIDEO_FILE constant can be replaced with any valid video file.
-
 """
 
 # Standard project pylint disables for unit tests using pytest.
@@ -61,10 +60,8 @@ import cv2
 # PySceneDetect Library Imports
 from scenedetect.scene_manager import SceneManager
 from scenedetect.frame_timecode import FrameTimecode
-
-from scenedetect.detectors import ContentDetector
-
 from scenedetect.video_manager import VideoManager
+from scenedetect.detectors import ContentDetector
 
 
 TEST_VIDEO_FILE = 'testvideo.mp4'
@@ -74,7 +71,7 @@ TEST_VIDEO_FILE = 'testvideo.mp4'
 def test_video_file():
     # type: () -> str
     """ Fixture for test video file path (ensures file exists).
-    
+
     Access in test case by adding a test_video_file argument to obtain the path.
     """
     if not os.path.exists(TEST_VIDEO_FILE):
@@ -89,17 +86,16 @@ def test_content_detect(test_video_file):
     vm = VideoManager([test_video_file])
     sm = SceneManager()
     sm.add_detector(ContentDetector())
-    
+
     try:
         video_fps = vm.get_framerate()
         start_time = FrameTimecode('00:00:00', video_fps)
         duration = FrameTimecode('00:00:05', video_fps)
-        
-        vm.set_duration(start_time = start_time, end_time = duration)
 
-        
+        vm.set_duration(start_time=start_time, end_time=duration)
+
         vm.start()
-        sm.detect_scenes(frame_source = vm)
+        sm.detect_scenes(frame_source=vm)
 
     finally:
         vm.release()
@@ -110,12 +106,12 @@ def test_content_detect_opencv_videocap(test_video_file):
     cap = cv2.VideoCapture(test_video_file)
     sm = SceneManager()
     sm.add_detector(ContentDetector())
-    
+
     try:
         video_fps = cap.get(cv2.CAP_PROP_FPS)
         duration = FrameTimecode('00:00:05', video_fps)
 
-        sm.detect_scenes(frame_source = cap, end_time = duration)
+        sm.detect_scenes(frame_source=cap, end_time=duration)
 
     finally:
         cap.release()

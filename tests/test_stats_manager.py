@@ -75,6 +75,8 @@ from scenedetect.stats_manager import NoMetricsSet
 
 TEST_VIDEO_FILE = 'testvideo.mp4'
 
+# TODO: Replace TEST_STATS_FILES with a @pytest.fixture called generate_stats_file.
+#       It should generate the path to a random stats file for use in a test case.
 TEST_STATS_FILES = ['TEST_STATS_FILE'] * 4
 TEST_STATS_FILES = ['%s_%012d.csv' % (stats_file, random.randint(0, 10**12))
     for stats_file in TEST_STATS_FILES]
@@ -316,8 +318,9 @@ def test_load_corrupt_stats():
             [COLUMN_NAME_TIMECODE, COLUMN_NAME_FRAME_NUMBER, some_metric_key])
         stats_writers[3].writerow(
             [some_frame_key, some_frame_timecode.get_timecode(), some_metric_value])
-        [stats_file.close() for stats_file in stats_files]
-
+        
+        for stats_file in stats_files: stats_file.close()
+        
         stats_files = [open(stats_file, 'rt') for stats_file in TEST_STATS_FILES]
 
         with pytest.raises(StatsFileCorrupt):
@@ -330,5 +333,6 @@ def test_load_corrupt_stats():
             stats_manager.load_from_csv(stats_files[3], base_timecode)
 
     finally:
-        [stats_file.close() for stats_file in stats_files]
-        [os.remove(stats_file) for stats_file in TEST_STATS_FILES]
+        for stats_file in stats_files: stats_file.close()
+        for stats_file in TEST_STATS_FILES: os.remove(stats_file)
+

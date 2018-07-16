@@ -109,7 +109,13 @@ class VideoDecoderNotStarted(RuntimeError):
 
 def get_video_name(video_file):
     # type: (str) -> Tuple[str, str]
-    """ Get Video Name: Returns a string representing the video file/device name. """
+    """ Get Video Name: Returns a string representing the video file/device name.
+    
+    Returns:
+        str: Video file name or device ID. In the case of a video, only the file
+            name is returned, not the whole path. For a device, the string format
+            is 'Device 123', where 123 is the integer ID of the capture device.
+    """
     if isinstance(video_file, int):
         return ('Device %d' % video_file, video_file)
     return (os.path.split(video_file)[1], video_file)
@@ -170,14 +176,14 @@ def open_captures(video_files, framerate=None, validate_parameters=True):
         cap_framerates = [cap.get(cv2.CAP_PROP_FPS) for cap in cap_list]
         cap_framerate, check_framerate = validate_capture_framerate(
             video_names, cap_framerates, framerate)
-        
+        # Store frame sizes as integers (VideoCapture.get() returns float).
         cap_frame_sizes = [(math.trunc(cap.get(cv2.CAP_PROP_FRAME_WIDTH)),
                             math.trunc(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)))
                            for cap in cap_list]
         cap_frame_size = cap_frame_sizes[0]
 
-        # If we need to validate the parameters, we check that the FPS and width/height of all
-        # open captures is identical (or almost identical in the case of FPS).
+        # If we need to validate the parameters, we check that the FPS and width/height
+        # of all open captures is identical (or almost identical in the case of FPS).
         if validate_parameters:
             validate_capture_parameters(
                 video_names=video_names, cap_frame_sizes=cap_frame_sizes,
@@ -322,12 +328,26 @@ class VideoManager(object):
 
     def get_base_timecode(self):
         # type: () -> FrameTimecode
-        """ Get Base Timecode - returns a FrameTimecode object at frame 0 (i.e. time 00:00:00).
+        """ Get Base Timecode - returns a FrameTimecode object at frame 0 / time 00:00:00.
+
+        The timecode returned by this method can be used to perform arithmetic (e.g.
+        addition), passing the resulting values back to the VideoManager (e.g. for the
+        set_duration() method), as the framerate of the returned FrameTimecode object
+        matches that of the VideoManager.
+
+        As such, this method is equivalent to creating a FrameTimecode at frame 0 with
+        the VideoManager framerate, for example, given a VideoManager called obj,
+        the following expression will evaluate as True:
+            obj.get_base_timecode() == FrameTimecode(0, obj.get_framerate())
+
+        Furthermore, the base timecode object returned by a particular VideoManager
+        should not be passed to another one, unless you first verify that their
+        framerates are the same.
 
         Returns:
             FrameTimecode object set to frame 0/time 00:00:00 with the video(s) framerate.
         """
-        return FrameTimecode(timecode=0, fps=self.get_framerate())
+        return FrameTimecode(timecode=0, fps=self._cap_framerate)
 
 
     def get_current_timecode(self):
@@ -345,9 +365,10 @@ class VideoManager(object):
         """ Get Framerate - returns the framerate the VideoManager is assuming for all
         open VideoCaptures.  Obtained from either the capture itself, or the passed
         framerate parameter when the VideoManager object was constructed.
+
         Returns:
-            Tuple of ints of the form (width, height) where width and height represent
-            the size of the video frame in pixels.
+            Tuple[int, int]: Video frame size in the form (width, height) where width
+                and height represent the size of the video frame in pixels.
         """
         return self._cap_framesize
 
@@ -360,7 +381,16 @@ class VideoManager(object):
         as well.
 
         Arguments:
-
+            duration (Optional[FrameTimecode]): The (maximum) duration in time to
+                decode from the opened video(s). Mutually exclusive with end_time
+                (i.e. if duration is set, end_time must be None).
+            start_time (Optional[FrameTimecode]): The time/first frame at which to
+                start decoding frames from. If set, the input video(s) will be
+                seeked to when start() is called, at which point the frame at
+                start_time can be obtained by calling retrieve().
+            end_time (Optional[FrameTimecode]): The time at which to stop decoding
+                frames from the opened video(s). Mutually exclusive with duration
+                (i.e. if end_time is set, duration must be None).
 
         Raises:
             VideoDecodingInProgress
@@ -386,7 +416,7 @@ class VideoManager(object):
             self._end_time = end_time
         elif duration is not None:
             self._end_time = self._start_time + duration
-        
+
         logging.info('VideoManager: Duration set, start: %s, duration: %s, end: %s.',
                      start_time.get_timecode() if start_time is not None else start_time,
                      duration.get_timecode() if duration is not None else duration,
@@ -419,8 +449,7 @@ class VideoManager(object):
         method has been called.
 
         Arguments:
-            timecode:   FrameTimecode object representing frame/timecode to seek
-                        to in input video(s).
+            timecode (FrameTimecode): Time in video to seek forwards to.
 
         Raises:
             VideoDecoderNotStarted
@@ -484,8 +513,9 @@ class VideoManager(object):
     def grab(self):
         # type: () -> bool
         """ Grab (cv2.VideoCapture method) - retrieves a frame but does not return it.
+
         Returns:
-            True if a frame was grabbed, False otherwise.
+            bool: True if a frame was grabbed, False otherwise.
 
         Raises:
             VideoDecoderNotStarted
@@ -511,9 +541,13 @@ class VideoManager(object):
         # type: () -> Tuple[bool, Union[None, numpy.ndarray]]
         """ Retrieve (cv2.VideoCapture method) - retrieves and returns a frame.
 
+        Frame returned corresponds to last call to get().
+
         Returns:
-            Tuple of (True, frame_image) where frame_image is the frame from the last
-            call to grab(), returns (False, None) otherwise (i.e. no more frames).
+            Tuple[bool, Union[None, numpy.ndarray]]: Returns tuple of
+                (True, frame_image) if a frame was grabbed during the last call
+                to grab(), and where frame_image is a numpy ndarray of the
+                decoded frame, otherwise returns (False, None).
 
         Raises:
             VideoDecoderNotStarted
@@ -538,8 +572,9 @@ class VideoManager(object):
         """ Read (cv2.VideoCapture method) - retrieves and returns a frame.
 
         Returns:
-            Tuple of (True, frame_image) if a frame was grabbed,
-            (False, None) otherwise.
+            Tuple[bool, Union[None, numpy.ndarray]]: Returns tuple of
+                (True, frame_image) if a frame was grabbed, where frame_image
+                is a numpy ndarray of the decoded frame, otherwise (False, None).
 
         Raises:
             VideoDecoderNotStarted

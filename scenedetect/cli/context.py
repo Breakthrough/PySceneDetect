@@ -154,7 +154,7 @@ class CliContext(object):
             error_strs = ["no input video(s) specified.",
                           "Make sure '--input VIDEO' is specified at the start of the command."]
             error_str = '\n'.join(error_strs)
-            logging.error('CliContext: %s' % error_str)
+            logging.error('CliContext: %s', error_str)
             raise click.BadParameter(error_str, param_hint='input video')
 
 

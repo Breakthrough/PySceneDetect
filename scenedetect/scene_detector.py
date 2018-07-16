@@ -55,14 +55,15 @@ class SceneDetector(object):
         return self._metric_keys
 
     def process_frame(self, frame_num, frame_img):
-        # type: (int, numpy.ndarray) -> Tuple[bool, Union[None, int]]
+        # type: (int, numpy.ndarray) -> Tuple[bool, Union[None, List[int]]
         """ Process Frame: Computes/stores metrics and detects any scene changes.
 
         Prototype method, no actual detection.
 
         Returns:
-            Tuple of (cut_detected: bool, frame_num: int/None), where if cut_detected
-            is True, frame_num is the integer frame number of the cut to add, else None. 
+            Tuple of (cut_detected: bool, List[frame_nums]: List[int]/None), where if
+            cut_detected is True, frame_nums is the list of integer frame numbers of
+            the cut(s) to add, else None. 
         """
         return (False, 0)
 

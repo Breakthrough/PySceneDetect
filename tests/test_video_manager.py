@@ -71,7 +71,7 @@ TEST_VIDEO_FILE = 'testvideo.mp4'       # Video file used by test_video_file fix
 def test_video_file():
     # type: () -> str
     """ Fixture for test video file path (ensures file exists).
-    
+
     Access in test case by adding a test_video_file argument to obtain the path.
     """
     if not os.path.exists(TEST_VIDEO_FILE):
@@ -123,11 +123,20 @@ def test_get_property(test_video_file):
 
 def test_wrong_video_files_type():
     """ Test VideoManager constructor (__init__ method) with invalid video_files
-    argument types to trigger ValueError/TypeError exceptions. """
+    argument types to trigger a ValueError exception. """
     with pytest.raises(ValueError): VideoManager([0, 1, 2])
     with pytest.raises(ValueError): VideoManager([0, 'somefile'])
     with pytest.raises(ValueError): VideoManager(['somefile', 1, 2, 'somefile'])
     with pytest.raises(ValueError): VideoManager([-1])
+
+
+def test_wrong_framerate_type(test_video_file):
+    """ Test VideoManager constructor (__init__ method) with an invalid framerate
+    argument types to trigger a TypeError exception. """
+    with pytest.raises(TypeError): VideoManager([test_video_file], framerate=int(0))
+    with pytest.raises(TypeError): VideoManager([test_video_file], framerate=int(10))
+    with pytest.raises(TypeError): VideoManager([test_video_file], framerate='10')
+    VideoManager([test_video_file], framerate=float(10)).release()
 
 
 def test_video_open_failure():
@@ -248,13 +257,13 @@ def test_multiple_videos(test_video_file):
         VideoManager([test_video_file])]
 
     # Set duration of all VideoManagers in vm_list to NUM_FRAMES frames.
-    [vm.set_duration(duration=base_timecode+NUM_FRAMES) for vm in vm_list]
+    for vm in vm_list: vm.set_duration(duration=base_timecode+NUM_FRAMES)
     # (FOR TESTING PURPOSES ONLY) Manually override _cap_list with the
     # duration-limited VideoManager objects in vm_list
     video_manager._cap_list = vm_list
 
     try:
-        [vm.start() for vm in vm_list]
+        for vm in vm_list: vm.start()
         video_manager.start()
         assert video_manager.get_current_timecode() == base_timecode
 

@@ -482,3 +482,13 @@ class FrameTimecode(object):
         else:
             raise TypeError('Unsupported type for performing >= with FrameTimecode.')
 
+
+
+    def __int__(self):
+        return self.get_frames()
+
+    def __str__(self):
+        return self.get_timecode()
+
+    def __float__(self):
+        return self.get_seconds()

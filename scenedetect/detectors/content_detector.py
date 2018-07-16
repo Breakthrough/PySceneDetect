@@ -57,6 +57,11 @@ class ContentDetector(SceneDetector):
 
     def process_frame(self, frame_num, frame_img):
         # type: (int, numpy.ndarray) -> bool, Optional[int]
+        """
+
+        Returns:
+        
+        """
         # Similar to ThresholdDetector, but using the HSV colour space DIFFERENCE instead
         # of single-frame RGB/grayscale intensity (thus cannot detect slow fades with this method).
 
@@ -109,7 +114,7 @@ class ContentDetector(SceneDetector):
             del self.last_frame
                 
         self.last_frame = frame_img.copy()
-        return cut_detected, cut_frame
+        return cut_detected, [cut_frame]
 
 
     #def post_process(self, scene_list, frame_num):
