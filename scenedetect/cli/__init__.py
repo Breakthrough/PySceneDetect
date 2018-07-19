@@ -153,6 +153,14 @@ No input specified. For help/usage information, specify the help command ('scene
     '[Optional] Force framerate, in frames/sec (e.g. -f 29.97). Disables check to ensure that all '
     ' input video framerates are equal.')
 @click.option(
+    '--downscale', '-d', metavar='N',
+    type=click.INT, default=None, help=
+    '[Optional] Integer factor to downscale frames by (e.g. 2, 3, 4...), where the frame is scaled'
+    ' to width/N x height/N (thus -d 1 implies no downscaling). Each increment speeds up processing'
+    ' by a factor of 4 (e.g. -d 2 is 4 times quicker than -d 1). Higher values can be used for'
+    ' high definition content with minimal effect on accuracy.'
+    ' [default: 1 for SD, 2 for 720p, 3 for 1080p+]')
+@click.option(
     '--stats', '-s', metavar='CSV',
     type=click.Path(exists=False, file_okay=True, writable=True, resolve_path=False), help=
     '[Optional] Path to stats file (.csv) for writing frame metrics to. If the file exists, any'
@@ -168,7 +176,7 @@ No input specified. For help/usage information, specify the help command ('scene
     type=click.Path(exists=False, file_okay=True, writable=True, resolve_path=True), help=
     '[Optional] Path to log file for writing application logging information (debug/errors).')
 @click.pass_context
-def scenedetect_cli(ctx, input, output, framerate, stats, info_level, logfile):
+def scenedetect_cli(ctx, input, output, framerate, downscale, stats, info_level, logfile):
     ctx.call_on_close(ctx.obj.process_input)
     
     logging.disable(logging.NOTSET)
@@ -182,7 +190,8 @@ def scenedetect_cli(ctx, input, output, framerate, stats, info_level, logfile):
             logging.disable(logging.CRITICAL)
     
     ctx.obj.parse_options(
-        input_list=input, output_dir=output, framerate=framerate, stats_file_path=stats)
+        input_list=input, output_dir=output, framerate=framerate, stats_file_path=stats,
+        downscale=downscale)
 
 
 @click.command('help', add_help_option=False)

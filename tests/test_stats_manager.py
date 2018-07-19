@@ -146,6 +146,7 @@ def test_detector_metrics(test_video_file):
         duration = FrameTimecode('00:00:20', video_fps)
 
         video_manager.set_duration(start_time=start_time, end_time=duration)
+        video_manager.set_downscale_factor()
         video_manager.start()
         scene_manager.detect_scenes(frame_source=video_manager)
 
@@ -242,6 +243,7 @@ def test_save_load_from_video(test_video_file):
         duration = FrameTimecode('00:00:20', video_fps)
         
         video_manager.set_duration(start_time=start_time, end_time=duration)
+        video_manager.set_downscale_factor()
         video_manager.start()
         scene_manager.detect_scenes(frame_source=video_manager)
 

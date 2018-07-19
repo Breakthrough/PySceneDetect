@@ -92,6 +92,7 @@ def test_content_detect(test_video_file):
         end_time = FrameTimecode('00:00:05', video_fps)
 
         vm.set_duration(start_time=start_time, end_time=end_time)
+        vm.set_downscale_factor()
 
         vm.start()
         num_frames = sm.detect_scenes(frame_source=vm)
@@ -133,6 +134,7 @@ def test_scene_list(test_video_file):
         end_time = FrameTimecode('00:00:10', video_fps)
 
         vm.set_duration(start_time=start_time, end_time=end_time)
+        vm.set_downscale_factor()
 
         vm.start()
         num_frames = sm.detect_scenes(frame_source=vm)

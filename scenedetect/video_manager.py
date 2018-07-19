@@ -100,11 +100,28 @@ class VideoDecodingInProgress(RuntimeError):
     must be called *before* start() has been called. """
     pass
 
-
 class VideoDecoderNotStarted(RuntimeError):
     """ VideoDecodingInProgress: Raised when attempting to call certain VideoManager methods that
     must be called *after* start() has been called. """
     pass
+
+class InvalidDownscaleFactor(ValueError):
+    """ InvalidDownscaleFactor: Raised when trying to set invalid downscale factor. """
+    def __init__(self, message="Downscale factor must be a positive integer greater than zero."):
+        super(InvalidDownscaleFactor, self).__init__(message)
+
+
+DEFAULT_DOWNSCALE_FACTORS = {
+    1700: 3,        # ~1080p
+    900: 2         # ~720p
+}
+
+
+def compute_downscale_factor(frame_width):
+    for width in sorted(DEFAULT_DOWNSCALE_FACTORS, reverse=True):
+        if frame_width >= width:
+            return DEFAULT_DOWNSCALE_FACTORS[width]
+    return 1
 
 
 def get_video_name(video_file):
@@ -303,6 +320,18 @@ class VideoManager(object):
             len(self._cap_list), 's' if len(self._cap_list) > 1 else '',
             self.get_framerate(), *self.get_framesize())
         self._started = False
+        self._downscale_factor = 1
+
+
+    def set_downscale_factor(self, downscale_factor=None):
+        # type: (Optional[int]) -> None
+        if downscale_factor is None:
+            self._downscale_factor = compute_downscale_factor(self.get_framesize()[0])
+        else:
+            if not downscale_factor > 0:
+                raise InvalidDownscaleFactor()
+            self._downscale_factor = downscale_factor
+        logging.info('VideoManager: Downscale factor set to %d.' % self._downscale_factor)
 
 
     def get_num_videos(self):
@@ -561,6 +590,9 @@ class VideoManager(object):
                 retrieved, self._last_frame = self._curr_cap.retrieve()
                 if not retrieved and not self._get_next_cap():
                     break
+                if self._downscale_factor > 1:
+                    self._last_frame = self._last_frame[
+                        ::self._downscale_factor, ::self._downscale_factor, :]
         if self._end_time is not None and self._curr_time >= self._end_time:
             retrieved = False
             self._last_frame = None
@@ -588,6 +620,9 @@ class VideoManager(object):
                 read_frame, self._last_frame = self._curr_cap.read()
                 if not read_frame and not self._get_next_cap():
                     break
+                if self._downscale_factor > 1:
+                    self._last_frame = self._last_frame[
+                        ::self._downscale_factor, ::self._downscale_factor, :]
         if self._end_time is not None and self._curr_time >= self._end_time:
             read_frame = False
             self._last_frame = None

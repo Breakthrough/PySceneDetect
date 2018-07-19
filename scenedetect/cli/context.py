@@ -58,6 +58,7 @@ from scenedetect.video_manager import VideoManager
 from scenedetect.video_manager import VideoOpenFailure
 from scenedetect.video_manager import VideoFramerateUnavailable
 from scenedetect.video_manager import VideoParameterMismatch
+from scenedetect.video_manager import InvalidDownscaleFactor
 from scenedetect.video_manager import VideoDecodingInProgress
 from scenedetect.video_manager import VideoDecoderNotStarted
 
@@ -139,10 +140,12 @@ class CliContext(object):
             logging.debug('CliContext: Input processing skipped.')
             return
 
-        self.check_input_open()       
+        self.check_input_open()
+        
+        # Init SceneManager.
+        self.scene_manager = SceneManager(self.stats_manager)
 
         # Run SceneManager here (cleanup [stop/release] happens even if except. thrown).
-        self.scene_manager = SceneManager(self.stats_manager)
         self.scene_manager.add_detector(scenedetect.detectors.ContentDetector())
 
         self.video_manager.start()
@@ -165,15 +168,14 @@ class CliContext(object):
             raise click.BadParameter(error_str, param_hint='input video')
 
 
-    def parse_options(self, input_list, output_dir, framerate, stats_file_path):
+    def parse_options(self, input_list, output_dir, framerate, stats_file_path, downscale):
         """ Parse Options: Parses all CLI arguments passed to scenedetect [options]. """
         if not input_list and framerate is None:
-            return False
+            return
 
         logging.debug('CliContext: Parsing program options.')
 
         self.output_directory = output_dir
-        
         self.stats_file_path = stats_file_path
         self.base_timecode = None
         
@@ -184,6 +186,7 @@ class CliContext(object):
                 video_files=input_list, framerate=framerate)
             video_manager_initialized = True
             self.base_timecode = self.video_manager.get_base_timecode()
+            self.video_manager.set_downscale_factor(downscale)
         except VideoOpenFailure as ex:
             error_strs = ['could not open video(s).', 'Failed to open video file(s):']
             error_strs += ['  %s' % file_name[0] for file_name in ex.file_list]
@@ -211,7 +214,12 @@ class CliContext(object):
                 ' resolution. -f / --framerate may be specified to override the framerate.')
             logging.error('\n'.join(error_strs))
             raise click.BadParameter('\n'.join(error_strs), param_hint='input videos')
-        
+        except InvalidDownscaleFactor as ex:
+            self.process_input_flag = False
+            error_strs = ['Downscale value is not > 0.', str(ex)]
+            logging.error('\n'.join(error_strs))
+            raise click.BadParameter('\n'.join(error_strs), param_hint='downscale factor')
+
         # Ensure VideoManager is initialized, and open StatsManager if --stats is specified.
         if not video_manager_initialized:
             self.video_manager = None
@@ -221,9 +229,6 @@ class CliContext(object):
             if self.stats_file_path is not None:
                 self.check_input_open()
                 self._open_stats_file()
-
-        return self.video_manager is None
-
 
     def time_command(self, start=None, duration=None, end=None):
         
