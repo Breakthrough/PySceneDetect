@@ -48,6 +48,7 @@ import scenedetect.detectors
 from scenedetect.frame_timecode import FrameTimecode
 
 from scenedetect.scene_manager import SceneManager
+from scenedetect.scene_manager import write_scene_list
 
 from scenedetect.stats_manager import StatsManager
 from scenedetect.stats_manager import StatsFileCorrupt
@@ -147,6 +148,12 @@ class CliContext(object):
         self.video_manager.start()
         self.scene_manager.detect_scenes(
             frame_source=self.video_manager, start_time=self.start_frame)
+
+        # testing
+        with open('testfile.csv', 'w') as test_file:
+            write_scene_list(test_file, self.scene_manager.get_scene_list(
+                self.video_manager.get_base_timecode()
+            ))
 
 
     def check_input_open(self):
