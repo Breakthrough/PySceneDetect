@@ -177,8 +177,13 @@ No input specified. For help/usage information, specify the help command ('scene
     type=click.Path(exists=False, file_okay=True, writable=True, resolve_path=True), help=
     '[Optional] Path to log file for writing application logging information.'
     ' Use with "-il debug" option when submitting bug reports.')
+@click.option(
+    '--quiet', '-q',
+    is_flag=True, flag_value=True, help=
+    '[Optional] Suppresses non-essential output. Equivalent of setting "--info-level none".'
+    ' Overrides the --info-level/-il option, if set.')
 @click.pass_context
-def scenedetect_cli(ctx, input, output, framerate, downscale, stats, info_level, logfile):
+def scenedetect_cli(ctx, input, output, framerate, downscale, stats, info_level, logfile, quiet):
     ctx.call_on_close(ctx.obj.process_input)
     
     logging.disable(logging.NOTSET)
@@ -189,6 +194,8 @@ def scenedetect_cli(ctx, input, output, framerate, downscale, stats, info_level,
     elif info_level.lower() == 'debug':
         format_str = '%(levelname)s: %(module)s.%(funcName)s(): %(message)s'
 
+    if quiet:
+        info_level = None
 
     if logfile is not None:
         logging.basicConfig(filename=logfile, filemode='w+',
