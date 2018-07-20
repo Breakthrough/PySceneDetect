@@ -316,7 +316,7 @@ class VideoManager(object):
         self._curr_cap, self._curr_cap_idx = None, None
         self._video_file_paths = video_files
         logging.info(
-            'VideoManager: Loaded %d video%s, framerate: %.2f FPS, resolution: %d x %d.',
+            'Loaded %d video%s, framerate: %.2f FPS, resolution: %d x %d.',
             len(self._cap_list), 's' if len(self._cap_list) > 1 else '',
             self.get_framerate(), *self.get_framesize())
         self._started = False
@@ -331,7 +331,7 @@ class VideoManager(object):
             if not downscale_factor > 0:
                 raise InvalidDownscaleFactor()
             self._downscale_factor = downscale_factor
-        logging.info('VideoManager: Downscale factor set to %d.' % self._downscale_factor)
+        logging.info('Downscale factor set to %d.' % self._downscale_factor)
 
 
     def get_num_videos(self):

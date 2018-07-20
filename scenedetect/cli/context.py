@@ -80,12 +80,12 @@ class CliContext(object):
         self.stats_file = None
 
         self.output_directory = None
-        self.process_input_flag = True
+        self.options_processed = False
         
 
     def cleanup(self):
         try:
-            logging.debug('CliContext: Cleaning up.')
+            logging.debug('Cleaning up...')
         finally:
             if self.video_manager is not None:
                 self.video_manager.release()
@@ -101,7 +101,7 @@ class CliContext(object):
                 self.stats_file_path = os.path.join(
                     self.output_directory, self.stats_file_path)
             if os.path.exists(self.stats_file_path):
-                logging.info('CliContext: Found stats file %s, loading frame metrics.',
+                logging.info('Found stats file %s, loading frame metrics.',
                     os.path.basename(self.stats_file_path))
                 try:
                     self.stats_file = open(self.stats_file_path, 'r')
@@ -134,10 +134,10 @@ class CliContext(object):
 
     def process_input(self):
         
-        logging.debug('CliContext: Processing input...')
+        logging.debug('Processing input...')
 
-        if not self.process_input_flag:
-            logging.debug('CliContext: Input processing skipped.')
+        if not self.options_processed:
+            logging.debug('Skipping processing, CLI options were not parsed successfully.')
             return
 
         self.check_input_open()
@@ -161,25 +161,25 @@ class CliContext(object):
 
     def check_input_open(self):
         if self.video_manager is None or not self.video_manager.get_num_videos() > 0:
-            error_strs = ["no input video(s) specified.",
+            error_strs = ["No input video(s) specified.",
                           "Make sure '--input VIDEO' is specified at the start of the command."]
             error_str = '\n'.join(error_strs)
-            logging.error('CliContext: %s', error_str)
+            logging.debug(error_str)
             raise click.BadParameter(error_str, param_hint='input video')
 
 
     def parse_options(self, input_list, output_dir, framerate, stats_file_path, downscale):
         """ Parse Options: Parses all CLI arguments passed to scenedetect [options]. """
-        if not input_list and framerate is None:
-            return
+        if not input_list:
+            self.check_input_open()
 
-        logging.debug('CliContext: Parsing program options.')
+        logging.debug('Parsing program options.')
 
         self.output_directory = output_dir
         self.stats_file_path = stats_file_path
         self.base_timecode = None
         
-        logging.debug('CliContext: Initializing VideoManager.')
+        logging.debug('Initializing VideoManager.')
         video_manager_initialized = False
         try:
             self.video_manager = VideoManager(
@@ -215,7 +215,6 @@ class CliContext(object):
             logging.error('\n'.join(error_strs))
             raise click.BadParameter('\n'.join(error_strs), param_hint='input videos')
         except InvalidDownscaleFactor as ex:
-            self.process_input_flag = False
             error_strs = ['Downscale value is not > 0.', str(ex)]
             logging.error('\n'.join(error_strs))
             raise click.BadParameter('\n'.join(error_strs), param_hint='downscale factor')
@@ -223,16 +222,19 @@ class CliContext(object):
         # Ensure VideoManager is initialized, and open StatsManager if --stats is specified.
         if not video_manager_initialized:
             self.video_manager = None
-            logging.info('CliContext: VideoManager not initialized.')
+            logging.info('VideoManager not initialized.')
         else:
-            logging.debug('CliContext: VideoManager initialized.')
+            logging.debug('VideoManager initialized.')
             if self.stats_file_path is not None:
                 self.check_input_open()
                 self._open_stats_file()
 
+        self.options_processed = True
+                
+
     def time_command(self, start=None, duration=None, end=None):
         
-        logging.debug('CliContext: Setting video time:\n    start: %s, duration: %s, end: %s',
+        logging.debug('Setting video time:\n    start: %s, duration: %s, end: %s',
             start, duration, end)
 
         self.check_input_open()
