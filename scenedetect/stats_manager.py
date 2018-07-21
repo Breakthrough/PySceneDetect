@@ -49,6 +49,8 @@ import logging
 # PySceneDetect Library Imports
 from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.frame_timecode import MINIMUM_FRAMES_PER_SECOND_FLOAT
+from scenedetect.platform import get_csv_reader
+from scenedetect.platform import get_csv_writer
 
 
 COLUMN_NAME_FPS = "Frame Rate:"
@@ -93,17 +95,6 @@ class NoMetricsRegistered(Exception):
 
 class NoMetricsSet(Exception):
     pass
-
-
-
-def get_stats_reader(file_handle):
-    # type: (File) -> csv.reader
-    return csv.reader(file_handle, lineterminator='\n')
-    
-
-def get_stats_writer(file_handle):
-    # type: (File) -> csv.writer
-    return csv.writer(file_handle, lineterminator='\n')
 
 
 
@@ -153,7 +144,7 @@ class StatsManager(object):
 
     def save_to_csv(self, csv_file, base_timecode, force_save=False):
         # type: (File [w], FrameTimecode, bool) -> None
-        csv_writer = get_stats_writer(csv_file)
+        csv_writer = get_csv_writer(csv_file)
         if (self._metrics_updated or force_save) and self.is_save_required():
             # Header rows.
             metric_keys = list(self._registered_metrics)
@@ -176,7 +167,7 @@ class StatsManager(object):
 
     def load_from_csv(self, csv_file, base_timecode = None):
         # type: (File [r], Optional[FrameTimecode]) -> int
-        csv_reader = get_stats_reader(csv_file)
+        csv_reader = get_csv_reader(csv_file)
         num_cols = None
         num_metrics = None
         num_frames = None
@@ -216,7 +207,7 @@ class StatsManager(object):
                 metric_dict[metric_keys[i]] = float(metric_str)
             self.set_metrics(int(row[0]), metric_dict)
             num_frames += 1
-        logging.info('StatsManager: Parsed %d metrics for %d frames.', num_metrics, num_frames)
+        logging.info('Loaded %d metrics for %d frames.', num_metrics, num_frames)
         return num_frames
 
 

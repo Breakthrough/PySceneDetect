@@ -42,6 +42,7 @@ intended to help with parsing string types from the CLI parser.
 # Standard Library Imports
 from __future__ import print_function
 import sys
+import csv
 
 # Third-Party Library Imports
 import cv2
@@ -79,4 +80,15 @@ if cv2.__version__[0] == '2' or not (
     cv2.CAP_PROP_POS_FRAMES = cv2.cv.CV_CAP_PROP_POS_FRAMES
     cv2.CAP_PROP_FRAME_COUNT = cv2.cv.CV_CAP_PROP_FRAME_COUNT
 # pylint: enable=c-extension-no-member
+
+
+# Functonality for obtaining csv reader/writer handles with uniform line terminations.
+def get_csv_reader(file_handle):
+    # type: (File) -> csv.reader
+    return csv.reader(file_handle, lineterminator='\n')
+    
+
+def get_csv_writer(file_handle):
+    # type: (File) -> csv.writer
+    return csv.writer(file_handle, lineterminator='\n')
 

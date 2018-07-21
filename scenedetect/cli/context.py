@@ -80,6 +80,9 @@ class CliContext(object):
 
         self.output_directory = None
         self.options_processed = False
+
+        self.print_scene_list = False
+        self.scene_list_path = None # Optional[str]: Path to stats file.
         
 
     def cleanup(self):
@@ -89,21 +92,27 @@ class CliContext(object):
             if self.video_manager is not None:
                 self.video_manager.release()
 
+    def _get_output_file_path(self, file_path):
+        # type: (Optional[str]) -> Union[None, str]
+        '''Returns path to output file_path passed as argument, and creates directories if necessary.'''
+        if file_path is None:
+            return None
+        # If an output directory is defined and the file path is a single
+        # filename (i.e. not an absolute/relative path), open the file handle
+        # in the output directory instead of the working directory.
+        if self.output_directory is not None and not os.path.split(file_path)[0]:
+            file_path = os.path.join(self.output_directory, file_path)
+        os.makedirs(os.path.split(os.path.abspath(file_path))[0], exist_ok=True)
+        return file_path
 
     def _open_stats_file(self):
         
         if self.stats_file_path is not None:
-            # If an output directory is defined and the stats file path is a single
-            # filename (i.e. not an absolute/relative path), open the file handle
-            # in the output directory instead of the working directory.
-            if self.output_directory is not None and os.path.split(self.stats_file_path)[0]:
-                self.stats_file_path = os.path.join(
-                    self.output_directory, self.stats_file_path)
             if os.path.exists(self.stats_file_path):
                 logging.info('Found stats file %s, loading frame metrics.',
                     os.path.basename(self.stats_file_path))
                 try:
-                    with open(self.stats_file_path, 'r') as stats_file:
+                    with open(self.stats_file_path, 'rt') as stats_file:
                         self.stats_manager.load_from_csv(stats_file, self.base_timecode)
                 except StatsFileCorrupt:
                     error_strs = [
@@ -149,9 +158,31 @@ class CliContext(object):
             frame_source=self.video_manager, start_time=self.start_frame)
 
         if self.stats_file_path is not None:
-            with open(self.stats_file_path, 'w') as stats_file:
+            with open(self.stats_file_path, 'wt') as stats_file:
                 self.stats_manager.save_to_csv(
                     stats_file, self.video_manager.get_base_timecode())
+
+        scene_list = self.scene_manager.get_scene_list(self.video_manager.get_base_timecode())
+
+        if self.scene_list_path is not None:
+            with open(self.scene_list_path, 'wt') as scene_list_file:
+                write_scene_list(scene_list_file, scene_list)
+
+        if self.print_scene_list:
+            logging.info("""Scene list:
+
+-----------------------------------------------------------------------
+ | Scene # | Start Frame |  Start Time  |  End Frame  |   End Time   |
+-----------------------------------------------------------------------
+%s
+-----------------------------------------------------------------------
+""", '\n'.join(
+    [' |  %5d  | %11d | %s | %11d | %s |' % (
+        i+1,
+        start_time.get_frames(), start_time.get_timecode(),
+        end_time.get_frames(), end_time.get_timecode())
+     for i, (start_time, end_time) in enumerate(scene_list)]))
+
 
 
     def check_input_open(self):
@@ -223,7 +254,7 @@ class CliContext(object):
     def parse_options(self, input_list, framerate, stats_file, downscale):
         """ Parse Options: Parses all CLI arguments passed to scenedetect [options]. """
         if not input_list:
-            self.check_input_open()
+            return
 
         logging.debug('Parsing program options.')
 
@@ -236,7 +267,7 @@ class CliContext(object):
             logging.info('VideoManager not initialized.')
         else:
             logging.debug('VideoManager initialized.')
-            self.stats_file_path = stats_file
+            self.stats_file_path = self._get_output_file_path(stats_file)
             if self.stats_file_path is not None:
                 self.check_input_open()
                 self._open_stats_file()
@@ -264,4 +295,11 @@ class CliContext(object):
         
         if start is not None:
             self.start_frame = start.get_frames()
+
+
+    def list_scenes_command(self, output_path, quiet_mode):
+        self.print_scene_list = True if quiet_mode is None else not quiet_mode
+        self.scene_list_path = self._get_output_file_path(output_path)
+        if self.scene_list_path is not None:
+            logging.info('Output scene list CSV file set:\n  %s', self.scene_list_path)
 

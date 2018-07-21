@@ -37,20 +37,20 @@ to the associated SceneDetectors for caching of frame metrics.
 
 # Standard Library Imports
 from __future__ import print_function
-import csv
 
 # PySceneDetect Library Imports
 from scenedetect.frame_timecode import FrameTimecode
+from scenedetect.platform import get_csv_writer
 
 
 def write_scene_list(output_csv_file, scene_list):
     # type: (File, List[FrameTimecode, FrameTimecode])
-    csv_writer = csv.writer(output_csv_file)
+    csv_writer = get_csv_writer(output_csv_file)
     # Output Timecode List
 
     csv_writer.writerow([
-        "Timecode List:", ",".join([start.get_timecode()
-                                    for start, _ in scene_list[1:]])])
+        "Timecode List:", *[start.get_timecode()
+                            for start, _ in scene_list[1:]]])
     csv_writer.writerow([
         "Scene Number",
         "Start Frame", "Start Timecode", "Start Time (seconds)",

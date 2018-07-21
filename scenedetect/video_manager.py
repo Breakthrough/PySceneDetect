@@ -333,7 +333,8 @@ class VideoManager(object):
                 raise InvalidDownscaleFactor()
             self._downscale_factor = downscale_factor
         if self._logger is not None:
-            self._logger.info('Downscale factor set to %d.' % self._downscale_factor)
+            self._logger.info('Downscale factor set to %d, effective resolution: %d x %d.' % (
+                self._downscale_factor, *self.get_framesize_effective()))
 
 
     def get_num_videos(self):
@@ -393,15 +394,25 @@ class VideoManager(object):
 
     def get_framesize(self):
         # type: () -> Tuple[int, int]
-        """ Get Framerate - returns the framerate the VideoManager is assuming for all
-        open VideoCaptures.  Obtained from either the capture itself, or the passed
-        framerate parameter when the VideoManager object was constructed.
+        """ Get Frame Size - returns the frame size of the video(s) open in the
+        VideoManager's capture objects.
 
         Returns:
             Tuple[int, int]: Video frame size in the form (width, height) where width
                 and height represent the size of the video frame in pixels.
         """
         return self._cap_framesize
+
+    def get_framesize_effective(self):
+        # type: () -> Tuple[int, int]
+        """ Get Frame Size - returns the frame size of the video(s) open in the
+        VideoManager's capture objects, divided by the current downscale factor.
+
+        Returns:
+            Tuple[int, int]: Video frame size in the form (width, height) where width
+                and height represent the size of the video frame in pixels.
+        """
+        return [num_pixels / self._downscale_factor for num_pixels in self._cap_framesize]
 
 
     def set_duration(self, duration=None, start_time=None, end_time=None):
