@@ -77,7 +77,6 @@ class CliContext(object):
 
         self.stats_manager = StatsManager()
         self.stats_file_path = None # Optional[str]: Path to stats file.
-        self.stats_file = None
 
         self.output_directory = None
         self.options_processed = False
@@ -104,17 +103,17 @@ class CliContext(object):
                 logging.info('Found stats file %s, loading frame metrics.',
                     os.path.basename(self.stats_file_path))
                 try:
-                    self.stats_file = open(self.stats_file_path, 'r')
-                    self.stats_manager.load_from_csv(self.stats_file, self.base_timecode)
+                    with open(self.stats_file_path, 'r') as stats_file:
+                        self.stats_manager.load_from_csv(stats_file, self.base_timecode)
                 except StatsFileCorrupt:
                     error_strs = [
-                        'could not load stats file.', 'Failed to parse stats file:',
+                        'Could not load stats file.', 'Failed to parse stats file:',
                         'Could not load frame metrics from stats file, file is corrupt or not a'
                         ' valid PySceneDetect stats file. If the file exists, ensure that it is'
                         ' a valid stats file CSV, otherwise delete it and run PySceneDetect again'
                         ' to re-generate the stats file.']
                     logging.error('\n'.join(error_strs))
-                    raise click.BadParameter('\n'.join(error_strs), param_hint='input stats file')
+                    raise click.BadParameter('could not load given stats file.', param_hint='input stats file')
                 except StatsFileFramerateMismatch as ex:
                     error_strs = [
                         'could not load stats file.', 'Failed to parse stats file:',
@@ -126,10 +125,9 @@ class CliContext(object):
                         'Ensure the correct stats file path was given, or delete and re-generate'
                         ' the stats file.']
                     logging.error('\n'.join(error_strs))
-                    raise click.BadParameter('\n'.join(error_strs), param_hint='input stats file')
-                finally:
-                    if self.stats_file is not None:
-                        self.stats_file.close()
+                    raise click.BadParameter(
+                        'framerate differs between given stats file and input video(s).',
+                        param_hint='input stats file')
 
 
     def process_input(self):
@@ -141,22 +139,19 @@ class CliContext(object):
             return
 
         self.check_input_open()
-        
-        # Init SceneManager.
-        self.scene_manager = SceneManager(self.stats_manager)
 
-        # Run SceneManager here (cleanup [stop/release] happens even if except. thrown).
-        self.scene_manager.add_detector(scenedetect.detectors.ContentDetector())
+        if not self.scene_manager._detector_list:
+            logging.error('No scene detectors specified (detect-content, detect-threshold, etc...).')
+            return
 
         self.video_manager.start()
         self.scene_manager.detect_scenes(
             frame_source=self.video_manager, start_time=self.start_frame)
 
-        # testing
-        with open('testfile.csv', 'w') as test_file:
-            write_scene_list(test_file, self.scene_manager.get_scene_list(
-                self.video_manager.get_base_timecode()
-            ))
+        if self.stats_file_path is not None:
+            with open(self.stats_file_path, 'w') as stats_file:
+                self.stats_manager.save_to_csv(
+                    stats_file, self.video_manager.get_base_timecode())
 
 
     def check_input_open(self):
@@ -168,22 +163,26 @@ class CliContext(object):
             raise click.BadParameter(error_str, param_hint='input video')
 
 
-    def parse_options(self, input_list, output_dir, framerate, stats_file_path, downscale):
-        """ Parse Options: Parses all CLI arguments passed to scenedetect [options]. """
-        if not input_list:
-            self.check_input_open()
+    def add_detector(self, detector):
+        self.check_input_open()
+        self.options_processed = False
+        try:
+            self.scene_manager.add_detector(detector)
+        except scenedetect.stats_manager.FrameMetricRegistered:
+            raise click.BadParameter(message='Cannot specify detection algorithm twice.',
+                                     param_hint=detector.cli_name)
+        self.options_processed = True
 
-        logging.debug('Parsing program options.')
 
-        self.output_directory = output_dir
-        self.stats_file_path = stats_file_path
+    def _init_video_manager(self, input_list, framerate, downscale):
+
         self.base_timecode = None
-        
+
         logging.debug('Initializing VideoManager.')
         video_manager_initialized = False
         try:
             self.video_manager = VideoManager(
-                video_files=input_list, framerate=framerate)
+                video_files=input_list, framerate=framerate, logger=logging)
             video_manager_initialized = True
             self.base_timecode = self.video_manager.get_base_timecode()
             self.video_manager.set_downscale_factor(downscale)
@@ -218,6 +217,18 @@ class CliContext(object):
             error_strs = ['Downscale value is not > 0.', str(ex)]
             logging.error('\n'.join(error_strs))
             raise click.BadParameter('\n'.join(error_strs), param_hint='downscale factor')
+        return video_manager_initialized
+
+
+    def parse_options(self, input_list, framerate, stats_file, downscale):
+        """ Parse Options: Parses all CLI arguments passed to scenedetect [options]. """
+        if not input_list:
+            self.check_input_open()
+
+        logging.debug('Parsing program options.')
+
+        video_manager_initialized = self._init_video_manager(
+            input_list=input_list, framerate=framerate, downscale=downscale)
 
         # Ensure VideoManager is initialized, and open StatsManager if --stats is specified.
         if not video_manager_initialized:
@@ -225,11 +236,16 @@ class CliContext(object):
             logging.info('VideoManager not initialized.')
         else:
             logging.debug('VideoManager initialized.')
+            self.stats_file_path = stats_file
             if self.stats_file_path is not None:
                 self.check_input_open()
                 self._open_stats_file()
 
+        # Init SceneManager.
+        self.scene_manager = SceneManager(self.stats_manager)
+
         self.options_processed = True
+
                 
 
     def time_command(self, start=None, duration=None, end=None):

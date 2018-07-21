@@ -44,7 +44,6 @@ respect to a SceneManager object.
 from __future__ import print_function
 import os
 import math
-import logging
 
 # Third-Party Library Imports
 import cv2
@@ -288,7 +287,7 @@ class VideoManager(object):
     video files, or a single device ID.  Similar to VideoManagerAsync, but runs in the
     same thread that it is created in.  Supports seeking and setting end time/duration.
     """
-    def __init__(self, video_files, framerate=None):
+    def __init__(self, video_files, framerate=None, logger=None):
         # type: (List[str], Optional[float])
         """ VideoManager Constructor Method (__init__)
 
@@ -315,10 +314,12 @@ class VideoManager(object):
         self._last_frame = None
         self._curr_cap, self._curr_cap_idx = None, None
         self._video_file_paths = video_files
-        logging.info(
-            'Loaded %d video%s, framerate: %.2f FPS, resolution: %d x %d.',
-            len(self._cap_list), 's' if len(self._cap_list) > 1 else '',
-            self.get_framerate(), *self.get_framesize())
+        self._logger = logger
+        if self._logger is not None:
+            self._logger.info(
+                'Loaded %d video%s, framerate: %.2f FPS, resolution: %d x %d.',
+                len(self._cap_list), 's' if len(self._cap_list) > 1 else '',
+                self.get_framerate(), *self.get_framesize())
         self._started = False
         self._downscale_factor = 1
 
@@ -331,7 +332,8 @@ class VideoManager(object):
             if not downscale_factor > 0:
                 raise InvalidDownscaleFactor()
             self._downscale_factor = downscale_factor
-        logging.info('Downscale factor set to %d.' % self._downscale_factor)
+        if self._logger is not None:
+            self._logger.info('Downscale factor set to %d.' % self._downscale_factor)
 
 
     def get_num_videos(self):
@@ -446,10 +448,11 @@ class VideoManager(object):
         elif duration is not None:
             self._end_time = self._start_time + duration
 
-        logging.info('VideoManager: Duration set, start: %s, duration: %s, end: %s.',
-                     start_time.get_timecode() if start_time is not None else start_time,
-                     duration.get_timecode() if duration is not None else duration,
-                     end_time.get_timecode() if end_time is not None else end_time)
+        if self._logger is not None:
+            self._logger.info('Duration set, start: %s, duration: %s, end: %s.',
+                        start_time.get_timecode() if start_time is not None else start_time,
+                        duration.get_timecode() if duration is not None else duration,
+                        end_time.get_timecode() if end_time is not None else end_time)
 
 
     def start(self):

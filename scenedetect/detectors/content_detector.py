@@ -54,6 +54,7 @@ class ContentDetector(SceneDetector):
         self.last_scene_cut = None
         self.last_hsv = None
         self._metric_keys = ['content_val', 'delta_hue', 'delta_sat', 'delta_lum']
+        self.cli_name = 'detect-content'
 
     def process_frame(self, frame_num, frame_img):
         # type: (int, numpy.ndarray) -> bool, Optional[int]

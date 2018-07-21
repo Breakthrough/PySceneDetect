@@ -81,6 +81,7 @@ class ThresholdDetector(SceneDetector):
           }
         self.block_size = block_size
         self._metric_keys = ['threshold_val']
+        self.cli_name = 'detect-threshold'
 
     def compute_frame_average(self, frame):
         """Computes the average pixel value/intensity over the whole frame.

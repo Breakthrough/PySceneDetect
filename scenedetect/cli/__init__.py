@@ -210,9 +210,9 @@ def scenedetect_cli(ctx, input, output, framerate, downscale, stats, info_level,
             logging.disable(logging.CRITICAL)
     
     try:
+        ctx.obj.output_directory = output
         ctx.obj.parse_options(
-            input_list=input, output_dir=output, framerate=framerate, stats_file_path=stats,
-            downscale=downscale)
+            input_list=input, framerate=framerate, stats_file=stats, downscale=downscale)
     except:
         logging.error('Could not parse CLI options.')
         raise
@@ -307,26 +307,33 @@ def time_command(ctx, start, duration, end):
     type=click.FLOAT, default=30.0, show_default=True, help=
     '[Optional] Threshold value the delta_hsv frame metric must exceed to trigger a new scene.'
     ' Refers to frame metric delta_hsv_avg in stats file.')
+#@click.option(
+#    '--intensity-cutoff', '-i', metavar='VAL',
+#    type=click.FLOAT, default=None, show_default=True, help=
+#    '[Optional] Intensity cutoff threshold to disable scene cut detection. Useful for avoiding.'
+#    ' scene changes triggered by flashes. Refers to frame metric delta_lum in stats file.')
 @click.option(
-    '--intensity-cutoff', '-i', metavar='VAL',
-    type=click.FLOAT, default=None, show_default=True, help=
-    '[Optional] Intensity cutoff threshold to disable scene cut detection. Useful for avoiding.'
-    ' scene changes triggered by flashes. Refers to frame metric delta_lum in stats file.')
+    '--min-scene-len', '-m', metavar='FRAMES',
+    type=click.INT, default=15, show_default=True, help=
+    '[Optional] Minimum size/length of any scene, in number of frames.')
 @click.pass_context
-def detect_content_command(ctx, threshold, intensity_cutoff):
+def detect_content_command(ctx, threshold, min_scene_len): #, intensity_cutoff):
     """ 
     detect-content
 
     detect-content --threshold 30
     """
 
-    if intensity_cutoff is not None:
-        raise NotImplementedError()
+    #if intensity_cutoff is not None:
+    #    raise NotImplementedError()
 
-    click.echo('detect_content, threshold: %s' % threshold)
     # Initialize detector and add to scene manager.
     # Need to ensure that a detector is not added twice, or will cause
     # a frame metric key error when registering the detector.
+    ctx.obj.add_detector(scenedetect.detectors.ContentDetector(
+        threshold=threshold, min_scene_len=min_scene_len))
+
+
 
 
 @click.command('output', add_help_option=False)

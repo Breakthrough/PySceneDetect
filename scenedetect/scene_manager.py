@@ -84,7 +84,6 @@ class SceneManager(object):
         if self._stats_manager is not None:
             self._stats_manager.register_metrics(detector.get_metrics())
 
-
     def clear(self):
         # type: () -> None
         """ Clear All Scenes/Cuts """

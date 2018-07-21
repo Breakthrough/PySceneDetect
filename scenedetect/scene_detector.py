@@ -43,6 +43,7 @@ class SceneDetector(object):
     def __init__(self):
         self.stats_manager = None
         self._metric_keys = []
+        self.cli_name = 'detect-none'
 
     def get_metrics(self):
         # type: () -> List[str]
