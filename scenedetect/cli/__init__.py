@@ -48,8 +48,8 @@ from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.video_manager import VideoManager
 
 
-# Preface/intro help message shown at the beginning of the help command.
 def get_help_command_preface(command_name='scenedetect'):
+    """ Preface/intro help message shown at the beginning of the help command. """
     return """
 The PySceneDetect command-line interface is grouped into commands which
 can be combined together, each containing its own set of arguments:
@@ -134,14 +134,12 @@ def print_help_header():
 
 
 @click.group(
-    chain=True, context_settings=CLICK_CONTEXT_SETTINGS, help="""
-No input specified. For help/usage information, specify the help command ('scenedetect help').
-""")
+    chain=True, context_settings=CLICK_CONTEXT_SETTINGS)
 @click.option(
     '--input', '-i',
     multiple=True, required=False, metavar='VIDEO',
     type=click.Path(exists=True, file_okay=True, readable=True, resolve_path=True), help=
-    'Input video file. May be specified multiple times to concatenate several videos together.')
+    '[Required] Input video file. May be specified multiple times to concatenate several videos together.')
 @click.option(
     '--output', '-o',
     multiple=False, required=False, metavar='DIR',
@@ -150,8 +148,8 @@ No input specified. For help/usage information, specify the help command ('scene
 @click.option(
     '--framerate', '-f', metavar='FPS',
     type=click.FLOAT, default=None, help=
-    'Force framerate, in frames/sec (e.g. -f 29.97). Disables check to ensure that all '
-    ' input video framerates are equal.')
+    'Force framerate, in frames/sec (e.g. -f 29.97). Disables check to ensure that all'
+    ' input videos have the same framerates.')
 @click.option(
     '--downscale', '-d', metavar='N',
     type=click.INT, default=None, help=
@@ -160,6 +158,12 @@ No input specified. For help/usage information, specify the help command ('scene
     ' by a factor of 4 (e.g. -d 2 is 4 times quicker than -d 1). Higher values can be used for'
     ' high definition content with minimal effect on accuracy.'
     ' [default: 1 for SD, 2 for 720p, 3 for 1080p+]')
+@click.option(
+    '--frame-skip', '-fs', metavar='N', show_default=True,
+    type=click.INT, default=0, help=
+    'Skips N frames during processing (-fs 1 skips every other frame, processing 50% of the video,'
+    ' -fs 2 processes 33% of the frames, -fs 3 processes 25%, etc...).'
+    ' Reduces processing speed at expense of accuracy.')
 @click.option(
     '--stats', '-s', metavar='CSV',
     type=click.Path(exists=False, file_okay=True, writable=True, resolve_path=False), help=
@@ -184,7 +188,8 @@ No input specified. For help/usage information, specify the help command ('scene
     ' commands. Equivalent to setting "--info-level none", and overrides the current info-'
     'level, even if --info-level/-il is specified.')
 @click.pass_context
-def scenedetect_cli(ctx, input, output, framerate, downscale, stats, info_level, logfile, quiet):
+def scenedetect_cli(ctx, input, output, framerate, downscale, frame_skip, stats,
+                    info_level, logfile, quiet):
     ctx.call_on_close(ctx.obj.process_input)
     
     logging.disable(logging.NOTSET)
@@ -199,9 +204,11 @@ def scenedetect_cli(ctx, input, output, framerate, downscale, stats, info_level,
         info_level = None
 
     if logfile is not None:
-        logging.basicConfig(filename=logfile, filemode='w+',
+        logging.basicConfig(filename=logfile, filemode='a',
             level=getattr(logging, info_level.upper()) if info_level is not None else info_level,
             format=format_str)
+        logging.info('Version: %s', scenedetect.__version__)
+        logging.info('Info Level: %s', info_level)
     else:
         if info_level is not None:
             logging.basicConfig(
@@ -216,6 +223,7 @@ def scenedetect_cli(ctx, input, output, framerate, downscale, stats, info_level,
             logging.info('Output directory set:\n  %s', ctx.obj.output_directory)
         ctx.obj.parse_options(
             input_list=input, framerate=framerate, stats_file=stats, downscale=downscale)
+        #print(frame_skip)
     except:
         logging.error('Could not parse CLI options.')
         raise
@@ -225,6 +233,8 @@ def scenedetect_cli(ctx, input, output, framerate, downscale, stats, info_level,
 @click.argument('command_name', required=False, type=click.STRING)
 @click.pass_context
 def help_command(ctx, command_name):
+    """ Print help for command (help [command]).
+    """
     ctx.obj.options_processed = False
     if command_name is not None:
         if command_name.lower() == 'all':
@@ -256,6 +266,7 @@ def help_command(ctx, command_name):
 @click.command('about', add_help_option=False)
 @click.pass_context
 def about_command(ctx):
+    """ Print license/copyright info. """
     ctx.obj.process_input_flag = False
     click.echo(click.style('----------------------------------------------------', fg='cyan'))
     click.echo(click.style(' About PySceneDetect %s' % scenedetect.__version__, fg='yellow'))
@@ -267,6 +278,7 @@ def about_command(ctx):
 @click.command('version', add_help_option=False)
 @click.pass_context
 def version_command(ctx):
+    """ Print version of PySceneDetect. """
     ctx.obj.process_input_flag = False
     click.echo(click.style('PySceneDetect %s' % scenedetect.__version__, fg='yellow'))
     ctx.exit()
@@ -292,7 +304,9 @@ def version_command(ctx):
     ' arguments. Mutually exclusive with --duration / -d.')
 @click.pass_context
 def time_command(ctx, start, duration, end):
-    """ Time values can be specified as frames (NNNN), seconds (NNNN.NNs), or as
+    """ Set start/end/duration of input video(s).
+    
+    Time values can be specified as frames (NNNN), seconds (NNNN.NNs), or as
     a timecode (HH:MM:SS.nnn). For example, to start scene detection at 1 minute,
     and stop after 100 seconds:
 
@@ -315,7 +329,7 @@ def time_command(ctx, start, duration, end):
 @click.option(
     '--threshold', '-t', metavar='VAL',
     type=click.FLOAT, default=30.0, show_default=True, help=
-    '[Optional] Threshold value the delta_hsv frame metric must exceed to trigger a new scene.'
+    'Threshold value (float) that the delta_hsv frame metric must exceed to trigger a new scene.'
     ' Refers to frame metric delta_hsv_avg in stats file.')
 #@click.option(
 #    '--intensity-cutoff', '-i', metavar='VAL',
@@ -325,23 +339,81 @@ def time_command(ctx, start, duration, end):
 @click.option(
     '--min-scene-len', '-m', metavar='FRAMES',
     type=click.INT, default=15, show_default=True, help=
-    '[Optional] Minimum size/length of any scene, in number of frames.')
+    'Minimum size/length of any scene, in number of frames.')
 @click.pass_context
 def detect_content_command(ctx, threshold, min_scene_len): #, intensity_cutoff):
     """ 
     detect-content
 
-    detect-content --threshold 30
+    detect-content --threshold 27.5
     """
 
     #if intensity_cutoff is not None:
     #    raise NotImplementedError()
+
+    logging.debug('Detecting content, parameters:\n'
+                  '  threshold: %d, min-scene-len: %d',
+                  threshold, min_scene_len)
 
     # Initialize detector and add to scene manager.
     # Need to ensure that a detector is not added twice, or will cause
     # a frame metric key error when registering the detector.
     ctx.obj.add_detector(scenedetect.detectors.ContentDetector(
         threshold=threshold, min_scene_len=min_scene_len))
+
+@click.command('detect-threshold')
+@click.option(
+    '--threshold', '-t', metavar='VAL',
+    type=click.IntRange(0, 255), default=12, show_default=True, help=
+    'Threshold value (integer) that the delta_rgb frame metric must exceed to trigger a new scene.'
+    ' Refers to frame metric delta_rgb in stats file.')
+@click.option(
+    '--min-scene-len', '-m', metavar='FRAMES',
+    type=click.INT, default=15, show_default=True, help=
+    'Minimum size/length of any scene, in number of frames.')
+@click.option(
+    '--fade-bias', '-f', metavar='PERCENT',
+    type=click.IntRange(-100, 100), default=0, show_default=True, help=
+    'Percent (%) from -100 to 100 of timecode skew for where cuts should be placed. -100'
+    ' indicates the start frame, +100 indicates the end frame, and 0 is the middle of both.')
+@click.option(
+    '--add-last-scene', '-l',
+    is_flag=True, flag_value=True, help=
+    'If set, if the video ends on a fade-out, an additional scene will be generated for the'
+    ' last fade out position.')
+@click.option(
+    '--min-percent', '-p', metavar='PERCENT',
+    type=click.IntRange(0, 100), default=95, show_default=True, help=
+    'Percent (%) from 0 to 100 of amount of pixels that must meet the threshold value in order'
+    'to trigger a scene change.')
+@click.option(
+    '--block-size', '-b', metavar='N',
+    type=click.IntRange(1, 128), default=8, show_default=True, help=
+    'Number of rows in image to sum per iteration (can be tuned for performance in some cases).')
+@click.pass_context
+def detect_threshold_command(ctx, threshold, min_scene_len, fade_bias, add_last_scene,
+                             min_percent, block_size):
+    """ 
+    detect-threshold
+
+    detect-threshold --threshold 15
+    """
+
+    logging.debug('Detecting threshold, parameters:\n'
+                  '  threshold: %d, min-scene-len: %d, fade-bias: %d,\n'
+                  '  add-last-scene: %s, min-percent: %d, block-size: %d',
+                  threshold, min_scene_len, fade_bias,
+                  'yes' if add_last_scene else 'no', min_percent, block_size)
+
+    # Handle case where add_last_scene is not set and is None.
+    add_last_scene = True if add_last_scene else False
+
+    # Convert min_percent and fade_bias from integer to floats (0.0-1.0 and -1.0-+1.0 respectively).
+    min_percent /= 100.0
+    fade_bias /= 100.0
+    ctx.obj.add_detector(scenedetect.detectors.ThresholdDetector(
+        threshold=threshold, min_scene_len=min_scene_len, fade_bias=fade_bias,
+        add_final_scene=add_last_scene, min_percent=min_percent, block_size=block_size))
 
 
 @click.command('list-scenes', add_help_option=False)
@@ -356,6 +428,8 @@ def detect_content_command(ctx, threshold, min_scene_len): #, intensity_cutoff):
     'Suppresses output of the table printed by the list-scenes command .')
 @click.pass_context
 def list_scenes_command(ctx, output, quiet):
+    """ Print scene list to console or a CSV file.
+    """
     ctx.obj.list_scenes_command(output, quiet)
 
 
@@ -382,7 +456,7 @@ def split_video_command(ctx, output):
     type=click.FLOAT, help=
     'Quality factor for encoding images..')
 @click.pass_context
-def split_video_command(ctx, output):
+def save_images_command(ctx, output):
     raise NotImplementedError()
 
 
@@ -395,4 +469,5 @@ add_cli_command(scenedetect_cli, version_command)
 # Commands Added To Help List:
 add_cli_command(scenedetect_cli, time_command)
 add_cli_command(scenedetect_cli, detect_content_command)
+add_cli_command(scenedetect_cli, detect_threshold_command)
 add_cli_command(scenedetect_cli, list_scenes_command)

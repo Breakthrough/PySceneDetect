@@ -80,7 +80,7 @@ class ThresholdDetector(SceneDetector):
             'type': None        # type of fade, can be either 'in' or 'out'
           }
         self.block_size = block_size
-        self._metric_keys = ['threshold_val']
+        self._metric_keys = ['delta_rgb']
         self.cli_name = 'detect-threshold'
 
     def compute_frame_average(self, frame):

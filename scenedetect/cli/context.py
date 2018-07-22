@@ -33,14 +33,12 @@ state/context and logic to run the PySceneDetect CLI.
 
 # Standard Library Imports
 from __future__ import print_function
-import sys
-import string
 import logging
 import os
 
 # Third-Party Library Imports
-import cv2
 import click
+import cv2
 
 # PySceneDetect Library Imports
 import scenedetect.detectors
@@ -64,6 +62,16 @@ from scenedetect.video_manager import VideoDecoderNotStarted
 
 
 class CliContext(object):
+    """ Context of the command-line interface passed between the various sub-commands.
+
+    Pools all options, processing the main program options as they come in (e.g. those
+    not passed to a command), followed by parsing each sub-command's options, preparing
+    the actions to be executed in the process_input() method, which is called after the
+    whole command line has been processed (successfully nor not).
+    
+    This class and the cli.__init__ module make up the bulk of the PySceneDetect
+    application logic for the command line.  
+    """
     def __init__(self):
         # Optional[SceneManager]: SceneManager to manage storing of detected cuts in a video,
         #                         and convert them 
@@ -87,10 +95,11 @@ class CliContext(object):
 
     def cleanup(self):
         try:
-            logging.debug('Cleaning up...')
+            logging.debug('Cleaning up...\n\n')
         finally:
             if self.video_manager is not None:
                 self.video_manager.release()
+
 
     def _get_output_file_path(self, file_path):
         # type: (Optional[str]) -> Union[None, str]
@@ -109,7 +118,7 @@ class CliContext(object):
         
         if self.stats_file_path is not None:
             if os.path.exists(self.stats_file_path):
-                logging.info('Found stats file %s, loading frame metrics.',
+                logging.info('Loading frame metrics from stats file: %s',
                     os.path.basename(self.stats_file_path))
                 try:
                     with open(self.stats_file_path, 'rt') as stats_file:
@@ -149,7 +158,7 @@ class CliContext(object):
 
         self.check_input_open()
 
-        if not self.scene_manager._detector_list:
+        if not self.scene_manager.get_num_detectors() > 0:
             logging.error('No scene detectors specified (detect-content, detect-threshold, etc...).')
             return
 
@@ -157,10 +166,17 @@ class CliContext(object):
         self.scene_manager.detect_scenes(
             frame_source=self.video_manager, start_time=self.start_frame)
 
+
         if self.stats_file_path is not None:
-            with open(self.stats_file_path, 'wt') as stats_file:
-                self.stats_manager.save_to_csv(
-                    stats_file, self.video_manager.get_base_timecode())
+            if self.stats_manager.is_save_required():
+                with open(self.stats_file_path, 'wt') as stats_file:
+                    logging.info('Saving frame metrics to stats file: %s',
+                        os.path.basename(self.stats_file_path))
+                    self.stats_manager.save_to_csv(
+                        stats_file, self.video_manager.get_base_timecode())
+            else:
+                logging.debug('No frame metrics updated, skipping update of the stats file.')
+        
 
         scene_list = self.scene_manager.get_scene_list(self.video_manager.get_base_timecode())
 

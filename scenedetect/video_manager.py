@@ -317,11 +317,18 @@ class VideoManager(object):
         self._logger = logger
         if self._logger is not None:
             self._logger.info(
-                'Loaded %d video%s, framerate: %.2f FPS, resolution: %d x %d.',
+                'Loaded %d video%s, framerate: %.2f FPS, resolution: %d x %d',
                 len(self._cap_list), 's' if len(self._cap_list) > 1 else '',
                 self.get_framerate(), *self.get_framesize())
         self._started = False
         self._downscale_factor = 1
+        self._frame_skip = 0
+
+    def set_frame_skip(self, frame_skip):
+        # type: (int) -> None
+        if frame_skip < 0:
+            raise ValueError('Frame skip must be a positive integer >= 0.')
+        self._frame_skip = frame_skip
 
 
     def set_downscale_factor(self, downscale_factor=None):
@@ -333,7 +340,7 @@ class VideoManager(object):
                 raise InvalidDownscaleFactor()
             self._downscale_factor = downscale_factor
         if self._logger is not None:
-            self._logger.info('Downscale factor set to %d, effective resolution: %d x %d.' % (
+            self._logger.info('Downscale factor set to %d, effective resolution: %d x %d' % (
                 self._downscale_factor, *self.get_framesize_effective()))
 
 

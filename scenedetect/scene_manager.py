@@ -41,6 +41,7 @@ from __future__ import print_function
 # PySceneDetect Library Imports
 from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.platform import get_csv_writer
+from scenedetect.stats_manager import FrameMetricRegistered
 
 
 def write_scene_list(output_csv_file, scene_list):
@@ -79,14 +80,36 @@ class SceneManager(object):
 
     def add_detector(self, detector):
         # type: (SceneDetector) -> None
+        """ Adds/registers a SceneDetector (e.g. ContentDetector, ThresholdDetector) to
+        run when detect_scenes is called.
+        """
         detector.stats_manager = self._stats_manager
         self._detector_list.append(detector)
         if self._stats_manager is not None:
-            self._stats_manager.register_metrics(detector.get_metrics())
+            # Allow multiple detection algorithms of the same type to be added
+            # by suppressing any FrameMetricRegistered exceptions due to attempts
+            # to re-register the same frame metric keys.
+            try:
+                self._stats_manager.register_metrics(detector.get_metrics())
+            except FrameMetricRegistered:
+                pass
+
+    def get_num_detectors(self):
+        # type: () -> int
+        """ Gets number of registered scene detectors added via add_detector. """
+        return len(self._detector_list)
 
     def clear(self):
         # type: () -> None
-        """ Clear All Scenes/Cuts """
+        """ Clears all cuts/scenes and resets the SceneManager's position.
+        
+        Any statistics generated are still saved in the StatsManager object
+        passed to the SceneManager's constructor, and thus, subsequent
+        calls to detect_scenes, using the same frame source reset at the
+        initial time (if it is a VideoManager, use the reset() method),
+        will use the cached frame metrics that were computed and saved
+        in the previous call to detect_scenes.
+        """
         self._cutting_list.clear()
         self._num_frames = 0
         self._start_frame = 0
@@ -115,7 +138,7 @@ class SceneManager(object):
         if not self._cutting_list:
             return scene_list
         cut_list = [FrameTimecode(timecode=base_timecode, new_time=cut)
-                    for cut in sorted(self._cutting_list)]
+                    for cut in self._get_cutting_list()]
         # Initialize last_cut to the first frame we processed,as it will be
         # the start timecode for the first scene in the list.
         last_cut = base_timecode + self._start_frame
@@ -130,7 +153,8 @@ class SceneManager(object):
 
     def _get_cutting_list(self):
         # type: () -> list
-        return sorted(self._cutting_list)
+        # We remove duplicates here by creating a set then back to a list and sort it.
+        return sorted(list(set(self._cutting_list)))
 
 
     def _process_frame(self, frame_num, frame_im):

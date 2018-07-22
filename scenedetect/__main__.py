@@ -41,8 +41,6 @@ Installing PySceneDetect (using `python setup.py install` in the parent director
 will also add the `scenedetect` command to %PATH% be used from anywhere.
 """
 
-import logging
-
 # PySceneDetect Library Imports
 from scenedetect.cli import CliContext
 from scenedetect.cli import scenedetect_cli as cli

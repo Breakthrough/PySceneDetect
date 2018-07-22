@@ -139,13 +139,17 @@ class StatsManager(object):
         # type: (int, List[str]) -> bool
         return all([self._metric_exists(frame_number, metric_key) for metric_key in metric_keys])
     
+
     def is_save_required(self):
+        return self._metrics_updated
+
+    def _data_can_be_saved(self):
         return self._registered_metrics and self._frame_metrics
 
     def save_to_csv(self, csv_file, base_timecode, force_save=False):
         # type: (File [w], FrameTimecode, bool) -> None
         csv_writer = get_csv_writer(csv_file)
-        if (self._metrics_updated or force_save) and self.is_save_required():
+        if self._data_can_be_saved() and (self.is_save_required() or force_save):
             # Header rows.
             metric_keys = list(self._registered_metrics)
             csv_writer.writerow([COLUMN_NAME_FPS, '%.10f' % base_timecode.get_framerate()])
@@ -165,7 +169,7 @@ class StatsManager(object):
                 raise NoMetricsSet()
             
 
-    def load_from_csv(self, csv_file, base_timecode = None):
+    def load_from_csv(self, csv_file, base_timecode = None, reset_save_required=True):
         # type: (File [r], Optional[FrameTimecode]) -> int
         csv_reader = get_csv_reader(csv_file)
         num_cols = None
@@ -208,6 +212,8 @@ class StatsManager(object):
             self.set_metrics(int(row[0]), metric_dict)
             num_frames += 1
         logging.info('Loaded %d metrics for %d frames.', num_metrics, num_frames)
+        if reset_save_required:
+            self._metrics_updated = False
         return num_frames
 
 

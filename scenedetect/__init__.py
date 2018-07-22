@@ -48,9 +48,7 @@ import click
 from scenedetect.scene_manager import SceneManager
 from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.video_manager import VideoManager
-# Asynchronous version will be disabled for now.
-#from scenedetect.video_manager_async import VideoManagerAsync
-#from scenedetect.scene_detectors import ThresholdDetector, ContentDetector
+from scenedetect.detectors import ThresholdDetector, ContentDetector
 
 # Used for module identification and when printing version & about info.
 # (scenedetect version and scenedetect about)
