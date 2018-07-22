@@ -61,7 +61,7 @@ def main():
         # The returned scene list is also sortable, should it become unsorted.
 
         print(scene_list)
-        
+
         print('List of scenes obtained:')
         for i, scene in enumerate(scene_list):
             print('    Scene %2d: Start %s / Frame %d, End %s / Frame %d' % (

@@ -13,8 +13,8 @@
 #  - https://github.com/Breakthrough/PySceneDetect/
 #  - http://www.bcastell.com/projects/pyscenedetect/
 #
-# This software uses Numpy, OpenCV, click, pytest, mkvmerge, and ffmpeg. See
-# the included LICENSE-* files, or one of the above URLs for more information.
+# This software uses the Numpy, OpenCV, click, tqdm, and pytest libraries.
+# See the included LICENSE files or one of the above URLs for more information.
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -65,10 +65,7 @@ class ContentDetector(SceneDetector):
         """
         # Similar to ThresholdDetector, but using the HSV colour space DIFFERENCE instead
         # of single-frame RGB/grayscale intensity (thus cannot detect slow fades with this method).
-
-        # Value to return indiciating if a scene cut was found or not.
-        cut_detected = False
-        cut_frame = None
+        cut_list = []
         metric_keys = self._metric_keys
 
         if self.last_frame is not None:
@@ -106,19 +103,20 @@ class ContentDetector(SceneDetector):
             if delta_hsv_avg >= self.threshold:
                 if self.last_scene_cut is None or (
                   (frame_num - self.last_scene_cut) >= self.min_scene_len):
-                    #scene_manager.add_cut(frame_num)   # Returning True will do the same now.
-                    cut_detected = True
-                    cut_frame = frame_num
+                    cut_list.append(frame_num)
                     self.last_scene_cut = frame_num
 
             #self.last_frame.release()
             del self.last_frame
                 
         self.last_frame = frame_img.copy()
-        return cut_detected, [cut_frame]
+
+        return cut_list
 
 
-    #def post_process(self, scene_list, frame_num):
-    #    """Not used for ContentDetector, as cuts are written as they are found."""
+    #def post_process(self, frame_num):
+    #    """ Not used for ContentDetector, as unlike ThresholdDetector, cuts
+    #    are always written as they are found.
+    #    """
     #    return []
 

@@ -13,8 +13,8 @@
 #  - https://github.com/Breakthrough/PySceneDetect/
 #  - http://www.bcastell.com/projects/pyscenedetect/
 #
-# This software uses Numpy, OpenCV, click, pytest, mkvmerge, and ffmpeg. See
-# the included LICENSE-* files, or one of the above URLs for more information.
+# This software uses the Numpy, OpenCV, click, tqdm, and pytest libraries.
+# See the included LICENSE files or one of the above URLs for more information.
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -135,6 +135,15 @@ def get_video_name(video_file):
     if isinstance(video_file, int):
         return ('Device %d' % video_file, video_file)
     return (os.path.split(video_file)[1], video_file)
+
+
+def get_num_frames(cap_list):
+    # type: (List[cv2.VideoCapture]) -> int
+    """ Get Number of Frames: Returns total number of frames in the cap_list.
+
+    Calls get(CAP_PROP_FRAME_COUNT) and returns the sum for all VideoCaptures.
+    """
+    return sum([math.trunc(cap.get(cv2.CAP_PROP_FRAME_COUNT)) for cap in cap_list])
 
 
 def open_captures(video_files, framerate=None, validate_parameters=True):
@@ -322,14 +331,7 @@ class VideoManager(object):
                 self.get_framerate(), *self.get_framesize())
         self._started = False
         self._downscale_factor = 1
-        self._frame_skip = 0
-
-    def set_frame_skip(self, frame_skip):
-        # type: (int) -> None
-        if frame_skip < 0:
-            raise ValueError('Frame skip must be a positive integer >= 0.')
-        self._frame_skip = frame_skip
-
+        self._frame_length = get_num_frames(self._cap_list)
 
     def set_downscale_factor(self, downscale_factor=None):
         # type: (Optional[int]) -> None
@@ -340,8 +342,9 @@ class VideoManager(object):
                 raise InvalidDownscaleFactor()
             self._downscale_factor = downscale_factor
         if self._logger is not None:
-            self._logger.info('Downscale factor set to %d, effective resolution: %d x %d' % (
-                self._downscale_factor, *self.get_framesize_effective()))
+            effective_framesize = self.get_framesize_effective()
+            self._logger.info('Downscale factor set to %d, effective resolution: %d x %d', 
+                self._downscale_factor, effective_framesize[0], effective_framesize[1])
 
 
     def get_num_videos(self):
@@ -542,22 +545,30 @@ class VideoManager(object):
             video_files=self._video_file_paths, framerate=self._curr_time.get_framerate())
 
 
-    def get(self, property, index=0):
-        # type: (int, Optional[int]) -> float
+    def get(self, capture_prop, index=None):
+        # type: (int, Optional[int]) -> Union[float, int]
         """ Get (cv2.VideoCapture method) - obtains capture properties from the current
         VideoCapture object in use.  Index represents the same index as the original
         video_files list passed to the constructor.  Getting/setting the position (POS)
         properties has no effect; seeking is implemented using VideoDecoder methods.
 
+        Note that getting the property CAP_PROP_FRAME_COUNT will return the integer sum of
+        the frame count for all VideoCapture objects if index is not specified (or is None),
+        otherwise the frame count for the given VideoCapture index is returned instead.
+
         Arguments:
-            property: OpenCV VideoCapture property to get (i.e. CAP_PROP_FPS).
+            capture_prop: OpenCV VideoCapture property to get (i.e. CAP_PROP_FPS).
             index (optional): Index in file_list of capture to get property from (default
                 is zero). Index is not checked and will raise exception if out of bounds.
 
         Returns:
             Return value from calling get(property) on the VideoCapture object.
         """
-        return self._cap_list[index].get(property)
+        if capture_prop == cv2.CAP_PROP_FRAME_COUNT and index is None:
+            return self._frame_length
+        elif index is None:
+            index = 0
+        return self._cap_list[index].get(capture_prop)
 
 
     def grab(self):
@@ -666,4 +677,3 @@ class VideoManager(object):
             self._curr_cap_idx += 1
             self._curr_cap = self._cap_list[self._curr_cap_idx]
             return True
-

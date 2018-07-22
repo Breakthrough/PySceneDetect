@@ -13,8 +13,8 @@
 #  - https://github.com/Breakthrough/PySceneDetect/
 #  - http://www.bcastell.com/projects/pyscenedetect/
 #
-# This software uses Numpy, OpenCV, click, pytest, mkvmerge, and ffmpeg. See
-# the included LICENSE-* files, or one of the above URLs for more information.
+# This software uses the Numpy, OpenCV, click, tqdm, and pytest libraries.
+# See the included LICENSE files or one of the above URLs for more information.
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -219,10 +219,12 @@ def scenedetect_cli(ctx, input, output, framerate, downscale, frame_skip, stats,
     
     try:
         ctx.obj.output_directory = output
+        ctx.obj.quiet_mode = True if info_level is None else False
         if ctx.obj.output_directory is not None:
             logging.info('Output directory set:\n  %s', ctx.obj.output_directory)
         ctx.obj.parse_options(
-            input_list=input, framerate=framerate, stats_file=stats, downscale=downscale)
+            input_list=input, framerate=framerate, stats_file=stats, downscale=downscale,
+            frame_skip=frame_skip)
         #print(frame_skip)
     except:
         logging.error('Could not parse CLI options.')

@@ -13,8 +13,8 @@
 #  - https://github.com/Breakthrough/PySceneDetect/
 #  - http://www.bcastell.com/projects/pyscenedetect/
 #
-# This software uses Numpy, OpenCV, click, pytest, mkvmerge, and ffmpeg. See
-# the included LICENSE-* files, or one of the above URLs for more information.
+# This software uses the Numpy, OpenCV, click, tqdm, and pytest libraries.
+# See the included LICENSE files or one of the above URLs for more information.
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -48,12 +48,20 @@ import csv
 import cv2
 
 
-# Python 2/3 Queue/queue library (scenedetect.platform.queue)
 # pylint: disable=unused-import
+
+# Python 2/3 Queue/queue library (scenedetect.platform.queue)
 if sys.version_info[0] == 2:
     import Queue as queue
 else:
     import queue
+
+# tqdm Library (scenedetect.platform.tqdm will be module or None)
+try:
+    from tqdm import tqdm
+except ImportError:
+    tqdm = None
+
 # pylint: enable=unused-import
 
 
@@ -82,13 +90,17 @@ if cv2.__version__[0] == '2' or not (
 # pylint: enable=c-extension-no-member
 
 
+
+
 # Functonality for obtaining csv reader/writer handles with uniform line terminations.
 def get_csv_reader(file_handle):
     # type: (File) -> csv.reader
+    """ Returns a csv.reader object using the passed file handle. """
     return csv.reader(file_handle, lineterminator='\n')
-    
+
 
 def get_csv_writer(file_handle):
     # type: (File) -> csv.writer
+    """ Returns a csv.writer object using the passed file handle. """
     return csv.writer(file_handle, lineterminator='\n')
 

@@ -13,8 +13,8 @@
 #  - https://github.com/Breakthrough/PySceneDetect/
 #  - http://www.bcastell.com/projects/pyscenedetect/
 #
-# This software uses Numpy, OpenCV, click, pytest, mkvmerge, and ffmpeg. See
-# the included LICENSE-* files, or one of the above URLs for more information.
+# This software uses the Numpy, OpenCV, click, tqdm, and pytest libraries.
+# See the included LICENSE files or one of the above URLs for more information.
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -141,6 +141,7 @@ class ThresholdDetector(SceneDetector):
         # then we trigger a new scene cut/break.
 
         # List of cuts to return.
+        cut_found = False
         cut_list = []
 
         # The metric used here to detect scene breaks is the percent of pixels
@@ -152,8 +153,6 @@ class ThresholdDetector(SceneDetector):
 
         if (self.stats_manager is not None and
             self.stats_manager.metrics_exist(frame_num, self._metric_keys)):
-            delta_hsv_avg, delta_h, delta_s, delta_v = self.stats_manager.get_metrics(
-                frame_num, self._metric_keys)
             frame_avg = self.stats_manager.get_metrics(frame_num, self._metric_keys)[0]
         else:
             frame_avg = self.compute_frame_average(frame_img)
@@ -176,6 +175,7 @@ class ThresholdDetector(SceneDetector):
                 if self.last_scene_cut is None or (
                     (frame_num - self.last_scene_cut) >= self.min_scene_len):
                     cut_list.append(f_split)
+                    cut_found = True
                     self.last_scene_cut = frame_num
                 self.last_fade['type'] = 'in'
                 self.last_fade['frame'] = frame_num
@@ -190,7 +190,7 @@ class ThresholdDetector(SceneDetector):
         self.last_frame_avg = frame_avg
         return cut_list
 
-    def post_process(self, scene_list, frame_num):
+    def post_process(self, frame_num):
         """Writes a final scene cut if the last detected fade was a fade-out.
 
         Only writes the scene cut if add_final_scene is true, and the last fade
@@ -203,8 +203,10 @@ class ThresholdDetector(SceneDetector):
         # scene break to indicate the end of the scene.  This is only done for
         # fade-outs, as a scene cut is already added when a fade-in is found.
         cut_times = []
+        cut_added = False
         if self.last_fade['type'] == 'out' and self.add_final_scene and (
             self.last_scene_cut is None or
             (frame_num - self.last_scene_cut) >= self.min_scene_len):
             cut_times.append(self.last_fade['frame'])
+            cut_added = True
         return cut_times

@@ -13,8 +13,8 @@
 #  - https://github.com/Breakthrough/PySceneDetect/
 #  - http://www.bcastell.com/projects/pyscenedetect/
 #
-# This software uses Numpy, OpenCV, click, pytest, mkvmerge, and ffmpeg. See
-# the included LICENSE-* files, or one of the above URLs for more information.
+# This software uses the Numpy, OpenCV, click, tqdm, and pytest libraries.
+# See the included LICENSE files or one of the above URLs for more information.
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -35,6 +35,7 @@ state/context and logic to run the PySceneDetect CLI.
 from __future__ import print_function
 import logging
 import os
+import time
 
 # Third-Party Library Imports
 import click
@@ -91,6 +92,9 @@ class CliContext(object):
 
         self.print_scene_list = False
         self.scene_list_path = None # Optional[str]: Path to stats file.
+
+        self.quiet_mode = False
+        self.frame_skip = 0
         
 
     def cleanup(self):
@@ -162,10 +166,19 @@ class CliContext(object):
             logging.error('No scene detectors specified (detect-content, detect-threshold, etc...).')
             return
 
-        self.video_manager.start()
-        self.scene_manager.detect_scenes(
-            frame_source=self.video_manager, start_time=self.start_frame)
 
+        self.video_manager.start()
+
+        base_timecode = self.video_manager.get_base_timecode()
+
+        start_time = time.time()
+        num_frames = self.scene_manager.detect_scenes(
+            frame_source=self.video_manager, start_time=self.start_frame,
+            frame_skip=self.frame_skip, show_progress=not self.quiet_mode)
+        end_time = time.time()
+        duration = end_time - start_time
+        logging.info('Processed %d frames in %.1f seconds (average %.2f FPS).', num_frames,
+            duration, num_frames/duration)
 
         if self.stats_file_path is not None:
             if self.stats_manager.is_save_required():
@@ -173,31 +186,39 @@ class CliContext(object):
                     logging.info('Saving frame metrics to stats file: %s',
                         os.path.basename(self.stats_file_path))
                     self.stats_manager.save_to_csv(
-                        stats_file, self.video_manager.get_base_timecode())
+                        stats_file, base_timecode)
             else:
                 logging.debug('No frame metrics updated, skipping update of the stats file.')
         
 
-        scene_list = self.scene_manager.get_scene_list(self.video_manager.get_base_timecode())
+        cut_list = self.scene_manager.get_cut_list(base_timecode)
+        scene_list = self.scene_manager.get_scene_list(base_timecode)
 
         if self.scene_list_path is not None:
             with open(self.scene_list_path, 'wt') as scene_list_file:
-                write_scene_list(scene_list_file, scene_list)
+                write_scene_list(scene_list_file, cut_list, scene_list)
 
         if self.print_scene_list:
-            logging.info("""Scene list:
+            logging.info("""Detected %d scenes, scene list:
 
 -----------------------------------------------------------------------
  | Scene # | Start Frame |  Start Time  |  End Frame  |   End Time   |
 -----------------------------------------------------------------------
 %s
 -----------------------------------------------------------------------
-""", '\n'.join(
+""", len(scene_list), '\n'.join(
     [' |  %5d  | %11d | %s | %11d | %s |' % (
         i+1,
         start_time.get_frames(), start_time.get_timecode(),
         end_time.get_frames(), end_time.get_timecode())
      for i, (start_time, end_time) in enumerate(scene_list)]))
+
+        else:
+            logging.info('Detected %d scenes.', len(scene_list))
+
+        if cut_list:
+            logging.info('Comma-separated timecode list:\n  %s',
+                         ','.join([cut.get_timecode() for cut in cut_list]))
 
 
 
@@ -267,12 +288,14 @@ class CliContext(object):
         return video_manager_initialized
 
 
-    def parse_options(self, input_list, framerate, stats_file, downscale):
+    def parse_options(self, input_list, framerate, stats_file, downscale, frame_skip):
         """ Parse Options: Parses all CLI arguments passed to scenedetect [options]. """
         if not input_list:
             return
 
         logging.debug('Parsing program options.')
+
+        self.frame_skip = frame_skip
 
         video_manager_initialized = self._init_video_manager(
             input_list=input_list, framerate=framerate, downscale=downscale)

@@ -13,8 +13,8 @@
 #  - https://github.com/Breakthrough/PySceneDetect/
 #  - http://www.bcastell.com/projects/pyscenedetect/
 #
-# This software uses Numpy, OpenCV, click, pytest, mkvmerge, and ffmpeg. See
-# the included LICENSE-* files, or one of the above URLs for more information.
+# This software uses the Numpy, OpenCV, click, tqdm, and pytest libraries.
+# See the included LICENSE files or one of the above URLs for more information.
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -62,11 +62,9 @@ class SceneDetector(object):
         Prototype method, no actual detection.
 
         Returns:
-            Tuple of (cut_detected: bool, List[frame_nums]: List[int]/None), where if
-            cut_detected is True, frame_nums is the list of integer frame numbers of
-            the cut(s) to add, else None. 
+            List of frame numbers of cuts to be added to the cutting list.
         """
-        return (False, 0)
+        return []
 
     def post_process(self, frame_num):
         # type: (int) -> List[int]
@@ -75,7 +73,7 @@ class SceneDetector(object):
         Prototype method, no actual detection.
 
         Returns:
-            List of frame numbers of additional cuts to be added.
+            List of frame numbers of cuts to be added to the cutting list.
         """
         return []
 
