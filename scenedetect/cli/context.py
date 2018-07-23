@@ -110,10 +110,9 @@ class CliContext(object):
         '''Returns path to output file_path passed as argument, and creates directories if necessary.'''
         if file_path is None:
             return None
-        # If an output directory is defined and the file path is a single
-        # filename (i.e. not an absolute/relative path), open the file handle
-        # in the output directory instead of the working directory.
-        if self.output_directory is not None and not os.path.split(file_path)[0]:
+        # If an output directory is defined and the file path is a relative path, open
+        # the file handle in the output directory instead of the working directory.
+        if self.output_directory is not None and not os.path.isabs(file_path):
             file_path = os.path.join(self.output_directory, file_path)
         os.makedirs(os.path.split(os.path.abspath(file_path))[0], exist_ok=True)
         return file_path
@@ -130,12 +129,12 @@ class CliContext(object):
                 except StatsFileCorrupt:
                     error_strs = [
                         'Could not load stats file.', 'Failed to parse stats file:',
-                        'Could not load frame metrics from stats file, file is corrupt or not a'
+                        'Could not load frame metrics from stats file - file is corrupt or not a'
                         ' valid PySceneDetect stats file. If the file exists, ensure that it is'
                         ' a valid stats file CSV, otherwise delete it and run PySceneDetect again'
                         ' to re-generate the stats file.']
                     logging.error('\n'.join(error_strs))
-                    raise click.BadParameter('could not load given stats file.', param_hint='input stats file')
+                    raise click.BadParameter('\n  Could not load given stats file, see above output for details.', param_hint='input stats file')
                 except StatsFileFramerateMismatch as ex:
                     error_strs = [
                         'could not load stats file.', 'Failed to parse stats file:',

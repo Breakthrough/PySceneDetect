@@ -106,6 +106,7 @@ class StatsManager(object):
         # of each frame metric key and the value it represents (usually float).
         self._frame_metrics = dict()        # Dict[FrameTimecode, Dict[str, float]]
         self._registered_metrics = set()    # Set of frame metric keys.
+        self._loaded_metrics = set()        # Metric keys loaded from stats file.
         self._stats_writer = None
         self._metrics_updated = False
 
@@ -125,7 +126,6 @@ class StatsManager(object):
             else:
                 raise FrameMetricRegistered(metric_key)
 
-                
     def get_metrics(self, frame_number, metric_keys):
         # type: (int, List[str]) -> List[Union[None, int, float, str]]
         return [self._get_metric(frame_number, metric_key) for metric_key in metric_keys]
@@ -151,7 +151,7 @@ class StatsManager(object):
         csv_writer = get_csv_writer(csv_file)
         if self._data_can_be_saved() and (self.is_save_required() or force_save):
             # Header rows.
-            metric_keys = list(self._registered_metrics)
+            metric_keys = list(self._registered_metrics.union(self._loaded_metrics))
             csv_writer.writerow([COLUMN_NAME_FPS, '%.10f' % base_timecode.get_framerate()])
             csv_writer.writerow(
                 [COLUMN_NAME_FRAME_NUMBER, COLUMN_NAME_TIMECODE] + metric_keys)
@@ -207,8 +207,14 @@ class StatsManager(object):
         num_frames = 0
         for row in csv_reader:
             metric_dict = {}
+            if not len(row) == num_cols:
+                raise StatsFileCorrupt('Wrong number of columns detected in stats file row.')
             for i, metric_str in enumerate(row[2:]):
-                metric_dict[metric_keys[i]] = float(metric_str)
+                if metric_str and metric_str != 'None':
+                    try:
+                        metric_dict[metric_keys[i]] = float(metric_str)
+                    except ValueError:
+                        raise StatsFileCorrupt('Corrupted value in stats file: %s' % metric_str)
             self.set_metrics(int(row[0]), metric_dict)
             num_frames += 1
         logging.info('Loaded %d metrics for %d frames.', num_metrics, num_frames)
