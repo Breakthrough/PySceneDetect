@@ -74,139 +74,141 @@ def test_framerate():
 
 def test_new_time():
     ''' Test FrameTimecode constructor argument "new_time". '''
-    with pytest.raises(TypeError): FrameTimecode(timecode = 0, fps = 1, new_time = 1)
-    with pytest.raises(TypeError): FrameTimecode(timecode = 0.0, fps = 1.0, new_time = 1.0)
-    with pytest.raises(ValueError): FrameTimecode(timecode = FrameTimecode(
-        timecode = 0, fps = 1), fps = None, new_time = -0.001)
-    with pytest.raises(ValueError): FrameTimecode(timecode = FrameTimecode(
-        timecode = 0, fps = 1), fps = None, new_time = "-1")
-    with pytest.raises(ValueError): FrameTimecode(timecode = FrameTimecode(
-        timecode = 0, fps = 1), fps = None, new_time = "1x")
-    with pytest.raises(ValueError): FrameTimecode(timecode = FrameTimecode(
-        timecode = 0, fps = 1), fps = None, new_time = -1)
-    assert FrameTimecode(timecode = FrameTimecode(
-        timecode = 1, fps = 1), fps = None, new_time = 0).frame_num == 0
-    assert FrameTimecode(timecode = FrameTimecode(
-        timecode = 1, fps = 1), fps = None, new_time = 1.0).frame_num == 1
-    assert FrameTimecode(timecode = FrameTimecode(
-        timecode = 1, fps = 1), fps = None, new_time = "2").frame_num == 2
-    assert FrameTimecode(timecode = FrameTimecode(
-        timecode = 1, fps = 1), fps = None, new_time = "00:00:03").frame_num == 3
-    assert FrameTimecode(timecode = FrameTimecode(
-        timecode = 1, fps = 1), fps = None, new_time = "00:00:03.900").frame_num == 3
+    with pytest.raises(TypeError): FrameTimecode(timecode=0, fps=1, new_time=1)
+    with pytest.raises(TypeError): FrameTimecode(timecode=0.0, fps=1.0, new_time=1.0)
+    with pytest.raises(ValueError): FrameTimecode(timecode=FrameTimecode(
+        timecode=0, fps=1), fps=None, new_time=-0.001)
+    with pytest.raises(ValueError): FrameTimecode(timecode=FrameTimecode(
+        timecode=0, fps=1), fps=None, new_time="-1")
+    with pytest.raises(ValueError): FrameTimecode(timecode=FrameTimecode(
+        timecode=0, fps=1), fps=None, new_time="1x")
+    with pytest.raises(ValueError): FrameTimecode(timecode=FrameTimecode(
+        timecode=0, fps=1), fps=None, new_time=-1)
+    assert FrameTimecode(timecode=FrameTimecode(
+        timecode=1, fps=1), fps=None, new_time=0).frame_num == 0
+    assert FrameTimecode(timecode=FrameTimecode(
+        timecode=1, fps=1), fps=None, new_time=1.0).frame_num == 1
+    assert FrameTimecode(timecode=FrameTimecode(
+        timecode=1, fps=1), fps=None, new_time="2").frame_num == 2
+    assert FrameTimecode(timecode=FrameTimecode(
+        timecode=1, fps=1), fps=None, new_time="00:00:03").frame_num == 3
+    assert FrameTimecode(timecode=FrameTimecode(
+        timecode=1, fps=1), fps=None, new_time="00:00:03.900").frame_num == 3
 
 def test_timecode_numeric():
     ''' Test FrameTimecode constructor argument "timecode" with numeric arguments. '''
-    with pytest.raises(ValueError): FrameTimecode(timecode = -1, fps = 1)
-    with pytest.raises(ValueError): FrameTimecode(timecode = -1.0, fps = 1.0)
-    with pytest.raises(ValueError): FrameTimecode(timecode = -0.1, fps = 1.0)
-    with pytest.raises(ValueError): FrameTimecode(timecode = -1.0/1000, fps = 1.0)
-    assert FrameTimecode(timecode = 0, fps = 1).frame_num == 0
-    assert FrameTimecode(timecode = 1, fps = 1).frame_num == 1
-    assert FrameTimecode(timecode = 0.0, fps = 1.0).frame_num == 0
-    assert FrameTimecode(timecode = 1.0, fps = 1.0).frame_num == 1
+    with pytest.raises(ValueError): FrameTimecode(timecode=-1, fps=1)
+    with pytest.raises(ValueError): FrameTimecode(timecode=-1.0, fps=1.0)
+    with pytest.raises(ValueError): FrameTimecode(timecode=-0.1, fps=1.0)
+    with pytest.raises(ValueError): FrameTimecode(timecode=-1.0/1000, fps=1.0)
+    assert FrameTimecode(timecode=0, fps=1).frame_num == 0
+    assert FrameTimecode(timecode=1, fps=1).frame_num == 1
+    assert FrameTimecode(timecode=0.0, fps=1.0).frame_num == 0
+    assert FrameTimecode(timecode=1.0, fps=1.0).frame_num == 1
 
 def test_timecode_string():
     ''' Test FrameTimecode constructor argument "timecode" with string arguments. '''
     # Invalid strings:
-    with pytest.raises(ValueError): FrameTimecode(timecode = '-1', fps = 1)
-    with pytest.raises(ValueError): FrameTimecode(timecode = '-1.0', fps = 1.0)
-    with pytest.raises(ValueError): FrameTimecode(timecode = '-0.1', fps = 1.0)
-    with pytest.raises(ValueError): FrameTimecode(timecode = '1.0', fps = 1.0)
-    with pytest.raises(ValueError): FrameTimecode(timecode = '1.9x', fps = 1)
-    with pytest.raises(ValueError): FrameTimecode(timecode = '1x', fps = 1.0)
-    with pytest.raises(ValueError): FrameTimecode(timecode = '1.9.9', fps = 1.0)
-    with pytest.raises(ValueError): FrameTimecode(timecode = '1.0-', fps = 1.0)
+    with pytest.raises(ValueError): FrameTimecode(timecode='-1', fps=1)
+    with pytest.raises(ValueError): FrameTimecode(timecode='-1.0', fps=1.0)
+    with pytest.raises(ValueError): FrameTimecode(timecode='-0.1', fps=1.0)
+    with pytest.raises(ValueError): FrameTimecode(timecode='1.0', fps=1.0)
+    with pytest.raises(ValueError): FrameTimecode(timecode='1.9x', fps=1)
+    with pytest.raises(ValueError): FrameTimecode(timecode='1x', fps=1.0)
+    with pytest.raises(ValueError): FrameTimecode(timecode='1.9.9', fps=1.0)
+    with pytest.raises(ValueError): FrameTimecode(timecode='1.0-', fps=1.0)
 
     # Frame number integer [int->str] ('%d', integer number as string)
-    assert FrameTimecode(timecode = '0', fps = 1).frame_num == 0
-    assert FrameTimecode(timecode = '1', fps = 1).frame_num == 1
-    assert FrameTimecode(timecode = '10', fps = 1.0).frame_num == 10
+    assert FrameTimecode(timecode='0', fps=1).frame_num == 0
+    assert FrameTimecode(timecode='1', fps=1).frame_num == 1
+    assert FrameTimecode(timecode='10', fps=1.0).frame_num == 10
 
     # Seconds format [float->str] ('%fs', number as string followed by 's' for seconds)
-    assert FrameTimecode(timecode = '0s', fps = 1).frame_num == 0
-    assert FrameTimecode(timecode = '1s', fps = 1).frame_num == 1
-    assert FrameTimecode(timecode = '10s', fps = 1.0).frame_num == 10
-    assert FrameTimecode(timecode = '10.0s', fps = 1.0).frame_num == 10
-    assert FrameTimecode(timecode = '10.0000000000s', fps = 1.0).frame_num == 10
-    assert FrameTimecode(timecode = '10.100s', fps = 1.0).frame_num == 10
-    assert FrameTimecode(timecode = '1.100s', fps = 10.0).frame_num == 11
+    assert FrameTimecode(timecode='0s', fps=1).frame_num == 0
+    assert FrameTimecode(timecode='1s', fps=1).frame_num == 1
+    assert FrameTimecode(timecode='10s', fps=1.0).frame_num == 10
+    assert FrameTimecode(timecode='10.0s', fps=1.0).frame_num == 10
+    assert FrameTimecode(timecode='10.0000000000s', fps=1.0).frame_num == 10
+    assert FrameTimecode(timecode='10.100s', fps=1.0).frame_num == 10
+    assert FrameTimecode(timecode='1.100s', fps=10.0).frame_num == 11
 
     # Standard timecode format [timecode->str] ('HH:MM:SS[.nnn]', where [.nnn] is optional)
-    assert FrameTimecode(timecode = '00:00:01', fps = 1).frame_num == 1
-    assert FrameTimecode(timecode = '00:00:01.9999', fps = 1).frame_num == 1
-    assert FrameTimecode(timecode = '00:00:02.0000', fps = 1).frame_num == 2
-    assert FrameTimecode(timecode = '00:00:02.0001', fps = 1).frame_num == 2
+    assert FrameTimecode(timecode='00:00:01', fps=1).frame_num == 1
+    assert FrameTimecode(timecode='00:00:01.9999', fps=1).frame_num == 1
+    assert FrameTimecode(timecode='00:00:02.0000', fps=1).frame_num == 2
+    assert FrameTimecode(timecode='00:00:02.0001', fps=1).frame_num == 2
 
-    assert FrameTimecode(timecode = '00:00:01', fps = 10).frame_num == 10
-    assert FrameTimecode(timecode = '00:00:00.5', fps = 10).frame_num == 5
-    assert FrameTimecode(timecode = '00:00:00.100', fps = 10).frame_num == 1
-    assert FrameTimecode(timecode = '00:00:00.001', fps = 1000).frame_num == 1
+    assert FrameTimecode(timecode='00:00:01', fps=10).frame_num == 10
+    assert FrameTimecode(timecode='00:00:00.5', fps=10).frame_num == 5
+    assert FrameTimecode(timecode='00:00:00.100', fps=10).frame_num == 1
+    assert FrameTimecode(timecode='00:00:00.001', fps=1000).frame_num == 1
 
-    assert FrameTimecode(timecode = '00:00:59.999', fps = 1).frame_num == 59
-    assert FrameTimecode(timecode = '00:01:00.000', fps = 1).frame_num == 60
-    assert FrameTimecode(timecode = '00:01:00.001', fps = 1).frame_num == 60
+    assert FrameTimecode(timecode='00:00:59.999', fps=1).frame_num == 59
+    assert FrameTimecode(timecode='00:01:00.000', fps=1).frame_num == 60
+    assert FrameTimecode(timecode='00:01:00.001', fps=1).frame_num == 60
 
-    assert FrameTimecode(timecode = '00:59:59.999', fps = 1).frame_num == 3599
-    assert FrameTimecode(timecode = '01:00:00.000', fps = 1).frame_num == 3600
-    assert FrameTimecode(timecode = '01:00:00.001', fps = 1).frame_num == 3600
+    assert FrameTimecode(timecode='00:59:59.999', fps=1).frame_num == 3599
+    assert FrameTimecode(timecode='01:00:00.000', fps=1).frame_num == 3600
+    assert FrameTimecode(timecode='01:00:00.001', fps=1).frame_num == 3600
 
 def test_get_frames():
     ''' Test FrameTimecode get_frames() method. '''
-    assert FrameTimecode(timecode = 1, fps = 1.0).get_frames(), 1
-    assert FrameTimecode(timecode = 1000, fps = 60.0).get_frames(), 1000
-    assert FrameTimecode(timecode = 1000000000, fps = 29.97).get_frames(), 1000000000
+    assert FrameTimecode(timecode=1, fps=1.0).get_frames(), 1
+    assert FrameTimecode(timecode=1000, fps=60.0).get_frames(), 1000
+    assert FrameTimecode(timecode=1000000000, fps=29.97).get_frames(), 1000000000
 
-    assert FrameTimecode(timecode = 1.0, fps = 1.0).get_frames(), int(1.0/1.0)
-    assert FrameTimecode(timecode = 1000.0, fps = 60.0).get_frames(), int(1000.0*60.0)
-    assert FrameTimecode(timecode = 1000000000.0, fps = 29.97).get_frames(), int(1000000000.0*29.97)
+    assert FrameTimecode(timecode=1.0, fps=1.0).get_frames(), int(1.0/1.0)
+    assert FrameTimecode(timecode=1000.0, fps=60.0).get_frames(), int(1000.0*60.0)
+    assert FrameTimecode(timecode=1000000000.0, fps=29.97).get_frames(), int(1000000000.0*29.97)
 
-    assert FrameTimecode(timecode = '00:00:02.0000', fps = 1).get_frames(), 2
-    assert FrameTimecode(timecode = '00:00:00.5', fps = 10).get_frames(), 5
-    assert FrameTimecode(timecode = '00:00:01', fps = 10).get_frames(), 10
-    assert FrameTimecode(timecode = '00:01:00.000', fps = 1).get_frames(), 60
+    assert FrameTimecode(timecode='00:00:02.0000', fps=1).get_frames(), 2
+    assert FrameTimecode(timecode='00:00:00.5', fps=10).get_frames(), 5
+    assert FrameTimecode(timecode='00:00:01', fps=10).get_frames(), 10
+    assert FrameTimecode(timecode='00:01:00.000', fps=1).get_frames(), 60
 
 def test_get_seconds():
     ''' Test FrameTimecode get_seconds() method. '''
-    assert FrameTimecode(timecode = 1, fps = 1.0).get_seconds(), pytest.approx(1.0/1.0)
-    assert FrameTimecode(timecode = 1000, fps = 60.0).get_seconds(), pytest.approx(1000/60.0)
-    assert FrameTimecode(timecode = 1000000000, fps = 29.97).get_seconds(), pytest.approx(1000000000/29.97)
+    assert FrameTimecode(timecode=1, fps=1.0).get_seconds(), pytest.approx(1.0/1.0)
+    assert FrameTimecode(timecode=1000, fps=60.0).get_seconds(), pytest.approx(1000/60.0)
+    assert FrameTimecode(
+        timecode=1000000000, fps=29.97).get_seconds(), pytest.approx(1000000000/29.97)
 
-    assert FrameTimecode(timecode = 1.0, fps = 1.0).get_seconds(), pytest.approx(1.0)
-    assert FrameTimecode(timecode = 1000.0, fps = 60.0).get_seconds(), pytest.approx(1000.0)
-    assert FrameTimecode(timecode = 1000000000.0, fps = 29.97).get_seconds(), pytest.approx(1000000000.0)
+    assert FrameTimecode(timecode=1.0, fps=1.0).get_seconds(), pytest.approx(1.0)
+    assert FrameTimecode(timecode=1000.0, fps=60.0).get_seconds(), pytest.approx(1000.0)
+    assert FrameTimecode(
+        timecode=1000000000.0, fps=29.97).get_seconds(), pytest.approx(1000000000.0)
 
-    assert FrameTimecode(timecode = '00:00:02.0000', fps = 1).get_seconds(), pytest.approx(2.0)
-    assert FrameTimecode(timecode = '00:00:00.5', fps = 10).get_seconds(), pytest.approx(0.5)
-    assert FrameTimecode(timecode = '00:00:01', fps = 10).get_seconds(), pytest.approx(1.0)
-    assert FrameTimecode(timecode = '00:01:00.000', fps = 1).get_seconds(), pytest.approx(60.0)
+    assert FrameTimecode(timecode='00:00:02.0000', fps=1).get_seconds(), pytest.approx(2.0)
+    assert FrameTimecode(timecode='00:00:00.5', fps=10).get_seconds(), pytest.approx(0.5)
+    assert FrameTimecode(timecode='00:00:01', fps=10).get_seconds(), pytest.approx(1.0)
+    assert FrameTimecode(timecode='00:01:00.000', fps=1).get_seconds(), pytest.approx(60.0)
 
 def test_get_timecode():
     ''' Test FrameTimecode get_timecode() method. '''
-    assert FrameTimecode(timecode = 1.0, fps = 1.0).get_timecode() == '00:00:01.000'
-    assert FrameTimecode(timecode = 60.117, fps = 60.0).get_timecode() == '00:01:00.117'
-    assert FrameTimecode(timecode = 3600.234, fps = 29.97).get_timecode() == '01:00:00.234'
+    assert FrameTimecode(timecode=1.0, fps=1.0).get_timecode() == '00:00:01.000'
+    assert FrameTimecode(timecode=60.117, fps=60.0).get_timecode() == '00:01:00.117'
+    assert FrameTimecode(timecode=3600.234, fps=29.97).get_timecode() == '01:00:00.234'
 
-    assert FrameTimecode(timecode = '00:00:02.0000', fps = 1).get_timecode() == '00:00:02.000'
-    assert FrameTimecode(timecode = '00:00:00.5', fps = 10).get_timecode() == '00:00:00.500'
-    assert FrameTimecode(timecode = '00:00:01.501', fps = 10).get_timecode() == '00:00:01.500'
-    assert FrameTimecode(timecode = '00:01:00.000', fps = 1).get_timecode() == '00:01:00.000'
+    assert FrameTimecode(timecode='00:00:02.0000', fps=1).get_timecode() == '00:00:02.000'
+    assert FrameTimecode(timecode='00:00:00.5', fps=10).get_timecode() == '00:00:00.500'
+    assert FrameTimecode(timecode='00:00:01.501', fps=10).get_timecode() == '00:00:01.500'
+    assert FrameTimecode(timecode='00:01:00.000', fps=1).get_timecode() == '00:01:00.000'
 
 def test_equality():
     ''' Test FrameTimecode equality (==, __eq__) operator. '''
-    x = FrameTimecode(timecode = 1.0, fps = 10.0)
+    x = FrameTimecode(timecode=1.0, fps=10.0)
     assert x == x
-    assert x == FrameTimecode(timecode = 1.0, fps = 10.0)
-    assert not x != FrameTimecode(timecode = 1.0, fps = 10.0)
-    assert x != FrameTimecode(timecode = 10.0, fps = 10.0)
-    assert not x == FrameTimecode(timecode = 10.0, fps = 10.0)
+    assert x == FrameTimecode(timecode=1.0, fps=10.0)
+    assert not x != FrameTimecode(timecode=1.0, fps=10.0)
+    assert x != FrameTimecode(timecode=10.0, fps=10.0)
+    assert not x == FrameTimecode(timecode=10.0, fps=10.0)
     # Comparing FrameTimecodes with different framerates raises a TypeError.
-    with pytest.raises(TypeError): x == FrameTimecode(timecode = 1.0, fps = 100.0)
-    with pytest.raises(TypeError): x == FrameTimecode(timecode = 1.0, fps = 10.1)
+    with pytest.raises(TypeError): x == FrameTimecode(timecode=1.0, fps=100.0)
+    with pytest.raises(TypeError): x == FrameTimecode(timecode=1.0, fps=10.1)
 
     assert x == FrameTimecode(x)
-    assert x == FrameTimecode(x, new_time = 1.0)
-    assert x == FrameTimecode(x, new_time = 10)
+    assert x == FrameTimecode(x, new_time=1.0)
+    assert x == FrameTimecode(x, new_time=10)
     assert x == '00:00:01'
     assert x == '00:00:01.0'
     assert x == '00:00:01.00'
@@ -223,39 +225,39 @@ def test_equality():
     with pytest.raises(TypeError): x == [0, 1, 2, 3]
     with pytest.raises(TypeError): x == {0:0}
 
-    assert FrameTimecode(timecode = '00:00:00.5', fps = 10) == '00:00:00.500'
-    assert FrameTimecode(timecode = '00:00:01.500', fps = 10) == '00:00:01.500'
-    assert FrameTimecode(timecode = '00:00:01.500', fps = 10) == '00:00:01.501'
-    assert FrameTimecode(timecode = '00:00:01.500', fps = 10) == '00:00:01.502'
-    assert FrameTimecode(timecode = '00:00:01.500', fps = 10) == '00:00:01.508'
-    assert FrameTimecode(timecode = '00:00:01.500', fps = 10) == '00:00:01.509'
-    assert FrameTimecode(timecode = '00:00:01.519', fps = 10) == '00:00:01.510'
+    assert FrameTimecode(timecode='00:00:00.5', fps=10) == '00:00:00.500'
+    assert FrameTimecode(timecode='00:00:01.500', fps=10) == '00:00:01.500'
+    assert FrameTimecode(timecode='00:00:01.500', fps=10) == '00:00:01.501'
+    assert FrameTimecode(timecode='00:00:01.500', fps=10) == '00:00:01.502'
+    assert FrameTimecode(timecode='00:00:01.500', fps=10) == '00:00:01.508'
+    assert FrameTimecode(timecode='00:00:01.500', fps=10) == '00:00:01.509'
+    assert FrameTimecode(timecode='00:00:01.519', fps=10) == '00:00:01.510'
 
 def test_addition():
     ''' Test FrameTimecode addition (+/+=, __add__/__iadd__) operator. '''
-    x = FrameTimecode(timecode = 1.0, fps = 10.0)
-    assert x + 1 == FrameTimecode(timecode = 1.1, fps = 10.0)
-    assert x + 1 == FrameTimecode(x, new_time = 1.1)
+    x = FrameTimecode(timecode=1.0, fps=10.0)
+    assert x + 1 == FrameTimecode(timecode=1.1, fps=10.0)
+    assert x + 1 == FrameTimecode(x, new_time=1.1)
     assert x + 10 == 20
     assert x + 10 == 2.0
 
     assert x + 10 == '00:00:02.000'
 
-    with pytest.raises(TypeError): FrameTimecode('00:00:02.000', fps = 20.0) == x + 10
+    with pytest.raises(TypeError): FrameTimecode('00:00:02.000', fps=20.0) == x + 10
 
 def test_subtraction():
     ''' Test FrameTimecode subtraction (-/-=, __sub__) operator. '''
-    x = FrameTimecode(timecode = 1.0, fps = 10.0)
-    assert x - 1 == FrameTimecode(timecode = 0.9, fps = 10.0)
-    assert x - 2 == FrameTimecode(x, new_time = 0.8)
-    assert x - 10 == FrameTimecode(x, new_time = 0.0)
-    assert x - 11 == FrameTimecode(x, new_time = 0.0)
-    assert x - 100 == FrameTimecode(x, new_time = 0.0)
+    x = FrameTimecode(timecode=1.0, fps=10.0)
+    assert x - 1 == FrameTimecode(timecode=0.9, fps=10.0)
+    assert x - 2 == FrameTimecode(x, new_time=0.8)
+    assert x - 10 == FrameTimecode(x, new_time=0.0)
+    assert x - 11 == FrameTimecode(x, new_time=0.0)
+    assert x - 100 == FrameTimecode(x, new_time=0.0)
 
-    assert x - 1.0 == FrameTimecode(x, new_time = 0.0)
-    assert x - 100.0 == FrameTimecode(x, new_time = 0.0)
+    assert x - 1.0 == FrameTimecode(x, new_time=0.0)
+    assert x - 100.0 == FrameTimecode(x, new_time=0.0)
 
-    assert x - 1 == FrameTimecode(timecode = 0.9, fps = 10.0)
+    assert x - 1 == FrameTimecode(timecode=0.9, fps=10.0)
 
-    with pytest.raises(TypeError): FrameTimecode('00:00:02.000', fps = 20.0) == x - 10
+    with pytest.raises(TypeError): FrameTimecode('00:00:02.000', fps=20.0) == x - 10
 

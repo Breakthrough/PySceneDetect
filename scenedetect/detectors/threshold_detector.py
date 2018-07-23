@@ -65,6 +65,7 @@ class ThresholdDetector(SceneDetector):
                  fade_bias = 0.0, add_final_scene = False, block_size = 8):
         """Initializes threshold-based scene detector object."""
 
+        super(ThresholdDetector, self).__init__()
         self.threshold = int(threshold)
         self.fade_bias = fade_bias
         self.min_percent = min_percent

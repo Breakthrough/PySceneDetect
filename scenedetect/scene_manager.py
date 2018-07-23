@@ -57,7 +57,7 @@ def write_scene_list(output_csv_file, scene_list, cut_list=None):
         scene_list: List of pairs of FrameTimecodes denoting each scene's start/end FrameTimecode.
         cut_list: Optional list of FrameTimecode objects denoting the cut list (i.e. the frames
             in the video that need to be split to generate individual scenes). If not passed,
-            the start times of each scene (besides the 0th scene) is used instead. 
+            the start times of each scene (besides the 0th scene) is used instead.
     """
     # type: (File, List[Tuple[FrameTimecode, FrameTimecode]], Optional[List[FrameTimecode]]) -> None
     csv_writer = get_csv_writer(output_csv_file)
@@ -125,7 +125,7 @@ class SceneManager(object):
     def clear(self):
         # type: () -> None
         """ Clears all cuts/scenes and resets the SceneManager's position.
-        
+
         Any statistics generated are still saved in the StatsManager object
         passed to the SceneManager's constructor, and thus, subsequent
         calls to detect_scenes, using the same frame source reset at the
@@ -201,7 +201,7 @@ class SceneManager(object):
         """
 
         return [FrameTimecode(timecode=base_timecode, new_time=cut)
-                    for cut in self._get_cutting_list()]
+                for cut in self._get_cutting_list()]
 
 
     def _get_cutting_list(self):
@@ -223,13 +223,13 @@ class SceneManager(object):
         for detector in self._detector_list:
             self._add_cuts(detector.post_process(frame_num))
 
-        
+
     def detect_scenes(self, frame_source, start_time=0, end_time=None, frame_skip=0,
                       show_progress=True):
         # type: (VideoManager, Union[int, FrameTimecode],
         #        Optional[Union[int, FrameTimecode]], Optional[bool]) -> int
         """ Perform scene detection on the given frame_source using the added SceneDetectors.
-        
+
         Blocks until all frames in the frame_source have been processed. Results
         can be obtained by calling the get_scene_list() method afterwards.
 
@@ -297,7 +297,7 @@ class SceneManager(object):
                 if not ret_val:
                     break
                 self._process_frame(self._num_frames, frame_im)
-                
+
                 curr_frame += 1
                 self._num_frames += 1
                 if progress_bar:
@@ -311,8 +311,7 @@ class SceneManager(object):
                         self._num_frames += 1
                         if progress_bar:
                             progress_bar.update(1)
-                        
-                
+
             self._post_process(curr_frame)
 
             num_frames = curr_frame - start_frame

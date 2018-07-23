@@ -48,6 +48,7 @@ class ContentDetector(SceneDetector):
     """
 
     def __init__(self, threshold = 30.0, min_scene_len = 15):
+        super(ContentDetector, self).__init__()
         self.threshold = threshold
         self.min_scene_len = min_scene_len  # minimum length of any given scene, in frames
         self.last_frame = None
@@ -96,13 +97,13 @@ class ContentDetector(SceneDetector):
                 if self.stats_manager is not None:
                     self.stats_manager.set_metrics(frame_num, {
                         metric_keys[0]: delta_hsv_avg, metric_keys[1]: delta_h,
-                        metric_keys[2]: delta_s, metric_keys[3]: delta_v })
+                        metric_keys[2]: delta_s, metric_keys[3]: delta_v})
 
                 self.last_hsv = curr_hsv
 
             if delta_hsv_avg >= self.threshold:
                 if self.last_scene_cut is None or (
-                  (frame_num - self.last_scene_cut) >= self.min_scene_len):
+                    (frame_num - self.last_scene_cut) >= self.min_scene_len):
                     cut_list.append(frame_num)
                     self.last_scene_cut = frame_num
 

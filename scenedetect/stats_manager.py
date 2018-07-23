@@ -43,11 +43,9 @@ same pair of SceneManager/StatsManager objects.
 
 # Standard Library Imports
 from __future__ import print_function
-import csv
 import logging
 
 # PySceneDetect Library Imports
-from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.frame_timecode import MINIMUM_FRAMES_PER_SECOND_FLOAT
 from scenedetect.platform import get_csv_reader
 from scenedetect.platform import get_csv_writer

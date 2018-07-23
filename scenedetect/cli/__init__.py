@@ -81,30 +81,32 @@ version and copyright information (e.g. {command_name} about):
 
 CLICK_CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
-COMMAND_LIST = []
+COMMAND_DICT = []
 
 
 def add_cli_command(cli, command):
+    # type: (Callable[[...] -> None], Callable[]
+    """Adds the CLI command to the cli object as well as to the COMMAND_DICT."""
     cli.add_command(command)
-    COMMAND_LIST.append(command)
+    COMMAND_DICT.append(command)
 
+def parse_timecode(cli_ctx, value):
+    # type: (CliContext, str) -> Union[FrameTimecode, None]
+    """ Parses a user input string expected to be a timecode, given a CLI context.
+    
+    Returns:
+        (FrameTimecode) Timecode set to value with the CliContext VideoManager framerate.
+            If value is None, skips processing and returns None.
 
-def get_command(command_name):
-    command_ref = None
-    for command in COMMAND_LIST:
-        if command.name == command_name:
-            command_ref = command
-            break
-    return command_ref
-
-
-def parse_timecode(ctx, value):
-    ctx.obj.check_input_open()
+    Raises:
+        click.BadParameter
+     """
+    cli_ctx.check_input_open()
     if value is None:
         return value
     try:
         timecode = FrameTimecode(
-            timecode=value, fps=ctx.obj.video_manager.get_framerate())
+            timecode=value, fps=cli_ctx.video_manager.get_framerate())
         return timecode
     except (ValueError, TypeError):
         raise click.BadParameter(
@@ -244,14 +246,14 @@ def help_command(ctx, command_name):
             click.echo(get_help_command_preface(ctx.parent.info_name))
             print_command_list_header()
             click.echo(ctx.parent.get_help())
-            for command in COMMAND_LIST:
-                print_command_help(ctx, command)
+            for command in COMMAND_DICT:
+                print_command_help(ctx, COMMAND_DICT[command])
         else:
-            command = get_command(command_name)
+            command = None if not command_name in COMMAND_DICT else COMMAND_DICT[command_name]
             if command is None:
                 error_strs = [
                     'unknown command.', 'List of valid commands:',
-                    '  %s' % ', '.join([command.name for command in COMMAND_LIST]) ]
+                    '  %s' % ', '.join([command for command in COMMAND_DICT]) ]
                 raise click.BadParameter('\n'.join(error_strs), param_hint='command name')
             click.echo('')
             print_command_help(ctx, command)
@@ -320,9 +322,9 @@ def time_command(ctx, start, duration, end):
 
     time --start 0 --end 1000
     """
-    start = parse_timecode(ctx, start)
-    duration = parse_timecode(ctx, duration)
-    end = parse_timecode(ctx, end)
+    start = parse_timecode(ctx.obj, start)
+    duration = parse_timecode(ctx.obj, duration)
+    end = parse_timecode(ctx.obj, end)
 
     ctx.obj.time_command(start, duration, end)
 

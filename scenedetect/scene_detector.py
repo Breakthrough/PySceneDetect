@@ -33,13 +33,10 @@ The SceneDetector class represents the interface which detection algorithms
 are expected to provide in order to be compatible with PySceneDetect.
 """
 
-# Third-Party Library Imports
-import cv2
-import numpy
-
+# pylint: disable=unused-argument
 
 class SceneDetector(object):
-    """Base SceneDetector class to implement a scene detection algorithm."""
+    """Base class to inheret from when implementing a scene detection algorithm."""
     def __init__(self):
         self.stats_manager = None
         self._metric_keys = []
@@ -48,7 +45,7 @@ class SceneDetector(object):
     def get_metrics(self):
         # type: () -> List[str]
         """ Get Metrics:  Get a list of all metric names/keys used by the detector.
-        
+
         Returns:
             A List[str] of the frame metric key names that will be used by
             the detector when a StatsManager is passed to process_frame.
