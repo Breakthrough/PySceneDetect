@@ -469,6 +469,10 @@ class VideoManager(object):
         elif duration is not None:
             self._end_time = self._start_time + duration
 
+        if self._end_time is not None:
+            self._frame_length = max(self._frame_length, self._end_time.get_frames())
+        self._frame_length -= self._start_time.get_frames()
+
         if self._logger is not None:
             self._logger.info('Duration set, start: %s, duration: %s, end: %s.',
                         start_time.get_timecode() if start_time is not None else start_time,
@@ -543,6 +547,7 @@ class VideoManager(object):
         self._curr_time = self.get_base_timecode()
         self._cap_list, self._cap_framerate, self._cap_framesize = open_captures(
             video_files=self._video_file_paths, framerate=self._curr_time.get_framerate())
+        self._curr_cap, self._curr_cap_idx = None, None
 
 
     def get(self, capture_prop, index=None):
@@ -592,7 +597,7 @@ class VideoManager(object):
                     break
                 else:
                     self._curr_time += 1
-        if self._end_time is not None and self._curr_time >= self._end_time:
+        if self._end_time is not None and self._curr_time > self._end_time:
             grabbed = False
             self._last_frame = None
         return grabbed
@@ -625,7 +630,7 @@ class VideoManager(object):
                 if self._downscale_factor > 1:
                     self._last_frame = self._last_frame[
                         ::self._downscale_factor, ::self._downscale_factor, :]
-        if self._end_time is not None and self._curr_time >= self._end_time:
+        if self._end_time is not None and self._curr_time > self._end_time:
             retrieved = False
             self._last_frame = None
         return (retrieved, self._last_frame)
@@ -655,7 +660,7 @@ class VideoManager(object):
                 if self._downscale_factor > 1:
                     self._last_frame = self._last_frame[
                         ::self._downscale_factor, ::self._downscale_factor, :]
-        if self._end_time is not None and self._curr_time >= self._end_time:
+        if self._end_time is not None and self._curr_time > self._end_time:
             read_frame = False
             self._last_frame = None
         if read_frame:

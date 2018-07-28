@@ -296,7 +296,7 @@ class SceneManager(object):
                 ret_val, frame_im = frame_source.read()
                 if not ret_val:
                     break
-                self._process_frame(self._num_frames, frame_im)
+                self._process_frame(self._num_frames + start_frame, frame_im)
 
                 curr_frame += 1
                 self._num_frames += 1
@@ -315,7 +315,6 @@ class SceneManager(object):
             self._post_process(curr_frame)
 
             num_frames = curr_frame - start_frame
-
 
         finally:
             if progress_bar:

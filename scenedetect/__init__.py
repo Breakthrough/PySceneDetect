@@ -33,28 +33,31 @@ classes so they can be accessed directly from the scenedetect module.
 """
 
 # Standard Library Imports
+
 from __future__ import print_function
 import sys
 import os
 import time
 
-# Third-Party Library Imports
-import cv2
-import click
 
 # PySceneDetect Library Imports
+
 # Commonly used classes for easier use directly from the scenedetect namespace (e.g.
 # scenedetect.SceneManager instead of scenedetect.scene_manager.SceneManager).
+
 from scenedetect.scene_manager import SceneManager
 from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.video_manager import VideoManager
 from scenedetect.detectors import ThresholdDetector, ContentDetector
 
+
 # Used for module identification and when printing version & about info.
 # (scenedetect version and scenedetect about)
+
 __version__ = 'v0.5-dev'
 
 # About & copyright message string shown for the 'about' CLI command (scenedetect about).
+
 ABOUT_STRING = """
 Site/Updates: https://github.com/Breakthrough/PySceneDetect/
 Documentation: http://pyscenedetect.readthedocs.org/
@@ -69,18 +72,32 @@ This software uses the following third-party components:
   > OpenCV [Copyright (C) 2018, OpenCV Team]
   > click [Copyright (C) 2018, Armin Ronacher]
 
-This software can also optionally make use of the following third-party
-software tools, if they are available:
+This software may also invoke mkvmerge or FFmpeg, if available.
 
-  > mkvmerge [Copyright (C) 2005-2018, Matroska]
-  > ffmpeg [Copyright (C) 2018, FFmpeg Team]
+FFmpeg is a trademark of Fabrice Bellard.
+mkvmerge is Copyright (C) 2005-2016, Matroska.
 
-Certain distributions of PySceneDetect may include binary releases of
-these software tools. These binaries were obtained from their
-respective copyright holders, and included without modification.
-Details as to obtaining a copy of the source code from the original
-copyright holder can be found in the relevant LICENSE- file included
-with this distribution.
+Unlike the third-party components, neither mkvmerge nor FFmpeg is
+distributed with PySceneDetect, and requires manual installation in
+order to allow for automatic video splitting capability. These programs
+can be obtained from following URLs:
+
+    FFmpeg:   [ https://ffmpeg.org/download.html ]
+    mkvmerge: [ https://mkvtoolnix.download/downloads.html ]
+        (Note that mkvmerge is a part of the mkvtoolnix package.)
+
+Once installed, ensure the respective program can be accessed from the
+same location running PySceneDetect from by calling the `mkvmerge` or
+`ffmpeg` command from a terminal/command prompt.
+
+PySceneDetect will automatically use whichever program is available on
+the computer, depending on the specified command-line options.
+
+Additionally, certain Windows distributions may include a compiled
+Python distribution. For license information regarding the distributed
+version of Python, see the LICENSE files in the installation directory,
+or visit the following URL: [ https://docs.python.org/3/license.html ]
 
 THE SOFTWARE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, EXPRESS OR IMPLIED.
 """
+

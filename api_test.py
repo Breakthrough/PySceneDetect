@@ -48,19 +48,21 @@ def main():
         end_time = base_timecode + 20.0     # 00:00:20.000
         # Set video_manager duration to read frames from 00:00:00 to 00:00:20.
         video_manager.set_duration(start_time=start_time, end_time=end_time)
+
+        # Set downscale factor to improve processing speed.
+        video_manager.set_downscale_factor()
+
         # Start video_manager.
         video_manager.start()
 
         # Perform scene detection on video_manager.
-        num_frames = scene_manager.detect_scenes(frame_source=video_manager,
-                                                 start_time=start_time)
+        scene_manager.detect_scenes(frame_source=video_manager,
+                                    start_time=start_time)
 
-        # Obtain scene list:
+        # Obtain list of detected scenes.
         scene_list = scene_manager.get_scene_list(base_timecode)
-
-        # The returned scene list is also sortable, should it become unsorted.
-
-        print(scene_list)
+        # Like FrameTimecodes, each scene in the scene_list can be sorted if the
+        # list of scenes becomes unsorted.
 
         print('List of scenes obtained:')
         for i, scene in enumerate(scene_list):
@@ -69,10 +71,10 @@ def main():
                 scene[0].get_timecode(), scene[0].get_frames(),
                 scene[1].get_timecode(), scene[1].get_frames(),))
 
-
-        # Write stats to CSV file opened in write mode:
-        with open(STATS_FILE_PATH, 'w') as stats_file:
-            stats_manager.save_to_csv(stats_file, base_timecode)
+        # We only write to the stats file if a save is required:
+        if stats_manager.is_save_required():
+            with open(STATS_FILE_PATH, 'w') as stats_file:
+                stats_manager.save_to_csv(stats_file, base_timecode)
 
     finally:
         video_manager.release()

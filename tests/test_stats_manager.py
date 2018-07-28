@@ -78,14 +78,14 @@ TEST_VIDEO_FILE = 'testvideo.mp4'
 #       It should generate the path to a random stats file for use in a test case.
 TEST_STATS_FILES = ['TEST_STATS_FILE'] * 4
 TEST_STATS_FILES = ['%s_%012d.csv' % (stats_file, random.randint(0, 10**12))
-    for stats_file in TEST_STATS_FILES]
+                    for stats_file in TEST_STATS_FILES]
 
 
 @pytest.fixture
 def test_video_file():
     # type: () -> str
     """ Fixture for test video file path (ensures file exists).
-    
+
     Access in test case by adding a test_video_file argument to obtain the path.
     """
     if not os.path.exists(TEST_VIDEO_FILE):
@@ -101,7 +101,7 @@ def test_metrics():
     """ Test StatsManager metric registration/setting/getting with a set of pre-defined
     key-value pairs (metric_dict).
     """
-    metric_dict = { 'some_metric': 1.2345, 'another_metric': 6.7890 }
+    metric_dict = {'some_metric': 1.2345, 'another_metric': 6.7890}
     metric_keys = list(metric_dict.keys())
 
     stats = StatsManager()
@@ -113,7 +113,7 @@ def test_metrics():
     assert not stats.is_save_required()
     with pytest.raises(FrameMetricRegistered):
         stats.register_metrics(metric_keys)
-    
+
     assert not stats.metrics_exist(frame_key, metric_keys)
     assert stats.get_metrics(frame_key, metric_keys) == [None] * len(metric_keys)
 
@@ -141,7 +141,7 @@ def test_detector_metrics(test_video_file):
     scene_manager.add_detector(ContentDetector())
     # add_detector should trigger register_metrics in the StatsManager.
     assert stats_manager._registered_metrics
-    
+
     try:
         video_fps = video_manager.get_framerate()
         start_time = FrameTimecode('00:00:00', video_fps)
@@ -177,7 +177,7 @@ def test_load_empty_stats(test_video_file):
         stats_file = open(TEST_STATS_FILES[0], 'r')
 
         stats_manager = StatsManager()
-        
+
         stats_reader = get_csv_reader(stats_file)
         stats_manager.load_from_csv(stats_reader)
 
@@ -221,7 +221,7 @@ def test_load_hardcoded_file(test_video_file):
         assert stats_manager.metrics_exist(some_frame_key, [some_metric_key])
         assert stats_manager.get_metrics(
             some_frame_key, [some_metric_key])[0] == pytest.approx(some_metric_value)
-        
+
     finally:
         stats_file.close()
         os.remove(TEST_STATS_FILES[0])
@@ -238,12 +238,12 @@ def test_save_load_from_video(test_video_file):
     base_timecode = video_manager.get_base_timecode()
 
     scene_manager.add_detector(ContentDetector())
-    
+
     try:
         video_fps = video_manager.get_framerate()
         start_time = FrameTimecode('00:00:00', video_fps)
         duration = FrameTimecode('00:00:20', video_fps)
-        
+
         video_manager.set_duration(start_time=start_time, end_time=duration)
         video_manager.set_downscale_factor()
         video_manager.start()
@@ -260,7 +260,7 @@ def test_save_load_from_video(test_video_file):
         # Choose the first available frame key and compare all metrics in both.
         frame_key = min(stats_manager._frame_metrics.keys())
         metric_keys = list(stats_manager._registered_metrics)
-        
+
         assert stats_manager.metrics_exist(frame_key, metric_keys)
         orig_metrics = stats_manager.get_metrics(frame_key, metric_keys)
         new_metrics = stats_manager_new.get_metrics(frame_key, metric_keys)
@@ -322,9 +322,9 @@ def test_load_corrupt_stats(test_video_file):
             [COLUMN_NAME_TIMECODE, COLUMN_NAME_FRAME_NUMBER, some_metric_key])
         stats_writers[3].writerow(
             [some_frame_key, some_frame_timecode.get_timecode(), some_metric_value])
-        
+
         for stats_file in stats_files: stats_file.close()
-        
+
         stats_files = [open(stats_file, 'rt') for stats_file in TEST_STATS_FILES]
 
         with pytest.raises(StatsFileCorrupt):

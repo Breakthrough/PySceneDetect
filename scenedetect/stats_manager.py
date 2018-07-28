@@ -137,19 +137,17 @@ class StatsManager(object):
         # type: (int, List[str]) -> bool
         return all([self._metric_exists(frame_number, metric_key) for metric_key in metric_keys])
     
-
     def is_save_required(self):
         return self._metrics_updated
 
-    def _data_can_be_saved(self):
-        return self._registered_metrics and self._frame_metrics
-
-    def save_to_csv(self, csv_file, base_timecode, force_save=False):
+    def save_to_csv(self, csv_file, base_timecode, force_save=True):
         # type: (File [w], FrameTimecode, bool) -> None
         csv_writer = get_csv_writer(csv_file)
-        if self._data_can_be_saved() and (self.is_save_required() or force_save):
+        # Ensure we need to write to the file, and that we have data to do so with.
+        if ((self.is_save_required() or force_save) and
+             self._registered_metrics and self._frame_metrics):
             # Header rows.
-            metric_keys = list(self._registered_metrics.union(self._loaded_metrics))
+            metric_keys = sorted(list(self._registered_metrics.union(self._loaded_metrics)))
             csv_writer.writerow([COLUMN_NAME_FPS, '%.10f' % base_timecode.get_framerate()])
             csv_writer.writerow(
                 [COLUMN_NAME_FRAME_NUMBER, COLUMN_NAME_TIMECODE] + metric_keys)
