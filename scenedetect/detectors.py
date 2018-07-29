@@ -182,18 +182,20 @@ class ThresholdDetector(SceneDetector):
             frame_avg = self.compute_frame_average(frame_img)
             frame_metrics[frame_num]['frame_avg_rgb'] = frame_avg
 
+        _under_thresh = self.frame_under_threshold(frame_img)
+
         if self.last_frame_avg is not None:
-            if self.last_fade['type'] == 'in' and self.frame_under_threshold(frame_img):
+            if self.last_fade['type'] == 'in' and _under_thresh:
                 # Just faded out of a scene, wait for next fade in.
                 self.last_fade['type'] = 'out'
                 self.last_fade['frame'] = frame_num
-            elif self.last_fade['type'] == 'out' and not self.frame_under_threshold(frame_img):
+            elif self.last_fade['type'] == 'out' and not _under_thresh:
                 # Just faded into a new scene, compute timecode for the scene
                 # split based on the fade bias.
                 f_in = frame_num
                 f_out = self.last_fade['frame']
                 f_split = int((f_in + f_out + int(self.fade_bias * (f_in - f_out))) / 2)
-                # Only add the scene if min_scene_len frames have passed. 
+                # Only add the scene if min_scene_len frames have passed.
                 if self.last_scene_cut is None or (
                     (frame_num - self.last_scene_cut) >= self.min_scene_len):
                     scene_list.append(f_split)
@@ -203,7 +205,7 @@ class ThresholdDetector(SceneDetector):
                 self.last_fade['frame'] = frame_num
         else:
             self.last_fade['frame'] = 0
-            if self.frame_under_threshold(frame_img):
+            if _under_thresh:
                 self.last_fade['type'] = 'out'
             else:
                 self.last_fade['type'] = 'in'
