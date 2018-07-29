@@ -62,6 +62,9 @@ from scenedetect.video_manager import InvalidDownscaleFactor
 from scenedetect.video_manager import VideoDecodingInProgress
 from scenedetect.video_manager import VideoDecoderNotStarted
 
+from scenedetect.video_splitter import split_video_ffmpeg
+from scenedetect.video_splitter import split_video_mkvmerge
+
 
 class CliContext(object):
     """ Context of the command-line interface passed between the various sub-commands.
@@ -96,6 +99,10 @@ class CliContext(object):
 
         self.quiet_mode = False
         self.frame_skip = 0
+
+        self.split_video = False
+        self.split_mkvmerge = False
+        self.split_args = None
         
 
     def cleanup(self):
@@ -153,15 +160,18 @@ class CliContext(object):
             logging.error('Could not generate all output images.')
 
 
-    def _get_output_file_path(self, file_path):
-        # type: (Optional[str]) -> Union[None, str]
+    def _get_output_file_path(self, file_path, output_dir=None):
+        # type: (str, Optional[str]) -> str
         '''Returns path to output file_path passed as argument, and creates directories if necessary.'''
         if file_path is None:
             return None
+        output_dir = self.output_directory if output_dir is None else output_dir
         # If an output directory is defined and the file path is a relative path, open
         # the file handle in the output directory instead of the working directory.
-        if self.output_directory is not None and not os.path.isabs(file_path):
-            file_path = os.path.join(self.output_directory, file_path)
+        if output_dir is not None and not os.path.isabs(file_path):
+            file_path = os.path.join(output_dir, file_path)
+        # Now that file_path is an absolute path, let's make sure all the directories
+        # exist for us to start writing files there.
         os.makedirs(os.path.split(os.path.abspath(file_path))[0], exist_ok=True)
         return file_path
 
@@ -267,6 +277,24 @@ class CliContext(object):
         if cut_list:
             logging.info('Comma-separated timecode list:\n  %s',
                          ','.join([cut.get_timecode() for cut in cut_list]))
+
+        # TODO: Add getter for VideoManager _video_file_paths property.
+        if self.split_video:
+            output_file_name = self._get_output_file_path(
+                os.path.basename(self.video_manager._video_file_paths[0]))
+            if output_file_name.rfind('.') >= 0:
+                output_file_name = output_file_name[:output_file_name.rfind('.')]
+            if self.split_mkvmerge:
+                logging.info('Splitting input video%s using mkvmerge...',
+                    's' if len(self.video_manager._video_file_paths) > 1 else '')
+                split_video_mkvmerge(self.video_manager._video_file_paths, scene_list,
+                    output_file_name)
+            else:
+                logging.info('Splitting input video%s using ffmpeg...',
+                    's' if len(self.video_manager._video_file_paths) > 1 else '')
+                split_video_ffmpeg(self.video_manager._video_file_paths, scene_list,
+                    output_file_name, arg_override=self.split_args)
+            logging.info('Video splitting completed, individual scenes written to disk.')
 
 
     def check_input_open(self):
@@ -391,3 +419,4 @@ class CliContext(object):
 
     def save_images_command(self, output_path, quality, resolution):
         pass
+
