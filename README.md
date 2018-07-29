@@ -7,17 +7,15 @@ Video Scene Cut Detection and Analysis Tool
 [![Documentation Status](https://readthedocs.org/projects/pyscenedetect/badge/?version=latest)](http://pyscenedetect.readthedocs.org/en/latest/?badge=latest) [![PyPI Status](https://img.shields.io/pypi/status/PySceneDetect.svg)](https://pypi.python.org/pypi/PySceneDetect/) [![PyPI Version](https://img.shields.io/pypi/v/PySceneDetect.svg)](https://pypi.python.org/pypi/PySceneDetect/)  [![PyPI License](https://img.shields.io/pypi/l/PySceneDetect.svg)](http://pyscenedetect.readthedocs.org/en/latest/copyright/)
 
 
-### Latest Release: v0.4 (January 14, 2017)
+### Latest Release: v0.5 (August ?, 2018)
 
-**New**: The latest version integrates with `mkvmerge` to automatically split the input video into individual clips.
+**New**: The latest release of PySceneDetect adds precise splitting support via `ffmpeg`, an improved CLI interface, and a significantly improved and refactored Python API.  Note that this release (v0.5) may break existing scripts and code using PySceneDetect.
 
-There is also now an installer for Windows that automatically installs all dependencies and the `scenedetect` command system wide (64-bit only currently).  This is the recommended installation method for Windows users now, and it can be found on [the Releases page](https://github.com/Breakthrough/PySceneDetect/releases).  The Windows builds do not require an existing Python environment, nor any other prerequisites.  There is also a portable .zip version available.
+There is an installer for Windows users that automatically installs all dependencies and the `scenedetect` command system wide (64-bit only currently).  This is the recommended installation method for Windows users now, and it can be found on [the Releases page](https://github.com/Breakthrough/PySceneDetect/releases).  The Windows builds do not require an existing Python environment, nor any other prerequisites, but downloading `mkvmerge`/`ffmpeg` manually is still required for video splitting support.  There is also a portable .zip version available.
 
-It is still recommended that both Linux and Mac users download the source distribution, following the installation instructions below.  
+It is still recommended that both Linux and Mac users download the source distribution, following the Quick Install instructions below.
 
---------
-
-Quick install; requires `numpy` and Python OpenCV `cv2` module, see [getting started guide](http://pyscenedetect.readthedocs.org/en/latest/examples/usage/) after install.  After installing the prerequisites, download the latest source distribution from [the Releases page](https://github.com/Breakthrough/PySceneDetect/releases), extract the archive, and in a terminal/command prompt in the location of the extracted files, run:
+**Quick Install**: Requires Python modules `numpy`, OpenCV `cv2`, and (optional) `tqdm` for displaying progress. See [getting started guide](http://pyscenedetect.readthedocs.org/en/latest/examples/usage/) after install.  After installing the prerequisites, download the latest source distribution from [the Releases page](https://github.com/Breakthrough/PySceneDetect/releases), extract the archive, and in a terminal/command prompt in the location of the extracted files, run:
 
     sudo python setup.py install
 
@@ -26,15 +24,17 @@ To test if you have the required prerequisites, open a `python` prompt, and run 
     import numpy
     import cv2
 
-If both of those commands execute without any problems, you should be able to install PySceneDetect without any issues.  See [the new `USAGE.md` file](https://github.com/Breakthrough/PySceneDetect/blob/master/USAGE.md) for details on the new detection modes, default values/thresholds to try, and how to effectively choose the optimal detection parameters.  Full documentation for PySceneDetect can be found on Readthedocs at http://pyscenedetect.readthedocs.org/
+If both of those commands execute without any problems, you should be able to install PySceneDetect without any issues. To enable video splitting support, you will also need to have `mkvmerge` or `ffmpeg` installed on your system.
+
+See [the `USAGE.md` file](https://github.com/Breakthrough/PySceneDetect/blob/master/USAGE.md) for details on detection modes, default values/thresholds to try, and how to effectively choose the optimal detection parameters.  Full documentation for PySceneDetect can be found on Readthedocs at http://pyscenedetect.readthedocs.org/
 
 ----------------------------------------------------------
 
 PySceneDetect is a command-line tool, written in Python and using OpenCV, which analyzes a video, looking for scene changes or cuts.  The output timecodes can then be used with another tool (e.g. `mkvmerge`, `ffmpeg`) to split the video into individual clips.  A frame-by-frame analysis can also be generated for a video, to help with determining optimal threshold values or detecting patterns/other analysis methods for a particular video.  See [the `USAGE.md` file](https://github.com/Breakthrough/PySceneDetect/blob/master/USAGE.md) for details.
 
-There are two main detection methods PySceneDetect uses: `threshold` (comparing each frame to a set black level, useful for detecting cuts and fades to/from black), and `content` (compares each frame sequentially looking for changes in content, useful for detecting fast cuts between video scenes, although slower to process).  Each mode has slightly different parameters, and is described in detail below.
+There are two main detection methods PySceneDetect uses: `detect-threshold` (comparing each frame to a set black level, useful for detecting cuts and fades to/from black), and `detect-content` (compares each frame sequentially looking for changes in content, useful for detecting fast cuts between video scenes, although slower to process).  Each mode has slightly different parameters, and is described in detail below.
 
-In general, use `threshold` mode if you want to detect scene boundaries using fades/cuts in/out to black.  If the video uses a lot of fast cuts between content, and has no well-defined scene boundaries, you should use the `content` mode.  Once you know what detection mode to use, you can try the parameters recommended below, or generate a statistics file (using the `-s` / `--statsfile` flag) in order to determine the correct paramters - specifically, the proper threshold value.
+In general, use `detect-threshold` mode if you want to detect scene boundaries using fades/cuts in/out to black.  If the video uses a lot of fast cuts between content, and has no well-defined scene boundaries, you should use the `detect-content` mode.  Once you know what detection mode to use, you can try the parameters recommended below, or generate a statistics file (using the `-s` / `--statsfile` flag) in order to determine the correct paramters - specifically, the proper threshold value.
 
 Note that PySceneDetect is currently in beta; see Current Features & Roadmap below for details.  For help or other issues, you can contact me on [my website](http://www.bcastell.com/about/), or we can chat in #pyscenedetect on Freenode.  Feel free to submit any bugs or feature requests to [the Issue Tracker](https://github.com/Breakthrough/PySceneDetect/issues) here on Github.
 
@@ -69,19 +69,27 @@ Usage
 
 To run PySceneDetect, use the `scenedetect` command if you have it installed to your system.  Otherwise, if you are running from source, you can invoke `python scenedetect.py` or `./scenedetect.py` (instead of `scenedetect` in the examples shown below and elsewhere).  To display the help file, detailing the command line parameters:
 
-    scenedetect --help
+    scenedetect help
 
-To perform threshold-based analysis with the default parameters, on a video named `myvideo.mp4`, saving a list of scenes to `myvideo_scenes.csv` (they are also printed to the terminal):
+To perform content-based analysis with the default parameters, on a video named `myvideo.mp4`, saving a list of scenes to `myvideo_scenes.csv` (they are also printed to the terminal when `list-scenes` is specified):
 
-    scenedetect --input myvideo.mp4 --csv-output myvideo_scenes.csv
+    scenedetect --input myvideo.mp4 detect-content list-scenes -o myvideo_scenes.csv
+
+To automatically split the input video into scenes with a statsfile specified (requires `ffmpeg` or `mkvmerge` to be installed):
+
+    scenedetect --input myvideo.mp4 --statsfile myvideo.stats.csv detect-content split-video:
+
+To automatically split the input video in *precise* mode (re-encodes input, requires `ffmpeg` to be installed):
+
+    scenedetect --input myvideo.mp4 --statsfile myvideo.stats.csv detect-content split-video:
 
 To perform content-based analysis, with a threshold intensity of 30:
 
-    scenedetect --input myvideo.mp4 --detector content --threshold 30
+    scenedetect --input myvideo.mp4 detect-content --threshold 30
 
 To perform threshold-based analysis, with a threshold intensity of 16 and a match percent of 90:
 
-    scenedetect --input myvideo.mp4 --detector threshold --threshold 16 --min-percent 90
+    scenedetect --input myvideo.mp4 detect-threshold --threshold 16 --min-percent 90
 
 Detailed descriptions of the above parameters, as well as their default values, can be obtained by using the `--help` flag.
 
