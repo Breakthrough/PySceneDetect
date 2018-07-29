@@ -122,10 +122,7 @@ class ThresholdDetector(SceneDetector):
         Returns:
             Floating point value representing average pixel intensity.
         """
-        num_pixel_values = float(
-            frame.shape[0] * frame.shape[1] * frame.shape[2])
-        avg_pixel_value = numpy.sum(frame[:,:,:]) / num_pixel_values
-        return avg_pixel_value
+        return cv2.mean(cv2.mean(frame))[0]
 
     def frame_under_threshold(self, frame):
         """Check if the frame is below (true) or above (false) the threshold.
@@ -185,18 +182,20 @@ class ThresholdDetector(SceneDetector):
             frame_avg = self.compute_frame_average(frame_img)
             frame_metrics[frame_num]['frame_avg_rgb'] = frame_avg
 
+        _under_thresh = self.frame_under_threshold(frame_img)
+
         if self.last_frame_avg is not None:
-            if self.last_fade['type'] == 'in' and self.frame_under_threshold(frame_img):
+            if self.last_fade['type'] == 'in' and _under_thresh:
                 # Just faded out of a scene, wait for next fade in.
                 self.last_fade['type'] = 'out'
                 self.last_fade['frame'] = frame_num
-            elif self.last_fade['type'] == 'out' and not self.frame_under_threshold(frame_img):
+            elif self.last_fade['type'] == 'out' and not _under_thresh:
                 # Just faded into a new scene, compute timecode for the scene
                 # split based on the fade bias.
                 f_in = frame_num
                 f_out = self.last_fade['frame']
                 f_split = int((f_in + f_out + int(self.fade_bias * (f_in - f_out))) / 2)
-                # Only add the scene if min_scene_len frames have passed. 
+                # Only add the scene if min_scene_len frames have passed.
                 if self.last_scene_cut is None or (
                     (frame_num - self.last_scene_cut) >= self.min_scene_len):
                     scene_list.append(f_split)
@@ -206,7 +205,7 @@ class ThresholdDetector(SceneDetector):
                 self.last_fade['frame'] = frame_num
         else:
             self.last_fade['frame'] = 0
-            if self.frame_under_threshold(frame_img):
+            if _under_thresh:
                 self.last_fade['type'] = 'out'
             else:
                 self.last_fade['type'] = 'in'
@@ -244,7 +243,7 @@ class ContentDetector(SceneDetector):
     content scenes still using HSV information, use the DissolveDetector.
     """
 
-    def __init__(self, threshold = 30.0, min_scene_len = 15):
+    def __init__(self, threshold=30.0, min_scene_len=15):
         super(ContentDetector, self).__init__()
         self.threshold = threshold
         self.min_scene_len = min_scene_len  # minimum length of any given scene, in frames
@@ -270,20 +269,19 @@ class ContentDetector(SceneDetector):
                 delta_v = frame_metrics[frame_num]['delta_lum']
 
             else:
-                num_pixels = frame_img.shape[0] * frame_img.shape[1]
-                curr_hsv = cv2.split(cv2.cvtColor(frame_img, cv2.COLOR_BGR2HSV))
-                last_hsv = self.last_hsv
-                if not last_hsv:
-                    last_hsv = cv2.split(cv2.cvtColor(self.last_frame, cv2.COLOR_BGR2HSV))
+                curr_hsv = cv2.cvtColor(frame_img, cv2.COLOR_BGR2HSV)
+                curr_hsv = curr_hsv.astype(numpy.int16)
 
-                delta_hsv = [-1, -1, -1]
-                for i in range(3):
-                    num_pixels = curr_hsv[i].shape[0] * curr_hsv[i].shape[1]
-                    curr_hsv[i] = curr_hsv[i].astype(numpy.int32)
-                    last_hsv[i] = last_hsv[i].astype(numpy.int32)
-                    delta_hsv[i] = numpy.sum(numpy.abs(curr_hsv[i] - last_hsv[i])) / float(num_pixels)
-                delta_hsv.append(sum(delta_hsv) / 3.0)
-                delta_h, delta_s, delta_v, delta_hsv_avg = delta_hsv
+                if self.last_hsv is None:
+                    last_hsv = cv2.cvtColor(self.last_frame, cv2.COLOR_BGR2HSV)
+                    last_hsv = last_hsv.astype(numpy.int16)
+                else:
+                    last_hsv = self.last_hsv
+
+                # Image math is faster with cv2
+                absdiff = cv2.absdiff(curr_hsv, last_hsv)[:3]
+                delta_h, delta_s, delta_v = cv2.mean(absdiff)[:3]
+                delta_hsv_avg = cv2.mean([delta_h, delta_s, delta_v])[0]
 
                 frame_metrics[frame_num]['delta_hsv_avg'] = delta_hsv_avg
                 frame_metrics[frame_num]['delta_hue'] = delta_h
@@ -423,4 +421,3 @@ class MotionDetector(SceneDetector):
 #                                                                             #
 #                                                                             #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-
