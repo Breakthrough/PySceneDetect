@@ -180,7 +180,7 @@ class SceneManager(object):
             scene_list.append((last_cut, cut - 1))
             last_cut = cut
         # Last scene is from last cut to end of video.
-        scene_list.append((last_cut, base_timecode + self._num_frames))
+        scene_list.append((last_cut, base_timecode + self._num_frames - 1))
 
         return scene_list
 

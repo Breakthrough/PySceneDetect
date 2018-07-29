@@ -53,11 +53,12 @@ import cv2
 
 # PySceneDetect Library Imports
 from scenedetect.video_manager import VideoManager
-
 from scenedetect.video_manager import VideoOpenFailure
+
 # TODO: The following exceptions still require test cases:
 from scenedetect.video_manager import VideoDecodingInProgress
 from scenedetect.video_manager import VideoDecoderNotStarted
+
 # TODO: Need to implement a mock VideoCapture to test the exceptions below.
 # TODO: The following exceptions still require test cases:
 from scenedetect.video_manager import VideoFramerateUnavailable
@@ -204,7 +205,7 @@ def test_seek(test_video_file):
         assert frame_image.shape[0] > 0
         assert video_manager.get_current_timecode() == base_timecode + 1
 
-        video_manager.seek(base_timecode + 10)
+        assert video_manager.seek(base_timecode + 10)
         assert video_manager.get_current_timecode() == base_timecode + 10
         ret_val, frame_image = video_manager.read()
         assert ret_val
@@ -274,11 +275,9 @@ def test_multiple_videos(test_video_file):
                 break
             assert frame_image.shape[0] > 0
             curr_time += 1
-
         assert curr_time == base_timecode + (NUM_FRAMES * NUM_VIDEOS)
 
     finally:
         # Will release the VideoManagers in vm_list as well.
         video_manager.release()
-
 

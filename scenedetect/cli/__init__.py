@@ -459,9 +459,28 @@ def split_video_command(ctx, output):
     '--quality', '-q', metavar='Q',
     type=click.FLOAT, help=
     'Quality factor for encoding images..')
+#@click.option(
+#    '--size', '-s', metavar='WxH or P%',
+#    type=click.FLOAT, help='')
 @click.pass_context
 def save_images_command(ctx, output):
     raise NotImplementedError()
+
+
+# Generate pallette image of average N colours in video.
+@click.command('colors', add_help_option=False)
+@click.option(
+    '--colors', '-c', metavar='N',
+    type=click.INT, default=4, help=
+    'Number of color averages to generate.')
+@click.option(
+    '--generate-pallette', '-p', metavar='N',
+    type=click.INT, default=4, help=
+    'Flag which, if set, saves an image with the colors in a grid as for use as a pallette.')
+@click.pass_context
+def colors_command(ctx):
+    raise NotImplementedError()
+
 
 
 
@@ -475,3 +494,6 @@ add_cli_command(scenedetect_cli, time_command)
 add_cli_command(scenedetect_cli, detect_content_command)
 add_cli_command(scenedetect_cli, detect_threshold_command)
 add_cli_command(scenedetect_cli, list_scenes_command)
+
+add_cli_command(scenedetect_cli, save_images_command)
+add_cli_command(scenedetect_cli, split_video_command)

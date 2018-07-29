@@ -96,8 +96,7 @@ def test_content_detect(test_video_file):
 
         vm.start()
         num_frames = sm.detect_scenes(frame_source=vm)
-
-        assert num_frames == end_time.get_frames()
+        assert num_frames == end_time.get_frames() + 1
 
     finally:
         vm.release()
@@ -139,7 +138,7 @@ def test_scene_list(test_video_file):
         vm.start()
         num_frames = sm.detect_scenes(frame_source=vm)
 
-        assert num_frames == end_time.get_frames()
+        assert num_frames == end_time.get_frames() + 1
 
         scene_list = sm.get_scene_list(base_timecode)
 

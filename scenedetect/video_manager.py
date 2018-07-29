@@ -467,17 +467,19 @@ class VideoManager(object):
                 raise ValueError("end_time is before start_time in time.")
             self._end_time = end_time
         elif duration is not None:
-            self._end_time = self._start_time + duration
+            # Need to subtract 1 here as end_time is inclusive.
+            self._end_time = self._start_time + duration - 1
 
         if self._end_time is not None:
             self._frame_length = max(self._frame_length, self._end_time.get_frames())
         self._frame_length -= self._start_time.get_frames()
 
         if self._logger is not None:
-            self._logger.info('Duration set, start: %s, duration: %s, end: %s.',
-                        start_time.get_timecode() if start_time is not None else start_time,
-                        duration.get_timecode() if duration is not None else duration,
-                        end_time.get_timecode() if end_time is not None else end_time)
+            self._logger.info(
+                'Duration set, start: %s, duration: %s, end: %s.',
+                start_time.get_timecode() if start_time is not None else start_time,
+                duration.get_timecode() if duration is not None else duration,
+                end_time.get_timecode() if end_time is not None else end_time)
 
 
     def start(self):
@@ -498,7 +500,7 @@ class VideoManager(object):
 
 
     def seek(self, timecode):
-        # type: (FrameTimecode) -> None
+        # type: (FrameTimecode) -> bool
         """ Seek - seeks forwards to the passed timecode.
 
         Only supports seeking forwards (i.e. timecode must be greater than the
@@ -508,6 +510,9 @@ class VideoManager(object):
         Arguments:
             timecode (FrameTimecode): Time in video to seek forwards to.
 
+        Returns:
+            True if seeking succeeded, False if no more frames / end of video.
+
         Raises:
             VideoDecoderNotStarted
         """
@@ -515,12 +520,14 @@ class VideoManager(object):
             raise VideoDecoderNotStarted()
 
         while self._curr_time < timecode:
-            # Seek to required time.
+            if self._curr_cap is None and not self._get_next_cap():
+                return False
             if self._curr_cap.grab():
                 self._curr_time += 1
             else:
                 if not self._get_next_cap():
-                    break
+                    return False
+        return True
 
 
     def release(self):
@@ -544,6 +551,7 @@ class VideoManager(object):
             raise VideoDecodingInProgress()
 
         self._started = False
+        self._end_of_video = False
         self._curr_time = self.get_base_timecode()
         self._cap_list, self._cap_framerate, self._cap_framesize = open_captures(
             video_files=self._video_file_paths, framerate=self._curr_time.get_framerate())

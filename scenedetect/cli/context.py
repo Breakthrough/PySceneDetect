@@ -40,6 +40,7 @@ import time
 # Third-Party Library Imports
 import click
 import cv2
+from scenedetect.platform import tqdm
 
 # PySceneDetect Library Imports
 import scenedetect.detectors
@@ -103,6 +104,53 @@ class CliContext(object):
         finally:
             if self.video_manager is not None:
                 self.video_manager.release()
+
+
+    def _generate_images(self, scene_list, num_frames_per_scene=2):
+
+
+        # type: (List[Tuple[FrameTimecode, FrameTimecode]) -> None
+        if not scene_list:
+            return
+        if not self.options_processed:
+            return
+        self.check_input_open()
+        
+        self.video_manager.release()
+        self.video_manager.reset()
+        self.video_manager.set_downscale_factor(1)
+        self.video_manager.start()
+
+        completed = True
+        logging.info('Generating output images (%d per scene)...', num_frames_per_scene)
+        progress_bar = None
+        if tqdm:
+            progress_bar = tqdm(
+                total=len(scene_list) * 2, unit='images')
+
+        for i, (start_time, end_time) in enumerate(scene_list):
+            # Need to interpolate timecodes if num_frames_per_scene > 2.
+            self.video_manager.seek(start_time)
+            self.video_manager.grab()
+            ret_val, frame_im = self.video_manager.retrieve()
+            if ret_val:
+                cv2.imwrite(self._get_output_file_path('Scene-%03d-00.jpg' % (i)), frame_im)
+            else:
+                completed = False
+                break
+            progress_bar.update(1)
+            self.video_manager.seek(end_time)
+            self.video_manager.grab()
+            ret_val, frame_im = self.video_manager.retrieve()
+            if ret_val:
+                cv2.imwrite(self._get_output_file_path('Scene-%03d-01.jpg' % (i)), frame_im)
+            else:
+                completed = False
+                break
+            progress_bar.update(1)
+                
+        if not completed:
+            logging.error('Could not generate all output images.')
 
 
     def _get_output_file_path(self, file_path):
@@ -171,6 +219,7 @@ class CliContext(object):
         base_timecode = self.video_manager.get_base_timecode()
 
         start_time = time.time()
+        logging.info('Detecting scenes...')
         num_frames = self.scene_manager.detect_scenes(
             frame_source=self.video_manager, start_time=self.start_frame,
             frame_skip=self.frame_skip, show_progress=not self.quiet_mode)
@@ -218,7 +267,6 @@ class CliContext(object):
         if cut_list:
             logging.info('Comma-separated timecode list:\n  %s',
                          ','.join([cut.get_timecode() for cut in cut_list]))
-
 
 
     def check_input_open(self):
@@ -316,7 +364,6 @@ class CliContext(object):
         self.options_processed = True
 
                 
-
     def time_command(self, start=None, duration=None, end=None):
         
         logging.debug('Setting video time:\n    start: %s, duration: %s, end: %s',
@@ -341,3 +388,6 @@ class CliContext(object):
         if self.scene_list_path is not None:
             logging.info('Output scene list CSV file set:\n  %s', self.scene_list_path)
 
+
+    def save_images_command(self, output_path, quality, resolution):
+        pass
