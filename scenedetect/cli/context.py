@@ -114,7 +114,8 @@ class CliContext(object):
                 self.video_manager.release()
 
 
-    def _generate_images(self, scene_list, num_frames_per_scene=2):
+    def _generate_images(self, scene_list, image_prefix, output_dir=None,
+                         num_frames_per_scene=2):
         # type: (List[Tuple[FrameTimecode, FrameTimecode]) -> None
 
         if num_frames_per_scene != 2:
@@ -147,8 +148,9 @@ class CliContext(object):
             ret_val, frame_im = self.video_manager.retrieve()
             if ret_val:
                 cv2.imwrite(
-                    self._get_output_file_path('Scene-%03d-00.%s' % (i, self.image_extension)),
-                    frame_im)
+                    self._get_output_file_path(
+                        '%s-Scene-%03d-00.%s' % (image_prefix, i, self.image_extension),
+                        output_dir=output_dir), frame_im)
             else:
                 completed = False
                 break
@@ -159,8 +161,9 @@ class CliContext(object):
             ret_val, frame_im = self.video_manager.retrieve()
             if ret_val:
                 cv2.imwrite(
-                    self._get_output_file_path('Scene-%03d-01.%s' % (i, self.image_extension)),
-                    frame_im)
+                    self._get_output_file_path(
+                        '%s-Scene-%03d-01.%s' % (image_prefix, i, self.image_extension),
+                        output_dir=output_dir), frame_im)
             else:
                 completed = False
                 break
@@ -265,6 +268,10 @@ class CliContext(object):
         # files with based on the given commands (list-scenes, split-video, save-images, etc...).
         cut_list = self.scene_manager.get_cut_list(base_timecode)
         scene_list = self.scene_manager.get_scene_list(base_timecode)
+        video_paths = self.video_manager.get_video_paths()
+        video_name = os.path.basename(video_paths[0])
+        if video_name.rfind('.') >= 0:
+            video_name = video_name[:video_name.rfind('.')]
 
         # Handle list-scenes command.
         # Handle `list-scenes -o`.
@@ -294,13 +301,15 @@ class CliContext(object):
             logging.info('Comma-separated timecode list:\n  %s',
                          ','.join([cut.get_timecode() for cut in cut_list]))
 
+        # Handle save-images command.
+        if self.save_images:
+            self._generate_images(scene_list=scene_list, image_prefix=video_name,
+                                  output_dir=self.image_directory)
+
         # Handle split-video command.
         if self.split_video:
-            video_paths = self.video_manager.get_video_paths()
             output_file_name = self._get_output_file_path(
-                os.path.basename(video_paths[0]))
-            if output_file_name.rfind('.') >= 0:
-                output_file_name = output_file_name[:output_file_name.rfind('.')]
+                video_name, output_dir=self.split_directory)
             mkvmerge_available = is_mkvmerge_available()
             ffmpeg_available = is_ffmpeg_available()
             if mkvmerge_available and (self.split_mkvmerge or not ffmpeg_available):
@@ -325,9 +334,6 @@ class CliContext(object):
                 
             logging.info('Video splitting completed, individual scenes written to disk.')
 
-        # Handle save-images command.
-        if self.save_images:
-            self._generate_images(scene_list)
 
 
     def check_input_open(self):
@@ -341,13 +347,14 @@ class CliContext(object):
 
     def add_detector(self, detector):
         self.check_input_open()
+        options_processed_orig = self.options_processed
         self.options_processed = False
         try:
             self.scene_manager.add_detector(detector)
         except scenedetect.stats_manager.FrameMetricRegistered:
             raise click.BadParameter(message='Cannot specify detection algorithm twice.',
                                      param_hint=detector.cli_name)
-        self.options_processed = True
+        self.options_processed = options_processed_orig
 
 
     def _init_video_manager(self, input_list, framerate, downscale):

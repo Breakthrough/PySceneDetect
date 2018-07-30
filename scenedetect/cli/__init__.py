@@ -137,6 +137,19 @@ def print_help_header():
     click.echo(click.style('----------------------------------------------------', fg='yellow'))
 
 
+def duplicate_command(ctx, param_hint=None):
+    ctx.obj.options_processed = False
+    error_strs = []
+    if param_hint:
+        error_strs.append('Command %s specified multiple times.' % param_hint)
+    else:
+        error_strs.append('Command specified multiple times.')
+    error_strs.append('Each command can only be specified at *most* once.')
+    error_strs.append('The only exception to this rule is detect commands.')
+        
+    logging.error('\n'.join(error_strs))
+    raise click.BadParameter('\n  Command specified twice.', param_hint=param_hint)
+
 @click.group(
     chain=True, context_settings=CLICK_CONTEXT_SETTINGS)
 @click.option(
@@ -495,17 +508,16 @@ def split_video_command(ctx, precise, mkvmerge, codec):
 
 @click.command('save-images', add_help_option=False)
 @click.option(
-    '--output', '-o', metavar='JPG/PNG',
+    '--output', '-o', metavar='DIR',
     type=click.Path(exists=False, file_okay=True, writable=True, resolve_path=False), help=
-    'Each pair of start/end frame images will be saved to the output path with'
-    ' the frame number appended.')
+    'Output directory to save images to (images will be named VIDEONAME-Scene-NNN-MM). Overrides main scenedetect -o option.')
 #@click.option(
 #    '--quality', '-q', metavar='Q',
 #    type=click.FLOAT, help=
 #    'Quality factor for encoding images. Depends on image type/extension (-e/--extension), default is JPEG.')
 @click.option(
     '--extension', '-e', metavar='JPG/PNG', default="jpg",
-    type=click.STRING, help=
+    type=click.Choice(['jpg', 'png', 'bmp', 'tga', 'gif']), help=
     'Output image format type (jpg, png, etc...).')
 #@click.option(
 #    '--size', '-s', metavar='WxH or P%',
@@ -513,7 +525,12 @@ def split_video_command(ctx, precise, mkvmerge, codec):
 @click.pass_context
 def save_images_command(ctx, output, extension):
     """ Create images for each detected scene. """
-    raise NotImplementedError()
+    if ctx.obj.save_images:
+        duplicate_command(ctx, 'save-images')
+
+    ctx.obj.save_images = True
+    ctx.obj.image_directory = output
+    ctx.obj.image_extension = extension
 
 
 # Generate pallette image of average N colours in video.
