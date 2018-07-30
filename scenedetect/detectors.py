@@ -281,7 +281,8 @@ class ContentDetector(SceneDetector):
                 # Image math is faster with cv2
                 absdiff = cv2.absdiff(curr_hsv, last_hsv)[:3]
                 delta_h, delta_s, delta_v = cv2.mean(absdiff)[:3]
-                delta_hsv_avg = cv2.mean([delta_h, delta_s, delta_v])[0]
+                delta_hsv_avg = cv2.mean(
+                    numpy.array([delta_h, delta_s, delta_v]))[0]
 
                 frame_metrics[frame_num]['delta_hsv_avg'] = delta_hsv_avg
                 frame_metrics[frame_num]['delta_hue'] = delta_h
