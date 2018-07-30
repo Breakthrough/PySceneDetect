@@ -92,16 +92,18 @@ class CliContext(object):
         self.quiet_mode = False                 # -q/--quiet or -v/--verbosity quiet
         self.frame_skip = 0                     # -fs/--frame-skip [frame_skip]
         # Properties for save-images command.
-        self.save_images = False                # save-images
+        self.save_images = False                # save-images command
         self.image_extension = 'jpg'            # save-images -e/--extension [image_extension]
         self.image_directory = None             # save-images -o/--output [image_directory]
         # Properties for split-video command.
-        self.split_video = False                # split-video
-        self.split_mkvmerge = False             # split-video -m (or split-video without ffmpeg)
-        self.split_args = None                  # split-video -c [split_args]
-        self.split_directory = None             # split-video -o [split_directory]
+        self.split_video = False                # split-video command
+        self.split_mkvmerge = False             # split-video -m/--mkvmerge (or split-video without ffmpeg)
+        self.split_args = None                  # split-video -f/--ffmpeg-args [split_args]
+        self.split_directory = None             # split-video -o/--output [split_directory]
+        self.split_quiet = False                # split-video -q/--quiet
         # Properties for list-scenes command.
-        self.print_scene_list = False           # list-scenes and not --quiet/-q
+        self.list_scenes = False                # list-scenes command
+        self.print_scene_list = False           # list-scenes --quiet/-q
         self.scene_list_path = None             # list-scenes -o [scene_list_path]
 
         
@@ -279,23 +281,24 @@ class CliContext(object):
             with open(self.scene_list_path, 'wt') as scene_list_file:
                 write_scene_list(scene_list_file, cut_list, scene_list)
         # Handle `list-scenes`.
+        logging.info('Detected %d scenes, average shot length %.1f seconds.',
+                     len(scene_list),
+                     sum([(end_time - start_time).get_seconds()
+                          for start_time, end_time in scene_list]) / float(len(scene_list)))
         if self.print_scene_list:
-            logging.info("""Detected %d scenes, scene list:
-
+            logging.info(""" Scene List:
 -----------------------------------------------------------------------
  | Scene # | Start Frame |  Start Time  |  End Frame  |   End Time   |
 -----------------------------------------------------------------------
 %s
 -----------------------------------------------------------------------
-""", len(scene_list), '\n'.join(
+""", '\n'.join(
     [' |  %5d  | %11d | %s | %11d | %s |' % (
         i+1,
         start_time.get_frames(), start_time.get_timecode(),
         end_time.get_frames(), end_time.get_timecode())
      for i, (start_time, end_time) in enumerate(scene_list)]))
 
-        else:
-            logging.info('Detected %d scenes.', len(scene_list))
 
         if cut_list:
             logging.info('Comma-separated timecode list:\n  %s',
@@ -317,14 +320,15 @@ class CliContext(object):
                     logging.info('ffmpeg not found.')
                 logging.info('Splitting input video%s using mkvmerge...',
                              's' if len(video_paths) > 1 else '')
-                split_video_mkvmerge(video_paths, scene_list,
-                    output_file_name)
+                split_video_mkvmerge(video_paths, scene_list, output_file_name,
+                                     suppress_output=self.quiet_mode or self.split_quiet)
             elif ffmpeg_available:
                 logging.info('Splitting input video%s using ffmpeg...',
                     's' if len(video_paths) > 1 else '')
                 split_video_ffmpeg(video_paths, scene_list,
-                    output_file_name, arg_override=self.split_args, hide_progress=self.quiet_mode,
-                    suppress_output=self.quiet_mode)
+                    output_file_name, arg_override=self.split_args,
+                    hide_progress=self.quiet_mode or self.split_quiet,
+                    suppress_output=self.quiet_mode or self.split_quiet)
             else:
                 error_strs = ["ffmpeg/mkvmerge is required for video splitting.",
                     "Install one of the above tools to enable the split-video command."]

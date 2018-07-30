@@ -40,7 +40,7 @@ from scenedetect.platform import tqdm
 def is_mkvmerge_available():
     # type: () -> bool
     """ Is mkvmerge Available: Gracefully checks if mkvmerge command is available.
-    
+
     Returns:
         (bool) True if the mkvmerge command is available, False otherwise.
     """
@@ -57,7 +57,7 @@ def is_mkvmerge_available():
 def is_ffmpeg_available():
     # type: () -> bool
     """ Is ffmpeg Available: Gracefully checks if ffmpeg command is available.
-    
+
     Returns:
         (bool) True if the ffmpeg command is available, False otherwise.
     """
@@ -125,7 +125,7 @@ def split_video_ffmpeg(input_video_paths, scene_list, output_file_prefix,
 
     ret_val = None
     arg_override = arg_override.split(' ')
-    
+
     try:
         progress_bar = None
         if tqdm and not hide_progress:
@@ -141,7 +141,9 @@ def split_video_ffmpeg(input_video_paths, scene_list, output_file_prefix,
             call_list += [
                 '-y',
                 '-i',
-                input_video_paths[0]] + arg_override + [
+                input_video_paths[0]]
+            call_list += arg_override
+            call_list += [
                 '-ss',
                 start_time.get_timecode(),
                 '-t',
@@ -150,8 +152,9 @@ def split_video_ffmpeg(input_video_paths, scene_list, output_file_prefix,
                 '%s-Scene-%03d.%s' % (output_file_prefix, i, output_extension)
                 ]
             ret_val = subprocess.call(call_list)
-            if i == 0:
-                logging.info('Output from ffmpeg shown for first output, splitting remaining scenes...')
+            if not suppress_output and i == 0 and len(scene_list) > 1:
+                logging.info(
+                    'Output from ffmpeg for Scene 1 shown above, splitting remaining scenes...')
             if ret_val != 0:
                 break
             if progress_bar:
@@ -160,5 +163,5 @@ def split_video_ffmpeg(input_video_paths, scene_list, output_file_prefix,
         logging.error('ffmpeg could not be found on the system.'
                       ' Please install ffmpeg to enable video output support.')
     if ret_val is not None and ret_val != 0:
-        logging.error('Error splitting video (ffmpeg returned %d).', ret_val)    
+        logging.error('Error splitting video (ffmpeg returned %d).', ret_val)
 
