@@ -62,8 +62,10 @@ from scenedetect.video_manager import InvalidDownscaleFactor
 from scenedetect.video_manager import VideoDecodingInProgress
 from scenedetect.video_manager import VideoDecoderNotStarted
 
-from scenedetect.video_splitter import split_video_ffmpeg
+from scenedetect.video_splitter import is_mkvmerge_available
+from scenedetect.video_splitter import is_ffmpeg_available
 from scenedetect.video_splitter import split_video_mkvmerge
+from scenedetect.video_splitter import split_video_ffmpeg
 
 
 class CliContext(object):
@@ -78,31 +80,30 @@ class CliContext(object):
     application logic for the command line.  
     """
     def __init__(self):
-        # Optional[SceneManager]: SceneManager to manage storing of detected cuts in a video,
-        #                         and convert them 
-        self.scene_manager = None
-        # Optional[VideoManager]: VideoManager to manage decoding of video(s).
-        self.video_manager = None
-        # Optional[FrameTimecode]: FrameTimecode time base, also holds framerate (e.g. by
-        #                          calling self.base_timecode.get_framerate()).
-        self.base_timecode = None
-        self.start_frame = 0
+        # Properties for main scenedetect command options (-i, -s, etc...) and CliContext logic.
+        self.options_processed = False          # True when CLI option parsing is complete.
+        self.scene_manager = None               # detect-content, detect-threshold, etc...
+        self.video_manager = None               # -i/--input, -d/--downscale
+        self.base_timecode = None               # -f/--framerate
+        self.start_frame = 0                    # time -s/--start [start_frame]
+        self.stats_manager = StatsManager()     # -s/--stats
+        self.stats_file_path = None             # -s/--stats [stats_file_path]
+        self.output_directory = None            # -o/--output [output_directory]
+        self.quiet_mode = False                 # -q/--quiet or -v/--verbosity quiet
+        self.frame_skip = 0                     # -fs/--frame-skip [frame_skip]
+        # Properties for save-images command.
+        self.save_images = False                # save-images
+        self.image_extension = 'jpg'            # save-images -e/--extension [image_extension]
+        self.image_directory = None             # save-images -o/--output [image_directory]
+        # Properties for split-video command.
+        self.split_video = False                # split-video
+        self.split_mkvmerge = False             # split-video -m (or split-video without ffmpeg)
+        self.split_args = None                  # split-video -c [split_args]
+        self.split_directory = None             # split-video -o [split_directory]
+        # Properties for list-scenes command.
+        self.print_scene_list = False           # list-scenes and not --quiet/-q
+        self.scene_list_path = None             # list-scenes -o [scene_list_path]
 
-        self.stats_manager = StatsManager()
-        self.stats_file_path = None # Optional[str]: Path to stats file.
-
-        self.output_directory = None
-        self.options_processed = False
-
-        self.print_scene_list = False
-        self.scene_list_path = None # Optional[str]: Path to stats file.
-
-        self.quiet_mode = False
-        self.frame_skip = 0
-
-        self.split_video = False
-        self.split_mkvmerge = False
-        self.split_args = None
         
 
     def cleanup(self):
@@ -114,47 +115,57 @@ class CliContext(object):
 
 
     def _generate_images(self, scene_list, num_frames_per_scene=2):
-
-
         # type: (List[Tuple[FrameTimecode, FrameTimecode]) -> None
+
+        if num_frames_per_scene != 2:
+            raise NotImplementedError()
+
         if not scene_list:
             return
         if not self.options_processed:
             return
         self.check_input_open()
-        
+
+        # Reset video manager and downscale factor.
         self.video_manager.release()
         self.video_manager.reset()
         self.video_manager.set_downscale_factor(1)
         self.video_manager.start()
 
+        # Setup flags and init progress bar if available.
         completed = True
         logging.info('Generating output images (%d per scene)...', num_frames_per_scene)
         progress_bar = None
-        if tqdm:
+        if tqdm and not self.quiet_mode:
             progress_bar = tqdm(
                 total=len(scene_list) * 2, unit='images')
 
         for i, (start_time, end_time) in enumerate(scene_list):
-            # Need to interpolate timecodes if num_frames_per_scene > 2.
+            # TODO: Interpolate timecodes if num_frames_per_scene != 2.
             self.video_manager.seek(start_time)
             self.video_manager.grab()
             ret_val, frame_im = self.video_manager.retrieve()
             if ret_val:
-                cv2.imwrite(self._get_output_file_path('Scene-%03d-00.jpg' % (i)), frame_im)
+                cv2.imwrite(
+                    self._get_output_file_path('Scene-%03d-00.%s' % (i, self.image_extension)),
+                    frame_im)
             else:
                 completed = False
                 break
-            progress_bar.update(1)
+            if progress_bar:
+                progress_bar.update(1)
             self.video_manager.seek(end_time)
             self.video_manager.grab()
             ret_val, frame_im = self.video_manager.retrieve()
             if ret_val:
-                cv2.imwrite(self._get_output_file_path('Scene-%03d-01.jpg' % (i)), frame_im)
+                cv2.imwrite(
+                    self._get_output_file_path('Scene-%03d-01.%s' % (i, self.image_extension)),
+                    frame_im)
             else:
                 completed = False
                 break
-            progress_bar.update(1)
+            if progress_bar:
+                progress_bar.update(1)
                 
         if not completed:
             logging.error('Could not generate all output images.')
@@ -210,52 +221,57 @@ class CliContext(object):
 
 
     def process_input(self):
+        # type: () -> None
+        """ Process Input: Processes input video(s) and generates output as per CLI commands.
         
+        Run after all command line options/sub-commands have been parsed.
+        """
         logging.debug('Processing input...')
-
         if not self.options_processed:
             logging.debug('Skipping processing, CLI options were not parsed successfully.')
             return
-
         self.check_input_open()
-
         if not self.scene_manager.get_num_detectors() > 0:
             logging.error('No scene detectors specified (detect-content, detect-threshold, etc...).')
             return
 
-
+        # Handle scene detection commands (detect-content, detect-threshold, etc...).
         self.video_manager.start()
-
         base_timecode = self.video_manager.get_base_timecode()
 
         start_time = time.time()
         logging.info('Detecting scenes...')
+
         num_frames = self.scene_manager.detect_scenes(
             frame_source=self.video_manager, start_time=self.start_frame,
             frame_skip=self.frame_skip, show_progress=not self.quiet_mode)
-        end_time = time.time()
-        duration = end_time - start_time
-        logging.info('Processed %d frames in %.1f seconds (average %.2f FPS).', num_frames,
-            duration, num_frames/duration)
 
+        duration = time.time() - start_time
+        logging.info('Processed %d frames in %.1f seconds (average %.2f FPS).',
+                     num_frames, duration, float(num_frames)/duration)
+
+        # Handle -s/--statsfile option.
         if self.stats_file_path is not None:
             if self.stats_manager.is_save_required():
                 with open(self.stats_file_path, 'wt') as stats_file:
                     logging.info('Saving frame metrics to stats file: %s',
-                        os.path.basename(self.stats_file_path))
+                                 os.path.basename(self.stats_file_path))
                     self.stats_manager.save_to_csv(
                         stats_file, base_timecode)
             else:
                 logging.debug('No frame metrics updated, skipping update of the stats file.')
         
-
+        # Get list of detected cuts and scenes from the SceneManager to generate the required output
+        # files with based on the given commands (list-scenes, split-video, save-images, etc...).
         cut_list = self.scene_manager.get_cut_list(base_timecode)
         scene_list = self.scene_manager.get_scene_list(base_timecode)
 
+        # Handle list-scenes command.
+        # Handle `list-scenes -o`.
         if self.scene_list_path is not None:
             with open(self.scene_list_path, 'wt') as scene_list_file:
                 write_scene_list(scene_list_file, cut_list, scene_list)
-
+        # Handle `list-scenes`.
         if self.print_scene_list:
             logging.info("""Detected %d scenes, scene list:
 
@@ -278,23 +294,40 @@ class CliContext(object):
             logging.info('Comma-separated timecode list:\n  %s',
                          ','.join([cut.get_timecode() for cut in cut_list]))
 
-        # TODO: Add getter for VideoManager _video_file_paths property.
+        # Handle split-video command.
         if self.split_video:
+            video_paths = self.video_manager.get_video_paths()
             output_file_name = self._get_output_file_path(
-                os.path.basename(self.video_manager._video_file_paths[0]))
+                os.path.basename(video_paths[0]))
             if output_file_name.rfind('.') >= 0:
                 output_file_name = output_file_name[:output_file_name.rfind('.')]
-            if self.split_mkvmerge:
+            mkvmerge_available = is_mkvmerge_available()
+            ffmpeg_available = is_ffmpeg_available()
+            if mkvmerge_available and (self.split_mkvmerge or not ffmpeg_available):
+                if not self.split_mkvmerge:
+                    logging.info('ffmpeg not found.')
                 logging.info('Splitting input video%s using mkvmerge...',
-                    's' if len(self.video_manager._video_file_paths) > 1 else '')
-                split_video_mkvmerge(self.video_manager._video_file_paths, scene_list,
+                             's' if len(video_paths) > 1 else '')
+                split_video_mkvmerge(video_paths, scene_list,
                     output_file_name)
-            else:
+            elif ffmpeg_available:
                 logging.info('Splitting input video%s using ffmpeg...',
-                    's' if len(self.video_manager._video_file_paths) > 1 else '')
-                split_video_ffmpeg(self.video_manager._video_file_paths, scene_list,
-                    output_file_name, arg_override=self.split_args)
+                    's' if len(video_paths) > 1 else '')
+                split_video_ffmpeg(video_paths, scene_list,
+                    output_file_name, arg_override=self.split_args, hide_progress=self.quiet_mode,
+                    suppress_output=self.quiet_mode)
+            else:
+                error_strs = ["ffmpeg/mkvmerge is required for video splitting.",
+                    "Install one of the above tools to enable the split-video command."]
+                error_str = '\n'.join(error_strs)
+                logging.debug(error_str)
+                raise click.BadParameter(error_str, param_hint='split-video')
+                
             logging.info('Video splitting completed, individual scenes written to disk.')
+
+        # Handle save-images command.
+        if self.save_images:
+            self._generate_images(scene_list)
 
 
     def check_input_open(self):
@@ -418,5 +451,6 @@ class CliContext(object):
 
 
     def save_images_command(self, output_path, quality, resolution):
+        self.save_images = True
         pass
 

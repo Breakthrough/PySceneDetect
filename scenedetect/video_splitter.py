@@ -37,13 +37,47 @@ import subprocess
 from scenedetect.platform import tqdm
 
 
-# Need to add a "config" command to allow users to switch default split tool.
+def is_mkvmerge_available():
+    # type: () -> bool
+    """ Is mkvmerge Available: Gracefully checks if mkvmerge command is available.
+    
+    Returns:
+        (bool) True if the mkvmerge command is available, False otherwise.
+    """
+    ret_val = None
+    try:
+        ret_val = subprocess.call(['mkvmerge', '--quiet'])
+    except OSError:
+        return False
+    if ret_val is not None and ret_val != 2:
+        return False
+    return True
 
 
-def split_video_mkvmerge(input_video_paths, scene_list, output_file_prefix):
-    # type: (List[str], List[FrameTimecode, FrameTimecode], Optional[str]) -> None
-    """ Calls the mkvmerge command on the input video, splitting it at the
-    passed timecodes, where each scene is written in sequence from 001."""
+def is_ffmpeg_available():
+    # type: () -> bool
+    """ Is ffmpeg Available: Gracefully checks if ffmpeg command is available.
+    
+    Returns:
+        (bool) True if the ffmpeg command is available, False otherwise.
+    """
+    ret_val = None
+    try:
+        ret_val = subprocess.call(['ffmpeg', '-v', 'quiet'])
+    except OSError:
+        return False
+    if ret_val is not None and ret_val != 1:
+        return False
+    return True
+
+
+
+def split_video_mkvmerge(input_video_paths, scene_list, output_file_prefix,
+                         suppress_output=False):
+    # type: (List[str], List[FrameTimecode, FrameTimecode], Optional[str],
+    #        Optional[bool]) -> None
+    """ Calls the mkvmerge command on the input video(s), splitting it at the
+    passed timecodes, where each scene is written in sequence from 001. """
 
     if not input_video_paths:
         return
@@ -51,34 +85,40 @@ def split_video_mkvmerge(input_video_paths, scene_list, output_file_prefix):
     # mkvmerge automatically adds the scene numbers.
     output_file_name = output_file_prefix + '-Scene.mkv'
     try:
-        ret_val = subprocess.call([
-            'mkvmerge',
+        call_list = ['mkvmerge']
+        if suppress_output:
+            call_list.append('--quiet')
+        call_list += [
             '-o', output_file_name,
             '--split',
             'timecodes:%s' % ','.join(
                 [start_time.get_timecode() for start_time, _ in scene_list[1:]]),
-            ' +'.join(input_video_paths)])
+            ' +'.join(input_video_paths)]
+        ret_val = subprocess.call(call_list)
     except OSError:
         logging.error('mkvmerge could not be found on the system.'
                       ' Please install mkvmerge to enable video output support.')
+        raise
     if ret_val is not None and ret_val != 0:
         logging.error('Error splitting video (mkvmerge returned %d).', ret_val)
 
 
 def split_video_ffmpeg(input_video_paths, scene_list, output_file_prefix,
                        arg_override='-c:v copy -c:a copy', output_extension='mp4',
-                       show_progress=True):
+                       hide_progress=False, suppress_output=False):
     # type: (List[str], List[Tuple[FrameTimecode, FrameTimecode]], Optional[str],
-    #        Optional[str]) -> None
-    
-    #https://trac.ffmpeg.org/wiki/Concatenate#samecodec
-
-    # Need to generate temp. file list for ffmpeg if len(input_video_paths) > 1.
+    #        Optional[str], Optional[bool]) -> None
+    """ Calls the ffmpeg command on the input video(s), generating a new video for
+    each scene based on the start/end timecodes. """
 
     if not input_video_paths:
         return
+
     if len(input_video_paths) > 1:
-        logging.error('Splitting multiple videos with ffmpeg is not supported yet.')
+        # TODO: Support for appending videos.
+        # https://trac.ffmpeg.org/wiki/Concatenate#samecodec
+        # Need to generate temp. file list for ffmpeg if len(input_video_paths) > 1.
+        logging.error('Splitting multiple input videos with ffmpeg is not supported yet.')
         raise NotImplementedError()
 
     arg_override = arg_override.replace('\\"', '"')
@@ -88,11 +128,13 @@ def split_video_ffmpeg(input_video_paths, scene_list, output_file_prefix,
     
     try:
         progress_bar = None
-        if show_progress and tqdm:
+        if tqdm and not hide_progress:
             progress_bar = tqdm(total=len(scene_list), unit='scenes')
         for i, (start_time, end_time) in enumerate(scene_list):
             call_list = ['ffmpeg']
-            if i > 0:
+            if suppress_output:
+                call_list += ['-v', 'quiet']
+            elif i > 0:
                 # Only show ffmpeg output for the first call, which will display any
                 # errors if it fails. We suppress the output for the remaining calls.
                 call_list += ['-v', 'error']
@@ -112,7 +154,8 @@ def split_video_ffmpeg(input_video_paths, scene_list, output_file_prefix,
                 logging.info('Output from ffmpeg shown for first output, splitting remaining scenes...')
             if ret_val != 0:
                 break
-            progress_bar.update(1)
+            if progress_bar:
+                progress_bar.update(1)
     except OSError:
         logging.error('ffmpeg could not be found on the system.'
                       ' Please install ffmpeg to enable video output support.')

@@ -47,6 +47,8 @@ from scenedetect.cli.context import CliContext
 from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.video_manager import VideoManager
 
+from scenedetect.video_splitter import is_mkvmerge_available
+from scenedetect.video_splitter import is_ffmpeg_available
 
 def get_help_command_preface(command_name='scenedetect'):
     """ Preface/intro help message shown at the beginning of the help command. """
@@ -346,7 +348,8 @@ def time_command(ctx, start, duration, end):
     'Minimum size/length of any scene, in number of frames.')
 @click.pass_context
 def detect_content_command(ctx, threshold, min_scene_len): #, intensity_cutoff):
-    """ 
+    """ Perform content detection algorithm on input video(s).
+
     detect-content
 
     detect-content --threshold 27.5
@@ -397,7 +400,8 @@ def detect_content_command(ctx, threshold, min_scene_len): #, intensity_cutoff):
 @click.pass_context
 def detect_threshold_command(ctx, threshold, min_scene_len, fade_bias, add_last_scene,
                              min_percent, block_size):
-    """ 
+    """  Perform threshold detection algorithm on input video(s).
+    
     detect-threshold
 
     detect-threshold --threshold 15
@@ -429,7 +433,7 @@ def detect_threshold_command(ctx, threshold, min_scene_len, fade_bias, add_last_
 @click.option(
     '--quiet', '-q',
     is_flag=True, flag_value=True, help=
-    'Suppresses output of the table printed by the list-scenes command .')
+    'Suppresses output of the table printed by the list-scenes command.')
 @click.pass_context
 def list_scenes_command(ctx, output, quiet):
     """ Print scene list to console or a CSV file.
@@ -477,6 +481,17 @@ def split_video_command(ctx, precise, mkvmerge, codec):
             codec = '-c:v libx264 -c:a copy' if precise else '-c:v copy -c:a copy'
         ctx.obj.split_args = codec
 
+    mkvmerge_available = is_mkvmerge_available()
+    ffmpeg_available = is_ffmpeg_available()
+    if not (mkvmerge_available or ffmpeg_available) or (
+            mkvmerge and not mkvmerge_available):
+        error_strs = ["ffmpeg/mkvmerge is required for video splitting.",
+            "Install one of the above tools to enable the split-video command."]
+        error_str = '\n'.join(error_strs)
+        logging.debug(error_str)
+        ctx.obj.options_processed = False
+        raise click.BadParameter(error_str, param_hint='split-video')
+
 
 @click.command('save-images', add_help_option=False)
 @click.option(
@@ -484,15 +499,20 @@ def split_video_command(ctx, precise, mkvmerge, codec):
     type=click.Path(exists=False, file_okay=True, writable=True, resolve_path=False), help=
     'Each pair of start/end frame images will be saved to the output path with'
     ' the frame number appended.')
+#@click.option(
+#    '--quality', '-q', metavar='Q',
+#    type=click.FLOAT, help=
+#    'Quality factor for encoding images. Depends on image type/extension (-e/--extension), default is JPEG.')
 @click.option(
-    '--quality', '-q', metavar='Q',
-    type=click.FLOAT, help=
-    'Quality factor for encoding images..')
+    '--extension', '-e', metavar='JPG/PNG', default="jpg",
+    type=click.STRING, help=
+    'Output image format type (jpg, png, etc...).')
 #@click.option(
 #    '--size', '-s', metavar='WxH or P%',
 #    type=click.FLOAT, help='')
 @click.pass_context
-def save_images_command(ctx, output):
+def save_images_command(ctx, output, extension):
+    """ Create images for each detected scene. """
     raise NotImplementedError()
 
 
@@ -524,5 +544,5 @@ add_cli_command(scenedetect_cli, detect_content_command)
 add_cli_command(scenedetect_cli, detect_threshold_command)
 add_cli_command(scenedetect_cli, list_scenes_command)
 
-#add_cli_command(scenedetect_cli, save_images_command)
+add_cli_command(scenedetect_cli, save_images_command)
 add_cli_command(scenedetect_cli, split_video_command)

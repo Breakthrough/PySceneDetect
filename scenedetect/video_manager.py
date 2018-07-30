@@ -357,6 +357,15 @@ class VideoManager(object):
         return len(self._cap_list)
 
 
+    def get_video_paths(self):
+        # type: () -> List[str]
+        """ Get Video Paths - returns list of strings containing paths to the open video(s).
+        Returns:
+            (List[str]) List of paths to the video files opened by the VideoManager.
+        """
+        return list(self._video_file_paths)
+
+
     def get_framerate(self):
         # type: () -> float
         """ Get Framerate - returns the framerate the VideoManager is assuming for all

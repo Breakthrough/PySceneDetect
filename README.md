@@ -44,10 +44,15 @@ Download & Installation
 
 **Downloading:** The latest version of PySceneDetect (`v0.4`) can be [downloaded here](https://github.com/Breakthrough/PySceneDetect/releases); to run it, you will need:
 
- - [Python 2 / 3](https://www.python.org/) (tested on 2.7.X, untested but should work on 3.X)
- - OpenCV Python Module (usually found in Linux package repos as `python-opencv`, Windows users can find [prebuilt binaries for Python 2.7 here](http://www.lfd.uci.edu/~gohlke/pythonlibs/#opencv))
+ - [Python 2 / 3](https://www.python.org/)
+ - [OpenCV](https://opencv.org/) Python Module (usually found in Linux package repos as `python-opencv`, Windows users can find [prebuilt binaries for Python 2.7 here](http://www.lfd.uci.edu/~gohlke/pythonlibs/#opencv))
  - [Numpy](http://sourceforge.net/projects/numpy/)
- - [mkvmerge](https://mkvtoolnix.download/downloads.html) (usually found in package managers, part of mkvtoolnix)
+ - [tqdm](https://github.com/tqdm/tqdm) (optional, can install via `pip install tqdm`)
+
+To enable video splitting support, you also need to have one of the following tools installed (Linux users can usually grab them from your package manager):
+
+ - [ffmpeg](https://ffmpeg.org/download.html)
+ - [mkvmerge](https://mkvtoolnix.download/downloads.html) (part of mkvtoolnix)
 
 More complete documentation and installation instructions can be [found on Readthedocs](http://pyscenedetect.readthedocs.org/en/latest/download/), including a detailed guide on how to install the above dependencies.  Note that in some cases the Windows version may require an additional `opencv_ffmpeg.dll` file for the specific version of OpenCV installed.
 
