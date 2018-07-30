@@ -11,7 +11,7 @@ Video Scene Cut Detection and Analysis Tool
 
 --------
 
-The next release of PySceneDetect will be v0.5, and should be released sometime this month.  The entire project has been refactored, new modules have been created, and unit tests will be provided in order to support the Python API first and foremost (as the current design was not modular enough, and became structured mostly around the CLI functionality).
+The next release of PySceneDetect will be v0.5, and should be released sometime this month.  The entire project has been refactored, new modules have been created, and unit tests will be provided in order to support the Python API first and foremost (as the current design was not modular enough, and became structured mostly around the CLI functionality).  Feel free to checkout and install [the v0.5-dev branch](https://github.com/Breakthrough/PySceneDetect/tree/v0.5-dev) if you would like to test the new version.
 
 Furthermore, the CLI itself has been drastically changed with the concept of *commands*, which is necessary in order to support the ever-growing list of options and flags.  This will be a major update to both the CLI and API, and **breaks existing code/scripts**.  However, it is necessary to bring the project forwards to a more stable point (thanks [@Hellowlol](https://github.com/Hellowlol) for the feedback).
 
