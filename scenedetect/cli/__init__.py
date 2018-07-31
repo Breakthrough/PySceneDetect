@@ -64,10 +64,10 @@ associated with the {command_name} command below (e.g. --input,
 --framerate) must be specified before any commands. The order of
 commands is not strict, but each command should only be specified once.
 
-Commands can also be combined, for example, running the 'detect_threshold'
-and 'detect_content' (specifying options for the latter):
+Commands can also be combined, for example, running the 'detect-threshold'
+and 'detect-content' (specifying options for the latter):
 
- > {command_name} input -i vid0001.mp4 detect_threshold detect_content --threshold 20
+ > {command_name} input -i vid0001.mp4 detect-threshold detect-content --threshold 20
 
 A list of all commands is printed below. Help for a particular command
 can be printed by specifying 'help [command]', or 'help all' to print
@@ -266,8 +266,9 @@ def help_command(ctx, command_name):
             click.echo(get_help_command_preface(ctx.parent.info_name))
             print_command_list_header()
             click.echo(ctx.parent.get_help())
+            click.echo('')
             for command in COMMAND_DICT:
-                print_command_help(ctx, COMMAND_DICT[command])
+                print_command_help(ctx, command)
         else:
             command = None if not command_name in COMMAND_DICT else COMMAND_DICT[command_name]
             if command is None:
