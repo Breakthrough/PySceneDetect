@@ -82,11 +82,11 @@ To perform content-based analysis with the default parameters, on a video named 
 
 To automatically split the input video into scenes with a statsfile specified (requires `ffmpeg` or `mkvmerge` to be installed):
 
-    scenedetect --input myvideo.mp4 --statsfile myvideo.stats.csv detect-content split-video:
+    scenedetect --input myvideo.mp4 --statsfile myvideo.stats.csv detect-content split-video
 
 To automatically split the input video in *precise* mode (re-encodes input, requires `ffmpeg` to be installed):
 
-    scenedetect --input myvideo.mp4 --statsfile myvideo.stats.csv detect-content split-video:
+    scenedetect --input myvideo.mp4 --statsfile myvideo.stats.csv detect-content split-video -p
 
 To perform content-based analysis, with a threshold intensity of 30:
 
