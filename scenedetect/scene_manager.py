@@ -217,6 +217,13 @@ class SceneManager(object):
         for detector in self._detector_list:
             self._add_cuts(detector.process_frame(frame_num, frame_im))
 
+    def _is_processing_required(self, frame_num):
+        # type(int) -> bool
+        """ Is Processing Required: Returns True if frame metrics not in StatsManager,
+        False otherwise.
+        """
+        return all([detector.is_processing_required(frame_num) for detector in self._detector_list])
+
     def _post_process(self, frame_num):
         # type(int, numpy.ndarray) -> None
         """ Adds any remaining cuts to the cutting list after processing the last frame. """
@@ -293,7 +300,14 @@ class SceneManager(object):
             while True:
                 if end_frame is not None and curr_frame >= end_frame:
                     break
-                ret_val, frame_im = frame_source.read()
+                
+                if (self._is_processing_required(self._num_frames + start_frame)
+                    or self._is_processing_required(self._num_frames + start_frame + 1)):
+                    ret_val, frame_im = frame_source.read()
+                else:
+                    ret_val = frame_source.grab()
+                    frame_im = None
+
                 if not ret_val:
                     break
                 self._process_frame(self._num_frames + start_frame, frame_im)

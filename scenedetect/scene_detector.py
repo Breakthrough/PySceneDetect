@@ -42,6 +42,11 @@ class SceneDetector(object):
         self._metric_keys = []
         self.cli_name = 'detect-none'
 
+    def is_processing_required(self, frame_num):
+        # type: (int) -> bool
+        return not (self.stats_manager is not None and
+                self.stats_manager.metrics_exist(frame_num, self._metric_keys))
+
     def get_metrics(self):
         # type: () -> List[str]
         """ Get Metrics:  Get a list of all metric names/keys used by the detector.
