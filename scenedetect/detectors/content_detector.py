@@ -108,15 +108,16 @@ class ContentDetector(SceneDetector):
                     cut_list.append(frame_num)
                     self.last_scene_cut = frame_num
 
-            #self.last_frame.release()
-            if self.last_frame is not None and self.last_frame != _unused:
+            if self.last_frame is not None and self.last_frame is not _unused:
                 del self.last_frame
                 
-        if not (self.stats_manager is not None and
+        # If we have the next frame computed, don't copy the current frame
+        # into last_frame since we won't use it on the next call anyways.
+        if (self.stats_manager is not None and
             self.stats_manager.metrics_exist(frame_num+1, metric_keys)):
-            self.last_frame = frame_img.copy()
-        else:
             self.last_frame = _unused
+        else:
+            self.last_frame = frame_img.copy()
 
         return cut_list
 

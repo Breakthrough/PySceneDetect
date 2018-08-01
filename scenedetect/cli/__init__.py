@@ -27,8 +27,14 @@
 """ PySceneDetect scenedetect.cli Module
 
 This file contains the implementation of the PySceneDetect command-line
-interface (CLI) parser, which uses the click library.  The main CLI
-entry-point function is the scenedetect_cli command group.
+interface (CLI) parser logic for the PySceneDetect application ("business logic"),
+which uses the click library. The main CLI entry-point function is the
+function scenedetect_cli, which is a chained command group.
+
+The scenedetect.cli module coordinates first parsing all actions to take and
+their validity, storing them in the CliContext, finally performing scene
+detection only after the input videos have been loaded and all CLI arguments
+parsed and validated.
 """
 
 
@@ -49,6 +55,10 @@ from scenedetect.video_manager import VideoManager
 
 from scenedetect.video_splitter import is_mkvmerge_available
 from scenedetect.video_splitter import is_ffmpeg_available
+
+
+
+
 
 def get_help_command_preface(command_name='scenedetect'):
     """ Preface/intro help message shown at the beginning of the help command. """
@@ -229,8 +239,7 @@ def scenedetect_cli(ctx, input, output, framerate, downscale, frame_skip, stats,
 
     ctx.obj.output_directory = output
     if logfile is not None:
-        logfile = ctx.obj._get_output_file_path(logfile)
-        click.echo(logfile)
+        logfile = ctx.obj.get_output_file_path(logfile)
         logging.basicConfig(
             filename=logfile, filemode='a', format=format_str,
             level=getattr(logging, verbosity.upper()) if verbosity is not None else verbosity)
@@ -245,6 +254,13 @@ def scenedetect_cli(ctx, input, output, framerate, downscale, frame_skip, stats,
 
     ctx.obj.quiet_mode = True if verbosity is None else False
 
+    if stats is not None and frame_skip != 0:
+        ctx.obj.options_processed = False
+        error_strs = [
+            'Unable to detect scenes with stats file if frame skip is not 1.',
+            '  Either remove the -f/--frame-skip option, or the -s/--stats file.\n']
+        logging.error('\n'.join(error_strs))
+        raise click.BadParameter('\n  Combining the -s/--stats and -f/--frame-skip options is not supported.', param_hint='frame skip + stats file')
     try:
         if ctx.obj.output_directory is not None:
             logging.info('Output directory set:\n  %s', ctx.obj.output_directory)
@@ -273,7 +289,11 @@ def help_command(ctx, command_name):
             for command in COMMAND_DICT:
                 print_command_help(ctx, command)
         else:
-            command = None if not command_name in COMMAND_DICT else COMMAND_DICT[command_name]
+            command = None
+            for command_ref in COMMAND_DICT:
+                if command_name == command_ref.name:
+                    command = command_ref
+                    break
             if command is None:
                 error_strs = [
                     'unknown command.', 'List of valid commands:',
@@ -528,7 +548,7 @@ def split_video_command(ctx, precise, mkvmerge, quiet, ffmpeg_args):
 
 @click.command('save-images', add_help_option=False)
 @click.option(
-    '--num-images', '-n', metavar='N', default=4,
+    '--num-images', '-n', metavar='N', default=2, #4,
     type=click.INT, help=
     'Number of images to generate. Will always include start/end frame,'
     ' unless N = 1, in which case the image will be the frame at the mid-point'
@@ -536,24 +556,8 @@ def split_video_command(ctx, precise, mkvmerge, quiet, ffmpeg_args):
 @click.option(
     '--output', '-o', metavar='DIR',
     type=click.Path(exists=False, file_okay=True, writable=True, resolve_path=False), help=
-    'Output directory to save images to (images will be named VIDEONAME-Scene-NNN-MM). Overrides main scenedetect -o option.')
-#@click.option(
-#    '--quality', '-q', metavar='Q',
-#    type=click.FLOAT, help=
-#    'Quality factor for encoding images. Depends on image type/extension (-e/--extension), default is JPEG.')
-#@click.option(
-#    '--extension', '-e', metavar='JPG/PNG', default="jpg",
-#    type=click.Choice(['jpg', 'png', 'bmp', 'tga', 'gif']), help=
-#    'Output image format type (jpg, png, etc...).')
-#@click.option(
-#    '--size', '-s', metavar='WxH or P%',
-#    type=click.FLOAT, help='')
-#TODO: Add flags for each output image type that takes an optional quality value?
-# e.g.
-#   save-images --jpg/--jpeg --quality 95  
-#   save-images --webp --quality 95  how can enable conditionally?
-#   save-images --png --compression 9
-#     - need to generate dict of (min,max) of all extensions
+    'Output directory to save images to (images will be named VIDEONAME-Scene-NNN-MM).'
+    ' Overrides main scenedetect -o option.')
 @click.option(
     '--jpeg', '-j',
     is_flag=True, flag_value=True, help=

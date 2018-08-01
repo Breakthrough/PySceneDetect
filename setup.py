@@ -16,7 +16,7 @@ if sys.version_info < (2, 6) or (sys.version_info > (3, 0) and sys.version_info 
 
 
 def get_requires():
-    requires = ['numpy', 'click']
+    requires = ['numpy', 'Click']
     return requires
 
 

@@ -70,6 +70,9 @@ from scenedetect.video_splitter import split_video_ffmpeg
 from scenedetect.platform import get_cv2_imwrite_params
 
 
+def get_plural(val_list):
+    return 's' if len(val_list) > 1 else ''
+
 class CliContext(object):
     """ Context of the command-line interface passed between the various sub-commands.
 
@@ -95,8 +98,11 @@ class CliContext(object):
         self.frame_skip = 0                     # -fs/--frame-skip [frame_skip]
         # Properties for save-images command.
         self.save_images = False                # save-images command
-        self.image_extension = 'jpg'            # save-images -e/--extension [image_extension]
+        self.image_extension = 'jpg'            # save-images -j/--jpeg, -w/--webp, -p/--png
         self.image_directory = None             # save-images -o/--output [image_directory]
+        self.image_param = None                 # save-images -q/--quality if -j/-w, -c/--compression if -p
+        self.num_images = 2                     # save-images -n/--num-images
+        self.imwrite_params = get_cv2_imwrite_params()
         # Properties for split-video command.
         self.split_video = False                # split-video command
         self.split_mkvmerge = False             # split-video -m/--mkvmerge (or split-video without ffmpeg)
@@ -118,11 +124,10 @@ class CliContext(object):
                 self.video_manager.release()
 
 
-    def _generate_images(self, scene_list, image_prefix, output_dir=None,
-                         num_frames_per_scene=2):
+    def _generate_images(self, scene_list, image_prefix, output_dir=None):
         # type: (List[Tuple[FrameTimecode, FrameTimecode]) -> None
 
-        if num_frames_per_scene != 2:
+        if self.num_images != 2:
             raise NotImplementedError()
 
         if not scene_list:
@@ -130,6 +135,11 @@ class CliContext(object):
         if not self.options_processed:
             return
         self.check_input_open()
+
+        imwrite_param = []
+        if self.image_param is not None:
+            imwrite_param = [self.imwrite_params[self.image_extension], self.image_param]
+        click.echo(imwrite_param)
 
         # Reset video manager and downscale factor.
         self.video_manager.release()
@@ -139,7 +149,7 @@ class CliContext(object):
 
         # Setup flags and init progress bar if available.
         completed = True
-        logging.info('Generating output images (%d per scene)...', num_frames_per_scene)
+        logging.info('Generating output images (%d per scene)...', self.num_images)
         progress_bar = None
         if tqdm and not self.quiet_mode:
             progress_bar = tqdm(
@@ -152,9 +162,9 @@ class CliContext(object):
             ret_val, frame_im = self.video_manager.retrieve()
             if ret_val:
                 cv2.imwrite(
-                    self._get_output_file_path(
+                    self.get_output_file_path(
                         '%s-Scene-%03d-00.%s' % (image_prefix, i + 1, self.image_extension),
-                        output_dir=output_dir), frame_im)
+                        output_dir=output_dir), frame_im, imwrite_param)
             else:
                 completed = False
                 break
@@ -165,9 +175,9 @@ class CliContext(object):
             ret_val, frame_im = self.video_manager.retrieve()
             if ret_val:
                 cv2.imwrite(
-                    self._get_output_file_path(
+                    self.get_output_file_path(
                         '%s-Scene-%03d-01.%s' % (image_prefix, i + 1, self.image_extension),
-                        output_dir=output_dir), frame_im)
+                        output_dir=output_dir), frame_im, imwrite_param)
             else:
                 completed = False
                 break
@@ -178,7 +188,7 @@ class CliContext(object):
             logging.error('Could not generate all output images.')
 
 
-    def _get_output_file_path(self, file_path, output_dir=None):
+    def get_output_file_path(self, file_path, output_dir=None):
         # type: (str, Optional[str]) -> str
         '''Returns path to output file_path passed as argument, and creates directories if necessary.'''
         if file_path is None:
@@ -313,7 +323,7 @@ class CliContext(object):
 
         # Handle split-video command.
         if self.split_video:
-            output_file_name = self._get_output_file_path(
+            output_file_name = self.get_output_file_path(
                 video_name, output_dir=self.split_directory)
             mkvmerge_available = is_mkvmerge_available()
             ffmpeg_available = is_ffmpeg_available()
@@ -376,9 +386,10 @@ class CliContext(object):
             self.base_timecode = self.video_manager.get_base_timecode()
             self.video_manager.set_downscale_factor(downscale)
         except VideoOpenFailure as ex:
-            error_strs = ['could not open video(s).', 'Failed to open video file(s):']
+            error_strs = ['could not open video%s.' % get_plural(ex.file_list),
+                'Failed to open the following video file%s:' % get_plural(ex.file_list)]
             error_strs += ['  %s' % file_name[0] for file_name in ex.file_list]
-            logging.error('\n'.join(error_strs))
+            logging.error('\n'.join(error_strs[1:]))
             raise click.BadParameter('\n'.join(error_strs), param_hint='input video')
         except VideoFramerateUnavailable as ex:
             error_strs = ['could not get framerate from video(s)',
@@ -427,7 +438,7 @@ class CliContext(object):
             logging.info('VideoManager not initialized.')
         else:
             logging.debug('VideoManager initialized.')
-            self.stats_file_path = self._get_output_file_path(stats_file)
+            self.stats_file_path = self.get_output_file_path(stats_file)
             if self.stats_file_path is not None:
                 self.check_input_open()
                 self._open_stats_file()
@@ -460,7 +471,7 @@ class CliContext(object):
         self.check_input_open()
         
         self.print_scene_list = True if quiet_mode is None else not quiet_mode
-        self.scene_list_path = self._get_output_file_path(output_path)
+        self.scene_list_path = self.get_output_file_path(output_path)
         if self.scene_list_path is not None:
             logging.info('Output scene list CSV file set:\n  %s', self.scene_list_path)
 
@@ -471,14 +482,13 @@ class CliContext(object):
         num_flags = sum([True if flag else False for flag in [jpeg, webp, png]])
         if num_flags <= 1:
             
-            imwrite_params = get_cv2_imwrite_params()
             # Ensure the format exists.
             extension = 'jpg'   # Default is jpg.
             if png:
                 extension = 'png'
             elif webp: 
                 extension = 'webp'
-            if imwrite_params[extension] is None:
+            if not extension in self.imwrite_params or self.imwrite_params[extension] is None:
                 error_strs = ['Image encoder type %s not supported.' % extension.upper(),
                 'The specified encoder type could not be found in the current OpenCV module.',
                 'To enable this output format, please update the installed version of OpenCV.',
@@ -489,7 +499,10 @@ class CliContext(object):
             self.save_images = True
             self.image_directory = output
             self.image_extension = extension
+            self.image_param = compression if png else quality
+            self.num_images = num_images
         else:
             self.options_processed = False
             logging.error('Multiple image type flags set for save-images command.')
             raise click.BadParameter('Only one image type (JPG/PNG/WEBP) can be specified.', param_hint='save-images')
+
