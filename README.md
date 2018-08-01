@@ -80,11 +80,11 @@ To perform content-based analysis with the default parameters, on a video named 
 
     scenedetect --input myvideo.mp4 detect-content list-scenes -o myvideo_scenes.csv
 
-To automatically split the input video into scenes with a statsfile specified (requires `ffmpeg` or `mkvmerge` to be installed):
+To automatically split the input video into scenes using stream copying (default) with a statsfile specified (requires `ffmpeg` or `mkvmerge` to be installed):
 
     scenedetect --input myvideo.mp4 --statsfile myvideo.stats.csv detect-content split-video
 
-To automatically split the input video in *precise* mode (re-encodes input, requires `ffmpeg` to be installed):
+To automatically split the input video in *precise* mode (re-encodes input, slower but frame-perfect accuracy for output files, requires `ffmpeg` to be installed):
 
     scenedetect --input myvideo.mp4 --statsfile myvideo.stats.csv detect-content split-video -p
 
