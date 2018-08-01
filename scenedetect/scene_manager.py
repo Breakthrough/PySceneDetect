@@ -264,6 +264,9 @@ class SceneManager(object):
             ValueError
         """
 
+        if frame_skip > 0 and self._stats_manager is not None:
+            raise ValueError('frame_skip must be 0 when using a StatsManager.')
+
         start_frame = 0
         curr_frame = 0
         end_frame = None
@@ -288,9 +291,6 @@ class SceneManager(object):
         if start_frame is not None:
             total_frames -= start_frame
 
-        #if frame_skip > 0:
-        #    total_frames = int(total_frames / (frame_skip + 1))
-
         progress_bar = None
         if tqdm and show_progress:
             progress_bar = tqdm(
@@ -300,7 +300,9 @@ class SceneManager(object):
             while True:
                 if end_frame is not None and curr_frame >= end_frame:
                     break
-                
+                # We don't compensate for frame_skip here as the frame_skip option
+                # is not allowed when using a StatsManager, and thus processing is
+                # always required for all frames when using frame_skip.
                 if (self._is_processing_required(self._num_frames + start_frame)
                     or self._is_processing_required(self._num_frames + start_frame + 1)):
                     ret_val, frame_im = frame_source.read()

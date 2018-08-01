@@ -258,9 +258,9 @@ def scenedetect_cli(ctx, input, output, framerate, downscale, frame_skip, stats,
         ctx.obj.options_processed = False
         error_strs = [
             'Unable to detect scenes with stats file if frame skip is not 1.',
-            '  Either remove the -f/--frame-skip option, or the -s/--stats file.\n']
+            '  Either remove the -fs/--frame-skip option, or the -s/--stats file.\n']
         logging.error('\n'.join(error_strs))
-        raise click.BadParameter('\n  Combining the -s/--stats and -f/--frame-skip options is not supported.', param_hint='frame skip + stats file')
+        raise click.BadParameter('\n  Combining the -s/--stats and -fs/--frame-skip options is not supported.', param_hint='frame skip + stats file')
     try:
         if ctx.obj.output_directory is not None:
             logging.info('Output directory set:\n  %s', ctx.obj.output_directory)
