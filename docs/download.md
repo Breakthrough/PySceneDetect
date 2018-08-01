@@ -6,7 +6,7 @@ PySceneDetect is completely free software, and can be downloaded from the links 
 
 ## Download
 
-### Windows Build (64-bit Only) &nbsp; <span class="wy-text-neutral"><span class="fa fa-windows"></span></span>
+### Windows Standalone (64-bit Only) &nbsp; <span class="wy-text-neutral"><span class="fa fa-windows"></span></span>
 
 <div class="important">
 <h3 class="wy-text-neutral"><span class="fa fa-forward wy-text-info"></span> Latest Release: <b class="wy-text-neutral">v0.4</b></h3>
@@ -17,7 +17,7 @@ PySceneDetect is completely free software, and can be downloaded from the links 
 The Windows distribution of PySceneDetect is bundled with all required dependencies.  After installation, you can call PySceneDetect from any terminal/command prompt by typing `scenedetect`.  Open a new command prompt (`cmd.exe`) and try running `scenedetect --version` to verify that everything was installed correctly.  If using the portable distribution, you need to run the command from the location of the extracted files, where the `scenedetect.exe` executable is.
 
 
-### Source (All Platforms, Requires Python) &nbsp; <span class="wy-text-neutral"><span class="fa fa-windows"></span> &nbsp; <span class="fa fa-linux"></span> &nbsp; <span class="fa fa-apple"></span></span></h3>
+### Python Installer (All Platforms, Requires Python) &nbsp; <span class="wy-text-neutral"><span class="fa fa-windows"></span> &nbsp; <span class="fa fa-linux"></span> &nbsp; <span class="fa fa-apple"></span></span></h3>
 
 <div class="important">
 <h3 class="wy-text-neutral"><span class="fa fa-forward wy-text-info"></span> Latest Release: <b class="wy-text-neutral">v0.4</b></h3>

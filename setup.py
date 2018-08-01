@@ -10,21 +10,19 @@ import sys
 from setuptools import setup
 
 
-if sys.version_info < (2, 6) or (3, 0) <= sys.version_info < (3, 3):
+if sys.version_info < (2, 6) or (sys.version_info > (3, 0) and sys.version_info < (3, 3)):
     print('PySceneDetect requires at least Python 2.6 or 3.3 to run.')
     sys.exit(1)
 
 
 def get_requires():
-    requires = ['numpy']
-    if sys.version_info == (2, 6):
-        requires += ['argparse']
+    requires = ['numpy', 'Click']
     return requires
 
 
 setup(
     name='PySceneDetect',
-    version='0.3.6',
+    version='0.4.1',
     description="A cross-platform, OpenCV-based video scene detection program and Python library. ",
     long_description=open('package-info.rst').read(),
     author='Brandon Castellano',
@@ -34,8 +32,8 @@ setup(
     keywords="video computer-vision analysis",
     install_requires=get_requires(),
     extras_require={
-        #'GUI': ['gi'],
-        #'VIDEOENC': ['moviepy']
+        'PROGRESS_BAR': ['tqdm'],
+        'UNIT_TESTS': ['pytest']
     },
     packages=['scenedetect'],
     package_data={'': ['../LICENSE*', '../USAGE.md', '../package-info.rst']},
@@ -57,6 +55,7 @@ setup(
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
         'Topic :: Multimedia :: Video',
         'Topic :: Multimedia :: Video :: Conversion',
         'Topic :: Multimedia :: Video :: Non-Linear Editor',

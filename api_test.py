@@ -9,11 +9,16 @@
 #
 
 from __future__ import print_function
+import os
 
 import scenedetect
-import scenedetect.detectors
-import scenedetect.manager
+from scenedetect.video_manager import VideoManager
+from scenedetect.scene_manager import SceneManager
+from scenedetect.frame_timecode import FrameTimecode
+from scenedetect.stats_manager import StatsManager
+from scenedetect.detectors import ContentDetector
 
+STATS_FILE_PATH = 'api_test_statsfile.csv'
 
 def main():
 
@@ -21,21 +26,58 @@ def main():
 
     print("PySceneDetect version being used: %s" % str(scenedetect.__version__))
 
-    content_detector = scenedetect.detectors.ContentDetector()
-    smgr = scenedetect.manager.SceneManager(detector = content_detector)
-    scenedetect.detect_scenes_file("goldeneye.mp4", smgr)
-    print("Detected %d scenes in video (algorithm = content, threshold = default)." % (len(smgr.scene_list)))
+    # Create a video_manager point to video file testvideo.mp4. Note that multiple
+    # videos can be appended by simply specifying more file paths in the list
+    # passed to the VideoManager constructor. Note that appending multiple videos
+    # requires that they all have the same frame size, and optionally, framerate.
+    video_manager = VideoManager(['testvideo.mp4'])
+    stats_manager = StatsManager()
+    scene_manager = SceneManager(stats_manager)
+    # Add ContentDetector algorithm (constructor takes detector options like threshold).
+    scene_manager.add_detector(ContentDetector())
+    base_timecode = video_manager.get_base_timecode()
 
-    content_detector = scenedetect.detectors.ContentDetector(threshold = 27)
-    smgr = scenedetect.manager.SceneManager(detector = content_detector, downscale_factor = 2)
-    scenedetect.detect_scenes_file("goldeneye.mp4", smgr)
-    print("Detected %d scenes in video (algorithm = content, threshold = 27)." % (len(smgr.scene_list)))
+    try:
+        # If stats file exists, load it.
+        if os.path.exists(STATS_FILE_PATH):
+            # Read stats from CSV file opened in read mode:
+            with open(STATS_FILE_PATH, 'r') as stats_file:
+                stats_manager.load_from_csv(stats_file, base_timecode)
 
-    threshold = scenedetect.detectors.ThresholdDetector(threshold = 100)
-    smgr = scenedetect.manager.SceneManager(detector = threshold, perf_update_rate = 5)
-    scenedetect.detect_scenes_file("goldeneye.mp4", smgr)
-    print("Detected %d scenes in video (algorithm = threshold, threshold = 100)." % (len(smgr.scene_list)))
+        start_time = base_timecode + 20     # 00:00:00.667
+        end_time = base_timecode + 20.0     # 00:00:20.000
+        # Set video_manager duration to read frames from 00:00:00 to 00:00:20.
+        video_manager.set_duration(start_time=start_time, end_time=end_time)
 
+        # Set downscale factor to improve processing speed.
+        video_manager.set_downscale_factor()
+
+        # Start video_manager.
+        video_manager.start()
+
+        # Perform scene detection on video_manager.
+        scene_manager.detect_scenes(frame_source=video_manager,
+                                    start_time=start_time)
+
+        # Obtain list of detected scenes.
+        scene_list = scene_manager.get_scene_list(base_timecode)
+        # Like FrameTimecodes, each scene in the scene_list can be sorted if the
+        # list of scenes becomes unsorted.
+
+        print('List of scenes obtained:')
+        for i, scene in enumerate(scene_list):
+            print('    Scene %2d: Start %s / Frame %d, End %s / Frame %d' % (
+                i+1,
+                scene[0].get_timecode(), scene[0].get_frames(),
+                scene[1].get_timecode(), scene[1].get_frames(),))
+
+        # We only write to the stats file if a save is required:
+        if stats_manager.is_save_required():
+            with open(STATS_FILE_PATH, 'w') as stats_file:
+                stats_manager.save_to_csv(stats_file, base_timecode)
+
+    finally:
+        video_manager.release()
 
 if __name__ == "__main__":
     main()

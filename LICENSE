@@ -54,8 +54,42 @@ installing or using this software/tutorial, you agree to these terms.
     This software uses OpenCV; see the LICENSE-OPENCV file
     or visit [ http://opencv.org/license.html ] for details.
 
-> mkvmerge [Copyright (C) 2005-2016, Matroska]:
-    This software uses mkvmerge; see the LICENSE-MKVMERGE file
-    or visit the following URL for details:
-    [ https://github.com/mbunkus/mkvtoolnix/blob/master/COPYING ]
+> click [Copyright (C) 2017, Armin Ronacher]:
+    This software uses OpenCV; see the LICENSE-CLICK file
+    or visit [ http://click.pocoo.org/license/ ] for details.
+
+> tqdm [Copyright (C) 2013-2018, Casper da Costa-Luis,
+        Google Inc., and Noam Yorav-Raphael]:
+    This software uses tqdm; see the LICENSE-TQDM file, or visit
+    the following URL for details:
+    [ https://raw.githubusercontent.com/tqdm/tqdm/master/LICENCE ]
+
+> pytest [Copyright (C) 2004-2017, Holger Krekel and others]:
+    This software uses pytest; see the LICENSE-PYTEST file, or visit
+    [ https://docs.pytest.org/en/latest/license.html ] for details.
+
+-----------------------------------------------------------------------
+
+This software may also invoke mkvmerge or FFmpeg, if available.
+
+FFmpeg is a trademark of Fabrice Bellard.
+mkvmerge is Copyright (C) 2005-2016, Matroska.
+
+Unlike the above software, neither mkvmerge nor FFmpeg is not distributed
+with PySceneDetect, and requires manual installation in order to allow
+for automatic video splitting capability. These programs can be obtained
+from following URLs (note mkvmerge is a part of the MKVToolNix package):
+
+    FFmpeg:   [ https://ffmpeg.org/download.html ]
+    mkvmerge: [ https://mkvtoolnix.download/downloads.html ]
+
+Once installed, ensure the program can be accessed system-wide by calling
+the `mkvmerge` or `ffmpeg` command from a terminal/command prompt.
+PySceneDetect will automatically use whichever program is available on
+the computer, depending on the specified command-line options.
+
+Additionally, certain Windows distributions may include a compiled
+Python distribution. For license information regarding the distributed
+version of Python, see the LICENSE files in the installation directory,
+or visit the following URL: [ https://docs.python.org/3/license.html ]
 
