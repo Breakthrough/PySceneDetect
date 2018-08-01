@@ -68,6 +68,7 @@ class ContentDetector(SceneDetector):
         # of single-frame RGB/grayscale intensity (thus cannot detect slow fades with this method).
         cut_list = []
         metric_keys = self._metric_keys
+        _unused = ''
 
         if self.last_frame is not None:
             # Change in average of HSV (hsv), (h)ue only, (s)aturation only, (l)uminance only.
@@ -108,9 +109,14 @@ class ContentDetector(SceneDetector):
                     self.last_scene_cut = frame_num
 
             #self.last_frame.release()
-            del self.last_frame
+            if self.last_frame is not None and self.last_frame != _unused:
+                del self.last_frame
                 
-        self.last_frame = frame_img.copy()
+        if not (self.stats_manager is not None and
+            self.stats_manager.metrics_exist(frame_num+1, metric_keys)):
+            self.last_frame = frame_img.copy()
+        else:
+            self.last_frame = _unused
 
         return cut_list
 
