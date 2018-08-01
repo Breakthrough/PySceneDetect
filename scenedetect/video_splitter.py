@@ -115,9 +115,9 @@ def split_video_ffmpeg(input_video_paths, scene_list, output_file_prefix,
         return
 
     if len(input_video_paths) > 1:
-        # TODO: Support for appending videos.
+        # TODO: Add support for splitting multiple/appended input videos.
         # https://trac.ffmpeg.org/wiki/Concatenate#samecodec
-        # Need to generate temp. file list for ffmpeg if len(input_video_paths) > 1.
+        # Requires generating a temporary file list for ffmpeg.
         logging.error('Splitting multiple input videos with ffmpeg is not supported yet.')
         raise NotImplementedError()
 
@@ -149,7 +149,7 @@ def split_video_ffmpeg(input_video_paths, scene_list, output_file_prefix,
                 '-t',
                 (end_time - start_time).get_timecode(),
                 '-sn',
-                '%s-Scene-%03d.%s' % (output_file_prefix, i, output_extension)
+                '%s-Scene-%03d.%s' % (output_file_prefix, i + 1, output_extension)
                 ]
             ret_val = subprocess.call(call_list)
             if not suppress_output and i == 0 and len(scene_list) > 1:

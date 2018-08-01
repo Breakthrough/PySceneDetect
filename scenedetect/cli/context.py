@@ -67,6 +67,8 @@ from scenedetect.video_splitter import is_ffmpeg_available
 from scenedetect.video_splitter import split_video_mkvmerge
 from scenedetect.video_splitter import split_video_ffmpeg
 
+from scenedetect.platform import get_cv2_imwrite_params
+
 
 class CliContext(object):
     """ Context of the command-line interface passed between the various sub-commands.
@@ -151,7 +153,7 @@ class CliContext(object):
             if ret_val:
                 cv2.imwrite(
                     self._get_output_file_path(
-                        '%s-Scene-%03d-00.%s' % (image_prefix, i, self.image_extension),
+                        '%s-Scene-%03d-00.%s' % (image_prefix, i + 1, self.image_extension),
                         output_dir=output_dir), frame_im)
             else:
                 completed = False
@@ -164,7 +166,7 @@ class CliContext(object):
             if ret_val:
                 cv2.imwrite(
                     self._get_output_file_path(
-                        '%s-Scene-%03d-01.%s' % (image_prefix, i, self.image_extension),
+                        '%s-Scene-%03d-01.%s' % (image_prefix, i + 1, self.image_extension),
                         output_dir=output_dir), frame_im)
             else:
                 completed = False
@@ -455,13 +457,39 @@ class CliContext(object):
 
 
     def list_scenes_command(self, output_path, quiet_mode):
+        self.check_input_open()
+        
         self.print_scene_list = True if quiet_mode is None else not quiet_mode
         self.scene_list_path = self._get_output_file_path(output_path)
         if self.scene_list_path is not None:
             logging.info('Output scene list CSV file set:\n  %s', self.scene_list_path)
 
 
-    def save_images_command(self, output_path, quality, resolution):
-        self.save_images = True
-        pass
+    def save_images_command(self, num_images, output, jpeg, webp, quality, png, compression):
+        self.check_input_open()
 
+        num_flags = sum([True if flag else False for flag in [jpeg, webp, png]])
+        if num_flags <= 1:
+            
+            imwrite_params = get_cv2_imwrite_params()
+            # Ensure the format exists.
+            extension = 'jpg'   # Default is jpg.
+            if png:
+                extension = 'png'
+            elif webp: 
+                extension = 'webp'
+            if imwrite_params[extension] is None:
+                error_strs = ['Image encoder type %s not supported.' % extension.upper(),
+                'The specified encoder type could not be found in the current OpenCV module.',
+                'To enable this output format, please update the installed version of OpenCV.',
+                'If you build OpenCV, ensure the the proper dependencies are enabled. ']
+                logging.error('\n'.join(error_strs))
+                raise click.BadParameter('Specified output image format not supported.', param_hint='save-images')
+
+            self.save_images = True
+            self.image_directory = output
+            self.image_extension = extension
+        else:
+            self.options_processed = False
+            logging.error('Multiple image type flags set for save-images command.')
+            raise click.BadParameter('Only one image type (JPG/PNG/WEBP) can be specified.', param_hint='save-images')

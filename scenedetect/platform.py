@@ -89,8 +89,22 @@ if cv2.__version__[0] == '2' or not (
     cv2.CAP_PROP_FRAME_COUNT = cv2.cv.CV_CAP_PROP_FRAME_COUNT
 # pylint: enable=c-extension-no-member
 
+def _get_cv2_param(param_name):
+    # type: (str) -> Union[?, None]
+    if param_name.startswith('CV_'):
+        param_name = param_name[3:]
+    try:
+        return getattr(cv2, param_name)
+    except AttributeError:
+        return None
 
-
+def get_cv2_imwrite_params():
+    # type: () -> Dict[str, Union[int, None]]
+    return {
+        'jpg': _get_cv2_param('IMWRITE_JPEG_QUALITY'),
+        'png': _get_cv2_param('IMWRITE_PNG_COMPRESSION'),
+        'webp': _get_cv2_param('IMWRITE_WEBP_QUALITY')
+    }
 
 # Functonality for obtaining csv reader/writer handles with uniform line terminations.
 def get_csv_reader(file_handle):
@@ -103,4 +117,6 @@ def get_csv_writer(file_handle):
     # type: (File) -> csv.writer
     """ Returns a csv.writer object using the passed file handle. """
     return csv.writer(file_handle, lineterminator='\n')
+
+
 
