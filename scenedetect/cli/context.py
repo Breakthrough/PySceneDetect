@@ -68,6 +68,7 @@ from scenedetect.video_splitter import split_video_mkvmerge
 from scenedetect.video_splitter import split_video_ffmpeg
 
 from scenedetect.platform import get_cv2_imwrite_params
+from scenedetect.platform import check_opencv_ffmpeg_dll
 
 
 def get_plural(val_list):
@@ -389,13 +390,22 @@ class CliContext(object):
             error_strs = ['could not open video%s.' % get_plural(ex.file_list),
                 'Failed to open the following video file%s:' % get_plural(ex.file_list)]
             error_strs += ['  %s' % file_name[0] for file_name in ex.file_list]
-            logging.error('\n'.join(error_strs[1:]))
+            dll_okay, dll_name = check_opencv_ffmpeg_dll()
+            if not dll_okay:
+                error_strs += [
+                    'Error: OpenCV dependency %s not found.' % dll_name,
+                    'Ensure that you installed the Python OpenCV module, and that the',
+                    '%s file can be found to enable video support.' % dll_name]
+            logging.debug('\n'.join(error_strs[1:]))
+            if not dll_okay:
+                click.echo(click.style(
+                    '\nOpenCV dependency missing, video input/decoding not available.\n', fg='red'))
             raise click.BadParameter('\n'.join(error_strs), param_hint='input video')
         except VideoFramerateUnavailable as ex:
             error_strs = ['could not get framerate from video(s)',
                           'Failed to obtain framerate for video file %s.' % ex.file_name]
             error_strs.append('Specify framerate manually with the -f / --framerate option.')
-            logging.error('\n'.join(error_strs))
+            logging.debug('\n'.join(error_strs))
             raise click.BadParameter('\n'.join(error_strs), param_hint='input video')
         except VideoParameterMismatch as ex:
             error_strs = ['video parameters do not match.', 'List of mismatched parameters:']
@@ -411,11 +421,11 @@ class CliContext(object):
             error_strs.append(
                 'Multiple videos may only be specified if they have the same framerate and'
                 ' resolution. -f / --framerate may be specified to override the framerate.')
-            logging.error('\n'.join(error_strs))
+            logging.debug('\n'.join(error_strs))
             raise click.BadParameter('\n'.join(error_strs), param_hint='input videos')
         except InvalidDownscaleFactor as ex:
             error_strs = ['Downscale value is not > 0.', str(ex)]
-            logging.error('\n'.join(error_strs))
+            logging.debug('\n'.join(error_strs))
             raise click.BadParameter('\n'.join(error_strs), param_hint='downscale factor')
         return video_manager_initialized
 
@@ -489,20 +499,33 @@ class CliContext(object):
             elif webp: 
                 extension = 'webp'
             if not extension in self.imwrite_params or self.imwrite_params[extension] is None:
-                error_strs = ['Image encoder type %s not supported.' % extension.upper(),
-                'The specified encoder type could not be found in the current OpenCV module.',
-                'To enable this output format, please update the installed version of OpenCV.',
-                'If you build OpenCV, ensure the the proper dependencies are enabled. ']
-                logging.error('\n'.join(error_strs))
-                raise click.BadParameter('Specified output image format not supported.', param_hint='save-images')
+                error_strs = [
+                    'Image encoder type %s not supported.' % extension.upper(),
+                    'The specified encoder type could not be found in the current OpenCV module.',
+                    'To enable this output format, please update the installed version of OpenCV.',
+                    'If you build OpenCV, ensure the the proper dependencies are enabled. ']
+                logging.debug('\n'.join(error_strs))
+                raise click.BadParameter('\n'.join(error_strs), param_hint='save-images')
 
             self.save_images = True
             self.image_directory = output
             self.image_extension = extension
             self.image_param = compression if png else quality
             self.num_images = num_images
+            
+            image_type = 'JPEG' if self.image_extension == 'jpg' else self.image_extension.upper()
+            image_param_type = ''
+            if self.image_param:
+                image_param_type = 'Compression' if image_type == 'PNG' else 'Quality'
+                image_param_type = ' [%s: %d]' % (image_param_type, self.image_param)
+            logging.info('Image output format set: %s%s', image_type, image_param_type)
+            if self.image_directory is not None:
+                logging.info('Image output directory set:\n  %s',
+                             os.path.abspath(self.image_directory))
+
         else:
             self.options_processed = False
             logging.error('Multiple image type flags set for save-images command.')
-            raise click.BadParameter('Only one image type (JPG/PNG/WEBP) can be specified.', param_hint='save-images')
+            raise click.BadParameter(
+                'Only one image type (JPG/PNG/WEBP) can be specified.', param_hint='save-images')
 

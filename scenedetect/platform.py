@@ -42,6 +42,9 @@ intended to help with parsing string types from the CLI parser.
 # Standard Library Imports
 from __future__ import print_function
 import sys
+import os
+import platform
+import struct
 import csv
 
 # Third-Party Library Imports
@@ -89,6 +92,29 @@ if cv2.__version__[0] == '2' or not (
     cv2.CAP_PROP_FRAME_COUNT = cv2.cv.CV_CAP_PROP_FRAME_COUNT
 # pylint: enable=c-extension-no-member
 
+def check_opencv_ffmpeg_dll():
+    # type: () -> bool
+    """ Check OpenCV FFmpeg DLL: Checks if OpenCV video support is available on Windows.
+
+    Always returns True on non-Windows platforms, or for OpenCV versions that do
+    not follow the X.Y.Z version numbering pattern.
+
+    Returns:
+        (bool) True if OpenCV video support is detected (e.g. the appropriate
+        opencv_ffmpegXYZ.dll file is in PATH), False otherwise.
+    """
+    if platform.system() == 'Windows' and (
+            cv2.__version__[0].isdigit() and cv2.__version__.find('.') > 0):
+        is_64_bit_str = '_64' if struct.calcsize("P") == 8 else ''
+        dll_filename = 'opencv_ffmpeg{OPENCV_VERSION}{IS_64_BIT}.dll'.format(
+            OPENCV_VERSION=cv2.__version__.replace('.', ''),
+            IS_64_BIT=is_64_bit_str)
+        return any([os.path.exists(os.path.join(path_path, dll_filename))
+                    for path_path in os.environ['PATH'].split(';')]), dll_filename
+    return True
+
+
+
 def _get_cv2_param(param_name):
     # type: (str) -> Union[?, None]
     if param_name.startswith('CV_'):
@@ -117,6 +143,4 @@ def get_csv_writer(file_handle):
     # type: (File) -> csv.writer
     """ Returns a csv.writer object using the passed file handle. """
     return csv.writer(file_handle, lineterminator='\n')
-
-
 
