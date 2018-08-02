@@ -294,10 +294,11 @@ class CliContext(object):
             with open(self.scene_list_path, 'wt') as scene_list_file:
                 write_scene_list(scene_list_file, cut_list, scene_list)
         # Handle `list-scenes`.
+        list_length = len(scene_list) if len(scene_list) else 1
         logging.info('Detected %d scenes, average shot length %.1f seconds.',
-                     len(scene_list),
+                     list_length,
                      sum([(end_time - start_time).get_seconds()
-                          for start_time, end_time in scene_list]) / float(len(scene_list)))
+                          for start_time, end_time in scene_list]) / float(list_length))
         if self.print_scene_list:
             logging.info(""" Scene List:
 -----------------------------------------------------------------------
