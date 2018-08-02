@@ -9,7 +9,7 @@ Video Scene Cut Detection and Analysis Tool
 
 ### Latest Release: v0.5 (August ?, 2018)
 
-**New**: The latest release of PySceneDetect adds precise splitting support via `ffmpeg`, an improved CLI interface, and a significantly improved and refactored Python API.  Note that this release (v0.5) may break existing scripts and code using PySceneDetect.
+**New**: The latest release of PySceneDetect adds precise splitting support via `ffmpeg`, an improved CLI interface, and a significantly improved and refactored Python API.  Note that this release (v0.5) may break existing scripts and code using PySceneDetect.  Those who install `v0.5-beta` can check out [the updated usage document](https://github.com/Breakthrough/PySceneDetect/blob/master/docs/examples/usage.md), or call `scenedetect help` from a terminal/console (`scenedetect.py help` if running the beta distribution locally).
 
 There is an installer for Windows users that automatically installs all dependencies and the `scenedetect` command system wide (64-bit only currently).  This is the recommended installation method for Windows users now, and it can be found on [the Releases page](https://github.com/Breakthrough/PySceneDetect/releases).  The Windows builds do not require an existing Python environment, nor any other prerequisites, but downloading `mkvmerge`/`ffmpeg` manually is still required for video splitting support.  There is also a portable .zip version available.
 
