@@ -297,7 +297,7 @@ def help_command(ctx, command_name):
             if command is None:
                 error_strs = [
                     'unknown command.', 'List of valid commands:',
-                    '  %s' % ', '.join([command for command in COMMAND_DICT]) ]
+                    '  %s' % ', '.join([command.name for command in COMMAND_DICT]) ]
                 raise click.BadParameter('\n'.join(error_strs), param_hint='command name')
             click.echo('')
             print_command_help(ctx, command)
