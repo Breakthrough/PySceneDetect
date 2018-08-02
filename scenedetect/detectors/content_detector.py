@@ -80,20 +80,18 @@ class ContentDetector(SceneDetector):
                     frame_num, metric_keys)
 
             else:
-                num_pixels = frame_img.shape[0] * frame_img.shape[1]
-                curr_hsv = cv2.split(cv2.cvtColor(frame_img, cv2.COLOR_BGR2HSV))
-                last_hsv = self.last_hsv
-                if not last_hsv:
-                    last_hsv = cv2.split(cv2.cvtColor(self.last_frame, cv2.COLOR_BGR2HSV))
-
-                delta_hsv = [0, 0, 0, 0]
-                for i in range(3):
-                    num_pixels = curr_hsv[i].shape[0] * curr_hsv[i].shape[1]
-                    curr_hsv[i] = curr_hsv[i].astype(numpy.int32)
-                    last_hsv[i] = last_hsv[i].astype(numpy.int32)
-                    delta_hsv[i] = numpy.sum(numpy.abs(curr_hsv[i] - last_hsv[i])) / float(num_pixels)
-                delta_hsv[3] = sum(delta_hsv[0:3]) / 3.0
-                delta_h, delta_s, delta_v, delta_hsv_avg = delta_hsv
+                curr_hsv = cv2.cvtColor(frame_img, cv2.COLOR_BGR2HSV)
+                curr_hsv = curr_hsv.astype(numpy.int16)
+                if self.last_hsv is None:
+                    last_hsv = cv2.cvtColor(self.last_frame, cv2.COLOR_BGR2HSV)
+                    last_hsv = last_hsv.astype(numpy.int16)
+                else:
+                    last_hsv = self.last_hsv
+                # Image math is faster with cv2
+                absdiff = cv2.absdiff(curr_hsv, last_hsv)[:3]
+                delta_h, delta_s, delta_v = cv2.mean(absdiff)[:3]
+                delta_hsv_avg = cv2.mean(
+                    numpy.array([delta_h, delta_s, delta_v]))[0]
 
                 if self.stats_manager is not None:
                     self.stats_manager.set_metrics(frame_num, {
