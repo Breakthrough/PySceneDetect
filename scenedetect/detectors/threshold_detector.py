@@ -31,6 +31,7 @@ to detect scene cuts when the average frame intensity passes the set threshold.
 """
 
 # Third-Party Library Imports
+import cv2
 import numpy
 
 # PySceneDetect Library Imports
@@ -93,10 +94,7 @@ class ThresholdDetector(SceneDetector):
         Returns:
             Floating point value representing average pixel intensity.
         """
-        num_pixel_values = float(
-            frame.shape[0] * frame.shape[1] * frame.shape[2])
-        avg_pixel_value = numpy.sum(frame[:,:,:]) / num_pixel_values
-        return avg_pixel_value
+        return cv2.mean(cv2.mean(frame)[:3])[0]
 
     def frame_under_threshold(self, frame):
         """Check if the frame is below (true) or above (false) the threshold.
