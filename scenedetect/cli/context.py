@@ -250,7 +250,8 @@ class CliContext(object):
             return
         self.check_input_open()
         if not self.scene_manager.get_num_detectors() > 0:
-            logging.error('No scene detectors specified (detect-content, detect-threshold, etc...).')
+            logging.error('No scene detectors specified (detect-content, detect-threshold, etc...),\n'
+                          '  or failed to process all command line arguments.')
             return
 
         # Handle scene detection commands (detect-content, detect-threshold, etc...).
@@ -329,13 +330,15 @@ class CliContext(object):
             mkvmerge_available = is_mkvmerge_available()
             ffmpeg_available = is_ffmpeg_available()
             if mkvmerge_available and (self.split_mkvmerge or not ffmpeg_available):
-                if not self.split_mkvmerge:
-                    logging.info('ffmpeg not found.')
+                if not (self.split_mkvmerge):
+                    logging.warning('ffmpeg not found, falling back to fast copy mode (split-video -c/--copy).')
                 logging.info('Splitting input video%s using mkvmerge...',
                              's' if len(video_paths) > 1 else '')
                 split_video_mkvmerge(video_paths, scene_list, output_file_name,
                                      suppress_output=self.quiet_mode or self.split_quiet)
             elif ffmpeg_available:
+                if self.split_mkvmerge:
+                    logging.warning('mkvmerge not found, falling back to normal split mode (split-video).')
                 logging.info('Splitting input video%s using ffmpeg...',
                     's' if len(video_paths) > 1 else '')
                 split_video_ffmpeg(video_paths, scene_list,
@@ -343,8 +346,14 @@ class CliContext(object):
                     hide_progress=self.quiet_mode or self.split_quiet,
                     suppress_output=self.quiet_mode or self.split_quiet)
             else:
-                error_strs = ["ffmpeg/mkvmerge is required for video splitting.",
-                    "Install one of the above tools to enable the split-video command."]
+                if not (mkvmerge_available or ffmpeg_available):
+                    error_strs = ["ffmpeg/mkvmerge is required for split-video [-m/--mkvmerge]."]
+                else:
+                    error_strs = [
+                        "{EXTERN_TOOL} is required for split-video{EXTRA_ARGS}.".format(
+                            EXTERN_TOOL='mkvmerge' if self.split_mkvmerge else 'ffmpeg',
+                            EXTRA_ARGS=' -c/--copy' if self.split_mkvmerge else '')]
+                error_strs += ["Install one of the above tools to enable the split-video command."]
                 error_str = '\n'.join(error_strs)
                 logging.debug(error_str)
                 raise click.BadParameter(error_str, param_hint='split-video')

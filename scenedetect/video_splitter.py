@@ -104,7 +104,7 @@ def split_video_mkvmerge(input_video_paths, scene_list, output_file_prefix,
 
 
 def split_video_ffmpeg(input_video_paths, scene_list, output_file_prefix,
-                       arg_override='-c:v copy -c:a copy', output_extension='mp4',
+                       arg_override='-c:v libx264 -preset fast -crf 21 -c:a copy', output_extension='mp4',
                        hide_progress=False, suppress_output=False):
     # type: (List[str], List[Tuple[FrameTimecode, FrameTimecode]], Optional[str],
     #        Optional[str], Optional[bool]) -> None
@@ -129,7 +129,7 @@ def split_video_ffmpeg(input_video_paths, scene_list, output_file_prefix,
     try:
         progress_bar = None
         if tqdm and not hide_progress:
-            progress_bar = tqdm(total=len(scene_list), unit='scenes')
+            progress_bar = tqdm(total=len(scene_list), unit='scene')
         for i, (start_time, end_time) in enumerate(scene_list):
             call_list = ['ffmpeg']
             if suppress_output:

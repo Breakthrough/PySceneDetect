@@ -72,30 +72,34 @@ This software uses the following third-party components:
   > OpenCV [Copyright (C) 2018, OpenCV Team]
   > click [Copyright (C) 2018, Armin Ronacher]
 
-This software may also invoke mkvmerge or FFmpeg, if available.
+This software may also invoke the following third-party executables:
 
-FFmpeg is a trademark of Fabrice Bellard.
-mkvmerge is Copyright (C) 2005-2016, Matroska.
+  > FFmpeg [Copyright (C) 2018, Fabrice Bellard]
+  > mkvmerge [Copyright (C) 2005-2016, Matroska]
 
-Unlike the third-party components, neither mkvmerge nor FFmpeg is
-distributed with PySceneDetect, and requires manual installation in
-order to allow for automatic video splitting capability. These programs
-can be obtained from following URLs:
+If included with your distribution of PySceneDetect, see the included
+LICENSE-FFMPEG and LICENSE-MKVMERGE files for details.
+
+FFmpeg and mkvmerge are distributed only with certain PySceneDetect
+releases, in order to allow for automatic video splitting capability.
+If they were not included with your distribution, they can usually be
+installed from your operating system's package manager, or downloaded
+from the following URLs:
 
     FFmpeg:   [ https://ffmpeg.org/download.html ]
     mkvmerge: [ https://mkvtoolnix.download/downloads.html ]
         (Note that mkvmerge is a part of the mkvtoolnix package.)
 
 Once installed, ensure the respective program can be accessed from the
-same location running PySceneDetect from by calling the `mkvmerge` or
-`ffmpeg` command from a terminal/command prompt.
+same location running PySceneDetect by calling the `ffmpeg` or
+`mkvmerge` command from a terminal/command prompt.
 
 PySceneDetect will automatically use whichever program is available on
 the computer, depending on the specified command-line options.
 
 Additionally, certain Windows distributions may include a compiled
 Python distribution. For license information regarding the distributed
-version of Python, see the LICENSE files in the installation directory,
+version of Python, see the included LICENSE-PYTHON file for details,
 or visit the following URL: [ https://docs.python.org/3/license.html ]
 
 THE SOFTWARE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, EXPRESS OR IMPLIED.

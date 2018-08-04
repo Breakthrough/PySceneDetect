@@ -488,76 +488,99 @@ def list_scenes_command(ctx, output, quiet):
 
 
 @click.command('split-video', add_help_option=False)
+#TODO: Re-add -o flag to allow overriding output filename.
+#      (should use output directory in global -o option unless absolute path given.)
 #@click.option(
 #    '--output', '-o', metavar='MKV',
 #    type=click.Path(exists=False, file_okay=True, writable=True, resolve_path=False), help=
 #    'If set, each scene will be output as a separate video using the passed filename.')
+# TODO: Rename '-m/--mkmerge' to '-c/--copy'?
 @click.option(
-    '--precise', '-p',
+    '--high-quality', '-h',
     is_flag=True, flag_value=True, help=
-    'Use precise splitting mode (re-encodes input), overrides -codec option.'
-    ' Equivalent to specifying --codec "-c:v libx264 -c:a copy".')
+    'Encode video with higher quality, overrides -f option if present.'
+    ' Equivalent to specifying -f "-c:v libx264 -preset slow -crf 17 -c:a copy".')
 @click.option(
     '--ffmpeg-args', '-f', metavar='ARGS',
     type=click.STRING, help=
-    'Override codec used to split/re-encode video when using ffmpeg.'
+    'Override codec options used to split/re-encode video when using ffmpeg.'
     ' Use double quotes (") around specified arguments. Must specify at least'
-    ' audio/video codec to use (-c:v [...] and -c:a [...]). The default'
-    ' value ["-c:v copy -c:a copy"] does not reencode, and only'
-    ' copies/splits input video on keyframes.  Specifying this value will'
-    ' improve splitting precision at the expense of re-encoding time.')
+    ' audio/video codec to use (-c:v [...] and -c:a [...]). [default:'
+    ' "-c:v libx264 -preset veryfast -crf 22 -c:a copy"]')
 @click.option(
     '--quiet', '-q',
     is_flag=True, flag_value=True, help=
-    'Suppresses output from external splitting tool.')
+    'Suppresses output from external video splitting tool.')
 @click.option(
-    '--mkvmerge', '-m',
+    '--copy', '-c',
     is_flag=True, flag_value=True, help=
-    'Use mkvmerge instead of ffmpeg for splitting videos'
-    ' (the --codec/--precise options will be ignored).')
+    'Copy instead of re-encode using mkvmerge instead of ffmpeg for splitting videos.'
+    ' Significantly faster, however,'
+    ' output videos sometimes may not be split exactly, especially if the scenes'
+    ' are very short in length, or the input video is heavily compressed. This can'
+    ' lead to smaller scenes being merged with others, or scene boundaries being'
+    ' shifted in time - thus when using this option, the number of videos written'
+    ' may not match the number of scenes that was detected. If this option is set,'
+    ' the --ffmpeg-args / --high-quality options will be ignored.')
 @click.pass_context
-def split_video_command(ctx, precise, mkvmerge, quiet, ffmpeg_args):
+def split_video_command(ctx, high_quality, ffmpeg_args, quiet, copy):
     """Split input video(s) using ffmpeg or mkvmerge."""
     if ctx.obj.split_video:
         logging.warning('split-video command is specified twice.')
     ctx.obj.check_input_open()
     ctx.obj.split_video = True
     ctx.obj.split_quiet = True if quiet else False
-    if mkvmerge:
+    if copy:
         ctx.obj.split_mkvmerge = True
-        if precise:
-            logging.warning('-p/--precise flag ignored due to -m/--mkvmerge.')
+        if high_quality:
+            logging.warning('-h/--high-quality flag ignored due to -c/--copy.')
         if ffmpeg_args:
-            logging.warning('-f/--ffmpeg-args option ignored due to -m/--mkvmerge.')
-    else:
-        if not ffmpeg_args:
-            ffmpeg_args = '-c:v libx264 -c:a copy' if precise else '-c:v copy -c:a copy'
-        ctx.obj.split_args = ffmpeg_args
+            logging.warning('-f/--ffmpeg-args option ignored due to -c/--copy.')
+    if not ffmpeg_args:
+        ffmpeg_args = '-c:v libx264 -preset slow -crf 19 -c:a copy' if high_quality else '-c:v libx264 -preset veryfast -crf 22 -c:a copy'
+    ctx.obj.split_args = ffmpeg_args
 
     mkvmerge_available = is_mkvmerge_available()
     ffmpeg_available = is_ffmpeg_available()
     if not (mkvmerge_available or ffmpeg_available) or (
-            mkvmerge and not mkvmerge_available):
-        error_strs = ["ffmpeg/mkvmerge is required for video splitting.",
-            "Install one of the above tools to enable the split-video command."]
+        (not mkvmerge_available and copy) or (not ffmpeg_available and not copy)):
+        split_tool = 'ffmpeg/mkvmerge'
+        if (not mkvmerge_available and copy):
+            split_tool = 'mkvmerge'
+        elif (not ffmpeg_available and not copy):
+            split_tool = 'ffmpeg'
+        error_strs = [
+            "{EXTERN_TOOL} is required for split-video{EXTRA_ARGS}.".format(
+                EXTERN_TOOL=split_tool, EXTRA_ARGS=' -c/--copy' if copy else ''),
+            "Install the above tool%s to enable video splitting support." % ('s' if split_tool.find('/') > 0 else '')]
+        if mkvmerge_available:
+            error_strs += ['You can also specify `split-video -c/--copy` to use mkvmerge for splitting.']
         error_str = '\n'.join(error_strs)
         logging.debug(error_str)
         ctx.obj.options_processed = False
         raise click.BadParameter(error_str, param_hint='split-video')
+    
 
 
 @click.command('save-images', add_help_option=False)
 @click.option(
-    '--num-images', '-n', metavar='N', default=2, #4,
+    '--num-images', '-i', metavar='N', default=2, #4,
     type=click.INT, help=
     'Number of images to generate. Will always include start/end frame,'
     ' unless N = 1, in which case the image will be the frame at the mid-point'
     ' in the scene.')
+# TODO: Change -o from DIR to file name.
 @click.option(
     '--output', '-o', metavar='DIR',
     type=click.Path(exists=False, file_okay=True, writable=True, resolve_path=False), help=
     'Output directory to save images to (images will be named VIDEONAME-Scene-NNN-MM).'
     ' Overrides main scenedetect -o option.')
+@click.option(
+    '--name-format', '-n', metavar='NAME',
+    type=click.Path(exists=False, file_okay=True, writable=True, resolve_path=False), help=
+    'Filename format to use when saving the image files. You can use the $VIDEO_NAME,'
+    ' $SCENE_NUMBER, and $IMAGE_NUMBER macros in the name.'
+    ' [default: $VIDEO_NAME-$SCENE_NUMBER-$IMAGE_NUMBER]')
 @click.option(
     '--jpeg', '-j',
     is_flag=True, flag_value=True, help=
@@ -582,7 +605,7 @@ def split_video_command(ctx, precise, mkvmerge, quiet, ffmpeg_args):
     ' in longer compression time. This setting does not affect image quality, only'
     ' file size. [default: 3]')
 @click.pass_context
-def save_images_command(ctx, num_images, output, jpeg, webp, quality, png, compression):
+def save_images_command(ctx, num_images, output, name_format, jpeg, webp, quality, png, compression):
     """ Create images for each detected scene. """
     if ctx.obj.save_images:
         duplicate_command(ctx, 'save-images')
