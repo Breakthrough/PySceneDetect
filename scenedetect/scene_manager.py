@@ -62,7 +62,6 @@ def write_scene_list(output_csv_file, scene_list, cut_list=None):
     # type: (File, List[Tuple[FrameTimecode, FrameTimecode]], Optional[List[FrameTimecode]]) -> None
     csv_writer = get_csv_writer(output_csv_file)
     # Output Timecode List
-
     csv_writer.writerow(
         ["Timecode List:"] +
         cut_list if cut_list else [start.get_timecode() for start, _ in scene_list[1:]])

@@ -93,30 +93,33 @@ class CliContext(object):
         self.scene_manager = None               # detect-content, detect-threshold, etc...
         self.video_manager = None               # -i/--input, -d/--downscale
         self.base_timecode = None               # -f/--framerate
-        self.start_frame = 0                    # time -s/--start [start_frame]
+        self.start_frame = 0                    # time -s/--start
         self.stats_manager = StatsManager()     # -s/--stats
-        self.stats_file_path = None             # -s/--stats [stats_file_path]
-        self.output_directory = None            # -o/--output [output_directory]
+        self.stats_file_path = None             # -s/--stats
+        self.output_directory = None            # -o/--output
         self.quiet_mode = False                 # -q/--quiet or -v/--verbosity quiet
-        self.frame_skip = 0                     # -fs/--frame-skip [frame_skip]
+        self.frame_skip = 0                     # -fs/--frame-skip
         # Properties for save-images command.
         self.save_images = False                # save-images command
         self.image_extension = 'jpg'            # save-images -j/--jpeg, -w/--webp, -p/--png
-        self.image_directory = None             # save-images -o/--output [image_directory]
+        self.image_directory = None             # save-images -o/--output
         self.image_param = None                 # save-images -q/--quality if -j/-w, -c/--compression if -p
         self.image_name_format = '$VIDEO_NAME-Scene-$SCENE_NUMBER-$IMAGE_NUMBER' # save-images -f/--name-format
         self.num_images = 2                     # save-images -n/--num-images
         self.imwrite_params = get_cv2_imwrite_params()
         # Properties for split-video command.
         self.split_video = False                # split-video command
-        self.split_mkvmerge = False             # split-video -m/--mkvmerge (or split-video without ffmpeg)
-        self.split_args = None                  # split-video -f/--ffmpeg-args [split_args]
-        self.split_directory = None             # split-video -o/--output [split_directory]
+        self.split_mkvmerge = False             # split-video -c/--copy
+        self.split_args = None                  # split-video -a/--override-args
+        self.split_directory = None             # split-video -o/--output
+        self.split_name_format = '$VIDEO_NAME-Scene-$SCENE_NUMBER'  # split-video -f/--filename
         self.split_quiet = False                # split-video -q/--quiet
         # Properties for list-scenes command.
         self.list_scenes = False                # list-scenes command
         self.print_scene_list = False           # list-scenes --quiet/-q
-        self.scene_list_path = None             # list-scenes -o [scene_list_path]
+        self.scene_list_directory = None        # list-scenes -o/--output
+        self.scene_list_name_format = None      # list-scenes -f/--filename
+        self.scene_list_output = False          # list-scenes -n/--no-output
 
         
 
@@ -310,12 +313,14 @@ class CliContext(object):
         video_name = os.path.basename(video_paths[0])
         if video_name.rfind('.') >= 0:
             video_name = video_name[:video_name.rfind('.')]
-
+        click.echo('is: %s' % self.scene_list_name_format)
         # Handle list-scenes command.
-        # Handle `list-scenes -o`.
-        if self.scene_list_path is not None:
-            with open(self.scene_list_path, 'wt') as scene_list_file:
-                write_scene_list(scene_list_file, cut_list, scene_list)
+        if self.scene_list_output:
+            scene_list_filename = Template(self.scene_list_name_format).safe_substitute(
+                VIDEO_NAME=video_name)
+            scene_list_path = self.get_output_file_path(scene_list_filename, self.scene_list_directory)
+            with open(scene_list_path, 'wt') as scene_list_file:
+                write_scene_list(scene_list_file, scene_list, cut_list)
         # Handle `list-scenes`.
         logging.info('Detected %d scenes, average shot length %.1f seconds.',
                      len(scene_list),
@@ -348,8 +353,18 @@ class CliContext(object):
 
         # Handle split-video command.
         if self.split_video:
-            output_file_name = self.get_output_file_path(
-                video_name, output_dir=self.split_directory)
+            # Add proper extension to filename template if required.
+            dot_pos = self.split_name_format.rfind('.')
+            if self.split_mkvmerge and not self.split_name_format.endswith('.mkv'):
+                self.split_name_format += '.mkv'
+            # Don't add if we find an extension between 2 and 4 characters
+            elif not (dot_pos >= 0) or (
+                    dot_pos >= 0 and not
+                    ((len(self.split_name_format) - (dot_pos+1) <= 4 >= 2))):
+                self.split_name_format += '.mp4'
+                
+            output_file_prefix = self.get_output_file_path(
+                self.split_name_format, output_dir=self.split_directory)
             mkvmerge_available = is_mkvmerge_available()
             ffmpeg_available = is_ffmpeg_available()
             if mkvmerge_available and (self.split_mkvmerge or not ffmpeg_available):
@@ -357,17 +372,17 @@ class CliContext(object):
                     logging.warning('ffmpeg not found, falling back to fast copy mode (split-video -c/--copy).')
                 logging.info('Splitting input video%s using mkvmerge...',
                              's' if len(video_paths) > 1 else '')
-                split_video_mkvmerge(video_paths, scene_list, output_file_name,
+                split_video_mkvmerge(video_paths, scene_list, output_file_prefix, video_name,
                                      suppress_output=self.quiet_mode or self.split_quiet)
             elif ffmpeg_available:
                 if self.split_mkvmerge:
                     logging.warning('mkvmerge not found, falling back to normal split mode (split-video).')
                 logging.info('Splitting input video%s using ffmpeg...',
                     's' if len(video_paths) > 1 else '')
-                split_video_ffmpeg(video_paths, scene_list,
-                    output_file_name, arg_override=self.split_args,
-                    hide_progress=self.quiet_mode or self.split_quiet,
-                    suppress_output=self.quiet_mode or self.split_quiet)
+                split_video_ffmpeg(video_paths, scene_list, output_file_prefix,
+                                   video_name, arg_override=self.split_args,
+                                   hide_progress=self.quiet_mode or self.split_quiet,
+                                   suppress_output=self.quiet_mode or self.split_quiet)
             else:
                 if not (mkvmerge_available or ffmpeg_available):
                     error_strs = ["ffmpeg/mkvmerge is required for split-video [-c/--copy]."]
@@ -509,14 +524,15 @@ class CliContext(object):
             self.start_frame = start.get_frames()
 
 
-    def list_scenes_command(self, output_path, quiet_mode):
+    def list_scenes_command(self, output_path, filename_format, no_output_mode, quiet_mode):
         self.check_input_open()
         
         self.print_scene_list = True if quiet_mode is None else not quiet_mode
-        self.scene_list_path = self.get_output_file_path(output_path)
-        if self.scene_list_path is not None:
-            logging.info('Output scene list CSV file set:\n  %s', self.scene_list_path)
-
+        self.scene_list_directory = output_path
+        self.scene_list_name_format = filename_format
+        self.scene_list_output = False if no_output_mode else True
+        if self.scene_list_directory is not None:
+            logging.info('Output scene list CSV directory set:\n  %s', self.scene_list_directory)
 
     def save_images_command(self, num_images, output, name_format, jpeg, webp, quality, png, compression):
         self.check_input_open()

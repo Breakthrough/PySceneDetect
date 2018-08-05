@@ -33,6 +33,8 @@ external tools (e.g. mkvmerge, ffmpeg).
 
 import logging
 import subprocess
+import math
+from string import Template
 
 from scenedetect.platform import tqdm
 
@@ -73,7 +75,7 @@ def is_ffmpeg_available():
 
 
 def split_video_mkvmerge(input_video_paths, scene_list, output_file_prefix,
-                         suppress_output=False):
+                         video_name, suppress_output=False):
     # type: (List[str], List[FrameTimecode, FrameTimecode], Optional[str],
     #        Optional[bool]) -> None
     """ Calls the mkvmerge command on the input video(s), splitting it at the
@@ -82,8 +84,14 @@ def split_video_mkvmerge(input_video_paths, scene_list, output_file_prefix,
     if not input_video_paths:
         return
     ret_val = None
-    # mkvmerge automatically adds the scene numbers.
-    output_file_name = output_file_prefix + '-Scene.mkv'
+    # mkvmerge automatically appends '-$SCENE_NUMBER'.
+    output_file_name = output_file_prefix.replace('-${SCENE_NUMBER}', '')
+    output_file_name = output_file_prefix.replace('-$SCENE_NUMBER', '')
+    output_file_template = Template(output_file_name)
+    output_file_name = output_file_template.safe_substitute(
+        VIDEO_NAME=video_name,
+        SCENE_NUMBER='')
+
     try:
         call_list = ['mkvmerge']
         if suppress_output:
@@ -103,8 +111,8 @@ def split_video_mkvmerge(input_video_paths, scene_list, output_file_prefix,
         logging.error('Error splitting video (mkvmerge returned %d).', ret_val)
 
 
-def split_video_ffmpeg(input_video_paths, scene_list, output_file_prefix,
-                       arg_override='-c:v libx264 -preset fast -crf 21 -c:a copy', output_extension='mp4',
+def split_video_ffmpeg(input_video_paths, scene_list, output_file_template, video_name,
+                       arg_override='-c:v libx264 -preset fast -crf 21 -c:a copy',
                        hide_progress=False, suppress_output=False):
     # type: (List[str], List[Tuple[FrameTimecode, FrameTimecode]], Optional[str],
     #        Optional[str], Optional[bool]) -> None
@@ -125,6 +133,9 @@ def split_video_ffmpeg(input_video_paths, scene_list, output_file_prefix,
 
     ret_val = None
     arg_override = arg_override.split(' ')
+    filename_template = Template(output_file_template)
+    scene_num_format = '%0'
+    scene_num_format += str(max(3, math.floor(math.log(len(scene_list), 10)) + 1)) + 'd'
 
     try:
         progress_bar = None
@@ -151,7 +162,9 @@ def split_video_ffmpeg(input_video_paths, scene_list, output_file_prefix,
                 '-t',
                 (end_time - start_time).get_timecode(),
                 '-sn',
-                '%s-Scene-%03d.%s' % (output_file_prefix, i + 1, output_extension)
+                filename_template.safe_substitute(
+                    VIDEO_NAME=video_name,
+                    SCENE_NUMBER=scene_num_format % (i + 1))
                 ]
             ret_val = subprocess.call(call_list)
             if not suppress_output and i == 0 and len(scene_list) > 1:

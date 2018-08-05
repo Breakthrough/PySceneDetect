@@ -468,20 +468,30 @@ def detect_threshold_command(ctx, threshold, min_scene_len, fade_bias, add_last_
 
 @click.command('list-scenes', add_help_option=False)
 @click.option(
-    '--output', '-o', metavar='CSV',
-    type=click.Path(exists=False, file_okay=True, writable=False, resolve_path=False), help=
-    'Path to file (including .csv) for writing the scene list. The output includes the start, end,'
-    ' and duration of each scene, in frames, seconds, and timecode format.')
+    '--output', '-o', metavar='DIR',
+    type=click.Path(exists=False, dir_okay=True, writable=True, resolve_path=False), help=
+    'Output directory to save videos to. Overrides global option -o/--output if set.')
+@click.option(
+    '--filename', '-f', metavar='NAME', default='$VIDEO_NAME-Scenes.csv',
+    type=click.STRING, show_default=True, help=
+    'Filename format to use for the scene list CSV file. You can use the'
+    ' $VIDEO_NAME macro in the file name.')
+@click.option(
+    '--no-output-file', '-n',
+    is_flag=True, flag_value=True, help=
+    'Disable writing scene list CSV file to disk.  If set, -o/--output and'
+    ' -f/--filename are ignored.')
 @click.option(
     '--quiet', '-q',
     is_flag=True, flag_value=True, help=
     'Suppresses output of the table printed by the list-scenes command.')
 @click.pass_context
-def list_scenes_command(ctx, output, quiet):
-    """ Print scene list to console or a CSV file. """
+def list_scenes_command(ctx, output, filename, no_output_file, quiet):
+    """ Prints scene list and outputs to a CSV file. The default filename is
+    $VIDEO_NAME-Scenes.csv. """
     if ctx.obj.list_scenes:
         duplicate_command(ctx, 'list-scenes')
-    ctx.obj.list_scenes_command(output, quiet)
+    ctx.obj.list_scenes_command(output, filename, no_output_file, quiet)
     ctx.obj.list_scenes = True
 
 
@@ -493,9 +503,9 @@ def list_scenes_command(ctx, output, quiet):
     type=click.Path(exists=False, dir_okay=True, writable=True, resolve_path=False), help=
     'Output directory to save videos to. Overrides global option -o/--output if set.')
 @click.option(
-    '--filename', '-f', metavar='NAME', default='$VIDEO_NAME-Scene-$SCENE_NUMBER.mp4',
+    '--filename', '-f', metavar='NAME', default='$VIDEO_NAME-Scene-$SCENE_NUMBER',
     type=click.STRING, show_default=True, help=
-    'File name format, *including* extension, to use when saving image files. You can use the'
+    'File name format, to use when saving image files. You can use the'
     ' $VIDEO_NAME and $SCENE_NUMBER macros in the file name.')
 @click.option(
     '--high-quality', '-h',
@@ -550,6 +560,8 @@ def split_video_command(ctx, output, filename, high_quality, override_args, quie
     ctx.obj.check_input_open()
     ctx.obj.split_video = True
     ctx.obj.split_quiet = True if quiet else False
+    ctx.obj.split_directory = output
+    ctx.obj.split_name_format = filename
     if copy:
         ctx.obj.split_mkvmerge = True
         if high_quality:
@@ -567,8 +579,8 @@ def split_video_command(ctx, output, filename, high_quality, override_args, quie
         logging.info('FFmpeg codec args set: %s', override_args)
     if filename:
         logging.info('Video ouptut file name format: %s', filename)
-    if output:
-        logging.info('Video output path set:  \n%s', output)
+    if ctx.obj.split_directory is not None:
+        logging.info('Video output path set:  \n%s', ctx.obj.split_directory)
     ctx.obj.split_args = override_args
 
     mkvmerge_available = is_mkvmerge_available()
@@ -595,12 +607,6 @@ def split_video_command(ctx, output, filename, high_quality, override_args, quie
 
 @click.command('save-images', add_help_option=False)
 @click.option(
-    '--num-images', '-n', metavar='N', default=2, #4,
-    type=click.INT, help=
-    'Number of images to generate. Will always include start/end frame,'
-    ' unless N = 1, in which case the image will be the frame at the mid-point'
-    ' in the scene.')
-@click.option(
     '--output', '-o', metavar='DIR',
     type=click.Path(exists=False, dir_okay=True, writable=True, resolve_path=False), help=
     'Output directory to save images to. Overrides global option -o/--output if set.')
@@ -610,9 +616,15 @@ def split_video_command(ctx, output, filename, high_quality, override_args, quie
     'Filename format, *without* extension, to use when saving image files. You can use the'
     ' $VIDEO_NAME, $SCENE_NUMBER, and $IMAGE_NUMBER macros in the file name.')
 @click.option(
+    '--num-images', '-n', metavar='N', default=2, #4,
+    type=click.INT, help=
+    'Number of images to generate. Will always include start/end frame,'
+    ' unless N = 1, in which case the image will be the frame at the mid-point'
+    ' in the scene.')
+@click.option(
     '--jpeg', '-j',
     is_flag=True, flag_value=True, help=
-    'Set output format to JPEG [default].')
+    'Set output format to JPEG. [default]')
 @click.option(
     '--webp', '-w',
     is_flag=True, flag_value=True, help=
@@ -621,7 +633,7 @@ def split_video_command(ctx, output, filename, high_quality, override_args, quie
     '--quality', '-q', metavar='Q', default=None,
     type=click.IntRange(0, 100), help=
     'JPEG/WebP encoding quality, from 0-100 (higher indicates better quality).'
-    ' For WebP, 100 indicates lossless. [default: 95 for JPEG, 100 for WebP]')
+    ' For WebP, 100 indicates lossless. [default: JPEG: 95, WebP: 100]')
 @click.option(
     '--png', '-p',
     is_flag=True, flag_value=True, help=
@@ -633,7 +645,7 @@ def split_video_command(ctx, output, filename, high_quality, override_args, quie
     ' in longer compression time. This setting does not affect image quality, only'
     ' file size. [default: 3]')
 @click.pass_context
-def save_images_command(ctx, num_images, output, filename, jpeg, webp, quality, png, compression):
+def save_images_command(ctx, output, filename, num_images, jpeg, webp, quality, png, compression):
     """ Create images for each detected scene. """
     if ctx.obj.save_images:
         duplicate_command(ctx, 'save-images')
