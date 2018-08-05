@@ -564,7 +564,7 @@ def split_video_command(ctx, high_quality, ffmpeg_args, quiet, copy):
 
 @click.command('save-images', add_help_option=False)
 @click.option(
-    '--num-images', '-i', metavar='N', default=2, #4,
+    '--num-images', '-n', metavar='N', default=2, #4,
     type=click.INT, help=
     'Number of images to generate. Will always include start/end frame,'
     ' unless N = 1, in which case the image will be the frame at the mid-point'
@@ -573,14 +573,13 @@ def split_video_command(ctx, high_quality, ffmpeg_args, quiet, copy):
 @click.option(
     '--output', '-o', metavar='DIR',
     type=click.Path(exists=False, file_okay=True, writable=True, resolve_path=False), help=
-    'Output directory to save images to (images will be named VIDEONAME-Scene-NNN-MM).'
-    ' Overrides main scenedetect -o option.')
+    'Output directory to save images to (images will be named VIDEONAME-Scene-NNN-MM by default,'
+    ' see the -f/--filename option for details). Overrides global option -o/--output if set.')
 @click.option(
-    '--name-format', '-n', metavar='NAME',
-    type=click.Path(exists=False, file_okay=True, writable=True, resolve_path=False), help=
-    'Filename format to use when saving the image files. You can use the $VIDEO_NAME,'
-    ' $SCENE_NUMBER, and $IMAGE_NUMBER macros in the name.'
-    ' [default: $VIDEO_NAME-$SCENE_NUMBER-$IMAGE_NUMBER]')
+    '--filename', '-f', metavar='NAME', default='$VIDEO_NAME-Scene-$SCENE_NUMBER-$IMAGE_NUMBER',
+    type=click.STRING, show_default=True, help=
+    'Filename format, *without* extension, to use when saving image files. You can use the'
+    ' $VIDEO_NAME, $SCENE_NUMBER, and $IMAGE_NUMBER macros in the file name.')
 @click.option(
     '--jpeg', '-j',
     is_flag=True, flag_value=True, help=
@@ -605,11 +604,11 @@ def split_video_command(ctx, high_quality, ffmpeg_args, quiet, copy):
     ' in longer compression time. This setting does not affect image quality, only'
     ' file size. [default: 3]')
 @click.pass_context
-def save_images_command(ctx, num_images, output, name_format, jpeg, webp, quality, png, compression):
+def save_images_command(ctx, num_images, output, filename, jpeg, webp, quality, png, compression):
     """ Create images for each detected scene. """
     if ctx.obj.save_images:
         duplicate_command(ctx, 'save-images')
-    ctx.obj.save_images_command(num_images, output, jpeg, webp, quality, png, compression)
+    ctx.obj.save_images_command(num_images, output, filename, jpeg, webp, quality, png, compression)
 
 
 

@@ -36,6 +36,8 @@ from __future__ import print_function
 import logging
 import os
 import time
+import math
+from string import Template
 
 # Third-Party Library Imports
 import click
@@ -102,6 +104,7 @@ class CliContext(object):
         self.image_extension = 'jpg'            # save-images -j/--jpeg, -w/--webp, -p/--png
         self.image_directory = None             # save-images -o/--output [image_directory]
         self.image_param = None                 # save-images -q/--quality if -j/-w, -c/--compression if -p
+        self.image_name_format = '$VIDEO_NAME-Scene-$SCENE_NUMBER-$IMAGE_NUMBER' # save-images -f/--name-format
         self.num_images = 2                     # save-images -n/--num-images
         self.imwrite_params = get_cv2_imwrite_params()
         # Properties for split-video command.
@@ -125,7 +128,9 @@ class CliContext(object):
                 self.video_manager.release()
 
 
-    def _generate_images(self, scene_list, image_prefix, output_dir=None):
+    def _generate_images(self, scene_list, video_name,
+                         image_name_template = '$VIDEO_NAME-Scene-$SCENE_NUMBER-$IMAGE_NUMBER',
+                         output_dir=None):
         # type: (List[Tuple[FrameTimecode, FrameTimecode]) -> None
 
         if self.num_images != 2:
@@ -148,6 +153,8 @@ class CliContext(object):
         self.video_manager.set_downscale_factor(1)
         self.video_manager.start()
 
+        filename_template = Template(image_name_template)
+
         # Setup flags and init progress bar if available.
         completed = True
         logging.info('Generating output images (%d per scene)...', self.num_images)
@@ -155,6 +162,13 @@ class CliContext(object):
         if tqdm and not self.quiet_mode:
             progress_bar = tqdm(
                 total=len(scene_list) * 2, unit='images')
+
+        
+        scene_num_format = '%0'
+        scene_num_format += str(max(3, math.floor(math.log(len(scene_list), 10)) + 1)) + 'd'
+        image_num_format = '%0'
+        image_num_format += str(math.floor(math.log(self.num_images, 10)) + 2) + 'd'
+
 
         for i, (start_time, end_time) in enumerate(scene_list):
             # TODO: Interpolate timecodes if num_frames_per_scene != 2.
@@ -164,7 +178,11 @@ class CliContext(object):
             if ret_val:
                 cv2.imwrite(
                     self.get_output_file_path(
-                        '%s-Scene-%03d-00.%s' % (image_prefix, i + 1, self.image_extension),
+                        '%s.%s' % (filename_template.safe_substitute(
+                                VIDEO_NAME=video_name,
+                                SCENE_NUMBER=scene_num_format % (i+1),
+                                IMAGE_NUMBER=image_num_format % (1)
+                        ), self.image_extension),
                         output_dir=output_dir), frame_im, imwrite_param)
             else:
                 completed = False
@@ -177,7 +195,11 @@ class CliContext(object):
             if ret_val:
                 cv2.imwrite(
                     self.get_output_file_path(
-                        '%s-Scene-%03d-01.%s' % (image_prefix, i + 1, self.image_extension),
+                        '%s.%s' % (filename_template.safe_substitute(
+                                VIDEO_NAME=video_name,
+                                SCENE_NUMBER='%03d' % (i+1),
+                                IMAGE_NUMBER='%02d' % (2)
+                        ), self.image_extension),
                         output_dir=output_dir), frame_im, imwrite_param)
             else:
                 completed = False
@@ -320,7 +342,8 @@ class CliContext(object):
 
         # Handle save-images command.
         if self.save_images:
-            self._generate_images(scene_list=scene_list, image_prefix=video_name,
+            self._generate_images(scene_list=scene_list, video_name=video_name,
+                                  image_name_template=self.image_name_format,
                                   output_dir=self.image_directory)
 
         # Handle split-video command.
@@ -347,7 +370,7 @@ class CliContext(object):
                     suppress_output=self.quiet_mode or self.split_quiet)
             else:
                 if not (mkvmerge_available or ffmpeg_available):
-                    error_strs = ["ffmpeg/mkvmerge is required for split-video [-m/--mkvmerge]."]
+                    error_strs = ["ffmpeg/mkvmerge is required for split-video [-c/--copy]."]
                 else:
                     error_strs = [
                         "{EXTERN_TOOL} is required for split-video{EXTRA_ARGS}.".format(
@@ -495,7 +518,7 @@ class CliContext(object):
             logging.info('Output scene list CSV file set:\n  %s', self.scene_list_path)
 
 
-    def save_images_command(self, num_images, output, jpeg, webp, quality, png, compression):
+    def save_images_command(self, num_images, output, name_format, jpeg, webp, quality, png, compression):
         self.check_input_open()
 
         num_flags = sum([True if flag else False for flag in [jpeg, webp, png]])
@@ -520,6 +543,7 @@ class CliContext(object):
             self.image_directory = output
             self.image_extension = extension
             self.image_param = compression if png else quality
+            self.image_name_format = name_format
             self.num_images = num_images
             
             image_type = 'JPEG' if self.image_extension == 'jpg' else self.image_extension.upper()
