@@ -313,21 +313,25 @@ class CliContext(object):
         video_name = os.path.basename(video_paths[0])
         if video_name.rfind('.') >= 0:
             video_name = video_name[:video_name.rfind('.')]
-        click.echo('is: %s' % self.scene_list_name_format)
-        # Handle list-scenes command.
-        if self.scene_list_output:
-            scene_list_filename = Template(self.scene_list_name_format).safe_substitute(
-                VIDEO_NAME=video_name)
-            scene_list_path = self.get_output_file_path(scene_list_filename, self.scene_list_directory)
-            with open(scene_list_path, 'wt') as scene_list_file:
-                write_scene_list(scene_list_file, scene_list, cut_list)
-        # Handle `list-scenes`.
+            
         logging.info('Detected %d scenes, average shot length %.1f seconds.',
                      len(scene_list),
                      sum([(end_time - start_time).get_seconds()
                           for start_time, end_time in scene_list]) / float(len(scene_list)))
+
+        # Handle list-scenes command.
+        if self.scene_list_output:
+            scene_list_filename = Template(self.scene_list_name_format).safe_substitute(
+                VIDEO_NAME=video_name)
+            if not scene_list_filename.lower().endswith('.csv'):
+                scene_list_filename += '.csv'
+            scene_list_path = self.get_output_file_path(scene_list_filename, self.scene_list_directory)
+            logging.info('Writing scene list to CSV file:\n  %s', scene_list_path)
+            with open(scene_list_path, 'wt') as scene_list_file:
+                write_scene_list(scene_list_file, scene_list, cut_list)
+        # Handle `list-scenes`.
         if self.print_scene_list:
-            logging.info(""" Scene List:
+            logging.info("""Scene List:
 -----------------------------------------------------------------------
  | Scene # | Start Frame |  Start Time  |  End Frame  |   End Time   |
 -----------------------------------------------------------------------
@@ -370,15 +374,15 @@ class CliContext(object):
             if mkvmerge_available and (self.split_mkvmerge or not ffmpeg_available):
                 if not (self.split_mkvmerge):
                     logging.warning('ffmpeg not found, falling back to fast copy mode (split-video -c/--copy).')
-                logging.info('Splitting input video%s using mkvmerge...',
-                             's' if len(video_paths) > 1 else '')
+                logging.info('Splitting input video%s using mkvmerge, output path template:\n  %s',
+                             's' if len(video_paths) > 1 else '', output_file_prefix)
                 split_video_mkvmerge(video_paths, scene_list, output_file_prefix, video_name,
                                      suppress_output=self.quiet_mode or self.split_quiet)
             elif ffmpeg_available:
                 if self.split_mkvmerge:
                     logging.warning('mkvmerge not found, falling back to normal split mode (split-video).')
-                logging.info('Splitting input video%s using ffmpeg...',
-                    's' if len(video_paths) > 1 else '')
+                logging.info('Splitting input video%s using ffmpeg, output path template:\n  %s',
+                    's' if len(video_paths) > 1 else '', output_file_prefix)
                 split_video_ffmpeg(video_paths, scene_list, output_file_prefix,
                                    video_name, arg_override=self.split_args,
                                    hide_progress=self.quiet_mode or self.split_quiet,
@@ -530,9 +534,11 @@ class CliContext(object):
         self.print_scene_list = True if quiet_mode is None else not quiet_mode
         self.scene_list_directory = output_path
         self.scene_list_name_format = filename_format
+        if self.scene_list_name_format is not None:
+            logging.info('Scene list CSV file name format:\n  %s', self.scene_list_name_format)
         self.scene_list_output = False if no_output_mode else True
         if self.scene_list_directory is not None:
-            logging.info('Output scene list CSV directory set:\n  %s', self.scene_list_directory)
+            logging.info('Scene list output directory set:\n  %s', self.scene_list_directory)
 
     def save_images_command(self, num_images, output, name_format, jpeg, webp, quality, png, compression):
         self.check_input_open()

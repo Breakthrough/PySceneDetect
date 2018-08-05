@@ -35,6 +35,9 @@ The scenedetect.cli module coordinates first parsing all actions to take and
 their validity, storing them in the CliContext, finally performing scene
 detection only after the input videos have been loaded and all CLI arguments
 parsed and validated.
+
+Some of this parsing functionality is shared between the scenedetect.cli
+module and the scenedetect.cli.CliContext object.
 """
 
 
@@ -574,11 +577,11 @@ def split_video_command(ctx, output, filename, high_quality, override_args, quie
         if preset is None:
             preset = 'veryfast' if not high_quality else 'slow'
         override_args = ('-c:v libx264 -preset {PRESET} -crf {RATE_FACTOR} -c:a copy'.format(
-                         PRESET=preset, RATE_FACTOR=rate_factor))
+            PRESET=preset, RATE_FACTOR=rate_factor))
     if not copy:
         logging.info('FFmpeg codec args set: %s', override_args)
     if filename:
-        logging.info('Video ouptut file name format: %s', filename)
+        logging.info('Video output file name format: %s', filename)
     if ctx.obj.split_directory is not None:
         logging.info('Video output path set:  \n%s', ctx.obj.split_directory)
     ctx.obj.split_args = override_args
@@ -586,7 +589,7 @@ def split_video_command(ctx, output, filename, high_quality, override_args, quie
     mkvmerge_available = is_mkvmerge_available()
     ffmpeg_available = is_ffmpeg_available()
     if not (mkvmerge_available or ffmpeg_available) or (
-        (not mkvmerge_available and copy) or (not ffmpeg_available and not copy)):
+            (not mkvmerge_available and copy) or (not ffmpeg_available and not copy)):
         split_tool = 'ffmpeg/mkvmerge'
         if (not mkvmerge_available and copy):
             split_tool = 'mkvmerge'
@@ -602,7 +605,7 @@ def split_video_command(ctx, output, filename, high_quality, override_args, quie
         logging.debug(error_str)
         ctx.obj.options_processed = False
         raise click.BadParameter(error_str, param_hint='split-video')
-    
+
 
 
 @click.command('save-images', add_help_option=False)

@@ -81,7 +81,7 @@ class VideoFramerateUnavailable(Exception):
 
 
 class VideoParameterMismatch(Exception):
-    """ VideoParameterMismatch: Raised when opening multiple videos with a VideoManager, and some 
+    """ VideoParameterMismatch: Raised when opening multiple videos with a VideoManager, and some
     of the video parameters (frame height, frame width, and framerate/FPS) do not match. """
     def __init__(self, file_list=None, message=
                  "OpenCV VideoCapture object parameters do not match."):
@@ -117,6 +117,13 @@ DEFAULT_DOWNSCALE_FACTORS = {
 
 
 def compute_downscale_factor(frame_width):
+    # type: (int) -> int
+    """ Compute Downscale Factor: Returns the optimal default downscale factor based on
+    a video's resolution (specifically, the width parameter).
+
+    Returns:
+        int: The defalt downscale factor to use with a video of frame_height x frame_width.
+    """
     for width in sorted(DEFAULT_DOWNSCALE_FACTORS, reverse=True):
         if frame_width >= width:
             return DEFAULT_DOWNSCALE_FACTORS[width]
@@ -126,7 +133,7 @@ def compute_downscale_factor(frame_width):
 def get_video_name(video_file):
     # type: (str) -> Tuple[str, str]
     """ Get Video Name: Returns a string representing the video file/device name.
-    
+
     Returns:
         str: Video file name or device ID. In the case of a video, only the file
             name is returned, not the whole path. For a device, the string format
@@ -238,7 +245,7 @@ def close_captures(cap_list):
 def validate_capture_framerate(video_names, cap_framerates, framerate=None):
     # type: (List[Tuple[str, str]], List[float], Optional[float]) -> Tuple[float, bool]
     """ Validate Capture Framerate: Ensures that the passed capture framerates are valid and equal.
-    
+
     Raises:
         ValueError, TypeError, VideoFramerateUnavailable
     """
@@ -263,10 +270,11 @@ def validate_capture_framerate(video_names, cap_framerates, framerate=None):
 
 def validate_capture_parameters(video_names, cap_frame_sizes, check_framerate=False,
                                 cap_framerates=None):
-    # type: (List[Tuple[str, str]], List[Tuple[int, int]], Optional[bool], Optional[List[float]]) -> None
+    # type: (List[Tuple[str, str]], List[Tuple[int, int]], Optional[bool],
+    #        Optional[List[float]]) -> None
     """ Validate Capture Parameters: Ensures that all passed capture frame sizes and (optionally)
     framerates are equal.  Raises VideoParameterMismatch if there is a mismatch.
-    
+
     Raises:
         VideoParameterMismatch
     """
@@ -335,6 +343,15 @@ class VideoManager(object):
 
     def set_downscale_factor(self, downscale_factor=None):
         # type: (Optional[int]) -> None
+        """ Set Downscale Factor - sets the downscale/subsample factor of returned frames.
+
+        If N is the downscale_factor, the size of the frames returned becomes
+        frame_width/N x frame_height/N via subsampling.
+
+        If downscale_factor is None, the downscale factor is computed automatically
+        based on the current video's resolution.  A downscale_factor of 1 indicates
+        no downscaling.
+        """
         if downscale_factor is None:
             self._downscale_factor = compute_downscale_factor(self.get_framesize()[0])
         else:
@@ -343,7 +360,8 @@ class VideoManager(object):
             self._downscale_factor = downscale_factor
         if self._logger is not None:
             effective_framesize = self.get_framesize_effective()
-            self._logger.info('Downscale factor set to %d, effective resolution: %d x %d', 
+            self._logger.info(
+                'Downscale factor set to %d, effective resolution: %d x %d',
                 self._downscale_factor, effective_framesize[0], effective_framesize[1])
 
 
@@ -502,7 +520,7 @@ class VideoManager(object):
         """
         if self._started:
             raise VideoDecodingInProgress()
-            
+
         self._started = True
         self._get_next_cap()
         self.seek(self._start_time)

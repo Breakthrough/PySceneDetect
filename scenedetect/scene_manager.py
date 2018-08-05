@@ -303,7 +303,7 @@ class SceneManager(object):
                 # is not allowed when using a StatsManager, and thus processing is
                 # always required for all frames when using frame_skip.
                 if (self._is_processing_required(self._num_frames + start_frame)
-                    or self._is_processing_required(self._num_frames + start_frame + 1)):
+                        or self._is_processing_required(self._num_frames + start_frame + 1)):
                     ret_val, frame_im = frame_source.read()
                 else:
                     ret_val = frame_source.grab()
