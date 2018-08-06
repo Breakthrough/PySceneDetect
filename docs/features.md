@@ -27,20 +27,20 @@
 
 ### Features in Current Release
 
- - exports list of scenes to .CSV file (both timecodes and frame numbers) (`-o scenelist.csv`)
- - exports timecodes in mkvmerge format: HH:MM:SS.nnnnn, comma-separated
- - statistics/analysis mode to export frame-by-frame video metrics (`-s statsfile.csv`)
- - output-suppression (quiet) mode for better automation with external scripts/programs
- - user-selectable subsampling for improved performance (`-df`)
- - user-selectable frame skipping for improved performance (`-fs`)
- - save an image of the first and last frame of each detected scene (`-si`)
- - ability to specify starting/ending times (`-st`/`-et`), and/or set duration for processing (`-dt`)
- - user-definable fade bias (`-fb`) to shift scenes between fade in/out points (threshold mode only)
+ - exports list of scenes to .CSV file and terminal (both timecodes and frame numbers) with `list-scenes` command
+ - exports timecodes in standard format (HH:MM:SS.nnn), comma-separated for easy copy-and-paste into external tools and analysis with spreadsheet software
+ - statistics/analysis mode to export frame-by-frame video metrics (`--stats/-s statsfile.csv`)
+ - output-suppression (quiet) mode for better automation with external scripts/programs (`-v quiet`)
+ - user-selectable subsampling for improved performance (`-d/--downscale`)
+ - user-selectable frame skipping for improved performance (`-fs`, not recommended)
+ - save an image of the first and last frame of each detected scene via the `save-images` command
+ - ability to specify starting/ending times via `time` command (`--start/-s` and `--end/-e`), and/or set duration for processing (`--duration/-d`)
+ - user-definable fade bias to shift scenes between fade in/out points (threshold mode only)
 
 ### List of Scene Detection Methods
 
- - **threshold scene detection** (`-d threshold`): analyzes video for changes in average frame intensity/brightness
- - **content-aware scene detection** (`-d content`): based on changes between frames in the HSV color space
+ - **threshold scene detection** (`detect-threshold`): analyzes video for changes in average frame intensity/brightness
+ - **content-aware scene detection** (`detect-content`): based on changes between frames in the HSV color space
 
 For a detailed explanation of how a particular scene detection method/algorithm works, see the [Scene Detection Method Details Section](reference/detection-methods.md) in the Documentation & Reference.
 
@@ -65,6 +65,5 @@ The following are features being planned or developed for future releases of PyS
  - export scenes in chapter/XML format
  - improve robustness of content-aware detection by combining with edge detection (similar to MATLAB-based scene change detector)
  - automatic threshold detection for the current scene detection methods (can be done in pre-pass if necessary)
- - standalone distribution/build for Windows (x86/64)
  - GUI for easier previewing and threshold setting (will be GTK+ 3 based via PyGObject)
 
