@@ -385,7 +385,7 @@ class CliContext(object):
                     's' if len(video_paths) > 1 else '', output_file_prefix)
                 split_video_ffmpeg(video_paths, scene_list, output_file_prefix,
                                    video_name, arg_override=self.split_args,
-                                   hide_progress=self.quiet_mode or self.split_quiet,
+                                   hide_progress=self.quiet_mode,
                                    suppress_output=self.quiet_mode or self.split_quiet)
             else:
                 if not (mkvmerge_available or ffmpeg_available):

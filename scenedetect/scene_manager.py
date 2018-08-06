@@ -176,10 +176,10 @@ class SceneManager(object):
         # the start timecode for the first scene in the list.
         last_cut = base_timecode + self._start_frame
         for cut in cut_list:
-            scene_list.append((last_cut, cut - 1))
+            scene_list.append((last_cut, cut))
             last_cut = cut
         # Last scene is from last cut to end of video.
-        scene_list.append((last_cut, base_timecode + self._num_frames - 1))
+        scene_list.append((last_cut, base_timecode + self._num_frames))
 
         return scene_list
 

@@ -34,6 +34,7 @@ external tools (e.g. mkvmerge, ffmpeg).
 import logging
 import subprocess
 import math
+import time
 from string import Template
 
 from scenedetect.platform import tqdm
@@ -99,10 +100,19 @@ def split_video_mkvmerge(input_video_paths, scene_list, output_file_prefix,
         call_list += [
             '-o', output_file_name,
             '--split',
-            'timecodes:%s' % ','.join(
-                [start_time.get_timecode() for start_time, _ in scene_list[1:]]),
+            #'timecodes:%s' % ','.join(
+            #    [start_time.get_timecode() for start_time, _ in scene_list[1:]]),
+            'parts:%s' % ','.join(
+                ['%s-%s' % (start_time.get_timecode(), end_time.get_timecode())
+                 for start_time, end_time in scene_list]),
             ' +'.join(input_video_paths)]
+        total_frames = scene_list[-1][1].get_frames() - scene_list[0][0].get_frames()
+        start_time = time.time()
         ret_val = subprocess.call(call_list)
+        if not suppress_output:
+            print('')
+            logging.info('Average processing speed %.2f frames/sec.',
+                         float(total_frames) / (time.time() - start_time))
     except OSError:
         logging.error('mkvmerge could not be found on the system.'
                       ' Please install mkvmerge to enable video output support.')
@@ -139,9 +149,12 @@ def split_video_ffmpeg(input_video_paths, scene_list, output_file_template, vide
 
     try:
         progress_bar = None
+        total_frames = 1 + scene_list[-1][1].get_frames() - scene_list[0][0].get_frames()
         if tqdm and not hide_progress:
-            progress_bar = tqdm(total=len(scene_list), unit='scene')
+            progress_bar = tqdm(total=total_frames, unit='frame', miniters=1)
+        start_time = time.time()
         for i, (start_time, end_time) in enumerate(scene_list):
+            duration = (end_time - start_time)
             call_list = ['ffmpeg']
             if suppress_output:
                 call_list += ['-v', 'quiet']
@@ -160,7 +173,7 @@ def split_video_ffmpeg(input_video_paths, scene_list, output_file_template, vide
                 '-ss',
                 start_time.get_timecode(),
                 '-t',
-                (end_time - start_time).get_timecode(),
+                duration.get_timecode(),
                 '-sn',
                 filename_template.safe_substitute(
                     VIDEO_NAME=video_name,
@@ -173,7 +186,10 @@ def split_video_ffmpeg(input_video_paths, scene_list, output_file_template, vide
             if ret_val != 0:
                 break
             if progress_bar:
-                progress_bar.update(1)
+                progress_bar.update(duration.get_frames())
+        if progress_bar:
+            print('')
+            logging.info('Average processing speed %.2f frames/sec.', float(total_frames) / (time.time() - start_time))
     except OSError:
         logging.error('ffmpeg could not be found on the system.'
                       ' Please install ffmpeg to enable video output support.')

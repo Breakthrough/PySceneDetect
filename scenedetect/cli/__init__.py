@@ -551,8 +551,9 @@ def list_scenes_command(ctx, output, filename, no_output_file, quiet):
         'ultrafast', 'superfast', 'veryfast', 'faster', 'fast', 'medium',
         'slow', 'slower', 'veryslow']),
     help=
-    'Video compression quality preset (x264 preset). Faster modes take less time to run,'
-    ' but the output files may be larger.'
+    'Video compression quality preset (x264 preset). Can be one of: ultrafast, superfast,'
+    ' veryfast, faster, fast, medium, slow, slower, and veryslow. Faster modes take less'
+    ' time to run, but the output files may be larger.'
     ' [default: veryfast, if -h/--high quality is set: slow]')
 @click.pass_context
 def split_video_command(ctx, output, filename, high_quality, override_args, quiet, copy,
