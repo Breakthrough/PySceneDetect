@@ -107,12 +107,12 @@ def split_video_mkvmerge(input_video_paths, scene_list, output_file_prefix,
                  for start_time, end_time in scene_list]),
             ' +'.join(input_video_paths)]
         total_frames = scene_list[-1][1].get_frames() - scene_list[0][0].get_frames()
-        start_time = time.time()
+        processing_start_time = time.time()
         ret_val = subprocess.call(call_list)
         if not suppress_output:
             print('')
             logging.info('Average processing speed %.2f frames/sec.',
-                         float(total_frames) / (time.time() - start_time))
+                         float(total_frames) / (time.time() - processing_start_time))
     except OSError:
         logging.error('mkvmerge could not be found on the system.'
                       ' Please install mkvmerge to enable video output support.')
@@ -152,7 +152,7 @@ def split_video_ffmpeg(input_video_paths, scene_list, output_file_template, vide
         total_frames = 1 + scene_list[-1][1].get_frames() - scene_list[0][0].get_frames()
         if tqdm and not hide_progress:
             progress_bar = tqdm(total=total_frames, unit='frame', miniters=1)
-        start_time = time.time()
+        processing_start_time = time.time()
         for i, (start_time, end_time) in enumerate(scene_list):
             duration = (end_time - start_time)
             call_list = ['ffmpeg']
@@ -189,7 +189,8 @@ def split_video_ffmpeg(input_video_paths, scene_list, output_file_template, vide
                 progress_bar.update(duration.get_frames())
         if progress_bar:
             print('')
-            logging.info('Average processing speed %.2f frames/sec.', float(total_frames) / (time.time() - start_time))
+            logging.info('Average processing speed %.2f frames/sec.',
+                         float(total_frames) / (time.time() - processing_start_time))
     except OSError:
         logging.error('ffmpeg could not be found on the system.'
                       ' Please install ffmpeg to enable video output support.')
