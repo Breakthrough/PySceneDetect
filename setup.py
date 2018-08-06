@@ -35,7 +35,10 @@ setup(
         'PROGRESS_BAR': ['tqdm'],
         'UNIT_TESTS': ['pytest']
     },
-    packages=['scenedetect'],
+    packages=['scenedetect',
+              'scenedetect.detectors',
+              'scenedetect.cli'
+    ],
     package_data={'': ['../LICENSE*', '../USAGE.md', '../package-info.rst']},
     #include_package_data = True,   # Only works with this line commented.
     #test_suite="unitest.py",

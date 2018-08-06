@@ -49,6 +49,7 @@ from scenedetect.scene_manager import SceneManager
 from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.video_manager import VideoManager
 from scenedetect.detectors import ThresholdDetector, ContentDetector
+from scenedetect.__main__ import main
 
 
 # Used for module identification and when printing version & about info.
