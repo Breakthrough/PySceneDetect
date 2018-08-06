@@ -194,7 +194,7 @@ def duplicate_command(ctx, param_hint):
     ' to width/N x height/N (thus -d 1 implies no downscaling). Each increment speeds up processing'
     ' by a factor of 4 (e.g. -d 2 is 4 times quicker than -d 1). Higher values can be used for'
     ' high definition content with minimal effect on accuracy.'
-    ' [default: 1 for SD, 2 for 720p, 3 for 1080p+]')
+    ' [default: 2 for SD, 4 for 720p, 6 for 1080p, 12 for 4k]')
 @click.option(
     '--frame-skip', '-fs', metavar='N', show_default=True,
     type=click.INT, default=0, help=

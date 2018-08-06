@@ -110,9 +110,16 @@ class InvalidDownscaleFactor(ValueError):
         super(InvalidDownscaleFactor, self).__init__(message)
 
 
+# The default downscale factor for a video of size W x H enforces the constraint
+# that W >= 200 to ensure an adequate amount of pixels for scene detection.
 DEFAULT_DOWNSCALE_FACTORS = {
-    1700: 3,        # ~1080p
-    900: 2         # ~720p
+    3200: 12,        # ~4k
+    2100: 8,        # ~2k
+    1700: 6,        # ~1080p
+    1200: 5,
+    900: 4,         # ~720p
+    600: 3,
+    400: 2        # ~480p
 }
 
 
