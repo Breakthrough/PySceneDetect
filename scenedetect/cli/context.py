@@ -313,11 +313,15 @@ class CliContext(object):
         video_name = os.path.basename(video_paths[0])
         if video_name.rfind('.') >= 0:
             video_name = video_name[:video_name.rfind('.')]
-            
-        logging.info('Detected %d scenes, average shot length %.1f seconds.',
-                     len(scene_list),
-                     sum([(end_time - start_time).get_seconds()
-                          for start_time, end_time in scene_list]) / float(len(scene_list)))
+        
+        # Ensure we don't divide by zero.
+        if scene_list:
+            logging.info('Detected %d scenes, average shot length %.1f seconds.',
+                        len(scene_list),
+                        sum([(end_time - start_time).get_seconds()
+                            for start_time, end_time in scene_list]) / float(len(scene_list)))
+        else:
+            logging.info('No scenes detected.')
 
         # Handle list-scenes command.
         if self.scene_list_output:
