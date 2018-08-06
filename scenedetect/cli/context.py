@@ -192,7 +192,7 @@ class CliContext(object):
                 break
             if progress_bar:
                 progress_bar.update(1)
-            self.video_manager.seek(end_time)
+            self.video_manager.seek(end_time - 1)
             self.video_manager.grab()
             ret_val, frame_im = self.video_manager.retrieve()
             if ret_val:

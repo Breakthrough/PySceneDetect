@@ -542,8 +542,8 @@ def list_scenes_command(ctx, output, filename, no_output_file, quiet):
 @click.option(
     '--rate-factor', '-crf', metavar='RATE', default=None,
     type=click.IntRange(0, 100), help=
-    'Video encoding quality (x264 constant rate factor), from 0-100. Higher indicates'
-    ' better quality at the expense of filesize, 0 indicates lossless.'
+    'Video encoding quality (x264 constant rate factor), from 0-100, where lower'
+    ' values represent better quality, with 0 indicating lossless.'
     ' [default: 22, if -h/--high-quality is set: 17]')
 @click.option(
     '--preset', '-p', metavar='LEVEL', default=None,

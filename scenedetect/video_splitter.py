@@ -155,12 +155,15 @@ def split_video_ffmpeg(input_video_paths, scene_list, output_file_template, vide
         processing_start_time = time.time()
         for i, (start_time, end_time) in enumerate(scene_list):
             duration = (end_time - start_time)
+            # Fix FFmpeg start timecode frame shift.
+            start_time -= 1
             call_list = ['ffmpeg']
             if suppress_output:
                 call_list += ['-v', 'quiet']
             elif i > 0:
                 # Only show ffmpeg output for the first call, which will display any
-                # errors if it fails. We suppress the output for the remaining calls.
+                # errors if it fails, and then break the loop. We only show error messages
+                # for the remaining calls.
                 call_list += ['-v', 'error']
             call_list += [
                 '-y',
