@@ -54,7 +54,7 @@ def test_framerate():
     # Not passing fps results in TypeError.
     with pytest.raises(TypeError): FrameTimecode()
     with pytest.raises(TypeError): FrameTimecode(timecode=0, fps=None)
-    with pytest.raises(TypeError): FrameTimecode(timecode=0, fps=None, new_time=1)
+    with pytest.raises(TypeError): FrameTimecode(timecode=None, fps=FrameTimecode(timecode=0, fps=None))
     # Test zero FPS/negative.
     with pytest.raises(ValueError): FrameTimecode(timecode=0, fps=0)
     with pytest.raises(ValueError): FrameTimecode(timecode=0, fps=-1)
@@ -71,29 +71,6 @@ def test_framerate():
     assert FrameTimecode(timecode=0, fps=MINIMUM_FRAMES_PER_SECOND_FLOAT * 2).frame_num == 0
     assert FrameTimecode(timecode=0, fps=1000).frame_num == 0
     assert FrameTimecode(timecode=0, fps=1000.0).frame_num == 0
-
-def test_new_time():
-    ''' Test FrameTimecode constructor argument "new_time". '''
-    with pytest.raises(TypeError): FrameTimecode(timecode=0, fps=1, new_time=1)
-    with pytest.raises(TypeError): FrameTimecode(timecode=0.0, fps=1.0, new_time=1.0)
-    with pytest.raises(ValueError): FrameTimecode(timecode=FrameTimecode(
-        timecode=0, fps=1), fps=None, new_time=-0.001)
-    with pytest.raises(ValueError): FrameTimecode(timecode=FrameTimecode(
-        timecode=0, fps=1), fps=None, new_time="-1")
-    with pytest.raises(ValueError): FrameTimecode(timecode=FrameTimecode(
-        timecode=0, fps=1), fps=None, new_time="1x")
-    with pytest.raises(ValueError): FrameTimecode(timecode=FrameTimecode(
-        timecode=0, fps=1), fps=None, new_time=-1)
-    assert FrameTimecode(timecode=FrameTimecode(
-        timecode=1, fps=1), fps=None, new_time=0).frame_num == 0
-    assert FrameTimecode(timecode=FrameTimecode(
-        timecode=1, fps=1), fps=None, new_time=1.0).frame_num == 1
-    assert FrameTimecode(timecode=FrameTimecode(
-        timecode=1, fps=1), fps=None, new_time="2").frame_num == 2
-    assert FrameTimecode(timecode=FrameTimecode(
-        timecode=1, fps=1), fps=None, new_time="00:00:03").frame_num == 3
-    assert FrameTimecode(timecode=FrameTimecode(
-        timecode=1, fps=1), fps=None, new_time="00:00:03.900").frame_num == 3
 
 def test_timecode_numeric():
     ''' Test FrameTimecode constructor argument "timecode" with numeric arguments. '''
@@ -207,8 +184,8 @@ def test_equality():
     with pytest.raises(TypeError): x == FrameTimecode(timecode=1.0, fps=10.1)
 
     assert x == FrameTimecode(x)
-    assert x == FrameTimecode(x, new_time=1.0)
-    assert x == FrameTimecode(x, new_time=10)
+    assert x == FrameTimecode(1.0, x)
+    assert x == FrameTimecode(10, x)
     assert x == '00:00:01'
     assert x == '00:00:01.0'
     assert x == '00:00:01.00'
@@ -237,7 +214,7 @@ def test_addition():
     ''' Test FrameTimecode addition (+/+=, __add__/__iadd__) operator. '''
     x = FrameTimecode(timecode=1.0, fps=10.0)
     assert x + 1 == FrameTimecode(timecode=1.1, fps=10.0)
-    assert x + 1 == FrameTimecode(x, new_time=1.1)
+    assert x + 1 == FrameTimecode(1.1, x)
     assert x + 10 == 20
     assert x + 10 == 2.0
 
@@ -248,14 +225,14 @@ def test_addition():
 def test_subtraction():
     ''' Test FrameTimecode subtraction (-/-=, __sub__) operator. '''
     x = FrameTimecode(timecode=1.0, fps=10.0)
-    assert x - 1 == FrameTimecode(timecode=0.9, fps=10.0)
-    assert x - 2 == FrameTimecode(x, new_time=0.8)
-    assert x - 10 == FrameTimecode(x, new_time=0.0)
-    assert x - 11 == FrameTimecode(x, new_time=0.0)
-    assert x - 100 == FrameTimecode(x, new_time=0.0)
+    assert (x - 1) == FrameTimecode(timecode=0.9, fps=10.0)
+    assert x - 2 == FrameTimecode(0.8, x)
+    assert x - 10 == FrameTimecode(0.0, x)
+    assert x - 11 == FrameTimecode(0.0, x)
+    assert x - 100 == FrameTimecode(0.0, x)
 
-    assert x - 1.0 == FrameTimecode(x, new_time=0.0)
-    assert x - 100.0 == FrameTimecode(x, new_time=0.0)
+    assert x - 1.0 == FrameTimecode(0.0, x)
+    assert x - 100.0 == FrameTimecode(0.0, x)
 
     assert x - 1 == FrameTimecode(timecode=0.9, fps=10.0)
 

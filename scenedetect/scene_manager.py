@@ -199,7 +199,7 @@ class SceneManager(object):
             for automated splitting of the input into individual scenes.
         """
 
-        return [FrameTimecode(timecode=base_timecode, new_time=cut)
+        return [FrameTimecode(cut, base_timecode)
                 for cut in self._get_cutting_list()]
 
 

@@ -46,20 +46,11 @@ Example:
 
         $ t = FrameTimecode(timecode = "00:01:00.000", fps = 10)
 
-    Lastly, the timecode parameter can also be specified as another FrameTimecode
-    as a copy constructor (fps does not need to be specified in this case).
-    A third, optional parameter "new_time" may be specified in this case to
-    replace the frame number, but keep the same framerate as the passed FrameTimecode.
-    For example, in this case, calling t.get_frames() will return 100:
-
-        $ t = FrameTimecode(timecode = FrameTimecode(0, 10), new_time = "00:00:10")
-
 FrameTimecode objects can be added and subtracted.  Note, however, that a negative
 timecode is not representable by a FrameTimecode, and subtractions towards zero
 will wrap at 0.  For example, calling t.get_frame() in this case will return 0:
 
     $ t = FrameTimecode(0, 10) - FrameTimecode(10, 10)
-
 
  (i.e. calling get_frame() on FrameTimecode)
 Unit tests for the FrameTimecode object can be found in tests/test_timecode.py.
@@ -93,20 +84,17 @@ class FrameTimecode(object):
         timecode (str, float, int, or FrameTimecode):  A timecode or frame
             number, given in any of the above valid formats/types.  This
             argument is always required.
-        fps (float, conditionally required): The framerate to base all frame
-            to time arithmetic on, to allow frame-accurate arithmetic.  The
+        fps (float, or FrameTimecode, conditionally required): The framerate
+            to base all frame to time arithmetic on (if FrameTimecode, copied
+            from the passed framerate), to allow frame-accurate arithmetic. The
             framerate must be the same when combining FrameTimecode objects
             in operations. This argument is required argument, unless the
             passed timecode is of type FrameTimecode, from which it is copied.
-        new_time (same types as timecode, optional):  A timecode or frame
-            number to overwrite the existing one. This can only be set/used
-            when the passed timecode value is of type FrameTimecode, where it
-            overrides the passed frames.
     Raises:
         TypeError, ValueError
     """
 
-    def __init__(self, timecode=None, fps=None, new_time=None):
+    def __init__(self, timecode=None, fps=None):
         # type: (Union[int, float, str, FrameTimecode], float,
         #        Union[int, float, str, FrameTimecode])
         # The following two properties are what is used to keep track of time
@@ -115,25 +103,19 @@ class FrameTimecode(object):
         self.framerate = None
         self.frame_num = None
 
-        # Copy constructor.  Only the timecode (and, optionally, new_time)
-        # arguments are used in this case.
+        # Copy constructor.  Only the timecode argument is used in this case.
         if isinstance(timecode, FrameTimecode):
             self.framerate = timecode.framerate
             self.frame_num = timecode.frame_num
             if fps is not None:
                 raise TypeError('Framerate cannot be overwritten when copying a FrameTimecode.')
-            if new_time is None:
-                return
-            else:
-                # Overwrite timecode so it will be replaced below as usual.
-                timecode = new_time
         else:
             # Ensure other arguments are consistent with API.
             if fps is None:
                 raise TypeError('Framerate (fps) is a required argument.')
-            if new_time is not None:
-                raise TypeError(
-                    'new_time can only be specified if timecode is a FrameTimecode object.')
+            if isinstance(fps, FrameTimecode):
+                fps = fps.framerate
+
             # Process the given framerate, if it was not already set.
             if not isinstance(fps, (int, float)):
                 raise TypeError('Framerate must be of type int/float.')
@@ -273,6 +255,9 @@ class FrameTimecode(object):
             if timecode < 0.0:
                 raise ValueError('Timecode value must be positive and greater than zero.')
             return self._seconds_to_frames(timecode)
+        # FrameTimecode
+        elif isinstance(timecode, FrameTimecode):
+            return timecode.frame_num
         elif timecode is None:
             raise TypeError('Timecode/frame number must be specified!')
         else:
