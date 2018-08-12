@@ -29,16 +29,25 @@ SceneDetector objects available in the `scenedetect.detectors` module:
  - ThresholdDetector - detects fade-outs/fade-ins to/from black by looking at the intensity/brightness of the video 
  - ContentDetector - detects scene cuts/content changes by converting the video to the HSV colourspace 
 
+ All functions are well documented with complete docstrs, and documentation can be found by calling help() from a Python REPL or browsing the complete PySceneDetect v0.5 API Reference (coming soon).
+
 
 API Reference
 ----------------------------------------------------------
 
 
-Coming soon.
+The current API reference is incomplete, however, full docstrs (e.g. the `help` command in a Python REPL), or auto-generated documentation (via the `pydoc` command/module) can be generated.
+
+To get started in the meantime, however, [see the `api_test.py` file](https://github.com/Breakthrough/PySceneDetect/blob/master/api_test.py) for a complete example of performing scene detection using the PySceneDetect Python API.  Also use the built-in `help` command in the Python REPL on the various `scenedetect` module members to view the appropriate docstrs.
+
+This page serves as a sort of stop-gap in the meantime, until the manual and automated processes can be bridged (if anyone has any suggestions on the best way to generate the Python documentation from the documentation string available, please feel free to suggest it by raising an issue).
+
 
 
 FrameTimecode
 ==========================================================
+
+A `FrameTimecode` represents a point in time in a video with a known, fixed framerate, and is accurate to a given frame.  A `FrameTimecode` object is created with a frame number/timecode/seconds value, as well as the video's framerate, or a another timecode already containing the framerate.
 
 In most use-cases, a `FrameTimecode` object is normally created from another `FrameTimecode` called the *base timecode*, returned by the video source (e.g. a `VideoManager`).  For example, given a `VideoManager` instance `video_manager`, we can create a new timecode `new_timecode` representing the frame 1 minute and 30 seconds in the source video by:
 
@@ -95,5 +104,17 @@ The reason we need a base timecode is because FrameTimecodes have frame-accurate
     timecode_d = FrameTimecode('00:01:30', fps=10)
     # Don't try this in C!
     print(timecode_a == timecode_b == timecode_c == timecode_d)
+
+
+VideoManager
+==========================================================
+
+A `VideoManager` is used to load one or more videos with an interface similar to the OpenCV `VideoCapture` object, but with extended capabilities required for use with the `SceneManager`.  This includes downscaling, seeking, and intuitive interfaces to retrive the video(s) resolution and base timecode (or framerate).
+
+SceneManager
+==========================================================
+
+TODO...
+
 
 

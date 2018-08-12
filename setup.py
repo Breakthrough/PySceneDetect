@@ -15,8 +15,18 @@ if sys.version_info < (2, 6) or (sys.version_info > (3, 0) and sys.version_info 
     sys.exit(1)
 
 
-def get_requires():
+def get_requires(include_opencv=False):
+    # type: (bool) -> List[str]
+    """ Get Requires: Returns a list of required packages PySceneDetect depends on.
+    
+    Arguments:
+        include_opencv (bool): Whether to include the cv2 module in the returned module
+            list or not (default is False). Package may not be able to be installed via
+            pip, thus the default behaviour is to have users install it separately for now.
+    """
     requires = ['numpy', 'Click']
+    if include_opencv:
+        requires += ['cv2']
     return requires
 
 
@@ -32,13 +42,13 @@ setup(
     keywords="video computer-vision analysis",
     install_requires=get_requires(),
     extras_require={
-        'PROGRESS_BAR': ['tqdm'],
-        'UNIT_TESTS': ['pytest']
-    },
+        'progress_bar': ['tqdm'],
+        'unit_tests': ['pytest']
+        },
     packages=['scenedetect',
               'scenedetect.detectors',
               'scenedetect.cli'
-    ],
+             ],
     package_data={'': ['../LICENSE*', '../USAGE.md', '../package-info.rst']},
     #include_package_data = True,   # Only works with this line commented.
     #test_suite="unitest.py",
