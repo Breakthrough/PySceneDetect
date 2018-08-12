@@ -111,7 +111,7 @@ As with `detect-content`, the optimal threshold can be determined by generating 
 
 ## Actions/Commands
 
-After setting the detection method(s), there are several commands that can be used.  Type `scenedetect help [command]` for help/arguments of a specific command listed below, or see the [full CLI reference](reference/command-line-params.md) for details.
+After setting the detection method(s), there are several commands that can be used.  Type `scenedetect help [command]` for help/arguments of a specific command listed below, or see the [full CLI reference](../reference/command-line-params.md) for details.
 
  - `time`: Used to set input video duration/length or start/end time (discussed below).
  - `list-scenes`: Print and save a list of all scenes in table and CSV format.
