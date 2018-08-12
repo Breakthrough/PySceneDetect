@@ -31,7 +31,11 @@ version and copyright information (e.g. scenedetect.py about):
 
     version: Displays the version of PySceneDetect being used.
     about:   Displays PySceneDetect license and copyright information.
+```
 
+## Global Options
+
+```md
 PySceneDetect Option/Command List:
 ----------------------------------------------------
 
@@ -88,6 +92,11 @@ Options:
                          specified.
   -h, --help             Show this message and exit.
 
+```
+
+## Command List
+
+```md
 Commands:
   about             Print license/copyright info.
   detect-content    Perform content detection algorithm on input...
@@ -98,25 +107,11 @@ Commands:
   split-video       Split input video(s) using ffmpeg or...
   time              Set start/end/duration of input video(s).
   version           Print version of PySceneDetect.
+```
 
-PySceneDetect help Command
-----------------------------------------------------
-Usage: scenedetect.py help [OPTIONS] [COMMAND_NAME]
+## `time` Command
 
-  Print help for command (help [command]).
-
-PySceneDetect about Command
-----------------------------------------------------
-Usage: scenedetect.py about [OPTIONS]
-
-  Print license/copyright info.
-
-PySceneDetect version Command
-----------------------------------------------------
-Usage: scenedetect.py version [OPTIONS]
-
-  Print version of PySceneDetect.
-
+```md
 PySceneDetect time Command
 ----------------------------------------------------
 Usage: scenedetect.py time [OPTIONS]
@@ -149,7 +144,11 @@ Options:
                            format is the same as other arguments. Mutually
                            exclusive with --duration / -d.
   -h, --help               Show this message and exit.
+```
 
+## `detect-content` Command
+
+```md
 PySceneDetect detect-content Command
 ----------------------------------------------------
 Usage: scenedetect.py detect-content [OPTIONS]
@@ -168,7 +167,11 @@ Options:
   -m, --min-scene-len FRAMES  Minimum size/length of any scene, in number of
                               frames.  [default: 15]
   -h, --help                  Show this message and exit.
+```
 
+## `detect-threshold` Command
+
+```md
 PySceneDetect detect-threshold Command
 ----------------------------------------------------
 Usage: scenedetect.py detect-threshold [OPTIONS]
@@ -200,7 +203,11 @@ Options:
                               (can be tuned for performance in some cases).
                               [default: 8]
   -h, --help                  Show this message and exit.
+```
 
+## `list-scenes` Command
+
+```md
 PySceneDetect list-scenes Command
 ----------------------------------------------------
 Usage: scenedetect.py list-scenes [OPTIONS]
@@ -218,7 +225,11 @@ Options:
                         -o/--output and -f/--filename are ignored.
   -q, --quiet           Suppresses output of the table printed by the list-
                         scenes command.
+```
 
+## `save-images` Command
+
+```md
 PySceneDetect save-images Command
 ----------------------------------------------------
 Usage: scenedetect.py save-images [OPTIONS]
@@ -246,7 +257,11 @@ Options:
                        smaller files but result in longer compression time.
                        This setting does not affect image quality, only file
                        size. [default: 3]
+```
 
+## `split-video` Command
+
+```md
 PySceneDetect split-video Command
 ----------------------------------------------------
 Usage: scenedetect.py split-video [OPTIONS]
