@@ -30,6 +30,5 @@ A full list of contributions to the PySceneDetect source code [can be found here
  * [@bubalazi](https://github.com/bubalazi) - performance improvements to detect-content and detect-threshold algorithms
  * [@r1b](https://github.com/r1b) - proof-of-concept implementation of detect-histogram algorithm
 
-
 In addition to those mentioned above, thank you to *everyone* who has submitted an issue, bug report, and/or pull request, as well as for those who continue to help the ongoing development of PySceneDetect.  Your contributions continue to improve PySceneDetect, and help ensure that not only is PySceneDetect one of the most accurate scene detection programs/libraries, it will always be free and open source.
 

@@ -109,6 +109,18 @@ For most videos, the minimum percentage (`-p` / `--min-percent`) should always b
 
 As with `detect-content`, the optimal threshold can be determined by generating a statsfile (`-s`), opening it with a spreadsheet editor (e.g. Excel), and examining the `delta_rgb` column.  These values represent the average intensity of the pixels for that particular frame (taken by averaging the R, G, and B values over the whole frame).  The threshold value should be set so that the average intensity of most frames in content scenes lie above the threshold value, and scenes where scene changes/breaks occur should fall *under* the threshold value (thus triggering a scene change).
 
+## Actions/Commands
+
+After setting the detection method(s), there are several commands that can be used.  Type `scenedetect help [command]` for help/arguments of a specific command listed below, or see the [full CLI reference](reference/command-line-params.md) for details.
+
+ - `time`: Used to set input video duration/length or start/end time (discussed below).
+ - `list-scenes`: Print and save a list of all scenes in table and CSV format.
+ - `split-video`: Split input video into scenes automatically.
+ - `save-images`: Save images from the video for each scene.
+ - `help`: Print help for PySceneDetect or a particular command. No processing is done if present.
+ - `version`: Print PySceneDetect release version. No processing is done if present.
+ - `about`: Print PySceneDetect license agreement and application information. No processing is done if present.
+
 
 ## Seeking, Duration, and Setting Start/Stop Times
 
