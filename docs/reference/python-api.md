@@ -30,7 +30,7 @@ API Reference
 
 The current API reference is incomplete, however, full docstrs (e.g. the `help` command in a Python REPL), or auto-generated documentation (via the `pydoc` command/module) can be generated.
 
-To get started in the meantime, however, [see the `api_test.py` file](https://github.com/Breakthrough/PySceneDetect/blob/master/api_test.py) for a complete example of performing scene detection using the PySceneDetect Python API.  Also use the built-in `help` command in the Python REPL on the various `scenedetect` module members to view the appropriate docstrs.
+To get started in the meantime, however, [see the `api_test.py` file](https://github.com/Breakthrough/PySceneDetect/blob/v0.5-beta-1/tests/api_test.py) for a complete example of performing scene detection using the PySceneDetect Python API.  Also use the built-in `help` command in the Python REPL on the various `scenedetect` module members to view the appropriate docstrs.
 
 This page serves as a sort of stop-gap in the meantime, until the manual and automated processes can be bridged (if anyone has any suggestions on the best way to generate the Python documentation from the documentation string available, please feel free to suggest it by raising an issue).
 

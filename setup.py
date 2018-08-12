@@ -10,8 +10,8 @@ import sys
 from setuptools import setup
 
 
-if sys.version_info < (2, 6) or (sys.version_info > (3, 0) and sys.version_info < (3, 3)):
-    print('PySceneDetect requires at least Python 2.6 or 3.3 to run.')
+if sys.version_info < (2, 7) or (sys.version_info >= (3, 0) and sys.version_info < (3, 3)):
+    print('PySceneDetect requires at least Python 2.7 or 3.3 to run.')
     sys.exit(1)
 
 
@@ -41,14 +41,12 @@ setup(
     license="BSD 2-Clause",
     keywords="video computer-vision analysis",
     install_requires=get_requires(),
-    extras_require={
-        'progress_bar': ['tqdm'],
-        'unit_tests': ['pytest']
-        },
+    extras_require={'progress_bar': ['tqdm']},
+    setup_requires=['pytest-runner'],
+    tests_require=['pytest'],
     packages=['scenedetect',
               'scenedetect.detectors',
-              'scenedetect.cli'
-             ],
+              'scenedetect.cli'],
     package_data={'': ['../LICENSE*', '../USAGE.md', '../package-info.rst']},
     #include_package_data = True,   # Only works with this line commented.
     #test_suite="unitest.py",
@@ -65,6 +63,7 @@ setup(
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
@@ -75,3 +74,4 @@ setup(
         'Topic :: Utilities'
     ]
 )
+

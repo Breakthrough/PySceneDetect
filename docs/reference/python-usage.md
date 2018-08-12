@@ -2,14 +2,14 @@
 Using PySceneDetect in Python
 ----------------------------------------------------------
 
-PySceneDetect can also be used from within other Python programs, or even the Python REPL itself.  PySceneDetect allows you to perform scene detection on a video file, yielding a list of scene cuts/breaks at the exact frame number where the scene boundaries occur.  Note: currently PySceneDetect requires the passed video stream to terminate, but support for live video stream segmentation is planned for the following version.
+PySceneDetect can also be used from within other Python programs, or even the Python REPL itself.  PySceneDetect allows you to perform scene detection on a video file, yielding a list of scene cuts/breaks at the exact frame number where the scene boundaries occur.
 
 The general usage workflow is to determine which detection method and threshold to use (this can even be done iteratively), using these values to create a `SceneDetector` object, the type of which depends on the detection method you want to use (e.g. `ThresholdDetector`, `ContentDetector`).  A list of `SceneDetector` objects is then passed with an open `VideoCapture` object and an empty list to the `scenedetect.detect_scenes()` function, which appends the frame numbers of any detected scene boundaries to the list (the function itself returns the number of frames read from the video file).
 
 
 ### Example
 
-The following code sample (the `api_test.py` file) illustrates the general workflow and usage of the `scenedetect` module to perform scene detection programmatically.  It provides a good example as to the general usage of the PySceneDetect Python API for detecting the scenes on an input video and printing the scenes to the terminal/console.
+The following code sample ([the `api_test.py` file]((https://github.com/Breakthrough/PySceneDetect/blob/v0.5-beta-1/tests/api_test.py))) illustrates the general workflow and usage of the `scenedetect` module to perform scene detection programmatically.  It provides a good example as to the general usage of the PySceneDetect Python API for detecting the scenes on an input video and printing the scenes to the terminal/console.
 
 
 ```python

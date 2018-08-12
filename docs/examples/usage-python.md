@@ -1,7 +1,7 @@
 
 
 <div class="warning">
-<h3><span class="fa wy-text-warning"></span>&nbsp; Note that the Python API is undergoing major changes. This document still needs updating - for now, see the "api_test.py" file in the PySceneDetect Github project page.</h3>
+<h3><span class="fa wy-text-warning"></span>&nbsp; Note that the Python API is undergoing major changes. This document still needs updating - for now, see <a href="https://github.com/Breakthrough/PySceneDetect/blob/v0.5-beta-1/tests/api_test.py">the "api_test.py" file (link)</a> in the PySceneDetect Github project page.</h3>
 This documentation refers to the API as of PySceneDetect v0.3.x and before (corresponding to the older version on pip).  You can also see the Github releases page to download a specific version of PySceneDetect.  The next major release (v0.5) will include a stable API with a much more intuitive workflow for Python users while retaining full command-line usability as a front-end program.
 </div>
 

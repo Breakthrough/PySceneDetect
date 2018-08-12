@@ -57,6 +57,7 @@ class ContentDetector(SceneDetector):
         self._metric_keys = ['content_val', 'delta_hue', 'delta_sat', 'delta_lum']
         self.cli_name = 'detect-content'
 
+
     def process_frame(self, frame_num, frame_img):
         # type: (int, numpy.ndarray) -> bool, Optional[int]
         # Similar to ThresholdDetector, but using the HSV colour space DIFFERENCE instead
@@ -68,9 +69,9 @@ class ContentDetector(SceneDetector):
         if self.last_frame is not None:
             # Change in average of HSV (hsv), (h)ue only, (s)aturation only, (l)uminance only.
             delta_hsv_avg, delta_h, delta_s, delta_v = 0.0, 0.0, 0.0, 0.0
-            
+
             if (self.stats_manager is not None and
-                self.stats_manager.metrics_exist(frame_num, metric_keys)):
+                    self.stats_manager.metrics_exist(frame_num, metric_keys)):
                 delta_hsv_avg, delta_h, delta_s, delta_v = self.stats_manager.get_metrics(
                     frame_num, metric_keys)
 
@@ -86,30 +87,33 @@ class ContentDetector(SceneDetector):
                     num_pixels = curr_hsv[i].shape[0] * curr_hsv[i].shape[1]
                     curr_hsv[i] = curr_hsv[i].astype(numpy.int32)
                     last_hsv[i] = last_hsv[i].astype(numpy.int32)
-                    delta_hsv[i] = numpy.sum(numpy.abs(curr_hsv[i] - last_hsv[i])) / float(num_pixels)
+                    delta_hsv[i] = numpy.sum(
+                        numpy.abs(curr_hsv[i] - last_hsv[i])) / float(num_pixels)
                 delta_hsv[3] = sum(delta_hsv[0:3]) / 3.0
                 delta_h, delta_s, delta_v, delta_hsv_avg = delta_hsv
 
                 if self.stats_manager is not None:
                     self.stats_manager.set_metrics(frame_num, {
-                        metric_keys[0]: delta_hsv_avg, metric_keys[1]: delta_h,
-                        metric_keys[2]: delta_s, metric_keys[3]: delta_v})
+                        metric_keys[0]: delta_hsv_avg,
+                        metric_keys[1]: delta_h,
+                        metric_keys[2]: delta_s,
+                        metric_keys[3]: delta_v})
 
                 self.last_hsv = curr_hsv
 
             if delta_hsv_avg >= self.threshold:
                 if self.last_scene_cut is None or (
-                    (frame_num - self.last_scene_cut) >= self.min_scene_len):
+                        (frame_num - self.last_scene_cut) >= self.min_scene_len):
                     cut_list.append(frame_num)
                     self.last_scene_cut = frame_num
 
             if self.last_frame is not None and self.last_frame is not _unused:
                 del self.last_frame
-                
+
         # If we have the next frame computed, don't copy the current frame
         # into last_frame since we won't use it on the next call anyways.
         if (self.stats_manager is not None and
-            self.stats_manager.metrics_exist(frame_num+1, metric_keys)):
+                self.stats_manager.metrics_exist(frame_num+1, metric_keys)):
             self.last_frame = _unused
         else:
             self.last_frame = frame_img.copy()

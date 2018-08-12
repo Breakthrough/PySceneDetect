@@ -20,7 +20,7 @@ from scenedetect.detectors import ContentDetector
 
 STATS_FILE_PATH = 'api_test_statsfile.csv'
 
-def main():
+def test_api():
 
     print("Running PySceneDetect API test...")
 
@@ -80,5 +80,5 @@ def main():
         video_manager.release()
 
 if __name__ == "__main__":
-    main()
+    test_api()
 
