@@ -15,7 +15,7 @@ scenedetect [global options] [commands + command options]
 For example, to perform content-aware detection on a video, listing all scenes in the console, a text file, *and* saving each detected scene as image files:
 
 ```rst
-scenedetect --input my_video.mp4 --stats my_video.stats.mp4 detect-content list-scenes -o my_video.scene_list.csv save-images -o output_image_dir 
+scenedetect --input my_video.mp4 --stats my_video.stats.csv detect-content list-scenes save-images -o output_image_dir 
 ```
 
 Note that there is no particular order to each command, the only requirement is that all global program options appear before the first command, and all options for a given command immediately follow it.
