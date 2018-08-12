@@ -1,15 +1,8 @@
 
-Currently, this page contains the output of running PySceneDetect with the `help all` command:
-
-```md
-----------------------------------------------------
- PySceneDetect v0.5-beta-1 Help
-----------------------------------------------------
-
 The PySceneDetect command-line interface is grouped into commands which
 can be combined together, each containing its own set of arguments:
 
- > scenedetect.py ([options]) [command] ([options]) ([...other command(s)...])
+    scenedetect.py ([options]) [command] ([options]) ([...other command(s)...])
 
 Where [command] is the name of the command, and ([options]) are the
 arguments/options associated with the command, if any. Options
@@ -20,7 +13,7 @@ commands is not strict, but each command should only be specified once.
 Commands can also be combined, for example, running the 'detect-content'
 and 'list-scenes' (specifying options for the latter):
 
- > scenedetect.py input -i vid0001.mp4 detect-content list-scenes -n
+    scenedetect.py input -i vid0001.mp4 detect-content list-scenes -n
 
 A list of all commands is printed below. Help for a particular command
 can be printed by specifying 'help [command]', or 'help all' to print
@@ -29,9 +22,8 @@ the help information for every command.
 Lastly, there are several commands used for displaying application
 version and copyright information (e.g. scenedetect.py about):
 
-    version: Displays the version of PySceneDetect being used.
-    about:   Displays PySceneDetect license and copyright information.
-```
+ - `version`: Displays the version of PySceneDetect being used.
+ - `about`:   Displays PySceneDetect license and copyright information.
 
 ## Global Options
 
