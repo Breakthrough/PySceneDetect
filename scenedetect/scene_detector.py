@@ -54,13 +54,16 @@ class SceneDetector(object):
         """ Is Processing Required: Test if all calculations for a given frame are already done.
 
         Returns:
-            (bool) True if the SceneDetector's stats_manager property is set to a valid
-            StatsManager object, which contains all of the required frame metrics/calculations
-            for the given frame (and thus, does not require decoding it). Returns False
-            otherwise (i.e. the frame_img passed to process_frame is required).
+            (bool) False if the SceneDetector has assigned _metric_keys, and the
+            stats_manager property is set to a valid StatsManager object containing
+            the required frame metrics/calculations for the given frame - thus, not
+            needing the frame to perform scene detection. Returns True otherwise
+            (i.e. the frame_img passed to process_frame is required to be passed
+            to process_frame for the given frame_num).
         """
-        return not (self.stats_manager is not None and
-                    self.stats_manager.metrics_exist(frame_num, self._metric_keys))
+        return not self._metric_keys or not (
+            self.stats_manager is not None and
+            self.stats_manager.metrics_exist(frame_num, self._metric_keys))
 
 
     def get_metrics(self):
