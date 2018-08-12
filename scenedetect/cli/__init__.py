@@ -561,8 +561,7 @@ def list_scenes_command(ctx, output, filename, no_output_file, quiet):
     ' are very short in length, or the input video is heavily compressed. This can'
     ' lead to smaller scenes being merged with others, or scene boundaries being'
     ' shifted in time - thus when using this option, the number of videos written'
-    ' may not match the number of scenes that was detected. If this option is set,'
-    ' the --ffmpeg-args / --high-quality options will be ignored.')
+    ' may not match the number of scenes that was detected.')
 @click.option(
     '--rate-factor', '-crf', metavar='RATE', default=None,
     type=click.IntRange(0, 100), help=

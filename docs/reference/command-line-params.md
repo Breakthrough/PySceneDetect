@@ -299,8 +299,7 @@ Options:
                             or scene boundaries being shifted in time - thus
                             when using this option, the number of videos
                             written may not match the number of scenes that
-                            was detected. If this option is set, the --ffmpeg-
-                            args / --high-quality options will be ignored.
+                            was detected.
   -crf, --rate-factor RATE  Video encoding quality (x264 constant rate
                             factor), from 0-100, where lower values represent
                             better quality, with 0 indicating lossless.
