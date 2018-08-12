@@ -1,8 +1,12 @@
 
+## PySceneDetect CLI Reference
+
 The PySceneDetect command-line interface is grouped into commands which
 can be combined together, each containing its own set of arguments:
 
-    scenedetect.py ([options]) [command] ([options]) ([...other command(s)...])
+```md
+scenedetect.py ([options]) [command] ([options]) ([...other command(s)...])
+```
 
 Where [command] is the name of the command, and ([options]) are the
 arguments/options associated with the command, if any. Options
@@ -13,8 +17,9 @@ commands is not strict, but each command should only be specified once.
 Commands can also be combined, for example, running the 'detect-content'
 and 'list-scenes' (specifying options for the latter):
 
-    scenedetect.py input -i vid0001.mp4 detect-content list-scenes -n
-
+```md
+scenedetect.py -i vid0001.mp4 detect-content list-scenes -n
+```
 A list of all commands is printed below. Help for a particular command
 can be printed by specifying 'help [command]', or 'help all' to print
 the help information for every command.
@@ -24,6 +29,7 @@ version and copyright information (e.g. scenedetect.py about):
 
  - `version`: Displays the version of PySceneDetect being used.
  - `about`:   Displays PySceneDetect license and copyright information.
+
 
 ## Global Options
 
@@ -86,6 +92,7 @@ Options:
 
 ```
 
+
 ## Command List
 
 ```md
@@ -100,6 +107,7 @@ Commands:
   time              Set start/end/duration of input video(s).
   version           Print version of PySceneDetect.
 ```
+
 
 ## `time` Command
 
@@ -138,6 +146,7 @@ Options:
   -h, --help               Show this message and exit.
 ```
 
+
 ## `detect-content` Command
 
 ```md
@@ -160,6 +169,7 @@ Options:
                               frames.  [default: 15]
   -h, --help                  Show this message and exit.
 ```
+
 
 ## `detect-threshold` Command
 
@@ -197,6 +207,7 @@ Options:
   -h, --help                  Show this message and exit.
 ```
 
+
 ## `list-scenes` Command
 
 ```md
@@ -218,6 +229,7 @@ Options:
   -q, --quiet           Suppresses output of the table printed by the list-
                         scenes command.
 ```
+
 
 ## `save-images` Command
 
@@ -250,6 +262,7 @@ Options:
                        This setting does not affect image quality, only file
                        size. [default: 3]
 ```
+
 
 ## `split-video` Command
 

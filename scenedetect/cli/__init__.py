@@ -76,7 +76,7 @@ commands is not strict, but each command should only be specified once.
 Commands can also be combined, for example, running the 'detect-content'
 and 'list-scenes' (specifying options for the latter):
 
- > {command_name} input -i vid0001.mp4 detect-content list-scenes -n
+ > {command_name} -i vid0001.mp4 detect-content list-scenes -n
 
 A list of all commands is printed below. Help for a particular command
 can be printed by specifying 'help [command]', or 'help all' to print
