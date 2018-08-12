@@ -26,7 +26,7 @@ scenedetect -i my_video.mp4 -s my_video.stats.csv detect-content -t 30
 
 The optimal threshold can be determined by generating a statsfile (`-s`) as shown above, opening it with a spreadsheet editor (e.g. Excel), and examining the `content_val` column.  This value should be very small between similar frames, and grow large when a big change in content is noticed (look at the values near frame numbers/times where you know a scene change occurs).  The threshold value should be set so that most scenes fall below the threshold value, and scenes where changes occur should *exceed* the threshold value (thus triggering a scene change).
 
-Automatically splitting video based on detected scenes (will save starting from `my_video-Scene-001.mp4`, call `help split-video` for details on changing the output filename format):
+To automatically split the video based on the detected scenes (will save starting from `my_video-Scene-001.mp4`, call `help split-video` for details on changing the output filename format), we add the `split-video` command at the end:
 
 ```rst
 scenedetect -i my_video.mp4 -s my_video.stats.csv detect-content -t 30 split-video

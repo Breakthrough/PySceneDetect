@@ -1,11 +1,4 @@
 
-
-<div class="warning">
-<h3><span class="fa wy-text-warning"></span>&nbsp; Note that the Python API is undergoing major changes.</h3>
-This documentation refers to the API as of PySceneDetect v0.3.x and before (corresponding to the older version on pip).  You can also see the Github releases page to download a specific version of PySceneDetect.  The next major release (v0.5) will include a stable API with a much more intuitive workflow for Python users while retaining full command-line usability as a front-end program.
-</div>
-
-
 Using PySceneDetect in Python
 ----------------------------------------------------------
 
@@ -16,29 +9,85 @@ The general usage workflow is to determine which detection method and threshold 
 
 ### Example
 
-The following code sample illustrates the general workflow and usage of the `scenedetect` module to perform scene detection programmatically:
+The following code sample (the `api_test.py` file) illustrates the general workflow and usage of the `scenedetect` module to perform scene detection programmatically.  It provides a good example as to the general usage of the PySceneDetect Python API for detecting the scenes on an input video and printing the scenes to the terminal/console.
+
 
 ```python
+from __future__ import print_function
+import os
+
 import scenedetect
+from scenedetect.video_manager import VideoManager
+from scenedetect.scene_manager import SceneManager
+from scenedetect.frame_timecode import FrameTimecode
+from scenedetect.stats_manager import StatsManager
+from scenedetect.detectors import ContentDetector
 
-scene_list = []        # Scenes will be added to this list in detect_scenes().
-path = 'my_video.mp4'  # Path to video file.
+STATS_FILE_PATH = 'api_test_statsfile.csv'
 
-# Usually use one detector, but multiple can be used.
-detector_list = [
-    scenedetect.detectors.ThresholdDetector(threshold = 16, min_percent = 0.9)
-]
+def main():
 
-video_framerate, frames_read = scenedetect.detect_scenes_file(
-    path, scene_list, detector_list)
+    print("Running PySceneDetect API test...")
 
-# scene_list now contains the frame numbers of scene boundaries.
-print scene_list
+    print("PySceneDetect version being used: %s" % str(scenedetect.__version__))
 
-# create new list with scene boundaries in milliseconds instead of frame #.
-scene_list_msec = [(1000.0 * x) / float(video_fps) for x in scene_list]
+    # Create a video_manager point to video file testvideo.mp4. Note that multiple
+    # videos can be appended by simply specifying more file paths in the list
+    # passed to the VideoManager constructor. Note that appending multiple videos
+    # requires that they all have the same frame size, and optionally, framerate.
+    video_manager = VideoManager(['testvideo.mp4'])
+    stats_manager = StatsManager()
+    scene_manager = SceneManager(stats_manager)
+    # Add ContentDetector algorithm (constructor takes detector options like threshold).
+    scene_manager.add_detector(ContentDetector())
+    base_timecode = video_manager.get_base_timecode()
 
-# create new list with scene boundaries in timecode strings ("HH:MM:SS.nnn").
-scene_list_tc = [scenedetect.timecodes.get_string(x) for x in scene_list_msec]
+    try:
+        # If stats file exists, load it.
+        if os.path.exists(STATS_FILE_PATH):
+            # Read stats from CSV file opened in read mode:
+            with open(STATS_FILE_PATH, 'r') as stats_file:
+                stats_manager.load_from_csv(stats_file, base_timecode)
+
+        start_time = base_timecode + 20     # 00:00:00.667
+        end_time = base_timecode + 20.0     # 00:00:20.000
+        # Set video_manager duration to read frames from 00:00:00 to 00:00:20.
+        video_manager.set_duration(start_time=start_time, end_time=end_time)
+
+        # Set downscale factor to improve processing speed.
+        video_manager.set_downscale_factor()
+
+        # Start video_manager.
+        video_manager.start()
+
+        # Perform scene detection on video_manager.
+        scene_manager.detect_scenes(frame_source=video_manager,
+                                    start_time=start_time)
+
+        # Obtain list of detected scenes.
+        scene_list = scene_manager.get_scene_list(base_timecode)
+        # Like FrameTimecodes, each scene in the scene_list can be sorted if the
+        # list of scenes becomes unsorted.
+
+        print('List of scenes obtained:')
+        for i, scene in enumerate(scene_list):
+            print('    Scene %2d: Start %s / Frame %d, End %s / Frame %d' % (
+                i+1,
+                scene[0].get_timecode(), scene[0].get_frames(),
+                scene[1].get_timecode(), scene[1].get_frames(),))
+
+        # We only write to the stats file if a save is required:
+        if stats_manager.is_save_required():
+            with open(STATS_FILE_PATH, 'w') as stats_file:
+                stats_manager.save_to_csv(stats_file, base_timecode)
+
+    finally:
+        video_manager.release()
+
+if __name__ == "__main__":
+    main()
 ```
+
+
+The scene list returned by the `SceneManager.get_scene_list(...)` method consists of the start and (one past) the end frame of each scene, in the form of a `FrameTimecode` object.  Each `FrameTimecode` can be converted to the appropriate working/output format via the `get_timecode()`, `get_frames()`, or `get_sceonds()` methods as shown above; see the API documentation for `FrameTimecode` objects for details.
 

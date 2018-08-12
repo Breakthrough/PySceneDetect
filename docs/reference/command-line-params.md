@@ -1,83 +1,300 @@
 
-Currently, this page contains the output of running PySceneDetect with the `--help` flag.  In the future, it will contain expanded definitions and inline examples for those options in the output below.
+Currently, this page contains the output of running PySceneDetect with the `help all` command:
 
 ```md
-usage: scenedetect.py [-h] [-v] -i VIDEO_FILE [-o SCENE_LIST] [-t intensity]
-                      [-m num_frames] [-p percent] [-b rows] [-s STATS_FILE]
-                      [-d detection_method] [-l] [-q] [-st time] [-dt time]
-                      [-et time] [-df factor] [-fs num_frames] [-si]
+----------------------------------------------------
+ PySceneDetect v0.5-beta-1 Help
+----------------------------------------------------
 
-arguments:
-  -h, --help            show this help message and exit
-  -v, --version         show version number and license/copyright information
-  -i VIDEO_FILE, --input VIDEO_FILE
-                        [REQUIRED] Path to input video. (default: None)
-  -o SCENE_LIST, --output VIDEO_FILE
-                        If specified, splits input video using mkvmerge, using
-                        this filename for the first scene (must end in .mkv).
-                        Each scene will be written to a new file in sequence,
-                        starting with VIDEO_FILE-001.mkv (default: None)
-  -co SCENE_LIST, --csv_output SCENE_LIST
-                        File to store detected scenes in using the specified
-                        timecodeformat as comma-separated values (.csv). File
-                        will be overwritten if already exists. (default: None)
-  -d detection_method, --detector detection_method
-                        Type of scene detection method/algorithm to use;
-                        detectors available: [threshold, content]. (default:
-                        threshold)
-  -t intensity, --threshold intensity
-                        8-bit intensity value, from 0-255, to use as the black
-                        level in threshold detection mode, or as the change
-                        tolerance threshold in content-aware detection mode.
-                        (default: 12)
-  -m num_frames, --min-scene-length num_frames
-                        Minimum length, in frames, before another scene cut
-                        can be generated. (default: 15)
-  -p percent, --min-percent percent
-                        Amount of pixels in a frame, from 0-100%, that must
-                        fall under [intensity]. Only applies to threshold
-                        detection. (default: 95)
-  -b rows, --block-size rows
-                        Number of rows in frame to check at once, can be tuned
-                        for performance. Only applies to threshold detection.
-                        (default: 32)
-  -s STATS_FILE, --statsfile STATS_FILE
-                        File to store video statistics data, comma-separated
-                        value format (.csv). Will be overwritten if exists.
-                        (default: None)
-  -l, --list-scenes     Output the final scene list in human-readable format
-                        as a table, in addition to CSV. (default: False)
-  -q, --quiet           Suppress all output except for final comma-separated
-                        list of scene cuts. Useful for computing or piping
-                        output directly into other programs/scripts. (default:
-                        False)
-  -st time, --start-time time
-                        Time to seek to in video before performing detection.
-                        Can be given in number of frames (12345), seconds
-                        (number followed by s, e.g. 123s or 123.45s), or
-                        timecode (HH:MM:SS[.nnn]). (default: None)
-  -dt time, --duration time
-                        Time to limit scene detection to (see -st for time
-                        format). Overrides -et. (default: None)
-  -et time, --end-time time
-                        Time to stop scene detection at (see -st for time
-                        format). (default: None)
-  -df factor, --downscale-factor factor
-                        Factor to downscale (shrink) image before processing,
-                        to improve performance. For example, if input video
-                        resolution is 1024 x 400, and factor = 2, each frame
-                        is reduced to 1024/2 x 400/2 = 512 x 200 before
-                        processing. (default: 1)
-  -fs num_frames, --frame-skip num_frames
-                        Number of frames to skip after processing a given
-                        frame. Improves performance at expense of frame
-                        accuracy, and may increase probability of inaccurate
-                        scene cut prediction. If required, values above 1 or 2
-                        are not recommended. (default: 0)
-  -si, --save-images    If set, the first and last frames in each detected
-                        scene will be saved to disk. Images will saved in the
-                        current working directory, using the same filename as
-                        the input but with the scene and frame numbers
-                        appended. (default: False)
+The PySceneDetect command-line interface is grouped into commands which
+can be combined together, each containing its own set of arguments:
+
+ > scenedetect.py ([options]) [command] ([options]) ([...other command(s)...])
+
+Where [command] is the name of the command, and ([options]) are the
+arguments/options associated with the command, if any. Options
+associated with the scenedetect.py command below (e.g. --input,
+--framerate) must be specified before any commands. The order of
+commands is not strict, but each command should only be specified once.
+
+Commands can also be combined, for example, running the 'detect-content'
+and 'list-scenes' (specifying options for the latter):
+
+ > scenedetect.py input -i vid0001.mp4 detect-content list-scenes -n
+
+A list of all commands is printed below. Help for a particular command
+can be printed by specifying 'help [command]', or 'help all' to print
+the help information for every command.
+
+Lastly, there are several commands used for displaying application
+version and copyright information (e.g. scenedetect.py about):
+
+    version: Displays the version of PySceneDetect being used.
+    about:   Displays PySceneDetect license and copyright information.
+
+PySceneDetect Option/Command List:
+----------------------------------------------------
+
+Usage: scenedetect.py [OPTIONS] COMMAND1 [ARGS]... [COMMAND2 [ARGS]...]...
+
+  For example:
+
+  scenedetect -i video.mp4 -s video.stats.csv detect-content list-scenes
+
+  Note that the following options represent [OPTIONS] above. To list the
+  optional [ARGS] for a particular COMMAND, type `scenedetect help COMMAND`.
+  You can also combine commands (e.g. scenedetect [...] detect-content save-
+  images --png split-video).
+
+Options:
+  -i, --input VIDEO      [Required] Input video file. May be specified
+                         multiple times to concatenate several videos
+                         together.
+  -o, --output DIR       Output directory for all files (stats file, output
+                         videos, images, log files, etc...).
+  -f, --framerate FPS    Force framerate, in frames/sec (e.g. -f 29.97).
+                         Disables check to ensure that all input videos have
+                         the same framerates.
+  -d, --downscale N      Integer factor to downscale frames by (e.g. 2, 3,
+                         4...), where the frame is scaled to width/N x
+                         height/N (thus -d 1 implies no downscaling). Each
+                         increment speeds up processing by a factor of 4 (e.g.
+                         -d 2 is 4 times quicker than -d 1). Higher values can
+                         be used for high definition content with minimal
+                         effect on accuracy. [default: 2 for SD, 4 for 720p, 6
+                         for 1080p, 12 for 4k]
+  -fs, --frame-skip N    Skips N frames during processing (-fs 1 skips every
+                         other frame, processing 50% of the video, -fs 2
+                         processes 33% of the frames, -fs 3 processes 25%,
+                         etc...). Reduces processing speed at expense of
+                         accuracy.  [default: 0]
+  -s, --stats CSV        Path to stats file (.csv) for writing frame metrics
+                         to. If the file exists, any metrics will be
+                         processed, otherwise a new file will be created. Can
+                         be used to determine optimal values for various scene
+                         detector options, and to cache frame calculations in
+                         order to speed up multiple detection runs.
+  -v, --verbosity LEVEL  Level of debug/info/error information to show.
+                         Setting to none will suppress all output except that
+                         generated by actions (e.g. timecode list output).
+  -l, --logfile LOG      Path to log file for writing application logging
+                         information, mainly for debugging. Make sure to set
+                         "-il debug" as well if you are submitting a bug
+                         report.
+  -q, --quiet            Suppresses all output of PySceneDetect except for
+                         those from the specified commands. Equivalent to
+                         setting "--info-level none", and overrides the
+                         current info-level, even if --info-level/-il is
+                         specified.
+  -h, --help             Show this message and exit.
+
+Commands:
+  about             Print license/copyright info.
+  detect-content    Perform content detection algorithm on input...
+  detect-threshold  Perform threshold detection algorithm on...
+  help              Print help for command (help [command]).
+  list-scenes       Prints scene list and outputs to a CSV file.
+  save-images       Create images for each detected scene.
+  split-video       Split input video(s) using ffmpeg or...
+  time              Set start/end/duration of input video(s).
+  version           Print version of PySceneDetect.
+
+PySceneDetect help Command
+----------------------------------------------------
+Usage: scenedetect.py help [OPTIONS] [COMMAND_NAME]
+
+  Print help for command (help [command]).
+
+PySceneDetect about Command
+----------------------------------------------------
+Usage: scenedetect.py about [OPTIONS]
+
+  Print license/copyright info.
+
+PySceneDetect version Command
+----------------------------------------------------
+Usage: scenedetect.py version [OPTIONS]
+
+  Print version of PySceneDetect.
+
+PySceneDetect time Command
+----------------------------------------------------
+Usage: scenedetect.py time [OPTIONS]
+
+  Set start/end/duration of input video(s).
+
+  Time values can be specified as frames (NNNN), seconds (NNNN.NNs), or as a
+  timecode (HH:MM:SS.nnn). For example, to start scene detection at 1
+  minute, and stop after 100 seconds:
+
+  time --start 00:01:00 --duration 100s
+
+  Note that --end and --duration are mutually exclusive (i.e. only one of
+  the two can be set). Lastly, the following is an example using absolute
+  frame numbers to process frames 0 through 1000:
+
+  time --start 0 --end 1000
+
+Options:
+  -s, --start TIMECODE     Time in video to begin detecting scenes. TIMECODE
+                           can be specified as exact number of frames (-s 100
+                           to start at frame 100), time in seconds followed by
+                           s (-s 100s to start at 100 seconds), or a timecode
+                           in the format HH:MM:SS or HH:MM:SS.nnn (-s 00:01:40
+                           to start at 1m40s).  [default: 0]
+  -d, --duration TIMECODE  Maximum time in video to process. TIMECODE format
+                           is the same as other arguments. Mutually exclusive
+                           with --end / -e.
+  -e, --end TIMECODE       Time in video to end detecting scenes. TIMECODE
+                           format is the same as other arguments. Mutually
+                           exclusive with --duration / -d.
+  -h, --help               Show this message and exit.
+
+PySceneDetect detect-content Command
+----------------------------------------------------
+Usage: scenedetect.py detect-content [OPTIONS]
+
+  Perform content detection algorithm on input video(s).
+
+  detect-content
+
+  detect-content --threshold 27.5
+
+Options:
+  -t, --threshold VAL         Threshold value (float) that the delta_hsv frame
+                              metric must exceed to trigger a new scene.
+                              Refers to frame metric delta_hsv_avg in stats
+                              file.  [default: 30.0]
+  -m, --min-scene-len FRAMES  Minimum size/length of any scene, in number of
+                              frames.  [default: 15]
+  -h, --help                  Show this message and exit.
+
+PySceneDetect detect-threshold Command
+----------------------------------------------------
+Usage: scenedetect.py detect-threshold [OPTIONS]
+
+  Perform threshold detection algorithm on input video(s).
+
+  detect-threshold
+
+  detect-threshold --threshold 15
+
+Options:
+  -t, --threshold VAL         Threshold value (integer) that the delta_rgb
+                              frame metric must exceed to trigger a new scene.
+                              Refers to frame metric delta_rgb in stats file.
+                              [default: 12]
+  -m, --min-scene-len FRAMES  Minimum size/length of any scene, in number of
+                              frames.  [default: 15]
+  -f, --fade-bias PERCENT     Percent (%) from -100 to 100 of timecode skew
+                              for where cuts should be placed. -100 indicates
+                              the start frame, +100 indicates the end frame,
+                              and 0 is the middle of both.  [default: 0]
+  -l, --add-last-scene        If set, if the video ends on a fade-out, an
+                              additional scene will be generated for the last
+                              fade out position.
+  -p, --min-percent PERCENT   Percent (%) from 0 to 100 of amount of pixels
+                              that must meet the threshold value in orderto
+                              trigger a scene change.  [default: 95]
+  -b, --block-size N          Number of rows in image to sum per iteration
+                              (can be tuned for performance in some cases).
+                              [default: 8]
+  -h, --help                  Show this message and exit.
+
+PySceneDetect list-scenes Command
+----------------------------------------------------
+Usage: scenedetect.py list-scenes [OPTIONS]
+
+  Prints scene list and outputs to a CSV file. The default filename is
+  $VIDEO_NAME-Scenes.csv.
+
+Options:
+  -o, --output DIR      Output directory to save videos to. Overrides global
+                        option -o/--output if set.
+  -f, --filename NAME   Filename format to use for the scene list CSV file.
+                        You can use the $VIDEO_NAME macro in the file name.
+                        [default: $VIDEO_NAME-Scenes.csv]
+  -n, --no-output-file  Disable writing scene list CSV file to disk.  If set,
+                        -o/--output and -f/--filename are ignored.
+  -q, --quiet           Suppresses output of the table printed by the list-
+                        scenes command.
+
+PySceneDetect save-images Command
+----------------------------------------------------
+Usage: scenedetect.py save-images [OPTIONS]
+
+  Create images for each detected scene.
+
+Options:
+  -o, --output DIR     Output directory to save images to. Overrides global
+                       option -o/--output if set.
+  -f, --filename NAME  Filename format, *without* extension, to use when
+                       saving image files. You can use the $VIDEO_NAME,
+                       $SCENE_NUMBER, and $IMAGE_NUMBER macros in the file
+                       name.  [default: $VIDEO_NAME-
+                       Scene-$SCENE_NUMBER-$IMAGE_NUMBER]
+  -n, --num-images N   Number of images to generate. Will always include
+                       start/end frame, unless N = 1, in which case the image
+                       will be the frame at the mid-point in the scene.
+  -j, --jpeg           Set output format to JPEG. [default]
+  -w, --webp           Set output format to WebP.
+  -q, --quality Q      JPEG/WebP encoding quality, from 0-100 (higher
+                       indicates better quality). For WebP, 100 indicates
+                       lossless. [default: JPEG: 95, WebP: 100]
+  -p, --png            Set output format to PNG.
+  -c, --compression C  PNG compression rate, from 0-9. Higher values produce
+                       smaller files but result in longer compression time.
+                       This setting does not affect image quality, only file
+                       size. [default: 3]
+
+PySceneDetect split-video Command
+----------------------------------------------------
+Usage: scenedetect.py split-video [OPTIONS]
+
+  Split input video(s) using ffmpeg or mkvmerge.
+
+Options:
+  -o, --output DIR          Output directory to save videos to. Overrides
+                            global option -o/--output if set.
+  -f, --filename NAME       File name format, to use when saving image files.
+                            You can use the $VIDEO_NAME and $SCENE_NUMBER
+                            macros in the file name.  [default: $VIDEO_NAME-
+                            Scene-$SCENE_NUMBER]
+  -h, --high-quality        Encode video with higher quality, overrides -f
+                            option if present. Equivalent to specifying
+                            --rate-factor 17 and --preset slow.
+  -a, --override-args ARGS  Override codec arguments/options passed to FFmpeg
+                            when splitting and re-encoding scenes. Use double
+                            quotes (") around specified arguments. Must
+                            specify at least audio/video codec to use (e.g. -a
+                            "-c:v [...] and -c:a [...]"). [default: "-c:v
+                            libx264 -preset veryfast -crf 22 -c:a copy"]
+  -q, --quiet               Suppresses output from external video splitting
+                            tool.
+  -c, --copy                Copy instead of re-encode using mkvmerge instead
+                            of ffmpeg for splitting videos. All other
+                            arguments except -o/--output and -q/--quiet are
+                            ignored in this mode, and output files will be
+                            named $VIDEO_NAME-$SCENE_NUMBER.mkv. Significantly
+                            faster when splitting videos, however, output
+                            videos sometimes may not be split exactly,
+                            especially if the scenes are very short in length,
+                            or the input video is heavily compressed. This can
+                            lead to smaller scenes being merged with others,
+                            or scene boundaries being shifted in time - thus
+                            when using this option, the number of videos
+                            written may not match the number of scenes that
+                            was detected. If this option is set, the --ffmpeg-
+                            args / --high-quality options will be ignored.
+  -crf, --rate-factor RATE  Video encoding quality (x264 constant rate
+                            factor), from 0-100, where lower values represent
+                            better quality, with 0 indicating lossless.
+                            [default: 22, if -h/--high-quality is set: 17]
+  -p, --preset LEVEL        Video compression quality preset (x264 preset).
+                            Can be one of: ultrafast, superfast, veryfast,
+                            faster, fast, medium, slow, slower, and veryslow.
+                            Faster modes take less time to run, but the output
+                            files may be larger. [default: veryfast, if
+                            -h/--high quality is set: slow]
 ```
 

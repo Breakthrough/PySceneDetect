@@ -1,9 +1,11 @@
 
-Creating a new scene detection method should be intuitive if you are familiar with Python and OpenCV already.  A `SceneDetector` is an object implementing the following class & methods:
+Creating a new scene detection method should be intuitive if you are familiar with Python and OpenCV already.  A `SceneDetector` is an object implementing the following class & methods (only prototypes are shown as an example):
 
 ```python
-class SceneDetector(object):
-    """Base SceneDetector class to implement a scene detection algorithm."""
+from scenedetect.scene_detector import SceneDetector
+
+class CustomDetector(SceneDetector):
+    """CustomDetector class to implement a scene detection algorithm."""
     def __init__(self):
         pass
 
@@ -17,6 +19,8 @@ class SceneDetector(object):
     def post_process(self, scene_list):
         pass
 ```
+
+See the actual `scenedetect/scene_detector.py` source file for specific details.  Alternatively, you can call `help(SceneDetector)` from a Python REPL.  For examples of actual detection algorithm implementations, see the source files in the `scenedetect/detectors/` directory (e.g. `threshold_detector.py`, `content_detector.py`).
 
 Processing is done by calling the `process_frame(...)` function for all frames in the video, followed by `post_process(...)` (optional) after the final frame.  Scene cuts are detected and added to the passed list object in both cases.
 

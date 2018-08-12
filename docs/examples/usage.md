@@ -44,18 +44,18 @@ Next, the same, but also split the input video into individual clips (starting f
 scenedetect --input my_video.mp4 detect-content list-scenes split-video
 ```
 
-The `split-video` command requires either `ffmpeg` or `mkvmerge` to be available (if both are, `ffmpeg` is used by default).  PySceneDetect will copy the input video stream at the given scene cuts, which is fairly quick.  However, in some cases, this does not produce accurate output videos, as some video formats only allow splitting on keyframes.  This is especially apparent when some of the scenes are very short in length.
-
-To overcome this, you can also supply the `-p` / `--precise` option to the `split-video` command, which re-encodes the output videos when splitting the video into scenes (this requires `ffmpeg` to be available):
-
-```rst
-scenedetect --input my_video.mp4 detect-content list-scenes split-video
-```
-
-This ensures that each video starts and ends *exactly* at the timecodes PySceneDetect finds.  You can also override the codec arguments manually:
+The `split-video` command requires either `ffmpeg` or `mkvmerge` to be available, depending on the options used.  By default `ffmpeg` is used unless the `-c`/`--copy` argument is specified. This ensures that each video starts and ends *exactly* at the timecodes PySceneDetect finds.  You can also override the codec arguments manually:
 
 ```rst
 scenedetect --input my_video.mp4 detect-content list-scenes split-video --ffmpeg-args "-c:v libx264 -c:a aac"
+```
+
+You can also supply the `-h` / `--high-quality` option to the `split-video` command, which re-encodes the output videos with better quality when splitting the video into scenes.  Optionally, you can also specify the x264 `-p`/`--preset` and `-crf`/`--rate-factor` (call `scenedetect help split-video` for details).
+
+PySceneDetect can also copy the input video stream at the given scene cuts instead of re-encoding if you supply the `-c` / `--copy` option, which uses `mkvmerge` and is fairly quick.  However, in some cases, this does not produce accurate output videos, as some video formats only allow splitting on keyframes.  This is especially apparent when some of the scenes are very short in length.
+
+```rst
+scenedetect --input my_video.mp4 detect-content list-scenes split-video --copy
 ```
 
 In order to effectively use PySceneDetect, you should become familiar with the basic command line options described below - especially the scene detection method/algorithm (`detect-content` and `detect-threshold`) and the threshold/sensitivity value for each (both commands have an optional `-t` / `--threshold` value that can be set).  These are described in the following section with respect to each detection method.

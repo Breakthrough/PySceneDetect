@@ -4,7 +4,7 @@ PySceneDetect Changelog
 
 ## 0.5 (In Development)
 
- * under development currently, release planned for late 2017, can be tested via latest Github commit (warning, may be unstable)
+ * under development currently, release planned for August 2018, v0.5-beta-1 available now
  * major release, includes stable Python API with examples and updated documentation
  * [enhance] image filename numbers are now consistent with those of split video scenes (PR #39, thanks [@e271828-](https://github.com/Breakthrough/PySceneDetect/pull/39))
  * [enhance] 5-10% improvement in processing performance due to reduced memory copy operations (PR #40, thanks [@elcombato](https://github.com/Breakthrough/PySceneDetect/pull/40))
