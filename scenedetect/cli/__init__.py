@@ -40,7 +40,6 @@ Some of this parsing functionality is shared between the scenedetect.cli
 module and the scenedetect.cli.CliContext object.
 """
 
-
 # Standard Library Imports
 from __future__ import print_function
 import sys
@@ -60,9 +59,6 @@ from scenedetect.video_splitter import is_mkvmerge_available
 from scenedetect.video_splitter import is_ffmpeg_available
 
 
-
-
-
 def get_help_command_preface(command_name='scenedetect'):
     """ Preface/intro help message shown at the beginning of the help command. """
     return """
@@ -77,10 +73,10 @@ associated with the {command_name} command below (e.g. --input,
 --framerate) must be specified before any commands. The order of
 commands is not strict, but each command should only be specified once.
 
-Commands can also be combined, for example, running the 'detect-threshold'
-and 'detect-content' (specifying options for the latter):
+Commands can also be combined, for example, running the 'detect-content'
+and 'list-scenes' (specifying options for the latter):
 
- > {command_name} input -i vid0001.mp4 detect-threshold detect-content --threshold 20
+ > {command_name} input -i vid0001.mp4 detect-content list-scenes -n
 
 A list of all commands is printed below. Help for a particular command
 can be printed by specifying 'help [command]', or 'help all' to print
@@ -100,15 +96,16 @@ COMMAND_DICT = []
 
 
 def add_cli_command(cli, command):
-    # type: (Callable[[...] -> None], Callable[]
+    # type: (Callable[[...] -> None], Callable[]) -> None
     """Adds the CLI command to the cli object as well as to the COMMAND_DICT."""
     cli.add_command(command)
     COMMAND_DICT.append(command)
 
+
 def parse_timecode(cli_ctx, value):
     # type: (CliContext, str) -> Union[FrameTimecode, None]
     """ Parses a user input string expected to be a timecode, given a CLI context.
-    
+
     Returns:
         (FrameTimecode) Timecode set to value with the CliContext VideoManager framerate.
             If value is None, skips processing and returns None.
@@ -129,6 +126,8 @@ def parse_timecode(cli_ctx, value):
 
 
 def print_command_help(ctx, command):
+    # type: (click.Context, Callable[]) -> None
+    """ Print Command Help: Prints PySceneDetect help/usage for a given command. """
     ctx_name = ctx.info_name
     ctx.info_name = command.name
     click.echo(click.style('PySceneDetect %s Command' % command.name, fg='cyan'))
@@ -139,12 +138,16 @@ def print_command_help(ctx, command):
 
 
 def print_command_list_header():
+    # type: () -> None
+    """ Print Command List Header: Prints header shown before the option/command list. """
     click.echo(click.style('PySceneDetect Option/Command List:', fg='green'))
     click.echo(click.style('----------------------------------------------------', fg='green'))
     click.echo('')
 
 
 def print_help_header():
+    # type: () -> None
+    """ Print Help Header: Prints header shown before the help command. """
     click.echo(click.style('----------------------------------------------------', fg='yellow'))
     click.echo(click.style(' PySceneDetect %s Help' % scenedetect.__version__, fg='yellow'))
     click.echo(click.style('----------------------------------------------------', fg='yellow'))
@@ -153,7 +156,7 @@ def print_help_header():
 def duplicate_command(ctx, param_hint):
     # type: (str) -> None
     """ Duplicate Command: Called when a command is duplicated to stop parsing and raise an error.
-    
+
     Called when a one-time use command is specified multiple times, displaying the appropriate
     error and usage information.
 
@@ -164,10 +167,12 @@ def duplicate_command(ctx, param_hint):
     error_strs = []
     error_strs.append('Error: Command %s specified multiple times.' % param_hint)
     error_strs.append('The %s command may appear only one time.')
-        
+
     logging.error('\n'.join(error_strs))
     raise click.BadParameter('\n  Command %s may only be specified once.' % param_hint,
                              param_hint='%s command' % param_hint)
+
+
 
 @click.group(
     chain=True, context_settings=CLICK_CONTEXT_SETTINGS)
@@ -227,6 +232,16 @@ def duplicate_command(ctx, param_hint):
 @click.pass_context
 def scenedetect_cli(ctx, input, output, framerate, downscale, frame_skip, stats,
                     verbosity, logfile, quiet):
+    """ For example:
+
+    scenedetect -i video.mp4 -s video.stats.csv detect-content list-scenes
+
+    Note that the following options represent [OPTIONS] above. To list the optional
+    [ARGS] for a particular COMMAND, type `scenedetect help COMMAND`. You can also
+    combine commands (e.g. scenedetect [...] detect-content save-images --png split-video).
+
+
+    """
     ctx.call_on_close(ctx.obj.process_input)
 
     logging.disable(logging.NOTSET)
@@ -263,7 +278,9 @@ def scenedetect_cli(ctx, input, output, framerate, downscale, frame_skip, stats,
             'Unable to detect scenes with stats file if frame skip is not 1.',
             '  Either remove the -fs/--frame-skip option, or the -s/--stats file.\n']
         logging.error('\n'.join(error_strs))
-        raise click.BadParameter('\n  Combining the -s/--stats and -fs/--frame-skip options is not supported.', param_hint='frame skip + stats file')
+        raise click.BadParameter(
+            '\n  Combining the -s/--stats and -fs/--frame-skip options is not supported.',
+            param_hint='frame skip + stats file')
     try:
         if ctx.obj.output_directory is not None:
             logging.info('Output directory set:\n  %s', ctx.obj.output_directory)
@@ -273,6 +290,7 @@ def scenedetect_cli(ctx, input, output, framerate, downscale, frame_skip, stats,
     except:
         logging.error('Could not parse CLI options.')
         raise
+
 
 
 @click.command('help', add_help_option=False)
@@ -300,7 +318,7 @@ def help_command(ctx, command_name):
             if command is None:
                 error_strs = [
                     'unknown command.', 'List of valid commands:',
-                    '  %s' % ', '.join([command.name for command in COMMAND_DICT]) ]
+                    '  %s' % ', '.join([command.name for command in COMMAND_DICT])]
                 raise click.BadParameter('\n'.join(error_strs), param_hint='command name')
             click.echo('')
             print_command_help(ctx, command)
@@ -309,9 +327,12 @@ def help_command(ctx, command_name):
         click.echo(get_help_command_preface(ctx.parent.info_name))
         print_command_list_header()
         click.echo(ctx.parent.get_help())
-        click.echo("\nType '%s help [command]' for usage/help of [command], or" % ctx.parent.info_name)
-        click.echo("'%s help all' to list usage information for every command." % (ctx.parent.info_name))
+        click.echo(
+            "\nType '%s help [command]' for usage/help of [command], or" % ctx.parent.info_name)
+        click.echo(
+            "'%s help all' to list usage information for every command." % (ctx.parent.info_name))
     ctx.exit()
+
 
 
 @click.command('about', add_help_option=False)
@@ -326,6 +347,7 @@ def about_command(ctx):
     ctx.exit()
 
 
+
 @click.command('version', add_help_option=False)
 @click.pass_context
 def version_command(ctx):
@@ -333,6 +355,7 @@ def version_command(ctx):
     ctx.obj.process_input_flag = False
     click.echo(click.style('PySceneDetect %s' % scenedetect.__version__, fg='yellow'))
     ctx.exit()
+
 
 
 @click.command('time')
@@ -356,7 +379,7 @@ def version_command(ctx):
 @click.pass_context
 def time_command(ctx, start, duration, end):
     """ Set start/end/duration of input video(s).
-    
+
     Time values can be specified as frames (NNNN), seconds (NNNN.NNs), or as
     a timecode (HH:MM:SS.nnn). For example, to start scene detection at 1 minute,
     and stop after 100 seconds:
@@ -374,6 +397,7 @@ def time_command(ctx, start, duration, end):
     end = parse_timecode(ctx.obj, end)
 
     ctx.obj.time_command(start, duration, end)
+
 
 
 @click.command('detect-content')
@@ -413,6 +437,8 @@ def detect_content_command(ctx, threshold, min_scene_len): #, intensity_cutoff):
     ctx.obj.add_detector(scenedetect.detectors.ContentDetector(
         threshold=threshold, min_scene_len=min_scene_len))
 
+
+
 @click.command('detect-threshold')
 @click.option(
     '--threshold', '-t', metavar='VAL',
@@ -446,7 +472,7 @@ def detect_content_command(ctx, threshold, min_scene_len): #, intensity_cutoff):
 def detect_threshold_command(ctx, threshold, min_scene_len, fade_bias, add_last_scene,
                              min_percent, block_size):
     """  Perform threshold detection algorithm on input video(s).
-    
+
     detect-threshold
 
     detect-threshold --threshold 15
@@ -467,7 +493,6 @@ def detect_threshold_command(ctx, threshold, min_scene_len, fade_bias, add_last_
     ctx.obj.add_detector(scenedetect.detectors.ThresholdDetector(
         threshold=threshold, min_scene_len=min_scene_len, fade_bias=fade_bias,
         add_final_scene=add_last_scene, min_percent=min_percent, block_size=block_size))
-
 
 @click.command('list-scenes', add_help_option=False)
 @click.option(
@@ -496,7 +521,6 @@ def list_scenes_command(ctx, output, filename, no_output_file, quiet):
         duplicate_command(ctx, 'list-scenes')
     ctx.obj.list_scenes_command(output, filename, no_output_file, quiet)
     ctx.obj.list_scenes = True
-
 
 
 
@@ -599,9 +623,11 @@ def split_video_command(ctx, output, filename, high_quality, override_args, quie
         error_strs = [
             "{EXTERN_TOOL} is required for split-video{EXTRA_ARGS}.".format(
                 EXTERN_TOOL=split_tool, EXTRA_ARGS=' -c/--copy' if copy else ''),
-            "Install the above tool%s to enable video splitting support." % ('s' if split_tool.find('/') > 0 else '')]
+            "Install the above tool%s to enable video splitting support." % (
+                's' if split_tool.find('/') > 0 else '')]
         if mkvmerge_available:
-            error_strs += ['You can also specify `split-video -c/--copy` to use mkvmerge for splitting.']
+            error_strs += [
+                'You can also specify `split-video -c/--copy` to use mkvmerge for splitting.']
         error_str = '\n'.join(error_strs)
         logging.debug(error_str)
         ctx.obj.options_processed = False
@@ -657,7 +683,6 @@ def save_images_command(ctx, output, filename, num_images, jpeg, webp, quality, 
 
 
 
-# Generate pallette image of average N colours in video.
 @click.command('colors', add_help_option=False)
 @click.option(
     '--colors', '-c', metavar='N',
@@ -669,8 +694,11 @@ def save_images_command(ctx, output, filename, num_images, jpeg, webp, quality, 
     'Flag which, if set, saves an image with the colors in a grid as for use as a pallette.')
 @click.pass_context
 def colors_command(ctx):
-    raise NotImplementedError()
+    """ Colors Command: Generates pallette/image of average N colours in video, and each scene.
 
+    Not implemented yet, needs to be added to backlog.
+    """
+    raise NotImplementedError()
 
 
 
@@ -687,3 +715,4 @@ add_cli_command(scenedetect_cli, list_scenes_command)
 
 add_cli_command(scenedetect_cli, save_images_command)
 add_cli_command(scenedetect_cli, split_video_command)
+

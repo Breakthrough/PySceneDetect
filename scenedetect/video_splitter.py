@@ -31,14 +31,20 @@ external tools (e.g. mkvmerge, ffmpeg).
 
 """
 
+# Standard Library Imports
 import logging
 import subprocess
 import math
 import time
 from string import Template
 
+# Third-Party Library Imports
 from scenedetect.platform import tqdm
 
+
+##
+## Command Availability Checking Functions
+##
 
 def is_mkvmerge_available():
     # type: () -> bool
@@ -74,6 +80,9 @@ def is_ffmpeg_available():
     return True
 
 
+##
+## Split Video Functions
+##
 
 def split_video_mkvmerge(input_video_paths, scene_list, output_file_prefix,
                          video_name, suppress_output=False):
@@ -136,7 +145,10 @@ def split_video_ffmpeg(input_video_paths, scene_list, output_file_template, vide
         # TODO: Add support for splitting multiple/appended input videos.
         # https://trac.ffmpeg.org/wiki/Concatenate#samecodec
         # Requires generating a temporary file list for ffmpeg.
-        logging.error('Splitting multiple input videos with ffmpeg is not supported yet.')
+        logging.error(
+            'Sorry, splitting multiple appended/concatenated input videos with'
+            ' ffmpeg is not supported yet. This feature will be added to a future'
+            ' version of PySceneDetect.')
         raise NotImplementedError()
 
     arg_override = arg_override.replace('\\"', '"')
@@ -149,7 +161,7 @@ def split_video_ffmpeg(input_video_paths, scene_list, output_file_template, vide
 
     try:
         progress_bar = None
-        total_frames = 1 + scene_list[-1][1].get_frames() - scene_list[0][0].get_frames()
+        total_frames = scene_list[-1][1].get_frames() - scene_list[0][0].get_frames()
         if tqdm and not hide_progress:
             progress_bar = tqdm(total=total_frames, unit='frame', miniters=1)
         processing_start_time = time.time()

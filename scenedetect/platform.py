@@ -29,14 +29,21 @@
 This file contains all platform/library/OS-specific compatibility fixes,
 intended to improve the systems that are able to run PySceneDetect, and allow
 for maintaining backwards compatibility with existing libraries going forwards.
+Other helper functions related to the detection of the appropriate dependency
+DLLs on Windows and getting uniform line-terminating csv reader/writer objects
+are also included in this module.
 
-Specifically, this module adds compatibility wrappers for Python's Queue/queue
-(Python 2/3, respectively) as scenedetect.platform.queue, and for OpenCV 2.x,
-copies the OpenCV VideoCapture property constants from the cv2.cv namespace
-directly to the cv2 namespace.  This ensures that the cv2 API is consistent
-with those changes made to it in OpenCV 3.0 and above.  This module also
-includes an alias for the unicode/string types in Python 2/3 as STRING_TYPE
-intended to help with parsing string types from the CLI parser.
+With respect to the Python standard library itself and Python 2 versus 3,
+this module adds compatibility wrappers for Python's Queue/queue (Python 2/3,
+respectively) as scenedetect.platform.queue.
+
+For OpenCV 2.x, the scenedetect.platform module also makes a copy of the
+OpenCV VideoCapture property constants from the cv2.cv namespace directly
+to the cv2 namespace.  This ensures that the cv2 API is consistent
+with those changes made to it in OpenCV 3.0 and above.
+
+This module also includes an alias for the unicode/string types in Python 2/3
+as STRING_TYPE intended to help with parsing string types from the CLI parser.
 """
 
 # Standard Library Imports
@@ -50,23 +57,35 @@ import csv
 # Third-Party Library Imports
 import cv2
 
-
 # pylint: disable=unused-import
 
-# Python 2/3 Queue/queue library (scenedetect.platform.queue)
+
+##
+## Python 2/3 Queue/queue Library (scenedetect.platform.queue)
+##
+
 if sys.version_info[0] == 2:
     import Queue as queue
 else:
     import queue
 
-# tqdm Library (scenedetect.platform.tqdm will be module or None)
+
+##
+## tqdm Library (scenedetect.platform.tqdm will be tqdm object or None)
+##
+
 try:
     from tqdm import tqdm
 except ImportError:
     tqdm = None
 
+
 # pylint: enable=unused-import
 
+
+##
+## click/Command-Line Interface String Type
+##
 
 # String type (used to allow FrameTimecode object to take both unicode and native
 # string objects when being constructed via scenedetect.platform.STRING_TYPE).
@@ -77,6 +96,10 @@ else:
     STRING_TYPE = str
 # pylint: enable=invalid-name, undefined-variable
 
+
+##
+## OpenCV 2.x Compatibility Fix
+##
 
 # Compatibility fix for OpenCV v2.x (copies CAP_PROP_* properties from the
 # cv2.cv namespace to the cv2 namespace, as the cv2.cv namespace was removed
@@ -92,12 +115,22 @@ if cv2.__version__[0] == '2' or not (
     cv2.CAP_PROP_FRAME_COUNT = cv2.cv.CV_CAP_PROP_FRAME_COUNT
 # pylint: enable=c-extension-no-member
 
+
+##
+## OpenCV DLL Check Function (Windows Only)
+##
+
 def check_opencv_ffmpeg_dll():
     # type: () -> bool
-    """ Check OpenCV FFmpeg DLL: Checks if OpenCV video support is available on Windows.
+    """ Check OpenCV FFmpeg DLL: Checks if OpenCV video I/O support is available,
+    on Windows only, by checking for the appropriate opencv_ffmpeg*.dll file.
 
-    Always returns True on non-Windows platforms, or for OpenCV versions that do
-    not follow the X.Y.Z version numbering pattern.
+    On non-Windows systems always returns True, or for OpenCV versions that do
+    not follow the X.Y.Z version numbering pattern. Thus there may be false
+    positives (True) with this function, but not false negatives (False).
+    In those cases, PySceneDetect will report that it could not open the
+    video file, and for Windows users, also gives an additional warning message
+    that the error may be due to the missing DLL file.
 
     Returns:
         (bool) True if OpenCV video support is detected (e.g. the appropriate
@@ -114,9 +147,12 @@ def check_opencv_ffmpeg_dll():
     return True
 
 
+##
+## OpenCV imwrite Supported Image Types & Quality/Compression Parameters
+##
 
 def _get_cv2_param(param_name):
-    # type: (str) -> Union[?, None]
+    # type: (str) -> Union[int, None]
     if param_name.startswith('CV_'):
         param_name = param_name[3:]
     try:
@@ -124,15 +160,29 @@ def _get_cv2_param(param_name):
     except AttributeError:
         return None
 
+
 def get_cv2_imwrite_params():
     # type: () -> Dict[str, Union[int, None]]
+    """ Get OpenCV imwrite Params: Returns a dict of supported image formats and
+    their associated quality/compression parameter.
+
+    Returns:
+        (Dict[str, int]) Dictionary of image formats/extensions ('jpg',
+            'png', etc...) mapped to the respective OpenCV quality or
+            compression parameter (e.g. 'jpg' -> cv2.IMWRITE_JPEG_QUALITY,
+            'png' -> cv2.IMWRITE_PNG_COMPRESSION)..
+    """
     return {
         'jpg': _get_cv2_param('IMWRITE_JPEG_QUALITY'),
         'png': _get_cv2_param('IMWRITE_PNG_COMPRESSION'),
         'webp': _get_cv2_param('IMWRITE_WEBP_QUALITY')
     }
 
-# Functonality for obtaining csv reader/writer handles with uniform line terminations.
+
+##
+## Python csv Module Wrapper (for StatsManager, and CliContext/list-scenes command)
+##
+
 def get_csv_reader(file_handle):
     # type: (File) -> csv.reader
     """ Returns a csv.reader object using the passed file handle. """

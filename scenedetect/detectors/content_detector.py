@@ -47,7 +47,7 @@ class ContentDetector(SceneDetector):
     content scenes still using HSV information, use the DissolveDetector.
     """
 
-    def __init__(self, threshold = 30.0, min_scene_len = 15):
+    def __init__(self, threshold=30.0, min_scene_len=15):
         super(ContentDetector, self).__init__()
         self.threshold = threshold
         self.min_scene_len = min_scene_len  # minimum length of any given scene, in frames
@@ -59,11 +59,6 @@ class ContentDetector(SceneDetector):
 
     def process_frame(self, frame_num, frame_img):
         # type: (int, numpy.ndarray) -> bool, Optional[int]
-        """
-
-        Returns:
-        
-        """
         # Similar to ThresholdDetector, but using the HSV colour space DIFFERENCE instead
         # of single-frame RGB/grayscale intensity (thus cannot detect slow fades with this method).
         cut_list = []

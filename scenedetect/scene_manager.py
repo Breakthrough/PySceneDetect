@@ -34,12 +34,11 @@ The SceneManager also facilitates passing a StatsManager, if any is defined,
 to the associated SceneDetectors for caching of frame metrics.
 """
 
-
 # Standard Library Imports
 from __future__ import print_function
 import math
 
-# Third-Library Imports
+# Third-Party Library Imports
 import cv2
 from scenedetect.platform import tqdm
 
@@ -79,8 +78,6 @@ def write_scene_list(output_csv_file, scene_list, cut_list=None):
             '%d' % duration.get_frames(), duration.get_timecode(), '%.3f' % duration.get_seconds()])
 
 
-
-
 class SceneManager(object):
     """ The SceneManager facilitates detection of scenes via the detect_scenes() method,
     given a video source (scenedetect.VideoManager or cv2.VideoCapture), and SceneDetector
@@ -100,10 +97,15 @@ class SceneManager(object):
         self._num_frames = 0
         self._start_frame = 0
 
+
     def add_detector(self, detector):
         # type: (SceneDetector) -> None
         """ Adds/registers a SceneDetector (e.g. ContentDetector, ThresholdDetector) to
-        run when detect_scenes is called.
+        run when detect_scenes is called. The SceneManager owns the detector object,
+        so a temporary may be passed.
+
+        Arguments:
+            detector (SceneDetector): Scene detector to add to the SceneManager.
         """
         detector.stats_manager = self._stats_manager
         self._detector_list.append(detector)
@@ -120,6 +122,7 @@ class SceneManager(object):
         # type: () -> int
         """ Gets number of registered scene detectors added via add_detector. """
         return len(self._detector_list)
+
 
     def clear(self):
         # type: () -> None
@@ -141,17 +144,6 @@ class SceneManager(object):
         # type: () -> None
         """ Removes all scene detectors added to the SceneManager via add_detector(). """
         self._detector_list.clear()
-
-
-    def _add_cut(self, frame_num):
-        # type: (int) -> None
-        # Adds a cut to the cutting list.
-        self._cutting_list.append(frame_num)
-
-    def _add_cuts(self, cut_list):
-        # type: (List[int]) -> None
-        # Adds a list of cuts to the cutting list.
-        self._cutting_list += cut_list
 
 
     def get_scene_list(self, base_timecode):
@@ -183,6 +175,7 @@ class SceneManager(object):
 
         return scene_list
 
+
     def get_cut_list(self, base_timecode):
         # type: (FrameTimecode) -> List[FrameTimecode]
         """ Returns a list of FrameTimecodes of the detected scene changes/cuts.
@@ -210,11 +203,24 @@ class SceneManager(object):
         return sorted(list(set(self._cutting_list)))
 
 
+    def _add_cut(self, frame_num):
+        # type: (int) -> None
+        # Adds a cut to the cutting list.
+        self._cutting_list.append(frame_num)
+
+
+    def _add_cuts(self, cut_list):
+        # type: (List[int]) -> None
+        # Adds a list of cuts to the cutting list.
+        self._cutting_list += cut_list
+
+
     def _process_frame(self, frame_num, frame_im):
         # type(int, numpy.ndarray) -> None
         """ Adds any cuts detected with the current frame to the cutting list. """
         for detector in self._detector_list:
             self._add_cuts(detector.process_frame(frame_num, frame_im))
+
 
     def _is_processing_required(self, frame_num):
         # type(int) -> bool
@@ -222,6 +228,7 @@ class SceneManager(object):
         False otherwise.
         """
         return all([detector.is_processing_required(frame_num) for detector in self._detector_list])
+
 
     def _post_process(self, frame_num):
         # type(int, numpy.ndarray) -> None

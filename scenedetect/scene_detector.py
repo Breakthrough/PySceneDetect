@@ -33,14 +33,21 @@ The SceneDetector class represents the interface which detection algorithms
 are expected to provide in order to be compatible with PySceneDetect.
 """
 
-# pylint: disable=unused-argument
+# pylint: disable=unused-argument, no-self-use
+
 
 class SceneDetector(object):
-    """Base class to inheret from when implementing a scene detection algorithm."""
+    """ Base class to inheret from when implementing a scene detection algorithm.
+
+    Also see the implemented scene detectors in the scenedetect.detectors module
+    to get an idea of how a particular detector can be created.
+    """
+
     def __init__(self):
         self.stats_manager = None
         self._metric_keys = []
         self.cli_name = 'detect-none'
+
 
     def is_processing_required(self, frame_num):
         # type: (int) -> bool
@@ -53,7 +60,8 @@ class SceneDetector(object):
             otherwise (i.e. the frame_img passed to process_frame is required).
         """
         return not (self.stats_manager is not None and
-                self.stats_manager.metrics_exist(frame_num, self._metric_keys))
+                    self.stats_manager.metrics_exist(frame_num, self._metric_keys))
+
 
     def get_metrics(self):
         # type: () -> List[str]
@@ -65,6 +73,7 @@ class SceneDetector(object):
         """
         return self._metric_keys
 
+
     def process_frame(self, frame_num, frame_img):
         # type: (int, numpy.ndarray) -> Tuple[bool, Union[None, List[int]]
         """ Process Frame: Computes/stores metrics and detects any scene changes.
@@ -75,6 +84,7 @@ class SceneDetector(object):
             List of frame numbers of cuts to be added to the cutting list.
         """
         return []
+
 
     def post_process(self, frame_num):
         # type: (int) -> List[int]

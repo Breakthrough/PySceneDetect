@@ -26,10 +26,14 @@
 
 """ PySceneDetect scenedetect Module
 
-This file contains the PySceneDetect version string (displayed when calling
+This is the main PySceneDetect module, containing imports of all classes
+so they can be directly accessed from the scenedetect module in addition
+to being directly imported (e.g. `from scenedetect import FrameTimecode`
+is the same as `from scenedetect.frame_timecode import FrameTimecode`).
+
+This file also contains the PySceneDetect version string (displayed when calling
 'scenedetect version'), the about string for license/copyright information
-(when calling 'scenedetect about'), and imports of the most frequently used
-classes so they can be accessed directly from the scenedetect module.
+(when calling 'scenedetect about').
 """
 
 # Standard Library Imports

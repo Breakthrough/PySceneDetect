@@ -37,14 +37,14 @@ or string HH:MM:SS[.nnn]. timecode format.
 
 # Standard project pylint disables for unit tests using pytest.
 # pylint: disable=no-self-use, protected-access, multiple-statements, invalid-name
-# pylint: disable=redefined-outer-name
+# pylint: disable=redefined-outer-name, pointless-statement, expression-not-assigned
+# pylint: disable=unneeded-not
 
 
 # Third-Party Library Imports
 import pytest
 
 # Standard Library Imports
-import scenedetect
 from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.frame_timecode import MINIMUM_FRAMES_PER_SECOND_FLOAT
 
@@ -54,7 +54,8 @@ def test_framerate():
     # Not passing fps results in TypeError.
     with pytest.raises(TypeError): FrameTimecode()
     with pytest.raises(TypeError): FrameTimecode(timecode=0, fps=None)
-    with pytest.raises(TypeError): FrameTimecode(timecode=None, fps=FrameTimecode(timecode=0, fps=None))
+    with pytest.raises(TypeError):
+        FrameTimecode(timecode=None, fps=FrameTimecode(timecode=0, fps=None))
     # Test zero FPS/negative.
     with pytest.raises(ValueError): FrameTimecode(timecode=0, fps=0)
     with pytest.raises(ValueError): FrameTimecode(timecode=0, fps=-1)

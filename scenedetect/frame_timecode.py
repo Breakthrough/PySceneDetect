@@ -62,6 +62,7 @@ import math
 # PySceneDetect Library Imports
 from scenedetect.platform import STRING_TYPE
 
+
 MINIMUM_FRAMES_PER_SECOND_FLOAT = 1.0 / 1000.0
 MINIMUM_FRAMES_PER_SECOND_DELTA_FLOAT = 1.0 / 100000
 
@@ -216,6 +217,7 @@ class FrameTimecode(object):
         if precision > 0:
             if use_rounding:
                 secs = round(secs, precision)
+                #secs = math.ceil(secs * (10**precision)) / float(10**precision)
             msec = format(secs, '.%df' % precision)[-precision:]
             secs = '%02d.%s' % (int(secs), msec)
         else:

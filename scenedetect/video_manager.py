@@ -54,6 +54,10 @@ import scenedetect.frame_timecode
 from scenedetect.frame_timecode import FrameTimecode
 
 
+##
+## VideoManager Exceptions
+##
+
 class VideoOpenFailure(Exception):
     """ VideoOpenFailure: Raised when an OpenCV VideoCapture object fails to open (i.e. calling
     the isOpened() method returns a non True value). """
@@ -99,16 +103,22 @@ class VideoDecodingInProgress(RuntimeError):
     must be called *before* start() has been called. """
     pass
 
+
 class VideoDecoderNotStarted(RuntimeError):
     """ VideoDecodingInProgress: Raised when attempting to call certain VideoManager methods that
     must be called *after* start() has been called. """
     pass
 
-class InvalidDownscaleFactor(ValueError):
-    """ InvalidDownscaleFactor: Raised when trying to set invalid downscale factor. """
-    def __init__(self, message="Downscale factor must be a positive integer greater than zero."):
-        super(InvalidDownscaleFactor, self).__init__(message)
 
+class InvalidDownscaleFactor(ValueError):
+    """ InvalidDownscaleFactor: Raised when trying to set invalid downscale factor,
+    i.e. the supplied downscale factor was not a positive integer greater than zero. """
+    pass
+
+
+##
+## VideoManager Constants & Helper Functions
+##
 
 # The default downscale factor for a video of size W x H enforces the constraint
 # that W >= 200 to ensure an adequate amount of pixels for scene detection.
@@ -306,11 +316,14 @@ def validate_capture_parameters(video_names, cap_frame_sizes, check_framerate=Fa
         raise VideoParameterMismatch(bad_params)
 
 
+##
+## VideoManager Class Implementation
+##
+
 class VideoManager(object):
-    """ Object for providing a cv2.VideoCapture-like interface to a set of one or more
-    video files, or a single device ID.  Similar to VideoManagerAsync, but runs in the
-    same thread that it is created in.  Supports seeking and setting end time/duration.
-    """
+    """ Provides a cv2.VideoCapture-like interface to a set of one or more video files,
+    or a single device ID. Supports seeking and setting end time/duration. """
+
     def __init__(self, video_files, framerate=None, logger=None):
         # type: (List[str], Optional[float])
         """ VideoManager Constructor Method (__init__)
@@ -347,6 +360,7 @@ class VideoManager(object):
         self._started = False
         self._downscale_factor = 1
         self._frame_length = get_num_frames(self._cap_list)
+
 
     def set_downscale_factor(self, downscale_factor=None):
         # type: (Optional[int]) -> None
@@ -446,6 +460,7 @@ class VideoManager(object):
                 and height represent the size of the video frame in pixels.
         """
         return self._cap_framesize
+
 
     def get_framesize_effective(self):
         # type: () -> Tuple[int, int]
@@ -724,3 +739,4 @@ class VideoManager(object):
             self._curr_cap_idx += 1
             self._curr_cap = self._cap_list[self._curr_cap_idx]
             return True
+
