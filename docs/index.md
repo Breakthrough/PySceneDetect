@@ -11,7 +11,7 @@
 <h3><span class="fa wy-text-warning"></span>&nbsp; Note that the Python API is undergoing major changes.</h3>
 This documentation refers to the API as of PySceneDetect v0.5-beta-1, which is working towards the next major release (v0.5).  The documentation is nearing completion, and demonstrates the new, stable API of v0.5 with a much more intuitive workflow for Python users (while retaining full command-line usability as a front-end program).
 
-Users are encouraged to update to the beta if possible.  Users still using the latest stable release can find the existing [documentation for v0.4 here](https://pyscenedetect.readthedocs.io/en/v0.4/reference/python-api/).
+Users are encouraged to update to the beta if possible.  Users still using the latest stable release can find the <a href="https://pyscenedetect.readthedocs.io/en/v0.4/reference/python-api/">existing documentation for v0.4 here</a>.
 </div>
 
 
