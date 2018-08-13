@@ -1,28 +1,29 @@
 
-# Getting Started
+# Usage (Command Line)
 
-This page outlines the most commonly used command-line options for using PySceneDetect.
-
-
-## Usage (Command Line)
-
-Basic usage of PySceneDetect is:
+This page outlines the most commonly used command-line options for using PySceneDetect. Basic usage of PySceneDetect (`scenedetect`) is:
 
 ```rst
 scenedetect [global options] [commands + command options]
 ```
 
-For example, to perform content-aware detection on a video, listing all scenes in the console, a text file, *and* saving each detected scene as image files:
+## Quick Example
+
+For example, to perform content-aware scene detection (`detect-content`) on a video (`--input my_video.mp4`), listing all scenes in the console/to a CSV file (`list-scenes`), *and* saving each detected scene as image files (`save-images`):
 
 ```rst
 scenedetect --input my_video.mp4 --output my_video_scenes --stats my_video.stats.csv detect-content list-scenes save-images
 ```
 
-Note that there is no particular order to each command, the only requirement is that all global program options appear before the first command, and all options for a given command immediately follow it.  For example, in addition to saving images for each scene, we can also split the input video or tweak detection parameters (using the stats file from the previous call as well will speed up scene detection time significantly):
+Here we also specified the output directory (`--output my_video_scenes`) as well as to generate/use a stats file (`--stats my_video.stats.csv`), which can be used to determine/tweak the various detection algorithm options.
+
+Note that there is no particular order to each command, the only requirement is that all global program options appear before the first command, and all options for a given command immediately follow it.  For example, in addition to saving images for each scene, we can also split the input video (`split-video`) or tweak detection parameters (using the stats file from the previous call as well will speed up scene detection time significantly):
 
 ```rst
 scenedetect --input my_video.mp4 --output my_video_scenes --stats my_video.stats.csv detect-content list-scenes save-images split-video
 ```
+
+## Getting Started
 
 To show a summary of all global options/arguments, and a list of commands:
 
@@ -113,7 +114,7 @@ For most videos, the minimum percentage (`-p` / `--min-percent`) should always b
 
 As with `detect-content`, the optimal threshold can be determined by generating a statsfile (`-s`), opening it with a spreadsheet editor (e.g. Excel), and examining the `delta_rgb` column.  These values represent the average intensity of the pixels for that particular frame (taken by averaging the R, G, and B values over the whole frame).  The threshold value should be set so that the average intensity of most frames in content scenes lie above the threshold value, and scenes where scene changes/breaks occur should fall *under* the threshold value (thus triggering a scene change).
 
-## Actions/Commands
+## Actions / Commands
 
 After setting the detection method(s), there are several commands that can be used.  Type `scenedetect help [command]` for help/arguments of a specific command listed below, or see the [full CLI reference](../reference/command-line-params.md) for details.
 
@@ -126,7 +127,7 @@ After setting the detection method(s), there are several commands that can be us
  - `about`: Print PySceneDetect license agreement and application information. No processing is done if present.
 
 
-## Seeking, Duration, and Setting Start/Stop Times
+## Seeking, Duration, and Setting Start / Stop Times
 
 Specifying the `time` command allows control over what portion of the video PySceneDetect processes.  The `time` command accepts three options: start time (`-s` / `-start`), end time (`-e` / `-end`), and duration (`-d` / `--duration`).  Specifying both end time and duration is redundant, and in this case, duration overrides end time.  Timecodes can be given in three formats:  exact frame number (e.g. `12345`), number of seconds followed by `s` (e.g. `123s`, `123.45s`), or standard format (HH:MM:SS[.nnn], e.g. `12:34:56`, `12:34:56.789`).
 
