@@ -6,15 +6,14 @@
 <a href="download/" class="btn btn-success" style="margin-bottom:8px;" role="button"><span class="fa fa-download"></span>&nbsp; <b>Download</b></a> &nbsp;&nbsp;&nbsp;&nbsp; <a href="changelog/" class="btn btn-info" style="margin-bottom:8px;" role="button"><span class="fa fa-reorder"></span>&nbsp; <b>Changelog</b></a> &nbsp;&nbsp;&nbsp;&nbsp; <a href="download/#installation" class="btn btn-warning" style="margin-bottom:8px;" role="button"><span class="fa fa-gear"></span>&nbsp; <b>Installation</b></a> &nbsp;&nbsp;&nbsp;&nbsp; <a href="examples/usage/" class="btn btn-danger" style="margin-bottom:8px;" role="button"><span class="fa fa-book"></span>&nbsp; <b>Getting Started</b></a>
 </div>
 
-
 <div class="warning">
-<h3><span class="fa wy-text-warning"></span>&nbsp; Note that the Python API is undergoing major changes.</h3>
-This documentation refers to the API as of PySceneDetect v0.5-beta-1, which is working towards the next major release (v0.5).  The documentation is nearing completion, and demonstrates the new, stable API of v0.5 with a much more intuitive workflow for Python users (while retaining full command-line usability as a front-end program).
+<h3><span class="fa wy-text-warning"></span>&nbsp; That the Python CLI and API has changed.</h3>
+This documentation refers to PySceneDetect v0.5, which has a new-and-improved command line interface (CLI) and an improved/refactored Python API.
 
-Users are encouraged to update to the beta if possible.  Users still using the latest stable release can find the <a href="https://pyscenedetect.readthedocs.io/en/v0.4/">existing documentation for v0.4 here</a>.
+The beta version, PySceneDetect v0.5-beta-1 is now available as a source-only release.  Users are encouraged to update to v0.5-beta-1 as soon as possible. When it is released, upgrading from the beta to the stable release of v0.5 will be seamless.
+
+Users still using the latest stable release (v0.4) can find the <a href="https://pyscenedetect.readthedocs.io/en/v0.4/">existing documentation for v0.4 here</a>.
 </div>
-
-
 
 **PySceneDetect** is a command-line application and a Python library for **detecting scene changes in videos**, and **automatically splitting the video into separate clips**.  Not only is it free and open-source software (FOSS), but there are several detection methods available ([see Features](features.md)), from simple threshold-based fade in/out detection, to advanced content aware fast-cut detection.
 
