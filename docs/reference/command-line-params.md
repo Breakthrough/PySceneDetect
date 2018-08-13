@@ -5,12 +5,12 @@ The PySceneDetect command-line interface is grouped into commands which
 can be combined together, each containing its own set of arguments:
 
 ```md
-scenedetect.py ([options]) [command] ([options]) ([...other command(s)...])
+scenedetect ([options]) [command] ([options]) ([...other command(s)...])
 ```
 
 Where [command] is the name of the command, and ([options]) are the
 arguments/options associated with the command, if any. Options
-associated with the scenedetect.py command below (e.g. --input,
+associated with the scenedetect command below (e.g. --input,
 --framerate) must be specified before any commands. The order of
 commands is not strict, but each command should only be specified once.
 
@@ -18,14 +18,14 @@ Commands can also be combined, for example, running the 'detect-content'
 and 'list-scenes' (specifying options for the latter):
 
 ```md
-scenedetect.py -i vid0001.mp4 detect-content list-scenes -n
+scenedetect -i vid0001.mp4 detect-content list-scenes -n
 ```
 A list of all commands is printed below. Help for a particular command
 can be printed by specifying 'help [command]', or 'help all' to print
 the help information for every command.
 
 Lastly, there are several commands used for displaying application
-version and copyright information (e.g. scenedetect.py about):
+version and copyright information (e.g. scenedetect about):
 
  - `version`: Displays the version of PySceneDetect being used.
  - `about`:   Displays PySceneDetect license and copyright information.
@@ -37,7 +37,7 @@ version and copyright information (e.g. scenedetect.py about):
 PySceneDetect Option/Command List:
 ----------------------------------------------------
 
-Usage: scenedetect.py [OPTIONS] COMMAND1 [ARGS]... [COMMAND2 [ARGS]...]...
+Usage: scenedetect [OPTIONS] COMMAND1 [ARGS]... [COMMAND2 [ARGS]...]...
 
   For example:
 
@@ -114,7 +114,7 @@ Commands:
 ```md
 PySceneDetect time Command
 ----------------------------------------------------
-Usage: scenedetect.py time [OPTIONS]
+Usage: scenedetect time [OPTIONS]
 
   Set start/end/duration of input video(s).
 
@@ -152,7 +152,7 @@ Options:
 ```md
 PySceneDetect detect-content Command
 ----------------------------------------------------
-Usage: scenedetect.py detect-content [OPTIONS]
+Usage: scenedetect detect-content [OPTIONS]
 
   Perform content detection algorithm on input video(s).
 
@@ -176,7 +176,7 @@ Options:
 ```md
 PySceneDetect detect-threshold Command
 ----------------------------------------------------
-Usage: scenedetect.py detect-threshold [OPTIONS]
+Usage: scenedetect detect-threshold [OPTIONS]
 
   Perform threshold detection algorithm on input video(s).
 
@@ -213,7 +213,7 @@ Options:
 ```md
 PySceneDetect list-scenes Command
 ----------------------------------------------------
-Usage: scenedetect.py list-scenes [OPTIONS]
+Usage: scenedetect list-scenes [OPTIONS]
 
   Prints scene list and outputs to a CSV file. The default filename is
   $VIDEO_NAME-Scenes.csv.
@@ -236,7 +236,7 @@ Options:
 ```md
 PySceneDetect save-images Command
 ----------------------------------------------------
-Usage: scenedetect.py save-images [OPTIONS]
+Usage: scenedetect save-images [OPTIONS]
 
   Create images for each detected scene.
 
@@ -269,7 +269,7 @@ Options:
 ```md
 PySceneDetect split-video Command
 ----------------------------------------------------
-Usage: scenedetect.py split-video [OPTIONS]
+Usage: scenedetect split-video [OPTIONS]
 
   Split input video(s) using ffmpeg or mkvmerge.
 
