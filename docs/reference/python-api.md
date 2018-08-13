@@ -23,7 +23,7 @@ SceneDetector objects available in the `scenedetect.detectors` module:
 
  All functions are well documented with complete docstrs, and documentation can be found by calling help() from a Python REPL or browsing the complete PySceneDetect v0.5 API Reference below.  Also note that auto-generated documentation (via the `pydoc` command/module) can be generated.
  
- To get started with development and integration, also make sure to [see the `api_test.py` file](https://github.com/Breakthrough/PySceneDetect/blob/v0.5-beta-1/tests/api_test.py) for a complete example of performing scene detection using the PySceneDetect Python API.  Also as mentioned, use the built-in `help` command in the Python REPL on the various `scenedetect` module members to view the appropriate docstrs, view the API reference below, or generate a copy locally via `pydoc`.
+ To get started with development and integration, also make sure to [see the `api_test.py` file](https://github.com/Breakthrough/PySceneDetect/blob/master/tests/api_test.py) for a complete example of performing scene detection using the PySceneDetect Python API.  Also as mentioned, use the built-in `help` command in the Python REPL on the various `scenedetect` module members to view the appropriate docstrs, view the API reference below, or generate a copy locally via `pydoc`.
 
 Below are quick descriptions of the essential classes/objects that make up a part of the PySceneDetect API.
 

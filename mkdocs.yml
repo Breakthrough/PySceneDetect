@@ -22,6 +22,7 @@ pages:
     - 'Basic Usage': 'examples/usage.md'
     - 'Examples': 'examples/usage-example.md'
     - 'Python Interface': 'examples/usage-python.md'
+    - 'Video Splitting Support': 'examples/video-splitting.md'
 - 'Documentation & Reference:':
     - 'Command-Line Parameters': 'reference/command-line-params.md'
     - 'Scene Detection Method Details': 'reference/detection-methods.md'

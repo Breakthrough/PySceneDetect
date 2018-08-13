@@ -1,5 +1,5 @@
 
-Creating a new scene detection method should be intuitive if you are familiar with Python and OpenCV already.  A `SceneDetector` is an object implementing the following class & methods (only prototypes are shown as an example):
+Creating a new scene detection method is intuitive if you are familiar with Python and OpenCV already.  A `SceneDetector` is an object implementing the following class & methods (only prototypes are shown as an example):
 
 ```python
 from scenedetect.scene_detector import SceneDetector
@@ -32,3 +32,6 @@ Processing is done by calling the `process_frame(...)` function for all frames i
 - `scene_list`: List containing the frame numbers where all scene cuts/breaks occur in the video.
 
 `post_process(...)` is called ***after** the final frame has been processed, to allow for any stored scene cuts to be written *if required* (e.g. in the case of the `ThresholdDetector`).
+
+You may also want to look into the implementation of current detectors to understand how frame metrics are saved/loaded to/from a StatsManager for caching and allowing values to be written to a stats file for users to graph and find trends in to tweak detector options.  Also see the section on the `SceneManager` in the [Python API Reference](python-api.md) for details.
+

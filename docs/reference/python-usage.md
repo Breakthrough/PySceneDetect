@@ -9,7 +9,7 @@ The general usage workflow is to determine which detection method and threshold 
 
 ### Example
 
-The following code sample ([the `api_test.py` file]((https://github.com/Breakthrough/PySceneDetect/blob/v0.5-beta-1/tests/api_test.py))) illustrates the general workflow and usage of the `scenedetect` module to perform scene detection programmatically.  It provides a good example as to the general usage of the PySceneDetect Python API for detecting the scenes on an input video and printing the scenes to the terminal/console.
+The following short program/code sample ([the `api_test.py` file]((https://github.com/Breakthrough/PySceneDetect/blob/master/tests/api_test.py))) illustrates the general workflow and usage of the `scenedetect` module to perform scene detection programmatically.  It provides a good example as to the general usage of the PySceneDetect Python API for detecting the scenes on an input video and printing the scenes to the terminal/console.
 
 
 ```python
@@ -23,14 +23,9 @@ from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.stats_manager import StatsManager
 from scenedetect.detectors import ContentDetector
 
-STATS_FILE_PATH = 'api_test_statsfile.csv'
+STATS_FILE_PATH = 'testvideo.stats.csv'
 
 def main():
-
-    print("Running PySceneDetect API test...")
-
-    print("PySceneDetect version being used: %s" % str(scenedetect.__version__))
-
     # Create a video_manager point to video file testvideo.mp4. Note that multiple
     # videos can be appended by simply specifying more file paths in the list
     # passed to the VideoManager constructor. Note that appending multiple videos
