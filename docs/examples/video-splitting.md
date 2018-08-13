@@ -1,5 +1,5 @@
 
-### <span class="fa fa-keyboard-o"></span>&nbsp; Video Splitting Support Requirements
+## <span class="fa fa-keyboard-o"></span>&nbsp; Video Splitting Support Requirements
 
 PySceneDetect can use either `ffmpeg` or `mkvmerge` to split videos automatically.
 

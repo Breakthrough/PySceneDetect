@@ -109,7 +109,8 @@ Implementations that wish to view the scene list frame-by-frame, or event-driven
 
 The following is the complete Python API reference for PySceneDetect v0.5.
 
-<h1 id="scenedetect">scenedetect</h1>
+
+# `scenedetect` Module
 
 PySceneDetect scenedetect Module
 
@@ -122,7 +123,7 @@ This file also contains the PySceneDetect version string (displayed when calling
 'scenedetect version'), the about string for license/copyright information
 (when calling 'scenedetect about').
 
-<h1 id="scenedetect.scene_detector">scenedetect.scene_detector</h1>
+# `scenedetect.scene_detector` (`SceneDetector`)
 
 PySceneDetect scenedetect.scene_detector Module
 
@@ -190,7 +191,7 @@ Prototype method, no actual detection.
 Returns:
     List of frame numbers of cuts to be added to the cutting list.
 
-<h1 id="scenedetect.detectors">scenedetect.detectors</h1>
+# `scenedetect.detectors` Module
 
 PySceneDetect scenedetect.detectors Module
 
@@ -202,7 +203,8 @@ well as custom scenario-specific algorithms.
 Individual detectors are imported in this file for easy access from other
 modules (i.e. from scenedetect.detectors import ContentDetector).
 
-<h1 id="scenedetect.detectors.content_detector">scenedetect.detectors.content_detector</h1>
+
+# `scenedetect.detectors.content_detector` (`ContentDetector`)
 
 PySceneDetect scenedetect.detectors.content_detector Module
 
@@ -221,7 +223,8 @@ Since the difference between frames is used, unlike the ThresholdDetector,
 only fast cuts are detected with this method.  To detect slow fades between
 content scenes still using HSV information, use the DissolveDetector.
 
-<h1 id="scenedetect.detectors.threshold_detector">scenedetect.detectors.threshold_detector</h1>
+
+# `scenedetect.detectors.threshold_detector` (`ThresholdDetector`)
 
 PySceneDetect scenedetect.detectors.threshold_detector Module
 
@@ -299,7 +302,8 @@ that was detected was a fade-out.  There is no bias applied to this cut
 (since there is no corresponding fade-in) so it will be located at the
 exact frame where the fade-out crossed the detection threshold.
 
-<h1 id="scenedetect.frame_timecode">scenedetect.frame_timecode</h1>
+
+# `scenedetect.frame_timecode` (`FrameTimecode`)
 
 PySceneDetect Frame Timecode Module
 
@@ -429,7 +433,8 @@ Args:
 Returns:
     A string with a formatted timecode (HH:MM:SS[.nnn]).
 
-<h1 id="scenedetect.scene_manager">scenedetect.scene_manager</h1>
+
+# `scenedetect.scene_manager` (`SceneManager`)
 
 PySceneDetect scenedetect.scene_manager Module
 
@@ -572,7 +577,8 @@ Returns:
 Raises:
     ValueError
 
-<h1 id="scenedetect.video_manager">scenedetect.video_manager</h1>
+
+# `scenedetect.video_manager` (`VideoManager`)
 
 PySceneDetect scenedetect.video_manager Module
 
@@ -976,7 +982,8 @@ Returns:
 Raises:
     VideoDecoderNotStarted
 
-<h1 id="scenedetect.stats_manager">scenedetect.stats_manager</h1>
+
+# `scenedetect.stats_manager` (`StatsManager`)
 
 PySceneDetect scenedetect.stats_manager Module
 
@@ -1156,11 +1163,10 @@ Returns:
 Raises:
     StatsFileCorrupt, StatsFileFramerateMismatch
 
-<h1 id="scenedetect.video_splitter">scenedetect.video_splitter</h1>
 
-TODO.
+# `scenedetect.video_splitter`
 
-This file contains functions to split videos with a scene list using
+The `scenedetect.video_splitter` module contains functions to split videos with a scene list using
 external tools (e.g. mkvmerge, ffmpeg).
 
 
