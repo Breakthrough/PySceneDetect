@@ -2,12 +2,12 @@
 <h4 class="wy-text-info">Intelligent scene cut detection and video splitting tool.</h4>
 
 <div class="important">
-<h3 class="wy-text-neutral"><span class="fa fa-info-circle wy-text-info"></span>&nbsp; Latest Release: <b>v0.5</b> (August ?, 2018)</h3>
+<h3 class="wy-text-neutral"><span class="fa fa-info-circle wy-text-info"></span>&nbsp; Latest Release: <b>v0.5-beta-1</b> (August 6, 2018)</h3>
 <a href="download/" class="btn btn-success" style="margin-bottom:8px;" role="button"><span class="fa fa-download"></span>&nbsp; <b>Download</b></a> &nbsp;&nbsp;&nbsp;&nbsp; <a href="changelog/" class="btn btn-info" style="margin-bottom:8px;" role="button"><span class="fa fa-reorder"></span>&nbsp; <b>Changelog</b></a> &nbsp;&nbsp;&nbsp;&nbsp; <a href="download/#installation" class="btn btn-warning" style="margin-bottom:8px;" role="button"><span class="fa fa-gear"></span>&nbsp; <b>Installation</b></a> &nbsp;&nbsp;&nbsp;&nbsp; <a href="examples/usage/" class="btn btn-danger" style="margin-bottom:8px;" role="button"><span class="fa fa-book"></span>&nbsp; <b>Getting Started</b></a>
 </div>
 
 <div class="warning">
-<h3><span class="fa wy-text-warning"></span>&nbsp; That the Python CLI and API has changed.</h3>
+<h3><span class="fa wy-text-warning"></span>&nbsp; The PySceneDetect command-line interface and Python API has changed.</h3>
 This documentation refers to PySceneDetect v0.5, which has a new-and-improved command line interface (CLI) and an improved/refactored Python API.
 
 The beta version, PySceneDetect v0.5-beta-1 is now available as a source-only release.  Users are encouraged to update to v0.5-beta-1 as soon as possible. When it is released, upgrading from the beta to the stable release of v0.5 will be seamless.
