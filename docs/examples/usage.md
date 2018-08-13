@@ -7,6 +7,12 @@ This page outlines the most commonly used command-line options for using PyScene
 scenedetect [global options] [commands + command options]
 ```
 
+You can also print the usage/help manual of PySceneDetect with the `help` command:
+
+```rst
+scenedetect help
+```
+
 ## Quick Example
 
 For example, to perform content-aware scene detection (`detect-content`) on a video (`--input my_video.mp4`), listing all scenes in the console/to a CSV file (`list-scenes`), *and* saving each detected scene as image files (`save-images`):
