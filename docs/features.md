@@ -50,20 +50,25 @@ For a detailed explanation of how a particular scene detection method/algorithm 
 
 ## Version Roadmap
 
+Specific issues/features that are queued up for the very next release will have [the `backlog` tag](https://github.com/Breakthrough/PySceneDetect/issues?q=is%3Aissue+is%3Aopen+label%3A%22status%3A+backlog%22), and issues/features being worked on will have [the `status: in progress` tag](https://github.com/Breakthrough/PySceneDetect/issues?q=is%3Aissue+is%3Aopen+label%3A%22status%3A+in+progress%22).  Also note that bug reports as well as additional feature requests can be submitted via [the issue tracker](https://github.com/Breakthrough/PySceneDetect/issues); read [the Bug Reports and Contributing page](contributing.md) for details.
+
 <h3>Features in Development for Next Version</h3>
 
-The following are features being planned or developed after the release of v0.5:
+The following are features being planned or developed for the release following v0.5 (which will be, depending on community feedback, v0.5.1, v0.6, or v1.0):
 
- - additional timecode formats
- - adaptive bias for fade in/out interpolation
- - multithreaded implementation of detection algorithms for improved performance
+ - optional suppression of short-length flashes/bursts of light [ [#35] ](https://github.com/Breakthrough/PySceneDetect/issues/35)
+ - export scenes in HTML format [ [#17] ](https://github.com/Breakthrough/PySceneDetect/issues/17)
+ - automatic threshold detection for the current scene detection methods (can simply be an ouptut message indicating "Predicted Best Threshold: X")
 
 <h3>Planned Features for Future Releases</h3>
 
-The following are features being planned or developed for future releases of PySceneDetect (v0.4 and onwards):
+The following are features being planned or developed for future releases of PySceneDetect:
 
- - export scenes in chapter/XML format
+ - colour histogram-based scene detection algorithm in the HSV/HSL colourspace [ [#53] ](https://github.com/Breakthrough/PySceneDetect/issues/53)
  - improve robustness of content-aware detection by combining with edge detection (similar to MATLAB-based scene change detector)
- - automatic threshold detection for the current scene detection methods (can be done in pre-pass if necessary)
+ - adaptive bias for fade in/out interpolation
+ - multithreaded implementation of detection algorithms for improved performance
  - GUI for easier previewing and threshold setting (will be GTK+ 3 based via PyGObject)
+ - export scenes in chapter/XML format
+ - additional timecode formats
 

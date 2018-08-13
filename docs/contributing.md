@@ -2,7 +2,7 @@
 
 ### <span class="fa fa-bug"></span>&nbsp; Bug Reports
 
-Bugs and issues with PySceneDetect are mainly handled through [the issue tracker on Github](https://github.com/Breakthrough/PySceneDetect/issues).  If you run into any bugs while using PySceneDetect, please feel free to [create a new issue](https://github.com/Breakthrough/PySceneDetect/issues/new).  Provide as much detail as you can - include an example that clearly demonstrates the problem (if possible), and make sure to include any/all relevant program output or error messages.
+Bugs and issues with (as well as feature requests for) PySceneDetect are mainly handled through [the issue tracker on Github](https://github.com/Breakthrough/PySceneDetect/issues).  If you run into any bugs while using PySceneDetect, please feel free to [create a new issue](https://github.com/Breakthrough/PySceneDetect/issues/new).  Provide as much detail as you can - include an example that clearly demonstrates the problem (if possible), and make sure to include any/all relevant program output or error messages.
 
 When submitting bug reports, please add the command-line options `-v debug -l BUG_REPORT.txt` to the very beginning of the `scenedetect` command you are using, and attach the generated `BUG_REPORT.txt` file.
 
@@ -24,11 +24,11 @@ The following list details some contributors people have made to the PySceneDete
 
 A full list of contributions to the PySceneDetect source code [can be found here](https://github.com/Breakthrough/PySceneDetect/graphs/contributors).  A full list of contributions to both PySceneDetect with respect to bug reports and fixes/pull requests can be derived from looking at the list of [all issues](https://github.com/Breakthrough/PySceneDetect/issues?utf8=%E2%9C%93&q=is%3Aissue) and [all pull request](https://github.com/Breakthrough/PySceneDetect/pulls?utf8=%E2%9C%93&q=is%3Apr+).
 
+In addition to those mentioned below, thank you to *everyone* who has submitted an issue, bug report, and/or pull request (see the links above for complete lists), as well as for those who continue to help the ongoing development of PySceneDetect.  Your contributions continue to improve PySceneDetect, highlight the assets and talents of the FOSS community, and help to make the project's goal of being the most accurate scene detection program/library become a reality.
+
  * [@elcombato](https://github.com/elcombato) - improvement of video processing performance due to reduced memory copy operations
  * [@marcelluzs](https://github.com/marcelluzs) - improvement of video processing performance when using the frame-skipping feature
  * [@Hellowlol](https://github.com/Hellowlol) - improvements to software architecture and API development
  * [@bubalazi](https://github.com/bubalazi) - performance improvements to detect-content and detect-threshold algorithms
  * [@r1b](https://github.com/r1b) - proof-of-concept implementation of detect-histogram algorithm
-
-In addition to those mentioned above, thank you to *everyone* who has submitted an issue, bug report, and/or pull request, as well as for those who continue to help the ongoing development of PySceneDetect.  Your contributions continue to improve PySceneDetect, and help ensure that not only is PySceneDetect one of the most accurate scene detection programs/libraries, it will always be free and open source.
 
