@@ -2,12 +2,10 @@
 API Overview
 ----------------------------------------------------------
 
-
-There are three main modules:
+There are two main modules:
 
  - scenedetect
  - scenedetect.detectors
- - scenedetect.cli
 
 Classes from main `scenedetect` module:
 
@@ -15,6 +13,7 @@ Classes from main `scenedetect` module:
  - SceneManager - high-level manager to coordinate SceneDetector, VideoManager, and optionally, StatsManager objects
  - VideoManager - used to load video(s) and provide seeking
  - StatsManager - used to store/cache frame metrics to speed up subsequent scene detection runs on the same video, and optionally, save/load to/from a CSV file
+ - SceneDetector - base class used to implement detection algorithms (e.g. ContentDetector, ThresholdDetector)
 
 SceneDetector objects available in the `scenedetect.detectors` module:
 

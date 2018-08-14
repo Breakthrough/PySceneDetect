@@ -49,7 +49,7 @@ Note: support for live video stream segmentation is supported by the API only cu
 
 The general usage workflow is to determine which detection method and threshold to use (this can even be done iteratively), using these values to create a `SceneDetector` object, the type of which depends on the detection method you want to use (e.g. `ThresholdDetector`, `ContentDetector`).  These detectors are then added to a `SceneManager` class, with optionally a `StatsManager` to cache frame metrics so subsequent scene detection runs are much faster (and can be saved/loaded to/from disk).  Finally, an open `VideoManager` object can be passed to the `SceneManager.detect_scenes()` method, which returns the number of frames processed.
 
-The following shows the contents of [the `api_test.py` file](https://github.com/Breakthrough/PySceneDetect/blob/v0.5-beta-1/tests/api_test.py) included with the PySceneDetect source code, which provides an example as to the general usage of the PySceneDetect Python API:
+The following shows the contents of [the `api_test.py` file](https://github.com/Breakthrough/PySceneDetect/blob/master/tests/api_test.py) included with the PySceneDetect source code, which provides an example as to the general usage of the PySceneDetect Python API:
 
 
 ```python
