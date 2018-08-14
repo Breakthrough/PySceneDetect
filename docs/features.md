@@ -56,6 +56,7 @@ Specific issues/features that are queued up for the very next release will have 
 
 The following are features being planned or developed for the release following v0.5 (which will be, depending on community feedback, v0.5.1, v0.6, or v1.0):
 
+ - support for using multiple `--input` videos and the `split-video` command **without** the `-c`/`--copy` flag [ [#71] ](https://github.com/Breakthrough/PySceneDetect/issues/71)
  - optional suppression of short-length flashes/bursts of light [ [#35] ](https://github.com/Breakthrough/PySceneDetect/issues/35)
  - export scenes in HTML format [ [#17] ](https://github.com/Breakthrough/PySceneDetect/issues/17)
  - automatic threshold detection for the current scene detection methods (can simply be an ouptut message indicating "Predicted Best Threshold: X")
