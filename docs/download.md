@@ -57,7 +57,11 @@ For video splitting support, you also need:
  - [ffmpeg](https://ffmpeg.org/download.html), part of mkvtoolnix, command-line tool, required to split video files in precise/high-quality mode (`split-video` or `split-video -h/--high-quality`)
  - [mkvmerge](https://mkvtoolnix.download/), part of mkvtoolnix, command-line tool, required to split video files in copy mode (`split-video -c/--copy`)
 
-Additionally, 64-bit Windows users can download an archive containing [`ffmpeg.exe` and `mkvmerge.exe` here](https://github.com/Breakthrough/PySceneDetect/blob/resources/third-party/split-video-progams-win64.7z?raw=true), which can be placed in the same folder as the `scenedetect.exe` file created after running `python setup.py install`, or somewhere else in your PATH directory.  The `scenedetect.exe` file is *usually* installed in the folder `C:\PythonXY\Scripts`, where XY is your Python version (e.g. 27, 36).
+
+<div class="important">
+<h3 class="wy-text-neutral"><span class="fa fa-info-circle wy-text-info"></span>&nbsp; Additionally, 64-bit Windows users can download an archive containing <a href="https://github.com/Breakthrough/PySceneDetect/blob/resources/third-party/split-video-progams-win64.7z?raw=true">`ffmpeg.exe` and `mkvmerge.exe` here</a>, which can be placed in the same folder as the `scenedetect.exe` file created after running `python setup.py install`, or somewhere else in your PATH directory.  The `scenedetect.exe` file is *usually* installed in the folder `C:\PythonXY\Scripts`, where XY is your Python version (e.g. 27, 36).
+</div>
+
 
 The `ffmpeg` and/or `mkvmerge` command must be available system wide (e.g. in a directory in PATH, so it can be used from any terminal/console by typing the command), or alternatively, placed in the same directory where PySceneDetect is installed.
 
