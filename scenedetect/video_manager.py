@@ -26,18 +26,24 @@
 
 """ PySceneDetect scenedetect.video_manager Module
 
-This file contains the VideoManager class, which provides a consistent
-interface to reading videos.
+This module contains the VideoManager class, which provides a consistent
+interface to reading videos. This module also contains specific exceptions
+raised upon certain error conditions.
 
-This module includes both single-threaded (VideoManager) and asynchronous
-(VideoManagerAsync) video manager classes, which can be used to pass a
-video (or sequence of videos) and a start and end time/duration to a
-SceneManager object for performing scene detection analysis.
+The VideoManager can be constructed with a path to a video (or sequence of
+videos) and a start and end time/duration, then passed to a SceneManager
+object for performing scene detection analysis. If the start time is
+modified, this needs to be reflected in the SceneManager as well.
 
 The VideoManager class attempts to emulate some methods of the OpenCV
 cv2.VideoCapture object, and can be used interchangably with one with
 respect to a SceneManager object.
 """
+
+# There also used to be an asynchronous implementation in addition to the
+# synchronous VideoManager, but the performance was poor. In the future, I may
+# consider rewriting an asynchronous frame grabber in C++ and write a C-API to
+# interface with the Python ctypes module. - B.C.
 
 
 # Standard Library Imports

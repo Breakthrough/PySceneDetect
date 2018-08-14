@@ -317,26 +317,26 @@ Example:
     A FrameTimecode can be created by specifying the frame number as an integer, along
     with the framerate:
 
-        $ t = FrameTimecode(timecode = 0, fps = 29.97)
+        x = FrameTimecode(timecode = 0, fps = 29.97)
 
     It can also be created from a floating-point number of seconds.  Note that calling
-    t.get_frames() will return 200 in this case (10.0 seconds at 20.0 frames/sec):
+    x.get_frames() will return 200 in this case (10.0 seconds at 20.0 frames/sec):
 
-        $ t = FrameTimecode(timecode = 10.0, fps = 20.0)
+        x = FrameTimecode(timecode = 10.0, fps = 20.0)
 
     Timecode can also be specified as a string in "HH:MM:SS[.nnn]" format.  Note that
-    calling t.get_frames() will return 600 in this case (1 minute, or 60 seconds, at
+    calling x.get_frames() will return 600 in this case (1 minute, or 60 seconds, at
     10 frames/sec):
 
-        $ t = FrameTimecode(timecode = "00:01:00.000", fps = 10)
+        x = FrameTimecode(timecode = "00:01:00.000", fps = 10)
 
 FrameTimecode objects can be added and subtracted.  Note, however, that a negative
 timecode is not representable by a FrameTimecode, and subtractions towards zero
-will wrap at 0.  For example, calling t.get_frame() in this case will return 0:
+will wrap at 0.  For example, calling x.get_frames() in this case will return 0:
 
-    $ t = FrameTimecode(0, 10) - FrameTimecode(10, 10)
+    x = FrameTimecode(0, 10) - FrameTimecode(10, 10)
+    print(x.get_frames())
 
- (i.e. calling get_frame() on FrameTimecode)
 Unit tests for the FrameTimecode object can be found in tests/test_timecode.py.
 
 <h2 id="scenedetect.frame_timecode.FrameTimecode">FrameTimecode</h2>
@@ -1166,8 +1166,11 @@ Raises:
 
 # `scenedetect.video_splitter`
 
-The `scenedetect.video_splitter` module contains functions to split videos with a scene list using
-external tools (e.g. mkvmerge, ffmpeg).
+PySceneDetect `scenedetect.video_splitter` Module
+
+The `scenedetect.video_splitter module` contains functions to split videos
+with a scene list using external tools (e.g. `mkvmerge`, `ffmpeg`), as well
+as functions to check if the tools are available.
 
 
 <h2 id="scenedetect.video_splitter.is_mkvmerge_available">is_mkvmerge_available</h2>
