@@ -15,7 +15,7 @@ The development of PySceneDetect is done on the Github Repo, guided by [the feat
 
 All submitted code should be linted with pylint, and follow the [Google Python Style Guide](https://google.github.io/styleguide/pyguide.html) as closely as possible.  Also, ensure that you search through [all existing issues](https://github.com/Breakthrough/PySceneDetect/issues?q=) (both open and closed) beforehand to avoid creating duplicate entries.
 
-Note that PySceneDetect is released under the BSD 2-Clause license, and submitted code should comply with this license (see [License & Copyright Information](copyright.md) for details).
+Note that PySceneDetect is released under the BSD 3-Clause license, and submitted code should comply with this license (see [License & Copyright Information](copyright.md) for details).
 
 
 ### <span class="fa fa-person"></span>&nbsp; List of Contributors

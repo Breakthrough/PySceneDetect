@@ -8,7 +8,7 @@
 #
 # Copyright (C) 2012-2018 Brandon Castellano <http://www.bcastell.com>.
 #
-# PySceneDetect is licensed under the BSD 2-Clause License; see the included
+# PySceneDetect is licensed under the BSD 3-Clause License; see the included
 # LICENSE file, or visit one of the following pages for details:
 #  - https://github.com/Breakthrough/PySceneDetect/
 #  - http://www.bcastell.com/projects/pyscenedetect/

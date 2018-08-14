@@ -1,10 +1,34 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 #
-# PySceneDetect setup.py
+#         PySceneDetect: Python-Based Video Scene Detector
+#   ---------------------------------------------------------------
+#     [  Site: http://www.bcastell.com/projects/pyscenedetect/   ]
+#     [  Github: https://github.com/Breakthrough/PySceneDetect/  ]
+#     [  Documentation: http://pyscenedetect.readthedocs.org/    ]
+#
+# Copyright (C) 2012-2018 Brandon Castellano <http://www.bcastell.com>.
 #
 
+""" PySceneDetect setup.py
 
-import glob
+To install PySceneDetect:
+
+    python setup.py install
+
+To run the PySceneDetect unit tests (requires testvideo.mp4, link below):
+
+    python setup.py test
+
+You can obtain the required testvideo.mp4 from the PySceneDetect [resources
+branch](https://github.com/Breakthrough/PySceneDetect/tree/resources) on Github,
+or the following URL:
+
+    https://raw.githubusercontent.com/Breakthrough/PySceneDetect/resources/tests/testvideo.mp4
+
+"""
+
+# Standard Library Imports
 import sys
 
 from setuptools import setup
@@ -18,7 +42,7 @@ if sys.version_info < (2, 7) or (sys.version_info >= (3, 0) and sys.version_info
 def get_requires(include_opencv=False):
     # type: (bool) -> List[str]
     """ Get Requires: Returns a list of required packages PySceneDetect depends on.
-    
+
     Arguments:
         include_opencv (bool): Whether to include the cv2 module in the returned module
             list or not (default is False). Package may not be able to be installed via
@@ -38,9 +62,9 @@ setup(
     author='Brandon Castellano',
     author_email='brandon248@gmail.com',
     url='https://github.com/Breakthrough/PySceneDetect',
-    license="BSD 2-Clause",
+    license="BSD 3-Clause",
     keywords="video computer-vision analysis",
-    install_requires=get_requires(),
+    install_requires=get_requires(),        # OpenCV must be installed separately so it is excluded.
     extras_require={'progress_bar': ['tqdm']},
     setup_requires=['pytest-runner'],
     tests_require=['pytest'],
@@ -48,8 +72,8 @@ setup(
               'scenedetect.detectors',
               'scenedetect.cli'],
     package_data={'': ['../LICENSE*', '../USAGE.md', '../package-info.rst']},
-    #include_package_data = True,   # Only works with this line commented.
-    #test_suite="unitest.py",
+    #include_package_data = True,           # Must leave this to the default.
+    #test_suite="unitest.py",               # Auto-detects tests from setup.cfg
     entry_points={"console_scripts": ["scenedetect=scenedetect:main"]},
     classifiers=[
         'Development Status :: 5 - Production/Stable',

@@ -135,7 +135,7 @@ The scene list returned by the `SceneManager.get_scene_list(...)` method consist
 ----------------------------------------------------------
 
 
-Licensed under BSD 2-Clause (see the `LICENSE` file for details).
+Licensed under BSD 3-Clause (see the `LICENSE` file for details).
 
 Copyright (C) 2012-2018 Brandon Castellano.
 All rights reserved.

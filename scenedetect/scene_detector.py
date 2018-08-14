@@ -8,7 +8,7 @@
 #
 # Copyright (C) 2012-2018 Brandon Castellano <http://www.bcastell.com>.
 #
-# PySceneDetect is licensed under the BSD 2-Clause License; see the included
+# PySceneDetect is licensed under the BSD 3-Clause License; see the included
 # LICENSE file, or visit one of the following pages for details:
 #  - https://github.com/Breakthrough/PySceneDetect/
 #  - http://www.bcastell.com/projects/pyscenedetect/
@@ -54,12 +54,13 @@ class SceneDetector(object):
         """ Is Processing Required: Test if all calculations for a given frame are already done.
 
         Returns:
-            (bool) False if the SceneDetector has assigned _metric_keys, and the
+            bool: False if the SceneDetector has assigned _metric_keys, and the
             stats_manager property is set to a valid StatsManager object containing
             the required frame metrics/calculations for the given frame - thus, not
-            needing the frame to perform scene detection. Returns True otherwise
-            (i.e. the frame_img passed to process_frame is required to be passed
-            to process_frame for the given frame_num).
+            needing the frame to perform scene detection.
+
+            True otherwise (i.e. the frame_img passed to process_frame is required
+            to be passed to process_frame for the given frame_num).
         """
         return not self._metric_keys or not (
             self.stats_manager is not None and
@@ -71,7 +72,7 @@ class SceneDetector(object):
         """ Get Metrics:  Get a list of all metric names/keys used by the detector.
 
         Returns:
-            A List[str] of the frame metric key names that will be used by
+            List[str]: A list of strings of frame metric key names that will be used by
             the detector when a StatsManager is passed to process_frame.
         """
         return self._metric_keys
@@ -84,7 +85,7 @@ class SceneDetector(object):
         Prototype method, no actual detection.
 
         Returns:
-            List of frame numbers of cuts to be added to the cutting list.
+            List[int]: List of frame numbers of cuts to be added to the cutting list.
         """
         return []
 
@@ -96,7 +97,7 @@ class SceneDetector(object):
         Prototype method, no actual detection.
 
         Returns:
-            List of frame numbers of cuts to be added to the cutting list.
+            List[int]: List of frame numbers of cuts to be added to the cutting list.
         """
         return []
 

@@ -4,7 +4,7 @@ site_author: "Brandon Castellano"
 
 repo_url: https://github.com/Breakthrough
 repo_name: "PySceneDetect on Github"
-copyright: 'Copyright &copy; 2012-2018 Brandon Castellano.  All rights reserved.<br />Licensed under BSD 2-Clause (see the <a href="https://github.com/Breakthrough/PySceneDetect/blob/master/LICENSE" alt="link to latest LICENSE file on Github">LICENSE file</a> for details).'
+copyright: 'Copyright &copy; 2012-2018 Brandon Castellano.  All rights reserved.<br />Licensed under BSD 3-Clause (see the <a href="https://github.com/Breakthrough/PySceneDetect/blob/master/LICENSE" alt="link to latest LICENSE file on Github">LICENSE file</a> for details).'
 
 #theme: mkdocs
 theme: readthedocs

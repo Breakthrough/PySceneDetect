@@ -8,13 +8,34 @@
 #
 # Copyright (C) 2012-2018 Brandon Castellano <http://www.bcastell.com>.
 #
-# PySceneDetect is licensed under the BSD 2-Clause License; see the included
+# PySceneDetect is licensed under the BSD 3-Clause License; see the included
 # LICENSE file, or visit one of the following pages for details:
 #  - https://github.com/Breakthrough/PySceneDetect/
 #  - http://www.bcastell.com/projects/pyscenedetect/
 #
 # This software uses the Numpy, OpenCV, click, tqdm, and pytest libraries.
 # See the included LICENSE files or one of the above URLs for more information.
+#
+# This software may also invoke mkvmerge or FFmpeg, if available.
+#
+# FFmpeg is a trademark of Fabrice Bellard.
+# mkvmerge is Copyright (C) 2005-2016, Matroska.
+#
+# Certain distributions of PySceneDetect may include the above software;
+# see the included LICENSE-FFMPEG and LICENSE-MKVMERGE files. If using a
+# source distribution, these programs can be obtained from following URLs
+# (note that mkvmerge is a part of the MKVToolNix package):
+#
+#     FFmpeg:   [ https://ffmpeg.org/download.html ]
+#     mkvmerge: [ https://mkvtoolnix.download/downloads.html ]
+#
+# Also note that Linux users can likely obtain them from their package
+# manager (e.g. `sudo apt-get install ffmpeg`).
+#
+# Once installed, ensure the program can be accessed system-wide by calling
+# the `mkvmerge` or `ffmpeg` command from a terminal/command prompt.
+# PySceneDetect will automatically use whichever program is available on
+# the computer, depending on the specified command-line options.
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -26,10 +47,24 @@
 
 """ PySceneDetect scenedetect.video_splitter Module
 
-This module contains functions to split videos with a scene list using
-external tools (e.g. mkvmerge, ffmpeg), as well as functions to check
-if the tools are available.
+The scenedetect.video_splitter module contains functions to split videos
+with a scene list using external tools (e.g. `mkvmerge`, `ffmpeg`), as well
+as functions to check if the tools are available.
 
+Certain distributions of PySceneDetect may include the above software. If
+using a source distribution, these programs can be obtained from following
+URLs (note that mkvmerge is a part of the MKVToolNix package):
+
+    FFmpeg:   [ https://ffmpeg.org/download.html ]
+    mkvmerge: [ https://mkvtoolnix.download/downloads.html ]
+
+Also note that Linux users can likely obtain them from their package
+manager (e.g. `sudo apt-get install ffmpeg`).
+
+Once installed, ensure the program can be accessed system-wide by calling
+the `mkvmerge` or `ffmpeg` command from a terminal/command prompt.
+PySceneDetect will automatically use whichever program is available on
+the computer, depending on the specified command-line options.
 """
 
 # Standard Library Imports
@@ -149,7 +184,9 @@ def split_video_ffmpeg(input_video_paths, scene_list, output_file_template, vide
         logging.error(
             'Sorry, splitting multiple appended/concatenated input videos with'
             ' ffmpeg is not supported yet. This feature will be added to a future'
-            ' version of PySceneDetect.')
+            ' version of PySceneDetect. In the meantime, you can try using the'
+            ' -c / --copy option with the split-video to use mkvmerge, which'
+            ' generates less accurate output, but supports multiple input videos.')
         raise NotImplementedError()
 
     arg_override = arg_override.replace('\\"', '"')
