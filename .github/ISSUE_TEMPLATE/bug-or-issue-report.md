@@ -1,5 +1,5 @@
 ---
-name: Bug Report
+name: Bug or Issue Report
 about: Submit a bug report or issue to help us fix and improve PySceneDetect.
 
 ---
