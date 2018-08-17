@@ -21,7 +21,7 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-""" PySceneDetect Frame Timecode Module
+""" PySceneDetect `scenedetect.frame_timecode` Module
 
 This module contains the FrameTimecode object, which is used as a way for PySceneDetect
 to store frame-accurate timestamps of each cut.  This is done by also specifying the
@@ -89,8 +89,8 @@ class FrameTimecode(object):
             to base all frame to time arithmetic on (if FrameTimecode, copied
             from the passed framerate), to allow frame-accurate arithmetic. The
             framerate must be the same when combining FrameTimecode objects
-            in operations. This argument is required argument, unless the
-            passed timecode is of type FrameTimecode, from which it is copied.
+            in operations. This argument is always required, unless **timecode**
+            is a FrameTimecode.
     Raises:
         TypeError, ValueError
     """

@@ -25,7 +25,7 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 #
 
-""" PySceneDetect scenedetect.stats_manager Module
+""" PySceneDetect `scenedetect.stats_manager` Module
 
 This file contains the StatsManager class, which provides a key-value store for
 each SceneDetector to read/write the metrics calculated for each frame.
@@ -231,7 +231,8 @@ class StatsManager(object):
                 exception will be thrown if is_save_required() returns False.
 
         Raises:
-            NoMetricsRegistered, NoMetricsSet
+            NoMetricsRegistered
+            NoMetricsSet
         """
         csv_writer = get_csv_writer(csv_file)
         # Ensure we need to write to the file, and that we have data to do so with.
@@ -273,7 +274,8 @@ class StatsManager(object):
                 input file was blank.
 
         Raises:
-            StatsFileCorrupt, StatsFileFramerateMismatch
+            StatsFileCorrupt
+            StatsFileFramerateMismatch
         """
         csv_reader = get_csv_reader(csv_file)
         num_cols = None

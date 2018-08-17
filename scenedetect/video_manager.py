@@ -24,7 +24,7 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-""" PySceneDetect scenedetect.video_manager Module
+""" PySceneDetect `scenedetect.video_manager` Module
 
 This module contains the VideoManager class, which provides a consistent
 interface to reading videos. This module also contains specific exceptions
@@ -200,7 +200,14 @@ def open_captures(video_files, framerate=None, validate_parameters=True):
         where width and height are integers representing the frame size in pixels.
 
     Raises:
-        ValueError, IOError, VideoFramerateUnavailable, VideoParameterMismatch
+        ValueError: No video file(s) specified, or invalid/multiple device IDs specified.
+        TypeError: `framerate` must be type `float`.
+        IOError: Video file(s) not found.
+        VideoFramerateUnavailable: Video framerate could not be obtained and `framerate`
+            was not set manually.
+        VideoParameterMismatch: All videos in `video_files` do not have equal parameters.
+            Set `validate_parameters=False` to skip this check.
+        VideoOpenFailure: Video(s) could not be opened.
     """
     is_device = False
     if not video_files:
@@ -270,7 +277,10 @@ def validate_capture_framerate(video_names, cap_framerates, framerate=None):
     """ Validate Capture Framerate: Ensures that the passed capture framerates are valid and equal.
 
     Raises:
-        ValueError, TypeError, VideoFramerateUnavailable
+        ValueError: Invalid framerate (must be positive non-zero value).
+        TypeError: Framerate must be of type float.
+        VideoFramerateUnavailable: Framerate for video could not be obtained,
+            and `framerate` was not set.
     """
     check_framerate = True
     cap_framerate = cap_framerates[0]
@@ -341,9 +351,15 @@ class VideoManager(object):
                 If not set (i.e. is None), it will be deduced from the first open capture
                 in video_files, else raises a VideoFramerateUnavailable exception.
 
-        Raises:
-            ValueError, TypeError, IOError, VideoOpenFailure, VideoFramerateUnavailable,
-            VideoFramerateMismatch
+        Raises:            
+            ValueError: No video file(s) specified, or invalid/multiple device IDs specified.
+            TypeError: `framerate` must be type `float`.
+            IOError: Video file(s) not found.
+            VideoFramerateUnavailable: Video framerate could not be obtained and `framerate`
+                was not set manually.
+            VideoParameterMismatch: All videos in `video_files` do not have equal parameters.
+                Set `validate_parameters=False` to skip this check.
+            VideoOpenFailure: Video(s) could not be opened.
         """
         if not video_files:
             raise ValueError("At least one string/integer must be passed in the video_files list.")
@@ -396,8 +412,9 @@ class VideoManager(object):
         # type: () -> int
         """ Get Number of Videos - returns the length of the capture list (self._cap_list),
         representing the number of videos the VideoManager has opened.
+
         Returns:
-            (int) Number of videos, equal to length of capture list.
+            int: Number of videos, equal to length of capture list.
         """
         return len(self._cap_list)
 
@@ -405,8 +422,9 @@ class VideoManager(object):
     def get_video_paths(self):
         # type: () -> List[str]
         """ Get Video Paths - returns list of strings containing paths to the open video(s).
+
         Returns:
-            (List[str]) List of paths to the video files opened by the VideoManager.
+            List[str]: List of paths to the video files opened by the VideoManager.
         """
         return list(self._video_file_paths)
 
@@ -416,8 +434,9 @@ class VideoManager(object):
         """ Get Framerate - returns the framerate the VideoManager is assuming for all
         open VideoCaptures.  Obtained from either the capture itself, or the passed
         framerate parameter when the VideoManager object was constructed.
+
         Returns:
-            (float) Framerate, in frames/sec.
+            float: Framerate, in frames/sec.
         """
         return self._cap_framerate
 
@@ -434,6 +453,7 @@ class VideoManager(object):
         As such, this method is equivalent to creating a FrameTimecode at frame 0 with
         the VideoManager framerate, for example, given a VideoManager called obj,
         the following expression will evaluate as True:
+
             obj.get_base_timecode() == FrameTimecode(0, obj.get_framerate())
 
         Furthermore, the base timecode object returned by a particular VideoManager
@@ -451,7 +471,7 @@ class VideoManager(object):
         """ Get Current Timecode - returns a FrameTimecode object at current VideoManager position.
 
         Returns:
-            FrameTimecode object at the current VideoManager position with the video(s) framerate.
+            FrameTimecode: Timecode at the current VideoManager position.
         """
         return self._curr_time
 
@@ -500,7 +520,7 @@ class VideoManager(object):
                 (i.e. if end_time is set, duration must be None).
 
         Raises:
-            VideoDecodingInProgress
+            VideoDecodingInProgress: Must call before start().
         """
         if self._started:
             raise VideoDecodingInProgress()
@@ -544,7 +564,8 @@ class VideoManager(object):
         decoder process has already been started.
 
         Raises:
-            VideoDecodingInProgress
+            VideoDecodingInProgress: Must call stop() before this method if
+                start() has already been called after initial construction.
         """
         if self._started:
             raise VideoDecodingInProgress()
@@ -566,10 +587,10 @@ class VideoManager(object):
             timecode (FrameTimecode): Time in video to seek forwards to.
 
         Returns:
-            True if seeking succeeded, False if no more frames / end of video.
+            bool: True if seeking succeeded, False if no more frames / end of video.
 
         Raises:
-            VideoDecoderNotStarted
+            VideoDecoderNotStarted: Must call start() before this method.
         """
         if not self._started:
             raise VideoDecoderNotStarted()
@@ -600,7 +621,7 @@ class VideoManager(object):
         Can only be called after the release method has been called.
 
         Raises:
-            VideoDecodingInProgress
+            VideoDecodingInProgress: Must call stop() before this method.
         """
         if self._started:
             raise VideoDecodingInProgress()
@@ -626,11 +647,11 @@ class VideoManager(object):
 
         Arguments:
             capture_prop: OpenCV VideoCapture property to get (i.e. CAP_PROP_FPS).
-            index (optional): Index in file_list of capture to get property from (default
+            index (int, optional): Index in file_list of capture to get property from (default
                 is zero). Index is not checked and will raise exception if out of bounds.
 
         Returns:
-            Return value from calling get(property) on the VideoCapture object.
+            float: Return value from calling get(property) on the VideoCapture object.
         """
         if capture_prop == cv2.CAP_PROP_FRAME_COUNT and index is None:
             return self._frame_length
@@ -647,7 +668,7 @@ class VideoManager(object):
             bool: True if a frame was grabbed, False otherwise.
 
         Raises:
-            VideoDecoderNotStarted
+            VideoDecoderNotStarted: Must call start() before this method.
         """
         if not self._started:
             raise VideoDecoderNotStarted()
@@ -679,7 +700,7 @@ class VideoManager(object):
                 decoded frame, otherwise returns (False, None).
 
         Raises:
-            VideoDecoderNotStarted
+            VideoDecoderNotStarted: Must call start() before this method.
         """
         if not self._started:
             raise VideoDecoderNotStarted()
@@ -709,7 +730,7 @@ class VideoManager(object):
                 is a numpy ndarray of the decoded frame, otherwise (False, None).
 
         Raises:
-            VideoDecoderNotStarted
+            VideoDecoderNotStarted: Must call start() before this method.
         """
         if not self._started:
             raise VideoDecoderNotStarted()

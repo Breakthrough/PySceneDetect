@@ -24,7 +24,7 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-""" PySceneDetect scenedetect.detectors.content_detector Module
+""" PySceneDetect `scenedetect.detectors.content_detector` Module
 
 This module implements the ContentDetector, which compares the difference
 in content between adjacent frames against a set threshold/score, which if
@@ -59,9 +59,21 @@ class ContentDetector(SceneDetector):
 
 
     def process_frame(self, frame_num, frame_img):
-        # type: (int, numpy.ndarray) -> bool, Optional[int]
-        # Similar to ThresholdDetector, but using the HSV colour space DIFFERENCE instead
-        # of single-frame RGB/grayscale intensity (thus cannot detect slow fades with this method).
+        # type: (int, numpy.ndarray) -> List[int]
+        """ Similar to ThresholdDetector, but using the HSV colour space DIFFERENCE instead
+        of single-frame RGB/grayscale intensity (thus cannot detect slow fades with this method).
+
+        Arguments:
+            frame_num (int): Frame number of frame that is being passed.
+
+            frame_img (Optional[int]): Decoded frame image (numpy.ndarray) to perform scene
+                detection on. Can be None *only* if the self.is_processing_required() method
+                (inhereted from the base SceneDetector class) returns True.
+
+        Returns:
+            List[int]: List of frames where scene cuts have been detected. There may be 0
+            or more frames in the list, and not necessarily the same as frame_num.
+        """
         cut_list = []
         metric_keys = self._metric_keys
         _unused = ''

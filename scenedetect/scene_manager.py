@@ -24,7 +24,7 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-""" PySceneDetect scenedetect.scene_manager Module
+""" PySceneDetect `scenedetect.scene_manager` Module
 
 This module implements the SceneManager object, which is used to coordinate
 SceneDetectors and frame sources (e.g. VideoManagers, VideoCaptures), creating

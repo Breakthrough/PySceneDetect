@@ -24,7 +24,7 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-""" PySceneDetect scenedetect.detectors.threshold_detector Module
+""" PySceneDetect `scenedetect.detectors.threshold_detector` Module
 
 This module implements the ThresholdDetector, which uses a set intensity level
 to detect scene cuts when the average frame intensity passes the set threshold.
@@ -145,6 +145,18 @@ class ThresholdDetector(SceneDetector):
         return True
 
     def process_frame(self, frame_num, frame_img):
+        # type: (int, Optional[numpy.ndarray]) -> List[int]
+        """
+        Args:
+            frame_num (int): Frame number of frame that is being passed.
+            frame_img (numpy.ndarray or None): Decoded frame image (numpy.ndarray) to perform
+                scene detection with. Can be None *only* if the self.is_processing_required()
+                method (inhereted from the base SceneDetector class) returns True.
+        Returns:
+            List[int]: List of frames where scene cuts have been detected. There may be 0
+            or more frames in the list, and not necessarily the same as frame_num.
+        """
+
         # Compare the # of pixels under threshold in current_frame & last_frame.
         # If absolute value of pixel intensity delta is above the threshold,
         # then we trigger a new scene cut/break.
