@@ -1,6 +1,6 @@
 ---
-name: Bug Report
-about: Create a report to help us improve PySceneDetect.
+name: Bug or Issue Report
+about: Submit a bug report or issue to help us fix and improve PySceneDetect.
 
 ---
 
