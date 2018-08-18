@@ -6,6 +6,9 @@ PySceneDetect can also be used from within other Python programs, or even the Py
 
 The general usage workflow is to determine which detection method and threshold to use (this can even be done iteratively), using these values to create a `SceneDetector` object, the type of which depends on the detection method you want to use (e.g. `ThresholdDetector`, `ContentDetector`).  A list of `SceneDetector` objects is then passed with an open `VideoCapture` object and an empty list to the `scenedetect.detect_scenes()` function, which appends the frame numbers of any detected scene boundaries to the list (the function itself returns the number of frames read from the video file).
 
+Note that the complete PySceneDetect Python API reference [can be found *here* (link).](http://breakthrough.github.io/PySceneDetect/)
+
+
 
 ### Example
 

@@ -1,4 +1,11 @@
 
+
+The complete PySceneDetect Python API reference [can be found *here* (link).](http://breakthrough.github.io/PySceneDetect/)
+
+-------------------------------
+
+
+
 Creating a new scene detection method is intuitive if you are familiar with Python and OpenCV already.  A `SceneDetector` is an object implementing the following class & methods (only prototypes are shown as an example):
 
 ```python

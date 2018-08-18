@@ -4,3 +4,4 @@ site/
 build/
 dist/
 *.egg-info/
+docs-api/_build/

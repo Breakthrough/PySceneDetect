@@ -4,6 +4,11 @@
 In addition to being used from the command line, or through the GUI, PySceneDetect can be used in Python directly - allowing easy integration into other applications/scripts, or interactive use through a Python REPL/notebook.
 
 
+## PySceneDetect API Reference
+
+The complete PySceneDetect Python API reference [can be found *here* (link).](http://breakthrough.github.io/PySceneDetect/)
+
+
 ## Example
 
 The following short Python program shows the general usage style of how to detect scenes using PySceneDetect.  This shows how to open a video (or videos), save/load stats to/from a statsfile (CSV), perform scene detection (using the `ContentDetector`), and print a list of detected scenes to the terminal/console.  
