@@ -50,7 +50,7 @@ def get_requires(include_opencv=False):
     """
     requires = ['numpy', 'Click']
     if include_opencv:
-        requires += ['cv2']
+        requires += ['opencv-python']
     return requires
 
 

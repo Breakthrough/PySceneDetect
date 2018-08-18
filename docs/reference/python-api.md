@@ -5,7 +5,7 @@ API Reference
 
 The complete PySceneDetect Python API reference can be found at the following URL:
 
-[http://breakthrough.github.io/PySceneDetect/](http://breakthrough.github.io/PySceneDetect/)
+[http://pyscenedetect-api.readthedocs.io/](http://pyscenedetect-api.readthedocs.io/)
 
 
 API Overview

@@ -10,7 +10,7 @@
 <h3><span class="fa wy-text-warning"></span>&nbsp; The PySceneDetect command-line interface and Python API has changed.</h3>
 This documentation refers to PySceneDetect v0.5, which has a new-and-improved command line interface (CLI) and an improved/refactored Python API.  Full reference documentation for the new PySceneDetect API can be found at the following URL:
 <br/>
-<a href="http://breakthrough.github.io/PySceneDetect/">http://breakthrough.github.io/PySceneDetect/</a>
+<a href="http://pyscenedetect-api.readthedocs.io/">http://pyscenedetect-api.readthedocs.io/</a>
 <br/>
 
 The beta version, PySceneDetect v0.5-beta-1 is now available as a source-only release.  Users are encouraged to update to v0.5-beta-1 as soon as possible. When it is released, upgrading from the beta to the stable release of v0.5 will be seamless.
