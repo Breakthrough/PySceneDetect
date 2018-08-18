@@ -8,15 +8,16 @@
 
 <div class="warning">
 <h3><span class="fa wy-text-warning"></span>&nbsp; The PySceneDetect command-line interface and Python API has changed.</h3>
-This documentation refers to PySceneDetect v0.5, which has a new-and-improved command line interface (CLI) and an improved/refactored Python API.
+This documentation refers to PySceneDetect v0.5, which has a new-and-improved command line interface (CLI) and an improved/refactored Python API.  Full reference documentation for the new PySceneDetect API can be found at the following URL:
+<br/>
+<a href="http://breakthrough.github.io/PySceneDetect/">http://breakthrough.github.io/PySceneDetect/</a>
+<br/>
 
 The beta version, PySceneDetect v0.5-beta-1 is now available as a source-only release.  Users are encouraged to update to v0.5-beta-1 as soon as possible. When it is released, upgrading from the beta to the stable release of v0.5 will be seamless.
-
+<br/>
 Users still using the latest stable release (v0.4) can find the <a href="https://pyscenedetect.readthedocs.io/en/v0.4/">existing documentation for v0.4 here</a>.
 
-A full reference of the new PySceneDetect API is available at the following URL:
 
-<a href="https://github.com/Breakthrough/PySceneDetect">https://github.com/Breakthrough/PySceneDetect</a>
 </div>
 
 **PySceneDetect** is a command-line application and a Python library for **detecting scene changes in videos**, and **automatically splitting the video into separate clips**.  Not only is it free and open-source software (FOSS), but there are several detection methods available ([see Features](features.md)), from simple threshold-based fade in/out detection, to advanced content aware fast-cut detection.
