@@ -45,7 +45,11 @@ Usage (Python)
 
 PySceneDetect can also be used from within other Python programs.  This allows you to perform scene detection directly in Python code using a `SceneManager`, which allows adding specific `SceneDetector` objects.  You can then perform scene detection on frames obtained from a `VideoManager` object (similar to an OpenCV `VideoCapture` object but with additional features to facilitate scene detection, like frame-accurate seeking support).
 
-Note: support for live video stream segmentation is supported by the API only currently, not the CLI.  See the API documentation on the parameters a `VideoManager` object constructor takes for details.
+The complete PySceneDetect Python API Reference can be found at the following URL:
+
+[http://pyscenedetect-api.readthedocs.io/](http://pyscenedetect-api.readthedocs.io/)
+
+Performing scene detection/segmenting live video streams is only supported by the API currently, not the CLI.  See the API documentation on the parameters a `VideoManager` object constructor takes for details (pass a list containing the device ID instead of a filename, e.g. `[1]` for device 1).
 
 The general usage workflow is to determine which detection method and threshold to use (this can even be done iteratively), using these values to create a `SceneDetector` object, the type of which depends on the detection method you want to use (e.g. `ThresholdDetector`, `ContentDetector`).  These detectors are then added to a `SceneManager` class, with optionally a `StatsManager` to cache frame metrics so subsequent scene detection runs are much faster (and can be saved/loaded to/from disk).  Finally, an open `VideoManager` object can be passed to the `SceneManager.detect_scenes()` method, which returns the number of frames processed.
 

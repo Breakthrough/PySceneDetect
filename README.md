@@ -11,7 +11,11 @@ Video Scene Cut Detection and Analysis Tool
 
 **New**: The latest release of PySceneDetect adds precise splitting support via `ffmpeg`, an improved CLI interface, and a significantly improved and refactored Python API.  Note that this release (v0.5) may break existing scripts and code using PySceneDetect.  Those who install `v0.5-beta` can check out [the updated usage document](https://github.com/Breakthrough/PySceneDetect/blob/master/USAGE.md), or call `scenedetect help` from a terminal/console (`scenedetect.py help` if running the beta distribution locally).
 
-There is an installer for Windows users that automatically installs all dependencies and the `scenedetect` command system wide (64-bit only currently).  This is the recommended installation method for Windows users now, and it can be found on [the Releases page](https://github.com/Breakthrough/PySceneDetect/releases).  The Windows builds do not require an existing Python environment, nor any other prerequisites, but downloading `mkvmerge`/`ffmpeg` manually is still required for video splitting support.  There is also a portable .zip version available.
+There is also newly created API documentation for the `scenedetect` module, available at:
+
+[http://pyscenedetect-api.readthedocs.io/](http://pyscenedetect-api.readthedocs.io/)
+
+There is an installer for Windows users that automatically installs all dependencies and the `scenedetect` command system wide (64-bit only currently) - **Latest Windows build is v0.4, Windows users who wish to upgrade can install from source in the meantime to get v0.5-beta-1**.  This is the recommended installation method for Windows users now, and it can be found on [the Releases page](https://github.com/Breakthrough/PySceneDetect/releases).  The Windows builds do not require an existing Python environment, nor any other prerequisites, but downloading `mkvmerge`/`ffmpeg` manually is still required for video splitting support.  There is also a portable .zip version available.
 
 It is still recommended that both Linux and Mac users download the source distribution, following the Quick Install instructions below.
 
