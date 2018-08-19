@@ -167,4 +167,7 @@ html_theme = 'alabaster'
 html_theme_options = {
     'sidebar_width': '235px',
     'description': 'v0.5 CLI/API Reference Manual',
+    'github_user': 'Breakthrough',
+    'github_repo': 'PySceneDetect',
+    'github_type': 'star',
 }
