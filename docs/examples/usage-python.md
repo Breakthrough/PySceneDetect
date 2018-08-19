@@ -6,7 +6,7 @@ In addition to being used from the command line, or through the GUI, PySceneDete
 
 ## PySceneDetect API Reference
 
-**The complete PySceneDetect Python API reference [can be found *here* (link).](http://pyscenedetect-api.readthedocs.io/)**
+**The complete PySceneDetect Python API Reference can be found in the [PySceneDetect Manual](http://pyscenedetect-manual.readthedocs.io/), located at [pyscenedetect-manual.readthedocs.io/](http://pyscenedetect-manual.readthedocs.io/)**.
 
 
 ## Example

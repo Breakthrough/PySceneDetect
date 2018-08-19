@@ -3,9 +3,9 @@
 API Reference
 ----------------------------------------------------------
 
-The complete PySceneDetect Python API reference can be found at the following URL:
+The complete PySceneDetect Python API reference can be found in the [PySceneDetect Manual](http://pyscenedetect-manual.readthedocs.io/) which is located at:
 
-[http://pyscenedetect-api.readthedocs.io/](http://pyscenedetect-api.readthedocs.io/)
+[http://pyscenedetect-manual.readthedocs.io/](http://pyscenedetect-manual.readthedocs.io/)
 
 
 API Overview

@@ -17,8 +17,6 @@ Overview
    :members:
    :undoc-members:
 
-
-
 ``video_manager`` Functions and Constants
 ===============================================================
 

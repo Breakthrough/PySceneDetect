@@ -13,6 +13,12 @@ You can also print the usage/help manual of PySceneDetect with the `help` comman
 scenedetect help
 ```
 
+
+## PySceneDetect Manual
+
+**The complete PySceneDetect Command-Line Interface (CLI) Reference can be found in the [PySceneDetect Manual](http://pyscenedetect-manual.readthedocs.io/), located at [pyscenedetect-manual.readthedocs.io/](http://pyscenedetect-manual.readthedocs.io/)**.
+
+
 ## Quick Example
 
 For example, to perform content-aware scene detection (`detect-content`) on a video (`--input my_video.mp4`), listing all scenes in the console/to a CSV file (`list-scenes`), *and* saving each detected scene as image files (`save-images`):

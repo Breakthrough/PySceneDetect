@@ -1,6 +1,6 @@
 
 
-The complete PySceneDetect Python API reference [can be found *here* (link).](http://pyscenedetect-api.readthedocs.io/)
+The complete PySceneDetect Python API reference [can be found *here* [PySceneDetect Manual]](http://pyscenedetect-manual.readthedocs.io/)
 
 -------------------------------
 
