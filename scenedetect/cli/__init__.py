@@ -535,7 +535,7 @@ def list_scenes_command(ctx, output, filename, no_output_file, quiet):
     'File name format, to use when saving image files. You can use the'
     ' $VIDEO_NAME and $SCENE_NUMBER macros in the file name.')
 @click.option(
-    '--high-quality', '-h',
+    '--high-quality', '-hq',
     is_flag=True, flag_value=True, help=
     'Encode video with higher quality, overrides -f option if present.'
     ' Equivalent to specifying --rate-factor 17 and --preset slow.')
@@ -567,7 +567,7 @@ def list_scenes_command(ctx, output, filename, no_output_file, quiet):
     type=click.IntRange(0, 100), help=
     'Video encoding quality (x264 constant rate factor), from 0-100, where lower'
     ' values represent better quality, with 0 indicating lossless.'
-    ' [default: 22, if -h/--high-quality is set: 17]')
+    ' [default: 22, if -hq/--high-quality is set: 17]')
 @click.option(
     '--preset', '-p', metavar='LEVEL', default=None,
     type=click.Choice([
@@ -592,7 +592,7 @@ def split_video_command(ctx, output, filename, high_quality, override_args, quie
     if copy:
         ctx.obj.split_mkvmerge = True
         if high_quality:
-            logging.warning('-h/--high-quality flag ignored due to -c/--copy.')
+            logging.warning('-hq/--high-quality flag ignored due to -c/--copy.')
         if override_args:
             logging.warning('-f/--ffmpeg-args option ignored due to -c/--copy.')
     if not override_args:

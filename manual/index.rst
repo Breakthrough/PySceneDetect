@@ -3,8 +3,9 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
+#######################################################################
 PySceneDetect v0.5 Manual
--------------------------------------------
+#######################################################################
 
 Note that this manual refers to both the the PySceneDetect
 command-line interface (the `scenedetect` command) and the PySceneDetect Python API
@@ -19,16 +20,17 @@ The latest source code for PySceneDetect can always be found on Github at
 
 
 
+***********************************************************************
 Table of Contents
-=========================================
+***********************************************************************
 
 
 .. toctree::
     :maxdepth: 3
-    :caption: Command-Line Interface (CLI):
+    :caption: Command-Line Interface [CLI]:
     :name: clitoc
 
-    cli/options
+    cli/global_options
     cli/detectors
     cli/commands
 
@@ -38,6 +40,7 @@ Table of Contents
     :caption: Python API Documentation:
     :name: apitoc
 
+    api
     api/frame_timecode
     api/video_manager
     api/scene_manager

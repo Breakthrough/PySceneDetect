@@ -14,7 +14,11 @@
 #
 import os
 import sys
+
+import alabaster
+
 sys.path.insert(0, os.path.abspath('..'))
+
 
 # -- Project information -----------------------------------------------------
 
@@ -159,6 +163,8 @@ texinfo_documents = [
 
 # -- Extension configuration -------------------------------------------------
 
-
-html_theme = "sphinx_rtd_theme"
-
+html_theme = 'alabaster'
+html_theme_options = {
+    'sidebar_width': '235px',
+    'description': 'v0.5 CLI/API Reference Manual',
+}
