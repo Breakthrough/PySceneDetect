@@ -21,37 +21,13 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-""" PySceneDetect `scenedetect.frame_timecode` Module
+""" PySceneDetect ``scenedetect.frame_timecode`` Module
 
-This module contains the FrameTimecode object, which is used as a way for PySceneDetect
+This module contains the ``FrameTimecode`` object, which is used as a way for PySceneDetect
 to store frame-accurate timestamps of each cut.  This is done by also specifying the
 video framerate with the timecode, allowing a frame number to be converted to/from
-a floating-point number of seconds, or string in the form "HH:MM:SS[.nnn]" (where the
-"[.nnn]" part is optional).
-
-Example:
-    A FrameTimecode can be created by specifying the frame number as an integer, along
-    with the framerate:
-
-        x = FrameTimecode(timecode = 0, fps = 29.97)
-
-    It can also be created from a floating-point number of seconds.  Note that calling
-    x.get_frames() will return 200 in this case (10.0 seconds at 20.0 frames/sec):
-
-        x = FrameTimecode(timecode = 10.0, fps = 20.0)
-
-    Timecode can also be specified as a string in "HH:MM:SS[.nnn]" format.  Note that
-    calling `x.get_frames()` will return 600 in this case (1 minute, or 60 seconds, at
-    10 frames/sec):
-
-        x = FrameTimecode(timecode = "00:01:00.000", fps = 10)
-
-FrameTimecode objects can be added and subtracted.  Note, however, that a negative
-timecode is not representable by a FrameTimecode, and subtractions towards zero
-will wrap at 0.  For example, calling `x.get_frames()` in this case will return 0:
-
-    x = FrameTimecode(0, 10) - FrameTimecode(10, 10)
-    print(x.get_frames())
+a floating-point number of seconds, or string in the form ``"HH:MM:SS[.nnn]"`` where
+the ``[.nnn]`` part is optional.
 
 Unit tests for the FrameTimecode object can be found in tests/test_timecode.py.
 """
@@ -71,15 +47,18 @@ class FrameTimecode(object):
     """ Object for frame-based timecodes, using the video framerate
     to compute back and forth between frame number and second/timecode formats.
 
-    The passed argument is declared valid if it meets one of three valid types:
-      1) string: standard timecode HH:MM:SS[.nnn]:
-            in string form 'HH:MM:SS' or 'HH:MM:SS.nnn', or
-            in list/tuple form [HH, MM, SS] or [HH, MM, SS.nnn]
-      2) float: number of seconds S[.SSS], where S >= 0.0:
-            in string form 'Ss' or 'S.SSSs' (e.g. '5s', '1.234s'), or
-            in integer or floating point form S or S.SSS
-      3) int: Exact number of frames N, where N >= 0:
-            in either integer or string form N or 'N'
+    The timecode argument is valid only if it complies with one of the following
+    three types/formats:
+
+    1) string: standard timecode HH:MM:SS[.nnn]:
+        `str` in form 'HH:MM:SS' or 'HH:MM:SS.nnn', or
+        `list`/`tuple` in form [HH, MM, SS] or [HH, MM, SS.nnn]
+    2) float: number of seconds S[.SSS], where S >= 0.0:
+        `float` in form S.SSS, or
+        `str` in form 'Ss' or 'S.SSSs' (e.g. '5s', '1.234s')
+    3) int: Exact number of frames N, where N >= 0:
+        `int` in form `N`, or
+        `str` in form 'N'
 
     Arguments:
         timecode (str, float, int, or FrameTimecode):  A timecode or frame
@@ -92,7 +71,9 @@ class FrameTimecode(object):
             in operations. This argument is always required, unless **timecode**
             is a FrameTimecode.
     Raises:
-        TypeError, ValueError
+        TypeError: Thrown if timecode is wrong type/format, or if fps is None
+            or a type other than int or float.
+        ValueError: Thrown when specifying a negative timecode or framerate.
     """
 
     def __init__(self, timecode=None, fps=None):

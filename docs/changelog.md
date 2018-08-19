@@ -13,6 +13,7 @@ PySceneDetect Changelog
  * several fixes to the documentation, including improper dates and outdated CLI arguments (PR #26 and #, thanks [@elcombato]
  (https://github.com/Breakthrough/PySceneDetect/pull/26), and [@colelawrence](https://github.com/Breakthrough/PySceneDetect/pull/33))
  * [other] move from BSD 2-clause to 3-clause license
+ * [enhance] add Sphinx-generated API documentation (available at: )
 
 
 ## 0.4 (January 14, 2017) &nbsp;<span class="fa fa-tags"></span>

@@ -160,3 +160,5 @@ texinfo_documents = [
 # -- Extension configuration -------------------------------------------------
 
 
+html_theme = "sphinx_rtd_theme"
+

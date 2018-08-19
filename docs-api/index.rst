@@ -6,7 +6,13 @@
 PySceneDetect API Reference
 -------------------------------------------
 
-Note that this documentation refers to the PySceneDetect Python API (the `scenedetect` module).  The latest documentation for the PySceneDetect command-line interface (the `scenedetect` **command**) can be found `on Readthedocs (link) <http://pyscenedetect.readthedocs.io/en/latest/>`_.
+Note that this documentation refers to the PySceneDetect Python API
+(the `scenedetect` module).  The latest documentation for the PySceneDetect
+command-line interface (the `scenedetect` **command**) can be found
+`on Readthedocs (link) <http://pyscenedetect.readthedocs.io/en/latest/>`_.
+
+The latest source code for PySceneDetect can always be found
+`on Github (link) <http://github.com/Breakthrough/PySceneDetect>`_.
 
 
 
@@ -26,6 +32,15 @@ Table of Contents
     scenedetect/video_splitter
 
 
+.. toctree::
+    :maxdepth: 3
+    :caption: AWd
+
+    scenedetect/frame_timecode
+    scenedetect/video_manager
+    scenedetect/scene_manager
+
+
 Indices and Tables
 ==================
 
@@ -33,3 +48,19 @@ Indices and Tables
 * :ref:`modindex`
 * :ref:`search`
 
+
+
+
+.. attention::
+   Beware killer rabbits!
+
+
+awd
+
+
+.. note:: This is a note admonition.
+   This is the second line of the first paragraph.
+
+   - The note contains all indented body elements
+     following.
+   - It includes this bullet list.

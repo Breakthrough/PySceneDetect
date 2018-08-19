@@ -27,8 +27,9 @@
 """ PySceneDetect `scenedetect.video_manager` Module
 
 This module contains the VideoManager class, which provides a consistent
-interface to reading videos. This module also contains specific exceptions
-raised upon certain error conditions.
+interface to reading videos, specific exceptions raised upon certain error
+conditions, and some global helper functions to open/close multiple videos,
+as well as validate their parameters.
 
 The VideoManager can be constructed with a path to a video (or sequence of
 videos) and a start and end time/duration, then passed to a SceneManager
@@ -126,8 +127,6 @@ class InvalidDownscaleFactor(ValueError):
 ## VideoManager Constants & Helper Functions
 ##
 
-# The default downscale factor for a video of size W x H enforces the constraint
-# that W >= 200 to ensure an adequate amount of pixels for scene detection.
 DEFAULT_DOWNSCALE_FACTORS = {
     3200: 12,        # ~4k
     2100: 8,        # ~2k
@@ -137,6 +136,10 @@ DEFAULT_DOWNSCALE_FACTORS = {
     600: 3,
     400: 2        # ~480p
 }
+"""Dict[int, int]: The default downscale factor for a video of size W x H,
+which enforces the constraint that W >= 200 to ensure an adequate amount
+of pixels for scene detection while providing a speedup in processing. """
+
 
 
 def compute_downscale_factor(frame_width):
@@ -483,7 +486,7 @@ class VideoManager(object):
 
         Returns:
             Tuple[int, int]: Video frame size in the form (width, height) where width
-                and height represent the size of the video frame in pixels.
+            and height represent the size of the video frame in pixels.
         """
         return self._cap_framesize
 
@@ -495,7 +498,7 @@ class VideoManager(object):
 
         Returns:
             Tuple[int, int]: Video frame size in the form (width, height) where width
-                and height represent the size of the video frame in pixels.
+            and height represent the size of the video frame in pixels.
         """
         return [num_pixels / self._downscale_factor for num_pixels in self._cap_framesize]
 
@@ -695,9 +698,9 @@ class VideoManager(object):
 
         Returns:
             Tuple[bool, Union[None, numpy.ndarray]]: Returns tuple of
-                (True, frame_image) if a frame was grabbed during the last call
-                to grab(), and where frame_image is a numpy ndarray of the
-                decoded frame, otherwise returns (False, None).
+            (True, frame_image) if a frame was grabbed during the last call
+            to grab(), and where frame_image is a numpy ndarray of the
+            decoded frame, otherwise returns (False, None).
 
         Raises:
             VideoDecoderNotStarted: Must call start() before this method.
@@ -726,8 +729,8 @@ class VideoManager(object):
 
         Returns:
             Tuple[bool, Union[None, numpy.ndarray]]: Returns tuple of
-                (True, frame_image) if a frame was grabbed, where frame_image
-                is a numpy ndarray of the decoded frame, otherwise (False, None).
+            (True, frame_image) if a frame was grabbed, where frame_image
+            is a numpy ndarray of the decoded frame, otherwise (False, None).
 
         Raises:
             VideoDecoderNotStarted: Must call start() before this method.
