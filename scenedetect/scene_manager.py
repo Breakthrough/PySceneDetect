@@ -26,12 +26,25 @@
 
 """ PySceneDetect `scenedetect.scene_manager` Module
 
-This module implements the SceneManager object, which is used to coordinate
-SceneDetectors and frame sources (e.g. VideoManagers, VideoCaptures), creating
-a SceneResult object for each detected scene.
+This module implements the :py:class:`SceneManager` object, which is used to coordinate
+SceneDetectors and frame sources (:py:class:`VideoManager <scenedetect.video_manager.VideoManager>`
+or ``cv2.VideoCapture``), creating a cut list (see :py:meth:`SceneManager.get_cut_list`)
+of all changes in scene, which is used to generate a final list of scenes
+(see :py:meth:`SceneManager.get_scene_list`) which contains pairs of start/end
+:py:class:`FrameTimecode <scenedetect.frame_timecode.FrameTimecode>`
+objects at each scene boundaries.
 
-The SceneManager also facilitates passing a StatsManager, if any is defined,
-to the associated SceneDetectors for caching of frame metrics.
+The :py:class:`FrameTimecode <scenedetect.frame_timecode.FrameTimecode>` objects and `tuples`
+thereof returned by :py:meth:`get_cut_list <SceneManager.get_cut_list>` and
+:py:meth:`get_scene_list <SceneManager.get_scene_list>`, respectively, can be sorted if for
+some reason the scene (or cut) list becomes unsorted. The :py:class:`SceneManager` also
+facilitates passing a :py:class:`scenedetect.stats_manager.StatsManager`,
+if any is defined, to the associated :py:class:`scenedetect.scene_detector.SceneDetector`
+objects for caching of frame metrics.
+
+This speeds up subsequent calls to the :py:meth:`SceneManager.detect_scenes` method
+that process the same frames with the same detection algorithm, even if different
+threshold values (or other algorithm options) are used.
 """
 
 # Standard Library Imports
@@ -79,12 +92,12 @@ def write_scene_list(output_csv_file, scene_list, cut_list=None):
 
 
 class SceneManager(object):
-    """ The SceneManager facilitates detection of scenes via the detect_scenes() method,
-    given a video source (scenedetect.VideoManager or cv2.VideoCapture), and SceneDetector
-    algorithms added via the add_detector() method.
+    """ The SceneManager facilitates detection of scenes via the :py:meth:`detect_scenes` method,
+    given a video source (:py:class:`VideoManager <scenedetect.video_manager.VideoManager>`
+    or cv2.VideoCapture), and SceneDetector algorithms added via the :py:meth:`add_detector` method.
 
     Can also optionally take a StatsManager instance during construction to cache intermediate
-    scene detection calculations, making subsequent calls to detect_scenes() much faster,
+    scene detection calculations, making subsequent calls to :py:meth:`detect_scenes` much faster,
     allowing the cached values to be saved/loaded to/from disk, and also manually determining
     the optimal threshold values or other options for various detection algorithms.
     """
@@ -247,8 +260,8 @@ class SceneManager(object):
         can be obtained by calling the get_scene_list() method afterwards.
 
         Arguments:
-            frame_source (scenedetect.VideoManager or cv2.VideoCapture):  A source of
-                frames to process (using frame_source.read() as in VideoCapture).
+            frame_source (scenedetect.video_manager.VideoManager or cv2.VideoCapture):
+                A source of frames to process (using frame_source.read() as in VideoCapture).
                 VideoManager is preferred as it allows concatenation of multiple videos
                 as well as seeking, by defining start time and end time/duration.
             start_time (int or FrameTimecode): Time/frame the passed frame_source object
@@ -261,7 +274,7 @@ class SceneManager(object):
             frame_skip (int): Number of frames to skip (i.e. process every 1 in N+1
                 frames, where N is frame_skip, processing only 1/N+1 percent of the
                 video, speeding up the detection time at the expense of accuracy).
-            show_progress (bool): If True, and the tqdm module is available, displays
+            show_progress (bool): If True, and the ``tqdm`` module is available, displays
                 a progress bar with the progress, framerate, and expected time to
                 complete processing the video frame source.
         Returns:

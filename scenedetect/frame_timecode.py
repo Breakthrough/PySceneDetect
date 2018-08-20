@@ -131,10 +131,13 @@ class FrameTimecode(object):
         """ Get the current time/position in number of frames.  This is the
         equivalent of accessing the self.frame_num property (which, along
         with the specified framerate, forms the base for all of the other
-        time measurement calculations, e.g. the get_seconds() method).
+        time measurement calculations, e.g. the :py:meth:`get_seconds` method).
+
+        If using to compare a :py:class:`FrameTimecode` with a frame number,
+        you can do so directly against the object (e.g. ``FrameTimecode(10, 10.0) <= 10``).
 
         Returns:
-            An integer of the current time/frame number.
+            int: The current time in frames (the current frame number).
         """
         return int(self.frame_num)
 
@@ -144,7 +147,7 @@ class FrameTimecode(object):
         """ Get Framerate: Returns the framerate used by the FrameTimecode object.
 
         Returns:
-            Framerate (float) of the current FrameTimecode object, in frames per second.
+            float: Framerate of the current FrameTimecode object, in frames per second.
         """
         return self.framerate
 
@@ -159,7 +162,7 @@ class FrameTimecode(object):
                     MINIMUM_FRAMES_PER_SECOND_DELTA_FLOAT defined in this module.
 
         Returns:
-            True if passed fps matches the FrameTimecode object's framerate, False otherwise.
+            bool: True if passed fps matches the FrameTimecode object's framerate, False otherwise.
 
         """
         return math.fabs(self.framerate - fps) < MINIMUM_FRAMES_PER_SECOND_DELTA_FLOAT
@@ -169,8 +172,11 @@ class FrameTimecode(object):
         # type: () -> float
         """ Get the frame's position in number of seconds.
 
+        If using to compare a :py:class:`FrameTimecode` with a frame number,
+        you can do so directly against the object (e.g. ``FrameTimecode(10, 10.0) <= 1.0``).
+
         Returns:
-            A float of the current time/position in seconds.
+            float: The current time/position in seconds.
         """
         return float(self.frame_num) / self.framerate
 
@@ -180,11 +186,11 @@ class FrameTimecode(object):
         """ Get a formatted timecode string of the form HH:MM:SS[.nnn].
 
         Args:
-            precision:     The number of decimal places to include in the output [.nnn].
+            precision:     The number of decimal places to include in the output ``[.nnn]``.
             use_rounding:  True (default) to round the output to the desired precision.
 
         Returns:
-            A string with a formatted timecode (HH:MM:SS[.nnn]).
+            str: The current time in the form ``"HH:MM:SS[.nnn]"``.
         """
         # Compute hours and minutes based off of seconds, and update seconds.
         secs = self.get_seconds()

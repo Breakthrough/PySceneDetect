@@ -174,4 +174,5 @@ html_theme_options = {
     'tip_bg': '#f0f6fa',
     'hint_bg': '#f0faf0',
     'warn_bg': '#f5ebd0',
+    'attention_bg': '#f5dcdc',
 }

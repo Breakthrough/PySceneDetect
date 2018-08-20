@@ -1,6 +1,6 @@
 
 ***********************************************************************
- ``scenedetect`` Program Options
+ ``scenedetect`` Options
 ***********************************************************************
 
 =======================================================================
@@ -14,16 +14,14 @@ input video(s)
 the stats file to use (`--stats video.stats.csv`)
 
 .. attention::
-   Any options on this page (global options) **must** be set before specifying
-   *any* commands.  Your commands must follow the form (where square brackets
+   Any options on this page (global options) *must* be set before using
+   any commands.  Your commands must follow the form (where square brackets
    denote things that may be optional):
 
        ``scenedetect (global options) (command-A [command-A options]) (...)``
    
    This is because once a command is specified, all options/arguments afterwards
-   will be parsed assuming they belong to *that* command (unless the argument is
-   another command, in which case the command is applied, and the process
-   repeats).
+   will be parsed assuming they belong to *that* command.
 
 
 =======================================================================

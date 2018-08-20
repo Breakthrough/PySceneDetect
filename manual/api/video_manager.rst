@@ -2,17 +2,10 @@
 VideoManager
 ---------------------------------------------------------------
 
-Overview
-===============================================================
-
 .. automodule:: scenedetect.video_manager
 
-.. note::
 
-    The :py:meth:`VideoManager.set_duration` and :py:meth:`VideoManager.set_downscale_factor`
-    methods must be called **before** :py:meth:`VideoManager.start`.
-
-Example
+Usage Example
 ===============================================================
 
 Assuming we have a file `video.mp4`, we can load it and iterate through the
@@ -39,8 +32,9 @@ resolution.
 
         video_manager = VideoManager(['video1.mp4', 'video2.mp4'],
                                      framerate=23.976)
+        # base_timecode will have a framerate of 23.976 now.
+        base_timecode = video_manager.get_base_timecode()
 
-    
 
 Next, we set the duration to 2 minutes and the downscale factor to the default
 based on video resolution:
@@ -50,9 +44,16 @@ based on video resolution:
     video_manager.set_duration(duration=base_timecode + '00:02:00')
     video_manager.set_downscale_factor()
 
-Note that if you are using a :py:class:`SceneManager` and set the ``start_time``
-argument of :py:meth:`VideoManager.set_duration`, you must also set the same
-``start_time`` argument when calling :py:meth:`SceneManager.detect_scenes`.
+:py:meth:`set_duration() <VideoManager.set_duration>` takes up to two arguments of
+``start_time``, ``end_time``, and ``duration``, where ``end_time`` and ``duration``
+are mutually exclusive.  Each argument should be a
+:py:class:`FrameTimecode <scenedetect.frame_timecode.FrameTimecode>` object.
+
+Note that if you are using a :py:class:`SceneManager <scenedetect.scene_manager.SceneManager>`
+and set the ``start_time`` argument of :py:meth:`VideoManager.set_duration`,
+you must pass set the same ``start_time`` argument to the
+:py:meth:`SceneManager.detect_scenes() <scenedetect.scene_manager.SceneManager.detect_scenes>`
+method.
 
 After calling the above, the number of frames returned by the :py:class:`VideoManager`
 will be limited to 2 minutes of video exactly, and setting the default downscale factor
@@ -60,8 +61,8 @@ ensures an adequate frame size for performing scene detection in most use cases.
 
 .. warning::
 
-    The :py:meth:`VideoManager.set_duration` and :py:meth:`VideoManager.set_downscale_factor`
-    methods must be called **before** :py:meth:`VideoManager.start`.
+    The :py:meth:`~VideoManager.set_duration` and :py:meth:`~VideoManager.set_downscale_factor`
+    methods must be called **before** :py:meth:`~VideoManager.start`.
 
 Now that all of our options have been set, we can call :py:meth:`VideoManager.start`
 and begin processing frames the same way we would with an OpenCV VideoCapture object:
@@ -81,14 +82,18 @@ Note that the :py:meth:`VideoManager.read`, :py:meth:`VideoManager.grab` and
 as their OpenCV counterparts.  Likewise, the frame image returned by these
 methods is a standard Numpy ``ndarray`` which can be operated on as expected.
 
+Lastly, when all processing is done, make sure to call :py:meth:`VideoManager.release`
+to cleanup all resources acquired by the :py:class:`VideoManager` object.
+
 .. hint::
-    Use a ``try``/``finally`` block to ensure that the VideoManager
-    release() method is called.  For example:
+    Use a ``try``/``finally`` block to ensure that the :py:meth:`~VideoManager.release`
+    method is called.  For example:
 
     .. code:: python
 
         video_manager = VideoManager(['video.mp4'])
         try:
+            video_manager.set_downscale_factor()
             video_manager.start()
             while True:
                 if not video_manager.grab():
@@ -100,6 +105,13 @@ methods is a standard Numpy ``ndarray`` which can be operated on as expected.
             
 
 
+When passing a :py:class:`VideoManager` to a
+:py:class:`SceneManager <scenedetect.scene_manager.SceneManager>` class, the
+:py:meth:`~VideoManager.start` method must already be called. Furthermore, if
+the ``start_time`` argument was passed to the :py:meth:`~VideoManager.set_duration`
+method, the same ``start_time`` must also be passed as an argument when calling the
+:py:meth:`SceneManager.detect_scenes() <scenedetect.scene_manager.SceneManager.detect_scenes>`
+method.
 
 
 
@@ -136,7 +148,7 @@ The following functions and constants are available in the ``scenedetect.video_m
 .. autofunction:: scenedetect.video_manager.validate_capture_parameters
 
 
-VideoManager Exceptions
+Exceptions
 ===============================================================
 
 .. autoexception:: scenedetect.video_manager.VideoOpenFailure
