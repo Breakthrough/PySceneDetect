@@ -166,8 +166,12 @@ texinfo_documents = [
 html_theme = 'alabaster'
 html_theme_options = {
     'sidebar_width': '235px',
-    'description': 'v0.5 CLI/API Reference Manual',
+    'description': 'CLI/API Reference Manual [v0.5]',
     'github_user': 'Breakthrough',
     'github_repo': 'PySceneDetect',
     'github_type': 'star',
+
+    'tip_bg': '#f0f6fa',
+    'hint_bg': '#f0faf0',
+    'warn_bg': '#f5ebd0',
 }

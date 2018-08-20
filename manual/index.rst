@@ -7,6 +7,13 @@
 PySceneDetect v0.5 Manual
 #######################################################################
 
+
+.. warning::
+
+    The **API reference** (second section) is complete, with more documentation and examples coming soon.
+
+    The CLI documentation, however (the first section), is still being written.  In the meantime check out the main PySceneDetect page linked below.
+
 Note that this manual refers to both the the PySceneDetect
 command-line interface (the `scenedetect` command) and the PySceneDetect Python API
 (the `scenedetect` module).
@@ -59,18 +66,3 @@ Indices and Tables
 * :ref:`search`
 
 
-
-
-.. attention::
-   Beware killer rabbits!
-
-
-awd
-
-
-.. note:: This is a note admonition.
-   This is the second line of the first paragraph.
-
-   - The note contains all indented body elements
-     following.
-   - It includes this bullet list.

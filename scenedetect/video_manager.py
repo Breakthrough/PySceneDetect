@@ -26,17 +26,17 @@
 
 """ PySceneDetect `scenedetect.video_manager` Module
 
-This module contains the VideoManager class, which provides a consistent
+This module contains the :py:class:`VideoManager` class, which provides a consistent
 interface to reading videos, specific exceptions raised upon certain error
 conditions, and some global helper functions to open/close multiple videos,
 as well as validate their parameters.
 
-The VideoManager can be constructed with a path to a video (or sequence of
-videos) and a start and end time/duration, then passed to a SceneManager
-object for performing scene detection analysis. If the start time is
-modified, this needs to be reflected in the SceneManager as well.
+The :py:class:`VideoManager` can be constructed with a path to a video (or sequence of
+videos) and a start and end time/duration, then passed to a `SceneManager`
+object for performing scene detection analysis.  If the start time is modified,
+then it also needs to be reflected in the `SceneManager`.
 
-The VideoManager class attempts to emulate some methods of the OpenCV
+The :py:class:`VideoManager` class attempts to emulate some methods of the OpenCV
 cv2.VideoCapture object, and can be used interchangably with one with
 respect to a SceneManager object.
 """
