@@ -43,11 +43,16 @@ class SceneDetector(object):
     to get an idea of how a particular detector can be created.
     """
 
-    def __init__(self):
-        self.stats_manager = None
-        self._metric_keys = []
-        self.cli_name = 'detect-none'
+    stats_manager = None
+    """ Optional :py:class:`StatsManager <scenedetect.stats_manager.StatsManager>` to
+    use for caching frame metrics to and from."""
 
+    _metric_keys = []
+    """ List of frame metric keys to be registered with the :py:attr:`stats_manager`,
+    if available. """
+
+    cli_name = 'detect-none'
+    """ Name of detector to use in command-line interface description. """
 
     def is_processing_required(self, frame_num):
         # type: (int) -> bool

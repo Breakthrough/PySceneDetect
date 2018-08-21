@@ -40,8 +40,8 @@ will wrap at zero.
 .. warning::
 
     Be careful when subtracting :py:class:`FrameTimecode` objects.
-    In the example below, ``c`` will be at time 0 since ``b > a``,
-    but ``d`` will be at frame 15:
+    In the example below, ``c`` will be at frame 0 since ``b > a``,
+    but ``d`` will be at frame 5:
 
     .. code:: python
 
@@ -52,6 +52,20 @@ will wrap at zero.
         print(c)
         print(d)
 
+When performing arithmetic/comparison operations with :py:class:`FrameTimecode` objects,
+the other operand can be a :py:class:`FrameTimecode`, an `int` number of frames,
+a `float` number of seconds, or a `str` of the form `"HH:MM:SS[.nnn]"`. For example:
+
+.. code:: python
+
+    x = FrameTimecode(timecode = "00:01:00.000", fps = 10.0)
+    # Can add int (frames), float (seconds), or str (timecode).
+    print(x + 10)
+    print(x + 10.0)
+    print(x + "00:10:00")
+    # The same goes for comparison.
+    print((x + 10.0) == "00:01:10.000")
+
 
 
 ``FrameTimecode`` Class
@@ -60,4 +74,5 @@ will wrap at zero.
 .. autoclass:: scenedetect.frame_timecode.FrameTimecode
    :members:
    :undoc-members:
+
 

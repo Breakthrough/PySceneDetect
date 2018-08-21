@@ -33,16 +33,18 @@ subsequent calls to the script (specifically the
 
 .. code:: python
 
+    from __future__ import print_function
     import os
 
-    import scenedetect
+    # Standard PySceneDetect imports:
     from scenedetect.video_manager import VideoManager
     from scenedetect.scene_manager import SceneManager
-    from scenedetect.frame_timecode import FrameTimecode
-    # for saving/loading stats file
+    # For caching detection metrics and saving/loading to a stats file
     from scenedetect.stats_manager import StatsManager
-    # for content-aware scene detection
-    from scenedetect.detectors import ContentDetector
+
+    # For content-aware scene detection:
+    from scenedetect.detectors.content_detector import ContentDetector
+
 
     def find_scenes(video_path):
         # type: (str) -> List[Tuple[FrameTimecode, FrameTimecode]]
@@ -84,7 +86,8 @@ subsequent calls to the script (specifically the
 
             print('List of scenes obtained:')
             for i, scene in enumerate(scene_list):
-                print('  Scene %2d: Start %s / Frame %d, End %s / Frame %d' % (
+                print(
+                    'Scene %2d: Start %s / Frame %d, End %s / Frame %d' % (
                     i+1,
                     scene[0].get_timecode(), scene[0].get_frames(),
                     scene[1].get_timecode(), scene[1].get_frames(),))
@@ -111,6 +114,8 @@ subsequent calls to the script (specifically the
 
 ``scene_manager`` Functions
 ===============================================================
+
+.. autofunction:: scenedetect.scene_manager.get_scenes_from_cuts
 
 .. autofunction:: scenedetect.scene_manager.write_scene_list
 
