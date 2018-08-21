@@ -39,17 +39,20 @@ subsequent calls to the script (specifically the
     from scenedetect.video_manager import VideoManager
     from scenedetect.scene_manager import SceneManager
     from scenedetect.frame_timecode import FrameTimecode
-    from scenedetect.stats_manager import StatsManager      # for saving/loading stats file
-    from scenedetect.detectors import ContentDetector       # for content-aware scene detection
+    # for saving/loading stats file
+    from scenedetect.stats_manager import StatsManager
+    # for content-aware scene detection
+    from scenedetect.detectors import ContentDetector
 
     def find_scenes(video_path):
         # type: (str) -> List[Tuple[FrameTimecode, FrameTimecode]]
         video_manager = VideoManager([video_path])
         stats_manager = StatsManager()
-        # Construct our SceneManager and pass it our StatsManager instance.
+        # Construct our SceneManager and pass it our StatsManager.
         scene_manager = SceneManager(stats_manager)
 
-        # Add ContentDetector algorithm (constructor takes detector options like threshold).
+        # Add ContentDetector algorithm (each detector's constructor
+        # takes detector options, e.g. threshold).
         scene_manager.add_detector(ContentDetector())
         base_timecode = video_manager.get_base_timecode()
 
@@ -65,11 +68,6 @@ subsequent calls to the script (specifically the
                 with open(stats_file_path, 'r') as stats_file:
                     stats_manager.load_from_csv(stats_file, base_timecode)
 
-            start_time = base_timecode + 20     # 00:00:00.667
-            end_time = base_timecode + 20.0     # 00:00:20.000
-            # Set video_manager duration to read frames from 00:00:00 to 00:00:20.
-            video_manager.set_duration(start_time=start_time, end_time=end_time)
-
             # Set downscale factor to improve processing speed.
             video_manager.set_downscale_factor()
 
@@ -82,12 +80,11 @@ subsequent calls to the script (specifically the
 
             # Obtain list of detected scenes.
             scene_list = scene_manager.get_scene_list(base_timecode)
-            # Like FrameTimecodes, each scene in the scene_list can be sorted if the
-            # list of scenes becomes unsorted.
+            # Each scene is a tuple of (start, end) FrameTimecodes.
 
             print('List of scenes obtained:')
             for i, scene in enumerate(scene_list):
-                print('    Scene %2d: Start %s / Frame %d, End %s / Frame %d' % (
+                print('  Scene %2d: Start %s / Frame %d, End %s / Frame %d' % (
                     i+1,
                     scene[0].get_timecode(), scene[0].get_frames(),
                     scene[1].get_timecode(), scene[1].get_frames(),))

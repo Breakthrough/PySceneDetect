@@ -61,6 +61,44 @@ from scenedetect.platform import get_csv_writer
 from scenedetect.stats_manager import FrameMetricRegistered
 
 
+def get_scenes_from_cuts(cut_list, base_timecode, num_frames, start_frame=0):
+    # type: List[FrameTimecode], FrameTimecode, Union[int, FrameTimecode],
+    #       Optional[Union[int, FrameTimecode]] -> List[Tuple[FrameTimecode, FrameTimecode]]
+    """ Returns a list of tuples of start/end FrameTimecodes for each scene based on a
+    list of detected scene cuts/breaks.
+
+    The scene list is generated from a cutting list (:py:meth:`SceneManager.get_cut_list`),
+    noting that each scene is contiguous, starting from the first to last frame of the input.
+
+    Arguments:
+        cut_list (List[FrameTimecode]): List of FrameTimecode objects where scene cuts/breaks occur.
+        base_timecode (FrameTimecode): The base_timecode of which all FrameTimecodes in the cut_list
+            are based on.
+        num_frames (int or FrameTimecode): The number of frames, or FrameTimecode representing
+            duration, of the video that was processed (used to generate last scene's end time).
+        start_frame (int or FrameTimecode): The start frame or FrameTimecode of the cut list.
+            Used to generate the first scene's start time.
+    Returns:
+        List of tuples in the form (start_time, end_time), where both start_time and
+        end_time are FrameTimecode objects representing the exact time/frame where each
+        scene occupies based on the input cut_list.
+    """
+    # Scene list, where scenes are tuples of (Start FrameTimecode, End FrameTimecode).
+    scene_list = []
+    if not cut_list:
+        return scene_list
+    # Initialize last_cut to the first frame we processed,as it will be
+    # the start timecode for the first scene in the list.
+    last_cut = base_timecode + start_frame
+    for cut in cut_list:
+        scene_list.append((last_cut, cut))
+        last_cut = cut
+    # Last scene is from last cut to end of video.
+    scene_list.append((last_cut, base_timecode + num_frames))
+
+    return scene_list
+
+
 def write_scene_list(output_csv_file, scene_list, cut_list=None):
     """ Writes the given list of scenes to an output file handle in CSV format.
 
@@ -171,22 +209,10 @@ class SceneManager(object):
             end_time are FrameTimecode objects representing the exact time/frame where each
             detected scene in the video begins and ends.
         """
-        # Scene list, where scenes are tuples of (Start FrameTimecode, End FrameTimecode),
-        # and base_timecode is the base FrameTimecode of the video used in detect_scenes.
-        scene_list = []
-        if not self._cutting_list:
-            return scene_list
-        cut_list = self.get_cut_list(base_timecode)
-        # Initialize last_cut to the first frame we processed,as it will be
-        # the start timecode for the first scene in the list.
-        last_cut = base_timecode + self._start_frame
-        for cut in cut_list:
-            scene_list.append((last_cut, cut))
-            last_cut = cut
-        # Last scene is from last cut to end of video.
-        scene_list.append((last_cut, base_timecode + self._num_frames))
+        return get_scenes_from_cuts(
+            self.get_cut_list(base_timecode), base_timecode,
+            self._num_frames, self._start_frame)
 
-        return scene_list
 
 
     def get_cut_list(self, base_timecode):
