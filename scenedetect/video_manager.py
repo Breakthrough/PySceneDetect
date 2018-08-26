@@ -549,7 +549,7 @@ class VideoManager(object):
             self._end_time = self._start_time + duration - 1
 
         if self._end_time is not None:
-            self._frame_length = min(self._frame_length, self._end_time.get_frames()) + 1
+            self._frame_length = min(self._frame_length + 1, self._end_time.get_frames())
         self._frame_length -= self._start_time.get_frames()
 
         if self._logger is not None:
