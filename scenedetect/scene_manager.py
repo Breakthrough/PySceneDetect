@@ -67,8 +67,10 @@ def get_scenes_from_cuts(cut_list, base_timecode, num_frames, start_frame=0):
     """ Returns a list of tuples of start/end FrameTimecodes for each scene based on a
     list of detected scene cuts/breaks.
 
+    This function is called when using the :py:meth:`SceneManager.get_scene_list` method.
     The scene list is generated from a cutting list (:py:meth:`SceneManager.get_cut_list`),
     noting that each scene is contiguous, starting from the first to last frame of the input.
+
 
     Arguments:
         cut_list (List[FrameTimecode]): List of FrameTimecode objects where scene cuts/breaks occur.
@@ -276,7 +278,7 @@ class SceneManager(object):
             self._add_cuts(detector.post_process(frame_num))
 
 
-    def detect_scenes(self, frame_source, start_time=0, end_time=None, frame_skip=0,
+    def detect_scenes(self, frame_source, end_time=None, frame_skip=0,
                       show_progress=True):
         # type: (VideoManager, Union[int, FrameTimecode],
         #        Optional[Union[int, FrameTimecode]], Optional[bool]) -> int
@@ -290,10 +292,6 @@ class SceneManager(object):
                 A source of frames to process (using frame_source.read() as in VideoCapture).
                 VideoManager is preferred as it allows concatenation of multiple videos
                 as well as seeking, by defining start time and end time/duration.
-            start_time (int or FrameTimecode): Time/frame the passed frame_source object
-                is currently at in time (i.e. the frame # read() will return next).
-                Must be passed if the frame_source has been seeked past frame 0
-                (i.e. calling set_duration on a VideoManager or seeking a VideoCapture).
             end_time (int or FrameTimecode): Maximum number of frames to detect
                 (set to None to detect all available frames). Only needed for OpenCV
                 VideoCapture objects, as VideoManager allows set_duration.
@@ -318,6 +316,7 @@ class SceneManager(object):
 
         total_frames = math.trunc(frame_source.get(cv2.CAP_PROP_FRAME_COUNT))
 
+        start_time = frame_source.get(cv2.CAP_PROP_POS_FRAMES)
         if isinstance(start_time, FrameTimecode):
             start_frame = start_time.get_frames()
         elif start_time is not None:
@@ -333,8 +332,12 @@ class SceneManager(object):
 
         if end_frame is not None:
             total_frames = end_frame
-        if start_frame is not None:
+
+        if start_frame is not None and not isinstance(start_time, FrameTimecode):
             total_frames -= start_frame
+
+        if total_frames < 0:
+            total_frames = 0
 
         progress_bar = None
         if tqdm and show_progress:
@@ -378,6 +381,7 @@ class SceneManager(object):
             num_frames = curr_frame - start_frame
 
         finally:
+
             if progress_bar:
                 progress_bar.close()
 

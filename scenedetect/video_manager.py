@@ -549,7 +549,7 @@ class VideoManager(object):
             self._end_time = self._start_time + duration - 1
 
         if self._end_time is not None:
-            self._frame_length = max(self._frame_length, self._end_time.get_frames())
+            self._frame_length = min(self._frame_length, self._end_time.get_frames()) + 1
         self._frame_length -= self._start_time.get_frames()
 
         if self._logger is not None:
@@ -658,6 +658,8 @@ class VideoManager(object):
         """
         if capture_prop == cv2.CAP_PROP_FRAME_COUNT and index is None:
             return self._frame_length
+        elif capture_prop == cv2.CAP_PROP_POS_FRAMES:
+            return self._curr_time
         elif index is None:
             index = 0
         return self._cap_list[index].get(capture_prop)

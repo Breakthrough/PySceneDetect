@@ -315,8 +315,8 @@ class CliContext(object):
         logging.info('Detecting scenes...')
 
         num_frames = self.scene_manager.detect_scenes(
-            frame_source=self.video_manager, start_time=self.start_frame,
-            frame_skip=self.frame_skip, show_progress=not self.quiet_mode)
+            frame_source=self.video_manager, frame_skip=self.frame_skip,
+            show_progress=not self.quiet_mode)
 
         duration = time.time() - start_time
         logging.info('Processed %d frames in %.1f seconds (average %.2f FPS).',
