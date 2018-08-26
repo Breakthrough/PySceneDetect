@@ -1,10 +1,16 @@
+
+***********************************************************************
 SceneManager
------------------------------------
+***********************************************************************
 
 .. automodule:: scenedetect.scene_manager
 
+
+.. _scenemanager-example:
+
+=======================================================================
 Usage Example
-===================================
+=======================================================================
 
 In the code example below, we create a function ``find_scenes()`` which performs
 the following actions:
@@ -22,14 +28,12 @@ the following actions:
    objects of the start and end times for each detected scene
 
 This example is a modified version of
-`the api_test.py file <https://github.com/Breakthrough/PySceneDetect/blob/master/api_test.py>`_,
+`the api_test.py file <https://github.com/Breakthrough/PySceneDetect/blob/master/tests/api_test.py>`_,
 and shows complete usage of a
 :py:class:`SceneManager <scenedetect.scene_manager.SceneManager>` object
 to perform content-aware scene detection using the
 :py:class:`ContentDetector <scenedetect.detectors.content_detector.ContentDetector>`,
-printing a list of scenes, and both saving/loading a stats file to make
-subsequent calls to the script (specifically the
-:py:meth:`detect_scenes <SceneManager.detect_scenes>` method) significantly faster.
+printing a list of scenes, and both saving/loading a stats file.
 
 .. code:: python
 
@@ -77,8 +81,7 @@ subsequent calls to the script (specifically the
             video_manager.start()
 
             # Perform scene detection on video_manager.
-            scene_manager.detect_scenes(frame_source=video_manager,
-                                        start_time=start_time)
+            scene_manager.detect_scenes(frame_source=video_manager)
 
             # Obtain list of detected scenes.
             scene_list = scene_manager.get_scene_list(base_timecode)
@@ -102,18 +105,27 @@ subsequent calls to the script (specifically the
 
         return scene_list
 
+The use of a :py:class:`StatsManager <scenedetect.stats_manager.StatsManager>` allows
+subsequent calls to ``find_scenes()`` (specifically the
+:py:meth:`detect_scenes <SceneManager.detect_scenes>` method) with the same video
+to be significantly faster, and saving/loading the stats file to a CSV file on disk
+allows the stats to persist even after the program exits.  This is the same file
+that is generated when running the ``scenedetect`` command with the ``-s``/``--stats``
+option.
 
 
+=======================================================================
 ``SceneManager`` Class
-===================================
+=======================================================================
 
 .. autoclass:: scenedetect.scene_manager.SceneManager
    :members:
    :undoc-members:
 
 
+=======================================================================
 ``scene_manager`` Functions
-===============================================================
+=======================================================================
 
 .. autofunction:: scenedetect.scene_manager.get_scenes_from_cuts
 

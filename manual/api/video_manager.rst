@@ -107,12 +107,7 @@ to cleanup all resources acquired by the :py:class:`VideoManager` object.
 
 When passing a :py:class:`VideoManager` to a
 :py:class:`SceneManager <scenedetect.scene_manager.SceneManager>` class, the
-:py:meth:`~VideoManager.start` method must already be called. Furthermore, if
-the ``start_time`` argument was passed to the :py:meth:`~VideoManager.set_duration`
-method, the same ``start_time`` must also be passed as an argument when calling the
-:py:meth:`SceneManager.detect_scenes() <scenedetect.scene_manager.SceneManager.detect_scenes>`
-method.
-
+:py:meth:`~VideoManager.start` method must already have been called.
 
 
 ``VideoManager`` Class 
