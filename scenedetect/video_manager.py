@@ -354,7 +354,7 @@ class VideoManager(object):
                 If not set (i.e. is None), it will be deduced from the first open capture
                 in video_files, else raises a VideoFramerateUnavailable exception.
 
-        Raises:            
+        Raises:
             ValueError: No video file(s) specified, or invalid/multiple device IDs specified.
             TypeError: `framerate` must be type `float`.
             IOError: Video file(s) not found.
@@ -545,11 +545,10 @@ class VideoManager(object):
                 raise ValueError("end_time is before start_time in time.")
             self._end_time = end_time
         elif duration is not None:
-            # Need to subtract 1 here as end_time is inclusive.
-            self._end_time = self._start_time + duration - 1
+            self._end_time = self._start_time + duration
 
         if self._end_time is not None:
-            self._frame_length = min(self._frame_length + 1, self._end_time.get_frames())
+            self._frame_length = min(self._frame_length, self._end_time.get_frames() + 1)
         self._frame_length -= self._start_time.get_frames()
 
         if self._logger is not None:

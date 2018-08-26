@@ -275,7 +275,7 @@ def test_multiple_videos(test_video_file):
                 break
             assert frame_image.shape[0] > 0
             curr_time += 1
-        assert curr_time == base_timecode + (NUM_FRAMES * NUM_VIDEOS)
+        assert curr_time == base_timecode + ((NUM_FRAMES+1) * NUM_VIDEOS)
 
     finally:
         # Will release the VideoManagers in vm_list as well.

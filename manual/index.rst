@@ -26,6 +26,16 @@ The latest source code for PySceneDetect can always be found on Github at
 `github.com/Breakthrough/PySceneDetect <http://github.com/Breakthrough/PySceneDetect>`_.
 
 
+.. note::
+
+     PySceneDetect supports both Python 2.7 and 3.x.
+
+     Certain types in the API reference are described according to
+     `PEP 484 <https://www.python.org/dev/peps/pep-0484/>`_
+     (see `PEP 483 for some examples <https://www.python.org/dev/peps/pep-0483/>`_).
+
+
+
 
 ***********************************************************************
 Table of Contents

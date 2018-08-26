@@ -61,6 +61,10 @@ from scenedetect.platform import get_csv_writer
 from scenedetect.stats_manager import FrameMetricRegistered
 
 
+##
+## SceneManager Helper Functions
+##
+
 def get_scenes_from_cuts(cut_list, base_timecode, num_frames, start_frame=0):
     # type: List[FrameTimecode], FrameTimecode, Union[int, FrameTimecode],
     #       Optional[Union[int, FrameTimecode]] -> List[Tuple[FrameTimecode, FrameTimecode]]
@@ -130,6 +134,10 @@ def write_scene_list(output_csv_file, scene_list, cut_list=None):
             '%d' % end.get_frames(), end.get_timecode(), '%.3f' % end.get_seconds(),
             '%d' % duration.get_frames(), duration.get_timecode(), '%.3f' % duration.get_seconds()])
 
+
+##
+## SceneManager Class Implementation
+##
 
 class SceneManager(object):
     """ The SceneManager facilitates detection of scenes via the :py:meth:`detect_scenes` method,
@@ -284,8 +292,8 @@ class SceneManager(object):
         #        Optional[Union[int, FrameTimecode]], Optional[bool]) -> int
         """ Perform scene detection on the given frame_source using the added SceneDetectors.
 
-        Blocks until all frames in the frame_source have been processed. Results
-        can be obtained by calling the get_scene_list() method afterwards.
+        Blocks until all frames in the frame_source have been processed. Results can
+        be obtained by calling either the get_scene_list() or get_cut_list() methods.
 
         Arguments:
             frame_source (scenedetect.video_manager.VideoManager or cv2.VideoCapture):
@@ -294,17 +302,20 @@ class SceneManager(object):
                 as well as seeking, by defining start time and end time/duration.
             end_time (int or FrameTimecode): Maximum number of frames to detect
                 (set to None to detect all available frames). Only needed for OpenCV
-                VideoCapture objects, as VideoManager allows set_duration.
-            frame_skip (int): Number of frames to skip (i.e. process every 1 in N+1
-                frames, where N is frame_skip, processing only 1/N+1 percent of the
-                video, speeding up the detection time at the expense of accuracy).
+                VideoCapture objects; for VideoManager objects, use set_duration() instead.
+            frame_skip (int): Not recommended except for extremely high framerate videos.
+                Number of frames to skip (i.e. process every 1 in N+1 frames,
+                where N is frame_skip, processing only 1/N+1 percent of the video,
+                speeding up the detection time at the expense of accuracy).
+                `frame_skip` **must** be 0 (the default) when using a StatsManager.
             show_progress (bool): If True, and the ``tqdm`` module is available, displays
                 a progress bar with the progress, framerate, and expected time to
                 complete processing the video frame source.
         Returns:
-            Number of frames read and processed from the frame source.
+            int: Number of frames read and processed from the frame source.
         Raises:
-            ValueError
+            ValueError: `frame_skip` **must** be 0 (the default) if the SceneManager
+                was constructed with a StatsManager object.
         """
 
         if frame_skip > 0 and self._stats_manager is not None:
@@ -349,8 +360,8 @@ class SceneManager(object):
                 if end_frame is not None and curr_frame >= end_frame:
                     break
                 # We don't compensate for frame_skip here as the frame_skip option
-                # is not allowed when using a StatsManager, and thus processing is
-                # always required for all frames when using frame_skip.
+                # is not allowed when using a StatsManager - thus, processing is
+                # *always* required for *all* frames when frame_skip > 0.
                 if (self._is_processing_required(self._num_frames + start_frame)
                         or self._is_processing_required(self._num_frames + start_frame + 1)):
                     ret_val, frame_im = frame_source.read()

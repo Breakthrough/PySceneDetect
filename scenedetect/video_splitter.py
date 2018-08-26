@@ -59,7 +59,7 @@ using a source distribution, these programs can be obtained from following
 URLs (note that mkvmerge is a part of the MKVToolNix package):
 
     FFmpeg:   [ https://ffmpeg.org/download.html ]
-    
+
     mkvmerge: [ https://mkvtoolnix.download/downloads.html ]
 
 Also note that Linux users can likely obtain them from their package

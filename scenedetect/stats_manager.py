@@ -157,7 +157,10 @@ class StatsManager(object):
         Used to ensure that multiple detector keys don't overlap.
 
         Raises:
-            FrameMetricRegistered
+            FrameMetricRegistered: A particular metric_key has already been registered/added
+                to the StatsManager. Only if the StatsManager is being used for read-only
+                access (i.e. all frames in the video have already been processed for the given
+                metric_key in the exception) is this behavior desirable.
         """
         for metric_key in metric_keys:
             if metric_key not in self._registered_metrics:
@@ -200,7 +203,7 @@ class StatsManager(object):
         """ Metrics Exist: Checks if the given metrics/stats exist for the given frame.
 
         Returns:
-            (bool) True if the given metric keys exist for the frame, False otherwise.
+            bool: True if the given metric keys exist for the frame, False otherwise.
         """
         return all([self._metric_exists(frame_number, metric_key) for metric_key in metric_keys])
 
@@ -210,8 +213,8 @@ class StatsManager(object):
         """ Is Save Required: Checks if the stats have been updated since loading.
 
         Returns:
-            (bool) True if there are frame metrics/statistics not yet written to disk,
-                False otherwise.
+            bool: True if there are frame metrics/statistics not yet written to disk,
+            False otherwise.
         """
         return self._metrics_updated
 
@@ -231,8 +234,10 @@ class StatsManager(object):
                 exception will be thrown if is_save_required() returns False.
 
         Raises:
-            NoMetricsRegistered
-            NoMetricsSet
+            NoMetricsRegistered: No frame metrics have been registered to save,
+                nor is there any frame data to save.
+            NoMetricsSet: No frame metrics have been entered/updated, thus there
+                is no frame data to save.
         """
         csv_writer = get_csv_writer(csv_file)
         # Ensure we need to write to the file, and that we have data to do so with.
@@ -270,12 +275,14 @@ class StatsManager(object):
             reset_save_required: If True, clears the flag indicating that a save is required.
 
         Returns:
-            (Union[int, None]) Number of frames/rows read from the CSV file, or None if the
-                input file was blank.
+            int or None: Number of frames/rows read from the CSV file, or None if the
+            input file was blank.
 
         Raises:
-            StatsFileCorrupt
-            StatsFileFramerateMismatch
+            StatsFileCorrupt: Stats file is corrupt and can't be loaded, or wrong file
+                was specified.
+            StatsFileFramerateMismatch: Framerate does not match the loaded stats file,
+                indicating either the wrong video or wrong stats file was specified.
         """
         csv_reader = get_csv_reader(csv_file)
         num_cols = None
