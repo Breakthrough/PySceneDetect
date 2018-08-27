@@ -12,7 +12,8 @@ PySceneDetect v0.5 Manual
 
     The **API reference** (second section) is complete, with more documentation and examples coming soon.
 
-    The CLI documentation, however (the first section), is still being written.  In the meantime check out the main PySceneDetect page linked below.
+    The CLI documentation is still under development, but nearly complete. To fill in any gaps in the meantime,
+    check out the main PySceneDetect page below or visit `py.scenedetect.com <http://py.scenedetect.com>`_.
 
 Note that this manual refers to both the the PySceneDetect
 command-line interface (the `scenedetect` command) and the PySceneDetect Python API
@@ -20,7 +21,7 @@ command-line interface (the `scenedetect` command) and the PySceneDetect Python 
 
 Information regarding installing/downloading PySceneDetect or obtaining the latest
 release can be found at
-`pyscenedetect.readthedocs.io <http://pyscenedetect.readthedocs.io/en/latest/>`_.
+`py.scenedetect.com <http://py.scenedetect.com/>`_.
 
 The latest source code for PySceneDetect can always be found on Github at
 `github.com/Breakthrough/PySceneDetect <http://github.com/Breakthrough/PySceneDetect>`_.
@@ -29,12 +30,9 @@ The latest source code for PySceneDetect can always be found on Github at
 .. note::
 
      PySceneDetect supports both Python 2.7 and 3.x.
-
-     Certain types in the API reference are described according to
-     `PEP 484 <https://www.python.org/dev/peps/pep-0484/>`_
-     (see `PEP 483 for some examples <https://www.python.org/dev/peps/pep-0483/>`_).
-
-
+     
+     It is suggested to use or migrate to Python 3.x whenever possible,
+     as it provides better overall performance.
 
 
 ***********************************************************************

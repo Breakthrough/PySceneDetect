@@ -13,7 +13,7 @@ Video Scene Cut Detection and Analysis Tool
 
 There is also newly created API documentation manual (CLI coming soon) for the `scenedetect` module, available at:
 
-[http://pyscenedetect-manual.readthedocs.io/](http://pyscenedetect-manual.readthedocs.io/)
+[man.scenedetect.com](http://man.scenedetect.com/)
 
 There is an installer for Windows users that automatically installs all dependencies and the `scenedetect` command system wide (64-bit only currently) - **Latest Windows build is v0.4, Windows users who wish to upgrade can install from source in the meantime to get v0.5-beta-1**.  This is the recommended installation method for Windows users now, and it can be found on [the Releases page](https://github.com/Breakthrough/PySceneDetect/releases).  The Windows builds do not require an existing Python environment, nor any other prerequisites, but downloading `mkvmerge`/`ffmpeg` manually is still required for video splitting support.  There is also a portable .zip version available.
 
@@ -30,7 +30,7 @@ To test if you have the required prerequisites, open a `python` prompt, and run 
 
 If both of those commands execute without any problems, you should be able to install PySceneDetect without any issues. To enable video splitting support, you will also need to have `mkvmerge` or `ffmpeg` installed on your system.
 
-See [the `USAGE.md` file](https://github.com/Breakthrough/PySceneDetect/blob/master/USAGE.md) for details on detection modes, default values/thresholds to try, and how to effectively choose the optimal detection parameters.  Full documentation for PySceneDetect can be found on Readthedocs at http://pyscenedetect.readthedocs.org/
+See [the `USAGE.md` file](https://github.com/Breakthrough/PySceneDetect/blob/master/USAGE.md) for details on detection modes, default values/thresholds to try, and how to effectively choose the optimal detection parameters.  Full documentation for PySceneDetect can be found [on Readthedocs](http://pyscenedetect.readthedocs.org/), or by visiting [py.scenedetect.com](http://py.scenedetect.com/).
 
 ----------------------------------------------------------
 
