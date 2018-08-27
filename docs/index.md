@@ -1,4 +1,5 @@
-<h1 class="wy-text-neutral">PySceneDetect &nbsp;<span class="fa fa-film wy-text-info"></span></h1>
+
+<img alt="PySceneDetect" src="https://raw.githubusercontent.com/Breakthrough/PySceneDetect/master/docs/img/pyscenedetect_logo_small.png" /> 
 <h4 class="wy-text-info">Intelligent scene cut detection and video splitting tool.</h4>
 
 <div class="important">

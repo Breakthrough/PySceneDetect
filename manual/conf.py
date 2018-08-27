@@ -178,4 +178,6 @@ html_theme_options = {
     'hint_bg': '#f0faf0',
     'warn_bg': '#f5ebd0',
     'attention_bg': '#f5dcdc',
+    'logo': 'pyscenedetect_logo.png',
+    #'logo_name': True,
 }
