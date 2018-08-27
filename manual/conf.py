@@ -175,9 +175,13 @@ html_theme_options = {
     'github_type': 'star',
 
     'tip_bg': '#f0f6fa',
+    'tip_border': '#c2dcf2',
     'hint_bg': '#f0faf0',
+    'hint_border': '#d3ebdc',
     'warn_bg': '#f5ebd0',
+    'warn_border': '#f2caa2',
     'attention_bg': '#f5dcdc',
+    'attention_border': '#ffaaaa',
     'logo': 'pyscenedetect_logo.png',
     #'logo_name': True,
 }
