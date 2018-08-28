@@ -183,5 +183,6 @@ html_theme_options = {
     'attention_bg': '#f5dcdc',
     'attention_border': '#ffaaaa',
     'logo': 'pyscenedetect_logo.png',
+    'logo_name': False,
     #'logo_name': True,
 }
