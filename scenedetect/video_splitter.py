@@ -47,7 +47,7 @@
 
 """ PySceneDetect `scenedetect.video_splitter` Module
 
-The scenedetect.video_splitter module contains functions to split videos
+The `scenedetect.video_splitter` module contains functions to split videos
 with a scene list using external tools (e.g. `mkvmerge`, `ffmpeg`), as well
 as functions to check if the tools are available.
 
@@ -58,12 +58,11 @@ Certain distributions of PySceneDetect may include the above software. If
 using a source distribution, these programs can be obtained from following
 URLs (note that mkvmerge is a part of the MKVToolNix package):
 
-    FFmpeg:   [ https://ffmpeg.org/download.html ]
+ * FFmpeg:   [ https://ffmpeg.org/download.html ]
+ * mkvmerge: [ https://mkvtoolnix.download/downloads.html ]
 
-    mkvmerge: [ https://mkvtoolnix.download/downloads.html ]
-
-Also note that Linux users can likely obtain them from their package
-manager (e.g. `sudo apt-get install ffmpeg`).
+If you are a Linux user, you can likely obtain the above programs from your
+package manager (e.g. `sudo apt-get install ffmpeg`).
 
 Once installed, ensure the program can be accessed system-wide by calling
 the `mkvmerge` or `ffmpeg` command from a terminal/command prompt.

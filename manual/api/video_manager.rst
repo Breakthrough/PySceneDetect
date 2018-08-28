@@ -107,7 +107,8 @@ to cleanup all resources acquired by the :py:class:`VideoManager` object.
 
 When passing a :py:class:`VideoManager` to a
 :py:class:`SceneManager <scenedetect.scene_manager.SceneManager>` class, the
-:py:meth:`~VideoManager.start` method must already have been called.
+:py:meth:`~VideoManager.start` method must already have been called.  See the
+:ref:`example in the SceneManager reference<scenemanager-example>` for more details.
 
 
 ``VideoManager`` Class 

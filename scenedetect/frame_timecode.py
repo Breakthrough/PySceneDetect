@@ -23,13 +23,15 @@
 
 """ PySceneDetect ``scenedetect.frame_timecode`` Module
 
-This module contains the ``FrameTimecode`` object, which is used as a way for PySceneDetect
-to store frame-accurate timestamps of each cut.  This is done by also specifying the
-video framerate with the timecode, allowing a frame number to be converted to/from
-a floating-point number of seconds, or string in the form ``"HH:MM:SS[.nnn]"`` where
-the ``[.nnn]`` part is optional.
+This module contains the :py:class:`FrameTimecode` object, which is used as a way for
+PySceneDetect to store frame-accurate timestamps of each cut. This is done by also
+specifying the video framerate with the timecode, allowing a frame number to be
+converted to/from a floating-point number of seconds, or string in the form
+`"HH:MM:SS[.nnn]"` where the `[.nnn]` part is optional.
 
-Unit tests for the FrameTimecode object can be found in tests/test_timecode.py.
+See the following examples, or the :py:class:`FrameTimecode constructor <FrameTimecode>`.
+
+Unit tests for the FrameTimecode object can be found in `tests/test_timecode.py`.
 """
 
 # Standard Library Imports

@@ -620,10 +620,10 @@ class VideoManager(object):
         # type: () -> None
         """ Reset - Reopens captures passed to the constructor of the VideoManager.
 
-        Can only be called after the release method has been called.
+        Can only be called after the release() method has been called.
 
         Raises:
-            VideoDecodingInProgress: Must call stop() before this method.
+            VideoDecodingInProgress: Must call release() before this method.
         """
         if self._started:
             raise VideoDecodingInProgress()

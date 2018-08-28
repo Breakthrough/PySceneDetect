@@ -235,23 +235,23 @@ The `split-video` command takes the following options:
 
  * ``-o``, ``--output DIR``
     Output directory to save videos to. Overrides
-    global option -o/--output if set.
+    global option `-o`/`--output` if set.
  * ``-f``, ``--filename NAME``
-    File name format, to use when saving image files.
-    You can use the $VIDEO_NAME and $SCENE_NUMBER
-    macros in the file name.  [default: $VIDEO_NAME-
-    Scene-$SCENE_NUMBER]
+    File name format, *without* extension, to use when saving image files.
+    You can use the `$VIDEO_NAME` and `$SCENE_NUMBER`
+    macros in the file name.  [default: `$VIDEO_NAME-
+    Scene-$SCENE_NUMBER`]
  * ``-h``, ``--high-quality``
-    Encode video with higher quality, overrides -f
+    Encode video with higher quality, overrides `-a`
     option if present. Equivalent to specifying
     --rate-factor 17 and --preset slow.
  * ``-a``, ``--override-args ARGS``
     Override codec arguments/options passed to FFmpeg
     when splitting and re-encoding scenes. Use double
     quotes (") around specified arguments. Must
-    specify at least audio/video codec to use (e.g. -a
-    "-c:v [...] and -c:a [...]"). [default: "-c:v
-    libx264 -preset veryfast -crf 22 -c:a copy"]
+    specify at least audio/video codec to use (e.g. `-a
+    "-c:v [...] and -c:a [...]"`). [default: `"-c:v
+    libx264 -preset veryfast -crf 22 -c:a copy"`]
  * ``-q``, ``--quiet``
     Suppresses output from external video splitting
     tool.
@@ -274,12 +274,12 @@ The `split-video` command takes the following options:
     Video encoding quality (x264 constant rate
     factor), from 0-100, where lower values represent
     better quality, with 0 indicating lossless.
-    [default: 22, if -h/--high-quality is set: 17]
+    [default: 22, if `-hq`/`--high-quality` is set: 17]
  * ``-p``, ``--preset LEVEL``
     Video compression quality preset (x264 preset).
     Can be one of: ultrafast, superfast, veryfast,
     faster, fast, medium, slow, slower, and veryslow.
     Faster modes take less time to run, but the output
     files may be larger. [default: veryfast, if
-    -h/--high quality is set: slow]
+    `-hq`/`--high-quality` is set: slow]
 

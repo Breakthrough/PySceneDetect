@@ -27,18 +27,22 @@
 
 """ PySceneDetect `scenedetect.stats_manager` Module
 
-This file contains the StatsManager class, which provides a key-value store for
-each SceneDetector to read/write the metrics calculated for each frame.
-The StatsManager must be registered to a SceneManager by passing it to the
-SceneManager's constructor.
+This module contains the :py:class:`StatsManager` class, which provides a key-value store
+for each :py:class:`SceneDetector <scenedetect.scene_detector.SceneDetector>` to read/write
+the metrics calculated for each frame. The :py:class:`StatsManager` must be registered to a
+:py:class:`SceneManager <scenedetect.scene_manager.SceneManager>` by passing it to the
+:py:class:`SceneManager constructor <scenedetect.scene_manager.SceneManager>` as the
+`stats_manager` argument.
 
-The entire StatsManager can be saved to and loaded from a human-readable CSV file,
-also allowing both precise determination of the threshold or other optimal values
-for video files.
+The entire :py:class:`StatsManager` can be :py:meth:`saved to <StatsManager.save_to_csv>`
+and :py:meth:`loaded from <StatsManager.load_from_csv>` a human-readable CSV
+file, also allowing both precise determination of the threshold or other optimal values
+for video files.  See the :py:meth:`save_to_csv() <StatsManager.save_to_csv>` and
+:py:meth:`load_from_csv() <StatsManager.load_from_csv>` methods for more information.
 
-The StatsManager can also be used to cache the calculation results of the scene
-detectors being used, speeding up subsequent scene detection runs using the
-same pair of SceneManager/StatsManager objects.
+The :py:class:`StatsManager` can also be used to cache the calculation results of the scene
+detectors being used, speeding up subsequent scene detection runs using the same pair of
+:py:class:`SceneManager<scenedetect.scene_manager.SceneManager>`/:py:class:`StatsManager` objects.
 """
 
 # Standard Library Imports
