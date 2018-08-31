@@ -7,34 +7,25 @@
 PySceneDetect v0.5 Manual
 #######################################################################
 
-.. warning::
-
-    This documentation is a draft/beta of the v0.5 documentation prepared for public review.
-    If you spot any errors, issues, or discrepencies of any kind, feel free to
-    `submit a new issue <https://github.com/Breakthrough/PySceneDetect/issues/new?template=blank-template.md>`_
-    on the `PySceneDetect Issue Tracker <https://github.com/Breakthrough/PySceneDetect/issues>`_
-
-    This documentation is almost complete, but still under development.  To fill in any gaps in the meantime,
-    you can visit the main project page at `py.scenedetect.com <http://py.scenedetect.com>`_.
-
-Note that this manual refers to both the the PySceneDetect
+This manual refers to both the PySceneDetect
 command-line interface (the `scenedetect` command) and the PySceneDetect Python API
 (the `scenedetect` module).
 
 Information regarding installing/downloading PySceneDetect or obtaining the latest
 release can be found at
-`scenedetect.com <http://scenedetect.com/>`_.
+`scenedetect.com <http://scenedetect.com/>`_.  Both Python 2.7 and 3.x are supported, however it is suggested to use or migrate
+to Python 3.x whenever possible, as it provides better overall performance.
 
-The latest source code for PySceneDetect can always be found on Github at
-`github.com/Breakthrough/PySceneDetect <http://github.com/Breakthrough/PySceneDetect>`_.
+PySceneDetect requires `ffmpeg` or `mkvmerge` for video splitting support.
 
 .. note::
 
-     PySceneDetect supports both Python 2.7 and 3.x.
-     
-     It is suggested to use or migrate to Python 3.x whenever possible,
-     as it provides better overall performance.
+     If you see any errors in this manual, or have any recommendations,
+     feel free to raise an issue on
+     `the PySceneDetect issue tracker <https://github.com/Breakthrough/PySceneDetect/issues>`_.
 
+The latest source code for PySceneDetect can be found on Github at
+`github.com/Breakthrough/PySceneDetect <http://github.com/Breakthrough/PySceneDetect>`_.
 
 ***********************************************************************
 Table of Contents
