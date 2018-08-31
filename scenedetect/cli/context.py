@@ -146,19 +146,17 @@ class CliContext(object):
                          output_dir=None):
         # type: (List[Tuple[FrameTimecode, FrameTimecode]) -> None
 
-        if self.num_images != 2:
-            raise NotImplementedError()
-
         if not scene_list:
             return
         if not self.options_processed:
             return
+        if self.num_images <= 0:
+            raise ValueError()
         self.check_input_open()
 
         imwrite_param = []
         if self.image_param is not None:
             imwrite_param = [self.imwrite_params[self.image_extension], self.image_param]
-        click.echo(imwrite_param)
 
         # Reset video manager and downscale factor.
         self.video_manager.release()
@@ -166,57 +164,67 @@ class CliContext(object):
         self.video_manager.set_downscale_factor(1)
         self.video_manager.start()
 
-        filename_template = Template(image_name_template)
-
         # Setup flags and init progress bar if available.
         completed = True
         logging.info('Generating output images (%d per scene)...', self.num_images)
         progress_bar = None
         if tqdm and not self.quiet_mode:
             progress_bar = tqdm(
-                total=len(scene_list) * 2, unit='images')
+                total=len(scene_list) * self.num_images, unit='images')
+
+        filename_template = Template(image_name_template)
+
 
         scene_num_format = '%0'
         scene_num_format += str(max(3, math.floor(math.log(len(scene_list), 10)) + 1)) + 'd'
         image_num_format = '%0'
         image_num_format += str(math.floor(math.log(self.num_images, 10)) + 2) + 'd'
 
-        for i, (start_time, end_time) in enumerate(scene_list):
-            # TODO: Interpolate timecodes if num_frames_per_scene != 2.
-            self.video_manager.seek(start_time)
-            self.video_manager.grab()
-            ret_val, frame_im = self.video_manager.retrieve()
-            if ret_val:
-                cv2.imwrite(
-                    self.get_output_file_path(
-                        '%s.%s' % (filename_template.safe_substitute(
-                            VIDEO_NAME=video_name,
-                            SCENE_NUMBER=scene_num_format % (i+1),
-                            IMAGE_NUMBER=image_num_format % (1)
-                        ), self.image_extension),
-                        output_dir=output_dir), frame_im, imwrite_param)
-            else:
-                completed = False
-                break
-            if progress_bar:
-                progress_bar.update(1)
-            self.video_manager.seek(end_time - 1)
-            self.video_manager.grab()
-            ret_val, frame_im = self.video_manager.retrieve()
-            if ret_val:
-                cv2.imwrite(
-                    self.get_output_file_path(
-                        '%s.%s' % (filename_template.safe_substitute(
-                            VIDEO_NAME=video_name,
-                            SCENE_NUMBER='%03d' % (i+1),
-                            IMAGE_NUMBER='%02d' % (2)
-                        ), self.image_extension),
-                        output_dir=output_dir), frame_im, imwrite_param)
-            else:
-                completed = False
-                break
-            if progress_bar:
-                progress_bar.update(1)
+        timecode_list = dict()
+
+        for i in range(len(scene_list)):
+            timecode_list[i] = []
+
+        if self.num_images == 1:
+            for i, (start_time, end_time) in enumerate(scene_list):
+                duration = end_time - start_time
+                timecode_list[i].append(start_time + int(duration.get_frames() / 2))
+
+        else:
+            middle_images = self.num_images - 2
+            for i, (start_time, end_time) in enumerate(scene_list):
+                timecode_list[i].append(start_time)
+
+                if middle_images > 0:
+                    duration = (end_time.get_frames() - 1) - start_time.get_frames()
+                    duration_increment = None
+                    duration_increment = int(duration / (middle_images + 1))
+                    for j in range(middle_images):
+                        timecode_list[i].append(start_time + ((j+1) * duration_increment))
+
+                # End FrameTimecode is always the same frame as the next scene's start_time
+                # (one frame past the end), so we need to subtract 1 here.
+                timecode_list[i].append(end_time - 1)
+
+        for i in timecode_list:
+            for j, image_timecode in enumerate(timecode_list[i]):
+                self.video_manager.seek(image_timecode)
+                self.video_manager.grab()
+                ret_val, frame_im = self.video_manager.retrieve()
+                if ret_val:
+                    cv2.imwrite(
+                        self.get_output_file_path(
+                            '%s.%s' % (filename_template.safe_substitute(
+                                VIDEO_NAME=video_name,
+                                SCENE_NUMBER=scene_num_format % (i+1),
+                                IMAGE_NUMBER=image_num_format % (j+1)
+                            ), self.image_extension),
+                            output_dir=output_dir), frame_im, imwrite_param)
+                else:
+                    completed = False
+                    break
+                if progress_bar:
+                    progress_bar.update(1)
 
         if not completed:
             logging.error('Could not generate all output images.')
