@@ -1,7 +1,25 @@
       
 PySceneDetect
 ==========================================================
+
 Video Scene Cut Detection and Analysis Tool
+----------------------------------------------------------
+
+.. image:: https://readthedocs.org/projects/pyscenedetect/badge/?version=latest
+   :target: http://pyscenedetect.readthedocs.org/en/latest/?badge=latest
+
+.. image:: https://img.shields.io/github/release/Breakthrough/PySceneDetect.svg
+   :target: https://github.com/Breakthrough/PySceneDetect
+
+.. image:: https://img.shields.io/pypi/status/scenedetect.svg
+   :target: https://github.com/Breakthrough/PySceneDetect
+
+.. image:: https://img.shields.io/pypi/l/scenedetect.svg
+   :target: http://pyscenedetect.readthedocs.org/en/latest/copyright/
+
+.. image:: https://img.shields.io/github/stars/Breakthrough/PySceneDetect.svg?style=social&label=View%20on%20Github
+   :target: https://github.com/Breakthrough/PySceneDetect
+
 ----------------------------------------------------------
 
 Website: http://py.scenedetect.com/
@@ -10,25 +28,7 @@ Documentation: http://manual.scenedetect.com/
 
 Github Repo: https://github.com/Breakthrough/PySceneDetect/
 
-
-.. image:: https://readthedocs.org/projects/pyscenedetect/badge/?version=latest
-   :target: http://pyscenedetect.readthedocs.org/en/latest/?badge=latest
-
-.. image:: https://img.shields.io/github/release/Breakthrough/PySceneDetect.svg
-   :target: https://github.com/Breakthrough/PySceneDetect
-
-.. image:: https://img.shields.io/pypi/status/PySceneDetect.svg
-   :target: https://github.com/Breakthrough/PySceneDetect
-
-.. image:: https://img.shields.io/pypi/dm/PySceneDetect.svg
-   :target: http://pyscenedetect.readthedocs.org/en/latest/download/
-
-.. image:: https://img.shields.io/pypi/l/PySceneDetect.svg
-   :target: http://pyscenedetect.readthedocs.org/en/latest/copyright/
-
-.. image:: https://img.shields.io/github/stars/Breakthrough/PySceneDetect.svg?style=social&label=View%20on%20Github
-   :target: https://github.com/Breakthrough/PySceneDetect
-
+----------------------------------------------------------
 
 PySceneDetect is a command-line tool, written in Python and using OpenCV, which analyzes a video, looking for scene changes or cuts.  The output timecodes can then be used with another tool (e.g. `mkvmerge`, `ffmpeg`) to split the video into individual clips (or using the `split-video` command).  A frame-by-frame analysis can also be generated for a video, to help with determining optimal threshold values or detecting patterns/other analysis methods for a particular video.  
 

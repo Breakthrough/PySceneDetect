@@ -7,15 +7,6 @@
 <a href="download/" class="btn btn-success" style="margin-bottom:8px;" role="button"><span class="fa fa-download"></span>&nbsp; <b>Download</b></a> &nbsp;&nbsp;&nbsp;&nbsp; <a href="changelog/" class="btn btn-info" style="margin-bottom:8px;" role="button"><span class="fa fa-reorder"></span>&nbsp; <b>Changelog</b></a> &nbsp;&nbsp;&nbsp;&nbsp; <a href="download/#installation" class="btn btn-warning" style="margin-bottom:8px;" role="button"><span class="fa fa-gear"></span>&nbsp; <b>Installation</b></a> &nbsp;&nbsp;&nbsp;&nbsp; <a href="examples/usage/" class="btn btn-danger" style="margin-bottom:8px;" role="button"><span class="fa fa-book"></span>&nbsp; <b>Getting Started</b></a>
 </div>
 
-<div class="warning">
-<h3><span class="fa wy-text-warning"></span>&nbsp; The PySceneDetect command-line interface and Python API has changed.</h3>
-This documentation refers to PySceneDetect v0.5, which has a new-and-improved command line interface (CLI) and an improved/refactored Python API.  A new manual for PySceneDetect has also been published, which will serve as a reference guide/documentation for both the CLI and API moving forwards:
-<br/>
-<a href="http://man.scenedetect.com">http://man.scenedetect.com/</a>
-<br/>
-Users still using the latest stable release (v0.4) can find the <a href="https://pyscenedetect.readthedocs.io/en/v0.4/">existing documentation for v0.4 here</a>.
-</div>
-
 **PySceneDetect** is a command-line application and a Python library for **detecting scene changes in videos**, and **automatically splitting the video into separate clips**.  Not only is it free and open-source software (FOSS), but there are several detection methods available ([see Features](features.md)), from simple threshold-based fade in/out detection, to advanced content aware fast-cut detection of each shot.
 
 PySceneDetect can be used on its own as a stand-alone executable, with other applications as part of a video processing pipeline, or integrated directly into other programs/scripts via the Python API.  PySceneDetect is written in Python, and requires the OpenCV and Numpy software libraries.
