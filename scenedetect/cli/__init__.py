@@ -229,7 +229,7 @@ def duplicate_command(ctx, param_hint):
     is_flag=True, flag_value=True, help=
     'Suppresses all output of PySceneDetect except for those from the specified'
     ' commands. Equivalent to setting `--verbosity none`. Overrides the current verbosity'
-    ' level, even if `-v`/`--verbosity` is specified.')
+    ' level, even if `-v`/`--verbosity` is set.')
 @click.pass_context
 def scenedetect_cli(ctx, input, output, framerate, downscale, frame_skip, stats,
                     verbosity, logfile, quiet):
@@ -578,7 +578,7 @@ def list_scenes_command(ctx, output, filename, no_output_file, quiet):
     'Video compression quality preset (x264 preset). Can be one of: ultrafast, superfast,'
     ' veryfast, faster, fast, medium, slow, slower, and veryslow. Faster modes take less'
     ' time to run, but the output files may be larger.'
-    ' [default: veryfast, if -h/--high quality is set: slow]')
+    ' [default: veryfast, if -hq/--high quality is set: slow]')
 @click.pass_context
 def split_video_command(ctx, output, filename, high_quality, override_args, quiet, copy,
                         rate_factor, preset):
@@ -646,7 +646,7 @@ def split_video_command(ctx, output, filename, high_quality, override_args, quie
     'Filename format, *without* extension, to use when saving image files. You can use the'
     ' $VIDEO_NAME, $SCENE_NUMBER, and $IMAGE_NUMBER macros in the file name.')
 @click.option(
-    '--num-images', '-n', metavar='N', default=2, #4,
+    '--num-images', '-n', metavar='N', default=3,
     type=click.INT, help=
     'Number of images to generate. Will always include start/end frame,'
     ' unless N = 1, in which case the image will be the frame at the mid-point'

@@ -4,33 +4,34 @@
 Video Scene Cut Detection and Analysis Tool
 ----------------------------------------------------------
 
-[![Documentation Status](https://readthedocs.org/projects/pyscenedetect/badge/?version=latest)](http://pyscenedetect.readthedocs.org/en/latest/?badge=latest) [![PyPI Status](https://img.shields.io/pypi/status/PySceneDetect.svg)](https://pypi.python.org/pypi/PySceneDetect/) [![PyPI Version](https://img.shields.io/pypi/v/PySceneDetect.svg)](https://pypi.python.org/pypi/PySceneDetect/)  [![PyPI License](https://img.shields.io/pypi/l/PySceneDetect.svg)](http://pyscenedetect.readthedocs.org/en/latest/copyright/)
+[![Documentation Status](https://readthedocs.org/projects/pyscenedetect/badge/?version=latest)](http://pyscenedetect.readthedocs.org/en/latest/?badge=latest) [![PyPI Status](https://img.shields.io/pypi/status/scenedetect.svg)](https://pypi.python.org/pypi/scenedetect/) [![PyPI Version](https://img.shields.io/pypi/v/scenedetect.svg)](https://pypi.python.org/pypi/scenedetect/)  [![PyPI License](https://img.shields.io/pypi/l/scenedetect.svg)](http://pyscenedetect.readthedocs.org/en/latest/copyright/)
 
 
-### Latest Release: v0.5 (August ?, 2018)
+### Latest Release: v0.5 (August 31, 2018)
 
-**New**: The latest release of PySceneDetect adds precise splitting support via `ffmpeg`, an improved CLI interface, and a significantly improved and refactored Python API.  Note that this release (v0.5) may break existing scripts and code using PySceneDetect.  Those who install `v0.5-beta` can check out [the updated usage document](https://github.com/Breakthrough/PySceneDetect/blob/master/USAGE.md), or call `scenedetect help` from a terminal/console (`scenedetect.py help` if running the beta distribution locally).
+**Main Webpage**:  [py.scenedetect.com](http://py.scenedetect.com)
 
-There is also newly created API documentation manual (CLI coming soon) for the `scenedetect` module, available at:
+**Documentation**:  [manual.scenedetect.com](http://manual.scenedetect.com)
 
-[man.scenedetect.com](http://man.scenedetect.com/)
+**Download/Install**: https://pyscenedetect.readthedocs.io/en/latest/download/
 
-There is an installer for Windows users that automatically installs all dependencies and the `scenedetect` command system wide (64-bit only currently) - **Latest Windows build is v0.4, Windows users who wish to upgrade can install from source in the meantime to get v0.5-beta-1**.  This is the recommended installation method for Windows users now, and it can be found on [the Releases page](https://github.com/Breakthrough/PySceneDetect/releases).  The Windows builds do not require an existing Python environment, nor any other prerequisites, but downloading `mkvmerge`/`ffmpeg` manually is still required for video splitting support.  There is also a portable .zip version available.
+----------------------------------------------------------
 
-It is still recommended that both Linux and Mac users download the source distribution, following the Quick Install instructions below.
+**Quick Install**: Requires Python modules `numpy`, OpenCV `cv2`, and (optional) `tqdm` for displaying progress.  To install PySceneDetect via `pip`:
 
-**Quick Install**: Requires Python modules `numpy`, OpenCV `cv2`, and (optional) `tqdm` for displaying progress. See [getting started guide](http://pyscenedetect.readthedocs.org/en/latest/examples/usage/) after install.  After installing the prerequisites, download the latest source distribution from [the Releases page](https://github.com/Breakthrough/PySceneDetect/releases), extract the archive, and in a terminal/command prompt in the location of the extracted files, run:
-
-    sudo python setup.py install
+    pip install scenedetect
 
 To test if you have the required prerequisites, open a `python` prompt, and run the following:
 
     import numpy
     import cv2
 
-If both of those commands execute without any problems, you should be able to install PySceneDetect without any issues. To enable video splitting support, you will also need to have `mkvmerge` or `ffmpeg` installed on your system.
+If both of those commands execute without any problems, you should be able to install PySceneDetect without any issues. To enable video splitting support, you will also need to have `mkvmerge` or `ffmpeg` installed on your system. See [getting started guide](http://pyscenedetect.readthedocs.org/en/latest/examples/usage/) after installation for details.
 
-See [the `USAGE.md` file](https://github.com/Breakthrough/PySceneDetect/blob/master/USAGE.md) for details on detection modes, default values/thresholds to try, and how to effectively choose the optimal detection parameters.  Full documentation for PySceneDetect can be found [on Readthedocs](http://pyscenedetect.readthedocs.org/), or by visiting [py.scenedetect.com](http://py.scenedetect.com/).
+Also see [the `USAGE.md` file](https://github.com/Breakthrough/PySceneDetect/blob/master/USAGE.md) for details on detection modes, default values/thresholds to try, and how to effectively choose the optimal detection parameters.  Full documentation for PySceneDetect can be found [on Readthedocs](http://pyscenedetect.readthedocs.org/), or by visiting [py.scenedetect.com](http://py.scenedetect.com/).
+
+To install from source instead, download the latest release and call `python setup.py install` (see [the download page](https://pyscenedetect.readthedocs.io/en/latest/download/) for details.
+
 
 ----------------------------------------------------------
 
@@ -68,7 +69,7 @@ To ensure you have all the system requirements installed, open a `python` interp
 
 After installation, you can use PySceneDetect as the `scenedetect` command from any terminal/command prompt.  To verify the installation, run the following command to display what version of PySceneDetect you have installed:
 
-    scenedetect --version
+    scenedetect version
 
 
 Usage

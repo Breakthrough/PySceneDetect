@@ -2,21 +2,24 @@
 PySceneDetect Changelog
 ==========================================================
 
-## 0.5 (In Development)
 
- * under development currently, release planned for August 2018, v0.5-beta-1 available now
- * major release, includes stable Python API with examples and updated documentation
+## 0.5 (August 31, 2017) &nbsp;<span class="fa fa-tags"></span>
+
+ * **major** release, includes stable Python API with examples and updated documentation
+ * numerous changes to command-line interface with addition of sub-commands (see [the new manual](http://manual.scenedetect.com) for updated usage information)
+ * [feature] videos are now split using `ffmpeg` by default, resulting in frame-perfect cuts (can still use `mkvmerge` by specifying the `-c`/`--copy` argument to the `split-video` command)
  * [enhance] image filename numbers are now consistent with those of split video scenes (PR #39, thanks [@e271828-](https://github.com/Breakthrough/PySceneDetect/pull/39))
  * [enhance] 5-10% improvement in processing performance due to reduced memory copy operations (PR #40, thanks [@elcombato]
  (https://github.com/Breakthrough/PySceneDetect/pull/40))
- * [internal] updated exception handling to raise proper standard exceptions (PR #37, thanks [@talkain](https://github.com/Breakthrough/PySceneDetect/pull/37))
+ * [enhance] updated exception handling to raise proper standard exceptions (PR #37, thanks [@talkain](https://github.com/Breakthrough/PySceneDetect/pull/37))
  * several fixes to the documentation, including improper dates and outdated CLI arguments (PR #26 and #, thanks [@elcombato]
  (https://github.com/Breakthrough/PySceneDetect/pull/26), and [@colelawrence](https://github.com/Breakthrough/PySceneDetect/pull/33))
- * [other] move from BSD 2-clause to 3-clause license
- * [enhance] add Sphinx-generated API documentation (available at: )
+ * *numerous* other PRs and issues/bug reports that have been fixed - there are too many to list individually here, so I want to extend a big thank you to **everyone** who contributed to making this release better
+ * [enhance] add Sphinx-generated API documentation (available at: http://manual.scenedetect.com)
+ * [project] move from BSD 2-clause to 3-clause license
 
 
-## 0.4 (January 14, 2017) &nbsp;<span class="fa fa-tags"></span>
+## 0.4 (January 14, 2017)
 
  * major release, includes integrated scene splitting via mkvmerge, changes meaning of `-o` / `--output` option
  * [feature] specifying `-o OUTPUT_FILE.mkv` will now automatically split the input video, generating a new video clip for each detected scene in sequence, starting with `OUTPUT_FILE-001.mkv`

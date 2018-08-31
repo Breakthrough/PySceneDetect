@@ -2,6 +2,9 @@
 PySceneDetect
 ==========================================================
 
+For extended usage information, see [the PySceneDetect manual (manual.scenedetect.com)](http://manual.scenedetect.com).
+
+
 Usage (Command Line)
 ----------------------------------------------------------
 

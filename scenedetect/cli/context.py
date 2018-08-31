@@ -256,7 +256,10 @@ class CliContext(object):
             file_path = os.path.join(output_dir, file_path)
         # Now that file_path is an absolute path, let's make sure all the directories
         # exist for us to start writing files there.
-        os.makedirs(os.path.split(os.path.abspath(file_path))[0], exist_ok=True)
+        try:
+            os.makedirs(os.path.split(os.path.abspath(file_path))[0])
+        except OSError:
+            pass
         return file_path
 
     def _open_stats_file(self):
