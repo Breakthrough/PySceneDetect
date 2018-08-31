@@ -41,8 +41,8 @@ Table of Contents
     :name: clitoc
 
     cli/global_options
-    cli/detectors
     cli/commands
+    cli/detectors
 
 =======================================================================
 ``scenedetect`` Python Module
