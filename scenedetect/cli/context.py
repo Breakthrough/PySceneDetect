@@ -419,17 +419,12 @@ class CliContext(object):
                 if not self.split_mkvmerge:
                     logging.warning(
                         'ffmpeg not found, falling back to fast copy mode (split-video -c/--copy).')
-                logging.info('Splitting input video%s using mkvmerge, output path template:\n  %s',
-                             's' if len(video_paths) > 1 else '', output_file_prefix)
                 split_video_mkvmerge(video_paths, scene_list, output_file_prefix, video_name,
                                      suppress_output=self.quiet_mode or self.split_quiet)
             elif ffmpeg_available:
                 if self.split_mkvmerge:
                     logging.warning('mkvmerge not found, falling back to normal splitting'
                                     ' mode (split-video).')
-                logging.info(
-                    'Splitting input video%s using ffmpeg, output path template:\n  %s',
-                    's' if len(video_paths) > 1 else '', output_file_prefix)
                 split_video_ffmpeg(video_paths, scene_list, output_file_prefix,
                                    video_name, arg_override=self.split_args,
                                    hide_progress=self.quiet_mode,
@@ -446,8 +441,8 @@ class CliContext(object):
                 error_str = '\n'.join(error_strs)
                 logging.debug(error_str)
                 raise click.BadParameter(error_str, param_hint='split-video')
-
-            logging.info('Video splitting completed, individual scenes written to disk.')
+            if scene_list:
+                logging.info('Video splitting completed, individual scenes written to disk.')
 
 
 
