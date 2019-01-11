@@ -66,6 +66,7 @@ The following are features being planned or developed for the release following 
 The following are features being planned or developed for future releases of PySceneDetect:
 
  - colour histogram-based scene detection algorithm in the HSV/HSL colourspace [ [#53] ](https://github.com/Breakthrough/PySceneDetect/issues/53)
+ - [perceptual hash](https://en.wikipedia.org/wiki/Perceptual_hashing) based scene detection
  - improve robustness of content-aware detection by combining with edge detection (similar to MATLAB-based scene change detector)
  - adaptive bias for fade in/out interpolation
  - multithreaded implementation of detection algorithms for improved performance
