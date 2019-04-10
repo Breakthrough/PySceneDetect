@@ -389,8 +389,8 @@ class FrameTimecode(object):
             else:
                 raise TypeError(
                     'FrameTimecode objects must have the same framerate to be compared.')
-        #elif other is None:
-        #    return False
+        elif other is None:
+           return False
         else:
             raise TypeError('Unsupported type for performing < with FrameTimecode.')
 

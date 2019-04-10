@@ -1,0 +1,7 @@
+{
+    "useHSV": true,
+    "showPreview": true,
+    "PreviewFrameSkip": 100,
+    "showFrameValues": false,
+    "threshold": 30
+}

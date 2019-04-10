@@ -1,7 +1,17 @@
 # -*- coding: utf-8 -*-
 #
-#         PySceneDetect: Python-Based Video Scene Detector
+#         VEGASSceneDetect: Python-Based Video Scene Detector
 #   ---------------------------------------------------------------
+#     [  Site: http://www.hlinke.de/   ]
+#     [  Github: coming soon  ]
+#     [  Documentation: coming soon    ]
+#
+#  Copyright (C) 2019 Harold Linke <http://www.hlinke.de>.
+# VEGASSceneDetect is licensed under the BSD 3-Clause License; see the included
+# LICENSE file
+# 
+# VEGASSceneDetect is based on pySceneDetect by Brandon Castellano
+#    ---------------------------------------------------------------
 #     [  Site: http://www.bcastell.com/projects/pyscenedetect/   ]
 #     [  Github: https://github.com/Breakthrough/PySceneDetect/  ]
 #     [  Documentation: http://pyscenedetect.readthedocs.org/    ]
@@ -53,13 +63,13 @@ import math
 
 # Third-Party Library Imports
 import cv2
+import numpy as np
 from scenedetect.platform import tqdm
 
 # PySceneDetect Library Imports
 from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.platform import get_csv_writer
 from scenedetect.stats_manager import FrameMetricRegistered
-
 
 ##
 ## SceneManager Helper Functions
@@ -157,7 +167,7 @@ class SceneManager(object):
         self._stats_manager = stats_manager
         self._num_frames = 0
         self._start_frame = 0
-
+        
 
     def add_detector(self, detector):
         # type: (SceneDetector) -> None
@@ -287,7 +297,7 @@ class SceneManager(object):
 
 
     def detect_scenes(self, frame_source, end_time=None, frame_skip=0,
-                      show_progress=True):
+                      show_progress=False, showPreview=True, previewFrameSkip=50):
         # type: (VideoManager, Union[int, FrameTimecode],
         #        Optional[Union[int, FrameTimecode]], Optional[bool]) -> int
         """ Perform scene detection on the given frame_source using the added SceneDetectors.
@@ -351,10 +361,19 @@ class SceneManager(object):
             total_frames = 0
 
         progress_bar = None
+
+        #**VEGASPython**
+        show_progress = False # tqmd does not work correctly in VEGASPython
+        #**/VEGASPython**
+
         if tqdm and show_progress:
             progress_bar = tqdm(
                 total=total_frames, unit='frames')
         try:
+            #**VEGASPython**
+            win1 = "Vegas Scene Detection Preview (press ESC to terminate)"
+            cv2.namedWindow(win1)
+            #**/VEGASPython**
 
             while True:
                 if end_frame is not None and curr_frame >= end_frame:
@@ -372,6 +391,33 @@ class SceneManager(object):
                 if not ret_val:
                     break
                 self._process_frame(self._num_frames + start_frame, frame_im)
+
+                #**VEGASPython**
+                
+                if (self._num_frames % previewFrameSkip == 0):
+                    frame_width = frame_im.shape[1]
+                    frame_height = frame_im.shape[0]
+                    lineHeight = int(frame_height / 40)
+                    linelength = int(frame_width * self._num_frames/total_frames)
+
+                    if showPreview:
+                        show_frame = frame_im.copy()
+                    else:
+                        show_frame = np.zeros((lineHeight,frame_width,3), np.uint8)
+
+                    #draw line on image
+                    #cv2.line(frame_im,(10,0),(10,linelength),(255,255,0),thickness=40)
+                    #cv2.line(frame_im,(0,0),(150,150),(255,255,0),100)
+                    #cv2.rectangle(frame_im,(15,25),(200,150),(0,0,255),15)
+                   
+                    show_frame[0:lineHeight,0:linelength,:] = 128 # generates the grey progress bar at the top
+                    cv2.imshow(win1, show_frame)
+                    key = cv2.waitKey(1)
+                    if key >-1:                            
+                        if key == 27:
+                            print ("Scenedetection terminated with ESC-key" )
+                            break
+                #**/VEGASPython**
 
                 curr_frame += 1
                 self._num_frames += 1
@@ -392,6 +438,9 @@ class SceneManager(object):
             num_frames = curr_frame - start_frame
 
         finally:
+            #**VEGASPython**
+            cv2.destroyWindow(win1)
+            #**/VEGASPython**
 
             if progress_bar:
                 progress_bar.close()

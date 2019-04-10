@@ -130,12 +130,8 @@ def split_video_mkvmerge(input_video_paths, scene_list, output_file_prefix,
     """ Calls the mkvmerge command on the input video(s), splitting it at the
     passed timecodes, where each scene is written in sequence from 001. """
 
-    if not input_video_paths or not scene_list:
+    if not input_video_paths:
         return
-
-    logging.info('Splitting input video%s using mkvmerge, output path template:\n  %s',
-            's' if len(input_video_paths) > 1 else '', output_file_prefix)
-
     ret_val = None
     # mkvmerge automatically appends '-$SCENE_NUMBER'.
     output_file_name = output_file_prefix.replace('-${SCENE_NUMBER}', '')
@@ -181,13 +177,9 @@ def split_video_ffmpeg(input_video_paths, scene_list, output_file_template, vide
     """ Calls the ffmpeg command on the input video(s), generating a new video for
     each scene based on the start/end timecodes. """
 
-    if not input_video_paths or not scene_list:
+    if not input_video_paths:
         return
 
-    logging.info(
-        'Splitting input video%s using ffmpeg, output path template:\n  %s',
-        's' if len(input_video_paths) > 1 else '', output_file_template)
-        
     if len(input_video_paths) > 1:
         # TODO: Add support for splitting multiple/appended input videos.
         # https://trac.ffmpeg.org/wiki/Concatenate#samecodec
