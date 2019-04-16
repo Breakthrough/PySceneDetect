@@ -1,16 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-#         VEGASSceneDetect: Python-Based Video Scene Detector
-#   ---------------------------------------------------------------
-#     [  Site: http://www.hlinke.de/   ]
-#     [  Github: coming soon  ]
-#     [  Documentation: coming soon    ]
-#
-#  Copyright (C) 2019 Harold Linke <http://www.hlinke.de>.
-# VEGASSceneDetect is licensed under the BSD 3-Clause License; see the included
-# LICENSE file
-#
-# VEGASSceneDetect is based on pySceneDetect by Brandon Castellano
+#         PySceneDetect: Python-Based Video Scene Detector
 #   ---------------------------------------------------------------
 #     [  Site: http://www.bcastell.com/projects/pyscenedetect/   ]
 #     [  Github: https://github.com/Breakthrough/PySceneDetect/  ]
@@ -69,6 +59,7 @@ import cv2
 from scenedetect.platform import STRING_TYPE
 import scenedetect.frame_timecode
 from scenedetect.frame_timecode import FrameTimecode
+
 
 ##
 ## VideoManager Exceptions
