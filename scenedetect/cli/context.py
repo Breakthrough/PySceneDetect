@@ -653,7 +653,7 @@ class CliContext(object):
         scenedetect [global options] export-html [export-html options] [other commands...].
 
         Raises:
-            clicl.BadParameter
+            click.BadParameter
         """
         self.check_input_open()
 
