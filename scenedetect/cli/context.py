@@ -49,6 +49,7 @@ import scenedetect.detectors
 
 from scenedetect.scene_manager import SceneManager
 from scenedetect.scene_manager import write_scene_list
+from scenedetect.scene_manager import write_scene_list_html
 
 from scenedetect.stats_manager import StatsManager
 from scenedetect.stats_manager import StatsFileCorrupt
@@ -130,6 +131,13 @@ class CliContext(object):
         self.scene_list_name_format = None      # list-scenes -f/--filename
         self.scene_list_output = False          # list-scenes -n/--no-output
 
+        self.export_html = False                # export-html command
+        self.html_name_format = None            # export-html -f/--filename
+        self.html_include_images = True         # export-html --no-images
+        self.image_filenames = None             # export-html used for embedding images
+        self.image_width = None                 # export-html -w/--image-width
+        self.image_height = None                # export-html -h/--image-height
+
 
     def cleanup(self):
         # type: () -> None
@@ -181,9 +189,11 @@ class CliContext(object):
         image_num_format += str(math.floor(math.log(self.num_images, 10)) + 2) + 'd'
 
         timecode_list = dict()
+        self.image_filenames = dict()
 
         for i in range(len(scene_list)):
             timecode_list[i] = []
+            self.image_filenames[i] = []
 
         if self.num_images == 1:
             for i, (start_time, end_time) in enumerate(scene_list):
@@ -212,14 +222,16 @@ class CliContext(object):
                 self.video_manager.grab()
                 ret_val, frame_im = self.video_manager.retrieve()
                 if ret_val:
+                    file_path = '%s.%s' % (filename_template.safe_substitute(
+                        VIDEO_NAME=video_name,
+                        SCENE_NUMBER=scene_num_format % (i + 1),
+                        IMAGE_NUMBER=image_num_format % (j + 1)),
+                                           self.image_extension)
+                    self.image_filenames[i].append(file_path)
                     cv2.imwrite(
-                        self.get_output_file_path(
-                            '%s.%s' % (filename_template.safe_substitute(
-                                VIDEO_NAME=video_name,
-                                SCENE_NUMBER=scene_num_format % (i+1),
-                                IMAGE_NUMBER=image_num_format % (j+1)
-                            ), self.image_extension),
-                            output_dir=output_dir), frame_im, imwrite_param)
+                        self.get_output_file_path(file_path,
+                                                  output_dir=output_dir),
+                        frame_im, imwrite_param)
                 else:
                     completed = False
                     break
@@ -398,6 +410,22 @@ class CliContext(object):
             self._generate_images(scene_list=scene_list, video_name=video_name,
                                   image_name_template=self.image_name_format,
                                   output_dir=self.image_directory)
+
+        # Handle export-html command.
+        if self.export_html:
+            html_filename = Template(self.html_name_format).safe_substitute(
+                VIDEO_NAME=video_name)
+            if not html_filename.lower().endswith('.html'):
+                html_filename += '.html'
+            html_path = self.get_output_file_path(
+                html_filename, self.image_directory)
+            logging.info('Exporting to html file:\n %s:', html_path)
+            if not self.html_include_images:
+                self.image_filenames = None
+            write_scene_list_html(html_path, scene_list, cut_list,
+                                  image_filenames=self.image_filenames,
+                                  image_width=self.image_width,
+                                  image_height=self.image_height)
 
         # Handle split-video command.
         if self.split_video:
@@ -616,6 +644,25 @@ class CliContext(object):
         self.scene_list_output = False if no_output_mode else True
         if self.scene_list_directory is not None:
             logging.info('Scene list output directory set:\n  %s', self.scene_list_directory)
+
+
+    def export_html_command(self, filename, no_images, image_width, image_height):
+        # type: (str, bool) -> None
+        """Export HTML command: Parses all options/arguments passed to the export-html command,
+        or with respect to the CLI, this function processes [export-html] options when calling:
+        scenedetect [global options] export-html [export-html options] [other commands...].
+
+        Raises:
+            clicl.BadParameter
+        """
+        self.check_input_open()
+
+        self.html_name_format = filename
+        if self.html_name_format is not None:
+            logging.info('Scene list html file name format:\n %s', self.html_name_format)
+        self.html_include_images = False if no_images else True
+        self.image_width = image_width
+        self.image_height = image_height
 
 
     def save_images_command(self, num_images, output, name_format, jpeg, webp, quality,

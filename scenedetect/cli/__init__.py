@@ -495,6 +495,34 @@ def detect_threshold_command(ctx, threshold, min_scene_len, fade_bias, add_last_
         threshold=threshold, min_scene_len=min_scene_len, fade_bias=fade_bias,
         add_final_scene=add_last_scene, min_percent=min_percent, block_size=block_size))
 
+
+@click.command('export-html', add_help_option=False)
+@click.option(
+    '--filename', '-f', metavar='NAME', default='$VIDEO_NAME-Scenes.html',
+    type=click.STRING, show_default=True, help=
+    'Filename format to use for the scene list html file. You can use the'
+    ' $VIDEO_NAME macro in the file name.')
+@click.option(
+    '--no-images', is_flag=True, flag_value=True, help=
+    'Export the scene list including or excluding the saved images.')
+@click.option(
+    '--image-width', '-w', metavar='pixels',
+    type=click.INT, help=
+    'Width in pixels of the images in the resulting html table.')
+@click.option(
+    '--image-height', '-h', metavar='pixels',
+    type=click.INT, help=
+    'Height in pixels of the images in the resulting html table.')
+@click.pass_context
+def export_html_command(ctx, filename, no_images, image_width, image_height):
+    """ Exports scene list to a html file. Can also include scene images."""
+    if not ctx.obj.save_images and not no_images:
+        raise click.BadParameter("save-images isn't enabled")
+    ctx.obj.export_html_command(filename, no_images, image_width, image_height)
+    ctx.obj.export_html = True
+
+
+
 @click.command('list-scenes', add_help_option=False)
 @click.option(
     '--output', '-o', metavar='DIR',
@@ -715,4 +743,6 @@ add_cli_command(scenedetect_cli, list_scenes_command)
 
 add_cli_command(scenedetect_cli, save_images_command)
 add_cli_command(scenedetect_cli, split_video_command)
+
+add_cli_command(scenedetect_cli, export_html_command)
 

@@ -60,6 +60,7 @@ from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.platform import get_csv_writer
 from scenedetect.stats_manager import FrameMetricRegistered
 
+from scenedetect.simpletable import SimpleTableCell, SimpleTableImage
 from scenedetect.simpletable import SimpleTableRow, SimpleTable, HTMLPage
 
 
@@ -139,7 +140,8 @@ def write_scene_list(output_csv_file, scene_list, cut_list=None):
             '%d' % duration.get_frames(), duration.get_timecode(), '%.3f' % duration.get_seconds()])
 
 
-def write_scene_list_html(output_html_filename, scene_list, cut_list=None, css=None, css_class='mytable'):
+def write_scene_list_html(output_html_filename, scene_list, cut_list=None, css=None, css_class='mytable',
+                          image_filenames=None, image_width=None, image_height=None):
     """Writes the given list of scenes to an output file handle in html format.
 
     Arguments:
@@ -150,8 +152,11 @@ def write_scene_list_html(output_html_filename, scene_list, cut_list=None, css=N
             the start times of each scene (besides the 0th scene) is used instead.
         css: String containing all the css information for the resulting html page.
         css_class: String containing the named css class
+        image_filenames: dict where key i contains a list with n elements (filenames of
+            the n saved images from that scene)
+        image_width: Optional desired width of images in table in pixels
+        image_height: Optional desired height of images in table in pixels
     """
-    # type: (File, List[Tuple[FrameTimecode, FrameTimecode]], Optional[List[FrameTimecode]]) -> None
     if not css:
         css = """
         table.mytable {
@@ -207,6 +212,10 @@ def write_scene_list_html(output_html_filename, scene_list, cut_list=None, css=N
             '%d' % start.get_frames(), start.get_timecode(), '%.3f' % start.get_seconds(),
             '%d' % end.get_frames(), end.get_timecode(), '%.3f' % end.get_seconds(),
             '%d' % duration.get_frames(), duration.get_timecode(), '%.3f' % duration.get_seconds()])
+
+        if image_filenames:
+            for image in image_filenames[i]:
+                row.add_cell(SimpleTableCell(SimpleTableImage(image, width=image_width, height=image_height)))
 
         if i == 0:
             scene_table = SimpleTable(rows=[row], header_row=header_row, css_class=css_class)
