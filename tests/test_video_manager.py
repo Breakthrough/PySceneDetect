@@ -51,6 +51,7 @@ import os
 import pytest
 import cv2
 
+from scenedetect.scene_manager import SceneManager
 # PySceneDetect Library Imports
 from scenedetect.video_manager import VideoManager
 from scenedetect.video_manager import VideoOpenFailure
@@ -281,3 +282,19 @@ def test_multiple_videos(test_video_file):
         # Will release the VideoManagers in vm_list as well.
         video_manager.release()
 
+def test_many_videos_downscale_detect_scenes(test_video_file):
+    """ Test VideoManager handling decoding frames across video boundaries. """
+
+    NUM_FRAMES = 10
+    NUM_VIDEOS = 3
+    # Open VideoManager and get base timecode.
+    video_manager = VideoManager([test_video_file] * NUM_VIDEOS)
+    video_manager.set_downscale_factor()
+
+    try:
+        video_manager.start()
+        scene_manager = SceneManager()
+        scene_manager.detect_scenes(frame_source=video_manager)
+    finally:
+        # Will release the VideoManagers in vm_list as well.
+        video_manager.release()
