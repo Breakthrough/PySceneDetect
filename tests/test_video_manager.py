@@ -283,11 +283,10 @@ def test_multiple_videos(test_video_file):
         video_manager.release()
 
 def test_many_videos_downscale_detect_scenes(test_video_file):
-    """ Test VideoManager handling decoding frames across video boundaries. """
+    """ Test scene detection on multiple videos in VideoManager. """
 
-    NUM_FRAMES = 10
     NUM_VIDEOS = 3
-    # Open VideoManager and get base timecode.
+    # Open VideoManager with NUM_VIDEOS test videos
     video_manager = VideoManager([test_video_file] * NUM_VIDEOS)
     video_manager.set_downscale_factor()
 

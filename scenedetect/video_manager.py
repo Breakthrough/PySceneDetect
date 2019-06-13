@@ -739,20 +739,18 @@ class VideoManager(object):
         if not self._started:
             raise VideoDecoderNotStarted()
 
-        read_frame = False
         if self._curr_cap is not None and self._end_of_video != True:
-            while not read_frame:
+            read_frame, self._last_frame = self._curr_cap.read()
+
+            # Switch to the next capture when the current one is over
+            if not read_frame and self._get_next_cap():
                 read_frame, self._last_frame = self._curr_cap.read()
-                # Switch to the next capture when the current one is over
-                if not read_frame:
-                    # Break the loop when all the captures are over
-                    if not self._get_next_cap():
-                        break
-                    # Get frame of the new capture
-                    read_frame, self._last_frame = self._curr_cap.read()
-                if self._downscale_factor > 1:
-                    self._last_frame = self._last_frame[
-                        ::self._downscale_factor, ::self._downscale_factor, :]
+
+            # Downscale frame if there was any
+            if read_frame and self._downscale_factor > 1:
+                self._last_frame = self._last_frame[
+                    ::self._downscale_factor, ::self._downscale_factor, :]
+
         if self._end_time is not None and self._curr_time > self._end_time:
             read_frame = False
             self._last_frame = None
