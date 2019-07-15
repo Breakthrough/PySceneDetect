@@ -13,10 +13,9 @@ You can also print the usage/help manual of PySceneDetect with the `help` comman
 scenedetect help
 ```
 
-
-## PySceneDetect Manual
-
-**The complete PySceneDetect Command-Line Interface (CLI) Reference can be found in the [PySceneDetect Manual](http://pyscenedetect-manual.readthedocs.io/), located at [pyscenedetect-manual.readthedocs.io/](http://pyscenedetect-manual.readthedocs.io/)**.
+<div class="important">
+The complete PySceneDetect Command-Line Interface (CLI) Reference <span class="fa fa-book"> can be found in the <a href="http://pyscenedetect-manual.readthedocs.io/" alt="Manual Link">PySceneDetect Manual</a>, located at <a href="http://pyscenedetect-manual.readthedocs.io/" alt="Manual Link">pyscenedetect-manual.readthedocs.io/</a>.
+</div>
 
 
 ## Quick Example

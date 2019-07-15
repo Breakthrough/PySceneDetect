@@ -54,17 +54,17 @@ Specific issues/features that are queued up for the very next release will have 
 
 <h3>Features in Development for Next Version</h3>
 
-The following are features being planned or developed for the release following v0.5 (which will be, depending on community feedback, v0.5.1, v0.6, or v1.0):
+The following are features being planned or developed for v0.5.1:
 
- - support for using multiple `--input` videos and the `split-video` command **without** the `-c`/`--copy` flag [ [#71] ](https://github.com/Breakthrough/PySceneDetect/issues/71)
- - optional suppression of short-length flashes/bursts of light [ [#35] ](https://github.com/Breakthrough/PySceneDetect/issues/35)
  - export scenes in HTML format [ [#17] ](https://github.com/Breakthrough/PySceneDetect/issues/17)
- - automatic threshold detection for the current scene detection methods (can simply be an ouptut message indicating "Predicted Best Threshold: X")
 
 <h3>Planned Features for Future Releases</h3>
 
 The following are features being planned or developed for future releases of PySceneDetect:
 
+ - automatic threshold detection for the current scene detection methods (can simply be an ouptut message indicating "Predicted Best Threshold: X")
+ - optional suppression of short-length flashes/bursts of light [ [#35] ](https://github.com/Breakthrough/PySceneDetect/issues/35)
+ - support for using multiple `--input` videos and the `split-video` command **without** the `-c`/`--copy` flag [ [#71] ](https://github.com/Breakthrough/PySceneDetect/issues/71)
  - colour histogram-based scene detection algorithm in the HSV/HSL colourspace [ [#53] ](https://github.com/Breakthrough/PySceneDetect/issues/53)
  - [perceptual hash](https://en.wikipedia.org/wiki/Perceptual_hashing) based scene detection
  - improve robustness of content-aware detection by combining with edge detection (similar to MATLAB-based scene change detector)

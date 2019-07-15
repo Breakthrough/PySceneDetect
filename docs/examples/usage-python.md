@@ -3,10 +3,9 @@
 
 In addition to being used from the command line, or through the GUI, PySceneDetect can be used in Python directly - allowing easy integration into other applications/scripts, or interactive use through a Python REPL/notebook.
 
-
-## PySceneDetect API Reference
-
-**The complete PySceneDetect Python API Reference can be found in the [PySceneDetect Manual](http://pyscenedetect-manual.readthedocs.io/), located at [pyscenedetect-manual.readthedocs.io/](http://pyscenedetect-manual.readthedocs.io/)**.
+<div class="important">
+The complete Python API Reference <span class="fa fa-book"> for the <tt>scenedetect</tt> module can be found in the <a href="http://pyscenedetect-manual.readthedocs.io/" alt="Manual Link">PySceneDetect Manual</a>, located at <a href="http://pyscenedetect-manual.readthedocs.io/" alt="Manual Link">pyscenedetect-manual.readthedocs.io/</a>.
+</div>
 
 
 ## Example
