@@ -26,7 +26,7 @@ To test if you have the required prerequisites, open a `python` prompt, and run 
     import numpy
     import cv2
 
-If both of those commands execute without any problems, you should be able to install PySceneDetect without any issues. To enable video splitting support, you will also need to have `mkvmerge` or `ffmpeg` installed on your system. See [getting started guide](http://pyscenedetect.readthedocs.org/en/latest/examples/usage/) after installation for details.
+If both of those commands execute without any problems, you should be able to install PySceneDetect without any issues. To enable video splitting support, you will also need to have `mkvmerge` or `ffmpeg` installed on your system. See the documentation on [Video Splitting Support](https://pyscenedetect.readthedocs.io/en/latest/examples/video-splitting/) after installation for details.
 
 Full documentation for PySceneDetect can be found [on Readthedocs](http://pyscenedetect.readthedocs.org/), or by visiting [py.scenedetect.com](http://py.scenedetect.com/).  This includes details on detection modes, default values/thresholds to try, and how to effectively choose the optimal detection parameters.
 
