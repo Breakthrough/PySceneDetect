@@ -31,4 +31,5 @@ In addition to those mentioned below, thank you to *everyone* who has submitted 
  * [@Hellowlol](https://github.com/Hellowlol) - improvements to software architecture and API development
  * [@bubalazi](https://github.com/bubalazi) - performance improvements to detect-content and detect-threshold algorithms
  * [@r1b](https://github.com/r1b) - proof-of-concept implementation of detect-histogram algorithm
+ * [@wjs018](https://github.com/wjs018) - implementation of `export-html` command
 

@@ -6,7 +6,7 @@
                 PySceneDetect License (BSD 3-Clause)
           < http://www.bcastell.com/projects/pyscenedetect >
 
-Copyright (C) 2012-2018, Brandon Castellano.
+Copyright (C) 2012-2019, Brandon Castellano.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -43,6 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 This section contains links to the license agreements for all third-party software libraries used and distributed with PySceneDetect.  You can find copies of all the relevant license agreements referenced below if you installed a copy of PySceneDetect by looking at the LICENSE files in the installation directory.
 
+-----------------------------------------------------------------------
 
 ### NumPy
 
@@ -74,6 +75,13 @@ This section contains links to the license agreements for all third-party softwa
  - URL: <a href="https://docs.pytest.org/en/latest/license.html" alt="pytest License">https://docs.pytest.org/en/latest/license.html</a>
 
 
+### simpletable
+
+ - Copyright (C) 2014-2019, Matheus Vieira Portela and others
+ - URL: <a href="https://github.com/matheusportela/simpletable/blob/master/LICENSE" alt="simpletable License">https://github.com/matheusportela/simpletable/blob/master/LICENSE</a>
+
+-----------------------------------------------------------------------
+
 ### FFmpeg and mkvmerge
 
 This software may also invoke mkvmerge or FFmpeg, if available.
@@ -96,12 +104,4 @@ Once installed, ensure the program can be accessed system-wide by calling
 the `mkvmerge` or `ffmpeg` command from a terminal/command prompt.
 PySceneDetect will automatically use whichever program is available on
 the computer, depending on the specified command-line options.
-
-
-### Python
-
-Additionally, certain Windows distributions may include a compiled
-Python distribution. For license information regarding the distributed
-version of Python, see the LICENSE files in the installation directory,
-or visit the following URL: [ https://docs.python.org/3/license.html ]
 

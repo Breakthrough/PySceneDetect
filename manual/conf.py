@@ -23,13 +23,13 @@ sys.path.insert(0, os.path.abspath('..'))
 # -- Project information -----------------------------------------------------
 
 project = 'PySceneDetect'
-copyright = '2018, Brandon Castellano'
+copyright = '2019, Brandon Castellano'
 author = 'Brandon Castellano'
 
 # The short X.Y version
 version = ''
 # The full version, including alpha/beta/rc tags
-release = 'v0.5'
+release = 'v0.5.1'
 
 
 # -- General configuration ---------------------------------------------------
@@ -166,7 +166,7 @@ texinfo_documents = [
 html_theme = 'alabaster'
 html_theme_options = {
     'sidebar_width': '235px',
-    'description': 'CLI/API Reference Manual [v0.5]',
+    'description': 'CLI/API Reference Manual [%s]' % (release),
     'show_relbar_bottom': True,
     'show_relbar_top': False,
 

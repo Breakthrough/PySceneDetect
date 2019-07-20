@@ -6,14 +6,14 @@
 #     [  Github: https://github.com/Breakthrough/PySceneDetect/  ]
 #     [  Documentation: http://pyscenedetect.readthedocs.org/    ]
 #
-# Copyright (C) 2012-2018 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2012-2019 Brandon Castellano <http://www.bcastell.com>.
 #
 # PySceneDetect is licensed under the BSD 3-Clause License; see the included
 # LICENSE file, or visit one of the following pages for details:
 #  - https://github.com/Breakthrough/PySceneDetect/
 #  - http://www.bcastell.com/projects/pyscenedetect/
 #
-# This software uses the Numpy, OpenCV, click, tqdm, and pytest libraries.
+# This software uses Numpy, OpenCV, click, tqdm, simpletable, and pytest.
 # See the included LICENSE files or one of the above URLs for more information.
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
@@ -59,7 +59,7 @@ from scenedetect.__main__ import main
 # Used for module identification and when printing version & about info.
 # (scenedetect version and scenedetect about)
 
-__version__ = 'v0.5'
+__version__ = 'v0.5.1'
 
 # About & copyright message string shown for the 'about' CLI command (scenedetect about).
 
@@ -67,7 +67,7 @@ ABOUT_STRING = """
 Site/Updates: https://github.com/Breakthrough/PySceneDetect/
 Documentation: http://pyscenedetect.readthedocs.org/
 
-Copyright (C) 2012-2018 Brandon Castellano. All rights reserved.
+Copyright (C) 2012-2019 Brandon Castellano. All rights reserved.
 
 PySceneDetect is released under the BSD 3-Clause license. See the
 included LICENSE file or visit the PySceneDetect website for details.
@@ -76,6 +76,7 @@ This software uses the following third-party components:
   > NumPy [Copyright (C) 2018, Numpy Developers]
   > OpenCV [Copyright (C) 2018, OpenCV Team]
   > click [Copyright (C) 2018, Armin Ronacher]
+  > simpletable [Copyright (C) 2014 Matheus Vieira Portela]
 
 This software may also invoke the following third-party executables:
 
@@ -83,7 +84,8 @@ This software may also invoke the following third-party executables:
   > mkvmerge [Copyright (C) 2005-2016, Matroska]
 
 If included with your distribution of PySceneDetect, see the included
-LICENSE-FFMPEG and LICENSE-MKVMERGE files for details.
+LICENSE-FFMPEG and LICENSE-MKVMERGE or visit:
+  [ https://pyscenedetect.readthedocs.io/en/latest/copyright/ ]
 
 FFmpeg and mkvmerge are distributed only with certain PySceneDetect
 releases, in order to allow for automatic video splitting capability.

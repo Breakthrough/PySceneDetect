@@ -13,7 +13,7 @@
 #  - https://github.com/Breakthrough/PySceneDetect/
 #  - http://www.bcastell.com/projects/pyscenedetect/
 #
-# This software uses the Numpy, OpenCV, click, tqdm, and pytest libraries.
+# This software uses Numpy, OpenCV, click, tqdm, simpletable, and pytest.
 # See the included LICENSE files or one of the above URLs for more information.
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
@@ -500,7 +500,7 @@ def detect_threshold_command(ctx, threshold, min_scene_len, fade_bias, add_last_
 @click.option(
     '--filename', '-f', metavar='NAME', default='$VIDEO_NAME-Scenes.html',
     type=click.STRING, show_default=True, help=
-    'Filename format to use for the scene list html file. You can use the'
+    'Filename format to use for the scene list HTML file. You can use the'
     ' $VIDEO_NAME macro in the file name.')
 @click.option(
     '--no-images', is_flag=True, flag_value=True, help=
@@ -508,14 +508,14 @@ def detect_threshold_command(ctx, threshold, min_scene_len, fade_bias, add_last_
 @click.option(
     '--image-width', '-w', metavar='pixels',
     type=click.INT, help=
-    'Width in pixels of the images in the resulting html table.')
+    'Width in pixels of the images in the resulting HTML table.')
 @click.option(
     '--image-height', '-h', metavar='pixels',
     type=click.INT, help=
-    'Height in pixels of the images in the resulting html table.')
+    'Height in pixels of the images in the resulting HTML table.')
 @click.pass_context
 def export_html_command(ctx, filename, no_images, image_width, image_height):
-    """ Exports scene list to a html file. Can also include scene images."""
+    """ Exports scene list to a HTML file. Requires save-images by default."""
     if not ctx.obj.save_images and not no_images:
         raise click.BadParameter("save-images isn't enabled")
     ctx.obj.export_html_command(filename, no_images, image_width, image_height)

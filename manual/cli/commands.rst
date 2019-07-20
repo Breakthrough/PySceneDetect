@@ -31,7 +31,7 @@ Input/output commands (applies to input videos and detected scenes):
     ``save-images --quality 80``
  - ``split-video`` - Automatically split input video using either `ffmpeg` (`split-video` or `split-video -hq` for higher quality), or `mkvmerge` (`split-video --copy`)
     ``split-video`` or ``split-video -hq`` for higher quality, ``split-video --copy`` for no re-encoding
-
+ - ``export-html`` - Exports scene list to a HTML file.  Requires ``save-images`` by default.
 
 .. note:: When using multiple commands, make sure to not
    specify the same command twice. The order of commands does
@@ -282,4 +282,37 @@ The `split-video` command takes the following options:
     Faster modes take less time to run, but the output
     files may be larger. [default: veryfast, if
     `-hq`/`--high-quality` is set: slow]
+
+
+
+=======================================================================
+``export-html``
+=======================================================================
+
+**The** ``export-html`` **command** generates an HTML file containing
+all detected scenes in tabular format, including thumbnails by default.
+This requires the ``save-images`` command to also be specified.
+If images are not required, specify the `--no-images` option.
+
+Command Options
+-----------------------------------------------------------------------
+
+The `export-html` command takes the following options:
+
+ * ``-o``, ``--output DIR``
+    Output directory to save videos to. Overrides
+    global option `-o`/`--output` if set.
+ * ``-f``, ``--filename NAME``
+    Filename format to use for the scene list HTML
+    file. You can use the $VIDEO_NAME macro in the
+    file name.  [default: $VIDEO_NAME-Scenes.html]
+ * ``--no-images``
+    Export the scene list including or excluding the
+    saved images.
+ * ``-w``, ``--image-width pixels``
+    Width in pixels of the images in the resulting
+    HTML table.
+ * ``-h``, ``--image-height pixels``
+    Height in pixels of the images in the resulting
+    HTML table.
 

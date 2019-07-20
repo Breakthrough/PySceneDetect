@@ -2,18 +2,25 @@
 PySceneDetect Changelog
 ==========================================================
 
+## 0.5.1 (July 20, 2019) &nbsp;<span class="fa fa-tags"></span>
 
-## 0.5 (August 31, 2017) &nbsp;<span class="fa fa-tags"></span>
+ * [feature] Add new `export-html` command to the CLI (thanks [@wjs018](https://github.com/Breakthrough/PySceneDetect/pull/104))
+ * [bugfix] VideoManager read function failed on multiple videos (thanks [@ivan23kor](https://github.com/Breakthrough/PySceneDetect/pull/107))
+ * [bugfix] Fix crash when no scenes are detected ([#79](https://github.com/Breakthrough/PySceneDetect/issues/79), thanks @raj6996)
+ * [bugfix] Fixed OpenCV not getting installed due to missing dependency ([#73](https://github.com/Breakthrough/PySceneDetect/issues/73))
+ * [enhance] When no scenes are detected, the whole video is now returned instead of nothing (thanks [@piercus](https://github.com/Breakthrough/PySceneDetect/pull/89))
+ * Removed Windows installer due to binary packages now being available, and to streamline the release process (see [#102](https://github.com/Breakthrough/PySceneDetect/issues/102) for more information).  When you type `pip install scenedetect`, all dependencies will be installed.
+
+
+## 0.5 (August 31, 2018)
 
  * **major** release, includes stable Python API with examples and updated documentation
  * numerous changes to command-line interface with addition of sub-commands (see [the new manual](http://manual.scenedetect.com) for updated usage information)
  * [feature] videos are now split using `ffmpeg` by default, resulting in frame-perfect cuts (can still use `mkvmerge` by specifying the `-c`/`--copy` argument to the `split-video` command)
  * [enhance] image filename numbers are now consistent with those of split video scenes (PR #39, thanks [@e271828-](https://github.com/Breakthrough/PySceneDetect/pull/39))
- * [enhance] 5-10% improvement in processing performance due to reduced memory copy operations (PR #40, thanks [@elcombato]
- (https://github.com/Breakthrough/PySceneDetect/pull/40))
+ * [enhance] 5-10% improvement in processing performance due to reduced memory copy operations (PR #40, thanks [@elcombato](https://github.com/Breakthrough/PySceneDetect/pull/40))
  * [enhance] updated exception handling to raise proper standard exceptions (PR #37, thanks [@talkain](https://github.com/Breakthrough/PySceneDetect/pull/37))
- * several fixes to the documentation, including improper dates and outdated CLI arguments (PR #26 and #, thanks [@elcombato]
- (https://github.com/Breakthrough/PySceneDetect/pull/26), and [@colelawrence](https://github.com/Breakthrough/PySceneDetect/pull/33))
+ * several fixes to the documentation, including improper dates and outdated CLI arguments (PR #26 and #, thanks [@elcombato](https://github.com/Breakthrough/PySceneDetect/pull/26), and [@colelawrence](https://github.com/Breakthrough/PySceneDetect/pull/33))
  * *numerous* other PRs and issues/bug reports that have been fixed - there are too many to list individually here, so I want to extend a big thank you to **everyone** who contributed to making this release better
  * [enhance] add Sphinx-generated API documentation (available at: http://manual.scenedetect.com)
  * [project] move from BSD 2-clause to 3-clause license

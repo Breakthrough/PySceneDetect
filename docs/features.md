@@ -50,13 +50,7 @@ For a detailed explanation of how a particular scene detection method/algorithm 
 
 ## Version Roadmap
 
-Specific issues/features that are queued up for the very next release will have [the `backlog` tag](https://github.com/Breakthrough/PySceneDetect/issues?q=is%3Aissue+is%3Aopen+label%3A%22status%3A+backlog%22), and issues/features being worked on will have [the `status: in progress` tag](https://github.com/Breakthrough/PySceneDetect/issues?q=is%3Aissue+is%3Aopen+label%3A%22status%3A+in+progress%22).  Also note that bug reports as well as additional feature requests can be submitted via [the issue tracker](https://github.com/Breakthrough/PySceneDetect/issues); read [the Bug Reports and Contributing page](contributing.md) for details.
-
-<h3>Features in Development for Next Version</h3>
-
-The following are features being planned or developed for v0.5.1:
-
- - export scenes in HTML format [ [#17] ](https://github.com/Breakthrough/PySceneDetect/issues/17)
+Future version roadmaps are now [tracked as milestones (link)](https://github.com/Breakthrough/PySceneDetect/milestones).  Specific issues/features that are queued up for the very next release will have [the `backlog` tag](https://github.com/Breakthrough/PySceneDetect/issues?q=is%3Aissue+is%3Aopen+label%3A%22status%3A+backlog%22), and issues/features being worked on will have [the `status: in progress` tag](https://github.com/Breakthrough/PySceneDetect/issues?q=is%3Aissue+is%3Aopen+label%3A%22status%3A+in+progress%22).  Also note that bug reports as well as additional feature requests can be submitted via [the issue tracker](https://github.com/Breakthrough/PySceneDetect/issues); read [the Bug Reports and Contributing page](contributing.md) for details.
 
 <h3>Planned Features for Future Releases</h3>
 

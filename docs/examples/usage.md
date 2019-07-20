@@ -133,6 +133,7 @@ After setting the detection method(s), there are several commands that can be us
  - `list-scenes`: Print and save a list of all scenes in table and CSV format.
  - `split-video`: Split input video into scenes automatically.
  - `save-images`: Save images from the video for each scene.
+ - `export-html`: Exports scene list to an HTML file.
  - `help`: Print help for PySceneDetect or a particular command. No processing is done if present.
  - `version`: Print PySceneDetect release version. No processing is done if present.
  - `about`: Print PySceneDetect license agreement and application information. No processing is done if present.

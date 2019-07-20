@@ -7,7 +7,7 @@ Video Scene Cut Detection and Analysis Tool
 [![Documentation Status](https://readthedocs.org/projects/pyscenedetect/badge/?version=latest)](http://pyscenedetect.readthedocs.org/en/latest/?badge=latest) [![PyPI Status](https://img.shields.io/pypi/status/scenedetect.svg)](https://pypi.python.org/pypi/scenedetect/) [![PyPI Version](https://img.shields.io/pypi/v/scenedetect.svg)](https://pypi.python.org/pypi/scenedetect/)  [![PyPI License](https://img.shields.io/pypi/l/scenedetect.svg)](http://pyscenedetect.readthedocs.org/en/latest/copyright/)
 
 
-### Latest Release: v0.5 (August 31, 2018)
+### Latest Release: v0.5.1 (July 20, 2019)
 
 **Main Webpage**:  [py.scenedetect.com](http://py.scenedetect.com)
 

@@ -100,6 +100,7 @@ Commands:
   about             Print license/copyright info.
   detect-content    Perform content detection algorithm on input...
   detect-threshold  Perform threshold detection algorithm on...
+  export-html       Exports scene list to a HTML file.
   help              Print help for command (help [command]).
   list-scenes       Prints scene list and outputs to a CSV file.
   save-images       Create images for each detected scene.
@@ -317,3 +318,24 @@ Options:
                             -h/--high quality is set: slow]
 ```
 
+
+## `export-html` Command
+
+```md
+PySceneDetect export-html Command
+----------------------------------------------------
+Usage: scenedetect.py export-html [OPTIONS]
+
+  Exports scene list to a HTML file. Requires save-images by default.
+
+Options:
+  -f, --filename NAME        Filename format to use for the scene list HTML
+                             file. You can use the $VIDEO_NAME macro in the
+                             file name.  [default: $VIDEO_NAME-Scenes.html]
+  --no-images                Export the scene list including or excluding the
+                             saved images.
+  -w, --image-width pixels   Width in pixels of the images in the resulting
+                             HTML table.
+  -h, --image-height pixels  Height in pixels of the images in the resulting
+                             HTML table.
+```

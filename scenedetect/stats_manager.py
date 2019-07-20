@@ -6,14 +6,14 @@
 #     [  Github: https://github.com/Breakthrough/PySceneDetect/  ]
 #     [  Documentation: http://pyscenedetect.readthedocs.org/    ]
 #
-# Copyright (C) 2012-2018 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2012-2019 Brandon Castellano <http://www.bcastell.com>.
 #
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file or visit one of the following pages for details:
 #  - http://www.bcastell.com/projects/pyscenedetect/
 #  - https://github.com/Breakthrough/PySceneDetect/
 #
-# This software uses the Numpy, OpenCV, click, tqdm, and pytest libraries.
+# This software uses Numpy, OpenCV, click, tqdm, simpletable, and pytest.
 # See the included LICENSE files or one of the above URLs for more information.
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
