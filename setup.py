@@ -7,7 +7,7 @@
 #     [  Github: https://github.com/Breakthrough/PySceneDetect/  ]
 #     [  Documentation: http://pyscenedetect.readthedocs.org/    ]
 #
-# Copyright (C) 2012-2018 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2012-2019 Brandon Castellano <http://www.bcastell.com>.
 #
 
 """ PySceneDetect setup.py
@@ -39,19 +39,21 @@ if sys.version_info < (2, 7) or (sys.version_info >= (3, 0) and sys.version_info
     sys.exit(1)
 
 
-def get_requires(include_opencv=False):
-    # type: (bool) -> List[str]
-    """ Get Requires: Returns a list of required packages PySceneDetect depends on.
+def get_requires():
+    # type: () -> List[str]
+    """ Get Requires: Returns a list of required packages. """
+    return [
+        'Click',
+        'numpy',
+        'opencv-python'
+    ]
 
-    Arguments:
-        include_opencv (bool): Whether to include the cv2 module in the returned module
-            list or not (default is False). Package may not be able to be installed via
-            pip, thus the default behaviour is to have users install it separately for now.
-    """
-    requires = ['numpy', 'Click']
-    if include_opencv:
-        requires += ['opencv-python']
-    return requires
+def get_extra_requires():
+    # type: () -> Dict[str, List[str]]
+    """ Get Extra Requires: Returns a list of extra/optional packages. """
+    return {
+        'progress_bar': ['tqdm']
+    }
 
 
 setup(
@@ -64,14 +66,15 @@ setup(
     url='https://github.com/Breakthrough/PySceneDetect',
     license="BSD 3-Clause",
     keywords="video computer-vision analysis",
-    install_requires=get_requires(),        # OpenCV must be installed separately so it is excluded.
-    extras_require={'progress_bar': ['tqdm']},
+    install_requires=get_requires(),
+    extras_require=get_extra_requires(),
     setup_requires=['pytest-runner'],
     tests_require=['pytest'],
     packages=['scenedetect',
+              'scenedetect.cli',
               'scenedetect.detectors',
-              'scenedetect.cli'],
-    package_data={'': ['../LICENSE*', '../USAGE.md', '../package-info.rst']},
+              'scenedetect.thirdparty'],
+    package_data={'': ['../LICENSE', '../USAGE.md', '../package-info.rst']},
     #include_package_data = True,           # Must leave this to the default.
     #test_suite="unitest.py",               # Auto-detects tests from setup.cfg
     entry_points={"console_scripts": ["scenedetect=scenedetect:main"]},

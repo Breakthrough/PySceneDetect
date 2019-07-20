@@ -6,14 +6,14 @@
 #     [  Github: https://github.com/Breakthrough/PySceneDetect/  ]
 #     [  Documentation: http://pyscenedetect.readthedocs.org/    ]
 #
-# Copyright (C) 2012-2018 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2012-2019 Brandon Castellano <http://www.bcastell.com>.
 #
 # PySceneDetect is licensed under the BSD 3-Clause License; see the included
 # LICENSE file, or visit one of the following pages for details:
 #  - https://github.com/Breakthrough/PySceneDetect/
 #  - http://www.bcastell.com/projects/pyscenedetect/
 #
-# This software uses the Numpy, OpenCV, click, tqdm, and pytest libraries.
+# This software uses Numpy, OpenCV, click, tqdm, simpletable, and pytest.
 # See the included LICENSE files or one of the above URLs for more information.
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
@@ -60,8 +60,8 @@ from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.platform import get_csv_writer
 from scenedetect.stats_manager import FrameMetricRegistered
 
-from scenedetect.simpletable import SimpleTableCell, SimpleTableImage
-from scenedetect.simpletable import SimpleTableRow, SimpleTable, HTMLPage
+from scenedetect.thirdparty.simpletable import SimpleTableCell, SimpleTableImage
+from scenedetect.thirdparty.simpletable import SimpleTableRow, SimpleTable, HTMLPage
 
 
 

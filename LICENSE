@@ -51,26 +51,31 @@ installing or using this software/tutorial, you agree to these terms.
 -----------------------------------------------------------------------
 
 > NumPy [Copyright (C) 2005-2016, Numpy Developers]:
-    This software uses Numpy; see the LICENSE-NUMPY file
-    or visit [ http://www.numpy.org/license.html ] for details.
+    This software uses Numpy; see the scenedetect/thirdparty/LICENSE-NUMPY
+    file or visit [ http://www.numpy.org/license.html ] for details.
 
 > OpenCV [Copyright (C) 2017, Itseez]:
-    This software uses OpenCV; see the LICENSE-OPENCV file
-    or visit [ http://opencv.org/license.html ] for details.
+    This software uses OpenCV; see the scenedetect/thirdparty/LICENSE-OPENCV
+    file or visit [ http://opencv.org/license.html ] for details.
 
 > click [Copyright (C) 2017, Armin Ronacher]:
-    This software uses OpenCV; see the LICENSE-CLICK file
-    or visit [ http://click.pocoo.org/license/ ] for details.
+    This software uses OpenCV; see the scenedetect/thirdparty/LICENSE-CLICK
+    file or visit [ http://click.pocoo.org/license/ ] for details.
 
 > tqdm [Copyright (C) 2013-2018, Casper da Costa-Luis,
         Google Inc., and Noam Yorav-Raphael]:
-    This software uses tqdm; see the LICENSE-TQDM file, or visit
-    the following URL for details:
-    [ https://raw.githubusercontent.com/tqdm/tqdm/master/LICENCE ]
+    This software uses tqdm; see the scenedetect/thirdparty/LICENSE-TQDM
+     file or visit the following URL for details:
+    [ https://github.com/tqdm/tqdm/blob/master/LICENCE ]
 
 > pytest [Copyright (C) 2004-2017, Holger Krekel and others]:
-    This software uses pytest; see the LICENSE-PYTEST file, or visit
-    [ https://docs.pytest.org/en/latest/license.html ] for details.
+    This software uses pytest; see the scenedetect/thirdparty/LICENSE-PYTEST
+    file or visit [ https://docs.pytest.org/en/latest/license.html ].
+
+> simpletable [Copyright (C) 2014-2019, Matheus Vieira Portela and others]:
+    This software uses simpletable; see the file 
+    scenedetect/thirdparty/simpletable.py or visit the following URL:
+    [ https://github.com/matheusportela/simpletable/blob/master/LICENSE ]
 
 -----------------------------------------------------------------------
 

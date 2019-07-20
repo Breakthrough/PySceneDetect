@@ -1,5 +1,28 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+
+# The MIT License (MIT)
+#
+# Copyright (c) 2014 Matheus Vieira Portela
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 """
 simpletable.py - v0.1 2014-07-31 Matheus Vieira Portela
 
@@ -10,10 +33,6 @@ Author's website: http://matheusvportela.wordpress.com/
 
 v0.4 2019-05-24 by Walter Schwenger
 """
-
-__version__ = '0.4'
-__date__    = '2019-05-24'
-__author__  = 'Matheus Vieira Portela'
 
 ### CHANGES ###
 # 2014-07-31: v0.1 MVP:
@@ -28,9 +47,6 @@ __author__  = 'Matheus Vieira Portela'
 # 2019-05-24: v0.4 WS:
 #   - Added SimpleTableImage class to handle adding images to tables
 #   - Added test images and image example to __main__
-
-### TODO ###
-# 
 
 ### REFERENCES ###
 # Decalage HTML.py module: http://www.decalage.info/python/html
@@ -295,68 +311,3 @@ def fit_data_to_columns(data, num_cols):
 
     return [data[num_cols*i:num_cols*i + num_cols] for i in range(num_iterations)]
 
-
-### Example usage ###
-if __name__ == "__main__":
-    css = """
-    table.mytable {
-        font-family: times;
-        font-size:12px;
-        color:#000000;
-        border-width: 1px;
-        border-color: #eeeeee;
-        border-collapse: collapse;
-        background-color: #ffffff;
-        width=100%;
-        max-width:550px;
-        table-layout:fixed;
-    }
-    table.mytable th {
-        border-width: 1px;
-        padding: 8px;
-        border-style: solid;
-        border-color: #eeeeee;
-        background-color: #e6eed6;
-        color:#000000;
-    }
-    table.mytable td {
-        border-width: 1px;
-        padding: 8px;
-        border-style: solid;
-        border-color: #eeeeee;
-    }
-    #code {
-        display:inline;
-        font-family: courier;
-        color: #3d9400;
-    }
-    #string {
-        display:inline;
-        font-weight: bold;
-    }
-    """
-    table1 = SimpleTable([['Hello,', 'world!'], ['How', 'are', 'you?']],
-            header_row=['Header1', 'Header2', 'Header3'],
-            css_class='mytable')
-    table2 = SimpleTable([['Testing', 'this'], ['table', 'here']],
-            css_class='mytable')
-
-    image_list = []
-    image_list.append(SimpleTableImage('images/image_1.jpg'))
-    image_list.append(SimpleTableImage('images/image_2.jpg', width=200))
-    image_list.append(SimpleTableImage('images/image_3.jpg', height=200))
-    image_list.append(SimpleTableImage('images/image_4.jpg', width=200, height=200))
-
-    table3 = SimpleTable([image_list],
-                         header_row=['No Size Specified',
-                                     'width=200',
-                                     'height=200',
-                                     'width=200, height=200'],
-                         css_class='mytable')
-
-    page = HTMLPage()
-    page.add_table(table1)
-    page.add_table(table2)
-    page.add_table(table3)
-    page.css = css
-    page.save("test.html")
