@@ -559,6 +559,25 @@ class VideoManager(object):
                 end_time.get_timecode() if end_time is not None else end_time)
 
 
+    def get_duration(self):
+        # type: () -> FrameTimecode
+        """ Get Duration - gets the duration/length of the video(s) to decode, as well as
+        the start/end times.
+
+        If the end time was not set by set_duration(), the end timecode is calculated
+        as the start timecode + total duration.
+
+        Returns:
+            Tuple[FrameTimecode, FrameTimecode, FrameTimecode]: The current video(s)
+                total duration, start timecode, and end timecode.
+        """
+        frame_length = self.get_base_timecode() + self._frame_length
+        end_time = self._end_time
+        if end_time is None:
+            end_time = self.get_base_timecode() + frame_length
+        return (frame_length, self._start_time, end_time)
+
+
     def start(self):
         # type: () -> None
         """ Start - starts video decoding and seeks to start time.  Raises
@@ -594,17 +613,9 @@ class VideoManager(object):
         Raises:
             VideoDecoderNotStarted: Must call start() before this method.
         """
-        if not self._started:
-            raise VideoDecoderNotStarted()
-
         while self._curr_time < timecode:
-            if self._curr_cap is None and not self._get_next_cap():
+            if not self.grab(): # raises VideoDecoderNotStarted if start() was not called
                 return False
-            if self._curr_cap.grab():
-                self._curr_time += 1
-            else:
-                if not self._get_next_cap():
-                    return False
         return True
 
 
