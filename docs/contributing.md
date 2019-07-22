@@ -9,7 +9,7 @@ When submitting bug reports, please add the command-line options `-v debug -l BU
 Before opening a new issue, please do [search for any existing issues](https://github.com/Breakthrough/PySceneDetect/issues?q=) (both open and closed) which might report similar issues/bugs to avoid creating duplicate entries.  If you do find a duplicate report, feel free to add any additional information you feel may be relevant.
 
 
-### <span class="fa fa-keyboard-o"></span>&nbsp; Contributing
+### <span class="fa fa-cogs"></span>&nbsp; Contributing
 
 The development of PySceneDetect is done on the Github Repo, guided by [the feature roadmap](features.md).  Code you wish to submit should be attached to a dedicated entry in [the issue tracker](https://github.com/Breakthrough/PySceneDetect/issues?q=) (with the appropriate tags for bugfixes, new features, enhancements, etc...), and allows for easier communication regarding development structure.  Feel free to create a new entry if required, as some planned features or bugs/issues may not yet exist in the tracker.
 
@@ -18,7 +18,7 @@ All submitted code should be linted with pylint, and follow the [Google Python S
 Note that PySceneDetect is released under the BSD 3-Clause license, and submitted code should comply with this license (see [License & Copyright Information](copyright.md) for details).
 
 
-### <span class="fa fa-person"></span>&nbsp; List of Contributors
+### <span class="fa fa-users"></span>&nbsp; List of Contributors
 
 The following list details some contributors people have made to the PySceneDetect project. In no way is this list complete, nor is the list maintained in any particular order. In addition to those listed below, a significant number of other contributors have greatly helped the development of PySceneDetect by reporting defects/bugs and providing adequate information in order to fix these issues.
 
