@@ -60,7 +60,7 @@ def main():
 
         # Perform scene detection on video_manager.
         scene_manager.detect_scenes(frame_source=video_manager,
-                                    start_time=start_time)
+                                    end_time=end_time)
 
         # Obtain list of detected scenes.
         scene_list = scene_manager.get_scene_list(base_timecode)
