@@ -10,10 +10,13 @@ PySceneDetect is compatible with both Python 2 and 3.  Note that Python 3 usuall
 ### Install via pip &nbsp; <span class="wy-text-neutral"><span class="fa fa-windows"></span> &nbsp; <span class="fa fa-linux"></span> &nbsp; <span class="fa fa-apple"></span></span></h3>
 
 <div class="important">
-&nbsp;<br/>
-<h3 class="wy-text-neutral"><span class="fa fa-forward wy-text-info"></span> <tt>pip install scenedetect</tt></h3></div>
+<h4 class="wy-text-neutral">Including all dependencies:</h4>
+<h3 class="wy-text-neutral"><span class="fa fa-forward wy-text-info"></span> <tt>pip install scenedetect[opencv,progress_bar]</tt></h3>
+<h4 class="wy-text-neutral">Without extras (OpenCV installation required):</h4>
+<h3 class="wy-text-neutral"><span class="fa fa-forward wy-text-info"></span> <tt>pip install scenedetect</tt></h3>
+</div>
 
-PySceneDetect is available via `pip` as [the `scenedetect` package](https://pypi.org/project/scenedetect/).
+PySceneDetect is available via `pip` as [the `scenedetect` package](https://pypi.org/project/scenedetect/).  See below for instructions on installing a non-pip version of OpenCV.  To ensure you have all the requirements installed, open a `python` interpreter, and ensure you can run `import cv2` without any errors.
 
 ### Python Installer (All Platforms) &nbsp; <span class="wy-text-neutral"><span class="fa fa-windows"></span> &nbsp; <span class="fa fa-linux"></span> &nbsp; <span class="fa fa-apple"></span></span></h3>
 
@@ -38,13 +41,16 @@ To get familiar with PySceneDetect, try running `scenedetect help`, or continue 
 
 ## Dependencies
 
-PySceneDetect requires [Python 2 or 3](https://www.python.org/) and the following third-party software:
+### Python Packages
 
- - [OpenCV](http://opencv.org/) (compatible with 2/3), can install via `pip install opencv`
- - [Numpy](http://sourceforge.net/projects/numpy/), can install via `pip install numpy`
- - [tqdm](https://github.com/tqdm/tqdm), optional, can install via `pip install tqdm`. Used to show progress bar and estimated time remaining.
+PySceneDetect requires [Python 2 or 3](https://www.python.org/) and the following packages:
 
-### Video Splitting Support
+ - [OpenCV](http://opencv.org/) (compatible with 2/3), can install via `pip install opencv`. Used for video I/O.
+ - [Numpy](https://numpy.org/), can install via `pip install numpy`. Used for frame processing.
+ - [Click](https://click.palletsprojects.com), can install via `pip install Click`. Used for command line interface.
+ - [tqdm](https://github.com/tqdm/tqdm) (optional), can install via `pip install tqdm`. Used to show progress bar and estimated time remaining.
+
+### Video Splitting Tools
 
 For video splitting support, you need to have the following tools available:
 
@@ -59,11 +65,11 @@ The `ffmpeg` and/or `mkvmerge` command must be available system wide (e.g. in a 
 
 If you have trouble getting PySceneDetect to find `ffmpeg` or `mkvmerge`, see the section on Manually Enabling `split-video` Support on [Getting Started: Video Splitting Support Requirements](examples/video-splitting).
 
-### Installing Latest Version of OpenCV (optional)
+### Building OpenCV from Source or Using a Different Version
 
-If you have installed OpenCV using `pip`, you will need to uninstall it before continuing on.
+If you have installed OpenCV using `pip`, you will need to uninstall it before installing a different version of OpenCV, or building and installing it from source.
 
-You can [click here](http://breakthrough.github.io/Installing-OpenCV/) for a quick guide (OpenCV + Numpy on Windows & Linux) on installing the latest versions of OpenCV/Numpy on [Windows (using pre-built binaries)](http://breakthrough.github.io/Installing-OpenCV/#installing-on-windows-pre-built-binaries) and [Linux (compiling from source)](http://breakthrough.github.io/Installing-OpenCV/#installing-on-linux-compiling-from-source).  If the Python module that comes with OpenCV on Windows is incompatible with your system architecture or Python version, [see this page](http://www.lfd.uci.edu/~gohlke/pythonlibs/#opencv) to obtain a pre-compiled (unofficial) module.
+You can [click here](http://breakthrough.github.io/Installing-OpenCV/) for a quick guide (OpenCV + Numpy on Windows & Linux) on installing OpenCV/Numpy on [Windows (using pre-built binaries)](http://breakthrough.github.io/Installing-OpenCV/#installing-on-windows-pre-built-binaries) and [Linux (compiling from source)](http://breakthrough.github.io/Installing-OpenCV/#installing-on-linux-compiling-from-source).  If the Python module that comes with OpenCV on Windows is incompatible with your system architecture or Python version, [see this page](http://www.lfd.uci.edu/~gohlke/pythonlibs/#opencv) to obtain a pre-compiled (unofficial) module.
 
 Note that some Linux package managers still provide older, dated builds of OpenCV (pre-3.0).  PySceneDetect is compatible with both versions, but if you want to ensure you have the latest version, it's recommended that you [build and install OpenCV from source](http://breakthrough.github.io/Installing-OpenCV/#installing-on-linux-compiling-from-source) on Linux.
   

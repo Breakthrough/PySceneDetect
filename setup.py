@@ -44,21 +44,21 @@ def get_requires():
     """ Get Requires: Returns a list of required packages. """
     return [
         'Click',
-        'numpy',
-        'opencv-python'
+        'numpy'
     ]
 
 def get_extra_requires():
     # type: () -> Dict[str, List[str]]
     """ Get Extra Requires: Returns a list of extra/optional packages. """
     return {
+        'opencv': ['opencv-python'],
         'progress_bar': ['tqdm']
     }
 
 
 setup(
     name='scenedetect',
-    version='0.5.1',
+    version='0.5.1.1',
     description="A cross-platform, OpenCV-based video scene detection program and Python library. ",
     long_description=open('package-info.rst').read(),
     author='Brandon Castellano',
