@@ -10,10 +10,10 @@ PySceneDetect is compatible with both Python 2 and 3.  Note that Python 3 usuall
 ### Install via pip &nbsp; <span class="wy-text-neutral"><span class="fa fa-windows"></span> &nbsp; <span class="fa fa-linux"></span> &nbsp; <span class="fa fa-apple"></span></span></h3>
 
 <div class="important">
-<h4 class="wy-text-neutral">Including all dependencies:</h4>
-<h3 class="wy-text-neutral"><span class="fa fa-forward wy-text-info"></span> <tt>pip install scenedetect[opencv,progress_bar]</tt></h3>
-<h4 class="wy-text-neutral">Without extras (OpenCV installation required):</h4>
-<h3 class="wy-text-neutral"><span class="fa fa-forward wy-text-info"></span> <tt>pip install scenedetect</tt></h3>
+<h4 class="wy-text-neutral"><span class="fa fa-angle-double-down wy-text-info"></span> Including all dependencies:</h4>
+<h3 class="wy-text-neutral"><tt>pip install scenedetect[opencv,progress_bar]</tt></h3>
+<h4 class="wy-text-neutral"><span class="fa fa-angle-down wy-text-info"></span> Without extras (OpenCV installation required):</h4>
+<h3 class="wy-text-neutral"><tt>pip install scenedetect</tt></h3>
 </div>
 
 PySceneDetect is available via `pip` as [the `scenedetect` package](https://pypi.org/project/scenedetect/).  See below for instructions on installing a non-pip version of OpenCV.  To ensure you have all the requirements installed, open a `python` interpreter, and ensure you can run `import cv2` without any errors.
