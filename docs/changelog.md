@@ -2,14 +2,23 @@
 PySceneDetect Changelog
 ==========================================================
 
-## 0.5.1 (July 20, 2019) &nbsp;<span class="fa fa-tags"></span>
+## 0.5.1.1 (August 3, 2019) &nbsp;<span class="fa fa-tags"></span>
+
+ * minor re-release of v0.5.1 which updates the setup.py file to return OpenCV as an optional dependency
+ * no change to PySceneDetect program version
+ * to install from pip now with all dependencies: `pip install scenedetect[opencv,progress_bar]`
+ * to install only PySceneDetect: `pip install scenedetect` (separate OpenCV installation required)
+ * the release notes of v0.5.1 have been modified to include the prior command
+
+
+## 0.5.1 (July 20, 2019)
 
  * [feature] Add new `export-html` command to the CLI (thanks [@wjs018](https://github.com/Breakthrough/PySceneDetect/pull/104))
  * [bugfix] VideoManager read function failed on multiple videos (thanks [@ivan23kor](https://github.com/Breakthrough/PySceneDetect/pull/107))
  * [bugfix] Fix crash when no scenes are detected ([#79](https://github.com/Breakthrough/PySceneDetect/issues/79), thanks @raj6996)
  * [bugfix] Fixed OpenCV not getting installed due to missing dependency ([#73](https://github.com/Breakthrough/PySceneDetect/issues/73))
  * [enhance] When no scenes are detected, the whole video is now returned instead of nothing (thanks [@piercus](https://github.com/Breakthrough/PySceneDetect/pull/89))
- * Removed Windows installer due to binary packages now being available, and to streamline the release process (see [#102](https://github.com/Breakthrough/PySceneDetect/issues/102) for more information).  When you type `pip install scenedetect`, all dependencies will be installed.
+ * Removed Windows installer due to binary packages now being available, and to streamline the release process (see [#102](https://github.com/Breakthrough/PySceneDetect/issues/102) for more information).  When you type `pip install scenedetect[opencv,progress_bar]`, all dependencies will be installed.
 
 
 ## 0.5 (August 31, 2018)
@@ -26,11 +35,17 @@ PySceneDetect Changelog
  * [project] move from BSD 2-clause to 3-clause license
 
 
+----------------------------------------------------------------
+
+
 ## 0.4 (January 14, 2017)
 
  * major release, includes integrated scene splitting via mkvmerge, changes meaning of `-o` / `--output` option
  * [feature] specifying `-o OUTPUT_FILE.mkv` will now automatically split the input video, generating a new video clip for each detected scene in sequence, starting with `OUTPUT_FILE-001.mkv`
  * [enhance] CSV file output is now specified with the `-co` / `--csv-output` option (*note, used to be `-o` in versions of PySceneDetect < 0.4*)
+
+
+----------------------------------------------------------------
 
 
 ### 0.3.6 (January 12, 2017)

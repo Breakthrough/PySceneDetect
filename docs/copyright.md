@@ -6,7 +6,7 @@
                 PySceneDetect License (BSD 3-Clause)
           < http://www.bcastell.com/projects/pyscenedetect >
 
-Copyright (C) 2012-2019, Brandon Castellano.
+Copyright (C) 2014-2019, Brandon Castellano.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without

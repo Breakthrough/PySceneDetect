@@ -10,7 +10,7 @@
 # alternative to running PySceneDetect from source (in addition to the standard
 # python -m scenedetect).
 #
-# Copyright (C) 2012-2019 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2014-2019 Brandon Castellano <http://www.bcastell.com>.
 #
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file or visit one of the following pages for details:

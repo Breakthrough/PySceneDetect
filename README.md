@@ -73,6 +73,6 @@ Additional features being planned or in development can be found [here (tagged a
 
 Licensed under BSD 3-Clause (see the `LICENSE` file for details).
 
-Copyright (C) 2012-2019 Brandon Castellano.
+Copyright (C) 2014-2019 Brandon Castellano.
 All rights reserved.
 
