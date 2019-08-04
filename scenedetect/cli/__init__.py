@@ -405,8 +405,8 @@ def time_command(ctx, start, duration, end):
 @click.option(
     '--threshold', '-t', metavar='VAL',
     type=click.FLOAT, default=30.0, show_default=True, help=
-    'Threshold value (float) that the delta_hsv frame metric must exceed to trigger a new scene.'
-    ' Refers to frame metric delta_hsv_avg in stats file.')
+    'Threshold value (float) that the content_val frame metric must exceed to trigger a new scene.'
+    ' Refers to frame metric content_val in stats file.')
 #@click.option(
 #    '--intensity-cutoff', '-i', metavar='VAL',
 #    type=click.FLOAT, default=None, show_default=True, help=

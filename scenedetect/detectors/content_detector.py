@@ -80,6 +80,7 @@ class ContentDetector(SceneDetector):
 
         if self.last_frame is not None:
             # Change in average of HSV (hsv), (h)ue only, (s)aturation only, (l)uminance only.
+            # These are refered to in a statsfile as their respective self._metric_keys string.
             delta_hsv_avg, delta_h, delta_s, delta_v = 0.0, 0.0, 0.0, 0.0
 
             if (self.stats_manager is not None and

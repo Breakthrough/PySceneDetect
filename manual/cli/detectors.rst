@@ -32,9 +32,9 @@ Detector Options
 
 The ``detect-content`` detector takes the following options:
 
-  -t, --threshold VAL         Threshold value (float) that the delta_hsv frame
+  -t, --threshold VAL         Threshold value (float) that the content_val frame
                               metric must exceed to trigger a new scene.
-                              Refers to frame metric delta_hsv_avg in stats
+                              Refers to frame metric content_val in stats
                               file.  [default: 30.0]
   -m, --min-scene-len FRAMES  Minimum size/length of any scene, in number of
                               frames.  [default: 15]
