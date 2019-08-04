@@ -185,14 +185,14 @@ class ThresholdDetector(SceneDetector):
                 self.last_fade['type'] = 'out'
                 self.last_fade['frame'] = frame_num
             elif self.last_fade['type'] == 'out' and not self.frame_under_threshold(frame_img):
-                # Just faded into a new scene, compute timecode for the scene
-                # split based on the fade bias.
-                f_in = frame_num
-                f_out = self.last_fade['frame']
-                f_split = int((f_in + f_out + int(self.fade_bias * (f_in - f_out))) / 2)
                 # Only add the scene if min_scene_len frames have passed.
-                if self.last_scene_cut is None or (
+                if (self.last_scene_cut is None and frame_num >= self.min_scene_len) or (
                         (frame_num - self.last_scene_cut) >= self.min_scene_len):
+                    # Just faded into a new scene, compute timecode for the scene
+                    # split based on the fade bias.
+                    f_out = self.last_fade['frame']
+                    f_split = int((frame_num + f_out +
+                                   int(self.fade_bias * (frame_num - f_out))) / 2)
                     cut_list.append(f_split)
                     self.last_scene_cut = frame_num
                 self.last_fade['type'] = 'in'
@@ -222,7 +222,7 @@ class ThresholdDetector(SceneDetector):
         # fade-outs, as a scene cut is already added when a fade-in is found.
         cut_times = []
         if self.last_fade['type'] == 'out' and self.add_final_scene and (
-                self.last_scene_cut is None or
+                (self.last_scene_cut is None and frame_num >= self.min_scene_len) or
                 (frame_num - self.last_scene_cut) >= self.min_scene_len):
             cut_times.append(self.last_fade['frame'])
         return cut_times

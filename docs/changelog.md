@@ -2,7 +2,7 @@
 PySceneDetect Changelog
 ==========================================================
 
-## 0.5.1.1 (August 3, 2019) &nbsp;<span class="fa fa-tags"></span>
+### 0.5.1.1 (August 3, 2019) &nbsp;<span class="fa fa-tags"></span>
 
  * minor re-release of v0.5.1 which updates the setup.py file to return OpenCV as an optional dependency
  * no change to PySceneDetect program version
@@ -11,7 +11,7 @@ PySceneDetect Changelog
  * the release notes of v0.5.1 have been modified to include the prior command
 
 
-## 0.5.1 (July 20, 2019)
+### 0.5.1 (July 20, 2019)
 
  * [feature] Add new `export-html` command to the CLI (thanks [@wjs018](https://github.com/Breakthrough/PySceneDetect/pull/104))
  * [bugfix] VideoManager read function failed on multiple videos (thanks [@ivan23kor](https://github.com/Breakthrough/PySceneDetect/pull/107))
