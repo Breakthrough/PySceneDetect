@@ -19,8 +19,8 @@ pages:
     - 'Bug Reports and Contributing': 'contributing.md'
     - 'License & Copyright Information': 'copyright.md'
 - 'Getting Started:':
-    - 'Basic Usage': 'examples/usage.md'
-    - 'Examples': 'examples/usage-example.md'
+    - 'Usage Example': 'examples/usage-example.md'
+    - 'Command Line Interface': 'examples/usage.md'
     - 'Python Interface': 'examples/usage-python.md'
     - 'Video Splitting Support': 'examples/video-splitting.md'
 - 'Documentation & Reference:':

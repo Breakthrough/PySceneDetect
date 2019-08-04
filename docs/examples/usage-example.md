@@ -1,5 +1,7 @@
 
-# Example: Detecting and Splitting Scenes in Movie Clip
+# Getting Started
+
+## Detecting and Splitting Scenes in a Movie Clip
 
 As a concrete example to become familiar with PySceneDetect, let's use the following short clip from the James Bond movie, GoldenEye (Copyright &copy; 1995 MGM):
 

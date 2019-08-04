@@ -1,5 +1,5 @@
 
-# Usage (Command Line)
+# PySceneDetect Command-Line Usage
 
 This page outlines the most commonly used command-line options for using PySceneDetect. Basic usage of PySceneDetect (`scenedetect`) is:
 
