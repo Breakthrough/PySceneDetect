@@ -5,10 +5,11 @@ PySceneDetect Changelog
 ### 0.5.1.1 (August 3, 2019) &nbsp;<span class="fa fa-tags"></span>
 
  * minor re-release of v0.5.1 which updates the setup.py file to return OpenCV as an optional dependency
- * no change to PySceneDetect program version
  * to install from pip now with all dependencies: `pip install scenedetect[opencv,progress_bar]`
  * to install only PySceneDetect: `pip install scenedetect` (separate OpenCV installation required)
  * the release notes of v0.5.1 have been modified to include the prior command
+ * no change to PySceneDetect program version
+ * [feature] add `get_duration` method to VideoManager ([#109](https://github.com/Breakthrough/PySceneDetect/issues/109), thanks @arianaa30)
 
 
 ### 0.5.1 (July 20, 2019)
