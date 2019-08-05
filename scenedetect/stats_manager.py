@@ -2,7 +2,7 @@
 #
 #         PySceneDetect: Python-Based Video Scene Detector
 #   ---------------------------------------------------------------
-#     [  Site: http://www.bcastell.com/projects/pyscenedetect/   ]
+#     [  Site: http://www.bcastell.com/projects/PySceneDetect/   ]
 #     [  Github: https://github.com/Breakthrough/PySceneDetect/  ]
 #     [  Documentation: http://pyscenedetect.readthedocs.org/    ]
 #
@@ -10,7 +10,7 @@
 #
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file or visit one of the following pages for details:
-#  - http://www.bcastell.com/projects/pyscenedetect/
+#  - http://www.bcastell.com/projects/PySceneDetect/
 #  - https://github.com/Breakthrough/PySceneDetect/
 #
 # This software uses Numpy, OpenCV, click, tqdm, simpletable, and pytest.

@@ -31,5 +31,5 @@ SceneDetector objects available in the `scenedetect.detectors` module:
 
  All functions are well documented with complete docstrs, and documentation can be found by calling help() from a Python REPL or browsing the complete PySceneDetect v0.5 API Reference below.  Also note that auto-generated documentation (via the `pydoc` command/module) can be generated.
  
-The complete PySceneDetect Python API reference [can be found *here* (link).](http://breakthrough.github.io/PySceneDetect/)
+The complete PySceneDetect Python API reference [can be found *here* (link).](https://pyscenedetect-manual.readthedocs.io/).
 
