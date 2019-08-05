@@ -30,7 +30,7 @@ Github Repo: https://github.com/Breakthrough/PySceneDetect/
 
 ----------------------------------------------------------
 
-PySceneDetect is a command-line tool, written in Python and using OpenCV, which analyzes a video, looking for scene changes or cuts.  The output timecodes can then be used with another tool (e.g. `mkvmerge`, `ffmpeg`) to split the video into individual clips (or using the `split-video` command).  A frame-by-frame analysis can also be generated for a video, to help with determining optimal threshold values or detecting patterns/other analysis methods for a particular video.  
+PySceneDetect is a command-line tool and Python library which analyzes a video, looking for scene changes or cuts.  PySceneDetect integrates with external tools (e.g. `mkvmerge`, `ffmpeg`) to automatically split the video into individual clips when using the `split-video` command.  A frame-by-frame analysis can also be generated for a video, called a stats file, to help with determining optimal threshold values or detecting patterns/other analysis methods for a particular video.  
 
 There are two main detection methods PySceneDetect uses: `detect-threshold` (comparing each frame to a set black level, useful for detecting cuts and fades to/from black), and `detect-content` (compares each frame sequentially looking for changes in content, useful for detecting fast cuts between video scenes, although slower to process).  Each mode has slightly different parameters, and is described in detail in the documentation.
 
