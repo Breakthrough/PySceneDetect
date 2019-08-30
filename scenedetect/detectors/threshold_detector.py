@@ -157,6 +157,10 @@ class ThresholdDetector(SceneDetector):
             or more frames in the list, and not necessarily the same as frame_num.
         """
 
+        # Initialize last scene cut point at the beginning of the frames of interest.
+        if self.last_scene_cut is None:
+            self.last_scene_cut = frame_num
+
         # Compare the # of pixels under threshold in current_frame & last_frame.
         # If absolute value of pixel intensity delta is above the threshold,
         # then we trigger a new scene cut/break.
@@ -186,8 +190,7 @@ class ThresholdDetector(SceneDetector):
                 self.last_fade['frame'] = frame_num
             elif self.last_fade['type'] == 'out' and not self.frame_under_threshold(frame_img):
                 # Only add the scene if min_scene_len frames have passed.
-                if (self.last_scene_cut is None and frame_num >= self.min_scene_len) or (
-                        (frame_num - self.last_scene_cut) >= self.min_scene_len):
+                if (frame_num - self.last_scene_cut) >= self.min_scene_len:
                     # Just faded into a new scene, compute timecode for the scene
                     # split based on the fade bias.
                     f_out = self.last_fade['frame']

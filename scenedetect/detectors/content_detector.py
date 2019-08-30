@@ -74,10 +74,16 @@ class ContentDetector(SceneDetector):
             List[int]: List of frames where scene cuts have been detected. There may be 0
             or more frames in the list, and not necessarily the same as frame_num.
         """
+
         cut_list = []
         metric_keys = self._metric_keys
         _unused = ''
 
+        # Initialize last scene cut point at the beginning of the frames of interest.
+        if self.last_scene_cut is None:
+            self.last_scene_cut = frame_num
+
+        # We can only start detecting once we have a frame to compare with.
         if self.last_frame is not None:
             # Change in average of HSV (hsv), (h)ue only, (s)aturation only, (l)uminance only.
             # These are refered to in a statsfile as their respective self._metric_keys string.
@@ -114,9 +120,10 @@ class ContentDetector(SceneDetector):
 
                 self.last_hsv = curr_hsv
 
-            if delta_hsv_avg >= self.threshold:
-                if self.last_scene_cut is None or (
-                        (frame_num - self.last_scene_cut) >= self.min_scene_len):
+            # We consider any frame over the threshold a new scene, but only if
+            # the minimum scene length has been reached (otherwise it is ignored).
+            if delta_hsv_avg >= self.threshold and (
+                (frame_num - self.last_scene_cut) >= self.min_scene_len):
                     cut_list.append(frame_num)
                     self.last_scene_cut = frame_num
 
@@ -135,8 +142,9 @@ class ContentDetector(SceneDetector):
 
 
     #def post_process(self, frame_num):
-    #    """ Not used for ContentDetector, as unlike ThresholdDetector, cuts
-    #    are always written as they are found.
+    #    """ TODO: Based on the parameters passed to the ContentDetector constructor,
+    #        ensure that the last scene meets the minimum length requirement,
+    #        otherwise it should be merged with the previous scene.
     #    """
     #    return []
 
