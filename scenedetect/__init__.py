@@ -59,7 +59,7 @@ from scenedetect.__main__ import main
 # Used for module identification and when printing version & about info.
 # (scenedetect version and scenedetect about)
 
-__version__ = 'v0.5.1'
+__version__ = 'v0.5.2-dev'
 
 # About & copyright message string shown for the 'about' CLI command (scenedetect about).
 

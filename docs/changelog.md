@@ -2,6 +2,13 @@
 PySceneDetect Changelog
 ==========================================================
 
+### 0.5.2 (TBD)
+
+ * [bugfix] `--min-scene-len` option was not respected by first/last scenes
+   ([#105](https://github.com/Breakthrough/PySceneDetect/issues/105), thanks @charlesvestal)
+   NOTE: Only fixed for first scenes currentl
+
+
 ### 0.5.1.1 (August 3, 2019) &nbsp;<span class="fa fa-tags"></span>
 
  * minor re-release of v0.5.1 which updates the setup.py file to return OpenCV as an optional dependency

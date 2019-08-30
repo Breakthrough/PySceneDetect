@@ -58,7 +58,7 @@ def get_extra_requires():
 
 setup(
     name='scenedetect',
-    version='0.5.1.1',
+    version='0.5.2-dev',
     description="A cross-platform, OpenCV-based video scene detection program and Python library. ",
     long_description=open('package-info.rst').read(),
     author='Brandon Castellano',
