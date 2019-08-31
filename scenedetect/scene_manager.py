@@ -96,7 +96,7 @@ def get_scenes_from_cuts(cut_list, base_timecode, num_frames, start_frame=0):
     # Scene list, where scenes are tuples of (Start FrameTimecode, End FrameTimecode).
     scene_list = []
     if not cut_list:
-        scene_list.append((base_timecode + start_frame, base_timecode + num_frames))
+        scene_list.append((base_timecode + start_frame, base_timecode + start_frame + num_frames))
         return scene_list
     # Initialize last_cut to the first frame we processed,as it will be
     # the start timecode for the first scene in the list.
@@ -105,7 +105,7 @@ def get_scenes_from_cuts(cut_list, base_timecode, num_frames, start_frame=0):
         scene_list.append((last_cut, cut))
         last_cut = cut
     # Last scene is from last cut to end of video.
-    scene_list.append((last_cut, base_timecode + num_frames))
+    scene_list.append((last_cut, base_timecode + start_frame + num_frames))
 
     return scene_list
 

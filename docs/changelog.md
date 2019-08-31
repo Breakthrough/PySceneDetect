@@ -4,9 +4,9 @@ PySceneDetect Changelog
 
 ### 0.5.2 (TBD)
 
- * [bugfix] `--min-scene-len` option was not respected by first/last scenes
-   ([#105](https://github.com/Breakthrough/PySceneDetect/issues/105), thanks @charlesvestal)
-   NOTE: Only fixed for first scenes currentl
+ * upcoming minor release of PySceneDetect including various bugfixes/enhancements prior to the v0.6 release 
+ * [bugfix] `--min-scene-len` option was not respected by first scene ([#105](https://github.com/Breakthrough/PySceneDetect/issues/105), thanks @charlesvestal)
+ * [bugfix] Splitting videos with an analyzed duration only splits within analyzed area ([#106](https://github.com/Breakthrough/PySceneDetect/issues/106), thanks @charlesvestal)
 
 
 ### 0.5.1.1 (August 3, 2019) &nbsp;<span class="fa fa-tags"></span>

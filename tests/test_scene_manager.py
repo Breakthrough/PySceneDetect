@@ -129,8 +129,10 @@ def test_scene_list(test_video_file):
     try:
         base_timecode = vm.get_base_timecode()
         video_fps = vm.get_framerate()
-        start_time = FrameTimecode('00:00:00', video_fps)
-        end_time = FrameTimecode('00:00:10', video_fps)
+        start_time = FrameTimecode('00:00:05', video_fps)
+        end_time = FrameTimecode('00:00:15', video_fps)
+
+        assert end_time.get_frames() > start_time.get_frames()
 
         vm.set_duration(start_time=start_time, end_time=end_time)
         vm.set_downscale_factor()
@@ -138,11 +140,14 @@ def test_scene_list(test_video_file):
         vm.start()
         num_frames = sm.detect_scenes(frame_source=vm)
 
-        assert num_frames == end_time.get_frames() + 1
+        assert num_frames == (1 + end_time.get_frames() - start_time.get_frames())
 
         scene_list = sm.get_scene_list(base_timecode)
-
+        assert scene_list
+        
         for i, _ in enumerate(scene_list):
+            assert len(scene_list[0]) == 2
+            assert scene_list[i][0].get_frames() < scene_list[i][1].get_frames()
             if i > 0:
                 # Ensure frame list is sorted (i.e. end time frame of
                 # one scene is equal to the start time of the next).
