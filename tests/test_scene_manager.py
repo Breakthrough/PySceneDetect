@@ -144,9 +144,10 @@ def test_scene_list(test_video_file):
 
         scene_list = sm.get_scene_list(base_timecode)
         assert scene_list
-        
+        # Each scene is in the format (Start Timecode, End Timecode)
+        assert len(scene_list[0]) == 2
+
         for i, _ in enumerate(scene_list):
-            assert len(scene_list[0]) == 2
             assert scene_list[i][0].get_frames() < scene_list[i][1].get_frames()
             if i > 0:
                 # Ensure frame list is sorted (i.e. end time frame of
