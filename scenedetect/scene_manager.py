@@ -140,8 +140,9 @@ def write_scene_list(output_csv_file, scene_list, cut_list=None):
             '%d' % duration.get_frames(), duration.get_timecode(), '%.3f' % duration.get_seconds()])
 
 
-def write_scene_list_html(output_html_filename, scene_list, cut_list=None, css=None, css_class='mytable',
-                          image_filenames=None, image_width=None, image_height=None):
+def write_scene_list_html(output_html_filename, scene_list, cut_list=None, css=None,
+                          css_class='mytable', image_filenames=None, image_width=None,
+                          image_height=None):
     """Writes the given list of scenes to an output file handle in html format.
 
     Arguments:
@@ -198,12 +199,14 @@ def write_scene_list_html(output_html_filename, scene_list, cut_list=None, css=N
 
     # Output Timecode list
     timecode_table = SimpleTable([["Timecode List:"] +
-                                  (cut_list if cut_list else [start.get_timecode() for start, _ in scene_list[1:]])],
+                                  (cut_list if cut_list else
+                                   [start.get_timecode() for start, _ in scene_list[1:]])],
                                  css_class=css_class)
 
     # Output list of scenes
-    header_row = ["Scene Number", "Start Frame", "Start Timecode", "Start Time (seconds)","End Frame",
-                  "End Timecode", "End Time (seconds)", "Length (frames)", "Length (timecode)", "Length (seconds)"]
+    header_row = ["Scene Number", "Start Frame", "Start Timecode", "Start Time (seconds)",
+                  "End Frame", "End Timecode", "End Time (seconds)",
+                  "Length (frames)", "Length (timecode)", "Length (seconds)"]
     for i, (start, end) in enumerate(scene_list):
         duration = end - start
 
@@ -215,7 +218,8 @@ def write_scene_list_html(output_html_filename, scene_list, cut_list=None, css=N
 
         if image_filenames:
             for image in image_filenames[i]:
-                row.add_cell(SimpleTableCell(SimpleTableImage(image, width=image_width, height=image_height)))
+                row.add_cell(SimpleTableCell(SimpleTableImage(
+                    image, width=image_width, height=image_height)))
 
         if i == 0:
             scene_table = SimpleTable(rows=[row], header_row=header_row, css_class=css_class)

@@ -123,9 +123,9 @@ class ContentDetector(SceneDetector):
             # We consider any frame over the threshold a new scene, but only if
             # the minimum scene length has been reached (otherwise it is ignored).
             if delta_hsv_avg >= self.threshold and (
-                (frame_num - self.last_scene_cut) >= self.min_scene_len):
-                    cut_list.append(frame_num)
-                    self.last_scene_cut = frame_num
+                    (frame_num - self.last_scene_cut) >= self.min_scene_len):
+                cut_list.append(frame_num)
+                self.last_scene_cut = frame_num
 
             if self.last_frame is not None and self.last_frame is not _unused:
                 del self.last_frame
