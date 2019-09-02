@@ -11,6 +11,11 @@ theme: readthedocs
 google_analytics: ['UA-72551323-1', 'auto']
 
 pages:
+- 'External Links':
+    - 'PySceneDetect @ Github': 'http://github.com/Breakthrough/PySceneDetect/'
+    - 'PySceneDetect @ PyPI': 'http://pypi.org/project/scenedetect/'
+    - 'PySceneDetect Manual': 'http://pyscenedetect-manual.readthedocs.io/'
+    - 'Issue Tracker': 'http://github.com/Breakthrough/PySceneDetect/issues'
 - 'PySceneDetect':
     - 'Introduction': 'index.md'
     - 'Features & Roadmap': 'features.md'
