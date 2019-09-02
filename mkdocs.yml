@@ -10,7 +10,7 @@ copyright: 'Copyright &copy; 2014-2019 Brandon Castellano.  All rights reserved.
 theme: readthedocs
 google_analytics: ['UA-72551323-1', 'auto']
 
-pages:
+nav:
 - 'External Links':
     - 'PySceneDetect @ Github': 'http://github.com/Breakthrough/PySceneDetect/'
     - 'PySceneDetect @ PyPI': 'http://pypi.org/project/scenedetect/'
