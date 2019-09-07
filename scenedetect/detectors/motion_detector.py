@@ -2,7 +2,7 @@
 #
 #         PySceneDetect: Python-Based Video Scene Detector
 #   ---------------------------------------------------------------
-#     [  Site: http://www.bcastell.com/projects/PySceneDetect/   ]
+#     [  Site: http://www.bcastell.com/projects/pyscenedetect/   ]
 #     [  Github: https://github.com/Breakthrough/PySceneDetect/  ]
 #     [  Documentation: http://pyscenedetect.readthedocs.org/    ]
 #
@@ -11,7 +11,7 @@
 # PySceneDetect is licensed under the BSD 3-Clause License; see the included
 # LICENSE file, or visit one of the following pages for details:
 #  - https://github.com/Breakthrough/PySceneDetect/
-#  - http://www.bcastell.com/projects/PySceneDetect/
+#  - http://www.bcastell.com/projects/pyscenedetect/
 #
 # This software uses Numpy, OpenCV, click, pytest, mkvmerge, and ffmpeg. See
 # the included LICENSE-* files, or one of the above URLs for more information.
@@ -29,9 +29,9 @@ import cv2
 import numpy
 
 
-from scenedetect.scene_detector import SceneDetector
+from scenedetect.scene_detector import SparseSceneDetector
 
-class MotionDetector(SceneDetector):
+class MotionDetector(SparseSceneDetector):
     """Detects motion events in scenes containing a static background.
 
     Uses background subtraction followed by noise removal (via morphological

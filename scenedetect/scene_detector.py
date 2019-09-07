@@ -39,6 +39,9 @@ are expected to provide in order to be compatible with PySceneDetect.
 class SceneDetector(object):
     """ Base class to inheret from when implementing a scene detection algorithm.
 
+    This represents a "dense" scene detector, which returns a list of frames where
+    the next scene/shot begins in a video.
+
     Also see the implemented scene detectors in the scenedetect.detectors module
     to get an idea of how a particular detector can be created.
     """
@@ -84,7 +87,7 @@ class SceneDetector(object):
 
 
     def process_frame(self, frame_num, frame_img):
-        # type: (int, numpy.ndarray) -> Tuple[bool, Union[None, List[int]]
+        # type: (int, numpy.ndarray) -> List[int]
         """ Process Frame: Computes/stores metrics and detects any scene changes.
 
         Prototype method, no actual detection.
@@ -103,6 +106,41 @@ class SceneDetector(object):
 
         Returns:
             List[int]: List of frame numbers of cuts to be added to the cutting list.
+        """
+        return []
+
+
+class SparseSceneDetector(SceneDetector):
+    """ Base class to inheret from when implementing a sparse scene detection algorithm.
+
+    Unlike dense detectors, sparse detectors detect "events" and return a *pair* of frames,
+    as opposed to just a single cut.
+
+    An example of a SparseSceneDetector is the MotionDetector.
+    """
+
+    def process_frame(self, frame_num, frame_img):
+        # type: (int, numpy.ndarray) -> List[Tuple[int, int]]
+        """ Process Frame: Computes/stores metrics and detects any scene changes.
+
+        Prototype method, no actual detection.
+
+        Returns:
+            List[Tuple[int,int]]: List of frame pairs representing individual scenes
+            to be added to the output scene list directly.
+        """
+        return []
+
+
+    def post_process(self, frame_num):
+        # type: (int) -> List[Tuple[int, int]]
+        """ Post Process: Performs any processing after the last frame has been read.
+
+        Prototype method, no actual detection.
+
+        Returns:
+            List[Tuple[int,int]]: List of frame pairs representing individual scenes
+            to be added to the output scene list directly.
         """
         return []
 
