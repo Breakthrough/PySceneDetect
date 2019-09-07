@@ -24,7 +24,7 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-""" PySceneDetect `scenedetect` Module
+""" Module: ``scenedetect``
 
 This is the main PySceneDetect module, containing imports of all classes
 so they can be directly accessed from the scenedetect module in addition

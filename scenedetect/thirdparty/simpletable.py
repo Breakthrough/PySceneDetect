@@ -23,7 +23,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""
+""" Module: ``scenedetect.thirdparty.simpletable``
+
 simpletable.py - v0.1 2014-07-31 Matheus Vieira Portela
 
 This module provides simple classes and interfaces to generate simple HTML

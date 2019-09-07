@@ -24,7 +24,7 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-""" PySceneDetect `scenedetect.__main__` Module
+""" Module: ``scenedetect.__main__``
 
 Provides entry point for PySceneDetect's command-line interface (CLI)
 functionality (in addition to using in other scripts via `import scenedetect`)

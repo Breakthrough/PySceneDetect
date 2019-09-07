@@ -24,11 +24,14 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-""" PySceneDetect `scenedetect.detectors.content_detector` Module
+""" Module: ``scenedetect.detectors.content_detector``
 
-This module implements the ContentDetector, which compares the difference
-in content between adjacent frames against a set threshold/score, which if
-exceeded, triggers a scene cut.
+This module implements the :py:class:`ContentDetector`, which compares the
+difference in content between adjacent frames against a set threshold/score,
+which if exceeded, triggers a scene cut.
+
+This detector is available from the command-line interface by using the
+`detect-content` command.
 """
 
 # Third-Party Library Imports

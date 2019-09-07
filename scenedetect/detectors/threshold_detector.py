@@ -24,10 +24,14 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-""" PySceneDetect `scenedetect.detectors.threshold_detector` Module
+""" Module: ``scenedetect.detectors.threshold_detector``
 
-This module implements the ThresholdDetector, which uses a set intensity level
-to detect scene cuts when the average frame intensity passes the set threshold.
+This module implements the :py:class:`ThresholdDetector`, which uses a set intensity
+level as a threshold, to detect cuts when the average frame intensity exceeds or falls
+below this threshold.
+
+This detector is available from the command-line interface by using the
+`detect-threshold` command.
 """
 
 # Third-Party Library Imports

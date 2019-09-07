@@ -25,7 +25,7 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 #
 
-""" PySceneDetect `scenedetect.stats_manager` Module
+""" Module: ``scenedetect.stats_manager``
 
 This module contains the :py:class:`StatsManager` class, which provides a key-value store
 for each :py:class:`SceneDetector <scenedetect.scene_detector.SceneDetector>` to read/write

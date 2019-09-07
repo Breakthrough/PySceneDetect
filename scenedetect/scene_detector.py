@@ -24,7 +24,7 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-""" PySceneDetect `scenedetect.scene_detector` Module
+""" Module: ``scenedetect.scene_detector``
 
 This module implements the base SceneDetector class, from which all scene
 detectors in the scenedetect.dectectors module are derived from.

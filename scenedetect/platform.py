@@ -24,7 +24,7 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-""" PySceneDetect `scenedetect.platform` Module
+""" Module: ``scenedetect.platform``
 
 This file contains all platform/library/OS-specific compatibility fixes,
 intended to improve the systems that are able to run PySceneDetect, and allow
