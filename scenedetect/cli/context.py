@@ -43,6 +43,7 @@ from string import Template
 import click
 import cv2
 from scenedetect.platform import tqdm
+from scenedetect.platform import get_and_create_path
 
 # PySceneDetect Library Imports
 import scenedetect.detectors
@@ -148,7 +149,7 @@ class CliContext(object):
             if self.video_manager is not None:
                 self.video_manager.release()
 
-
+    # TODO: Replace with scenedetect.scene_manager.save_images
     def _generate_images(self, scene_list, video_name,
                          image_name_template='$VIDEO_NAME-Scene-$SCENE_NUMBER-$IMAGE_NUMBER',
                          output_dir=None):
@@ -229,8 +230,7 @@ class CliContext(object):
                                            self.image_extension)
                     self.image_filenames[i].append(file_path)
                     cv2.imwrite(
-                        self.get_output_file_path(file_path,
-                                                  output_dir=output_dir),
+                        get_and_create_path(file_path, output_dir),
                         frame_im, imwrite_param)
                 else:
                     completed = False
@@ -240,39 +240,6 @@ class CliContext(object):
 
         if not completed:
             logging.error('Could not generate all output images.')
-
-
-    def get_output_file_path(self, file_path, output_dir=None):
-        # type: (str, Optional[str]) -> str
-        """ Get Output File Path: Gets full path to output file passed as argument, in
-        the specified global output directory (scenedetect -o/--output) if set, creating
-        any required directories along the way.
-
-        Arguments:
-            file_path (str): File name to get path for.  If file_path is an absolute
-                path (e.g. starts at a drive/root), no modification of the path
-                is performed, only ensuring that all output directories are created.
-            output_dir (Optional[str]): An optional output directory to override the
-                global output directory option, if set.
-
-        Returns:
-            (str) Full path to output file suitable for writing.
-
-        """
-        if file_path is None:
-            return None
-        output_dir = self.output_directory if output_dir is None else output_dir
-        # If an output directory is defined and the file path is a relative path, open
-        # the file handle in the output directory instead of the working directory.
-        if output_dir is not None and not os.path.isabs(file_path):
-            file_path = os.path.join(output_dir, file_path)
-        # Now that file_path is an absolute path, let's make sure all the directories
-        # exist for us to start writing files there.
-        try:
-            os.makedirs(os.path.split(os.path.abspath(file_path))[0])
-        except OSError:
-            pass
-        return file_path
 
     def _open_stats_file(self):
 
@@ -380,7 +347,7 @@ class CliContext(object):
                 VIDEO_NAME=video_name)
             if not scene_list_filename.lower().endswith('.csv'):
                 scene_list_filename += '.csv'
-            scene_list_path = self.get_output_file_path(
+            scene_list_path = get_and_create_path(
                 scene_list_filename, self.scene_list_directory)
             logging.info('Writing scene list to CSV file:\n  %s', scene_list_path)
             with open(scene_list_path, 'wt') as scene_list_file:
@@ -417,8 +384,7 @@ class CliContext(object):
                 VIDEO_NAME=video_name)
             if not html_filename.lower().endswith('.html'):
                 html_filename += '.html'
-            html_path = self.get_output_file_path(
-                html_filename, self.image_directory)
+            html_path = get_and_create_path(html_filename, self.image_directory)
             logging.info('Exporting to html file:\n %s:', html_path)
             if not self.html_include_images:
                 self.image_filenames = None
@@ -439,8 +405,8 @@ class CliContext(object):
                     ((len(self.split_name_format) - (dot_pos+1) <= 4 >= 2))):
                 self.split_name_format += '.mp4'
 
-            output_file_prefix = self.get_output_file_path(
-                self.split_name_format, output_dir=self.split_directory)
+            output_file_prefix = get_and_create_path(
+                self.split_name_format, self.split_directory)
             mkvmerge_available = is_mkvmerge_available()
             ffmpeg_available = is_ffmpeg_available()
             if mkvmerge_available and (self.split_mkvmerge or not ffmpeg_available):
@@ -589,7 +555,7 @@ class CliContext(object):
             logging.info('VideoManager not initialized.')
         else:
             logging.debug('VideoManager initialized.')
-            self.stats_file_path = self.get_output_file_path(stats_file)
+            self.stats_file_path = get_and_create_path(stats_file, self.output_directory)
             if self.stats_file_path is not None:
                 self.check_input_open()
                 self._open_stats_file()

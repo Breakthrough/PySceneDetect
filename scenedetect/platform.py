@@ -50,6 +50,7 @@ as STRING_TYPE intended to help with parsing string types from the CLI parser.
 from __future__ import print_function
 import sys
 import os
+import os.path
 import platform
 import struct
 import csv
@@ -193,4 +194,42 @@ def get_csv_writer(file_handle):
     # type: (File) -> csv.writer
     """ Returns a csv.writer object using the passed file handle. """
     return csv.writer(file_handle, lineterminator='\n')
+
+
+##
+## File I/O
+##
+
+def get_and_create_path(file_path, output_directory=None):
+    # type: (str, Optional[str]) -> str
+    """ Get & Create Path: Gets and returns the full/absolute path to file_path
+    in the specified output_directory if set, creating any required directories
+    along the way.
+
+    If file_path is already an absolute path, then output_directory is ignored.
+
+    Arguments:
+        file_path (str): File name to get path for.  If file_path is an absolute
+            path (e.g. starts at a drive/root), no modification of the path
+            is performed, only ensuring that all output directories are created.
+        output_dir (Optional[str]): An optional output directory to override the
+            directory of file_path if it is relative to the working directory.
+
+    Returns:
+        (str) Full path to output file suitable for writing.
+
+    """
+    if file_path is None:
+        return None
+    # If an output directory is defined and the file path is a relative path, open
+    # the file handle in the output directory instead of the working directory.
+    if output_directory is not None and not os.path.isabs(file_path):
+        file_path = os.path.join(output_directory, file_path)
+    # Now that file_path is an absolute path, let's make sure all the directories
+    # exist for us to start writing files there.
+    try:
+        os.makedirs(os.path.split(os.path.abspath(file_path))[0])
+    except OSError:
+        pass
+    return file_path
 
