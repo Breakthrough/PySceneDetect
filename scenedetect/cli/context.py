@@ -230,7 +230,9 @@ class CliContext(object):
                                            self.image_extension)
                     self.image_filenames[i].append(file_path)
                     cv2.imwrite(
-                        get_and_create_path(file_path, output_dir),
+                        get_and_create_path(
+                            file_path,
+                            output_dir if output_dir is not None else self.output_directory),
                         frame_im, imwrite_param)
                 else:
                     completed = False
@@ -348,7 +350,9 @@ class CliContext(object):
             if not scene_list_filename.lower().endswith('.csv'):
                 scene_list_filename += '.csv'
             scene_list_path = get_and_create_path(
-                scene_list_filename, self.scene_list_directory)
+                scene_list_filename,
+                self.scene_list_directory if self.scene_list_directory is not None
+                else self.output_directory)
             logging.info('Writing scene list to CSV file:\n  %s', scene_list_path)
             with open(scene_list_path, 'wt') as scene_list_file:
                 write_scene_list(scene_list_file, scene_list, cut_list)
@@ -384,7 +388,10 @@ class CliContext(object):
                 VIDEO_NAME=video_name)
             if not html_filename.lower().endswith('.html'):
                 html_filename += '.html'
-            html_path = get_and_create_path(html_filename, self.image_directory)
+            html_path = get_and_create_path(
+                html_filename,
+                self.image_directory if self.image_directory is not None
+                else self.output_directory)
             logging.info('Exporting to html file:\n %s:', html_path)
             if not self.html_include_images:
                 self.image_filenames = None
@@ -406,7 +413,9 @@ class CliContext(object):
                 self.split_name_format += '.mp4'
 
             output_file_prefix = get_and_create_path(
-                self.split_name_format, self.split_directory)
+                self.split_name_format,
+                self.split_directory if self.split_directory is not None
+                else self.output_directory)
             mkvmerge_available = is_mkvmerge_available()
             ffmpeg_available = is_ffmpeg_available()
             if mkvmerge_available and (self.split_mkvmerge or not ffmpeg_available):
