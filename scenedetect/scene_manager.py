@@ -515,7 +515,7 @@ class SceneManager(object):
             self._cutting_list += detector.post_process(frame_num)
 
 
-    def detect_scenes(self, frame_source, end_time=None, frame_skip=0,
+    def detect_scenes(self, frame_source, end_time=None, frame_skip=0, max_scenes=None,
                       show_progress=True):
         # type: (VideoManager, Union[int, FrameTimecode],
         #        Optional[Union[int, FrameTimecode]], Optional[bool]) -> int
@@ -588,6 +588,8 @@ class SceneManager(object):
             while True:
                 if end_frame is not None and curr_frame >= end_frame:
                     break
+                if max_scenes is not None and len(self._get_cutting_list()) >= max_scenes:
+                    break
                 # We don't compensate for frame_skip here as the frame_skip option
                 # is not allowed when using a StatsManager - thus, processing is
                 # *always* required for *all* frames when frame_skip > 0.
@@ -626,4 +628,3 @@ class SceneManager(object):
                 progress_bar.close()
 
         return num_frames
-

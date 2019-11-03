@@ -123,8 +123,8 @@ def is_ffmpeg_available():
 ## Split Video Functions
 ##
 
-def split_video_mkvmerge(input_video_paths, scene_list, output_file_prefix,
-                         video_name, suppress_output=False):
+def split_video_mkvmerge(input_video_paths, scene_list, scene_indices,
+                         output_file_prefix, video_name, suppress_output=False):
     # type: (List[str], List[FrameTimecode, FrameTimecode], Optional[str],
     #        Optional[bool]) -> None
     """ Calls the mkvmerge command on the input video(s), splitting it at the
@@ -156,7 +156,9 @@ def split_video_mkvmerge(input_video_paths, scene_list, output_file_prefix,
             #    [start_time.get_timecode() for start_time, _ in scene_list[1:]]),
             'parts:%s' % ','.join(
                 ['%s-%s' % (start_time.get_timecode(), end_time.get_timecode())
-                 for start_time, end_time in scene_list]),
+                 for i, (start_time, end_time) in enumerate(scene_list)
+                 if (scene_indices is None or i in scene_indices)
+                ]),
             ' +'.join(input_video_paths)]
         total_frames = scene_list[-1][1].get_frames() - scene_list[0][0].get_frames()
         processing_start_time = time.time()
@@ -173,7 +175,8 @@ def split_video_mkvmerge(input_video_paths, scene_list, output_file_prefix,
         logging.error('Error splitting video (mkvmerge returned %d).', ret_val)
 
 
-def split_video_ffmpeg(input_video_paths, scene_list, output_file_template, video_name,
+def split_video_ffmpeg(input_video_paths, scene_list, scene_indices,
+                       output_file_template, video_name,
                        arg_override='-c:v libx264 -preset fast -crf 21 -c:a copy',
                        hide_progress=False, suppress_output=False):
     # type: (List[str], List[Tuple[FrameTimecode, FrameTimecode]], Optional[str],
@@ -187,7 +190,7 @@ def split_video_ffmpeg(input_video_paths, scene_list, output_file_template, vide
     logging.info(
         'Splitting input video%s using ffmpeg, output path template:\n  %s',
         's' if len(input_video_paths) > 1 else '', output_file_template)
-        
+
     if len(input_video_paths) > 1:
         # TODO: Add support for splitting multiple/appended input videos.
         # https://trac.ffmpeg.org/wiki/Concatenate#samecodec
@@ -215,6 +218,8 @@ def split_video_ffmpeg(input_video_paths, scene_list, output_file_template, vide
             progress_bar = tqdm(total=total_frames, unit='frame', miniters=1)
         processing_start_time = time.time()
         for i, (start_time, end_time) in enumerate(scene_list):
+            if (scene_indices is not None) and (i not in scene_indices):
+                continue
             duration = (end_time - start_time)
             # Fix FFmpeg start timecode frame shift.
             start_time -= 1
@@ -260,4 +265,3 @@ def split_video_ffmpeg(input_video_paths, scene_list, output_file_template, vide
                       ' Please install ffmpeg to enable video output support.')
     if ret_val is not None and ret_val != 0:
         logging.error('Error splitting video (ffmpeg returned %d).', ret_val)
-

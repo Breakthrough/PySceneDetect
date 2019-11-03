@@ -173,6 +173,19 @@ def duplicate_command(ctx, param_hint):
                              param_hint='%s command' % param_hint)
 
 
+def validate_slice_list(ctx, param, value):
+    try:
+        if value is None:
+            return []
+        return [
+            slice(*[int(i) if i is not None and len(i) else None
+                    for i in (s.split(":") + [None]*3 )[:3]])
+            if ":" in s else int(s) for s in value.split(",")
+        ]
+    except ValueError:
+        raise click.BadParameter(
+            'must be a comma-separated list of indexes or slices in start:[stop:[step]] notation'
+        )
 
 @click.group(
     chain=True, context_settings=CLICK_CONTEXT_SETTINGS)
@@ -214,6 +227,14 @@ def duplicate_command(ctx, param_hint):
     ' optimal values for various scene detector options, and to cache frame calculations in order'
     ' to speed up multiple detection runs.')
 @click.option(
+    '--scene-range', '-r', metavar='INT_OR_SLICE',
+    callback=validate_slice_list, default=None,
+    type=click.STRING, help=
+    'A comma-separated list of integer indexes or ranges indicating the scenes to be '
+    ' selected for the "save-images" and "split-video" commands. Ranges are expresseed in'
+    ' Python slice notation (start:[stop:[step]]). Indexes can be negative, in which'
+    ' case they are interpreted as offsets from the end of the list of detected scnenes.')
+@click.option(
     '--verbosity', '-v', metavar='LEVEL',
     type=click.Choice(['none', 'debug', 'info', 'warning', 'error']), default='info', help=
     'Level of debug/info/error information to show. Setting to none will'
@@ -232,7 +253,7 @@ def duplicate_command(ctx, param_hint):
     ' level, even if `-v`/`--verbosity` is set.')
 @click.pass_context
 def scenedetect_cli(ctx, input, output, framerate, downscale, frame_skip, stats,
-                    verbosity, logfile, quiet):
+                    scene_range, verbosity, logfile, quiet):
     """ For example:
 
     scenedetect -i video.mp4 -s video.stats.csv detect-content list-scenes
@@ -272,6 +293,7 @@ def scenedetect_cli(ctx, input, output, framerate, downscale, frame_skip, stats,
             logging.disable(logging.CRITICAL)
 
     ctx.obj.quiet_mode = True if verbosity is None else False
+    ctx.obj.scenes = scene_range
 
     if stats is not None and frame_skip != 0:
         ctx.obj.options_processed = False
@@ -745,4 +767,3 @@ add_cli_command(scenedetect_cli, save_images_command)
 add_cli_command(scenedetect_cli, split_video_command)
 
 add_cli_command(scenedetect_cli, export_html_command)
-

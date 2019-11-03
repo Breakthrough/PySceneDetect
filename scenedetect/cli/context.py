@@ -38,6 +38,7 @@ import os
 import time
 import math
 from string import Template
+from itertools import chain
 
 # Third-Party Library Imports
 import click
@@ -150,11 +151,10 @@ class CliContext(object):
                 self.video_manager.release()
 
     # TODO: Replace with scenedetect.scene_manager.save_images
-    def _generate_images(self, scene_list, video_name,
+    def _generate_images(self, scene_list, scene_indices, video_name,
                          image_name_template='$VIDEO_NAME-Scene-$SCENE_NUMBER-$IMAGE_NUMBER',
                          output_dir=None):
         # type: (List[Tuple[FrameTimecode, FrameTimecode]) -> None
-
         if not scene_list:
             return
         if not self.options_processed:
@@ -198,12 +198,15 @@ class CliContext(object):
 
         if self.num_images == 1:
             for i, (start_time, end_time) in enumerate(scene_list):
+                if (scene_indices is not None) and (i not in scene_indices):
+                    continue
                 duration = end_time - start_time
                 timecode_list[i].append(start_time + int(duration.get_frames() / 2))
-
         else:
             middle_images = self.num_images - 2
             for i, (start_time, end_time) in enumerate(scene_list):
+                if (scene_indices is not None) and (i not in scene_indices):
+                    continue
                 timecode_list[i].append(start_time)
 
                 if middle_images > 0:
@@ -306,8 +309,27 @@ class CliContext(object):
         start_time = time.time()
         logging.info('Detecting scenes...')
 
+        def index_or_slice_max(s):
+            if isinstance(s, slice) and (
+                    s.start is None
+                    or s.start >= 0
+                ) and (
+                    s.stop is None
+                    or s.start >= 0
+                ):
+                return max(s.start, s.stop-1)
+            elif isinstance(s, int) and s >= 0:
+                return s
+            else:
+                return None
+        try:
+            max_scenes = max([ index_or_slice_max(s) for s in self.scenes ]) + 1
+        except (TypeError, ValueError):
+            max_scenes = None
+
         num_frames = self.scene_manager.detect_scenes(
             frame_source=self.video_manager, frame_skip=self.frame_skip,
+            max_scenes=max_scenes,
             show_progress=not self.quiet_mode)
 
         duration = time.time() - start_time
@@ -331,6 +353,13 @@ class CliContext(object):
         scene_list = self.scene_manager.get_scene_list(base_timecode)
         video_paths = self.video_manager.get_video_paths()
         video_name = os.path.basename(video_paths[0])
+
+        scene_indices = list(set(
+            chain(*[ range(*s.indices(len(scene_list)))
+                     if isinstance(s, slice)
+                     else range(s, s+1) for s in self.scenes ]))
+        ) if self.scenes else None
+
         if video_name.rfind('.') >= 0:
             video_name = video_name[:video_name.rfind('.')]
 
@@ -378,7 +407,8 @@ class CliContext(object):
 
         # Handle save-images command.
         if self.save_images:
-            self._generate_images(scene_list=scene_list, video_name=video_name,
+            self._generate_images(scene_list=scene_list, scene_indices = scene_indices,
+                                  video_name=video_name,
                                   image_name_template=self.image_name_format,
                                   output_dir=self.image_directory)
 
@@ -422,13 +452,13 @@ class CliContext(object):
                 if not self.split_mkvmerge:
                     logging.warning(
                         'ffmpeg not found, falling back to fast copy mode (split-video -c/--copy).')
-                split_video_mkvmerge(video_paths, scene_list, output_file_prefix, video_name,
+                split_video_mkvmerge(video_paths, scene_list, scene_indices, output_file_prefix, video_name,
                                      suppress_output=self.quiet_mode or self.split_quiet)
             elif ffmpeg_available:
                 if self.split_mkvmerge:
                     logging.warning('mkvmerge not found, falling back to normal splitting'
                                     ' mode (split-video).')
-                split_video_ffmpeg(video_paths, scene_list, output_file_prefix,
+                split_video_ffmpeg(video_paths, scene_list, scene_indices, output_file_prefix,
                                    video_name, arg_override=self.split_args,
                                    hide_progress=self.quiet_mode,
                                    suppress_output=self.quiet_mode or self.split_quiet)
@@ -691,4 +721,3 @@ class CliContext(object):
             logging.error('Multiple image type flags set for save-images command.')
             raise click.BadParameter(
                 'Only one image type (JPG/PNG/WEBP) can be specified.', param_hint='save-images')
-
