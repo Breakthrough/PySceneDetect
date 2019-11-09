@@ -329,6 +329,33 @@ class CliContext(object):
         # files with based on the given commands (list-scenes, split-video, save-images, etc...).
         cut_list = self.scene_manager.get_cut_list(base_timecode)
         scene_list = self.scene_manager.get_scene_list(base_timecode)
+
+
+        def merge_scenes(scenes, min_duration):
+            scenes = scenes[:]
+            i = 0
+            while i < len(scenes) - 1:
+                if i >= len(scenes) - 1:
+                    break
+                if (scenes[i][1] - scenes[i][0]) < min_duration:
+                    scenes[i] = (scenes[i][0], scenes[i+1][1])
+                    del scenes[i+1]
+                    i = 0
+                else:
+                    i += 1
+            return scenes
+
+        if self.min_duration:
+            if self.min_duration_action == "merge":
+                scene_list = merge_scenes(scene_list, self.min_duration)
+            elif self.min_duration_action == "drop":
+                scene_list = [
+                    s for s in scene_list
+                    if ( s[1].get_seconds() - s[0].get_seconds() ) >= self.min_duration
+                ]
+            else:
+                raise click.BadParameter("unknown value for --min-duration-action: %s" %(self.min_duration_action))
+
         video_paths = self.video_manager.get_video_paths()
         video_name = os.path.basename(video_paths[0])
         if video_name.rfind('.') >= 0:
@@ -536,7 +563,8 @@ class CliContext(object):
         return video_manager_initialized
 
 
-    def parse_options(self, input_list, framerate, stats_file, downscale, frame_skip):
+    def parse_options(self, input_list, framerate, stats_file, downscale, frame_skip,
+                      min_duration, min_duration_action):
         # type: (List[str], float, str, int, int) -> None
         """ Parse Options: Parses all global options/arguments passed to the main
         scenedetect command, before other sub-commands (e.g. this function processes
@@ -574,6 +602,8 @@ class CliContext(object):
 
         self.options_processed = True
 
+        self.min_duration = min_duration
+        self.min_duration_action = min_duration_action
 
     def time_command(self, start=None, duration=None, end=None):
         # type: (Optional[str], Optional[str], Optional[str]) -> None
@@ -691,4 +721,3 @@ class CliContext(object):
             logging.error('Multiple image type flags set for save-images command.')
             raise click.BadParameter(
                 'Only one image type (JPG/PNG/WEBP) can be specified.', param_hint='save-images')
-

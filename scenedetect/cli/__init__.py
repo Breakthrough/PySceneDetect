@@ -207,6 +207,17 @@ def duplicate_command(ctx, param_hint):
     ' -fs 2 processes 33% of the frames, -fs 3 processes 25%, etc...).'
     ' Reduces processing speed at expense of accuracy.')
 @click.option(
+    '--min-duration', '-m', metavar='SECONDS',
+    type=click.FLOAT, default=None, help=
+    'Ensure that scenes are at least SECONDS long, either by merging shorter scenes together'
+    ' (with `--min-duration-action=merge` or by dropping them (with `--min-duration-action=drop`')
+@click.option(
+    '--min-duration-action', '-M', metavar='ACTION',
+    type=click.Choice(['merge', 'drop']), default='merge', help=
+    'Select how short scenes are merged when using `--min-duration`.  Valid values are'
+    ' `merge` to have short scenes merged with their neighbors, or `drop` to drop short'
+    ' scenes from the output')
+@click.option(
     '--stats', '-s', metavar='CSV',
     type=click.Path(exists=False, file_okay=True, writable=True, resolve_path=False), help=
     'Path to stats file (.csv) for writing frame metrics to. If the file exists, any'
@@ -231,7 +242,8 @@ def duplicate_command(ctx, param_hint):
     ' commands. Equivalent to setting `--verbosity none`. Overrides the current verbosity'
     ' level, even if `-v`/`--verbosity` is set.')
 @click.pass_context
-def scenedetect_cli(ctx, input, output, framerate, downscale, frame_skip, stats,
+def scenedetect_cli(ctx, input, output, framerate,downscale, frame_skip,
+                    min_duration, min_duration_action, stats,
                     verbosity, logfile, quiet):
     """ For example:
 
@@ -287,7 +299,7 @@ def scenedetect_cli(ctx, input, output, framerate, downscale, frame_skip, stats,
             logging.info('Output directory set:\n  %s', ctx.obj.output_directory)
         ctx.obj.parse_options(
             input_list=input, framerate=framerate, stats_file=stats, downscale=downscale,
-            frame_skip=frame_skip)
+            frame_skip=frame_skip, min_duration=min_duration, min_duration_action=min_duration_action)
     except:
         logging.error('Could not parse CLI options.')
         raise
@@ -745,4 +757,3 @@ add_cli_command(scenedetect_cli, save_images_command)
 add_cli_command(scenedetect_cli, split_video_command)
 
 add_cli_command(scenedetect_cli, export_html_command)
-
