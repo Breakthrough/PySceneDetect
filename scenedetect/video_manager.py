@@ -750,6 +750,7 @@ class VideoManager(object):
         if not self._started:
             raise VideoDecoderNotStarted()
 
+        read_frame = False
         if self._curr_cap is not None and self._end_of_video != True:
             read_frame, self._last_frame = self._curr_cap.read()
 
