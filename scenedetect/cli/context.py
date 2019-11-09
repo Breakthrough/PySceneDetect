@@ -204,7 +204,7 @@ class CliContext(object):
         else:
             middle_images = self.num_images - 2
             for i, (start_time, end_time) in enumerate(scene_list):
-                timecode_list[i].append(start_time)
+                timecode_list[i].append(start_time + self.image_frame_margin)
 
                 if middle_images > 0:
                     duration = (end_time.get_frames() - 1) - start_time.get_frames()
@@ -215,7 +215,7 @@ class CliContext(object):
 
                 # End FrameTimecode is always the same frame as the next scene's start_time
                 # (one frame past the end), so we need to subtract 1 here.
-                timecode_list[i].append(end_time - 1)
+                timecode_list[i].append(end_time - 1 - self.image_frame_margin)
 
         for i in timecode_list:
             for j, image_timecode in enumerate(timecode_list[i]):
@@ -641,7 +641,7 @@ class CliContext(object):
 
 
     def save_images_command(self, num_images, output, name_format, jpeg, webp, quality,
-                            png, compression):
+                            png, compression, image_frame_margin):
         # type: (int, str, str, bool, bool, int, bool, int) -> None
         """ Save Images Command: Parses all options/arguments passed to the save-images command,
         or with respect to the CLI, this function processes [save-images options] when calling:
@@ -676,6 +676,7 @@ class CliContext(object):
             self.image_param = compression if png else quality
             self.image_name_format = name_format
             self.num_images = num_images
+            self.image_frame_margin = image_frame_margin
 
             image_type = 'JPEG' if self.image_extension == 'jpg' else self.image_extension.upper()
             image_param_type = ''
@@ -691,4 +692,3 @@ class CliContext(object):
             logging.error('Multiple image type flags set for save-images command.')
             raise click.BadParameter(
                 'Only one image type (JPG/PNG/WEBP) can be specified.', param_hint='save-images')
-
