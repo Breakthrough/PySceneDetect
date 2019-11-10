@@ -413,9 +413,11 @@ def time_command(ctx, start, duration, end):
 #    '[Optional] Intensity cutoff threshold to disable scene cut detection. Useful for avoiding.'
 #    ' scene changes triggered by flashes. Refers to frame metric delta_lum in stats file.')
 @click.option(
-    '--min-scene-len', '-m', metavar='FRAMES',
-    type=click.INT, default=15, show_default=True, help=
-    'Minimum size/length of any scene, in number of frames.')
+    '--min-scene-len', '-m', metavar='TIMECODE',
+    type=click.STRING, default="0", help=
+    'Minimum size/length of any scene. TIMECODE can be specified as exact'
+    ' number of frames, a time in seconds followed by s, or a timecode in the'
+    ' format HH:MM:SS or HH:MM:SS.nnn')
 @click.pass_context
 def detect_content_command(ctx, threshold, min_scene_len): #, intensity_cutoff):
     """ Perform content detection algorithm on input video(s).
@@ -427,6 +429,8 @@ def detect_content_command(ctx, threshold, min_scene_len): #, intensity_cutoff):
 
     #if intensity_cutoff is not None:
     #    raise NotImplementedError()
+
+    min_scene_len = parse_timecode(ctx.obj, min_scene_len)
 
     logging.debug('Detecting content, parameters:\n'
                   '  threshold: %d, min-scene-len: %d',
@@ -447,9 +451,11 @@ def detect_content_command(ctx, threshold, min_scene_len): #, intensity_cutoff):
     'Threshold value (integer) that the delta_rgb frame metric must exceed to trigger a new scene.'
     ' Refers to frame metric delta_rgb in stats file.')
 @click.option(
-    '--min-scene-len', '-m', metavar='FRAMES',
-    type=click.INT, default=15, show_default=True, help=
-    'Minimum size/length of any scene, in number of frames.')
+    '--min-scene-len', '-m', metavar='TIMECODE',
+    type=click.STRING, default="0", help=
+    'Minimum size/length of any scene. TIMECODE can be specified as exact'
+    ' number of frames, a time in seconds followed by s, or a timecode in the'
+    ' format HH:MM:SS or HH:MM:SS.nnn')
 @click.option(
     '--fade-bias', '-f', metavar='PERCENT',
     type=click.IntRange(-100, 100), default=0, show_default=True, help=
@@ -487,6 +493,8 @@ def detect_threshold_command(ctx, threshold, min_scene_len, fade_bias, add_last_
 
     # Handle case where add_last_scene is not set and is None.
     add_last_scene = True if add_last_scene else False
+
+    min_scene_len = parse_timecode(ctx.obj, min_scene_len)
 
     # Convert min_percent and fade_bias from integer to floats (0.0-1.0 and -1.0-+1.0 respectively).
     min_percent /= 100.0
