@@ -212,11 +212,18 @@ class CliContext(object):
                     for j, a in enumerate(np.array_split(r, self.num_images))
                 ]
             ]
-            # create range of frames in scene
-            for i, r in enumerate(
-                    range(start.get_frames(), end.get_frames())
-                    # for each scene in scene list
-                    for start, end in scene_list)
+            for i, r in enumerate([
+                    # pad ranges to number of images
+                    r
+                    if r.stop-r.start >= self.num_images
+                    else list(r) + [r.stop-1] * (self.num_images - len(r))
+                    # create range of frames in scene
+                    for r in (
+                            range(start.get_frames(), end.get_frames())
+                            # for each scene in scene list
+                            for start, end in scene_list
+                    )
+            ])
         ]
 
         self.image_filenames = { i: [] for i in range(len(timecode_list)) }
