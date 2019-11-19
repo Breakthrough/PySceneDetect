@@ -702,12 +702,16 @@ def split_video_command(ctx, output, filename, high_quality, override_args, quie
     'PNG compression rate, from 0-9. Higher values produce smaller files but result'
     ' in longer compression time. This setting does not affect image quality, only'
     ' file size. [default: 3]')
+@click.option(
+    '--image-frame-margin', metavar='N', default=0,
+    type=click.INT, help=
+    'Number of frames to ignore at the beginning and end of scenes when saving images')
 @click.pass_context
-def save_images_command(ctx, output, filename, num_images, jpeg, webp, quality, png, compression):
+def save_images_command(ctx, output, filename, num_images, jpeg, webp, quality, png, compression, image_frame_margin):
     """ Create images for each detected scene. """
     if ctx.obj.save_images:
         duplicate_command(ctx, 'save-images')
-    ctx.obj.save_images_command(num_images, output, filename, jpeg, webp, quality, png, compression)
+    ctx.obj.save_images_command(num_images, output, filename, jpeg, webp, quality, png, compression, image_frame_margin)
 
 
 
@@ -745,4 +749,3 @@ add_cli_command(scenedetect_cli, save_images_command)
 add_cli_command(scenedetect_cli, split_video_command)
 
 add_cli_command(scenedetect_cli, export_html_command)
-

@@ -38,6 +38,7 @@ import os
 import time
 import math
 from string import Template
+import numpy as np
 
 # Third-Party Library Imports
 import click
@@ -70,6 +71,8 @@ from scenedetect.video_splitter import split_video_ffmpeg
 from scenedetect.platform import get_cv2_imwrite_params
 from scenedetect.platform import check_opencv_ffmpeg_dll
 
+
+from scenedetect.frame_timecode import FrameTimecode
 
 def get_plural(val_list):
     """ Get Plural: Helper function to return 's' if a list has more than one (1)
@@ -190,35 +193,43 @@ class CliContext(object):
         image_num_format += str(math.floor(math.log(self.num_images, 10)) + 2) + 'd'
 
         timecode_list = dict()
-        self.image_filenames = dict()
 
-        for i in range(len(scene_list)):
-            timecode_list[i] = []
-            self.image_filenames[i] = []
+        fps = scene_list[0][0].framerate
 
-        if self.num_images == 1:
-            for i, (start_time, end_time) in enumerate(scene_list):
-                duration = end_time - start_time
-                timecode_list[i].append(start_time + int(duration.get_frames() / 2))
+        timecode_list = [
+            [
+                FrameTimecode(int(f), fps=fps) for f in [
+                    # middle frames
+                    a[len(a)//2] if (0 < j < self.num_images-1) or self.num_images == 1
 
-        else:
-            middle_images = self.num_images - 2
-            for i, (start_time, end_time) in enumerate(scene_list):
-                timecode_list[i].append(start_time)
+                    # first frame
+                    else min(a[0] + self.image_frame_margin, a[-1]) if j == 0
 
-                if middle_images > 0:
-                    duration = (end_time.get_frames() - 1) - start_time.get_frames()
-                    duration_increment = None
-                    duration_increment = int(duration / (middle_images + 1))
-                    for j in range(middle_images):
-                        timecode_list[i].append(start_time + ((j+1) * duration_increment))
+                    # last frame
+                    else max(a[-1] - self.image_frame_margin, a[0])
 
-                # End FrameTimecode is always the same frame as the next scene's start_time
-                # (one frame past the end), so we need to subtract 1 here.
-                timecode_list[i].append(end_time - 1)
+                    # for each evenly-split array of frames in the scene list
+                    for j, a in enumerate(np.array_split(r, self.num_images))
+                ]
+            ]
+            for i, r in enumerate([
+                    # pad ranges to number of images
+                    r
+                    if r.stop-r.start >= self.num_images
+                    else list(r) + [r.stop-1] * (self.num_images - len(r))
+                    # create range of frames in scene
+                    for r in (
+                            range(start.get_frames(), end.get_frames())
+                            # for each scene in scene list
+                            for start, end in scene_list
+                    )
+            ])
+        ]
 
-        for i in timecode_list:
-            for j, image_timecode in enumerate(timecode_list[i]):
+        self.image_filenames = { i: [] for i in range(len(timecode_list)) }
+
+        for i, tl in enumerate(timecode_list):
+            for j, image_timecode in enumerate(tl):
                 self.video_manager.seek(image_timecode)
                 self.video_manager.grab()
                 ret_val, frame_im = self.video_manager.retrieve()
@@ -226,7 +237,8 @@ class CliContext(object):
                     file_path = '%s.%s' % (filename_template.safe_substitute(
                         VIDEO_NAME=video_name,
                         SCENE_NUMBER=scene_num_format % (i + 1),
-                        IMAGE_NUMBER=image_num_format % (j + 1)),
+                        IMAGE_NUMBER=image_num_format % (j + 1),
+                        FRAME_NUMBER=image_timecode.get_frames()),
                                            self.image_extension)
                     self.image_filenames[i].append(file_path)
                     cv2.imwrite(
@@ -641,7 +653,7 @@ class CliContext(object):
 
 
     def save_images_command(self, num_images, output, name_format, jpeg, webp, quality,
-                            png, compression):
+                            png, compression, image_frame_margin):
         # type: (int, str, str, bool, bool, int, bool, int) -> None
         """ Save Images Command: Parses all options/arguments passed to the save-images command,
         or with respect to the CLI, this function processes [save-images options] when calling:
@@ -676,6 +688,7 @@ class CliContext(object):
             self.image_param = compression if png else quality
             self.image_name_format = name_format
             self.num_images = num_images
+            self.image_frame_margin = image_frame_margin
 
             image_type = 'JPEG' if self.image_extension == 'jpg' else self.image_extension.upper()
             image_param_type = ''
@@ -691,4 +704,3 @@ class CliContext(object):
             logging.error('Multiple image type flags set for save-images command.')
             raise click.BadParameter(
                 'Only one image type (JPG/PNG/WEBP) can be specified.', param_hint='save-images')
-
