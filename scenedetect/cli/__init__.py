@@ -414,7 +414,7 @@ def time_command(ctx, start, duration, end):
 #    ' scene changes triggered by flashes. Refers to frame metric delta_lum in stats file.')
 @click.option(
     '--min-scene-len', '-m', metavar='TIMECODE',
-    type=click.STRING, default="0", help=
+    type=click.STRING, default="0.6s", show_default=True, help=
     'Minimum size/length of any scene. TIMECODE can be specified as exact'
     ' number of frames, a time in seconds followed by s, or a timecode in the'
     ' format HH:MM:SS or HH:MM:SS.nnn')
@@ -452,7 +452,7 @@ def detect_content_command(ctx, threshold, min_scene_len): #, intensity_cutoff):
     ' Refers to frame metric delta_rgb in stats file.')
 @click.option(
     '--min-scene-len', '-m', metavar='TIMECODE',
-    type=click.STRING, default="0", help=
+    type=click.STRING, show_default=True, default="0.6s", help=
     'Minimum size/length of any scene. TIMECODE can be specified as exact'
     ' number of frames, a time in seconds followed by s, or a timecode in the'
     ' format HH:MM:SS or HH:MM:SS.nnn')

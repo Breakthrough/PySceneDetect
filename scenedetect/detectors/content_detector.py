@@ -53,7 +53,7 @@ class ContentDetector(SceneDetector):
     def __init__(self, threshold=30.0, min_scene_len=15):
         super(ContentDetector, self).__init__()
         self.threshold = threshold
-        self.min_scene_len = min_scene_len  # minimum length of any given scene, in frames
+        self.min_scene_len = min_scene_len  # minimum length of any given scene, in frames (int) or FrameTimecode
         self.last_frame = None
         self.last_scene_cut = None
         self.last_hsv = None

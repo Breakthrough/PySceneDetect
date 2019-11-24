@@ -76,7 +76,7 @@ class ThresholdDetector(SceneDetector):
         min_percent:  Float between 0.0 and 1.0 which represents the minimum
             percent of pixels in a frame that must meet the threshold value in
             order to trigger a fade in/out.
-        min_scene_len:  Unsigned integer greater than 0 representing the
+        min_scene_len:  FrameTimecode object or integer greater than 0 of the
             minimum length, in frames, of a scene (or subsequent scene cut).
         fade_bias:  Float between -1.0 and +1.0 representing the percentage of
             timecode skew for the start of a scene (-1.0 causing a cut at the

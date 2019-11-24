@@ -24,7 +24,7 @@ are any other commands to be performed, and their own options (e.g.
    denote things that may be optional):
 
        ``scenedetect (global options) (command-A [command-A options]) (...)``
-   
+
    This is because once a command is specified, all options/arguments afterwards
    will be parsed assuming they belong to *that* command.
 
