@@ -135,7 +135,7 @@ def write_scene_list(output_csv_file, scene_list, cut_list=None):
         "Start Frame", "Start Timecode", "Start Time (seconds)",
         "End Frame", "End Timecode", "End Time (seconds)",
         "Length (frames)", "Length (timecode)", "Length (seconds)"])
-    for i, (start, end) in enumerate(scene_list):
+    for i, ((start, end), selected) in enumerate(scene_list):
         duration = end - start
         csv_writer.writerow([
             '%d' % (i+1),

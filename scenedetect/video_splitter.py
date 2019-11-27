@@ -123,7 +123,7 @@ def is_ffmpeg_available():
 ## Split Video Functions
 ##
 
-def split_video_mkvmerge(input_video_paths, scene_list, scene_indices,
+def split_video_mkvmerge(input_video_paths, scene_list,
                          output_file_prefix, video_name, suppress_output=False):
     # type: (List[str], List[FrameTimecode, FrameTimecode], Optional[str],
     #        Optional[bool]) -> None
@@ -156,11 +156,11 @@ def split_video_mkvmerge(input_video_paths, scene_list, scene_indices,
             #    [start_time.get_timecode() for start_time, _ in scene_list[1:]]),
             'parts:%s' % ','.join(
                 ['%s-%s' % (start_time.get_timecode(), end_time.get_timecode())
-                 for i, (start_time, end_time) in enumerate(scene_list)
-                 if (scene_indices is None or i in scene_indices)
+                 for i, ( (start_time, end_time), selected) in enumerate(scene_list)
+                 if selected
                 ]),
             ' +'.join(input_video_paths)]
-        total_frames = scene_list[-1][1].get_frames() - scene_list[0][0].get_frames()
+        total_frames = scene_list[-1][0][1].get_frames() - scene_list[0][0][0].get_frames()
         processing_start_time = time.time()
         ret_val = subprocess.call(call_list)
         if not suppress_output:
@@ -175,7 +175,7 @@ def split_video_mkvmerge(input_video_paths, scene_list, scene_indices,
         logging.error('Error splitting video (mkvmerge returned %d).', ret_val)
 
 
-def split_video_ffmpeg(input_video_paths, scene_list, scene_indices,
+def split_video_ffmpeg(input_video_paths, scene_list,
                        output_file_template, video_name,
                        arg_override='-c:v libx264 -preset fast -crf 21 -c:a copy',
                        hide_progress=False, suppress_output=False):
@@ -213,12 +213,12 @@ def split_video_ffmpeg(input_video_paths, scene_list, scene_indices,
 
     try:
         progress_bar = None
-        total_frames = scene_list[-1][1].get_frames() - scene_list[0][0].get_frames()
+        total_frames = scene_list[-1][0][1].get_frames() - scene_list[0][0][0].get_frames()
         if tqdm and not hide_progress:
             progress_bar = tqdm(total=total_frames, unit='frame', miniters=1)
         processing_start_time = time.time()
-        for i, (start_time, end_time) in enumerate(scene_list):
-            if (scene_indices is not None) and (i not in scene_indices):
+        for i, ((start_time, end_time), selected) in enumerate(scene_list):
+            if not selected:
                 continue
             duration = (end_time - start_time)
             # Fix FFmpeg start timecode frame shift.

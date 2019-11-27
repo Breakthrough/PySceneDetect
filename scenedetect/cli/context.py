@@ -151,7 +151,7 @@ class CliContext(object):
                 self.video_manager.release()
 
     # TODO: Replace with scenedetect.scene_manager.save_images
-    def _generate_images(self, scene_list, scene_indices, video_name,
+    def _generate_images(self, scene_list, video_name,
                          image_name_template='$VIDEO_NAME-Scene-$SCENE_NUMBER-$IMAGE_NUMBER',
                          output_dir=None):
         # type: (List[Tuple[FrameTimecode, FrameTimecode]) -> None
@@ -197,15 +197,15 @@ class CliContext(object):
             self.image_filenames[i] = []
 
         if self.num_images == 1:
-            for i, (start_time, end_time) in enumerate(scene_list):
-                if (scene_indices is not None) and (i not in scene_indices):
+            for i, ((start_time, end_time), selected) in enumerate(scene_list):
+                if not selected:
                     continue
                 duration = end_time - start_time
                 timecode_list[i].append(start_time + int(duration.get_frames() / 2))
         else:
             middle_images = self.num_images - 2
-            for i, (start_time, end_time) in enumerate(scene_list):
-                if (scene_indices is not None) and (i not in scene_indices):
+            for i, ((start_time, end_time), selected) in enumerate(scene_list):
+                if not selected:
                     continue
                 timecode_list[i].append(start_time)
 
@@ -360,6 +360,11 @@ class CliContext(object):
                      else range(s, s+1) for s in self.scenes ]))
         ) if self.scenes else None
 
+        scene_list = [
+            (s, i in scene_indices)
+            for i, s in enumerate(scene_list)
+        ]
+
         if video_name.rfind('.') >= 0:
             video_name = video_name[:video_name.rfind('.')]
 
@@ -368,7 +373,7 @@ class CliContext(object):
             logging.info('Detected %d scenes, average shot length %.1f seconds.',
                          len(scene_list),
                          sum([(end_time - start_time).get_seconds()
-                              for start_time, end_time in scene_list]) / float(len(scene_list)))
+                              for (start_time, end_time), selected in scene_list]) / float(len(scene_list)))
         else:
             logging.info('No scenes detected.')
 
@@ -398,7 +403,7 @@ class CliContext(object):
         i+1,
         start_time.get_frames(), start_time.get_timecode(),
         end_time.get_frames(), end_time.get_timecode())
-     for i, (start_time, end_time) in enumerate(scene_list)]))
+     for i, ((start_time, end_time), selected) in enumerate(scene_list)]))
 
 
         if cut_list:
@@ -407,7 +412,7 @@ class CliContext(object):
 
         # Handle save-images command.
         if self.save_images:
-            self._generate_images(scene_list=scene_list, scene_indices = scene_indices,
+            self._generate_images(scene_list=scene_list,
                                   video_name=video_name,
                                   image_name_template=self.image_name_format,
                                   output_dir=self.image_directory)
@@ -452,13 +457,13 @@ class CliContext(object):
                 if not self.split_mkvmerge:
                     logging.warning(
                         'ffmpeg not found, falling back to fast copy mode (split-video -c/--copy).')
-                split_video_mkvmerge(video_paths, scene_list, scene_indices, output_file_prefix, video_name,
+                split_video_mkvmerge(video_paths, scene_list, output_file_prefix, video_name,
                                      suppress_output=self.quiet_mode or self.split_quiet)
             elif ffmpeg_available:
                 if self.split_mkvmerge:
                     logging.warning('mkvmerge not found, falling back to normal splitting'
                                     ' mode (split-video).')
-                split_video_ffmpeg(video_paths, scene_list, scene_indices, output_file_prefix,
+                split_video_ffmpeg(video_paths, scene_list, output_file_prefix,
                                    video_name, arg_override=self.split_args,
                                    hide_progress=self.quiet_mode,
                                    suppress_output=self.quiet_mode or self.split_quiet)
