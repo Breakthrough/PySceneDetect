@@ -207,6 +207,15 @@ def duplicate_command(ctx, param_hint):
     ' -fs 2 processes 33% of the frames, -fs 3 processes 25%, etc...).'
     ' Reduces processing speed at expense of accuracy.')
 @click.option(
+    '--min-scene-len', '-m', metavar='TIMECODE',
+    type=click.STRING, default="0", help=
+    'Minimum size/length of any scene. TIMECODE can be specified as exact'
+    ' number of frames, a time in seconds followed by s, or a timecode in the'
+    ' format HH:MM:SS or HH:MM:SS.nnn')
+@click.option(
+    '--drop-short-scenes', is_flag=True, flag_value=True, help=
+    'Drop scenes shorter than `--min-scene-len` instead of combining them with neighbors')
+@click.option(
     '--stats', '-s', metavar='CSV',
     type=click.Path(exists=False, file_okay=True, writable=True, resolve_path=False), help=
     'Path to stats file (.csv) for writing frame metrics to. If the file exists, any'
@@ -231,7 +240,9 @@ def duplicate_command(ctx, param_hint):
     ' commands. Equivalent to setting `--verbosity none`. Overrides the current verbosity'
     ' level, even if `-v`/`--verbosity` is set.')
 @click.pass_context
-def scenedetect_cli(ctx, input, output, framerate, downscale, frame_skip, stats,
+def scenedetect_cli(ctx, input, output, framerate, downscale, frame_skip,
+                    min_scene_len, drop_short_scenes, stats,
+                    scene_range,
                     verbosity, logfile, quiet):
     """ For example:
 
@@ -244,7 +255,6 @@ def scenedetect_cli(ctx, input, output, framerate, downscale, frame_skip, stats,
 
     """
     ctx.call_on_close(ctx.obj.process_input)
-
     logging.disable(logging.NOTSET)
 
     format_str = '[PySceneDetect] %(message)s'
@@ -282,14 +292,17 @@ def scenedetect_cli(ctx, input, output, framerate, downscale, frame_skip, stats,
         raise click.BadParameter(
             '\n  Combining the -s/--stats and -fs/--frame-skip options is not supported.',
             param_hint='frame skip + stats file')
+
     try:
         if ctx.obj.output_directory is not None:
             logging.info('Output directory set:\n  %s', ctx.obj.output_directory)
         ctx.obj.parse_options(
             input_list=input, framerate=framerate, stats_file=stats, downscale=downscale,
-            frame_skip=frame_skip)
-    except:
-        logging.error('Could not parse CLI options.')
+            frame_skip=frame_skip, min_scene_len=min_scene_len, drop_short_scenes=drop_short_scenes)
+        ctx.obj.min_scene_len = parse_timecode(ctx.obj, min_scene_len)
+
+    except Exception as e:
+        logging.error('Could not parse CLI options.: %s' %(e))
         raise
 
 
@@ -412,14 +425,8 @@ def time_command(ctx, start, duration, end):
 #    type=click.FLOAT, default=None, show_default=True, help=
 #    '[Optional] Intensity cutoff threshold to disable scene cut detection. Useful for avoiding.'
 #    ' scene changes triggered by flashes. Refers to frame metric delta_lum in stats file.')
-@click.option(
-    '--min-scene-len', '-m', metavar='TIMECODE',
-    type=click.STRING, default="0.6s", show_default=True, help=
-    'Minimum size/length of any scene. TIMECODE can be specified as exact'
-    ' number of frames, a time in seconds followed by s, or a timecode in the'
-    ' format HH:MM:SS or HH:MM:SS.nnn')
 @click.pass_context
-def detect_content_command(ctx, threshold, min_scene_len): #, intensity_cutoff):
+def detect_content_command(ctx, threshold): #, intensity_cutoff):
     """ Perform content detection algorithm on input video(s).
 
     detect-content
@@ -430,8 +437,7 @@ def detect_content_command(ctx, threshold, min_scene_len): #, intensity_cutoff):
     #if intensity_cutoff is not None:
     #    raise NotImplementedError()
 
-    min_scene_len = parse_timecode(ctx.obj, min_scene_len)
-
+    min_scene_len = 0 if ctx.obj.drop_short_scenes else ctx.obj.min_scene_len
     logging.debug('Detecting content, parameters:\n'
                   '  threshold: %d, min-scene-len: %d',
                   threshold, min_scene_len)
@@ -450,12 +456,6 @@ def detect_content_command(ctx, threshold, min_scene_len): #, intensity_cutoff):
     type=click.IntRange(0, 255), default=12, show_default=True, help=
     'Threshold value (integer) that the delta_rgb frame metric must exceed to trigger a new scene.'
     ' Refers to frame metric delta_rgb in stats file.')
-@click.option(
-    '--min-scene-len', '-m', metavar='TIMECODE',
-    type=click.STRING, show_default=True, default="0.6s", help=
-    'Minimum size/length of any scene. TIMECODE can be specified as exact'
-    ' number of frames, a time in seconds followed by s, or a timecode in the'
-    ' format HH:MM:SS or HH:MM:SS.nnn')
 @click.option(
     '--fade-bias', '-f', metavar='PERCENT',
     type=click.IntRange(-100, 100), default=0, show_default=True, help=
@@ -476,7 +476,7 @@ def detect_content_command(ctx, threshold, min_scene_len): #, intensity_cutoff):
     type=click.IntRange(1, 128), default=8, show_default=True, help=
     'Number of rows in image to sum per iteration (can be tuned for performance in some cases).')
 @click.pass_context
-def detect_threshold_command(ctx, threshold, min_scene_len, fade_bias, add_last_scene,
+def detect_threshold_command(ctx, threshold, fade_bias, add_last_scene,
                              min_percent, block_size):
     """  Perform threshold detection algorithm on input video(s).
 
@@ -484,6 +484,8 @@ def detect_threshold_command(ctx, threshold, min_scene_len, fade_bias, add_last_
 
     detect-threshold --threshold 15
     """
+
+    min_scene_len = 0 if ctx.obj.drop_short_scenes else ctx.obj.min_scene_len
 
     logging.debug('Detecting threshold, parameters:\n'
                   '  threshold: %d, min-scene-len: %d, fade-bias: %d,\n'
@@ -493,8 +495,6 @@ def detect_threshold_command(ctx, threshold, min_scene_len, fade_bias, add_last_
 
     # Handle case where add_last_scene is not set and is None.
     add_last_scene = True if add_last_scene else False
-
-    min_scene_len = parse_timecode(ctx.obj, min_scene_len)
 
     # Convert min_percent and fade_bias from integer to floats (0.0-1.0 and -1.0-+1.0 respectively).
     min_percent /= 100.0
