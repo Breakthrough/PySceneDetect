@@ -363,6 +363,13 @@ class CliContext(object):
         # files with based on the given commands (list-scenes, split-video, save-images, etc...).
         cut_list = self.scene_manager.get_cut_list()
         scene_list = self.scene_manager.get_scene_list()
+
+        if self.drop_short_scenes:
+            scene_list = [
+                s for s in scene_list
+                if ( s[1] - s[0] ) >= self.min_scene_len
+            ]
+
         video_paths = self.video_manager.get_video_paths()
         video_name = os.path.basename(video_paths[0])
         if video_name.rfind('.') >= 0:
@@ -570,7 +577,7 @@ class CliContext(object):
         return video_manager_initialized
 
 
-    def parse_options(self, input_list, framerate, stats_file, downscale, frame_skip):
+    def parse_options(self, input_list, framerate, stats_file, downscale, frame_skip, min_scene_len, drop_short_scenes):
         # type: (List[str], float, str, int, int) -> None
         """ Parse Options: Parses all global options/arguments passed to the main
         scenedetect command, before other sub-commands (e.g. this function processes
@@ -588,6 +595,9 @@ class CliContext(object):
         logging.debug('Parsing program options.')
 
         self.frame_skip = frame_skip
+
+        # min_scene_len needs to be parsed later, after fps is available
+        self.drop_short_scenes = drop_short_scenes
 
         video_manager_initialized = self._init_video_manager(
             input_list=input_list, framerate=framerate, downscale=downscale)
