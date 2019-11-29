@@ -361,7 +361,7 @@ class CliContext(object):
         ) if self.scenes else None
 
         scene_list = [
-            (s, i in scene_indices)
+            (s, i in scene_indices if scene_indices else True)
             for i, s in enumerate(scene_list)
         ]
 
