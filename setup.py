@@ -44,7 +44,8 @@ def get_requires():
     """ Get Requires: Returns a list of required packages. """
     return [
         'Click',
-        'numpy'
+        'numpy',
+        'pandas'
     ]
 
 def get_extra_requires():
