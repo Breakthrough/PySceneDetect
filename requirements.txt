@@ -3,6 +3,8 @@
 #
 opencv-python
 numpy
+pandas
+scipy
 click
 tqdm
 pytest
