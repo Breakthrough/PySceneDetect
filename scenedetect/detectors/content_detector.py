@@ -86,12 +86,19 @@ class ContentDetector(SceneDetector):
         if self.last_scene_cut is None:
             self.last_scene_cut = frame_num
 
-        # We can only start detecting once we have a frame to compare with.
-        if self.last_frame is not None:
-            # Change in average of HSV (hsv), (h)ue only, (s)aturation only, (l)uminance only.
-            # These are refered to in a statsfile as their respective self._metric_keys string.
-            delta_hsv_avg, delta_h, delta_s, delta_v = 0.0, 0.0, 0.0, 0.0
+        # Change in average of HSV (hsv), (h)ue only, (s)aturation only, (l)uminance only.
+        # These are refered to in a statsfile as their respective self._metric_keys string.
+        delta_hsv_avg, delta_h, delta_s, delta_v = 0.0, 0.0, 0.0, 0.0
 
+        # We can only start detecting once we have a frame to compare with.
+        if self.last_frame is None:
+            if self.stats_manager is not None:
+                self.stats_manager.set_metrics(frame_num, {
+                    metric_keys[0]: delta_hsv_avg,
+                    metric_keys[1]: delta_h,
+                    metric_keys[2]: delta_s,
+                    metric_keys[3]: delta_v})
+        else:
             if (self.stats_manager is not None and
                     self.stats_manager.metrics_exist(frame_num, metric_keys)):
                 delta_hsv_avg, delta_h, delta_s, delta_v = self.stats_manager.get_metrics(
@@ -144,7 +151,7 @@ class ContentDetector(SceneDetector):
         return cut_list
 
 
-    #def post_process(self, frame_num):
+    #def post_process(self, frame_num, frame_rate):
     #    """ TODO: Based on the parameters passed to the ContentDetector constructor,
     #        ensure that the last scene meets the minimum length requirement,
     #        otherwise it should be merged with the previous scene.

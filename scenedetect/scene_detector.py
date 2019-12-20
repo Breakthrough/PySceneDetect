@@ -98,7 +98,7 @@ class SceneDetector(object):
         return []
 
 
-    def post_process(self, frame_num):
+    def post_process(self, frame_num, frame_rate):
         # type: (int) -> List[int]
         """ Post Process: Performs any processing after the last frame has been read.
 
@@ -132,7 +132,7 @@ class SparseSceneDetector(SceneDetector):
         return []
 
 
-    def post_process(self, frame_num):
+    def post_process(self, frame_num, frame_rate):
         # type: (int) -> List[Tuple[int, int]]
         """ Post Process: Performs any processing after the last frame has been read.
 
