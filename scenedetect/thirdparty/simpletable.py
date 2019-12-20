@@ -142,7 +142,9 @@ class SimpleTableRow(object):
         if isinstance(cells[0], SimpleTableCell):
             self.cells = cells
         else:
-            self.cells = [SimpleTableCell(cell, header=header) for cell in cells]
+            self.cells = []
+            for i in range(0,len(cells)):
+                self.cells.append(SimpleTableCell(cells[i], header=header))
         
         self.header = header
         
