@@ -360,3 +360,11 @@ class StatsManager(object):
         return (frame_number in self._frame_metrics and
                 metric_key in self._frame_metrics[frame_number])
 
+    def get_metric(self, metric_key):
+        m = {int(k) : v for k, v in self._frame_metrics.items()}
+        x = []
+        for k, v in m.items():
+            x.append(v[metric_key])
+        return x
+    def get_registered_metrics(self):
+        return self._registered_metrics
