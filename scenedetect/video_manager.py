@@ -387,6 +387,9 @@ class VideoManager(object):
         self._frame_length = get_num_frames(self._cap_list)
 
 
+    def get_downscale_factor(self):
+        return self._downscale_factor
+
     def set_downscale_factor(self, downscale_factor=None):
         # type: (Optional[int]) -> None
         """ Set Downscale Factor - sets the downscale/subsample factor of returned frames.
