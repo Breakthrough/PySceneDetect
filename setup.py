@@ -45,7 +45,8 @@ def get_requires():
     return [
         'Click',
         'numpy',
-        'pandas'
+        'pandas',
+        'scipy'
     ]
 
 def get_extra_requires():
