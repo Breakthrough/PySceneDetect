@@ -155,7 +155,7 @@ class CliContext(object):
     # TODO: Replace with scenedetect.scene_manager.save_images
     def _generate_images(self, scene_list, video_name,
                          image_name_template='$VIDEO_NAME-Scene-$SCENE_NUMBER-$IMAGE_NUMBER',
-                         output_dir=None):
+                         output_dir=None, downscale_factor=1):
         # type: (List[Tuple[FrameTimecode, FrameTimecode]) -> None
 
         if not scene_list:
@@ -233,6 +233,15 @@ class CliContext(object):
                 self.video_manager.seek(image_timecode)
                 self.video_manager.grab()
                 ret_val, frame_im = self.video_manager.retrieve()
+
+                if downscale_factor != 1:
+                    logging.info("resizing thumb")
+                    scale_percent = 1/downscale_factor
+                    width  = int(frame_im.shape[1] * scale_percent)
+                    height = int(frame_im.shape[0] * scale_percent)
+                    resized = cv2.resize(frame_im, (width, height), interpolation = cv2.INTER_AREA)
+                    frame_im = resized
+
                 if ret_val:
                     file_path = '%s.%s' % (filename_template.safe_substitute(
                         VIDEO_NAME=video_name,
@@ -392,7 +401,7 @@ class CliContext(object):
         if self.save_images:
             self._generate_images(scene_list=scene_list, video_name=video_name,
                                   image_name_template=self.image_name_format,
-                                  output_dir=self.image_directory)
+                                  output_dir=self.image_directory, downscale_factor=self.video_manager.get_downscale_factor())
 
         # Handle export-html command.
         if self.export_html:
