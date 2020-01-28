@@ -54,6 +54,7 @@ v0.4 2019-05-24 by Walter Schwenger
 
 import codecs
 
+from urllib.parse import quote
 
 class SimpleTableCell(object):
     """A table class to create table cells.
@@ -107,12 +108,14 @@ class SimpleTableImage(object):
 
     def __str__(self):
         """Return the HTML code for the table cell with the image."""
-        output = '<img src="%s"' %(self.image_file)
+        safe_filename = quote(self.image_file)
+        output = '<a href="%s">' %(safe_filename)
+        output += '<img src="%s"' %(safe_filename)
         if self.height:
             output += ' height="%s"' %(self.height)
         if self.width:
             output += ' width="%s"' %(self.width)
-        output += '>'
+        output += '></a>'
 
         return output
 
