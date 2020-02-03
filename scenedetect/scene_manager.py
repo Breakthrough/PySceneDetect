@@ -491,13 +491,19 @@ class SceneManager(object):
                 for start, end in self._event_list]
 
 
-    def _process_frame(self, frame_num, frame_im):
+    def _process_frame(self, frame_num, frame_im, callback=None):
         # type(int, numpy.ndarray) -> None
         """ Adds any cuts detected with the current frame to the cutting list. """
         for detector in self._detector_list:
-            self._cutting_list += detector.process_frame(frame_num, frame_im)
+            cuts = detector.process_frame(frame_num, frame_im)
+            if len(cuts):
+                callback(frame_im)
+            self._cutting_list += cuts
         for detector in self._sparse_detector_list:
-            self._event_list += detector.process_frame(frame_num, frame_im)
+            events = detector.process_frame(frame_num, frame_im)
+            if len(events):
+                callback(frame_im)
+            self._event_list += events
 
 
     def _is_processing_required(self, frame_num):
@@ -516,9 +522,9 @@ class SceneManager(object):
 
 
     def detect_scenes(self, frame_source, end_time=None, frame_skip=0,
-                      show_progress=True):
+                      show_progress=True, callback=None):
         # type: (VideoManager, Union[int, FrameTimecode],
-        #        Optional[Union[int, FrameTimecode]], Optional[bool]) -> int
+        #        Optional[Union[int, FrameTimecode]], Optional[bool], optional[callable]) -> int
         """ Perform scene detection on the given frame_source using the added SceneDetectors.
 
         Blocks until all frames in the frame_source have been processed. Results can
@@ -540,6 +546,7 @@ class SceneManager(object):
             show_progress (bool): If True, and the ``tqdm`` module is available, displays
                 a progress bar with the progress, framerate, and expected time to
                 complete processing the video frame source.
+            callback ((image_ndarray) -> None): If not None, called after each scene/event detected.
         Returns:
             int: Number of frames read and processed from the frame source.
         Raises:
