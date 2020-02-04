@@ -109,7 +109,7 @@ class SimpleTableImage(object):
     def __str__(self):
         """Return the HTML code for the table cell with the image."""
         safe_filename = quote(self.image_file)
-        output = '<a href="%s">' %(safe_filename)
+        output = '<a href="%s" target="_blank">' %(safe_filename)
         output += '<img src="%s"' %(safe_filename)
         if self.height:
             output += ' height="%s"' %(self.height)
