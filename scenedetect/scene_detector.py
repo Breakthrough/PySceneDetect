@@ -109,7 +109,7 @@ class SceneDetector(object):
         """
         return []
     
-    def meta_post_process(self, video_manager, stats_manager, metathreshold):
+    def meta_post_process(self, video_manager, metathreshold):
         # type: (video) -> List[int]
         """Performs additional post processing based on values for the entire video
         rather than frame by frame.
@@ -117,7 +117,7 @@ class SceneDetector(object):
         Returns: 
             List[int]: revised list of cuts
         """
-        return []
+        return None
 
 
 class SparseSceneDetector(SceneDetector):

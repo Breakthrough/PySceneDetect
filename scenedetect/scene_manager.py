@@ -517,10 +517,13 @@ class SceneManager(object):
     def _meta_post_process(self, video_manager, stats_manager):
         # type(int, VideoManager) -> None
         """ Replaces the cut list with a revised one based on metaanalysis of the
-        entire video. """
+        entire video.
+        """
         for detector in self._detector_list:
             #if isinstance(detector, SmartContentDetector) is True:
-            self._cutting_list = detector.meta_post_process(video_manager, stats_manager)
+            returned_cut_list = detector.meta_post_process(video_manager)
+            if returned_cut_list is not None:
+                self._cutting_list = returned_cut_list
 
     def detect_scenes(self, frame_source, end_time=None, frame_skip=0,
                       show_progress=True):
