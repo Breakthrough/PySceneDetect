@@ -108,6 +108,16 @@ class SceneDetector(object):
             List[int]: List of frame numbers of cuts to be added to the cutting list.
         """
         return []
+    
+    def meta_post_process(self, video_manager, stats_manager, metathreshold):
+        # type: (video) -> List[int]
+        """Performs additional post processing based on values for the entire video
+        rather than frame by frame.
+        
+        Returns: 
+            List[int]: revised list of cuts
+        """
+        return []
 
 
 class SparseSceneDetector(SceneDetector):

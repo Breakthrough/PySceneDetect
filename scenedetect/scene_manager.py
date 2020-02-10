@@ -124,7 +124,7 @@ def write_scene_list(output_csv_file, scene_list, cut_list=None):
             in the video that need to be split to generate individual scenes). If not passed,
             the start times of each scene (besides the 0th scene) is used instead.
     """
-    # type: (File, List[Tuple[FrameTimecode, FrameTimecode]], Optional[List[FrameTimecode]]) -> None
+    # type: (File, List[Tuple[FrameTimecode, FrmaeTimecode]], Optional[List[FrameTimecode]]) -> None
     csv_writer = get_csv_writer(output_csv_file)
     # Output Timecode List
     csv_writer.writerow(
@@ -514,6 +514,13 @@ class SceneManager(object):
         for detector in self._detector_list:
             self._cutting_list += detector.post_process(frame_num)
 
+    def _meta_post_process(self, video_manager, stats_manager):
+        # type(int, VideoManager) -> None
+        """ Replaces the cut list with a revised one based on metaanalysis of the
+        entire video. """
+        for detector in self._detector_list:
+            #if isinstance(detector, SmartContentDetector) is True:
+            self._cutting_list = detector.meta_post_process(video_manager, stats_manager)
 
     def detect_scenes(self, frame_source, end_time=None, frame_skip=0,
                       show_progress=True):
@@ -619,6 +626,8 @@ class SceneManager(object):
             self._post_process(curr_frame)
 
             num_frames = curr_frame - start_frame
+            
+            self._meta_post_process(frame_source, self._stats_manager)
 
         finally:
 
