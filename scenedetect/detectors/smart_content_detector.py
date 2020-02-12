@@ -52,18 +52,16 @@ class SmartContentDetector(SceneDetector):
     
     """
 
-    def __init__(self, threshold=30.0, min_scene_len=15):
+    def __init__(self, threshold=30.0, min_scene_len=15, metathreshold=3):
         super(SmartContentDetector, self).__init__()
         self.threshold = threshold
         self.min_scene_len = min_scene_len  # minimum length of any given scene, in frames (int) or FrameTimecode
+        self.metathreshold = metathreshold
         self.last_frame = None
         self.last_scene_cut = None
         self.last_hsv = None
-        self._metric_keys = ['content_val',
-                             'delta_hue',
-                             'delta_sat',
-                             'delta_lum',
-                             'con_val_ratio']
+        self._metric_keys = ['content_val', 'delta_hue', 'delta_sat',
+                             'delta_lum', 'con_val_ratio']
         self.cli_name = 'smart-detect-content'
 
     def process_frame(self, frame_num, frame_img):
@@ -154,7 +152,7 @@ class SmartContentDetector(SceneDetector):
         """
         return self.stats_manager.get_metrics(frame_num, ['content_val'])[0]
 
-    def meta_post_process(self, video_manager, metathreshold=3):
+    def meta_post_process(self, video_manager):
         """
         After an initial run through the video to detect content change
         between each frame, we try to identify fast cuts as short peaks in the
@@ -169,31 +167,40 @@ class SmartContentDetector(SceneDetector):
         start_frame = start_timecode.get_frames()
         end_frame = end_timecode.get_frames()
         metric_keys = self._metric_keys
+        metathreshold = self.metathreshold
 
         if self.stats_manager is not None:
-            for frame_num in range(start_frame + 3, end_frame - 1):
+            for frame_num in range(start_frame + 3, end_frame - 2):
                 # If the `content-val` of the frame is more than
                 # `metathreshold` times the mean `content-val` of the
                 # frames around it, then we mark it as a cut.
-                denominator = sum([self.get_content_val(frame_num - 2),
-                                   self.get_content_val(frame_num - 1),
-                                   self.get_content_val(frame_num + 1),
-                                   self.get_content_val(frame_num + 2)]) / 4
+                denominator = sum([
+                    self.get_content_val(frame_num - 2),
+                    self.get_content_val(frame_num - 1),
+                    self.get_content_val(frame_num + 1),
+                    self.get_content_val(frame_num + 2)
+                ]) / 4
                 if denominator != 0:
-                    self.stats_manager.set_metrics(frame_num, {
-                        metric_keys[4]: self.get_content_val(frame_num)
-                                        / denominator})
-                elif denominator == 0 and self.get_content_val(frame_num) >= 2:
-                    self.stats_manager.set_metrics(frame_num, {
-                        metric_keys[4]: 99})
+                    self.stats_manager.set_metrics(
+                        frame_num, {
+                            metric_keys[4]:
+                                self.get_content_val(frame_num) / denominator
+                        })
+                elif denominator == 0 and self.get_content_val(frame_num) >= 5:
+                    # avoid dividing by zero, setting con_val_ratio to
+                    # a really high value
+                    self.stats_manager.set_metrics(frame_num,
+                                                   {metric_keys[4]: 99})
                 else:
-                    self.stats_manager.set_metrics(frame_num, {
-                        metric_keys[4]: 0})
-            for frame_num in range(start_frame + 3, end_frame - 1):
-                if (self.stats_manager.get_metrics(
-                        frame_num, ['con_val_ratio'])[0] > metathreshold
-                        and self.stats_manager.get_metrics(
-                            frame_num, ['content_val'])[0] > 3):
+                    # avoid dividing by zero, setting con_val_ratio to zero
+                    # if content_val is still very low
+                    self.stats_manager.set_metrics(frame_num,
+                                                   {metric_keys[4]: 0})
+            for frame_num in range(start_frame + 3, end_frame - 2):
+                if self.stats_manager.get_metrics(
+                        frame_num, ['con_val_ratio'])[0] > metathreshold:
+                        #and self.stats_manager.get_metrics(frame_num,
+                        #                               ['content_val'])[0] > 3):
                     revised_cut_list.append(frame_num)
             return revised_cut_list
         return None

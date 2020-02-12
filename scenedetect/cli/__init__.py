@@ -441,9 +441,51 @@ def detect_content_command(ctx, threshold, min_scene_len): #, intensity_cutoff):
     # a frame metric key error when registering the detector.
     ctx.obj.add_detector(scenedetect.detectors.ContentDetector(
         threshold=threshold, min_scene_len=min_scene_len))
+@click.command('smart-detect-content')
+@click.option(
+    '--threshold', '-t', metavar='VAL',
+    type=click.FLOAT, default=30.0, show_default=True, help=
+    'Threshold value (float) that the content_val frame metric must exceed to trigger a new scene.'
+    ' Refers to frame metric content_val in stats file.')
+#    '--intensity-cutoff', '-i', metavar='VAL',
+#    type=click.FLOAT, default=None, show_default=True, help=
+#    '[Optional] Intensity cutoff threshold to disable scene cut detection. Useful for avoiding.'
+#    ' scene changes triggered by flashes. Refers to frame metric delta_lum in stats file.')
+@click.option(
+    '--min-scene-len', '-m', metavar='TIMECODE',
+    type=click.STRING, default="0.6s", show_default=True, help=
+    'Minimum size/length of any scene. TIMECODE can be specified as exact'
+    ' number of frames, a time in seconds followed by s, or a timecode in the'
+    ' format HH:MM:SS or HH:MM:SS.nnn')
+@click.option(
+    '--metathreshold', '-M', metavar='VAL',
+    type=click.FLOAT, default=3.0, show_default=True, help=
+    'Metathreshold value (float): the content_val frame metric must be this many times'
+    ' the content_val for the surrounding frames to trigger a new scene.')
+@click.pass_context
+def detect_content_command(ctx, threshold, min_scene_len, metathreshold): #, intensity_cutoff):
+    """ Perform content detection algorithm on input video(s).
 
+    smart-detect-content
 
+    smart-detect-content --metatheshold 3.2
+    """
 
+    #if intensity_cutoff is not None:
+    #    raise NotImplementedError()
+
+    min_scene_len = parse_timecode(ctx.obj, min_scene_len)
+
+    logging.debug('Detecting content, parameters:\n'
+                  '  threshold: %d, min-scene-len: %d',
+                  threshold, min_scene_len)
+
+    # Initialize detector and add to scene manager.
+    # Need to ensure that a detector is not added twice, or will cause
+    # a frame metric key error when registering the detector.
+    ctx.obj.add_detector(scenedetect.detectors.SmartContentDetector(
+        threshold=threshold, min_scene_len=min_scene_len,
+        metathreshold=metathreshold))
 @click.command('detect-threshold')
 @click.option(
     '--threshold', '-t', metavar='VAL',
