@@ -52,7 +52,7 @@ class SmartContentDetector(SceneDetector):
     
     """
 
-    def __init__(self, threshold=30.0, min_scene_len=15, metathreshold=3):
+    def __init__(self, threshold=30.0, min_scene_len=15, metathreshold=3.0):
         super(SmartContentDetector, self).__init__()
         self.threshold = threshold
         self.min_scene_len = min_scene_len  # minimum length of any given scene, in frames (int) or FrameTimecode
@@ -186,7 +186,7 @@ class SmartContentDetector(SceneDetector):
                             metric_keys[4]:
                                 self.get_content_val(frame_num) / denominator
                         })
-                elif denominator == 0 and self.get_content_val(frame_num) >= 5:
+                elif denominator == 0 and self.get_content_val(frame_num) >= 6:
                     # avoid dividing by zero, setting con_val_ratio to
                     # a really high value
                     self.stats_manager.set_metrics(frame_num,
@@ -197,10 +197,10 @@ class SmartContentDetector(SceneDetector):
                     self.stats_manager.set_metrics(frame_num,
                                                    {metric_keys[4]: 0})
             for frame_num in range(start_frame + 3, end_frame - 2):
-                if self.stats_manager.get_metrics(
-                        frame_num, ['con_val_ratio'])[0] > metathreshold:
-                        #and self.stats_manager.get_metrics(frame_num,
-                        #                               ['content_val'])[0] > 3):
+                if (self.stats_manager.get_metrics(
+                    frame_num, ['con_val_ratio'])[0] > metathreshold and
+                        self.stats_manager.get_metrics(frame_num,
+                                                       ['content_val'])[0] > 6):
                     revised_cut_list.append(frame_num)
             return revised_cut_list
         return None
