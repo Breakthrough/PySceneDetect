@@ -514,7 +514,7 @@ class SceneManager(object):
         for detector in self._detector_list:
             self._cutting_list += detector.post_process(frame_num)
 
-    def _meta_post_process(self, video_manager, stats_manager):
+    def _meta_post_process(self, video_manager):
         # type(int, VideoManager) -> None
         """ Replaces the cut list with a revised one based on metaanalysis of the
         entire video.
@@ -630,7 +630,7 @@ class SceneManager(object):
 
             num_frames = curr_frame - start_frame
             
-            self._meta_post_process(frame_source, self._stats_manager)
+            self._meta_post_process(frame_source)
 
         finally:
 
