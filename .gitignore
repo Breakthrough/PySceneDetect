@@ -5,7 +5,3 @@ build/
 dist/
 *.egg-info/
 manual/_build/
-*.mp4
-*.csv
-.spyproject/
-test.py

@@ -124,7 +124,7 @@ def write_scene_list(output_csv_file, scene_list, cut_list=None):
             in the video that need to be split to generate individual scenes). If not passed,
             the start times of each scene (besides the 0th scene) is used instead.
     """
-    # type: (File, List[Tuple[FrameTimecode, FrmaeTimecode]], Optional[List[FrameTimecode]]) -> None
+    # type: (File, List[Tuple[FrameTimecode, FrameTimecode]], Optional[List[FrameTimecode]]) -> None
     csv_writer = get_csv_writer(output_csv_file)
     # Output Timecode List
     csv_writer.writerow(
