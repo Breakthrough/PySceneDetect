@@ -42,7 +42,7 @@ import cv2
 from scenedetect.scene_detector import SceneDetector
 
 
-class SmartContentDetector(SceneDetector):
+class AdaptiveContentDetector(SceneDetector):
     """Detects fast cuts using changes in colour and intensity between frames.
 
     Since the difference between frames is used, unlike the ThresholdDetector,
@@ -52,17 +52,17 @@ class SmartContentDetector(SceneDetector):
     
     """
 
-    def __init__(self, threshold=30.0, min_scene_len=15, metathreshold=3.0):
-        super(SmartContentDetector, self).__init__()
-        self.threshold = threshold
+    def __init__(self, video_manager=None, adaptive_threshold=3.0, min_scene_len=15):
+        super(AdaptiveContentDetector, self).__init__()
+        self.video_manager = video_manager
         self.min_scene_len = min_scene_len  # minimum length of any given scene, in frames (int) or FrameTimecode
-        self.metathreshold = metathreshold
+        self.adaptive_threshold = adaptive_threshold
         self.last_frame = None
         self.last_scene_cut = None
         self.last_hsv = None
         self._metric_keys = ['content_val', 'delta_hue', 'delta_sat',
                              'delta_lum', 'con_val_ratio']
-        self.cli_name = 'smart-detect-content'
+        self.cli_name = 'adaptive-detect-content'
 
     def process_frame(self, frame_num, frame_img):
         # type: (int, numpy.ndarray) -> List[int]
@@ -81,13 +81,8 @@ class SmartContentDetector(SceneDetector):
             or more frames in the list, and not necessarily the same as frame_num.
         """
 
-        cut_list = []
         metric_keys = self._metric_keys
         _unused = ''
-
-        # Initialize last scene cut point at the beginning of the frames of interest.
-        if self.last_scene_cut is None:
-            self.last_scene_cut = frame_num
 
         # We can only start detecting once we have a frame to compare with.
         if self.last_frame is not None:
@@ -126,15 +121,8 @@ class SmartContentDetector(SceneDetector):
 
                 self.last_hsv = curr_hsv
 
-            # We consider any frame over the threshold a new scene, but only if
-            # the minimum scene length has been reached (otherwise it is ignored).
-            if delta_hsv_avg >= self.threshold and (
-                    (frame_num - self.last_scene_cut) >= self.min_scene_len):
-                cut_list.append(frame_num)
-                self.last_scene_cut = frame_num
-
-            if self.last_frame is not None and self.last_frame is not _unused:
-                del self.last_frame
+        if self.last_frame is not None and self.last_frame is not _unused:
+            del self.last_frame
 
         # If we have the next frame computed, don't copy the current frame
         # into last_frame since we won't use it on the next call anyways.
@@ -144,7 +132,7 @@ class SmartContentDetector(SceneDetector):
         else:
             self.last_frame = frame_img.copy()
 
-        return cut_list
+        return []
 
     def get_content_val(self, frame_num):
         """
@@ -152,7 +140,7 @@ class SmartContentDetector(SceneDetector):
         """
         return self.stats_manager.get_metrics(frame_num, ['content_val'])[0]
 
-    def meta_post_process(self, video_manager):
+    def post_process(self, frame):
         """
         After an initial run through the video to detect content change
         between each frame, we try to identify fast cuts as short peaks in the
@@ -163,11 +151,11 @@ class SmartContentDetector(SceneDetector):
         more than a single frame.
         """
         revised_cut_list = []
-        _, start_timecode, end_timecode = video_manager.get_duration()
+        _, start_timecode, end_timecode = self.video_manager.get_duration()
         start_frame = start_timecode.get_frames()
         end_frame = end_timecode.get_frames()
         metric_keys = self._metric_keys
-        metathreshold = self.metathreshold
+        adaptive_threshold = self.adaptive_threshold
 
         if self.stats_manager is not None:
             for frame_num in range(start_frame + 3, end_frame - 2):
@@ -198,16 +186,9 @@ class SmartContentDetector(SceneDetector):
                                                    {metric_keys[4]: 0})
             for frame_num in range(start_frame + 3, end_frame - 2):
                 if (self.stats_manager.get_metrics(
-                    frame_num, ['con_val_ratio'])[0] > metathreshold and
+                    frame_num, ['con_val_ratio'])[0] > adaptive_threshold and
                         self.stats_manager.get_metrics(frame_num,
                                                        ['content_val'])[0] > 6):
                     revised_cut_list.append(frame_num)
             return revised_cut_list
         return None
-
-    #def post_process(self, frame_num):
-    #    """ TODO: Based on the parameters passed to the ContentDetector constructor,
-    #        ensure that the last scene meets the minimum length requirement,
-    #        otherwise it should be merged with the previous scene.
-    #    """
-    #    return []

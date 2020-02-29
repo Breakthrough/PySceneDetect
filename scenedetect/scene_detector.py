@@ -37,7 +37,7 @@ are expected to provide in order to be compatible with PySceneDetect.
 
 
 class SceneDetector(object):
-    """ Base class to inheret from when implementing a scene detection algorithm.
+    """ Base class to inherit from when implementing a scene detection algorithm.
 
     This represents a "dense" scene detector, which returns a list of frames where
     the next scene/shot begins in a video.
@@ -108,16 +108,6 @@ class SceneDetector(object):
             List[int]: List of frame numbers of cuts to be added to the cutting list.
         """
         return []
-    
-    def meta_post_process(self, video_manager):
-        # type: (video) -> List[int]
-        """Performs additional post processing based on values for the entire video
-        rather than frame by frame.
-        
-        Returns: 
-            List[int]: revised list of cuts
-        """
-        return None
 
 
 class SparseSceneDetector(SceneDetector):
