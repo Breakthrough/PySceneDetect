@@ -496,12 +496,12 @@ class SceneManager(object):
         """ Adds any cuts detected with the current frame to the cutting list. """
         for detector in self._detector_list:
             cuts = detector.process_frame(frame_num, frame_im)
-            if len(cuts) and callback:
+            if cuts and callback:
                 callback(frame_im)
             self._cutting_list += cuts
         for detector in self._sparse_detector_list:
             events = detector.process_frame(frame_num, frame_im)
-            if len(events) and callback:
+            if events and callback:
                 callback(frame_im)
             self._event_list += events
 
