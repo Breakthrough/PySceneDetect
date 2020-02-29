@@ -524,7 +524,7 @@ class SceneManager(object):
     def detect_scenes(self, frame_source, end_time=None, frame_skip=0,
                       show_progress=True, callback=None):
         # type: (VideoManager, Union[int, FrameTimecode],
-        #        Optional[Union[int, FrameTimecode]], Optional[bool], optional[callable]) -> int
+        #        Optional[Union[int, FrameTimecode]], Optional[bool], optional[callable[numpy.ndarray]) -> int
         """ Perform scene detection on the given frame_source using the added SceneDetectors.
 
         Blocks until all frames in the frame_source have been processed. Results can
