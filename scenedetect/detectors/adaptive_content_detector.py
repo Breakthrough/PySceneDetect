@@ -43,20 +43,18 @@ from scenedetect.scene_detector import SceneDetector
 
 
 class AdaptiveContentDetector(SceneDetector):
-    """Detects fast cuts using changes in colour and intensity between frames.
-
-    Since the difference between frames is used, unlike the ThresholdDetector,
-    only fast cuts are detected with this method.  To detect slow fades between
-    content scenes still using HSV information, use the DissolveDetector.
-    
-    
+    """Detects cuts using HSV changes similar to ContentDetector, but with a
+    rolling average that can help mitigate false detections in situations such
+    as camera moves.
     """
 
-    def __init__(self, video_manager=None, adaptive_threshold=3.0, min_scene_len=15):
+    def __init__(self, video_manager=None, adaptive_threshold=3.0, min_scene_len=15, min_delta_hsv=5.0, window_width=2):
         super(AdaptiveContentDetector, self).__init__()
         self.video_manager = video_manager
         self.min_scene_len = min_scene_len  # minimum length of any given scene, in frames (int) or FrameTimecode
         self.adaptive_threshold = adaptive_threshold
+        self.min_delta_hsv = min_delta_hsv
+        self.window_width = window_width
         self.last_frame = None
         self.last_scene_cut = None
         self.last_hsv = None
@@ -66,8 +64,8 @@ class AdaptiveContentDetector(SceneDetector):
 
     def process_frame(self, frame_num, frame_img):
         # type: (int, numpy.ndarray) -> List[int]
-        """ Similar to ThresholdDetector, but using the HSV colour space DIFFERENCE instead
-        of single-frame RGB/grayscale intensity (thus cannot detect slow fades with this method).
+        """ Similar to ContentDetector, but looking for frames in which the HSV difference is
+        significantly different than the neighboring frames.
 
         Arguments:
             frame_num (int): Frame number of frame that is being passed.
@@ -77,8 +75,9 @@ class AdaptiveContentDetector(SceneDetector):
                 (inhereted from the base SceneDetector class) returns True.
 
         Returns:
-            List[int]: List of frames where scene cuts have been detected. There may be 0
-            or more frames in the list, and not necessarily the same as frame_num.
+            Empty list: The process_frame function for this detector does not register any cuts,
+                instead only calculating scene metrics that are used to detect cuts with the
+                post_process function.
         """
 
         metric_keys = self._metric_keys
@@ -150,45 +149,64 @@ class AdaptiveContentDetector(SceneDetector):
         could be fast camera movement or a change in lighting that lasts for
         more than a single frame.
         """
-        revised_cut_list = []
+        cut_list = []
         _, start_timecode, end_timecode = self.video_manager.get_duration()
         start_frame = start_timecode.get_frames()
         end_frame = end_timecode.get_frames()
         metric_keys = self._metric_keys
         adaptive_threshold = self.adaptive_threshold
+        window_width = self.window_width
+        last_cut = None
 
         if self.stats_manager is not None:
-            for frame_num in range(start_frame + 3, end_frame - 2):
-                # If the `content-val` of the frame is more than
-                # `metathreshold` times the mean `content-val` of the
+            # Loop through the stats, building the con_val_ratio metric
+            for frame_num in range(start_frame + window_width + 1, end_frame - window_width):
+                # If the content-val of the frame is more than
+                # adaptive_threshold times the mean content_val of the
                 # frames around it, then we mark it as a cut.
-                denominator = sum([
-                    self.get_content_val(frame_num - 2),
-                    self.get_content_val(frame_num - 1),
-                    self.get_content_val(frame_num + 1),
-                    self.get_content_val(frame_num + 2)
-                ]) / 4
+                denominator = 0
+                for offset in range(-window_width, window_width + 1):
+                    if offset == 0:
+                        continue
+                    else:
+                        denominator += self.get_content_val(frame_num + offset)
+
+                denominator = denominator / (2 * window_width)
+
                 if denominator != 0:
+                    # store the calculated con_val_ratio in our metrics
                     self.stats_manager.set_metrics(
-                        frame_num, {
-                            metric_keys[4]:
-                                self.get_content_val(frame_num) / denominator
-                        })
-                elif denominator == 0 and self.get_content_val(frame_num) >= 6:
-                    # avoid dividing by zero, setting con_val_ratio to
-                    # a really high value
-                    self.stats_manager.set_metrics(frame_num,
-                                                   {metric_keys[4]: 99})
+                        frame_num,
+                        {metric_keys[4]: self.get_content_val(frame_num) / denominator})
+
+                elif denominator == 0 and self.get_content_val(frame_num) >= self.min_delta_hsv:
+                    # avoid dividing by zero, setting con_val_ratio to above the threshold
+                    self.stats_manager.set_metrics(frame_num, {metric_keys[4]: adaptive_threshold + 1})
+
                 else:
-                    # avoid dividing by zero, setting con_val_ratio to zero
-                    # if content_val is still very low
-                    self.stats_manager.set_metrics(frame_num,
-                                                   {metric_keys[4]: 0})
-            for frame_num in range(start_frame + 3, end_frame - 2):
+                    # avoid dividing by zero, setting con_val_ratio to zero if content_val is still very low
+                    self.stats_manager.set_metrics(frame_num, {metric_keys[4]: 0})
+
+            # Loop through the frames again now that con_val_ratio has been calculated to detect
+            # cuts using con_val_ratio
+            for frame_num in range(start_frame + window_width + 1, end_frame - window_width):
+                # Check to see if con_val_ratio exceeds the adaptive_threshold as well as there
+                # being a large enough content_val to trigger a cut
                 if (self.stats_manager.get_metrics(
-                    frame_num, ['con_val_ratio'])[0] > adaptive_threshold and
-                        self.stats_manager.get_metrics(frame_num,
-                                                       ['content_val'])[0] > 6):
-                    revised_cut_list.append(frame_num)
-            return revised_cut_list
+                    frame_num, ['con_val_ratio'])[0] >= adaptive_threshold and
+                        self.stats_manager.get_metrics(
+                            frame_num, ['content_val'])[0] >= self.min_delta_hsv):
+
+                    if last_cut is None:
+                        # No previously detected cuts
+                        cut_list.append(frame_num)
+                        last_cut = frame_num
+                    elif (frame_num - last_cut) >= self.min_scene_len:
+                        # Respect the min_scene_len parameter
+                        cut_list.append(frame_num)
+                        last_cut = frame_num
+
+            return cut_list
+
+        # Stats manager must be used for this detector
         return None

@@ -455,8 +455,18 @@ def detect_content_command(ctx, threshold, min_scene_len): #, intensity_cutoff):
     'Minimum size/length of any scene. TIMECODE can be specified as exact'
     ' number of frames, a time in seconds followed by s, or a timecode in the'
     ' format HH:MM:SS or HH:MM:SS.nnn')
+@click.option(
+    '--min-delta-hsv', '-d', metavar='VAL',
+    type=click.FLOAT, default=5.0, show_default=True, help=
+    'Minimum threshold (float) that the content_val must exceed in order to register as a new scene.'
+    ' This is calculated the same way that the detect-content command calculates content_val.')
+@click.option(
+    '--frame-window', '-w', metavar='VAL',
+    type=click.INT, default=2, show_default=True, help=
+    'Number of frames before and after each frame to average together in'
+    ' order to detect deviations from the mean.')
 @click.pass_context
-def adaptive_detect_content_command(ctx, threshold, min_scene_len):
+def adaptive_detect_content_command(ctx, threshold, min_scene_len, min_delta_hsv, frame_window):
     """ Perform adaptive content detection algorithm on input video(s).
 
     adaptive-detect-content
@@ -484,7 +494,11 @@ def adaptive_detect_content_command(ctx, threshold, min_scene_len):
     # Need to ensure that a detector is not added twice, or will cause
     # a frame metric key error when registering the detector.
     ctx.obj.add_detector(scenedetect.detectors.AdaptiveContentDetector(
-        video_manager=ctx.obj.video_manager, adaptive_threshold=threshold, min_scene_len=min_scene_len))
+        video_manager=ctx.obj.video_manager,
+        adaptive_threshold=threshold,
+        min_scene_len=min_scene_len,
+        min_delta_hsv=min_delta_hsv,
+        window_width=frame_window))
 
 
 @click.command('detect-threshold')
