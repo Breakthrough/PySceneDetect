@@ -31,5 +31,7 @@ In addition to those mentioned below, thank you to *everyone* who has submitted 
  * [@Hellowlol](https://github.com/Hellowlol) - improvements to software architecture and API development
  * [@bubalazi](https://github.com/bubalazi) - performance improvements to detect-content and detect-threshold algorithms
  * [@r1b](https://github.com/r1b) - proof-of-concept implementation of detect-histogram algorithm
- * [@wjs018](https://github.com/wjs018) - implementation of `export-html` command
+ * [@wjs018](https://github.com/wjs018) - implementation of `export-html` command and various bugfixes
+ * [@tonycpsu](https://github.com/tonycpsu) - enhancements to `--min-scene-len` and `save-images` command
+ * [@charlesvestal](https://github.com/charlesvestal) - various bugfixes and improvements
 
