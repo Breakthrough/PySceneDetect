@@ -6,7 +6,7 @@
 #     [  Github: https://github.com/Breakthrough/PySceneDetect/  ]
 #     [  Documentation: http://pyscenedetect.readthedocs.org/    ]
 #
-# Copyright (C) 2014-2019 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2014-2020 Brandon Castellano <http://www.bcastell.com>.
 #
 # PySceneDetect is licensed under the BSD 3-Clause License; see the included
 # LICENSE file, or visit one of the following pages for details:
@@ -60,7 +60,7 @@ from scenedetect.__main__ import main
 # Used for module identification and when printing version & about info.
 # (scenedetect version and scenedetect about)
 
-__version__ = 'v0.5.2-dev'
+__version__ = 'v0.5.2'
 
 # About & copyright message string shown for the 'about' CLI command (scenedetect about).
 
@@ -68,7 +68,7 @@ ABOUT_STRING = """
 Site/Updates: https://github.com/Breakthrough/PySceneDetect/
 Documentation: http://pyscenedetect.readthedocs.org/
 
-Copyright (C) 2014-2019 Brandon Castellano. All rights reserved.
+Copyright (C) 2014-2020 Brandon Castellano. All rights reserved.
 
 PySceneDetect is released under the BSD 3-Clause license. See the
 included LICENSE file or visit the PySceneDetect website for details.

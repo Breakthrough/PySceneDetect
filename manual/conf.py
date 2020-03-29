@@ -23,13 +23,13 @@ sys.path.insert(0, os.path.abspath('..'))
 # -- Project information -----------------------------------------------------
 
 project = 'PySceneDetect'
-copyright = '2019, Brandon Castellano'
+copyright = '2020, Brandon Castellano'
 author = 'Brandon Castellano'
 
 # The short X.Y version
 version = ''
 # The full version, including alpha/beta/rc tags
-release = 'v0.5.1'
+release = 'v0.5.2'
 
 
 # -- General configuration ---------------------------------------------------

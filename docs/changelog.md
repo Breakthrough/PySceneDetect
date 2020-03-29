@@ -2,15 +2,18 @@
 PySceneDetect Changelog
 ==========================================================
 
-### 0.5.2 (TBD)
+### 0.5.2 (March 29, 2020) &nbsp;<span class="fa fa-tags"></span>
 
- * upcoming minor release of PySceneDetect including various bugfixes/enhancements prior to the v0.6 release
+ * [enhancement] `--min-duration` now accepts a timecode in addition to frame number ([#128](https://github.com/Breakthrough/PySceneDetect/pull/128), thanks @tonycpsu)
+ * [feature] Add `--image-frame-margin` option to `save-images` command to ignore a number of frames at the start/end of a scene ([#129](https://github.com/Breakthrough/PySceneDetect/pull/129), thanks @tonycpsu)
  * [bugfix] `--min-scene-len` option was not respected by first scene ([#105](https://github.com/Breakthrough/PySceneDetect/issues/105), thanks @charlesvestal)
  * [bugfix] Splitting videos with an analyzed duration only splits within analyzed area ([#106](https://github.com/Breakthrough/PySceneDetect/issues/106), thanks @charlesvestal)
- * [bugfix] Improper start timecode applied to the `split-video` command when using `ffmpeg` ([#93], thanks @typoman)
+ * [bugfix] Improper start timecode applied to the `split-video` command when using `ffmpeg` ([#93](https://github.com/Breakthrough/PySceneDetect/issues/93), thanks @typoman)
+ * [bugfix] Added links and filename sanitation to html output ([#139](https://github.com/Breakthrough/PySceneDetect/issues/139) and [#140](https://github.com/Breakthrough/PySceneDetect/issues/140), thanks @wsj018)
+ * [bugfix] UnboundLocalError in `detect_scenes` when `frame_skip` is larger than 0 ([#126](https://github.com/Breakthrough/PySceneDetect/issues/126), thanks @twostarxx)
 
 
-### 0.5.1.1 (August 3, 2019) &nbsp;<span class="fa fa-tags"></span>
+### 0.5.1.1 (August 3, 2019)
 
  * minor re-release of v0.5.1 which updates the setup.py file to return OpenCV as an optional dependency
  * to install from pip now with all dependencies: `pip install scenedetect[opencv,progress_bar]`
