@@ -187,7 +187,7 @@ def split_video_ffmpeg(input_video_paths, scene_list, output_file_template, vide
     logging.info(
         'Splitting input video%s using ffmpeg, output path template:\n  %s',
         's' if len(input_video_paths) > 1 else '', output_file_template)
-        
+
     if len(input_video_paths) > 1:
         # TODO: Add support for splitting multiple/appended input videos.
         # https://trac.ffmpeg.org/wiki/Concatenate#samecodec
@@ -216,8 +216,6 @@ def split_video_ffmpeg(input_video_paths, scene_list, output_file_template, vide
         processing_start_time = time.time()
         for i, (start_time, end_time) in enumerate(scene_list):
             duration = (end_time - start_time)
-            # Fix FFmpeg start timecode frame shift.
-            start_time -= 1
             call_list = ['ffmpeg']
             if suppress_output:
                 call_list += ['-v', 'quiet']

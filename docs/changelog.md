@@ -4,9 +4,10 @@ PySceneDetect Changelog
 
 ### 0.5.2 (TBD)
 
- * upcoming minor release of PySceneDetect including various bugfixes/enhancements prior to the v0.6 release 
+ * upcoming minor release of PySceneDetect including various bugfixes/enhancements prior to the v0.6 release
  * [bugfix] `--min-scene-len` option was not respected by first scene ([#105](https://github.com/Breakthrough/PySceneDetect/issues/105), thanks @charlesvestal)
  * [bugfix] Splitting videos with an analyzed duration only splits within analyzed area ([#106](https://github.com/Breakthrough/PySceneDetect/issues/106), thanks @charlesvestal)
+ * [bugfix] Improper start timecode applied to the `split-video` command when using `ffmpeg` ([#93], thanks @typoman)
 
 
 ### 0.5.1.1 (August 3, 2019) &nbsp;<span class="fa fa-tags"></span>
@@ -94,7 +95,7 @@ PySceneDetect Changelog
  * [feature] added command line option to specify maximum duration to process (`-dt`, overrides `-et`)
 
 
-### 0.3.1-beta (January 23, 2016) 
+### 0.3.1-beta (January 23, 2016)
 
  * [feature] added downscaling/subsampling option (`-df` / `--downscale-factor`) to improve performance on higher resolution videos
  * [feature] added frameskip option (`-fs` / `--frame-skip`) to improve performance on high framerate videos, at expense of frame accuracy and possible inaccurate scene cut prediction
