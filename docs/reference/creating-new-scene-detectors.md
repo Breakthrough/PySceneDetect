@@ -38,7 +38,7 @@ Processing is done by calling the `process_frame(...)` function for all frames i
 - `frame_metrics`: dictionary for memoizing results of detection algorithm calculations for quicker subsequent analyses (if possible)
 - `scene_list`: List containing the frame numbers where all scene cuts/breaks occur in the video.
 
-`post_process(...)` is called ***after** the final frame has been processed, to allow for any stored scene cuts to be written *if required* (e.g. in the case of the `ThresholdDetector`).
+`post_process(...)` is called **after** the final frame has been processed, to allow for any stored scene cuts to be written *if required* (e.g. in the case of the `ThresholdDetector`).
 
 You may also want to look into the implementation of current detectors to understand how frame metrics are saved/loaded to/from a StatsManager for caching and allowing values to be written to a stats file for users to graph and find trends in to tweak detector options.  Also see the section on the `SceneManager` in the [Python API Reference](python-api.md) for details.
 
