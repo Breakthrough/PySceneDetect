@@ -227,7 +227,7 @@ def split_video_ffmpeg(input_video_paths, scene_list, output_file_template, vide
             call_list += [
                 '-y',
                 '-ss',
-                start_time.get_timecode(),
+                str(start_time.get_seconds()),
                 '-i',
                 input_video_paths[0]]
             call_list += arg_override
@@ -235,7 +235,7 @@ def split_video_ffmpeg(input_video_paths, scene_list, output_file_template, vide
                 '-strict',
                 '-2',
                 '-t',
-                duration.get_timecode(),
+                str(duration.get_seconds()),
                 '-sn',
                 filename_template.safe_substitute(
                     VIDEO_NAME=video_name,
