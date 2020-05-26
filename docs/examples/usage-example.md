@@ -56,11 +56,15 @@ We now know that a threshold of `30` does not work in all cases for our video, a
 
 We can determine the proper threshold in this case by generating a statistics file (with the `-s` / `--stats` option) for the video `goldeneye.mp4`, and looking at the behaviour of the values where we expect the scene break/cut to occur in scene 17:
 
+```rst
 scenedetect --input goldeneye.mp4 --stats goldeneye.stats.csv detect-content list-scenes save-images
+```
 
 After examining the file and determining an optimal value of 27 for `detect-content`, we can set the threshold for the detector via:
 
+```rst
 scenedetect --input goldeneye.mp4 --stats goldeneye.stats.csv detect-content --threshold 27 list-scenes save-images
+```
 
 Note that specifying the same `--stats` file again will make parsing the scenes significantly quicker, as the frame metrics stored in this file are re-used as a cache instead of computing them again. Finally, our updated scene list appears as follows (similar entries skipped for brevity):
 
