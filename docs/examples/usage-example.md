@@ -87,7 +87,7 @@ Now the missing scene (scene number 18, in this case) has been detected properly
 
 The last step to automatically split the input file into clips is to specify the `split-video` command.  This will pass a list of the detected scene timecodes to `ffmpeg` if installed, splitting the input video into scenes.
 
-You may also want to use the `-c/--copy` option to ensure that no re-encoding is performed (using `mkvmerge` instead), at the expense of frame-accurate scene cuts, since when copying, cuts can sometimes only be generated on keyframes.  You can also pass the `-h/--high-quality` option to ensure the output videos are visually identical to the input (at the expense of longer processing time and greater filesize).
+You may also want to use the `-c/--copy` option to ensure that no re-encoding is performed (using `mkvmerge` instead), at the expense of frame-accurate scene cuts, since when copying, cuts can sometimes only be generated on keyframes.  You can also pass the `-hq/--high-quality` option to ensure the output videos are visually identical to the input (at the expense of longer processing time and greater filesize).
 
 Thus, to generate a sequence of files `goldeneye-scene-001.mp4`, `goldeneye-scene-002.mp4`, `goldeneye-scene-003.mp4`..., our full command becomes:
 
