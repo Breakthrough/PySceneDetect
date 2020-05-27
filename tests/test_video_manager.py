@@ -66,7 +66,8 @@ from scenedetect.video_manager import VideoFramerateUnavailable
 from scenedetect.video_manager import VideoParameterMismatch
 
 
-TEST_VIDEO_FILE = 'testvideo.mp4'       # Video file used by test_video_file fixture.
+# Video file used by test_video_file fixture.
+TEST_VIDEO_FILE = os.path.join(os.path.abspath(os.path.dirname(__file__)), "testvideo.mp4")
 
 
 @pytest.fixture
