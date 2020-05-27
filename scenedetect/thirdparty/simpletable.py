@@ -55,6 +55,7 @@ v0.4 2019-05-24 by Walter Schwenger
 import codecs
 
 
+# noinspection PyCompatibility,PyUnresolvedReferences
 def quote(string):
     try:
         from urllib.parse import quote
