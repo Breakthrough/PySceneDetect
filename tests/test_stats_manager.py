@@ -153,19 +153,16 @@ def test_detector_metrics(test_video_file):
 def test_load_empty_stats(test_video_file):
     """ Test loading an empty stats file, ensuring it results in no errors. """
     try:
-        stats_file = open(TEST_STATS_FILES[0], 'w')
+        open(TEST_STATS_FILES[0], 'w').close()
 
-        stats_file.close()
-        stats_file = open(TEST_STATS_FILES[0], 'r')
+        with open(TEST_STATS_FILES[0], 'r') as stats_file:
 
-        stats_manager = StatsManager()
+            stats_manager = StatsManager()
 
-        stats_reader = get_csv_reader(stats_file)
-        stats_manager.load_from_csv(stats_reader)
+            stats_reader = get_csv_reader(stats_file)
+            stats_manager.load_from_csv(stats_reader)
 
     finally:
-        stats_file.close()
-
         os.remove(TEST_STATS_FILES[0])
 
 
