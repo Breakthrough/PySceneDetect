@@ -54,7 +54,15 @@ v0.4 2019-05-24 by Walter Schwenger
 
 import codecs
 
-from urllib.parse import quote
+
+def quote(string):
+    try:
+        from urllib.parse import quote
+        return quote(string)
+    except ModuleNotFoundError:
+        from urllib import pathname2url
+        return pathname2url(string)
+
 
 class SimpleTableCell(object):
     """A table class to create table cells.
