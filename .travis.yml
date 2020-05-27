@@ -8,7 +8,7 @@ python:
   - "3.8"
 install:
   - "pip install -r requirements.txt"
-  - "git fetch"
-  - "git restore -s origin/resources -- tests/testvideo.mp4"
+  - "git fetch --depth=1 git@github.com:Breakthrough/PySceneDetect.git refs/heads/resources:refs/remotes/origin/resources"
+  - "git checkout refs/remotes/origin/resources -- tests/testvideo.mp4"
 script:
   - python -m pytest tests/
