@@ -11,6 +11,6 @@ python:
 install:
   - "pip install -r requirements.txt"
   - "git fetch"
-  - "git checkout origin/resources -- tests/testvideo.mp4"
+  - "git restore -s origin/resources -- tests/testvideo.mp4"
 script:
   - python -m pytest tests/
