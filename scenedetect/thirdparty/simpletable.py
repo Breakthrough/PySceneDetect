@@ -140,7 +140,7 @@ class SimpleTableRow(object):
     cell2 = SimpleTableCell('world!')
     row = SimpleTableRow([cell1, cell2])
     """
-    def __init__(self, cells=[], header=False):
+    def __init__(self, cells=None, header=False):
         """Table row constructor.
 
         Keyword arguments:
@@ -150,6 +150,7 @@ class SimpleTableRow(object):
                   responsibility to verify whether it was created with the
                   header flag set to True.
         """
+        cells = cells or []
         if isinstance(cells[0], SimpleTableCell):
             self.cells = cells
         else:
@@ -200,7 +201,7 @@ class SimpleTable(object):
     rows = SimpleTableRow(['Hello,', 'world!'])
     table = SimpleTable(rows)
     """
-    def __init__(self, rows=[], header_row=None, css_class=None):
+    def __init__(self, rows=None, header_row=None, css_class=None):
         """Table constructor.
 
         Keyword arguments:
@@ -211,6 +212,7 @@ class SimpleTable(object):
                       header flag set to True.
         css_class -- table CSS class
         """
+        rows = rows or []
         if isinstance(rows[0], SimpleTableRow):
             self.rows = rows
         else:
@@ -261,7 +263,7 @@ class SimpleTable(object):
 
 class HTMLPage(object):
     """A class to create HTML pages containing CSS and tables."""
-    def __init__(self, tables=[], css=None, encoding="utf-8"):
+    def __init__(self, tables=None, css=None, encoding="utf-8"):
         """HTML page constructor.
 
         Keyword arguments:
@@ -270,7 +272,7 @@ class HTMLPage(object):
                table string
         encoding -- Characters encoding. Default: UTF-8
         """
-        self.tables = tables
+        self.tables = tables or []
         self.css = css
         self.encoding = encoding
         
