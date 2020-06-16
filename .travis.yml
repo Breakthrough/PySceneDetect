@@ -1,0 +1,14 @@
+language: python
+python:
+  - "2.7"
+  - "3.4"
+  - "3.5"
+  - "3.6"
+  - "3.7"
+  - "3.8"
+install:
+  - "pip install -r requirements.txt"
+  - "git fetch --depth=1 https://github.com/Breakthrough/PySceneDetect.git refs/heads/resources:refs/remotes/origin/resources"
+  - "git checkout refs/remotes/origin/resources -- tests/testvideo.mp4"
+script:
+  - python -m pytest tests/

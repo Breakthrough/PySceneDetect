@@ -14,11 +14,12 @@ import os
 import scenedetect
 from scenedetect.video_manager import VideoManager
 from scenedetect.scene_manager import SceneManager
-from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.stats_manager import StatsManager
 from scenedetect.detectors import ContentDetector
+from tests.conftest import TEST_VIDEO_FILE
 
 STATS_FILE_PATH = 'api_test_statsfile.csv'
+
 
 def test_api():
 
@@ -30,7 +31,7 @@ def test_api():
     # videos can be appended by simply specifying more file paths in the list
     # passed to the VideoManager constructor. Note that appending multiple videos
     # requires that they all have the same frame size, and optionally, framerate.
-    video_manager = VideoManager(['testvideo.mp4'])
+    video_manager = VideoManager([TEST_VIDEO_FILE])
     stats_manager = StatsManager()
     scene_manager = SceneManager(stats_manager)
     # Add ContentDetector algorithm (constructor takes detector options like threshold).
@@ -78,6 +79,6 @@ def test_api():
     finally:
         video_manager.release()
 
+
 if __name__ == "__main__":
     test_api()
-
