@@ -582,7 +582,7 @@ def list_scenes_command(ctx, output, filename, no_output_file, quiet):
     'Override codec arguments/options passed to FFmpeg when splitting and re-encoding'
     ' scenes. Use double quotes (") around specified arguments. Must specify at least'
     ' audio/video codec to use (e.g. -a "-c:v [...] and -c:a [...]"). [default:'
-    ' "-c:v libx264 -preset veryfast -crf 22 -c:a copy"]')
+    ' "-c:v libx264 -preset veryfast -crf 22 -c:a aac"]')
 @click.option(
     '--quiet', '-q',
     is_flag=True, flag_value=True, help=
@@ -637,7 +637,7 @@ def split_video_command(ctx, output, filename, high_quality, override_args, quie
             rate_factor = 22 if not high_quality else 17
         if preset is None:
             preset = 'veryfast' if not high_quality else 'slow'
-        override_args = ('-c:v libx264 -preset {PRESET} -crf {RATE_FACTOR} -c:a copy'.format(
+        override_args = ('-c:v libx264 -preset {PRESET} -crf {RATE_FACTOR} -c:a aac'.format(
             PRESET=preset, RATE_FACTOR=rate_factor))
     if not copy:
         logging.info('FFmpeg codec args set: %s', override_args)
