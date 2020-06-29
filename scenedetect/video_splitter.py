@@ -123,23 +123,35 @@ def is_ffmpeg_available():
 ## Split Video Functions
 ##
 
-def split_video_mkvmerge(input_video_paths, scene_list, output_file_prefix,
+def split_video_mkvmerge(input_video_paths, scene_list, output_file_template,
                          video_name, suppress_output=False):
     # type: (List[str], List[FrameTimecode, FrameTimecode], Optional[str],
     #        Optional[bool]) -> None
     """ Calls the mkvmerge command on the input video(s), splitting it at the
-    passed timecodes, where each scene is written in sequence from 001. """
+    passed timecodes, where each scene is written in sequence from 001.
+
+    Arguments:
+        input_video_paths (List[str]): List of strings to the input video path(s).
+            Is a list to allow for concatenation of multiple input videos together.
+        scene_list (List[Tuple[FrameTimecode, FrameTimecode]]): List of scenes
+            (pairs of FrameTimecodes) denoting the start/end frames of each scene.
+        output_file_template (str): Template to use for output files.  Note that the
+            scene number is automatically appended to the prefix by mkvmerge.
+            Can use $VIDEO_NAME as a parameter in the template.
+        video_name (str): Name of the video to be substituted in output_file_template.
+        suppress_output (bool): If True, adds the --quiet flag when invoking `mkvmerge`.
+    """
 
     if not input_video_paths or not scene_list:
         return
 
     logging.info('Splitting input video%s using mkvmerge, output path template:\n  %s',
-                 's' if len(input_video_paths) > 1 else '', output_file_prefix)
+                 's' if len(input_video_paths) > 1 else '', output_file_template)
 
     ret_val = None
     # mkvmerge automatically appends '-$SCENE_NUMBER'.
-    output_file_name = output_file_prefix.replace('-${SCENE_NUMBER}', '')
-    output_file_name = output_file_prefix.replace('-$SCENE_NUMBER', '')
+    output_file_name = output_file_template.replace('-${SCENE_NUMBER}', '')
+    output_file_name = output_file_template.replace('-$SCENE_NUMBER', '')
     output_file_template = Template(output_file_name)
     output_file_name = output_file_template.safe_substitute(
         VIDEO_NAME=video_name,
@@ -177,9 +189,23 @@ def split_video_ffmpeg(input_video_paths, scene_list, output_file_template, vide
                        arg_override='-c:v libx264 -preset fast -crf 21 -c:a copy',
                        hide_progress=False, suppress_output=False):
     # type: (List[str], List[Tuple[FrameTimecode, FrameTimecode]], Optional[str],
-    #        Optional[str], Optional[bool]) -> None
+    #        Optional[str], Optional[bool], Optional[bool]) -> None
     """ Calls the ffmpeg command on the input video(s), generating a new video for
-    each scene based on the start/end timecodes. """
+    each scene based on the start/end timecodes.
+
+    Arguments:
+        input_video_paths (List[str]): List of strings to the input video path(s).
+            Is a list to allow for concatenation of multiple input videos together.
+        scene_list (List[Tuple[FrameTimecode, FrameTimecode]]): List of scenes
+            (pairs of FrameTimecodes) denoting the start/end frames of each scene.
+        output_file_template (str): Template to use for generating the output filenames.
+            Can use $VIDEO_NAME and $SCENE_NUMBER in this format, for example:
+            `$VIDEO_NAME - Scene $SCENE_NUMBER`
+        video_name (str): Name of the video to be substituted in output_file_template.
+        arg_override (str): Allows overriding the arguments passed to ffmpeg for encoding.
+        hide_progress (bool): If True, will hide progress bar provided by tqdm (if installed).
+        suppress_output (bool): If True, will set verbosity to quiet for the first scene.
+    """
 
     if not input_video_paths or not scene_list:
         return
