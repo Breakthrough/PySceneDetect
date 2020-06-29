@@ -28,11 +28,11 @@
 
 This module implements the :py:class:`SceneManager` object, which is used to coordinate
 SceneDetectors and frame sources (:py:class:`VideoManager <scenedetect.video_manager.VideoManager>`
-or ``cv2.VideoCapture``).  This includes creating a cut list (see :py:meth:`SceneManager.get_cut_list`)
-and event list (see :py:meth:`SceneManager.get_event_list`) of all changes in scene,
-which is used to generate a final list of scenes (see :py:meth:`SceneManager.get_scene_list`)
-in the form of a list of start/end :py:class:`FrameTimecode <scenedetect.frame_timecode.FrameTimecode>`
-objects at each scene boundaries.
+or ``cv2.VideoCapture``).  This includes creating a cut list (see
+:py:meth:`SceneManager.get_cut_list`) and event list (see :py:meth:`SceneManager.get_event_list`)
+of all changes in scene, which is used to generate a final list of scenes (see
+:py:meth:`SceneManager.get_scene_list`) in the form of a list of start/end
+:py:class:`FrameTimecode <scenedetect.frame_timecode.FrameTimecode>` objects at each scene boundary.
 
 The :py:class:`FrameTimecode <scenedetect.frame_timecode.FrameTimecode>` objects and `tuples`
 thereof returned by :py:meth:`get_cut_list <SceneManager.get_cut_list>` and
@@ -115,6 +115,7 @@ def get_scenes_from_cuts(cut_list, base_timecode, num_frames, start_frame=0):
 
 
 def write_scene_list(output_csv_file, scene_list, cut_list=None):
+    # type: (File, List[Tuple[FrameTimecode, FrameTimecode]], Optional[List[FrameTimecode]]) -> None
     """ Writes the given list of scenes to an output file handle in CSV format.
 
     Arguments:
@@ -124,7 +125,6 @@ def write_scene_list(output_csv_file, scene_list, cut_list=None):
             in the video that need to be split to generate individual scenes). If not passed,
             the start times of each scene (besides the 0th scene) is used instead.
     """
-    # type: (File, List[Tuple[FrameTimecode, FrameTimecode]], Optional[List[FrameTimecode]]) -> None
     csv_writer = get_csv_writer(output_csv_file)
     # Output Timecode List
     csv_writer.writerow(
@@ -626,4 +626,3 @@ class SceneManager(object):
                 progress_bar.close()
 
         return num_frames
-

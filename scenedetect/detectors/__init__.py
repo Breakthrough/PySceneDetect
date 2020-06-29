@@ -86,5 +86,3 @@ from scenedetect.detectors.threshold_detector import ThresholdDetector
 #                                                                             #
 #                                                                             #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-
-

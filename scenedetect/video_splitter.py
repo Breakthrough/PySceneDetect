@@ -134,7 +134,7 @@ def split_video_mkvmerge(input_video_paths, scene_list, output_file_prefix,
         return
 
     logging.info('Splitting input video%s using mkvmerge, output path template:\n  %s',
-            's' if len(input_video_paths) > 1 else '', output_file_prefix)
+                 's' if len(input_video_paths) > 1 else '', output_file_prefix)
 
     ret_val = None
     # mkvmerge automatically appends '-$SCENE_NUMBER'.
@@ -258,4 +258,3 @@ def split_video_ffmpeg(input_video_paths, scene_list, output_file_template, vide
                       ' Please install ffmpeg to enable video output support.')
     if ret_val is not None and ret_val != 0:
         logging.error('Error splitting video (ffmpeg returned %d).', ret_val)
-

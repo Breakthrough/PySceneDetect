@@ -59,6 +59,7 @@ import csv
 import cv2
 
 # pylint: disable=unused-import
+# pylint: disable=no-member
 
 
 ##
@@ -105,7 +106,6 @@ else:
 # Compatibility fix for OpenCV v2.x (copies CAP_PROP_* properties from the
 # cv2.cv namespace to the cv2 namespace, as the cv2.cv namespace was removed
 # with the release of OpenCV 3.0).
-# pylint: disable=c-extension-no-member
 if cv2.__version__[0] == '2' or not (
         cv2.__version__[0].isdigit() and int(cv2.__version__[0]) >= 3):
     cv2.CAP_PROP_FRAME_WIDTH = cv2.cv.CV_CAP_PROP_FRAME_WIDTH
@@ -114,7 +114,6 @@ if cv2.__version__[0] == '2' or not (
     cv2.CAP_PROP_POS_MSEC = cv2.cv.CV_CAP_PROP_POS_MSEC
     cv2.CAP_PROP_POS_FRAMES = cv2.cv.CV_CAP_PROP_POS_FRAMES
     cv2.CAP_PROP_FRAME_COUNT = cv2.cv.CV_CAP_PROP_FRAME_COUNT
-# pylint: enable=c-extension-no-member
 
 
 ##
@@ -232,4 +231,3 @@ def get_and_create_path(file_path, output_directory=None):
     except OSError:
         pass
     return file_path
-

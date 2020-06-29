@@ -116,14 +116,14 @@ class NoMetricsRegistered(Exception):
     """ Raised when attempting to save a CSV file via save_to_csv(...) without any
     frame metrics having been registered (i.e. no SceneDetector objects were added
     to the owning SceneManager object, if any). """
-    pass
+    ...
 
 
 class NoMetricsSet(Exception):
     """ Raised if no frame metrics have been set via set_metrics(...) when attempting
     to save the stats to a CSV file via save_to_csv(...). This may also indicate that
     detect_scenes(...) was not called on the owning SceneManager object, if any. """
-    pass
+    ...
 
 
 ##
@@ -348,8 +348,8 @@ class StatsManager(object):
 
 
     def _set_metric(self, frame_number, metric_key, metric_value):
-        self._metrics_updated = True
         # type: (int, str, Union[None, int, float, str]) -> None
+        self._metrics_updated = True
         if not frame_number in self._frame_metrics:
             self._frame_metrics[frame_number] = dict()
         self._frame_metrics[frame_number][metric_key] = metric_value
@@ -359,4 +359,3 @@ class StatsManager(object):
         # type: (int, List[str]) -> bool
         return (frame_number in self._frame_metrics and
                 metric_key in self._frame_metrics[frame_number])
-
