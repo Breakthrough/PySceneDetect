@@ -108,19 +108,22 @@ class VideoParameterMismatch(Exception):
 class VideoDecodingInProgress(RuntimeError):
     """ VideoDecodingInProgress: Raised when attempting to call certain VideoManager methods that
     must be called *before* start() has been called. """
-    ...
+    # pylint: disable=unnecessary-pass
+    pass
 
 
 class VideoDecoderNotStarted(RuntimeError):
     """ VideoDecodingInProgress: Raised when attempting to call certain VideoManager methods that
     must be called *after* start() has been called. """
-    ...
+    # pylint: disable=unnecessary-pass
+    pass
 
 
 class InvalidDownscaleFactor(ValueError):
     """ InvalidDownscaleFactor: Raised when trying to set invalid downscale factor,
     i.e. the supplied downscale factor was not a positive integer greater than zero. """
-    ...
+    # pylint: disable=unnecessary-pass
+    pass
 
 
 ##

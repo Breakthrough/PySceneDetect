@@ -116,14 +116,16 @@ class NoMetricsRegistered(Exception):
     """ Raised when attempting to save a CSV file via save_to_csv(...) without any
     frame metrics having been registered (i.e. no SceneDetector objects were added
     to the owning SceneManager object, if any). """
-    ...
+    # pylint: disable=unnecessary-pass
+    pass
 
 
 class NoMetricsSet(Exception):
     """ Raised if no frame metrics have been set via set_metrics(...) when attempting
     to save the stats to a CSV file via save_to_csv(...). This may also indicate that
     detect_scenes(...) was not called on the owning SceneManager object, if any. """
-    ...
+    # pylint: disable=unnecessary-pass
+    pass
 
 
 ##
