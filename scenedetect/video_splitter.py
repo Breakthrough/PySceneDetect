@@ -174,7 +174,7 @@ def split_video_mkvmerge(input_video_paths, scene_list, output_file_prefix,
 
 
 def split_video_ffmpeg(input_video_paths, scene_list, output_file_template, video_name,
-                       arg_override='-c:v libx264 -preset fast -crf 21 -c:a copy',
+                       arg_override='-c:v libx264 -preset fast -crf 21 -c:a aac',
                        hide_progress=False, suppress_output=False):
     # type: (List[str], List[Tuple[FrameTimecode, FrameTimecode]], Optional[str],
     #        Optional[str], Optional[bool]) -> None
@@ -229,13 +229,12 @@ def split_video_ffmpeg(input_video_paths, scene_list, output_file_template, vide
                 '-ss',
                 str(start_time.get_seconds()),
                 '-i',
-                input_video_paths[0]]
+                input_video_paths[0],
+                '-t',
+                str(duration.get_seconds())
+            ]
             call_list += arg_override
             call_list += [
-                '-strict',
-                '-2',
-                '-t',
-                str(duration.get_seconds()),
                 '-sn',
                 filename_template.safe_substitute(
                     VIDEO_NAME=video_name,

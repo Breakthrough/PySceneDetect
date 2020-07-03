@@ -214,6 +214,15 @@ class FrameTimecode(object):
         # Return hours, minutes, and seconds as a formatted timecode string.
         return '%02d:%02d:%s' % (hrs, mins, secs)
 
+    def previous_frame(self):
+        # type: () -> FrameTimecode
+        """
+        Returns a new FrameTimecode for the frame before this one.
+        :return: New FrameTimeCode object, one frame earlier
+        """
+        new_timecode = FrameTimecode(self)
+        new_timecode.frame_num -= 1
+        return new_timecode
 
     def _seconds_to_frames(self, seconds):
         # type: (float) -> int
