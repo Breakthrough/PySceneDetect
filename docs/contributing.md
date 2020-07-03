@@ -29,9 +29,12 @@ In addition to those mentioned below, thank you to *everyone* who has submitted 
  * [@elcombato](https://github.com/elcombato) - improvement of video processing performance due to reduced memory copy operations
  * [@marcelluzs](https://github.com/marcelluzs) - improvement of video processing performance when using the frame-skipping feature
  * [@Hellowlol](https://github.com/Hellowlol) - improvements to software architecture and API development
- * [@bubalazi](https://github.com/bubalazi) - performance improvements to detect-content and detect-threshold algorithms
+ * Lyuboslav Petrov [@bubalazi](https://github.com/bubalazi) - performance improvements to detect-content and detect-threshold algorithms
  * [@r1b](https://github.com/r1b) - proof-of-concept implementation of detect-histogram algorithm
- * [@wjs018](https://github.com/wjs018) - implementation of `export-html` command and various bugfixes
+ * Walter Schwenger [@wjs018](https://github.com/wjs018) - implementation of `export-html` command and various bugfixes
  * [@tonycpsu](https://github.com/tonycpsu) - enhancements to `--min-scene-len` and `save-images` command
  * [@charlesvestal](https://github.com/charlesvestal) - various bugfixes and improvements
+ * Joshua Coales [@joshcoales](https://github.com/joshcoales) - investigation and resolution of ffmpeg "frame bleed" issues (clips not getting cut at the proper split points)
+
+Another way to view the contribution list is [via libraries.io](https://libraries.io/github/Breakthrough/PySceneDetect/contributors).  Thank you all for your help, support, feedback, and direction on the project as a whole!
 
