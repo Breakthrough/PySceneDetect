@@ -227,7 +227,7 @@ def split_video_ffmpeg(input_video_paths, scene_list, output_file_template, vide
             call_list += [
                 '-y',
                 '-ss',
-                str(start_time.get_timecode()),
+                str(start_time.get_seconds()),
                 '-i',
                 input_video_paths[0],
                 '-t',
