@@ -58,6 +58,8 @@ from scenedetect.video_manager import VideoManager
 from scenedetect.video_splitter import is_mkvmerge_available
 from scenedetect.video_splitter import is_ffmpeg_available
 
+from scenedetect.platform import get_and_create_path
+
 
 def get_help_command_preface(command_name='scenedetect'):
     """ Preface/intro help message shown at the beginning of the help command. """
@@ -259,7 +261,7 @@ def scenedetect_cli(ctx, input, output, framerate, downscale, frame_skip, stats,
 
     ctx.obj.output_directory = output
     if logfile is not None:
-        logfile = ctx.obj.get_output_file_path(logfile)
+        logfile = get_and_create_path(logfile)
         logging.basicConfig(
             filename=logfile, filemode='a', format=format_str,
             level=getattr(logging, verbosity.upper()) if verbosity is not None else verbosity)
