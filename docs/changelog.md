@@ -11,7 +11,7 @@ PySceneDetect Changelog
   * [bugfix] fix crash when supplying `-l`/`--logfile` argument (see [#169](https://github.com/Breakthrough/PySceneDetect/issues/169), thanks @typoman)
 
 
-### 0.5.2 (March 29, 2020) &nbsp;<span class="fa fa-tags"></span>
+### 0.5.2 (March 29, 2020)
 
  * [enhancement] `--min-duration` now accepts a timecode in addition to frame number ([#128](https://github.com/Breakthrough/PySceneDetect/pull/128), thanks @tonycpsu)
  * [feature] Add `--image-frame-margin` option to `save-images` command to ignore a number of frames at the start/end of a scene ([#129](https://github.com/Breakthrough/PySceneDetect/pull/129), thanks @tonycpsu)
