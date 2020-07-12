@@ -45,7 +45,7 @@ To get familiar with PySceneDetect, try running `scenedetect help`, or continue 
 
 PySceneDetect requires [Python 2 or 3](https://www.python.org/) and the following packages:
 
- - [OpenCV](http://opencv.org/) (compatible with 2/3), can install via `pip install opencv`. Used for video I/O.
+ - [OpenCV](http://opencv.org/) (compatible with 2/3), can install via `pip install opencv-python`. Used for video I/O.
  - [Numpy](https://numpy.org/), can install via `pip install numpy`. Used for frame processing.
  - [Click](https://click.palletsprojects.com), can install via `pip install Click`. Used for command line interface.
  - [tqdm](https://github.com/tqdm/tqdm) (optional), can install via `pip install tqdm`. Used to show progress bar and estimated time remaining.
