@@ -2,14 +2,14 @@
 PySceneDetect Changelog
 ==========================================================
 
-### 0.6 (TBD)
+
+### 0.5.3 (July 12, 2020) &nbsp;<span class="fa fa-tags"></span>
 
  * [bugfix] Changed default audio codec from 'copy' to 'aac' when splitting scenes with `ffmpeg` to reduce frequency of frames from next scene showing up at the end of the current one when split using `ffmpeg` (see [#93](https://github.com/Breakthrough/PySceneDetect/issues/93), [#159](https://github.com/Breakthrough/PySceneDetect/issues/159), #166 - thank you everyone for your assistance, especially joshcoales,amvscenes, jelias, and typoman). If this still occurs, please provide any information you can by [filing a new issue on Github](https://github.com/Breakthrough/PySceneDetect/issues/new/choose).
   * [enhancement] `video_splitter` module now has completed documentation
   * [bugfix] improve timestamp accuracy using the `split-video` command due to timecode formatting
+  * [bugfix] fix crash when supplying `-l`/`--logfile` argument (see [#169](https://github.com/Breakthrough/PySceneDetect/issues/169), thanks @typoman)
 
-  * [in progress] improved seeking performance ([#98](https://github.com/Breakthrough/PySceneDetect/issues/98) / [PR #163](https://github.com/Breakthrough/PySceneDetect/pull/163), thanks @obroomhall)
-  * [in progress] camera flash suppression
 
 ### 0.5.2 (March 29, 2020) &nbsp;<span class="fa fa-tags"></span>
 
