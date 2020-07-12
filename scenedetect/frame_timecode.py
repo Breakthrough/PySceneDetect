@@ -477,4 +477,3 @@ class FrameTimecode(object):
 
     def __repr__(self):
         return 'FrameTimecode(frame=%d, fps=%f)' % (self.frame_num, self.framerate)
-

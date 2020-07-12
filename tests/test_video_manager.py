@@ -53,7 +53,9 @@ from scenedetect.scene_manager import SceneManager
 from scenedetect.video_manager import VideoManager
 from scenedetect.video_manager import VideoOpenFailure
 
-# TODO: The following exceptions still require test cases:
+# TODO: The following exceptions still require test cases.
+# Since these are API contract violations, should they be refactored
+# into assertions instead?
 from scenedetect.video_manager import VideoDecodingInProgress
 from scenedetect.video_manager import VideoDecoderNotStarted
 

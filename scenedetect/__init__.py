@@ -60,7 +60,7 @@ from scenedetect.__main__ import main
 # Used for module identification and when printing version & about info.
 # (scenedetect version and scenedetect about)
 
-__version__ = 'v0.5.2'
+__version__ = 'v0.6.dev0'
 
 # About & copyright message string shown for the 'about' CLI command (scenedetect about).
 
@@ -112,4 +112,3 @@ or visit the following URL: [ https://docs.python.org/3/license.html ]
 
 THE SOFTWARE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, EXPRESS OR IMPLIED.
 """
-

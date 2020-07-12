@@ -120,6 +120,7 @@ class CliContext(object):
         self.image_name_format = (              # save-images -f/--name-format
             '$VIDEO_NAME-Scene-$SCENE_NUMBER-$IMAGE_NUMBER')
         self.num_images = 2                     # save-images -n/--num-images
+        self.image_frame_margin = 0             # save-images --image-frame-margin
         self.imwrite_params = get_cv2_imwrite_params()
         # Properties for split-video command.
         self.split_video = False                # split-video command
@@ -213,23 +214,23 @@ class CliContext(object):
                 ]
             ]
             for i, r in enumerate([
-                    # pad ranges to number of images
-                    r
-                    if r.stop-r.start >= self.num_images
-                    else list(r) + [r.stop-1] * (self.num_images - len(r))
-                    # create range of frames in scene
-                    for r in (
-                            range(start.get_frames(), end.get_frames())
-                            # for each scene in scene list
-                            for start, end in scene_list
+                # pad ranges to number of images
+                r
+                if r.stop-r.start >= self.num_images
+                else list(r) + [r.stop-1] * (self.num_images - len(r))
+                # create range of frames in scene
+                for r in (
+                    range(start.get_frames(), end.get_frames())
+                    # for each scene in scene list
+                    for start, end in scene_list
                     )
             ])
         ]
 
-        self.image_filenames = { i: [] for i in range(len(timecode_list)) }
+        self.image_filenames = {i: [] for i in range(len(timecode_list))}
 
-        for i, tl in enumerate(timecode_list):
-            for j, image_timecode in enumerate(tl):
+        for i, scene_timecodes in enumerate(timecode_list):
+            for j, image_timecode in enumerate(scene_timecodes):
                 self.video_manager.seek(image_timecode)
                 self.video_manager.grab()
                 ret_val, frame_im = self.video_manager.retrieve()
@@ -305,7 +306,8 @@ class CliContext(object):
             logging.debug('Skipping processing, CLI options were not parsed successfully.')
             return
         self.check_input_open()
-        if not self.scene_manager.get_num_detectors() > 0:
+        assert self.scene_manager.get_num_detectors() >= 0
+        if self.scene_manager.get_num_detectors() == 0:
             logging.error(
                 'No scene detectors specified (detect-content, detect-threshold, etc...),\n'
                 '  or failed to process all command line arguments.')

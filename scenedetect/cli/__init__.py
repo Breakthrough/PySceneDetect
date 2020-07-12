@@ -231,6 +231,7 @@ def duplicate_command(ctx, param_hint):
     ' commands. Equivalent to setting `--verbosity none`. Overrides the current verbosity'
     ' level, even if `-v`/`--verbosity` is set.')
 @click.pass_context
+# pylint: disable=redefined-builtin
 def scenedetect_cli(ctx, input, output, framerate, downscale, frame_skip, stats,
                     verbosity, logfile, quiet):
     """ For example:
@@ -407,11 +408,6 @@ def time_command(ctx, start, duration, end):
     type=click.FLOAT, default=30.0, show_default=True, help=
     'Threshold value (float) that the content_val frame metric must exceed to trigger a new scene.'
     ' Refers to frame metric content_val in stats file.')
-#@click.option(
-#    '--intensity-cutoff', '-i', metavar='VAL',
-#    type=click.FLOAT, default=None, show_default=True, help=
-#    '[Optional] Intensity cutoff threshold to disable scene cut detection. Useful for avoiding.'
-#    ' scene changes triggered by flashes. Refers to frame metric delta_lum in stats file.')
 @click.option(
     '--min-scene-len', '-m', metavar='TIMECODE',
     type=click.STRING, default="0.6s", show_default=True, help=
@@ -419,16 +415,13 @@ def time_command(ctx, start, duration, end):
     ' number of frames, a time in seconds followed by s, or a timecode in the'
     ' format HH:MM:SS or HH:MM:SS.nnn')
 @click.pass_context
-def detect_content_command(ctx, threshold, min_scene_len): #, intensity_cutoff):
+def detect_content_command(ctx, threshold, min_scene_len):
     """ Perform content detection algorithm on input video(s).
 
     detect-content
 
     detect-content --threshold 27.5
     """
-
-    #if intensity_cutoff is not None:
-    #    raise NotImplementedError()
 
     min_scene_len = parse_timecode(ctx.obj, min_scene_len)
 
@@ -715,11 +708,13 @@ def split_video_command(ctx, output, filename, high_quality, override_args, quie
     type=click.INT, help=
     'Number of frames to ignore at the beginning and end of scenes when saving images')
 @click.pass_context
-def save_images_command(ctx, output, filename, num_images, jpeg, webp, quality, png, compression, image_frame_margin):
+def save_images_command(ctx, output, filename, num_images, jpeg, webp, quality, png,
+                        compression, image_frame_margin):
     """ Create images for each detected scene. """
     if ctx.obj.save_images:
         duplicate_command(ctx, 'save-images')
-    ctx.obj.save_images_command(num_images, output, filename, jpeg, webp, quality, png, compression, image_frame_margin)
+    ctx.obj.save_images_command(num_images, output, filename, jpeg, webp, quality, png,
+                                compression, image_frame_margin)
 
 
 

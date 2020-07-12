@@ -108,18 +108,21 @@ class VideoParameterMismatch(Exception):
 class VideoDecodingInProgress(RuntimeError):
     """ VideoDecodingInProgress: Raised when attempting to call certain VideoManager methods that
     must be called *before* start() has been called. """
+    # pylint: disable=unnecessary-pass
     pass
 
 
 class VideoDecoderNotStarted(RuntimeError):
     """ VideoDecodingInProgress: Raised when attempting to call certain VideoManager methods that
     must be called *after* start() has been called. """
+    # pylint: disable=unnecessary-pass
     pass
 
 
 class InvalidDownscaleFactor(ValueError):
     """ InvalidDownscaleFactor: Raised when trying to set invalid downscale factor,
     i.e. the supplied downscale factor was not a positive integer greater than zero. """
+    # pylint: disable=unnecessary-pass
     pass
 
 
@@ -689,7 +692,7 @@ class VideoManager(object):
             raise VideoDecoderNotStarted()
 
         grabbed = False
-        if self._curr_cap is not None and self._end_of_video != True:
+        if self._curr_cap is not None and not self._end_of_video:
             while not grabbed:
                 grabbed = self._curr_cap.grab()
                 if not grabbed and not self._get_next_cap():
@@ -721,7 +724,7 @@ class VideoManager(object):
             raise VideoDecoderNotStarted()
 
         retrieved = False
-        if self._curr_cap is not None and self._end_of_video != True:
+        if self._curr_cap is not None and not self._end_of_video:
             while not retrieved:
                 retrieved, self._last_frame = self._curr_cap.retrieve()
                 if not retrieved and not self._get_next_cap():
@@ -751,7 +754,7 @@ class VideoManager(object):
             raise VideoDecoderNotStarted()
 
         read_frame = False
-        if self._curr_cap is not None and self._end_of_video != True:
+        if self._curr_cap is not None and not self._end_of_video:
             read_frame, self._last_frame = self._curr_cap.read()
 
             # Switch to the next capture when the current one is over
@@ -785,4 +788,3 @@ class VideoManager(object):
             self._curr_cap_idx += 1
             self._curr_cap = self._cap_list[self._curr_cap_idx]
             return True
-

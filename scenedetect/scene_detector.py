@@ -143,4 +143,3 @@ class SparseSceneDetector(SceneDetector):
             to be added to the output scene list directly.
         """
         return []
-
