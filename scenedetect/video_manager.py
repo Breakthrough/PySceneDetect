@@ -266,14 +266,14 @@ def open_captures(video_files, framerate=None, validate_parameters=True):
 
 def release_captures(cap_list):
     # type: (Iterable[VideoCapture]) -> None
-    """ Close Captures:  Calls the release() method on every capture in cap_list. """
+    """ Close Captures:  Calls release() on every capture in cap_list. """
     for cap in cap_list:
         cap.release()
 
 
 def close_captures(cap_list):
     # type: (Iterable[VideoCapture]) -> None
-    """ Close Captures:  Calls the close() method on every capture in cap_list. """
+    """ Close Captures:  Calls close() on every capture in cap_list. """
     for cap in cap_list:
         cap.close()
 
@@ -416,8 +416,8 @@ class VideoManager(object):
 
     def get_num_videos(self):
         # type: () -> int
-        """ Get Number of Videos - returns the length of the capture list (self._cap_list),
-        representing the number of videos the VideoManager has opened.
+        """ Get Number of Videos - returns the length of the internal capture list,
+        representing the number of videos the VideoManager was constructed with.
 
         Returns:
             int: Number of videos, equal to length of capture list.
@@ -453,8 +453,8 @@ class VideoManager(object):
 
         The timecode returned by this method can be used to perform arithmetic (e.g.
         addition), passing the resulting values back to the VideoManager (e.g. for the
-        set_duration() method), as the framerate of the returned FrameTimecode object
-        matches that of the VideoManager.
+        :py:meth:`set_duration()` method), as the framerate of the returned FrameTimecode
+        object matches that of the VideoManager.
 
         As such, this method is equivalent to creating a FrameTimecode at frame 0 with
         the VideoManager framerate, for example, given a VideoManager called obj,
@@ -509,9 +509,9 @@ class VideoManager(object):
     def set_duration(self, duration=None, start_time=None, end_time=None):
         # type: (Optional[FrameTimecode], Optional[FrameTimecode], Optional[FrameTimecode]) -> None
         """ Set Duration - sets the duration/length of the video(s) to decode, as well as
-        the start/end times.  Must be called before start() is called, otherwise a
-        VideoDecodingInProgress exception will be thrown.  May be called after reset()
-        as well.
+        the start/end times.  Must be called before :py:meth:`start()` is called, otherwise
+        a VideoDecodingInProgress exception will be thrown.  May be called after
+        :py:meth:`reset()` as well.
 
         Arguments:
             duration (Optional[FrameTimecode]): The (maximum) duration in time to
@@ -564,11 +564,11 @@ class VideoManager(object):
 
     def get_duration(self):
         # type: () -> FrameTimecode
-        """ Get Duration - gets the duration/length of the video(s) to decode, as well as
-        the start/end times.
+        """ Get Duration - gets the duration/length of the video(s) to decode,
+        as well as the start/end times.
 
-        If the end time was not set by set_duration(), the end timecode is calculated
-        as the start timecode + total duration.
+        If the end time was not set by :py:meth:`set_duration()`, the end timecode
+        is calculated as the start timecode + total duration.
 
         Returns:
             Tuple[FrameTimecode, FrameTimecode, FrameTimecode]: The current video(s)
@@ -588,8 +588,9 @@ class VideoManager(object):
         decoder process has already been started.
 
         Raises:
-            VideoDecodingInProgress: Must call stop() before this method if
-                start() has already been called after initial construction.
+            VideoDecodingInProgress: Must call :py:meth:`stop()` before this
+                method if :py:meth:`start()` has already been called after
+                initial construction.
         """
         if self._started:
             raise VideoDecodingInProgress()
@@ -604,7 +605,7 @@ class VideoManager(object):
         """ Seek - seeks forwards to the passed timecode.
 
         Only supports seeking forwards (i.e. timecode must be greater than the
-        current VideoManager position).  Can only be used after the start()
+        current position).  Can only be used after the :py:meth:`start()`
         method has been called.
 
         Arguments:
@@ -614,7 +615,7 @@ class VideoManager(object):
             bool: True if seeking succeeded, False if no more frames / end of video.
 
         Raises:
-            VideoDecoderNotStarted: Must call start() before this method.
+            VideoDecoderNotStarted: Must call :py:meth:`start()` before this method.
         """
         while self._curr_time < timecode:
             if not self.grab(): # raises VideoDecoderNotStarted if start() was not called
@@ -634,10 +635,10 @@ class VideoManager(object):
         # type: () -> None
         """ Reset - Reopens captures passed to the constructor of the VideoManager.
 
-        Can only be called after the release() method has been called.
+        Can only be called after the :py:meth:`release()` method has been called.
 
         Raises:
-            VideoDecodingInProgress: Must call release() before this method.
+            VideoDecodingInProgress: Must call :py:meth:`release()` before this method.
         """
         if self._started:
             raise VideoDecodingInProgress()
@@ -686,7 +687,7 @@ class VideoManager(object):
             bool: True if a frame was grabbed, False otherwise.
 
         Raises:
-            VideoDecoderNotStarted: Must call start() before this method.
+            VideoDecoderNotStarted: Must call :py:meth:`start()` before this method.
         """
         if not self._started:
             raise VideoDecoderNotStarted()
@@ -709,7 +710,7 @@ class VideoManager(object):
         # type: () -> Tuple[bool, Union[None, numpy.ndarray]]
         """ Retrieve (cv2.VideoCapture method) - retrieves and returns a frame.
 
-        Frame returned corresponds to last call to get().
+        Frame returned corresponds to last call to :py:meth:`grab()`.
 
         Returns:
             Tuple[bool, Union[None, numpy.ndarray]]: Returns tuple of
@@ -718,7 +719,7 @@ class VideoManager(object):
             decoded frame, otherwise returns (False, None).
 
         Raises:
-            VideoDecoderNotStarted: Must call start() before this method.
+            VideoDecoderNotStarted: Must call :py:meth:`start()` before this method.
         """
         if not self._started:
             raise VideoDecoderNotStarted()
@@ -748,7 +749,7 @@ class VideoManager(object):
             is a numpy ndarray of the decoded frame, otherwise (False, None).
 
         Raises:
-            VideoDecoderNotStarted: Must call start() before this method.
+            VideoDecoderNotStarted: Must call :py:meth:`start()` before this method.
         """
         if not self._started:
             raise VideoDecoderNotStarted()
