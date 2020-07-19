@@ -259,22 +259,21 @@ def scenedetect_cli(ctx, input, output, framerate, downscale, frame_skip, stats,
     if quiet:
         verbosity = None
 
+    ctx.obj.quiet_mode = True if verbosity is None else False
     ctx.obj.output_directory = output
+
     if logfile is not None:
         logfile = get_and_create_path(logfile)
         logging.basicConfig(
             filename=logfile, filemode='a', format=format_str,
             level=getattr(logging, verbosity.upper()) if verbosity is not None else verbosity)
-        logging.info('Version: %s', scenedetect.__version__)
-        logging.info('Info Level: %s', verbosity)
+    elif verbosity is not None:
+        logging.basicConfig(format=format_str,
+                            level=getattr(logging, verbosity.upper()))
     else:
-        if verbosity is not None:
-            logging.basicConfig(format=format_str,
-                                level=getattr(logging, verbosity.upper()))
-        else:
-            logging.disable(logging.CRITICAL)
+        logging.disable(logging.CRITICAL)
 
-    ctx.obj.quiet_mode = True if verbosity is None else False
+    logging.info('PySceneDetect %s', scenedetect.__version__)
 
     if stats is not None and frame_skip != 0:
         ctx.obj.options_processed = False

@@ -8,15 +8,17 @@ PySceneDetect Releases
 
 #### Release Notes
 
- * Primarily maintenance release including various bugfixes
+ * Primarily maintenance release including various bugfixes and minor API changes
  * Removed first row from statsfiles so it is a valid CSV file
+ * The progress bar now correctly resizes when the terminal is resized
 
 #### Changelog
 
- * Removed first row from statsfile to comply with RFC 4180, includes backwards compatibility so existing statsfiles can still be loaded (resolves [#136](https://github.com/Breakthrough/PySceneDetect/issues/136))
- * Removed now unused argument base_timecode from StatsManager.load_from_csv() method
- * Enabled dynamic resizing for progress bar (resolves [#193](https://github.com/Breakthrough/PySceneDetect/issues/193))
- * Fix unhandled exception causing improper error message when a video fails to load on non-Windows platforms (resolves [#192](https://github.com/Breakthrough/PySceneDetect/issues/192))
+ * [enhancement] Always ouptut version number via logger to assist with debugging (resolves [#171](https://github.com/Breakthrough/PySceneDetect/issues/171))
+ * [enhancement] Removed first row from statsfile to comply with RFC 4180, includes backwards compatibility so existing statsfiles can still be loaded (resolves [#136](https://github.com/Breakthrough/PySceneDetect/issues/136))
+ * [api] Removed unused argument base_timecode from `StatsManager.load_from_csv()` method
+ * [enhancement] Enabled dynamic resizing for progress bar (resolves [#193](https://github.com/Breakthrough/PySceneDetect/issues/193))
+ * [bugfix] Fix unhandled exception causing improper error message when a video fails to load on non-Windows platforms (resolves [#192](https://github.com/Breakthrough/PySceneDetect/issues/192))
 
 #### Known Issues
 
