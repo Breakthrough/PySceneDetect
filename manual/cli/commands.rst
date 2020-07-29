@@ -154,11 +154,11 @@ The `list-scenes` command takes the following options:
  * ``-o``, ``--output DIR``
     Output directory to save videos to. Overrides global
     option `-o`/`--output` if set.
- * ``-f, ``--filename NAME``
+ * ``-f``, ``--filename NAME``
     Filename format to use for the scene list CSV file.
     You can use the `$VIDEO_NAME` macro in the file name.
     [default: `$VIDEO_NAME-Scenes.csv`]
- * ``-n, ``--no-output-file``
+ * ``-n``, ``--no-output-file``
     Disable writing scene list CSV file to disk.  If set,
     `-o`/`--output` and `-f`/`--filename` are ignored.
  * ``-q``, ``--quiet``
