@@ -21,24 +21,79 @@ Video Scene Cut Detection and Analysis Tool
 
     pip install scenedetect[opencv,progress_bar]
 
-Or to install just PySceneDetect (OpenCV installation required):
+Or to install just PySceneDetect (manual OpenCV installation required):
 
     pip install scenedetect
 
-To test if you have the required prerequisites, open a `python` prompt, and run the following:
-
-    import numpy
-    import cv2
-
-If both of those commands execute without any problems, you should be able to run PySceneDetect without any issues. To enable video splitting support, you will also need to have `mkvmerge` or `ffmpeg` installed on your system. See the documentation on [Video Splitting Support](https://pyscenedetect.readthedocs.io/en/latest/examples/video-splitting/) after installation for details.
-
-Full documentation for PySceneDetect can be found [on Readthedocs](http://pyscenedetect.readthedocs.org/), or by visiting [py.scenedetect.com](http://py.scenedetect.com/).  This includes details on detection modes, default values/thresholds to try, and how to effectively choose the optimal detection parameters.
-
-**Install From Source**: To install from source code instead, download the latest release archive, and run `python setup.py install` wherever you extract the archive (see releases tab or [the download page](https://pyscenedetect.readthedocs.io/en/latest/download/) for details).
+To enable video splitting support, you will also need to have `mkvmerge` or `ffmpeg` installed on your system. See the documentation on [Video Splitting Support](https://pyscenedetect.readthedocs.io/en/latest/examples/video-splitting/) after installation for details.
 
 ----------------------------------------------------------
 
-PySceneDetect is a command-line tool, written in Python and using OpenCV, which analyzes a video, looking for scene changes or cuts.  The output timecodes can then be used with another tool (e.g. `mkvmerge`, `ffmpeg`) to split the video into individual clips.  A frame-by-frame analysis can also be generated for a video, to help with determining optimal threshold values or detecting patterns/other analysis methods for a particular video.  See [the Usage documentation](https://pyscenedetect.readthedocs.io/en/latest/examples/usage/) for details.
+**Quick Start (Command Line)**:
+
+Split the input video wherever a new scene is detected:
+
+    ``scenedetect -i video.mp4 detect-content split-video``
+
+Skip the first 10 seconds of the input video, and output a list of scenes to the terminal:
+
+    ``scenedetect -i video.mp4 time -s 10s detect-content list-scenes``
+
+To show a summary of all other options and commands:
+
+    ``scenedetect help``
+
+You can find more examples [on the website](https://pyscenedetect.readthedocs.io/en/stable/examples/usage-example/) or [in the manual](https://pyscenedetect.readthedocs.io/projects/Manual/en/stable/cli/global_options.html).
+
+**Quick Start (Python API)**:
+
+In the code example below, we create a function `find_scenes()` which will
+load a video, detect the scenes, and return a list of tuples containing the
+(start, end) timecodes of each detected scene.  Note that you can modify
+the `threshold` argument to modify the sensitivity of the scene detection.
+
+```python
+# Standard PySceneDetect imports:
+from scenedetect.video_manager import VideoManager
+from scenedetect.scene_manager import SceneManager
+
+# For content-aware scene detection:
+from scenedetect.detectors.content_detector import ContentDetector
+
+
+def find_scenes(video_path, threshold=30.0):
+    # type: (str) -> List[Tuple[FrameTimecode, FrameTimecode]]
+    video_manager = VideoManager([video_path])
+    scene_manager = SceneManager()
+
+    # Add ContentDetector algorithm (each detector's constructor
+    # takes detector options, e.g. threshold).
+    scene_manager.add_detector(
+        ContentDetector(threshold=threshold))
+
+    # Base timestamp at frame 0, required to obtain the scene list.
+    base_timecode = video_manager.get_base_timecode()
+
+    scene_list = []
+
+    # Set downscale factor to improve processing speed.
+    video_manager.set_downscale_factor()
+
+    # Start video_manager.
+    video_manager.start()
+
+    # Perform scene detection on video_manager.
+    scene_manager.detect_scenes(frame_source=video_manager)
+
+    # Each scene is a tuple of (start, end) FrameTimecodes.
+    return scene_manager.get_scene_list(base_timecode)
+```
+
+See [the manual](https://pyscenedetect.readthedocs.io/projects/Manual/en/stable/api.html) for the full PySceneDetect API documentation.
+
+----------------------------------------------------------
+
+PySceneDetect is a command-line tool and Python library, which uses OpenCV to analyze a video to find scene changes or cuts.  If `ffmpeg` or `mkvmerge` is installed, the video can also be split into scenes automatically.  A frame-by-frame analysis can also be generated for a video, to help with determining optimal threshold values or detecting patterns/other analysis methods for a particular video.  See [the Usage documentation](https://pyscenedetect.readthedocs.io/en/latest/examples/usage/) for details.
 
 There are two main detection methods PySceneDetect uses: `detect-threshold` (comparing each frame to a set black level, useful for detecting cuts and fades to/from black), and `detect-content` (compares each frame sequentially looking for changes in content, useful for detecting fast cuts between video scenes, although slower to process).  Each mode has slightly different parameters, and is described in detail below.
 

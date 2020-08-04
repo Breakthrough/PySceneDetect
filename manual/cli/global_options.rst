@@ -1,6 +1,34 @@
 
 ***********************************************************************
- ``scenedetect`` Command
+Quickstart
+***********************************************************************
+
+Split the input video wherever a new scene is detected:
+
+    ``scenedetect -i video.mp4 detect-content split-video``
+
+Print a table of detected scenes to the terminal, and save an image
+at the start, middle, and end frame of each scene:
+
+    ``scenedetect -i video.mp4 detect-content list-scenes -n save-images``
+
+Skip the first 10 seconds of the input video:
+
+    ``scenedetect -i video.mp4 time -s 10s detect-content``
+
+To show a summary of all other options and commands:
+
+    ``scenedetect help``
+
+You can also type `help command` where `command` is a specific command
+or detection algorithm (e.g. `detect-content`, `split-video`). To show a
+complete help listing for every command:
+
+    ``scenedetect help all``
+
+
+***********************************************************************
+ ``scenedetect`` Command Options
 ***********************************************************************
 
 The options in this section represent the "global" arguments for the
@@ -82,12 +110,17 @@ The ``scenedetect`` command takes the following global options:
 
 
 =======================================================================
-Example Usage
+Scene Detectors and Commands
 =======================================================================
 
 Note again that calls to the `scenedetect` command should be specified as follows:
 
     ``scenedetect [global options] [detector] [commands]``
+
+Detector specifies the scene detection algorithm to use.  Commands specify what
+to do with the specified options (splitting the input video, or save a thumbnail
+for each scene).  Each can have its own sub-options, which are documented in
+the following sections of this manual.
 
 For example, to use the `--input` and `--stats` options from above along with
 the `detect-content` detector on a file `video.mp4`, and using the `list-scenes`
@@ -97,4 +130,3 @@ command to print a table of detected scenes to the terminal:
 
 More examples can be found in the following sections, which detail the options for
 each scene detector and all commands.
-

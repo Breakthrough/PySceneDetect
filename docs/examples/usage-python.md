@@ -8,9 +8,54 @@ The complete Python API Reference <span class="fa fa-book"> for the <tt>scenedet
 </div>
 
 
-## Example
+## Quickstart
 
-The following short Python program shows the general usage style of how to detect scenes using PySceneDetect.  This shows how to open a video (or videos), save/load stats to/from a statsfile (CSV), perform scene detection (using the `ContentDetector`), and print a list of detected scenes to the terminal/console.  
+In the code example below, we create a function `find_scenes()` which will
+load a video, detect the scenes, and return a list of tuples containing the
+(start, end) timecodes of each detected scene.  Note that you can modify
+the `threshold` argument to modify the sensitivity of the `ContentDetector`.
+
+```python
+# Standard PySceneDetect imports:
+from scenedetect.video_manager import VideoManager
+from scenedetect.scene_manager import SceneManager
+
+# For content-aware scene detection:
+from scenedetect.detectors.content_detector import ContentDetector
+
+
+def find_scenes(video_path, threshold=30.0):
+    # type: (str) -> List[Tuple[FrameTimecode, FrameTimecode]]
+    video_manager = VideoManager([video_path])
+    scene_manager = SceneManager()
+
+    # Add ContentDetector algorithm (each detector's constructor
+    # takes detector options, e.g. threshold).
+    scene_manager.add_detector(
+        ContentDetector(threshold=threshold))
+
+    # Base timestamp at frame 0, required to obtain the scene list.
+    base_timecode = video_manager.get_base_timecode()
+
+    scene_list = []
+
+    # Set downscale factor to improve processing speed.
+    video_manager.set_downscale_factor()
+
+    # Start video_manager.
+    video_manager.start()
+
+    # Perform scene detection on video_manager.
+    scene_manager.detect_scenes(frame_source=video_manager)
+
+    # Each scene is a tuple of (start, end) FrameTimecodes.
+    return scene_manager.get_scene_list(base_timecode)
+```
+
+
+## Advanced Example
+
+The following short Python program shows the general usage style of how to detect scenes using PySceneDetect.  This shows how to open a video (or videos), save/load stats to/from a statsfile (CSV), perform scene detection (using the `ContentDetector`), and print a list of detected scenes to the terminal/console.
 
 ```python
 from __future__ import print_function
@@ -87,4 +132,3 @@ if __name__ == "__main__":
 ## Scene Detection in a Python REPL
 
 PySceneDetect can be used interactively as well.  One way to get familiar with this is to type the above example into a Python REPL line by line, viewing the output as you run through the code and making sure you understand the output/results.  In the future, functions may be added to preview the scene boundaries graphically using OpenCV's GUI functionality, to allow interactive use of PySceneDetect from the command-line without launching the full GUI.
-

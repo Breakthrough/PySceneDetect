@@ -41,7 +41,7 @@ provided in the ``scenedetect`` package:
           CSV format for analysis. Also be used as a persistent cache
           to make several scene detection runs on the same video source
           `significantly` faster.
-    
+
         * ``scenedetect.scene_detector``: Contains
           :py:class:`SceneDetector <scenedetect.scene_detector.SceneDetector>`
           base class for implementing scene detection algorithms.
@@ -60,12 +60,55 @@ provided in the ``scenedetect`` package:
         * ``scenedetect.video_splitter``: Contains
           helper functions to use external tools after processing
           to split the video into individual scenes.
-          
+
 
 =======================================================================
 Example
 =======================================================================
 
-For an example of using the PySceneDetect API to perform scene detection,
-take a look at the :ref:`example in the SceneManager reference<scenemanager-example>`.
+In the code example below, we create a function ``find_scenes()`` which will
+load a video, detect the scenes, and return a list of tuples containing the
+(start, end) timecodes of each detected scene.  Note that you can modify
+the `threshold` argument to modify the sensitivity of the
+:py:class:`ContentDetector <scenedetect.detectors.content_detector.ContentDetector>`.
 
+For a more advanced example of using the PySceneDetect API to with a stats file
+(to speed up processing of the same file multiple times), take a look at the
+:ref:`example in the SceneManager reference<scenemanager-example>`.
+
+.. code:: python
+
+    # Standard PySceneDetect imports:
+    from scenedetect.video_manager import VideoManager
+    from scenedetect.scene_manager import SceneManager
+
+    # For content-aware scene detection:
+    from scenedetect.detectors.content_detector import ContentDetector
+
+
+    def find_scenes(video_path, threshold=30.0):
+        # type: (str) -> List[Tuple[FrameTimecode, FrameTimecode]]
+        video_manager = VideoManager([video_path])
+        scene_manager = SceneManager()
+
+        # Add ContentDetector algorithm (each detector's constructor
+        # takes detector options, e.g. threshold).
+        scene_manager.add_detector(
+            ContentDetector(threshold=threshold))
+
+        # Base timestamp at frame 0, required to obtain the scene list.
+        base_timecode = video_manager.get_base_timecode()
+
+        scene_list = []
+
+        # Set downscale factor to improve processing speed.
+        video_manager.set_downscale_factor()
+
+        # Start video_manager.
+        video_manager.start()
+
+        # Perform scene detection on video_manager.
+        scene_manager.detect_scenes(frame_source=video_manager)
+
+        # Each scene is a tuple of (start, end) FrameTimecodes.
+        return scene_manager.get_scene_list(base_timecode)
