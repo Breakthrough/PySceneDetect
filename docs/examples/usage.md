@@ -31,7 +31,8 @@ Print a table of detected scenes to the terminal, and save an image
 at the start, middle, and end frame of each scene:
 
 ```rst
-scenedetect -i video.mp4 detect-content list-scenes -n save-images```
+scenedetect -i video.mp4 detect-content list-scenes -n save-images
+```
 
 Skip the first 10 seconds of the input video:
 

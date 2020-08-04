@@ -1,6 +1,8 @@
 
+.. _cli-detectors:
+
 ***********************************************************************
-Scene Detection Commands
+Detectors
 ***********************************************************************
 
 There are currently two implemented scene detection algorithms, threshold

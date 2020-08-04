@@ -1,6 +1,8 @@
 
+.. _cli-commands:
+
 ***********************************************************************
-Command Reference
+Commands
 ***********************************************************************
 
 The following commands are available when using ``scenedetect``.

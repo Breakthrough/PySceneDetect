@@ -1,6 +1,6 @@
 
 ***********************************************************************
-The ``scenedetect`` Module
+``scenedetect`` Module
 ***********************************************************************
 
 
@@ -72,10 +72,6 @@ load a video, detect the scenes, and return a list of tuples containing the
 the `threshold` argument to modify the sensitivity of the
 :py:class:`ContentDetector <scenedetect.detectors.content_detector.ContentDetector>`.
 
-For a more advanced example of using the PySceneDetect API to with a stats file
-(to speed up processing of the same file multiple times), take a look at the
-:ref:`example in the SceneManager reference<scenemanager-example>`.
-
 .. code:: python
 
     # Standard PySceneDetect imports:
@@ -112,3 +108,8 @@ For a more advanced example of using the PySceneDetect API to with a stats file
 
         # Each scene is a tuple of (start, end) FrameTimecodes.
         return scene_manager.get_scene_list(base_timecode)
+
+
+For a more advanced example of using the PySceneDetect API to with a stats file
+(to speed up processing of the same file multiple times), take a look at the
+:ref:`example in the SceneManager reference<scenemanager-example>`.

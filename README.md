@@ -13,19 +13,17 @@ Video Scene Cut Detection and Analysis Tool
 
 **Documentation**:  [manual.scenedetect.com](http://manual.scenedetect.com)
 
-**Download/Install**: https://pyscenedetect.readthedocs.io/en/latest/download/
+**Installation and Dependencies**: https://pyscenedetect.readthedocs.io/en/latest/download/
 
 ----------------------------------------------------------
 
-**Quick Install**: Requires Python modules `numpy`, OpenCV `cv2`, and (optional) `tqdm` for displaying progress.  To install PySceneDetect via `pip` with all dependencies:
+**Quick Install**: To install PySceneDetect via `pip` with all dependencies:
 
     pip install scenedetect[opencv,progress_bar]
 
-Or to install just PySceneDetect (manual OpenCV installation required):
-
-    pip install scenedetect
-
 To enable video splitting support, you will also need to have `mkvmerge` or `ffmpeg` installed on your system. See the documentation on [Video Splitting Support](https://pyscenedetect.readthedocs.io/en/latest/examples/video-splitting/) after installation for details.
+
+Requires Python modules `numpy`, OpenCV `cv2`, and (optional) `tqdm` for displaying progress.
 
 ----------------------------------------------------------
 
@@ -33,15 +31,15 @@ To enable video splitting support, you will also need to have `mkvmerge` or `ffm
 
 Split the input video wherever a new scene is detected:
 
-    ``scenedetect -i video.mp4 detect-content split-video``
+    scenedetect -i video.mp4 detect-content split-video
 
 Skip the first 10 seconds of the input video, and output a list of scenes to the terminal:
 
-    ``scenedetect -i video.mp4 time -s 10s detect-content list-scenes``
+    scenedetect -i video.mp4 time -s 10s detect-content list-scenes
 
 To show a summary of all other options and commands:
 
-    ``scenedetect help``
+    scenedetect help
 
 You can find more examples [on the website](https://pyscenedetect.readthedocs.io/en/stable/examples/usage-example/) or [in the manual](https://pyscenedetect.readthedocs.io/projects/Manual/en/stable/cli/global_options.html).
 
@@ -101,11 +99,6 @@ In general, use `detect-threshold` mode if you want to detect scene boundaries u
 
 Note that PySceneDetect is currently in beta; see Current Features & Roadmap below for details.  For help or other issues, you can contact me on [my website](http://www.bcastell.com/about/), or we can chat in #pyscenedetect on Freenode.  Feel free to submit any bugs or feature requests to [the Issue Tracker](https://github.com/Breakthrough/PySceneDetect/issues) here on Github.
 
-
-Download & Installation
-----------------------------------------------------------
-
-See [the Download & Installation page on Readthedocs](http://pyscenedetect.readthedocs.org/en/latest/download/) ([alt. link](https://github.com/Breakthrough/PySceneDetect/blob/master/docs/download.md)) for how to get PySceneDetect, as well as details on which system dependencies are required.
 
 Usage
 ----------------------------------------------------------

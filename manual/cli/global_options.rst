@@ -1,7 +1,11 @@
 
 ***********************************************************************
-Quickstart
+``scenedetect`` Application
 ***********************************************************************
+
+=======================================================================
+Quickstart
+=======================================================================
 
 Split the input video wherever a new scene is detected:
 
@@ -27,9 +31,9 @@ complete help listing for every command:
     ``scenedetect help all``
 
 
-***********************************************************************
- ``scenedetect`` Command Options
-***********************************************************************
+=======================================================================
+Overview
+=======================================================================
 
 The options in this section represent the "global" arguments for the
 main ``scenedetect`` command. The most commonly used options are the
@@ -58,7 +62,7 @@ are any other commands to be performed, and their own options (e.g.
 
 
 =======================================================================
-Command Options
+Global Options
 =======================================================================
 
 The ``scenedetect`` command takes the following global options:
@@ -110,23 +114,24 @@ The ``scenedetect`` command takes the following global options:
 
 
 =======================================================================
-Scene Detectors and Commands
+Detectors and Commands
 =======================================================================
 
-Note again that calls to the `scenedetect` command should be specified as follows:
+Calls to the `scenedetect` command should be specified as follows:
 
     ``scenedetect [global options] [detector] [commands]``
 
-Detector specifies the scene detection algorithm to use.  Commands specify what
-to do with the specified options (splitting the input video, or save a thumbnail
-for each scene).  Each can have its own sub-options, which are documented in
-the following sections of this manual.
+`[detector]` specifies which :ref:`scene detection algorithm<cli-detectors>` to use.
+`[commands]` specify one or more :ref:`commands<cli-commands>` (or "actions"), such
+as splitting the input video, or saving a thumbnail for each scene.  Each command
+can have its own sub-options, which are documented in the following sections of
+this manual.
 
-For example, to use the `--input` and `--stats` options from above along with
+As an example, to use the `--input` and `--stats` options from above along with
 the `detect-content` detector on a file `video.mp4`, and using the `list-scenes`
 command to print a table of detected scenes to the terminal:
 
     ``scenedetect -i video.mp4 -s video.stats.csv detect-content list-scenes -n``
 
-More examples can be found in the following sections, which detail the options for
-each scene detector and all commands.
+More examples can be found in the following section, which details the options for
+all available commands.
