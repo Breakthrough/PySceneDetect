@@ -23,33 +23,32 @@ from scenedetect.scene_manager import SceneManager
 # For content-aware scene detection:
 from scenedetect.detectors.content_detector import ContentDetector
 
-
 def find_scenes(video_path, threshold=30.0):
-    # type: (str) -> List[Tuple[FrameTimecode, FrameTimecode]]
+    # Create our video & scene managers, then add the detector.
     video_manager = VideoManager([video_path])
     scene_manager = SceneManager()
-
-    # Add ContentDetector algorithm (each detector's constructor
-    # takes detector options, e.g. threshold).
     scene_manager.add_detector(
         ContentDetector(threshold=threshold))
 
-    # Base timestamp at frame 0, required to obtain the scene list.
+    # Base timestamp at frame 0 (required to obtain the scene list).
     base_timecode = video_manager.get_base_timecode()
 
-    scene_list = []
-
-    # Set downscale factor to improve processing speed.
+    # Improve processing speed by downscaling before processing.
     video_manager.set_downscale_factor()
 
-    # Start video_manager.
+    # Start the video manager and perform the scene detection.
     video_manager.start()
-
-    # Perform scene detection on video_manager.
     scene_manager.detect_scenes(frame_source=video_manager)
 
-    # Each scene is a tuple of (start, end) FrameTimecodes.
+    # Each returned scene is a tuple of the (start, end) timecode.
     return scene_manager.get_scene_list(base_timecode)
+```
+
+To get started, try printing the return value of `find_scenes` on a small video clip:
+
+```python
+scenes = find_scenes('video.mp4')
+print(scenes)
 ```
 
 A more advanced usage example can be found in [the API reference manual](https://pyscenedetect.readthedocs.io/projects/Manual/en/stable/api/scene_manager.html#scenemanager-example).
