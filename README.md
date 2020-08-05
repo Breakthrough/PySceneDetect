@@ -41,7 +41,7 @@ To show a summary of all other options and commands:
 
     scenedetect help
 
-You can find more examples [on the website](https://pyscenedetect.readthedocs.io/en/stable/examples/usage-example/) or [in the manual](https://pyscenedetect.readthedocs.io/projects/Manual/en/stable/cli/global_options.html).
+You can find more examples [on the website](https://pyscenedetect.readthedocs.io/en/latest/examples/usage-example/) or [in the manual](https://pyscenedetect.readthedocs.io/projects/Manual/en/latest/cli/global_options.html).
 
 **Quick Start (Python API)**:
 
@@ -86,7 +86,7 @@ To get started, try printing the result from calling `find_scenes` on a small vi
     print(scenes)
 ```
 
-See [the manual](https://pyscenedetect.readthedocs.io/projects/Manual/en/stable/api.html) for the full PySceneDetect API documentation.
+See [the manual](https://pyscenedetect.readthedocs.io/projects/Manual/en/latest/api.html) for the full PySceneDetect API documentation.
 
 ----------------------------------------------------------
 

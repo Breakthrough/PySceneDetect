@@ -51,7 +51,7 @@ scenes = find_scenes('video.mp4')
 print(scenes)
 ```
 
-A more advanced usage example can be found in [the API reference manual](https://pyscenedetect.readthedocs.io/projects/Manual/en/stable/api/scene_manager.html#scenemanager-example).
+A more advanced usage example can be found in [the API reference manual](https://pyscenedetect.readthedocs.io/projects/Manual/en/latest/api/scene_manager.html#scenemanager-example).
 
 
 ## Scene Detection in a Python REPL
