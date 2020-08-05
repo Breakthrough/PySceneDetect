@@ -52,11 +52,11 @@ the `threshold` argument to modify the sensitivity of the scene detection.
 
 ```python
 # Standard PySceneDetect imports:
-from scenedetect.video_manager import VideoManager
-from scenedetect.scene_manager import SceneManager
+from scenedetect import VideoManager
+from scenedetect import SceneManager
 
 # For content-aware scene detection:
-from scenedetect.detectors.content_detector import ContentDetector
+from scenedetect.detectors import ContentDetector
 
 def find_scenes(video_path, threshold=30.0):
     # Create our video & scene managers, then add the detector.

@@ -57,8 +57,7 @@ import cv2
 
 # PySceneDetect Library Imports
 from scenedetect.platform import STRING_TYPE
-import scenedetect.frame_timecode
-from scenedetect.frame_timecode import FrameTimecode
+from scenedetect.frame_timecode import FrameTimecode, MINIMUM_FRAMES_PER_SECOND_FLOAT
 
 
 ##
@@ -131,13 +130,13 @@ class InvalidDownscaleFactor(ValueError):
 ##
 
 DEFAULT_DOWNSCALE_FACTORS = {
-    3200: 12,        # ~4k
-    2100: 8,        # ~2k
-    1700: 6,        # ~1080p
-    1200: 5,
-    900: 4,         # ~720p
-    600: 3,
-    400: 2        # ~480p
+    3200: 12,   # ~4k
+    2100:  8,   # ~2k
+    1700:  6,   # ~1080p
+    1200:  5,
+    900:   4,   # ~720p
+    600:   3,
+    400:   2    # ~480p
 }
 """Dict[int, int]: The default downscale factor for a video of size W x H,
 which enforces the constraint that W >= 200 to ensure an adequate amount
@@ -292,16 +291,16 @@ def validate_capture_framerate(video_names, cap_framerates, framerate=None):
     cap_framerate = cap_framerates[0]
     if framerate is not None:
         if isinstance(framerate, float):
-            if framerate < scenedetect.frame_timecode.MINIMUM_FRAMES_PER_SECOND_FLOAT:
+            if framerate < MINIMUM_FRAMES_PER_SECOND_FLOAT:
                 raise ValueError("Invalid framerate (must be a positive non-zero value).")
             cap_framerate = framerate
             check_framerate = False
         else:
             raise TypeError("Expected float for framerate, got %s." % type(framerate).__name__)
     else:
-        unavailable_framerates = [(video_names[i][0], video_names[i][1]) for
-                                  i, fps in enumerate(cap_framerates) if fps <
-                                  scenedetect.frame_timecode.MINIMUM_FRAMES_PER_SECOND_FLOAT]
+        unavailable_framerates = [(video_names[i][0], video_names[i][1])
+                                  for i, fps in enumerate(cap_framerates)
+                                  if fps < MINIMUM_FRAMES_PER_SECOND_FLOAT]
         if unavailable_framerates:
             raise VideoFramerateUnavailable(unavailable_framerates)
     return (cap_framerate, check_framerate)
@@ -318,7 +317,7 @@ def validate_capture_parameters(video_names, cap_frame_sizes, check_framerate=Fa
         VideoParameterMismatch
     """
     bad_params = []
-    max_framerate_delta = scenedetect.frame_timecode.MINIMUM_FRAMES_PER_SECOND_FLOAT
+    max_framerate_delta = MINIMUM_FRAMES_PER_SECOND_FLOAT
     # Check heights/widths match.
     bad_params += [(cv2.CAP_PROP_FRAME_WIDTH, frame_size[0],
                     cap_frame_sizes[0][0], video_names[i][0], video_names[i][1]) for

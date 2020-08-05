@@ -37,9 +37,9 @@ import os
 import sys
 
 import scenedetect
-from scenedetect.video_manager import VideoManager
-from scenedetect.scene_manager import SceneManager
-from scenedetect.stats_manager import StatsManager
+from scenedetect import VideoManager
+from scenedetect import SceneManager
+from scenedetect import StatsManager
 from scenedetect.detectors import ContentDetector
 
 STATS_FILE_PATH = 'api_test_statsfile.csv'

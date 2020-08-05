@@ -19,11 +19,10 @@ The following short program/code sample ([the `api_test.py` file in the `tests` 
 from __future__ import print_function
 import os
 
-import scenedetect
-from scenedetect.video_manager import VideoManager
-from scenedetect.scene_manager import SceneManager
-from scenedetect.frame_timecode import FrameTimecode
-from scenedetect.stats_manager import StatsManager
+from scenedetect import VideoManager
+from scenedetect import SceneManager
+from scenedetect import FrameTimecode
+from scenedetect import StatsManager
 from scenedetect.detectors import ContentDetector
 
 STATS_FILE_PATH = 'testvideo.stats.csv'
