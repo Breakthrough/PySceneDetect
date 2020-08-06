@@ -497,12 +497,12 @@ class SceneManager(object):
         for detector in self._detector_list:
             cuts = detector.process_frame(frame_num, frame_im)
             if cuts and callback:
-                callback(frame_im)
+                callback(frame_im, frame_num)
             self._cutting_list += cuts
         for detector in self._sparse_detector_list:
             events = detector.process_frame(frame_num, frame_im)
             if events and callback:
-                callback(frame_im)
+                callback(frame_im, frame_num)
             self._event_list += events
 
 
@@ -546,7 +546,7 @@ class SceneManager(object):
             show_progress (bool): If True, and the ``tqdm`` module is available, displays
                 a progress bar with the progress, framerate, and expected time to
                 complete processing the video frame source.
-            callback ((image_ndarray) -> None): If not None, called after each scene/event detected.
+            callback ((image_ndarray, frame_num: int) -> None): If not None, called after each scene/event detected.
         Returns:
             int: Number of frames read and processed from the frame source.
         Raises:
