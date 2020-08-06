@@ -504,7 +504,8 @@ def detect_threshold_command(ctx, threshold, min_scene_len, fade_bias, add_last_
     '--filename', '-f', metavar='NAME', default='$VIDEO_NAME-Scenes.html',
     type=click.STRING, show_default=True, help=
     'Filename format to use for the scene list HTML file. You can use the'
-    ' $VIDEO_NAME macro in the file name.')
+    ' $VIDEO_NAME macro in the file name. Note that you may have to wrap'
+    ' the format name using single quotes.')
 @click.option(
     '--no-images', is_flag=True, flag_value=True, help=
     'Export the scene list including or excluding the saved images.')
@@ -535,7 +536,8 @@ def export_html_command(ctx, filename, no_images, image_width, image_height):
     '--filename', '-f', metavar='NAME', default='$VIDEO_NAME-Scenes.csv',
     type=click.STRING, show_default=True, help=
     'Filename format to use for the scene list CSV file. You can use the'
-    ' $VIDEO_NAME macro in the file name.')
+    ' $VIDEO_NAME macro in the file name. Note that you may have to wrap'
+    ' the name using single quotes.')
 @click.option(
     '--no-output-file', '-n',
     is_flag=True, flag_value=True, help=
@@ -565,7 +567,8 @@ def list_scenes_command(ctx, output, filename, no_output_file, quiet):
     '--filename', '-f', metavar='NAME', default='$VIDEO_NAME-Scene-$SCENE_NUMBER',
     type=click.STRING, show_default=True, help=
     'File name format, to use when saving image files. You can use the'
-    ' $VIDEO_NAME and $SCENE_NUMBER macros in the file name.')
+    ' $VIDEO_NAME and $SCENE_NUMBER macros in the file name. Note that'
+    ' you may have to wrap the name using single quotes.')
 @click.option(
     '--high-quality', '-hq',
     is_flag=True, flag_value=True, help=
@@ -581,19 +584,14 @@ def list_scenes_command(ctx, output, filename, no_output_file, quiet):
 @click.option(
     '--quiet', '-q',
     is_flag=True, flag_value=True, help=
-    'Suppresses output from external video splitting tool.')
+    'Hides any output from the external video splitting tool.')
 @click.option(
     '--copy', '-c',
     is_flag=True, flag_value=True, help=
-    'Copy instead of re-encode using mkvmerge instead of ffmpeg for splitting videos.'
-    ' All other arguments except -o/--output and -q/--quiet are ignored in this mode,'
-    ' and output files will be named $VIDEO_NAME-$SCENE_NUMBER.mkv.'
-    ' Significantly faster when splitting videos, however,'
-    ' output videos sometimes may not be split exactly, especially if the scenes'
-    ' are very short in length, or the input video is heavily compressed. This can'
-    ' lead to smaller scenes being merged with others, or scene boundaries being'
-    ' shifted in time - thus when using this option, the number of videos written'
-    ' may not match the number of scenes that was detected.')
+    'Copy instead of re-encode using mkvmerge. All other options except'
+    ' -o/--output and -q/--quiet are ignored in this mode.'
+    ' Significantly faster, but far less precise. Output files will be'
+    ' named $VIDEO_NAME-$SCENE_NUMBER.mkv.')
 @click.option(
     '--rate-factor', '-crf', metavar='RATE', default=None,
     type=click.IntRange(0, 100), help=
@@ -675,7 +673,8 @@ def split_video_command(ctx, output, filename, high_quality, override_args, quie
     '--filename', '-f', metavar='NAME', default='$VIDEO_NAME-Scene-$SCENE_NUMBER-$IMAGE_NUMBER',
     type=click.STRING, show_default=True, help=
     'Filename format, *without* extension, to use when saving image files. You can use the'
-    ' $VIDEO_NAME, $SCENE_NUMBER, and $IMAGE_NUMBER macros in the file name.')
+    ' $VIDEO_NAME, $SCENE_NUMBER, and $IMAGE_NUMBER macros in the file name. Note that you'
+    ' may have to wrap the format in single quotes.')
 @click.option(
     '--num-images', '-n', metavar='N', default=3,
     type=click.INT, help=
