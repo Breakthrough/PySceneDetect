@@ -21,7 +21,7 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-""" ``scenedetect.frame_timecode``
+""" ``scenedetect.frame_timecode`` Module
 
 This module contains the :py:class:`FrameTimecode` object, which is used as a way for
 PySceneDetect to store frame-accurate timestamps of each cut. This is done by also

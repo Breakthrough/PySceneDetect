@@ -23,7 +23,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-""" Module: ``scenedetect.thirdparty.simpletable``
+""" ``scenedetect.thirdparty.simpletable`` Module
 
 simpletable.py - v0.1 2014-07-31 Matheus Vieira Portela
 
@@ -81,12 +81,12 @@ class SimpleTableCell(object):
         """
         self.text = text
         self.header = header
-        
+
     def __str__(self):
         """Return the HTML code for the table cell."""
         if self.header:
             return '<th>%s</th>' %(self.text)
-        else:    
+        else:
             return '<td>%s</td>' %(self.text)
 
 
@@ -156,9 +156,9 @@ class SimpleTableRow(object):
             self.cells = cells
         else:
             self.cells = [SimpleTableCell(cell, header=header) for cell in cells]
-        
+
         self.header = header
-        
+
     def __str__(self):
         """Return the HTML code for the table row and its cells as a string."""
         row = []
@@ -169,7 +169,7 @@ class SimpleTableRow(object):
             row.append(str(cell))
 
         row.append('</tr>')
-        
+
         return '\n'.join(row)
 
     def __iter__(self):
@@ -244,7 +244,7 @@ class SimpleTable(object):
             table.append(str(row))
 
         table.append('</table>')
-        
+
         return '\n'.join(table)
 
     def __iter__(self):
@@ -276,7 +276,7 @@ class HTMLPage(object):
         self.tables = tables or []
         self.css = css
         self.encoding = encoding
-        
+
     def __str__(self):
         """Return the HTML page as a string."""
         page = []

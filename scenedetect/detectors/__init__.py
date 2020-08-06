@@ -25,7 +25,7 @@
 #
 
 
-""" PySceneDetect `scenedetect.detectors` Module
+""" ``scenedetect.detectors`` Module
 
 This module contains implementations of scene detection algorithms by inhereting
 from the base SceneDetector class (in scenedetect.scene_detector) and implementing

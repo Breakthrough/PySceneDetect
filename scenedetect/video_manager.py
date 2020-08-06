@@ -24,7 +24,7 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-""" Module: ``scenedetect.video_manager``
+""" ``scenedetect.video_manager`` Module
 
 This module contains the :py:class:`VideoManager` class, which provides a consistent
 interface to reading videos, specific exceptions raised upon certain error

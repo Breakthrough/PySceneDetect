@@ -45,7 +45,7 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-""" Module: ``scenedetect.video_splitter``
+""" ``scenedetect.video_splitter`` Module
 
 The `scenedetect.video_splitter` module contains functions to split videos
 with a scene list using external tools (e.g. `mkvmerge`, `ffmpeg`), as well

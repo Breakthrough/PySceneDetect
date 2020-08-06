@@ -1,6 +1,6 @@
 
 ***********************************************************************
-``scenedetect`` Module
+``scenedetect`` 🎬 Module
 ***********************************************************************
 
 
@@ -9,57 +9,58 @@ Overview
 =======================================================================
 
 The ``scenedetect`` module is organized into several sub-modules, each
-containing a particular class.  Every module has the same name of the
-implemented class in `lowercase_underscore` format, whereas the class
-name is in `PascalCase` format.  There are also some constants,
-functions, and exceptions defined in various modules that are
-documented in the section describing the associated class.
-
-The following is an overview of the modules and classes
-provided in the ``scenedetect`` package:
-
-    * ``scenedetect``: Main PySceneDetect module.
-
-        * ``scenedetect.frame_timecode``: Contains
-          :py:class:`FrameTimecode <scenedetect.frame_timecode.FrameTimecode>`
-          class for storing, converting, and performing arithmetic on timecodes
-          with frame-accurate precision.
+containing the implementation of a particular class.  The most commonly
+used classes are available for import directly from the `scenedetect`
+module (see the `Example`_ below).  The following is an overview of the
+main classes/modules provided in the `scenedetect` package:
 
 
-        * ``scenedetect.video_manager``: Contains
-          :py:class:`VideoManager <scenedetect.video_manager.VideoManager>`
-          class for loading one or more videos, providing seeking, and downscaling.
+    * :ref:`scenedetect.frame_timecode ⏱️ <scenedetect-frame_timecode>`: Contains
+      :py:class:`FrameTimecode <scenedetect.frame_timecode.FrameTimecode>`
+      class for storing, converting, and performing arithmetic on timecodes
+      with frame-accurate precision.
 
-        * ``scenedetect.scene_manager``: Contains
-          :py:class:`SceneManager <scenedetect.scene_manager.SceneManager>`
-          class for applying `SceneDetector` objects on a `VideoManager`,
-          and optionally using a `StatsManager` as a cache.
+    * :ref:`scenedetect.video_manager 🎥 <scenedetect-video_manager>`: Contains
+      :py:class:`VideoManager <scenedetect.video_manager.VideoManager>`
+      class for loading one or more videos, providing seeking, and downscaling.
 
-        * ``scenedetect.stats_manager``: Contains
-          :py:class:`StatsManager <scenedetect.stats_manager.StatsManager>`
-          class for caching frame metrics and loading/saving them to disk in
-          CSV format for analysis. Also be used as a persistent cache
-          to make several scene detection runs on the same video source
-          `significantly` faster.
+    * :ref:`scenedetect.scene_manager 🎞️ <scenedetect-scene_manager>`: Contains
+      :py:class:`SceneManager <scenedetect.scene_manager.SceneManager>`
+      class for applying `SceneDetector` objects on a `VideoManager`,
+      and optionally using a `StatsManager` as a cache.
 
-        * ``scenedetect.scene_detector``: Contains
-          :py:class:`SceneDetector <scenedetect.scene_detector.SceneDetector>`
-          base class for implementing scene detection algorithms.
+    * :ref:`scenedetect.stats_manager 🧮 <scenedetect-stats_manager>`: Contains
+      :py:class:`StatsManager <scenedetect.stats_manager.StatsManager>`
+      class for caching frame metrics and loading/saving them to disk in
+      CSV format for analysis. Also be used as a persistent cache
+      to make several scene detection runs on the same video source
+      `significantly` faster.
 
-        * ``scenedetect.detectors``: Contains all detection algorithm
-          implementations, which are classes that inherit from
-          :py:class:`SceneDetectors <scenedetect.scene_detector.SceneDetector>`.
+    * :ref:`scenedetect.scene_detector 🌐 <scenedetect-scene_detector>`: Contains
+      :py:class:`SceneDetector <scenedetect.scene_detector.SceneDetector>`
+      base class for implementing scene detection algorithms.
 
-            * ``scenedetect.detectors.content_detector``: The
-              :py:class:`ContentDetector <scenedetect.detectors.content_detector.ContentDetector>`
-              algorithm, which detects fast changes/cuts in video content.
-            * ``scenedetect.detectors.threshold_detector``: The
-              :py:class:`ThresholdDetector <scenedetect.detectors.threshold_detector.ThresholdDetector>`
-              algorithm, which detects changes in video brightness/intensity.
+    * :ref:`scenedetect.detectors 🕵️ <scenedetect-detectors>`: Contains all detection algorithm
+      implementations, which are classes that inherit from
+      :py:class:`SceneDetectors <scenedetect.scene_detector.SceneDetector>`.
 
-        * ``scenedetect.video_splitter``: Contains
-          helper functions to use external tools after processing
-          to split the video into individual scenes.
+        * :py:class:`ContentDetector <scenedetect.detectors.content_detector.ContentDetector>`
+          detects fast changes/cuts in video content.
+
+        * :py:class:`ThresholdDetector <scenedetect.detectors.threshold_detector.ThresholdDetector>`
+          detects changes in video brightness/intensity.
+
+    * :ref:`scenedetect.video_splitter ✂️ <scenedetect-video_splitter>`: Contains
+      helper functions to use external tools after processing
+      to split the video into individual scenes.
+
+
+
+Note that every module has the same name of the implemented
+class in `lowercase_underscore` format, whereas the class name itself
+is in `PascalCase` format.  There are also some constants, functions,
+and exceptions defined in various modules that are documented in the
+section describing the associated class.
 
 
 =======================================================================

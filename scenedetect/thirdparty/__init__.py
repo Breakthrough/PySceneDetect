@@ -24,7 +24,7 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-""" Module: ``scenedetect.thirdparty``
+""" ``scenedetect.thirdparty`` Module
 
 This module includes all third-party libraries/dependencies that are distributed
 with PySceneDetect.  The source directory also includes the license files for all

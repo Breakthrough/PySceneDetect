@@ -24,7 +24,7 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-""" Module: ``scenedetect.scene_manager``
+""" ``scenedetect.scene_manager`` Module
 
 This module implements the :py:class:`SceneManager` object, which is used to coordinate
 SceneDetectors and frame sources (:py:class:`VideoManager <scenedetect.video_manager.VideoManager>`

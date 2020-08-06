@@ -24,7 +24,7 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-""" PySceneDetect scenedetect.cli Module
+""" ``scenedetect.cli`` Module
 
 This file contains the implementation of the PySceneDetect command-line
 interface (CLI) parser logic for the PySceneDetect application ("business logic"),

@@ -1,4 +1,7 @@
 
+.. _scenedetect-detectors:
+
+----------------------------------------
 Detection Algorithms
 ----------------------------------------
 
@@ -7,6 +10,7 @@ Detection Algorithms
    :undoc-members:
 
 
+=========================================
 ContentDetector
 =========================================
 
@@ -15,6 +19,7 @@ ContentDetector
    :undoc-members:
 
 
+=========================================
 ThresholdDetector
 =========================================
 
