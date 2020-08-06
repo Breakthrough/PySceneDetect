@@ -616,8 +616,16 @@ class VideoManager(object):
         Raises:
             VideoDecoderNotStarted: Must call :py:meth:`start()` before this method.
         """
+        if not self._started:
+            raise VideoDecoderNotStarted()
+
+        if isinstance(self._curr_cap, cv2.VideoCapture):
+            if self._curr_cap is not None and self._end_of_video is not True:
+                self._curr_cap.set(cv2.CAP_PROP_POS_FRAMES, timecode.get_frames() - 1)
+                self._curr_time = timecode - 1
+
         while self._curr_time < timecode:
-            if not self.grab(): # raises VideoDecoderNotStarted if start() was not called
+            if not self.grab():  # raises VideoDecoderNotStarted if start() was not called
                 return False
         return True
 
