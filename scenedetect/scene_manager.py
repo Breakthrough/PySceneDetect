@@ -505,13 +505,19 @@ class SceneManager(object):
                 for start, end in self._event_list]
 
 
-    def _process_frame(self, frame_num, frame_im):
+    def _process_frame(self, frame_num, frame_im, callback=None):
         # type(int, numpy.ndarray) -> None
         """ Adds any cuts detected with the current frame to the cutting list. """
         for detector in self._detector_list:
-            self._cutting_list += detector.process_frame(frame_num, frame_im)
+            cuts = detector.process_frame(frame_num, frame_im)
+            if cuts and callback:
+                callback(frame_im, frame_num)
+            self._cutting_list += cuts
         for detector in self._sparse_detector_list:
-            self._event_list += detector.process_frame(frame_num, frame_im)
+            events = detector.process_frame(frame_num, frame_im)
+            if events and callback:
+                callback(frame_im, frame_num)
+            self._event_list += events
 
 
     def _is_processing_required(self, frame_num):
@@ -530,9 +536,9 @@ class SceneManager(object):
 
 
     def detect_scenes(self, frame_source, end_time=None, frame_skip=0,
-                      show_progress=True):
+                      show_progress=True, callback=None):
         # type: (VideoManager, Union[int, FrameTimecode],
-        #        Optional[Union[int, FrameTimecode]], Optional[bool]) -> int
+        #        Optional[Union[int, FrameTimecode]], Optional[bool], optional[callable[numpy.ndarray]) -> int
         """ Perform scene detection on the given frame_source using the added SceneDetectors.
 
         Blocks until all frames in the frame_source have been processed. Results can
@@ -554,6 +560,8 @@ class SceneManager(object):
             show_progress (bool): If True, and the ``tqdm`` module is available, displays
                 a progress bar with the progress, framerate, and expected time to
                 complete processing the video frame source.
+            callback ((image_ndarray, frame_num: int) -> None): If not None, called after
+                each scene/event detected.
         Returns:
             int: Number of frames read and processed from the frame source.
         Raises:
@@ -618,7 +626,7 @@ class SceneManager(object):
 
                 if not ret_val:
                     break
-                self._process_frame(self._num_frames + start_frame, frame_im)
+                self._process_frame(self._num_frames + start_frame, frame_im, callback)
 
                 curr_frame += 1
                 self._num_frames += 1
