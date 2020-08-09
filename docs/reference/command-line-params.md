@@ -1,6 +1,14 @@
 
 ## PySceneDetect CLI Reference
 
+
+<div class="warning">
+All information on this page can be obtained on the command line by running the command <tt>scenedetect help all</tt>, <tt>scenedetect help</tt> to get started, or <tt>scenedetect help [commmand]</tt> for information about a particular command.
+<br /><br />
+The complete PySceneDetect CLI Reference 📚 for the <tt>scenedetect</tt> command can be found in the <a href="http://pyscenedetect-manual.readthedocs.io/" alt="Manual Link">PySceneDetect Manual</a>, located at <a href="http://pyscenedetect-manual.readthedocs.io/" alt="Manual Link">pyscenedetect-manual.readthedocs.io/</a>.  This page will eventually be deprecated in favor of the manual.
+</div>
+
+
 The PySceneDetect command-line interface is grouped into commands which
 can be combined together, each containing its own set of arguments:
 
