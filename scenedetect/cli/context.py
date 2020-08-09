@@ -216,8 +216,8 @@ class CliContext(object):
             for i, r in enumerate([
                 # pad ranges to number of images
                 r
-                if r.stop-r.start >= self.num_images
-                else list(r) + [r.stop-1] * (self.num_images - len(r))
+                if 1+r[-1]-r[0] >= self.num_images
+                else list(r) + [r[-1]] * (self.num_images - len(r))
                 # create range of frames in scene
                 for r in (
                     range(start.get_frames(), end.get_frames())
