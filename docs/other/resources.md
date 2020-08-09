@@ -9,6 +9,8 @@ PySceneDetect is a useful tool for statistical analysis of video.  Below are lin
 
  - [NLP-Enriched Automatic Video Segmentation](https://ieeexplore.ieee.org/document/8525880/) by Mohannad AlMousa, Rachid Benlamri, Richard Khoury
 
+ - Thesis Project: [Smart Shades and Cane for The Blind](https://www.linkedin.com/pulse/blind-people-dont-have-good-muhammad-hashim-1f/) by Muhammad Hashim
+
 This list is only provided for academic and research purposes, and is far from an exhaustive source of the uses of PySceneDetect in literature.  If you think a particular submission is relevant and should be added to this list, feel free to [raise an issue](https://github.com/Breakthrough/PySceneDetect/issues/new/choose) with your suggestion.  Publically available material is preferred, although not a requirement.
 
 
