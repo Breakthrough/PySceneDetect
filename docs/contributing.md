@@ -35,6 +35,7 @@ In addition to those mentioned below, thank you to *everyone* who has submitted 
  * [@tonycpsu](https://github.com/tonycpsu) - enhancements to `--min-scene-len` and `save-images` command
  * [@charlesvestal](https://github.com/charlesvestal) - various bugfixes and improvements
  * Joshua Coales [@joshcoales](https://github.com/joshcoales) - investigation and resolution of ffmpeg "frame bleed" issues (clips not getting cut at the proper split points)
+ * Muhammad Hashim [@mhashim6](https://github.com/mhashim6) - addition of callbacks to be executed when new scenes are detected
 
 Another way to view the contribution list is [via libraries.io](https://libraries.io/github/Breakthrough/PySceneDetect/contributors).  Thank you all for your help, support, feedback, and direction on the project as a whole!
 
