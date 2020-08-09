@@ -9,7 +9,7 @@ copyright: 'Copyright &copy; 2014-2020 Brandon Castellano.  All rights reserved.
 theme: readthedocs
 google_analytics: ['UA-72551323-1', 'auto']
 
-nav:
+pages:
 - 'PySceneDetect':
     - 'Introduction': 'index.md'
     - 'Features & Roadmap': 'features.md'
