@@ -2,6 +2,10 @@
 PySceneDetect Changelog
 ==========================================================
 
+### 0.5.4 (TBD)
+
+ * [bugfix] fix save-images command under Python 2.7 ([#174](https://github.com/Breakthrough/PySceneDetect/issues/174), thanks @santiagodemierre)
+ * [enhancement] Improved seeking performance, greatly improves performance of the `time` and `save-images` commands ([#98](https://github.com/Breakthrough/PySceneDetect/issues/98) and [PR #163](https://github.com/Breakthrough/PySceneDetect/pull/163) - thanks @obroomhall)
 
 ### 0.5.3 (July 12, 2020) &nbsp;<span class="fa fa-tags"></span>
 
