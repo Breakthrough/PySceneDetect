@@ -15,7 +15,7 @@ pages:
     - 'Introduction': 'index.md'
     - 'Features & Roadmap': 'features.md'
     - 'Download': 'download.md'
-    - 'Changelog': 'changelog.md'
+    - 'Releases (Changelog)': 'changelog.md'
     - 'Bug Reports and Contributing': 'contributing.md'
     - 'License & Copyright Information': 'copyright.md'
 - 'Getting Started:':

@@ -1,14 +1,30 @@
 
-PySceneDetect Changelog
+PySceneDetect Releases
 ==========================================================
 
 
 ### 0.5.3 (July 12, 2020) &nbsp;<span class="fa fa-tags"></span>
 
- * [bugfix] Changed default audio codec from 'copy' to 'aac' when splitting scenes with `ffmpeg` to reduce frequency of frames from next scene showing up at the end of the current one when split using `ffmpeg` (see [#93](https://github.com/Breakthrough/PySceneDetect/issues/93), [#159](https://github.com/Breakthrough/PySceneDetect/issues/159), #166 - thank you everyone for your assistance, especially joshcoales, amvscenes, jelias, and typoman). If this still occurs, please provide any information you can by [filing a new issue on Github](https://github.com/Breakthrough/PySceneDetect/issues/new/choose).
+#### Release Notes
+
+ * Resolved long-standing bug where `split-video` command would duplicate certain frames at the beginning/end of the output ([#93](https://github.com/Breakthrough/PySceneDetect/issues/93))
+ * This was determined to be caused by copying (instead of re-encoding) the audio track, causing extra frames to be brought in when the audio samples did not line up on a frame boundary (thank you @joshcoales for your assistance)
+ * Default behavior is to now re-encode audio tracks using the `aac` codec when using `split-video` (it can be overriden in both the command line and Python interface)
+ * Improved timestamp accuracy when using `split-video` command to further reduce instances of duplicated or off-by-one frame issues
+ * Fixed application crash when using the `-l`/`--logfile` argument
+
+#### Changelog
+
+ * [bugfix] Changed default audio codec from 'copy' to 'aac' when splitting scenes with `ffmpeg` to reduce frequency of frames from next scene showing up at the end of the current one when split using `ffmpeg` (see [#93](https://github.com/Breakthrough/PySceneDetect/issues/93), [#159](https://github.com/Breakthrough/PySceneDetect/issues/159), and [PR #166](https://github.com/Breakthrough/PySceneDetect/pull/166) - thank you everyone for your assistance, especially joshcoales, amvscenes, jelias, and typoman). If this still occurs, please provide any information you can by [filing a new issue on Github](https://github.com/Breakthrough/PySceneDetect/issues/new/choose).
   * [enhancement] `video_splitter` module now has completed documentation
   * [bugfix] improve timestamp accuracy using the `split-video` command due to timecode formatting
   * [bugfix] fix crash when supplying `-l`/`--logfile` argument (see [#169](https://github.com/Breakthrough/PySceneDetect/issues/169), thanks @typoman)
+
+#### Known Issues
+
+ * Seeking through long videos is inefficient, causing the `time` and `save-images` command to take a long time to run.  This will be resolved in the next release (see [#98](https://github.com/Breakthrough/PySceneDetect/issues/98))
+ * The `save-images` command causes PySceneDetect to crash under Python 2.7 (see [#174](https://github.com/Breakthrough/PySceneDetect/issues/174))
+ * Variable framerate videos are not supported properly currently (#168), a warning may be added in the next release to indicate when a VFR video is detected, until this can be properly resolved ([#168](https://github.com/Breakthrough/PySceneDetect/issues/168))
 
 
 ### 0.5.2 (March 29, 2020)
