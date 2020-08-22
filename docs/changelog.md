@@ -10,11 +10,13 @@ PySceneDetect Releases
 
  * Minor maintenane release, includes fix for crashing `save-images` command under Python 2.7
  * Improved seeking implementation improves performance when using `time` and `save-images` commands (see below)
+ * Support for Python 3.3 and 3.4 has been deprecated
 
 #### Changelog
 
  * [bugfix] fix `save-images` command under Python 2.7 ([#174](https://github.com/Breakthrough/PySceneDetect/issues/174), thanks @santiagodemierre)
  * [enhancement] Improved seeking performance, greatly improves performance of the `time` and `save-images` commands ([#98](https://github.com/Breakthrough/PySceneDetect/issues/98) and [PR #163](https://github.com/Breakthrough/PySceneDetect/pull/163) - thanks @obroomhall)
+ * [general] Support for Python 3.3 and 3.4 has been deprecated
 
 #### Known Issues
 

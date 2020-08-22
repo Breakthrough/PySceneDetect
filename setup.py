@@ -57,17 +57,13 @@ def get_extra_requires():
         # dictionary based on a list of compatible Python & opencv-python
         # package versions (will need to use the output for requirements.txt).
         # TODO: Is there a tool that can do this automagically?
-        'opencv:python_version < "3.0"':
+        'opencv:python_version <= "3.5"':
             ['opencv-python<=4.2.0.32'],
-        'opencv:python_version > "3.0" and python_version <= "3.5"':
-            ['opencv-python<=4.3.0.38'],
         'opencv:python_version > "3.5"':
             ['opencv-python'],
 
-        'opencv-headless:python_version < "3.0"':
+        'opencv-headless:python_version <= "3.5"':
             ['opencv-python-headless<=4.2.0.32'],
-        'opencv-headless:python_version > "3.0" and python_version <= "3.5"':
-            ['opencv-python-headless<=4.3.0.38'],
         'opencv-headless:python_version > "3.5"':
             ['opencv-python-headless'],
     }
@@ -107,8 +103,6 @@ setup(
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.3',
-        'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
