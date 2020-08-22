@@ -10,17 +10,19 @@ PySceneDetect Releases
 
  * Minor maintenane release, includes fix for crashing `save-images` command under Python 2.7
  * Improved seeking implementation improves performance when using `time` and `save-images` commands (see below)
- * Support for Python 3.3 and 3.4 has been deprecated
+ * Support for Python 3.3 and 3.4 has been deprecated (see below)
 
 #### Changelog
 
  * [bugfix] fix `save-images` command under Python 2.7 ([#174](https://github.com/Breakthrough/PySceneDetect/issues/174), thanks @santiagodemierre)
  * [enhancement] Improved seeking performance, greatly improves performance of the `time` and `save-images` commands ([#98](https://github.com/Breakthrough/PySceneDetect/issues/98) and [PR #163](https://github.com/Breakthrough/PySceneDetect/pull/163) - thanks @obroomhall)
- * [general] Support for Python 3.3 and 3.4 has been deprecated
+ * [general] Made `tqdm` a regular requirement and not an extra ([#180](https://github.com/Breakthrough/PySceneDetect/issues/98))
+ * [general] Support for Python 3.3 and 3.4 has been deprecated. Newer builds may still work on these Python versions, but future releases are not tested against these versions. This decision was made as part of [#180](https://github.com/Breakthrough/PySceneDetect/issues/98)
 
 #### Known Issues
 
  * Variable framerate videos are not supported properly currently (#168), a warning may be added in the next release to indicate when a VFR video is detected, until this can be properly resolved ([#168](https://github.com/Breakthrough/PySceneDetect/issues/168))
+ * In certain cases, video files which will not load will fail silently, with PySceneDetect reporting that it processed 0 frames.  Better error handling/messaging is planned for these cases as part of [#179](https://github.com/Breakthrough/PySceneDetect/issues/179)
 
 
 ### 0.5.3 (July 12, 2020) &nbsp;<span class="fa fa-tags"></span>
