@@ -60,14 +60,14 @@ def get_extra_requires():
         'opencv:python_version < "3.0"':
             ['opencv-python<=4.2.0.32'],
         'opencv:python_version > "3.0" and python_version <= "3.5"':
-            ['opencv-python<=4.4.0.42'],
+            ['opencv-python<=4.3.0.38'],
         'opencv:python_version > "3.5"':
             ['opencv-python'],
 
         'opencv-headless:python_version < "3.0"':
             ['opencv-python-headless<=4.2.0.32'],
         'opencv-headless:python_version > "3.0" and python_version <= "3.5"':
-            ['opencv-python-headless<=4.4.0.42'],
+            ['opencv-python-headless<=4.3.0.38'],
         'opencv-headless:python_version > "3.5"':
             ['opencv-python-headless'],
     }
