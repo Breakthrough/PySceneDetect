@@ -5,6 +5,8 @@
 <div class="important">
 <h3 class="wy-text-neutral"><span class="fa fa-info-circle wy-text-info"></span>&nbsp; Latest Release: <b>v0.5.3</b> (July 12, 2020)</h3>
 <a href="download/" class="btn btn-success" style="margin-bottom:8px;" role="button"><span class="fa fa-download"></span>&nbsp; <b>Download</b></a> &nbsp;&nbsp;&nbsp;&nbsp; <a href="changelog/" class="btn btn-info" style="margin-bottom:8px;" role="button"><span class="fa fa-reorder"></span>&nbsp; <b>Changelog</b></a> &nbsp;&nbsp;&nbsp;&nbsp; <a href="http://pyscenedetect-manual.readthedocs.io/" class="btn btn-warning" style="margin-bottom:8px;" role="button"><span class="fa fa-gear"></span>&nbsp; <b>Manual</b></a> &nbsp;&nbsp;&nbsp;&nbsp; <a href="examples/usage-example/" class="btn btn-danger" style="margin-bottom:8px;" role="button"><span class="fa fa-book"></span>&nbsp; <b>Getting Started</b></a>
+<br/>
+See the changelog for the latest release notes and known issues.
 </div>
 
 **PySceneDetect** is a command-line application and a Python library for **detecting scene changes in videos**, and **automatically splitting the video into separate clips**.  Not only is it free and open-source software (FOSS), but there are several detection methods available ([see Features](features.md)), from simple threshold-based fade in/out detection, to advanced content aware fast-cut detection of each shot.

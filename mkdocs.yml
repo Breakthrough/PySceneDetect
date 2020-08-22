@@ -15,20 +15,19 @@ pages:
     - 'Features & Roadmap': 'features.md'
     - 'Download': 'download.md'
     - 'Releases (Changelog)': 'changelog.md'
-    - 'Bug Reports and Contributing': 'contributing.md'
-    - 'License & Copyright Information': 'copyright.md'
-- 'Getting Started:':
+    - 'Bug Reports & Contributing': 'contributing.md'
+- 'Quickstart:':
     - 'Usage Example': 'examples/usage-example.md'
     - 'Command Line Interface': 'examples/usage.md'
     - 'Video Splitting Support': 'examples/video-splitting.md'
     - 'Python Interface': 'examples/usage-python.md'
-- 'Documentation & Reference:':
+- 'Documentation:':
     - 'Command-Line Parameters': 'reference/command-line-params.md'
     - 'Scene Detection Algorithms': 'reference/detection-methods.md'
     - 'Python API & Integration': 'reference/python-api.md'
-- 'External Resources':
-    - 'Third-Party Tools': 'other/thirdparty.md'
-    - 'Similar Programs': 'other/similar.md'
-    - 'Research, Academia, and Literature': 'other/resources.md'
+- 'Resources':
+    - 'Similar Programs & Tools': 'other/similar.md'
+    - 'Research & Literature': 'other/literature.md'
+    - 'License & Copyright Info': 'other/copyright.md'
 
 markdown_extensions: [fenced_code]
