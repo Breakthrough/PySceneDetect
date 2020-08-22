@@ -1,6 +1,8 @@
 #
 # PySceneDetect Python Requirements
 #
+opencv-python<=4.2.0.32; python_version < "3.0"
+opencv-python<=4.4.0.42; python_version <= "3.5"
 opencv-python
 numpy
 click
