@@ -15,6 +15,7 @@ pages:
     - 'Features & Roadmap': 'features.md'
     - 'Download': 'download.md'
     - 'Releases (Changelog)': 'changelog.md'
+    - 'Frequently Asked Questions (FAQ)': 'faq.md'
     - 'Bug Reports & Contributing': 'contributing.md'
 - 'Quickstart:':
     - 'Usage Example': 'examples/usage-example.md'
