@@ -95,6 +95,9 @@ except ImportError:
 # pylint: disable=invalid-name, undefined-variable
 if sys.version_info[0] == 2:
     STRING_TYPE = unicode
+    class FileNotFoundError():
+        pass
+
 else:
     STRING_TYPE = str
 # pylint: enable=invalid-name, undefined-variable
@@ -241,6 +244,19 @@ class CommandTooLong(Exception):
     # pylint: disable=unnecessary-pass
     pass
 
+if os.name != 'nt':
+    class FileNotFoundError(Exception):
+        """ Required for compatibility with issue #164. """
+        # pylint: disable=unnecessary-pass
+        pass
+
+
+    class WindowsError(Exception):
+        """ Raised when the length of a command line argument doesn't play nicely
+        with the Windows command prompt. """
+        # pylint: disable=unnecessary-pass
+        pass
+
 
 def invoke_command(args):
     # type: (List[str] -> None)
@@ -261,7 +277,13 @@ def invoke_command(args):
     """
     try:
         return subprocess.call(args)
-    except (FileNotFoundError, WindowsError) as err:
-        if '206' in str(err):
+    except OSError as err:
+        if os.name != 'nt':
+            raise
+        exception_string = str(err)
+        # Error 206: The filename or extension is too long
+        # Error 87:  The parameter is incorrect
+        to_match = ('206', '87')
+        if any([x in exception_string for x in to_match]):
             raise CommandTooLong()
         raise
