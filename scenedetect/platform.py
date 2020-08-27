@@ -95,8 +95,6 @@ except ImportError:
 # pylint: disable=invalid-name, undefined-variable
 if sys.version_info[0] == 2:
     STRING_TYPE = unicode
-    class FileNotFoundError():
-        pass
 
 else:
     STRING_TYPE = str
@@ -243,19 +241,6 @@ class CommandTooLong(Exception):
     with the Windows command prompt. """
     # pylint: disable=unnecessary-pass
     pass
-
-if os.name != 'nt':
-    class FileNotFoundError(Exception):
-        """ Required for compatibility with issue #164. """
-        # pylint: disable=unnecessary-pass
-        pass
-
-
-    class WindowsError(Exception):
-        """ Raised when the length of a command line argument doesn't play nicely
-        with the Windows command prompt. """
-        # pylint: disable=unnecessary-pass
-        pass
 
 
 def invoke_command(args):
