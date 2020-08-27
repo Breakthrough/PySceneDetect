@@ -45,7 +45,7 @@ from scenedetect.platform import CommandTooLong, invoke_command
 def test_invoke_command():
     """ Ensures the function exists and is callable without throwing
     an exception. """
-    invoke_command('echo "Hello, world!"')
+    invoke_command(['echo'])
 
 
 def test_long_command():
