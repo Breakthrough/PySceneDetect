@@ -13,7 +13,7 @@
 
 <div class="danger">
 <h3><span class="fa fa-bar-chart-o wy-text-warning"></span>&nbsp; Statistical Video Analysis</h3>
-&nbsp;<span class="fa fa-info-circle wy-text-info"></span>&nbsp;&nbsp; Can output a spreadsheet-compatible file for analyzing trends in a particular video file, to determine the optimal threshold values to use with specific scene detection methods/algorithms. 
+&nbsp;<span class="fa fa-info-circle wy-text-info"></span>&nbsp;&nbsp; Can output a spreadsheet-compatible file for analyzing trends in a particular video file, to determine the optimal threshold values to use with specific scene detection methods/algorithms.
 </div>
 
 <div class="warning">
@@ -25,7 +25,7 @@
 ----------------
 
 
-### Features in Current Release
+## Features in Current Release
 
  - exports list of scenes to .CSV file and terminal (both timecodes and frame numbers) with `list-scenes` command
  - exports timecodes in standard format (HH:MM:SS.nnn), comma-separated for easy copy-and-paste into external tools and analysis with spreadsheet software
@@ -37,7 +37,7 @@
  - ability to specify starting/ending times via `time` command (`--start/-s` and `--end/-e`), and/or set duration for processing (`--duration/-d`)
  - user-definable fade bias to shift scenes between fade in/out points (threshold mode only)
 
-### List of Scene Detection Methods
+### Scene Detection Methods
 
  - **threshold scene detection** (`detect-threshold`): analyzes video for changes in average frame intensity/brightness
  - **content-aware scene detection** (`detect-content`): based on changes between frames in the HSV color space
@@ -52,7 +52,8 @@ For a detailed explanation of how a particular scene detection method/algorithm 
 
 Future version roadmaps are now [tracked as milestones (link)](https://github.com/Breakthrough/PySceneDetect/milestones).  Specific issues/features that are queued up for the very next release will have [the `backlog` tag](https://github.com/Breakthrough/PySceneDetect/issues?q=is%3Aissue+is%3Aopen+label%3A%22status%3A+backlog%22), and issues/features being worked on will have [the `status: in progress` tag](https://github.com/Breakthrough/PySceneDetect/issues?q=is%3Aissue+is%3Aopen+label%3A%22status%3A+in+progress%22).  Also note that bug reports as well as additional feature requests can be submitted via [the issue tracker](https://github.com/Breakthrough/PySceneDetect/issues); read [the Bug Reports and Contributing page](contributing.md) for details.
 
-<h3>Planned Features for Future Releases</h3>
+
+### Planned Features for Future Releases
 
 The following are features being planned or developed for future releases of PySceneDetect:
 
