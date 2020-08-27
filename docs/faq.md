@@ -25,7 +25,6 @@ Unlike calling `pip install opencv-python`, the above commands will download and
 To enable video splitting support, you will also need to have `mkvmerge` or `ffmpeg` installed on your system. See the documentation on [Video Splitting Support](https://pyscenedetect.readthedocs.io/en/latest/examples/video-splitting/) after installation for details.
 
 
-
 #### How can I get around the error `Cannot split video due to too many scenes`?
 
 This error occurs on Windows platforms specifically when the number of detected scenes is too large.  This is because PySceneDetect internally invokes other commands, such as those used for the `split-video` command.
@@ -33,4 +32,3 @@ This error occurs on Windows platforms specifically when the number of detected 
 You can get around this issue by simply invoking those tools manually, using a smaller sub-set of scenes (or splitting the scene list into multiple parts).  You can obtain a comma-separated list of timecodes by using the `list-scenes` command.
 
 See [Issue #164](https://github.com/Breakthrough/PySceneDetect/issues/164) for details, or if you have any further questions.
-

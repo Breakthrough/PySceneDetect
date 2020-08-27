@@ -15,7 +15,6 @@ All submitted code should be linted with pylint, and follow the [Google Python S
 
 Note that PySceneDetect is released under the BSD 3-Clause license, and submitted code should comply with this license (see [License & Copyright Information](copyright.md) for details).
 
-
 ## <span class="fa fa-cogs"></span>&nbsp; Features That Need Help
 
 The following is a "wishlist" of features which PySceneDetect eventually should have, but does not currently due to lack of resources.  Anyone who is able to contribute in any capacity to these items is encouraged to do so by starting a dialogue by opening a new issue on Github as per above.
@@ -37,3 +36,5 @@ Ideally, this would be something like `-threshold=auto` as a default.
 ### Advanced Detection Strategies
 
 Research into advanced scene detection for content detection would be most useful, perhaps in terms of histogram analysis or edge detection.  This could be integrated into the existing `detect-content` command, or be a separate command.  The real blocker here is achieving reasonable performance utilizing the current software architecture.
+
+There are many open issues on the issue tracker that contain reference implementations contributed by various community members.  There are already several concepts which are proven to be viable candidates for production, but still require some degree optimization.
