@@ -324,6 +324,17 @@ class CliContext(object):
             frame_source=self.video_manager, frame_skip=self.frame_skip,
             show_progress=not self.quiet_mode)
 
+        # Handle case where video fails with multiple audio tracks (#179).
+        # TODO: Is there a fix for this? See #179.
+        if num_frames <= 0:
+            logging.critical(
+                'Failed to read any frames from video file. This could be'
+                ' caused by the video having multiple audio tracks. If so,'
+                ' please try removing the audio tracks or muxing to mkv.'
+                ' For additional details, see Issue #179 on GitHub:'
+                ' https://github.com/Breakthrough/PySceneDetect/issues/179')
+            return
+
         duration = time.time() - start_time
         logging.info('Processed %d frames in %.1f seconds (average %.2f FPS).',
                      num_frames, duration, float(num_frames)/duration)
