@@ -330,9 +330,7 @@ class CliContext(object):
             logging.critical(
                 'Failed to read any frames from video file. This could be'
                 ' caused by the video having multiple audio tracks. If so,'
-                ' please try removing the audio tracks or muxing to mkv.'
-                ' For additional details, see Issue #179 on GitHub:'
-                ' https://github.com/Breakthrough/PySceneDetect/issues/179')
+                ' please try removing the audio tracks or muxing to mkv.')
             return
 
         duration = time.time() - start_time
