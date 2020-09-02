@@ -1,5 +1,5 @@
 
-<img alt="PySceneDetect" src="https://raw.githubusercontent.com/Breakthrough/PySceneDetect/master/docs/img/pyscenedetect_logo_small.png" />
+<img alt="PySceneDetect" src="img/pyscenedetect_logo_small.png" />
 <h4 class="wy-text-info">Intelligent scene cut detection and video splitting tool.</h4>
 
 <div class="important">
