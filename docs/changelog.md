@@ -24,6 +24,7 @@ PySceneDetect Releases
 
  * Seeking through long videos is inefficient, causing the `time` and `save-images` command to take a long time to run.  This will be resolved in the next release (see [#98](https://github.com/Breakthrough/PySceneDetect/issues/98))
  * The `save-images` command causes PySceneDetect to crash under Python 2.7 (see [#174](https://github.com/Breakthrough/PySceneDetect/issues/174))
+ * Using `detect-threshold` with a statsfile causes PySceneDetect to crash (see [#122](https://github.com/Breakthrough/PySceneDetect/issues/122))
  * Variable framerate videos are not supported properly currently (#168), a warning may be added in the next release to indicate when a VFR video is detected, until this can be properly resolved ([#168](https://github.com/Breakthrough/PySceneDetect/issues/168))
  * Videos with multiple audio tracks may not work correctly, see [this comment on #179](https://github.com/Breakthrough/PySceneDetect/issues/179#issuecomment-685252441) for a workaround using `ffmpeg` or `mkvmerge`
 
