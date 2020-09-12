@@ -8,8 +8,10 @@ PySceneDetect Releases
 
 #### Release Notes
 
- * Minor maintenane release, includes fix for crashing `save-images` command under Python 2.7
- * Improved seeking implementation improves performance when using `time` and `save-images` commands (see below)
+ * Improved performance when using `time` and `save-images` commands
+ * Improved performance of `detect-threshold` when using a small minimum percent
+ * Fix crash when using `detect-threshold` with a statsfile
+ * Fix crash when using `save-images` command under Python 2.7
  * Support for Python 3.3 and 3.4 has been deprecated (see below)
 
 #### Changelog
