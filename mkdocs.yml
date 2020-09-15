@@ -11,12 +11,13 @@ google_analytics: ['UA-72551323-1', 'auto']
 
 pages:
 - 'PySceneDetect':
-    - 'Introduction': 'index.md'
+    - 'Home': 'index.md'
     - 'Features & Roadmap': 'features.md'
     - 'Download': 'download.md'
     - 'Releases (Changelog)': 'changelog.md'
     - 'Frequently Asked Questions (FAQ)': 'faq.md'
     - 'Bug Reports & Contributing': 'contributing.md'
+    - 'Supporting Development': 'supporting.md'
 - 'Quickstart:':
     - 'Usage Example': 'examples/usage-example.md'
     - 'Command Line Interface': 'examples/usage.md'

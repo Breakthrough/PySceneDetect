@@ -25,3 +25,26 @@ Unlike calling `pip install opencv-python`, the above commands will download and
 To enable video splitting support, you will also need to have `mkvmerge` or `ffmpeg` installed on your system. See the documentation on [Video Splitting Support](https://pyscenedetect.readthedocs.io/en/latest/examples/video-splitting/) after installation for details.
 
 
+#### How can I fix the error `Cannot split video due to too many scenes`?
+
+This error occurs on Windows platforms specifically when the number of detected scenes is too large.  This is because PySceneDetect internally invokes other commands, such as those used for the `split-video` command.
+
+You can get around this issue by simply invoking those tools manually, using a smaller sub-set of scenes (or splitting the scene list into multiple parts).  You can obtain a comma-separated list of timecodes by using the `list-scenes` command.
+
+See [Issue #164](https://github.com/Breakthrough/PySceneDetect/issues/164) for details, or if you have any further questions.
+
+#### How can I fix the error `Failed to read any frames from video file`?
+
+Unfortunately, the underlying library used to perform video I/O was unable to open the file.  This occasionally happens due to videos having multiple audio tracks (as per [#179](https://github.com/Breakthrough/PySceneDetect/issues/179)).
+
+As a workaround, you can remove the audio track using either `ffmpeg` or `mkvmerge` as follows:
+
+```md
+ffmpeg -i input.mp4 -c copy -an output.mp4
+```
+
+Or:
+
+```md
+mkvmerge -o output.mkv input.mp4
+```

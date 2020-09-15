@@ -310,7 +310,7 @@ class CliContext(object):
         if self.scene_manager.get_num_detectors() == 0:
             logging.error(
                 'No scene detectors specified (detect-content, detect-threshold, etc...),\n'
-                '  or failed to process all command line arguments.')
+                ' or failed to process all command line arguments.')
             return
 
         # Handle scene detection commands (detect-content, detect-threshold, etc...).
@@ -323,6 +323,19 @@ class CliContext(object):
         num_frames = self.scene_manager.detect_scenes(
             frame_source=self.video_manager, frame_skip=self.frame_skip,
             show_progress=not self.quiet_mode)
+
+        # Handle case where video fails with multiple audio tracks (#179).
+        # TODO: Is there a fix for this? See #179.
+        if num_frames <= 0:
+            logging.critical('\n'.join([
+                'Failed to read any frames from video file. This could be caused'
+                ' by the video having multiple audio tracks. If so, please try'
+                ' removing the audio tracks or muxing to mkv via:'
+                '      ffmpeg -i input.mp4 -c copy -an output.mp4'
+                'or:'
+                '      mkvmerge -o output.mkv input.mp4'
+                ' For details, see https://pyscenedetect.readthedocs.io/en/latest/faq/']))
+            return
 
         duration = time.time() - start_time
         logging.info('Processed %d frames in %.1f seconds (average %.2f FPS).',

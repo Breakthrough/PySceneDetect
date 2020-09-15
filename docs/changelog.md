@@ -2,8 +2,35 @@
 PySceneDetect Releases
 ==========================================================
 
+## PySceneDetect 0.5
 
-### 0.5.3 (July 12, 2020) &nbsp;<span class="fa fa-tags"></span>
+### 0.5.4 (September 14, 2020) &nbsp;<span class="fa fa-tags"></span>
+
+#### Release Notes
+
+ * Improved performance when using `time` and `save-images` commands
+ * Improved performance of `detect-threshold` when using a small minimum percent
+ * Fix crash when using `detect-threshold` with a statsfile
+ * Fix crash when using `save-images` command under Python 2.7
+ * Support for Python 3.3 and 3.4 has been deprecated (see below)
+
+#### Changelog
+
+ * [bugfix] fix `detect-threshold` crash when using statsfile ([#122](https://github.com/Breakthrough/PySceneDetect/issues/122))
+ * [bugfix] fix `save-images` command under Python 2.7 ([#174](https://github.com/Breakthrough/PySceneDetect/issues/174), thanks @santiagodemierre)
+ * [bugfix] gracefully exit and show link to FAQ when number of scenes is too large to split with mkvmerge on Windows (see [#164](https://github.com/Breakthrough/PySceneDetect/issues/164, thanks @alexboydray)
+ * [enhancement] Improved seeking performance, greatly improves performance of the `time` and `save-images` commands ([#98](https://github.com/Breakthrough/PySceneDetect/issues/98) and [PR #163](https://github.com/Breakthrough/PySceneDetect/pull/163) - thanks @obroomhall)
+ * [enhancement] improve `detect-threshold` performance when min-percent is less than 50%
+ * [general] Made `tqdm` a regular requirement and not an extra ([#180](https://github.com/Breakthrough/PySceneDetect/issues/180))
+ * [general] Support for Python 3.3 and 3.4 has been deprecated. Newer builds may still work on these Python versions, but future releases are not tested against these versions. This decision was made as part of [#180](https://github.com/Breakthrough/PySceneDetect/issues/180)
+
+#### Known Issues
+
+ * Variable framerate videos are not supported properly currently (#168), a warning may be added in the next release to indicate when a VFR video is detected, until this can be properly resolved ([#168](https://github.com/Breakthrough/PySceneDetect/issues/168))
+ * In certain cases, video files which will not load will fail silently, with PySceneDetect reporting that it processed 0 frames.  Better error handling/messaging is planned for these cases as part of [#179](https://github.com/Breakthrough/PySceneDetect/issues/179)
+
+
+### 0.5.3 (July 12, 2020)
 
 #### Release Notes
 
@@ -60,7 +87,7 @@ PySceneDetect Releases
  * Removed Windows installer due to binary packages now being available, and to streamline the release process (see [#102](https://github.com/Breakthrough/PySceneDetect/issues/102) for more information).  When you type `pip install scenedetect[opencv,progress_bar]`, all dependencies will be installed.
 
 
-## 0.5 (August 31, 2018)
+### 0.5 (August 31, 2018)
 
  * **major** release, includes stable Python API with examples and updated documentation
  * numerous changes to command-line interface with addition of sub-commands (see [the new manual](http://manual.scenedetect.com) for updated usage information)
@@ -76,8 +103,9 @@ PySceneDetect Releases
 
 ----------------------------------------------------------------
 
+## PySceneDetect 0.4
 
-## 0.4 (January 14, 2017)
+### 0.4 (January 14, 2017)
 
  * major release, includes integrated scene splitting via mkvmerge, changes meaning of `-o` / `--output` option
  * [feature] specifying `-o OUTPUT_FILE.mkv` will now automatically split the input video, generating a new video clip for each detected scene in sequence, starting with `OUTPUT_FILE-001.mkv`
@@ -86,6 +114,8 @@ PySceneDetect Releases
 
 ----------------------------------------------------------------
 
+
+## PySceneDetect 0.3-beta
 
 ### 0.3.6 (January 12, 2017)
 
@@ -133,7 +163,7 @@ PySceneDetect Releases
  * [internal] additional API functions to remove requirement on passing OpenCV video objects, and allow just a file path instead
 
 
-## 0.3-beta (January 8, 2016)
+### 0.3-beta (January 8, 2016)
 
  * major release, includes improved detection algorithms and complete internal code refactor
  * [feature]  content-aware scene detection using HSV-colourspace based algorithm (use `-d content`)
@@ -145,6 +175,7 @@ PySceneDetect Releases
 
 ----------------------------------------------------------------
 
+## PySceneDetect 0.2-alpha
 
 ### 0.2.4-alpha (December 22, 2015)
  * [bugfix] updated OpenCV compatibility with self-reported version on some Linux distributions
@@ -168,7 +199,7 @@ PySceneDetect Releases
  * [enhance] one-line of CSV timecodes added for easy splitting with external tool
 
 
-## 0.2-alpha (June 9, 2014)
+### 0.2-alpha (June 9, 2014)
 
  * [enhance] now provides discrete scene list (in addition to fades)
  * [feature] ability to output to file (-o / --output flag)
@@ -177,7 +208,9 @@ PySceneDetect Releases
 ----------------------------------------------------------------
 
 
-## 0.1-alpha (June 8, 2014)
+## PySceneDetect 0.1-alpha
+
+### 0.1-alpha (June 8, 2014)
 
  * first public release
  * [feature] threshold-based fade in/out detection

@@ -1,15 +1,13 @@
 
-
 ## <span class="fa fa-bug"></span>&nbsp; Bug Reports
 
-Bugs and issues with (as well as feature requests for) PySceneDetect are mainly handled through [the issue tracker on Github](https://github.com/Breakthrough/PySceneDetect/issues).  If you run into any bugs while using PySceneDetect, please feel free to [create a new issue](https://github.com/Breakthrough/PySceneDetect/issues/new).  Provide as much detail as you can - include an example that clearly demonstrates the problem (if possible), and make sure to include any/all relevant program output or error messages.
+Bugs, issues, features, and improvements to PySceneDetect are handled through [the issue tracker on Github](https://github.com/Breakthrough/PySceneDetect/issues).  If you run into any bugs using PySceneDetect, please [create a new issue](https://github.com/Breakthrough/PySceneDetect/issues/new).  Provide as much detail as you can - include an example that clearly demonstrates the problem (if possible), and make sure to include any/all relevant program output or error messages.
 
 When submitting bug reports, please add the command-line options `-v debug -l BUG_REPORT.txt` to the very beginning of the `scenedetect` command you are using, and attach the generated `BUG_REPORT.txt` file.
 
 Before opening a new issue, please do [search for any existing issues](https://github.com/Breakthrough/PySceneDetect/issues?q=) (both open and closed) which might report similar issues/bugs to avoid creating duplicate entries.  If you do find a duplicate report, feel free to add any additional information you feel may be relevant.
 
-
-## <span class="fa fa-cogs"></span>&nbsp; Contributing
+## <span class="fa fa-cogs"></span>&nbsp; Contributing to Development
 
 The development of PySceneDetect is done on the Github Repo, guided by [the feature roadmap](features.md).  Code you wish to submit should be attached to a dedicated entry in [the issue tracker](https://github.com/Breakthrough/PySceneDetect/issues?q=) (with the appropriate tags for bugfixes, new features, enhancements, etc...), and allows for easier communication regarding development structure.  Feel free to create a new entry if required, as some planned features or bugs/issues may not yet exist in the tracker.
 
@@ -17,25 +15,26 @@ All submitted code should be linted with pylint, and follow the [Google Python S
 
 Note that PySceneDetect is released under the BSD 3-Clause license, and submitted code should comply with this license (see [License & Copyright Information](copyright.md) for details).
 
+## <span class="fa fa-cogs"></span>&nbsp; Features That Need Help
 
-## <span class="fa fa-users"></span>&nbsp; List of Contributors
+The following is a "wishlist" of features which PySceneDetect eventually should have, but does not currently due to lack of resources.  Anyone who is able to contribute in any capacity to these items is encouraged to do so by starting a dialogue by opening a new issue on Github as per above.
 
-The following list details some contributors people have made to the PySceneDetect project. In no way is this list complete, nor is the list maintained in any particular order. In addition to those listed below, a significant number of other contributors have greatly helped the development of PySceneDetect by reporting defects/bugs and providing adequate information in order to fix these issues.
+### GUI
 
-A full list of contributions to the PySceneDetect source code [can be found here](https://github.com/Breakthrough/PySceneDetect/graphs/contributors).  A full list of contributions to both PySceneDetect with respect to bug reports and fixes/pull requests can be derived from looking at the list of [all issues](https://github.com/Breakthrough/PySceneDetect/issues?utf8=%E2%9C%93&q=is%3Aissue) and [all pull request](https://github.com/Breakthrough/PySceneDetect/pulls?utf8=%E2%9C%93&q=is%3Apr+).
+A graphical user interface will be crucial for making PySceneDetect approchable by a wider audience.  There have been several suggested designs, but nothing concrete has been developed yet.  Any proposed solution for the GUI should work across Windows, Linux, and OSX.
 
-In addition to those mentioned below, thank you to *everyone* who has submitted an issue, bug report, and/or pull request (see the links above for complete lists), as well as for those who continue to help the ongoing development of PySceneDetect.  Your contributions continue to improve PySceneDetect, highlight the assets and talents of the FOSS community, and help to make the project's goal of being the most accurate scene detection program/library become a reality.
+### Localization
 
- * [@elcombato](https://github.com/elcombato) - improvement of video processing performance due to reduced memory copy operations
- * [@marcelluzs](https://github.com/marcelluzs) - improvement of video processing performance when using the frame-skipping feature
- * [@Hellowlol](https://github.com/Hellowlol) - improvements to software architecture and API development
- * Lyuboslav Petrov [@bubalazi](https://github.com/bubalazi) - performance improvements to detect-content and detect-threshold algorithms
- * [@r1b](https://github.com/r1b) - proof-of-concept implementation of detect-histogram algorithm
- * Walter Schwenger [@wjs018](https://github.com/wjs018) - implementation of `export-html` command and various bugfixes
- * [@tonycpsu](https://github.com/tonycpsu) - enhancements to `--min-scene-len` and `save-images` command
- * [@charlesvestal](https://github.com/charlesvestal) - various bugfixes and improvements
- * Joshua Coales [@joshcoales](https://github.com/joshcoales) - investigation and resolution of ffmpeg "frame bleed" issues (clips not getting cut at the proper split points)
- * Muhammad Hashim [@mhashim6](https://github.com/mhashim6) - addition of callbacks to be executed when new scenes are detected
+PySceneDetect currently is not localized for other languages.  Anyone who can help improve how localization can be approached for development material is encouraged to contribute in any way possible.  Whether it is the GUI program, the command line interface, or documentation, localization will allow PySceneDetect to be used by much more users in their native languages.
 
-Another way to view the contribution list is [via libraries.io](https://libraries.io/github/Breakthrough/PySceneDetect/contributors).  Thank you all for your help, support, feedback, and direction on the project as a whole!
+### Automatic Threshold / Peak Detection
 
+The `detect-content` command requires a manual threshold to be set currently.  Methods to use peak detection to dynamically determine when scene cuts occur would allow for the program to work with a much wider amount of material without requiring manual tuning, but would require statistical analysis.
+
+Ideally, this would be something like `-threshold=auto` as a default.
+
+### Advanced Detection Strategies
+
+Research into advanced scene detection for content detection would be most useful, perhaps in terms of histogram analysis or edge detection.  This could be integrated into the existing `detect-content` command, or be a separate command.  The real blocker here is achieving reasonable performance utilizing the current software architecture.
+
+There are many open issues on the issue tracker that contain reference implementations contributed by various community members.  There are already several concepts which are proven to be viable candidates for production, but still require some degree optimization.

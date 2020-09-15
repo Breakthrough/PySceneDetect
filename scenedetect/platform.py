@@ -54,6 +54,7 @@ import os.path
 import platform
 import struct
 import csv
+import subprocess
 
 # Third-Party Library Imports
 import cv2
@@ -94,6 +95,7 @@ except ImportError:
 # pylint: disable=invalid-name, undefined-variable
 if sys.version_info[0] == 2:
     STRING_TYPE = unicode
+
 else:
     STRING_TYPE = str
 # pylint: enable=invalid-name, undefined-variable
@@ -231,3 +233,42 @@ def get_and_create_path(file_path, output_directory=None):
     except OSError:
         pass
     return file_path
+
+
+
+class CommandTooLong(Exception):
+    """ Raised when the length of a command line argument doesn't play nicely
+    with the Windows command prompt. """
+    # pylint: disable=unnecessary-pass
+    pass
+
+
+def invoke_command(args):
+    # type: (List[str] -> None)
+    """ Same as calling Python's subprocess.call() method, but explicitly
+    raises a different exception when the command length is too long.
+
+    See https://github.com/Breakthrough/PySceneDetect/issues/164 for details.
+
+    Arguments:
+        args (List[str]): List of strings to pass to subprocess.call().
+
+    Returns:
+        int: Return code of command.
+
+    Raises:
+        CommandTooLong when passed command list exceeds built in command line
+        length limit on Windows.
+    """
+    try:
+        return subprocess.call(args)
+    except OSError as err:
+        if os.name != 'nt':
+            raise
+        exception_string = str(err)
+        # Error 206: The filename or extension is too long
+        # Error 87:  The parameter is incorrect
+        to_match = ('206', '87')
+        if any([x in exception_string for x in to_match]):
+            raise CommandTooLong()
+        raise
