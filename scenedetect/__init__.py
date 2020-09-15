@@ -42,6 +42,8 @@ from scenedetect.scene_manager import SceneManager
 from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.video_manager import VideoManager
 from scenedetect.stats_manager import StatsManager
+from scenedetect.__main__ import main
+
 
 # We also bring the detectors into the main scenedetect package namespace
 # for convenience as well. Examples still reference the full package.
