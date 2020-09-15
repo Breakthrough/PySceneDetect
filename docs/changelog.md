@@ -4,7 +4,7 @@ PySceneDetect Releases
 
 ## PySceneDetect 0.5
 
-### 0.5.4 (TBD)
+### 0.5.4 (September 14, 2020) &nbsp;<span class="fa fa-tags"></span>
 
 #### Release Notes
 
@@ -18,6 +18,7 @@ PySceneDetect Releases
 
  * [bugfix] fix `detect-threshold` crash when using statsfile ([#122](https://github.com/Breakthrough/PySceneDetect/issues/122))
  * [bugfix] fix `save-images` command under Python 2.7 ([#174](https://github.com/Breakthrough/PySceneDetect/issues/174), thanks @santiagodemierre)
+ * [bugfix] gracefully exit and show link to FAQ when number of scenes is too large to split with mkvmerge on Windows (see [#164](https://github.com/Breakthrough/PySceneDetect/issues/164, thanks @alexboydray)
  * [enhancement] Improved seeking performance, greatly improves performance of the `time` and `save-images` commands ([#98](https://github.com/Breakthrough/PySceneDetect/issues/98) and [PR #163](https://github.com/Breakthrough/PySceneDetect/pull/163) - thanks @obroomhall)
  * [enhancement] improve `detect-threshold` performance when min-percent is less than 50%
  * [general] Made `tqdm` a regular requirement and not an extra ([#180](https://github.com/Breakthrough/PySceneDetect/issues/180))
@@ -29,7 +30,7 @@ PySceneDetect Releases
  * In certain cases, video files which will not load will fail silently, with PySceneDetect reporting that it processed 0 frames.  Better error handling/messaging is planned for these cases as part of [#179](https://github.com/Breakthrough/PySceneDetect/issues/179)
 
 
-### 0.5.3 (July 12, 2020) &nbsp;<span class="fa fa-tags"></span>
+### 0.5.3 (July 12, 2020)
 
 #### Release Notes
 
