@@ -19,7 +19,7 @@ Video Scene Cut Detection and Analysis Tool
 
 **Quick Install**: To install PySceneDetect via `pip` with all dependencies:
 
-    pip install scenedetect[opencv,progress_bar]
+    pip install scenedetect[opencv]
 
 To enable video splitting support, you will also need to have `mkvmerge` or `ffmpeg` installed on your system. See the documentation on [Video Splitting Support](https://pyscenedetect.readthedocs.io/en/latest/examples/video-splitting/) after installation for details.
 
