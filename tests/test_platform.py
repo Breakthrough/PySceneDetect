@@ -39,7 +39,11 @@ from __future__ import print_function
 import platform
 import pytest
 
+from scenedetect.video_manager import VideoManager
+
 from scenedetect.platform import CommandTooLong, invoke_command
+from scenedetect.platform import opencv_version_required
+from scenedetect.platform import get_aspect_ratio
 
 
 def test_invoke_command():
@@ -55,3 +59,40 @@ def test_long_command():
     if platform.system() == 'Windows':
         with pytest.raises(CommandTooLong):
             invoke_command('x' * 2**15)
+
+
+def test_opencv_version_required():
+    """ Test version requirement function for checking installed OpenCV
+    version to ensure compatibility layer works correctly. """
+
+    version = "3.1.2"
+    assert opencv_version_required([2, 0, 0], version)
+    assert opencv_version_required([3], version)
+    assert opencv_version_required([3, 0], version)
+    assert opencv_version_required([3, 1], version)
+    assert opencv_version_required([3, 1, 1], version)
+    assert opencv_version_required([3, 1, 2], version)
+    assert not opencv_version_required([3, 1, 3], version)
+    assert not opencv_version_required([3, 2], version)
+    assert not opencv_version_required([4], version)
+
+    version = "3.1"
+    assert opencv_version_required([2, 0, 0], version)
+    assert opencv_version_required([3], version)
+    assert opencv_version_required([3, 0], version)
+    assert opencv_version_required([3, 1], version)
+    assert not opencv_version_required([3, 1, 1], version)
+    assert not opencv_version_required([3, 1, 2], version)
+    assert not opencv_version_required([3, 2], version)
+    assert not opencv_version_required([4], version)
+
+    # Test invalid version strings.
+    # Incorrect version strings always return False.
+    assert not opencv_version_required([2, 0, 0], "b21412")
+    assert not opencv_version_required([2, 0, 0], "2b.4")
+
+
+def test_get_aspect_ratio(test_video_file):
+    """ Test get_aspect_ratio function. """
+    video_manager = VideoManager([test_video_file])
+    assert abs(get_aspect_ratio(video_manager) - 1.0) < 0.01

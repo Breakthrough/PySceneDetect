@@ -48,13 +48,14 @@ as STRING_TYPE intended to help with parsing string types from the CLI parser.
 
 # Standard Library Imports
 from __future__ import print_function
-import sys
+
+import csv
 import os
 import os.path
 import platform
 import struct
-import csv
 import subprocess
+import sys
 
 # Third-Party Library Imports
 import cv2
@@ -95,7 +96,6 @@ except ImportError:
 # pylint: disable=invalid-name, undefined-variable
 if sys.version_info[0] == 2:
     STRING_TYPE = unicode
-
 else:
     STRING_TYPE = str
 # pylint: enable=invalid-name, undefined-variable
@@ -105,22 +105,27 @@ else:
 ## OpenCV Compatibility Fixes
 ##
 
-def opencv_version_required(min_version):
+def opencv_version_required(min_version, version=None):
+    # type: (List[int], Optional[str])
     """ Checks if the OpenCV library version is at least min_version.
 
     Arguments:
         min_version: List[int] of the version to compare against.
+        version: Optional string representing version string to
+        compare with, used for testing purposes.
 
     Returns:
         bool: True if the installed version is at least min_version,
         False otherwise.
     """
-    if not cv2.__version__[0].isdigit():
+    if version is None:
+        version = cv2.__version__
+    if not version[0].isdigit():
         return False
     try:
-        version = [int(x) for x in cv2.__version__.split('.')]
+        version = [int(x) for x in version.split('.')]
         if len(version) < len(min_version):
-            return False
+            version += [0] * (len(min_version) - len(version))
         return not any([x[0] < x[1] for x in zip(version, min_version)])
     except ValueError:
         return False
