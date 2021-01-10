@@ -292,7 +292,9 @@ def generate_images(scene_list, video_manager, video_name, num_images=2,
     progress_bar = None
     if tqdm and show_progress:
         progress_bar = tqdm(
-            total=len(scene_list) * num_images, unit='images')
+            total=len(scene_list) * num_images,
+            unit='images',
+            dynamic_ncols=True)
 
     filename_template = Template(image_name_template)
 
@@ -582,7 +584,9 @@ class SceneManager(object):
         progress_bar = None
         if tqdm and show_progress:
             progress_bar = tqdm(
-                total=total_frames, unit='frames')
+                total=total_frames,
+                unit='frames',
+                dynamic_ncols=True)
         try:
 
             while True:

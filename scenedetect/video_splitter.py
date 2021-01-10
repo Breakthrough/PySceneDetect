@@ -247,7 +247,11 @@ def split_video_ffmpeg(input_video_paths, scene_list, output_file_template, vide
         progress_bar = None
         total_frames = scene_list[-1][1].get_frames() - scene_list[0][0].get_frames()
         if tqdm and not hide_progress:
-            progress_bar = tqdm(total=total_frames, unit='frame', miniters=1)
+            progress_bar = tqdm(
+                total=total_frames,
+                unit='frame',
+                miniters=1,
+                dynamic_ncols=True)
         processing_start_time = time.time()
         for i, (start_time, end_time) in enumerate(scene_list):
             duration = (end_time - start_time)

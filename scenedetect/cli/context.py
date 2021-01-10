@@ -182,7 +182,9 @@ class CliContext(object):
         progress_bar = None
         if tqdm and not self.quiet_mode:
             progress_bar = tqdm(
-                total=len(scene_list) * self.num_images, unit='images')
+                total=len(scene_list) * self.num_images,
+                unit='images',
+                dynamic_ncols=True)
 
         filename_template = Template(image_name_template)
 
@@ -266,7 +268,7 @@ class CliContext(object):
                              os.path.basename(self.stats_file_path))
                 try:
                     with open(self.stats_file_path, 'rt') as stats_file:
-                        self.stats_manager.load_from_csv(stats_file, self.base_timecode)
+                        self.stats_manager.load_from_csv(stats_file)
                 except StatsFileCorrupt:
                     error_strs = [
                         'Could not load stats file.', 'Failed to parse stats file:',
