@@ -162,7 +162,8 @@ def duplicate_command(ctx, param_hint):
     multiple=True, required=False, metavar='VIDEO',
     type=click.STRING, help=
     '[Required] Input video file.'
-    ' May be specified multiple times to concatenate several videos together.')
+    ' May be specified multiple times to concatenate several videos together.'
+    ' Also supports image sequences and URLs.')
 @click.option(
     '--output', '-o',
     multiple=False, required=False, metavar='DIR',

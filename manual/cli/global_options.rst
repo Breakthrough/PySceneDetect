@@ -70,7 +70,7 @@ The ``scenedetect`` command takes the following global options:
 
   -i, --input VIDEO      [Required] Input video file. May be specified
                          multiple times to concatenate several videos
-                         together.
+                         together. Also supports image sequences and URLs.
   -o, --output DIR       Output directory for all files (stats file, output
                          videos, images, log files, etc...).
   -f, --framerate FPS    Force framerate, in frames/sec (e.g. -f 29.97).
