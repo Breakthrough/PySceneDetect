@@ -123,7 +123,7 @@ if cv2.__version__[0] == '2' or not (
 ##
 
 def check_opencv_ffmpeg_dll():
-    # type: () -> bool
+    # type: () -> Tuple[bool, str]
     """ Check OpenCV FFmpeg DLL: Checks if OpenCV video I/O support is available,
     on Windows only, by checking for the appropriate opencv_ffmpeg*.dll file.
 
@@ -135,8 +135,10 @@ def check_opencv_ffmpeg_dll():
     that the error may be due to the missing DLL file.
 
     Returns:
-        (bool) True if OpenCV video support is detected (e.g. the appropriate
-        opencv_ffmpegXYZ.dll file is in PATH), False otherwise.
+        (True, DLL_NAME) if OpenCV video support is detected (e.g. the appropriate
+        opencv_ffmpegXYZ.dll file is in PATH), (False, DLL_NAME) otherwise,
+        where DLL_NAME is the name of the expected DLL file that OpenCV requires.
+        On Non-Windows platforms, DLL_NAME will be a blank string.
     """
     if platform.system() == 'Windows' and (
             cv2.__version__[0].isdigit() and cv2.__version__.find('.') > 0):
@@ -146,7 +148,7 @@ def check_opencv_ffmpeg_dll():
             IS_64_BIT=is_64_bit_str)
         return any([os.path.exists(os.path.join(path_path, dll_filename))
                     for path_path in os.environ['PATH'].split(';')]), dll_filename
-    return True
+    return True, ''
 
 
 ##
