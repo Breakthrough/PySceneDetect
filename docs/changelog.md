@@ -17,25 +17,24 @@ PySceneDetect Releases
 
 #### Changelog
 
- * [cli] Make `--min-scene-len` a global option rather than per-detector (resolves [#131](https://github.com/Breakthrough/PySceneDetect/issues/131), thanks @tonycpsu)
+ * [cli] Make `--min-scene-len` a global option rather than per-detector ([#131](https://github.com/Breakthrough/PySceneDetect/issues/131), thanks @tonycpsu)
  * [feature] Added `--drop-short-scenes` option to remove all scenes smaller than `--min-scene-len`, instead of merging them
- * [enhancement] Removed first row from statsfile to comply with RFC 4180, includes backwards compatibility so existing statsfiles can still be loaded (resolves [#136](https://github.com/Breakthrough/PySceneDetect/issues/136))
+ * [enhancement] Removed first row from statsfile to comply with RFC 4180, includes backwards compatibility so existing statsfiles can still be loaded ([#136](https://github.com/Breakthrough/PySceneDetect/issues/136))
  * [api] Removed unused argument base_timecode from `StatsManager.load_from_csv()` method
- * [api] Make the `base_timecode` argument optional on the `SceneManager` methods `get_scene_list()`, `get_cut_list()`, and `get_event_list()` (resolves [#173](https://github.com/Breakthrough/PySceneDetect/issues/173))
- * [api] Support for live video stream callbacks by adding new `callback` argument to the `detect_scenes()` method of `SceneManager` (resolves [#5](https://github.com/Breakthrough/PySceneDetect/issues/5), thanks @mhashim6)
- * [bugfix] Fix unhandled exception causing improper error message when a video fails to load on non-Windows platforms (resolves [#192](https://github.com/Breakthrough/PySceneDetect/issues/192))
- * [enhancement] Enabled dynamic resizing for progress bar (resolves [#193](https://github.com/Breakthrough/PySceneDetect/issues/193))
- * [enhancement] Always ouptut version number via logger to assist with debugging (resolves [#171](https://github.com/Breakthrough/PySceneDetect/issues/171))
- * [bugfix] Allow image sequences and URLs to be used as inputs (resolves [#152](https://github.com/Breakthrough/PySceneDetect/issues/171) and [#188](https://github.com/Breakthrough/PySceneDetect/issues/188))
- * [bugfix] Resolve RuntimeWarning when running as module (resolves [#181](https://github.com/Breakthrough/PySceneDetect/issues/181))
- * [bugfix] Pixel aspect ratio is now applied when using `save-images` (resolves [#195](https://github.com/Breakthrough/PySceneDetect/issues/195))
- * [bugfix] Fix issue where `save-images` was not saving the last frame
+ * [api] Make the `base_timecode` argument optional on the `SceneManager` methods `get_scene_list()`, `get_cut_list()`, and `get_event_list()` ([#173](https://github.com/Breakthrough/PySceneDetect/issues/173))
+ * [api] Support for live video stream callbacks by adding new `callback` argument to the `detect_scenes()` method of `SceneManager` ([#5](https://github.com/Breakthrough/PySceneDetect/issues/5), thanks @mhashim6)
+ * [bugfix] Fix unhandled exception causing improper error message when a video fails to load on non-Windows platforms ([#192](https://github.com/Breakthrough/PySceneDetect/issues/192))
+ * [enhancement] Enabled dynamic resizing for progress bar ([#193](https://github.com/Breakthrough/PySceneDetect/issues/193))
+ * [enhancement] Always ouptut version number via logger to assist with debugging ([#171](https://github.com/Breakthrough/PySceneDetect/issues/171))
+ * [bugfix] Allow image sequences and URLs to be used as inputs ([#152](https://github.com/Breakthrough/PySceneDetect/issues/171) and [#188](https://github.com/Breakthrough/PySceneDetect/issues/188))
+ * [bugfix] Resolve RuntimeWarning when running as module ([#181](https://github.com/Breakthrough/PySceneDetect/issues/181))
+ * [bugfix] Pixel aspect ratio is now applied when using `save-images` ([#195](https://github.com/Breakthrough/PySceneDetect/issues/195))
+ * [bugfix] Fix `save-images` command not saving the last frame of the final scene due to overseeking
 
 #### Known Issues
 
- * Variable framerate videos are not supported properly currently (#168), a warning may be added in the next release to indicate when a VFR video is detected, until this can be properly resolved ([#168](https://github.com/Breakthrough/PySceneDetect/issues/168))
  * Image sequences or URL inputs are not supported by the `save-images` or `split-video` commands
- * In certain cases, video files which will not load will fail silently, with PySceneDetect reporting that it processed 0 frames.  Better error handling/messaging is planned for these cases as part of [#179](https://github.com/Breakthrough/PySceneDetect/issues/179)
+ * Variable framerate videos (VFR) are not fully supported, and will yield incorrect timestamps ([#168](https://github.com/Breakthrough/PySceneDetect/issues/168))
 
 
 ### 0.5.4 (September 14, 2020) &nbsp;<span class="fa fa-tags"></span>
@@ -55,13 +54,13 @@ PySceneDetect Releases
  * [bugfix] gracefully exit and show link to FAQ when number of scenes is too large to split with mkvmerge on Windows (see [#164](https://github.com/Breakthrough/PySceneDetect/issues/164, thanks @alexboydray)
  * [enhancement] Improved seeking performance, greatly improves performance of the `time` and `save-images` commands ([#98](https://github.com/Breakthrough/PySceneDetect/issues/98) and [PR #163](https://github.com/Breakthrough/PySceneDetect/pull/163) - thanks @obroomhall)
  * [enhancement] improve `detect-threshold` performance when min-percent is less than 50%
+ * [bugfix] Fixed issue where video loading would fail silently due to multiple audio tracks ([#179](https://github.com/Breakthrough/PySceneDetect/issues/179))
  * [general] Made `tqdm` a regular requirement and not an extra ([#180](https://github.com/Breakthrough/PySceneDetect/issues/180))
  * [general] Support for Python 3.3 and 3.4 has been deprecated. Newer builds may still work on these Python versions, but future releases are not tested against these versions. This decision was made as part of [#180](https://github.com/Breakthrough/PySceneDetect/issues/180)
 
 #### Known Issues
 
  * Variable framerate videos are not supported properly currently (#168), a warning may be added in the next release to indicate when a VFR video is detected, until this can be properly resolved ([#168](https://github.com/Breakthrough/PySceneDetect/issues/168))
- * In certain cases, video files which will not load will fail silently, with PySceneDetect reporting that it processed 0 frames.  Better error handling/messaging is planned for these cases as part of [#179](https://github.com/Breakthrough/PySceneDetect/issues/179)
 
 
 ### 0.5.3 (July 12, 2020)
