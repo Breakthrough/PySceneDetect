@@ -38,10 +38,6 @@ The ``detect-content`` detector takes the following options:
                                 metric must exceed to trigger a new scene.
                                 Refers to frame metric content_val in stats
                                 file.  [default: 30.0]
-  -m, --min-scene-len TIMECODE  Minimum size/length of any scene. TIMECODE can be
-                                specified as exact number of frames, a time in
-                                seconds followed by s, or a timecode in the format
-                                HH:MM:SS or HH:MM:SS.nnn [default: 0.6s]
 
 
 
@@ -68,10 +64,6 @@ The ``detect-threshold`` detector takes the following options:
                                 frame metric must exceed to trigger a new scene.
                                 Refers to frame metric delta_rgb in stats file.
                                 [default: 12]
-  -m, --min-scene-len TIMECODE  Minimum size/length of any scene. TIMECODE can be
-                                specified as exact number of frames, a time in
-                                seconds followed by s, or a timecode in the format
-                                HH:MM:SS or HH:MM:SS.nnn [default: 0.6s]
   -f, --fade-bias PERCENT       Percent (%) from -100 to 100 of timecode skew
                                 for where cuts should be placed. -100 indicates
                                 the start frame, +100 indicates the end frame,

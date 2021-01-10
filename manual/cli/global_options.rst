@@ -84,6 +84,13 @@ The ``scenedetect`` command takes the following global options:
                          be used for high definition content with minimal
                          effect on accuracy. [default: 2 for SD, 4 for 720p, 6
                          for 1080p, 12 for 4k]
+  -m, --min-scene-len TIMECODE
+                         Minimum size/length of any scene. TIMECODE can
+                         be specified as exact number of frames, a time
+                         in seconds followed by s, or a timecode in the
+                         format HH:MM:SS or HH:MM:SS.nnn [default: 0.6s]
+  --drop-short-scenes    Drop scenes shorter than `--min-scene-len`
+                         instead of combining them with neighbors
   -s, --stats CSV        Path to stats file (.csv) for writing frame metrics
                          to. If the file exists, any metrics will be
                          processed, otherwise a new file will be created. Can

@@ -53,6 +53,7 @@ import click
 import scenedetect
 from scenedetect.cli.context import CliContext
 from scenedetect.cli.context import contains_sequence_or_url
+from scenedetect.cli.context import parse_timecode
 from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.video_manager import VideoManager
 
@@ -103,29 +104,6 @@ def add_cli_command(cli, command):
     """Adds the CLI command to the cli object as well as to the COMMAND_DICT."""
     cli.add_command(command)
     COMMAND_DICT.append(command)
-
-
-def parse_timecode(cli_ctx, value):
-    # type: (CliContext, str) -> Union[FrameTimecode, None]
-    """ Parses a user input string expected to be a timecode, given a CLI context.
-
-    Returns:
-        (FrameTimecode) Timecode set to value with the CliContext VideoManager framerate.
-            If value is None, skips processing and returns None.
-
-    Raises:
-        click.BadParameter
-     """
-    cli_ctx.check_input_open()
-    if value is None:
-        return value
-    try:
-        timecode = FrameTimecode(
-            timecode=value, fps=cli_ctx.video_manager.get_framerate())
-        return timecode
-    except (ValueError, TypeError):
-        raise click.BadParameter(
-            'timecode must be in frames (1234), seconds (123.4s), or HH:MM:SS (00:02:03.400)')
 
 
 def print_command_help(ctx, command):
@@ -211,7 +189,7 @@ def duplicate_command(ctx, param_hint):
     ' Reduces processing speed at expense of accuracy.')
 @click.option(
     '--min-scene-len', '-m', metavar='TIMECODE',
-    type=click.STRING, default="0", help=
+    type=click.STRING, default='0.6s', show_default=True, help=
     'Minimum size/length of any scene. TIMECODE can be specified as exact'
     ' number of frames, a time in seconds followed by s, or a timecode in the'
     ' format HH:MM:SS or HH:MM:SS.nnn')
@@ -246,7 +224,6 @@ def duplicate_command(ctx, param_hint):
 # pylint: disable=redefined-builtin
 def scenedetect_cli(ctx, input, output, framerate, downscale, frame_skip,
                     min_scene_len, drop_short_scenes, stats,
-                    scene_range,
                     verbosity, logfile, quiet):
     """ For example:
 
@@ -302,10 +279,9 @@ def scenedetect_cli(ctx, input, output, framerate, downscale, frame_skip,
         ctx.obj.parse_options(
             input_list=input, framerate=framerate, stats_file=stats, downscale=downscale,
             frame_skip=frame_skip, min_scene_len=min_scene_len, drop_short_scenes=drop_short_scenes)
-        ctx.obj.min_scene_len = parse_timecode(ctx.obj, min_scene_len)
 
-    except Exception as e:
-        logging.error('Could not parse CLI options.: %s' %(e))
+    except Exception as ex:
+        logging.error('Could not parse CLI options.: %s', ex)
         raise
 
 

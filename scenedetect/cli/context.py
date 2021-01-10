@@ -71,8 +71,31 @@ from scenedetect.video_splitter import split_video_ffmpeg
 from scenedetect.platform import get_cv2_imwrite_params
 from scenedetect.platform import check_opencv_ffmpeg_dll
 
-
 from scenedetect.frame_timecode import FrameTimecode
+
+
+def parse_timecode(cli_ctx, value):
+    # type: (CliContext, str) -> Union[FrameTimecode, None]
+    """ Parses a user input string expected to be a timecode, given a CLI context.
+
+    Returns:
+        (FrameTimecode) Timecode set to value with the CliContext VideoManager framerate.
+            If value is None, skips processing and returns None.
+
+    Raises:
+        click.BadParameter
+     """
+    cli_ctx.check_input_open()
+    if value is None:
+        return value
+    try:
+        timecode = FrameTimecode(
+            timecode=value, fps=cli_ctx.video_manager.get_framerate())
+        return timecode
+    except (ValueError, TypeError):
+        raise click.BadParameter(
+            'timecode must be in frames (1234), seconds (123.4s), or HH:MM:SS (00:02:03.400)')
+
 
 def get_plural(val_list):
     # type: (List[any]) -> str
@@ -83,6 +106,7 @@ def get_plural(val_list):
         str: String of 's' if the length of val_list is greater than 1, otherwise ''.
     """
     return 's' if len(val_list) > 1 else ''
+
 
 def contains_sequence_or_url(video_paths):
     # type: (List[str]) -> bool
@@ -96,6 +120,7 @@ def contains_sequence_or_url(video_paths):
 
     return any(['%' in video_path or '://' in video_path
             for video_path in video_paths])
+
 
 class CliContext(object):
     """ Context of the command-line interface passed between the various sub-commands.
@@ -121,6 +146,8 @@ class CliContext(object):
         self.output_directory = None            # -o/--output
         self.quiet_mode = False                 # -q/--quiet or -v/--verbosity quiet
         self.frame_skip = 0                     # -fs/--frame-skip
+        self.drop_short_scenes = False          # --drop-short-scenes
+        self.min_scene_len = None               # -m/--min-scene-len
         # Properties for save-images command.
         self.save_images = False                # save-images command
         self.image_extension = 'jpg'            # save-images -j/--jpeg, -w/--webp, -p/--png
@@ -364,10 +391,11 @@ class CliContext(object):
         cut_list = self.scene_manager.get_cut_list()
         scene_list = self.scene_manager.get_scene_list()
 
-        if self.drop_short_scenes:
+        # Handle --drop-short-scenes.
+        if self.drop_short_scenes and self.min_scene_len > 0:
             scene_list = [
                 s for s in scene_list
-                if ( s[1] - s[0] ) >= self.min_scene_len
+                if (s[1] - s[0]) >= self.min_scene_len
             ]
 
         video_paths = self.video_manager.get_video_paths()
@@ -375,8 +403,7 @@ class CliContext(object):
         if video_name.rfind('.') >= 0:
             video_name = video_name[:video_name.rfind('.')]
 
-        # Ensure we don't divide by zero.
-        if scene_list:
+        if scene_list:  # Ensure we don't divide by zero.
             logging.info('Detected %d scenes, average shot length %.1f seconds.',
                          len(scene_list),
                          sum([(end_time - start_time).get_seconds()
@@ -397,7 +424,7 @@ class CliContext(object):
             logging.info('Writing scene list to CSV file:\n  %s', scene_list_path)
             with open(scene_list_path, 'wt') as scene_list_file:
                 write_scene_list(scene_list_file, scene_list, cut_list)
-        # Handle `list-scenes`.
+
         if self.print_scene_list:
             logging.info("""Scene List:
 -----------------------------------------------------------------------
@@ -411,7 +438,6 @@ class CliContext(object):
         start_time.get_frames(), start_time.get_timecode(),
         end_time.get_frames(), end_time.get_timecode())
      for i, (start_time, end_time) in enumerate(scene_list)]))
-
 
         if cut_list:
             logging.info('Comma-separated timecode list:\n  %s',
@@ -577,7 +603,8 @@ class CliContext(object):
         return video_manager_initialized
 
 
-    def parse_options(self, input_list, framerate, stats_file, downscale, frame_skip, min_scene_len, drop_short_scenes):
+    def parse_options(self, input_list, framerate, stats_file, downscale, frame_skip,
+                      min_scene_len, drop_short_scenes):
         # type: (List[str], float, str, int, int) -> None
         """ Parse Options: Parses all global options/arguments passed to the main
         scenedetect command, before other sub-commands (e.g. this function processes
@@ -596,9 +623,6 @@ class CliContext(object):
 
         self.frame_skip = frame_skip
 
-        # min_scene_len needs to be parsed later, after fps is available
-        self.drop_short_scenes = drop_short_scenes
-
         video_manager_initialized = self._init_video_manager(
             input_list=input_list, framerate=framerate, downscale=downscale)
 
@@ -615,6 +639,9 @@ class CliContext(object):
 
         # Init SceneManager.
         self.scene_manager = SceneManager(self.stats_manager)
+
+        self.drop_short_scenes = drop_short_scenes
+        self.min_scene_len = parse_timecode(self, min_scene_len)
 
         self.options_processed = True
 

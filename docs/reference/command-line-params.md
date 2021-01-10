@@ -78,6 +78,13 @@ Options:
                          processes 33% of the frames, -fs 3 processes 25%,
                          etc...). Reduces processing speed at expense of
                          accuracy.  [default: 0]
+  -m, --min-scene-len TIMECODE
+                         Minimum size/length of any scene. TIMECODE can
+                         be specified as exact number of frames, a time
+                         in seconds followed by s, or a timecode in the
+                         format HH:MM:SS or HH:MM:SS.nnn [default: 0.6s]
+  --drop-short-scenes    Drop scenes shorter than `--min-scene-len`
+                         instead of combining them with neighbors
   -s, --stats CSV        Path to stats file (.csv) for writing frame metrics
                          to. If the file exists, any metrics will be
                          processed, otherwise a new file will be created. Can
@@ -174,8 +181,6 @@ Options:
                               metric must exceed to trigger a new scene.
                               Refers to frame metric delta_hsv_avg in stats
                               file.  [default: 30.0]
-  -m, --min-scene-len FRAMES  Minimum size/length of any scene, in number of
-                              frames.  [default: 15]
   -h, --help                  Show this message and exit.
 ```
 
@@ -198,8 +203,6 @@ Options:
                               frame metric must exceed to trigger a new scene.
                               Refers to frame metric delta_rgb in stats file.
                               [default: 12]
-  -m, --min-scene-len FRAMES  Minimum size/length of any scene, in number of
-                              frames.  [default: 15]
   -f, --fade-bias PERCENT     Percent (%) from -100 to 100 of timecode skew
                               for where cuts should be placed. -100 indicates
                               the start frame, +100 indicates the end frame,

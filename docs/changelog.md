@@ -9,6 +9,7 @@ PySceneDetect Releases
 #### Release Notes
 
  * Primarily maintenance release including various bugfixes, minor API changes, and enhancements
+ * The `--min-scene-len`/`-m` option is now global rather than per-detector
  * Removed first row from statsfiles so it is a valid CSV file
  * The progress bar now correctly resizes when the terminal is resized
  * Image sequences and URLs are now supported for input via the CLI/API
@@ -16,10 +17,12 @@ PySceneDetect Releases
 
 #### Changelog
 
+ * [cli] Make `--min-scene-len` a global option rather than per-detector (resolves [#131](https://github.com/Breakthrough/PySceneDetect/issues/131), thanks @tonycpsu)
+ * [feature] Added `--drop-short-scenes` option to remove all scenes smaller than `--min-scene-len`, instead of merging them
  * [enhancement] Removed first row from statsfile to comply with RFC 4180, includes backwards compatibility so existing statsfiles can still be loaded (resolves [#136](https://github.com/Breakthrough/PySceneDetect/issues/136))
  * [api] Removed unused argument base_timecode from `StatsManager.load_from_csv()` method
  * [api] Make the `base_timecode` argument optional on the `SceneManager` methods `get_scene_list()`, `get_cut_list()`, and `get_event_list()` (resolves [#173](https://github.com/Breakthrough/PySceneDetect/issues/173))
- * [api] Support for live video stream callbacks by adding new `callback` argument to the `detect_scenes()` method of `SceneManager` (resolves [#5](https://github.com/Breakthrough/PySceneDetect/issues/5))
+ * [api] Support for live video stream callbacks by adding new `callback` argument to the `detect_scenes()` method of `SceneManager` (resolves [#5](https://github.com/Breakthrough/PySceneDetect/issues/5), thanks @mhashim6)
  * [bugfix] Fix unhandled exception causing improper error message when a video fails to load on non-Windows platforms (resolves [#192](https://github.com/Breakthrough/PySceneDetect/issues/192))
  * [enhancement] Enabled dynamic resizing for progress bar (resolves [#193](https://github.com/Breakthrough/PySceneDetect/issues/193))
  * [enhancement] Always ouptut version number via logger to assist with debugging (resolves [#171](https://github.com/Breakthrough/PySceneDetect/issues/171))
