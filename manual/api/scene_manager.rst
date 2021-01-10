@@ -62,7 +62,6 @@ printing a list of scenes, and both saving/loading a stats file.
         # Add ContentDetector algorithm (each detector's constructor
         # takes detector options, e.g. threshold).
         scene_manager.add_detector(ContentDetector())
-        base_timecode = video_manager.get_base_timecode()
 
         # We save our stats file to {VIDEO_PATH}.stats.csv.
         stats_file_path = '%s.stats.csv' % video_path
@@ -74,7 +73,7 @@ printing a list of scenes, and both saving/loading a stats file.
             if os.path.exists(stats_file_path):
                 # Read stats from CSV file opened in read mode:
                 with open(stats_file_path, 'r') as stats_file:
-                    stats_manager.load_from_csv(stats_file, base_timecode)
+                    stats_manager.load_from_csv(stats_file)
 
             # Set downscale factor to improve processing speed.
             video_manager.set_downscale_factor()
@@ -86,7 +85,7 @@ printing a list of scenes, and both saving/loading a stats file.
             scene_manager.detect_scenes(frame_source=video_manager)
 
             # Obtain list of detected scenes.
-            scene_list = scene_manager.get_scene_list(base_timecode)
+            scene_list = scene_manager.get_scene_list()
             # Each scene is a tuple of (start, end) FrameTimecodes.
 
             print('List of scenes obtained:')
@@ -99,6 +98,7 @@ printing a list of scenes, and both saving/loading a stats file.
 
             # We only write to the stats file if a save is required:
             if stats_manager.is_save_required():
+                base_timecode = video_manager.get_base_timecode()
                 with open(stats_file_path, 'w') as stats_file:
                     stats_manager.save_to_csv(stats_file, base_timecode)
 

@@ -107,7 +107,6 @@ def test_scene_list(test_video_file):
     sm.add_detector(ContentDetector())
 
     try:
-        base_timecode = vm.get_base_timecode()
         video_fps = vm.get_framerate()
         start_time = FrameTimecode('00:00:05', video_fps)
         end_time = FrameTimecode('00:00:15', video_fps)
@@ -122,7 +121,7 @@ def test_scene_list(test_video_file):
 
         assert num_frames == (1 + end_time.get_frames() - start_time.get_frames())
 
-        scene_list = sm.get_scene_list(base_timecode)
+        scene_list = sm.get_scene_list()
         assert scene_list
         # Each scene is in the format (Start Timecode, End Timecode)
         assert len(scene_list[0]) == 2

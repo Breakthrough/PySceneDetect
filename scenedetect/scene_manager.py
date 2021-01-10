@@ -374,6 +374,7 @@ class SceneManager(object):
         self._stats_manager = stats_manager
         self._num_frames = 0
         self._start_frame = 0
+        self._base_timecode = None
 
 
     def add_detector(self, detector):
@@ -431,7 +432,7 @@ class SceneManager(object):
         self._sparse_detector_list.clear()
 
 
-    def get_scene_list(self, base_timecode):
+    def get_scene_list(self, base_timecode=None):
         # type: (FrameTimecode) -> List[Tuple[FrameTimecode, FrameTimecode]]
         """ Returns a list of tuples of start/end FrameTimecodes for each detected scene.
 
@@ -444,12 +445,16 @@ class SceneManager(object):
             end_time are FrameTimecode objects representing the exact time/frame where each
             detected scene in the video begins and ends.
         """
+        if base_timecode is None:
+            base_timecode = self._base_timecode
+        if base_timecode is None:
+            return []
         return sorted(self.get_event_list(base_timecode) + get_scenes_from_cuts(
             self.get_cut_list(base_timecode), base_timecode,
             self._num_frames, self._start_frame))
 
 
-    def get_cut_list(self, base_timecode):
+    def get_cut_list(self, base_timecode=None):
         # type: (FrameTimecode) -> List[FrameTimecode]
         """ Returns a list of FrameTimecodes of the detected scene changes/cuts.
 
@@ -466,7 +471,10 @@ class SceneManager(object):
             was detected in the input video(s), which can also be passed to external tools
             for automated splitting of the input into individual scenes.
         """
-
+        if base_timecode is None:
+            base_timecode = self._base_timecode
+        if base_timecode is None:
+            return []
         return [FrameTimecode(cut, base_timecode)
                 for cut in self._get_cutting_list()]
 
@@ -478,7 +486,7 @@ class SceneManager(object):
         return sorted(list(set(self._cutting_list)))
 
 
-    def get_event_list(self, base_timecode):
+    def get_event_list(self, base_timecode=None):
         # type: (FrameTimecode) -> List[FrameTimecode]
         """ Returns a list of FrameTimecode pairs of the detected scenes by all sparse detectors.
 
@@ -489,6 +497,10 @@ class SceneManager(object):
         Returns:
             List of pairs of FrameTimecode objects denoting the detected scenes.
         """
+        if base_timecode is None:
+            base_timecode = self._base_timecode
+        if base_timecode is None:
+            return []
         return [(base_timecode + start, base_timecode + end)
                 for start, end in self._event_list]
 
@@ -555,6 +567,8 @@ class SceneManager(object):
         start_frame = 0
         curr_frame = 0
         end_frame = None
+        self._base_timecode = FrameTimecode(
+            timecode=0, fps=frame_source.get(cv2.CAP_PROP_FPS))
 
         total_frames = math.trunc(frame_source.get(cv2.CAP_PROP_FRAME_COUNT))
 

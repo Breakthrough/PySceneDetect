@@ -302,7 +302,6 @@ class CliContext(object):
 
         # Handle scene detection commands (detect-content, detect-threshold, etc...).
         self.video_manager.start()
-        base_timecode = self.video_manager.get_base_timecode()
 
         start_time = time.time()
         logging.info('Detecting scenes...')
@@ -334,6 +333,7 @@ class CliContext(object):
                 with open(self.stats_file_path, 'wt') as stats_file:
                     logging.info('Saving frame metrics to stats file: %s',
                                  os.path.basename(self.stats_file_path))
+                    base_timecode = self.video_manager.get_base_timecode()
                     self.stats_manager.save_to_csv(
                         stats_file, base_timecode)
             else:
@@ -341,8 +341,8 @@ class CliContext(object):
 
         # Get list of detected cuts and scenes from the SceneManager to generate the required output
         # files with based on the given commands (list-scenes, split-video, save-images, etc...).
-        cut_list = self.scene_manager.get_cut_list(base_timecode)
-        scene_list = self.scene_manager.get_scene_list(base_timecode)
+        cut_list = self.scene_manager.get_cut_list()
+        scene_list = self.scene_manager.get_scene_list()
         video_paths = self.video_manager.get_video_paths()
         video_name = os.path.basename(video_paths[0])
         if video_name.rfind('.') >= 0:
