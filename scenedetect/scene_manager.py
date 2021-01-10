@@ -68,7 +68,6 @@ from scenedetect.thirdparty.simpletable import SimpleTableCell, SimpleTableImage
 from scenedetect.thirdparty.simpletable import SimpleTableRow, SimpleTable, HTMLPage
 
 
-
 ##
 ## SceneManager Helper Functions
 ##
