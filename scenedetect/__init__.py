@@ -52,7 +52,7 @@ from scenedetect.detectors import ThresholdDetector, ContentDetector
 
 # Used for module identification and when printing version & about info
 # (e.g. calling `scenedetect version` or `scenedetect about`).
-__version__ = 'v0.5.4'
+__version__ = 'v0.5.5-dev'
 
 # About & copyright message string shown for the 'about' CLI command (scenedetect about).
 
