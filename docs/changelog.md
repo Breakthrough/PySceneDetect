@@ -23,6 +23,7 @@ PySceneDetect Releases
  * [enhancement] Enabled dynamic resizing for progress bar (resolves [#193](https://github.com/Breakthrough/PySceneDetect/issues/193))
  * [enhancement] Always ouptut version number via logger to assist with debugging (resolves [#171](https://github.com/Breakthrough/PySceneDetect/issues/171))
  * [bugfix] Allow image sequences and URLs to be used as inputs (resolves [#152](https://github.com/Breakthrough/PySceneDetect/issues/171) and [#188](https://github.com/Breakthrough/PySceneDetect/issues/188))
+ * [bugfix] Resolve RuntimeWarning when running as module (resolves [#181](https://github.com/Breakthrough/PySceneDetect/issues/181))
 
 #### Known Issues
 

@@ -90,7 +90,7 @@ setup(
     package_data={'': ['../LICENSE', '../USAGE.md', '../package-info.rst']},
     #include_package_data = True,           # Must leave this to the default.
     #test_suite="unitest.py",               # Auto-detects tests from setup.cfg
-    entry_points={"console_scripts": ["scenedetect=scenedetect:main"]},
+    entry_points={"console_scripts": ["scenedetect=scenedetect.__main__:main"]},
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Environment :: Console',
