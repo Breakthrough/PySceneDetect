@@ -74,6 +74,7 @@ from scenedetect.platform import check_opencv_ffmpeg_dll
 from scenedetect.frame_timecode import FrameTimecode
 
 def get_plural(val_list):
+    # type: (List[any]) -> str
     """ Get Plural: Helper function to return 's' if a list has more than one (1)
     element, otherwise returns ''.
 
@@ -82,6 +83,18 @@ def get_plural(val_list):
     """
     return 's' if len(val_list) > 1 else ''
 
+def contains_sequence_or_url(video_paths):
+    # type: (List[str]) -> bool
+    """ Checks if any of the video paths are a URL or image sequence.
+
+    Arguments:
+        video_paths: List of strings.
+
+    Returns: bool: True if any of the video_paths are a URL or image sequence,
+        False otherwise. """
+
+    return any(['%' in video_path or '://' in video_path
+            for video_path in video_paths])
 
 class CliContext(object):
     """ Context of the command-line interface passed between the various sub-commands.
@@ -665,6 +678,12 @@ class CliContext(object):
             click.BadParameter
         """
         self.check_input_open()
+
+        if contains_sequence_or_url(self.video_manager.get_video_paths()):
+            self.options_processed = False
+            error_str = '\nThe save-images command is incompatible with image sequences/URLs.'
+            logging.error(error_str)
+            raise click.BadParameter(error_str, param_hint='save-images')
 
         num_flags = sum([True if flag else False for flag in [jpeg, webp, png]])
         if num_flags <= 1:

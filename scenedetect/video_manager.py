@@ -227,8 +227,11 @@ def open_captures(video_files, framerate=None, validate_parameters=True):
         raise ValueError("Unexpected element type in video_files list (expected str(s)/int).")
     elif framerate is not None and not isinstance(framerate, float):
         raise TypeError("Expected type float for parameter framerate.")
-    # Check if files exist.
-    if not is_device and any([not os.path.exists(video_file) for video_file in video_files]):
+    # Check if files exist if passed video file is not an image sequence
+    # (checked with presence of % in filename) or not a URL (://).
+    if not is_device and any(
+        [not os.path.exists(video_file) for video_file in video_files
+         if not ('%' in video_file or '://' in video_file)]):
         raise IOError("Video file(s) not found.")
     cap_list = []
 
@@ -681,6 +684,8 @@ class VideoManager(object):
             return self._frame_length
         elif capture_prop == cv2.CAP_PROP_POS_FRAMES:
             return self._curr_time
+        elif capture_prop == cv2.CAP_PROP_FPS:
+            return self._cap_framerate
         elif index is None:
             index = 0
         return self._cap_list[index].get(capture_prop)

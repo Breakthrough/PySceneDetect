@@ -52,6 +52,7 @@ import click
 # PySceneDetect Library Imports
 import scenedetect
 from scenedetect.cli.context import CliContext
+from scenedetect.cli.context import contains_sequence_or_url
 from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.video_manager import VideoManager
 
@@ -181,7 +182,7 @@ def duplicate_command(ctx, param_hint):
 @click.option(
     '--input', '-i',
     multiple=True, required=False, metavar='VIDEO',
-    type=click.Path(exists=True, file_okay=True, readable=True, resolve_path=True), help=
+    type=click.STRING, help=
     '[Required] Input video file.'
     ' May be specified multiple times to concatenate several videos together.')
 @click.option(
@@ -614,6 +615,13 @@ def split_video_command(ctx, output, filename, high_quality, override_args, quie
     if ctx.obj.split_video:
         logging.warning('split-video command is specified twice.')
     ctx.obj.check_input_open()
+
+    if contains_sequence_or_url(ctx.obj.video_manager.get_video_paths()):
+        ctx.obj.options_processed = False
+        error_str = 'The save-images command is incompatible with image sequences/URLs.'
+        logging.error(error_str)
+        raise click.BadParameter(error_str, param_hint='save-images')
+
     ctx.obj.split_video = True
     ctx.obj.split_quiet = True if quiet else False
     ctx.obj.split_directory = output
