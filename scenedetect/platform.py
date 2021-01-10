@@ -102,20 +102,57 @@ else:
 
 
 ##
-## OpenCV 2.x Compatibility Fix
+## OpenCV Compatibility Fixes
 ##
+
+def opencv_version_required(min_version):
+    """ Checks if the OpenCV library version is at least min_version.
+
+    Arguments:
+        min_version: List[int] of the version to compare against.
+
+    Returns:
+        bool: True if the installed version is at least min_version,
+        False otherwise.
+    """
+    if not cv2.__version__[0].isdigit():
+        return False
+    try:
+        version = [int(x) for x in cv2.__version__.split('.')]
+        if len(version) < len(min_version):
+            return False
+        return not any([x[0] < x[1] for x in zip(version, min_version)])
+    except ValueError:
+        return False
+
 
 # Compatibility fix for OpenCV v2.x (copies CAP_PROP_* properties from the
 # cv2.cv namespace to the cv2 namespace, as the cv2.cv namespace was removed
 # with the release of OpenCV 3.0).
-if cv2.__version__[0] == '2' or not (
-        cv2.__version__[0].isdigit() and int(cv2.__version__[0]) >= 3):
+if not opencv_version_required([3, 0]):
     cv2.CAP_PROP_FRAME_WIDTH = cv2.cv.CV_CAP_PROP_FRAME_WIDTH
     cv2.CAP_PROP_FRAME_HEIGHT = cv2.cv.CV_CAP_PROP_FRAME_HEIGHT
     cv2.CAP_PROP_FPS = cv2.cv.CV_CAP_PROP_FPS
     cv2.CAP_PROP_POS_MSEC = cv2.cv.CV_CAP_PROP_POS_MSEC
     cv2.CAP_PROP_POS_FRAMES = cv2.cv.CV_CAP_PROP_POS_FRAMES
     cv2.CAP_PROP_FRAME_COUNT = cv2.cv.CV_CAP_PROP_FRAME_COUNT
+
+
+def get_aspect_ratio(cap):
+    # type: (cv2.VideoCapture) -> float
+    """ Compatibility fix for OpenCV < v3.4.1 to get the aspect ratio
+    of a video. For older versions, this function always returns 1.0.
+
+    Argument:
+        cap: cv2.VideoCapture object. Must be opened and in valid state.
+
+    Returns:
+        float: Display aspect ratio CAP_PROP_SAR_NUM / CAP_PROP_SAR_DEN,
+        or 1.0 if using a version of OpenCV < 3.4.1.
+    """
+    if not opencv_version_required([3, 4, 1]):
+        return 1.0
+    return cap.get(cv2.CAP_PROP_SAR_NUM) / cap.get(cv2.CAP_PROP_SAR_DEN)
 
 
 ##
