@@ -55,7 +55,6 @@ from scenedetect.scene_manager import write_scene_list_html
 
 from scenedetect.stats_manager import StatsManager
 from scenedetect.stats_manager import StatsFileCorrupt
-from scenedetect.stats_manager import StatsFileFramerateMismatch
 
 from scenedetect.video_manager import VideoManager
 from scenedetect.video_manager import VideoOpenFailure
@@ -278,20 +277,6 @@ class CliContext(object):
                     logging.error('\n'.join(error_strs))
                     raise click.BadParameter(
                         '\n  Could not load given stats file, see above output for details.',
-                        param_hint='input stats file')
-                except StatsFileFramerateMismatch as ex:
-                    error_strs = [
-                        'could not load stats file.', 'Failed to parse stats file:',
-                        'Framerate differs between stats file (%.2f FPS) and input'
-                        ' video%s (%.2f FPS)' % (
-                            ex.stats_file_fps,
-                            's' if self.video_manager.get_num_videos() > 1 else '',
-                            ex.base_timecode_fps),
-                        'Ensure the correct stats file path was given, or delete and re-generate'
-                        ' the stats file.']
-                    logging.error('\n'.join(error_strs))
-                    raise click.BadParameter(
-                        'framerate differs between given stats file and input video(s).',
                         param_hint='input stats file')
 
 

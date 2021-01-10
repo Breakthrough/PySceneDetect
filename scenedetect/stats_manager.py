@@ -61,7 +61,6 @@ from scenedetect.platform import get_csv_writer
 ## StatsManager CSV File Column Names (Header Row)
 ##
 
-COLUMN_NAME_FPS = "Frame Rate:"
 COLUMN_NAME_FRAME_NUMBER = "Frame Number"
 COLUMN_NAME_TIMECODE = "Timecode"
 
@@ -98,18 +97,6 @@ class StatsFileCorrupt(Exception):
         # type: (str, str)
         # Pass message string to base Exception class.
         super(StatsFileCorrupt, self).__init__(message)
-
-
-class StatsFileFramerateMismatch(Exception):
-    """ Raised when attempting to load a CSV file with a framerate that differs from
-    the current base timecode / VideoManager. """
-    def __init__(self, base_timecode_fps, stats_file_fps, message=
-                 "Framerate differs between stats file and base timecode."):
-        # type: (str, str)
-        # Pass message string to base Exception class.
-        super(StatsFileFramerateMismatch, self).__init__(message)
-        self.base_timecode_fps = base_timecode_fps
-        self.stats_file_fps = stats_file_fps
 
 
 class NoMetricsRegistered(Exception):
@@ -251,7 +238,6 @@ class StatsManager(object):
                 self._registered_metrics and self._frame_metrics):
             # Header rows.
             metric_keys = sorted(list(self._registered_metrics.union(self._loaded_metrics)))
-            csv_writer.writerow([COLUMN_NAME_FPS, '%.10f' % base_timecode.get_framerate()])
             csv_writer.writerow(
                 [COLUMN_NAME_FRAME_NUMBER, COLUMN_NAME_TIMECODE] + metric_keys)
             frame_keys = sorted(self._frame_metrics.keys())
@@ -287,33 +273,17 @@ class StatsManager(object):
         Raises:
             StatsFileCorrupt: Stats file is corrupt and can't be loaded, or wrong file
                 was specified.
-            StatsFileFramerateMismatch: Framerate does not match the loaded stats file,
-                indicating either the wrong video or wrong stats file was specified.
         """
         csv_reader = get_csv_reader(csv_file)
         num_cols = None
         num_metrics = None
         num_frames = None
-        # First row: Framerate, [video_framerate]
+        # First Row: Frame Num, Timecode, [metrics...]
         try:
             row = next(csv_reader)
         except StopIteration:
             # If the file is blank or we couldn't decode anything, assume the file was empty.
-            return num_frames
-        # First Row (FPS = [...]) and ensure framerate equals base_timecode if set.
-        if not len(row) == 2 or not row[0] == COLUMN_NAME_FPS:
-            raise StatsFileCorrupt()
-        stats_file_framerate = float(row[1])
-        if stats_file_framerate < MINIMUM_FRAMES_PER_SECOND_FLOAT:
-            raise StatsFileCorrupt("Invalid framerate detected in CSV stats file "
-                                   "(decoded FPS: %f)." % stats_file_framerate)
-        if base_timecode is not None and not base_timecode.equal_framerate(stats_file_framerate):
-            raise StatsFileFramerateMismatch(base_timecode.get_framerate(), stats_file_framerate)
-        # Second Row: Frame Num, Timecode, [metrics...]
-        try:
-            row = next(csv_reader)
-        except StopIteration:
-            raise StatsFileCorrupt("Header row(s) missing.")
+            return None
         if not row or not len(row) >= 2:
             raise StatsFileCorrupt()
         if row[0] != COLUMN_NAME_FRAME_NUMBER or row[1] != COLUMN_NAME_TIMECODE:
