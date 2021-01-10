@@ -4,6 +4,26 @@ PySceneDetect Releases
 
 ## PySceneDetect 0.5
 
+### 0.5.5
+
+
+#### Release Notes
+
+ * Primarily maintenance release including various bugfixes
+ * Removed first row from statsfiles so it is a valid CSV file
+
+#### Changelog
+
+ * Removed first row from statsfile to comply with RFC 4180, includes backwards compatibility so existing statsfiles can still be loaded (resolves [#136](https://github.com/Breakthrough/PySceneDetect/issues/136))
+ * Removed now unused argument base_timecode from StatsManager.load_from_csv() method
+
+#### Known Issues
+
+ * Variable framerate videos are not supported properly currently (#168), a warning may be added in the next release to indicate when a VFR video is detected, until this can be properly resolved ([#168](https://github.com/Breakthrough/PySceneDetect/issues/168))
+ * In certain cases, video files which will not load will fail silently, with PySceneDetect reporting that it processed 0 frames.  Better error handling/messaging is planned for these cases as part of [#179](https://github.com/Breakthrough/PySceneDetect/issues/179)
+
+
+
 ### 0.5.4 (September 14, 2020) &nbsp;<span class="fa fa-tags"></span>
 
 #### Release Notes
