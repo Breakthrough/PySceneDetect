@@ -50,7 +50,6 @@ from __future__ import print_function
 import logging
 
 # PySceneDetect Library Imports
-from scenedetect.frame_timecode import MINIMUM_FRAMES_PER_SECOND_FLOAT
 from scenedetect.platform import get_csv_reader
 from scenedetect.platform import get_csv_writer
 
@@ -253,17 +252,29 @@ class StatsManager(object):
             if not self._frame_metrics:
                 raise NoMetricsSet()
 
+    @staticmethod
+    def valid_header(row):
+        # type: (List[str]) -> bool
+        """ Validates if the given CSV row is a valid header for a statsfile.
 
-    def load_from_csv(self, csv_file, base_timecode=None, reset_save_required=True):
-        # type: (File [r], FrameTimecode, Optional[bool] -> int
+        Arguments:
+            row: A row decoded from the CSV reader.
+
+        Returns:
+            True if a valid statsfile header, False otherwise.
+        """
+        if not row or not len(row) >= 2:
+            return False
+        if row[0] != COLUMN_NAME_FRAME_NUMBER or row[1] != COLUMN_NAME_TIMECODE:
+            return False
+        return True
+
+    def load_from_csv(self, csv_file, reset_save_required=True):
+        # type: (File [r], Optional[bool] -> int
         """ Load From CSV: Loads all metrics stored in a CSV file into the StatsManager instance.
 
         Arguments:
             csv_file: A file handle opened in read mode (e.g. open('...', 'r')).
-            base_timecode: The base_timecode obtained from the frame source VideoManager.
-                If using an OpenCV VideoCapture, create one using the video framerate by
-                setting base_timecode=FrameTimecode(0, fps=video_framerate).
-                If base_timecode is not set (i.e. is None), the framerate is not validated.
             reset_save_required: If True, clears the flag indicating that a save is required.
 
         Returns:
@@ -281,12 +292,14 @@ class StatsManager(object):
         # First Row: Frame Num, Timecode, [metrics...]
         try:
             row = next(csv_reader)
+            # Backwards compatibility for previous versions of statsfile
+            # which included an additional header row.
+            if not self.valid_header(row):
+                row = next(csv_reader)
         except StopIteration:
             # If the file is blank or we couldn't decode anything, assume the file was empty.
             return None
-        if not row or not len(row) >= 2:
-            raise StatsFileCorrupt()
-        if row[0] != COLUMN_NAME_FRAME_NUMBER or row[1] != COLUMN_NAME_TIMECODE:
+        if not self.valid_header(row):
             raise StatsFileCorrupt()
         num_cols = len(row)
         num_metrics = num_cols - 2
