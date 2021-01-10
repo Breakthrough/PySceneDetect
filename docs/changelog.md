@@ -8,7 +8,7 @@ PySceneDetect Releases
 
 #### Release Notes
 
- * Primarily maintenance release including various bugfixes and minor API changes
+ * Primarily maintenance release including various bugfixes, minor API changes, and enhancements
  * Removed first row from statsfiles so it is a valid CSV file
  * The progress bar now correctly resizes when the terminal is resized
  * Image sequences and URLs are now supported for input via the CLI/API
@@ -22,7 +22,7 @@ PySceneDetect Releases
  * [bugfix] Fix unhandled exception causing improper error message when a video fails to load on non-Windows platforms (resolves [#192](https://github.com/Breakthrough/PySceneDetect/issues/192))
  * [enhancement] Enabled dynamic resizing for progress bar (resolves [#193](https://github.com/Breakthrough/PySceneDetect/issues/193))
  * [enhancement] Always ouptut version number via logger to assist with debugging (resolves [#171](https://github.com/Breakthrough/PySceneDetect/issues/171))
- * [enhancement] Allow image sequences and URLs to be used as inputs (resolves [#152](https://github.com/Breakthrough/PySceneDetect/issues/171) and [#188](https://github.com/Breakthrough/PySceneDetect/issues/188))
+ * [bugfix] Allow image sequences and URLs to be used as inputs (resolves [#152](https://github.com/Breakthrough/PySceneDetect/issues/171) and [#188](https://github.com/Breakthrough/PySceneDetect/issues/188))
 
 #### Known Issues
 
