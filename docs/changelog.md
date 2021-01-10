@@ -12,6 +12,7 @@ PySceneDetect Releases
  * Removed first row from statsfiles so it is a valid CSV file
  * The progress bar now correctly resizes when the terminal is resized
  * Image sequences and URLs are now supported for input via the CLI/API
+ * Images exported using the `save-images` command are now resized to match the display aspect ratio
 
 #### Changelog
 
@@ -24,6 +25,8 @@ PySceneDetect Releases
  * [enhancement] Always ouptut version number via logger to assist with debugging (resolves [#171](https://github.com/Breakthrough/PySceneDetect/issues/171))
  * [bugfix] Allow image sequences and URLs to be used as inputs (resolves [#152](https://github.com/Breakthrough/PySceneDetect/issues/171) and [#188](https://github.com/Breakthrough/PySceneDetect/issues/188))
  * [bugfix] Resolve RuntimeWarning when running as module (resolves [#181](https://github.com/Breakthrough/PySceneDetect/issues/181))
+ * [bugfix] Pixel aspect ratio is now applied when using `save-images` (resolves [#195](https://github.com/Breakthrough/PySceneDetect/issues/195))
+ * [bugfix] Fix issue where `save-images` was not saving the last frame
 
 #### Known Issues
 

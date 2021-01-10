@@ -45,6 +45,7 @@ import click
 import cv2
 from scenedetect.platform import tqdm
 from scenedetect.platform import get_and_create_path
+from scenedetect.platform import get_aspect_ratio
 
 # PySceneDetect Library Imports
 import scenedetect.detectors
@@ -242,12 +243,14 @@ class CliContext(object):
         ]
 
         self.image_filenames = {i: [] for i in range(len(timecode_list))}
+        aspect_ratio = get_aspect_ratio(self.video_manager)
+        if abs(aspect_ratio - 1.0) < 0.01:
+            aspect_ratio = None
 
         for i, scene_timecodes in enumerate(timecode_list):
             for j, image_timecode in enumerate(scene_timecodes):
                 self.video_manager.seek(image_timecode)
-                self.video_manager.grab()
-                ret_val, frame_im = self.video_manager.retrieve()
+                ret_val, frame_im = self.video_manager.read()
                 if ret_val:
                     file_path = '%s.%s' % (filename_template.safe_substitute(
                         VIDEO_NAME=video_name,
@@ -256,6 +259,10 @@ class CliContext(object):
                         FRAME_NUMBER=image_timecode.get_frames()),
                                            self.image_extension)
                     self.image_filenames[i].append(file_path)
+                    if aspect_ratio is not None:
+                        frame_im = cv2.resize(
+                            frame_im, (0, 0), fx=aspect_ratio, fy=1.0,
+                            interpolation=cv2.INTER_CUBIC)
                     cv2.imwrite(
                         get_and_create_path(
                             file_path,

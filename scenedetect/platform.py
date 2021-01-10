@@ -136,6 +136,7 @@ if not opencv_version_required([3, 0]):
     cv2.CAP_PROP_POS_MSEC = cv2.cv.CV_CAP_PROP_POS_MSEC
     cv2.CAP_PROP_POS_FRAMES = cv2.cv.CV_CAP_PROP_POS_FRAMES
     cv2.CAP_PROP_FRAME_COUNT = cv2.cv.CV_CAP_PROP_FRAME_COUNT
+    cv2.INTER_CUBIC = cv2.cv.INTER_CUBIC
 
 
 def get_aspect_ratio(cap):
