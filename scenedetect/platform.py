@@ -144,21 +144,29 @@ if not opencv_version_required([3, 0]):
     cv2.INTER_CUBIC = cv2.cv.INTER_CUBIC
 
 
-def get_aspect_ratio(cap):
+def get_aspect_ratio(cap, epsilon=0.01):
     # type: (cv2.VideoCapture) -> float
     """ Compatibility fix for OpenCV < v3.4.1 to get the aspect ratio
     of a video. For older versions, this function always returns 1.0.
 
     Argument:
         cap: cv2.VideoCapture object. Must be opened and in valid state.
+        epsilon: Used to compare numerator/denominator to zero.
 
     Returns:
         float: Display aspect ratio CAP_PROP_SAR_NUM / CAP_PROP_SAR_DEN,
-        or 1.0 if using a version of OpenCV < 3.4.1.
+        or 1.0 if using a version of OpenCV < 3.4.1.  Also returns 1.0
+        if for some reason the numerator/denominator returned is zero
+        (can happen if the video was not opened correctly).
     """
     if not opencv_version_required([3, 4, 1]):
         return 1.0
-    return cap.get(cv2.CAP_PROP_SAR_NUM) / cap.get(cv2.CAP_PROP_SAR_DEN)
+    num = cap.get(cv2.CAP_PROP_SAR_NUM)
+    den = cap.get(cv2.CAP_PROP_SAR_DEN)
+    # If numerator or denominator are zero, fall back to 1.0 aspect ratio.
+    if abs(num) < epsilon or abs(den) < epsilon:
+        return 1.0
+    return num / den
 
 
 ##
