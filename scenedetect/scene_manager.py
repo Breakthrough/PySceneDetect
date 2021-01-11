@@ -51,11 +51,14 @@ threshold values (or other algorithm options) are used.
 from __future__ import print_function
 from string import Template
 import math
+import logging
 
 # Third-Party Library Imports
 import cv2
+import numpy as np
 from scenedetect.platform import tqdm
 from scenedetect.platform import get_and_create_path
+from scenedetect.platform import get_aspect_ratio
 
 # PySceneDetect Library Imports
 from scenedetect.frame_timecode import FrameTimecode
@@ -238,39 +241,21 @@ def write_scene_list_html(output_html_filename, scene_list, cut_list=None, css=N
     page.save(output_html_filename)
 
 
-def generate_images(scene_list, video_manager, video_name, num_images=2,
-                    image_extension='jpg', quality_or_compression=95,
+def generate_images(scene_list, video_manager, video_name,
+                    num_images=3, image_frame_margin=0,
+                    image_extension='jpg', encoder_param=95,
                     image_name_template='$VIDEO_NAME-Scene-$SCENE_NUMBER-$IMAGE_NUMBER',
                     output_dir=None, downscale_factor=1, show_progress=False):
     # type: (...) -> Dict[List[str]]
-    """ Generates output images for the given scene list.
-
-    Arguments:
-        TODO.
-
-    Returns:
-        Dictionary of { scene_index : [image_paths] }.
-
-    """
+    """ TODO: Documentation.  Returns dictionary of format { scene # : [paths] } """
 
     if not scene_list:
-        return True
+        return {}
     if num_images <= 0:
         raise ValueError()
 
-    if not image_extension in ('jpg', 'png', 'webp'):
-        raise ValueError("Unrecognized image extension: %s" % image_extension)
-
-    imwrite_param = []
-    available_extensions = get_cv2_imwrite_params()
-    if quality_or_compression is not None:
-        if image_extension in available_extensions:
-            imwrite_param = [available_extensions[image_extension], quality_or_compression]
-        else:
-            valid_extensions = str(list(available_extensions.keys()))
-            raise RuntimeError(
-                'Invalid image extension, must be one of (case-sensitive): %s' %
-                valid_extensions)
+    imwrite_param = [get_cv2_imwrite_params()[image_extension],
+                     encoder_param] if encoder_param is not None else []
 
     # Reset video manager and downscale factor.
     video_manager.release()
@@ -280,8 +265,9 @@ def generate_images(scene_list, video_manager, video_name, num_images=2,
 
     # Setup flags and init progress bar if available.
     completed = True
+    logging.info('Generating output images (%d per scene)...', num_images)
     progress_bar = None
-    if tqdm and show_progress:
+    if show_progress and tqdm:
         progress_bar = tqdm(
             total=len(scene_list) * num_images,
             unit='images',
@@ -296,39 +282,59 @@ def generate_images(scene_list, video_manager, video_name, num_images=2,
 
     timecode_list = dict()
 
-    for i in range(len(scene_list)):
-        timecode_list[i] = []
+    fps = scene_list[0][0].framerate
 
-    if num_images == 1:
-        for i, (start_time, end_time) in enumerate(scene_list):
-            duration = end_time - start_time
-            timecode_list[i].append(start_time + int(duration.get_frames() / 2))
-    else:
-        middle_images = num_images - 2
-        for i, (start_time, end_time) in enumerate(scene_list):
-            timecode_list[i].append(start_time)
+    timecode_list = [
+        [
+            FrameTimecode(int(f), fps=fps) for f in [
+                # middle frames
+                a[len(a)//2] if (0 < j < num_images-1) or num_images == 1
 
-            if middle_images > 0:
-                duration = (end_time.get_frames() - 1) - start_time.get_frames()
-                duration_increment = None
-                duration_increment = int(duration / (middle_images + 1))
-                for j in range(middle_images):
-                    timecode_list[i].append(start_time + ((j+1) * duration_increment))
-            # End FrameTimecode is always the same frame as the next scene's start_time
-            # (one frame past the end), so we need to subtract 1 here.
-            timecode_list[i].append(end_time - 1)
+                # first frame
+                else min(a[0] + image_frame_margin, a[-1]) if j == 0
 
-    for i in timecode_list:
-        for j, image_timecode in enumerate(timecode_list[i]):
+                # last frame
+                else max(a[-1] - image_frame_margin, a[0])
+
+                # for each evenly-split array of frames in the scene list
+                for j, a in enumerate(np.array_split(r, num_images))
+            ]
+        ]
+        for i, r in enumerate([
+            # pad ranges to number of images
+            r
+            if 1+r[-1]-r[0] >= num_images
+            else list(r) + [r[-1]] * (num_images - len(r))
+            # create range of frames in scene
+            for r in (
+                range(start.get_frames(), end.get_frames())
+                # for each scene in scene list
+                for start, end in scene_list
+                )
+        ])
+    ]
+
+    image_filenames = {i: [] for i in range(len(timecode_list))}
+    aspect_ratio = get_aspect_ratio(video_manager)
+    if abs(aspect_ratio - 1.0) < 0.01:
+        aspect_ratio = None
+
+    for i, scene_timecodes in enumerate(timecode_list):
+        for j, image_timecode in enumerate(scene_timecodes):
             video_manager.seek(image_timecode)
-            video_manager.grab()
-            ret_val, frame_im = video_manager.retrieve()
+            ret_val, frame_im = video_manager.read()
             if ret_val:
                 file_path = '%s.%s' % (filename_template.safe_substitute(
                     VIDEO_NAME=video_name,
                     SCENE_NUMBER=scene_num_format % (i + 1),
-                    IMAGE_NUMBER=image_num_format % (j + 1)),
-                                       image_extension)
+                    IMAGE_NUMBER=image_num_format % (j + 1),
+                    FRAME_NUMBER=image_timecode.get_frames()),
+                                        image_extension)
+                image_filenames[i].append(file_path)
+                if aspect_ratio is not None:
+                    frame_im = cv2.resize(
+                        frame_im, (0, 0), fx=aspect_ratio, fy=1.0,
+                        interpolation=cv2.INTER_CUBIC)
                 cv2.imwrite(
                     get_and_create_path(file_path, output_dir),
                     frame_im, imwrite_param)
@@ -338,7 +344,10 @@ def generate_images(scene_list, video_manager, video_name, num_images=2,
             if progress_bar:
                 progress_bar.update(1)
 
-    return completed
+    if not completed:
+        logging.error('Could not generate all output images.')
+
+    return image_filenames
 
 
 ##
