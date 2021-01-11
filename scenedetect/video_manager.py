@@ -50,6 +50,7 @@ respect to a SceneManager object.
 # Standard Library Imports
 from __future__ import print_function
 import os
+import os.path
 import math
 
 # Third-Party Library Imports
@@ -435,6 +436,22 @@ class VideoManager(object):
             List[str]: List of paths to the video files opened by the VideoManager.
         """
         return list(self._video_file_paths)
+
+
+    def get_video_name(self):
+        # type: () -> str
+        """ Returns the name of the video based on the first video path.
+
+        Returns:
+            str: The base name of the video file, without extension.
+        """
+        video_paths = self.get_video_paths()
+        if not video_paths:
+            return ''
+        video_name = os.path.basename(video_paths[0])
+        if video_name.rfind('.') >= 0:
+            video_name = video_name[:video_name.rfind('.')]
+        return video_name
 
 
     def get_framerate(self):

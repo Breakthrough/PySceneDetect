@@ -683,7 +683,7 @@ def split_video_command(ctx, output, filename, high_quality, override_args, quie
     is_flag=True, flag_value=True, help=
     'Set output format to PNG.')
 @click.option(
-    '--compression', '-c', metavar='C', default=None,
+    '--compression', '-c', metavar='C', default=3, show_default=True,
     type=click.IntRange(0, 9), help=
     'PNG compression rate, from 0-9. Higher values produce smaller files but result'
     ' in longer compression time. This setting does not affect image quality, only'
@@ -698,6 +698,8 @@ def save_images_command(ctx, output, filename, num_images, jpeg, webp, quality, 
     """ Create images for each detected scene. """
     if ctx.obj.save_images:
         duplicate_command(ctx, 'save-images')
+    if quality is None:
+        quality = 100 if webp else 95
     ctx.obj.save_images_command(num_images, output, filename, jpeg, webp, quality, png,
                                 compression, image_frame_margin)
 

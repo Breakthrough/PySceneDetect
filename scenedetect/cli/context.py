@@ -148,6 +148,7 @@ class CliContext(object):
         self.frame_skip = 0                     # -fs/--frame-skip
         self.drop_short_scenes = False          # --drop-short-scenes
         self.min_scene_len = None               # -m/--min-scene-len
+
         # Properties for save-images command.
         self.save_images = False                # save-images command
         self.image_extension = 'jpg'            # save-images -j/--jpeg, -w/--webp, -p/--png
@@ -155,13 +156,11 @@ class CliContext(object):
 
         self.image_param = None                 # save-images -q/--quality if -j/-w,
                                                 #   -c/--compression if -p
-
-
         self.image_name_format = (              # save-images -f/--name-format
             '$VIDEO_NAME-Scene-$SCENE_NUMBER-$IMAGE_NUMBER')
-        self.num_images = 2                     # save-images -n/--num-images
+        self.num_images = 3                     # save-images -n/--num-images
         self.image_frame_margin = 0             # save-images --image-frame-margin
-        self.imwrite_params = get_cv2_imwrite_params()
+
         # Properties for split-video command.
         self.split_video = False                # split-video command
         self.split_mkvmerge = False             # split-video -c/--copy
@@ -169,6 +168,7 @@ class CliContext(object):
         self.split_directory = None             # split-video -o/--output
         self.split_name_format = '$VIDEO_NAME-Scene-$SCENE_NUMBER'  # split-video -f/--filename
         self.split_quiet = False                # split-video -q/--quiet
+
         # Properties for list-scenes command.
         self.list_scenes = False                # list-scenes command
         self.print_scene_list = False           # list-scenes --quiet/-q
@@ -176,10 +176,10 @@ class CliContext(object):
         self.scene_list_name_format = None      # list-scenes -f/--filename
         self.scene_list_output = False          # list-scenes -n/--no-output
 
+        # Properties for export-html command.
         self.export_html = False                # export-html command
         self.html_name_format = None            # export-html -f/--filename
         self.html_include_images = True         # export-html --no-images
-        self.image_filenames = None             # export-html used for embedding images
         self.image_width = None                 # export-html -w/--image-width
         self.image_height = None                # export-html -h/--image-height
 
@@ -193,47 +193,45 @@ class CliContext(object):
             if self.video_manager is not None:
                 self.video_manager.release()
 
-    # TODO: Replace with scenedetect.scene_manager.save_images
-    def _generate_images(self, scene_list, video_name,
+    # TODO: Replace with scenedetect.scene_manager.generate_images
+    @staticmethod
+    def _generate_images(scene_list, video_manager, video_name,
+                         num_images=3, image_frame_margin=0,
+                         image_extension='jpg', encoder_param=95,
                          image_name_template='$VIDEO_NAME-Scene-$SCENE_NUMBER-$IMAGE_NUMBER',
-                         output_dir=None):
-        # type: (List[Tuple[FrameTimecode, FrameTimecode]) -> None
+                         output_dir=None, downscale_factor=1, show_progress=False):
+        # type: (List[Tuple[FrameTimecode, FrameTimecode]) -> Dict[List[str]]
 
         if not scene_list:
             return
-        if not self.options_processed:
-            return
-        if self.num_images <= 0:
+        if num_images <= 0:
             raise ValueError()
-        self.check_input_open()
 
-        imwrite_param = []
-        if self.image_param is not None:
-            imwrite_param = [self.imwrite_params[self.image_extension], self.image_param]
+        imwrite_param = [get_cv2_imwrite_params()[image_extension],
+                         encoder_param] if encoder_param is not None else []
 
         # Reset video manager and downscale factor.
-        self.video_manager.release()
-        self.video_manager.reset()
-        self.video_manager.set_downscale_factor(1)
-        self.video_manager.start()
+        video_manager.release()
+        video_manager.reset()
+        video_manager.set_downscale_factor(downscale_factor)
+        video_manager.start()
 
         # Setup flags and init progress bar if available.
         completed = True
-        logging.info('Generating output images (%d per scene)...', self.num_images)
+        logging.info('Generating output images (%d per scene)...', num_images)
         progress_bar = None
-        if tqdm and not self.quiet_mode:
+        if show_progress and tqdm:
             progress_bar = tqdm(
-                total=len(scene_list) * self.num_images,
+                total=len(scene_list) * num_images,
                 unit='images',
                 dynamic_ncols=True)
 
         filename_template = Template(image_name_template)
 
-
         scene_num_format = '%0'
         scene_num_format += str(max(3, math.floor(math.log(len(scene_list), 10)) + 1)) + 'd'
         image_num_format = '%0'
-        image_num_format += str(math.floor(math.log(self.num_images, 10)) + 2) + 'd'
+        image_num_format += str(math.floor(math.log(num_images, 10)) + 2) + 'd'
 
         timecode_list = dict()
 
@@ -243,23 +241,23 @@ class CliContext(object):
             [
                 FrameTimecode(int(f), fps=fps) for f in [
                     # middle frames
-                    a[len(a)//2] if (0 < j < self.num_images-1) or self.num_images == 1
+                    a[len(a)//2] if (0 < j < num_images-1) or num_images == 1
 
                     # first frame
-                    else min(a[0] + self.image_frame_margin, a[-1]) if j == 0
+                    else min(a[0] + image_frame_margin, a[-1]) if j == 0
 
                     # last frame
-                    else max(a[-1] - self.image_frame_margin, a[0])
+                    else max(a[-1] - image_frame_margin, a[0])
 
                     # for each evenly-split array of frames in the scene list
-                    for j, a in enumerate(np.array_split(r, self.num_images))
+                    for j, a in enumerate(np.array_split(r, num_images))
                 ]
             ]
             for i, r in enumerate([
                 # pad ranges to number of images
                 r
-                if 1+r[-1]-r[0] >= self.num_images
-                else list(r) + [r[-1]] * (self.num_images - len(r))
+                if 1+r[-1]-r[0] >= num_images
+                else list(r) + [r[-1]] * (num_images - len(r))
                 # create range of frames in scene
                 for r in (
                     range(start.get_frames(), end.get_frames())
@@ -269,31 +267,29 @@ class CliContext(object):
             ])
         ]
 
-        self.image_filenames = {i: [] for i in range(len(timecode_list))}
-        aspect_ratio = get_aspect_ratio(self.video_manager)
+        image_filenames = {i: [] for i in range(len(timecode_list))}
+        aspect_ratio = get_aspect_ratio(video_manager)
         if abs(aspect_ratio - 1.0) < 0.01:
             aspect_ratio = None
 
         for i, scene_timecodes in enumerate(timecode_list):
             for j, image_timecode in enumerate(scene_timecodes):
-                self.video_manager.seek(image_timecode)
-                ret_val, frame_im = self.video_manager.read()
+                video_manager.seek(image_timecode)
+                ret_val, frame_im = video_manager.read()
                 if ret_val:
                     file_path = '%s.%s' % (filename_template.safe_substitute(
                         VIDEO_NAME=video_name,
                         SCENE_NUMBER=scene_num_format % (i + 1),
                         IMAGE_NUMBER=image_num_format % (j + 1),
                         FRAME_NUMBER=image_timecode.get_frames()),
-                                           self.image_extension)
-                    self.image_filenames[i].append(file_path)
+                                           image_extension)
+                    image_filenames[i].append(file_path)
                     if aspect_ratio is not None:
                         frame_im = cv2.resize(
                             frame_im, (0, 0), fx=aspect_ratio, fy=1.0,
                             interpolation=cv2.INTER_CUBIC)
                     cv2.imwrite(
-                        get_and_create_path(
-                            file_path,
-                            output_dir if output_dir is not None else self.output_directory),
+                        get_and_create_path(file_path, output_dir),
                         frame_im, imwrite_param)
                 else:
                     completed = False
@@ -303,6 +299,8 @@ class CliContext(object):
 
         if not completed:
             logging.error('Could not generate all output images.')
+
+        return image_filenames
 
     def _open_stats_file(self):
 
@@ -399,9 +397,7 @@ class CliContext(object):
             ]
 
         video_paths = self.video_manager.get_video_paths()
-        video_name = os.path.basename(video_paths[0])
-        if video_name.rfind('.') >= 0:
-            video_name = video_name[:video_name.rfind('.')]
+        video_name = self.video_manager.get_video_name()
 
         if scene_list:  # Ensure we don't divide by zero.
             logging.info('Detected %d scenes, average shot length %.1f seconds.',
@@ -444,10 +440,23 @@ class CliContext(object):
                          ','.join([cut.get_timecode() for cut in cut_list]))
 
         # Handle save-images command.
+
         if self.save_images:
-            self._generate_images(scene_list=scene_list, video_name=video_name,
-                                  image_name_template=self.image_name_format,
-                                  output_dir=self.image_directory)
+            image_output_dir = self.output_directory
+            if self.image_directory is not None:
+                image_output_dir = self.image_directory
+
+            image_filenames = self._generate_images(
+                scene_list=scene_list,
+                video_manager=self.video_manager,
+                video_name=video_name,
+                num_images=self.num_images,
+                image_frame_margin=self.image_frame_margin,
+                image_extension=self.image_extension,
+                encoder_param=self.image_param,
+                image_name_template=self.image_name_format,
+                output_dir=image_output_dir,
+                show_progress=not self.quiet_mode)
 
         # Handle export-html command.
         if self.export_html:
@@ -461,9 +470,9 @@ class CliContext(object):
                 else self.output_directory)
             logging.info('Exporting to html file:\n %s:', html_path)
             if not self.html_include_images:
-                self.image_filenames = None
+                image_filenames = None
             write_scene_list_html(html_path, scene_list, cut_list,
-                                  image_filenames=self.image_filenames,
+                                  image_filenames=image_filenames,
                                   image_width=self.image_width,
                                   image_height=self.image_height)
 
@@ -729,7 +738,7 @@ class CliContext(object):
             logging.error(error_str)
             raise click.BadParameter(error_str, param_hint='save-images')
 
-        num_flags = sum([True if flag else False for flag in [jpeg, webp, png]])
+        num_flags = sum([1 if flag else 0 for flag in [jpeg, webp, png]])
         if num_flags <= 1:
 
             # Ensure the format exists.
@@ -738,7 +747,8 @@ class CliContext(object):
                 extension = 'png'
             elif webp:
                 extension = 'webp'
-            if not extension in self.imwrite_params or self.imwrite_params[extension] is None:
+            valid_params = get_cv2_imwrite_params()
+            if not extension in valid_params or valid_params[extension] is None:
                 error_strs = [
                     'Image encoder type %s not supported.' % extension.upper(),
                     'The specified encoder type could not be found in the current OpenCV module.',

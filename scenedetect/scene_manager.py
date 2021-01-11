@@ -237,31 +237,19 @@ def write_scene_list_html(output_html_filename, scene_list, cut_list=None, css=N
     page.css = css
     page.save(output_html_filename)
 
-#
-# TODO - Add a method to scene_manager called save_images which calls this function.
-#
+
 def generate_images(scene_list, video_manager, video_name, num_images=2,
                     image_extension='jpg', quality_or_compression=95,
                     image_name_template='$VIDEO_NAME-Scene-$SCENE_NUMBER-$IMAGE_NUMBER',
                     output_dir=None, downscale_factor=1, show_progress=False):
-    # type: (...) -> bool
-    """
-
-    TODO: Documentation.
+    # type: (...) -> Dict[List[str]]
+    """ Generates output images for the given scene list.
 
     Arguments:
-        quality_or_compression: For image_extension=jpg or webp, represents encoding quality,
-        from 0-100 (higher indicates better quality). For WebP, 100 indicates lossless.
-        Default value in the CLI is 95 for JPEG, and 100 for WebP.
-
-        If image_extension=png, represents the compression rate, from 0-9. Higher values
-        produce smaller files but result in longer compression time. This setting does not
-        affect image quality (lossless PNG), only file size. Default value in the CLI is 3.
-
-        [default: 95]
+        TODO.
 
     Returns:
-        True if all requested images were generated & saved successfully, False otherwise.
+        Dictionary of { scene_index : [image_paths] }.
 
     """
 
@@ -269,6 +257,9 @@ def generate_images(scene_list, video_manager, video_name, num_images=2,
         return True
     if num_images <= 0:
         raise ValueError()
+
+    if not image_extension in ('jpg', 'png', 'webp'):
+        raise ValueError("Unrecognized image extension: %s" % image_extension)
 
     imwrite_param = []
     available_extensions = get_cv2_imwrite_params()
