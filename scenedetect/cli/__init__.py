@@ -6,7 +6,7 @@
 #     [  Github: https://github.com/Breakthrough/PySceneDetect/  ]
 #     [  Documentation: http://pyscenedetect.readthedocs.org/    ]
 #
-# Copyright (C) 2014-2019 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2014-2020 Brandon Castellano <http://www.bcastell.com>.
 #
 # PySceneDetect is licensed under the BSD 3-Clause License; see the included
 # LICENSE file, or visit one of the following pages for details:
@@ -24,7 +24,7 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-""" PySceneDetect scenedetect.cli Module
+""" ``scenedetect.cli`` Module
 
 This file contains the implementation of the PySceneDetect command-line
 interface (CLI) parser logic for the PySceneDetect application ("business logic"),
@@ -57,6 +57,8 @@ from scenedetect.video_manager import VideoManager
 
 from scenedetect.video_splitter import is_mkvmerge_available
 from scenedetect.video_splitter import is_ffmpeg_available
+
+from scenedetect.platform import get_and_create_path
 
 
 def get_help_command_preface(command_name='scenedetect'):
@@ -231,6 +233,7 @@ def duplicate_command(ctx, param_hint):
     ' commands. Equivalent to setting `--verbosity none`. Overrides the current verbosity'
     ' level, even if `-v`/`--verbosity` is set.')
 @click.pass_context
+# pylint: disable=redefined-builtin
 def scenedetect_cli(ctx, input, output, framerate, downscale, frame_skip, stats,
                     verbosity, logfile, quiet):
     """ For example:
@@ -258,7 +261,7 @@ def scenedetect_cli(ctx, input, output, framerate, downscale, frame_skip, stats,
 
     ctx.obj.output_directory = output
     if logfile is not None:
-        logfile = ctx.obj.get_output_file_path(logfile)
+        logfile = get_and_create_path(logfile)
         logging.basicConfig(
             filename=logfile, filemode='a', format=format_str,
             level=getattr(logging, verbosity.upper()) if verbosity is not None else verbosity)
@@ -407,11 +410,6 @@ def time_command(ctx, start, duration, end):
     type=click.FLOAT, default=30.0, show_default=True, help=
     'Threshold value (float) that the content_val frame metric must exceed to trigger a new scene.'
     ' Refers to frame metric content_val in stats file.')
-#@click.option(
-#    '--intensity-cutoff', '-i', metavar='VAL',
-#    type=click.FLOAT, default=None, show_default=True, help=
-#    '[Optional] Intensity cutoff threshold to disable scene cut detection. Useful for avoiding.'
-#    ' scene changes triggered by flashes. Refers to frame metric delta_lum in stats file.')
 @click.option(
     '--min-scene-len', '-m', metavar='TIMECODE',
     type=click.STRING, default="0.6s", show_default=True, help=
@@ -419,16 +417,13 @@ def time_command(ctx, start, duration, end):
     ' number of frames, a time in seconds followed by s, or a timecode in the'
     ' format HH:MM:SS or HH:MM:SS.nnn')
 @click.pass_context
-def detect_content_command(ctx, threshold, min_scene_len): #, intensity_cutoff):
+def detect_content_command(ctx, threshold, min_scene_len):
     """ Perform content detection algorithm on input video(s).
 
     detect-content
 
     detect-content --threshold 27.5
     """
-
-    #if intensity_cutoff is not None:
-    #    raise NotImplementedError()
 
     min_scene_len = parse_timecode(ctx.obj, min_scene_len)
 
@@ -566,7 +561,8 @@ def detect_threshold_command(ctx, threshold, min_scene_len, fade_bias, add_last_
     '--filename', '-f', metavar='NAME', default='$VIDEO_NAME-Scenes.html',
     type=click.STRING, show_default=True, help=
     'Filename format to use for the scene list HTML file. You can use the'
-    ' $VIDEO_NAME macro in the file name.')
+    ' $VIDEO_NAME macro in the file name. Note that you may have to wrap'
+    ' the format name using single quotes.')
 @click.option(
     '--no-images', is_flag=True, flag_value=True, help=
     'Export the scene list including or excluding the saved images.')
@@ -597,7 +593,8 @@ def export_html_command(ctx, filename, no_images, image_width, image_height):
     '--filename', '-f', metavar='NAME', default='$VIDEO_NAME-Scenes.csv',
     type=click.STRING, show_default=True, help=
     'Filename format to use for the scene list CSV file. You can use the'
-    ' $VIDEO_NAME macro in the file name.')
+    ' $VIDEO_NAME macro in the file name. Note that you may have to wrap'
+    ' the name using single quotes.')
 @click.option(
     '--no-output-file', '-n',
     is_flag=True, flag_value=True, help=
@@ -627,7 +624,8 @@ def list_scenes_command(ctx, output, filename, no_output_file, quiet):
     '--filename', '-f', metavar='NAME', default='$VIDEO_NAME-Scene-$SCENE_NUMBER',
     type=click.STRING, show_default=True, help=
     'File name format, to use when saving image files. You can use the'
-    ' $VIDEO_NAME and $SCENE_NUMBER macros in the file name.')
+    ' $VIDEO_NAME and $SCENE_NUMBER macros in the file name. Note that'
+    ' you may have to wrap the name using single quotes.')
 @click.option(
     '--high-quality', '-hq',
     is_flag=True, flag_value=True, help=
@@ -639,23 +637,18 @@ def list_scenes_command(ctx, output, filename, no_output_file, quiet):
     'Override codec arguments/options passed to FFmpeg when splitting and re-encoding'
     ' scenes. Use double quotes (") around specified arguments. Must specify at least'
     ' audio/video codec to use (e.g. -a "-c:v [...] and -c:a [...]"). [default:'
-    ' "-c:v libx264 -preset veryfast -crf 22 -c:a copy"]')
+    ' "-c:v libx264 -preset veryfast -crf 22 -c:a aac"]')
 @click.option(
     '--quiet', '-q',
     is_flag=True, flag_value=True, help=
-    'Suppresses output from external video splitting tool.')
+    'Hides any output from the external video splitting tool.')
 @click.option(
     '--copy', '-c',
     is_flag=True, flag_value=True, help=
-    'Copy instead of re-encode using mkvmerge instead of ffmpeg for splitting videos.'
-    ' All other arguments except -o/--output and -q/--quiet are ignored in this mode,'
-    ' and output files will be named $VIDEO_NAME-$SCENE_NUMBER.mkv.'
-    ' Significantly faster when splitting videos, however,'
-    ' output videos sometimes may not be split exactly, especially if the scenes'
-    ' are very short in length, or the input video is heavily compressed. This can'
-    ' lead to smaller scenes being merged with others, or scene boundaries being'
-    ' shifted in time - thus when using this option, the number of videos written'
-    ' may not match the number of scenes that was detected.')
+    'Copy instead of re-encode using mkvmerge. All other options except'
+    ' -o/--output and -q/--quiet are ignored in this mode.'
+    ' Significantly faster, but far less precise. Output files will be'
+    ' named $VIDEO_NAME-$SCENE_NUMBER.mkv.')
 @click.option(
     '--rate-factor', '-crf', metavar='RATE', default=None,
     type=click.IntRange(0, 100), help=
@@ -694,7 +687,7 @@ def split_video_command(ctx, output, filename, high_quality, override_args, quie
             rate_factor = 22 if not high_quality else 17
         if preset is None:
             preset = 'veryfast' if not high_quality else 'slow'
-        override_args = ('-c:v libx264 -preset {PRESET} -crf {RATE_FACTOR} -c:a copy'.format(
+        override_args = ('-c:v libx264 -preset {PRESET} -crf {RATE_FACTOR} -c:a aac'.format(
             PRESET=preset, RATE_FACTOR=rate_factor))
     if not copy:
         logging.info('FFmpeg codec args set: %s', override_args)
@@ -737,7 +730,8 @@ def split_video_command(ctx, output, filename, high_quality, override_args, quie
     '--filename', '-f', metavar='NAME', default='$VIDEO_NAME-Scene-$SCENE_NUMBER-$IMAGE_NUMBER',
     type=click.STRING, show_default=True, help=
     'Filename format, *without* extension, to use when saving image files. You can use the'
-    ' $VIDEO_NAME, $SCENE_NUMBER, and $IMAGE_NUMBER macros in the file name.')
+    ' $VIDEO_NAME, $SCENE_NUMBER, and $IMAGE_NUMBER macros in the file name. Note that you'
+    ' may have to wrap the format in single quotes.')
 @click.option(
     '--num-images', '-n', metavar='N', default=3,
     type=click.INT, help=
@@ -772,11 +766,13 @@ def split_video_command(ctx, output, filename, high_quality, override_args, quie
     type=click.INT, help=
     'Number of frames to ignore at the beginning and end of scenes when saving images')
 @click.pass_context
-def save_images_command(ctx, output, filename, num_images, jpeg, webp, quality, png, compression, image_frame_margin):
+def save_images_command(ctx, output, filename, num_images, jpeg, webp, quality, png,
+                        compression, image_frame_margin):
     """ Create images for each detected scene. """
     if ctx.obj.save_images:
         duplicate_command(ctx, 'save-images')
-    ctx.obj.save_images_command(num_images, output, filename, jpeg, webp, quality, png, compression, image_frame_margin)
+    ctx.obj.save_images_command(num_images, output, filename, jpeg, webp, quality, png,
+                                compression, image_frame_margin)
 
 
 

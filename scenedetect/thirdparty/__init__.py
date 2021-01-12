@@ -6,7 +6,7 @@
 #     [  Github: https://github.com/Breakthrough/PySceneDetect/  ]
 #     [  Documentation: http://pyscenedetect.readthedocs.org/    ]
 #
-# Copyright (C) 2014-2019 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2014-2020 Brandon Castellano <http://www.bcastell.com>.
 #
 # PySceneDetect is licensed under the BSD 3-Clause License; see the included
 # LICENSE file, or visit one of the following pages for details:
@@ -24,7 +24,7 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-""" Module: ``scenedetect.thirdparty``
+""" ``scenedetect.thirdparty`` Module
 
 This module includes all third-party libraries/dependencies that are distributed
 with PySceneDetect.  The source directory also includes the license files for all

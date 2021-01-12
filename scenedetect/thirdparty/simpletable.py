@@ -23,7 +23,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-""" Module: ``scenedetect.thirdparty.simpletable``
+""" ``scenedetect.thirdparty.simpletable`` Module
 
 simpletable.py - v0.1 2014-07-31 Matheus Vieira Portela
 
@@ -55,6 +55,16 @@ v0.4 2019-05-24 by Walter Schwenger
 import codecs
 
 
+# noinspection PyCompatibility,PyUnresolvedReferences
+def quote(string):
+    try:
+        from urllib.parse import quote
+        return quote(string)
+    except ModuleNotFoundError:
+        from urllib import pathname2url
+        return pathname2url(string)
+
+
 class SimpleTableCell(object):
     """A table class to create table cells.
 
@@ -71,12 +81,12 @@ class SimpleTableCell(object):
         """
         self.text = text
         self.header = header
-        
+
     def __str__(self):
         """Return the HTML code for the table cell."""
         if self.header:
             return '<th>%s</th>' %(self.text)
-        else:    
+        else:
             return '<td>%s</td>' %(self.text)
 
 
@@ -107,12 +117,14 @@ class SimpleTableImage(object):
 
     def __str__(self):
         """Return the HTML code for the table cell with the image."""
-        output = '<img src="%s"' %(self.image_file)
+        safe_filename = quote(self.image_file)
+        output = '<a href="%s" target="_blank">' %(safe_filename)
+        output += '<img src="%s"' %(safe_filename)
         if self.height:
             output += ' height="%s"' %(self.height)
         if self.width:
             output += ' width="%s"' %(self.width)
-        output += '>'
+        output += '></a>'
 
         return output
 
@@ -129,7 +141,7 @@ class SimpleTableRow(object):
     cell2 = SimpleTableCell('world!')
     row = SimpleTableRow([cell1, cell2])
     """
-    def __init__(self, cells=[], header=False):
+    def __init__(self, cells=None, header=False):
         """Table row constructor.
 
         Keyword arguments:
@@ -139,13 +151,14 @@ class SimpleTableRow(object):
                   responsibility to verify whether it was created with the
                   header flag set to True.
         """
+        cells = cells or []
         if isinstance(cells[0], SimpleTableCell):
             self.cells = cells
         else:
             self.cells = [SimpleTableCell(cell, header=header) for cell in cells]
-        
+
         self.header = header
-        
+
     def __str__(self):
         """Return the HTML code for the table row and its cells as a string."""
         row = []
@@ -156,7 +169,7 @@ class SimpleTableRow(object):
             row.append(str(cell))
 
         row.append('</tr>')
-        
+
         return '\n'.join(row)
 
     def __iter__(self):
@@ -189,7 +202,7 @@ class SimpleTable(object):
     rows = SimpleTableRow(['Hello,', 'world!'])
     table = SimpleTable(rows)
     """
-    def __init__(self, rows=[], header_row=None, css_class=None):
+    def __init__(self, rows=None, header_row=None, css_class=None):
         """Table constructor.
 
         Keyword arguments:
@@ -200,6 +213,7 @@ class SimpleTable(object):
                       header flag set to True.
         css_class -- table CSS class
         """
+        rows = rows or []
         if isinstance(rows[0], SimpleTableRow):
             self.rows = rows
         else:
@@ -230,7 +244,7 @@ class SimpleTable(object):
             table.append(str(row))
 
         table.append('</table>')
-        
+
         return '\n'.join(table)
 
     def __iter__(self):
@@ -250,7 +264,7 @@ class SimpleTable(object):
 
 class HTMLPage(object):
     """A class to create HTML pages containing CSS and tables."""
-    def __init__(self, tables=[], css=None, encoding="utf-8"):
+    def __init__(self, tables=None, css=None, encoding="utf-8"):
         """HTML page constructor.
 
         Keyword arguments:
@@ -259,10 +273,10 @@ class HTMLPage(object):
                table string
         encoding -- Characters encoding. Default: UTF-8
         """
-        self.tables = tables
+        self.tables = tables or []
         self.css = css
         self.encoding = encoding
-        
+
     def __str__(self):
         """Return the HTML page as a string."""
         page = []

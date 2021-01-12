@@ -6,7 +6,7 @@
 #     [  Github: https://github.com/Breakthrough/PySceneDetect/  ]
 #     [  Documentation: http://pyscenedetect.readthedocs.org/    ]
 #
-# Copyright (C) 2014-2019 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2014-2020 Brandon Castellano <http://www.bcastell.com>.
 #
 # PySceneDetect is licensed under the BSD 3-Clause License; see the included
 # LICENSE file, or visit one of the following pages for details:
@@ -21,7 +21,7 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-""" ``scenedetect.frame_timecode``
+""" ``scenedetect.frame_timecode`` Module
 
 This module contains the :py:class:`FrameTimecode` object, which is used as a way for
 PySceneDetect to store frame-accurate timestamps of each cut. This is done by also
@@ -214,6 +214,15 @@ class FrameTimecode(object):
         # Return hours, minutes, and seconds as a formatted timecode string.
         return '%02d:%02d:%s' % (hrs, mins, secs)
 
+    def previous_frame(self):
+        # type: () -> FrameTimecode
+        """
+        Returns a new FrameTimecode for the frame before this one.
+        :return: New FrameTimeCode object, one frame earlier
+        """
+        new_timecode = FrameTimecode(self)
+        new_timecode.frame_num -= 1
+        return new_timecode
 
     def _seconds_to_frames(self, seconds):
         # type: (float) -> int
@@ -468,4 +477,3 @@ class FrameTimecode(object):
 
     def __repr__(self):
         return 'FrameTimecode(frame=%d, fps=%f)' % (self.frame_num, self.framerate)
-

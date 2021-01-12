@@ -6,7 +6,7 @@
 #     [  Github: https://github.com/Breakthrough/PySceneDetect/  ]
 #     [  Documentation: http://pyscenedetect.readthedocs.org/    ]
 #
-# Copyright (C) 2014-2019 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2014-2020 Brandon Castellano <http://www.bcastell.com>.
 #
 # PySceneDetect is licensed under the BSD 3-Clause License; see the included
 # LICENSE file, or visit one of the following pages for details:
@@ -24,7 +24,7 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-""" PySceneDetect scenedetect.cli.context Module
+""" ``scenedetect.cli.context`` Module
 
 This file contains the implementation of the PySceneDetect command-line
 interface (CLI) context class CliContext, used for the main application
@@ -120,6 +120,7 @@ class CliContext(object):
         self.image_name_format = (              # save-images -f/--name-format
             '$VIDEO_NAME-Scene-$SCENE_NUMBER-$IMAGE_NUMBER')
         self.num_images = 2                     # save-images -n/--num-images
+        self.image_frame_margin = 0             # save-images --image-frame-margin
         self.imwrite_params = get_cv2_imwrite_params()
         # Properties for split-video command.
         self.split_video = False                # split-video command
@@ -213,23 +214,23 @@ class CliContext(object):
                 ]
             ]
             for i, r in enumerate([
-                    # pad ranges to number of images
-                    r
-                    if r.stop-r.start >= self.num_images
-                    else list(r) + [r.stop-1] * (self.num_images - len(r))
-                    # create range of frames in scene
-                    for r in (
-                            range(start.get_frames(), end.get_frames())
-                            # for each scene in scene list
-                            for start, end in scene_list
+                # pad ranges to number of images
+                r
+                if 1+r[-1]-r[0] >= self.num_images
+                else list(r) + [r[-1]] * (self.num_images - len(r))
+                # create range of frames in scene
+                for r in (
+                    range(start.get_frames(), end.get_frames())
+                    # for each scene in scene list
+                    for start, end in scene_list
                     )
             ])
         ]
 
-        self.image_filenames = { i: [] for i in range(len(timecode_list)) }
+        self.image_filenames = {i: [] for i in range(len(timecode_list))}
 
-        for i, tl in enumerate(timecode_list):
-            for j, image_timecode in enumerate(tl):
+        for i, scene_timecodes in enumerate(timecode_list):
+            for j, image_timecode in enumerate(scene_timecodes):
                 self.video_manager.seek(image_timecode)
                 self.video_manager.grab()
                 ret_val, frame_im = self.video_manager.retrieve()
@@ -305,10 +306,11 @@ class CliContext(object):
             logging.debug('Skipping processing, CLI options were not parsed successfully.')
             return
         self.check_input_open()
-        if not self.scene_manager.get_num_detectors() > 0:
+        assert self.scene_manager.get_num_detectors() >= 0
+        if self.scene_manager.get_num_detectors() == 0:
             logging.error(
                 'No scene detectors specified (detect-content, detect-threshold, etc...),\n'
-                '  or failed to process all command line arguments.')
+                ' or failed to process all command line arguments.')
             return
 
         # Handle scene detection commands (detect-content, detect-threshold, etc...).
@@ -321,6 +323,19 @@ class CliContext(object):
         num_frames = self.scene_manager.detect_scenes(
             frame_source=self.video_manager, frame_skip=self.frame_skip,
             show_progress=not self.quiet_mode)
+
+        # Handle case where video fails with multiple audio tracks (#179).
+        # TODO: Is there a fix for this? See #179.
+        if num_frames <= 0:
+            logging.critical('\n'.join([
+                'Failed to read any frames from video file. This could be caused'
+                ' by the video having multiple audio tracks. If so, please try'
+                ' removing the audio tracks or muxing to mkv via:'
+                '      ffmpeg -i input.mp4 -c copy -an output.mp4'
+                'or:'
+                '      mkvmerge -o output.mkv input.mp4'
+                ' For details, see https://pyscenedetect.readthedocs.io/en/latest/faq/']))
+            return
 
         duration = time.time() - start_time
         logging.info('Processed %d frames in %.1f seconds (average %.2f FPS).',

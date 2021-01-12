@@ -6,7 +6,7 @@
 #     [  Github: https://github.com/Breakthrough/PySceneDetect/  ]
 #     [  Documentation: http://pyscenedetect.readthedocs.org/    ]
 #
-# Copyright (C) 2014-2019 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2014-2020 Brandon Castellano <http://www.bcastell.com>.
 #
 # PySceneDetect is licensed under the BSD 3-Clause License; see the included
 # LICENSE file, or visit one of the following pages for details:
@@ -45,7 +45,7 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-""" Module: ``scenedetect.video_splitter``
+""" ``scenedetect.video_splitter`` Module
 
 The `scenedetect.video_splitter` module contains functions to split videos
 with a scene list using external tools (e.g. `mkvmerge`, `ffmpeg`), as well
@@ -77,9 +77,17 @@ import math
 import time
 from string import Template
 
-# Third-Party Library Imports
-from scenedetect.platform import tqdm
+# PySceneDetect Imports
+from scenedetect.platform import tqdm, invoke_command, CommandTooLong
 
+COMMAND_TOO_LONG_STRING = '''
+Cannot split video due to too many scenes (resulting command
+is too large to process). To work around this issue, you can
+split the video manually by exporting a list of cuts with the
+`list-scenes` command.
+See https://github.com/Breakthrough/PySceneDetect/issues/164
+for details.  Sorry about that!
+'''
 
 ##
 ## Command Availability Checking Functions
@@ -123,23 +131,35 @@ def is_ffmpeg_available():
 ## Split Video Functions
 ##
 
-def split_video_mkvmerge(input_video_paths, scene_list, output_file_prefix,
+def split_video_mkvmerge(input_video_paths, scene_list, output_file_template,
                          video_name, suppress_output=False):
     # type: (List[str], List[FrameTimecode, FrameTimecode], Optional[str],
     #        Optional[bool]) -> None
     """ Calls the mkvmerge command on the input video(s), splitting it at the
-    passed timecodes, where each scene is written in sequence from 001. """
+    passed timecodes, where each scene is written in sequence from 001.
+
+    Arguments:
+        input_video_paths (List[str]): List of strings to the input video path(s).
+            Is a list to allow for concatenation of multiple input videos together.
+        scene_list (List[Tuple[FrameTimecode, FrameTimecode]]): List of scenes
+            (pairs of FrameTimecodes) denoting the start/end frames of each scene.
+        output_file_template (str): Template to use for output files.  Note that the
+            scene number is automatically appended to the prefix by mkvmerge.
+            Can use $VIDEO_NAME as a parameter in the template.
+        video_name (str): Name of the video to be substituted in output_file_template.
+        suppress_output (bool): If True, adds the --quiet flag when invoking `mkvmerge`.
+    """
 
     if not input_video_paths or not scene_list:
         return
 
     logging.info('Splitting input video%s using mkvmerge, output path template:\n  %s',
-            's' if len(input_video_paths) > 1 else '', output_file_prefix)
+                 's' if len(input_video_paths) > 1 else '', output_file_template)
 
     ret_val = None
     # mkvmerge automatically appends '-$SCENE_NUMBER'.
-    output_file_name = output_file_prefix.replace('-${SCENE_NUMBER}', '')
-    output_file_name = output_file_prefix.replace('-$SCENE_NUMBER', '')
+    output_file_name = output_file_template.replace('-${SCENE_NUMBER}', '')
+    output_file_name = output_file_template.replace('-$SCENE_NUMBER', '')
     output_file_template = Template(output_file_name)
     output_file_name = output_file_template.safe_substitute(
         VIDEO_NAME=video_name,
@@ -160,26 +180,41 @@ def split_video_mkvmerge(input_video_paths, scene_list, output_file_prefix,
             ' +'.join(input_video_paths)]
         total_frames = scene_list[-1][1].get_frames() - scene_list[0][0].get_frames()
         processing_start_time = time.time()
-        ret_val = subprocess.call(call_list)
+        ret_val = invoke_command(call_list)
         if not suppress_output:
             print('')
             logging.info('Average processing speed %.2f frames/sec.',
                          float(total_frames) / (time.time() - processing_start_time))
+    except CommandTooLong:
+        logging.error(COMMAND_TOO_LONG_STRING)
     except OSError:
         logging.error('mkvmerge could not be found on the system.'
                       ' Please install mkvmerge to enable video output support.')
-        raise
     if ret_val is not None and ret_val != 0:
         logging.error('Error splitting video (mkvmerge returned %d).', ret_val)
 
 
 def split_video_ffmpeg(input_video_paths, scene_list, output_file_template, video_name,
-                       arg_override='-c:v libx264 -preset fast -crf 21 -c:a copy',
+                       arg_override='-c:v libx264 -preset fast -crf 21 -c:a aac',
                        hide_progress=False, suppress_output=False):
     # type: (List[str], List[Tuple[FrameTimecode, FrameTimecode]], Optional[str],
-    #        Optional[str], Optional[bool]) -> None
+    #        Optional[str], Optional[bool], Optional[bool]) -> None
     """ Calls the ffmpeg command on the input video(s), generating a new video for
-    each scene based on the start/end timecodes. """
+    each scene based on the start/end timecodes.
+
+    Arguments:
+        input_video_paths (List[str]): List of strings to the input video path(s).
+            Is a list to allow for concatenation of multiple input videos together.
+        scene_list (List[Tuple[FrameTimecode, FrameTimecode]]): List of scenes
+            (pairs of FrameTimecodes) denoting the start/end frames of each scene.
+        output_file_template (str): Template to use for generating the output filenames.
+            Can use $VIDEO_NAME and $SCENE_NUMBER in this format, for example:
+            `$VIDEO_NAME - Scene $SCENE_NUMBER`
+        video_name (str): Name of the video to be substituted in output_file_template.
+        arg_override (str): Allows overriding the arguments passed to ffmpeg for encoding.
+        hide_progress (bool): If True, will hide progress bar provided by tqdm (if installed).
+        suppress_output (bool): If True, will set verbosity to quiet for the first scene.
+    """
 
     if not input_video_paths or not scene_list:
         return
@@ -187,7 +222,7 @@ def split_video_ffmpeg(input_video_paths, scene_list, output_file_template, vide
     logging.info(
         'Splitting input video%s using ffmpeg, output path template:\n  %s',
         's' if len(input_video_paths) > 1 else '', output_file_template)
-        
+
     if len(input_video_paths) > 1:
         # TODO: Add support for splitting multiple/appended input videos.
         # https://trac.ffmpeg.org/wiki/Concatenate#samecodec
@@ -216,8 +251,6 @@ def split_video_ffmpeg(input_video_paths, scene_list, output_file_template, vide
         processing_start_time = time.time()
         for i, (start_time, end_time) in enumerate(scene_list):
             duration = (end_time - start_time)
-            # Fix FFmpeg start timecode frame shift.
-            start_time -= 1
             call_list = ['ffmpeg']
             if suppress_output:
                 call_list += ['-v', 'quiet']
@@ -229,21 +262,20 @@ def split_video_ffmpeg(input_video_paths, scene_list, output_file_template, vide
             call_list += [
                 '-y',
                 '-ss',
-                start_time.get_timecode(),
+                str(start_time.get_seconds()),
                 '-i',
-                input_video_paths[0]]
+                input_video_paths[0],
+                '-t',
+                str(duration.get_seconds())
+            ]
             call_list += arg_override
             call_list += [
-                '-strict',
-                '-2',
-                '-t',
-                duration.get_timecode(),
                 '-sn',
                 filename_template.safe_substitute(
                     VIDEO_NAME=video_name,
                     SCENE_NUMBER=scene_num_format % (i + 1))
                 ]
-            ret_val = subprocess.call(call_list)
+            ret_val = invoke_command(call_list)
             if not suppress_output and i == 0 and len(scene_list) > 1:
                 logging.info(
                     'Output from ffmpeg for Scene 1 shown above, splitting remaining scenes...')
@@ -255,9 +287,11 @@ def split_video_ffmpeg(input_video_paths, scene_list, output_file_template, vide
             print('')
             logging.info('Average processing speed %.2f frames/sec.',
                          float(total_frames) / (time.time() - processing_start_time))
+
+    except CommandTooLong:
+        logging.error(COMMAND_TOO_LONG_STRING)
     except OSError:
         logging.error('ffmpeg could not be found on the system.'
                       ' Please install ffmpeg to enable video output support.')
     if ret_val is not None and ret_val != 0:
         logging.error('Error splitting video (ffmpeg returned %d).', ret_val)
-

@@ -6,7 +6,7 @@
 #     [  Github: https://github.com/Breakthrough/PySceneDetect/  ]
 #     [  Documentation: http://pyscenedetect.readthedocs.org/    ]
 #
-# Copyright (C) 2014-2019 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2014-2020 Brandon Castellano <http://www.bcastell.com>.
 #
 # PySceneDetect is licensed under the BSD 3-Clause License; see the included
 # LICENSE file, or visit one of the following pages for details:
@@ -44,9 +44,6 @@ directly:  https://github.com/Breakthrough/PySceneDetect/tree/resources/tests
 # pylint: disable=redefined-outer-name
 
 
-# Standard Library Imports
-import os
-
 # Third-Party Library Imports
 import pytest
 import cv2
@@ -56,7 +53,9 @@ from scenedetect.scene_manager import SceneManager
 from scenedetect.video_manager import VideoManager
 from scenedetect.video_manager import VideoOpenFailure
 
-# TODO: The following exceptions still require test cases:
+# TODO: The following exceptions still require test cases.
+# Since these are API contract violations, should they be refactored
+# into assertions instead?
 from scenedetect.video_manager import VideoDecodingInProgress
 from scenedetect.video_manager import VideoDecoderNotStarted
 
@@ -64,22 +63,6 @@ from scenedetect.video_manager import VideoDecoderNotStarted
 # TODO: The following exceptions still require test cases:
 from scenedetect.video_manager import VideoFramerateUnavailable
 from scenedetect.video_manager import VideoParameterMismatch
-
-
-TEST_VIDEO_FILE = 'testvideo.mp4'       # Video file used by test_video_file fixture.
-
-
-@pytest.fixture
-def test_video_file():
-    # type: () -> str
-    """ Fixture for test video file path (ensures file exists).
-
-    Access in test case by adding a test_video_file argument to obtain the path.
-    """
-    if not os.path.exists(TEST_VIDEO_FILE):
-        raise FileNotFoundError(
-            'Test video file (%s) must be present to run test cases' % TEST_VIDEO_FILE)
-    return TEST_VIDEO_FILE
 
 
 def test_video_params(test_video_file):

@@ -6,7 +6,7 @@
 #     [  Github: https://github.com/Breakthrough/PySceneDetect/  ]
 #     [  Documentation: http://pyscenedetect.readthedocs.org/    ]
 #
-# Copyright (C) 2014-2019 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2014-2020 Brandon Castellano <http://www.bcastell.com>.
 #
 # PySceneDetect is licensed under the BSD 3-Clause License; see the included
 # LICENSE file, or visit one of the following pages for details:
@@ -50,11 +50,7 @@ Alternatively, the TEST_VIDEO_FILE constant can be replaced with any valid video
 # pylint: disable=redefined-outer-name
 
 
-# Standard Library Imports
-import os
-
 # Third-Party Library Imports
-import pytest
 import cv2
 
 # PySceneDetect Library Imports
@@ -62,22 +58,6 @@ from scenedetect.scene_manager import SceneManager
 from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.video_manager import VideoManager
 from scenedetect.detectors import ContentDetector
-
-
-TEST_VIDEO_FILE = 'testvideo.mp4'
-
-
-@pytest.fixture
-def test_video_file():
-    # type: () -> str
-    """ Fixture for test video file path (ensures file exists).
-
-    Access in test case by adding a test_video_file argument to obtain the path.
-    """
-    if not os.path.exists(TEST_VIDEO_FILE):
-        raise FileNotFoundError(
-            'Test video file (%s) must be present to run test cases' % TEST_VIDEO_FILE)
-    return TEST_VIDEO_FILE
 
 
 def test_content_detect(test_video_file):
@@ -156,4 +136,3 @@ def test_scene_list(test_video_file):
 
     finally:
         vm.release()
-

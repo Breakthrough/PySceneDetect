@@ -1,26 +1,57 @@
+# -*- coding: utf-8 -*-
+#
+#         PySceneDetect: Python-Based Video Scene Detector
+#   ---------------------------------------------------------------
+#     [  Site: http://www.bcastell.com/projects/PySceneDetect/   ]
+#     [  Github: https://github.com/Breakthrough/PySceneDetect/  ]
+#     [  Documentation: http://pyscenedetect.readthedocs.org/    ]
+#
+# Copyright (C) 2014-2020 Brandon Castellano <http://www.bcastell.com>.
+#
+# PySceneDetect is licensed under the BSD 3-Clause License; see the included
+# LICENSE file, or visit one of the following pages for details:
+#  - https://github.com/Breakthrough/PySceneDetect/
+#  - http://www.bcastell.com/projects/PySceneDetect/
+#
+# This software uses Numpy, OpenCV, click, tqdm, simpletable, and pytest.
+# See the included LICENSE files or one of the above URLs for more information.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+# AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
+# ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+# WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+#
 
-#
-# PySceneDetect v0.5 API Test Script
-#
-# NOTE: This file can only be used with development versions of PySceneDetect,
-#       and gives a high-level overview of how the new API will look and work.
-#       This file is for development and testing purposes mostly, although it
-#       also serves as a base for further example and test programs.
-#
+""" PySceneDetect API Test Script
+
+Usage: Run as part of standard test suite, but can be manually invoked
+by passing the video file to perform scene detection on as an argument
+to this file, e.g. `python api_test.py SOME_VIDEO.mp4`
+
+"""
 
 from __future__ import print_function
 import os
+import sys
 
 import scenedetect
-from scenedetect.video_manager import VideoManager
-from scenedetect.scene_manager import SceneManager
-from scenedetect.frame_timecode import FrameTimecode
-from scenedetect.stats_manager import StatsManager
+from scenedetect import VideoManager
+from scenedetect import SceneManager
+from scenedetect import StatsManager
 from scenedetect.detectors import ContentDetector
 
 STATS_FILE_PATH = 'api_test_statsfile.csv'
 
-def test_api():
+
+def test_api(test_video_file):
+    # (str) -> None
+    """ Test overall PySceneDetect API functionality.
+
+    Can be considered a high level integration/black-box test.
+
+    """
 
     print("Running PySceneDetect API test...")
 
@@ -30,7 +61,7 @@ def test_api():
     # videos can be appended by simply specifying more file paths in the list
     # passed to the VideoManager constructor. Note that appending multiple videos
     # requires that they all have the same frame size, and optionally, framerate.
-    video_manager = VideoManager(['testvideo.mp4'])
+    video_manager = VideoManager([test_video_file])
     stats_manager = StatsManager()
     scene_manager = SceneManager(stats_manager)
     # Add ContentDetector algorithm (constructor takes detector options like threshold).
@@ -78,6 +109,10 @@ def test_api():
     finally:
         video_manager.release()
 
-if __name__ == "__main__":
-    test_api()
 
+# Support running as a stand-alone file.
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print('Usage: %s [TEST_VIDEO_FILE]' % sys.argv[0])
+    else:
+        test_api(sys.argv[1])

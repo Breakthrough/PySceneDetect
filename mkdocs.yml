@@ -2,36 +2,34 @@ site_name: PySceneDetect
 site_description: "Website and documentation for PySceneDetect, a program to automatically detect scene cuts and split videos.  Written in Python, and also provides Python API in addition to command-line interface for use within other programs."
 site_author: "Brandon Castellano"
 
-repo_url: https://github.com/Breakthrough
+repo_url: https://github.com/Breakthrough/PySceneDetect
 repo_name: "PySceneDetect on Github"
-copyright: 'Copyright &copy; 2014-2019 Brandon Castellano.  All rights reserved.<br />Licensed under BSD 3-Clause (see the <a href="https://github.com/Breakthrough/PySceneDetect/blob/master/LICENSE" alt="link to latest LICENSE file on Github">LICENSE file</a> for details).'
+copyright: 'Copyright &copy; 2014-2020 Brandon Castellano.  All rights reserved.<br />Licensed under BSD 3-Clause (see the <a href="https://github.com/Breakthrough/PySceneDetect/blob/master/LICENSE" alt="link to latest LICENSE file on Github">LICENSE file</a> for details).'
 
-#theme: mkdocs
 theme: readthedocs
 google_analytics: ['UA-72551323-1', 'auto']
 
 pages:
 - 'PySceneDetect':
-    - 'Introduction': 'index.md'
+    - 'Home': 'index.md'
     - 'Features & Roadmap': 'features.md'
     - 'Download': 'download.md'
-    - 'Changelog': 'changelog.md'
-    - 'Bug Reports and Contributing': 'contributing.md'
-    - 'License & Copyright Information': 'copyright.md'
-- 'Getting Started:':
+    - 'Releases (Changelog)': 'changelog.md'
+    - 'Frequently Asked Questions (FAQ)': 'faq.md'
+    - 'Bug Reports & Contributing': 'contributing.md'
+    - 'Supporting Development': 'supporting.md'
+- 'Quickstart:':
     - 'Usage Example': 'examples/usage-example.md'
     - 'Command Line Interface': 'examples/usage.md'
-    - 'Python Interface': 'examples/usage-python.md'
     - 'Video Splitting Support': 'examples/video-splitting.md'
-- 'Documentation & Reference:':
+    - 'Python Interface': 'examples/usage-python.md'
+- 'Documentation:':
     - 'Command-Line Parameters': 'reference/command-line-params.md'
-    - 'Scene Detection Method Details': 'reference/detection-methods.md'
-    - 'Python Interface & Integration With Other Applications': 'reference/python-usage.md'
-    - 'Python API Reference': 'reference/python-api.md'
-    - 'Creating New Scene Detection Methods': 'reference/creating-new-scene-detectors.md'
-- 'Other Links':
-    - 'Third-Party Tools & Utilities': 'other/thirdparty.md'
-    - 'Other Similar Programs': 'other/similar.md'
-    - 'Useful Resources & Reading Material': 'other/resources.md'
+    - 'Scene Detection Algorithms': 'reference/detection-methods.md'
+    - 'Python API & Integration': 'reference/python-api.md'
+- 'Resources':
+    - 'Similar Programs & Tools': 'other/similar.md'
+    - 'Research & Literature': 'other/literature.md'
+    - 'License & Copyright Info': 'other/copyright.md'
 
 markdown_extensions: [fenced_code]

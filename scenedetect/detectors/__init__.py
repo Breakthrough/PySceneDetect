@@ -6,7 +6,7 @@
 #     [  Github: https://github.com/Breakthrough/PySceneDetect/  ]
 #     [  Documentation: http://pyscenedetect.readthedocs.org/    ]
 #
-# Copyright (C) 2014-2019 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2014-2020 Brandon Castellano <http://www.bcastell.com>.
 #
 # PySceneDetect is licensed under the BSD 3-Clause License; see the included
 # LICENSE file, or visit one of the following pages for details:
@@ -25,7 +25,7 @@
 #
 
 
-""" PySceneDetect `scenedetect.detectors` Module
+""" ``scenedetect.detectors`` Module
 
 This module contains implementations of scene detection algorithms by inhereting
 from the base SceneDetector class (in scenedetect.scene_detector) and implementing
@@ -87,5 +87,3 @@ from scenedetect.detectors.adaptive_content_detector import AdaptiveContentDetec
 #                                                                             #
 #                                                                             #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-
-

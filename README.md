@@ -4,41 +4,93 @@
 Video Scene Cut Detection and Analysis Tool
 ----------------------------------------------------------
 
-[![Documentation Status](https://readthedocs.org/projects/pyscenedetect/badge/?version=latest)](http://pyscenedetect.readthedocs.org/en/latest/?badge=latest) [![PyPI Status](https://img.shields.io/pypi/status/scenedetect.svg)](https://pypi.python.org/pypi/scenedetect/) [![PyPI Version](https://img.shields.io/pypi/v/scenedetect.svg)](https://pypi.python.org/pypi/scenedetect/)  [![PyPI License](https://img.shields.io/pypi/l/scenedetect.svg)](http://pyscenedetect.readthedocs.org/en/latest/copyright/)
+[![Build Status](https://img.shields.io/travis/com/Breakthrough/PySceneDetect)](https://travis-ci.com/github/Breakthrough/PySceneDetect) [![PyPI Status](https://img.shields.io/pypi/status/scenedetect.svg)](https://pypi.python.org/pypi/scenedetect/) [![PyPI Version](https://img.shields.io/pypi/v/scenedetect?color=blue)](https://pypi.python.org/pypi/scenedetect/)  [![PyPI License](https://img.shields.io/pypi/l/scenedetect.svg)](http://pyscenedetect.readthedocs.org/en/latest/copyright/)
 
 
-### Latest Release: v0.5.1.1 (August 3, 2019)
+### Latest Release: v0.5.4 (September 14, 2020)
 
 **Main Webpage**:  [py.scenedetect.com](http://py.scenedetect.com)
 
 **Documentation**:  [manual.scenedetect.com](http://manual.scenedetect.com)
 
-**Download/Install**: https://pyscenedetect.readthedocs.io/en/latest/download/
+**Installation and Dependencies**: https://pyscenedetect.readthedocs.io/en/latest/download/
 
 ----------------------------------------------------------
 
-**Quick Install**: Requires Python modules `numpy`, OpenCV `cv2`, and (optional) `tqdm` for displaying progress.  To install PySceneDetect via `pip` with all dependencies:
+**Quick Install**: To install PySceneDetect via `pip` with all dependencies:
 
-    pip install scenedetect[opencv,progress_bar]
+    pip install scenedetect[opencv]
 
-Or to install just PySceneDetect (OpenCV installation required):
+To enable video splitting support, you will also need to have `mkvmerge` or `ffmpeg` installed on your system. See the documentation on [Video Splitting Support](https://pyscenedetect.readthedocs.io/en/latest/examples/video-splitting/) after installation for details.
 
-    pip install scenedetect
-
-To test if you have the required prerequisites, open a `python` prompt, and run the following:
-
-    import numpy
-    import cv2
-
-If both of those commands execute without any problems, you should be able to run PySceneDetect without any issues. To enable video splitting support, you will also need to have `mkvmerge` or `ffmpeg` installed on your system. See the documentation on [Video Splitting Support](https://pyscenedetect.readthedocs.io/en/latest/examples/video-splitting/) after installation for details.
-
-Full documentation for PySceneDetect can be found [on Readthedocs](http://pyscenedetect.readthedocs.org/), or by visiting [py.scenedetect.com](http://py.scenedetect.com/).  This includes details on detection modes, default values/thresholds to try, and how to effectively choose the optimal detection parameters.
-
-**Install From Source**: To install from source code instead, download the latest release archive, and run `python setup.py install` wherever you extract the archive (see releases tab or [the download page](https://pyscenedetect.readthedocs.io/en/latest/download/) for details).
+Requires Python modules `numpy`, OpenCV `cv2`, and (optional) `tqdm` for displaying progress.
 
 ----------------------------------------------------------
 
-PySceneDetect is a command-line tool, written in Python and using OpenCV, which analyzes a video, looking for scene changes or cuts.  The output timecodes can then be used with another tool (e.g. `mkvmerge`, `ffmpeg`) to split the video into individual clips.  A frame-by-frame analysis can also be generated for a video, to help with determining optimal threshold values or detecting patterns/other analysis methods for a particular video.  See [the Usage documentation](https://pyscenedetect.readthedocs.io/en/latest/examples/usage/) for details.
+**Quick Start (Command Line)**:
+
+Split the input video wherever a new scene is detected:
+
+    scenedetect -i video.mp4 detect-content split-video
+
+Skip the first 10 seconds of the input video, and output a list of scenes to the terminal:
+
+    scenedetect -i video.mp4 time -s 10s detect-content list-scenes
+
+To show a summary of all other options and commands:
+
+    scenedetect help
+
+You can find more examples [on the website](https://pyscenedetect.readthedocs.io/en/latest/examples/usage-example/) or [in the manual](https://pyscenedetect.readthedocs.io/projects/Manual/en/latest/cli/global_options.html).
+
+**Quick Start (Python API)**:
+
+In the code example below, we create a function `find_scenes()` which will
+load a video, detect the scenes, and return a list of tuples containing the
+(start, end) timecodes of each detected scene.  Note that you can modify
+the `threshold` argument to modify the sensitivity of the scene detection.
+
+```python
+# Standard PySceneDetect imports:
+from scenedetect import VideoManager
+from scenedetect import SceneManager
+
+# For content-aware scene detection:
+from scenedetect.detectors import ContentDetector
+
+def find_scenes(video_path, threshold=30.0):
+    # Create our video & scene managers, then add the detector.
+    video_manager = VideoManager([video_path])
+    scene_manager = SceneManager()
+    scene_manager.add_detector(
+        ContentDetector(threshold=threshold))
+
+    # Base timestamp at frame 0 (required to obtain the scene list).
+    base_timecode = video_manager.get_base_timecode()
+
+    # Improve processing speed by downscaling before processing.
+    video_manager.set_downscale_factor()
+
+    # Start the video manager and perform the scene detection.
+    video_manager.start()
+    scene_manager.detect_scenes(frame_source=video_manager)
+
+    # Each returned scene is a tuple of the (start, end) timecode.
+    return scene_manager.get_scene_list(base_timecode)
+```
+
+To get started, try printing the result from calling `find_scenes` on a small video clip:
+
+```python
+    scenes = find_scenes('video.mp4')
+    print(scenes)
+```
+
+See [the manual](https://pyscenedetect.readthedocs.io/projects/Manual/en/latest/api.html) for the full PySceneDetect API documentation.
+
+----------------------------------------------------------
+
+PySceneDetect is a command-line tool and Python library, which uses OpenCV to analyze a video to find scene changes or cuts.  If `ffmpeg` or `mkvmerge` is installed, the video can also be split into scenes automatically.  A frame-by-frame analysis can also be generated for a video, to help with determining optimal threshold values or detecting patterns/other analysis methods for a particular video.  See [the Usage documentation](https://pyscenedetect.readthedocs.io/en/latest/examples/usage/) for details.
 
 There are two main detection methods PySceneDetect uses: `detect-threshold` (comparing each frame to a set black level, useful for detecting cuts and fades to/from black), and `detect-content` (compares each frame sequentially looking for changes in content, useful for detecting fast cuts between video scenes, although slower to process).  Each mode has slightly different parameters, and is described in detail below.
 
@@ -46,11 +98,6 @@ In general, use `detect-threshold` mode if you want to detect scene boundaries u
 
 Note that PySceneDetect is currently in beta; see Current Features & Roadmap below for details.  For help or other issues, you can contact me on [my website](http://www.bcastell.com/about/), or we can chat in #pyscenedetect on Freenode.  Feel free to submit any bugs or feature requests to [the Issue Tracker](https://github.com/Breakthrough/PySceneDetect/issues) here on Github.
 
-
-Download & Installation
-----------------------------------------------------------
-
-See [the Download & Installation page on Readthedocs](http://pyscenedetect.readthedocs.org/en/latest/download/) ([alt. link](https://github.com/Breakthrough/PySceneDetect/blob/master/docs/download.md)) for how to get PySceneDetect, as well as details on which system dependencies are required.
 
 Usage
 ----------------------------------------------------------
@@ -73,6 +120,6 @@ Additional features being planned or in development can be found [here (tagged a
 
 Licensed under BSD 3-Clause (see the `LICENSE` file for details).
 
-Copyright (C) 2014-2019 Brandon Castellano.
+Copyright (C) 2014-2020 Brandon Castellano.
 All rights reserved.
 

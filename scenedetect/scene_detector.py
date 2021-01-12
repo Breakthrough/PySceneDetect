@@ -6,7 +6,7 @@
 #     [  Github: https://github.com/Breakthrough/PySceneDetect/  ]
 #     [  Documentation: http://pyscenedetect.readthedocs.org/    ]
 #
-# Copyright (C) 2014-2019 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2014-2020 Brandon Castellano <http://www.bcastell.com>.
 #
 # PySceneDetect is licensed under the BSD 3-Clause License; see the included
 # LICENSE file, or visit one of the following pages for details:
@@ -24,7 +24,7 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-""" Module: ``scenedetect.scene_detector``
+""" ``scenedetect.scene_detector`` Module
 
 This module implements the base SceneDetector class, from which all scene
 detectors in the scenedetect.dectectors module are derived from.
@@ -143,4 +143,3 @@ class SparseSceneDetector(SceneDetector):
             to be added to the output scene list directly.
         """
         return []
-

@@ -20,23 +20,27 @@ The complete PySceneDetect Command-Line Interface (CLI) Reference <span class="f
 
 ## Quick Example
 
-For example, to perform content-aware scene detection (`detect-content`) on a video (`--input my_video.mp4`), listing all scenes in the console/to a CSV file (`list-scenes`), *and* saving each detected scene as image files (`save-images`):
+
+Split the input video wherever a new scene is detected:
 
 ```rst
-scenedetect --input my_video.mp4 --output my_video_scenes --stats my_video.stats.csv detect-content list-scenes save-images
+scenedetect -i video.mp4 detect-content split-video
 ```
 
-Here we also specified the output directory (`--output my_video_scenes`) as well as to generate/use a stats file (`--stats my_video.stats.csv`), which can be used to determine/tweak the various detection algorithm options.
-
-Note that there is no particular order to each command, the only requirement is that all global program options appear before the first command, and all options for a given command immediately follow it.  For example, in addition to saving images for each scene, we can also split the input video (`split-video`) or tweak detection parameters (using the stats file from the previous call as well will speed up scene detection time significantly):
+Print a table of detected scenes to the terminal, and save an image
+at the start, middle, and end frame of each scene:
 
 ```rst
-scenedetect --input my_video.mp4 --output my_video_scenes --stats my_video.stats.csv detect-content list-scenes save-images split-video
+scenedetect -i video.mp4 detect-content list-scenes -n save-images
 ```
 
-## Getting Started
+Skip the first 10 seconds of the input video:
 
-To show a summary of all global options/arguments, and a list of commands:
+```rst
+scenedetect -i video.mp4 time -s 10s detect-content
+```
+
+There are many other options and commands.  To show a summary of available options/arguments, and a list of all commands:
 
 ```rst
 scenedetect help
@@ -48,13 +52,15 @@ You can also type `help command` where `command` is a specific command (e.g. `li
 scenedetect help all
 ```
 
+## Getting Started
+
 To start off, let's perform content-aware scene detection on a video `my_video.mp4` ([example](usage-example.md)) with the default threshold, and display a list of detected scenes:
 
 ```rst
 scenedetect --input my_video.mp4 detect-content list-scenes
 ```
 
-Next, the same, but also split the input video into individual clips (starting from `my_video-Scene-001.mp4`): 
+Next, the same, but also split the input video into individual clips (starting from `my_video-Scene-001.mp4`):
 
 ```rst
 scenedetect --input my_video.mp4 detect-content list-scenes split-video

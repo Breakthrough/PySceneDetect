@@ -1,6 +1,8 @@
 
+.. _cli-commands:
+
 ***********************************************************************
-Command Reference
+Commands
 ***********************************************************************
 
 The following commands are available when using ``scenedetect``.
@@ -154,11 +156,12 @@ The `list-scenes` command takes the following options:
  * ``-o``, ``--output DIR``
     Output directory to save videos to. Overrides global
     option `-o`/`--output` if set.
- * ``-f, ``--filename NAME``
+ * ``-f``, ``--filename NAME``
     Filename format to use for the scene list CSV file.
     You can use the `$VIDEO_NAME` macro in the file name.
+    Note that you may have to wrap the name using single quotes.
     [default: `$VIDEO_NAME-Scenes.csv`]
- * ``-n, ``--no-output-file``
+ * ``-n``, ``--no-output-file``
     Disable writing scene list CSV file to disk.  If set,
     `-o`/`--output` and `-f`/`--filename` are ignored.
  * ``-q``, ``--quiet``
@@ -198,8 +201,8 @@ The `save-images` command takes the following options:
     Filename format, *without* extension, to use when
     saving image files. You can use the $VIDEO_NAME,
     $SCENE_NUMBER, and $IMAGE_NUMBER macros in the file
-    name.  [default: $VIDEO_NAME-
-    Scene-$SCENE_NUMBER-$IMAGE_NUMBER]
+    name. Note that you may have to wrap the name using single
+    quotes.  [default: $VIDEO_NAME-Scene-$SCENE_NUMBER-$IMAGE_NUMBER]
  * ``-n``, ``--num-images N``
     Number of images to generate. Will always include
     start/end frame, unless N = 1, in which case the image
@@ -239,8 +242,9 @@ The `split-video` command takes the following options:
  * ``-f``, ``--filename NAME``
     File name format, *without* extension, to use when saving image files.
     You can use the `$VIDEO_NAME` and `$SCENE_NUMBER`
-    macros in the file name.  [default: `$VIDEO_NAME-
-    Scene-$SCENE_NUMBER`]
+    macros in the file name. Note that you may have to
+    wrap the name using single quotes.
+    [default: `$VIDEO_NAME-Scene-$SCENE_NUMBER`]
  * ``-h``, ``--high-quality``
     Encode video with higher quality, overrides `-a`
     option if present. Equivalent to specifying
@@ -305,7 +309,9 @@ The `export-html` command takes the following options:
  * ``-f``, ``--filename NAME``
     Filename format to use for the scene list HTML
     file. You can use the $VIDEO_NAME macro in the
-    file name.  [default: $VIDEO_NAME-Scenes.html]
+    file name.  Note that you may have to wrap the
+    name using single quotes.
+    [default: $VIDEO_NAME-Scenes.html]
  * ``--no-images``
     Export the scene list including or excluding the
     saved images.

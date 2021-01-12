@@ -6,7 +6,7 @@
 #     [  Github: https://github.com/Breakthrough/PySceneDetect/  ]
 #     [  Documentation: http://pyscenedetect.readthedocs.org/    ]
 #
-# Copyright (C) 2014-2019 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2014-2020 Brandon Castellano <http://www.bcastell.com>.
 #
 # PySceneDetect is licensed under the BSD 3-Clause License; see the included
 # LICENSE file, or visit one of the following pages for details:
@@ -24,7 +24,7 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-""" Module: ``scenedetect.platform``
+""" ``scenedetect.platform`` Module
 
 This file contains all platform/library/OS-specific compatibility fixes,
 intended to improve the systems that are able to run PySceneDetect, and allow
@@ -54,11 +54,13 @@ import os.path
 import platform
 import struct
 import csv
+import subprocess
 
 # Third-Party Library Imports
 import cv2
 
 # pylint: disable=unused-import
+# pylint: disable=no-member
 
 
 ##
@@ -93,6 +95,7 @@ except ImportError:
 # pylint: disable=invalid-name, undefined-variable
 if sys.version_info[0] == 2:
     STRING_TYPE = unicode
+
 else:
     STRING_TYPE = str
 # pylint: enable=invalid-name, undefined-variable
@@ -105,7 +108,6 @@ else:
 # Compatibility fix for OpenCV v2.x (copies CAP_PROP_* properties from the
 # cv2.cv namespace to the cv2 namespace, as the cv2.cv namespace was removed
 # with the release of OpenCV 3.0).
-# pylint: disable=c-extension-no-member
 if cv2.__version__[0] == '2' or not (
         cv2.__version__[0].isdigit() and int(cv2.__version__[0]) >= 3):
     cv2.CAP_PROP_FRAME_WIDTH = cv2.cv.CV_CAP_PROP_FRAME_WIDTH
@@ -114,7 +116,6 @@ if cv2.__version__[0] == '2' or not (
     cv2.CAP_PROP_POS_MSEC = cv2.cv.CV_CAP_PROP_POS_MSEC
     cv2.CAP_PROP_POS_FRAMES = cv2.cv.CV_CAP_PROP_POS_FRAMES
     cv2.CAP_PROP_FRAME_COUNT = cv2.cv.CV_CAP_PROP_FRAME_COUNT
-# pylint: enable=c-extension-no-member
 
 
 ##
@@ -233,3 +234,41 @@ def get_and_create_path(file_path, output_directory=None):
         pass
     return file_path
 
+
+
+class CommandTooLong(Exception):
+    """ Raised when the length of a command line argument doesn't play nicely
+    with the Windows command prompt. """
+    # pylint: disable=unnecessary-pass
+    pass
+
+
+def invoke_command(args):
+    # type: (List[str] -> None)
+    """ Same as calling Python's subprocess.call() method, but explicitly
+    raises a different exception when the command length is too long.
+
+    See https://github.com/Breakthrough/PySceneDetect/issues/164 for details.
+
+    Arguments:
+        args (List[str]): List of strings to pass to subprocess.call().
+
+    Returns:
+        int: Return code of command.
+
+    Raises:
+        CommandTooLong when passed command list exceeds built in command line
+        length limit on Windows.
+    """
+    try:
+        return subprocess.call(args)
+    except OSError as err:
+        if os.name != 'nt':
+            raise
+        exception_string = str(err)
+        # Error 206: The filename or extension is too long
+        # Error 87:  The parameter is incorrect
+        to_match = ('206', '87')
+        if any([x in exception_string for x in to_match]):
+            raise CommandTooLong()
+        raise

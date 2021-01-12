@@ -6,7 +6,7 @@
 #     [  Github: https://github.com/Breakthrough/PySceneDetect/  ]
 #     [  Documentation: http://pyscenedetect.readthedocs.org/    ]
 #
-# Copyright (C) 2014-2019 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2014-2020 Brandon Castellano <http://www.bcastell.com>.
 #
 # PySceneDetect is licensed under the BSD 3-Clause License; see the included
 # LICENSE file, or visit one of the following pages for details:
@@ -24,7 +24,7 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-""" Module: ``scenedetect.video_manager``
+""" ``scenedetect.video_manager`` Module
 
 This module contains the :py:class:`VideoManager` class, which provides a consistent
 interface to reading videos, specific exceptions raised upon certain error
@@ -57,8 +57,7 @@ import cv2
 
 # PySceneDetect Library Imports
 from scenedetect.platform import STRING_TYPE
-import scenedetect.frame_timecode
-from scenedetect.frame_timecode import FrameTimecode
+from scenedetect.frame_timecode import FrameTimecode, MINIMUM_FRAMES_PER_SECOND_FLOAT
 
 
 ##
@@ -108,18 +107,21 @@ class VideoParameterMismatch(Exception):
 class VideoDecodingInProgress(RuntimeError):
     """ VideoDecodingInProgress: Raised when attempting to call certain VideoManager methods that
     must be called *before* start() has been called. """
+    # pylint: disable=unnecessary-pass
     pass
 
 
 class VideoDecoderNotStarted(RuntimeError):
     """ VideoDecodingInProgress: Raised when attempting to call certain VideoManager methods that
     must be called *after* start() has been called. """
+    # pylint: disable=unnecessary-pass
     pass
 
 
 class InvalidDownscaleFactor(ValueError):
     """ InvalidDownscaleFactor: Raised when trying to set invalid downscale factor,
     i.e. the supplied downscale factor was not a positive integer greater than zero. """
+    # pylint: disable=unnecessary-pass
     pass
 
 
@@ -128,13 +130,13 @@ class InvalidDownscaleFactor(ValueError):
 ##
 
 DEFAULT_DOWNSCALE_FACTORS = {
-    3200: 12,        # ~4k
-    2100: 8,        # ~2k
-    1700: 6,        # ~1080p
-    1200: 5,
-    900: 4,         # ~720p
-    600: 3,
-    400: 2        # ~480p
+    3200: 12,   # ~4k
+    2100:  8,   # ~2k
+    1700:  6,   # ~1080p
+    1200:  5,
+    900:   4,   # ~720p
+    600:   3,
+    400:   2    # ~480p
 }
 """Dict[int, int]: The default downscale factor for a video of size W x H,
 which enforces the constraint that W >= 200 to ensure an adequate amount
@@ -263,14 +265,14 @@ def open_captures(video_files, framerate=None, validate_parameters=True):
 
 def release_captures(cap_list):
     # type: (Iterable[VideoCapture]) -> None
-    """ Close Captures:  Calls the release() method on every capture in cap_list. """
+    """ Close Captures:  Calls release() on every capture in cap_list. """
     for cap in cap_list:
         cap.release()
 
 
 def close_captures(cap_list):
     # type: (Iterable[VideoCapture]) -> None
-    """ Close Captures:  Calls the close() method on every capture in cap_list. """
+    """ Close Captures:  Calls close() on every capture in cap_list. """
     for cap in cap_list:
         cap.close()
 
@@ -289,16 +291,16 @@ def validate_capture_framerate(video_names, cap_framerates, framerate=None):
     cap_framerate = cap_framerates[0]
     if framerate is not None:
         if isinstance(framerate, float):
-            if framerate < scenedetect.frame_timecode.MINIMUM_FRAMES_PER_SECOND_FLOAT:
+            if framerate < MINIMUM_FRAMES_PER_SECOND_FLOAT:
                 raise ValueError("Invalid framerate (must be a positive non-zero value).")
             cap_framerate = framerate
             check_framerate = False
         else:
             raise TypeError("Expected float for framerate, got %s." % type(framerate).__name__)
     else:
-        unavailable_framerates = [(video_names[i][0], video_names[i][1]) for
-                                  i, fps in enumerate(cap_framerates) if fps <
-                                  scenedetect.frame_timecode.MINIMUM_FRAMES_PER_SECOND_FLOAT]
+        unavailable_framerates = [(video_names[i][0], video_names[i][1])
+                                  for i, fps in enumerate(cap_framerates)
+                                  if fps < MINIMUM_FRAMES_PER_SECOND_FLOAT]
         if unavailable_framerates:
             raise VideoFramerateUnavailable(unavailable_framerates)
     return (cap_framerate, check_framerate)
@@ -315,7 +317,7 @@ def validate_capture_parameters(video_names, cap_frame_sizes, check_framerate=Fa
         VideoParameterMismatch
     """
     bad_params = []
-    max_framerate_delta = scenedetect.frame_timecode.MINIMUM_FRAMES_PER_SECOND_FLOAT
+    max_framerate_delta = MINIMUM_FRAMES_PER_SECOND_FLOAT
     # Check heights/widths match.
     bad_params += [(cv2.CAP_PROP_FRAME_WIDTH, frame_size[0],
                     cap_frame_sizes[0][0], video_names[i][0], video_names[i][1]) for
@@ -413,8 +415,8 @@ class VideoManager(object):
 
     def get_num_videos(self):
         # type: () -> int
-        """ Get Number of Videos - returns the length of the capture list (self._cap_list),
-        representing the number of videos the VideoManager has opened.
+        """ Get Number of Videos - returns the length of the internal capture list,
+        representing the number of videos the VideoManager was constructed with.
 
         Returns:
             int: Number of videos, equal to length of capture list.
@@ -450,8 +452,8 @@ class VideoManager(object):
 
         The timecode returned by this method can be used to perform arithmetic (e.g.
         addition), passing the resulting values back to the VideoManager (e.g. for the
-        set_duration() method), as the framerate of the returned FrameTimecode object
-        matches that of the VideoManager.
+        :py:meth:`set_duration()` method), as the framerate of the returned FrameTimecode
+        object matches that of the VideoManager.
 
         As such, this method is equivalent to creating a FrameTimecode at frame 0 with
         the VideoManager framerate, for example, given a VideoManager called obj,
@@ -506,9 +508,9 @@ class VideoManager(object):
     def set_duration(self, duration=None, start_time=None, end_time=None):
         # type: (Optional[FrameTimecode], Optional[FrameTimecode], Optional[FrameTimecode]) -> None
         """ Set Duration - sets the duration/length of the video(s) to decode, as well as
-        the start/end times.  Must be called before start() is called, otherwise a
-        VideoDecodingInProgress exception will be thrown.  May be called after reset()
-        as well.
+        the start/end times.  Must be called before :py:meth:`start()` is called, otherwise
+        a VideoDecodingInProgress exception will be thrown.  May be called after
+        :py:meth:`reset()` as well.
 
         Arguments:
             duration (Optional[FrameTimecode]): The (maximum) duration in time to
@@ -561,11 +563,11 @@ class VideoManager(object):
 
     def get_duration(self):
         # type: () -> FrameTimecode
-        """ Get Duration - gets the duration/length of the video(s) to decode, as well as
-        the start/end times.
+        """ Get Duration - gets the duration/length of the video(s) to decode,
+        as well as the start/end times.
 
-        If the end time was not set by set_duration(), the end timecode is calculated
-        as the start timecode + total duration.
+        If the end time was not set by :py:meth:`set_duration()`, the end timecode
+        is calculated as the start timecode + total duration.
 
         Returns:
             Tuple[FrameTimecode, FrameTimecode, FrameTimecode]: The current video(s)
@@ -585,8 +587,9 @@ class VideoManager(object):
         decoder process has already been started.
 
         Raises:
-            VideoDecodingInProgress: Must call stop() before this method if
-                start() has already been called after initial construction.
+            VideoDecodingInProgress: Must call :py:meth:`stop()` before this
+                method if :py:meth:`start()` has already been called after
+                initial construction.
         """
         if self._started:
             raise VideoDecodingInProgress()
@@ -601,7 +604,7 @@ class VideoManager(object):
         """ Seek - seeks forwards to the passed timecode.
 
         Only supports seeking forwards (i.e. timecode must be greater than the
-        current VideoManager position).  Can only be used after the start()
+        current position).  Can only be used after the :py:meth:`start()`
         method has been called.
 
         Arguments:
@@ -611,10 +614,18 @@ class VideoManager(object):
             bool: True if seeking succeeded, False if no more frames / end of video.
 
         Raises:
-            VideoDecoderNotStarted: Must call start() before this method.
+            VideoDecoderNotStarted: Must call :py:meth:`start()` before this method.
         """
+        if not self._started:
+            raise VideoDecoderNotStarted()
+
+        if isinstance(self._curr_cap, cv2.VideoCapture):
+            if self._curr_cap is not None and self._end_of_video is not True:
+                self._curr_cap.set(cv2.CAP_PROP_POS_FRAMES, timecode.get_frames() - 1)
+                self._curr_time = timecode - 1
+
         while self._curr_time < timecode:
-            if not self.grab(): # raises VideoDecoderNotStarted if start() was not called
+            if not self.grab():  # raises VideoDecoderNotStarted if start() was not called
                 return False
         return True
 
@@ -631,10 +642,10 @@ class VideoManager(object):
         # type: () -> None
         """ Reset - Reopens captures passed to the constructor of the VideoManager.
 
-        Can only be called after the release() method has been called.
+        Can only be called after the :py:meth:`release()` method has been called.
 
         Raises:
-            VideoDecodingInProgress: Must call release() before this method.
+            VideoDecodingInProgress: Must call :py:meth:`release()` before this method.
         """
         if self._started:
             raise VideoDecodingInProgress()
@@ -683,13 +694,13 @@ class VideoManager(object):
             bool: True if a frame was grabbed, False otherwise.
 
         Raises:
-            VideoDecoderNotStarted: Must call start() before this method.
+            VideoDecoderNotStarted: Must call :py:meth:`start()` before this method.
         """
         if not self._started:
             raise VideoDecoderNotStarted()
 
         grabbed = False
-        if self._curr_cap is not None and self._end_of_video != True:
+        if self._curr_cap is not None and not self._end_of_video:
             while not grabbed:
                 grabbed = self._curr_cap.grab()
                 if not grabbed and not self._get_next_cap():
@@ -706,7 +717,7 @@ class VideoManager(object):
         # type: () -> Tuple[bool, Union[None, numpy.ndarray]]
         """ Retrieve (cv2.VideoCapture method) - retrieves and returns a frame.
 
-        Frame returned corresponds to last call to get().
+        Frame returned corresponds to last call to :py:meth:`grab()`.
 
         Returns:
             Tuple[bool, Union[None, numpy.ndarray]]: Returns tuple of
@@ -715,13 +726,13 @@ class VideoManager(object):
             decoded frame, otherwise returns (False, None).
 
         Raises:
-            VideoDecoderNotStarted: Must call start() before this method.
+            VideoDecoderNotStarted: Must call :py:meth:`start()` before this method.
         """
         if not self._started:
             raise VideoDecoderNotStarted()
 
         retrieved = False
-        if self._curr_cap is not None and self._end_of_video != True:
+        if self._curr_cap is not None and not self._end_of_video:
             while not retrieved:
                 retrieved, self._last_frame = self._curr_cap.retrieve()
                 if not retrieved and not self._get_next_cap():
@@ -745,13 +756,13 @@ class VideoManager(object):
             is a numpy ndarray of the decoded frame, otherwise (False, None).
 
         Raises:
-            VideoDecoderNotStarted: Must call start() before this method.
+            VideoDecoderNotStarted: Must call :py:meth:`start()` before this method.
         """
         if not self._started:
             raise VideoDecoderNotStarted()
 
         read_frame = False
-        if self._curr_cap is not None and self._end_of_video != True:
+        if self._curr_cap is not None and not self._end_of_video:
             read_frame, self._last_frame = self._curr_cap.read()
 
             # Switch to the next capture when the current one is over
@@ -785,4 +796,3 @@ class VideoManager(object):
             self._curr_cap_idx += 1
             self._curr_cap = self._cap_list[self._curr_cap_idx]
             return True
-

@@ -6,7 +6,7 @@
 #     [  Github: https://github.com/Breakthrough/PySceneDetect/  ]
 #     [  Documentation: http://pyscenedetect.readthedocs.org/    ]
 #
-# Copyright (C) 2014-2019 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2014-2020 Brandon Castellano <http://www.bcastell.com>.
 #
 # PySceneDetect is licensed under the BSD 3-Clause License; see the included
 # LICENSE file, or visit one of the following pages for details:
@@ -72,29 +72,11 @@ from scenedetect.stats_manager import NoMetricsRegistered
 from scenedetect.stats_manager import NoMetricsSet
 
 
-TEST_VIDEO_FILE = 'testvideo.mp4'
-
 # TODO: Replace TEST_STATS_FILES with a @pytest.fixture called generate_stats_file.
 #       It should generate the path to a random stats file for use in a test case.
 TEST_STATS_FILES = ['TEST_STATS_FILE'] * 4
 TEST_STATS_FILES = ['%s_%012d.csv' % (stats_file, random.randint(0, 10**12))
                     for stats_file in TEST_STATS_FILES]
-
-
-@pytest.fixture
-def test_video_file():
-    # type: () -> str
-    """ Fixture for test video file path (ensures file exists).
-
-    Access in test case by adding a test_video_file argument to obtain the path.
-    """
-    if not os.path.exists(TEST_VIDEO_FILE):
-        raise FileNotFoundError(
-            'Test video file (%s) must be present to run test cases' % TEST_VIDEO_FILE)
-    for stats_file in TEST_STATS_FILES:
-        if os.path.exists(stats_file):
-            raise FileExistsError('Existing file would be overwritten by running test, aborting.')
-    return TEST_VIDEO_FILE
 
 
 def test_metrics():
@@ -171,19 +153,16 @@ def test_detector_metrics(test_video_file):
 def test_load_empty_stats(test_video_file):
     """ Test loading an empty stats file, ensuring it results in no errors. """
     try:
-        stats_file = open(TEST_STATS_FILES[0], 'w')
+        open(TEST_STATS_FILES[0], 'w').close()
 
-        stats_file.close()
-        stats_file = open(TEST_STATS_FILES[0], 'r')
+        with open(TEST_STATS_FILES[0], 'r') as stats_file:
 
-        stats_manager = StatsManager()
+            stats_manager = StatsManager()
 
-        stats_reader = get_csv_reader(stats_file)
-        stats_manager.load_from_csv(stats_reader)
+            stats_reader = get_csv_reader(stats_file)
+            stats_manager.load_from_csv(stats_reader)
 
     finally:
-        stats_file.close()
-
         os.remove(TEST_STATS_FILES[0])
 
 
@@ -339,4 +318,3 @@ def test_load_corrupt_stats(test_video_file):
     finally:
         for stats_file in stats_files: stats_file.close()
         for stats_file in TEST_STATS_FILES: os.remove(stats_file)
-

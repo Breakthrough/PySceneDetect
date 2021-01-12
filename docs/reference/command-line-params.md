@@ -1,6 +1,14 @@
 
 ## PySceneDetect CLI Reference
 
+
+<div class="warning">
+All information on this page can be obtained on the command line by running the command <tt>scenedetect help all</tt>, <tt>scenedetect help</tt> to get started, or <tt>scenedetect help [commmand]</tt> for information about a particular command.
+<br /><br />
+The complete PySceneDetect CLI Reference 📚 for the <tt>scenedetect</tt> command can be found in the <a href="http://pyscenedetect-manual.readthedocs.io/" alt="Manual Link">PySceneDetect Manual</a>, located at <a href="http://pyscenedetect-manual.readthedocs.io/" alt="Manual Link">pyscenedetect-manual.readthedocs.io/</a>.  This page will eventually be deprecated in favor of the manual.
+</div>
+
+
 The PySceneDetect command-line interface is grouped into commands which
 can be combined together, each containing its own set of arguments:
 
@@ -224,7 +232,7 @@ Options:
                         option -o/--output if set.
   -f, --filename NAME   Filename format to use for the scene list CSV file.
                         You can use the $VIDEO_NAME macro in the file name.
-                        [default: $VIDEO_NAME-Scenes.csv]
+                        Note that you may have to wrap the name using single quotes.  [default: $VIDEO_NAME-Scenes.csv]
   -n, --no-output-file  Disable writing scene list CSV file to disk.  If set,
                         -o/--output and -f/--filename are ignored.
   -q, --quiet           Suppresses output of the table printed by the list-
@@ -247,7 +255,8 @@ Options:
   -f, --filename NAME  Filename format, *without* extension, to use when
                        saving image files. You can use the $VIDEO_NAME,
                        $SCENE_NUMBER, and $IMAGE_NUMBER macros in the file
-                       name.  [default: $VIDEO_NAME-
+                       name. Note that you may have to wrap the name using
+                       single quotes.  [default: $VIDEO_NAME-
                        Scene-$SCENE_NUMBER-$IMAGE_NUMBER]
   -n, --num-images N   Number of images to generate. Will always include
                        start/end frame, unless N = 1, in which case the image
@@ -279,8 +288,9 @@ Options:
                             global option -o/--output if set.
   -f, --filename NAME       File name format, to use when saving image files.
                             You can use the $VIDEO_NAME and $SCENE_NUMBER
-                            macros in the file name.  [default: $VIDEO_NAME-
-                            Scene-$SCENE_NUMBER]
+                            macros in the file name. Note that you may have
+                            to wrap the name using single quotes.
+                            [default: $VIDEO_NAME-Scene-$SCENE_NUMBER]
   -h, --high-quality        Encode video with higher quality, overrides -f
                             option if present. Equivalent to specifying
                             --rate-factor 17 and --preset slow.
@@ -331,7 +341,9 @@ Usage: scenedetect.py export-html [OPTIONS]
 Options:
   -f, --filename NAME        Filename format to use for the scene list HTML
                              file. You can use the $VIDEO_NAME macro in the
-                             file name.  [default: $VIDEO_NAME-Scenes.html]
+                             file name. Note that you may have to wrap the
+                             the format name using single quotes.
+                             [default: $VIDEO_NAME-Scenes.html]
   --no-images                Export the scene list including or excluding the
                              saved images.
   -w, --image-width pixels   Width in pixels of the images in the resulting

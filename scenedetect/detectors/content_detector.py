@@ -6,7 +6,7 @@
 #     [  Github: https://github.com/Breakthrough/PySceneDetect/  ]
 #     [  Documentation: http://pyscenedetect.readthedocs.org/    ]
 #
-# Copyright (C) 2014-2019 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2014-2020 Brandon Castellano <http://www.bcastell.com>.
 #
 # PySceneDetect is licensed under the BSD 3-Clause License; see the included
 # LICENSE file, or visit one of the following pages for details:
@@ -24,7 +24,7 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-""" Module: ``scenedetect.detectors.content_detector``
+""" ``scenedetect.detectors.content_detector`` Module
 
 This module implements the :py:class:`ContentDetector`, which compares the
 difference in content between adjacent frames against a set threshold/score,
@@ -51,9 +51,11 @@ class ContentDetector(SceneDetector):
     """
 
     def __init__(self, threshold=30.0, min_scene_len=15):
+        # type: (float, Union[int, FrameTimecode]) -> None
         super(ContentDetector, self).__init__()
         self.threshold = threshold
-        self.min_scene_len = min_scene_len  # minimum length of any given scene, in frames (int) or FrameTimecode
+        # Minimum length of any given scene, in frames (int) or FrameTimecode
+        self.min_scene_len = min_scene_len
         self.last_frame = None
         self.last_scene_cut = None
         self.last_hsv = None
@@ -150,4 +152,3 @@ class ContentDetector(SceneDetector):
     #        otherwise it should be merged with the previous scene.
     #    """
     #    return []
-

@@ -6,7 +6,7 @@
 #     [  Github: https://github.com/Breakthrough/PySceneDetect/  ]
 #     [  Documentation: http://pyscenedetect.readthedocs.org/    ]
 #
-# Copyright (C) 2014-2019 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2014-2020 Brandon Castellano <http://www.bcastell.com>.
 #
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file or visit one of the following pages for details:
@@ -25,7 +25,7 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 #
 
-""" Module: ``scenedetect.stats_manager``
+""" ``scenedetect.stats_manager`` Module
 
 This module contains the :py:class:`StatsManager` class, which provides a key-value store
 for each :py:class:`SceneDetector <scenedetect.scene_detector.SceneDetector>` to read/write
@@ -116,6 +116,7 @@ class NoMetricsRegistered(Exception):
     """ Raised when attempting to save a CSV file via save_to_csv(...) without any
     frame metrics having been registered (i.e. no SceneDetector objects were added
     to the owning SceneManager object, if any). """
+    # pylint: disable=unnecessary-pass
     pass
 
 
@@ -123,6 +124,7 @@ class NoMetricsSet(Exception):
     """ Raised if no frame metrics have been set via set_metrics(...) when attempting
     to save the stats to a CSV file via save_to_csv(...). This may also indicate that
     detect_scenes(...) was not called on the owning SceneManager object, if any. """
+    # pylint: disable=unnecessary-pass
     pass
 
 
@@ -348,8 +350,8 @@ class StatsManager(object):
 
 
     def _set_metric(self, frame_number, metric_key, metric_value):
-        self._metrics_updated = True
         # type: (int, str, Union[None, int, float, str]) -> None
+        self._metrics_updated = True
         if not frame_number in self._frame_metrics:
             self._frame_metrics[frame_number] = dict()
         self._frame_metrics[frame_number][metric_key] = metric_value
@@ -359,4 +361,3 @@ class StatsManager(object):
         # type: (int, List[str]) -> bool
         return (frame_number in self._frame_metrics and
                 metric_key in self._frame_metrics[frame_number])
-

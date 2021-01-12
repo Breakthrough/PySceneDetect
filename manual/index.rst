@@ -1,10 +1,10 @@
 
 .. PySceneDetect documentation index file (contains toctree directive).
-    Copyright (C) 2019 Brandon Castellano.  All rights reserved.
+    Copyright (C) 2014-2020 Brandon Castellano.  All rights reserved.
 
 
 #######################################################################
-PySceneDetect v0.5.2-dev Manual
+PySceneDetect v0.5.4 Manual
 #######################################################################
 
 This manual refers to both the PySceneDetect
@@ -13,8 +13,10 @@ command-line interface (the `scenedetect` command) and the PySceneDetect Python 
 
 Information regarding installing/downloading PySceneDetect or obtaining the latest
 release can be found at
-`scenedetect.com <http://scenedetect.com/>`_.  Both Python 2.7 and 3.x are supported, however it is suggested to use or migrate
-to Python 3.x whenever possible, as it provides better overall performance.
+`scenedetect.com <http://scenedetect.com/>`_.  Both Python 2.7 and 3.x are supported,
+however it is suggested to use or migrate to Python 3.x whenever possible, as it
+provides better overall performance.  Python 2.7 support may be dropped sometime
+in 2021 (possibly earlier).
 
 PySceneDetect requires `ffmpeg` or `mkvmerge` for video splitting support.
 
@@ -32,7 +34,7 @@ Table of Contents
 ***********************************************************************
 
 =======================================================================
-``scenedetect`` Command Reference
+``scenedetect`` Command Reference 🖥️
 =======================================================================
 
 .. toctree::
@@ -45,7 +47,7 @@ Table of Contents
     cli/detectors
 
 =======================================================================
-``scenedetect`` Python Module
+``scenedetect`` Python Module 🐍
 =======================================================================
 
 .. toctree::

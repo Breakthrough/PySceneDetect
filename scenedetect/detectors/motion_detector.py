@@ -6,7 +6,7 @@
 #     [  Github: https://github.com/Breakthrough/PySceneDetect/  ]
 #     [  Documentation: http://pyscenedetect.readthedocs.org/    ]
 #
-# Copyright (C) 2014-2019 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2014-2020 Brandon Castellano <http://www.bcastell.com>.
 #
 # PySceneDetect is licensed under the BSD 3-Clause License; see the included
 # LICENSE file, or visit one of the following pages for details:
@@ -24,7 +24,7 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-""" PySceneDetect ``scenedetect.detectors.motion_detector`` Module
+""" ``scenedetect.detectors.motion_detector`` Module
 
 This module implements the :py:class:`MotionDetector`, which detects motion events
 using background subtraction, morphological transforms, and thresholding.
@@ -71,7 +71,7 @@ class MotionDetector(SparseSceneDetector):
             # video resolution (480p = 3x3, 720p = 5x5, 1080p = 7x7).
             pass
 
-        self.bg_subtractor = cv2.createBackgroundSubtractorMOG2( 
+        self.bg_subtractor = cv2.createBackgroundSubtractorMOG2(
             detectShadows = False )
 
         self.last_frame_score = 0.0
@@ -93,7 +93,7 @@ class MotionDetector(SparseSceneDetector):
         kernel = numpy.ones((self.kernel_size, self.kernel_size), numpy.uint8)
         filtered_frame = cv2.morphologyEx(fgmask, cv2.MORPH_OPEN, kernel)
 
-        frame_score = numpy.sum(filtered_frame) / float( 
+        frame_score = numpy.sum(filtered_frame) / float(
             filtered_frame.shape[0] * filtered_frame.shape[1] )
 
         return cut_detected

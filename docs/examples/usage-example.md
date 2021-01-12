@@ -56,11 +56,15 @@ We now know that a threshold of `30` does not work in all cases for our video, a
 
 We can determine the proper threshold in this case by generating a statistics file (with the `-s` / `--stats` option) for the video `goldeneye.mp4`, and looking at the behaviour of the values where we expect the scene break/cut to occur in scene 17:
 
+```rst
 scenedetect --input goldeneye.mp4 --stats goldeneye.stats.csv detect-content list-scenes save-images
+```
 
 After examining the file and determining an optimal value of 27 for `detect-content`, we can set the threshold for the detector via:
 
+```rst
 scenedetect --input goldeneye.mp4 --stats goldeneye.stats.csv detect-content --threshold 27 list-scenes save-images
+```
 
 Note that specifying the same `--stats` file again will make parsing the scenes significantly quicker, as the frame metrics stored in this file are re-used as a cache instead of computing them again. Finally, our updated scene list appears as follows (similar entries skipped for brevity):
 
@@ -83,7 +87,7 @@ Now the missing scene (scene number 18, in this case) has been detected properly
 
 The last step to automatically split the input file into clips is to specify the `split-video` command.  This will pass a list of the detected scene timecodes to `ffmpeg` if installed, splitting the input video into scenes.
 
-You may also want to use the `-c/--copy` option to ensure that no re-encoding is performed (using `mkvmerge` instead), at the expense of frame-accurate scene cuts, since when copying, cuts can sometimes only be generated on keyframes.  You can also pass the `-h/--high-quality` option to ensure the output videos are visually identical to the input (at the expense of longer processing time and greater filesize).
+You may also want to use the `-c/--copy` option to ensure that no re-encoding is performed (using `mkvmerge` instead), at the expense of frame-accurate scene cuts, since when copying, cuts can sometimes only be generated on keyframes.  You can also pass the `-hq/--high-quality` option to ensure the output videos are visually identical to the input (at the expense of longer processing time and greater filesize).
 
 Thus, to generate a sequence of files `goldeneye-scene-001.mp4`, `goldeneye-scene-002.mp4`, `goldeneye-scene-003.mp4`..., our full command becomes:
 

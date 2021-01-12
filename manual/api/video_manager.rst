@@ -1,10 +1,14 @@
 
+.. _scenedetect-video_manager:
+
+---------------------------------------------------------------
 VideoManager
 ---------------------------------------------------------------
 
 .. automodule:: scenedetect.video_manager
 
 
+===============================================================
 Usage Example
 ===============================================================
 
@@ -102,7 +106,7 @@ to cleanup all resources acquired by the :py:class:`VideoManager` object.
             # Ensures release() is called even if an exception
             # is thrown during any code added to process frames.
             video_manager.release()
-            
+
 
 
 When passing a :py:class:`VideoManager` to a
@@ -111,7 +115,7 @@ When passing a :py:class:`VideoManager` to a
 :ref:`example in the SceneManager reference<scenemanager-example>` for more details.
 
 
-``VideoManager`` Class 
+``VideoManager`` Class
 ===============================================================
 
 .. autoclass:: scenedetect.video_manager.VideoManager
@@ -126,8 +130,6 @@ The following functions and constants are available in the ``scenedetect.video_m
 .. autodata:: scenedetect.video_manager.DEFAULT_DOWNSCALE_FACTORS
 
 .. autofunction:: scenedetect.video_manager.compute_downscale_factor
-
-.. autoexception:: scenedetect.video_manager.InvalidDownscaleFactor
 
 .. autofunction:: scenedetect.video_manager.get_video_name
 
@@ -147,6 +149,8 @@ The following functions and constants are available in the ``scenedetect.video_m
 Exceptions
 ===============================================================
 
+.. autoexception:: scenedetect.video_manager.InvalidDownscaleFactor
+
 .. autoexception:: scenedetect.video_manager.VideoOpenFailure
 
 .. autoexception:: scenedetect.video_manager.VideoFramerateUnavailable
@@ -156,7 +160,5 @@ Exceptions
 .. autoexception:: scenedetect.video_manager.VideoDecodingInProgress
 
 .. autoexception:: scenedetect.video_manager.VideoDecoderNotStarted
-
-.. autoexception:: scenedetect.video_manager.InvalidDownscaleFactor
 
 
