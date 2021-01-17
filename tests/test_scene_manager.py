@@ -52,9 +52,13 @@ Alternatively, the TEST_VIDEO_FILE constant can be replaced with any valid video
 
 # Third-Party Library Imports
 import cv2
+import os
+import os.path
+import glob
 
 # PySceneDetect Library Imports
 from scenedetect.scene_manager import SceneManager
+from scenedetect.scene_manager import save_images
 from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.video_manager import VideoManager
 from scenedetect.detectors import ContentDetector
@@ -135,3 +139,49 @@ def test_scene_list(test_video_file):
 
     finally:
         vm.release()
+
+
+def test_save_images(test_movie_file):
+    """ Test scenedetect.scene_manager.save_images function.  """
+    vm = VideoManager([test_movie_file])
+    sm = SceneManager()
+    sm.add_detector(ContentDetector())
+
+    image_name_glob = 'scenedetect.tempfile.*.jpg'
+    image_name_template = 'scenedetect.tempfile.$SCENE_NUMBER.$IMAGE_NUMBER'
+
+    try:
+        video_fps = vm.get_framerate()
+        start_time = FrameTimecode('00:00:05', video_fps)
+        end_time = FrameTimecode('00:00:15', video_fps)
+
+        vm.set_duration(start_time=start_time, end_time=end_time)
+        vm.set_downscale_factor()
+
+        vm.start()
+        sm.detect_scenes(frame_source=vm)
+
+        scene_list = sm.get_scene_list()
+        assert scene_list
+
+        image_filenames = save_images(
+            scene_list=scene_list,
+            video_manager=vm,
+            num_images=3,
+            image_extension='jpg',
+            image_name_template=image_name_template)
+
+        # Ensure images got created, and the proper number got created.
+        total_images = 0
+        for scene_number in image_filenames:
+            for path in image_filenames[scene_number]:
+                assert os.path.exists(path)
+                total_images += 1
+
+        assert total_images == len(glob.glob(image_name_glob))
+
+    finally:
+        vm.release()
+        for path in glob.glob(image_name_glob):
+            os.remove(path)
+

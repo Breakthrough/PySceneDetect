@@ -10,10 +10,13 @@ PySceneDetect Releases
 
  * Primarily maintenance release including various bugfixes, minor API changes, and enhancements
  * The `--min-scene-len`/`-m` option is now global rather than per-detector
+ * There is a new global option `--drop-short-scenes` to go along with `-m`
  * Removed first row from statsfiles so it is a valid CSV file
  * The progress bar now correctly resizes when the terminal is resized
  * Image sequences and URLs are now supported for input via the CLI/API
  * Images exported using the `save-images` command are now resized to match the display aspect ratio
+ * A new flag `-s`/`--skip-cuts` has been added to the `list-scenes` command to allow standardized processing
+ * The functionality of `save-images` is now accessible via the Python API through the `save_images()` function in `scenedetect.scene_manager`
 
 #### Changelog
 
@@ -22,6 +25,7 @@ PySceneDetect Releases
  * [bugfix] Fix `save-images` command not saving the last frame of the final scene due to overseeking
  * [cli] Make `--min-scene-len` a global option rather than per-detector ([#131](https://github.com/Breakthrough/PySceneDetect/issues/131), thanks @tonycpsu)
  * [feature] Added `--drop-short-scenes` option to remove all scenes smaller than `--min-scene-len`, instead of merging them
+ * [cli] Add `-s`/`--skip-cuts` option to `list-scenes` command to allow outputting a scene list CSV file as compliant with RFC 4180 ([#136](https://github.com/Breakthrough/PySceneDetect/issues/136))
  * [enhancement] Removed first row from statsfile to comply with RFC 4180, includes backwards compatibility so existing statsfiles can still be loaded ([#136](https://github.com/Breakthrough/PySceneDetect/issues/136))
  * [api] Add argument `include_cut_list` to `write_scene_list` method in `SceneManager` to support [#136](https://github.com/Breakthrough/PySceneDetect/issues/136)
  * [api] Removed unused argument base_timecode from `StatsManager.load_from_csv()` method
@@ -31,6 +35,7 @@ PySceneDetect Releases
  * [enhancement] Enabled dynamic resizing for progress bar ([#193](https://github.com/Breakthrough/PySceneDetect/issues/193))
  * [enhancement] Always ouptut version number via logger to assist with debugging ([#171](https://github.com/Breakthrough/PySceneDetect/issues/171))
  * [bugfix] Resolve RuntimeWarning when running as module ([#181](https://github.com/Breakthrough/PySceneDetect/issues/181))
+ * [api] Add `save_images()` function to `scenedetect.scene_manager` module which exposes the same functionality as the CLI `save-images` command ([#88](https://github.com/Breakthrough/PySceneDetect/issues/88))
 
 #### Known Issues
 

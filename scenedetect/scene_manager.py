@@ -246,21 +246,57 @@ def write_scene_list_html(output_html_filename, scene_list, cut_list=None, css=N
     page.save(output_html_filename)
 
 
-def generate_images(scene_list, video_manager, video_name,
-                    num_images=3, image_frame_margin=0,
-                    image_extension='jpg', encoder_param=95,
-                    image_name_template='$VIDEO_NAME-Scene-$SCENE_NUMBER-$IMAGE_NUMBER',
-                    output_dir=None, downscale_factor=1, show_progress=False):
+def save_images(scene_list, video_manager, num_images=3, image_frame_margin=0,
+                image_extension='jpg', encoder_param=95,
+                image_name_template='$VIDEO_NAME-Scene-$SCENE_NUMBER-$IMAGE_NUMBER',
+                output_dir=None, downscale_factor=1, show_progress=False):
     # type: (...) -> Dict[List[str]]
-    """ TODO: Documentation.  Returns dictionary of format { scene # : [paths] } """
+    """ Saves a set number of images from each scene, given a list of scenes
+    and the associated video/frame source.
+
+    Arguments:
+        scene_list: A list of scenes (pairs of FrameTimecode objects) returned
+            from calling a SceneManager's detect_scenes() method.
+        video_manager: A VideoManager object corresponding to the scene list.
+            Note that the video will be closed/re-opened and seeked through.
+        num_images: Number of images to generate for each scene.  Minimum is 1.
+        image_frame_margin: Number of frames to pad each scene around the beginning
+            and end (e.g. moves the first/last image into the scene by N frames).
+        image_extension: Type of image to save (must be one of 'jpg', 'png', or 'webp').
+        encoder_param: Quality/compression efficiency, based on type of image:
+            'jpg' / 'webp':  Quality 0-100, higher is better quality.  100 is lossless for webp.
+            'png': Compression from 1-9, where 9 achieves best filesize but is slower to encode.
+        image_name_template: Template to use when creating the images on disk. Can
+            use the macros $VIDEO_NAME, $SCENE_NUMBER, and $IMAGE_NUMBER. The image
+            extension is applied automatically as per the argument image_extension.
+        output_dir: Directory to output the images into.  If not set, the output
+            is created in the working directory.
+        downscale_factor: Integer factor to downscale images by.  No filtering
+            is currently done, only downsampling (thus requiring an integer).
+        show_progress: If True, shows a progress bar if tqdm is installed.
+
+
+    Returns:
+        Dict[List[str]]: Dictionary of the format { scene_num : [image_paths] },
+        where scene_num is the number of the scene in scene_list (starting from 1),
+        and image_paths is a list of the paths to the newly saved/created images.
+
+    Raises:
+        ValueError: Raised if any arguments are invalid or out of range (e.g.
+        if num_images is negative).
+    """
 
     if not scene_list:
         return {}
     if num_images <= 0:
         raise ValueError()
 
+    # TODO: Validate that encoder_param is within the proper range.
+    # Should be between 0 and 100 (inclusive) for jpg/webp, and 1-9 for png.
     imwrite_param = [get_cv2_imwrite_params()[image_extension],
                      encoder_param] if encoder_param is not None else []
+
+    video_name = video_manager.get_video_name()
 
     # Reset video manager and downscale factor.
     video_manager.release()
@@ -329,12 +365,13 @@ def generate_images(scene_list, video_manager, video_name,
             video_manager.seek(image_timecode)
             ret_val, frame_im = video_manager.read()
             if ret_val:
-                file_path = '%s.%s' % (filename_template.safe_substitute(
-                    VIDEO_NAME=video_name,
-                    SCENE_NUMBER=scene_num_format % (i + 1),
-                    IMAGE_NUMBER=image_num_format % (j + 1),
-                    FRAME_NUMBER=image_timecode.get_frames()),
-                                        image_extension)
+                file_path = '%s.%s' % (
+                    filename_template.safe_substitute(
+                        VIDEO_NAME=video_name,
+                        SCENE_NUMBER=scene_num_format % (i + 1),
+                        IMAGE_NUMBER=image_num_format % (j + 1),
+                        FRAME_NUMBER=image_timecode.get_frames()),
+                    image_extension)
                 image_filenames[i].append(file_path)
                 if aspect_ratio is not None:
                     frame_im = cv2.resize(

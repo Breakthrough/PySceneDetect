@@ -45,8 +45,8 @@ import cv2
 # PySceneDetect Library Imports
 import scenedetect.detectors
 
+import scenedetect.scene_manager
 from scenedetect.scene_manager import SceneManager
-from scenedetect.scene_manager import generate_images
 from scenedetect.scene_manager import write_scene_list
 from scenedetect.scene_manager import write_scene_list_html
 
@@ -340,10 +340,9 @@ class CliContext(object):
             if self.image_directory is not None:
                 image_output_dir = self.image_directory
 
-            image_filenames = generate_images(
+            image_filenames = scenedetect.scene_manager.save_images(
                 scene_list=scene_list,
                 video_manager=self.video_manager,
-                video_name=video_name,
                 num_images=self.num_images,
                 image_frame_margin=self.image_frame_margin,
                 image_extension=self.image_extension,
