@@ -246,7 +246,7 @@ def write_scene_list_html(output_html_filename, scene_list, cut_list=None, css=N
     page.save(output_html_filename)
 
 
-def save_images(scene_list, video_manager, num_images=3, image_frame_margin=1,
+def save_images(scene_list, video_manager, num_images=3, frame_margin=1,
                 image_extension='jpg', encoder_param=95,
                 image_name_template='$VIDEO_NAME-Scene-$SCENE_NUMBER-$IMAGE_NUMBER',
                 output_dir=None, downscale_factor=1, show_progress=False):
@@ -263,7 +263,7 @@ def save_images(scene_list, video_manager, num_images=3, image_frame_margin=1,
         video_manager: A VideoManager object corresponding to the scene list.
             Note that the video will be closed/re-opened and seeked through.
         num_images: Number of images to generate for each scene.  Minimum is 1.
-        image_frame_margin: Number of frames to pad each scene around the beginning
+        frame_margin: Number of frames to pad each scene around the beginning
             and end (e.g. moves the first/last image into the scene by N frames).
             Can set to 0, but will result in some video files failing to extract
             the very last frame.
@@ -293,7 +293,7 @@ def save_images(scene_list, video_manager, num_images=3, image_frame_margin=1,
 
     if not scene_list:
         return {}
-    if num_images <= 0 or image_frame_margin < 0:
+    if num_images <= 0 or frame_margin < 0:
         raise ValueError()
 
     # TODO: Validate that encoder_param is within the proper range.
@@ -337,10 +337,10 @@ def save_images(scene_list, video_manager, num_images=3, image_frame_margin=1,
                 a[len(a)//2] if (0 < j < num_images-1) or num_images == 1
 
                 # first frame
-                else min(a[0] + image_frame_margin, a[-1]) if j == 0
+                else min(a[0] + frame_margin, a[-1]) if j == 0
 
                 # last frame
-                else max(a[-1] - image_frame_margin, a[0])
+                else max(a[-1] - frame_margin, a[0])
 
                 # for each evenly-split array of frames in the scene list
                 for j, a in enumerate(np.array_split(r, num_images))

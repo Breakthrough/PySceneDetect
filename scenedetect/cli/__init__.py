@@ -700,14 +700,14 @@ def split_video_command(ctx, output, filename, high_quality, override_args, quie
     'Number of frames to ignore at the beginning and end of scenes when saving images')
 @click.pass_context
 def save_images_command(ctx, output, filename, num_images, jpeg, webp, quality, png,
-                        compression, image_frame_margin):
+                        compression, frame_margin):
     """ Create images for each detected scene. """
     if ctx.obj.save_images:
         duplicate_command(ctx, 'save-images')
     if quality is None:
         quality = 100 if webp else 95
     ctx.obj.save_images_command(num_images, output, filename, jpeg, webp, quality, png,
-                                compression, image_frame_margin)
+                                compression, frame_margin)
 
 
 

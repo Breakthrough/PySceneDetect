@@ -156,7 +156,7 @@ class CliContext(object):
         self.image_name_format = (              # save-images -f/--name-format
             '$VIDEO_NAME-Scene-$SCENE_NUMBER-$IMAGE_NUMBER')
         self.num_images = 3                     # save-images -n/--num-images
-        self.image_frame_margin = 1             # save-images -m/--frame-margin
+        self.frame_margin = 1                   # save-images -m/--frame-margin
 
         # Properties for split-video command.
         self.split_video = False                # split-video command
@@ -344,7 +344,7 @@ class CliContext(object):
                 scene_list=scene_list,
                 video_manager=self.video_manager,
                 num_images=self.num_images,
-                image_frame_margin=self.image_frame_margin,
+                frame_margin=self.frame_margin,
                 image_extension=self.image_extension,
                 encoder_param=self.image_param,
                 image_name_template=self.image_name_format,
@@ -616,7 +616,7 @@ class CliContext(object):
 
 
     def save_images_command(self, num_images, output, name_format, jpeg, webp, quality,
-                            png, compression, image_frame_margin):
+                            png, compression, frame_margin):
         # type: (int, str, str, bool, bool, int, bool, int) -> None
         """ Save Images Command: Parses all options/arguments passed to the save-images command,
         or with respect to the CLI, this function processes [save-images options] when calling:
@@ -658,7 +658,7 @@ class CliContext(object):
             self.image_param = compression if png else quality
             self.image_name_format = name_format
             self.num_images = num_images
-            self.image_frame_margin = image_frame_margin
+            self.frame_margin = frame_margin
 
             image_type = 'JPEG' if self.image_extension == 'jpg' else self.image_extension.upper()
             image_param_type = ''
