@@ -172,6 +172,7 @@ class CliContext(object):
         self.scene_list_directory = None        # list-scenes -o/--output
         self.scene_list_name_format = None      # list-scenes -f/--filename
         self.scene_list_output = False          # list-scenes -n/--no-output
+        self.skip_cuts = False                  # list-scenes -s/--skip-cuts
 
         # Properties for export-html command.
         self.export_html = False                # export-html command
@@ -308,7 +309,11 @@ class CliContext(object):
                 else self.output_directory)
             logging.info('Writing scene list to CSV file:\n  %s', scene_list_path)
             with open(scene_list_path, 'wt') as scene_list_file:
-                write_scene_list(scene_list_file, scene_list, cut_list)
+                write_scene_list(
+                    output_csv_file=scene_list_file,
+                    scene_list=scene_list,
+                    include_cut_list=not self.skip_cuts,
+                    cut_list=cut_list)
 
         if self.print_scene_list:
             logging.info("""Scene List:
@@ -569,7 +574,8 @@ class CliContext(object):
             self.start_frame = start.get_frames()
 
 
-    def list_scenes_command(self, output_path, filename_format, no_output_mode, quiet_mode):
+    def list_scenes_command(self, output_path, filename_format, no_output_mode,
+                            quiet_mode, skip_cuts):
         # type: (str, str, bool, bool) -> None
         """ List Scenes Command: Parses all options/arguments passed to the list-scenes command,
         or with respect to the CLI, this function processes [list-scenes options] when calling:
@@ -588,6 +594,7 @@ class CliContext(object):
         self.scene_list_output = False if no_output_mode else True
         if self.scene_list_directory is not None:
             logging.info('Scene list output directory set:\n  %s', self.scene_list_directory)
+        self.skip_cuts = skip_cuts
 
 
     def export_html_command(self, filename, no_images, image_width, image_height):

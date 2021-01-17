@@ -524,13 +524,19 @@ def export_html_command(ctx, filename, no_images, image_width, image_height):
     '--quiet', '-q',
     is_flag=True, flag_value=True, help=
     'Suppresses output of the table printed by the list-scenes command.')
+@click.option(
+    '--skip-cuts', '-s',
+    is_flag=True, flag_value=True, help=
+    'Skips outputting the cutting list as the first row in the CSV file.'
+    ' Set this option if compliance with RFC 4810 is required.')
 @click.pass_context
-def list_scenes_command(ctx, output, filename, no_output_file, quiet):
+def list_scenes_command(ctx, output, filename, no_output_file, quiet, skip_cuts):
     """ Prints scene list and outputs to a CSV file. The default filename is
     $VIDEO_NAME-Scenes.csv. """
     if ctx.obj.list_scenes:
         duplicate_command(ctx, 'list-scenes')
-    ctx.obj.list_scenes_command(output, filename, no_output_file, quiet)
+    ctx.obj.list_scenes_command(
+        output, filename, no_output_file, quiet, skip_cuts)
     ctx.obj.list_scenes = True
 
 

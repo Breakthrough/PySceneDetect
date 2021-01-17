@@ -235,11 +235,15 @@ Options:
                         option -o/--output if set.
   -f, --filename NAME   Filename format to use for the scene list CSV file.
                         You can use the $VIDEO_NAME macro in the file name.
-                        Note that you may have to wrap the name using single quotes.  [default: $VIDEO_NAME-Scenes.csv]
+                        Note that you may have to wrap the name using single
+                        quotes.  [default: $VIDEO_NAME-Scenes.csv]
   -n, --no-output-file  Disable writing scene list CSV file to disk.  If set,
                         -o/--output and -f/--filename are ignored.
   -q, --quiet           Suppresses output of the table printed by the list-
                         scenes command.
+  -s, --skip-cuts       Skips outputting the cutting list as the first row in
+                        the CSV file. Set this option if compliance with RFC
+                        4810 is required.
 ```
 
 
