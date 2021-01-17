@@ -261,24 +261,11 @@ def open_captures(video_files, framerate=None, validate_parameters=True):
                 check_framerate=check_framerate, cap_framerates=cap_framerates)
 
     except:
-        release_captures(cap_list)
+        for cap in cap_list:
+            cap.release()
         raise
 
     return (cap_list, cap_framerate, cap_frame_size)
-
-
-def release_captures(cap_list):
-    # type: (Iterable[VideoCapture]) -> None
-    """ Close Captures:  Calls release() on every capture in cap_list. """
-    for cap in cap_list:
-        cap.release()
-
-
-def close_captures(cap_list):
-    # type: (Iterable[VideoCapture]) -> None
-    """ Close Captures:  Calls close() on every capture in cap_list. """
-    for cap in cap_list:
-        cap.close()
 
 
 def validate_capture_framerate(video_names, cap_framerates, framerate=None):
@@ -653,7 +640,8 @@ class VideoManager(object):
     def release(self):
         # type: () -> None
         """ Release (cv2.VideoCapture method), releases all open capture(s). """
-        release_captures(self._cap_list)
+        for cap in self._cap_list:
+            cap.release()
         self._cap_list = []
         self._started = False
 

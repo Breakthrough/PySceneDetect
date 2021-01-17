@@ -8,7 +8,7 @@ PySceneDetect Releases
 
 #### Release Notes
 
- * Primarily maintenance release including various bugfixes, minor API changes, and enhancements
+ * One of the last major updates before transitioning to the new v0.6.x API
  * The `--min-scene-len`/`-m` option is now global rather than per-detector
  * There is a new global option `--drop-short-scenes` to go along with `-m`
  * Removed first row from statsfiles so it is a valid CSV file
@@ -36,6 +36,7 @@ PySceneDetect Releases
  * [enhancement] Always ouptut version number via logger to assist with debugging ([#171](https://github.com/Breakthrough/PySceneDetect/issues/171))
  * [bugfix] Resolve RuntimeWarning when running as module ([#181](https://github.com/Breakthrough/PySceneDetect/issues/181))
  * [api] Add `save_images()` function to `scenedetect.scene_manager` module which exposes the same functionality as the CLI `save-images` command ([#88](https://github.com/Breakthrough/PySceneDetect/issues/88))
+ * [api] Removed `close_captures()` and `release_captures()` functions from `scenedetect.video_manager` module
 
 #### Known Issues
 

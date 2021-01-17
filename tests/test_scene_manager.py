@@ -49,12 +49,13 @@ Alternatively, the TEST_VIDEO_FILE constant can be replaced with any valid video
 # pylint: disable=no-self-use, protected-access, multiple-statements, invalid-name
 # pylint: disable=redefined-outer-name
 
-
-# Third-Party Library Imports
-import cv2
+# Standard Library Imports
 import os
 import os.path
 import glob
+
+# Third-Party Library Imports
+import cv2
 
 # PySceneDetect Library Imports
 from scenedetect.scene_manager import SceneManager
@@ -184,4 +185,3 @@ def test_save_images(test_movie_file):
         vm.release()
         for path in glob.glob(image_name_glob):
             os.remove(path)
-

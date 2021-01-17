@@ -133,3 +133,4 @@ option.
 
 .. autofunction:: scenedetect.scene_manager.write_scene_list
 
+.. autofunction:: scenedetect.scene_manager.save_images
