@@ -59,7 +59,7 @@ Usage: scenedetect [OPTIONS] COMMAND1 [ARGS]... [COMMAND2 [ARGS]...]...
 Options:
   -i, --input VIDEO      [Required] Input video file. May be specified
                          multiple times to concatenate several videos
-                         together.
+                         together. Also supports image sequences and URLs.
   -o, --output DIR       Output directory for all files (stats file, output
                          videos, images, log files, etc...).
   -f, --framerate FPS    Force framerate, in frames/sec (e.g. -f 29.97).
@@ -78,6 +78,13 @@ Options:
                          processes 33% of the frames, -fs 3 processes 25%,
                          etc...). Reduces processing speed at expense of
                          accuracy.  [default: 0]
+  -m, --min-scene-len TIMECODE
+                         Minimum size/length of any scene. TIMECODE can
+                         be specified as exact number of frames, a time
+                         in seconds followed by s, or a timecode in the
+                         format HH:MM:SS or HH:MM:SS.nnn [default: 0.6s]
+  --drop-short-scenes    Drop scenes shorter than `--min-scene-len`
+                         instead of combining them with neighbors
   -s, --stats CSV        Path to stats file (.csv) for writing frame metrics
                          to. If the file exists, any metrics will be
                          processed, otherwise a new file will be created. Can
@@ -174,8 +181,6 @@ Options:
                               metric must exceed to trigger a new scene.
                               Refers to frame metric delta_hsv_avg in stats
                               file.  [default: 30.0]
-  -m, --min-scene-len FRAMES  Minimum size/length of any scene, in number of
-                              frames.  [default: 15]
   -h, --help                  Show this message and exit.
 ```
 
@@ -198,8 +203,6 @@ Options:
                               frame metric must exceed to trigger a new scene.
                               Refers to frame metric delta_rgb in stats file.
                               [default: 12]
-  -m, --min-scene-len FRAMES  Minimum size/length of any scene, in number of
-                              frames.  [default: 15]
   -f, --fade-bias PERCENT     Percent (%) from -100 to 100 of timecode skew
                               for where cuts should be placed. -100 indicates
                               the start frame, +100 indicates the end frame,
@@ -232,11 +235,15 @@ Options:
                         option -o/--output if set.
   -f, --filename NAME   Filename format to use for the scene list CSV file.
                         You can use the $VIDEO_NAME macro in the file name.
-                        Note that you may have to wrap the name using single quotes.  [default: $VIDEO_NAME-Scenes.csv]
+                        Note that you may have to wrap the name using single
+                        quotes.  [default: $VIDEO_NAME-Scenes.csv]
   -n, --no-output-file  Disable writing scene list CSV file to disk.  If set,
                         -o/--output and -f/--filename are ignored.
   -q, --quiet           Suppresses output of the table printed by the list-
                         scenes command.
+  -s, --skip-cuts       Skips outputting the cutting list as the first row in
+                        the CSV file. Set this option if compliance with RFC
+                        4810 is required.
 ```
 
 
@@ -250,27 +257,29 @@ Usage: scenedetect save-images [OPTIONS]
   Create images for each detected scene.
 
 Options:
-  -o, --output DIR     Output directory to save images to. Overrides global
-                       option -o/--output if set.
-  -f, --filename NAME  Filename format, *without* extension, to use when
-                       saving image files. You can use the $VIDEO_NAME,
-                       $SCENE_NUMBER, and $IMAGE_NUMBER macros in the file
-                       name. Note that you may have to wrap the name using
-                       single quotes.  [default: $VIDEO_NAME-
-                       Scene-$SCENE_NUMBER-$IMAGE_NUMBER]
-  -n, --num-images N   Number of images to generate. Will always include
-                       start/end frame, unless N = 1, in which case the image
-                       will be the frame at the mid-point in the scene.
-  -j, --jpeg           Set output format to JPEG. [default]
-  -w, --webp           Set output format to WebP.
-  -q, --quality Q      JPEG/WebP encoding quality, from 0-100 (higher
-                       indicates better quality). For WebP, 100 indicates
-                       lossless. [default: JPEG: 95, WebP: 100]
-  -p, --png            Set output format to PNG.
-  -c, --compression C  PNG compression rate, from 0-9. Higher values produce
-                       smaller files but result in longer compression time.
-                       This setting does not affect image quality, only file
-                       size. [default: 3]
+  -o, --output DIR      Output directory to save images to. Overrides global
+                        option -o/--output if set.
+  -f, --filename NAME   Filename format, *without* extension, to use when
+                        saving image files. You can use the $VIDEO_NAME,
+                        $SCENE_NUMBER, and $IMAGE_NUMBER macros in the file
+                        name. Note that you may have to wrap the format in
+                        single quotes.  [default: $VIDEO_NAME-
+                        Scene-$SCENE_NUMBER-$IMAGE_NUMBER]
+  -n, --num-images N    Number of images to generate. Will always include
+                        start/end frame, unless N = 1, in which case the image
+                        will be the frame at the mid-point in the scene.
+  -j, --jpeg            Set output format to JPEG. [default]
+  -w, --webp            Set output format to WebP.
+  -q, --quality Q       JPEG/WebP encoding quality, from 0-100 (higher
+                        indicates better quality). For WebP, 100 indicates
+                        lossless. [default: JPEG: 95, WebP: 100]  [0<=x<=100]
+  -p, --png             Set output format to PNG.
+  -c, --compression C   PNG compression rate, from 0-9. Higher values produce
+                        smaller files but result in longer compression time.
+                        This setting does not affect image quality, only file
+                        size. [default: 3]  [0<=x<=9]
+  -m, --frame-margin N  Number of frames to ignore at the beginning and end of
+                        scenes when saving images [default: 1]
 ```
 
 

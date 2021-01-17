@@ -6,7 +6,7 @@
 #     [  Github: https://github.com/Breakthrough/PySceneDetect/  ]
 #     [  Documentation: http://pyscenedetect.readthedocs.org/    ]
 #
-# Copyright (C) 2014-2020 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2014-2021 Brandon Castellano <http://www.bcastell.com>.
 #
 # PySceneDetect is licensed under the BSD 3-Clause License; see the included
 # LICENSE file, or visit one of the following pages for details:
@@ -36,26 +36,22 @@ from __future__ import print_function
 import logging
 import os
 import time
-import math
 from string import Template
-import numpy as np
 
 # Third-Party Library Imports
 import click
 import cv2
-from scenedetect.platform import tqdm
-from scenedetect.platform import get_and_create_path
 
 # PySceneDetect Library Imports
 import scenedetect.detectors
 
+import scenedetect.scene_manager
 from scenedetect.scene_manager import SceneManager
 from scenedetect.scene_manager import write_scene_list
 from scenedetect.scene_manager import write_scene_list_html
 
 from scenedetect.stats_manager import StatsManager
 from scenedetect.stats_manager import StatsFileCorrupt
-from scenedetect.stats_manager import StatsFileFramerateMismatch
 
 from scenedetect.video_manager import VideoManager
 from scenedetect.video_manager import VideoOpenFailure
@@ -70,11 +66,36 @@ from scenedetect.video_splitter import split_video_ffmpeg
 
 from scenedetect.platform import get_cv2_imwrite_params
 from scenedetect.platform import check_opencv_ffmpeg_dll
-
+from scenedetect.platform import get_and_create_path
 
 from scenedetect.frame_timecode import FrameTimecode
 
+
+def parse_timecode(cli_ctx, value):
+    # type: (CliContext, str) -> Union[FrameTimecode, None]
+    """ Parses a user input string expected to be a timecode, given a CLI context.
+
+    Returns:
+        (FrameTimecode) Timecode set to value with the CliContext VideoManager framerate.
+            If value is None, skips processing and returns None.
+
+    Raises:
+        click.BadParameter
+     """
+    cli_ctx.check_input_open()
+    if value is None:
+        return value
+    try:
+        timecode = FrameTimecode(
+            timecode=value, fps=cli_ctx.video_manager.get_framerate())
+        return timecode
+    except (ValueError, TypeError):
+        raise click.BadParameter(
+            'timecode must be in frames (1234), seconds (123.4s), or HH:MM:SS (00:02:03.400)')
+
+
 def get_plural(val_list):
+    # type: (List[any]) -> str
     """ Get Plural: Helper function to return 's' if a list has more than one (1)
     element, otherwise returns ''.
 
@@ -82,6 +103,20 @@ def get_plural(val_list):
         str: String of 's' if the length of val_list is greater than 1, otherwise ''.
     """
     return 's' if len(val_list) > 1 else ''
+
+
+def contains_sequence_or_url(video_paths):
+    # type: (List[str]) -> bool
+    """ Checks if any of the video paths are a URL or image sequence.
+
+    Arguments:
+        video_paths: List of strings.
+
+    Returns: bool: True if any of the video_paths are a URL or image sequence,
+        False otherwise. """
+
+    return any(['%' in video_path or '://' in video_path
+            for video_path in video_paths])
 
 
 class CliContext(object):
@@ -108,6 +143,9 @@ class CliContext(object):
         self.output_directory = None            # -o/--output
         self.quiet_mode = False                 # -q/--quiet or -v/--verbosity quiet
         self.frame_skip = 0                     # -fs/--frame-skip
+        self.drop_short_scenes = False          # --drop-short-scenes
+        self.min_scene_len = None               # -m/--min-scene-len
+
         # Properties for save-images command.
         self.save_images = False                # save-images command
         self.image_extension = 'jpg'            # save-images -j/--jpeg, -w/--webp, -p/--png
@@ -115,13 +153,11 @@ class CliContext(object):
 
         self.image_param = None                 # save-images -q/--quality if -j/-w,
                                                 #   -c/--compression if -p
-
-
         self.image_name_format = (              # save-images -f/--name-format
             '$VIDEO_NAME-Scene-$SCENE_NUMBER-$IMAGE_NUMBER')
-        self.num_images = 2                     # save-images -n/--num-images
-        self.image_frame_margin = 0             # save-images --image-frame-margin
-        self.imwrite_params = get_cv2_imwrite_params()
+        self.num_images = 3                     # save-images -n/--num-images
+        self.frame_margin = 1                   # save-images -m/--frame-margin
+
         # Properties for split-video command.
         self.split_video = False                # split-video command
         self.split_mkvmerge = False             # split-video -c/--copy
@@ -129,17 +165,19 @@ class CliContext(object):
         self.split_directory = None             # split-video -o/--output
         self.split_name_format = '$VIDEO_NAME-Scene-$SCENE_NUMBER'  # split-video -f/--filename
         self.split_quiet = False                # split-video -q/--quiet
+
         # Properties for list-scenes command.
         self.list_scenes = False                # list-scenes command
         self.print_scene_list = False           # list-scenes --quiet/-q
         self.scene_list_directory = None        # list-scenes -o/--output
         self.scene_list_name_format = None      # list-scenes -f/--filename
         self.scene_list_output = False          # list-scenes -n/--no-output
+        self.skip_cuts = False                  # list-scenes -s/--skip-cuts
 
+        # Properties for export-html command.
         self.export_html = False                # export-html command
         self.html_name_format = None            # export-html -f/--filename
         self.html_include_images = True         # export-html --no-images
-        self.image_filenames = None             # export-html used for embedding images
         self.image_width = None                 # export-html -w/--image-width
         self.image_height = None                # export-html -h/--image-height
 
@@ -153,108 +191,6 @@ class CliContext(object):
             if self.video_manager is not None:
                 self.video_manager.release()
 
-    # TODO: Replace with scenedetect.scene_manager.save_images
-    def _generate_images(self, scene_list, video_name,
-                         image_name_template='$VIDEO_NAME-Scene-$SCENE_NUMBER-$IMAGE_NUMBER',
-                         output_dir=None):
-        # type: (List[Tuple[FrameTimecode, FrameTimecode]) -> None
-
-        if not scene_list:
-            return
-        if not self.options_processed:
-            return
-        if self.num_images <= 0:
-            raise ValueError()
-        self.check_input_open()
-
-        imwrite_param = []
-        if self.image_param is not None:
-            imwrite_param = [self.imwrite_params[self.image_extension], self.image_param]
-
-        # Reset video manager and downscale factor.
-        self.video_manager.release()
-        self.video_manager.reset()
-        self.video_manager.set_downscale_factor(1)
-        self.video_manager.start()
-
-        # Setup flags and init progress bar if available.
-        completed = True
-        logging.info('Generating output images (%d per scene)...', self.num_images)
-        progress_bar = None
-        if tqdm and not self.quiet_mode:
-            progress_bar = tqdm(
-                total=len(scene_list) * self.num_images, unit='images')
-
-        filename_template = Template(image_name_template)
-
-
-        scene_num_format = '%0'
-        scene_num_format += str(max(3, math.floor(math.log(len(scene_list), 10)) + 1)) + 'd'
-        image_num_format = '%0'
-        image_num_format += str(math.floor(math.log(self.num_images, 10)) + 2) + 'd'
-
-        timecode_list = dict()
-
-        fps = scene_list[0][0].framerate
-
-        timecode_list = [
-            [
-                FrameTimecode(int(f), fps=fps) for f in [
-                    # middle frames
-                    a[len(a)//2] if (0 < j < self.num_images-1) or self.num_images == 1
-
-                    # first frame
-                    else min(a[0] + self.image_frame_margin, a[-1]) if j == 0
-
-                    # last frame
-                    else max(a[-1] - self.image_frame_margin, a[0])
-
-                    # for each evenly-split array of frames in the scene list
-                    for j, a in enumerate(np.array_split(r, self.num_images))
-                ]
-            ]
-            for i, r in enumerate([
-                # pad ranges to number of images
-                r
-                if 1+r[-1]-r[0] >= self.num_images
-                else list(r) + [r[-1]] * (self.num_images - len(r))
-                # create range of frames in scene
-                for r in (
-                    range(start.get_frames(), end.get_frames())
-                    # for each scene in scene list
-                    for start, end in scene_list
-                    )
-            ])
-        ]
-
-        self.image_filenames = {i: [] for i in range(len(timecode_list))}
-
-        for i, scene_timecodes in enumerate(timecode_list):
-            for j, image_timecode in enumerate(scene_timecodes):
-                self.video_manager.seek(image_timecode)
-                self.video_manager.grab()
-                ret_val, frame_im = self.video_manager.retrieve()
-                if ret_val:
-                    file_path = '%s.%s' % (filename_template.safe_substitute(
-                        VIDEO_NAME=video_name,
-                        SCENE_NUMBER=scene_num_format % (i + 1),
-                        IMAGE_NUMBER=image_num_format % (j + 1),
-                        FRAME_NUMBER=image_timecode.get_frames()),
-                                           self.image_extension)
-                    self.image_filenames[i].append(file_path)
-                    cv2.imwrite(
-                        get_and_create_path(
-                            file_path,
-                            output_dir if output_dir is not None else self.output_directory),
-                        frame_im, imwrite_param)
-                else:
-                    completed = False
-                    break
-                if progress_bar:
-                    progress_bar.update(1)
-
-        if not completed:
-            logging.error('Could not generate all output images.')
 
     def _open_stats_file(self):
 
@@ -267,7 +203,7 @@ class CliContext(object):
                              os.path.basename(self.stats_file_path))
                 try:
                     with open(self.stats_file_path, 'rt') as stats_file:
-                        self.stats_manager.load_from_csv(stats_file, self.base_timecode)
+                        self.stats_manager.load_from_csv(stats_file)
                 except StatsFileCorrupt:
                     error_strs = [
                         'Could not load stats file.', 'Failed to parse stats file:',
@@ -278,20 +214,6 @@ class CliContext(object):
                     logging.error('\n'.join(error_strs))
                     raise click.BadParameter(
                         '\n  Could not load given stats file, see above output for details.',
-                        param_hint='input stats file')
-                except StatsFileFramerateMismatch as ex:
-                    error_strs = [
-                        'could not load stats file.', 'Failed to parse stats file:',
-                        'Framerate differs between stats file (%.2f FPS) and input'
-                        ' video%s (%.2f FPS)' % (
-                            ex.stats_file_fps,
-                            's' if self.video_manager.get_num_videos() > 1 else '',
-                            ex.base_timecode_fps),
-                        'Ensure the correct stats file path was given, or delete and re-generate'
-                        ' the stats file.']
-                    logging.error('\n'.join(error_strs))
-                    raise click.BadParameter(
-                        'framerate differs between given stats file and input video(s).',
                         param_hint='input stats file')
 
 
@@ -315,7 +237,6 @@ class CliContext(object):
 
         # Handle scene detection commands (detect-content, detect-threshold, etc...).
         self.video_manager.start()
-        base_timecode = self.video_manager.get_base_timecode()
 
         start_time = time.time()
         logging.info('Detecting scenes...')
@@ -347,6 +268,7 @@ class CliContext(object):
                 with open(self.stats_file_path, 'wt') as stats_file:
                     logging.info('Saving frame metrics to stats file: %s',
                                  os.path.basename(self.stats_file_path))
+                    base_timecode = self.video_manager.get_base_timecode()
                     self.stats_manager.save_to_csv(
                         stats_file, base_timecode)
             else:
@@ -354,15 +276,20 @@ class CliContext(object):
 
         # Get list of detected cuts and scenes from the SceneManager to generate the required output
         # files with based on the given commands (list-scenes, split-video, save-images, etc...).
-        cut_list = self.scene_manager.get_cut_list(base_timecode)
-        scene_list = self.scene_manager.get_scene_list(base_timecode)
-        video_paths = self.video_manager.get_video_paths()
-        video_name = os.path.basename(video_paths[0])
-        if video_name.rfind('.') >= 0:
-            video_name = video_name[:video_name.rfind('.')]
+        cut_list = self.scene_manager.get_cut_list()
+        scene_list = self.scene_manager.get_scene_list()
 
-        # Ensure we don't divide by zero.
-        if scene_list:
+        # Handle --drop-short-scenes.
+        if self.drop_short_scenes and self.min_scene_len > 0:
+            scene_list = [
+                s for s in scene_list
+                if (s[1] - s[0]) >= self.min_scene_len
+            ]
+
+        video_paths = self.video_manager.get_video_paths()
+        video_name = self.video_manager.get_video_name()
+
+        if scene_list:  # Ensure we don't divide by zero.
             logging.info('Detected %d scenes, average shot length %.1f seconds.',
                          len(scene_list),
                          sum([(end_time - start_time).get_seconds()
@@ -382,8 +309,12 @@ class CliContext(object):
                 else self.output_directory)
             logging.info('Writing scene list to CSV file:\n  %s', scene_list_path)
             with open(scene_list_path, 'wt') as scene_list_file:
-                write_scene_list(scene_list_file, scene_list, cut_list)
-        # Handle `list-scenes`.
+                write_scene_list(
+                    output_csv_file=scene_list_file,
+                    scene_list=scene_list,
+                    include_cut_list=not self.skip_cuts,
+                    cut_list=cut_list)
+
         if self.print_scene_list:
             logging.info("""Scene List:
 -----------------------------------------------------------------------
@@ -398,16 +329,27 @@ class CliContext(object):
         end_time.get_frames(), end_time.get_timecode())
      for i, (start_time, end_time) in enumerate(scene_list)]))
 
-
         if cut_list:
             logging.info('Comma-separated timecode list:\n  %s',
                          ','.join([cut.get_timecode() for cut in cut_list]))
 
         # Handle save-images command.
+
         if self.save_images:
-            self._generate_images(scene_list=scene_list, video_name=video_name,
-                                  image_name_template=self.image_name_format,
-                                  output_dir=self.image_directory)
+            image_output_dir = self.output_directory
+            if self.image_directory is not None:
+                image_output_dir = self.image_directory
+
+            image_filenames = scenedetect.scene_manager.save_images(
+                scene_list=scene_list,
+                video_manager=self.video_manager,
+                num_images=self.num_images,
+                frame_margin=self.frame_margin,
+                image_extension=self.image_extension,
+                encoder_param=self.image_param,
+                image_name_template=self.image_name_format,
+                output_dir=image_output_dir,
+                show_progress=not self.quiet_mode)
 
         # Handle export-html command.
         if self.export_html:
@@ -421,9 +363,9 @@ class CliContext(object):
                 else self.output_directory)
             logging.info('Exporting to html file:\n %s:', html_path)
             if not self.html_include_images:
-                self.image_filenames = None
+                image_filenames = None
             write_scene_list_html(html_path, scene_list, cut_list,
-                                  image_filenames=self.image_filenames,
+                                  image_filenames=image_filenames,
                                   image_width=self.image_width,
                                   image_height=self.image_height)
 
@@ -563,7 +505,8 @@ class CliContext(object):
         return video_manager_initialized
 
 
-    def parse_options(self, input_list, framerate, stats_file, downscale, frame_skip):
+    def parse_options(self, input_list, framerate, stats_file, downscale, frame_skip,
+                      min_scene_len, drop_short_scenes):
         # type: (List[str], float, str, int, int) -> None
         """ Parse Options: Parses all global options/arguments passed to the main
         scenedetect command, before other sub-commands (e.g. this function processes
@@ -599,6 +542,9 @@ class CliContext(object):
         # Init SceneManager.
         self.scene_manager = SceneManager(self.stats_manager)
 
+        self.drop_short_scenes = drop_short_scenes
+        self.min_scene_len = parse_timecode(self, min_scene_len)
+
         self.options_processed = True
 
 
@@ -627,7 +573,8 @@ class CliContext(object):
             self.start_frame = start.get_frames()
 
 
-    def list_scenes_command(self, output_path, filename_format, no_output_mode, quiet_mode):
+    def list_scenes_command(self, output_path, filename_format, no_output_mode,
+                            quiet_mode, skip_cuts):
         # type: (str, str, bool, bool) -> None
         """ List Scenes Command: Parses all options/arguments passed to the list-scenes command,
         or with respect to the CLI, this function processes [list-scenes options] when calling:
@@ -646,6 +593,7 @@ class CliContext(object):
         self.scene_list_output = False if no_output_mode else True
         if self.scene_list_directory is not None:
             logging.info('Scene list output directory set:\n  %s', self.scene_list_directory)
+        self.skip_cuts = skip_cuts
 
 
     def export_html_command(self, filename, no_images, image_width, image_height):
@@ -668,7 +616,7 @@ class CliContext(object):
 
 
     def save_images_command(self, num_images, output, name_format, jpeg, webp, quality,
-                            png, compression, image_frame_margin):
+                            png, compression, frame_margin):
         # type: (int, str, str, bool, bool, int, bool, int) -> None
         """ Save Images Command: Parses all options/arguments passed to the save-images command,
         or with respect to the CLI, this function processes [save-images options] when calling:
@@ -679,7 +627,13 @@ class CliContext(object):
         """
         self.check_input_open()
 
-        num_flags = sum([True if flag else False for flag in [jpeg, webp, png]])
+        if contains_sequence_or_url(self.video_manager.get_video_paths()):
+            self.options_processed = False
+            error_str = '\nThe save-images command is incompatible with image sequences/URLs.'
+            logging.error(error_str)
+            raise click.BadParameter(error_str, param_hint='save-images')
+
+        num_flags = sum([1 if flag else 0 for flag in [jpeg, webp, png]])
         if num_flags <= 1:
 
             # Ensure the format exists.
@@ -688,7 +642,8 @@ class CliContext(object):
                 extension = 'png'
             elif webp:
                 extension = 'webp'
-            if not extension in self.imwrite_params or self.imwrite_params[extension] is None:
+            valid_params = get_cv2_imwrite_params()
+            if not extension in valid_params or valid_params[extension] is None:
                 error_strs = [
                     'Image encoder type %s not supported.' % extension.upper(),
                     'The specified encoder type could not be found in the current OpenCV module.',
@@ -703,7 +658,7 @@ class CliContext(object):
             self.image_param = compression if png else quality
             self.image_name_format = name_format
             self.num_images = num_images
-            self.image_frame_margin = image_frame_margin
+            self.frame_margin = frame_margin
 
             image_type = 'JPEG' if self.image_extension == 'jpg' else self.image_extension.upper()
             image_param_type = ''

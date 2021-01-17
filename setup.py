@@ -7,7 +7,7 @@
 #     [  Github: https://github.com/Breakthrough/PySceneDetect/  ]
 #     [  Documentation: http://pyscenedetect.readthedocs.org/    ]
 #
-# Copyright (C) 2014-2020 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2014-2021 Brandon Castellano <http://www.bcastell.com>.
 #
 
 """ PySceneDetect setup.py
@@ -71,7 +71,7 @@ def get_extra_requires():
 
 setup(
     name='scenedetect',
-    version='0.5.4.1',
+    version='0.5.5',
     description="A cross-platform, OpenCV-based video scene detection program and Python library. ",
     long_description=open('package-info.rst').read(),
     author='Brandon Castellano',
@@ -90,7 +90,7 @@ setup(
     package_data={'': ['../LICENSE', '../USAGE.md', '../package-info.rst']},
     #include_package_data = True,           # Must leave this to the default.
     #test_suite="unitest.py",               # Auto-detects tests from setup.cfg
-    entry_points={"console_scripts": ["scenedetect=scenedetect:main"]},
+    entry_points={"console_scripts": ["scenedetect=scenedetect.__main__:main"]},
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Environment :: Console',

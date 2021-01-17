@@ -167,7 +167,10 @@ The `list-scenes` command takes the following options:
  * ``-q``, ``--quiet``
     Suppresses output of the table printed by the `list-scenes`
     command.
-
+ * ``-s``, ``--skip-cuts``
+    Skips outputting the cutting list as the first row in
+    the CSV file. Set this option if compliance with RFC
+    4810 is required.
 
 Usage Examples
 -----------------------------------------------------------------------
@@ -222,6 +225,9 @@ The `save-images` command takes the following options:
     smaller files but result in longer compression time.
     This setting does not affect image quality, only file
     size. [default: 3]
+ * ``-m``, ``--frame-margin N``
+    Number of frames to ignore at the beginning and end of
+    scenes when saving images  [default: 1]
 
 
 =======================================================================

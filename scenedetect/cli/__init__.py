@@ -6,7 +6,7 @@
 #     [  Github: https://github.com/Breakthrough/PySceneDetect/  ]
 #     [  Documentation: http://pyscenedetect.readthedocs.org/    ]
 #
-# Copyright (C) 2014-2020 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2014-2021 Brandon Castellano <http://www.bcastell.com>.
 #
 # PySceneDetect is licensed under the BSD 3-Clause License; see the included
 # LICENSE file, or visit one of the following pages for details:
@@ -52,6 +52,8 @@ import click
 # PySceneDetect Library Imports
 import scenedetect
 from scenedetect.cli.context import CliContext
+from scenedetect.cli.context import contains_sequence_or_url
+from scenedetect.cli.context import parse_timecode
 from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.video_manager import VideoManager
 
@@ -102,29 +104,6 @@ def add_cli_command(cli, command):
     """Adds the CLI command to the cli object as well as to the COMMAND_DICT."""
     cli.add_command(command)
     COMMAND_DICT.append(command)
-
-
-def parse_timecode(cli_ctx, value):
-    # type: (CliContext, str) -> Union[FrameTimecode, None]
-    """ Parses a user input string expected to be a timecode, given a CLI context.
-
-    Returns:
-        (FrameTimecode) Timecode set to value with the CliContext VideoManager framerate.
-            If value is None, skips processing and returns None.
-
-    Raises:
-        click.BadParameter
-     """
-    cli_ctx.check_input_open()
-    if value is None:
-        return value
-    try:
-        timecode = FrameTimecode(
-            timecode=value, fps=cli_ctx.video_manager.get_framerate())
-        return timecode
-    except (ValueError, TypeError):
-        raise click.BadParameter(
-            'timecode must be in frames (1234), seconds (123.4s), or HH:MM:SS (00:02:03.400)')
 
 
 def print_command_help(ctx, command):
@@ -181,9 +160,10 @@ def duplicate_command(ctx, param_hint):
 @click.option(
     '--input', '-i',
     multiple=True, required=False, metavar='VIDEO',
-    type=click.Path(exists=True, file_okay=True, readable=True, resolve_path=True), help=
+    type=click.STRING, help=
     '[Required] Input video file.'
-    ' May be specified multiple times to concatenate several videos together.')
+    ' May be specified multiple times to concatenate several videos together.'
+    ' Also supports image sequences and URLs.')
 @click.option(
     '--output', '-o',
     multiple=False, required=False, metavar='DIR',
@@ -208,6 +188,15 @@ def duplicate_command(ctx, param_hint):
     'Skips N frames during processing (-fs 1 skips every other frame, processing 50% of the video,'
     ' -fs 2 processes 33% of the frames, -fs 3 processes 25%, etc...).'
     ' Reduces processing speed at expense of accuracy.')
+@click.option(
+    '--min-scene-len', '-m', metavar='TIMECODE',
+    type=click.STRING, default='0.6s', show_default=True, help=
+    'Minimum size/length of any scene. TIMECODE can be specified as exact'
+    ' number of frames, a time in seconds followed by s, or a timecode in the'
+    ' format HH:MM:SS or HH:MM:SS.nnn')
+@click.option(
+    '--drop-short-scenes', is_flag=True, flag_value=True, help=
+    'Drop scenes shorter than `--min-scene-len` instead of combining them with neighbors')
 @click.option(
     '--stats', '-s', metavar='CSV',
     type=click.Path(exists=False, file_okay=True, writable=True, resolve_path=False), help=
@@ -234,7 +223,8 @@ def duplicate_command(ctx, param_hint):
     ' level, even if `-v`/`--verbosity` is set.')
 @click.pass_context
 # pylint: disable=redefined-builtin
-def scenedetect_cli(ctx, input, output, framerate, downscale, frame_skip, stats,
+def scenedetect_cli(ctx, input, output, framerate, downscale, frame_skip,
+                    min_scene_len, drop_short_scenes, stats,
                     verbosity, logfile, quiet):
     """ For example:
 
@@ -247,7 +237,6 @@ def scenedetect_cli(ctx, input, output, framerate, downscale, frame_skip, stats,
 
     """
     ctx.call_on_close(ctx.obj.process_input)
-
     logging.disable(logging.NOTSET)
 
     format_str = '[PySceneDetect] %(message)s'
@@ -259,22 +248,21 @@ def scenedetect_cli(ctx, input, output, framerate, downscale, frame_skip, stats,
     if quiet:
         verbosity = None
 
+    ctx.obj.quiet_mode = True if verbosity is None else False
     ctx.obj.output_directory = output
+
     if logfile is not None:
         logfile = get_and_create_path(logfile)
         logging.basicConfig(
             filename=logfile, filemode='a', format=format_str,
             level=getattr(logging, verbosity.upper()) if verbosity is not None else verbosity)
-        logging.info('Version: %s', scenedetect.__version__)
-        logging.info('Info Level: %s', verbosity)
+    elif verbosity is not None:
+        logging.basicConfig(format=format_str,
+                            level=getattr(logging, verbosity.upper()))
     else:
-        if verbosity is not None:
-            logging.basicConfig(format=format_str,
-                                level=getattr(logging, verbosity.upper()))
-        else:
-            logging.disable(logging.CRITICAL)
+        logging.disable(logging.CRITICAL)
 
-    ctx.obj.quiet_mode = True if verbosity is None else False
+    logging.info('PySceneDetect %s', scenedetect.__version__)
 
     if stats is not None and frame_skip != 0:
         ctx.obj.options_processed = False
@@ -285,14 +273,16 @@ def scenedetect_cli(ctx, input, output, framerate, downscale, frame_skip, stats,
         raise click.BadParameter(
             '\n  Combining the -s/--stats and -fs/--frame-skip options is not supported.',
             param_hint='frame skip + stats file')
+
     try:
         if ctx.obj.output_directory is not None:
             logging.info('Output directory set:\n  %s', ctx.obj.output_directory)
         ctx.obj.parse_options(
             input_list=input, framerate=framerate, stats_file=stats, downscale=downscale,
-            frame_skip=frame_skip)
-    except:
-        logging.error('Could not parse CLI options.')
+            frame_skip=frame_skip, min_scene_len=min_scene_len, drop_short_scenes=drop_short_scenes)
+
+    except Exception as ex:
+        logging.error('Could not parse CLI options.: %s', ex)
         raise
 
 
@@ -410,14 +400,8 @@ def time_command(ctx, start, duration, end):
     type=click.FLOAT, default=30.0, show_default=True, help=
     'Threshold value (float) that the content_val frame metric must exceed to trigger a new scene.'
     ' Refers to frame metric content_val in stats file.')
-@click.option(
-    '--min-scene-len', '-m', metavar='TIMECODE',
-    type=click.STRING, default="0.6s", show_default=True, help=
-    'Minimum size/length of any scene. TIMECODE can be specified as exact'
-    ' number of frames, a time in seconds followed by s, or a timecode in the'
-    ' format HH:MM:SS or HH:MM:SS.nnn')
 @click.pass_context
-def detect_content_command(ctx, threshold, min_scene_len):
+def detect_content_command(ctx, threshold):
     """ Perform content detection algorithm on input video(s).
 
     detect-content
@@ -425,8 +409,7 @@ def detect_content_command(ctx, threshold, min_scene_len):
     detect-content --threshold 27.5
     """
 
-    min_scene_len = parse_timecode(ctx.obj, min_scene_len)
-
+    min_scene_len = 0 if ctx.obj.drop_short_scenes else ctx.obj.min_scene_len
     logging.debug('Detecting content, parameters:\n'
                   '  threshold: %d, min-scene-len: %d',
                   threshold, min_scene_len)
@@ -445,12 +428,6 @@ def detect_content_command(ctx, threshold, min_scene_len):
     type=click.IntRange(0, 255), default=12, show_default=True, help=
     'Threshold value (integer) that the delta_rgb frame metric must exceed to trigger a new scene.'
     ' Refers to frame metric delta_rgb in stats file.')
-@click.option(
-    '--min-scene-len', '-m', metavar='TIMECODE',
-    type=click.STRING, show_default=True, default="0.6s", help=
-    'Minimum size/length of any scene. TIMECODE can be specified as exact'
-    ' number of frames, a time in seconds followed by s, or a timecode in the'
-    ' format HH:MM:SS or HH:MM:SS.nnn')
 @click.option(
     '--fade-bias', '-f', metavar='PERCENT',
     type=click.IntRange(-100, 100), default=0, show_default=True, help=
@@ -471,7 +448,7 @@ def detect_content_command(ctx, threshold, min_scene_len):
     type=click.IntRange(1, 128), default=8, show_default=True, help=
     'Number of rows in image to sum per iteration (can be tuned for performance in some cases).')
 @click.pass_context
-def detect_threshold_command(ctx, threshold, min_scene_len, fade_bias, add_last_scene,
+def detect_threshold_command(ctx, threshold, fade_bias, add_last_scene,
                              min_percent, block_size):
     """  Perform threshold detection algorithm on input video(s).
 
@@ -479,6 +456,8 @@ def detect_threshold_command(ctx, threshold, min_scene_len, fade_bias, add_last_
 
     detect-threshold --threshold 15
     """
+
+    min_scene_len = 0 if ctx.obj.drop_short_scenes else ctx.obj.min_scene_len
 
     logging.debug('Detecting threshold, parameters:\n'
                   '  threshold: %d, min-scene-len: %d, fade-bias: %d,\n'
@@ -488,8 +467,6 @@ def detect_threshold_command(ctx, threshold, min_scene_len, fade_bias, add_last_
 
     # Handle case where add_last_scene is not set and is None.
     add_last_scene = True if add_last_scene else False
-
-    min_scene_len = parse_timecode(ctx.obj, min_scene_len)
 
     # Convert min_percent and fade_bias from integer to floats (0.0-1.0 and -1.0-+1.0 respectively).
     min_percent /= 100.0
@@ -547,13 +524,19 @@ def export_html_command(ctx, filename, no_images, image_width, image_height):
     '--quiet', '-q',
     is_flag=True, flag_value=True, help=
     'Suppresses output of the table printed by the list-scenes command.')
+@click.option(
+    '--skip-cuts', '-s',
+    is_flag=True, flag_value=True, help=
+    'Skips outputting the cutting list as the first row in the CSV file.'
+    ' Set this option if compliance with RFC 4810 is required.')
 @click.pass_context
-def list_scenes_command(ctx, output, filename, no_output_file, quiet):
+def list_scenes_command(ctx, output, filename, no_output_file, quiet, skip_cuts):
     """ Prints scene list and outputs to a CSV file. The default filename is
     $VIDEO_NAME-Scenes.csv. """
     if ctx.obj.list_scenes:
         duplicate_command(ctx, 'list-scenes')
-    ctx.obj.list_scenes_command(output, filename, no_output_file, quiet)
+    ctx.obj.list_scenes_command(
+        output, filename, no_output_file, quiet, skip_cuts)
     ctx.obj.list_scenes = True
 
 
@@ -615,6 +598,13 @@ def split_video_command(ctx, output, filename, high_quality, override_args, quie
     if ctx.obj.split_video:
         logging.warning('split-video command is specified twice.')
     ctx.obj.check_input_open()
+
+    if contains_sequence_or_url(ctx.obj.video_manager.get_video_paths()):
+        ctx.obj.options_processed = False
+        error_str = 'The save-images command is incompatible with image sequences/URLs.'
+        logging.error(error_str)
+        raise click.BadParameter(error_str, param_hint='save-images')
+
     ctx.obj.split_video = True
     ctx.obj.split_quiet = True if quiet else False
     ctx.obj.split_directory = output
@@ -699,23 +689,25 @@ def split_video_command(ctx, output, filename, high_quality, override_args, quie
     is_flag=True, flag_value=True, help=
     'Set output format to PNG.')
 @click.option(
-    '--compression', '-c', metavar='C', default=None,
+    '--compression', '-c', metavar='C', default=3, show_default=False,
     type=click.IntRange(0, 9), help=
     'PNG compression rate, from 0-9. Higher values produce smaller files but result'
     ' in longer compression time. This setting does not affect image quality, only'
     ' file size. [default: 3]')
 @click.option(
-    '--image-frame-margin', metavar='N', default=0,
+    '-m', '--frame-margin', metavar='N', default=1, show_default=True,
     type=click.INT, help=
     'Number of frames to ignore at the beginning and end of scenes when saving images')
 @click.pass_context
 def save_images_command(ctx, output, filename, num_images, jpeg, webp, quality, png,
-                        compression, image_frame_margin):
+                        compression, frame_margin):
     """ Create images for each detected scene. """
     if ctx.obj.save_images:
         duplicate_command(ctx, 'save-images')
+    if quality is None:
+        quality = 100 if webp else 95
     ctx.obj.save_images_command(num_images, output, filename, jpeg, webp, quality, png,
-                                compression, image_frame_margin)
+                                compression, frame_margin)
 
 
 
