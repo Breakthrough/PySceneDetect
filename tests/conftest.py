@@ -72,8 +72,8 @@ def test_video_file():
     """
     return get_absolute_path("testvideo.mp4")
 
-@pytest.fixture
-def test_movie_file():
-    # type: () -> str
-    """ Fixture for obtaining path to test video from a movie scene. """
-    return get_absolute_path("goldeneye.mp4")
+#@pytest.fixture
+#def test_movie_file():
+#    # type: () -> str
+#    """ Fixture for obtaining path to test video from a movie scene. """
+#    return get_absolute_path("goldeneye.mp4")

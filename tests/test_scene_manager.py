@@ -142,9 +142,9 @@ def test_scene_list(test_video_file):
         vm.release()
 
 
-def test_save_images(test_movie_file):
+def test_save_images(test_video_file):
     """ Test scenedetect.scene_manager.save_images function.  """
-    vm = VideoManager([test_movie_file])
+    vm = VideoManager([test_video_file])
     sm = SceneManager()
     sm.add_detector(ContentDetector())
 
