@@ -117,6 +117,6 @@ Additional features being planned or in development can be found [here (tagged a
 
 Licensed under BSD 3-Clause (see the `LICENSE` file for details).
 
-Copyright (C) 2014-2020 Brandon Castellano.
+Copyright (C) 2014-2021 Brandon Castellano.
 All rights reserved.
 

@@ -23,7 +23,7 @@ sys.path.insert(0, os.path.abspath('..'))
 # -- Project information -----------------------------------------------------
 
 project = 'PySceneDetect'
-copyright = '2014-2020, Brandon Castellano'
+copyright = '2014-2021, Brandon Castellano'
 author = 'Brandon Castellano'
 
 # The short X.Y version

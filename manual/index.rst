@@ -1,6 +1,6 @@
 
 .. PySceneDetect documentation index file (contains toctree directive).
-    Copyright (C) 2014-2020 Brandon Castellano.  All rights reserved.
+    Copyright (C) 2014-2021 Brandon Castellano.  All rights reserved.
 
 
 #######################################################################
