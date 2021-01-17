@@ -257,27 +257,29 @@ Usage: scenedetect save-images [OPTIONS]
   Create images for each detected scene.
 
 Options:
-  -o, --output DIR     Output directory to save images to. Overrides global
-                       option -o/--output if set.
-  -f, --filename NAME  Filename format, *without* extension, to use when
-                       saving image files. You can use the $VIDEO_NAME,
-                       $SCENE_NUMBER, and $IMAGE_NUMBER macros in the file
-                       name. Note that you may have to wrap the name using
-                       single quotes.  [default: $VIDEO_NAME-
-                       Scene-$SCENE_NUMBER-$IMAGE_NUMBER]
-  -n, --num-images N   Number of images to generate. Will always include
-                       start/end frame, unless N = 1, in which case the image
-                       will be the frame at the mid-point in the scene.
-  -j, --jpeg           Set output format to JPEG. [default]
-  -w, --webp           Set output format to WebP.
-  -q, --quality Q      JPEG/WebP encoding quality, from 0-100 (higher
-                       indicates better quality). For WebP, 100 indicates
-                       lossless. [default: JPEG: 95, WebP: 100]
-  -p, --png            Set output format to PNG.
-  -c, --compression C  PNG compression rate, from 0-9. Higher values produce
-                       smaller files but result in longer compression time.
-                       This setting does not affect image quality, only file
-                       size. [default: 3]
+  -o, --output DIR      Output directory to save images to. Overrides global
+                        option -o/--output if set.
+  -f, --filename NAME   Filename format, *without* extension, to use when
+                        saving image files. You can use the $VIDEO_NAME,
+                        $SCENE_NUMBER, and $IMAGE_NUMBER macros in the file
+                        name. Note that you may have to wrap the format in
+                        single quotes.  [default: $VIDEO_NAME-
+                        Scene-$SCENE_NUMBER-$IMAGE_NUMBER]
+  -n, --num-images N    Number of images to generate. Will always include
+                        start/end frame, unless N = 1, in which case the image
+                        will be the frame at the mid-point in the scene.
+  -j, --jpeg            Set output format to JPEG. [default]
+  -w, --webp            Set output format to WebP.
+  -q, --quality Q       JPEG/WebP encoding quality, from 0-100 (higher
+                        indicates better quality). For WebP, 100 indicates
+                        lossless. [default: JPEG: 95, WebP: 100]  [0<=x<=100]
+  -p, --png             Set output format to PNG.
+  -c, --compression C   PNG compression rate, from 0-9. Higher values produce
+                        smaller files but result in longer compression time.
+                        This setting does not affect image quality, only file
+                        size. [default: 3]  [0<=x<=9]
+  -m, --frame-margin N  Number of frames to ignore at the beginning and end of
+                        scenes when saving images [default: 1]
 ```
 
 

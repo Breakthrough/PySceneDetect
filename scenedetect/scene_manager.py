@@ -246,11 +246,14 @@ def write_scene_list_html(output_html_filename, scene_list, cut_list=None, css=N
     page.save(output_html_filename)
 
 
-def save_images(scene_list, video_manager, num_images=3, image_frame_margin=0,
+def save_images(scene_list, video_manager, num_images=3, image_frame_margin=1,
                 image_extension='jpg', encoder_param=95,
                 image_name_template='$VIDEO_NAME-Scene-$SCENE_NUMBER-$IMAGE_NUMBER',
                 output_dir=None, downscale_factor=1, show_progress=False):
-    # type: (...) -> Dict[List[str]]
+    # type: (List[Tuple[FrameTimecode, FrameTimecode]], VideoManager,
+    #        Optional[int], Optional[int], Optional[str], Optional[int],
+    #        Optional[str], Optional[str], Optional[int], Optional[bool])
+    #       -> Dict[List[str]]
     """ Saves a set number of images from each scene, given a list of scenes
     and the associated video/frame source.
 
@@ -262,6 +265,8 @@ def save_images(scene_list, video_manager, num_images=3, image_frame_margin=0,
         num_images: Number of images to generate for each scene.  Minimum is 1.
         image_frame_margin: Number of frames to pad each scene around the beginning
             and end (e.g. moves the first/last image into the scene by N frames).
+            Can set to 0, but will result in some video files failing to extract
+            the very last frame.
         image_extension: Type of image to save (must be one of 'jpg', 'png', or 'webp').
         encoder_param: Quality/compression efficiency, based on type of image:
             'jpg' / 'webp':  Quality 0-100, higher is better quality.  100 is lossless for webp.
@@ -288,7 +293,7 @@ def save_images(scene_list, video_manager, num_images=3, image_frame_margin=0,
 
     if not scene_list:
         return {}
-    if num_images <= 0:
+    if num_images <= 0 or image_frame_margin < 0:
         raise ValueError()
 
     # TODO: Validate that encoder_param is within the proper range.

@@ -4,7 +4,7 @@ PySceneDetect Releases
 
 ## PySceneDetect 0.5
 
-### 0.5.5
+### 0.5.5 (January 17, 2021) &nbsp;<span class="fa fa-tags"></span>
 
 #### Release Notes
 
@@ -17,12 +17,14 @@ PySceneDetect Releases
  * Images exported using the `save-images` command are now resized to match the display aspect ratio
  * A new flag `-s`/`--skip-cuts` has been added to the `list-scenes` command to allow standardized processing
  * The functionality of `save-images` is now accessible via the Python API through the `save_images()` function in `scenedetect.scene_manager`
+ * Under the `save-images` command, renamed `--image-frame-margin` to `--frame-margin`, added short option `-m`, and increased the default value from 0 to 1 due to instances of the last frame of a video being occasionally missed (set `-m 0` to restore original behaviour)
 
 #### Changelog
 
  * [bugfix] Allow image sequences and URLs to be used as inputs ([#152](https://github.com/Breakthrough/PySceneDetect/issues/171) and [#188](https://github.com/Breakthrough/PySceneDetect/issues/188))
  * [bugfix] Pixel aspect ratio is now applied when using `save-images` ([#195](https://github.com/Breakthrough/PySceneDetect/issues/195))
- * [bugfix] Fix `save-images` command not saving the last frame of the final scene due to overseeking
+ * [cli] Renamed `--image-frame-margin` to `--frame-margin` in `save-images` command, added short option `-m` as alias
+ * [bugfix] Fix `save-images` command not saving the last frame by modifying seeking, as well as increasing default of `--frame-margin` from 0 to 1
  * [cli] Make `--min-scene-len` a global option rather than per-detector ([#131](https://github.com/Breakthrough/PySceneDetect/issues/131), thanks @tonycpsu)
  * [feature] Added `--drop-short-scenes` option to remove all scenes smaller than `--min-scene-len`, instead of merging them
  * [cli] Add `-s`/`--skip-cuts` option to `list-scenes` command to allow outputting a scene list CSV file as compliant with RFC 4180 ([#136](https://github.com/Breakthrough/PySceneDetect/issues/136))
@@ -44,7 +46,7 @@ PySceneDetect Releases
  * Variable framerate videos (VFR) are not fully supported, and will yield incorrect timestamps ([#168](https://github.com/Breakthrough/PySceneDetect/issues/168))
 
 
-### 0.5.4 (September 14, 2020) &nbsp;<span class="fa fa-tags"></span>
+### 0.5.4 (September 14, 2020)
 
 #### Release Notes
 

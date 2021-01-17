@@ -225,6 +225,9 @@ The `save-images` command takes the following options:
     smaller files but result in longer compression time.
     This setting does not affect image quality, only file
     size. [default: 3]
+ * ``-m``, ``--frame-margin N``
+    Number of frames to ignore at the beginning and end of
+    scenes when saving images  [default: 1]
 
 
 =======================================================================

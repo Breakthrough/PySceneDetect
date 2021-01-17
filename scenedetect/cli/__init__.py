@@ -689,13 +689,13 @@ def split_video_command(ctx, output, filename, high_quality, override_args, quie
     is_flag=True, flag_value=True, help=
     'Set output format to PNG.')
 @click.option(
-    '--compression', '-c', metavar='C', default=3, show_default=True,
+    '--compression', '-c', metavar='C', default=3, show_default=False,
     type=click.IntRange(0, 9), help=
     'PNG compression rate, from 0-9. Higher values produce smaller files but result'
     ' in longer compression time. This setting does not affect image quality, only'
     ' file size. [default: 3]')
 @click.option(
-    '--image-frame-margin', metavar='N', default=0,
+    '-m', '--frame-margin', metavar='N', default=1, show_default=True,
     type=click.INT, help=
     'Number of frames to ignore at the beginning and end of scenes when saving images')
 @click.pass_context

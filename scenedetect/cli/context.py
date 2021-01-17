@@ -156,7 +156,7 @@ class CliContext(object):
         self.image_name_format = (              # save-images -f/--name-format
             '$VIDEO_NAME-Scene-$SCENE_NUMBER-$IMAGE_NUMBER')
         self.num_images = 3                     # save-images -n/--num-images
-        self.image_frame_margin = 0             # save-images --image-frame-margin
+        self.image_frame_margin = 1             # save-images -m/--frame-margin
 
         # Properties for split-video command.
         self.split_video = False                # split-video command
