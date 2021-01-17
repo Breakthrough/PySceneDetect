@@ -71,9 +71,3 @@ def test_video_file():
     Access in test case by adding a test_video_file argument to obtain the path.
     """
     return get_absolute_path("testvideo.mp4")
-
-#@pytest.fixture
-#def test_movie_file():
-#    # type: () -> str
-#    """ Fixture for obtaining path to test video from a movie scene. """
-#    return get_absolute_path("goldeneye.mp4")
