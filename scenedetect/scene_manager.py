@@ -117,22 +117,27 @@ def get_scenes_from_cuts(cut_list, base_timecode, num_frames, start_frame=0):
     return scene_list
 
 
-def write_scene_list(output_csv_file, scene_list, cut_list=None):
-    # type: (File, List[Tuple[FrameTimecode, FrameTimecode]], Optional[List[FrameTimecode]]) -> None
+def write_scene_list(output_csv_file, scene_list, include_cut_list=True, cut_list=None):
+    # type: (File, List[Tuple[FrameTimecode, FrameTimecode]],
+    #        Optional[bool], Optional[List[FrameTimecode]]) -> None
     """ Writes the given list of scenes to an output file handle in CSV format.
 
     Arguments:
         output_csv_file: Handle to open file in write mode.
         scene_list: List of pairs of FrameTimecodes denoting each scene's start/end FrameTimecode.
+        include_cut_list: Bool indicating if the first row should include the timecodes where
+            each scene starts.  Current default is True, but will be moving to False eventually
+            as part of #136 (https://github.com/Breakthrough/PySceneDetect/issues/136).
         cut_list: Optional list of FrameTimecode objects denoting the cut list (i.e. the frames
             in the video that need to be split to generate individual scenes). If not passed,
             the start times of each scene (besides the 0th scene) is used instead.
     """
     csv_writer = get_csv_writer(output_csv_file)
-    # Output Timecode List
-    csv_writer.writerow(
-        ["Timecode List:"] +
-        cut_list if cut_list else [start.get_timecode() for start, _ in scene_list[1:]])
+    # If required, output the cutting list as the first row (i.e. before the header row).
+    if include_cut_list:
+        csv_writer.writerow(
+            ["Timecode List:"] +
+            cut_list if cut_list else [start.get_timecode() for start, _ in scene_list[1:]])
     csv_writer.writerow([
         "Scene Number",
         "Start Frame", "Start Timecode", "Start Time (seconds)",

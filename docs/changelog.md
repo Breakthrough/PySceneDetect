@@ -17,19 +17,20 @@ PySceneDetect Releases
 
 #### Changelog
 
+ * [bugfix] Allow image sequences and URLs to be used as inputs ([#152](https://github.com/Breakthrough/PySceneDetect/issues/171) and [#188](https://github.com/Breakthrough/PySceneDetect/issues/188))
+ * [bugfix] Pixel aspect ratio is now applied when using `save-images` ([#195](https://github.com/Breakthrough/PySceneDetect/issues/195))
+ * [bugfix] Fix `save-images` command not saving the last frame of the final scene due to overseeking
  * [cli] Make `--min-scene-len` a global option rather than per-detector ([#131](https://github.com/Breakthrough/PySceneDetect/issues/131), thanks @tonycpsu)
  * [feature] Added `--drop-short-scenes` option to remove all scenes smaller than `--min-scene-len`, instead of merging them
  * [enhancement] Removed first row from statsfile to comply with RFC 4180, includes backwards compatibility so existing statsfiles can still be loaded ([#136](https://github.com/Breakthrough/PySceneDetect/issues/136))
+ * [api] Add argument `include_cut_list` to `write_scene_list` method in `SceneManager` to support [#136](https://github.com/Breakthrough/PySceneDetect/issues/136)
  * [api] Removed unused argument base_timecode from `StatsManager.load_from_csv()` method
  * [api] Make the `base_timecode` argument optional on the `SceneManager` methods `get_scene_list()`, `get_cut_list()`, and `get_event_list()` ([#173](https://github.com/Breakthrough/PySceneDetect/issues/173))
  * [api] Support for live video stream callbacks by adding new `callback` argument to the `detect_scenes()` method of `SceneManager` ([#5](https://github.com/Breakthrough/PySceneDetect/issues/5), thanks @mhashim6)
  * [bugfix] Fix unhandled exception causing improper error message when a video fails to load on non-Windows platforms ([#192](https://github.com/Breakthrough/PySceneDetect/issues/192))
  * [enhancement] Enabled dynamic resizing for progress bar ([#193](https://github.com/Breakthrough/PySceneDetect/issues/193))
  * [enhancement] Always ouptut version number via logger to assist with debugging ([#171](https://github.com/Breakthrough/PySceneDetect/issues/171))
- * [bugfix] Allow image sequences and URLs to be used as inputs ([#152](https://github.com/Breakthrough/PySceneDetect/issues/171) and [#188](https://github.com/Breakthrough/PySceneDetect/issues/188))
  * [bugfix] Resolve RuntimeWarning when running as module ([#181](https://github.com/Breakthrough/PySceneDetect/issues/181))
- * [bugfix] Pixel aspect ratio is now applied when using `save-images` ([#195](https://github.com/Breakthrough/PySceneDetect/issues/195))
- * [bugfix] Fix `save-images` command not saving the last frame of the final scene due to overseeking
 
 #### Known Issues
 
