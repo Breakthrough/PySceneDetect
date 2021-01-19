@@ -13,7 +13,7 @@ Video Scene Cut Detection and Analysis Tool
 
 **Documentation**:  [manual.scenedetect.com](http://manual.scenedetect.com)
 
-**Installation and Dependencies**: https://pyscenedetect.readthedocs.io/en/latest/download/
+**Discord**: https://discord.gg/H83HbJngk7
 
 ----------------------------------------------------------
 
@@ -21,9 +21,9 @@ Video Scene Cut Detection and Analysis Tool
 
     pip install scenedetect[opencv]
 
-To enable video splitting support, you will also need to have `mkvmerge` or `ffmpeg` installed on your system. See the documentation on [Video Splitting Support](https://pyscenedetect.readthedocs.io/en/latest/examples/video-splitting/) after installation for details.
+For servers, you can use the headless (non-GUI) version of OpenCV by installing `scenedetect[opencv-headless]`.  To enable video splitting support, you will also need to have `mkvmerge` or `ffmpeg` installed - see the documentation on [Video Splitting Support](https://pyscenedetect.readthedocs.io/en/latest/examples/video-splitting/) for details.
 
-Requires Python modules `numpy`, OpenCV `cv2`, and (optional) `tqdm` for displaying progress.
+Requires Python modules `click`, `numpy`, OpenCV `cv2`, and (optional) `tqdm` for displaying progress.  For details, see the [dependencies on the downloads page](https://pyscenedetect.readthedocs.io/en/latest/download/#dependencies).
 
 ----------------------------------------------------------
 
