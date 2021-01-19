@@ -137,10 +137,6 @@ The following functions and constants are available in the ``scenedetect.video_m
 
 .. autofunction:: scenedetect.video_manager.open_captures
 
-.. autofunction:: scenedetect.video_manager.release_captures
-
-.. autofunction:: scenedetect.video_manager.close_captures
-
 .. autofunction:: scenedetect.video_manager.validate_capture_framerate
 
 .. autofunction:: scenedetect.video_manager.validate_capture_parameters

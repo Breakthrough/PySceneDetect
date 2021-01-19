@@ -7,13 +7,13 @@ Video Scene Cut Detection and Analysis Tool
 [![Build Status](https://img.shields.io/travis/com/Breakthrough/PySceneDetect)](https://travis-ci.com/github/Breakthrough/PySceneDetect) [![PyPI Status](https://img.shields.io/pypi/status/scenedetect.svg)](https://pypi.python.org/pypi/scenedetect/) [![PyPI Version](https://img.shields.io/pypi/v/scenedetect?color=blue)](https://pypi.python.org/pypi/scenedetect/)  [![PyPI License](https://img.shields.io/pypi/l/scenedetect.svg)](http://pyscenedetect.readthedocs.org/en/latest/copyright/)
 
 
-### Latest Release: v0.5.4 (September 14, 2020)
+### Latest Release: v0.5.5 (January 17, 2021)
 
 **Main Webpage**:  [py.scenedetect.com](http://py.scenedetect.com)
 
 **Documentation**:  [manual.scenedetect.com](http://manual.scenedetect.com)
 
-**Installation and Dependencies**: https://pyscenedetect.readthedocs.io/en/latest/download/
+**Discord**: https://discord.gg/H83HbJngk7
 
 ----------------------------------------------------------
 
@@ -21,9 +21,9 @@ Video Scene Cut Detection and Analysis Tool
 
     pip install scenedetect[opencv]
 
-To enable video splitting support, you will also need to have `mkvmerge` or `ffmpeg` installed on your system. See the documentation on [Video Splitting Support](https://pyscenedetect.readthedocs.io/en/latest/examples/video-splitting/) after installation for details.
+For servers, you can use the headless (non-GUI) version of OpenCV by installing `scenedetect[opencv-headless]`.  To enable video splitting support, you will also need to have `mkvmerge` or `ffmpeg` installed - see the documentation on [Video Splitting Support](https://pyscenedetect.readthedocs.io/en/latest/examples/video-splitting/) for details.
 
-Requires Python modules `numpy`, OpenCV `cv2`, and (optional) `tqdm` for displaying progress.
+Requires Python modules `click`, `numpy`, OpenCV `cv2`, and (optional) `tqdm` for displaying progress.  For details, see the [dependencies on the downloads page](https://pyscenedetect.readthedocs.io/en/latest/download/#dependencies).
 
 ----------------------------------------------------------
 
@@ -65,9 +65,6 @@ def find_scenes(video_path, threshold=30.0):
     scene_manager.add_detector(
         ContentDetector(threshold=threshold))
 
-    # Base timestamp at frame 0 (required to obtain the scene list).
-    base_timecode = video_manager.get_base_timecode()
-
     # Improve processing speed by downscaling before processing.
     video_manager.set_downscale_factor()
 
@@ -76,7 +73,7 @@ def find_scenes(video_path, threshold=30.0):
     scene_manager.detect_scenes(frame_source=video_manager)
 
     # Each returned scene is a tuple of the (start, end) timecode.
-    return scene_manager.get_scene_list(base_timecode)
+    return scene_manager.get_scene_list()
 ```
 
 To get started, try printing the result from calling `find_scenes` on a small video clip:
@@ -96,7 +93,7 @@ There are two main detection methods PySceneDetect uses: `detect-threshold` (com
 
 In general, use `detect-threshold` mode if you want to detect scene boundaries using fades/cuts in/out to black.  If the video uses a lot of fast cuts between content, and has no well-defined scene boundaries, you should use the `detect-content` mode.  Once you know what detection mode to use, you can try the parameters recommended below, or generate a statistics file (using the `-s` / `--statsfile` flag) in order to determine the correct paramters - specifically, the proper threshold value.
 
-Note that PySceneDetect is currently in beta; see Current Features & Roadmap below for details.  For help or other issues, you can contact me on [my website](http://www.bcastell.com/about/), or we can chat in #pyscenedetect on Freenode.  Feel free to submit any bugs or feature requests to [the Issue Tracker](https://github.com/Breakthrough/PySceneDetect/issues) here on Github.
+Note that PySceneDetect is currently in beta; see Current Features & Roadmap below for details.  For help or other issues, you can join [the official PySceneDetect Discord Server](https://discord.gg/H83HbJngk7), submit an issue/bug report [here on Github](https://github.com/Breakthrough/PySceneDetect/issues), or contact me via [my website](http://www.bcastell.com/about/).
 
 
 Usage
@@ -120,6 +117,6 @@ Additional features being planned or in development can be found [here (tagged a
 
 Licensed under BSD 3-Clause (see the `LICENSE` file for details).
 
-Copyright (C) 2014-2020 Brandon Castellano.
+Copyright (C) 2014-2021 Brandon Castellano.
 All rights reserved.
 

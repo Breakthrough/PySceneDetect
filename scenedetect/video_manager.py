@@ -6,7 +6,7 @@
 #     [  Github: https://github.com/Breakthrough/PySceneDetect/  ]
 #     [  Documentation: http://pyscenedetect.readthedocs.org/    ]
 #
-# Copyright (C) 2014-2020 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2014-2021 Brandon Castellano <http://www.bcastell.com>.
 #
 # PySceneDetect is licensed under the BSD 3-Clause License; see the included
 # LICENSE file, or visit one of the following pages for details:
@@ -50,6 +50,7 @@ respect to a SceneManager object.
 # Standard Library Imports
 from __future__ import print_function
 import os
+import os.path
 import math
 
 # Third-Party Library Imports
@@ -227,8 +228,11 @@ def open_captures(video_files, framerate=None, validate_parameters=True):
         raise ValueError("Unexpected element type in video_files list (expected str(s)/int).")
     elif framerate is not None and not isinstance(framerate, float):
         raise TypeError("Expected type float for parameter framerate.")
-    # Check if files exist.
-    if not is_device and any([not os.path.exists(video_file) for video_file in video_files]):
+    # Check if files exist if passed video file is not an image sequence
+    # (checked with presence of % in filename) or not a URL (://).
+    if not is_device and any(
+        [not os.path.exists(video_file) for video_file in video_files
+         if not ('%' in video_file or '://' in video_file)]):
         raise IOError("Video file(s) not found.")
     cap_list = []
 
@@ -257,24 +261,11 @@ def open_captures(video_files, framerate=None, validate_parameters=True):
                 check_framerate=check_framerate, cap_framerates=cap_framerates)
 
     except:
-        release_captures(cap_list)
+        for cap in cap_list:
+            cap.release()
         raise
 
     return (cap_list, cap_framerate, cap_frame_size)
-
-
-def release_captures(cap_list):
-    # type: (Iterable[VideoCapture]) -> None
-    """ Close Captures:  Calls release() on every capture in cap_list. """
-    for cap in cap_list:
-        cap.release()
-
-
-def close_captures(cap_list):
-    # type: (Iterable[VideoCapture]) -> None
-    """ Close Captures:  Calls close() on every capture in cap_list. """
-    for cap in cap_list:
-        cap.close()
 
 
 def validate_capture_framerate(video_names, cap_framerates, framerate=None):
@@ -432,6 +423,22 @@ class VideoManager(object):
             List[str]: List of paths to the video files opened by the VideoManager.
         """
         return list(self._video_file_paths)
+
+
+    def get_video_name(self):
+        # type: () -> str
+        """ Returns the name of the video based on the first video path.
+
+        Returns:
+            str: The base name of the video file, without extension.
+        """
+        video_paths = self.get_video_paths()
+        if not video_paths:
+            return ''
+        video_name = os.path.basename(video_paths[0])
+        if video_name.rfind('.') >= 0:
+            video_name = video_name[:video_name.rfind('.')]
+        return video_name
 
 
     def get_framerate(self):
@@ -633,7 +640,8 @@ class VideoManager(object):
     def release(self):
         # type: () -> None
         """ Release (cv2.VideoCapture method), releases all open capture(s). """
-        release_captures(self._cap_list)
+        for cap in self._cap_list:
+            cap.release()
         self._cap_list = []
         self._started = False
 
@@ -681,6 +689,8 @@ class VideoManager(object):
             return self._frame_length
         elif capture_prop == cv2.CAP_PROP_POS_FRAMES:
             return self._curr_time
+        elif capture_prop == cv2.CAP_PROP_FPS:
+            return self._cap_framerate
         elif index is None:
             index = 0
         return self._cap_list[index].get(capture_prop)

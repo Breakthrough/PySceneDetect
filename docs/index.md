@@ -3,7 +3,7 @@
 <h4 class="wy-text-info">Intelligent scene cut detection and video splitting tool.</h4>
 
 <div class="important">
-<h3 class="wy-text-neutral"><span class="fa fa-info-circle wy-text-info"></span>&nbsp; Latest Release: <b>v0.5.4</b> (September 14, 2020)</h3>
+<h3 class="wy-text-neutral"><span class="fa fa-info-circle wy-text-info"></span>&nbsp; Latest Release: <b>v0.5.5</b> (January 17, 2021)</h3>
 <a href="download/" class="btn btn-success" style="margin-bottom:8px;" role="button"><span class="fa fa-download"></span>&nbsp; <b>Download</b></a> &nbsp;&nbsp;&nbsp;&nbsp; <a href="changelog/" class="btn btn-info" style="margin-bottom:8px;" role="button"><span class="fa fa-reorder"></span>&nbsp; <b>Changelog</b></a> &nbsp;&nbsp;&nbsp;&nbsp; <a href="http://pyscenedetect-manual.readthedocs.io/" class="btn btn-warning" style="margin-bottom:8px;" role="button"><span class="fa fa-gear"></span>&nbsp; <b>Manual</b></a> &nbsp;&nbsp;&nbsp;&nbsp; <a href="examples/usage-example/" class="btn btn-danger" style="margin-bottom:8px;" role="button"><span class="fa fa-book"></span>&nbsp; <b>Getting Started</b></a>
 <br/>
 See the changelog for the latest release notes and known issues.

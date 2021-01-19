@@ -6,7 +6,7 @@
 #     [  Github: https://github.com/Breakthrough/PySceneDetect/  ]
 #     [  Documentation: http://pyscenedetect.readthedocs.org/    ]
 #
-# Copyright (C) 2014-2020 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2014-2021 Brandon Castellano <http://www.bcastell.com>.
 #
 # PySceneDetect is licensed under the BSD 3-Clause License; see the included
 # LICENSE file, or visit one of the following pages for details:
@@ -247,7 +247,11 @@ def split_video_ffmpeg(input_video_paths, scene_list, output_file_template, vide
         progress_bar = None
         total_frames = scene_list[-1][1].get_frames() - scene_list[0][0].get_frames()
         if tqdm and not hide_progress:
-            progress_bar = tqdm(total=total_frames, unit='frame', miniters=1)
+            progress_bar = tqdm(
+                total=total_frames,
+                unit='frame',
+                miniters=1,
+                dynamic_ncols=True)
         processing_start_time = time.time()
         for i, (start_time, end_time) in enumerate(scene_list):
             duration = (end_time - start_time)

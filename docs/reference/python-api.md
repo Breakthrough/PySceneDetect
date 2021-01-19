@@ -65,9 +65,6 @@ def find_scenes(video_path, threshold=30.0):
     scene_manager.add_detector(
         ContentDetector(threshold=threshold))
 
-    # Base timestamp at frame 0 (required to obtain the scene list).
-    base_timecode = video_manager.get_base_timecode()
-
     # Improve processing speed by downscaling before processing.
     video_manager.set_downscale_factor()
 
@@ -76,11 +73,11 @@ def find_scenes(video_path, threshold=30.0):
     scene_manager.detect_scenes(frame_source=video_manager)
 
     # Each returned scene is a tuple of the (start, end) timecode.
-    return scene_manager.get_scene_list(base_timecode)
+    return scene_manager.get_scene_list()
 ```
 
 
-The scene list returned by the `SceneManager.get_scene_list(...)` method consists of the start and (one past) the end frame of each scene, in the form of a `FrameTimecode` object.  Each `FrameTimecode` can be converted to the appropriate working/output format via the `get_timecode()`, `get_frames()`, or `get_sceonds()` methods as shown above; see the API documentation for `FrameTimecode` objects for details.
+The scene list returned by the `SceneManager.get_scene_list()` method consists of the start and (one past) the end frame of each scene, in the form of a `FrameTimecode` object.  Each `FrameTimecode` can be converted to the appropriate working/output format via the `get_timecode()`, `get_frames()`, or `get_seconds()` methods as shown above; see the API documentation for `FrameTimecode` objects for details.
 
 
 For a more advanced example, see [the `api_test.py` file in the `tests` folder](https://github.com/Breakthrough/PySceneDetect/blob/master/tests/api_test.py) which illustrates the general workflow and usage of the `scenedetect` module to perform scene detection programmatically.  It provides a good example as to the general usage of the PySceneDetect Python API for detecting the scenes on an input video and printing the scenes to the terminal/console.

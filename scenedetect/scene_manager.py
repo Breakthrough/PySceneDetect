@@ -6,7 +6,7 @@
 #     [  Github: https://github.com/Breakthrough/PySceneDetect/  ]
 #     [  Documentation: http://pyscenedetect.readthedocs.org/    ]
 #
-# Copyright (C) 2014-2020 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2014-2021 Brandon Castellano <http://www.bcastell.com>.
 #
 # PySceneDetect is licensed under the BSD 3-Clause License; see the included
 # LICENSE file, or visit one of the following pages for details:
@@ -51,11 +51,14 @@ threshold values (or other algorithm options) are used.
 from __future__ import print_function
 from string import Template
 import math
+import logging
 
 # Third-Party Library Imports
 import cv2
+import numpy as np
 from scenedetect.platform import tqdm
 from scenedetect.platform import get_and_create_path
+from scenedetect.platform import get_aspect_ratio
 
 # PySceneDetect Library Imports
 from scenedetect.frame_timecode import FrameTimecode
@@ -114,22 +117,27 @@ def get_scenes_from_cuts(cut_list, base_timecode, num_frames, start_frame=0):
     return scene_list
 
 
-def write_scene_list(output_csv_file, scene_list, cut_list=None):
-    # type: (File, List[Tuple[FrameTimecode, FrameTimecode]], Optional[List[FrameTimecode]]) -> None
+def write_scene_list(output_csv_file, scene_list, include_cut_list=True, cut_list=None):
+    # type: (File, List[Tuple[FrameTimecode, FrameTimecode]],
+    #        Optional[bool], Optional[List[FrameTimecode]]) -> None
     """ Writes the given list of scenes to an output file handle in CSV format.
 
     Arguments:
         output_csv_file: Handle to open file in write mode.
         scene_list: List of pairs of FrameTimecodes denoting each scene's start/end FrameTimecode.
+        include_cut_list: Bool indicating if the first row should include the timecodes where
+            each scene starts.  Current default is True, but will be moving to False eventually
+            as part of #136 (https://github.com/Breakthrough/PySceneDetect/issues/136).
         cut_list: Optional list of FrameTimecode objects denoting the cut list (i.e. the frames
             in the video that need to be split to generate individual scenes). If not passed,
             the start times of each scene (besides the 0th scene) is used instead.
     """
     csv_writer = get_csv_writer(output_csv_file)
-    # Output Timecode List
-    csv_writer.writerow(
-        ["Timecode List:"] +
-        cut_list if cut_list else [start.get_timecode() for start, _ in scene_list[1:]])
+    # If required, output the cutting list as the first row (i.e. before the header row).
+    if include_cut_list:
+        csv_writer.writerow(
+            ["Timecode List:"] +
+            cut_list if cut_list else [start.get_timecode() for start, _ in scene_list[1:]])
     csv_writer.writerow([
         "Scene Number",
         "Start Frame", "Start Timecode", "Start Time (seconds)",
@@ -237,49 +245,63 @@ def write_scene_list_html(output_html_filename, scene_list, cut_list=None, css=N
     page.css = css
     page.save(output_html_filename)
 
-#
-# TODO - Add a method to scene_manager called save_images which calls this function.
-#
-def generate_images(scene_list, video_manager, video_name, num_images=2,
-                    image_extension='jpg', quality_or_compression=95,
-                    image_name_template='$VIDEO_NAME-Scene-$SCENE_NUMBER-$IMAGE_NUMBER',
-                    output_dir=None, downscale_factor=1, show_progress=False):
-    # type: (...) -> bool
-    """
 
-    TODO: Documentation.
+def save_images(scene_list, video_manager, num_images=3, frame_margin=1,
+                image_extension='jpg', encoder_param=95,
+                image_name_template='$VIDEO_NAME-Scene-$SCENE_NUMBER-$IMAGE_NUMBER',
+                output_dir=None, downscale_factor=1, show_progress=False):
+    # type: (List[Tuple[FrameTimecode, FrameTimecode]], VideoManager,
+    #        Optional[int], Optional[int], Optional[str], Optional[int],
+    #        Optional[str], Optional[str], Optional[int], Optional[bool])
+    #       -> Dict[List[str]]
+    """ Saves a set number of images from each scene, given a list of scenes
+    and the associated video/frame source.
 
     Arguments:
-        quality_or_compression: For image_extension=jpg or webp, represents encoding quality,
-        from 0-100 (higher indicates better quality). For WebP, 100 indicates lossless.
-        Default value in the CLI is 95 for JPEG, and 100 for WebP.
+        scene_list: A list of scenes (pairs of FrameTimecode objects) returned
+            from calling a SceneManager's detect_scenes() method.
+        video_manager: A VideoManager object corresponding to the scene list.
+            Note that the video will be closed/re-opened and seeked through.
+        num_images: Number of images to generate for each scene.  Minimum is 1.
+        frame_margin: Number of frames to pad each scene around the beginning
+            and end (e.g. moves the first/last image into the scene by N frames).
+            Can set to 0, but will result in some video files failing to extract
+            the very last frame.
+        image_extension: Type of image to save (must be one of 'jpg', 'png', or 'webp').
+        encoder_param: Quality/compression efficiency, based on type of image:
+            'jpg' / 'webp':  Quality 0-100, higher is better quality.  100 is lossless for webp.
+            'png': Compression from 1-9, where 9 achieves best filesize but is slower to encode.
+        image_name_template: Template to use when creating the images on disk. Can
+            use the macros $VIDEO_NAME, $SCENE_NUMBER, and $IMAGE_NUMBER. The image
+            extension is applied automatically as per the argument image_extension.
+        output_dir: Directory to output the images into.  If not set, the output
+            is created in the working directory.
+        downscale_factor: Integer factor to downscale images by.  No filtering
+            is currently done, only downsampling (thus requiring an integer).
+        show_progress: If True, shows a progress bar if tqdm is installed.
 
-        If image_extension=png, represents the compression rate, from 0-9. Higher values
-        produce smaller files but result in longer compression time. This setting does not
-        affect image quality (lossless PNG), only file size. Default value in the CLI is 3.
-
-        [default: 95]
 
     Returns:
-        True if all requested images were generated & saved successfully, False otherwise.
+        Dict[List[str]]: Dictionary of the format { scene_num : [image_paths] },
+        where scene_num is the number of the scene in scene_list (starting from 1),
+        and image_paths is a list of the paths to the newly saved/created images.
 
+    Raises:
+        ValueError: Raised if any arguments are invalid or out of range (e.g.
+        if num_images is negative).
     """
 
     if not scene_list:
-        return True
-    if num_images <= 0:
+        return {}
+    if num_images <= 0 or frame_margin < 0:
         raise ValueError()
 
-    imwrite_param = []
-    available_extensions = get_cv2_imwrite_params()
-    if quality_or_compression is not None:
-        if image_extension in available_extensions:
-            imwrite_param = [available_extensions[image_extension], quality_or_compression]
-        else:
-            valid_extensions = str(list(available_extensions.keys()))
-            raise RuntimeError(
-                'Invalid image extension, must be one of (case-sensitive): %s' %
-                valid_extensions)
+    # TODO: Validate that encoder_param is within the proper range.
+    # Should be between 0 and 100 (inclusive) for jpg/webp, and 1-9 for png.
+    imwrite_param = [get_cv2_imwrite_params()[image_extension],
+                     encoder_param] if encoder_param is not None else []
+
+    video_name = video_manager.get_video_name()
 
     # Reset video manager and downscale factor.
     video_manager.release()
@@ -289,10 +311,13 @@ def generate_images(scene_list, video_manager, video_name, num_images=2,
 
     # Setup flags and init progress bar if available.
     completed = True
+    logging.info('Generating output images (%d per scene)...', num_images)
     progress_bar = None
-    if tqdm and show_progress:
+    if show_progress and tqdm:
         progress_bar = tqdm(
-            total=len(scene_list) * num_images, unit='images')
+            total=len(scene_list) * num_images,
+            unit='images',
+            dynamic_ncols=True)
 
     filename_template = Template(image_name_template)
 
@@ -303,39 +328,60 @@ def generate_images(scene_list, video_manager, video_name, num_images=2,
 
     timecode_list = dict()
 
-    for i in range(len(scene_list)):
-        timecode_list[i] = []
+    fps = scene_list[0][0].framerate
 
-    if num_images == 1:
-        for i, (start_time, end_time) in enumerate(scene_list):
-            duration = end_time - start_time
-            timecode_list[i].append(start_time + int(duration.get_frames() / 2))
-    else:
-        middle_images = num_images - 2
-        for i, (start_time, end_time) in enumerate(scene_list):
-            timecode_list[i].append(start_time)
+    timecode_list = [
+        [
+            FrameTimecode(int(f), fps=fps) for f in [
+                # middle frames
+                a[len(a)//2] if (0 < j < num_images-1) or num_images == 1
 
-            if middle_images > 0:
-                duration = (end_time.get_frames() - 1) - start_time.get_frames()
-                duration_increment = None
-                duration_increment = int(duration / (middle_images + 1))
-                for j in range(middle_images):
-                    timecode_list[i].append(start_time + ((j+1) * duration_increment))
-            # End FrameTimecode is always the same frame as the next scene's start_time
-            # (one frame past the end), so we need to subtract 1 here.
-            timecode_list[i].append(end_time - 1)
+                # first frame
+                else min(a[0] + frame_margin, a[-1]) if j == 0
 
-    for i in timecode_list:
-        for j, image_timecode in enumerate(timecode_list[i]):
+                # last frame
+                else max(a[-1] - frame_margin, a[0])
+
+                # for each evenly-split array of frames in the scene list
+                for j, a in enumerate(np.array_split(r, num_images))
+            ]
+        ]
+        for i, r in enumerate([
+            # pad ranges to number of images
+            r
+            if 1+r[-1]-r[0] >= num_images
+            else list(r) + [r[-1]] * (num_images - len(r))
+            # create range of frames in scene
+            for r in (
+                range(start.get_frames(), end.get_frames())
+                # for each scene in scene list
+                for start, end in scene_list
+                )
+        ])
+    ]
+
+    image_filenames = {i: [] for i in range(len(timecode_list))}
+    aspect_ratio = get_aspect_ratio(video_manager)
+    if abs(aspect_ratio - 1.0) < 0.01:
+        aspect_ratio = None
+
+    for i, scene_timecodes in enumerate(timecode_list):
+        for j, image_timecode in enumerate(scene_timecodes):
             video_manager.seek(image_timecode)
-            video_manager.grab()
-            ret_val, frame_im = video_manager.retrieve()
+            ret_val, frame_im = video_manager.read()
             if ret_val:
-                file_path = '%s.%s' % (filename_template.safe_substitute(
-                    VIDEO_NAME=video_name,
-                    SCENE_NUMBER=scene_num_format % (i + 1),
-                    IMAGE_NUMBER=image_num_format % (j + 1)),
-                                       image_extension)
+                file_path = '%s.%s' % (
+                    filename_template.safe_substitute(
+                        VIDEO_NAME=video_name,
+                        SCENE_NUMBER=scene_num_format % (i + 1),
+                        IMAGE_NUMBER=image_num_format % (j + 1),
+                        FRAME_NUMBER=image_timecode.get_frames()),
+                    image_extension)
+                image_filenames[i].append(file_path)
+                if aspect_ratio is not None:
+                    frame_im = cv2.resize(
+                        frame_im, (0, 0), fx=aspect_ratio, fy=1.0,
+                        interpolation=cv2.INTER_CUBIC)
                 cv2.imwrite(
                     get_and_create_path(file_path, output_dir),
                     frame_im, imwrite_param)
@@ -345,7 +391,10 @@ def generate_images(scene_list, video_manager, video_name, num_images=2,
             if progress_bar:
                 progress_bar.update(1)
 
-    return completed
+    if not completed:
+        logging.error('Could not generate all output images.')
+
+    return image_filenames
 
 
 ##
@@ -372,6 +421,7 @@ class SceneManager(object):
         self._stats_manager = stats_manager
         self._num_frames = 0
         self._start_frame = 0
+        self._base_timecode = None
 
 
     def add_detector(self, detector):
@@ -429,7 +479,7 @@ class SceneManager(object):
         self._sparse_detector_list.clear()
 
 
-    def get_scene_list(self, base_timecode):
+    def get_scene_list(self, base_timecode=None):
         # type: (FrameTimecode) -> List[Tuple[FrameTimecode, FrameTimecode]]
         """ Returns a list of tuples of start/end FrameTimecodes for each detected scene.
 
@@ -442,12 +492,16 @@ class SceneManager(object):
             end_time are FrameTimecode objects representing the exact time/frame where each
             detected scene in the video begins and ends.
         """
+        if base_timecode is None:
+            base_timecode = self._base_timecode
+        if base_timecode is None:
+            return []
         return sorted(self.get_event_list(base_timecode) + get_scenes_from_cuts(
             self.get_cut_list(base_timecode), base_timecode,
             self._num_frames, self._start_frame))
 
 
-    def get_cut_list(self, base_timecode):
+    def get_cut_list(self, base_timecode=None):
         # type: (FrameTimecode) -> List[FrameTimecode]
         """ Returns a list of FrameTimecodes of the detected scene changes/cuts.
 
@@ -464,7 +518,10 @@ class SceneManager(object):
             was detected in the input video(s), which can also be passed to external tools
             for automated splitting of the input into individual scenes.
         """
-
+        if base_timecode is None:
+            base_timecode = self._base_timecode
+        if base_timecode is None:
+            return []
         return [FrameTimecode(cut, base_timecode)
                 for cut in self._get_cutting_list()]
 
@@ -476,7 +533,7 @@ class SceneManager(object):
         return sorted(list(set(self._cutting_list)))
 
 
-    def get_event_list(self, base_timecode):
+    def get_event_list(self, base_timecode=None):
         # type: (FrameTimecode) -> List[FrameTimecode]
         """ Returns a list of FrameTimecode pairs of the detected scenes by all sparse detectors.
 
@@ -487,17 +544,27 @@ class SceneManager(object):
         Returns:
             List of pairs of FrameTimecode objects denoting the detected scenes.
         """
+        if base_timecode is None:
+            base_timecode = self._base_timecode
+        if base_timecode is None:
+            return []
         return [(base_timecode + start, base_timecode + end)
                 for start, end in self._event_list]
 
 
-    def _process_frame(self, frame_num, frame_im):
+    def _process_frame(self, frame_num, frame_im, callback=None):
         # type(int, numpy.ndarray) -> None
         """ Adds any cuts detected with the current frame to the cutting list. """
         for detector in self._detector_list:
-            self._cutting_list += detector.process_frame(frame_num, frame_im)
+            cuts = detector.process_frame(frame_num, frame_im)
+            if cuts and callback:
+                callback(frame_im, frame_num)
+            self._cutting_list += cuts
         for detector in self._sparse_detector_list:
-            self._event_list += detector.process_frame(frame_num, frame_im)
+            events = detector.process_frame(frame_num, frame_im)
+            if events and callback:
+                callback(frame_im, frame_num)
+            self._event_list += events
 
 
     def _is_processing_required(self, frame_num):
@@ -515,9 +582,9 @@ class SceneManager(object):
             self._cutting_list += detector.post_process(frame_num)
 
     def detect_scenes(self, frame_source, end_time=None, frame_skip=0,
-                      show_progress=True):
+                      show_progress=True, callback=None):
         # type: (VideoManager, Union[int, FrameTimecode],
-        #        Optional[Union[int, FrameTimecode]], Optional[bool]) -> int
+        #        Optional[Union[int, FrameTimecode]], Optional[bool], optional[callable[numpy.ndarray]) -> int
         """ Perform scene detection on the given frame_source using the added SceneDetectors.
 
         Blocks until all frames in the frame_source have been processed. Results can
@@ -539,6 +606,8 @@ class SceneManager(object):
             show_progress (bool): If True, and the ``tqdm`` module is available, displays
                 a progress bar with the progress, framerate, and expected time to
                 complete processing the video frame source.
+            callback ((image_ndarray, frame_num: int) -> None): If not None, called after
+                each scene/event detected.
         Returns:
             int: Number of frames read and processed from the frame source.
         Raises:
@@ -552,6 +621,8 @@ class SceneManager(object):
         start_frame = 0
         curr_frame = 0
         end_frame = None
+        self._base_timecode = FrameTimecode(
+            timecode=0, fps=frame_source.get(cv2.CAP_PROP_FPS))
 
         total_frames = math.trunc(frame_source.get(cv2.CAP_PROP_FRAME_COUNT))
 
@@ -581,7 +652,9 @@ class SceneManager(object):
         progress_bar = None
         if tqdm and show_progress:
             progress_bar = tqdm(
-                total=total_frames, unit='frames')
+                total=total_frames,
+                unit='frames',
+                dynamic_ncols=True)
         try:
 
             while True:
@@ -599,7 +672,7 @@ class SceneManager(object):
 
                 if not ret_val:
                     break
-                self._process_frame(self._num_frames + start_frame, frame_im)
+                self._process_frame(self._num_frames + start_frame, frame_im, callback)
 
                 curr_frame += 1
                 self._num_frames += 1

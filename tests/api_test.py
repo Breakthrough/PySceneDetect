@@ -6,7 +6,7 @@
 #     [  Github: https://github.com/Breakthrough/PySceneDetect/  ]
 #     [  Documentation: http://pyscenedetect.readthedocs.org/    ]
 #
-# Copyright (C) 2014-2020 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2014-2021 Brandon Castellano <http://www.bcastell.com>.
 #
 # PySceneDetect is licensed under the BSD 3-Clause License; see the included
 # LICENSE file, or visit one of the following pages for details:
@@ -73,7 +73,7 @@ def test_api(test_video_file):
         if os.path.exists(STATS_FILE_PATH):
             # Read stats from CSV file opened in read mode:
             with open(STATS_FILE_PATH, 'r') as stats_file:
-                stats_manager.load_from_csv(stats_file, base_timecode)
+                stats_manager.load_from_csv(stats_file)
 
         start_time = base_timecode + 20     # 00:00:00.667
         end_time = base_timecode + 20.0     # 00:00:20.000
@@ -90,7 +90,7 @@ def test_api(test_video_file):
         scene_manager.detect_scenes(frame_source=video_manager)
 
         # Obtain list of detected scenes.
-        scene_list = scene_manager.get_scene_list(base_timecode)
+        scene_list = scene_manager.get_scene_list()
         # Like FrameTimecodes, each scene in the scene_list can be sorted if the
         # list of scenes becomes unsorted.
 
