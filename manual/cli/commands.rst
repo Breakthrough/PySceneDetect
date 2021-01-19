@@ -203,7 +203,7 @@ The `save-images` command takes the following options:
  * ``-f``, ``--filename NAME``
     Filename format, *without* extension, to use when
     saving image files. You can use the $VIDEO_NAME,
-    $SCENE_NUMBER, and $IMAGE_NUMBER macros in the file
+    $SCENE_NUMBER, $IMAGE_NUMBER, and $FRAME_NUMBER macros in the file
     name. Note that you may have to wrap the name using single
     quotes.  [default: $VIDEO_NAME-Scene-$SCENE_NUMBER-$IMAGE_NUMBER]
  * ``-n``, ``--num-images N``
