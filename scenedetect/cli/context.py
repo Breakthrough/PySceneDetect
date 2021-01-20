@@ -157,6 +157,9 @@ class CliContext(object):
             '$VIDEO_NAME-Scene-$SCENE_NUMBER-$IMAGE_NUMBER')
         self.num_images = 3                     # save-images -n/--num-images
         self.frame_margin = 1                   # save-images -m/--frame-margin
+        self.scale = None                       # save-images -s/--scale
+        self.height = None                      # save-images -h/--height
+        self.width = None                       # save-images -w/--width
 
         # Properties for split-video command.
         self.split_video = False                # split-video command
@@ -349,7 +352,10 @@ class CliContext(object):
                 encoder_param=self.image_param,
                 image_name_template=self.image_name_format,
                 output_dir=image_output_dir,
-                show_progress=not self.quiet_mode)
+                show_progress=not self.quiet_mode,
+                scale=self.scale,
+                height=self.height,
+                width=self.width)
 
         # Handle export-html command.
         if self.export_html:
@@ -616,8 +622,8 @@ class CliContext(object):
 
 
     def save_images_command(self, num_images, output, name_format, jpeg, webp, quality,
-                            png, compression, frame_margin):
-        # type: (int, str, str, bool, bool, int, bool, int) -> None
+                            png, compression, frame_margin, scale, height, width):
+        # type: (int, str, str, bool, bool, int, bool, int, float, int, int) -> None
         """ Save Images Command: Parses all options/arguments passed to the save-images command,
         or with respect to the CLI, this function processes [save-images options] when calling:
         scenedetect [global options] save-images [save-images options] [other commands...].
@@ -659,6 +665,9 @@ class CliContext(object):
             self.image_name_format = name_format
             self.num_images = num_images
             self.frame_margin = frame_margin
+            self.scale = scale
+            self.height = height
+            self.width = width
 
             image_type = 'JPEG' if self.image_extension == 'jpg' else self.image_extension.upper()
             image_param_type = ''

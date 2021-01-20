@@ -249,10 +249,12 @@ def write_scene_list_html(output_html_filename, scene_list, cut_list=None, css=N
 def save_images(scene_list, video_manager, num_images=3, frame_margin=1,
                 image_extension='jpg', encoder_param=95,
                 image_name_template='$VIDEO_NAME-Scene-$SCENE_NUMBER-$IMAGE_NUMBER',
-                output_dir=None, downscale_factor=1, show_progress=False):
+                output_dir=None, downscale_factor=1, show_progress=False,
+                scale=None, height=None, width=None):
     # type: (List[Tuple[FrameTimecode, FrameTimecode]], VideoManager,
     #        Optional[int], Optional[int], Optional[str], Optional[int],
-    #        Optional[str], Optional[str], Optional[int], Optional[bool])
+    #        Optional[str], Optional[str], Optional[int], Optional[bool],
+    #        Optional[float], Optional[int], Optional[int])
     #       -> Dict[List[str]]
     """ Saves a set number of images from each scene, given a list of scenes
     and the associated video/frame source.
@@ -279,6 +281,18 @@ def save_images(scene_list, video_manager, num_images=3, frame_margin=1,
         downscale_factor: Integer factor to downscale images by.  No filtering
             is currently done, only downsampling (thus requiring an integer).
         show_progress: If True, shows a progress bar if tqdm is installed.
+        scale: Optional factor by which to rescale saved images.A scaling factor of 1 would
+            not result in rescaling. A value <1 results in a smaller saved image, while a
+            value >1 results in an image larger than the original. This value is ignored if
+            either the height or width values are specified.
+        height: Optional value for the height of the saved images. Specifying both the height
+            and width will resize images to an exact size, regardless of aspect ratio.
+            Specifying only height will rescale the image to that number of pixels in height
+            while preserving the aspect ratio.
+        width: Optional value for the width of the saved images. Specifying both the width
+            and height will resize images to an exact size, regardless of aspect ratio.
+            Specifying only width will rescale the image to that number of pixels wide
+            while preserving the aspect ratio.
 
 
     Returns:
@@ -382,6 +396,30 @@ def save_images(scene_list, video_manager, num_images=3, frame_margin=1,
                     frame_im = cv2.resize(
                         frame_im, (0, 0), fx=aspect_ratio, fy=1.0,
                         interpolation=cv2.INTER_CUBIC)
+                
+                # Get frame dimensions prior to resizing or scaling
+                frame_height = frame_im.shape[0]
+                frame_width = frame_im.shape[1]
+
+                # Figure out what kind of resizing needs to be done
+                if height and width:
+                    frame_im = cv2.resize(
+                        frame_im, (width, height), interpolation=cv2.INTER_CUBIC)
+                elif height and not width:
+                    factor = height / float(frame_height)
+                    width = int(factor * frame_width)
+                    frame_im = cv2.resize(
+                        frame_im, (width, height), interpolation=cv2.INTER_CUBIC)
+                elif width and not height:
+                    factor = width / float(frame_width)
+                    height = int(factor * frame_height)
+                    frame_im = cv2.resize(
+                        frame_im, (width, height), interpolation=cv2.INTER_CUBIC)
+                elif scale:
+                    frame_im = cv2.resize(
+                        frame_im, (0, 0), fx=scale, fy=scale,
+                        interpolation=cv2.INTER_CUBIC)
+
                 cv2.imwrite(
                     get_and_create_path(file_path, output_dir),
                     frame_im, imwrite_param)
