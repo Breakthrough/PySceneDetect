@@ -6,7 +6,7 @@
 #     [  Github: https://github.com/Breakthrough/PySceneDetect/  ]
 #     [  Documentation: http://pyscenedetect.readthedocs.org/    ]
 #
-# Copyright (C) 2014-2019 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2014-2021 Brandon Castellano <http://www.bcastell.com>.
 #
 # PySceneDetect is licensed under the BSD 3-Clause License; see the included
 # LICENSE file, or visit one of the following pages for details:
@@ -24,32 +24,32 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-""" Module: ``scenedetect.detectors.content_detector``
+""" Module: ``scenedetect.detectors.adaptive_content_detector``
 
-This module implements the :py:class:`ContentDetector`, which compares the
-difference in content between adjacent frames against a set threshold/score,
-which if exceeded, triggers a scene cut.
+This module implements the :py:class:`AdaptiveContentDetector`, which compares the
+difference in content between adjacent frames similar to `ContentDetector` except the
+threshold isn't fixed, but is a rolling average of adjacent frame changes. This can
+help mitigate false detections in situations such as fast camera motions.
 
 This detector is available from the command-line interface by using the
-`detect-content` command.
+`adaptive-detect-content` command.
 """
 
-# Third-Party Library Imports
-import numpy
-import cv2
-
 # PySceneDetect Library Imports
-from scenedetect.scene_detector import SceneDetector
+from scenedetect.detectors import ContentDetector
 
 
-class AdaptiveContentDetector(SceneDetector):
+class AdaptiveContentDetector(ContentDetector):
     """Detects cuts using HSV changes similar to ContentDetector, but with a
     rolling average that can help mitigate false detections in situations such
     as camera moves.
     """
 
-    def __init__(self, video_manager=None, adaptive_threshold=3.0, min_scene_len=15, min_delta_hsv=5.0, window_width=2):
-        super(AdaptiveContentDetector, self).__init__()
+    def __init__(self, video_manager=None, adaptive_threshold=3.0, min_scene_len=15, 
+                  min_delta_hsv=5.0, window_width=2):
+        # Initialize ContentDetector with an impossibly high threshold 
+        # so it does not trigger any cuts
+        super(AdaptiveContentDetector, self).__init__(threshold=300, min_scene_len=min_scene_len)
         self.video_manager = video_manager
         self.min_scene_len = min_scene_len  # minimum length of any given scene, in frames (int) or FrameTimecode
         self.adaptive_threshold = adaptive_threshold
@@ -61,77 +61,6 @@ class AdaptiveContentDetector(SceneDetector):
         self._metric_keys = ['content_val', 'delta_hue', 'delta_sat',
                              'delta_lum', 'con_val_ratio']
         self.cli_name = 'adaptive-detect-content'
-
-    def process_frame(self, frame_num, frame_img):
-        # type: (int, numpy.ndarray) -> List[int]
-        """ Similar to ContentDetector, but looking for frames in which the HSV difference is
-        significantly different than the neighboring frames.
-
-        Arguments:
-            frame_num (int): Frame number of frame that is being passed.
-
-            frame_img (Optional[int]): Decoded frame image (numpy.ndarray) to perform scene
-                detection on. Can be None *only* if the self.is_processing_required() method
-                (inhereted from the base SceneDetector class) returns True.
-
-        Returns:
-            Empty list: The process_frame function for this detector does not register any cuts,
-                instead only calculating scene metrics that are used to detect cuts with the
-                post_process function.
-        """
-
-        metric_keys = self._metric_keys
-        _unused = ''
-
-        # We can only start detecting once we have a frame to compare with.
-        if self.last_frame is not None:
-            # Change in average of HSV (hsv), (h)ue only, (s)aturation only, (l)uminance only.
-            # These are refered to in a statsfile as their respective self._metric_keys string.
-            delta_hsv_avg, delta_h, delta_s, delta_v = 0.0, 0.0, 0.0, 0.0
-
-            if (self.stats_manager is not None and
-                    self.stats_manager.metrics_exist(frame_num, metric_keys)):
-                delta_hsv_avg, delta_h, delta_s, delta_v = self.stats_manager.get_metrics(
-                    frame_num, metric_keys)[:4]
-
-            else:
-                num_pixels = frame_img.shape[0] * frame_img.shape[1]
-                curr_hsv = cv2.split(cv2.cvtColor(frame_img, cv2.COLOR_BGR2HSV))
-                last_hsv = self.last_hsv
-                if not last_hsv:
-                    last_hsv = cv2.split(cv2.cvtColor(self.last_frame, cv2.COLOR_BGR2HSV))
-
-                delta_hsv = [0, 0, 0, 0]
-                for i in range(3):
-                    num_pixels = curr_hsv[i].shape[0] * curr_hsv[i].shape[1]
-                    curr_hsv[i] = curr_hsv[i].astype(numpy.int32)
-                    last_hsv[i] = last_hsv[i].astype(numpy.int32)
-                    delta_hsv[i] = numpy.sum(
-                        numpy.abs(curr_hsv[i] - last_hsv[i])) / float(num_pixels)
-                delta_hsv[3] = sum(delta_hsv[0:3]) / 3.0
-                delta_h, delta_s, delta_v, delta_hsv_avg = delta_hsv
-
-                if self.stats_manager is not None:
-                    self.stats_manager.set_metrics(frame_num, {
-                        metric_keys[0]: delta_hsv_avg,
-                        metric_keys[1]: delta_h,
-                        metric_keys[2]: delta_s,
-                        metric_keys[3]: delta_v})
-
-                self.last_hsv = curr_hsv
-
-        if self.last_frame is not None and self.last_frame is not _unused:
-            del self.last_frame
-
-        # If we have the next frame computed, don't copy the current frame
-        # into last_frame since we won't use it on the next call anyways.
-        if (self.stats_manager is not None and
-                self.stats_manager.metrics_exist(frame_num+1, metric_keys)):
-            self.last_frame = _unused
-        else:
-            self.last_frame = frame_img.copy()
-
-        return []
 
     def get_content_val(self, frame_num):
         """
