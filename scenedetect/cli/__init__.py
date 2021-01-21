@@ -698,16 +698,37 @@ def split_video_command(ctx, output, filename, high_quality, override_args, quie
     '-m', '--frame-margin', metavar='N', default=1, show_default=True,
     type=click.INT, help=
     'Number of frames to ignore at the beginning and end of scenes when saving images')
+@click.option(
+    '--scale', '-s', metavar='S', default=None, show_default=False,
+    type=click.FLOAT, help=
+    'Optional factor by which saved images are rescaled. A scaling factor of 1 would'
+    ' not result in rescaling. A value <1 results in a smaller saved image, while a'
+    ' value >1 results in an image larger than the original. This value is ignored if'
+    ' either the height, -h, or width, -w, values are specified.')
+@click.option(
+    '--height', '-h', metavar='H', default=None, show_default=False,
+    type=click.INT, help=
+    'Optional value for the height of the saved images. Specifying both the height'
+    ' and width, -w, will resize images to an exact size, regardless of aspect ratio.'
+    ' Specifying only height will rescale the image to that number of pixels in height'
+    ' while preserving the aspect ratio.')
+@click.option(
+    '--width', '-w', metavar='W', default=None, show_default=False,
+    type=click.INT, help=
+    'Optional value for the width of the saved images. Specifying both the width'
+    ' and height, -h, will resize images to an exact size, regardless of aspect ratio.'
+    ' Specifying only width will rescale the image to that number of pixels wide'
+    ' while preserving the aspect ratio.')
 @click.pass_context
 def save_images_command(ctx, output, filename, num_images, jpeg, webp, quality, png,
-                        compression, frame_margin):
+                        compression, frame_margin, scale, height, width):
     """ Create images for each detected scene. """
     if ctx.obj.save_images:
         duplicate_command(ctx, 'save-images')
     if quality is None:
         quality = 100 if webp else 95
     ctx.obj.save_images_command(num_images, output, filename, jpeg, webp, quality, png,
-                                compression, frame_margin)
+                                compression, frame_margin, scale, height, width)
 
 
 
