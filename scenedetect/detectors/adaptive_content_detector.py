@@ -49,7 +49,7 @@ class AdaptiveContentDetector(ContentDetector):
                   min_delta_hsv=5.0, window_width=2):
         # Initialize ContentDetector with an impossibly high threshold 
         # so it does not trigger any cuts
-        super(AdaptiveContentDetector, self).__init__(threshold=300, min_scene_len=min_scene_len)
+        super(AdaptiveContentDetector, self).__init__()
         self.video_manager = video_manager
         self.min_scene_len = min_scene_len  # minimum length of any given scene, in frames (int) or FrameTimecode
         self.adaptive_threshold = adaptive_threshold
@@ -61,6 +61,29 @@ class AdaptiveContentDetector(ContentDetector):
         self._metric_keys = ['content_val', 'delta_hue', 'delta_sat',
                              'delta_lum', 'con_val_ratio']
         self.cli_name = 'adaptive-detect-content'
+    
+    def process_frame(self, frame_num, frame_img):
+        # type: (int, numpy.ndarray) -> List[int]
+        """ Similar to ThresholdDetector, but using the HSV colour space DIFFERENCE instead
+        of single-frame RGB/grayscale intensity (thus cannot detect slow fades with this method).
+
+        Arguments:
+            frame_num (int): Frame number of frame that is being passed.
+
+            frame_img (Optional[int]): Decoded frame image (numpy.ndarray) to perform scene
+                detection on. Can be None *only* if the self.is_processing_required() method
+                (inhereted from the base SceneDetector class) returns True.
+
+        Returns:
+            Empty list
+        """
+
+        # Call the process_frame function of ContentDetector but ignore any
+        # returned cuts
+        _ = super(AdaptiveContentDetector, self).process_frame(
+            frame_num=frame_num, frame_img=frame_img)
+        
+        return []
 
     def get_content_val(self, frame_num):
         """
