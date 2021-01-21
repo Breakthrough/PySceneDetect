@@ -203,7 +203,7 @@ The `save-images` command takes the following options:
  * ``-f``, ``--filename NAME``
     Filename format, *without* extension, to use when
     saving image files. You can use the $VIDEO_NAME,
-    $SCENE_NUMBER, and $IMAGE_NUMBER macros in the file
+    $SCENE_NUMBER, $IMAGE_NUMBER, and $FRAME_NUMBER macros in the file
     name. Note that you may have to wrap the name using single
     quotes.  [default: $VIDEO_NAME-Scene-$SCENE_NUMBER-$IMAGE_NUMBER]
  * ``-n``, ``--num-images N``
@@ -228,6 +228,26 @@ The `save-images` command takes the following options:
  * ``-m``, ``--frame-margin N``
     Number of frames to ignore at the beginning and end of
     scenes when saving images  [default: 1]
+ * ``s``, ``--scale S``
+    Optional factor by which saved images are rescaled. A 
+    scaling factor of 1 would not result in rescaling. A 
+    value <1 results in a smaller saved image, while a 
+    value >1 results in an image larger than the original. 
+    This value is ignored if either the height, -h, or 
+    width, -w, values are specified.
+ * ``h``, ``--height H``
+    Optional value for the height of the saved images. 
+    Specifying both the height and width, -w, will resize 
+    images to an exact size, regardless of aspect ratio. 
+    Specifying only height will rescale the image to that 
+    number of pixels in height while preserving the aspect 
+    ratio.
+ * ``w``, ``--width W``
+    Optional value for the width of the saved images. 
+    Specifying both the width and height, -h, will resize 
+    images to an exact size, regardless of aspect ratio. 
+    Specifying only width will rescale the image to that 
+    number of pixels wide while preserving the aspect ratio.
 
 
 =======================================================================
