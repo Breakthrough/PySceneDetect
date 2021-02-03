@@ -240,7 +240,7 @@ class StatsManager(object):
             csv_writer.writerow(
                 [COLUMN_NAME_FRAME_NUMBER, COLUMN_NAME_TIMECODE] + metric_keys)
             frame_keys = sorted(self._frame_metrics.keys())
-            print("Writing %d frames to CSV..." % len(frame_keys))
+            logging.info("Writing %d frames to CSV...", len(frame_keys))
             for frame_key in frame_keys:
                 frame_timecode = base_timecode + frame_key
                 csv_writer.writerow(
