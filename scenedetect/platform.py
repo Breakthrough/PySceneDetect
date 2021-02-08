@@ -322,5 +322,5 @@ def invoke_command(args):
         # Error 87:  The parameter is incorrect
         to_match = ('206', '87')
         if any([x in exception_string for x in to_match]):
-            raise CommandTooLong() from None
+            raise CommandTooLong()
         raise
