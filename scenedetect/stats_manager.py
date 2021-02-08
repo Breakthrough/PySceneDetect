@@ -316,7 +316,8 @@ class StatsManager(object):
                     try:
                         metric_dict[metric_keys[i]] = float(metric_str)
                     except ValueError:
-                        raise StatsFileCorrupt('Corrupted value in stats file: %s' % metric_str)
+                        raise StatsFileCorrupt(
+                            'Corrupted value in stats file: %s' % metric_str) from None
             self.set_metrics(int(row[0]), metric_dict)
             num_frames += 1
         logging.info('Loaded %d metrics for %d frames.', num_metrics, num_frames)

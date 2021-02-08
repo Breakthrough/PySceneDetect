@@ -288,7 +288,6 @@ def get_and_create_path(file_path, output_directory=None):
     return file_path
 
 
-
 class CommandTooLong(Exception):
     """ Raised when the length of a command line argument doesn't play nicely
     with the Windows command prompt. """
@@ -323,5 +322,5 @@ def invoke_command(args):
         # Error 87:  The parameter is incorrect
         to_match = ('206', '87')
         if any([x in exception_string for x in to_match]):
-            raise CommandTooLong()
+            raise CommandTooLong() from None
         raise

@@ -396,7 +396,7 @@ def save_images(scene_list, video_manager, num_images=3, frame_margin=1,
                     frame_im = cv2.resize(
                         frame_im, (0, 0), fx=aspect_ratio, fy=1.0,
                         interpolation=cv2.INTER_CUBIC)
-                
+
                 # Get frame dimensions prior to resizing or scaling
                 frame_height = frame_im.shape[0]
                 frame_width = frame_im.shape[1]
@@ -623,7 +623,8 @@ class SceneManager(object):
     def detect_scenes(self, frame_source, end_time=None, frame_skip=0,
                       show_progress=True, callback=None):
         # type: (VideoManager, Union[int, FrameTimecode],
-        #        Optional[Union[int, FrameTimecode]], Optional[bool], optional[callable[numpy.ndarray]) -> int
+        #        Optional[Union[int, FrameTimecode]], Optional[bool],
+        #        Optional[Callable[numpy.ndarray]) -> int
         """ Perform scene detection on the given frame_source using the added SceneDetectors.
 
         Blocks until all frames in the frame_source have been processed. Results can
