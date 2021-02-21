@@ -24,7 +24,7 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-""" Module: ``scenedetect.detectors.adaptive_content_detector``
+""" Module: ``scenedetect.detectors.adaptive_detector``
 
 This module implements the :py:class:`AdaptiveDetector`, which compares the
 difference in content between adjacent frames similar to `ContentDetector` except the
@@ -114,6 +114,8 @@ class AdaptiveDetector(ContentDetector):
         adaptive_threshold = self.adaptive_threshold
         window_width = self.window_width
         last_cut = None
+
+        assert self.stats_manager is not None
 
         if self.stats_manager is not None:
             # Loop through the stats, building the adaptive_ratio metric
