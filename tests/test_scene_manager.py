@@ -65,7 +65,7 @@ from scenedetect.video_manager import VideoManager
 from scenedetect.detectors import ContentDetector
 
 
-def test_content_detect(test_video_file):
+def test_using_pyscenedetect_videomanager(test_video_file):
     """ Test SceneManager with VideoManager and ContentDetector. """
     vm = VideoManager([test_video_file])
     sm = SceneManager()
@@ -87,7 +87,7 @@ def test_content_detect(test_video_file):
         vm.release()
 
 
-def test_content_detect_opencv_videocap(test_video_file):
+def test_using_opencv_videocapture(test_video_file):
     """ Test SceneManager with cv2.VideoCapture and ContentDetector. """
     cap = cv2.VideoCapture(test_video_file)
     sm = SceneManager()

@@ -9,5 +9,6 @@ install:
   - "pip install -r requirements.txt"
   - "git fetch --depth=1 https://github.com/Breakthrough/PySceneDetect.git refs/heads/resources:refs/remotes/origin/resources"
   - "git checkout refs/remotes/origin/resources -- tests/testvideo.mp4"
+  - "git checkout refs/remotes/origin/resources -- tests/goldeneye/goldeneye.mp4"
 script:
   - python -m pytest tests/
