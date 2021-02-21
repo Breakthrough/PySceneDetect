@@ -50,10 +50,6 @@ class SceneDetector(object):
     """ Optional :py:class:`StatsManager <scenedetect.stats_manager.StatsManager>` to
     use for caching frame metrics to and from."""
 
-    _metric_keys = []
-    """ List of frame metric keys to be registered with the :py:attr:`stats_manager`,
-    if available. """
-
     cli_name = 'detect-none'
     """ Name of detector to use in command-line interface description. """
 
@@ -70,9 +66,10 @@ class SceneDetector(object):
             True otherwise (i.e. the frame_img passed to process_frame is required
             to be passed to process_frame for the given frame_num).
         """
-        return not self._metric_keys or not (
+        metric_keys = self.get_metrics()
+        return not metric_keys or not (
             self.stats_manager is not None and
-            self.stats_manager.metrics_exist(frame_num, self._metric_keys))
+            self.stats_manager.metrics_exist(frame_num, metric_keys))
 
 
     def get_metrics(self):
@@ -83,7 +80,7 @@ class SceneDetector(object):
             List[str]: A list of strings of frame metric key names that will be used by
             the detector when a StatsManager is passed to process_frame.
         """
-        return self._metric_keys
+        return []
 
 
     def process_frame(self, frame_num, frame_img):

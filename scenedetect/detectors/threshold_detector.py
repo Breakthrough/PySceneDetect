@@ -88,6 +88,10 @@ class ThresholdDetector(SceneDetector):
             tuned to increase performance in some cases; should be computed
             programmatically in the future).
     """
+
+    # TODO: Add min_percent to metric key.
+    THRESHOLD_VALUE_KEY = 'delta_rgb'
+
     def __init__(self, threshold=12, min_percent=0.95, min_scene_len=15,
                  fade_bias=0.0, add_final_scene=False, block_size=8):
         """Initializes threshold-based scene detector object."""
@@ -110,6 +114,11 @@ class ThresholdDetector(SceneDetector):
         self.block_size = block_size
         self._metric_keys = ['delta_rgb']
         self.cli_name = 'detect-threshold'
+
+
+    def get_metrics(self):
+        return [ThresholdDetector.THRESHOLD_VALUE_KEY]
+
 
     def is_processing_required(self, frame_num):
         # type: (int) -> bool

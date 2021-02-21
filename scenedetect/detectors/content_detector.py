@@ -50,6 +50,11 @@ class ContentDetector(SceneDetector):
     content scenes still using HSV information, use the DissolveDetector.
     """
 
+    FRAME_SCORE_KEY = 'content_val'
+    DELTA_H_KEY, DELTA_S_KEY, DELTA_V_KEY = ('delta_hue', 'delta_sat', 'delta_lum')
+    METRIC_KEYS = [FRAME_SCORE_KEY, DELTA_H_KEY, DELTA_S_KEY, DELTA_V_KEY]
+
+
     def __init__(self, threshold=30.0, min_scene_len=15):
         # type: (float, Union[int, FrameTimecode]) -> None
         super(ContentDetector, self).__init__()
@@ -59,8 +64,11 @@ class ContentDetector(SceneDetector):
         self.last_frame = None
         self.last_scene_cut = None
         self.last_hsv = None
-        self._metric_keys = ['content_val', 'delta_hue', 'delta_sat', 'delta_lum']
         self.cli_name = 'detect-content'
+
+
+    def get_metrics(self):
+        return ContentDetector.METRIC_KEYS
 
 
     def process_frame(self, frame_num, frame_img):
@@ -81,7 +89,6 @@ class ContentDetector(SceneDetector):
         """
 
         cut_list = []
-        metric_keys = self._metric_keys
         _unused = ''
 
         # Initialize last scene cut point at the beginning of the frames of interest.
@@ -91,13 +98,13 @@ class ContentDetector(SceneDetector):
         # We can only start detecting once we have a frame to compare with.
         if self.last_frame is not None:
             # Change in average of HSV (hsv), (h)ue only, (s)aturation only, (l)uminance only.
-            # These are refered to in a statsfile as their respective self._metric_keys string.
+            # These are refered to in a statsfile as their respective metric keys.
             delta_hsv_avg, delta_h, delta_s, delta_v = 0.0, 0.0, 0.0, 0.0
 
             if (self.stats_manager is not None and
-                    self.stats_manager.metrics_exist(frame_num, metric_keys)):
+                    self.stats_manager.metrics_exist(frame_num, ContentDetector.METRIC_KEYS)):
                 delta_hsv_avg, delta_h, delta_s, delta_v = self.stats_manager.get_metrics(
-                    frame_num, metric_keys)
+                    frame_num, ContentDetector.METRIC_KEYS)
 
             else:
                 num_pixels = frame_img.shape[0] * frame_img.shape[1]
@@ -118,10 +125,10 @@ class ContentDetector(SceneDetector):
 
                 if self.stats_manager is not None:
                     self.stats_manager.set_metrics(frame_num, {
-                        metric_keys[0]: delta_hsv_avg,
-                        metric_keys[1]: delta_h,
-                        metric_keys[2]: delta_s,
-                        metric_keys[3]: delta_v})
+                        self.FRAME_SCORE_KEY: delta_hsv_avg,
+                        self.DELTA_H_KEY: delta_h,
+                        self.DELTA_S_KEY: delta_s,
+                        self.DELTA_V_KEY: delta_v})
 
                 self.last_hsv = curr_hsv
 
@@ -138,7 +145,7 @@ class ContentDetector(SceneDetector):
         # If we have the next frame computed, don't copy the current frame
         # into last_frame since we won't use it on the next call anyways.
         if (self.stats_manager is not None and
-                self.stats_manager.metrics_exist(frame_num+1, metric_keys)):
+                self.stats_manager.metrics_exist(frame_num+1, ContentDetector.METRIC_KEYS)):
             self.last_frame = _unused
         else:
             self.last_frame = frame_img.copy()
