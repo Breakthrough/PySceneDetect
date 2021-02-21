@@ -305,7 +305,7 @@ class StatsManager(object):
         num_metrics = num_cols - 2
         if not num_metrics > 0:
             raise StatsFileCorrupt('No metrics defined in CSV file.')
-        metric_keys = row[2:]
+        self._loaded_metrics = row[2:]
         num_frames = 0
         for row in csv_reader:
             metric_dict = {}
@@ -314,7 +314,7 @@ class StatsManager(object):
             for i, metric_str in enumerate(row[2:]):
                 if metric_str and metric_str != 'None':
                     try:
-                        metric_dict[metric_keys[i]] = float(metric_str)
+                        metric_dict[self._loaded_metrics[i]] = float(metric_str)
                     except ValueError:
                         raise StatsFileCorrupt('Corrupted value in stats file: %s' % metric_str)
             self.set_metrics(int(row[0]), metric_dict)
