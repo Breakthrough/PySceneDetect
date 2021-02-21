@@ -37,7 +37,7 @@ are expected to provide in order to be compatible with PySceneDetect.
 
 
 class SceneDetector(object):
-    """ Base class to inheret from when implementing a scene detection algorithm.
+    """ Base class to inherit from when implementing a scene detection algorithm.
 
     This represents a "dense" scene detector, which returns a list of frames where
     the next scene/shot begins in a video.

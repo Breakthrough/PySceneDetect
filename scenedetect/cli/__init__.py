@@ -421,6 +421,63 @@ def detect_content_command(ctx, threshold):
         threshold=threshold, min_scene_len=min_scene_len))
 
 
+@click.command('adaptive-detect-content')
+@click.option(
+    '--threshold', '-t', metavar='VAL',
+    type=click.FLOAT, default=3.0, show_default=True, help=
+    'Threshold value (float) that the con_val_ratio frame metric must exceed to trigger a new scene.'
+    ' Refers to frame metric content_val_ratio in stats file.')
+@click.option(
+    '--min-scene-len', '-m', metavar='TIMECODE',
+    type=click.STRING, default="0.6s", show_default=True, help=
+    'Minimum size/length of any scene. TIMECODE can be specified as exact'
+    ' number of frames, a time in seconds followed by s, or a timecode in the'
+    ' format HH:MM:SS or HH:MM:SS.nnn')
+@click.option(
+    '--min-delta-hsv', '-d', metavar='VAL',
+    type=click.FLOAT, default=5.0, show_default=True, help=
+    'Minimum threshold (float) that the content_val must exceed in order to register as a new scene.'
+    ' This is calculated the same way that the detect-content command calculates content_val.')
+@click.option(
+    '--frame-window', '-w', metavar='VAL',
+    type=click.INT, default=2, show_default=True, help=
+    'Number of frames before and after each frame to average together in'
+    ' order to detect deviations from the mean.')
+@click.pass_context
+def adaptive_detect_content_command(ctx, threshold, min_scene_len, min_delta_hsv, frame_window):
+    """ Perform adaptive content detection algorithm on input video(s).
+
+    adaptive-detect-content
+
+    adaptive-detect-content --threshold 3.2
+    """
+
+    min_scene_len = parse_timecode(ctx.obj, min_scene_len)
+
+    logging.debug('Adaptively detecting content, parameters:\n'
+                  '  threshold: %d, min-scene-len: %d',
+                  threshold, min_scene_len)
+
+    # Check for a stats manager, necessary to use the adaptive content detector
+    if not ctx.obj.stats_manager:
+        error_strs = [
+            'No stats file specified for use with the adaptive content detector.'
+            ' Either use a different detector or specify a stats file with -s/--stats\n']
+        logging.error('\n'.join(error_strs))
+        raise click.BadParameter(
+            '\n  Specifying a stats file -s/--stats is necessary to use the adaptive content detector',
+            param_hint='adaptive detector + stats file')
+
+    # Initialize detector and add to scene manager.
+    # Need to ensure that a detector is not added twice, or will cause
+    # a frame metric key error when registering the detector.
+    ctx.obj.add_detector(scenedetect.detectors.AdaptiveContentDetector(
+        video_manager=ctx.obj.video_manager,
+        adaptive_threshold=threshold,
+        min_scene_len=min_scene_len,
+        min_delta_hsv=min_delta_hsv,
+        window_width=frame_window))
+
 
 @click.command('detect-threshold')
 @click.option(
@@ -760,6 +817,7 @@ add_cli_command(scenedetect_cli, version_command)
 add_cli_command(scenedetect_cli, time_command)
 add_cli_command(scenedetect_cli, detect_content_command)
 add_cli_command(scenedetect_cli, detect_threshold_command)
+add_cli_command(scenedetect_cli, adaptive_detect_content_command)
 add_cli_command(scenedetect_cli, list_scenes_command)
 
 add_cli_command(scenedetect_cli, save_images_command)

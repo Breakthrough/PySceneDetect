@@ -619,7 +619,6 @@ class SceneManager(object):
         for detector in self._detector_list:
             self._cutting_list += detector.post_process(frame_num)
 
-
     def detect_scenes(self, frame_source, end_time=None, frame_skip=0,
                       show_progress=True, callback=None):
         # type: (VideoManager, Union[int, FrameTimecode],
