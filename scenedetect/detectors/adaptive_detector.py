@@ -55,7 +55,6 @@ class AdaptiveDetector(ContentDetector):
         self.adaptive_threshold = adaptive_threshold
         self.min_delta_hsv = min_delta_hsv
         self.window_width = window_width
-        self.cli_name = 'adaptive-detect-content'
         self._adaptive_ratio_key = AdaptiveDetector.ADAPTIVE_RATIO_KEY_TEMPLATE.format(
             window_width=window_width)
 

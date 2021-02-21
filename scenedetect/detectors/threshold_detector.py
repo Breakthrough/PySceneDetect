@@ -113,7 +113,6 @@ class ThresholdDetector(SceneDetector):
         }
         self.block_size = block_size
         self._metric_keys = ['delta_rgb']
-        self.cli_name = 'detect-threshold'
 
 
     def get_metrics(self):

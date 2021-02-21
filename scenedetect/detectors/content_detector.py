@@ -64,7 +64,6 @@ class ContentDetector(SceneDetector):
         self.last_frame = None
         self.last_scene_cut = None
         self.last_hsv = None
-        self.cli_name = 'detect-content'
 
 
     def get_metrics(self):

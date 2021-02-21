@@ -50,9 +50,6 @@ class SceneDetector(object):
     """ Optional :py:class:`StatsManager <scenedetect.stats_manager.StatsManager>` to
     use for caching frame metrics to and from."""
 
-    cli_name = 'detect-none'
-    """ Name of detector to use in command-line interface description. """
-
     def is_processing_required(self, frame_num):
         # type: (int) -> bool
         """ Is Processing Required: Test if all calculations for a given frame are already done.
