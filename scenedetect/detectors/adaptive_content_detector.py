@@ -135,12 +135,12 @@ class AdaptiveContentDetector(ContentDetector):
                 if not denominator_is_zero:
                     adaptive_ratio = self.get_content_val(frame_num) / denominator
                 elif denominator_is_zero and self.get_content_val(frame_num) >= self.min_delta_hsv:
-                    # if we would have divided by zero, set adaptive_ratio above the threshold
-                    adaptive_ratio = adaptive_threshold + 1
+                    # if we would have divided by zero, set adaptive_ratio to the max (255.0)
+                    adaptive_ratio = 255.0
                 else:
                     # avoid dividing by zero by setting con_val_ratio to zero if content_val
                     # is still very low
-                    adaptive_ratio = 0
+                    adaptive_ratio = 0.0
 
                 self.stats_manager.set_metrics(
                     frame_num, {self._adaptive_ratio_key: adaptive_ratio})
