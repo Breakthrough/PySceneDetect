@@ -90,17 +90,14 @@ class ContentDetector(SceneDetector):
 
         # We can only start detecting once we have a frame to compare with.
         if self.last_frame is not None:
-            # Change in average of HSV (hsv), (h)ue only, (s)aturation only, (l)uminance only.
-            # These are refered to in a statsfile as their respective self._metric_keys string.
-            delta_hsv_avg, delta_h, delta_s, delta_v = 0.0, 0.0, 0.0, 0.0
-
+            # We obtain the change in average of HSV (delta_hsv_avg), (h)ue only,
+            # (s)aturation only, and (l)uminance only.  These are refered to in a statsfile
+            # as their respective metric keys.
             if (self.stats_manager is not None and
                     self.stats_manager.metrics_exist(frame_num, metric_keys)):
                 delta_hsv_avg, delta_h, delta_s, delta_v = self.stats_manager.get_metrics(
                     frame_num, metric_keys)
-
             else:
-                num_pixels = frame_img.shape[0] * frame_img.shape[1]
                 curr_hsv = cv2.split(cv2.cvtColor(frame_img, cv2.COLOR_BGR2HSV))
                 last_hsv = self.last_hsv
                 if not last_hsv:
