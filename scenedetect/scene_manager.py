@@ -340,13 +340,11 @@ def save_images(scene_list, video_manager, num_images=3, frame_margin=1,
     image_num_format = '%0'
     image_num_format += str(math.floor(math.log(num_images, 10)) + 2) + 'd'
 
-    timecode_list = dict()
-
-    fps = scene_list[0][0].framerate
+    framerate = scene_list[0][0].framerate
 
     timecode_list = [
         [
-            FrameTimecode(int(f), fps=fps) for f in [
+            FrameTimecode(int(f), fps=framerate) for f in [
                 # middle frames
                 a[len(a)//2] if (0 < j < num_images-1) or num_images == 1
 

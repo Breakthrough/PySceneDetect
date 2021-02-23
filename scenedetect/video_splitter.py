@@ -157,13 +157,11 @@ def split_video_mkvmerge(input_video_paths, scene_list, output_file_template,
                  's' if len(input_video_paths) > 1 else '', output_file_template)
 
     ret_val = None
-    # mkvmerge automatically appends '-$SCENE_NUMBER'.
-    output_file_name = output_file_template.replace('-${SCENE_NUMBER}', '')
-    output_file_name = output_file_template.replace('-$SCENE_NUMBER', '')
-    output_file_template = Template(output_file_name)
-    output_file_name = output_file_template.safe_substitute(
-        VIDEO_NAME=video_name,
-        SCENE_NUMBER='')
+    # mkvmerge automatically appends '-$SCENE_NUMBER', so we remove it if present.
+    output_file_template = output_file_template.replace(
+        '-$SCENE_NUMBER', '').replace('$SCENE_NUMBER', '')
+    output_file_name = Template(output_file_template).safe_substitute(
+        VIDEO_NAME=video_name)
 
     try:
         call_list = ['mkvmerge']

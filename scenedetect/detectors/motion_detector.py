@@ -59,9 +59,9 @@ class MotionDetector(SparseSceneDetector):
     def __init__(self, threshold = 0.50, num_frames_post_scene = 30,
                  kernel_size = -1):
         """Initializes motion-based scene detector object."""
-        # Requires porting to v0.5 API.
+        # TODO: Requires porting to v0.5 API.
         raise NotImplementedError()
-
+        """
         self.threshold = float(threshold)
         self.num_frames_post_scene = int(num_frames_post_scene)
 
@@ -79,13 +79,11 @@ class MotionDetector(SparseSceneDetector):
         self.in_motion_event = False
         self.first_motion_frame_index = -1
         self.last_motion_frame_index = -1
+        """
 
-
-    def process_frame(self, frame_num, frame_img, frame_metrics, scene_list):
-
-        # Value to return indiciating if a scene cut was found or not.
-        cut_detected = False
-
+    def process_frame(self, frame_num, frame_img):
+        # TODO.
+        """
         frame_grayscale = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         masked_frame = self.bg_subtractor.apply(frame_grayscale)
 
@@ -94,20 +92,22 @@ class MotionDetector(SparseSceneDetector):
 
         frame_score = numpy.sum(filtered_frame) / float(
             filtered_frame.shape[0] * filtered_frame.shape[1] )
+        """
+        return []
 
-        return cut_detected
-
-    def post_process(self, scene_list, frame_num):
+    def post_process(self, frame_num):
         """Writes the last scene if the video ends while in a motion event.
         """
 
         # If the last fade detected was a fade out, we add a corresponding new
         # scene break to indicate the end of the scene.  This is only done for
         # fade-outs, as a scene cut is already added when a fade-in is found.
-
+        """
         if self.in_motion_event:
             # Write new scene based on first and last motion event frames.
             pass
         return self.in_motion_event
+        """
+        return []
 
 

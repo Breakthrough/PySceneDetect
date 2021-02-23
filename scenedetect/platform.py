@@ -60,19 +60,9 @@ import sys
 # Third-Party Library Imports
 import cv2
 
+
 # pylint: disable=unused-import
 # pylint: disable=no-member
-
-
-##
-## Python 2/3 Queue/queue Library (scenedetect.platform.queue)
-##
-
-if sys.version_info[0] == 2:
-    import Queue as queue
-else:
-    import queue
-
 
 ##
 ## tqdm Library (scenedetect.platform.tqdm will be tqdm object or None)
@@ -82,7 +72,6 @@ try:
     from tqdm import tqdm
 except ImportError:
     tqdm = None
-
 
 # pylint: enable=unused-import
 

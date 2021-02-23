@@ -51,16 +51,20 @@ import click
 
 # PySceneDetect Library Imports
 import scenedetect
+
 from scenedetect.cli.context import CliContext
+from scenedetect.cli.context import check_split_video_requirements
 from scenedetect.cli.context import contains_sequence_or_url
 from scenedetect.cli.context import parse_timecode
+
 from scenedetect.frame_timecode import FrameTimecode
+
+from scenedetect.platform import get_and_create_path
+
 from scenedetect.video_manager import VideoManager
 
 from scenedetect.video_splitter import is_mkvmerge_available
 from scenedetect.video_splitter import is_ffmpeg_available
-
-from scenedetect.platform import get_and_create_path
 
 
 def get_help_command_preface(command_name='scenedetect'):
@@ -462,6 +466,7 @@ def detect_adaptive_command(ctx, threshold, min_scene_len, min_delta_hsv, frame_
     # TODO: Allow use of the detector even without `-s` specified by instantiating
     # a stats manager, but preventing it from being saved to disk.
     if not ctx.obj.stats_manager:
+        ctx.obj.options_processed = False
         error_strs = [
             'No stats file specified for use with the adaptive content detector.'
             ' Either use a different detector or specify a stats file with -s/--stats\n']
@@ -479,6 +484,7 @@ def detect_adaptive_command(ctx, threshold, min_scene_len, min_delta_hsv, frame_
         min_scene_len=min_scene_len,
         min_delta_hsv=min_delta_hsv,
         window_width=frame_window))
+
 
 
 @click.command('detect-threshold')
@@ -535,6 +541,7 @@ def detect_threshold_command(ctx, threshold, fade_bias, add_last_scene,
         add_final_scene=add_last_scene, min_percent=min_percent, block_size=block_size))
 
 
+
 @click.command('export-html', add_help_option=False)
 @click.option(
     '--filename', '-f', metavar='NAME', default='$VIDEO_NAME-Scenes.html',
@@ -557,7 +564,10 @@ def detect_threshold_command(ctx, threshold, fade_bias, add_last_scene,
 def export_html_command(ctx, filename, no_images, image_width, image_height):
     """ Exports scene list to a HTML file. Requires save-images by default."""
     if not ctx.obj.save_images and not no_images:
-        raise click.BadParameter("save-images isn't enabled")
+        ctx.obj.options_processed = False
+        raise click.BadArgumentUsage(
+            'The export-html command requires that the save-images command\n'
+            'is specified before it, unless --no-images is specified.')
     ctx.obj.export_html_command(filename, no_images, image_width, image_height)
     ctx.obj.export_html = True
 
@@ -655,8 +665,9 @@ def split_video_command(ctx, output, filename, high_quality, override_args, quie
                         rate_factor, preset):
     """Split input video(s) using ffmpeg or mkvmerge."""
     if ctx.obj.split_video:
-        logging.warning('split-video command is specified twice.')
+        duplicate_command(ctx, 'split-video')
     ctx.obj.check_input_open()
+    check_split_video_requirements(copy)
 
     if contains_sequence_or_url(ctx.obj.video_manager.get_video_paths()):
         ctx.obj.options_processed = False
@@ -688,28 +699,6 @@ def split_video_command(ctx, output, filename, high_quality, override_args, quie
     if ctx.obj.split_directory is not None:
         logging.info('Video output path set:  \n%s', ctx.obj.split_directory)
     ctx.obj.split_args = override_args
-
-    mkvmerge_available = is_mkvmerge_available()
-    ffmpeg_available = is_ffmpeg_available()
-    if not (mkvmerge_available or ffmpeg_available) or (
-            (not mkvmerge_available and copy) or (not ffmpeg_available and not copy)):
-        split_tool = 'ffmpeg/mkvmerge'
-        if (not mkvmerge_available and copy):
-            split_tool = 'mkvmerge'
-        elif (not ffmpeg_available and not copy):
-            split_tool = 'ffmpeg'
-        error_strs = [
-            "{EXTERN_TOOL} is required for split-video{EXTRA_ARGS}.".format(
-                EXTERN_TOOL=split_tool, EXTRA_ARGS=' -c/--copy' if copy else ''),
-            "Install the above tool%s to enable video splitting support." % (
-                's' if split_tool.find('/') > 0 else '')]
-        if mkvmerge_available:
-            error_strs += [
-                'You can also specify `split-video -c/--copy` to use mkvmerge for splitting.']
-        error_str = '\n'.join(error_strs)
-        logging.debug(error_str)
-        ctx.obj.options_processed = False
-        raise click.BadParameter(error_str, param_hint='split-video')
 
 
 
@@ -810,19 +799,25 @@ def colors_command(ctx):
 
 
 
-# Info/Terminating Commands:
+# ----------------------------------------------------------------------
+# Commands Added To Help List
+# ----------------------------------------------------------------------
+
+# Info/Terminating Commands
 add_cli_command(scenedetect_cli, help_command)
-add_cli_command(scenedetect_cli, about_command)
 add_cli_command(scenedetect_cli, version_command)
+add_cli_command(scenedetect_cli, about_command)
 
-# Commands Added To Help List:
+# Input Commands
 add_cli_command(scenedetect_cli, time_command)
-add_cli_command(scenedetect_cli, detect_content_command)
-add_cli_command(scenedetect_cli, detect_threshold_command)
-add_cli_command(scenedetect_cli, detect_adaptive_command)
-add_cli_command(scenedetect_cli, list_scenes_command)
 
+# Output Commands
+add_cli_command(scenedetect_cli, export_html_command)
+add_cli_command(scenedetect_cli, list_scenes_command)
 add_cli_command(scenedetect_cli, save_images_command)
 add_cli_command(scenedetect_cli, split_video_command)
 
-add_cli_command(scenedetect_cli, export_html_command)
+# Detection Algorithms
+add_cli_command(scenedetect_cli, detect_content_command)
+add_cli_command(scenedetect_cli, detect_threshold_command)
+add_cli_command(scenedetect_cli, detect_adaptive_command)

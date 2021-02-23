@@ -45,8 +45,8 @@ import cv2
 # PySceneDetect Library Imports
 import scenedetect.detectors
 
-import scenedetect.scene_manager
 from scenedetect.scene_manager import SceneManager
+from scenedetect.scene_manager import save_images
 from scenedetect.scene_manager import write_scene_list
 from scenedetect.scene_manager import write_scene_list_html
 
@@ -113,10 +113,39 @@ def contains_sequence_or_url(video_paths):
         video_paths: List of strings.
 
     Returns: bool: True if any of the video_paths are a URL or image sequence,
-        False otherwise. """
+        False otherwise.
+    """
 
     return any(['%' in video_path or '://' in video_path
             for video_path in video_paths])
+
+
+def check_split_video_requirements(use_mkvmerge):
+    # type: (bool) -> None
+    """ Validates that the proper tool is available on the system to perform the split-video
+    command, which depends on if -c/--copy is set (to use mkvmerge) or not (to use ffmpeg).
+
+    Arguments:
+        use_mkvmerge: True if -c/--copy is set, False otherwise.
+
+    Raises: click.BadParameter if the proper video splitting tool cannot be found.
+    """
+
+    if (use_mkvmerge and not is_mkvmerge_available()) or not is_ffmpeg_available():
+        error_strs = [
+            "{EXTERN_TOOL} is required for split-video{EXTRA_ARGS}.".format(
+                EXTERN_TOOL='mkvmerge' if use_mkvmerge else 'ffmpeg',
+                EXTRA_ARGS=' -c/--copy' if use_mkvmerge else '')]
+        error_strs += ["Install one of the above tools to enable the split-video command."]
+        if not use_mkvmerge and is_mkvmerge_available():
+            error_strs += [
+                'You can also specify `-c/--copy` to use mkvmerge for splitting.']
+        elif use_mkvmerge and is_ffmpeg_available():
+            error_strs += [
+                'You can also omit `-c/--copy` to use ffmpeg for splitting.']
+        error_str = '\n'.join(error_strs)
+        raise click.BadParameter(error_str, param_hint='split-video')
+
 
 
 class CliContext(object):
@@ -208,12 +237,13 @@ class CliContext(object):
                     with open(self.stats_file_path, 'rt') as stats_file:
                         self.stats_manager.load_from_csv(stats_file)
                 except StatsFileCorrupt:
+                    error_info = (
+                        'Could not load frame metrics from stats file - file is either corrupt,'
+                        ' or not a valid PySceneDetect stats file. If the file exists, ensure that'
+                        ' it is a valid stats file CSV, otherwise delete it and run PySceneDetect'
+                        ' again to re-generate the stats file.')
                     error_strs = [
-                        'Could not load stats file.', 'Failed to parse stats file:',
-                        'Could not load frame metrics from stats file - file is corrupt or not a'
-                        ' valid PySceneDetect stats file. If the file exists, ensure that it is'
-                        ' a valid stats file CSV, otherwise delete it and run PySceneDetect again'
-                        ' to re-generate the stats file.']
+                        'Could not load stats file.', 'Failed to parse stats file:', error_info ]
                     logging.error('\n'.join(error_strs))
                     raise click.BadParameter(
                         '\n  Could not load given stats file, see above output for details.',
@@ -343,7 +373,7 @@ class CliContext(object):
             if self.image_directory is not None:
                 image_output_dir = self.image_directory
 
-            image_filenames = scenedetect.scene_manager.save_images(
+            image_filenames = save_images(
                 scene_list=scene_list,
                 video_manager=self.video_manager,
                 num_images=self.num_images,
@@ -377,48 +407,30 @@ class CliContext(object):
 
         # Handle split-video command.
         if self.split_video:
+            output_path_template = self.split_name_format
             # Add proper extension to filename template if required.
-            dot_pos = self.split_name_format.rfind('.')
-            if self.split_mkvmerge and not self.split_name_format.endswith('.mkv'):
-                self.split_name_format += '.mkv'
-            # Don't add if we find an extension between 2 and 4 characters
-            elif not (dot_pos >= 0) or (
-                    dot_pos >= 0 and not
-                    ((len(self.split_name_format) - (dot_pos+1) <= 4 >= 2))):
-                self.split_name_format += '.mp4'
-
-            output_file_prefix = get_and_create_path(
-                self.split_name_format,
+            dot_pos = output_path_template.rfind('.')
+            extension_length = 0 if dot_pos < 0 else len(output_path_template) - (dot_pos + 1)
+            # If using mkvmerge, force extension to .mkv.
+            if self.split_mkvmerge and not output_path_template.endswith('.mkv'):
+                output_path_template += '.mkv'
+            # Otherwise, if using ffmpeg, only add an extension if one doesn't exist.
+            elif not 2 <= extension_length <= 4:
+                output_path_template += '.mp4'
+            output_path_template = get_and_create_path(
+                output_path_template,
                 self.split_directory if self.split_directory is not None
                 else self.output_directory)
-            mkvmerge_available = is_mkvmerge_available()
-            ffmpeg_available = is_ffmpeg_available()
-            if mkvmerge_available and (self.split_mkvmerge or not ffmpeg_available):
-                if not self.split_mkvmerge:
-                    logging.warning(
-                        'ffmpeg not found, falling back to fast copy mode (split-video -c/--copy).')
-                split_video_mkvmerge(video_paths, scene_list, output_file_prefix, video_name,
+            # Ensure the appropriate tool is available before handling split-video.
+            check_split_video_requirements(self.split_mkvmerge)
+            if self.split_mkvmerge:
+                split_video_mkvmerge(video_paths, scene_list, output_path_template, video_name,
                                      suppress_output=self.quiet_mode or self.split_quiet)
-            elif ffmpeg_available:
-                if self.split_mkvmerge:
-                    logging.warning('mkvmerge not found, falling back to normal splitting'
-                                    ' mode (split-video).')
-                split_video_ffmpeg(video_paths, scene_list, output_file_prefix,
+            else:
+                split_video_ffmpeg(video_paths, scene_list, output_path_template,
                                    video_name, arg_override=self.split_args,
                                    hide_progress=self.quiet_mode,
                                    suppress_output=self.quiet_mode or self.split_quiet)
-            else:
-                if not (mkvmerge_available or ffmpeg_available):
-                    error_strs = ["ffmpeg/mkvmerge is required for split-video [-c/--copy]."]
-                else:
-                    error_strs = [
-                        "{EXTERN_TOOL} is required for split-video{EXTRA_ARGS}.".format(
-                            EXTERN_TOOL='mkvmerge' if self.split_mkvmerge else 'ffmpeg',
-                            EXTRA_ARGS=' -c/--copy' if self.split_mkvmerge else '')]
-                error_strs += ["Install one of the above tools to enable the split-video command."]
-                error_str = '\n'.join(error_strs)
-                logging.debug(error_str)
-                raise click.BadParameter(error_str, param_hint='split-video')
             if scene_list:
                 logging.info('Video splitting completed, individual scenes written to disk.')
 
