@@ -473,19 +473,6 @@ def detect_adaptive_command(ctx, threshold, min_scene_len, min_delta_hsv,
                   '  threshold: %d, min-scene-len: %d%s',
                   threshold, min_scene_len, luma_mode_str)
 
-    # Check for a stats manager, necessary to use the adaptive content detector
-    # TODO: Allow use of the detector even without `-s` specified by instantiating
-    # a stats manager, but preventing it from being saved to disk.
-    if not ctx.obj.stats_manager:
-        ctx.obj.options_processed = False
-        error_strs = [
-            'No stats file specified for use with the adaptive content detector.'
-            ' Either use a different detector or specify a stats file with -s/--stats\n']
-        logging.error('\n'.join(error_strs))
-        raise click.BadParameter(
-            '\n  Specifying a stats file -s/--stats is necessary to use the adaptive content detector',
-            param_hint='adaptive detector + stats file')
-
     # Initialize detector and add to scene manager.
     # Need to ensure that a detector is not added twice, or will cause
     # a frame metric key error when registering the detector.

@@ -84,9 +84,12 @@ def test_adaptive_detector(test_movie_clip):
     # We use the ground truth of ContentDetector with threshold=27.
     start_frames = TEST_MOVIE_CLIP_GROUND_TRUTH_CONTENT[1][1]
     vm = VideoManager([test_movie_clip])
-    stats = StatsManager()
-    sm = SceneManager(stats_manager=stats)
-    sm.add_detector(AdaptiveDetector(video_manager=vm, stats_manager=stats))
+    sm = SceneManager()
+    assert sm._stats_manager is None
+    # The SceneManager should implicitly create a StatsManager since this
+    # detector requires it.
+    sm.add_detector(AdaptiveDetector(video_manager=vm))
+    assert sm._stats_manager is not None
 
     try:
         video_fps = vm.get_framerate()

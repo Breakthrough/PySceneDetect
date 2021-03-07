@@ -65,6 +65,14 @@ class AdaptiveDetector(ContentDetector):
         """ Combines base ContentDetector metric keys with the AdaptiveDetector one. """
         return super(AdaptiveDetector, self).get_metrics() + [self._adaptive_ratio_key]
 
+    def stats_manager_required(self):
+        # type: () -> bool
+        """ Overload to indicate that this detector requires a StatsManager.
+
+        Returns:
+            True as AdaptiveDetector requires stats.
+        """
+        return True
 
     def process_frame(self, frame_num, frame_img):
         # type: (int, numpy.ndarray) -> List[int]

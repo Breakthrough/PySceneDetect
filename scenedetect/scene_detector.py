@@ -69,6 +69,16 @@ class SceneDetector(object):
             self.stats_manager.metrics_exist(frame_num, metric_keys))
 
 
+    def stats_manager_required(self):
+        # type: () -> bool
+        """ Stats Manager Required: Prototype indicating if detector requires stats.
+
+        Returns:
+            bool: True if a StatsManager is required for the detector, False otherwise.
+        """
+        return False
+
+
     def get_metrics(self):
         # type: () -> List[str]
         """ Get Metrics:  Get a list of all metric names/keys used by the detector.

@@ -64,6 +64,7 @@ from scenedetect.platform import get_aspect_ratio
 from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.platform import get_csv_writer
 from scenedetect.platform import get_cv2_imwrite_params
+from scenedetect.stats_manager import StatsManager
 from scenedetect.stats_manager import FrameMetricRegistered
 from scenedetect.scene_detector import SparseSceneDetector
 
@@ -469,6 +470,12 @@ class SceneManager(object):
         Arguments:
             detector (SceneDetector): Scene detector to add to the SceneManager.
         """
+        if self._stats_manager is None and detector.stats_manager_required():
+            # Make sure the lists are empty so that the detectors don't get
+            # out of sync (require an explicit statsmanager instead)
+            assert not self._detector_list and not self._sparse_detector_list
+            self._stats_manager = StatsManager()
+
         detector.stats_manager = self._stats_manager
         if self._stats_manager is not None:
             # Allow multiple detection algorithms of the same type to be added
