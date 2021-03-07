@@ -45,10 +45,10 @@ class AdaptiveDetector(ContentDetector):
     as camera moves.
     """
 
-    ADAPTIVE_RATIO_KEY_TEMPLATE = "adaptive_ratio (w={window_width})"
+    ADAPTIVE_RATIO_KEY_TEMPLATE = "adaptive_ratio{luma_only} (w={window_width})"
 
     def __init__(self, video_manager, stats_manager=None, adaptive_threshold=3.0,
-                 min_scene_len=15, min_delta_hsv=15.0, window_width=2):
+                 luma_only=False, min_scene_len=15, min_delta_hsv=15.0, window_width=2):
         super(AdaptiveDetector, self).__init__()
         self.video_manager = video_manager
         self.stats_manager = stats_manager
@@ -56,8 +56,9 @@ class AdaptiveDetector(ContentDetector):
         self.adaptive_threshold = adaptive_threshold
         self.min_delta_hsv = min_delta_hsv
         self.window_width = window_width
+        self._luma_only = luma_only
         self._adaptive_ratio_key = AdaptiveDetector.ADAPTIVE_RATIO_KEY_TEMPLATE.format(
-            window_width=window_width)
+            window_width=window_width, luma_only='' if not luma_only else '_lum')
 
 
     def get_metrics(self):
@@ -94,8 +95,10 @@ class AdaptiveDetector(ContentDetector):
         """
         Returns the average content change for a frame.
         """
+        metric_key = (ContentDetector.FRAME_SCORE_KEY if not self._luma_only
+            else ContentDetector.DELTA_V_KEY)
         return self.stats_manager.get_metrics(
-            frame_num, [ContentDetector.FRAME_SCORE_KEY])[0]
+            frame_num, [metric_key])[0]
 
 
     def post_process(self, _):
