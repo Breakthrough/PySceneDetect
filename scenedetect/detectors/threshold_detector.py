@@ -73,11 +73,6 @@ class ThresholdDetector(SceneDetector):
     Attributes:
         threshold:  8-bit intensity value that each pixel value (R, G, and B)
             must be <= to in order to trigger a fade in/out.
-        min_percent:  Float between 0.0 and 1.0 which represents the minimum
-            percent of pixels in a frame that must meet the threshold value in
-            order to trigger a fade in/out.  Setting this to a large or small
-            value (e.g. 0.95 or 0.05) will result in better single-pass
-            performance, but cannot make use of a statsfile.
         min_scene_len:  FrameTimecode object or integer greater than 0 of the
             minimum length, in frames, of a scene (or subsequent scene cut).
         fade_bias:  Float between -1.0 and +1.0 representing the percentage of
@@ -91,17 +86,15 @@ class ThresholdDetector(SceneDetector):
             programmatically in the future).
     """
 
-    # TODO: Add min_percent to metric key.
     THRESHOLD_VALUE_KEY = 'delta_rgb'
 
-    def __init__(self, threshold=12, min_percent=0.95, min_scene_len=15,
-                 fade_bias=0.0, add_final_scene=False, block_size=8):
+    def __init__(self, threshold=12, min_scene_len=15, fade_bias=0.0,
+                 add_final_scene=False, block_size=8):
         """Initializes threshold-based scene detector object."""
 
         super(ThresholdDetector, self).__init__()
         self.threshold = int(threshold)
         self.fade_bias = fade_bias
-        self.min_percent = min_percent
         self.min_scene_len = min_scene_len
         self.processed_frame = False
         self.last_scene_cut = None
@@ -114,54 +107,12 @@ class ThresholdDetector(SceneDetector):
             'type': None        # type of fade, can be either 'in' or 'out'
         }
         self.block_size = block_size
-        self._metric_keys = ['delta_rgb']
+        self._metric_keys = [ThresholdDetector.THRESHOLD_VALUE_KEY]
 
 
     def get_metrics(self):
-        return [ThresholdDetector.THRESHOLD_VALUE_KEY]
+        return self._metric_keys
 
-
-    def frame_under_threshold(self, frame):
-        """Check if the frame is below (true) or above (false) the threshold.
-
-        Instead of using the average, we check all pixel values (R, G, and B)
-        meet the given threshold (within the minimum percent).  This ensures
-        that the threshold is not exceeded while maintaining some tolerance for
-        compression and noise.
-
-        This is the algorithm used for single pass mode of the threshold detector.
-
-        Returns:
-            Boolean, True if the number of pixels whose R, G, and B values are
-            all <= the threshold is within min_percent pixels, or False if not.
-        """
-        # First we compute the minimum number of pixels that need to meet the
-        # threshold. Internally, we check for values greater than the threshold
-        # as it's more likely that a given frame contains actual content. This
-        # is done in blocks of rows, so in many cases we only have to check a
-        # small portion of the frame instead of inspecting every single pixel.
-        num_pixel_values = float(frame.shape[0] * frame.shape[1] * frame.shape[2])
-        large_ratio = self.min_percent > 0.5
-        ratio = 1.0 - self.min_percent if large_ratio else self.min_percent
-        min_pixels = int(num_pixel_values * ratio)
-
-        curr_frame_amt = 0
-        curr_frame_row = 0
-
-        while curr_frame_row < frame.shape[0]:
-            # Add and total the number of individual pixel values (R, G, and B)
-            # in the current row block that exceed the threshold.
-            block = frame[curr_frame_row : curr_frame_row + self.block_size, :, :]
-            if large_ratio:
-                curr_frame_amt += int(numpy.sum(block > self.threshold))
-            else:
-                curr_frame_amt += int(numpy.sum(block <= self.threshold))
-            # If we've already exceeded the most pixels allowed to be above the
-            # threshold, we can skip processing the rest of the pixels.
-            if curr_frame_amt > min_pixels:
-                return not large_ratio
-            curr_frame_row += self.block_size
-        return large_ratio
 
     def process_frame(self, frame_num, frame_img):
         # type: (int, Optional[numpy.ndarray]) -> List[int]
@@ -226,6 +177,7 @@ class ThresholdDetector(SceneDetector):
                 self.last_fade['type'] = 'in'
         self.processed_frame = True
         return cut_list
+
 
     def post_process(self, frame_num):
         """Writes a final scene cut if the last detected fade was a fade-out.

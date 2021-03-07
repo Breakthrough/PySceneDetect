@@ -538,7 +538,7 @@ def detect_threshold_command(ctx, threshold, fade_bias, add_last_scene,
     fade_bias /= 100.0
     ctx.obj.add_detector(scenedetect.detectors.ThresholdDetector(
         threshold=threshold, min_scene_len=min_scene_len, fade_bias=fade_bias,
-        add_final_scene=add_last_scene, min_percent=min_percent, block_size=block_size))
+        add_final_scene=add_last_scene, block_size=block_size))
 
 
 
