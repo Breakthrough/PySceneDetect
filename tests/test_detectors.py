@@ -39,6 +39,7 @@ test case material.
 from scenedetect.scene_manager import SceneManager
 from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.video_manager import VideoManager
+from scenedetect.stats_manager import StatsManager
 from scenedetect.detectors import ContentDetector
 from scenedetect.detectors import ThresholdDetector
 
@@ -102,3 +103,40 @@ def test_threshold_detector(test_video_file):
 
     finally:
         vm.release()
+
+
+
+def test_detectors_with_stats(test_video_file):
+    """ Test all detectors functionality with a StatsManager. """
+    for detector in [ContentDetector, ThresholdDetector]:
+        vm = VideoManager([test_video_file])
+        stats = StatsManager()
+        sm = SceneManager(stats_manager=stats)
+        sm.add_detector(detector())
+
+        try:
+            end_time = FrameTimecode('00:00:15', vm.get_framerate())
+
+            vm.set_duration(end_time=end_time)
+            vm.set_downscale_factor()
+
+            vm.start()
+            sm.detect_scenes(frame_source=vm)
+            initial_scene_len = len(sm.get_scene_list())
+            assert initial_scene_len > 0   # test case must have at least one scene!
+            # Re-analyze using existing stats manager.
+            sm = SceneManager(stats_manager=stats)
+            sm.add_detector(detector())
+
+            vm.release()
+            vm.reset()
+            vm.set_duration(end_time=end_time)
+            vm.set_downscale_factor()
+            vm.start()
+
+            sm.detect_scenes(frame_source=vm)
+            scene_list = sm.get_scene_list()
+            assert len(scene_list) == initial_scene_len
+
+        finally:
+            vm.release()

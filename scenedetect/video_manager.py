@@ -550,7 +550,7 @@ class VideoManager(object):
             self._start_time = start_time
 
         if end_time is not None:
-            if end_time < start_time:
+            if end_time < self._start_time:
                 raise ValueError("end_time is before start_time in time.")
             self._end_time = end_time
         elif duration is not None:
