@@ -40,10 +40,11 @@ from scenedetect.scene_manager import SceneManager
 from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.video_manager import VideoManager
 from scenedetect.detectors import ContentDetector
+from scenedetect.detectors import ThresholdDetector
 
 
 # Test case ground truth format: (threshold, [scene start frame])
-TEST_MOVIE_CLIP_GROUND_TRUTH = [
+TEST_MOVIE_CLIP_GROUND_TRUTH_CONTENT = [
     (30, [1198, 1226, 1260, 1281, 1334, 1365, 1697, 1871]),
     (27, [1198, 1226, 1260, 1281, 1334, 1365, 1590, 1697, 1871])
 ]
@@ -51,7 +52,7 @@ TEST_MOVIE_CLIP_GROUND_TRUTH = [
 
 def test_content_detector(test_movie_clip):
     """ Test SceneManager with VideoManager and ContentDetector. """
-    for threshold, start_frames in TEST_MOVIE_CLIP_GROUND_TRUTH:
+    for threshold, start_frames in TEST_MOVIE_CLIP_GROUND_TRUTH_CONTENT:
         vm = VideoManager([test_movie_clip])
         sm = SceneManager()
         sm.add_detector(ContentDetector(threshold=threshold))
@@ -74,3 +75,30 @@ def test_content_detector(test_movie_clip):
 
         finally:
             vm.release()
+
+
+# Defaults for now.
+TEST_VIDEO_FILE_GROUND_TRUTH_THRESHOLD = [
+    0, 15, 198, 376
+]
+
+def test_threshold_detector(test_video_file):
+    """ Test SceneManager with VideoManager and ThresholdDetector. """
+    vm = VideoManager([test_video_file])
+    sm = SceneManager()
+    sm.add_detector(ThresholdDetector())
+
+    try:
+        vm.set_downscale_factor()
+
+        vm.start()
+        sm.detect_scenes(frame_source=vm)
+        scene_list = sm.get_scene_list()
+        assert len(scene_list) == len(TEST_VIDEO_FILE_GROUND_TRUTH_THRESHOLD)
+        detected_start_frames = [
+            timecode.get_frames() for timecode, _ in scene_list ]
+        assert all(x == y for (x, y) in zip(
+            TEST_VIDEO_FILE_GROUND_TRUTH_THRESHOLD, detected_start_frames))
+
+    finally:
+        vm.release()

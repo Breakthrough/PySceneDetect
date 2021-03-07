@@ -75,7 +75,9 @@ class ThresholdDetector(SceneDetector):
             must be <= to in order to trigger a fade in/out.
         min_percent:  Float between 0.0 and 1.0 which represents the minimum
             percent of pixels in a frame that must meet the threshold value in
-            order to trigger a fade in/out.
+            order to trigger a fade in/out.  Setting this to a large or small
+            value (e.g. 0.95 or 0.05) will result in better single-pass
+            performance, but cannot make use of a statsfile.
         min_scene_len:  FrameTimecode object or integer greater than 0 of the
             minimum length, in frames, of a scene (or subsequent scene cut).
         fade_bias:  Float between -1.0 and +1.0 representing the percentage of
@@ -119,18 +121,6 @@ class ThresholdDetector(SceneDetector):
         return [ThresholdDetector.THRESHOLD_VALUE_KEY]
 
 
-    def is_processing_required(self, frame_num):
-        # type: (int) -> bool
-        """ Is Processing Required: Test if all calculations are already done.
-
-        TODO: Update statsfile logic to include frame_under_threshold metric
-        using the threshold + minimum pixel percentage as metric keys (#178).
-
-        Returns:
-            bool: True, since all frames are required for calculations.
-        """
-        return True
-
     def frame_under_threshold(self, frame):
         """Check if the frame is below (true) or above (false) the threshold.
 
@@ -139,7 +129,7 @@ class ThresholdDetector(SceneDetector):
         that the threshold is not exceeded while maintaining some tolerance for
         compression and noise.
 
-        This is the algorithm used for absolute mode of the threshold detector.
+        This is the algorithm used for single pass mode of the threshold detector.
 
         Returns:
             Boolean, True if the number of pixels whose R, G, and B values are
@@ -202,17 +192,21 @@ class ThresholdDetector(SceneDetector):
         # user-supplied values, we supply the average pixel intensity as this
         # frame metric instead (to assist with manually selecting a threshold)
         if (self.stats_manager is not None) and (
-                not self.stats_manager.metrics_exist(frame_num, self._metric_keys)):
-            self.stats_manager.set_metrics(
-                frame_num,
-                {self._metric_keys[0]: compute_frame_average(frame_img)})
+                self.stats_manager.metrics_exist(frame_num, self._metric_keys)):
+            frame_avg = self.stats_manager.get_metrics(
+                frame_num, self._metric_keys)[0]
+        else:
+            frame_avg = compute_frame_average(frame_img)
+            if self.stats_manager is not None:
+                self.stats_manager.set_metrics(
+                    frame_num, {self._metric_keys[0]: frame_avg})
 
         if self.processed_frame:
-            if self.last_fade['type'] == 'in' and self.frame_under_threshold(frame_img):
+            if self.last_fade['type'] == 'in' and frame_avg < self.threshold:
                 # Just faded out of a scene, wait for next fade in.
                 self.last_fade['type'] = 'out'
                 self.last_fade['frame'] = frame_num
-            elif self.last_fade['type'] == 'out' and not self.frame_under_threshold(frame_img):
+            elif self.last_fade['type'] == 'out' and frame_avg >= self.threshold:
                 # Only add the scene if min_scene_len frames have passed.
                 if (frame_num - self.last_scene_cut) >= self.min_scene_len:
                     # Just faded into a new scene, compute timecode for the scene
@@ -226,7 +220,7 @@ class ThresholdDetector(SceneDetector):
                 self.last_fade['frame'] = frame_num
         else:
             self.last_fade['frame'] = 0
-            if self.frame_under_threshold(frame_img):
+            if frame_avg < self.threshold:
                 self.last_fade['type'] = 'out'
             else:
                 self.last_fade['type'] = 'in'
