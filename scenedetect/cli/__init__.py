@@ -439,7 +439,7 @@ def detect_content_command(ctx, threshold):
     ' format HH:MM:SS or HH:MM:SS.nnn')
 @click.option(
     '--min-delta-hsv', '-d', metavar='VAL',
-    type=click.FLOAT, default=5.0, show_default=True, help=
+    type=click.FLOAT, default=15.0, show_default=True, help=
     'Minimum threshold (float) that the content_val must exceed in order to register as a new'
     ' scene. This is calculated the same way that `detect-content` calculates frame score.')
 @click.option(

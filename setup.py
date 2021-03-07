@@ -111,5 +111,11 @@ setup(
         'Topic :: Multimedia :: Video :: Conversion',
         'Topic :: Multimedia :: Video :: Non-Linear Editor',
         'Topic :: Utilities'
-    ]
+    ],
+    project_urls={
+        'Homepage': 'https://pyscenedetect.readthedocs.io/',
+        'Manual': 'https://pyscenedetect.readthedocs.io/projects/Manual/en/latest/',
+        'Changelog': 'https://pyscenedetect.readthedocs.io/en/latest/changelog/',
+        'Bug Tracker': 'https://github.com/Breakthrough/PySceneDetect/issues',
+    }
 )
