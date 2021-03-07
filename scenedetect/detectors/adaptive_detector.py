@@ -47,10 +47,11 @@ class AdaptiveDetector(ContentDetector):
 
     ADAPTIVE_RATIO_KEY_TEMPLATE = "adaptive_ratio (w={window_width})"
 
-    def __init__(self, video_manager, adaptive_threshold=3.0, min_scene_len=15,
-                 min_delta_hsv=15.0, window_width=2):
+    def __init__(self, video_manager, stats_manager=None, adaptive_threshold=3.0,
+                 min_scene_len=15, min_delta_hsv=15.0, window_width=2):
         super(AdaptiveDetector, self).__init__()
         self.video_manager = video_manager
+        self.stats_manager = stats_manager
         self.min_scene_len = min_scene_len  # minimum length of any given scene, in frames (int) or FrameTimecode
         self.adaptive_threshold = adaptive_threshold
         self.min_delta_hsv = min_delta_hsv

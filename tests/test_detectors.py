@@ -42,6 +42,7 @@ from scenedetect.video_manager import VideoManager
 from scenedetect.stats_manager import StatsManager
 from scenedetect.detectors import ContentDetector
 from scenedetect.detectors import ThresholdDetector
+from scenedetect.detectors import AdaptiveDetector
 
 
 # Test case ground truth format: (threshold, [scene start frame])
@@ -76,6 +77,35 @@ def test_content_detector(test_movie_clip):
 
         finally:
             vm.release()
+
+
+def test_adaptive_detector(test_movie_clip):
+    """ Test SceneManager with VideoManager and AdaptiveDetector. """
+    # We use the ground truth of ContentDetector with threshold=27.
+    start_frames = TEST_MOVIE_CLIP_GROUND_TRUTH_CONTENT[1][1]
+    vm = VideoManager([test_movie_clip])
+    stats = StatsManager()
+    sm = SceneManager(stats_manager=stats)
+    sm.add_detector(AdaptiveDetector(video_manager=vm, stats_manager=stats))
+
+    try:
+        video_fps = vm.get_framerate()
+        start_time = FrameTimecode('00:00:50', video_fps)
+        end_time = FrameTimecode('00:01:19', video_fps)
+
+        vm.set_duration(start_time=start_time, end_time=end_time)
+        vm.set_downscale_factor()
+
+        vm.start()
+        sm.detect_scenes(frame_source=vm)
+        scene_list = sm.get_scene_list()
+        assert len(scene_list) == len(start_frames)
+        detected_start_frames = [
+            timecode.get_frames() for timecode, _ in scene_list ]
+        assert all(x == y for (x, y) in zip(start_frames, detected_start_frames))
+
+    finally:
+        vm.release()
 
 
 # Defaults for now.
