@@ -13,6 +13,7 @@ PySceneDetect Releases
  * The exit code from the respective tool is now returned by the `split_video_` functions
  * Statsfiles now work properly with `detect-threshold`
  * The `-p`/`--min-percent` option has been removed from `detect-threshold`
+ * Add new option `-l`/`--luma-only` to `detect-content`/`detect-adaptive` to only consider brightness channel (useful for greyscale videos)
 
 #### Changelog
 

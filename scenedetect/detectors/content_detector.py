@@ -71,6 +71,11 @@ class ContentDetector(SceneDetector):
         return ContentDetector.METRIC_KEYS
 
 
+    def is_processing_required(self, frame_num):
+        return self.stats_manager is None or (
+            not self.stats_manager.metrics_exist(frame_num, ContentDetector.METRIC_KEYS))
+
+
     def calculate_frame_score(self, frame_num, curr_hsv, last_hsv):
 
         delta_hsv = [0, 0, 0, 0]

@@ -404,8 +404,12 @@ def time_command(ctx, start, duration, end):
     type=click.FLOAT, default=30.0, show_default=True, help=
     'Threshold value (float) that the content_val frame metric must exceed to trigger a new scene.'
     ' Refers to frame metric content_val in stats file.')
+@click.option(
+    '--luma-only', '-l',
+    is_flag=True, flag_value=True, help=
+    'Only consider luma/brightness channel (useful for greyscale videos).')
 @click.pass_context
-def detect_content_command(ctx, threshold):
+def detect_content_command(ctx, threshold, luma_only):
     """ Perform content detection algorithm on input video(s).
 
     detect-content
@@ -414,15 +418,16 @@ def detect_content_command(ctx, threshold):
     """
 
     min_scene_len = 0 if ctx.obj.drop_short_scenes else ctx.obj.min_scene_len
+    luma_mode_str = '' if not luma_only else ', luma_only mode'
     logging.debug('Detecting content, parameters:\n'
-                  '  threshold: %d, min-scene-len: %d',
-                  threshold, min_scene_len)
+                  '  threshold: %d, min-scene-len: %d%s',
+                  threshold, min_scene_len, luma_mode_str)
 
     # Initialize detector and add to scene manager.
     # Need to ensure that a detector is not added twice, or will cause
     # a frame metric key error when registering the detector.
     ctx.obj.add_detector(scenedetect.detectors.ContentDetector(
-        threshold=threshold, min_scene_len=min_scene_len))
+        threshold=threshold, min_scene_len=min_scene_len, luma_only=luma_only))
 
 
 @click.command('detect-adaptive')
@@ -447,8 +452,13 @@ def detect_content_command(ctx, threshold):
     type=click.INT, default=2, show_default=True, help=
     'Size of window (number of frames) before and after each frame to average together in'
     ' order to detect deviations from the mean.')
+@click.option(
+    '--luma-only', '-l',
+    is_flag=True, flag_value=True, help=
+    'Only consider luma/brightness channel (useful for greyscale videos).')
 @click.pass_context
-def detect_adaptive_command(ctx, threshold, min_scene_len, min_delta_hsv, frame_window):
+def detect_adaptive_command(ctx, threshold, min_scene_len, min_delta_hsv,
+                            frame_window, luma_only):
     """ Perform adaptive detection algorithm on input video(s).
 
     detect-adaptive
@@ -457,10 +467,11 @@ def detect_adaptive_command(ctx, threshold, min_scene_len, min_delta_hsv, frame_
     """
 
     min_scene_len = parse_timecode(ctx.obj, min_scene_len)
+    luma_mode_str = '' if not luma_only else ', luma_only mode'
 
     logging.debug('Adaptively detecting content, parameters:\n'
-                  '  threshold: %d, min-scene-len: %d',
-                  threshold, min_scene_len)
+                  '  threshold: %d, min-scene-len: %d%s',
+                  threshold, min_scene_len, luma_mode_str)
 
     # Check for a stats manager, necessary to use the adaptive content detector
     # TODO: Allow use of the detector even without `-s` specified by instantiating
@@ -483,7 +494,8 @@ def detect_adaptive_command(ctx, threshold, min_scene_len, min_delta_hsv, frame_
         adaptive_threshold=threshold,
         min_scene_len=min_scene_len,
         min_delta_hsv=min_delta_hsv,
-        window_width=frame_window))
+        window_width=frame_window,
+        luma_only=luma_only))
 
 
 
