@@ -53,9 +53,11 @@ Note that this is *almost* perfect - however, one of the scene cuts/breaks in sc
 
 ## Finding Optimal Threshold/Sensitivity Value
 
-We now know that a threshold of `30` does not work in all cases for our video, as per scene 17 detected above (note the last image is from a different scene):
+We now know that a threshold of `30` does not work in all cases for our video, which is clear if we look at the generated images for scene 17 (note the last image is from a different scene):
 
 <img src="https://raw.githubusercontent.com/Breakthrough/PySceneDetect/resources/tests/goldeneye/d-content-t-30/goldeneye-Scene-017-01.jpg" width="720" />
+<img src="https://raw.githubusercontent.com/Breakthrough/PySceneDetect/resources/tests/goldeneye/d-content-t-30/goldeneye-Scene-017-02.jpg" width="720" />
+<img src="https://raw.githubusercontent.com/Breakthrough/PySceneDetect/resources/tests/goldeneye/d-content-t-30/goldeneye-Scene-017-03.jpg" width="720" />
 
 We can determine the proper threshold in this case by generating a statistics file (with the `-s` / `--stats` option) for the video `goldeneye.mp4`, and looking at the behaviour of the values where we expect the scene break/cut to occur in scene 17:
 
