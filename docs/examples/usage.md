@@ -69,7 +69,7 @@ scenedetect --input my_video.mp4 detect-content list-scenes split-video
 The `split-video` command requires either `ffmpeg` or `mkvmerge` to be available, depending on the options used.  By default `ffmpeg` is used unless the `-c`/`--copy` argument is specified. This ensures that each video starts and ends *exactly* at the timecodes PySceneDetect finds.  You can also override the codec arguments manually:
 
 ```rst
-scenedetect --input my_video.mp4 detect-content list-scenes split-video --ffmpeg-args "-c:v libx264 -c:a aac"
+scenedetect --input my_video.mp4 detect-content list-scenes split-video --override-args "-c:v libx264 -c:a aac"
 ```
 
 You can also supply the `-h` / `--high-quality` option to the `split-video` command, which re-encodes the output videos with better quality when splitting the video into scenes.  Optionally, you can also specify the x264 `-p`/`--preset` and `-crf`/`--rate-factor` (call `scenedetect help split-video` for details).

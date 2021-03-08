@@ -541,6 +541,7 @@ def detect_threshold_command(ctx, threshold, fade_bias, add_last_scene,
 
 
 
+
 @click.command('export-html', add_help_option=False)
 @click.option(
     '--filename', '-f', metavar='NAME', default='$VIDEO_NAME-Scenes.html',
