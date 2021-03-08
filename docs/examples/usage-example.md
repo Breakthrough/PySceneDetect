@@ -45,7 +45,7 @@ Running the above command, in the working directory, you should see a file `gold
 |      18      |  00:01:10.779 | <img src="https://raw.githubusercontent.com/Breakthrough/PySceneDetect/resources/tests/goldeneye/d-content-t-30/goldeneye-Scene-018-01.jpg" width="480" />  |
 |      19      |  00:01:18.036 | <img src="https://raw.githubusercontent.com/Breakthrough/PySceneDetect/resources/tests/goldeneye/d-content-t-30/goldeneye-Scene-019-01.jpg" width="480" />  |
 |      20      |  00:01:19.913 | <img src="https://raw.githubusercontent.com/Breakthrough/PySceneDetect/resources/tests/goldeneye/d-content-t-30/goldeneye-Scene-020-01.jpg" width="480" />  |
-|      21      |  00:01:21.999 | <img src="https://raw.githubusercontent.com/Breakthrough/PySceneDetect/resources/tests/goldeneye/d-content-t-30/goldeneye-Scene-020-01.jpg" width="480" />  |
+|      21      |  00:01:21.999 | <img src="https://raw.githubusercontent.com/Breakthrough/PySceneDetect/resources/tests/goldeneye/d-content-t-30/goldeneye-Scene-021-01.jpg" width="480" />  |
 
 
 Note that this is *almost* perfect - however, one of the scene cuts/breaks in scene 17 was not detected.  To find the proper threshold, we need to generate a statistics file.
