@@ -48,7 +48,7 @@ Running the above command, in the working directory, you should see a file `gold
 |      21      |  00:01:21.999 | <img src="https://raw.githubusercontent.com/Breakthrough/PySceneDetect/resources/tests/goldeneye/d-content-t-30/goldeneye-Scene-021-01.jpg" width="480" />  |
 
 
-Note that this is *almost* perfect - however, one of the scene cuts/breaks in scene 17 was not detected.  To find the proper threshold, we need to generate a statistics file.
+Note that this is *almost* perfect - however, one of the scene cuts/breaks in scene 17 was not detected (yielding a total of 21 scenes).  To find the proper threshold, we need to generate a statistics file.
 
 
 ## Finding Optimal Threshold/Sensitivity Value
@@ -56,7 +56,9 @@ Note that this is *almost* perfect - however, one of the scene cuts/breaks in sc
 We now know that a threshold of `30` does not work in all cases for our video, which is clear if we look at the generated images for scene 17 (note the last image is from a different scene):
 
 <img src="https://raw.githubusercontent.com/Breakthrough/PySceneDetect/resources/tests/goldeneye/d-content-t-30/goldeneye-Scene-017-01.jpg" width="720" />
+<br/>
 <img src="https://raw.githubusercontent.com/Breakthrough/PySceneDetect/resources/tests/goldeneye/d-content-t-30/goldeneye-Scene-017-02.jpg" width="720" />
+<br/>
 <img src="https://raw.githubusercontent.com/Breakthrough/PySceneDetect/resources/tests/goldeneye/d-content-t-30/goldeneye-Scene-017-03.jpg" width="720" />
 
 We can determine the proper threshold in this case by generating a statistics file (with the `-s` / `--stats` option) for the video `goldeneye.mp4`, and looking at the behaviour of the values where we expect the scene break/cut to occur in scene 17:
@@ -77,16 +79,12 @@ Note that specifying the same `--stats` file again will make parsing the scenes 
 |   Scene #    |  Start Time   |    Preview    |
 | ------------ | ------------- | ------------- |
 |     ...      |      ...      |     ...       |
-|      16      |  00:00:55.639 | <img src="https://raw.githubusercontent.com/Breakthrough/PySceneDetect/resources/tests/goldeneye/d-content-t-27/goldeneye-Scene-016-01.jpg" width="480" />  |
 |      17      |  00:00:56.932 | <img src="https://raw.githubusercontent.com/Breakthrough/PySceneDetect/resources/tests/goldeneye/d-content-t-27/goldeneye-Scene-017-01.jpg" width="480" />  |
 |      18      |  00:01:06.316 | <img src="https://raw.githubusercontent.com/Breakthrough/PySceneDetect/resources/tests/goldeneye/d-content-t-27/goldeneye-Scene-018-01.jpg" width="480" />  |
 |      19      |  00:01:10.779 | <img src="https://raw.githubusercontent.com/Breakthrough/PySceneDetect/resources/tests/goldeneye/d-content-t-27/goldeneye-Scene-019-01.jpg" width="480" />  |
-|      20      |  00:01:18.036 | <img src="https://raw.githubusercontent.com/Breakthrough/PySceneDetect/resources/tests/goldeneye/d-content-t-27/goldeneye-Scene-020-01.jpg" width="480" />  |
-|      21      |  00:01:19.913 | <img src="https://raw.githubusercontent.com/Breakthrough/PySceneDetect/resources/tests/goldeneye/d-content-t-27/goldeneye-Scene-021-01.jpg" width="480" />  |
-|      22      |  00:01:21.999 | <img src="https://raw.githubusercontent.com/Breakthrough/PySceneDetect/resources/tests/goldeneye/d-content-t-27/goldeneye-Scene-022-01.jpg" width="480" />  |
+|     ...      |      ...      |     ...       |
 
-
-Now the missing scene (scene number 18, in this case) has been detected properly, and our scene list is larger now due to the added cuts.
+Now the missing scene (scene number 18, in this case) has been detected properly, and our scene list is larger now due to the added cuts.  There should be a total of 22 detected scenes now.
 
 
 ## Splitting/Cutting Video into Clips
