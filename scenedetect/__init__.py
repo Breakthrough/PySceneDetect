@@ -43,15 +43,16 @@ from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.video_manager import VideoManager
 from scenedetect.stats_manager import StatsManager
 
-
 # We also bring the detectors into the main scenedetect package namespace
 # for convenience as well. Examples still reference the full package.
-from scenedetect.detectors import ThresholdDetector, ContentDetector
+from scenedetect.detectors import ThresholdDetector
+from scenedetect.detectors import ContentDetector
+from scenedetect.detectors import AdaptiveDetector
 
 
 # Used for module identification and when printing version & about info
 # (e.g. calling `scenedetect version` or `scenedetect about`).
-__version__ = 'v0.5.5'
+__version__ = 'v0.5.6a0'
 
 # About & copyright message string shown for the 'about' CLI command (scenedetect about).
 

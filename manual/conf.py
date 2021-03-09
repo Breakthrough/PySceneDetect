@@ -28,7 +28,7 @@ author = 'Brandon Castellano'
 # The short X.Y version
 version = ''
 # The full version, including alpha/beta/rc tags
-release = 'v0.5.5'
+release = 'v0.5.6dev0'
 
 
 # -- General configuration ---------------------------------------------------

@@ -4,7 +4,7 @@
 
 
 #######################################################################
-PySceneDetect v0.5.5 Manual
+PySceneDetect v0.5.6dev0 Manual
 #######################################################################
 
 This manual refers to both the PySceneDetect
