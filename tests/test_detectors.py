@@ -52,6 +52,14 @@ TEST_MOVIE_CLIP_GROUND_TRUTH_CONTENT = [
 ]
 
 
+# TODO: Remove when an actual detector factory is created.
+def create_detector(detector_type, video_manager):
+    if detector_type == AdaptiveDetector:
+        return detector_type(video_manager=video_manager)
+    return detector_type()
+
+
+
 def test_content_detector(test_movie_clip):
     """ Test SceneManager with VideoManager and ContentDetector. """
     for threshold, start_frames in TEST_MOVIE_CLIP_GROUND_TRUTH_CONTENT:
@@ -141,11 +149,11 @@ def test_threshold_detector(test_video_file):
 
 def test_detectors_with_stats(test_video_file):
     """ Test all detectors functionality with a StatsManager. """
-    for detector in [ContentDetector, ThresholdDetector]:
+    for detector in [ContentDetector, ThresholdDetector, AdaptiveDetector]:
         vm = VideoManager([test_video_file])
         stats = StatsManager()
         sm = SceneManager(stats_manager=stats)
-        sm.add_detector(detector())
+        sm.add_detector(create_detector(detector, vm))
 
         try:
             end_time = FrameTimecode('00:00:15', vm.get_framerate())
@@ -159,7 +167,7 @@ def test_detectors_with_stats(test_video_file):
             assert initial_scene_len > 0   # test case must have at least one scene!
             # Re-analyze using existing stats manager.
             sm = SceneManager(stats_manager=stats)
-            sm.add_detector(detector())
+            sm.add_detector(create_detector(detector, vm))
 
             vm.release()
             vm.reset()
