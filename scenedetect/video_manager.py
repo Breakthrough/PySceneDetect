@@ -603,7 +603,8 @@ class VideoManager(object):
 
         self._started = True
         self._get_next_cap()
-        self.seek(self._start_time)
+        if self._start_time != 0:
+            self.seek(self._start_time)
 
 
     def seek(self, timecode):
