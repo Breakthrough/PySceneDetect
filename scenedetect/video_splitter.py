@@ -262,6 +262,7 @@ def split_video_ffmpeg(input_video_paths, scene_list, output_file_template, vide
                 # for the remaining calls.
                 call_list += ['-v', 'error']
             call_list += [
+                '-nostdin',
                 '-y',
                 '-ss',
                 str(start_time.get_seconds()),
