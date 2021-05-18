@@ -185,3 +185,44 @@ def test_save_images(test_video_file):
         vm.release()
         for path in glob.glob(image_name_glob):
             os.remove(path)
+
+
+class FakeCallback(object):
+    """ Fake callback used for testing purposes only. Currently just stores
+    the number of times the callback was invoked."""
+    def __init__(self):
+        self._i = 0
+
+    def num_invoked(self):
+        return self._i
+
+    def get_callback(self):
+        return lambda image, frame_num: self._callback(image, frame_num)
+
+    def _callback(self, image, frame_num):
+        self._i += 1
+
+
+def test_detect_scenes_callback(test_video_file):
+    """ Test SceneManager detect_scenes method with a callback function.
+
+    Note that the API signature of the callback will undergo breaking changes in v0.6.
+    """
+    vm = VideoManager([test_video_file])
+    sm = SceneManager()
+    sm.add_detector(ContentDetector())
+
+    fake_callback = FakeCallback()
+
+    try:
+        video_fps = vm.get_framerate()
+        start_time = FrameTimecode('00:00:05', video_fps)
+        end_time = FrameTimecode('00:00:15', video_fps)
+        vm.set_duration(start_time=start_time, end_time=end_time)
+        vm.set_downscale_factor()
+        vm.start()
+        num_frames = sm.detect_scenes(frame_source=vm, callback=fake_callback.get_callback())
+        assert fake_callback.num_invoked() == (len(sm.get_scene_list()) - 1)
+
+    finally:
+        vm.release()

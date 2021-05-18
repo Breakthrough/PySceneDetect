@@ -57,14 +57,7 @@ from scenedetect.cli.context import check_split_video_requirements
 from scenedetect.cli.context import contains_sequence_or_url
 from scenedetect.cli.context import parse_timecode
 
-from scenedetect.frame_timecode import FrameTimecode
-
 from scenedetect.platform import get_and_create_path
-
-from scenedetect.video_manager import VideoManager
-
-from scenedetect.video_splitter import is_mkvmerge_available
-from scenedetect.video_splitter import is_ffmpeg_available
 
 
 def get_help_command_preface(command_name='scenedetect'):

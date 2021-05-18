@@ -54,8 +54,8 @@ PySceneDetect requires [Python 2 or 3](https://www.python.org/) and the followin
 
 For video splitting support, you need to have the following tools available:
 
- - [ffmpeg](https://ffmpeg.org/download.html), part of mkvtoolnix, command-line tool, required to split video files in precise/high-quality mode (`split-video` or `split-video -h/--high-quality`)
- - [mkvmerge](https://mkvtoolnix.download/), part of mkvtoolnix, command-line tool, required to split video files in copy mode (`split-video -c/--copy`)
+ - [ffmpeg](https://ffmpeg.org/download.html), required to split video files (`split-video`)
+ - [mkvmerge](https://mkvtoolnix.download/), part of mkvtoolnix, command-line tool, required to split video files in stream copy mode (`split-video -c/--copy`)
 
 Note that Linux users should use a package manager if possible (e.g. `sudo apt-get install ffmpeg`). Windows users may require additional steps in order for PySceneDetect to detect `ffmpeg` - see the section Manually Enabling `split-video` Support below for details.
 

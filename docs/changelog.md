@@ -21,6 +21,8 @@ PySceneDetect Releases
  * [api] The `split_video_` functions now return the exit code of invoking `ffmpeg` or `mkvmerge` ([#209](https://github.com/Breakthrough/PySceneDetect/issues/209), thanks @AdrienLF)
  * [bugfix] The `detect-threshold` command now works properly with a statsfile ([#211](https://github.com/Breakthrough/PySceneDetect/issues/211), thanks @jeremymeyers)
  * [api] Removed the `min_percent` argument from `ThresholdDetector` as it does not provide any performance improvement ([#178](https://github.com/Breakthrough/PySceneDetect/issues/178))
+ * [api] Calling `seek()` on a `VideoManager` will now respect the end time if set
+
 
 #### Known Issues
 

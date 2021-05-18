@@ -651,7 +651,9 @@ class SceneManager(object):
                 a progress bar with the progress, framerate, and expected time to
                 complete processing the video frame source.
             callback ((image_ndarray, frame_num: int) -> None): If not None, called after
-                each scene/event detected.
+                each scene/event detected.  Note that the signature of the callback will
+                undergo breaking changes in v0.6 to provide more context to the callback
+                (detector type, event type, etc... - see #177 for further details).
         Returns:
             int: Number of frames read and processed from the frame source.
         Raises:

@@ -69,12 +69,6 @@ This section contains links to the license agreements for all third-party softwa
  - URL: <a href="https://raw.githubusercontent.com/tqdm/tqdm/master/LICENCE" alt="tqdm License">https://raw.githubusercontent.com/tqdm/tqdm/master/LICENCE</a>
 
 
-### click
-
- - Copyright (C) 2004-2017, Holger Krekel and others.
- - URL: <a href="https://docs.pytest.org/en/latest/license.html" alt="pytest License">https://docs.pytest.org/en/latest/license.html</a>
-
-
 ### simpletable
 
  - Copyright (C) 2014-2019, Matheus Vieira Portela and others
