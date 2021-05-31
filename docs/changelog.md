@@ -68,9 +68,9 @@ PySceneDetect Releases
 
 #### Known Issues
 
+ * Certain non-PyPI OpenCV packages may cause a crash with the message `TypeError: isinstance() arg 2 must be a type or tuple of types` - as a workaround, install the Python OpenCV package by running `pip install scenedetect[opencv]` ([#220](https://github.com/Breakthrough/PySceneDetect/issues/220))
  * Image sequences or URL inputs are not supported by the `save-images` or `split-video` commands
  * Variable framerate videos (VFR) are not fully supported, and will yield incorrect timestamps ([#168](https://github.com/Breakthrough/PySceneDetect/issues/168))
-
 
 ### 0.5.4 (September 14, 2020)
 
