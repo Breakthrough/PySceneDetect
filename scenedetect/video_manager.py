@@ -378,6 +378,7 @@ class VideoManager(object):
         self._started = False
         self._downscale_factor = 1
         self._frame_length = self.get_base_timecode() + get_num_frames(self._cap_list)
+        self._first_cap_len = self.get_base_timecode() + get_num_frames([self._cap_list[0]])
 
 
     def set_downscale_factor(self, downscale_factor=None):
@@ -629,18 +630,20 @@ class VideoManager(object):
         if self._end_time is not None and timecode > self._end_time:
             timecode = self._end_time
 
-        if isinstance(self._curr_cap, cv2.VideoCapture):
-            # TODO: Seeking only works for the first (or current) video in the VideoManager.
-            if len(self._cap_list) > 1 and timecode > self._frame_length:
+        # TODO: Seeking only works for the first (or current) video in the VideoManager.
+        # Warn the user there are multiple videos in the VideoManager, and the requested
+        # seek time exceeds the length of the first video.
+        if len(self._cap_list) > 1 and timecode > self._first_cap_len:
+            # TODO: This should throw an exception instead of potentially failing silently
+            # if no logger was provided.
+            if self._logger is not None:
                 self._logger.error(
                     'Seeking past the first input video is not currently supported.')
                 self._logger.warn('Seeking to end of first input.')
-                timecode = self._frame_length
-            # Add a warning to the output if there are multiple videos in the VideoManager,
-            # and the length requested exceeds the length of the first video.
-            if self._curr_cap is not None and self._end_of_video is not True:
-                self._curr_cap.set(cv2.CAP_PROP_POS_FRAMES, timecode.get_frames() - 1)
-                self._curr_time = timecode - 1
+            timecode = self._first_cap_len
+        if self._curr_cap is not None and self._end_of_video is not True:
+            self._curr_cap.set(cv2.CAP_PROP_POS_FRAMES, timecode.get_frames() - 1)
+            self._curr_time = timecode - 1
 
         while self._curr_time < timecode:
             if not self.grab():  # raises VideoDecoderNotStarted if start() was not called

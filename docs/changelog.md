@@ -18,11 +18,11 @@ PySceneDetect Releases
 
  * [feature] New adaptive content detector algorithm `detect-adaptive` ([#153](https://github.com/Breakthrough/PySceneDetect/issues/153)thanks @scarwire and @wjs018)
  * [feature] Images generated with the `save-images` command (`scene_manager.save_images()` function in the Python API) can now be scaled or resized ([#160](https://github.com/Breakthrough/PySceneDetect/issues/160) and [PR #203](https://github.com/Breakthrough/PySceneDetect/pull/203), thanks @wjs018)
- * [api] The `split_video_` functions now return the exit code of invoking `ffmpeg` or `mkvmerge` ([#209](https://github.com/Breakthrough/PySceneDetect/issues/209), thanks @AdrienLF)
- * [bugfix] The `detect-threshold` command now works properly with a statsfile ([#211](https://github.com/Breakthrough/PySceneDetect/issues/211), thanks @jeremymeyers)
+ * [api] The `split_video_` functions now return the exit code of invoking `ffmpeg` or `mkvmerge` ([#209](https://github.com/Breakthrough/PySceneDetect/issues/209), thanks @AdrienLF)(https://github.com/Breakthrough/PySceneDetect/issues/211), thanks @jeremymeyers)
  * [api] Removed the `min_percent` argument from `ThresholdDetector` as it does not provide any performance improvement ([#178](https://github.com/Breakthrough/PySceneDetect/issues/178))
  * [api] Calling `seek()` on a `VideoManager` will now respect the end time if set
-
+ * [bugfix] The `detect-threshold` command now works properly with a statsfile ([#211]
+ * [bugfix] Fixed crash due to unhandled `TypeError` exception when using non-PyPI OpenCV packages from certain Linux distributions ([#220](https://github.com/Breakthrough/PySceneDetect/issues/220))
 
 #### Known Issues
 
@@ -71,6 +71,7 @@ PySceneDetect Releases
  * Certain non-PyPI OpenCV packages may cause a crash with the message `TypeError: isinstance() arg 2 must be a type or tuple of types` - as a workaround, install the Python OpenCV package by running `pip install scenedetect[opencv]` ([#220](https://github.com/Breakthrough/PySceneDetect/issues/220))
  * Image sequences or URL inputs are not supported by the `save-images` or `split-video` commands
  * Variable framerate videos (VFR) are not fully supported, and will yield incorrect timestamps ([#168](https://github.com/Breakthrough/PySceneDetect/issues/168))
+
 
 ### 0.5.4 (September 14, 2020)
 
