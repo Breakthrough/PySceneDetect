@@ -165,16 +165,6 @@ def check_opencv_ffmpeg_dll():
 ## OpenCV imwrite Supported Image Types & Quality/Compression Parameters
 ##
 
-def _get_cv2_param(param_name):
-    # type: (str) -> Union[int, None]
-    if param_name.startswith('CV_'):
-        param_name = param_name[3:]
-    try:
-        return getattr(cv2, param_name)
-    except AttributeError:
-        return None
-
-
 def get_cv2_imwrite_params():
     # type: () -> Dict[str, Union[int, None]]
     """ Get OpenCV imwrite Params: Returns a dict of supported image formats and
@@ -186,6 +176,16 @@ def get_cv2_imwrite_params():
             compression parameter (e.g. 'jpg' -> cv2.IMWRITE_JPEG_QUALITY,
             'png' -> cv2.IMWRITE_PNG_COMPRESSION)..
     """
+
+    def _get_cv2_param(param_name):
+        # type: (str) -> Union[int, None]
+        if param_name.startswith('CV_'):
+            param_name = param_name[3:]
+        try:
+            return getattr(cv2, param_name)
+        except AttributeError:
+            return None
+
     return {
         'jpg': _get_cv2_param('IMWRITE_JPEG_QUALITY'),
         'png': _get_cv2_param('IMWRITE_PNG_COMPRESSION'),
@@ -255,7 +255,7 @@ class CommandTooLong(Exception):
 
 
 def invoke_command(args):
-    # type: (List[str] -> None)
+    # type: (List[str]) -> None
     """ Same as calling Python's subprocess.call() method, but explicitly
     raises a different exception when the command length is too long.
 
