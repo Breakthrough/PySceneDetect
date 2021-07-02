@@ -90,40 +90,10 @@ else:
 # pylint: enable=invalid-name, undefined-variable
 
 
-##
-## OpenCV Compatibility Fixes
-##
-
-def opencv_version_required(min_version, version=None):
-    # type: (List[int], Optional[str])
-    """ Checks if the OpenCV library version is at least min_version.
-
-    Arguments:
-        min_version: List[int] of the version to compare against.
-        version: Optional string representing version string to
-        compare with, used for testing purposes.
-
-    Returns:
-        bool: True if the installed version is at least min_version,
-        False otherwise.
-    """
-    if version is None:
-        version = cv2.__version__
-    if not version[0].isdigit():
-        return False
-    try:
-        version = [int(x) for x in version.split('.')]
-        if len(version) < len(min_version):
-            version += [0] * (len(min_version) - len(version))
-        return not any([x[0] < x[1] for x in zip(version, min_version)])
-    except ValueError:
-        return False
-
-
 # Compatibility fix for OpenCV v2.x (copies CAP_PROP_* properties from the
 # cv2.cv namespace to the cv2 namespace, as the cv2.cv namespace was removed
 # with the release of OpenCV 3.0).
-if not opencv_version_required([3, 0]):
+if not 'CAP_PROP_FPS' in dir(cv2):
     cv2.CAP_PROP_FRAME_WIDTH = cv2.cv.CV_CAP_PROP_FRAME_WIDTH
     cv2.CAP_PROP_FRAME_HEIGHT = cv2.cv.CV_CAP_PROP_FRAME_HEIGHT
     cv2.CAP_PROP_FPS = cv2.cv.CV_CAP_PROP_FPS
@@ -134,7 +104,7 @@ if not opencv_version_required([3, 0]):
 
 
 def get_aspect_ratio(cap, epsilon=0.01):
-    # type: (cv2.VideoCapture) -> float
+    # type: (cv2.VideoCapture, float) -> float
     """ Compatibility fix for OpenCV < v3.4.1 to get the aspect ratio
     of a video. For older versions, this function always returns 1.0.
 
@@ -148,7 +118,7 @@ def get_aspect_ratio(cap, epsilon=0.01):
         if for some reason the numerator/denominator returned is zero
         (can happen if the video was not opened correctly).
     """
-    if not opencv_version_required([3, 4, 1]):
+    if not 'CAP_PROP_SAR_NUM' in dir(cv2):
         return 1.0
     num = cap.get(cv2.CAP_PROP_SAR_NUM)
     den = cap.get(cv2.CAP_PROP_SAR_DEN)
