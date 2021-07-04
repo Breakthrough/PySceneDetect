@@ -372,7 +372,7 @@ class VideoManager(object):
         self._logger = logger
         if self._logger is not None:
             self._logger.info(
-                'Loaded %d video%s, framerate: %.2f FPS, resolution: %d x %d',
+                'Loaded %d video%s, framerate: %.3f FPS, resolution: %d x %d',
                 len(self._cap_list), 's' if len(self._cap_list) > 1 else '',
                 self.get_framerate(), *self.get_framesize())
         self._started = False
