@@ -268,6 +268,15 @@ class CliContext(object):
                 ' or failed to process all command line arguments.')
             return
 
+        # Display a warning if the video codec type seems unsupported (#86).
+        if int(abs(self.video_manager.get(cv2.CAP_PROP_FOURCC))) == 0:
+            logging.error(
+                'Video codec detection failed, output may be incorrect.\nThis could be caused'
+                ' by using an outdated version of OpenCV, or using codecs that currently are'
+                ' not well supported (e.g. VP9).\n'
+                'As a workaround, consider re-encoding the source material before processing.\n'
+                'For details, see https://github.com/Breakthrough/PySceneDetect/issues/86')
+
         # Handle scene detection commands (detect-content, detect-threshold, etc...).
         self.video_manager.start()
 
@@ -279,16 +288,17 @@ class CliContext(object):
             show_progress=not self.quiet_mode)
 
         # Handle case where video fails with multiple audio tracks (#179).
-        # TODO: Is there a fix for this? See #179.
+        # TODO: Using a different video backend as per #213 may also resolve this issue,
+        # as well as numerous other timing related issues.
         if num_frames <= 0:
-            logging.critical('\n'.join([
+            logging.critical(
                 'Failed to read any frames from video file. This could be caused'
                 ' by the video having multiple audio tracks. If so, please try'
-                ' removing the audio tracks or muxing to mkv via:'
-                '      ffmpeg -i input.mp4 -c copy -an output.mp4'
-                'or:'
-                '      mkvmerge -o output.mkv input.mp4'
-                ' For details, see https://pyscenedetect.readthedocs.io/en/latest/faq/']))
+                ' removing the audio tracks or muxing to mkv via:\n'
+                '      ffmpeg -i input.mp4 -c copy -an output.mp4\n'
+                'or:\n'
+                '      mkvmerge -o output.mkv input.mp4\n'
+                'For details, see https://pyscenedetect.readthedocs.io/en/latest/faq/')
             return
 
         duration = time.time() - start_time
