@@ -57,9 +57,9 @@ import math
 import cv2
 
 # PySceneDetect Library Imports
+from scenedetect.platform import logger as default_logger
 from scenedetect.platform import STRING_TYPE
 from scenedetect.frame_timecode import FrameTimecode, MINIMUM_FRAMES_PER_SECOND_FLOAT
-
 
 ##
 ## VideoManager Exceptions
@@ -336,7 +336,7 @@ class VideoManager(object):
     """ Provides a cv2.VideoCapture-like interface to a set of one or more video files,
     or a single device ID. Supports seeking and setting end time/duration. """
 
-    def __init__(self, video_files, framerate=None, logger=None):
+    def __init__(self, video_files, framerate=None, logger=default_logger):
         # type: (List[str], Optional[float])
         """ VideoManager Constructor Method (__init__)
 
@@ -372,12 +372,13 @@ class VideoManager(object):
         self._logger = logger
         if self._logger is not None:
             self._logger.info(
-                'Loaded %d video%s, framerate: %.2f FPS, resolution: %d x %d',
+                'Loaded %d video%s, framerate: %.3f FPS, resolution: %d x %d',
                 len(self._cap_list), 's' if len(self._cap_list) > 1 else '',
                 self.get_framerate(), *self.get_framesize())
         self._started = False
         self._downscale_factor = 1
-        self._frame_length = get_num_frames(self._cap_list)
+        self._frame_length = self.get_base_timecode() + get_num_frames(self._cap_list)
+        self._first_cap_len = self.get_base_timecode() + get_num_frames([self._cap_list[0]])
 
 
     def set_downscale_factor(self, downscale_factor=None):
@@ -550,15 +551,15 @@ class VideoManager(object):
             self._start_time = start_time
 
         if end_time is not None:
-            if end_time < start_time:
+            if end_time < self._start_time:
                 raise ValueError("end_time is before start_time in time.")
             self._end_time = end_time
         elif duration is not None:
             self._end_time = self._start_time + duration
 
         if self._end_time is not None:
-            self._frame_length = min(self._frame_length, self._end_time.get_frames() + 1)
-        self._frame_length -= self._start_time.get_frames()
+            self._frame_length = min(self._frame_length, self._end_time + 1)
+        self._frame_length -= self._start_time
 
         if self._logger is not None:
             self._logger.info(
@@ -580,11 +581,10 @@ class VideoManager(object):
             Tuple[FrameTimecode, FrameTimecode, FrameTimecode]: The current video(s)
                 total duration, start timecode, and end timecode.
         """
-        frame_length = self.get_base_timecode() + self._frame_length
         end_time = self._end_time
         if end_time is None:
-            end_time = self.get_base_timecode() + frame_length
-        return (frame_length, self._start_time, end_time)
+            end_time = self.get_base_timecode() + self._frame_length
+        return (self._frame_length, self._start_time, end_time)
 
 
     def start(self):
@@ -627,10 +627,23 @@ class VideoManager(object):
         if not self._started:
             raise VideoDecoderNotStarted()
 
-        if isinstance(self._curr_cap, cv2.VideoCapture):
-            if self._curr_cap is not None and self._end_of_video is not True:
-                self._curr_cap.set(cv2.CAP_PROP_POS_FRAMES, timecode.get_frames() - 1)
-                self._curr_time = timecode - 1
+        if self._end_time is not None and timecode > self._end_time:
+            timecode = self._end_time
+
+        # TODO: Seeking only works for the first (or current) video in the VideoManager.
+        # Warn the user there are multiple videos in the VideoManager, and the requested
+        # seek time exceeds the length of the first video.
+        if len(self._cap_list) > 1 and timecode > self._first_cap_len:
+            # TODO: This should throw an exception instead of potentially failing silently
+            # if no logger was provided.
+            if self._logger is not None:
+                self._logger.error(
+                    'Seeking past the first input video is not currently supported.')
+                self._logger.warn('Seeking to end of first input.')
+            timecode = self._first_cap_len
+        if self._curr_cap is not None and self._end_of_video is not True:
+            self._curr_cap.set(cv2.CAP_PROP_POS_FRAMES, timecode.get_frames() - 1)
+            self._curr_time = timecode - 1
 
         while self._curr_time < timecode:
             if not self.grab():  # raises VideoDecoderNotStarted if start() was not called
@@ -687,7 +700,7 @@ class VideoManager(object):
             float: Return value from calling get(property) on the VideoCapture object.
         """
         if capture_prop == cv2.CAP_PROP_FRAME_COUNT and index is None:
-            return self._frame_length
+            return self._frame_length.get_frames()
         elif capture_prop == cv2.CAP_PROP_POS_FRAMES:
             return self._curr_time
         elif capture_prop == cv2.CAP_PROP_FPS:
@@ -716,11 +729,13 @@ class VideoManager(object):
                 grabbed = self._curr_cap.grab()
                 if not grabbed and not self._get_next_cap():
                     break
-                else:
-                    self._curr_time += 1
         if self._end_time is not None and self._curr_time > self._end_time:
             grabbed = False
             self._last_frame = None
+        if grabbed:
+            self._curr_time += 1
+        else:
+            self._correct_frame_length()
         return grabbed
 
 
@@ -790,6 +805,8 @@ class VideoManager(object):
             self._last_frame = None
         if read_frame:
             self._curr_time += 1
+        else:
+            self._correct_frame_length()
         return (read_frame, self._last_frame)
 
 
@@ -807,3 +824,13 @@ class VideoManager(object):
             self._curr_cap_idx += 1
             self._curr_cap = self._cap_list[self._curr_cap_idx]
             return True
+
+
+    def _correct_frame_length(self):
+        # type: () -> None
+        """ Checks if the current frame position exceeds that originally calculated,
+        and adjusts the internally calculated frame length accordingly.  Called after
+        exhausting all input frames from the video source(s).
+        """
+        self._end_time = self._curr_time
+        self._frame_length = self._curr_time - self._start_time

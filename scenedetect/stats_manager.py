@@ -55,6 +55,7 @@ from scenedetect.platform import get_csv_writer
 
 # pylint: disable=useless-super-delegation
 
+logger = logging.getLogger('pyscenedetect')
 
 ##
 ## StatsManager CSV File Column Names (Header Row)
@@ -240,7 +241,7 @@ class StatsManager(object):
             csv_writer.writerow(
                 [COLUMN_NAME_FRAME_NUMBER, COLUMN_NAME_TIMECODE] + metric_keys)
             frame_keys = sorted(self._frame_metrics.keys())
-            print("Writing %d frames to CSV..." % len(frame_keys))
+            logger.info("Writing %d frames to CSV...", len(frame_keys))
             for frame_key in frame_keys:
                 frame_timecode = base_timecode + frame_key
                 csv_writer.writerow(
@@ -305,7 +306,7 @@ class StatsManager(object):
         num_metrics = num_cols - 2
         if not num_metrics > 0:
             raise StatsFileCorrupt('No metrics defined in CSV file.')
-        metric_keys = row[2:]
+        self._loaded_metrics = row[2:]
         num_frames = 0
         for row in csv_reader:
             metric_dict = {}
@@ -314,12 +315,12 @@ class StatsManager(object):
             for i, metric_str in enumerate(row[2:]):
                 if metric_str and metric_str != 'None':
                     try:
-                        metric_dict[metric_keys[i]] = float(metric_str)
+                        metric_dict[self._loaded_metrics[i]] = float(metric_str)
                     except ValueError:
                         raise StatsFileCorrupt('Corrupted value in stats file: %s' % metric_str)
             self.set_metrics(int(row[0]), metric_dict)
             num_frames += 1
-        logging.info('Loaded %d metrics for %d frames.', num_metrics, num_frames)
+        logger.info('Loaded %d metrics for %d frames.', num_metrics, num_frames)
         if reset_save_required:
             self._metrics_updated = False
         return num_frames

@@ -42,8 +42,6 @@ module and the scenedetect.cli.CliContext object.
 
 # Standard Library Imports
 from __future__ import print_function
-import sys
-import string
 import logging
 
 # Third-Party Library Imports
@@ -52,20 +50,13 @@ import click
 # PySceneDetect Library Imports
 import scenedetect
 
-from scenedetect.cli.context import CliContext
 from scenedetect.cli.context import check_split_video_requirements
 from scenedetect.cli.context import contains_sequence_or_url
 from scenedetect.cli.context import parse_timecode
 
-from scenedetect.frame_timecode import FrameTimecode
-
 from scenedetect.platform import get_and_create_path
-
-from scenedetect.video_manager import VideoManager
-
-from scenedetect.video_splitter import is_mkvmerge_available
-from scenedetect.video_splitter import is_ffmpeg_available
-
+from scenedetect.platform import init_logger
+logger = logging.getLogger('pyscenedetect')
 
 def get_help_command_preface(command_name='scenedetect'):
     """ Preface/intro help message shown at the beginning of the help command. """
@@ -153,7 +144,7 @@ def duplicate_command(ctx, param_hint):
     error_strs.append('Error: Command %s specified multiple times.' % param_hint)
     error_strs.append('The %s command may appear only one time.')
 
-    logging.error('\n'.join(error_strs))
+    ctx.obj.logger.error('\n'.join(error_strs))
     raise click.BadParameter('\n  Command %s may only be specified once.' % param_hint,
                              param_hint='%s command' % param_hint)
 
@@ -222,9 +213,8 @@ def duplicate_command(ctx, param_hint):
 @click.option(
     '--quiet', '-q',
     is_flag=True, flag_value=True, help=
-    'Suppresses all output of PySceneDetect except for those from the specified'
-    ' commands. Equivalent to setting `--verbosity none`. Overrides the current verbosity'
-    ' level, even if `-v`/`--verbosity` is set.')
+    'Suppresses all output of PySceneDetect to the terminal/stdout. If a logfile is'
+    ' specified, it will still be generated with the specified verbosity.')
 @click.pass_context
 # pylint: disable=redefined-builtin
 def scenedetect_cli(ctx, input, output, framerate, downscale, frame_skip,
@@ -241,52 +231,36 @@ def scenedetect_cli(ctx, input, output, framerate, downscale, frame_skip,
 
     """
     ctx.call_on_close(ctx.obj.process_input)
+
     logging.disable(logging.NOTSET)
 
-    format_str = '[PySceneDetect] %(message)s'
-    if verbosity.lower() == 'none':
-        verbosity = None
-    elif verbosity.lower() == 'debug':
-        format_str = '%(levelname)s: %(module)s.%(funcName)s(): %(message)s'
+    verbosity = getattr(logging, verbosity.upper()) if verbosity is not None else None
+    init_logger(log_level=verbosity, show_stdout=not quiet, log_file=logfile)
 
-    if quiet:
-        verbosity = None
-
-    ctx.obj.quiet_mode = True if verbosity is None else False
+    ctx.obj.quiet_mode = True if quiet else False
     ctx.obj.output_directory = output
 
-    if logfile is not None:
-        logfile = get_and_create_path(logfile)
-        logging.basicConfig(
-            filename=logfile, filemode='a', format=format_str,
-            level=getattr(logging, verbosity.upper()) if verbosity is not None else verbosity)
-    elif verbosity is not None:
-        logging.basicConfig(format=format_str,
-                            level=getattr(logging, verbosity.upper()))
-    else:
-        logging.disable(logging.CRITICAL)
-
-    logging.info('PySceneDetect %s', scenedetect.__version__)
+    ctx.obj.logger.info('PySceneDetect %s', scenedetect.__version__)
 
     if stats is not None and frame_skip != 0:
         ctx.obj.options_processed = False
         error_strs = [
             'Unable to detect scenes with stats file if frame skip is not 1.',
             '  Either remove the -fs/--frame-skip option, or the -s/--stats file.\n']
-        logging.error('\n'.join(error_strs))
+        ctx.obj.logger.error('\n'.join(error_strs))
         raise click.BadParameter(
             '\n  Combining the -s/--stats and -fs/--frame-skip options is not supported.',
             param_hint='frame skip + stats file')
 
     try:
         if ctx.obj.output_directory is not None:
-            logging.info('Output directory set:\n  %s', ctx.obj.output_directory)
+            ctx.obj.logger.info('Output directory set:\n  %s', ctx.obj.output_directory)
         ctx.obj.parse_options(
             input_list=input, framerate=framerate, stats_file=stats, downscale=downscale,
             frame_skip=frame_skip, min_scene_len=min_scene_len, drop_short_scenes=drop_short_scenes)
 
     except Exception as ex:
-        logging.error('Could not parse CLI options.: %s', ex)
+        ctx.obj.logger.error('Could not parse CLI options.: %s', ex)
         raise
 
 
@@ -404,8 +378,12 @@ def time_command(ctx, start, duration, end):
     type=click.FLOAT, default=30.0, show_default=True, help=
     'Threshold value (float) that the content_val frame metric must exceed to trigger a new scene.'
     ' Refers to frame metric content_val in stats file.')
+@click.option(
+    '--luma-only', '-l',
+    is_flag=True, flag_value=True, help=
+    'Only consider luma/brightness channel (useful for greyscale videos).')
 @click.pass_context
-def detect_content_command(ctx, threshold):
+def detect_content_command(ctx, threshold, luma_only):
     """ Perform content detection algorithm on input video(s).
 
     detect-content
@@ -414,15 +392,71 @@ def detect_content_command(ctx, threshold):
     """
 
     min_scene_len = 0 if ctx.obj.drop_short_scenes else ctx.obj.min_scene_len
-    logging.debug('Detecting content, parameters:\n'
-                  '  threshold: %d, min-scene-len: %d',
-                  threshold, min_scene_len)
+    luma_mode_str = '' if not luma_only else ', luma_only mode'
+    ctx.obj.logger.debug('Detecting content, parameters:\n'
+                  '  threshold: %d, min-scene-len: %d%s',
+                  threshold, min_scene_len, luma_mode_str)
 
     # Initialize detector and add to scene manager.
     # Need to ensure that a detector is not added twice, or will cause
     # a frame metric key error when registering the detector.
     ctx.obj.add_detector(scenedetect.detectors.ContentDetector(
-        threshold=threshold, min_scene_len=min_scene_len))
+        threshold=threshold, min_scene_len=min_scene_len, luma_only=luma_only))
+
+
+@click.command('detect-adaptive')
+@click.option(
+    '--threshold', '-t', metavar='VAL',
+    type=click.FLOAT, default=3.0, show_default=True, help=
+    'Threshold value (float) that the calculated frame score must exceed to'
+    ' trigger a new scene (see frame metric adaptive_ratio in stats file).')
+@click.option(
+    '--min-scene-len', '-m', metavar='TIMECODE',
+    type=click.STRING, default="0.6s", show_default=True, help=
+    'Minimum size/length of any scene. TIMECODE can be specified as exact'
+    ' number of frames, a time in seconds followed by s, or a timecode in the'
+    ' format HH:MM:SS or HH:MM:SS.nnn')
+@click.option(
+    '--min-delta-hsv', '-d', metavar='VAL',
+    type=click.FLOAT, default=15.0, show_default=True, help=
+    'Minimum threshold (float) that the content_val must exceed in order to register as a new'
+    ' scene. This is calculated the same way that `detect-content` calculates frame score.')
+@click.option(
+    '--frame-window', '-w', metavar='VAL',
+    type=click.INT, default=2, show_default=True, help=
+    'Size of window (number of frames) before and after each frame to average together in'
+    ' order to detect deviations from the mean.')
+@click.option(
+    '--luma-only', '-l',
+    is_flag=True, flag_value=True, help=
+    'Only consider luma/brightness channel (useful for greyscale videos).')
+@click.pass_context
+def detect_adaptive_command(ctx, threshold, min_scene_len, min_delta_hsv,
+                            frame_window, luma_only):
+    """ Perform adaptive detection algorithm on input video(s).
+
+    detect-adaptive
+
+    detect-adaptive --threshold 3.2
+    """
+
+    min_scene_len = parse_timecode(ctx.obj, min_scene_len)
+    luma_mode_str = '' if not luma_only else ', luma_only mode'
+
+    ctx.obj.logger.debug('Adaptively detecting content, parameters:\n'
+                  '  threshold: %d, min-scene-len: %d%s',
+                  threshold, min_scene_len, luma_mode_str)
+
+    # Initialize detector and add to scene manager.
+    # Need to ensure that a detector is not added twice, or will cause
+    # a frame metric key error when registering the detector.
+    ctx.obj.add_detector(scenedetect.detectors.AdaptiveDetector(
+        video_manager=ctx.obj.video_manager,
+        adaptive_threshold=threshold,
+        min_scene_len=min_scene_len,
+        min_delta_hsv=min_delta_hsv,
+        window_width=frame_window,
+        luma_only=luma_only))
 
 
 
@@ -463,7 +497,7 @@ def detect_threshold_command(ctx, threshold, fade_bias, add_last_scene,
 
     min_scene_len = 0 if ctx.obj.drop_short_scenes else ctx.obj.min_scene_len
 
-    logging.debug('Detecting threshold, parameters:\n'
+    ctx.obj.logger.debug('Detecting threshold, parameters:\n'
                   '  threshold: %d, min-scene-len: %d, fade-bias: %d,\n'
                   '  add-last-scene: %s, min-percent: %d, block-size: %d',
                   threshold, min_scene_len, fade_bias,
@@ -477,7 +511,8 @@ def detect_threshold_command(ctx, threshold, fade_bias, add_last_scene,
     fade_bias /= 100.0
     ctx.obj.add_detector(scenedetect.detectors.ThresholdDetector(
         threshold=threshold, min_scene_len=min_scene_len, fade_bias=fade_bias,
-        add_final_scene=add_last_scene, min_percent=min_percent, block_size=block_size))
+        add_final_scene=add_last_scene, block_size=block_size))
+
 
 
 
@@ -611,7 +646,7 @@ def split_video_command(ctx, output, filename, high_quality, override_args, quie
     if contains_sequence_or_url(ctx.obj.video_manager.get_video_paths()):
         ctx.obj.options_processed = False
         error_str = 'The save-images command is incompatible with image sequences/URLs.'
-        logging.error(error_str)
+        ctx.obj.logger.error(error_str)
         raise click.BadParameter(error_str, param_hint='save-images')
 
     ctx.obj.split_video = True
@@ -621,9 +656,9 @@ def split_video_command(ctx, output, filename, high_quality, override_args, quie
     if copy:
         ctx.obj.split_mkvmerge = True
         if high_quality:
-            logging.warning('-hq/--high-quality flag ignored due to -c/--copy.')
+            ctx.obj.logger.warning('-hq/--high-quality flag ignored due to -c/--copy.')
         if override_args:
-            logging.warning('-f/--ffmpeg-args option ignored due to -c/--copy.')
+            ctx.obj.logger.warning('-f/--ffmpeg-args option ignored due to -c/--copy.')
     if not override_args:
         if rate_factor is None:
             rate_factor = 22 if not high_quality else 17
@@ -632,11 +667,11 @@ def split_video_command(ctx, output, filename, high_quality, override_args, quie
         override_args = ('-c:v libx264 -preset {PRESET} -crf {RATE_FACTOR} -c:a aac'.format(
             PRESET=preset, RATE_FACTOR=rate_factor))
     if not copy:
-        logging.info('FFmpeg codec args set: %s', override_args)
+        ctx.obj.logger.info('FFmpeg codec args set: %s', override_args)
     if filename:
-        logging.info('Video output file name format: %s', filename)
+        ctx.obj.logger.info('Video output file name format: %s', filename)
     if ctx.obj.split_directory is not None:
-        logging.info('Video output path set:  \n%s', ctx.obj.split_directory)
+        ctx.obj.logger.info('Video output path set:  \n%s', ctx.obj.split_directory)
     ctx.obj.split_args = override_args
 
 
@@ -650,8 +685,8 @@ def split_video_command(ctx, output, filename, high_quality, override_args, quie
     '--filename', '-f', metavar='NAME', default='$VIDEO_NAME-Scene-$SCENE_NUMBER-$IMAGE_NUMBER',
     type=click.STRING, show_default=True, help=
     'Filename format, *without* extension, to use when saving image files. You can use the'
-    ' $VIDEO_NAME, $SCENE_NUMBER, $IMAGE_NUMBER, and $FRAME_NUMBER macros in the file name. Note that you'
-    ' may have to wrap the format in single quotes.')
+    ' $VIDEO_NAME, $SCENE_NUMBER, $IMAGE_NUMBER, and $FRAME_NUMBER macros in the file name.'
+    ' Note that you may have to wrap the format in single quotes.')
 @click.option(
     '--num-images', '-n', metavar='N', default=3,
     type=click.INT, help=
@@ -759,3 +794,4 @@ add_cli_command(scenedetect_cli, split_video_command)
 # Detection Algorithms
 add_cli_command(scenedetect_cli, detect_content_command)
 add_cli_command(scenedetect_cli, detect_threshold_command)
+add_cli_command(scenedetect_cli, detect_adaptive_command)

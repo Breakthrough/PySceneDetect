@@ -64,12 +64,15 @@ from scenedetect.platform import get_aspect_ratio
 from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.platform import get_csv_writer
 from scenedetect.platform import get_cv2_imwrite_params
+from scenedetect.stats_manager import StatsManager
 from scenedetect.stats_manager import FrameMetricRegistered
 from scenedetect.scene_detector import SparseSceneDetector
 
 from scenedetect.thirdparty.simpletable import SimpleTableCell, SimpleTableImage
 from scenedetect.thirdparty.simpletable import SimpleTableRow, SimpleTable, HTMLPage
 
+
+logger = logging.getLogger('pyscenedetect')
 
 
 ##
@@ -325,7 +328,7 @@ def save_images(scene_list, video_manager, num_images=3, frame_margin=1,
 
     # Setup flags and init progress bar if available.
     completed = True
-    logging.info('Generating output images (%d per scene)...', num_images)
+    logger.info('Generating output images (%d per scene)...', num_images)
     progress_bar = None
     if show_progress and tqdm:
         progress_bar = tqdm(
@@ -394,7 +397,7 @@ def save_images(scene_list, video_manager, num_images=3, frame_margin=1,
                     frame_im = cv2.resize(
                         frame_im, (0, 0), fx=aspect_ratio, fy=1.0,
                         interpolation=cv2.INTER_CUBIC)
-                
+
                 # Get frame dimensions prior to resizing or scaling
                 frame_height = frame_im.shape[0]
                 frame_width = frame_im.shape[1]
@@ -428,7 +431,7 @@ def save_images(scene_list, video_manager, num_images=3, frame_margin=1,
                 progress_bar.update(1)
 
     if not completed:
-        logging.error('Could not generate all output images.')
+        logger.error('Could not generate all output images.')
 
     return image_filenames
 
@@ -469,6 +472,12 @@ class SceneManager(object):
         Arguments:
             detector (SceneDetector): Scene detector to add to the SceneManager.
         """
+        if self._stats_manager is None and detector.stats_manager_required():
+            # Make sure the lists are empty so that the detectors don't get
+            # out of sync (require an explicit statsmanager instead)
+            assert not self._detector_list and not self._sparse_detector_list
+            self._stats_manager = StatsManager()
+
         detector.stats_manager = self._stats_manager
         if self._stats_manager is not None:
             # Allow multiple detection algorithms of the same type to be added
@@ -617,11 +626,11 @@ class SceneManager(object):
         for detector in self._detector_list:
             self._cutting_list += detector.post_process(frame_num)
 
-
     def detect_scenes(self, frame_source, end_time=None, frame_skip=0,
                       show_progress=True, callback=None):
         # type: (VideoManager, Union[int, FrameTimecode],
-        #        Optional[Union[int, FrameTimecode]], Optional[bool], optional[callable[numpy.ndarray]) -> int
+        #        Optional[Union[int, FrameTimecode]], Optional[bool],
+        #        Optional[Callable[numpy.ndarray]) -> int
         """ Perform scene detection on the given frame_source using the added SceneDetectors.
 
         Blocks until all frames in the frame_source have been processed. Results can
@@ -644,7 +653,9 @@ class SceneManager(object):
                 a progress bar with the progress, framerate, and expected time to
                 complete processing the video frame source.
             callback ((image_ndarray, frame_num: int) -> None): If not None, called after
-                each scene/event detected.
+                each scene/event detected.  Note that the signature of the callback will
+                undergo breaking changes in v0.6 to provide more context to the callback
+                (detector type, event type, etc... - see #177 for further details).
         Returns:
             int: Number of frames read and processed from the frame source.
         Raises:

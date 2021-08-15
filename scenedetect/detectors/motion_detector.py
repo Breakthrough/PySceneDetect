@@ -79,9 +79,8 @@ class MotionDetector(SparseSceneDetector):
         self.in_motion_event = False
         self.first_motion_frame_index = -1
         self.last_motion_frame_index = -1
-        self.cli_name = 'detect-motion'
         """
-        return
+
     def process_frame(self, frame_num, frame_img):
         # TODO.
         """

@@ -50,17 +50,52 @@ class ContentDetector(SceneDetector):
     content scenes still using HSV information, use the DissolveDetector.
     """
 
-    def __init__(self, threshold=30.0, min_scene_len=15):
+    FRAME_SCORE_KEY = 'content_val'
+    DELTA_H_KEY, DELTA_S_KEY, DELTA_V_KEY = ('delta_hue', 'delta_sat', 'delta_lum')
+    METRIC_KEYS = [FRAME_SCORE_KEY, DELTA_H_KEY, DELTA_S_KEY, DELTA_V_KEY]
+
+
+    def __init__(self, threshold=30.0, min_scene_len=15, luma_only=False):
         # type: (float, Union[int, FrameTimecode]) -> None
         super(ContentDetector, self).__init__()
         self.threshold = threshold
         # Minimum length of any given scene, in frames (int) or FrameTimecode
         self.min_scene_len = min_scene_len
+        self.luma_only = luma_only
         self.last_frame = None
         self.last_scene_cut = None
         self.last_hsv = None
-        self._metric_keys = ['content_val', 'delta_hue', 'delta_sat', 'delta_lum']
-        self.cli_name = 'detect-content'
+
+
+    def get_metrics(self):
+        return ContentDetector.METRIC_KEYS
+
+
+    def is_processing_required(self, frame_num):
+        return self.stats_manager is None or (
+            not self.stats_manager.metrics_exist(frame_num, ContentDetector.METRIC_KEYS))
+
+
+    def calculate_frame_score(self, frame_num, curr_hsv, last_hsv):
+
+        delta_hsv = [0, 0, 0, 0]
+        for i in range(3):
+            num_pixels = curr_hsv[i].shape[0] * curr_hsv[i].shape[1]
+            curr_hsv[i] = curr_hsv[i].astype(numpy.int32)
+            last_hsv[i] = last_hsv[i].astype(numpy.int32)
+            delta_hsv[i] = numpy.sum(
+                numpy.abs(curr_hsv[i] - last_hsv[i])) / float(num_pixels)
+
+        delta_hsv[3] = sum(delta_hsv[0:3]) / 3.0
+        delta_h, delta_s, delta_v, delta_content = delta_hsv
+
+        if self.stats_manager is not None:
+            self.stats_manager.set_metrics(frame_num, {
+                self.FRAME_SCORE_KEY: delta_content,
+                self.DELTA_H_KEY: delta_h,
+                self.DELTA_S_KEY: delta_s,
+                self.DELTA_V_KEY: delta_v})
+        return delta_content if not self.luma_only else delta_v
 
 
     def process_frame(self, frame_num, frame_img):
@@ -81,7 +116,6 @@ class ContentDetector(SceneDetector):
         """
 
         cut_list = []
-        metric_keys = self._metric_keys
         _unused = ''
 
         # Initialize last scene cut point at the beginning of the frames of interest.
@@ -90,41 +124,27 @@ class ContentDetector(SceneDetector):
 
         # We can only start detecting once we have a frame to compare with.
         if self.last_frame is not None:
-            # We obtain the change in average of HSV (delta_hsv_avg), (h)ue only,
+            # We obtain the change in average of HSV (frame_score), (h)ue only,
             # (s)aturation only, and (l)uminance only.  These are refered to in a statsfile
             # as their respective metric keys.
+            metric_key = (ContentDetector.DELTA_V_KEY if self.luma_only
+                          else ContentDetector.FRAME_SCORE_KEY)
             if (self.stats_manager is not None and
-                    self.stats_manager.metrics_exist(frame_num, metric_keys)):
-                delta_hsv_avg, delta_h, delta_s, delta_v = self.stats_manager.get_metrics(
-                    frame_num, metric_keys)
+                    self.stats_manager.metrics_exist(frame_num, [metric_key])):
+                frame_score = self.stats_manager.get_metrics(frame_num, [metric_key])[0]
             else:
                 curr_hsv = cv2.split(cv2.cvtColor(frame_img, cv2.COLOR_BGR2HSV))
                 last_hsv = self.last_hsv
                 if not last_hsv:
                     last_hsv = cv2.split(cv2.cvtColor(self.last_frame, cv2.COLOR_BGR2HSV))
 
-                delta_hsv = [0, 0, 0, 0]
-                for i in range(3):
-                    num_pixels = curr_hsv[i].shape[0] * curr_hsv[i].shape[1]
-                    curr_hsv[i] = curr_hsv[i].astype(numpy.int32)
-                    last_hsv[i] = last_hsv[i].astype(numpy.int32)
-                    delta_hsv[i] = numpy.sum(
-                        numpy.abs(curr_hsv[i] - last_hsv[i])) / float(num_pixels)
-                delta_hsv[3] = sum(delta_hsv[0:3]) / 3.0
-                delta_h, delta_s, delta_v, delta_hsv_avg = delta_hsv
-
-                if self.stats_manager is not None:
-                    self.stats_manager.set_metrics(frame_num, {
-                        metric_keys[0]: delta_hsv_avg,
-                        metric_keys[1]: delta_h,
-                        metric_keys[2]: delta_s,
-                        metric_keys[3]: delta_v})
+                frame_score = self.calculate_frame_score(frame_num, curr_hsv, last_hsv)
 
                 self.last_hsv = curr_hsv
 
             # We consider any frame over the threshold a new scene, but only if
             # the minimum scene length has been reached (otherwise it is ignored).
-            if delta_hsv_avg >= self.threshold and (
+            if frame_score >= self.threshold and (
                     (frame_num - self.last_scene_cut) >= self.min_scene_len):
                 cut_list.append(frame_num)
                 self.last_scene_cut = frame_num
@@ -135,7 +155,7 @@ class ContentDetector(SceneDetector):
         # If we have the next frame computed, don't copy the current frame
         # into last_frame since we won't use it on the next call anyways.
         if (self.stats_manager is not None and
-                self.stats_manager.metrics_exist(frame_num+1, metric_keys)):
+                self.stats_manager.metrics_exist(frame_num+1, self.get_metrics())):
             self.last_frame = _unused
         else:
             self.last_frame = frame_img.copy()

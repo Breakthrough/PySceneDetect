@@ -71,7 +71,7 @@ def get_extra_requires():
 
 setup(
     name='scenedetect',
-    version='0.5.5',
+    version='0.5.6',
     description="A cross-platform, OpenCV-based video scene detection program and Python library. ",
     long_description=open('package-info.rst').read(),
     author='Brandon Castellano',
@@ -111,5 +111,11 @@ setup(
         'Topic :: Multimedia :: Video :: Conversion',
         'Topic :: Multimedia :: Video :: Non-Linear Editor',
         'Topic :: Utilities'
-    ]
+    ],
+    project_urls={
+        'Homepage': 'https://pyscenedetect.readthedocs.io/',
+        'Manual': 'https://pyscenedetect.readthedocs.io/projects/Manual/en/latest/',
+        'Changelog': 'https://pyscenedetect.readthedocs.io/en/latest/changelog/',
+        'Bug Tracker': 'https://github.com/Breakthrough/PySceneDetect/issues',
+    }
 )

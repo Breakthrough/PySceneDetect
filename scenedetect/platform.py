@@ -50,6 +50,7 @@ as STRING_TYPE intended to help with parsing string types from the CLI parser.
 from __future__ import print_function
 
 import csv
+import logging
 import os
 import os.path
 import platform
@@ -90,51 +91,22 @@ else:
 # pylint: enable=invalid-name, undefined-variable
 
 
-##
-## OpenCV Compatibility Fixes
-##
-
-def opencv_version_required(min_version, version=None):
-    # type: (List[int], Optional[str])
-    """ Checks if the OpenCV library version is at least min_version.
-
-    Arguments:
-        min_version: List[int] of the version to compare against.
-        version: Optional string representing version string to
-        compare with, used for testing purposes.
-
-    Returns:
-        bool: True if the installed version is at least min_version,
-        False otherwise.
-    """
-    if version is None:
-        version = cv2.__version__
-    if not version[0].isdigit():
-        return False
-    try:
-        version = [int(x) for x in version.split('.')]
-        if len(version) < len(min_version):
-            version += [0] * (len(min_version) - len(version))
-        return not any([x[0] < x[1] for x in zip(version, min_version)])
-    except ValueError:
-        return False
-
-
 # Compatibility fix for OpenCV v2.x (copies CAP_PROP_* properties from the
 # cv2.cv namespace to the cv2 namespace, as the cv2.cv namespace was removed
 # with the release of OpenCV 3.0).
-if not opencv_version_required([3, 0]):
+if not 'CAP_PROP_FPS' in dir(cv2):
     cv2.CAP_PROP_FRAME_WIDTH = cv2.cv.CV_CAP_PROP_FRAME_WIDTH
     cv2.CAP_PROP_FRAME_HEIGHT = cv2.cv.CV_CAP_PROP_FRAME_HEIGHT
     cv2.CAP_PROP_FPS = cv2.cv.CV_CAP_PROP_FPS
     cv2.CAP_PROP_POS_MSEC = cv2.cv.CV_CAP_PROP_POS_MSEC
     cv2.CAP_PROP_POS_FRAMES = cv2.cv.CV_CAP_PROP_POS_FRAMES
     cv2.CAP_PROP_FRAME_COUNT = cv2.cv.CV_CAP_PROP_FRAME_COUNT
+    cv2.CAP_PROP_FOURCC = cv2.cv.CV_CAP_PROP_FOURCC
     cv2.INTER_CUBIC = cv2.cv.INTER_CUBIC
 
 
 def get_aspect_ratio(cap, epsilon=0.01):
-    # type: (cv2.VideoCapture) -> float
+    # type: (cv2.VideoCapture, float) -> float
     """ Compatibility fix for OpenCV < v3.4.1 to get the aspect ratio
     of a video. For older versions, this function always returns 1.0.
 
@@ -148,7 +120,7 @@ def get_aspect_ratio(cap, epsilon=0.01):
         if for some reason the numerator/denominator returned is zero
         (can happen if the video was not opened correctly).
     """
-    if not opencv_version_required([3, 4, 1]):
+    if not 'CAP_PROP_SAR_NUM' in dir(cv2):
         return 1.0
     num = cap.get(cv2.CAP_PROP_SAR_NUM)
     den = cap.get(cv2.CAP_PROP_SAR_DEN)
@@ -195,16 +167,6 @@ def check_opencv_ffmpeg_dll():
 ## OpenCV imwrite Supported Image Types & Quality/Compression Parameters
 ##
 
-def _get_cv2_param(param_name):
-    # type: (str) -> Union[int, None]
-    if param_name.startswith('CV_'):
-        param_name = param_name[3:]
-    try:
-        return getattr(cv2, param_name)
-    except AttributeError:
-        return None
-
-
 def get_cv2_imwrite_params():
     # type: () -> Dict[str, Union[int, None]]
     """ Get OpenCV imwrite Params: Returns a dict of supported image formats and
@@ -216,6 +178,16 @@ def get_cv2_imwrite_params():
             compression parameter (e.g. 'jpg' -> cv2.IMWRITE_JPEG_QUALITY,
             'png' -> cv2.IMWRITE_PNG_COMPRESSION)..
     """
+
+    def _get_cv2_param(param_name):
+        # type: (str) -> Union[int, None]
+        if param_name.startswith('CV_'):
+            param_name = param_name[3:]
+        try:
+            return getattr(cv2, param_name)
+        except AttributeError:
+            return None
+
     return {
         'jpg': _get_cv2_param('IMWRITE_JPEG_QUALITY'),
         'png': _get_cv2_param('IMWRITE_PNG_COMPRESSION'),
@@ -277,6 +249,53 @@ def get_and_create_path(file_path, output_directory=None):
     return file_path
 
 
+##
+## Logging
+##
+
+def init_logger(log_level=logging.INFO, show_stdout=False, log_file=None):
+    """ Initializes the Python logging module for PySceneDetect.
+
+    Mainly used by the command line interface, but can also be used by other modules
+    by calling init_logger(). The logger instance used is named 'pyscenedetect-logger'.
+
+    All existing log handlers are removed every time this function is invoked.
+
+    Arguments:
+      log_level: Verbosity of log messages.
+      quiet_mode: If True, no output will be generated to stdout.
+      log_file: File to also send messages to, in addition to stdout.
+    """
+    # Format of log messages depends on verbosity.
+    format_str = '[PySceneDetect] %(message)s'
+    if log_level == logging.DEBUG:
+        format_str = '%(levelname)s: %(module)s.%(funcName)s(): %(message)s'
+    # Get the named logger and remove any existing handlers.
+    logger_instance = logging.getLogger('pyscenedetect')
+    logger_instance.handlers = []
+    logger_instance.setLevel(log_level)
+    # Add stdout handler if required.
+    if show_stdout:
+        handler = logging.StreamHandler(stream=sys.stdout)
+        handler.setLevel(log_level)
+        handler.setFormatter(logging.Formatter(fmt=format_str))
+        logger_instance.addHandler(handler)
+    # Add file handler if required.
+    if log_file:
+        log_file = get_and_create_path(log_file)
+        handler = logging.FileHandler(log_file)
+        handler.setLevel(log_level)
+        handler.setFormatter(logging.Formatter(fmt=format_str))
+        logger_instance.addHandler(handler)
+    return logger_instance
+
+# Default logger to be used by library objects.
+logger = init_logger()
+
+
+##
+## Running External Commands
+##
 
 class CommandTooLong(Exception):
     """ Raised when the length of a command line argument doesn't play nicely
@@ -284,9 +303,8 @@ class CommandTooLong(Exception):
     # pylint: disable=unnecessary-pass
     pass
 
-
 def invoke_command(args):
-    # type: (List[str] -> None)
+    # type: (List[str]) -> None
     """ Same as calling Python's subprocess.call() method, but explicitly
     raises a different exception when the command length is too long.
 

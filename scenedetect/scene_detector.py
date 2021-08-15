@@ -37,7 +37,7 @@ are expected to provide in order to be compatible with PySceneDetect.
 
 
 class SceneDetector(object):
-    """ Base class to inheret from when implementing a scene detection algorithm.
+    """ Base class to inherit from when implementing a scene detection algorithm.
 
     This represents a "dense" scene detector, which returns a list of frames where
     the next scene/shot begins in a video.
@@ -49,13 +49,6 @@ class SceneDetector(object):
     stats_manager = None
     """ Optional :py:class:`StatsManager <scenedetect.stats_manager.StatsManager>` to
     use for caching frame metrics to and from."""
-
-    _metric_keys = []
-    """ List of frame metric keys to be registered with the :py:attr:`stats_manager`,
-    if available. """
-
-    cli_name = 'detect-none'
-    """ Name of detector to use in command-line interface description. """
 
     def is_processing_required(self, frame_num):
         # type: (int) -> bool
@@ -70,9 +63,20 @@ class SceneDetector(object):
             True otherwise (i.e. the frame_img passed to process_frame is required
             to be passed to process_frame for the given frame_num).
         """
-        return not self._metric_keys or not (
+        metric_keys = self.get_metrics()
+        return not metric_keys or not (
             self.stats_manager is not None and
-            self.stats_manager.metrics_exist(frame_num, self._metric_keys))
+            self.stats_manager.metrics_exist(frame_num, metric_keys))
+
+
+    def stats_manager_required(self):
+        # type: () -> bool
+        """ Stats Manager Required: Prototype indicating if detector requires stats.
+
+        Returns:
+            bool: True if a StatsManager is required for the detector, False otherwise.
+        """
+        return False
 
 
     def get_metrics(self):
@@ -83,7 +87,7 @@ class SceneDetector(object):
             List[str]: A list of strings of frame metric key names that will be used by
             the detector when a StatsManager is passed to process_frame.
         """
-        return self._metric_keys
+        return []
 
 
     def process_frame(self, frame_num, frame_img):
