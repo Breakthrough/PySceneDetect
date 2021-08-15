@@ -55,6 +55,7 @@ from scenedetect.cli.context import contains_sequence_or_url
 from scenedetect.cli.context import parse_timecode
 
 from scenedetect.platform import get_and_create_path
+from scenedetect.platform import init_logger
 logger = logging.getLogger('pyscenedetect')
 
 def get_help_command_preface(command_name='scenedetect'):
@@ -234,7 +235,7 @@ def scenedetect_cli(ctx, input, output, framerate, downscale, frame_skip,
     logging.disable(logging.NOTSET)
 
     verbosity = getattr(logging, verbosity.upper()) if verbosity is not None else None
-    scenedetect.init_logger(log_level=verbosity, show_stdout=not quiet, log_file=logfile)
+    init_logger(log_level=verbosity, show_stdout=not quiet, log_file=logfile)
 
     ctx.obj.quiet_mode = True if quiet else False
     ctx.obj.output_directory = output

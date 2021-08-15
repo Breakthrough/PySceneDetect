@@ -50,6 +50,7 @@ as STRING_TYPE intended to help with parsing string types from the CLI parser.
 from __future__ import print_function
 
 import csv
+import logging
 import os
 import os.path
 import platform
@@ -248,12 +249,59 @@ def get_and_create_path(file_path, output_directory=None):
     return file_path
 
 
+##
+## Logging
+##
+
+def init_logger(log_level=logging.INFO, show_stdout=False, log_file=None):
+    """ Initializes the Python logging module for PySceneDetect.
+
+    Mainly used by the command line interface, but can also be used by other modules
+    by calling init_logger(). The logger instance used is named 'pyscenedetect-logger'.
+
+    All existing log handlers are removed every time this function is invoked.
+
+    Arguments:
+      log_level: Verbosity of log messages.
+      quiet_mode: If True, no output will be generated to stdout.
+      log_file: File to also send messages to, in addition to stdout.
+    """
+    # Format of log messages depends on verbosity.
+    format_str = '[PySceneDetect] %(message)s'
+    if log_level == logging.DEBUG:
+        format_str = '%(levelname)s: %(module)s.%(funcName)s(): %(message)s'
+    # Get the named logger and remove any existing handlers.
+    logger_instance = logging.getLogger('pyscenedetect')
+    logger_instance.handlers.clear()
+    logger_instance.setLevel(log_level)
+    # Add stdout handler if required.
+    if show_stdout:
+        handler = logging.StreamHandler(stream=sys.stdout)
+        handler.setLevel(log_level)
+        handler.setFormatter(logging.Formatter(fmt=format_str))
+        logger_instance.addHandler(handler)
+    # Add file handler if required.
+    if log_file:
+        log_file = get_and_create_path(log_file)
+        handler = logging.FileHandler(log_file)
+        handler.setLevel(log_level)
+        handler.setFormatter(logging.Formatter(fmt=format_str))
+        logger_instance.addHandler(handler)
+    return logger_instance
+
+# Default logger to be used by library objects.
+logger = init_logger()
+
+
+##
+## Running External Commands
+##
+
 class CommandTooLong(Exception):
     """ Raised when the length of a command line argument doesn't play nicely
     with the Windows command prompt. """
     # pylint: disable=unnecessary-pass
     pass
-
 
 def invoke_command(args):
     # type: (List[str]) -> None

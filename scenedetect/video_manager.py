@@ -57,9 +57,9 @@ import math
 import cv2
 
 # PySceneDetect Library Imports
+from scenedetect.platform import logger as default_logger
 from scenedetect.platform import STRING_TYPE
 from scenedetect.frame_timecode import FrameTimecode, MINIMUM_FRAMES_PER_SECOND_FLOAT
-
 
 ##
 ## VideoManager Exceptions
@@ -336,7 +336,7 @@ class VideoManager(object):
     """ Provides a cv2.VideoCapture-like interface to a set of one or more video files,
     or a single device ID. Supports seeking and setting end time/duration. """
 
-    def __init__(self, video_files, framerate=None, logger=None):
+    def __init__(self, video_files, framerate=None, logger=default_logger):
         # type: (List[str], Optional[float])
         """ VideoManager Constructor Method (__init__)
 
