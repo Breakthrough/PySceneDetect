@@ -4,7 +4,7 @@ PySceneDetect Releases
 
 ## PySceneDetect 0.5
 
-### 0.5.6
+### 0.5.6 (August 15, 2021)  &nbsp;<span class="fa fa-tags"></span>
 
 #### Release Notes
 
@@ -25,6 +25,8 @@ PySceneDetect Releases
  * [api] Removed the `min_percent` argument from `ThresholdDetector` as was not providing any performance benefit for the majority of use cases ([#178](https://github.com/Breakthrough/PySceneDetect/issues/178))
  * [bugfix] The `detect-threshold` command now works properly with a statsfile ([#211](https://github.com/Breakthrough/PySceneDetect/issues/211))
  * [bugfix] Fixed crash due to unhandled `TypeError` exception when using non-PyPI OpenCV packages from certain Linux distributions ([#220](https://github.com/Breakthrough/PySceneDetect/issues/220))
+ * [bugfix] A warning is now displayed for videos which may not be decoded correctly, esp. VP9 ([#86](https://github.com/Breakthrough/PySceneDetect/issues/86))
+ * [api] A named logger is now used for both API and CLI logging instead of the root logger ([#205](https://github.com/Breakthrough/PySceneDetect/issues/205))
 
 #### Known Issues
 
@@ -32,7 +34,7 @@ PySceneDetect Releases
  * Variable framerate videos (VFR) are not fully supported, and will yield incorrect timestamps ([#168](https://github.com/Breakthrough/PySceneDetect/issues/168))
 
 
-### 0.5.5 (January 17, 2021) &nbsp;<span class="fa fa-tags"></span>
+### 0.5.5 (January 17, 2021)
 
 #### Release Notes
 
