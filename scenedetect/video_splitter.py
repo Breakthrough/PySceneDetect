@@ -80,6 +80,8 @@ from string import Template
 # PySceneDetect Imports
 from scenedetect.platform import tqdm, invoke_command, CommandTooLong
 
+logger = logging.getLogger('pyscenedetect')
+
 COMMAND_TOO_LONG_STRING = '''
 Cannot split video due to too many scenes (resulting command
 is too large to process). To work around this issue, you can
@@ -157,7 +159,7 @@ def split_video_mkvmerge(input_video_paths, scene_list, output_file_template,
     if not input_video_paths or not scene_list:
         return None
 
-    logging.info('Splitting input video%s using mkvmerge, output path template:\n  %s',
+    logger.info('Splitting input video%s using mkvmerge, output path template:\n  %s',
                  's' if len(input_video_paths) > 1 else '', output_file_template)
 
     ret_val = 0
@@ -185,15 +187,15 @@ def split_video_mkvmerge(input_video_paths, scene_list, output_file_template,
         ret_val = invoke_command(call_list)
         if not suppress_output:
             print('')
-            logging.info('Average processing speed %.2f frames/sec.',
+            logger.info('Average processing speed %.2f frames/sec.',
                          float(total_frames) / (time.time() - processing_start_time))
     except CommandTooLong:
-        logging.error(COMMAND_TOO_LONG_STRING)
+        logger.error(COMMAND_TOO_LONG_STRING)
     except OSError:
-        logging.error('mkvmerge could not be found on the system.'
+        logger.error('mkvmerge could not be found on the system.'
                       ' Please install mkvmerge to enable video output support.')
     if ret_val != 0:
-        logging.error('Error splitting video (mkvmerge returned %d).', ret_val)
+        logger.error('Error splitting video (mkvmerge returned %d).', ret_val)
     return ret_val
 
 
@@ -226,7 +228,7 @@ def split_video_ffmpeg(input_video_paths, scene_list, output_file_template, vide
     if not input_video_paths or not scene_list:
         return None
 
-    logging.info(
+    logger.info(
         'Splitting input video%s using ffmpeg, output path template:\n  %s',
         's' if len(input_video_paths) > 1 else '', output_file_template)
 
@@ -236,7 +238,7 @@ def split_video_ffmpeg(input_video_paths, scene_list, output_file_template, vide
         #
         # Requires generating a temporary file list for ffmpeg to use as an input
         # (see https://trac.ffmpeg.org/wiki/Concatenate#samecodec for details).
-        logging.error(
+        logger.error(
             'Sorry, splitting multiple appended/concatenated input videos with'
             ' ffmpeg is not supported yet. This feature will be added to a future'
             ' version of PySceneDetect. In the meantime, you can try using the'
@@ -291,21 +293,21 @@ def split_video_ffmpeg(input_video_paths, scene_list, output_file_template, vide
                 ]
             ret_val = invoke_command(call_list)
             if not suppress_output and i == 0 and len(scene_list) > 1:
-                logging.info(
+                logger.info(
                     'Output from ffmpeg for Scene 1 shown above, splitting remaining scenes...')
             if ret_val != 0:
-                logging.error('Error splitting video (ffmpeg returned %d).', ret_val)
+                logger.error('Error splitting video (ffmpeg returned %d).', ret_val)
                 break
             if progress_bar:
                 progress_bar.update(duration.get_frames())
         if progress_bar:
             print('')
-            logging.info('Average processing speed %.2f frames/sec.',
+            logger.info('Average processing speed %.2f frames/sec.',
                          float(total_frames) / (time.time() - processing_start_time))
 
     except CommandTooLong:
-        logging.error(COMMAND_TOO_LONG_STRING)
+        logger.error(COMMAND_TOO_LONG_STRING)
     except OSError:
-        logging.error('ffmpeg could not be found on the system.'
+        logger.error('ffmpeg could not be found on the system.'
                       ' Please install ffmpeg to enable video output support.')
     return ret_val

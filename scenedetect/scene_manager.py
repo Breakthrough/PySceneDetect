@@ -72,6 +72,8 @@ from scenedetect.thirdparty.simpletable import SimpleTableCell, SimpleTableImage
 from scenedetect.thirdparty.simpletable import SimpleTableRow, SimpleTable, HTMLPage
 
 
+logger = logging.getLogger('pyscenedetect')
+
 
 ##
 ## SceneManager Helper Functions
@@ -326,7 +328,7 @@ def save_images(scene_list, video_manager, num_images=3, frame_margin=1,
 
     # Setup flags and init progress bar if available.
     completed = True
-    logging.info('Generating output images (%d per scene)...', num_images)
+    logger.info('Generating output images (%d per scene)...', num_images)
     progress_bar = None
     if show_progress and tqdm:
         progress_bar = tqdm(
@@ -429,7 +431,7 @@ def save_images(scene_list, video_manager, num_images=3, frame_margin=1,
                 progress_bar.update(1)
 
     if not completed:
-        logging.error('Could not generate all output images.')
+        logger.error('Could not generate all output images.')
 
     return image_filenames
 

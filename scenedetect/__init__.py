@@ -104,3 +104,49 @@ or visit the following URL: [ https://docs.python.org/3/license.html ]
 
 THE SOFTWARE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, EXPRESS OR IMPLIED.
 """
+
+import sys
+import logging
+from scenedetect.platform import get_and_create_path
+
+def init_logger(log_level=logging.INFO, show_stdout=False, log_file=None):
+    """ Initializes the Python logging module for PySceneDetect.
+
+    Mainly used by the command line interface, but can also be used by other modules
+    by calling init_logger(). The logger instance used is named 'pyscenedetect-logger'.
+
+    All existing log handlers are removed every time this function is invoked.
+
+    Arguments:
+      log_level: Verbosity of log messages.
+      quiet_mode: If True, no output will be generated to stdout.
+      log_file: File to also send messages to, in addition to stdout.
+    """
+    # Format of log messages depends on verbosity.
+    format_str = '[PySceneDetect] %(message)s'
+    if log_level == logging.DEBUG:
+        format_str = '%(levelname)s: %(module)s.%(funcName)s(): %(message)s'
+    # Get the named logger and remove any existing handlers.
+    logger = logging.getLogger('pyscenedetect')
+    logger.handlers.clear()
+
+    # Add stdout handler if required.
+    if show_stdout:
+        handler = logging.StreamHandler(stream=sys.stdout)
+        handler.setLevel(log_level)
+        handler.setFormatter(logging.Formatter(fmt=format_str))
+        logger.addHandler(handler)
+    # Add file handler if required.
+    if log_file:
+        log_file = get_and_create_path(log_file)
+        handler = logging.FileHandler(log_file)
+        handler.setLevel(log_level)
+        handler.setFormatter(logging.Formatter(fmt=format_str))
+        logger.addHandler(handler)
+    logger.disabled = True if not logger.handlers else False
+    if not logger.disabled:
+        logger.setLevel(log_level)
+    return logger
+
+
+init_logger()

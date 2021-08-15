@@ -58,7 +58,7 @@ from scenedetect.cli.context import contains_sequence_or_url
 from scenedetect.cli.context import parse_timecode
 
 from scenedetect.platform import get_and_create_path
-
+logger = logging.getLogger('pyscenedetect')
 
 def get_help_command_preface(command_name='scenedetect'):
     """ Preface/intro help message shown at the beginning of the help command. """
@@ -146,7 +146,7 @@ def duplicate_command(ctx, param_hint):
     error_strs.append('Error: Command %s specified multiple times.' % param_hint)
     error_strs.append('The %s command may appear only one time.')
 
-    logging.error('\n'.join(error_strs))
+    ctx.obj.logger.error('\n'.join(error_strs))
     raise click.BadParameter('\n  Command %s may only be specified once.' % param_hint,
                              param_hint='%s command' % param_hint)
 
@@ -215,9 +215,8 @@ def duplicate_command(ctx, param_hint):
 @click.option(
     '--quiet', '-q',
     is_flag=True, flag_value=True, help=
-    'Suppresses all output of PySceneDetect except for those from the specified'
-    ' commands. Equivalent to setting `--verbosity none`. Overrides the current verbosity'
-    ' level, even if `-v`/`--verbosity` is set.')
+    'Suppresses all output of PySceneDetect to the terminal/stdout. If a logfile is'
+    ' specified, it will still be generated with the specified verbosity.')
 @click.pass_context
 # pylint: disable=redefined-builtin
 def scenedetect_cli(ctx, input, output, framerate, downscale, frame_skip,
@@ -234,52 +233,36 @@ def scenedetect_cli(ctx, input, output, framerate, downscale, frame_skip,
 
     """
     ctx.call_on_close(ctx.obj.process_input)
+
     logging.disable(logging.NOTSET)
 
-    format_str = '[PySceneDetect] %(message)s'
-    if verbosity.lower() == 'none':
-        verbosity = None
-    elif verbosity.lower() == 'debug':
-        format_str = '%(levelname)s: %(module)s.%(funcName)s(): %(message)s'
+    verbosity = getattr(logging, verbosity.upper()) if verbosity is not None else None
+    scenedetect.init_logger(log_level=verbosity, show_stdout=not quiet, log_file=logfile)
 
-    if quiet:
-        verbosity = None
-
-    ctx.obj.quiet_mode = True if verbosity is None else False
+    ctx.obj.quiet_mode = True if quiet else False
     ctx.obj.output_directory = output
 
-    if logfile is not None:
-        logfile = get_and_create_path(logfile)
-        logging.basicConfig(
-            filename=logfile, filemode='a', format=format_str,
-            level=getattr(logging, verbosity.upper()) if verbosity is not None else verbosity)
-    elif verbosity is not None:
-        logging.basicConfig(format=format_str,
-                            level=getattr(logging, verbosity.upper()))
-    else:
-        logging.disable(logging.CRITICAL)
-
-    logging.info('PySceneDetect %s', scenedetect.__version__)
+    ctx.obj.logger.info('PySceneDetect %s', scenedetect.__version__)
 
     if stats is not None and frame_skip != 0:
         ctx.obj.options_processed = False
         error_strs = [
             'Unable to detect scenes with stats file if frame skip is not 1.',
             '  Either remove the -fs/--frame-skip option, or the -s/--stats file.\n']
-        logging.error('\n'.join(error_strs))
+        ctx.obj.logger.error('\n'.join(error_strs))
         raise click.BadParameter(
             '\n  Combining the -s/--stats and -fs/--frame-skip options is not supported.',
             param_hint='frame skip + stats file')
 
     try:
         if ctx.obj.output_directory is not None:
-            logging.info('Output directory set:\n  %s', ctx.obj.output_directory)
+            ctx.obj.logger.info('Output directory set:\n  %s', ctx.obj.output_directory)
         ctx.obj.parse_options(
             input_list=input, framerate=framerate, stats_file=stats, downscale=downscale,
             frame_skip=frame_skip, min_scene_len=min_scene_len, drop_short_scenes=drop_short_scenes)
 
     except Exception as ex:
-        logging.error('Could not parse CLI options.: %s', ex)
+        ctx.obj.logger.error('Could not parse CLI options.: %s', ex)
         raise
 
 
@@ -412,7 +395,7 @@ def detect_content_command(ctx, threshold, luma_only):
 
     min_scene_len = 0 if ctx.obj.drop_short_scenes else ctx.obj.min_scene_len
     luma_mode_str = '' if not luma_only else ', luma_only mode'
-    logging.debug('Detecting content, parameters:\n'
+    ctx.obj.logger.debug('Detecting content, parameters:\n'
                   '  threshold: %d, min-scene-len: %d%s',
                   threshold, min_scene_len, luma_mode_str)
 
@@ -462,7 +445,7 @@ def detect_adaptive_command(ctx, threshold, min_scene_len, min_delta_hsv,
     min_scene_len = parse_timecode(ctx.obj, min_scene_len)
     luma_mode_str = '' if not luma_only else ', luma_only mode'
 
-    logging.debug('Adaptively detecting content, parameters:\n'
+    ctx.obj.logger.debug('Adaptively detecting content, parameters:\n'
                   '  threshold: %d, min-scene-len: %d%s',
                   threshold, min_scene_len, luma_mode_str)
 
@@ -516,7 +499,7 @@ def detect_threshold_command(ctx, threshold, fade_bias, add_last_scene,
 
     min_scene_len = 0 if ctx.obj.drop_short_scenes else ctx.obj.min_scene_len
 
-    logging.debug('Detecting threshold, parameters:\n'
+    ctx.obj.logger.debug('Detecting threshold, parameters:\n'
                   '  threshold: %d, min-scene-len: %d, fade-bias: %d,\n'
                   '  add-last-scene: %s, min-percent: %d, block-size: %d',
                   threshold, min_scene_len, fade_bias,
@@ -665,7 +648,7 @@ def split_video_command(ctx, output, filename, high_quality, override_args, quie
     if contains_sequence_or_url(ctx.obj.video_manager.get_video_paths()):
         ctx.obj.options_processed = False
         error_str = 'The save-images command is incompatible with image sequences/URLs.'
-        logging.error(error_str)
+        ctx.obj.logger.error(error_str)
         raise click.BadParameter(error_str, param_hint='save-images')
 
     ctx.obj.split_video = True
@@ -675,9 +658,9 @@ def split_video_command(ctx, output, filename, high_quality, override_args, quie
     if copy:
         ctx.obj.split_mkvmerge = True
         if high_quality:
-            logging.warning('-hq/--high-quality flag ignored due to -c/--copy.')
+            ctx.obj.logger.warning('-hq/--high-quality flag ignored due to -c/--copy.')
         if override_args:
-            logging.warning('-f/--ffmpeg-args option ignored due to -c/--copy.')
+            ctx.obj.logger.warning('-f/--ffmpeg-args option ignored due to -c/--copy.')
     if not override_args:
         if rate_factor is None:
             rate_factor = 22 if not high_quality else 17
@@ -686,11 +669,11 @@ def split_video_command(ctx, output, filename, high_quality, override_args, quie
         override_args = ('-c:v libx264 -preset {PRESET} -crf {RATE_FACTOR} -c:a aac'.format(
             PRESET=preset, RATE_FACTOR=rate_factor))
     if not copy:
-        logging.info('FFmpeg codec args set: %s', override_args)
+        ctx.obj.logger.info('FFmpeg codec args set: %s', override_args)
     if filename:
-        logging.info('Video output file name format: %s', filename)
+        ctx.obj.logger.info('Video output file name format: %s', filename)
     if ctx.obj.split_directory is not None:
-        logging.info('Video output path set:  \n%s', ctx.obj.split_directory)
+        ctx.obj.logger.info('Video output path set:  \n%s', ctx.obj.split_directory)
     ctx.obj.split_args = override_args
 
 

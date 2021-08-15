@@ -55,6 +55,7 @@ from scenedetect.platform import get_csv_writer
 
 # pylint: disable=useless-super-delegation
 
+logger = logging.getLogger('pyscenedetect')
 
 ##
 ## StatsManager CSV File Column Names (Header Row)
@@ -240,7 +241,7 @@ class StatsManager(object):
             csv_writer.writerow(
                 [COLUMN_NAME_FRAME_NUMBER, COLUMN_NAME_TIMECODE] + metric_keys)
             frame_keys = sorted(self._frame_metrics.keys())
-            logging.info("Writing %d frames to CSV...", len(frame_keys))
+            logger.info("Writing %d frames to CSV...", len(frame_keys))
             for frame_key in frame_keys:
                 frame_timecode = base_timecode + frame_key
                 csv_writer.writerow(
@@ -319,7 +320,7 @@ class StatsManager(object):
                         raise StatsFileCorrupt('Corrupted value in stats file: %s' % metric_str)
             self.set_metrics(int(row[0]), metric_dict)
             num_frames += 1
-        logging.info('Loaded %d metrics for %d frames.', num_metrics, num_frames)
+        logger.info('Loaded %d metrics for %d frames.', num_metrics, num_frames)
         if reset_save_required:
             self._metrics_updated = False
         return num_frames
