@@ -272,7 +272,7 @@ def init_logger(log_level=logging.INFO, show_stdout=False, log_file=None):
         format_str = '%(levelname)s: %(module)s.%(funcName)s(): %(message)s'
     # Get the named logger and remove any existing handlers.
     logger_instance = logging.getLogger('pyscenedetect')
-    logger_instance.handlers.clear()
+    logger_instance.handlers = []
     logger_instance.setLevel(log_level)
     # Add stdout handler if required.
     if show_stdout:
