@@ -42,8 +42,6 @@ module and the scenedetect.cli.CliContext object.
 
 # Standard Library Imports
 from __future__ import print_function
-import sys
-import string
 import logging
 
 # Third-Party Library Imports
@@ -52,7 +50,6 @@ import click
 # PySceneDetect Library Imports
 import scenedetect
 
-from scenedetect.cli.context import CliContext
 from scenedetect.cli.context import check_split_video_requirements
 from scenedetect.cli.context import contains_sequence_or_url
 from scenedetect.cli.context import parse_timecode
