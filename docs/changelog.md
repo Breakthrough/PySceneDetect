@@ -16,16 +16,16 @@ PySceneDetect Releases
 
 #### Changelog
 
- * [feature] New adaptive content detector algorithm `detect-adaptive` ([#153](https://github.com/Breakthrough/PySceneDetect/issues/153)thanks @scarwire and @wjs018)
+ * [feature] New adaptive content detector algorithm `detect-adaptive` ([#153](https://github.com/Breakthrough/PySceneDetect/issues/153), thanks @scarwire and @wjs018)
  * [feature] Images generated with the `save-images` command (`scene_manager.save_images()` function in the Python API) can now be scaled or resized ([#160](https://github.com/Breakthrough/PySceneDetect/issues/160) and [PR #203](https://github.com/Breakthrough/PySceneDetect/pull/203), thanks @wjs018)
      * Images can be resized by a constant scaling factory using `-s`/`--scale` (e.g. `--scale 0.5` shrinks the height/width by half)
      * Images can be resized to a specified height (`-h`/`--height`) and/or width (`-w`/`--width`), in pixels; if only one is specified, the aspect ratio of the original video is kept
  * [api] Calling `seek()` on a `VideoManager` will now respect the end time if set
- * [api] The `split_video_` functions now return the exit code of invoking `ffmpeg` or `mkvmerge` ([#209](https://github.com/Breakthrough/PySceneDetect/issues/209), thanks @AdrienLF)(https://github.com/Breakthrough/PySceneDetect/issues/211), thanks @jeremymeyers)
+ * [api] The `split_video_` functions now return the exit code of invoking `ffmpeg` or `mkvmerge` ([#209](https://github.com/Breakthrough/PySceneDetect/issues/209), thanks  @AdrienLF)
  * [api] Removed the `min_percent` argument from `ThresholdDetector` as was not providing any performance benefit for the majority of use cases ([#178](https://github.com/Breakthrough/PySceneDetect/issues/178))
- * [bugfix] The `detect-threshold` command now works properly with a statsfile ([#211](https://github.com/Breakthrough/PySceneDetect/issues/211))
+ * [bugfix] The `detect-threshold` command now works properly with a statsfile ([#211](https://github.com/Breakthrough/PySceneDetect/issues/211), thanks @jeremymeyers)
  * [bugfix] Fixed crash due to unhandled `TypeError` exception when using non-PyPI OpenCV packages from certain Linux distributions ([#220](https://github.com/Breakthrough/PySceneDetect/issues/220))
- * [bugfix] A warning is now displayed for videos which may not be decoded correctly, esp. VP9 ([#86](https://github.com/Breakthrough/PySceneDetect/issues/86))
+ * [bugfix] A warning is now displayed for videos which may not be decoded correctly, esp. VP9 ([#86](https://github.com/Breakthrough/PySceneDetect/issues/86), thanks @wjs018)
  * [api] A named logger is now used for both API and CLI logging instead of the root logger ([#205](https://github.com/Breakthrough/PySceneDetect/issues/205))
 
 #### Known Issues
