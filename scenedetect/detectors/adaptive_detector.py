@@ -32,7 +32,7 @@ threshold isn't fixed, but is a rolling average of adjacent frame changes. This 
 help mitigate false detections in situations such as fast camera motions.
 
 This detector is available from the command-line interface by using the
-`adaptive-detect-content` command.
+`detect-adaptive` command.
 """
 
 # PySceneDetect Library Imports
