@@ -3,9 +3,12 @@ to the terms of this license.  If you do not agree to any of these
 terms or licenses, do not download, install, copy, or use the contents
 or any other material included in in distribution.
 
+All rights reserved.
+
 -----------------------------------------------------------------------
 
                   PySceneDetect Resources License
+          < https://github.com/Breakthrough/PySceneDetect/ >
           < http://www.bcastell.com/projects/pyscenedetect >
 
 The contents of this distribution, except where explicitly stated
@@ -13,8 +16,10 @@ otherwise, are copyrighted works, and provided for testing purposes
 only.  Distribution without modification, in whole or part, is
 permitted if a copy of this text is included with the distribution.
 
+The material in this repository falls under fair-use guidelines. If you
+are the copyright holder of any material and feel this is not the case,
+you may create a new issue at the following URL:
+
+https://github.com/Breakthrough/PySceneDetect/issues
+
 -----------------------------------------------------------------------
-
-Copyright (C) 2012-2016, Brandon Castellano.
-All rights reserved.
-
