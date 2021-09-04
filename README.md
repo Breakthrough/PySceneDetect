@@ -8,7 +8,5 @@ This is the `resources` branch of PySceneDetect, containing media including vide
 
 ----------------------------------------------------------
 
-Copyright (C) 2012-2016 Brandon Castellano.
-All rights reserved.
-
 Except where explicitly stated, all files in this branch are copyrighted (see the `LICENSE` file for details).
+All rights reserved.
