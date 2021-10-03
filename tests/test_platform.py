@@ -50,7 +50,10 @@ from scenedetect.platform import get_aspect_ratio
 def test_invoke_command():
     """ Ensures the function exists and is callable without throwing
     an exception. """
-    invoke_command(['echo'])
+    if platform.system() == 'Windows':
+        invoke_command(['cmd'])
+    else:
+        invoke_command(['echo'])
 
 
 def test_long_command():
