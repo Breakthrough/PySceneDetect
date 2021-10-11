@@ -77,12 +77,12 @@ class ContentDetector(SceneDetector):
 
 
     def calculate_frame_score(self, frame_num, curr_hsv, last_hsv):
-
+        # type: (int, List[numpy.ndarray], List[numpy.ndarray]) -> float
+        curr_hsv = [x.astype(numpy.int32) for x in curr_hsv]
+        last_hsv = [x.astype(numpy.int32) for x in last_hsv]
         delta_hsv = [0, 0, 0, 0]
         for i in range(3):
             num_pixels = curr_hsv[i].shape[0] * curr_hsv[i].shape[1]
-            curr_hsv[i] = curr_hsv[i].astype(numpy.int32)
-            last_hsv[i] = last_hsv[i].astype(numpy.int32)
             delta_hsv[i] = numpy.sum(
                 numpy.abs(curr_hsv[i] - last_hsv[i])) / float(num_pixels)
 
