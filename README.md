@@ -7,7 +7,7 @@ Video Scene Cut Detection and Analysis Tool
 [![Build Status](https://img.shields.io/travis/com/Breakthrough/PySceneDetect/master)](https://travis-ci.com/github/Breakthrough/PySceneDetect) [![PyPI Status](https://img.shields.io/pypi/status/scenedetect.svg)](https://pypi.python.org/pypi/scenedetect/) [![PyPI Version](https://img.shields.io/pypi/v/scenedetect?color=blue)](https://pypi.python.org/pypi/scenedetect/)  [![PyPI License](https://img.shields.io/pypi/l/scenedetect.svg)](http://pyscenedetect.readthedocs.org/en/latest/copyright/)
 
 
-### Latest Release: v0.5.6 (August 15, 2021)
+### Latest Release: v0.5.6.1 (October 11, 2021)
 
 **Main Webpage**:  [py.scenedetect.com](http://py.scenedetect.com)
 
@@ -87,7 +87,7 @@ See [the manual](https://pyscenedetect.readthedocs.io/projects/Manual/en/latest/
 
 ----------------------------------------------------------
 
-PySceneDetect is a command-line tool and Python library, which uses OpenCV to analyze a video to find scene changes or cuts.  If `ffmpeg` or `mkvmerge` is installed, the video can also be split into scenes automatically.  A frame-by-frame analysis can also be generated for a video, to help with determining optimal threshold values or detecting patterns/other analysis methods for a particular video.  See [the Usage documentation](https://pyscenedetect.readthedocs.io/en/latest/examples/usage/) for details.
+PySceneDetect is a command-line tool and Python library, which uses OpenCV to analyze a video to find each shot change (or "cut"/"scene").  If `ffmpeg` or `mkvmerge` is installed, the video can also be split into scenes automatically.  A frame-by-frame analysis can also be generated for a video, to help with determining optimal threshold values or detecting patterns/other analysis methods for a particular video.  See [the Usage documentation](https://pyscenedetect.readthedocs.io/en/latest/examples/usage/) for details.
 
 There are two main detection methods PySceneDetect uses: `detect-threshold` (comparing each frame to a set black level, useful for detecting cuts and fades to/from black), and `detect-content` (compares each frame sequentially looking for changes in content, useful for detecting fast cuts between video scenes, although slower to process).  Each mode has slightly different parameters, and is described in detail below.
 

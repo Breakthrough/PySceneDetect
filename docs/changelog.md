@@ -4,7 +4,11 @@ PySceneDetect Releases
 
 ## PySceneDetect 0.5
 
-### 0.5.6 (August 15, 2021)  &nbsp;<span class="fa fa-tags"></span>
+### 0.5.6.1 (October 11, 2021)
+
+ * Fix crash when using `detect-content` or `detect-adaptive` with latest version of OpenCV (thanks @bilde2910)
+
+### 0.5.6 (August 15, 2021)
 
 #### Release Notes
 

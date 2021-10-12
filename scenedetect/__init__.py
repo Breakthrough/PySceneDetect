@@ -52,7 +52,7 @@ from scenedetect.detectors import AdaptiveDetector
 
 # Used for module identification and when printing version & about info
 # (e.g. calling `scenedetect version` or `scenedetect about`).
-__version__ = 'v0.5.6'
+__version__ = 'v0.5.6.1'
 
 # About & copyright message string shown for the 'about' CLI command (scenedetect about).
 
