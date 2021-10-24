@@ -1,0 +1,7 @@
+This video contains 30 frames each tagged with the frame # (starting from 1) and the presentation time.
+It's framerate is 10fps, thus the presentation length of each frame is 0.1 seconds.
+
+The first frame, frame #1, has a PTS of 0s.
+The last frame, frame #30, has a PTS of 2.9s with a duration of 0.1s (thus the total video length is 3.0s).
+
+This is used for testing frame-accurate splits as well as indexing errors for other commands, e.g. save-images.
