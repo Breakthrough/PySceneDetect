@@ -20,6 +20,15 @@ ContentDetector
 
 
 =========================================
+AdaptiveDetector
+=========================================
+
+.. automodule:: scenedetect.detectors.adaptive_detector
+   :members:
+   :undoc-members:
+
+
+=========================================
 ThresholdDetector
 =========================================
 

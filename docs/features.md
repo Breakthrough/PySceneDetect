@@ -41,6 +41,7 @@
 
  - **threshold scene detection** (`detect-threshold`): analyzes video for changes in average frame intensity/brightness
  - **content-aware scene detection** (`detect-content`): based on changes between frames in the HSV color space
+ - **adaptive content scene detection** (`detect-adaptive`): based on `detect-content` but handles fast camera movement better in some cases
 
 For a detailed explanation of how a particular scene detection method/algorithm works, see the [Scene Detection Method Details Section](reference/detection-methods.md) in the Documentation & Reference.
 

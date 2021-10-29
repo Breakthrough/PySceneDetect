@@ -5,10 +5,13 @@ This page discusses the scene detection methods/algorithms available for use in 
 
 ## Content-Aware Detector
 
-The content-aware scene detector (`detect-content`) works the way most people think of "cuts" between scenes in a movie - given two frames, do they belong to the same scene, or different scenes?  The content-aware scene detector finds areas where the *difference* between two subsequent frames exceeds the threshold value that is set (a good value to start with is `--threshold 30`).
+The content-aware scene detector (`detect-content`) detects [jump cuts](https://en.wikipedia.org/wiki/Jump_cut) in the input video.  This is typically what people think of as "cuts" between scenes in a movie - given two adjacent frames, do they belong to the same scene?  The content-aware scene detector finds areas where the *difference* between two subsequent frames exceeds the threshold value that is set (a good value to start with is `--threshold 27`).
 
-This allows you to detect cuts between scenes both containing content, rather than how most traditional scene detection methods work.  With a properly set threshold, this method can even detect minor, abrupt changes, such as [jump cuts](https://en.wikipedia.org/wiki/Jump_cut) in film.
+Internally, this detector functions by converting the colorspace of each decoded frame from [RGB](https://en.wikipedia.org/wiki/RGB_color_space) into [HSV](https://en.wikipedia.org/wiki/HSL_and_HSV).  It then takes the average difference across all channels (or optionally just the *value* channel) from frame to frame.  When this exceeds a set threshold, a scene change is triggered.
 
+## Adaptive Content Detector
+
+The adaptive content detector (`detect-adaptive`) compares the difference in content between adjacent frames similar to `detect-content` but instead using a rolling average of adjacent frame changes. This helps mitigate false detections where there is fast camera motion.
 
 ## Threshold Detector
 
