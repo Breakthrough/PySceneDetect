@@ -597,16 +597,16 @@ class SceneManager(object):
                 for start, end in self._event_list]
 
 
-    def _process_frame(self, frame_num, frame_im, callback=None):
-        # type(int, numpy.ndarray) -> None
+    def _process_frame(self, frame_num, frame_im, total_frames, callback=None):
+        # type(int, numpy.ndarray, int) -> None
         """ Adds any cuts detected with the current frame to the cutting list. """
         for detector in self._detector_list:
-            cuts = detector.process_frame(frame_num, frame_im)
+            cuts = detector.process_frame(frame_num, frame_im, total_frames)
             if cuts and callback:
                 callback(frame_im, frame_num)
             self._cutting_list += cuts
         for detector in self._sparse_detector_list:
-            events = detector.process_frame(frame_num, frame_im)
+            events = detector.process_frame(frame_num, frame_im, total_frames)
             if events and callback:
                 callback(frame_im, frame_num)
             self._event_list += events
@@ -720,7 +720,7 @@ class SceneManager(object):
 
                 if not ret_val:
                     break
-                self._process_frame(self._num_frames + start_frame, frame_im, callback)
+                self._process_frame(self._num_frames + start_frame, frame_im, total_frames, callback)
 
                 curr_frame += 1
                 self._num_frames += 1

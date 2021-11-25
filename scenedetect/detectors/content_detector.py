@@ -98,8 +98,8 @@ class ContentDetector(SceneDetector):
         return delta_content if not self.luma_only else delta_v
 
 
-    def process_frame(self, frame_num, frame_img):
-        # type: (int, numpy.ndarray) -> List[int]
+    def process_frame(self, frame_num, frame_img, total_frames):
+        # type: (int, numpy.ndarray, int) -> List[int]
         """ Similar to ThresholdDetector, but using the HSV colour space DIFFERENCE instead
         of single-frame RGB/grayscale intensity (thus cannot detect slow fades with this method).
 
@@ -145,7 +145,8 @@ class ContentDetector(SceneDetector):
             # We consider any frame over the threshold a new scene, but only if
             # the minimum scene length has been reached (otherwise it is ignored).
             if frame_score >= self.threshold and (
-                    (frame_num - self.last_scene_cut) >= self.min_scene_len):
+                    (frame_num - self.last_scene_cut) >= self.min_scene_len) and (
+                        (total_frames - frame_num) >= self.min_scene_len):
                 cut_list.append(frame_num)
                 self.last_scene_cut = frame_num
 

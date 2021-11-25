@@ -74,8 +74,8 @@ class AdaptiveDetector(ContentDetector):
         """
         return True
 
-    def process_frame(self, frame_num, frame_img):
-        # type: (int, numpy.ndarray) -> List[int]
+    def process_frame(self, frame_num, frame_img, total_frames):
+        # type: (int, numpy.ndarray, int) -> List[int]
         """ Similar to ThresholdDetector, but using the HSV colour space DIFFERENCE instead
         of single-frame RGB/grayscale intensity (thus cannot detect slow fades with this method).
 

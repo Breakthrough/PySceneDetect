@@ -114,8 +114,8 @@ class ThresholdDetector(SceneDetector):
         return self._metric_keys
 
 
-    def process_frame(self, frame_num, frame_img):
-        # type: (int, Optional[numpy.ndarray]) -> List[int]
+    def process_frame(self, frame_num, frame_img, total_frames):
+        # type: (int, Optional[numpy.ndarray], int) -> List[int]
         """
         Args:
             frame_num (int): Frame number of frame that is being passed.
@@ -159,7 +159,8 @@ class ThresholdDetector(SceneDetector):
                 self.last_fade['frame'] = frame_num
             elif self.last_fade['type'] == 'out' and frame_avg >= self.threshold:
                 # Only add the scene if min_scene_len frames have passed.
-                if (frame_num - self.last_scene_cut) >= self.min_scene_len:
+                if (frame_num - self.last_scene_cut) >= self.min_scene_len and (
+                    (total_frames - frame_num) >= self.min_scene_len):
                     # Just faded into a new scene, compute timecode for the scene
                     # split based on the fade bias.
                     f_out = self.last_fade['frame']
