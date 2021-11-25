@@ -123,8 +123,8 @@ class SparseSceneDetector(SceneDetector):
     An example of a SparseSceneDetector is the MotionDetector.
     """
 
-    def process_frame(self, frame_num, frame_img):
-        # type: (int, numpy.ndarray) -> List[Tuple[int, int]]
+    def process_frame(self, frame_num, frame_img, total_frames):
+        # type: (int, numpy.ndarray, int) -> List[Tuple[int, int]]
         """ Process Frame: Computes/stores metrics and detects any scene changes.
 
         Prototype method, no actual detection.
