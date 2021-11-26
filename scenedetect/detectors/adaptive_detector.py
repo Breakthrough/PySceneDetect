@@ -94,7 +94,7 @@ class AdaptiveDetector(ContentDetector):
         # returned cuts
         if self.is_processing_required(frame_num):
             super(AdaptiveDetector, self).process_frame(
-                frame_num=frame_num, frame_img=frame_img)
+                frame_num=frame_num, frame_img=frame_img, total_frames=total_frames)
 
         return []
 
