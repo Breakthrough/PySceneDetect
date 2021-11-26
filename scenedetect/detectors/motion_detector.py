@@ -81,7 +81,7 @@ class MotionDetector(SparseSceneDetector):
         self.last_motion_frame_index = -1
         """
 
-    def process_frame(self, frame_num, frame_img, total_frames):
+    def process_frame(self, frame_num, frame_img, end_frame):
         # TODO.
         """
         frame_grayscale = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)

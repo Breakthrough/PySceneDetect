@@ -74,7 +74,7 @@ class AdaptiveDetector(ContentDetector):
         """
         return True
 
-    def process_frame(self, frame_num, frame_img, total_frames):
+    def process_frame(self, frame_num, frame_img, end_frame):
         # type: (int, numpy.ndarray, int) -> List[int]
         """ Similar to ThresholdDetector, but using the HSV colour space DIFFERENCE instead
         of single-frame RGB/grayscale intensity (thus cannot detect slow fades with this method).
@@ -94,7 +94,7 @@ class AdaptiveDetector(ContentDetector):
         # returned cuts
         if self.is_processing_required(frame_num):
             super(AdaptiveDetector, self).process_frame(
-                frame_num=frame_num, frame_img=frame_img, total_frames=total_frames)
+                frame_num=frame_num, frame_img=frame_img, end_frame=end_frame)
 
         return []
 
