@@ -66,7 +66,7 @@ def find_scenes(video_path, threshold=30.0):
         ContentDetector(threshold=threshold))
 
     # Improve processing speed by downscaling before processing.
-    video_manager.set_downscale_factor()
+    scene_manager.auto_downscale = True
 
     # Start the video manager and perform the scene detection.
     video_manager.start()

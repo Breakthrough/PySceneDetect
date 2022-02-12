@@ -23,7 +23,6 @@
 # ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-
 """ ``scenedetect`` Module
 
 This is the main PySceneDetect module, containing imports of all classes
@@ -40,27 +39,19 @@ This file also contains the PySceneDetect version string (displayed when calling
 # scenedetect.SceneManager instead of scenedetect.scene_manager.SceneManager).
 from scenedetect.scene_manager import SceneManager
 from scenedetect.frame_timecode import FrameTimecode
-from scenedetect.video_manager import VideoManager
+from scenedetect.video_stream import VideoStream
 from scenedetect.stats_manager import StatsManager
-
-# We also bring the detectors into the main scenedetect package namespace
-# for convenience as well. Examples still reference the full package.
-from scenedetect.detectors import ThresholdDetector
-from scenedetect.detectors import ContentDetector
-from scenedetect.detectors import AdaptiveDetector
-
 
 # Used for module identification and when printing version & about info
 # (e.g. calling `scenedetect version` or `scenedetect about`).
-__version__ = 'v0.5.6.1'
-
+__version__ = 'v0.6-dev'
 # About & copyright message string shown for the 'about' CLI command (scenedetect about).
 
 ABOUT_STRING = """
 Site/Updates: https://github.com/Breakthrough/PySceneDetect/
 Documentation: http://pyscenedetect.readthedocs.org/
 
-Copyright (C) 2014-2021 Brandon Castellano. All rights reserved.
+Copyright (C) 2014-2022 Brandon Castellano. All rights reserved.
 
 PySceneDetect is released under the BSD 3-Clause license. See the
 included LICENSE file or visit the PySceneDetect website for details.
@@ -104,3 +95,8 @@ or visit the following URL: [ https://docs.python.org/3/license.html ]
 
 THE SOFTWARE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, EXPRESS OR IMPLIED.
 """
+
+#
+# TODO(v1.0): Add a high level `get_scenes` / `get_cuts` function which acts like the API test.
+# Only take in a video path, statsfile, threshold, min_scene_len, fps, and an optional detector.
+#

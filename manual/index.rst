@@ -4,19 +4,17 @@
 
 
 #######################################################################
-PySceneDetect v0.5.6.1 Manual
+PySceneDetect Manual
 #######################################################################
 
-This manual refers to both the PySceneDetect
-command-line interface (the `scenedetect` command) and the PySceneDetect Python API
-(the `scenedetect` module).
+.. warning::
 
-Information regarding installing/downloading PySceneDetect or obtaining the latest
-release can be found at
-`scenedetect.com <http://scenedetect.com/>`_.  Both Python 2.7 and 3.x are supported,
-however it is suggested to use or migrate to Python 3.x whenever possible, as it
-provides better overall performance.  Python 2.7 support may be dropped sometime
-in 2021 (possibly earlier).
+    Version 1.0 is under development. This manual may be outdated or incorrect in places.
+
+This manual refers to both the PySceneDetect command-line interface (the `scenedetect`
+command) and the PySceneDetect Python API (the `scenedetect` module).  Information
+regarding installing/downloading PySceneDetect or obtaining the latest release can be
+found at `scenedetect.com <http://scenedetect.com/>`_.
 
 PySceneDetect requires `ffmpeg` or `mkvmerge` for video splitting support.
 
@@ -57,8 +55,10 @@ Table of Contents
 
     api
     api/frame_timecode
-    api/video_manager
+    api/video_stream
+    api/backends
     api/scene_manager
+    api/scene_list
     api/stats_manager
     api/scene_detector
     api/detectors

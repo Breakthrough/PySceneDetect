@@ -37,9 +37,6 @@ Unit tests for the FrameTimecode object can be found in `tests/test_timecode.py`
 # Standard Library Imports
 import math
 
-# PySceneDetect Library Imports
-from scenedetect.platform import STRING_TYPE
-
 
 MINIMUM_FRAMES_PER_SECOND_FLOAT = 1.0 / 1000.0
 MINIMUM_FRAMES_PER_SECOND_DELTA_FLOAT = 1.0 / 100000
@@ -109,7 +106,7 @@ class FrameTimecode(object):
             self.framerate = float(fps)
 
         # Process the timecode value, storing it as an exact number of frames.
-        if isinstance(timecode, (str, STRING_TYPE)):
+        if isinstance(timecode, str):
             self.frame_num = self._parse_timecode_string(timecode)
         else:
             self.frame_num = self._parse_timecode_number(timecode)
@@ -346,7 +343,7 @@ class FrameTimecode(object):
         elif isinstance(other, float):
             self.frame_num -= self._seconds_to_frames(other)
         else:
-            raise TypeError('Unsupported type for performing subtraction with FrameTimecode.')
+            raise TypeError('Unsupported type for performing subtraction with FrameTimecode: %s' % type(other))
         if self.frame_num < 0:
             self.frame_num = 0
         return self
@@ -376,7 +373,7 @@ class FrameTimecode(object):
         elif other is None:
             return False
         else:
-            raise TypeError('Unsupported type for performing == with FrameTimecode.')
+            raise TypeError('Unsupported type for performing == with FrameTimecode: %s' % type(other))
 
 
     def __ne__(self, other):
@@ -401,7 +398,7 @@ class FrameTimecode(object):
         #elif other is None:
         #    return False
         else:
-            raise TypeError('Unsupported type for performing < with FrameTimecode.')
+            raise TypeError('Unsupported type for performing < with FrameTimecode: %s' % type(other))
 
 
     def __le__(self, other):
@@ -421,7 +418,7 @@ class FrameTimecode(object):
         #elif other is None:
         #    return False
         else:
-            raise TypeError('Unsupported type for performing <= with FrameTimecode.')
+            raise TypeError('Unsupported type for performing <= with FrameTimecode: %s' % type(other))
 
 
     def __gt__(self, other):
@@ -441,8 +438,8 @@ class FrameTimecode(object):
         #elif other is None:
         #    return False
         else:
-            raise TypeError('Unsupported type (%s) for performing > with FrameTimecode.' %
-                            type(other).__name__)
+            raise TypeError('Unsupported type for performing > with FrameTimecode: %s' %
+                            type(other))
 
 
     def __ge__(self, other):
@@ -462,9 +459,10 @@ class FrameTimecode(object):
         #elif other is None:
         #    return False
         else:
-            raise TypeError('Unsupported type for performing >= with FrameTimecode.')
+            raise TypeError('Unsupported type for performing >= with FrameTimecode: %s' % type(other))
 
 
+    # TODO: __int__ and __float__ should be removed.
 
     def __int__(self):
         return self.frame_num
@@ -476,4 +474,7 @@ class FrameTimecode(object):
         return self.get_timecode()
 
     def __repr__(self):
-        return 'FrameTimecode(frame=%d, fps=%f)' % (self.frame_num, self.framerate)
+        return '%s [frame=%d, fps=%.3f]' % (self.get_timecode(), self.frame_num, self.framerate)
+
+    def __hash__(self):
+        return self.frame_num

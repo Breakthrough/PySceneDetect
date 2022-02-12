@@ -26,9 +26,9 @@ copyright = '2014-2021, Brandon Castellano'
 author = 'Brandon Castellano'
 
 # The short X.Y version
-version = ''
+version = '0.6'
 # The full version, including alpha/beta/rc tags
-release = 'v0.5.6.1'
+release = 'v0.6-dev'
 
 
 # -- General configuration ---------------------------------------------------

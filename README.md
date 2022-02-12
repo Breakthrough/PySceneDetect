@@ -4,14 +4,17 @@
 Video Scene Cut Detection and Analysis Tool
 ----------------------------------------------------------
 
-[![Build Status](https://img.shields.io/travis/com/Breakthrough/PySceneDetect/master)](https://travis-ci.com/github/Breakthrough/PySceneDetect) [![PyPI Status](https://img.shields.io/pypi/status/scenedetect.svg)](https://pypi.python.org/pypi/scenedetect/) [![LGTM Analysis](https://img.shields.io/lgtm/grade/python/github/Breakthrough/PySceneDetect.svg)](https://lgtm.com/projects/g/Breakthrough/PySceneDetect) [![PyPI Version](https://img.shields.io/pypi/v/scenedetect?color=blue)](https://pypi.python.org/pypi/scenedetect/)  [![PyPI License](https://img.shields.io/pypi/l/scenedetect.svg)](http://pyscenedetect.readthedocs.org/en/latest/copyright/)
+[![Build Status](https://img.shields.io/travis/com/Breakthrough/PySceneDetect/v0.6)](https://travis-ci.com/github/Breakthrough/PySceneDetect) [![PyPI Status](https://img.shields.io/pypi/status/scenedetect.svg)](https://pypi.python.org/pypi/scenedetect/) [![LGTM Analysis](https://img.shields.io/lgtm/grade/python/github/Breakthrough/PySceneDetect.svg)](https://lgtm.com/projects/g/Breakthrough/PySceneDetect) [![PyPI Version](https://img.shields.io/pypi/v/scenedetect?color=blue)](https://pypi.python.org/pypi/scenedetect/)  [![PyPI License](https://img.shields.io/pypi/l/scenedetect.svg)](http://pyscenedetect.readthedocs.org/en/latest/copyright/)
 
+----------------------------------------------------------
 
-### Latest Release: v0.5.6.1 (October 11, 2021)
+### Version: v0.6-dev (TBD)
 
-**Main Webpage**:  [py.scenedetect.com](http://py.scenedetect.com)
+**Website**:  http://www.scenedetect.com
 
-**Documentation**:  [manual.scenedetect.com](http://manual.scenedetect.com)
+**Getting Started**: [Usage Example](https://pyscenedetect.readthedocs.io/en/latest/examples/usage-example/)
+
+**Documentation**:  http://manual.scenedetect.com
 
 **Discord**: https://discord.gg/H83HbJngk7
 
@@ -52,26 +55,18 @@ the `threshold` argument to modify the sensitivity of the scene detection.
 
 ```python
 # Standard PySceneDetect imports:
-from scenedetect import VideoManager
-from scenedetect import SceneManager
-
+from scenedetect import open_video, SceneManager
 # For content-aware scene detection:
 from scenedetect.detectors import ContentDetector
 
 def find_scenes(video_path, threshold=30.0):
-    # Create our video & scene managers, then add the detector.
-    video_manager = VideoManager([video_path])
+    # Open our video, create a scene manager, and add a detector.
+    video = open_video(path=video_path)
     scene_manager = SceneManager()
     scene_manager.add_detector(
         ContentDetector(threshold=threshold))
-
-    # Improve processing speed by downscaling before processing.
-    video_manager.set_downscale_factor()
-
-    # Start the video manager and perform the scene detection.
-    video_manager.start()
-    scene_manager.detect_scenes(frame_source=video_manager)
-
+    # Process all frames in the video.
+    scene_manager.detect_scenes(video)
     # Each returned scene is a tuple of the (start, end) timecode.
     return scene_manager.get_scene_list()
 ```

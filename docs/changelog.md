@@ -2,6 +2,48 @@
 PySceneDetect Releases
 ==========================================================
 
+## PySceneDetect 0.6
+
+### 0.6 (TBD)
+
+#### Release Notes
+
+PySceneDetect v0.6 is a major stepping-stone update towards the planned stable v1.0 API.  Changes to the command-line are minor and not expected to break most workflows.  There are several breaking changes to the Python API, and support for Python 2.7 has now been removed.
+
+#### Changelog
+
+**General changes:**
+
+ * Support for Python 2.7 has been dropped, minimum supported Python version is 3.6
+ * Support for OpenCV 2.x has been dropped, minimum OpenCV version is 3.x
+ * Breaking API changes to `VideoManager` (replaced with `VideoStream`), `StatsManager`, and `save_images()`
+ * Besides critical bugfixes, this marks the end of development for PySceneDetect v0.5
+ * Adds support for multiple video backends to improve both performance and accuracy
+
+**Command-line changes:**
+
+ * `-i`/`--input` may no longer be specified multiple times (use an external tool like `ffmpeg` to perform concatenation first)
+ * `split-video` command:
+     * The `-c`/`--copy` flag now uses `ffmpeg` stream copying mode instead of `mkvmerge`
+     * The new `-m`/`--mkvmerge` flag specifies to use `mkvmerge` instead of `ffmpeg`
+
+**API changes:**
+
+ * New `VideoStream` replaces `VideoManager` and supports both OpenCV and PyAV backends ([#213](https://github.com/Breakthrough/PySceneDetect/issues/213))
+    * Improves video seeking invariants, especially around defining what frames 0 and 1 mean for different time properties (`frame_number` is 1-based whereas `position` is 0-based to align with PTS)
+    * See `test_time_invariants` in `tests/test_video_stream.py` as a reference for specific behaviours of these properties, and a test video detailing visually what is expected
+    * Both command-line and public-facing API outputs still retain 0-based frame numbers (this will be changed in v1.0)
+ * Changes to `SceneManager`:
+    * Now handles frame downscaling, see the `downscale` and `auto_downscale` properties
+    * `detect_scenes()` no longer displays a progress bar by default (set `show_progress=True` to restore the previous behaviour)
+    * `clear()` now also clears any detectors, as detectors are stateful
+    * `get_scene_list()` now returns an empty list if there are no detected cuts (previously one scene with the duration of the video was returned)
+        * To restore the previous behaviour, specify `start_in_scene=True`
+        * Command-line output is unaffected, and still reports 1 scene spanning the entire video if no cuts were found
+ * `save_images()` no longer accepts downscale_factor, since there is already the ability to resize images via the `scale` or `height`/`width` arguments
+ * The `StatsManager` load/save methods now accept a path or an open file handle
+ * The video splitting functions no longer support multiple input videos for concatenation (`scenedetect.video_splitter`)
+
 ## PySceneDetect 0.5
 
 ### 0.5.6.1 (October 11, 2021)

@@ -23,8 +23,6 @@
 # ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-
-
 """ ``scenedetect.detectors`` Module
 
 This module contains implementations of scene detection algorithms by inhereting
@@ -43,7 +41,6 @@ from scenedetect.detectors.adaptive_detector import AdaptiveDetector
 
 # Algorithms being ported:
 #from scenedetect.detectors.motion_detector import MotionDetector
-
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 #                                                                             #

@@ -23,7 +23,6 @@
 # ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-
 """ ``scenedetect.__main__`` Module
 
 Provides entry point for PySceneDetect's command-line interface (CLI)
@@ -45,19 +44,16 @@ will also add the `scenedetect` command to %PATH% be used from anywhere.
 from scenedetect.cli import scenedetect_cli as cli
 from scenedetect.cli.context import CliContext
 
+
 def main():
     """ Main: PySceneDetect command-line interface (CLI) entry point.
 
     Passes control flow to the CLI parser (using the click library), whose
     entry point is the decorated scenedetect.cli.scenedetect_cli function.
     """
+    cli_ctx = CliContext() # CliContext object passed between CLI commands.
+    cli.main(obj=cli_ctx)  # Parse CLI arguments with registered callbacks.
 
-    cli_ctx = CliContext()  # CliContext object passed between CLI commands.
-    try:
-        # pylint: disable=unexpected-keyword-arg, no-value-for-parameter
-        cli.main(obj=cli_ctx)   # Parse CLI arguments with registered callbacks.
-    finally:
-        cli_ctx.cleanup()
 
 if __name__ == '__main__':
     main()

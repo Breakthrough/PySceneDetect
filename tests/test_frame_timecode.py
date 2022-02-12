@@ -229,6 +229,7 @@ def test_subtraction():
     assert (x - 1) == FrameTimecode(timecode=0.9, fps=10.0)
     assert x - 2 == FrameTimecode(0.8, x)
     assert x - 10 == FrameTimecode(0.0, x)
+    # TODO(v1.0): Allow negative values
     assert x - 11 == FrameTimecode(0.0, x)
     assert x - 100 == FrameTimecode(0.0, x)
 

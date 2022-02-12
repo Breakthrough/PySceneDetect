@@ -23,7 +23,6 @@
 # ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-
 """ PySceneDetect Test Configuration
 
 This file includes all pytest configuration for running PySceneDetect's tests.
@@ -39,30 +38,28 @@ the following URL:
 import os
 import pytest
 
-
 #
 # Helper Functions
 #
 
-def get_absolute_path(relative_path):
+
+def get_absolute_path(relative_path: str) -> str:
     # type: (str) -> str
     """ Returns the absolute path to a (relative) path of a file that
     should exist within the tests/ directory.
 
     Throws FileNotFoundError if the file could not be found.
     """
-    abs_path = os.path.join(
-        os.path.abspath(os.path.dirname(__file__)), relative_path)
+    abs_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), relative_path)
     if not os.path.exists(abs_path):
-        raise FileNotFoundError(
-            'Test video file (%s) must be present to run test case!' % relative_path)
+        raise FileNotFoundError('Test video file (%s) must be present to run test case!' %
+                                relative_path)
     return abs_path
 
 
 #
 # Test Case Fixtures
 #
-
 @pytest.fixture
 def test_video_file():
     # type: () -> str
@@ -71,6 +68,7 @@ def test_video_file():
     Access in test case by adding a test_video_file argument to obtain the path.
     """
     return get_absolute_path("testvideo.mp4")
+
 
 @pytest.fixture
 def test_movie_clip():
