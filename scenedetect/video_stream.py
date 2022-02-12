@@ -29,6 +29,8 @@ This module contains the :py:class:`VideoStream` class, which provides a consist
 interface to reading videos which is library agnostic.  This allows PySceneDetect to
 support multiple video backends.
 
+See :py:module:`scenedetect.backends` for concrete implementations.
+
 """
 
 from abc import ABC, abstractmethod
@@ -84,6 +86,10 @@ def compute_downscale_factor(frame_width: int, effective_width: int = DEFAULT_MI
     return frame_width // effective_width
 
 
+##
+## VideoStream Interface (Base Class)
+##
+
 class VideoStream(ABC):
     """ Interface which all video backends must implement. """
 
@@ -95,6 +101,13 @@ class VideoStream(ABC):
     #
     # Abstract Properties
     #
+
+    @property
+    @classmethod
+    @abstractmethod
+    def BACKEND_NAME(cls):
+        """Unique name used to identify this backend."""
+        return NotImplementedError
 
     @property
     @abstractmethod

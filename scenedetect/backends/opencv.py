@@ -6,7 +6,7 @@
 #     [  Github: https://github.com/Breakthrough/PySceneDetect/  ]
 #     [  Documentation: http://pyscenedetect.readthedocs.org/    ]
 #
-# Copyright (C) 2014-2021 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2014-2022 Brandon Castellano <http://www.bcastell.com>.
 #
 # PySceneDetect is licensed under the BSD 3-Clause License; see the included
 # LICENSE file, or visit one of the following pages for details:
@@ -77,6 +77,9 @@ class VideoStreamCv2(VideoStream):
         self._has_grabbed = False
 
         self._open_capture(framerate)
+
+    BACKEND_NAME = 'opencv'
+    """Unique name used to identify this backend."""
 
     @property
     def capture(self) -> cv2.VideoCapture:
