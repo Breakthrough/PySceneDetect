@@ -36,13 +36,13 @@ The OpenCV backend (:py:class:`scenedetect.backends.opencv.VideoStreamCv2`) is g
 always be available.
 """
 
-#
 # TODO(v1.0): Consider removing and making this a namespace package so that additional backends can
-# be dynamically added. The same thing should be done for detection algorithms.
-#
+# be dynamically added. The preferred approach for this should probably be:
+# https://packaging.python.org/en/latest/guides/creating-and-discovering-plugins/#using-namespace-packages
+
 # TODO: Future VideoStream implementations under consideration:
 #  - Nvidia VPF: https://developer.nvidia.com/blog/vpf-hardware-accelerated-video-processing-framework-in-python/
-#
+
 
 from typing import Dict, Iterable, List, Optional, Type
 
@@ -75,27 +75,26 @@ def get_available_backends() -> Dict[str, Type]:
 
 def open_video(path: str,
                framerate: Optional[float] = None,
-               preferred_backend: Optional[str] = None) -> VideoStream:
+               backend: Optional[str] = None) -> VideoStream:
     """Opens a video at the given path.
 
     Arguments:
         path: Path to video file to open.
         framerate: Overrides detected framerate if set.
-        preferred_backend: Backend name to use if available. See AVAILABLE_BACKENDS for available
-            backend names which can be specified. If unavailable or not set, PREFERRED_BACKENDS
-            will be used in order. If no PREFERRED_BACKENDS are available, VideoStreamCv2 will be
-            used as a fall-back.
+        backend: Name of specific to use if possible. See AVAILABLE_BACKENDS for available backends.
+            If the specified backend is unavailable (or backend is not specified), the values of
+            PREFERRED_BACKENDS will be used in order. If none of the backends in PREFERRED_BACKENDS
+            are available, VideoStreamCv2 will be used as a fall-back.
 
     Returns:
-        Concrete VideoStream object pointing to opened video.
+        A VideoStream backend object created with the specified video path.
 
     Raises:
         VideoOpenFailure if constructing the VideoStream fails.
     """
     # TODO(v0.6): If a backend results in a failure to open the video, the next preferred backend
     # should be used if possible.
-    if preferred_backend in AVAILABLE_BACKENDS:
-        return AVAILABLE_BACKENDS[preferred_backend](path, framerate)
-    for backend in PREFERRED_BACKENDS:
-        if backend is not None:
-            return backend(path, framerate)
+    if backend is not None and backend in AVAILABLE_BACKENDS:
+        return AVAILABLE_BACKENDS[backend](path, framerate)
+    for backend_type in PREFERRED_BACKENDS:
+        return backend_type(path, framerate)

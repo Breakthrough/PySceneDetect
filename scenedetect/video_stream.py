@@ -180,11 +180,10 @@ class VideoStream(ABC):
     #
 
     @abstractmethod
-    def read(self, decode: bool = True, advance: bool = True) -> Union[Optional[ndarray], bool]:
-        """ Return next frame (or current if advance = False), or None if end of video.
+    def read(self, decode: bool = True, advance: bool = True) -> Union[ndarray, bool]:
+        """ Return next frame (or current if advance = False), or False if end of video.
 
-        If decode = False, None will be returned, but will be slightly faster.  Instead a
-        boolean indicating if the next frame was advanced or not is returned.
+        If decode = False, a boolean indicating if the next frame was advanced or not is returned.
 
         If decode and advance are both False, equivalent to a no-op, and the return value should
         be discarded/ignored.
