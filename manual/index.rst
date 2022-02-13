@@ -2,7 +2,6 @@
 .. PySceneDetect documentation index file (contains toctree directive).
     Copyright (C) 2014-2022 Brandon Castellano.  All rights reserved.
 
-
 #######################################################################
 PySceneDetect Manual
 #######################################################################
@@ -26,6 +25,7 @@ PySceneDetect requires `ffmpeg` or `mkvmerge` for video splitting support.
 The latest source code for PySceneDetect can be found on Github at
 `github.com/Breakthrough/PySceneDetect <http://github.com/Breakthrough/PySceneDetect>`_.
 
+
 ***********************************************************************
 Table of Contents
 ***********************************************************************
@@ -43,6 +43,7 @@ Table of Contents
     cli/commands
     cli/detectors
 
+
 =======================================================================
 ``scenedetect`` Python Module 🐍
 =======================================================================
@@ -59,16 +60,15 @@ Table of Contents
     api/backends
     api/frame_timecode
     api/scene_manager
-    api/scene_list
     api/stats_manager
     api/video_splitter
     api/migration_guide
 
+
+=======================================================================
 Indices and Tables
-==================
+=======================================================================
 
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-
-

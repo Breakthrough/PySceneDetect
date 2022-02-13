@@ -22,15 +22,15 @@ main classes/modules provided in the `scenedetect` package:
 
     * :ref:`scenedetect.video_stream 🎥 <scenedetect-video_stream>`: Contains
       :py:class:`VideoStream <scenedetect.video_stream.VideoStream>`
-      class for loading videos, providing seeking, and downscaling.
-      Supported backends:
+      interface for video decoding using different backends (:py:mod:`scenedetect.backends`).
+      Current supported backends:
 
         * OpenCV: :py:class:`VideoStreamCv2 <scenedetect.backends.opencv.VideoStreamCv2>`
         * PyAV: TODO(v0.6)
 
     * :ref:`scenedetect.scene_manager 🎞️ <scenedetect-scene_manager>`: Contains
       :py:class:`SceneManager <scenedetect.scene_manager.SceneManager>`
-      class for applying `SceneDetector` objects on a `VideoManager`,
+      class for applying `SceneDetector` objects on a `VideoStream`,
       and optionally using a `StatsManager` as a cache.
 
     * :ref:`scenedetect.stats_manager 🧮 <scenedetect-stats_manager>`: Contains
@@ -121,7 +121,6 @@ For a more advanced example of using the PySceneDetect API to with a stats file
 Migration Guide
 =======================================================================
 
-PySceneDetect v0.6 introduces several breaking changes which are incompatible with the v0.5.x
-API. See :ref:`The Migration Guide <scenedetect-migration_guide>` for details on how to update
+PySceneDetect v0.6 introduces several breaking changes which are incompatible with v0.5. See :ref:`Migration Guide <scenedetect-migration_guide>` for details on how to update
 your application.
 

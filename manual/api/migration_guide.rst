@@ -21,4 +21,4 @@ TODO(v0.6)
 save_images
 ===============================================================
 
-The `downscale_factor` parameter has been removed. The existing `scale` parameter should be used instead. Equivalent functionality can be achieved by calculating `scale` as `1.0 / downscale_factor`.
+The `downscale_factor` parameter has been removed from :py:func:`save_images <scenedetect.scene_manager.save_images>`. The existing `scale` parameter should be used instead. Equivalent functionality can be achieved by setting `scale` to `1.0 / downscale_factor`.

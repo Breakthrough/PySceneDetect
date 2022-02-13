@@ -314,12 +314,11 @@ class CliContext(object):
 
     def check_input_open(self):
         # type: () -> None
-        """ Check Input Open: Ensures that the CliContext's VideoManager was initialized,
-        started, and at *least* one input video was successfully opened - otherwise, an
-        exception is raised.
+        """Ensure self.video_stream was initialized (i.e. -i/--input was specified),
+        otherwise raises an exception.
 
         Raises:
-            click.BadParameter
+            click.BadParameter if self.video_stream was not initialized.
         """
         if self.video_stream is None:
             if not self._check_input_open_failed:

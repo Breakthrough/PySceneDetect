@@ -197,7 +197,7 @@ class StatsManager(object):
 
         Arguments:
             csv_file: A file handle opened in write mode (e.g. open('...', 'w')).
-            base_timecode: The base_timecode obtained from the frame source VideoManager.
+            base_timecode: The base_timecode obtained from the frame source VideoStream.
                 If using an OpenCV VideoCapture, create one using the video framerate by
                 setting base_timecode=FrameTimecode(0, fps=video_framerate).
 

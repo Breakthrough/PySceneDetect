@@ -45,6 +45,7 @@ extensions = [
     'sphinx.ext.autodoc',
 ]
 
+autodoc_typehints = 'description'
 autodoc_typehints_format = 'short'
 
 # Add any paths that contain templates here, relative to this directory.

@@ -42,7 +42,7 @@ from scenedetect.frame_timecode import FrameTimecode
 
 
 ##
-## VideoManager Exceptions
+## VideoStream Exceptions
 ##
 
 class SeekError(Exception):
@@ -92,21 +92,29 @@ def compute_downscale_factor(frame_width: int, effective_width: int = DEFAULT_MI
 class VideoStream(ABC):
     """ Interface which all video backends must implement. """
 
+    #
+    # Default Implementations
+    #
+
     @property
     def base_timecode(self) -> FrameTimecode:
-        """Base FrameTimecode object to use as a time base."""
+        """FrameTimecode object to use as a time base."""
         return FrameTimecode(timecode=0, fps=self.frame_rate)
+
+    #
+    # Abstract Static Methods
+    #
+
+    @staticmethod
+    @abstractmethod
+    def BACKEND_NAME() -> str:
+        """Unique name used to identify this backend. Should be a static property in derived
+        classes (`BACKEND_NAME = 'backend_identifier'`)."""
+        return NotImplementedError
 
     #
     # Abstract Properties
     #
-
-    @property
-    @staticmethod
-    @abstractmethod
-    def BACKEND_NAME():
-        """Unique name used to identify this backend."""
-        return NotImplementedError
 
     @property
     @abstractmethod

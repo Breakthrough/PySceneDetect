@@ -31,6 +31,41 @@ function can be used to open a video with any available backend (or a string hin
 backend is preferred).  Backends available on the current system can be found via
 :py:data:`AVAILABLE_BACKENDS <scenedetect.backends.AVAILABLE_BACKENDS>`.
 
+===============================================================
+Usage Example
+===============================================================
+
+Assuming we have a file `video.mp4` in our working directory, we can load it and iterate through
+all of the frames:
+
+.. code:: python
+
+    from scenedetect.backends import open_video
+    video = open_video(path='video.mp4')
+    while True:
+        frame = video.read()
+        if frame is False:
+            break
+    print("Read %d frames" % video.frame_number)
+
+If we want to use a specific backend from
+:py:data:`AVAILABLE_BACKENDS <scenedetect.backends.AVAILABLE_BACKENDS>`, we can pass it to
+:py:func:`open_video <scenedetect.backends.open_video>`:
+
+.. code:: python
+
+    # Specifying a backend via `open_video`:
+    from scenedetect.backends import open_video
+    video = open_video(path='video.mp4', backend='opencv')
+
+Or we can import and use specific backend directly:
+
+.. code:: python
+
+    # Manually importing and constructing a backend:
+    from scenedetect.backends.opencv import VideoStreamCv2
+    video = VideoStreamCv2(path_or_device='video.mp4')
+
 The `'opencv'` backend (:py:class:`backends.opencv.VideoStreamCv2
 <scenedetect.backends.opencv.VideoStreamCv2>`) is guaranteed to always be available.
 """
@@ -64,7 +99,8 @@ specified, or the specified `preferred_backend` is unavailable."""
 def open_video(path: str,
                framerate: Optional[float] = None,
                backend: Optional[str] = None) -> VideoStream:
-    """Opens a video at the given path.
+    """Opens a video at the given path. See top level :py:mod:`scenedetect.backends` documentation
+    for a usage example.
 
     Arguments:
         path: Path to video file to open.

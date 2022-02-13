@@ -17,8 +17,7 @@ Usage Example
 In the code example below, we create a function ``find_scenes()`` which performs
 the following actions:
 
- * loads a video file by path (`str`) as argument `video_path` using a
-   :py:class:`VideoManager <scenedetect.video_manager.VideoManager>`
+ * loads a video file by path (`str`) using :py:func:`scenedetect.backends.open_video`
  * loads/saves a stats file for the video to ``{video_path}.stats.csv`` using a
    :py:class:`StatsManager <scenedetect.stats_manager.StatsManager>`
  * performs content-aware scene detection on the video using a
@@ -42,7 +41,7 @@ printing a list of scenes, and both saving/loading a stats file.
     import os
 
     # Standard PySceneDetect imports:
-    from scenedetect.backends.opencv import VideoStreamCv2
+    from scenedetect.backends import open_video
     from scenedetect.scene_manager import SceneManager
 
     # For caching detection metrics and saving/loading to a stats file
@@ -52,9 +51,8 @@ printing a list of scenes, and both saving/loading a stats file.
     from scenedetect.detectors.content_detector import ContentDetector
 
 
-    def find_scenes(video_path):
-        # type: (str) -> List[Tuple[FrameTimecode, FrameTimecode]]
-        video_stream = VideoStreamCv2(video_path)
+    def find_scenes(video_path: str) -> List[Tuple[FrameTimecode, FrameTimecode]]:
+        video_stream = open_video(path=video_path)
         stats_manager = StatsManager()
         # Construct our SceneManager and pass it our StatsManager.
         scene_manager = SceneManager(stats_manager)

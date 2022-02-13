@@ -78,8 +78,9 @@ class VideoStreamCv2(VideoStream):
 
         self._open_capture(framerate)
 
-    BACKEND_NAME = 'opencv'
-    """Unique name used to identify this backend."""
+    #
+    # Backend-Specific Methods/Properties
+    #
 
     @property
     def capture(self) -> cv2.VideoCapture:
@@ -92,6 +93,9 @@ class VideoStreamCv2(VideoStream):
     #
     # VideoStream Methods/Properties
     #
+
+    BACKEND_NAME = 'opencv'
+    """Unique name used to identify this backend."""
 
     @property
     def frame_rate(self) -> float:

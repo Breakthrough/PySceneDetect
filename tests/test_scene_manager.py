@@ -46,7 +46,7 @@ from scenedetect.scene_manager import SceneManager, save_images
 
 
 def test_scene_list(test_video_file):
-    """ Test SceneManager get_scene_list method with VideoManager/ContentDetector. """
+    """ Test SceneManager get_scene_list method with VideoStreamCv2/ContentDetector. """
     video = VideoStreamCv2(test_video_file)
     sm = SceneManager()
     sm.add_detector(ContentDetector())
