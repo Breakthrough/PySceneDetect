@@ -26,7 +26,7 @@ main classes/modules provided in the `scenedetect` package:
       Supported backends:
 
         * OpenCV: :py:class:`VideoStreamCv2 <scenedetect.backends.opencv.VideoStreamCv2>`
-        * PyAV: TODO(v1.0)
+        * PyAV: TODO(v0.6)
 
     * :ref:`scenedetect.scene_manager 🎞️ <scenedetect-scene_manager>`: Contains
       :py:class:`SceneManager <scenedetect.scene_manager.SceneManager>`

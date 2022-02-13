@@ -25,15 +25,14 @@
 #
 """ ``scenedetect.backends`` Module
 
-This module contains concrete :py:class:`scenedetect.video_stream.VideoStream` implementations,
-as well as high level functions to dynamically query available backends, and to open a video
-file by path using any available backend.
+This module contains concrete :py:class:`VideoStream <scenedetect.video_stream.VideoStream>`
+implementations. For video files, the :py:data:`open_video <scenedetect.backends.open_video>`
+function can be used to open a video with any available backend (or a string hinting which
+backend is preferred).  Backends available on the current system can be found via
+:py:data:`AVAILABLE_BACKENDS <scenedetect.backends.AVAILABLE_BACKENDS>`.
 
-Available concrete implementations are imported into this namespace automatically. If dependencies
-for a given backend are unavailable, they will be set to None instead.
-
-The OpenCV backend (:py:class:`scenedetect.backends.opencv.VideoStreamCv2`) is guaranteed to
-always be available.
+The `'opencv'` backend (:py:class:`backends.opencv.VideoStreamCv2
+<scenedetect.backends.opencv.VideoStreamCv2>`) is guaranteed to always be available.
 """
 
 # TODO(v1.0): Consider removing and making this a namespace package so that additional backends can

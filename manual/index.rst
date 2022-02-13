@@ -1,6 +1,6 @@
 
 .. PySceneDetect documentation index file (contains toctree directive).
-    Copyright (C) 2014-2021 Brandon Castellano.  All rights reserved.
+    Copyright (C) 2014-2022 Brandon Castellano.  All rights reserved.
 
 
 #######################################################################
@@ -9,7 +9,7 @@ PySceneDetect Manual
 
 .. warning::
 
-    Version 1.0 is under development. This manual may be outdated or incorrect in places.
+    Version 0.6 is under development. This manual may be outdated or incorrect in places.
 
 This manual refers to both the PySceneDetect command-line interface (the `scenedetect`
 command) and the PySceneDetect Python API (the `scenedetect` module).  Information
