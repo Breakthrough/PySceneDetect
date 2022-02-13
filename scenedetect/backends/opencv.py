@@ -69,7 +69,7 @@ class VideoStreamCv2(VideoStream):
         self._is_device = isinstance(self._path_or_device, int)
 
         # Initialized in _open_capture:
-        self._cap = None    # Reference to underlying cv2.VideoCapture object.
+        self._cap = None # Reference to underlying cv2.VideoCapture object.
         self._frame_rate = None
 
         # VideoCapture state

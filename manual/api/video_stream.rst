@@ -12,7 +12,7 @@ VideoStream
 Usage Example
 ===============================================================
 
-A :py:func:`VideoStream <scenedetect.video_stream.VideoStream>` is not used directly, but by constructing a concrete implementation from :py:module:`scenedetect.backends`. In most cases where any backend is acceptable, the :py:func:`scenedetect.backends.open_video` function can be used.
+A :py:class:`VideoStream <scenedetect.video_stream.VideoStream>` is not used directly, but by constructing a concrete implementation from :py:mod:`scenedetect.backends`. In most cases where any backend is acceptable, the :py:func:`scenedetect.backends.open_video` function can be used.
 
 Assuming we have a file `video.mp4` in our working directory, we can load it and iterate through all of the frames:
 
@@ -36,11 +36,13 @@ If we want to use a specific backend, we can pass it to :py:func:`open_video <sc
 
 Or we can import and use specific backend directly:
 
+.. code:: python
+
     # Manually importing and constructing a backend:
     from scenedetect.backends.opencv import VideoStreamCv2
     video = VideoStreamCv2(path_or_device='video.mp4')
 
-Backends available on the current system are populated in the `scenedetect.backends.AVAILABLE_BACKENDS` dict, which maps each backend's name to its corresponding type (e.g. {`'opencv': VideoStreamCv2`, ...}).  See the :py:module:`scenedetect.backends` for more information on available backends.  Note that the `'opencv'` backend (:py:class:`VideoStreamCv2 <scenedetect.backends.opencv.VideoStreamCv2>`) is guaranteed to exist).
+Backends available on the current system are populated in the :py:data:`scenedetect.backends.AVAILABLE_BACKENDS` dict, which maps each backend's name to its corresponding type (e.g. {`'opencv': VideoStreamCv2`, ...}).  Note that the `'opencv'` backend (:py:class:`VideoStreamCv2 <scenedetect.backends.opencv.VideoStreamCv2>`) is guaranteed to exist.
 
 
 ``VideoStream`` Class

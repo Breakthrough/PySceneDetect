@@ -25,11 +25,10 @@
 #
 """ ``scenedetect.video_stream`` Module
 
-This module contains the :py:class:`VideoStream` class, which provides a consistent
-interface to reading videos which is library agnostic.  This allows PySceneDetect to
-support multiple video backends.
+This module contains the :py:class:`VideoStream` class, which provides a library agnostic
+interface for video input.  This allows PySceneDetect to support multiple video backends.
 
-See :py:module:`scenedetect.backends` for concrete implementations.
+See :py:mod:`scenedetect.backends` for concrete implementations.
 
 """
 
@@ -103,9 +102,9 @@ class VideoStream(ABC):
     #
 
     @property
-    @classmethod
+    @staticmethod
     @abstractmethod
-    def BACKEND_NAME(cls):
+    def BACKEND_NAME():
         """Unique name used to identify this backend."""
         return NotImplementedError
 

@@ -42,13 +42,11 @@ The `'opencv'` backend (:py:class:`backends.opencv.VideoStreamCv2
 # TODO: Future VideoStream implementations under consideration:
 #  - Nvidia VPF: https://developer.nvidia.com/blog/vpf-hardware-accelerated-video-processing-framework-in-python/
 
-
 from typing import Dict, Iterable, List, Optional, Type
 
 # VideoStreamCv2 must be available at minimum.
 from scenedetect.backends.opencv import VideoStreamCv2
 from scenedetect.video_stream import VideoStream
-
 
 AVAILABLE_BACKENDS: Dict[str, Type] = {
     backend.BACKEND_NAME: backend for backend in filter(None, [
@@ -61,15 +59,6 @@ These backends must support construction via BackendType(path, framerate)."""
 PREFERRED_BACKENDS: Iterable[Type] = list(filter(None, []))
 """List of backend types to try when using `open_video` in order if a preferred backend is not
 specified, or the specified `preferred_backend` is unavailable."""
-
-
-def get_available_backends() -> Dict[str, Type]:
-    """Returns a dictionary of backend names to their respective type.
-
-    This function is only intended for use for opening files. To open a device or image sequence,
-    use a specific backend type directly.
-    """
-    return
 
 
 def open_video(path: str,
