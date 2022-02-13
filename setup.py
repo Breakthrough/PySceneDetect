@@ -33,12 +33,6 @@ import sys
 
 from setuptools import setup
 
-
-if sys.version_info < (3, 6):
-    print('PySceneDetect requires at least Python 3.3 to run.')
-    sys.exit(1)
-
-
 def get_requires():
     # type: () -> List[str]
     """ Get Requires: Returns a list of required packages. """
