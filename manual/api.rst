@@ -116,3 +116,12 @@ To get started, try printing the return value of `find_scenes` on a small video 
 For a more advanced example of using the PySceneDetect API to with a stats file
 (to speed up processing of the same file multiple times), take a look at the
 :ref:`example in the SceneManager reference<scenemanager-example>`.
+
+=======================================================================
+Migration Guide
+=======================================================================
+
+PySceneDetect v0.6 introduces several breaking changes which are incompatible with the v0.5.x
+API. See :ref:`The Migration Guide <scenedetect-migration_guide>` for details on how to update
+your application.
+

@@ -325,9 +325,9 @@ def save_images(scene_list: List[Tuple[FrameTimecode, FrameTimecode]],
         output_dir: Directory to output the images into.  If not set, the output
             is created in the working directory.
         show_progress: If True, shows a progress bar if tqdm is installed.
-        scale: Optional factor by which to rescale saved images.A scaling factor of 1 would
-            not result in rescaling. A value <1 results in a smaller saved image, while a
-            value >1 results in an image larger than the original. This value is ignored if
+        scale: Optional factor by which to rescale saved images. A scaling factor of 1 would
+            not result in rescaling. A value < 1 results in a smaller saved image, while a
+            value > 1 results in an image larger than the original. This value is ignored if
             either the height or width values are specified.
         height: Optional value for the height of the saved images. Specifying both the height
             and width will resize images to an exact size, regardless of aspect ratio.
