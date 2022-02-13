@@ -42,6 +42,10 @@ to the cv2 namespace.  This ensures that the cv2 API is consistent
 with those changes made to it in OpenCV 3.0 and above.
 """
 
+#
+# TODO(v0.6): Move this into scenedetect.cli.
+#
+
 import csv
 import logging
 import os
