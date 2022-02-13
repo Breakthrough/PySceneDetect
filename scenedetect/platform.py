@@ -46,6 +46,11 @@ This module also includes an alias for the unicode/string types in Python 2/3
 as STRING_TYPE intended to help with parsing string types from the CLI parser.
 """
 
+#
+# TODO(v0.6): Move this into scenedetect.cli.
+#
+
+
 # Standard Library Imports
 from __future__ import print_function
 
