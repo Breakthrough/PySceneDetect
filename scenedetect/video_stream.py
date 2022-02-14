@@ -204,27 +204,22 @@ class VideoStream(ABC):
 
     @abstractmethod
     def seek(self, target: Union[FrameTimecode, float, int]) -> None:
-        """Seek to the given timecode, frame, or time in seconds. The next frame returned from
-        read() will be target + 1.
-        with advance=True (the default).
+        """Seek to the given timecode. If given as a frame number, represents the current seek
+        pointer (e.g. if seeking to 0, the next frame decoded will be the first frame of the video).
 
-        Frame 0 has a (presentation) timecode of 0.
+        For 1-based indices (first frame is frame #1), the target frame number needs to be converted
+        to 0-based by subtracting one. For example, if we want to seek to the first frame, we call
+        seek(0) followed by read(). If we want to seek to the 5th frame, we call seek(4) followed
+        by read(), at which point frame_number will be 5.
 
-        May not be supported on all backends/types of videos (e.g. cameras).
-
-        Internally, PySceneDetect maps the first frame to 0 to simplify timecode handling.
-        Note that most external libraries denote the first frame as 1, so correction for this is
-        sometimes required.
+        May not be supported on all backend types or inputs (e.g. cameras).
 
         Arguments:
-            target: Target position in video stream to seek to. Interpreted based on type.
-              If FrameTimecode, backend can seek using any representation (preferably native when
-              VFR support is added).
-              If float, interpreted as time in seconds.
-              If int, interpreted as frame number.
+            target: Target position in video stream to seek to.
+                If float, interpreted as time in seconds.
+                If int, interpreted as frame number.
         Raises:
-            SeekError: An unrecoverable error occurs while seeking, or seeking is not
-              supported (either by the backend entirely, or if the input is a stream).
+            SeekError: An error occurs while seeking, or seeking is not supported.
             ValueError: `target` is not a valid value (i.e. it is negative).
         """
         raise NotImplementedError

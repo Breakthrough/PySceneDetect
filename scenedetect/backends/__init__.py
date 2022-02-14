@@ -122,3 +122,4 @@ def open_video(path: str,
         return AVAILABLE_BACKENDS[backend](path, framerate)
     for backend_type in PREFERRED_BACKENDS:
         return backend_type(path, framerate)
+    return VideoStreamCv2(path_or_device=path, framerate=framerate)

@@ -44,6 +44,8 @@ PySceneDetect v0.6 is a major stepping-stone update towards the planned stable v
  * `save_images()` no longer accepts downscale_factor, since there is already the ability to resize images via the `scale` or `height`/`width` arguments
  * The `StatsManager` load/save methods now accept a path or an open file handle
  * The video splitting functions no longer support multiple input videos for concatenation (`scenedetect.video_splitter`)
+ * Fixed issue with `previous_frame` method of `FrameTimecode` allowing a negative frame number
+ * Merged `MAX_FPS_DELTA` and `MINIMUM_FRAMES_PER_SECOND_DELTA_FLOAT` constants in `scenedetect.frame_timecode` into new constant `MAX_FPS_DELTA`
 
 ## PySceneDetect 0.5
 

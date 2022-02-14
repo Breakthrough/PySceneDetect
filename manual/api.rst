@@ -3,7 +3,6 @@
 ``scenedetect`` 🎬 Module
 ***********************************************************************
 
-
 =======================================================================
 Overview
 =======================================================================
@@ -13,7 +12,6 @@ containing the implementation of a particular class.  The most commonly
 used classes are available for import directly from the `scenedetect`
 module (see the `Example`_ below).  The following is an overview of the
 main classes/modules provided in the `scenedetect` package:
-
 
     * :ref:`scenedetect.frame_timecode ⏱️ <scenedetect-frame_timecode>`: Contains
       :py:class:`FrameTimecode <scenedetect.frame_timecode.FrameTimecode>`
@@ -59,7 +57,6 @@ main classes/modules provided in the `scenedetect` package:
       to split the video into individual scenes.
 
 
-
 Note that every module has the same name of the implemented
 class in `lowercase_underscore` format, whereas the class name itself
 is in `PascalCase` format.  There are also some constants, functions,
@@ -79,48 +76,35 @@ the `threshold` argument to modify the sensitivity of the
 
 .. code:: python
 
-    # Standard PySceneDetect imports:
-    from scenedetect import VideoManager
-    from scenedetect import SceneManager
-
-    # For content-aware scene detection:
+    from scenedetect import SceneManager, open_video
     from scenedetect.detectors import ContentDetector
 
-    def find_scenes(video_path, threshold=30.0):
+    def find_scenes(video_path, threshold=27.0):
         # Create our video & scene managers, then add the detector.
-        video_manager = VideoManager([video_path])
+        video = open_video(video_path)
         scene_manager = SceneManager()
         scene_manager.add_detector(
             ContentDetector(threshold=threshold))
-
         # Improve processing speed by downscaling before processing.
         scene_manager.auto_downscale = True
-
-        # Start the video manager and perform the scene detection.
-        video_manager.start()
-        scene_manager.detect_scenes(frame_source=video_manager)
-
-        # Each returned scene is a tuple of the (start, end) timecode.
+        # Detect all scenes in video from current position to end.
+        scene_manager.detect_scenes(video)
+        # `get_scene_list` returns a list of start/end timecode pairs
+        # for each scene that was found.
         return scene_manager.get_scene_list()
 
-
-To get started, try printing the return value of `find_scenes` on a small video clip:
-
-
-.. code:: python
-
+    # Detect scenes and print them to the terminal.
     scenes = find_scenes('video.mp4')
-    print(scenes)
-
+    for i, scene in enumerate(scenes):
+      print('Scene %d: Start = %s, End = %s' % (i, scene[0], scene[1]))
 
 For a more advanced example of using the PySceneDetect API to with a stats file
 (to speed up processing of the same file multiple times), take a look at the
 :ref:`example in the SceneManager reference<scenemanager-example>`.
 
+
 =======================================================================
-Migration Guide
+Migrating From v0.5
 =======================================================================
 
-PySceneDetect v0.6 introduces several breaking changes which are incompatible with v0.5. See :ref:`Migration Guide <scenedetect-migration_guide>` for details on how to update
-your application.
-
+PySceneDetect v0.6 introduces several breaking changes which are incompatible with v0.5. See :ref:`Migration Guide <scenedetect-migration_guide>` for details on how to update your application.

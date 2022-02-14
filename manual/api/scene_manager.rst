@@ -41,8 +41,7 @@ printing a list of scenes, and both saving/loading a stats file.
     import os
 
     # Standard PySceneDetect imports:
-    from scenedetect.backends import open_video
-    from scenedetect.scene_manager import SceneManager
+    from scenedetect import open_video, SceneManager
 
     # For caching detection metrics and saving/loading to a stats file
     from scenedetect.stats_manager import StatsManager

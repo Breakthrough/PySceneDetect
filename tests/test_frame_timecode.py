@@ -46,7 +46,7 @@ import pytest
 
 # Standard Library Imports
 from scenedetect.frame_timecode import FrameTimecode
-from scenedetect.frame_timecode import MINIMUM_FRAMES_PER_SECOND_FLOAT
+from scenedetect.frame_timecode import MAX_FPS_DELTA
 
 
 def test_framerate():
@@ -64,12 +64,12 @@ def test_framerate():
     with pytest.raises(ValueError): FrameTimecode(timecode=0, fps=-1.0)
     with pytest.raises(ValueError): FrameTimecode(timecode=0, fps=-1000.0)
     with pytest.raises(ValueError):
-        FrameTimecode(timecode=0, fps=MINIMUM_FRAMES_PER_SECOND_FLOAT / 2)
+        FrameTimecode(timecode=0, fps=MAX_FPS_DELTA / 2)
     # Test positive framerates.
     assert FrameTimecode(timecode=0, fps=1).frame_num == 0
-    assert FrameTimecode(timecode=0, fps=MINIMUM_FRAMES_PER_SECOND_FLOAT).frame_num == 0
+    assert FrameTimecode(timecode=0, fps=MAX_FPS_DELTA).frame_num == 0
     assert FrameTimecode(timecode=0, fps=10).frame_num == 0
-    assert FrameTimecode(timecode=0, fps=MINIMUM_FRAMES_PER_SECOND_FLOAT * 2).frame_num == 0
+    assert FrameTimecode(timecode=0, fps=MAX_FPS_DELTA * 2).frame_num == 0
     assert FrameTimecode(timecode=0, fps=1000).frame_num == 0
     assert FrameTimecode(timecode=0, fps=1000.0).frame_num == 0
 

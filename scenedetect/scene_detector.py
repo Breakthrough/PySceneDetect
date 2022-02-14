@@ -36,7 +36,7 @@ are expected to provide in order to be compatible with PySceneDetect.
 # pylint: disable=unused-argument, no-self-use
 
 
-class SceneDetector(object):
+class SceneDetector:
     """ Base class to inherit from when implementing a scene detection algorithm.
 
     This represents a "dense" scene detector, which returns a list of frames where

@@ -98,7 +98,7 @@ class StatsFileCorrupt(Exception):
 ## StatsManager Class Implementation
 ##
 
-class StatsManager(object):
+class StatsManager:
     """ Provides a key-value store for frame metrics/calculations which can be used
     as a cache to speed up subsequent calls to a SceneManager's detect_scenes(...)
     method. The statistics can be saved to a CSV file, and loaded from disk.

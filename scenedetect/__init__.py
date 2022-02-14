@@ -35,11 +35,11 @@ This file also contains the PySceneDetect version string (displayed when calling
 (when calling 'scenedetect about').
 """
 
-# Commonly used classes for easier use directly from the scenedetect namespace (e.g.
-# scenedetect.SceneManager instead of scenedetect.scene_manager.SceneManager).
-from scenedetect.scene_manager import SceneManager
+# Commonly used classes/functions exported under the `scenedetect` namespace for brevity.
+from scenedetect.scene_manager import SceneManager, save_images
 from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.video_stream import VideoStream
+from scenedetect.backends import open_video, AVAILABLE_BACKENDS
 from scenedetect.stats_manager import StatsManager
 
 # Used for module identification and when printing version & about info

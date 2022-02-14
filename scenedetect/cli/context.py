@@ -41,7 +41,7 @@ import click
 import cv2
 
 from scenedetect.backends.opencv import VideoStreamCv2
-from scenedetect.frame_timecode import FrameTimecode, MINIMUM_FRAMES_PER_SECOND_FLOAT
+from scenedetect.frame_timecode import FrameTimecode, MAX_FPS_DELTA
 import scenedetect.detectors
 from scenedetect.platform import (
     check_opencv_ffmpeg_dll, get_and_create_path, get_cv2_imwrite_params)
@@ -102,7 +102,7 @@ def check_split_video_requirements(use_mkvmerge: bool) -> None:
         raise click.BadParameter(error_str, param_hint='split-video')
 
 
-class CliContext(object):
+class CliContext:
     """ Context of the command-line interface passed between the various sub-commands.
 
     After processing the main program options in `parse_options`, the CLI will set the options
@@ -362,7 +362,7 @@ class CliContext(object):
         except IOError as ex:
             raise click.BadParameter('Input error:\n\n\t%s\n' % str(ex), param_hint='-i/--input')
 
-        if self.video_stream.frame_rate < MINIMUM_FRAMES_PER_SECOND_FLOAT:
+        if self.video_stream.frame_rate < MAX_FPS_DELTA:
             raise click.BadParameter(
                 'Failed to obtain framerate for input video. Manually specify framerate with the'
                 ' -f/--framerate option, or try re-encoding the file.',

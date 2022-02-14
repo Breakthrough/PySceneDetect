@@ -36,7 +36,7 @@ import os.path
 import cv2
 from numpy import ndarray
 
-from scenedetect.frame_timecode import FrameTimecode, MINIMUM_FRAMES_PER_SECOND_FLOAT
+from scenedetect.frame_timecode import FrameTimecode, MAX_FPS_DELTA
 from scenedetect.platform import get_aspect_ratio, get_file_name, logger
 from scenedetect.video_stream import VideoStream, SeekError, VideoOpenFailure
 
@@ -174,26 +174,22 @@ class VideoStreamCv2(VideoStream):
 
     def seek(self, target: Union[FrameTimecode, float, int]):
         """Seek to the given timecode. If given as a frame number, represents the current seek
-        pointer (e.g. if seeking to 0, the next frame decoded will be the first frame).
+        pointer (e.g. if seeking to 0, the next frame decoded will be the first frame of the video).
 
-        This means that, for 1-based indices (first frame is frame #1), the target frame number
-        needs to be converted to 0-based by subtracting one.  For example, if we want to seek to
-        the first frame, we call seek(0) followed by read(). At this point, frame_number will be 1.
-        If we call seek(4) (the *fifth* frame) and then read(), frame_number will be 5.
-
-        Seeking past the end of video shall be equivalent to seeking to the last frame.
+        For 1-based indices (first frame is frame #1), the target frame number needs to be converted
+        to 0-based by subtracting one. For example, if we want to seek to the first frame, we call
+        seek(0) followed by read(). If we want to seek to the 5th frame, we call seek(4) followed
+        by read(), at which point frame_number will be 5.
 
         Not supported if the VideoStream is a device/camera.  Untested with web streams.
 
         Arguments:
-            target: Target position in video stream to seek to. Interpreted based on type.
-              If FrameTimecode, backend can seek using any representation (preferably native when
-              VFR support is added).
-              If float, interpreted as time in seconds.
-              If int, interpreted as frame number, starting from 0.
+            target: Target position in video stream to seek to.
+                If float, interpreted as time in seconds.
+                If int, interpreted as frame number.
         Raises:
-            SeekError if an unrecoverable error occurs while seeking, or seeking is not
-            supported (either by the backend entirely, or if the input is a stream).
+            SeekError: An error occurs while seeking, or seeking is not supported.
+            ValueError: `target` is not a valid value (i.e. it is negative).
         """
         if self._is_device:
             raise SeekError("Cannot seek if input is a device!")
@@ -270,7 +266,7 @@ class VideoStreamCv2(VideoStream):
         # addressed in the PyAV backend if required since it supports integer timebases.
         if not framerate:
             framerate = cap.get(cv2.CAP_PROP_FPS)
-            if framerate < MINIMUM_FRAMES_PER_SECOND_FLOAT:
+            if framerate < MAX_FPS_DELTA:
                 raise VideoOpenFailure(
                     "Unable to obtain video framerate! Check the file/device/stream, or set the"
                     " `framerate` to assume a given framerate.")
