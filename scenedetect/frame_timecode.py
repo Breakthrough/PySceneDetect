@@ -44,29 +44,24 @@ class FrameTimecode:
 
     A timecode is valid only if it complies with one of the following three types/formats:
 
-    1) string: standard timecode HH:MM:SS[.nnn]:
-        `str` in form 'HH:MM:SS' or 'HH:MM:SS.nnn', or
-        `list`/`tuple` in form [HH, MM, SS] or [HH, MM, SS.nnn]
-    2) float: number of seconds S[.SSS], where S >= 0.0:
-        `float` in form S.SSS, or
-        `str` in form 'Ss' or 'S.SSSs' (e.g. '5s', '1.234s')
-    3) int: Exact number of frames N, where N >= 0:
-        `int` in form `N`, or
-        `str` in form 'N'
-
-    Arguments:
-        timecode: A timecode or frame number, given in any of the above valid formats/types.
-            This argument is always required. If set to a FrameTimecode, it will be cloned.
-        fps: The framerate or another FrameTimecode to base all time arithmetic on.
-    Raises:
-        TypeError: Thrown if timecode is wrong type/format, or if fps is None
-            or a type other than int or float.
-        ValueError: Thrown when specifying a negative timecode or framerate.
+    1) Timecode as `str` in the form 'HH:MM:SS[.nnn]' (`'01:23:45'` or `'01:23:45.678'`)
+    2) Number of seconds as `float`, or `str` in form 'Ss' or 'S.SSSs' (`'2s'` or `'2.3456s'`)
+    3) Exact number of frames as `int`, or `str` in form NNNNN (`123` or `'123'`)
     """
 
     def __init__(self,
                  timecode: Union[int, float, str, 'FrameTimecode'] = None,
                  fps: Union[int, float, str, 'FrameTimecode'] = None):
+        """Construct a new FrameTimecode.
+
+        Arguments:
+            timecode: A timecode or frame number given in any of the above valid formats/types
+                described in the class level documentation.
+            fps: The framerate or FrameTimecode to use as a time base for all arithmetic.
+        Raises:
+            TypeError: Thrown if either `timecode` or `fps` are unsupported types.
+            ValueError: Thrown when specifying a negative timecode or framerate.
+        """
 
         # The following two properties are what is used to keep track of time
         # in a frame-specific manner.  Note that once the framerate is set,

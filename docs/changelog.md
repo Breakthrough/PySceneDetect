@@ -8,7 +8,7 @@ PySceneDetect Releases
 
 #### Release Notes
 
-PySceneDetect v0.6 is a major stepping-stone update towards the planned stable v1.0 API.  Changes to the command-line are minor and not expected to break most workflows.  There are several breaking changes to the Python API, and support for Python 2.7 has now been removed.  See the [Migration Guide](https://pyscenedetect.readthedocs.io/projects/Manual/en/v0.6/api/migration_guide.html) for information on how to port existing applications to the new API.
+PySceneDetect v0.6 is a major stepping-stone update towards the planned stable v1.0 API. The new minimum Python version is now 3.6. Changes to the command-line are minor and not expected to break most workflows, however there are breaking changes to the Python API. See the [Migration Guide](https://pyscenedetect.readthedocs.io/projects/Manual/en/v0.6/api/migration_guide.html) for information on how to port existing applications to the new API.
 
 #### Changelog
 
@@ -45,7 +45,7 @@ PySceneDetect v0.6 is a major stepping-stone update towards the planned stable v
  * The `StatsManager` load/save methods now accept a path or an open file handle
  * The video splitting functions no longer support multiple input videos for concatenation (`scenedetect.video_splitter`)
  * Fixed issue with `previous_frame` method of `FrameTimecode` allowing a negative frame number
- * Merged `MAX_FPS_DELTA` and `MINIMUM_FRAMES_PER_SECOND_DELTA_FLOAT` constants in `scenedetect.frame_timecode` into new constant `MAX_FPS_DELTA`
+ * Merged constants `MAX_FPS_DELTA` and `MINIMUM_FRAMES_PER_SECOND_DELTA_FLOAT` in `scenedetect.frame_timecode` into new `MAX_FPS_DELTA` constant
 
 ## PySceneDetect 0.5
 

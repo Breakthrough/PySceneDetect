@@ -26,20 +26,7 @@ for maintaining backwards compatibility with existing libraries going forwards.
 Other helper functions related to the detection of the appropriate dependency
 DLLs on Windows and getting uniform line-terminating csv reader/writer objects
 are also included in this module.
-
-With respect to the Python standard library itself and Python 2 versus 3,
-this module adds compatibility wrappers for Python's Queue/queue (Python 2/3,
-respectively) as scenedetect.platform.queue.
-
-For OpenCV 2.x, the scenedetect.platform module also makes a copy of the
-OpenCV VideoCapture property constants from the cv2.cv namespace directly
-to the cv2 namespace.  This ensures that the cv2 API is consistent
-with those changes made to it in OpenCV 3.0 and above.
 """
-
-#
-# TODO(v0.6): Move this into scenedetect.cli.
-#
 
 import csv
 import logging
@@ -49,13 +36,12 @@ import platform
 import struct
 import subprocess
 import sys
-from typing import List, Optional
+from typing import Dict, List, Optional, TextIO, Tuple, Union
 
 import cv2
 
-
 ##
-## tqdm Library (scenedetect.platform.tqdm will be tqdm object or None)
+## tqdm Library (`scenedetect.platform.tqdm`` will be tqdm object type or None)
 ##
 
 # pylint: disable=unused-import
@@ -97,8 +83,7 @@ def get_aspect_ratio(cap: cv2.VideoCapture, epsilon: float = 0.01) -> float:
 ##
 
 
-def check_opencv_ffmpeg_dll():
-    # type: () -> Tuple[bool, str]
+def check_opencv_ffmpeg_dll() -> Tuple[bool, str]:
     """ Check OpenCV FFmpeg DLL: Checks if OpenCV video I/O support is available,
     on Windows only, by checking for the appropriate opencv_ffmpeg*.dll file.
 
@@ -132,20 +117,19 @@ def check_opencv_ffmpeg_dll():
 ##
 
 
-def get_cv2_imwrite_params():
-    # type: () -> Dict[str, Union[int, None]]
+def get_cv2_imwrite_params() -> Dict[str, Union[int, None]]:
     """ Get OpenCV imwrite Params: Returns a dict of supported image formats and
-    their associated quality/compression parameter.
+    their associated quality/compression parameter index, or None if that format
+    is not supported.
 
     Returns:
-        (Dict[str, int]) Dictionary of image formats/extensions ('jpg',
-            'png', etc...) mapped to the respective OpenCV quality or
-            compression parameter (e.g. 'jpg' -> cv2.IMWRITE_JPEG_QUALITY,
-            'png' -> cv2.IMWRITE_PNG_COMPRESSION)..
+        Dictionary of supported image formats/extensions ('jpg', 'png', etc...) mapped to the
+            respective OpenCV quality or compression parameter as {'jpg':
+            cv2.IMWRITE_JPEG_QUALITY, 'png': cv2.IMWRITE_PNG_COMPRESSION, ...}. Parameter will
+            be None if not found on the current system library (e.g. {'jpg': None}).
     """
 
-    def _get_cv2_param(param_name):
-        # type: (str) -> Union[int, None]
+    def _get_cv2_param(param_name: str) -> Union[int, None]:
         if param_name.startswith('CV_'):
             param_name = param_name[3:]
         try:
@@ -165,13 +149,13 @@ def get_cv2_imwrite_params():
 ##
 
 
-def get_csv_reader(file_handle):
+def get_csv_reader(file_handle: TextIO):
     # type: (File) -> csv.reader
     """ Returns a csv.reader object using the passed file handle. """
     return csv.reader(file_handle, lineterminator='\n')
 
 
-def get_csv_writer(file_handle):
+def get_csv_writer(file_handle: TextIO):
     # type: (File) -> csv.writer
     """ Returns a csv.writer object using the passed file handle. """
     return csv.writer(file_handle, lineterminator='\n')
@@ -227,7 +211,7 @@ def get_and_create_path(file_path: str, output_directory: Optional[str] = None):
 ##
 
 
-def init_logger(log_level=logging.INFO, show_stdout=False, log_file=None):
+def init_logger(log_level: int = logging.INFO, show_stdout: bool = False, log_file: TextIO = None):
     """ Initializes the Python logging module for PySceneDetect.
 
     Mainly used by the command line interface, but can also be used by other modules
