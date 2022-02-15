@@ -8,21 +8,15 @@
 #
 # Copyright (C) 2014-2021 Brandon Castellano <http://www.bcastell.com>.
 #
-# PySceneDetect is licensed under the BSD 3-Clause License; see the
-# included LICENSE file or visit one of the following pages for details:
-#  - http://www.bcastell.com/projects/PySceneDetect/
-#  - https://github.com/Breakthrough/PySceneDetect/
+# PySceneDetect is licensed under the BSD 3-Clause License; see the included
+# LICENSE file, or visit one of the above pages for details.
 #
-# This software uses Numpy, OpenCV, click, tqdm, simpletable, and pytest.
-# See the included LICENSE files or one of the above URLs for more information.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-# IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR
-# OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
-# ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
-# OTHER DEALINGS IN THE SOFTWARE.
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+# AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
+# ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+# WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
 """ ``scenedetect.stats_manager`` Module
