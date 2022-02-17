@@ -66,9 +66,6 @@ def test_api(test_video_file):
     start_time = base_timecode + 20     # 00:00:00.667
     end_time = base_timecode + 20.0     # 00:00:20.000
 
-    # Set downscale factor to improve processing speed.
-    scene_manager.auto_downscale = True
-
     # Perform scene detection on video.
     video.seek(start_time)
     scene_manager.detect_scenes(video=video, end_time=end_time)

@@ -30,12 +30,15 @@ This file also contains the PySceneDetect version string (displayed when calling
 (when calling 'scenedetect about').
 """
 
+from typing import List, Optional, Tuple
+
 # Commonly used classes/functions exported under the `scenedetect` namespace for brevity.
 from scenedetect.scene_manager import SceneManager, save_images
 from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.video_stream import VideoStream
 from scenedetect.backends import open_video, AVAILABLE_BACKENDS
 from scenedetect.stats_manager import StatsManager
+from scenedetect.detectors import ContentDetector, AdaptiveDetector, ThresholdDetector
 
 # Used for module identification and when printing version & about info
 # (e.g. calling `scenedetect version` or `scenedetect about`).
@@ -91,7 +94,36 @@ or visit the following URL: [ https://docs.python.org/3/license.html ]
 THE SOFTWARE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, EXPRESS OR IMPLIED.
 """
 
-#
-# TODO(v1.0): Add a high level `get_scenes` / `get_cuts` function which acts like the API test.
-# Only take in a video path, statsfile, threshold, min_scene_len, fps, and an optional detector.
-#
+
+def detect_scenes(
+    video_path: str,
+    threshold: Optional[int] = None,
+    stats_file_path: Optional[str] = None) -> List[Tuple[FrameTimecode, FrameTimecode]]:
+    """High level function that performs scene content-aware scene detection on a given
+    video path, and returns a list of scenes (pairs of FrameTimecodes).
+
+    Arguments:
+        TODO(v0.6)
+
+    Raises:
+        TODO(v0.6)
+    """
+
+    video = open_video(video_path)
+    if stats_file_path:
+        stats_manager = StatsManager()
+        stats_manager.load_from_csv(stats_file_path)
+        scene_manager = SceneManager(stats_manager)
+    else:
+        stats_manager = None
+        scene_manager = SceneManager()
+
+    if threshold is not None:
+        scene_manager.add_detector(ContentDetector(threshold=threshold))
+    else:
+        scene_manager.add_detector(ContentDetector())
+
+    scene_manager.detect_scenes(video=video)
+    if not stats_manager is None:
+        stats_manager.save_to_csv(path=stats_file_path, base_timecode=video.base_timecode)
+    return scene_manager.get_scene_list()

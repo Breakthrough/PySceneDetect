@@ -48,34 +48,46 @@ You can find more examples [on the website](https://pyscenedetect.readthedocs.io
 
 **Quick Start (Python API)**:
 
-In the code example below, we create a function `find_scenes()` which will
-load a video, detect the scenes, and return a list of tuples containing the
-(start, end) timecodes of each detected scene.  Note that you can modify
-the `threshold` argument to modify the sensitivity of the scene detection.
+To get started, there is a high level function in the library that performs content-aware
+scene detection on a video path:
 
 ```python
-# Standard PySceneDetect imports:
-from scenedetect import open_video, SceneManager
-# For content-aware scene detection:
-from scenedetect.detectors import ContentDetector
+from scenedetect import detect_scenes
 
-def find_scenes(video_path, threshold=30.0):
+scene_list = detect_scenes('my_video.mp4')
+```
+
+Scenes will now be a list containing the start/end times of all scenes found in the video.
+We can just call `print(scene_list)`, but to show the result in a nicer format:
+
+```python
+for i, scene in enumerate(scene_list):
+    print('    Scene %2d: Start %s / Frame %d, End %s / Frame %d' % (
+        i+1,
+        scene[0].get_timecode(), scene[0].get_frames(),
+        scene[1].get_timecode(), scene[1].get_frames(),))
+```
+
+You can also specify threshold, and an optional file to store the metrics calculated on each frame.
+For more advanced usage the API is highly configurable and can easily integrate with any pipeline.
+This includes using different detection algorithms, splitting the input video, and more.
+For example:
+
+```python
+from scenedetect import open_video, SceneManager
+from scenedetect.detectors import ContentDetector
+from scenedetect.video_splitter import split_video_ffmpeg
+
+def split_video_into_scenes(video_path, threshold=27.0):
     # Open our video, create a scene manager, and add a detector.
     video = open_video(path=video_path)
     scene_manager = SceneManager()
     scene_manager.add_detector(
         ContentDetector(threshold=threshold))
-    # Process all frames in the video.
-    scene_manager.detect_scenes(video)
-    # Each returned scene is a tuple of the (start, end) timecode.
-    return scene_manager.get_scene_list()
-```
-
-To get started, try printing the result from calling `find_scenes` on a small video clip:
-
-```python
-    scenes = find_scenes('video.mp4')
-    print(scenes)
+    # Process all frames in the video, and show a progress bar.
+    scene_manager.detect_scenes(video, show_progress=True)
+    scene_list = scene_manager.get_scene_list()
+    split_video_ffmpeg(video_path, scene_list)
 ```
 
 See [the manual](https://pyscenedetect.readthedocs.io/projects/Manual/en/latest/api.html) for the full PySceneDetect API documentation.
