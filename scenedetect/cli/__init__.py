@@ -450,7 +450,7 @@ def detect_adaptive_command(ctx, threshold, min_scene_len, min_delta_hsv,
     detect-adaptive --threshold 3.2
     """
 
-    min_scene_len = parse_timecode(ctx.obj, min_scene_len)
+    min_scene_len = parse_timecode(min_scene_len, ctx.obj.video_stream.frame_rate)
     luma_mode_str = '' if not luma_only else ', luma_only mode'
 
     ctx.obj.logger.debug('Adaptively detecting content, parameters:\n'
@@ -461,7 +461,6 @@ def detect_adaptive_command(ctx, threshold, min_scene_len, min_delta_hsv,
     # Need to ensure that a detector is not added twice, or will cause
     # a frame metric key error when registering the detector.
     ctx.obj.add_detector(scenedetect.detectors.AdaptiveDetector(
-        video_manager=ctx.obj.video_manager,
         adaptive_threshold=threshold,
         min_scene_len=min_scene_len,
         min_delta_hsv=min_delta_hsv,

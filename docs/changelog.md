@@ -46,12 +46,18 @@ PySceneDetect v0.6 is a major stepping-stone update towards the planned stable v
  * The video splitting functions no longer support multiple input videos for concatenation (`scenedetect.video_splitter`)
  * Fixed issue with `previous_frame` method of `FrameTimecode` allowing a negative frame number
  * Merged constants `MAX_FPS_DELTA` and `MINIMUM_FRAMES_PER_SECOND_DELTA_FLOAT` in `scenedetect.frame_timecode` into new `MAX_FPS_DELTA` constant
+ * The `video_manager` parameter has been removed from the `AdaptiveDetector` constructor
+
+
+----------------------------------------------------------------
+
 
 ## PySceneDetect 0.5
 
 ### 0.5.6.1 (October 11, 2021)
 
  * Fix crash when using `detect-content` or `detect-adaptive` with latest version of OpenCV (thanks @bilde2910)
+
 
 ### 0.5.6 (August 15, 2021)
 
@@ -124,6 +130,7 @@ PySceneDetect v0.6 is a major stepping-stone update towards the planned stable v
  * Certain non-PyPI OpenCV packages may cause a crash with the message `TypeError: isinstance() arg 2 must be a type or tuple of types` - as a workaround, install the Python OpenCV package by running `pip install scenedetect[opencv]` ([#220](https://github.com/Breakthrough/PySceneDetect/issues/220))
  * Image sequences or URL inputs are not supported by the `save-images` or `split-video` commands
  * Variable framerate videos (VFR) are not fully supported, and will yield incorrect timestamps ([#168](https://github.com/Breakthrough/PySceneDetect/issues/168))
+
 
 ### 0.5.4 (September 14, 2020)
 
@@ -224,6 +231,7 @@ PySceneDetect v0.6 is a major stepping-stone update towards the planned stable v
 
 ----------------------------------------------------------------
 
+
 ## PySceneDetect 0.4
 
 ### 0.4 (January 14, 2017)
@@ -296,6 +304,7 @@ PySceneDetect v0.6 is a major stepping-stone update towards the planned stable v
 
 ----------------------------------------------------------------
 
+
 ## PySceneDetect 0.2-alpha
 
 ### 0.2.4-alpha (December 22, 2015)
@@ -335,4 +344,3 @@ PySceneDetect v0.6 is a major stepping-stone update towards the planned stable v
 
  * first public release
  * [feature] threshold-based fade in/out detection
-

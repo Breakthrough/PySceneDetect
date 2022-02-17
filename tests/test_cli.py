@@ -34,9 +34,7 @@ VIDEO_PATH = 'tests/goldeneye/goldeneye.mp4'
 DEFAULT_STATSFILE = 'statsfile.csv'
 DEFAULT_TIME = '-s 2s -d 6s'    # Seek forward a bit but limit the amount we process.
 DEFAULT_DETECTOR = 'detect-content'
-
-# TODO(v0.6): Re-enable detect-adaptive.
-ALL_DETECTORS = ['detect-content', 'detect-threshold']
+ALL_DETECTORS = ['detect-content', 'detect-threshold', 'detect-adaptive']
 
 
 def invoke_scenedetect(args: str = '', **kwargs):

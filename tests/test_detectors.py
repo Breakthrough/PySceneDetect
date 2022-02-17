@@ -72,7 +72,6 @@ def test_content_detector(test_movie_clip):
         assert start_frames == detected_start_frames
 
 
-@pytest.mark.skip(reason="TODO(v0.6): Fix AdaptiveDetector.")
 def test_adaptive_detector(test_movie_clip):
     """ Test SceneManager with VideoStreamCv2 and AdaptiveDetector. """
     # We use the ground truth of ContentDetector with threshold=27.
@@ -124,9 +123,8 @@ def test_threshold_detector(test_video_file):
 
 def test_detectors_with_stats(test_video_file):
     """ Test all detectors functionality with a StatsManager. """
-    # TODO(v0.6): Re-enable AdaptiveDetector.
     # TODO(v0.6): Parameterize this test case (move fixture from cli to test config).
-    for detector in [ContentDetector, ThresholdDetector]:
+    for detector in [ContentDetector, ThresholdDetector, ThresholdDetector]:
         video = VideoStreamCv2(test_video_file)
         stats = StatsManager()
         scene_manager = SceneManager(stats_manager=stats)
