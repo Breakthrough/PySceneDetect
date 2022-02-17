@@ -17,3 +17,4 @@ manual/_build/
 *.m4v
 *.csv
 .vscode/*
+tests/resources/*

@@ -30,7 +30,7 @@ import pytest
 # TODO(v1.0): Test should clean up working directory (create a temp one).
 
 SCENEDETECT_CMD = 'python -m scenedetect'
-VIDEO_PATH = 'tests/goldeneye/goldeneye.mp4'
+VIDEO_PATH = 'tests/resources/goldeneye.mp4'
 DEFAULT_STATSFILE = 'statsfile.csv'
 DEFAULT_TIME = '-s 2s -d 6s'    # Seek forward a bit but limit the amount we process.
 DEFAULT_DETECTOR = 'detect-content'

@@ -70,6 +70,7 @@ def calculate_frame_delta(frame_a, frame_b, roi=None) -> float:
     return numpy.sum(numpy.abs(frame_b - frame_a)) / num_pixels
 
 
+# TODO: Need to reduce code duplication here and in `conftest.py`
 def get_absolute_path(relative_path: str) -> str:
     # type: (str) -> str
     """ Returns the absolute path to a (relative) path of a file that
@@ -95,18 +96,19 @@ class VideoParameters:
         # TODO: Aspect ratio.
 
 
+# TODO: Need to reduce duplicated paths here and in `conftest.py`
 def get_test_video_params():
     # type: () -> str
     """Fixture for parameters of all videos."""
     return [
         VideoParameters(
-            path=get_absolute_path("testvideo.mp4"),
+            path=get_absolute_path("resources/testvideo.mp4"),
             width=1280,
             height=720,
             frame_rate=29.97,
             total_frames=720),
         VideoParameters(
-            path=get_absolute_path("goldeneye/goldeneye.mp4"),
+            path=get_absolute_path("resources/goldeneye.mp4"),
             width=1280,
             height=544,
             frame_rate=23.976,
