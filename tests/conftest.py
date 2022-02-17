@@ -28,12 +28,13 @@
 
 This file includes all pytest configuration for running PySceneDetect's tests.
 
-These tests rely on the files in the tests/ folder in the "resources" branch of
-the PySceneDetect git repository.  These files can be downloaded manually from
-the following URL:
+These tests rely on the files in the tests/resources/ folder in the "resources" branch of
+the PySceneDetect git repository. These files can be checked out via git by running the
+following from the root of the repo:
 
-    [ https://github.com/Breakthrough/PySceneDetect/tree/resources/tests ]
+    git checkout refs/remotes/origin/resources -- tests/resources/
 
+Note that currently these tests create some temporary files which are not yet cleaned up.
 """
 
 import os
@@ -70,7 +71,7 @@ def test_video_file():
 
     Access in test case by adding a test_video_file argument to obtain the path.
     """
-    return get_absolute_path("testvideo.mp4")
+    return get_absolute_path("resources/testvideo.mp4")
 
 @pytest.fixture
 def test_movie_clip():
@@ -79,4 +80,4 @@ def test_movie_clip():
 
     Access in test case by adding a test_movie_clip argument to obtain the path.
     """
-    return get_absolute_path("goldeneye/goldeneye.mp4")
+    return get_absolute_path("resources/goldeneye.mp4")
