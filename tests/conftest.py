@@ -26,6 +26,7 @@ These tests rely on the files in the tests/resources/ folder in the "resources" 
 the PySceneDetect git repository. These files can be checked out via git by running the
 following from the root of the repo:
 
+    git fetch --depth=1 https://github.com/Breakthrough/PySceneDetect.git refs/heads/resources:refs/remotes/origin/resources
     git checkout refs/remotes/origin/resources -- tests/resources/
 
 Note that currently these tests create some temporary files which are not yet cleaned up.
@@ -64,7 +65,6 @@ def test_video_file():
     Access in test case by adding a test_video_file argument to obtain the path.
     """
     return get_absolute_path("resources/testvideo.mp4")
-
 
 @pytest.fixture
 def test_movie_clip():
