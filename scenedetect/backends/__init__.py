@@ -76,7 +76,7 @@ from typing import Dict, Iterable, List, Optional, Type
 
 # VideoStreamCv2 must be available at minimum.
 from scenedetect.backends.opencv import VideoStreamCv2
-from scenedetect.video_stream import VideoStream
+from scenedetect.video_stream import VideoStream, VideoOpenFailure
 
 AVAILABLE_BACKENDS: Dict[str, Type] = {
     backend.BACKEND_NAME: backend for backend in filter(None, [
@@ -111,10 +111,17 @@ def open_video(path: str,
     Raises:
         VideoOpenFailure if constructing the VideoStream fails.
     """
-    # TODO(v0.6): If a backend results in a failure to open the video, the next preferred backend
-    # should be used if possible.
+    # Try to open the video with the specified backend.
     if backend is not None and backend in AVAILABLE_BACKENDS:
-        return AVAILABLE_BACKENDS[backend](path, framerate)
+        try:
+            return AVAILABLE_BACKENDS[backend](path, framerate)
+        except VideoOpenFailure:
+            pass
+    # Try to open the video with the preferred backends in order.
     for backend_type in PREFERRED_BACKENDS:
-        return backend_type(path, framerate)
+        try:
+            return backend_type(path, framerate)
+        except VideoOpenFailure:
+            continue
+    # Fallback to trying to open the video with VideoStreamCv2.
     return VideoStreamCv2(path_or_device=path, framerate=framerate)
