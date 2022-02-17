@@ -38,14 +38,14 @@ import cv2
 from scenedetect.backends.opencv import VideoStreamCv2
 from scenedetect.frame_timecode import FrameTimecode, MAX_FPS_DELTA
 import scenedetect.detectors
-from scenedetect.platform import (
-    check_opencv_ffmpeg_dll, get_and_create_path, get_cv2_imwrite_params)
-from scenedetect.scene_manager import (
-    SceneManager, save_images, write_scene_list, write_scene_list_html)
+from scenedetect.platform import (check_opencv_ffmpeg_dll, get_and_create_path,
+                                  get_cv2_imwrite_params)
+from scenedetect.scene_manager import (SceneManager, save_images, write_scene_list,
+                                       write_scene_list_html)
 from scenedetect.stats_manager import StatsManager, StatsFileCorrupt
 from scenedetect.video_stream import VideoStream, VideoOpenFailure
-from scenedetect.video_splitter import (
-    is_mkvmerge_available, is_ffmpeg_available, split_video_mkvmerge, split_video_ffmpeg)
+from scenedetect.video_splitter import (is_mkvmerge_available, is_ffmpeg_available,
+                                        split_video_mkvmerge, split_video_ffmpeg)
 
 
 def parse_timecode(value: Union[str, int, FrameTimecode], frame_rate: float) -> FrameTimecode:
@@ -171,7 +171,7 @@ class CliContext:
         self.image_height: int = None         # export-html -h/--image-height
 
         # Internal variables
-        self._check_input_open_failed = False   # Used to avoid excessive log messages
+        self._check_input_open_failed = False # Used to avoid excessive log messages
 
     def parse_options(self, input_path: str, framerate: float, stats_file: Optional[str],
                       downscale: Optional[int], frame_skip: int, min_scene_len: str,
@@ -578,14 +578,16 @@ class CliContext:
                 self.video_stream.path,
                 scene_list,
                 output_path_template,
-                suppress_output=self.quiet_mode or self.split_quiet)
+                show_output=not (self.quiet_mode or self.split_quiet),
+            )
         else:
             split_video_ffmpeg(
                 self.video_stream.path,
                 scene_list,
                 output_path_template,
                 arg_override=self.split_args,
-                hide_progress=self.quiet_mode,
-                suppress_output=self.quiet_mode or self.split_quiet)
+                show_progress=not self.quiet_mode,
+                show_output=not (self.quiet_mode or self.split_quiet),
+            )
         if scene_list:
             self.logger.info('Video splitting completed, individual scenes written to disk.')

@@ -58,6 +58,7 @@ scene_list = detect_scenes('my_video.mp4')
 ```
 
 Scenes will now be a list containing the start/end times of all scenes found in the video.
+You can also set `show_progress=True` to see a progress bar if you have `tqdm` installed.
 We can just call `print(scene_list)`, but to show the result in a nicer format:
 
 ```python
@@ -84,10 +85,10 @@ def split_video_into_scenes(video_path, threshold=27.0):
     scene_manager = SceneManager()
     scene_manager.add_detector(
         ContentDetector(threshold=threshold))
-    # Process all frames in the video, and show a progress bar.
+    # Progress bar will only be shown if `tqdm` is installed.
     scene_manager.detect_scenes(video, show_progress=True)
     scene_list = scene_manager.get_scene_list()
-    split_video_ffmpeg(video_path, scene_list)
+    split_video_ffmpeg(video_path, scene_list, show_progress=True)
 ```
 
 See [the manual](https://pyscenedetect.readthedocs.io/projects/Manual/en/latest/api.html) for the full PySceneDetect API documentation.

@@ -98,7 +98,8 @@ THE SOFTWARE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, EXPRESS OR IMPLIED.
 def detect_scenes(
     video_path: str,
     threshold: Optional[int] = None,
-    stats_file_path: Optional[str] = None) -> List[Tuple[FrameTimecode, FrameTimecode]]:
+    stats_file_path: Optional[str] = None,
+    show_progress: bool = False) -> List[Tuple[FrameTimecode, FrameTimecode]]:
     """High level function that performs scene content-aware scene detection on a given
     video path, and returns a list of scenes (pairs of FrameTimecodes).
 
@@ -123,7 +124,7 @@ def detect_scenes(
     else:
         scene_manager.add_detector(ContentDetector())
 
-    scene_manager.detect_scenes(video=video)
+    scene_manager.detect_scenes(video=video, show_progress=show_progress)
     if not stats_manager is None:
         stats_manager.save_to_csv(path=stats_file_path, base_timecode=video.base_timecode)
     return scene_manager.get_scene_list()

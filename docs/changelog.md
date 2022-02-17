@@ -47,6 +47,9 @@ PySceneDetect v0.6 is a major stepping-stone update towards the planned stable v
  * Fixed issue with `previous_frame` method of `FrameTimecode` allowing a negative frame number
  * Merged constants `MAX_FPS_DELTA` and `MINIMUM_FRAMES_PER_SECOND_DELTA_FLOAT` in `scenedetect.frame_timecode` into new `MAX_FPS_DELTA` constant
  * The `video_manager` parameter has been removed from the `AdaptiveDetector` constructor
+ * The `split_video_ffmpeg` and `split_video_mkvmerge` functions in `scenedetect.video_splitter` arguments have been renamed and defaults updated:
+    * `suppress_output` is now `show_output`, default is `False`
+    * `hide_progress` is now `show_progress`, default is `False`
 
 
 ----------------------------------------------------------------

@@ -136,7 +136,7 @@ def split_video_mkvmerge(input_video_path: str,
                          scene_list: Iterable[FrameTimecodePair],
                          output_file_template: str = '$VIDEO_NAME-Scene-$SCENE_NUMBER.mkv',
                          video_name: Optional[str] = None,
-                         suppress_output: bool = False):
+                         show_output: bool = False):
     """ Calls the mkvmerge command on the input video(s), splitting it at the
     passed timecodes, where each scene is written in sequence from 001.
 
@@ -148,7 +148,7 @@ def split_video_mkvmerge(input_video_path: str,
             (e.g. "$VIDEO_NAME-Scene").
         video_name (str): Name of the video to be substituted in output_file_template for
             $VIDEO_NAME. If not specified, will be obtained from the filename.
-        suppress_output (bool): If True, adds the --quiet flag when invoking `mkvmerge`.
+        show_output: If False, adds the --quiet flag when invoking `mkvmerge`.
 
     Returns:
         Return code of invoking mkvmerge (0 on success). If scene_list is empty, will
@@ -172,7 +172,7 @@ def split_video_mkvmerge(input_video_path: str,
 
     try:
         call_list = ['mkvmerge']
-        if suppress_output:
+        if not show_output:
             call_list.append('--quiet')
         call_list += [
             '-o', output_file_name, '--split',
@@ -184,8 +184,7 @@ def split_video_mkvmerge(input_video_path: str,
         total_frames = scene_list[-1][1].get_frames() - scene_list[0][0].get_frames()
         processing_start_time = time.time()
         ret_val = invoke_command(call_list)
-        if not suppress_output:
-            print('')
+        if show_output:
             logger.info('Average processing speed %.2f frames/sec.',
                         float(total_frames) / (time.time() - processing_start_time))
     except CommandTooLong:
@@ -203,8 +202,8 @@ def split_video_ffmpeg(input_video_path: str,
                        output_file_template: str = '$VIDEO_NAME-Scene-$SCENE_NUMBER.mp4',
                        video_name: Optional[str] = None,
                        arg_override: str = '-c:v libx264 -preset fast -crf 21 -c:a aac',
-                       hide_progress: bool = False,
-                       suppress_output: bool = False):
+                       show_progress: bool = False,
+                       show_output: bool = False):
     """ Calls the ffmpeg command on the input video, generating a new video for
     each scene based on the start/end timecodes.
 
@@ -218,8 +217,8 @@ def split_video_ffmpeg(input_video_path: str,
         video_name (str): Name of the video to be substituted in output_file_template. If not
             passed will be calculated from input_video_path automatically.
         arg_override (str): Allows overriding the arguments passed to ffmpeg for encoding.
-        hide_progress (bool): If True, will hide progress bar provided by tqdm (if installed).
-        suppress_output (bool): If True, will set verbosity to quiet for the first scene.
+        show_progress (bool): If True, will show progress bar provided by tqdm (if installed).
+        show_output (bool): If True, will show output from ffmpeg for first split.
 
     Returns:
         Return code of invoking ffmpeg (0 on success). If scene_list is empty, will
@@ -246,13 +245,13 @@ def split_video_ffmpeg(input_video_path: str,
     try:
         progress_bar = None
         total_frames = scene_list[-1][1].get_frames() - scene_list[0][0].get_frames()
-        if tqdm and not hide_progress:
+        if show_progress and tqdm:
             progress_bar = tqdm(total=total_frames, unit='frame', miniters=1, dynamic_ncols=True)
         processing_start_time = time.time()
         for i, (start_time, end_time) in enumerate(scene_list):
             duration = (end_time - start_time)
             call_list = ['ffmpeg']
-            if suppress_output:
+            if not show_output:
                 call_list += ['-v', 'quiet']
             elif i > 0:
                 # Only show ffmpeg output for the first call, which will display any
@@ -271,7 +270,7 @@ def split_video_ffmpeg(input_video_path: str,
                     VIDEO_NAME=video_name, SCENE_NUMBER=scene_num_format % (i + 1))
             ]
             ret_val = invoke_command(call_list)
-            if not suppress_output and i == 0 and len(scene_list) > 1:
+            if show_output and i == 0 and len(scene_list) > 1:
                 logger.info(
                     'Output from ffmpeg for Scene 1 shown above, splitting remaining scenes...')
             if ret_val != 0:
@@ -279,8 +278,7 @@ def split_video_ffmpeg(input_video_path: str,
                 break
             if progress_bar:
                 progress_bar.update(duration.get_frames())
-        if progress_bar:
-            print('')
+        if show_output:
             logger.info('Average processing speed %.2f frames/sec.',
                         float(total_frames) / (time.time() - processing_start_time))
 

@@ -38,3 +38,16 @@ The `downscale_factor` parameter has been removed from :py:func:`save_images <sc
 ===============================================================
 
 Replace uses of both `MAX_FPS_DELTA` and `MINIMUM_FRAMES_PER_SECOND_DELTA_FLOAT` from :py:mod:`scenedetect.frame_timecode` with :py:data:`MAX_FPS_DELTA <scenedetect.frame_timecode.MAX_FPS_DELTA>`.
+
+
+===============================================================
+`split_video_*` Functions
+===============================================================
+
+The `suppress_output` and `hide_progress` arguments passed to the :py:func:`split_video_ffmpeg <scenedetect.video_splitter.split_video_ffmpeg>` and :py:func:`split_video_mkvmerge <scenedetect.video_splitter.split_video_mkvmerge>` have been renamed, and have new defaults:
+
+ * `suppress_output` is now `show_output`, default is `False`
+
+ * `hide_progress` is now `show_progress`, default is `False`
+
+This makes the API consistent with that of :py:class:`SceneManager <scenedetect.scene_manager.SceneManager>`.
