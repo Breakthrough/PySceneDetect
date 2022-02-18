@@ -34,11 +34,13 @@ from typing import List, Optional, Tuple
 
 # Commonly used classes/functions exported under the `scenedetect` namespace for brevity.
 from scenedetect.scene_manager import SceneManager, save_images
+from scenedetect.scene_detector import SceneDetector
 from scenedetect.frame_timecode import FrameTimecode
-from scenedetect.video_stream import VideoStream
+from scenedetect.video_stream import VideoStream, VideoOpenFailure
 from scenedetect.backends import open_video, AVAILABLE_BACKENDS
-from scenedetect.stats_manager import StatsManager
+from scenedetect.stats_manager import StatsManager, StatsFileCorrupt
 from scenedetect.detectors import ContentDetector, AdaptiveDetector, ThresholdDetector
+from scenedetect.video_splitter import split_video_ffmpeg, split_video_mkvmerge
 
 # Used for module identification and when printing version & about info
 # (e.g. calling `scenedetect version` or `scenedetect about`).
@@ -94,37 +96,36 @@ or visit the following URL: [ https://docs.python.org/3/license.html ]
 THE SOFTWARE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, EXPRESS OR IMPLIED.
 """
 
-
-def detect_scenes(
-    video_path: str,
-    threshold: Optional[int] = None,
-    stats_file_path: Optional[str] = None,
-    show_progress: bool = False) -> List[Tuple[FrameTimecode, FrameTimecode]]:
-    """High level function that performs scene content-aware scene detection on a given
-    video path, and returns a list of scenes (pairs of FrameTimecodes).
+# pylint: disable=line-too-long
+def detect(video_path: str,
+           detector: SceneDetector,
+           stats_file_path: Optional[str] = None,
+           show_progress: bool = False) -> List[Tuple[FrameTimecode, FrameTimecode]]:
+    """Perform scene detection on a given video `path` using the specified `detector`.
 
     Arguments:
-        TODO(v0.6)
+        video_path: Path to input video (absolute or relative to working directory).
+        detector: A `SceneDetector` instance (`ContentDetector`, `ThresholdDetector`, etc...).
+            See :py:mod:`scenedetect.detectors` for a full list of detection algorithms.
+        stats_file_path: Path to save per-frame metrics to for statistical analysis or to
+            determine a better threshold value.
+        show_progress: Show a progress bar with estimated time remaining. Default is False.
+
+    Returns:
+        List of scenes (pairs of :py:class:`FrameTimecode` objects).
 
     Raises:
-        TODO(v0.6)
+        :py:class:`VideoOpenFailure`: `video_path` could not be opened.
+        :py:class:`StatsFileCorrupt`: `stats_file_path` is an invalid stats file
     """
-
     video = open_video(video_path)
     if stats_file_path:
-        stats_manager = StatsManager()
-        stats_manager.load_from_csv(stats_file_path)
-        scene_manager = SceneManager(stats_manager)
+        scene_manager = SceneManager(StatsManager())
     else:
-        stats_manager = None
         scene_manager = SceneManager()
-
-    if threshold is not None:
-        scene_manager.add_detector(ContentDetector(threshold=threshold))
-    else:
-        scene_manager.add_detector(ContentDetector())
-
+    scene_manager.add_detector(detector)
     scene_manager.detect_scenes(video=video, show_progress=show_progress)
-    if not stats_manager is None:
-        stats_manager.save_to_csv(path=stats_file_path, base_timecode=video.base_timecode)
+    if not scene_manager.stats_manager is None:
+        scene_manager.stats_manager.save_to_csv(
+            path=stats_file_path, base_timecode=video.base_timecode)
     return scene_manager.get_scene_list()

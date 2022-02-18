@@ -48,20 +48,18 @@ You can find more examples [on the website](https://pyscenedetect.readthedocs.io
 
 **Quick Start (Python API)**:
 
-To get started, there is a high level function in the library that performs content-aware
-scene detection on a video path:
+To get started, there is a high level function in the library that performs content-aware scene detection on a video (try it from a Python prompt):
 
 ```python
-from scenedetect import detect_scenes
-
-scene_list = detect_scenes('my_video.mp4')
+from scenedetect import detect, ContentDetector
+scene_list = detect('my_video.mp4', ContentDetector())
 ```
 
-Scenes will now be a list containing the start/end times of all scenes found in the video.
-You can also set `show_progress=True` to see a progress bar if you have `tqdm` installed.
-We can just call `print(scene_list)`, but to show the result in a nicer format:
+`scene_list` will now be a list containing the start/end times of all scenes found in the video. Try calling `print(scene_list)`, or iterating over each scene:
 
 ```python
+from scenedetect import detect, ContentDetector
+scene_list = detect('my_video.mp4', ContentDetector())
 for i, scene in enumerate(scene_list):
     print('    Scene %2d: Start %s / Frame %d, End %s / Frame %d' % (
         i+1,
@@ -69,13 +67,18 @@ for i, scene in enumerate(scene_list):
         scene[1].get_timecode(), scene[1].get_frames(),))
 ```
 
-You can also specify threshold, and an optional file to store the metrics calculated on each frame.
-For more advanced usage the API is highly configurable and can easily integrate with any pipeline.
-This includes using different detection algorithms, splitting the input video, and more.
-For example:
+We can also split the video into each scene if `ffmpeg` is installed (`mkvmerge` is also supported):
 
 ```python
-from scenedetect import open_video, SceneManager
+from scenedetect import detect, ContentDetector, split_video_ffmpeg
+scene_list = detect('my_video.mp4', ContentDetector())
+split_video_ffmpeg('my_video.mp4', scene_list)
+```
+
+For more advanced usage, the API is highly configurable, and can easily integrate with any pipeline. This includes using different detection algorithms, splitting the input video, and much more. The following example shows how to implement a function simimlar to `detect_scenes` above, and split the resulting video into individual clips using `ffmpeg`:
+
+```python
+from scenedetect import open_video, SceneManager, split_video_ffmpeg
 from scenedetect.detectors import ContentDetector
 from scenedetect.video_splitter import split_video_ffmpeg
 
@@ -91,7 +94,8 @@ def split_video_into_scenes(video_path, threshold=27.0):
     split_video_ffmpeg(video_path, scene_list, show_progress=True)
 ```
 
-See [the manual](https://pyscenedetect.readthedocs.io/projects/Manual/en/latest/api.html) for the full PySceneDetect API documentation.
+See [the manual](https://pyscenedetect.readthedocs.io/projects/Manual/en/latest/api.html) for the
+full PySceneDetect API documentation.
 
 ----------------------------------------------------------
 
@@ -101,7 +105,7 @@ There are two main detection methods PySceneDetect uses: `detect-threshold` (com
 
 In general, use `detect-threshold` mode if you want to detect scene boundaries using fades/cuts in/out to black.  If the video uses a lot of fast cuts between content, and has no well-defined scene boundaries, you should use the `detect-content` mode.  Once you know what detection mode to use, you can try the parameters recommended below, or generate a statistics file (using the `-s` / `--statsfile` flag) in order to determine the correct paramters - specifically, the proper threshold value.
 
-Note that PySceneDetect is currently in beta; see Current Features & Roadmap below for details.  For help or other issues, you can join [the official PySceneDetect Discord Server](https://discord.gg/H83HbJngk7), submit an issue/bug report [here on Github](https://github.com/Breakthrough/PySceneDetect/issues), or contact me via [my website](http://www.bcastell.com/about/).
+For help or other issues, you can join [the official PySceneDetect Discord Server](https://discord.gg/H83HbJngk7), submit an issue/bug report [here on Github](https://github.com/Breakthrough/PySceneDetect/issues), or contact me via [my website](http://www.bcastell.com/about/).
 
 
 Usage
@@ -125,6 +129,6 @@ Additional features being planned or in development can be found [here (tagged a
 
 Licensed under BSD 3-Clause (see the `LICENSE` file for details).
 
-Copyright (C) 2014-2021 Brandon Castellano.
+Copyright (C) 2014-2022 Brandon Castellano.
 All rights reserved.
 

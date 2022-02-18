@@ -460,7 +460,7 @@ class CliContext:
                 self.logger.info('Saving frame metrics to stats file: %s',
                                  os.path.basename(self.stats_file_path))
                 self.stats_manager.save_to_csv(
-                    self.stats_file_path, base_timecode=self.video_stream.base_timecode)
+                    path=self.stats_file_path, base_timecode=self.video_stream.base_timecode)
             else:
                 self.logger.debug('No frame metrics updated, skipping update of the stats file.')
 

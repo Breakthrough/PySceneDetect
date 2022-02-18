@@ -71,7 +71,6 @@ a `float` number of seconds, or a `str` of the form `"HH:MM:SS[.nnn]"`. For exam
     print((x + 10.0) == "00:01:10.000")
 
 
-
 ``FrameTimecode`` Class
 =========================================
 
@@ -80,3 +79,7 @@ a `float` number of seconds, or a `str` of the form `"HH:MM:SS[.nnn]"`. For exam
    :undoc-members:
 
 
+Constants
+=========================================
+
+.. autodata:: scenedetect.frame_timecode.MAX_FPS_DELTA

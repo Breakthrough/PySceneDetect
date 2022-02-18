@@ -485,18 +485,8 @@ def detect_adaptive_command(ctx, threshold, min_scene_len, min_delta_hsv,
     is_flag=True, flag_value=True, help=
     'If set, if the video ends on a fade-out, an additional scene will be generated for the'
     ' last fade out position.')
-@click.option(
-    '--min-percent', '-p', metavar='PERCENT',
-    type=click.IntRange(0, 100), default=95, show_default=True, help=
-    'Percent (%) from 0 to 100 of amount of pixels that must meet the threshold value in order'
-    'to trigger a scene change.')
-@click.option(
-    '--block-size', '-b', metavar='N',
-    type=click.IntRange(1, 128), default=8, show_default=True, help=
-    'Number of rows in image to sum per iteration (can be tuned for performance in some cases).')
 @click.pass_context
-def detect_threshold_command(ctx, threshold, fade_bias, add_last_scene,
-                             min_percent, block_size):
+def detect_threshold_command(ctx, threshold, fade_bias, add_last_scene):
     """  Perform threshold detection algorithm on input video(s).
 
     detect-threshold
@@ -507,20 +497,17 @@ def detect_threshold_command(ctx, threshold, fade_bias, add_last_scene,
     min_scene_len = 0 if ctx.obj.drop_short_scenes else ctx.obj.min_scene_len
 
     ctx.obj.logger.debug('Detecting threshold, parameters:\n'
-                  '  threshold: %d, min-scene-len: %d, fade-bias: %d,\n'
-                  '  add-last-scene: %s, min-percent: %d, block-size: %d',
-                  threshold, min_scene_len, fade_bias,
-                  'yes' if add_last_scene else 'no', min_percent, block_size)
+                  '  threshold: %d, min-scene-len: %d, fade-bias: %d, add-last-scene: %s',
+                  threshold, min_scene_len, fade_bias, 'yes' if add_last_scene else 'no')
 
     # Handle case where add_last_scene is not set and is None.
     add_last_scene = True if add_last_scene else False
 
-    # Convert min_percent and fade_bias from integer to floats (0.0-1.0 and -1.0-+1.0 respectively).
-    min_percent /= 100.0
+    # Convert and fade_bias from integer to float with a valid range of -1.0 to 1.0.
     fade_bias /= 100.0
     ctx.obj.add_detector(scenedetect.detectors.ThresholdDetector(
         threshold=threshold, min_scene_len=min_scene_len, fade_bias=fade_bias,
-        add_final_scene=add_last_scene, block_size=block_size))
+        add_final_scene=add_last_scene))
 
 
 

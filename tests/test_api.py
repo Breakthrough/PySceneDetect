@@ -84,7 +84,7 @@ def test_api(test_video_file):
 
     # We need to save the statsfile if we want to re-use these metrics again the
     # next time we run the program.
-    stats_manager.save_to_csv(STATS_FILE_PATH, base_timecode=base_timecode)
+    stats_manager.save_to_csv(path=STATS_FILE_PATH, base_timecode=base_timecode)
 
 
 

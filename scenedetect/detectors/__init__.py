@@ -25,8 +25,16 @@ from the base SceneDetector class (in scenedetect.scene_detector) and implementi
 the required methods. This allows implementation of other generic algorithms as
 well as custom scenario-specific algorithms.
 
-Individual detectors are imported in this file for easy access from other
-modules (i.e. from scenedetect.detectors import ContentDetector).
+The following detection algorithms come with PySceneDetect:
+
+ * :py:class:`ContentDetector <scenedetect.detectors.content_detector.ContentDetector>`:
+    Detects shot changes by considering pixel changes in the HSV colorspace.
+
+ * :py:class:`ThresholdDetector <scenedetect.detectors.threshold_detector.ThresholdDetector>`:
+    Detects transitions below a set pixel intensity (cuts or fades to black).
+
+ * :py:class:`AdaptiveDetector <scenedetect.detectors.adaptive_detector.AdaptiveDetector>`:
+    Two-pass version of `ContentDetector` that handles fast camera movement better in some cases.
 """
 
 # PySceneDetect Detection Algorithm Imports

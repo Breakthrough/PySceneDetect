@@ -21,10 +21,19 @@
 """ ``scenedetect.video_stream`` Module
 
 This module contains the :py:class:`VideoStream` class, which provides a library agnostic
-interface for video input.  This allows PySceneDetect to support multiple video backends.
+interface for video input.  See :py:mod:`scenedetect.backends` for supported backends.
 
-See :py:mod:`scenedetect.backends` for concrete implementations.
+A :py:class:`VideoStream <scenedetect.video_stream.VideoStream>` is not used directly, but
+by constructing a concrete implementation from :py:mod:`scenedetect.backends`.  For most
+use cases, this can be done using the :py:func:`scenedetect.backends.open_video` function,
+which will automatically use any available backend. Specific backends (e.g.
+:py:class:`VideoStreamCv2 <scenedetect.backends.opencv.VideoStreamCv2>`) can also be
+constructed directly. See the :py:mod:`scenedetect.backends` documentation for an example.
 
+To actually implement the :py:class:`VideoStream <scenedetect.video_stream.VideoStream>`
+interface, see :py:class:`VideoStreamCv2 <scenedetect.backends.opencv.VideoStreamCv2>` in
+:py:mod:`scenedetect.backends.opencv` as a reference. To verify the implementation, run
+the `VideoStream` test suite in `tests/test_video_stream.py` on the new backend.
 """
 
 from abc import ABC, abstractmethod
@@ -35,10 +44,10 @@ from numpy import ndarray
 from scenedetect.platform import logger
 from scenedetect.frame_timecode import FrameTimecode
 
-
 ##
 ## VideoStream Exceptions
 ##
+
 
 class SeekError(Exception):
     """Either an unrecoverable error happened while attempting to seek, or the underlying
@@ -83,6 +92,7 @@ def compute_downscale_factor(frame_width: int, effective_width: int = DEFAULT_MI
 ##
 ## VideoStream Interface (Base Class)
 ##
+
 
 class VideoStream(ABC):
     """ Interface which all video backends must implement. """
@@ -185,10 +195,14 @@ class VideoStream(ABC):
     def read(self, decode: bool = True, advance: bool = True) -> Union[ndarray, bool]:
         """ Return next frame (or current if advance = False), or False if end of video.
 
-        If decode = False, a boolean indicating if the next frame was advanced or not is returned.
+        Arguments:
+            decode: Decode and return the frame.
+            advance: Seek to the next frame. If False, will remain on the current frame.
 
-        If decode and advance are both False, equivalent to a no-op, and the return value should
-        be discarded/ignored.
+        Returns:
+            If decode = True, returns either the decoded frame, or False if end of video.
+            If decode = False, a boolean indicating if the next frame was advanced to or not is
+            returned.
         """
         raise NotImplementedError
 

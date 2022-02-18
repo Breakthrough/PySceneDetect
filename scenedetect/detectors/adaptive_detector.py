@@ -18,15 +18,12 @@
 # ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-""" Module: ``scenedetect.detectors.adaptive_detector``
+""":py:class:`AdaptiveDetector` compares the difference in content between adjacent frames
+similar to `ContentDetector` except the threshold isn't fixed, but is a rolling average of
+adjacent frame changes. This can help mitigate false detections in situations such as fast
+camera motions.
 
-This module implements the :py:class:`AdaptiveDetector`, which compares the
-difference in content between adjacent frames similar to `ContentDetector` except the
-threshold isn't fixed, but is a rolling average of adjacent frame changes. This can
-help mitigate false detections in situations such as fast camera motions.
-
-This detector is available from the command-line interface by using the
-`detect-adaptive` command.
+This detector is available from the command-line as the `detect-adaptive` command.
 """
 
 # PySceneDetect Library Imports
@@ -47,7 +44,7 @@ class AdaptiveDetector(ContentDetector):
                  min_scene_len=15,
                  min_delta_hsv=15.0,
                  window_width=2):
-        super(AdaptiveDetector, self).__init__()
+        super().__init__()
         self.min_scene_len = min_scene_len                                              # minimum length of any given scene, in frames (int) or FrameTimecode
         self.adaptive_threshold = adaptive_threshold
         self.min_delta_hsv = min_delta_hsv
@@ -62,7 +59,7 @@ class AdaptiveDetector(ContentDetector):
     def get_metrics(self):
         # type: () -> List[str]
         """ Combines base ContentDetector metric keys with the AdaptiveDetector one. """
-        return super(AdaptiveDetector, self).get_metrics() + [self._adaptive_ratio_key]
+        return super().get_metrics() + [self._adaptive_ratio_key]
 
     def stats_manager_required(self):
         # type: () -> bool
@@ -92,7 +89,7 @@ class AdaptiveDetector(ContentDetector):
         # Call the process_frame function of ContentDetector but ignore any
         # returned cuts
         if self.is_processing_required(frame_num):
-            super(AdaptiveDetector, self).process_frame(frame_num=frame_num, frame_img=frame_img)
+            super().process_frame(frame_num=frame_num, frame_img=frame_img)
 
         if self._first_frame is None:
             self._first_frame = frame_num
@@ -129,7 +126,8 @@ class AdaptiveDetector(ContentDetector):
 
         if self.stats_manager is not None:
             # Loop through the stats, building the adaptive_ratio metric
-            for frame_num in range(self._first_frame + window_width + 1, self._last_frame - window_width):
+            for frame_num in range(self._first_frame + window_width + 1,
+                                   self._last_frame - window_width):
                 # If the content-val of the frame is more than
                 # adaptive_threshold times the mean content_val of the
                 # frames around it, then we mark it as a cut.
@@ -158,7 +156,8 @@ class AdaptiveDetector(ContentDetector):
 
             # Loop through the frames again now that adaptive_ratio has been calculated to detect
             # cuts using adaptive_ratio
-            for frame_num in range(self._first_frame + window_width + 1, self._last_frame - window_width):
+            for frame_num in range(self._first_frame + window_width + 1,
+                                   self._last_frame - window_width):
                 # Check to see if adaptive_ratio exceeds the adaptive_threshold as well as there
                 # being a large enough content_val to trigger a cut
                 if (self.stats_manager.get_metrics(

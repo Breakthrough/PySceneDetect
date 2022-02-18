@@ -30,8 +30,8 @@ the metrics calculated for each frame. The :py:class:`StatsManager` must be regi
 The entire :py:class:`StatsManager` can be :py:meth:`saved to <StatsManager.save_to_csv>`
 and :py:meth:`loaded from <StatsManager.load_from_csv>` a human-readable CSV
 file, also allowing both precise determination of the threshold or other optimal values
-for video files.  See the :py:meth:`save_to_csv() <StatsManager.save_to_csv>` and
-:py:meth:`load_from_csv() <StatsManager.load_from_csv>` methods for more information.
+for video files.  See the :py:meth:`save_to_csv <StatsManager.save_to_csv>` and
+:py:meth:`load_from_csv <StatsManager.load_from_csv>` methods for more information.
 
 The :py:class:`StatsManager` can also be used to cache the calculation results of the scene
 detectors being used, speeding up subsequent scene detection runs using the same pair of
@@ -113,13 +113,20 @@ class StatsManager:
     from disk are treated as `float`.
     """
 
-    def __init__(self):
+    def __init__(self, base_timecode: FrameTimecode=None):
+        """Initialize a new StatsManager.
+
+        Arguments:
+            base_timecode: Timecode associated with this object. Must not be None (default value
+                will be removed in v1.0).
+        """
         # Frame metrics is a dict of frame (int): metric_dict (Dict[str, float])
         # of each frame metric key and the value it represents (usually float).
         self._frame_metrics = dict()     # Dict[FrameTimecode, Dict[str, float]]
         self._registered_metrics = set() # Set of frame metric keys.
         self._loaded_metrics = set()     # Metric keys loaded from stats file.
         self._metrics_updated = False    # Flag indicating if metrics require saving.
+        self._base_timecode = base_timecode     # Used for timing calculations.
 
     def register_metrics(self, metric_keys: Iterable[str]) -> None:
         """Register a list of metric keys that will be used by the detector.
@@ -192,19 +199,20 @@ class StatsManager:
         """ Save To CSV: Saves all frame metrics stored in the StatsManager to a CSV file.
 
         Arguments:
-            csv_file: A file handle opened in write mode (e.g. open('...', 'w')).
+            path: Path to destination file. Use `file` to pass a file handle instead.
+            file: A file handle opened in write mode (e.g. open('...', 'w')).
             base_timecode: The base_timecode obtained from the frame source VideoStream.
-                If using an OpenCV VideoCapture, create one using the video framerate by
-                setting base_timecode=FrameTimecode(0, fps=video_framerate).
-            force_save: If True, forcably writes metrics out even if one is not required
-                (see `is_save_required`).
+            force_save: If True, writes metrics out even if an update is not required.
 
         Raises:
-            IOError: If fail to open file for writing.
+            ValueError: If both path and file are specified, or base_timecode is None.
+            IOError: If `path` cannot be opened or a write failure occurs.
         """
 
         if path is not None and file is not None:
             raise ValueError("Only one of path or file can be specified")
+        if base_timecode is None:
+            raise ValueError("base_timecode must be set!")
 
         # Ensure we need to write to the file, and that we have data to do so with.
         if not ((self.is_save_required() or force_save) and self._registered_metrics

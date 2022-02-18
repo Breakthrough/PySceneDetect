@@ -27,6 +27,8 @@ PySceneDetect v0.6 is a major stepping-stone update towards the planned stable v
  * `split-video` command:
      * The `-c`/`--copy` flag now uses `ffmpeg` stream copying mode instead of `mkvmerge`
      * The new `-m`/`--mkvmerge` flag specifies to use `mkvmerge` instead of `ffmpeg`
+ * `detect-threshold` command:
+     * The `-p`/`--min-percent` and `-b`/`--block-size` arguments have been removed
 
 **API changes:**
 
@@ -41,6 +43,7 @@ PySceneDetect v0.6 is a major stepping-stone update towards the planned stable v
     * `get_scene_list()` now returns an empty list if there are no detected cuts (previously one scene with the duration of the video was returned)
         * To restore the previous behaviour, specify `start_in_scene=True`
         * Command-line output is unaffected, and still reports 1 scene spanning the entire video if no cuts were found
+ * New high-level `detect` function in `scenedetect` module that only has two required arguments: the path to a video (`path`) and a detector (`detector`)
  * `save_images()` no longer accepts downscale_factor, since there is already the ability to resize images via the `scale` or `height`/`width` arguments
  * The `StatsManager` load/save methods now accept a path or an open file handle
  * The video splitting functions no longer support multiple input videos for concatenation (`scenedetect.video_splitter`)
@@ -50,7 +53,8 @@ PySceneDetect v0.6 is a major stepping-stone update towards the planned stable v
  * The `split_video_ffmpeg` and `split_video_mkvmerge` functions in `scenedetect.video_splitter` arguments have been renamed and defaults updated:
     * `suppress_output` is now `show_output`, default is `False`
     * `hide_progress` is now `show_progress`, default is `False`
-
+ * The `block_size` argument has been removed from the `ThresholdDetector` constructor
+ * The `calculate_frame_score` method of `ContentDetector` has been renamed to `_calculate_frame_score`
 
 ----------------------------------------------------------------
 

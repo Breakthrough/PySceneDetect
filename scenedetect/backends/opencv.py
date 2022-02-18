@@ -18,10 +18,9 @@
 # ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-""" ``scenedetect.backends.opencv`` Module
+""":py:class:`VideoStreamCv2` provides an adapter for the OpenCV cv2.VideoCapture object.
 
-This module contains the :py:class:`VideoStreamCv2` class, which provides an OpenCV
-based video decoder (based on cv2.VideoCapture).
+Uses string identifier ``'opencv'``.
 """
 
 import math
@@ -36,14 +35,6 @@ from scenedetect.platform import get_aspect_ratio, get_file_name, logger
 from scenedetect.video_stream import VideoStream, SeekError, VideoOpenFailure
 
 
-def open_video(path: Optional[str], device: Optional[int], framerate: Optional[float]):
-    if path is not None and device is not None:
-        raise ValueError("Only one of path or device can be specified!")
-    if path is not None:
-        return VideoStreamCv2(path_or_device=path, framerate=framerate)
-    return VideoStreamCv2(path_or_device=device, framerate=framerate)
-
-
 class VideoStreamCv2(VideoStream):
     """ OpenCV VideoCapture backend. """
 
@@ -52,12 +43,8 @@ class VideoStreamCv2(VideoStream):
 
         Arguments:
             path_or_device: Path to video, or device ID as integer.
-
-            TODO: Split VideoStreamCv2 up into a child class VideoStreamCv2Device which overrides
-            methods in VideoStreamCv2 rather than having to branch. Can then consider renaming this
-            to VideoStreamCv2File, and also have one for image sequence if required (since that has
-            implications for the seek method as well).
-            """
+            framerate: If set, overrides the detected framerate.
+        """
         super().__init__()
 
         self._path_or_device = path_or_device
@@ -79,10 +66,12 @@ class VideoStreamCv2(VideoStream):
 
     @property
     def capture(self) -> cv2.VideoCapture:
-        """Returns reference to underlying VideoCapture object.
+        """Returns reference to underlying VideoCapture object. Use with caution.
 
-        Do not seek nor call the read/grab methods through the VideoCapture otherwise the
-        VideoStreamCv2 object will be in an inconsistent state."""
+        Prefer to use this property only to take ownership of the underlying cv2.VideoCapture object
+        backing this object. Seeking or using the read/grab methods through this property are
+        unsupported and will leave this object in an inconsistent state.
+        """
         return self._cap
 
     #
@@ -176,7 +165,7 @@ class VideoStreamCv2(VideoStream):
         seek(0) followed by read(). If we want to seek to the 5th frame, we call seek(4) followed
         by read(), at which point frame_number will be 5.
 
-        Not supported if the VideoStream is a device/camera.  Untested with web streams.
+        Not supported if the VideoStream is a device/camera. Untested with web streams.
 
         Arguments:
             target: Target position in video stream to seek to.
@@ -207,17 +196,20 @@ class VideoStreamCv2(VideoStream):
 
     def reset(self):
         """ Close and re-open the VideoStream (should be equivalent to calling `seek(0)`). """
-        self.seek(0)
         self._cap.release()
         self._open_capture(self._frame_rate)
 
     def read(self, decode: bool = True, advance: bool = True) -> Union[ndarray, bool]:
         """ Return next frame (or current if advance = False), or False if end of video.
 
-        If decode = False, a boolean indicating if the next frame was advanced or not is returned.
+        Arguments:
+            decode: Decode and return the frame.
+            advance: Seek to the next frame. If False, will remain on the current frame.
 
-        If decode and advance are both False, equivalent to a no-op, and the return value should
-        be discarded/ignored.
+        Returns:
+            If decode = True, returns either the decoded frame, or False if end of video.
+            If decode = False, a boolean indicating if the next frame was advanced to or not is
+            returned.
         """
         if not self._cap.isOpened():
             return False
@@ -249,7 +241,7 @@ class VideoStreamCv2(VideoStream):
             raise VideoOpenFailure("isOpened() returned False when opening OpenCV VideoCapture!")
 
         # Display a warning if the video codec type seems unsupported (#86).
-        if int(abs(cap.get(cv2.CAP_PROP_FOURCC))) == 0:
+        if not self._is_device and int(abs(cap.get(cv2.CAP_PROP_FOURCC))) == 0:
             logger.error(
                 "Video codec detection failed, output may be incorrect.\nThis could be caused"
                 " by using an outdated version of OpenCV, or using codecs that currently are"

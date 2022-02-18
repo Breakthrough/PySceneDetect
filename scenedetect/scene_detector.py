@@ -38,6 +38,8 @@ from scenedetect.stats_manager import StatsManager
 class SceneDetector:
     """ Base class to inherit from when implementing a scene detection algorithm.
 
+    This API is not yet stable and subject to change.
+
     This represents a "dense" scene detector, which returns a list of frames where
     the next scene/shot begins in a video.
 
@@ -105,6 +107,8 @@ class SceneDetector:
 
 class SparseSceneDetector(SceneDetector):
     """Base class to inheret from when implementing a sparse scene detection algorithm.
+
+    This class will be removed in v1.0 and should not be used.
 
     Unlike dense detectors, sparse detectors detect "events" and return a *pair* of frames,
     as opposed to just a single cut.

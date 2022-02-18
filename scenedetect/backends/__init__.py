@@ -21,10 +21,10 @@
 """ ``scenedetect.backends`` Module
 
 This module contains concrete :py:class:`VideoStream <scenedetect.video_stream.VideoStream>`
-implementations. For video files, the :py:data:`open_video <scenedetect.backends.open_video>`
-function can be used to open a video with any available backend (or a string hinting which
-backend is preferred).  Backends available on the current system can be found via
-:py:data:`AVAILABLE_BACKENDS <scenedetect.backends.AVAILABLE_BACKENDS>`.
+implementations. For video files, the :py:data:`open_video` function can be used to open a
+video with any available backend (or a string hinting which backend is preferred).
+
+Backends available on the current system can be found via :py:data:`AVAILABLE_BACKENDS`.
 
 ===============================================================
 Usage Example
@@ -43,9 +43,8 @@ all of the frames:
             break
     print("Read %d frames" % video.frame_number)
 
-If we want to use a specific backend from
-:py:data:`AVAILABLE_BACKENDS <scenedetect.backends.AVAILABLE_BACKENDS>`, we can pass it to
-:py:func:`open_video <scenedetect.backends.open_video>`:
+If we want to use a specific backend from :py:data:`AVAILABLE_BACKENDS`, we can pass it to
+:py:func:`open_video`:
 
 .. code:: python
 
@@ -61,8 +60,8 @@ Or we can import and use specific backend directly:
     from scenedetect.backends.opencv import VideoStreamCv2
     video = VideoStreamCv2(path_or_device='video.mp4')
 
-The `'opencv'` backend (:py:class:`backends.opencv.VideoStreamCv2
-<scenedetect.backends.opencv.VideoStreamCv2>`) is guaranteed to always be available.
+The ``'opencv'`` backend (:py:class:`VideoStreamCv2 <scenedetect.backends.opencv.VideoStreamCv2>`)
+is guaranteed to be available.
 """
 
 # TODO(v1.0): Consider removing and making this a namespace package so that additional backends can
@@ -94,22 +93,22 @@ specified, or the specified `preferred_backend` is unavailable."""
 def open_video(path: str,
                framerate: Optional[float] = None,
                backend: Optional[str] = None) -> VideoStream:
-    """Opens a video at the given path. See top level :py:mod:`scenedetect.backends` documentation
-    for a usage example.
+    """Opens a video at the given path.
 
     Arguments:
         path: Path to video file to open.
         framerate: Overrides detected framerate if set.
-        backend: Name of specific to use if possible. See AVAILABLE_BACKENDS for available backends.
-            If the specified backend is unavailable (or backend is not specified), the values of
-            PREFERRED_BACKENDS will be used in order. If none of the backends in PREFERRED_BACKENDS
-            are available, VideoStreamCv2 will be used as a fall-back.
+        backend: Name of specific to use if possible. See :py:data:`AVAILABLE_BACKENDS` for
+            available backends. If the specified backend is unavailable (or `backend` is not
+            specified), the values in :py:data:`PREFERRED_BACKENDS` will be used in order.
+            If none of the backends in :py:data:`PREFERRED_BACKENDS` are available, the OpenCV
+            backend will be used.
 
     Returns:
-        A VideoStream backend object created with the specified video path.
+        VideoStream backend object created with the specified video path.
 
     Raises:
-        VideoOpenFailure if constructing the VideoStream fails.
+        :py:class:`VideoOpenFailure`: Constructing the VideoStream fails.
     """
     # Try to open the video with the specified backend.
     if backend is not None and backend in AVAILABLE_BACKENDS:
