@@ -36,7 +36,7 @@ import platform
 import struct
 import subprocess
 import sys
-from typing import Dict, List, Optional, TextIO, Tuple, Union
+from typing import Any, Dict, List, Optional, TextIO, Tuple, Union
 
 import cv2
 
@@ -58,15 +58,14 @@ def get_aspect_ratio(cap: cv2.VideoCapture, epsilon: float = 0.01) -> float:
     """ Compatibility fix for OpenCV < v3.4.1 to get the aspect ratio
     of a video. For older versions, this function always returns 1.0.
 
-    Argument:
+    Arguments:
         cap: cv2.VideoCapture object. Must be opened and in valid state.
         epsilon: Used to compare numerator/denominator to zero.
 
     Returns:
-        float: Display aspect ratio CAP_PROP_SAR_NUM / CAP_PROP_SAR_DEN,
-        or 1.0 if using a version of OpenCV < 3.4.1.  Also returns 1.0
-        if for some reason the numerator/denominator returned is zero
-        (can happen if the video was not opened correctly).
+        Display aspect ratio CAP_PROP_SAR_NUM / CAP_PROP_SAR_DEN, or 1.0 if using a version
+        of OpenCV < 3.4.1.  Also returns 1.0 if for some reason the numerator/denominator
+        returned is zero (can happen if the video was not opened correctly or is corrupt).
     """
     if not 'CAP_PROP_SAR_NUM' in dir(cv2):
         return 1.0
@@ -124,9 +123,9 @@ def get_cv2_imwrite_params() -> Dict[str, Union[int, None]]:
 
     Returns:
         Dictionary of supported image formats/extensions ('jpg', 'png', etc...) mapped to the
-            respective OpenCV quality or compression parameter as {'jpg':
-            cv2.IMWRITE_JPEG_QUALITY, 'png': cv2.IMWRITE_PNG_COMPRESSION, ...}. Parameter will
-            be None if not found on the current system library (e.g. {'jpg': None}).
+        respective OpenCV quality or compression parameter as {'jpg': cv2.IMWRITE_JPEG_QUALITY,
+        'png': cv2.IMWRITE_PNG_COMPRESSION, ...}. Parameter will be None if not found on the
+        current system library (e.g. {'jpg': None}).
     """
 
     def _get_cv2_param(param_name: str) -> Union[int, None]:
@@ -149,15 +148,13 @@ def get_cv2_imwrite_params() -> Dict[str, Union[int, None]]:
 ##
 
 
-def get_csv_reader(file_handle: TextIO):
-    # type: (File) -> csv.reader
-    """ Returns a csv.reader object using the passed file handle. """
+def get_csv_reader(file_handle: TextIO) -> Any:
+    """Return a csv.reader object using the passed file handle."""
     return csv.reader(file_handle, lineterminator='\n')
 
 
-def get_csv_writer(file_handle: TextIO):
-    # type: (File) -> csv.writer
-    """ Returns a csv.writer object using the passed file handle. """
+def get_csv_writer(file_handle: TextIO) -> Any:
+    """Return a csv.writer object using the passed file handle."""
     return csv.writer(file_handle, lineterminator='\n')
 
 
@@ -166,8 +163,8 @@ def get_csv_writer(file_handle: TextIO):
 ##
 
 
-def get_file_name(file_path: str, include_extension=True):
-    """Returns the file name that `file_path` refers to, optionally removing the extension.
+def get_file_name(file_path: str, include_extension=True) -> str:
+    """Return the file name that `file_path` refers to, optionally removing the extension.
 
     E.g. /tmp/foo.bar -> foo"""
     file_name = os.path.basename(file_path)
@@ -178,7 +175,7 @@ def get_file_name(file_path: str, include_extension=True):
     return file_name
 
 
-def get_and_create_path(file_path: str, output_directory: Optional[str] = None):
+def get_and_create_path(file_path: str, output_directory: Optional[str] = None) -> str:
     """ Get & Create Path: Gets and returns the full/absolute path to file_path
     in the specified output_directory if set, creating any required directories
     along the way.
@@ -186,14 +183,14 @@ def get_and_create_path(file_path: str, output_directory: Optional[str] = None):
     If file_path is already an absolute path, then output_directory is ignored.
 
     Arguments:
-        file_path (str): File name to get path for.  If file_path is an absolute
+        file_path: File name to get path for.  If file_path is an absolute
             path (e.g. starts at a drive/root), no modification of the path
             is performed, only ensuring that all output directories are created.
-        output_dir (Optional[str]): An optional output directory to override the
+        output_dir: An optional output directory to override the
             directory of file_path if it is relative to the working directory.
 
     Returns:
-        (str) Full path to output file suitable for writing.
+        Full path to output file suitable for writing.
 
     """
     # If an output directory is defined and the file path is a relative path, open
@@ -211,7 +208,9 @@ def get_and_create_path(file_path: str, output_directory: Optional[str] = None):
 ##
 
 
-def init_logger(log_level: int = logging.INFO, show_stdout: bool = False, log_file: TextIO = None):
+def init_logger(log_level: int = logging.INFO,
+                show_stdout: bool = False,
+                log_file: TextIO = None) -> logging.Logger:
     """ Initializes the Python logging module for PySceneDetect.
 
     Mainly used by the command line interface, but can also be used by other modules
@@ -220,9 +219,12 @@ def init_logger(log_level: int = logging.INFO, show_stdout: bool = False, log_fi
     All existing log handlers are removed every time this function is invoked.
 
     Arguments:
-      log_level: Verbosity of log messages.
-      quiet_mode: If True, no output will be generated to stdout.
-      log_file: File to also send messages to, in addition to stdout.
+        log_level: Verbosity of log messages.
+        quiet_mode: If True, no output will be generated to stdout.
+        log_file: File to also send messages to, in addition to stdout.
+
+    Returns:
+        Logger instance to use.
     """
     # Format of log messages depends on verbosity.
     format_str = '[PySceneDetect] %(message)s'
@@ -248,8 +250,8 @@ def init_logger(log_level: int = logging.INFO, show_stdout: bool = False, log_fi
     return logger_instance
 
 
-# Default logger to be used by library objects.
 logger = init_logger()
+"""Default logger to be used by PySceneDetect library objects."""
 
 ##
 ## Running External Commands
@@ -257,28 +259,23 @@ logger = init_logger()
 
 
 class CommandTooLong(Exception):
-    """ Raised when the length of a command line argument doesn't play nicely
-    with the Windows command prompt. """
-    # pylint: disable=unnecessary-pass
-    pass
+    """Raised if the length of a command line argument exceeds the limit allowed on Windows."""
 
 
 def invoke_command(args: List[str]) -> int:
-    # type: (List[str]) -> None
     """ Same as calling Python's subprocess.call() method, but explicitly
     raises a different exception when the command length is too long.
 
     See https://github.com/Breakthrough/PySceneDetect/issues/164 for details.
 
     Arguments:
-        args (List[str]): List of strings to pass to subprocess.call().
+        args: List of strings to pass to subprocess.call().
 
     Returns:
-        int: Return code of command.
+        Return code of command.
 
     Raises:
-        CommandTooLong when passed command list exceeds built in command line
-        length limit on Windows.
+        CommandTooLong: `args` exceeds built in command line length limit on Windows.
     """
     try:
         return subprocess.call(args)

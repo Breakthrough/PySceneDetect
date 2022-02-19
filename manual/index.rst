@@ -6,24 +6,13 @@
 PySceneDetect Manual
 #######################################################################
 
-.. warning::
-
-    Version 0.6 is under development. This manual may be outdated or incorrect in places.
-
-This manual refers to both the PySceneDetect command-line interface (the `scenedetect`
-command) and the PySceneDetect Python API (the `scenedetect` module).  The latest release
-of PySceneDetect can be installed via `pip install scenedetect[opencv]`, or Windows builds
-and source releases can be found at `scenedetect.com <http://scenedetect.com/>`_. Note that
-PySceneDetect requires `ffmpeg` or `mkvmerge` for video splitting support.
+This manual refers to both the PySceneDetect command-line interface (the `scenedetect` command) and the PySceneDetect Python API (the `scenedetect` module).  The latest release of PySceneDetect can be installed via `pip install scenedetect[opencv]`, or Windows builds and source releases can be found at `scenedetect.com <http://scenedetect.com/>`_. Note that PySceneDetect requires `ffmpeg` or `mkvmerge` for video splitting support.
 
 .. note::
 
-     If you see any errors in this manual, or have any recommendations,
-     feel free to raise an issue on
-     `the PySceneDetect issue tracker <https://github.com/Breakthrough/PySceneDetect/issues>`_.
+     If you see any errors in this manual, or have any recommendations, feel free to raise an issue on `the PySceneDetect issue tracker <https://github.com/Breakthrough/PySceneDetect/issues>`_.
 
-The latest source code for PySceneDetect can be found on Github at
-`github.com/Breakthrough/PySceneDetect <http://github.com/Breakthrough/PySceneDetect>`_.
+The latest source code for PySceneDetect can be found on Github at `github.com/Breakthrough/PySceneDetect <http://github.com/Breakthrough/PySceneDetect>`_.
 
 
 ***********************************************************************

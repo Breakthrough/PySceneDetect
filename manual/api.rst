@@ -36,30 +36,41 @@ The ``scenedetect`` module is organized into several sub-modules, each containin
     * :ref:`scenedetect.stats_manager 🧮 <scenedetect-stats_manager>`: Contains :py:class:`StatsManager <scenedetect.stats_manager.StatsManager>` class for caching frame metrics and loading/saving them to disk in CSV format for analysis. Also used as a persistent cache to make multiple passes on the same video significantly faster.
 
 
-Note that every module has the same name of the implemented
-class in `lowercase_underscore` format, whereas the class name itself
-is in `PascalCase` format.  However, most types/functions are also available directly from the `scenedetect` package to make imports simpler.
+Most types/functions are also available directly from the `scenedetect` package to make imports simpler.
+
+.. note::
+
+    The PySceneDetect API is still under development. It is recommended that you pin the `scenedetect` version in your requirements to below the next major release:
+
+    .. code:: python
+
+        scenedetect<0.7
 
 
 =======================================================================
 Quickstart
 =======================================================================
 
-To get started, the :py:func:`scenedetect.detect_scenes` function will perform scene detection using :py:class:`ContentDetector <scenedetect.detectors.content_detector.ContentDetector>`, and return the resulting scene list:
+To get started, the :py:func:`scenedetect.detect` function will perform scene detection using :py:class:`ContentDetector <scenedetect.detectors.content_detector.ContentDetector>`, and return the resulting scene list:
 
 .. code:: python
 
     from scenedetect import detect, ContentDetector
     scene_list = detect('my_video.mp4', ContentDetector())
+
+``scene_list`` is now a list of :py:class:`FrameTimecode <scenedetect.frame_timecode.FrameTimecode>` pairs representing the start/end of each scene (try calling ``print(scene_list)``). Note that you can set ``show_progress=True`` when calling :py:func:`detect <scenedetect.detect>` to display a progress bar with estimated time remaining.
+
+Next, let's print the scene list in a more readable format by iterating over it:
+
+.. code:: python
+
     for i, scene in enumerate(scene_list):
-        print('    Scene %2d: Start %s / Frame %d, End %s / Frame %d' % (
+        print('Scene %2d: Start %s / Frame %d, End %s / Frame %d' % (
             i+1,
             scene[0].get_timecode(), scene[0].get_frames(),
             scene[1].get_timecode(), scene[1].get_frames(),))
 
-You can also set ``show_progress=True`` when calling :py:func:`detect <scenedetect.detect>` to display a progress bar and estimated time remaining.
-
-Now that we have a list of the timecodes where each scene is, let's :ref:`split the video <scenedetect-video_splitter>` into each scene if `ffmpeg` is installed (`mkvmerge` is also supported):
+Now that we know where each scene is, we can also :ref:`split the input video <scenedetect-video_splitter>` automatically using `ffmpeg` (`mkvmerge` is also supported):
 
 .. code:: python
 
@@ -67,15 +78,15 @@ Now that we have a list of the timecodes where each scene is, let's :ref:`split 
     scene_list = detect('my_video.mp4', ContentDetector())
     split_video_ffmpeg('my_video.mp4', scene_list)
 
-PySceneDetect has a highly modular API that can integrate with any application workflow. In the following example, we show how the various library components can be used to create a more customizable scene cut/shot detection pipeline.
+This is just a small snippet of what PySceneDetect offers. The library is very modular, and can integrate with most application workflows easily. In the next example, we show how the various library components can be used to create a more customizable scene cut/shot detection pipeline.
 
 
 .. _scenedetect-detailed_example:
 =======================================================================
-Detailed Example
+Example
 =======================================================================
 
-In the code example below, we create a function ``find_scenes()`` which will load a video, detect the scenes, and return a list of tuples containing the (start, end) timecodes of each detected scene.  Note that you can modify the `threshold` argument to modify the sensitivity of the :py:class:`ContentDetector <scenedetect.detectors.content_detector.ContentDetector>`, or use other detection algorithms (e.g. :py:class:`ThresholdDetector <scenedetect.detectors.threshold_detector.ThresholdDetector>`, :py:class:`AdaptiveDetector <scenedetect.detectors.adaptive_detector.AdaptiveDetector>`).
+In this example, we create a function ``find_scenes()`` which will load a video, detect the scenes, and return a list of tuples containing the (start, end) timecodes of each detected scene.  Note that you can modify the `threshold` argument to modify the sensitivity of the :py:class:`ContentDetector <scenedetect.detectors.content_detector.ContentDetector>`, or use other detection algorithms (e.g. :py:class:`ThresholdDetector <scenedetect.detectors.threshold_detector.ThresholdDetector>`, :py:class:`AdaptiveDetector <scenedetect.detectors.adaptive_detector.AdaptiveDetector>`).
 
 .. code:: python
 
