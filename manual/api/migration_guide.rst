@@ -5,6 +5,11 @@
 Migration Guide
 ---------------------------------------------------------------
 
+This page details how to transition a program written using PySceneDetect v0.5 to the new v0.6 API.
+
+PySceneDetect v0.6 is a major step towards a more stable and simplified API and should better serve most use cases.  The biggest change to most existing workflows should be how video input is handled, and that Python 3.6 or above is now required.  This page should cover the most common use-cases, although it is not exhaustive.  For a complete list of API changes, see `the changelog <https://pyscenedetect.readthedocs.io/en/latest/changelog/>`_.
+
+
 ===============================================================
 `VideoManager`
 ===============================================================

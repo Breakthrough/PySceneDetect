@@ -8,7 +8,9 @@ PySceneDetect Releases
 
 #### Release Notes
 
-PySceneDetect v0.6 is a major stepping-stone update towards the planned stable v1.0 API. The new minimum Python version is now 3.6. Changes to the command-line are minor and not expected to break most workflows, however there are breaking changes to the Python API. See the [Migration Guide](https://pyscenedetect.readthedocs.io/projects/Manual/en/v0.6/api/migration_guide.html) for information on how to port existing applications to the new API.
+PySceneDetect v0.6 is a **major breaking change** towards a stable API. The new **minimum Python version is now 3.6**. See the [Migration Guide](https://pyscenedetect.readthedocs.io/projects/Manual/en/v0.6/api/migration_guide.html) for information on how to port existing applications to the new API.  Changes to the command-line are minor and not expected to break most workflows.
+
+The main goal of v0.6 was to simplify and stabalize the video input and statsfile APIs, while addressing many minor technical debt items. This should help the eventual transition to the planned v1.0 release to proceed more smoothly as now most changes can be focused just on the `SceneManager` and `SceneDetector` classes.
 
 #### Changelog
 
@@ -24,11 +26,13 @@ PySceneDetect v0.6 is a major stepping-stone update towards the planned stable v
 **Command-line changes:**
 
  * `-i`/`--input` may no longer be specified multiple times (use an external tool like `ffmpeg` to perform concatenation first)
+ * `detect-content` command:
+     * The default threshold value `-t`/`--threshold` has been lowered to 27 and is now slightly more sensitive to shot changes ([#246](https://github.com/Breakthrough/PySceneDetect/issues/246))
+ * `detect-threshold` command:
+     * The `-p`/`--min-percent` and `-b`/`--block-size` arguments have been removed
  * `split-video` command:
      * The `-c`/`--copy` flag now uses `ffmpeg` stream copying mode instead of `mkvmerge`
      * The new `-m`/`--mkvmerge` flag specifies to use `mkvmerge` instead of `ffmpeg`
- * `detect-threshold` command:
-     * The `-p`/`--min-percent` and `-b`/`--block-size` arguments have been removed
 
 **API changes:**
 
@@ -55,6 +59,7 @@ PySceneDetect v0.6 is a major stepping-stone update towards the planned stable v
     * `hide_progress` is now `show_progress`, default is `False`
  * The `block_size` argument has been removed from the `ThresholdDetector` constructor
  * The `calculate_frame_score` method of `ContentDetector` has been renamed to `_calculate_frame_score`
+
 
 ----------------------------------------------------------------
 

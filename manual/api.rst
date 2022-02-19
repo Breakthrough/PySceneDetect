@@ -67,7 +67,7 @@ Now that we have a list of the timecodes where each scene is, let's :ref:`split 
     scene_list = detect('my_video.mp4', ContentDetector())
     split_video_ffmpeg('my_video.mp4', scene_list)
 
-The next example shows how we can write our own function to do the same thing using the various library components.
+PySceneDetect has a highly modular API that can integrate with any application workflow. In the following example, we show how the various library components can be used to create a more customizable scene cut/shot detection pipeline.
 
 
 .. _scenedetect-detailed_example:
@@ -93,7 +93,9 @@ In the code example below, we create a function ``find_scenes()`` which will loa
         # for each scene that was found.
         return scene_manager.get_scene_list()
 
-For a more advanced example of using the PySceneDetect API to with a stats file (to speed up processing of the same file multiple times), take a look at the :ref:`example in the SceneManager reference<scenemanager-example>`.
+Using a :py:class:`SceneManager <scenedetect.scene_manager.SceneManager>` directly allows tweaking the Parameters passed to :py:meth:`detect_scenes <scenedetect.scene_manager.SceneManager.detect_scenes>` including setting a limit to the number of frames to process, which is useful for live streams/camera devices.  You can also combine detection algorithms or create new ones from scratch.
+
+For a more advanced example of using the PySceneDetect API to with a stats file (to save per-frame metrics to disk and/or speed up multiple passes of the same video), take a look at the :ref:`example in the SceneManager reference<scenemanager-example>`.
 
 
 =======================================================================
