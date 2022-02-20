@@ -51,7 +51,7 @@ Most types/functions are also available directly from the `scenedetect` package 
 Quickstart
 =======================================================================
 
-To get started, the :py:func:`scenedetect.detect` function will perform scene detection using :py:class:`ContentDetector <scenedetect.detectors.content_detector.ContentDetector>`, and return the resulting scene list:
+To get started, the :py:func:`scenedetect.detect` function takes a path to a video and a :ref:`scene detector object<scenedetect-detectors>`, and returns a list of start/end timecodes.  For detecting fast cuts (shot changes), we use the :py:class:`ContentDetector <scenedetect.detectors.content_detector.ContentDetector>`:
 
 .. code:: python
 

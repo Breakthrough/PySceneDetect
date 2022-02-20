@@ -22,11 +22,10 @@ pages:
     - 'Usage Example': 'examples/usage-example.md'
     - 'Command Line Interface': 'examples/usage.md'
     - 'Video Splitting Support': 'examples/video-splitting.md'
-    - 'Python Interface': 'examples/usage-python.md'
 - 'Documentation:':
     - 'Command-Line Parameters': 'reference/command-line-params.md'
     - 'Scene Detection Algorithms': 'reference/detection-methods.md'
-    - 'Python API & Integration': 'reference/python-api.md'
+    - 'Python API': 'reference/python-api.md'
 - 'Resources':
     - 'Similar Programs & Tools': 'other/similar.md'
     - 'Research & Literature': 'other/literature.md'
