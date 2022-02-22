@@ -36,7 +36,7 @@ The main goal of v0.6 was to simplify and stabalize the video input and statsfil
 
 **API changes:**
 
- * New `VideoStream` replaces `VideoManager` and supports both OpenCV and PyAV backends ([#213](https://github.com/Breakthrough/PySceneDetect/issues/213))
+ * New `VideoStream` replaces `VideoManager` and supports both OpenCV (`VideoStreamCv2`) and PyAV (`VideoStreamAv`) backends ([#213](https://github.com/Breakthrough/PySceneDetect/issues/213))
     * Improves video seeking invariants, especially around defining what frames 0 and 1 mean for different time properties (`frame_number` is 1-based whereas `position` is 0-based to align with PTS)
     * See `test_time_invariants` in `tests/test_video_stream.py` as a reference for specific behaviours of these properties, and a test video detailing visually what is expected
     * Both command-line and public-facing API outputs still retain 0-based frame numbers (this will be changed in v1.0)

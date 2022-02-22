@@ -37,6 +37,7 @@ import pytest
 
 from scenedetect.video_stream import VideoStream
 from scenedetect.backends.opencv import VideoStreamCv2
+from scenedetect.backends.pyav import VideoStreamAv
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 ## List of Required/TBD Test Cases
@@ -166,7 +167,7 @@ class TestVideoStream:
         assert stream.position_ms == pytest.approx(0.0, abs=TIME_TOLERANCE_MS)
         assert stream.frame_number == 0
 
-        stream.read()
+        assert stream.read() is not False
         # After the first frame has been decoded, position is still at 0 (PTS),
         # but frame_number is 1.
         assert stream.position == stream.base_timecode
@@ -184,7 +185,7 @@ class TestVideoStream:
         stream.reset()
 
         for i in range(1, 100 + 1):
-            assert stream.read() is not None
+            assert stream.read() is not False
             assert stream.position == stream.base_timecode + (i - 1)
             assert stream.position_ms == pytest.approx(1000.0 * (i - 1) / float(stream.frame_rate),
                                                        abs=TIME_TOLERANCE_MS)

@@ -39,11 +39,14 @@ class VideoStreamCv2(VideoStream):
     """ OpenCV VideoCapture backend. """
 
     def __init__(self, path_or_device: Union[str, int], framerate: Optional[float] = None):
-        """Open a new OpenCV backend.
+        """Open a video or device.
 
         Arguments:
             path_or_device: Path to video, or device ID as integer.
             framerate: If set, overrides the detected framerate.
+
+        Raises:
+            IOError: file could not be found or access was denied
         """
         super().__init__()
 

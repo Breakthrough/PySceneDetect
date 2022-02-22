@@ -77,9 +77,15 @@ from typing import Dict, Iterable, List, Optional, Type
 from scenedetect.backends.opencv import VideoStreamCv2
 from scenedetect.video_stream import VideoStream, VideoOpenFailure
 
+try:
+    from scenedetect.backends.pyav import VideoStreamAv
+except ImportError:
+    VideoStreamAv = None
+
 AVAILABLE_BACKENDS: Dict[str, Type] = {
     backend.BACKEND_NAME: backend for backend in filter(None, [
         VideoStreamCv2,
+        VideoStreamAv,
     ])
 }
 """All available backends that open_video can consider for the `preferred_backend` argument.
