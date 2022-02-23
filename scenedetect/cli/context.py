@@ -208,6 +208,7 @@ class CliContext:
             self.scene_manager.auto_downscale = True
         else:
             try:
+                self.scene_manager.auto_downscale = False
                 self.scene_manager.downscale = downscale
             except ValueError as ex:
                 self.logger.debug(str(ex))
