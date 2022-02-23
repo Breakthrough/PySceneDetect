@@ -117,7 +117,7 @@ def get_test_video_params():
     ]
 
 
-pytestmark = pytest.mark.parametrize("vs_type", [VideoStreamCv2])
+pytestmark = pytest.mark.parametrize("vs_type", [VideoStreamCv2, VideoStreamAv])
 
 
 @pytest.mark.parametrize("test_video", get_test_video_params())

@@ -35,9 +35,10 @@ from scenedetect.video_stream import VideoStream, VideoOpenFailure
 
 #pylint: disable=c-extension-no-member
 class VideoStreamAv(VideoStream):
+    """PyAV `av.InputContainer` backend."""
 
     def __init__(self, path: str):
-        """Open a video.
+        """Open a video by path.
 
         Arguments:
             path: Path to the video.
@@ -66,14 +67,14 @@ class VideoStreamAv(VideoStream):
     #
 
     @property
-    def video_stream(self):
+    def _video_stream(self):
         """PyAV `av.video.stream.VideoStream` being used."""
         return self._container.streams.video[0]
 
     @property
-    def codec_context(self):
+    def _codec_context(self):
         """PyAV `av.codec.context.CodecContext` associated with the `video_stream`."""
-        return self.video_stream.codec_context
+        return self._video_stream.codec_context
 
     #
     # VideoStream Methods/Properties
@@ -100,17 +101,17 @@ class VideoStreamAv(VideoStream):
     @property
     def frame_size(self) -> Tuple[int, int]:
         """Size of each video frame in pixels as a tuple of (width, height)."""
-        return (self.codec_context.coded_width, self.codec_context.coded_height)
+        return (self._codec_context.coded_width, self._codec_context.coded_height)
 
     @property
     def duration(self) -> FrameTimecode:
         """Duration of the video as a FrameTimecode."""
-        return self.base_timecode + self.video_stream.frames
+        return self.base_timecode + self._video_stream.frames
 
     @property
     def frame_rate(self) -> float:
         """Frame rate in frames/sec."""
-        return (self.codec_context.framerate.numerator / self.codec_context.framerate.denominator)
+        return self._codec_context.framerate.numerator / self._codec_context.framerate.denominator
 
     @property
     def position(self) -> FrameTimecode:
@@ -142,8 +143,8 @@ class VideoStreamAv(VideoStream):
     @property
     def aspect_ratio(self) -> float:
         """Display/pixel aspect ratio as a float (1.0 represents square pixels)."""
-        return (self.codec_context.display_aspect_ratio.numerator /
-                self.codec_context.display_aspect_ratio.denominator)
+        return (self._codec_context.display_aspect_ratio.numerator /
+                self._codec_context.display_aspect_ratio.denominator)
 
     def seek(self, target: Union[FrameTimecode, float, int]) -> None:
         """Seek to the given timecode. If given as a frame number, represents the current seek
@@ -161,16 +162,22 @@ class VideoStreamAv(VideoStream):
                 If float, interpreted as time in seconds.
                 If int, interpreted as frame number.
         Raises:
-            SeekError: An error occurs while seeking, or seeking is not supported.
             ValueError: `target` is not a valid value (i.e. it is negative).
         """
-        # TODO(v0.6): Need to use the stream's time base for seek offset.
-        #self.video_stream.time_base.numerator/denominator
-        # At the third frame:
-        #     x.pts == 3003
-        #     x.time_base == Fraction(1, 24000)
-        #     x.time = 0.12512
-        raise NotImplementedError
+        if target < 0:
+            raise ValueError("Target cannot be negative!")
+        beginning = (target == 0)
+        target = (self.base_timecode + target)
+        if target >= 1:
+            target = target - 1
+        target_pts = self._video_stream.start_time + int(
+            (self.base_timecode + target).get_seconds() / self._video_stream.time_base)
+        self._frame = None
+        self._container.seek(target_pts)
+        if not beginning:
+            self.read(decode=False, advance=True)
+        while self.position < target:
+            self.read(decode=False, advance=True)
 
     def reset(self):
         """ Close and re-open the VideoStream (should be equivalent to calling `seek(0)`). """
@@ -201,7 +208,9 @@ class VideoStreamAv(VideoStream):
             except av.error.EOFError:
                 self._frame = last_frame
                 return False
+            except StopIteration:
+                return False
             has_advanced = True
         if decode:
-            return self._frame.to_ndarray(format='rgb24')
+            return self._frame.to_ndarray(format='bgr24')
         return has_advanced

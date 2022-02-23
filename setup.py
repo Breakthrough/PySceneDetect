@@ -28,13 +28,10 @@ or the following URL:
 
 """
 
-# Standard Library Imports
-import sys
-
 from setuptools import setup
+from typing import Dict, List
 
-def get_requires():
-    # type: () -> List[str]
+def get_requires() -> List[str]:
     """ Get Requires: Returns a list of required packages. """
     return [
         'Click',
@@ -42,8 +39,7 @@ def get_requires():
         'tqdm'
     ]
 
-def get_extra_requires():
-    # type: () -> Dict[str, List[str]]
+def get_extra_requires() -> Dict[str, List[str]]:
     """ Get Extra Requires: Returns a list of extra/optional packages. """
     return {
         'opencv': ['opencv-python'],

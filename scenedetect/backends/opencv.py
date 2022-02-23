@@ -36,7 +36,7 @@ from scenedetect.video_stream import VideoStream, SeekError, VideoOpenFailure
 
 
 class VideoStreamCv2(VideoStream):
-    """ OpenCV VideoCapture backend. """
+    """OpenCV `cv2.VideoCapture` backend."""
 
     def __init__(self, path_or_device: Union[str, int], framerate: Optional[float] = None):
         """Open a video or device.
