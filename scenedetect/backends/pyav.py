@@ -23,7 +23,7 @@
 Uses string identifier ``'pyav'``.
 """
 
-from typing import Tuple, Union
+from typing import Optional, Tuple, Union
 
 import av
 from numpy import ndarray
@@ -37,8 +37,9 @@ class VideoStreamAv(VideoStream):
     """PyAV `av.InputContainer` backend."""
 
 
+    # TODO(v0.6): Handle framerate override.
     # TODO(#257): Allow creating a VideoStreamAv using a BytesIO object in addition to a path.
-    def __init__(self, path: str):
+    def __init__(self, path: str, framerate: Optional[float] = None):
         """Open a video by path.
 
         Arguments:

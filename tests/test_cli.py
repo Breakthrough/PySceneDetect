@@ -136,3 +136,10 @@ def test_cli_export_html():
     assert invoke_scenedetect(base_command, COMMAND='save-images export-html') == 0
     assert invoke_scenedetect(base_command, COMMAND='export-html --no-images') == 0
     # TODO: Check for existence of HTML & image files, remove after.
+
+
+def test_cli_backends():
+    base_command = '-i {VIDEO} -b {BACKEND} time {TIME} {DETECTOR}'
+    assert invoke_scenedetect(base_command, BACKEND='opencv') == 0
+    assert invoke_scenedetect(base_command, BACKEND='pyav') == 0
+    assert invoke_scenedetect(base_command, BACKEND='unknown_backend_type') != 0

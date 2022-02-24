@@ -45,6 +45,7 @@ from scenedetect.cli.context import check_split_video_requirements
 from scenedetect.cli.context import contains_sequence_or_url
 from scenedetect.cli.context import parse_timecode
 from scenedetect.platform import init_logger
+from scenedetect.backends import AVAILABLE_BACKENDS
 
 
 logger = logging.getLogger('pyscenedetect')
@@ -203,11 +204,16 @@ def duplicate_command(ctx, param_hint):
     is_flag=True, flag_value=True, help=
     'Suppresses all output of PySceneDetect to the terminal/stdout. If a logfile is'
     ' specified, it will still be generated with the specified verbosity.')
+@click.option(
+    '--backend', '-b', metavar='BACKEND',
+    type=click.Choice([key for key in AVAILABLE_BACKENDS.keys()]), default='opencv', help=
+    'Name of backend to use. Default is opencv. Backends available on this system: %s' % str(
+        [key for key in AVAILABLE_BACKENDS.keys()]))
 @click.pass_context
 # pylint: disable=redefined-builtin
 def scenedetect_cli(ctx, input, output, framerate, downscale, frame_skip,
                     min_scene_len, drop_short_scenes, stats,
-                    verbosity, logfile, quiet):
+                    verbosity, logfile, quiet, backend):
     """ For example:
 
     scenedetect -i video.mp4 -s video.stats.csv detect-content list-scenes
@@ -248,7 +254,8 @@ def scenedetect_cli(ctx, input, output, framerate, downscale, frame_skip,
             ctx.obj.logger.info('Output directory set:\n  %s', ctx.obj.output_directory)
         ctx.obj.parse_options(
             input_path=input, framerate=framerate, stats_file=stats, downscale=downscale,
-            frame_skip=frame_skip, min_scene_len=min_scene_len, drop_short_scenes=drop_short_scenes)
+            frame_skip=frame_skip, min_scene_len=min_scene_len, drop_short_scenes=drop_short_scenes,
+            backend=backend)
 
         ctx.obj.options_processed = True
     except click.BadParameter as ex:

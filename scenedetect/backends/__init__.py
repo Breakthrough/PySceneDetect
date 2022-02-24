@@ -89,7 +89,10 @@ AVAILABLE_BACKENDS: Dict[str, Type] = {
     ])
 }
 """All available backends that open_video can consider for the `preferred_backend` argument.
-These backends must support construction via BackendType(path, framerate)."""
+These backends must support construction with the following signature:
+
+    BackendType(path: str, framerate: Optional[float])
+"""
 
 PREFERRED_BACKENDS: Iterable[Type] = list(filter(None, []))
 """List of backend types to try when using `open_video` in order if a preferred backend is not
@@ -129,4 +132,4 @@ def open_video(path: str,
         except VideoOpenFailure:
             continue
     # Fallback to trying to open the video with VideoStreamCv2.
-    return VideoStreamCv2(path_or_device=path, framerate=framerate)
+    return VideoStreamCv2(path, framerate)

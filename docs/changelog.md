@@ -26,6 +26,9 @@ The main goal of v0.6 was to simplify and stabalize the video input and statsfil
 **Command-line changes:**
 
  * `-i`/`--input` may no longer be specified multiple times (use an external tool like `ffmpeg` to perform concatenation first)
+ * New `-b`/`--backend` option can be set to use a specific video backend
+     * Current options are `opencv` (default) and `pyav` if the `av` package is installed
+     * Run `scenedetect help` to see a list of backends available on the current system
  * `detect-content` command:
      * The default threshold value `-t`/`--threshold` has been lowered to 27 and is now slightly more sensitive to shot changes ([#246](https://github.com/Breakthrough/PySceneDetect/issues/246))
  * `detect-threshold` command:

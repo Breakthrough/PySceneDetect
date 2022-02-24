@@ -35,8 +35,7 @@ from typing import Dict, List, Tuple, Optional, Union
 import click
 import cv2
 
-from scenedetect.backends.opencv import VideoStreamCv2
-from scenedetect.backends.pyav import VideoStreamAv
+from scenedetect.backends import AVAILABLE_BACKENDS, VideoStreamCv2
 from scenedetect.frame_timecode import FrameTimecode, MAX_FPS_DELTA
 import scenedetect.detectors
 from scenedetect.platform import (check_opencv_ffmpeg_dll, get_and_create_path,
@@ -176,7 +175,7 @@ class CliContext:
 
     def parse_options(self, input_path: str, framerate: float, stats_file: Optional[str],
                       downscale: Optional[int], frame_skip: int, min_scene_len: str,
-                      drop_short_scenes: bool):
+                      drop_short_scenes: bool, backend: str):
         """ Parse Options: Parses all global options/arguments passed to the main
         scenedetect command, before other sub-commands (e.g. this function processes
         the [options] when calling scenedetect [options] [commands [command options]].
@@ -193,7 +192,7 @@ class CliContext:
         if input_path is None:
             return
 
-        self._init_video_stream(input_path=input_path, framerate=framerate)
+        self._init_video_stream(input_path=input_path, framerate=framerate, backend=backend)
         self.min_scene_len = parse_timecode(min_scene_len, self.video_stream.frame_rate)
         self.drop_short_scenes = drop_short_scenes
         self.frame_skip = frame_skip
@@ -332,14 +331,15 @@ class CliContext:
                 message='Cannot specify detection algorithm twice.', param_hint=detector.cli_name)
         self.options_processed = options_processed_orig
 
-    def _init_video_stream(self, input_path: str = None, framerate: float = None):
+    def _init_video_stream(self, input_path: str, framerate: Optional[float], backend: str):
         self.base_timecode = None
-        #self.logger.debug('Initializing VideoStreamCv2.')
-        self.logger.debug('Initializing VideoStreamAv.')
         try:
-            #self.video_stream = VideoStreamCv2(path_or_device=input_path, framerate=framerate)
-            # TODO(v0.6): Manual framerate override
-            self.video_stream = VideoStreamAv(path=input_path)
+            if not backend in AVAILABLE_BACKENDS:
+                raise click.BadParameter('Specified backend is not available on this system!',
+                                         param_hint='-b/--backend')
+            self.logger.debug(
+                'Using backend: %s / %s', backend, AVAILABLE_BACKENDS[backend].__name__)
+            self.video_stream = AVAILABLE_BACKENDS[backend](input_path, framerate)
             self.base_timecode = self.video_stream.base_timecode
         except VideoOpenFailure as ex:
             dll_okay, dll_name = check_opencv_ffmpeg_dll()
