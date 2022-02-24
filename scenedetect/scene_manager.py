@@ -764,30 +764,23 @@ class SceneManager:
             args=(self, video, frame_skip, downscale_factor, end_time, frame_queue),
             daemon=True)
         decode_thread.start()
-        try:
-            frame_im = None
-            while True:
-                next_frame, position = frame_queue.get()
-                if next_frame is None and position is None:
-                    break
-                if not next_frame is None:
-                    frame_im = next_frame
-                self._process_frame(position.frame_num, frame_im, callback)
-
-                if progress_bar:
-                    progress_bar.update(1 + frame_skip)
-
-            decode_thread.join()
-            if self._start_pos is None:
-                self._start_pos = video.position
-            self._post_process(video.position.frame_num)
-
-        finally:
-
+        frame_im = None
+        while True:
+            next_frame, position = frame_queue.get()
+            if next_frame is None and position is None:
+                break
+            if not next_frame is None:
+                frame_im = next_frame
+            self._process_frame(position.frame_num, frame_im, callback)
             if progress_bar:
-                progress_bar.close()
+                progress_bar.update(1 + frame_skip)
 
+        decode_thread.join()
+
+        if self._start_pos is None:
+            self._start_pos = video.position
         self._last_pos = video.base_timecode + video.frame_number
+        self._post_process(video.position.frame_num)
         return video.frame_number - start_frame_num
 
     def _decode_thread(self, video, frame_skip, downscale_factor, end_time, out_queue):
