@@ -23,7 +23,7 @@
 Uses string identifier ``'pyav'``.
 """
 
-from typing import Optional, Tuple, Union
+from typing import BinaryIO, Optional, Tuple, Union
 
 import av
 from numpy import ndarray
@@ -32,24 +32,29 @@ from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.platform import get_file_name
 from scenedetect.video_stream import VideoStream, VideoOpenFailure
 
+
 #pylint: disable=c-extension-no-member
 class VideoStreamAv(VideoStream):
     """PyAV `av.InputContainer` backend."""
 
-
-    # TODO(v0.6): Handle framerate override.
-    # TODO(#257): Allow creating a VideoStreamAv using a BytesIO object in addition to a path.
-    def __init__(self, path: str, framerate: Optional[float] = None):
+    # TODO(#213): Handle framerate override.
+    def __init__(self,
+                 path_or_io: Union[str, bytes, BinaryIO],
+                 framerate: Optional[float] = None,
+                 name: Optional[str] = None):
         """Open a video by path.
 
         Arguments:
-            path: Path to the video.
+            path_or_io: Path to the video, or a file-like object.
+            framerate: TODO.
+            name: Overrides the `name` property derived from the video path.
+                Should be set if `path_or_io` is a file-like object.
 
         Raises:
             IOError: file could not be found or access was denied
             VideoOpenFailure: video could not be opened (may be corrupted).
         """
-        # TODO(v0.6): Investigate why setting the video stream threading mode to 'AUTO' / 'FRAME'
+        # TODO: Investigate why setting the video stream threading mode to 'AUTO' / 'FRAME'
         # causes decoding to stop early, e.g. adding the following:
         #
         #     self._container.streams.video[0].thread_type = 'AUTO'  # Go faster!
@@ -65,10 +70,20 @@ class VideoStreamAv(VideoStream):
         # TODO(#258): See if setting self._container.discard_corrupt = True affects anything.
         super().__init__()
 
-        self._path = path
+        self._path: Union[str, bytes] = ''
+        self._name: Union[str, bytes] = '' if name is None else name
+        self._io: Optional[BinaryIO] = None
         self._frame = None
+
+        if isinstance(path_or_io, (str, bytes)):
+            self._path = path_or_io
+            if not self._name:
+                self._name = get_file_name(self.path, include_extension=False)
+        else:
+            self._io = path_or_io
+
         try:
-            self._container = av.open(path)
+            self._container = av.open(self._path if self._path else self._io)
         except av.error.FileNotFoundError as ex:
             raise IOError from ex
         except Exception as ex:
@@ -96,18 +111,20 @@ class VideoStreamAv(VideoStream):
     """Unique name used to identify this backend."""
 
     @property
-    def path(self) -> str:
+    def path(self) -> Union[bytes, str]:
         """Video path."""
         return self._path
 
     @property
-    def name(self) -> str:
+    def name(self) -> Union[bytes, str]:
         """Name of the video, without extension."""
-        return get_file_name(self.path, include_extension=False)
+        return self._name
 
     @property
     def is_seekable(self) -> bool:
         """True if seek() is allowed, False otherwise."""
+        if not self._io is None and not self._io.seekable():
+            return False
         return self._container.format.seek_to_pts
 
     @property
@@ -200,7 +217,7 @@ class VideoStreamAv(VideoStream):
         self._container.close()
         self._frame = None
         try:
-            self._container = av.open(self._path)
+            self._container = av.open(self._path if self._path else self._io)
         except Exception as ex:
             raise VideoOpenFailure() from ex
 

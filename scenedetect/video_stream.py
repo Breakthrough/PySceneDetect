@@ -123,13 +123,13 @@ class VideoStream(ABC):
 
     @property
     @abstractmethod
-    def path(self) -> str:
+    def path(self) -> Union[bytes, str]:
         """Video or device path."""
         raise NotImplementedError
 
     @property
     @abstractmethod
-    def name(self) -> str:
+    def name(self) -> Union[bytes, str]:
         """Name of the video, without extension, or device."""
         raise NotImplementedError
 

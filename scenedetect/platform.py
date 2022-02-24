@@ -36,7 +36,7 @@ import platform
 import struct
 import subprocess
 import sys
-from typing import Any, Dict, List, Optional, TextIO, Tuple, Union
+from typing import Any, AnyStr, Dict, List, Optional, TextIO, Tuple, Union
 
 import cv2
 
@@ -163,7 +163,7 @@ def get_csv_writer(file_handle: TextIO) -> Any:
 ##
 
 
-def get_file_name(file_path: str, include_extension=True) -> str:
+def get_file_name(file_path: AnyStr, include_extension=True) -> AnyStr:
     """Return the file name that `file_path` refers to, optionally removing the extension.
 
     E.g. /tmp/foo.bar -> foo"""
@@ -175,7 +175,7 @@ def get_file_name(file_path: str, include_extension=True) -> str:
     return file_name
 
 
-def get_and_create_path(file_path: str, output_directory: Optional[str] = None) -> str:
+def get_and_create_path(file_path: AnyStr, output_directory: Optional[AnyStr] = None) -> AnyStr:
     """ Get & Create Path: Gets and returns the full/absolute path to file_path
     in the specified output_directory if set, creating any required directories
     along the way.

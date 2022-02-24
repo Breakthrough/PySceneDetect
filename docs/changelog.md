@@ -8,7 +8,7 @@ PySceneDetect Releases
 
 #### Release Notes
 
-PySceneDetect v0.6 is a **major breaking change** towards a stable API. The new **minimum Python version is now 3.6**. See the [Migration Guide](https://pyscenedetect.readthedocs.io/projects/Manual/en/v0.6/api/migration_guide.html) for information on how to port existing applications to the new API.  Changes to the command-line are minor and not expected to break most workflows.
+PySceneDetect v0.6 is a **major breaking change** towards a stable API. The new **minimum Python version is now 3.6**. See the [Migration Guide](https://pyscenedetect.readthedocs.io/projects/Manual/en/v0.6/api/migration_guide.html) for information on how to port existing applications to the new API.  Changes to the command-line are minor and not expected to break most workflows, and significant performance gains are expected for most use cases.
 
 The main goal of v0.6 was to simplify and stabalize the video input and statsfile APIs, while addressing many minor technical debt items. This should help the eventual transition to the planned v1.0 release to proceed more smoothly as now most changes can be focused just on the `SceneManager` and `SceneDetector` classes.
 
@@ -18,6 +18,7 @@ The main goal of v0.6 was to simplify and stabalize the video input and statsfil
 
  * Support for Python 2.7 has been dropped, minimum supported Python version is 3.6
  * Support for OpenCV 2.x has been dropped, minimum OpenCV version is 3.x
+ * Decoding now runs in parallel with detection resulting in significant performance improvements
  * Breaking API changes to `VideoManager` (replaced with `VideoStream`), `StatsManager`, and `save_images()`
     * See the [Migration Guide](https://pyscenedetect.readthedocs.io/projects/Manual/en/v0.6/api/migration_guide.html) for details on how to update from v0.5.x
  * Besides critical bugfixes, this marks the end of development for PySceneDetect v0.5

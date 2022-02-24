@@ -38,7 +38,7 @@ from scenedetect.video_stream import VideoStream, SeekError, VideoOpenFailure
 class VideoStreamCv2(VideoStream):
     """OpenCV `cv2.VideoCapture` backend."""
 
-    def __init__(self, path_or_device: Union[str, int], framerate: Optional[float] = None):
+    def __init__(self, path_or_device: Union[bytes, str, int], framerate: Optional[float] = None):
         """Open a video or device.
 
         Arguments:
@@ -90,14 +90,14 @@ class VideoStreamCv2(VideoStream):
         return self._frame_rate
 
     @property
-    def path(self) -> str:
+    def path(self) -> Union[bytes, str]:
         """Video or device path."""
         if self._is_device:
             return "Device %d" % self._path_or_device
         return self._path_or_device
 
     @property
-    def name(self) -> str:
+    def name(self) -> Union[bytes, str]:
         """Name of the video, without extension, or device."""
         if self._is_device:
             return self.path
