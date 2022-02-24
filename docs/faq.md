@@ -35,9 +35,9 @@ See [Issue #164](https://github.com/Breakthrough/PySceneDetect/issues/164) for d
 
 #### How can I fix the error `Failed to read any frames from video file`?
 
-Unfortunately, the underlying library used to perform video I/O was unable to open the file.  This occasionally happens due to videos having multiple audio tracks (as per [#179](https://github.com/Breakthrough/PySceneDetect/issues/179)).
+Unfortunately, the underlying library used to perform video I/O was unable to open the file. Try using a different backend by installing PyAV (`pip install av`) and see if the problem persists.
 
-As a workaround, you can remove the audio track using either `ffmpeg` or `mkvmerge` as follows:
+This can also happen due to videos having multiple audio tracks (as per [#179](https://github.com/Breakthrough/PySceneDetect/issues/179)).  If the PyAV backend does not succeed in processing the video, as a workaround you can remove the audio track using either `ffmpeg` or `mkvmerge`:
 
 ```md
 ffmpeg -i input.mp4 -c copy -an output.mp4

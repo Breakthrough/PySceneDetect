@@ -36,6 +36,7 @@ import click
 import cv2
 
 from scenedetect.backends.opencv import VideoStreamCv2
+from scenedetect.backends.pyav import VideoStreamAv
 from scenedetect.frame_timecode import FrameTimecode, MAX_FPS_DELTA
 import scenedetect.detectors
 from scenedetect.platform import (check_opencv_ffmpeg_dll, get_and_create_path,
@@ -235,7 +236,6 @@ class CliContext:
             return
 
         # Display a warning if the video codec type seems unsupported (#86).
-        # TODO(#213): Need to see if PyAV requires something similar.
         if isinstance(self.video_stream, VideoStreamCv2):
             if int(abs(self.video_stream.capture.get(cv2.CAP_PROP_FOURCC))) == 0:
                 self.logger.error(
@@ -257,15 +257,13 @@ class CliContext:
             show_progress=not self.quiet_mode)
 
         # Handle case where video failure is most likely due to multiple audio tracks (#179).
-        # TODO(#213): Using PyAV as a backend should resolve this issue.  When available,
-        # update the error message below accordingly.
         if num_frames <= 0:
             self.logger.critical(
-                'Failed to read any frames from video file. This could be caused'
-                ' by the video having multiple audio tracks. If so, please try'
-                ' removing the audio tracks or muxing to mkv via:\n'
+                'Failed to read any frames from video file. This could be caused by the video'
+                ' having multiple audio tracks. If so, try installing the PyAV backend:\n'
+                '      pip install av\n'
+                'Or remove the audio tracks by running either:\n'
                 '      ffmpeg -i input.mp4 -c copy -an output.mp4\n'
-                'or:\n'
                 '      mkvmerge -o output.mkv input.mp4\n'
                 'For details, see https://pyscenedetect.readthedocs.io/en/latest/faq/')
             return
@@ -336,9 +334,12 @@ class CliContext:
 
     def _init_video_stream(self, input_path: str = None, framerate: float = None):
         self.base_timecode = None
-        self.logger.debug('Initializing VideoStreamCv2.')
+        #self.logger.debug('Initializing VideoStreamCv2.')
+        self.logger.debug('Initializing VideoStreamAv.')
         try:
-            self.video_stream = VideoStreamCv2(path_or_device=input_path, framerate=framerate)
+            #self.video_stream = VideoStreamCv2(path_or_device=input_path, framerate=framerate)
+            # TODO(v0.6): Manual framerate override
+            self.video_stream = VideoStreamAv(path=input_path)
             self.base_timecode = self.video_stream.base_timecode
         except VideoOpenFailure as ex:
             dll_okay, dll_name = check_opencv_ffmpeg_dll()

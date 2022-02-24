@@ -32,11 +32,12 @@ from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.platform import get_file_name
 from scenedetect.video_stream import VideoStream, VideoOpenFailure
 
-
 #pylint: disable=c-extension-no-member
 class VideoStreamAv(VideoStream):
     """PyAV `av.InputContainer` backend."""
 
+
+    # TODO(#257): Allow creating a VideoStreamAv using a BytesIO object in addition to a path.
     def __init__(self, path: str):
         """Open a video by path.
 
@@ -47,20 +48,30 @@ class VideoStreamAv(VideoStream):
             IOError: file could not be found or access was denied
             VideoOpenFailure: video could not be opened (may be corrupted).
         """
+        # TODO(v0.6): Investigate why setting the video stream threading mode to 'AUTO' / 'FRAME'
+        # causes decoding to stop early, e.g. adding the following:
+        #
+        #     self._container.streams.video[0].thread_type = 'AUTO'  # Go faster!
+        #
+        # As a workaround, we can re-open the video without threading, and continue decoding from
+        # where the multithreaded version left off. That could be as simple as re-initializing
+        # self._container and retrying the read() call.
+        #
+        # The 'FRAME' threading method provides a significant speed boost (~400 FPS vs
+        # 240 FPS without), so this seems like a worth-while tradeoff. The OpenCV backend
+        # gets around 350 FPS for comparison.
+
+        # TODO(#258): See if setting self._container.discard_corrupt = True affects anything.
         super().__init__()
 
         self._path = path
+        self._frame = None
         try:
             self._container = av.open(path)
         except av.error.FileNotFoundError as ex:
             raise IOError from ex
         except Exception as ex:
             raise VideoOpenFailure() from ex
-
-        # TODO(v0.6): See what this affects:
-        # self._container.discard_corrupt = True
-
-        self._frame = None
 
     #
     # Backend-Specific Methods/Properties
@@ -106,6 +117,10 @@ class VideoStreamAv(VideoStream):
     @property
     def duration(self) -> FrameTimecode:
         """Duration of the video as a FrameTimecode."""
+        # TODO: Some ffmpeg wrappers have provisions for when the stream does not report a number
+        # of frames (i.e. frames == 0).  In this case, we need to get the length of the video
+        # and convert it into frames from it's time base (e.g. CvCapture_FFMPEG::get_total_frames()
+        # and CvCapture_FFMPEG::get_duration_sec() from OpenCV).
         return self.base_timecode + self._video_stream.frames
 
     @property
