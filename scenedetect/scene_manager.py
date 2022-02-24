@@ -71,6 +71,9 @@ logger = logging.getLogger('pyscenedetect')
 DEFAULT_MIN_WIDTH: int = 256
 """The default minimum width a frame will be downscaled to when calculating a downscale factor."""
 
+MAX_FRAME_QUEUE_LENGTH: int = 4
+"""Maximum size of the queue of frames waiting to be processed after decoding."""
+
 
 def compute_downscale_factor(frame_width: int, effective_width: int = DEFAULT_MIN_WIDTH) -> int:
     """Get the optimal default downscale factor based on a video's resolution (currently only
@@ -693,6 +696,8 @@ class SceneManager:
 
         Blocks until all frames in the video have been processed. Results can
         be obtained by calling either the get_scene_list() or get_cut_list() methods.
+        Video decoding is performed in a background thread to allow scene detection and
+        frame decoding to happen in parallel.
 
         Arguments:
             video: A VideoStream object pointing.
@@ -758,7 +763,7 @@ class SceneManager:
         if tqdm and show_progress:
             progress_bar = tqdm(total=int(total_frames), unit='frames', dynamic_ncols=True)
 
-        frame_queue = queue.Queue(128)
+        frame_queue = queue.Queue(MAX_FRAME_QUEUE_LENGTH)
         decode_thread = threading.Thread(
             target=SceneManager._decode_thread,
             args=(self, video, frame_skip, downscale_factor, end_time, frame_queue),
@@ -808,7 +813,7 @@ class SceneManager:
 
                 if frame_skip > 0:
                     for _ in range(frame_skip):
-                        if not video.grab():
+                        if not video.read(decode=False):
                             break
 
                 if end_time is not None and video.position >= end_time:

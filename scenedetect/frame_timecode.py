@@ -34,7 +34,7 @@ Unit tests for the FrameTimecode object can be found in `tests/test_timecode.py`
 import math
 from typing import Union
 
-MAX_FPS_DELTA = 1.0 / 100000
+MAX_FPS_DELTA = 1.0 / 10000
 """Maximum amount two framerates can differ by for equality testing."""
 
 
