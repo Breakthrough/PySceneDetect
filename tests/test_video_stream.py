@@ -288,3 +288,5 @@ def test_reset(vs_type: Type[VideoStream], test_video_file: str):
     assert stream.position == 0
     assert stream.position_ms == pytest.approx(0, abs=TIME_TOLERANCE_MS)
 
+
+
