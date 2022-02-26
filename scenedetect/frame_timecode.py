@@ -34,7 +34,7 @@ Unit tests for the FrameTimecode object can be found in `tests/test_timecode.py`
 import math
 from typing import Union
 
-MAX_FPS_DELTA = 1.0 / 10000
+MAX_FPS_DELTA = 1.0 / 100000
 """Maximum amount two framerates can differ by for equality testing."""
 
 
@@ -52,17 +52,15 @@ class FrameTimecode:
     def __init__(self,
                  timecode: Union[int, float, str, 'FrameTimecode'] = None,
                  fps: Union[int, float, str, 'FrameTimecode'] = None):
-        """Construct a new FrameTimecode.
-
+        """
         Arguments:
-            timecode: A timecode or frame number given in any of the above valid formats/types
-                described in the class level documentation.
+            timecode: A frame number (int), number of seconds (float), or timecode (str in
+                the form `'HH:MM:SS'` or `'HH:MM:SS.nnn'`).
             fps: The framerate or FrameTimecode to use as a time base for all arithmetic.
         Raises:
             TypeError: Thrown if either `timecode` or `fps` are unsupported types.
             ValueError: Thrown when specifying a negative timecode or framerate.
         """
-
         # The following two properties are what is used to keep track of time
         # in a frame-specific manner.  Note that once the framerate is set,
         # the value should never be modified (only read if required).

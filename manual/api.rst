@@ -7,7 +7,7 @@
 Overview
 =======================================================================
 
-The ``scenedetect`` module is organized into several sub-modules, each containing the implementation of a particular class. The most commonly used classes are available for import directly from the `scenedetect` module (see the `Detailed Example`_ below).  The following is an overview of the main classes/modules provided in the `scenedetect` package:
+The ``scenedetect`` module is organized into several sub-modules, each containing the implementation of a particular class. The most commonly used classes are available for import directly from the `scenedetect` module (see the `Example`_ below).  The following is an overview of the main classes/modules provided in the `scenedetect` package:
 
     * :ref:`scenedetect.scene_manager 🎞️ <scenedetect-scene_manager>`: Contains :py:class:`SceneManager <scenedetect.scene_manager.SceneManager>` class which applies `SceneDetector` objects on a `VideoStream`. Also contains the :py:func:`save_images <scenedetect.scene_manager.save_images>` and :py:func:`write_scene_list <scenedetect.scene_manager.write_scene_list>` / :py:func:`write_scene_list_html <scenedetect.scene_manager.write_scene_list_html>` functions to export information about the detected scenes in various formats.
 
@@ -82,6 +82,7 @@ This is just a small snippet of what PySceneDetect offers. The library is very m
 
 
 .. _scenedetect-detailed_example:
+
 =======================================================================
 Example
 =======================================================================

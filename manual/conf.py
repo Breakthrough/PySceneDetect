@@ -45,6 +45,8 @@ extensions = [
     'sphinx.ext.autodoc',
 ]
 
+autoclass_content = "both"
+
 autodoc_typehints = 'description'
 autodoc_typehints_format = 'short'
 

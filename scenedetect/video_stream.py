@@ -23,17 +23,18 @@
 This module contains the :py:class:`VideoStream` class, which provides a library agnostic
 interface for video input.  See :py:mod:`scenedetect.backends` for supported backends.
 
-A :py:class:`VideoStream <scenedetect.video_stream.VideoStream>` is not used directly, but
-by constructing a concrete implementation from :py:mod:`scenedetect.backends`.  For most
-use cases, this can be done using the :py:func:`scenedetect.backends.open_video` function,
-which will automatically use any available backend. Specific backends (e.g.
-:py:class:`VideoStreamCv2 <scenedetect.backends.opencv.VideoStreamCv2>`) can also be
-constructed directly. See the :py:mod:`scenedetect.backends` documentation for an example.
+To open a video by path, either construct one of the available backends directly, or use
+the :py:func:`scenedetect.backends.open_video` function:
 
-To actually implement the :py:class:`VideoStream <scenedetect.video_stream.VideoStream>`
-interface, see :py:class:`VideoStreamCv2 <scenedetect.backends.opencv.VideoStreamCv2>` in
-:py:mod:`scenedetect.backends.opencv` as a reference. To verify the implementation, run
-the `VideoStream` test suite in `tests/test_video_stream.py` on the new backend.
+.. code:: python
+
+    from scenedetect import open_video
+    video = open_video(path='video.mp4')
+
+See :py:mod:`scenedetect.backends` for a more detailed example example.
+
+New :py:class:`VideoStream <scenedetect.video_stream.VideoStream>` implementations can be
+tested by adding it to the test suite in `tests/test_video_stream.py`.
 """
 
 from abc import ABC, abstractmethod
@@ -41,7 +42,6 @@ from typing import Tuple, Optional, Union
 
 from numpy import ndarray
 
-from scenedetect.platform import logger
 from scenedetect.frame_timecode import FrameTimecode
 
 ##

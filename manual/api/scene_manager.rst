@@ -72,8 +72,8 @@ The statsfile can be used to find a better threshold for certain inputs, or perf
    :undoc-members:
 
 
-
 .. _scenedetect-scene_manager-functions:
+
 =======================================================================
 ``scene_manager`` Functions
 =======================================================================
@@ -85,4 +85,3 @@ The statsfile can be used to find a better threshold for certain inputs, or perf
 .. autofunction:: scenedetect.scene_manager.write_scene_list_html
 
 .. autofunction:: scenedetect.scene_manager.get_scenes_from_cuts
-

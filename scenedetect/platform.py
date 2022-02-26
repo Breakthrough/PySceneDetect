@@ -220,7 +220,7 @@ def init_logger(log_level: int = logging.INFO,
 
     Arguments:
         log_level: Verbosity of log messages.
-        quiet_mode: If True, no output will be generated to stdout.
+        show_stdout: If False, no output will be generated to stdout.
         log_file: File to also send messages to, in addition to stdout.
 
     Returns:

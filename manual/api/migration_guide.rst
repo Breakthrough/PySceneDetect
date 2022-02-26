@@ -11,7 +11,7 @@ PySceneDetect v0.6 is a major step towards a more stable and simplified API and 
 
 
 ===============================================================
-`VideoManager`
+`VideoManager` Class
 ===============================================================
 
 `VideoManager` has been removed and placed with :py:mod:`scenedetect.backends`.  For most applications, the easiest way to update this is to use the :py:func:`open_video <scenedetect.backends.open_video>` function:
@@ -27,21 +27,21 @@ See :py:mod:`scenedetect.backends` for examples of how to create specific backen
 
 
 ===============================================================
-`StatsManager`
+`StatsManager` Class
 ===============================================================
 
 The :py:func:`save_to_csv <scenedetect.stats_manager.StatsManager.save_to_csv>` and :py:func:`load_from_csv <scenedetect.stats_manager.StatsManager.save_to_csv>` methods now accept either a `path` or an open `file` handle.
 
 
 ===============================================================
-`SceneManager`
+`SceneManager` Class
 ===============================================================
 
 The first argument of the :py:meth:`detect_scenes <scenedetect.scene_manager.SceneManager.detect_scenes>` method has been renamed to `video` and should now be a :py:class:`VideoStream <scenedetect.video_stream.VideoStream>` object (see above).
 
 
 ===============================================================
-`save_images` Parameters
+`save_images` Function
 ===============================================================
 
 The second argument of :py:func:`save_images <scenedetect.scene_manager.save_images>` in :py:mod:`scenedetect.scene_manager` has been renamed from `video_manager` to `video`.
@@ -50,17 +50,10 @@ The `downscale_factor` parameter has been removed from :py:func:`save_images <sc
 
 
 ===============================================================
-`AdaptiveDetector`
+`AdaptiveDetector` Class
 ===============================================================
 
-The `video_manager` parameter is no longer required when constructing an :py:class:`AdaptiveDetector <scenedetect.detectors.adaptive_detector.AdaptiveDetector>` object.
-
-
-===============================================================
-`MINIMUM_FRAMES_PER_SECOND_*` Constants
-===============================================================
-
-In :py:mod:`scenedetect.frame_timecode` the constants `MINIMUM_FRAMES_PER_SECOND_FLOAT` and `MINIMUM_FRAMES_PER_SECOND_DELTA_FLOAT` have been replaced with :py:data:`MAX_FPS_DELTA <scenedetect.frame_timecode.MAX_FPS_DELTA>`.
+The `video_manager` parameter has been removed and is no longer required when constructing an :py:class:`AdaptiveDetector <scenedetect.detectors.adaptive_detector.AdaptiveDetector>` object.
 
 
 ===============================================================
@@ -75,3 +68,26 @@ The `suppress_output` and `hide_progress` arguments to the :py:func:`split_video
  * `hide_progress` is now `show_progress`, default is `False`
 
 This makes the API consistent with that of :py:class:`SceneManager <scenedetect.scene_manager.SceneManager>`.
+
+
+===============================================================
+Other
+===============================================================
+
+`ThresholdDetector` Class
+===============================================================
+
+The `block_size` argument has been removed from the :py:class:`ThresholdDetector <scenedetect.detectors.threshold_detector.ThresholdDetector>`` constructor. It is no longer required.
+
+
+`ContentDetector` Class
+===============================================================
+
+The `calculate_frame_score` method of :py:class:`ContentDetector <scenedetect.detectors.content_detector.ContentDetector>` has been renamed to :py:meth:`_calculate_frame_score <scenedetect.detectors.content_detector.ContentDetector._calculate_frame_score>`
+
+
+`MINIMUM_FRAMES_PER_SECOND_*` Constants
+===============================================================
+
+In :py:mod:`scenedetect.frame_timecode` the constants `MINIMUM_FRAMES_PER_SECOND_FLOAT` and `MINIMUM_FRAMES_PER_SECOND_DELTA_FLOAT` have been replaced with :py:data:`MAX_FPS_DELTA <scenedetect.frame_timecode.MAX_FPS_DELTA>`.
+

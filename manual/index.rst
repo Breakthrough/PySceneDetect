@@ -43,16 +43,15 @@ Table of Contents
     :name: apitoc
 
     api
-    api/scene_detector
+    api/scene_manager
     api/detectors
     api/video_stream
     api/backends
-    api/frame_timecode
-    api/scene_manager
-    api/stats_manager
     api/video_splitter
+    api/frame_timecode
+    api/scene_detector
+    api/stats_manager
     api/migration_guide
-
 
 =======================================================================
 Indices and Tables

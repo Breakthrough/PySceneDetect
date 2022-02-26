@@ -462,20 +462,23 @@ def save_images(scene_list: List[Tuple[FrameTimecode, FrameTimecode]],
 
 
 class SceneManager:
-    """The SceneManager facilitates detection of scenes via the :py:meth:`detect_scenes` method,
-    given a video source (:py:class:`VideoStream <scenedetect.video.VideoStream>`), and
-    SceneDetector algorithms added via the :py:meth:`add_detector` method.
-
-    Can also optionally take a StatsManager instance during construction to cache intermediate
-    scene detection calculations, making subsequent calls to :py:meth:`detect_scenes` much faster,
-    allowing the cached values to be saved/loaded to/from disk, and also manually determining
-    the optimal threshold values or other options for various detection algorithms.
+    """The SceneManager facilitates detection of scenes via the :py:meth:`detect_scenes`
+    method, given a video source (:py:class:`VideoStream <scenedetect.video.VideoStream>`),
+    and SceneDetector algorithms added via the :py:meth:`add_detector` method. Scene
+    detection is performed in parallel with decoding the video by reading frames from the
+    `VideoStream` in a background thread.
     """
 
     def __init__(
         self,
         stats_manager: Optional[StatsManager] = None,
     ):
+        """
+        Arguments:
+            stats_manager: :py:class:`StatsManager` to bind to this `SceneManager`. Can be
+                accessed via the `stats_manager` property of the resulting object to load
+                from or save to a file on disk.
+        """
         self._cutting_list = []
         self._event_list = []
         self._detector_list = []
@@ -484,9 +487,9 @@ class SceneManager:
         # Expose a new `stats_manager` @property from the SceneManager, and either change the
         # `stats_manager` argument to to `store_stats: bool=False``, or lazy-init one.
 
-        # TODO(v1.0): This class should own a VideoStream as well, instead of continually passing one
-        # to the detect_scenes method.  If concatenation is required, it can be implemented as a
-        # generic VideoStream wrapper.
+        # TODO(v1.0): This class should own a VideoStream as well, instead of passing one
+        # to the detect_scenes method. If concatenation is required, it can be implemented as
+        # a generic VideoStream wrapper.
         self._stats_manager: Optional[StatsManager] = stats_manager
 
         # Position of video that was first passed to detect_scenes.

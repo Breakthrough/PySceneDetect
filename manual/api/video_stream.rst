@@ -8,6 +8,7 @@ VideoStream
 .. automodule:: scenedetect.video_stream
 
 
+===============================================================
 ``VideoStream`` Interface
 ===============================================================
 
@@ -16,6 +17,7 @@ VideoStream
    :undoc-members:
 
 
+===============================================================
 ``video_stream`` Functions and Constants
 ===============================================================
 
@@ -26,6 +28,7 @@ The following functions and constants are available in the ``scenedetect.video_s
 .. autofunction:: scenedetect.video_stream.compute_downscale_factor
 
 
+===============================================================
 Exceptions
 ===============================================================
 

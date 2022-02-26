@@ -47,6 +47,7 @@ The main goal of v0.6 was to simplify and stabalize the video input and statsfil
  * Changes to `SceneManager`:
     * Now handles frame downscaling, see the `downscale` and `auto_downscale` properties
     * `detect_scenes()` no longer displays a progress bar by default (set `show_progress=True` to restore the previous behaviour)
+    * `detect_scenes()` now performs video decoding in a background thread which greatly improves performance in many cases
     * `clear()` now also clears any detectors, as detectors are stateful
     * `get_scene_list()` now returns an empty list if there are no detected cuts (previously one scene with the duration of the video was returned)
         * To restore the previous behaviour, specify `start_in_scene=True`
