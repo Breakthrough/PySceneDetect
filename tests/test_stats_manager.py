@@ -40,22 +40,16 @@ These files will be deleted, if possible, after the tests are completed running.
 # pylint: disable=no-self-use, protected-access, multiple-statements, invalid-name
 # pylint: disable=redefined-outer-name
 
-
-# Standard Library Imports
+import csv
 import os
 import random
 
-# Third-Party Library Imports
 import pytest
 
-# PySceneDetect Library Imports
 from scenedetect.scene_manager import SceneManager
 from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.backends.opencv import VideoStreamCv2
 from scenedetect.detectors import ContentDetector
-
-from scenedetect.platform import get_csv_reader
-from scenedetect.platform import get_csv_writer
 
 from scenedetect.stats_manager import StatsManager
 from scenedetect.stats_manager import FrameMetricRegistered
@@ -158,7 +152,7 @@ def test_load_hardcoded_file():
     stats_manager = StatsManager()
     with open(TEST_STATS_FILES[0], 'w') as stats_file:
 
-        stats_writer = get_csv_writer(stats_file)
+        stats_writer = csv.writer(stats_file, lineterminator='\n')
 
         some_metric_key = 'some_metric'
         some_metric_value = 1.2
@@ -190,7 +184,7 @@ def test_load_hardcoded_file_backwards_compat():
 
     stats_manager = StatsManager()
     with open(TEST_STATS_FILES[0], 'w') as stats_file:
-        stats_writer = get_csv_writer(stats_file)
+        stats_writer = csv.writer(stats_file, lineterminator='\n')
 
         some_metric_key = 'some_metric'
         some_metric_value = 1.2
@@ -259,7 +253,7 @@ def test_load_corrupt_stats():
     stats_manager = StatsManager()
 
     with open(TEST_STATS_FILES[0], 'wt') as stats_file:
-        stats_writer = get_csv_writer(stats_file)
+        stats_writer = csv.writer(stats_file, lineterminator='\n')
 
         some_metric_key = 'some_metric'
         some_metric_value = str(1.2)

@@ -28,7 +28,6 @@ DLLs on Windows and getting uniform line-terminating csv reader/writer objects
 are also included in this module.
 """
 
-import csv
 import logging
 import os
 import os.path
@@ -36,7 +35,7 @@ import platform
 import struct
 import subprocess
 import sys
-from typing import Any, AnyStr, Dict, List, Optional, TextIO, Tuple, Union
+from typing import AnyStr, Dict, List, Optional, TextIO, Tuple, Union
 
 import cv2
 
@@ -144,21 +143,6 @@ def get_cv2_imwrite_params() -> Dict[str, Union[int, None]]:
 
 
 ##
-## Python csv Module Wrapper (for StatsManager, and CliContext/list-scenes command)
-##
-
-
-def get_csv_reader(file_handle: TextIO) -> Any:
-    """Return a csv.reader object using the passed file handle."""
-    return csv.reader(file_handle, lineterminator='\n')
-
-
-def get_csv_writer(file_handle: TextIO) -> Any:
-    """Return a csv.writer object using the passed file handle."""
-    return csv.writer(file_handle, lineterminator='\n')
-
-
-##
 ## File I/O
 ##
 
@@ -210,21 +194,15 @@ def get_and_create_path(file_path: AnyStr, output_directory: Optional[AnyStr] = 
 
 def init_logger(log_level: int = logging.INFO,
                 show_stdout: bool = False,
-                log_file: TextIO = None) -> logging.Logger:
-    """ Initializes the Python logging module for PySceneDetect.
-
-    Mainly used by the command line interface, but can also be used by other modules
-    by calling init_logger(). The logger instance used is named 'pyscenedetect-logger'.
-
-    All existing log handlers are removed every time this function is invoked.
+                log_file: Optional[TextIO] = None):
+    """Initializes logging for PySceneDetect. The logger instance used is named 'pyscenedetect'.
+    By default the logger has no handlers to suppress output. All existing log handlers are replaced
+    every time this function is invoked.
 
     Arguments:
         log_level: Verbosity of log messages.
-        show_stdout: If False, no output will be generated to stdout.
-        log_file: File to also send messages to, in addition to stdout.
-
-    Returns:
-        Logger instance to use.
+        show_stdout: If True, add handler to show log messages on stdout (default: False).
+        log_file: If set, add handler to dump log messages to given file.
     """
     # Format of log messages depends on verbosity.
     format_str = '[PySceneDetect] %(message)s'
@@ -247,11 +225,9 @@ def init_logger(log_level: int = logging.INFO,
         handler.setLevel(log_level)
         handler.setFormatter(logging.Formatter(fmt=format_str))
         logger_instance.addHandler(handler)
-    return logger_instance
 
+init_logger()
 
-logger = init_logger()
-"""Default logger to be used by PySceneDetect library objects."""
 
 ##
 ## Running External Commands

@@ -23,6 +23,7 @@
 Uses string identifier ``'opencv'``.
 """
 
+import logging
 import math
 from typing import Tuple, Union, Optional
 import os.path
@@ -31,8 +32,10 @@ import cv2
 from numpy import ndarray
 
 from scenedetect.frame_timecode import FrameTimecode, MAX_FPS_DELTA
-from scenedetect.platform import get_aspect_ratio, get_file_name, logger
+from scenedetect.platform import get_aspect_ratio, get_file_name
 from scenedetect.video_stream import VideoStream, SeekError, VideoOpenFailure
+
+logger = logging.getLogger('pyscenedetect')
 
 
 class VideoStreamCv2(VideoStream):

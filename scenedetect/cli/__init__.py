@@ -205,15 +205,21 @@ def duplicate_command(ctx, param_hint):
     'Suppresses all output of PySceneDetect to the terminal/stdout. If a logfile is'
     ' specified, it will still be generated with the specified verbosity.')
 @click.option(
-    '--backend', '-b', metavar='BACKEND',
+    '--backend', '-b', metavar='BACKEND', show_default=True,
     type=click.Choice([key for key in AVAILABLE_BACKENDS.keys()]), default='opencv', help=
-    'Name of backend to use. Default is opencv. Backends available on this system: %s' % str(
+    'Name of backend to use. Backends available on this system: %s' % str(
         [key for key in AVAILABLE_BACKENDS.keys()]))
+@click.option(
+    '--config', '-c', metavar='FILE',
+    type=click.Path(exists=False, file_okay=True, readable=True, resolve_path=False), help=
+    'Path to config file. If not set, tries to load `settings.cfg` from one of these paths:'
+    ' on Windows C:/Users/%USERNAME%/AppData/Local/PySceneDetect, on Linux ~/.config/PySceneDetect'
+    ' or in $XDG_CONFIG_HOME, on OSX ~/Library/Preferences/PySceneDetect.')
 @click.pass_context
 # pylint: disable=redefined-builtin
 def scenedetect_cli(ctx, input, output, framerate, downscale, frame_skip,
                     min_scene_len, drop_short_scenes, stats,
-                    verbosity, logfile, quiet, backend):
+                    verbosity, logfile, quiet, backend, config):
     """ For example:
 
     scenedetect -i video.mp4 -s video.stats.csv detect-content list-scenes
@@ -234,7 +240,10 @@ def scenedetect_cli(ctx, input, output, framerate, downscale, frame_skip,
     verbosity = getattr(logging, verbosity.upper()) if verbosity is not None else None
     init_logger(log_level=verbosity, show_stdout=not quiet, log_file=logfile)
 
+    # TODO(#247): Need to set verbosity default to None and allow the case where quiet-mode=True
+    # in the config, but -v debug is specified.
     ctx.obj.quiet_mode = True if quiet else False
+
     ctx.obj.output_directory = output
 
     ctx.obj.logger.info('PySceneDetect %s', scenedetect.__version__)

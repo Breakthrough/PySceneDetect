@@ -41,6 +41,7 @@ that process the same frames with the same detection algorithm, even if differen
 threshold values (or other algorithm options) are used.
 """
 
+import csv
 from string import Template
 from typing import Iterable, List, Tuple, Optional, Dict, Callable, Union, TextIO
 import threading
@@ -52,7 +53,7 @@ import cv2
 import numpy as np
 
 from scenedetect.frame_timecode import FrameTimecode
-from scenedetect.platform import (tqdm, get_and_create_path, get_csv_writer, get_cv2_imwrite_params)
+from scenedetect.platform import (tqdm, get_and_create_path, get_cv2_imwrite_params)
 from scenedetect.video_stream import VideoStream
 from scenedetect.stats_manager import StatsManager, FrameMetricRegistered
 from scenedetect.scene_detector import SceneDetector, SparseSceneDetector
@@ -151,7 +152,7 @@ def write_scene_list(output_csv_file: TextIO,
             in the video that need to be split to generate individual scenes). If not specified,
             the cut list is generated using the start times of each scene following the first one.
     """
-    csv_writer = get_csv_writer(output_csv_file)
+    csv_writer = csv.writer(output_csv_file, lineterminator='\n')
     # If required, output the cutting list as the first row (i.e. before the header row).
     if include_cut_list:
         csv_writer.writerow(

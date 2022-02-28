@@ -38,12 +38,12 @@ detectors being used, speeding up subsequent scene detection runs using the same
 :py:class:`SceneManager<scenedetect.scene_manager.SceneManager>`/:py:class:`StatsManager` objects.
 """
 
+import csv
 from logging import getLogger
 from typing import Any, Dict, Iterable, List, Optional, TextIO
 import os.path
 
 from scenedetect.frame_timecode import FrameTimecode
-from scenedetect.platform import get_csv_reader, get_csv_writer
 
 logger = getLogger('pyscenedetect')
 
@@ -226,7 +226,7 @@ class StatsManager:
             with open(path, 'w') as file:
                 return self.save_to_csv(
                     file=file, base_timecode=base_timecode, force_save=force_save)
-        csv_writer = get_csv_writer(file)
+        csv_writer = csv.writer(file, lineterminator='\n')
 
         # Header rows.
         metric_keys = sorted(list(self._registered_metrics.union(self._loaded_metrics)))
@@ -278,8 +278,11 @@ class StatsManager:
             if os.path.exists(path):
                 with open(path, 'r') as file:
                     return self.load_from_csv(file=file)
+            # Path doesn't exist.
             return
-        csv_reader = get_csv_reader(file)
+
+        # If we get here, file is a valid file handle in read-only text mode.
+        csv_reader = csv.reader(file, lineterminator='\n')
         num_cols = None
         num_metrics = None
         num_frames = None
