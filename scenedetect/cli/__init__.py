@@ -41,14 +41,15 @@ import logging
 import click
 
 import scenedetect
-from scenedetect.cli.context import check_split_video_requirements
-from scenedetect.cli.context import contains_sequence_or_url
-from scenedetect.cli.context import parse_timecode
-from scenedetect.platform import init_logger
 from scenedetect.backends import AVAILABLE_BACKENDS
+from scenedetect.cli.config import ConfigRegistry, ConfigLoadFailure
+from scenedetect.cli.context import (
+    check_split_video_requirements, contains_sequence_or_url, parse_timecode)
+from scenedetect.platform import init_logger
 
 
 logger = logging.getLogger('pyscenedetect')
+USER_CONFIG = ConfigRegistry()
 
 
 def get_help_command_preface(command_name='scenedetect'):
@@ -154,7 +155,8 @@ def duplicate_command(ctx, param_hint):
     '--output', '-o',
     multiple=False, required=False, metavar='DIR',
     type=click.Path(exists=False, dir_okay=True, writable=True, resolve_path=True), help=
-    'Output directory for all files (stats file, output videos, images, log files, etc...).')
+    'Output directory for all files (stats file, output videos, images, log files, etc...)'
+    ' If not set defaults to working directory. Some commands allow overriding this value.')
 @click.option(
     '--framerate', '-f', metavar='FPS',
     type=click.FLOAT, default=None, help=
@@ -193,7 +195,8 @@ def duplicate_command(ctx, param_hint):
 @click.option(
     '--verbosity', '-v', metavar='LEVEL',
     type=click.Choice(['debug', 'info', 'warning', 'error']), default='info', help=
-    'Level of debug/info/error information to show. Will be overriden if `-q`/`--quiet` is set.')
+    'Level of debug/info/error information to show. Will be overriden if `-q`/`--quiet` is set.'
+    ' Must be one of: debug, info, warning, error.')
 @click.option(
     '--logfile', '-l', metavar='LOG',
     type=click.Path(exists=False, file_okay=True, writable=True, resolve_path=False), help=
@@ -247,6 +250,26 @@ def scenedetect_cli(ctx, input, output, framerate, downscale, frame_skip,
     ctx.obj.output_directory = output
 
     ctx.obj.logger.info('PySceneDetect %s', scenedetect.__version__)
+
+    # Replace the user configuration if -c/--config was specified.
+
+    # TODO: Don't modify USER_CONFIG, just create a new one in CliContext and reference this one
+    # when required.
+    if config:
+        try:
+            new_config = ConfigRegistry(config)
+        except ConfigLoadFailure as ex:
+            for (log_level, log_str) in ex.init_log:
+                ctx.obj.logger.log(log_level, log_str)
+            ctx.obj.logger.error("Failed to load config file!\n")
+            raise click.BadParameter(
+                'Failed to read config file, see log for details.', param_hint='-c/--config') from ex
+
+        # pylint: disable=global-statement
+        global USER_CONFIG
+        USER_CONFIG = new_config
+
+    ctx.obj.logger.debug("Loaded config:\n%s", str(USER_CONFIG._config))
 
     if stats is not None and frame_skip != 0:
         ctx.obj.options_processed = False

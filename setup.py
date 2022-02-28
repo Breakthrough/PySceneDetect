@@ -36,7 +36,8 @@ def get_requires() -> List[str]:
     return [
         'Click',
         'numpy',
-        'tqdm'
+        'tqdm',
+        'appdirs'
     ]
 
 def get_extra_requires() -> Dict[str, List[str]]:

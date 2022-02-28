@@ -57,6 +57,7 @@ PySceneDetect requires [Python 3](https://www.python.org/) and the following pac
  - [Numpy](https://numpy.org/), can install via `pip install numpy`. Used for frame processing.
  - [Click](https://click.palletsprojects.com), can install via `pip install Click`. Used for command line interface.
  - [tqdm](https://github.com/tqdm/tqdm), can install via `pip install tqdm`. Used to show progress bar and estimated time remaining.
+ - [appdirs](https://github.com/ActiveState/appdirs), can install via `pip install appdirs`. Used to obtain path correct configuration file path for each platform.
 
 ### Video Splitting Tools
 
