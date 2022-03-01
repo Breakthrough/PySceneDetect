@@ -37,7 +37,6 @@ module and the scenedetect.cli.CliContext object.
 
 from __future__ import print_function
 import logging
-from typing import Callable
 
 import click
 
@@ -47,7 +46,7 @@ from scenedetect.cli.context import (
     BACKEND_CHOICES, VERBOSITY_CHOICES,
     # TODO(v0.6): Move usages of these functions inside of CliContext.
     check_split_video_requirements, contains_sequence_or_url, parse_timecode)
-
+from scenedetect.cli.controller import run_scenedetect
 
 logger = logging.getLogger('pyscenedetect')
 
@@ -88,13 +87,13 @@ CLICK_CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 COMMAND_DICT = []
 
 
-def add_cli_command(cli: Callable[...], command: Callable[...]):
+def add_cli_command(cli, command):
     """Adds the CLI command to the cli object as well as to the COMMAND_DICT."""
     cli.add_command(command)
     COMMAND_DICT.append(command)
 
 
-def print_command_help(ctx: click.Context, command: Callable[...]):
+def print_command_help(ctx: click.Context, command):
     """ Print Command Help: Prints PySceneDetect help/usage for a given command. """
     ctx_name = ctx.info_name
     ctx.info_name = command.name
@@ -215,7 +214,7 @@ def duplicate_command(ctx: click.Context, param_hint: str) -> None:
     ' or in $XDG_CONFIG_HOME, on OSX ~/Library/Preferences/PySceneDetect.')
 @click.pass_context
 # pylint: disable=redefined-builtin
-def scenedetect_cli(ctx, input, output, framerate, downscale, frame_skip,
+def scenedetect_cli(ctx: click.Context, input, output, framerate, downscale, frame_skip,
                     min_scene_len, drop_short_scenes, stats,
                     verbosity, logfile, quiet, backend, config):
     """ For example:
@@ -228,7 +227,7 @@ def scenedetect_cli(ctx, input, output, framerate, downscale, frame_skip,
 
 
     """
-    ctx.call_on_close(ctx.obj.process_input)
+    ctx.call_on_close(lambda: run_scenedetect(ctx.obj))
     ctx.obj.parse_options(
         input_path=input, output=output, framerate=framerate, stats_file=stats, downscale=downscale,
         frame_skip=frame_skip, min_scene_len=min_scene_len, drop_short_scenes=drop_short_scenes,
