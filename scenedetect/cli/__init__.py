@@ -37,19 +37,19 @@ module and the scenedetect.cli.CliContext object.
 
 from __future__ import print_function
 import logging
+from typing import Callable
 
 import click
 
 import scenedetect
 from scenedetect.backends import AVAILABLE_BACKENDS
-from scenedetect.cli.config import ConfigRegistry, ConfigLoadFailure
 from scenedetect.cli.context import (
+    BACKEND_CHOICES, VERBOSITY_CHOICES,
+    # TODO(v0.6): Move usages of these functions inside of CliContext.
     check_split_video_requirements, contains_sequence_or_url, parse_timecode)
-from scenedetect.platform import init_logger
 
 
 logger = logging.getLogger('pyscenedetect')
-USER_CONFIG = ConfigRegistry()
 
 
 def get_help_command_preface(command_name='scenedetect'):
@@ -88,15 +88,13 @@ CLICK_CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 COMMAND_DICT = []
 
 
-def add_cli_command(cli, command):
-    # type: (Callable[[...] -> None], Callable[]) -> None
+def add_cli_command(cli: Callable[...], command: Callable[...]):
     """Adds the CLI command to the cli object as well as to the COMMAND_DICT."""
     cli.add_command(command)
     COMMAND_DICT.append(command)
 
 
-def print_command_help(ctx, command):
-    # type: (click.Context, Callable[]) -> None
+def print_command_help(ctx: click.Context, command: Callable[...]):
     """ Print Command Help: Prints PySceneDetect help/usage for a given command. """
     ctx_name = ctx.info_name
     ctx.info_name = command.name
@@ -107,24 +105,21 @@ def print_command_help(ctx, command):
     ctx.info_name = ctx_name
 
 
-def print_command_list_header():
-    # type: () -> None
+def print_command_list_header() -> None:
     """ Print Command List Header: Prints header shown before the option/command list. """
     click.echo(click.style('PySceneDetect Option/Command List:', fg='green'))
     click.echo(click.style('----------------------------------------------------', fg='green'))
     click.echo('')
 
 
-def print_help_header():
-    # type: () -> None
+def print_help_header() -> None:
     """ Print Help Header: Prints header shown before the help command. """
     click.echo(click.style('----------------------------------------------------', fg='yellow'))
     click.echo(click.style(' PySceneDetect %s Help' % scenedetect.__version__, fg='yellow'))
     click.echo(click.style('----------------------------------------------------', fg='yellow'))
 
 
-def duplicate_command(ctx, param_hint):
-    # type: (str) -> None
+def duplicate_command(ctx: click.Context, param_hint: str) -> None:
     """ Duplicate Command: Called when a command is duplicated to stop parsing and raise an error.
 
     Called when a one-time use command is specified multiple times, displaying the appropriate
@@ -234,69 +229,10 @@ def scenedetect_cli(ctx, input, output, framerate, downscale, frame_skip,
 
     """
     ctx.call_on_close(ctx.obj.process_input)
-
-    # TODO(v1.0): Make the stats value optional (e.g. allow -s only), and allow use of
-    # $VIDEO_NAME macro in the name.  Default to $VIDEO_NAME.csv.
-
-    logging.disable(logging.NOTSET)
-
-    verbosity = getattr(logging, verbosity.upper()) if verbosity is not None else None
-    init_logger(log_level=verbosity, show_stdout=not quiet, log_file=logfile)
-
-    # TODO(#247): Need to set verbosity default to None and allow the case where quiet-mode=True
-    # in the config, but -v debug is specified.
-    ctx.obj.quiet_mode = True if quiet else False
-
-    ctx.obj.output_directory = output
-
-    ctx.obj.logger.info('PySceneDetect %s', scenedetect.__version__)
-
-    # Replace the user configuration if -c/--config was specified.
-
-    # TODO: Don't modify USER_CONFIG, just create a new one in CliContext and reference this one
-    # when required.
-    if config:
-        try:
-            new_config = ConfigRegistry(config)
-        except ConfigLoadFailure as ex:
-            for (log_level, log_str) in ex.init_log:
-                ctx.obj.logger.log(log_level, log_str)
-            ctx.obj.logger.error("Failed to load config file!\n")
-            raise click.BadParameter(
-                'Failed to read config file, see log for details.', param_hint='-c/--config') from ex
-
-        # pylint: disable=global-statement
-        global USER_CONFIG
-        USER_CONFIG = new_config
-
-    ctx.obj.logger.debug("Loaded config:\n%s", str(USER_CONFIG._config))
-
-    if stats is not None and frame_skip != 0:
-        ctx.obj.options_processed = False
-        error_strs = [
-            'Unable to detect scenes with stats file if frame skip is not 1.',
-            '  Either remove the -fs/--frame-skip option, or the -s/--stats file.\n']
-        ctx.obj.logger.error('\n'.join(error_strs))
-        raise click.BadParameter(
-            '\n  Combining the -s/--stats and -fs/--frame-skip options is not supported.',
-            param_hint='frame skip + stats file')
-
-    try:
-        if ctx.obj.output_directory is not None:
-            ctx.obj.logger.info('Output directory set:\n  %s', ctx.obj.output_directory)
-        ctx.obj.parse_options(
-            input_path=input, framerate=framerate, stats_file=stats, downscale=downscale,
-            frame_skip=frame_skip, min_scene_len=min_scene_len, drop_short_scenes=drop_short_scenes,
-            backend=backend)
-
-        ctx.obj.options_processed = True
-    except click.BadParameter as ex:
-        ctx.obj.logger.debug('Could not parse CLI options, bad parameter: %s', ex)
-        raise
-    except Exception as ex:
-        ctx.obj.logger.error('Could not parse CLI options: %s', ex)
-        raise
-
+    ctx.obj.parse_options(
+        input_path=input, output=output, framerate=framerate, stats_file=stats, downscale=downscale,
+        frame_skip=frame_skip, min_scene_len=min_scene_len, drop_short_scenes=drop_short_scenes,
+        backend=backend, quiet=quiet, logfile=logfile, config=config, stats=stats, verbosity=verbosity)
 
 
 @click.command('help', add_help_option=False)
@@ -305,7 +241,7 @@ def scenedetect_cli(ctx, input, output, framerate, downscale, frame_skip,
 def help_command(ctx, command_name):
     """ Print help for command (help [command]).
     """
-    ctx.obj.options_processed = False
+    ctx.obj.process_input_flag = False
     if command_name is not None:
         if command_name.lower() == 'all':
             print_help_header()

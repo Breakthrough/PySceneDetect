@@ -136,7 +136,12 @@ class ConfigRegistry:
         if self._load_from_disk(path) is False and path is not None:
             raise ConfigLoadFailure(self._init_log)
 
+    @property
+    def config_dict(self) -> ConfigDict:
+        return self._config
+
     def get_init_log(self):
+        """Get initialization log. Consumes the log, so subsequent calls will return None."""
         init_log = self._init_log
         self._init_log = None
         return init_log

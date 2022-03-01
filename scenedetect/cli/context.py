@@ -36,16 +36,22 @@ import click
 import cv2
 
 from scenedetect.backends import AVAILABLE_BACKENDS, VideoStreamCv2
+from scenedetect.cli.config import ConfigRegistry, ConfigLoadFailure
 from scenedetect.frame_timecode import FrameTimecode, MAX_FPS_DELTA
 import scenedetect.detectors
 from scenedetect.platform import (check_opencv_ffmpeg_dll, get_and_create_path,
-                                  get_cv2_imwrite_params)
+                                  get_cv2_imwrite_params, init_logger)
 from scenedetect.scene_manager import (SceneManager, save_images, write_scene_list,
                                        write_scene_list_html)
 from scenedetect.stats_manager import StatsManager, StatsFileCorrupt
 from scenedetect.video_stream import VideoStream, VideoOpenFailure
 from scenedetect.video_splitter import (is_mkvmerge_available, is_ffmpeg_available,
                                         split_video_mkvmerge, split_video_ffmpeg)
+
+USER_CONFIG = ConfigRegistry()
+
+VERBOSITY_CHOICES = click.Choice(['debug', 'info', 'warning', 'error'])
+BACKEND_CHOICES = click.Choice([key for key in AVAILABLE_BACKENDS.keys()])
 
 
 def parse_timecode(value: Union[str, int, FrameTimecode], frame_rate: float) -> FrameTimecode:
@@ -110,6 +116,8 @@ class CliContext:
 
     def __init__(self):
         self.logger = logging.getLogger('pyscenedetect')
+        self.config = USER_CONFIG
+
         self.options_processed: bool = False # True when CLI option parsing is complete.
         self.process_input_flag: bool = True # If False, skips video processing.
 
@@ -173,9 +181,11 @@ class CliContext:
         # Internal variables
         self._check_input_open_failed = False # Used to avoid excessive log messages
 
-    def parse_options(self, input_path: str, framerate: float, stats_file: Optional[str],
-                      downscale: Optional[int], frame_skip: int, min_scene_len: str,
-                      drop_short_scenes: bool, backend: str):
+    def parse_options(self, input_path: str, output: Optional[str], framerate: float,
+                      stats_file: Optional[str], downscale: Optional[int], frame_skip: int,
+                      min_scene_len: str, drop_short_scenes: bool, backend: str, quiet: bool,
+                      logfile: Optional[str], config: Optional[str], stats: Optional[str],
+                      verbosity: str):
         """ Parse Options: Parses all global options/arguments passed to the main
         scenedetect command, before other sub-commands (e.g. this function processes
         the [options] when calling scenedetect [options] [commands [command options]].
@@ -187,12 +197,60 @@ class CliContext:
             click.BadParameter
         """
 
+        # TODO(v1.0): Make the stats value optional (e.g. allow -s only), and allow use of
+        # $VIDEO_NAME macro in the name.  Default to $VIDEO_NAME.csv.
+
+        logging.disable(logging.NOTSET)
+
+        verbosity = getattr(logging, verbosity.upper()) if verbosity is not None else None
+        init_logger(log_level=verbosity, show_stdout=not quiet, log_file=logfile)
+        self.logger.info('PySceneDetect %s', scenedetect.__version__)
+
+        # TODO(#247): Need to set verbosity default to None and allow the case where quiet-mode=True
+        # in the config, but -v debug is specified.
+        self.quiet_mode = True if quiet else False
+        self.output_directory = output
+
+        # Replace the user configuration if -c/--config was specified.
+        # TODO: Don't modify USER_CONFIG, just create a new one in CliContext and reference this one
+        # when required.
+        if config:
+            try:
+                new_config = ConfigRegistry(config)
+            except ConfigLoadFailure as ex:
+                for (log_level, log_str) in ex.init_log:
+                    self.logger.log(log_level, log_str)
+                self.logger.error("Failed to load config file!\n")
+                raise click.BadParameter(
+                    'Failed to read config file, see log for details.',
+                    param_hint='-c/--config') from ex
+
+            self.config = new_config
+        for (log_level, log_str) in self.config.get_init_log():
+            self.logger.log(log_level, log_str)
+        self.logger.debug("Current configuration:\n%s", str(self.config.config_dict))
+
+        if stats is not None and frame_skip != 0:
+            self.options_processed = False
+            error_strs = [
+                'Unable to detect scenes with stats file if frame skip is not 1.',
+                '  Either remove the -fs/--frame-skip option, or the -s/--stats file.\n'
+            ]
+            self.logger.error('\n'.join(error_strs))
+            raise click.BadParameter(
+                '\n  Combining the -s/--stats and -fs/--frame-skip options is not supported.',
+                param_hint='frame skip + stats file')
+
+        if self.output_directory is not None:
+            self.logger.info('Output directory set:\n  %s', self.output_directory)
+
         self.logger.debug('Parsing program options.')
-        # input_path will be None if -i is not specified (e.g. when calling `scenedetect help`).
+
+        # Have to load the input video to obtain a time base before parsing timecodes.
         if input_path is None:
             return
-
         self._init_video_stream(input_path=input_path, framerate=framerate, backend=backend)
+
         self.min_scene_len = parse_timecode(min_scene_len, self.video_stream.frame_rate)
         self.drop_short_scenes = drop_short_scenes
         self.frame_skip = frame_skip
@@ -201,7 +259,6 @@ class CliContext:
         if stats_file:
             self._open_stats_file(file_path=stats_file)
 
-        # Init SceneManager.
         self.logger.debug('Initializing SceneManager.')
         self.scene_manager = SceneManager(self.stats_manager)
         if downscale is None:
@@ -213,6 +270,7 @@ class CliContext:
             except ValueError as ex:
                 self.logger.debug(str(ex))
                 raise click.BadParameter(str(ex), param_hint='downscale factor')
+        self.options_processed = True
 
     def process_input(self):
         # type: () -> None
@@ -220,13 +278,13 @@ class CliContext:
 
         Run after all command line options/sub-commands have been parsed.
         """
-        self.logger.debug('Processing input...')
         if not self.process_input_flag:
-            self.logger.debug('Skipping processing (process_input_flag=False).')
+            self.logger.debug('Skipping processing (process_input_flag is False).')
             return
         if not self.options_processed:
             self.logger.debug('Skipping processing, CLI options were not parsed successfully.')
             return
+        self.logger.debug('Processing input...')
         self.check_input_open()
         if self.scene_manager.get_num_detectors() == 0:
             self.logger.error(
@@ -335,10 +393,10 @@ class CliContext:
         self.base_timecode = None
         try:
             if not backend in AVAILABLE_BACKENDS:
-                raise click.BadParameter('Specified backend is not available on this system!',
-                                         param_hint='-b/--backend')
-            self.logger.debug(
-                'Using backend: %s / %s', backend, AVAILABLE_BACKENDS[backend].__name__)
+                raise click.BadParameter(
+                    'Specified backend is not available on this system!', param_hint='-b/--backend')
+            self.logger.debug('Using backend: %s / %s', backend,
+                              AVAILABLE_BACKENDS[backend].__name__)
             self.video_stream = AVAILABLE_BACKENDS[backend](input_path, framerate)
             self.base_timecode = self.video_stream.base_timecode
         except VideoOpenFailure as ex:
