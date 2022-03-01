@@ -262,7 +262,7 @@ def _split_video(context: CliContext, scene_list: List[Tuple[FrameTimecode,
         output_path_template, context.split_directory
         if context.split_directory is not None else context.output_directory)
     # Ensure the appropriate tool is available before handling split-video.
-    _check_split_video_requirements(context.split_mkvmerge)
+    check_split_video_requirements(context.split_mkvmerge)
     if context.split_mkvmerge:
         split_video_mkvmerge(
             context.video_stream.path,
@@ -283,7 +283,7 @@ def _split_video(context: CliContext, scene_list: List[Tuple[FrameTimecode,
         logger.info('Video splitting completed, individual scenes written to disk.')
 
 
-def _check_split_video_requirements(use_mkvmerge: bool) -> None:
+def check_split_video_requirements(use_mkvmerge: bool) -> None:
     # type: (bool) -> None
     """ Validates that the proper tool is available on the system to perform the split-video
     command, which depends on if -m/--mkvmerge is set (if not, defaults to ffmpeg).

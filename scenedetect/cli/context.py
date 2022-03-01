@@ -70,14 +70,11 @@ def contains_sequence_or_url(video_path: str) -> bool:
 
 
 class CliContext:
-    """ Context of the command-line interface passed between the various sub-commands.
+    """Context of the command-line interface passed between the various sub-commands.
 
     After processing the main program options in `parse_options`, the CLI will set the options
     passed for each sub-command.  After preparing the commands, their actions are executed by
-    the `process_input` method.
-
-    The only other module which should directly access/modify the properties of this class is
-    `scenedetect.cli.__init__` (file scenedetect/cli/__init__.py).
+    passing this object to :py:func:`scenedetect.cli.controller.run_scenedetect`.
     """
 
     def __init__(self):

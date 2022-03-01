@@ -42,10 +42,11 @@ import click
 
 import scenedetect
 from scenedetect.backends import AVAILABLE_BACKENDS
+from scenedetect.cli.controller import check_split_video_requirements
 from scenedetect.cli.context import (
-    BACKEND_CHOICES, VERBOSITY_CHOICES,
+    BACKEND_CHOICES, VERBOSITY_CHOICES, CliContext,
     # TODO(v0.6): Move usages of these functions inside of CliContext.
-    check_split_video_requirements, contains_sequence_or_url, parse_timecode)
+    contains_sequence_or_url, parse_timecode)
 from scenedetect.cli.controller import run_scenedetect
 
 logger = logging.getLogger('pyscenedetect')
@@ -127,6 +128,8 @@ def duplicate_command(ctx: click.Context, param_hint: str) -> None:
     Raises:
         click.BadParameter
     """
+    assert isinstance(ctx.obj, CliContext)
+
     ctx.obj.options_processed = False
     error_strs = []
     error_strs.append('Error: Command %s specified multiple times.' % param_hint)
@@ -227,6 +230,8 @@ def scenedetect_cli(ctx: click.Context, input, output, framerate, downscale, fra
 
 
     """
+    assert isinstance(ctx.obj, CliContext)
+
     ctx.call_on_close(lambda: run_scenedetect(ctx.obj))
     ctx.obj.parse_options(
         input_path=input, output=output, framerate=framerate, stats_file=stats, downscale=downscale,
@@ -238,8 +243,9 @@ def scenedetect_cli(ctx: click.Context, input, output, framerate, downscale, fra
 @click.argument('command_name', required=False, type=click.STRING)
 @click.pass_context
 def help_command(ctx, command_name):
-    """ Print help for command (help [command]).
-    """
+    """Print help for command (help [command])."""
+    assert isinstance(ctx.obj, CliContext)
+
     ctx.obj.process_input_flag = False
     if command_name is not None:
         if command_name.lower() == 'all':
@@ -280,6 +286,8 @@ def help_command(ctx, command_name):
 @click.pass_context
 def about_command(ctx):
     """ Print license/copyright info. """
+    assert isinstance(ctx.obj, CliContext)
+
     ctx.obj.process_input_flag = False
     click.echo(click.style('----------------------------------------------------', fg='cyan'))
     click.echo(click.style(' About PySceneDetect %s' % scenedetect.__version__, fg='yellow'))
@@ -293,6 +301,8 @@ def about_command(ctx):
 @click.pass_context
 def version_command(ctx):
     """ Print version of PySceneDetect. """
+    assert isinstance(ctx.obj, CliContext)
+
     ctx.obj.process_input_flag = False
     click.echo(click.style('PySceneDetect %s' % scenedetect.__version__, fg='yellow'))
     ctx.exit()
@@ -333,6 +343,8 @@ def time_command(ctx, start, duration, end):
 
     time --start 0 --end 1000
     """
+    assert isinstance(ctx.obj, CliContext)
+
     if ctx.obj.time:
         duplicate_command(ctx, 'time')
     if duration is not None and end is not None:
@@ -374,6 +386,7 @@ def detect_content_command(ctx, threshold, luma_only):
 
     detect-content --threshold 27.5
     """
+    assert isinstance(ctx.obj, CliContext)
 
     min_scene_len = 0 if ctx.obj.drop_short_scenes else ctx.obj.min_scene_len
     luma_mode_str = '' if not luma_only else ', luma_only mode'
@@ -423,6 +436,7 @@ def detect_adaptive_command(ctx, threshold, min_scene_len, min_delta_hsv,
 
     detect-adaptive --threshold 3.2
     """
+    assert isinstance(ctx.obj, CliContext)
 
     min_scene_len = parse_timecode(min_scene_len, ctx.obj.video_stream.frame_rate)
     luma_mode_str = '' if not luma_only else ', luma_only mode'
@@ -467,6 +481,7 @@ def detect_threshold_command(ctx, threshold, fade_bias, add_last_scene):
 
     detect-threshold --threshold 15
     """
+    assert isinstance(ctx.obj, CliContext)
 
     min_scene_len = 0 if ctx.obj.drop_short_scenes else ctx.obj.min_scene_len
 
@@ -507,6 +522,8 @@ def detect_threshold_command(ctx, threshold, fade_bias, add_last_scene):
 @click.pass_context
 def export_html_command(ctx, filename, no_images, image_width, image_height):
     """ Exports scene list to a HTML file. Requires save-images by default."""
+    assert isinstance(ctx.obj, CliContext)
+
     if ctx.obj.export_html:
         duplicate_command(ctx, 'export_html')
     ctx.obj.check_input_open()
@@ -557,6 +574,8 @@ def export_html_command(ctx, filename, no_images, image_width, image_height):
 def list_scenes_command(ctx, output, filename, no_output_file, quiet, skip_cuts):
     """ Prints scene list and outputs to a CSV file. The default filename is
     $VIDEO_NAME-Scenes.csv. """
+    assert isinstance(ctx.obj, CliContext)
+
     if ctx.obj.list_scenes:
         duplicate_command(ctx, 'list-scenes')
     ctx.obj.check_input_open()
@@ -634,6 +653,8 @@ def list_scenes_command(ctx, output, filename, no_output_file, quiet, skip_cuts)
 def split_video_command(ctx, output, filename, high_quality, override_args, quiet, copy,
                         mkvmerge, rate_factor, preset):
     """Split input video(s) using ffmpeg or mkvmerge."""
+    assert isinstance(ctx.obj, CliContext)
+
     if ctx.obj.split_video:
         duplicate_command(ctx, 'split-video')
     ctx.obj.check_input_open()
@@ -778,6 +799,8 @@ def split_video_command(ctx, output, filename, high_quality, override_args, quie
 def save_images_command(ctx, output, filename, num_images, jpeg, webp, quality, png,
                         compression, frame_margin, scale, height, width):
     """ Create images for each detected scene. """
+    assert isinstance(ctx.obj, CliContext)
+
     if ctx.obj.save_images:
         duplicate_command(ctx, 'save-images')
     if quality is None:
