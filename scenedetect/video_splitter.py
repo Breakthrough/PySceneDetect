@@ -129,7 +129,7 @@ def is_ffmpeg_available():
 
 def split_video_mkvmerge(input_video_path: str,
                          scene_list: Iterable[FrameTimecodePair],
-                         output_file_template: str = '$VIDEO_NAME-Scene-$SCENE_NUMBER.mkv',
+                         output_file_template: str = '$VIDEO_NAME.mkv',
                          video_name: Optional[str] = None,
                          show_output: bool = False):
     """ Calls the mkvmerge command on the input video(s), splitting it at the
@@ -138,9 +138,8 @@ def split_video_mkvmerge(input_video_path: str,
     Arguments:
         input_video_path: Path to the video to be split.
         scene_list : List of scenes as pairs of FrameTimecodes denoting the start/end times.
-        output_file_template: Template to use for output files. Note that the scene number is
-            appended to the prefix by mkvmerge. Can use $VIDEO_NAME as a template parameter
-            (e.g. "$VIDEO_NAME-Scene").
+        output_file_template: Template to use for output files. Mkvmerge always adds the suffix
+            "-$SCENE_NUMBER". Can use $VIDEO_NAME as a template parameter (e.g. "$VIDEO_NAME.mkv").
         video_name (str): Name of the video to be substituted in output_file_template for
             $VIDEO_NAME. If not specified, will be obtained from the filename.
         show_output: If False, adds the --quiet flag when invoking `mkvmerge`.

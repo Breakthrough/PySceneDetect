@@ -265,16 +265,16 @@ def _split_video(context: CliContext, scene_list: List[Tuple[FrameTimecode,
     check_split_video_requirements(context.split_mkvmerge)
     if context.split_mkvmerge:
         split_video_mkvmerge(
-            context.video_stream.path,
-            scene_list,
-            output_path_template,
+            input_video_path = context.video_stream.path,
+            scene_list = scene_list,
+            output_file_template = output_path_template,
             show_output=not (context.quiet_mode or context.split_quiet),
         )
     else:
         split_video_ffmpeg(
-            context.video_stream.path,
-            scene_list,
-            output_path_template,
+            input_video_path = context.video_stream.path,
+            scene_list = scene_list,
+            output_file_template = output_path_template,
             arg_override=context.split_args,
             show_progress=not context.quiet_mode,
             show_output=not (context.quiet_mode or context.split_quiet),

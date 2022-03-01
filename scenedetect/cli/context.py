@@ -40,6 +40,8 @@ from scenedetect.scene_manager import SceneManager
 from scenedetect.stats_manager import StatsManager, StatsFileCorrupt
 from scenedetect.video_stream import VideoStream, VideoOpenFailure
 
+logger = logging.getLogger('pyscenedetect')
+
 USER_CONFIG = ConfigRegistry()
 
 VERBOSITY_CHOICES = click.Choice(['debug', 'info', 'warning', 'error'])
@@ -78,9 +80,7 @@ class CliContext:
     """
 
     def __init__(self):
-        self.logger = logging.getLogger('pyscenedetect')
         self.config = USER_CONFIG
-
         self.options_processed: bool = False # True when CLI option parsing is complete.
         self.process_input_flag: bool = True # If False, skips video processing.
 
@@ -91,11 +91,11 @@ class CliContext:
 
         # Main `scenedetect` Options
         self.output_directory: str = None        # -o/--output
-        self.quiet_mode: bool = False            # -q/--quiet or -v/--verbosity quiet
+        self.quiet_mode: bool = None             # -q/--quiet or -v/--verbosity quiet
         self.stats_file_path: str = None         # -s/--stats
-        self.drop_short_scenes: bool = False     # --drop-short-scenes
+        self.drop_short_scenes: bool = None      # --drop-short-scenes
         self.min_scene_len: FrameTimecode = None # -m/--min-scene-len
-        self.frame_skip: int = 0                 # -fs/--frame-skip
+        self.frame_skip: int = None              # -fs/--frame-skip
 
         # `time` Command Options
         self.time: bool = False
@@ -105,39 +105,37 @@ class CliContext:
 
         # `save-images` Command Options
         self.save_images: bool = False
-        self.image_extension: str = 'jpg' # save-images -j/--jpeg, -w/--webp, -p/--png
-        self.image_directory: str = None  # save-images -o/--output
-        self.image_param: int = None      # save-images -q/--quality if -j/-w,
-                                          #   otherwise -c/--compression if -p
-        self.image_name_format: str = (   # save-images -f/--name-format
-            '$VIDEO_NAME-Scene-$SCENE_NUMBER-$IMAGE_NUMBER')
-        self.num_images: int = 3          # save-images -n/--num-images
-        self.frame_margin: int = 1        # save-images -m/--frame-margin
-        self.scale: float = None          # save-images -s/--scale
-        self.height: int = None           # save-images -h/--height
-        self.width: int = None            # save-images -w/--width
+        self.image_extension: str = None   # save-images -j/--jpeg, -w/--webp, -p/--png
+        self.image_directory: str = None   # save-images -o/--output
+        self.image_param: int = None       # save-images -q/--quality if -j/-w,
+                                           #   otherwise -c/--compression if -p
+        self.image_name_format: str = None # save-images -f/--name-format
+        self.num_images: int = None        # save-images -n/--num-images
+        self.frame_margin: int = 1         # save-images -m/--frame-margin
+        self.scale: float = None           # save-images -s/--scale
+        self.height: int = None            # save-images -h/--height
+        self.width: int = None             # save-images -w/--width
 
         # `split-video` Command Options
         self.split_video: bool = False
-        self.split_mkvmerge: bool = False # split-video -m/--mkvmerge
-        self.split_args: str = None       # split-video -a/--override-args, -c/--copy
-        self.split_directory: str = None  # split-video -o/--output
-        self.split_name_format: str = (   # split-video -f/--filename
-            '$VIDEO_NAME-Scene-$SCENE_NUMBER')
-        self.split_quiet: bool = False    # split-video -q/--quiet
+        self.split_mkvmerge: bool = None   # split-video -m/--mkvmerge
+        self.split_args: str = None        # split-video -a/--override-args, -c/--copy
+        self.split_directory: str = None   # split-video -o/--output
+        self.split_name_format: str = None # split-video -f/--filename
+        self.split_quiet: bool = None      # split-video -q/--quiet
 
         # `list-scenes` Command Options
         self.list_scenes: bool = False
-        self.print_scene_list: bool = False     # list-scenes -q/--quiet
+        self.print_scene_list: bool = None      # list-scenes -q/--quiet
         self.scene_list_directory: str = None   # list-scenes -o/--output
         self.scene_list_name_format: str = None # list-scenes -f/--filename
-        self.scene_list_output: bool = False    # list-scenes -n/--no-output
-        self.skip_cuts: bool = False            # list-scenes -s/--skip-cuts
+        self.scene_list_output: bool = None     # list-scenes -n/--no-output
+        self.skip_cuts: bool = None             # list-scenes -s/--skip-cuts
 
         # `export-html` Command Options
         self.export_html: bool = False
         self.html_name_format: str = None     # export-html -f/--filename
-        self.html_include_images: bool = True # export-html --no-images
+        self.html_include_images: bool = None # export-html --no-images
         self.image_width: int = None          # export-html -w/--image-width
         self.image_height: int = None         # export-html -h/--image-height
 
@@ -167,7 +165,7 @@ class CliContext:
 
         verbosity = getattr(logging, verbosity.upper()) if verbosity is not None else None
         init_logger(log_level=verbosity, show_stdout=not quiet, log_file=logfile)
-        self.logger.info('PySceneDetect %s', scenedetect.__version__)
+        logger.info('PySceneDetect %s', scenedetect.__version__)
 
         # TODO(#247): Need to set verbosity default to None and allow the case where quiet-mode=True
         # in the config, but -v debug is specified.
@@ -182,16 +180,16 @@ class CliContext:
                 new_config = ConfigRegistry(config)
             except ConfigLoadFailure as ex:
                 for (log_level, log_str) in ex.init_log:
-                    self.logger.log(log_level, log_str)
-                self.logger.error("Failed to load config file!\n")
+                    logger.log(log_level, log_str)
+                logger.error("Failed to load config file!\n")
                 raise click.BadParameter(
                     'Failed to read config file, see log for details.',
                     param_hint='-c/--config') from ex
 
             self.config = new_config
         for (log_level, log_str) in self.config.get_init_log():
-            self.logger.log(log_level, log_str)
-        self.logger.debug("Current configuration:\n%s", str(self.config.config_dict))
+            logger.log(log_level, log_str)
+        logger.debug("Current configuration:\n%s", str(self.config.config_dict))
 
         if stats is not None and frame_skip != 0:
             self.options_processed = False
@@ -199,15 +197,15 @@ class CliContext:
                 'Unable to detect scenes with stats file if frame skip is not 1.',
                 '  Either remove the -fs/--frame-skip option, or the -s/--stats file.\n'
             ]
-            self.logger.error('\n'.join(error_strs))
+            logger.error('\n'.join(error_strs))
             raise click.BadParameter(
                 '\n  Combining the -s/--stats and -fs/--frame-skip options is not supported.',
                 param_hint='frame skip + stats file')
 
         if self.output_directory is not None:
-            self.logger.info('Output directory set:\n  %s', self.output_directory)
+            logger.info('Output directory set:\n  %s', self.output_directory)
 
-        self.logger.debug('Parsing program options.')
+        logger.debug('Parsing program options.')
 
         # Have to load the input video to obtain a time base before parsing timecodes.
         if input_path is None:
@@ -222,7 +220,7 @@ class CliContext:
         if stats_file:
             self._open_stats_file(file_path=stats_file)
 
-        self.logger.debug('Initializing SceneManager.')
+        logger.debug('Initializing SceneManager.')
         self.scene_manager = SceneManager(self.stats_manager)
         if downscale is None:
             self.scene_manager.auto_downscale = True
@@ -231,7 +229,7 @@ class CliContext:
                 self.scene_manager.auto_downscale = False
                 self.scene_manager.downscale = downscale
             except ValueError as ex:
-                self.logger.debug(str(ex))
+                logger.debug(str(ex))
                 raise click.BadParameter(str(ex), param_hint='downscale factor')
         self.options_processed = True
 
@@ -245,7 +243,7 @@ class CliContext:
         """
         if self.video_stream is None:
             if not self._check_input_open_failed:
-                self.logger.error('Error: No input video was specified.')
+                logger.error('Error: No input video was specified.')
             self._check_input_open_failed = True
             raise click.BadParameter('Input video not set.', param_hint='-i/--input')
 
@@ -267,16 +265,15 @@ class CliContext:
             if not backend in AVAILABLE_BACKENDS:
                 raise click.BadParameter(
                     'Specified backend is not available on this system!', param_hint='-b/--backend')
-            self.logger.debug('Using backend: %s / %s', backend,
-                              AVAILABLE_BACKENDS[backend].__name__)
+            logger.debug('Using backend: %s / %s', backend, AVAILABLE_BACKENDS[backend].__name__)
             self.video_stream = AVAILABLE_BACKENDS[backend](input_path, framerate)
             self.base_timecode = self.video_stream.base_timecode
         except VideoOpenFailure as ex:
             dll_okay, dll_name = check_opencv_ffmpeg_dll()
             if dll_okay:
-                self.logger.error('Backend failed to open video: %s', str(ex))
+                logger.error('Backend failed to open video: %s', str(ex))
             else:
-                self.logger.error(
+                logger.error(
                     'Error: OpenCV dependency %s not found.'
                     ' Ensure that you installed the Python OpenCV module, and that the'
                     ' %s file can be found to enable video support.', dll_name, dll_name)
@@ -302,8 +299,8 @@ class CliContext:
         self.stats_file_path = get_and_create_path(file_path, self.output_directory)
         self.stats_manager = StatsManager()
 
-        self.logger.info('Loading frame metrics from stats file: %s',
-                         os.path.basename(self.stats_file_path))
+        logger.info('Loading frame metrics from stats file: %s',
+                    os.path.basename(self.stats_file_path))
         try:
             self.stats_manager.load_from_csv(self.stats_file_path)
         except StatsFileCorrupt:
@@ -313,7 +310,7 @@ class CliContext:
                 ' it is a valid stats file CSV, otherwise delete it and run PySceneDetect'
                 ' again to re-generate the stats file.')
             error_strs = ['Could not load stats file.', 'Failed to parse stats file:', error_info]
-            self.logger.error('\n'.join(error_strs))
+            logger.error('\n'.join(error_strs))
             # pylint: disable=raise-missing-from
             raise click.BadParameter(
                 '\n  Could not load given stats file, see above output for details.',
@@ -335,7 +332,7 @@ class CliContext:
 
         if contains_sequence_or_url(self.video_stream.path):
             error_str = '\nThe save-images command is incompatible with image sequences/URLs.'
-            self.logger.error(error_str)
+            logger.error(error_str)
             raise click.BadParameter(error_str, param_hint='save-images')
 
         num_flags = sum([1 if flag else 0 for flag in [jpeg, webp, png]])
@@ -355,7 +352,7 @@ class CliContext:
                     'To enable this output format, please update the installed version of OpenCV.',
                     'If you build OpenCV, ensure the the proper dependencies are enabled. '
                 ]
-                self.logger.debug('\n'.join(error_strs))
+                logger.debug('\n'.join(error_strs))
                 raise click.BadParameter('\n'.join(error_strs), param_hint='save-images')
 
             self.save_images = True
@@ -374,12 +371,12 @@ class CliContext:
             if self.image_param:
                 image_param_type = 'Compression' if image_type == 'PNG' else 'Quality'
                 image_param_type = ' [%s: %d]' % (image_param_type, self.image_param)
-            self.logger.info('Image output format set: %s%s', image_type, image_param_type)
+            logger.info('Image output format set: %s%s', image_type, image_param_type)
             if self.image_directory is not None:
-                self.logger.info('Image output directory set:\n  %s',
-                                 os.path.abspath(self.image_directory))
+                logger.info('Image output directory set:\n  %s',
+                            os.path.abspath(self.image_directory))
             self.options_processed = options_processed_orig
         else:
-            self.logger.error('Multiple image type flags set for save-images command.')
+            logger.error('Multiple image type flags set for save-images command.')
             raise click.BadParameter(
                 'Only one image type (JPG/PNG/WEBP) can be specified.', param_hint='save-images')

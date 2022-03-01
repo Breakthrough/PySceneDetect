@@ -75,7 +75,7 @@ scene_list = detect('my_video.mp4', ContentDetector())
 split_video_ffmpeg('my_video.mp4', scene_list)
 ```
 
-For more advanced usage, the API is highly configurable, and can easily integrate with any pipeline. This includes using different detection algorithms, splitting the input video, and much more. The following example shows how to implement a function simimlar to `detect_scenes` above, and split the resulting video into individual clips using `ffmpeg`:
+For more advanced usage, the API is highly configurable, and can easily integrate with any pipeline. This includes using different detection algorithms, splitting the input video, and much more. The following example shows how to implement a function similar to the above, but using [the `scenedetect` API](https://pyscenedetect.readthedocs.io/projects/Manual/en/latest/api.html):
 
 ```python
 from scenedetect import open_video, SceneManager, split_video_ffmpeg
@@ -88,7 +88,6 @@ def split_video_into_scenes(video_path, threshold=27.0):
     scene_manager = SceneManager()
     scene_manager.add_detector(
         ContentDetector(threshold=threshold))
-    # Progress bar will only be shown if `tqdm` is installed.
     scene_manager.detect_scenes(video, show_progress=True)
     scene_list = scene_manager.get_scene_list()
     split_video_ffmpeg(video_path, scene_list, show_progress=True)

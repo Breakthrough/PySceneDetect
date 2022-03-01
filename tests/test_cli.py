@@ -113,6 +113,7 @@ def test_cli_list_scenes():
 def test_cli_split_video_ffmpeg():
     assert invoke_scenedetect('-i {VIDEO} -s {STATS} time {TIME} {DETECTOR} split-video') == 0
     assert invoke_scenedetect('-i {VIDEO} -s {STATS} time {TIME} {DETECTOR} split-video -c') == 0
+    assert invoke_scenedetect('-i {VIDEO} -s {STATS} time {TIME} {DETECTOR} split-video -f test$VIDEO_NAME-test$SCENE_NUMBER') == 0
     assert invoke_scenedetect('-i {VIDEO} -s {STATS} time {TIME} {DETECTOR} split-video -c -a "-c:v libx264"')
     # TODO(v0.6): Check for existence of split video files, remove after.
 
@@ -121,7 +122,7 @@ def test_cli_split_video_ffmpeg():
 def test_cli_split_video_mkvmerge():
     assert invoke_scenedetect('-i {VIDEO} -s {STATS} time {TIME} {DETECTOR} split-video -m') == 0
     assert invoke_scenedetect('-i {VIDEO} -s {STATS} time {TIME} {DETECTOR} split-video -m -c') == 0
-    assert invoke_scenedetect('-i {VIDEO} -s {STATS} time {TIME} {DETECTOR} split-video -m -f "test$VIDEO_NAME"')
+    assert invoke_scenedetect('-i {VIDEO} -s {STATS} time {TIME} {DETECTOR} split-video -m -f "test$VIDEO_NAME"') == 0
     assert invoke_scenedetect('-i {VIDEO} -s {STATS} time {TIME} {DETECTOR} split-video -m -a "-c:v libx264"')
     # TODO(v0.6): Check for existence of split video files, remove after.
 

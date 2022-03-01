@@ -135,7 +135,7 @@ def duplicate_command(ctx: click.Context, param_hint: str) -> None:
     error_strs.append('Error: Command %s specified multiple times.' % param_hint)
     error_strs.append('The %s command may appear only one time.')
 
-    ctx.obj.logger.error('\n'.join(error_strs))
+    logger.error('\n'.join(error_strs))
     raise click.BadParameter('\n  Command %s may only be specified once.' % param_hint,
                              param_hint='%s command' % param_hint)
 
@@ -234,10 +234,21 @@ def scenedetect_cli(ctx: click.Context, input, output, framerate, downscale, fra
 
     ctx.call_on_close(lambda: run_scenedetect(ctx.obj))
     ctx.obj.parse_options(
-        input_path=input, output=output, framerate=framerate, stats_file=stats, downscale=downscale,
-        frame_skip=frame_skip, min_scene_len=min_scene_len, drop_short_scenes=drop_short_scenes,
-        backend=backend, quiet=quiet, logfile=logfile, config=config, stats=stats, verbosity=verbosity)
-
+        input_path=input,
+        output=output,
+        framerate=framerate,
+        stats_file=stats,
+        downscale=downscale,
+        frame_skip=frame_skip,
+        min_scene_len=min_scene_len,
+        drop_short_scenes=drop_short_scenes,
+        backend=backend,
+        quiet=quiet,
+        logfile=logfile,
+        config=config,
+        stats=stats,
+        verbosity=verbosity,
+    )
 
 @click.command('help', add_help_option=False)
 @click.argument('command_name', required=False, type=click.STRING)
@@ -355,7 +366,7 @@ def time_command(ctx, start, duration, end):
     ctx.obj.check_input_open()
     frame_rate = ctx.obj.video_stream.frame_rate
 
-    ctx.obj.logger.debug('Setting video time:\n    start: %s, duration: %s, end: %s',
+    logger.debug('Setting video time:\n    start: %s, duration: %s, end: %s',
                     start, duration, end)
 
     options_processed_orig = ctx.obj.options_processed
@@ -390,7 +401,7 @@ def detect_content_command(ctx, threshold, luma_only):
 
     min_scene_len = 0 if ctx.obj.drop_short_scenes else ctx.obj.min_scene_len
     luma_mode_str = '' if not luma_only else ', luma_only mode'
-    ctx.obj.logger.debug('Detecting content, parameters:\n'
+    logger.debug('Detecting content, parameters:\n'
                   '  threshold: %d, min-scene-len: %d%s',
                   threshold, min_scene_len, luma_mode_str)
 
@@ -441,7 +452,7 @@ def detect_adaptive_command(ctx, threshold, min_scene_len, min_delta_hsv,
     min_scene_len = parse_timecode(min_scene_len, ctx.obj.video_stream.frame_rate)
     luma_mode_str = '' if not luma_only else ', luma_only mode'
 
-    ctx.obj.logger.debug('Adaptively detecting content, parameters:\n'
+    logger.debug('Adaptively detecting content, parameters:\n'
                   '  threshold: %d, min-scene-len: %d%s',
                   threshold, min_scene_len, luma_mode_str)
 
@@ -485,7 +496,7 @@ def detect_threshold_command(ctx, threshold, fade_bias, add_last_scene):
 
     min_scene_len = 0 if ctx.obj.drop_short_scenes else ctx.obj.min_scene_len
 
-    ctx.obj.logger.debug('Detecting threshold, parameters:\n'
+    logger.debug('Detecting threshold, parameters:\n'
                   '  threshold: %d, min-scene-len: %d, fade-bias: %d, add-last-scene: %s',
                   threshold, min_scene_len, fade_bias, 'yes' if add_last_scene else 'no')
 
@@ -536,7 +547,7 @@ def export_html_command(ctx, filename, no_images, image_width, image_height):
 
     if filename is not None:
         ctx.obj.html_name_format = filename
-        ctx.obj.logger.info('Scene list html file name format:\n %s', filename)
+        logger.info('Scene list html file name format:\n %s', filename)
     ctx.obj.html_include_images = False if no_images else True
     ctx.obj.image_width = image_width
     ctx.obj.image_height = image_height
@@ -584,10 +595,10 @@ def list_scenes_command(ctx, output, filename, no_output_file, quiet, skip_cuts)
     ctx.obj.scene_list_directory = output
     ctx.obj.scene_list_name_format = filename
     if ctx.obj.scene_list_name_format is not None and not no_output_file:
-        ctx.obj.logger.info('Scene list CSV file name format:\n  %s', ctx.obj.scene_list_name_format)
+        logger.info('Scene list filename format:\n  %s', ctx.obj.scene_list_name_format)
     ctx.obj.scene_list_output = False if no_output_file else True
     if ctx.obj.scene_list_directory is not None:
-        ctx.obj.logger.info('Scene list output directory set:\n  %s', ctx.obj.scene_list_directory)
+        logger.info('Scene list output directory:\n  %s', ctx.obj.scene_list_directory)
     ctx.obj.skip_cuts = skip_cuts
 
     ctx.obj.list_scenes = True
@@ -600,7 +611,7 @@ def list_scenes_command(ctx, output, filename, no_output_file, quiet, skip_cuts)
     type=click.Path(exists=False, dir_okay=True, writable=True, resolve_path=False), help=
     'Output directory to save videos to. Overrides global option -o/--output if set.')
 @click.option(
-    '--filename', '-f', metavar='NAME', default=None,
+    '--filename', '-f', metavar='NAME', default='$VIDEO_NAME-Scene-$SCENE_NUMBER',
     type=click.STRING, show_default=False, help= # TODO(v1.0): Change macros to {}s?
     'File name format to use when saving videos (with or without extension). You can use the'
     ' $VIDEO_NAME and $SCENE_NUMBER macros in the filename (e.g. $VIDEO_NAME-Part-$SCENE_NUMBER).'
@@ -631,8 +642,9 @@ def list_scenes_command(ctx, output, filename, no_output_file, quiet, skip_cuts)
     '--mkvmerge', '-m',
     is_flag=True, flag_value=True, help=
     'Split the video using mkvmerge. Faster than re-encoding, but less precise. The output will'
-    ' be named $VIDEO_NAME-$SCENE_NUMBER.mkv (specifying -f/--filename with -m/--mkvmerge is an'
-    ' error). If set, all options other than -q/--quiet and -o/--output will be ignored.')
+    ' be named $VIDEO_NAME-$SCENE_NUMBER.mkv. If set, all options other than -f/--filename,'
+    ' -q/--quiet and -o/--output will be ignored. Note that mkvmerge automatically appends a'
+    'suffix of "-$SCENE_NUMBER".')
 @click.option(
     '--rate-factor', '-crf', metavar='RATE', default=None, show_default=False,
     type=click.IntRange(0, 100), help=
@@ -669,10 +681,11 @@ def split_video_command(ctx, output, filename, high_quality, override_args, quie
     ## Common Arguments/Options
     ##
     ctx.obj.split_video = True
-    ctx.obj.split_quiet = True if quiet else False
+    ctx.obj.split_quiet = bool(quiet)
     ctx.obj.split_directory = output
     if ctx.obj.split_directory is not None:
-        ctx.obj.logger.info('Video output path set:  \n%s', ctx.obj.split_directory)
+        logger.info('Video output path set:  \n%s', ctx.obj.split_directory)
+    ctx.obj.split_name_format = filename
 
     # Disallow certain combinations of flags.
     if mkvmerge or copy:
@@ -697,19 +710,15 @@ def split_video_command(ctx, output, filename, high_quality, override_args, quie
     ## mkvmerge-Specific Arguments/Options
     ##
     if mkvmerge:
-        if filename:
-            raise click.BadParameter('-f/--filename cannot be specified with -m/--mkvmerge',
-                                     param_hint='split_video')
         if copy:
-            ctx.obj.logger.warning('-c/--copy flag ignored due to -m/--mkvmerge.')
+            logger.warning('-c/--copy flag ignored due to -m/--mkvmerge.')
         ctx.obj.split_mkvmerge = True
-        ctx.obj.logger.info('Using mkvmerge for video splitting.')
+        logger.info('Using mkvmerge for video splitting.')
         return
 
     ##
     ## ffmpeg-Specific Arguments/Options
     ##
-    ctx.obj.split_name_format = '$VIDEO_NAME-Scene-$SCENE_NUMBER' if filename is None else filename
     # TODO: Should add some validation of the name format to ensure it contains at least one variable,
     # otherwise the output will just keep getting overwritten.
 
@@ -723,10 +732,10 @@ def split_video_command(ctx, output, filename, high_quality, override_args, quie
         override_args = ('-c:v libx264 -preset {PRESET} -crf {RATE_FACTOR} -c:a aac'.format(
             PRESET=preset, RATE_FACTOR=rate_factor))
 
-    ctx.obj.logger.info('ffmpeg arguments: %s', override_args)
+    logger.info('ffmpeg arguments: %s', override_args)
     ctx.obj.split_args = override_args
     if filename:
-        ctx.obj.logger.info('Output file name format: %s', filename)
+        logger.info('Output file name format: %s', filename)
 
 
 
