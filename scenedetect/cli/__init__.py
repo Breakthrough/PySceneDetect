@@ -42,9 +42,10 @@ import click
 
 import scenedetect
 from scenedetect.backends import AVAILABLE_BACKENDS
+from scenedetect.cli.config import CONFIG_FILE_PATH, CHOICE_MAP
 from scenedetect.cli.controller import check_split_video_requirements
 from scenedetect.cli.context import (
-    BACKEND_CHOICES, VERBOSITY_CHOICES, CliContext,
+    USER_CONFIG, CliContext,
     # TODO(v0.6): Move usages of these functions inside of CliContext.
     contains_sequence_or_url, parse_timecode)
 from scenedetect.cli.controller import run_scenedetect
@@ -191,9 +192,9 @@ def duplicate_command(ctx: click.Context, param_hint: str) -> None:
     ' to speed up multiple detection runs.')
 @click.option(
     '--verbosity', '-v', metavar='LEVEL',
-    type=click.Choice(['debug', 'info', 'warning', 'error']), default='info', help=
-    'Level of debug/info/error information to show. Will be overriden if `-q`/`--quiet` is set.'
-    ' Must be one of: debug, info, warning, error.')
+    type=click.Choice(CHOICE_MAP['global']['verbosity'], False), default=None, help=
+    'Level of debug/info/error information to show. Overrides `-q`/`--quiet`.'
+    ' Must be one of: debug, info, warning, error.%s' % USER_CONFIG.get_help_string("global", "verbosity"))
 @click.option(
     '--logfile', '-l', metavar='LOG',
     type=click.Path(exists=False, file_okay=True, writable=True, resolve_path=False), help=
@@ -212,9 +213,7 @@ def duplicate_command(ctx: click.Context, param_hint: str) -> None:
 @click.option(
     '--config', '-c', metavar='FILE',
     type=click.Path(exists=False, file_okay=True, readable=True, resolve_path=False), help=
-    'Path to config file. If not set, tries to load `settings.cfg` from one of these paths:'
-    ' on Windows C:/Users/%USERNAME%/AppData/Local/PySceneDetect, on Linux ~/.config/PySceneDetect'
-    ' or in $XDG_CONFIG_HOME, on OSX ~/Library/Preferences/PySceneDetect.')
+    'Path to config file. If not set, tries to load one from %s' % (CONFIG_FILE_PATH))
 @click.pass_context
 # pylint: disable=redefined-builtin
 def scenedetect_cli(ctx: click.Context, input, output, framerate, downscale, frame_skip,

@@ -29,6 +29,9 @@ import pytest
 
 # TODO(v1.0): Test should clean up working directory (create a temp one).
 
+# TODO(v0.6): Need to create a temporary blank file to override the values in the user configuration
+# file if one is on the same system as the one being tested.
+
 SCENEDETECT_CMD = 'python -m scenedetect'
 VIDEO_PATH = 'tests/resources/goldeneye.mp4'
 DEFAULT_STATSFILE = 'statsfile.csv'
@@ -37,7 +40,7 @@ DEFAULT_DETECTOR = 'detect-content'
 ALL_DETECTORS = ['detect-content', 'detect-threshold', 'detect-adaptive']
 
 
-def invoke_scenedetect(args: str = '', **kwargs):
+def invoke_scenedetect(tmp_path, args: str = '', **kwargs):
     """Invokes the scenedetect CLI with the specified arguments and returns the exit code.
     The kwargs are passed to the args format method, for example:
         invoke_scenedetect('-i {VIDEO} {DETECTOR}', video='file.mp4', detector='detect-content')

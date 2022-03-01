@@ -25,24 +25,27 @@ import os.path
 from configparser import ConfigParser
 from typing import Dict, List, Optional, Tuple, Union
 
+import click
+
 from appdirs import user_config_dir
 
 ConfigValue = Union[bool, int, float, str]
 ConfigDict = Dict[str, Dict[str, ConfigValue]]
 
-CONFIG_FILE_NAME = 'scenedetect.conf'
-CONFIG_FILE_DIR = user_config_dir("PySceneDetect", False)
+_CONFIG_FILE_NAME = 'scenedetect.cfg'
+_CONFIG_FILE_DIR = user_config_dir("PySceneDetect", False)
+
+CONFIG_FILE_PATH = os.path.join(_CONFIG_FILE_DIR, _CONFIG_FILE_NAME)
 
 CONFIG_MAP: ConfigDict = {
     'global': {
+        'verbosity': 'info',
         'backend': 'opencv',                                               # NOT DONE
         'downscale': 0,                                                    # NOT DONE
         'drop-short-scenes': False,                                        # NOT DONE
         'frame-skip': 0,                                                   # NOT DONE
         'min-scene-len': '0.6s',                                           # NOT DONE
         'output': '',                                                      # NOT DONE
-        'quiet': False,                                                    # NOT DONE
-        'verbosity': 'info',                                               # NOT DONE
     },
     'detect-content': {
         'luma-only': False,                                                # NOT DONE
@@ -66,7 +69,7 @@ CONFIG_MAP: ConfigDict = {
 CHOICE_MAP: Dict[str, Dict[str, List[str]]] = {
     'global': {
         'backends': ['opencv', 'pyav'],
-        'verbosity': ['debug', 'info', 'warning', 'error'],
+        'verbosity': ['debug', 'info', 'warning', 'error', 'none'],
     },
 }
 """Mapping of options which can only be of a particular set of values."""
@@ -143,7 +146,7 @@ class ConfigRegistry:
     def get_init_log(self):
         """Get initialization log. Consumes the log, so subsequent calls will return None."""
         init_log = self._init_log
-        self._init_log = None
+        self._init_log = []
         return init_log
 
     def _log(self, log_level, log_str):
@@ -152,10 +155,10 @@ class ConfigRegistry:
     def _load_from_disk(self, path=None) -> bool:
         """Tries to find a configuration file and load it."""
         config = ConfigParser()
-        if path is None:
-            path = os.path.join(CONFIG_FILE_DIR, CONFIG_FILE_NAME)
-        result = config.read(path)
+        result = config.read(path if path is not None else CONFIG_FILE_PATH)
         if not result:
+            if path is None:
+                self._log(logging.DEBUG, "No default config file found.")
             return False
         self._log(logging.INFO, "Loading config file:\n%s" % (os.path.abspath(result[0])))
         errors = _validate_structure(config)
@@ -166,6 +169,9 @@ class ConfigRegistry:
                 self._log(logging.ERROR, log_str)
             return False
         return True
+
+    def is_default(self, command: str, option: str) -> bool:
+        return not (command in self._config and option in self._config[command])
 
     def get_value(self, command: str, option: str) -> ConfigValue:
         """Get the current setting or default value of the specified command option."""
@@ -189,8 +195,8 @@ class ConfigRegistry:
                 value_str = 'on' if self._config[command][option] else 'off'
             else:
                 value_str = str(self._config[command][option])
-            return '[setting: %s]' % (value_str)
+            return ' [setting: %s]' % (value_str)
         # Flags do not take values.
         if is_flag:
             return ''
-        return '[default: %s]' % (str(CONFIG_MAP[command][option]))
+        return ' [default: %s]' % (str(CONFIG_MAP[command][option]))

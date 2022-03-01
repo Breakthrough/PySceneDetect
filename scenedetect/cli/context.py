@@ -26,12 +26,12 @@ This module contains :py:class:`CliContext` which encapsulates the command-line 
 from __future__ import print_function
 import logging
 import os
-from typing import Optional, Union
+from typing import Optional, TextIO, Union
 
 import click
 
 from scenedetect.backends import AVAILABLE_BACKENDS
-from scenedetect.cli.config import ConfigRegistry, ConfigLoadFailure
+from scenedetect.cli.config import ConfigRegistry, ConfigLoadFailure, CHOICE_MAP
 from scenedetect.frame_timecode import FrameTimecode, MAX_FPS_DELTA
 import scenedetect.detectors
 from scenedetect.platform import (check_opencv_ffmpeg_dll, get_and_create_path,
@@ -43,9 +43,6 @@ from scenedetect.video_stream import VideoStream, VideoOpenFailure
 logger = logging.getLogger('pyscenedetect')
 
 USER_CONFIG = ConfigRegistry()
-
-VERBOSITY_CHOICES = click.Choice(['debug', 'info', 'warning', 'error'])
-BACKEND_CHOICES = click.Choice([key for key in AVAILABLE_BACKENDS.keys()])
 
 
 def parse_timecode(value: Union[str, int, FrameTimecode], frame_rate: float) -> FrameTimecode:
@@ -142,11 +139,66 @@ class CliContext:
         # Internal variables
         self._check_input_open_failed = False # Used to avoid excessive log messages
 
+    def _initialize(self, config: Optional[str], quiet: Optional[bool], verbosity: Optional[str],
+                    logfile: Optional[TextIO]):
+        """Setup logging and load application configuration file."""
+        self.quiet_mode = bool(quiet)
+        curr_verbosity = logging.INFO
+        # Convert verbosity into it's log level enum, and override quiet mode if set.
+        if verbosity is not None:
+            assert verbosity in CHOICE_MAP['global']['verbosity']
+            if verbosity.lower() == 'none':
+                self.quiet_mode = True
+                verbosity = 'info'
+            else:
+                # Override quiet mode if verbosity is set.
+                self.quiet_mode = False
+            curr_verbosity = getattr(logging, verbosity.upper())
+        else:
+            verbosity_str = USER_CONFIG.get_value('global', 'verbosity')
+            assert verbosity_str in CHOICE_MAP['global']['verbosity']
+            if verbosity_str.lower() == 'none':
+                self.quiet_mode = True
+            else:
+                curr_verbosity = getattr(logging, verbosity_str.upper())
+                # Override quiet mode if verbosity is set.
+                if not USER_CONFIG.is_default('global', 'verbosity'):
+                    self.quiet_mode = False
+
+        init_logger(log_level=curr_verbosity, show_stdout=not self.quiet_mode, log_file=logfile)
+
+        if not self.quiet_mode:
+            for (log_level, log_str) in USER_CONFIG.get_init_log():
+                logger.log(log_level, log_str)
+
+        if config:
+            try:
+                new_config = ConfigRegistry(config)
+                self.config = new_config
+            except ConfigLoadFailure as ex:
+                logger.error('PySceneDetect %s', scenedetect.__version__)
+                for (log_level, log_str) in ex.init_log:
+                    logger.log(log_level, log_str)
+                logger.error("Failed to load config file!\n")
+                raise click.BadParameter(
+                    'Failed to read config file, see log for details.',
+                    param_hint='-c/--config') from ex
+
+            # Re-initialize logger with the correct verbosity.
+            if verbosity is None and not self.config.is_default('global', 'verbosity'):
+                verbosity_str = self.config.get_value('global', 'verbosity')
+                assert verbosity_str in CHOICE_MAP['global']['verbosity']
+                curr_verbosity = getattr(logging, verbosity_str.upper())
+                self.quiet_mode = False
+                init_logger(
+                    log_level=curr_verbosity, show_stdout=not self.quiet_mode, log_file=logfile)
+
+
     def parse_options(self, input_path: str, output: Optional[str], framerate: float,
                       stats_file: Optional[str], downscale: Optional[int], frame_skip: int,
                       min_scene_len: str, drop_short_scenes: bool, backend: str, quiet: bool,
                       logfile: Optional[str], config: Optional[str], stats: Optional[str],
-                      verbosity: str):
+                      verbosity: Optional[str]):
         """ Parse Options: Parses all global options/arguments passed to the main
         scenedetect command, before other sub-commands (e.g. this function processes
         the [options] when calling scenedetect [options] [commands [command options]].
@@ -161,35 +213,20 @@ class CliContext:
         # TODO(v1.0): Make the stats value optional (e.g. allow -s only), and allow use of
         # $VIDEO_NAME macro in the name.  Default to $VIDEO_NAME.csv.
 
-        logging.disable(logging.NOTSET)
+        try:
+            self._initialize(config, quiet, verbosity, logfile)
+        finally:
+            # Make sure we always print the version number even on any kind of init failure.
+            logger.info('PySceneDetect %s', scenedetect.__version__)
+            for (log_level, log_str) in self.config.get_init_log():
+                logger.log(log_level, log_str)
 
-        verbosity = getattr(logging, verbosity.upper()) if verbosity is not None else None
-        init_logger(log_level=verbosity, show_stdout=not quiet, log_file=logfile)
-        logger.info('PySceneDetect %s', scenedetect.__version__)
+        logger.debug("Current configuration:\n%s", str(self.config.config_dict))
+        logger.debug('Parsing program options.')
 
         # TODO(#247): Need to set verbosity default to None and allow the case where quiet-mode=True
         # in the config, but -v debug is specified.
-        self.quiet_mode = True if quiet else False
         self.output_directory = output
-
-        # Replace the user configuration if -c/--config was specified.
-        # TODO: Don't modify USER_CONFIG, just create a new one in CliContext and reference this one
-        # when required.
-        if config:
-            try:
-                new_config = ConfigRegistry(config)
-            except ConfigLoadFailure as ex:
-                for (log_level, log_str) in ex.init_log:
-                    logger.log(log_level, log_str)
-                logger.error("Failed to load config file!\n")
-                raise click.BadParameter(
-                    'Failed to read config file, see log for details.',
-                    param_hint='-c/--config') from ex
-
-            self.config = new_config
-        for (log_level, log_str) in self.config.get_init_log():
-            logger.log(log_level, log_str)
-        logger.debug("Current configuration:\n%s", str(self.config.config_dict))
 
         if stats is not None and frame_skip != 0:
             self.options_processed = False
@@ -204,8 +241,6 @@ class CliContext:
 
         if self.output_directory is not None:
             logger.info('Output directory set:\n  %s', self.output_directory)
-
-        logger.debug('Parsing program options.')
 
         # Have to load the input video to obtain a time base before parsing timecodes.
         if input_path is None:
