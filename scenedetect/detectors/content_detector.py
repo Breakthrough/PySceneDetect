@@ -69,8 +69,13 @@ class ContentDetector(SceneDetector):
         return ContentDetector.METRIC_KEYS
 
     def is_processing_required(self, frame_num):
-        return self.stats_manager is None or (not self.stats_manager.metrics_exist(
-            frame_num, ContentDetector.METRIC_KEYS))
+        if self.stats_manager is None:
+            return False
+        # Note this will always return True on the last frame of a video, but that's fine
+        # as the only side-effect is the frame being decoded. We still don't perform the
+        # calculations for that frame in `process_frame` if the last frame's metrics exist.
+        return not self.stats_manager.metrics_exist(frame_num, ContentDetector.METRIC_KEYS) or (
+            not self.stats_manager.metrics_exist(frame_num + 1, ContentDetector.METRIC_KEYS))
 
     def _calculate_frame_score(self, frame_num: int, curr_hsv: List[numpy.ndarray],
                                last_hsv: List[numpy.ndarray]) -> float:

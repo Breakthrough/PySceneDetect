@@ -796,11 +796,10 @@ class SceneManager:
         try:
             while True:
                 frame_im = None
-                # The following is a hack for ContentDetector since it requires frame deltas.
-                # Ideally this should be handled by the ContentDetector or some configuration
-                # for detectors.
-                if (self._is_processing_required(video.position.frame_num)
-                        or self._is_processing_required(video.position.frame_num + 1)):
+                # We don't do any kind of locking here since the worst-case of this being wrong
+                # is that we do some extra work, and this function should never mutate any data
+                # (all of which should be modified under the GIL).
+                if (self._is_processing_required(video.position.frame_num)):
                     frame_im = video.read()
                     if frame_im is False:
                         break
