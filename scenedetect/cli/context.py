@@ -57,10 +57,10 @@ def parse_timecode(value: Union[str, int, FrameTimecode], frame_rate: float) -> 
         return None
     try:
         return FrameTimecode(timecode=value, fps=frame_rate)
-    except (ValueError, TypeError):
-        #pylint: disable=raise-missing-from
+    except ValueError as ex:
         raise click.BadParameter(
-            'timecode must be in frames (1234), seconds (123.4s), or HH:MM:SS (00:02:03.400)')
+            'timecode must be in frames (1234), seconds (123.4s), or HH:MM:SS (00:02:03.400)'
+        ) from ex
 
 
 def contains_sequence_or_url(video_path: str) -> bool:
@@ -200,32 +200,33 @@ class CliContext:
         # $VIDEO_NAME macro in the name.  Default to $VIDEO_NAME.csv.
 
         try:
-            config_load_failure = False
+            init_failure = False
             init_log = self.config.get_init_log()
             self._initialize(config, quiet, verbosity, logfile)
         except ConfigLoadFailure as ex:
-            config_load_failure = True
+            init_failure = True
             init_log += ex.init_log
         finally:
             # Make sure we always print the version number even on any kind of init failure.
             logger.info('PySceneDetect %s', scenedetect.__version__)
+            init_log += self.config.get_init_log()
             for (log_level, log_str) in init_log:
                 logger.log(log_level, log_str)
                 # We don't raise an exception if the user configuration fails to load, so instead
                 # we look for any errors in the init log.
                 if log_level >= logging.ERROR:
                     init_failure = True
-            if config_load_failure:
+            if init_failure:
                 logger.critical("Error processing configuration file.")
                 raise click.Abort()
 
         logger.debug("Current configuration:\n%s", str(self.config.config_dict))
         logger.debug('Parsing program options.')
 
-        if stats is not None and frame_skip != 0:
+        if stats is not None and frame_skip:
             self.options_processed = False
             error_strs = [
-                'Unable to detect scenes with stats file if frame skip is not 1.',
+                'Unable to detect scenes with stats file if frame skip is not 0.',
                 '  Either remove the -fs/--frame-skip option, or the -s/--stats file.\n'
             ]
             logger.error('\n'.join(error_strs))
@@ -244,9 +245,11 @@ class CliContext:
         if self.output_directory is not None:
             logger.info('Output directory set:\n  %s', self.output_directory)
 
-        self.min_scene_len = parse_timecode(min_scene_len, self.video_stream.frame_rate)
+        self.min_scene_len = parse_timecode(
+            min_scene_len if min_scene_len is not None else self.config.get_value(
+                "global", "min-scene-len").value, self.video_stream.frame_rate)
         self.drop_short_scenes = drop_short_scenes
-        self.frame_skip = frame_skip
+        self.frame_skip = self.config.get_value("global", "frame-skip", frame_skip)
 
         # Open StatsManager if --stats is specified.
         if stats_file:
@@ -254,12 +257,13 @@ class CliContext:
 
         logger.debug('Initializing SceneManager.')
         self.scene_manager = SceneManager(self.stats_manager)
-        if downscale is None:
+        if downscale is None and self.config.is_default("global", "downscale"):
             self.scene_manager.auto_downscale = True
         else:
             try:
                 self.scene_manager.auto_downscale = False
-                self.scene_manager.downscale = downscale
+                self.scene_manager.downscale = self.config.get_value("global", "downscale",
+                                                                     downscale)
             except ValueError as ex:
                 logger.debug(str(ex))
                 raise click.BadParameter(str(ex), param_hint='downscale factor')

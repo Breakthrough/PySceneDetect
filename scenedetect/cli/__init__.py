@@ -167,17 +167,17 @@ def duplicate_command(ctx: click.Context, param_hint: str) -> None:
     ' to width/N x height/N (thus -d 1 implies no downscaling). Leave unset for automatic'
     ' downscaling based on source resolution.')
 @click.option(
-    '--frame-skip', '-fs', metavar='N', show_default=True,
-    type=click.INT, default=0, help=
-    'Skips N frames during processing (-fs 1 skips every other frame, processing 50% of the video,'
-    ' -fs 2 processes 33% of the frames, -fs 3 processes 25%, etc...).'
-    ' Reduces processing speed at expense of accuracy.')
+    '--frame-skip', '-fs', metavar='N',
+    type=click.INT, default=None, help=
+    'Skips N frames during processing (-fs 1 skips every other frame, processing 50%% of the video,'
+    ' -fs 2 processes 33%% of the frames, -fs 3 processes 25%%, etc...).'
+    ' Reduces processing speed at expense of accuracy.%s' % USER_CONFIG.get_help_string("global", "frame-skip"))
 @click.option(
     '--min-scene-len', '-m', metavar='TIMECODE',
-    type=click.STRING, default='0.6s', show_default=True, help=
+    type=click.STRING, default=None, help=
     'Minimum length of any scene. TIMECODE can be specified as exact'
     ' number of frames, a time in seconds followed by s, or a timecode in the'
-    ' format HH:MM:SS or HH:MM:SS.nnn')
+    ' format HH:MM:SS or HH:MM:SS.nnn.%s' % USER_CONFIG.get_help_string("global", "min-scene-len"))
 @click.option(
     '--drop-short-scenes', is_flag=True, flag_value=True, help=
     'Drop scenes shorter than `--min-scene-len` instead of combining them with neighbors')

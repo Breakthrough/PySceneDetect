@@ -26,10 +26,26 @@ from configparser import ConfigParser
 from typing import Dict, List, Optional, Tuple, Union
 
 import click
-
 from appdirs import user_config_dir
 
-ConfigValue = Union[bool, int, float, str]
+from scenedetect.frame_timecode import FrameTimecode
+
+
+class TimecodeValue:
+
+    def __init__(self, value: Union[int, str]):
+        # Ensure value is a valid timecode.
+        FrameTimecode(timecode=value, fps=100.0)
+        self.value = value
+
+    def __repr__(self) -> str:
+        return str(self.value)
+
+    def __str__(self) -> str:
+        return str(self.value)
+
+
+ConfigValue = Union[bool, int, float, str, TimecodeValue]
 ConfigDict = Dict[str, Dict[str, ConfigValue]]
 
 _CONFIG_FILE_NAME = 'scenedetect.cfg'
@@ -40,11 +56,11 @@ CONFIG_FILE_PATH = os.path.join(_CONFIG_FILE_DIR, _CONFIG_FILE_NAME)
 CONFIG_MAP: ConfigDict = {
     'global': {
         'verbosity': 'info',
+        'min-scene-len': TimecodeValue('0.6s'),
+        'downscale': 0,
+        'frame-skip': 0,
         'backend': 'opencv',                                               # NOT DONE
-        'downscale': 0,                                                    # NOT DONE
         'drop-short-scenes': False,                                        # NOT DONE
-        'frame-skip': 0,                                                   # NOT DONE
-        'min-scene-len': '0.6s',                                           # NOT DONE
         'output': '',                                                      # NOT DONE
     },
     'detect-content': {
@@ -66,9 +82,10 @@ CONFIG_MAP: ConfigDict = {
 """Mapping of valid configuration file parameters and their default values."""
 
 # We use a list instead of a set to preserve order when generating error contexts.
+# TODO: This should probably be a type like TimecodeValue rather than a separate constant.
 CHOICE_MAP: Dict[str, Dict[str, List[str]]] = {
     'global': {
-        'backends': ['opencv', 'pyav'],
+        'backend': ['opencv', 'pyav'],
         'verbosity': ['debug', 'info', 'warning', 'error', 'none'],
     },
 }
@@ -108,7 +125,21 @@ def _parse_config(config) -> Tuple[ConfigDict, List[str]]:
                 except ValueError as _:
                     errors.append('Invalid %s value for %s:\n  %s is not a valid %s.' %
                                   (command, option, config.get(command, option), value_type))
+                if value_type:
                     continue
+
+                if isinstance(CONFIG_MAP[command][option], TimecodeValue):
+                    value = config.get(command, option).replace('\n', ' ').strip()
+                    try:
+                        new_value = TimecodeValue(value)
+                        out_map[command][option] = new_value
+                    except ValueError:
+                        errors.append(
+                            'Invalid %s value for %s:\n  %s is not a valid timecode. Timecodes'
+                            ' must be in frames (1234), seconds (123.4s), or HH:MM:SS'
+                            ' (00:02:03.400).' % (command, option, value))
+                    continue
+
                 # If we didn't process the value as a given type, handle it as a string. We also
                 # replace newlines with spaces, and strip any remaining leading/trailing whitespace.
                 if value_type is None:
@@ -177,9 +208,11 @@ class ConfigRegistry:
     def is_default(self, command: str, option: str) -> bool:
         return not (command in self._config and option in self._config[command])
 
-    def get_value(self, command: str, option: str) -> ConfigValue:
+    def get_value(self, command: str, option: str, override: Optional[ConfigValue] = None) -> ConfigValue:
         """Get the current setting or default value of the specified command option."""
         assert command in CONFIG_MAP and option in CONFIG_MAP[command]
+        if override is not None:
+            return override
         if command in self._config and option in self._config[command]:
             return self._config[command][option]
         return CONFIG_MAP[command][option]
