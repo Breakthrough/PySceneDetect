@@ -42,16 +42,12 @@ from scenedetect.video_splitter import (is_mkvmerge_available, is_ffmpeg_availab
 
 logger = logging.getLogger('pyscenedetect')
 
-
-# TODO(v0.6): Move this function and it's associated helper into a separate module, and
-# pass the CliContext in explicitly. That way CliContext is only responsible for processing
-# and validating the specified input options / user configuration, and the actual control
-# flow has it's own place (call it scenedetect.cli.controller).
 def run_scenedetect(context: CliContext):
-    """Run scenedetect: Perform main CLI application control logic.
+    """Perform main CLI application control logic. Run once all command-line options and
+    configuration file options have been validated.
 
     Arguments:
-        context: Validated command-line option context to use for processing.
+        context: Prevalidated command-line option context to use for processing.
     """
     if not context.process_input_flag:
         logger.debug('Skipping processing (process_input_flag is False).')

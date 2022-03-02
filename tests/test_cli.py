@@ -40,7 +40,7 @@ DEFAULT_DETECTOR = 'detect-content'
 ALL_DETECTORS = ['detect-content', 'detect-threshold', 'detect-adaptive']
 
 
-def invoke_scenedetect(tmp_path, args: str = '', **kwargs):
+def invoke_scenedetect(args: str = '', **kwargs):
     """Invokes the scenedetect CLI with the specified arguments and returns the exit code.
     The kwargs are passed to the args format method, for example:
         invoke_scenedetect('-i {VIDEO} {DETECTOR}', video='file.mp4', detector='detect-content')

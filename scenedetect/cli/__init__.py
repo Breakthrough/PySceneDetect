@@ -164,10 +164,8 @@ def duplicate_command(ctx: click.Context, param_hint: str) -> None:
     '--downscale', '-d', metavar='N',
     type=click.INT, default=None, help=
     'Integer factor to downscale frames by (e.g. 2, 3, 4...), where the frame is scaled'
-    ' to width/N x height/N (thus -d 1 implies no downscaling). Each increment speeds up processing'
-    ' by a factor of 4 (e.g. -d 2 is 4 times quicker than -d 1). Higher values can be used for'
-    ' high definition content with minimal effect on accuracy.'
-    ' [default: 2 for SD, 4 for 720p, 6 for 1080p, 12 for 4k]')
+    ' to width/N x height/N (thus -d 1 implies no downscaling). Leave unset for automatic'
+    ' downscaling based on source resolution.')
 @click.option(
     '--frame-skip', '-fs', metavar='N', show_default=True,
     type=click.INT, default=0, help=
@@ -193,18 +191,20 @@ def duplicate_command(ctx: click.Context, param_hint: str) -> None:
 @click.option(
     '--verbosity', '-v', metavar='LEVEL',
     type=click.Choice(CHOICE_MAP['global']['verbosity'], False), default=None, help=
-    'Level of debug/info/error information to show. Overrides `-q`/`--quiet`.'
-    ' Must be one of: debug, info, warning, error.%s' % USER_CONFIG.get_help_string("global", "verbosity"))
+    'Level of debug/info/error information to show. Must be one of: %s.'
+    ' Overrides `-q`/`--quiet`. Use `-v debug` for bug reports.%s' % (
+        ', '.join(CHOICE_MAP["global"]["verbosity"]),
+        USER_CONFIG.get_help_string("global", "verbosity")))
 @click.option(
     '--logfile', '-l', metavar='LOG',
     type=click.Path(exists=False, file_okay=True, writable=True, resolve_path=False), help=
     'Path to log file for writing application logging information, mainly for debugging.'
-    ' Make sure to set `-v debug` as well if you are submitting a bug report.')
+    ' Set `-v debug` as well if you are submitting a bug report. If verbosity is none, logfile'
+    ' is still be generated with info-level verbosity.')
 @click.option(
     '--quiet', '-q',
     is_flag=True, flag_value=True, help=
-    'Suppresses all output of PySceneDetect to the terminal/stdout. If a logfile is'
-    ' specified, it will still be generated with the specified verbosity.')
+    'Suppresses all output of PySceneDetect to the terminal/stdout. Equivalent to `-v none`.')
 @click.option(
     '--backend', '-b', metavar='BACKEND', show_default=True,
     type=click.Choice([key for key in AVAILABLE_BACKENDS.keys()]), default='opencv', help=
@@ -212,7 +212,7 @@ def duplicate_command(ctx: click.Context, param_hint: str) -> None:
         [key for key in AVAILABLE_BACKENDS.keys()]))
 @click.option(
     '--config', '-c', metavar='FILE',
-    type=click.Path(exists=False, file_okay=True, readable=True, resolve_path=False), help=
+    type=click.Path(exists=True, file_okay=True, readable=True, resolve_path=False), help=
     'Path to config file. If not set, tries to load one from %s' % (CONFIG_FILE_PATH))
 @click.pass_context
 # pylint: disable=redefined-builtin

@@ -155,12 +155,16 @@ class ConfigRegistry:
     def _load_from_disk(self, path=None) -> bool:
         """Tries to find a configuration file and load it."""
         config = ConfigParser()
-        result = config.read(path if path is not None else CONFIG_FILE_PATH)
+        config_file_path = path if path is not None else CONFIG_FILE_PATH
+        result = config.read(config_file_path)
         if not result:
-            if path is None:
-                self._log(logging.DEBUG, "No default config file found.")
+            if not os.path.exists(config_file_path):
+                self._log(logging.DEBUG,
+                          "User config file not found (path: %s)" % (config_file_path))
+            else:
+                self._log(logging.ERROR, "Failed to read config file.")
             return False
-        self._log(logging.INFO, "Loading config file:\n%s" % (os.path.abspath(result[0])))
+        self._log(logging.INFO, "Loading config from file:\n%s" % (os.path.abspath(result[0])))
         errors = _validate_structure(config)
         if not errors:
             self._config, errors = _parse_config(config)

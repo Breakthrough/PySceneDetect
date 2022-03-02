@@ -167,23 +167,10 @@ class CliContext:
 
         init_logger(log_level=curr_verbosity, show_stdout=not self.quiet_mode, log_file=logfile)
 
-        if not self.quiet_mode:
-            for (log_level, log_str) in USER_CONFIG.get_init_log():
-                logger.log(log_level, log_str)
-
+        # Configuration file was specified via CLI argument -c/--config.
         if config:
-            try:
-                new_config = ConfigRegistry(config)
-                self.config = new_config
-            except ConfigLoadFailure as ex:
-                logger.error('PySceneDetect %s', scenedetect.__version__)
-                for (log_level, log_str) in ex.init_log:
-                    logger.log(log_level, log_str)
-                logger.error("Failed to load config file!\n")
-                raise click.BadParameter(
-                    'Failed to read config file, see log for details.',
-                    param_hint='-c/--config') from ex
-
+            new_config = ConfigRegistry(config)
+            self.config = new_config
             # Re-initialize logger with the correct verbosity.
             if verbosity is None and not self.config.is_default('global', 'verbosity'):
                 verbosity_str = self.config.get_value('global', 'verbosity')
@@ -192,7 +179,6 @@ class CliContext:
                 self.quiet_mode = False
                 init_logger(
                     log_level=curr_verbosity, show_stdout=not self.quiet_mode, log_file=logfile)
-
 
     def parse_options(self, input_path: str, output: Optional[str], framerate: float,
                       stats_file: Optional[str], downscale: Optional[int], frame_skip: int,
@@ -214,19 +200,27 @@ class CliContext:
         # $VIDEO_NAME macro in the name.  Default to $VIDEO_NAME.csv.
 
         try:
+            config_load_failure = False
+            init_log = self.config.get_init_log()
             self._initialize(config, quiet, verbosity, logfile)
+        except ConfigLoadFailure as ex:
+            config_load_failure = True
+            init_log += ex.init_log
         finally:
             # Make sure we always print the version number even on any kind of init failure.
             logger.info('PySceneDetect %s', scenedetect.__version__)
-            for (log_level, log_str) in self.config.get_init_log():
+            for (log_level, log_str) in init_log:
                 logger.log(log_level, log_str)
+                # We don't raise an exception if the user configuration fails to load, so instead
+                # we look for any errors in the init log.
+                if log_level >= logging.ERROR:
+                    init_failure = True
+            if config_load_failure:
+                logger.critical("Error processing configuration file.")
+                raise click.Abort()
 
         logger.debug("Current configuration:\n%s", str(self.config.config_dict))
         logger.debug('Parsing program options.')
-
-        # TODO(#247): Need to set verbosity default to None and allow the case where quiet-mode=True
-        # in the config, but -v debug is specified.
-        self.output_directory = output
 
         if stats is not None and frame_skip != 0:
             self.options_processed = False
@@ -239,13 +233,16 @@ class CliContext:
                 '\n  Combining the -s/--stats and -fs/--frame-skip options is not supported.',
                 param_hint='frame skip + stats file')
 
-        if self.output_directory is not None:
-            logger.info('Output directory set:\n  %s', self.output_directory)
-
-        # Have to load the input video to obtain a time base before parsing timecodes.
+        # Handle the case where -i/--input was not specified (e.g. for the `help` command).
         if input_path is None:
             return
+
+        # Have to load the input video to obtain a time base before parsing timecodes.
         self._init_video_stream(input_path=input_path, framerate=framerate, backend=backend)
+
+        self.output_directory = output
+        if self.output_directory is not None:
+            logger.info('Output directory set:\n  %s', self.output_directory)
 
         self.min_scene_len = parse_timecode(min_scene_len, self.video_stream.frame_rate)
         self.drop_short_scenes = drop_short_scenes
