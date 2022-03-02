@@ -95,11 +95,11 @@ def _validate_structure(config) -> List[str]:
     errors: List[str] = []
     for section in config.sections():
         if not section in CONFIG_MAP.keys():
-            errors.append('Error: Unknown section: %s' % (section))
+            errors.append('Unsupported config section: [%s]' % (section))
             continue
         for (option_name, _) in config.items(section):
             if not option_name in CONFIG_MAP[section].keys():
-                errors.append('Error: Unknown %s option: %s' % (section, option_name))
+                errors.append('Unsupported config option in [%s]: %s' % (section, option_name))
     return errors
 
 
@@ -207,7 +207,10 @@ class ConfigRegistry:
     def is_default(self, command: str, option: str) -> bool:
         return not (command in self._config and option in self._config[command])
 
-    def get_value(self, command: str, option: str, override: Optional[ConfigValue] = None) -> ConfigValue:
+    def get_value(self,
+                  command: str,
+                  option: str,
+                  override: Optional[ConfigValue] = None) -> ConfigValue:
         """Get the current setting or default value of the specified command option."""
         assert command in CONFIG_MAP and option in CONFIG_MAP[command]
         if override is not None:
@@ -232,7 +235,7 @@ class ConfigRegistry:
             else:
                 value_str = str(self._config[command][option])
             return ' [setting: %s]' % (value_str)
-        # Flags do not take values.
+        # Flags are implicitly off by default, so we don't print defaults for them.
         if is_flag:
             return ''
         return ' [default: %s]' % (str(CONFIG_MAP[command][option]))

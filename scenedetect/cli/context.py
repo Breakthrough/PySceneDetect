@@ -180,20 +180,18 @@ class CliContext:
                 init_logger(
                     log_level=curr_verbosity, show_stdout=not self.quiet_mode, log_file=logfile)
 
-    def parse_options(self, input_path: str, output: Optional[str], framerate: float,
-                      stats_file: Optional[str], downscale: Optional[int], frame_skip: int,
-                      min_scene_len: str, drop_short_scenes: bool, backend: Optional[str],
-                      quiet: bool, logfile: Optional[str], config: Optional[str],
-                      stats: Optional[str], verbosity: Optional[str]):
-        """ Parse Options: Parses all global options/arguments passed to the main
-        scenedetect command, before other sub-commands (e.g. this function processes
-        the [options] when calling scenedetect [options] [commands [command options]].
-
-        This method calls the _init_video_stream(), _open_stats_file(), and
-        check_input_open() methods, which may raise a click.BadParameter exception.
+    def handle_options(self, input_path: str, output: Optional[str], framerate: float,
+                       stats_file: Optional[str], downscale: Optional[int], frame_skip: int,
+                       min_scene_len: str, drop_short_scenes: bool, backend: Optional[str],
+                       quiet: bool, logfile: Optional[str], config: Optional[str],
+                       stats: Optional[str], verbosity: Optional[str]):
+        """Parses all global options/arguments passed to the main scenedetect command, before other
+        sub-commands (e.g. this function processes the [options] when calling `scenedetect [options]
+        [commands [command options]]`).
 
         Raises:
-            click.BadParameter
+            click.BadParameter: One of the given options/parameters is invalid.
+            click.Abort: Fatal initialization failure.
         """
 
         # TODO(v1.0): Make the stats value optional (e.g. allow -s only), and allow use of
@@ -273,13 +271,13 @@ class CliContext:
                 raise click.BadParameter(str(ex), param_hint='downscale factor')
         self.options_processed = True
 
-    def check_input_open(self):
-        # type: () -> None
+    def check_input_open(self) -> None:
         """Ensure self.video_stream was initialized (i.e. -i/--input was specified),
-        otherwise raises an exception.
+        otherwise raises an exception. Should only be used from commands that require an
+        input video to process the options (e.g. those that require a timecode).
 
         Raises:
-            click.BadParameter if self.video_stream was not initialized.
+            click.BadParameter: self.video_stream was not initialized.
         """
         if self.video_stream is None:
             if not self._check_input_open_failed:
@@ -287,6 +285,19 @@ class CliContext:
             self._check_input_open_failed = True
             raise click.BadParameter('Input video not set.', param_hint='-i/--input')
 
+    def handle_detect_content(self, threshold: Optional[float], luma_only: bool):
+        """Handles detect-content options."""
+        min_scene_len = 0 if self.drop_short_scenes else self.min_scene_len
+        threshold = self.config.get_value("detect-content", "threshold", threshold)
+        luma_only = luma_only or self.config.get_value("detect-content", "luma-only")
+        logger.debug(
+            'Adding detector: ContentDetector(threshold=%f, min_scene_len=%d, luma_only=%s)',
+            threshold, min_scene_len, luma_only)
+        self.add_detector(
+            scenedetect.detectors.ContentDetector(
+                threshold=threshold, min_scene_len=min_scene_len, luma_only=luma_only))
+
+    # TODO(v0.6): Make this a private method.
     def add_detector(self, detector):
         """ Add Detector: Adds a detection algorithm to the CliContext's SceneManager. """
         self.check_input_open()

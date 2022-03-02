@@ -180,7 +180,9 @@ def duplicate_command(ctx: click.Context, param_hint: str) -> None:
     ' format HH:MM:SS or HH:MM:SS.nnn.%s' % USER_CONFIG.get_help_string("global", "min-scene-len"))
 @click.option(
     '--drop-short-scenes', is_flag=True, flag_value=True, help=
-    'Drop scenes shorter than `--min-scene-len` instead of combining them with neighbors')
+    'Drop scenes shorter than `--min-scene-len` instead of combining them with neighbors.%s' % (
+        USER_CONFIG.get_help_string('global', 'drop-short-scenes')
+    ))
 @click.option(
     '--stats', '-s', metavar='CSV',
     type=click.Path(exists=False, file_okay=True, writable=True, resolve_path=False), help=
@@ -208,8 +210,8 @@ def duplicate_command(ctx: click.Context, param_hint: str) -> None:
 @click.option(
     '--backend', '-b', metavar='BACKEND', show_default=True,
     type=click.Choice(CHOICE_MAP["global"]["backend"]), default=None, help=
-    'Name of backend to use. Backends available on this system: %s%s' % (str(
-        [key for key in AVAILABLE_BACKENDS.keys()]), USER_CONFIG.get_help_string("global", "backend")))
+    'Name of backend to use for video input. Backends available on this system: %s%s' % (
+        str(AVAILABLE_BACKENDS.keys()), USER_CONFIG.get_help_string("global", "backend")))
 @click.option(
     '--config', '-c', metavar='FILE',
     type=click.Path(exists=True, file_okay=True, readable=True, resolve_path=False), help=
@@ -230,9 +232,8 @@ def scenedetect_cli(ctx: click.Context, input, output, framerate, downscale, fra
 
     """
     assert isinstance(ctx.obj, CliContext)
-
     ctx.call_on_close(lambda: run_scenedetect(ctx.obj))
-    ctx.obj.parse_options(
+    ctx.obj.handle_options(
         input_path=input,
         output=output,
         framerate=framerate,
@@ -255,7 +256,6 @@ def scenedetect_cli(ctx: click.Context, input, output, framerate, downscale, fra
 def help_command(ctx, command_name):
     """Print help for command (help [command])."""
     assert isinstance(ctx.obj, CliContext)
-
     ctx.obj.process_input_flag = False
     if command_name is not None:
         if command_name.lower() == 'all':
@@ -297,7 +297,6 @@ def help_command(ctx, command_name):
 def about_command(ctx):
     """ Print license/copyright info. """
     assert isinstance(ctx.obj, CliContext)
-
     ctx.obj.process_input_flag = False
     click.echo(click.style('----------------------------------------------------', fg='cyan'))
     click.echo(click.style(' About PySceneDetect %s' % scenedetect.__version__, fg='yellow'))
@@ -312,7 +311,6 @@ def about_command(ctx):
 def version_command(ctx):
     """ Print version of PySceneDetect. """
     assert isinstance(ctx.obj, CliContext)
-
     ctx.obj.process_input_flag = False
     click.echo(click.style('PySceneDetect %s' % scenedetect.__version__, fg='yellow'))
     ctx.exit()
@@ -381,13 +379,15 @@ def time_command(ctx, start, duration, end):
 @click.command('detect-content')
 @click.option(
     '--threshold', '-t', metavar='VAL',
-    type=click.FLOAT, default=27.0, show_default=True, help=
+    type=click.FLOAT, default=None, help=
     'Threshold value (float) that the content_val frame metric must exceed to trigger a new scene.'
-    ' Refers to frame metric content_val in stats file.')
+    ' Refers to frame metric content_val in stats file.%s' % (
+        USER_CONFIG.get_help_string("detect-content", "threshold")))
 @click.option(
     '--luma-only', '-l',
     is_flag=True, flag_value=True, help=
-    'Only consider luma/brightness channel (useful for greyscale videos).')
+    'Only consider luma/brightness channel (useful for greyscale videos).%s' % (
+        USER_CONFIG.get_help_string("detect-content", "luma-only")))
 @click.pass_context
 def detect_content_command(ctx, threshold, luma_only):
     """ Perform content detection algorithm on input video(s).
@@ -397,18 +397,8 @@ def detect_content_command(ctx, threshold, luma_only):
     detect-content --threshold 27.5
     """
     assert isinstance(ctx.obj, CliContext)
+    ctx.obj.handle_detect_content(threshold=threshold, luma_only=luma_only)
 
-    min_scene_len = 0 if ctx.obj.drop_short_scenes else ctx.obj.min_scene_len
-    luma_mode_str = '' if not luma_only else ', luma_only mode'
-    logger.debug('Detecting content, parameters:\n'
-                  '  threshold: %d, min-scene-len: %d%s',
-                  threshold, min_scene_len, luma_mode_str)
-
-    # Initialize detector and add to scene manager.
-    # Need to ensure that a detector is not added twice, or will cause
-    # a frame metric key error when registering the detector.
-    ctx.obj.add_detector(scenedetect.detectors.ContentDetector(
-        threshold=threshold, min_scene_len=min_scene_len, luma_only=luma_only))
 
 
 @click.command('detect-adaptive')
