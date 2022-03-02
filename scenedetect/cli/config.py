@@ -25,7 +25,6 @@ import os.path
 from configparser import ConfigParser
 from typing import Dict, List, Optional, Tuple, Union
 
-import click
 from appdirs import user_config_dir
 
 from scenedetect.frame_timecode import FrameTimecode
@@ -59,9 +58,9 @@ CONFIG_MAP: ConfigDict = {
         'min-scene-len': TimecodeValue('0.6s'),
         'downscale': 0,
         'frame-skip': 0,
-        'backend': 'opencv',                                               # NOT DONE
-        'drop-short-scenes': False,                                        # NOT DONE
-        'output': '',                                                      # NOT DONE
+        'backend': 'opencv',
+        'drop-short-scenes': False,
+        'output': '',
     },
     'detect-content': {
         'luma-only': False,                                                # NOT DONE
@@ -123,7 +122,7 @@ def _parse_config(config) -> Tuple[ConfigDict, List[str]]:
                         value_type = 'number'
                         out_map[command][option] = config.getfloat(command, option)
                 except ValueError as _:
-                    errors.append('Invalid %s value for %s:\n  %s is not a valid %s.' %
+                    errors.append('Invalid [%s] value for %s: %s is not a valid %s.' %
                                   (command, option, config.get(command, option), value_type))
                 if value_type:
                     continue
@@ -135,7 +134,7 @@ def _parse_config(config) -> Tuple[ConfigDict, List[str]]:
                         out_map[command][option] = new_value
                     except ValueError:
                         errors.append(
-                            'Invalid %s value for %s:\n  %s is not a valid timecode. Timecodes'
+                            'Invalid [%s] value for %s: %s is not a valid timecode. Timecodes'
                             ' must be in frames (1234), seconds (123.4s), or HH:MM:SS'
                             ' (00:02:03.400).' % (command, option, value))
                     continue
@@ -146,7 +145,7 @@ def _parse_config(config) -> Tuple[ConfigDict, List[str]]:
                     config_value = config.get(command, option).replace('\n', ' ').strip()
                     if command in CHOICE_MAP and option in CHOICE_MAP[command]:
                         if config_value.lower() not in CHOICE_MAP[command][option]:
-                            errors.append('Invalid %s value for %s:\n  %s must be one of: %s.' %
+                            errors.append('Invalid [%s] value for %s: %s. Must be one of: %s.' %
                                           (command, option, config.get(command, option), ', '.join(
                                               choice for choice in CHOICE_MAP[command][option])))
                             continue

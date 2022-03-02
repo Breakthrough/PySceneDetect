@@ -182,9 +182,9 @@ class CliContext:
 
     def parse_options(self, input_path: str, output: Optional[str], framerate: float,
                       stats_file: Optional[str], downscale: Optional[int], frame_skip: int,
-                      min_scene_len: str, drop_short_scenes: bool, backend: str, quiet: bool,
-                      logfile: Optional[str], config: Optional[str], stats: Optional[str],
-                      verbosity: Optional[str]):
+                      min_scene_len: str, drop_short_scenes: bool, backend: Optional[str],
+                      quiet: bool, logfile: Optional[str], config: Optional[str],
+                      stats: Optional[str], verbosity: Optional[str]):
         """ Parse Options: Parses all global options/arguments passed to the main
         scenedetect command, before other sub-commands (e.g. this function processes
         the [options] when calling scenedetect [options] [commands [command options]].
@@ -239,16 +239,20 @@ class CliContext:
             return
 
         # Have to load the input video to obtain a time base before parsing timecodes.
-        self._init_video_stream(input_path=input_path, framerate=framerate, backend=backend)
+        self._init_video_stream(
+            input_path=input_path,
+            framerate=framerate,
+            backend=self.config.get_value("global", "backend", backend))
 
-        self.output_directory = output
-        if self.output_directory is not None:
+        self.output_directory = output if output else self.config.get_value("global", "output")
+        if self.output_directory:
             logger.info('Output directory set:\n  %s', self.output_directory)
 
         self.min_scene_len = parse_timecode(
             min_scene_len if min_scene_len is not None else self.config.get_value(
                 "global", "min-scene-len").value, self.video_stream.frame_rate)
-        self.drop_short_scenes = drop_short_scenes
+        self.drop_short_scenes = drop_short_scenes or self.config.get_value(
+            "global", "drop-short-scenes")
         self.frame_skip = self.config.get_value("global", "frame-skip", frame_skip)
 
         # Open StatsManager if --stats is specified.

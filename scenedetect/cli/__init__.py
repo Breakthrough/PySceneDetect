@@ -207,9 +207,9 @@ def duplicate_command(ctx: click.Context, param_hint: str) -> None:
     'Suppresses all output of PySceneDetect to the terminal/stdout. Equivalent to `-v none`.')
 @click.option(
     '--backend', '-b', metavar='BACKEND', show_default=True,
-    type=click.Choice([key for key in AVAILABLE_BACKENDS.keys()]), default='opencv', help=
-    'Name of backend to use. Backends available on this system: %s' % str(
-        [key for key in AVAILABLE_BACKENDS.keys()]))
+    type=click.Choice(CHOICE_MAP["global"]["backend"]), default=None, help=
+    'Name of backend to use. Backends available on this system: %s%s' % (str(
+        [key for key in AVAILABLE_BACKENDS.keys()]), USER_CONFIG.get_help_string("global", "backend")))
 @click.option(
     '--config', '-c', metavar='FILE',
     type=click.Path(exists=True, file_okay=True, readable=True, resolve_path=False), help=
