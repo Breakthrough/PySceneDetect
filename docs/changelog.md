@@ -14,17 +14,17 @@ The main goal of v0.6 was to simplify and stabalize the video input and statsfil
 
 #### Changelog
 
-**General changes:**
+**Overview:**
 
  * Support for Python 2.7 has been dropped, minimum supported Python version is 3.6
  * Support for OpenCV 2.x has been dropped, minimum OpenCV version is 3.x
  * Decoding now runs in parallel with detection resulting in significant performance improvements
+ * Adds support for multiple video backends, PyAV is now supported in addition to OpenCV
  * Breaking API changes to `VideoManager` (replaced with `VideoStream`), `StatsManager`, and `save_images()`
     * See the [Migration Guide](https://pyscenedetect.readthedocs.io/projects/Manual/en/v0.6/api/migration_guide.html) for details on how to update from v0.5.x
  * Besides critical bugfixes, this marks the end of development for PySceneDetect v0.5
- * Adds support for multiple video backends to improve both performance and accuracy
 
-**Command-line changes:**
+**Command-Line Changes:**
 
  * `-i`/`--input` may no longer be specified multiple times (use an external tool like `ffmpeg` to perform concatenation first)
  * New `-b`/`--backend` option can be set to use a specific video backend
@@ -32,24 +32,25 @@ The main goal of v0.6 was to simplify and stabalize the video input and statsfil
      * Run `scenedetect help` to see a list of backends available on the current system
  * `-v`/`--verbosity` now takes precedence over `-q`/`--quiet`
  * `detect-content` command:
-     * The default threshold value `-t`/`--threshold` has been lowered to 27 and is now slightly more sensitive to shot changes ([#246](https://github.com/Breakthrough/PySceneDetect/issues/246))
+     * Default threshold `-t`/`--threshold` lowered to 27 to be more sensitive to shot changes ([#246](https://github.com/Breakthrough/PySceneDetect/issues/246))
  * `detect-threshold` command:
-     * The `-p`/`--min-percent` and `-b`/`--block-size` arguments have been removed
+     * `-p`/`--min-percent` and `-b`/`--block-size` have been removed
  * `split-video` command:
-     * The `-c`/`--copy` flag now uses `ffmpeg` stream copying mode instead of `mkvmerge`
-     * The new `-m`/`--mkvmerge` flag specifies to use `mkvmerge` instead of `ffmpeg`
+     * Long name for `-a` has been changed to `--args` (from `--override-args`)
+     * `-c`/`--copy` now uses `ffmpeg` instead of `mkvmerge`
+     * New `-m`/`--mkvmerge` flag can be set to use `mkvmerge` instead of `ffmpeg`
 
-**API changes:**
+**API Changes:**
 
  * New `VideoStream` replaces `VideoManager` and supports both OpenCV (`VideoStreamCv2`) and PyAV (`VideoStreamAv`) backends ([#213](https://github.com/Breakthrough/PySceneDetect/issues/213))
     * Improves video seeking invariants, especially around defining what frames 0 and 1 mean for different time properties (`frame_number` is 1-based whereas `position` is 0-based to align with PTS)
     * See `test_time_invariants` in `tests/test_video_stream.py` as a reference for specific behaviours of these properties, and a test video detailing visually what is expected
     * Both command-line and public-facing API outputs still retain 0-based frame numbers (this will be changed in v1.0)
  * Changes to `SceneManager`:
-    * Now handles frame downscaling, see the `downscale` and `auto_downscale` properties
-    * `detect_scenes()` no longer displays a progress bar by default (set `show_progress=True` to restore the previous behaviour)
+    * `SceneManager` is now responsible for frame downscaling (see the `downscale` and `auto_downscale` properties)
     * `detect_scenes()` now performs video decoding in a background thread which greatly improves performance in many cases
-    * `clear()` now also clears any detectors, as detectors are stateful
+    * `clear()` now also clears any
+    * `detect_scenes()` no longer displays a progress bar by default (set `show_progress=True` to restore the previous behaviour)detectors, as detectors are stateful
     * `get_scene_list()` now returns an empty list if there are no detected cuts (previously one scene with the duration of the video was returned)
         * To restore the previous behaviour, specify `start_in_scene=True`
         * Command-line output is unaffected, and still reports 1 scene spanning the entire video if no cuts were found

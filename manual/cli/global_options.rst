@@ -37,7 +37,7 @@ Overview
 
 The options in this section represent the "global" arguments for the
 main ``scenedetect`` command. The most commonly used options are the
-input video(s)
+input video
 (`--input video.mp4`), the output directory (`--output video_out`), and
 the stats file to use (`--stats video.stats.csv`).
 

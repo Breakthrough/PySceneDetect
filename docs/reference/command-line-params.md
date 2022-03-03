@@ -119,8 +119,8 @@ Commands:
   help              Print help for command (help [command]).
   list-scenes       Prints scene list and outputs to a CSV file.
   save-images       Create images for each detected scene.
-  split-video       Split input video(s) using ffmpeg or...
-  time              Set start/end/duration of input video(s).
+  split-video       Split input video using ffmpeg or...
+  time              Set start/end/duration of input video.
   version           Print version of PySceneDetect.
 ```
 
@@ -132,7 +132,7 @@ PySceneDetect time Command
 ----------------------------------------------------
 Usage: scenedetect time [OPTIONS]
 
-  Set start/end/duration of input video(s).
+  Set start/end/duration of input video.
 
   Time values can be specified as frames (NNNN), seconds (NNNN.NNs), or as a
   timecode (HH:MM:SS.nnn). For example, to start scene detection at 1
@@ -170,7 +170,7 @@ PySceneDetect detect-content Command
 ----------------------------------------------------
 Usage: scenedetect detect-content [OPTIONS]
 
-  Perform content detection algorithm on input video(s).
+  Perform content detection algorithm on input video.
 
   detect-content
 
@@ -192,7 +192,7 @@ PySceneDetect detect-threshold Command
 ----------------------------------------------------
 Usage: scenedetect detect-threshold [OPTIONS]
 
-  Perform threshold detection algorithm on input video(s).
+  Perform threshold detection algorithm on input video.
 
   detect-threshold
 
@@ -280,22 +280,22 @@ Options:
                         size. [default: 3]  [0<=x<=9]
   -m, --frame-margin N  Number of frames to ignore at the beginning and end of
                         scenes when saving images [default: 1]
-  -s  --scale S         Optional factor by which saved images are rescaled. A 
-                        scaling factor of 1 would not result in rescaling. A 
-                        value <1 results in a smaller saved image, while a 
-                        value >1 results in an image larger than the original. 
-                        This value is ignored if either the height, -h, or 
+  -s  --scale S         Optional factor by which saved images are rescaled. A
+                        scaling factor of 1 would not result in rescaling. A
+                        value <1 results in a smaller saved image, while a
+                        value >1 results in an image larger than the original.
+                        This value is ignored if either the height, -h, or
                         width, -w, values are specified.
-  -h  --height H        Optional value for the height of the saved images. 
-                        Specifying both the height and width, -w, will resize 
-                        images to an exact size, regardless of aspect ratio. 
-                        Specifying only height will rescale the image to that 
-                        number of pixels in height while preserving the aspect 
+  -h  --height H        Optional value for the height of the saved images.
+                        Specifying both the height and width, -w, will resize
+                        images to an exact size, regardless of aspect ratio.
+                        Specifying only height will rescale the image to that
+                        number of pixels in height while preserving the aspect
                         ratio.
-  -w  --width W         Optional value for the width of the saved images. 
-                        Specifying both the width and height, -h, will resize 
-                        images to an exact size, regardless of aspect ratio. 
-                        Specifying only width will rescale the image to that 
+  -w  --width W         Optional value for the width of the saved images.
+                        Specifying both the width and height, -h, will resize
+                        images to an exact size, regardless of aspect ratio.
+                        Specifying only width will rescale the image to that
                         number of pixels wide while preserving the aspect ratio.
 ```
 
@@ -307,7 +307,7 @@ PySceneDetect split-video Command
 ----------------------------------------------------
 Usage: scenedetect split-video [OPTIONS]
 
-  Split input video(s) using ffmpeg or mkvmerge.
+  Split input video using ffmpeg or mkvmerge.
 
 Options:
   -o, --output DIR          Output directory to save videos to. Overrides
@@ -320,12 +320,13 @@ Options:
   -h, --high-quality        Encode video with higher quality, overrides -f
                             option if present. Equivalent to specifying
                             --rate-factor 17 and --preset slow.
-  -a, --override-args ARGS  Override codec arguments/options passed to FFmpeg
+  -a, --args ARGS  Override codec arguments/options passed to FFmpeg
                             when splitting and re-encoding scenes. Use double
                             quotes (") around specified arguments. Must
-                            specify at least audio/video codec to use (e.g. -a
-                            "-c:v [...] and -c:a [...]"). [default: "-c:v
-                            libx264 -preset veryfast -crf 22 -c:a copy"]
+                            specify at least audio/video codec to use
+                            (e.g. -a "-c:v [...] and -c:a [...]").
+                            [default: "-c:v libx264 -preset veryfast
+                            -crf 22 -c:a copy"]
   -q, --quiet               Suppresses output from external video splitting
                             tool.
   -c, --copy                Copy instead of re-encode using mkvmerge instead

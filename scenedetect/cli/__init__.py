@@ -337,7 +337,7 @@ def version_command(ctx):
     ' arguments. Mutually exclusive with --duration / -d.')
 @click.pass_context
 def time_command(ctx, start, duration, end):
-    """ Set start/end/duration of input video(s).
+    """ Set start/end/duration of input video.
 
     Time values can be specified as frames (NNNN), seconds (NNNN.NNs), or as
     a timecode (HH:MM:SS.nnn). For example, to start scene detection at 1 minute,
@@ -390,7 +390,7 @@ def time_command(ctx, start, duration, end):
         USER_CONFIG.get_help_string("detect-content", "luma-only")))
 @click.pass_context
 def detect_content_command(ctx, threshold, luma_only):
-    """ Perform content detection algorithm on input video(s).
+    """ Perform content detection algorithm on input video.
 
     detect-content
 
@@ -430,7 +430,7 @@ def detect_content_command(ctx, threshold, luma_only):
 @click.pass_context
 def detect_adaptive_command(ctx, threshold, min_scene_len, min_delta_hsv,
                             frame_window, luma_only):
-    """ Perform adaptive detection algorithm on input video(s).
+    """ Perform adaptive detection algorithm on input video.
 
     detect-adaptive
 
@@ -475,7 +475,7 @@ def detect_adaptive_command(ctx, threshold, min_scene_len, min_delta_hsv,
     ' last fade out position.')
 @click.pass_context
 def detect_threshold_command(ctx, threshold, fade_bias, add_last_scene):
-    """  Perform threshold detection algorithm on input video(s).
+    """  Perform threshold detection algorithm on input video.
 
     detect-threshold
 
@@ -612,7 +612,7 @@ def list_scenes_command(ctx, output, filename, no_output_file, quiet, skip_cuts)
     'Encode video with higher quality, overrides -f option if present.'
     ' Equivalent to specifying --rate-factor 17 and --preset slow.')
 @click.option(
-    '--override-args', '-a', metavar='ARGS',
+    '--args', '-a', metavar='ARGS',
     type=click.STRING, help=
     'Override codec arguments/options passed to FFmpeg when splitting and re-encoding'
     ' scenes. Use double quotes (") around specified arguments. Must specify at least'
@@ -651,9 +651,9 @@ def list_scenes_command(ctx, output, filename, no_output_file, quiet, skip_cuts)
     ' time to run, but the output files may be larger.'
     ' [default: veryfast, if -hq/--high quality is set: slow]')
 @click.pass_context
-def split_video_command(ctx, output, filename, high_quality, override_args, quiet, copy,
+def split_video_command(ctx, output, filename, high_quality, args, quiet, copy,
                         mkvmerge, rate_factor, preset):
-    """Split input video(s) using ffmpeg or mkvmerge."""
+    """Split input video using ffmpeg or mkvmerge."""
     assert isinstance(ctx.obj, CliContext)
 
     if ctx.obj.split_video:
@@ -683,9 +683,9 @@ def split_video_command(ctx, output, filename, high_quality, override_args, quie
             raise click.BadParameter(
                 '-hq/--high-quality cannot be specified with {command}'.format(command=command),
                 param_hint='split_video')
-        if override_args:
+        if args:
             raise click.BadParameter(
-                '-a/--override-args cannot be specified with {command}'.format(command=command),
+                '-a/--args cannot be specified with {command}'.format(command=command),
                 param_hint='split_video')
         if rate_factor:
             raise click.BadParameter(
@@ -712,17 +712,17 @@ def split_video_command(ctx, output, filename, high_quality, override_args, quie
     # otherwise the output will just keep getting overwritten.
 
     if copy:
-        override_args = '-c:v copy -c:a copy'
-    elif not override_args:
+        args = '-c:v copy -c:a copy'
+    elif not args:
         if rate_factor is None:
             rate_factor = 22 if not high_quality else 17
         if preset is None:
             preset = 'veryfast' if not high_quality else 'slow'
-        override_args = ('-c:v libx264 -preset {PRESET} -crf {RATE_FACTOR} -c:a aac'.format(
+        args = ('-c:v libx264 -preset {PRESET} -crf {RATE_FACTOR} -c:a aac'.format(
             PRESET=preset, RATE_FACTOR=rate_factor))
 
-    logger.info('ffmpeg arguments: %s', override_args)
-    ctx.obj.split_args = override_args
+    logger.info('ffmpeg arguments: %s', args)
+    ctx.obj.split_args = args
     if filename:
         logger.info('Output file name format: %s', filename)
 

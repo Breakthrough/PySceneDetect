@@ -619,7 +619,7 @@ class SceneManager:
         """ Returns a list of FrameTimecodes of the detected scene changes/cuts.
 
         Unlike get_scene_list, the cutting list returns a list of FrameTimecodes representing
-        the point in the input video(s) where a new scene was detected, and thus the frame
+        the point in the input video where a new scene was detected, and thus the frame
         where the input should be cut/split. The cutting list, in turn, is used to generate
         the scene list, noting that each scene is contiguous starting from the first frame
         and ending at the last frame detected.
@@ -628,7 +628,7 @@ class SceneManager:
 
         Returns:
             List of FrameTimecode objects denoting the points in time where a scene change
-            was detected in the input video(s), which can also be passed to external tools
+            was detected in the input video, which can also be passed to external tools
             for automated splitting of the input into individual scenes.
         """
         if base_timecode is None:
@@ -649,7 +649,7 @@ class SceneManager:
         """ Returns a list of FrameTimecode pairs of the detected scenes by all sparse detectors.
 
         Unlike get_scene_list, the event list returns a list of FrameTimecodes representing
-        the point in the input video(s) where a new scene was detected only by sparse
+        the point in the input video where a new scene was detected only by sparse
         detectors, otherwise it is the same.
 
         Returns:

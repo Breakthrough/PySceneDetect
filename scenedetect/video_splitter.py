@@ -132,7 +132,7 @@ def split_video_mkvmerge(input_video_path: str,
                          output_file_template: str = '$VIDEO_NAME.mkv',
                          video_name: Optional[str] = None,
                          show_output: bool = False):
-    """ Calls the mkvmerge command on the input video(s), splitting it at the
+    """ Calls the mkvmerge command on the input video, splitting it at the
     passed timecodes, where each scene is written in sequence from 001.
 
     Arguments:

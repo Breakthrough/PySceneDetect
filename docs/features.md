@@ -58,7 +58,6 @@ The following features are under consideration for future releases of PySceneDet
 
  - automatic threshold detection for the current scene detection methods (can simply be an ouptut message indicating "Predicted Best Threshold: X")
  - optional suppression of short-length flashes/bursts of light [ [#35] ](https://github.com/Breakthrough/PySceneDetect/issues/35)
- - support for using multiple `--input` videos and the `split-video` command **without** the `-c`/`--copy` flag [ [#71] ](https://github.com/Breakthrough/PySceneDetect/issues/71)
  - colour histogram-based scene detection algorithm in the HSV/HSL colourspace [ [#53] ](https://github.com/Breakthrough/PySceneDetect/issues/53)
  - [perceptual hash](https://en.wikipedia.org/wiki/Perceptual_hashing) based scene detection
  - improve robustness of content-aware detection by combining with edge detection (similar to MATLAB-based scene change detector)

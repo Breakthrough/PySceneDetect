@@ -25,7 +25,7 @@ Help/information commands (prints information and quits):
 
 Input/output commands (applies to input videos and detected scenes):
 
- - ``time`` - Set start time/end time/duration of input video(s)
+ - ``time`` - Set start time/end time/duration of input video
     ``time --start 00:01:00 --end 00:02:00``
  - ``list-scenes`` - Write list of scenes and timecodes to the terminal as well as a .CSV file
     ``list-scenes``
@@ -229,24 +229,24 @@ The `save-images` command takes the following options:
     Number of frames to ignore at the beginning and end of
     scenes when saving images  [default: 1]
  * ``s``, ``--scale S``
-    Optional factor by which saved images are rescaled. A 
-    scaling factor of 1 would not result in rescaling. A 
-    value <1 results in a smaller saved image, while a 
-    value >1 results in an image larger than the original. 
-    This value is ignored if either the height, -h, or 
+    Optional factor by which saved images are rescaled. A
+    scaling factor of 1 would not result in rescaling. A
+    value <1 results in a smaller saved image, while a
+    value >1 results in an image larger than the original.
+    This value is ignored if either the height, -h, or
     width, -w, values are specified.
  * ``h``, ``--height H``
-    Optional value for the height of the saved images. 
-    Specifying both the height and width, -w, will resize 
-    images to an exact size, regardless of aspect ratio. 
-    Specifying only height will rescale the image to that 
-    number of pixels in height while preserving the aspect 
+    Optional value for the height of the saved images.
+    Specifying both the height and width, -w, will resize
+    images to an exact size, regardless of aspect ratio.
+    Specifying only height will rescale the image to that
+    number of pixels in height while preserving the aspect
     ratio.
  * ``w``, ``--width W``
-    Optional value for the width of the saved images. 
-    Specifying both the width and height, -h, will resize 
-    images to an exact size, regardless of aspect ratio. 
-    Specifying only width will rescale the image to that 
+    Optional value for the width of the saved images.
+    Specifying both the width and height, -h, will resize
+    images to an exact size, regardless of aspect ratio.
+    Specifying only width will rescale the image to that
     number of pixels wide while preserving the aspect ratio.
 
 
@@ -275,7 +275,7 @@ The `split-video` command takes the following options:
     Encode video with higher quality, overrides `-a`
     option if present. Equivalent to specifying
     --rate-factor 17 and --preset slow.
- * ``-a``, ``--override-args ARGS``
+ * ``-a``, ``--args ARGS``
     Override codec arguments/options passed to FFmpeg
     when splitting and re-encoding scenes. Use double
     quotes (") around specified arguments. Must

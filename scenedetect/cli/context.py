@@ -116,7 +116,7 @@ class CliContext:
         # `split-video` Command Options
         self.split_video: bool = False
         self.split_mkvmerge: bool = None   # split-video -m/--mkvmerge
-        self.split_args: str = None        # split-video -a/--override-args, -c/--copy
+        self.split_args: str = None        # split-video -a/--args, -c/--copy
         self.split_directory: str = None   # split-video -o/--output
         self.split_name_format: str = None # split-video -f/--filename
         self.split_quiet: bool = None      # split-video -q/--quiet

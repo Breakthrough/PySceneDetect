@@ -26,7 +26,7 @@ Several more command line interface examples are shown in the following section.
 ``detect-content``
 =======================================================================
 
-Perform content detection algorithm on input video(s).
+Perform content detection algorithm on input video.
 
 
 Detector Options
@@ -53,7 +53,7 @@ Usage Examples
 ``detect-threshold``
 =======================================================================
 
-  Perform threshold detection algorithm on input video(s).
+  Perform threshold detection algorithm on input video.
 
 Detector Options
 -----------------------------------------------------------------------

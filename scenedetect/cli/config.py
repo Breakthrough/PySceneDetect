@@ -72,7 +72,7 @@ CONFIG_MAP: ConfigDict = {
         'high-quality': False,                                             # NOT DONE
         'mkvmerge': False,                                                 # NOT DONE
         'output': '/usr/tmp/encoded',                                      # NOT DONE
-        'override-args': "-c:v libx264 -preset veryfast -crf 22 -c:a aac", # NOT DONE
+        'args': "-c:v libx264 -preset veryfast -crf 22 -c:a aac", # NOT DONE
         'preset': 'veryfast',                                              # NOT DONE
         'quiet': False,                                                    # NOT DONE
         'rate-factor': 22,                                                 # NOT DONE
@@ -86,6 +86,12 @@ CHOICE_MAP: Dict[str, Dict[str, List[str]]] = {
     'global': {
         'backend': ['opencv', 'pyav'],
         'verbosity': ['debug', 'info', 'warning', 'error', 'none'],
+    },
+    'split-video': {
+        'preset': [
+            'ultrafast', 'superfast', 'veryfast', 'faster', 'fast', 'medium', 'slow', 'slower',
+            'veryslow'
+        ],
     },
 }
 """Mapping of options which can only be of a particular set of values."""
