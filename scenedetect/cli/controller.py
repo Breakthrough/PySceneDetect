@@ -33,9 +33,9 @@ import click
 import cv2
 
 from scenedetect.backends import VideoStreamCv2
-from scenedetect.cli.context import CliContext
+from scenedetect.cli.context import CliContext, check_split_video_requirements
 from scenedetect.frame_timecode import FrameTimecode
-from scenedetect.platform import (get_and_create_path)
+from scenedetect.platform import get_and_create_path
 from scenedetect.scene_manager import (save_images, write_scene_list, write_scene_list_html)
 from scenedetect.video_splitter import (is_mkvmerge_available, is_ffmpeg_available,
                                         split_video_mkvmerge, split_video_ffmpeg)
@@ -56,7 +56,6 @@ def run_scenedetect(context: CliContext):
         logger.debug('Skipping processing, CLI options were not parsed successfully.')
         return
     logger.debug('Processing input...')
-    context.check_input_open()
     if context.scene_manager.get_num_detectors() == 0:
         logger.error('No scene detectors specified (detect-content, detect-threshold, etc...),\n'
                      ' or failed to process all command line arguments.')
@@ -277,29 +276,3 @@ def _split_video(context: CliContext, scene_list: List[Tuple[FrameTimecode,
         )
     if scene_list:
         logger.info('Video splitting completed, individual scenes written to disk.')
-
-
-def check_split_video_requirements(use_mkvmerge: bool) -> None:
-    # type: (bool) -> None
-    """ Validates that the proper tool is available on the system to perform the split-video
-    command, which depends on if -m/--mkvmerge is set (if not, defaults to ffmpeg).
-
-    Arguments:
-        use_mkvmerge: True if -m/--mkvmerge is set, False otherwise.
-
-    Raises: click.BadParameter if the proper video splitting tool cannot be found.
-    """
-
-    if (use_mkvmerge and not is_mkvmerge_available()) or not is_ffmpeg_available():
-        error_strs = [
-            "{EXTERN_TOOL} is required for split-video{EXTRA_ARGS}.".format(
-                EXTERN_TOOL='mkvmerge' if use_mkvmerge else 'ffmpeg',
-                EXTRA_ARGS=' -m/--mkvmerge' if use_mkvmerge else '')
-        ]
-        error_strs += ["Install one of the above tools to enable the split-video command."]
-        if not use_mkvmerge and is_mkvmerge_available():
-            error_strs += ['You can also specify `-m/--mkvmerge` to use mkvmerge for splitting.']
-        elif use_mkvmerge and is_ffmpeg_available():
-            error_strs += ['You can also specify `-c/--copy` to use ffmpeg stream copying.']
-        error_str = '\n'.join(error_strs)
-        raise click.BadParameter(error_str, param_hint='split-video')

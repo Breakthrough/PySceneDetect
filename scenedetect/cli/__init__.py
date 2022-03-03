@@ -42,12 +42,8 @@ import click
 
 import scenedetect
 from scenedetect.backends import AVAILABLE_BACKENDS
-from scenedetect.cli.config import CONFIG_FILE_PATH, CHOICE_MAP
-from scenedetect.cli.controller import check_split_video_requirements
-from scenedetect.cli.context import (
-    USER_CONFIG, CliContext,
-    # TODO(v0.6): Move usages of these functions inside of CliContext.
-    contains_sequence_or_url, parse_timecode)
+from scenedetect.cli.config import CONFIG_FILE_PATH, CONFIG_MAP, CHOICE_MAP
+from scenedetect.cli.context import USER_CONFIG, CliContext, parse_timecode
 from scenedetect.cli.controller import run_scenedetect
 
 logger = logging.getLogger('pyscenedetect')
@@ -360,7 +356,7 @@ def time_command(ctx, start, duration, end):
             'Only one of --duration/-d or --end/-e can be specified, not both.',
             param_hint='time')
 
-    ctx.obj.check_input_open()
+    ctx.obj._check_input_open()
     frame_rate = ctx.obj.video_stream.frame_rate
 
     logger.debug('Setting video time:\n    start: %s, duration: %s, end: %s',
@@ -379,8 +375,11 @@ def time_command(ctx, start, duration, end):
 @click.command('detect-content')
 @click.option(
     '--threshold', '-t', metavar='VAL',
-    type=click.FLOAT, default=None, help=
-    'Threshold value (float) that the content_val frame metric must exceed to trigger a new scene.'
+    type=click.FloatRange(
+        CONFIG_MAP['detect-content']['threshold'].min_val,
+        CONFIG_MAP['detect-content']['threshold'].max_val),
+    default=None, help=
+    'Threshold value that the content_val frame metric must exceed to trigger a new scene.'
     ' Refers to frame metric content_val in stats file.%s' % (
         USER_CONFIG.get_help_string("detect-content", "threshold")))
 @click.option(
@@ -448,7 +447,7 @@ def detect_adaptive_command(ctx, threshold, min_scene_len, min_delta_hsv,
     # Initialize detector and add to scene manager.
     # Need to ensure that a detector is not added twice, or will cause
     # a frame metric key error when registering the detector.
-    ctx.obj.add_detector(scenedetect.detectors.AdaptiveDetector(
+    ctx.obj._add_detector(scenedetect.detectors.AdaptiveDetector(
         adaptive_threshold=threshold,
         min_scene_len=min_scene_len,
         min_delta_hsv=min_delta_hsv,
@@ -494,7 +493,7 @@ def detect_threshold_command(ctx, threshold, fade_bias, add_last_scene):
 
     # Convert and fade_bias from integer to float with a valid range of -1.0 to 1.0.
     fade_bias /= 100.0
-    ctx.obj.add_detector(scenedetect.detectors.ThresholdDetector(
+    ctx.obj._add_detector(scenedetect.detectors.ThresholdDetector(
         threshold=threshold, min_scene_len=min_scene_len, fade_bias=fade_bias,
         add_final_scene=add_last_scene))
 
@@ -526,7 +525,7 @@ def export_html_command(ctx, filename, no_images, image_width, image_height):
 
     if ctx.obj.export_html:
         duplicate_command(ctx, 'export_html')
-    ctx.obj.check_input_open()
+    ctx.obj._check_input_open()
 
     if not ctx.obj.save_images and not no_images:
         ctx.obj.options_processed = False
@@ -578,7 +577,7 @@ def list_scenes_command(ctx, output, filename, no_output_file, quiet, skip_cuts)
 
     if ctx.obj.list_scenes:
         duplicate_command(ctx, 'list-scenes')
-    ctx.obj.check_input_open()
+    ctx.obj._check_input_open()
 
     ctx.obj.print_scene_list = True if quiet is None else not quiet
     ctx.obj.scene_list_directory = output
@@ -600,132 +599,81 @@ def list_scenes_command(ctx, output, filename, no_output_file, quiet, skip_cuts)
     type=click.Path(exists=False, dir_okay=True, writable=True, resolve_path=False), help=
     'Output directory to save videos to. Overrides global option -o/--output if set.')
 @click.option(
-    '--filename', '-f', metavar='NAME', default='$VIDEO_NAME-Scene-$SCENE_NUMBER',
-    type=click.STRING, show_default=False, help= # TODO(v1.0): Change macros to {}s?
+    '--filename', '-f', metavar='NAME', default=None,
+    type=click.STRING, show_default=False, help=
     'File name format to use when saving videos (with or without extension). You can use the'
     ' $VIDEO_NAME and $SCENE_NUMBER macros in the filename (e.g. $VIDEO_NAME-Part-$SCENE_NUMBER).'
-    ' Note that you may have to wrap the format in single quotes to avoid variable expansion.'
-    ' [default: $VIDEO_NAME-Scene-$SCENE_NUMBER]')
-@click.option(
-    '--high-quality', '-hq',
-    is_flag=True, flag_value=True, help=
-    'Encode video with higher quality, overrides -f option if present.'
-    ' Equivalent to specifying --rate-factor 17 and --preset slow.')
-@click.option(
-    '--args', '-a', metavar='ARGS',
-    type=click.STRING, help=
-    'Override codec arguments/options passed to FFmpeg when splitting and re-encoding'
-    ' scenes. Use double quotes (") around specified arguments. Must specify at least'
-    ' audio/video codec to use (e.g. -a "-c:v [...] -c:a [...]").'
-    ' [default: "-c:v libx264 -preset veryfast -crf 22 -c:a aac"]')
+    ' Note that you may have to wrap the format in single quotes to avoid variable expansion.%s' % (
+        USER_CONFIG.get_help_string('split-video', 'filename')))
 @click.option(
     '--quiet', '-q',
     is_flag=True, flag_value=True, help=
-    'Hides any output from the external video splitting tool.')
+    'Hides any output from the external video splitting tool.%s' % (
+        USER_CONFIG.get_help_string('split-video', 'quiet')))
 @click.option(
     '--copy', '-c',
     is_flag=True, flag_value=True, help=
     'Copy instead of re-encode. Much faster, but less precise. Equivalent to specifying'
-    ' -a "-c:v copy -c:a copy".')
+    ' -a "-c:v copy -c:a copy".%s' % (
+        USER_CONFIG.get_help_string('split-video', 'copy')))
+@click.option(
+    '--high-quality', '-hq',
+    is_flag=True, flag_value=True, help=
+    'Encode video with higher quality, overrides -f option if present.'
+    ' Equivalent to specifying --rate-factor 17 and --preset slow.%s' % (
+        USER_CONFIG.get_help_string('split-video', 'high-quality')))
+@click.option(
+    '--rate-factor', '-crf', metavar='RATE', default=None, show_default=False,
+    type=click.IntRange(
+        CONFIG_MAP['split-video']['rate-factor'].min_val,
+        CONFIG_MAP['split-video']['rate-factor'].max_val),
+    help=
+    'Video encoding quality (x264 constant rate factor), from 0-100, where lower'
+    ' values represent better quality, with 0 indicating lossless.%s' % (
+        USER_CONFIG.get_help_string('split-video', 'rate-factor')))
+@click.option(
+    '--preset', '-p', metavar='LEVEL', default=None, show_default=False,
+    type=click.Choice(CHOICE_MAP['split-video']['preset']),
+    help=
+    'Video compression quality preset (x264 preset). Can be one of: ultrafast, superfast,'
+    ' veryfast, faster, fast, medium, slow, slower, and veryslow. Faster modes take less'
+    ' time to run, but the output files may be larger.%s' % (
+        USER_CONFIG.get_help_string('split-video', 'preset')))
+@click.option(
+    '--args', '-a', metavar='ARGS',
+    type=click.STRING, default=None, help=
+    'Override codec arguments/options passed to FFmpeg when splitting and re-encoding'
+    ' scenes. Use double quotes (") around specified arguments. Must specify at least'
+    ' audio/video codec to use (e.g. -a "-c:v [...] -c:a [...]").%s' % (
+        USER_CONFIG.get_help_string('split-video', 'args')))
 @click.option(
     '--mkvmerge', '-m',
     is_flag=True, flag_value=True, help=
     'Split the video using mkvmerge. Faster than re-encoding, but less precise. The output will'
     ' be named $VIDEO_NAME-$SCENE_NUMBER.mkv. If set, all options other than -f/--filename,'
     ' -q/--quiet and -o/--output will be ignored. Note that mkvmerge automatically appends a'
-    'suffix of "-$SCENE_NUMBER".')
-@click.option(
-    '--rate-factor', '-crf', metavar='RATE', default=None, show_default=False,
-    type=click.IntRange(0, 100), help=
-    'Video encoding quality (x264 constant rate factor), from 0-100, where lower'
-    ' values represent better quality, with 0 indicating lossless.'
-    ' [default: 22, if -hq/--high-quality is set: 17]')
-@click.option(
-    '--preset', '-p', metavar='LEVEL', default=None, show_default=False,
-    type=click.Choice([
-        'ultrafast', 'superfast', 'veryfast', 'faster', 'fast', 'medium',
-        'slow', 'slower', 'veryslow']),
-    help=
-    'Video compression quality preset (x264 preset). Can be one of: ultrafast, superfast,'
-    ' veryfast, faster, fast, medium, slow, slower, and veryslow. Faster modes take less'
-    ' time to run, but the output files may be larger.'
-    ' [default: veryfast, if -hq/--high quality is set: slow]')
+    'suffix of "-$SCENE_NUMBER".%s' % (
+        USER_CONFIG.get_help_string('split-video', 'mkvmerge')))
 @click.pass_context
-def split_video_command(ctx, output, filename, high_quality, args, quiet, copy,
-                        mkvmerge, rate_factor, preset):
+def split_video_command(ctx, output, filename, quiet, copy, high_quality, rate_factor, preset,
+                        args, mkvmerge):
     """Split input video using ffmpeg or mkvmerge."""
     assert isinstance(ctx.obj, CliContext)
 
     if ctx.obj.split_video:
         duplicate_command(ctx, 'split-video')
-    ctx.obj.check_input_open()
-    check_split_video_requirements(use_mkvmerge=mkvmerge)
 
-    if contains_sequence_or_url(ctx.obj.video_stream.path):
-        ctx.obj.options_processed = False
-        error_str = 'The save-images command is incompatible with image sequences/URLs.'
-        raise click.BadParameter(error_str, param_hint='save-images')
-
-    ##
-    ## Common Arguments/Options
-    ##
-    ctx.obj.split_video = True
-    ctx.obj.split_quiet = bool(quiet)
-    ctx.obj.split_directory = output
-    if ctx.obj.split_directory is not None:
-        logger.info('Video output path set:  \n%s', ctx.obj.split_directory)
-    ctx.obj.split_name_format = filename
-
-    # Disallow certain combinations of flags.
-    if mkvmerge or copy:
-        command = '-m/--mkvmerge' if mkvmerge else '-c/--copy'
-        if high_quality:
-            raise click.BadParameter(
-                '-hq/--high-quality cannot be specified with {command}'.format(command=command),
-                param_hint='split_video')
-        if args:
-            raise click.BadParameter(
-                '-a/--args cannot be specified with {command}'.format(command=command),
-                param_hint='split_video')
-        if rate_factor:
-            raise click.BadParameter(
-                '-crf/--rate-factor cannot be specified with {command}'.format(command=command),
-                param_hint='split_video')
-        if preset:
-            raise click.BadParameter(
-                '-p/--preset cannot be specified with {command}'.format(command=command),
-                param_hint='split_video')
-    ##
-    ## mkvmerge-Specific Arguments/Options
-    ##
-    if mkvmerge:
-        if copy:
-            logger.warning('-c/--copy flag ignored due to -m/--mkvmerge.')
-        ctx.obj.split_mkvmerge = True
-        logger.info('Using mkvmerge for video splitting.')
-        return
-
-    ##
-    ## ffmpeg-Specific Arguments/Options
-    ##
-    # TODO: Should add some validation of the name format to ensure it contains at least one variable,
-    # otherwise the output will just keep getting overwritten.
-
-    if copy:
-        args = '-c:v copy -c:a copy'
-    elif not args:
-        if rate_factor is None:
-            rate_factor = 22 if not high_quality else 17
-        if preset is None:
-            preset = 'veryfast' if not high_quality else 'slow'
-        args = ('-c:v libx264 -preset {PRESET} -crf {RATE_FACTOR} -c:a aac'.format(
-            PRESET=preset, RATE_FACTOR=rate_factor))
-
-    logger.info('ffmpeg arguments: %s', args)
-    ctx.obj.split_args = args
-    if filename:
-        logger.info('Output file name format: %s', filename)
-
+    ctx.obj.handle_split_video(
+        output=output,
+        filename=filename,
+        quiet=quiet,
+        copy=copy,
+        high_quality=high_quality,
+        rate_factor=rate_factor,
+        preset=preset,
+        args=args,
+        mkvmerge=mkvmerge,
+    )
 
 
 @click.command('save-images', add_help_option=False)
@@ -803,8 +751,8 @@ def save_images_command(ctx, output, filename, num_images, jpeg, webp, quality, 
         duplicate_command(ctx, 'save-images')
     if quality is None:
         quality = 100 if webp else 95
-    ctx.obj.save_images_command(num_images, output, filename, jpeg, webp, quality, png,
-                                compression, frame_margin, scale, height, width)
+    ctx.obj.handle_save_images(num_images, output, filename, jpeg, webp, quality, png,
+                               compression, frame_margin, scale, height, width)
 
 
 # ----------------------------------------------------------------------

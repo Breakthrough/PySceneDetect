@@ -39,6 +39,7 @@ from scenedetect.platform import (check_opencv_ffmpeg_dll, get_and_create_path,
 from scenedetect.scene_manager import SceneManager
 from scenedetect.stats_manager import StatsManager, StatsFileCorrupt
 from scenedetect.video_stream import VideoStream, VideoOpenFailure
+from scenedetect.video_splitter import is_mkvmerge_available, is_ffmpeg_available
 
 logger = logging.getLogger('pyscenedetect')
 
@@ -68,6 +69,33 @@ def contains_sequence_or_url(video_path: str) -> bool:
     return '%' in video_path or '://' in video_path
 
 
+def check_split_video_requirements(use_mkvmerge: bool) -> None:
+    # type: (bool) -> None
+    """ Validates that the proper tool is available on the system to perform the split-video
+    command, which depends on if -m/--mkvmerge is set (if not, defaults to ffmpeg).
+
+    Arguments:
+        use_mkvmerge: True if -m/--mkvmerge is set, False otherwise.
+
+    Raises: click.BadParameter if the proper video splitting tool cannot be found.
+    """
+
+    if (use_mkvmerge and not is_mkvmerge_available()) or not is_ffmpeg_available():
+        error_strs = [
+            "{EXTERN_TOOL} is required for split-video{EXTRA_ARGS}.".format(
+                EXTERN_TOOL='mkvmerge' if use_mkvmerge else 'ffmpeg',
+                EXTRA_ARGS=' -m/--mkvmerge' if use_mkvmerge else '')
+        ]
+        error_strs += ["Install one of the above tools to enable the split-video command."]
+        if not use_mkvmerge and is_mkvmerge_available():
+            error_strs += ['You can also specify `-m/--mkvmerge` to use mkvmerge for splitting.']
+        elif use_mkvmerge and is_ffmpeg_available():
+            error_strs += ['You can also specify `-c/--copy` to use ffmpeg stream copying.']
+        error_str = '\n'.join(error_strs)
+        raise click.BadParameter(error_str, param_hint='split-video')
+
+
+# pylint: disable=too-many-instance-attributes,too-many-arguments,too-many-locals
 class CliContext:
     """Context of the command-line interface passed between the various sub-commands.
 
@@ -139,52 +167,27 @@ class CliContext:
         # Internal variables
         self._check_input_open_failed = False # Used to avoid excessive log messages
 
-    def _initialize(self, config: Optional[str], quiet: Optional[bool], verbosity: Optional[str],
-                    logfile: Optional[TextIO]):
-        """Setup logging and load application configuration file."""
-        self.quiet_mode = bool(quiet)
-        curr_verbosity = logging.INFO
-        # Convert verbosity into it's log level enum, and override quiet mode if set.
-        if verbosity is not None:
-            assert verbosity in CHOICE_MAP['global']['verbosity']
-            if verbosity.lower() == 'none':
-                self.quiet_mode = True
-                verbosity = 'info'
-            else:
-                # Override quiet mode if verbosity is set.
-                self.quiet_mode = False
-            curr_verbosity = getattr(logging, verbosity.upper())
-        else:
-            verbosity_str = USER_CONFIG.get_value('global', 'verbosity')
-            assert verbosity_str in CHOICE_MAP['global']['verbosity']
-            if verbosity_str.lower() == 'none':
-                self.quiet_mode = True
-            else:
-                curr_verbosity = getattr(logging, verbosity_str.upper())
-                # Override quiet mode if verbosity is set.
-                if not USER_CONFIG.is_default('global', 'verbosity'):
-                    self.quiet_mode = False
+    #
+    # Command Handlers
+    #
 
-        init_logger(log_level=curr_verbosity, show_stdout=not self.quiet_mode, log_file=logfile)
-
-        # Configuration file was specified via CLI argument -c/--config.
-        if config:
-            new_config = ConfigRegistry(config)
-            self.config = new_config
-            # Re-initialize logger with the correct verbosity.
-            if verbosity is None and not self.config.is_default('global', 'verbosity'):
-                verbosity_str = self.config.get_value('global', 'verbosity')
-                assert verbosity_str in CHOICE_MAP['global']['verbosity']
-                curr_verbosity = getattr(logging, verbosity_str.upper())
-                self.quiet_mode = False
-                init_logger(
-                    log_level=curr_verbosity, show_stdout=not self.quiet_mode, log_file=logfile)
-
-    def handle_options(self, input_path: str, output: Optional[str], framerate: float,
-                       stats_file: Optional[str], downscale: Optional[int], frame_skip: int,
-                       min_scene_len: str, drop_short_scenes: bool, backend: Optional[str],
-                       quiet: bool, logfile: Optional[str], config: Optional[str],
-                       stats: Optional[str], verbosity: Optional[str]):
+    def handle_options(
+        self,
+        input_path: str,
+        output: Optional[str],
+        framerate: float,
+        stats_file: Optional[str],
+        downscale: Optional[int],
+        frame_skip: int,
+        min_scene_len: str,
+        drop_short_scenes: bool,
+        backend: Optional[str],
+        quiet: bool,
+        logfile: Optional[str],
+        config: Optional[str],
+        stats: Optional[str],
+        verbosity: Optional[str],
+    ):
         """Parses all global options/arguments passed to the main scenedetect command, before other
         sub-commands (e.g. this function processes the [options] when calling `scenedetect [options]
         [commands [command options]]`).
@@ -248,7 +251,7 @@ class CliContext:
 
         self.min_scene_len = parse_timecode(
             min_scene_len if min_scene_len is not None else self.config.get_value(
-                "global", "min-scene-len").value, self.video_stream.frame_rate)
+                "global", "min-scene-len"), self.video_stream.frame_rate)
         self.drop_short_scenes = drop_short_scenes or self.config.get_value(
             "global", "drop-short-scenes")
         self.frame_skip = self.config.get_value("global", "frame-skip", frame_skip)
@@ -271,7 +274,260 @@ class CliContext:
                 raise click.BadParameter(str(ex), param_hint='downscale factor')
         self.options_processed = True
 
-    def check_input_open(self) -> None:
+    def handle_detect_content(
+        self,
+        threshold: Optional[float],
+        luma_only: bool,
+    ):
+        """Handles detect-content options."""
+        min_scene_len = 0 if self.drop_short_scenes else self.min_scene_len
+        threshold = self.config.get_value("detect-content", "threshold", threshold)
+        luma_only = luma_only or self.config.get_value("detect-content", "luma-only")
+        logger.debug(
+            'Adding detector: ContentDetector(threshold=%f, min_scene_len=%d, luma_only=%s)',
+            threshold, min_scene_len, luma_only)
+        self._add_detector(
+            scenedetect.detectors.ContentDetector(
+                threshold=threshold, min_scene_len=min_scene_len, luma_only=luma_only))
+
+    def handle_split_video(
+        self,
+        output: Optional[str],
+        filename: Optional[str],
+        quiet: bool,
+        copy: bool,
+        high_quality: bool,
+        rate_factor: Optional[int],
+        preset: Optional[str],
+        args: Optional[str],
+        mkvmerge: bool,
+    ):
+        self._check_input_open()
+        options_processed_orig = self.options_processed
+        self.options_processed = False
+        check_split_video_requirements(use_mkvmerge=mkvmerge)
+
+        if contains_sequence_or_url(self.video_stream.path):
+            self.options_processed = False
+            error_str = 'The split-video command is incompatible with image sequences/URLs.'
+            raise click.BadParameter(error_str, param_hint='split-video')
+
+        ##
+        ## Common Arguments/Options
+        ##
+
+        self.split_video = True
+        self.split_quiet = quiet or self.config.get_value('split-video', 'quiet')
+        self.split_directory = self.config.get_value(
+            'split-video', 'output', output, ignore_default=True)
+        if self.split_directory is not None:
+            logger.info('Video output path set:  \n%s', self.split_directory)
+        self.split_name_format = self.config.get_value('split-video', 'filename', filename)
+
+        # We only load the config values for these flags/options if none of the other encoder
+        # flags/options were set via the CLI to avoid any conflicting options (e.g. if the
+        # config file sets `high-quality = yes` but `--copy` is specified).
+        if not (mkvmerge or copy or high_quality or args or rate_factor or preset):
+            mkvmerge = self.config.get_value('split-video', 'mkvmerge')
+            copy = self.config.get_value('split-video', 'copy')
+            high_quality = self.config.get_value('split-video', 'high-quality')
+            rate_factor = self.config.get_value('split-video', 'rate-factor')
+            preset = self.config.get_value('split-video', 'preset')
+            args = self.config.get_value('split-video', 'args')
+
+        # Disallow certain combinations of flags/options.
+        if mkvmerge or copy:
+            command = 'mkvmerge (-m)' if mkvmerge else 'copy (-c)'
+            if high_quality:
+                raise click.BadParameter(
+                    'high-quality (-hq) cannot be specified with {command}'.format(command=command),
+                    param_hint='split-video')
+            if args:
+                raise click.BadParameter(
+                    'args (-a) cannot be specified with {command}'.format(command=command),
+                    param_hint='split-video')
+            if rate_factor:
+                raise click.BadParameter(
+                    'rate-factor (crf) cannot be specified with {command}'.format(command=command),
+                    param_hint='split-video')
+            if preset:
+                raise click.BadParameter(
+                    'preset (-p) cannot be specified with {command}'.format(command=command),
+                    param_hint='split-video')
+        ##
+        ## mkvmerge-Specific Arguments/Options
+        ##
+        if mkvmerge:
+            if copy:
+                logger.warning('copy mode (-c) ignored due to mkvmerge mode (-m).')
+            self.split_mkvmerge = True
+            logger.info('Using mkvmerge for video splitting.')
+            return
+
+        ##
+        ## ffmpeg-Specific Arguments/Options
+        ##
+        # TODO: Should add some validation of the name format to ensure it contains at least one variable,
+        # otherwise the output will just keep getting overwritten.
+
+        if copy:
+            args = '-c:v copy -c:a copy'
+        elif not args:
+            if rate_factor is None:
+                rate_factor = 22 if not high_quality else 17
+            if preset is None:
+                preset = 'veryfast' if not high_quality else 'slow'
+            args = ('-c:v libx264 -preset {PRESET} -crf {RATE_FACTOR} -c:a aac'.format(
+                PRESET=preset, RATE_FACTOR=rate_factor))
+
+        logger.info('ffmpeg arguments: %s', args)
+        self.split_args = args
+        if filename:
+            logger.info('Output file name format: %s', filename)
+
+        self.options_processed = options_processed_orig
+
+    def handle_save_images(
+        self,
+        num_images: int,
+        output: Optional[str],
+        name_format: str,
+        jpeg: bool,
+        webp: bool,
+        quality: int,
+        png: bool,
+        compression: int,
+        frame_margin: int,
+        scale: float,
+        height: int,
+        width: int,
+    ):
+        """ Save Images Command: Parses all options/arguments passed to the save-images command,
+        or with respect to the CLI, this function processes [save-images options] when calling:
+        scenedetect [global options] save-images [save-images options] [other commands...].
+
+        Raises:
+            click.BadParameter
+        """
+        self._check_input_open()
+        options_processed_orig = self.options_processed
+        self.options_processed = False
+
+        if contains_sequence_or_url(self.video_stream.path):
+            error_str = '\nThe save-images command is incompatible with image sequences/URLs.'
+            logger.error(error_str)
+            raise click.BadParameter(error_str, param_hint='save-images')
+
+        num_flags = sum([1 if flag else 0 for flag in [jpeg, webp, png]])
+        if num_flags <= 1:
+
+            # Ensure the format exists (default is JPEG).
+            extension = 'jpg'
+            if png:
+                extension = 'png'
+            elif webp:
+                extension = 'webp'
+            valid_params = get_cv2_imwrite_params()
+            if not extension in valid_params or valid_params[extension] is None:
+                error_strs = [
+                    'Image encoder type %s not supported.' % extension.upper(),
+                    'The specified encoder type could not be found in the current OpenCV module.',
+                    'To enable this output format, please update the installed version of OpenCV.',
+                    'If you build OpenCV, ensure the the proper dependencies are enabled. '
+                ]
+                logger.debug('\n'.join(error_strs))
+                raise click.BadParameter('\n'.join(error_strs), param_hint='save-images')
+
+            self.save_images = True
+            self.image_directory = output
+            self.image_extension = extension
+            self.image_param = compression if png else quality
+            self.image_name_format = name_format
+            self.num_images = num_images
+            self.frame_margin = frame_margin
+            self.scale = scale
+            self.height = height
+            self.width = width
+
+            image_type = 'JPEG' if self.image_extension == 'jpg' else self.image_extension.upper()
+            image_param_type = ''
+            if self.image_param:
+                image_param_type = 'Compression' if image_type == 'PNG' else 'Quality'
+                image_param_type = ' [%s: %d]' % (image_param_type, self.image_param)
+            logger.info('Image output format set: %s%s', image_type, image_param_type)
+            if self.image_directory is not None:
+                logger.info('Image output directory set:\n  %s',
+                            os.path.abspath(self.image_directory))
+            self.options_processed = options_processed_orig
+        else:
+            logger.error('Multiple image type flags set for save-images command.')
+            raise click.BadParameter(
+                'Only one image type (JPG/PNG/WEBP) can be specified.', param_hint='save-images')
+
+    #
+    # Private Methods
+    #
+
+    def _initialize(
+        self,
+        config: Optional[str],
+        quiet: Optional[bool],
+        verbosity: Optional[str],
+        logfile: Optional[TextIO],
+    ):
+        """Setup logging and load application configuration file."""
+        self.quiet_mode = bool(quiet)
+        curr_verbosity = logging.INFO
+        # Convert verbosity into it's log level enum, and override quiet mode if set.
+        if verbosity is not None:
+            assert verbosity in CHOICE_MAP['global']['verbosity']
+            if verbosity.lower() == 'none':
+                self.quiet_mode = True
+                verbosity = 'info'
+            else:
+                # Override quiet mode if verbosity is set.
+                self.quiet_mode = False
+            curr_verbosity = getattr(logging, verbosity.upper())
+        else:
+            verbosity_str = USER_CONFIG.get_value('global', 'verbosity')
+            assert verbosity_str in CHOICE_MAP['global']['verbosity']
+            if verbosity_str.lower() == 'none':
+                self.quiet_mode = True
+            else:
+                curr_verbosity = getattr(logging, verbosity_str.upper())
+                # Override quiet mode if verbosity is set.
+                if not USER_CONFIG.is_default('global', 'verbosity'):
+                    self.quiet_mode = False
+
+        init_logger(log_level=curr_verbosity, show_stdout=not self.quiet_mode, log_file=logfile)
+
+        # Configuration file was specified via CLI argument -c/--config.
+        if config:
+            new_config = ConfigRegistry(config)
+            self.config = new_config
+            # Re-initialize logger with the correct verbosity.
+            if verbosity is None and not self.config.is_default('global', 'verbosity'):
+                verbosity_str = self.config.get_value('global', 'verbosity')
+                assert verbosity_str in CHOICE_MAP['global']['verbosity']
+                curr_verbosity = getattr(logging, verbosity_str.upper())
+                self.quiet_mode = False
+                init_logger(
+                    log_level=curr_verbosity, show_stdout=not self.quiet_mode, log_file=logfile)
+
+    def _add_detector(self, detector):
+        """ Add Detector: Adds a detection algorithm to the CliContext's SceneManager. """
+        self._check_input_open()
+        options_processed_orig = self.options_processed
+        self.options_processed = False
+        try:
+            self.scene_manager.add_detector(detector)
+        except scenedetect.stats_manager.FrameMetricRegistered as ex:
+            raise click.BadParameter(
+                message='Cannot specify detection algorithm twice.',
+                param_hint=detector.cli_name) from ex
+        self.options_processed = options_processed_orig
+
+    def _check_input_open(self) -> None:
         """Ensure self.video_stream was initialized (i.e. -i/--input was specified),
         otherwise raises an exception. Should only be used from commands that require an
         input video to process the options (e.g. those that require a timecode).
@@ -284,31 +540,6 @@ class CliContext:
                 logger.error('Error: No input video was specified.')
             self._check_input_open_failed = True
             raise click.BadParameter('Input video not set.', param_hint='-i/--input')
-
-    def handle_detect_content(self, threshold: Optional[float], luma_only: bool):
-        """Handles detect-content options."""
-        min_scene_len = 0 if self.drop_short_scenes else self.min_scene_len
-        threshold = self.config.get_value("detect-content", "threshold", threshold)
-        luma_only = luma_only or self.config.get_value("detect-content", "luma-only")
-        logger.debug(
-            'Adding detector: ContentDetector(threshold=%f, min_scene_len=%d, luma_only=%s)',
-            threshold, min_scene_len, luma_only)
-        self.add_detector(
-            scenedetect.detectors.ContentDetector(
-                threshold=threshold, min_scene_len=min_scene_len, luma_only=luma_only))
-
-    # TODO(v0.6): Make this a private method.
-    def add_detector(self, detector):
-        """ Add Detector: Adds a detection algorithm to the CliContext's SceneManager. """
-        self.check_input_open()
-        options_processed_orig = self.options_processed
-        self.options_processed = False
-        try:
-            self.scene_manager.add_detector(detector)
-        except scenedetect.stats_manager.FrameMetricRegistered:
-            raise click.BadParameter(
-                message='Cannot specify detection algorithm twice.', param_hint=detector.cli_name)
-        self.options_processed = options_processed_orig
 
     def _init_video_stream(self, input_path: str, framerate: Optional[float], backend: str):
         self.base_timecode = None
@@ -366,68 +597,3 @@ class CliContext:
             raise click.BadParameter(
                 '\n  Could not load given stats file, see above output for details.',
                 param_hint='input stats file')
-
-    def save_images_command(self, num_images: int, output: Optional[str], name_format: str,
-                            jpeg: bool, webp: bool, quality: int, png: bool, compression: int,
-                            frame_margin: int, scale: float, height: int, width: int):
-        """ Save Images Command: Parses all options/arguments passed to the save-images command,
-        or with respect to the CLI, this function processes [save-images options] when calling:
-        scenedetect [global options] save-images [save-images options] [other commands...].
-
-        Raises:
-            click.BadParameter
-        """
-        self.check_input_open()
-        options_processed_orig = self.options_processed
-        self.options_processed = False
-
-        if contains_sequence_or_url(self.video_stream.path):
-            error_str = '\nThe save-images command is incompatible with image sequences/URLs.'
-            logger.error(error_str)
-            raise click.BadParameter(error_str, param_hint='save-images')
-
-        num_flags = sum([1 if flag else 0 for flag in [jpeg, webp, png]])
-        if num_flags <= 1:
-
-            # Ensure the format exists (default is JPEG).
-            extension = 'jpg'
-            if png:
-                extension = 'png'
-            elif webp:
-                extension = 'webp'
-            valid_params = get_cv2_imwrite_params()
-            if not extension in valid_params or valid_params[extension] is None:
-                error_strs = [
-                    'Image encoder type %s not supported.' % extension.upper(),
-                    'The specified encoder type could not be found in the current OpenCV module.',
-                    'To enable this output format, please update the installed version of OpenCV.',
-                    'If you build OpenCV, ensure the the proper dependencies are enabled. '
-                ]
-                logger.debug('\n'.join(error_strs))
-                raise click.BadParameter('\n'.join(error_strs), param_hint='save-images')
-
-            self.save_images = True
-            self.image_directory = output
-            self.image_extension = extension
-            self.image_param = compression if png else quality
-            self.image_name_format = name_format
-            self.num_images = num_images
-            self.frame_margin = frame_margin
-            self.scale = scale
-            self.height = height
-            self.width = width
-
-            image_type = 'JPEG' if self.image_extension == 'jpg' else self.image_extension.upper()
-            image_param_type = ''
-            if self.image_param:
-                image_param_type = 'Compression' if image_type == 'PNG' else 'Quality'
-                image_param_type = ' [%s: %d]' % (image_param_type, self.image_param)
-            logger.info('Image output format set: %s%s', image_type, image_param_type)
-            if self.image_directory is not None:
-                logger.info('Image output directory set:\n  %s',
-                            os.path.abspath(self.image_directory))
-            self.options_processed = options_processed_orig
-        else:
-            logger.error('Multiple image type flags set for save-images command.')
-            raise click.BadParameter(
-                'Only one image type (JPG/PNG/WEBP) can be specified.', param_hint='save-images')

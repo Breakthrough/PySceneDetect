@@ -43,7 +43,7 @@ rate-factor = 17
 filename = $VIDEO_NAME-Clip-$SCENE_NUMBER
 
 [save-images]
-jpeg = yes
+format = jpeg
 quality = 80
 num-images = 3
 ```

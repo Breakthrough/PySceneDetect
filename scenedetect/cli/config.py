@@ -18,7 +18,12 @@
 # ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-""" ``scenedetect.cli.config`` Module """
+"""``scenedetect.cli.config`` Module
+
+Handles loading configuration files from disk and validating each section. Only validation
+of the config file schema and data types are performed. Constants/defaults are also defined
+here where possible and re-used by the CLI so that there is one source of truth.
+"""
 
 import logging
 import os.path
@@ -33,9 +38,9 @@ from scenedetect.frame_timecode import FrameTimecode
 class TimecodeValue:
 
     def __init__(self, value: Union[int, str]):
+        self.value = value
         # Ensure value is a valid timecode.
         FrameTimecode(timecode=value, fps=100.0)
-        self.value = value
 
     def __repr__(self) -> str:
         return str(self.value)
@@ -44,7 +49,25 @@ class TimecodeValue:
         return str(self.value)
 
 
-ConfigValue = Union[bool, int, float, str, TimecodeValue]
+class RangeValue:
+
+    def __init__(self, value: Union[int, float], min_val: Union[int, float], max_val: Union[int,
+                                                                                            float]):
+        self.value = value
+        if value < min_val or value > max_val:
+            # min and max are inclusive.
+            raise ValueError()
+        self.min_val = min_val
+        self.max_val = max_val
+
+    def __repr__(self) -> str:
+        return str(self.value)
+
+    def __str__(self) -> str:
+        return str(self.value)
+
+
+ConfigValue = Union[bool, int, float, str]
 ConfigDict = Dict[str, Dict[str, ConfigValue]]
 
 _CONFIG_FILE_NAME = 'scenedetect.cfg'
@@ -63,25 +86,25 @@ CONFIG_MAP: ConfigDict = {
         'output': '',
     },
     'detect-content': {
-        'luma-only': False,                                                # NOT DONE
-        'threshold': 27,                                                   # NOT DONE
+        'luma-only': False,
+        'threshold': RangeValue(27.0, min_val=0.0, max_val=255.0),
     },
     'split-video': {
-        'copy': False,                                                     # NOT DONE
-        'filename': '$VIDEO_NAME-Scene-$SCENE_NUMBER',                     # NOT DONE
-        'high-quality': False,                                             # NOT DONE
-        'mkvmerge': False,                                                 # NOT DONE
-        'output': '/usr/tmp/encoded',                                      # NOT DONE
-        'args': "-c:v libx264 -preset veryfast -crf 22 -c:a aac", # NOT DONE
-        'preset': 'veryfast',                                              # NOT DONE
-        'quiet': False,                                                    # NOT DONE
-        'rate-factor': 22,                                                 # NOT DONE
+        'copy': False,
+        'filename': '$VIDEO_NAME-Scene-$SCENE_NUMBER',
+        'high-quality': False,
+        'mkvmerge': False,
+        'output': '/usr/tmp/encoded',
+        'args': "-c:v libx264 -preset veryfast -crf 22 -c:a aac",
+        'preset': 'veryfast',
+        'quiet': False,
+        'rate-factor': RangeValue(22, min_val=0, max_val=100),
     },
 }
-"""Mapping of valid configuration file parameters and their default values."""
+"""Mapping of valid configuration file parameters and their default values or placeholders.
+The types of these values are used when decoding the configuration file. Valid choices for
+certain string options are stored in `CHOICE_MAP`."""
 
-# We use a list instead of a set to preserve order when generating error contexts.
-# TODO: This should probably be a type like TimecodeValue rather than a separate constant.
 CHOICE_MAP: Dict[str, Dict[str, List[str]]] = {
     'global': {
         'backend': ['opencv', 'pyav'],
@@ -93,11 +116,20 @@ CHOICE_MAP: Dict[str, Dict[str, List[str]]] = {
             'veryslow'
         ],
     },
+    'save-images': {
+        'format': ['jpeg', 'png', 'webp'],
+    }
 }
-"""Mapping of options which can only be of a particular set of values."""
+"""Mapping of string options which can only be of a particular set of values. We use a list instead
+of a set to preserve order when generating error contexts."""
 
 
-def _validate_structure(config) -> List[str]:
+def _validate_structure(config: ConfigParser) -> List[str]:
+    """Validates the layout of the section/option mapping.
+
+    Returns:
+        List of any parsing errors in human-readable form.
+    """
     errors: List[str] = []
     for section in config.sections():
         if not section in CONFIG_MAP.keys():
@@ -109,7 +141,12 @@ def _validate_structure(config) -> List[str]:
     return errors
 
 
-def _parse_config(config) -> Tuple[ConfigDict, List[str]]:
+def _parse_config(config: ConfigParser) -> Tuple[ConfigDict, List[str]]:
+    """Process the given configuration into a key-value mapping.
+
+    Returns:
+        Configuration mapping and list of any processing errors in human readable form.
+    """
     out_map: ConfigDict = {}
     errors: List[str] = []
     for command in CONFIG_MAP:
@@ -121,16 +158,31 @@ def _parse_config(config) -> Tuple[ConfigDict, List[str]]:
                     if isinstance(CONFIG_MAP[command][option], bool):
                         value_type = 'yes/no value'
                         out_map[command][option] = config.getboolean(command, option)
+                        continue
                     elif isinstance(CONFIG_MAP[command][option], int):
                         value_type = 'integer'
                         out_map[command][option] = config.getint(command, option)
+                        continue
                     elif isinstance(CONFIG_MAP[command][option], float):
                         value_type = 'number'
                         out_map[command][option] = config.getfloat(command, option)
+                        continue
                 except ValueError as _:
                     errors.append('Invalid [%s] value for %s: %s is not a valid %s.' %
                                   (command, option, config.get(command, option), value_type))
-                if value_type:
+
+                if isinstance(CONFIG_MAP[command][option], RangeValue):
+                    default: RangeValue = CONFIG_MAP[command][option]
+                    value = (
+                        config.getint(command, option)
+                        if isinstance(default.value, int) else config.getfloat(command, option))
+                    try:
+                        new_value = RangeValue(value, default.min_val, default.max_val)
+                        out_map[command][option] = new_value
+                    except ValueError:
+                        errors.append(
+                            'Invalid [%s] value for %s: %s. Value must be be between %s and %s.' %
+                            ((command, option, value, default.min_val, default.max_val)))
                     continue
 
                 if isinstance(CONFIG_MAP[command][option], TimecodeValue):
@@ -177,6 +229,7 @@ class ConfigRegistry:
 
     @property
     def config_dict(self) -> ConfigDict:
+        """Current configuration options that are set for each command."""
         return self._config
 
     def get_init_log(self):
@@ -216,14 +269,21 @@ class ConfigRegistry:
     def get_value(self,
                   command: str,
                   option: str,
-                  override: Optional[ConfigValue] = None) -> ConfigValue:
+                  override: Optional[ConfigValue] = None,
+                  ignore_default: bool = False) -> ConfigValue:
         """Get the current setting or default value of the specified command option."""
         assert command in CONFIG_MAP and option in CONFIG_MAP[command]
         if override is not None:
             return override
         if command in self._config and option in self._config[command]:
-            return self._config[command][option]
-        return CONFIG_MAP[command][option]
+            value = self._config[command][option]
+        else:
+            value = CONFIG_MAP[command][option]
+        if ignore_default:
+            return None
+        if isinstance(value, (TimecodeValue, RangeValue)):
+            return value.value
+        return value
 
     def get_help_string(self, command: str, option: str) -> str:
         """Get a string to specify for the help text indicating the current command option value,
