@@ -125,7 +125,7 @@ As with `detect-content`, the optimal threshold can be determined by generating 
 
 ## Actions / Commands
 
-After setting the detection method(s), there are several commands that can be used.  Type `scenedetect help [command]` for help/arguments of a specific command listed below, or see the [full CLI reference](../reference/command-line-params.md) for details.
+After setting the detection method(s), there are several commands that can be used.  Type `scenedetect help [command]` for help/arguments of a specific command listed below:
 
  - `time`: Used to set input video duration/length or start/end time (discussed below).
  - `list-scenes`: Print and save a list of all scenes in table and CSV format.
@@ -136,6 +136,7 @@ After setting the detection method(s), there are several commands that can be us
  - `version`: Print PySceneDetect release version. No processing is done if present.
  - `about`: Print PySceneDetect license agreement and application information. No processing is done if present.
 
+You can also type `scenedetect help all` for the full CLI reference or [view it here](../reference/command-line.md).
 
 ## Seeking, Duration, and Setting Start / Stop Times
 

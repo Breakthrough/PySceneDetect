@@ -19,6 +19,7 @@ The main goal of v0.6 was to simplify and stabalize the video input and statsfil
  * Support for Python 2.7 has been dropped, minimum supported Python version is 3.6
  * Support for OpenCV 2.x has been dropped, minimum OpenCV version is 3.x
  * Decoding now runs in parallel with detection resulting in significant performance improvements
+ * Adds support for configuration file via command line or in user settings folder
  * Adds support for multiple video backends, PyAV is now supported in addition to OpenCV
  * Breaking API changes to `VideoManager` (replaced with `VideoStream`), `StatsManager`, and `save_images()`
     * See the [Migration Guide](https://pyscenedetect.readthedocs.io/projects/Manual/en/v0.6/api/migration_guide.html) for details on how to update from v0.5.x
@@ -26,6 +27,7 @@ The main goal of v0.6 was to simplify and stabalize the video input and statsfil
 
 **Command-Line Changes:**
 
+ * Configuration files are now supported via `-c`/`--config` or from a user config folder, see [docs for details](TODO(v0.6))
  * `-i`/`--input` may no longer be specified multiple times (use an external tool like `ffmpeg` to perform concatenation first)
  * New `-b`/`--backend` option can be set to use a specific video backend
      * Current options are `opencv` (default) and `pyav` if the `av` package is installed

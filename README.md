@@ -115,7 +115,7 @@ Usage
  - [Example: Detecting and Splitting Scenes in Movie Clip](https://pyscenedetect.readthedocs.io/en/latest/examples/usage-example/)
 
 
-Current Features & Roadmap
+Features & Roadmap
 ----------------------------------------------------------
 
 You can [view the latest features and version roadmap on Readthedocs](http://pyscenedetect.readthedocs.org/en/latest/features/).
@@ -124,10 +124,10 @@ See [`docs/changelog.md`](https://github.com/Breakthrough/PySceneDetect/blob/mas
 Additional features being planned or in development can be found [here (tagged as `feature`) in the issue tracker](https://github.com/Breakthrough/PySceneDetect/issues?q=is%3Aissue+is%3Aopen+label%3Afeature).  You can also find additional information about PySceneDetect at [http://www.bcastell.com/projects/PySceneDetect/](http://www.bcastell.com/projects/PySceneDetect/).
 
 
+License
 ----------------------------------------------------------
 
 Licensed under BSD 3-Clause (see the `LICENSE` file for details).
 
 Copyright (C) 2014-2022 Brandon Castellano.
 All rights reserved.
-
