@@ -94,7 +94,6 @@ In this example, we create a function ``find_scenes()`` which will load a video,
     from scenedetect import SceneManager, open_video, ContentDetector
 
     def find_scenes(video_path, threshold=27.0):
-        # Create our video & scene managers, then add the detector.
         video = open_video(video_path)
         scene_manager = SceneManager()
         scene_manager.add_detector(

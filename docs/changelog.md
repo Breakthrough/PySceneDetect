@@ -73,6 +73,12 @@ The main goal of v0.6 was to simplify and stabalize the video input and statsfil
  * The `block_size` argument has been removed from the `ThresholdDetector` constructor
  * The `calculate_frame_score` method of `ContentDetector` has been renamed to `_calculate_frame_score`
 
+#### Known Issues
+
+ * Image sequences or URL inputs are not supported by the `save-images` or `split-video` commands
+ * Variable framerate videos (VFR) are not fully supported, and will yield incorrect timestamps ([#168](https://github.com/Breakthrough/PySceneDetect/issues/168))
+ * The `-l`/`--add-last-scene` option in `detect-threshold` cannot be disabled
+
 
 ----------------------------------------------------------------
 
@@ -112,6 +118,7 @@ The main goal of v0.6 was to simplify and stabalize the video input and statsfil
 
  * Image sequences or URL inputs are not supported by the `save-images` or `split-video` commands
  * Variable framerate videos (VFR) are not fully supported, and will yield incorrect timestamps ([#168](https://github.com/Breakthrough/PySceneDetect/issues/168))
+ * The `-l`/`--add-last-scene` option in `detect-threshold` cannot be disabled
 
 
 ### 0.5.5 (January 17, 2021)

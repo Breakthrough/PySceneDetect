@@ -19,9 +19,16 @@ PySceneDetect v0.6 is a major step towards a more stable and simplified API and 
 .. code:: python
 
     from scenedetect import open_video
-    video = open_video(path='video.mp4')
+    video = open_video(video.mp4')
 
-The resulting object can then be passed to a :py:class:`SceneManager <scenedetect.scene_manager.SceneManager>` when calling :py:meth:`detect_scenes <scenedetect.scene_manager.SceneManager.detect_scenes>`, or any other function/method that used to take a `VideoManager`.
+The resulting object can then be passed to a :py:class:`SceneManager <scenedetect.scene_manager.SceneManager>` when calling :py:meth:`detect_scenes <scenedetect.scene_manager.SceneManager.detect_scenes>`, or any other function/method that used to take a `VideoManager`, e.g.:
+
+    from scenedetect import open_video, SceneManager, ContentDetector
+    video = open_video('video.mp4')
+    scene_manager = SceneManager()
+    scene_manager.add_detector(ContentDetector(threshold=threshold))
+    scene_manager.detect_scenes(video)
+    print(scene_manager.get_scene_list())
 
 See :py:mod:`scenedetect.backends` for examples of how to create specific backends. Note that where previously a list of paths was accepted, now only a single string should be provided.
 

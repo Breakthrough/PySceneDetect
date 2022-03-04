@@ -39,7 +39,7 @@ threshold = 26
 [split-video]
 preset = slow
 rate-factor = 17
-# Don't need to use quotes even for spaces
+# Don't need to use quotes even if filename contains spaces
 filename = $VIDEO_NAME-Clip-$SCENE_NUMBER
 
 [save-images]

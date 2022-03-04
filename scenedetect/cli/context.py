@@ -367,8 +367,9 @@ class CliContext:
 
         threshold = self.config.get_value("detect-threshold", "threshold", threshold)
         fade_bias = self.config.get_value("detect-threshold", "fade-bias", fade_bias)
+        # TODO: This cannot be disabled right now.
         add_last_scene = add_last_scene or self.config.get_value("detect-threshold",
-                                                                 "add-last-scene", add_last_scene)
+                                                                 "add-last-scene")
 
         logger.debug(
             'Adding detector: ThresholdDetector(threshold=%f, fade_bias=%f,'
