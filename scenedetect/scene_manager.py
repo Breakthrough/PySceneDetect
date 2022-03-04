@@ -451,6 +451,9 @@ def save_images(scene_list: List[Tuple[FrameTimecode, FrameTimecode]],
             if progress_bar:
                 progress_bar.update(1)
 
+    if progress_bar:
+        progress_bar.close()
+
     if not completed:
         logger.error('Could not generate all output images.')
 
@@ -784,6 +787,8 @@ class SceneManager:
             if progress_bar:
                 progress_bar.update(1 + frame_skip)
 
+        if progress_bar:
+            progress_bar.close()
         decode_thread.join()
 
         if self._start_pos is None:

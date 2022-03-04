@@ -99,9 +99,12 @@ def check_split_video_requirements(use_mkvmerge: bool) -> None:
 class CliContext:
     """Context of the command-line interface passed between the various sub-commands.
 
-    After processing the main program options in `parse_options`, the CLI will set the options
-    passed for each sub-command.  After preparing the commands, their actions are executed by
-    passing this object to :py:func:`scenedetect.cli.controller.run_scenedetect`.
+    Handles validation of options taken in from the CLI and configuration files.
+
+    After processing the main program options via `handle_options`, the CLI will then call the
+    respective `handle_*` method for each command. Once all commands have been processed,
+    the main program actions are executed by passing this object to the `run_scenedetect`
+    function in `scenedetect.cli.controller`.
     """
 
     def __init__(self):

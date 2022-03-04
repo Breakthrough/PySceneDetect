@@ -272,6 +272,9 @@ def split_video_ffmpeg(input_video_path: str,
                 break
             if progress_bar:
                 progress_bar.update(duration.get_frames())
+
+        if progress_bar:
+            progress_bar.close()
         if show_output:
             logger.info('Average processing speed %.2f frames/sec.',
                         float(total_frames) / (time.time() - processing_start_time))
