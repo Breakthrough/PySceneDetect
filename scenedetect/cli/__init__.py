@@ -387,8 +387,17 @@ def time_command(ctx, start, duration, end):
     is_flag=True, flag_value=True, help=
     'Only consider luma/brightness channel (useful for greyscale videos).%s' % (
         USER_CONFIG.get_help_string("detect-content", "luma-only")))
+@click.option(
+    '--min-scene-len', '-m', metavar='TIMECODE',
+    type=click.STRING, default=None, help=
+    'Minimum length of any scene. Overrides global min-scene-len (-m) setting.'
+    'TIMECODE can be specified as exact number of frames, a time in seconds followed by s, '
+    'or a timecode in the format HH:MM:SS or HH:MM:SS.nnn.%s' % (
+        '' if USER_CONFIG.is_default('detect-content', 'min-scene-len')
+        else USER_CONFIG.get_help_string('detect-content', 'min-scene-len'))
+    )
 @click.pass_context
-def detect_content_command(ctx, threshold, luma_only):
+def detect_content_command(ctx, threshold, luma_only, min_scene_len):
     """ Perform content detection algorithm on input video.
 
     detect-content
@@ -396,39 +405,49 @@ def detect_content_command(ctx, threshold, luma_only):
     detect-content --threshold 27.5
     """
     assert isinstance(ctx.obj, CliContext)
-    ctx.obj.handle_detect_content(threshold=threshold, luma_only=luma_only)
+    ctx.obj.handle_detect_content(threshold=threshold, luma_only=luma_only, min_scene_len=min_scene_len)
 
 
 
 @click.command('detect-adaptive')
 @click.option(
     '--threshold', '-t', metavar='VAL',
-    type=click.FLOAT, default=3.0, show_default=True, help=
+    type=click.FLOAT, default=None, help=
     'Threshold value (float) that the calculated frame score must exceed to'
-    ' trigger a new scene (see frame metric adaptive_ratio in stats file).')
-@click.option(
-    '--min-scene-len', '-m', metavar='TIMECODE',
-    type=click.STRING, default="0.6s", show_default=True, help=
-    'Minimum size/length of any scene. TIMECODE can be specified as exact'
-    ' number of frames, a time in seconds followed by s, or a timecode in the'
-    ' format HH:MM:SS or HH:MM:SS.nnn')
+    ' trigger a new scene (see frame metric adaptive_ratio in stats file).%s' % (
+        USER_CONFIG.get_help_string('detect-adaptive', 'threshold')
+    ))
 @click.option(
     '--min-delta-hsv', '-d', metavar='VAL',
-    type=click.FLOAT, default=15.0, show_default=True, help=
+    type=click.FLOAT, default=None, help=
     'Minimum threshold (float) that the content_val must exceed in order to register as a new'
-    ' scene. This is calculated the same way that `detect-content` calculates frame score.')
+    ' scene. This is calculated the same way that `detect-content` calculates frame score.%s' % (
+        USER_CONFIG.get_help_string('detect-adaptive', 'min-delta-hsv')
+    ))
 @click.option(
     '--frame-window', '-w', metavar='VAL',
-    type=click.INT, default=2, show_default=True, help=
+    type=click.INT, default=None, help=
     'Size of window (number of frames) before and after each frame to average together in'
-    ' order to detect deviations from the mean.')
+    ' order to detect deviations from the mean.%s' % (
+        USER_CONFIG.get_help_string('detect-adaptive', 'frame-window')
+    ))
 @click.option(
     '--luma-only', '-l',
     is_flag=True, flag_value=True, help=
-    'Only consider luma/brightness channel (useful for greyscale videos).')
+    'Only consider luma/brightness channel (useful for greyscale videos).%s' % (
+        USER_CONFIG.get_help_string('detect-adaptive', 'luma-only')
+    ))
+@click.option(
+    '--min-scene-len', '-m', metavar='TIMECODE',
+    type=click.STRING, default=None, help=
+    'Minimum length of any scene. Overrides global min-scene-len (-m) setting.'
+    'TIMECODE can be specified as exact number of frames, a time in seconds followed by s, '
+    'or a timecode in the format HH:MM:SS or HH:MM:SS.nnn.%s' % (
+        '' if USER_CONFIG.is_default('detect-adaptive', 'min-scene-len')
+        else USER_CONFIG.get_help_string('detect-adaptive', 'min-scene-len'))
+    )
 @click.pass_context
-def detect_adaptive_command(ctx, threshold, min_scene_len, min_delta_hsv,
-                            frame_window, luma_only):
+def detect_adaptive_command(ctx, threshold, min_delta_hsv, frame_window, luma_only, min_scene_len):
     """ Perform adaptive detection algorithm on input video.
 
     detect-adaptive
@@ -437,43 +456,54 @@ def detect_adaptive_command(ctx, threshold, min_scene_len, min_delta_hsv,
     """
     assert isinstance(ctx.obj, CliContext)
 
-    min_scene_len = parse_timecode(min_scene_len, ctx.obj.video_stream.frame_rate)
-    luma_mode_str = '' if not luma_only else ', luma_only mode'
-
-    logger.debug('Adaptively detecting content, parameters:\n'
-                  '  threshold: %d, min-scene-len: %d%s',
-                  threshold, min_scene_len, luma_mode_str)
-
-    # Initialize detector and add to scene manager.
-    # Need to ensure that a detector is not added twice, or will cause
-    # a frame metric key error when registering the detector.
-    ctx.obj._add_detector(scenedetect.detectors.AdaptiveDetector(
-        adaptive_threshold=threshold,
-        min_scene_len=min_scene_len,
+    ctx.obj.handle_detect_adaptive(
+        threshold=threshold,
         min_delta_hsv=min_delta_hsv,
-        window_width=frame_window,
-        luma_only=luma_only))
+        frame_window=frame_window,
+        luma_only=luma_only,
+        min_scene_len=min_scene_len
+    )
 
 
 
 @click.command('detect-threshold')
 @click.option(
     '--threshold', '-t', metavar='VAL',
-    type=click.IntRange(0, 255), default=12, show_default=True, help=
+    type=click.FloatRange(
+        CONFIG_MAP['detect-threshold']['threshold'].min_val,
+        CONFIG_MAP['detect-threshold']['threshold'].max_val),
+    default=None, help=
     'Threshold value (integer) that the delta_rgb frame metric must exceed to trigger a new scene.'
-    ' Refers to frame metric delta_rgb in stats file.')
+    ' Refers to frame metric delta_rgb in stats file.%s' % (
+        USER_CONFIG.get_help_string('detect-threshold', 'threshold')))
 @click.option(
     '--fade-bias', '-f', metavar='PERCENT',
-    type=click.IntRange(-100, 100), default=0, show_default=True, help=
-    'Percent (%) from -100 to 100 of timecode skew for where cuts should be placed. -100'
-    ' indicates the start frame, +100 indicates the end frame, and 0 is the middle of both.')
+    type=click.FloatRange(
+        CONFIG_MAP['detect-threshold']['fade-bias'].min_val,
+        CONFIG_MAP['detect-threshold']['fade-bias'].max_val),
+    default=None, help=
+    'Percent (%%) from -100 to 100 of timecode skew for where cuts should be placed. -100'
+    ' indicates the start frame, +100 indicates the end frame, and 0 is the middle of both.%s' % (
+        USER_CONFIG.get_help_string('detect-threshold', 'fade-bias'))
+    )
 @click.option(
     '--add-last-scene', '-l',
     is_flag=True, flag_value=True, help=
-    'If set, if the video ends on a fade-out, an additional scene will be generated for the'
-    ' last fade out position.')
+    'If set, if the video ends on a fade-out, a final scene will be generated from the last fade'
+    ' out position to the end of the video.%s' % (
+        USER_CONFIG.get_help_string('detect-threshold', 'add-last-scene'))
+    )
+@click.option(
+    '--min-scene-len', '-m', metavar='TIMECODE',
+    type=click.STRING, default=None, help=
+    'Minimum length of any scene. Overrides global min-scene-len (-m) setting.'
+    'TIMECODE can be specified as exact number of frames, a time in seconds followed by s, '
+    'or a timecode in the format HH:MM:SS or HH:MM:SS.nnn.%s' % (
+        '' if USER_CONFIG.is_default('detect-threshold', 'min-scene-len')
+        else USER_CONFIG.get_help_string('detect-threshold', 'min-scene-len'))
+    )
 @click.pass_context
-def detect_threshold_command(ctx, threshold, fade_bias, add_last_scene):
+def detect_threshold_command(ctx, threshold, fade_bias, add_last_scene, min_scene_len):
     """  Perform threshold detection algorithm on input video.
 
     detect-threshold
@@ -482,21 +512,12 @@ def detect_threshold_command(ctx, threshold, fade_bias, add_last_scene):
     """
     assert isinstance(ctx.obj, CliContext)
 
-    min_scene_len = 0 if ctx.obj.drop_short_scenes else ctx.obj.min_scene_len
-
-    logger.debug('Detecting threshold, parameters:\n'
-                  '  threshold: %d, min-scene-len: %d, fade-bias: %d, add-last-scene: %s',
-                  threshold, min_scene_len, fade_bias, 'yes' if add_last_scene else 'no')
-
-    # Handle case where add_last_scene is not set and is None.
-    add_last_scene = True if add_last_scene else False
-
-    # Convert and fade_bias from integer to float with a valid range of -1.0 to 1.0.
-    fade_bias /= 100.0
-    ctx.obj._add_detector(scenedetect.detectors.ThresholdDetector(
-        threshold=threshold, min_scene_len=min_scene_len, fade_bias=fade_bias,
-        add_final_scene=add_last_scene))
-
+    ctx.obj.handle_detect_threshold(
+        threshold=threshold,
+        fade_bias=fade_bias,
+        add_last_scene=add_last_scene,
+        min_scene_len=min_scene_len,
+    )
 
 
 

@@ -33,10 +33,14 @@ The main goal of v0.6 was to simplify and stabalize the video input and statsfil
      * Current options are `opencv` (default) and `pyav` if the `av` package is installed
      * Run `scenedetect help` to see a list of backends available on the current system
  * `-v`/`--verbosity` now takes precedence over `-q`/`--quiet`
+ * `detect-adaptive` command:
+     * The `--drop-short-scenes` global option now works correctly with `detect-adaptive`
  * `detect-content` command:
      * Default threshold `-t`/`--threshold` lowered to 27 to be more sensitive to shot changes ([#246](https://github.com/Breakthrough/PySceneDetect/issues/246))
+     * Add override for global `-m`/`--min-scene-len` option
  * `detect-threshold` command:
      * `-p`/`--min-percent` and `-b`/`--block-size` have been removed
+     * Add override for global `-m`/`--min-scene-len` option
  * `split-video` command:
      * Long name for `-a` has been changed to `--args` (from `--override-args`)
      * `-c`/`--copy` now uses `ffmpeg` instead of `mkvmerge`

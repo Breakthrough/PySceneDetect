@@ -76,26 +76,40 @@ _CONFIG_FILE_DIR = user_config_dir("PySceneDetect", False)
 CONFIG_FILE_PATH = os.path.join(_CONFIG_FILE_DIR, _CONFIG_FILE_NAME)
 
 CONFIG_MAP: ConfigDict = {
-    'global': {
-        'verbosity': 'info',
-        'min-scene-len': TimecodeValue('0.6s'),
-        'downscale': 0,
-        'frame-skip': 0,
-        'backend': 'opencv',
-        'drop-short-scenes': False,
-        'output': '',
+    'detect-adaptive': {
+        'threshold': RangeValue(3.0, min_val=0.0, max_val=255.0),
+        'min-delta-hsv': RangeValue(15.0, min_val=0.0, max_val=255.0),
+        'frame-window': 2,
+        'luma-only': False,
+        'min-scene-len': TimecodeValue(0),  # Default not used
     },
     'detect-content': {
         'luma-only': False,
         'threshold': RangeValue(27.0, min_val=0.0, max_val=255.0),
+        'min-scene-len': TimecodeValue(0),  # Default not used
+    },
+    'detect-threshold': {
+        'threshold': RangeValue(12.0, min_val=0.0, max_val=255.0),
+        'fade-bias': RangeValue(0, min_val=-100.0, max_val=100.0),
+        'add-last-scene': True,
+        'min-scene-len': TimecodeValue(0),  # Default not used
+    },
+    'global': {
+        'downscale': 0,
+        'backend': 'opencv',
+        'drop-short-scenes': False,
+        'frame-skip': 0,
+        'min-scene-len': TimecodeValue('0.6s'),
+        'output': '',
+        'verbosity': 'info',
     },
     'split-video': {
+        'args': "-c:v libx264 -preset veryfast -crf 22 -c:a aac",
         'copy': False,
         'filename': '$VIDEO_NAME-Scene-$SCENE_NUMBER',
         'high-quality': False,
         'mkvmerge': False,
         'output': '/usr/tmp/encoded',
-        'args': "-c:v libx264 -preset veryfast -crf 22 -c:a aac",
         'preset': 'veryfast',
         'quiet': False,
         'rate-factor': RangeValue(22, min_val=0, max_val=100),
@@ -301,7 +315,6 @@ class ConfigRegistry:
             else:
                 value_str = str(self._config[command][option])
             return ' [setting: %s]' % (value_str)
-        # Flags are implicitly off by default, so we don't print defaults for them.
-        if is_flag:
+        if is_flag and CONFIG_MAP[command][option] is False:
             return ''
         return ' [default: %s]' % (str(CONFIG_MAP[command][option]))

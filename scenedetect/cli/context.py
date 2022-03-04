@@ -281,9 +281,21 @@ class CliContext:
         self,
         threshold: Optional[float],
         luma_only: bool,
+        min_scene_len: Optional[str],
     ):
-        """Handles detect-content options."""
-        min_scene_len = 0 if self.drop_short_scenes else self.min_scene_len
+        """Handle detect-content options."""
+        self._check_input_open()
+
+        if self.drop_short_scenes:
+            min_scene_len = 0
+        else:
+            if min_scene_len is None:
+                if self.config.is_default("detect-content", "min-scene-len"):
+                    min_scene_len = self.min_scene_len.frame_num
+                else:
+                    min_scene_len = self.config.get_value("detect-content", "min-scene-len")
+            min_scene_len = parse_timecode(min_scene_len, self.video_stream.frame_rate).frame_num
+
         threshold = self.config.get_value("detect-content", "threshold", threshold)
         luma_only = luma_only or self.config.get_value("detect-content", "luma-only")
         logger.debug(
@@ -292,6 +304,84 @@ class CliContext:
         self._add_detector(
             scenedetect.detectors.ContentDetector(
                 threshold=threshold, min_scene_len=min_scene_len, luma_only=luma_only))
+
+    def handle_detect_adaptive(
+        self,
+        threshold: Optional[float],
+        min_delta_hsv: Optional[float],
+        frame_window: Optional[int],
+        luma_only: bool,
+        min_scene_len: Optional[str],
+    ):
+        """Handle detect-adaptive options."""
+        self._check_input_open()
+
+        if self.drop_short_scenes:
+            min_scene_len = 0
+        else:
+            if min_scene_len is None:
+                if self.config.is_default("detect-adaptive", "min-scene-len"):
+                    min_scene_len = self.min_scene_len.frame_num
+                else:
+                    min_scene_len = self.config.get_value("detect-adaptive", "min-scene-len")
+            min_scene_len = parse_timecode(min_scene_len, self.video_stream.frame_rate).frame_num
+
+        threshold = self.config.get_value("detect-adaptive", "threshold", threshold)
+        min_delta_hsv = self.config.get_value("detect-adaptive", "min-delta-hsv", min_delta_hsv)
+        frame_window = self.config.get_value("detect-adaptive", "frame-window", frame_window)
+        luma_only = luma_only or self.config.get_value("detect-adaptive", "luma-only")
+
+        logger.debug(
+            'Adding detector: AdaptiveDetector(threshold=%f, min_delta_hsv=%f,'
+            ' min_scene_len=%d, luma_only=%s, frame_window=%d)', threshold, min_delta_hsv,
+            min_scene_len, luma_only, frame_window)
+
+        self._add_detector(
+            scenedetect.detectors.AdaptiveDetector(
+                adaptive_threshold=threshold,
+                min_scene_len=min_scene_len,
+                min_delta_hsv=min_delta_hsv,
+                luma_only=luma_only,
+                window_width=frame_window,
+            ))
+
+    def handle_detect_threshold(
+        self,
+        threshold: Optional[float],
+        fade_bias: Optional[float],
+        add_last_scene: bool,
+        min_scene_len: Optional[str],
+    ):
+        """Handle detect-threshold options."""
+        self._check_input_open()
+
+        if self.drop_short_scenes:
+            min_scene_len = 0
+        else:
+            if min_scene_len is None:
+                if self.config.is_default("detect-threshold", "min-scene-len"):
+                    min_scene_len = self.min_scene_len.frame_num
+                else:
+                    min_scene_len = self.config.get_value("detect-threshold", "min-scene-len")
+            min_scene_len = parse_timecode(min_scene_len, self.video_stream.frame_rate).frame_num
+
+        threshold = self.config.get_value("detect-threshold", "threshold", threshold)
+        fade_bias = self.config.get_value("detect-threshold", "fade-bias", fade_bias)
+        add_last_scene = add_last_scene or self.config.get_value("detect-threshold",
+                                                                 "add-last-scene", add_last_scene)
+
+        logger.debug(
+            'Adding detector: ThresholdDetector(threshold=%f, fade_bias=%f,'
+            ' min_scene_len=%d, add_last_scene=%s)', threshold, fade_bias, min_scene_len,
+            add_last_scene)
+
+        self._add_detector(
+            scenedetect.detectors.ThresholdDetector(
+                threshold=threshold,
+                fade_bias=fade_bias,
+                min_scene_len=min_scene_len,
+                add_final_scene=add_last_scene,
+            ))
 
     def handle_split_video(
         self,
