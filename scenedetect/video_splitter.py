@@ -2,42 +2,19 @@
 #
 #         PySceneDetect: Python-Based Video Scene Detector
 #   ---------------------------------------------------------------
-#     [  Site: http://www.bcastell.com/projects/PySceneDetect/   ]
+#     [  Site:   http://www.scenedetect.scenedetect.com/         ]
+#     [  Docs:   http://manual.scenedetect.scenedetect.com/      ]
 #     [  Github: https://github.com/Breakthrough/PySceneDetect/  ]
-#     [  Documentation: http://pyscenedetect.readthedocs.org/    ]
 #
 # Copyright (C) 2014-2022 Brandon Castellano <http://www.bcastell.com>.
-#
-# PySceneDetect is licensed under the BSD 3-Clause License; see the included
-# LICENSE file, or visit one of the above pages for details.
+# PySceneDetect is licensed under the BSD 3-Clause License; see the
+# included LICENSE file, or visit one of the above pages for details.
 #
 # This software may also invoke mkvmerge or FFmpeg, if available.
-#
 # FFmpeg is a trademark of Fabrice Bellard.
 # mkvmerge is Copyright (C) 2005-2016, Matroska.
-#
 # Certain distributions of PySceneDetect may include the above software;
-# see the included LICENSE-FFMPEG and LICENSE-MKVMERGE files. If using a
-# source distribution, these programs can be obtained from following URLs
-# (note that mkvmerge is a part of the MKVToolNix package):
-#
-#     FFmpeg:   [ https://ffmpeg.org/download.html ]
-#     mkvmerge: [ https://mkvtoolnix.download/downloads.html ]
-#
-# Also note that Linux users can likely obtain them from their package
-# manager (e.g. `sudo apt-get install ffmpeg`).
-#
-# Once installed, ensure the program can be accessed system-wide by calling
-# the `mkvmerge` or `ffmpeg` command from a terminal/command prompt.
-# PySceneDetect will automatically use whichever program is available on
-# the computer, depending on the specified command-line options.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-# AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
-# ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-# WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+# see the included LICENSE-FFMPEG and LICENSE-MKVMERGE files.
 #
 """ ``scenedetect.video_splitter`` Module
 

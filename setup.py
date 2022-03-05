@@ -3,11 +3,13 @@
 #
 #         PySceneDetect: Python-Based Video Scene Detector
 #   ---------------------------------------------------------------
-#     [  Site: http://www.bcastell.com/projects/PySceneDetect/   ]
+#     [  Site:   http://www.scenedetect.scenedetect.com/         ]
+#     [  Docs:   http://manual.scenedetect.scenedetect.com/      ]
 #     [  Github: https://github.com/Breakthrough/PySceneDetect/  ]
-#     [  Documentation: http://pyscenedetect.readthedocs.org/    ]
 #
 # Copyright (C) 2014-2022 Brandon Castellano <http://www.bcastell.com>.
+# PySceneDetect is licensed under the BSD 3-Clause License; see the
+# included LICENSE file, or visit one of the above pages for details.
 #
 
 """ PySceneDetect setup.py
