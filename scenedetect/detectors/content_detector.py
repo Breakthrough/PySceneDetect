@@ -24,12 +24,39 @@ against a set threshold/score, which if exceeded, triggers a scene cut.
 This detector is available from the command-line as the `detect-content` command.
 """
 
-from typing import List
+from typing import Iterable, List, Tuple
 
 import numpy
 import cv2
 
 from scenedetect.scene_detector import SceneDetector
+
+
+def calculate_frame_score(current_frame_hsv: Iterable[numpy.ndarray],
+                          last_frame_hsv: Iterable[numpy.ndarray]) -> Tuple[float]:
+    """Calculates score between two adjacent frames in the HSV colourspace. Frames should be
+    split, e.g. cv2.split(cv2.cvtColor(frame_data, cv2.COLOR_BGR2HSV)).
+
+    Arguments:
+        curr_frame_hsv: Current frame.
+        last_frame_hsv: Previous frame.
+
+    Returns:
+
+        Tuple containing the average pixel change for each component as well as the average
+        across all components, e.g. (avg_h, avg_s, avg_v, avg_all).
+
+    """
+    current_frame_hsv = [x.astype(numpy.int32) for x in current_frame_hsv]
+    last_frame_hsv = [x.astype(numpy.int32) for x in last_frame_hsv]
+    delta_hsv = [0, 0, 0, 0]
+    for i in range(3):
+        num_pixels = current_frame_hsv[i].shape[0] * current_frame_hsv[i].shape[1]
+        delta_hsv[i] = numpy.sum(
+            numpy.abs(current_frame_hsv[i] - last_frame_hsv[i])) / float(num_pixels)
+
+    delta_hsv[3] = sum(delta_hsv[0:3]) / 3.0
+    return tuple(delta_hsv)
 
 
 class ContentDetector(SceneDetector):
@@ -79,15 +106,7 @@ class ContentDetector(SceneDetector):
 
     def _calculate_frame_score(self, frame_num: int, curr_hsv: List[numpy.ndarray],
                                last_hsv: List[numpy.ndarray]) -> float:
-        curr_hsv = [x.astype(numpy.int32) for x in curr_hsv]
-        last_hsv = [x.astype(numpy.int32) for x in last_hsv]
-        delta_hsv = [0, 0, 0, 0]
-        for i in range(3):
-            num_pixels = curr_hsv[i].shape[0] * curr_hsv[i].shape[1]
-            delta_hsv[i] = numpy.sum(numpy.abs(curr_hsv[i] - last_hsv[i])) / float(num_pixels)
-
-        delta_hsv[3] = sum(delta_hsv[0:3]) / 3.0
-        delta_h, delta_s, delta_v, delta_content = delta_hsv
+        delta_h, delta_s, delta_v, delta_content = calculate_frame_score(curr_hsv, last_hsv)
 
         if self.stats_manager is not None:
             self.stats_manager.set_metrics(

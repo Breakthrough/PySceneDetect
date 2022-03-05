@@ -7,7 +7,9 @@ Migration Guide
 
 This page details how to transition a program written using PySceneDetect v0.5 to the new v0.6 API.
 
-PySceneDetect v0.6 is a major step towards a more stable and simplified API and should better serve most use cases.  The biggest change to most existing workflows should be how video input is handled, and that Python 3.6 or above is now required.  This page should cover the most common use-cases, although it is not exhaustive.  For a complete list of API changes, see `the changelog <https://pyscenedetect.readthedocs.io/en/latest/changelog/>`_.
+PySceneDetect v0.6 is a major step towards a more stable and simplified API.  The biggest change to most existing workflows is how video input is handled, and that Python 3.6 or above is now required.
+
+This page covers the most commonly used APIs which require updates to work with v0.6.  Note that this page is not an exhaustive set of changes.  For a complete list of breaking API changes, see `the changelog <https://pyscenedetect.readthedocs.io/en/latest/changelog/>`_.
 
 
 ===============================================================
@@ -34,13 +36,6 @@ See :py:mod:`scenedetect.backends` for examples of how to create specific backen
 
 
 ===============================================================
-`StatsManager` Class
-===============================================================
-
-The :py:func:`save_to_csv <scenedetect.stats_manager.StatsManager.save_to_csv>` and :py:func:`load_from_csv <scenedetect.stats_manager.StatsManager.save_to_csv>` methods now accept either a `path` or an open `file` handle.
-
-
-===============================================================
 `SceneManager` Class
 ===============================================================
 
@@ -57,24 +52,31 @@ The `downscale_factor` parameter has been removed from :py:func:`save_images <sc
 
 
 ===============================================================
-`AdaptiveDetector` Class
-===============================================================
-
-The `video_manager` parameter has been removed and is no longer required when constructing an :py:class:`AdaptiveDetector <scenedetect.detectors.adaptive_detector.AdaptiveDetector>` object.
-
-
-===============================================================
 `split_video_*` Functions
 ===============================================================
 
 The the :py:mod:`scenedetect.video_splitter` functions :py:func:`split_video_ffmpeg <scenedetect.video_splitter.split_video_ffmpeg>` and :py:func:`split_video_mkvmerge <scenedetect.video_splitter.split_video_mkvmerge>` now only accept a single path as the input (first) argument, where previously it was required to be a list.
 
-The `suppress_output` and `hide_progress` arguments to the :py:func:`split_video_ffmpeg <scenedetect.video_splitter.split_video_ffmpeg>` and :py:func:`split_video_mkvmerge <scenedetect.video_splitter.split_video_mkvmerge>` have been renamed, and have new defaults:
+The `suppress_output` and `hide_progress` arguments to the :py:func:`split_video_ffmpeg <scenedetect.video_splitter.split_video_ffmpeg>` and :py:func:`split_video_mkvmerge <scenedetect.video_splitter.split_video_mkvmerge>` have been removed, and two new options have been added:
 
  * `suppress_output` is now `show_output`, default is `False`
  * `hide_progress` is now `show_progress`, default is `False`
 
 This makes the API consistent with that of :py:class:`SceneManager <scenedetect.scene_manager.SceneManager>`.
+
+
+===============================================================
+`StatsManager` Class
+===============================================================
+
+The :py:func:`save_to_csv <scenedetect.stats_manager.StatsManager.save_to_csv>` and :py:func:`load_from_csv <scenedetect.stats_manager.StatsManager.save_to_csv>` methods now accept either a `path` or an open `file` handle.
+
+
+===============================================================
+`AdaptiveDetector` Class
+===============================================================
+
+The `video_manager` parameter has been removed and is no longer required when constructing an :py:class:`AdaptiveDetector <scenedetect.detectors.adaptive_detector.AdaptiveDetector>` object.
 
 
 ===============================================================
@@ -90,7 +92,7 @@ The `block_size` argument has been removed from the :py:class:`ThresholdDetector
 `ContentDetector` Class
 ===============================================================
 
-The `calculate_frame_score` method of :py:class:`ContentDetector <scenedetect.detectors.content_detector.ContentDetector>` has been renamed to :py:meth:`_calculate_frame_score <scenedetect.detectors.content_detector.ContentDetector._calculate_frame_score>`
+The `calculate_frame_score` method of :py:class:`ContentDetector <scenedetect.detectors.content_detector.ContentDetector>` has been renamed to :py:meth:`_calculate_frame_score <scenedetect.detectors.content_detector.ContentDetector._calculate_frame_score>`. Use new global function :py:func:`calculate_frame_score <scenedetect.detectors.content_detector.calculate_frame_score>` to achieve the same result.
 
 
 `MINIMUM_FRAMES_PER_SECOND_*` Constants
