@@ -72,18 +72,18 @@ CONFIG_MAP: ConfigDict = {
         'frame-window': 2,
         'luma-only': False,
         'min-delta-hsv': RangeValue(15.0, min_val=0.0, max_val=255.0),
-        'min-scene-len': TimecodeValue(0),                             # Default not used
+        'min-scene-len': TimecodeValue(0),
         'threshold': RangeValue(3.0, min_val=0.0, max_val=255.0),
     },
     'detect-content': {
         'luma-only': False,
-        'min-scene-len': TimecodeValue(0),                             # Default not used
+        'min-scene-len': TimecodeValue(0),
         'threshold': RangeValue(27.0, min_val=0.0, max_val=255.0),
     },
     'detect-threshold': {
         'add-last-scene': True,
         'fade-bias': RangeValue(0, min_val=-100.0, max_val=100.0),
-        'min-scene-len': TimecodeValue(0),                             # Default not used
+        'min-scene-len': TimecodeValue(0),
         'threshold': RangeValue(12.0, min_val=0.0, max_val=255.0),
     },
     'export-html': {
@@ -201,6 +201,7 @@ def _parse_config(config: ConfigParser) -> Tuple[ConfigDict, List[str]]:
                 except ValueError as _:
                     errors.append('Invalid [%s] value for %s: %s is not a valid %s.' %
                                   (command, option, config.get(command, option), value_type))
+                    continue
 
                 if isinstance(CONFIG_MAP[command][option], RangeValue):
                     default: RangeValue = CONFIG_MAP[command][option]
@@ -239,6 +240,7 @@ def _parse_config(config: ConfigParser) -> Tuple[ConfigDict, List[str]]:
                                               choice for choice in CHOICE_MAP[command][option])))
                             continue
                     out_map[command][option] = config_value
+                    continue
 
     return (out_map, errors)
 
@@ -316,14 +318,19 @@ class ConfigRegistry:
             return value.value
         return value
 
-    def get_help_string(self, command: str, option: str) -> str:
+    def get_help_string(self,
+                        command: str,
+                        option: str,
+                        show_default: Optional[bool] = None) -> str:
         """Get a string to specify for the help text indicating the current command option value,
         if set, or the default.
 
         Arguments:
             command: A command name or, "global" for global options.
             option: Command-line option to set within `command`.
-            show_flag_default: """
+            show_default: Always show default value. Default is False for flag/bool values,
+                True otherwise.
+        """
         assert command in CONFIG_MAP and option in CONFIG_MAP[command]
         is_flag = isinstance(CONFIG_MAP[command][option], bool)
         if command in self._config and option in self._config[command]:
@@ -332,6 +339,7 @@ class ConfigRegistry:
             else:
                 value_str = str(self._config[command][option])
             return ' [setting: %s]' % (value_str)
-        if is_flag and CONFIG_MAP[command][option] is False:
+        if show_default is False or (show_default is None and is_flag
+                                     and CONFIG_MAP[command][option] is False):
             return ''
         return ' [default: %s]' % (str(CONFIG_MAP[command][option]))

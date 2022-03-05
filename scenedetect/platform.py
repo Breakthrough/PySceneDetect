@@ -152,7 +152,7 @@ def get_and_create_path(file_path: AnyStr, output_directory: Optional[AnyStr] = 
 
 def init_logger(log_level: int = logging.INFO,
                 show_stdout: bool = False,
-                log_file: Optional[TextIO] = None):
+                log_file: Optional[str] = None):
     """Initializes logging for PySceneDetect. The logger instance used is named 'pyscenedetect'.
     By default the logger has no handlers to suppress output. All existing log handlers are replaced
     every time this function is invoked.
@@ -160,7 +160,7 @@ def init_logger(log_level: int = logging.INFO,
     Arguments:
         log_level: Verbosity of log messages.
         show_stdout: If True, add handler to show log messages on stdout (default: False).
-        log_file: If set, add handler to dump log messages to given file.
+        log_file: If set, add handler to dump log messages to given file path.
     """
     # Format of log messages depends on verbosity.
     format_str = '[PySceneDetect] %(message)s'

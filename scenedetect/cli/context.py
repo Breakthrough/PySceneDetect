@@ -18,7 +18,7 @@ This module contains :py:class:`CliContext` which encapsulates the command-line 
 from __future__ import print_function
 import logging
 import os
-from typing import Optional, TextIO, Union
+from typing import AnyStr, Optional, Union
 
 import click
 
@@ -62,11 +62,11 @@ def contains_sequence_or_url(video_path: str) -> bool:
 
 def check_split_video_requirements(use_mkvmerge: bool) -> None:
     # type: (bool) -> None
-    """ Validates that the proper tool is available on the system to perform the split-video
-    command, which depends on if -m/--mkvmerge is set (if not, defaults to ffmpeg).
+    """ Validates that the proper tool is available on the system to perform the
+    `split-video` command.
 
     Arguments:
-        use_mkvmerge: True if -m/--mkvmerge is set, False otherwise.
+        use_mkvmerge: True if mkvmerge (-m), False otherwise.
 
     Raises: click.BadParameter if the proper video splitting tool cannot be found.
     """
@@ -75,13 +75,13 @@ def check_split_video_requirements(use_mkvmerge: bool) -> None:
         error_strs = [
             "{EXTERN_TOOL} is required for split-video{EXTRA_ARGS}.".format(
                 EXTERN_TOOL='mkvmerge' if use_mkvmerge else 'ffmpeg',
-                EXTRA_ARGS=' -m/--mkvmerge' if use_mkvmerge else '')
+                EXTRA_ARGS=' when mkvmerge (-m) is set' if use_mkvmerge else '')
         ]
-        error_strs += ["Install one of the above tools to enable the split-video command."]
+        error_strs += ['Ensure the program is available on your system and try again.']
         if not use_mkvmerge and is_mkvmerge_available():
-            error_strs += ['You can also specify `-m/--mkvmerge` to use mkvmerge for splitting.']
+            error_strs += ['You can specify mkvmerge (-m) to use mkvmerge for splitting.']
         elif use_mkvmerge and is_ffmpeg_available():
-            error_strs += ['You can also specify `-c/--copy` to use ffmpeg stream copying.']
+            error_strs += ['You can specify copy (-c) to use ffmpeg stream copying.']
         error_str = '\n'.join(error_strs)
         raise click.BadParameter(error_str, param_hint='split-video')
 
@@ -92,10 +92,10 @@ class CliContext:
 
     Handles validation of options taken in from the CLI and configuration files.
 
-    After processing the main program options via `handle_options`, the CLI will then call the
-    respective `handle_*` method for each command. Once all commands have been processed,
-    the main program actions are executed by passing this object to the `run_scenedetect`
-    function in `scenedetect.cli.controller`.
+    After processing the main program options via `handle_options`, the CLI will then call
+    the respective `handle_*` method for each command. Once all commands have been
+    processed, the main program actions are executed by passing this object to the
+    `run_scenedetect` function in `scenedetect.cli.controller`.
     """
 
     def __init__(self):
@@ -167,24 +167,24 @@ class CliContext:
 
     def handle_options(
         self,
-        input_path: str,
-        output: Optional[str],
+        input_path: AnyStr,
+        output: Optional[AnyStr],
         framerate: float,
-        stats_file: Optional[str],
+        stats_file: Optional[AnyStr],
         downscale: Optional[int],
         frame_skip: int,
         min_scene_len: str,
         drop_short_scenes: bool,
         backend: Optional[str],
         quiet: bool,
-        logfile: Optional[str],
-        config: Optional[str],
-        stats: Optional[str],
+        logfile: Optional[AnyStr],
+        config: Optional[AnyStr],
+        stats: Optional[AnyStr],
         verbosity: Optional[str],
     ):
-        """Parses all global options/arguments passed to the main scenedetect command, before other
-        sub-commands (e.g. this function processes the [options] when calling `scenedetect [options]
-        [commands [command options]]`).
+        """Parse all global options/arguments passed to the main scenedetect command,
+        before other sub-commands (e.g. this function processes the [options] when calling
+        `scenedetect [options] [commands [command options]]`).
 
         Raises:
             click.BadParameter: One of the given options/parameters is invalid.
@@ -203,13 +203,13 @@ class CliContext:
             init_failure = True
             init_log += ex.init_log
         finally:
-            # Make sure we always print the version number even on any kind of init failure.
+            # Make sure we print the version number even on any kind of init failure.
             logger.info('PySceneDetect %s', scenedetect.__version__)
             init_log += self.config.get_init_log()
             for (log_level, log_str) in init_log:
                 logger.log(log_level, log_str)
-                # We don't raise an exception if the user configuration fails to load, so instead
-                # we look for any errors in the init log.
+                # We don't raise an exception if the user configuration fails to load, so
+                # we instead look for errors in the init log.
                 if log_level >= logging.ERROR:
                     init_failure = True
             if init_failure:
@@ -226,7 +226,7 @@ class CliContext:
             ]
             logger.error('\n'.join(error_strs))
             raise click.BadParameter(
-                '\n  Combining the -s/--stats and -fs/--frame-skip options is not supported.',
+                'Combining the -s/--stats and -fs/--frame-skip options is not supported.',
                 param_hint='frame skip + stats file')
 
         # Handle the case where -i/--input was not specified (e.g. for the `help` command).
@@ -234,7 +234,7 @@ class CliContext:
             return
 
         # Have to load the input video to obtain a time base before parsing timecodes.
-        self._init_video_stream(
+        self._open_video_stream(
             input_path=input_path,
             framerate=framerate,
             backend=self.config.get_value("global", "backend", backend))
@@ -388,7 +388,13 @@ class CliContext:
 
         self.options_processed = options_processed_orig
 
-    def handle_export_html(self, filename, no_images, image_width, image_height):
+    def handle_export_html(
+        self,
+        filename: Optional[AnyStr],
+        no_images: bool,
+        image_width: Optional[int],
+        image_height: Optional[int],
+    ):
         """Handle `export-html` command options."""
         self._check_input_open()
         options_processed_orig = self.options_processed
@@ -396,24 +402,32 @@ class CliContext:
         if self.export_html:
             self._on_duplicate_command('export_html')
 
+        no_images = no_images or self.config.get_value('export-html', 'no-images')
+        self.html_include_images = not no_images
+
+        self.html_name_format = self.config.get_value('export-html', 'filename', filename)
+        self.image_width = self.config.get_value('export-html', 'image-width', image_width)
+        self.image_height = self.config.get_value('export-html', 'image-height', image_height)
+
         if not self.save_images and not no_images:
             self.options_processed = False
             raise click.BadArgumentUsage(
                 'The export-html command requires that the save-images command\n'
                 'is specified before it, unless --no-images is specified.')
-
-        if filename is not None:
-            self.html_name_format = filename
-            logger.info('Scene list html file name format:\n %s', filename)
-        self.html_include_images = False if no_images else True
-        self.image_width = image_width
-        self.image_height = image_height
+        logger.info('HTML file name format:\n %s', filename)
 
         self.export_html = True
 
         self.options_processed = options_processed_orig
 
-    def handle_list_scenes(self, output, filename, no_output_file, quiet, skip_cuts):
+    def handle_list_scenes(
+        self,
+        output: Optional[AnyStr],
+        filename: Optional[AnyStr],
+        no_output_file: bool,
+        quiet: bool,
+        skip_cuts: bool,
+    ):
         """Handle `list-scenes` command options."""
         self._check_input_open()
         options_processed_orig = self.options_processed
@@ -421,15 +435,18 @@ class CliContext:
         if self.list_scenes:
             self._on_duplicate_command('list-scenes')
 
-        self.print_scene_list = True if quiet is None else not quiet
-        self.scene_list_directory = output
-        self.scene_list_name_format = filename
+        self.skip_cuts = skip_cuts or self.config.get_value('list-scenes', 'skip-cuts')
+        self.print_scene_list = not (quiet or self.config.get_value('list-scenes', 'quiet'))
+        no_output_file = no_output_file or self.config.get_value('list-scenes', 'no-output-file')
+
+        self.scene_list_directory = self.config.get_value(
+            'list-scenes', 'output', output, ignore_default=True)
+        self.scene_list_name_format = self.config.get_value('list-scenes', 'filename', filename)
         if self.scene_list_name_format is not None and not no_output_file:
             logger.info('Scene list filename format:\n  %s', self.scene_list_name_format)
-        self.scene_list_output = False if no_output_file else True
+        self.scene_list_output = not no_output_file
         if self.scene_list_directory is not None:
             logger.info('Scene list output directory:\n  %s', self.scene_list_directory)
-        self.skip_cuts = skip_cuts
 
         self.list_scenes = True
 
@@ -437,8 +454,8 @@ class CliContext:
 
     def handle_split_video(
         self,
-        output: Optional[str],
-        filename: Optional[str],
+        output: Optional[AnyStr],
+        filename: Optional[AnyStr],
         quiet: bool,
         copy: bool,
         high_quality: bool,
@@ -472,9 +489,9 @@ class CliContext:
             logger.info('Video output path set:  \n%s', self.split_directory)
         self.split_name_format = self.config.get_value('split-video', 'filename', filename)
 
-        # We only load the config values for these flags/options if none of the other encoder
-        # flags/options were set via the CLI to avoid any conflicting options (e.g. if the
-        # config file sets `high-quality = yes` but `--copy` is specified).
+        # We only load the config values for these flags/options if none of the other
+        # encoder flags/options were set via the CLI to avoid any conflicting options
+        # (e.g. if the config file sets `high-quality = yes` but `--copy` is specified).
         if not (mkvmerge or copy or high_quality or args or rate_factor or preset):
             mkvmerge = self.config.get_value('split-video', 'mkvmerge')
             copy = self.config.get_value('split-video', 'copy')
@@ -488,20 +505,19 @@ class CliContext:
             command = 'mkvmerge (-m)' if mkvmerge else 'copy (-c)'
             if high_quality:
                 raise click.BadParameter(
-                    'high-quality (-hq) cannot be specified with {command}'.format(command=command),
+                    'high-quality (-hq) cannot be used with %s' % (command),
                     param_hint='split-video')
             if args:
                 raise click.BadParameter(
-                    'args (-a) cannot be specified with {command}'.format(command=command),
-                    param_hint='split-video')
+                    'args (-a) cannot be used with %s' % (command), param_hint='split-video')
             if rate_factor:
                 raise click.BadParameter(
-                    'rate-factor (crf) cannot be specified with {command}'.format(command=command),
+                    'rate-factor (crf) cannot be used with %s' % (command),
                     param_hint='split-video')
             if preset:
                 raise click.BadParameter(
-                    'preset (-p) cannot be specified with {command}'.format(command=command),
-                    param_hint='split-video')
+                    'preset (-p) cannot be used with %s' % (command), param_hint='split-video')
+
         ##
         ## mkvmerge-Specific Arguments/Options
         ##
@@ -516,8 +532,8 @@ class CliContext:
         ##
         ## ffmpeg-Specific Arguments/Options
         ##
-        # TODO: Should add some validation of the name format to ensure it contains at least one variable,
-        # otherwise the output will just keep getting overwritten.
+        # TODO: Should add some validation of the name format to ensure it contains at
+        # least one variable, otherwise the output will just keep getting overwritten.
 
         if copy:
             args = '-c:v copy -c:a copy'
@@ -538,18 +554,18 @@ class CliContext:
 
     def handle_save_images(
         self,
-        num_images: int,
-        output: Optional[str],
-        name_format: str,
+        num_images: Optional[int],
+        output: Optional[AnyStr],
+        filename: Optional[AnyStr],
         jpeg: bool,
         webp: bool,
         quality: Optional[int],
         png: bool,
-        compression: int,
-        frame_margin: int,
-        scale: float,
-        height: int,
-        width: int,
+        compression: Optional[int],
+        frame_margin: Optional[int],
+        scale: Optional[float],
+        height: Optional[int],
+        width: Optional[int],
     ):
         """Handle `save-images` command options."""
         self._check_input_open()
@@ -563,54 +579,61 @@ class CliContext:
             logger.error(error_str)
             raise click.BadParameter(error_str, param_hint='save-images')
 
-        if quality is None:
-            quality = 100 if webp else 95
-
         num_flags = sum([1 if flag else 0 for flag in [jpeg, webp, png]])
-        if num_flags <= 1:
+        if num_flags > 1:
+            logger.error('Multiple image type flags set for save-images command.')
+            raise click.BadParameter(
+                'Only one image type (JPG/PNG/WEBP) can be specified.', param_hint='save-images')
+        # Only use config params for image format if one wasn't specified.
+        elif num_flags == 0:
+            image_format = self.config.get_value('save-images', 'format').lower()
+            jpeg = image_format == 'jpeg'
+            webp = image_format == 'webp'
+            png = image_format == 'png'
 
-            # Ensure the format exists (default is JPEG).
-            extension = 'jpg'
-            if png:
-                extension = 'png'
-            elif webp:
-                extension = 'webp'
-            valid_params = get_cv2_imwrite_params()
-            if not extension in valid_params or valid_params[extension] is None:
-                error_strs = [
-                    'Image encoder type %s not supported.' % extension.upper(),
-                    'The specified encoder type could not be found in the current OpenCV module.',
-                    'To enable this output format, please update the installed version of OpenCV.',
-                    'If you build OpenCV, ensure the the proper dependencies are enabled. '
-                ]
-                logger.debug('\n'.join(error_strs))
-                raise click.BadParameter('\n'.join(error_strs), param_hint='save-images')
-
-            self.save_images = True
-            self.image_directory = output
-            self.image_extension = extension
-            self.image_param = compression if png else quality
-            self.image_name_format = name_format
-            self.num_images = num_images
-            self.frame_margin = frame_margin
+        # Only use config params for scale/height/width if none of them are specified explicitly.
+        if scale is None and height is None and width is None:
+            self.scale = self.config.get_value('save-images', 'scale')
+            self.height = self.config.get_value('save-images', 'height')
+            self.width = self.config.get_value('save-images', 'width')
+        else:
             self.scale = scale
             self.height = height
             self.width = width
 
-            image_type = 'JPEG' if self.image_extension == 'jpg' else self.image_extension.upper()
-            image_param_type = ''
-            if self.image_param:
-                image_param_type = 'Compression' if image_type == 'PNG' else 'Quality'
-                image_param_type = ' [%s: %d]' % (image_param_type, self.image_param)
-            logger.info('Image output format set: %s%s', image_type, image_param_type)
-            if self.image_directory is not None:
-                logger.info('Image output directory set:\n  %s',
-                            os.path.abspath(self.image_directory))
-            self.options_processed = options_processed_orig
-        else:
-            logger.error('Multiple image type flags set for save-images command.')
-            raise click.BadParameter(
-                'Only one image type (JPG/PNG/WEBP) can be specified.', param_hint='save-images')
+        quality = self.config.get_value('save-images', 'quality', 100 if webp else 95)
+        compression = self.config.get_value('save-images', 'compression', compression)
+        self.image_param = compression if png else quality
+
+        self.image_extension = 'jpg' if jpeg else 'png' if png else 'webp'
+        valid_params = get_cv2_imwrite_params()
+        if not self.image_extension in valid_params or valid_params[self.image_extension] is None:
+            error_strs = [
+                'Image encoder type `%s` not supported.' % self.image_extension.upper(),
+                'The specified encoder type could not be found in the current OpenCV module.',
+                'To enable this output format, please update the installed version of OpenCV.',
+                'If you build OpenCV, ensure the the proper dependencies are enabled. '
+            ]
+            logger.debug('\n'.join(error_strs))
+            raise click.BadParameter('\n'.join(error_strs), param_hint='save-images')
+
+        self.image_directory = self.config.get_value(
+            'save-images', 'output', output, ignore_default=True)
+
+        self.image_name_format = self.config.get_value('save-images', 'filename', filename)
+        self.num_images = self.config.get_value('save-images', 'num-images', num_images)
+        self.frame_margin = self.config.get_value('save-images', 'frame-margin', frame_margin)
+
+        image_type = ('jpeg' if jpeg else self.image_extension).upper()
+        image_param_type = 'Compression' if png else 'Quality'
+        image_param_type = ' [%s: %d]' % (image_param_type, self.image_param)
+        logger.info('Image output format set: %s%s', image_type, image_param_type)
+        if self.image_directory is not None:
+            logger.info('Image output directory set:\n  %s', os.path.abspath(self.image_directory))
+
+        self.save_images = True
+
+        self.options_processed = options_processed_orig
 
     def handle_time(self, start, duration, end):
         """Handle `time` command options."""
@@ -644,7 +667,7 @@ class CliContext:
         config: Optional[str],
         quiet: Optional[bool],
         verbosity: Optional[str],
-        logfile: Optional[TextIO],
+        logfile: Optional[AnyStr],
     ):
         """Setup logging and load application configuration file."""
         self.quiet_mode = bool(quiet)
@@ -710,7 +733,7 @@ class CliContext:
             self.options_processed = False
             raise click.Abort()
 
-    def _init_video_stream(self, input_path: str, framerate: Optional[float], backend: str):
+    def _open_video_stream(self, input_path: AnyStr, framerate: Optional[float], backend: str):
         self.base_timecode = None
         try:
             if not backend in AVAILABLE_BACKENDS:
@@ -735,8 +758,8 @@ class CliContext:
 
     def _open_stats_file(self, file_path: str):
         """Initializes this object's StatsManager, loading any existing stats from disk.
-        If the file does not already exist, all directories leading up to it's eventual location
-        will be created here."""
+        If the file does not already exist, all directories leading up to it's eventual
+        location will be created here."""
         self.stats_file_path = get_and_create_path(file_path, self.output_directory)
         self.stats_manager = StatsManager()
 

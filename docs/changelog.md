@@ -29,6 +29,7 @@ The main goal of v0.6 was to simplify and stabalize the video input and statsfil
 
  * Configuration files are now supported via `-c`/`--config` or from a user config folder, see [docs for details](https://scenedetect.com/en/v0.6/reference/config)
  * `-i`/`--input` may no longer be specified multiple times (use an external tool like `ffmpeg` to perform concatenation first)
+ * `-l`/`--logfile` now respects `-o`/`--output`
  * New `-b`/`--backend` option can be set to use a specific video backend
      * Current options are `opencv` (default) and `pyav` if the `av` package is installed
      * Run `scenedetect help` to see a list of backends available on the current system
