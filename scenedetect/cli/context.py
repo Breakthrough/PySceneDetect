@@ -26,8 +26,7 @@ from scenedetect.backends import AVAILABLE_BACKENDS
 from scenedetect.cli.config import ConfigRegistry, ConfigLoadFailure, CHOICE_MAP
 from scenedetect.frame_timecode import FrameTimecode, MAX_FPS_DELTA
 import scenedetect.detectors
-from scenedetect.platform import (check_opencv_ffmpeg_dll, get_and_create_path,
-                                  get_cv2_imwrite_params, init_logger)
+from scenedetect.platform import get_and_create_path, get_cv2_imwrite_params, init_logger
 from scenedetect.scene_manager import SceneManager
 from scenedetect.stats_manager import StatsManager, StatsFileCorrupt
 from scenedetect.video_stream import VideoStream, VideoOpenFailure
@@ -191,6 +190,7 @@ class CliContext:
             click.BadParameter: One of the given options/parameters is invalid.
             click.Abort: Fatal initialization failure.
         """
+        self.options_processed = False
 
         # TODO(v1.0): Make the stats value optional (e.g. allow -s only), and allow use of
         # $VIDEO_NAME macro in the name.  Default to $VIDEO_NAME.csv.
@@ -220,7 +220,6 @@ class CliContext:
         logger.debug('Parsing program options.')
 
         if stats is not None and frame_skip:
-            self.options_processed = False
             error_strs = [
                 'Unable to detect scenes with stats file if frame skip is not 0.',
                 '  Either remove the -fs/--frame-skip option, or the -s/--stats file.\n'
@@ -267,6 +266,7 @@ class CliContext:
             except ValueError as ex:
                 logger.debug(str(ex))
                 raise click.BadParameter(str(ex), param_hint='downscale factor')
+
         self.options_processed = True
 
     def handle_detect_content(
@@ -275,8 +275,10 @@ class CliContext:
         luma_only: bool,
         min_scene_len: Optional[str],
     ):
-        """Handle detect-content options."""
+        """Handle detect-content command options."""
         self._check_input_open()
+        options_processed_orig = self.options_processed
+        self.options_processed = False
 
         if self.drop_short_scenes:
             min_scene_len = 0
@@ -297,6 +299,8 @@ class CliContext:
             scenedetect.detectors.ContentDetector(
                 threshold=threshold, min_scene_len=min_scene_len, luma_only=luma_only))
 
+        self.options_processed = options_processed_orig
+
     def handle_detect_adaptive(
         self,
         threshold: Optional[float],
@@ -305,8 +309,10 @@ class CliContext:
         luma_only: bool,
         min_scene_len: Optional[str],
     ):
-        """Handle detect-adaptive options."""
+        """Handle detect-adaptive command options."""
         self._check_input_open()
+        options_processed_orig = self.options_processed
+        self.options_processed = False
 
         if self.drop_short_scenes:
             min_scene_len = 0
@@ -337,6 +343,8 @@ class CliContext:
                 window_width=frame_window,
             ))
 
+        self.options_processed = options_processed_orig
+
     def handle_detect_threshold(
         self,
         threshold: Optional[float],
@@ -344,8 +352,10 @@ class CliContext:
         add_last_scene: bool,
         min_scene_len: Optional[str],
     ):
-        """Handle detect-threshold options."""
+        """Handle detect-threshold command options."""
         self._check_input_open()
+        options_processed_orig = self.options_processed
+        self.options_processed = False
 
         if self.drop_short_scenes:
             min_scene_len = 0
@@ -376,6 +386,55 @@ class CliContext:
                 add_final_scene=add_last_scene,
             ))
 
+        self.options_processed = options_processed_orig
+
+    def handle_export_html(self, filename, no_images, image_width, image_height):
+        """Handle `export-html` command options."""
+        self._check_input_open()
+        options_processed_orig = self.options_processed
+        self.options_processed = False
+        if self.export_html:
+            self._on_duplicate_command('export_html')
+
+        if not self.save_images and not no_images:
+            self.options_processed = False
+            raise click.BadArgumentUsage(
+                'The export-html command requires that the save-images command\n'
+                'is specified before it, unless --no-images is specified.')
+
+        if filename is not None:
+            self.html_name_format = filename
+            logger.info('Scene list html file name format:\n %s', filename)
+        self.html_include_images = False if no_images else True
+        self.image_width = image_width
+        self.image_height = image_height
+
+        self.export_html = True
+
+        self.options_processed = options_processed_orig
+
+    def handle_list_scenes(self, output, filename, no_output_file, quiet, skip_cuts):
+        """Handle `list-scenes` command options."""
+        self._check_input_open()
+        options_processed_orig = self.options_processed
+        self.options_processed = False
+        if self.list_scenes:
+            self._on_duplicate_command('list-scenes')
+
+        self.print_scene_list = True if quiet is None else not quiet
+        self.scene_list_directory = output
+        self.scene_list_name_format = filename
+        if self.scene_list_name_format is not None and not no_output_file:
+            logger.info('Scene list filename format:\n  %s', self.scene_list_name_format)
+        self.scene_list_output = False if no_output_file else True
+        if self.scene_list_directory is not None:
+            logger.info('Scene list output directory:\n  %s', self.scene_list_directory)
+        self.skip_cuts = skip_cuts
+
+        self.list_scenes = True
+
+        self.options_processed = options_processed_orig
+
     def handle_split_video(
         self,
         output: Optional[str],
@@ -388,13 +447,16 @@ class CliContext:
         args: Optional[str],
         mkvmerge: bool,
     ):
+        """Handle `split-video` command options."""
         self._check_input_open()
         options_processed_orig = self.options_processed
         self.options_processed = False
+        if self.split_video:
+            self._on_duplicate_command('split-video')
+
         check_split_video_requirements(use_mkvmerge=mkvmerge)
 
         if contains_sequence_or_url(self.video_stream.path):
-            self.options_processed = False
             error_str = 'The split-video command is incompatible with image sequences/URLs.'
             raise click.BadParameter(error_str, param_hint='split-video')
 
@@ -448,6 +510,7 @@ class CliContext:
                 logger.warning('copy mode (-c) ignored due to mkvmerge mode (-m).')
             self.split_mkvmerge = True
             logger.info('Using mkvmerge for video splitting.')
+            self.options_processed = options_processed_orig
             return
 
         ##
@@ -480,7 +543,7 @@ class CliContext:
         name_format: str,
         jpeg: bool,
         webp: bool,
-        quality: int,
+        quality: Optional[int],
         png: bool,
         compression: int,
         frame_margin: int,
@@ -488,14 +551,10 @@ class CliContext:
         height: int,
         width: int,
     ):
-        """ Save Images Command: Parses all options/arguments passed to the save-images command,
-        or with respect to the CLI, this function processes [save-images options] when calling:
-        scenedetect [global options] save-images [save-images options] [other commands...].
-
-        Raises:
-            click.BadParameter
-        """
+        """Handle `save-images` command options."""
         self._check_input_open()
+        if self.save_images:
+            self._on_duplicate_command('save-images')
         options_processed_orig = self.options_processed
         self.options_processed = False
 
@@ -503,6 +562,9 @@ class CliContext:
             error_str = '\nThe save-images command is incompatible with image sequences/URLs.'
             logger.error(error_str)
             raise click.BadParameter(error_str, param_hint='save-images')
+
+        if quality is None:
+            quality = 100 if webp else 95
 
         num_flags = sum([1 if flag else 0 for flag in [jpeg, webp, png]])
         if num_flags <= 1:
@@ -549,6 +611,29 @@ class CliContext:
             logger.error('Multiple image type flags set for save-images command.')
             raise click.BadParameter(
                 'Only one image type (JPG/PNG/WEBP) can be specified.', param_hint='save-images')
+
+    def handle_time(self, start, duration, end):
+        """Handle `time` command options."""
+        self._check_input_open()
+        options_processed_orig = self.options_processed
+        self.options_processed = False
+        if self.time:
+            self._on_duplicate_command('time')
+
+        if duration is not None and end is not None:
+            raise click.BadParameter(
+                'Only one of --duration/-d or --end/-e can be specified, not both.',
+                param_hint='time')
+
+        logger.debug('Setting video time:\n    start: %s, duration: %s, end: %s', start, duration,
+                     end)
+
+        self.start_time = parse_timecode(start, self.video_stream.frame_rate)
+        self.end_time = parse_timecode(end, self.video_stream.frame_rate)
+        self.duration = parse_timecode(duration, self.video_stream.frame_rate)
+        self.time = True
+
+        self.options_processed = options_processed_orig
 
     #
     # Private Methods
@@ -603,15 +688,12 @@ class CliContext:
     def _add_detector(self, detector):
         """ Add Detector: Adds a detection algorithm to the CliContext's SceneManager. """
         self._check_input_open()
-        options_processed_orig = self.options_processed
-        self.options_processed = False
         try:
             self.scene_manager.add_detector(detector)
         except scenedetect.stats_manager.FrameMetricRegistered as ex:
             raise click.BadParameter(
                 message='Cannot specify detection algorithm twice.',
                 param_hint=detector.cli_name) from ex
-        self.options_processed = options_processed_orig
 
     def _check_input_open(self) -> None:
         """Ensure self.video_stream was initialized (i.e. -i/--input was specified),
@@ -623,9 +705,10 @@ class CliContext:
         """
         if self.video_stream is None:
             if not self._check_input_open_failed:
-                logger.error('Error: No input video was specified.')
+                logger.error('Error: No input video (-i/--input) was specified.')
             self._check_input_open_failed = True
-            raise click.BadParameter('Input video not set.', param_hint='-i/--input')
+            self.options_processed = False
+            raise click.Abort()
 
     def _init_video_stream(self, input_path: str, framerate: Optional[float], backend: str):
         self.base_timecode = None
@@ -633,24 +716,14 @@ class CliContext:
             if not backend in AVAILABLE_BACKENDS:
                 raise click.BadParameter(
                     'Specified backend is not available on this system!', param_hint='-b/--backend')
+            backend_name = AVAILABLE_BACKENDS[backend].__name__
             logger.debug('Using backend: %s / %s', backend, AVAILABLE_BACKENDS[backend].__name__)
             self.video_stream = AVAILABLE_BACKENDS[backend](input_path, framerate)
             self.base_timecode = self.video_stream.base_timecode
         except VideoOpenFailure as ex:
-            dll_okay, dll_name = check_opencv_ffmpeg_dll()
-            if dll_okay:
-                logger.error('Backend failed to open video: %s', str(ex))
-            else:
-                logger.error(
-                    'Error: OpenCV dependency %s not found.'
-                    ' Ensure that you installed the Python OpenCV module, and that the'
-                    ' %s file can be found to enable video support.', dll_name, dll_name)
-                # Add additional output message in red.
-                click.echo(
-                    click.style(
-                        '\nOpenCV dependency missing, video input/decoding not available.\n',
-                        fg='red'))
-            raise click.BadParameter('Failed to open video!', param_hint='-i/--input')
+            logger.error('%s: %s', backend_name, str(ex))
+            raise click.FileError(
+                input_path, hint='failed to load video, see error output above.') from ex
         except IOError as ex:
             raise click.BadParameter('Input error:\n\n\t%s\n' % str(ex), param_hint='-i/--input')
 
@@ -683,3 +756,22 @@ class CliContext:
             raise click.BadParameter(
                 '\n  Could not load given stats file, see above output for details.',
                 param_hint='input stats file')
+
+    def _on_duplicate_command(self, command: str) -> None:
+        """Called when a command is duplicated to stop parsing and raise an error.
+
+        Arguments:
+            command: Command that was duplicated for error context.
+
+        Raises:
+            click.BadParameter
+        """
+        self.options_processed = False
+        error_strs = []
+        error_strs.append('Error: Command %s specified multiple times.' % command)
+        error_strs.append('The %s command may appear only one time.')
+
+        logger.error('\n'.join(error_strs))
+        raise click.BadParameter(
+            '\n  Command %s may only be specified once.' % command,
+            param_hint='%s command' % command)

@@ -69,31 +69,56 @@ CONFIG_FILE_PATH = os.path.join(_CONFIG_FILE_DIR, _CONFIG_FILE_NAME)
 
 CONFIG_MAP: ConfigDict = {
     'detect-adaptive': {
-        'threshold': RangeValue(3.0, min_val=0.0, max_val=255.0),
-        'min-delta-hsv': RangeValue(15.0, min_val=0.0, max_val=255.0),
         'frame-window': 2,
         'luma-only': False,
-        'min-scene-len': TimecodeValue(0),  # Default not used
+        'min-delta-hsv': RangeValue(15.0, min_val=0.0, max_val=255.0),
+        'min-scene-len': TimecodeValue(0),                             # Default not used
+        'threshold': RangeValue(3.0, min_val=0.0, max_val=255.0),
     },
     'detect-content': {
         'luma-only': False,
+        'min-scene-len': TimecodeValue(0),                             # Default not used
         'threshold': RangeValue(27.0, min_val=0.0, max_val=255.0),
-        'min-scene-len': TimecodeValue(0),  # Default not used
     },
     'detect-threshold': {
-        'threshold': RangeValue(12.0, min_val=0.0, max_val=255.0),
-        'fade-bias': RangeValue(0, min_val=-100.0, max_val=100.0),
         'add-last-scene': True,
-        'min-scene-len': TimecodeValue(0),  # Default not used
+        'fade-bias': RangeValue(0, min_val=-100.0, max_val=100.0),
+        'min-scene-len': TimecodeValue(0),                             # Default not used
+        'threshold': RangeValue(12.0, min_val=0.0, max_val=255.0),
+    },
+    'export-html': {
+        'filename': '$VIDEO_NAME-Scenes.html',
+        'image-height': 0,
+        'image-width': 0,
+        'no-images': False,
+    },
+    'list-scenes': {
+        'output': '',
+        'filename': '$VIDEO_NAME-Scenes.csv',
+        'no-output-file': False,
+        'quiet': False,
+        'skip-cuts': False,
     },
     'global': {
-        'downscale': 0,
         'backend': 'opencv',
+        'downscale': 0,
         'drop-short-scenes': False,
         'frame-skip': 0,
         'min-scene-len': TimecodeValue('0.6s'),
         'output': '',
         'verbosity': 'info',
+    },
+    'save-images': {
+        'output': '',
+        'filename': '$VIDEO_NAME-Scene-$SCENE_NUMBER-$IMAGE_NUMBER',
+        'num-images': 3,
+        'format': 'jpeg',
+        'quality': RangeValue(95, 0, 100),
+        'compression': RangeValue(3, 0, 9),
+        'frame-margin': 1,
+        'scale': 1.0,
+        'height': 0,
+        'width': 0,
     },
     'split-video': {
         'args': "-c:v libx264 -preset veryfast -crf 22 -c:a aac",

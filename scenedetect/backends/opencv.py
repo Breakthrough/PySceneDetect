@@ -226,26 +226,28 @@ class VideoStreamCv2(VideoStream):
     def _open_capture(self, framerate: Optional[float] = None):
         """Opens capture referenced by this object and resets internal state."""
         if self._is_device and self._path_or_device < 0:
-            raise ValueError("Invalid/negative device ID specified.")
+            raise ValueError('Invalid/negative device ID specified.')
         # Check if files exist if passed video file is not an image sequence
         # (checked with presence of % in filename) or not a URL (://).
         if not self._is_device and not ('%' in self._path_or_device
                                         or '://' in self._path_or_device):
             if not os.path.exists(self._path_or_device):
-                raise IOError("Video file not found.")
+                raise IOError('Video file not found.')
 
         cap = cv2.VideoCapture(self._path_or_device)
         if not cap.isOpened():
-            raise VideoOpenFailure("isOpened() returned False when opening OpenCV VideoCapture!")
+            raise VideoOpenFailure(
+                'VideoCapture.isOpened() returned False. Ensure the input file is a valid video,'
+                ' and check that OpenCV is installed correctly.\n')
 
         # Display a warning if the video codec type seems unsupported (#86).
         if not self._is_device and int(abs(cap.get(cv2.CAP_PROP_FOURCC))) == 0:
             logger.error(
-                "Video codec detection failed, output may be incorrect.\nThis could be caused"
-                " by using an outdated version of OpenCV, or using codecs that currently are"
-                " not well supported (e.g. VP9).\n"
-                "As a workaround, consider re-encoding the source material before processing.\n"
-                "For details, see https://github.com/Breakthrough/PySceneDetect/issues/86")
+                'Video codec detection failed, output may be incorrect.\nThis could be caused'
+                ' by using an outdated version of OpenCV, or using codecs that currently are'
+                ' not well supported (e.g. VP9).\n'
+                'As a workaround, consider re-encoding the source material before processing.\n'
+                'For details, see https://github.com/Breakthrough/PySceneDetect/issues/86')
 
         # Ensure the framerate is correct to avoid potential divide by zero errors. This can be
         # addressed in the PyAV backend if required since it supports integer timebases.
@@ -253,8 +255,8 @@ class VideoStreamCv2(VideoStream):
             framerate = cap.get(cv2.CAP_PROP_FPS)
             if framerate < MAX_FPS_DELTA:
                 raise VideoOpenFailure(
-                    "Unable to obtain video framerate! Check the file/device/stream, or set the"
-                    " `framerate` to assume a given framerate.")
+                    'Unable to obtain video framerate! Check the file/device/stream, or set the'
+                    ' `framerate` to assume a given framerate.')
 
         self._cap = cap
         self._frame_rate = framerate

@@ -69,40 +69,6 @@ def get_aspect_ratio(cap: cv2.VideoCapture, epsilon: float = 0.01) -> float:
 
 
 ##
-## OpenCV DLL Check Function (Windows Only)
-##
-
-
-def check_opencv_ffmpeg_dll() -> Tuple[bool, str]:
-    """ Check OpenCV FFmpeg DLL: Checks if OpenCV video I/O support is available,
-    on Windows only, by checking for the appropriate opencv_ffmpeg*.dll file.
-
-    On non-Windows systems always returns True, or for OpenCV versions that do
-    not follow the X.Y.Z version numbering pattern. Thus there may be false
-    positives (True) with this function, but not false negatives (False).
-    In those cases, PySceneDetect will report that it could not open the
-    video file, and for Windows users, also gives an additional warning message
-    that the error may be due to the missing DLL file.
-
-    Returns:
-        (True, DLL_NAME) if OpenCV video support is detected (e.g. the appropriate
-        opencv_ffmpegXYZ.dll file is in PATH), (False, DLL_NAME) otherwise,
-        where DLL_NAME is the name of the expected DLL file that OpenCV requires.
-        On Non-Windows platforms, DLL_NAME will be a blank string.
-    """
-    if platform.system() == 'Windows' and (cv2.__version__[0].isdigit()
-                                           and cv2.__version__.find('.') > 0):
-        is_64_bit_str = '_64' if struct.calcsize("P") == 8 else ''
-        dll_filename = 'opencv_ffmpeg{OPENCV_VERSION}{IS_64_BIT}.dll'.format(
-            OPENCV_VERSION=cv2.__version__.replace('.', ''), IS_64_BIT=is_64_bit_str)
-        return any([
-            os.path.exists(os.path.join(path_path, dll_filename))
-            for path_path in os.environ['PATH'].split(';')
-        ]), dll_filename
-    return True, ''
-
-
-##
 ## OpenCV imwrite Supported Image Types & Quality/Compression Parameters
 ##
 
@@ -218,8 +184,8 @@ def init_logger(log_level: int = logging.INFO,
         handler.setFormatter(logging.Formatter(fmt=format_str))
         logger_instance.addHandler(handler)
 
-init_logger()
 
+init_logger()
 
 ##
 ## Running External Commands

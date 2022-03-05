@@ -108,27 +108,6 @@ def print_help_header() -> None:
     click.echo(click.style('----------------------------------------------------', fg='yellow'))
 
 
-def duplicate_command(ctx: click.Context, param_hint: str) -> None:
-    """ Duplicate Command: Called when a command is duplicated to stop parsing and raise an error.
-
-    Called when a one-time use command is specified multiple times, displaying the appropriate
-    error and usage information.
-
-    Raises:
-        click.BadParameter
-    """
-    assert isinstance(ctx.obj, CliContext)
-
-    ctx.obj.options_processed = False
-    error_strs = []
-    error_strs.append('Error: Command %s specified multiple times.' % param_hint)
-    error_strs.append('The %s command may appear only one time.')
-
-    logger.error('\n'.join(error_strs))
-    raise click.BadParameter('\n  Command %s may only be specified once.' % param_hint,
-                             param_hint='%s command' % param_hint)
-
-
 
 @click.group(
     chain=True, context_settings=CLICK_CONTEXT_SETTINGS)
@@ -286,6 +265,7 @@ def about_command(ctx):
     """ Print license/copyright info. """
     assert isinstance(ctx.obj, CliContext)
     ctx.obj.process_input_flag = False
+    click.echo('')
     click.echo(click.style('----------------------------------------------------', fg='cyan'))
     click.echo(click.style(' About PySceneDetect %s' % scenedetect.__version__, fg='yellow'))
     click.echo(click.style('----------------------------------------------------', fg='cyan'))
@@ -300,6 +280,7 @@ def version_command(ctx):
     """ Print version of PySceneDetect. """
     assert isinstance(ctx.obj, CliContext)
     ctx.obj.process_input_flag = False
+    click.echo('')
     click.echo(click.style('PySceneDetect %s' % scenedetect.__version__, fg='yellow'))
     ctx.exit()
 
@@ -340,27 +321,11 @@ def time_command(ctx, start, duration, end):
     time --start 0 --end 1000
     """
     assert isinstance(ctx.obj, CliContext)
-
-    if ctx.obj.time:
-        duplicate_command(ctx, 'time')
-    if duration is not None and end is not None:
-        raise click.BadParameter(
-            'Only one of --duration/-d or --end/-e can be specified, not both.',
-            param_hint='time')
-
-    ctx.obj._check_input_open()
-    frame_rate = ctx.obj.video_stream.frame_rate
-
-    logger.debug('Setting video time:\n    start: %s, duration: %s, end: %s',
-                    start, duration, end)
-
-    options_processed_orig = ctx.obj.options_processed
-    ctx.obj.options_processed = False
-    ctx.obj.start_time = parse_timecode(start, frame_rate)
-    ctx.obj.end_time = parse_timecode(end, frame_rate)
-    ctx.obj.duration = parse_timecode(duration, frame_rate)
-    ctx.obj.time = True
-    ctx.obj.options_processed = options_processed_orig
+    ctx.obj.handle_time(
+        start=start,
+        duration=duration,
+        end=end,
+    )
 
 
 
@@ -397,7 +362,11 @@ def detect_content_command(ctx, threshold, luma_only, min_scene_len):
     detect-content --threshold 27.5
     """
     assert isinstance(ctx.obj, CliContext)
-    ctx.obj.handle_detect_content(threshold=threshold, luma_only=luma_only, min_scene_len=min_scene_len)
+    ctx.obj.handle_detect_content(
+        threshold=threshold,
+        luma_only=luma_only,
+        min_scene_len=min_scene_len,
+    )
 
 
 
@@ -453,7 +422,7 @@ def detect_adaptive_command(ctx, threshold, min_delta_hsv, frame_window, luma_on
         min_delta_hsv=min_delta_hsv,
         frame_window=frame_window,
         luma_only=luma_only,
-        min_scene_len=min_scene_len
+        min_scene_len=min_scene_len,
     )
 
 
@@ -535,25 +504,12 @@ def detect_threshold_command(ctx, threshold, fade_bias, add_last_scene, min_scen
 def export_html_command(ctx, filename, no_images, image_width, image_height):
     """ Exports scene list to a HTML file. Requires save-images by default."""
     assert isinstance(ctx.obj, CliContext)
-
-    if ctx.obj.export_html:
-        duplicate_command(ctx, 'export_html')
-    ctx.obj._check_input_open()
-
-    if not ctx.obj.save_images and not no_images:
-        ctx.obj.options_processed = False
-        raise click.BadArgumentUsage(
-            'The export-html command requires that the save-images command\n'
-            'is specified before it, unless --no-images is specified.')
-
-    if filename is not None:
-        ctx.obj.html_name_format = filename
-        logger.info('Scene list html file name format:\n %s', filename)
-    ctx.obj.html_include_images = False if no_images else True
-    ctx.obj.image_width = image_width
-    ctx.obj.image_height = image_height
-
-    ctx.obj.export_html = True
+    ctx.obj.handle_export_html(
+        filename=filename,
+        no_images=no_images,
+        image_width=image_width,
+        image_height=image_height,
+    )
 
 
 
@@ -587,22 +543,13 @@ def list_scenes_command(ctx, output, filename, no_output_file, quiet, skip_cuts)
     """ Prints scene list and outputs to a CSV file. The default filename is
     $VIDEO_NAME-Scenes.csv. """
     assert isinstance(ctx.obj, CliContext)
-
-    if ctx.obj.list_scenes:
-        duplicate_command(ctx, 'list-scenes')
-    ctx.obj._check_input_open()
-
-    ctx.obj.print_scene_list = True if quiet is None else not quiet
-    ctx.obj.scene_list_directory = output
-    ctx.obj.scene_list_name_format = filename
-    if ctx.obj.scene_list_name_format is not None and not no_output_file:
-        logger.info('Scene list filename format:\n  %s', ctx.obj.scene_list_name_format)
-    ctx.obj.scene_list_output = False if no_output_file else True
-    if ctx.obj.scene_list_directory is not None:
-        logger.info('Scene list output directory:\n  %s', ctx.obj.scene_list_directory)
-    ctx.obj.skip_cuts = skip_cuts
-
-    ctx.obj.list_scenes = True
+    ctx.obj.handle_list_scenes(
+        output=output,
+        filename=filename,
+        no_output_file=no_output_file,
+        quiet=quiet,
+        skip_cuts=skip_cuts,
+    )
 
 
 
@@ -672,10 +619,6 @@ def split_video_command(ctx, output, filename, quiet, copy, high_quality, rate_f
                         args, mkvmerge):
     """Split input video using ffmpeg or mkvmerge."""
     assert isinstance(ctx.obj, CliContext)
-
-    if ctx.obj.split_video:
-        duplicate_command(ctx, 'split-video')
-
     ctx.obj.handle_split_video(
         output=output,
         filename=filename,
@@ -759,11 +702,6 @@ def save_images_command(ctx, output, filename, num_images, jpeg, webp, quality, 
                         compression, frame_margin, scale, height, width):
     """ Create images for each detected scene. """
     assert isinstance(ctx.obj, CliContext)
-
-    if ctx.obj.save_images:
-        duplicate_command(ctx, 'save-images')
-    if quality is None:
-        quality = 100 if webp else 95
     ctx.obj.handle_save_images(num_images, output, filename, jpeg, webp, quality, png,
                                compression, frame_margin, scale, height, width)
 

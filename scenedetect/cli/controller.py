@@ -21,18 +21,17 @@ from string import Template
 import time
 from typing import Dict, List, Tuple, Optional
 
-import click
 import cv2
 
 from scenedetect.backends import VideoStreamCv2
 from scenedetect.cli.context import CliContext, check_split_video_requirements
 from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.platform import get_and_create_path
-from scenedetect.scene_manager import (save_images, write_scene_list, write_scene_list_html)
-from scenedetect.video_splitter import (is_mkvmerge_available, is_ffmpeg_available,
-                                        split_video_mkvmerge, split_video_ffmpeg)
+from scenedetect.scene_manager import save_images, write_scene_list, write_scene_list_html
+from scenedetect.video_splitter import split_video_mkvmerge, split_video_ffmpeg
 
 logger = logging.getLogger('pyscenedetect')
+
 
 def run_scenedetect(context: CliContext):
     """Perform main CLI application control logic. Run once all command-line options and
@@ -42,12 +41,11 @@ def run_scenedetect(context: CliContext):
         context: Prevalidated command-line option context to use for processing.
     """
     if not context.process_input_flag:
-        logger.debug('Skipping processing (process_input_flag is False).')
+        logger.debug('No input to process.')
         return
     if not context.options_processed:
-        logger.debug('Skipping processing, CLI options were not parsed successfully.')
+        logger.debug('CLI options were not parsed successfully.')
         return
-    logger.debug('Processing input...')
     if context.scene_manager.get_num_detectors() == 0:
         logger.error('No scene detectors specified (detect-content, detect-threshold, etc...),\n'
                      ' or failed to process all command line arguments.')
@@ -63,10 +61,12 @@ def run_scenedetect(context: CliContext):
                 'As a workaround, consider re-encoding the source material before processing.\n'
                 'For details, see https://github.com/Breakthrough/PySceneDetect/issues/86')
 
-    logger.info('Detecting scenes...')
     perf_start_time = time.time()
     if context.start_time is not None:
+        logger.debug('Seeking to start time...')
         context.video_stream.seek(target=context.start_time)
+
+    logger.info('Detecting scenes...')
     num_frames = context.scene_manager.detect_scenes(
         video=context.video_stream,
         duration=context.duration,
@@ -252,16 +252,16 @@ def _split_video(context: CliContext, scene_list: List[Tuple[FrameTimecode,
     check_split_video_requirements(context.split_mkvmerge)
     if context.split_mkvmerge:
         split_video_mkvmerge(
-            input_video_path = context.video_stream.path,
-            scene_list = scene_list,
-            output_file_template = output_path_template,
+            input_video_path=context.video_stream.path,
+            scene_list=scene_list,
+            output_file_template=output_path_template,
             show_output=not (context.quiet_mode or context.split_quiet),
         )
     else:
         split_video_ffmpeg(
-            input_video_path = context.video_stream.path,
-            scene_list = scene_list,
-            output_file_template = output_path_template,
+            input_video_path=context.video_stream.path,
+            scene_list=scene_list,
+            output_file_template=output_path_template,
             arg_override=context.split_args,
             show_progress=not context.quiet_mode,
             show_output=not (context.quiet_mode or context.split_quiet),
