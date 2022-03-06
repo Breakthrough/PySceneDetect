@@ -1,8 +1,7 @@
 
-Settings File
-----------------------------------------------------------
+## Settings File
 
-Most command line parameters can be set using a configuration file. [Click here to download a `scenedetect.cfg` template](https://github.com/Breakthrough/PySceneDetect/blob/v0.6/scenedetect.cfg) containing every possible option with comments that describe each one. Note that lines starting with a `#` are comments and will be ignored.  The `scenedetect.cfg` template file is also available in the folder where PySceneDetect is installed.
+Most command line parameters can be set using a configuration file. [Click here to download a `scenedetect.cfg` template](https://raw.githubusercontent.com/Breakthrough/PySceneDetect/v0.6/scenedetect.cfg) containing every possible option with comments that describe each one. Note that lines starting with a `#` are comments and will be ignored.  The `scenedetect.cfg` template file is also available in the folder where PySceneDetect is installed.
 
 A configuration file path can be specified using the `-c`/`--config` argument. PySceneDetect also looks for a config file named `scenedetect.cfg` in one of the following locations:
 
@@ -16,7 +15,9 @@ A configuration file path can be specified using the `-c`/`--config` argument. P
  * Mac:
      * `~/Library/Preferences/PySceneDetect/scenedetect.cfg`
 
-Run `scenedetect help` to see the exact path on your system which will be used (it will be listed under the help text for the -c/--config option). Specifying a config file path using -c/--config overrides the user config file. Specifying values via the command line override any values in the config file.
+Run `scenedetect help` to see the exact path on your system which will be used (it will be listed under the help text for the -c/--config option). You can right-click and save the above `scenedetect.cfg` template into one of these locations to get started.
+
+Specifying a config file path using -c/--config overrides the user config file. Specifying values on the command line will override those values in the config file.
 
 The syntax of a configuration file is:
 
@@ -27,7 +28,7 @@ option_a = value
 option_b = 1
 ```
 
-For example:
+### Example
 
 ```
 [global]
@@ -48,4 +49,4 @@ quality = 80
 num-images = 3
 ```
 
-See the `scenedetect.cfg` file in the location you installed PySceneDetect or [download it from Github](https://github.com/Breakthrough/PySceneDetect/blob/v0.6/scenedetect.cfg) for a complete listing of all configuration options.
+See the `scenedetect.cfg` file in the location you installed PySceneDetect or [download it from Github](https://raw.githubusercontent.com/Breakthrough/PySceneDetect/v0.6/scenedetect.cfg) for a complete listing of all configuration options.

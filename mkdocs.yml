@@ -21,11 +21,11 @@ pages:
 - 'Quickstart:':
     - 'Usage Example': 'examples/usage-example.md'
     - 'Command Line Interface': 'examples/usage.md'
-    - 'Video Splitting Support': 'examples/video-splitting.md'
 - 'Documentation:':
     - 'Command-Line Options': 'reference/command-line.md'
     - 'Configuration File': 'reference/config.md'
     - 'Scene Detection Algorithms': 'reference/detection-methods.md'
+    - 'Video Splitting Support': 'reference/video-splitting.md'
     - 'Python API': 'reference/python-api.md'
 - 'Resources':
     - 'Similar Programs & Tools': 'other/similar.md'

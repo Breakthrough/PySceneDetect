@@ -12,7 +12,6 @@ PySceneDetect v0.6 is a **major breaking change** including better performance, 
 
 The main goals of v0.6 are reliability and performance. To achieve this required several breaking changes.  The video input API was refactored, and *many* technical debt items were addressed. This should help the eventual transition to the first planned stable release (v1.0) where the goal is an improved scene detection API.
 
-
 #### Changelog
 
 **Overview:**
@@ -24,11 +23,10 @@ The main goals of v0.6 are reliability and performance. To achieve this required
  * Adds support for multiple video backends, PyAV is now supported in addition to OpenCV
  * Breaking API changes to `VideoManager` (replaced with `VideoStream`), `StatsManager`, and `save_images()`
     * See the [Migration Guide](https://manual.scenedetect.com/v0.6/api/migration_guide.html) for details on how to update from v0.5.x
- * Besides critical bugfixes, this marks the end of development for PySceneDetect v0.5
 
 **Command-Line Changes:**
 
- * Configuration files are now supported via `-c`/`--config` or from a user config folder, see [docs for details](https://scenedetect.com/en/v0.6/reference/config)
+ * Configuration files are now supported via `-c`/`--config` or from a user config folder ([see documentation for details](https://scenedetect.com/en/v0.6/reference/config))
  * `-i`/`--input` may no longer be specified multiple times (use an external tool like `ffmpeg` to perform concatenation first)
  * `-l`/`--logfile` now respects `-o`/`--output`
  * New `-b`/`--backend` option can be set to use a specific video backend
