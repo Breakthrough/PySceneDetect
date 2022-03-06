@@ -82,7 +82,7 @@ def _print_command_help(ctx: click.Context, command: click.Command):
     ctx.help_option_names = []
     ctx_name = ctx.info_name
     ctx.info_name = command.name
-    click.echo(click.style('PySceneDetect %s Command' % command.name, fg='cyan'))
+    click.echo(click.style('`%s` Command' % command.name, fg='cyan'))
     click.echo(click.style('----------------------------------------------------', fg='cyan'))
     click.echo(command.get_help(ctx))
     click.echo('')
@@ -91,7 +91,7 @@ def _print_command_help(ctx: click.Context, command: click.Command):
 
 def _print_command_list_header() -> None:
     """Print header shown before the option/command list."""
-    click.echo(click.style('PySceneDetect Option/Command List:', fg='green'))
+    click.echo(click.style('PySceneDetect Options & Commands', fg='green'))
     click.echo(click.style('----------------------------------------------------', fg='green'))
     click.echo('')
 
@@ -987,20 +987,21 @@ def save_images_command(
         width=width,
     )
 
+# ----------------------------------------------------------------------
+# Commands Omitted From Help List
+# ----------------------------------------------------------------------
+
+# Info Commands
+scenedetect_cli.add_command(help_command)
+scenedetect_cli.add_command(version_command)
+scenedetect_cli.add_command(about_command)
 
 # ----------------------------------------------------------------------
 # Commands Added To Help List
 # ----------------------------------------------------------------------
 
-# Info/Terminating Commands
-_add_cli_command(scenedetect_cli, help_command)
-_add_cli_command(scenedetect_cli, version_command)
-_add_cli_command(scenedetect_cli, about_command)
-
-# Input Commands
+# Input / Output
 _add_cli_command(scenedetect_cli, time_command)
-
-# Output Commands
 _add_cli_command(scenedetect_cli, export_html_command)
 _add_cli_command(scenedetect_cli, list_scenes_command)
 _add_cli_command(scenedetect_cli, save_images_command)

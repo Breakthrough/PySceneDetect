@@ -22,24 +22,29 @@ detected scenes to the terminal:
 
 Several more command line interface examples are shown in the following section.
 
+
 =======================================================================
 ``detect-content``
 =======================================================================
 
 Perform content detection algorithm on input video.
 
-
 Detector Options
 -----------------------------------------------------------------------
 
-The ``detect-content`` detector takes the following options:
-
-  -t, --threshold VAL           Threshold value (float) that the content_val frame
+  -t, --threshold VAL           Threshold value that the content_val frame
                                 metric must exceed to trigger a new scene.
                                 Refers to frame metric content_val in stats
-                                file.  [default: 30.0]
+                                file. [default: 27.0]
 
+  -l, --luma-only               Only consider luma/brightness channel (useful
+                                for greyscale videos).
 
+  -m, --min-scene-len TIMECODE  Minimum length of any scene. Overrides global
+                                min-scene-len (-m) setting. TIMECODE can be
+                                specified as exact number of frames, a time in
+                                seconds followed by s, or a timecode in the
+                                format HH:MM:SS or HH:MM:SS.nnn. [setting: 40]
 
 Usage Examples
 -----------------------------------------------------------------------
@@ -53,31 +58,32 @@ Usage Examples
 ``detect-threshold``
 =======================================================================
 
-  Perform threshold detection algorithm on input video.
+Perform threshold detection algorithm on input video.
 
 Detector Options
 -----------------------------------------------------------------------
 
-The ``detect-threshold`` detector takes the following options:
-
   -t, --threshold VAL           Threshold value (integer) that the delta_rgb
-                                frame metric must exceed to trigger a new scene.
-                                Refers to frame metric delta_rgb in stats file.
-                                [default: 12]
-  -f, --fade-bias PERCENT       Percent (%) from -100 to 100 of timecode skew
-                                for where cuts should be placed. -100 indicates
-                                the start frame, +100 indicates the end frame,
-                                and 0 is the middle of both.  [default: 0]
-  -l, --add-last-scene          If set, if the video ends on a fade-out, an
-                                additional scene will be generated for the last
-                                fade out position.
-  -p, --min-percent PERCENT     Percent (%) from 0 to 100 of amount of pixels
-                                that must meet the threshold value in orderto
-                                trigger a scene change.  [default: 95]
-  -b, --block-size N            Number of rows in image to sum per iteration
-                                (can be tuned for performance in some cases).
-                                [default: 8]
+                                frame metric must exceed to trigger a new
+                                scene. Refers to frame metric delta_rgb in
+                                stats file. [default: 12.0]
 
+  -f, --fade-bias PERCENT       Percent (%) from -100 to 100 of timecode skew
+                                for where cuts should be placed. -100
+                                indicates the start frame, +100 indicates the
+                                end frame, and 0 is the middle of both.
+                                [default: 0]
+
+  -l, --add-last-scene          If set, if the video ends on a fade-out, a
+                                final scene will be generated from the last
+                                fade-out position to the end of the video.
+                                [default: True]
+
+  -m, --min-scene-len TIMECODE  Minimum length of any scene. Overrides global
+                                min-scene-len (-m) setting. TIMECODE can be
+                                specified as exact number of frames, a time in
+                                seconds followed by s, or a timecode in the
+                                format HH:MM:SS or HH:MM:SS.nnn.
 
 Usage Examples
 -----------------------------------------------------------------------
@@ -86,3 +92,45 @@ Usage Examples
 
   ``detect-threshold --threshold 15``
 
+
+=======================================================================
+``detect-adaptive``
+=======================================================================
+
+Perform adaptive detection algorithm on input video.
+
+Detector Options
+-----------------------------------------------------------------------
+
+  -t, --threshold VAL           Threshold value (float) that the calculated
+                                frame score must exceed to trigger a new scene
+                                (see frame metric adaptive_ratio in stats
+                                file). [default: 3.0]
+
+  -d, --min-delta-hsv VAL       Minimum threshold (float) that the content_val
+                                must exceed in order to register as a new
+                                scene. This is calculated the same way that
+                                `detect-content` calculates frame score.
+                                [default: 15.0]
+
+  -w, --frame-window VAL        Size of window (number of frames) before and
+                                after each frame to average together in order
+                                to detect deviations from the mean. [default:
+                                2]
+
+  -l, --luma-only               Only consider luma/brightness channel (useful
+                                for greyscale videos).
+
+  -m, --min-scene-len TIMECODE  Minimum length of any scene. Overrides global
+                                min-scene-len (-m) setting. TIMECODE can be
+                                specified as exact number of frames, a time in
+                                seconds followed by s, or a timecode in the
+                                format HH:MM:SS or HH:MM:SS.nnn.
+
+
+Usage Examples
+-----------------------------------------------------------------------
+
+  ``detect-adaptive``
+
+  ``detect-adaptive --threshold 3.2 --min-delta-hsv 16``
