@@ -68,6 +68,6 @@ scenedetect --input goldeneye.mp4 --stats goldeneye.stats.csv detect-content
 
 We can then plot the values of the `content_val` column:
 
-<img alt="goldeneye.mp4 statistics graph" src="../../img/goldeneye-stats.png" />
+![goldeneye.mp4 statistics graph](img/goldeneye-stats.png)
 
 The peaks in values correspond to the scene breaks in the input video. In some cases the threshold may need to be raised or lowered accordingly.

@@ -107,22 +107,6 @@ The ``scenedetect`` command takes the following global options:
                                 opencv]
 
   -c, --config FILE             Path to config file. If not set, tries to load
-                                one from C:\Users\Pietro\AppData\Local\PyScene
-                                Detect\scenedetect.cfg
-
-
-=======================================================================
-Detectors and Commands
-=======================================================================
-
-Calls to the `scenedetect` command should be specified as follows:
-
-    ``scenedetect [global options] [detector] [commands]``
-
-`[detector]` specifies which :ref:`scene detection algorithm<cli-detectors>` to use. `[commands]` specify one or more :ref:`commands<cli-commands>` (or "actions"), such as splitting the input video, or saving a thumbnail for each scene.  Each command can have its own sub-options, which are documented in the following sections of this manual.
-
-As an example, to use the `--input` and `--stats` options from above along with the `detect-content` detector on a file `video.mp4`, and using `split-video` command to split the video into scenes using `ffmpeg`:
-
-    ``scenedetect -i video.mp4 -s video.stats.csv detect-content split-video``
-
-More examples can be found in the following section, which details the options for all available commands.
+                                one from a location based on your operating system.
+                                Type `scenedetect help` and this option will show
+                                the correct path on your system.

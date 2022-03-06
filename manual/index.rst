@@ -31,6 +31,7 @@ Table of Contents
     cli/global_options
     cli/commands
     cli/detectors
+    cli/config_file
 
 
 =======================================================================
