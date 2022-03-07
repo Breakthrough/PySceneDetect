@@ -83,7 +83,7 @@ def run_scenedetect(context: CliContext):
             'Or remove the audio tracks by running either:\n'
             '      ffmpeg -i input.mp4 -c copy -an output.mp4\n'
             '      mkvmerge -o output.mkv input.mp4\n'
-            'For details, see https://pyscenedetect.readthedocs.io/en/latest/faq/')
+            'For details, see https://scenedetect.com/faq/')
         return
 
     perf_duration = time.time() - perf_start_time

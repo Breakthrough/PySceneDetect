@@ -22,7 +22,7 @@ Unlike calling `pip install opencv-python`, the above commands will download and
 
 #### How can I enable video splitting support?
 
-To enable video splitting support, you will also need to have `mkvmerge` or `ffmpeg` installed on your system. See the documentation on [Video Splitting Support](https://pyscenedetect.readthedocs.io/en/latest/examples/video-splitting/) after installation for details.
+To enable video splitting support, you will also need to have `mkvmerge` or `ffmpeg` installed on your system. See the documentation on [Video Splitting Support](https://scenedetect.com/examples/video-splitting/) after installation for details.
 
 
 #### How can I fix the error `Cannot split video due to too many scenes`?

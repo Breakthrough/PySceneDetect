@@ -4,9 +4,11 @@ PySceneDetect Releases
 
 ## PySceneDetect 0.6
 
-### 0.6 (TBD)
+### 0.6-dev2 (March 6, 2022)
 
 #### Release Notes
+
+**This is a pre-release of the upcoming PySceneDetect v0.6.**
 
 PySceneDetect v0.6 is a **major breaking change** including better performance, configuration file support, and a more ergonomic API.  The new **minimum Python version is now 3.6**. See the [Migration Guide](https://manual.scenedetect.com/v0.6/api/migration_guide.html) for information on how to port existing applications to the new API.  Most users will see performance improvements after updating, and changes to the command-line are not expected to break most workflows.
 

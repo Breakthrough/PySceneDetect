@@ -1,4 +1,4 @@
 
 ## API Reference
 
-The [`scenedetect` API reference](https://pyscenedetect.readthedocs.io/projects/Manual/en/latest/api.html) is available as part of the [PySceneDetect Manual](http://pyscenedetect-manual.readthedocs.io/). See the [Quickstart](https://pyscenedetect.readthedocs.io/projects/Manual/en/latest/api.html#quickstart) and [Example](https://pyscenedetect.readthedocs.io/projects/Manual/en/latest/api.html#example) sections to get started.
+The [`scenedetect` API reference](https://manual.scenedetect.com/en/0.6-dev2/api.html) is available as part of the [PySceneDetect Manual](http://manual.scenedetect.com/). See the [Quickstart](https://scenedetect.com/projects/Manual/en/latest/api.html#quickstart) and [Example](https://manual.scenedetect.com/en/0.6-dev2/api.html#example) sections to get started.

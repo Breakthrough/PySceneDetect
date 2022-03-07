@@ -14,7 +14,7 @@ scenedetect help
 ```
 
 <div class="important">
-The complete PySceneDetect Command-Line Interface (CLI) Reference <span class="fa fa-book"> can be found in the <a href="http://pyscenedetect-manual.readthedocs.io/" alt="Manual Link">PySceneDetect Manual</a>, located at <a href="http://pyscenedetect-manual.readthedocs.io/" alt="Manual Link">pyscenedetect-manual.readthedocs.io/</a>.
+The complete PySceneDetect Command-Line Interface (CLI) Reference <span class="fa fa-book"> can be found in the <a href="http://manual.scenedetect.com/en/0.6-dev2/" alt="Manual Link">PySceneDetect Manual</a>, located at <a href="http://manual.scenedetect.com/0.6-dev2/" alt="Manual Link">manual.scenedetect.com/0.6-dev2/</a>.
 </div>
 
 

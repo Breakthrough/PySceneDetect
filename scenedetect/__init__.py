@@ -36,7 +36,7 @@ from scenedetect.video_splitter import split_video_ffmpeg, split_video_mkvmerge
 
 # Used for module identification and when printing version & about info
 # (e.g. calling `scenedetect version` or `scenedetect about`).
-__version__ = 'v0.6-dev'
+__version__ = 'v0.6-dev2'
 # About & copyright message string shown for the 'about' CLI command (scenedetect about).
 
 ABOUT_STRING = """
@@ -61,7 +61,7 @@ This software may also invoke the following third-party executables:
 
 If included with your distribution of PySceneDetect, see the included
 LICENSE-FFMPEG and LICENSE-MKVMERGE or visit:
-  [ https://pyscenedetect.readthedocs.io/en/latest/copyright/ ]
+  [ https://scenedetect.com/copyright/ ]
 
 FFmpeg and mkvmerge are distributed only with certain PySceneDetect
 releases, in order to allow for automatic video splitting capability.
