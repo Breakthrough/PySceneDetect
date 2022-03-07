@@ -94,7 +94,7 @@ setup(
     ],
     project_urls={
         'Homepage': 'https://pyscenedetect.readthedocs.io/',
-        'Manual': 'https://manual.scenedetect.com/en/v0.6-dev2/',
+        'Manual': 'https://manual.scenedetect.com/en/v0.6/',
         'Changelog': 'https://scenedetect.com/changelog/',
         'Bug Tracker': 'https://github.com/Breakthrough/PySceneDetect/issues',
     }

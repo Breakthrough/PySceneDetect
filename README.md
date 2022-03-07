@@ -44,7 +44,7 @@ To show a summary of all other options and commands:
 
     scenedetect help
 
-You can find more examples [on the website](https://scenedetect.com/examples/usage-example/) or [in the manual](https://manual.scenedetect.com/en/v0.6-dev2/cli/global_options.html).
+You can find more examples [on the website](https://scenedetect.com/examples/usage-example/) or [in the manual](https://manual.scenedetect.com/en/v0.6/cli/global_options.html).
 
 **Quick Start (Python API)**:
 
@@ -75,7 +75,7 @@ scene_list = detect('my_video.mp4', ContentDetector())
 split_video_ffmpeg('my_video.mp4', scene_list)
 ```
 
-For more advanced usage, the API is highly configurable, and can easily integrate with any pipeline. This includes using different detection algorithms, splitting the input video, and much more. The following example shows how to implement a function similar to the above, but using [the `scenedetect` API](https://manual.scenedetect.com/en/v0.6-dev2/api.html):
+For more advanced usage, the API is highly configurable, and can easily integrate with any pipeline. This includes using different detection algorithms, splitting the input video, and much more. The following example shows how to implement a function similar to the above, but using [the `scenedetect` API](https://manual.scenedetect.com/en/v0.6/api.html):
 
 ```python
 from scenedetect import open_video, SceneManager, split_video_ffmpeg
@@ -93,7 +93,7 @@ def split_video_into_scenes(video_path, threshold=27.0):
     split_video_ffmpeg(video_path, scene_list, show_progress=True)
 ```
 
-See [the manual](https://manual.scenedetect.com/en/v0.6-dev2/api.html) for the
+See [the manual](https://manual.scenedetect.com/en/v0.6/api.html) for the
 full PySceneDetect API documentation.
 
 ----------------------------------------------------------
