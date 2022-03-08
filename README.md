@@ -23,7 +23,7 @@ Video Scene Cut Detection and Analysis Tool
 
     pip install scenedetect[opencv] --upgrade
 
-To install the v0.6 beta (better performance, [config file support](http://manual.scenedetect.com/en/v0.6/cli/config_file.html), and [improved API](http://manual.scenedetect.com/en/v0.6/api.html#quickstart)):
+To install the v0.6 beta (better performance, [config file support](http://manual.scenedetect.com/en/v0.6/cli/config_file.html), and [improved API](http://manual.scenedetect.com/en/v0.6/api.html#quickstart) - see [scenedetect.com/en/v0.6](https://scenedetect.com/en/v0.6) for documentation):
 
     pip install scenedetect[opencv] --pre --upgrade
 
