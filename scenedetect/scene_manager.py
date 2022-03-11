@@ -440,10 +440,10 @@ def save_images(scene_list: List[Tuple[FrameTimecode, FrameTimecode]],
             else:
                 completed = False
                 break
-            if progress_bar:
+            if progress_bar is not None:
                 progress_bar.update(1)
 
-    if progress_bar:
+    if progress_bar is not None:
         progress_bar.close()
 
     if not completed:
@@ -781,10 +781,10 @@ class SceneManager:
             if not next_frame is None:
                 frame_im = next_frame
             self._process_frame(position.frame_num, frame_im, callback)
-            if progress_bar:
+            if progress_bar is not None:
                 progress_bar.update(1 + frame_skip)
 
-        if progress_bar:
+        if progress_bar is not None:
             progress_bar.close()
         decode_thread.join()
 
