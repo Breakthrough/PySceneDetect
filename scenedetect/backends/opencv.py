@@ -42,8 +42,13 @@ class VideoStreamCv2(VideoStream):
 
         Raises:
             IOError: file could not be found or access was denied
+            VideoOpenFailure: video could not be opened (may be corrupted)
         """
         super().__init__()
+
+
+        if framerate is not None and framerate < MAX_FPS_DELTA:
+            raise VideoOpenFailure('Specified framerate (%f) is invalid!' % framerate)
 
         self._path_or_device = path_or_device
         self._is_device = isinstance(self._path_or_device, int)
@@ -251,7 +256,8 @@ class VideoStreamCv2(VideoStream):
 
         # Ensure the framerate is correct to avoid potential divide by zero errors. This can be
         # addressed in the PyAV backend if required since it supports integer timebases.
-        if not framerate:
+        assert framerate is None or framerate > MAX_FPS_DELTA
+        if framerate is None:
             framerate = cap.get(cv2.CAP_PROP_FPS)
             if framerate < MAX_FPS_DELTA:
                 raise VideoOpenFailure(

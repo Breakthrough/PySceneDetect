@@ -15,21 +15,23 @@
 Uses string identifier ``'pyav'``.
 """
 
+from logging import getLogger
 from typing import BinaryIO, Optional, Tuple, Union
 
 import av
 from numpy import ndarray
 
-from scenedetect.frame_timecode import FrameTimecode
+from scenedetect.frame_timecode import FrameTimecode, MAX_FPS_DELTA
 from scenedetect.platform import get_file_name
 from scenedetect.video_stream import VideoStream, VideoOpenFailure
+
+logger = getLogger('pyscenedetect')
 
 
 #pylint: disable=c-extension-no-member
 class VideoStreamAv(VideoStream):
     """PyAV `av.InputContainer` backend."""
 
-    # TODO(#213): Handle framerate override.
     def __init__(self,
                  path_or_io: Union[str, bytes, BinaryIO],
                  framerate: Optional[float] = None,
@@ -38,13 +40,13 @@ class VideoStreamAv(VideoStream):
 
         Arguments:
             path_or_io: Path to the video, or a file-like object.
-            framerate: TODO.
+            framerate: If set, overrides the detected framerate.
             name: Overrides the `name` property derived from the video path.
                 Should be set if `path_or_io` is a file-like object.
 
         Raises:
             IOError: file could not be found or access was denied
-            VideoOpenFailure: video could not be opened (may be corrupted).
+            VideoOpenFailure: video could not be opened (may be corrupted)
         """
         # TODO: Investigate why setting the video stream threading mode to 'AUTO' / 'FRAME'
         # causes decoding to stop early, e.g. adding the following:
@@ -65,6 +67,7 @@ class VideoStreamAv(VideoStream):
         self._path: Union[str, bytes] = ''
         self._name: Union[str, bytes] = '' if name is None else name
         self._io: Optional[BinaryIO] = None
+        self._duration_frames: int = 0
         self._frame = None
 
         if isinstance(path_or_io, (str, bytes)):
@@ -79,7 +82,17 @@ class VideoStreamAv(VideoStream):
         except av.error.FileNotFoundError as ex:
             raise IOError from ex
         except Exception as ex:
-            raise VideoOpenFailure() from ex
+            raise VideoOpenFailure('Failed to open video: %s' % str(ex)) from ex
+
+        if framerate is not None and framerate < MAX_FPS_DELTA:
+            raise VideoOpenFailure('Specified framerate (%f) is invalid!' % framerate)
+        self._frame_rate: float = framerate
+        if self._frame_rate is None:
+            self._frame_rate = self._get_frame_rate()
+
+        # Calculate duration in terms of number of frames once we have set the framerate.
+        self._duration_frames = self._get_duration()
+
 
     #
     # Backend-Specific Methods/Properties
@@ -94,6 +107,37 @@ class VideoStreamAv(VideoStream):
     def _codec_context(self):
         """PyAV `av.codec.context.CodecContext` associated with the `video_stream`."""
         return self._video_stream.codec_context
+
+    def _get_frame_rate(self, fallback_value: float = 30.0) -> float:
+        """Get video frame rate based on the underlying video stream."""
+        if self._codec_context.framerate.denominator == 0:
+            logger.warning(
+                'Unable to obtain video framerate (value: %s), assuming framerate of %f FPS.',
+                str(self._codec_context.framerate), fallback_value)
+            return fallback_value
+        return self._codec_context.framerate.numerator / float(
+            self._codec_context.framerate.denominator)
+
+
+    def _get_duration(self) -> int:
+        """Get video duration as number of frames based on the video and set framerate."""
+        assert self.frame_rate is not None, "Frame rate must be set before calling _get_duration!"
+        if self._video_stream.frames > 0:
+            return self._video_stream.frames
+        duration_sec = float(self._video_stream.container.duration / av.time_base)
+        if duration_sec < MAX_FPS_DELTA:
+            if self._video_stream.duration is None:
+                logger.warning('Video duration unavailable.')
+                return 0
+            time_base = self._video_stream.time_base
+            if time_base.denominator == 0:
+                logger.warning(
+                    'Unable to calculate video duration: time_base (%s) has zero denominator!',
+                    str(time_base))
+                return 0
+            duration_sec = float(self._video_stream.duration / time_base)
+        return round(duration_sec * self.frame_rate)
+
 
     #
     # VideoStream Methods/Properties
@@ -127,16 +171,12 @@ class VideoStreamAv(VideoStream):
     @property
     def duration(self) -> FrameTimecode:
         """Duration of the video as a FrameTimecode."""
-        # TODO: Some ffmpeg wrappers have provisions for when the stream does not report a number
-        # of frames (i.e. frames == 0).  In this case, we need to get the length of the video
-        # and convert it into frames from it's time base (e.g. CvCapture_FFMPEG::get_total_frames()
-        # and CvCapture_FFMPEG::get_duration_sec() from OpenCV).
-        return self.base_timecode + self._video_stream.frames
+        return self.base_timecode + self._duration_frames
 
     @property
     def frame_rate(self) -> float:
         """Frame rate in frames/sec."""
-        return self._codec_context.framerate.numerator / self._codec_context.framerate.denominator
+        return self._frame_rate
 
     @property
     def position(self) -> FrameTimecode:
