@@ -10,7 +10,7 @@ PySceneDetect Releases
 
 **This is a pre-release of the upcoming PySceneDetect v0.6.**
 
-PySceneDetect v0.6 is a **major breaking change** including better performance, configuration file support, and a more ergonomic API.  The new **minimum Python version is now 3.6**. See the [Migration Guide](https://manual.scenedetect.com/v0.6/api/migration_guide.html) for information on how to port existing applications to the new API.  Most users will see performance improvements after updating, and changes to the command-line are not expected to break most workflows.
+PySceneDetect v0.6 is a **major breaking change** including better performance, configuration file support, and a more ergonomic API.  The new **minimum Python version is now 3.6**. See the [Migration Guide](https://manual.scenedetect.com/en/v0.6/api/migration_guide.html) for information on how to port existing applications to the new API.  Most users will see performance improvements after updating, and changes to the command-line are not expected to break most workflows.
 
 The main goals of v0.6 are reliability and performance. To achieve this required several breaking changes.  The video input API was refactored, and *many* technical debt items were addressed. This should help the eventual transition to the first planned stable release (v1.0) where the goal is an improved scene detection API.
 
@@ -24,7 +24,7 @@ The main goals of v0.6 are reliability and performance. To achieve this required
  * Adds support for configuration file via command line or in user settings folder
  * Adds support for multiple video backends, PyAV is now supported in addition to OpenCV
  * Breaking API changes to `VideoManager` (replaced with `VideoStream`), `StatsManager`, and `save_images()`
-    * See the [Migration Guide](https://manual.scenedetect.com/v0.6/api/migration_guide.html) for details on how to update from v0.5.x
+    * See the [Migration Guide](https://manual.scenedetect.com/en/v0.6/api/migration_guide.html) for details on how to update from v0.5.x
 
 **Command-Line Changes:**
 
@@ -50,6 +50,7 @@ The main goals of v0.6 are reliability and performance. To achieve this required
 
 **API Changes:**
 
+ * New high-level `detect` function in `scenedetect` module that only has two required arguments: the path to a video (`path`) and a detector (`detector`), [see example here](http://manual.scenedetect.com/en/v0.6/api.html#quickstart)
  * New `VideoStream` replaces `VideoManager` and supports both OpenCV (`VideoStreamCv2`) and PyAV (`VideoStreamAv`) backends ([#213](https://github.com/Breakthrough/PySceneDetect/issues/213))
     * Improves video seeking invariants, especially around defining what frames 0 and 1 mean for different time properties (`frame_number` is 1-based whereas `position` is 0-based to align with PTS)
     * See `test_time_invariants` in `tests/test_video_stream.py` as a reference for specific behaviours of these properties, and a test video detailing visually what is expected
@@ -62,9 +63,10 @@ The main goals of v0.6 are reliability and performance. To achieve this required
     * `get_scene_list()` now returns an empty list if there are no detected cuts (previously one scene with the duration of the video was returned)
         * To restore the previous behaviour, specify `start_in_scene=True`
         * Command-line output is unaffected, and still reports 1 scene spanning the entire video if no cuts were found
- * New high-level `detect` function in `scenedetect` module that only has two required arguments: the path to a video (`path`) and a detector (`detector`)
+ * Changes to `StatsManager`:
+    * The `load_from_csv`/`save_to_csv` methods now accept a path or an open file handle
+    * The `base_timecode` argument has been removed from `save_to_csv` (it is no longer required)
  * `save_images()` no longer accepts downscale_factor, since there is already the ability to resize images via the `scale` or `height`/`width` arguments
- * `StatsManager` load/save methods now accept a path or an open file handle
  * Video splitting functions no longer support multiple input videos for concatenation (`scenedetect.video_splitter`)
  * Fixed issue with `previous_frame` method of `FrameTimecode` allowing a negative frame number
  * Merged constants `MAX_FPS_DELTA` and `MINIMUM_FRAMES_PER_SECOND_DELTA_FLOAT` in `scenedetect.frame_timecode` into new `MAX_FPS_DELTA` constant

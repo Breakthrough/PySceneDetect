@@ -132,8 +132,7 @@ def _save_stats(context: CliContext) -> None:
         if context.stats_manager.is_save_required():
             logger.info('Saving frame metrics to stats file: %s',
                         os.path.basename(context.stats_file_path))
-            context.stats_manager.save_to_csv(
-                path=context.stats_file_path, base_timecode=context.video_stream.base_timecode)
+            context.stats_manager.save_to_csv(path=context.stats_file_path)
         else:
             logger.debug('No frame metrics updated, skipping update of the stats file.')
 

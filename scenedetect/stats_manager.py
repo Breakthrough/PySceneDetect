@@ -181,30 +181,25 @@ class StatsManager:
         """
         return self._metrics_updated
 
-    # TODO(v1.0): Remove `base_timecode` from `save_to_csv` by having the SceneManager own
-    # a StatsManager, which allows the base timecode to be passed to this object during init.
     def save_to_csv(self,
                     path: str = None,
                     file: TextIO = None,
-                    base_timecode: FrameTimecode = None,
                     force_save=True) -> None:
         """ Save To CSV: Saves all frame metrics stored in the StatsManager to a CSV file.
 
         Arguments:
             path: Path to destination file. Use `file` to pass a file handle instead.
             file: A file handle opened in write mode (e.g. open('...', 'w')).
-            base_timecode: The base_timecode obtained from the frame source VideoStream.
+            base_timecode: [DEPRECATED] The base_timecode to use. Not required in v0.6.
             force_save: If True, writes metrics out even if an update is not required.
 
         Raises:
-            ValueError: If both path and file are specified, or base_timecode is None.
+            ValueError: If both path and file are specified.
             IOError: If `path` cannot be opened or a write failure occurs.
         """
 
         if path is not None and file is not None:
             raise ValueError("Only one of path or file can be specified")
-        if base_timecode is None:
-            raise ValueError("base_timecode must be set!")
 
         # Ensure we need to write to the file, and that we have data to do so with.
         if not ((self.is_save_required() or force_save) and self._registered_metrics
@@ -212,12 +207,13 @@ class StatsManager:
             logger.info("No metrics to save.")
             return
 
+        assert self._base_timecode is not None
+
         # If we get a path instead of an open file handle, recursively call ourselves
         # again but with file handle instead of path.
         if path is not None:
             with open(path, 'w') as file:
-                return self.save_to_csv(
-                    file=file, base_timecode=base_timecode, force_save=force_save)
+                return self.save_to_csv(file=file, force_save=force_save)
         csv_writer = csv.writer(file, lineterminator='\n')
 
         # Header rows.
@@ -226,7 +222,7 @@ class StatsManager:
         frame_keys = sorted(self._frame_metrics.keys())
         logger.info("Writing %d frames to CSV...", len(frame_keys))
         for frame_key in frame_keys:
-            frame_timecode = base_timecode + frame_key
+            frame_timecode = self._base_timecode + frame_key
             csv_writer.writerow(
                 [frame_timecode.get_frames(),
                  frame_timecode.get_timecode()] +

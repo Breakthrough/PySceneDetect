@@ -1,15 +1,15 @@
 
 ***********************************************************************
-``scenedetect`` 🎬 Module
+``scenedetect`` 🎬 Package
 ***********************************************************************
 
 =======================================================================
 Overview
 =======================================================================
 
-The ``scenedetect`` module is organized into several sub-modules, each containing the implementation of a particular class. The most commonly used classes are available for import directly from the `scenedetect` module (see the `Example`_ below).  The following is an overview of the main classes/modules provided in the `scenedetect` package:
+The `scenedetect` API is designed to be extensible and easy to integrate with most application workflows.  Many use cases are covered by the `Quickstart`_ and `Example`_ sections below.  The `scenedetect` package provides:
 
-    * :ref:`scenedetect.scene_manager 🎞️ <scenedetect-scene_manager>`: Contains :py:class:`SceneManager <scenedetect.scene_manager.SceneManager>` class which applies `SceneDetector` objects on a `VideoStream`. Also contains the :py:func:`save_images <scenedetect.scene_manager.save_images>` and :py:func:`write_scene_list <scenedetect.scene_manager.write_scene_list>` / :py:func:`write_scene_list_html <scenedetect.scene_manager.write_scene_list_html>` functions to export information about the detected scenes in various formats.
+    * :ref:`scenedetect.scene_manager 🎞️ <scenedetect-scene_manager>`: The :py:class:`SceneManager <scenedetect.scene_manager.SceneManager>` class applies `SceneDetector` objects on video frames from a :ref:`VideoStream <scenedetect-video_stream>`. Also contains the :py:func:`save_images <scenedetect.scene_manager.save_images>` and :py:func:`write_scene_list <scenedetect.scene_manager.write_scene_list>` / :py:func:`write_scene_list_html <scenedetect.scene_manager.write_scene_list_html>` functions to export information about the detected scenes in various formats.
 
     * :ref:`scenedetect.detectors 🕵️ <scenedetect-detectors>`: Scene/shot detection algorithms:
 
@@ -47,6 +47,8 @@ Most types/functions are also available directly from the `scenedetect` package 
         scenedetect<0.7
 
 
+.. _scenedetect-quickstart:
+
 =======================================================================
 Quickstart
 =======================================================================
@@ -78,7 +80,7 @@ Now that we know where each scene is, we can also :ref:`split the input video <s
     scene_list = detect('my_video.mp4', ContentDetector())
     split_video_ffmpeg('my_video.mp4', scene_list)
 
-This is just a small snippet of what PySceneDetect offers. The library is very modular, and can integrate with most application workflows easily. In the next example, we show how the various library components can be used to create a more customizable scene cut/shot detection pipeline.
+This is just a small snippet of what PySceneDetect offers. The library is very modular, and can integrate with most application workflows easily. In the next example, we show how the various library components can be used to create a more customizable scene cut/shot detection pipeline.  In addition, demonstrations of common use cases can be found in the `tests/test_api.py <https://github.com/Breakthrough/PySceneDetect/blob/v0.6/tests/test_api.py>`_ file.
 
 
 .. _scenedetect-detailed_example:
@@ -108,12 +110,14 @@ Using a :py:class:`SceneManager <scenedetect.scene_manager.SceneManager>` direct
 
 For a more advanced example of using the PySceneDetect API to with a stats file (to save per-frame metrics to disk and/or speed up multiple passes of the same video), take a look at the :ref:`example in the SceneManager reference<scenemanager-example>`.
 
+In addition to module-level examples, demonstrations of some common use cases can be found in the `tests/test_api.py <https://github.com/Breakthrough/PySceneDetect/blob/v0.6/tests/test_api.py>`_ file.
+
 
 =======================================================================
 Migrating From v0.5
 =======================================================================
 
-PySceneDetect v0.6 introduces several breaking changes which are incompatible with v0.5. See :ref:`Migration Guide <scenedetect-migration_guide>` for details on how to update your application.
+PySceneDetect v0.6 introduces several breaking changes which are incompatible with v0.5. See :ref:`Migration Guide <scenedetect-migration_guide>` for details on how to update your application. In addition, demonstrations of common use cases can be found in the `tests/test_api.py <https://github.com/Breakthrough/PySceneDetect/blob/v0.6/tests/test_api.py>`_ file.
 
 
 =======================================================================

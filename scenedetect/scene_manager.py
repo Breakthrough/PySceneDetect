@@ -721,6 +721,8 @@ class SceneManager:
                 was constructed with a StatsManager object.
         """
 
+        #
+
         if frame_skip > 0 and self.stats_manager is not None:
             raise ValueError('frame_skip must be 0 when using a StatsManager.')
         if duration is not None and end_time is not None:
@@ -731,6 +733,9 @@ class SceneManager:
             raise ValueError('end_time must be greater than or equal to 0!')
 
         self._base_timecode = video.base_timecode
+        # TODO: Fix this properly.
+        if self._stats_manager is not None:
+            self._stats_manager._base_timecode = self._base_timecode
         start_frame_num: int = video.frame_number
 
         if duration is not None:

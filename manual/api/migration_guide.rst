@@ -5,7 +5,7 @@
 Migration Guide
 ---------------------------------------------------------------
 
-This page details how to transition a program written using PySceneDetect v0.5 to the new v0.6 API.
+This page details how to transition a program written using PySceneDetect v0.5 to the new v0.6 API. It is recommended to review the new :ref:`Quickstart <scenedetect-quickstart>` and :ref:`Example <scenedetect-detailed_example>` sections first, as they should cover the majority of use cases. Also see `tests/test_api.py <https://github.com/Breakthrough/PySceneDetect/blob/v0.6/tests/test_api.py>` for a set of demonstrations covering many high level use cases.
 
 PySceneDetect v0.6 is a major step towards a more stable and simplified API.  The biggest change to most existing workflows is how video input is handled, and that Python 3.6 or above is now required.
 
@@ -25,6 +25,8 @@ This page covers the most commonly used APIs which require updates to work with 
 
 The resulting object can then be passed to a :py:class:`SceneManager <scenedetect.scene_manager.SceneManager>` when calling :py:meth:`detect_scenes <scenedetect.scene_manager.SceneManager.detect_scenes>`, or any other function/method that used to take a `VideoManager`, e.g.:
 
+.. code:: python
+
     from scenedetect import open_video, SceneManager, ContentDetector
     video = open_video('video.mp4')
     scene_manager = SceneManager()
@@ -33,6 +35,29 @@ The resulting object can then be passed to a :py:class:`SceneManager <scenedetec
     print(scene_manager.get_scene_list())
 
 See :py:mod:`scenedetect.backends` for examples of how to create specific backends. Note that where previously a list of paths was accepted, now only a single string should be provided.
+
+
+Seeking and Start/End Times
+===============================================================
+
+Instead of setting the start time via the `VideoManager`, now :py:meth:`seek <scenedetect.video_stream.VideoStream.seek>` to the starting time on the :py:class:`VideoStream <scenedetect.video_stream.VideoStream>` object.
+
+Instead of setting the duration or end time via the `VideoManager`, now set the `duration` or `end_time` parameters when calling :py:meth:`detect_scenes <scenedetect.scene_manager.SceneManager.detect_scenes>`.
+
+.. code:: python
+
+    from scenedetect import open_video, SceneManager, ContentDetector
+    video = open_video('video.mp4')
+    # Can be seconds (float), frame # (int), or FrameTimecode
+    start_time, end_time = 2.5, 5.0
+    scene_manager = SceneManager()
+    scene_manager.add_detector(ContentDetector(threshold=threshold))
+    video.seek(start_time)
+    # Note there is also a `duration` parameter that can also be set.
+    # If neither `duration` nor `end_time` is provided, the video will
+    # be processed from its current position until the end.
+    scene_manager.detect_scenes(video, end_time=end_time)
+    print(scene_manager.get_scene_list())
 
 
 ===============================================================
@@ -71,6 +96,8 @@ This makes the API consistent with that of :py:class:`SceneManager <scenedetect.
 
 The :py:func:`save_to_csv <scenedetect.stats_manager.StatsManager.save_to_csv>` and :py:func:`load_from_csv <scenedetect.stats_manager.StatsManager.save_to_csv>` methods now accept either a `path` or an open `file` handle.
 
+The `base_timecode` argument has been removed from :py:func:`save_to_csv <scenedetect.stats_manager.StatsManager.save_to_csv>`. It is no longer required.
+
 
 ===============================================================
 `AdaptiveDetector` Class
@@ -86,7 +113,7 @@ Other
 `ThresholdDetector` Class
 ===============================================================
 
-The `block_size` argument has been removed from the :py:class:`ThresholdDetector <scenedetect.detectors.threshold_detector.ThresholdDetector>`` constructor. It is no longer required.
+The `block_size` argument has been removed from the :py:class:`ThresholdDetector <scenedetect.detectors.threshold_detector.ThresholdDetector>` constructor. It is no longer required.
 
 
 `ContentDetector` Class

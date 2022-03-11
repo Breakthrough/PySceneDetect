@@ -105,7 +105,6 @@ def test_detector_metrics(test_video_file):
     video = VideoStreamCv2(test_video_file)
     stats_manager = StatsManager()
     scene_manager = SceneManager(stats_manager)
-    #base_timecode = video.get_base_timecode
 
     assert not stats_manager._registered_metrics
     scene_manager.add_detector(ContentDetector())
@@ -136,6 +135,12 @@ def test_load_empty_stats():
     open(TEST_STATS_FILES[0], 'w').close()
     stats_manager = StatsManager()
     stats_manager.load_from_csv(TEST_STATS_FILES[0])
+
+
+def test__save_no_detect_scenes():
+    """Test saving without calling detect_scenes."""
+    stats_manager = StatsManager()
+    stats_manager.save_to_csv(TEST_STATS_FILES[0])
 
 
 def test_load_hardcoded_file():
@@ -210,8 +215,6 @@ def test_save_load_from_video(test_video_file):
     stats_manager = StatsManager()
     scene_manager = SceneManager(stats_manager)
 
-    base_timecode = video.base_timecode
-
     scene_manager.add_detector(ContentDetector())
 
     video_fps = video.frame_rate
@@ -220,7 +223,7 @@ def test_save_load_from_video(test_video_file):
     scene_manager.auto_downscale = True
     scene_manager.detect_scenes(video, duration=duration)
 
-    stats_manager.save_to_csv(path=TEST_STATS_FILES[0], base_timecode=base_timecode)
+    stats_manager.save_to_csv(path=TEST_STATS_FILES[0])
 
     stats_manager_new = StatsManager()
 

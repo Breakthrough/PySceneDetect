@@ -53,7 +53,7 @@ def get_extra_requires() -> Dict[str, List[str]]:
 setup(
     name='scenedetect',
     version='0.6-dev2',
-    description="A cross-platform, OpenCV-based video scene detection program and Python library. ",
+    description='Video scene cut/shot detection program and Python library.',
     long_description=open('package-info.rst').read(),
     author='Brandon Castellano',
     author_email='brandon248@gmail.com',
