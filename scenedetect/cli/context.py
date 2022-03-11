@@ -736,13 +736,15 @@ class CliContext:
     def _open_video_stream(self, input_path: AnyStr, framerate: Optional[float], backend: str):
         self.base_timecode = None
         try:
+            # TODO(v0.6): Make backend optional, only error out if specified and unavailable.
             if not backend in AVAILABLE_BACKENDS:
                 raise click.BadParameter(
-                    'Specified backend is not available on this system!', param_hint='-b/--backend')
+                    'Specified backend %s is not available on this system!' % backend,
+                    param_hint='-b/--backend')
             backend_name = AVAILABLE_BACKENDS[backend].__name__
-            logger.debug('Using backend: %s / %s', backend, AVAILABLE_BACKENDS[backend].__name__)
             self.video_stream = AVAILABLE_BACKENDS[backend](input_path, framerate)
             self.base_timecode = self.video_stream.base_timecode
+            logger.debug('Video opened using backend %s', type(self.video_stream).__name__)
         except VideoOpenFailure as ex:
             logger.error('%s: %s', backend_name, str(ex))
             raise click.FileError(
