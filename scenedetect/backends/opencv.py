@@ -25,7 +25,7 @@ from numpy import ndarray
 
 from scenedetect.frame_timecode import FrameTimecode, MAX_FPS_DELTA
 from scenedetect.platform import get_aspect_ratio, get_file_name
-from scenedetect.video_stream import VideoStream, SeekError, VideoOpenFailure
+from scenedetect.video_stream import VideoStream, SeekError, VideoOpenFailure, FrameRateUnavailable
 
 logger = logging.getLogger('pyscenedetect')
 
@@ -43,12 +43,12 @@ class VideoStreamCv2(VideoStream):
         Raises:
             IOError: file could not be found or access was denied
             VideoOpenFailure: video could not be opened (may be corrupted)
+            ValueError: specified framerate is invalid
         """
         super().__init__()
 
-
         if framerate is not None and framerate < MAX_FPS_DELTA:
-            raise VideoOpenFailure('Specified framerate (%f) is invalid!' % framerate)
+            raise ValueError('Specified framerate (%f) is invalid!' % framerate)
 
         self._path_or_device = path_or_device
         self._is_device = isinstance(self._path_or_device, int)
@@ -256,13 +256,11 @@ class VideoStreamCv2(VideoStream):
 
         # Ensure the framerate is correct to avoid potential divide by zero errors. This can be
         # addressed in the PyAV backend if required since it supports integer timebases.
-        assert framerate is None or framerate > MAX_FPS_DELTA
+        assert framerate is None or framerate > MAX_FPS_DELTA, "Framerate must be validated if set!"
         if framerate is None:
             framerate = cap.get(cv2.CAP_PROP_FPS)
             if framerate < MAX_FPS_DELTA:
-                raise VideoOpenFailure(
-                    'Unable to obtain video framerate! Check the file/device/stream, or set the'
-                    ' `framerate` to assume a given framerate.')
+                raise FrameRateUnavailable()
 
         self._cap = cap
         self._frame_rate = framerate

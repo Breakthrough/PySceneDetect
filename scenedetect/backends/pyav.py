@@ -23,7 +23,7 @@ from numpy import ndarray
 
 from scenedetect.frame_timecode import FrameTimecode, MAX_FPS_DELTA
 from scenedetect.platform import get_file_name
-from scenedetect.video_stream import VideoStream, VideoOpenFailure
+from scenedetect.video_stream import VideoStream, VideoOpenFailure, FrameRateUnavailable
 
 logger = getLogger('pyscenedetect')
 
@@ -47,6 +47,7 @@ class VideoStreamAv(VideoStream):
         Raises:
             IOError: file could not be found or access was denied
             VideoOpenFailure: video could not be opened (may be corrupted)
+            ValueError: specified framerate is invalid
         """
         # TODO: Investigate why setting the video stream threading mode to 'AUTO' / 'FRAME'
         # causes decoding to stop early, e.g. adding the following:
@@ -82,17 +83,25 @@ class VideoStreamAv(VideoStream):
         except av.error.FileNotFoundError as ex:
             raise IOError from ex
         except Exception as ex:
-            raise VideoOpenFailure('Failed to open video: %s' % str(ex)) from ex
+            raise VideoOpenFailure(str(ex)) from ex
 
-        if framerate is not None and framerate < MAX_FPS_DELTA:
-            raise VideoOpenFailure('Specified framerate (%f) is invalid!' % framerate)
-        self._frame_rate: float = framerate
-        if self._frame_rate is None:
-            self._frame_rate = self._get_frame_rate()
+        if framerate is None:
+            # Calculate framerate from video container.
+            if self._codec_context.framerate.denominator == 0:
+                raise FrameRateUnavailable()
+            frame_rate = self._codec_context.framerate.numerator / float(
+                self._codec_context.framerate.denominator)
+            if frame_rate < MAX_FPS_DELTA:
+                raise FrameRateUnavailable()
+            self._frame_rate: float = frame_rate
+        else:
+            # Ensure specified framerate is valid.
+            if framerate < MAX_FPS_DELTA:
+                raise ValueError('Specified framerate (%f) is invalid!' % framerate)
+            self._frame_rate: float = framerate
 
         # Calculate duration in terms of number of frames once we have set the framerate.
         self._duration_frames = self._get_duration()
-
 
     #
     # Backend-Specific Methods/Properties
@@ -108,27 +117,26 @@ class VideoStreamAv(VideoStream):
         """PyAV `av.codec.context.CodecContext` associated with the `video_stream`."""
         return self._video_stream.codec_context
 
-    def _get_frame_rate(self, fallback_value: float = 30.0) -> float:
-        """Get video frame rate based on the underlying video stream."""
-        if self._codec_context.framerate.denominator == 0:
-            logger.warning(
-                'Unable to obtain video framerate (value: %s), assuming framerate of %f FPS.',
-                str(self._codec_context.framerate), fallback_value)
-            return fallback_value
-        return self._codec_context.framerate.numerator / float(
-            self._codec_context.framerate.denominator)
-
-
     def _get_duration(self) -> int:
         """Get video duration as number of frames based on the video and set framerate."""
+        # See https://pyav.org/docs/develop/api/time.html for details on how ffmpeg/PyAV
+        # handle time calculations internally and which time base to use.
         assert self.frame_rate is not None, "Frame rate must be set before calling _get_duration!"
+        # See if we can obtain the number of frames directly from the stream itself.
         if self._video_stream.frames > 0:
             return self._video_stream.frames
-        duration_sec = float(self._video_stream.container.duration / av.time_base)
-        if duration_sec < MAX_FPS_DELTA:
+        # Calculate based on the reported container duration.
+        duration_sec = None
+        container = self._video_stream.container
+        if container.duration is not None and container.duration > 0:
+            # Containers use AV_TIME_BASE as the time base.
+            duration_sec = float(self._video_stream.container.duration / av.time_base)
+        # Lastly, if that calculation fails, try to calculate it based on the stream duration.
+        if duration_sec is None or duration_sec < MAX_FPS_DELTA:
             if self._video_stream.duration is None:
                 logger.warning('Video duration unavailable.')
                 return 0
+            # Streams use stream `time_base` as the time base.
             time_base = self._video_stream.time_base
             if time_base.denominator == 0:
                 logger.warning(
@@ -137,7 +145,6 @@ class VideoStreamAv(VideoStream):
                 return 0
             duration_sec = float(self._video_stream.duration / time_base)
         return round(duration_sec * self.frame_rate)
-
 
     #
     # VideoStream Methods/Properties

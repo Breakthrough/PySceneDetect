@@ -36,7 +36,7 @@ from scenedetect.video_splitter import split_video_ffmpeg, split_video_mkvmerge
 
 # Used for module identification and when printing version & about info
 # (e.g. calling `scenedetect version` or `scenedetect about`).
-__version__ = 'v0.6-dev2'
+__version__ = 'v0.6-dev3'
 # About & copyright message string shown for the 'about' CLI command (scenedetect about).
 
 ABOUT_STRING = """

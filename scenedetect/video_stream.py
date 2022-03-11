@@ -49,6 +49,13 @@ class SeekError(Exception):
 class VideoOpenFailure(Exception):
     """Raised by a backend if opening a video fails."""
 
+class FrameRateUnavailable(VideoOpenFailure):
+    """Exception instance to provide consistent error messaging across backends when the video frame
+    rate is unavailable or cannot be calculated. Subclass of VideoOpenFailure."""
+    def __init__(self):
+        super().__init__('Unable to obtain video framerate! Specify `framerate` manually, or'
+                         ' re-encode/re-mux the video and try again.')
+
 
 ##
 ## VideoStream Constants & Helper Functions

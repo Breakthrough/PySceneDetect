@@ -4,7 +4,7 @@ PySceneDetect Releases
 
 ## PySceneDetect 0.6
 
-### 0.6-dev2 (March 6, 2022)
+### 0.6-dev3 (WIP)
 
 #### Release Notes
 

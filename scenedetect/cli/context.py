@@ -29,7 +29,7 @@ import scenedetect.detectors
 from scenedetect.platform import get_and_create_path, get_cv2_imwrite_params, init_logger
 from scenedetect.scene_manager import SceneManager
 from scenedetect.stats_manager import StatsManager, StatsFileCorrupt
-from scenedetect.video_stream import VideoStream, VideoOpenFailure
+from scenedetect.video_stream import VideoStream, VideoOpenFailure, FrameRateUnavailable
 from scenedetect.video_splitter import is_mkvmerge_available, is_ffmpeg_available
 
 logger = logging.getLogger('pyscenedetect')
@@ -735,28 +735,28 @@ class CliContext:
 
     def _open_video_stream(self, input_path: AnyStr, framerate: Optional[float], backend: str):
         self.base_timecode = None
+        if framerate is not None and framerate < MAX_FPS_DELTA:
+            raise click.BadParameter('Invalid framerate specified!', param_hint='-f/--framerate')
+
         try:
             # TODO(v0.6): Make backend optional, only error out if specified and unavailable.
             if not backend in AVAILABLE_BACKENDS:
                 raise click.BadParameter(
                     'Specified backend %s is not available on this system!' % backend,
                     param_hint='-b/--backend')
-            backend_name = AVAILABLE_BACKENDS[backend].__name__
             self.video_stream = AVAILABLE_BACKENDS[backend](input_path, framerate)
             self.base_timecode = self.video_stream.base_timecode
             logger.debug('Video opened using backend %s', type(self.video_stream).__name__)
-        except VideoOpenFailure as ex:
-            logger.error('%s: %s', backend_name, str(ex))
-            raise click.FileError(
-                input_path, hint='failed to load video, see error output above.') from ex
-        except IOError as ex:
-            raise click.BadParameter('Input error:\n\n\t%s\n' % str(ex), param_hint='-i/--input')
-
-        if self.video_stream.frame_rate < MAX_FPS_DELTA:
+        except FrameRateUnavailable as ex:
             raise click.BadParameter(
                 'Failed to obtain framerate for input video. Manually specify framerate with the'
                 ' -f/--framerate option, or try re-encoding the file.',
-                param_hint='-i/--input')
+                param_hint='-i/--input') from ex
+        except VideoOpenFailure as ex:
+            raise click.BadParameter(
+                'Failed to open input video: %s' % str(ex), param_hint='-i/--input') from ex
+        except IOError as ex:
+            raise click.BadParameter('Input error:\n\n\t%s\n' % str(ex), param_hint='-i/--input')
 
     def _open_stats_file(self, file_path: str):
         """Initializes this object's StatsManager, loading any existing stats from disk.
