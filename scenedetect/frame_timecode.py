@@ -262,6 +262,8 @@ class FrameTimecode:
         # Check if value to add is in number of seconds.
         elif isinstance(other, float):
             self.frame_num += self._seconds_to_frames(other)
+        elif isinstance(other, str):
+            self.frame_num += self._parse_timecode_string(other)
         else:
             raise TypeError('Unsupported type for performing addition with FrameTimecode.')
         if self.frame_num < 0: # Required to allow adding negative seconds/frames.
@@ -284,6 +286,8 @@ class FrameTimecode:
         # Check if value to add is in number of seconds.
         elif isinstance(other, float):
             self.frame_num -= self._seconds_to_frames(other)
+        elif isinstance(other, str):
+            self.frame_num -= self._parse_timecode_string(other)
         else:
             raise TypeError('Unsupported type for performing subtraction with FrameTimecode: %s' %
                             type(other))

@@ -24,7 +24,7 @@ STATS_FILE_PATH = 'api_test_statsfile.csv'
 
 
 def print_scenes(scene_list: List[Tuple[FrameTimecode, FrameTimecode]]):
-    """Iterates over a scene list and prints it to the terminal."""
+    """Iterate over a scene list and print it to the terminal."""
     print('Scene List:')
     for i, scene in enumerate(scene_list):
         print('  Scene %2d: Start %s / Frame %d, End %s / Frame %d' % (
@@ -37,11 +37,12 @@ def print_scenes(scene_list: List[Tuple[FrameTimecode, FrameTimecode]]):
 
 
 def test_api_start_end_time(test_video_file: str):
-    """Demonstrate processing a subsection of a video based on time."""
+    """Demonstrate processing a subsection of a video based on a starting/ending time."""
     video = open_video(test_video_file)
     scene_manager = SceneManager()
     scene_manager.add_detector(ContentDetector())
-    # See FrameTimecode docs for all supported timecode formats.
+    # See FrameTimecode docs or test_api_timecode_types for all
+    # supported timecode formats.
     start_time = 20 # Start at frame (int) 20
     end_time = 15.0 # End at 15 seconds (float)
     video.seek(start_time)
@@ -55,7 +56,7 @@ def test_api_start_end_time(test_video_file: str):
 def test_api_stats_manager(test_video_file: str):
     """Demonstrate using a StatsManager to save and optionally load stats from disk."""
     video = open_video(test_video_file)
-    scene_manager = SceneManager(stats_manager = StatsManager())
+    scene_manager = SceneManager(stats_manager=StatsManager())
     scene_manager.add_detector(ContentDetector())
     # Loading from disk is optional.
     scene_manager.stats_manager.load_from_csv(path=STATS_FILE_PATH)
@@ -74,3 +75,20 @@ def test_api_video_stream_opencv(test_video_file: str):
     scene_manager.detect_scenes(video=video)
     scene_list = scene_manager.get_scene_list()
     print_scenes(scene_list=scene_list)
+
+
+def test_api_timecode_types():
+    """Demonstrate all different types of timecodes that can be used."""
+    base_timecode = FrameTimecode(timecode=0, fps=10.0)
+    # Frames (int)
+    timecode = base_timecode + 1
+    assert timecode.get_frames() == 1
+    # Seconds (float)
+    timecode = base_timecode + 1.0
+    assert timecode.get_frames() == 10
+    # Timecode (str, 'HH:MM:SS' or 'HH:MM:SSS.nnn')
+    timecode = base_timecode + '00:00:01.500'
+    assert timecode.get_frames() == 15
+    # Seconds (str, 'SSSs' or 'SSSS.SSSs')
+    timecode = base_timecode + '1.5s'
+    assert timecode.get_frames() == 15
