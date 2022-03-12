@@ -2,46 +2,41 @@ language: python
 
 matrix:
   include:
-    - dist: xenial
-      os: linux
+    - os: linux
+      dist: xenial
       language: python
       python: "3.6"
-    - dist: xenial
-      os: linux
+    - os: linux
+      dist: xenial
       language: python
       python: "3.7"
-    - dist: xenial
-      os: linux
+    - os: linux
+      dist: xenial
       language: python
       python: "3.8"
-    - dist: xenial
-      os: linux
+
+    - os: linux
+      dist: bionic
+      language: python
+      python: "3.8"
+    - os: linux
+      dist: focal
       language: python
       python: "3.9"
 
-    - dist: bionic
-      os: linux
-      language: python
-      python: "3.7"
-    - dist: bionic
-      os: linux
+    - os: linux
+      dist: focal
       language: python
       python: "3.8"
-    - dist: bionic
-      os: linux
+    - os: linux
+      dist: focal
       language: python
       python: "3.9"
 
-    - dist: focal
-      os: linux
-      language: python
-      python: "3.7"
-    - dist: focal
-      os: linux
+    - os: osx
       language: python
       python: "3.8"
-    - dist: focal
-      os: linux
+    - os: osx
       language: python
       python: "3.9"
 
