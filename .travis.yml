@@ -1,12 +1,23 @@
 language: python
+os:
+  - linux
+
+matrix:
+    include:
+        - dist: trusty
+        - dist: xenial
+        - dist: bionic
+
 python:
   - "3.6"
   - "3.7"
   - "3.8"
   - "3.9"
+
 install:
   - "pip install -r requirements.txt"
   - "git fetch --depth=1 https://github.com/Breakthrough/PySceneDetect.git refs/heads/resources:refs/remotes/origin/resources"
   - "git checkout refs/remotes/origin/resources -- tests/resources/"
+
 script:
   - python -m pytest tests/
