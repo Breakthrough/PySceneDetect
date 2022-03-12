@@ -1,18 +1,31 @@
 language: python
-os:
-  - linux
 
 matrix:
-    include:
-        - dist: trusty
-        - dist: xenial
-        - dist: bionic
+  include:
+    - dist: xenial
+      os: linux
+      language: python
+      python:
+        - "3.6"
+        - "3.7"
+        - "3.8"
+        - "3.9"
 
-python:
-  - "3.6"
-  - "3.7"
-  - "3.8"
-  - "3.9"
+    - dist: bionic
+      os: linux
+      language: python
+      python:
+        - "3.7"
+        - "3.8"
+        - "3.9"
+
+    - dist: focal
+      os: linux
+      language: python
+      python:
+        - "3.7"
+        - "3.8"
+        - "3.9"
 
 install:
   - "pip install -r requirements.txt"
