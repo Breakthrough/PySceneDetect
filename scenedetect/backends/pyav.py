@@ -39,7 +39,7 @@ class VideoStreamAv(VideoStream):
         path_or_io: Union[AnyStr, BinaryIO],
         framerate: Optional[float] = None,
         name: Optional[str] = None,
-        threading_mode: str = 'AUTO',
+        threading_mode: str = 'SLICE',
     ):
         """Open a video by path.
 
@@ -52,7 +52,7 @@ class VideoStreamAv(VideoStream):
                 for valid threading modes ('AUTO', 'FRAME', 'NONE', and 'SLICE'). If this mode is
                 'AUTO' or 'FRAME' and not all frames have been decoded, the video will be reopened
                 if it is seekable, and the remaining frames will be decoded in single-threaded mode.
-                Default is 'AUTO' for performance (there will be a slight pause near the end).
+                TODO: Default is 'AUTO' for performance (there will be a slight pause near the end).
 
         Raises:
             OSError: file could not be found or access was denied
