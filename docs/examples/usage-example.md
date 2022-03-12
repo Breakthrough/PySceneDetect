@@ -31,15 +31,7 @@ Running the above command, in the working directory, you should see a file `gold
 |       6      |  00:00:27.110 | <img src="https://raw.githubusercontent.com/Breakthrough/PySceneDetect/resources/tests/resources/goldeneye/d-content-t-27/goldeneye-Scene-006-01.jpg" width="480" />  |
 |       7      |  00:00:34.117 | <img src="https://raw.githubusercontent.com/Breakthrough/PySceneDetect/resources/tests/resources/goldeneye/d-content-t-27/goldeneye-Scene-007-01.jpg" width="480" />  |
 |       8      |  00:00:36.536 | <img src="https://raw.githubusercontent.com/Breakthrough/PySceneDetect/resources/tests/resources/goldeneye/d-content-t-27/goldeneye-Scene-008-01.jpg" width="480" />  |
-|       9      |  00:00:42.501 | <img src="https://raw.githubusercontent.com/Breakthrough/PySceneDetect/resources/tests/resources/goldeneye/d-content-t-27/goldeneye-Scene-009-01.jpg" width="480" />  |
-|      10      |  00:00:44.002 | <img src="https://raw.githubusercontent.com/Breakthrough/PySceneDetect/resources/tests/resources/goldeneye/d-content-t-27/goldeneye-Scene-010-01.jpg" width="480" />  |
-|      11      |  00:00:45.837 | <img src="https://raw.githubusercontent.com/Breakthrough/PySceneDetect/resources/tests/resources/goldeneye/d-content-t-27/goldeneye-Scene-011-01.jpg" width="480" />  |
-|      12      |  00:00:48.966 | <img src="https://raw.githubusercontent.com/Breakthrough/PySceneDetect/resources/tests/resources/goldeneye/d-content-t-27/goldeneye-Scene-012-01.jpg" width="480" />  |
-|      13      |  00:00:51.134 | <img src="https://raw.githubusercontent.com/Breakthrough/PySceneDetect/resources/tests/resources/goldeneye/d-content-t-27/goldeneye-Scene-013-01.jpg" width="480" />  |
-|      14      |  00:00:52.552 | <img src="https://raw.githubusercontent.com/Breakthrough/PySceneDetect/resources/tests/resources/goldeneye/d-content-t-27/goldeneye-Scene-014-01.jpg" width="480" />  |
-|      15      |  00:00:53.428 | <img src="https://raw.githubusercontent.com/Breakthrough/PySceneDetect/resources/tests/resources/goldeneye/d-content-t-27/goldeneye-Scene-015-01.jpg" width="480" />  |
-|      16      |  00:00:55.639 | <img src="https://raw.githubusercontent.com/Breakthrough/PySceneDetect/resources/tests/resources/goldeneye/d-content-t-27/goldeneye-Scene-016-01.jpg" width="480" />  |
-|      17      |  00:00:56.932 | <img src="https://raw.githubusercontent.com/Breakthrough/PySceneDetect/resources/tests/resources/goldeneye/d-content-t-27/goldeneye-Scene-017-01.jpg" width="480" />  |
+|      ...     |       ...      |       ...      |
 |      18      |  00:01:06.316 | <img src="https://raw.githubusercontent.com/Breakthrough/PySceneDetect/resources/tests/resources/goldeneye/d-content-t-27/goldeneye-Scene-018-01.jpg" width="480" />  |
 |      19      |  00:01:10.779 | <img src="https://raw.githubusercontent.com/Breakthrough/PySceneDetect/resources/tests/resources/goldeneye/d-content-t-27/goldeneye-Scene-019-01.jpg" width="480" />  |
 |      20      |  00:01:18.036 | <img src="https://raw.githubusercontent.com/Breakthrough/PySceneDetect/resources/tests/resources/goldeneye/d-content-t-27/goldeneye-Scene-020-01.jpg" width="480" />  |
