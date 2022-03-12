@@ -9,7 +9,7 @@ Video Scene Cut Detection and Analysis Tool
 
 ### Latest Release: v0.5.6.1 (October 11, 2021)
 
-### Beta Release: v0.6-dev2 (March 6, 2022)
+### Beta Release: [v0.6-beta](https://github.com/Breakthrough/PySceneDetect/releases)
 
 **Main Webpage**:  [scenedetect.com](http://scenedetect.com)
 
