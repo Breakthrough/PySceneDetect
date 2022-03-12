@@ -22,7 +22,7 @@ from typing import AnyStr, Optional, Union
 
 import click
 
-from scenedetect.backends import AVAILABLE_BACKENDS
+from scenedetect.backends import open_video, AVAILABLE_BACKENDS
 from scenedetect.cli.config import ConfigRegistry, ConfigLoadFailure, CHOICE_MAP
 from scenedetect.frame_timecode import FrameTimecode, MAX_FPS_DELTA
 import scenedetect.detectors
@@ -104,7 +104,6 @@ class CliContext:
         self.process_input_flag: bool = True # If False, skips video processing.
 
         self.video_stream: VideoStream = None
-        self.base_timecode: FrameTimecode = None
         self.scene_manager: SceneManager = None
         self.stats_manager: StatsManager = None
 
@@ -237,7 +236,7 @@ class CliContext:
         self._open_video_stream(
             input_path=input_path,
             framerate=framerate,
-            backend=self.config.get_value("global", "backend", backend))
+            backend=self.config.get_value("global", "backend", ignore_default=True))
 
         self.output_directory = output if output else self.config.get_value("global", "output")
         if self.output_directory:
@@ -733,19 +732,19 @@ class CliContext:
             self.options_processed = False
             raise click.Abort()
 
-    def _open_video_stream(self, input_path: AnyStr, framerate: Optional[float], backend: str):
-        self.base_timecode = None
+    def _open_video_stream(self, input_path: AnyStr, framerate: Optional[float],
+                           backend: Optional[str]):
         if framerate is not None and framerate < MAX_FPS_DELTA:
             raise click.BadParameter('Invalid framerate specified!', param_hint='-f/--framerate')
-
         try:
-            # TODO(v0.6): Make backend optional, only error out if specified and unavailable.
-            if not backend in AVAILABLE_BACKENDS:
-                raise click.BadParameter(
-                    'Specified backend %s is not available on this system!' % backend,
-                    param_hint='-b/--backend')
-            self.video_stream = AVAILABLE_BACKENDS[backend](input_path, framerate)
-            self.base_timecode = self.video_stream.base_timecode
+            if backend is not None:
+                if not backend in AVAILABLE_BACKENDS:
+                    raise click.BadParameter(
+                        'Specified backend %s is not available on this system!' % backend,
+                        param_hint='-b/--backend')
+                self.video_stream = AVAILABLE_BACKENDS[backend](input_path, framerate)
+            else:
+                self.video_stream = open_video(path=input_path, framerate=framerate)
             logger.debug('Video opened using backend %s', type(self.video_stream).__name__)
         except FrameRateUnavailable as ex:
             raise click.BadParameter(
@@ -754,7 +753,9 @@ class CliContext:
                 param_hint='-i/--input') from ex
         except VideoOpenFailure as ex:
             raise click.BadParameter(
-                'Failed to open input video: %s' % str(ex), param_hint='-i/--input') from ex
+                'Failed to open input video%s: %s' %
+                (' using %s backend' % backend if backend else '', str(ex)),
+                param_hint='-i/--input') from ex
         except IOError as ex:
             raise click.BadParameter('Input error:\n\n\t%s\n' % str(ex), param_hint='-i/--input')
 

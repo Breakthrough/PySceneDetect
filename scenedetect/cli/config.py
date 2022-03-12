@@ -20,10 +20,11 @@ here where possible and re-used by the CLI so that there is one source of truth.
 import logging
 import os.path
 from configparser import ConfigParser
-from typing import Dict, List, Optional, Tuple, Union
+from typing import AnyStr, Dict, List, Optional, Tuple, Union
 
 from appdirs import user_config_dir
 
+from scenedetect.backends import PREFERRED_BACKENDS
 from scenedetect.frame_timecode import FrameTimecode
 
 
@@ -62,10 +63,13 @@ class RangeValue:
 ConfigValue = Union[bool, int, float, str]
 ConfigDict = Dict[str, Dict[str, ConfigValue]]
 
-_CONFIG_FILE_NAME = 'scenedetect.cfg'
-_CONFIG_FILE_DIR = user_config_dir("PySceneDetect", False)
+_CONFIG_FILE_NAME: AnyStr = 'scenedetect.cfg'
+_CONFIG_FILE_DIR: AnyStr = user_config_dir("PySceneDetect", False)
 
-CONFIG_FILE_PATH = os.path.join(_CONFIG_FILE_DIR, _CONFIG_FILE_NAME)
+CONFIG_FILE_PATH: AnyStr = os.path.join(_CONFIG_FILE_DIR, _CONFIG_FILE_NAME)
+
+_DEFAULT_BACKENDS: str = 'try %s in order' % ', '.join(
+    backend_type for backend_type in PREFERRED_BACKENDS)
 
 CONFIG_MAP: ConfigDict = {
     'detect-adaptive': {
@@ -100,7 +104,7 @@ CONFIG_MAP: ConfigDict = {
         'skip-cuts': False,
     },
     'global': {
-        'backend': 'opencv',
+        'backend': _DEFAULT_BACKENDS,
         'downscale': 0,
         'drop-short-scenes': False,
         'frame-skip': 0,
@@ -312,8 +316,8 @@ class ConfigRegistry:
             value = self._config[command][option]
         else:
             value = CONFIG_MAP[command][option]
-        if ignore_default:
-            return None
+            if ignore_default:
+                return None
         if isinstance(value, (TimecodeValue, RangeValue)):
             return value.value
         return value

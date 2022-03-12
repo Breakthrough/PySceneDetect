@@ -64,7 +64,7 @@ is guaranteed to be available.
 #  - Nvidia VPF: https://developer.nvidia.com/blog/vpf-hardware-accelerated-video-processing-framework-in-python/
 
 from logging import getLogger
-from typing import Dict, Iterable, List, Optional, Type
+from typing import Dict, List, Optional, Type
 
 # VideoStreamCv2 must be available at minimum.
 from scenedetect.backends.opencv import VideoStreamCv2
@@ -83,15 +83,14 @@ AVAILABLE_BACKENDS: Dict[str, Type] = {
         VideoStreamAv,
     ])
 }
-"""All available backends that open_video can consider for the `preferred_backend` argument.
-These backends must support construction with the following signature:
+"""All available backends that :py:func:`open_video` can consider for the `preferred_backend`
+parameter. These backends must support construction with the following signature:
 
     BackendType(path: str, framerate: Optional[float])
 """
 
-PREFERRED_BACKENDS: Iterable[Type] = list(filter(None, [VideoStreamAv]))
-"""List of backend types to try when using `open_video` in order if a preferred backend is not
-specified, or the specified `backend` is unavailable."""
+PREFERRED_BACKENDS: List[str] = ['pyav', 'opencv']
+"""List of backend names to try, in order, when using :py:func:`open_video`."""
 
 
 def open_video(path: str,
@@ -105,16 +104,16 @@ def open_video(path: str,
         backend: Name of specific to use if possible. See :py:data:`AVAILABLE_BACKENDS` for
             available backends. If the specified backend is unavailable (or `backend` is not
             specified), the values in :py:data:`PREFERRED_BACKENDS` will be used in order.
-            If none of the backends in :py:data:`PREFERRED_BACKENDS` are available, the OpenCV
-            backend will be used.
 
     Returns:
         VideoStream backend object created with the specified video path.
 
     Raises:
-        :py:class:`VideoOpenFailure`: Constructing the VideoStream fails.
+        :py:class:`VideoOpenFailure`: Constructing the VideoStream fails. If multiple backends have
+            been attempted, the error from the first backend will be returned.
     """
     # Try to open the video with the specified backend.
+    last_error = None
     if backend is not None:
         if backend in AVAILABLE_BACKENDS:
             try:
@@ -123,15 +122,20 @@ def open_video(path: str,
             except VideoOpenFailure as ex:
                 logger.debug('Failed to open video: %s', str(ex))
                 logger.debug('Trying preferred backends...')
+                last_error = ex
         else:
-            logger.debug('Backend %s not available.', backend)
+            logger.debug('Backend %s not available. Trying preferred backends...', backend)
     # Try to open the video with the preferred backends in order.
     for backend_type in PREFERRED_BACKENDS:
+        if not backend_type in AVAILABLE_BACKENDS:
+            continue
         try:
-            logger.debug('Opening video with %s...', backend_type.__name__)
-            return backend_type(path, framerate)
-        except VideoOpenFailure:
+            backend = AVAILABLE_BACKENDS[backend_type]
+            logger.debug('Opening video with %s...', backend.__name__)
+            return backend(path, framerate)
+        except VideoOpenFailure as ex:
             logger.debug('Failed to open video: %s', str(ex))
-    # Fallback to trying to open the video with VideoStreamCv2.
-    logger.debug('Opening video with %s...', VideoStreamCv2.__name__)
-    return VideoStreamCv2(path, framerate)
+            if last_error is None:
+                last_error = ex
+    assert last_error is not None
+    raise last_error
