@@ -22,7 +22,7 @@ Video Scene Cut Detection and Analysis Tool
 
 ----------------------------------------------------------
 
-Website: http://py.scenedetect.com/
+Website: http://scenedetect.com/
 
 Documentation: http://manual.scenedetect.com/
 

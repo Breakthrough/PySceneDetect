@@ -32,6 +32,8 @@ logger = getLogger('pyscenedetect')
 class VideoStreamAv(VideoStream):
     """PyAV `av.InputContainer` backend."""
 
+    # TODO(v0.6.1): Add config file option for threading mode.
+    # TODO(v0.6.1): Add `accurate_duration` option (default to False) to config file.
     def __init__(
         self,
         path_or_io: Union[AnyStr, BinaryIO],
@@ -99,7 +101,7 @@ class VideoStreamAv(VideoStream):
             assert framerate >= MAX_FPS_DELTA
             self._frame_rate: float = framerate
 
-        # Calculate duration in terms of number of frames once we have set the framerate.
+        # Calculate duration after we have set the framerate.
         self._duration_frames = self._get_duration()
 
     #
@@ -288,7 +290,7 @@ class VideoStreamAv(VideoStream):
         return round(duration_sec * self.frame_rate)
 
     def _handle_eof(self):
-        """Fix issue where if thread_type is 'AUTO' the whole video is sometimes not decoded.
+        """Fix for issue where if thread_type is 'AUTO' the whole video is not decoded.
 
         Re-open video if the threading mode is AUTO and we didn't decode all of the frames."""
         # Don't re-open the video if we already did, or if we already decoded all the frames.
