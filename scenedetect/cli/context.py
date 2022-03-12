@@ -236,7 +236,7 @@ class CliContext:
         self._open_video_stream(
             input_path=input_path,
             framerate=framerate,
-            backend=self.config.get_value("global", "backend", ignore_default=True))
+            backend=self.config.get_value("global", "backend", backend, ignore_default=True))
 
         self.output_directory = output if output else self.config.get_value("global", "output")
         if self.output_directory:
@@ -756,7 +756,7 @@ class CliContext:
                 'Failed to open input video%s: %s' %
                 (' using %s backend' % backend if backend else '', str(ex)),
                 param_hint='-i/--input') from ex
-        except IOError as ex:
+        except OSError as ex:
             raise click.BadParameter('Input error:\n\n\t%s\n' % str(ex), param_hint='-i/--input')
 
     def _open_stats_file(self, file_path: str):

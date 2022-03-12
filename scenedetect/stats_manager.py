@@ -195,7 +195,7 @@ class StatsManager:
 
         Raises:
             ValueError: If both path and file are specified.
-            IOError: If `path` cannot be opened or a write failure occurs.
+            OSError: If `path` cannot be opened or a write failure occurs.
         """
 
         if path is not None and file is not None:

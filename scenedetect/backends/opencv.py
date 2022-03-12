@@ -41,7 +41,7 @@ class VideoStreamCv2(VideoStream):
             framerate: If set, overrides the detected framerate.
 
         Raises:
-            IOError: file could not be found or access was denied
+            OSError: file could not be found or access was denied
             VideoOpenFailure: video could not be opened (may be corrupted)
             ValueError: specified framerate is invalid
         """
@@ -237,7 +237,7 @@ class VideoStreamCv2(VideoStream):
         if not self._is_device and not ('%' in self._path_or_device
                                         or '://' in self._path_or_device):
             if not os.path.exists(self._path_or_device):
-                raise IOError('Video file not found.')
+                raise OSError('Video file not found.')
 
         cap = cv2.VideoCapture(self._path_or_device)
         if not cap.isOpened():

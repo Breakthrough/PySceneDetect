@@ -252,7 +252,7 @@ class TestVideoStream:
 
 def test_invalid_path(vs_type: Type[VideoStream]):
     """Ensure correct exception is thrown if the path does not exist."""
-    with pytest.raises(IOError):
+    with pytest.raises(OSError):
         _ = vs_type('this_path_should_not_exist.mp4')
 
 

@@ -16,7 +16,7 @@ Uses string identifier ``'pyav'``.
 """
 
 from logging import getLogger
-from typing import BinaryIO, Optional, Tuple, Union
+from typing import AnyStr, BinaryIO, Optional, Tuple, Union
 
 import av
 from numpy import ndarray
@@ -32,56 +32,57 @@ logger = getLogger('pyscenedetect')
 class VideoStreamAv(VideoStream):
     """PyAV `av.InputContainer` backend."""
 
-    def __init__(self,
-                 path_or_io: Union[str, bytes, BinaryIO],
-                 framerate: Optional[float] = None,
-                 name: Optional[str] = None):
+    def __init__(
+        self,
+        path_or_io: Union[AnyStr, BinaryIO],
+        framerate: Optional[float] = None,
+        name: Optional[str] = None,
+        threading_mode: str = 'AUTO',
+    ):
         """Open a video by path.
 
         Arguments:
             path_or_io: Path to the video, or a file-like object.
             framerate: If set, overrides the detected framerate.
-            name: Overrides the `name` property derived from the video path.
-                Should be set if `path_or_io` is a file-like object.
+            name: Overrides the `name` property derived from the video path. Should be set if
+                `path_or_io` is a file-like object.
+            threading_mode: The PyAV video stream `thread_type`. See av.codec.context.ThreadType
+                for valid threading modes ('AUTO', 'FRAME', 'NONE', and 'SLICE'). If this mode is
+                'AUTO' or 'FRAME' and not all frames have been decoded, the video will be reopened
+                if it is seekable, and the remaining frames will be decoded in single-threaded mode.
+                Default is 'AUTO' for performance (there will be a slight pause near the end).
 
         Raises:
-            IOError: file could not be found or access was denied
+            OSError: file could not be found or access was denied
             VideoOpenFailure: video could not be opened (may be corrupted)
             ValueError: specified framerate is invalid
         """
-        # TODO: Investigate why setting the video stream threading mode to 'AUTO' / 'FRAME'
-        # causes decoding to stop early, e.g. adding the following:
-        #
-        #     self._container.streams.video[0].thread_type = 'AUTO'  # Go faster!
-        #
-        # As a workaround, we can re-open the video without threading, and continue decoding from
-        # where the multithreaded version left off. That could be as simple as re-initializing
-        # self._container and retrying the read() call.
-        #
-        # The 'FRAME' threading method provides a significant speed boost (~400 FPS vs
-        # 240 FPS without), so this seems like a worth-while tradeoff. The OpenCV backend
-        # gets around 350 FPS for comparison.
-
-        # TODO(#258): See if setting self._container.discard_corrupt = True affects anything.
+        # TODO(#258): See what self._container.discard_corrupt = True does with corrupt videos.
         super().__init__()
 
-        self._path: Union[str, bytes] = ''
-        self._name: Union[str, bytes] = '' if name is None else name
-        self._io: Optional[BinaryIO] = None
-        self._duration_frames: int = 0
-        self._frame = None
+        # Ensure specified framerate is valid if set.
+        if framerate is not None and framerate < MAX_FPS_DELTA:
+            raise ValueError('Specified framerate (%f) is invalid!' % framerate)
 
-        if isinstance(path_or_io, (str, bytes)):
-            self._path = path_or_io
-            if not self._name:
-                self._name = get_file_name(self.path, include_extension=False)
-        else:
-            self._io = path_or_io
+        self._name: Union[str, bytes] = '' if name is None else name
+        self._frame = None
+        self._reopened = True
 
         try:
-            self._container = av.open(self._path if self._path else self._io)
-        except av.error.FileNotFoundError as ex:
-            raise IOError from ex
+            if isinstance(path_or_io, (str, bytes)):
+                self._path = path_or_io
+                self._io = open(path_or_io, 'rb')
+                if not self._name:
+                    self._name = get_file_name(self.path, include_extension=False)
+            else:
+                self._io = path_or_io
+
+            self._container = av.open(self._io)
+            if threading_mode is not None:
+                self._video_stream.thread_type = threading_mode
+                self._reopened = False
+        except OSError:
+            raise
         except Exception as ex:
             raise VideoOpenFailure(str(ex)) from ex
 
@@ -95,56 +96,11 @@ class VideoStreamAv(VideoStream):
                 raise FrameRateUnavailable()
             self._frame_rate: float = frame_rate
         else:
-            # Ensure specified framerate is valid.
-            if framerate < MAX_FPS_DELTA:
-                raise ValueError('Specified framerate (%f) is invalid!' % framerate)
+            assert framerate >= MAX_FPS_DELTA
             self._frame_rate: float = framerate
 
         # Calculate duration in terms of number of frames once we have set the framerate.
         self._duration_frames = self._get_duration()
-
-    #
-    # Backend-Specific Methods/Properties
-    #
-
-    @property
-    def _video_stream(self):
-        """PyAV `av.video.stream.VideoStream` being used."""
-        return self._container.streams.video[0]
-
-    @property
-    def _codec_context(self):
-        """PyAV `av.codec.context.CodecContext` associated with the `video_stream`."""
-        return self._video_stream.codec_context
-
-    def _get_duration(self) -> int:
-        """Get video duration as number of frames based on the video and set framerate."""
-        # See https://pyav.org/docs/develop/api/time.html for details on how ffmpeg/PyAV
-        # handle time calculations internally and which time base to use.
-        assert self.frame_rate is not None, "Frame rate must be set before calling _get_duration!"
-        # See if we can obtain the number of frames directly from the stream itself.
-        if self._video_stream.frames > 0:
-            return self._video_stream.frames
-        # Calculate based on the reported container duration.
-        duration_sec = None
-        container = self._video_stream.container
-        if container.duration is not None and container.duration > 0:
-            # Containers use AV_TIME_BASE as the time base.
-            duration_sec = float(self._video_stream.container.duration / av.time_base)
-        # Lastly, if that calculation fails, try to calculate it based on the stream duration.
-        if duration_sec is None or duration_sec < MAX_FPS_DELTA:
-            if self._video_stream.duration is None:
-                logger.warning('Video duration unavailable.')
-                return 0
-            # Streams use stream `time_base` as the time base.
-            time_base = self._video_stream.time_base
-            if time_base.denominator == 0:
-                logger.warning(
-                    'Unable to calculate video duration: time_base (%s) has zero denominator!',
-                    str(time_base))
-                return 0
-            duration_sec = float(self._video_stream.duration / time_base)
-        return round(duration_sec * self.frame_rate)
 
     #
     # VideoStream Methods/Properties
@@ -166,9 +122,7 @@ class VideoStreamAv(VideoStream):
     @property
     def is_seekable(self) -> bool:
         """True if seek() is allowed, False otherwise."""
-        if not self._io is None and not self._io.seekable():
-            return False
-        return self._container.format.seek_to_pts
+        return self._io.seekable()
 
     @property
     def frame_size(self) -> Tuple[int, int]:
@@ -249,7 +203,8 @@ class VideoStreamAv(VideoStream):
         if not beginning:
             self.read(decode=False, advance=True)
         while self.position < target:
-            self.read(decode=False, advance=True)
+            if self.read(decode=False, advance=True) is False:
+                break
 
     def reset(self):
         """ Close and re-open the VideoStream (should be equivalent to calling `seek(0)`). """
@@ -279,6 +234,8 @@ class VideoStreamAv(VideoStream):
                 self._frame = next(self._container.decode(video=0))
             except av.error.EOFError:
                 self._frame = last_frame
+                if self._handle_eof():
+                    return self.read(decode, advance=True)
                 return False
             except StopIteration:
                 return False
@@ -286,3 +243,68 @@ class VideoStreamAv(VideoStream):
         if decode:
             return self._frame.to_ndarray(format='bgr24')
         return has_advanced
+
+    #
+    # Private Methods/Properties
+    #
+
+    @property
+    def _video_stream(self):
+        """PyAV `av.video.stream.VideoStream` being used."""
+        return self._container.streams.video[0]
+
+    @property
+    def _codec_context(self):
+        """PyAV `av.codec.context.CodecContext` associated with the `video_stream`."""
+        return self._video_stream.codec_context
+
+    def _get_duration(self) -> int:
+        """Get video duration as number of frames based on the video and set framerate."""
+        # See https://pyav.org/docs/develop/api/time.html for details on how ffmpeg/PyAV
+        # handle time calculations internally and which time base to use.
+        assert self.frame_rate is not None, "Frame rate must be set before calling _get_duration!"
+        # See if we can obtain the number of frames directly from the stream itself.
+        if self._video_stream.frames > 0:
+            return self._video_stream.frames
+        # Calculate based on the reported container duration.
+        duration_sec = None
+        container = self._video_stream.container
+        if container.duration is not None and container.duration > 0:
+            # Containers use AV_TIME_BASE as the time base.
+            duration_sec = float(self._video_stream.container.duration / av.time_base)
+        # Lastly, if that calculation fails, try to calculate it based on the stream duration.
+        if duration_sec is None or duration_sec < MAX_FPS_DELTA:
+            if self._video_stream.duration is None:
+                logger.warning('Video duration unavailable.')
+                return 0
+            # Streams use stream `time_base` as the time base.
+            time_base = self._video_stream.time_base
+            if time_base.denominator == 0:
+                logger.warning(
+                    'Unable to calculate video duration: time_base (%s) has zero denominator!',
+                    str(time_base))
+                return 0
+            duration_sec = float(self._video_stream.duration / time_base)
+        return round(duration_sec * self.frame_rate)
+
+    def _handle_eof(self):
+        """Fix issue where if thread_type is 'AUTO' the whole video is sometimes not decoded.
+
+        Re-open video if the threading mode is AUTO and we didn't decode all of the frames."""
+        # Don't re-open the video if we already did, or if we already decoded all the frames.
+        if self._reopened or self.frame_number >= self.duration:
+            return False
+        # Don't re-open the video if we can't seek or aren't in AUTO/FRAME thread_type mode.
+        if not self.is_seekable or not self._video_stream.thread_type in ('AUTO', 'FRAME'):
+            return False
+        last_frame = self.frame_number
+        orig_pos = self._io.tell()
+        try:
+            self._io.seek(0)
+            container = av.open(self._io)
+        except:
+            self._io.seek(orig_pos)
+            raise
+        self._container = container
+        self.seek(last_frame)
+        return True
