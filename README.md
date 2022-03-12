@@ -11,7 +11,7 @@ Video Scene Cut Detection and Analysis Tool
 
 ### Beta Release: v0.6-dev2 (March 6, 2022)
 
-**Main Webpage**:  [py.scenedetect.com](http://py.scenedetect.com)
+**Main Webpage**:  [scenedetect.com](http://scenedetect.com)
 
 **Documentation**:  [manual.scenedetect.com](http://manual.scenedetect.com)
 
