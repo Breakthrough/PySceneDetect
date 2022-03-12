@@ -28,7 +28,8 @@ matrix:
         - "3.9"
 
 install:
-  - "pip install -r requirements.txt"
+  - "python -m pip install --upgrade pip"
+  - "python -m pip install -r requirements.txt"
   - "git fetch --depth=1 https://github.com/Breakthrough/PySceneDetect.git refs/heads/resources:refs/remotes/origin/resources"
   - "git checkout refs/remotes/origin/resources -- tests/resources/"
 
