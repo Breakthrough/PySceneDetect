@@ -40,6 +40,25 @@ matrix:
       language: python
       python: "3.9"
 
+    - name: "Python 3.7.12 on Windows"
+      os: windows
+      language: shell   # 'language: python' is not supported yet
+      before_install:
+        - choco install python --version 3.7.12
+        - python --version
+        - python -m pip install --upgrade pip
+        - pip3 install --upgrade pytest
+      env: PATH=/c/Python37:/c/Python37/Scripts:$PATH
+    - name: "Python 3.9.8 on Windows"
+      os: windows
+      language: shell   # 'language: python' is not supported yet
+      before_install:
+        - choco install python --version 3.9.8
+        - python --version
+        - python -m pip install --upgrade pip
+        - pip3 install --upgrade pytest
+      env: PATH=/c/Python39:/c/Python39/Scripts:$PATH
+
 install:
   - "python -m pip install --upgrade pip"
   - "python -m pip install -r requirements.txt"
