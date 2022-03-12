@@ -4,7 +4,7 @@ PySceneDetect Releases
 
 ## PySceneDetect 0.6
 
-### 0.6-dev3 (WIP)
+### 0.6-dev3 (March 12, 2022)
 
 #### Release Notes
 
@@ -28,6 +28,15 @@ The main goals of v0.6 are reliability and performance. To achieve this required
 
 **Command-Line Changes:**
 
+*v0.6-dev3*:
+
+ * `pyav` backend (the `av` package) will be used by default for video decoding, if installed
+ * Specifying `-b pyav` / `--backend pyav` now uses faster multithreaded decoding
+ * [v0.6-only] Fix progress bar stuck at 0 when video duration was not available
+ * [v0.6-only] Fix slow seeking with `pyav` backend
+
+*v0.6-dev2*:
+
  * Configuration files are now supported via `-c`/`--config` or from a user config folder ([see documentation for details](https://scenedetect.com/en/v0.6/reference/config))
  * `-i`/`--input` may no longer be specified multiple times (use an external tool like `ffmpeg` to perform concatenation first)
  * `-l`/`--logfile` now respects `-o`/`--output`
@@ -50,6 +59,21 @@ The main goals of v0.6 are reliability and performance. To achieve this required
 
 **API Changes:**
 
+*v0.6-dev3*:
+
+ * [v0.6-only] `VideoStreamAv`:
+    * Allow specifying `threading_mode`, default is now to use multithreaded decoding
+    * Allow specifying `framerate`
+    * Fix incorrect duration calculation
+ * Changes to `FrameTimecode`:
+    * `FrameTimecode` objects can now perform arithmetic with formatted strings, e.g. `'HH:MM:SS.nnn'`
+ * Changes to `StatsManager`:
+    * The `load_from_csv`/`save_to_csv` methods now accept a path or an open file handle
+    * The `base_timecode` argument has been removed from `save_to_csv` (it is no longer required)
+ * When calling `scenedetect.backends.open_video`, `VideoStreamAv` will now be used as the preferred backend instead of `VideoStreamCv2`
+
+*v0.6-dev2*:
+
  * New high-level `detect` function in `scenedetect` module that only has two required arguments: the path to a video (`path`) and a detector (`detector`), [see example here](http://manual.scenedetect.com/en/v0.6/api.html#quickstart)
  * New `VideoStream` replaces `VideoManager` and supports both OpenCV (`VideoStreamCv2`) and PyAV (`VideoStreamAv`) backends ([#213](https://github.com/Breakthrough/PySceneDetect/issues/213))
     * Improves video seeking invariants, especially around defining what frames 0 and 1 mean for different time properties (`frame_number` is 1-based whereas `position` is 0-based to align with PTS)
@@ -65,10 +89,10 @@ The main goals of v0.6 are reliability and performance. To achieve this required
         * Command-line output is unaffected, and still reports 1 scene spanning the entire video if no cuts were found
  * Changes to `StatsManager`:
     * The `load_from_csv`/`save_to_csv` methods now accept a path or an open file handle
-    * The `base_timecode` argument has been removed from `save_to_csv` (it is no longer required)
+ * Changes to `FrameTimecode`:
+    * Fixed issue with `previous_frame` method of `FrameTimecode` allowing a negative frame number
  * `save_images()` no longer accepts downscale_factor, since there is already the ability to resize images via the `scale` or `height`/`width` arguments
  * Video splitting functions no longer support multiple input videos for concatenation (`scenedetect.video_splitter`)
- * Fixed issue with `previous_frame` method of `FrameTimecode` allowing a negative frame number
  * Merged constants `MAX_FPS_DELTA` and `MINIMUM_FRAMES_PER_SECOND_DELTA_FLOAT` in `scenedetect.frame_timecode` into new `MAX_FPS_DELTA` constant
  * `video_manager` parameter has been removed from the `AdaptiveDetector` constructor
  * `split_video_ffmpeg` and `split_video_mkvmerge` functions in `scenedetect.video_splitter` arguments have been renamed and defaults updated:
