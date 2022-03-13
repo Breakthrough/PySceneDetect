@@ -41,7 +41,8 @@ class VideoStreamAv(VideoStream):
         path_or_io: Union[AnyStr, BinaryIO],
         framerate: Optional[float] = None,
         name: Optional[str] = None,
-        threading_mode: Optional[str] = None,
+        threading_mode: Optional[str] = 'AUTO',
+        restore_logging_on_delete: bool = True,
     ):
         """Open a video by path.
 
@@ -55,7 +56,12 @@ class VideoStreamAv(VideoStream):
                 'AUTO' or 'FRAME' and not all frames have been decoded, the video will be reopened
                 if it is seekable, and the remaining frames will be decoded in single-threaded mode.
                 Using 'FRAME' or 'AUTO' on non-Windows platforms may result in the program hanging
-                on exit. If None, uses 'AUTO' on Windows otherwise the default PyAV mode ('SLICE').
+                on exit if `restore_logging_on_delete` is False.
+            restore_logging_on_delete: Revert back to FFmpeg's log callback when this object is
+                destroyed, causing further output to be printed to the terminal. If this is set
+                to False, and `threading_mode` is 'AUTO' or 'FRAME, you should call
+                av.logging.restore_default_callback() once all VideoStreamAv objects are destroyed
+                otherwise the program may hang on exit.
 
         Raises:
             OSError: file could not be found or access was denied
@@ -83,11 +89,6 @@ class VideoStreamAv(VideoStream):
                 self._io = path_or_io
 
             self._container = av.open(self._io)
-            # Enable AUTO threading mode only on Windows sytems, as doing so on Linux causes the
-            # the program to hang when quitting occasionally.
-            # TODO(v0.6): File a bug for future investigation into the issue.
-            if threading_mode is None and os.name == 'nt':
-                threading_mode = 'AUTO'
             if threading_mode is not None:
                 self._video_stream.thread_type = threading_mode
                 self._reopened = False
@@ -111,6 +112,12 @@ class VideoStreamAv(VideoStream):
 
         # Calculate duration after we have set the framerate.
         self._duration_frames = self._get_duration()
+        # Prevent program from hanging.
+        self._restore_logging = restore_logging_on_delete
+
+    def __del__(self):
+        if self._restore_logging:
+            av.logging.restore_default_callback()
 
     #
     # VideoStream Methods/Properties
