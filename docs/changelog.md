@@ -54,8 +54,8 @@ The main goals of v0.6 are reliability and performance. To achieve this required
      * Add override for global `-m`/`--min-scene-len` option
  * `split-video` command:
      * Long name for `-a` has been changed to `--args` (from `--override-args`)
-     * `-c`/`--copy` now uses `ffmpeg` instead of `mkvmerge`
-     * New `-m`/`--mkvmerge` flag can be set to use `mkvmerge` instead of `ffmpeg`
+     * `-c`/`--copy` now uses `ffmpeg` instead of `mkvmerge` ([#77](https://github.com/Breakthrough/PySceneDetect/issues/77), [#236](https://github.com/Breakthrough/PySceneDetect/issues/236))
+     * New `-m`/`--mkvmerge` flag can be set to use `mkvmerge` instead of `ffmpeg` ([#77](https://github.com/Breakthrough/PySceneDetect/issues/77))
 
 **API Changes:**
 
