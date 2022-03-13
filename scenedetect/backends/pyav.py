@@ -41,7 +41,7 @@ class VideoStreamAv(VideoStream):
         path_or_io: Union[AnyStr, BinaryIO],
         framerate: Optional[float] = None,
         name: Optional[str] = None,
-        threading_mode: Optional[str] = 'AUTO' if os.name == 'nt' else None,
+        threading_mode: Optional[str] = None,
     ):
         """Open a video by path.
 
@@ -54,9 +54,8 @@ class VideoStreamAv(VideoStream):
                 for valid threading modes ('AUTO', 'FRAME', 'NONE', and 'SLICE'). If this mode is
                 'AUTO' or 'FRAME' and not all frames have been decoded, the video will be reopened
                 if it is seekable, and the remaining frames will be decoded in single-threaded mode.
-                Default is 'AUTO' (better performance) on Windows and PyAV default ('SLICE') on
-                other platforms. Using 'FRAME' or 'AUTO' on non-Windows platforms may result in
-                the program hanging on termination for some reason.
+                Using 'FRAME' or 'AUTO' on non-Windows platforms may result in the program hanging
+                on exit. If None, uses 'AUTO' on Windows otherwise the default PyAV mode ('SLICE').
 
         Raises:
             OSError: file could not be found or access was denied
@@ -84,6 +83,11 @@ class VideoStreamAv(VideoStream):
                 self._io = path_or_io
 
             self._container = av.open(self._io)
+            # Enable AUTO threading mode only on Windows sytems, as doing so on Linux causes the
+            # the program to hang when quitting occasionally.
+            # TODO(v0.6): File a bug for future investigation into the issue.
+            if threading_mode is None and os.name == 'nt':
+                threading_mode = 'AUTO'
             if threading_mode is not None:
                 self._video_stream.thread_type = threading_mode
                 self._reopened = False
