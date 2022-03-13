@@ -33,22 +33,26 @@ matrix:
       language: python
       python: "3.9"
 
-    - name: "Python 3.7.9 on Windows"
-      os: windows
-      language: shell
-      before_install:
-        - choco install python --version 3.7.9
-        - python -m pip install --upgrade pip
-        - pip3 install --upgrade pytest
-      env: PATH=/c/Python37:/c/Python37/Scripts:$PATH
-    - name: "Python 3.9.8 on Windows"
-      os: windows
-      language: shell
-      before_install:
-        - choco install python --version 3.9.8
-        - python -m pip install --upgrade pip
-        - pip3 install --upgrade pytest
-      env: PATH=/c/Python39:/c/Python39/Scripts:$PATH
+#
+# TODO: Fix Windows builds, they fail because `av` is missing some DLL files.
+#
+#    - name: "Python 3.7.9 on Windows"
+#      os: windows
+#      language: shell
+#      before_install:
+#        - choco install python --version 3.7.9
+#        - python -m pip install --upgrade pip
+#        - pip3 install --upgrade pytest
+#      env: PATH=/c/Python37:/c/Python37/Scripts:$PATH
+#    - name: "Python 3.9.8 on Windows"
+#      os: windows
+#      language: shell
+#      before_install:
+#        - choco install python --version 3.9.8
+#        - python -m pip install --upgrade pip
+#        - pip3 install --upgrade pytest
+#      env: PATH=/c/Python39:/c/Python39/Scripts:$PATH
+#
 
 install:
   - "python -m pip install --upgrade pip"
