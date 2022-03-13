@@ -61,6 +61,11 @@ The main goals of v0.6 are reliability and performance. To achieve this required
 
 *v0.6-dev3*:
 
+ * Changes to `StatsManager`:
+    * The `load_from_csv` method is now deprecated and will be removed in v1.0
+
+*v0.6-dev3*:
+
  * [v0.6-only] `VideoStreamAv`:
     * Allow specifying `threading_mode`, default is now to use multithreaded decoding
     * Allow specifying `framerate`
@@ -68,7 +73,6 @@ The main goals of v0.6 are reliability and performance. To achieve this required
  * Changes to `FrameTimecode`:
     * `FrameTimecode` objects can now perform arithmetic with formatted strings, e.g. `'HH:MM:SS.nnn'`
  * Changes to `StatsManager`:
-    * The `load_from_csv`/`save_to_csv` methods now accept a path or an open file handle
     * The `base_timecode` argument has been removed from `save_to_csv` (it is no longer required)
  * When calling `scenedetect.backends.open_video`, `VideoStreamAv` will now be used as the preferred backend instead of `VideoStreamCv2`
 

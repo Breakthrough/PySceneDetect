@@ -733,7 +733,8 @@ class SceneManager:
             raise ValueError('end_time must be greater than or equal to 0!')
 
         self._base_timecode = video.base_timecode
-        # TODO: Fix this properly.
+        # TODO(v1.0): Fix this properly by making SceneManager just own a StatsManager (which can
+        # be optionally constructed using a boolean parameter).
         if self._stats_manager is not None:
             self._stats_manager._base_timecode = self._base_timecode
         start_frame_num: int = video.frame_number
@@ -801,6 +802,8 @@ class SceneManager:
                 # We don't do any kind of locking here since the worst-case of this being wrong
                 # is that we do some extra work, and this function should never mutate any data
                 # (all of which should be modified under the GIL).
+                # TODO(v1.0): This optimization should be removed as it is rarely used and
+                # simplifies the implementation of detection algorithms.
                 if (self._is_processing_required(video.position.frame_num)):
                     frame_im = video.read()
                     if frame_im is False:

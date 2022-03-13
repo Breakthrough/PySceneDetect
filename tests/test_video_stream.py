@@ -31,22 +31,10 @@ from scenedetect.video_stream import VideoStream
 from scenedetect.backends.opencv import VideoStreamCv2
 from scenedetect.backends.pyav import VideoStreamAv
 
-## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
-## List of Required/TBD Test Cases
-## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
-
-# TODO: End of video read()/seek behaviour!
-
-# TODO: Add checks that frame was decoded properly - compare against
-# a set of hand-picked frames? Or just a few colour samples?
-
-# TODO: Add test using image sequence.
-
-# TODO: Create a test case which opens both a corrupted video (set random bytes in the header
-# to zeroes until one fails with all backends?).  Can create dynamically by just opening
-# the path to a good video, copying it to a temp location, and modifying it in place.
-
-## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+# TODO(v0.6): End of video read/seek behaviour, seek to very large offset, etc.
+# TODO(v0.6): Add test using image sequence (use counter.mp4 frames).
+# TODO(#258): Create a test case which opens a corrupted video. Copy one of the ground truth
+# files and see if a frame decode failure can be triggered.
 
 
 # Accuracy a framerate is checked to for testing purposes.
@@ -63,7 +51,7 @@ def calculate_frame_delta(frame_a, frame_b, roi=None) -> float:
     return numpy.sum(numpy.abs(frame_b - frame_a)) / num_pixels
 
 
-# TODO: Need to reduce code duplication here and in `conftest.py`
+# TODO: Reduce code duplication here and in `conftest.py`
 def get_absolute_path(relative_path: str) -> str:
     # type: (str) -> str
     """ Returns the absolute path to a (relative) path of a file that
@@ -86,10 +74,10 @@ class VideoParameters:
         self.width = width
         self.frame_rate = frame_rate
         self.total_frames = total_frames
-        # TODO: Aspect ratio.
+        # TODO(v0.6): Test aspect ratio.
 
 
-# TODO: Need to reduce duplicated paths here and in `conftest.py`
+# TODO: Reduce duplicated paths here and in `conftest.py`
 def get_test_video_params():
     # type: () -> str
     """Fixture for parameters of all videos."""
@@ -116,6 +104,7 @@ pytestmark = pytest.mark.parametrize("vs_type", [VideoStreamCv2, VideoStreamAv])
 class TestVideoStream:
 
     def test_basic_params(self, vs_type: Type[VideoStream], test_video: VideoParameters):
+        """Validate getting basic video parameters: frame size, frame rate, duration, etc."""
         stream = vs_type(test_video.path)
         assert stream.frame_size == (test_video.width, test_video.height)
         assert stream.frame_rate == pytest.approx(test_video.frame_rate, FRAMERATE_TOLERANCE)

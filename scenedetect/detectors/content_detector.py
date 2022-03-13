@@ -73,8 +73,6 @@ class ContentDetector(SceneDetector):
             luma_only: If True, only considers changes in the luminance channel of the video. The
                 default is False, which considers changes in hue, saturation, and luma.
         """
-        #
-        #  type: (float, Union[int, FrameTimecode]) -> None
         super().__init__()
         self.threshold = threshold
         # Minimum length of any given scene, in frames (int) or FrameTimecode
@@ -124,7 +122,6 @@ class ContentDetector(SceneDetector):
             List of frames where scene cuts have been detected. There may be 0
             or more frames in the list, and not necessarily the same as frame_num.
         """
-
         cut_list = []
         _unused = ''
 
@@ -172,9 +169,10 @@ class ContentDetector(SceneDetector):
 
         return cut_list
 
+    # TODO(#250): Based on the parameters passed to the ContentDetector constructor,
+    # ensure that the last scene meets the minimum length requirement, otherwise it
+    # should be merged with the previous scene.
+
     #def post_process(self, frame_num):
-    #    """ TODO: Based on the parameters passed to the ContentDetector constructor,
-    #        ensure that the last scene meets the minimum length requirement,
-    #        otherwise it should be merged with the previous scene.
     #    """
     #    return []

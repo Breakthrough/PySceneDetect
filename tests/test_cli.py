@@ -19,7 +19,7 @@ import pytest
 # return code from the process. We do not yet check for correctness of the output, just a
 # successful invocation of the command (i.e. no exceptions/errors).
 
-# TODO(v1.0): Test should clean up working directory (create a temp one).
+# TODO(v1.0): Test should clean up working directory (use pytest fixture that provides one).
 
 # TODO(v0.6): Need to create a temporary blank file to override the values in the user configuration
 # file if one is on the same system as the one being tested.

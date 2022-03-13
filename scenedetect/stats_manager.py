@@ -20,14 +20,8 @@ the metrics calculated for each frame. The :py:class:`StatsManager` must be regi
 `stats_manager` argument.
 
 The entire :py:class:`StatsManager` can be :py:meth:`saved to <StatsManager.save_to_csv>`
-and :py:meth:`loaded from <StatsManager.load_from_csv>` a human-readable CSV
-file, also allowing both precise determination of the threshold or other optimal values
-for video files.  See the :py:meth:`save_to_csv <StatsManager.save_to_csv>` and
-:py:meth:`load_from_csv <StatsManager.load_from_csv>` methods for more information.
-
-The :py:class:`StatsManager` can also be used to cache the calculation results of the scene
-detectors being used, speeding up subsequent scene detection runs using the same pair of
-:py:class:`SceneManager<scenedetect.scene_manager.SceneManager>`/:py:class:`StatsManager` objects.
+a human-readable CSV file, also allowing both precise determination of the threshold or
+other optimal values for video files.
 """
 
 import csv
@@ -91,8 +85,7 @@ class StatsFileCorrupt(Exception):
 
 class StatsManager:
     """Provides a key-value store for frame metrics/calculations which can be used
-    as a cache to speed up subsequent calls to a SceneManager's detect_scenes(...)
-    method. The statistics can be saved to a CSV file, and loaded from disk.
+    for two-pass detection algorithms, as well as saving stats to a CSV file.
 
     Analyzing a statistics CSV file is also very useful for finding the optimal
     algorithm parameters for certain detection methods. Additionally, the data
@@ -244,8 +237,11 @@ class StatsManager:
             return False
         return True
 
+    # TODO(v1.0): Remove.
     def load_from_csv(self, path: str = None, file: TextIO = None) -> Optional[int]:
-        """Load all metrics stored in a CSV file into the StatsManager instance.
+        """[DEPRECATED] Load all metrics stored in a CSV file into the StatsManager instance.
+
+        Will be removed in v1.0.
 
         Arguments:
             csv_file: A file handle opened in read mode (e.g. open('...', 'r')) or a path as str.
@@ -258,6 +254,7 @@ class StatsManager:
             StatsFileCorrupt: Stats file is corrupt and can't be loaded, or wrong file
                 was specified.
         """
+        logger.warning("Loading stats from CSV files is deprecated and will be removed in v1.0!")
         if path is not None and file is not None:
             raise ValueError("Only one of path or file can be specified")
         # If we get a path instead of an open file handle, check that it exists, and if so,

@@ -368,7 +368,7 @@ class CliContext:
 
         threshold = self.config.get_value("detect-threshold", "threshold", threshold)
         fade_bias = self.config.get_value("detect-threshold", "fade-bias", fade_bias)
-        # TODO: This cannot be disabled right now.
+        # TODO(v1.0): This cannot be disabled right now.
         add_last_scene = add_last_scene or self.config.get_value("detect-threshold",
                                                                  "add-last-scene")
 
@@ -531,9 +531,6 @@ class CliContext:
         ##
         ## ffmpeg-Specific Arguments/Options
         ##
-        # TODO: Should add some validation of the name format to ensure it contains at
-        # least one variable, otherwise the output will just keep getting overwritten.
-
         if copy:
             args = '-c:v copy -c:a copy'
         elif not args:

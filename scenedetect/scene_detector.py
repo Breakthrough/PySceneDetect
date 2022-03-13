@@ -43,6 +43,7 @@ class SceneDetector:
     """Optional :py:class:`StatsManager <scenedetect.stats_manager.StatsManager>` to
     use for caching frame metrics to and from."""
 
+    # TODO(v1.0): Remove - this is a rarely used case for what is now a neglegible performance gain.
     def is_processing_required(self, frame_num: int) -> bool:
         """Is Processing Required: Test if all calculations for a given frame are already done.
 
