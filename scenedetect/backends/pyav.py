@@ -54,7 +54,7 @@ class VideoStreamAv(VideoStream):
                 for valid threading modes ('AUTO', 'FRAME', 'NONE', and 'SLICE'). If this mode is
                 'AUTO' or 'FRAME' and not all frames have been decoded, the video will be reopened
                 if it is seekable, and the remaining frames will be decoded in single-threaded mode.
-                Default is 'AUTO' (better performance) on Windows and 'SLICE' (PyAV default) on
+                Default is 'AUTO' (better performance) on Windows and PyAV default ('SLICE') on
                 other platforms. Using 'FRAME' or 'AUTO' on non-Windows platforms may result in
                 the program hanging on termination for some reason.
 
