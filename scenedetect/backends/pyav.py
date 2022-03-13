@@ -16,6 +16,7 @@ Uses string identifier ``'pyav'``.
 """
 
 from logging import getLogger
+import os
 from typing import AnyStr, BinaryIO, Optional, Tuple, Union
 
 import av
@@ -32,14 +33,15 @@ logger = getLogger('pyscenedetect')
 class VideoStreamAv(VideoStream):
     """PyAV `av.InputContainer` backend."""
 
-    # TODO(v0.6.1): Add config file option for threading mode.
-    # TODO(v0.6.1): Add `accurate_duration` option (default to False) to config file.
+    # TODO(v0.6): Add config file option for threading mode.
+    # TODO: Investigate adding an accurate_duration option to backends to
+    # calculate the duration with higher precision.
     def __init__(
         self,
         path_or_io: Union[AnyStr, BinaryIO],
         framerate: Optional[float] = None,
         name: Optional[str] = None,
-        threading_mode: str = 'SLICE',
+        threading_mode: Optional[str] = 'AUTO' if os.name == 'nt' else None,
     ):
         """Open a video by path.
 
@@ -52,7 +54,9 @@ class VideoStreamAv(VideoStream):
                 for valid threading modes ('AUTO', 'FRAME', 'NONE', and 'SLICE'). If this mode is
                 'AUTO' or 'FRAME' and not all frames have been decoded, the video will be reopened
                 if it is seekable, and the remaining frames will be decoded in single-threaded mode.
-                TODO: Default is 'AUTO' for performance (there will be a slight pause near the end).
+                Default is 'AUTO' (better performance) on Windows and 'SLICE' (PyAV default) on
+                other platforms. Using 'FRAME' or 'AUTO' on non-Windows platforms may result in
+                the program hanging on termination for some reason.
 
         Raises:
             OSError: file could not be found or access was denied
@@ -296,6 +300,7 @@ class VideoStreamAv(VideoStream):
         # Don't re-open the video if we already did, or if we already decoded all the frames.
         if self._reopened or self.frame_number >= self.duration:
             return False
+        self._reopened = True
         # Don't re-open the video if we can't seek or aren't in AUTO/FRAME thread_type mode.
         if not self.is_seekable or not self._video_stream.thread_type in ('AUTO', 'FRAME'):
             return False
