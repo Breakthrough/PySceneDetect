@@ -34,24 +34,24 @@ matrix:
       python: "3.9"
 
     - os: osx
-      language: python
-      python: "3.8"
+      language: generic
+      env: TOXENV=py38
     - os: osx
-      language: python
-      python: "3.9"
+      language: generic
+      env: TOXENV=py39
 
-    - name: "Python 3.7.12 on Windows"
+    - name: "Python 3.7.9 on Windows"
       os: windows
-      language: shell   # 'language: python' is not supported yet
+      language: generic   # 'language: python' is not supported yet
       before_install:
-        - choco install python --version 3.7.12
+        - choco install python --version 3.7.9
         - python --version
         - python -m pip install --upgrade pip
         - pip3 install --upgrade pytest
       env: PATH=/c/Python37:/c/Python37/Scripts:$PATH
     - name: "Python 3.9.8 on Windows"
       os: windows
-      language: shell   # 'language: python' is not supported yet
+      language: generic   # 'language: python' is not supported yet
       before_install:
         - choco install python --version 3.9.8
         - python --version
@@ -62,6 +62,7 @@ matrix:
 install:
   - "python -m pip install --upgrade pip"
   - "python -m pip install -r requirements.txt"
+  - "python -m pip install opencv-contrib-python"
   - "git fetch --depth=1 https://github.com/Breakthrough/PySceneDetect.git refs/heads/resources:refs/remotes/origin/resources"
   - "git checkout refs/remotes/origin/resources -- tests/resources/"
 
