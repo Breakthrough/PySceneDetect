@@ -33,13 +33,6 @@ matrix:
       language: python
       python: "3.9"
 
-    - os: osx
-      language: generic
-      env: TOXENV=py38
-    - os: osx
-      language: generic
-      env: TOXENV=py39
-
     - name: "Python 3.7.9 on Windows"
       os: windows
       language: generic   # 'language: python' is not supported yet
