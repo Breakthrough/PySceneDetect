@@ -24,6 +24,8 @@ import pytest
 # TODO(v0.6): Need to create a temporary blank file to override the values in the user configuration
 # file if one is on the same system as the one being tested.
 
+# TODO(v0.6): Add tests using different backends.
+
 SCENEDETECT_CMD = 'python -m scenedetect'
 VIDEO_PATH = 'tests/resources/goldeneye.mp4'
 DEFAULT_STATSFILE = 'statsfile.csv'

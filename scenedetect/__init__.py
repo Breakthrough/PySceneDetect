@@ -34,6 +34,9 @@ from scenedetect.stats_manager import StatsManager, StatsFileCorrupt
 from scenedetect.detectors import ContentDetector, AdaptiveDetector, ThresholdDetector
 from scenedetect.video_splitter import split_video_ffmpeg, split_video_mkvmerge
 
+# Deprecated - do not use.
+from scenedetect.video_manager import VideoManager
+
 # Used for module identification and when printing version & about info
 # (e.g. calling `scenedetect version` or `scenedetect about`).
 __version__ = 'v0.6-dev3'

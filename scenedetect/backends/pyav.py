@@ -16,7 +16,6 @@ Uses string identifier ``'pyav'``.
 """
 
 from logging import getLogger
-import os
 from typing import AnyStr, BinaryIO, Optional, Tuple, Union
 
 import av
@@ -26,6 +25,7 @@ from scenedetect.frame_timecode import FrameTimecode, MAX_FPS_DELTA
 from scenedetect.platform import get_file_name
 from scenedetect.video_stream import VideoStream, VideoOpenFailure, FrameRateUnavailable
 
+# TODO(v0.6): Move this inside of VideoStreamAv and accept a custom logger if provided.
 logger = getLogger('pyscenedetect')
 
 
@@ -33,7 +33,6 @@ logger = getLogger('pyscenedetect')
 class VideoStreamAv(VideoStream):
     """PyAV `av.InputContainer` backend."""
 
-    # TODO(v0.6): Add config file option for threading mode.
     # TODO: Investigate adding an accurate_duration option to backends to
     # calculate the duration with higher precision.
     def __init__(
@@ -58,10 +57,11 @@ class VideoStreamAv(VideoStream):
                 Using 'FRAME' or 'AUTO' on non-Windows platforms may result in the program hanging
                 on exit if `restore_logging_on_delete` is False.
             restore_logging_on_delete: Revert back to FFmpeg's log callback when this object is
-                destroyed, causing further output to be printed to the terminal. If this is set
-                to False, and `threading_mode` is 'AUTO' or 'FRAME, you should call
-                av.logging.restore_default_callback() once all VideoStreamAv objects are destroyed
-                otherwise the program may hang on exit.
+                destroyed, causing further output to be printed to the terminal. Set to False if
+                you require multiple VideoStreamAv objects in your program. If False, make sure to
+                call av.logging.restore_default_callback() once all VideoStreamAv objects are
+                destroyed, otherwise the program may hang on exit. See the PyAV docs for details:
+                https://pyav.org/docs/stable/overview/caveats.html#sub-interpeters
 
         Raises:
             OSError: file could not be found or access was denied

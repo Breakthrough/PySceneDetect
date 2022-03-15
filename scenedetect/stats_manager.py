@@ -175,6 +175,7 @@ class StatsManager:
         return self._metrics_updated
 
     def save_to_csv(self,
+                    # TODO(v0.6): Just make this called 'file' and accept str, bytes, or TextIO.
                     path: str = None,
                     file: TextIO = None,
                     force_save=True) -> None:
