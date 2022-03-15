@@ -41,7 +41,7 @@ class VideoStreamAv(VideoStream):
         framerate: Optional[float] = None,
         name: Optional[str] = None,
         threading_mode: Optional[str] = 'AUTO',
-        restore_logging_on_delete: bool = True,
+        restore_logging: bool = True,
     ):
         """Open a video by path.
 
@@ -56,11 +56,8 @@ class VideoStreamAv(VideoStream):
                 if it is seekable, and the remaining frames will be decoded in single-threaded mode.
                 Using 'FRAME' or 'AUTO' on non-Windows platforms may result in the program hanging
                 on exit if `restore_logging_on_delete` is False.
-            restore_logging_on_delete: Revert back to FFmpeg's log callback when this object is
-                destroyed, causing further output to be printed to the terminal. Set to False if
-                you require multiple VideoStreamAv objects in your program. If False, make sure to
-                call av.logging.restore_default_callback() once all VideoStreamAv objects are
-                destroyed, otherwise the program may hang on exit. See the PyAV docs for details:
+            restore_logging: Revert back to FFmpeg's log callback. If False, the program may hang
+                on exit if `threading_mode` is 'AUTO' or 'FRAME'. See the PyAV docs for details:
                 https://pyav.org/docs/stable/overview/caveats.html#sub-interpeters
 
         Raises:
@@ -78,6 +75,9 @@ class VideoStreamAv(VideoStream):
         self._name: Union[str, bytes] = '' if name is None else name
         self._frame = None
         self._reopened = True
+
+        if restore_logging:
+            av.logging.restore_default_callback()
 
         try:
             if isinstance(path_or_io, (str, bytes)):
@@ -112,12 +112,6 @@ class VideoStreamAv(VideoStream):
 
         # Calculate duration after we have set the framerate.
         self._duration_frames = self._get_duration()
-        # Prevent program from hanging.
-        self._restore_logging = restore_logging_on_delete
-
-    def __del__(self):
-        if self._restore_logging:
-            av.logging.restore_default_callback()
 
     #
     # VideoStream Methods/Properties
