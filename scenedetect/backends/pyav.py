@@ -40,8 +40,7 @@ class VideoStreamAv(VideoStream):
         path_or_io: Union[AnyStr, BinaryIO],
         framerate: Optional[float] = None,
         name: Optional[str] = None,
-        threading_mode: Optional[str] = None,
-        restore_logging: bool = True,
+        threading_mode: Optional[str] = 'AUTO',
     ):
         """Open a video by path.
 
@@ -54,14 +53,9 @@ class VideoStreamAv(VideoStream):
                 for valid threading modes ('AUTO', 'FRAME', 'NONE', and 'SLICE'). If this mode is
                 'AUTO' or 'FRAME' and not all frames have been decoded, the video will be reopened
                 if it is seekable, and the remaining frames will be decoded in single-threaded mode.
-                Using 'FRAME' or 'AUTO' may result in the program hangingon exit if
-                `restore_logging_on_delete` is False. Additionally if `path_or_io` is a file handle,
-                this should be set to 'SLICE' otherwise the program may hang on exit.
-                Default is 'AUTO' if `path_or_io` is a path, and `SLICE` otherwise.
-            restore_logging: Revert back to FFmpeg's log callback. If False, the program may hang
-                on exit if `threading_mode` is 'AUTO' or 'FRAME'. See the PyAV docs for details:
+                Using 'FRAME' or 'AUTO' may result in the program hanging on exit - see the PyAV
+                documentation for details:
                 https://pyav.org/docs/stable/overview/caveats.html#sub-interpeters
-
 
         Raises:
             OSError: file could not be found or access was denied
@@ -76,24 +70,24 @@ class VideoStreamAv(VideoStream):
             raise ValueError('Specified framerate (%f) is invalid!' % framerate)
 
         self._name: Union[str, bytes] = '' if name is None else name
+        self._path = ''
         self._frame = None
         self._reopened = True
 
-        if restore_logging:
-            av.logging.restore_default_callback()
-
-        self._path_or_io = path_or_io
-        self._is_io = not isinstance(path_or_io, (str, bytes))
-        if not self._name and not self._is_io:
-            self._name = get_file_name(self.path, include_extension=False)
-
-        if threading_mode is None and not self._is_io:
-            threading_mode = 'AUTO'
+        # Reduce frequency of deadlocks.
+        av.logging.restore_default_callback()
 
         try:
-            self._container = av.open(self._path_or_io)
-            if threading_mode is not None and not self._is_io:
-                self._container_alt = av.open(self._path_or_io)
+            if isinstance(path_or_io, (str, bytes)):
+                self._path = path_or_io
+                self._io = open(path_or_io, 'rb')
+                if not self._name:
+                    self._name = get_file_name(self.path, include_extension=False)
+            else:
+                self._io = path_or_io
+
+            self._container = av.open(self._io)
+            if threading_mode is not None:
                 self._video_stream.thread_type = threading_mode
                 self._reopened = False
         except OSError:
@@ -127,7 +121,7 @@ class VideoStreamAv(VideoStream):
     @property
     def path(self) -> Union[bytes, str]:
         """Video path."""
-        return self._path_or_io if not self._is_io else ''
+        return self._path
 
     @property
     def name(self) -> Union[bytes, str]:
@@ -137,7 +131,7 @@ class VideoStreamAv(VideoStream):
     @property
     def is_seekable(self) -> bool:
         """True if seek() is allowed, False otherwise."""
-        return not self._is_io or self._path_or_io.seekable()
+        return self._io.seekable()
 
     @property
     def frame_size(self) -> Tuple[int, int]:
@@ -222,15 +216,11 @@ class VideoStreamAv(VideoStream):
                 break
 
     def reset(self):
-        """ Close and re-open the VideoStream (should be equivalent to calling `seek(0)`).
-        The input must be seekable to use this method.
-        """
+        """ Close and re-open the VideoStream (should be equivalent to calling `seek(0)`). """
         self._container.close()
         self._frame = None
         try:
-            if self._is_io and self._path_or_io.seekable():
-                self._path_or_io.seek(0)
-            self._container = av.open(self._path_or_io)
+            self._container = av.open(self._path if self._path else self._io)
         except Exception as ex:
             raise VideoOpenFailure() from ex
 
@@ -318,14 +308,12 @@ class VideoStreamAv(VideoStream):
         if not self.is_seekable or not self._video_stream.thread_type in ('AUTO', 'FRAME'):
             return False
         last_frame = self.frame_number
-        orig_pos = self._path_or_io.tell() if self._is_io else None
+        orig_pos = self._io.tell()
         try:
-            if self._is_io:
-                self._path_or_io.seek(0)
-            container = av.open(self._path_or_io)
+            self._io.seek(0)
+            container = av.open(self._io)
         except:
-            if self._is_io:
-                self._path_or_io.seek(orig_pos)
+            self._io.seek(orig_pos)
             raise
         self._container = container
         self.seek(last_frame)
