@@ -13,17 +13,20 @@
 """ ``scenedetect.video_stream`` Module
 
 This module contains the :py:class:`VideoStream` class, which provides a library agnostic
-interface for video input.  See :py:mod:`scenedetect.backends` for supported backends.
-
-To open a video by path, either construct one of the available backends directly, or use
-the :py:func:`scenedetect.backends.open_video` function:
+interface for video input. To open a video by path with any available backend, use the
+:py:func:`scenedetect.backends.open_video` function:
 
 .. code:: python
 
     from scenedetect import open_video
     video = open_video(path='video.mp4')
 
-See :py:mod:`scenedetect.backends` for a more detailed example example.
+See :py:mod:`scenedetect.backends` for a detailed example.
+
+Setting the ``backend`` argument will attempt to use the specified backend, and fall back to those
+in the ``PREFERRED_BACKENDS`` constant in :py:mod:`scenedetect.backends`. To only allow a specific
+backend type, use that type directly (e.g.
+:py:class:`VideoStreamCv2 <scenedetect.backends.opencv.VideoStreamCv2>`).
 
 New :py:class:`VideoStream <scenedetect.video_stream.VideoStream>` implementations can be
 tested by adding it to the test suite in `tests/test_video_stream.py`.

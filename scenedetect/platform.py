@@ -156,7 +156,8 @@ def init_logger(log_level: int = logging.INFO,
     every time this function is invoked.
 
     Arguments:
-        log_level: Verbosity of log messages.
+        log_level: Verbosity of log messages. Should be one of [logging.INFO, logging.DEBUG,
+            logging.WARNING, logging.ERROR, logging.CRITICAL].
         show_stdout: If True, add handler to show log messages on stdout (default: False).
         log_file: If set, add handler to dump log messages to given file path.
     """

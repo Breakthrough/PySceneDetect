@@ -127,3 +127,9 @@ Module-Level Functions
 =======================================================================
 
 .. autofunction:: scenedetect.detect
+
+=======================================================================
+Logging
+=======================================================================
+
+PySceneDetect outputs messages to a logger named ``'pyscenedetect'`` which does not have any default handlers. To enable it, call :py:func:`scenedetect.init_logger <scenedetect.platform.init_logger>` with ``show_stdout=True`` or specify a log file (verbosity can also be specified). Alternatively you can call ``logging.getLogger('pyscenedetect')`` and attach log handlers manually.
