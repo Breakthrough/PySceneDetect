@@ -29,6 +29,7 @@ from scenedetect.video_stream import VideoStream, SeekError, VideoOpenFailure, F
 
 logger = getLogger('pyscenedetect')
 
+
 class VideoStreamCv2(VideoStream):
     """OpenCV `cv2.VideoCapture` backend."""
 
@@ -249,7 +250,9 @@ class VideoStreamCv2(VideoStream):
                 ' and check that OpenCV is installed correctly.\n')
 
         # Display a warning if the video codec type seems unsupported (#86).
-        if not self._is_device and int(abs(cap.get(cv2.CAP_PROP_FOURCC))) == 0:
+        # We don't do the check if this is a webcam/video capture device or an image sequence.
+        if not (self._is_device or '%' in self._path_or_device) and int(
+                abs(cap.get(cv2.CAP_PROP_FOURCC))) == 0:
             logger.error(
                 'Video codec detection failed, output may be incorrect.\nThis could be caused'
                 ' by using an outdated version of OpenCV, or using codecs that currently are'

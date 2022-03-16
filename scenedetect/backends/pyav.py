@@ -48,6 +48,7 @@ class VideoStreamAv(VideoStream):
         framerate: Optional[float] = None,
         name: Optional[str] = None,
         threading_mode: Optional[str] = 'AUTO',
+        restore_logging: bool = True,
     ):
         """Open a video by path.
 
@@ -59,10 +60,12 @@ class VideoStreamAv(VideoStream):
             threading_mode: The PyAV video stream `thread_type`. See av.codec.context.ThreadType
                 for valid threading modes ('AUTO', 'FRAME', 'NONE', and 'SLICE'). If this mode is
                 'AUTO' or 'FRAME' and not all frames have been decoded, the video will be reopened
-                if it is seekable, and the remaining frames will be decoded in single-threaded mode.
-                Using 'FRAME' or 'AUTO' may result in the program hanging on exit - see the PyAV
-                documentation for details:
-                https://pyav.org/docs/stable/overview/caveats.html#sub-interpeters
+                if seekable, and the remaining frames decoded in single-threaded mode. Using 'FRAME'
+                or 'AUTO' may result in the program hanging on exit - see the PyAV documentation
+                for details: https://pyav.org/docs/stable/overview/caveats.html#sub-interpeters
+            restore_logging: If True, calls `av.logging.restore_default_callback()` before any other
+                library calls. If False the application may deadlock. See the PyAV documentation
+                for details: https://pyav.org/docs/stable/overview/caveats.html#sub-interpeters
 
         Raises:
             OSError: file could not be found or access was denied
@@ -81,8 +84,9 @@ class VideoStreamAv(VideoStream):
         self._frame = None
         self._reopened = True
 
-        # Reduce frequency of deadlocks.
-        av.logging.restore_default_callback()
+        if restore_logging:
+            # Reduce frequency of lockups (https://pyav.org/docs/stable/overview/caveats.html).
+            av.logging.restore_default_callback()
 
         try:
             if isinstance(path_or_io, (str, bytes)):

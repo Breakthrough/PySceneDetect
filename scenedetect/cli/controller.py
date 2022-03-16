@@ -52,16 +52,6 @@ def run_scenedetect(context: CliContext):
                      ' or failed to process all command line arguments.')
         return
 
-    # Display a warning if the video codec type seems unsupported (#86).
-    if isinstance(context.video_stream, VideoStreamCv2):
-        if int(abs(context.video_stream.capture.get(cv2.CAP_PROP_FOURCC))) == 0:
-            logger.error(
-                'Video codec detection failed, output may be incorrect.\nThis could be caused'
-                ' by using an outdated version of OpenCV, or using codecs that currently are'
-                ' not well supported (e.g. VP9).\n'
-                'As a workaround, consider re-encoding the source material before processing.\n'
-                'For details, see https://github.com/Breakthrough/PySceneDetect/issues/86')
-
     perf_start_time = time.time()
     if context.start_time is not None:
         logger.debug('Seeking to start time...')
@@ -76,7 +66,7 @@ def run_scenedetect(context: CliContext):
         show_progress=not context.quiet_mode)
 
     # Handle case where video failure is most likely due to multiple audio tracks (#179).
-    if num_frames <= 0:
+    if num_frames <= 0 and isinstance(context.video_stream, VideoStreamCv2):
         logger.critical(
             'Failed to read any frames from video file. This could be caused by the video'
             ' having multiple audio tracks. If so, try installing the PyAV backend:\n'
@@ -125,9 +115,11 @@ def run_scenedetect(context: CliContext):
     # Handle split-video command.
     _split_video(context, scene_list)
 
-    # Ensure any potential deadlocks using VideoStreamAv don't block indefinitely.
+    # Ensure any lockups at exit don't cause the program to hang indefinitely.
     if VideoStreamAv is not None and isinstance(context.video_stream, VideoStreamAv):
-        _handle_termination()
+        # Spawn background thread to abort program after 5 seconds if it is still running once
+        # this function returns.
+        _abort_after(5.0)
 
 
 def _save_stats(context: CliContext) -> None:
@@ -273,9 +265,19 @@ def _split_video(context: CliContext, scene_list: List[Tuple[FrameTimecode,
     if scene_list:
         logger.info('Video splitting completed, individual scenes written to disk.')
 
-def _handle_termination():
-    """Ensures program aborts as using PyAV can cause lockups."""
-    def terminate_func():
-        time.sleep(5)
+
+def _abort_after(timeout_sec: float) -> None:
+    """Spawn background thread that calls `os.abort()` after `timeout_sec`.
+
+    Used to ensure PySceneDetect aborts in the case of a deadlock. Created as using the
+    PyAV/VideoStreamAv backend can cause deadlocks at exit.
+
+    Arguments:
+        timeout_sec: Amount of time to wait before aborting the program.
+    """
+
+    def abort_func():
+        time.sleep(timeout_sec)
         os.abort()
-    threading.Thread(target=terminate_func, daemon=True).start()
+
+    threading.Thread(target=abort_func, daemon=True).start()

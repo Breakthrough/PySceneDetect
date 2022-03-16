@@ -64,7 +64,7 @@ def test_api_stats_manager(test_video_file: str):
     scene_list = scene_manager.get_scene_list()
     print_scenes(scene_list=scene_list)
     # Save per-frame statistics to disk.
-    scene_manager.stats_manager.save_to_csv(csv_file=STATS_FILE_PATH)
+    scene_manager.stats_manager.save_to_csv(path=STATS_FILE_PATH)
 
 
 def test_api_video_stream_opencv(test_video_file: str):

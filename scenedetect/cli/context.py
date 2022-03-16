@@ -731,6 +731,10 @@ class CliContext:
 
     def _open_video_stream(self, input_path: AnyStr, framerate: Optional[float],
                            backend: Optional[str]):
+        if contains_sequence_or_url(input_path) and backend is None or backend != 'opencv':
+            raise click.BadParameter(
+                'The OpenCV backend (`--backend opencv`) must be used to process image sequences.',
+                param_hint='-i/--input')
         if framerate is not None and framerate < MAX_FPS_DELTA:
             raise click.BadParameter('Invalid framerate specified!', param_hint='-f/--framerate')
         try:
