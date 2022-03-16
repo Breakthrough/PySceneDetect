@@ -13,6 +13,13 @@
 """:py:class:`VideoStreamAv` provides an adapter for the PyAV av.InputContainer object.
 
 Uses string identifier ``'pyav'``.
+
+
+.. warning::
+
+    Using :py:class:`VideoStreamAv` with the default arguments can lead to applications deadlocking.
+    Either set `threading_mode = None`, or ensure that your application can handle this edge case.
+    See https://pyav.org/docs/stable/overview/caveats.html#sub-interpeters for details.
 """
 
 from logging import getLogger

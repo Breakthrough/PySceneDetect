@@ -26,4 +26,3 @@ PyAV
 .. automodule:: scenedetect.backends.pyav
    :members:
    :undoc-members:
-

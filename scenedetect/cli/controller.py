@@ -19,11 +19,12 @@ import logging
 import os
 from string import Template
 import time
+import threading
 from typing import Dict, List, Tuple, Optional
 
 import cv2
 
-from scenedetect.backends import VideoStreamCv2
+from scenedetect.backends import VideoStreamCv2, VideoStreamAv
 from scenedetect.cli.context import CliContext, check_split_video_requirements
 from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.platform import get_and_create_path
@@ -123,6 +124,10 @@ def run_scenedetect(context: CliContext):
 
     # Handle split-video command.
     _split_video(context, scene_list)
+
+    # Ensure any potential deadlocks using VideoStreamAv don't block indefinitely.
+    if VideoStreamAv is not None and isinstance(context.video_stream, VideoStreamAv):
+        _handle_termination()
 
 
 def _save_stats(context: CliContext) -> None:
@@ -267,3 +272,10 @@ def _split_video(context: CliContext, scene_list: List[Tuple[FrameTimecode,
         )
     if scene_list:
         logger.info('Video splitting completed, individual scenes written to disk.')
+
+def _handle_termination():
+    """Ensures program aborts as using PyAV can cause lockups."""
+    def terminate_func():
+        time.sleep(5)
+        os.abort()
+    threading.Thread(target=terminate_func, daemon=True)
