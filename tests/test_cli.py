@@ -24,7 +24,8 @@ import pytest
 # TODO(v0.6): Need to create a temporary blank file to override the values in the user configuration
 # file if one is on the same system as the one being tested.
 
-# TODO(v0.6): Add tests using different backends.
+# TODO(v0.6): Add tests using different backends. Need to take into account that PyAV can hang
+# though so exit code 3 is permissible.
 
 SCENEDETECT_CMD = 'python -m scenedetect'
 VIDEO_PATH = 'tests/resources/goldeneye.mp4'

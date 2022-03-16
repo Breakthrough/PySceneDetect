@@ -23,10 +23,9 @@ interface for video input. To open a video by path with any available backend, u
 
 See :py:mod:`scenedetect.backends` for a detailed example.
 
-Setting the ``backend`` argument will attempt to use the specified backend, and fall back to those
-in the ``PREFERRED_BACKENDS`` constant in :py:mod:`scenedetect.backends`. To only allow a specific
-backend type, use that type directly (e.g.
-:py:class:`VideoStreamCv2 <scenedetect.backends.opencv.VideoStreamCv2>`).
+Setting the ``backend`` argument will attempt to use the specified backend, and fall back to
+:py:class:`VideoStreamCv2 <scenedetect.backends.opencv.VideoStreamCv2>` if ``backend`` is not
+available on the current system.  To only allow a specific backend type, use that type directly.
 
 New :py:class:`VideoStream <scenedetect.video_stream.VideoStream>` implementations can be
 tested by adding it to the test suite in `tests/test_video_stream.py`.

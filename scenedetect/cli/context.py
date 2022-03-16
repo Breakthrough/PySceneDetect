@@ -741,7 +741,7 @@ class CliContext:
                         param_hint='-b/--backend')
                 self.video_stream = AVAILABLE_BACKENDS[backend](input_path, framerate)
             else:
-                self.video_stream = open_video(path=input_path, framerate=framerate)
+                self.video_stream = open_video(path=input_path, framerate=framerate, backend='pyav')
             logger.debug('Video opened using backend %s', type(self.video_stream).__name__)
         except FrameRateUnavailable as ex:
             raise click.BadParameter(

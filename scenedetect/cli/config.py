@@ -24,7 +24,6 @@ from typing import AnyStr, Dict, List, Optional, Tuple, Union
 
 from appdirs import user_config_dir
 
-from scenedetect.backends import PREFERRED_BACKENDS
 from scenedetect.frame_timecode import FrameTimecode
 
 
@@ -68,8 +67,8 @@ _CONFIG_FILE_DIR: AnyStr = user_config_dir("PySceneDetect", False)
 
 CONFIG_FILE_PATH: AnyStr = os.path.join(_CONFIG_FILE_DIR, _CONFIG_FILE_NAME)
 
-_DEFAULT_BACKENDS: str = 'try %s in order' % ', '.join(
-    backend_type for backend_type in PREFERRED_BACKENDS)
+DEFAULT_BACKENDS = ['pyav', 'opencv']
+
 
 CONFIG_MAP: ConfigDict = {
     'detect-adaptive': {
@@ -104,7 +103,7 @@ CONFIG_MAP: ConfigDict = {
         'skip-cuts': False,
     },
     'global': {
-        'backend': _DEFAULT_BACKENDS,
+        'backend': 'try `pyav`, then `opencv`',
         'downscale': 0,
         'drop-short-scenes': False,
         'frame-skip': 0,

@@ -83,27 +83,24 @@ AVAILABLE_BACKENDS: Dict[str, Type] = {
         VideoStreamAv,
     ])
 }
-"""All available backends that :py:func:`open_video` can consider for the `preferred_backend`
+"""All available backends that :py:func:`open_video` can consider for the `backend`
 parameter. These backends must support construction with the following signature:
 
     BackendType(path: str, framerate: Optional[float])
 """
 
-PREFERRED_BACKENDS: List[str] = ['pyav', 'opencv']
-"""List of backend names to try, in order, when using :py:func:`open_video`."""
-
 
 def open_video(path: str,
                framerate: Optional[float] = None,
                backend: Optional[str] = None) -> VideoStream:
-    """Opens a video at the given path.
+    """Opens a video at the given path. If `backend` is specified but not available on the current
+    system, OpenCV (`VideoStreamCv2`) will be used as a fallback.
 
     Arguments:
         path: Path to video file to open.
         framerate: Overrides detected framerate if set.
         backend: Name of specific to use if possible. See :py:data:`AVAILABLE_BACKENDS` for
-            available backends. If the specified backend is unavailable (or `backend` is not
-            specified), the values in :py:data:`PREFERRED_BACKENDS` will be used in order.
+            backends available on the current system.
 
     Returns:
         VideoStream backend object created with the specified video path.
@@ -121,21 +118,19 @@ def open_video(path: str,
                 return AVAILABLE_BACKENDS[backend](path, framerate)
             except VideoOpenFailure as ex:
                 logger.debug('Failed to open video: %s', str(ex))
-                logger.debug('Trying preferred backends...')
+                logger.debug('Falling back to OpenCV.')
                 last_error = ex
         else:
-            logger.debug('Backend %s not available. Trying preferred backends...', backend)
-    # Try to open the video with the preferred backends in order.
-    for backend_type in PREFERRED_BACKENDS:
-        if not backend_type in AVAILABLE_BACKENDS:
-            continue
-        try:
-            backend = AVAILABLE_BACKENDS[backend_type]
-            logger.debug('Opening video with %s...', backend.__name__)
-            return backend(path, framerate)
-        except VideoOpenFailure as ex:
-            logger.debug('Failed to open video: %s', str(ex))
-            if last_error is None:
-                last_error = ex
+            logger.debug('Backend %s not available, falling back to OpenCV.', backend)
+    # Either backend was not specified, or failed to open the video - try using OpenCV.
+    try:
+        logger.debug('Opening video with %s...', VideoStreamCv2.__name__)
+        return VideoStreamCv2(path_or_device=path, framerate=framerate)
+    except VideoOpenFailure as ex:
+        logger.debug('Failed to open video: %s', str(ex))
+        if last_error is None:
+            last_error = ex
+    # If we get here, either the specified backend or the OpenCV backend threw an exception, so
+    # make sure we propagate it.
     assert last_error is not None
     raise last_error
