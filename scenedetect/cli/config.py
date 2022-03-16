@@ -67,8 +67,7 @@ _CONFIG_FILE_DIR: AnyStr = user_config_dir("PySceneDetect", False)
 
 CONFIG_FILE_PATH: AnyStr = os.path.join(_CONFIG_FILE_DIR, _CONFIG_FILE_NAME)
 
-DEFAULT_BACKENDS = ['pyav', 'opencv']
-
+DEFAULT_BACKEND: str = 'pyav'
 
 CONFIG_MAP: ConfigDict = {
     'detect-adaptive': {
@@ -103,7 +102,7 @@ CONFIG_MAP: ConfigDict = {
         'skip-cuts': False,
     },
     'global': {
-        'backend': 'try `pyav`, then `opencv`',
+        'backend': 'try `%s`, then `opencv`' % DEFAULT_BACKEND,
         'downscale': 0,
         'drop-short-scenes': False,
         'frame-skip': 0,

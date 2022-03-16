@@ -23,7 +23,7 @@ from typing import AnyStr, Optional, Union
 import click
 
 from scenedetect.backends import open_video, AVAILABLE_BACKENDS
-from scenedetect.cli.config import ConfigRegistry, ConfigLoadFailure, CHOICE_MAP
+from scenedetect.cli.config import ConfigRegistry, ConfigLoadFailure, CHOICE_MAP, DEFAULT_BACKEND
 from scenedetect.frame_timecode import FrameTimecode, MAX_FPS_DELTA
 import scenedetect.detectors
 from scenedetect.platform import get_and_create_path, get_cv2_imwrite_params, init_logger
@@ -741,7 +741,8 @@ class CliContext:
                         param_hint='-b/--backend')
                 self.video_stream = AVAILABLE_BACKENDS[backend](input_path, framerate)
             else:
-                self.video_stream = open_video(path=input_path, framerate=framerate, backend='pyav')
+                self.video_stream = open_video(
+                    path=input_path, framerate=framerate, backend=DEFAULT_BACKEND)
             logger.debug('Video opened using backend %s', type(self.video_stream).__name__)
         except FrameRateUnavailable as ex:
             raise click.BadParameter(
