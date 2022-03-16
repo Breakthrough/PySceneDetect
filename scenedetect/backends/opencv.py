@@ -15,7 +15,7 @@
 Uses string identifier ``'opencv'``.
 """
 
-import logging
+from logging import getLogger
 import math
 from typing import Tuple, Union, Optional
 import os.path
@@ -27,13 +27,16 @@ from scenedetect.frame_timecode import FrameTimecode, MAX_FPS_DELTA
 from scenedetect.platform import get_aspect_ratio, get_file_name
 from scenedetect.video_stream import VideoStream, SeekError, VideoOpenFailure, FrameRateUnavailable
 
-logger = logging.getLogger('pyscenedetect')
-
+logger = getLogger('pyscenedetect')
 
 class VideoStreamCv2(VideoStream):
     """OpenCV `cv2.VideoCapture` backend."""
 
-    def __init__(self, path_or_device: Union[bytes, str, int], framerate: Optional[float] = None):
+    def __init__(
+        self,
+        path_or_device: Union[bytes, str, int],
+        framerate: Optional[float] = None,
+    ):
         """Open a video or device.
 
         Arguments:

@@ -25,16 +25,16 @@ from scenedetect.frame_timecode import FrameTimecode, MAX_FPS_DELTA
 from scenedetect.platform import get_file_name
 from scenedetect.video_stream import VideoStream, VideoOpenFailure, FrameRateUnavailable
 
-# TODO(v0.6): Move this inside of VideoStreamAv and accept a custom logger if provided.
 logger = getLogger('pyscenedetect')
-
 
 #pylint: disable=c-extension-no-member
 class VideoStreamAv(VideoStream):
     """PyAV `av.InputContainer` backend."""
 
-    # TODO: Investigate adding an accurate_duration option to backends to
-    # calculate the duration with higher precision.
+    # TODO: Investigate adding an accurate_duration option to backends to calculate the duration
+    # with higher precision. Sometimes it doesn't exactly match what the codec or VLC reports,
+    # but we can try to seek to the end of the video first to determine it. Investigate how VLC
+    # calculates the end time.
     def __init__(
         self,
         path_or_io: Union[AnyStr, BinaryIO],
@@ -61,6 +61,7 @@ class VideoStreamAv(VideoStream):
             restore_logging: Revert back to FFmpeg's log callback. If False, the program may hang
                 on exit if `threading_mode` is 'AUTO' or 'FRAME'. See the PyAV docs for details:
                 https://pyav.org/docs/stable/overview/caveats.html#sub-interpeters
+
 
         Raises:
             OSError: file could not be found or access was denied
@@ -127,6 +128,7 @@ class VideoStreamAv(VideoStream):
     def path(self) -> Union[bytes, str]:
         """Video path."""
         return self._path_or_io if not self._is_io else ''
+
     @property
     def name(self) -> Union[bytes, str]:
         """Name of the video, without extension."""
