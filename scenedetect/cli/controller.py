@@ -278,4 +278,4 @@ def _handle_termination():
     def terminate_func():
         time.sleep(5)
         os.abort()
-    threading.Thread(target=terminate_func, daemon=True)
+    threading.Thread(target=terminate_func, daemon=True).start()
