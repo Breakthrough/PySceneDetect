@@ -25,6 +25,7 @@ The main goals of v0.6 are reliability and performance. To achieve this required
  * Adds support for multiple video backends, PyAV is now supported in addition to OpenCV
  * Breaking API changes to `VideoManager` (replaced with `VideoStream`), `StatsManager`, and `save_images()`
     * See the [Migration Guide](https://manual.scenedetect.com/en/v0.6/api/migration_guide.html) for details on how to update from v0.5.x
+    * Compatibility with the previous API has been maintained where possible, but these uses deprecated and will be removed in a future release
 
 **Command-Line Changes:**
 

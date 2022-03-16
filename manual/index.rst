@@ -52,6 +52,7 @@ Table of Contents
     api/frame_timecode
     api/scene_detector
     api/stats_manager
+    api/platform
     api/migration_guide
 
 =======================================================================

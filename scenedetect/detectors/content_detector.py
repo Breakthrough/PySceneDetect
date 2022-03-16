@@ -64,8 +64,7 @@ class ContentDetector(SceneDetector):
     METRIC_KEYS = [FRAME_SCORE_KEY, DELTA_H_KEY, DELTA_S_KEY, DELTA_V_KEY]
 
     def __init__(self, threshold: float = 27.0, min_scene_len: int = 15, luma_only: bool = False):
-        """Construct a `ContentDetector`.
-
+        """
         Arguments:
             threshold: Threshold the average change in pixel intensity must exceed to trigger a cut.
             min_scene_len: Once a cut is detected, this many frames must pass before a new one can

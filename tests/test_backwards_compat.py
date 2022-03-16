@@ -22,43 +22,46 @@ import os
 
 from scenedetect import SceneManager, StatsManager, VideoManager, ContentDetector
 
+# TODO(v0.6):
+# - [ ] Test output is same versus api_test.py in main/v0.5 branch
+# - [ ] Test output is same versus api_test.py on second run that uses statsfile
 
-def test_backwards_compatibility(test_video_file: str):
-    """Test backwards compatibility wrapper for VideoManager. This is equivalent to the
-    api_test.py file from v0.5. See `test_api_stats_manager` in test_api.py for how this
+
+def validate_backwards_compatibility(test_video_file: str, stats_file_path: str):
+    """Validate backwards compatibility wrapper for VideoManager. This is equivalent to the
+    tests/api_test.py file from v0.5. See `test_api_stats_manager` in test_api.py for how this
     should be written using the v0.6 API."""
     video_manager = VideoManager([test_video_file])
+    stats_file_path = test_video_file + '.csv'
     stats_manager = StatsManager()
     scene_manager = SceneManager(stats_manager)
     scene_manager.add_detector(ContentDetector())
     base_timecode = video_manager.get_base_timecode()
-    stats_file_path = test_video_file + '.csv'
+    scene_list = []
     try:
-        # If stats file exists, load it.
-        if os.path.exists(stats_file_path):
-            # Read stats from CSV file opened in read mode:
-            with open(stats_file_path, 'r') as stats_file:
-                # TODO(v0.6): Fix.
-                #stats_manager.load_from_csv(stats_file)
-                pass
-
         start_time = base_timecode + 20 # 00:00:00.667
         end_time = base_timecode + 20.0 # 00:00:20.000
-                                        # Set video_manager duration to read frames from 00:00:00 to 00:00:20.
+
+        if os.path.exists(stats_file_path):
+            with open(stats_file_path, 'r') as stats_file:
+                stats_manager.load_from_csv(stats_file)
+            # ContentDetector requires at least 1 frame before it can calculate any metrics.
+            assert stats_manager.metrics_exist(start_time.get_frames() + 1,
+                                               [ContentDetector.FRAME_SCORE_KEY])
+            # Correct end frame # for presentation duration.
+            assert stats_manager.metrics_exist(end_time.get_frames() - 1,
+                                               [ContentDetector.FRAME_SCORE_KEY])
+
         video_manager.set_duration(start_time=start_time, end_time=end_time)
-
-        # Set downscale factor to improve processing speed.
         video_manager.set_downscale_factor()
-
-        # Start video_manager.
         video_manager.start()
+        assert video_manager.get_current_timecode().get_frames() == start_time.get_frames()
 
-        # TODO(v0.6): Add back `frame_source=video_manager`
-        scene_manager.detect_scenes(video_manager)
-
+        scene_manager.detect_scenes(frame_source=video_manager)
         scene_list = scene_manager.get_scene_list()
-        # Like FrameTimecodes, each scene in the scene_list can be sorted if the
-        # list of scenes becomes unsorted.
+
+        # Correct end frame # for presentation duration.
+        assert video_manager.get_current_timecode().get_frames() == end_time.get_frames() + 1
 
         print('List of scenes obtained:')
         for i, scene in enumerate(scene_list):
@@ -70,19 +73,25 @@ def test_backwards_compatibility(test_video_file: str):
                 scene[1].get_frames(),
             ))
 
-        # We only write to the stats file if a save is required:
         if stats_manager.is_save_required():
             with open(stats_file_path, 'w') as stats_file:
-                # TODO(v0.6): Fix.
-                #stats_manager.save_to_csv(stats_file, base_timecode)
-                pass
-
+                stats_manager.save_to_csv(stats_file, base_timecode)
     finally:
         video_manager.release()
+    return scene_list
 
 
 def test_backwards_compatibility_with_stats(test_video_file: str):
-    """Same as above, but runs twice to use the statsfile."""
-    test_backwards_compatibility(test_video_file)
-    test_backwards_compatibility(test_video_file)
-
+    """Runs equivalent code to `tests/api_test.py` from v0.5 twice to also
+    exercise loading a statsfile from disk."""
+    stats_file_path = test_video_file + '.csv'
+    try:
+        os.remove(stats_file_path)
+    except FileNotFoundError:
+        pass
+    scenes = validate_backwards_compatibility(test_video_file, stats_file_path)
+    assert scenes
+    assert os.path.exists(stats_file_path)
+    # Make sure run with statsfile matches previous results.
+    assert validate_backwards_compatibility(test_video_file, stats_file_path) == scenes
+    os.remove(stats_file_path)

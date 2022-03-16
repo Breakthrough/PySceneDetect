@@ -310,6 +310,9 @@ class VideoStreamAv(VideoStream):
         if not self.is_seekable or not self._video_stream.thread_type in ('AUTO', 'FRAME'):
             return False
         last_frame = self.frame_number
+        # TODO: We may have to resort to using a path for most use cases, as it's possible using a
+        # BytesIO here is causing occasional lockups:
+        # https://pyav.org/docs/stable/overview/caveats.html#sub-interpeters
         orig_pos = self._io.tell()
         try:
             self._io.seek(0)

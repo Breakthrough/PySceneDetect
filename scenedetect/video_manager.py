@@ -31,16 +31,6 @@ from scenedetect.video_stream import VideoStream, VideoOpenFailure, FrameRateUna
 from scenedetect.frame_timecode import FrameTimecode, MAX_FPS_DELTA
 from scenedetect.platform import get_file_name, get_aspect_ratio
 
-# - [ ] Implement VideoStream for VideoManager
-# - [ ] Add to backends tests
-# - [ ] Add test case to verify seeking works when setting start/end time
-# - [ ] Add `frame_source` argument back to SceneManager
-# - [ ] Test output is same versus api_test.py in main/v0.5 branch
-# - [ ] Test output is same versus api_test.py on second run that uses statsfile
-#
-
-STRING_TYPE = bytes
-
 ##
 ## VideoManager Exceptions
 ##
@@ -139,7 +129,7 @@ def open_captures(
         elif video_files[0] < 0:
             raise ValueError("Invalid/negative device ID specified.")
         is_device = True
-    elif not all([isinstance(video_file, (str, STRING_TYPE)) for video_file in video_files]):
+    elif not all([isinstance(video_file, (str, bytes)) for video_file in video_files]):
         print(video_files)
         raise ValueError("Unexpected element type in video_files list (expected str(s)/int).")
     elif framerate is not None and not isinstance(framerate, float):

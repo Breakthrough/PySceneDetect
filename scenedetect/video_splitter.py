@@ -46,7 +46,6 @@ from string import Template
 from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.platform import tqdm, invoke_command, CommandTooLong, get_file_name
 
-
 logger = logging.getLogger('pyscenedetect')
 
 FrameTimecodePair = Tuple[FrameTimecode, FrameTimecode]
@@ -104,11 +103,14 @@ def is_ffmpeg_available():
 ##
 
 
-def split_video_mkvmerge(input_video_path: str,
-                         scene_list: Iterable[FrameTimecodePair],
-                         output_file_template: str = '$VIDEO_NAME.mkv',
-                         video_name: Optional[str] = None,
-                         show_output: bool = False):
+def split_video_mkvmerge(
+    input_video_path: str,
+    scene_list: Iterable[FrameTimecodePair],
+    output_file_template: str = '$VIDEO_NAME.mkv',
+    video_name: Optional[str] = None,
+    show_output: bool = False,
+    suppress_output=None,
+):
     """ Calls the mkvmerge command on the input video, splitting it at the
     passed timecodes, where each scene is written in sequence from 001.
 
@@ -120,11 +122,16 @@ def split_video_mkvmerge(input_video_path: str,
         video_name (str): Name of the video to be substituted in output_file_template for
             $VIDEO_NAME. If not specified, will be obtained from the filename.
         show_output: If False, adds the --quiet flag when invoking `mkvmerge`.
+        suppress_output: [DEPRECATED] DO NOT USE. For backwards compatibility only.
 
     Returns:
         Return code of invoking mkvmerge (0 on success). If scene_list is empty, will
         still return 0, but no commands will be invoked.
     """
+    # TODO: Remove `suppress_output`.
+    if suppress_output is not None:
+        logger.error('suppress_output is deprecated, use show_output instead.')
+        show_output = not suppress_output
 
     if not scene_list:
         return 0
@@ -168,13 +175,17 @@ def split_video_mkvmerge(input_video_path: str,
     return ret_val
 
 
-def split_video_ffmpeg(input_video_path: str,
-                       scene_list: Iterable[FrameTimecodePair],
-                       output_file_template: str = '$VIDEO_NAME-Scene-$SCENE_NUMBER.mp4',
-                       video_name: Optional[str] = None,
-                       arg_override: str = '-c:v libx264 -preset fast -crf 21 -c:a aac',
-                       show_progress: bool = False,
-                       show_output: bool = False):
+def split_video_ffmpeg(
+    input_video_path: str,
+    scene_list: Iterable[FrameTimecodePair],
+    output_file_template: str = '$VIDEO_NAME-Scene-$SCENE_NUMBER.mp4',
+    video_name: Optional[str] = None,
+    arg_override: str = '-c:v libx264 -preset fast -crf 21 -c:a aac',
+    show_progress: bool = False,
+    show_output: bool = False,
+    suppress_output=None,
+    hide_progress=None,
+):
     """ Calls the ffmpeg command on the input video, generating a new video for
     each scene based on the start/end timecodes.
 
@@ -190,11 +201,20 @@ def split_video_ffmpeg(input_video_path: str,
         arg_override (str): Allows overriding the arguments passed to ffmpeg for encoding.
         show_progress (bool): If True, will show progress bar provided by tqdm (if installed).
         show_output (bool): If True, will show output from ffmpeg for first split.
+        suppress_output: [DEPRECATED] DO NOT USE. For backwards compatibility only.
+        hide_progress: [DEPRECATED] DO NOT USE. For backwards compatibility only.
 
     Returns:
         Return code of invoking ffmpeg (0 on success). If scene_list is empty, will
         still return 0, but no commands will be invoked.
     """
+    # TODO: Remove `suppress_output` and `hide_progress`.
+    if suppress_output is not None:
+        logger.error('suppress_output is deprecated, use show_output instead.')
+        show_output = not suppress_output
+    if hide_progress is not None:
+        logger.error('hide_progress is deprecated, use show_progress instead.')
+        show_progress = not hide_progress
 
     if not scene_list:
         return 0

@@ -35,6 +35,8 @@ The `scenedetect` API is designed to be extensible and easy to integrate with mo
 
     * :ref:`scenedetect.stats_manager 🧮 <scenedetect-stats_manager>`: Contains :py:class:`StatsManager <scenedetect.stats_manager.StatsManager>` class for caching frame metrics and loading/saving them to disk in CSV format for analysis. Also used as a persistent cache to make multiple passes on the same video significantly faster.
 
+    * :ref:`scenedetect.platform 🐱‍💻 <scenedetect-platform>`: Logging and utility functions.
+
 
 Most types/functions are also available directly from the `scenedetect` package to make imports simpler.
 

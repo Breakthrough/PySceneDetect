@@ -16,11 +16,14 @@ are triggered when the average pixel intensity exceeds or falls below this thres
 This detector is available from the command-line as the `detect-threshold` command.
 """
 
+from logging import getLogger
 from typing import List
 
 import numpy
 
 from scenedetect.scene_detector import SceneDetector
+
+logger = getLogger('pyscenedetect')
 
 ##
 ## ThresholdDetector Helper Functions
@@ -58,13 +61,15 @@ class ThresholdDetector(SceneDetector):
 
     THRESHOLD_VALUE_KEY = 'delta_rgb'
 
-    def __init__(self,
-                 threshold: float = 12,
-                 min_scene_len: int = 15,
-                 fade_bias: float = 0.0,
-                 add_final_scene: bool = False):
-        """Construct a `ThresholdDetector`.
-
+    def __init__(
+        self,
+        threshold: float = 12,
+        min_scene_len: int = 15,
+        fade_bias: float = 0.0,
+        add_final_scene: bool = False,
+        block_size=None,
+    ):
+        """
         Arguments:
             threshold:  8-bit intensity value that each pixel value (R, G, and B)
                 must be <= to in order to trigger a fade in/out.
@@ -76,7 +81,13 @@ class ThresholdDetector(SceneDetector):
                 right at the position where the threshold is passed).
             add_final_scene:  Boolean indicating if the video ends on a fade-out to
                 generate an additional scene at this timecode.
+            block_size: [DEPRECATED] DO NOT USE. For backwards compatibility.
         """
+        # TODO: Remove `block_size`.
+        if block_size is not None:
+            logger.error('block_size is deprecated.')
+
+
         super().__init__()
         self.threshold = int(threshold)
         self.fade_bias = fade_bias

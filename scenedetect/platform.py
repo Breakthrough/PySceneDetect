@@ -23,11 +23,9 @@ are also included in this module.
 import logging
 import os
 import os.path
-import platform
-import struct
 import subprocess
 import sys
-from typing import AnyStr, Dict, List, Optional, TextIO, Tuple, Union
+from typing import AnyStr, Dict, List, Optional, Union
 
 import cv2
 
@@ -44,7 +42,7 @@ except ModuleNotFoundError:
 # pylint: enable=unused-import
 # pylint: enable=invalid-name
 
-
+# TODO: Move this into scenedetect.backends.opencv.
 def get_aspect_ratio(cap: cv2.VideoCapture, epsilon: float = 0.01) -> float:
     """ Compatibility fix for OpenCV < v3.4.1 to get the aspect ratio
     of a video. For older versions, this function always returns 1.0.
@@ -72,7 +70,7 @@ def get_aspect_ratio(cap: cv2.VideoCapture, epsilon: float = 0.01) -> float:
 ## OpenCV imwrite Supported Image Types & Quality/Compression Parameters
 ##
 
-
+# TODO: Move this into scene_manager.
 def get_cv2_imwrite_params() -> Dict[str, Union[int, None]]:
     """ Get OpenCV imwrite Params: Returns a dict of supported image formats and
     their associated quality/compression parameter index, or None if that format

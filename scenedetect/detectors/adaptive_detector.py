@@ -18,9 +18,12 @@ camera motions.
 This detector is available from the command-line as the `detect-adaptive` command.
 """
 
+from logging import getLogger
+
 # PySceneDetect Library Imports
 from scenedetect.detectors import ContentDetector
 
+logger = getLogger('pyscenedetect')
 
 class AdaptiveDetector(ContentDetector):
     """Detects cuts using HSV changes similar to ContentDetector, but with a
@@ -35,7 +38,24 @@ class AdaptiveDetector(ContentDetector):
                  luma_only=False,
                  min_scene_len=15,
                  min_delta_hsv=15.0,
-                 window_width=2):
+                 window_width=2,
+                 video_manager=None):
+        """
+        Arguments:
+            adaptive_threshold: Threshold value (float) that the calculated frame score must exceed to
+                trigger a new scene (see frame metric adaptive_ratio in stats file).
+            luma_only: Only consider luma/brightness channel (useful for greyscale videos).
+            min_scene_len: Minimum length of any scene.
+            min_delta_hsv: Minimum threshold (float) that the content_val must exceed in order to register as a new'
+                scene. This is calculated the same way that `detect-content` calculates frame score.
+            window_width: Size of window (number of frames) before and after each frame to average together in'
+                order to detect deviations from the mean.
+            video_manager: [DEPRECATED] DO NOT USE. For backwards compatibility only.
+        """
+        # TODO: Remove `video_manager`.
+        if video_manager is not None:
+            logger.error('video_manager is deprecated, use video instead.')
+
         super().__init__()
         self.min_scene_len = min_scene_len                                              # minimum length of any given scene, in frames (int) or FrameTimecode
         self.adaptive_threshold = adaptive_threshold

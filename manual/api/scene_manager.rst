@@ -56,7 +56,7 @@ This example is a modified version of `the api_test.py file <https://github.com/
                 scene[1].get_timecode(), scene[1].get_frames(),))
 
         # Store the frame metrics we calculated for the next time the program runs.
-        stats_manager.save_to_csv(path=stats_file_path, base_timecode=base_timecode)
+        stats_manager.save_to_csv(csv_file=stats_file_path, base_timecode=base_timecode)
 
         return scene_list
 

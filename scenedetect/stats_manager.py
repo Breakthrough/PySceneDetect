@@ -26,7 +26,7 @@ other optimal values for video files.
 
 import csv
 from logging import getLogger
-from typing import Any, Dict, Iterable, List, Optional, TextIO
+from typing import Any, Dict, Iterable, List, Optional, TextIO, Union
 import os.path
 
 from scenedetect.frame_timecode import FrameTimecode
@@ -103,7 +103,7 @@ class StatsManager:
 
         Arguments:
             base_timecode: Timecode associated with this object. Must not be None (default value
-                will be removed in v1.0).
+                will be removed in a future release).
         """
         # Frame metrics is a dict of frame (int): metric_dict (Dict[str, float])
         # of each frame metric key and the value it represents (usually float).
@@ -175,25 +175,22 @@ class StatsManager:
         return self._metrics_updated
 
     def save_to_csv(self,
-                    # TODO(v0.6): Just make this called 'file' and accept str, bytes, or TextIO.
-                    path: str = None,
-                    file: TextIO = None,
+                    csv_file: Union[str, bytes, TextIO],
+                    base_timecode: Optional[FrameTimecode] = None,
                     force_save=True) -> None:
         """ Save To CSV: Saves all frame metrics stored in the StatsManager to a CSV file.
 
         Arguments:
-            path: Path to destination file. Use `file` to pass a file handle instead.
-            file: A file handle opened in write mode (e.g. open('...', 'w')).
-            base_timecode: [DEPRECATED] The base_timecode to use. Not required in v0.6.
+            csv_file: A file handle opened in write mode (e.g. open('...', 'w')) or a path as str.
+            base_timecode: [DEPRECATED] DO NOT USE. For backwards compatibility.
             force_save: If True, writes metrics out even if an update is not required.
 
         Raises:
-            ValueError: If both path and file are specified.
             OSError: If `path` cannot be opened or a write failure occurs.
         """
-
-        if path is not None and file is not None:
-            raise ValueError("Only one of path or file can be specified")
+        # TODO: Remove `base_timecode`.
+        if base_timecode is not None:
+            logger.error('base_timecode is deprecated.')
 
         # Ensure we need to write to the file, and that we have data to do so with.
         if not ((self.is_save_required() or force_save) and self._registered_metrics
@@ -205,10 +202,10 @@ class StatsManager:
 
         # If we get a path instead of an open file handle, recursively call ourselves
         # again but with file handle instead of path.
-        if path is not None:
-            with open(path, 'w') as file:
-                return self.save_to_csv(file=file, force_save=force_save)
-        csv_writer = csv.writer(file, lineterminator='\n')
+        if isinstance(csv_file, (str, bytes)):
+            with open(csv_file, 'w') as file:
+                return self.save_to_csv(csv_file=file, force_save=force_save)
+        csv_writer = csv.writer(csv_file, lineterminator='\n')
 
         # Header rows.
         metric_keys = sorted(list(self._registered_metrics.union(self._loaded_metrics)))
@@ -239,10 +236,11 @@ class StatsManager:
         return True
 
     # TODO(v1.0): Remove.
-    def load_from_csv(self, path: str = None, file: TextIO = None) -> Optional[int]:
-        """[DEPRECATED] Load all metrics stored in a CSV file into the StatsManager instance.
+    def load_from_csv(self, csv_file: Union[str, bytes, TextIO]) -> Optional[int]:
+        """[DEPRECATED] DO NOT USE
 
-        Will be removed in v1.0.
+        Load all metrics stored in a CSV file into the StatsManager instance. Will be removed in a
+        future release after becoming a no-op.
 
         Arguments:
             csv_file: A file handle opened in read mode (e.g. open('...', 'r')) or a path as str.
@@ -255,20 +253,20 @@ class StatsManager:
             StatsFileCorrupt: Stats file is corrupt and can't be loaded, or wrong file
                 was specified.
         """
-        logger.warning("Loading stats from CSV files is deprecated and will be removed in v1.0!")
-        if path is not None and file is not None:
-            raise ValueError("Only one of path or file can be specified")
+        # TODO: Make this an error, then make load_from_csv() a no-op, and finally, remove it.
+        logger.warning("load_from_csv() is deprecated and will be removed in a future release.")
+
         # If we get a path instead of an open file handle, check that it exists, and if so,
         # recursively call ourselves again but with file set instead of path.
-        if path is not None:
-            if os.path.exists(path):
-                with open(path, 'r') as file:
-                    return self.load_from_csv(file=file)
+        if isinstance(csv_file, (str, bytes)):
+            if os.path.exists(csv_file):
+                with open(csv_file, 'r') as file:
+                    return self.load_from_csv(csv_file=file)
             # Path doesn't exist.
-            return
+            return None
 
         # If we get here, file is a valid file handle in read-only text mode.
-        csv_reader = csv.reader(file, lineterminator='\n')
+        csv_reader = csv.reader(csv_file, lineterminator='\n')
         num_cols = None
         num_metrics = None
         num_frames = None

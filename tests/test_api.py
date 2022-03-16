@@ -59,12 +59,12 @@ def test_api_stats_manager(test_video_file: str):
     scene_manager = SceneManager(stats_manager=StatsManager())
     scene_manager.add_detector(ContentDetector())
     # Loading from disk is optional.
-    scene_manager.stats_manager.load_from_csv(path=STATS_FILE_PATH)
+    scene_manager.stats_manager.load_from_csv(csv_file=STATS_FILE_PATH)
     scene_manager.detect_scenes(video=video)
     scene_list = scene_manager.get_scene_list()
     print_scenes(scene_list=scene_list)
     # Save per-frame statistics to disk.
-    scene_manager.stats_manager.save_to_csv(path=STATS_FILE_PATH)
+    scene_manager.stats_manager.save_to_csv(csv_file=STATS_FILE_PATH)
 
 
 def test_api_video_stream_opencv(test_video_file: str):

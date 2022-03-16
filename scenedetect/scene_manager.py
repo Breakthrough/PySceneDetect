@@ -295,8 +295,10 @@ def save_images(scene_list: List[Tuple[FrameTimecode, FrameTimecode]],
                 show_progress: Optional[bool] = False,
                 scale: Optional[float] = None,
                 height: Optional[int] = None,
-                width: Optional[int] = None) -> Dict[int, List[str]]:
-    """ Saves a set number of images from each scene, given a list of scenes
+                width: Optional[int] = None,
+                video_manager = None,
+                ) -> Dict[int, List[str]]:
+    """Save a set number of images from each scene, given a list of scenes
     and the associated video/frame source.
 
     Arguments:
@@ -331,6 +333,7 @@ def save_images(scene_list: List[Tuple[FrameTimecode, FrameTimecode]],
             and height will resize images to an exact size, regardless of aspect ratio.
             Specifying only width will rescale the image to that number of pixels wide
             while preserving the aspect ratio.
+        video_manager: [DEPRECATED] DO NOT USE. For backwards compatibility only.
 
     Returns:
         Dictionary of the format { scene_num : [image_paths] }, where scene_num is the
@@ -341,6 +344,10 @@ def save_images(scene_list: List[Tuple[FrameTimecode, FrameTimecode]],
         ValueError: Raised if any arguments are invalid or out of range (e.g.
         if num_images is negative).
     """
+    # TODO: Remove `video_manager`.
+    if video_manager is not None:
+        logger.error('video_manager is deprecated, use video instead.')
+        video = video_manager
 
     if not scene_list:
         return {}
@@ -685,12 +692,13 @@ class SceneManager:
             self._cutting_list += detector.post_process(frame_num)
 
     def detect_scenes(self,
-                      video: VideoStream,
+                      video: VideoStream = None,
                       duration: Optional[FrameTimecode] = None,
                       end_time: Optional[FrameTimecode] = None,
                       frame_skip: int = 0,
                       show_progress: bool = False,
-                      callback: Optional[Callable[[np.ndarray, int], None]] = None):
+                      callback: Optional[Callable[[np.ndarray, int], None]] = None,
+                      frame_source: Optional[VideoStream] = None) -> int:
         """ Perform scene detection on the given video using the added SceneDetectors.
 
         Blocks until all frames in the video have been processed. Results can
@@ -699,7 +707,8 @@ class SceneManager:
         frame decoding to happen in parallel.
 
         Arguments:
-            video: A VideoStream object pointing.
+            video: VideoStream obtained from either `scenedetect.open_video`, or by creating
+                one directly (e.g. `scenedetect.backends.opencv.VideoStreamCv2`).
             duration: Maximum amount of frames to detect. If not specified,
                 stream will be processed until end. Cannot be specified if `end_time` is set.
             end_time: Last frame number to process. If not specified,
@@ -713,15 +722,19 @@ class SceneManager:
                 a progress bar with the progress, framerate, and expected time to
                 complete processing the video frame source.
             callback: If set, called after each scene/event detected.
-                TODO(v1.0): Update signature.
+            frame_source: [DEPRECATED] DO NOT USE. For compatibility with previous version.
         Returns:
             int: Number of frames read and processed from the frame source.
         Raises:
             ValueError: `frame_skip` **must** be 0 (the default) if the SceneManager
                 was constructed with a StatsManager object.
         """
-
-        #
+        # Compatibility for v0.5 API.
+        # TODO: Remove default value for `video`` when removing `frame_source`.
+        if frame_source is not None:
+            video = frame_source
+        if video is None:
+            raise TypeError("detect_scenes() missing 1 required positional argument: 'video'")
 
         if frame_skip > 0 and self.stats_manager is not None:
             raise ValueError('frame_skip must be 0 when using a StatsManager.')
@@ -733,8 +746,9 @@ class SceneManager:
             raise ValueError('end_time must be greater than or equal to 0!')
 
         self._base_timecode = video.base_timecode
-        # TODO(v1.0): Fix this properly by making SceneManager just own a StatsManager (which can
-        # be optionally constructed using a boolean parameter).
+        # TODO(v1.0): Fix this properly by making SceneManager create and own a StatsManager,
+        # and requiring the framerate to be passed to the StatsManager the constructor (feasible
+        # when removing load_from_csv).
         if self._stats_manager is not None:
             self._stats_manager._base_timecode = self._base_timecode
         start_frame_num: int = video.frame_number

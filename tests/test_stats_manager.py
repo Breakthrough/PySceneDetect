@@ -223,7 +223,7 @@ def test_save_load_from_video(test_video_file):
     scene_manager.auto_downscale = True
     scene_manager.detect_scenes(video, duration=duration)
 
-    stats_manager.save_to_csv(path=TEST_STATS_FILES[0])
+    stats_manager.save_to_csv(csv_file=TEST_STATS_FILES[0])
 
     stats_manager_new = StatsManager()
 
