@@ -28,7 +28,7 @@ all of the frames:
 .. code:: python
 
     from scenedetect.backends import open_video
-    video = open_video(path='video.mp4')
+    video = open_video('video.mp4')
     while True:
         frame = video.read()
         if frame is False:
@@ -42,7 +42,7 @@ If we want to use a specific backend from :py:data:`AVAILABLE_BACKENDS`, we can 
 
     # Specifying a backend via `open_video`:
     from scenedetect.backends import open_video
-    video = open_video(path='video.mp4', backend='opencv')
+    video = open_video('video.mp4', backend='opencv')
 
 Or we can import and use specific backend directly:
 
@@ -50,7 +50,7 @@ Or we can import and use specific backend directly:
 
     # Manually importing and constructing a backend:
     from scenedetect.backends.opencv import VideoStreamCv2
-    video = VideoStreamCv2(path_or_device='video.mp4')
+    video = VideoStreamCv2('video.mp4')
 
 The ``'opencv'`` backend (:py:class:`VideoStreamCv2 <scenedetect.backends.opencv.VideoStreamCv2>`)
 is guaranteed to be available.
@@ -90,9 +90,12 @@ parameter. These backends must support construction with the following signature
 """
 
 
-def open_video(path: str,
-               framerate: Optional[float] = None,
-               backend: Optional[str] = None) -> VideoStream:
+def open_video(
+    path: str,
+    framerate: Optional[float] = None,
+    backend: Optional[str] = None,
+    **kwargs,
+) -> VideoStream:
     """Opens a video at the given path. If `backend` is specified but not available on the current
     system, OpenCV (`VideoStreamCv2`) will be used as a fallback.
 
@@ -100,7 +103,10 @@ def open_video(path: str,
         path: Path to video file to open.
         framerate: Overrides detected framerate if set.
         backend: Name of specific to use if possible. See :py:data:`AVAILABLE_BACKENDS` for
-            backends available on the current system.
+            backends available on the current system. If the backend fails to open the video,
+            OpenCV will be attempted to be used as a fallback.
+        kwargs: Optional named arguments to pass to the specified `backend` constructor for
+            overriding backend-specific options.
 
     Returns:
         VideoStream backend object created with the specified video path.
@@ -115,7 +121,7 @@ def open_video(path: str,
         if backend in AVAILABLE_BACKENDS:
             try:
                 logger.debug('Opening video with %s...', AVAILABLE_BACKENDS[backend].__name__)
-                return AVAILABLE_BACKENDS[backend](path, framerate)
+                return AVAILABLE_BACKENDS[backend](path, framerate, **kwargs)
             except VideoOpenFailure as ex:
                 logger.debug('Failed to open video: %s', str(ex))
                 logger.debug('Falling back to OpenCV.')

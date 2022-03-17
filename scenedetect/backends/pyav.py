@@ -13,13 +13,6 @@
 """:py:class:`VideoStreamAv` provides an adapter for the PyAV av.InputContainer object.
 
 Uses string identifier ``'pyav'``.
-
-
-.. warning::
-
-    Using :py:class:`VideoStreamAv` with the default arguments can lead to applications deadlocking.
-    Either set `threading_mode = None`, or ensure that your application can handle this edge case.
-    See https://pyav.org/docs/stable/overview/caveats.html#sub-interpeters for details.
 """
 
 from logging import getLogger
@@ -47,10 +40,15 @@ class VideoStreamAv(VideoStream):
         path_or_io: Union[AnyStr, BinaryIO],
         framerate: Optional[float] = None,
         name: Optional[str] = None,
-        threading_mode: Optional[str] = 'AUTO',
+        threading_mode: Optional[str] = None,
         restore_logging: bool = True,
     ):
         """Open a video by path.
+
+        .. warning::
+
+            Using `threading_mode` can cause lockups in your application. See the PyAV documentation
+            for details: https://pyav.org/docs/stable/overview/caveats.html#sub-interpeters
 
         Arguments:
             path_or_io: Path to the video, or a file-like object.
@@ -66,6 +64,7 @@ class VideoStreamAv(VideoStream):
             restore_logging: If True, calls `av.logging.restore_default_callback()` before any other
                 library calls. If False the application may deadlock. See the PyAV documentation
                 for details: https://pyav.org/docs/stable/overview/caveats.html#sub-interpeters
+                Has no effect unless `threading_mode` is set.
 
         Raises:
             OSError: file could not be found or access was denied
@@ -79,12 +78,12 @@ class VideoStreamAv(VideoStream):
         if framerate is not None and framerate < MAX_FPS_DELTA:
             raise ValueError('Specified framerate (%f) is invalid!' % framerate)
 
-        self._name: Union[str, bytes] = '' if name is None else name
+        self._name = '' if name is None else name
         self._path = ''
         self._frame = None
         self._reopened = True
 
-        if restore_logging:
+        if threading_mode and restore_logging:
             # Reduce frequency of lockups (https://pyav.org/docs/stable/overview/caveats.html).
             av.logging.restore_default_callback()
 

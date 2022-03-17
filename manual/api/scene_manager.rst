@@ -33,7 +33,7 @@ This example is a modified version of `the api_test.py file <https://github.com/
     def find_scenes(video_path):
         # type: (str) -> List[Tuple[FrameTimecode, FrameTimecode]]
 
-        video_stream = open_video(path=video_path)
+        video_stream = open_video(video_path)
         stats_manager = StatsManager()
         # Construct our SceneManager and pass it our StatsManager.
         scene_manager = SceneManager(stats_manager)

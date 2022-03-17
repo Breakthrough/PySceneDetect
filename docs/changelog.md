@@ -25,14 +25,18 @@ The main goals of v0.6 are reliability and performance. To achieve this required
  * Adds support for multiple video backends, PyAV is now supported in addition to OpenCV
  * Breaking API changes to `VideoManager` (replaced with `VideoStream`), `StatsManager`, and `save_images()`
     * See the [Migration Guide](https://manual.scenedetect.com/en/v0.6/api/migration_guide.html) for details on how to update from v0.5.x
-    * Compatibility with the previous API has been maintained where possible, but these uses deprecated and will be removed in a future release
+    * A backwards compatibility layer has been added to prevent most applications from breaking - this layer will be removed in a future release
 
 **Command-Line Changes:**
 
+*v0.6-dev4*:
+ * Using `--backend pyav` no longer causes the application to occasionally hang once processing is complete
+ * `save-images` now supports image sequences
+
 *v0.6-dev3*:
 
- * `pyav` backend (the `av` package) will be used by default for video decoding, if installed
- * Specifying `-b pyav` / `--backend pyav` now uses faster multithreaded decoding
+ * The `pyav` backend (the `av` package) will be used by default
+ * The `pyav` backend now uses faster multithreaded decoding
  * [v0.6-only] Fix progress bar stuck at 0 when video duration was not available
  * [v0.6-only] Fix slow seeking with `pyav` backend
 
@@ -60,8 +64,10 @@ The main goals of v0.6 are reliability and performance. To achieve this required
 
 **API Changes:**
 
-*v0.6-dev3*:
+*v0.6-dev4*:
 
+ * Add some backwards compatibility with v0.5 to avoid breaking most applications on release while still allowing performance improvements
+ * [v0.6-only] `VideoStreamAv`: Many fixes around `threading_mode` and documentation regarding application lockups
  * Changes to `StatsManager`:
     * The `load_from_csv` method is now deprecated and will be removed in v1.0
 

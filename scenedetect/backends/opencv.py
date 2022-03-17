@@ -105,7 +105,11 @@ class VideoStreamCv2(VideoStream):
         """Name of the video, without extension, or device."""
         if self._is_device:
             return self.path
-        return get_file_name(self.path, include_extension=False)
+        file_name = get_file_name(self.path, include_extension=False)
+        if '%' in file_name:
+            # file_name is an image sequence, trim everything including/after the %.
+            file_name = file_name[:file_name.rfind('%')]
+        return file_name
 
     @property
     def is_seekable(self) -> bool:

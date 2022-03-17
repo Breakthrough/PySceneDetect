@@ -22,7 +22,7 @@ from typing import AnyStr, Optional, Union
 
 import click
 
-from scenedetect.backends import open_video, AVAILABLE_BACKENDS
+from scenedetect.backends import open_video, AVAILABLE_BACKENDS, VideoStreamAv
 from scenedetect.cli.config import ConfigRegistry, ConfigLoadFailure, CHOICE_MAP, DEFAULT_BACKEND
 from scenedetect.frame_timecode import FrameTimecode, MAX_FPS_DELTA
 import scenedetect.detectors
@@ -216,8 +216,8 @@ class CliContext:
                 raise click.Abort()
 
         logger.debug("Current configuration:\n%s", str(self.config.config_dict))
-        logger.debug('Parsing program options.')
 
+        logger.debug('Parsing program options.')
         if stats is not None and frame_skip:
             error_strs = [
                 'Unable to detect scenes with stats file if frame skip is not 0.',
@@ -570,8 +570,8 @@ class CliContext:
         options_processed_orig = self.options_processed
         self.options_processed = False
 
-        if contains_sequence_or_url(self.video_stream.path):
-            error_str = '\nThe save-images command is incompatible with image sequences/URLs.'
+        if '://' in self.video_stream.path:
+            error_str = '\nThe save-images command is incompatible with URLs.'
             logger.error(error_str)
             raise click.BadParameter(error_str, param_hint='save-images')
 
@@ -731,22 +731,35 @@ class CliContext:
 
     def _open_video_stream(self, input_path: AnyStr, framerate: Optional[float],
                            backend: Optional[str]):
-        if contains_sequence_or_url(input_path) and backend is None or backend != 'opencv':
+        if '%' in input_path and backend != 'opencv':
             raise click.BadParameter(
                 'The OpenCV backend (`--backend opencv`) must be used to process image sequences.',
                 param_hint='-i/--input')
         if framerate is not None and framerate < MAX_FPS_DELTA:
             raise click.BadParameter('Invalid framerate specified!', param_hint='-f/--framerate')
         try:
-            if backend is not None:
+            if backend is None:
+                backend = DEFAULT_BACKEND
+            else:
                 if not backend in AVAILABLE_BACKENDS:
                     raise click.BadParameter(
                         'Specified backend %s is not available on this system!' % backend,
                         param_hint='-b/--backend')
-                self.video_stream = AVAILABLE_BACKENDS[backend](input_path, framerate)
+            # Use faster threading mode with VideoStreamAv.
+            if backend == 'pyav':
+                self.video_stream = open_video(
+                    path=input_path,
+                    framerate=framerate,
+                    backend='pyav',
+                    threading_mode='AUTO',
+                    restore_logging=True,
+                )
             else:
                 self.video_stream = open_video(
-                    path=input_path, framerate=framerate, backend=DEFAULT_BACKEND)
+                    path=input_path,
+                    framerate=framerate,
+                    backend=DEFAULT_BACKEND,
+                )
             logger.debug('Video opened using backend %s', type(self.video_stream).__name__)
         except FrameRateUnavailable as ex:
             raise click.BadParameter(

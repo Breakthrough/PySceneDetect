@@ -102,7 +102,7 @@ CONFIG_MAP: ConfigDict = {
         'skip-cuts': False,
     },
     'global': {
-        'backend': 'try `%s`, then `opencv`' % DEFAULT_BACKEND,
+        'backend': 'try pyav, then opencv',
         'downscale': 0,
         'drop-short-scenes': False,
         'frame-skip': 0,

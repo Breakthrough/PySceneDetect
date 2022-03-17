@@ -19,7 +19,7 @@ interface for video input. To open a video by path with any available backend, u
 .. code:: python
 
     from scenedetect import open_video
-    video = open_video(path='video.mp4')
+    video = open_video('video.mp4')
 
 See :py:mod:`scenedetect.backends` for a detailed example.
 
@@ -51,6 +51,7 @@ class SeekError(Exception):
 class VideoOpenFailure(Exception):
     """Raised by a backend if opening a video fails."""
 
+    # pylint: disable=useless-super-delegation
     def __init__(self, message: str = "Unknown backend error."):
         super().__init__(message)
 
