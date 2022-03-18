@@ -22,9 +22,6 @@ import time
 import threading
 from typing import Dict, List, Tuple, Optional
 
-import cv2
-
-from scenedetect.backends import VideoStreamCv2, VideoStreamAv
 from scenedetect.cli.context import CliContext, check_split_video_requirements
 from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.platform import get_and_create_path
@@ -66,7 +63,7 @@ def run_scenedetect(context: CliContext):
         show_progress=not context.quiet_mode)
 
     # Handle case where video failure is most likely due to multiple audio tracks (#179).
-    if num_frames <= 0 and isinstance(context.video_stream, VideoStreamCv2):
+    if num_frames <= 0 and context.video_stream.BACKEND_NAME == 'opencv':
         logger.critical(
             'Failed to read any frames from video file. This could be caused by the video'
             ' having multiple audio tracks. If so, try installing the PyAV backend:\n'
@@ -116,7 +113,7 @@ def run_scenedetect(context: CliContext):
     _split_video(context, scene_list)
 
     # Ensure any lockups at exit don't cause the program to hang indefinitely.
-    if VideoStreamAv is not None and isinstance(context.video_stream, VideoStreamAv):
+    if context.video_stream.BACKEND_NAME == 'pyav':
         # Spawn background thread to abort program after 5 seconds if it is still running once
         # this function returns.
         _abort_after(5.0)

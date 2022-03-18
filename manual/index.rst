@@ -32,6 +32,7 @@ Table of Contents
     cli/commands
     cli/detectors
     cli/config_file
+    cli/backends
 
 
 =======================================================================

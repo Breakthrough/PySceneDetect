@@ -22,15 +22,14 @@ import os
 
 from scenedetect import SceneManager, StatsManager, VideoManager, ContentDetector
 
-# TODO(v0.6):
-# - [ ] Test output is same versus api_test.py in main/v0.5 branch
-# - [ ] Test output is same versus api_test.py on second run that uses statsfile
-
 
 def validate_backwards_compatibility(test_video_file: str, stats_file_path: str):
-    """Validate backwards compatibility wrapper for VideoManager. This is equivalent to the
-    tests/api_test.py file from v0.5. See `test_api_stats_manager` in test_api.py for how this
-    should be written using the v0.6 API."""
+    """Validate backwards compatibility wrapper for VideoManager.
+
+    This is equivalent to the tests/api_test.py file from v0.5 with additional assertions.
+    Do not following this test for writing applications - see test_api.py for examples
+    using the current API. This test is equivalent to `test_api_stats_manager`.
+    """
     video_manager = VideoManager([test_video_file])
     stats_file_path = test_video_file + '.csv'
     stats_manager = StatsManager()

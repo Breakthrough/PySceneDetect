@@ -18,12 +18,14 @@ here where possible and re-used by the CLI so that there is one source of truth.
 """
 
 import logging
+import os
 import os.path
 from configparser import ConfigParser
 from typing import AnyStr, Dict, List, Optional, Tuple, Union
 
 from appdirs import user_config_dir
 
+from scenedetect.backends.pyav import VALID_THREAD_MODES
 from scenedetect.frame_timecode import FrameTimecode
 
 
@@ -67,9 +69,10 @@ _CONFIG_FILE_DIR: AnyStr = user_config_dir("PySceneDetect", False)
 
 CONFIG_FILE_PATH: AnyStr = os.path.join(_CONFIG_FILE_DIR, _CONFIG_FILE_NAME)
 
-DEFAULT_BACKEND: str = 'pyav'
-
 CONFIG_MAP: ConfigDict = {
+    'backend-pyav': {
+        'threading-mode': 'auto' if os.name == 'nt' else 'slice',
+    },
     'detect-adaptive': {
         'frame-window': 2,
         'luma-only': False,
@@ -102,7 +105,7 @@ CONFIG_MAP: ConfigDict = {
         'skip-cuts': False,
     },
     'global': {
-        'backend': 'try pyav, then opencv',
+        'backend': 'pyav' if os.name == 'nt' else 'opencv',
         'downscale': 0,
         'drop-short-scenes': False,
         'frame-skip': 0,
@@ -151,10 +154,14 @@ CHOICE_MAP: Dict[str, Dict[str, List[str]]] = {
     },
     'save-images': {
         'format': ['jpeg', 'png', 'webp'],
-    }
+    },
+    'backend-pyav': {
+        'threading_mode': [str(mode).lower() for mode in VALID_THREAD_MODES],
+    },
 }
 """Mapping of string options which can only be of a particular set of values. We use a list instead
-of a set to preserve order when generating error contexts."""
+of a set to preserve order when generating error contexts. Values are case-insensitive, and must be
+in lowercase in this map."""
 
 
 def _validate_structure(config: ConfigParser) -> List[str]:

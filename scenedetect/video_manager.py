@@ -12,11 +12,11 @@
 #
 """``scenedetect.video_manager`` Module
 
-DEPRECATED. Use the `open_video` function from `scenedetect.backends` or create a
+[DEPRECATED] DO NOT USE. Use `open_video` from `scenedetect.backends` or create a
 VideoStreamCv2 object (`scenedetect.backends.opencv`) instead.
 
-This module exists for *some* backwards compatibility with v0.5, and will be
-removed in a future release.
+This module exists for *some* backwards compatibility with v0.5, and will be removed
+in a future release.
 """
 
 import os
@@ -56,6 +56,7 @@ class VideoDecodingInProgress(RuntimeError):
     """ VideoDecodingInProgress: Raised when attempting to call certain VideoManager methods that
     must be called *before* start() has been called. """
 
+
 class InvalidDownscaleFactor(ValueError):
     """ InvalidDownscaleFactor: Raised when trying to set invalid downscale factor,
     i.e. the supplied downscale factor was not a positive integer greater than zero. """
@@ -86,9 +87,10 @@ def get_num_frames(cap_list: Iterable[cv2.VideoCapture]) -> int:
 
 
 def open_captures(
-        video_files: Iterable[str],
-        framerate: Optional[float] = None,
-        validate_parameters: bool = True,) -> Tuple[List[cv2.VideoCapture], float, Tuple[int, int]]:
+    video_files: Iterable[str],
+    framerate: Optional[float] = None,
+    validate_parameters: bool = True,
+) -> Tuple[List[cv2.VideoCapture], float, Tuple[int, int]]:
     """ Open Captures - helper function to open all capture objects, set the framerate,
     and ensure that all open captures have been opened and the framerates match on a list
     of video file paths, or a list containing a single device ID.
@@ -176,7 +178,11 @@ def open_captures(
     return (cap_list, cap_framerate, cap_frame_size)
 
 
-def validate_capture_framerate(video_names: Iterable[Tuple[str, str]], cap_framerates: List[float], framerate: Optional[float]=None,) -> Tuple[float, bool]:
+def validate_capture_framerate(
+    video_names: Iterable[Tuple[str, str]],
+    cap_framerates: List[float],
+    framerate: Optional[float] = None,
+) -> Tuple[float, bool]:
     """Ensure the passed capture framerates are valid and equal.
 
     Raises:
@@ -204,10 +210,12 @@ def validate_capture_framerate(video_names: Iterable[Tuple[str, str]], cap_frame
     return (cap_framerate, check_framerate)
 
 
-def validate_capture_parameters(video_names: List[Tuple[str, str]],
-                                cap_frame_sizes,
-                                check_framerate=False,
-                                cap_framerates=None,):
+def validate_capture_parameters(
+    video_names: List[Tuple[str, str]],
+    cap_frame_sizes,
+    check_framerate=False,
+    cap_framerates=None,
+):
     # type: (List[Tuple[str, str]], List[Tuple[int, int]], Optional[bool],
     #        Optional[List[float]]) -> None
     """ Validate Capture Parameters: Ensures that all passed capture frame sizes and (optionally)
@@ -244,8 +252,10 @@ def validate_capture_parameters(video_names: List[Tuple[str, str]],
 
 
 class VideoManager(VideoStream):
-    """ Provides a cv2.VideoCapture-like interface to a set of one or more video files,
-    or a single device ID. Supports seeking and setting end time/duration. """
+    """[DEPRECATED] DO NOT USE.
+
+    Provides a cv2.VideoCapture-like interface to a set of one or more video files,
+    or a single device ID. Supports seeking and setting end time/duration."""
 
     BACKEND_NAME = 'video_manager_do_not_use'
 
@@ -253,7 +263,7 @@ class VideoManager(VideoStream):
                  video_files: List[str],
                  framerate: Optional[float] = None,
                  logger=getLogger('pyscenedetect')):
-        """ VideoManager Constructor Method (__init__)
+        """[DEPRECATED] DO NOT USE.
 
         Arguments:
             video_files (list of str(s)/int): A list of one or more paths (str), or a list
@@ -483,6 +493,10 @@ class VideoManager(VideoStream):
         if self._start_time != 0:
             self.seek(self._start_time)
 
+    # This overrides the seek method from the VideoStream interface, but the name was changed
+    # from `timecode` to `target`. For compatibility, we allow calling seek with the form
+    # seek(0), seek(timecode=0), and seek(target=0). Specifying both arguments is an error.
+    # pylint: disable=arguments-differ
     def seek(self, timecode: FrameTimecode = None, target: FrameTimecode = None) -> bool:
         """Seek forwards to the passed timecode.
 
@@ -679,7 +693,6 @@ class VideoManager(VideoStream):
         self._end_time = self._curr_time
         self._frame_length = self._curr_time - self._start_time
 
-
     # VideoStream Interface (Some Covered Above)
 
     @property
@@ -753,4 +766,3 @@ class VideoManager(VideoStream):
         if self._is_device:
             return self.path
         return get_file_name(self.path, include_extension=False)
-

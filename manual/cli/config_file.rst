@@ -1,11 +1,13 @@
 
+.. _scenedetect_cli-config_file:
+
 ***********************************************************************
 Configuration File
 ***********************************************************************
 
-Most command line parameters can be set using a configuration file. `Click here to download a scenedetect.cfg file template <https://raw.githubusercontent.com/Breakthrough/PySceneDetect/v0.6/scenedetect.cfg>`_ containing every possible option, along with comments that describe each one, or see the complete config option listing below. Note that lines starting with a ``#`` are comments and will be ignored.  The scenedetect.cfg template file is also available in the folder where PySceneDetect is installed.
+Most command line parameters can be set using a configuration file. See the :ref:`Template <config_file Template>` below for an example ``scenedetect.cfg`` file containing every possible option, along with comments that describe each one.  Note that lines starting with a ``#`` are comments and will be ignored.
 
-A configuration file path can be specified using the ``-c``/``--config`` argument. PySceneDetect also looks for a config file named scenedetect.cfg in one of the following locations:
+PySceneDetect looks for a file named ``scenedetect.cfg`` in one of the following locations:
 
  * Windows:
      * ``C:/Users/%USERNAME%/AppData/Local/PySceneDetect/scenedetect.cfg``
@@ -17,9 +19,7 @@ A configuration file path can be specified using the ``-c``/``--config`` argumen
  * Mac:
      * ``~/Library/Preferences/PySceneDetect/scenedetect.cfg``
 
-Run `scenedetect help` to see the exact path on your system which will be used (it will be listed under the help text for the ``-c``/``--config`` option). You can right-click and save the above scenedetect.cfg template into one of these locations to get started.
-
-Specifying a config file path using ``-c``/``--config`` overrides the user config file. Specifying values on the command line will override those values in the config file.
+Run `scenedetect help` to see the exact path on your system which will be used. You can also specify the direct path to a config file using the ``-c``/``--config`` argument. Values set on the command line take precedence over those set in the config file.
 
 The syntax of a configuration file is:
 
@@ -29,6 +29,7 @@ The syntax of a configuration file is:
     option_a = value
     #comment
     option_b = 1
+
 
 =======================================================================
 Example
@@ -53,9 +54,14 @@ Example
     quality = 80
     num-images = 3
 
+
+.. _config_file Template:
+
 =======================================================================
 Template
 =======================================================================
+
+This template shows every possible configuration option and default values. It can be used as a ``scenedetect.cfg`` file. You can also `download it from Github <https://raw.githubusercontent.com/Breakthrough/PySceneDetect/v0.6/scenedetect.cfg>`_.
 
 .. literalinclude:: ../../scenedetect.cfg
    :language: ini

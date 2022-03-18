@@ -18,6 +18,7 @@ Uses string identifier ``'pyav'``.
 from logging import getLogger
 from typing import AnyStr, BinaryIO, Optional, Tuple, Union
 
+#pylint: disable=c-extension-no-member
 import av
 from numpy import ndarray
 
@@ -27,7 +28,13 @@ from scenedetect.video_stream import VideoStream, VideoOpenFailure, FrameRateUna
 
 logger = getLogger('pyscenedetect')
 
-#pylint: disable=c-extension-no-member
+VALID_THREAD_MODES = [
+    av.codec.context.ThreadType.NONE,
+    av.codec.context.ThreadType.SLICE,
+    av.codec.context.ThreadType.FRAME,
+    av.codec.context.ThreadType.AUTO,
+]
+
 class VideoStreamAv(VideoStream):
     """PyAV `av.InputContainer` backend."""
 
@@ -83,8 +90,14 @@ class VideoStreamAv(VideoStream):
         self._frame = None
         self._reopened = True
 
+        if threading_mode:
+            threading_mode = threading_mode.upper()
+            if not threading_mode in VALID_THREAD_MODES:
+                raise ValueError('Invalid threading mode! Must be one of: %s' % VALID_THREAD_MODES)
+
         if threading_mode and restore_logging:
             # Reduce frequency of lockups (https://pyav.org/docs/stable/overview/caveats.html).
+            logger.debug('Restoring default ffmpeg log callback.')
             av.logging.restore_default_callback()
 
         try:
@@ -100,6 +113,7 @@ class VideoStreamAv(VideoStream):
             if threading_mode is not None:
                 self._video_stream.thread_type = threading_mode
                 self._reopened = False
+                logger.debug('Threading mode set: %s', threading_mode)
         except OSError:
             raise
         except Exception as ex:

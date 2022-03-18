@@ -22,8 +22,8 @@ from typing import AnyStr, Optional, Union
 
 import click
 
-from scenedetect.backends import open_video, AVAILABLE_BACKENDS, VideoStreamAv
-from scenedetect.cli.config import ConfigRegistry, ConfigLoadFailure, CHOICE_MAP, DEFAULT_BACKEND
+from scenedetect.backends import open_video, AVAILABLE_BACKENDS
+from scenedetect.cli.config import ConfigRegistry, ConfigLoadFailure, CHOICE_MAP
 from scenedetect.frame_timecode import FrameTimecode, MAX_FPS_DELTA
 import scenedetect.detectors
 from scenedetect.platform import get_and_create_path, get_cv2_imwrite_params, init_logger
@@ -739,26 +739,27 @@ class CliContext:
             raise click.BadParameter('Invalid framerate specified!', param_hint='-f/--framerate')
         try:
             if backend is None:
-                backend = DEFAULT_BACKEND
+                backend = self.config.get_value('global', 'backend')
             else:
                 if not backend in AVAILABLE_BACKENDS:
                     raise click.BadParameter(
                         'Specified backend %s is not available on this system!' % backend,
                         param_hint='-b/--backend')
-            # Use faster threading mode with VideoStreamAv.
+            # Need to specify threading mode config value with VideoStreamAv.
             if backend == 'pyav':
                 self.video_stream = open_video(
                     path=input_path,
                     framerate=framerate,
                     backend='pyav',
-                    threading_mode='AUTO',
+                    threading_mode=self.config.get_value('backend-pyav', 'threading-mode'),
                     restore_logging=True,
                 )
+            # Handle backends without any config options.
             else:
                 self.video_stream = open_video(
                     path=input_path,
                     framerate=framerate,
-                    backend=DEFAULT_BACKEND,
+                    backend=backend,
                 )
             logger.debug('Video opened using backend %s', type(self.video_stream).__name__)
         except FrameRateUnavailable as ex:

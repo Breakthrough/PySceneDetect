@@ -13,10 +13,10 @@
 """ ``scenedetect.backends`` Module
 
 This module contains concrete :py:class:`VideoStream <scenedetect.video_stream.VideoStream>`
-implementations. For video files, the :py:data:`open_video` function can be used to open a
-video with any available backend (or a string hinting which backend is preferred).
+implementations. In addition to creating backend objects directly, the :py:func:`open_video`
+can be used to open a video with a specified backend, falling back to OpenCV if not available.
+All backends available on the current system can be found via :py:data:`AVAILABLE_BACKENDS`.
 
-Backends available on the current system can be found via :py:data:`AVAILABLE_BACKENDS`.
 
 ===============================================================
 Usage Example
@@ -44,7 +44,9 @@ If we want to use a specific backend from :py:data:`AVAILABLE_BACKENDS`, we can 
     from scenedetect.backends import open_video
     video = open_video('video.mp4', backend='opencv')
 
-Or we can import and use specific backend directly:
+If the specified ``backend`` is not available, OpenCV will be used as a fallback. Other keyword
+arguments passed to :py:func:`open_video` will be forwarded to the specified backend.
+Lastly, we can import and use specific backend directly:
 
 .. code:: python
 
