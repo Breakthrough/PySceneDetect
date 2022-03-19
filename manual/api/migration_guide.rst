@@ -7,18 +7,18 @@ Migration Guide
 
 This page details how to transition a program written using PySceneDetect v0.5 to the new v0.6 API. It is recommended to review the new :ref:`Quickstart <scenedetect-quickstart>` and :ref:`Example <scenedetect-detailed_example>` sections first, as they should cover the majority of use cases. Also see `tests/test_api.py <https://github.com/Breakthrough/PySceneDetect/blob/v0.6/tests/test_api.py>`_ for a set of demonstrations covering many high level use cases.
 
-PySceneDetect v0.6 is a major step towards a more stable and simplified API.  The biggest change to most existing workflows is how video input is handled, and that Python 3.6 or above is now required.
+PySceneDetect v0.6 is a major step towards a more stable and simplified API.  The biggest change to existing workflows is how video input is handled, and that Python 3.6 or above is now required.
 
-This page covers the most commonly used APIs which require updates to work with v0.6.  Note that this page is not an exhaustive set of changes.  For a complete list of breaking API changes, see `the changelog <https://scenedetect.com/changelog/>`_.
+This page covers commonly used APIs which require updates to work with v0.6.  Note that this page is not an exhaustive set of changes.  For a complete list of breaking API changes, see `the changelog <https://scenedetect.com/changelog/>`_.
 
-In many places a backwards compatibility layer has been added to avoid breaking most applications. This should not be relied upon and will be removed in the future. You can call ``scenedetect.platform.init_logger(show_stdout=True)`` or attach a custom log handler to the ``'pyscenedetect'`` logger to help find these cases.
+In some places, a backwards compatibility layer has been added to avoid breaking most applications upon release. This should not be relied upon, and will be removed in the future. You can call ``scenedetect.platform.init_logger(show_stdout=True)`` or attach a custom log handler to the ``'pyscenedetect'`` logger to help find these cases.
 
 
 ===============================================================
 `VideoManager` Class
 ===============================================================
 
-`VideoManager` has been deprecated and replaced with :py:mod:`scenedetect.backends`.  For most applications, the easiest way to update this is to use the :py:func:`open_video <scenedetect.backends.open_video>` function:
+`VideoManager` has been deprecated and replaced with :py:mod:`scenedetect.backends`.  For most applications, the :py:func:`open_video <scenedetect.backends.open_video>` function should be used instead:
 
 .. code:: python
 
@@ -36,7 +36,7 @@ The resulting object can then be passed to a :py:class:`SceneManager <scenedetec
     scene_manager.detect_scenes(video)
     print(scene_manager.get_scene_list())
 
-See :py:mod:`scenedetect.backends` for examples of how to create specific backends. Note that where previously a list of paths was accepted, now only a single string should be provided.
+See :py:mod:`scenedetect.backends` for examples of how to create specific backends.  Where previously a list of paths was accepted, now only a single string should be provided.
 
 
 Seeking and Start/End Times
@@ -82,7 +82,7 @@ The `downscale_factor` parameter has been removed from :py:func:`save_images <sc
 `split_video_*` Functions
 ===============================================================
 
-The the :py:mod:`scenedetect.video_splitter` functions :py:func:`split_video_ffmpeg <scenedetect.video_splitter.split_video_ffmpeg>` and :py:func:`split_video_mkvmerge <scenedetect.video_splitter.split_video_mkvmerge>` now only accept a single path as the input (first) argument, where previously it was required to be a list.
+The the :py:mod:`scenedetect.video_splitter` functions :py:func:`split_video_ffmpeg <scenedetect.video_splitter.split_video_ffmpeg>` and :py:func:`split_video_mkvmerge <scenedetect.video_splitter.split_video_mkvmerge>` now only accept a single path as the input (first) argument.
 
 The `suppress_output` and `hide_progress` arguments to the :py:func:`split_video_ffmpeg <scenedetect.video_splitter.split_video_ffmpeg>` and :py:func:`split_video_mkvmerge <scenedetect.video_splitter.split_video_mkvmerge>` have been removed, and two new options have been added:
 

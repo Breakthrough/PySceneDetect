@@ -69,7 +69,7 @@ def is_mkvmerge_available():
     """ Is mkvmerge Available: Gracefully checks if mkvmerge command is available.
 
     Returns:
-        (bool) True if the mkvmerge command is available, False otherwise.
+        True if `mkvmerge` can be invoked, False otherwise.
     """
     ret_val = None
     try:
@@ -86,7 +86,7 @@ def is_ffmpeg_available():
     """ Is ffmpeg Available: Gracefully checks if ffmpeg command is available.
 
     Returns:
-        (bool) True if the ffmpeg command is available, False otherwise.
+        True if `ffmpeg` can be invoked, False otherwise.
     """
     ret_val = None
     try:
@@ -121,14 +121,18 @@ def split_video_mkvmerge(
             "-$SCENE_NUMBER". Can use $VIDEO_NAME as a template parameter (e.g. "$VIDEO_NAME.mkv").
         video_name (str): Name of the video to be substituted in output_file_template for
             $VIDEO_NAME. If not specified, will be obtained from the filename.
-        show_output: If False, adds the --quiet flag when invoking `mkvmerge`.
+        show_output: If False, adds the --quiet flag when invoking `mkvmerge`..
         suppress_output: [DEPRECATED] DO NOT USE. For backwards compatibility only.
-
     Returns:
         Return code of invoking mkvmerge (0 on success). If scene_list is empty, will
         still return 0, but no commands will be invoked.
     """
-    # TODO: Remove `suppress_output`.
+    # Handle backwards compatibility with v0.5 API.
+    if isinstance(input_video_path, list):
+        logger.error('Using a list of paths is deprecated. Pass a single path instead.')
+        if len(input_video_path) > 1:
+            raise ValueError('Concatenating multiple input videos is not supported.')
+        input_video_path = input_video_path[0]
     if suppress_output is not None:
         logger.error('suppress_output is deprecated, use show_output instead.')
         show_output = not suppress_output
@@ -208,7 +212,12 @@ def split_video_ffmpeg(
         Return code of invoking ffmpeg (0 on success). If scene_list is empty, will
         still return 0, but no commands will be invoked.
     """
-    # TODO: Remove `suppress_output` and `hide_progress`.
+    # Handle backwards compatibility with v0.5 API.
+    if isinstance(input_video_path, list):
+        logger.error('Using a list of paths is deprecated. Pass a single path instead.')
+        if len(input_video_path) > 1:
+            raise ValueError('Concatenating multiple input videos is not supported.')
+        input_video_path = input_video_path[0]
     if suppress_output is not None:
         logger.error('suppress_output is deprecated, use show_output instead.')
         show_output = not suppress_output
