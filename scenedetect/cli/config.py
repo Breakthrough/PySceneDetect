@@ -71,6 +71,7 @@ CONFIG_FILE_PATH: AnyStr = os.path.join(_CONFIG_FILE_DIR, _CONFIG_FILE_NAME)
 
 CONFIG_MAP: ConfigDict = {
     'backend-pyav': {
+        'suppress-output': False,
         'threading-mode': 'auto' if os.name == 'nt' else 'slice',
     },
     'detect-adaptive': {

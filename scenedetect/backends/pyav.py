@@ -48,7 +48,7 @@ class VideoStreamAv(VideoStream):
         framerate: Optional[float] = None,
         name: Optional[str] = None,
         threading_mode: Optional[str] = None,
-        restore_logging: bool = True,
+        suppress_output: bool = False,
     ):
         """Open a video by path.
 
@@ -68,10 +68,10 @@ class VideoStreamAv(VideoStream):
                 if seekable, and the remaining frames decoded in single-threaded mode. Using 'FRAME'
                 or 'AUTO' may result in the program hanging on exit - see the PyAV documentation
                 for details: https://pyav.org/docs/stable/overview/caveats.html#sub-interpeters
-            restore_logging: If True, calls `av.logging.restore_default_callback()` before any other
-                library calls. If False the application may deadlock. See the PyAV documentation
+            suppress_output: If False, ffmpeg output will be sent to stdout/stderr by calling
+                `av.logging.restore_default_callback()` before any other library calls. If True
+                the application may deadlock if threading_mode is set. See the PyAV documentation
                 for details: https://pyav.org/docs/stable/overview/caveats.html#sub-interpeters
-                Has no effect unless `threading_mode` is set.
 
         Raises:
             OSError: file could not be found or access was denied
@@ -95,9 +95,8 @@ class VideoStreamAv(VideoStream):
             if not threading_mode in VALID_THREAD_MODES:
                 raise ValueError('Invalid threading mode! Must be one of: %s' % VALID_THREAD_MODES)
 
-        if threading_mode and restore_logging:
-            # Reduce frequency of lockups (https://pyav.org/docs/stable/overview/caveats.html).
-            logger.debug('Restoring default ffmpeg log callback.')
+        if not suppress_output:
+            logger.debug('Restoring default ffmpeg log callbacks.')
             av.logging.restore_default_callback()
 
         try:

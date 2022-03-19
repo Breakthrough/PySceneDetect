@@ -745,14 +745,14 @@ class CliContext:
                     raise click.BadParameter(
                         'Specified backend %s is not available on this system!' % backend,
                         param_hint='-b/--backend')
-            # Need to specify threading mode config value with VideoStreamAv.
+            # Open the video with the specified backend, loading any required config settings.
             if backend == 'pyav':
                 self.video_stream = open_video(
                     path=input_path,
                     framerate=framerate,
                     backend='pyav',
                     threading_mode=self.config.get_value('backend-pyav', 'threading-mode'),
-                    restore_logging=True,
+                    suppress_output=self.config.get_value('backend-pyav', 'suppress-output'),
                 )
             # Handle backends without any config options.
             else:

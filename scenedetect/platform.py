@@ -42,6 +42,7 @@ except ModuleNotFoundError:
 # pylint: enable=unused-import
 # pylint: enable=invalid-name
 
+
 # TODO: Move this into scenedetect.backends.opencv.
 def get_aspect_ratio(cap: cv2.VideoCapture, epsilon: float = 0.01) -> float:
     """ Compatibility fix for OpenCV < v3.4.1 to get the aspect ratio
@@ -69,6 +70,7 @@ def get_aspect_ratio(cap: cv2.VideoCapture, epsilon: float = 0.01) -> float:
 ##
 ## OpenCV imwrite Supported Image Types & Quality/Compression Parameters
 ##
+
 
 # TODO: Move this into scene_manager.
 def get_cv2_imwrite_params() -> Dict[str, Union[int, None]]:
