@@ -32,6 +32,8 @@ The main goals of v0.6 are reliability and performance. To achieve this required
 *v0.6-dev4*:
  * Using `--backend pyav` no longer causes the application to occasionally hang once processing is complete
  * `save-images` now supports image sequences
+ * `-s`/`--stats` is now only used to write stats files, previously would load existing contents if any
+    * Previous behavior can be obtained by merging stats files from multiple runs and setting the start/end times accordingly
 
 *v0.6-dev3*:
 

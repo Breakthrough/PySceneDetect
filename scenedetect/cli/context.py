@@ -249,9 +249,10 @@ class CliContext:
             "global", "drop-short-scenes")
         self.frame_skip = self.config.get_value("global", "frame-skip", frame_skip)
 
-        # Open StatsManager if --stats is specified.
+        # Create StatsManager if --stats is specified.
         if stats_file:
-            self._open_stats_file(file_path=stats_file)
+            self.stats_file_path = get_and_create_path(stats_file, self.output_directory)
+            self.stats_manager = StatsManager()
 
         logger.debug('Initializing SceneManager.')
         self.scene_manager = SceneManager(self.stats_manager)
@@ -775,29 +776,6 @@ class CliContext:
         except OSError as ex:
             raise click.BadParameter('Input error:\n\n\t%s\n' % str(ex), param_hint='-i/--input')
 
-    def _open_stats_file(self, file_path: str):
-        """Initializes this object's StatsManager, loading any existing stats from disk.
-        If the file does not already exist, all directories leading up to it's eventual
-        location will be created here."""
-        self.stats_file_path = get_and_create_path(file_path, self.output_directory)
-        self.stats_manager = StatsManager()
-
-        logger.info('Loading frame metrics from stats file: %s',
-                    os.path.basename(self.stats_file_path))
-        try:
-            self.stats_manager.load_from_csv(self.stats_file_path)
-        except StatsFileCorrupt:
-            error_info = (
-                'Could not load frame metrics from stats file - file is either corrupt,'
-                ' or not a valid PySceneDetect stats file. If the file exists, ensure that'
-                ' it is a valid stats file CSV, otherwise delete it and run PySceneDetect'
-                ' again to re-generate the stats file.')
-            error_strs = ['Could not load stats file.', 'Failed to parse stats file:', error_info]
-            logger.error('\n'.join(error_strs))
-            # pylint: disable=raise-missing-from
-            raise click.BadParameter(
-                '\n  Could not load given stats file, see above output for details.',
-                param_hint='input stats file')
 
     def _on_duplicate_command(self, command: str) -> None:
         """Called when a command is duplicated to stop parsing and raise an error.

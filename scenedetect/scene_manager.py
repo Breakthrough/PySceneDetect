@@ -747,8 +747,7 @@ class SceneManager:
 
         self._base_timecode = video.base_timecode
         # TODO(v1.0): Fix this properly by making SceneManager create and own a StatsManager,
-        # and requiring the framerate to be passed to the StatsManager the constructor (feasible
-        # when removing load_from_csv).
+        # and requiring the framerate to be passed to the StatsManager the constructor.
         if self._stats_manager is not None:
             self._stats_manager._base_timecode = self._base_timecode
         start_frame_num: int = video.frame_number
