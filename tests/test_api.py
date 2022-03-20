@@ -17,14 +17,15 @@ Demonstrates high-level usage of the PySceneDetect API.
 
 from typing import List, Tuple
 
-from scenedetect import open_video, ContentDetector, FrameTimecode, SceneManager, StatsManager
+from scenedetect import detect, open_video
+from scenedetect import ContentDetector, FrameTimecode, SceneManager, StatsManager
 from scenedetect.backends import VideoStreamCv2
 
 STATS_FILE_PATH = 'api_test_statsfile.csv'
 
 
 def print_scenes(scene_list: List[Tuple[FrameTimecode, FrameTimecode]]):
-    """Iterate over a scene list and print it to the terminal."""
+    """Helper function to print a list of scenes to the terminal."""
     print('Scene List:')
     for i, scene in enumerate(scene_list):
         print('  Scene %2d: Start %s / Frame %d, End %s / Frame %d' % (
@@ -36,25 +37,30 @@ def print_scenes(scene_list: List[Tuple[FrameTimecode, FrameTimecode]]):
         ))
 
 
+def test_api_detect(test_video_file: str):
+    """Demonstrate basic usage of the `detect` function to process a complete video."""
+    scene_list = detect(test_video_file, ContentDetector())
+    print_scenes(scene_list=scene_list)
+
+
 def test_api_start_end_time(test_video_file: str):
     """Demonstrate processing a subsection of a video based on a starting/ending time."""
     video = open_video(test_video_file)
     scene_manager = SceneManager()
     scene_manager.add_detector(ContentDetector())
-    # See FrameTimecode docs or test_api_timecode_types for all
-    # supported timecode formats.
+    # See test_api_timecode_types below for all supported timecode formats.
     start_time = 20 # Start at frame (int) 20
     end_time = 15.0 # End at 15 seconds (float)
     video.seek(start_time)
 
-    # Can specify `duration` instead of `end_time`.
+    # Can also specify `duration` instead of `end_time`.
     scene_manager.detect_scenes(video=video, end_time=end_time)
     scene_list = scene_manager.get_scene_list()
     print_scenes(scene_list=scene_list)
 
 
 def test_api_stats_manager(test_video_file: str):
-    """Demonstrate using a StatsManager to save and optionally load stats from disk."""
+    """Demonstrate using a StatsManager to save per-frame statistics to disk."""
     video = open_video(test_video_file)
     scene_manager = SceneManager(stats_manager=StatsManager())
     scene_manager.add_detector(ContentDetector())
@@ -68,7 +74,10 @@ def test_api_stats_manager(test_video_file: str):
 
 
 def test_api_video_stream_opencv(test_video_file: str):
-    """Demonstrate constructing and using a VideoStream backend."""
+    """Demonstrate constructing and using a VideoStream backend directly, instead of
+    using the `open_video` function. Only VideoStreamCv2 is guaranteed to be available.
+    Applications that do not require a specific backend library should use `open_video`.
+    """
     video = VideoStreamCv2(test_video_file)
     scene_manager = SceneManager()
     scene_manager.add_detector(ContentDetector())

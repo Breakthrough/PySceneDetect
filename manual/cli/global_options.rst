@@ -79,6 +79,9 @@ The ``scenedetect`` command takes the following global options:
   --drop-short-scenes           Drop scenes shorter than `min-scene-len`
                                 instead of combining them with neighbors.
 
+  --merge-last-scene            Merge last scene with previous if shorter than
+                                min-scene-len.
+
   -s, --stats CSV               Path to stats file (.csv) for writing frame
                                 metrics to. If the file exists, any metrics
                                 will be processed, otherwise a new file will

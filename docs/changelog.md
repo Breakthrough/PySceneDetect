@@ -35,6 +35,7 @@ The main goals of v0.6 are reliability and performance. To achieve this required
  * `-s`/`--stats` is now only used to write stats files, previously would load existing contents if any
     * Previous behavior can be obtained by merging stats files from multiple runs and setting the start/end times accordingly
  * Using `--backend opencv` is now more robust to frame decode failures
+ * Add global option `--merge-last-scene` to merge final scene if it is shorter than `--min-scene-len`
 
 *v0.6-dev3*:
 

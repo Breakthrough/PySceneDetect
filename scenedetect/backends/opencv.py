@@ -59,13 +59,16 @@ class VideoStreamCv2(VideoStream):
 
         if framerate is not None and framerate < MAX_FPS_DELTA:
             raise ValueError('Specified framerate (%f) is invalid!' % framerate)
+        if max_decode_attempts < 0:
+            raise ValueError('Maximum decode attempts must be >= 0!')
 
         self._path_or_device = path_or_device
         self._is_device = isinstance(self._path_or_device, int)
 
         # Initialized in _open_capture:
-        self._cap = None # Reference to underlying cv2.VideoCapture object.
-        self._frame_rate = None
+        self._cap: Optional[
+            cv2.VideoCapture] = None # Reference to underlying cv2.VideoCapture object.
+        self._frame_rate: Optional[float] = None
 
         # VideoCapture state
         self._has_seeked = False
@@ -88,6 +91,7 @@ class VideoStreamCv2(VideoStream):
         backing this object. Seeking or using the read/grab methods through this property are
         unsupported and will leave this object in an inconsistent state.
         """
+        assert self._cap
         return self._cap
 
     #
@@ -100,13 +104,16 @@ class VideoStreamCv2(VideoStream):
     @property
     def frame_rate(self) -> float:
         """Framerate in frames/sec."""
+        assert self._frame_rate
         return self._frame_rate
 
     @property
     def path(self) -> Union[bytes, str]:
         """Video or device path."""
         if self._is_device:
+            assert isinstance(self._path_or_device, (int))
             return "Device %d" % self._path_or_device
+        assert isinstance(self._path_or_device, (bytes, str))
         return self._path_or_device
 
     @property
@@ -114,7 +121,7 @@ class VideoStreamCv2(VideoStream):
         """Name of the video, without extension, or device."""
         if self._is_device:
             return self.path
-        file_name = get_file_name(self.path, include_extension=False)
+        file_name: str = get_file_name(self.path, include_extension=False)
         if '%' in file_name:
             # file_name is an image sequence, trim everything including/after the %.
             file_name = file_name[:file_name.rfind('%')]
@@ -236,7 +243,7 @@ class VideoStreamCv2(VideoStream):
         if advance:
             self._has_grabbed = self._cap.grab()
             if not self._has_grabbed:
-                if self.duration > 0 and self.position < (self.duration-1):
+                if self.duration > 0 and self.position < (self.duration - 1):
                     for _ in range(self._max_decode_attempts):
                         self._has_grabbed = self._cap.grab()
                         if self._has_grabbed:

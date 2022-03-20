@@ -26,7 +26,7 @@ other optimal values for video files.
 
 import csv
 from logging import getLogger
-from typing import Any, Dict, Iterable, List, Optional, TextIO, Union
+from typing import Any, Dict, Iterable, List, Optional, Set, TextIO, Union
 import os.path
 
 from scenedetect.frame_timecode import FrameTimecode
@@ -98,7 +98,7 @@ class StatsManager:
     from disk are treated as `float`.
     """
 
-    def __init__(self, base_timecode: FrameTimecode=None):
+    def __init__(self, base_timecode: FrameTimecode = None):
         """Initialize a new StatsManager.
 
         Arguments:
@@ -107,11 +107,11 @@ class StatsManager:
         """
         # Frame metrics is a dict of frame (int): metric_dict (Dict[str, float])
         # of each frame metric key and the value it represents (usually float).
-        self._frame_metrics = dict()     # Dict[FrameTimecode, Dict[str, float]]
-        self._registered_metrics = set() # Set of frame metric keys.
-        self._loaded_metrics = set()     # Metric keys loaded from stats file.
-        self._metrics_updated = False    # Flag indicating if metrics require saving.
-        self._base_timecode = base_timecode     # Used for timing calculations.
+        self._frame_metrics: Dict[FrameTimecode, Dict[str, float]] = dict()
+        self._registered_metrics: Set[str] = set()                   # Set of frame metric keys.
+        self._loaded_metrics: Set[str] = set()                       # Metric keys loaded from stats file.
+        self._metrics_updated: bool = False                          # Flag indicating if metrics require saving.
+        self._base_timecode: Optional[FrameTimecode] = base_timecode # Used for timing calculations.
 
     def register_metrics(self, metric_keys: Iterable[str]) -> None:
         """Register a list of metric keys that will be used by the detector.

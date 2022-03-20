@@ -110,6 +110,7 @@ CONFIG_MAP: ConfigDict = {
         'downscale': 0,
         'drop-short-scenes': False,
         'frame-skip': 0,
+        'merge-last-scene': False,
         'min-scene-len': TimecodeValue('0.6s'),
         'output': '',
         'verbosity': 'info',

@@ -105,11 +105,11 @@ def get_cv2_imwrite_params() -> Dict[str, Union[int, None]]:
 ##
 
 
-def get_file_name(file_path: AnyStr, include_extension=True) -> AnyStr:
+def get_file_name(file_path: AnyStr, include_extension=True) -> str:
     """Return the file name that `file_path` refers to, optionally removing the extension.
 
     E.g. /tmp/foo.bar -> foo"""
-    file_name = os.path.basename(file_path)
+    file_name = str(os.path.basename(file_path))
     if not include_extension:
         last_dot_pos = file_name.rfind('.')
         if last_dot_pos >= 0:

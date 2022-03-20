@@ -28,7 +28,7 @@ from scenedetect.frame_timecode import FrameTimecode, MAX_FPS_DELTA
 import scenedetect.detectors
 from scenedetect.platform import get_and_create_path, get_cv2_imwrite_params, init_logger
 from scenedetect.scene_manager import SceneManager
-from scenedetect.stats_manager import StatsManager, StatsFileCorrupt
+from scenedetect.stats_manager import StatsManager
 from scenedetect.video_stream import VideoStream, VideoOpenFailure, FrameRateUnavailable
 from scenedetect.video_splitter import is_mkvmerge_available, is_ffmpeg_available
 
@@ -61,7 +61,6 @@ def contains_sequence_or_url(video_path: str) -> bool:
 
 
 def check_split_video_requirements(use_mkvmerge: bool) -> None:
-    # type: (bool) -> None
     """ Validates that the proper tool is available on the system to perform the
     `split-video` command.
 
@@ -112,6 +111,7 @@ class CliContext:
         self.quiet_mode: bool = None             # -q/--quiet or -v/--verbosity quiet
         self.stats_file_path: str = None         # -s/--stats
         self.drop_short_scenes: bool = None      # --drop-short-scenes
+        self.merge_last_scene: bool = None       # --merge-last-scene
         self.min_scene_len: FrameTimecode = None # -m/--min-scene-len
         self.frame_skip: int = None              # -fs/--frame-skip
 
@@ -174,6 +174,7 @@ class CliContext:
         frame_skip: int,
         min_scene_len: str,
         drop_short_scenes: bool,
+        merge_last_scene: bool,
         backend: Optional[str],
         quiet: bool,
         logfile: Optional[AnyStr],
@@ -247,6 +248,8 @@ class CliContext:
                 "global", "min-scene-len"), self.video_stream.frame_rate)
         self.drop_short_scenes = drop_short_scenes or self.config.get_value(
             "global", "drop-short-scenes")
+        self.merge_last_scene = merge_last_scene or self.config.get_value(
+            "global", "merge-last-scene")
         self.frame_skip = self.config.get_value("global", "frame-skip", frame_skip)
 
         # Create StatsManager if --stats is specified.
@@ -775,7 +778,6 @@ class CliContext:
                 param_hint='-i/--input') from ex
         except OSError as ex:
             raise click.BadParameter('Input error:\n\n\t%s\n' % str(ex), param_hint='-i/--input')
-
 
     def _on_duplicate_command(self, command: str) -> None:
         """Called when a command is duplicated to stop parsing and raise an error.

@@ -176,6 +176,13 @@ def _print_help_header() -> None:
     (USER_CONFIG.get_help_string('global', 'drop-short-scenes')),
 )
 @click.option(
+    '--merge-last-scene',
+    is_flag=True,
+    flag_value=True,
+    help='Merge last scene with previous if shorter than min-scene-len.%s' %
+    (USER_CONFIG.get_help_string('global', 'merge-last-scene')),
+)
+@click.option(
     '--stats',
     '-s',
     metavar='CSV',
@@ -239,6 +246,7 @@ def scenedetect_cli(
     frame_skip: Optional[int],
     min_scene_len: Optional[str],
     drop_short_scenes: bool,
+    merge_last_scene: bool,
     stats: Optional[AnyStr],
     verbosity: Optional[str],
     logfile: Optional[AnyStr],
@@ -267,6 +275,7 @@ def scenedetect_cli(
         frame_skip=frame_skip,
         min_scene_len=min_scene_len,
         drop_short_scenes=drop_short_scenes,
+        merge_last_scene=merge_last_scene,
         backend=backend,
         quiet=quiet,
         logfile=logfile,

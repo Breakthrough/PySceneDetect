@@ -212,12 +212,10 @@ def validate_capture_framerate(
 
 def validate_capture_parameters(
     video_names: List[Tuple[str, str]],
-    cap_frame_sizes,
-    check_framerate=False,
-    cap_framerates=None,
-):
-    # type: (List[Tuple[str, str]], List[Tuple[int, int]], Optional[bool],
-    #        Optional[List[float]]) -> None
+    cap_frame_sizes: List[Tuple[int, int]],
+    check_framerate: bool=False,
+    cap_framerates: Optional[List[float]]=None,
+) -> None:
     """ Validate Capture Parameters: Ensures that all passed capture frame sizes and (optionally)
     framerates are equal.  Raises VideoParameterMismatch if there is a mismatch.
 
@@ -386,7 +384,6 @@ class VideoManager(VideoStream):
         return self._curr_time
 
     def get_framesize(self) -> Tuple[int, int]:
-        # type: () -> Tuple[int, int]
         """Get frame size of the video(s) open in the VideoManager's capture objects.
 
         Returns:
@@ -520,6 +517,7 @@ class VideoManager(VideoStream):
             raise ValueError('Only one of `timecode` or `target` can be set.')
         if target is not None:
             timecode = target
+        assert timecode is not None
         if timecode < 0:
             raise ValueError("Target seek position cannot be negative!")
 

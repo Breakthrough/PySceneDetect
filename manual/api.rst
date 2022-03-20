@@ -82,7 +82,9 @@ Now that we know where each scene is, we can also :ref:`split the input video <s
     scene_list = detect('my_video.mp4', ContentDetector())
     split_video_ffmpeg('my_video.mp4', scene_list)
 
-This is just a small snippet of what PySceneDetect offers. The library is very modular, and can integrate with most application workflows easily. In the next example, we show how the various library components can be used to create a more customizable scene cut/shot detection pipeline.  In addition, demonstrations of common use cases can be found in the `tests/test_api.py <https://github.com/Breakthrough/PySceneDetect/blob/v0.6/tests/test_api.py>`_ file.
+This is just a small snippet of what PySceneDetect offers. The library is very modular, and can integrate with most application workflows easily.
+
+In the next example, we show how the library components can be used to create a more customizable scene cut/shot detection pipeline.  Additional demonstrations/recipes can be found in the `tests/test_api.py <https://github.com/Breakthrough/PySceneDetect/blob/v0.6/tests/test_api.py>`_ file.
 
 
 .. _scenedetect-detailed_example:

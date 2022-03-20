@@ -87,6 +87,12 @@ def run_scenedetect(context: CliContext):
     cut_list = context.scene_manager.get_cut_list()
     scene_list = context.scene_manager.get_scene_list(start_in_scene=True)
 
+    # Handle --merge-last-scene.
+    if context.merge_last_scene and context.min_scene_len is not None and context.min_scene_len > 0:
+        if len(scene_list) > 1 and (scene_list[-1][1] - scene_list[-1][0]) < context.min_scene_len:
+            new_last_scene = (scene_list[-2][0], scene_list[-1][1])
+            scene_list = scene_list[:-2] + [new_last_scene]
+
     # Handle --drop-short-scenes.
     if context.drop_short_scenes and context.min_scene_len > 0:
         scene_list = [s for s in scene_list if (s[1] - s[0]) >= context.min_scene_len]
@@ -111,12 +117,6 @@ def run_scenedetect(context: CliContext):
 
     # Handle split-video command.
     _split_video(context, scene_list)
-
-    # Ensure any lockups at exit don't cause the program to hang indefinitely.
-    if context.video_stream.BACKEND_NAME == 'pyav':
-        # Spawn background thread to abort program after 5 seconds if it is still running once
-        # this function returns.
-        _abort_after(5.0)
 
 
 def _save_stats(context: CliContext) -> None:
@@ -261,20 +261,3 @@ def _split_video(context: CliContext, scene_list: List[Tuple[FrameTimecode,
         )
     if scene_list:
         logger.info('Video splitting completed, individual scenes written to disk.')
-
-
-def _abort_after(timeout_sec: float) -> None:
-    """Spawn background thread that calls `os.abort()` after `timeout_sec`.
-
-    Used to ensure PySceneDetect aborts in the case of a deadlock. Created as using the
-    PyAV/VideoStreamAv backend can cause deadlocks at exit.
-
-    Arguments:
-        timeout_sec: Amount of time to wait before aborting the program.
-    """
-
-    def abort_func():
-        time.sleep(timeout_sec)
-        os.abort()
-
-    threading.Thread(target=abort_func, daemon=True).start()

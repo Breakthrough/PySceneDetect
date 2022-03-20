@@ -45,7 +45,9 @@ class SceneDetector:
 
     # TODO(v1.0): Remove - this is a rarely used case for what is now a neglegible performance gain.
     def is_processing_required(self, frame_num: int) -> bool:
-        """Is Processing Required: Test if all calculations for a given frame are already done.
+        """[DEPRECATED] DO NOT USE
+
+        Test if all calculations for a given frame are already done.
 
         Returns:
             False if the SceneDetector has assigned _metric_keys, and the

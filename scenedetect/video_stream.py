@@ -118,7 +118,7 @@ class VideoStream(ABC):
     def BACKEND_NAME() -> str:
         """Unique name used to identify this backend. Should be a static property in derived
         classes (`BACKEND_NAME = 'backend_identifier'`)."""
-        return NotImplementedError
+        raise NotImplementedError
 
     #
     # Abstract Properties
