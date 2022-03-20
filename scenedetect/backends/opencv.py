@@ -37,12 +37,18 @@ class VideoStreamCv2(VideoStream):
         self,
         path_or_device: Union[bytes, str, int],
         framerate: Optional[float] = None,
+        max_decode_attempts: int = 5,
     ):
         """Open a video or device.
 
         Arguments:
             path_or_device: Path to video, or device ID as integer.
             framerate: If set, overrides the detected framerate.
+            max_decode_attempts: Number of attempts to continue decoding the video
+                after a frame fails to decode. This allows processing videos that
+                have a few corrupted frames or metadata (in which case accuracy
+                of detection algorithms may be lower). Once this limit is passed,
+                decoding will stop and emit an error.
 
         Raises:
             OSError: file could not be found or access was denied
@@ -64,6 +70,9 @@ class VideoStreamCv2(VideoStream):
         # VideoCapture state
         self._has_seeked = False
         self._has_grabbed = False
+        self._max_decode_attempts = max_decode_attempts
+        self._decode_failures = 0
+        self._warning_displayed = False
 
         self._open_capture(framerate)
 
@@ -226,6 +235,18 @@ class VideoStreamCv2(VideoStream):
             return False
         if advance:
             self._has_grabbed = self._cap.grab()
+            if not self._has_grabbed:
+                if self.duration > 0 and self.position < (self.duration-1):
+                    for _ in range(self._max_decode_attempts):
+                        self._has_grabbed = self._cap.grab()
+                        if self._has_grabbed:
+                            break
+                # Report previous failure in debug mode.
+                if self._has_grabbed:
+                    self._decode_failures += 1
+                    logger.debug('Frame failed to decode.')
+                    if not self._warning_displayed and self._decode_failures > 1:
+                        logger.warning('Failed to decode some frames, results may be inaccurate.')
             self._has_seeked = False
         if decode and self._has_grabbed:
             _, frame = self._cap.retrieve()
