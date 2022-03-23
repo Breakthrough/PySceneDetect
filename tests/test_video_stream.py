@@ -269,3 +269,15 @@ def test_reset(vs_type: Type[VideoStream], test_video_file: str):
     assert stream.position == 0
     assert stream.position_ms == pytest.approx(0, abs=TIME_TOLERANCE_MS)
 
+
+def test_corrupt_video(vs_type: Type[VideoStream], corrupt_video_file: str):
+    """Test that backend handles video with corrupt frame gracefully with defaults."""
+    if vs_type == VideoManager:
+        pytest.skip(msg='VideoManager does not support handling corrupt videos.')
+
+    stream = vs_type(corrupt_video_file)
+
+    # OpenCV usually fails to read the video at frame 45, so we make sure all backends can
+    # get to 100 without reporting a failure.
+    for frame in range(100):
+        assert stream.read() is not False, "Failed on frame %d!" % frame

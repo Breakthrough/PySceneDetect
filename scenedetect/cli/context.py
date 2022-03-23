@@ -758,6 +758,14 @@ class CliContext:
                     threading_mode=self.config.get_value('backend-pyav', 'threading-mode'),
                     suppress_output=self.config.get_value('backend-pyav', 'suppress-output'),
                 )
+            elif backend == 'opencv':
+                self.video_stream = open_video(
+                    path=input_path,
+                    framerate=framerate,
+                    backend='opencv',
+                    max_decode_attempts=self.config.get_value('backend-opencv',
+                                                              'max-decode-attempts'),
+                )
             # Handle backends without any config options.
             else:
                 self.video_stream = open_video(

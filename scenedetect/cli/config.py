@@ -70,6 +70,9 @@ _CONFIG_FILE_DIR: AnyStr = user_config_dir("PySceneDetect", False)
 CONFIG_FILE_PATH: AnyStr = os.path.join(_CONFIG_FILE_DIR, _CONFIG_FILE_NAME)
 
 CONFIG_MAP: ConfigDict = {
+    'backend-opencv': {
+        'max-decode-attempts': 5,
+    },
     'backend-pyav': {
         'suppress-output': False,
         'threading-mode': 'auto' if os.name == 'nt' else 'slice',

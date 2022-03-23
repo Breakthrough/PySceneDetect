@@ -49,20 +49,19 @@ def get_absolute_path(relative_path: str) -> str:
 #
 # Test Case Fixtures
 #
-@pytest.fixture
-def test_video_file():
-    # type: () -> str
-    """ Fixture for test video file path (ensures file exists).
 
-    Access in test case by adding a test_video_file argument to obtain the path.
-    """
+@pytest.fixture
+def test_video_file() -> str:
+    """Simple test video containing both fast cuts and fades/dissolves."""
     return get_absolute_path("resources/testvideo.mp4")
 
 @pytest.fixture
-def test_movie_clip():
-    # type: () -> str
-    """ Fixture for test movie clip path (ensures file exists).
-
-    Access in test case by adding a test_movie_clip argument to obtain the path.
-    """
+def test_movie_clip() -> str:
+    """Movie clip containing fast cuts."""
     return get_absolute_path("resources/goldeneye.mp4")
+
+
+@pytest.fixture
+def corrupt_video_file() -> str:
+    """Video containing a corrupted frame causing a decode failure."""
+    return get_absolute_path("resources/corrupt_frame.mp4")

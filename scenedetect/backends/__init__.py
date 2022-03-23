@@ -119,25 +119,26 @@ def open_video(
     """
     # Try to open the video with the specified backend.
     last_error = None
-    if backend is not None:
-        if backend in AVAILABLE_BACKENDS:
-            try:
-                logger.debug('Opening video with %s...', AVAILABLE_BACKENDS[backend].__name__)
-                return AVAILABLE_BACKENDS[backend](path, framerate, **kwargs)
-            except VideoOpenFailure as ex:
-                logger.debug('Failed to open video: %s', str(ex))
-                logger.debug('Falling back to OpenCV.')
-                last_error = ex
-        else:
-            logger.debug('Backend %s not available, falling back to OpenCV.', backend)
-    # Either backend was not specified, or failed to open the video - try using OpenCV.
+    if backend is not None and backend != 'opencv' and backend in AVAILABLE_BACKENDS:
+        try:
+            logger.debug('Opening video with %s...', AVAILABLE_BACKENDS[backend].__name__)
+            return AVAILABLE_BACKENDS[backend](path, framerate, **kwargs)
+        except VideoOpenFailure as ex:
+            logger.debug('Failed to open video: %s', str(ex))
+            logger.debug('Falling back to OpenCV.')
+            last_error = ex
+    else:
+        logger.debug('Backend %s not available, falling back to OpenCV.', backend)
+
+    # OpenCV backend must be available.
+    logger.debug('Opening video with %s...', VideoStreamCv2.__name__)
     try:
-        logger.debug('Opening video with %s...', VideoStreamCv2.__name__)
-        return VideoStreamCv2(path_or_device=path, framerate=framerate)
+        return VideoStreamCv2(path, framerate, **kwargs)
     except VideoOpenFailure as ex:
         logger.debug('Failed to open video: %s', str(ex))
         if last_error is None:
             last_error = ex
+
     # If we get here, either the specified backend or the OpenCV backend threw an exception, so
     # make sure we propagate it.
     assert last_error is not None
