@@ -1,3 +1,7 @@
+# We have to disable the `build` command explicitly otherwise the default is
+# MSBuild which assumes this is a Visual Studio project. Python source/binary
+# wheels a Windows .exe are generated below in `install`.
+build: false
 
 environment:
   matrix:
