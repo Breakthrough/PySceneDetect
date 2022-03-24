@@ -1,12 +1,13 @@
 
-matrix:
-    - PYTHON: "C:\Python36"
-    - PYTHON: "C:\Python37"
-    - PYTHON: "C:\Python38"
-    - PYTHON: "C:\Python39"
+build: false
 
+environment:
+  matrix:
+    - PYTHON: "C:\\Python36"
 
-build: off
+    - PYTHON: "C:\\Python37"
+
+    - PYTHON: "C:\\Python38"
 
 install:
   - "SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
