@@ -14,7 +14,7 @@ install:
   - "python --version"
   - "python -m pip install --upgrade pip"
   - "python -m pip install -r requirements_headless.txt"
-  - "python -m pip install --upgrade pyinstaller
+  - "python -m pip install --upgrade pyinstaller"
   - "git fetch --depth=1 https://github.com/Breakthrough/PySceneDetect.git refs/heads/resources:refs/remotes/origin/resources"
   - "git checkout refs/remotes/origin/resources -- tests/resources/"
   - "git checkout refs/remotes/origin/resources -- dist/"
