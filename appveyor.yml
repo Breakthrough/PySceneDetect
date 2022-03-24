@@ -1,3 +1,5 @@
+
+
 # We have to disable the `build` command explicitly otherwise the default is
 # MSBuild which assumes this is a Visual Studio project. Python source/binary
 # wheels a Windows .exe are generated below in `install`.
@@ -8,6 +10,13 @@ environment:
     - PYTHON: "C:\\Python36-x64"
     - PYTHON: "C:\\Python37-x64"
     - PYTHON: "C:\\Python38-x64"
+
+deploy:
+- provider: Webhook
+  # TODO: Change to release-signing when complete.
+  url: https://app.signpath.io/API/v1/f2efa44c-5b5c-45f2-b44f-8f9dde708313/Integrations/AppVeyor?ProjectSlug=PySceneDetect&SigningPolicySlug=test-signing
+  authorization:
+     secure: mdCtq1nvbA+ADEqG36J9szgR045RLAsBbc58b7rusEnSuUA7rHFE4jMZvtdr6ODZOJqYZX8i/0bTgFPiiG/2rA==
 
 install:
   - 'SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%'
