@@ -22,7 +22,7 @@ install:
 
 test_script:
   - "pytest"
-  - "7z a scenedetect-win64.zip dist/scenedetect/*
+  - "7z a scenedetect-win64.zip dist/scenedetect/*"
   - "cd dist/scenedetect"
   - "scenedetect.exe version"
   - "scenedetect.exe -i ../../tests/resources/testvideo.mp4 -b opencv detect-content"
