@@ -10,36 +10,36 @@ environment:
     - PYTHON: "C:\\Python38-x64"
 
 install:
-  - "SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
-  - "python --version"
-  - "python -m pip install --upgrade pip"
-  - "python -m pip install -r dist/requirements_windows.txt"
-  - "python -m pip install --upgrade setuptools wheel pyinstaller"
-  - "git fetch --depth=1 https://github.com/Breakthrough/PySceneDetect.git refs/heads/resources:refs/remotes/origin/resources"
-  - "git checkout refs/remotes/origin/resources -- tests/resources/"
-  - "git checkout refs/remotes/origin/resources -- dist/"
-  - "python setup.py sdist bdist_wheel"
-  - "pyinstaller dist/scenedetect.spec"
-  - "7z a dist/scenedetect-win64.zip dist/scenedetect/*"
+  - 'SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%'
+  - python --version
+  - python -m pip install --upgrade pip
+  - python -m pip install -r dist/requirements_windows.txt
+  - python -m pip install --upgrade setuptools wheel pyinstaller
+  - git fetch --depth=1 https://github.com/Breakthrough/PySceneDetect.git refs/heads/resources:refs/remotes/origin/resources
+  - git checkout refs/remotes/origin/resources -- tests/resources/
+  - git checkout refs/remotes/origin/resources -- dist/
+  - python setup.py sdist bdist_wheel
+  - pyinstaller dist/scenedetect.spec
+  - '7z a dist/scenedetect-win64.zip dist/scenedetect/*'
 
 test_script:
   # Unit Tests
-  - "pytest"
+  - pytest
   # Test Python Distributions
   # Have to copy to a known filename due to difficulties with wildcard expansion and pip install.
-  - "copy dist\*.whl scenedetect.whl"
-  - "python -m pip install scenedetect.whl"
-  - "scenedetect -i tests/resources/testvideo.mp4 detect-content time -e 2s"
-  - "python -m pip uninstall scenedetect"
-  - "copy dist\*.tar.gz scenedetect.tar.gz"
-  - "python -m pip install scenedetect.tar.gz"
-  - "scenedetect -i tests/resources/testvideo.mp4 detect-content time -e 2s"
-  - "python -m pip uninstall scenedetect"
+  - 'copy dist\*.whl scenedetect.whl'
+  - python -m pip install scenedetect.whl
+  - scenedetect -i tests/resources/testvideo.mp4 detect-content time -e 2s
+  - python -m pip uninstall scenedetect
+  - 'copy dist\*.tar.gz scenedetect.tar.gz'
+  - python -m pip install scenedetect.tar.gz
+  - scenedetect -i tests/resources/testvideo.mp4 detect-content time -e 2s
+  - python -m pip uninstall scenedetect
   # Test Windows Build
-  - "cd dist/scenedetect"
-  - "scenedetect.exe version"
-  - "scenedetect.exe -i ../../tests/resources/testvideo.mp4 -b opencv detect-content time -e 2s"
-  - "scenedetect.exe -i ../../tests/resources/testvideo.mp4 -b pyav detect-content time -e 2s"
+  - cd dist/scenedetect
+  - scenedetect.exe version
+  - scenedetect.exe -i ../../tests/resources/testvideo.mp4 -b opencv detect-content time -e 2s
+  - scenedetect.exe -i ../../tests/resources/testvideo.mp4 -b pyav detect-content time -e 2s
 
 artifacts:
   - path: dist/scenedetect-win64.zip
