@@ -20,7 +20,7 @@ install:
   - git checkout refs/remotes/origin/resources -- dist/
   - python setup.py sdist bdist_wheel
   - pyinstaller dist/scenedetect.spec
-  - 7z a dist/scenedetect-win64.zip dist/scenedetect/*'
+  - 7z a dist/scenedetect-win64.zip dist/scenedetect/*
 
 test_script:
   # Unit Tests
