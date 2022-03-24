@@ -19,7 +19,7 @@ install:
   - "git checkout refs/remotes/origin/resources -- tests/resources/"
   - "git checkout refs/remotes/origin/resources -- dist/"
   - "python setup.py sdist bdist_wheel"
-  - "pyinstaller scenedetect.spec"
+  - "pyinstaller dist/scenedetect.spec"
   - "7z a scenedetect-win64.zip dist/scenedetect/*"
 
 test_script:
