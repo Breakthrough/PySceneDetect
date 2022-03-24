@@ -15,6 +15,7 @@ install:
   - "python -m pip install --upgrade pip"
   - "python -m pip install -r dist/requirements_windows.txt"
   - "python -m pip install --upgrade pyinstaller"
+  - "python -m pip install --upgrade wheel"
   - "git fetch --depth=1 https://github.com/Breakthrough/PySceneDetect.git refs/heads/resources:refs/remotes/origin/resources"
   - "git checkout refs/remotes/origin/resources -- tests/resources/"
   - "git checkout refs/remotes/origin/resources -- dist/"
