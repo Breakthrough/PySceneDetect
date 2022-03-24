@@ -26,10 +26,13 @@ test_script:
   # Unit Tests
   - "pytest"
   # Test Python Distributions
-  - 'python -m pip install dist\*.whl'
+  # Have to copy to a known filename due to difficulties with wildcard expansion and pip install.
+  - "copy dist/*.whl scenedetect.whl"
+  - "python -m pip install scenedetect.whl"
   - "scenedetect -i tests/resources/testvideo.mp4 detect-content time -e 2s"
   - "python -m pip uninstall scenedetect"
-  - 'python -m pip install dist\*.tar.gz'
+  - "copy dist/*.tar.gz scenedetect.tar.gz"
+  - "python -m pip install scenedetect.tar.gz"
   - "scenedetect -i tests/resources/testvideo.mp4 detect-content time -e 2s"
   - "python -m pip uninstall scenedetect"
   # Test Windows Build
