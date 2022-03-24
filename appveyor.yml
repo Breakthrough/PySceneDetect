@@ -1,12 +1,8 @@
 
-build: false
-
 environment:
   matrix:
     - PYTHON: "C:\\Python36-x64"
-
     - PYTHON: "C:\\Python37-x64"
-
     - PYTHON: "C:\\Python38-x64"
 
 install:
@@ -29,13 +25,10 @@ test_script:
   - "scenedetect.exe -i ../../tests/resources/testvideo.mp4 -b opencv detect-content"
   - "scenedetect.exe -i ../../tests/resources/testvideo.mp4 -b pyav detect-content"
 
-
 artifacts:
   - path: scenedetect-win64.zip
-    name: PySceneDetect-win64
-
+    name: PySceneDetect-win64_portable
   - path: dist/*.tar.gz
-    name: PySceneDetect-src
-
+    name: PySceneDetect-sdist
   - path: dist/*.whl
-    name: PySceneDetect-whl
+    name: PySceneDetect-bdist_wheel
