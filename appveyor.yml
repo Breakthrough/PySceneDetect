@@ -18,11 +18,12 @@ install:
   - "git fetch --depth=1 https://github.com/Breakthrough/PySceneDetect.git refs/heads/resources:refs/remotes/origin/resources"
   - "git checkout refs/remotes/origin/resources -- tests/resources/"
   - "git checkout refs/remotes/origin/resources -- dist/"
+  - "python setup.py sdist bdist_wheel"
   - "pyinstaller scenedetect.spec"
+  - "7z a scenedetect-win64.zip dist/scenedetect/*"
 
 test_script:
   - "pytest"
-  - "7z a scenedetect-win64.zip dist/scenedetect/*"
   - "cd dist/scenedetect"
   - "scenedetect.exe version"
   - "scenedetect.exe -i ../../tests/resources/testvideo.mp4 -b opencv detect-content"
