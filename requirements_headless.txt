@@ -2,11 +2,8 @@
 # PySceneDetect Requirements for Headless Machines
 #
 appdirs
-
-# PyAV seems to require some missing dependencies on the Travis environment.
-av<=8.0.3; sys_platform != 'win32' and python_version <= "3.6"
-av; sys_platform != 'win32' and python_version > "3.6"
-
+av<=8.0.3; python_version <= "3.6"
+av; python_version > "3.6"
 click
 numpy
 opencv-python-headless
