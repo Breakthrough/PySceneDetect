@@ -13,7 +13,7 @@ install:
   - "SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
   - "python --version"
   - "python -m pip install --upgrade pip"
-  - "python -m pip install -r requirements_headless.txt"
+  - "python -m pip install -r dist/requirements_windows.txt"
   - "python -m pip install --upgrade pyinstaller"
   - "git fetch --depth=1 https://github.com/Breakthrough/PySceneDetect.git refs/heads/resources:refs/remotes/origin/resources"
   - "git checkout refs/remotes/origin/resources -- tests/resources/"
@@ -23,4 +23,4 @@ install:
 test_script:
   - "pytest"
   - "cd dist/scenedetect"
-  - "./scenedetect.exe version"
+  - "scenedetect.exe version"
