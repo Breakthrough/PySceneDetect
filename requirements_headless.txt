@@ -1,11 +1,13 @@
 #
 # PySceneDetect Requirements for Headless Machines
 #
+# These are pinned to the versions required for the Windows build to work.
+# You can use newer versions if required.
 appdirs
 av<=8.0.3; python_version <= "3.6"
 av; python_version > "3.6"
 click
 numpy
-opencv-python-headless
+opencv-python-headless==4.5.1.48
 pytest
 tqdm
