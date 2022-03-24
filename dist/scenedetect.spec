@@ -3,10 +3,10 @@
 block_cipher = None
 
 
-a = Analysis(['scenedetect/__main__.py'],
+a = Analysis(['../scenedetect/__main__.py'],
              pathex=['.'],
              binaries=None,
-             datas=[('./*.md', '.'), ('./docs/', 'docs/')],
+             datas=[('../*.md', '.'), ('../docs/', 'docs/')],
              hiddenimports=[],
              hookspath=[],
              runtime_hooks=[],
@@ -26,7 +26,7 @@ exe = EXE(pyz,
           upx=True,
           console=True,
           version='.version_info',
-          icon='dist/pyscenedetect.ico')
+          icon='pyscenedetect.ico')
 coll = COLLECT(exe,
                a.binaries,
                a.zipfiles,
