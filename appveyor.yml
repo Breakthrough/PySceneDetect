@@ -1,15 +1,15 @@
 
 matrix:
-    - PYTHON: "C:\Python36"
-    - PYTHON: "C:\Python37"
-    - PYTHON: "C:\Python38"
-    - PYTHON: "C:\Python39"
+    - PYTHON: "C:\\Python36"
+    - PYTHON: "C:\\Python37"
+    - PYTHON: "C:\\Python38"
+    - PYTHON: "C:\\Python39"
 
 
 build: off
 
 install:
-  - "SET PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%"
+  - "SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
   - "python --version"
   - "python -m pip install --upgrade pip"
   - "python -m pip install -r requirements_headless.txt"
