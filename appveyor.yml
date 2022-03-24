@@ -20,17 +20,26 @@ install:
   - "git checkout refs/remotes/origin/resources -- dist/"
   - "python setup.py sdist bdist_wheel"
   - "pyinstaller dist/scenedetect.spec"
-  - "7z a scenedetect-win64.zip dist/scenedetect/*"
+  - "7z a dist/scenedetect-win64.zip dist/scenedetect/*"
 
 test_script:
+  # Unit Tests
   - "pytest"
+  # Test Python wheels
+  - "python -m pip install dist/*.whl"
+  - "scenedetect -i tests/resources/testvideo.mp4 detect-content time -e 2s"
+  - "python -m pip uninstall scenedetect"
+  - "python -m pip install dist/*.tar.gz"
+  - "scenedetect -i tests/resources/testvideo.mp4 detect-content time -e 2s"
+  - "python -m pip uninstall scenedetect"
+  # Test .exe build
   - "cd dist/scenedetect"
   - "scenedetect.exe version"
-  - "scenedetect.exe -i ../../tests/resources/testvideo.mp4 -b opencv detect-content"
-  - "scenedetect.exe -i ../../tests/resources/testvideo.mp4 -b pyav detect-content"
+  - "scenedetect.exe -i ../../tests/resources/testvideo.mp4 -b opencv detect-content time -e 2s"
+  - "scenedetect.exe -i ../../tests/resources/testvideo.mp4 -b pyav detect-content time -e 2s"
 
 artifacts:
-  - path: scenedetect-win64.zip
+  - path: dist/scenedetect-win64.zip
     name: PySceneDetect-win64_portable
   - path: dist/*.tar.gz
     name: PySceneDetect-sdist
