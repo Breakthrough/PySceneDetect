@@ -34,7 +34,7 @@ artifacts:
     name: PySceneDetect-win64
 
 artifacts:
-  - path: dist/*.zip
+  - path: dist/*.tar.gz
     name: PySceneDetect-src
 
 artifacts:
