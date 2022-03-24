@@ -54,7 +54,7 @@ setup(
     name='scenedetect',
     version='0.6-dev3',
     description='Video scene cut/shot detection program and Python library.',
-    long_description=open('package-info.rst').read(),
+    long_description=open('dist/package-info.rst').read(),
     author='Brandon Castellano',
     author_email='brandon248@gmail.com',
     url='https://github.com/Breakthrough/PySceneDetect',
