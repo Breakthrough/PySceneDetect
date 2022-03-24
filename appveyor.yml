@@ -33,10 +33,8 @@ artifacts:
   - path: scenedetect-win64.zip
     name: PySceneDetect-win64
 
-artifacts:
   - path: dist/*.tar.gz
     name: PySceneDetect-src
 
-artifacts:
   - path: dist/*.whl
     name: PySceneDetect-whl
