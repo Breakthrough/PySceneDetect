@@ -22,7 +22,21 @@ install:
 
 test_script:
   - "pytest"
+  - "7z a scenedetect-win64.zip dist/scenedetect/*
   - "cd dist/scenedetect"
   - "scenedetect.exe version"
   - "scenedetect.exe -i ../../tests/resources/testvideo.mp4 -b opencv detect-content"
   - "scenedetect.exe -i ../../tests/resources/testvideo.mp4 -b pyav detect-content"
+
+
+artifacts:
+  - path: scenedetect-win64.zip
+    name: PySceneDetect-win64
+
+artifacts:
+  - path: dist/*.zip
+    name: PySceneDetect-src
+
+artifacts:
+  - path: dist/*.whl
+    name: PySceneDetect-whl
