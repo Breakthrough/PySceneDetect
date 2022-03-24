@@ -24,3 +24,5 @@ test_script:
   - "pytest"
   - "cd dist/scenedetect"
   - "scenedetect.exe version"
+  - "scenedetect.exe -i tests/resources/testvideo.mp4 -b opencv detect-content"
+  - "scenedetect.exe -i tests/resources/testvideo.mp4 -b pyav detect-content"
