@@ -42,6 +42,8 @@ test_script:
 artifacts:
   - path: dist/scenedetect-win64.zip
     name: PySceneDetect-win64_portable
+  - path: dist/scenedetect/scenedetect.exe
+    name: PySceneDetect-win64_exeonly
   - path: dist/*.tar.gz
     name: PySceneDetect-sdist
   - path: dist/*.whl
