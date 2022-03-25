@@ -22,6 +22,7 @@ This file also contains the PySceneDetect version string (displayed when calling
 (when calling 'scenedetect about').
 """
 
+from logging import getLogger
 from typing import List, Optional, Tuple
 
 # Commonly used classes/functions exported under the `scenedetect` namespace for brevity.
@@ -29,7 +30,7 @@ from scenedetect.scene_manager import SceneManager, save_images
 from scenedetect.scene_detector import SceneDetector
 from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.video_stream import VideoStream, VideoOpenFailure
-from scenedetect.backends import open_video, AVAILABLE_BACKENDS
+from scenedetect.backends import AVAILABLE_BACKENDS, VideoStreamCv2, VideoStreamAv
 from scenedetect.stats_manager import StatsManager, StatsFileCorrupt
 from scenedetect.detectors import ContentDetector, AdaptiveDetector, ThresholdDetector
 from scenedetect.video_splitter import split_video_ffmpeg, split_video_mkvmerge
@@ -92,7 +93,62 @@ or visit the following URL: [ https://docs.python.org/3/license.html ]
 THE SOFTWARE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, EXPRESS OR IMPLIED.
 """
 
-# pylint: disable=line-too-long
+logger = getLogger('pyscenedetect')
+
+
+def open_video(
+    path: str,
+    framerate: Optional[float] = None,
+    backend: Optional[str] = None,
+    **kwargs,
+) -> VideoStream:
+    """Open a video at the given path. If `backend` is specified but not available on the current
+    system, OpenCV (`VideoStreamCv2`) will be used as a fallback.
+
+    Arguments:
+        path: Path to video file to open.
+        framerate: Overrides detected framerate if set.
+        backend: Name of specific to use if possible. See
+            :py:data:`scenedetect.backends.AVAILABLE_BACKENDS` for backends available on the current
+            system. If the backend fails to open the video, OpenCV will be used as a fallback.
+        kwargs: Optional named arguments to pass to the specified `backend` constructor for
+            overriding backend-specific options.
+
+    Returns:
+        :py:class:`VideoStream` backend object created with the specified video path.
+
+    Raises:
+        :py:class:`VideoOpenFailure`: Constructing the VideoStream fails. If multiple backends have
+            been attempted, the error from the first backend will be returned.
+    """
+    # Try to open the video with the specified backend.
+    last_error = None
+    if backend is not None and backend != 'opencv' and backend in AVAILABLE_BACKENDS:
+        try:
+            logger.debug('Opening video with %s...', AVAILABLE_BACKENDS[backend].__name__)
+            return AVAILABLE_BACKENDS[backend](path, framerate, **kwargs)
+        except VideoOpenFailure as ex:
+            logger.debug('Failed to open video: %s', str(ex))
+            logger.debug('Falling back to OpenCV.')
+            last_error = ex
+    else:
+        logger.debug('Backend %s not available, falling back to OpenCV.', backend)
+
+    # OpenCV backend must be available.
+    logger.debug('Opening video with %s...', VideoStreamCv2.__name__)
+    try:
+        return VideoStreamCv2(path, framerate, **kwargs)
+    except VideoOpenFailure as ex:
+        logger.debug('Failed to open video: %s', str(ex))
+        if last_error is None:
+            last_error = ex
+
+    # If we get here, either the specified backend or the OpenCV backend threw an exception, so
+    # make sure we propagate it.
+    assert last_error is not None
+    raise last_error
+
+
 def detect(video_path: str,
            detector: SceneDetector,
            stats_file_path: Optional[str] = None,
@@ -101,8 +157,8 @@ def detect(video_path: str,
 
     Arguments:
         video_path: Path to input video (absolute or relative to working directory).
-        detector: A `SceneDetector` instance (`ContentDetector`, `ThresholdDetector`, etc...).
-            See :py:mod:`scenedetect.detectors` for a full list of detection algorithms.
+        detector: A `SceneDetector` instance (see :py:mod:`scenedetect.detectors` for a full list
+            of detectors).
         stats_file_path: Path to save per-frame metrics to for statistical analysis or to
             determine a better threshold value.
         show_progress: Show a progress bar with estimated time remaining. Default is False.

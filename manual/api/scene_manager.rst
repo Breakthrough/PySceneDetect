@@ -16,7 +16,7 @@ Usage Example
 
 In the code example below, we create a function ``find_scenes()`` which performs the following actions:
 
- * loads a video file by path (`str`) using :py:func:`scenedetect.backends.open_video`
+ * loads a video file by path (`str`) using :py:func:`scenedetect.open_video`
  * loads/saves a stats file for the video to ``{video_path}.stats.csv`` using a :py:class:`StatsManager <scenedetect.stats_manager.StatsManager>`
  * performs content-aware scene detection on the video using a :py:class:`ContentDetector <scenedetect.detectors.content_detector.ContentDetector>` bound to a :py:class:`SceneManager`
  * ``print()`` out a table of detected scenes to the terminal/console

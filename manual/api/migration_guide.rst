@@ -18,7 +18,7 @@ In some places, a backwards compatibility layer has been added to avoid breaking
 `VideoManager` Class
 ===============================================================
 
-`VideoManager` has been deprecated and replaced with :py:mod:`scenedetect.backends`.  For most applications, the :py:func:`open_video <scenedetect.backends.open_video>` function should be used instead:
+`VideoManager` has been deprecated and replaced with :py:mod:`scenedetect.backends`.  For most applications, the :py:func:`open_video <scenedetect.open_video>` function should be used instead:
 
 .. code:: python
 
