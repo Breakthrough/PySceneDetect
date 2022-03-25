@@ -33,7 +33,7 @@ StringFileInfo(
     StringStruct(u'FileDescription', u'www.scenedetect.com'),
     StringStruct(u'FileVersion', u'v0.6-dev4'),
     StringStruct(u'InternalName', u'PySceneDetect'),
-    StringStruct(u'LegalCopyright', u'Copyright (C) 2022 Brandon Castellano'),
+    StringStruct(u'LegalCopyright', u'Copyright © 2022 Brandon Castellano'),
     StringStruct(u'OriginalFilename', u'scenedetect.exe'),
     StringStruct(u'ProductName', u'PySceneDetect'),
     StringStruct(u'ProductVersion', u'v0.6-dev4')])
