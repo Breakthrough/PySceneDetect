@@ -22,7 +22,7 @@ from typing import AnyStr, Optional, Union
 
 import click
 
-from scenedetect.backends import open_video, AVAILABLE_BACKENDS
+from scenedetect import open_video, AVAILABLE_BACKENDS
 from scenedetect.cli.config import ConfigRegistry, ConfigLoadFailure, CHOICE_MAP
 from scenedetect.frame_timecode import FrameTimecode, MAX_FPS_DELTA
 import scenedetect.detectors

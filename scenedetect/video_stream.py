@@ -13,7 +13,7 @@
 """ ``scenedetect.video_stream`` Module
 
 This module contains the :py:class:`VideoStream` class, which provides a library agnostic
-interface for video input. To open a video by path, use :py:func:`scenedetect.backends.open_video`:
+interface for video input. To open a video by path, use :py:func:`scenedetect.open_video`:
 
 .. code:: python
 
