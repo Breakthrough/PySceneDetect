@@ -1,9 +1,9 @@
 
-
 # We have to disable the `build` command explicitly otherwise the default is
 # MSBuild which assumes this is a Visual Studio project. Python source/binary
 # wheels a Windows .exe are generated below in `install`.
 build: false
+
 
 environment:
   matrix:
@@ -11,6 +11,8 @@ environment:
     - PYTHON: "C:\\Python37-x64"
     - PYTHON: "C:\\Python38-x64"
 
+
+# SignPath Config
 deploy:
 - provider: Webhook
   # TODO: Change to release-signing when complete.
@@ -18,42 +20,54 @@ deploy:
   authorization:
      secure: mdCtq1nvbA+ADEqG36J9szgR045RLAsBbc58b7rusEnSuUA7rHFE4jMZvtdr6ODZOJqYZX8i/0bTgFPiiG/2rA==
 
+
 install:
+  # Setup Python environment and update basic packages.
   - 'SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%'
   - python --version
   - python -m pip install --upgrade pip
-  - python -m pip install -r dist/requirements_windows.txt
   - python -m pip install --upgrade setuptools wheel pyinstaller
+
+  # Install PySceneDetect dependencies and checkout resources required for tests.
+  - python -m pip install -r dist/requirements_windows.txt
   - git fetch --depth=1 https://github.com/Breakthrough/PySceneDetect.git refs/heads/resources:refs/remotes/origin/resources
   - git checkout refs/remotes/origin/resources -- tests/resources/
   - git checkout refs/remotes/origin/resources -- dist/
+
+  # Build Python package
   - python setup.py sdist bdist_wheel
+
+  # Build Windows .EXE
   - pyinstaller dist/scenedetect.spec
+
+  # Bundle Windows .EXE distribution with all dependencies.
   - 7z a dist/scenedetect-win64.zip dist/scenedetect/*
+
 
 test_script:
   # Unit Tests
   - pytest
-  # TODO: Test Python Distributions
-  # Wildcard expansion seems to not work correctly with pip install here.
-  #- python -m pip install dist\*.whl
-  #- scenedetect -i tests/resources/testvideo.mp4 detect-content time -e 2s
-  #- python -m pip uninstall scenedetect
-  #- python -m pip install dist\*.tar.gz
-  #- scenedetect -i tests/resources/testvideo.mp4 detect-content time -e 2s
-  #- python -m pip uninstall scenedetect
+
   # Test Windows Build
   - cd dist/scenedetect
   - scenedetect.exe version
   - scenedetect.exe -i ../../tests/resources/testvideo.mp4 -b opencv detect-content time -e 2s
   - scenedetect.exe -i ../../tests/resources/testvideo.mp4 -b pyav detect-content time -e 2s
 
+  # TODO: Test Python Distributions
+  # Wildcard expansion doesn't seem to work with pip here, e.g. the following fails:
+  #- python -m pip install dist\*.whl
+
+
 artifacts:
   - path: dist/scenedetect-win64.zip
     name: PySceneDetect-win64_portable
+
   - path: dist/scenedetect/scenedetect.exe
     name: PySceneDetect-win64_exeonly
+
   - path: dist/*.tar.gz
     name: PySceneDetect-sdist
+
   - path: dist/*.whl
     name: PySceneDetect-bdist_wheel
