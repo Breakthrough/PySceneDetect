@@ -18,6 +18,7 @@ environment:
     - PYTHON: "C:\\Python37-x64"
     - PYTHON: "C:\\Python38-x64"
     - PYTHON: "C:\\Python39-x64"
+    - PYTHON: "C:\\Python310-x64"
 
 
 # SignPath Config
@@ -29,6 +30,7 @@ deploy:
      secure: mdCtq1nvbA+ADEqG36J9szgR045RLAsBbc58b7rusEnSuUA7rHFE4jMZvtdr6ODZOJqYZX8i/0bTgFPiiG/2rA==
   on:
     APPVEYOR_REPO_TAG: true
+    #PYTHON: "C:\\Python310-x64"
 
 install:
   # Setup Python environment and update basic packages.
@@ -50,6 +52,7 @@ install:
   - pyinstaller dist/scenedetect.spec
 
   # Bundle Windows .EXE distribution with all dependencies.
+  - python dist/cleanup_dependencies.py
   - 7z a dist/scenedetect-win64.zip dist/scenedetect/*
 
 
