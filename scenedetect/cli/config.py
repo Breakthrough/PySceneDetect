@@ -75,7 +75,7 @@ CONFIG_MAP: ConfigDict = {
     },
     'backend-pyav': {
         'suppress-output': False,
-        'threading-mode': 'auto' if os.name == 'nt' else 'slice',
+        'threading-mode': 'auto',
     },
     'detect-adaptive': {
         'frame-window': 2,

@@ -25,15 +25,4 @@ PyAV
 
 *[Default on Windows]*
 
-The PyAV backend is a more robust and faster backend that supports multithreaded decoding.
-
-On Linux, the PyAV backend uses a slower threading mode by default (`threading-mode = slice`). Using the faster mode (`threading-mode = auto`) can cause the program to not quit properly, requiring Ctrl + C to fully stop it. For most use cases this does not affect anything, but it can be a problem if you are using the `scenedetect` command as part of a script.
-
-If you wish to enable the faster threading mode, create/specify :ref:`a config file <scenedetect_cli-config_file>`, and set the following option:
-
-.. code:: ini
-
-    [backend-pyav]
-    threading-mode = auto
-
-Using this mode on Linux/OSX is not suggested for applications requiring the program to terminate gracefully. If required, your application should monitor the progress of the *scenedetect* command for the last expected log message. The command is then safe to terminate if it is still running after a few more seconds.
+The PyAV backend is a more robust backend that can handle multiple audio tracks and decode errors more gracefully.

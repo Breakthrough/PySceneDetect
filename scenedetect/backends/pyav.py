@@ -54,8 +54,9 @@ class VideoStreamAv(VideoStream):
 
         .. warning::
 
-            Using `threading_mode` can cause lockups in your application. See the PyAV documentation
-            for details: https://pyav.org/docs/stable/overview/caveats.html#sub-interpeters
+            Using `threading_mode` with `suppress_output = True` can cause lockups in your
+            application. See the PyAV documentation for details:
+            https://pyav.org/docs/stable/overview/caveats.html#sub-interpeters
 
         Arguments:
             path_or_io: Path to the video, or a file-like object.
@@ -65,9 +66,7 @@ class VideoStreamAv(VideoStream):
             threading_mode: The PyAV video stream `thread_type`. See av.codec.context.ThreadType
                 for valid threading modes ('AUTO', 'FRAME', 'NONE', and 'SLICE'). If this mode is
                 'AUTO' or 'FRAME' and not all frames have been decoded, the video will be reopened
-                if seekable, and the remaining frames decoded in single-threaded mode. Using 'FRAME'
-                or 'AUTO' may result in the program hanging on exit - see the PyAV documentation
-                for details: https://pyav.org/docs/stable/overview/caveats.html#sub-interpeters
+                if seekable, and the remaining frames decoded in single-threaded mode.
             suppress_output: If False, ffmpeg output will be sent to stdout/stderr by calling
                 `av.logging.restore_default_callback()` before any other library calls. If True
                 the application may deadlock if threading_mode is set. See the PyAV documentation
@@ -133,6 +132,9 @@ class VideoStreamAv(VideoStream):
 
         # Calculate duration after we have set the framerate.
         self._duration_frames = self._get_duration()
+
+    def __del__(self):
+        self._container.close()
 
     #
     # VideoStream Methods/Properties
@@ -338,6 +340,7 @@ class VideoStreamAv(VideoStream):
         except:
             self._io.seek(orig_pos)
             raise
+        self._container.close()
         self._container = container
         self.seek(last_frame)
         return True

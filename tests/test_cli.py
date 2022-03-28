@@ -171,6 +171,5 @@ def test_cli_backends():
     """
     base_command = '-i {VIDEO} -b {BACKEND} time {TIME} {DETECTOR}'
     assert invoke_scenedetect(base_command, BACKEND='opencv') == 0
-    # The PyAV backend may deadlock which requires the program to issue SIGABRT, returning code 3.
     assert invoke_scenedetect(base_command, BACKEND='pyav') == 0
     assert invoke_scenedetect(base_command, BACKEND='unknown_backend_type') != 0
