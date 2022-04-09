@@ -77,6 +77,8 @@ class VideoStreamAv(VideoStream):
             VideoOpenFailure: video could not be opened (may be corrupted)
             ValueError: specified framerate is invalid
         """
+        self._container = None
+
         # TODO(#258): See what self._container.discard_corrupt = True does with corrupt videos.
         super().__init__()
 
@@ -134,7 +136,8 @@ class VideoStreamAv(VideoStream):
         self._duration_frames = self._get_duration()
 
     def __del__(self):
-        self._container.close()
+        if self._container is not None:
+            self._container.close()
 
     #
     # VideoStream Methods/Properties
