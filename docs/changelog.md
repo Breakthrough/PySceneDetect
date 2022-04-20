@@ -75,6 +75,8 @@ The main goals of v0.6 are reliability and performance. To achieve this required
     * The `load_from_csv` method is now deprecated and will be removed in v1.0
  * [v0.6-only] `VideoStreamAv`: Many fixes around `threading_mode` and documentation regarding application lockups
  * [v0.6-only] Moved `open_video` function from `scenedetect.backends` to `scenedetect` module
+ * Changes to `FrameTimecode`:
+    * Values in the form of seconds (float) or timecodes (str) are now rounded to the nearest frame, rather than truncated ([#268](https://github.com/Breakthrough/PySceneDetect/issues/268)), allowing correct round-trip conversion
 
 *v0.6-dev3*:
 

@@ -100,7 +100,7 @@ class FrameTimecode:
         Returns:
             int: The current time in frames (the current frame number).
         """
-        return int(self.frame_num)
+        return self.frame_num
 
     # TODO(v1.0): Add a `framerate` property to replace the existing one and deprecate this getter.
     def get_framerate(self) -> float:
@@ -181,7 +181,7 @@ class FrameTimecode:
             Integer number of frames the passed number of seconds represents using
             the current FrameTimecode's framerate property.
         """
-        return int(seconds * self.framerate)
+        return round(seconds * self.framerate)
 
     def _parse_timecode_number(self, timecode: Union[int, float]) -> int:
         """ Parse a timecode number, storing it as the exact number of frames.
@@ -231,7 +231,7 @@ class FrameTimecode:
             secs = float(secs)
             if secs < 0.0:
                 raise ValueError('Timecode seconds value must be positive.')
-            return int(secs * self.framerate)
+            return self._seconds_to_frames(secs)
         # Exact number of frames N
         elif timecode_string.isdigit():
             timecode = int(timecode_string)
@@ -249,7 +249,7 @@ class FrameTimecode:
             if not (hrs >= 0 and mins >= 0 and secs >= 0 and mins < 60 and secs < 60):
                 raise ValueError('Invalid timecode range (values outside allowed range).')
             secs += (((hrs * 60.0) + mins) * 60.0)
-            return int(secs * self.framerate)
+            return self._seconds_to_frames(secs)
 
     def __iadd__(self, other: Union[int, float, str, 'FrameTimecode']) -> 'FrameTimecode':
         if isinstance(other, int):

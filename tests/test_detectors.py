@@ -28,8 +28,8 @@ from scenedetect.backends.opencv import VideoStreamCv2
 
 # TODO(v1.0): Add new test video.
 
-TEST_MOVIE_CLIP_GROUND_TRUTH_CONTENT = [(30, [1198, 1226, 1260, 1281, 1334, 1365, 1697, 1871]),
-                                        (27, [1198, 1226, 1260, 1281, 1334, 1365, 1590, 1697,
+TEST_MOVIE_CLIP_GROUND_TRUTH_CONTENT = [(30, [1199, 1226, 1260, 1281, 1334, 1365, 1697, 1871]),
+                                        (27, [1199, 1226, 1260, 1281, 1334, 1365, 1590, 1697,
                                               1871])]
 """Ground truth for `test_movie_clip` with ContentDetector as (threshold, [scene start frame])."""
 

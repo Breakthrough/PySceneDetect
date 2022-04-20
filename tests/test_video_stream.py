@@ -194,7 +194,7 @@ class TestVideoStream:
 
         stream.seek(2.0)
         stream.read()
-        assert stream.frame_number == 1 + int(stream.frame_rate * 2.0)
+        assert stream.frame_number == 1 + round(stream.frame_rate * 2.0)
         # FrameTimecode is currently one "behind" the frame_number since it
         # starts counting from zero. This should eventually be changed.
         assert stream.position == stream.base_timecode + 2.0
