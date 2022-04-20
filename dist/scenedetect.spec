@@ -26,7 +26,7 @@ exe = EXE(pyz,
           upx=True,
           console=True,
           version='.version_info',
-          icon='../pyscenedetect.ico')
+          icon='pyscenedetect.ico')
 coll = COLLECT(exe,
                a.binaries,
                a.zipfiles,
