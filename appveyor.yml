@@ -42,6 +42,7 @@ install:
   - python -m pip install -r dist/requirements_windows.txt
   - git fetch --depth=1 https://github.com/Breakthrough/PySceneDetect.git refs/heads/resources:refs/remotes/origin/resources
   - git checkout refs/remotes/origin/resources -- tests/resources/
+  - git checkout refs/remotes/origin/resources -- dist/
 
   # Build Python package
   - python setup.py sdist bdist_wheel
