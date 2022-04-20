@@ -233,7 +233,7 @@ class FrameTimecode(object):
             Integer number of frames the passed number of seconds represents using
             the current FrameTimecode's framerate property.
         """
-        return int(seconds * self.framerate)
+        return round(seconds * self.framerate)
 
 
     def _parse_timecode_number(self, timecode):
@@ -304,7 +304,7 @@ class FrameTimecode(object):
             if not (hrs >= 0 and mins >= 0 and secs >= 0 and mins < 60 and secs < 60):
                 raise ValueError('Invalid timecode range (values outside allowed range).')
             secs += (((hrs * 60.0) + mins) * 60.0)
-            return int(secs * self.framerate)
+            return self._seconds_to_frames(secs)
 
 
     def __iadd__(self, other):

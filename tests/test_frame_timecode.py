@@ -239,3 +239,11 @@ def test_subtraction():
 
     with pytest.raises(TypeError): FrameTimecode('00:00:02.000', fps=20.0) == x - 10
 
+@pytest.mark.parametrize("frame_num,fps", [(1, 1), (61, 14), (29, 25), (126, 24000/1001)])
+def test_identity(frame_num, fps):
+    ''' Test FrameTimecode values, when used in init return the same values '''
+    frame_time_code = FrameTimecode(frame_num, fps=fps)
+    assert FrameTimecode(frame_time_code) == frame_time_code
+    assert FrameTimecode(frame_time_code.get_frames(), fps=fps) == frame_time_code
+    assert FrameTimecode(frame_time_code.get_seconds(), fps=fps) == frame_time_code
+    assert FrameTimecode(frame_time_code.get_timecode(), fps=fps) == frame_time_code
