@@ -36,7 +36,7 @@ install:
   - 'SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%'
   - python --version
   - python -m pip install --upgrade pip
-  - python -m pip install --upgrade setuptools wheel pyinstaller
+  - python -m pip install --upgrade setuptools wheel pyinstaller==4.10
 
   # Install PySceneDetect dependencies and checkout resources required for tests.
   - python -m pip install -r dist/requirements_windows.txt
