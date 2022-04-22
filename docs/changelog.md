@@ -39,6 +39,8 @@ The main goals of v0.6 are reliability and performance. To achieve this required
  * Frame numbers are now 1-based, and there is no longer any overlap between the start/end frame numbers of adjacent scenes
      * This also applies to the frame numbers in a statsfile (`-s`/`--stats`) and those provided by `list-scenes`
      * The output via the CLI now matches `ffmpeg` in all cases
+ * The default backend has been changed back to `opencv`
+     * To enable the `pyav` backend, either specify `-b pyav` via the command line, or set `backend = pyav` under `[global]` in your [config file](http://scenedetect.com/projects/Manual/en/v0.6/cli/config_file.html)
 
 *v0.6-dev3*:
 

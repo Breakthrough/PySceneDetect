@@ -225,8 +225,8 @@ def _print_help_header() -> None:
     type=click.Choice(CHOICE_MAP["global"]["backend"]),
     default=None,
     help='Backend to use for video input. Backends can be configured using -c/--config. Backends'
-    ' available on this system: %s. Default is pyav on Windows, opencv on other platforms.' %
-    (', '.join(AVAILABLE_BACKENDS.keys())),
+    ' available on this system: %s.%s.' %
+    (', '.join(AVAILABLE_BACKENDS.keys()), USER_CONFIG.get_help_string("global", "backend")),
 )
 @click.option(
     '--config',

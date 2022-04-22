@@ -12,7 +12,7 @@ PySceneDetect supports multiple backends for video input. Some can be configured
 OpenCV
 =======================================================================
 
-*[Default on Linux/OSX]*
+*[Default]*
 
 This backend, named ``opencv`` on the command line, uses OpenCV's VideoCapture object for video input. It is mostly reliable and fast, although can occasionally run into issues processing videos with multiple audio tracks or small amounts of frame corruption.
 
@@ -23,6 +23,6 @@ The OpenCV backend also supports image sequences as inputs (e.g. ``frame%02d.jpg
 PyAV
 =======================================================================
 
-*[Default on Windows]*
+The PyAV backend is a more robust backend that handles multiple audio tracks and frame decode errors gracefully.
 
-The PyAV backend is a more robust backend that can handle multiple audio tracks and decode errors more gracefully.
+This backend can be used by specifying `-b pyav` via command line, or setting `backend = pyav` under the `[global]` section of your :ref:`config file <scenedetect_cli-config_file>`.
