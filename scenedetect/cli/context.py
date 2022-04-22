@@ -762,7 +762,7 @@ class CliContext:
                 self.video_stream = open_video(
                     path=input_path,
                     framerate=framerate,
-                    backend='pyav',
+                    backend=backend,
                     threading_mode=self.config.get_value('backend-pyav', 'threading-mode'),
                     suppress_output=self.config.get_value('backend-pyav', 'suppress-output'),
                 )
@@ -770,7 +770,7 @@ class CliContext:
                 self.video_stream = open_video(
                     path=input_path,
                     framerate=framerate,
-                    backend='opencv',
+                    backend=backend,
                     max_decode_attempts=self.config.get_value('backend-opencv',
                                                               'max-decode-attempts'),
                 )
