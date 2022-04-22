@@ -601,7 +601,11 @@ class CliContext:
             self.height = height
             self.width = width
 
-        quality = self.config.get_value('save-images', 'quality', 100 if webp else 95)
+        default_quality = 100 if webp else 95
+        quality = (
+            default_quality if self.config.is_default('save-images', 'quality') else
+            self.config.get_value('save-images', 'quality'))
+
         compression = self.config.get_value('save-images', 'compression', compression)
         self.image_param = compression if png else quality
 
