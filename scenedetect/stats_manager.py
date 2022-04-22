@@ -215,7 +215,7 @@ class StatsManager:
         for frame_key in frame_keys:
             frame_timecode = self._base_timecode + frame_key
             csv_writer.writerow(
-                [frame_timecode.get_frames(),
+                [frame_timecode.get_frames() + 1,
                  frame_timecode.get_timecode()] +
                 [str(metric) for metric in self.get_metrics(frame_key, metric_keys)])
 
@@ -299,7 +299,11 @@ class StatsManager:
                     except ValueError:
                         raise StatsFileCorrupt('Corrupted value in stats file: %s' %
                                                metric_str) from ValueError
-            self.set_metrics(int(row[0]), metric_dict)
+            frame_number = int(row[0])
+            # Switch from 1-based to 0-based frame numbers.
+            if frame_number > 0:
+                frame_number -= 1
+            self.set_metrics(frame_number, metric_dict)
             num_frames += 1
         logger.info('Loaded %d metrics for %d frames.', num_metrics, num_frames)
         self._metrics_updated = False

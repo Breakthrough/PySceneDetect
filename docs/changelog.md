@@ -36,6 +36,9 @@ The main goals of v0.6 are reliability and performance. To achieve this required
     * Previous behavior can be obtained by merging stats files from multiple runs and setting the start/end times accordingly
  * Using `--backend opencv` is now more robust to frame decode failures
  * Add global option `--merge-last-scene` to merge final scene if it is shorter than `--min-scene-len`
+ * Frame numbers are now 1-based, and there is no longer any overlap between the start/end frame numbers of adjacent scenes
+     * This also applies to the frame numbers in a statsfile (`-s`/`--stats`) and those provided by `list-scenes`
+     * The output via the CLI now matches `ffmpeg` in all cases
 
 *v0.6-dev3*:
 
@@ -96,7 +99,6 @@ The main goals of v0.6 are reliability and performance. To achieve this required
  * New `VideoStream` replaces `VideoManager` and supports both OpenCV (`VideoStreamCv2`) and PyAV (`VideoStreamAv`) backends ([#213](https://github.com/Breakthrough/PySceneDetect/issues/213))
     * Improves video seeking invariants, especially around defining what frames 0 and 1 mean for different time properties (`frame_number` is 1-based whereas `position` is 0-based to align with PTS)
     * See `test_time_invariants` in `tests/test_video_stream.py` as a reference for specific behaviours of these properties, and a test video detailing visually what is expected
-    * Both command-line and public-facing API outputs still retain 0-based frame numbers (this will be changed in v1.0)
  * Changes to `SceneManager`:
     * `SceneManager` is now responsible for frame downscaling (see the `downscale` and `auto_downscale` properties)
     * `detect_scenes()` now performs video decoding in a background thread which greatly improves performance in many cases

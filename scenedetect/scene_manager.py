@@ -159,7 +159,7 @@ def write_scene_list(output_csv_file: TextIO,
         duration = end - start
         csv_writer.writerow([
             '%d' % (i + 1),
-            '%d' % start.get_frames(),
+            '%d' % (start.get_frames() + 1),
             start.get_timecode(),
             '%.3f' % start.get_seconds(),
             '%d' % end.get_frames(),
@@ -250,7 +250,7 @@ def write_scene_list_html(output_html_filename,
 
         row = SimpleTableRow([
             '%d' % (i + 1),
-            '%d' % start.get_frames(),
+            '%d' % (start.get_frames() + 1),
             start.get_timecode(),
             '%.3f' % start.get_seconds(),
             '%d' % end.get_frames(),

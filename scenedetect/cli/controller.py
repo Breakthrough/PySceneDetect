@@ -160,8 +160,9 @@ def _list_scenes(context: CliContext, scene_list: List[Tuple[FrameTimecode, Fram
 -----------------------------------------------------------------------
 """, '\n'.join([
                 ' |  %5d  | %11d | %s | %11d | %s |' %
-                (i + 1, start_time.get_frames(), start_time.get_timecode(), end_time.get_frames(),
-                 end_time.get_timecode()) for i, (start_time, end_time) in enumerate(scene_list)
+                (i + 1, start_time.get_frames() + 1, start_time.get_timecode(),
+                 end_time.get_frames(), end_time.get_timecode())
+                for i, (start_time, end_time) in enumerate(scene_list)
             ]))
 
     if cut_list:
