@@ -1,8 +1,6 @@
 
 ## Settings File
 
-Most command line parameters can be set using a configuration file. [Click here to download a `scenedetect.cfg` template](https://raw.githubusercontent.com/Breakthrough/PySceneDetect/v0.6/scenedetect.cfg) containing every possible option with comments that describe each one. Note that lines starting with a `#` are comments and will be ignored.  The `scenedetect.cfg` template file is also available in the folder where PySceneDetect is installed.
-
 A configuration file path can be specified using the `-c`/`--config` argument. PySceneDetect also looks for a config file named `scenedetect.cfg` in one of the following locations:
 
  * Windows:
@@ -15,7 +13,7 @@ A configuration file path can be specified using the `-c`/`--config` argument. P
  * Mac:
      * `~/Library/Preferences/PySceneDetect/scenedetect.cfg`
 
-Run `scenedetect help` to see the exact path on your system which will be used (it will be listed under the help text for the -c/--config option). You can right-click and save the above `scenedetect.cfg` template into one of these locations to get started.
+Run `scenedetect help` to see the exact path on your system which will be used (it will be listed under the help text for the -c/--config option).  You can [click here to download a `scenedetect.cfg` config file](https://raw.githubusercontent.com/Breakthrough/PySceneDetect/v0.6/scenedetect.cfg) to use as a template. Note that lines starting with a `#` are comments and will be ignored.  The `scenedetect.cfg` template file is also available in the folder where PySceneDetect is installed.
 
 Specifying a config file path using -c/--config overrides the user config file. Specifying values on the command line will override those values in the config file.
 

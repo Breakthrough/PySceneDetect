@@ -5,9 +5,7 @@
 Configuration File
 ***********************************************************************
 
-Most command line parameters can be set using a configuration file. See the :ref:`Template <config_file Template>` below for an example ``scenedetect.cfg`` file containing every possible option, along with comments that describe each one.  Note that lines starting with a ``#`` are comments and will be ignored.
-
-PySceneDetect looks for a file named ``scenedetect.cfg`` in one of the following locations:
+A configuration file path can be specified using the ``-c``/``--config`` argument. PySceneDetect also looks for a config file named `scenedetect.cfg` in one of the following locations:
 
  * Windows:
      * ``C:/Users/%USERNAME%/AppData/Local/PySceneDetect/scenedetect.cfg``
@@ -19,7 +17,9 @@ PySceneDetect looks for a file named ``scenedetect.cfg`` in one of the following
  * Mac:
      * ``~/Library/Preferences/PySceneDetect/scenedetect.cfg``
 
-Run `scenedetect help` to see the exact path on your system which will be used. You can also specify the direct path to a config file using the ``-c``/``--config`` argument. Values set on the command line take precedence over those set in the config file.
+Run `scenedetect help` to see the exact path on your system which will be used.  Values set on the command line take precedence over those set in the config file.
+
+Most command line parameters can be set using a configuration file. See the :ref:`Template <config_file Template>` below for an example ``scenedetect.cfg`` file containing every possible option, along with comments that describe each one.  Note that lines starting with a ``#`` are comments and will be ignored.
 
 The syntax of a configuration file is:
 
