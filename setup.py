@@ -52,7 +52,7 @@ def get_extra_requires() -> Dict[str, List[str]]:
 
 setup(
     name='scenedetect',
-    version='0.6-dev3',
+    version='0.6-rc0',
     description='Video scene cut/shot detection program and Python library.',
     long_description=open('dist/package-info.rst').read(),
     author='Brandon Castellano',

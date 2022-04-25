@@ -21,17 +21,17 @@ PySceneDetect is available via `pip` as [the `scenedetect` package](https://pypi
 ### Windows Build (64-bit Only) &nbsp; <span class="wy-text-neutral"><span class="fa fa-windows"></span></span>
 
 <div class="important">
-<h3 class="wy-text-neutral"><span class="fa fa-forward wy-text-info"></span> Latest Release: <b class="wy-text-neutral">v0.6-dev2</b></h3>
-<h4 class="wy-text-neutral"><span class="fa fa-calendar wy-text-info"></span>&nbsp; Release Date:&nbsp; <b>March 6, 2022</b></h4>
+<h3 class="wy-text-neutral"><span class="fa fa-forward wy-text-info"></span> Latest Release: <b class="wy-text-neutral">v0.6-rc0</b></h3>
+<h4 class="wy-text-neutral"><span class="fa fa-calendar wy-text-info"></span>&nbsp; Release Date:&nbsp; <b>April 24, 2022</b></h4>
 <a href="https://github.com/Breakthrough/PySceneDetect/releases/download/v0.6-dev2/PySceneDetect-0.6-dev2-win64-portable.zip" class="btn btn-info" style="margin-bottom:8px;" role="button"><span class="fa fa-download"></span>&nbsp; <b>Portable .zip</b></a> &nbsp;&nbsp;&nbsp;&nbsp; <a href="../examples/usage/" class="btn btn-success" style="margin-bottom:8px;" role="button"><span class="fa fa-book"></span>&nbsp; <b>Getting Started</b></a>
 </div>
 
 ### Python Installer (All Platforms) &nbsp; <span class="wy-text-neutral"><span class="fa fa-windows"></span> &nbsp; <span class="fa fa-linux"></span> &nbsp; <span class="fa fa-apple"></span></span></h3>
 
 <div class="important">
-<h4 class="wy-text-neutral"><span class="fa fa-forward wy-text-info"></span> Latest Release: <b class="wy-text-neutral">v0.6-dev2</b></h4>
-<h4 class="wy-text-neutral"><span class="fa fa-calendar wy-text-info"></span>&nbsp; Release Date:&nbsp; <b>March 6, 2022</b></h4>
-<a href="https://github.com/Breakthrough/PySceneDetect/archive/v0.6-dev2.zip" class="btn btn-info" style="margin-bottom:8px;" role="button"><span class="fa fa-download"></span>&nbsp; <b>Source</b>&nbsp;&nbsp;.zip</a> &nbsp;&nbsp;&nbsp;&nbsp; <a href="https://github.com/Breakthrough/PySceneDetect/archive/v0.6-dev2.tar.gz" class="btn btn-info" style="margin-bottom:8px;" role="button"><span class="fa fa-download"></span>&nbsp; <b>Source</b>&nbsp;&nbsp;.tar.gz</a> &nbsp;&nbsp;&nbsp;&nbsp; <a href="../examples/usage/" class="btn btn-success" style="margin-bottom:8px;" role="button"><span class="fa fa-book"></span>&nbsp; <b>Getting Started</b></a>
+<h4 class="wy-text-neutral"><span class="fa fa-forward wy-text-info"></span> Latest Release: <b class="wy-text-neutral">v0.6-rc0</b></h4>
+<h4 class="wy-text-neutral"><span class="fa fa-calendar wy-text-info"></span>&nbsp; Release Date:&nbsp; <b>April 24, 2022</b></h4>
+<a href="https://github.com/Breakthrough/PySceneDetect/archive/v0.6-rc0.zip" class="btn btn-info" style="margin-bottom:8px;" role="button"><span class="fa fa-download"></span>&nbsp; <b>Source</b>&nbsp;&nbsp;.zip</a> &nbsp;&nbsp;&nbsp;&nbsp; <a href="https://github.com/Breakthrough/PySceneDetect/archive/v0.6-rc0.tar.gz" class="btn btn-info" style="margin-bottom:8px;" role="button"><span class="fa fa-download"></span>&nbsp; <b>Source</b>&nbsp;&nbsp;.tar.gz</a> &nbsp;&nbsp;&nbsp;&nbsp; <a href="../examples/usage/" class="btn btn-success" style="margin-bottom:8px;" role="button"><span class="fa fa-book"></span>&nbsp; <b>Getting Started</b></a>
 </div>
 
 To install from source, download and extract the latest release to a location of your choice, and make sure you have the appropriate [system requirements](#dependencies) installed before continuing.  PySceneDetect can be installed by running the following command in the location of the extracted files (don't forget `sudo` if you're installing system-wide):
@@ -53,7 +53,7 @@ To get familiar with PySceneDetect, try running `scenedetect help`, or continue 
 
 PySceneDetect requires [Python 3](https://www.python.org/) and the following packages:
 
- - [OpenCV](http://opencv.org/) (compatible with 2/3), can install via `pip install opencv-python`. Used for video I/O.
+ - [OpenCV](http://opencv.org/) (compatible with 3/4), can install via `pip install opencv-python`. Used for video I/O.
  - [Numpy](https://numpy.org/), can install via `pip install numpy`. Used for frame processing.
  - [Click](https://click.palletsprojects.com), can install via `pip install Click`. Used for command line interface.
  - [tqdm](https://github.com/tqdm/tqdm), can install via `pip install tqdm`. Used to show progress bar and estimated time remaining.

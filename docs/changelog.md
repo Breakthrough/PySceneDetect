@@ -4,7 +4,7 @@ PySceneDetect Releases
 
 ## PySceneDetect 0.6
 
-### 0.6-dev3 (March 11, 2022)
+### 0.6-rc0 (April 24, 2022)
 
 #### Release Notes
 
@@ -29,7 +29,7 @@ The main goals of v0.6 are reliability and performance. To achieve this required
 
 **Command-Line Changes:**
 
-*v0.6-dev4*:
+*v0.6-rc0*:
  * Using `--backend pyav` no longer causes the application to occasionally hang once processing is complete
  * `save-images` now supports image sequences
  * `-s`/`--stats` is now only used to write stats files, previously would load existing contents if any
@@ -73,7 +73,7 @@ The main goals of v0.6 are reliability and performance. To achieve this required
 
 **API Changes:**
 
-*v0.6-dev4*:
+*v0.6-rc0*:
 
  * Add some backwards compatibility with v0.5 to avoid breaking most applications on release while still allowing performance improvements
  * Changes to `StatsManager`:
