@@ -131,9 +131,10 @@ The main goals of v0.6 are reliability and performance. To achieve this required
 
 #### Known Issues
 
- * Image sequences or URL inputs are not supported by the `save-images` or `split-video` commands
  * Variable framerate videos (VFR) are not fully supported, and will yield incorrect timestamps ([#168](https://github.com/Breakthrough/PySceneDetect/issues/168))
  * The `-l`/`--add-last-scene` option in `detect-threshold` cannot be disabled
+ * Image sequences or URL inputs are not supported by the `save-images` or `split-video` commands (in v0.6 `save-images` works with image sequences)
+ * Due to the use of truncation for frame number calculation, FrameTimecode objects may be off-by-one when constructed using a float value ([#268](https://github.com/Breakthrough/PySceneDetect/issues/268), fixed in v0.6)
 
 
 ### 0.5.5 (January 17, 2021)
