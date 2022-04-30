@@ -82,4 +82,6 @@ You can [click here](http://breakthrough.github.io/Installing-OpenCV/) for a qui
 
 To ensure you have all the requirements installed, open a `python` interpreter, and ensure you can run `import numpy` and `import cv2` without any errors.
 
+## Code Signing Policy
 
+Windows EXE/MSI Builds: Free code signing provided by SignPath.io, certificate by SignPath Foundation.

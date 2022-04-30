@@ -22,6 +22,7 @@ The development of PySceneDetect is supported by the following tools, technologi
  - PyPI
  - PyInstaller
  - AdvancedInstaller
+ - SignPath
 
 ### Languages and Dependencies
 
