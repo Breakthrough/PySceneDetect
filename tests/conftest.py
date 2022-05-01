@@ -50,10 +50,12 @@ def get_absolute_path(relative_path: str) -> str:
 # Test Case Fixtures
 #
 
+
 @pytest.fixture
 def test_video_file() -> str:
     """Simple test video containing both fast cuts and fades/dissolves."""
     return get_absolute_path("resources/testvideo.mp4")
+
 
 @pytest.fixture
 def test_movie_clip() -> str:

@@ -20,6 +20,7 @@ For VideoStream tests that validate conformance, see test_video_stream.py.
 
 from scenedetect.backends.pyav import VideoStreamAv
 
+
 def test_video_stream_pyav_bytesio(test_video_file: str):
     """Test that VideoStreamAv works with a BytesIO input in addition to a path."""
     # Mode must be binary!

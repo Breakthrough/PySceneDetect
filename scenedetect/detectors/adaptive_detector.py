@@ -25,6 +25,7 @@ from scenedetect.detectors import ContentDetector
 
 logger = getLogger('pyscenedetect')
 
+
 class AdaptiveDetector(ContentDetector):
     """Detects cuts using HSV changes similar to ContentDetector, but with a
     rolling average that can help mitigate false detections in situations such

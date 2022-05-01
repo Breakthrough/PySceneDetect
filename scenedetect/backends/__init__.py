@@ -74,7 +74,6 @@ try:
 except ImportError:
     VideoStreamAv = None
 
-
 AVAILABLE_BACKENDS: Dict[str, Type] = {
     backend.BACKEND_NAME: backend for backend in filter(None, [
         VideoStreamCv2,

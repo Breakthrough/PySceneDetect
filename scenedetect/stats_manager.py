@@ -215,8 +215,8 @@ class StatsManager:
         for frame_key in frame_keys:
             frame_timecode = self._base_timecode + frame_key
             csv_writer.writerow(
-                [frame_timecode.get_frames() + 1,
-                 frame_timecode.get_timecode()] +
+                [frame_timecode.get_frames() +
+                 1, frame_timecode.get_timecode()] +
                 [str(metric) for metric in self.get_metrics(frame_key, metric_keys)])
 
     @staticmethod

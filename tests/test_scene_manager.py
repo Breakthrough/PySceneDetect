@@ -61,8 +61,7 @@ def test_scene_list(test_video_file):
         if i > 0:
             # Ensure frame list is sorted (i.e. end time frame of
             # one scene is equal to the start time of the next).
-            assert scene_list[i-1][1] == scene_list[i][0]
-
+            assert scene_list[i - 1][1] == scene_list[i][0]
 
 
 def test_save_images(test_video_file):

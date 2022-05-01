@@ -35,6 +35,7 @@ VALID_THREAD_MODES = [
     av.codec.context.ThreadType.AUTO,
 ]
 
+
 class VideoStreamAv(VideoStream):
     """PyAV `av.InputContainer` backend."""
 

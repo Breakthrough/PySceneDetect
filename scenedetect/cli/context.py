@@ -37,7 +37,9 @@ logger = logging.getLogger('pyscenedetect')
 USER_CONFIG = ConfigRegistry()
 
 
-def parse_timecode(value: str, frame_rate: float, first_index_is_one: bool = False) -> FrameTimecode:
+def parse_timecode(value: str,
+                   frame_rate: float,
+                   first_index_is_one: bool = False) -> FrameTimecode:
     """Parses a user input string into a FrameTimecode assuming the given framerate.
 
     If value is None, None will be returned instead of processing the value.
@@ -659,9 +661,11 @@ class CliContext:
         logger.debug('Setting video time:\n    start: %s, duration: %s, end: %s', start, duration,
                      end)
 
-        self.start_time = parse_timecode(start, self.video_stream.frame_rate, first_index_is_one=True)
+        self.start_time = parse_timecode(
+            start, self.video_stream.frame_rate, first_index_is_one=True)
         self.end_time = parse_timecode(end, self.video_stream.frame_rate, first_index_is_one=True)
-        self.duration = parse_timecode(duration, self.video_stream.frame_rate, first_index_is_one=True)
+        self.duration = parse_timecode(
+            duration, self.video_stream.frame_rate, first_index_is_one=True)
         self.time = True
 
         self.options_processed = options_processed_orig

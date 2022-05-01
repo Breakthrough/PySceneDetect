@@ -213,8 +213,8 @@ def validate_capture_framerate(
 def validate_capture_parameters(
     video_names: List[Tuple[str, str]],
     cap_frame_sizes: List[Tuple[int, int]],
-    check_framerate: bool=False,
-    cap_framerates: Optional[List[float]]=None,
+    check_framerate: bool = False,
+    cap_framerates: Optional[List[float]] = None,
 ) -> None:
     """ Validate Capture Parameters: Ensures that all passed capture frame sizes and (optionally)
     framerates are equal.  Raises VideoParameterMismatch if there is a mismatch.

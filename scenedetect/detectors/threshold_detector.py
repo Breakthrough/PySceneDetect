@@ -87,7 +87,6 @@ class ThresholdDetector(SceneDetector):
         if block_size is not None:
             logger.error('block_size is deprecated.')
 
-
         super().__init__()
         self.threshold = int(threshold)
         self.fade_bias = fade_bias

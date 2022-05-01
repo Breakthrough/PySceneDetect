@@ -10,7 +10,6 @@
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
-
 """ PySceneDetect scenedetect.stats_manager Tests
 
 This file includes unit tests for the scenedetect.stats_manager module (specifically,
@@ -55,8 +54,9 @@ from scenedetect.stats_manager import FrameMetricNotRegistered
 
 # TODO(v1.0): use https://docs.pytest.org/en/6.2.x/tmpdir.html
 TEST_STATS_FILES = ['TEST_STATS_FILE'] * 4
-TEST_STATS_FILES = ['%s_%012d.csv' % (stats_file, random.randint(0, 10**12))
-                    for stats_file in TEST_STATS_FILES]
+TEST_STATS_FILES = [
+    '%s_%012d.csv' % (stats_file, random.randint(0, 10**12)) for stats_file in TEST_STATS_FILES
+]
 
 
 def teardown_module():
@@ -94,8 +94,8 @@ def test_metrics():
     assert stats.metrics_exist(frame_key, metric_keys)
     assert stats.metrics_exist(frame_key, metric_keys[1:])
 
-    assert stats.get_metrics(frame_key, metric_keys) == [
-        metric_dict[metric_key] for metric_key in metric_keys]
+    assert stats.get_metrics(
+        frame_key, metric_keys) == [metric_dict[metric_key] for metric_key in metric_keys]
 
 
 def test_detector_metrics(test_video_file):
@@ -125,9 +125,8 @@ def test_detector_metrics(test_video_file):
 
     # Since we only added 1 detector, the number of metrics from get_metrics
     # should equal the number of metric keys in _registered_metrics.
-    assert len(stats_manager.get_metrics(
-        frame_key, list(stats_manager._registered_metrics))) == len(
-            stats_manager._registered_metrics)
+    assert len(stats_manager.get_metrics(frame_key, list(
+        stats_manager._registered_metrics))) == len(stats_manager._registered_metrics)
 
 
 def test_load_empty_stats():
@@ -158,17 +157,19 @@ def test_load_hardcoded_file():
         some_frame_timecode = base_timecode + some_frame_key
 
         # Write out a valid file.
+        stats_writer.writerow([COLUMN_NAME_FRAME_NUMBER, COLUMN_NAME_TIMECODE, some_metric_key])
         stats_writer.writerow(
-            [COLUMN_NAME_FRAME_NUMBER, COLUMN_NAME_TIMECODE, some_metric_key])
-        stats_writer.writerow(
-            [some_frame_key + 1, some_frame_timecode.get_timecode(), str(some_metric_value)])
+            [some_frame_key + 1,
+             some_frame_timecode.get_timecode(),
+             str(some_metric_value)])
 
     stats_manager.load_from_csv(TEST_STATS_FILES[0])
 
     # Check that we decoded the correct values.
     assert stats_manager.metrics_exist(some_frame_key, [some_metric_key])
-    assert stats_manager.get_metrics(
-        some_frame_key, [some_metric_key])[0] == pytest.approx(some_metric_value)
+    assert stats_manager.get_metrics(some_frame_key,
+                                     [some_metric_key])[0] == pytest.approx(some_metric_value)
+
 
 def test_save_load_from_video(test_video_file):
     """ Test generating and saving some frame metrics from TEST_VIDEO_FILE to a file on disk, and
@@ -204,7 +205,6 @@ def test_save_load_from_video(test_video_file):
         assert metric_val == pytest.approx(new_metrics[i])
 
 
-
 def test_load_corrupt_stats():
     """ Test loading a corrupted stats file created by outputting data in the wrong format. """
 
@@ -223,8 +223,7 @@ def test_load_corrupt_stats():
 
         # File #0: Wrong Header Names [StatsFileCorrupt]
         # Swapped timecode & frame number.
-        stats_writer.writerow(
-            [COLUMN_NAME_TIMECODE, COLUMN_NAME_FRAME_NUMBER, some_metric_key])
+        stats_writer.writerow([COLUMN_NAME_TIMECODE, COLUMN_NAME_FRAME_NUMBER, some_metric_key])
         stats_writer.writerow(
             [some_frame_key, some_frame_timecode.get_timecode(), some_metric_value])
 

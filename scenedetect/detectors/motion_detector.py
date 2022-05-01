@@ -25,6 +25,7 @@ import cv2
 # PySceneDetect Library Imports
 from scenedetect.scene_detector import SparseSceneDetector
 
+
 class MotionDetector(SparseSceneDetector):
     """Detects motion events in scenes containing a static background.
 
@@ -42,8 +43,8 @@ class MotionDetector(SparseSceneDetector):
             Setting to -1 (default) will auto-compute based on video resolution
             (typically 3 for SD, 5-7 for HD). Must be an odd integer > 1.
     """
-    def __init__(self, threshold = 0.50, num_frames_post_scene = 30,
-                 kernel_size = -1):
+
+    def __init__(self, threshold=0.50, num_frames_post_scene=30, kernel_size=-1):
         """Initializes motion-based scene detector object."""
         # TODO: Requires porting to v0.5 API.
         raise NotImplementedError()
@@ -95,5 +96,3 @@ class MotionDetector(SparseSceneDetector):
         return self.in_motion_event
         """
         return []
-
-

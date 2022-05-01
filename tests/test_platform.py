@@ -10,7 +10,6 @@
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
-
 """ PySceneDetect scenedetect.platform Tests
 
 This file includes unit tests for the scenedetect.platform module, containing
@@ -20,7 +19,6 @@ all platform/library/OS-specific compatibility fixes.
 # Standard project pylint disables for unit tests using pytest.
 # pylint: disable=no-self-use, protected-access, multiple-statements, invalid-name
 # pylint: disable=redefined-outer-name
-
 
 from __future__ import print_function
 import platform
