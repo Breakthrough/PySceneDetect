@@ -14,9 +14,15 @@ jobs:
         uses: actions/setup-python@v3
         with:
           python-version: '3.x'
-      - name: Install Dependencies
+
+      - name: Update pip
+        run: python -m pip install --upgrade pip
+      - name: Install yapf
         run: python -m pip install --upgrade pip yapf
+      - name: Install PySceneDetect Dependencies
         run: python -m pip install -r requirements_headless.txt
-      - name: Check Code Format
+
+      - name: Check Code Format (scenedetect)
         run: python -m yapf --diff --recursive scenedetect/
+      - name: Check Code Format (tests)
         run: python -m yapf --diff --recursive tests/
