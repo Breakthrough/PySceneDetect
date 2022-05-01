@@ -28,6 +28,7 @@ deploy:
      secure: mdCtq1nvbA+ADEqG36J9szgR045RLAsBbc58b7rusEnSuUA7rHFE4jMZvtdr6ODZOJqYZX8i/0bTgFPiiG/2rA==
   on:
     APPVEYOR_REPO_TAG: true
+    PYTHON: "C:\\Python39-x64"
 
 
 install:
