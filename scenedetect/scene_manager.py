@@ -809,13 +809,12 @@ class SceneManager:
         if self._exception_info is not None:
             raise self._exception_info[1].with_traceback(self._exception_info[2])
 
-        if self._start_pos is None:
-            self._start_pos = video.position
         self._last_pos = video.base_timecode + video.frame_number
         self._post_process(video.position.frame_num)
         return video.frame_number - start_frame_num
 
     def _decode_thread(self, video, frame_skip, downscale_factor, end_time, out_queue):
+
         try:
             while True:
                 frame_im = None
@@ -834,10 +833,11 @@ class SceneManager:
                     if video.read(decode=False) is False:
                         break
 
-                out_queue.put((frame_im, video.position))
-
+                # Set the start position now that we decoded at least the first frame.
                 if self._start_pos is None:
                     self._start_pos = video.position
+
+                out_queue.put((frame_im, video.position))
 
                 if frame_skip > 0:
                     for _ in range(frame_skip):
@@ -856,5 +856,8 @@ class SceneManager:
             self._exception_info = sys.exc_info()
 
         finally:
+            # Handle case where start position was never set if we did not decode any frames.
+            if self._start_pos is None:
+                self._start_pos = video.position
             # Make sure main thread stops processing loop.
             out_queue.put((None, None))

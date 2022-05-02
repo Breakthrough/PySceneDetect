@@ -12,7 +12,8 @@
 #
 """PySceneDetect API Tests
 
-Demonstrates high-level usage of the PySceneDetect API.
+Demonstrates high-level usage of the PySceneDetect API. These tests are provided for
+examples of common use cases, and only validate semantic correctness.
 """
 
 from typing import List, Tuple
