@@ -37,7 +37,6 @@ FILE_GLOBS = [
     'libGLESv2.dll',
     'opengl32sw.dll',
     'Qt5*.dll',
-    'scenedetect.cfg',
     'wxbase*.dll',
     'wxmsw315u*.dll',
 ]
