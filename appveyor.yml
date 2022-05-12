@@ -54,11 +54,14 @@ install:
   - python dist/cleanup_dependencies.py
   - 7z a dist/scenedetect-win64.zip dist/scenedetect/*
 
-  # TODO: Rename using APPVEYOR_REPO_COMMIT env var and inline Powershell script
+  # TODO: Rename using APPVEYOR_REPO_COMMIT env var and inline Powershell script if this is not
+  # a tagged commit.
 
 
 test_script:
   # Unit Tests
+  # TODO(v0.6): Should also download ffmpeg/mkvmerge before running since some tests will be skipped
+  # without them.
   - pytest
 
   # Test Windows Build
