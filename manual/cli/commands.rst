@@ -265,7 +265,7 @@ Command Options
                             and $SCENE_NUMBER macros in the filename (e.g.
                             $VIDEO_NAME-Part-$SCENE_NUMBER). Note that you may
                             have to wrap the format in single quotes to avoid
-                            variable expansion. [setting: $VIDEO_NAME-awd-
+                            variable expansion. [default: $VIDEO_NAME-
                             Scene-$SCENE_NUMBER]
 
   -q, --quiet               Hides any output from the external video splitting
