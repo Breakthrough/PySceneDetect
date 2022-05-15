@@ -87,6 +87,7 @@ The main goals of v0.6 are reliability and performance. To achieve this required
     * `hide_progress` is now `show_progress`, default is `False`
  * `block_size` argument has been removed from the `ThresholdDetector` constructor
  * `calculate_frame_score` method of `ContentDetector` has been renamed to `_calculate_frame_score`, use new module-level function of the same name instead
+ * `get_aspect_ratio` has been removed from `scenedetect.platform` (use the `aspect_ratio` property of a `VideoStream` instead)
 
 #### Known Issues
 

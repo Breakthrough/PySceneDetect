@@ -24,10 +24,22 @@ import cv2
 from numpy import ndarray
 
 from scenedetect.frame_timecode import FrameTimecode, MAX_FPS_DELTA
-from scenedetect.platform import get_aspect_ratio, get_file_name
+from scenedetect.platform import get_file_name
 from scenedetect.video_stream import VideoStream, SeekError, VideoOpenFailure, FrameRateUnavailable
 
 logger = getLogger('pyscenedetect')
+
+def get_aspect_ratio(cap: cv2.VideoCapture, epsilon: float = 0.0001) -> float:
+    """Display/pixel aspect ratio of the VideoCapture as a float (1.0 represents square pixels)."""
+    # Versions of OpenCV < 3.4.1 do not support this, so we fall back to 1.0.
+    if not 'CAP_PROP_SAR_NUM' in dir(cv2):
+        return 1.0
+    num: float = cap.get(cv2.CAP_PROP_SAR_NUM)
+    den: float = cap.get(cv2.CAP_PROP_SAR_DEN)
+    # If numerator or denominator are close to zero, so we fall back to 1.0.
+    if abs(num) < epsilon or abs(den) < epsilon:
+        return 1.0
+    return num / den
 
 
 class VideoStreamCv2(VideoStream):

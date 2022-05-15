@@ -27,7 +27,6 @@ import pytest
 import cv2
 
 from scenedetect.platform import CommandTooLong, invoke_command
-from scenedetect.platform import get_aspect_ratio
 
 
 def test_invoke_command():
@@ -46,18 +45,3 @@ def test_long_command():
     if platform.system() == 'Windows':
         with pytest.raises(CommandTooLong):
             invoke_command('x' * 2**15)
-
-
-def test_get_aspect_ratio(test_video_file):
-    """ Test get_aspect_ratio function. """
-    expected_value = 1.0
-    epsilon = 0.01
-
-    cap = cv2.VideoCapture(test_video_file)
-    assert abs(get_aspect_ratio(cap) - expected_value) < epsilon
-
-    # Ensure non-open VideoCapture returns 1.0.
-    blank_cap = cv2.VideoCapture()
-    assert abs(get_aspect_ratio(blank_cap) - expected_value) < epsilon
-
-    # TODO: Add non-square example to test cases.

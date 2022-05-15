@@ -43,30 +43,6 @@ except ModuleNotFoundError:
 # pylint: enable=invalid-name
 
 
-# TODO: Move this into scenedetect.backends.opencv.
-def get_aspect_ratio(cap: cv2.VideoCapture, epsilon: float = 0.01) -> float:
-    """ Compatibility fix for OpenCV < v3.4.1 to get the aspect ratio
-    of a video. For older versions, this function always returns 1.0.
-
-    Arguments:
-        cap: cv2.VideoCapture object. Must be opened and in valid state.
-        epsilon: Used to compare numerator/denominator to zero.
-
-    Returns:
-        Display aspect ratio CAP_PROP_SAR_NUM / CAP_PROP_SAR_DEN, or 1.0 if using a version
-        of OpenCV < 3.4.1.  Also returns 1.0 if for some reason the numerator/denominator
-        returned is zero (can happen if the video was not opened correctly or is corrupt).
-    """
-    if not 'CAP_PROP_SAR_NUM' in dir(cv2):
-        return 1.0
-    num = cap.get(cv2.CAP_PROP_SAR_NUM)
-    den = cap.get(cv2.CAP_PROP_SAR_DEN)
-    # If numerator or denominator are zero, fall back to 1.0 aspect ratio.
-    if abs(num) < epsilon or abs(den) < epsilon:
-        return 1.0
-    return num / den
-
-
 ##
 ## OpenCV imwrite Supported Image Types & Quality/Compression Parameters
 ##

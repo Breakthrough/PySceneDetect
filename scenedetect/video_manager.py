@@ -28,8 +28,9 @@ from numpy import ndarray
 import cv2
 
 from scenedetect.video_stream import VideoStream, VideoOpenFailure, FrameRateUnavailable
+from scenedetect.backends.opencv import get_aspect_ratio
 from scenedetect.frame_timecode import FrameTimecode, MAX_FPS_DELTA
-from scenedetect.platform import get_file_name, get_aspect_ratio
+from scenedetect.platform import get_file_name
 
 ##
 ## VideoManager Exceptions

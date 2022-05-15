@@ -129,3 +129,8 @@ The `calculate_frame_score` method of :py:class:`ContentDetector <scenedetect.de
 
 In :py:mod:`scenedetect.frame_timecode` the constants `MINIMUM_FRAMES_PER_SECOND_FLOAT` and `MINIMUM_FRAMES_PER_SECOND_DELTA_FLOAT` have been replaced with :py:data:`MAX_FPS_DELTA <scenedetect.frame_timecode.MAX_FPS_DELTA>`.
 
+
+`get_aspect_ratio` Function
+===============================================================
+
+ The `get_aspect_ratio` function has been removed from `scenedetect.platform`. Use the :py:attr:`aspect_ratio <scenedetect.video_stream.VideoStream.aspect_ratio>` property from the :py:class:`VideoStream <scenedetect.video_stream.VideoStream>`  object instead.

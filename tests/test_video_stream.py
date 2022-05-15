@@ -42,6 +42,8 @@ from scenedetect.video_manager import VideoManager
 FRAMERATE_TOLERANCE = 0.001
 # Accuracy a time in milliseconds is checked to for testing purposes.
 TIME_TOLERANCE_MS = 0.1
+# Accuracy a pixel aspect ratio is checked to for testing purposes.
+PIXEL_ASPECT_RATIO_TOLERANCE = 0.001
 
 
 def calculate_frame_delta(frame_a, frame_b, roi=None) -> float:
@@ -69,16 +71,16 @@ def get_absolute_path(relative_path: str) -> str:
 
 class VideoParameters:
 
-    def __init__(self, path: str, height: int, width: int, frame_rate: float, total_frames: int):
+    def __init__(self, path: str, height: int, width: int, frame_rate: float, total_frames: int,
+                 aspect_ratio: float):
         self.path = path
         self.height = height
         self.width = width
         self.frame_rate = frame_rate
         self.total_frames = total_frames
-        # TODO(v0.6): Test aspect ratio.
+        self.aspect_ratio = aspect_ratio
 
 
-# TODO: Reduce duplicated paths here and in `conftest.py`
 def get_test_video_params():
     # type: () -> str
     """Fixture for parameters of all videos."""
@@ -88,13 +90,25 @@ def get_test_video_params():
             width=1280,
             height=720,
             frame_rate=29.97,
-            total_frames=720),
+            total_frames=720,
+            aspect_ratio=1.0,
+        ),
         VideoParameters(
             path=get_absolute_path("resources/goldeneye.mp4"),
             width=1280,
             height=544,
             frame_rate=23.976,
-            total_frames=1980),
+            total_frames=1980,
+            aspect_ratio=1.0,
+        ),
+        VideoParameters(
+            path=get_absolute_path("resources/out.mp4"),
+            width=704,
+            height=576,
+            frame_rate=25.0,
+            total_frames=628,
+            aspect_ratio=1.4545454545,
+        ),
     ]
 
 
@@ -104,8 +118,8 @@ pytestmark = pytest.mark.parametrize("vs_type", [VideoStreamCv2, VideoStreamAv, 
 @pytest.mark.parametrize("test_video", get_test_video_params())
 class TestVideoStream:
 
-    def test_basic_params(self, vs_type: Type[VideoStream], test_video: VideoParameters):
-        """Validate getting basic video parameters: frame size, frame rate, duration, etc."""
+    def test_properties(self, vs_type: Type[VideoStream], test_video: VideoParameters):
+        """Validate video properties: frame size, frame rate, duration, aspect ratio, etc."""
         stream = vs_type(test_video.path)
         assert stream.frame_size == (test_video.width, test_video.height)
         assert stream.frame_rate == pytest.approx(test_video.frame_rate, FRAMERATE_TOLERANCE)
@@ -113,6 +127,7 @@ class TestVideoStream:
         file_name = os.path.basename(test_video.path)
         last_dot_pos = file_name.rfind('.')
         assert stream.name == file_name[:last_dot_pos]
+        assert stream.aspect_ratio == pytest.approx(test_video.aspect_ratio, PIXEL_ASPECT_RATIO_TOLERANCE)
 
     def test_read(self, vs_type: Type[VideoStream], test_video: VideoParameters):
         """Validate basic `read` functionality."""

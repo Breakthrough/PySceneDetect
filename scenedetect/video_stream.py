@@ -163,7 +163,7 @@ class VideoStream(ABC):
     @property
     @abstractmethod
     def aspect_ratio(self) -> float:
-        """Display/pixel aspect ratio as a float (1.0 represents square pixels)."""
+        """Pixel aspect ratio as a float (1.0 represents square pixels)."""
         raise NotImplementedError
 
     @property

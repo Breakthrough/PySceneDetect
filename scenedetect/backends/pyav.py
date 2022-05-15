@@ -206,9 +206,12 @@ class VideoStreamAv(VideoStream):
 
     @property
     def aspect_ratio(self) -> float:
-        """Display/pixel aspect ratio as a float (1.0 represents square pixels)."""
+        """Pixel aspect ratio as a float (1.0 represents square pixels)."""
+        # TODO(v0.6): This is incorrect, and will be height/width for videos with a pixel aspect
+        # ratio of 1.0. Test this with some non-square videos to see if the value can be derived
+        # from the height/width versus display_aspect_ratio.
         return (self._codec_context.display_aspect_ratio.numerator /
-                self._codec_context.display_aspect_ratio.denominator)
+                self._codec_context.display_aspect_ratio.denominator) / (self.frame_size[0] / self.frame_size[1])
 
     def seek(self, target: Union[FrameTimecode, float, int]) -> None:
         """Seek to the given timecode. If given as a frame number, represents the current seek
@@ -293,7 +296,7 @@ class VideoStreamAv(VideoStream):
 
     @property
     def _codec_context(self):
-        """PyAV `av.codec.context.CodecContext` associated with the `video_stream`."""
+        """PyAV `av.codec.context.CodecContext` being used."""
         return self._video_stream.codec_context
 
     def _get_duration(self) -> int:
