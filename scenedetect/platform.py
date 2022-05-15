@@ -42,7 +42,6 @@ except ModuleNotFoundError:
 # pylint: enable=unused-import
 # pylint: enable=invalid-name
 
-
 ##
 ## OpenCV imwrite Supported Image Types & Quality/Compression Parameters
 ##

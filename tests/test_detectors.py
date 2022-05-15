@@ -109,7 +109,7 @@ def test_threshold_detector(test_video_file):
 
 def test_detectors_with_stats(test_video_file):
     """ Test all detectors functionality with a StatsManager. """
-    # TODO(v0.6): Parameterize this test case (move fixture from cli to test config).
+    # TODO(v1.0): Parameterize this test case (move fixture from cli to test config).
     for detector in [ContentDetector, ThresholdDetector, ThresholdDetector]:
         video = VideoStreamCv2(test_video_file)
         stats = StatsManager()

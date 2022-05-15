@@ -60,8 +60,7 @@ install:
 
 test_script:
   # Unit Tests
-  # TODO(v0.6): Should also download ffmpeg/mkvmerge before running since some tests will be skipped
-  # without them.
+  # TODO(v0.6): D ffmpeg/mkvmerge before running since some tests will be skipped without them.
   - pytest
 
   # Test Windows Build

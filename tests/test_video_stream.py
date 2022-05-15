@@ -127,7 +127,8 @@ class TestVideoStream:
         file_name = os.path.basename(test_video.path)
         last_dot_pos = file_name.rfind('.')
         assert stream.name == file_name[:last_dot_pos]
-        assert stream.aspect_ratio == pytest.approx(test_video.aspect_ratio, PIXEL_ASPECT_RATIO_TOLERANCE)
+        assert stream.aspect_ratio == pytest.approx(test_video.aspect_ratio,
+                                                    PIXEL_ASPECT_RATIO_TOLERANCE)
 
     def test_read(self, vs_type: Type[VideoStream], test_video: VideoParameters):
         """Validate basic `read` functionality."""

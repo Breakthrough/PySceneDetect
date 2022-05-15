@@ -29,6 +29,7 @@ from scenedetect.video_stream import VideoStream, SeekError, VideoOpenFailure, F
 
 logger = getLogger('pyscenedetect')
 
+
 def get_aspect_ratio(cap: cv2.VideoCapture, epsilon: float = 0.0001) -> float:
     """Display/pixel aspect ratio of the VideoCapture as a float (1.0 represents square pixels)."""
     # Versions of OpenCV < 3.4.1 do not support this, so we fall back to 1.0.
@@ -293,16 +294,16 @@ class VideoStreamCv2(VideoStream):
                 'VideoCapture.isOpened() returned False. Ensure the input file is a valid video,'
                 ' and check that OpenCV is installed correctly.\n')
 
-        # Display a warning if the video codec type seems unsupported (#86).
-        # We don't do the check if this is a webcam/video capture device or an image sequence.
-        if not (self._is_device or '%' in self._path_or_device) and int(
-                abs(cap.get(cv2.CAP_PROP_FOURCC))) == 0:
-            logger.error(
-                'Video codec detection failed, output may be incorrect.\nThis could be caused'
-                ' by using an outdated version of OpenCV, or using codecs that currently are'
-                ' not well supported (e.g. VP9).\n'
-                'As a workaround, consider re-encoding the source material before processing.\n'
-                'For details, see https://github.com/Breakthrough/PySceneDetect/issues/86')
+        # Display an error if the video codec type seems unsupported (#86) as this indicates
+        # potential video corruption, or may explain missing frames.
+        codec_unsupported: bool = (int(abs(cap.get(cv2.CAP_PROP_FOURCC))) == 0)
+        # Skip the check if this is a webcam/video capture device or an image sequence.
+        if codec_unsupported and not (self._is_device or '%' in self._path_or_device):
+            logger.error('Video codec detection failed. If output is incorrect:\n'
+                         '  - Re-encode the input video with ffmpeg\n'
+                         '  - Update OpenCV (pip install --upgrade opencv-python)\n'
+                         '  - Use the PyAV backend (--backend pyav)\n'
+                         'For details, see https://github.com/Breakthrough/PySceneDetect/issues/86')
 
         # Ensure the framerate is correct to avoid potential divide by zero errors. This can be
         # addressed in the PyAV backend if required since it supports integer timebases.
