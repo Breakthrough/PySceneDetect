@@ -102,7 +102,7 @@ def get_test_video_params():
             aspect_ratio=1.0,
         ),
         VideoParameters(
-            path=get_absolute_path("resources/out.mp4"),
+            path=get_absolute_path("resources/issue-195-aspect-ratio.mp4"),
             width=704,
             height=576,
             frame_rate=25.0,
