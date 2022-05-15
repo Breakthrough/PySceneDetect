@@ -170,7 +170,6 @@ def _list_scenes(context: CliContext, scene_list: List[Tuple[FrameTimecode, Fram
                     ','.join([cut.get_timecode() for cut in cut_list]))
 
 
-# TODO(v0.6): Test save-images output matches the frames from v0.5.x (use counter.mp4).
 def _save_images(
         context: CliContext,
         scene_list: List[Tuple[FrameTimecode, FrameTimecode]]) -> Optional[Dict[int, List[str]]]:

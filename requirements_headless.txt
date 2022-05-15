@@ -7,5 +7,5 @@ av; python_version > "3.6"
 click
 numpy
 opencv-python-headless
-pytest
+pytest>=7.0
 tqdm

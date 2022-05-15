@@ -32,15 +32,14 @@ import pytest
 #
 
 
-def get_absolute_path(relative_path: str) -> str:
-    # type: (str) -> str
+def get_absolute_path(relative_path: str, check_exists: bool = True) -> str:
     """ Returns the absolute path to a (relative) path of a file that
     should exist within the tests/ directory.
 
     Throws FileNotFoundError if the file could not be found.
     """
     abs_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), relative_path)
-    if not os.path.exists(abs_path):
+    if check_exists and not os.path.exists(abs_path):
         raise FileNotFoundError('Test video file (%s) must be present to run test case!' %
                                 relative_path)
     return abs_path
@@ -67,3 +66,11 @@ def test_movie_clip() -> str:
 def corrupt_video_file() -> str:
     """Video containing a corrupted frame causing a decode failure."""
     return get_absolute_path("resources/corrupt_frame.mp4")
+
+
+@pytest.fixture
+def test_image_sequence() -> str:
+    """Path to a short image sequence (from counter.mp4)."""
+    # Make sure at least one image in the sequence exists.
+    _ = get_absolute_path('resources/counter/frame001.png')
+    return get_absolute_path('resources/counter/frame%03d.png', check_exists=False)

@@ -84,7 +84,6 @@ class VideoStreamCv2(VideoStream):
         self._frame_rate: Optional[float] = None
 
         # VideoCapture state
-        self._has_seeked = False
         self._has_grabbed = False
         self._max_decode_attempts = max_decode_attempts
         self._decode_failures = 0
@@ -226,13 +225,16 @@ class VideoStreamCv2(VideoStream):
         if target_frame_cv2 > 0:
             target_frame_cv2 -= 1
         self._cap.set(cv2.CAP_PROP_POS_FRAMES, target_frame_cv2)
+        self._has_grabbed = False
+        # Preemptively grab the frame behind the target position if possible.
         if target > 0:
-            self._cap.grab()
-            self._has_grabbed = True
-            self._has_seeked = False
-        else:
-            self._has_grabbed = False
-            self._has_seeked = True
+            self._has_grabbed = self._cap.grab()
+            # If we seeked past the end of the video, need to seek one frame backwards
+            # from the current position and grab that frame instead.
+            if not self._has_grabbed:
+                seek_pos = round(self._cap.get(cv2.CAP_PROP_POS_FRAMES) - 1.0)
+                self._cap.set(cv2.CAP_PROP_POS_FRAMES, max(0, seek_pos))
+                self._has_grabbed = self._cap.grab()
 
     def reset(self):
         """ Close and re-open the VideoStream (should be equivalent to calling `seek(0)`). """
@@ -253,21 +255,27 @@ class VideoStreamCv2(VideoStream):
         """
         if not self._cap.isOpened():
             return False
+        # Grab the next frame if possible.
         if advance:
-            self._has_grabbed = self._cap.grab()
-            if not self._has_grabbed:
+            has_grabbed = self._cap.grab()
+            # If we failed to grab the frame, retry a few times if required.
+            if not has_grabbed:
                 if self.duration > 0 and self.position < (self.duration - 1):
                     for _ in range(self._max_decode_attempts):
-                        self._has_grabbed = self._cap.grab()
-                        if self._has_grabbed:
+                        has_grabbed = self._cap.grab()
+                        if has_grabbed:
                             break
                 # Report previous failure in debug mode.
-                if self._has_grabbed:
+                if has_grabbed:
                     self._decode_failures += 1
                     logger.debug('Frame failed to decode.')
                     if not self._warning_displayed and self._decode_failures > 1:
                         logger.warning('Failed to decode some frames, results may be inaccurate.')
-            self._has_seeked = False
+            # We didn't manage to grab a frame even after retrying, so just return.
+            if not has_grabbed:
+                return False
+            self._has_grabbed = True
+        # Need to make sure we actually grabbed a frame before calling retrieve.
         if decode and self._has_grabbed:
             _, frame = self._cap.retrieve()
             return frame
@@ -315,5 +323,4 @@ class VideoStreamCv2(VideoStream):
 
         self._cap = cap
         self._frame_rate = framerate
-        self._has_seeked = False
         self._has_grabbed = False

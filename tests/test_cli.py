@@ -19,10 +19,11 @@ import pytest
 # return code from the process. We do not yet check for correctness of the output, just a
 # successful invocation of the command (i.e. no exceptions/errors).
 
-# TODO(v0.6): Add some basic correctness tests to validate the output (just look for the
-# last expected log message or extract # of scenes).
+# TODO: Add some basic correctness tests to validate the output (just look for the
+# last expected log message or extract # of scenes). Might need to refactor the test cases
+# since we need to calculate the output file names for commands that write to disk.
 
-# TODO(v1.0): Define error/exit codes explicitly. Right now these tests only verify that the
+# TODO: Define error/exit codes explicitly. Right now these tests only verify that the
 # exit code is zero or nonzero.
 
 SCENEDETECT_CMD = 'python -m scenedetect'
@@ -123,7 +124,7 @@ def test_cli_detector_with_stats(tmp_path, detector_command: str):
         output_dir=tmp_path,
         DETECTOR=detector_command,
     ) == 0
-    # TODO(v0.6): Check for existence of statsfile by trying to load it with the library,
+    # TODO: Check for existence of statsfile by trying to load it with the library,
     # and ensuring that we got some frames.
 
 
@@ -159,8 +160,8 @@ def test_cli_list_scenes(tmp_path):
         '-i {VIDEO} time {TIME} {DETECTOR} list-scenes -n',
         output_dir=tmp_path,
     ) == 0
-    # TODO(v0.6): Check for output files from regular invocation.
-    # TODO(v0.6): Delete scene list and ensure is not recreated using -n.
+    # TODO: Check for output files from regular invocation.
+    # TODO: Delete scene list and ensure is not recreated using -n.
 
 
 @pytest.mark.skipif(condition=not can_invoke('ffmpeg'), reason="ffmpeg could not be invoked!")
@@ -177,7 +178,7 @@ def test_cli_split_video_ffmpeg(tmp_path):
     assert invoke_scenedetect(
         '-i {VIDEO} -s {STATS} time {TIME} {DETECTOR} split-video -c -a "-c:v libx264"',
         output_dir=tmp_path)
-    # TODO(v0.6): Check for existence of split video files.
+    # TODO: Check for existence of split video files.
 
 
 @pytest.mark.skipif(condition=not can_invoke('mkvmerge'), reason="mkvmerge could not be invoked!")
@@ -194,14 +195,14 @@ def test_cli_split_video_mkvmerge(tmp_path):
     assert invoke_scenedetect(
         '-i {VIDEO} -s {STATS} time {TIME} {DETECTOR} split-video -m -a "-c:v libx264"',
         output_dir=tmp_path)
-    # TODO(v0.6): Check for existence of split video files.
+    # TODO: Check for existence of split video files.
 
 
 def test_cli_save_images(tmp_path):
     """Test `save-images` command."""
     assert invoke_scenedetect(
         '-i {VIDEO} -s {STATS} time {TIME} {DETECTOR} save-images', output_dir=tmp_path) == 0
-    # TODO(v0.6): Check for existence of split video files.
+    # TODO: Check for existence of split video files.
 
 
 def test_cli_export_html(tmp_path):
@@ -211,7 +212,7 @@ def test_cli_export_html(tmp_path):
         base_command, COMMAND='save-images export-html', output_dir=tmp_path) == 0
     assert invoke_scenedetect(
         base_command, COMMAND='export-html --no-images', output_dir=tmp_path) == 0
-    # TODO(v0.6): Check for existence of HTML & image files.
+    # TODO: Check for existence of HTML & image files.
 
 
 @pytest.mark.parametrize('backend_type', ALL_BACKENDS)

@@ -30,13 +30,7 @@ import pytest
 from scenedetect.video_stream import VideoStream
 from scenedetect.backends.opencv import VideoStreamCv2
 from scenedetect.backends.pyav import VideoStreamAv
-# Compatibility w/ v0.5.
 from scenedetect.video_manager import VideoManager
-
-# TODO(v0.6): End of video read/seek behaviour, seek to very large offset, etc.
-# TODO(v0.6): Add test using image sequence (use counter.mp4 frames).
-# TODO(#258): Create a test case which opens a corrupted video. Copy one of the ground truth
-# files and see if a frame decode failure can be triggered.
 
 # Accuracy a framerate is checked to for testing purposes.
 FRAMERATE_TOLERANCE = 0.001
@@ -250,6 +244,23 @@ class TestVideoStream:
         stream.read()
         assert stream.frame_number == 2
 
+    def test_seek_end(self, vs_type: Type[VideoStream], test_video: VideoParameters):
+        """Validate seeking behaviour at end of the video."""
+        if vs_type == VideoManager:
+            pytest.skip(reason='VideoManager does not have compliant end-of-video seek behaviour.')
+        stream = vs_type(test_video.path)
+        last_frame_pts = test_video.total_frames - 1
+        # Seek to a reasonably large seek offset. Some backends only support 32-bit frame numbers.
+        stream.seek(2**32)
+        # Shouldn't be able to decode any more frames since we seeked to the last frame.
+        assert stream.read(advance=True) is False
+        assert stream.read(advance=False) is not False
+        # TODO: On some videos, the PyAV backend seems to drop a frame. See where this occurs.
+        if vs_type == VideoStreamAv:
+            assert stream.position in (last_frame_pts, last_frame_pts - 1)
+        else:
+            assert stream.position == last_frame_pts
+
 
 #
 # Tests which only use a single video file
@@ -289,7 +300,7 @@ def test_reset(vs_type: Type[VideoStream], test_video_file: str):
 def test_corrupt_video(vs_type: Type[VideoStream], corrupt_video_file: str):
     """Test that backend handles video with corrupt frame gracefully with defaults."""
     if vs_type == VideoManager:
-        pytest.skip(msg='VideoManager does not support handling corrupt videos.')
+        pytest.skip(reason='VideoManager does not support handling corrupt videos.')
 
     stream = vs_type(corrupt_video_file)
 
