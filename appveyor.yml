@@ -1,0 +1,64 @@
+# We have to disable the `build` command explicitly otherwise the default is
+# MSBuild which assumes this is a Visual Studio project. Python source/binary
+# wheels a Windows .exe are generated below in `install`.
+build: false
+
+
+environment:
+  matrix:
+    - PYTHON: "C:\\Python39-x64"
+
+
+# SignPath Config
+deploy:
+- provider: Webhook
+  url: https://app.signpath.io/API/v1/f2efa44c-5b5c-45f2-b44f-8f9dde708313/Integrations/AppVeyor?ProjectSlug=PySceneDetect&SigningPolicySlug=release-signing
+  authorization:
+     secure: mdCtq1nvbA+ADEqG36J9szgR045RLAsBbc58b7rusEnSuUA7rHFE4jMZvtdr6ODZOJqYZX8i/0bTgFPiiG/2rA==
+
+install:
+  # Setup Python environment and update basic packages.
+  - 'SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%'
+  - python --version
+  - python -m pip install --upgrade pip
+  - python -m pip install --upgrade setuptools wheel pyinstaller==4.10
+
+  # Install PySceneDetect dependencies and checkout resources required for tests.
+  # TODO: Move these Windows-specific files out of the main branch and into this one.
+  - python -m pip install -r dist/requirements_windows.txt
+  # Checkout exact version to build.
+  # TODO: Define this version identifier somewhere above as a variable.
+  - git checkout v0.6-rc0
+  - git fetch --depth=1 https://github.com/Breakthrough/PySceneDetect.git refs/heads/resources:refs/remotes/origin/resources
+  - git checkout refs/remotes/origin/resources -- tests/resources/
+  - git checkout refs/remotes/origin/resources -- dist/
+
+  # Build Windows .EXE
+  - pyinstaller dist/scenedetect.spec
+
+  # Bundle Windows .EXE distribution with all dependencies.
+  - python dist/cleanup_dependencies.py
+  - 7z a dist/scenedetect-win64.zip dist/scenedetect/*
+
+
+test_script:
+  # Unit Tests
+  # TODO: Should also download ffmpeg/mkvmerge before running since some tests will be skipped
+  # without them. Hard-code a version and download URL:
+  # Ffmpeg: https://github.com/GyanD/codexffmpeg/releases/tag/5.0.1
+  # Mkvmerge:  https://www.fosshub.com/MKVToolNix-old.html?dwl=mkvtoolnix-64-bit-66.0.0.7z
+  - pytest
+
+  # Test Windows Build
+  - cd dist/scenedetect
+  - scenedetect.exe version
+  - scenedetect.exe -i ../../tests/resources/testvideo.mp4 -b opencv detect-content time -e 2s
+  - scenedetect.exe -i ../../tests/resources/testvideo.mp4 -b pyav detect-content time -e 2s
+
+
+artifacts:
+  - path: dist/scenedetect-win64.zip
+    name: PySceneDetect-win64_portable
+
+  - path: dist/scenedetect/scenedetect.exe
+    name: PySceneDetect-win64_exeonly

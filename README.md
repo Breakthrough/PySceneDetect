@@ -1,4 +1,1 @@
-PySceneDetect
-=============
-
-A Python/OpenCV-based scene detection program, using threshold/content analysis on a given video.
+This branch is used for building signed Windows binaries (.MSI installer and portable .ZIP).
