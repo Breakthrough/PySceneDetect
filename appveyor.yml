@@ -17,6 +17,9 @@ deploy:
      secure: mdCtq1nvbA+ADEqG36J9szgR045RLAsBbc58b7rusEnSuUA7rHFE4jMZvtdr6ODZOJqYZX8i/0bTgFPiiG/2rA==
 
 install:
+  # Checkout exact version to build.
+  - git checkout v0.6-rc0
+
   # Setup Python environment and update basic packages.
   - 'SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%'
   - python --version
@@ -26,9 +29,6 @@ install:
   # Install PySceneDetect dependencies and checkout resources required for tests.
   # TODO: Move these Windows-specific files out of the main branch and into this one.
   - python -m pip install -r dist/requirements_windows.txt
-  # Checkout exact version to build.
-  # TODO: Define this version identifier somewhere above as a variable.
-  - git checkout v0.6-rc0
   - git fetch --depth=1 https://github.com/Breakthrough/PySceneDetect.git refs/heads/resources:refs/remotes/origin/resources
   - git checkout refs/remotes/origin/resources -- tests/resources/
   - git checkout refs/remotes/origin/resources -- dist/
