@@ -22,8 +22,8 @@ install:
   - 'SET PATH=%PATH%;C:\\Program Files (x86)\\Caphyon\\Advanced Installer 19.4\\bin\\x86'
   - AdvancedInstaller.com /help
 
-  # Checkout exact version to build.
-  - git checkout v0.6-rc0
+  # TODO: Checkout a specific tag, for now just checking out latest to match the build changes.
+  - git checkout v0.6
 
   # Setup Python environment and update basic packages.
   - 'SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%'
