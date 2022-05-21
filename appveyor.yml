@@ -15,11 +15,6 @@ environment:
 #     secure: mdCtq1nvbA+ADEqG36J9szgR045RLAsBbc58b7rusEnSuUA7rHFE4jMZvtdr6ODZOJqYZX8i/0bTgFPiiG/2rA==
 
 install:
-  - appveyor DownloadFile https://www.advancedinstaller.com/downloads/advinst.msi
-  - msiexec /i advinst.msi /qn
-  - 'SET PATH=%PATH%;C:\\Program Files (x86)\\Caphyon\\Advanced Installer 19.4\\bin\\x86'
-  - AdvancedInstaller.com /help
-
   # TODO: Checkout a specific tag, for now just checking out latest to match the build changes.
   - git checkout v0.6
 
@@ -30,14 +25,11 @@ install:
   - python -m pip install --upgrade setuptools wheel pyinstaller==4.10
 
   # Install PySceneDetect dependencies and checkout resources required for tests.
-  # TODO: Move these Windows-specific files out of the main branch and into this one.
   - python -m pip install -r dist/requirements_windows.txt
-  - git fetch --depth=1 https://github.com/Breakthrough/PySceneDetect.git refs/heads/resources:refs/remotes/origin/resources
-  - git checkout refs/remotes/origin/resources -- tests/resources/
 
   # Checkout all Windows build dependencies and extract them.
   - git checkout refs/remotes/origin/resources -- dist/
-  - git fetch --depth=1 https://github.com/Breakthrough/PySceneDetect.git refs/heads/resources:refs/remotes/origin/build-windows_installersetup
+  # TODO: Update branch name below when merging with main build-windows branch.
   - git checkout refs/remotes/origin/build-windows_installersetup -- dist/
   - cd dist
   - 7z e windows_thirdparty.7z
@@ -48,24 +40,32 @@ install:
   - python dist/cleanup_dependencies.py
   # Create portable ZIP
   - 7z a dist/scenedetect-win64.zip dist/scenedetect/*
+
+  # Download and install AdvancedInstaller
+  - appveyor DownloadFile https://www.advancedinstaller.com/downloads/advinst.msi
+  - msiexec /i advinst.msi /qn
+  - 'SET PATH=%PATH%;C:\\Program Files (x86)\\Caphyon\\Advanced Installer 19.4\\bin\\x86'
   # Create MSI installer
   - AdvancedInstaller.com /build dist/installer/PySceneDetect.aip
 
 test_script:
-  # Unit Tests
+  # Checkout required test resources
+  - git fetch --depth=1 https://github.com/Breakthrough/PySceneDetect.git refs/heads/resources:refs/remotes/origin/resources
+  - git checkout refs/remotes/origin/resources -- tests/resources/
   - cp dist/windows/ffmpeg.exe .
   - cp dist/windows/mkvmerge.exe .
+  # Run unit tests
   - pytest
-
-  # Test Windows Build
+  # Test Windows build
   - cd dist/scenedetect
   - scenedetect.exe version
   - scenedetect.exe -i ../../tests/resources/testvideo.mp4 -b opencv detect-content time -e 2s
   - scenedetect.exe -i ../../tests/resources/testvideo.mp4 -b pyav detect-content time -e 2s
 
 artifacts:
+  # Portable ZIP
   - path: dist/scenedetect-win64.zip
     name: PySceneDetect-win64_portable
-
-  - path: dist/scenedetect/scenedetect.exe
-    name: PySceneDetect-win64_exeonly
+  # MSI Installer
+  - path: dist/installer/PySceneDetect-0.6-win64.msi
+    name: PySceneDetect-win64_installer
