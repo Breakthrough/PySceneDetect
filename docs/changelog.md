@@ -12,6 +12,8 @@ PySceneDetect v0.6 is a **major breaking change** including better performance, 
 
 The main goals of v0.6 are reliability and performance. To achieve this required several breaking changes.  The video input API was refactored, and *many* technical debt items were addressed. This should help the eventual transition to the first planned stable release (v1.0) where the goal is an improved scene detection API.
 
+Both the Windows installer and portable distributions now include signed executables. Many thanks to SignPath, AppVeyor, and AdvancedInstaller for their support.
+
 #### Changelog
 
 **Overview:**
