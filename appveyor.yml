@@ -3,11 +3,9 @@
 # wheels a Windows .exe are generated below in `install`.
 build: false
 
-
 environment:
   matrix:
     - PYTHON: "C:\\Python39-x64"
-
 
 # SignPath Config
 #deploy:
@@ -36,22 +34,26 @@ install:
   - python -m pip install -r dist/requirements_windows.txt
   - git fetch --depth=1 https://github.com/Breakthrough/PySceneDetect.git refs/heads/resources:refs/remotes/origin/resources
   - git checkout refs/remotes/origin/resources -- tests/resources/
-  - git checkout refs/remotes/origin/resources -- dist/
 
   # Build Windows .EXE
   - pyinstaller dist/scenedetect.spec
+
+  # Checkout all Windows build dependencies and extract them.
+  - git checkout refs/remotes/origin/resources -- dist/
+  - git fetch --depth=1 https://github.com/Breakthrough/PySceneDetect.git refs/heads/resources:refs/remotes/origin/build-windows_installersetup
+  - git checkout refs/remotes/origin/build-windows_installersetup -- dist/
 
   # Bundle Windows .EXE distribution with all dependencies.
   - python dist/cleanup_dependencies.py
   - 7z a dist/scenedetect-win64.zip dist/scenedetect/*
 
+  # Build Windows MSI installer
+  - AdvancedInstaller.com /build dist/installer/PySceneDetect.aip
 
 test_script:
   # Unit Tests
-  # TODO: Should also download ffmpeg/mkvmerge before running since some tests will be skipped
-  # without them. Hard-code a version and download URL:
-  # Ffmpeg: https://github.com/GyanD/codexffmpeg/releases/tag/5.0.1
-  # Mkvmerge:  https://www.fosshub.com/MKVToolNix-old.html?dwl=mkvtoolnix-64-bit-66.0.0.7z
+  - cp dist/windows/ffmpeg.exe .
+  - cp dist/windows/mkvmerge.exe .
   - pytest
 
   # Test Windows Build
@@ -59,7 +61,6 @@ test_script:
   - scenedetect.exe version
   - scenedetect.exe -i ../../tests/resources/testvideo.mp4 -b opencv detect-content time -e 2s
   - scenedetect.exe -i ../../tests/resources/testvideo.mp4 -b pyav detect-content time -e 2s
-
 
 artifacts:
   - path: dist/scenedetect-win64.zip
