@@ -32,7 +32,9 @@ install:
   # TODO: Update branch name below when merging with main build-windows branch.
   - git checkout refs/remotes/origin/build-windows_installersetup -- dist/
   - cd dist
+  - dir
   - 7z e windows_thirdparty.7z
+  - dir
   - cd ..
 
   # Build Windows .EXE.
