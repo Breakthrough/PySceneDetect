@@ -35,19 +35,20 @@ install:
   - git fetch --depth=1 https://github.com/Breakthrough/PySceneDetect.git refs/heads/resources:refs/remotes/origin/resources
   - git checkout refs/remotes/origin/resources -- tests/resources/
 
-  # Build Windows .EXE
-  - pyinstaller dist/scenedetect.spec
-
   # Checkout all Windows build dependencies and extract them.
   - git checkout refs/remotes/origin/resources -- dist/
   - git fetch --depth=1 https://github.com/Breakthrough/PySceneDetect.git refs/heads/resources:refs/remotes/origin/build-windows_installersetup
   - git checkout refs/remotes/origin/build-windows_installersetup -- dist/
+  - cd dist
+  - 7z e windows_thirdparty.7z
+  - cd ..
 
-  # Bundle Windows .EXE distribution with all dependencies.
+  # Build Windows .EXE.
+  - pyinstaller dist/scenedetect.spec
   - python dist/cleanup_dependencies.py
+  # Create portable ZIP
   - 7z a dist/scenedetect-win64.zip dist/scenedetect/*
-
-  # Build Windows MSI installer
+  # Create MSI installer
   - AdvancedInstaller.com /build dist/installer/PySceneDetect.aip
 
 test_script:
