@@ -8,7 +8,7 @@ a = Analysis(['../scenedetect/__main__.py'],
              binaries=None,
              datas=[
                 ('../*.md', '.'),
-                ('../LICENSE', '.'),
+                ('../windows/*', '.'),
                 ('../dist/LICENSE-*', '.'),
                 ('../docs/', 'docs/'),
                 ('../scenedetect.cfg', '.')
