@@ -59,8 +59,12 @@ install:
 
 
 test_script:
-  # Unit Tests
-  # TODO(v0.6): D ffmpeg/mkvmerge before running since some tests will be skipped without them.
+  # Checkout Windows dependencies and extract them.
+  - git checkout refs/remotes/origin/resources -- dist/
+  - git checkout refs/remotes/origin/build-windows -- dist/
+  - 7z e dist/windows_thirdparty.7z
+
+  # Run Unit Tests
   - pytest
 
   # Test Windows Build
