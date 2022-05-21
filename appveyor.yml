@@ -29,8 +29,7 @@ install:
 
   # Checkout all Windows build dependencies and extract them.
   - git checkout refs/remotes/origin/resources -- dist/
-  # TODO: Update branch name below when merging with main build-windows branch.
-  - git checkout refs/remotes/origin/build-windows_installersetup -- dist/
+  - git checkout refs/remotes/origin/build-windows -- dist/
   - 7z e dist/windows_thirdparty.7z
   - move ffmpeg.exe dist/windows/
   - move mkvmerge.exe dist/windows/
