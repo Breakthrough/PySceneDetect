@@ -17,6 +17,11 @@ environment:
 #     secure: mdCtq1nvbA+ADEqG36J9szgR045RLAsBbc58b7rusEnSuUA7rHFE4jMZvtdr6ODZOJqYZX8i/0bTgFPiiG/2rA==
 
 install:
+  - appveyor DownloadFile https://www.advancedinstaller.com/downloads/advinst.msi
+  - msiexec /i advinst.msi /qn
+  - 'SET PATH=%PATH%;C:\\Program Files (x86)\\Caphyon\\Advanced Installer 19.4\\bin\\x86'
+  - AdvancedInstaller.com /help
+
   # Checkout exact version to build.
   - git checkout v0.6-rc0
 
