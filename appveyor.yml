@@ -8,11 +8,11 @@ environment:
     - PYTHON: "C:\\Python39-x64"
 
 # SignPath Config
-#deploy:
-#- provider: Webhook
-#  url: https://app.signpath.io/API/v1/f2efa44c-5b5c-45f2-b44f-8f9dde708313/Integrations/AppVeyor?ProjectSlug=PySceneDetect&SigningPolicySlug=release-signing
-#  authorization:
-#     secure: mdCtq1nvbA+ADEqG36J9szgR045RLAsBbc58b7rusEnSuUA7rHFE4jMZvtdr6ODZOJqYZX8i/0bTgFPiiG/2rA==
+deploy:
+- provider: Webhook
+  url: https://app.signpath.io/API/v1/f2efa44c-5b5c-45f2-b44f-8f9dde708313/Integrations/AppVeyor?ProjectSlug=PySceneDetect&SigningPolicySlug=test-signing
+  authorization:
+     secure: mdCtq1nvbA+ADEqG36J9szgR045RLAsBbc58b7rusEnSuUA7rHFE4jMZvtdr6ODZOJqYZX8i/0bTgFPiiG/2rA==
 
 install:
   # TODO: Checkout a specific tag, for now just checking out latest to match the build changes.
@@ -47,6 +47,9 @@ install:
   # Create MSI installer
   - AdvancedInstaller.com /build dist/installer/PySceneDetect.aip
 
+  # Zip all resources together for code signing
+  - 7z a dist/scenedetect-signed.zip dist/scenedetect/scenedetect.exe dist/installer/PySceneDetect-0.6-win64.msi
+
 test_script:
   # Checkout required test resources
   - git fetch --depth=1 https://github.com/Breakthrough/PySceneDetect.git refs/heads/resources:refs/remotes/origin/resources
@@ -65,6 +68,6 @@ artifacts:
   # Portable ZIP
   - path: dist/scenedetect-win64.zip
     name: PySceneDetect-win64_portable
-  # MSI Installer
-  - path: dist/installer/PySceneDetect-0.6-win64.msi
+  # MSI Installer + .EXE Bundle for Signing
+  - path: dist/scenedetect-signed.zip
     name: PySceneDetect-win64_installer
