@@ -43,7 +43,7 @@ install:
   - python dist/cleanup_dependencies.py
   - cd dist/scenedetect
   - 7z a ../scenedetect-win64.zip *
-  - cd ..
+  - cd ../..
 
   # TODO: Rename using APPVEYOR_REPO_COMMIT env var and inline Powershell script if this is not
   # a tagged commit.
