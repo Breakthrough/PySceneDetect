@@ -41,7 +41,9 @@ install:
 
   # Bundle Windows .EXE distribution with all dependencies.
   - python dist/cleanup_dependencies.py
-  - 7z a dist/scenedetect-win64.zip dist/scenedetect/*
+  - cd dist/scenedetect
+  - 7z a ../scenedetect-win64.zip *
+  - cd ..
 
   # TODO: Rename using APPVEYOR_REPO_COMMIT env var and inline Powershell script if this is not
   # a tagged commit.
