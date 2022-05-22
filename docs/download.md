@@ -84,4 +84,4 @@ To ensure you have all the requirements installed, open a `python` interpreter, 
 
 ## Code Signing Policy
 
-Windows EXE/MSI Builds: Free code signing provided by SignPath.io, certificate by SignPath Foundation.
+Windows EXE/MSI Builds: Free code signing provided by [SignPath.io](https://signpath.io/), certificate by [SignPath Foundation](https://signpath.org/).
