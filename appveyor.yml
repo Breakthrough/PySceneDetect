@@ -55,6 +55,7 @@ install:
   - move installer\PySceneDetect-*.msi .
   - move scenedetect\scenedetect.exe .
   - 7z a scenedetect-signed.zip scenedetect.exe PySceneDetect-*.msi
+  - cd ..
 
 test_script:
   # Checkout required test resources
