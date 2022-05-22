@@ -38,7 +38,9 @@ install:
   - pyinstaller dist/scenedetect.spec
   - python dist/cleanup_dependencies.py
   # Create portable ZIP
-  - 7z a dist/scenedetect-win64.zip dist/scenedetect/*
+  - cd dist/scenedetect
+  - 7z a ../scenedetect-win64.zip *
+  - cd ../..
 
   # Download and install AdvancedInstaller
   - appveyor DownloadFile https://www.advancedinstaller.com/downloads/advinst.msi
@@ -48,7 +50,10 @@ install:
   - AdvancedInstaller.com /build dist/installer/PySceneDetect.aip
 
   # Zip all resources together for code signing
-  - 7z a dist/scenedetect-signed.zip dist/scenedetect/scenedetect.exe dist/installer/PySceneDetect-0.6-win64.msi
+  - cd dist
+  - move installer/*.msi .
+  - move scenedetect/scenedetect.exe .
+  - 7z a scenedetect-signed.zip scenedetect.exe PySceneDetect-*.msi
 
 test_script:
   # Checkout required test resources
