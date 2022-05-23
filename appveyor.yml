@@ -23,7 +23,9 @@ install:
   # TODO: Checkout a specific tag or commit hash for release.
   - git checkout v0.6
 
-  # Setup Python environment and update basic packages.
+  - echo * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+  - echo * *                      SETTING UP PYTHON ENVIRONMENT                      * *
+  - echo * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
   - 'SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%'
   - python --version
   - python -m pip install --upgrade pip
@@ -39,6 +41,9 @@ install:
   - move ffmpeg.exe dist/windows/
   - move mkvmerge.exe dist/windows/
 
+  - echo * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+  - echo * *                          BUILDING WINDOWS EXE                           * *
+  - echo * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
   # Build Windows .EXE and create portable .ZIP
   - pyinstaller dist/scenedetect.spec
   - python dist/cleanup_dependencies.py
@@ -46,18 +51,25 @@ install:
   - 7z a ../scenedetect-win64.zip *
   - cd ../..
 
+  - echo * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+  - echo * *                         BUILDING MSI INSTALLER                          * *
+  - echo * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
   # Download, install, and register AdvancedInstaller
   - cd dist/installer
   - ps: iex ((New-Object Net.WebClient).DownloadString('https://raw.githubusercontent.com/appveyor/secure-file/master/install.ps1'))
   - appveyor-tools\secure-file -decrypt license65.dat.enc -secret %ai_license_secret% -salt %ai_license_salt%
   - appveyor DownloadFile https://www.advancedinstaller.com/downloads/advinst.msi
   - msiexec /i advinst.msi TARGETDIR="%cd\AI" /qn
+  - dir
   # License path must be absolute
   - AI\bin\x86\AdvancedInstaller.com /RegisterOffline "%cd%\license65.dat"
   # Create MSI installer
   - AI\bin\x86\AdvancedInstaller.com /build PySceneDetect.aip
   - cd ../..
 
+  - echo * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+  - echo * *                        PACKAGING BUILD ARTIFACTS                        * *
+  - echo * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
   # Zip all resources together for code signing
   - cd dist
   - move installer\PySceneDetect-*.msi .
@@ -66,6 +78,9 @@ install:
   - cd ..
 
 test_script:
+  - echo * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+  - echo * *                              TESTING BUILD                              * *
+  - echo * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
   # Checkout required test resources
   - git fetch --depth=1 https://github.com/Breakthrough/PySceneDetect.git refs/heads/resources:refs/remotes/origin/resources
   - git checkout refs/remotes/origin/resources -- tests/resources/
