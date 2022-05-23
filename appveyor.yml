@@ -59,12 +59,12 @@ install:
   - ps: iex ((New-Object Net.WebClient).DownloadString('https://raw.githubusercontent.com/appveyor/secure-file/master/install.ps1'))
   - appveyor-tools\secure-file -decrypt license65.dat.enc -secret %ai_license_secret% -salt %ai_license_salt%
   - appveyor DownloadFile https://www.advancedinstaller.com/downloads/advinst.msi
-  - msiexec /i advinst.msi TARGETDIR="%cd\AI" /qn
-  - dir
+  - msiexec /i advinst.msi /qn
+  - 'SET PATH=%PATH%;C:\\Program Files (x86)\\Caphyon\\Advanced Installer 19.4\\bin\\x86'
   # License path must be absolute
-  - AI\bin\x86\AdvancedInstaller.com /RegisterOffline "%cd%\license65.dat"
+  - AdvancedInstaller.com /RegisterOffline "%cd%\license65.dat"
   # Create MSI installer
-  - AI\bin\x86\AdvancedInstaller.com /build PySceneDetect.aip
+  - AdvancedInstaller.com /build PySceneDetect.aip
   - cd ../..
 
   - echo * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
