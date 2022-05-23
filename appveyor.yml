@@ -6,14 +6,13 @@ build: false
 environment:
   matrix:
     - PYTHON: "C:\\Python39-x64"
-
+  # Encrypted AdvancedInstaller License
   ai_license_secret:
     secure: lulTujjpNX3A1RKIvj834/Czn6etzevma6oqlA5Xia5tgrg75SPXcs1lPNlu5YPU
   ai_license_salt:
     secure: kMv/7J3wqaRGUJYwnfaY6edw0VW39uX7oM9Od9PQ2wwlCmTZcwAh4kEUxhB5u91QbXmp4McMuwcXAO4UdVoSGg==
 
-
-# SignPath Config
+# SignPath Config for Code Signing
 deploy:
 - provider: Webhook
   url: https://app.signpath.io/API/v1/f2efa44c-5b5c-45f2-b44f-8f9dde708313/Integrations/AppVeyor?ProjectSlug=PySceneDetect&SigningPolicySlug=test-signing
@@ -21,7 +20,7 @@ deploy:
      secure: mdCtq1nvbA+ADEqG36J9szgR045RLAsBbc58b7rusEnSuUA7rHFE4jMZvtdr6ODZOJqYZX8i/0bTgFPiiG/2rA==
 
 install:
-  # TODO: Checkout a specific tag, for now just checking out latest to match the build changes.
+  # TODO: Checkout a specific tag or commit hash for release.
   - git checkout v0.6
 
   # Setup Python environment and update basic packages.
@@ -40,22 +39,22 @@ install:
   - move ffmpeg.exe dist/windows/
   - move mkvmerge.exe dist/windows/
 
-  # Build Windows .EXE.
+  # Build Windows .EXE and create portable .ZIP
   - pyinstaller dist/scenedetect.spec
   - python dist/cleanup_dependencies.py
-  # Create portable ZIP
   - cd dist/scenedetect
   - 7z a ../scenedetect-win64.zip *
   - cd ../..
 
-  # Download and install AdvancedInstaller
+  # Download, install, and register AdvancedInstaller
+  - cd dist/installer
   - appveyor DownloadFile https://www.advancedinstaller.com/downloads/advinst.msi
   - msiexec /i advinst.msi /qn
+  # TODO: Figure out flag to install to a specific path so don't
   - 'SET PATH=%PATH%;C:\\Program Files (x86)\\Caphyon\\Advanced Installer 19.4\\bin\\x86'
-  # Register AdvancedInstaller using encrypted license file
-  - cd dist/installer
   - ps: iex ((New-Object Net.WebClient).DownloadString('https://raw.githubusercontent.com/appveyor/secure-file/master/install.ps1'))
   - appveyor-tools\secure-file -decrypt license65.dat.enc -secret %ai_license_secret% -salt %ai_license_salt%
+  - dir
   - AdvancedInstaller.com /RegisterOffline license65.dat
   # Create MSI installer
   - AdvancedInstaller.com /build PySceneDetect.aip
