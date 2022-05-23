@@ -7,6 +7,12 @@ environment:
   matrix:
     - PYTHON: "C:\\Python39-x64"
 
+  ai_license_secret:
+    secure: lulTujjpNX3A1RKIvj834/Czn6etzevma6oqlA5Xia5tgrg75SPXcs1lPNlu5YPU
+  ai_license_salt:
+    secure: kMv/7J3wqaRGUJYwnfaY6edw0VW39uX7oM9Od9PQ2wwlCmTZcwAh4kEUxhB5u91QbXmp4McMuwcXAO4UdVoSGg==
+
+
 # SignPath Config
 deploy:
 - provider: Webhook
@@ -46,8 +52,14 @@ install:
   - appveyor DownloadFile https://www.advancedinstaller.com/downloads/advinst.msi
   - msiexec /i advinst.msi /qn
   - 'SET PATH=%PATH%;C:\\Program Files (x86)\\Caphyon\\Advanced Installer 19.4\\bin\\x86'
+  # Register AdvancedInstaller using encrypted license file
+  - cd dist/installer
+  - ps: iex ((New-Object Net.WebClient).DownloadString('https://raw.githubusercontent.com/appveyor/secure-file/master/install.ps1'))
+  - appveyor-tools\secure-file -decrypt license65.dat.enc -secret %ai_license_secret% -salt %ai_license_salt%
+  - AdvancedInstaller.com /RegisterOffline license65.dat
   # Create MSI installer
-  - AdvancedInstaller.com /build dist/installer/PySceneDetect.aip
+  - AdvancedInstaller.com /build PySceneDetect.aip
+  - cd ../..
 
   # Zip all resources together for code signing
   - cd dist

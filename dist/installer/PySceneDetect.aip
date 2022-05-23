@@ -331,6 +331,9 @@
     <ROW File="_bz2.pyd" Component_="_decimal.pyd" FileName="_bz2.pyd" Attributes="0" SourcePath="..\scenedetect\_bz2.pyd" SelfReg="false"/>
     <ROW File="_ctypes.pyd" Component_="_decimal.pyd" FileName="_ctypes.pyd" Attributes="0" SourcePath="..\scenedetect\_ctypes.pyd" SelfReg="false"/>
   </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.BootstrOptComponent">
+    <ROW BootstrOptKey="GlobalOptions" DownloadFolder="[LocalAppDataFolder]\[|ProductName]\prerequisites"/>
+  </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.BuildComponent">
     <ROW BuildKey="DefaultBuild" BuildName="DefaultBuild" BuildOrder="1" BuildType="0" PackageFolder="." PackageFileName="PySceneDetect-0.6-win64" Languages="en" InstallationType="4" ExtUI="true" UseLargeSchema="true" MsiPackageType="x64"/>
   </COMPONENT>
