@@ -29,25 +29,13 @@ install:
   - python -m pip install --upgrade setuptools wheel pyinstaller==4.10
 
   # Install PySceneDetect dependencies and checkout resources required for tests.
-  - python -m pip install -r dist/requirements_windows.txt
+  - python -m pip install -r requirements_headless.txt
   - git fetch --depth=1 https://github.com/Breakthrough/PySceneDetect.git refs/heads/resources:refs/remotes/origin/resources
   - git checkout refs/remotes/origin/resources -- tests/resources/
   - git checkout refs/remotes/origin/resources -- dist/
 
   # Build Python package
   - python setup.py sdist bdist_wheel
-
-  # Build Windows .EXE
-  - pyinstaller dist/scenedetect.spec
-
-  # Bundle Windows .EXE distribution with all dependencies.
-  - python dist/cleanup_dependencies.py
-  - cd dist/scenedetect
-  - 7z a ../scenedetect-win64.zip *
-  - cd ../..
-
-  # TODO: Rename using APPVEYOR_REPO_COMMIT env var and inline Powershell script if this is not
-  # a tagged commit.
 
 
 test_script:
@@ -59,24 +47,17 @@ test_script:
   # Run Unit Tests
   - pytest
 
-  # Test Windows Build
-  - cd dist/scenedetect
-  - scenedetect.exe version
-  - scenedetect.exe -i ../../tests/resources/testvideo.mp4 -b opencv detect-content time -e 2s
-  - scenedetect.exe -i ../../tests/resources/testvideo.mp4 -b pyav detect-content time -e 2s
-
-  # TODO: Test Python Distributions
+  # TODO: Test Python Distributions install and function correctly.
   # Wildcard expansion doesn't seem to work with pip here, e.g. the following fails:
   #- python -m pip install dist\*.whl
+  # For now we just test the source module directly.
+
+  - python -m scenedetect version
+  - python -m scenedetect -i tests/resources/testvideo.mp4 -b opencv detect-content time -e 2s
+  - python -m scenedetect -i tests/resources/testvideo.mp4 -b pyav detect-content time -e 2s
 
 
 artifacts:
-  - path: dist/scenedetect-win64.zip
-    name: PySceneDetect-win64_portable
-
-  - path: dist/scenedetect/scenedetect.exe
-    name: PySceneDetect-win64_exeonly
-
   - path: dist/*.tar.gz
     name: PySceneDetect-sdist
 
