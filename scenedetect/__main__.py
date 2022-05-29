@@ -2,28 +2,14 @@
 #
 #         PySceneDetect: Python-Based Video Scene Detector
 #   ---------------------------------------------------------------
-#     [  Site: http://www.bcastell.com/projects/PySceneDetect/   ]
+#     [  Site:   http://www.scenedetect.scenedetect.com/         ]
+#     [  Docs:   http://manual.scenedetect.scenedetect.com/      ]
 #     [  Github: https://github.com/Breakthrough/PySceneDetect/  ]
-#     [  Documentation: http://pyscenedetect.readthedocs.org/    ]
 #
-# Copyright (C) 2014-2021 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2014-2022 Brandon Castellano <http://www.bcastell.com>.
+# PySceneDetect is licensed under the BSD 3-Clause License; see the
+# included LICENSE file, or visit one of the above pages for details.
 #
-# PySceneDetect is licensed under the BSD 3-Clause License; see the included
-# LICENSE file, or visit one of the following pages for details:
-#  - https://github.com/Breakthrough/PySceneDetect/
-#  - http://www.bcastell.com/projects/PySceneDetect/
-#
-# This software uses Numpy, OpenCV, click, tqdm, simpletable, and pytest.
-# See the included LICENSE files or one of the above URLs for more information.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-# AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
-# ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-# WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#
-
 """ ``scenedetect.__main__`` Module
 
 Provides entry point for PySceneDetect's command-line interface (CLI)
@@ -45,19 +31,19 @@ will also add the `scenedetect` command to %PATH% be used from anywhere.
 from scenedetect.cli import scenedetect_cli as cli
 from scenedetect.cli.context import CliContext
 
+
 def main():
     """ Main: PySceneDetect command-line interface (CLI) entry point.
 
     Passes control flow to the CLI parser (using the click library), whose
     entry point is the decorated scenedetect.cli.scenedetect_cli function.
-    """
 
-    cli_ctx = CliContext()  # CliContext object passed between CLI commands.
-    try:
-        # pylint: disable=unexpected-keyword-arg, no-value-for-parameter
-        cli.main(obj=cli_ctx)   # Parse CLI arguments with registered callbacks.
-    finally:
-        cli_ctx.cleanup()
+    Once options have been processed, the main program logic is executed in the
+    :py:func:`scenedetect.cli.controller.run_scenedetect` function.
+    """
+    cli_ctx = CliContext() # CliContext object passed between CLI commands.
+    cli.main(obj=cli_ctx)  # Parse CLI arguments with registered callbacks.
+
 
 if __name__ == '__main__':
     main()

@@ -1,10 +1,11 @@
 #
-# PySceneDetect Python Requirements
+# PySceneDetect Requirements
 #
-opencv-python<=4.2.0.32; python_version <= "3.5"
-opencv-python; python_version > "3.5"
-numpy
+appdirs
+av<=8.0.3; python_version <= "3.6"
+av; python_version > "3.6"
 click
+numpy
+opencv-python==4.5.1.48
+pytest>=7.0
 tqdm
-pytest
-

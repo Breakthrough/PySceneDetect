@@ -22,7 +22,7 @@ Unlike calling `pip install opencv-python`, the above commands will download and
 
 #### How can I enable video splitting support?
 
-To enable video splitting support, you will also need to have `mkvmerge` or `ffmpeg` installed on your system. See the documentation on [Video Splitting Support](https://pyscenedetect.readthedocs.io/en/latest/examples/video-splitting/) after installation for details.
+To enable video splitting support, you will also need to have `mkvmerge` or `ffmpeg` installed on your system. See the documentation on [Video Splitting Support](https://scenedetect.com/en/v0.6/examples/video-splitting/) after installation for details.
 
 
 #### How can I fix the error `Cannot split video due to too many scenes`?
@@ -35,9 +35,9 @@ See [Issue #164](https://github.com/Breakthrough/PySceneDetect/issues/164) for d
 
 #### How can I fix the error `Failed to read any frames from video file`?
 
-Unfortunately, the underlying library used to perform video I/O was unable to open the file.  This occasionally happens due to videos having multiple audio tracks (as per [#179](https://github.com/Breakthrough/PySceneDetect/issues/179)).
+Unfortunately, the underlying library used to perform video I/O was unable to open the file. Try using a different backend by installing PyAV (`pip install av`) and see if the problem persists.
 
-As a workaround, you can remove the audio track using either `ffmpeg` or `mkvmerge` as follows:
+This can also happen due to videos having multiple audio tracks (as per [#179](https://github.com/Breakthrough/PySceneDetect/issues/179)).  If the PyAV backend does not succeed in processing the video, as a workaround you can remove the audio track using either `ffmpeg` or `mkvmerge`:
 
 ```md
 ffmpeg -i input.mp4 -c copy -an output.mp4

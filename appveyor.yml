@@ -1,0 +1,71 @@
+
+skip_commits:
+  files:
+    - docs/*
+    - 'manual/*'
+    - '**/*.rst'
+    - '**/*.md'
+
+
+# We have to disable the `build` command explicitly otherwise the default is
+# MSBuild which assumes this is a Visual Studio project. Python source/binary
+# wheels a Windows .exe are generated below in `install`.
+build: false
+
+
+environment:
+  matrix:
+    - PYTHON: "C:\\Python37-x64"
+    - PYTHON: "C:\\Python38-x64"
+    - PYTHON: "C:\\Python39-x64"
+    - PYTHON: "C:\\Python310-x64"
+
+
+install:
+  # Setup Python environment and update basic packages.
+  - 'SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%'
+  - python --version
+  - python -m pip install --upgrade pip
+  - python -m pip install --upgrade setuptools wheel pyinstaller==4.10
+
+  # Make sure we get latest binary packages of the video input libraries.
+  - python -m pip install av opencv-python-headless --only-binary ":all:"
+
+  # Install other PySceneDetect dependencies and checkout resources required for tests.
+  - python -m pip install -r requirements_headless.txt
+  - git fetch --depth=1 https://github.com/Breakthrough/PySceneDetect.git refs/heads/resources:refs/remotes/origin/resources
+  - git checkout refs/remotes/origin/resources -- tests/resources/
+  - git checkout refs/remotes/origin/resources -- dist/
+
+  # Build Python package
+  - python setup.py sdist bdist_wheel
+
+
+test_script:
+  # Checkout Windows dependencies and extract them.
+  - git checkout refs/remotes/origin/resources -- dist/
+  - git checkout refs/remotes/origin/build-windows -- dist/
+  - 7z e dist/windows_thirdparty.7z
+
+  # Run Unit Tests
+  - python -m pytest tests/
+
+  # TODO: Test Python Distributions install and function correctly.
+  # Wildcard expansion doesn't seem to work with pip here, e.g. the following fails:
+  #- python -m pip install dist\*.whl
+  # For now we just test the source module directly.
+
+  - python -m scenedetect version
+  - python -m scenedetect -i tests/resources/testvideo.mp4 -b opencv detect-content time -e 2s
+  - python -m scenedetect -i tests/resources/testvideo.mp4 -b pyav detect-content time -e 2s
+
+
+artifacts:
+  # TODO: Need to incorporate the build number into the package version. Use a custom setup.py
+  # that modifies the version number in the package before building using an environment variable.
+
+  - path: dist/*.tar.gz
+    name: PySceneDetect-sdist
+
+  - path: dist/*.whl
+    name: PySceneDetect-bdist_wheel

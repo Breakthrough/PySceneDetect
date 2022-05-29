@@ -1,0 +1,11 @@
+#
+# PySceneDetect Requirements for Headless Machines
+#
+appdirs
+av<=8.0.3; python_version <= "3.6"
+av; python_version > "3.6"
+click
+numpy
+opencv-python-headless
+pytest>=7.0
+tqdm

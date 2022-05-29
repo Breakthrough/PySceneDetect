@@ -26,10 +26,3 @@ Exceptions
 .. autoexception:: scenedetect.stats_manager.FrameMetricNotRegistered
 
 .. autoexception:: scenedetect.stats_manager.StatsFileCorrupt
-
-.. autoexception:: scenedetect.stats_manager.StatsFileFramerateMismatch
-
-.. autoexception:: scenedetect.stats_manager.NoMetricsRegistered
-
-.. autoexception:: scenedetect.stats_manager.NoMetricsSet
-

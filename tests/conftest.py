@@ -2,28 +2,14 @@
 #
 #         PySceneDetect: Python-Based Video Scene Detector
 #   ---------------------------------------------------------------
-#     [  Site: http://www.bcastell.com/projects/PySceneDetect/   ]
+#     [  Site:   http://www.scenedetect.scenedetect.com/         ]
+#     [  Docs:   http://manual.scenedetect.scenedetect.com/      ]
 #     [  Github: https://github.com/Breakthrough/PySceneDetect/  ]
-#     [  Documentation: http://pyscenedetect.readthedocs.org/    ]
 #
-# Copyright (C) 2014-2021 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2014-2022 Brandon Castellano <http://www.bcastell.com>.
+# PySceneDetect is licensed under the BSD 3-Clause License; see the
+# included LICENSE file, or visit one of the above pages for details.
 #
-# PySceneDetect is licensed under the BSD 3-Clause License; see the included
-# LICENSE file, or visit one of the following pages for details:
-#  - https://github.com/Breakthrough/PySceneDetect/
-#  - http://www.bcastell.com/projects/PySceneDetect/
-#
-# This software uses Numpy, OpenCV, click, tqdm, simpletable, and pytest.
-# See the included LICENSE files or one of the above URLs for more information.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-# AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
-# ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-# WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#
-
 """ PySceneDetect Test Configuration
 
 This file includes all pytest configuration for running PySceneDetect's tests.
@@ -41,23 +27,21 @@ Note that currently these tests create some temporary files which are not yet cl
 import os
 import pytest
 
-
 #
 # Helper Functions
 #
 
-def get_absolute_path(relative_path):
-    # type: (str) -> str
+
+def get_absolute_path(relative_path: str, check_exists: bool = True) -> str:
     """ Returns the absolute path to a (relative) path of a file that
     should exist within the tests/ directory.
 
     Throws FileNotFoundError if the file could not be found.
     """
-    abs_path = os.path.join(
-        os.path.abspath(os.path.dirname(__file__)), relative_path)
-    if not os.path.exists(abs_path):
-        raise FileNotFoundError(
-            'Test video file (%s) must be present to run test case!' % relative_path)
+    abs_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), relative_path)
+    if check_exists and not os.path.exists(abs_path):
+        raise FileNotFoundError('Test video file (%s) must be present to run test case!' %
+                                relative_path)
     return abs_path
 
 
@@ -65,20 +49,28 @@ def get_absolute_path(relative_path):
 # Test Case Fixtures
 #
 
-@pytest.fixture
-def test_video_file():
-    # type: () -> str
-    """ Fixture for test video file path (ensures file exists).
 
-    Access in test case by adding a test_video_file argument to obtain the path.
-    """
+@pytest.fixture
+def test_video_file() -> str:
+    """Simple test video containing both fast cuts and fades/dissolves."""
     return get_absolute_path("resources/testvideo.mp4")
 
-@pytest.fixture
-def test_movie_clip():
-    # type: () -> str
-    """ Fixture for test movie clip path (ensures file exists).
 
-    Access in test case by adding a test_movie_clip argument to obtain the path.
-    """
+@pytest.fixture
+def test_movie_clip() -> str:
+    """Movie clip containing fast cuts."""
     return get_absolute_path("resources/goldeneye.mp4")
+
+
+@pytest.fixture
+def corrupt_video_file() -> str:
+    """Video containing a corrupted frame causing a decode failure."""
+    return get_absolute_path("resources/corrupt_frame.mp4")
+
+
+@pytest.fixture
+def test_image_sequence() -> str:
+    """Path to a short image sequence (from counter.mp4)."""
+    # Make sure at least one image in the sequence exists.
+    _ = get_absolute_path('resources/counter/frame001.png')
+    return get_absolute_path('resources/counter/frame%03d.png', check_exists=False)

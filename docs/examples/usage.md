@@ -14,7 +14,7 @@ scenedetect help
 ```
 
 <div class="important">
-The complete PySceneDetect Command-Line Interface (CLI) Reference <span class="fa fa-book"> can be found in the <a href="http://pyscenedetect-manual.readthedocs.io/" alt="Manual Link">PySceneDetect Manual</a>, located at <a href="http://pyscenedetect-manual.readthedocs.io/" alt="Manual Link">pyscenedetect-manual.readthedocs.io/</a>.
+The complete PySceneDetect Command-Line Interface (CLI) Reference <span class="fa fa-book"> can be found in the <a href="http://manual.scenedetect.com/en/v0.6/" alt="Manual Link">PySceneDetect Manual</a>, located at <a href="http://manual.scenedetect.com/en/v0.6/" alt="Manual Link">manual.scenedetect.com/en/v0.6/</a>.
 </div>
 
 
@@ -66,23 +66,15 @@ Next, the same, but also split the input video into individual clips (starting f
 scenedetect --input my_video.mp4 detect-content list-scenes split-video
 ```
 
-The `split-video` command requires either `ffmpeg` or `mkvmerge` to be available, depending on the options used.  By default `ffmpeg` is used unless the `-c`/`--copy` argument is specified. This ensures that each video starts and ends *exactly* at the timecodes PySceneDetect finds.  You can also override the codec arguments manually:
+The `split-video` command requires either `ffmpeg` or `mkvmerge` to be available, depending on the options used.  You can override the exact arguments passed to `ffmpeg`:
 
 ```rst
-scenedetect --input my_video.mp4 detect-content list-scenes split-video --override-args "-c:v libx264 -c:a aac"
+scenedetect --input my_video.mp4 detect-content list-scenes split-video --args "-c:v libx264 -crf 20 -c:a aac"
 ```
 
-You can also supply the `-h` / `--high-quality` option to the `split-video` command, which re-encodes the output videos with better quality when splitting the video into scenes.  Optionally, you can also specify the x264 `-p`/`--preset` and `-crf`/`--rate-factor` (call `scenedetect help split-video` for details).
+You can also specify `-h` / `--high-quality` to produces near lossless results, or `-p`/`--preset` and `-crf`/`--rate-factor` (call `scenedetect help split-video` for details). If either `-c`/`--copy` or `-m`/`--mkvmerge` is specified, codec copying mode is used, at the expense of frame accurate cuts.  Optionally, you can also specify the x264 `-p`/`--preset` and `-crf`/`--rate-factor` (call `scenedetect help split-video` for details).
 
-PySceneDetect can also copy the input video stream at the given scene cuts instead of re-encoding if you supply the `-c` / `--copy` option, which uses `mkvmerge` and is fairly quick.  However, in some cases, this does not produce accurate output videos, as some video formats only allow splitting on keyframes.  This is especially apparent when some of the scenes are very short in length.
-
-```rst
-scenedetect --input my_video.mp4 detect-content list-scenes split-video --copy
-```
-
-In order to effectively use PySceneDetect, you should become familiar with the basic command line options described below - especially the scene detection method/algorithm (`detect-content` and `detect-threshold`) and the threshold/sensitivity value for each (both commands have an optional `-t` / `--threshold` value that can be set).  These are described in the following section with respect to each detection method.
-
-Lastly, note that descriptions for all command-line arguments, as well as their default values, can be obtained by running PySceneDetect with the `help` command, `help [command]` for a specific command, or `help all` for a complete help and command listing.
+Note that descriptions for all command-line arguments, as well as their default values, can be obtained by running `scenedetect help` for global options, `scenedetect help [command]` for a specific command, or `help all` for a complete help and command listing.
 
 
 ## Detection Methods
@@ -112,7 +104,7 @@ The optimal threshold can be determined by generating a stats file (`-s`), openi
 
 You can supply the same stats file in subsequent calls to `scenedetect` with different threshold values to speed the processing time up significantly when experimenting with different values on the **same** video (or set of videos).  You *can* use multiple detectors with the same stats file, so long as you supply the *exact* same `-i` / `--input` video file(s) each time.
 
-*Remember*: once a stats file is created, it can only be used with the **same** input video(s).  If you want to process a different input video (or set of videos), change the name of the stats file supplied to `-s` / `--stats`, or delete the existing stats file on disk.
+*Remember*: once a stats file is created, it can only be used with the **same** input video.  If you want to process a different input video (or set of videos), change the name of the stats file supplied to `-s` / `--stats`, or delete the existing stats file on disk.
 
 
 ### Threshold-Based Detection Mode
@@ -133,7 +125,7 @@ As with `detect-content`, the optimal threshold can be determined by generating 
 
 ## Actions / Commands
 
-After setting the detection method(s), there are several commands that can be used.  Type `scenedetect help [command]` for help/arguments of a specific command listed below, or see the [full CLI reference](../reference/command-line-params.md) for details.
+After setting the detection method(s), there are several commands that can be used.  Type `scenedetect help [command]` for help/arguments of a specific command listed below:
 
  - `time`: Used to set input video duration/length or start/end time (discussed below).
  - `list-scenes`: Print and save a list of all scenes in table and CSV format.
@@ -144,6 +136,7 @@ After setting the detection method(s), there are several commands that can be us
  - `version`: Print PySceneDetect release version. No processing is done if present.
  - `about`: Print PySceneDetect license agreement and application information. No processing is done if present.
 
+You can also type `scenedetect help all` for the full CLI reference or [view it here](../reference/command-line.md).
 
 ## Seeking, Duration, and Setting Start / Stop Times
 

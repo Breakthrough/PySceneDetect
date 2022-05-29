@@ -1,0 +1,28 @@
+
+name: Check Code Format
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python 3.x
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.x'
+
+      - name: Update pip
+        run: python -m pip install --upgrade pip
+      - name: Install yapf
+        run: python -m pip install --upgrade yapf toml
+      - name: Install PySceneDetect Dependencies
+        run: python -m pip install -r requirements_headless.txt
+
+      - name: Check Code Format (scenedetect)
+        run: python -m yapf --diff --recursive scenedetect/
+      - name: Check Code Format (tests)
+        run: python -m yapf --diff --recursive tests/

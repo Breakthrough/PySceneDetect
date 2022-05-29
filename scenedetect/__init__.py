@@ -2,28 +2,14 @@
 #
 #         PySceneDetect: Python-Based Video Scene Detector
 #   ---------------------------------------------------------------
-#     [  Site: http://www.bcastell.com/projects/PySceneDetect/   ]
+#     [  Site:   http://www.scenedetect.scenedetect.com/         ]
+#     [  Docs:   http://manual.scenedetect.scenedetect.com/      ]
 #     [  Github: https://github.com/Breakthrough/PySceneDetect/  ]
-#     [  Documentation: http://pyscenedetect.readthedocs.org/    ]
 #
-# Copyright (C) 2014-2021 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2014-2022 Brandon Castellano <http://www.bcastell.com>.
+# PySceneDetect is licensed under the BSD 3-Clause License; see the
+# included LICENSE file, or visit one of the above pages for details.
 #
-# PySceneDetect is licensed under the BSD 3-Clause License; see the included
-# LICENSE file, or visit one of the following pages for details:
-#  - https://github.com/Breakthrough/PySceneDetect/
-#  - http://www.bcastell.com/projects/PySceneDetect/
-#
-# This software uses Numpy, OpenCV, click, tqdm, simpletable, and pytest.
-# See the included LICENSE files or one of the above URLs for more information.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-# AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
-# ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-# WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#
-
 """ ``scenedetect`` Module
 
 This is the main PySceneDetect module, containing imports of all classes
@@ -36,31 +22,33 @@ This file also contains the PySceneDetect version string (displayed when calling
 (when calling 'scenedetect about').
 """
 
-# Commonly used classes for easier use directly from the scenedetect namespace (e.g.
-# scenedetect.SceneManager instead of scenedetect.scene_manager.SceneManager).
-from scenedetect.scene_manager import SceneManager
+from logging import getLogger
+from typing import List, Optional, Tuple
+
+# Commonly used classes/functions exported under the `scenedetect` namespace for brevity.
+from scenedetect.scene_manager import SceneManager, save_images
+from scenedetect.scene_detector import SceneDetector
 from scenedetect.frame_timecode import FrameTimecode
+from scenedetect.video_stream import VideoStream, VideoOpenFailure
+from scenedetect.backends import AVAILABLE_BACKENDS, VideoStreamCv2, VideoStreamAv
+from scenedetect.stats_manager import StatsManager, StatsFileCorrupt
+from scenedetect.detectors import ContentDetector, AdaptiveDetector, ThresholdDetector
+from scenedetect.video_splitter import split_video_ffmpeg, split_video_mkvmerge
+from scenedetect.platform import init_logger
+
+# [DEPRECATED] DO NOT USE.
 from scenedetect.video_manager import VideoManager
-from scenedetect.stats_manager import StatsManager
-
-# We also bring the detectors into the main scenedetect package namespace
-# for convenience as well. Examples still reference the full package.
-from scenedetect.detectors import ThresholdDetector
-from scenedetect.detectors import ContentDetector
-from scenedetect.detectors import AdaptiveDetector
-
 
 # Used for module identification and when printing version & about info
 # (e.g. calling `scenedetect version` or `scenedetect about`).
-__version__ = 'v0.5.6.1'
-
+__version__ = 'v0.6'
 # About & copyright message string shown for the 'about' CLI command (scenedetect about).
 
 ABOUT_STRING = """
 Site/Updates: https://github.com/Breakthrough/PySceneDetect/
 Documentation: http://pyscenedetect.readthedocs.org/
 
-Copyright (C) 2014-2021 Brandon Castellano. All rights reserved.
+Copyright (C) 2014-2022 Brandon Castellano. All rights reserved.
 
 PySceneDetect is released under the BSD 3-Clause license. See the
 included LICENSE file or visit the PySceneDetect website for details.
@@ -78,7 +66,7 @@ This software may also invoke the following third-party executables:
 
 If included with your distribution of PySceneDetect, see the included
 LICENSE-FFMPEG and LICENSE-MKVMERGE or visit:
-  [ https://pyscenedetect.readthedocs.io/en/latest/copyright/ ]
+  [ https://scenedetect.com/copyright/ ]
 
 FFmpeg and mkvmerge are distributed only with certain PySceneDetect
 releases, in order to allow for automatic video splitting capability.
@@ -104,3 +92,93 @@ or visit the following URL: [ https://docs.python.org/3/license.html ]
 
 THE SOFTWARE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, EXPRESS OR IMPLIED.
 """
+
+logger = getLogger('pyscenedetect')
+
+
+def open_video(
+    path: str,
+    framerate: Optional[float] = None,
+    backend: str = 'opencv',
+    **kwargs,
+) -> VideoStream:
+    """Open a video at the given path. If `backend` is specified but not available on the current
+    system, OpenCV (`VideoStreamCv2`) will be used as a fallback.
+
+    Arguments:
+        path: Path to video file to open.
+        framerate: Overrides detected framerate if set.
+        backend: Name of specific backend to use, if possible. See
+            :py:data:`scenedetect.backends.AVAILABLE_BACKENDS` for backends available on the current
+            system. If the backend fails to open the video, OpenCV will be used as a fallback.
+        kwargs: Optional named arguments to pass to the specified `backend` constructor for
+            overriding backend-specific options.
+
+    Returns:
+        :py:class:`VideoStream` backend object created with the specified video path.
+
+    Raises:
+        :py:class:`VideoOpenFailure`: Constructing the VideoStream fails. If multiple backends have
+            been attempted, the error from the first backend will be returned.
+    """
+    # Try to open the video with the specified backend.
+    last_error = None
+    if backend in AVAILABLE_BACKENDS:
+        backend_type = AVAILABLE_BACKENDS[backend]
+        try:
+            logger.debug('Opening video with %s...', backend_type.BACKEND_NAME)
+            return backend_type(path, framerate, **kwargs)
+        except VideoOpenFailure as ex:
+            logger.warning('Failed to open video with %s: %s', backend_type.BACKEND_NAME, str(ex))
+            if backend == VideoStreamCv2.BACKEND_NAME:
+                raise
+            last_error = ex
+    else:
+        logger.warning('Backend %s not available.', backend)
+    # Fallback to OpenCV if `backend` could not open the video or is unavailable.
+    backend_type = VideoStreamCv2
+    logger.warning('Trying another backend: %s', backend_type.BACKEND_NAME)
+    try:
+        return backend_type(path, framerate)
+    except VideoOpenFailure as ex:
+        logger.debug('Failed to open video: %s', str(ex))
+        if last_error is None:
+            last_error = ex
+    # If we get here, either the specified backend or the OpenCV backend threw an exception, so
+    # make sure we propagate it.
+    assert last_error is not None
+    raise last_error
+
+
+def detect(video_path: str,
+           detector: SceneDetector,
+           stats_file_path: Optional[str] = None,
+           show_progress: bool = False) -> List[Tuple[FrameTimecode, FrameTimecode]]:
+    """Perform scene detection on a given video `path` using the specified `detector`.
+
+    Arguments:
+        video_path: Path to input video (absolute or relative to working directory).
+        detector: A `SceneDetector` instance (see :py:mod:`scenedetect.detectors` for a full list
+            of detectors).
+        stats_file_path: Path to save per-frame metrics to for statistical analysis or to
+            determine a better threshold value.
+        show_progress: Show a progress bar with estimated time remaining. Default is False.
+
+    Returns:
+        List of scenes (pairs of :py:class:`FrameTimecode` objects).
+
+    Raises:
+        :py:class:`VideoOpenFailure`: `video_path` could not be opened.
+        :py:class:`StatsFileCorrupt`: `stats_file_path` is an invalid stats file
+    """
+    video = open_video(video_path)
+    if stats_file_path:
+        scene_manager = SceneManager(StatsManager())
+    else:
+        scene_manager = SceneManager()
+    scene_manager.add_detector(detector)
+    scene_manager.detect_scenes(video=video, show_progress=show_progress)
+    if not scene_manager.stats_manager is None:
+        scene_manager.stats_manager.save_to_csv(
+            path=stats_file_path, base_timecode=video.base_timecode)
+    return scene_manager.get_scene_list()

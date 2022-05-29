@@ -22,7 +22,6 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-
 """ ``scenedetect.thirdparty.simpletable`` Module
 
 simpletable.py - v0.1 2014-07-31 Matheus Vieira Portela
@@ -85,9 +84,9 @@ class SimpleTableCell(object):
     def __str__(self):
         """Return the HTML code for the table cell."""
         if self.header:
-            return '<th>%s</th>' %(self.text)
+            return '<th>%s</th>' % (self.text)
         else:
-            return '<td>%s</td>' %(self.text)
+            return '<td>%s</td>' % (self.text)
 
 
 class SimpleTableImage(object):
@@ -107,23 +106,23 @@ class SimpleTableImage(object):
         """
         self.image_file = image_file
         if width:
-            self.width=round(width)
+            self.width = round(width)
         else:
-            self.width=width
+            self.width = width
         if height:
-            self.height=round(height)
+            self.height = round(height)
         else:
-            self.height=height
+            self.height = height
 
     def __str__(self):
         """Return the HTML code for the table cell with the image."""
         safe_filename = quote(self.image_file)
-        output = '<a href="%s" target="_blank">' %(safe_filename)
-        output += '<img src="%s"' %(safe_filename)
+        output = '<a href="%s" target="_blank">' % (safe_filename)
+        output += '<img src="%s"' % (safe_filename)
         if self.height:
-            output += ' height="%s"' %(self.height)
+            output += ' height="%s"' % (self.height)
         if self.width:
-            output += ' width="%s"' %(self.width)
+            output += ' width="%s"' % (self.width)
         output += '></a>'
 
         return output
@@ -141,6 +140,7 @@ class SimpleTableRow(object):
     cell2 = SimpleTableCell('world!')
     row = SimpleTableRow([cell1, cell2])
     """
+
     def __init__(self, cells=None, header=False):
         """Table row constructor.
 
@@ -202,6 +202,7 @@ class SimpleTable(object):
     rows = SimpleTableRow(['Hello,', 'world!'])
     table = SimpleTable(rows)
     """
+
     def __init__(self, rows=None, header_row=None, css_class=None):
         """Table constructor.
 
@@ -264,6 +265,7 @@ class SimpleTable(object):
 
 class HTMLPage(object):
     """A class to create HTML pages containing CSS and tables."""
+
     def __init__(self, tables=None, css=None, encoding="utf-8"):
         """HTML page constructor.
 
@@ -286,7 +288,7 @@ class HTMLPage(object):
 
         # Set encoding
         page.append('<meta http-equiv="Content-Type" content="text/html;'
-            'charset=%s">' % self.encoding)
+                    'charset=%s">' % self.encoding)
 
         for table in self.tables:
             page.append(str(table))
@@ -319,10 +321,9 @@ def fit_data_to_columns(data, num_cols):
     fitted_data = fit_data_to_columns(test_data, 5)
     table = SimpleTable(fitted_data)
     """
-    num_iterations = len(data)/num_cols
+    num_iterations = len(data) / num_cols
 
-    if len(data)%num_cols != 0:
+    if len(data) % num_cols != 0:
         num_iterations += 1
 
-    return [data[num_cols*i:num_cols*i + num_cols] for i in range(num_iterations)]
-
+    return [data[num_cols * i:num_cols * i + num_cols] for i in range(num_iterations)]

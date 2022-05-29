@@ -1,3 +1,9 @@
-include *.md
-include *.rst
-include LICENSE*
+recursive-exclude .github *
+recursive-exclude dist *
+recursive-exclude manual *
+exclude manual/requirements.txt
+exclude *
+include README.md
+include LICENSE
+include pyproject.toml
+include setup.cfg

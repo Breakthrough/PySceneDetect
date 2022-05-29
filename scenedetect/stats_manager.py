@@ -2,29 +2,14 @@
 #
 #         PySceneDetect: Python-Based Video Scene Detector
 #   ---------------------------------------------------------------
-#     [  Site: http://www.bcastell.com/projects/PySceneDetect/   ]
+#     [  Site:   http://www.scenedetect.scenedetect.com/         ]
+#     [  Docs:   http://manual.scenedetect.scenedetect.com/      ]
 #     [  Github: https://github.com/Breakthrough/PySceneDetect/  ]
-#     [  Documentation: http://pyscenedetect.readthedocs.org/    ]
 #
-# Copyright (C) 2014-2021 Brandon Castellano <http://www.bcastell.com>.
-#
+# Copyright (C) 2014-2022 Brandon Castellano <http://www.bcastell.com>.
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
-# included LICENSE file or visit one of the following pages for details:
-#  - http://www.bcastell.com/projects/PySceneDetect/
-#  - https://github.com/Breakthrough/PySceneDetect/
+# included LICENSE file, or visit one of the above pages for details.
 #
-# This software uses Numpy, OpenCV, click, tqdm, simpletable, and pytest.
-# See the included LICENSE files or one of the above URLs for more information.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-# IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR
-# OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
-# ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
-# OTHER DEALINGS IN THE SOFTWARE.
-#
-
 """ ``scenedetect.stats_manager`` Module
 
 This module contains the :py:class:`StatsManager` class, which provides a key-value store
@@ -35,94 +20,72 @@ the metrics calculated for each frame. The :py:class:`StatsManager` must be regi
 `stats_manager` argument.
 
 The entire :py:class:`StatsManager` can be :py:meth:`saved to <StatsManager.save_to_csv>`
-and :py:meth:`loaded from <StatsManager.load_from_csv>` a human-readable CSV
-file, also allowing both precise determination of the threshold or other optimal values
-for video files.  See the :py:meth:`save_to_csv() <StatsManager.save_to_csv>` and
-:py:meth:`load_from_csv() <StatsManager.load_from_csv>` methods for more information.
-
-The :py:class:`StatsManager` can also be used to cache the calculation results of the scene
-detectors being used, speeding up subsequent scene detection runs using the same pair of
-:py:class:`SceneManager<scenedetect.scene_manager.SceneManager>`/:py:class:`StatsManager` objects.
+a human-readable CSV file, also allowing both precise determination of the threshold or
+other optimal values for video files.
 """
 
-# Standard Library Imports
-from __future__ import print_function
-import logging
+import csv
+from logging import getLogger
+from typing import Any, Dict, Iterable, List, Optional, Set, TextIO, Union
+import os.path
 
-# PySceneDetect Library Imports
-from scenedetect.platform import get_csv_reader
-from scenedetect.platform import get_csv_writer
+from scenedetect.frame_timecode import FrameTimecode
 
-# pylint: disable=useless-super-delegation
-
-logger = logging.getLogger('pyscenedetect')
+logger = getLogger('pyscenedetect')
 
 ##
 ## StatsManager CSV File Column Names (Header Row)
 ##
 
 COLUMN_NAME_FRAME_NUMBER = "Frame Number"
-COLUMN_NAME_TIMECODE = "Timecode"
+"""Name of column containing frame numbers in the statsfile CSV."""
 
+COLUMN_NAME_TIMECODE = "Timecode"
+"""Name of column containing timecodes in the statsfile CSV."""
 
 ##
 ## StatsManager Exceptions
 ##
 
+
 class FrameMetricRegistered(Exception):
     """ Raised when attempting to register a frame metric key which has
     already been registered. """
-    def __init__(self, metric_key, message="Attempted to re-register frame metric key."):
-        # type: (str, str)
-        # Pass message string to base Exception class.
-        super(FrameMetricRegistered, self).__init__(message)
+
+    def __init__(self,
+                 metric_key: str,
+                 message: str = "Attempted to re-register frame metric key."):
+        super().__init__(message)
         self.metric_key = metric_key
 
 
 class FrameMetricNotRegistered(Exception):
     """ Raised when attempting to call get_metrics(...)/set_metrics(...) with a
     frame metric that does not exist, or has not been registered. """
-    def __init__(self, metric_key, message=
-                 "Attempted to get/set frame metrics for unregistered metric key."):
-        # type: (str, str)
-        # Pass message string to base Exception class.
-        super(FrameMetricNotRegistered, self).__init__(message)
+
+    def __init__(self,
+                 metric_key: str,
+                 message: str = "Attempted to get/set frame metrics for unregistered metric key."):
+        super().__init__(message)
         self.metric_key = metric_key
 
 
 class StatsFileCorrupt(Exception):
-    """ Raised when frame metrics/stats could not be loaded from a provided CSV file. """
-    def __init__(self, message=
-                 "Could not load frame metric data data from passed CSV file."):
-        # type: (str, str)
-        # Pass message string to base Exception class.
-        super(StatsFileCorrupt, self).__init__(message)
+    """Raised when frame metrics/stats could not be loaded from a provided CSV file."""
 
-
-class NoMetricsRegistered(Exception):
-    """ Raised when attempting to save a CSV file via save_to_csv(...) without any
-    frame metrics having been registered (i.e. no SceneDetector objects were added
-    to the owning SceneManager object, if any). """
-    # pylint: disable=unnecessary-pass
-    pass
-
-
-class NoMetricsSet(Exception):
-    """ Raised if no frame metrics have been set via set_metrics(...) when attempting
-    to save the stats to a CSV file via save_to_csv(...). This may also indicate that
-    detect_scenes(...) was not called on the owning SceneManager object, if any. """
-    # pylint: disable=unnecessary-pass
-    pass
+    def __init__(self,
+                 message: str = "Could not load frame metric data data from passed CSV file."):
+        super().__init__(message)
 
 
 ##
 ## StatsManager Class Implementation
 ##
 
-class StatsManager(object):
-    """ Provides a key-value store for frame metrics/calculations which can be used
-    as a cache to speed up subsequent calls to a SceneManager's detect_scenes(...)
-    method. The statistics can be saved to a CSV file, and loaded from disk.
+
+class StatsManager:
+    """Provides a key-value store for frame metrics/calculations which can be used
+    for two-pass detection algorithms, as well as saving stats to a CSV file.
 
     Analyzing a statistics CSV file is also very useful for finding the optimal
     algorithm parameters for certain detection methods. Additionally, the data
@@ -130,23 +93,29 @@ class StatsManager(object):
     metric of interest for a series of frames by iteratively calling get_metrics(),
     after having called the detect_scenes(...) method on the SceneManager object
     which owns the given StatsManager instance.
+
+    Only metrics consisting of `float` or `int` should be used currently. All metrics loaded
+    from disk are treated as `float`.
     """
 
-    def __init__(self):
-        # type: ()
+    def __init__(self, base_timecode: FrameTimecode = None):
+        """Initialize a new StatsManager.
+
+        Arguments:
+            base_timecode: Timecode associated with this object. Must not be None (default value
+                will be removed in a future release).
+        """
         # Frame metrics is a dict of frame (int): metric_dict (Dict[str, float])
         # of each frame metric key and the value it represents (usually float).
-        self._frame_metrics = dict()        # Dict[FrameTimecode, Dict[str, float]]
-        self._registered_metrics = set()    # Set of frame metric keys.
-        self._loaded_metrics = set()        # Metric keys loaded from stats file.
-        self._metrics_updated = False       # Flag indicating if metrics require saving.
+        self._frame_metrics: Dict[FrameTimecode, Dict[str, float]] = dict()
+        self._registered_metrics: Set[str] = set()                   # Set of frame metric keys.
+        self._loaded_metrics: Set[str] = set()                       # Metric keys loaded from stats file.
+        self._metrics_updated: bool = False                          # Flag indicating if metrics require saving.
+        self._base_timecode: Optional[FrameTimecode] = base_timecode # Used for timing calculations.
 
+    def register_metrics(self, metric_keys: Iterable[str]) -> None:
+        """Register a list of metric keys that will be used by the detector.
 
-    def register_metrics(self, metric_keys):
-        # type: (List[str]) -> bool
-        """ Register Metrics
-
-        Register a list of metric keys that will be used by the detector.
         Used to ensure that multiple detector keys don't overlap.
 
         Raises:
@@ -161,10 +130,10 @@ class StatsManager(object):
             else:
                 raise FrameMetricRegistered(metric_key)
 
-
-    def get_metrics(self, frame_number, metric_keys):
-        # type: (int, List[str]) -> List[Union[None, int, float, str]]
-        """ Get Metrics: Returns the requested statistics/metrics for a given frame.
+    # TODO(v1.0): Change frame_number to a FrameTimecode now that it is just a hash and will
+    # be required for VFR support.
+    def get_metrics(self, frame_number: int, metric_keys: Iterable[str]) -> List[Any]:
+        """Return the requested statistics/metrics for a given frame.
 
         Arguments:
             frame_number (int): Frame number to retrieve metrics for.
@@ -177,22 +146,18 @@ class StatsManager(object):
         """
         return [self._get_metric(frame_number, metric_key) for metric_key in metric_keys]
 
-
-    def set_metrics(self, frame_number, metric_kv_dict):
-        # type: (int, Dict[str, Union[None, int, float, str]]) -> None
+    def set_metrics(self, frame_number: int, metric_kv_dict: Dict[str, Any]) -> None:
         """ Set Metrics: Sets the provided statistics/metrics for a given frame.
 
         Arguments:
-            frame_number (int): Frame number to retrieve metrics for.
-            metric_kv_dict (Dict[str, metric]): A dict mapping metric keys to the
+            frame_number: Frame number to retrieve metrics for.
+            metric_kv_dict: A dict mapping metric keys to the
                 respective integer/floating-point metric values to set.
         """
         for metric_key in metric_kv_dict:
             self._set_metric(frame_number, metric_key, metric_kv_dict[metric_key])
 
-
-    def metrics_exist(self, frame_number, metric_keys):
-        # type: (int, List[str]) -> bool
+    def metrics_exist(self, frame_number: int, metric_keys: Iterable[str]) -> bool:
         """ Metrics Exist: Checks if the given metrics/stats exist for the given frame.
 
         Returns:
@@ -200,9 +165,7 @@ class StatsManager(object):
         """
         return all([self._metric_exists(frame_number, metric_key) for metric_key in metric_keys])
 
-
-    def is_save_required(self):
-        # type: () -> bool
+    def is_save_required(self) -> bool:
         """ Is Save Required: Checks if the stats have been updated since loading.
 
         Returns:
@@ -211,58 +174,60 @@ class StatsManager(object):
         """
         return self._metrics_updated
 
-
-    def save_to_csv(self, csv_file, base_timecode, force_save=True):
-        # type: (File [w], FrameTimecode, bool) -> None
+    def save_to_csv(self,
+                    csv_file: Union[str, bytes, TextIO],
+                    base_timecode: Optional[FrameTimecode] = None,
+                    force_save=True) -> None:
         """ Save To CSV: Saves all frame metrics stored in the StatsManager to a CSV file.
 
         Arguments:
-            csv_file: A file handle opened in write mode (e.g. open('...', 'w')).
-            base_timecode: The base_timecode obtained from the frame source VideoManager.
-                If using an OpenCV VideoCapture, create one using the video framerate by
-                setting base_timecode=FrameTimecode(0, fps=video_framerate).
-            force_save: If True, forcably writes metrics out even if there are no
-                registered metrics or frame statistics. If False, a NoMetricsRegistered
-                will be thrown if there are no registered metrics, and a NoMetricsSet
-                exception will be thrown if is_save_required() returns False.
+            csv_file: A file handle opened in write mode (e.g. open('...', 'w')) or a path as str.
+            base_timecode: [DEPRECATED] DO NOT USE. For backwards compatibility.
+            force_save: If True, writes metrics out even if an update is not required.
 
         Raises:
-            NoMetricsRegistered: No frame metrics have been registered to save,
-                nor is there any frame data to save.
-            NoMetricsSet: No frame metrics have been entered/updated, thus there
-                is no frame data to save.
+            OSError: If `path` cannot be opened or a write failure occurs.
         """
-        csv_writer = get_csv_writer(csv_file)
+        # TODO: Remove `base_timecode`.
+        if base_timecode is not None:
+            logger.error('base_timecode is deprecated.')
+
         # Ensure we need to write to the file, and that we have data to do so with.
-        if ((self.is_save_required() or force_save) and
-                self._registered_metrics and self._frame_metrics):
-            # Header rows.
-            metric_keys = sorted(list(self._registered_metrics.union(self._loaded_metrics)))
+        if not ((self.is_save_required() or force_save) and self._registered_metrics
+                and self._frame_metrics):
+            logger.info("No metrics to save.")
+            return
+
+        assert self._base_timecode is not None
+
+        # If we get a path instead of an open file handle, recursively call ourselves
+        # again but with file handle instead of path.
+        if isinstance(csv_file, (str, bytes)):
+            with open(csv_file, 'w') as file:
+                return self.save_to_csv(csv_file=file, force_save=force_save)
+        csv_writer = csv.writer(csv_file, lineterminator='\n')
+
+        # Header rows.
+        metric_keys = sorted(list(self._registered_metrics.union(self._loaded_metrics)))
+        csv_writer.writerow([COLUMN_NAME_FRAME_NUMBER, COLUMN_NAME_TIMECODE] + metric_keys)
+        frame_keys = sorted(self._frame_metrics.keys())
+        logger.info("Writing %d frames to CSV...", len(frame_keys))
+        for frame_key in frame_keys:
+            frame_timecode = self._base_timecode + frame_key
             csv_writer.writerow(
-                [COLUMN_NAME_FRAME_NUMBER, COLUMN_NAME_TIMECODE] + metric_keys)
-            frame_keys = sorted(self._frame_metrics.keys())
-            logger.info("Writing %d frames to CSV...", len(frame_keys))
-            for frame_key in frame_keys:
-                frame_timecode = base_timecode + frame_key
-                csv_writer.writerow(
-                    [frame_timecode.get_frames(), frame_timecode.get_timecode()] +
-                    [str(metric) for metric in self.get_metrics(frame_key, metric_keys)])
-        else:
-            if not self._registered_metrics:
-                raise NoMetricsRegistered()
-            if not self._frame_metrics:
-                raise NoMetricsSet()
+                [frame_timecode.get_frames() +
+                 1, frame_timecode.get_timecode()] +
+                [str(metric) for metric in self.get_metrics(frame_key, metric_keys)])
 
     @staticmethod
-    def valid_header(row):
-        # type: (List[str]) -> bool
-        """ Validates if the given CSV row is a valid header for a statsfile.
+    def valid_header(row: List[str]) -> bool:
+        """Check that the given CSV row is a valid header for a statsfile.
 
         Arguments:
             row: A row decoded from the CSV reader.
 
         Returns:
-            True if a valid statsfile header, False otherwise.
+            True if `row` is a valid statsfile header, False otherwise.
         """
         if not row or not len(row) >= 2:
             return False
@@ -270,23 +235,38 @@ class StatsManager(object):
             return False
         return True
 
-    def load_from_csv(self, csv_file, reset_save_required=True):
-        # type: (File [r], Optional[bool] -> int
-        """ Load From CSV: Loads all metrics stored in a CSV file into the StatsManager instance.
+    # TODO(v1.0): Remove.
+    def load_from_csv(self, csv_file: Union[str, bytes, TextIO]) -> Optional[int]:
+        """[DEPRECATED] DO NOT USE
+
+        Load all metrics stored in a CSV file into the StatsManager instance. Will be removed in a
+        future release after becoming a no-op.
 
         Arguments:
-            csv_file: A file handle opened in read mode (e.g. open('...', 'r')).
-            reset_save_required: If True, clears the flag indicating that a save is required.
+            csv_file: A file handle opened in read mode (e.g. open('...', 'r')) or a path as str.
 
         Returns:
             int or None: Number of frames/rows read from the CSV file, or None if the
-            input file was blank.
+            input file was blank or could not be found.
 
         Raises:
             StatsFileCorrupt: Stats file is corrupt and can't be loaded, or wrong file
                 was specified.
         """
-        csv_reader = get_csv_reader(csv_file)
+        # TODO: Make this an error, then make load_from_csv() a no-op, and finally, remove it.
+        logger.warning("load_from_csv() is deprecated and will be removed in a future release.")
+
+        # If we get a path instead of an open file handle, check that it exists, and if so,
+        # recursively call ourselves again but with file set instead of path.
+        if isinstance(csv_file, (str, bytes)):
+            if os.path.exists(csv_file):
+                with open(csv_file, 'r') as file:
+                    return self.load_from_csv(csv_file=file)
+            # Path doesn't exist.
+            return None
+
+        # If we get here, file is a valid file handle in read-only text mode.
+        csv_reader = csv.reader(csv_file, lineterminator='\n')
         num_cols = None
         num_metrics = None
         num_frames = None
@@ -317,31 +297,29 @@ class StatsManager(object):
                     try:
                         metric_dict[self._loaded_metrics[i]] = float(metric_str)
                     except ValueError:
-                        raise StatsFileCorrupt('Corrupted value in stats file: %s' % metric_str)
-            self.set_metrics(int(row[0]), metric_dict)
+                        raise StatsFileCorrupt('Corrupted value in stats file: %s' %
+                                               metric_str) from ValueError
+            frame_number = int(row[0])
+            # Switch from 1-based to 0-based frame numbers.
+            if frame_number > 0:
+                frame_number -= 1
+            self.set_metrics(frame_number, metric_dict)
             num_frames += 1
         logger.info('Loaded %d metrics for %d frames.', num_metrics, num_frames)
-        if reset_save_required:
-            self._metrics_updated = False
+        self._metrics_updated = False
         return num_frames
 
-
-    def _get_metric(self, frame_number, metric_key):
-        # type: (int, str) -> Union[None, int, float, str]
+    def _get_metric(self, frame_number: int, metric_key: str) -> Optional[Any]:
         if self._metric_exists(frame_number, metric_key):
             return self._frame_metrics[frame_number][metric_key]
         return None
 
-
-    def _set_metric(self, frame_number, metric_key, metric_value):
-        # type: (int, str, Union[None, int, float, str]) -> None
+    def _set_metric(self, frame_number: int, metric_key: str, metric_value: Any) -> None:
         self._metrics_updated = True
         if not frame_number in self._frame_metrics:
             self._frame_metrics[frame_number] = dict()
         self._frame_metrics[frame_number][metric_key] = metric_value
 
-
-    def _metric_exists(self, frame_number, metric_key):
-        # type: (int, List[str]) -> bool
-        return (frame_number in self._frame_metrics and
-                metric_key in self._frame_metrics[frame_number])
+    def _metric_exists(self, frame_number: int, metric_key: str) -> bool:
+        return (frame_number in self._frame_metrics
+                and metric_key in self._frame_metrics[frame_number])

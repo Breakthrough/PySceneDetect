@@ -2,29 +2,14 @@
 #
 #         PySceneDetect: Python-Based Video Scene Detector
 #   ---------------------------------------------------------------
-#     [  Site: http://www.bcastell.com/projects/PySceneDetect/   ]
+#     [  Site:   http://www.scenedetect.scenedetect.com/         ]
+#     [  Docs:   http://manual.scenedetect.scenedetect.com/      ]
 #     [  Github: https://github.com/Breakthrough/PySceneDetect/  ]
-#     [  Documentation: http://pyscenedetect.readthedocs.org/    ]
 #
-# Copyright (C) 2014-2021 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2014-2022 Brandon Castellano <http://www.bcastell.com>.
+# PySceneDetect is licensed under the BSD 3-Clause License; see the
+# included LICENSE file, or visit one of the above pages for details.
 #
-# PySceneDetect is licensed under the BSD 3-Clause License; see the included
-# LICENSE file, or visit one of the following pages for details:
-#  - https://github.com/Breakthrough/PySceneDetect/
-#  - http://www.bcastell.com/projects/PySceneDetect/
-#
-# This software uses Numpy, OpenCV, click, tqdm, simpletable, and pytest.
-# See the included LICENSE files or one of the above URLs for more information.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-# AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
-# ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-# WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#
-
-
 """ ``scenedetect.detectors`` Module
 
 This module contains implementations of scene detection algorithms by inhereting
@@ -32,18 +17,17 @@ from the base SceneDetector class (in scenedetect.scene_detector) and implementi
 the required methods. This allows implementation of other generic algorithms as
 well as custom scenario-specific algorithms.
 
-Individual detectors are imported in this file for easy access from other
-modules (i.e. from scenedetect.detectors import ContentDetector).
+The following detection algorithms come with PySceneDetect:
+
+ * :py:class:`ContentDetector <scenedetect.detectors.content_detector.ContentDetector>`:
+    Detects shot changes by considering pixel changes in the HSV colorspace.
+
+ * :py:class:`ThresholdDetector <scenedetect.detectors.threshold_detector.ThresholdDetector>`:
+    Detects transitions below a set pixel intensity (cuts or fades to black).
+
+ * :py:class:`AdaptiveDetector <scenedetect.detectors.adaptive_detector.AdaptiveDetector>`:
+    Two-pass version of `ContentDetector` that handles fast camera movement better in some cases.
 """
-
-# PySceneDetect Detection Algorithm Imports
-from scenedetect.detectors.content_detector import ContentDetector
-from scenedetect.detectors.threshold_detector import ThresholdDetector
-from scenedetect.detectors.adaptive_detector import AdaptiveDetector
-
-# Algorithms being ported:
-#from scenedetect.detectors.motion_detector import MotionDetector
-
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 #                                                                             #
@@ -87,3 +71,11 @@ from scenedetect.detectors.adaptive_detector import AdaptiveDetector
 #                                                                             #
 #                                                                             #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+# PySceneDetect Detection Algorithm Imports
+from scenedetect.detectors.content_detector import ContentDetector
+from scenedetect.detectors.threshold_detector import ThresholdDetector
+from scenedetect.detectors.adaptive_detector import AdaptiveDetector
+
+# Algorithms being ported:
+#from scenedetect.detectors.motion_detector import MotionDetector

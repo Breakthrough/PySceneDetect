@@ -5,3 +5,16 @@ build/
 dist/
 *.egg-info/
 manual/_build/
+*.mp4
+*.jpg
+*.jpeg
+*.patch
+.eggs/*
+*.exe
+*.mkv
+*.rtf
+*.txt
+*.m4v
+*.csv
+.vscode/*
+tests/resources/*

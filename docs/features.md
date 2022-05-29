@@ -22,20 +22,18 @@
 </div>
 
 
-----------------
+------------------------------------------------------------------------
 
 
 ## Features in Current Release
 
  - exports list of scenes to .CSV file and terminal (both timecodes and frame numbers) with `list-scenes` command
  - exports timecodes in standard format (HH:MM:SS.nnn), comma-separated for easy copy-and-paste into external tools and analysis with spreadsheet software
- - statistics/analysis mode to export frame-by-frame video metrics (`--stats/-s statsfile.csv`)
- - output-suppression (quiet) mode for better automation with external scripts/programs (`-v quiet`)
- - user-selectable subsampling for improved performance (`-d/--downscale`)
- - user-selectable frame skipping for improved performance (`-fs`, not recommended)
+ - statistics/analysis mode to export frame-by-frame video metrics via the `-s [FILE]`/`--stats [FILE]` argument (e.g. `--stats metrics.csv`)
+ - output-suppression (quiet) mode for better automation with external scripts/programs (`-q`/`--quiet`)
  - save an image of the first and last frame of each detected scene via the `save-images` command
- - ability to specify starting/ending times via `time` command (`--start/-s` and `--end/-e`), and/or set duration for processing (`--duration/-d`)
- - user-definable fade bias to shift scenes between fade in/out points (threshold mode only)
+ - split the input video automatically if `ffmpeg` or `mkvmerge` is available via the `split-video` command
+
 
 ### Scene Detection Methods
 
@@ -46,7 +44,7 @@
 For a detailed explanation of how a particular scene detection method/algorithm works, see the [Scene Detection Method Details Section](reference/detection-methods.md) in the Documentation & Reference.
 
 
-----------------
+------------------------------------------------------------------------
 
 
 ## Version Roadmap
@@ -56,11 +54,10 @@ Future version roadmaps are now [tracked as milestones (link)](https://github.co
 
 ### Planned Features for Future Releases
 
-The following are features being planned or developed for future releases of PySceneDetect:
+The following features are under consideration for future releases of PySceneDetect.  Feel free to jump in and help out!
 
  - automatic threshold detection for the current scene detection methods (can simply be an ouptut message indicating "Predicted Best Threshold: X")
  - optional suppression of short-length flashes/bursts of light [ [#35] ](https://github.com/Breakthrough/PySceneDetect/issues/35)
- - support for using multiple `--input` videos and the `split-video` command **without** the `-c`/`--copy` flag [ [#71] ](https://github.com/Breakthrough/PySceneDetect/issues/71)
  - colour histogram-based scene detection algorithm in the HSV/HSL colourspace [ [#53] ](https://github.com/Breakthrough/PySceneDetect/issues/53)
  - [perceptual hash](https://en.wikipedia.org/wiki/Perceptual_hashing) based scene detection
  - improve robustness of content-aware detection by combining with edge detection (similar to MATLAB-based scene change detector)

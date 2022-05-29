@@ -22,13 +22,13 @@ sys.path.insert(0, os.path.abspath('..'))
 # -- Project information -----------------------------------------------------
 
 project = 'PySceneDetect'
-copyright = '2014-2021, Brandon Castellano'
+copyright = '2014-2022, Brandon Castellano'
 author = 'Brandon Castellano'
 
 # The short X.Y version
-version = ''
+version = '0.6'
 # The full version, including alpha/beta/rc tags
-release = 'v0.5.6.1'
+release = 'v0.6'
 
 
 # -- General configuration ---------------------------------------------------
@@ -44,6 +44,11 @@ extensions = [
     'sphinx.ext.napoleon',
     'sphinx.ext.autodoc',
 ]
+
+autoclass_content = "both"
+
+autodoc_typehints = 'description'
+autodoc_typehints_format = 'short'
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

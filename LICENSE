@@ -79,29 +79,24 @@ installing or using this software/tutorial, you agree to these terms.
 
 -----------------------------------------------------------------------
 
-This software may also invoke mkvmerge or FFmpeg, if available.
-
-FFmpeg is a trademark of Fabrice Bellard.
-mkvmerge is Copyright (C) 2005-2016, Matroska.
-
-Certain distributions of PySceneDetect may include the above software;
-see the included LICENSE-FFMPEG and LICENSE-MKVMERGE files, or visit the
-below URLs for details.  In source distributions of PySceneDetect,
-neither mkvmerge nor FFmpeg is not distributed, and requires manual
-installation in order to allow automatic video splitting capability.
-These programs can be obtained from following URLs (note that mkvmerge
-is a part of the MKVToolNix package):
+This software may also invoke FFmpeg or mkvmerge, if available. If required,
+these programs can be obtained from following URLs:
 
     FFmpeg:   [ https://ffmpeg.org/download.html ]
     mkvmerge: [ https://mkvtoolnix.download/downloads.html ]
 
-Once installed, ensure the program can be accessed system-wide by calling
-the `mkvmerge` or `ffmpeg` command from a terminal/command prompt.
-PySceneDetect will automatically use whichever program is available on
-the computer, depending on the specified command-line options.
+Once installed, ensure the program is in your PATH variable (i.e. you can
+run the `ffmpeg` or `mkvmerge` command from any location).
+
+Certain distributions of PySceneDetect may include the above software;
+see the included LICENSE-FFMPEG and LICENSE-MKVMERGE files, or visit
+[ https://ffmpeg.org ] and [ https://mkvtoolnix.download ] respectively.
+
+FFmpeg is a trademark of Fabrice Bellard.
+mkvmerge is Copyright (C) 2005-2016, Matroska.
 
 Additionally, certain Windows distributions may include a compiled
 Python distribution. For license information regarding the distributed
-version of Python, see the LICENSE files in the installation directory,
-or visit the following URL: [ https://docs.python.org/3/license.html ]
+version of Python, see the LICENSE-PYTHON file, or visit:
 
+    [ https://docs.python.org/3/license.html ]
