@@ -8,7 +8,7 @@ Video Scene Cut Detection and Analysis Tool
 
 ----------------------------------------------------------
 
-### Latest Release: v0.6 (TBD)
+### Latest Release: v0.6 (May 29, 2022)
 
 **Website**:  http://www.scenedetect.com
 

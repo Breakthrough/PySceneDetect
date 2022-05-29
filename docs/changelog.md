@@ -4,7 +4,7 @@ PySceneDetect Releases
 
 ## PySceneDetect 0.6
 
-### 0.6 (TBD)
+### 0.6 (May 29, 2022)
 
 #### Release Notes
 
