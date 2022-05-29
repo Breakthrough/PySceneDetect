@@ -49,3 +49,17 @@ script:
   - python -m pytest tests/
   # TODO: Install and test the built Python packages.
   # TODO: Install ffmpeg/mkvtoolnix to run split-video tests.
+
+  # Install and test source distribution.
+  - python -m pip install dist/scenedetect-`python -c "import scenedetect; print(scenedetect.__version__[1:])"`.tar.gz
+  - scenedetect version
+  - scenedetect -i tests/resources/testvideo.mp4 -b opencv detect-content time -e 2s
+  - scenedetect -i tests/resources/testvideo.mp4 -b pyav detect-content time -e 2s
+  - python -m pip uninstall scenedetect
+
+  # Install and test binary wheel.
+  - python -m pip install dist/scenedetect-`python -c "import scenedetect; print(scenedetect.__version__[1:])"`-py3-none-any.whl
+  - scenedetect version
+  - scenedetect -i tests/resources/testvideo.mp4 -b opencv detect-content time -e 2s
+  - scenedetect -i tests/resources/testvideo.mp4 -b pyav detect-content time -e 2s
+  - python -m pip uninstall scenedetect
