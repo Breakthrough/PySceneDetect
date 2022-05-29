@@ -10,19 +10,15 @@ matrix:
       dist: xenial
       language: python
       python: "3.7"
-    - os: linux
-      dist: xenial
-      language: python
-      python: "3.8"
 
     - os: linux
       dist: bionic
       language: python
-      python: "3.8"
+      python: "3.7"
     - os: linux
-      dist: focal
+      dist: bionic
       language: python
-      python: "3.9"
+      python: "3.8"
 
     - os: linux
       dist: focal
@@ -32,6 +28,10 @@ matrix:
       dist: focal
       language: python
       python: "3.9"
+    - os: linux
+      dist: focal
+      language: python
+      python: "3.10"
 
 install:
   - "python -m pip install --upgrade pip"
