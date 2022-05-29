@@ -35,10 +35,16 @@ matrix:
 
 install:
   - "python -m pip install --upgrade pip"
+  # Make sure we get latest binary packages of the video input libraries.
+  - "python -m pip install av opencv-python-headless --only-binary :all:"
+  # Install other required packages and download required test resources.
   - "python -m pip install -r requirements_headless.txt"
   - "git fetch --depth=1 https://github.com/Breakthrough/PySceneDetect.git refs/heads/resources:refs/remotes/origin/resources"
   - "git checkout refs/remotes/origin/resources -- tests/resources/"
+  # Make sure the Python package is buildable.
+  - "python setup.py sdist bdist_wheel"
 
 script:
-  # TODO: Need to install ffmpeg/mkvtoolnix to run split-video tests.
   - python -m pytest tests/
+  # TODO: Install and test the built Python packages.
+  # TODO: Install ffmpeg/mkvtoolnix to run split-video tests.

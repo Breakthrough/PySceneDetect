@@ -28,7 +28,10 @@ install:
   - python -m pip install --upgrade pip
   - python -m pip install --upgrade setuptools wheel pyinstaller==4.10
 
-  # Install PySceneDetect dependencies and checkout resources required for tests.
+  # Make sure we get latest binary packages of the video input libraries.
+  - python -m pip install av opencv-python-headless --only-binary ":all:"
+
+  # Install other PySceneDetect dependencies and checkout resources required for tests.
   - python -m pip install -r requirements_headless.txt
   - git fetch --depth=1 https://github.com/Breakthrough/PySceneDetect.git refs/heads/resources:refs/remotes/origin/resources
   - git checkout refs/remotes/origin/resources -- tests/resources/
@@ -45,7 +48,7 @@ test_script:
   - 7z e dist/windows_thirdparty.7z
 
   # Run Unit Tests
-  - pytest
+  - python -m pytest tests/
 
   # TODO: Test Python Distributions install and function correctly.
   # Wildcard expansion doesn't seem to work with pip here, e.g. the following fails:
@@ -58,6 +61,9 @@ test_script:
 
 
 artifacts:
+  # TODO: Need to incorporate the build number into the package version. Use a custom setup.py
+  # that modifies the version number in the package before building using an environment variable.
+
   - path: dist/*.tar.gz
     name: PySceneDetect-sdist
 
