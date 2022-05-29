@@ -8,7 +8,7 @@ Video Scene Cut Detection and Analysis Tool
 
 ----------------------------------------------------------
 
-### Latest Release: v0.6-dev3 (March 11, 2022)
+### Latest Release: v0.6 (TBD)
 
 **Website**:  http://www.scenedetect.com
 
@@ -22,7 +22,7 @@ Video Scene Cut Detection and Analysis Tool
 
 **Quick Install**: To install PySceneDetect via `pip` with all dependencies:
 
-    pip install scenedetect[opencv] --pre
+    pip install scenedetect[opencv]
 
 For servers, you can use the headless (non-GUI) version of OpenCV by installing `scenedetect[opencv-headless]`.  To enable video splitting support, you will also need to have `mkvmerge` or `ffmpeg` installed - see the documentation on [Video Splitting Support](https://scenedetect.com/en/v0.6/examples/video-splitting/) for details.
 

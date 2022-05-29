@@ -18,12 +18,12 @@ Both the Windows installer and portable distributions now include signed executa
 
 **Overview:**
 
- * Video decoding now runs in parallel with scene detection, resulting in significant performance improvements
- * Adds [support for configuration file](http://scenedetect.com/projects/Manual/en/v0.6/cli/config_file.html) via command line or in user settings folder
- * Adds support for multiple video backends, PyAV is now supported in addition to OpenCV
+ * Major performance improvements on multicore systems
+ * [Configuration file support](http://scenedetect.com/projects/Manual/en/v0.6/cli/config_file.html) via command line option or user settings folder
+ * Support for multiple video backends, PyAV is now supported in addition to OpenCV
  * Breaking API changes to `VideoManager` (replaced with `VideoStream`), `StatsManager`, and `save_images()`
     * See the [Migration Guide](https://manual.scenedetect.com/en/v0.6/api/migration_guide.html) for details on how to update from v0.5.x
-    * A backwards compatibility layer has been added to prevent most applications from breaking - this layer will be removed in a future release
+    * A backwards compatibility layer has been added to prevent most applications from breaking, will be removed in a future release
  * Support for Python 2.7 has been dropped, minimum supported Python version is 3.6
  * Support for OpenCV 2.x has been dropped, minimum OpenCV version is 3.x
  * Windows binaries are now signed, thanks [SignPath.io](https://signpath.io/) (certificate by [SignPath Foundation](https://signpath.org/))
