@@ -6,21 +6,17 @@ matrix:
     - os: linux
       dist: xenial
       language: python
-      python: "3.6"
-    - os: linux
-      dist: xenial
-      language: python
       python: "3.8"
+
+    - os: linux
+      dist: bionic
+      language: python
+      python: "3.9"
 
     - os: linux
       dist: bionic
       language: python
       python: "3.7"
-    - os: linux
-      dist: bionic
-      language: python
-      python: "3.8"
-
     - os: linux
       dist: focal
       language: python
@@ -42,9 +38,7 @@ install:
   - "python -m pip install -r requirements_headless.txt"
   - "git fetch --depth=1 https://github.com/Breakthrough/PySceneDetect.git refs/heads/resources:refs/remotes/origin/resources"
   - "git checkout refs/remotes/origin/resources -- tests/resources/"
-  # TODO: When dropping support for Python 3.6, switch to build instead of setuptools.
-  - "python -m pip install --upgrade setuptools"
-  - "python setup.py sdist bdist_wheel"
+  - "python -m build"
 
 script:
   - python -m pytest tests/
