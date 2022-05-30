@@ -25,6 +25,17 @@ This file also contains the PySceneDetect version string (displayed when calling
 from logging import getLogger
 from typing import List, Optional, Tuple
 
+# OpenCV is a required package, but we don't have it as an explicit dependency since we
+# need to support both opencv-python and opencv-python-headless. Include some additional
+# context with the exception if this is the case.
+try:
+    import cv2 as _
+except ModuleNotFoundError as ex:
+    raise ModuleNotFoundError(
+        "OpenCV could not be found, try installing opencv-python:\n\npip install opencv-python",
+        name='cv2',
+    ) from ex
+
 # Commonly used classes/functions exported under the `scenedetect` namespace for brevity.
 from scenedetect.scene_manager import SceneManager, save_images
 from scenedetect.scene_detector import SceneDetector
@@ -41,7 +52,7 @@ from scenedetect.video_manager import VideoManager
 
 # Used for module identification and when printing version & about info
 # (e.g. calling `scenedetect version` or `scenedetect about`).
-__version__ = 'v0.6.0.1'
+__version__ = 'v0.6.0.2'
 # About & copyright message string shown for the 'about' CLI command (scenedetect about).
 
 ABOUT_STRING = """

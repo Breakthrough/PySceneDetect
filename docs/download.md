@@ -11,9 +11,9 @@ PySceneDetect requires at least Python 3.6 or higher.
 
 <div class="important">
 <h4 class="wy-text-neutral"><span class="fa fa-angle-double-down wy-text-info"></span> Including OpenCV (recommended):</h4>
-<h3 class="wy-text-neutral"><tt>pip install --pre scenedetect[opencv]</tt></h3>
-<h4 class="wy-text-neutral"><span class="fa fa-angle-down wy-text-info"></span> Including Headless OpenCV :</h4>
-<h3 class="wy-text-neutral"><tt>pip install --pre scenedetect[opencv-headless]</tt></h3>
+<h3 class="wy-text-neutral"><tt>pip install --upgrade scenedetect[opencv]</tt></h3>
+<h4 class="wy-text-neutral"><span class="fa fa-angle-down wy-text-info"></span> Including Headless OpenCV (servers):</h4>
+<h3 class="wy-text-neutral"><tt>pip install --upgrade scenedetect[opencv-headless]</tt></h3>
 </div>
 
 PySceneDetect is available via `pip` as [the `scenedetect` package](https://pypi.org/project/scenedetect/).  See below for instructions on installing a non-pip version of OpenCV.  To ensure you have all the requirements installed, open a `python` interpreter, and ensure you can run `import cv2` without any errors.
