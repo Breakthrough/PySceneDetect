@@ -25,7 +25,7 @@ install:
   # Setup Python environment and update basic packages.
   - 'SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%'
   - python --version
-  - python -m pip install --upgrade pip setuptools wheel
+  - python -m pip install --upgrade pip build wheel
 
   # Make sure we get latest binary packages of the video input libraries.
   - python -m pip install av opencv-python-headless --only-binary ":all:"
