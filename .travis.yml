@@ -35,30 +35,36 @@ matrix:
       python: "3.10"
 
 install:
-  - "python -m pip install --upgrade pip"
+  - "python -m pip install --upgrade pip build"
   # Make sure we get latest binary packages of the video input libraries.
   - "python -m pip install av opencv-python-headless --only-binary :all:"
   # Install other required packages and download required test resources.
   - "python -m pip install -r requirements_headless.txt"
   - "git fetch --depth=1 https://github.com/Breakthrough/PySceneDetect.git refs/heads/resources:refs/remotes/origin/resources"
   - "git checkout refs/remotes/origin/resources -- tests/resources/"
-  # Make sure the Python package is buildable.
-  - "python setup.py sdist bdist_wheel"
+  - "python -m build"
 
 script:
   - python -m pytest tests/
   # TODO: Install ffmpeg/mkvtoolnix to run split-video tests.
 
+  - python -m pip uninstall -y av
   # Install and test source distribution.
   - python -m pip install dist/scenedetect-`python -c "import scenedetect; print(scenedetect.__version__[1:])"`.tar.gz
+  # Test with OpenCV backend.
   - scenedetect version
   - scenedetect -i tests/resources/testvideo.mp4 -b opencv detect-content time -e 2s
+  # Test with optional PyAV backend.
+  - python -m pip install av
   - scenedetect -i tests/resources/testvideo.mp4 -b pyav detect-content time -e 2s
-  - python -m pip uninstall -y scenedetect
+  - python -m pip uninstall -y scenedetect av
 
   # Install and test binary wheel.
   - python -m pip install dist/scenedetect-`python -c "import scenedetect; print(scenedetect.__version__[1:])"`-py3-none-any.whl
+  # Test with OpenCV backend.
   - scenedetect version
   - scenedetect -i tests/resources/testvideo.mp4 -b opencv detect-content time -e 2s
+  # Test with optional PyAV backend.
+  - python -m pip install av
   - scenedetect -i tests/resources/testvideo.mp4 -b pyav detect-content time -e 2s
-  - python -m pip uninstall -y scenedetect
+  - python -m pip uninstall -y scenedetect av

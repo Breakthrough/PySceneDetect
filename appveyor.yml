@@ -38,7 +38,7 @@ install:
   - git checkout refs/remotes/origin/resources -- dist/
 
   # Build Python package
-  - python setup.py sdist bdist_wheel
+  - python -m build
 
 
 test_script:
