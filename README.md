@@ -24,12 +24,6 @@ Video Scene Cut Detection and Analysis Tool
 
     pip install scenedetect[opencv] --upgrade
 
-To install the v0.6 beta (better performance, [config file support](http://manual.scenedetect.com/en/v0.6/cli/config_file.html), and [improved API](http://manual.scenedetect.com/en/v0.6/api.html#quickstart) - see [scenedetect.com](http://scenedetect.com/) for documentation):
-
-    pip install scenedetect[opencv] --pre --upgrade
-
-For servers, you can use the headless (non-GUI) version of OpenCV by installing `scenedetect[opencv-headless]`.  To enable video splitting support, you will also need to have `mkvmerge` or `ffmpeg` installed - see the documentation on [Video Splitting Support](https://scenedetect.com/en/v0.6/examples/video-splitting/) for details.
-
 Requires Python modules `click`, `numpy`, OpenCV `cv2`, and (optional) `tqdm` for displaying progress.  For details, see the [dependencies on the downloads page](https://scenedetect.com/download/#dependencies).
 
 ----------------------------------------------------------
