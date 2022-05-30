@@ -4,17 +4,17 @@
 Video Scene Cut Detection and Analysis Tool
 ----------------------------------------------------------
 
-[![Build Status](https://img.shields.io/travis/com/Breakthrough/PySceneDetect/v0.6)](https://travis-ci.com/github/Breakthrough/PySceneDetect) [![PyPI Status](https://img.shields.io/pypi/status/scenedetect.svg)](https://pypi.python.org/pypi/scenedetect/) [![LGTM Analysis](https://img.shields.io/lgtm/grade/python/github/Breakthrough/PySceneDetect.svg)](https://lgtm.com/projects/g/Breakthrough/PySceneDetect) [![PyPI Version](https://img.shields.io/pypi/v/scenedetect?color=blue)](https://pypi.python.org/pypi/scenedetect/)  [![PyPI License](https://img.shields.io/pypi/l/scenedetect.svg)](http://pyscenedetect.readthedocs.org/en/latest/copyright/)
+[![Build Status](https://img.shields.io/travis/com/Breakthrough/PySceneDetect/master)](https://travis-ci.com/github/Breakthrough/PySceneDetect) [![PyPI Status](https://img.shields.io/pypi/status/scenedetect.svg)](https://pypi.python.org/pypi/scenedetect/) [![LGTM Analysis](https://img.shields.io/lgtm/grade/python/github/Breakthrough/PySceneDetect.svg)](https://lgtm.com/projects/g/Breakthrough/PySceneDetect) [![PyPI Version](https://img.shields.io/pypi/v/scenedetect?color=blue)](https://pypi.python.org/pypi/scenedetect/)  [![PyPI License](https://img.shields.io/pypi/l/scenedetect.svg)](http://pyscenedetect.readthedocs.org/en/latest/copyright/)
 
 ----------------------------------------------------------
 
 ### Latest Release: v0.6 (May 29, 2022)
 
-**Website**:  http://www.scenedetect.com
+**Website**:  [scenedetect.com](http://www.scenedetect.com)
 
 **Getting Started**: [Usage Example](https://scenedetect.com/en/v0.6/examples/usage-example/)
 
-**Documentation**:  http://manual.scenedetect.com
+**Documentation**:  [manual.scenedetect.com](http://manual.scenedetect.com)
 
 **Discord**: https://discord.gg/H83HbJngk7
 
@@ -22,9 +22,7 @@ Video Scene Cut Detection and Analysis Tool
 
 **Quick Install**: To install PySceneDetect via `pip` with all dependencies:
 
-    pip install scenedetect[opencv]
-
-For servers, you can use the headless (non-GUI) version of OpenCV by installing `scenedetect[opencv-headless]`.  To enable video splitting support, you will also need to have `mkvmerge` or `ffmpeg` installed - see the documentation on [Video Splitting Support](https://scenedetect.com/en/v0.6/examples/video-splitting/) for details.
+    pip install scenedetect[opencv] --upgrade
 
 Requires Python modules `click`, `numpy`, OpenCV `cv2`, and (optional) `tqdm` for displaying progress.  For details, see the [dependencies on the downloads page](https://scenedetect.com/download/#dependencies).
 
