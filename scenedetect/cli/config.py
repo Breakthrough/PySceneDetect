@@ -29,6 +29,7 @@ from scenedetect.frame_timecode import FrameTimecode
 
 VALID_PYAV_THREAD_MODES = ['NONE', 'SLICE', 'FRAME', 'AUTO']
 
+
 class TimecodeValue:
 
     def __init__(self, value: Union[int, str]):
