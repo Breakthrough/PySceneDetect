@@ -25,9 +25,9 @@ from typing import AnyStr, Dict, List, Optional, Tuple, Union
 
 from appdirs import user_config_dir
 
-from scenedetect.backends.pyav import VALID_THREAD_MODES
 from scenedetect.frame_timecode import FrameTimecode
 
+VALID_PYAV_THREAD_MODES = ['NONE', 'SLICE', 'FRAME', 'AUTO']
 
 class TimecodeValue:
 
@@ -162,7 +162,7 @@ CHOICE_MAP: Dict[str, Dict[str, List[str]]] = {
         'format': ['jpeg', 'png', 'webp'],
     },
     'backend-pyav': {
-        'threading_mode': [str(mode).lower() for mode in VALID_THREAD_MODES],
+        'threading_mode': [str(mode).lower() for mode in VALID_PYAV_THREAD_MODES],
     },
 }
 """Mapping of string options which can only be of a particular set of values. We use a list instead
