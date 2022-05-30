@@ -30,7 +30,7 @@
     <ROW Property="ProductCode" Value="1033:{819445A0-0F7A-443E-BEED-BF5D4C10C0FD} " Type="16"/>
     <ROW Property="ProductLanguage" Value="1033"/>
     <ROW Property="ProductName" Value="PySceneDetect"/>
-    <ROW Property="ProductVersion" Value="0.6"/>
+    <ROW Property="ProductVersion" Value="0.6.1"/>
     <ROW Property="SecureCustomProperties" Value="OLDPRODUCTS;AI_NEWERPRODUCTFOUND"/>
     <ROW Property="UpgradeCode" Value="{D0AF0419-DBD5-455C-A4AC-4518A35DD23E}"/>
     <ROW Property="WindowsType9X" MultiBuildValue="DefaultBuild:Windows 9x/ME" ValueLocId="-"/>

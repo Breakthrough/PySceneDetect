@@ -12,12 +12,12 @@ environment:
   ai_license_salt:
     secure: kMv/7J3wqaRGUJYwnfaY6edw0VW39uX7oM9Od9PQ2wwlCmTZcwAh4kEUxhB5u91QbXmp4McMuwcXAO4UdVoSGg==
 
-# SignPath Config for Code Signing
-deploy:
-- provider: Webhook
-  url: https://app.signpath.io/API/v1/f2efa44c-5b5c-45f2-b44f-8f9dde708313/Integrations/AppVeyor?ProjectSlug=PySceneDetect&SigningPolicySlug=release-signing
-  authorization:
-     secure: mdCtq1nvbA+ADEqG36J9szgR045RLAsBbc58b7rusEnSuUA7rHFE4jMZvtdr6ODZOJqYZX8i/0bTgFPiiG/2rA==
+## SignPath Config for Code Signing
+#deploy:
+#- provider: Webhook
+#  url: https://app.signpath.io/API/v1/f2efa44c-5b5c-45f2-b44f-8f9dde708313/Integrations/AppVeyor?ProjectSlug=PySceneDetect&SigningPolicySlug=release-signing
+#  authorization:
+#     secure: mdCtq1nvbA+ADEqG36J9szgR045RLAsBbc58b7rusEnSuUA7rHFE4jMZvtdr6ODZOJqYZX8i/0bTgFPiiG/2rA==
 
 install:
   - git checkout refs/tags/v0.6
@@ -28,7 +28,7 @@ install:
   - 'SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%'
   - python --version
   - python -m pip install --upgrade pip
-  - python -m pip install --upgrade setuptools wheel pyinstaller==4.10
+  - python -m pip install pyinstaller==4.10
 
   # Install PySceneDetect dependencies and checkout resources required for tests.
   - python -m pip install -r dist/requirements_windows.txt
@@ -47,6 +47,8 @@ install:
   - pyinstaller dist/scenedetect.spec
   - python dist/cleanup_dependencies.py
   - cd dist/scenedetect
+  - cp dist/windows/ffmpeg.exe .
+  - cp dist/windows/mkvmerge.exe .
   - 7z a ../scenedetect-win64.zip *
   - cd ../..
 
