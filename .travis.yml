@@ -42,7 +42,6 @@ install:
   - "python -m pip install -r requirements_headless.txt"
   - "git fetch --depth=1 https://github.com/Breakthrough/PySceneDetect.git refs/heads/resources:refs/remotes/origin/resources"
   - "git checkout refs/remotes/origin/resources -- tests/resources/"
-  - "python -m build"
 
 script:
   - python -m pytest tests/
@@ -57,8 +56,8 @@ script:
   # Test with OpenCV backend
   - python -m scenedetect version
   - python -m scenedetect -i tests/resources/testvideo.mp4 -b opencv detect-content time -e 2s
-  # Test with optional PyAV backend
-  - python -m pip install av
+  # Test with optional backends
+  - "python -m pip install -r requirements_headless.txt --only-binary :all:"
   - python -m scenedetect -i tests/resources/testvideo.mp4 -b pyav detect-content time -e 2s
   # Cleanup
   - python -m pip uninstall -y scenedetect av
@@ -68,8 +67,8 @@ script:
   # Test with OpenCV backend
   - scenedetect version
   - scenedetect -i tests/resources/testvideo.mp4 -b opencv detect-content time -e 2s
-  # Test with optional PyAV backend
-  - python -m pip install av
+  # Test with optional backends
+  - "python -m pip install -r requirements_headless.txt --only-binary :all:"
   - scenedetect -i tests/resources/testvideo.mp4 -b pyav detect-content time -e 2s
   # Cleanup
   - python -m pip uninstall -y scenedetect av
@@ -79,8 +78,8 @@ script:
   # Test with OpenCV backend
   - scenedetect version
   - scenedetect -i tests/resources/testvideo.mp4 -b opencv detect-content time -e 2s
-  # Test with optional PyAV backend
-  - python -m pip install av
+  # Test with optional backends
+  - "python -m pip install -r requirements_headless.txt --only-binary :all:"
   - scenedetect -i tests/resources/testvideo.mp4 -b pyav detect-content time -e 2s
   # Cleanup
   - python -m pip uninstall -y scenedetect av
