@@ -94,12 +94,17 @@ Both the Windows installer and portable distributions now include signed executa
  * `get_aspect_ratio` has been removed from `scenedetect.platform` (use the `aspect_ratio` property of a `VideoStream` instead)
  * Backwards compatibility with v0.5 to avoid breaking most applications on release while still allowing performance improvements
 
+#### Python Distribution Changes
+
+ * *v0.6.0.2* - Improve error messaging when OpenCV is not installed
+ * *v0.6.0.1* - Fix original v0.6 release requiring `av` to run the `scenedetect` command
+
 #### Known Issues
 
  * URL inputs are not supported by the `save-images` or `split-video` commands
  * Variable framerate videos (VFR) are not fully supported, and will yield incorrect timestamps ([#168](https://github.com/Breakthrough/PySceneDetect/issues/168))
  * The `detect-threshold` option `-l`/`--add-last-scene` cannot be disabled
-
+ * Due to a switch from EXE to MSI for the Windows installer, you may have to uninstall older versions first before installing v0.6
 
 ----------------------------------------------------------------
 
