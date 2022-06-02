@@ -37,8 +37,6 @@ install:
   - git checkout refs/remotes/origin/resources -- dist/
   - git checkout refs/remotes/origin/build-windows -- dist/
   - 7z e dist/windows_thirdparty.7z
-  - move ffmpeg.exe dist/windows/
-  - move mkvmerge.exe dist/windows/
 
   - echo * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
   - echo * *                          BUILDING WINDOWS EXE                           * *
@@ -46,9 +44,9 @@ install:
   # Build Windows .EXE and create portable .ZIP
   - pyinstaller dist/scenedetect.spec
   - python dist/cleanup_dependencies.py
+  - cp ffmpeg.exe dist/scenedetect
+  - cp mkvmerge.exe dist/scenedetect
   - cd dist/scenedetect
-  - cp dist/windows/ffmpeg.exe .
-  - cp dist/windows/mkvmerge.exe .
   - 7z a ../scenedetect-win64.zip *
   - cd ../..
 
@@ -85,8 +83,6 @@ test_script:
   # Checkout required test resources
   - git fetch --depth=1 https://github.com/Breakthrough/PySceneDetect.git refs/heads/resources:refs/remotes/origin/resources
   - git checkout refs/remotes/origin/resources -- tests/resources/
-  - cp dist/windows/ffmpeg.exe .
-  - cp dist/windows/mkvmerge.exe .
   # Run unit tests
   - pytest
   # Test Windows build
