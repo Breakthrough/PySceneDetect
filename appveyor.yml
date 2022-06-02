@@ -20,7 +20,7 @@ environment:
 #     secure: mdCtq1nvbA+ADEqG36J9szgR045RLAsBbc58b7rusEnSuUA7rHFE4jMZvtdr6ODZOJqYZX8i/0bTgFPiiG/2rA==
 
 install:
-  - git checkout refs/tags/v0.6
+  - git checkout refs/tags/v0.6-release
 
   - echo * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
   - echo * *                      SETTING UP PYTHON ENVIRONMENT                      * *
