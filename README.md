@@ -20,11 +20,11 @@ Video Scene Cut Detection and Analysis Tool
 
 ----------------------------------------------------------
 
-**Quick Install**: To install PySceneDetect via `pip` with all dependencies:
+**Quick Install**:
 
     pip install scenedetect[opencv] --upgrade
 
-Requires Python modules `click`, `numpy`, OpenCV `cv2`, and (optional) `tqdm` for displaying progress.  For details, see the [dependencies on the downloads page](https://scenedetect.com/download/#dependencies).
+Requires ffmpeg/mkvmerge for video splitting support. Windows builds (MSI installer/portable ZIP) can be found on [the download page](http://scenedetect.com/en/latest/download/).
 
 ----------------------------------------------------------
 
@@ -38,7 +38,7 @@ Skip the first 10 seconds of the input video, and output a list of scenes to the
 
     scenedetect -i video.mp4 time -s 10s detect-content list-scenes
 
-To show a summary of all other options and commands:
+Help:
 
     scenedetect help
 

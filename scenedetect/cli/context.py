@@ -18,7 +18,7 @@ This module contains :py:class:`CliContext` which encapsulates the command-line 
 from __future__ import print_function
 import logging
 import os
-from typing import AnyStr, Optional, Union
+from typing import AnyStr, Optional
 
 import click
 

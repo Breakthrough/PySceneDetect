@@ -96,6 +96,7 @@ Both the Windows installer and portable distributions now include signed executa
 
 #### Python Distribution Changes
 
+ * *v0.6.0.3* - Fix missing package description
  * *v0.6.0.2* - Improve error messaging when OpenCV is not installed
  * *v0.6.0.1* - Fix original v0.6 release requiring `av` to run the `scenedetect` command
 

@@ -16,7 +16,7 @@ PySceneDetect requires at least Python 3.6 or higher.
 <h3 class="wy-text-neutral"><tt>pip install --upgrade scenedetect[opencv-headless]</tt></h3>
 </div>
 
-PySceneDetect is available via `pip` as [the `scenedetect` package](https://pypi.org/project/scenedetect/).  See below for instructions on installing a non-pip version of OpenCV.  To ensure you have all the requirements installed, open a `python` interpreter, and ensure you can run `import cv2` without any errors.
+PySceneDetect is available via `pip` as [the `scenedetect` package](https://pypi.org/project/scenedetect/).
 
 ### Windows Build (64-bit Only) &nbsp; <span class="wy-text-neutral"><span class="fa fa-windows"></span></span>
 
@@ -27,21 +27,6 @@ PySceneDetect is available via `pip` as [the `scenedetect` package](https://pypi
 <a href="https://github.com/Breakthrough/PySceneDetect/releases/download/v0.6-release/PySceneDetect-0.6-win64-portable.zip" class="btn btn-info" style="margin-bottom:8px;" role="button"><span class="fa fa-download"></span>&nbsp; <b>Portable .zip</b></a> &nbsp;&nbsp;&nbsp;&nbsp;
 <a href="../examples/usage/" class="btn btn-success" style="margin-bottom:8px;" role="button"><span class="fa fa-book"></span>&nbsp; <b>Getting Started</b></a>
 </div>
-
-
-### Python Installer (All Platforms) &nbsp; <span class="wy-text-neutral"><span class="fa fa-windows"></span> &nbsp; <span class="fa fa-linux"></span> &nbsp; <span class="fa fa-apple"></span></span></h3>
-
-<div class="important">
-<h4 class="wy-text-neutral"><span class="fa fa-forward wy-text-info"></span> Latest Release: <b class="wy-text-neutral">v0.6</b></h4>
-<h4 class="wy-text-neutral"><span class="fa fa-calendar wy-text-info"></span>&nbsp; Release Date:&nbsp; <b>May 29, 2022</b></h4>
-<a href="https://github.com/Breakthrough/PySceneDetect/archive/v0.6.zip" class="btn btn-info" style="margin-bottom:8px;" role="button"><span class="fa fa-download"></span>&nbsp; <b>Source</b>&nbsp;&nbsp;.zip</a> &nbsp;&nbsp;&nbsp;&nbsp; <a href="https://github.com/Breakthrough/PySceneDetect/archive/v0.6.tar.gz" class="btn btn-info" style="margin-bottom:8px;" role="button"><span class="fa fa-download"></span>&nbsp; <b>Source</b>&nbsp;&nbsp;.tar.gz</a> &nbsp;&nbsp;&nbsp;&nbsp; <a href="../examples/usage/" class="btn btn-success" style="margin-bottom:8px;" role="button"><span class="fa fa-book"></span>&nbsp; <b>Getting Started</b></a>
-</div>
-
-To install from source, download and extract the latest release to a location of your choice, and make sure you have the appropriate [system requirements](#dependencies) installed before continuing.  PySceneDetect can be installed by running the following command in the location of the extracted files (don't forget `sudo` if you're installing system-wide):
-
-```md
-python setup.py install
-```
 
 ### Post Installation
 
@@ -56,34 +41,35 @@ To get familiar with PySceneDetect, try running `scenedetect help`, or continue 
 
 PySceneDetect requires [Python 3](https://www.python.org/) and the following packages:
 
- - [OpenCV](http://opencv.org/) (compatible with 3/4), can install via `pip install opencv-python`. Used for video I/O.
- - [Numpy](https://numpy.org/), can install via `pip install numpy`. Used for frame processing.
- - [Click](https://click.palletsprojects.com), can install via `pip install Click`. Used for command line interface.
- - [tqdm](https://github.com/tqdm/tqdm), can install via `pip install tqdm`. Used to show progress bar and estimated time remaining.
- - [appdirs](https://github.com/ActiveState/appdirs), can install via `pip install appdirs`. Used to obtain path correct configuration file path for each platform.
+ - [OpenCV](http://opencv.org/): `pip install opencv-python`
+ - [Numpy](https://numpy.org/): `pip install numpy`
+ - [Click](https://click.palletsprojects.com): `pip install Click`
+ - [tqdm](https://github.com/tqdm/tqdm): `pip install tqdm`
+ - [appdirs](https://github.com/ActiveState/appdirs): `pip install appdirs`
+
+Optional packages:
+
+ - [PyAV](https://pyav.org/): `pip install av`
 
 ### Video Splitting Tools
 
-For video splitting support, you need to have one of the following tools available:
+For video splitting support, you need to have one of the following tools available (included in Windows builds):
 
  - [ffmpeg](https://ffmpeg.org/download.html), required to split video files (`split-video` or `split-video -c/--copy`)
  - [mkvmerge](https://mkvtoolnix.download/), part of mkvtoolnix, command-line tool, required to split video files in stream copy mode (`split-video -c/--copy` only)
-
-Windows/OSX users can obtain them from the above links.  Note that the Windows installer/portable version includes these tools (you can replace the included versions them with newer copies).  Linux users can typically obtain these tools from the system package manager (e.g. `sudo apt-get install ffmpeg`).
 
 The `ffmpeg` and/or `mkvmerge` command must be available system wide (e.g. in a directory in `PATH`, so it can be used from any terminal/console by typing the command), or alternatively, placed in the same directory where PySceneDetect is installed.  On Windows this is usually `C:\PythonXY\Scripts`, where `XY` is your Python version.
 
 If you have trouble getting PySceneDetect to find `ffmpeg` or `mkvmerge`, see the section on Manually Enabling `split-video` Support on [Getting Started: Video Splitting Support Requirements](examples/video-splitting).
 
-If both tools are installed, `ffmpeg` will be used when specifying `split-video -c/--copy`.  You can ensure `mkvmerge` is used by also specifying `--use-mkvmerge`.
-
-### Building OpenCV from Source or Using a Different Version
+### Building OpenCV from Source
 
 If you have installed OpenCV using `pip`, you will need to uninstall it before installing a different version of OpenCV, or building and installing it from source.
 
 You can [click here](http://breakthrough.github.io/Installing-OpenCV/) for a quick guide (OpenCV + Numpy on Windows & Linux) on installing OpenCV/Numpy on [Windows (using pre-built binaries)](http://breakthrough.github.io/Installing-OpenCV/#installing-on-windows-pre-built-binaries) and [Linux (compiling from source)](http://breakthrough.github.io/Installing-OpenCV/#installing-on-linux-compiling-from-source).  If the Python module that comes with OpenCV on Windows is incompatible with your system architecture or Python version, [see this page](http://www.lfd.uci.edu/~gohlke/pythonlibs/#opencv) to obtain a pre-compiled (unofficial) module.
 
 To ensure you have all the requirements installed, open a `python` interpreter, and ensure you can run `import numpy` and `import cv2` without any errors.
+
 
 ## Code Signing Policy
 
