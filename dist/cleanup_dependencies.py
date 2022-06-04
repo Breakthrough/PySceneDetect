@@ -46,5 +46,5 @@ for dir_glob in DIRECTORY_GLOBS:
         shutil.rmtree(dir_path)
 
 for file_glob in FILE_GLOBS:
-    for file_path in glob.glob(os.path.join(BASE_PATH, dir_glob)):
+    for file_path in glob.glob(os.path.join(BASE_PATH, file_glob)):
         os.remove(file_path)
