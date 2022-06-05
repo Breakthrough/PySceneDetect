@@ -8,7 +8,7 @@ PySceneDetect Releases
 
 #### Release Notes
 
-PySceneDetect v0.6 is a **major breaking change** including better performance, configuration file support, and a more ergonomic API.  The new **minimum Python version is now 3.6**. See the [Migration Guide](https://manual.scenedetect.com/en/v0.6/api/migration_guide.html) for information on how to port existing applications to the new API.  Most users will see performance improvements after updating, and changes to the command-line are not expected to break most workflows.
+PySceneDetect v0.6 is a **major breaking change** including better performance, configuration file support, and a more ergonomic API.  The new **minimum Python version is now 3.6**. See the [Migration Guide](https://scenedetect.com/projects/Manual/en/latest/api/migration_guide.html) for information on how to port existing applications to the new API.  Most users will see performance improvements after updating, and changes to the command-line are not expected to break most workflows.
 
 The main goals of v0.6 are reliability and performance. To achieve this required several breaking changes.  The video input API was refactored, and *many* technical debt items were addressed. This should help the eventual transition to the first planned stable release (v1.0) where the goal is an improved scene detection API.
 
@@ -19,10 +19,10 @@ Both the Windows installer and portable distributions now include signed executa
 **Overview:**
 
  * Major performance improvements on multicore systems
- * [Configuration file support](http://scenedetect.com/projects/Manual/en/v0.6/cli/config_file.html) via command line option or user settings folder
+ * [Configuration file support](http://scenedetect.com/projects/Manual/en/latest/cli/config_file.html) via command line option or user settings folder
  * Support for multiple video backends, PyAV is now supported in addition to OpenCV
  * Breaking API changes to `VideoManager` (replaced with `VideoStream`), `StatsManager`, and `save_images()`
-    * See the [Migration Guide](https://manual.scenedetect.com/en/v0.6/api/migration_guide.html) for details on how to update from v0.5.x
+    * See the [Migration Guide](https://scenedetect.com/projects/Manual/en/latest/api/migration_guide.html) for details on how to update from v0.5.x
     * A backwards compatibility layer has been added to prevent most applications from breaking, will be removed in a future release
  * Support for Python 2.7 has been dropped, minimum supported Python version is 3.6
  * Support for OpenCV 2.x has been dropped, minimum OpenCV version is 3.x
@@ -30,7 +30,7 @@ Both the Windows installer and portable distributions now include signed executa
 
 **Command-Line Changes:**
 
- * Configuration files are now supported, [see documentation for details](http://scenedetect.com/projects/Manual/en/v0.6/cli/config_file.html)
+ * Configuration files are now supported, [see documentation for details](http://scenedetect.com/projects/Manual/en/latest/cli/config_file.html)
      * Can specify config file path with `-c`/`--config`, or create a `scenedetect.cfg` file in your user config folder
  * Frame numbers are now 1-based, aligning with most other tools (e.g. `ffmpeg`) and video editors ([#265](https://github.com/Breakthrough/PySceneDetect/issues/265))
  * Start/end *frame numbers* of adjacent scenes no longer overlap ([#264](https://github.com/Breakthrough/PySceneDetect/issues/265))
@@ -61,8 +61,8 @@ Both the Windows installer and portable distributions now include signed executa
 
 **API Changes:**
 
- * New `detect()` function performs scene detection on a video path, [see example here](http://manual.scenedetect.com/en/v0.6/api.html#quickstart)
- * New `open_video()` function to handle video input, [see example here](http://manual.scenedetect.com/en/v0.6/api.html#example)
+ * New `detect()` function performs scene detection on a video path, [see example here](http://scenedetect.com/projects/Manual/en/latest/api.html#quickstart)
+ * New `open_video()` function to handle video input, [see example here](http://scenedetect.com/projects/Manual/en/latest/api.html#example)
  * `split_video_ffmpeg()` and `split_video_mkvmerge()` now take a single path as input
  * `save_images()` no longer accepts `downscale_factor`
     * Use `scale` or `height`/`width` arguments to resize images

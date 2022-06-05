@@ -12,7 +12,7 @@ Video Scene Cut Detection and Analysis Tool
 
 **Website**:  [scenedetect.com](http://www.scenedetect.com)
 
-**Getting Started**: [Usage Example](https://scenedetect.com/en/v0.6/examples/usage-example/)
+**Getting Started**: [Usage Example](https://scenedetect.com/en/latest/examples/usage-example/)
 
 **Documentation**:  [manual.scenedetect.com](http://manual.scenedetect.com)
 
@@ -42,7 +42,7 @@ Help:
 
     scenedetect help
 
-You can find more examples [on the website](https://scenedetect.com/en/v0.6/examples/usage-example/) or [in the manual](https://manual.scenedetect.com/en/v0.6/cli/global_options.html).
+You can find more examples [on the website](https://scenedetect.com/en/latest/examples/usage-example/) or [in the manual](https://scenedetect.com/projects/Manual/en/latest/cli/global_options.html).
 
 **Quick Start (Python API)**:
 
@@ -73,7 +73,7 @@ scene_list = detect('my_video.mp4', ContentDetector())
 split_video_ffmpeg('my_video.mp4', scene_list)
 ```
 
-For more advanced usage, the API is highly configurable, and can easily integrate with any pipeline. This includes using different detection algorithms, splitting the input video, and much more. The following example shows how to implement a function similar to the above, but using [the `scenedetect` API](https://manual.scenedetect.com/en/v0.6/api.html):
+For more advanced usage, the API is highly configurable, and can easily integrate with any pipeline. This includes using different detection algorithms, splitting the input video, and much more. The following example shows how to implement a function similar to the above, but using [the `scenedetect` API](https://scenedetect.com/projects/Manual/en/latest/api.html):
 
 ```python
 from scenedetect import open_video, SceneManager, split_video_ffmpeg
@@ -91,12 +91,12 @@ def split_video_into_scenes(video_path, threshold=27.0):
     split_video_ffmpeg(video_path, scene_list, show_progress=True)
 ```
 
-See [the manual](https://manual.scenedetect.com/en/v0.6/api.html) for the
+See [the manual](https://scenedetect.com/projects/Manual/en/latest/api.html) for the
 full PySceneDetect API documentation.
 
 ----------------------------------------------------------
 
-PySceneDetect is a command-line tool and Python library, which uses OpenCV to analyze a video to find each shot change (or "cut"/"scene").  If `ffmpeg` or `mkvmerge` is installed, the video can also be split into scenes automatically.  A frame-by-frame analysis can also be generated for a video, to help with determining optimal threshold values or detecting patterns/other analysis methods for a particular video.  See [the Usage documentation](https://scenedetect.com/en/v0.6/examples/usage/) for details.
+PySceneDetect is a command-line tool and Python library, which uses OpenCV to analyze a video to find each shot change (or "cut"/"scene").  If `ffmpeg` or `mkvmerge` is installed, the video can also be split into scenes automatically.  A frame-by-frame analysis can also be generated for a video, to help with determining optimal threshold values or detecting patterns/other analysis methods for a particular video.  See [the Usage documentation](https://scenedetect.com/en/latest/examples/usage/) for details.
 
 There are two main detection methods PySceneDetect uses: `detect-threshold` (comparing each frame to a set black level, useful for detecting cuts and fades to/from black), and `detect-content` (compares each frame sequentially looking for changes in content, useful for detecting fast cuts between video scenes, although slower to process).  Each mode has slightly different parameters, and is described in detail below.
 
@@ -109,8 +109,8 @@ Usage
 ----------------------------------------------------------
 
  - [Basic Usage](https://scenedetect.com/en/latest/examples/usage/)
- - [PySceneDetect Manual](https://manual.scenedetect.com/io/en/latest/), covers `scenedetect` command and Python API
- - [Example: Detecting and Splitting Scenes in Movie Clip](https://scenedetect.com/en/v0.6/examples/usage-example/)
+ - [PySceneDetect Manual](https://manual.scenedetect.com/), covers `scenedetect` command and Python API
+ - [Example: Detecting and Splitting Scenes in Movie Clip](https://scenedetect.com/en/latest/examples/usage-example/)
 
 
 Features & Roadmap
