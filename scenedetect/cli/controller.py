@@ -19,7 +19,6 @@ import logging
 import os
 from string import Template
 import time
-import threading
 from typing import Dict, List, Tuple, Optional
 
 from scenedetect.cli.context import CliContext, check_split_video_requirements

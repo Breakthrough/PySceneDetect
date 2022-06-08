@@ -49,6 +49,10 @@ class VideoOpenFailure(Exception):
 
     # pylint: disable=useless-super-delegation
     def __init__(self, message: str = "Unknown backend error."):
+        """
+        Arguments:
+            message: Additional context the backend can provide for the open failure.
+        """
         super().__init__(message)
 
 
