@@ -50,6 +50,7 @@ script:
   #
   # Test CLI using source code
   #
+  - "PACKAGE_VERSION=`python -c \"import scenedetect; print(scenedetect.__version__[1:].replace('-', '.'))\"`"
   # Test with OpenCV backend
   - python -m scenedetect version
   - python -m scenedetect -i tests/resources/testvideo.mp4 -b opencv detect-content time -e 2s
@@ -60,7 +61,7 @@ script:
   - python -m pip uninstall -y scenedetect av
 
   # Test CLI using source distribution
-  - python -m pip install dist/scenedetect-`python -c "import scenedetect; print(scenedetect.__version__[1:])"`.tar.gz
+  - python -m pip install dist/scenedetect-$PACKAGE_VERSION.tar.gz
   # Test with OpenCV backend
   - scenedetect version
   - scenedetect -i tests/resources/testvideo.mp4 -b opencv detect-content time -e 2s
@@ -71,7 +72,7 @@ script:
   - python -m pip uninstall -y scenedetect av
 
   # Test CLI using binary wheel
-  - python -m pip install dist/scenedetect-`python -c "import scenedetect; print(scenedetect.__version__[1:])"`-py3-none-any.whl
+  - python -m pip install dist/scenedetect-$PACKAGE_VERSION-py3-none-any.whl
   # Test with OpenCV backend
   - scenedetect version
   - scenedetect -i tests/resources/testvideo.mp4 -b opencv detect-content time -e 2s
