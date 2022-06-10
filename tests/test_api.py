@@ -39,13 +39,35 @@ def print_scenes(scene_list: List[Tuple[FrameTimecode, FrameTimecode]]):
 
 
 def test_api_detect(test_video_file: str):
-    """Demonstrate basic usage of the `detect` function to process a complete video."""
+    """Demonstrate usage of the `detect()` function to process a complete video."""
     scene_list = detect(test_video_file, ContentDetector())
     print_scenes(scene_list=scene_list)
 
 
-def test_api_start_end_time(test_video_file: str):
-    """Demonstrate processing a subsection of a video based on a starting/ending time."""
+def test_api_detect_start_end_time(test_video_file: str):
+    """Demonstrate usage of the `detect()` function to process a subset of a video."""
+    # Can specify start/end time in seconds (float), frames (int), or timecode 'HH:MM:SSS.nnn' (str)
+    scene_list = detect(test_video_file, ContentDetector(), start_time=10.5, end_time=20.9)
+    print_scenes(scene_list=scene_list)
+
+
+def test_api_detect_stats(test_video_file: str):
+    """Demonstrate usage of the `detect()` function to generate a statsfile."""
+    detect(test_video_file, ContentDetector(), stats_file_path="frame_metrics.csv")
+
+
+def test_api_scene_manager(test_video_file: str):
+    """Demonstrate how to use a SceneManager to implement a function similar to `detect()`."""
+    video = open_video(test_video_file)
+    scene_manager = SceneManager()
+    scene_manager.add_detector(ContentDetector())
+    scene_manager.detect_scenes(video=video)
+    scene_list = scene_manager.get_scene_list()
+    print_scenes(scene_list=scene_list)
+
+
+def test_api_scene_manager_start_end_time(test_video_file: str):
+    """Demonstrate how to use a SceneManager to process a subset of the input video."""
     video = open_video(test_video_file)
     scene_manager = SceneManager()
     scene_manager.add_detector(ContentDetector())
@@ -61,7 +83,7 @@ def test_api_start_end_time(test_video_file: str):
 
 
 def test_api_stats_manager(test_video_file: str):
-    """Demonstrate using a StatsManager to save per-frame statistics to disk."""
+    """Demonstrate using a StatsManager with a SceneManager to save per-frame statistics to disk."""
     video = open_video(test_video_file)
     scene_manager = SceneManager(stats_manager=StatsManager())
     scene_manager.add_detector(ContentDetector())

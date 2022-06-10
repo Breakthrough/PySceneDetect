@@ -4,6 +4,22 @@ PySceneDetect Releases
 
 ## PySceneDetect 0.6
 
+### 0.6.1 (TBD)
+
+#### Release Notes
+
+ - In development.
+
+#### Changelog
+
+**Command-Line Changes:**
+
+**API Changes:**
+ - [bugfix] Fix `scenedetect.detect()` throwing `TypeError` when specifying `stats_file_path`
+ - [enhancement] Add optional `start_time` and `end_time` arguments to `scenedetect.detect()`
+
+
+
 ### 0.6 (May 29, 2022)
 
 #### Release Notes

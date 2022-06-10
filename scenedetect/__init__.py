@@ -23,7 +23,7 @@ This file also contains the PySceneDetect version string (displayed when calling
 """
 
 from logging import getLogger
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Union
 
 # OpenCV is a required package, but we don't have it as an explicit dependency since we
 # need to support both opencv-python and opencv-python-headless. Include some additional
@@ -52,7 +52,7 @@ from scenedetect.video_manager import VideoManager
 
 # Used for module identification and when printing version & about info
 # (e.g. calling `scenedetect version` or `scenedetect about`).
-__version__ = 'v0.6.0.3'
+__version__ = 'v0.6.1-dev'
 # About & copyright message string shown for the 'about' CLI command (scenedetect about).
 
 ABOUT_STRING = """
@@ -161,10 +161,14 @@ def open_video(
     raise last_error
 
 
-def detect(video_path: str,
-           detector: SceneDetector,
-           stats_file_path: Optional[str] = None,
-           show_progress: bool = False) -> List[Tuple[FrameTimecode, FrameTimecode]]:
+def detect(
+    video_path: str,
+    detector: SceneDetector,
+    stats_file_path: Optional[str] = None,
+    show_progress: bool = False,
+    start_time: Optional[Union[str, float, int]] = None,
+    end_time: Optional[Union[str, float, int]] = None,
+) -> List[Tuple[FrameTimecode, FrameTimecode]]:
     """Perform scene detection on a given video `path` using the specified `detector`.
 
     Arguments:
@@ -174,6 +178,10 @@ def detect(video_path: str,
         stats_file_path: Path to save per-frame metrics to for statistical analysis or to
             determine a better threshold value.
         show_progress: Show a progress bar with estimated time remaining. Default is False.
+        start_time: Starting point in video, in the form of a timecode ``HH:MM:SS[.nnn]`` (`str`),
+            number of seconds ``123.45`` (`float`), or number of frames ``200`` (`int`).
+        end_time: Starting point in video, in the form of a timecode ``HH:MM:SS[.nnn]`` (`str`),
+            number of seconds ``123.45`` (`float`), or number of frames ``200`` (`int`).
 
     Returns:
         List of scenes (pairs of :py:class:`FrameTimecode` objects).
@@ -181,15 +189,24 @@ def detect(video_path: str,
     Raises:
         :py:class:`VideoOpenFailure`: `video_path` could not be opened.
         :py:class:`StatsFileCorrupt`: `stats_file_path` is an invalid stats file
+        ValueError: `start_time` or `end_time` are incorrectly formatted.
+        TypeError: `start_time` or `end_time` are invalid types.
     """
     video = open_video(video_path)
-    if stats_file_path:
-        scene_manager = SceneManager(StatsManager())
-    else:
-        scene_manager = SceneManager()
+    if start_time is not None:
+        start_time = video.base_timecode + start_time
+        video.seek(start_time)
+    if end_time is not None:
+        end_time = video.base_timecode + end_time
+    # To reduce memory consumption when not required, we only add a StatsManager if we
+    # need to save frame metrics to disk.
+    scene_manager = SceneManager(StatsManager() if stats_file_path else None)
     scene_manager.add_detector(detector)
-    scene_manager.detect_scenes(video=video, show_progress=show_progress)
+    scene_manager.detect_scenes(
+        video=video,
+        show_progress=show_progress,
+        end_time=end_time,
+    )
     if not scene_manager.stats_manager is None:
-        scene_manager.stats_manager.save_to_csv(
-            path=stats_file_path, base_timecode=video.base_timecode)
+        scene_manager.stats_manager.save_to_csv(stats_file_path)
     return scene_manager.get_scene_list()
