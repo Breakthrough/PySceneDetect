@@ -33,6 +33,18 @@ class VideoStreamMoviePy(VideoStream):
     """MoviePy `FFMPEG_VideoReader` backend."""
 
     def __init__(self, path: AnyStr, framerate: Optional[float] = None, print_infos: bool = False):
+        """Open a video or device.
+
+        Arguments:
+            path: Path to video,.
+            framerate: If set, overrides the detected framerate.
+            print_infos: If True, prints information about the opened video to stdout.
+
+        Raises:
+            OSError: file could not be found, access was denied, or the video is corrupt
+            VideoOpenFailure: video could not be opened (may be corrupted)
+        """
+        super().__init__()
 
         # TODO(v0.6.1) - Investigate how MoviePy handles ffmpeg not being on PATH.
         #if not is_ffmpeg_available():
@@ -42,27 +54,28 @@ class VideoStreamMoviePy(VideoStream):
         if framerate is not None:
             raise NotImplementedError("TODO(v0.6.1)")
 
+        self._path = path
+        # TODO(v0.6.1): Need to map errors based on the strings, since several failure
+        # cases return IOErrors (e.g. could not read duration/video resolution). These
+        # should be mapped to specific errors, e.g. write a function to map MoviePy
+        # exceptions to a new set of equivalents.
+        self._reader = FFMPEG_VideoReader(path, print_infos=print_infos)
+        # This will always be one behind self._reader.lastread when we finally call read()
+        # as MoviePy caches the first frame when opening the video. Thus self._last_frame
+        # will always be the current frame, and self._reader.lastread will be the next.
+        self._last_frame: Union[bool, ndarray] = False
+        # Older versions don't track the video position when calling read_frame so we need
+        # to keep track of the current frame number.
+        self._frame_number = 0
+        # We need to manually keep track of EOF as duration may not be accurate.
+        self._eof = False
+        # MoviePy doesn't support extracting the aspect ratio yet, so for now we just fall
+        # back to using OpenCV to determine it.
         try:
-            self._path = path
-            self._reader = FFMPEG_VideoReader(path, print_infos=print_infos)
-            # This will always be one behind self._reader.lastread when we finally call read()
-            # as MoviePy caches the first frame when opening the video. Thus self._last_frame
-            # will always be the current frame, and self._reader.lastread will be the next.
-            self._last_frame: Union[bool, ndarray] = False
-            # Older versions don't track the video position when calling read_frame so we need
-            # to keep track of the current frame number.
-            self._frame_number = 0
-            # We need to manually keep track of EOF as duration may not be accurate.
-            self._eof = False
-            # TODO(v0.6.1): Submit a PR to MoviePy that extracts the aspect ratio from the
-            # info ffmpeg dumps when opening the file. For now we just use OpenCV for the AR.
-            try:
-                self._aspect_ratio = VideoStreamCv2(self._path).aspect_ratio
-            except VideoOpenFailure as ex:
-                logger.warning("Unable to determine aspect ratio: %s", str(ex))
-                self._aspect_ratio = 1.0
-        except Exception as ex:
-            raise VideoOpenFailure("Unable to open video: %s" % str(ex)) from ex
+            self._aspect_ratio = VideoStreamCv2(self._path).aspect_ratio
+        except VideoOpenFailure as ex:
+            logger.warning("Unable to determine aspect ratio: %s", str(ex))
+            self._aspect_ratio = 1.0
 
     #
     # VideoStream Methods/Properties
