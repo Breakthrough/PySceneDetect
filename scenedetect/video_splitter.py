@@ -44,7 +44,8 @@ from typing import Iterable, Optional, Tuple
 from string import Template
 
 from scenedetect.frame_timecode import FrameTimecode
-from scenedetect.platform import tqdm, invoke_command, CommandTooLong, get_file_name
+from scenedetect.platform import (tqdm, invoke_command, CommandTooLong, get_file_name,
+                                  get_ffmpeg_path)
 
 logger = logging.getLogger('pyscenedetect')
 
@@ -58,6 +59,8 @@ split the video manually by exporting a list of cuts with the
 See https://github.com/Breakthrough/PySceneDetect/issues/164
 for details.  Sorry about that!
 '''
+
+FFMPEG_PATH = get_ffmpeg_path()
 
 ##
 ## Command Availability Checking Functions
@@ -88,14 +91,7 @@ def is_ffmpeg_available():
     Returns:
         True if `ffmpeg` can be invoked, False otherwise.
     """
-    ret_val = None
-    try:
-        ret_val = subprocess.call(['ffmpeg', '-v', 'quiet'])
-    except OSError:
-        return False
-    if ret_val is not None and ret_val != 1:
-        return False
-    return True
+    return FFMPEG_PATH is not None
 
 
 ##
@@ -250,7 +246,8 @@ def split_video_ffmpeg(
         processing_start_time = time.time()
         for i, (start_time, end_time) in enumerate(scene_list):
             duration = (end_time - start_time)
-            call_list = ['ffmpeg']
+            # Gracefully handle case where FFMPEG_PATH might be unset.
+            call_list = [FFMPEG_PATH if FFMPEG_PATH is not None else 'ffmpeg']
             if not show_output:
                 call_list += ['-v', 'quiet']
             elif i > 0:

@@ -199,3 +199,29 @@ def invoke_command(args: List[str]) -> int:
         if any([x in exception_string for x in to_match]):
             raise CommandTooLong() from err
         raise
+
+
+def get_ffmpeg_path() -> Optional[str]:
+    """Get path to ffmpeg if available on the current system, or None if not available."""
+    # Prefer using ffmpeg if it already exists in PATH.
+    try:
+        subprocess.call(['ffmpeg', '-v', 'quiet'])
+        return 'ffmpeg'
+    except OSError:
+        pass
+    # Failed to invoke ffmpeg from PATH, see if we have a copy from imageio_ffmpeg.
+    try:
+        # pylint: disable=import-outside-toplevel
+        from imageio_ffmpeg import get_ffmpeg_exe
+        subprocess.call([get_ffmpeg_exe(), '-v', 'quiet'])
+        return get_ffmpeg_exe()
+    # Gracefully handle case where imageio_ffmpeg is not available.
+    except ModuleNotFoundError:
+        pass
+    # Handle case where path might be wrong/non-existent.
+    except OSError:
+        pass
+    # get_ffmpeg_exe may throw a RuntimeError if the executable is not available.
+    except RuntimeError:
+        pass
+    return None
