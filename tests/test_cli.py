@@ -15,6 +15,8 @@ from typing import Optional
 import subprocess
 import pytest
 
+from scenedetect.video_splitter import is_ffmpeg_available, is_mkvmerge_available
+
 # These tests validate that the CLI itself functions correctly, mainly based on the return
 # return code from the process. We do not yet check for correctness of the output, just a
 # successful invocation of the command (i.e. no exceptions/errors).
@@ -73,23 +75,6 @@ def invoke_scenedetect(
         command += ' -c %s' % config_file
     command += ' ' + args.format(**value_dict)
     return subprocess.call(command.strip().split(' '))
-
-
-def can_invoke(cmd: str, args: str = '-h'):
-    """Return True if the specified command can be invoked, False otherwise.
-
-    The command should be able to be invoked as `cmd -h` and return code 0 (or override
-    `args` accordingly to achieve the same behaviour).
-
-    Used to test if certain external programs (e.g. ffmpeg, mkvmerge) are available to
-    conditionally enable/disable tests that require them.
-    """
-    try:
-        subprocess.run(args=[cmd, *args.split(' ')], check=True, capture_output=True)
-    # pylint: disable=bare-except
-    except:
-        return False
-    return True
 
 
 def test_cli_no_args():
@@ -164,7 +149,7 @@ def test_cli_list_scenes(tmp_path):
     # TODO: Delete scene list and ensure is not recreated using -n.
 
 
-@pytest.mark.skipif(condition=not can_invoke('ffmpeg'), reason="ffmpeg could not be invoked!")
+@pytest.mark.skipif(condition=not is_ffmpeg_available(), reason="ffmpeg is not available")
 def test_cli_split_video_ffmpeg(tmp_path):
     """Test `split-video` command using ffmpeg."""
     assert invoke_scenedetect(
@@ -181,7 +166,7 @@ def test_cli_split_video_ffmpeg(tmp_path):
     # TODO: Check for existence of split video files.
 
 
-@pytest.mark.skipif(condition=not can_invoke('mkvmerge'), reason="mkvmerge could not be invoked!")
+@pytest.mark.skipif(condition=not is_mkvmerge_available(), reason="mkvmerge is not available")
 def test_cli_split_video_mkvmerge(tmp_path):
     """Test `split-video` command using mkvmerge."""
     assert invoke_scenedetect(
