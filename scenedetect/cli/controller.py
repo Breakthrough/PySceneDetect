@@ -51,6 +51,7 @@ def run_scenedetect(context: CliContext):
     perf_start_time = time.time()
     if context.start_time is not None:
         logger.debug('Seeking to start time...')
+        # TODO(v0.6.1): Handle SeekError.
         context.video_stream.seek(target=context.start_time)
 
     logger.info('Detecting scenes...')

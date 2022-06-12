@@ -74,10 +74,16 @@ try:
 except ImportError:
     VideoStreamAv = None
 
+try:
+    from scenedetect.backends.moviepy import VideoStreamMoviePy
+except ImportError:
+    VideoStreamMoviePy = None
+
 AVAILABLE_BACKENDS: Dict[str, Type] = {
     backend.BACKEND_NAME: backend for backend in filter(None, [
         VideoStreamCv2,
         VideoStreamAv,
+        VideoStreamMoviePy,
     ])
 }
 """All available backends that :py:func:`scenedetect.open_video` can consider for the `backend`

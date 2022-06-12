@@ -14,11 +14,13 @@ PySceneDetect Releases
 
 **Command-Line Changes:**
 
+ - [feature] Add `moviepy` backend wrapping the MoviePy package, uses `ffmpeg` binary on the system for video decoding
+
 **API Changes:**
+
  - [bugfix] Fix `scenedetect.detect()` throwing `TypeError` when specifying `stats_file_path`
  - [enhancement] Add optional `start_time` and `end_time` arguments to `scenedetect.detect()`
-
-
+ - [feature] Add new backend `VideoStreamMoviePy` using the MoviePy package
 
 ### 0.6 (May 29, 2022)
 

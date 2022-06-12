@@ -34,7 +34,7 @@ DEFAULT_TIME = '-s 2s -d 6s'            # Seek forward a bit but limit the amoun
 DEFAULT_DETECTOR = 'detect-content'
 DEFAULT_CONFIG_FILE = 'scenedetect.cfg' # Ensure we default to a "blank" config file.
 ALL_DETECTORS = ['detect-content', 'detect-threshold', 'detect-adaptive']
-ALL_BACKENDS = ['opencv', 'pyav']
+ALL_BACKENDS = ['opencv', 'pyav', 'moviepy']
 
 
 def invoke_scenedetect(

@@ -150,7 +150,7 @@ certain string options are stored in `CHOICE_MAP`."""
 
 CHOICE_MAP: Dict[str, Dict[str, List[str]]] = {
     'global': {
-        'backend': ['opencv', 'pyav'],
+        'backend': ['opencv', 'pyav', 'moviepy'],
         'verbosity': ['debug', 'info', 'warning', 'error', 'none'],
     },
     'split-video': {

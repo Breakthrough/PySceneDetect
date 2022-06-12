@@ -28,7 +28,7 @@ tested by adding it to the test suite in `tests/test_video_stream.py`.
 """
 
 from abc import ABC, abstractmethod
-from typing import Tuple, Optional, Union
+from typing import AnyStr, Tuple, Optional, Union
 
 from numpy import ndarray
 
@@ -41,7 +41,9 @@ from scenedetect.frame_timecode import FrameTimecode
 
 class SeekError(Exception):
     """Either an unrecoverable error happened while attempting to seek, or the underlying
-    stream is not seekable (additional information will be provided when possible)."""
+    stream is not seekable (additional information will be provided when possible).
+
+    The stream is guaranteed to be left in a valid state, but the position may be reset."""
 
 
 class VideoOpenFailure(Exception):
@@ -128,6 +130,8 @@ class VideoStream(ABC):
     # Abstract Properties
     #
 
+    # TODO(v0.6.1): Replace Union[bytes, str] with typing.AnyStr
+
     @property
     @abstractmethod
     def path(self) -> Union[bytes, str]:
@@ -209,7 +213,8 @@ class VideoStream(ABC):
         Returns:
             If decode = True, returns either the decoded frame, or False if end of video.
             If decode = False, a boolean indicating if the next frame was advanced to or not is
-            returned.
+            returned. It is undefined what a backend may return if both decode and advance
+            are False.
         """
         raise NotImplementedError
 

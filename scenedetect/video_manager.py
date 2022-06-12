@@ -281,6 +281,7 @@ class VideoManager(VideoStream):
                 Set `validate_parameters=False` to skip this check.
             VideoOpenFailure: Video(s) could not be opened.
         """
+        # TODO(v0.6.1): Add a warning here with the `warnings` module.
         if not video_files:
             raise ValueError("At least one string/integer must be passed in the video_files list.")
         # Need to support video_files as a single str too for compatibility.
