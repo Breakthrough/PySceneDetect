@@ -11,12 +11,12 @@ matrix:
     - os: linux
       dist: bionic
       language: python
-      python: "3.9"
-
+      python: "3.7"
     - os: linux
       dist: bionic
       language: python
-      python: "3.7"
+      python: "3.9"
+
     - os: linux
       dist: focal
       language: python
@@ -31,7 +31,7 @@ matrix:
       python: "3.10"
 
 install:
-  - "python -m pip install --upgrade pip build wheel virtualenv"
+  - "python -m pip install --upgrade pip build wheel virtualenv setuptools==62.3.4"
   # Make sure we get latest binary packages of the video input libraries.
   - "python -m pip install av opencv-python-headless --only-binary :all:"
   # Install other required packages and download required test resources.

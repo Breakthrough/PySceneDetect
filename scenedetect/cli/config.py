@@ -229,7 +229,7 @@ def _parse_config(config: ConfigParser) -> Tuple[ConfigDict, List[str]]:
                         out_map[command][option] = new_value
                     except ValueError:
                         errors.append(
-                            'Invalid [%s] value for %s: %s. Value must be be between %s and %s.' %
+                            'Invalid [%s] value for %s: %s. Value must be between %s and %s.' %
                             ((command, option, value, default.min_val, default.max_val)))
                     continue
 

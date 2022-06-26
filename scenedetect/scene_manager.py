@@ -816,6 +816,7 @@ class SceneManager:
     def _decode_thread(self, video, frame_skip, downscale_factor, end_time, out_queue):
 
         try:
+            # TODO(v0.6.1): Add a threading.Event to allow asynchronous stopping of detect_scenes().
             while True:
                 frame_im = None
                 # We don't do any kind of locking here since the worst-case of this being wrong
