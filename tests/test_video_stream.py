@@ -17,13 +17,9 @@ backends implemented in scenedetect.backends.  These tests enforce a consistent 
 all supported backends, and verify that they are functionally equivalent where possible.
 """
 
-# Standard project pylint disables for unit tests using pytest.
-# pylint: disable=no-self-use, protected-access, multiple-statements, invalid-name
-# pylint: disable=redefined-outer-name
-
 from typing import Type
 import os.path
-# Third-Party Library Imports
+
 import numpy
 import pytest
 

@@ -26,11 +26,48 @@ thereof returned by :py:meth:`get_cut_list <SceneManager.get_cut_list>` and
 some reason the scene (or cut) list becomes unsorted. The :py:class:`SceneManager` also
 facilitates passing a :py:class:`scenedetect.stats_manager.StatsManager`,
 if any is defined, to the associated :py:class:`scenedetect.scene_detector.SceneDetector`
-objects for caching of frame metrics.
+objects for storing per-frame metrics.
 
-This speeds up subsequent calls to the :py:meth:`SceneManager.detect_scenes` method
-that process the same frames with the same detection algorithm, even if different
-threshold values (or other algorithm options) are used.
+===============================================================
+Usage
+===============================================================
+
+In this example, we create a function ``find_scenes()`` which will load a video, detect the scenes,
+and return a list of tuples containing the (start, end) timecodes of each detected scene.
+
+.. code:: python
+
+    from scenedetect import open_video, SceneManager, ContentDetector
+
+    def find_scenes(video_path, threshold=27.0):
+        video = open_video(video_path)
+        scene_manager = SceneManager()
+        scene_manager.add_detector(
+            ContentDetector(threshold=threshold))
+        # Detect all scenes in video from current position to end.
+        scene_manager.detect_scenes(video)
+        # `get_scene_list` returns a list of start/end timecode pairs
+        # for each scene that was found.
+        return scene_manager.get_scene_list()
+
+An optional callback can also be invoked on each detected scene, for example:
+
+.. code:: python
+
+    from scenedetect import open_video, SceneManager, ContentDetector
+
+    # Callback to invoke on the first frame of every new scene detection.
+    def on_new_scene(frame_img: numpy.ndarray, frame_num: int):
+        print("New scene found at frame %d." % frame_num)
+
+    video = open_video(test_video_file)
+    scene_manager = SceneManager()
+    scene_manager.add_detector(ContentDetector())
+    scene_manager.detect_scenes(video=video, callback=on_new_scene)
+
+To use a `SceneManager` with a webcam/device or existing `cv2.VideoCapture` device, use the
+:py:class:`VideoCaptureAdapter <scenedetect.backends.opencv.VideoCaptureAdapter>` instead of
+`open_video`.
 """
 
 import csv
@@ -757,10 +794,10 @@ class SceneManager:
         start_frame_num: int = video.frame_number
 
         if duration is not None:
-            end_time = duration + start_frame_num
+            end_time: Union[int, FrameTimecode] = duration + start_frame_num
 
         if end_time is not None:
-            end_time = self._base_timecode + end_time
+            end_time: FrameTimecode = self._base_timecode + end_time
 
         # Can only calculate total number of frames we expect to process if the duration of
         # the video is available.

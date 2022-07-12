@@ -18,9 +18,12 @@ examples of common use cases, and only validate semantic correctness.
 
 from typing import List, Tuple
 
+import cv2
+import numpy
+
 from scenedetect import detect, open_video
 from scenedetect import ContentDetector, FrameTimecode, SceneManager, StatsManager
-from scenedetect.backends import VideoStreamCv2
+from scenedetect.backends import VideoStreamCv2, VideoCaptureAdapter
 
 STATS_FILE_PATH = 'api_test_statsfile.csv'
 
@@ -82,6 +85,22 @@ def test_api_scene_manager_start_end_time(test_video_file: str):
     print_scenes(scene_list=scene_list)
 
 
+def test_api_scene_manager_callback(test_video_file: str):
+    """Demonstrate how to use a SceneManager to implement a function similar to `detect()`
+    which also invokes a callback function every time a new scene has been found."""
+
+    # Callback to invoke on the first frame of every new scene detection.
+    def on_new_scene(frame_img: numpy.ndarray, frame_num: int):
+        print("New scene found at frame %d." % frame_num)
+
+    video = open_video(test_video_file)
+    scene_manager = SceneManager()
+    scene_manager.add_detector(ContentDetector())
+    scene_manager.detect_scenes(video=video, callback=on_new_scene)
+    scene_list = scene_manager.get_scene_list()
+    print_scenes(scene_list=scene_list)
+
+
 def test_api_stats_manager(test_video_file: str):
     """Demonstrate using a StatsManager with a SceneManager to save per-frame statistics to disk."""
     video = open_video(test_video_file)
@@ -92,19 +111,6 @@ def test_api_stats_manager(test_video_file: str):
     print_scenes(scene_list=scene_list)
     # Save per-frame statistics to disk.
     scene_manager.stats_manager.save_to_csv(csv_file=STATS_FILE_PATH)
-
-
-def test_api_video_stream_opencv(test_video_file: str):
-    """Demonstrate constructing and using a VideoStream backend directly, instead of
-    using the `open_video` function. Only VideoStreamCv2 is guaranteed to be available.
-    Applications that do not require a specific backend library should use `open_video`.
-    """
-    video = VideoStreamCv2(test_video_file)
-    scene_manager = SceneManager()
-    scene_manager.add_detector(ContentDetector())
-    scene_manager.detect_scenes(video=video)
-    scene_list = scene_manager.get_scene_list()
-    print_scenes(scene_list=scene_list)
 
 
 def test_api_timecode_types():
@@ -122,3 +128,26 @@ def test_api_timecode_types():
     # Seconds (str, 'SSSs' or 'SSSS.SSSs')
     timecode = base_timecode + '1.5s'
     assert timecode.get_frames() == 15
+
+
+def test_api_device_callback(test_video_file: str):
+    """Demonstrate how to use a webcam/device/pipe and a callback function.
+
+    Instead of calling `open_video()`, an existing `cv2.VideoCapture` can be used by
+    wrapping it with a `VideoCaptureAdapter.`"""
+
+    # Callback to invoke on the first frame of every new scene detection.
+    def on_new_scene(frame_img: numpy.ndarray, frame_num: int):
+        print("New scene found at frame %d." % frame_num)
+
+    # We open a file just for test purposes, but we can also use a device or pipe here.
+    cap = cv2.VideoCapture(test_video_file)
+    video = VideoCaptureAdapter(cap)
+    # Now `video` can be used as normal with a `SceneManager`. Remember to set `duration`
+    # or `end_time` if the input is non-terminating.
+    # TODO(#274): Document that asynchronous stopping is also supported once SceneManager
+    # has a `stop()` method.
+    total_frames = 1000
+    scene_manager = SceneManager()
+    scene_manager.add_detector(ContentDetector())
+    scene_manager.detect_scenes(video=video, duration=total_frames, callback=on_new_scene)

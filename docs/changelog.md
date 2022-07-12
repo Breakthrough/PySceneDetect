@@ -22,6 +22,9 @@ PySceneDetect Releases
  - [enhancement] Add optional `start_time` and `end_time` arguments to `scenedetect.detect()`
  - [feature] Add new backend `VideoStreamMoviePy` using the MoviePy package
  - [enhancement] If available, the `ffmpeg` binary from the `imageio_ffmpeg` package will be used if one could not be found in PATH
+ - [enhancement] Add new `scenedetect.VideoCaptureAdapter` object to allow using existing `cv2.VideoCapture` objects with a `SceneManager` (#276)
+    - Note that using a device with `scenedetect.VideoStreamCv2` is deprecated as a result, replace with `VideoCaptureAdapter` ([see updated examples](http://scenedetect.com/projects/Manual/en/latest/api/backends.html#usage-example))
+ - [docs] Add example for [using a callback](http://scenedetect.com/projects/Manual/en/latest/api/scene_manager.html) (#273)
 
 ### 0.6 (May 29, 2022)
 

@@ -18,7 +18,7 @@ can be used to open a video with a specified backend, falling back to OpenCV if 
 All backends available on the current system can be found via :py:data:`AVAILABLE_BACKENDS`.
 
 ===============================================================
-Usage Example
+Usage Examples
 ===============================================================
 
 Assuming we have a file `video.mp4` in our working directory, we can load it and iterate through
@@ -55,6 +55,28 @@ Lastly, we can import and use specific backend directly:
 
 The ``opencv`` backend (:py:class:`VideoStreamCv2 <scenedetect.backends.opencv.VideoStreamCv2>`)
 is guaranteed to be available.
+
+===============================================================
+Devices / Cameras / Pipes
+===============================================================
+
+You can use an existing `cv2.VideoCapture` object with some parts of the PySceneDetect API by
+using a :py:class:`VideoCaptureAdapter <scenedetect.backends.opencv.VideoCaptureAdapter>`).
+
+For example, to use a :py:class:`SceneManager <scenedetect.scene_manager.SceneManager>`) with
+a webcam device:
+
+.. code:: python
+
+    from scenedetect import SceneManager, ContentDetector
+    from scenedetect.backends import VideoCaptureAdapter
+
+    cap = cv2.VideoCapture(2)   # Open device 2
+    video = VideoCaptureAdapter(cap)
+    total_frames = 1000
+    scene_manager = SceneManager()
+    scene_manager.add_detector(ContentDetector())
+    scene_manager.detect_scenes(video=video, duration=total_frames)
 """
 
 # TODO(v1.0): Consider removing and making this a namespace package so that additional backends can
@@ -67,7 +89,7 @@ is guaranteed to be available.
 from typing import Dict, Type
 
 # VideoStreamCv2 must be available at minimum.
-from scenedetect.backends.opencv import VideoStreamCv2
+from scenedetect.backends.opencv import VideoStreamCv2, VideoCaptureAdapter
 
 try:
     from scenedetect.backends.pyav import VideoStreamAv
