@@ -60,23 +60,26 @@ is guaranteed to be available.
 Devices / Cameras / Pipes
 ===============================================================
 
-You can use an existing `cv2.VideoCapture` object with some parts of the PySceneDetect API by
-using a :py:class:`VideoCaptureAdapter <scenedetect.backends.opencv.VideoCaptureAdapter>`).
-
-For example, to use a :py:class:`SceneManager <scenedetect.scene_manager.SceneManager>`) with
-a webcam device:
+You can use an existing `cv2.VideoCapture` object with the PySceneDetect API using a
+:py:class:`VideoCaptureAdapter <scenedetect.backends.opencv.VideoCaptureAdapter>`). For example,
+to use a :py:class:`SceneManager <scenedetect.scene_manager.SceneManager>` with a webcam device:
 
 .. code:: python
 
     from scenedetect import SceneManager, ContentDetector
     from scenedetect.backends import VideoCaptureAdapter
-
-    cap = cv2.VideoCapture(2)   # Open device 2
+    # Open device ID 2.
+    cap = cv2.VideoCapture(2)
     video = VideoCaptureAdapter(cap)
     total_frames = 1000
     scene_manager = SceneManager()
     scene_manager.add_detector(ContentDetector())
     scene_manager.detect_scenes(video=video, duration=total_frames)
+
+You can also pass a callback to
+:py:meth:`detect_scenes() <scenedetect.scene_manager.SceneManager.detect_scenes>`,
+which is sometimes useful when working with live inputs. See the
+:py:meth:`SceneManager <scenedetect.scene_manager.SceneManager>` examples for details.
 """
 
 # TODO(v1.0): Consider removing and making this a namespace package so that additional backends can
