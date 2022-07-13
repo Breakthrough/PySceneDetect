@@ -272,8 +272,8 @@ Command Options
                             tool. [setting: off]
 
   -c, --copy                Copy instead of re-encode. Much faster, but less
-                            precise. Equivalent to specifying -a "-c:v copy
-                            -c:a copy".
+                            precise. Equivalent to specifying -a "-map 0 -c:v
+                            copy -c:a copy ".
 
   -hq, --high-quality       Encode video with higher quality, overrides -f
                             option if present. Equivalent to specifying
@@ -294,8 +294,8 @@ Command Options
                             when splitting and re-encoding scenes. Use double
                             quotes (") around specified arguments. Must
                             specify at least audio/video codec to use (e.g. -a
-                            "-c:v [...] -c:a [...]"). [default: -c:v libx264
-                            -preset veryfast -crf 22 -c:a aac]
+                            "-c:v [...] -c:a [...]"). [default: -map 0 -c:v
+                            libx264 -preset veryfast -crf 22 -c:a aac]
 
   -m, --mkvmerge            Split the video using mkvmerge. Faster than re-
                             encoding, but less precise. The output will be

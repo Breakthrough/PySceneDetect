@@ -765,7 +765,7 @@ def list_scenes_command(
     is_flag=True,
     flag_value=True,
     help='Copy instead of re-encode. Much faster, but less precise. Equivalent to specifying'
-    ' -a "-c:v copy -c:a copy".%s' % (USER_CONFIG.get_help_string('split-video', 'copy')),
+    ' -a "-map 0 -c:v copy -c:a copy".%s' % (USER_CONFIG.get_help_string('split-video', 'copy')),
 )
 @click.option(
     '--high-quality',

@@ -15,6 +15,7 @@ PySceneDetect Releases
 **Command-Line Changes:**
 
  - [feature] Add `moviepy` backend wrapping the MoviePy package, uses `ffmpeg` binary on the system for video decoding
+ - [enhancement] When using ffmpeg to split videos, `-map 0` has been added to the default arguments so other audio tracks are also included when present ([#271](https://github.com/Breakthrough/PySceneDetect/issues/271))
 
 **API Changes:**
 
@@ -25,6 +26,7 @@ PySceneDetect Releases
  - [enhancement] Add new `scenedetect.VideoCaptureAdapter` object to allow using existing `cv2.VideoCapture` objects with a `SceneManager` (#276)
     - Note that using a device with `scenedetect.VideoStreamCv2` is deprecated as a result, replace with `VideoCaptureAdapter` ([see updated examples](http://scenedetect.com/projects/Manual/en/latest/api/backends.html#devices-cameras-pipes))
  - [docs] Add example for [using a callback](http://scenedetect.com/projects/Manual/en/v0.6.1/api/scene_manager.html#usage) (#273)
+ - [enhancement] Add `-map 0` option to default arguments of `split_video_ffmpeg` to include all audio tracks by default ([#271](https://github.com/Breakthrough/PySceneDetect/issues/271))
 
 ### 0.6 (May 29, 2022)
 

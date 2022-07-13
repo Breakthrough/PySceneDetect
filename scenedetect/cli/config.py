@@ -124,7 +124,7 @@ CONFIG_MAP: ConfigDict = {
         'filename': '$VIDEO_NAME-Scene-$SCENE_NUMBER-$IMAGE_NUMBER',
         'num-images': 3,
         'format': 'jpeg',
-                                                                         # Default value of quality is unused as it depends on the format.
+                                                                           # Default value of quality is unused as it depends on the format.
         'quality': RangeValue(0, min_val=0, max_val=100),
         'compression': RangeValue(3, min_val=0, max_val=9),
         'frame-margin': 1,
@@ -133,7 +133,7 @@ CONFIG_MAP: ConfigDict = {
         'width': 0,
     },
     'split-video': {
-        'args': "-c:v libx264 -preset veryfast -crf 22 -c:a aac",
+        'args': "-map 0 -c:v libx264 -preset veryfast -crf 22 -c:a aac",
         'copy': False,
         'filename': '$VIDEO_NAME-Scene-$SCENE_NUMBER',
         'high-quality': False,

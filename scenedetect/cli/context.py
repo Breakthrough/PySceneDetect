@@ -542,13 +542,13 @@ class CliContext:
         ## ffmpeg-Specific Arguments/Options
         ##
         if copy:
-            args = '-c:v copy -c:a copy'
+            args = '-map 0 -c:v copy -c:a copy'
         elif not args:
             if rate_factor is None:
                 rate_factor = 22 if not high_quality else 17
             if preset is None:
                 preset = 'veryfast' if not high_quality else 'slow'
-            args = ('-c:v libx264 -preset {PRESET} -crf {RATE_FACTOR} -c:a aac'.format(
+            args = ('-map 0 -c:v libx264 -preset {PRESET} -crf {RATE_FACTOR} -c:a aac'.format(
                 PRESET=preset, RATE_FACTOR=rate_factor))
 
         logger.info('ffmpeg arguments: %s', args)

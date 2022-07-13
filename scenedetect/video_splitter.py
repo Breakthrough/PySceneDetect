@@ -180,7 +180,7 @@ def split_video_ffmpeg(
     scene_list: Iterable[FrameTimecodePair],
     output_file_template: str = '$VIDEO_NAME-Scene-$SCENE_NUMBER.mp4',
     video_name: Optional[str] = None,
-    arg_override: str = '-c:v libx264 -preset fast -crf 21 -c:a aac',
+    arg_override: str = '-map 0 -c:v libx264 -preset fast -crf 21 -c:a aac',
     show_progress: bool = False,
     show_output: bool = False,
     suppress_output=None,
