@@ -708,7 +708,7 @@ def export_html_command(
     is_flag=True,
     flag_value=True,
     help='Skips outputting the cutting list as the first row in the CSV file.'
-    ' Set this option if compliance with RFC 4810 is required.%s' %
+    ' Set this option if compliance with RFC 4180 is required.%s' %
     (USER_CONFIG.get_help_string('list-scenes', 'skip-cuts')),
 )
 @click.pass_context
