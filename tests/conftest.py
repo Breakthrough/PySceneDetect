@@ -69,6 +69,12 @@ def corrupt_video_file() -> str:
 
 
 @pytest.fixture
+def rotated_video_file() -> str:
+    """Video containing a corrupted frame causing a decode failure."""
+    return get_absolute_path("resources/issue-134-rotate.mp4")
+
+
+@pytest.fixture
 def test_image_sequence() -> str:
     """Path to a short image sequence (from counter.mp4)."""
     # Make sure at least one image in the sequence exists.

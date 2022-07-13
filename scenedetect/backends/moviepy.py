@@ -18,6 +18,7 @@ Uses string identifier ``'moviepy'``.
 from logging import getLogger
 from typing import AnyStr, Tuple, Union, Optional
 
+import cv2
 from moviepy.video.io.ffmpeg_reader import FFMPEG_VideoReader
 from numpy import ndarray
 
@@ -205,7 +206,7 @@ class VideoStreamMoviePy(VideoStream):
             return self._last_frame
         if not hasattr(self._reader, 'lastread'):
             return False
-        self._last_frame = self._reader.lastread
+        self._last_frame = cv2.cvtColor(self._reader.lastread, cv2.COLOR_BGR2RGB)
         self._reader.read_frame()
         if self._last_frame is self._reader.lastread:
             # Didn't decode a new frame, must have hit EOF.

@@ -11,9 +11,13 @@
 # included LICENSE file, or visit one of the above pages for details.
 #
 
+import glob
+import os
 from typing import Optional
 import subprocess
 import pytest
+
+import cv2
 
 from scenedetect.video_splitter import is_ffmpeg_available, is_mkvmerge_available
 
@@ -187,7 +191,25 @@ def test_cli_save_images(tmp_path):
     """Test `save-images` command."""
     assert invoke_scenedetect(
         '-i {VIDEO} -s {STATS} time {TIME} {DETECTOR} save-images', output_dir=tmp_path) == 0
-    # TODO: Check for existence of split video files.
+    # Open one of the created images and make sure it has the correct resolution.
+    # TODO: Also need to test that the right number of images was generated, and compare with
+    # expected frames from the actual video.
+    images = glob.glob(os.path.join(tmp_path, '*.jpg'))
+    assert images
+    image = cv2.imread(images[0])
+    assert image.shape == (544, 1280, 3)
+
+
+# TODO(#134): This works fine with OpenCV currently, but needs to be supported for PyAV and MoviePy.
+def test_cli_save_images_rotation(rotated_video_file, tmp_path):
+    """Test that `save-images` command rotates images correctly with the default backend."""
+    assert invoke_scenedetect(
+        '-i {VIDEO} {DETECTOR} save-images', VIDEO=rotated_video_file, output_dir=tmp_path) == 0
+    images = glob.glob(os.path.join(tmp_path, '*.jpg'))
+    assert images
+    image = cv2.imread(images[0])
+    # Note same resolution as in test_cli_save_images but rotated 90 degrees.
+    assert image.shape == (1280, 544, 3)
 
 
 def test_cli_export_html(tmp_path):

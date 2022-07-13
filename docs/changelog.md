@@ -28,6 +28,7 @@ PySceneDetect Releases
  - [docs] Add example for [using a callback](http://scenedetect.com/projects/Manual/en/v0.6.1/api/scene_manager.html#usage) (#273)
  - [enhancement] Add `-map 0` option to default arguments of `split_video_ffmpeg` to include all audio tracks by default ([#271](https://github.com/Breakthrough/PySceneDetect/issues/271))
 
+
 ### 0.6 (May 29, 2022)
 
 #### Release Notes
