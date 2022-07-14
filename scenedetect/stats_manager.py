@@ -12,16 +12,14 @@
 #
 """ ``scenedetect.stats_manager`` Module
 
-This module contains the :py:class:`StatsManager` class, which provides a key-value store
-for each :py:class:`SceneDetector <scenedetect.scene_detector.SceneDetector>` to read/write
-the metrics calculated for each frame. The :py:class:`StatsManager` must be registered to a
-:py:class:`SceneManager <scenedetect.scene_manager.SceneManager>` by passing it to the
-:py:class:`SceneManager constructor <scenedetect.scene_manager.SceneManager>` as the
-`stats_manager` argument.
+This module contains the :py:class:`StatsManager` class, which provides a key-value store for each
+:py:class:`SceneDetector <scenedetect.scene_detector.SceneDetector>` to write the metrics calculated
+for each frame. The :py:class:`StatsManager` must be registered to a
+:py:class:`SceneManager <scenedetect.scene_manager.SceneManager>` upon construction.
 
-The entire :py:class:`StatsManager` can be :py:meth:`saved to <StatsManager.save_to_csv>`
-a human-readable CSV file, also allowing both precise determination of the threshold or
-other optimal values for video files.
+The entire :py:class:`StatsManager` can be :py:meth:`saved to <StatsManager.save_to_csv>` a
+human-readable CSV file, allowing for precise determination of the ideal threshold (or other
+detection parameters) for the given input.
 """
 
 import csv

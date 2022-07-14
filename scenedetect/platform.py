@@ -12,12 +12,8 @@
 #
 """ ``scenedetect.platform`` Module
 
-This file contains all platform/library/OS-specific compatibility fixes,
-intended to improve the systems that are able to run PySceneDetect, and allow
-for maintaining backwards compatibility with existing libraries going forwards.
-Other helper functions related to the detection of the appropriate dependency
-DLLs on Windows and getting uniform line-terminating csv reader/writer objects
-are also included in this module.
+This moduke contains all platform/library specific compatibility fixes, as well as some utility
+functions to handle logging and invoking external commands.
 """
 
 import logging

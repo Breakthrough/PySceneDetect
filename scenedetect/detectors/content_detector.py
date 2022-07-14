@@ -10,8 +10,8 @@
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
-""":py:class:`ContentDetector` compares the difference in content between adjacent frames
-against a set threshold/score, which if exceeded, triggers a scene cut.
+""":py:class:`ContentDetector` compares the difference in content between adjacent frames against a
+set threshold/score, which if exceeded, triggers a scene cut.
 
 This detector is available from the command-line as the `detect-content` command.
 """

@@ -14,8 +14,8 @@
 
 Uses string identifier ``'opencv'``.
 
-For wrapping devices or live streams, there is also the :py:class:`VideoCaptureAdapter`
-which can be created using an existing `cv2.VideoCapture` object.
+For wrapping devices or live streams, there is also the :py:class:`VideoCaptureAdapter` which can
+be created using an existing `cv2.VideoCapture` object.
 """
 
 from logging import getLogger

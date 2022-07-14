@@ -12,17 +12,17 @@
 #
 """ ``scenedetect.scene_detector`` Module
 
-This module implements the base SceneDetector class, from which all scene
-detectors in the scenedetect.dectectors module are derived from.
+This module contains the :py:class:`SceneDetector` interface, from which all scene detectors in
+:py:mod:`scenedetect.detectors` module are derived from.
 
-The SceneDetector class represents the interface which detection algorithms
-are expected to provide in order to be compatible with PySceneDetect.
+The SceneDetector class represents the interface which detection algorithms are expected to provide
+in order to be compatible with PySceneDetect.
 
 .. warning::
 
-    This API is still unstable, and changes and design improvements are planned for
-    the v1.0 release. Instead of just timecodes, detection algorithms will also
-    provide a specific type of event (in, out, cut, etc...).
+    This API is still unstable, and changes and design improvements are planned for the v1.0
+    release. Instead of just timecodes, detection algorithms will also provide a specific type of
+    event (in, out, cut, etc...).
 """
 
 from typing import List, Optional, Tuple

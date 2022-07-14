@@ -12,12 +12,12 @@
 #
 """``scenedetect.cli`` Module
 
-This file contains the implementation of the PySceneDetect command-line interface (CLI)
-parser logic for the PySceneDetect application ("business logic"), The main CLI
-entry-point function is the function scenedetect_cli, which is a chained command group.
+This file contains the implementation of the PySceneDetect command-line interface (CLI) parser
+logic for the PySceneDetect application ("business logic"), The main CLI entry-point function is
+the function scenedetect_cli, which is a chained command group.
 
-The scenedetect.cli module coordinates first parsing all commands and their options using
-a `CliContext`, finally performing scene detection by passing the `CliContext` to the
+The scenedetect.cli module coordinates first parsing all commands and their options using a
+`CliContext`, finally performing scene detection by passing the `CliContext` to the
 `run_scenedetect` run in `scenedetect.cli.controller`.
 """
 

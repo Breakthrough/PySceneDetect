@@ -10,8 +10,8 @@
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
-""":py:class:`ThresholdDetector` uses a set intensity as a threshold to detect cuts, which
-are triggered when the average pixel intensity exceeds or falls below this threshold.
+""":py:class:`ThresholdDetector` uses a set intensity as a threshold to detect cuts, which are
+triggered when the average pixel intensity exceeds or falls below this threshold.
 
 This detector is available from the command-line as the `detect-threshold` command.
 """

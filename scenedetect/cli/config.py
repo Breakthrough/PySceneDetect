@@ -12,9 +12,9 @@
 #
 """``scenedetect.cli.config`` Module
 
-Handles loading configuration files from disk and validating each section. Only validation
-of the config file schema and data types are performed. Constants/defaults are also defined
-here where possible and re-used by the CLI so that there is one source of truth.
+Handles loading configuration files from disk and validating each section. Only validation of the
+config file schema and data types are performed. Constants/defaults are also defined here where
+possible and re-used by the CLI so that there is one source of truth.
 """
 
 import logging

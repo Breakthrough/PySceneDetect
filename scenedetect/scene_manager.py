@@ -12,21 +12,12 @@
 #
 """ ``scenedetect.scene_manager`` Module
 
-This module implements the :py:class:`SceneManager` object, which is used to coordinate
-SceneDetectors and frame sources (:py:class:`VideoStream <scenedetect.video_stream.VideoStream>`).
-This includes creating a cut list (see :py:meth:`SceneManager.get_cut_list`) and event list (see
-:py:meth:`SceneManager.get_event_list`) of all changes in scene, which is used to generate a final
-list of scenes (see :py:meth:`SceneManager.get_scene_list`) in the form of a list of start/end
-:py:class:`FrameTimecode <scenedetect.frame_timecode.FrameTimecode>` objects at each scene boundary.
-Decoding of video frames is performed in a separate thread to improve parallelism.
+This module implements the :py:class:`SceneManager` object, which is used to perform scene detection
+(using a detector from :py:mod:`scenedetect.detectors`) on videos. Video decoding is done in a
+separate thread to improve performance.
 
-The :py:class:`FrameTimecode <scenedetect.frame_timecode.FrameTimecode>` objects and `tuples`
-thereof returned by :py:meth:`get_cut_list <SceneManager.get_cut_list>` and
-:py:meth:`get_scene_list <SceneManager.get_scene_list>`, respectively, can be sorted if for
-some reason the scene (or cut) list becomes unsorted. The :py:class:`SceneManager` also
-facilitates passing a :py:class:`scenedetect.stats_manager.StatsManager`,
-if any is defined, to the associated :py:class:`scenedetect.scene_detector.SceneDetector`
-objects for storing per-frame metrics.
+This module also contains other helper functions (e.g. :py:func:`save_images`) which can be used to
+process the resulting scene list.
 
 ===============================================================
 Usage

@@ -10,10 +10,9 @@
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
-""":py:class:`AdaptiveDetector` compares the difference in content between adjacent frames
-similar to `ContentDetector` except the threshold isn't fixed, but is a rolling average of
-adjacent frame changes. This can help mitigate false detections in situations such as fast
-camera motions.
+""":py:class:`AdaptiveDetector` compares the difference in content between adjacent frames similar
+to `ContentDetector` except the threshold isn't fixed, but is a rolling average of adjacent frame
+changes. This can help mitigate false detections in situations such as fast camera motions.
 
 This detector is available from the command-line as the `detect-adaptive` command.
 """
