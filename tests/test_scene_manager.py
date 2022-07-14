@@ -33,7 +33,7 @@ from scenedetect.scene_manager import SceneManager, save_images
 
 
 def test_scene_list(test_video_file):
-    """ Test SceneManager get_scene_list method with VideoStreamCv2/ContentDetector. """
+    """Test SceneManager get_scene_list method with VideoStreamCv2/ContentDetector."""
     video = VideoStreamCv2(test_video_file)
     sm = SceneManager()
     sm.add_detector(ContentDetector())
@@ -65,7 +65,7 @@ def test_scene_list(test_video_file):
 
 
 def test_save_images(test_video_file):
-    """ Test scenedetect.scene_manager.save_images function.  """
+    """Test scenedetect.scene_manager.save_images function."""
     video = VideoStreamCv2(test_video_file)
     sm = SceneManager()
     sm.add_detector(ContentDetector())
@@ -108,8 +108,7 @@ def test_save_images(test_video_file):
 
 
 class FakeCallback(object):
-    """ Fake callback used for testing purposes only. Currently just stores
-    the number of times the callback was invoked."""
+    """Fake callback used for testing. Tracks number of times the callback was invoked."""
 
     def __init__(self):
         self.num_invoked: int = 0
@@ -134,7 +133,7 @@ class FakeCallback(object):
 
 
 def test_detect_scenes_callback(test_video_file):
-    """ Test SceneManager detect_scenes method with a callback function.
+    """Test SceneManager detect_scenes method with a callback function.
 
     Note that the API signature of the callback will undergo breaking changes in v1.0.
     """

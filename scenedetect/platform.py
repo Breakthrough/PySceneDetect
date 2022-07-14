@@ -31,7 +31,6 @@ import cv2
 
 # pylint: disable=unused-import
 # pylint: disable=invalid-name
-# TODO(v0.6.1): Assume tqdm is available now as it is listed as a required package.
 try:
     from tqdm import tqdm
 except ModuleNotFoundError:

@@ -19,14 +19,15 @@ PySceneDetect Releases
 
 **API Changes:**
 
+ - [feature] Add new backend `VideoStreamMoviePy` using the MoviePy package
  - [bugfix] Fix `scenedetect.detect()` throwing `TypeError` when specifying `stats_file_path`
  - [enhancement] Add optional `start_time` and `end_time` arguments to `scenedetect.detect()`
- - [feature] Add new backend `VideoStreamMoviePy` using the MoviePy package
  - [enhancement] If available, the `ffmpeg` binary from the `imageio_ffmpeg` package will be used if one could not be found in PATH
- - [enhancement] Add new `scenedetect.VideoCaptureAdapter` object to allow using existing `cv2.VideoCapture` objects with a `SceneManager` (#276)
-    - Note that using a device with `scenedetect.VideoStreamCv2` is deprecated as a result, replace with `VideoCaptureAdapter` ([see updated examples](http://scenedetect.com/projects/Manual/en/latest/api/backends.html#devices-cameras-pipes))
- - [docs] Add example for [using a callback](http://scenedetect.com/projects/Manual/en/v0.6.1/api/scene_manager.html#usage) (#273)
  - [enhancement] Add `-map 0` option to default arguments of `split_video_ffmpeg` to include all audio tracks by default ([#271](https://github.com/Breakthrough/PySceneDetect/issues/271))
+ - [docs] Add example for [using a callback](http://scenedetect.com/projects/Manual/en/v0.6.1/api/scene_manager.html#usage) ([#273](https://github.com/Breakthrough/PySceneDetect/issues/273))
+ - [enhancement] Add thread-safe `stop()` method to `SceneManager` ([#274](https://github.com/Breakthrough/PySceneDetect/issues/274))
+ - [enhancement] Add new `scenedetect.VideoCaptureAdapter` object to allow using existing `cv2.VideoCapture` objects with a `SceneManager` ([#276](https://github.com/Breakthrough/PySceneDetect/issues/276))
+    - Note that using a device with `scenedetect.VideoStreamCv2` is deprecated as a result, replace with `VideoCaptureAdapter` ([see updated examples](http://scenedetect.com/projects/Manual/en/latest/api/backends.html#devices-cameras-pipes))
 
 
 ### 0.6 (May 29, 2022)
@@ -131,6 +132,7 @@ Both the Windows installer and portable distributions now include signed executa
  * Variable framerate videos (VFR) are not fully supported, and will yield incorrect timestamps ([#168](https://github.com/Breakthrough/PySceneDetect/issues/168))
  * The `detect-threshold` option `-l`/`--add-last-scene` cannot be disabled
  * Due to a switch from EXE to MSI for the Windows installer, you may have to uninstall older versions first before installing v0.6
+
 
 ----------------------------------------------------------------
 

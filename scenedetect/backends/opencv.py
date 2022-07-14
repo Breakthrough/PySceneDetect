@@ -46,10 +46,6 @@ def get_aspect_ratio(cap: cv2.VideoCapture, epsilon: float = 0.0001) -> float:
     return num / den
 
 
-# TODO(v0.6.1): Deprecate path_or_device (replace w/ just `path: AnyStr`), and redirect
-# device usage to `VideoCaptureAdapter`. Then document this as requiring that the input
-# be seekable (which is the case for most inputs except devices/gstreamer pipes, which
-# should be covered by `VideoCaptureAdapter`).
 class VideoStreamCv2(VideoStream):
     """OpenCV `cv2.VideoCapture` backend."""
 

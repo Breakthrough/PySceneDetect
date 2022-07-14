@@ -143,10 +143,8 @@ def test_api_device_callback(test_video_file: str):
     # We open a file just for test purposes, but we can also use a device or pipe here.
     cap = cv2.VideoCapture(test_video_file)
     video = VideoCaptureAdapter(cap)
-    # Now `video` can be used as normal with a `SceneManager`. Remember to set `duration`
-    # or `end_time` if the input is non-terminating.
-    # TODO(#274): Document that asynchronous stopping is also supported once SceneManager
-    # has a `stop()` method.
+    # Now `video` can be used as normal with a `SceneManager`. If the input is non-terminating,
+    # either set `end_time/duration` when calling `detect_scenes`, or call `scene_manager.stop()`.
     total_frames = 1000
     scene_manager = SceneManager()
     scene_manager.add_detector(ContentDetector())
