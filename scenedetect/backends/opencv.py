@@ -10,12 +10,14 @@
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
-""":py:class:`VideoStreamCv2` provides an adapter for the OpenCV `cv2.VideoCapture` object.
+""":py:class:`VideoStreamCv2` provides an adapter for the OpenCV `cv2.VideoCapture` object. Works
+with video files, image sequences, and network streams/URLs.
 
 Uses string identifier ``'opencv'``.
 
-For wrapping devices or live streams, there is also the :py:class:`VideoCaptureAdapter` which can
-be created using an existing `cv2.VideoCapture` object.
+For wrapping input devices or pipes, there is also the :py:class:`VideoCaptureAdapter` which can
+be created from an existing `cv2.VideoCapture`. This allows performing scene detection on inputs
+which do not support seeking.
 """
 
 from logging import getLogger
@@ -31,6 +33,14 @@ from scenedetect.platform import get_file_name
 from scenedetect.video_stream import VideoStream, SeekError, VideoOpenFailure, FrameRateUnavailable
 
 logger = getLogger('pyscenedetect')
+
+IMAGE_SEQUENCE_IDENTIFIER = '%'
+
+NON_VIDEO_FILE_INPUT_IDENTIFIERS = (
+    IMAGE_SEQUENCE_IDENTIFIER,       # image sequence
+    '://',                           # URL/network stream
+    ' ! ',                           # gstreamer pipe
+)
 
 
 def get_aspect_ratio(cap: cv2.VideoCapture, epsilon: float = 0.0001) -> float:
@@ -146,9 +156,10 @@ class VideoStreamCv2(VideoStream):
         if self._is_device:
             return self.path
         file_name: str = get_file_name(self.path, include_extension=False)
-        if '%' in file_name:
+        if IMAGE_SEQUENCE_IDENTIFIER in file_name:
             # file_name is an image sequence, trim everything including/after the %.
-            file_name = file_name[:file_name.rfind('%')]
+            # TODO: This excludes any suffix after the sequence identifier.
+            file_name = file_name[:file_name.rfind(IMAGE_SEQUENCE_IDENTIFIER)]
         return file_name
 
     @property
@@ -301,11 +312,11 @@ class VideoStreamCv2(VideoStream):
         """Opens capture referenced by this object and resets internal state."""
         if self._is_device and self._path_or_device < 0:
             raise ValueError('Invalid/negative device ID specified.')
-        # Check if files exist if passed video file is not an image sequence
-        # (checked with presence of % in filename) or not a URL (://).
-        # TODO(#276): This doesn't work with gstreamer pipelines, need to also check for '!'.
-        if not self._is_device and not ('%' in self._path_or_device
-                                        or '://' in self._path_or_device):
+        input_is_video_file = not self._is_device and not any(
+            identifier in self._path_or_device for identifier in NON_VIDEO_FILE_INPUT_IDENTIFIERS)
+        # We don't have a way of querying why opening a video fails (errors are logged at least),
+        # so provide a better error message if we try to open a file that doesn't exist.
+        if input_is_video_file:
             if not os.path.exists(self._path_or_device):
                 raise OSError('Video file not found.')
 
@@ -316,10 +327,10 @@ class VideoStreamCv2(VideoStream):
                 ' and check that OpenCV is installed correctly.\n')
 
         # Display an error if the video codec type seems unsupported (#86) as this indicates
-        # potential video corruption, or may explain missing frames.
+        # potential video corruption, or may explain missing frames. We only perform this check
+        # for video files on-disk (skipped for devices, image sequences, streams, etc...).
         codec_unsupported: bool = (int(abs(cap.get(cv2.CAP_PROP_FOURCC))) == 0)
-        # Skip the check if this is a webcam/video capture device or an image sequence.
-        if codec_unsupported and not (self._is_device or '%' in self._path_or_device):
+        if codec_unsupported and input_is_video_file:
             logger.error('Video codec detection failed. If output is incorrect:\n'
                          '  - Re-encode the input video with ffmpeg\n'
                          '  - Update OpenCV (pip install --upgrade opencv-python)\n'

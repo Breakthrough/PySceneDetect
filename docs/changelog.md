@@ -26,8 +26,9 @@ PySceneDetect Releases
  - [enhancement] Add `-map 0` option to default arguments of `split_video_ffmpeg` to include all audio tracks by default ([#271](https://github.com/Breakthrough/PySceneDetect/issues/271))
  - [docs] Add example for [using a callback](http://scenedetect.com/projects/Manual/en/v0.6.1/api/scene_manager.html#usage) ([#273](https://github.com/Breakthrough/PySceneDetect/issues/273))
  - [enhancement] Add thread-safe `stop()` method to `SceneManager` ([#274](https://github.com/Breakthrough/PySceneDetect/issues/274))
- - [enhancement] Add new `scenedetect.VideoCaptureAdapter` object to allow using existing `cv2.VideoCapture` objects with a `SceneManager` ([#276](https://github.com/Breakthrough/PySceneDetect/issues/276))
-    - Note that using a device with `scenedetect.VideoStreamCv2` is deprecated as a result, replace with `VideoCaptureAdapter` ([see updated examples](http://scenedetect.com/projects/Manual/en/latest/api/backends.html#devices-cameras-pipes))
+ - [enhancement] Add new `VideoCaptureAdapter` to make existing `cv2.VideoCapture` objects compatible with a `SceneManager` ([#276](https://github.com/Breakthrough/PySceneDetect/issues/276))
+    - Primary use case is for handling input devices/webcams and gstreamer pipes, [see updated examples](http://scenedetect.com/projects/Manual/en/latest/api/backends.html#devices-cameras-pipes)
+    - Files, image sequences, and network streams/URLs should continue to use `VideoStreamCv2`
 
 
 ### 0.6 (May 29, 2022)
