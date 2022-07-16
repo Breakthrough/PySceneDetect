@@ -21,11 +21,11 @@ from string import Template
 import time
 from typing import Dict, List, Tuple, Optional
 
-from scenedetect.cli.context import CliContext, check_split_video_requirements
 from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.platform import get_and_create_path
 from scenedetect.scene_manager import save_images, write_scene_list, write_scene_list_html
 from scenedetect.video_splitter import split_video_mkvmerge, split_video_ffmpeg
+from scenedetect.cli.context import CliContext, check_split_video_requirements
 
 logger = logging.getLogger('pyscenedetect')
 

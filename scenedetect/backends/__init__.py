@@ -12,9 +12,11 @@
 #
 """ ``scenedetect.backends`` Module
 
-This module contains concrete :py:class:`VideoStream <scenedetect.video_stream.VideoStream>`
-implementations. In addition to creating backend objects directly, :py:func:`scenedetect.open_video`
-can be used to open a video with a specified backend, falling back to OpenCV if not available.
+This module contains :py:class:`VideoStream <scenedetect.video_stream.VideoStream>` implementations
+backed by various Python multimedia libraries. In addition to creating backend objects directly,
+:py:func:`scenedetect.open_video` can be used to open a video with a specified backend, falling
+back to OpenCV if not available.
+
 All backends available on the current system can be found via :py:data:`AVAILABLE_BACKENDS`.
 
 If you already have a `cv2.VideoCapture` object you want to use for scene detection, you can

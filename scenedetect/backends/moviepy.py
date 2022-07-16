@@ -22,10 +22,10 @@ import cv2
 from moviepy.video.io.ffmpeg_reader import FFMPEG_VideoReader
 from numpy import ndarray
 
-from scenedetect.backends.opencv import VideoStreamCv2
 from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.platform import get_file_name
 from scenedetect.video_stream import VideoStream, SeekError, VideoOpenFailure
+from scenedetect.backends.opencv import VideoStreamCv2
 
 logger = getLogger('pyscenedetect')
 
