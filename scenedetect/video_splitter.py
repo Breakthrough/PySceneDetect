@@ -236,7 +236,7 @@ def split_video_ffmpeg(
     try:
         progress_bar = None
         total_frames = scene_list[-1][1].get_frames() - scene_list[0][0].get_frames()
-        if show_progress and tqdm:
+        if show_progress:
             progress_bar = tqdm(total=total_frames, unit='frame', miniters=1, dynamic_ncols=True)
         processing_start_time = time.time()
         for i, (start_time, end_time) in enumerate(scene_list):
@@ -266,6 +266,7 @@ def split_video_ffmpeg(
                 logger.info(
                     'Output from ffmpeg for Scene 1 shown above, splitting remaining scenes...')
             if ret_val != 0:
+                # TODO(v0.6.1): Capture stdout/stderr and display it on any failed calls.
                 logger.error('Error splitting video (ffmpeg returned %d).', ret_val)
                 break
             if progress_bar:

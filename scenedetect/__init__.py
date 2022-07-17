@@ -101,6 +101,7 @@ or visit the following URL: [ https://docs.python.org/3/license.html ]
 THE SOFTWARE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, EXPRESS OR IMPLIED.
 """
 
+init_logger()
 logger = getLogger('pyscenedetect')
 
 

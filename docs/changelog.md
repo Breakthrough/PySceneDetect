@@ -15,7 +15,9 @@ PySceneDetect Releases
 **Command-Line Changes:**
 
  - [feature] Add `moviepy` backend wrapping the MoviePy package, uses `ffmpeg` binary on the system for video decoding
+ - [enhancement] Progress bar now displays number of detected scenes
  - [enhancement] When using ffmpeg to split videos, `-map 0` has been added to the default arguments so other audio tracks are also included when present ([#271](https://github.com/Breakthrough/PySceneDetect/issues/271))
+ - [enhancement] Progress bar no longer conflicts with program output
 
 **API Changes:**
 

@@ -96,6 +96,9 @@ DEFAULT_MIN_WIDTH: int = 256
 MAX_FRAME_QUEUE_LENGTH: int = 4
 """Maximum size of the queue of frames waiting to be processed after decoding."""
 
+PROGRESS_BAR_DESCRIPTION = 'Detected: %d | Progress'
+"""Template to use for progress bar."""
+
 
 def compute_downscale_factor(frame_width: int, effective_width: int = DEFAULT_MIN_WIDTH) -> int:
     """Get the optimal default downscale factor based on a video's resolution (currently only
@@ -393,7 +396,7 @@ def save_images(scene_list: List[Tuple[FrameTimecode, FrameTimecode]],
     completed = True
     logger.info('Generating output images (%d per scene)...', num_images)
     progress_bar = None
-    if show_progress and tqdm:
+    if show_progress:
         progress_bar = tqdm(total=len(scene_list) * num_images, unit='images', dynamic_ncols=True)
 
     filename_template = Template(image_name_template)
@@ -697,18 +700,22 @@ class SceneManager:
     def _process_frame(self,
                        frame_num: int,
                        frame_im: np.ndarray,
-                       callback: Optional[Callable[[np.ndarray, int], None]] = None) -> None:
-        """Add any cuts detected with the current frame to the cutting list."""
+                       callback: Optional[Callable[[np.ndarray, int], None]] = None) -> bool:
+        """Add any cuts detected with the current frame to the cutting list. Returns True if any new
+        cuts were detected, False otherwise."""
+        new_cuts = False
         for detector in self._detector_list:
             cuts = detector.process_frame(frame_num, frame_im)
             if cuts and callback:
                 callback(frame_im, frame_num)
             self._cutting_list += cuts
+            new_cuts = True if cuts else False
         for detector in self._sparse_detector_list:
             events = detector.process_frame(frame_num, frame_im)
             if events and callback:
                 callback(frame_im, frame_num)
             self._event_list += events
+        return new_cuts
 
     def _is_processing_required(self, frame_num: int) -> bool:
         """True if frame metrics not in StatsManager, False otherwise."""
@@ -813,11 +820,13 @@ class SceneManager:
                         video.frame_size[1] // downscale_factor)
 
         progress_bar = None
-        # TODO(v0.6.1): Need to use logging_redirect_tqdm so log statements don't conflict
-        # with progress bar.
-        # TODO(v0.6.1): Add number of detected scenes to progress bar description text.
-        if tqdm and show_progress:
-            progress_bar = tqdm(total=int(total_frames), unit='frames', dynamic_ncols=True)
+        if show_progress:
+            progress_bar = tqdm(
+                total=int(total_frames),
+                unit='frames',
+                desc=PROGRESS_BAR_DESCRIPTION % 0,
+                dynamic_ncols=True,
+            )
 
         frame_queue = queue.Queue(MAX_FRAME_QUEUE_LENGTH)
         self._stop.clear()
@@ -827,14 +836,18 @@ class SceneManager:
             daemon=True)
         decode_thread.start()
         frame_im = None
+
+        logger.info('Detecting scenes...')
         while not self._stop.is_set():
             next_frame, position = frame_queue.get()
             if next_frame is None and position is None:
                 break
             if not next_frame is None:
                 frame_im = next_frame
-            self._process_frame(position.frame_num, frame_im, callback)
+            new_cuts = self._process_frame(position.frame_num, frame_im, callback)
             if progress_bar is not None:
+                if new_cuts:
+                    progress_bar.set_description(PROGRESS_BAR_DESCRIPTION % len(self._cutting_list))
                 progress_bar.update(1 + frame_skip)
 
         if progress_bar is not None:
@@ -852,7 +865,14 @@ class SceneManager:
         self._post_process(video.position.frame_num)
         return video.frame_number - start_frame_num
 
-    def _decode_thread(self, video, frame_skip, downscale_factor, end_time, out_queue):
+    def _decode_thread(
+        self,
+        video: VideoStream,
+        frame_skip: int,
+        downscale_factor: int,
+        end_time: FrameTimecode,
+        out_queue: queue.Queue,
+    ):
         try:
             while not self._stop.is_set():
                 frame_im = None

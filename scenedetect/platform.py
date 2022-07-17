@@ -26,17 +26,56 @@ from typing import AnyStr, Dict, List, Optional, Union
 import cv2
 
 ##
-## tqdm Library (`scenedetect.platform.tqdm`` will be tqdm object type or None)
+## tqdm Library
 ##
 
-# pylint: disable=unused-import
-# pylint: disable=invalid-name
+
+class FakeTqdmObject:
+    """Provides a fake tqdm-like no-op object."""
+
+    # pylint: disable=unused-argument
+    def __init__(self, **kawrgs):
+        """No-op."""
+
+    def update(self, _):
+        """No-op."""
+
+    def close(self):
+        """No-op."""
+
+    def set_description(self, _):
+        """No-op."""
+
+    # pylint: enable=unused-argument
+
+
+class FakeTqdmLoggingRedirect:
+    """Provides a fake tqdm logging redirect context manager."""
+
+    # pylint: disable=redefined-builtin,unused-argument
+    def __init__(self, **kawrgs):
+        """No-op."""
+
+    def __enter__(self):
+        """No-op."""
+
+    def __exit__(self, type, value, traceback):
+        """No-op."""
+
+    # pylint: enable=redefined-builtin,unused-argument
+
+
+# Try to import tqdm and the logging redirect, otherwise provide fake implementations..
 try:
+    # pylint: disable=unused-import
     from tqdm import tqdm
+    from tqdm.contrib.logging import logging_redirect_tqdm
+    # pylint: enable=unused-import
 except ModuleNotFoundError:
-    tqdm = None
-# pylint: enable=unused-import
-# pylint: enable=invalid-name
+    # pylint: disable=invalid-name
+    tqdm = FakeTqdmObject
+    logging_redirect_tqdm = FakeTqdmLoggingRedirect
+    # pylint: enable=invalid-name
 
 ##
 ## OpenCV imwrite Supported Image Types & Quality/Compression Parameters
@@ -159,8 +198,6 @@ def init_logger(log_level: int = logging.INFO,
         handler.setFormatter(logging.Formatter(fmt=format_str))
         logger_instance.addHandler(handler)
 
-
-init_logger()
 
 ##
 ## Running External Commands
