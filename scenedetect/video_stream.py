@@ -28,7 +28,7 @@ tested by adding it to the test suite in `tests/test_video_stream.py`.
 """
 
 from abc import ABC, abstractmethod
-from typing import AnyStr, Tuple, Optional, Union
+from typing import Tuple, Optional, Union
 
 from numpy import ndarray
 
@@ -130,8 +130,6 @@ class VideoStream(ABC):
     # Abstract Properties
     #
 
-    # TODO(v0.6.1): Replace Union[bytes, str] with typing.AnyStr
-
     @property
     @abstractmethod
     def path(self) -> Union[bytes, str]:
@@ -204,17 +202,15 @@ class VideoStream(ABC):
 
     @abstractmethod
     def read(self, decode: bool = True, advance: bool = True) -> Union[ndarray, bool]:
-        """ Return next frame (or current if advance = False), or False if end of video.
+        """Read and decode the next frame as a numpy.ndarray. Returns False when video ends.
 
         Arguments:
             decode: Decode and return the frame.
-            advance: Seek to the next frame. If False, will remain on the current frame.
+            advance: Seek to the next frame. If False, will return the current (last) frame.
 
         Returns:
-            If decode = True, returns either the decoded frame, or False if end of video.
-            If decode = False, a boolean indicating if the next frame was advanced to or not is
-            returned. It is undefined what a backend may return if both decode and advance
-            are False.
+            If decode = True, the decoded frame (numpy.ndarray), or False (bool) if end of video.
+            If decode = False, a bool indicating if advancing to the the next frame succeeded.
         """
         raise NotImplementedError
 

@@ -186,7 +186,7 @@ class StatsManager:
         Raises:
             OSError: If `path` cannot be opened or a write failure occurs.
         """
-        # TODO: Remove `base_timecode`.
+        # TODO(v0.7): Replace with DeprecationWarning that `base_timecode` will be removed in v0.8.
         if base_timecode is not None:
             logger.error('base_timecode is deprecated.')
 

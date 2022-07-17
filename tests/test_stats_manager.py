@@ -49,7 +49,7 @@ from scenedetect.stats_manager import StatsFileCorrupt
 from scenedetect.stats_manager import COLUMN_NAME_FRAME_NUMBER
 from scenedetect.stats_manager import COLUMN_NAME_TIMECODE
 
-# TODO(1.0): The following exception still requires a test case:
+# TODO(v1.0): The following exception still requires a test case:
 from scenedetect.stats_manager import FrameMetricNotRegistered
 
 # TODO(v1.0): use https://docs.pytest.org/en/6.2.x/tmpdir.html
@@ -60,7 +60,6 @@ TEST_STATS_FILES = [
 
 
 def teardown_module():
-    # type: () -> None
     """ Removes any created stats files, if any. """
     for stats_file in TEST_STATS_FILES:
         if os.path.exists(stats_file):

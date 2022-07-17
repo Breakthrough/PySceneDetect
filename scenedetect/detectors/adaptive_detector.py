@@ -18,8 +18,10 @@ This detector is available from the command-line as the `detect-adaptive` comman
 """
 
 from logging import getLogger
+from typing import List, Optional
 
-# PySceneDetect Library Imports
+from numpy import ndarray
+
 from scenedetect.detectors import ContentDetector
 
 logger = getLogger('pyscenedetect')
@@ -52,7 +54,7 @@ class AdaptiveDetector(ContentDetector):
                 order to detect deviations from the mean.
             video_manager: [DEPRECATED] DO NOT USE. For backwards compatibility only.
         """
-        # TODO: Remove `video_manager`.
+        # TODO(v0.7): Replace with DeprecationWarning that `video_manager` will be removed in v0.8.
         if video_manager is not None:
             logger.error('video_manager is deprecated, use video instead.')
 
@@ -68,13 +70,11 @@ class AdaptiveDetector(ContentDetector):
         self._first_frame = None
         self._last_frame = None
 
-    def get_metrics(self):
-        # type: () -> List[str]
+    def get_metrics(self) -> List[str]:
         """ Combines base ContentDetector metric keys with the AdaptiveDetector one. """
         return super().get_metrics() + [self._adaptive_ratio_key]
 
-    def stats_manager_required(self):
-        # type: () -> bool
+    def stats_manager_required(self) -> bool:
         """ Overload to indicate that this detector requires a StatsManager.
 
         Returns:
@@ -82,15 +82,14 @@ class AdaptiveDetector(ContentDetector):
         """
         return True
 
-    def process_frame(self, frame_num, frame_img):
-        # type: (int, numpy.ndarray) -> List[int]
+    def process_frame(self, frame_num: int, frame_img: Optional[ndarray]) -> List[int]:
         """ Similar to ThresholdDetector, but using the HSV colour space DIFFERENCE instead
         of single-frame RGB/grayscale intensity (thus cannot detect slow fades with this method).
 
         Arguments:
-            frame_num (int): Frame number of frame that is being passed.
+            frame_num: Frame number of frame that is being passed.
 
-            frame_img (Optional[int]): Decoded frame image (numpy.ndarray) to perform scene
+            frame_img: Decoded frame image (numpy.ndarray) to perform scene
                 detection on. Can be None *only* if the self.is_processing_required() method
                 (inhereted from the base SceneDetector class) returns True.
 
@@ -109,7 +108,7 @@ class AdaptiveDetector(ContentDetector):
 
         return []
 
-    def get_content_val(self, frame_num):
+    def get_content_val(self, frame_num: int) -> float:
         """
         Returns the average content change for a frame.
         """
@@ -117,7 +116,7 @@ class AdaptiveDetector(ContentDetector):
             ContentDetector.FRAME_SCORE_KEY if not self._luma_only else ContentDetector.DELTA_V_KEY)
         return self.stats_manager.get_metrics(frame_num, [metric_key])[0]
 
-    def post_process(self, _):
+    def post_process(self, _unused_frame_num: int):
         """
         After an initial run through the video to detect content change
         between each frame, we try to identify fast cuts as short peaks in the

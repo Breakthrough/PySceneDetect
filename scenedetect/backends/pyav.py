@@ -257,16 +257,15 @@ class VideoStreamAv(VideoStream):
             raise VideoOpenFailure() from ex
 
     def read(self, decode: bool = True, advance: bool = True) -> Union[ndarray, bool]:
-        """ Return next frame (or current if advance = False), or False if end of video.
+        """Read and decode the next frame as a numpy.ndarray. Returns False when video ends.
 
         Arguments:
             decode: Decode and return the frame.
-            advance: Seek to the next frame. If False, will remain on the current frame.
+            advance: Seek to the next frame. If False, will return the current (last) frame.
 
         Returns:
-            If decode = True, returns either the decoded frame, or False if end of video.
-            If decode = False, a boolean indicating if the next frame was advanced to or not is
-            returned.
+            If decode = True, the decoded frame (numpy.ndarray), or False (bool) if end of video.
+            If decode = False, a bool indicating if advancing to the the next frame succeeded.
         """
         has_advanced = False
         if advance:

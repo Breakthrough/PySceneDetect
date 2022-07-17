@@ -65,6 +65,7 @@ class VideoStreamMoviePy(VideoStream):
         # as MoviePy caches the first frame when opening the video. Thus self._last_frame
         # will always be the current frame, and self._reader.lastread will be the next.
         self._last_frame: Union[bool, ndarray] = False
+        self._last_frame_rgb: Optional[ndarray] = None
         # Older versions don't track the video position when calling read_frame so we need
         # to keep track of the current frame number.
         self._frame_number = 0
@@ -96,7 +97,7 @@ class VideoStreamMoviePy(VideoStream):
         return self._path
 
     @property
-    def name(self) -> Union[bytes, str]:
+    def name(self) -> str:
         """Name of the video, without extension, or device."""
         return get_file_name(self.path, include_extension=False)
 
@@ -191,22 +192,23 @@ class VideoStreamMoviePy(VideoStream):
         self._eof = False
 
     def read(self, decode: bool = True, advance: bool = True) -> Union[ndarray, bool]:
-        """ Return next frame (or current if advance = False), or False if end of video.
+        """Read and decode the next frame as a numpy.ndarray. Returns False when video ends.
 
         Arguments:
             decode: Decode and return the frame.
-            advance: Seek to the next frame. If False, will remain on the current frame.
+            advance: Seek to the next frame. If False, will return the current (last) frame.
 
         Returns:
-            If decode = True, returns either the decoded frame, or False if end of video.
-            If decode = False, a boolean indicating if the next frame was advanced to or not is
-            returned.
+            If decode = True, the decoded frame (numpy.ndarray), or False (bool) if end of video.
+            If decode = False, a bool indicating if advancing to the the next frame succeeded.
         """
         if not advance:
-            return self._last_frame
+            if self._last_frame_rgb is None:
+                self._last_frame_rgb = cv2.cvtColor(self._last_frame, cv2.COLOR_BGR2RGB)
+            return self._last_frame_rgb
         if not hasattr(self._reader, 'lastread'):
             return False
-        self._last_frame = cv2.cvtColor(self._reader.lastread, cv2.COLOR_BGR2RGB)
+        self._last_frame = self._reader.lastread
         self._reader.read_frame()
         if self._last_frame is self._reader.lastread:
             # Didn't decode a new frame, must have hit EOF.
@@ -215,5 +217,7 @@ class VideoStreamMoviePy(VideoStream):
             self._eof = True
         self._frame_number += 1
         if decode:
-            return self._last_frame
+            if self._last_frame_rgb is None:
+                self._last_frame_rgb = cv2.cvtColor(self._last_frame, cv2.COLOR_BGR2RGB)
+            return self._last_frame_rgb
         return True

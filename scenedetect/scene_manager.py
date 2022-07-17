@@ -72,14 +72,14 @@ import sys
 
 import cv2
 import numpy as np
-
-from scenedetect.frame_timecode import FrameTimecode
-from scenedetect.platform import (tqdm, get_and_create_path, get_cv2_imwrite_params)
-from scenedetect.video_stream import VideoStream
-from scenedetect.stats_manager import StatsManager, FrameMetricRegistered
-from scenedetect.scene_detector import SceneDetector, SparseSceneDetector
 from scenedetect.thirdparty.simpletable import (SimpleTableCell, SimpleTableImage, SimpleTableRow,
                                                 SimpleTable, HTMLPage)
+
+from scenedetect.platform import (tqdm, get_and_create_path, get_cv2_imwrite_params)
+from scenedetect.frame_timecode import FrameTimecode
+from scenedetect.video_stream import VideoStream
+from scenedetect.scene_detector import SceneDetector, SparseSceneDetector
+from scenedetect.stats_manager import StatsManager, FrameMetricRegistered
 
 logger = logging.getLogger('pyscenedetect')
 
@@ -372,7 +372,7 @@ def save_images(scene_list: List[Tuple[FrameTimecode, FrameTimecode]],
         ValueError: Raised if any arguments are invalid or out of range (e.g.
         if num_images is negative).
     """
-    # TODO: Remove `video_manager`.
+    # TODO(v0.7): Add DeprecationWarning that `video_manager` will be removed in v0.8.
     if video_manager is not None:
         logger.error('video_manager is deprecated, use video instead.')
         video = video_manager
@@ -764,8 +764,8 @@ class SceneManager:
             ValueError: `frame_skip` **must** be 0 (the default) if the SceneManager
                 was constructed with a StatsManager object.
         """
-        # Compatibility for v0.5 API.
-        # TODO: Remove default value for `video`` when removing `frame_source`.
+        # TODO(v0.7): Add DeprecationWarning that `frame_source` will be removed in v0.8.
+        # TODO(v0.8): Remove default value for `video`` when removing `frame_source`.
         if frame_source is not None:
             video = frame_source
         if video is None:

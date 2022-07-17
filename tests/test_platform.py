@@ -20,11 +20,8 @@ all platform/library/OS-specific compatibility fixes.
 # pylint: disable=no-self-use, protected-access, multiple-statements, invalid-name
 # pylint: disable=redefined-outer-name
 
-from __future__ import print_function
 import platform
 import pytest
-
-import cv2
 
 from scenedetect.platform import CommandTooLong, invoke_command
 

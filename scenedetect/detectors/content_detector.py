@@ -16,7 +16,7 @@ set threshold/score, which if exceeded, triggers a scene cut.
 This detector is available from the command-line as the `detect-content` command.
 """
 
-from typing import Iterable, List, Tuple
+from typing import Iterable, List, Optional, Tuple
 
 import numpy
 import cv2
@@ -107,7 +107,7 @@ class ContentDetector(SceneDetector):
                 })
         return delta_content if not self.luma_only else delta_v
 
-    def process_frame(self, frame_num: int, frame_img: numpy.ndarray) -> List[int]:
+    def process_frame(self, frame_num: int, frame_img: Optional[numpy.ndarray]) -> List[int]:
         """ Similar to ThresholdDetector, but using the HSV colour space DIFFERENCE instead
         of single-frame RGB/grayscale intensity (thus cannot detect slow fades with this method).
 

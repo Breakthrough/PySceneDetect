@@ -15,7 +15,6 @@
 This module contains :py:class:`CliContext` which encapsulates the command-line options.
 """
 
-from __future__ import print_function
 import logging
 import os
 from typing import AnyStr, Optional
@@ -23,14 +22,15 @@ from typing import AnyStr, Optional
 import click
 
 from scenedetect import open_video, AVAILABLE_BACKENDS
-from scenedetect.cli.config import ConfigRegistry, ConfigLoadFailure, CHOICE_MAP
-from scenedetect.frame_timecode import FrameTimecode, MAX_FPS_DELTA
-import scenedetect.detectors
 from scenedetect.platform import get_and_create_path, get_cv2_imwrite_params, init_logger
-from scenedetect.scene_manager import SceneManager
-from scenedetect.stats_manager import StatsManager
+from scenedetect.frame_timecode import FrameTimecode, MAX_FPS_DELTA
 from scenedetect.video_stream import VideoStream, VideoOpenFailure, FrameRateUnavailable
 from scenedetect.video_splitter import is_mkvmerge_available, is_ffmpeg_available
+import scenedetect.detectors
+from scenedetect.stats_manager import StatsManager
+from scenedetect.scene_manager import SceneManager
+
+from scenedetect.cli.config import ConfigRegistry, ConfigLoadFailure, CHOICE_MAP
 
 logger = logging.getLogger('pyscenedetect')
 

@@ -25,6 +25,8 @@ from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.platform import get_and_create_path
 from scenedetect.scene_manager import save_images, write_scene_list, write_scene_list_html
 from scenedetect.video_splitter import split_video_mkvmerge, split_video_ffmpeg
+from scenedetect.video_stream import SeekError
+
 from scenedetect.cli.context import CliContext, check_split_video_requirements
 
 logger = logging.getLogger('pyscenedetect')
@@ -51,8 +53,13 @@ def run_scenedetect(context: CliContext):
     perf_start_time = time.time()
     if context.start_time is not None:
         logger.debug('Seeking to start time...')
-        # TODO(v0.6.1): Handle SeekError.
-        context.video_stream.seek(target=context.start_time)
+        try:
+            context.video_stream.seek(target=context.start_time)
+        except SeekError as ex:
+            logging.critical('Failed to seek to %s / frame %d: %s',
+                             context.start_time.get_timecode(), context.start_time.get_frames(),
+                             str(ex))
+            return
 
     logger.info('Detecting scenes...')
     num_frames = context.scene_manager.detect_scenes(

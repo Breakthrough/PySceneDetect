@@ -85,7 +85,7 @@ class SceneDetector:
         """
         return []
 
-    def process_frame(self, frame_num: int, frame_img: numpy.ndarray) -> List[int]:
+    def process_frame(self, frame_num: int, frame_img: Optional[numpy.ndarray]) -> List[int]:
         """Process Frame: Computes/stores metrics and detects any scene changes.
 
         Prototype method, no actual detection.

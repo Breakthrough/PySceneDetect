@@ -86,7 +86,7 @@ class VideoStreamCv2(VideoStream):
             ValueError: specified framerate is invalid
         """
         super().__init__()
-        # TODO: Remove `path_or_device` and all associated conditional logic.
+        # TODO(v0.7): Replace with DeprecationWarning that `path_or_device` will be removed in v0.8.
         if path_or_device is not None:
             logger.error('path_or_device is deprecated, use path or VideoCaptureAdapter instead.')
             path = path_or_device
@@ -151,7 +151,7 @@ class VideoStreamCv2(VideoStream):
         return self._path_or_device
 
     @property
-    def name(self) -> Union[bytes, str]:
+    def name(self) -> str:
         """Name of the video, without extension, or device."""
         if self._is_device:
             return self.path
@@ -265,16 +265,16 @@ class VideoStreamCv2(VideoStream):
         self._open_capture(self._frame_rate)
 
     def read(self, decode: bool = True, advance: bool = True) -> Union[ndarray, bool]:
-        """ Return next frame (or current if advance = False), or False if end of video.
+        """Read and decode the next frame as a numpy.ndarray. Returns False when video ends,
+        or the maximum number of decode attempts has passed.
 
         Arguments:
             decode: Decode and return the frame.
-            advance: Seek to the next frame. If False, will remain on the current frame.
+            advance: Seek to the next frame. If False, will return the current (last) frame.
 
         Returns:
-            If decode = True, returns either the decoded frame, or False if end of video.
-            If decode = False, a boolean indicating if the next frame was advanced to or not is
-            returned.
+            If decode = True, the decoded frame (numpy.ndarray), or False (bool) if end of video.
+            If decode = False, a bool indicating if advancing to the the next frame succeeded.
         """
         if not self._cap.isOpened():
             return False
@@ -429,32 +429,30 @@ class VideoCaptureAdapter(VideoStream):
         assert self._frame_rate
         return self._frame_rate
 
-    # TODO(v0.6.1): Make this optional in the interface.
     @property
-    def path(self) -> Union[bytes, str]:
-        """Video or device path."""
-        return None
+    def path(self) -> str:
+        """Always 'CAP_ADAPTER'."""
+        return 'CAP_ADAPTER'
 
-    # TODO(v0.6.1): Make this optional in the interface.
     @property
-    def name(self) -> Union[bytes, str]:
-        """Name of the video, without extension, or device."""
-        return None
+    def name(self) -> str:
+        """Always 'CAP_ADAPTER'."""
+        return 'CAP_ADAPTER'
 
     @property
     def is_seekable(self) -> bool:
-        """Return False, as the underlying VideoCapture is assumed to not support seeking."""
+        """Always False, as the underlying VideoCapture is assumed to not support seeking."""
         return False
 
     @property
     def frame_size(self) -> Tuple[int, int]:
-        """Size of each video frame in pixels as a tuple of (width, height)."""
+        """Reported size of each video frame in pixels as a tuple of (width, height)."""
         return (math.trunc(self._cap.get(cv2.CAP_PROP_FRAME_WIDTH)),
                 math.trunc(self._cap.get(cv2.CAP_PROP_FRAME_HEIGHT)))
 
     @property
     def duration(self) -> Optional[FrameTimecode]:
-        """Return None, as the underlying VideoCapture is assumed to not have a known duration."""
+        """Always None, as the underlying VideoCapture is assumed to not have a known duration."""
         None
 
     @property
@@ -503,16 +501,16 @@ class VideoCaptureAdapter(VideoStream):
         raise NotImplementedError("Reset is not supported.")
 
     def read(self, decode: bool = True, advance: bool = True) -> Union[ndarray, bool]:
-        """ Return next frame (or current if advance = False), or False if end of video.
+        """Read and decode the next frame as a numpy.ndarray. Returns False when video ends,
+        or the maximum number of decode attempts has passed.
 
         Arguments:
             decode: Decode and return the frame.
-            advance: Seek to the next frame. If False, will remain on the current frame.
+            advance: Seek to the next frame. If False, will return the current (last) frame.
 
         Returns:
-            If decode = True, returns either the decoded frame, or False if end of video.
-            If decode = False, a boolean indicating if the next frame was advanced to or not is
-            returned.
+            If decode = True, the decoded frame (numpy.ndarray), or False (bool) if end of video.
+            If decode = False, a bool indicating if advancing to the the next frame succeeded.
         """
         if not self._cap.isOpened():
             return False

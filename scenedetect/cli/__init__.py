@@ -28,6 +28,7 @@ import click
 
 import scenedetect
 from scenedetect.backends import AVAILABLE_BACKENDS
+
 from scenedetect.cli.config import CONFIG_FILE_PATH, CONFIG_MAP, CHOICE_MAP
 from scenedetect.cli.context import USER_CONFIG, CliContext
 from scenedetect.cli.controller import run_scenedetect

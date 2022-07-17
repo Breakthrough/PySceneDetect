@@ -17,7 +17,7 @@ This detector is available from the command-line as the `detect-threshold` comma
 """
 
 from logging import getLogger
-from typing import List
+from typing import List, Optional
 
 import numpy
 
@@ -83,7 +83,7 @@ class ThresholdDetector(SceneDetector):
                 generate an additional scene at this timecode.
             block_size: [DEPRECATED] DO NOT USE. For backwards compatibility.
         """
-        # TODO: Remove `block_size`.
+        # TODO(v0.7): Replace with DeprecationWarning that `block_size` will be removed in v0.8.
         if block_size is not None:
             logger.error('block_size is deprecated.')
 
@@ -106,7 +106,7 @@ class ThresholdDetector(SceneDetector):
     def get_metrics(self) -> List[str]:
         return self._metric_keys
 
-    def process_frame(self, frame_num: int, frame_img: numpy.ndarray) -> List[int]:
+    def process_frame(self, frame_num: int, frame_img: Optional[numpy.ndarray]) -> List[int]:
         """
         Args:
             frame_num (int): Frame number of frame that is being passed.

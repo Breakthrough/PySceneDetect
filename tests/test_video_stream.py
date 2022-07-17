@@ -17,7 +17,8 @@ backends implemented in scenedetect.backends.  These tests enforce a consistent 
 all supported backends, and verify that they are functionally equivalent where possible.
 """
 
-from typing import Type
+from dataclasses import dataclass
+from typing import List, Type
 import os.path
 
 import numpy
@@ -47,7 +48,6 @@ def calculate_frame_delta(frame_a, frame_b, roi=None) -> float:
 
 # TODO: Reduce code duplication here and in `conftest.py`
 def get_absolute_path(relative_path: str) -> str:
-    # type: (str) -> str
     """ Returns the absolute path to a (relative) path of a file that
     should exist within the tests/ directory.
 
@@ -60,20 +60,17 @@ def get_absolute_path(relative_path: str) -> str:
     return abs_path
 
 
+@dataclass
 class VideoParameters:
-
-    def __init__(self, path: str, height: int, width: int, frame_rate: float, total_frames: int,
-                 aspect_ratio: float):
-        self.path = path
-        self.height = height
-        self.width = width
-        self.frame_rate = frame_rate
-        self.total_frames = total_frames
-        self.aspect_ratio = aspect_ratio
+    path: str
+    height: int
+    width: int
+    frame_rate: float
+    total_frames: int
+    aspect_ratio: float
 
 
-def get_test_video_params():
-    # type: () -> str
+def get_test_video_params() -> List[VideoParameters]:
     """Fixture for parameters of all videos."""
     return [
         VideoParameters(

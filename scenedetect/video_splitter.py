@@ -40,9 +40,9 @@ import time
 from typing import Iterable, Optional, Tuple
 from string import Template
 
-from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.platform import (tqdm, invoke_command, CommandTooLong, get_file_name,
                                   get_ffmpeg_path)
+from scenedetect.frame_timecode import FrameTimecode
 
 logger = logging.getLogger('pyscenedetect')
 
@@ -64,8 +64,7 @@ FFMPEG_PATH = get_ffmpeg_path()
 ##
 
 
-def is_mkvmerge_available():
-    # type: () -> bool
+def is_mkvmerge_available() -> bool:
     """ Is mkvmerge Available: Gracefully checks if mkvmerge command is available.
 
     Returns:
@@ -81,8 +80,7 @@ def is_mkvmerge_available():
     return True
 
 
-def is_ffmpeg_available():
-    # type: () -> bool
+def is_ffmpeg_available() -> bool:
     """ Is ffmpeg Available: Gracefully checks if ffmpeg command is available.
 
     Returns:
