@@ -240,3 +240,6 @@ class VideoStream(ABC):
             ValueError: `target` is not a valid value (i.e. it is negative).
         """
         raise NotImplementedError
+
+
+# TODO(v0.6.2): Add a StreamJoiner class to concatenate multiple videos using a specified backend.

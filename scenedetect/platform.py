@@ -31,7 +31,7 @@ import cv2
 
 
 class FakeTqdmObject:
-    """Provides a fake tqdm-like no-op object."""
+    """Provides a no-op tqdm-like object."""
 
     # pylint: disable=unused-argument
     def __init__(self, **kawrgs):
@@ -50,7 +50,7 @@ class FakeTqdmObject:
 
 
 class FakeTqdmLoggingRedirect:
-    """Provides a fake tqdm logging redirect context manager."""
+    """Provides a no-op tqdm context manager for redirecting log messages."""
 
     # pylint: disable=redefined-builtin,unused-argument
     def __init__(self, **kawrgs):
