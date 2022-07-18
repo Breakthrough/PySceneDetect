@@ -70,8 +70,17 @@ disallows negative values, and will clamp negative results to 0.
 import math
 from typing import Union
 
-MAX_FPS_DELTA = 1.0 / 100000
+MAX_FPS_DELTA: float = 1.0 / 100000
 """Maximum amount two framerates can differ by for equality testing."""
+
+# TODO(v0.6.1): Replace uses of Union[int, float, str] with TimecodeValue.
+TimecodeValue = Union[int, float, str]
+"""Named type for values representing timecodes. Must be in one of the following forms:
+
+  1. Timecode as `str` in the form 'HH:MM:SS[.nnn]' (`'01:23:45'` or `'01:23:45.678'`)
+  2. Number of seconds as `float`, or `str` in form 'Ss' or 'S.SSSs' (`'2s'` or `'2.3456s'`)
+  3. Exact number of frames as `int`, or `str` in form NNNNN (`123` or `'123'`)
+"""
 
 
 class FrameTimecode:
@@ -80,9 +89,9 @@ class FrameTimecode:
 
     A timecode is valid only if it complies with one of the following three types/formats:
 
-    1) Timecode as `str` in the form 'HH:MM:SS[.nnn]' (`'01:23:45'` or `'01:23:45.678'`)
-    2) Number of seconds as `float`, or `str` in form 'Ss' or 'S.SSSs' (`'2s'` or `'2.3456s'`)
-    3) Exact number of frames as `int`, or `str` in form NNNNN (`123` or `'123'`)
+      1. Timecode as `str` in the form 'HH:MM:SS[.nnn]' (`'01:23:45'` or `'01:23:45.678'`)
+      2. Number of seconds as `float`, or `str` in form 'Ss' or 'S.SSSs' (`'2s'` or `'2.3456s'`)
+      3. Exact number of frames as `int`, or `str` in form NNNNN (`123` or `'123'`)
     """
 
     def __init__(self,

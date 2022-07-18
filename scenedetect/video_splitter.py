@@ -156,6 +156,7 @@ def split_video_mkvmerge(
         ]
         total_frames = scene_list[-1][1].get_frames() - scene_list[0][0].get_frames()
         processing_start_time = time.time()
+        # TODO(v0.6.1): Capture stdout/stderr and show that if the command fails.
         ret_val = invoke_command(call_list)
         if show_output:
             logger.info('Average processing speed %.2f frames/sec.',

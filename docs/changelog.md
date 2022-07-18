@@ -15,9 +15,8 @@ PySceneDetect Releases
 **Command-Line Changes:**
 
  - [feature] Add `moviepy` backend wrapping the MoviePy package, uses `ffmpeg` binary on the system for video decoding
- - [enhancement] Progress bar now displays number of detected scenes
+ - [enhancement] Progress bar now displays number of detections while processing, no longer conflicts with log message output
  - [enhancement] When using ffmpeg to split videos, `-map 0` has been added to the default arguments so other audio tracks are also included when present ([#271](https://github.com/Breakthrough/PySceneDetect/issues/271))
- - [enhancement] Progress bar no longer conflicts with program output
 
 **API Changes:**
 
@@ -31,6 +30,7 @@ PySceneDetect Releases
  - [enhancement] Add new `VideoCaptureAdapter` to make existing `cv2.VideoCapture` objects compatible with a `SceneManager` ([#276](https://github.com/Breakthrough/PySceneDetect/issues/276))
     - Primary use case is for handling input devices/webcams and gstreamer pipes, [see updated examples](http://scenedetect.com/projects/Manual/en/latest/api/backends.html#devices-cameras-pipes)
     - Files, image sequences, and network streams/URLs should continue to use `VideoStreamCv2`
+ - [enhancement] No-op progress bar and log capture objects are now provided in `scenedetect.platform` for systems without `tqdm`
 
 
 ### 0.6 (May 29, 2022)

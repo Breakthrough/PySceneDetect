@@ -124,14 +124,14 @@ def open_video(
             overriding backend-specific options.
 
     Returns:
-        :py:class:`VideoStream` backend object created with the specified video path.
+        Backend object created with the specified video path.
 
     Raises:
         :py:class:`VideoOpenFailure`: Constructing the VideoStream fails. If multiple backends have
             been attempted, the error from the first backend will be returned.
     """
-    # Try to open the video with the specified backend.
-    last_error = None
+    last_error: Exception = None
+    # If `backend` is available, try to open the video at `path` using it.
     if backend in AVAILABLE_BACKENDS:
         backend_type = AVAILABLE_BACKENDS[backend]
         try:
@@ -144,7 +144,7 @@ def open_video(
             last_error = ex
     else:
         logger.warning('Backend %s not available.', backend)
-    # Fallback to OpenCV if `backend` could not open the video or is unavailable.
+    # Fallback to OpenCV if `backend` is unavailable, or specified backend failed to open `path`.
     backend_type = VideoStreamCv2
     logger.warning('Trying another backend: %s', backend_type.BACKEND_NAME)
     try:
@@ -153,8 +153,7 @@ def open_video(
         logger.debug('Failed to open video: %s', str(ex))
         if last_error is None:
             last_error = ex
-    # If we get here, either the specified backend or the OpenCV backend threw an exception, so
-    # make sure we propagate it.
+    # Propagate any exceptions raised from specified backend, instead of errors from the fallback.
     assert last_error is not None
     raise last_error
 
