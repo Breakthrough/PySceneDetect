@@ -300,6 +300,8 @@ class CliContext:
             min_scene_len = parse_timecode(min_scene_len, self.video_stream.frame_rate).frame_num
 
         threshold = self.config.get_value("detect-content", "threshold", threshold)
+        # TODO(v0.6.1): This does nothing now, need to update weights instead.
+        # Have this override any weight setting, and mark it as deprecated.
         luma_only = luma_only or self.config.get_value("detect-content", "luma-only")
         logger.debug(
             'Adding detector: ContentDetector(threshold=%f, min_scene_len=%d, luma_only=%s)',

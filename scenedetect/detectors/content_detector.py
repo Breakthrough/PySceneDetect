@@ -60,14 +60,15 @@ def calculate_frame_score(current_frame_hsve: Iterable[numpy.ndarray],
     current_frame_hsve = [x.astype(numpy.int32) for x in current_frame_hsve]
     last_frame_hsve = [x.astype(numpy.int32) for x in last_frame_hsve]
     delta_hsve = [0.0] * 5
-    calculate_edge_component: bool = (delta_hsve[3] > 0.0)
-    # TODO(v0.6.1): This is wrong for edges, just calculate edges separately.
-    # Need to multiply both edge masks together.
-    for i in range(4 if calculate_edge_component else 3):
+    num_components = len(current_frame_hsve)
+    for i in range(num_components):
         num_pixels = current_frame_hsve[i].shape[0] * current_frame_hsve[i].shape[1]
         delta_hsve[i] = numpy.sum(
             numpy.abs(current_frame_hsve[i] - last_frame_hsve[i])) / float(num_pixels)
-    delta_hsve[4] = sum([(delta_hsve[i] * weight_map[i]) for i in range(4)]) / sum(weight_map)
+    if num_components < 4:
+        delta_hsve[3] = None
+    delta_hsve[4] = sum([(delta_hsve[i] * weight_map[i]) for i in range(num_components)
+                        ]) / sum(weight_map)
     return tuple(delta_hsve)
 
 
@@ -96,7 +97,7 @@ class ContentDetector(SceneDetector):
             self,
             threshold: float = 27.0,
             min_scene_len: int = 15,
-            luma_only: bool = False, # TODO: Remove luma_only.
+            luma_only: bool = False, # TODO(v0.6.1): Mark luma_only as deprecated.
             hsle_weights=DEFAULT_HSLE_WEIGHT_MAP):
         """
         Arguments:
@@ -137,9 +138,8 @@ class ContentDetector(SceneDetector):
                     self.DELTA_H_KEY: delta_h,
                     self.DELTA_S_KEY: delta_s,
                     self.DELTA_V_KEY: delta_v,
+                    self.DELTA_E_KEY: delta_e,
                 })
-            if self._hsle_weights[3] > 0.0:
-                self.stats_manager.set_metrics(frame_num, {self.DELTA_E_KEY: delta_e})
 
         # TODO: Try to add debug mode params to the config file,
         # e.g. allow edge_mask_file = video.avi in [detect-content].
