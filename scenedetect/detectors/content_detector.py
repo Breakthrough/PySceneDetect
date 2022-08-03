@@ -15,8 +15,9 @@ set threshold/score, which if exceeded, triggers a scene cut.
 
 This detector is available from the command-line as the `detect-content` command.
 """
-
-from typing import Iterable, List, Optional, Tuple
+from dataclasses import dataclass
+import math
+from typing import List, NamedTuple, Optional
 
 import numpy
 import cv2
@@ -24,56 +25,24 @@ import cv2
 from scenedetect.scene_detector import SceneDetector
 
 
-def calculate_frame_components(frame: numpy.ndarray,
-                               calculate_edges: bool = True,
-                               sigma: float = 1.0 / 3.0):
-    hsv = cv2.split(cv2.cvtColor(frame, cv2.COLOR_BGR2HSV))
-    if not calculate_edges:
-        return hsv
-    median = numpy.median(hsv[2])
-    # TODO: Add config file entries for sigma, aperture size, etc.
-    low = int(max(0, (1.0 - sigma) * median))
-    high = int(min(255, (1.0 + sigma) * median))
-    edge = cv2.Canny(hsv[2], low, high)
-    # TODO: Use morphological filter to open edges based on resolution, need to increase line width
-    # accordingly - just automatically size and allow to be overriden in config file.
-    return (*hsv, edge)
-
-
-def calculate_frame_score(current_frame_hsve: Iterable[numpy.ndarray],
-                          last_frame_hsve: Iterable[numpy.ndarray],
-                          weight_map: Iterable[float]) -> Tuple[float]:
-    """Calculates score between two adjacent frames in the HSVE colourspace. Frames should be
-    split, e.g. cv2.split(cv2.cvtColor(frame_data, cv2.COLOR_BGR2HSV)), and edge information
-    appended.
-
-    Arguments:
-        curr_frame_hsv: Current frame.
-        last_frame_hsv: Previous frame.
-
-    Returns:
-
-        Tuple containing the average pixel change for each component as well as the average
-        across all components, e.g. (avg_h, avg_s, avg_v, avg_e, avg_all).
-
+def mean_pixel_distance(left: numpy.ndarray, right: numpy.ndarray) -> float:
+    """Return the mean average distance in pixel values between `left` and `right`.
+    Both `left and `right` should be 2 dimensional 8-bit images of the same shape.
     """
-    current_frame_hsve = [x.astype(numpy.int32) for x in current_frame_hsve]
-    last_frame_hsve = [x.astype(numpy.int32) for x in last_frame_hsve]
-    delta_hsve = [0.0] * 5
-    num_components = len(current_frame_hsve)
-    for i in range(num_components):
-        num_pixels = current_frame_hsve[i].shape[0] * current_frame_hsve[i].shape[1]
-        delta_hsve[i] = numpy.sum(
-            numpy.abs(current_frame_hsve[i] - last_frame_hsve[i])) / float(num_pixels)
-    if num_components < 4:
-        delta_hsve[3] = None
-    delta_hsve[4] = sum([(delta_hsve[i] * weight_map[i]) for i in range(num_components)
-                        ]) / sum(weight_map)
-    return tuple(delta_hsve)
+    assert len(left.shape) == 2 and len(right.shape) == 2
+    assert left.shape == right.shape
+    num_pixels: float = float(left.shape[0] * left.shape[1])
+    return (numpy.sum(numpy.abs(left.astype(numpy.int32) - right.astype(numpy.int32))) / num_pixels)
 
 
-# TODO: May need to create a dataclass of ContentDetector options:
-# - threshold, min_scene_len, luma_only, weight_h, weight_l, ....
+def estimated_kernel_size(frame_width: int, frame_height: int) -> int:
+    """Estimate kernel size based on video resolution."""
+    # TODO: This equation is based on manual estimation from a few videos.
+    # Create a more comprehensive test suite to optimize against.
+    size: int = 4 + round(math.sqrt(frame_width * frame_height) / 192)
+    if size % 2 == 0:
+        size += 1
+    return size
 
 
 class ContentDetector(SceneDetector):
@@ -84,21 +53,50 @@ class ContentDetector(SceneDetector):
     content scenes still using HSV information, use the DissolveDetector.
     """
 
-    FRAME_SCORE_KEY = 'content_val'
-    DELTA_H_KEY, DELTA_S_KEY, DELTA_V_KEY, DELTA_E_KEY = ('delta_hue', 'delta_sat', 'delta_lum',
-                                                          'delta_edge')
-    METRIC_KEYS = [FRAME_SCORE_KEY, DELTA_H_KEY, DELTA_S_KEY, DELTA_V_KEY, DELTA_E_KEY]
+    class Components(NamedTuple):
+        """Components that make up a frame's score."""
+        delta_hue: float
+        """Difference between pixel hue values of adjacent frames."""
+        delta_sat: float
+        """Difference between pixel saturation values of adjacent frames."""
+        delta_lum: float
+        """Difference between pixel luma (brightness) values of adjacent frames."""
+        delta_edges: float
+        """Difference between calculated edges of adjacent frames."""
 
     # TODO: Come up with some good weights for a new default if there is one that can pass
     # a wider variety of test cases.
-    DEFAULT_HSLE_WEIGHT_MAP = (1.0, 1.0, 1.0, 0.0)
+    DEFAULT_COMPONENT_WEIGHTS = Components(
+        delta_hue=1.0,
+        delta_sat=1.0,
+        delta_lum=1.0,
+        delta_edges=0.0,
+    )
+
+    FRAME_SCORE_KEY = 'content_val'
+
+    METRIC_KEYS = [FRAME_SCORE_KEY, *Components._fields]
+
+    @dataclass
+    class _FrameData:
+        """Data calculated for a given frame."""
+        hue: numpy.ndarray
+        """Frame hue map [2D 8-bit]."""
+        sat: numpy.ndarray
+        """Frame saturation map [2D 8-bit]."""
+        lum: numpy.ndarray
+        """Frame luma/brightness map [2D 8-bit]."""
+        edges: Optional[numpy.ndarray]
+        """Frame edge map [2D 8-bit, edges are 255, non edges 0]. Affected by `kernel_size`."""
 
     def __init__(
-            self,
-            threshold: float = 27.0,
-            min_scene_len: int = 15,
-            luma_only: bool = False, # TODO(v0.6.1): Mark luma_only as deprecated.
-            hsle_weights=DEFAULT_HSLE_WEIGHT_MAP):
+        self,
+        threshold: float = 27.0,
+        min_scene_len: int = 15,
+        luma_only: bool = False,
+        score_weights: 'ContentDetector.Components' = DEFAULT_COMPONENT_WEIGHTS,
+        kernel_size: Optional[int] = None,
+    ):
         """
         Arguments:
             threshold: Threshold the average change in pixel intensity must exceed to trigger a cut.
@@ -107,54 +105,83 @@ class ContentDetector(SceneDetector):
             luma_only: If True, only considers changes in the luminance channel of the video. The
                 default is False, which considers changes in hue, saturation, and luma.
         """
+        # TODO(v0.6.1): Mark luma_only as deprecated and warn if set.
         super().__init__()
-        self.threshold = threshold
-                                     # Minimum length of any given scene, in frames (int) or FrameTimecode
-        self.min_scene_len = min_scene_len
-
-        self.last_frame = None
-        self.last_scene_cut = None
-        self.last_hsve = None
-        self._hsle_weights = hsle_weights
-        # TODO: Need to calculate filter sizes based on downscale factor when creating the detector
+        self._threshold: float = threshold
+        self._min_scene_len: int = min_scene_len
+        self._last_scene_cut: Optional[int] = None
+        self._last_frame: Optional[ContentDetector._FrameData] = None
+        self._score_weights: ContentDetector.Components = score_weights
+        # TODO(v0.6.1): Remove debug_mode.
         self._debug_mode = False
         self._edge_mask_out: Optional[cv2.VideoWriter] = None
+        self._kernel: Optional[numpy.ndarray] = None
+        if kernel_size is not None:
+            if kernel_size < 3 or kernel_size % 2 == 0:
+                raise ValueError('kernel_size must be odd integer >= 3')
+            self._kernel = numpy.ones((kernel_size, kernel_size), numpy.uint8)
 
     def get_metrics(self):
         return ContentDetector.METRIC_KEYS
 
     def is_processing_required(self, frame_num):
-        # TODO(v0.6.1): Deprecate this method.
+        # TODO(v0.6.1): Deprecate this method and prepare for transition in v0.7.
         return True
 
-    def _calculate_frame_score(self, frame_num: int, curr_hsve: List[numpy.ndarray],
-                               last_hsve: List[numpy.ndarray]) -> float:
-        delta_h, delta_s, delta_v, delta_e, delta_content = calculate_frame_score(
-            curr_hsve, last_hsve, self._hsle_weights)
-        if self.stats_manager is not None:
-            self.stats_manager.set_metrics(
-                frame_num, {
-                    self.FRAME_SCORE_KEY: delta_content,
-                    self.DELTA_H_KEY: delta_h,
-                    self.DELTA_S_KEY: delta_s,
-                    self.DELTA_V_KEY: delta_v,
-                    self.DELTA_E_KEY: delta_e,
-                })
+    def _calculate_frame_score(self, frame_num: int, frame_img: numpy.ndarray) -> float:
+        """Calculate score representing relative amount of motion in `frame_img` compared to
+        the last time the function was called (returns 0.0 on the first call)."""
+        # TODO: Add option to enable motion estimation before calculating score components.
+        # TODO: Investigate methods of performing cheaper alternatives, e.g. shifting or resizing
+        # the frame to simulate camera movement, using optical flow, etc...
 
-        # TODO: Try to add debug mode params to the config file,
+        # Convert image into HSV colorspace.
+        hue, sat, lum = cv2.split(cv2.cvtColor(frame_img, cv2.COLOR_BGR2HSV))
+
+        # Performance: Only calculate edges if we have to.
+        calculate_edges: bool = ((self._score_weights.delta_edges > 0.0)
+                                 or self.stats_manager is not None or self._debug_mode)
+        edges = self._detect_edges(lum) if calculate_edges else None
+
+        if self._last_frame is None:
+            # Need another frame to compare with for score calculation.
+            self._last_frame = ContentDetector._FrameData(hue, sat, lum, edges)
+            return 0.0
+
+        score_components = ContentDetector.Components(
+            delta_hue=mean_pixel_distance(hue, self._last_frame.hue),
+            delta_sat=mean_pixel_distance(sat, self._last_frame.sat),
+            delta_lum=mean_pixel_distance(lum, self._last_frame.lum),
+            delta_edges=(0.0 if edges is None else mean_pixel_distance(
+                edges, self._last_frame.edges)),
+        )
+
+        frame_score: float = (
+            sum(component * weight
+                for (component, weight) in zip(score_components, self._score_weights)) /
+            sum(abs(weight) for weight in (self._score_weights)))
+
+        # Record components and frame score if needed for analysis.
+        if self.stats_manager is not None:
+            metrics = {self.FRAME_SCORE_KEY: frame_score}
+            metrics.update(score_components._asdict())
+            self.stats_manager.set_metrics(frame_num, metrics)
+
+        # TODO(v0.6.1): Try to add debug mode params to the config file,
         # e.g. allow edge_mask_file = video.avi in [detect-content].
         if self._debug_mode:
-            out_frame = cv2.cvtColor(curr_hsve[3], cv2.COLOR_GRAY2BGR)
+            out_frame = cv2.cvtColor(edges, cv2.COLOR_GRAY2BGR)
             if self._edge_mask_out is None:
-                self._edge_mask_out = cv2.VideoWriter('debug.avi',
-                                                      cv2.VideoWriter_fourcc('X', 'V', 'I',
-                                                                             'D'), 23.976,
+                self._edge_mask_out = cv2.VideoWriter('debug.avi', cv2.VideoWriter_fourcc(*'XVID'),
+                                                      23.976,
                                                       (out_frame.shape[1], out_frame.shape[0]))
             self._edge_mask_out.write(out_frame)
 
-        return delta_content
+        # Store all data required to calculate the next frame's score.
+        self._last_frame = ContentDetector._FrameData(hue, sat, lum, edges)
+        return frame_score
 
-    def process_frame(self, frame_num: int, frame_img: Optional[numpy.ndarray]) -> List[int]:
+    def process_frame(self, frame_num: int, frame_img: numpy.ndarray) -> List[int]:
         """ Similar to ThresholdDetector, but using the HSV colour space DIFFERENCE instead
         of single-frame RGB/grayscale intensity (thus cannot detect slow fades with this method).
 
@@ -168,43 +195,63 @@ class ContentDetector(SceneDetector):
             List of frames where scene cuts have been detected. There may be 0
             or more frames in the list, and not necessarily the same as frame_num.
         """
-        cut_list = []
-        _unused = ''
+        if frame_img is None:
+            # TODO(v0.6.1): Make frame_img a required argument in the interface. Log a warning
+            # that passing None is deprecated and results will be incorrect if this is the case.
+            return []
 
         # Initialize last scene cut point at the beginning of the frames of interest.
-        if self.last_scene_cut is None:
-            self.last_scene_cut = frame_num
+        if self._last_scene_cut is None:
+            self._last_scene_cut = frame_num
 
-        # We can only start detecting once we have a frame to compare with.
-        if self.last_frame is not None:
+        frame_score = self._calculate_frame_score(frame_num, frame_img)
+        if frame_score is None:
+            return []
 
-            calculate_edges: bool = (self._hsle_weights[3] > 0.0) or self._debug_mode
-            curr_hsve = calculate_frame_components(frame_img, calculate_edges=calculate_edges)
-            last_hsve = self.last_hsve
-            if not last_hsve:
-                last_hsve = calculate_frame_components(
-                    self.last_frame, calculate_edges=calculate_edges)
-            frame_score = self._calculate_frame_score(frame_num, curr_hsve, last_hsve)
-            self.last_hsve = curr_hsve
+        # We consider any frame over the threshold a new scene, but only if
+        # the minimum scene length has been reached (otherwise it is ignored).
+        if frame_score >= self._threshold and (
+            (frame_num - self._last_scene_cut) >= self._min_scene_len):
+            self._last_scene_cut = frame_num
+            return [frame_num]
 
-            # We consider any frame over the threshold a new scene, but only if
-            # the minimum scene length has been reached (otherwise it is ignored).
-            if frame_score >= self.threshold and (
-                (frame_num - self.last_scene_cut) >= self.min_scene_len):
-                cut_list.append(frame_num)
-                self.last_scene_cut = frame_num
-
-            if self.last_frame is not None and self.last_frame is not _unused:
-                del self.last_frame
-
-        self.last_frame = frame_img.copy()
-
-        return cut_list
+        return []
 
     # TODO(#250): Based on the parameters passed to the ContentDetector constructor,
     # ensure that the last scene meets the minimum length requirement, otherwise it
-    # should be merged with the previous scene.
+    # should be merged with the previous scene. This can be done by caching the cuts
+    # for the amount of time the minimum length is set to, returning any outstanding
+    # final cuts in post_process.
 
     #def post_process(self, frame_num):
     #    """
     #    return []
+
+    def _detect_edges(self, lum: numpy.ndarray) -> numpy.ndarray:
+        """Detect edges using the luma channel of a frame.
+
+        Arguments:
+            lum: 2D 8-bit image representing the luma channel of a frame.
+
+        Returns:
+            2D 8-bit image of the same size as the input, where pixels with values of 255
+            represent edges, and all other pixels are 0.
+        """
+        # Initialize kernel.
+        if self._kernel is None:
+            kernel_size = estimated_kernel_size(lum.shape[1], lum.shape[0])
+            self._kernel = numpy.ones((kernel_size, kernel_size), numpy.uint8)
+
+        # Estimate levels for thresholding.
+        # TODO(v0.6.1): Give default sigma a named constant.
+        sigma: float = 1.0 / 3.0
+        # TODO: Add config file entries for sigma, aperture/kernel size, etc.
+        median = numpy.median(lum)
+        low = int(max(0, (1.0 - sigma) * median))
+        high = int(min(255, (1.0 + sigma) * median))
+
+        # Calculate edges using Canny algorithm, and reduce noise by dilating the edges.
+        # This increases edge overlap leading to improved robustness against noise and slow
+        # camera movement. Note that very large kernel sizes can negatively affect accuracy.
+        edges = cv2.Canny(lum, low, high)
+        return cv2.dilate(edges, self._kernel)

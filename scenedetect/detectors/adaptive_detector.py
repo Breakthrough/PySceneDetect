@@ -59,16 +59,15 @@ class AdaptiveDetector(ContentDetector):
             logger.error('video_manager is deprecated, use video instead.')
 
         super().__init__()
-        self.min_scene_len = min_scene_len                                              # minimum length of any given scene, in frames (int) or FrameTimecode
+        self.min_scene_len = min_scene_len
         self.adaptive_threshold = adaptive_threshold
         self.min_delta_hsv = min_delta_hsv
         self.window_width = window_width
         self._luma_only = luma_only
         self._adaptive_ratio_key = AdaptiveDetector.ADAPTIVE_RATIO_KEY_TEMPLATE.format(
             window_width=window_width, luma_only='' if not luma_only else '_lum')
-
-        self._first_frame = None
-        self._last_frame = None
+        self._first_frame_num = None
+        self._last_frame_num = None
 
     def get_metrics(self) -> List[str]:
         """ Combines base ContentDetector metric keys with the AdaptiveDetector one. """
@@ -102,9 +101,9 @@ class AdaptiveDetector(ContentDetector):
         if self.is_processing_required(frame_num):
             super().process_frame(frame_num=frame_num, frame_img=frame_img)
 
-        if self._first_frame is None:
-            self._first_frame = frame_num
-        self._last_frame = frame_num
+        if self._first_frame_num is None:
+            self._first_frame_num = frame_num
+        self._last_frame_num = frame_num
 
         return []
 
@@ -127,7 +126,7 @@ class AdaptiveDetector(ContentDetector):
         more than a single frame.
         """
         cut_list = []
-        if self._first_frame is None:
+        if self._first_frame_num is None:
             return []
         adaptive_threshold = self.adaptive_threshold
         window_width = self.window_width
@@ -137,8 +136,8 @@ class AdaptiveDetector(ContentDetector):
 
         if self.stats_manager is not None:
             # Loop through the stats, building the adaptive_ratio metric
-            for frame_num in range(self._first_frame + window_width + 1,
-                                   self._last_frame - window_width):
+            for frame_num in range(self._first_frame_num + window_width + 1,
+                                   self._last_frame_num - window_width):
                 # If the content-val of the frame is more than
                 # adaptive_threshold times the mean content_val of the
                 # frames around it, then we mark it as a cut.
@@ -167,8 +166,8 @@ class AdaptiveDetector(ContentDetector):
 
             # Loop through the frames again now that adaptive_ratio has been calculated to detect
             # cuts using adaptive_ratio
-            for frame_num in range(self._first_frame + window_width + 1,
-                                   self._last_frame - window_width):
+            for frame_num in range(self._first_frame_num + window_width + 1,
+                                   self._last_frame_num - window_width):
                 # Check to see if adaptive_ratio exceeds the adaptive_threshold as well as there
                 # being a large enough content_val to trigger a cut
                 if (self.stats_manager.get_metrics(
