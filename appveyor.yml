@@ -12,15 +12,17 @@ environment:
   ai_license_salt:
     secure: kMv/7J3wqaRGUJYwnfaY6edw0VW39uX7oM9Od9PQ2wwlCmTZcwAh4kEUxhB5u91QbXmp4McMuwcXAO4UdVoSGg==
 
-## SignPath Config for Code Signing
-#deploy:
-#- provider: Webhook
-#  url: https://app.signpath.io/API/v1/f2efa44c-5b5c-45f2-b44f-8f9dde708313/Integrations/AppVeyor?ProjectSlug=PySceneDetect&SigningPolicySlug=test-signing
-#  authorization:
-#     secure: NPMogMcEb5S/ASMEiL275H79D+Pj9cgUqx8kjTPGXtF9drZW41nljczuhF1XvcxFgI0q9TA1BUX9YuCoTQ3mEQ==
+# SignPath Config for Code Signing
+deploy:
+- provider: Webhook
+  url: https://app.signpath.io/API/v1/f2efa44c-5b5c-45f2-b44f-8f9dde708313/Integrations/AppVeyor?ProjectSlug=PySceneDetect&SigningPolicySlug=test-signing
+  authorization:
+     secure: NPMogMcEb5S/ASMEiL275H79D+Pj9cgUqx8kjTPGXtF9drZW41nljczuhF1XvcxFgI0q9TA1BUX9YuCoTQ3mEQ==
 
 install:
-  - git checkout refs/tags/v0.6-release
+  # The commit being checked out must meet SignPath's origin verification requirements:
+  https://about.signpath.io/documentation/build-system-integration#ci-integrations-with-origin-verification
+  - git checkout dd287324e177b48b3b2abb1e3e81f88ac98d9577
 
   - echo * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
   - echo * *                      SETTING UP PYTHON ENVIRONMENT                      * *
