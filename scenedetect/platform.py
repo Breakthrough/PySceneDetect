@@ -251,6 +251,7 @@ def get_ffmpeg_path() -> Optional[str]:
     try:
         # pylint: disable=import-outside-toplevel
         from imageio_ffmpeg import get_ffmpeg_exe
+        # pylint: enable=import-outside-toplevel
         subprocess.call([get_ffmpeg_exe(), '-v', 'quiet'])
         return get_ffmpeg_exe()
     # Gracefully handle case where imageio_ffmpeg is not available.

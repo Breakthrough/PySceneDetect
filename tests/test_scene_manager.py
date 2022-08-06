@@ -16,15 +16,11 @@ This file includes unit tests for the scenedetect.scene_manager.SceneManager cla
 which applies SceneDetector algorithms on VideoStream backends.
 """
 
-# Standard project pylint disables for unit tests using pytest.
-# pylint: disable=protected-access, invalid-name, unused-argument, redefined-outer-name
+# pylint: disable=invalid-name
 
 import glob
 import os
 import os.path
-from typing import Iterable, Tuple
-
-import pytest
 
 from scenedetect.backends.opencv import VideoStreamCv2
 from scenedetect.detectors import ContentDetector
@@ -127,6 +123,9 @@ def test_save_images(test_video_file):
             os.remove(path)
 
 
+# TODO: This would be more readable if the callbacks were defined within the test case, e.g.
+# split up the callback function and callback lambda test cases.
+# pylint: disable=unused-argument, unnecessary-lambda
 class FakeCallback(object):
     """Fake callback used for testing. Tracks number of times the callback was invoked."""
 
@@ -150,6 +149,9 @@ class FakeCallback(object):
 
     def _callback(self, image, frame_num):
         self.num_invoked += 1
+
+
+# pylint: enable=unused-argument, unnecessary-lambda
 
 
 def test_detect_scenes_callback(test_video_file):

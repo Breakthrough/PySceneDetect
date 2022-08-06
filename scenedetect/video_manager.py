@@ -550,6 +550,8 @@ class VideoManager(VideoStream):
                 return False
         return True
 
+    # pylint: enable=arguments-differ
+
     def release(self) -> None:
         """ Release (cv2.VideoCapture method), releases all open capture(s). """
         for cap in self._cap_list:

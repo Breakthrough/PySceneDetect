@@ -62,6 +62,8 @@ class VideoOpenFailure(Exception):
         """
         super().__init__(message)
 
+    # pylint: enable=useless-super-delegation
+
 
 class FrameRateUnavailable(VideoOpenFailure):
     """Exception instance to provide consistent error messaging across backends when the video frame

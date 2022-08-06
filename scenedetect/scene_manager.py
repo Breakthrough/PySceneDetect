@@ -893,11 +893,13 @@ class SceneManager:
             # Make sure main thread stops processing loop.
             out_queue.put((None, None))
 
+        # pylint: enable=bare-except
+
     #
     # Deprecated Methods
     #
 
-    #pylint: disable=unused-argument
+    # pylint: disable=unused-argument
 
     def get_cut_list(self, base_timecode: Optional[FrameTimecode] = None) -> List[FrameTimecode]:
         """[DEPRECATED] Return a list of FrameTimecodes of the detected scene changes/cuts.
@@ -944,7 +946,7 @@ class SceneManager:
         logger.error('`get_event_list()` is deprecated and will be removed in a future release.')
         return self._get_event_list()
 
-    #pylint: enable=unused-argument
+    # pylint: enable=unused-argument
 
     def _is_processing_required(self, frame_num: int) -> bool:
         """True if frame metrics not in StatsManager, False otherwise."""

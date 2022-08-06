@@ -281,6 +281,9 @@ def scenedetect_cli(
     )
 
 
+# pylint: enable=redefined-builtin
+
+
 @click.command('help')
 @click.argument(
     'command_name',
