@@ -32,6 +32,7 @@ PySceneDetect Releases
     - Primary use case is for handling input devices/webcams and gstreamer pipes, [see updated examples](http://scenedetect.com/projects/Manual/en/latest/api/backends.html#devices-cameras-pipes)
     - Files, image sequences, and network streams/URLs should continue to use `VideoStreamCv2`
  - [enhancement] No-op progress bar and log capture objects are now provided in `scenedetect.platform` for systems without `tqdm`
+ - [deprecation] The `SceneManager` methods `get_cut_list()` and `get_event_list()` are now deprecated, along with the `base_timecode` argument, and will be removed in a future version
 
 
 ### 0.6 (May 29, 2022)
