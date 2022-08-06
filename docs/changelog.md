@@ -23,6 +23,7 @@ PySceneDetect Releases
 
  - [feature] Add new backend `VideoStreamMoviePy` using the MoviePy package
  - [bugfix] Fix `scenedetect.detect()` throwing `TypeError` when specifying `stats_file_path`
+ - [bugfix] Fix off-by-one error in end event timecode when `end_time` was set (reported end time was always one extra frame)
  - [enhancement] Add optional `start_time` and `end_time` arguments to `scenedetect.detect()`
  - [enhancement] If available, the `ffmpeg` binary from the `imageio_ffmpeg` package will be used if one could not be found in PATH
  - [enhancement] Add `-map 0` option to default arguments of `split_video_ffmpeg` to include all audio tracks by default ([#271](https://github.com/Breakthrough/PySceneDetect/issues/271))
@@ -32,7 +33,9 @@ PySceneDetect Releases
     - Primary use case is for handling input devices/webcams and gstreamer pipes, [see updated examples](http://scenedetect.com/projects/Manual/en/latest/api/backends.html#devices-cameras-pipes)
     - Files, image sequences, and network streams/URLs should continue to use `VideoStreamCv2`
  - [enhancement] No-op progress bar and log capture objects are now provided in `scenedetect.platform` for systems without `tqdm`
+ - [enhancement] Add `start_in_scene` argument to `detect()` function ([#282](https://github.com/Breakthrough/PySceneDetect/issues/282))
  - [deprecation] The `SceneManager` methods `get_cut_list()` and `get_event_list()` are now deprecated, along with the `base_timecode` argument, and will be removed in a future version
+ - [deprecation] The `base_timecode` argument of `get_scenes_from_cuts()` in `scenedetect.stats_manager` is now deprecated and will be removed in a future version (the signature of this function has been changed accordingly)
 
 
 ### 0.6 (May 29, 2022)

@@ -165,6 +165,7 @@ def detect(
     show_progress: bool = False,
     start_time: Optional[Union[str, float, int]] = None,
     end_time: Optional[Union[str, float, int]] = None,
+    start_in_scene: bool = False,
 ) -> List[Tuple[FrameTimecode, FrameTimecode]]:
     """Perform scene detection on a given video `path` using the specified `detector`.
 
@@ -179,6 +180,11 @@ def detect(
             number of seconds ``123.45`` (`float`), or number of frames ``200`` (`int`).
         end_time: Starting point in video, in the form of a timecode ``HH:MM:SS[.nnn]`` (`str`),
             number of seconds ``123.45`` (`float`), or number of frames ``200`` (`int`).
+        start_in_scene: Assume the video begins in a scene. This means that when detecting
+            fast cuts with `ContentDetector`, if no cuts are found, the resulting scene list
+            will contain a single scene spanning the entire video (instead of no scenes).
+            When detecting fades with `ThresholdDetector`, the beginning portion of the video
+            will always be included until the first fade-out event is detected.
 
     Returns:
         List of scenes (pairs of :py:class:`FrameTimecode` objects).
@@ -206,4 +212,4 @@ def detect(
     )
     if not scene_manager.stats_manager is None:
         scene_manager.stats_manager.save_to_csv(stats_file_path)
-    return scene_manager.get_scene_list()
+    return scene_manager.get_scene_list(start_in_scene=start_in_scene)

@@ -64,6 +64,26 @@ def test_scene_list(test_video_file):
             assert scene_list[i - 1][1] == scene_list[i][0]
 
 
+def test_get_scene_list_start_in_scene(test_video_file):
+    """Test SceneManager `get_scene_list()` method with the `start_in_scene` flag."""
+    video = VideoStreamCv2(test_video_file)
+    sm = SceneManager()
+    sm.add_detector(ContentDetector())
+
+    video_fps = video.frame_rate
+    # End time must be short enough that we won't detect any scenes.
+    end_time = FrameTimecode(25, video_fps)
+    sm.auto_downscale = True
+    sm.detect_scenes(video=video, end_time=end_time)
+    # Should be an empty list.
+    assert len(sm.get_scene_list()) == 0
+    # Should be a list with a single element spanning the video duration.
+    scene_list = sm.get_scene_list(start_in_scene=True)
+    assert len(scene_list) == 1
+    assert scene_list[0][0] == 0
+    assert scene_list[0][1] == end_time
+
+
 def test_save_images(test_video_file):
     """Test scenedetect.scene_manager.save_images function."""
     video = VideoStreamCv2(test_video_file)

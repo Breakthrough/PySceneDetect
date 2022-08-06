@@ -117,9 +117,11 @@ def compute_downscale_factor(frame_width: int, effective_width: int = DEFAULT_MI
 
 
 def get_scenes_from_cuts(
-        cut_list: Iterable[FrameTimecode], base_timecode: FrameTimecode,
-        start_pos: Union[int, FrameTimecode],
-        end_pos: Union[int, FrameTimecode]) -> List[Tuple[FrameTimecode, FrameTimecode]]:
+    cut_list: Iterable[FrameTimecode],
+    start_pos: Union[int, FrameTimecode],
+    end_pos: Union[int, FrameTimecode],
+    base_timecode: Optional[FrameTimecode] = None,
+) -> List[Tuple[FrameTimecode, FrameTimecode]]:
     """Returns a list of tuples of start/end FrameTimecodes for each scene based on a
     list of detected scene cuts/breaks.
 
@@ -135,24 +137,29 @@ def get_scenes_from_cuts(
             was processed (used to generate last scene's end time).
         start_frame: The start frame or FrameTimecode of the cut list. Used to generate the first
             scene's start time.
+            base_timecode: [DEPRECATED] DO NOT USE. For backwards compatibility only.
     Returns:
         List of tuples in the form (start_time, end_time), where both start_time and
         end_time are FrameTimecode objects representing the exact time/frame where each
         scene occupies based on the input cut_list.
     """
+    # TODO(v0.7): Use the warnings module to turn this into a warning.
+    if base_timecode is not None:
+        logger.error('`base_timecode` argument is deprecated has no effect.')
+
     # Scene list, where scenes are tuples of (Start FrameTimecode, End FrameTimecode).
     scene_list = []
     if not cut_list:
-        scene_list.append((base_timecode + start_pos, base_timecode + end_pos))
+        scene_list.append((start_pos, end_pos))
         return scene_list
     # Initialize last_cut to the first frame we processed,as it will be
     # the start timecode for the first scene in the list.
-    last_cut = base_timecode + start_pos
+    last_cut = start_pos
     for cut in cut_list:
         scene_list.append((last_cut, cut))
         last_cut = cut
     # Last scene is from last cut to end of video.
-    scene_list.append((last_cut, base_timecode + end_pos))
+    scene_list.append((last_cut, end_pos))
 
     return scene_list
 
@@ -645,8 +652,8 @@ class SceneManager:
         if self._base_timecode is None:
             return []
         cut_list = self.get_cut_list(self._base_timecode)
-        scene_list = get_scenes_from_cuts(cut_list, self._base_timecode, self._start_pos,
-                                          self._last_pos)
+        scene_list = get_scenes_from_cuts(
+            cut_list=cut_list, start_pos=self._start_pos, end_pos=self._last_pos)
         # If we didn't actually detect any cuts, make sure the resulting scene_list is empty
         # unless start_in_scene is True.
         if not cut_list and not start_in_scene:
@@ -827,7 +834,7 @@ class SceneManager:
         if self._exception_info is not None:
             raise self._exception_info[1].with_traceback(self._exception_info[2])
 
-        self._last_pos = video.base_timecode + video.frame_number
+        self._last_pos = video.position
         self._post_process(video.position.frame_num)
         return video.frame_number - start_frame_num
 

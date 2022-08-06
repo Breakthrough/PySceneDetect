@@ -28,9 +28,10 @@ from scenedetect.backends.opencv import VideoStreamCv2
 
 # TODO(v1.0): Add new test video.
 
-TEST_MOVIE_CLIP_GROUND_TRUTH_CONTENT = [(30, [1199, 1226, 1260, 1281, 1334, 1365, 1697, 1871]),
-                                        (27, [1199, 1226, 1260, 1281, 1334, 1365, 1590, 1697,
-                                              1871])]
+TEST_MOVIE_CLIP_GROUND_TRUTH_CONTENT = [
+    (30, [1199, 1226, 1260, 1281, 1334, 1365, 1697, 1871]),
+    (27, [1199, 1226, 1260, 1281, 1334, 1365, 1590, 1697, 1871]),
+]
 """Ground truth for `test_movie_clip` with ContentDetector as (threshold, [scene start frame])."""
 
 TEST_VIDEO_FILE_GROUND_TRUTH_THRESHOLD = [0, 15, 198, 376]
@@ -65,6 +66,8 @@ def test_content_detector(test_movie_clip):
         assert len(scene_list) == len(start_frames)
         detected_start_frames = [timecode.get_frames() for timecode, _ in scene_list]
         assert start_frames == detected_start_frames
+        # Ensure last scene's end timecode matches the end time we set.
+        assert scene_list[-1][1] == end_time
 
 
 def test_adaptive_detector(test_movie_clip):
@@ -91,6 +94,8 @@ def test_adaptive_detector(test_movie_clip):
     assert len(scene_list) == len(start_frames)
     detected_start_frames = [timecode.get_frames() for timecode, _ in scene_list]
     assert start_frames == detected_start_frames
+    # Ensure last scene's end timecode matches the end time we set.
+    assert scene_list[-1][1] == end_time
 
 
 def test_threshold_detector(test_video_file):
