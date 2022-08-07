@@ -21,7 +21,7 @@ from abc import ABC, abstractmethod
 import logging
 import os
 import os.path
-from configparser import ConfigParser
+from configparser import ConfigParser, ParsingError
 from typing import Any, AnyStr, Dict, List, Optional, Tuple, Union
 
 from appdirs import user_config_dir
@@ -331,26 +331,46 @@ def _parse_config(config: ConfigParser) -> Tuple[ConfigDict, List[str]]:
 
 
 class ConfigLoadFailure(Exception):
+    """Raised when a user-specified configuration file fails to be loaded or validated."""
 
-    def __init__(self, init_log: Tuple[int, str]):
+    def __init__(self, init_log: Tuple[int, str], reason: Optional[Exception] = None):
         super().__init__()
         self.init_log = init_log
+        self.reason = reason
 
 
-# TODO: Provide better error messaging when the user config file fails to be parsed.
-# Currently this results in an unhandled exception.
 class ConfigRegistry:
 
-    def __init__(self, path: Optional[str] = None):
+    def __init__(self, path: Optional[str] = None, throw_exception: bool = True):
         self._config: ConfigDict = {} # Options set in the loaded config file.
         self._init_log: List[Tuple[int, str]] = []
-        if self._load_from_disk(path) is False and path is not None:
-            raise ConfigLoadFailure(self._init_log)
+        self._initialized = False
+
+        try:
+            self._load_from_disk(path)
+            self._initialized = True
+
+        except ConfigLoadFailure as ex:
+            if throw_exception:
+                raise
+            # If we fail to load the user config file, ensure the object is flagged as
+            # uninitialized, and log the error so it can be dealt with if necessary.
+            self._init_log = ex.init_log
+            if ex.reason is not None:
+                self._init_log += [
+                    (logging.ERROR, 'Error: %s' % str(ex.reason).replace('\t', '  ')),
+                ]
+            self._initialized = False
 
     @property
     def config_dict(self) -> ConfigDict:
         """Current configuration options that are set for each command."""
         return self._config
+
+    @property
+    def initialized(self) -> bool:
+        """True if the ConfigRegistry was constructed without errors, False otherwise."""
+        return self._initialized
 
     def get_init_log(self):
         """Get initialization log. Consumes the log, so subsequent calls will return None."""
@@ -361,27 +381,38 @@ class ConfigRegistry:
     def _log(self, log_level, log_str):
         self._init_log.append((log_level, log_str))
 
-    def _load_from_disk(self, path=None) -> bool:
-        """Tries to find a configuration file and load it."""
+    def _load_from_disk(self, path=None):
+        # Validate `path`, or if not provided, use CONFIG_FILE_PATH if it exists.
+        if path:
+            self._init_log.append((logging.INFO, "Loading config from file:\n  %s" % path))
+            if not os.path.exists(path):
+                self._init_log.append((logging.ERROR, "File not found: %s" % (path)))
+                raise ConfigLoadFailure(self._init_log)
+        else:
+            # Gracefully handle the case where there isn't a user config file.
+            if not os.path.exists(CONFIG_FILE_PATH):
+                self._init_log.append((logging.DEBUG, "User config file not found."))
+                return
+            path = CONFIG_FILE_PATH
+            self._init_log.append((logging.INFO, "Loading user config file:\n  %s" % path))
+        # Try to load and parse the config file at `path`.
         config = ConfigParser()
-        config_file_path = path if path is not None else CONFIG_FILE_PATH
-        result = config.read(config_file_path)
-        if not result:
-            if not os.path.exists(config_file_path):
-                self._log(logging.DEBUG,
-                          "User config file not found (path: %s)" % (config_file_path))
-            else:
-                self._log(logging.ERROR, "Failed to read config file.")
-            return False
-        self._log(logging.INFO, "Loading config from file:\n%s" % (os.path.abspath(result[0])))
+        try:
+            config_file_contents = open(path, 'r').read()
+            config.read_string(config_file_contents, source=path)
+        except ParsingError as ex:
+            raise ConfigLoadFailure(self._init_log, reason=ex)
+        except OSError as ex:
+            raise ConfigLoadFailure(self._init_log, reason=ex)
+        # At this point the config file syntax is correct, but we need to still validate
+        # the parsed options (i.e. that the options have valid values).
         errors = _validate_structure(config)
         if not errors:
             self._config, errors = _parse_config(config)
         if errors:
             for log_str in errors:
-                self._log(logging.ERROR, log_str)
-            return False
-        return True
+                self._init_log.append((logging.ERROR, log_str))
+            raise ConfigLoadFailure(self._init_log)
 
     def is_default(self, command: str, option: str) -> bool:
         return not (command in self._config and option in self._config[command])

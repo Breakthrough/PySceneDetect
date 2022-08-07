@@ -115,13 +115,13 @@ def test_threshold_detector(test_video_file):
 def test_detectors_with_stats(test_video_file):
     """ Test all detectors functionality with a StatsManager. """
     # TODO(v1.0): Parameterize this test case (move fixture from cli to test config).
-    for detector in [ContentDetector, ThresholdDetector, ThresholdDetector]:
+    for detector in [ContentDetector, ThresholdDetector, AdaptiveDetector]:
         video = VideoStreamCv2(test_video_file)
         stats = StatsManager()
         scene_manager = SceneManager(stats_manager=stats)
         scene_manager.add_detector(detector())
         scene_manager.auto_downscale = True
-        end_time = FrameTimecode('00:00:15', video.frame_rate)
+        end_time = FrameTimecode('00:00:08', video.frame_rate)
         benchmark_start = time.time()
         scene_manager.detect_scenes(video=video, end_time=end_time)
         benchmark_end = time.time()

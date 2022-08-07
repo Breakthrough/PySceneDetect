@@ -32,11 +32,15 @@ from scenedetect.video_splitter import is_ffmpeg_available, is_mkvmerge_availabl
 # TODO: Define error/exit codes explicitly. Right now these tests only verify that the
 # exit code is zero or nonzero.
 
+# TODO: These tests are very expensive since they spin up new Python interpreters.
+# Move most of these test cases (e.g. argument validation) to ones that interface directly
+# with the scenedetect.cli module.
+
 SCENEDETECT_CMD = 'python -m scenedetect'
 VIDEO_PATH = 'tests/resources/goldeneye.mp4'
 DEFAULT_BACKEND = 'opencv'
 DEFAULT_STATSFILE = 'statsfile.csv'
-DEFAULT_TIME = '-s 2s -d 6s'            # Seek forward a bit but limit the amount we process.
+DEFAULT_TIME = '-s 2s -d 4s'            # Seek forward a bit but limit the amount we process.
 DEFAULT_DETECTOR = 'detect-content'
 DEFAULT_CONFIG_FILE = 'scenedetect.cfg' # Ensure we default to a "blank" config file.
 ALL_DETECTORS = ['detect-content', 'detect-threshold', 'detect-adaptive']
@@ -128,9 +132,9 @@ def test_cli_time():
     base_command = '-i {VIDEO} time {TIME} {DETECTOR}'
 
     # Test setting start/end.
-    assert invoke_scenedetect(base_command, TIME='-s 2s -e 8s') == 0
+    assert invoke_scenedetect(base_command, TIME='-s 2s -e 4s') == 0
     # Test setting start/duration.
-    assert invoke_scenedetect(base_command, TIME='-s 2s -d 6s') == 0
+    assert invoke_scenedetect(base_command, TIME='-s 2s -d 2s') == 0
 
     # Ensure cannot set end and duration at the same time.
     assert invoke_scenedetect(base_command, TIME='-s 2s -d 6s -e 8s') != 0
@@ -209,7 +213,9 @@ def test_cli_save_images(tmp_path):
 def test_cli_save_images_rotation(rotated_video_file, tmp_path):
     """Test that `save-images` command rotates images correctly with the default backend."""
     assert invoke_scenedetect(
-        '-i {VIDEO} {DETECTOR} save-images', VIDEO=rotated_video_file, output_dir=tmp_path) == 0
+        '-i {VIDEO} {DETECTOR} time {TIME} save-images',
+        VIDEO=rotated_video_file,
+        output_dir=tmp_path) == 0
     images = glob.glob(os.path.join(tmp_path, '*.jpg'))
     assert images
     image = cv2.imread(images[0])

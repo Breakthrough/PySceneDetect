@@ -34,7 +34,7 @@ def test_api_detect_start_end_time(test_video_file: str):
     from scenedetect import detect, ContentDetector
     # Times can be seconds (float), frames (int), or timecode 'HH:MM:SSS.nnn' (str).
     # See test_api_timecode_types() for examples of each format.
-    scene_list = detect(test_video_file, ContentDetector(), start_time=10.5, end_time=20.9)
+    scene_list = detect(test_video_file, ContentDetector(), start_time=10.5, end_time=15.9)
     for i, scene in enumerate(scene_list):
         print('Scene %d: %s - %s' % (i + 1, scene[0].get_timecode(), scene[1].get_timecode()))
 
@@ -65,8 +65,8 @@ def test_api_scene_manager_start_end_time(test_video_file: str):
     scene_manager.add_detector(ContentDetector())
     # Times can be seconds (float), frames (int), or timecode 'HH:MM:SSS.nnn' (str).
     # See test_api_timecode_types() for examples of each format.
-    start_time = 20 # Start at frame (int) 20
-    end_time = 15.0 # End at 15 seconds (float)
+    start_time = 200 # Start at frame (int) 200
+    end_time = 15.0  # End at 15 seconds (float)
     video.seek(start_time)
     scene_manager.detect_scenes(video=video, end_time=end_time)
     scene_list = scene_manager.get_scene_list()

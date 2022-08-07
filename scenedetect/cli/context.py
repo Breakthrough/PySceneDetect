@@ -34,7 +34,7 @@ from scenedetect.cli.config import ConfigRegistry, ConfigLoadFailure, CHOICE_MAP
 
 logger = logging.getLogger('pyscenedetect')
 
-USER_CONFIG = ConfigRegistry()
+USER_CONFIG = ConfigRegistry(throw_exception=False)
 
 
 def parse_timecode(value: str,
@@ -203,25 +203,32 @@ class CliContext:
         # $VIDEO_NAME macro in the name.  Default to $VIDEO_NAME.csv.
 
         try:
-            init_failure = False
+            init_failure = not self.config.initialized
             init_log = self.config.get_init_log()
-            self._initialize(config, quiet, verbosity, logfile)
+            quiet = not init_failure and quiet
+            self._initialize_logging(quiet=quiet, verbosity=verbosity, logfile=logfile)
+
+            # Configuration file was specified via CLI argument -c/--config.
+            if config and not init_failure:
+                # This makes mit
+                self.config = ConfigRegistry(config)
+                # Re-initialize logger with the correct verbosity.
+                if verbosity is None and not self.config.is_default('global', 'verbosity'):
+                    verbosity_str = self.config.get_value('global', 'verbosity')
+                    assert verbosity_str in CHOICE_MAP['global']['verbosity']
+                    self.quiet_mode = False
+                    self._initialize_logging(verbosity=verbosity_str, logfile=logfile)
+
         except ConfigLoadFailure as ex:
             init_failure = True
             init_log += ex.init_log
             if ex.reason is not None:
                 init_log += [(logging.ERROR, 'Error: %s' % str(ex.reason).replace('\t', '  '))]
-
         finally:
             # Make sure we print the version number even on any kind of init failure.
             logger.info('PySceneDetect %s', scenedetect.__version__)
-            init_log += self.config.get_init_log()
             for (log_level, log_str) in init_log:
                 logger.log(log_level, log_str)
-                # We don't raise an exception if the user configuration fails to load, so
-                # we instead look for errors in the init log.
-                if log_level >= logging.ERROR:
-                    init_failure = True
             if init_failure:
                 logger.critical("Error processing configuration file.")
                 raise click.Abort()
@@ -686,15 +693,15 @@ class CliContext:
     # Private Methods
     #
 
-    def _initialize(
+    def _initialize_logging(
         self,
-        config: Optional[str],
-        quiet: Optional[bool],
-        verbosity: Optional[str],
-        logfile: Optional[AnyStr],
+        quiet: Optional[bool] = None,
+        verbosity: Optional[str] = None,
+        logfile: Optional[AnyStr] = None,
     ):
-        """Setup logging and load application configuration file."""
-        self.quiet_mode = bool(quiet)
+        """Setup logging based on CLI args and user configuration settings."""
+        if quiet is not None:
+            self.quiet_mode = bool(quiet)
         curr_verbosity = logging.INFO
         # Convert verbosity into it's log level enum, and override quiet mode if set.
         if verbosity is not None:
@@ -716,21 +723,8 @@ class CliContext:
                 # Override quiet mode if verbosity is set.
                 if not USER_CONFIG.is_default('global', 'verbosity'):
                     self.quiet_mode = False
-
+        # Initialize logger with the set CLI args / user configuration.
         init_logger(log_level=curr_verbosity, show_stdout=not self.quiet_mode, log_file=logfile)
-
-        # Configuration file was specified via CLI argument -c/--config.
-        if config:
-            new_config = ConfigRegistry(config)
-            self.config = new_config
-            # Re-initialize logger with the correct verbosity.
-            if verbosity is None and not self.config.is_default('global', 'verbosity'):
-                verbosity_str = self.config.get_value('global', 'verbosity')
-                assert verbosity_str in CHOICE_MAP['global']['verbosity']
-                curr_verbosity = getattr(logging, verbosity_str.upper())
-                self.quiet_mode = False
-                init_logger(
-                    log_level=curr_verbosity, show_stdout=not self.quiet_mode, log_file=logfile)
 
     def _add_detector(self, detector):
         """ Add Detector: Adds a detection algorithm to the CliContext's SceneManager. """
