@@ -28,43 +28,67 @@ logger = getLogger('pyscenedetect')
 
 
 class AdaptiveDetector(ContentDetector):
-    """Detects cuts using HSV changes similar to ContentDetector, but with a
-    rolling average that can help mitigate false detections in situations such
-    as camera moves.
+    """Two-pass detector that calculates frame scores with ContentDetector, and then applies
+    a rolling average when processing the result that can help mitigate false detections
+    in situations such as camera movement.
     """
 
     ADAPTIVE_RATIO_KEY_TEMPLATE = "adaptive_ratio{luma_only} (w={window_width})"
 
-    def __init__(self,
-                 adaptive_threshold=3.0,
-                 luma_only=False,
-                 min_scene_len=15,
-                 min_delta_hsv=15.0,
-                 window_width=2,
-                 video_manager=None):
+    def __init__(
+        self,
+        adaptive_threshold: float = 3.0,
+        min_scene_len: int = 15,
+        window_width: int = 2,
+        min_content_val: float = 15.0,
+        weights: ContentDetector.Components = ContentDetector.DEFAULT_COMPONENT_WEIGHTS,
+        luma_only: bool = False,
+        kernel_size: Optional[int] = None,
+        video_manager=None,
+        min_delta_hsv: Optional[float] = None,
+    ):
         """
         Arguments:
             adaptive_threshold: Threshold value (float) that the calculated frame score must exceed to
                 trigger a new scene (see frame metric adaptive_ratio in stats file).
-            luma_only: Only consider luma/brightness channel (useful for greyscale videos).
             min_scene_len: Minimum length of any scene.
-            min_delta_hsv: Minimum threshold (float) that the content_val must exceed in order to register as a new'
-                scene. This is calculated the same way that `detect-content` calculates frame score.
             window_width: Size of window (number of frames) before and after each frame to average together in'
                 order to detect deviations from the mean.
+            min_content_val: Minimum threshold (float) that the content_val must exceed in order to
+                register as a new scene. This is calculated the same way that `detect-content`
+                calculates frame score based on `weights`/`luma_only`/`kernel_size`.
+            weights: Weight to place on each component when calculating frame score
+                (`content_val` in a statsfile, the value `threshold` is compared against).
+                If omitted, the default ContentDetector weights are used.
+            luma_only: If True, only considers changes in the luminance channel of the video.
+                Equivalent to specifying `weights` as :py:data:`ContentDetector.LUMA_ONLY`.
+                Overrides `weights` if both are set.
+            kernel_size: Size of kernel to use for post edge detection filtering. If None,
+                automatically set based on video resolution.
             video_manager: [DEPRECATED] DO NOT USE. For backwards compatibility only.
+            min_delta_hsv: [DEPRECATED] DO NOT USE. Use `min_content_val` instead.
         """
-        # TODO(v0.7): Replace with DeprecationWarning that `video_manager` will be removed in v0.8.
+        # TODO(v0.7): Replace with DeprecationWarning that `video_manager` and `min_delta_hsv` will
+        # be removed in v0.8.
         if video_manager is not None:
             logger.error('video_manager is deprecated, use video instead.')
+        if min_delta_hsv is not None:
+            logger.error('min_delta_hsv is deprecated, use min_content_val instead.')
+            min_content_val = min_delta_hsv
 
-        # TODO(v0.6.1): Need to initialize ContentDetector with correct HSLE weights.
-        super().__init__()
+        super().__init__(
+            threshold=255.0,
+            min_scene_len=0,
+            weights=weights,
+            luma_only=luma_only,
+            kernel_size=kernel_size,
+        )
+
+        # TODO: Make all properties private.
         self.min_scene_len = min_scene_len
         self.adaptive_threshold = adaptive_threshold
-        self.min_delta_hsv = min_delta_hsv
+        self.min_content_val = min_content_val
         self.window_width = window_width
-        self._luma_only = luma_only
         self._adaptive_ratio_key = AdaptiveDetector.ADAPTIVE_RATIO_KEY_TEMPLATE.format(
             window_width=window_width, luma_only='' if not luma_only else '_lum')
         self._first_frame_num = None
@@ -112,9 +136,7 @@ class AdaptiveDetector(ContentDetector):
         """
         Returns the average content change for a frame.
         """
-        metric_key = (
-            ContentDetector.FRAME_SCORE_KEY if not self._luma_only else ContentDetector.DELTA_V_KEY)
-        return self.stats_manager.get_metrics(frame_num, [metric_key])[0]
+        return self.stats_manager.get_metrics(frame_num, [ContentDetector.FRAME_SCORE_KEY])[0]
 
     def post_process(self, _unused_frame_num: int):
         """
@@ -154,7 +176,8 @@ class AdaptiveDetector(ContentDetector):
 
                 if not denominator_is_zero:
                     adaptive_ratio = self.get_content_val(frame_num) / denominator
-                elif denominator_is_zero and self.get_content_val(frame_num) >= self.min_delta_hsv:
+                elif denominator_is_zero and self.get_content_val(
+                        frame_num) >= self.min_content_val:
                     # if we would have divided by zero, set adaptive_ratio to the max (255.0)
                     adaptive_ratio = 255.0
                 else:
@@ -173,7 +196,7 @@ class AdaptiveDetector(ContentDetector):
                 # being a large enough content_val to trigger a cut
                 if (self.stats_manager.get_metrics(
                         frame_num, [self._adaptive_ratio_key])[0] >= adaptive_threshold
-                        and self.get_content_val(frame_num) >= self.min_delta_hsv):
+                        and self.get_content_val(frame_num) >= self.min_content_val):
 
                     if last_cut is None:
                         # No previously detected cuts

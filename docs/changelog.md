@@ -15,14 +15,25 @@ PySceneDetect Releases
 **Command-Line Changes:**
 
  - [feature] Add `moviepy` backend wrapping the MoviePy package, uses `ffmpeg` binary on the system for video decoding
+ - [feature] Edge detection can now be enabled with `detect-content` to improve accuracy in some cases, especially under lighting changes, see [new `-w`/`--weights` option](http://scenedetect.com/projects/Manual/en/latest/cli/detectors.html#detect-content) for more information
+    - Edge differences are typically larger than other components, so you may need to increase `-t`/`--threshold` higher when increasing the edge weight (the last component)
+    - For example, a good starting point is to place 100% weight on the change in a frame's hue, 50% on saturation change, 100% on luma (brightness) change, and 25% on the change in edges, with a threshold of 32 (final score is normalized, sum of weights does not need to equal 100%):
+    `detect-content -w 1.0 0.5 1.0 0.25 -t 32`
+    - May be enabled by default in the future once it has been more thoroughly tested, further improvements for `detect-content` are being investigated as well (e.g. motion compensation, flash suppression)
  - [enhancement] Progress bar now displays number of detections while processing, no longer conflicts with log message output
  - [enhancement] When using ffmpeg to split videos, `-map 0` has been added to the default arguments so other audio tracks are also included when present ([#271](https://github.com/Breakthrough/PySceneDetect/issues/271))
  - [enhancement] Add `-a` flag to `version` command to print more information about versions of dependencies/tools being used
- - [enhancement] The resizing method used
+ - [enhancement] The resizing method used used for frame downscaling or resizing can now be set using [a config file](http://scenedetect.com/projects/Manual/en/latest/cli/config_file.html), see `[global]` option `downscale-method` and `[save-images]` option `scale-method`
+ - [other] Linear interpolation is now used as the default downscaling method (previously was nearest neighbor) for improved edge detection accuracy
+ - [other] Add `-c`/`--min-content-val` argument to `detect-adaptive`, deprecate `-d`/`--min-delta-hsv`
 
 **General:**
 
- - [feature] Add new backend `VideoStreamMoviePy` using the MoviePy package
+ - [feature] Add new backend `VideoStreamMoviePy` using the MoviePy package`
+ - [feature] Add edge detection to `ContentDetector` ([#35](https://github.com/Breakthrough/PySceneDetect/issues/35))
+    - Add ability to specify content score weights of hue, saturation, luma, and edge differences between frames
+    - Default remains as `1.0, 1.0, 1.0, 0.0` so there is no change in behavior
+    - Kernel size used for improving edge overlap can also be customized
  - [bugfix] Fix `scenedetect.detect()` throwing `TypeError` when specifying `stats_file_path`
  - [bugfix] Fix off-by-one error in end event timecode when `end_time` was set (reported end time was always one extra frame)
  - [enhancement] Add optional `start_time` and `end_time` arguments to `scenedetect.detect()`
@@ -41,6 +52,7 @@ PySceneDetect Releases
  - [enhancement] Add `interpolation` property to `SceneManager` to allow setting interpolation method for frame downscaling
  - [enhancement] `SceneManager` now downscales using linear interpolation by default, previously used nearest neighbor
  - [enhancement] Add `interpolation` argument to `save_images` to allow setting interpolation method when resizing images
+ - [api] Rename `AdaptiveDetector` constructor parameter `min_delta_hsv` to `min_content_val
 
 ### 0.6 (May 29, 2022)
 

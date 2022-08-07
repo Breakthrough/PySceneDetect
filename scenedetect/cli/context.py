@@ -17,7 +17,7 @@ This module contains :py:class:`CliContext` which encapsulates the command-line 
 
 import logging
 import os
-from typing import AnyStr, Optional
+from typing import AnyStr, Optional, Tuple
 
 import click
 
@@ -289,15 +289,16 @@ class CliContext:
                 raise click.BadParameter(str(ex), param_hint='downscale factor')
         self.scene_manager.interpolation = Interpolation[self.config.get_value(
             'global', 'downscale-method').upper()]
-
+        # This is the *only* place self.options_processed should be set to True.
         self.options_processed = True
 
-    # TODO(v0.6.1): Replace luma_only with hsle_weights.
     def handle_detect_content(
         self,
         threshold: Optional[float],
         luma_only: bool,
         min_scene_len: Optional[str],
+        weights: Optional[Tuple[float, float, float, float]],
+        kernel_size: Optional[int],
     ):
         """Handle detect-content command options."""
         self._check_input_open()
@@ -308,41 +309,59 @@ class CliContext:
             min_scene_len = 0
         else:
             if min_scene_len is None:
-                if self.config.is_default("detect-content", "min-scene-len"):
+                if self.config.is_default('detect-content', 'min-scene-len'):
                     min_scene_len = self.min_scene_len.frame_num
                 else:
-                    min_scene_len = self.config.get_value("detect-content", "min-scene-len")
+                    min_scene_len = self.config.get_value('detect-content', 'min-scene-len')
             min_scene_len = parse_timecode(min_scene_len, self.video_stream.frame_rate).frame_num
 
-        threshold = self.config.get_value("detect-content", "threshold", threshold)
-        hsle_weights = self.config.get_value("detect-content", "hsle-weights")
-        # TODO(v0.6.1): Remove luma-only and replace with hsle-weights. Right now
-        # luma-only has no effect.
-        luma_only = luma_only or self.config.get_value("detect-content", "luma-only")
-        if luma_only:
-            logger.error("luma-only has no effect and will be removed. Use hsle-weights instead.")
-        logger.debug(
-            'Adding detector: ContentDetector(threshold=%.3f, min_scene_len=%d, hsle_weights=%s)',
-            threshold, min_scene_len, hsle_weights)
-        self._add_detector(
-            scenedetect.detectors.ContentDetector(
-                threshold=threshold, min_scene_len=min_scene_len, score_weights=hsle_weights))
-
+        if weights is not None:
+            try:
+                weights = scenedetect.detectors.ContentDetector.Components(*weights)
+            except ValueError as ex:
+                logger.debug(str(ex))
+                raise click.BadParameter(str(ex), param_hint='weights')
+        # Log detector args for debugging before we construct it.
+        detector_args = {
+            'weights': self.config.get_value('detect-content', 'weights', weights),
+            'kernel_size': self.config.get_value('detect-content', 'kernel-size', kernel_size),
+            'luma_only': luma_only or self.config.get_value('detect-content', 'luma-only'),
+            'min_scene_len': min_scene_len,
+            'threshold': self.config.get_value('detect-content', 'threshold', threshold),
+        }
+        logger.debug('Adding detector: ContentDetector(%s)', detector_args)
+        self._add_detector(scenedetect.detectors.ContentDetector(**detector_args))
         self.options_processed = options_processed_orig
 
-    # TODO(v0.6.1): Replace luma_only with hsle_weights.
+    # TODO(v0.6.1): Add weights.
     def handle_detect_adaptive(
         self,
         threshold: Optional[float],
-        min_delta_hsv: Optional[float],
+        min_content_val: Optional[float],
         frame_window: Optional[int],
         luma_only: bool,
         min_scene_len: Optional[str],
+        weights: Optional[Tuple[float, float, float, float]],
+        kernel_size: Optional[int],
+        min_delta_hsv: Optional[float],
     ):
         """Handle detect-adaptive command options."""
         self._check_input_open()
         options_processed_orig = self.options_processed
         self.options_processed = False
+
+        # TODO(v0.7): Remove these branches when removing -d/--min-delta-hsv.
+        if min_delta_hsv is not None:
+            logger.error('-d/--min-delta-hsv is deprecated, use -c/--min-content-val instead.')
+            if min_content_val is None:
+                min_content_val = min_delta_hsv
+        # Handle case where deprecated min-delta-hsv is set, and use it to set min-content-val.
+        if not self.config.is_default("detect-adaptive", "min-delta-hsv"):
+            logger.error('[detect-adaptive] config file option `min-delta-hsv` is deprecated'
+                         ', use `min-delta-hsv` instead.')
+            if self.config.is_default("detect-adaptive", "min-content-val"):
+                self.config.config_dict["detect-adaptive"]["min-content-val"] = (
+                    self.config.config_dict["detect-adaptive"]["min-deleta-hsv"])
 
         if self.drop_short_scenes:
             min_scene_len = 0
@@ -353,26 +372,25 @@ class CliContext:
                 else:
                     min_scene_len = self.config.get_value("detect-adaptive", "min-scene-len")
             min_scene_len = parse_timecode(min_scene_len, self.video_stream.frame_rate).frame_num
-
-        threshold = self.config.get_value("detect-adaptive", "threshold", threshold)
-        min_delta_hsv = self.config.get_value("detect-adaptive", "min-delta-hsv", min_delta_hsv)
-        frame_window = self.config.get_value("detect-adaptive", "frame-window", frame_window)
-        luma_only = luma_only or self.config.get_value("detect-adaptive", "luma-only")
-
-        logger.debug(
-            'Adding detector: AdaptiveDetector(threshold=%f, min_delta_hsv=%f,'
-            ' min_scene_len=%d, luma_only=%s, frame_window=%d)', threshold, min_delta_hsv,
-            min_scene_len, luma_only, frame_window)
-
-        self._add_detector(
-            scenedetect.detectors.AdaptiveDetector(
-                adaptive_threshold=threshold,
-                min_scene_len=min_scene_len,
-                min_delta_hsv=min_delta_hsv,
-                luma_only=luma_only,
-                window_width=frame_window,
-            ))
-
+        # Log detector args for debugging before we construct it.
+        detector_args = {
+            'adaptive_threshold':
+                self.config.get_value("detect-adaptive", "threshold", threshold),
+            'weights':
+                self.config.get_value("detect-adaptive", "weights", weights),
+            'kernel_size':
+                self.config.get_value("detect-adaptive", "kernel-size", kernel_size),
+            'luma_only':
+                luma_only or self.config.get_value("detect-adaptive", "luma-only"),
+            'min_content_val':
+                self.config.get_value("detect-adaptive", "min-content-val", min_content_val),
+            'min_scene_len':
+                min_scene_len,
+            'window_width':
+                self.config.get_value("detect-adaptive", "frame-window", frame_window),
+        }
+        logger.debug('Adding detector: AdaptiveDetector(%s)', detector_args)
+        self._add_detector(scenedetect.detectors.AdaptiveDetector(**detector_args))
         self.options_processed = options_processed_orig
 
     def handle_detect_threshold(
@@ -402,7 +420,7 @@ class CliContext:
         # TODO(v1.0): This cannot be disabled right now.
         add_last_scene = add_last_scene or self.config.get_value("detect-threshold",
                                                                  "add-last-scene")
-
+        # Log detector args for debugging before we construct it.
         logger.debug(
             'Adding detector: ThresholdDetector(threshold=%f, fade_bias=%f,'
             ' min_scene_len=%d, add_last_scene=%s)', threshold, fade_bias, min_scene_len,

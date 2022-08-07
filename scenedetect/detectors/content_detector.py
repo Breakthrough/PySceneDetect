@@ -53,29 +53,39 @@ class ContentDetector(SceneDetector):
     content scenes still using HSV information, use the DissolveDetector.
     """
 
-    class Components(NamedTuple):
-        """Components that make up a frame's score."""
-        delta_hue: float
-        """Difference between pixel hue values of adjacent frames."""
-        delta_sat: float
-        """Difference between pixel saturation values of adjacent frames."""
-        delta_lum: float
-        """Difference between pixel luma (brightness) values of adjacent frames."""
-        delta_edges: float
-        """Difference between calculated edges of adjacent frames."""
-
     # TODO: Come up with some good weights for a new default if there is one that can pass
     # a wider variety of test cases.
-    DEFAULT_COMPONENT_WEIGHTS = Components(
-        delta_hue=1.0,
-        delta_sat=1.0,
+    class Components(NamedTuple):
+        """Components that make up a frame's score, and their default values."""
+        delta_hue: float = 1.0
+        """Difference between pixel hue values of adjacent frames."""
+        delta_sat: float = 1.0
+        """Difference between pixel saturation values of adjacent frames."""
+        delta_lum: float = 1.0
+        """Difference between pixel luma (brightness) values of adjacent frames."""
+        delta_edges: float = 0.0
+        """Difference between calculated edges of adjacent frames.
+
+        Edge differences are typically larger than the other components, so the detection
+        threshold may need to be adjusted accordingly."""
+
+    DEFAULT_COMPONENT_WEIGHTS = Components()
+    """Default component weights. Actual default values are specified in :py:class:`Components`
+    to allow adding new components without breaking existing usage."""
+
+    LUMA_ONLY_WEIGHTS = Components(
+        delta_hue=0.0,
+        delta_sat=0.0,
         delta_lum=1.0,
         delta_edges=0.0,
     )
+    """Component weights to use if `luma_only` is set."""
 
     FRAME_SCORE_KEY = 'content_val'
+    """Key in statsfile representing the final frame score after weighed by specified components."""
 
     METRIC_KEYS = [FRAME_SCORE_KEY, *Components._fields]
+    """All statsfile keys this detector produces."""
 
     @dataclass
     class _FrameData:
@@ -93,8 +103,8 @@ class ContentDetector(SceneDetector):
         self,
         threshold: float = 27.0,
         min_scene_len: int = 15,
+        weights: 'ContentDetector.Components' = DEFAULT_COMPONENT_WEIGHTS,
         luma_only: bool = False,
-        score_weights: 'ContentDetector.Components' = DEFAULT_COMPONENT_WEIGHTS,
         kernel_size: Optional[int] = None,
     ):
         """
@@ -102,8 +112,13 @@ class ContentDetector(SceneDetector):
             threshold: Threshold the average change in pixel intensity must exceed to trigger a cut.
             min_scene_len: Once a cut is detected, this many frames must pass before a new one can
                 be added to the scene list.
-            luma_only: If True, only considers changes in the luminance channel of the video. The
-                default is False, which considers changes in hue, saturation, and luma.
+            weights: Weight to place on each component when calculating frame score
+                (`content_val` in a statsfile, the value `threshold` is compared against).
+            luma_only: If True, only considers changes in the luminance channel of the video.
+                Equivalent to specifying `weights` as :py:data:`ContentDetector.LUMA_ONLY`.
+                Overrides `weights` if both are set.
+            kernel_size: Size of kernel for expanding detected edges. Must be odd integer
+                greater than or equal to 3. If None, automatically set using video resolution.
         """
         # TODO(v0.6.1): Mark luma_only as deprecated and warn if set.
         super().__init__()
@@ -111,18 +126,19 @@ class ContentDetector(SceneDetector):
         self._min_scene_len: int = min_scene_len
         self._last_scene_cut: Optional[int] = None
         self._last_frame: Optional[ContentDetector._FrameData] = None
-        self._score_weights: ContentDetector.Components = score_weights
-        # TODO(v0.6.1): Remove debug_mode.
+        self._weights: ContentDetector.Components = weights
+        if luma_only:
+            self._weights = ContentDetector.LUMA_ONLY_WEIGHTS
+        # TODO(v0.6.1): Remove debug_mode or figure out a better way of keeping it, as file
+        # paths for the edge mask video are hard-coded currently.
         self._debug_mode = False
         self._edge_mask_out: Optional[cv2.VideoWriter] = None
         self._kernel: Optional[numpy.ndarray] = None
         if kernel_size is not None:
+            print(kernel_size)
             if kernel_size < 3 or kernel_size % 2 == 0:
                 raise ValueError('kernel_size must be odd integer >= 3')
             self._kernel = numpy.ones((kernel_size, kernel_size), numpy.uint8)
-
-        if luma_only is True:
-            raise NotImplementedError("TODO(v0.6.1)")
 
     def get_metrics(self):
         return ContentDetector.METRIC_KEYS
@@ -142,8 +158,8 @@ class ContentDetector(SceneDetector):
         hue, sat, lum = cv2.split(cv2.cvtColor(frame_img, cv2.COLOR_BGR2HSV))
 
         # Performance: Only calculate edges if we have to.
-        calculate_edges: bool = ((self._score_weights.delta_edges > 0.0)
-                                 or self.stats_manager is not None or self._debug_mode)
+        calculate_edges: bool = ((self._weights.delta_edges > 0.0) or self.stats_manager is not None
+                                 or self._debug_mode)
         edges = self._detect_edges(lum) if calculate_edges else None
 
         if self._last_frame is None:
@@ -160,9 +176,8 @@ class ContentDetector(SceneDetector):
         )
 
         frame_score: float = (
-            sum(component * weight
-                for (component, weight) in zip(score_components, self._score_weights)) /
-            sum(abs(weight) for weight in (self._score_weights)))
+            sum(component * weight for (component, weight) in zip(score_components, self._weights))
+            / sum(abs(weight) for weight in self._weights))
 
         # Record components and frame score if needed for analysis.
         if self.stats_manager is not None:

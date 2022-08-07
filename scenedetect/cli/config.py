@@ -141,8 +141,8 @@ class RangeValue(ValidatedValue):
                                      (default.min_val, default.max_val)) from ex
 
 
-class HSLEValue(ValidatedValue):
-    """Validator for HSLE values (tuple of four numbers)."""
+class ScoreWeightsValue(ValidatedValue):
+    """Validator for score weight values (currently a tuple of four numbers)."""
 
     _IGNORE_CHARS = [',', '/', '(', ')']
     """Characters to ignore."""
@@ -151,10 +151,11 @@ class HSLEValue(ValidatedValue):
         if isinstance(value, ContentDetector.Components):
             self._value = value
         else:
-            translation_table = str.maketrans({char: ' ' for char in HSLEValue._IGNORE_CHARS})
+            translation_table = str.maketrans(
+                {char: ' ' for char in ScoreWeightsValue._IGNORE_CHARS})
             values = value.translate(translation_table).split()
             if not len(values) == 4:
-                raise ValueError("HSLE weights must be specified as four numbers!")
+                raise ValueError("Score weights must be specified as four numbers!")
             self._value = ContentDetector.Components(*(float(val) for val in values))
 
     @property
@@ -165,16 +166,53 @@ class HSLEValue(ValidatedValue):
         return str(self.value)
 
     def __str__(self) -> str:
-        return '%f / %f / %f / %f' % self.value
+        return '%.3f, %.3f, %.3f, %.3f' % self.value
 
     @staticmethod
-    def from_config(config_value: str, default: 'HSLEValue') -> 'HSLEValue':
+    def from_config(config_value: str, default: 'ScoreWeightsValue') -> 'ScoreWeightsValue':
         try:
-            return HSLEValue(config_value)
+            return ScoreWeightsValue(config_value)
         except ValueError as ex:
             raise OptionParseFailure(
-                'HSLE weights must be specified as four numbers in the form (H,S,L,E),'
+                'Score weights must be specified as four numbers in the form (H,S,L,E),'
                 ' e.g. (0.9, 0.2, 2.0, 0.5). Commas/brackets/slashes are ignored.') from ex
+
+
+class KernelSizeValue(ValidatedValue):
+    """Validator for kernel sizes (odd integer > 1, or -1 for auto size)."""
+
+    def __init__(self, value: int):
+        if value == -1:
+            # Downscale factor of -1 maps to None internally for auto downscale.
+            value = None
+        elif value < 0:
+            # Disallow other negative values.
+            raise ValueError()
+        elif value % 2 == 0:
+            # Disallow even values.
+            raise ValueError()
+        self._value = value
+
+    @property
+    def value(self) -> int:
+        return self._value
+
+    def __repr__(self) -> str:
+        return str(self.value)
+
+    def __str__(self) -> str:
+        if self.value is None:
+            return 'auto'
+        return str(self.value)
+
+    @staticmethod
+    def from_config(config_value: str, default: 'KernelSizeValue') -> 'KernelSizeValue':
+        try:
+            return KernelSizeValue(int(config_value))
+        except ValueError as ex:
+            raise OptionParseFailure(
+                'Value must be an odd integer greater than 1, or set to -1 for auto kernel size.'
+            ) from ex
 
 
 ConfigValue = Union[bool, int, float, str]
@@ -195,16 +233,21 @@ CONFIG_MAP: ConfigDict = {
     },
     'detect-adaptive': {
         'frame-window': 2,
+        'kernel-size': KernelSizeValue(-1),
         'luma-only': False,
-        'min-delta-hsv': RangeValue(15.0, min_val=0.0, max_val=255.0),
+        'min-content-val': RangeValue(15.0, min_val=0.0, max_val=255.0),
         'min-scene-len': TimecodeValue(0),
         'threshold': RangeValue(3.0, min_val=0.0, max_val=255.0),
+        'weights': ScoreWeightsValue(ContentDetector.DEFAULT_COMPONENT_WEIGHTS),
+                                                                                   # TODO(v0.7): Remove `min-delta-hsv``.
+        'min-delta-hsv': RangeValue(15.0, min_val=0.0, max_val=255.0),
     },
     'detect-content': {
-        'luma-only': False,                                                   # TODO(v0.6.1): Remove.
-        'hsle-weights': HSLEValue(ContentDetector.DEFAULT_COMPONENT_WEIGHTS),
+        'kernel-size': KernelSizeValue(-1),
+        'luma-only': False,
         'min-scene-len': TimecodeValue(0),
         'threshold': RangeValue(27.0, min_val=0.0, max_val=255.0),
+        'weights': ScoreWeightsValue(ContentDetector.DEFAULT_COMPONENT_WEIGHTS),
     },
     'detect-threshold': {
         'add-last-scene': True,
@@ -244,7 +287,7 @@ CONFIG_MAP: ConfigDict = {
         'height': 0,
         'num-images': 3,
         'output': '',
-        'quality': RangeValue(0, min_val=0, max_val=100),                     # Default depends on format
+        'quality': RangeValue(0, min_val=0, max_val=100),                        # Default depends on format
         'scale': 1.0,
         'scale-method': 'linear',
         'width': 0,

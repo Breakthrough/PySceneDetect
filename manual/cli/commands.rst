@@ -64,21 +64,32 @@ copyright information for each component.
 Usage Examples
 -----------------------------------------------------------------------
 
-The ``help`` command:
+``help`` command (show help for global options/command):
 
     ``scenedetect help``
 
-    ``scenedetect help all``
-
     ``scenedetect help detect-content``
 
-The ``about`` command:
+    ``scenedetect help all``
+
+``about`` command (show license/copyright info):
 
     ``scenedetect about``
 
-The ``version`` command:
+``version`` command (show software or system version info):
 
     ``scenedetect version``
+
+    ``scenedetect version --all``
+
+System Dependencies
+-----------------------------------------------------------------------
+
+You can use the ``version`` command with  ``-a`` / ``--all`` to check installed software dependencies:
+
+    ``scenedetect version --all``
+
+Please include this information when submitting bug reports.
 
 
 .. _time Command:
