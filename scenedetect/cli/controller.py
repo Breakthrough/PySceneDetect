@@ -96,7 +96,7 @@ def run_scenedetect(context: CliContext):
 
         # Get list of detected cuts/scenes from the SceneManager to generate the required output
         # files, based on the given commands (list-scenes, split-video, save-images, etc...).
-        cut_list = context.scene_manager.get_cut_list()
+        cut_list = context.scene_manager.get_cut_list(show_warning=False)
         scene_list = context.scene_manager.get_scene_list(start_in_scene=True)
 
         # Handle --merge-last-scene.
@@ -206,7 +206,8 @@ def _save_images(
         show_progress=not context.quiet_mode,
         scale=context.scale,
         height=context.height,
-        width=context.width)
+        width=context.width,
+        interpolation=context.scale_method)
 
 
 def _export_html(context: CliContext, scene_list: List[Tuple[FrameTimecode, FrameTimecode]],

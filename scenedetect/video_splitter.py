@@ -46,18 +46,23 @@ from scenedetect.frame_timecode import FrameTimecode
 
 logger = logging.getLogger('pyscenedetect')
 
-FrameTimecodePair = Tuple[FrameTimecode, FrameTimecode]
+TimecodePair = Tuple[FrameTimecode, FrameTimecode]
+"""Named type for pairs of timecodes, which typically represents the start/end of a scene."""
 
-COMMAND_TOO_LONG_STRING = '''
+COMMAND_TOO_LONG_STRING = """
 Cannot split video due to too many scenes (resulting command
 is too large to process). To work around this issue, you can
 split the video manually by exporting a list of cuts with the
 `list-scenes` command.
 See https://github.com/Breakthrough/PySceneDetect/issues/164
 for details.  Sorry about that!
-'''
+"""
 
-FFMPEG_PATH = get_ffmpeg_path()
+FFMPEG_PATH: Optional[str] = get_ffmpeg_path()
+"""Relative path to the Ffmpeg binary on this system, if any (will be None if not available)."""
+
+DEFAULT_FFMPEG_ARGS = '-map 0 -c:v libx264 -preset veryfast -crf 22 -c:a aac'
+"""Default arguments passed to ffmpeg when invoking the `split_video_ffmpeg` function."""
 
 ##
 ## Command Availability Checking Functions
@@ -96,7 +101,7 @@ def is_ffmpeg_available() -> bool:
 
 def split_video_mkvmerge(
     input_video_path: str,
-    scene_list: Iterable[FrameTimecodePair],
+    scene_list: Iterable[TimecodePair],
     output_file_template: str = '$VIDEO_NAME.mkv',
     video_name: Optional[str] = None,
     show_output: bool = False,
@@ -173,10 +178,10 @@ def split_video_mkvmerge(
 
 def split_video_ffmpeg(
     input_video_path: str,
-    scene_list: Iterable[FrameTimecodePair],
+    scene_list: Iterable[TimecodePair],
     output_file_template: str = '$VIDEO_NAME-Scene-$SCENE_NUMBER.mp4',
     video_name: Optional[str] = None,
-    arg_override: str = '-map 0 -c:v libx264 -preset fast -crf 21 -c:a aac',
+    arg_override: str = DEFAULT_FFMPEG_ARGS,
     show_progress: bool = False,
     show_output: bool = False,
     suppress_output=None,

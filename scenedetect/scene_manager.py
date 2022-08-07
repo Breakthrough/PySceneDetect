@@ -58,6 +58,7 @@ To use a `SceneManager` with a webcam/device or existing `cv2.VideoCapture` devi
 """
 
 import csv
+from enum import Enum
 from string import Template
 from typing import Iterable, List, Tuple, Optional, Dict, Callable, Union, TextIO
 import threading
@@ -94,6 +95,20 @@ MAX_FRAME_QUEUE_LENGTH: int = 4
 
 PROGRESS_BAR_DESCRIPTION = 'Detected: %d | Progress'
 """Template to use for progress bar."""
+
+
+class Interpolation(Enum):
+    """Interpolation method used for image resizing. Based on constants defined in OpenCV."""
+    NEAREST = cv2.INTER_NEAREST
+    """Nearest neighbor interpolation."""
+    LINEAR = cv2.INTER_LINEAR
+    """Bilinear interpolation."""
+    CUBIC = cv2.INTER_CUBIC
+    """Bicubic interpolation."""
+    AREA = cv2.INTER_AREA
+    """Pixel area relation resampling. Provides moire'-free downscaling."""
+    LANCZOS4 = cv2.INTER_LANCZOS4
+    """Lanczos interpolation over 8x8 neighborhood."""
 
 
 def compute_downscale_factor(frame_width: int, effective_width: int = DEFAULT_MIN_WIDTH) -> int:
@@ -331,6 +346,7 @@ def save_images(scene_list: List[Tuple[FrameTimecode, FrameTimecode]],
                 scale: Optional[float] = None,
                 height: Optional[int] = None,
                 width: Optional[int] = None,
+                interpolation: Interpolation = Interpolation.CUBIC,
                 video_manager=None) -> Dict[int, List[str]]:
     """Save a set number of images from each scene, given a list of scenes
     and the associated video/frame source.
@@ -367,6 +383,7 @@ def save_images(scene_list: List[Tuple[FrameTimecode, FrameTimecode]],
             and height will resize images to an exact size, regardless of aspect ratio.
             Specifying only width will rescale the image to that number of pixels wide
             while preserving the aspect ratio.
+        interpolation: Type of interpolation to use when resizing images.
         video_manager: [DEPRECATED] DO NOT USE. For backwards compatibility only.
 
     Returns:
@@ -455,28 +472,30 @@ def save_images(scene_list: List[Tuple[FrameTimecode, FrameTimecode]],
                     IMAGE_NUMBER=image_num_format % (j + 1),
                     FRAME_NUMBER=image_timecode.get_frames()), image_extension)
                 image_filenames[i].append(file_path)
+                # TODO(v0.6.1): Combine this resize with the ones below.
                 if aspect_ratio is not None:
                     frame_im = cv2.resize(
-                        frame_im, (0, 0), fx=aspect_ratio, fy=1.0, interpolation=cv2.INTER_CUBIC)
-
-                # Get frame dimensions prior to resizing or scaling
+                        frame_im, (0, 0),
+                        fx=aspect_ratio,
+                        fy=1.0,
+                        interpolation=interpolation.value)
                 frame_height = frame_im.shape[0]
                 frame_width = frame_im.shape[1]
 
                 # Figure out what kind of resizing needs to be done
-                if height and width:
-                    frame_im = cv2.resize(frame_im, (width, height), interpolation=cv2.INTER_CUBIC)
-                elif height and not width:
-                    factor = height / float(frame_height)
-                    width = int(factor * frame_width)
-                    frame_im = cv2.resize(frame_im, (width, height), interpolation=cv2.INTER_CUBIC)
-                elif width and not height:
-                    factor = width / float(frame_width)
-                    height = int(factor * frame_height)
-                    frame_im = cv2.resize(frame_im, (width, height), interpolation=cv2.INTER_CUBIC)
+                if height or width:
+                    if height and not width:
+                        factor = height / float(frame_height)
+                        width = int(factor * frame_width)
+                    if width and not height:
+                        factor = width / float(frame_width)
+                        height = int(factor * frame_height)
+                    assert height > 0 and width > 0
+                    frame_im = cv2.resize(
+                        frame_im, (width, height), interpolation=interpolation.value)
                 elif scale:
                     frame_im = cv2.resize(
-                        frame_im, (0, 0), fx=scale, fy=scale, interpolation=cv2.INTER_CUBIC)
+                        frame_im, (0, 0), fx=scale, fy=scale, interpolation=interpolation.value)
 
                 cv2.imwrite(get_and_create_path(file_path, output_dir), frame_im, imwrite_param)
             else:
@@ -537,11 +556,23 @@ class SceneManager:
         self._base_timecode: Optional[FrameTimecode] = None
         self._downscale: int = 1
         self._auto_downscale: bool = True
+        # Interpolation method to use when downscaling. Defaults to linear interpolation
+        # as a good balance between quality and performance.
+        self._interpolation: Interpolation = Interpolation.LINEAR
         # Boolean indicating if we have only seen EventType.CUT events so far.
         self._only_cuts: bool = True
         # Set by decode thread when an exception occurs.
         self._exception_info = None
         self._stop = threading.Event()
+
+    @property
+    def interpolation(self) -> Interpolation:
+        """Interpolation method to use when downscaling frames. Must be one of cv2.INTER_*."""
+        return self._interpolation
+
+    @interpolation.setter
+    def interpolation(self, value: Interpolation):
+        self._interpolation = value
 
     @property
     def stats_manager(self) -> Optional[StatsManager]:
@@ -865,7 +896,7 @@ class SceneManager:
                         frame_im = cv2.resize(
                             frame_im, (round(frame_im.shape[1] / downscale_factor),
                                        round(frame_im.shape[0] / downscale_factor)),
-                            interpolation=cv2.INTER_LINEAR)
+                            interpolation=self._interpolation.value)
                 else:
                     if video.read(decode=False) is False:
                         break
@@ -907,7 +938,9 @@ class SceneManager:
 
     # pylint: disable=unused-argument
 
-    def get_cut_list(self, base_timecode: Optional[FrameTimecode] = None) -> List[FrameTimecode]:
+    def get_cut_list(self,
+                     base_timecode: Optional[FrameTimecode] = None,
+                     show_warning: bool = True) -> List[FrameTimecode]:
         """[DEPRECATED] Return a list of FrameTimecodes of the detected scene changes/cuts.
 
         Unlike get_scene_list, the cutting list returns a list of FrameTimecodes representing
@@ -920,6 +953,8 @@ class SceneManager:
 
         Arguments:
             base_timecode: [DEPRECATED] DO NOT USE. For backwards compatibility only.
+            show_warning: If set to False, suppresses the error from being warned. In v0.7,
+                this will have no effect and the error will become a Python warning.
 
         Returns:
             List of FrameTimecode objects denoting the points in time where a scene change
@@ -927,7 +962,8 @@ class SceneManager:
             for automated splitting of the input into individual scenes.
         """
         # TODO(v0.7): Use the warnings module to turn this into a warning.
-        logger.error('`get_cut_list()` is deprecated and will be removed in a future release.')
+        if show_warning:
+            logger.error('`get_cut_list()` is deprecated and will be removed in a future release.')
         return self._get_cutting_list()
 
     def get_event_list(

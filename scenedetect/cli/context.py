@@ -28,7 +28,7 @@ from scenedetect.video_stream import VideoStream, VideoOpenFailure, FrameRateUna
 from scenedetect.video_splitter import is_mkvmerge_available, is_ffmpeg_available
 import scenedetect.detectors
 from scenedetect.stats_manager import StatsManager
-from scenedetect.scene_manager import SceneManager
+from scenedetect.scene_manager import SceneManager, Interpolation
 
 from scenedetect.cli.config import ConfigRegistry, ConfigLoadFailure, CHOICE_MAP
 
@@ -139,6 +139,7 @@ class CliContext:
         self.scale: float = None           # save-images -s/--scale
         self.height: int = None            # save-images -h/--height
         self.width: int = None             # save-images -w/--width
+        self.scale_method: Interpolation = None
 
         # `split-video` Command Options
         self.split_video: bool = False
@@ -265,16 +266,19 @@ class CliContext:
 
         logger.debug('Initializing SceneManager.')
         self.scene_manager = SceneManager(self.stats_manager)
+
         if downscale is None and self.config.is_default("global", "downscale"):
             self.scene_manager.auto_downscale = True
         else:
+            self.scene_manager.auto_downscale = False
+            downscale = self.config.get_value("global", "downscale", downscale)
             try:
-                self.scene_manager.auto_downscale = False
-                self.scene_manager.downscale = self.config.get_value("global", "downscale",
-                                                                     downscale)
+                self.scene_manager.downscale = downscale
             except ValueError as ex:
                 logger.debug(str(ex))
                 raise click.BadParameter(str(ex), param_hint='downscale factor')
+        self.scene_manager.interpolation = Interpolation[self.config.get_value(
+            'global', 'downscale-method').upper()]
 
         self.options_processed = True
 
@@ -608,6 +612,9 @@ class CliContext:
             self.scale = scale
             self.height = height
             self.width = width
+
+        self.scale_method = Interpolation[self.config.get_value('save-images',
+                                                                'scale-method').upper()]
 
         default_quality = 100 if webp else 95
         quality = (

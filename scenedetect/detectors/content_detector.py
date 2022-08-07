@@ -121,6 +121,9 @@ class ContentDetector(SceneDetector):
                 raise ValueError('kernel_size must be odd integer >= 3')
             self._kernel = numpy.ones((kernel_size, kernel_size), numpy.uint8)
 
+        if luma_only is True:
+            raise NotImplementedError("TODO(v0.6.1)")
+
     def get_metrics(self):
         return ContentDetector.METRIC_KEYS
 

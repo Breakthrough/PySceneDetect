@@ -26,6 +26,8 @@ from typing import AnyStr, Dict, List, Optional, Tuple, Union
 from appdirs import user_config_dir
 
 from scenedetect.frame_timecode import FrameTimecode
+from scenedetect.scene_manager import Interpolation
+from scenedetect.video_splitter import DEFAULT_FFMPEG_ARGS
 
 VALID_PYAV_THREAD_MODES = ['NONE', 'SLICE', 'FRAME', 'AUTO']
 
@@ -112,6 +114,7 @@ CONFIG_MAP: ConfigDict = {
     'global': {
         'backend': 'opencv',
         'downscale': 0,
+        'downscale-method': 'linear',
         'drop-short-scenes': False,
         'frame-skip': 0,
         'merge-last-scene': False,
@@ -120,20 +123,20 @@ CONFIG_MAP: ConfigDict = {
         'verbosity': 'info',
     },
     'save-images': {
-        'output': '',
-        'filename': '$VIDEO_NAME-Scene-$SCENE_NUMBER-$IMAGE_NUMBER',
-        'num-images': 3,
-        'format': 'jpeg',
-                                                                           # Default value of quality is unused as it depends on the format.
-        'quality': RangeValue(0, min_val=0, max_val=100),
         'compression': RangeValue(3, min_val=0, max_val=9),
+        'filename': '$VIDEO_NAME-Scene-$SCENE_NUMBER-$IMAGE_NUMBER',
+        'format': 'jpeg',
         'frame-margin': 1,
-        'scale': 1.0,
         'height': 0,
+        'num-images': 3,
+        'output': '',
+        'quality': RangeValue(0, min_val=0, max_val=100),              # Default depends on format
+        'scale': 1.0,
+        'scale-method': 'linear',
         'width': 0,
     },
     'split-video': {
-        'args': "-map 0 -c:v libx264 -preset veryfast -crf 22 -c:a aac",
+        'args': DEFAULT_FFMPEG_ARGS,
         'copy': False,
         'filename': '$VIDEO_NAME-Scene-$SCENE_NUMBER',
         'high-quality': False,
@@ -152,6 +155,7 @@ CHOICE_MAP: Dict[str, Dict[str, List[str]]] = {
     'global': {
         'backend': ['opencv', 'pyav', 'moviepy'],
         'verbosity': ['debug', 'info', 'warning', 'error', 'none'],
+        'downscale-method': [value.name.lower() for value in Interpolation],
     },
     'split-video': {
         'preset': [
@@ -161,6 +165,7 @@ CHOICE_MAP: Dict[str, Dict[str, List[str]]] = {
     },
     'save-images': {
         'format': ['jpeg', 'png', 'webp'],
+        'scale-method': [value.name.lower() for value in Interpolation],
     },
     'backend-pyav': {
         'threading_mode': [str(mode).lower() for mode in VALID_PYAV_THREAD_MODES],

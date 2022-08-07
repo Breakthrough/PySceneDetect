@@ -18,8 +18,9 @@ PySceneDetect Releases
  - [enhancement] Progress bar now displays number of detections while processing, no longer conflicts with log message output
  - [enhancement] When using ffmpeg to split videos, `-map 0` has been added to the default arguments so other audio tracks are also included when present ([#271](https://github.com/Breakthrough/PySceneDetect/issues/271))
  - [enhancement] Add `-a` flag to `version` command to print more information about versions of dependencies/tools being used
+ - [enhancement] The resizing method used
 
-**API Changes:**
+**General:**
 
  - [feature] Add new backend `VideoStreamMoviePy` using the MoviePy package
  - [bugfix] Fix `scenedetect.detect()` throwing `TypeError` when specifying `stats_file_path`
@@ -34,9 +35,12 @@ PySceneDetect Releases
     - Files, image sequences, and network streams/URLs should continue to use `VideoStreamCv2`
  - [enhancement] No-op progress bar and log capture objects are now provided in `scenedetect.platform` for systems without `tqdm`
  - [enhancement] Add `start_in_scene` argument to `detect()` function ([#282](https://github.com/Breakthrough/PySceneDetect/issues/282))
- - [deprecation] The `SceneManager` methods `get_cut_list()` and `get_event_list()` are now deprecated, along with the `base_timecode` argument, and will be removed in a future version
- - [deprecation] The `base_timecode` argument of `get_scenes_from_cuts()` in `scenedetect.stats_manager` is now deprecated and will be removed in a future version (the signature of this function has been changed accordingly)
-
+ - [api] The `SceneManager` methods `get_cut_list()` and `get_event_list()` are now deprecated, along with the `base_timecode` argument, and will be removed in a future version
+ - [api] The `base_timecode` argument of `get_scenes_from_cuts()` in `scenedetect.stats_manager` is now deprecated and will be removed in a future version (the signature of this function has been changed accordingly)
+ - [general] The default `crf` used for `split_video_ffmpeg` has been changed from 21 to 22 to match the CLI default
+ - [enhancement] Add `interpolation` property to `SceneManager` to allow setting interpolation method for frame downscaling
+ - [enhancement] `SceneManager` now downscales using linear interpolation by default, previously used nearest neighbor
+ - [enhancement] Add `interpolation` argument to `save_images` to allow setting interpolation method when resizing images
 
 ### 0.6 (May 29, 2022)
 
