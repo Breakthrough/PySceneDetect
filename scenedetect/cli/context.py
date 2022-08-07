@@ -209,6 +209,9 @@ class CliContext:
         except ConfigLoadFailure as ex:
             init_failure = True
             init_log += ex.init_log
+            if ex.reason is not None:
+                init_log += [(logging.ERROR, 'Error: %s' % str(ex.reason).replace('\t', '  '))]
+
         finally:
             # Make sure we print the version number even on any kind of init failure.
             logger.info('PySceneDetect %s', scenedetect.__version__)
@@ -304,8 +307,8 @@ class CliContext:
             min_scene_len = parse_timecode(min_scene_len, self.video_stream.frame_rate).frame_num
 
         threshold = self.config.get_value("detect-content", "threshold", threshold)
-        # TODO(v0.6.1): This does nothing now, need to update weights instead.
-        # Have this override any weight setting, and mark it as deprecated.
+        # TODO(v0.6.1): Remove luma-only and replace with hsle-weights. Right now
+        # luma-only has no effect.
         luma_only = luma_only or self.config.get_value("detect-content", "luma-only")
         logger.debug(
             'Adding detector: ContentDetector(threshold=%f, min_scene_len=%d, luma_only=%s)',

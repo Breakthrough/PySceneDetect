@@ -17,11 +17,12 @@ config file schema and data types are performed. Constants/defaults are also def
 possible and re-used by the CLI so that there is one source of truth.
 """
 
+from abc import ABC, abstractmethod
 import logging
 import os
 import os.path
 from configparser import ConfigParser
-from typing import AnyStr, Dict, List, Optional, Tuple, Union
+from typing import Any, AnyStr, Dict, List, Optional, Tuple, Union
 
 from appdirs import user_config_dir
 
@@ -32,12 +33,47 @@ from scenedetect.video_splitter import DEFAULT_FFMPEG_ARGS
 VALID_PYAV_THREAD_MODES = ['NONE', 'SLICE', 'FRAME', 'AUTO']
 
 
-class TimecodeValue:
+class OptionParseFailure(Exception):
+    """Raised when a value provided in a user config file fails validation."""
 
-    def __init__(self, value: Union[int, str]):
-        self.value = value
+    def __init__(self, error):
+        super().__init__()
+        self.error = error
+
+
+class ValidatedValue(ABC):
+    """Used to represent configuration values that must be validated against constraints."""
+
+    @property
+    @abstractmethod
+    def value(self) -> Any:
+        """Get the value after validation."""
+        raise NotImplementedError()
+
+    @staticmethod
+    @abstractmethod
+    def from_config(config_value: str, default: 'ValidatedValue') -> 'ValidatedValue':
+        """Validate and get the user-specified configuration option.
+
+        Raises:
+            OptionParseFailure: Value from config file did not meet validation constraints.
+        """
+        raise NotImplementedError()
+
+
+class TimecodeValue(ValidatedValue):
+    """Validator for timecode values in frames (1234), seconds (123.4s), or HH:MM:SS.
+
+    Stores value in original representation."""
+
+    def __init__(self, value: Union[int, float, str]):
         # Ensure value is a valid timecode.
         FrameTimecode(timecode=value, fps=100.0)
+        self._value = value
+
+    @property
+    def value(self) -> Union[int, float, str]:
+        return self._value
 
     def __repr__(self) -> str:
         return str(self.value)
@@ -45,23 +81,63 @@ class TimecodeValue:
     def __str__(self) -> str:
         return str(self.value)
 
+    @staticmethod
+    def from_config(config_value: str, default: 'TimecodeValue') -> 'TimecodeValue':
+        try:
+            return TimecodeValue(config_value)
+        except ValueError as ex:
+            raise OptionParseFailure(
+                'Timecodes must be in frames (1234), seconds (123.4s), or HH:MM:SS (00:02:03.400).'
+            ) from ex
 
-class RangeValue:
 
-    def __init__(self, value: Union[int, float], min_val: Union[int, float], max_val: Union[int,
-                                                                                            float]):
-        self.value = value
+class RangeValue(ValidatedValue):
+    """Validator for int/float ranges. `min_val` and `max_val` are inclusive."""
+
+    def __init__(
+        self,
+        value: Union[int, float],
+        min_val: Union[int, float],
+        max_val: Union[int, float],
+    ):
         if value < min_val or value > max_val:
             # min and max are inclusive.
             raise ValueError()
-        self.min_val = min_val
-        self.max_val = max_val
+        self._value = value
+        self._min_val = min_val
+        self._max_val = max_val
+
+    @property
+    def value(self) -> Union[int, float]:
+        return self._value
+
+    @property
+    def min_val(self) -> Union[int, float]:
+        """Minimum value of the range."""
+        return self._min_val
+
+    @property
+    def max_val(self) -> Union[int, float]:
+        """Maximum value of the range."""
+        return self._max_val
 
     def __repr__(self) -> str:
         return str(self.value)
 
     def __str__(self) -> str:
         return str(self.value)
+
+    @staticmethod
+    def from_config(config_value: str, default: 'RangeValue') -> 'RangeValue':
+        try:
+            return RangeValue(
+                value=int(config_value) if isinstance(default.value, int) else float(config_value),
+                min_val=default.min_val,
+                max_val=default.max_val,
+            )
+        except ValueError as ex:
+            raise OptionParseFailure('Value must be between %s and %s.' %
+                                     (default.min_val, default.max_val)) from ex
 
 
 ConfigValue = Union[bool, int, float, str]
@@ -88,7 +164,8 @@ CONFIG_MAP: ConfigDict = {
         'threshold': RangeValue(3.0, min_val=0.0, max_val=255.0),
     },
     'detect-content': {
-        'luma-only': False,
+        'luma-only': False,                                            # TODO(v0.6.1): Remove.
+        'hsle-weights': False,                                         # TODO(v0.6.1): Implement.
         'min-scene-len': TimecodeValue(0),
         'threshold': RangeValue(27.0, min_val=0.0, max_val=255.0),
     },
@@ -224,30 +301,17 @@ def _parse_config(config: ConfigParser) -> Tuple[ConfigDict, List[str]]:
                                   (command, option, config.get(command, option), value_type))
                     continue
 
-                if isinstance(CONFIG_MAP[command][option], RangeValue):
-                    default: RangeValue = CONFIG_MAP[command][option]
-                    value = (
-                        config.getint(command, option)
-                        if isinstance(default.value, int) else config.getfloat(command, option))
+                # Handle custom validation types.
+                config_value = config.get(command, option)
+                default = CONFIG_MAP[command][option]
+                option_type = type(default)
+                if issubclass(option_type, ValidatedValue):
                     try:
-                        new_value = RangeValue(value, default.min_val, default.max_val)
-                        out_map[command][option] = new_value
-                    except ValueError:
-                        errors.append(
-                            'Invalid [%s] value for %s: %s. Value must be between %s and %s.' %
-                            ((command, option, value, default.min_val, default.max_val)))
-                    continue
-
-                if isinstance(CONFIG_MAP[command][option], TimecodeValue):
-                    value = config.get(command, option).replace('\n', ' ').strip()
-                    try:
-                        new_value = TimecodeValue(value)
-                        out_map[command][option] = new_value
-                    except ValueError:
-                        errors.append(
-                            'Invalid [%s] value for %s: %s is not a valid timecode. Timecodes'
-                            ' must be in frames (1234), seconds (123.4s), or HH:MM:SS'
-                            ' (00:02:03.400).' % (command, option, value))
+                        out_map[option] = option_type.from_config(
+                            config_value=config_value, default=default)
+                    except OptionParseFailure as ex:
+                        errors.append('Invalid [%s] value for %s:\n  %s\n%s' %
+                                      (command, option, config_value, ex.error))
                     continue
 
                 # If we didn't process the value as a given type, handle it as a string. We also
@@ -273,6 +337,8 @@ class ConfigLoadFailure(Exception):
         self.init_log = init_log
 
 
+# TODO: Provide better error messaging when the user config file fails to be parsed.
+# Currently this results in an unhandled exception.
 class ConfigRegistry:
 
     def __init__(self, path: Optional[str] = None):
@@ -335,7 +401,7 @@ class ConfigRegistry:
             value = CONFIG_MAP[command][option]
             if ignore_default:
                 return None
-        if isinstance(value, (TimecodeValue, RangeValue)):
+        if issubclass(type(value), ValidatedValue):
             return value.value
         return value
 
