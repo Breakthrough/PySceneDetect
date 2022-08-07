@@ -124,14 +124,14 @@ def open_video(
             overriding backend-specific options.
 
     Returns:
-        :py:class:`VideoStream` backend object created with the specified video path.
+        Backend object created with the specified video path.
 
     Raises:
         :py:class:`VideoOpenFailure`: Constructing the VideoStream fails. If multiple backends have
             been attempted, the error from the first backend will be returned.
     """
-    # Try to open the video with the specified backend.
-    last_error = None
+    last_error: Exception = None
+    # If `backend` is available, try to open the video at `path` using it.
     if backend in AVAILABLE_BACKENDS:
         backend_type = AVAILABLE_BACKENDS[backend]
         try:
@@ -144,7 +144,7 @@ def open_video(
             last_error = ex
     else:
         logger.warning('Backend %s not available.', backend)
-    # Fallback to OpenCV if `backend` could not open the video or is unavailable.
+    # Fallback to OpenCV if `backend` is unavailable, or specified backend failed to open `path`.
     backend_type = VideoStreamCv2
     logger.warning('Trying another backend: %s', backend_type.BACKEND_NAME)
     try:
@@ -153,8 +153,7 @@ def open_video(
         logger.debug('Failed to open video: %s', str(ex))
         if last_error is None:
             last_error = ex
-    # If we get here, either the specified backend or the OpenCV backend threw an exception, so
-    # make sure we propagate it.
+    # Propagate any exceptions raised from specified backend, instead of errors from the fallback.
     assert last_error is not None
     raise last_error
 
@@ -166,6 +165,7 @@ def detect(
     show_progress: bool = False,
     start_time: Optional[Union[str, float, int]] = None,
     end_time: Optional[Union[str, float, int]] = None,
+    start_in_scene: bool = False,
 ) -> List[Tuple[FrameTimecode, FrameTimecode]]:
     """Perform scene detection on a given video `path` using the specified `detector`.
 
@@ -180,6 +180,11 @@ def detect(
             number of seconds ``123.45`` (`float`), or number of frames ``200`` (`int`).
         end_time: Starting point in video, in the form of a timecode ``HH:MM:SS[.nnn]`` (`str`),
             number of seconds ``123.45`` (`float`), or number of frames ``200`` (`int`).
+        start_in_scene: Assume the video begins in a scene. This means that when detecting
+            fast cuts with `ContentDetector`, if no cuts are found, the resulting scene list
+            will contain a single scene spanning the entire video (instead of no scenes).
+            When detecting fades with `ThresholdDetector`, the beginning portion of the video
+            will always be included until the first fade-out event is detected.
 
     Returns:
         List of scenes (pairs of :py:class:`FrameTimecode` objects).
@@ -207,4 +212,4 @@ def detect(
     )
     if not scene_manager.stats_manager is None:
         scene_manager.stats_manager.save_to_csv(stats_file_path)
-    return scene_manager.get_scene_list()
+    return scene_manager.get_scene_list(start_in_scene=start_in_scene)

@@ -16,15 +16,11 @@ This file includes unit tests for the scenedetect.scene_manager.SceneManager cla
 which applies SceneDetector algorithms on VideoStream backends.
 """
 
-# Standard project pylint disables for unit tests using pytest.
-# pylint: disable=protected-access, invalid-name, unused-argument, redefined-outer-name
+# pylint: disable=invalid-name
 
 import glob
 import os
 import os.path
-from typing import Iterable, Tuple
-
-import pytest
 
 from scenedetect.backends.opencv import VideoStreamCv2
 from scenedetect.detectors import ContentDetector
@@ -62,6 +58,26 @@ def test_scene_list(test_video_file):
             # Ensure frame list is sorted (i.e. end time frame of
             # one scene is equal to the start time of the next).
             assert scene_list[i - 1][1] == scene_list[i][0]
+
+
+def test_get_scene_list_start_in_scene(test_video_file):
+    """Test SceneManager `get_scene_list()` method with the `start_in_scene` flag."""
+    video = VideoStreamCv2(test_video_file)
+    sm = SceneManager()
+    sm.add_detector(ContentDetector())
+
+    video_fps = video.frame_rate
+    # End time must be short enough that we won't detect any scenes.
+    end_time = FrameTimecode(25, video_fps)
+    sm.auto_downscale = True
+    sm.detect_scenes(video=video, end_time=end_time)
+    # Should be an empty list.
+    assert len(sm.get_scene_list()) == 0
+    # Should be a list with a single element spanning the video duration.
+    scene_list = sm.get_scene_list(start_in_scene=True)
+    assert len(scene_list) == 1
+    assert scene_list[0][0] == 0
+    assert scene_list[0][1] == end_time
 
 
 def test_save_images(test_video_file):
@@ -107,6 +123,9 @@ def test_save_images(test_video_file):
             os.remove(path)
 
 
+# TODO: This would be more readable if the callbacks were defined within the test case, e.g.
+# split up the callback function and callback lambda test cases.
+# pylint: disable=unused-argument, unnecessary-lambda
 class FakeCallback(object):
     """Fake callback used for testing. Tracks number of times the callback was invoked."""
 
@@ -130,6 +149,9 @@ class FakeCallback(object):
 
     def _callback(self, image, frame_num):
         self.num_invoked += 1
+
+
+# pylint: enable=unused-argument, unnecessary-lambda
 
 
 def test_detect_scenes_callback(test_video_file):

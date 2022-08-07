@@ -28,9 +28,10 @@ import click
 
 import scenedetect
 from scenedetect.backends import AVAILABLE_BACKENDS
+from scenedetect.platform import get_system_version_info
 
-from scenedetect.cli.config import CONFIG_FILE_PATH, CONFIG_MAP, CHOICE_MAP
-from scenedetect.cli.context import USER_CONFIG, CliContext
+from scenedetect.cli.config import CHOICE_MAP, CONFIG_FILE_PATH, CONFIG_MAP
+from scenedetect.cli.context import CliContext, USER_CONFIG
 from scenedetect.cli.controller import run_scenedetect
 
 logger = logging.getLogger('pyscenedetect')
@@ -70,12 +71,6 @@ version and copyright information (e.g. {command_name} about):
 
 _COMMAND_DICT = []
 """All commands registered with the CLI. Used for generating help contexts."""
-
-
-def _add_cli_command(cli: click.Group, command: click.Command):
-    """Add the given `command` to the `cli` group as well as the global _COMMAND_DICT."""
-    cli.add_command(command)
-    _COMMAND_DICT.append(command)
 
 
 def _print_command_help(ctx: click.Context, command: click.Command):
@@ -286,6 +281,9 @@ def scenedetect_cli(
     )
 
 
+# pylint: enable=redefined-builtin
+
+
 @click.command('help')
 @click.argument(
     'command_name',
@@ -347,13 +345,22 @@ def about_command(ctx: click.Context):
 
 
 @click.command('version')
+@click.option(
+    '-a',
+    '--show-all',
+    is_flag=True,
+    flag_value=True,
+    help='Include system and package version information. Useful for troubleshooting.')
 @click.pass_context
-def version_command(ctx: click.Context):
+def version_command(ctx: click.Context, show_all: bool):
     """Print PySceneDetect version."""
     assert isinstance(ctx.obj, CliContext)
     ctx.obj.process_input_flag = False
     click.echo('')
     click.echo(click.style('PySceneDetect %s' % scenedetect.__version__, fg='yellow'))
+    if show_all:
+        click.echo('')
+        click.echo(get_system_version_info())
     ctx.exit()
 
 
@@ -999,14 +1006,20 @@ def save_images_command(
     )
 
 
+def _add_cli_command(cli: click.Group, command: click.Command):
+    """Add the given `command` to the `cli` group as well as the global `_COMMAND_DICT`."""
+    cli.add_command(command)
+    _COMMAND_DICT.append(command)
+
+
 # ----------------------------------------------------------------------
 # Commands Omitted From Help List
 # ----------------------------------------------------------------------
 
 # Info Commands
-scenedetect_cli.add_command(help_command)
-scenedetect_cli.add_command(version_command)
-scenedetect_cli.add_command(about_command)
+_add_cli_command(scenedetect_cli, help_command)
+_add_cli_command(scenedetect_cli, version_command)
+_add_cli_command(scenedetect_cli, about_command)
 
 # ----------------------------------------------------------------------
 # Commands Added To Help List

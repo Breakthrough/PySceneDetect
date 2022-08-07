@@ -19,6 +19,11 @@ interface for video input. To open a video by path, use :py:func:`scenedetect.op
 
     from scenedetect import open_video
     video = open_video('video.mp4')
+    while True:
+        frame = video.read()
+        if frame is False:
+            break
+    print("Read %d frames" % video.frame_number)
 
 You can also optionally specify a framerate and a specific backend library to use. Unless specified,
 OpenCV will be used as the video backend. See :py:mod:`scenedetect.backends` for a detailed example.
@@ -56,6 +61,8 @@ class VideoOpenFailure(Exception):
             message: Additional context the backend can provide for the open failure.
         """
         super().__init__(message)
+
+    # pylint: enable=useless-super-delegation
 
 
 class FrameRateUnavailable(VideoOpenFailure):

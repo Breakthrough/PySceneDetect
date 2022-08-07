@@ -27,9 +27,7 @@ TEST_STATS_FILE_XXXXXXXXXXXX.csv, where the X's will be replaced with random dig
 These files will be deleted, if possible, after the tests are completed running.
 """
 
-# Standard project pylint disables for unit tests using pytest.
-# pylint: disable=no-self-use, protected-access, multiple-statements, invalid-name
-# pylint: disable=redefined-outer-name
+#pylint: disable=protected-access
 
 import csv
 import os
@@ -49,8 +47,7 @@ from scenedetect.stats_manager import StatsFileCorrupt
 from scenedetect.stats_manager import COLUMN_NAME_FRAME_NUMBER
 from scenedetect.stats_manager import COLUMN_NAME_TIMECODE
 
-# TODO(v1.0): The following exception still requires a test case:
-from scenedetect.stats_manager import FrameMetricNotRegistered
+# TODO(v1.0): Need to add test case which raises scenedetect.stats_manager.FrameMetricNotRegistered.
 
 # TODO(v1.0): use https://docs.pytest.org/en/6.2.x/tmpdir.html
 TEST_STATS_FILES = ['TEST_STATS_FILE'] * 4

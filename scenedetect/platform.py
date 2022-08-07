@@ -16,9 +16,11 @@ This moduke contains all platform/library specific compatibility fixes, as well 
 functions to handle logging and invoking external commands.
 """
 
+import importlib
 import logging
 import os
 import os.path
+import platform
 import subprocess
 import sys
 from typing import AnyStr, Dict, List, Optional, Union
@@ -249,6 +251,7 @@ def get_ffmpeg_path() -> Optional[str]:
     try:
         # pylint: disable=import-outside-toplevel
         from imageio_ffmpeg import get_ffmpeg_exe
+        # pylint: enable=import-outside-toplevel
         subprocess.call([get_ffmpeg_exe(), '-v', 'quiet'])
         return get_ffmpeg_exe()
     # Gracefully handle case where imageio_ffmpeg is not available.
@@ -261,3 +264,66 @@ def get_ffmpeg_path() -> Optional[str]:
     except RuntimeError:
         pass
     return None
+
+
+def get_system_version_info() -> str:
+    """Get the system's operating system, Python, packages, and external tool versions.
+    Useful for debugging or filing bug reports.
+
+    Used for the `scenedetect version -a` command.
+    """
+    output_template = '{:<12} {}'
+    line_separator = '-' * 60
+    out_lines = []
+
+    # System (Python, OS)
+    out_lines += ['System Version Info', line_separator]
+    out_lines += [
+        output_template.format(name, version) for name, version in (
+            ('OS', '%s' % platform.platform()),
+            ('Python', '%d.%d.%d' % sys.version_info[0:3]),
+        )
+    ]
+
+    # Third-Party Packages
+    out_lines += ['', 'Package Version Info', line_separator]
+    backend_modules = [
+        'appdirs',
+        'av',
+        'click',
+        'cv2',
+        'moviepy',
+        'numpy',
+        'tqdm',
+    ]
+    for module_name in backend_modules:
+        try:
+            module = importlib.import_module(module_name)
+            out_lines.append(output_template.format(module_name, module.__version__))
+        except ModuleNotFoundError:
+            out_lines.append(output_template.format(module_name, '[Not Found]'))
+
+    # External Tools
+    out_lines += ['', 'Tool Version Info', line_separator]
+
+    # ffmpeg
+    tool_name = 'ffmpeg'
+    ffmpeg_path = get_ffmpeg_path()
+    if ffmpeg_path is not None:
+        output = subprocess.check_output(args=[ffmpeg_path, '-version'], text=True)
+        output_split = output.split()
+        if len(output_split) >= 3 and output_split[1] == 'version':
+            out_lines.append(output_template.format(tool_name, output_split[2]))
+        else:
+            out_lines.append(output_template.format(tool_name, ' '.join(output_split)))
+
+    # mkvmerge
+    tool_name = 'mkvmerge'
+    output = subprocess.check_output(args=[tool_name, '--version'], text=True)
+    output_split = output.split()
+    if len(output_split) >= 1 and output_split[0] == 'mkvmerge':
+        out_lines.append(output_template.format(tool_name, ' '.join(output_split[1:])))
+    else:
+        out_lines.append(output_template.format(tool_name, ' '.join(output_split)))
+
+    return '\n'.join(out_lines)

@@ -17,7 +17,7 @@ backends implemented in scenedetect.backends.  These tests enforce a consistent 
 all supported backends, and verify that they are functionally equivalent where possible.
 """
 
-#pylint: disable=no-self-use,missing-function-docstring
+# pylint: disable=no-self-use,missing-function-docstring
 
 from dataclasses import dataclass
 from typing import List, Type

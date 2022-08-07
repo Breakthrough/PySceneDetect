@@ -92,6 +92,11 @@ def test_cli_info_command(info_command):
     assert invoke_scenedetect(info_command) == 0
 
 
+def test_cli_version_info():
+    """Test `scenedetect` version command with the `-a`/`--show-all` flag."""
+    assert invoke_scenedetect('version -a') == 0
+
+
 @pytest.mark.parametrize('detector_command', ALL_DETECTORS)
 def test_cli_detector(detector_command: str):
     """Test each detection algorithm."""

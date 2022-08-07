@@ -18,7 +18,7 @@ Uses string identifier ``'pyav'``.
 from logging import getLogger
 from typing import AnyStr, BinaryIO, Optional, Tuple, Union
 
-#pylint: disable=c-extension-no-member
+# pylint: disable=c-extension-no-member
 import av
 from numpy import ndarray
 

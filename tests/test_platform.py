@@ -16,10 +16,6 @@ This file includes unit tests for the scenedetect.platform module, containing
 all platform/library/OS-specific compatibility fixes.
 """
 
-# Standard project pylint disables for unit tests using pytest.
-# pylint: disable=no-self-use, protected-access, multiple-statements, invalid-name
-# pylint: disable=redefined-outer-name
-
 import platform
 import pytest
 
