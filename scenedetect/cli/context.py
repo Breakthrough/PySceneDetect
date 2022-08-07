@@ -210,8 +210,8 @@ class CliContext:
 
             # Configuration file was specified via CLI argument -c/--config.
             if config and not init_failure:
-                # This makes mit
                 self.config = ConfigRegistry(config)
+                init_log += self.config.get_init_log()
                 # Re-initialize logger with the correct verbosity.
                 if verbosity is None and not self.config.is_default('global', 'verbosity'):
                     verbosity_str = self.config.get_value('global', 'verbosity')
@@ -292,6 +292,7 @@ class CliContext:
 
         self.options_processed = True
 
+    # TODO(v0.6.1): Replace luma_only with hsle_weights.
     def handle_detect_content(
         self,
         threshold: Optional[float],
@@ -314,18 +315,22 @@ class CliContext:
             min_scene_len = parse_timecode(min_scene_len, self.video_stream.frame_rate).frame_num
 
         threshold = self.config.get_value("detect-content", "threshold", threshold)
+        hsle_weights = self.config.get_value("detect-content", "hsle-weights")
         # TODO(v0.6.1): Remove luma-only and replace with hsle-weights. Right now
         # luma-only has no effect.
         luma_only = luma_only or self.config.get_value("detect-content", "luma-only")
+        if luma_only:
+            logger.error("luma-only has no effect and will be removed. Use hsle-weights instead.")
         logger.debug(
-            'Adding detector: ContentDetector(threshold=%f, min_scene_len=%d, luma_only=%s)',
-            threshold, min_scene_len, luma_only)
+            'Adding detector: ContentDetector(threshold=%.3f, min_scene_len=%d, hsle_weights=%s)',
+            threshold, min_scene_len, hsle_weights)
         self._add_detector(
             scenedetect.detectors.ContentDetector(
-                threshold=threshold, min_scene_len=min_scene_len, luma_only=luma_only))
+                threshold=threshold, min_scene_len=min_scene_len, score_weights=hsle_weights))
 
         self.options_processed = options_processed_orig
 
+    # TODO(v0.6.1): Replace luma_only with hsle_weights.
     def handle_detect_adaptive(
         self,
         threshold: Optional[float],

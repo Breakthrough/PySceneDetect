@@ -58,6 +58,7 @@ class AdaptiveDetector(ContentDetector):
         if video_manager is not None:
             logger.error('video_manager is deprecated, use video instead.')
 
+        # TODO(v0.6.1): Need to initialize ContentDetector with correct HSLE weights.
         super().__init__()
         self.min_scene_len = min_scene_len
         self.adaptive_threshold = adaptive_threshold

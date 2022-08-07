@@ -26,6 +26,7 @@ from typing import Any, AnyStr, Dict, List, Optional, Tuple, Union
 
 from appdirs import user_config_dir
 
+from scenedetect.detectors import ContentDetector
 from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.scene_manager import Interpolation
 from scenedetect.video_splitter import DEFAULT_FFMPEG_ARGS
@@ -140,6 +141,42 @@ class RangeValue(ValidatedValue):
                                      (default.min_val, default.max_val)) from ex
 
 
+class HSLEValue(ValidatedValue):
+    """Validator for HSLE values (tuple of four numbers)."""
+
+    _IGNORE_CHARS = [',', '/', '(', ')']
+    """Characters to ignore."""
+
+    def __init__(self, value: Union[str, ContentDetector.Components]):
+        if isinstance(value, ContentDetector.Components):
+            self._value = value
+        else:
+            translation_table = str.maketrans({char: ' ' for char in HSLEValue._IGNORE_CHARS})
+            values = value.translate(translation_table).split()
+            if not len(values) == 4:
+                raise ValueError("HSLE weights must be specified as four numbers!")
+            self._value = ContentDetector.Components(*(float(val) for val in values))
+
+    @property
+    def value(self) -> Tuple[float, float, float, float]:
+        return self._value
+
+    def __repr__(self) -> str:
+        return str(self.value)
+
+    def __str__(self) -> str:
+        return '%f / %f / %f / %f' % self.value
+
+    @staticmethod
+    def from_config(config_value: str, default: 'HSLEValue') -> 'HSLEValue':
+        try:
+            return HSLEValue(config_value)
+        except ValueError as ex:
+            raise OptionParseFailure(
+                'HSLE weights must be specified as four numbers in the form (H,S,L,E),'
+                ' e.g. (0.9, 0.2, 2.0, 0.5). Commas/brackets/slashes are ignored.') from ex
+
+
 ConfigValue = Union[bool, int, float, str]
 ConfigDict = Dict[str, Dict[str, ConfigValue]]
 
@@ -164,8 +201,8 @@ CONFIG_MAP: ConfigDict = {
         'threshold': RangeValue(3.0, min_val=0.0, max_val=255.0),
     },
     'detect-content': {
-        'luma-only': False,                                            # TODO(v0.6.1): Remove.
-        'hsle-weights': False,                                         # TODO(v0.6.1): Implement.
+        'luma-only': False,                                                   # TODO(v0.6.1): Remove.
+        'hsle-weights': HSLEValue(ContentDetector.DEFAULT_COMPONENT_WEIGHTS),
         'min-scene-len': TimecodeValue(0),
         'threshold': RangeValue(27.0, min_val=0.0, max_val=255.0),
     },
@@ -207,7 +244,7 @@ CONFIG_MAP: ConfigDict = {
         'height': 0,
         'num-images': 3,
         'output': '',
-        'quality': RangeValue(0, min_val=0, max_val=100),              # Default depends on format
+        'quality': RangeValue(0, min_val=0, max_val=100),                     # Default depends on format
         'scale': 1.0,
         'scale-method': 'linear',
         'width': 0,
@@ -307,7 +344,7 @@ def _parse_config(config: ConfigParser) -> Tuple[ConfigDict, List[str]]:
                 option_type = type(default)
                 if issubclass(option_type, ValidatedValue):
                     try:
-                        out_map[option] = option_type.from_config(
+                        out_map[command][option] = option_type.from_config(
                             config_value=config_value, default=default)
                     except OptionParseFailure as ex:
                         errors.append('Invalid [%s] value for %s:\n  %s\n%s' %
@@ -415,6 +452,7 @@ class ConfigRegistry:
             raise ConfigLoadFailure(self._init_log)
 
     def is_default(self, command: str, option: str) -> bool:
+        """True if specified config option is unset (i.e. the default), False otherwise."""
         return not (command in self._config and option in self._config[command])
 
     def get_value(self,
