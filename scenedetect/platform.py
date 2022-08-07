@@ -266,6 +266,34 @@ def get_ffmpeg_path() -> Optional[str]:
     return None
 
 
+def get_ffmpeg_version() -> Optional[str]:
+    """Get ffmpeg version identifier, or None if ffmpeg is not found. Uses `get_ffmpeg_path()`."""
+    ffmpeg_path = get_ffmpeg_path()
+    if ffmpeg_path is None:
+        return None
+    # If get_ffmpeg_path() returns a value, the path it returns should be invokable.
+    output = subprocess.check_output(args=[ffmpeg_path, '-version'], text=True)
+    output_split = output.split()
+    if len(output_split) >= 3 and output_split[1] == 'version':
+        return output_split[2]
+    # If parsing the version fails, return the entire first line of output.
+    return output.splitlines()[0]
+
+
+def get_mkvmerge_version() -> Optional[str]:
+    """Get mkvmerge version identifier, or None if mkvmerge is not found in PATH."""
+    tool_name = 'mkvmerge'
+    try:
+        output = subprocess.check_output(args=[tool_name, '--version'], text=True)
+    except FileNotFoundError:
+        return None
+    output_split = output.split()
+    if len(output_split) >= 1 and output_split[0] == tool_name:
+        return ' '.join(output_split[1:])
+    # If parsing the version fails, return the entire first line of output.
+    return output.splitlines()[0]
+
+
 def get_system_version_info() -> str:
     """Get the system's operating system, Python, packages, and external tool versions.
     Useful for debugging or filing bug reports.
@@ -274,6 +302,7 @@ def get_system_version_info() -> str:
     """
     output_template = '{:<12} {}'
     line_separator = '-' * 60
+    not_found_str = '[Not Found]'
     out_lines = []
 
     # System (Python, OS)
@@ -287,7 +316,7 @@ def get_system_version_info() -> str:
 
     # Third-Party Packages
     out_lines += ['', 'Package Version Info', line_separator]
-    backend_modules = [
+    backend_modules = (
         'appdirs',
         'av',
         'click',
@@ -295,35 +324,24 @@ def get_system_version_info() -> str:
         'moviepy',
         'numpy',
         'tqdm',
-    ]
+    )
     for module_name in backend_modules:
         try:
             module = importlib.import_module(module_name)
             out_lines.append(output_template.format(module_name, module.__version__))
         except ModuleNotFoundError:
-            out_lines.append(output_template.format(module_name, '[Not Found]'))
+            out_lines.append(output_template.format(module_name, not_found_str))
 
     # External Tools
     out_lines += ['', 'Tool Version Info', line_separator]
 
-    # ffmpeg
-    tool_name = 'ffmpeg'
-    ffmpeg_path = get_ffmpeg_path()
-    if ffmpeg_path is not None:
-        output = subprocess.check_output(args=[ffmpeg_path, '-version'], text=True)
-        output_split = output.split()
-        if len(output_split) >= 3 and output_split[1] == 'version':
-            out_lines.append(output_template.format(tool_name, output_split[2]))
-        else:
-            out_lines.append(output_template.format(tool_name, ' '.join(output_split)))
+    tool_version_info = (
+        ('ffmpeg', get_ffmpeg_version()),
+        ('mkvmerge', get_mkvmerge_version()),
+    )
 
-    # mkvmerge
-    tool_name = 'mkvmerge'
-    output = subprocess.check_output(args=[tool_name, '--version'], text=True)
-    output_split = output.split()
-    if len(output_split) >= 1 and output_split[0] == 'mkvmerge':
-        out_lines.append(output_template.format(tool_name, ' '.join(output_split[1:])))
-    else:
-        out_lines.append(output_template.format(tool_name, ' '.join(output_split)))
+    for (tool_name, tool_version) in tool_version_info:
+        out_lines.append(
+            output_template.format(tool_name, tool_version if tool_version else not_found_str))
 
     return '\n'.join(out_lines)
