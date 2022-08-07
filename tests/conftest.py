@@ -24,7 +24,9 @@ following from the root of the repo:
 Note that currently these tests create some temporary files which are not yet cleaned up.
 """
 
+import logging
 import os
+
 import pytest
 
 #
@@ -48,6 +50,14 @@ def get_absolute_path(relative_path: str, check_exists: bool = True) -> str:
 #
 # Test Case Fixtures
 #
+
+
+@pytest.fixture(autouse=True)
+def no_logs_gte_error(caplog):
+    """Ensure no log messages with error severity or higher were reported during test execution."""
+    yield
+    errors = [record for record in caplog.get_records('call') if record.levelno >= logging.ERROR]
+    assert not errors, "Test failed due to presence of one or more logs with ERROR severity."
 
 
 @pytest.fixture

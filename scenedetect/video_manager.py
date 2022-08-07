@@ -283,6 +283,7 @@ class VideoManager(VideoStream):
         """
         # TODO(v0.7): Add DeprecationWarning that this class will be removed in v0.8: 'VideoManager
         # will be removed in PySceneDetect v0.8. Use VideoStreamCv2 or VideoCaptureAdapter instead.'
+        logger.error("VideoManager is deprecated and will be removed.")
         if not video_files:
             raise ValueError("At least one string/integer must be passed in the video_files list.")
         # Need to support video_files as a single str too for compatibility.

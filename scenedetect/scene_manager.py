@@ -683,7 +683,7 @@ class SceneManager:
             logger.error('`base_timecode` argument is deprecated and has no effect.')
         if self._base_timecode is None:
             return []
-        cut_list = self.get_cut_list(self._base_timecode)
+        cut_list = self._get_cutting_list()
         scene_list = get_scenes_from_cuts(
             cut_list=cut_list, start_pos=self._start_pos, end_pos=self._last_pos)
         # If we didn't actually detect any cuts, make sure the resulting scene_list is empty
