@@ -372,6 +372,13 @@ class CliContext:
                 else:
                     min_scene_len = self.config.get_value("detect-adaptive", "min-scene-len")
             min_scene_len = parse_timecode(min_scene_len, self.video_stream.frame_rate).frame_num
+
+        if weights is not None:
+            try:
+                weights = scenedetect.detectors.ContentDetector.Components(*weights)
+            except ValueError as ex:
+                logger.debug(str(ex))
+                raise click.BadParameter(str(ex), param_hint='weights')
         # Log detector args for debugging before we construct it.
         detector_args = {
             'adaptive_threshold':

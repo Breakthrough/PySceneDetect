@@ -139,12 +139,12 @@ class ContentDetector(SceneDetector):
             if kernel_size < 3 or kernel_size % 2 == 0:
                 raise ValueError('kernel_size must be odd integer >= 3')
             self._kernel = numpy.ones((kernel_size, kernel_size), numpy.uint8)
+        self._frame_score: Optional[float] = None
 
     def get_metrics(self):
         return ContentDetector.METRIC_KEYS
 
     def is_processing_required(self, frame_num):
-        # TODO(v0.6.1): Deprecate this method and prepare for transition in v0.7.
         return True
 
     def _calculate_frame_score(self, frame_num: int, frame_img: numpy.ndarray) -> float:
@@ -222,13 +222,13 @@ class ContentDetector(SceneDetector):
         if self._last_scene_cut is None:
             self._last_scene_cut = frame_num
 
-        frame_score = self._calculate_frame_score(frame_num, frame_img)
-        if frame_score is None:
+        self._frame_score = self._calculate_frame_score(frame_num, frame_img)
+        if self._frame_score is None:
             return []
 
         # We consider any frame over the threshold a new scene, but only if
         # the minimum scene length has been reached (otherwise it is ignored).
-        if frame_score >= self._threshold and (
+        if self._frame_score >= self._threshold and (
             (frame_num - self._last_scene_cut) >= self._min_scene_len):
             self._last_scene_cut = frame_num
             return [frame_num]

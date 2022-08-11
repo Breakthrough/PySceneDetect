@@ -554,7 +554,7 @@ Examples:
 )
 @click.option(
     '--frame-window',
-    '-w',
+    '-f',
     metavar='VAL',
     type=click.INT,
     default=None,

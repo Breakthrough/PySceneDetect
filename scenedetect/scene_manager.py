@@ -565,6 +565,9 @@ class SceneManager:
         self._exception_info = None
         self._stop = threading.Event()
 
+        self._frame_buffer = []
+        self._frame_buffer_size = 0
+
     @property
     def interpolation(self) -> Interpolation:
         """Interpolation method to use when downscaling frames. Must be one of cv2.INTER_*."""
@@ -636,6 +639,8 @@ class SceneManager:
             self._detector_list.append(detector)
         else:
             self._sparse_detector_list.append(detector)
+
+        self._frame_buffer_size = max(detector.event_buffer_length, self._frame_buffer_size)
 
     def get_num_detectors(self) -> int:
         """Get number of registered scene detectors added via add_detector. """
@@ -714,17 +719,28 @@ class SceneManager:
         """Add any cuts detected with the current frame to the cutting list. Returns True if any new
         cuts were detected, False otherwise."""
         new_cuts = False
+        # TODO(#283): This breaks with AdaptiveDetector as cuts differ from the frame number
+        # being processed. Allow detectors to specify the max frame lookahead they require
+        # (i.e. any event will never be more than N frames behind the current one).
+        self._frame_buffer.append(frame_im)
+        # frame_buffer[-1] is current frame, -2 is one behind, etc
+        # so index based on cut frame should be [event_frame - (frame_num + 1)]
+        self._frame_buffer = self._frame_buffer[-(self._frame_buffer_size + 1):]
         for detector in self._detector_list:
             cuts = detector.process_frame(frame_num, frame_im)
-            if cuts and callback:
-                callback(frame_im, frame_num)
             self._cutting_list += cuts
             new_cuts = True if cuts else False
+            if callback:
+                for cut_frame_num in cuts:
+                    buffer_index = cut_frame_num - (frame_num + 1)
+                    callback(self._frame_buffer[buffer_index], cut_frame_num)
         for detector in self._sparse_detector_list:
             events = detector.process_frame(frame_num, frame_im)
-            if events and callback:
-                callback(frame_im, frame_num)
             self._event_list += events
+            if callback:
+                for event_start, _ in events:
+                    buffer_index = event_start - (frame_num + 1)
+                    callback(self._frame_buffer[buffer_index], event_start)
         return new_cuts
 
     def _post_process(self, frame_num: int) -> None:

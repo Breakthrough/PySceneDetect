@@ -44,6 +44,7 @@ class SceneDetector:
     Also see the implemented scene detectors in the scenedetect.detectors module
     to get an idea of how a particular detector can be created.
     """
+    # TODO(v0.7): Make this a proper abstract base class.
 
     stats_manager: Optional[StatsManager] = None
     """Optional :py:class:`StatsManager <scenedetect.stats_manager.StatsManager>` to
@@ -104,6 +105,13 @@ class SceneDetector:
             List of frame numbers of cuts to be added to the cutting list.
         """
         return []
+
+    @property
+    def event_buffer_length(self) -> int:
+        """The amount of frames a given event can be buffered for, in time. Represents maximum
+        amount any event can be behind `frame_number` in the result of :py:meth:`process_frame`.
+        """
+        return 0
 
 
 class SparseSceneDetector(SceneDetector):

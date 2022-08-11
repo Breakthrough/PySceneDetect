@@ -53,7 +53,9 @@ from scenedetect import detect, ContentDetector
 scene_list = detect('my_video.mp4', ContentDetector())
 ```
 
-`scene_list` will now be a list containing the start/end times of all scenes found in the video. Try calling `print(scene_list)`, or iterating over each scene:
+`scene_list` will now be a list containing the start/end times of all scenes found in the video.  There also exists a two-pass version `AdaptiveDetector` which handles fast camera movement better, and `ThresholdDetector` for handling fade out/fade in events.
+
+Try calling `print(scene_list)`, or iterating over each scene:
 
 ```python
 from scenedetect import detect, ContentDetector
