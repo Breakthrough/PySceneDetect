@@ -76,6 +76,7 @@ The following detection algorithms come with PySceneDetect:
 from scenedetect.detectors.content_detector import ContentDetector
 from scenedetect.detectors.threshold_detector import ThresholdDetector
 from scenedetect.detectors.adaptive_detector import AdaptiveDetector
+from scenedetect.detectors.hash_detector import HashDetector
 
 # Algorithms being ported:
 #from scenedetect.detectors.motion_detector import MotionDetector
