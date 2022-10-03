@@ -22,7 +22,6 @@ a `CliContext`, finally performing scene detection by passing the `CliContext` t
 """
 
 import logging
-from optparse import Option
 from typing import AnyStr, Optional
 
 import click
