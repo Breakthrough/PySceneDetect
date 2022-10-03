@@ -96,6 +96,12 @@ CONFIG_MAP: ConfigDict = {
         'min-scene-len': TimecodeValue(0),
         'threshold': RangeValue(12.0, min_val=0.0, max_val=255.0),
     },
+    'detect-hash': {
+        'threshold': RangeValue(100, min_val=0.0, max_val=65536.0),
+        'size': RangeValue(16, min_val=2, max_val=65536),
+        'freq_factor': RangeValue(2, min_val=1, max_val=65536),
+        'min_scene_len': TimecodeValue(0)
+    },
     'export-html': {
         'filename': '$VIDEO_NAME-Scenes.html',
         'image-height': 0,

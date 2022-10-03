@@ -396,6 +396,46 @@ class CliContext:
             ))
 
         self.options_processed = options_processed_orig
+    
+    def handle_detect_hash(
+        self,
+        threshold: Optional[float],
+        min_scene_len: Optional[str],
+        hash_size: Optional[int],
+        highfreq_factor: Optional[int]
+    ):
+        """Handle detect-hash command options."""
+        self._check_input_open()
+        options_processed_orig = self.options_processed
+        self.options_processed = False
+
+        if self.drop_short_scenes:
+            min_scene_len = 0
+        else:
+            if min_scene_len is None:
+                if self.config.is_default("detect-hash", "min-scene-len"):
+                    min_scene_len = self.min_scene_len.frame_num
+                else:
+                    min_scene_len = self.config.get_value("detect-hash", "min-scene-len")
+            min_scene_len = parse_timecode(min_scene_len, self.video_stream.frame_rate).frame_num
+        
+        threshold = self.config.get_value("detect-hash", "threshold", threshold)
+        hash_size = self.config.get_value("detect-hash", "size", hash_size)
+        highfreq_factor = self.config.get_value("detect-hash", "freq_factor", highfreq_factor)
+
+        logger.debug("Adding detector: HashDetector(threshold=%f, min_scene_len=%d,"
+            " hash_size=%d, highfreq_factor=%d)", threshold, min_scene_len, hash_size, highfreq_factor)
+        
+        self._add_detector(
+            scenedetect.detectors.HashDetector(
+                threshold=threshold,
+                min_scene_len=min_scene_len,
+                hash_size=hash_size,
+                highfreq_factor=highfreq_factor
+            )
+        )
+
+        self.options_processed = options_processed_orig
 
     def handle_export_html(
         self,
