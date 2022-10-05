@@ -238,7 +238,6 @@ def split_video_ffmpeg(
 
     ret_val = 0
     arg_override = arg_override.split(' ')
-    filename_template = Template(output_file_template)
     scene_num_format = '%0'
     scene_num_format += str(max(3, math.floor(math.log(len(scene_list), 10)) + 1)) + 'd'
 
@@ -250,6 +249,17 @@ def split_video_ffmpeg(
         processing_start_time = time.time()
         for i, (start_time, end_time) in enumerate(scene_list):
             duration = (end_time - start_time)
+
+            # Format output filename with template variables
+            output_file_template_iter = Template(output_file_template).safe_substitute(
+                VIDEO_NAME=video_name, SCENE_NUMBER=scene_num_format % (i + 1),
+                START_TIME=str(start_time.get_timecode()), END_TIME=str(end_time.get_timecode()),
+                START_FRAME=str(start_time.get_frames()), END_FRAME=str(end_time.get_frames())
+            )
+
+            # Remove : character or else ffmpeg will error out
+            output_file_template_iter = output_file_template_iter.replace(":", ";")
+
             call_list = ['ffmpeg']
             if not show_output:
                 call_list += ['-v', 'quiet']
@@ -264,11 +274,8 @@ def split_video_ffmpeg(
                 str(duration.get_seconds())
             ]
             call_list += arg_override
-            call_list += [
-                '-sn',
-                filename_template.safe_substitute(
-                    VIDEO_NAME=video_name, SCENE_NUMBER=scene_num_format % (i + 1))
-            ]
+            call_list += ['-sn']
+            call_list += [output_file_template_iter]
             ret_val = invoke_command(call_list)
             if show_output and i == 0 and len(scene_list) > 1:
                 logger.info(
