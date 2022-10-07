@@ -64,21 +64,32 @@ copyright information for each component.
 Usage Examples
 -----------------------------------------------------------------------
 
-The ``help`` command:
+``help`` command (show help for global options/command):
 
     ``scenedetect help``
 
-    ``scenedetect help all``
-
     ``scenedetect help detect-content``
 
-The ``about`` command:
+    ``scenedetect help all``
+
+``about`` command (show license/copyright info):
 
     ``scenedetect about``
 
-The ``version`` command:
+``version`` command (show software or system version info):
 
     ``scenedetect version``
+
+    ``scenedetect version --all``
+
+System Dependencies
+-----------------------------------------------------------------------
+
+You can use the ``version`` command with  ``-a`` / ``--all`` to check installed software dependencies:
+
+    ``scenedetect version --all``
+
+Please include this information when submitting bug reports.
 
 
 .. _time Command:
@@ -272,8 +283,8 @@ Command Options
                             tool. [setting: off]
 
   -c, --copy                Copy instead of re-encode. Much faster, but less
-                            precise. Equivalent to specifying -a "-c:v copy
-                            -c:a copy".
+                            precise. Equivalent to specifying -a "-map 0 -c:v
+                            copy -c:a copy ".
 
   -hq, --high-quality       Encode video with higher quality, overrides -f
                             option if present. Equivalent to specifying
@@ -294,8 +305,8 @@ Command Options
                             when splitting and re-encoding scenes. Use double
                             quotes (") around specified arguments. Must
                             specify at least audio/video codec to use (e.g. -a
-                            "-c:v [...] -c:a [...]"). [default: -c:v libx264
-                            -preset veryfast -crf 22 -c:a aac]
+                            "-c:v [...] -c:a [...]"). [default: -map 0 -c:v
+                            libx264 -preset veryfast -crf 22 -c:a aac]
 
   -m, --mkvmerge            Split the video using mkvmerge. Faster than re-
                             encoding, but less precise. The output will be

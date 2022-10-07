@@ -33,7 +33,8 @@ option_b = 1
 min-scene-len = 0.8s
 
 [detect-content]
-threshold = 26
+threshold = 32
+weights = 1.0 0.5 1.0 0.2
 
 [split-video]
 preset = slow

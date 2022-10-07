@@ -12,24 +12,29 @@
 #
 """``scenedetect.cli`` Module
 
-This file contains the implementation of the PySceneDetect command-line interface (CLI)
-parser logic for the PySceneDetect application ("business logic"), The main CLI
-entry-point function is the function scenedetect_cli, which is a chained command group.
+This file contains the implementation of the PySceneDetect command-line interface (CLI) parser
+logic for the PySceneDetect application ("business logic"), The main CLI entry-point function is
+the function scenedetect_cli, which is a chained command group.
 
-The scenedetect.cli module coordinates first parsing all commands and their options using
-a `CliContext`, finally performing scene detection by passing the `CliContext` to the
+The scenedetect.cli module coordinates first parsing all commands and their options using a
+`CliContext`, finally performing scene detection by passing the `CliContext` to the
 `run_scenedetect` run in `scenedetect.cli.controller`.
 """
 
+# Some parts of this file need word wrap to be displayed.
+# pylint: disable=line-too-long
+
 import logging
-from typing import AnyStr, Optional
+from typing import AnyStr, Optional, Tuple
 
 import click
 
 import scenedetect
 from scenedetect.backends import AVAILABLE_BACKENDS
-from scenedetect.cli.config import CONFIG_FILE_PATH, CONFIG_MAP, CHOICE_MAP
-from scenedetect.cli.context import USER_CONFIG, CliContext
+from scenedetect.platform import get_system_version_info
+
+from scenedetect.cli.config import CHOICE_MAP, CONFIG_FILE_PATH, CONFIG_MAP
+from scenedetect.cli.context import CliContext, USER_CONFIG
 from scenedetect.cli.controller import run_scenedetect
 
 logger = logging.getLogger('pyscenedetect')
@@ -69,12 +74,6 @@ version and copyright information (e.g. {command_name} about):
 
 _COMMAND_DICT = []
 """All commands registered with the CLI. Used for generating help contexts."""
-
-
-def _add_cli_command(cli: click.Group, command: click.Command):
-    """Add the given `command` to the `cli` group as well as the global _COMMAND_DICT."""
-    cli.add_command(command)
-    _COMMAND_DICT.append(command)
 
 
 def _print_command_help(ctx: click.Context, command: click.Command):
@@ -285,6 +284,9 @@ def scenedetect_cli(
     )
 
 
+# pylint: enable=redefined-builtin
+
+
 @click.command('help')
 @click.argument(
     'command_name',
@@ -346,13 +348,23 @@ def about_command(ctx: click.Context):
 
 
 @click.command('version')
+@click.option(
+    '-a',
+    '--all',
+    'show_all',
+    is_flag=True,
+    flag_value=True,
+    help='Include system and package version information. Useful for troubleshooting.')
 @click.pass_context
-def version_command(ctx: click.Context):
+def version_command(ctx: click.Context, show_all: bool):
     """Print PySceneDetect version."""
     assert isinstance(ctx.obj, CliContext)
     ctx.obj.process_input_flag = False
     click.echo('')
     click.echo(click.style('PySceneDetect %s' % scenedetect.__version__, fg='yellow'))
+    if show_all:
+        click.echo('')
+        click.echo(get_system_version_info())
     ctx.exit()
 
 
@@ -428,12 +440,32 @@ def time_command(
     (USER_CONFIG.get_help_string("detect-content", "threshold")),
 )
 @click.option(
+    '--weights',
+    '-w',
+    type=(float, float, float, float),
+    default=None,
+    help='Weights of the 4 components used to calculate content_val in the form'
+    ' (delta_hue, delta_sat, delta_lum, delta_edges).%s' %
+    (USER_CONFIG.get_help_string("detect-content", "weights")),
+)
+@click.option(
     '--luma-only',
     '-l',
     is_flag=True,
     flag_value=True,
-    help='Only consider luma/brightness channel (useful for greyscale videos).%s' %
+    help='Only consider luma (brightness) channel. Useful for greyscale videos. Equivalent to'
+    'setting -w/--weights to 0, 0, 1, 0.%s' %
     (USER_CONFIG.get_help_string("detect-content", "luma-only")),
+)
+@click.option(
+    '--kernel-size',
+    '-k',
+    metavar='N',
+    type=click.INT,
+    default=None,
+    help='Size of kernel for expanding detected edges. Must be odd integer greater than or'
+    ' equal to 3. If unset, kernel size is estimated using video resolution.%s' %
+    (USER_CONFIG.get_help_string("detect-content", "kernel-size")),
 )
 @click.option(
     '--min-scene-len',
@@ -451,10 +483,30 @@ def time_command(
 def detect_content_command(
     ctx: click.Context,
     threshold: Optional[float],
+    weights: Optional[Tuple[float, float, float, float]],
     luma_only: bool,
+    kernel_size: Optional[int],
     min_scene_len: Optional[str],
 ):
     """Perform content detection algorithm on input video.
+
+When processing each frame, a score (from 0 to 255.0) is calculated representing the difference in content from the previous frame (higher = more difference). A change in scene is triggered when this value exceeds the value set for `-t`/`--threshold`. This value is the *content_val* column in a statsfile.
+
+Frame scores are calculated from several components, which are used to generate a final weighted value with `-w`/`--weights`. These are also recorded in the statsfile if set. Currently there are four components:
+
+ - *delta_hue*: Difference between pixel hue values of adjacent frames.
+
+ - *delta_sat*: Difference between pixel saturation values of adjacent frames.
+
+ - *delta_lum*: Difference between pixel luma (brightness) values of adjacent frames.
+
+ - *delta_edges*: Difference between calculated edges of adjacent frames. Typically larger than other components, so threshold may need to be increased to compensate.
+
+Weights are set as a set of 4 numbers in the form (*delta_hue*, *delta_sat*, *delta_lum*, *delta_edges*). For example, `-w 1.0 0.5 1.0 0.2 -t 32` is a good starting point to use with edge detection.
+
+Edge detection is not enabled by default. Current default parameters are `-w 1.0 1.0 1.0 0.0 -t 27`. The final weighted sum is normalized based on the weight of the components, so they do not need to equal 100%.
+
+Examples:
 
     detect-content
 
@@ -465,7 +517,8 @@ def detect_content_command(
         threshold=threshold,
         luma_only=luma_only,
         min_scene_len=min_scene_len,
-    )
+        weights=weights,
+        kernel_size=kernel_size)
 
 
 @click.command('detect-adaptive')
@@ -480,18 +533,28 @@ def detect_content_command(
     (USER_CONFIG.get_help_string('detect-adaptive', 'threshold')),
 )
 @click.option(
-    '--min-delta-hsv',
-    '-d',
+    '--min-content-val',
+    '-c',
     metavar='VAL',
     type=click.FLOAT,
     default=None,
     help='Minimum threshold (float) that the content_val must exceed in order to register as a new'
     ' scene. This is calculated the same way that `detect-content` calculates frame score.%s' %
+    (USER_CONFIG.get_help_string('detect-adaptive', 'min-content-val')),
+)
+@click.option(
+    '--min-delta-hsv',
+    '-d',
+    metavar='VAL',
+    type=click.FLOAT,
+    default=None,
+    help='[DEPRECATED] Use -c/--min-content-val instead.%s' %
     (USER_CONFIG.get_help_string('detect-adaptive', 'min-delta-hsv')),
+    hidden=True,
 )
 @click.option(
     '--frame-window',
-    '-w',
+    '-f',
     metavar='VAL',
     type=click.INT,
     default=None,
@@ -500,12 +563,32 @@ def detect_content_command(
     (USER_CONFIG.get_help_string('detect-adaptive', 'frame-window')),
 )
 @click.option(
+    '--weights',
+    '-w',
+    type=(float, float, float, float),
+    default=None,
+    help='Weights of the 4 components used to calculate content_val in the form'
+    ' (delta_hue, delta_sat, delta_lum, delta_edges).%s' %
+    (USER_CONFIG.get_help_string("detect-content", "weights")),
+)
+@click.option(
     '--luma-only',
     '-l',
     is_flag=True,
     flag_value=True,
-    help='Only consider luma/brightness channel (useful for greyscale videos).%s' %
-    (USER_CONFIG.get_help_string('detect-adaptive', 'luma-only')),
+    help='Only consider luma (brightness) channel. Useful for greyscale videos. Equivalent to'
+    'setting -w/--weights to 0, 0, 1, 0.%s' %
+    (USER_CONFIG.get_help_string("detect-content", "luma-only")),
+)
+@click.option(
+    '--kernel-size',
+    '-k',
+    metavar='N',
+    type=click.INT,
+    default=None,
+    help='Size of kernel for expanding detected edges. Must be odd integer greater than or'
+    ' equal to 3. If unset, kernel size is estimated using video resolution.%s' %
+    (USER_CONFIG.get_help_string("detect-content", "kernel-size")),
 )
 @click.option(
     '--min-scene-len',
@@ -523,12 +606,19 @@ def detect_content_command(
 def detect_adaptive_command(
     ctx: click.Context,
     threshold: Optional[float],
+    min_content_val: Optional[float],
     min_delta_hsv: Optional[float],
     frame_window: Optional[int],
+    weights: Optional[Tuple[float, float, float, float]],
     luma_only: bool,
+    kernel_size: Optional[int],
     min_scene_len: Optional[str],
 ):
     """Perform adaptive detection algorithm on input video.
+
+Two-pass algorithm that first calculates frame scores with `detect-content`, and then applies a rolling average when processing the result. This can help mitigate false detections in situations such as camera movement.
+
+Examples:
 
     detect-adaptive
 
@@ -538,10 +628,13 @@ def detect_adaptive_command(
 
     ctx.obj.handle_detect_adaptive(
         threshold=threshold,
+        min_content_val=min_content_val,
         min_delta_hsv=min_delta_hsv,
         frame_window=frame_window,
         luma_only=luma_only,
         min_scene_len=min_scene_len,
+        weights=weights,
+        kernel_size=kernel_size,
     )
 
 
@@ -598,6 +691,10 @@ def detect_threshold_command(
     min_scene_len: Optional[str],
 ):
     """Perform threshold detection algorithm on input video.
+
+Detects fades in/out based on average frame pixel value compared against `-t`/`--threshold`.
+
+Examples:
 
     detect-threshold
 
@@ -822,7 +919,7 @@ def list_scenes_command(
     is_flag=True,
     flag_value=True,
     help='Copy instead of re-encode. Much faster, but less precise. Equivalent to specifying'
-    ' -a "-c:v copy -c:a copy".%s' % (USER_CONFIG.get_help_string('split-video', 'copy')),
+    ' -a "-map 0 -c:v copy -c:a copy".%s' % (USER_CONFIG.get_help_string('split-video', 'copy')),
 )
 @click.option(
     '--high-quality',
@@ -1055,14 +1152,20 @@ def save_images_command(
     )
 
 
+def _add_cli_command(cli: click.Group, command: click.Command):
+    """Add the given `command` to the `cli` group as well as the global `_COMMAND_DICT`."""
+    cli.add_command(command)
+    _COMMAND_DICT.append(command)
+
+
 # ----------------------------------------------------------------------
 # Commands Omitted From Help List
 # ----------------------------------------------------------------------
 
 # Info Commands
-scenedetect_cli.add_command(help_command)
-scenedetect_cli.add_command(version_command)
-scenedetect_cli.add_command(about_command)
+_add_cli_command(scenedetect_cli, help_command)
+_add_cli_command(scenedetect_cli, version_command)
+_add_cli_command(scenedetect_cli, about_command)
 
 # ----------------------------------------------------------------------
 # Commands Added To Help List

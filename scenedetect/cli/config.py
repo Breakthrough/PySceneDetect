@@ -12,30 +12,69 @@
 #
 """``scenedetect.cli.config`` Module
 
-Handles loading configuration files from disk and validating each section. Only validation
-of the config file schema and data types are performed. Constants/defaults are also defined
-here where possible and re-used by the CLI so that there is one source of truth.
+Handles loading configuration files from disk and validating each section. Only validation of the
+config file schema and data types are performed. Constants/defaults are also defined here where
+possible and re-used by the CLI so that there is one source of truth.
 """
 
+from abc import ABC, abstractmethod
 import logging
 import os
 import os.path
-from configparser import ConfigParser
-from typing import AnyStr, Dict, List, Optional, Tuple, Union
+from configparser import ConfigParser, ParsingError
+from typing import Any, AnyStr, Dict, List, Optional, Tuple, Union
 
 from appdirs import user_config_dir
 
+from scenedetect.detectors import ContentDetector
 from scenedetect.frame_timecode import FrameTimecode
+from scenedetect.scene_manager import Interpolation
+from scenedetect.video_splitter import DEFAULT_FFMPEG_ARGS
 
 VALID_PYAV_THREAD_MODES = ['NONE', 'SLICE', 'FRAME', 'AUTO']
 
 
-class TimecodeValue:
+class OptionParseFailure(Exception):
+    """Raised when a value provided in a user config file fails validation."""
 
-    def __init__(self, value: Union[int, str]):
-        self.value = value
+    def __init__(self, error):
+        super().__init__()
+        self.error = error
+
+
+class ValidatedValue(ABC):
+    """Used to represent configuration values that must be validated against constraints."""
+
+    @property
+    @abstractmethod
+    def value(self) -> Any:
+        """Get the value after validation."""
+        raise NotImplementedError()
+
+    @staticmethod
+    @abstractmethod
+    def from_config(config_value: str, default: 'ValidatedValue') -> 'ValidatedValue':
+        """Validate and get the user-specified configuration option.
+
+        Raises:
+            OptionParseFailure: Value from config file did not meet validation constraints.
+        """
+        raise NotImplementedError()
+
+
+class TimecodeValue(ValidatedValue):
+    """Validator for timecode values in frames (1234), seconds (123.4s), or HH:MM:SS.
+
+    Stores value in original representation."""
+
+    def __init__(self, value: Union[int, float, str]):
         # Ensure value is a valid timecode.
         FrameTimecode(timecode=value, fps=100.0)
+        self._value = value
+
+    @property
+    def value(self) -> Union[int, float, str]:
+        return self._value
 
     def __repr__(self) -> str:
         return str(self.value)
@@ -43,23 +82,137 @@ class TimecodeValue:
     def __str__(self) -> str:
         return str(self.value)
 
+    @staticmethod
+    def from_config(config_value: str, default: 'TimecodeValue') -> 'TimecodeValue':
+        try:
+            return TimecodeValue(config_value)
+        except ValueError as ex:
+            raise OptionParseFailure(
+                'Timecodes must be in frames (1234), seconds (123.4s), or HH:MM:SS (00:02:03.400).'
+            ) from ex
 
-class RangeValue:
 
-    def __init__(self, value: Union[int, float], min_val: Union[int, float], max_val: Union[int,
-                                                                                            float]):
-        self.value = value
+class RangeValue(ValidatedValue):
+    """Validator for int/float ranges. `min_val` and `max_val` are inclusive."""
+
+    def __init__(
+        self,
+        value: Union[int, float],
+        min_val: Union[int, float],
+        max_val: Union[int, float],
+    ):
         if value < min_val or value > max_val:
             # min and max are inclusive.
             raise ValueError()
-        self.min_val = min_val
-        self.max_val = max_val
+        self._value = value
+        self._min_val = min_val
+        self._max_val = max_val
+
+    @property
+    def value(self) -> Union[int, float]:
+        return self._value
+
+    @property
+    def min_val(self) -> Union[int, float]:
+        """Minimum value of the range."""
+        return self._min_val
+
+    @property
+    def max_val(self) -> Union[int, float]:
+        """Maximum value of the range."""
+        return self._max_val
 
     def __repr__(self) -> str:
         return str(self.value)
 
     def __str__(self) -> str:
         return str(self.value)
+
+    @staticmethod
+    def from_config(config_value: str, default: 'RangeValue') -> 'RangeValue':
+        try:
+            return RangeValue(
+                value=int(config_value) if isinstance(default.value, int) else float(config_value),
+                min_val=default.min_val,
+                max_val=default.max_val,
+            )
+        except ValueError as ex:
+            raise OptionParseFailure('Value must be between %s and %s.' %
+                                     (default.min_val, default.max_val)) from ex
+
+
+class ScoreWeightsValue(ValidatedValue):
+    """Validator for score weight values (currently a tuple of four numbers)."""
+
+    _IGNORE_CHARS = [',', '/', '(', ')']
+    """Characters to ignore."""
+
+    def __init__(self, value: Union[str, ContentDetector.Components]):
+        if isinstance(value, ContentDetector.Components):
+            self._value = value
+        else:
+            translation_table = str.maketrans(
+                {char: ' ' for char in ScoreWeightsValue._IGNORE_CHARS})
+            values = value.translate(translation_table).split()
+            if not len(values) == 4:
+                raise ValueError("Score weights must be specified as four numbers!")
+            self._value = ContentDetector.Components(*(float(val) for val in values))
+
+    @property
+    def value(self) -> Tuple[float, float, float, float]:
+        return self._value
+
+    def __repr__(self) -> str:
+        return str(self.value)
+
+    def __str__(self) -> str:
+        return '%.3f, %.3f, %.3f, %.3f' % self.value
+
+    @staticmethod
+    def from_config(config_value: str, default: 'ScoreWeightsValue') -> 'ScoreWeightsValue':
+        try:
+            return ScoreWeightsValue(config_value)
+        except ValueError as ex:
+            raise OptionParseFailure(
+                'Score weights must be specified as four numbers in the form (H,S,L,E),'
+                ' e.g. (0.9, 0.2, 2.0, 0.5). Commas/brackets/slashes are ignored.') from ex
+
+
+class KernelSizeValue(ValidatedValue):
+    """Validator for kernel sizes (odd integer > 1, or -1 for auto size)."""
+
+    def __init__(self, value: int):
+        if value == -1:
+            # Downscale factor of -1 maps to None internally for auto downscale.
+            value = None
+        elif value < 0:
+            # Disallow other negative values.
+            raise ValueError()
+        elif value % 2 == 0:
+            # Disallow even values.
+            raise ValueError()
+        self._value = value
+
+    @property
+    def value(self) -> int:
+        return self._value
+
+    def __repr__(self) -> str:
+        return str(self.value)
+
+    def __str__(self) -> str:
+        if self.value is None:
+            return 'auto'
+        return str(self.value)
+
+    @staticmethod
+    def from_config(config_value: str, default: 'KernelSizeValue') -> 'KernelSizeValue':
+        try:
+            return KernelSizeValue(int(config_value))
+        except ValueError as ex:
+            raise OptionParseFailure(
+                'Value must be an odd integer greater than 1, or set to -1 for auto kernel size.'
+            ) from ex
 
 
 ConfigValue = Union[bool, int, float, str]
@@ -80,15 +233,21 @@ CONFIG_MAP: ConfigDict = {
     },
     'detect-adaptive': {
         'frame-window': 2,
+        'kernel-size': KernelSizeValue(-1),
         'luma-only': False,
-        'min-delta-hsv': RangeValue(15.0, min_val=0.0, max_val=255.0),
+        'min-content-val': RangeValue(15.0, min_val=0.0, max_val=255.0),
         'min-scene-len': TimecodeValue(0),
         'threshold': RangeValue(3.0, min_val=0.0, max_val=255.0),
+        'weights': ScoreWeightsValue(ContentDetector.DEFAULT_COMPONENT_WEIGHTS),
+                                                                                   # TODO(v0.7): Remove `min-delta-hsv``.
+        'min-delta-hsv': RangeValue(15.0, min_val=0.0, max_val=255.0),
     },
     'detect-content': {
+        'kernel-size': KernelSizeValue(-1),
         'luma-only': False,
         'min-scene-len': TimecodeValue(0),
         'threshold': RangeValue(27.0, min_val=0.0, max_val=255.0),
+        'weights': ScoreWeightsValue(ContentDetector.DEFAULT_COMPONENT_WEIGHTS),
     },
     'detect-threshold': {
         'add-last-scene': True,
@@ -118,6 +277,7 @@ CONFIG_MAP: ConfigDict = {
     'global': {
         'backend': 'opencv',
         'downscale': 0,
+        'downscale-method': 'linear',
         'drop-short-scenes': False,
         'frame-skip': 0,
         'merge-last-scene': False,
@@ -126,20 +286,20 @@ CONFIG_MAP: ConfigDict = {
         'verbosity': 'info',
     },
     'save-images': {
-        'output': '',
-        'filename': '$VIDEO_NAME-Scene-$SCENE_NUMBER-$IMAGE_NUMBER',
-        'num-images': 3,
-        'format': 'jpeg',
-                                                                         # Default value of quality is unused as it depends on the format.
-        'quality': RangeValue(0, min_val=0, max_val=100),
         'compression': RangeValue(3, min_val=0, max_val=9),
+        'filename': '$VIDEO_NAME-Scene-$SCENE_NUMBER-$IMAGE_NUMBER',
+        'format': 'jpeg',
         'frame-margin': 1,
-        'scale': 1.0,
         'height': 0,
+        'num-images': 3,
+        'output': '',
+        'quality': RangeValue(0, min_val=0, max_val=100),                        # Default depends on format
+        'scale': 1.0,
+        'scale-method': 'linear',
         'width': 0,
     },
     'split-video': {
-        'args': "-c:v libx264 -preset veryfast -crf 22 -c:a aac",
+        'args': DEFAULT_FFMPEG_ARGS,
         'copy': False,
         'filename': '$VIDEO_NAME-Scene-$SCENE_NUMBER',
         'high-quality': False,
@@ -156,8 +316,9 @@ certain string options are stored in `CHOICE_MAP`."""
 
 CHOICE_MAP: Dict[str, Dict[str, List[str]]] = {
     'global': {
-        'backend': ['opencv', 'pyav'],
+        'backend': ['opencv', 'pyav', 'moviepy'],
         'verbosity': ['debug', 'info', 'warning', 'error', 'none'],
+        'downscale-method': [value.name.lower() for value in Interpolation],
     },
     'split-video': {
         'preset': [
@@ -167,6 +328,7 @@ CHOICE_MAP: Dict[str, Dict[str, List[str]]] = {
     },
     'save-images': {
         'format': ['jpeg', 'png', 'webp'],
+        'scale-method': [value.name.lower() for value in Interpolation],
     },
     'backend-pyav': {
         'threading_mode': [str(mode).lower() for mode in VALID_PYAV_THREAD_MODES],
@@ -225,30 +387,17 @@ def _parse_config(config: ConfigParser) -> Tuple[ConfigDict, List[str]]:
                                   (command, option, config.get(command, option), value_type))
                     continue
 
-                if isinstance(CONFIG_MAP[command][option], RangeValue):
-                    default: RangeValue = CONFIG_MAP[command][option]
-                    value = (
-                        config.getint(command, option)
-                        if isinstance(default.value, int) else config.getfloat(command, option))
+                # Handle custom validation types.
+                config_value = config.get(command, option)
+                default = CONFIG_MAP[command][option]
+                option_type = type(default)
+                if issubclass(option_type, ValidatedValue):
                     try:
-                        new_value = RangeValue(value, default.min_val, default.max_val)
-                        out_map[command][option] = new_value
-                    except ValueError:
-                        errors.append(
-                            'Invalid [%s] value for %s: %s. Value must be be between %s and %s.' %
-                            ((command, option, value, default.min_val, default.max_val)))
-                    continue
-
-                if isinstance(CONFIG_MAP[command][option], TimecodeValue):
-                    value = config.get(command, option).replace('\n', ' ').strip()
-                    try:
-                        new_value = TimecodeValue(value)
-                        out_map[command][option] = new_value
-                    except ValueError:
-                        errors.append(
-                            'Invalid [%s] value for %s: %s is not a valid timecode. Timecodes'
-                            ' must be in frames (1234), seconds (123.4s), or HH:MM:SS'
-                            ' (00:02:03.400).' % (command, option, value))
+                        out_map[command][option] = option_type.from_config(
+                            config_value=config_value, default=default)
+                    except OptionParseFailure as ex:
+                        errors.append('Invalid [%s] value for %s:\n  %s\n%s' %
+                                      (command, option, config_value, ex.error))
                     continue
 
                 # If we didn't process the value as a given type, handle it as a string. We also
@@ -268,24 +417,46 @@ def _parse_config(config: ConfigParser) -> Tuple[ConfigDict, List[str]]:
 
 
 class ConfigLoadFailure(Exception):
+    """Raised when a user-specified configuration file fails to be loaded or validated."""
 
-    def __init__(self, init_log: Tuple[int, str]):
+    def __init__(self, init_log: Tuple[int, str], reason: Optional[Exception] = None):
         super().__init__()
         self.init_log = init_log
+        self.reason = reason
 
 
 class ConfigRegistry:
 
-    def __init__(self, path: Optional[str] = None):
+    def __init__(self, path: Optional[str] = None, throw_exception: bool = True):
         self._config: ConfigDict = {} # Options set in the loaded config file.
         self._init_log: List[Tuple[int, str]] = []
-        if self._load_from_disk(path) is False and path is not None:
-            raise ConfigLoadFailure(self._init_log)
+        self._initialized = False
+
+        try:
+            self._load_from_disk(path)
+            self._initialized = True
+
+        except ConfigLoadFailure as ex:
+            if throw_exception:
+                raise
+            # If we fail to load the user config file, ensure the object is flagged as
+            # uninitialized, and log the error so it can be dealt with if necessary.
+            self._init_log = ex.init_log
+            if ex.reason is not None:
+                self._init_log += [
+                    (logging.ERROR, 'Error: %s' % str(ex.reason).replace('\t', '  ')),
+                ]
+            self._initialized = False
 
     @property
     def config_dict(self) -> ConfigDict:
         """Current configuration options that are set for each command."""
         return self._config
+
+    @property
+    def initialized(self) -> bool:
+        """True if the ConfigRegistry was constructed without errors, False otherwise."""
+        return self._initialized
 
     def get_init_log(self):
         """Get initialization log. Consumes the log, so subsequent calls will return None."""
@@ -296,29 +467,41 @@ class ConfigRegistry:
     def _log(self, log_level, log_str):
         self._init_log.append((log_level, log_str))
 
-    def _load_from_disk(self, path=None) -> bool:
-        """Tries to find a configuration file and load it."""
+    def _load_from_disk(self, path=None):
+        # Validate `path`, or if not provided, use CONFIG_FILE_PATH if it exists.
+        if path:
+            self._init_log.append((logging.INFO, "Loading config from file:\n  %s" % path))
+            if not os.path.exists(path):
+                self._init_log.append((logging.ERROR, "File not found: %s" % (path)))
+                raise ConfigLoadFailure(self._init_log)
+        else:
+            # Gracefully handle the case where there isn't a user config file.
+            if not os.path.exists(CONFIG_FILE_PATH):
+                self._init_log.append((logging.DEBUG, "User config file not found."))
+                return
+            path = CONFIG_FILE_PATH
+            self._init_log.append((logging.INFO, "Loading user config file:\n  %s" % path))
+        # Try to load and parse the config file at `path`.
         config = ConfigParser()
-        config_file_path = path if path is not None else CONFIG_FILE_PATH
-        result = config.read(config_file_path)
-        if not result:
-            if not os.path.exists(config_file_path):
-                self._log(logging.DEBUG,
-                          "User config file not found (path: %s)" % (config_file_path))
-            else:
-                self._log(logging.ERROR, "Failed to read config file.")
-            return False
-        self._log(logging.INFO, "Loading config from file:\n%s" % (os.path.abspath(result[0])))
+        try:
+            config_file_contents = open(path, 'r').read()
+            config.read_string(config_file_contents, source=path)
+        except ParsingError as ex:
+            raise ConfigLoadFailure(self._init_log, reason=ex)
+        except OSError as ex:
+            raise ConfigLoadFailure(self._init_log, reason=ex)
+        # At this point the config file syntax is correct, but we need to still validate
+        # the parsed options (i.e. that the options have valid values).
         errors = _validate_structure(config)
         if not errors:
             self._config, errors = _parse_config(config)
         if errors:
             for log_str in errors:
-                self._log(logging.ERROR, log_str)
-            return False
-        return True
+                self._init_log.append((logging.ERROR, log_str))
+            raise ConfigLoadFailure(self._init_log)
 
     def is_default(self, command: str, option: str) -> bool:
+        """True if specified config option is unset (i.e. the default), False otherwise."""
         return not (command in self._config and option in self._config[command])
 
     def get_value(self,
@@ -336,7 +519,7 @@ class ConfigRegistry:
             value = CONFIG_MAP[command][option]
             if ignore_default:
                 return None
-        if isinstance(value, (TimecodeValue, RangeValue)):
+        if issubclass(type(value), ValidatedValue):
             return value.value
         return value
 

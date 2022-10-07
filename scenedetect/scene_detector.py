@@ -12,17 +12,17 @@
 #
 """ ``scenedetect.scene_detector`` Module
 
-This module implements the base SceneDetector class, from which all scene
-detectors in the scenedetect.dectectors module are derived from.
+This module contains the :py:class:`SceneDetector` interface, from which all scene detectors in
+:py:mod:`scenedetect.detectors` module are derived from.
 
-The SceneDetector class represents the interface which detection algorithms
-are expected to provide in order to be compatible with PySceneDetect.
+The SceneDetector class represents the interface which detection algorithms are expected to provide
+in order to be compatible with PySceneDetect.
 
 .. warning::
 
-    This API is still unstable, and changes and design improvements are planned for
-    the v1.0 release. Instead of just timecodes, detection algorithms will also
-    provide a specific type of event (in, out, cut, etc...).
+    This API is still unstable, and changes and design improvements are planned for the v1.0
+    release. Instead of just timecodes, detection algorithms will also provide a specific type of
+    event (in, out, cut, etc...).
 """
 
 from typing import List, Optional, Tuple
@@ -44,6 +44,7 @@ class SceneDetector:
     Also see the implemented scene detectors in the scenedetect.detectors module
     to get an idea of how a particular detector can be created.
     """
+    # TODO(v0.7): Make this a proper abstract base class.
 
     stats_manager: Optional[StatsManager] = None
     """Optional :py:class:`StatsManager <scenedetect.stats_manager.StatsManager>` to
@@ -85,7 +86,7 @@ class SceneDetector:
         """
         return []
 
-    def process_frame(self, frame_num: int, frame_img: numpy.ndarray) -> List[int]:
+    def process_frame(self, frame_num: int, frame_img: Optional[numpy.ndarray]) -> List[int]:
         """Process Frame: Computes/stores metrics and detects any scene changes.
 
         Prototype method, no actual detection.
@@ -104,6 +105,13 @@ class SceneDetector:
             List of frame numbers of cuts to be added to the cutting list.
         """
         return []
+
+    @property
+    def event_buffer_length(self) -> int:
+        """The amount of frames a given event can be buffered for, in time. Represents maximum
+        amount any event can be behind `frame_number` in the result of :py:meth:`process_frame`.
+        """
+        return 0
 
 
 class SparseSceneDetector(SceneDetector):

@@ -15,26 +15,26 @@
 This module contains :py:class:`CliContext` which encapsulates the command-line options.
 """
 
-from __future__ import print_function
 import logging
 import os
-from typing import AnyStr, Optional
+from typing import AnyStr, Optional, Tuple
 
 import click
 
 from scenedetect import open_video, AVAILABLE_BACKENDS
-from scenedetect.cli.config import ConfigRegistry, ConfigLoadFailure, CHOICE_MAP
-from scenedetect.frame_timecode import FrameTimecode, MAX_FPS_DELTA
-import scenedetect.detectors
 from scenedetect.platform import get_and_create_path, get_cv2_imwrite_params, init_logger
-from scenedetect.scene_manager import SceneManager
-from scenedetect.stats_manager import StatsManager
+from scenedetect.frame_timecode import FrameTimecode, MAX_FPS_DELTA
 from scenedetect.video_stream import VideoStream, VideoOpenFailure, FrameRateUnavailable
 from scenedetect.video_splitter import is_mkvmerge_available, is_ffmpeg_available
+import scenedetect.detectors
+from scenedetect.stats_manager import StatsManager
+from scenedetect.scene_manager import SceneManager, Interpolation
+
+from scenedetect.cli.config import ConfigRegistry, ConfigLoadFailure, CHOICE_MAP
 
 logger = logging.getLogger('pyscenedetect')
 
-USER_CONFIG = ConfigRegistry()
+USER_CONFIG = ConfigRegistry(throw_exception=False)
 
 
 def parse_timecode(value: str,
@@ -139,6 +139,7 @@ class CliContext:
         self.scale: float = None           # save-images -s/--scale
         self.height: int = None            # save-images -h/--height
         self.width: int = None             # save-images -w/--width
+        self.scale_method: Interpolation = None
 
         # `split-video` Command Options
         self.split_video: bool = False
@@ -202,22 +203,32 @@ class CliContext:
         # $VIDEO_NAME macro in the name.  Default to $VIDEO_NAME.csv.
 
         try:
-            init_failure = False
+            init_failure = not self.config.initialized
             init_log = self.config.get_init_log()
-            self._initialize(config, quiet, verbosity, logfile)
+            quiet = not init_failure and quiet
+            self._initialize_logging(quiet=quiet, verbosity=verbosity, logfile=logfile)
+
+            # Configuration file was specified via CLI argument -c/--config.
+            if config and not init_failure:
+                self.config = ConfigRegistry(config)
+                init_log += self.config.get_init_log()
+                # Re-initialize logger with the correct verbosity.
+                if verbosity is None and not self.config.is_default('global', 'verbosity'):
+                    verbosity_str = self.config.get_value('global', 'verbosity')
+                    assert verbosity_str in CHOICE_MAP['global']['verbosity']
+                    self.quiet_mode = False
+                    self._initialize_logging(verbosity=verbosity_str, logfile=logfile)
+
         except ConfigLoadFailure as ex:
             init_failure = True
             init_log += ex.init_log
+            if ex.reason is not None:
+                init_log += [(logging.ERROR, 'Error: %s' % str(ex.reason).replace('\t', '  '))]
         finally:
             # Make sure we print the version number even on any kind of init failure.
             logger.info('PySceneDetect %s', scenedetect.__version__)
-            init_log += self.config.get_init_log()
             for (log_level, log_str) in init_log:
                 logger.log(log_level, log_str)
-                # We don't raise an exception if the user configuration fails to load, so
-                # we instead look for errors in the init log.
-                if log_level >= logging.ERROR:
-                    init_failure = True
             if init_failure:
                 logger.critical("Error processing configuration file.")
                 raise click.Abort()
@@ -265,17 +276,20 @@ class CliContext:
 
         logger.debug('Initializing SceneManager.')
         self.scene_manager = SceneManager(self.stats_manager)
+
         if downscale is None and self.config.is_default("global", "downscale"):
             self.scene_manager.auto_downscale = True
         else:
+            self.scene_manager.auto_downscale = False
+            downscale = self.config.get_value("global", "downscale", downscale)
             try:
-                self.scene_manager.auto_downscale = False
-                self.scene_manager.downscale = self.config.get_value("global", "downscale",
-                                                                     downscale)
+                self.scene_manager.downscale = downscale
             except ValueError as ex:
                 logger.debug(str(ex))
                 raise click.BadParameter(str(ex), param_hint='downscale factor')
-
+        self.scene_manager.interpolation = Interpolation[self.config.get_value(
+            'global', 'downscale-method').upper()]
+        # This is the *only* place self.options_processed should be set to True.
         self.options_processed = True
 
     def handle_detect_content(
@@ -283,6 +297,8 @@ class CliContext:
         threshold: Optional[float],
         luma_only: bool,
         min_scene_len: Optional[str],
+        weights: Optional[Tuple[float, float, float, float]],
+        kernel_size: Optional[int],
     ):
         """Handle detect-content command options."""
         self._check_input_open()
@@ -293,35 +309,59 @@ class CliContext:
             min_scene_len = 0
         else:
             if min_scene_len is None:
-                if self.config.is_default("detect-content", "min-scene-len"):
+                if self.config.is_default('detect-content', 'min-scene-len'):
                     min_scene_len = self.min_scene_len.frame_num
                 else:
-                    min_scene_len = self.config.get_value("detect-content", "min-scene-len")
+                    min_scene_len = self.config.get_value('detect-content', 'min-scene-len')
             min_scene_len = parse_timecode(min_scene_len, self.video_stream.frame_rate).frame_num
 
-        threshold = self.config.get_value("detect-content", "threshold", threshold)
-        luma_only = luma_only or self.config.get_value("detect-content", "luma-only")
-        logger.debug(
-            'Adding detector: ContentDetector(threshold=%f, min_scene_len=%d, luma_only=%s)',
-            threshold, min_scene_len, luma_only)
-        self._add_detector(
-            scenedetect.detectors.ContentDetector(
-                threshold=threshold, min_scene_len=min_scene_len, luma_only=luma_only))
-
+        if weights is not None:
+            try:
+                weights = scenedetect.detectors.ContentDetector.Components(*weights)
+            except ValueError as ex:
+                logger.debug(str(ex))
+                raise click.BadParameter(str(ex), param_hint='weights')
+        # Log detector args for debugging before we construct it.
+        detector_args = {
+            'weights': self.config.get_value('detect-content', 'weights', weights),
+            'kernel_size': self.config.get_value('detect-content', 'kernel-size', kernel_size),
+            'luma_only': luma_only or self.config.get_value('detect-content', 'luma-only'),
+            'min_scene_len': min_scene_len,
+            'threshold': self.config.get_value('detect-content', 'threshold', threshold),
+        }
+        logger.debug('Adding detector: ContentDetector(%s)', detector_args)
+        self._add_detector(scenedetect.detectors.ContentDetector(**detector_args))
         self.options_processed = options_processed_orig
 
+    # TODO(v0.6.1): Add weights.
     def handle_detect_adaptive(
         self,
         threshold: Optional[float],
-        min_delta_hsv: Optional[float],
+        min_content_val: Optional[float],
         frame_window: Optional[int],
         luma_only: bool,
         min_scene_len: Optional[str],
+        weights: Optional[Tuple[float, float, float, float]],
+        kernel_size: Optional[int],
+        min_delta_hsv: Optional[float],
     ):
         """Handle detect-adaptive command options."""
         self._check_input_open()
         options_processed_orig = self.options_processed
         self.options_processed = False
+
+        # TODO(v0.7): Remove these branches when removing -d/--min-delta-hsv.
+        if min_delta_hsv is not None:
+            logger.error('-d/--min-delta-hsv is deprecated, use -c/--min-content-val instead.')
+            if min_content_val is None:
+                min_content_val = min_delta_hsv
+        # Handle case where deprecated min-delta-hsv is set, and use it to set min-content-val.
+        if not self.config.is_default("detect-adaptive", "min-delta-hsv"):
+            logger.error('[detect-adaptive] config file option `min-delta-hsv` is deprecated'
+                         ', use `min-delta-hsv` instead.')
+            if self.config.is_default("detect-adaptive", "min-content-val"):
+                self.config.config_dict["detect-adaptive"]["min-content-val"] = (
+                    self.config.config_dict["detect-adaptive"]["min-deleta-hsv"])
 
         if self.drop_short_scenes:
             min_scene_len = 0
@@ -333,25 +373,31 @@ class CliContext:
                     min_scene_len = self.config.get_value("detect-adaptive", "min-scene-len")
             min_scene_len = parse_timecode(min_scene_len, self.video_stream.frame_rate).frame_num
 
-        threshold = self.config.get_value("detect-adaptive", "threshold", threshold)
-        min_delta_hsv = self.config.get_value("detect-adaptive", "min-delta-hsv", min_delta_hsv)
-        frame_window = self.config.get_value("detect-adaptive", "frame-window", frame_window)
-        luma_only = luma_only or self.config.get_value("detect-adaptive", "luma-only")
-
-        logger.debug(
-            'Adding detector: AdaptiveDetector(threshold=%f, min_delta_hsv=%f,'
-            ' min_scene_len=%d, luma_only=%s, frame_window=%d)', threshold, min_delta_hsv,
-            min_scene_len, luma_only, frame_window)
-
-        self._add_detector(
-            scenedetect.detectors.AdaptiveDetector(
-                adaptive_threshold=threshold,
-                min_scene_len=min_scene_len,
-                min_delta_hsv=min_delta_hsv,
-                luma_only=luma_only,
-                window_width=frame_window,
-            ))
-
+        if weights is not None:
+            try:
+                weights = scenedetect.detectors.ContentDetector.Components(*weights)
+            except ValueError as ex:
+                logger.debug(str(ex))
+                raise click.BadParameter(str(ex), param_hint='weights')
+        # Log detector args for debugging before we construct it.
+        detector_args = {
+            'adaptive_threshold':
+                self.config.get_value("detect-adaptive", "threshold", threshold),
+            'weights':
+                self.config.get_value("detect-adaptive", "weights", weights),
+            'kernel_size':
+                self.config.get_value("detect-adaptive", "kernel-size", kernel_size),
+            'luma_only':
+                luma_only or self.config.get_value("detect-adaptive", "luma-only"),
+            'min_content_val':
+                self.config.get_value("detect-adaptive", "min-content-val", min_content_val),
+            'min_scene_len':
+                min_scene_len,
+            'window_width':
+                self.config.get_value("detect-adaptive", "frame-window", frame_window),
+        }
+        logger.debug('Adding detector: AdaptiveDetector(%s)', detector_args)
+        self._add_detector(scenedetect.detectors.AdaptiveDetector(**detector_args))
         self.options_processed = options_processed_orig
 
     def handle_detect_threshold(
@@ -381,7 +427,7 @@ class CliContext:
         # TODO(v1.0): This cannot be disabled right now.
         add_last_scene = add_last_scene or self.config.get_value("detect-threshold",
                                                                  "add-last-scene")
-
+        # Log detector args for debugging before we construct it.
         logger.debug(
             'Adding detector: ThresholdDetector(threshold=%f, fade_bias=%f,'
             ' min_scene_len=%d, add_last_scene=%s)', threshold, fade_bias, min_scene_len,
@@ -582,13 +628,13 @@ class CliContext:
         ## ffmpeg-Specific Arguments/Options
         ##
         if copy:
-            args = '-c:v copy -c:a copy'
+            args = '-map 0 -c:v copy -c:a copy'
         elif not args:
             if rate_factor is None:
                 rate_factor = 22 if not high_quality else 17
             if preset is None:
                 preset = 'veryfast' if not high_quality else 'slow'
-            args = ('-c:v libx264 -preset {PRESET} -crf {RATE_FACTOR} -c:a aac'.format(
+            args = ('-map 0 -c:v libx264 -preset {PRESET} -crf {RATE_FACTOR} -c:a aac'.format(
                 PRESET=preset, RATE_FACTOR=rate_factor))
 
         logger.info('ffmpeg arguments: %s', args)
@@ -646,6 +692,9 @@ class CliContext:
             self.scale = scale
             self.height = height
             self.width = width
+
+        self.scale_method = Interpolation[self.config.get_value('save-images',
+                                                                'scale-method').upper()]
 
         default_quality = 100 if webp else 95
         quality = (
@@ -714,15 +763,15 @@ class CliContext:
     # Private Methods
     #
 
-    def _initialize(
+    def _initialize_logging(
         self,
-        config: Optional[str],
-        quiet: Optional[bool],
-        verbosity: Optional[str],
-        logfile: Optional[AnyStr],
+        quiet: Optional[bool] = None,
+        verbosity: Optional[str] = None,
+        logfile: Optional[AnyStr] = None,
     ):
-        """Setup logging and load application configuration file."""
-        self.quiet_mode = bool(quiet)
+        """Setup logging based on CLI args and user configuration settings."""
+        if quiet is not None:
+            self.quiet_mode = bool(quiet)
         curr_verbosity = logging.INFO
         # Convert verbosity into it's log level enum, and override quiet mode if set.
         if verbosity is not None:
@@ -744,21 +793,8 @@ class CliContext:
                 # Override quiet mode if verbosity is set.
                 if not USER_CONFIG.is_default('global', 'verbosity'):
                     self.quiet_mode = False
-
+        # Initialize logger with the set CLI args / user configuration.
         init_logger(log_level=curr_verbosity, show_stdout=not self.quiet_mode, log_file=logfile)
-
-        # Configuration file was specified via CLI argument -c/--config.
-        if config:
-            new_config = ConfigRegistry(config)
-            self.config = new_config
-            # Re-initialize logger with the correct verbosity.
-            if verbosity is None and not self.config.is_default('global', 'verbosity'):
-                verbosity_str = self.config.get_value('global', 'verbosity')
-                assert verbosity_str in CHOICE_MAP['global']['verbosity']
-                curr_verbosity = getattr(logging, verbosity_str.upper())
-                self.quiet_mode = False
-                init_logger(
-                    log_level=curr_verbosity, show_stdout=not self.quiet_mode, log_file=logfile)
 
     def _add_detector(self, detector):
         """ Add Detector: Adds a detection algorithm to the CliContext's SceneManager. """

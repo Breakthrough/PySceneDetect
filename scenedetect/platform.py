@@ -12,17 +12,15 @@
 #
 """ ``scenedetect.platform`` Module
 
-This file contains all platform/library/OS-specific compatibility fixes,
-intended to improve the systems that are able to run PySceneDetect, and allow
-for maintaining backwards compatibility with existing libraries going forwards.
-Other helper functions related to the detection of the appropriate dependency
-DLLs on Windows and getting uniform line-terminating csv reader/writer objects
-are also included in this module.
+This moduke contains all platform/library specific compatibility fixes, as well as some utility
+functions to handle logging and invoking external commands.
 """
 
+import importlib
 import logging
 import os
 import os.path
+import platform
 import subprocess
 import sys
 from typing import AnyStr, Dict, List, Optional, Union
@@ -30,17 +28,56 @@ from typing import AnyStr, Dict, List, Optional, Union
 import cv2
 
 ##
-## tqdm Library (`scenedetect.platform.tqdm`` will be tqdm object type or None)
+## tqdm Library
 ##
 
-# pylint: disable=unused-import
-# pylint: disable=invalid-name
+
+class FakeTqdmObject:
+    """Provides a no-op tqdm-like object."""
+
+    # pylint: disable=unused-argument
+    def __init__(self, **kawrgs):
+        """No-op."""
+
+    def update(self, _):
+        """No-op."""
+
+    def close(self):
+        """No-op."""
+
+    def set_description(self, _):
+        """No-op."""
+
+    # pylint: enable=unused-argument
+
+
+class FakeTqdmLoggingRedirect:
+    """Provides a no-op tqdm context manager for redirecting log messages."""
+
+    # pylint: disable=redefined-builtin,unused-argument
+    def __init__(self, **kawrgs):
+        """No-op."""
+
+    def __enter__(self):
+        """No-op."""
+
+    def __exit__(self, type, value, traceback):
+        """No-op."""
+
+    # pylint: enable=redefined-builtin,unused-argument
+
+
+# Try to import tqdm and the logging redirect, otherwise provide fake implementations..
 try:
+    # pylint: disable=unused-import
     from tqdm import tqdm
+    from tqdm.contrib.logging import logging_redirect_tqdm
+    # pylint: enable=unused-import
 except ModuleNotFoundError:
-    tqdm = None
-# pylint: enable=unused-import
-# pylint: enable=invalid-name
+    # pylint: disable=invalid-name
+    tqdm = FakeTqdmObject
+    logging_redirect_tqdm = FakeTqdmLoggingRedirect
+    # pylint: enable=invalid-name
 
 ##
 ## OpenCV imwrite Supported Image Types & Quality/Compression Parameters
@@ -80,12 +117,15 @@ def get_cv2_imwrite_params() -> Dict[str, Union[int, None]]:
 ##
 
 
-def get_file_name(file_path: AnyStr, include_extension=True) -> str:
+def get_file_name(file_path: AnyStr, include_extension=True) -> AnyStr:
     """Return the file name that `file_path` refers to, optionally removing the extension.
 
+    If `include_extension` is False, the result will always be a str.
+
     E.g. /tmp/foo.bar -> foo"""
-    file_name = str(os.path.basename(file_path))
+    file_name = os.path.basename(file_path)
     if not include_extension:
+        file_name = str(file_name)
         last_dot_pos = file_name.rfind('.')
         if last_dot_pos >= 0:
             file_name = file_name[:last_dot_pos]
@@ -161,8 +201,6 @@ def init_logger(log_level: int = logging.INFO,
         logger_instance.addHandler(handler)
 
 
-init_logger()
-
 ##
 ## Running External Commands
 ##
@@ -199,3 +237,111 @@ def invoke_command(args: List[str]) -> int:
         if any([x in exception_string for x in to_match]):
             raise CommandTooLong() from err
         raise
+
+
+def get_ffmpeg_path() -> Optional[str]:
+    """Get path to ffmpeg if available on the current system, or None if not available."""
+    # Prefer using ffmpeg if it already exists in PATH.
+    try:
+        subprocess.call(['ffmpeg', '-v', 'quiet'])
+        return 'ffmpeg'
+    except OSError:
+        pass
+    # Failed to invoke ffmpeg from PATH, see if we have a copy from imageio_ffmpeg.
+    try:
+        # pylint: disable=import-outside-toplevel
+        from imageio_ffmpeg import get_ffmpeg_exe
+        # pylint: enable=import-outside-toplevel
+        subprocess.call([get_ffmpeg_exe(), '-v', 'quiet'])
+        return get_ffmpeg_exe()
+    # Gracefully handle case where imageio_ffmpeg is not available.
+    except ModuleNotFoundError:
+        pass
+    # Handle case where path might be wrong/non-existent.
+    except OSError:
+        pass
+    # get_ffmpeg_exe may throw a RuntimeError if the executable is not available.
+    except RuntimeError:
+        pass
+    return None
+
+
+def get_ffmpeg_version() -> Optional[str]:
+    """Get ffmpeg version identifier, or None if ffmpeg is not found. Uses `get_ffmpeg_path()`."""
+    ffmpeg_path = get_ffmpeg_path()
+    if ffmpeg_path is None:
+        return None
+    # If get_ffmpeg_path() returns a value, the path it returns should be invokable.
+    output = subprocess.check_output(args=[ffmpeg_path, '-version'], text=True)
+    output_split = output.split()
+    if len(output_split) >= 3 and output_split[1] == 'version':
+        return output_split[2]
+    # If parsing the version fails, return the entire first line of output.
+    return output.splitlines()[0]
+
+
+def get_mkvmerge_version() -> Optional[str]:
+    """Get mkvmerge version identifier, or None if mkvmerge is not found in PATH."""
+    tool_name = 'mkvmerge'
+    try:
+        output = subprocess.check_output(args=[tool_name, '--version'], text=True)
+    except FileNotFoundError:
+        return None
+    output_split = output.split()
+    if len(output_split) >= 1 and output_split[0] == tool_name:
+        return ' '.join(output_split[1:])
+    # If parsing the version fails, return the entire first line of output.
+    return output.splitlines()[0]
+
+
+def get_system_version_info() -> str:
+    """Get the system's operating system, Python, packages, and external tool versions.
+    Useful for debugging or filing bug reports.
+
+    Used for the `scenedetect version -a` command.
+    """
+    output_template = '{:<12} {}'
+    line_separator = '-' * 60
+    not_found_str = '[Not Found]'
+    out_lines = []
+
+    # System (Python, OS)
+    out_lines += ['System Version Info', line_separator]
+    out_lines += [
+        output_template.format(name, version) for name, version in (
+            ('OS', '%s' % platform.platform()),
+            ('Python', '%d.%d.%d' % sys.version_info[0:3]),
+        )
+    ]
+
+    # Third-Party Packages
+    out_lines += ['', 'Package Version Info', line_separator]
+    backend_modules = (
+        'appdirs',
+        'av',
+        'click',
+        'cv2',
+        'moviepy',
+        'numpy',
+        'tqdm',
+    )
+    for module_name in backend_modules:
+        try:
+            module = importlib.import_module(module_name)
+            out_lines.append(output_template.format(module_name, module.__version__))
+        except ModuleNotFoundError:
+            out_lines.append(output_template.format(module_name, not_found_str))
+
+    # External Tools
+    out_lines += ['', 'Tool Version Info', line_separator]
+
+    tool_version_info = (
+        ('ffmpeg', get_ffmpeg_version()),
+        ('mkvmerge', get_mkvmerge_version()),
+    )
+
+    for (tool_name, tool_version) in tool_version_info:
+        out_lines.append(
+            output_template.format(tool_name, tool_version if tool_version else not_found_str))
+
+    return '\n'.join(out_lines)
