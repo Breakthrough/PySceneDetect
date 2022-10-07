@@ -1,10 +1,13 @@
 #
 # PySceneDetect Requirements
 #
+
+# TODO: Replace appdirs with platformdirs.
 appdirs
 av<=8.0.3; python_version <= "3.6"
 av; python_version > "3.6"
 click
+moviepy
 numpy
 opencv-python
 pytest>=7.0

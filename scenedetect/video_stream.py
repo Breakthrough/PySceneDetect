@@ -19,6 +19,11 @@ interface for video input. To open a video by path, use :py:func:`scenedetect.op
 
     from scenedetect import open_video
     video = open_video('video.mp4')
+    while True:
+        frame = video.read()
+        if frame is False:
+            break
+    print("Read %d frames" % video.frame_number)
 
 You can also optionally specify a framerate and a specific backend library to use. Unless specified,
 OpenCV will be used as the video backend. See :py:mod:`scenedetect.backends` for a detailed example.
@@ -41,7 +46,9 @@ from scenedetect.frame_timecode import FrameTimecode
 
 class SeekError(Exception):
     """Either an unrecoverable error happened while attempting to seek, or the underlying
-    stream is not seekable (additional information will be provided when possible)."""
+    stream is not seekable (additional information will be provided when possible).
+
+    The stream is guaranteed to be left in a valid state, but the position may be reset."""
 
 
 class VideoOpenFailure(Exception):
@@ -54,6 +61,8 @@ class VideoOpenFailure(Exception):
             message: Additional context the backend can provide for the open failure.
         """
         super().__init__(message)
+
+    # pylint: enable=useless-super-delegation
 
 
 class FrameRateUnavailable(VideoOpenFailure):
@@ -200,16 +209,15 @@ class VideoStream(ABC):
 
     @abstractmethod
     def read(self, decode: bool = True, advance: bool = True) -> Union[ndarray, bool]:
-        """ Return next frame (or current if advance = False), or False if end of video.
+        """Read and decode the next frame as a numpy.ndarray. Returns False when video ends.
 
         Arguments:
             decode: Decode and return the frame.
-            advance: Seek to the next frame. If False, will remain on the current frame.
+            advance: Seek to the next frame. If False, will return the current (last) frame.
 
         Returns:
-            If decode = True, returns either the decoded frame, or False if end of video.
-            If decode = False, a boolean indicating if the next frame was advanced to or not is
-            returned.
+            If decode = True, the decoded frame (numpy.ndarray), or False (bool) if end of video.
+            If decode = False, a bool indicating if advancing to the the next frame succeeded.
         """
         raise NotImplementedError
 
@@ -239,3 +247,6 @@ class VideoStream(ABC):
             ValueError: `target` is not a valid value (i.e. it is negative).
         """
         raise NotImplementedError
+
+
+# TODO(v0.6.2): Add a StreamJoiner class to concatenate multiple videos using a specified backend.

@@ -24,7 +24,9 @@ following from the root of the repo:
 Note that currently these tests create some temporary files which are not yet cleaned up.
 """
 
+import logging
 import os
+
 import pytest
 
 #
@@ -50,6 +52,14 @@ def get_absolute_path(relative_path: str, check_exists: bool = True) -> str:
 #
 
 
+@pytest.fixture(autouse=True)
+def no_logs_gte_error(caplog):
+    """Ensure no log messages with error severity or higher were reported during test execution."""
+    yield
+    errors = [record for record in caplog.get_records('call') if record.levelno >= logging.ERROR]
+    assert not errors, "Test failed due to presence of one or more logs with ERROR severity."
+
+
 @pytest.fixture
 def test_video_file() -> str:
     """Simple test video containing both fast cuts and fades/dissolves."""
@@ -66,6 +76,12 @@ def test_movie_clip() -> str:
 def corrupt_video_file() -> str:
     """Video containing a corrupted frame causing a decode failure."""
     return get_absolute_path("resources/corrupt_frame.mp4")
+
+
+@pytest.fixture
+def rotated_video_file() -> str:
+    """Video containing a corrupted frame causing a decode failure."""
+    return get_absolute_path("resources/issue-134-rotate.mp4")
 
 
 @pytest.fixture

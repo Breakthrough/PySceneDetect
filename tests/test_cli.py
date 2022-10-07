@@ -11,9 +11,15 @@
 # included LICENSE file, or visit one of the above pages for details.
 #
 
+import glob
+import os
 from typing import Optional
 import subprocess
 import pytest
+
+import cv2
+
+from scenedetect.video_splitter import is_ffmpeg_available, is_mkvmerge_available
 
 # These tests validate that the CLI itself functions correctly, mainly based on the return
 # return code from the process. We do not yet check for correctness of the output, just a
@@ -26,15 +32,19 @@ import pytest
 # TODO: Define error/exit codes explicitly. Right now these tests only verify that the
 # exit code is zero or nonzero.
 
+# TODO: These tests are very expensive since they spin up new Python interpreters.
+# Move most of these test cases (e.g. argument validation) to ones that interface directly
+# with the scenedetect.cli module.
+
 SCENEDETECT_CMD = 'python -m scenedetect'
 VIDEO_PATH = 'tests/resources/goldeneye.mp4'
 DEFAULT_BACKEND = 'opencv'
 DEFAULT_STATSFILE = 'statsfile.csv'
-DEFAULT_TIME = '-s 2s -d 6s'            # Seek forward a bit but limit the amount we process.
+DEFAULT_TIME = '-s 2s -d 4s'            # Seek forward a bit but limit the amount we process.
 DEFAULT_DETECTOR = 'detect-content'
 DEFAULT_CONFIG_FILE = 'scenedetect.cfg' # Ensure we default to a "blank" config file.
 ALL_DETECTORS = ['detect-content', 'detect-threshold', 'detect-adaptive']
-ALL_BACKENDS = ['opencv', 'pyav']
+ALL_BACKENDS = ['opencv', 'pyav', 'moviepy']
 
 
 def invoke_scenedetect(
@@ -75,23 +85,6 @@ def invoke_scenedetect(
     return subprocess.call(command.strip().split(' '))
 
 
-def can_invoke(cmd: str, args: str = '-h'):
-    """Return True if the specified command can be invoked, False otherwise.
-
-    The command should be able to be invoked as `cmd -h` and return code 0 (or override
-    `args` accordingly to achieve the same behaviour).
-
-    Used to test if certain external programs (e.g. ffmpeg, mkvmerge) are available to
-    conditionally enable/disable tests that require them.
-    """
-    try:
-        subprocess.run(args=[cmd, *args.split(' ')], check=True, capture_output=True)
-    # pylint: disable=bare-except
-    except:
-        return False
-    return True
-
-
 def test_cli_no_args():
     """Test `scenedetect` command invoked without any arguments."""
     assert invoke_scenedetect(config_file=None) == 0
@@ -101,6 +94,11 @@ def test_cli_no_args():
 def test_cli_info_command(info_command):
     """Test `scenedetect` info commands (e.g. help, about)."""
     assert invoke_scenedetect(info_command) == 0
+
+
+def test_cli_version_info():
+    """Test `scenedetect` version command with the `-a`/`--show-all` flag."""
+    assert invoke_scenedetect('version -a') == 0
 
 
 @pytest.mark.parametrize('detector_command', ALL_DETECTORS)
@@ -134,9 +132,9 @@ def test_cli_time():
     base_command = '-i {VIDEO} time {TIME} {DETECTOR}'
 
     # Test setting start/end.
-    assert invoke_scenedetect(base_command, TIME='-s 2s -e 8s') == 0
+    assert invoke_scenedetect(base_command, TIME='-s 2s -e 4s') == 0
     # Test setting start/duration.
-    assert invoke_scenedetect(base_command, TIME='-s 2s -d 6s') == 0
+    assert invoke_scenedetect(base_command, TIME='-s 2s -d 2s') == 0
 
     # Ensure cannot set end and duration at the same time.
     assert invoke_scenedetect(base_command, TIME='-s 2s -d 6s -e 8s') != 0
@@ -164,7 +162,7 @@ def test_cli_list_scenes(tmp_path):
     # TODO: Delete scene list and ensure is not recreated using -n.
 
 
-@pytest.mark.skipif(condition=not can_invoke('ffmpeg'), reason="ffmpeg could not be invoked!")
+@pytest.mark.skipif(condition=not is_ffmpeg_available(), reason="ffmpeg is not available")
 def test_cli_split_video_ffmpeg(tmp_path):
     """Test `split-video` command using ffmpeg."""
     assert invoke_scenedetect(
@@ -181,7 +179,7 @@ def test_cli_split_video_ffmpeg(tmp_path):
     # TODO: Check for existence of split video files.
 
 
-@pytest.mark.skipif(condition=not can_invoke('mkvmerge'), reason="mkvmerge could not be invoked!")
+@pytest.mark.skipif(condition=not is_mkvmerge_available(), reason="mkvmerge is not available")
 def test_cli_split_video_mkvmerge(tmp_path):
     """Test `split-video` command using mkvmerge."""
     assert invoke_scenedetect(
@@ -202,7 +200,27 @@ def test_cli_save_images(tmp_path):
     """Test `save-images` command."""
     assert invoke_scenedetect(
         '-i {VIDEO} -s {STATS} time {TIME} {DETECTOR} save-images', output_dir=tmp_path) == 0
-    # TODO: Check for existence of split video files.
+    # Open one of the created images and make sure it has the correct resolution.
+    # TODO: Also need to test that the right number of images was generated, and compare with
+    # expected frames from the actual video.
+    images = glob.glob(os.path.join(tmp_path, '*.jpg'))
+    assert images
+    image = cv2.imread(images[0])
+    assert image.shape == (544, 1280, 3)
+
+
+# TODO(#134): This works fine with OpenCV currently, but needs to be supported for PyAV and MoviePy.
+def test_cli_save_images_rotation(rotated_video_file, tmp_path):
+    """Test that `save-images` command rotates images correctly with the default backend."""
+    assert invoke_scenedetect(
+        '-i {VIDEO} {DETECTOR} time {TIME} save-images',
+        VIDEO=rotated_video_file,
+        output_dir=tmp_path) == 0
+    images = glob.glob(os.path.join(tmp_path, '*.jpg'))
+    assert images
+    image = cv2.imread(images[0])
+    # Note same resolution as in test_cli_save_images but rotated 90 degrees.
+    assert image.shape == (1280, 544, 3)
 
 
 def test_cli_export_html(tmp_path):

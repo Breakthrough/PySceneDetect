@@ -26,3 +26,12 @@ PyAV
 .. automodule:: scenedetect.backends.pyav
    :members:
    :undoc-members:
+
+
+=========================================
+MoviePy
+=========================================
+
+.. automodule:: scenedetect.backends.moviepy
+   :members:
+   :undoc-members:

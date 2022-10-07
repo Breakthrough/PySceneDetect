@@ -21,10 +21,7 @@ to and from various time formats like integer frame number, float number of seco
 or string HH:MM:SS[.nnn]. timecode format.
 """
 
-# Standard project pylint disables for unit tests using pytest.
-# pylint: disable=no-self-use, protected-access, multiple-statements, invalid-name
-# pylint: disable=redefined-outer-name, pointless-statement, expression-not-assigned
-# pylint: disable=unneeded-not
+# pylint: disable=invalid-name, expression-not-assigned, unneeded-not, pointless-statement
 
 # Third-Party Library Imports
 import pytest
