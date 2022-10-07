@@ -272,13 +272,14 @@ Command Options
                             global option -o/--output if set.
 
   -f, --filename NAME       File name format to use when saving videos (with
-                            or without extension). You can use the $VIDEO_NAME, 
-                            $SCENE_NUMBER, $START_TIME, $END_TIME, $START_FRAME,
-                             and $END_FRAME macros in the filename. A potential 
-                            formatting pitfall is that macros cannot be followed
-                             by an underscore character in order to be replaced 
-                            correctly. For example, the value 
-                            Scene-$SCENE_NUMBER-Frame-$FRAME_NUMBER will 
+                            or without extension). You can use the $VIDEO_NAME 
+                            or $SCENE_NUMBER macros. Additional macros that are 
+                            available only with the ffmpeg backend include 
+                            $START_TIME, $END_TIME, $START_FRAME, and 
+                            $END_FRAME. A potential formatting pitfall is that 
+                            macros cannot be followed by an underscore character
+                             in order to be replaced correctly. For example, the
+                             value Scene-$SCENE_NUMBER-Frame-$FRAME_NUMBER will 
                             properly replace both macro values. However, using 
                             Scene_$SCENE_NUMBER_Frame_$FRAME_NUMBER will not. 
                             Note that you may have to wrap the format in single 
