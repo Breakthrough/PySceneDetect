@@ -40,7 +40,8 @@ import time
 from typing import Iterable, Optional, Tuple
 from string import Template
 
-from scenedetect.platform import (tqdm, invoke_command, CommandTooLong, get_file_name, get_ffmpeg_path)
+from scenedetect.platform import (tqdm, invoke_command, CommandTooLong, get_file_name,
+                                  get_ffmpeg_path)
 from scenedetect.frame_timecode import FrameTimecode
 
 logger = logging.getLogger('pyscenedetect')
@@ -135,14 +136,16 @@ def split_video_mkvmerge(
     if not scene_list:
         return 0
 
-    logger.info('Splitting input video using mkvmerge, output path template:\n  %s', output_file_template)
+    logger.info('Splitting input video using mkvmerge, output path template:\n  %s',
+                output_file_template)
 
     if video_name is None:
         video_name = get_file_name(input_video_path, include_extension=False)
 
     ret_val = 0
     # mkvmerge automatically appends '-$SCENE_NUMBER', so we remove it if present.
-    output_file_template = output_file_template.replace('-$SCENE_NUMBER', '').replace('$SCENE_NUMBER', '')
+    output_file_template = output_file_template.replace('-$SCENE_NUMBER',
+                                                        '').replace('$SCENE_NUMBER', '')
     output_file_name = Template(output_file_template).safe_substitute(VIDEO_NAME=video_name)
 
     try:
@@ -152,7 +155,8 @@ def split_video_mkvmerge(
         call_list += [
             '-o', output_file_name, '--split',
             'parts:%s' % ','.join([
-                '%s-%s' % (start_time.get_timecode(), end_time.get_timecode()) for start_time, end_time in scene_list
+                '%s-%s' % (start_time.get_timecode(), end_time.get_timecode())
+                for start_time, end_time in scene_list
             ]), input_video_path
         ]
         total_frames = scene_list[-1][1].get_frames() - scene_list[0][0].get_frames()
@@ -221,7 +225,8 @@ def split_video_ffmpeg(
     if not scene_list:
         return 0
 
-    logger.info('Splitting input video using ffmpeg, output path template:\n  %s', output_file_template)
+    logger.info('Splitting input video using ffmpeg, output path template:\n  %s',
+                output_file_template)
 
     if video_name is None:
         video_name = get_file_name(input_video_path, include_extension=False)
@@ -272,7 +277,8 @@ def split_video_ffmpeg(
             call_list += [output_file_template_iter]
             ret_val = invoke_command(call_list)
             if show_output and i == 0 and len(scene_list) > 1:
-                logger.info('Output from ffmpeg for Scene 1 shown above, splitting remaining scenes...')
+                logger.info(
+                    'Output from ffmpeg for Scene 1 shown above, splitting remaining scenes...')
             if ret_val != 0:
                 # TODO(v0.6.1): Capture stdout/stderr and display it on any failed calls.
                 logger.error('Error splitting video (ffmpeg returned %d).', ret_val)
