@@ -175,9 +175,9 @@ Command Options
   -q, --quiet           Suppresses output of the table printed by the list-
                         scenes command.
 
-  -s, --skip-cuts       Skips outputting the cutting list as the first row in
-                        the CSV file. Set this option if compliance with RFC
-                        4810 is required.
+  -s, --skip-cuts       Skips outputting the cut list as the first row in the
+                        CSV file. Set this option if compliance with RFC
+                        4180 is required.
 
 Usage Examples
 -----------------------------------------------------------------------

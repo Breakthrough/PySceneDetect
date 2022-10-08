@@ -20,6 +20,7 @@ following from the root of the repo:
 
     git fetch --depth=1 https://github.com/Breakthrough/PySceneDetect.git refs/heads/resources:refs/remotes/origin/resources
     git checkout refs/remotes/origin/resources -- tests/resources/
+    git reset
 
 Note that currently these tests create some temporary files which are not yet cleaned up.
 """
@@ -42,8 +43,13 @@ def get_absolute_path(relative_path: str, check_exists: bool = True) -> str:
     """
     abs_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), relative_path)
     if check_exists and not os.path.exists(abs_path):
-        raise FileNotFoundError('Test video file (%s) must be present to run test case!' %
-                                relative_path)
+        raise FileNotFoundError("""
+Test video file (%s) must be present to run test case. This file can be obtained by running the following commands from the root of the repository:
+
+git fetch --depth=1 https://github.com/Breakthrough/PySceneDetect.git refs/heads/resources:refs/remotes/origin/resources
+git checkout refs/remotes/origin/resources -- tests/resources/
+git reset
+""" % relative_path)
     return abs_path
 
 
