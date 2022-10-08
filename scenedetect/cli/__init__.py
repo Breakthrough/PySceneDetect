@@ -712,26 +712,35 @@ Examples:
 
 @click.command('detect-hash')
 @click.option(
-    '--threshold', '-t', metavar='VAL',
-    type=click.FLOAT, default=100.0, show_default=True, help=
-    'Threshold value (float) that the hash_dist metric must exceed to trigger'
-    ' a new scene. Refers to frame metric hash_dist in the stats file.'
-)
+    '--threshold',
+    '-t',
+    metavar='VAL',
+    type=click.FLOAT,
+    default=100.0,
+    show_default=True,
+    help='Threshold value (float) that the hash_dist metric must exceed to trigger'
+    ' a new scene. Refers to frame metric hash_dist in the stats file.')
 @click.option(
-    '--size', '-s', metavar='VAL',
-    type=click.IntRange(min=2), default=16, show_default=True, help=
-    'Size of the hash used in the perceptual hasing algorithm. Must be an '
-    'integer >=2.'
-)
+    '--size',
+    '-s',
+    metavar='VAL',
+    type=click.IntRange(min=2),
+    default=16,
+    show_default=True,
+    help='Size of the hash used in the perceptual hasing algorithm. Must be an '
+    'integer >=2.')
 @click.option(
-    '--freq_factor', '-f', metavar='VAL',
-    type=click.IntRange(min=1), default=2, show_default=True, help=
-    'Parameter used to specify the amount of high frequency image information '
+    '--freq_factor',
+    '-f',
+    metavar='VAL',
+    type=click.IntRange(min=1),
+    default=2,
+    show_default=True,
+    help='Parameter used to specify the amount of high frequency image information '
     'used for the perceptual hashing algorithm. A high value uses less high '
     'frequency image information, meaning that the algorithm is less sensitive '
     'to small changes. A low value causes the algorithm to be more sensitive to'
-    ' small changes. Must be an integer >0.'
-)
+    ' small changes. Must be an integer >0.')
 @click.option(
     '--min-scene-len',
     '-m',
@@ -741,17 +750,11 @@ Examples:
     help='Minimum length of any scene. Overrides global min-scene-len (-m) setting.'
     ' TIMECODE can be specified as exact number of frames, a time in seconds followed by s,'
     ' or a timecode in the format HH:MM:SS or HH:MM:SS.nnn.%s' %
-    ('' if USER_CONFIG.is_default('detect-hash', 'min-scene-len') else
-     USER_CONFIG.get_help_string('detect-hash', 'min-scene-len'))
-)
+    ('' if USER_CONFIG.is_default('detect-hash', 'min-scene-len') else USER_CONFIG.get_help_string(
+        'detect-hash', 'min-scene-len')))
 @click.pass_context
-def detect_hash_command(
-    ctx: click.Context,
-    threshold: Optional[float],
-    size: Optional[int],
-    freq_factor: Optional[int],
-    min_scene_len: Optional[str]
-    ):
+def detect_hash_command(ctx: click.Context, threshold: Optional[float], size: Optional[int],
+                        freq_factor: Optional[int], min_scene_len: Optional[str]):
     """ Perform perceptual hashing based scene detection on input video(s).
     detect-hash
     detect-hash --threshold 27.5
@@ -763,8 +766,7 @@ def detect_hash_command(
         threshold=threshold,
         min_scene_len=min_scene_len,
         hash_size=size,
-        highfreq_factor=freq_factor
-    )
+        highfreq_factor=freq_factor)
 
 
 @click.command('export-html')
