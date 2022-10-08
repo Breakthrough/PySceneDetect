@@ -42,6 +42,36 @@ import cv2
 from scenedetect.scene_detector import SceneDetector
 
 
+def calculate_frame_hash(frame_img, hash_size, highfreq_factor):
+    """Helper function that calculates the hash of a frame and returns it.
+
+    Perceptual hashing algorithm based on phash, updated to use OpenCV instead of PIL + scipy
+    https://github.com/JohannesBuchner/imagehash
+    """
+
+    # Transform to grayscale
+    gray_img = cv2.cvtColor(frame_img, cv2.COLOR_BGR2GRAY)
+
+    # Resize image to square to help with DCT
+    imsize = hash_size * highfreq_factor
+    resized_img = cv2.resize(gray_img, (imsize, imsize), interpolation=cv2.INTER_AREA)
+
+    # Calculate discrete cosine tranformation of the image
+    resized_img = numpy.float32(resized_img) / numpy.max(numpy.max(resized_img))
+    dct_complete = cv2.dct(resized_img)
+
+    # Only keep the low frequency information
+    dct_low_freq = dct_complete[:hash_size, :hash_size]
+
+    # Calculate the median of the low frequency informations
+    med = numpy.median(dct_low_freq)
+
+    # Transform the low frequency information into a binary image based on > or < median
+    hash_img = dct_low_freq > med
+
+    return hash_img
+
+
 class HashDetector(SceneDetector):
     """Detects cuts using a perceptual hashing algorithm. For more information
     on the perceptual hashing algorithm see references below.
@@ -55,14 +85,19 @@ class HashDetector(SceneDetector):
 
     def __init__(self, threshold=100.0, min_scene_len=15, hash_size=16, highfreq_factor=2):
         super(HashDetector, self).__init__()
+        # How much of a difference between subsequent hash values should trigger a cut
         self.threshold = threshold
+
         # Minimum length of any given scene, in frames (int) or FrameTimecode
         self.min_scene_len = min_scene_len
+
         # Size of square of low frequency data to include from the discrete cosine transform
         self.hash_size = hash_size
+
         # How much high frequency data should be thrown out from the DCT
         # A value of 2 means only keep 1/2 of the freq data, a value of 4 means only keep 1/4
         self.highfreq_factor = highfreq_factor
+
         self.last_frame = None
         self.last_scene_cut = None
         self.last_hash = numpy.array([])
@@ -99,51 +134,26 @@ class HashDetector(SceneDetector):
 
         # We can only start detecting once we have a frame to compare with.
         if self.last_frame is not None:
-            # We obtain the change in hash value between subsequent frames as
-            # well as the actual hash value. This is refered to in a statsfile
-            # as their respective metric keys.
-            if (self.stats_manager is not None
-                    and self.stats_manager.metrics_exist(frame_num, metric_keys)):
-                hash_dist = self.stats_manager.get_metrics(frame_num, metric_keys)
-            else:
-                # Perceptual hashing algorithm based on phash, updated to use OpenCV instead of PIL + scipy
-                # https://github.com/JohannesBuchner/imagehash
+            # We obtain the change in hash value between subsequent frames.
+            curr_hash = calculate_frame_hash(
+                frame_img=frame_img, hash_size=self.hash_size, highfreq_factor=self.highfreq_factor)
 
-                # Convert to grayscale
-                curr_gray = cv2.cvtColor(frame_img, cv2.COLOR_BGR2GRAY)
-                # Resize image to square to help with DCT
-                imsize = self.hash_size * self.highfreq_factor
-                curr_resized = cv2.resize(curr_gray, (imsize, imsize), interpolation=cv2.INTER_AREA)
-                # Calculate discrete cosine tranformation of the image
-                curr_resized = numpy.float32(curr_resized) / numpy.max(numpy.max(curr_resized))
-                curr_dct = cv2.dct(curr_resized)
-                # Only keep the low frequency information
-                curr_dct_low_freq = curr_dct[:self.hash_size, :self.hash_size]
-                # Calculate the median of the low frequency information
-                curr_med = numpy.median(curr_dct_low_freq)
-                # Transform the low frequency information into a binary image based on > or < median
-                curr_hash = curr_dct_low_freq > curr_med
+            last_hash = self.last_hash
 
-                last_hash = self.last_hash
+            if last_hash.size == 0:
+                # Calculate hash of last frame
+                last_hash = calculate_frame_hash(
+                    frame_img=self.last_frame,
+                    hash_size=self.hash_size,
+                    highfreq_factor=self.highfreq_factor)
 
-                if last_hash.size == 0:
-                    # Calculate hash as above
-                    last_gray = cv2.cvtColor(self.last_frame, cv2.COLOR_BGR2GRAY)
-                    last_resized = cv2.resize(
-                        last_gray, (imsize, imsize), interpolation=cv2.INTER_AREA)
-                    last_resized = numpy.float32(last_resized) / numpy.max(numpy.max(last_resized))
-                    last_dct = cv2.dct(last_resized)
-                    last_dct_low_freq = last_dct[:self.hash_size, :self.hash_size]
-                    last_med = numpy.median(last_dct_low_freq)
-                    last_hash = last_dct_low_freq > last_med
+            # Hamming distance is calculated to compare to last frame
+            hash_dist = numpy.count_nonzero(curr_hash.flatten() != last_hash.flatten())
 
-                # Hamming distance is calculated to compare to last frame
-                hash_dist = numpy.count_nonzero(curr_hash.flatten() != last_hash.flatten())
+            if self.stats_manager is not None:
+                self.stats_manager.set_metrics(frame_num, {metric_keys[0]: hash_dist})
 
-                if self.stats_manager is not None:
-                    self.stats_manager.set_metrics(frame_num, {metric_keys[0]: hash_dist})
-
-                self.last_hash = curr_hash
+            self.last_hash = curr_hash
 
             # We consider any frame over the threshold a new scene, but only if
             # the minimum scene length has been reached (otherwise it is ignored).
@@ -155,12 +165,6 @@ class HashDetector(SceneDetector):
             if self.last_frame is not None and self.last_frame is not _unused:
                 del self.last_frame
 
-        # If we have the next frame computed, don't copy the current frame
-        # into last_frame since we won't use it on the next call anyways.
-        if (self.stats_manager is not None
-                and self.stats_manager.metrics_exist(frame_num + 1, metric_keys)):
-            self.last_frame = _unused
-        else:
-            self.last_frame = frame_img.copy()
+        self.last_frame = frame_img.copy()
 
         return cut_list
