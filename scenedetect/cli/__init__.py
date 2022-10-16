@@ -715,32 +715,34 @@ Examples:
     '--threshold',
     '-t',
     metavar='VAL',
-    type=click.FLOAT,
-    default=100.0,
-    show_default=True,
+    type=click.FloatRange(CONFIG_MAP['detect-hash']['threshold'].min_val,
+                          CONFIG_MAP['detect-hash']['threshold'].max_val),
+    default=None,
     help='Threshold value (float) that the hash_dist metric must exceed to trigger'
-    ' a new scene. Refers to frame metric hash_dist in the stats file.')
+    ' a new scene. Refers to frame metric hash_dist in the stats file.%s' %
+    (USER_CONFIG.get_help_string('detect-hash', 'threshold')))
 @click.option(
     '--size',
     '-s',
     metavar='VAL',
-    type=click.IntRange(min=2),
-    default=16,
-    show_default=True,
+    type=click.IntRange(CONFIG_MAP['detect-hash']['size'].min_val,
+                        CONFIG_MAP['detect-hash']['size'].max_val),
+    default=None,
     help='Size of the hash used in the perceptual hasing algorithm. Must be an '
-    'integer >=2.')
+    'integer >=2.%s' % (USER_CONFIG.get_help_string('detect-hash', 'size')))
 @click.option(
     '--freq_factor',
     '-f',
     metavar='VAL',
-    type=click.IntRange(min=1),
-    default=2,
-    show_default=True,
+    type=click.IntRange(CONFIG_MAP['detect-hash']['freq_factor'].min_val,
+                        CONFIG_MAP['detect-hash']['freq_factor'].max_val),
+    default=None,
     help='Parameter used to specify the amount of high frequency image information '
     'used for the perceptual hashing algorithm. A high value uses less high '
     'frequency image information, meaning that the algorithm is less sensitive '
     'to small changes. A low value causes the algorithm to be more sensitive to'
-    ' small changes. Must be an integer >0.')
+    ' small changes. Must be an integer >0.%s' %
+    (USER_CONFIG.get_help_string('detect-hash', 'freq_factor')))
 @click.option(
     '--min-scene-len',
     '-m',
