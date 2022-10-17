@@ -30,7 +30,7 @@ import scenedetect.detectors
 from scenedetect.stats_manager import StatsManager
 from scenedetect.scene_manager import SceneManager, Interpolation
 
-from scenedetect.cli.config import ConfigRegistry, ConfigLoadFailure, CHOICE_MAP
+from scenedetect.cli.config import CONFIG_MAP, ConfigRegistry, ConfigLoadFailure, CHOICE_MAP
 
 logger = logging.getLogger('pyscenedetect')
 
@@ -305,15 +305,7 @@ class CliContext:
         options_processed_orig = self.options_processed
         self.options_processed = False
 
-        if self.drop_short_scenes:
-            min_scene_len = 0
-        else:
-            if min_scene_len is None:
-                if self.config.is_default('detect-content', 'min-scene-len'):
-                    min_scene_len = self.min_scene_len.frame_num
-                else:
-                    min_scene_len = self.config.get_value('detect-content', 'min-scene-len')
-            min_scene_len = parse_timecode(min_scene_len, self.video_stream.frame_rate).frame_num
+        min_scene_len = self._get_min_scene_len("detect-content")
 
         if weights is not None:
             try:
@@ -363,15 +355,7 @@ class CliContext:
                 self.config.config_dict["detect-adaptive"]["min-content-val"] = (
                     self.config.config_dict["detect-adaptive"]["min-deleta-hsv"])
 
-        if self.drop_short_scenes:
-            min_scene_len = 0
-        else:
-            if min_scene_len is None:
-                if self.config.is_default("detect-adaptive", "min-scene-len"):
-                    min_scene_len = self.min_scene_len.frame_num
-                else:
-                    min_scene_len = self.config.get_value("detect-adaptive", "min-scene-len")
-            min_scene_len = parse_timecode(min_scene_len, self.video_stream.frame_rate).frame_num
+        min_scene_len = self._get_min_scene_len("detect-adaptive")
 
         if weights is not None:
             try:
@@ -412,16 +396,7 @@ class CliContext:
         options_processed_orig = self.options_processed
         self.options_processed = False
 
-        if self.drop_short_scenes:
-            min_scene_len = 0
-        else:
-            if min_scene_len is None:
-                if self.config.is_default("detect-threshold", "min-scene-len"):
-                    min_scene_len = self.min_scene_len.frame_num
-                else:
-                    min_scene_len = self.config.get_value("detect-threshold", "min-scene-len")
-            min_scene_len = parse_timecode(min_scene_len, self.video_stream.frame_rate).frame_num
-
+        min_scene_len = self._get_min_scene_len("detect-threshold")
         threshold = self.config.get_value("detect-threshold", "threshold", threshold)
         fade_bias = self.config.get_value("detect-threshold", "fade-bias", fade_bias)
         # TODO(v1.0): This cannot be disabled right now.
@@ -450,16 +425,7 @@ class CliContext:
         options_processed_orig = self.options_processed
         self.options_processed = False
 
-        if self.drop_short_scenes:
-            min_scene_len = 0
-        else:
-            if min_scene_len is None:
-                if self.config.is_default("detect-hash", "min-scene-len"):
-                    min_scene_len = self.min_scene_len.frame_num
-                else:
-                    min_scene_len = self.config.get_value("detect-hash", "min-scene-len")
-            min_scene_len = parse_timecode(min_scene_len, self.video_stream.frame_rate).frame_num
-
+        min_scene_len = self._get_min_scene_len("detect-hash")
         threshold = self.config.get_value("detect-hash", "threshold", threshold)
         hash_size = self.config.get_value("detect-hash", "size", hash_size)
         highfreq_factor = self.config.get_value("detect-hash", "freq_factor", highfreq_factor)
@@ -888,3 +854,29 @@ class CliContext:
         raise click.BadParameter(
             '\n  Command %s may only be specified once.' % command,
             param_hint='%s command' % command)
+
+    def _get_min_scene_len(self, command=None):
+        """Called when a detector needs to get the min_scene_len before initialization.
+
+        Arguments:
+            command: string of the detector command e.g. 'detect-adaptive'
+
+        Returns:
+            min_scene_len
+        """
+        # Raise an error if this function is called without a valid command
+        assert command in CONFIG_MAP and "min-scene-len" in CONFIG_MAP[command]
+
+        min_scene_len = None
+
+        if self.drop_short_scenes:
+            min_scene_len = 0
+        else:
+            if min_scene_len is None:
+                if self.config.is_default(command, "min-scene-len"):
+                    min_scene_len = self.min_scene_len.frame_num
+                else:
+                    min_scene_len = self.config.get_value(command, "min-scene-len")
+            min_scene_len = parse_timecode(min_scene_len, self.video_stream.frame_rate).frame_num
+
+        return min_scene_len
