@@ -21,6 +21,10 @@ The adaptive content detector (`detect-adaptive`) compares the difference in con
 
 The threshold-based scene detector (`detect-threshold`) is how most traditional scene detection methods work (e.g. the `ffmpeg blackframe` filter), by comparing the intensity/brightness of the current frame with a set threshold, and triggering a scene cut/break when this value crosses the threshold.  In PySceneDetect, this value is computed by averaging the R, G, and B values for every pixel in the frame, yielding a single floating point number representing the average pixel value (from 0.0 to 255.0).
 
+## Perceptual Hash Detector
+
+The perceptual hash detector (`detect-hash`) calculates a hash for a frame and compares that hash to the previous frame's hash. If the hashes differ by more than the defined threshold, then a scene change is recorded. The hashing algorithm used for this detector is an implementation of `phash` from the [imagehash](https://github.com/JohannesBuchner/imagehash) library. In practice, this detector works similarly to `detect-content` in that it picks up large differences between adjacent frames. One important note is that the hashing algorithm converts the frames to grayscale, so this detector is insensitive to changes in colors if the brightness remains constant. In general, this algorithm is very computationally efficient compared to `detect-content` or `detect-adaptive`, especially if downscaling is not used. See [here](https://www.hackerfactor.com/blog/index.php?/archives/432-Looks-Like-It.html) for an overview of how a perceptual hashing algorithm can be used for detecting similarity (or otherwise) of images and a visual depiction of the algorithm.
+
 # Creating New Detection Algorithms
 
 All scene detection algorithms must inherit from [the base `SceneDetector` class](https://scenedetect.com/projects/Manual/en/latest/api/scene_detector.html). Note that the current SceneDetector API is under development and expected to change somewhat before v1.0 is released, so make sure to pin your `scenedetect` dependency to the correct API version (e.g. `scenedetect < 0.6`, `scenedetect < 0.7`, etc...).

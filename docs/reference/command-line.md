@@ -13,6 +13,6 @@ The `scenedetect` command reference is available as part of [the PySceneDetect M
     - Exporting scene list as HTML (`export-html`)
 
  - [Detector Reference](http://scenedetect.com/projects/Manual/en/latest/cli/detectors.html):
-    - Detectors, e.g. `detect-content`, `detect-threshold`, `detect-adaptive`
+    - Detectors, e.g. `detect-content`, `detect-threshold`, `detect-adaptive`, `detect-hash`
 
 You can also run `scenedetect help all` locally for the full `scenedetect command reference.
