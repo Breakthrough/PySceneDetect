@@ -5,12 +5,13 @@
 Detectors
 ***********************************************************************
 
-There are currently two implemented scene detection algorithms, threshold
-based detection (``detect-threshold``), and content-aware detection
-(``detect-content``).  Each detector can be selected by adding the
-respective `detect-` command, and any relevant options, after setting
-the main ``scenedetect`` command global options.  In general, commands
-should follow the form:
+There are currently four implemented scene detection algorithms, threshold
+based detection (``detect-threshold``), content-aware detection
+(``detect-content``), adaptive content-aware detection (``detect-adaptive``), 
+and perceptual hashing based detection (``detect-hash``). Each detector can be 
+selected by adding the respective `detect-` command, and any relevant options, 
+after setting the main ``scenedetect`` command global options.  In general, 
+commands should follow the form:
 
     ``scenedetect [global options] [detector] [commands]``
 
@@ -138,13 +139,6 @@ Detector Options
                                 seconds followed by s, or a timecode in the
                                 format HH:MM:SS or HH:MM:SS.nnn.
 
-Usage Examples
------------------------------------------------------------------------
-
-  ``detect-threshold``
-
-  ``detect-threshold --threshold 15``
-
 
 =======================================================================
 ``detect-adaptive``
@@ -184,6 +178,80 @@ Detector Options
 
   -l, --luma-only               Only consider luma/brightness channel (useful
                                 for greyscale videos).
+
+  -m, --min-scene-len TIMECODE  Minimum length of any scene. Overrides global
+                                min-scene-len (-m) setting. TIMECODE can be
+                                specified as exact number of frames, a time in
+                                seconds followed by s, or a timecode in the
+                                format HH:MM:SS or HH:MM:SS.nnn.
+
+
+=======================================================================
+``detect-hash``
+=======================================================================
+
+Perform detection using a perceptual hashing algorithm on input video.
+
+When processing each frame, the frame is converted into a hash and this is 
+compared to the previously analyzed frame. If the difference between these two 
+hashes exceeds the value set for `-t`/`--threshold`, then a scene change is 
+triggered.
+
+This detector is only available when using the OpenCV backend.
+
+The hashing algorithm used is based on the implementation of `phash <https://github.com/JohannesBuchner/imagehash>`_. 
+The basic steps of the hashing algorithm are detailed below:
+
+1. The image is first converted to grayscale (meaning this detector is not 
+sensitive to color transitions). 
+2. The resulting grayscale image is then scaled down in size to a square image 
+with the length of each side equal to `-s`/`--size` \* `-f`/`--freq_factor`.
+3. The discrete cosine transform (DCT) of the resized image is calculated.
+4. Only the low frequency information from the DCT is retained. This is 
+accomplished by discarding all but the upper left values of the resulting DCT 
+matrix. The size of the resulting submatrix is set as a square with the length 
+of each side determined by `-s`/`--size`.
+5. The median of the retained DCT information is determined.
+6. The hash is calculated by converting the retained DCT matrix into a binary 
+array by comparing each element to the median. The resulting binary values are 
+True if the value is greater than the median and False if it is less than or 
+equal to the median.
+
+The metric used for scene detection is the difference between the hashes of 
+subsequent frames. This difference is calculated using the Hamming distance 
+between two hashes. This is defined as the number of elements that differ 
+between two hashes. This metric is recorded in the statsfile as `hash_dist` if 
+a statsfile is specified.
+
+Examples:
+
+    ``detect-hash``
+
+    ``detect-hash --threshold 80``
+
+Detector Options
+-----------------------------------------------------------------------
+
+  -t, --threshold VAL           Threshold value (float) that the calculated
+                                frame score must exceed to trigger a new scene
+                                (see frame metric hash_dist in stats file). 
+                                [default: 100.0]
+
+  -s, --size VAL                Hash size (int) that is used for the detector. 
+                                Larger values can help increase sensitivity to 
+                                small changes, but can increase computation 
+                                time. [default: 16]
+
+  -f, --freq_factor VAL         Frequency factor (int) used to determing how 
+                                much high frequency data is discarded in the 
+                                hashing algorithm. For example a value of 4 
+                                corresponds to keeping only 1/4 of the 
+                                frequency information of the image (a value of 
+                                2 would be 1/2 of the frequency information, 
+                                etc.). Smaller values make the detector more 
+                                sensitive to smaller sized features in the 
+                                frame, but can increase computation time. 
+                                [default: 2]
 
   -m, --min-scene-len TIMECODE  Minimum length of any scene. Overrides global
                                 min-scene-len (-m) setting. TIMECODE can be
