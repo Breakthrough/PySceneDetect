@@ -83,7 +83,7 @@ class HashDetector(SceneDetector):
     only fast cuts are detected with this method.
     """
 
-    def __init__(self, threshold=100.0, min_scene_len=15, hash_size=16, highfreq_factor=2):
+    def __init__(self, threshold=101.0, min_scene_len=15, hash_size=16, highfreq_factor=2):
         super(HashDetector, self).__init__()
         # How much of a difference between subsequent hash values should trigger a cut
         self.threshold = threshold
