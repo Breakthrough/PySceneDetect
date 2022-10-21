@@ -236,7 +236,7 @@ Detector Options
   -t, --threshold VAL           Threshold value (float) that the calculated
                                 frame score must exceed to trigger a new scene
                                 (see frame metric hash_dist in stats file). 
-                                [default: 100.0]
+                                [default: 101.0]
 
   -s, --size VAL                Hash size (int) that is used for the detector. 
                                 Larger values can help increase sensitivity to 
