@@ -199,8 +199,9 @@ triggered.
 
 This detector is only available when using the OpenCV backend.
 
-The hashing algorithm used is based on the implementation of `phash <https://github.com/JohannesBuchner/imagehash>`_. 
-The basic steps of the hashing algorithm are detailed below:
+The hashing algorithm used is based on the implementation of 
+`phash <https://github.com/JohannesBuchner/imagehash>`_. The basic steps of the 
+hashing algorithm are detailed below:
 
 1. The image is first converted to grayscale (meaning this detector is not 
 sensitive to color transitions). 
