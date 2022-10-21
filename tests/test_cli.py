@@ -43,7 +43,7 @@ DEFAULT_STATSFILE = 'statsfile.csv'
 DEFAULT_TIME = '-s 2s -d 4s'            # Seek forward a bit but limit the amount we process.
 DEFAULT_DETECTOR = 'detect-content'
 DEFAULT_CONFIG_FILE = 'scenedetect.cfg' # Ensure we default to a "blank" config file.
-ALL_DETECTORS = ['detect-content', 'detect-threshold', 'detect-adaptive']
+ALL_DETECTORS = ['detect-content', 'detect-threshold', 'detect-adaptive', 'detect-hash']
 ALL_BACKENDS = ['opencv', 'pyav', 'moviepy']
 
 
