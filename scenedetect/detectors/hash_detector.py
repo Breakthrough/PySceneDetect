@@ -56,8 +56,14 @@ def calculate_frame_hash(frame_img, hash_size, highfreq_factor):
     imsize = hash_size * highfreq_factor
     resized_img = cv2.resize(gray_img, (imsize, imsize), interpolation=cv2.INTER_AREA)
 
+    # Check to avoid dividing by zero
+    max_value = numpy.max(numpy.max(resized_img))
+    if max_value == 0:
+        # Just set the max to 1 to not change the values
+        max_value = 1
+
     # Calculate discrete cosine tranformation of the image
-    resized_img = numpy.float32(resized_img) / numpy.max(numpy.max(resized_img))
+    resized_img = numpy.float32(resized_img) / max_value
     dct_complete = cv2.dct(resized_img)
 
     # Only keep the low frequency information
@@ -106,6 +112,9 @@ class HashDetector(SceneDetector):
 
     def get_metrics(self):
         return self._metric_keys
+
+    def is_processing_required(self, frame_num):
+        return True
 
     def process_frame(self, frame_num, frame_img):
         """ Similar to ContentDetector, but using a perceptual hashing algorithm
