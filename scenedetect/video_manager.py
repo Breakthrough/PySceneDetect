@@ -27,10 +27,10 @@ from typing import Iterable, List, Optional, Tuple, Union
 from numpy import ndarray
 import cv2
 
+from scenedetect.platform import get_file_name
+from scenedetect.frame_timecode import FrameTimecode, MAX_FPS_DELTA
 from scenedetect.video_stream import VideoStream, VideoOpenFailure, FrameRateUnavailable
 from scenedetect.backends.opencv import get_aspect_ratio
-from scenedetect.frame_timecode import FrameTimecode, MAX_FPS_DELTA
-from scenedetect.platform import get_file_name
 
 ##
 ## VideoManager Exceptions
@@ -281,6 +281,9 @@ class VideoManager(VideoStream):
                 Set `validate_parameters=False` to skip this check.
             VideoOpenFailure: Video(s) could not be opened.
         """
+        # TODO(v0.7): Add DeprecationWarning that this class will be removed in v0.8: 'VideoManager
+        # will be removed in PySceneDetect v0.8. Use VideoStreamCv2 or VideoCaptureAdapter instead.'
+        logger.error("VideoManager is deprecated and will be removed.")
         if not video_files:
             raise ValueError("At least one string/integer must be passed in the video_files list.")
         # Need to support video_files as a single str too for compatibility.
@@ -547,6 +550,8 @@ class VideoManager(VideoStream):
             if not self.grab():
                 return False
         return True
+
+    # pylint: enable=arguments-differ
 
     def release(self) -> None:
         """ Release (cv2.VideoCapture method), releases all open capture(s). """

@@ -12,12 +12,7 @@
 #
 """ ``scenedetect.detectors`` Module
 
-This module contains implementations of scene detection algorithms by inhereting
-from the base SceneDetector class (in scenedetect.scene_detector) and implementing
-the required methods. This allows implementation of other generic algorithms as
-well as custom scenario-specific algorithms.
-
-The following detection algorithms come with PySceneDetect:
+This module contains the following scene detection algorithms:
 
  * :py:class:`ContentDetector <scenedetect.detectors.content_detector.ContentDetector>`:
     Detects shot changes by considering pixel changes in the HSV colorspace.
@@ -27,6 +22,11 @@ The following detection algorithms come with PySceneDetect:
 
  * :py:class:`AdaptiveDetector <scenedetect.detectors.adaptive_detector.AdaptiveDetector>`:
     Two-pass version of `ContentDetector` that handles fast camera movement better in some cases.
+
+Detection algorithms are created by implementing the
+:py:class:`SceneDetector <scenedetect.scene_detector.SceneDetector>` interface. Detectors are
+typically attached to a :py:class:`SceneManager <scenedetect.scene_manager.SceneManager>` when
+processing videos, however they can also be used to process frames directly.
 """
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #

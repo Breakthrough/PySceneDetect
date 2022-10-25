@@ -10,21 +10,9 @@
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
-""" ``scenedetect.__main__`` Module
+"""``scenedetect.__main__`` Module
 
-Provides entry point for PySceneDetect's command-line interface (CLI)
-functionality (in addition to using in other scripts via `import scenedetect`)
-by installing the module and running the `scenedetect` command, or by calling:
-
-  > python -m scenedetect
-
-This module provides a high-level main() function, utilizing the scenedetect.cli
-module, itself based on the click library, to provide command-line interface (CLI)
-parsing functionality.  Also note that a convenience script scenedetect.py is also
-included for development purposes (allows ./scenedetect.py vs python -m scenedetect)
-
-Installing PySceneDetect (using `python setup.py install` in the parent directory)
-will also add the `scenedetect` command to %PATH% be used from anywhere.
+Provides entry point for PySceneDetect's command-line interface.
 """
 
 # PySceneDetect Library Imports
@@ -33,7 +21,7 @@ from scenedetect.cli.context import CliContext
 
 
 def main():
-    """ Main: PySceneDetect command-line interface (CLI) entry point.
+    """PySceneDetect command-line interface (CLI) entry point.
 
     Passes control flow to the CLI parser (using the click library), whose
     entry point is the decorated scenedetect.cli.scenedetect_cli function.

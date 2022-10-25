@@ -12,28 +12,53 @@
 #
 """ ``scenedetect.scene_manager`` Module
 
-This module implements the :py:class:`SceneManager` object, which is used to coordinate
-SceneDetectors and frame sources (:py:class:`VideoStream <scenedetect.video_stream.VideoStream>`).
-This includes creating a cut list (see :py:meth:`SceneManager.get_cut_list`) and event list (see
-:py:meth:`SceneManager.get_event_list`) of all changes in scene, which is used to generate a final
-list of scenes (see :py:meth:`SceneManager.get_scene_list`) in the form of a list of start/end
-:py:class:`FrameTimecode <scenedetect.frame_timecode.FrameTimecode>` objects at each scene boundary.
-Decoding of video frames is performed in a separate thread to improve parallelism.
+This module implements the :py:class:`SceneManager` object, which is used to perform scene detection
+(using a detector from :py:mod:`scenedetect.detectors`) on videos. Video decoding is done in a
+separate thread to improve performance.
 
-The :py:class:`FrameTimecode <scenedetect.frame_timecode.FrameTimecode>` objects and `tuples`
-thereof returned by :py:meth:`get_cut_list <SceneManager.get_cut_list>` and
-:py:meth:`get_scene_list <SceneManager.get_scene_list>`, respectively, can be sorted if for
-some reason the scene (or cut) list becomes unsorted. The :py:class:`SceneManager` also
-facilitates passing a :py:class:`scenedetect.stats_manager.StatsManager`,
-if any is defined, to the associated :py:class:`scenedetect.scene_detector.SceneDetector`
-objects for caching of frame metrics.
+This module also contains other helper functions (e.g. :py:func:`save_images`) which can be used to
+process the resulting scene list.
 
-This speeds up subsequent calls to the :py:meth:`SceneManager.detect_scenes` method
-that process the same frames with the same detection algorithm, even if different
-threshold values (or other algorithm options) are used.
+===============================================================
+Usage
+===============================================================
+
+The following example shows basic usage of a :py:class:`SceneManager`:
+
+.. code:: python
+
+    from scenedetect import open_video, SceneManager, ContentDetector
+    video = open_video(video_path)
+    scene_manager = SceneManager()
+    scene_manager.add_detector(ContentDetector())
+    # Detect all scenes in video from current position to end.
+    scene_manager.detect_scenes(video)
+    # `get_scene_list` returns a list of start/end timecode pairs
+    # for each scene that was found.
+    scenes = scene_manager.get_scene_list()
+
+An optional callback can also be invoked on each detected scene, for example:
+
+.. code:: python
+
+    from scenedetect import open_video, SceneManager, ContentDetector
+
+    # Callback to invoke on the first frame of every new scene detection.
+    def on_new_scene(frame_img: numpy.ndarray, frame_num: int):
+        print("New scene found at frame %d." % frame_num)
+
+    video = open_video(test_video_file)
+    scene_manager = SceneManager()
+    scene_manager.add_detector(ContentDetector())
+    scene_manager.detect_scenes(video=video, callback=on_new_scene)
+
+To use a `SceneManager` with a webcam/device or existing `cv2.VideoCapture` device, use the
+:py:class:`VideoCaptureAdapter <scenedetect.backends.opencv.VideoCaptureAdapter>` instead of
+`open_video`.
 """
 
 import csv
+from enum import Enum
 from string import Template
 from typing import Iterable, List, Tuple, Optional, Dict, Callable, Union, TextIO
 import threading
@@ -44,14 +69,14 @@ import sys
 
 import cv2
 import numpy as np
-
-from scenedetect.frame_timecode import FrameTimecode
-from scenedetect.platform import (tqdm, get_and_create_path, get_cv2_imwrite_params)
-from scenedetect.video_stream import VideoStream
-from scenedetect.stats_manager import StatsManager, FrameMetricRegistered
-from scenedetect.scene_detector import SceneDetector, SparseSceneDetector
 from scenedetect.thirdparty.simpletable import (SimpleTableCell, SimpleTableImage, SimpleTableRow,
                                                 SimpleTable, HTMLPage)
+
+from scenedetect.platform import (tqdm, get_and_create_path, get_cv2_imwrite_params)
+from scenedetect.frame_timecode import FrameTimecode
+from scenedetect.video_stream import VideoStream
+from scenedetect.scene_detector import SceneDetector, SparseSceneDetector
+from scenedetect.stats_manager import StatsManager, FrameMetricRegistered
 
 logger = logging.getLogger('pyscenedetect')
 
@@ -67,6 +92,23 @@ DEFAULT_MIN_WIDTH: int = 256
 
 MAX_FRAME_QUEUE_LENGTH: int = 4
 """Maximum size of the queue of frames waiting to be processed after decoding."""
+
+PROGRESS_BAR_DESCRIPTION = 'Detected: %d | Progress'
+"""Template to use for progress bar."""
+
+
+class Interpolation(Enum):
+    """Interpolation method used for image resizing. Based on constants defined in OpenCV."""
+    NEAREST = cv2.INTER_NEAREST
+    """Nearest neighbor interpolation."""
+    LINEAR = cv2.INTER_LINEAR
+    """Bilinear interpolation."""
+    CUBIC = cv2.INTER_CUBIC
+    """Bicubic interpolation."""
+    AREA = cv2.INTER_AREA
+    """Pixel area relation resampling. Provides moire'-free downscaling."""
+    LANCZOS4 = cv2.INTER_LANCZOS4
+    """Lanczos interpolation over 8x8 neighborhood."""
 
 
 def compute_downscale_factor(frame_width: int, effective_width: int = DEFAULT_MIN_WIDTH) -> int:
@@ -90,9 +132,11 @@ def compute_downscale_factor(frame_width: int, effective_width: int = DEFAULT_MI
 
 
 def get_scenes_from_cuts(
-        cut_list: Iterable[FrameTimecode], base_timecode: FrameTimecode,
-        start_pos: Union[int, FrameTimecode],
-        end_pos: Union[int, FrameTimecode]) -> List[Tuple[FrameTimecode, FrameTimecode]]:
+    cut_list: Iterable[FrameTimecode],
+    start_pos: Union[int, FrameTimecode],
+    end_pos: Union[int, FrameTimecode],
+    base_timecode: Optional[FrameTimecode] = None,
+) -> List[Tuple[FrameTimecode, FrameTimecode]]:
     """Returns a list of tuples of start/end FrameTimecodes for each scene based on a
     list of detected scene cuts/breaks.
 
@@ -108,24 +152,29 @@ def get_scenes_from_cuts(
             was processed (used to generate last scene's end time).
         start_frame: The start frame or FrameTimecode of the cut list. Used to generate the first
             scene's start time.
+            base_timecode: [DEPRECATED] DO NOT USE. For backwards compatibility only.
     Returns:
         List of tuples in the form (start_time, end_time), where both start_time and
         end_time are FrameTimecode objects representing the exact time/frame where each
         scene occupies based on the input cut_list.
     """
+    # TODO(v0.7): Use the warnings module to turn this into a warning.
+    if base_timecode is not None:
+        logger.error('`base_timecode` argument is deprecated has no effect.')
+
     # Scene list, where scenes are tuples of (Start FrameTimecode, End FrameTimecode).
     scene_list = []
     if not cut_list:
-        scene_list.append((base_timecode + start_pos, base_timecode + end_pos))
+        scene_list.append((start_pos, end_pos))
         return scene_list
     # Initialize last_cut to the first frame we processed,as it will be
     # the start timecode for the first scene in the list.
-    last_cut = base_timecode + start_pos
+    last_cut = start_pos
     for cut in cut_list:
         scene_list.append((last_cut, cut))
         last_cut = cut
     # Last scene is from last cut to end of video.
-    scene_list.append((last_cut, base_timecode + end_pos))
+    scene_list.append((last_cut, end_pos))
 
     return scene_list
 
@@ -297,6 +346,7 @@ def save_images(scene_list: List[Tuple[FrameTimecode, FrameTimecode]],
                 scale: Optional[float] = None,
                 height: Optional[int] = None,
                 width: Optional[int] = None,
+                interpolation: Interpolation = Interpolation.CUBIC,
                 video_manager=None) -> Dict[int, List[str]]:
     """Save a set number of images from each scene, given a list of scenes
     and the associated video/frame source.
@@ -333,6 +383,7 @@ def save_images(scene_list: List[Tuple[FrameTimecode, FrameTimecode]],
             and height will resize images to an exact size, regardless of aspect ratio.
             Specifying only width will rescale the image to that number of pixels wide
             while preserving the aspect ratio.
+        interpolation: Type of interpolation to use when resizing images.
         video_manager: [DEPRECATED] DO NOT USE. For backwards compatibility only.
 
     Returns:
@@ -344,9 +395,9 @@ def save_images(scene_list: List[Tuple[FrameTimecode, FrameTimecode]],
         ValueError: Raised if any arguments are invalid or out of range (e.g.
         if num_images is negative).
     """
-    # TODO: Remove `video_manager`.
+    # TODO(v0.7): Add DeprecationWarning that `video_manager` will be removed in v0.8.
     if video_manager is not None:
-        logger.error('video_manager is deprecated, use video instead.')
+        logger.error('`video_manager` argument is deprecated, use `video` instead.')
         video = video_manager
 
     if not scene_list:
@@ -365,7 +416,7 @@ def save_images(scene_list: List[Tuple[FrameTimecode, FrameTimecode]],
     completed = True
     logger.info('Generating output images (%d per scene)...', num_images)
     progress_bar = None
-    if show_progress and tqdm:
+    if show_progress:
         progress_bar = tqdm(total=len(scene_list) * num_images, unit='images', dynamic_ncols=True)
 
     filename_template = Template(image_name_template)
@@ -409,6 +460,7 @@ def save_images(scene_list: List[Tuple[FrameTimecode, FrameTimecode]],
     if abs(aspect_ratio - 1.0) < 0.01:
         aspect_ratio = None
 
+    # TODO(v0.6.1): Make resizing interpolation configurable.
     for i, scene_timecodes in enumerate(timecode_list):
         for j, image_timecode in enumerate(scene_timecodes):
             video.seek(image_timecode)
@@ -420,28 +472,30 @@ def save_images(scene_list: List[Tuple[FrameTimecode, FrameTimecode]],
                     IMAGE_NUMBER=image_num_format % (j + 1),
                     FRAME_NUMBER=image_timecode.get_frames()), image_extension)
                 image_filenames[i].append(file_path)
+                # TODO(v0.6.1): Combine this resize with the ones below.
                 if aspect_ratio is not None:
                     frame_im = cv2.resize(
-                        frame_im, (0, 0), fx=aspect_ratio, fy=1.0, interpolation=cv2.INTER_CUBIC)
-
-                # Get frame dimensions prior to resizing or scaling
+                        frame_im, (0, 0),
+                        fx=aspect_ratio,
+                        fy=1.0,
+                        interpolation=interpolation.value)
                 frame_height = frame_im.shape[0]
                 frame_width = frame_im.shape[1]
 
                 # Figure out what kind of resizing needs to be done
-                if height and width:
-                    frame_im = cv2.resize(frame_im, (width, height), interpolation=cv2.INTER_CUBIC)
-                elif height and not width:
-                    factor = height / float(frame_height)
-                    width = int(factor * frame_width)
-                    frame_im = cv2.resize(frame_im, (width, height), interpolation=cv2.INTER_CUBIC)
-                elif width and not height:
-                    factor = width / float(frame_width)
-                    height = int(factor * frame_height)
-                    frame_im = cv2.resize(frame_im, (width, height), interpolation=cv2.INTER_CUBIC)
+                if height or width:
+                    if height and not width:
+                        factor = height / float(frame_height)
+                        width = int(factor * frame_width)
+                    if width and not height:
+                        factor = width / float(frame_width)
+                        height = int(factor * frame_height)
+                    assert height > 0 and width > 0
+                    frame_im = cv2.resize(
+                        frame_im, (width, height), interpolation=interpolation.value)
                 elif scale:
                     frame_im = cv2.resize(
-                        frame_im, (0, 0), fx=scale, fy=scale, interpolation=cv2.INTER_CUBIC)
+                        frame_im, (0, 0), fx=scale, fy=scale, interpolation=interpolation.value)
 
                 cv2.imwrite(get_and_create_path(file_path, output_dir), frame_im, imwrite_param)
             else:
@@ -502,10 +556,26 @@ class SceneManager:
         self._base_timecode: Optional[FrameTimecode] = None
         self._downscale: int = 1
         self._auto_downscale: bool = True
+        # Interpolation method to use when downscaling. Defaults to linear interpolation
+        # as a good balance between quality and performance.
+        self._interpolation: Interpolation = Interpolation.LINEAR
         # Boolean indicating if we have only seen EventType.CUT events so far.
         self._only_cuts: bool = True
         # Set by decode thread when an exception occurs.
         self._exception_info = None
+        self._stop = threading.Event()
+
+        self._frame_buffer = []
+        self._frame_buffer_size = 0
+
+    @property
+    def interpolation(self) -> Interpolation:
+        """Interpolation method to use when downscaling frames. Must be one of cv2.INTER_*."""
+        return self._interpolation
+
+    @interpolation.setter
+    def interpolation(self, value: Interpolation):
+        self._interpolation = value
 
     @property
     def stats_manager(self) -> Optional[StatsManager]:
@@ -542,7 +612,7 @@ class SceneManager:
         self._auto_downscale = value
 
     def add_detector(self, detector: SceneDetector) -> None:
-        """ Adds/registers a SceneDetector (e.g. ContentDetector, ThresholdDetector) to
+        """Add/register a SceneDetector (e.g. ContentDetector, ThresholdDetector) to
         run when detect_scenes is called. The SceneManager owns the detector object,
         so a temporary may be passed.
 
@@ -570,12 +640,14 @@ class SceneManager:
         else:
             self._sparse_detector_list.append(detector)
 
+        self._frame_buffer_size = max(detector.event_buffer_length, self._frame_buffer_size)
+
     def get_num_detectors(self) -> int:
-        """ Gets number of registered scene detectors added via add_detector. """
+        """Get number of registered scene detectors added via add_detector. """
         return len(self._detector_list)
 
     def clear(self) -> None:
-        """ Clears all cuts/scenes and resets the SceneManager's position.
+        """Clear all cuts/scenes and resets the SceneManager's position.
 
         Any statistics generated are still saved in the StatsManager object passed to the
         SceneManager's constructor, and thus, subsequent calls to detect_scenes, using the same
@@ -589,111 +661,96 @@ class SceneManager:
         self.clear_detectors()
 
     def clear_detectors(self) -> None:
-        """ Removes all scene detectors added to the SceneManager via add_detector(). """
+        """Remove all scene detectors added to the SceneManager via add_detector(). """
         self._detector_list.clear()
         self._sparse_detector_list.clear()
 
-    def get_scene_list(
-        self,
-        base_timecode: Optional[FrameTimecode] = None,
-        start_in_scene: bool = False,
-    ) -> List[Tuple[FrameTimecode, FrameTimecode]]:
-        """ Returns a list of tuples of start/end FrameTimecodes for each detected scene.
+    def get_scene_list(self,
+                       base_timecode: Optional[FrameTimecode] = None,
+                       start_in_scene: bool = False) -> List[Tuple[FrameTimecode, FrameTimecode]]:
+        """Return a list of tuples of start/end FrameTimecodes for each detected scene.
 
-        The scene list is generated by combining the results of all sparse detectors with
-        those from dense ones (i.e. combining the results of :py:meth:`get_cut_list`
-        and :py:meth:`get_event_list`).
+        Arguments:
+            base_timecode: [DEPRECATED] DO NOT USE. For backwards compatibility.
+            start_in_scene: Assume the video begins in a scene. This means that when detecting
+                fast cuts with `ContentDetector`, if no cuts are found, the resulting scene list
+                will contain a single scene spanning the entire video (instead of no scenes).
+                When detecting fades with `ThresholdDetector`, the beginning portion of the video
+                will always be included until the first fade-out event is detected.
 
         Returns:
             List of tuples in the form (start_time, end_time), where both start_time and
             end_time are FrameTimecode objects representing the exact time/frame where each
             detected scene in the video begins and ends.
         """
-        if base_timecode is None:
-            base_timecode = self._base_timecode
-        if base_timecode is None:
+        # TODO(v0.7): Replace with DeprecationWarning that `base_timecode` will be removed in v0.8.
+        if base_timecode is not None:
+            logger.error('`base_timecode` argument is deprecated and has no effect.')
+        if self._base_timecode is None:
             return []
-        cut_list = self.get_cut_list(base_timecode)
-        scene_list = get_scenes_from_cuts(cut_list, base_timecode, self._start_pos, self._last_pos)
+        cut_list = self._get_cutting_list()
+        scene_list = get_scenes_from_cuts(
+            cut_list=cut_list, start_pos=self._start_pos, end_pos=self._last_pos)
         # If we didn't actually detect any cuts, make sure the resulting scene_list is empty
         # unless start_in_scene is True.
         if not cut_list and not start_in_scene:
             scene_list = []
-        return sorted(self.get_event_list(base_timecode) + scene_list)
-
-    def get_cut_list(self, base_timecode: Optional[FrameTimecode] = None) -> List[FrameTimecode]:
-        """ Returns a list of FrameTimecodes of the detected scene changes/cuts.
-
-        Unlike get_scene_list, the cutting list returns a list of FrameTimecodes representing
-        the point in the input video where a new scene was detected, and thus the frame
-        where the input should be cut/split. The cutting list, in turn, is used to generate
-        the scene list, noting that each scene is contiguous starting from the first frame
-        and ending at the last frame detected.
-
-        If only sparse detectors are used (e.g. MotionDetector), this will always be empty.
-
-        Returns:
-            List of FrameTimecode objects denoting the points in time where a scene change
-            was detected in the input video, which can also be passed to external tools
-            for automated splitting of the input into individual scenes.
-        """
-        if base_timecode is None:
-            base_timecode = self._base_timecode
-        if base_timecode is None:
-            return []
-        return [FrameTimecode(cut, base_timecode) for cut in self._get_cutting_list()]
+        return sorted(self._get_event_list() + scene_list)
 
     def _get_cutting_list(self) -> List[int]:
-        """ Returns a sorted list of unique frame numbers of any detected scene cuts. """
-        # We remove duplicates here by creating a set then back to a list and sort it.
-        return sorted(list(set(self._cutting_list)))
-
-    def get_event_list(
-            self,
-            base_timecode: Optional[FrameTimecode] = None
-    ) -> List[Tuple[FrameTimecode, FrameTimecode]]:
-        """ Returns a list of FrameTimecode pairs of the detected scenes by all sparse detectors.
-
-        Unlike get_scene_list, the event list returns a list of FrameTimecodes representing
-        the point in the input video where a new scene was detected only by sparse
-        detectors, otherwise it is the same.
-
-        Returns:
-            List of pairs of FrameTimecode objects denoting the detected scenes.
-        """
-        if base_timecode is None:
-            base_timecode = self._base_timecode
-        if base_timecode is None:
+        """Return a sorted list of unique frame numbers of any detected scene cuts."""
+        if not self._cutting_list:
             return []
-        return [(base_timecode + start, base_timecode + end) for start, end in self._event_list]
+        assert self._base_timecode is not None
+        # Ensure all cuts are unique by using a set to remove all duplicates.
+        return [self._base_timecode + cut for cut in sorted(set(self._cutting_list))]
+
+    def _get_event_list(self) -> List[Tuple[FrameTimecode, FrameTimecode]]:
+        if not self._event_list:
+            return []
+        assert self._base_timecode is not None
+        return [(self._base_timecode + start, self._base_timecode + end)
+                for start, end in self._event_list]
 
     def _process_frame(self,
                        frame_num: int,
                        frame_im: np.ndarray,
-                       callback: Optional[Callable[[np.ndarray, int], None]] = None) -> None:
-        """ Adds any cuts detected with the current frame to the cutting list. """
+                       callback: Optional[Callable[[np.ndarray, int], None]] = None) -> bool:
+        """Add any cuts detected with the current frame to the cutting list. Returns True if any new
+        cuts were detected, False otherwise."""
+        new_cuts = False
+        # TODO(#283): This breaks with AdaptiveDetector as cuts differ from the frame number
+        # being processed. Allow detectors to specify the max frame lookahead they require
+        # (i.e. any event will never be more than N frames behind the current one).
+        self._frame_buffer.append(frame_im)
+        # frame_buffer[-1] is current frame, -2 is one behind, etc
+        # so index based on cut frame should be [event_frame - (frame_num + 1)]
+        self._frame_buffer = self._frame_buffer[-(self._frame_buffer_size + 1):]
         for detector in self._detector_list:
             cuts = detector.process_frame(frame_num, frame_im)
-            if cuts and callback:
-                callback(frame_im, frame_num)
             self._cutting_list += cuts
+            new_cuts = True if cuts else False
+            if callback:
+                for cut_frame_num in cuts:
+                    buffer_index = cut_frame_num - (frame_num + 1)
+                    callback(self._frame_buffer[buffer_index], cut_frame_num)
         for detector in self._sparse_detector_list:
             events = detector.process_frame(frame_num, frame_im)
-            if events and callback:
-                callback(frame_im, frame_num)
             self._event_list += events
-
-    def _is_processing_required(self, frame_num: int) -> bool:
-        """ Is Processing Required: Returns True if frame metrics not in StatsManager,
-        False otherwise. """
-        if self.stats_manager is None:
-            return True
-        return all([detector.is_processing_required(frame_num) for detector in self._detector_list])
+            if callback:
+                for event_start, _ in events:
+                    buffer_index = event_start - (frame_num + 1)
+                    callback(self._frame_buffer[buffer_index], event_start)
+        return new_cuts
 
     def _post_process(self, frame_num: int) -> None:
-        """ Adds any remaining cuts to the cutting list after processing the last frame. """
+        """Add remaining cuts to the cutting list, after processing the last frame."""
         for detector in self._detector_list:
             self._cutting_list += detector.post_process(frame_num)
+
+    def stop(self) -> None:
+        """Stop the current :py:meth:`detect_scenes` call, if any. Thread-safe."""
+        self._stop.set()
 
     def detect_scenes(self,
                       video: VideoStream = None,
@@ -703,12 +760,13 @@ class SceneManager:
                       show_progress: bool = False,
                       callback: Optional[Callable[[np.ndarray, int], None]] = None,
                       frame_source: Optional[VideoStream] = None) -> int:
-        """ Perform scene detection on the given video using the added SceneDetectors.
+        """Perform scene detection on the given video using the added SceneDetectors, returning the
+        number of frames processed. Results can be obtained by calling :py:meth:`get_scene_list` or
+        :py:meth:`get_cut_list`.
 
-        Blocks until all frames in the video have been processed. Results can
-        be obtained by calling either the get_scene_list() or get_cut_list() methods.
-        Video decoding is performed in a background thread to allow scene detection and
-        frame decoding to happen in parallel.
+        Video decoding is performed in a background thread to allow scene detection and frame
+        decoding to happen in parallel. Detection will continue until no more frames are left,
+        the specified duration or end time has been reached, or :py:meth:`stop` was called.
 
         Arguments:
             video: VideoStream obtained from either `scenedetect.open_video`, or by creating
@@ -733,8 +791,8 @@ class SceneManager:
             ValueError: `frame_skip` **must** be 0 (the default) if the SceneManager
                 was constructed with a StatsManager object.
         """
-        # Compatibility for v0.5 API.
-        # TODO: Remove default value for `video`` when removing `frame_source`.
+        # TODO(v0.7): Add DeprecationWarning that `frame_source` will be removed in v0.8.
+        # TODO(v0.8): Remove default value for `video`` when removing `frame_source`.
         if frame_source is not None:
             video = frame_source
         if video is None:
@@ -757,10 +815,10 @@ class SceneManager:
         start_frame_num: int = video.frame_number
 
         if duration is not None:
-            end_time = duration + start_frame_num
+            end_time: Union[int, FrameTimecode] = duration + start_frame_num
 
         if end_time is not None:
-            end_time = self._base_timecode + end_time
+            end_time: FrameTimecode = self._base_timecode + end_time
 
         # Can only calculate total number of frames we expect to process if the duration of
         # the video is available.
@@ -782,53 +840,79 @@ class SceneManager:
                         video.frame_size[1] // downscale_factor)
 
         progress_bar = None
-        if tqdm and show_progress:
-            progress_bar = tqdm(total=int(total_frames), unit='frames', dynamic_ncols=True)
+        if show_progress:
+            progress_bar = tqdm(
+                total=int(total_frames),
+                unit='frames',
+                desc=PROGRESS_BAR_DESCRIPTION % 0,
+                dynamic_ncols=True,
+            )
 
         frame_queue = queue.Queue(MAX_FRAME_QUEUE_LENGTH)
+        self._stop.clear()
         decode_thread = threading.Thread(
             target=SceneManager._decode_thread,
             args=(self, video, frame_skip, downscale_factor, end_time, frame_queue),
             daemon=True)
         decode_thread.start()
         frame_im = None
-        while True:
+
+        logger.info('Detecting scenes...')
+        while not self._stop.is_set():
             next_frame, position = frame_queue.get()
             if next_frame is None and position is None:
                 break
             if not next_frame is None:
                 frame_im = next_frame
-            self._process_frame(position.frame_num, frame_im, callback)
+            new_cuts = self._process_frame(position.frame_num, frame_im, callback)
             if progress_bar is not None:
+                if new_cuts:
+                    progress_bar.set_description(
+                        PROGRESS_BAR_DESCRIPTION % len(self._cutting_list), refresh=False)
                 progress_bar.update(1 + frame_skip)
 
         if progress_bar is not None:
             progress_bar.close()
+        # Unblock any puts in the decode thread before joining. This can happen if the main
+        # processing thread stops before the decode thread.
+        while not frame_queue.empty():
+            frame_queue.get_nowait()
         decode_thread.join()
 
         if self._exception_info is not None:
             raise self._exception_info[1].with_traceback(self._exception_info[2])
 
-        self._last_pos = video.base_timecode + video.frame_number
+        self._last_pos = video.position
         self._post_process(video.position.frame_num)
         return video.frame_number - start_frame_num
 
-    def _decode_thread(self, video, frame_skip, downscale_factor, end_time, out_queue):
-
+    def _decode_thread(
+        self,
+        video: VideoStream,
+        frame_skip: int,
+        downscale_factor: int,
+        end_time: FrameTimecode,
+        out_queue: queue.Queue,
+    ):
         try:
-            while True:
+            while not self._stop.is_set():
                 frame_im = None
                 # We don't do any kind of locking here since the worst-case of this being wrong
                 # is that we do some extra work, and this function should never mutate any data
                 # (all of which should be modified under the GIL).
-                # TODO(v1.0): This optimization should be removed as it is rarely used and
-                # simplifies the implementation of detection algorithms.
-                if (self._is_processing_required(video.position.frame_num)):
+                # TODO(v1.0): This optimization should be removed as it is an uncommon use case and
+                # greatly increases the complexity of detection algorithms using it.
+                if self._is_processing_required(video.position.frame_num):
                     frame_im = video.read()
                     if frame_im is False:
                         break
                     if downscale_factor > 1:
-                        frame_im = frame_im[::downscale_factor, ::downscale_factor, :]
+                        # TODO(v0.6.1): Make downscale type configurable and document update in
+                        # default behavior.
+                        frame_im = cv2.resize(
+                            frame_im, (round(frame_im.shape[1] / downscale_factor),
+                                       round(frame_im.shape[0] / downscale_factor)),
+                            interpolation=self._interpolation.value)
                 else:
                     if video.read(decode=False) is False:
                         break
@@ -849,11 +933,11 @@ class SceneManager:
 
         # If *any* exceptions occur, we re-raise them in the main thread so that the caller of
         # detect_scenes can handle it.
-
         # pylint: disable=bare-except
         except:
             logger.critical('Fatal error: Exception raised in decode thread.')
             self._exception_info = sys.exc_info()
+            self._stop.set()
 
         finally:
             # Handle case where start position was never set if we did not decode any frames.
@@ -861,3 +945,69 @@ class SceneManager:
                 self._start_pos = video.position
             # Make sure main thread stops processing loop.
             out_queue.put((None, None))
+
+        # pylint: enable=bare-except
+
+    #
+    # Deprecated Methods
+    #
+
+    # pylint: disable=unused-argument
+
+    def get_cut_list(self,
+                     base_timecode: Optional[FrameTimecode] = None,
+                     show_warning: bool = True) -> List[FrameTimecode]:
+        """[DEPRECATED] Return a list of FrameTimecodes of the detected scene changes/cuts.
+
+        Unlike get_scene_list, the cutting list returns a list of FrameTimecodes representing
+        the point in the input video where a new scene was detected, and thus the frame
+        where the input should be cut/split. The cutting list, in turn, is used to generate
+        the scene list, noting that each scene is contiguous starting from the first frame
+        and ending at the last frame detected.
+
+        If only sparse detectors are used (e.g. MotionDetector), this will always be empty.
+
+        Arguments:
+            base_timecode: [DEPRECATED] DO NOT USE. For backwards compatibility only.
+            show_warning: If set to False, suppresses the error from being warned. In v0.7,
+                this will have no effect and the error will become a Python warning.
+
+        Returns:
+            List of FrameTimecode objects denoting the points in time where a scene change
+            was detected in the input video, which can also be passed to external tools
+            for automated splitting of the input into individual scenes.
+        """
+        # TODO(v0.7): Use the warnings module to turn this into a warning.
+        if show_warning:
+            logger.error('`get_cut_list()` is deprecated and will be removed in a future release.')
+        return self._get_cutting_list()
+
+    def get_event_list(
+            self,
+            base_timecode: Optional[FrameTimecode] = None
+    ) -> List[Tuple[FrameTimecode, FrameTimecode]]:
+        """[DEPRECATED] DO NOT USE.
+
+        Get a list of start/end timecodes of sparse detection events.
+
+        Unlike get_scene_list, the event list returns a list of FrameTimecodes representing
+        the point in the input video where a new scene was detected only by sparse detectors,
+        otherwise it is the same.
+
+        Arguments:
+            base_timecode: [DEPRECATED] DO NOT USE. For backwards compatibility only.
+
+        Returns:
+            List of pairs of FrameTimecode objects denoting the detected scenes.
+        """
+        # TODO(v0.7): Use the warnings module to turn this into a warning.
+        logger.error('`get_event_list()` is deprecated and will be removed in a future release.')
+        return self._get_event_list()
+
+    # pylint: enable=unused-argument
+
+    def _is_processing_required(self, frame_num: int) -> bool:
+        """True if frame metrics not in StatsManager, False otherwise."""
+        if self.stats_manager is None:
+            return True
+        return all([detector.is_processing_required(frame_num) for detector in self._detector_list])

@@ -21,11 +21,13 @@ from string import Template
 import time
 from typing import Dict, List, Tuple, Optional
 
-from scenedetect.cli.context import CliContext, check_split_video_requirements
 from scenedetect.frame_timecode import FrameTimecode
-from scenedetect.platform import get_and_create_path
+from scenedetect.platform import get_and_create_path, logging_redirect_tqdm, FakeTqdmLoggingRedirect
 from scenedetect.scene_manager import save_images, write_scene_list, write_scene_list_html
 from scenedetect.video_splitter import split_video_mkvmerge, split_video_ffmpeg
+from scenedetect.video_stream import SeekError
+
+from scenedetect.cli.context import CliContext, check_split_video_requirements
 
 logger = logging.getLogger('pyscenedetect')
 
@@ -51,71 +53,83 @@ def run_scenedetect(context: CliContext):
     perf_start_time = time.time()
     if context.start_time is not None:
         logger.debug('Seeking to start time...')
-        context.video_stream.seek(target=context.start_time)
+        try:
+            context.video_stream.seek(target=context.start_time)
+        except SeekError as ex:
+            logging.critical('Failed to seek to %s / frame %d: %s',
+                             context.start_time.get_timecode(), context.start_time.get_frames(),
+                             str(ex))
+            return
 
-    logger.info('Detecting scenes...')
-    num_frames = context.scene_manager.detect_scenes(
-        video=context.video_stream,
-        duration=context.duration,
-        end_time=context.end_time,
-        frame_skip=context.frame_skip,
-        show_progress=not context.quiet_mode)
+    # Ensure log messages don't conflict with any progress bars. If we're in quiet mode, where
+    # no progress bars get created, we instead create a fake context manager. This is done here
+    # to avoid needing a separate context manager at each point a progress bar is created.
+    log_redirect = FakeTqdmLoggingRedirect() if context.quiet_mode else (logging_redirect_tqdm(
+        loggers=[logger]))
+    with log_redirect:
+        num_frames = context.scene_manager.detect_scenes(
+            video=context.video_stream,
+            duration=context.duration,
+            end_time=context.end_time,
+            frame_skip=context.frame_skip,
+            show_progress=not context.quiet_mode)
 
-    # Handle case where video failure is most likely due to multiple audio tracks (#179).
-    if num_frames <= 0 and context.video_stream.BACKEND_NAME == 'opencv':
-        logger.critical(
-            'Failed to read any frames from video file. This could be caused by the video'
-            ' having multiple audio tracks. If so, try installing the PyAV backend:\n'
-            '      pip install av\n'
-            'Or remove the audio tracks by running either:\n'
-            '      ffmpeg -i input.mp4 -c copy -an output.mp4\n'
-            '      mkvmerge -o output.mkv input.mp4\n'
-            'For details, see https://scenedetect.com/faq/')
-        return
+        # Handle case where video failure is most likely due to multiple audio tracks (#179).
+        if num_frames <= 0 and context.video_stream.BACKEND_NAME == 'opencv':
+            logger.critical(
+                'Failed to read any frames from video file. This could be caused by the video'
+                ' having multiple audio tracks. If so, try installing the PyAV backend:\n'
+                '      pip install av\n'
+                'Or remove the audio tracks by running either:\n'
+                '      ffmpeg -i input.mp4 -c copy -an output.mp4\n'
+                '      mkvmerge -o output.mkv input.mp4\n'
+                'For details, see https://scenedetect.com/faq/')
+            return
 
-    perf_duration = time.time() - perf_start_time
-    logger.info('Processed %d frames in %.1f seconds (average %.2f FPS).', num_frames,
-                perf_duration,
-                float(num_frames) / perf_duration)
+        perf_duration = time.time() - perf_start_time
+        logger.info('Processed %d frames in %.1f seconds (average %.2f FPS).', num_frames,
+                    perf_duration,
+                    float(num_frames) / perf_duration)
 
-    # Handle -s/--stats option.
-    _save_stats(context)
+        # Handle -s/--stats option.
+        _save_stats(context)
 
-    # Get list of detected cuts/scenes from the SceneManager to generate the required output
-    # files, based on the given commands (list-scenes, split-video, save-images, etc...).
-    cut_list = context.scene_manager.get_cut_list()
-    scene_list = context.scene_manager.get_scene_list(start_in_scene=True)
+        # Get list of detected cuts/scenes from the SceneManager to generate the required output
+        # files, based on the given commands (list-scenes, split-video, save-images, etc...).
+        cut_list = context.scene_manager.get_cut_list(show_warning=False)
+        scene_list = context.scene_manager.get_scene_list(start_in_scene=True)
 
-    # Handle --merge-last-scene.
-    if context.merge_last_scene and context.min_scene_len is not None and context.min_scene_len > 0:
-        if len(scene_list) > 1 and (scene_list[-1][1] - scene_list[-1][0]) < context.min_scene_len:
-            new_last_scene = (scene_list[-2][0], scene_list[-1][1])
-            scene_list = scene_list[:-2] + [new_last_scene]
+        # Handle --merge-last-scene.
+        if context.merge_last_scene and context.min_scene_len is not None and context.min_scene_len > 0:
+            if len(scene_list) > 1 and (scene_list[-1][1] -
+                                        scene_list[-1][0]) < context.min_scene_len:
+                new_last_scene = (scene_list[-2][0], scene_list[-1][1])
+                scene_list = scene_list[:-2] + [new_last_scene]
 
-    # Handle --drop-short-scenes.
-    if context.drop_short_scenes and context.min_scene_len > 0:
-        scene_list = [s for s in scene_list if (s[1] - s[0]) >= context.min_scene_len]
+        # Handle --drop-short-scenes.
+        if context.drop_short_scenes and context.min_scene_len > 0:
+            scene_list = [s for s in scene_list if (s[1] - s[0]) >= context.min_scene_len]
 
-    # Ensure we don't divide by zero.
-    if scene_list:
-        logger.info(
-            'Detected %d scenes, average shot length %.1f seconds.', len(scene_list),
-            sum([(end_time - start_time).get_seconds() for start_time, end_time in scene_list]) /
-            float(len(scene_list)))
-    else:
-        logger.info('No scenes detected.')
+        # Ensure we don't divide by zero.
+        if scene_list:
+            logger.info(
+                'Detected %d scenes, average shot length %.1f seconds.', len(scene_list),
+                sum([(end_time - start_time).get_seconds() for start_time, end_time in scene_list])
+                / float(len(scene_list)))
+        else:
+            logger.info('No scenes detected.')
 
-    # Handle list-scenes command.
-    _list_scenes(context, scene_list, cut_list)
+        # Handle list-scenes command.
+        _list_scenes(context, scene_list, cut_list)
 
-    # Handle save-images command.
-    image_filenames = _save_images(context, scene_list)
+        # Handle save-images command.
+        image_filenames = _save_images(context, scene_list)
 
-    # Handle export-html command.
-    _export_html(context, scene_list, cut_list, image_filenames)
+        # Handle export-html command.
+        _export_html(context, scene_list, cut_list, image_filenames)
 
-    # Handle split-video command.
-    _split_video(context, scene_list)
+        # Handle split-video command.
+        _split_video(context, scene_list)
 
 
 def _save_stats(context: CliContext) -> None:
@@ -192,7 +206,8 @@ def _save_images(
         show_progress=not context.quiet_mode,
         scale=context.scale,
         height=context.height,
-        width=context.width)
+        width=context.width,
+        interpolation=context.scale_method)
 
 
 def _export_html(context: CliContext, scene_list: List[Tuple[FrameTimecode, FrameTimecode]],

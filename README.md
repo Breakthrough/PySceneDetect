@@ -8,7 +8,7 @@ Video Scene Cut Detection and Analysis Tool
 
 ----------------------------------------------------------
 
-### Latest Release: v0.6 (May 29, 2022)
+### Latest Release: v0.6.1-dev (In Development)
 
 **Website**:  [scenedetect.com](http://www.scenedetect.com)
 
@@ -53,7 +53,9 @@ from scenedetect import detect, ContentDetector
 scene_list = detect('my_video.mp4', ContentDetector())
 ```
 
-`scene_list` will now be a list containing the start/end times of all scenes found in the video. Try calling `print(scene_list)`, or iterating over each scene:
+`scene_list` will now be a list containing the start/end times of all scenes found in the video.  There also exists a two-pass version `AdaptiveDetector` which handles fast camera movement better, and `ThresholdDetector` for handling fade out/fade in events.
+
+Try calling `print(scene_list)`, or iterating over each scene:
 
 ```python
 from scenedetect import detect, ContentDetector
