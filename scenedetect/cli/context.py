@@ -443,6 +443,24 @@ class CliContext:
 
         self.options_processed = options_processed_orig
 
+    def handle_load_scenes(self, input: AnyStr, start_col: Optional[str], end_col: Optional[str],
+                           framerate: Optional[float]):
+        """Handle `load-scenes` command options."""
+        self._check_input_open()
+        options_processed_orig = self.options_processed
+        self.options_processed = False
+
+        input = self.config.get_value("load-scenes", "input", input)
+        start_col = self.config.get_value("load-scenes", "start_col", start_col)
+        end_col = self.config.get_value("load-scenes", "end_col", end_col)
+        framerate = self.config.get_value("load-scenes", "framerate", framerate)
+
+        self._add_detector(
+            scenedetect.detectors.SceneLoader(
+                csv_file=input, start_col=start_col, end_col=end_col, framerate=framerate))
+
+        self.options_processed = options_processed_orig
+
     def handle_export_html(
         self,
         filename: Optional[AnyStr],
