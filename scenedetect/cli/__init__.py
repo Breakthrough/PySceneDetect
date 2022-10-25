@@ -24,7 +24,6 @@ The scenedetect.cli module coordinates first parsing all commands and their opti
 # Some parts of this file need word wrap to be displayed.
 # pylint: disable=line-too-long
 
-from email.policy import default
 import logging
 from typing import AnyStr, Optional, Tuple
 
