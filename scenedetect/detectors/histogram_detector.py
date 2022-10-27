@@ -70,6 +70,9 @@ class HistogramDetector(SceneDetector):
         if np_data_type != numpy.uint8:
             raise ValueError('Image must be 8-bit rgb for HistogramDetector')
 
+        if frame_img.shape[2] != 3:
+            raise ValueError('Image must have three color channels for HistogramDetector')
+
         # Initialize last scene cut point at the beginning of the frames of interest.
         if not self._last_scene_cut:
             self._last_scene_cut = frame_num
