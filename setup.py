@@ -9,7 +9,6 @@
 #
 # Copyright (C) 2014-2022 Brandon Castellano <http://www.bcastell.com>.
 #
-
 """ PySceneDetect setup.py - DEPRECATED.
 
 Build using `python -m build` and installing the resulting .whl using `pip`.

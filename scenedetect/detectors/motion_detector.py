@@ -12,11 +12,10 @@
 #
 """ ``scenedetect.detectors.motion_detector`` Module
 
-This module implements the :py:class:`MotionDetector`, which detects motion events
-using background subtraction, morphological transforms, and thresholding.
+This module implements the :py:class:`MotionDetector`, which detects motion events using background
+subtraction, morphological transforms, and thresholding.
 
-This detector is available from the command-line interface by using the
-`detect-motion` command.
+This detector is available from the command-line interface by using the `detect-motion` command.
 """
 
 # Third-Party Library Imports
