@@ -443,6 +443,37 @@ class CliContext:
 
         self.options_processed = options_processed_orig
 
+    def handle_detect_hist(self, threshold: Optional[float], bits: Optional[int],
+                           min_scene_len: Optional[str]):
+        """Handle `detect-hist` command options."""
+        self._check_input_open()
+        options_processed_orig = self.options_processed
+        self.options_processed = False
+
+        if self.drop_short_scenes:
+            min_scene_len = 0
+        else:
+            if min_scene_len is None:
+                if self.config.is_default("detect-hist", "min-scene-len"):
+                    min_scene_len = self.min_scene_len.frame_num
+                else:
+                    min_scene_len = self.config.get_value("detect-hist", "min-scene-len")
+            min_scene_len = parse_timecode(min_scene_len, self.video_stream.frame_rate).frame_num
+
+        threshold = self.config.get_value("detect-hist", "threshold", threshold)
+        bits = self.config.get_value("detect-hist", "bits", bits)
+
+        # Log detector args for debugging before we construct it.
+        logger.debug(
+            'Adding detector: HistogramDetector(threshold=%f, bits=%d,'
+            ' min_scene_len=%d)', threshold, bits, min_scene_len)
+
+        self._add_detector(
+            scenedetect.detectors.HistogramDetector(
+                threshold=threshold, bits=bits, min_scene_len=min_scene_len))
+
+        self.options_processed = options_processed_orig
+
     def handle_export_html(
         self,
         filename: Optional[AnyStr],

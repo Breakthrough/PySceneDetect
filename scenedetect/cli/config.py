@@ -57,7 +57,11 @@ class ValidatedValue(ABC):
         """Validate and get the user-specified configuration option.
 
         Raises:
-            OptionParseFailure: Value from config file did not meet validation constraints.
+            Option# Log detector args for debugging before we construct it.
+        logger.debug(
+            'Adding detector: ThresholdDetector(threshold=%f, fade_bias=%f,'
+            ' min_scene_len=%d, add_last_scene=%s)', threshold, fade_bias, min_scene_len,
+            add_last_scene)ParseFailure: Value from config file did not meet validation constraints.
         """
         raise NotImplementedError()
 
@@ -254,6 +258,11 @@ CONFIG_MAP: ConfigDict = {
         'fade-bias': RangeValue(0, min_val=-100.0, max_val=100.0),
         'min-scene-len': TimecodeValue(0),
         'threshold': RangeValue(12.0, min_val=0.0, max_val=255.0),
+    },
+    'detect-hist': {
+        'threshold': RangeValue(20000.0, min_val=0.0, max_val=float(2**32 - 1)),
+        'bits': RangeValue(4, min_val=1, max_val=8),
+        'min-scene-len': TimecodeValue(0)
     },
     'export-html': {
         'filename': '$VIDEO_NAME-Scenes.html',
