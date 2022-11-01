@@ -190,3 +190,47 @@ Detector Options
                                 specified as exact number of frames, a time in
                                 seconds followed by s, or a timecode in the
                                 format HH:MM:SS or HH:MM:SS.nnn.
+
+
+=======================================================================
+``detect-hist``
+=======================================================================
+
+Perform color histogram detection algorithm on input video.
+
+This algorithm first separates the color channels of the video and then
+quantizes each color image. The color channels are then bit-shifted and joined
+together once again. A histogram is calculated for the resulting composite image
+and if the element-wise difference between histograms of adjacent frames 
+exceeds the threshold value, a new scene is triggered.
+
+The input video for the ``detect-hist`` must be an 8-bit color video due to the
+bit shifting calculations that are done.
+
+Examples:
+
+    ``detect-hist``
+
+    ``detect-hist --threshold 25000.0``
+
+
+Detector Options
+-----------------------------------------------------------------------
+
+  -t, --threshold VAL           Threshold value (float) that the calculated
+                                histogram difference must exceed to trigger a
+                                new scene (see frame metric hist_diff in stats
+                                file). [default: 20000.0]
+
+  -b, --bits VAL                The number of most significant bits to retain
+                                when quantizing video frames. A higher value
+                                retains more color information, but increases
+                                computational complexity. Can be in the range
+                                [1-8] since input video must be 8-bit color.
+                                [default: 4]
+
+  -m, --min-scene-len TIMECODE  Minimum length of any scene. Overrides global
+                                min-scene-len (-m) setting. TIMECODE can be
+                                specified as exact number of frames, a time in
+                                seconds followed by s, or a timecode in the
+                                format HH:MM:SS or HH:MM:SS.nnn.

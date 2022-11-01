@@ -21,6 +21,10 @@ The adaptive content detector (`detect-adaptive`) compares the difference in con
 
 The threshold-based scene detector (`detect-threshold`) is how most traditional scene detection methods work (e.g. the `ffmpeg blackframe` filter), by comparing the intensity/brightness of the current frame with a set threshold, and triggering a scene cut/break when this value crosses the threshold.  In PySceneDetect, this value is computed by averaging the R, G, and B values for every pixel in the frame, yielding a single floating point number representing the average pixel value (from 0.0 to 255.0).
 
+## Histogram Detector
+
+The color histogram detector uses color information to detect fast cuts. The input video for this detector must be in 8-bit color. The detection algorithm consists of separating the three RGB color channels and then quantizing them by eliminating all but the given number of most significant bits (`--bits/-b`). The resulting quantized color channels are then bit shifted and joined together into a new, composite image. A histogram is then constructed from the pixel values in the new, composite image. This histogram is compared element-wise with the histogram from the previous frame and if the total difference between the two adjacent histograms exceeds the given threshold (`--threshold/-t`), then a new scene is triggered.
+
 # Creating New Detection Algorithms
 
 All scene detection algorithms must inherit from [the base `SceneDetector` class](https://scenedetect.com/projects/Manual/en/latest/api/scene_detector.html). Note that the current SceneDetector API is under development and expected to change somewhat before v1.0 is released, so make sure to pin your `scenedetect` dependency to the correct API version (e.g. `scenedetect < 0.6`, `scenedetect < 0.7`, etc...).

@@ -29,6 +29,15 @@ AdaptiveDetector
 
 
 =========================================
+HistogramDetector
+=========================================
+
+.. automodule:: scenedetect.detectors.histogram_detector
+   :members:
+   :undoc-members:
+
+
+=========================================
 ThresholdDetector
 =========================================
 
