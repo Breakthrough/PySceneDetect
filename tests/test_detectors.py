@@ -20,7 +20,7 @@ test case material.
 import time
 
 from scenedetect import detect, SceneManager, FrameTimecode, StatsManager
-from scenedetect.detectors import AdaptiveDetector, ContentDetector, ThresholdDetector
+from scenedetect.detectors import AdaptiveDetector, ContentDetector, ThresholdDetector, HistogramDetector
 from scenedetect.backends.opencv import VideoStreamCv2
 
 # TODO(v1.0): Parameterize these tests like VideoStreams are.
@@ -87,6 +87,28 @@ def test_adaptive_detector(test_movie_clip):
     assert scene_list[-1][1] == end_time
 
 
+def test_histogram_detector(test_movie_clip):
+    """ Test SceneManager with VideoStreamCv2 and HistogramDetector. """
+    video = VideoStreamCv2(test_movie_clip)
+    scene_manager = SceneManager()
+    scene_manager.add_detector(HistogramDetector())
+    scene_manager.auto_downscale = True
+
+    video_fps = video.frame_rate
+    start_time = FrameTimecode('00:00:50', video_fps)
+    end_time = FrameTimecode('00:01:19', video_fps)
+
+    video.seek(start_time)
+    scene_manager.detect_scenes(video=video, end_time=end_time)
+
+    scene_list = scene_manager.get_scene_list()
+    assert len(scene_list) == len(TEST_MOVIE_CLIP_START_FRAMES_ACTUAL)
+    detected_start_frames = [timecode.get_frames() for timecode, _ in scene_list]
+    assert TEST_MOVIE_CLIP_START_FRAMES_ACTUAL == detected_start_frames
+    # Ensure last scene's end timecode matches the end time we set.
+    assert scene_list[-1][1] == end_time
+
+
 def test_threshold_detector(test_video_file):
     """ Test SceneManager with VideoStreamCv2 and ThresholdDetector. """
     video = VideoStreamCv2(test_video_file)
@@ -103,7 +125,7 @@ def test_threshold_detector(test_video_file):
 def test_detectors_with_stats(test_video_file):
     """ Test all detectors functionality with a StatsManager. """
     # TODO(v1.0): Parameterize this test case (move fixture from cli to test config).
-    for detector in [ContentDetector, ThresholdDetector, AdaptiveDetector]:
+    for detector in [ContentDetector, ThresholdDetector, AdaptiveDetector, HistogramDetector]:
         video = VideoStreamCv2(test_video_file)
         stats = StatsManager()
         scene_manager = SceneManager(stats_manager=stats)
