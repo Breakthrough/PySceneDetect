@@ -191,5 +191,5 @@ def detect(video_path: str,
     scene_manager.detect_scenes(video=video, show_progress=show_progress)
     if not scene_manager.stats_manager is None:
         scene_manager.stats_manager.save_to_csv(
-            path=stats_file_path, base_timecode=video.base_timecode)
+            csv_file=stats_file_path, base_timecode=video.base_timecode)
     return scene_manager.get_scene_list()
