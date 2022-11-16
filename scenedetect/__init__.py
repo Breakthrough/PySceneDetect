@@ -211,5 +211,5 @@ def detect(
         end_time=end_time,
     )
     if not scene_manager.stats_manager is None:
-        scene_manager.stats_manager.save_to_csv(stats_file_path)
+        scene_manager.stats_manager.save_to_csv(csv_file=stats_file_path)
     return scene_manager.get_scene_list(start_in_scene=start_in_scene)
