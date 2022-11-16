@@ -13,6 +13,7 @@ PySceneDetect Releases
 #### Changelog
 
 **Command-Line Changes:**
+
  - [feature] Add `moviepy` backend wrapping the MoviePy package, uses `ffmpeg` binary on the system for video decoding
  - [feature] Edge detection can now be enabled with `detect-content` and `detect-adaptive` to improve accuracy in some cases, especially under lighting changes, see [new `-w`/`--weights` option](http://scenedetect.com/projects/Manual/en/latest/cli/detectors.html#detect-content) for more information
     - A good starting point is to place 100% weight on the change in a frame's hue, 50% on saturation change, 100% on luma (brightness) change, and 25% on change in edges, with a threshold of 32:
@@ -30,6 +31,7 @@ PySceneDetect Releases
 
 **General:**
 
+ - [general] Recommend `detect-adaptive` over `detect-content`
  - [feature] Add new backend `VideoStreamMoviePy` using the MoviePy package`
  - [feature] Add edge detection to `ContentDetector` and `AdaptiveDetector` ([#35](https://github.com/Breakthrough/PySceneDetect/issues/35))
     - Add ability to specify content score weights of hue, saturation, luma, and edge differences between frames
