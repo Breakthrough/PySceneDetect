@@ -40,6 +40,7 @@ PySceneDetect Releases
  - [feature] `AdaptiveDetector` no longer requires a `StatsManager` and can now be used with `frame_skip` ([#283](https://github.com/Breakthrough/PySceneDetect/issues/283))
  - [bugfix] Fix `scenedetect.detect()` throwing `TypeError` when specifying `stats_file_path`
  - [bugfix] Fix off-by-one error in end event timecode when `end_time` was set (reported end time was always one extra frame)
+ - [bugfix] Fix a named argument that was incorrect ([#299](https://github.com/Breakthrough/PySceneDetect/issues/299))
  - [enhancement] Add optional `start_time`, `end_time`, and `start_in_scene` arguments to `scenedetect.detect()` ([#282](https://github.com/Breakthrough/PySceneDetect/issues/282))
  - [enhancement] Add `-map 0` option to default arguments of `split_video_ffmpeg` to include all audio tracks by default ([#271](https://github.com/Breakthrough/PySceneDetect/issues/271))
  - [docs] Add example for [using a callback](http://scenedetect.com/projects/Manual/en/v0.6.1/api/scene_manager.html#usage) ([#273](https://github.com/Breakthrough/PySceneDetect/issues/273))
