@@ -18,22 +18,19 @@
 #
 """ ``scenedetect.video_splitter`` Module
 
-The `scenedetect.video_splitter` module contains functions to split videos
-with a scene list using external tools (e.g. `mkvmerge`, `ffmpeg`), as well
-as functions to check if the tools are available.
+The `scenedetect.video_splitter` module contains functions to split existing videos into clips
+using ffmpeg or mkvmerge.
 
 These programs can be obtained from following URLs (note that mkvmerge is a part mkvtoolnix):
 
  * FFmpeg:   [ https://ffmpeg.org/download.html ]
  * mkvmerge: [ https://mkvtoolnix.download/downloads.html ]
 
-If you are a Linux user, you can likely obtain the above programs from your
-package manager (e.g. `sudo apt-get install ffmpeg`).
+If you are a Linux user, you can likely obtain the above programs from your package manager.
 
-Once installed, ensure the program can be accessed system-wide by calling
-the `mkvmerge` or `ffmpeg` command from a terminal/command prompt.
-PySceneDetect will automatically use whichever program is available on
-the computer, depending on the specified command-line options.
+Once installed, ensure the program can be accessed system-wide by calling the `mkvmerge` or `ffmpeg`
+command from a terminal/command prompt. PySceneDetect will automatically use whichever program is
+available on the computer, depending on the specified command-line options.
 """
 
 import logging
@@ -43,29 +40,36 @@ import time
 from typing import Iterable, Optional, Tuple
 from string import Template
 
+from scenedetect.platform import (tqdm, invoke_command, CommandTooLong, get_file_name,
+                                  get_ffmpeg_path)
 from scenedetect.frame_timecode import FrameTimecode
-from scenedetect.platform import tqdm, invoke_command, CommandTooLong, get_file_name
 
 logger = logging.getLogger('pyscenedetect')
 
-FrameTimecodePair = Tuple[FrameTimecode, FrameTimecode]
+TimecodePair = Tuple[FrameTimecode, FrameTimecode]
+"""Named type for pairs of timecodes, which typically represents the start/end of a scene."""
 
-COMMAND_TOO_LONG_STRING = '''
+COMMAND_TOO_LONG_STRING = """
 Cannot split video due to too many scenes (resulting command
 is too large to process). To work around this issue, you can
 split the video manually by exporting a list of cuts with the
 `list-scenes` command.
 See https://github.com/Breakthrough/PySceneDetect/issues/164
 for details.  Sorry about that!
-'''
+"""
+
+FFMPEG_PATH: Optional[str] = get_ffmpeg_path()
+"""Relative path to the Ffmpeg binary on this system, if any (will be None if not available)."""
+
+DEFAULT_FFMPEG_ARGS = '-map 0 -c:v libx264 -preset veryfast -crf 22 -c:a aac'
+"""Default arguments passed to ffmpeg when invoking the `split_video_ffmpeg` function."""
 
 ##
 ## Command Availability Checking Functions
 ##
 
 
-def is_mkvmerge_available():
-    # type: () -> bool
+def is_mkvmerge_available() -> bool:
     """ Is mkvmerge Available: Gracefully checks if mkvmerge command is available.
 
     Returns:
@@ -81,21 +85,13 @@ def is_mkvmerge_available():
     return True
 
 
-def is_ffmpeg_available():
-    # type: () -> bool
+def is_ffmpeg_available() -> bool:
     """ Is ffmpeg Available: Gracefully checks if ffmpeg command is available.
 
     Returns:
         True if `ffmpeg` can be invoked, False otherwise.
     """
-    ret_val = None
-    try:
-        ret_val = subprocess.call(['ffmpeg', '-v', 'quiet'])
-    except OSError:
-        return False
-    if ret_val is not None and ret_val != 1:
-        return False
-    return True
+    return FFMPEG_PATH is not None
 
 
 ##
@@ -105,7 +101,7 @@ def is_ffmpeg_available():
 
 def split_video_mkvmerge(
     input_video_path: str,
-    scene_list: Iterable[FrameTimecodePair],
+    scene_list: Iterable[TimecodePair],
     output_file_template: str = '$VIDEO_NAME.mkv',
     video_name: Optional[str] = None,
     show_output: bool = False,
@@ -165,6 +161,7 @@ def split_video_mkvmerge(
         ]
         total_frames = scene_list[-1][1].get_frames() - scene_list[0][0].get_frames()
         processing_start_time = time.time()
+        # TODO(v0.6.1): Capture stdout/stderr and show that if the command fails.
         ret_val = invoke_command(call_list)
         if show_output:
             logger.info('Average processing speed %.2f frames/sec.',
@@ -181,10 +178,10 @@ def split_video_mkvmerge(
 
 def split_video_ffmpeg(
     input_video_path: str,
-    scene_list: Iterable[FrameTimecodePair],
+    scene_list: Iterable[TimecodePair],
     output_file_template: str = '$VIDEO_NAME-Scene-$SCENE_NUMBER.mp4',
     video_name: Optional[str] = None,
-    arg_override: str = '-c:v libx264 -preset fast -crf 21 -c:a aac',
+    arg_override: str = DEFAULT_FFMPEG_ARGS,
     show_progress: bool = False,
     show_output: bool = False,
     suppress_output=None,
@@ -238,19 +235,31 @@ def split_video_ffmpeg(
 
     ret_val = 0
     arg_override = arg_override.split(' ')
-    filename_template = Template(output_file_template)
     scene_num_format = '%0'
     scene_num_format += str(max(3, math.floor(math.log(len(scene_list), 10)) + 1)) + 'd'
 
     try:
         progress_bar = None
         total_frames = scene_list[-1][1].get_frames() - scene_list[0][0].get_frames()
-        if show_progress and tqdm:
+        if show_progress:
             progress_bar = tqdm(total=total_frames, unit='frame', miniters=1, dynamic_ncols=True)
         processing_start_time = time.time()
         for i, (start_time, end_time) in enumerate(scene_list):
             duration = (end_time - start_time)
-            call_list = ['ffmpeg']
+            # Format output filename with template variables
+            output_file_template_iter = Template(output_file_template).safe_substitute(
+                VIDEO_NAME=video_name,
+                SCENE_NUMBER=scene_num_format % (i + 1),
+                START_TIME=str(start_time.get_timecode()),
+                END_TIME=str(end_time.get_timecode()),
+                START_FRAME=str(start_time.get_frames()),
+                END_FRAME=str(end_time.get_frames()))
+
+            # Remove : character or else ffmpeg will error out
+            output_file_template_iter = output_file_template_iter.replace(":", ";")
+
+            # Gracefully handle case where FFMPEG_PATH might be unset.
+            call_list = [FFMPEG_PATH if FFMPEG_PATH is not None else 'ffmpeg']
             if not show_output:
                 call_list += ['-v', 'quiet']
             elif i > 0:
@@ -264,16 +273,14 @@ def split_video_ffmpeg(
                 str(duration.get_seconds())
             ]
             call_list += arg_override
-            call_list += [
-                '-sn',
-                filename_template.safe_substitute(
-                    VIDEO_NAME=video_name, SCENE_NUMBER=scene_num_format % (i + 1))
-            ]
+            call_list += ['-sn']
+            call_list += [output_file_template_iter]
             ret_val = invoke_command(call_list)
             if show_output and i == 0 and len(scene_list) > 1:
                 logger.info(
                     'Output from ffmpeg for Scene 1 shown above, splitting remaining scenes...')
             if ret_val != 0:
+                # TODO(v0.6.1): Capture stdout/stderr and display it on any failed calls.
                 logger.error('Error splitting video (ffmpeg returned %d).', ret_val)
                 break
             if progress_bar:

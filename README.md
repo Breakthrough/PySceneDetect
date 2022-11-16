@@ -8,7 +8,7 @@ Video Scene Cut Detection and Analysis Tool
 
 ----------------------------------------------------------
 
-### Latest Release: v0.6 (May 29, 2022)
+### Latest Release: v0.6.1-dev (In Development)
 
 **Website**:  [scenedetect.com](http://www.scenedetect.com)
 
@@ -32,11 +32,11 @@ Requires ffmpeg/mkvmerge for video splitting support. Windows builds (MSI instal
 
 Split the input video wherever a new scene is detected:
 
-    scenedetect -i video.mp4 detect-content split-video
+    scenedetect -i video.mp4 detect-adaptive split-video
 
 Skip the first 10 seconds of the input video, and output a list of scenes to the terminal:
 
-    scenedetect -i video.mp4 time -s 10s detect-content list-scenes
+    scenedetect -i video.mp4 time -s 10s detect-adaptive list-scenes
 
 Help:
 
@@ -53,7 +53,9 @@ from scenedetect import detect, ContentDetector
 scene_list = detect('my_video.mp4', ContentDetector())
 ```
 
-`scene_list` will now be a list containing the start/end times of all scenes found in the video. Try calling `print(scene_list)`, or iterating over each scene:
+`scene_list` will now be a list containing the start/end times of all scenes found in the video.  There also exists a two-pass version `AdaptiveDetector` which handles fast camera movement better, and `ThresholdDetector` for handling fade out/fade in events.
+
+Try calling `print(scene_list)`, or iterating over each scene:
 
 ```python
 from scenedetect import detect, ContentDetector
@@ -98,9 +100,9 @@ full PySceneDetect API documentation.
 
 PySceneDetect is a command-line tool and Python library, which uses OpenCV to analyze a video to find each shot change (or "cut"/"scene").  If `ffmpeg` or `mkvmerge` is installed, the video can also be split into scenes automatically.  A frame-by-frame analysis can also be generated for a video, to help with determining optimal threshold values or detecting patterns/other analysis methods for a particular video.  See [the Usage documentation](https://scenedetect.com/en/latest/examples/usage/) for details.
 
-There are two main detection methods PySceneDetect uses: `detect-threshold` (comparing each frame to a set black level, useful for detecting cuts and fades to/from black), and `detect-content` (compares each frame sequentially looking for changes in content, useful for detecting fast cuts between video scenes, although slower to process).  Each mode has slightly different parameters, and is described in detail below.
+There are two main detection methods PySceneDetect uses: `detect-threshold` (comparing each frame to a set black level, useful for detecting cuts and fades to/from black), and `detect-adaptive` (compares each frame sequentially looking for changes in content, useful for detecting fast cuts between video scenes, although slower to process).  Each mode has slightly different parameters, and is described in detail below.
 
-In general, use `detect-threshold` mode if you want to detect scene boundaries using fades/cuts in/out to black.  If the video uses a lot of fast cuts between content, and has no well-defined scene boundaries, you should use the `detect-content` mode.  Once you know what detection mode to use, you can try the parameters recommended below, or generate a statistics file (using the `-s` / `--statsfile` flag) in order to determine the correct paramters - specifically, the proper threshold value.
+In general, use `detect-threshold` mode if you want to detect scene boundaries using fades/cuts in/out to black.  If the video uses a lot of fast cuts between content, and has no well-defined scene boundaries, you should use the `detect-adaptive` or `detect-content` modes.  Once you know what detection mode to use, you can try the parameters recommended below, or generate a statistics file (using the `-s` / `--statsfile` flag) in order to determine the correct paramters - specifically, the proper threshold value.
 
 For help or other issues, you can join [the official PySceneDetect Discord Server](https://discord.gg/H83HbJngk7), submit an issue/bug report [here on Github](https://github.com/Breakthrough/PySceneDetect/issues), or contact me via [my website](http://www.bcastell.com/about/).
 

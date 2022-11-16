@@ -9,6 +9,10 @@ The content-aware scene detector (`detect-content`) detects [jump cuts](https://
 
 Internally, this detector functions by converting the colorspace of each decoded frame from [RGB](https://en.wikipedia.org/wiki/RGB_color_space) into [HSV](https://en.wikipedia.org/wiki/HSL_and_HSV).  It then takes the average difference across all channels (or optionally just the *value* channel) from frame to frame.  When this exceeds a set threshold, a scene change is triggered.
 
+`detect-content` also has edge detection, which can be enabled by providing a set of 4 numbers in the form (*delta_hue*, *delta_sat*, *delta_lum*, *delta_edges*). Changes in edges are typically larger than the other components, so threshold may need to be increased accordingly.  For example, `-w 1.0 0.5 1.0 0.2 -t 32` is a good starting point to use with edge detection.  The default weights are `--weights 1.0 1.0 1.0 0.0` which does not include edges, but this may change in the future.
+
+See [the documentation for detect-content](http://scenedetect.com/projects/Manual/en/latest/cli/detectors.html#detect-content) for details.
+
 ## Adaptive Content Detector
 
 The adaptive content detector (`detect-adaptive`) compares the difference in content between adjacent frames similar to `detect-content` but instead using a rolling average of adjacent frame changes. This helps mitigate false detections where there is fast camera motion.

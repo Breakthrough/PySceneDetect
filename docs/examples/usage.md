@@ -20,24 +20,23 @@ The complete PySceneDetect Command-Line Interface (CLI) Reference <span class="f
 
 ## Quick Example
 
-
 Split the input video wherever a new scene is detected:
 
 ```rst
-scenedetect -i video.mp4 detect-content split-video
+scenedetect -i video.mp4 detect-adaptive split-video
 ```
 
 Print a table of detected scenes to the terminal, and save an image
 at the start, middle, and end frame of each scene:
 
 ```rst
-scenedetect -i video.mp4 detect-content list-scenes -n save-images
+scenedetect -i video.mp4 detect-adaptive list-scenes -n save-images
 ```
 
 Skip the first 10 seconds of the input video:
 
 ```rst
-scenedetect -i video.mp4 time -s 10s detect-content
+scenedetect -i video.mp4 time -s 10s detect-adaptive
 ```
 
 There are many other options and commands.  To show a summary of available options/arguments, and a list of all commands:
@@ -46,7 +45,7 @@ There are many other options and commands.  To show a summary of available optio
 scenedetect help
 ```
 
-You can also type `help command` where `command` is a specific command (e.g. `list-scenes`, `detect-content`).  Also, to show a complete help listing for every command:
+You can also type `help command` where `command` is a specific command (e.g. `list-scenes`, `detect-adaptive`).  Also, to show a complete help listing for every command:
 
 ```rst
 scenedetect help all
@@ -54,22 +53,22 @@ scenedetect help all
 
 ## Getting Started
 
-To start off, let's perform content-aware scene detection on a video `my_video.mp4` ([example](usage-example.md)) with the default threshold, and display a list of detected scenes:
+To start off, let's perform adaptive scene detection on a video `my_video.mp4` ([example](usage-example.md)) with the default threshold, and display a list of detected scenes:
 
 ```rst
-scenedetect --input my_video.mp4 detect-content list-scenes
+scenedetect --input my_video.mp4 detect-adaptive list-scenes
 ```
 
 Next, the same, but also split the input video into individual clips (starting from `my_video-Scene-001.mp4`):
 
 ```rst
-scenedetect --input my_video.mp4 detect-content list-scenes split-video
+scenedetect --input my_video.mp4 detect-adaptive list-scenes split-video
 ```
 
 The `split-video` command requires either `ffmpeg` or `mkvmerge` to be available, depending on the options used.  You can override the exact arguments passed to `ffmpeg`:
 
 ```rst
-scenedetect --input my_video.mp4 detect-content list-scenes split-video --args "-c:v libx264 -crf 20 -c:a aac"
+scenedetect --input my_video.mp4 detect-adaptive list-scenes split-video --args "-c:v libx264 -crf 20 -c:a aac"
 ```
 
 You can also specify `-h` / `--high-quality` to produces near lossless results, or `-p`/`--preset` and `-crf`/`--rate-factor` (call `scenedetect help split-video` for details). If either `-c`/`--copy` or `-m`/`--mkvmerge` is specified, codec copying mode is used, at the expense of frame accurate cuts.  Optionally, you can also specify the x264 `-p`/`--preset` and `-crf`/`--rate-factor` (call `scenedetect help split-video` for details).
@@ -79,12 +78,14 @@ Note that descriptions for all command-line arguments, as well as their default 
 
 ## Detection Methods
 
-There are two main detection methods PySceneDetect uses: `detect-threshold` (comparing each frame to a set black level, useful for detecting cuts and fades to/from black), and `detect-content` (compares each frame sequentially looking for changes in content, useful for detecting fast cuts between video scenes, although slower to process).  Each mode has slightly different parameters, and is described in detail below.
+There are two main detection methods PySceneDetect uses: `detect-threshold` (comparing each frame to a set black level, useful for detecting cuts and fades to/from black), and `detect-content` (compares each frame sequentially looking for changes in content, useful for detecting fast cuts between video scenes, although slower to process).  There also is `detect-adaptive`, which uses the same frame score as `detect-content` but compares the ratio of each frame score to its neighbors.
 
-In general, use `detect-threshold` mode if you want to detect scene boundaries using fades/cuts in/out to black.  If the video uses a lot of fast cuts between content, and has no well-defined scene boundaries, you should use the `detect-content` mode.  Once you know what detection mode to use, you can try the parameters recommended below, or generate a statistics file (using the `-s` / `--stats` flag) in order to determine the correct paramters - specifically, the proper threshold value.
+Each mode has slightly different parameters, and is described in detail below. Most detector parameters can also be [set with a config file](http://scenedetect.com/projects/Manual/en/latest/cli/config_file.html).
+
+In general, use `detect-threshold` mode if you want to detect scene boundaries using fades/cuts in/out to black.  If the video uses a lot of fast cuts between content, and has no well-defined scene boundaries, you should use the `detect-adaptive` or  `detect-content` modes.  Once you know what detection mode to use, you can try the parameters recommended below, or generate a statistics file (using the `-s` / `--stats` flag) in order to determine the correct paramters - specifically, the proper threshold value.
 
 
-### Content-Aware Detection Mode & Stats Files
+### Content-Aware Detection
 
 Unlike threshold mode, content-aware mode looks at the *difference* between each pair of adjacent frames, triggering a scene break when this difference exceeds the threshold value.  The default threshold value (`-t` / `--threshold`), which is good for a first try when using content-aware mode (`detect-content`), is `30`.  Thus:
 
@@ -107,7 +108,7 @@ You can supply the same stats file in subsequent calls to `scenedetect` with dif
 *Remember*: once a stats file is created, it can only be used with the **same** input video.  If you want to process a different input video (or set of videos), change the name of the stats file supplied to `-s` / `--stats`, or delete the existing stats file on disk.
 
 
-### Threshold-Based Detection Mode
+### Threshold Detection
 
 Threshold-based mode is what most traditional scene detection programs use, which looks at the average intensity of the *current* frame, triggering a scene break when the intensity falls below the threshold (or crosses back upwards).  The default threshold when using the `detect-threshold` is `12` (e.g. `detect-threshold` is the same as `detect-threshold --threshold 12` when the `-t` / `--threshold` option is not supplied), which is a good value to try when detecting fade outs to black on most videos.
 
@@ -122,6 +123,12 @@ scenedetect -i my_video.mp4 -s my_video.stats.mp4 detect-threshold -t 12 -p 95
 For most videos, the minimum percentage (`-p` / `--min-percent`) should always be at *least* 90% (`-p 90`, the default value is `95`).  Also, using values for threshold less than `8` may cause problems with some videos, especially those encoded at lower bitrates or with limited dynamic range.
 
 As with `detect-content`, the optimal threshold can be determined by generating a statsfile (`-s`), opening it with a spreadsheet editor (e.g. Excel), and examining the `delta_rgb` column.  These values represent the average intensity of the pixels for that particular frame (taken by averaging the R, G, and B values over the whole frame).  The threshold value should be set so that the average intensity of most frames in content scenes lie above the threshold value, and scenes where scene changes/breaks occur should fall *under* the threshold value (thus triggering a scene change).
+
+
+### Adaptive Detection
+
+The `detect-adaptive` mode compares each frame's score as calculated by `detect-content` wigh its neighbors. This score is what forms the `adaptive_ratio` metric in the statsfile. You can also configure the amount of neighboring frames via the `frame-window` option, as well as the minimum change in `content_val` score using `min-content-val`.
+
 
 ## Actions / Commands
 
@@ -138,6 +145,7 @@ After setting the detection method(s), there are several commands that can be us
 
 You can also type `scenedetect help all` for the full CLI reference or [view it here](../reference/command-line.md).
 
+
 ## Seeking, Duration, and Setting Start / Stop Times
 
 Specifying the `time` command allows control over what portion of the video PySceneDetect processes.  The `time` command accepts three options: start time (`-s` / `-start`), end time (`-e` / `-end`), and duration (`-d` / `--duration`).  Specifying both end time and duration is redundant, and in this case, duration overrides end time.  Timecodes can be given in three formats:  exact frame number (e.g. `12345`), number of seconds followed by `s` (e.g. `123s`, `123.45s`), or standard format (HH:MM:SS[.nnn], e.g. `12:34:56`, `12:34:56.789`).
@@ -145,19 +153,19 @@ Specifying the `time` command allows control over what portion of the video PySc
 For example, let's say we have a video shot at 30 FPS, and want to analyze only the segment from the 5 to the 6.5 minute mark in the video (we want to analyze the 90 seconds [2700 frames] between 00:05:00 and 00:06:30).  The following commands are all thus equivalent in this regard (assuming we are using the content detector):
 
 ```rst
-scenedetect -i my_video.mp4 time --start 00:05:00 --end 00:06:30 detect-content
+scenedetect -i my_video.mp4 time --start 00:05:00 --end 00:06:30 detect-adaptive
 ```
 
 ```rst
-scenedetect -i my_video.mp4 time --start 300s --end 390s detect-content
+scenedetect -i my_video.mp4 time --start 300s --end 390s detect-adaptive
 ```
 
 ```rst
-scenedetect -i my_video.mp4 time --start 300s --duration 90s detect-content
+scenedetect -i my_video.mp4 time --start 300s --duration 90s detect-adaptive
 ```
 
 ```rst
-scenedetect -i my_video.mp4 time --start 300s --duration 2700 detect-content
+scenedetect -i my_video.mp4 time --start 300s --duration 2700 detect-adaptive
 ```
 
 This demonstrates the different timecode formats, interchanging end time with duration and vice-versa, and precedence of setting duration over end time.
@@ -187,4 +195,3 @@ The option still remains, however, for the set of cases where it is still requir
 If set too large, enough frames may be skipped each time that the threshold is met during every iteration, continually triggering scene changes.  This is because frame skipping essentially raises the threshold between frames in the same scene (making them more likely to appear as *cuts*) while not affecting the threshold between frames of different scenes.
 
 This makes the two harder to distinguish, and can cause additional false scene cuts to be detected.  While this can be compensated for by raising the threshold value, this increases the probability of missing a real/true scene cut - thus, the use of the `-fs` / `--frame-skip` option is discouraged.
-

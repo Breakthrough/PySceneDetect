@@ -10,20 +10,16 @@
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
-""" ``scenedetect`` Module
+"""``scenedetect`` Module
 
-This is the main PySceneDetect module, containing imports of all classes
-so they can be directly accessed from the scenedetect module in addition
-to being directly imported (e.g. `from scenedetect import FrameTimecode`
-is the same as `from scenedetect.frame_timecode import FrameTimecode`).
-
-This file also contains the PySceneDetect version string (displayed when calling
-'scenedetect version'), the about string for license/copyright information
-(when calling 'scenedetect about').
+This is the main PySceneDetect module. This file contains the following:
+ - imports of commonly used classes for importing directly from `scenedetect`
+ - high level functions to simplify common use cases (e.g. `detect` and `open_video`)
+ - version and copyright/license information
 """
 
 from logging import getLogger
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Union
 
 # OpenCV is a required package, but we don't have it as an explicit dependency since we
 # need to support both opencv-python and opencv-python-headless. Include some additional
@@ -37,22 +33,23 @@ except ModuleNotFoundError as ex:
     ) from ex
 
 # Commonly used classes/functions exported under the `scenedetect` namespace for brevity.
-from scenedetect.scene_manager import SceneManager, save_images
-from scenedetect.scene_detector import SceneDetector
+from scenedetect.platform import init_logger
 from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.video_stream import VideoStream, VideoOpenFailure
-from scenedetect.backends import AVAILABLE_BACKENDS, VideoStreamCv2, VideoStreamAv
-from scenedetect.stats_manager import StatsManager, StatsFileCorrupt
-from scenedetect.detectors import ContentDetector, AdaptiveDetector, ThresholdDetector
 from scenedetect.video_splitter import split_video_ffmpeg, split_video_mkvmerge
-from scenedetect.platform import init_logger
+from scenedetect.scene_detector import SceneDetector
+from scenedetect.detectors import ContentDetector, AdaptiveDetector, ThresholdDetector
+from scenedetect.backends import (AVAILABLE_BACKENDS, VideoStreamCv2, VideoStreamAv,
+                                  VideoStreamMoviePy, VideoCaptureAdapter)
+from scenedetect.stats_manager import StatsManager, StatsFileCorrupt
+from scenedetect.scene_manager import SceneManager, save_images
 
 # [DEPRECATED] DO NOT USE.
 from scenedetect.video_manager import VideoManager
 
 # Used for module identification and when printing version & about info
 # (e.g. calling `scenedetect version` or `scenedetect about`).
-__version__ = 'v0.6.0.3'
+__version__ = 'v0.6.1-dev0'
 # About & copyright message string shown for the 'about' CLI command (scenedetect about).
 
 ABOUT_STRING = """
@@ -104,6 +101,7 @@ or visit the following URL: [ https://docs.python.org/3/license.html ]
 THE SOFTWARE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, EXPRESS OR IMPLIED.
 """
 
+init_logger()
 logger = getLogger('pyscenedetect')
 
 
@@ -126,14 +124,14 @@ def open_video(
             overriding backend-specific options.
 
     Returns:
-        :py:class:`VideoStream` backend object created with the specified video path.
+        Backend object created with the specified video path.
 
     Raises:
         :py:class:`VideoOpenFailure`: Constructing the VideoStream fails. If multiple backends have
             been attempted, the error from the first backend will be returned.
     """
-    # Try to open the video with the specified backend.
-    last_error = None
+    last_error: Exception = None
+    # If `backend` is available, try to open the video at `path` using it.
     if backend in AVAILABLE_BACKENDS:
         backend_type = AVAILABLE_BACKENDS[backend]
         try:
@@ -146,7 +144,7 @@ def open_video(
             last_error = ex
     else:
         logger.warning('Backend %s not available.', backend)
-    # Fallback to OpenCV if `backend` could not open the video or is unavailable.
+    # Fallback to OpenCV if `backend` is unavailable, or specified backend failed to open `path`.
     backend_type = VideoStreamCv2
     logger.warning('Trying another backend: %s', backend_type.BACKEND_NAME)
     try:
@@ -155,16 +153,20 @@ def open_video(
         logger.debug('Failed to open video: %s', str(ex))
         if last_error is None:
             last_error = ex
-    # If we get here, either the specified backend or the OpenCV backend threw an exception, so
-    # make sure we propagate it.
+    # Propagate any exceptions raised from specified backend, instead of errors from the fallback.
     assert last_error is not None
     raise last_error
 
 
-def detect(video_path: str,
-           detector: SceneDetector,
-           stats_file_path: Optional[str] = None,
-           show_progress: bool = False) -> List[Tuple[FrameTimecode, FrameTimecode]]:
+def detect(
+    video_path: str,
+    detector: SceneDetector,
+    stats_file_path: Optional[str] = None,
+    show_progress: bool = False,
+    start_time: Optional[Union[str, float, int]] = None,
+    end_time: Optional[Union[str, float, int]] = None,
+    start_in_scene: bool = False,
+) -> List[Tuple[FrameTimecode, FrameTimecode]]:
     """Perform scene detection on a given video `path` using the specified `detector`.
 
     Arguments:
@@ -174,6 +176,15 @@ def detect(video_path: str,
         stats_file_path: Path to save per-frame metrics to for statistical analysis or to
             determine a better threshold value.
         show_progress: Show a progress bar with estimated time remaining. Default is False.
+        start_time: Starting point in video, in the form of a timecode ``HH:MM:SS[.nnn]`` (`str`),
+            number of seconds ``123.45`` (`float`), or number of frames ``200`` (`int`).
+        end_time: Starting point in video, in the form of a timecode ``HH:MM:SS[.nnn]`` (`str`),
+            number of seconds ``123.45`` (`float`), or number of frames ``200`` (`int`).
+        start_in_scene: Assume the video begins in a scene. This means that when detecting
+            fast cuts with `ContentDetector`, if no cuts are found, the resulting scene list
+            will contain a single scene spanning the entire video (instead of no scenes).
+            When detecting fades with `ThresholdDetector`, the beginning portion of the video
+            will always be included until the first fade-out event is detected.
 
     Returns:
         List of scenes (pairs of :py:class:`FrameTimecode` objects).
@@ -181,15 +192,24 @@ def detect(video_path: str,
     Raises:
         :py:class:`VideoOpenFailure`: `video_path` could not be opened.
         :py:class:`StatsFileCorrupt`: `stats_file_path` is an invalid stats file
+        ValueError: `start_time` or `end_time` are incorrectly formatted.
+        TypeError: `start_time` or `end_time` are invalid types.
     """
     video = open_video(video_path)
-    if stats_file_path:
-        scene_manager = SceneManager(StatsManager())
-    else:
-        scene_manager = SceneManager()
+    if start_time is not None:
+        start_time = video.base_timecode + start_time
+        video.seek(start_time)
+    if end_time is not None:
+        end_time = video.base_timecode + end_time
+    # To reduce memory consumption when not required, we only add a StatsManager if we
+    # need to save frame metrics to disk.
+    scene_manager = SceneManager(StatsManager() if stats_file_path else None)
     scene_manager.add_detector(detector)
-    scene_manager.detect_scenes(video=video, show_progress=show_progress)
+    scene_manager.detect_scenes(
+        video=video,
+        show_progress=show_progress,
+        end_time=end_time,
+    )
     if not scene_manager.stats_manager is None:
-        scene_manager.stats_manager.save_to_csv(
-            csv_file=stats_file_path, base_timecode=video.base_timecode)
+        scene_manager.stats_manager.save_to_csv(csv_file=stats_file_path)
     return scene_manager.get_scene_list()

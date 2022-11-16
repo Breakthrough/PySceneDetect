@@ -15,7 +15,7 @@ In this case, we want to split this clip up into each individual scene - at each
 Using the following command, let's run PySceneDetect on the video, and also save a scene list CSV file and some images of each scene:
 
 ```rst
-scenedetect --input goldeneye.mp4 detect-content list-scenes save-images
+scenedetect --input goldeneye.mp4 detect-adaptive list-scenes save-images
 ```
 
 Running the above command, in the working directory, you should see a file `goldeneye.scenes.csv`, as well as individual frames for the start/middle/end of each scene as `goldeneye-XXXX-00/01.jpg`.  The results should appear as follows:
@@ -44,18 +44,20 @@ Running the above command, in the working directory, you should see a file `gold
 The `split-video` command can be used to automatically split the input video using `ffmpeg` or `mkvmerge`. For example:
 
 ```rst
-scenedetect -i goldeneye.mp4 detect-content split-video
+scenedetect -i goldeneye.mp4 detect-adaptive split-video
 ```
 
 Type `scenedetect help split-video` for a full list of options which can be specified for video splitting, including high quality mode (`-hq/--high-quality`) or copy mode (`-c/--copy`).
 
 
-## Finding Optimal Threshold/Sensitivity
+## Tweaking Detection Parameters
 
-If the default threshold of `27` does not produce correct results, we can determine the proper threshold by generating a statistics file with the `-s` / `--stats` option:
+Detectors take a variety of parameters, which can be [configured via command-line](http://scenedetect.com/projects/Manual/en/latest/cli/detectors.html) or by [using a config file](http://scenedetect.com/projects/Manual/en/latest/cli/config_file.html). If the default parameters do not produce correct results, you can generate a stats file using the `-s` / `--stats` option.
+
+For example, with `detect-content`, if the default threshold of `27` does not produce correct results, we can determine the proper threshold by first generating a stats file:
 
 ```rst
-scenedetect --input goldeneye.mp4 --stats goldeneye.stats.csv detect-content
+scenedetect --input goldeneye.mp4 --stats goldeneye.stats.csv detect-adaptive
 ```
 
 We can then plot the values of the `content_val` column:
