@@ -153,7 +153,8 @@ class ContentDetector(SceneDetector):
         hue, sat, lum = cv2.split(cv2.cvtColor(frame_img, cv2.COLOR_BGR2HSV))
 
         # Performance: Only calculate edges if we have to.
-        calculate_edges: bool = ((self._weights.delta_edges > 0.0) or self.stats_manager is not None)
+        calculate_edges: bool = ((self._weights.delta_edges > 0.0)
+                                 or self.stats_manager is not None)
         edges = self._detect_edges(lum) if calculate_edges else None
 
         if self._last_frame is None:
