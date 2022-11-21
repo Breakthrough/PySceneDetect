@@ -866,8 +866,8 @@ class SceneManager:
             new_cuts = self._process_frame(position.frame_num, frame_im, callback)
             if progress_bar is not None:
                 if new_cuts:
-                    progress_bar.set_description(
-                        PROGRESS_BAR_DESCRIPTION % len(self._cutting_list), refresh=False)
+                    progress_bar.set_description(PROGRESS_BAR_DESCRIPTION % len(self._cutting_list),
+                                                 False)
                 progress_bar.update(1 + frame_skip)
 
         if progress_bar is not None:
