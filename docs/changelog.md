@@ -4,11 +4,11 @@ PySceneDetect Releases
 
 ## PySceneDetect 0.6
 
-### 0.6.1 (TBD)
+### 0.6.1 (November 20, 2022)
 
 #### Release Notes
 
- - In development.
+Includes [MoviePy support](https://github.com/Zulko/moviepy), edge detection capability for fast cuts, and several enhancements/bugfixes.
 
 #### Changelog
 

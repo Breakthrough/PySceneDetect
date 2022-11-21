@@ -460,7 +460,6 @@ def save_images(scene_list: List[Tuple[FrameTimecode, FrameTimecode]],
     if abs(aspect_ratio - 1.0) < 0.01:
         aspect_ratio = None
 
-    # TODO(v0.6.1): Make resizing interpolation configurable.
     for i, scene_timecodes in enumerate(timecode_list):
         for j, image_timecode in enumerate(scene_timecodes):
             video.seek(image_timecode)
@@ -472,7 +471,7 @@ def save_images(scene_list: List[Tuple[FrameTimecode, FrameTimecode]],
                     IMAGE_NUMBER=image_num_format % (j + 1),
                     FRAME_NUMBER=image_timecode.get_frames()), image_extension)
                 image_filenames[i].append(file_path)
-                # TODO(v0.6.1): Combine this resize with the ones below.
+                # TODO(v0.6.2): Combine this resize with the ones below.
                 if aspect_ratio is not None:
                     frame_im = cv2.resize(
                         frame_im, (0, 0),
@@ -907,8 +906,6 @@ class SceneManager:
                     if frame_im is False:
                         break
                     if downscale_factor > 1:
-                        # TODO(v0.6.1): Make downscale type configurable and document update in
-                        # default behavior.
                         frame_im = cv2.resize(
                             frame_im, (round(frame_im.shape[1] / downscale_factor),
                                        round(frame_im.shape[0] / downscale_factor)),

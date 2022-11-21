@@ -73,7 +73,7 @@ from typing import Union
 MAX_FPS_DELTA: float = 1.0 / 100000
 """Maximum amount two framerates can differ by for equality testing."""
 
-# TODO(v0.6.1): Replace uses of Union[int, float, str] with TimecodeValue.
+# TODO(v0.6.2): Replace uses of Union[int, float, str] with TimecodeValue.
 TimecodeValue = Union[int, float, str]
 """Named type for values representing timecodes. Must be in one of the following forms:
 
