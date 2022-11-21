@@ -15,14 +15,14 @@ environment:
 # SignPath Config for Code Signing
 deploy:
 - provider: Webhook
-  url: https://app.signpath.io/API/v1/f2efa44c-5b5c-45f2-b44f-8f9dde708313/Integrations/AppVeyor?ProjectSlug=PySceneDetect&SigningPolicySlug=test-signing
+  url: https://app.signpath.io/API/v1/f2efa44c-5b5c-45f2-b44f-8f9dde708313/Integrations/AppVeyor?ProjectSlug=PySceneDetect&SigningPolicySlug=release-signing
   authorization:
      secure: NPMogMcEb5S/ASMEiL275H79D+Pj9cgUqx8kjTPGXtF9drZW41nljczuhF1XvcxFgI0q9TA1BUX9YuCoTQ3mEQ==
 
 install:
   # The commit being checked out must meet SignPath's origin verification requirements:
   # https://about.signpath.io/documentation/build-system-integration#ci-integrations-with-origin-verification
-  - git checkout 2a3177216531c978826e4ef88b5e2e56d3bcbb78
+  - git checkout 76cca68f93904896172be3699cd939d142712890
 
   - echo * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
   - echo * *                      SETTING UP PYTHON ENVIRONMENT                      * *
