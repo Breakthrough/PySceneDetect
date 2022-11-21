@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<DOCUMENT Type="Advanced Installer" CreateVersion="13.5" version="19.4" Modules="professional" RootPath="." Language="en" Id="{3919FEC9-E2C3-453E-81FD-9E8BABBE2CA4}">
+<DOCUMENT Type="Advanced Installer" CreateVersion="13.5" version="20.1" Modules="professional" RootPath="." Language="en" Id="{3919FEC9-E2C3-453E-81FD-9E8BABBE2CA4}">
   <COMPONENT cid="caphyon.advinst.msicomp.ProjectOptionsComponent">
-    <ROW Name="HiddenItems" Value="ActSyncAppComponent;AutorunComponent;CPLAppletComponent;GameUxComponent;SilverlightSlnComponent;AppXAppDetailsComponent;FixupComponent;AppXCapabilitiesComponent;AppXDependenciesComponent;AppXProductDetailsComponent;AppXVisualAssetsComponent;AppXAppDeclarationsComponent;AppXUriRulesComponent;MsiXDiffComponent;MsixManifestEditorComponent"/>
+    <ROW Name="HiddenItems" Value="ActSyncAppComponent;CPLAppletComponent;AppXAppDetailsComponent;FixupComponent;AppXCapabilitiesComponent;AppXDependenciesComponent;AppXProductDetailsComponent;AppXVisualAssetsComponent;AppXAppDeclarationsComponent;AppXUriRulesComponent;MsiXDiffComponent;MsixManifestEditorComponent"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiPropsComponent">
     <ROW Property="AI_BITMAP_DISPLAY_MODE" Value="0"/>
     <ROW Property="AI_CURRENT_YEAR" Value="2022" ValueLocId="-"/>
     <ROW Property="AI_EXTERNALUIUNINSTALLERNAME" MultiBuildValue="DefaultBuild:aiui"/>
-    <ROW Property="AI_PACKAGING_TOOL" Value="Advanced Installer 19.4 build 4648ec91" ValueLocId="-"/>
+    <ROW Property="AI_PACKAGING_TOOL" Value="Advanced Installer 20.1 build 87d75adb" ValueLocId="-"/>
     <ROW Property="AI_PREREQ_REPAIR_ENABLED" MultiBuildValue="DefaultBuild:1"/>
     <ROW Property="AI_PRODUCTNAME_ARP" Value="[|ProductName]"/>
     <ROW Property="AI_ThemeStyle" Value="aero" MultiBuildValue="DefaultBuild:classic" MsiKey="AI_ThemeStyle"/>
@@ -30,7 +30,7 @@
     <ROW Property="ProductCode" Value="1033:{819445A0-0F7A-443E-BEED-BF5D4C10C0FD} " Type="16"/>
     <ROW Property="ProductLanguage" Value="1033"/>
     <ROW Property="ProductName" Value="PySceneDetect"/>
-    <ROW Property="ProductVersion" Value="0.6.1"/>
+    <ROW Property="ProductVersion" Value="0.6.1.1"/>
     <ROW Property="SecureCustomProperties" Value="OLDPRODUCTS;AI_NEWERPRODUCTFOUND"/>
     <ROW Property="UpgradeCode" Value="{D0AF0419-DBD5-455C-A4AC-4518A35DD23E}"/>
     <ROW Property="WindowsType9X" MultiBuildValue="DefaultBuild:Windows 9x/ME" ValueLocId="-"/>
@@ -77,7 +77,7 @@
     <ROW Component="ProductInformation" ComponentId="{C45D033C-5DD4-40D4-AABA-C6639AF83796}" Directory_="APPDIR" Attributes="4" KeyPath="Version"/>
     <ROW Component="VCRUNTIME140.dll" ComponentId="{9D43EA6A-262C-4E7A-8B63-7046CA950E40}" Directory_="APPDIR" Attributes="256" KeyPath="VCRUNTIME140.dll"/>
     <ROW Component="__init__.py" ComponentId="{87336677-B6D8-4844-8A1F-83CD613210F1}" Directory_="data_1_Dir" Attributes="0" KeyPath="__init__.py" Type="0"/>
-    <ROW Component="_decimal.pyd" ComponentId="{E70BCEFB-8371-4676-910D-2FAB50283DA0}" Directory_="APPDIR" Attributes="256" KeyPath="_decimal.pyd" Type="0"/>
+    <ROW Component="_decimal.pyd" ComponentId="{E70BCEFB-8371-4676-910D-2FAB50283DA0}" Directory_="APPDIR" Attributes="256" KeyPath="_queue.pyd" Type="0"/>
     <ROW Component="_multiarray_tests.cp39win_amd64.pyd" ComponentId="{DC9CE16B-83C4-4A1C-A276-50CE1AEC9D53}" Directory_="core_Dir" Attributes="256" KeyPath="_multiarray_tests.cp39win_amd64.pyd" Type="0"/>
     <ROW Component="_pocketfft_internal.cp39win_amd64.pyd" ComponentId="{159C1327-C7DC-4506-BF6A-FA33DEF2C996}" Directory_="fft_Dir" Attributes="256" KeyPath="_pocketfft_internal.cp39win_amd64.pyd" Type="0"/>
     <ROW Component="apimswincoreconsolel110.dll" ComponentId="{D4C253BD-52FE-41F7-AAB8-6A52D09AD235}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincoreconsolel110.dll"/>
@@ -141,7 +141,6 @@
     <ROW Component="lapack_lite.cp39win_amd64.pyd" ComponentId="{44D901C1-EE8F-40D8-8540-37F5591822E3}" Directory_="linalg_Dir" Attributes="256" KeyPath="lapack_lite.cp39win_amd64.pyd" Type="0"/>
     <ROW Component="libcrypto1_1.dll" ComponentId="{9A14B3ED-4BA0-4503-81BD-A9C102B3FB18}" Directory_="APPDIR" Attributes="256" KeyPath="libcrypto1_1.dll"/>
     <ROW Component="libffi7.dll" ComponentId="{361A2CAC-EAC7-4625-89D0-97E141B46621}" Directory_="APPDIR" Attributes="256" KeyPath="libffi7.dll"/>
-    <ROW Component="libopenblas.EL2C6PLE4ZYW3ECEVIV3OXXGRN2NRFM2.gfortranwin_amd64.dll" ComponentId="{770B67F6-F993-4CDC-99CF-D72257756508}" Directory_="APPDIR" Attributes="256" KeyPath="libopenblas.EL2C6PLE4ZYW3ECEVIV3OXXGRN2NRFM2.gfortranwin_amd64.dll"/>
     <ROW Component="libssl1_1.dll" ComponentId="{BFDD545F-92FD-48C6-8AAD-60B0E78FD18E}" Directory_="APPDIR" Attributes="256" KeyPath="libssl1_1.dll"/>
     <ROW Component="mkvmerge.exe" ComponentId="{55BCC633-07AA-42A9-9ECF-0CC6DF87E97E}" Directory_="APPDIR" Attributes="256" KeyPath="mkvmerge.exe"/>
     <ROW Component="motionvectors.cp39win_amd64.pyd" ComponentId="{2534E2C0-5C00-4186-814D-F0A280DBCA56}" Directory_="sidedata_Dir" Attributes="256" KeyPath="motionvectors.cp39win_amd64.pyd" Type="0"/>
@@ -187,11 +186,6 @@
     <ROW File="supporting.md" Component_="changelog.md" FileName="SUPPOR~1.MD|supporting.md" Attributes="0" SourcePath="..\scenedetect\docs\supporting.md" SelfReg="false"/>
     <ROW File="ffmpeg.exe" Component_="ffmpeg.exe" FileName="ffmpeg.exe" Attributes="0" SourcePath="..\scenedetect\ffmpeg.exe" SelfReg="false" DigSign="true"/>
     <ROW File="mkvmerge.exe" Component_="mkvmerge.exe" FileName="mkvmerge.exe" Attributes="0" SourcePath="..\scenedetect\mkvmerge.exe" SelfReg="false"/>
-    <ROW File="_decimal.pyd" Component_="_decimal.pyd" FileName="_decimal.pyd" Attributes="0" SourcePath="..\scenedetect\_decimal.pyd" SelfReg="false"/>
-    <ROW File="_hashlib.pyd" Component_="_decimal.pyd" FileName="_hashlib.pyd" Attributes="0" SourcePath="..\scenedetect\_hashlib.pyd" SelfReg="false"/>
-    <ROW File="_lzma.pyd" Component_="_decimal.pyd" FileName="_lzma.pyd" Attributes="0" SourcePath="..\scenedetect\_lzma.pyd" SelfReg="false"/>
-    <ROW File="_multiprocessing.pyd" Component_="_decimal.pyd" FileName="_MULTI~1.PYD|_multiprocessing.pyd" Attributes="0" SourcePath="..\scenedetect\_multiprocessing.pyd" SelfReg="false"/>
-    <ROW File="_overlapped.pyd" Component_="_decimal.pyd" FileName="_OVERL~1.PYD|_overlapped.pyd" Attributes="0" SourcePath="..\scenedetect\_overlapped.pyd" SelfReg="false"/>
     <ROW File="_queue.pyd" Component_="_decimal.pyd" FileName="_queue.pyd" Attributes="0" SourcePath="..\scenedetect\_queue.pyd" SelfReg="false"/>
     <ROW File="_socket.pyd" Component_="_decimal.pyd" FileName="_socket.pyd" Attributes="0" SourcePath="..\scenedetect\_socket.pyd" SelfReg="false"/>
     <ROW File="_ssl.pyd" Component_="_decimal.pyd" FileName="_ssl.pyd" Attributes="0" SourcePath="..\scenedetect\_ssl.pyd" SelfReg="false"/>
@@ -243,7 +237,6 @@
     <ROW File="base_library.zip" Component_="_decimal.pyd" FileName="BASE_L~1.ZIP|base_library.zip" Attributes="0" SourcePath="..\scenedetect\base_library.zip" SelfReg="false"/>
     <ROW File="libcrypto1_1.dll" Component_="libcrypto1_1.dll" FileName="LIBCRY~1.DLL|libcrypto-1_1.dll" Attributes="0" SourcePath="..\scenedetect\libcrypto-1_1.dll" SelfReg="false"/>
     <ROW File="libffi7.dll" Component_="libffi7.dll" FileName="libffi-7.dll" Attributes="0" SourcePath="..\scenedetect\libffi-7.dll" SelfReg="false"/>
-    <ROW File="libopenblas.EL2C6PLE4ZYW3ECEVIV3OXXGRN2NRFM2.gfortranwin_amd64.dll" Component_="libopenblas.EL2C6PLE4ZYW3ECEVIV3OXXGRN2NRFM2.gfortranwin_amd64.dll" FileName="LIBOPE~1.DLL|libopenblas.EL2C6PLE4ZYW3ECEVIV3OXXGRN2NRFM2.gfortran-win_amd64.dll" Attributes="0" SourcePath="..\scenedetect\libopenblas.EL2C6PLE4ZYW3ECEVIV3OXXGRN2NRFM2.gfortran-win_amd64.dll" SelfReg="false"/>
     <ROW File="libssl1_1.dll" Component_="libssl1_1.dll" FileName="LIBSSL~1.DLL|libssl-1_1.dll" Attributes="0" SourcePath="..\scenedetect\libssl-1_1.dll" SelfReg="false"/>
     <ROW File="LICENSE" Component_="_decimal.pyd" FileName="LICENSE" Attributes="0" SourcePath="..\scenedetect\LICENSE" SelfReg="false"/>
     <ROW File="LICENSEFFMPEG" Component_="_decimal.pyd" FileName="LICENS~1|LICENSE-FFMPEG" Attributes="0" SourcePath="..\scenedetect\LICENSE-FFMPEG" SelfReg="false"/>
@@ -327,8 +320,6 @@
     <ROW File="_pcg64.cp39win_amd64.pyd" Component_="bit_generator.cp39win_amd64.pyd" FileName="_PCG64~1.PYD|_pcg64.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\numpy\random\_pcg64.cp39-win_amd64.pyd" SelfReg="false"/>
     <ROW File="_philox.cp39win_amd64.pyd" Component_="bit_generator.cp39win_amd64.pyd" FileName="_PHILO~1.PYD|_philox.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\numpy\random\_philox.cp39-win_amd64.pyd" SelfReg="false"/>
     <ROW File="_sfc64.cp39win_amd64.pyd" Component_="bit_generator.cp39win_amd64.pyd" FileName="_SFC64~1.PYD|_sfc64.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\numpy\random\_sfc64.cp39-win_amd64.pyd" SelfReg="false"/>
-    <ROW File="_asyncio.pyd" Component_="_decimal.pyd" FileName="_asyncio.pyd" Attributes="0" SourcePath="..\scenedetect\_asyncio.pyd" SelfReg="false"/>
-    <ROW File="_bz2.pyd" Component_="_decimal.pyd" FileName="_bz2.pyd" Attributes="0" SourcePath="..\scenedetect\_bz2.pyd" SelfReg="false"/>
     <ROW File="_ctypes.pyd" Component_="_decimal.pyd" FileName="_ctypes.pyd" Attributes="0" SourcePath="..\scenedetect\_ctypes.pyd" SelfReg="false"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.BootstrOptComponent">
@@ -419,6 +410,7 @@
     <ROW Action="AI_InstallPostPrerequisite" Type="1" Source="Prereq.dll" Target="InstallPostPrereq"/>
     <ROW Action="AI_InstallPrerequisite" Type="1" Source="Prereq.dll" Target="InstallPrereq"/>
     <ROW Action="AI_PREPARE_UPGRADE" Type="65" Source="aicustact.dll" Target="PrepareUpgrade"/>
+    <ROW Action="AI_PRESERVE_INSTALL_TYPE" Type="65" Source="aicustact.dll" Target="PreserveInstallType"/>
     <ROW Action="AI_RESTORE_AI_SETUPEXEPATH" Type="51" Source="AI_SETUPEXEPATH" Target="[AI_SETUPEXEPATH_ORIGINAL]"/>
     <ROW Action="AI_RESTORE_LOCATION" Type="65" Source="aicustact.dll" Target="RestoreLocation"/>
     <ROW Action="AI_RemoveExternalUIStub" Type="1" Source="ExternalUICleaner.dll" Target="RemoveExternalUIStub"/>
@@ -492,7 +484,6 @@
     <ROW Feature_="PySceneDetect" Component_="avutil56.dll"/>
     <ROW Feature_="PySceneDetect" Component_="libcrypto1_1.dll"/>
     <ROW Feature_="PySceneDetect" Component_="libffi7.dll"/>
-    <ROW Feature_="PySceneDetect" Component_="libopenblas.EL2C6PLE4ZYW3ECEVIV3OXXGRN2NRFM2.gfortranwin_amd64.dll"/>
     <ROW Feature_="PySceneDetect" Component_="libssl1_1.dll"/>
     <ROW Feature_="PySceneDetect" Component_="postproc55.dll"/>
     <ROW Feature_="PySceneDetect" Component_="python39.dll"/>
@@ -550,6 +541,7 @@
     <ROW Action="AI_AppSearchEx" Sequence="101"/>
     <ROW Action="AI_SETMIXINSTLOCATION" Sequence="745"/>
     <ROW Action="AI_RESTORE_LOCATION" Condition="APPDIR=&quot;&quot;" Sequence="749"/>
+    <ROW Action="AI_PRESERVE_INSTALL_TYPE" Sequence="199"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiLaunchConditionsComponent">
     <ROW Condition="( Version9X OR VersionNT64 )" Description="[ProductName] cannot be installed on [WindowsTypeNTDisplay]." DescriptionLocId="AI.LaunchCondition.NoNT" IsPredefined="true" Builds="DefaultBuild"/>
