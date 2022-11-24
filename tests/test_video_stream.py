@@ -117,12 +117,15 @@ def get_test_video_params() -> List[VideoParameters]:
 
 
 pytestmark = [
-    pytest.mark.parametrize("vs_type", list(filter(lambda x: x is not None, [
-        VideoStreamCv2,
-        VideoStreamAv,
-        VideoStreamMoviePy,
-        VideoManager,
-    ]))),
+    pytest.mark.parametrize(
+        "vs_type",
+        list(
+            filter(lambda x: x is not None, [
+                VideoStreamCv2,
+                VideoStreamAv,
+                VideoStreamMoviePy,
+                VideoManager,
+            ]))),
     pytest.mark.filterwarnings(MOVIEPY_WARNING_FILTER),
 ]
 
