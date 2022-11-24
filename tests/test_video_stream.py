@@ -28,7 +28,7 @@ import pytest
 
 from scenedetect.video_stream import VideoStream, SeekError
 from scenedetect.backends.opencv import VideoStreamCv2
-from scenedetect.backends.pyav import VideoStreamAv
+from scenedetect.backends import VideoStreamAv
 from scenedetect.backends import VideoStreamMoviePy
 from scenedetect.video_manager import VideoManager
 
@@ -117,12 +117,12 @@ def get_test_video_params() -> List[VideoParameters]:
 
 
 pytestmark = [
-    pytest.mark.parametrize("vs_type", [
+    pytest.mark.parametrize("vs_type", list(filter(lambda x: x is not None, [
         VideoStreamCv2,
         VideoStreamAv,
         VideoStreamMoviePy,
         VideoManager,
-    ]),
+    ]))),
     pytest.mark.filterwarnings(MOVIEPY_WARNING_FILTER),
 ]
 

@@ -32,6 +32,7 @@ install:
 
   # Install other PySceneDetect dependencies and checkout resources required for tests.
   - python -m pip install -r requirements_headless.txt
+  - python -m pip install moviepy
   - git fetch --depth=1 https://github.com/Breakthrough/PySceneDetect.git refs/heads/resources:refs/remotes/origin/resources
   - git checkout refs/remotes/origin/resources -- tests/resources/
   - git checkout refs/remotes/origin/resources -- dist/
