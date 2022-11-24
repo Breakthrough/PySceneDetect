@@ -13,6 +13,10 @@
 """:py:class:`VideoStreamMoviePy` provides an adapter for MoviePy's `FFMPEG_VideoReader`.
 
 Uses string identifier ``'moviepy'``.
+
+.. warning::
+
+    The MoviePy backend is still under development. Some features are not yet supported.
 """
 
 from logging import getLogger

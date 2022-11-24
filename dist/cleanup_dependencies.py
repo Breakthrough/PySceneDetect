@@ -29,7 +29,6 @@ FILE_GLOBS = [
     '_hashlib.pyd',
     '_lzma.pyd',
     '_multiprocessing.pyd',
-    '_overlapped.pyd',
     '_tkinter.pyd',
     'd3dcompiler*.dll',
     'kiwisolver.*.pyd',
