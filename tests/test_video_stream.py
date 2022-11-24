@@ -29,7 +29,7 @@ import pytest
 from scenedetect.video_stream import VideoStream, SeekError
 from scenedetect.backends.opencv import VideoStreamCv2
 from scenedetect.backends.pyav import VideoStreamAv
-from scenedetect.backends.moviepy import VideoStreamMoviePy
+from scenedetect.backends import VideoStreamMoviePy
 from scenedetect.video_manager import VideoManager
 
 # Accuracy a framerate is checked to for testing purposes.
