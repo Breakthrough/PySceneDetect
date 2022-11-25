@@ -246,17 +246,14 @@ def split_video_ffmpeg(
         processing_start_time = time.time()
         for i, (start_time, end_time) in enumerate(scene_list):
             duration = (end_time - start_time)
-            # Format output filename with template variables
+            # Format output filename with template variable
             output_file_template_iter = Template(output_file_template).safe_substitute(
                 VIDEO_NAME=video_name,
                 SCENE_NUMBER=scene_num_format % (i + 1),
-                START_TIME=str(start_time.get_timecode()),
-                END_TIME=str(end_time.get_timecode()),
+                START_TIME=str(start_time.get_timecode().replace(":", ";")),
+                END_TIME=str(end_time.get_timecode().replace(":", ";")),
                 START_FRAME=str(start_time.get_frames()),
                 END_FRAME=str(end_time.get_frames()))
-
-            # Remove : character or else ffmpeg will error out
-            output_file_template_iter = output_file_template_iter.replace(":", ";")
 
             # Gracefully handle case where FFMPEG_PATH might be unset.
             call_list = [FFMPEG_PATH if FFMPEG_PATH is not None else 'ffmpeg']
