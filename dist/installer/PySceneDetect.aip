@@ -98,7 +98,7 @@
     <ROW Component="copyright.md" ComponentId="{E3CD3397-09CD-4072-B7F0-1B7A4B9933F8}" Directory_="other_Dir" Attributes="0" KeyPath="copyright.md" Type="0"/>
     <ROW Component="core.cp39win_amd64.pyd" ComponentId="{30BF294C-D5D4-4B3B-858D-4E2B32B0A122}" Directory_="container_Dir" Attributes="256" KeyPath="core.cp39win_amd64.pyd" Type="0"/>
     <ROW Component="cv2.cp39win_amd64.pyd" ComponentId="{3E2608F0-74FB-4C98-A44B-6329440F4AFC}" Directory_="cv2_Dir" Attributes="256" KeyPath="cv2.cp39win_amd64.pyd" Type="0"/>
-    <ROW Component="ffmpeg.exe" ComponentId="{FBEB2C60-7899-4F01-BA91-1AE58D23FDCA}" Directory_="APPDIR" Attributes="256" KeyPath="ffmpeg.exe"/>
+    <ROW Component="ffmpeg.exe" ComponentId="{F4B924A7-41DD-4B94-8E55-9CDBC910EF11}" Directory_="APPDIR" Attributes="256" KeyPath="ffmpeg.exe"/>
     <ROW Component="goldeneyestats.png" ComponentId="{4B2CF22D-CCF2-476D-9D24-589CF04F766C}" Directory_="img_Dir" Attributes="0" KeyPath="goldeneyestats.png" Type="0"/>
     <ROW Component="lapack_lite.cp39win_amd64.pyd" ComponentId="{81EC4BBC-1373-4476-B337-627771EFB3E1}" Directory_="linalg_Dir" Attributes="256" KeyPath="lapack_lite.cp39win_amd64.pyd" Type="0"/>
     <ROW Component="libaom467b7650.dll" ComponentId="{0EF7E4F4-68C5-4520-8664-1C59C899B627}" Directory_="av.libs_Dir" Attributes="256" KeyPath="libaom467b7650.dll"/>
@@ -140,7 +140,7 @@
     <ROW Component="libx26564fe7b8a.dll" ComponentId="{4B2DBD17-9346-4235-A4EA-F36CB983AF71}" Directory_="av.libs_Dir" Attributes="256" KeyPath="libx26564fe7b8a.dll"/>
     <ROW Component="libxml22177166ef.dll" ComponentId="{7BDD647A-3915-4CE3-B93C-D02624F58B51}" Directory_="av.libs_Dir" Attributes="256" KeyPath="libxml22177166ef.dll"/>
     <ROW Component="loadorderav9.2.0" ComponentId="{AB2A3F41-B880-4397-B536-BB863E1060CC}" Directory_="av.libs_Dir" Attributes="0" KeyPath="loadorderav9.2.0" Type="0"/>
-    <ROW Component="mkvmerge.exe" ComponentId="{8C2CD16E-54E6-48DD-8589-4F521BA38174}" Directory_="APPDIR" Attributes="256" KeyPath="mkvmerge.exe"/>
+    <ROW Component="mkvmerge.exe" ComponentId="{6398B58B-34C5-4004-82C1-801FBF3D8EA3}" Directory_="APPDIR" Attributes="256" KeyPath="mkvmerge.exe"/>
     <ROW Component="motionvectors.cp39win_amd64.pyd" ComponentId="{3DD6D460-C5D2-423B-8705-9B04BD7F5C48}" Directory_="sidedata_Dir" Attributes="256" KeyPath="motionvectors.cp39win_amd64.pyd" Type="0"/>
     <ROW Component="opencv_videoio_ffmpeg451_64.dll" ComponentId="{D93A2BB7-76F4-4430-B063-1EB2A8C067DC}" Directory_="cv2_Dir" Attributes="256" KeyPath="opencv_videoio_ffmpeg451_64.dll"/>
     <ROW Component="postproc55566af066.dll" ComponentId="{9F49DD52-0C59-4D93-BD0B-93AFECBE0016}" Directory_="av.libs_Dir" Attributes="256" KeyPath="postproc55566af066.dll"/>
@@ -317,8 +317,8 @@
     <ROW File="base_library.zip" Component_="LICENSE" FileName="BASE_L~1.ZIP|base_library.zip" Attributes="0" SourcePath="..\scenedetect\base_library.zip" SelfReg="false"/>
     <ROW File="libcrypto1_1.dll" Component_="libcrypto1_1.dll" FileName="LIBCRY~1.DLL|libcrypto-1_1.dll" Attributes="0" SourcePath="..\scenedetect\libcrypto-1_1.dll" SelfReg="false"/>
     <ROW File="libffi7.dll" Component_="libffi7.dll" FileName="libffi-7.dll" Attributes="0" SourcePath="..\scenedetect\libffi-7.dll" SelfReg="false"/>
-    <ROW File="ffmpeg.exe" Component_="ffmpeg.exe" FileName="ffmpeg.exe" Attributes="0" SourcePath="..\..\..\..\Downloads\scenedetect-win64\ffmpeg.exe" SelfReg="false" DigSign="true"/>
-    <ROW File="mkvmerge.exe" Component_="mkvmerge.exe" FileName="mkvmerge.exe" Attributes="0" SourcePath="..\..\..\..\Downloads\scenedetect-win64\mkvmerge.exe" SelfReg="false"/>
+    <ROW File="ffmpeg.exe" Component_="ffmpeg.exe" FileName="ffmpeg.exe" Attributes="0" SourcePath="..\scenedetect\ffmpeg.exe" SelfReg="false" DigSign="true"/>
+    <ROW File="mkvmerge.exe" Component_="mkvmerge.exe" FileName="mkvmerge.exe" Attributes="0" SourcePath="..\scenedetect\mkvmerge.exe" SelfReg="false"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.BootstrOptComponent">
     <ROW BootstrOptKey="GlobalOptions" DownloadFolder="[LocalAppDataFolder]\[|ProductName]\prerequisites"/>
