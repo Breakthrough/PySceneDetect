@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<DOCUMENT Type="Advanced Installer" CreateVersion="13.5" version="20.1" Modules="professional" RootPath="." Language="en" Id="{3919FEC9-E2C3-453E-81FD-9E8BABBE2CA4}">
+<DOCUMENT Type="Advanced Installer" CreateVersion="13.5" version="20.1.1" Modules="professional" RootPath="." Language="en" Id="{3919FEC9-E2C3-453E-81FD-9E8BABBE2CA4}">
   <COMPONENT cid="caphyon.advinst.msicomp.ProjectOptionsComponent">
     <ROW Name="HiddenItems" Value="ActSyncAppComponent;CPLAppletComponent;AppXAppDetailsComponent;FixupComponent;AppXCapabilitiesComponent;AppXDependenciesComponent;AppXProductDetailsComponent;AppXVisualAssetsComponent;AppXAppDeclarationsComponent;AppXUriRulesComponent;MsiXDiffComponent;MsixManifestEditorComponent"/>
   </COMPONENT>
@@ -7,7 +7,7 @@
     <ROW Property="AI_BITMAP_DISPLAY_MODE" Value="0"/>
     <ROW Property="AI_CURRENT_YEAR" Value="2022" ValueLocId="-"/>
     <ROW Property="AI_EXTERNALUIUNINSTALLERNAME" MultiBuildValue="DefaultBuild:aiui"/>
-    <ROW Property="AI_PACKAGING_TOOL" Value="Advanced Installer 20.1 build 87d75adb" ValueLocId="-"/>
+    <ROW Property="AI_PACKAGING_TOOL" Value="Advanced Installer 20.1.1 build 68535b5e" ValueLocId="-"/>
     <ROW Property="AI_PREREQ_REPAIR_ENABLED" MultiBuildValue="DefaultBuild:1"/>
     <ROW Property="AI_PRODUCTNAME_ARP" Value="[|ProductName]"/>
     <ROW Property="AI_ThemeStyle" Value="aero" MultiBuildValue="DefaultBuild:classic" MsiKey="AI_ThemeStyle"/>
@@ -53,7 +53,7 @@
     <ROW Directory="container_Dir" Directory_Parent="av_Dir" DefaultDir="CONTAI~1|container"/>
     <ROW Directory="core_Dir" Directory_Parent="numpy_Dir" DefaultDir="core"/>
     <ROW Directory="cv2_Dir" Directory_Parent="APPDIR" DefaultDir="cv2"/>
-    <ROW Directory="data_1_Dir" Directory_Parent="cv2_Dir" DefaultDir="data"/>
+    <ROW Directory="data_2_Dir" Directory_Parent="cv2_Dir" DefaultDir="data"/>
     <ROW Directory="data_Dir" Directory_Parent="av_Dir" DefaultDir="data"/>
     <ROW Directory="docs_Dir" Directory_Parent="APPDIR" DefaultDir="docs"/>
     <ROW Directory="examples_Dir" Directory_Parent="docs_Dir" DefaultDir="examples"/>
@@ -74,85 +74,46 @@
     <ROW Component="AI_DisableModify" ComponentId="{653C9260-5E39-41EA-9C74-362F9C299BED}" Directory_="APPDIR" Attributes="260" KeyPath="NoModify" Options="1"/>
     <ROW Component="APPDIR" ComponentId="{088A429B-96BF-40BE-9BA2-B2CA5EB76862}" Directory_="APPDIR" Attributes="0"/>
     <ROW Component="C4FE6FD5B7C4D07B3A313E754A9A6A8" ComponentId="{0DC87E5B-5F60-4A9A-AB46-BF92FDC477F3}" Directory_="APPDIR" Attributes="260" KeyPath="C4FE6FD5B7C4D07B3A313E754A9A6A8" Options="2"/>
+    <ROW Component="LICENSEFFMPEG" ComponentId="{198BFB37-5DD7-423C-8A43-219A38364857}" Directory_="APPDIR" Attributes="0" KeyPath="LICENSEFFMPEG" Type="0"/>
     <ROW Component="ProductInformation" ComponentId="{C45D033C-5DD4-40D4-AABA-C6639AF83796}" Directory_="APPDIR" Attributes="4" KeyPath="Version"/>
-    <ROW Component="VCRUNTIME140.dll" ComponentId="{9D43EA6A-262C-4E7A-8B63-7046CA950E40}" Directory_="APPDIR" Attributes="256" KeyPath="VCRUNTIME140.dll"/>
-    <ROW Component="__init__.py" ComponentId="{87336677-B6D8-4844-8A1F-83CD613210F1}" Directory_="data_1_Dir" Attributes="0" KeyPath="__init__.py" Type="0"/>
-    <ROW Component="_decimal.pyd" ComponentId="{E70BCEFB-8371-4676-910D-2FAB50283DA0}" Directory_="APPDIR" Attributes="256" KeyPath="_queue.pyd" Type="0"/>
-    <ROW Component="_multiarray_tests.cp39win_amd64.pyd" ComponentId="{DC9CE16B-83C4-4A1C-A276-50CE1AEC9D53}" Directory_="core_Dir" Attributes="256" KeyPath="_multiarray_tests.cp39win_amd64.pyd" Type="0"/>
-    <ROW Component="_pocketfft_internal.cp39win_amd64.pyd" ComponentId="{159C1327-C7DC-4506-BF6A-FA33DEF2C996}" Directory_="fft_Dir" Attributes="256" KeyPath="_pocketfft_internal.cp39win_amd64.pyd" Type="0"/>
-    <ROW Component="apimswincoreconsolel110.dll" ComponentId="{D4C253BD-52FE-41F7-AAB8-6A52D09AD235}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincoreconsolel110.dll"/>
-    <ROW Component="apimswincoredatetimel110.dll" ComponentId="{A611099B-4476-42E8-8902-49C505ED882F}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincoredatetimel110.dll"/>
-    <ROW Component="apimswincoredebugl110.dll" ComponentId="{ABB950F5-D6BB-4688-99A6-F9E730879A84}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincoredebugl110.dll"/>
-    <ROW Component="apimswincoreerrorhandlingl110.dll" ComponentId="{DEBC24A4-EE41-479F-8B16-6DAB1723FFFB}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincoreerrorhandlingl110.dll"/>
-    <ROW Component="apimswincorefibersl110.dll" ComponentId="{7A1D358D-1A3D-460B-A07B-2667BC2BD90E}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincorefibersl110.dll"/>
-    <ROW Component="apimswincorefilel110.dll" ComponentId="{C5A10CAA-5748-4A80-AA59-C9283697CE69}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincorefilel110.dll"/>
-    <ROW Component="apimswincorefilel120.dll" ComponentId="{83BC863B-68EE-46A2-A998-A0412AC54F35}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincorefilel120.dll"/>
-    <ROW Component="apimswincorefilel210.dll" ComponentId="{FDB35F95-9F81-4DD6-90A1-9378BB80E47D}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincorefilel210.dll"/>
-    <ROW Component="apimswincorehandlel110.dll" ComponentId="{56C021F1-501D-438B-95FD-C6A7AED4AEAC}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincorehandlel110.dll"/>
-    <ROW Component="apimswincoreheapl110.dll" ComponentId="{713B6B99-96C1-4CE7-9308-05890429F8A8}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincoreheapl110.dll"/>
-    <ROW Component="apimswincoreinterlockedl110.dll" ComponentId="{708EC3A6-BF23-4130-B7E5-C8E696D9B580}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincoreinterlockedl110.dll"/>
-    <ROW Component="apimswincorelibraryloaderl110.dll" ComponentId="{FD18EA2A-5120-4C20-AFBA-5C111851DAB4}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincorelibraryloaderl110.dll"/>
-    <ROW Component="apimswincorelocalizationl120.dll" ComponentId="{B11E83E8-2F10-4A2E-BC9E-B178465136BA}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincorelocalizationl120.dll"/>
-    <ROW Component="apimswincorememoryl110.dll" ComponentId="{40F0FA34-58E6-438A-9FB1-BC3DA7E6AC6F}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincorememoryl110.dll"/>
-    <ROW Component="apimswincorenamedpipel110.dll" ComponentId="{18705080-FE89-4AC6-8A6E-E1BA0DF5C0D1}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincorenamedpipel110.dll"/>
-    <ROW Component="apimswincoreprocessenvironmentl110.dll" ComponentId="{00E7C611-2D71-4DF0-8543-5972642C8790}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincoreprocessenvironmentl110.dll"/>
-    <ROW Component="apimswincoreprocessthreadsl110.dll" ComponentId="{B60A6BBA-F380-411F-BFD3-B0DF6818D501}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincoreprocessthreadsl110.dll"/>
-    <ROW Component="apimswincoreprocessthreadsl111.dll" ComponentId="{ECAF1AAE-F9AA-44EC-9D39-4DA258F9BC91}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincoreprocessthreadsl111.dll"/>
-    <ROW Component="apimswincoreprofilel110.dll" ComponentId="{D44469F9-D5AB-473A-9DD1-D2B73E9C558F}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincoreprofilel110.dll"/>
-    <ROW Component="apimswincorertlsupportl110.dll" ComponentId="{2C756FAB-D123-4CAA-8934-8A28A6963B52}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincorertlsupportl110.dll"/>
-    <ROW Component="apimswincorestringl110.dll" ComponentId="{AE6B18FC-37A2-49B7-A27C-0AB5DD94A25D}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincorestringl110.dll"/>
-    <ROW Component="apimswincoresynchl110.dll" ComponentId="{923911A3-8458-4472-8981-FB368E5514A2}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincoresynchl110.dll"/>
-    <ROW Component="apimswincoresynchl120.dll" ComponentId="{8D32C615-F055-411F-852E-4EC513C1CE31}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincoresynchl120.dll"/>
-    <ROW Component="apimswincoresysinfol110.dll" ComponentId="{5CD80CF1-2A75-4452-AC8D-B65C861CCFD4}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincoresysinfol110.dll"/>
-    <ROW Component="apimswincoretimezonel110.dll" ComponentId="{CC7E8992-183B-4C97-A2F7-19825F2C60D9}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincoretimezonel110.dll"/>
-    <ROW Component="apimswincoreutill110.dll" ComponentId="{916D60D2-5B8C-4269-9FFC-58317724DB5E}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincoreutill110.dll"/>
-    <ROW Component="apimswincrtconiol110.dll" ComponentId="{4E11AB6B-8E58-4295-92A1-48E997368699}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincrtconiol110.dll"/>
-    <ROW Component="apimswincrtconvertl110.dll" ComponentId="{0B4EF864-EC54-4CE6-91DE-7CE13230DEC8}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincrtconvertl110.dll"/>
-    <ROW Component="apimswincrtenvironmentl110.dll" ComponentId="{1253A1C1-6ACF-4E8F-AA4E-1119CF29C009}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincrtenvironmentl110.dll"/>
-    <ROW Component="apimswincrtfilesysteml110.dll" ComponentId="{0523F7BE-7B15-46F8-9F1F-01A85CAB22BF}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincrtfilesysteml110.dll"/>
-    <ROW Component="apimswincrtheapl110.dll" ComponentId="{05DEB392-4486-4036-8BF7-433D4216A0CB}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincrtheapl110.dll"/>
-    <ROW Component="apimswincrtlocalel110.dll" ComponentId="{86C783AB-EDDF-4FD1-8D1E-9CE8EBFA22E9}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincrtlocalel110.dll"/>
-    <ROW Component="apimswincrtmathl110.dll" ComponentId="{C5FD02A1-228D-4CA3-823F-F61592622CDD}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincrtmathl110.dll"/>
-    <ROW Component="apimswincrtprocessl110.dll" ComponentId="{C459E3F7-1209-41B2-82F6-0ACB616721C8}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincrtprocessl110.dll"/>
-    <ROW Component="apimswincrtruntimel110.dll" ComponentId="{0A5BAC4A-BB34-4A89-A628-6DF237505FB2}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincrtruntimel110.dll"/>
-    <ROW Component="apimswincrtstdiol110.dll" ComponentId="{B977A310-C2D1-44C1-9134-0C3D89304AA1}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincrtstdiol110.dll"/>
-    <ROW Component="apimswincrtstringl110.dll" ComponentId="{C7464479-5EA0-47EF-8F24-BC7884C8BDC6}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincrtstringl110.dll"/>
-    <ROW Component="apimswincrttimel110.dll" ComponentId="{C4813243-0B25-45F8-8541-3FB15CAFD5CF}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincrttimel110.dll"/>
-    <ROW Component="apimswincrtutilityl110.dll" ComponentId="{5EB0F535-0A59-4749-BF7C-D9CD3FEF58EE}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincrtutilityl110.dll"/>
-    <ROW Component="avcodec58.dll" ComponentId="{C1E89411-6CED-4C47-A0D6-AA80A2B7FE3D}" Directory_="APPDIR" Attributes="256" KeyPath="avcodec58.dll"/>
-    <ROW Component="avdevice58.dll" ComponentId="{E3827EC3-2C27-4A5D-B92F-30F48C9CEDD6}" Directory_="APPDIR" Attributes="256" KeyPath="avdevice58.dll"/>
-    <ROW Component="avfilter7.dll" ComponentId="{C6DC369E-F8AD-41DA-A57F-606559813355}" Directory_="APPDIR" Attributes="256" KeyPath="avfilter7.dll"/>
-    <ROW Component="avformat58.dll" ComponentId="{C75F5171-EB0D-4EAD-A974-E88D55FF5B37}" Directory_="APPDIR" Attributes="256" KeyPath="avformat58.dll"/>
-    <ROW Component="avutil56.dll" ComponentId="{FF453046-E2E7-471D-927D-FC83361D189B}" Directory_="APPDIR" Attributes="256" KeyPath="avutil56.dll"/>
-    <ROW Component="bit_generator.cp39win_amd64.pyd" ComponentId="{3B7339A6-2517-42CA-8756-83526D10C528}" Directory_="random_Dir" Attributes="256" KeyPath="bit_generator.cp39win_amd64.pyd" Type="0"/>
-    <ROW Component="buffer.cp39win_amd64.pyd" ComponentId="{E6879C11-0F85-45BF-96EA-BC358898602B}" Directory_="av_Dir" Attributes="256" KeyPath="buffer.cp39win_amd64.pyd" Type="0"/>
-    <ROW Component="changelog.md" ComponentId="{9FAA5606-4AA9-4E09-BE08-01D44D026C72}" Directory_="docs_Dir" Attributes="0" KeyPath="changelog.md" Type="0"/>
-    <ROW Component="codec.cp39win_amd64.pyd" ComponentId="{140C95D0-539E-41A9-BAC8-D753DE2BA681}" Directory_="codec_Dir" Attributes="256" KeyPath="codec.cp39win_amd64.pyd" Type="0"/>
-    <ROW Component="codeccontext.cp39win_amd64.pyd" ComponentId="{063FAFC3-95D0-42D2-B52A-EB827BA4C2C8}" Directory_="audio_Dir" Attributes="256" KeyPath="codeccontext.cp39win_amd64.pyd" Type="0"/>
-    <ROW Component="codeccontext.cp39win_amd64.pyd_1" ComponentId="{4858F275-97C8-4AEC-9993-A32FE90D8F62}" Directory_="subtitles_Dir" Attributes="256" KeyPath="codeccontext.cp39win_amd64.pyd_1" Type="0"/>
-    <ROW Component="codeccontext.cp39win_amd64.pyd_2" ComponentId="{02F9B8D4-C58A-4748-AD07-9A1F39C3499C}" Directory_="video_Dir" Attributes="256" KeyPath="codeccontext.cp39win_amd64.pyd_2" Type="0"/>
-    <ROW Component="commandline.md" ComponentId="{7974A5A1-E591-4F1E-ACEC-FC37C87F8DBB}" Directory_="reference_Dir" Attributes="0" KeyPath="commandline.md" Type="0"/>
-    <ROW Component="context.cp39win_amd64.pyd" ComponentId="{8AA0088B-BCC1-431B-9F2D-F3D577984492}" Directory_="filter_Dir" Attributes="256" KeyPath="context.cp39win_amd64.pyd_1" Type="0"/>
-    <ROW Component="copyright.md" ComponentId="{29C90290-9D66-4E64-9B8D-01AAC8E1EA3A}" Directory_="other_Dir" Attributes="0" KeyPath="copyright.md" Type="0"/>
-    <ROW Component="core.cp39win_amd64.pyd" ComponentId="{BDF46100-C43A-4C46-9CFF-4D1466CF49F3}" Directory_="container_Dir" Attributes="256" KeyPath="core.cp39win_amd64.pyd" Type="0"/>
-    <ROW Component="cv2.cp39win_amd64.pyd" ComponentId="{8DAC7821-B471-4850-B309-2A2B914D7275}" Directory_="cv2_Dir" Attributes="256" KeyPath="cv2.cp39win_amd64.pyd" Type="0"/>
+    <ROW Component="VCRUNTIME140.dll" ComponentId="{792F5C55-564F-4383-89BC-32AE7D2FFB59}" Directory_="APPDIR" Attributes="256" KeyPath="VCRUNTIME140.dll"/>
+    <ROW Component="__init__.py" ComponentId="{112B34B1-1596-4C6F-9920-E4C4079B9909}" Directory_="data_2_Dir" Attributes="0" KeyPath="__init__.py" Type="0"/>
+    <ROW Component="_multiarray_tests.cp39win_amd64.pyd" ComponentId="{D632F6BC-995E-478C-83F8-EE59CA6D5021}" Directory_="core_Dir" Attributes="256" KeyPath="_multiarray_tests.cp39win_amd64.pyd" Type="0"/>
+    <ROW Component="_pocketfft_internal.cp39win_amd64.pyd" ComponentId="{00E01C5F-FA8A-4852-8203-34E94D7AD39B}" Directory_="fft_Dir" Attributes="256" KeyPath="_pocketfft_internal.cp39win_amd64.pyd" Type="0"/>
+    <ROW Component="avcodec58.dll" ComponentId="{E42DF28C-05CB-49F1-BE84-239F6C828060}" Directory_="APPDIR" Attributes="256" KeyPath="avcodec58.dll"/>
+    <ROW Component="avdevice58.dll" ComponentId="{EACCBC85-912D-4AC7-B2CF-94D700AB3F68}" Directory_="APPDIR" Attributes="256" KeyPath="avdevice58.dll"/>
+    <ROW Component="avfilter7.dll" ComponentId="{B88AECE5-DA0F-401E-B529-68673E3A05EF}" Directory_="APPDIR" Attributes="256" KeyPath="avfilter7.dll"/>
+    <ROW Component="avformat58.dll" ComponentId="{90DB8500-9A52-45DF-8DF8-A22441AC2EE7}" Directory_="APPDIR" Attributes="256" KeyPath="avformat58.dll"/>
+    <ROW Component="avutil56.dll" ComponentId="{5F77A1BC-A330-4EF3-812B-88EA766069FD}" Directory_="APPDIR" Attributes="256" KeyPath="avutil56.dll"/>
+    <ROW Component="bit_generator.cp39win_amd64.pyd" ComponentId="{3AEECF31-1FE6-431F-BA0A-3E72132DF2B3}" Directory_="random_Dir" Attributes="256" KeyPath="bit_generator.cp39win_amd64.pyd" Type="0"/>
+    <ROW Component="buffer.cp39win_amd64.pyd" ComponentId="{AB957A9E-3295-4590-9D38-97D59E0FD639}" Directory_="av_Dir" Attributes="256" KeyPath="buffer.cp39win_amd64.pyd" Type="0"/>
+    <ROW Component="changelog.md" ComponentId="{30C89EDE-321D-4D06-A90E-9650093ADD73}" Directory_="docs_Dir" Attributes="0" KeyPath="changelog.md" Type="0"/>
+    <ROW Component="codec.cp39win_amd64.pyd" ComponentId="{E5E90BBF-2CB2-4EC7-8187-53843865256C}" Directory_="codec_Dir" Attributes="256" KeyPath="codec.cp39win_amd64.pyd" Type="0"/>
+    <ROW Component="codeccontext.cp39win_amd64.pyd" ComponentId="{DC11505E-3CCF-4A4A-BAB7-6CF633A88813}" Directory_="audio_Dir" Attributes="256" KeyPath="codeccontext.cp39win_amd64.pyd" Type="0"/>
+    <ROW Component="codeccontext.cp39win_amd64.pyd_3" ComponentId="{058DF240-3D88-42A4-A7DF-9842CFDFE29A}" Directory_="subtitles_Dir" Attributes="256" KeyPath="codeccontext.cp39win_amd64.pyd_3" Type="0"/>
+    <ROW Component="codeccontext.cp39win_amd64.pyd_4" ComponentId="{66D0747E-507A-4E2E-9302-E65E89C9F641}" Directory_="video_Dir" Attributes="256" KeyPath="codeccontext.cp39win_amd64.pyd_4" Type="0"/>
+    <ROW Component="commandline.md" ComponentId="{8848348A-4FB5-41A1-92F9-DB45C3D78572}" Directory_="reference_Dir" Attributes="0" KeyPath="commandline.md" Type="0"/>
+    <ROW Component="context.cp39win_amd64.pyd" ComponentId="{E3F30987-9DAB-4443-A474-37EA79D57470}" Directory_="filter_Dir" Attributes="256" KeyPath="context.cp39win_amd64.pyd_2" Type="0"/>
+    <ROW Component="copyright.md" ComponentId="{B4B77536-94AD-4C38-A336-D28929DA9816}" Directory_="other_Dir" Attributes="0" KeyPath="copyright.md" Type="0"/>
+    <ROW Component="core.cp39win_amd64.pyd" ComponentId="{463D5F46-10D7-4D00-B2AB-1F04AAE655BA}" Directory_="container_Dir" Attributes="256" KeyPath="core.cp39win_amd64.pyd" Type="0"/>
+    <ROW Component="cv2.cp39win_amd64.pyd" ComponentId="{0AFE4DC0-4338-4841-AFEC-E3951F826A51}" Directory_="cv2_Dir" Attributes="256" KeyPath="cv2.cp39win_amd64.pyd" Type="0"/>
     <ROW Component="ffmpeg.exe" ComponentId="{A08C3599-F3C1-4C66-82D8-311B54D79EC3}" Directory_="APPDIR" Attributes="256" KeyPath="ffmpeg.exe"/>
-    <ROW Component="goldeneyestats.png" ComponentId="{01AC122E-B1E6-4FAD-90EC-943AAA98DC7F}" Directory_="img_Dir" Attributes="0" KeyPath="goldeneyestats.png" Type="0"/>
-    <ROW Component="lapack_lite.cp39win_amd64.pyd" ComponentId="{44D901C1-EE8F-40D8-8540-37F5591822E3}" Directory_="linalg_Dir" Attributes="256" KeyPath="lapack_lite.cp39win_amd64.pyd" Type="0"/>
-    <ROW Component="libcrypto1_1.dll" ComponentId="{9A14B3ED-4BA0-4503-81BD-A9C102B3FB18}" Directory_="APPDIR" Attributes="256" KeyPath="libcrypto1_1.dll"/>
-    <ROW Component="libffi7.dll" ComponentId="{361A2CAC-EAC7-4625-89D0-97E141B46621}" Directory_="APPDIR" Attributes="256" KeyPath="libffi7.dll"/>
-    <ROW Component="libssl1_1.dll" ComponentId="{BFDD545F-92FD-48C6-8AAD-60B0E78FD18E}" Directory_="APPDIR" Attributes="256" KeyPath="libssl1_1.dll"/>
+    <ROW Component="goldeneyestats.png" ComponentId="{DFA6EE75-0200-4206-B671-F9BE87D19309}" Directory_="img_Dir" Attributes="0" KeyPath="goldeneyestats.png" Type="0"/>
+    <ROW Component="lapack_lite.cp39win_amd64.pyd" ComponentId="{5F44B5F6-F8E8-4BE2-86AF-F8E0673BC80C}" Directory_="linalg_Dir" Attributes="256" KeyPath="lapack_lite.cp39win_amd64.pyd" Type="0"/>
+    <ROW Component="libcrypto1_1.dll" ComponentId="{3B2ED2C9-985A-4943-A9DF-96FAEC0C4846}" Directory_="APPDIR" Attributes="256" KeyPath="libcrypto1_1.dll"/>
+    <ROW Component="libffi7.dll" ComponentId="{07FBA050-8DCA-4532-B700-C55B716730B3}" Directory_="APPDIR" Attributes="256" KeyPath="libffi7.dll"/>
+    <ROW Component="libopenblas.FB5AE2TYXYH2IJRDKGDGQ3XBKLKTF43H.gfortranwin_amd64.dll" ComponentId="{EDF2144D-7794-42F1-8DA8-A367745CC493}" Directory_="APPDIR" Attributes="256" KeyPath="libopenblas.FB5AE2TYXYH2IJRDKGDGQ3XBKLKTF43H.gfortranwin_amd64.dll"/>
+    <ROW Component="libssl1_1.dll" ComponentId="{9996385D-22E9-4D02-92B4-10FB3D43E538}" Directory_="APPDIR" Attributes="256" KeyPath="libssl1_1.dll"/>
     <ROW Component="mkvmerge.exe" ComponentId="{55BCC633-07AA-42A9-9ECF-0CC6DF87E97E}" Directory_="APPDIR" Attributes="256" KeyPath="mkvmerge.exe"/>
-    <ROW Component="motionvectors.cp39win_amd64.pyd" ComponentId="{2534E2C0-5C00-4186-814D-F0A280DBCA56}" Directory_="sidedata_Dir" Attributes="256" KeyPath="motionvectors.cp39win_amd64.pyd" Type="0"/>
-    <ROW Component="opencv_videoio_ffmpeg451_64.dll" ComponentId="{CE4025E4-B971-44C9-A398-4136B0F86E8D}" Directory_="cv2_Dir" Attributes="256" KeyPath="opencv_videoio_ffmpeg451_64.dll"/>
-    <ROW Component="postproc55.dll" ComponentId="{71368E1B-248B-4B3F-A905-5F2907CF54DD}" Directory_="APPDIR" Attributes="256" KeyPath="postproc55.dll"/>
-    <ROW Component="python39.dll" ComponentId="{E85F54A7-6034-4B6B-A8B4-9F9CD0F04D54}" Directory_="APPDIR" Attributes="256" KeyPath="python39.dll"/>
-    <ROW Component="scenedetect.exe" ComponentId="{12AC7943-010B-4DB8-B764-77193E9E6A32}" Directory_="APPDIR" Attributes="256" KeyPath="scenedetect.exe"/>
-    <ROW Component="stream.cp39win_amd64.pyd" ComponentId="{2AE34951-A59C-4628-B9AB-9A59D7C58670}" Directory_="data_Dir" Attributes="256" KeyPath="stream.cp39win_amd64.pyd_1" Type="0"/>
-    <ROW Component="swresample3.dll" ComponentId="{42F47332-2D7E-4A9A-9E0C-8E9EB1FCDDD0}" Directory_="APPDIR" Attributes="256" KeyPath="swresample3.dll"/>
-    <ROW Component="swscale5.dll" ComponentId="{6030345A-F7E9-46BA-9F0E-6792CEF258C1}" Directory_="APPDIR" Attributes="256" KeyPath="swscale5.dll"/>
-    <ROW Component="ucrtbase.dll" ComponentId="{BA358259-21F7-445F-9706-371E9998349A}" Directory_="APPDIR" Attributes="256" KeyPath="ucrtbase.dll"/>
-    <ROW Component="usageexample.md" ComponentId="{ECCB744F-4A7A-4F6C-9662-796B80B0943B}" Directory_="examples_Dir" Attributes="0" KeyPath="usageexample.md" Type="0"/>
+    <ROW Component="motionvectors.cp39win_amd64.pyd" ComponentId="{164220BC-3DC2-4705-967E-BCE2A97070C0}" Directory_="sidedata_Dir" Attributes="256" KeyPath="motionvectors.cp39win_amd64.pyd" Type="0"/>
+    <ROW Component="opencv_videoio_ffmpeg451_64.dll" ComponentId="{7A409EC6-64AE-4880-8F68-31D007451DBF}" Directory_="cv2_Dir" Attributes="256" KeyPath="opencv_videoio_ffmpeg451_64.dll"/>
+    <ROW Component="postproc55.dll" ComponentId="{0A5060B9-A58F-420F-B4B8-D2F2FF3071AE}" Directory_="APPDIR" Attributes="256" KeyPath="postproc55.dll"/>
+    <ROW Component="python39.dll" ComponentId="{0748FD45-1660-40EF-A77E-F7CEEB9A6A18}" Directory_="APPDIR" Attributes="256" KeyPath="python39.dll"/>
+    <ROW Component="scenedetect.exe" ComponentId="{CFBCC2A6-B038-4DB8-809F-1250D0C709E7}" Directory_="APPDIR" Attributes="256" KeyPath="scenedetect.exe"/>
+    <ROW Component="stream.cp39win_amd64.pyd" ComponentId="{F2096943-913E-467D-9FE0-BAEA3DC388EF}" Directory_="data_Dir" Attributes="256" KeyPath="stream.cp39win_amd64.pyd_5" Type="0"/>
+    <ROW Component="swresample3.dll" ComponentId="{684191B3-538B-40C3-B815-17412586F690}" Directory_="APPDIR" Attributes="256" KeyPath="swresample3.dll"/>
+    <ROW Component="swscale5.dll" ComponentId="{69DC5AAD-77BF-4F39-8936-05523079877F}" Directory_="APPDIR" Attributes="256" KeyPath="swscale5.dll"/>
+    <ROW Component="usageexample.md" ComponentId="{0CF1766E-4A8F-4CF6-8BEE-9CB092455275}" Directory_="examples_Dir" Attributes="0" KeyPath="usageexample.md" Type="0"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiFeatsComponent">
     <ROW Feature="C4FE6FD5B7C4D07B3A313E754A9A6A8" Title="Visual C++ Redistributable for Visual Studio 2015-2019 x64" Description="Visual C++ Redistributable for Visual Studio 2015-2019 x64" Display="9" Level="1" Attributes="0"/>
@@ -162,6 +123,74 @@
     <ATTRIBUTE name="CurrentFeature" value="PySceneDetect"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiFilesComponent">
+    <ROW File="ffmpeg.exe" Component_="ffmpeg.exe" FileName="ffmpeg.exe" Attributes="0" SourcePath="..\scenedetect\ffmpeg.exe" SelfReg="false" DigSign="true"/>
+    <ROW File="mkvmerge.exe" Component_="mkvmerge.exe" FileName="mkvmerge.exe" Attributes="0" SourcePath="..\scenedetect\mkvmerge.exe" SelfReg="false"/>
+    <ROW File="LICENSEFFMPEG" Component_="LICENSEFFMPEG" FileName="LICENS~1|LICENSE-FFMPEG" Attributes="0" SourcePath="..\scenedetect\LICENSE-FFMPEG" SelfReg="false"/>
+    <ROW File="LICENSEMKVMERGE" Component_="LICENSEFFMPEG" FileName="LICENS~2|LICENSE-MKVMERGE" Attributes="0" SourcePath="..\scenedetect\LICENSE-MKVMERGE" SelfReg="false"/>
+    <ROW File="LICENSEPYTHON" Component_="LICENSEFFMPEG" FileName="LICENS~3|LICENSE-PYTHON" Attributes="0" SourcePath="..\scenedetect\LICENSE-PYTHON" SelfReg="false"/>
+    <ROW File="postproc55.dll" Component_="postproc55.dll" FileName="POSTPR~1.DLL|postproc-55.dll" Attributes="0" SourcePath="..\scenedetect\postproc-55.dll" SelfReg="false"/>
+    <ROW File="pyexpat.pyd" Component_="LICENSEFFMPEG" FileName="pyexpat.pyd" Attributes="0" SourcePath="..\scenedetect\pyexpat.pyd" SelfReg="false"/>
+    <ROW File="python39.dll" Component_="python39.dll" FileName="python39.dll" Attributes="0" SourcePath="..\scenedetect\python39.dll" SelfReg="false"/>
+    <ROW File="README.md" Component_="LICENSEFFMPEG" FileName="README.md" Attributes="0" SourcePath="..\scenedetect\README.md" SelfReg="false"/>
+    <ROW File="scenedetect.cfg" Component_="LICENSEFFMPEG" FileName="SCENED~1.CFG|scenedetect.cfg" Attributes="0" SourcePath="..\scenedetect\scenedetect.cfg" SelfReg="false"/>
+    <ROW File="scenedetect.exe" Component_="scenedetect.exe" FileName="SCENED~1.EXE|scenedetect.exe" Attributes="0" SourcePath="..\scenedetect\scenedetect.exe" SelfReg="false" DigSign="true"/>
+    <ROW File="select.pyd" Component_="LICENSEFFMPEG" FileName="select.pyd" Attributes="0" SourcePath="..\scenedetect\select.pyd" SelfReg="false"/>
+    <ROW File="swresample3.dll" Component_="swresample3.dll" FileName="SWRESA~1.DLL|swresample-3.dll" Attributes="0" SourcePath="..\scenedetect\swresample-3.dll" SelfReg="false"/>
+    <ROW File="swscale5.dll" Component_="swscale5.dll" FileName="SWSCAL~1.DLL|swscale-5.dll" Attributes="0" SourcePath="..\scenedetect\swscale-5.dll" SelfReg="false"/>
+    <ROW File="unicodedata.pyd" Component_="LICENSEFFMPEG" FileName="UNICOD~1.PYD|unicodedata.pyd" Attributes="0" SourcePath="..\scenedetect\unicodedata.pyd" SelfReg="false"/>
+    <ROW File="VCRUNTIME140.dll" Component_="VCRUNTIME140.dll" FileName="VCRUNT~1.DLL|VCRUNTIME140.dll" Attributes="0" SourcePath="..\scenedetect\VCRUNTIME140.dll" SelfReg="false"/>
+    <ROW File="codeccontext.cp39win_amd64.pyd" Component_="codeccontext.cp39win_amd64.pyd" FileName="CODECC~1.PYD|codeccontext.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\audio\codeccontext.cp39-win_amd64.pyd" SelfReg="false"/>
+    <ROW File="fifo.cp39win_amd64.pyd" Component_="codeccontext.cp39win_amd64.pyd" FileName="FIFOCP~1.PYD|fifo.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\audio\fifo.cp39-win_amd64.pyd" SelfReg="false"/>
+    <ROW File="format.cp39win_amd64.pyd" Component_="codeccontext.cp39win_amd64.pyd" FileName="FORMAT~1.PYD|format.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\audio\format.cp39-win_amd64.pyd" SelfReg="false"/>
+    <ROW File="frame.cp39win_amd64.pyd" Component_="codeccontext.cp39win_amd64.pyd" FileName="FRAMEC~1.PYD|frame.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\audio\frame.cp39-win_amd64.pyd" SelfReg="false"/>
+    <ROW File="layout.cp39win_amd64.pyd" Component_="codeccontext.cp39win_amd64.pyd" FileName="LAYOUT~1.PYD|layout.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\audio\layout.cp39-win_amd64.pyd" SelfReg="false"/>
+    <ROW File="plane.cp39win_amd64.pyd" Component_="codeccontext.cp39win_amd64.pyd" FileName="PLANEC~1.PYD|plane.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\audio\plane.cp39-win_amd64.pyd" SelfReg="false"/>
+    <ROW File="resampler.cp39win_amd64.pyd" Component_="codeccontext.cp39win_amd64.pyd" FileName="RESAMP~1.PYD|resampler.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\audio\resampler.cp39-win_amd64.pyd" SelfReg="false"/>
+    <ROW File="stream.cp39win_amd64.pyd" Component_="codeccontext.cp39win_amd64.pyd" FileName="STREAM~1.PYD|stream.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\audio\stream.cp39-win_amd64.pyd" SelfReg="false"/>
+    <ROW File="buffer.cp39win_amd64.pyd" Component_="buffer.cp39win_amd64.pyd" FileName="BUFFER~1.PYD|buffer.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\buffer.cp39-win_amd64.pyd" SelfReg="false"/>
+    <ROW File="bytesource.cp39win_amd64.pyd" Component_="buffer.cp39win_amd64.pyd" FileName="BYTESO~1.PYD|bytesource.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\bytesource.cp39-win_amd64.pyd" SelfReg="false"/>
+    <ROW File="codec.cp39win_amd64.pyd" Component_="codec.cp39win_amd64.pyd" FileName="CODECC~1.PYD|codec.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\codec\codec.cp39-win_amd64.pyd" SelfReg="false"/>
+    <ROW File="context.cp39win_amd64.pyd" Component_="codec.cp39win_amd64.pyd" FileName="CONTEX~1.PYD|context.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\codec\context.cp39-win_amd64.pyd" SelfReg="false"/>
+    <ROW File="core.cp39win_amd64.pyd" Component_="core.cp39win_amd64.pyd" FileName="CORECP~1.PYD|core.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\container\core.cp39-win_amd64.pyd" SelfReg="false"/>
+    <ROW File="input.cp39win_amd64.pyd" Component_="core.cp39win_amd64.pyd" FileName="INPUTC~1.PYD|input.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\container\input.cp39-win_amd64.pyd" SelfReg="false"/>
+    <ROW File="output.cp39win_amd64.pyd" Component_="core.cp39win_amd64.pyd" FileName="OUTPUT~1.PYD|output.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\container\output.cp39-win_amd64.pyd" SelfReg="false"/>
+    <ROW File="pyio.cp39win_amd64.pyd" Component_="core.cp39win_amd64.pyd" FileName="PYIOCP~1.PYD|pyio.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\container\pyio.cp39-win_amd64.pyd" SelfReg="false"/>
+    <ROW File="streams.cp39win_amd64.pyd" Component_="core.cp39win_amd64.pyd" FileName="STREAM~1.PYD|streams.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\container\streams.cp39-win_amd64.pyd" SelfReg="false"/>
+    <ROW File="stream.cp39win_amd64.pyd_5" Component_="stream.cp39win_amd64.pyd" FileName="STREAM~1.PYD|stream.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\data\stream.cp39-win_amd64.pyd" SelfReg="false"/>
+    <ROW File="descriptor.cp39win_amd64.pyd" Component_="buffer.cp39win_amd64.pyd" FileName="DESCRI~1.PYD|descriptor.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\descriptor.cp39-win_amd64.pyd" SelfReg="false"/>
+    <ROW File="dictionary.cp39win_amd64.pyd" Component_="buffer.cp39win_amd64.pyd" FileName="DICTIO~1.PYD|dictionary.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\dictionary.cp39-win_amd64.pyd" SelfReg="false"/>
+    <ROW File="enum.cp39win_amd64.pyd" Component_="buffer.cp39win_amd64.pyd" FileName="ENUMCP~1.PYD|enum.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\enum.cp39-win_amd64.pyd" SelfReg="false"/>
+    <ROW File="error.cp39win_amd64.pyd" Component_="buffer.cp39win_amd64.pyd" FileName="ERRORC~1.PYD|error.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\error.cp39-win_amd64.pyd" SelfReg="false"/>
+    <ROW File="context.cp39win_amd64.pyd_2" Component_="context.cp39win_amd64.pyd" FileName="CONTEX~1.PYD|context.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\filter\context.cp39-win_amd64.pyd" SelfReg="false"/>
+    <ROW File="filter.cp39win_amd64.pyd" Component_="context.cp39win_amd64.pyd" FileName="FILTER~1.PYD|filter.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\filter\filter.cp39-win_amd64.pyd" SelfReg="false"/>
+    <ROW File="graph.cp39win_amd64.pyd" Component_="context.cp39win_amd64.pyd" FileName="GRAPHC~1.PYD|graph.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\filter\graph.cp39-win_amd64.pyd" SelfReg="false"/>
+    <ROW File="link.cp39win_amd64.pyd" Component_="context.cp39win_amd64.pyd" FileName="LINKCP~1.PYD|link.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\filter\link.cp39-win_amd64.pyd" SelfReg="false"/>
+    <ROW File="pad.cp39win_amd64.pyd" Component_="context.cp39win_amd64.pyd" FileName="PADCP3~1.PYD|pad.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\filter\pad.cp39-win_amd64.pyd" SelfReg="false"/>
+    <ROW File="format.cp39win_amd64.pyd_3" Component_="buffer.cp39win_amd64.pyd" FileName="FORMAT~1.PYD|format.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\format.cp39-win_amd64.pyd" SelfReg="false"/>
+    <ROW File="frame.cp39win_amd64.pyd_3" Component_="buffer.cp39win_amd64.pyd" FileName="FRAMEC~1.PYD|frame.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\frame.cp39-win_amd64.pyd" SelfReg="false"/>
+    <ROW File="logging.cp39win_amd64.pyd" Component_="buffer.cp39win_amd64.pyd" FileName="LOGGIN~1.PYD|logging.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\logging.cp39-win_amd64.pyd" SelfReg="false"/>
+    <ROW File="option.cp39win_amd64.pyd" Component_="buffer.cp39win_amd64.pyd" FileName="OPTION~1.PYD|option.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\option.cp39-win_amd64.pyd" SelfReg="false"/>
+    <ROW File="packet.cp39win_amd64.pyd" Component_="buffer.cp39win_amd64.pyd" FileName="PACKET~1.PYD|packet.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\packet.cp39-win_amd64.pyd" SelfReg="false"/>
+    <ROW File="plane.cp39win_amd64.pyd_3" Component_="buffer.cp39win_amd64.pyd" FileName="PLANEC~1.PYD|plane.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\plane.cp39-win_amd64.pyd" SelfReg="false"/>
+    <ROW File="motionvectors.cp39win_amd64.pyd" Component_="motionvectors.cp39win_amd64.pyd" FileName="MOTION~1.PYD|motionvectors.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\sidedata\motionvectors.cp39-win_amd64.pyd" SelfReg="false"/>
+    <ROW File="sidedata.cp39win_amd64.pyd" Component_="motionvectors.cp39win_amd64.pyd" FileName="SIDEDA~1.PYD|sidedata.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\sidedata\sidedata.cp39-win_amd64.pyd" SelfReg="false"/>
+    <ROW File="stream.cp39win_amd64.pyd_6" Component_="buffer.cp39win_amd64.pyd" FileName="STREAM~1.PYD|stream.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\stream.cp39-win_amd64.pyd" SelfReg="false"/>
+    <ROW File="codeccontext.cp39win_amd64.pyd_3" Component_="codeccontext.cp39win_amd64.pyd_3" FileName="CODECC~1.PYD|codeccontext.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\subtitles\codeccontext.cp39-win_amd64.pyd" SelfReg="false"/>
+    <ROW File="stream.cp39win_amd64.pyd_7" Component_="codeccontext.cp39win_amd64.pyd_3" FileName="STREAM~1.PYD|stream.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\subtitles\stream.cp39-win_amd64.pyd" SelfReg="false"/>
+    <ROW File="subtitle.cp39win_amd64.pyd" Component_="codeccontext.cp39win_amd64.pyd_3" FileName="SUBTIT~1.PYD|subtitle.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\subtitles\subtitle.cp39-win_amd64.pyd" SelfReg="false"/>
+    <ROW File="utils.cp39win_amd64.pyd" Component_="buffer.cp39win_amd64.pyd" FileName="UTILSC~1.PYD|utils.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\utils.cp39-win_amd64.pyd" SelfReg="false"/>
+    <ROW File="codeccontext.cp39win_amd64.pyd_4" Component_="codeccontext.cp39win_amd64.pyd_4" FileName="CODECC~1.PYD|codeccontext.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\video\codeccontext.cp39-win_amd64.pyd" SelfReg="false"/>
+    <ROW File="format.cp39win_amd64.pyd_4" Component_="codeccontext.cp39win_amd64.pyd_4" FileName="FORMAT~1.PYD|format.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\video\format.cp39-win_amd64.pyd" SelfReg="false"/>
+    <ROW File="frame.cp39win_amd64.pyd_4" Component_="codeccontext.cp39win_amd64.pyd_4" FileName="FRAMEC~1.PYD|frame.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\video\frame.cp39-win_amd64.pyd" SelfReg="false"/>
+    <ROW File="plane.cp39win_amd64.pyd_4" Component_="codeccontext.cp39win_amd64.pyd_4" FileName="PLANEC~1.PYD|plane.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\video\plane.cp39-win_amd64.pyd" SelfReg="false"/>
+    <ROW File="reformatter.cp39win_amd64.pyd" Component_="codeccontext.cp39win_amd64.pyd_4" FileName="REFORM~1.PYD|reformatter.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\video\reformatter.cp39-win_amd64.pyd" SelfReg="false"/>
+    <ROW File="stream.cp39win_amd64.pyd_8" Component_="codeccontext.cp39win_amd64.pyd_4" FileName="STREAM~1.PYD|stream.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\video\stream.cp39-win_amd64.pyd" SelfReg="false"/>
+    <ROW File="_core.cp39win_amd64.pyd" Component_="buffer.cp39win_amd64.pyd" FileName="_COREC~1.PYD|_core.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\_core.cp39-win_amd64.pyd" SelfReg="false"/>
+    <ROW File="cv2.cp39win_amd64.pyd" Component_="cv2.cp39win_amd64.pyd" FileName="CV2CP3~1.PYD|cv2.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\cv2\cv2.cp39-win_amd64.pyd" SelfReg="false"/>
+    <ROW File="__init__.py" Component_="__init__.py" FileName="__init__.py" Attributes="0" SourcePath="..\scenedetect\cv2\data\__init__.py" SelfReg="false"/>
+    <ROW File="opencv_videoio_ffmpeg451_64.dll" Component_="opencv_videoio_ffmpeg451_64.dll" FileName="OPENCV~1.DLL|opencv_videoio_ffmpeg451_64.dll" Attributes="0" SourcePath="..\scenedetect\cv2\opencv_videoio_ffmpeg451_64.dll" SelfReg="false"/>
+    <ROW File="version.py" Component_="cv2.cp39win_amd64.pyd" FileName="version.py" Attributes="0" SourcePath="..\scenedetect\cv2\version.py" SelfReg="false"/>
+    <ROW File="__init__.py_2" Component_="cv2.cp39win_amd64.pyd" FileName="__init__.py" Attributes="0" SourcePath="..\scenedetect\cv2\__init__.py" SelfReg="false"/>
     <ROW File="changelog.md" Component_="changelog.md" FileName="CHANGE~1.MD|changelog.md" Attributes="0" SourcePath="..\scenedetect\docs\changelog.md" SelfReg="false"/>
     <ROW File="contributing.md" Component_="changelog.md" FileName="CONTRI~1.MD|contributing.md" Attributes="0" SourcePath="..\scenedetect\docs\contributing.md" SelfReg="false"/>
     <ROW File="download.md" Component_="changelog.md" FileName="download.md" Attributes="0" SourcePath="..\scenedetect\docs\download.md" SelfReg="false"/>
@@ -184,128 +213,6 @@
     <ROW File="videosplitting.md" Component_="commandline.md" FileName="VIDEO-~1.MD|video-splitting.md" Attributes="0" SourcePath="..\scenedetect\docs\reference\video-splitting.md" SelfReg="false"/>
     <ROW File="requirements.txt" Component_="changelog.md" FileName="REQUIR~1.TXT|requirements.txt" Attributes="0" SourcePath="..\scenedetect\docs\requirements.txt" SelfReg="false"/>
     <ROW File="supporting.md" Component_="changelog.md" FileName="SUPPOR~1.MD|supporting.md" Attributes="0" SourcePath="..\scenedetect\docs\supporting.md" SelfReg="false"/>
-    <ROW File="ffmpeg.exe" Component_="ffmpeg.exe" FileName="ffmpeg.exe" Attributes="0" SourcePath="..\scenedetect\ffmpeg.exe" SelfReg="false" DigSign="true"/>
-    <ROW File="mkvmerge.exe" Component_="mkvmerge.exe" FileName="mkvmerge.exe" Attributes="0" SourcePath="..\scenedetect\mkvmerge.exe" SelfReg="false"/>
-    <ROW File="_queue.pyd" Component_="_decimal.pyd" FileName="_queue.pyd" Attributes="0" SourcePath="..\scenedetect\_queue.pyd" SelfReg="false"/>
-    <ROW File="_socket.pyd" Component_="_decimal.pyd" FileName="_socket.pyd" Attributes="0" SourcePath="..\scenedetect\_socket.pyd" SelfReg="false"/>
-    <ROW File="_ssl.pyd" Component_="_decimal.pyd" FileName="_ssl.pyd" Attributes="0" SourcePath="..\scenedetect\_ssl.pyd" SelfReg="false"/>
-    <ROW File="_uuid.pyd" Component_="_decimal.pyd" FileName="_uuid.pyd" Attributes="0" SourcePath="..\scenedetect\_uuid.pyd" SelfReg="false"/>
-    <ROW File="apimswincoreconsolel110.dll" Component_="apimswincoreconsolel110.dll" FileName="API-MS~1.DLL|api-ms-win-core-console-l1-1-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-core-console-l1-1-0.dll" SelfReg="false"/>
-    <ROW File="apimswincoredatetimel110.dll" Component_="apimswincoredatetimel110.dll" FileName="API-MS~2.DLL|api-ms-win-core-datetime-l1-1-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-core-datetime-l1-1-0.dll" SelfReg="false"/>
-    <ROW File="apimswincoredebugl110.dll" Component_="apimswincoredebugl110.dll" FileName="API-MS~3.DLL|api-ms-win-core-debug-l1-1-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-core-debug-l1-1-0.dll" SelfReg="false"/>
-    <ROW File="apimswincoreerrorhandlingl110.dll" Component_="apimswincoreerrorhandlingl110.dll" FileName="API-MS~4.DLL|api-ms-win-core-errorhandling-l1-1-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-core-errorhandling-l1-1-0.dll" SelfReg="false"/>
-    <ROW File="apimswincorefibersl110.dll" Component_="apimswincorefibersl110.dll" FileName="API-MS~5.DLL|api-ms-win-core-fibers-l1-1-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-core-fibers-l1-1-0.dll" SelfReg="false"/>
-    <ROW File="apimswincorefilel110.dll" Component_="apimswincorefilel110.dll" FileName="API-MS~6.DLL|api-ms-win-core-file-l1-1-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-core-file-l1-1-0.dll" SelfReg="false"/>
-    <ROW File="apimswincorefilel120.dll" Component_="apimswincorefilel120.dll" FileName="API-MS~7.DLL|api-ms-win-core-file-l1-2-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-core-file-l1-2-0.dll" SelfReg="false"/>
-    <ROW File="apimswincorefilel210.dll" Component_="apimswincorefilel210.dll" FileName="API-MS~8.DLL|api-ms-win-core-file-l2-1-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-core-file-l2-1-0.dll" SelfReg="false"/>
-    <ROW File="apimswincorehandlel110.dll" Component_="apimswincorehandlel110.dll" FileName="API-MS~9.DLL|api-ms-win-core-handle-l1-1-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-core-handle-l1-1-0.dll" SelfReg="false"/>
-    <ROW File="apimswincoreheapl110.dll" Component_="apimswincoreheapl110.dll" FileName="API-M~10.DLL|api-ms-win-core-heap-l1-1-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-core-heap-l1-1-0.dll" SelfReg="false"/>
-    <ROW File="apimswincoreinterlockedl110.dll" Component_="apimswincoreinterlockedl110.dll" FileName="API-M~11.DLL|api-ms-win-core-interlocked-l1-1-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-core-interlocked-l1-1-0.dll" SelfReg="false"/>
-    <ROW File="apimswincorelibraryloaderl110.dll" Component_="apimswincorelibraryloaderl110.dll" FileName="API-M~12.DLL|api-ms-win-core-libraryloader-l1-1-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-core-libraryloader-l1-1-0.dll" SelfReg="false"/>
-    <ROW File="apimswincorelocalizationl120.dll" Component_="apimswincorelocalizationl120.dll" FileName="API-M~13.DLL|api-ms-win-core-localization-l1-2-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-core-localization-l1-2-0.dll" SelfReg="false"/>
-    <ROW File="apimswincorememoryl110.dll" Component_="apimswincorememoryl110.dll" FileName="API-M~14.DLL|api-ms-win-core-memory-l1-1-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-core-memory-l1-1-0.dll" SelfReg="false"/>
-    <ROW File="apimswincorenamedpipel110.dll" Component_="apimswincorenamedpipel110.dll" FileName="API-M~15.DLL|api-ms-win-core-namedpipe-l1-1-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-core-namedpipe-l1-1-0.dll" SelfReg="false"/>
-    <ROW File="apimswincoreprocessenvironmentl110.dll" Component_="apimswincoreprocessenvironmentl110.dll" FileName="API-M~16.DLL|api-ms-win-core-processenvironment-l1-1-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-core-processenvironment-l1-1-0.dll" SelfReg="false"/>
-    <ROW File="apimswincoreprocessthreadsl110.dll" Component_="apimswincoreprocessthreadsl110.dll" FileName="API-M~17.DLL|api-ms-win-core-processthreads-l1-1-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-core-processthreads-l1-1-0.dll" SelfReg="false"/>
-    <ROW File="apimswincoreprocessthreadsl111.dll" Component_="apimswincoreprocessthreadsl111.dll" FileName="API-M~18.DLL|api-ms-win-core-processthreads-l1-1-1.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-core-processthreads-l1-1-1.dll" SelfReg="false"/>
-    <ROW File="apimswincoreprofilel110.dll" Component_="apimswincoreprofilel110.dll" FileName="API-M~19.DLL|api-ms-win-core-profile-l1-1-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-core-profile-l1-1-0.dll" SelfReg="false"/>
-    <ROW File="apimswincorertlsupportl110.dll" Component_="apimswincorertlsupportl110.dll" FileName="API-M~20.DLL|api-ms-win-core-rtlsupport-l1-1-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-core-rtlsupport-l1-1-0.dll" SelfReg="false"/>
-    <ROW File="apimswincorestringl110.dll" Component_="apimswincorestringl110.dll" FileName="API-M~21.DLL|api-ms-win-core-string-l1-1-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-core-string-l1-1-0.dll" SelfReg="false"/>
-    <ROW File="apimswincoresynchl110.dll" Component_="apimswincoresynchl110.dll" FileName="API-M~22.DLL|api-ms-win-core-synch-l1-1-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-core-synch-l1-1-0.dll" SelfReg="false"/>
-    <ROW File="apimswincoresynchl120.dll" Component_="apimswincoresynchl120.dll" FileName="API-M~23.DLL|api-ms-win-core-synch-l1-2-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-core-synch-l1-2-0.dll" SelfReg="false"/>
-    <ROW File="apimswincoresysinfol110.dll" Component_="apimswincoresysinfol110.dll" FileName="API-M~24.DLL|api-ms-win-core-sysinfo-l1-1-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-core-sysinfo-l1-1-0.dll" SelfReg="false"/>
-    <ROW File="apimswincoretimezonel110.dll" Component_="apimswincoretimezonel110.dll" FileName="API-M~25.DLL|api-ms-win-core-timezone-l1-1-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-core-timezone-l1-1-0.dll" SelfReg="false"/>
-    <ROW File="apimswincoreutill110.dll" Component_="apimswincoreutill110.dll" FileName="API-M~26.DLL|api-ms-win-core-util-l1-1-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-core-util-l1-1-0.dll" SelfReg="false"/>
-    <ROW File="apimswincrtconiol110.dll" Component_="apimswincrtconiol110.dll" FileName="API-M~27.DLL|api-ms-win-crt-conio-l1-1-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-crt-conio-l1-1-0.dll" SelfReg="false"/>
-    <ROW File="apimswincrtconvertl110.dll" Component_="apimswincrtconvertl110.dll" FileName="API-M~28.DLL|api-ms-win-crt-convert-l1-1-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-crt-convert-l1-1-0.dll" SelfReg="false"/>
-    <ROW File="apimswincrtenvironmentl110.dll" Component_="apimswincrtenvironmentl110.dll" FileName="API-M~29.DLL|api-ms-win-crt-environment-l1-1-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-crt-environment-l1-1-0.dll" SelfReg="false"/>
-    <ROW File="apimswincrtfilesysteml110.dll" Component_="apimswincrtfilesysteml110.dll" FileName="API-M~30.DLL|api-ms-win-crt-filesystem-l1-1-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-crt-filesystem-l1-1-0.dll" SelfReg="false"/>
-    <ROW File="apimswincrtheapl110.dll" Component_="apimswincrtheapl110.dll" FileName="API-M~31.DLL|api-ms-win-crt-heap-l1-1-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-crt-heap-l1-1-0.dll" SelfReg="false"/>
-    <ROW File="apimswincrtlocalel110.dll" Component_="apimswincrtlocalel110.dll" FileName="API-M~32.DLL|api-ms-win-crt-locale-l1-1-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-crt-locale-l1-1-0.dll" SelfReg="false"/>
-    <ROW File="apimswincrtmathl110.dll" Component_="apimswincrtmathl110.dll" FileName="API-M~33.DLL|api-ms-win-crt-math-l1-1-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-crt-math-l1-1-0.dll" SelfReg="false"/>
-    <ROW File="apimswincrtprocessl110.dll" Component_="apimswincrtprocessl110.dll" FileName="API-M~34.DLL|api-ms-win-crt-process-l1-1-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-crt-process-l1-1-0.dll" SelfReg="false"/>
-    <ROW File="apimswincrtruntimel110.dll" Component_="apimswincrtruntimel110.dll" FileName="API-M~35.DLL|api-ms-win-crt-runtime-l1-1-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-crt-runtime-l1-1-0.dll" SelfReg="false"/>
-    <ROW File="apimswincrtstdiol110.dll" Component_="apimswincrtstdiol110.dll" FileName="API-M~36.DLL|api-ms-win-crt-stdio-l1-1-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-crt-stdio-l1-1-0.dll" SelfReg="false"/>
-    <ROW File="apimswincrtstringl110.dll" Component_="apimswincrtstringl110.dll" FileName="API-M~37.DLL|api-ms-win-crt-string-l1-1-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-crt-string-l1-1-0.dll" SelfReg="false"/>
-    <ROW File="apimswincrttimel110.dll" Component_="apimswincrttimel110.dll" FileName="API-M~38.DLL|api-ms-win-crt-time-l1-1-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-crt-time-l1-1-0.dll" SelfReg="false"/>
-    <ROW File="apimswincrtutilityl110.dll" Component_="apimswincrtutilityl110.dll" FileName="API-M~39.DLL|api-ms-win-crt-utility-l1-1-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-crt-utility-l1-1-0.dll" SelfReg="false"/>
-    <ROW File="avcodec58.dll" Component_="avcodec58.dll" FileName="AVCODE~1.DLL|avcodec-58.dll" Attributes="0" SourcePath="..\scenedetect\avcodec-58.dll" SelfReg="false"/>
-    <ROW File="avdevice58.dll" Component_="avdevice58.dll" FileName="AVDEVI~1.DLL|avdevice-58.dll" Attributes="0" SourcePath="..\scenedetect\avdevice-58.dll" SelfReg="false"/>
-    <ROW File="avfilter7.dll" Component_="avfilter7.dll" FileName="AVFILT~1.DLL|avfilter-7.dll" Attributes="0" SourcePath="..\scenedetect\avfilter-7.dll" SelfReg="false"/>
-    <ROW File="avformat58.dll" Component_="avformat58.dll" FileName="AVFORM~1.DLL|avformat-58.dll" Attributes="0" SourcePath="..\scenedetect\avformat-58.dll" SelfReg="false"/>
-    <ROW File="avutil56.dll" Component_="avutil56.dll" FileName="AVUTIL~1.DLL|avutil-56.dll" Attributes="0" SourcePath="..\scenedetect\avutil-56.dll" SelfReg="false"/>
-    <ROW File="base_library.zip" Component_="_decimal.pyd" FileName="BASE_L~1.ZIP|base_library.zip" Attributes="0" SourcePath="..\scenedetect\base_library.zip" SelfReg="false"/>
-    <ROW File="libcrypto1_1.dll" Component_="libcrypto1_1.dll" FileName="LIBCRY~1.DLL|libcrypto-1_1.dll" Attributes="0" SourcePath="..\scenedetect\libcrypto-1_1.dll" SelfReg="false"/>
-    <ROW File="libffi7.dll" Component_="libffi7.dll" FileName="libffi-7.dll" Attributes="0" SourcePath="..\scenedetect\libffi-7.dll" SelfReg="false"/>
-    <ROW File="libssl1_1.dll" Component_="libssl1_1.dll" FileName="LIBSSL~1.DLL|libssl-1_1.dll" Attributes="0" SourcePath="..\scenedetect\libssl-1_1.dll" SelfReg="false"/>
-    <ROW File="LICENSE" Component_="_decimal.pyd" FileName="LICENSE" Attributes="0" SourcePath="..\scenedetect\LICENSE" SelfReg="false"/>
-    <ROW File="LICENSEFFMPEG" Component_="_decimal.pyd" FileName="LICENS~1|LICENSE-FFMPEG" Attributes="0" SourcePath="..\scenedetect\LICENSE-FFMPEG" SelfReg="false"/>
-    <ROW File="LICENSEMKVMERGE" Component_="_decimal.pyd" FileName="LICENS~2|LICENSE-MKVMERGE" Attributes="0" SourcePath="..\scenedetect\LICENSE-MKVMERGE" SelfReg="false"/>
-    <ROW File="LICENSEPYTHON" Component_="_decimal.pyd" FileName="LICENS~3|LICENSE-PYTHON" Attributes="0" SourcePath="..\scenedetect\LICENSE-PYTHON" SelfReg="false"/>
-    <ROW File="postproc55.dll" Component_="postproc55.dll" FileName="POSTPR~1.DLL|postproc-55.dll" Attributes="0" SourcePath="..\scenedetect\postproc-55.dll" SelfReg="false"/>
-    <ROW File="pyexpat.pyd" Component_="_decimal.pyd" FileName="pyexpat.pyd" Attributes="0" SourcePath="..\scenedetect\pyexpat.pyd" SelfReg="false"/>
-    <ROW File="python39.dll" Component_="python39.dll" FileName="python39.dll" Attributes="0" SourcePath="..\scenedetect\python39.dll" SelfReg="false"/>
-    <ROW File="README.md" Component_="_decimal.pyd" FileName="README.md" Attributes="0" SourcePath="..\scenedetect\README.md" SelfReg="false"/>
-    <ROW File="scenedetect.cfg" Component_="_decimal.pyd" FileName="SCENED~1.CFG|scenedetect.cfg" Attributes="0" SourcePath="..\scenedetect\scenedetect.cfg" SelfReg="false"/>
-    <ROW File="scenedetect.exe" Component_="scenedetect.exe" FileName="SCENED~1.EXE|scenedetect.exe" Attributes="0" SourcePath="..\scenedetect\scenedetect.exe" SelfReg="false" DigSign="true"/>
-    <ROW File="select.pyd" Component_="_decimal.pyd" FileName="select.pyd" Attributes="0" SourcePath="..\scenedetect\select.pyd" SelfReg="false"/>
-    <ROW File="swresample3.dll" Component_="swresample3.dll" FileName="SWRESA~1.DLL|swresample-3.dll" Attributes="0" SourcePath="..\scenedetect\swresample-3.dll" SelfReg="false"/>
-    <ROW File="swscale5.dll" Component_="swscale5.dll" FileName="SWSCAL~1.DLL|swscale-5.dll" Attributes="0" SourcePath="..\scenedetect\swscale-5.dll" SelfReg="false"/>
-    <ROW File="ucrtbase.dll" Component_="ucrtbase.dll" FileName="ucrtbase.dll" Attributes="0" SourcePath="..\scenedetect\ucrtbase.dll" SelfReg="false"/>
-    <ROW File="unicodedata.pyd" Component_="_decimal.pyd" FileName="UNICOD~1.PYD|unicodedata.pyd" Attributes="0" SourcePath="..\scenedetect\unicodedata.pyd" SelfReg="false"/>
-    <ROW File="VCRUNTIME140.dll" Component_="VCRUNTIME140.dll" FileName="VCRUNT~1.DLL|VCRUNTIME140.dll" Attributes="0" SourcePath="..\scenedetect\VCRUNTIME140.dll" SelfReg="false"/>
-    <ROW File="codeccontext.cp39win_amd64.pyd" Component_="codeccontext.cp39win_amd64.pyd" FileName="CODECC~1.PYD|codeccontext.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\audio\codeccontext.cp39-win_amd64.pyd" SelfReg="false"/>
-    <ROW File="fifo.cp39win_amd64.pyd" Component_="codeccontext.cp39win_amd64.pyd" FileName="FIFOCP~1.PYD|fifo.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\audio\fifo.cp39-win_amd64.pyd" SelfReg="false"/>
-    <ROW File="format.cp39win_amd64.pyd" Component_="codeccontext.cp39win_amd64.pyd" FileName="FORMAT~1.PYD|format.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\audio\format.cp39-win_amd64.pyd" SelfReg="false"/>
-    <ROW File="frame.cp39win_amd64.pyd" Component_="codeccontext.cp39win_amd64.pyd" FileName="FRAMEC~1.PYD|frame.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\audio\frame.cp39-win_amd64.pyd" SelfReg="false"/>
-    <ROW File="layout.cp39win_amd64.pyd" Component_="codeccontext.cp39win_amd64.pyd" FileName="LAYOUT~1.PYD|layout.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\audio\layout.cp39-win_amd64.pyd" SelfReg="false"/>
-    <ROW File="plane.cp39win_amd64.pyd" Component_="codeccontext.cp39win_amd64.pyd" FileName="PLANEC~1.PYD|plane.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\audio\plane.cp39-win_amd64.pyd" SelfReg="false"/>
-    <ROW File="resampler.cp39win_amd64.pyd" Component_="codeccontext.cp39win_amd64.pyd" FileName="RESAMP~1.PYD|resampler.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\audio\resampler.cp39-win_amd64.pyd" SelfReg="false"/>
-    <ROW File="stream.cp39win_amd64.pyd" Component_="codeccontext.cp39win_amd64.pyd" FileName="STREAM~1.PYD|stream.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\audio\stream.cp39-win_amd64.pyd" SelfReg="false"/>
-    <ROW File="buffer.cp39win_amd64.pyd" Component_="buffer.cp39win_amd64.pyd" FileName="BUFFER~1.PYD|buffer.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\buffer.cp39-win_amd64.pyd" SelfReg="false"/>
-    <ROW File="bytesource.cp39win_amd64.pyd" Component_="buffer.cp39win_amd64.pyd" FileName="BYTESO~1.PYD|bytesource.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\bytesource.cp39-win_amd64.pyd" SelfReg="false"/>
-    <ROW File="codec.cp39win_amd64.pyd" Component_="codec.cp39win_amd64.pyd" FileName="CODECC~1.PYD|codec.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\codec\codec.cp39-win_amd64.pyd" SelfReg="false"/>
-    <ROW File="context.cp39win_amd64.pyd" Component_="codec.cp39win_amd64.pyd" FileName="CONTEX~1.PYD|context.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\codec\context.cp39-win_amd64.pyd" SelfReg="false"/>
-    <ROW File="core.cp39win_amd64.pyd" Component_="core.cp39win_amd64.pyd" FileName="CORECP~1.PYD|core.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\container\core.cp39-win_amd64.pyd" SelfReg="false"/>
-    <ROW File="input.cp39win_amd64.pyd" Component_="core.cp39win_amd64.pyd" FileName="INPUTC~1.PYD|input.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\container\input.cp39-win_amd64.pyd" SelfReg="false"/>
-    <ROW File="output.cp39win_amd64.pyd" Component_="core.cp39win_amd64.pyd" FileName="OUTPUT~1.PYD|output.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\container\output.cp39-win_amd64.pyd" SelfReg="false"/>
-    <ROW File="pyio.cp39win_amd64.pyd" Component_="core.cp39win_amd64.pyd" FileName="PYIOCP~1.PYD|pyio.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\container\pyio.cp39-win_amd64.pyd" SelfReg="false"/>
-    <ROW File="streams.cp39win_amd64.pyd" Component_="core.cp39win_amd64.pyd" FileName="STREAM~1.PYD|streams.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\container\streams.cp39-win_amd64.pyd" SelfReg="false"/>
-    <ROW File="stream.cp39win_amd64.pyd_1" Component_="stream.cp39win_amd64.pyd" FileName="STREAM~1.PYD|stream.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\data\stream.cp39-win_amd64.pyd" SelfReg="false"/>
-    <ROW File="descriptor.cp39win_amd64.pyd" Component_="buffer.cp39win_amd64.pyd" FileName="DESCRI~1.PYD|descriptor.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\descriptor.cp39-win_amd64.pyd" SelfReg="false"/>
-    <ROW File="dictionary.cp39win_amd64.pyd" Component_="buffer.cp39win_amd64.pyd" FileName="DICTIO~1.PYD|dictionary.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\dictionary.cp39-win_amd64.pyd" SelfReg="false"/>
-    <ROW File="enum.cp39win_amd64.pyd" Component_="buffer.cp39win_amd64.pyd" FileName="ENUMCP~1.PYD|enum.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\enum.cp39-win_amd64.pyd" SelfReg="false"/>
-    <ROW File="error.cp39win_amd64.pyd" Component_="buffer.cp39win_amd64.pyd" FileName="ERRORC~1.PYD|error.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\error.cp39-win_amd64.pyd" SelfReg="false"/>
-    <ROW File="context.cp39win_amd64.pyd_1" Component_="context.cp39win_amd64.pyd" FileName="CONTEX~1.PYD|context.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\filter\context.cp39-win_amd64.pyd" SelfReg="false"/>
-    <ROW File="filter.cp39win_amd64.pyd" Component_="context.cp39win_amd64.pyd" FileName="FILTER~1.PYD|filter.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\filter\filter.cp39-win_amd64.pyd" SelfReg="false"/>
-    <ROW File="graph.cp39win_amd64.pyd" Component_="context.cp39win_amd64.pyd" FileName="GRAPHC~1.PYD|graph.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\filter\graph.cp39-win_amd64.pyd" SelfReg="false"/>
-    <ROW File="link.cp39win_amd64.pyd" Component_="context.cp39win_amd64.pyd" FileName="LINKCP~1.PYD|link.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\filter\link.cp39-win_amd64.pyd" SelfReg="false"/>
-    <ROW File="pad.cp39win_amd64.pyd" Component_="context.cp39win_amd64.pyd" FileName="PADCP3~1.PYD|pad.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\filter\pad.cp39-win_amd64.pyd" SelfReg="false"/>
-    <ROW File="format.cp39win_amd64.pyd_1" Component_="buffer.cp39win_amd64.pyd" FileName="FORMAT~1.PYD|format.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\format.cp39-win_amd64.pyd" SelfReg="false"/>
-    <ROW File="frame.cp39win_amd64.pyd_1" Component_="buffer.cp39win_amd64.pyd" FileName="FRAMEC~1.PYD|frame.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\frame.cp39-win_amd64.pyd" SelfReg="false"/>
-    <ROW File="logging.cp39win_amd64.pyd" Component_="buffer.cp39win_amd64.pyd" FileName="LOGGIN~1.PYD|logging.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\logging.cp39-win_amd64.pyd" SelfReg="false"/>
-    <ROW File="option.cp39win_amd64.pyd" Component_="buffer.cp39win_amd64.pyd" FileName="OPTION~1.PYD|option.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\option.cp39-win_amd64.pyd" SelfReg="false"/>
-    <ROW File="packet.cp39win_amd64.pyd" Component_="buffer.cp39win_amd64.pyd" FileName="PACKET~1.PYD|packet.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\packet.cp39-win_amd64.pyd" SelfReg="false"/>
-    <ROW File="plane.cp39win_amd64.pyd_1" Component_="buffer.cp39win_amd64.pyd" FileName="PLANEC~1.PYD|plane.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\plane.cp39-win_amd64.pyd" SelfReg="false"/>
-    <ROW File="motionvectors.cp39win_amd64.pyd" Component_="motionvectors.cp39win_amd64.pyd" FileName="MOTION~1.PYD|motionvectors.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\sidedata\motionvectors.cp39-win_amd64.pyd" SelfReg="false"/>
-    <ROW File="sidedata.cp39win_amd64.pyd" Component_="motionvectors.cp39win_amd64.pyd" FileName="SIDEDA~1.PYD|sidedata.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\sidedata\sidedata.cp39-win_amd64.pyd" SelfReg="false"/>
-    <ROW File="stream.cp39win_amd64.pyd_2" Component_="buffer.cp39win_amd64.pyd" FileName="STREAM~1.PYD|stream.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\stream.cp39-win_amd64.pyd" SelfReg="false"/>
-    <ROW File="codeccontext.cp39win_amd64.pyd_1" Component_="codeccontext.cp39win_amd64.pyd_1" FileName="CODECC~1.PYD|codeccontext.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\subtitles\codeccontext.cp39-win_amd64.pyd" SelfReg="false"/>
-    <ROW File="stream.cp39win_amd64.pyd_3" Component_="codeccontext.cp39win_amd64.pyd_1" FileName="STREAM~1.PYD|stream.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\subtitles\stream.cp39-win_amd64.pyd" SelfReg="false"/>
-    <ROW File="subtitle.cp39win_amd64.pyd" Component_="codeccontext.cp39win_amd64.pyd_1" FileName="SUBTIT~1.PYD|subtitle.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\subtitles\subtitle.cp39-win_amd64.pyd" SelfReg="false"/>
-    <ROW File="utils.cp39win_amd64.pyd" Component_="buffer.cp39win_amd64.pyd" FileName="UTILSC~1.PYD|utils.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\utils.cp39-win_amd64.pyd" SelfReg="false"/>
-    <ROW File="codeccontext.cp39win_amd64.pyd_2" Component_="codeccontext.cp39win_amd64.pyd_2" FileName="CODECC~1.PYD|codeccontext.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\video\codeccontext.cp39-win_amd64.pyd" SelfReg="false"/>
-    <ROW File="format.cp39win_amd64.pyd_2" Component_="codeccontext.cp39win_amd64.pyd_2" FileName="FORMAT~1.PYD|format.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\video\format.cp39-win_amd64.pyd" SelfReg="false"/>
-    <ROW File="frame.cp39win_amd64.pyd_2" Component_="codeccontext.cp39win_amd64.pyd_2" FileName="FRAMEC~1.PYD|frame.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\video\frame.cp39-win_amd64.pyd" SelfReg="false"/>
-    <ROW File="plane.cp39win_amd64.pyd_2" Component_="codeccontext.cp39win_amd64.pyd_2" FileName="PLANEC~1.PYD|plane.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\video\plane.cp39-win_amd64.pyd" SelfReg="false"/>
-    <ROW File="reformatter.cp39win_amd64.pyd" Component_="codeccontext.cp39win_amd64.pyd_2" FileName="REFORM~1.PYD|reformatter.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\video\reformatter.cp39-win_amd64.pyd" SelfReg="false"/>
-    <ROW File="stream.cp39win_amd64.pyd_4" Component_="codeccontext.cp39win_amd64.pyd_2" FileName="STREAM~1.PYD|stream.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\video\stream.cp39-win_amd64.pyd" SelfReg="false"/>
-    <ROW File="_core.cp39win_amd64.pyd" Component_="buffer.cp39win_amd64.pyd" FileName="_COREC~1.PYD|_core.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\av\_core.cp39-win_amd64.pyd" SelfReg="false"/>
-    <ROW File="cv2.cp39win_amd64.pyd" Component_="cv2.cp39win_amd64.pyd" FileName="CV2CP3~1.PYD|cv2.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\cv2\cv2.cp39-win_amd64.pyd" SelfReg="false"/>
-    <ROW File="__init__.py" Component_="__init__.py" FileName="__init__.py" Attributes="0" SourcePath="..\scenedetect\cv2\data\__init__.py" SelfReg="false"/>
-    <ROW File="opencv_videoio_ffmpeg451_64.dll" Component_="opencv_videoio_ffmpeg451_64.dll" FileName="OPENCV~1.DLL|opencv_videoio_ffmpeg451_64.dll" Attributes="0" SourcePath="..\scenedetect\cv2\opencv_videoio_ffmpeg451_64.dll" SelfReg="false"/>
-    <ROW File="version.py" Component_="cv2.cp39win_amd64.pyd" FileName="version.py" Attributes="0" SourcePath="..\scenedetect\cv2\version.py" SelfReg="false"/>
-    <ROW File="__init__.py_1" Component_="cv2.cp39win_amd64.pyd" FileName="__init__.py" Attributes="0" SourcePath="..\scenedetect\cv2\__init__.py" SelfReg="false"/>
     <ROW File="_multiarray_tests.cp39win_amd64.pyd" Component_="_multiarray_tests.cp39win_amd64.pyd" FileName="_MULTI~1.PYD|_multiarray_tests.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\numpy\core\_multiarray_tests.cp39-win_amd64.pyd" SelfReg="false"/>
     <ROW File="_multiarray_umath.cp39win_amd64.pyd" Component_="_multiarray_tests.cp39win_amd64.pyd" FileName="_MULTI~2.PYD|_multiarray_umath.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\numpy\core\_multiarray_umath.cp39-win_amd64.pyd" SelfReg="false"/>
     <ROW File="_pocketfft_internal.cp39win_amd64.pyd" Component_="_pocketfft_internal.cp39win_amd64.pyd" FileName="_POCKE~1.PYD|_pocketfft_internal.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\numpy\fft\_pocketfft_internal.cp39-win_amd64.pyd" SelfReg="false"/>
@@ -320,7 +227,23 @@
     <ROW File="_pcg64.cp39win_amd64.pyd" Component_="bit_generator.cp39win_amd64.pyd" FileName="_PCG64~1.PYD|_pcg64.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\numpy\random\_pcg64.cp39-win_amd64.pyd" SelfReg="false"/>
     <ROW File="_philox.cp39win_amd64.pyd" Component_="bit_generator.cp39win_amd64.pyd" FileName="_PHILO~1.PYD|_philox.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\numpy\random\_philox.cp39-win_amd64.pyd" SelfReg="false"/>
     <ROW File="_sfc64.cp39win_amd64.pyd" Component_="bit_generator.cp39win_amd64.pyd" FileName="_SFC64~1.PYD|_sfc64.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\numpy\random\_sfc64.cp39-win_amd64.pyd" SelfReg="false"/>
-    <ROW File="_ctypes.pyd" Component_="_decimal.pyd" FileName="_ctypes.pyd" Attributes="0" SourcePath="..\scenedetect\_ctypes.pyd" SelfReg="false"/>
+    <ROW File="_ctypes.pyd" Component_="LICENSEFFMPEG" FileName="_ctypes.pyd" Attributes="0" SourcePath="..\scenedetect\_ctypes.pyd" SelfReg="false"/>
+    <ROW File="_overlapped.pyd" Component_="LICENSEFFMPEG" FileName="_OVERL~1.PYD|_overlapped.pyd" Attributes="0" SourcePath="..\scenedetect\_overlapped.pyd" SelfReg="false"/>
+    <ROW File="_queue.pyd" Component_="LICENSEFFMPEG" FileName="_queue.pyd" Attributes="0" SourcePath="..\scenedetect\_queue.pyd" SelfReg="false"/>
+    <ROW File="_socket.pyd" Component_="LICENSEFFMPEG" FileName="_socket.pyd" Attributes="0" SourcePath="..\scenedetect\_socket.pyd" SelfReg="false"/>
+    <ROW File="_ssl.pyd" Component_="LICENSEFFMPEG" FileName="_ssl.pyd" Attributes="0" SourcePath="..\scenedetect\_ssl.pyd" SelfReg="false"/>
+    <ROW File="_uuid.pyd" Component_="LICENSEFFMPEG" FileName="_uuid.pyd" Attributes="0" SourcePath="..\scenedetect\_uuid.pyd" SelfReg="false"/>
+    <ROW File="avcodec58.dll" Component_="avcodec58.dll" FileName="AVCODE~1.DLL|avcodec-58.dll" Attributes="0" SourcePath="..\scenedetect\avcodec-58.dll" SelfReg="false"/>
+    <ROW File="avdevice58.dll" Component_="avdevice58.dll" FileName="AVDEVI~1.DLL|avdevice-58.dll" Attributes="0" SourcePath="..\scenedetect\avdevice-58.dll" SelfReg="false"/>
+    <ROW File="avfilter7.dll" Component_="avfilter7.dll" FileName="AVFILT~1.DLL|avfilter-7.dll" Attributes="0" SourcePath="..\scenedetect\avfilter-7.dll" SelfReg="false"/>
+    <ROW File="avformat58.dll" Component_="avformat58.dll" FileName="AVFORM~1.DLL|avformat-58.dll" Attributes="0" SourcePath="..\scenedetect\avformat-58.dll" SelfReg="false"/>
+    <ROW File="avutil56.dll" Component_="avutil56.dll" FileName="AVUTIL~1.DLL|avutil-56.dll" Attributes="0" SourcePath="..\scenedetect\avutil-56.dll" SelfReg="false"/>
+    <ROW File="base_library.zip" Component_="LICENSEFFMPEG" FileName="BASE_L~1.ZIP|base_library.zip" Attributes="0" SourcePath="..\scenedetect\base_library.zip" SelfReg="false"/>
+    <ROW File="libcrypto1_1.dll" Component_="libcrypto1_1.dll" FileName="LIBCRY~1.DLL|libcrypto-1_1.dll" Attributes="0" SourcePath="..\scenedetect\libcrypto-1_1.dll" SelfReg="false"/>
+    <ROW File="libffi7.dll" Component_="libffi7.dll" FileName="libffi-7.dll" Attributes="0" SourcePath="..\scenedetect\libffi-7.dll" SelfReg="false"/>
+    <ROW File="libopenblas.FB5AE2TYXYH2IJRDKGDGQ3XBKLKTF43H.gfortranwin_amd64.dll" Component_="libopenblas.FB5AE2TYXYH2IJRDKGDGQ3XBKLKTF43H.gfortranwin_amd64.dll" FileName="LIBOPE~1.DLL|libopenblas.FB5AE2TYXYH2IJRDKGDGQ3XBKLKTF43H.gfortran-win_amd64.dll" Attributes="0" SourcePath="..\scenedetect\libopenblas.FB5AE2TYXYH2IJRDKGDGQ3XBKLKTF43H.gfortran-win_amd64.dll" SelfReg="false"/>
+    <ROW File="libssl1_1.dll" Component_="libssl1_1.dll" FileName="LIBSSL~1.DLL|libssl-1_1.dll" Attributes="0" SourcePath="..\scenedetect\libssl-1_1.dll" SelfReg="false"/>
+    <ROW File="LICENSE" Component_="LICENSEFFMPEG" FileName="LICENSE" Attributes="0" SourcePath="..\scenedetect\LICENSE" SelfReg="false"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.BootstrOptComponent">
     <ROW BootstrOptKey="GlobalOptions" DownloadFolder="[LocalAppDataFolder]\[|ProductName]\prerequisites"/>
@@ -431,66 +354,12 @@
     <ROW Feature_="PySceneDetect" Component_="APPDIR"/>
     <ROW Feature_="PySceneDetect" Component_="AI_CustomARPName"/>
     <ROW Feature_="PySceneDetect" Component_="AI_DisableModify"/>
-    <ROW Feature_="PySceneDetect" Component_="_decimal.pyd"/>
-    <ROW Feature_="PySceneDetect" Component_="apimswincoreconsolel110.dll"/>
-    <ROW Feature_="PySceneDetect" Component_="apimswincoredatetimel110.dll"/>
-    <ROW Feature_="PySceneDetect" Component_="apimswincoredebugl110.dll"/>
-    <ROW Feature_="PySceneDetect" Component_="apimswincoreerrorhandlingl110.dll"/>
-    <ROW Feature_="PySceneDetect" Component_="apimswincorefibersl110.dll"/>
-    <ROW Feature_="PySceneDetect" Component_="apimswincorefilel110.dll"/>
-    <ROW Feature_="PySceneDetect" Component_="apimswincorefilel120.dll"/>
-    <ROW Feature_="PySceneDetect" Component_="apimswincorefilel210.dll"/>
-    <ROW Feature_="PySceneDetect" Component_="apimswincorehandlel110.dll"/>
-    <ROW Feature_="PySceneDetect" Component_="apimswincoreheapl110.dll"/>
-    <ROW Feature_="PySceneDetect" Component_="apimswincoreinterlockedl110.dll"/>
-    <ROW Feature_="PySceneDetect" Component_="apimswincorelibraryloaderl110.dll"/>
-    <ROW Feature_="PySceneDetect" Component_="apimswincorelocalizationl120.dll"/>
-    <ROW Feature_="PySceneDetect" Component_="apimswincorememoryl110.dll"/>
-    <ROW Feature_="PySceneDetect" Component_="apimswincorenamedpipel110.dll"/>
-    <ROW Feature_="PySceneDetect" Component_="apimswincoreprocessenvironmentl110.dll"/>
-    <ROW Feature_="PySceneDetect" Component_="apimswincoreprocessthreadsl110.dll"/>
-    <ROW Feature_="PySceneDetect" Component_="apimswincoreprocessthreadsl111.dll"/>
-    <ROW Feature_="PySceneDetect" Component_="apimswincoreprofilel110.dll"/>
-    <ROW Feature_="PySceneDetect" Component_="apimswincorertlsupportl110.dll"/>
-    <ROW Feature_="PySceneDetect" Component_="changelog.md"/>
-    <ROW Feature_="PySceneDetect" Component_="usageexample.md"/>
-    <ROW Feature_="PySceneDetect" Component_="goldeneyestats.png"/>
-    <ROW Feature_="PySceneDetect" Component_="copyright.md"/>
-    <ROW Feature_="PySceneDetect" Component_="commandline.md"/>
-    <ROW Feature_="PySceneDetect" Component_="apimswincorestringl110.dll"/>
-    <ROW Feature_="PySceneDetect" Component_="apimswincoresynchl110.dll"/>
-    <ROW Feature_="PySceneDetect" Component_="apimswincoresynchl120.dll"/>
-    <ROW Feature_="PySceneDetect" Component_="apimswincoresysinfol110.dll"/>
-    <ROW Feature_="PySceneDetect" Component_="apimswincoretimezonel110.dll"/>
-    <ROW Feature_="PySceneDetect" Component_="apimswincoreutill110.dll"/>
-    <ROW Feature_="PySceneDetect" Component_="apimswincrtconiol110.dll"/>
-    <ROW Feature_="PySceneDetect" Component_="apimswincrtconvertl110.dll"/>
-    <ROW Feature_="PySceneDetect" Component_="apimswincrtenvironmentl110.dll"/>
-    <ROW Feature_="PySceneDetect" Component_="apimswincrtfilesysteml110.dll"/>
-    <ROW Feature_="PySceneDetect" Component_="apimswincrtheapl110.dll"/>
-    <ROW Feature_="C4FE6FD5B7C4D07B3A313E754A9A6A8" Component_="C4FE6FD5B7C4D07B3A313E754A9A6A8"/>
-    <ROW Feature_="PySceneDetect" Component_="apimswincrtlocalel110.dll"/>
-    <ROW Feature_="PySceneDetect" Component_="apimswincrtmathl110.dll"/>
-    <ROW Feature_="PySceneDetect" Component_="apimswincrtprocessl110.dll"/>
-    <ROW Feature_="PySceneDetect" Component_="apimswincrtruntimel110.dll"/>
-    <ROW Feature_="PySceneDetect" Component_="apimswincrtstdiol110.dll"/>
-    <ROW Feature_="PySceneDetect" Component_="apimswincrtstringl110.dll"/>
-    <ROW Feature_="PySceneDetect" Component_="apimswincrttimel110.dll"/>
-    <ROW Feature_="PySceneDetect" Component_="apimswincrtutilityl110.dll"/>
-    <ROW Feature_="PySceneDetect" Component_="avcodec58.dll"/>
-    <ROW Feature_="PySceneDetect" Component_="avdevice58.dll"/>
-    <ROW Feature_="PySceneDetect" Component_="avfilter7.dll"/>
-    <ROW Feature_="PySceneDetect" Component_="avformat58.dll"/>
-    <ROW Feature_="PySceneDetect" Component_="avutil56.dll"/>
-    <ROW Feature_="PySceneDetect" Component_="libcrypto1_1.dll"/>
-    <ROW Feature_="PySceneDetect" Component_="libffi7.dll"/>
-    <ROW Feature_="PySceneDetect" Component_="libssl1_1.dll"/>
+    <ROW Feature_="PySceneDetect" Component_="LICENSEFFMPEG"/>
     <ROW Feature_="PySceneDetect" Component_="postproc55.dll"/>
     <ROW Feature_="PySceneDetect" Component_="python39.dll"/>
     <ROW Feature_="PySceneDetect" Component_="scenedetect.exe"/>
     <ROW Feature_="PySceneDetect" Component_="swresample3.dll"/>
     <ROW Feature_="PySceneDetect" Component_="swscale5.dll"/>
-    <ROW Feature_="PySceneDetect" Component_="ucrtbase.dll"/>
     <ROW Feature_="PySceneDetect" Component_="VCRUNTIME140.dll"/>
     <ROW Feature_="PySceneDetect" Component_="codeccontext.cp39win_amd64.pyd"/>
     <ROW Feature_="PySceneDetect" Component_="buffer.cp39win_amd64.pyd"/>
@@ -499,15 +368,30 @@
     <ROW Feature_="PySceneDetect" Component_="stream.cp39win_amd64.pyd"/>
     <ROW Feature_="PySceneDetect" Component_="context.cp39win_amd64.pyd"/>
     <ROW Feature_="PySceneDetect" Component_="motionvectors.cp39win_amd64.pyd"/>
-    <ROW Feature_="PySceneDetect" Component_="codeccontext.cp39win_amd64.pyd_1"/>
-    <ROW Feature_="PySceneDetect" Component_="codeccontext.cp39win_amd64.pyd_2"/>
+    <ROW Feature_="PySceneDetect" Component_="codeccontext.cp39win_amd64.pyd_3"/>
+    <ROW Feature_="PySceneDetect" Component_="codeccontext.cp39win_amd64.pyd_4"/>
     <ROW Feature_="PySceneDetect" Component_="cv2.cp39win_amd64.pyd"/>
     <ROW Feature_="PySceneDetect" Component_="__init__.py"/>
     <ROW Feature_="PySceneDetect" Component_="opencv_videoio_ffmpeg451_64.dll"/>
+    <ROW Feature_="PySceneDetect" Component_="changelog.md"/>
+    <ROW Feature_="PySceneDetect" Component_="usageexample.md"/>
+    <ROW Feature_="PySceneDetect" Component_="goldeneyestats.png"/>
+    <ROW Feature_="PySceneDetect" Component_="copyright.md"/>
+    <ROW Feature_="PySceneDetect" Component_="commandline.md"/>
     <ROW Feature_="PySceneDetect" Component_="_multiarray_tests.cp39win_amd64.pyd"/>
     <ROW Feature_="PySceneDetect" Component_="_pocketfft_internal.cp39win_amd64.pyd"/>
     <ROW Feature_="PySceneDetect" Component_="lapack_lite.cp39win_amd64.pyd"/>
     <ROW Feature_="PySceneDetect" Component_="bit_generator.cp39win_amd64.pyd"/>
+    <ROW Feature_="PySceneDetect" Component_="avcodec58.dll"/>
+    <ROW Feature_="PySceneDetect" Component_="avdevice58.dll"/>
+    <ROW Feature_="C4FE6FD5B7C4D07B3A313E754A9A6A8" Component_="C4FE6FD5B7C4D07B3A313E754A9A6A8"/>
+    <ROW Feature_="PySceneDetect" Component_="avfilter7.dll"/>
+    <ROW Feature_="PySceneDetect" Component_="avformat58.dll"/>
+    <ROW Feature_="PySceneDetect" Component_="avutil56.dll"/>
+    <ROW Feature_="PySceneDetect" Component_="libcrypto1_1.dll"/>
+    <ROW Feature_="PySceneDetect" Component_="libffi7.dll"/>
+    <ROW Feature_="PySceneDetect" Component_="libopenblas.FB5AE2TYXYH2IJRDKGDGQ3XBKLKTF43H.gfortranwin_amd64.dll"/>
+    <ROW Feature_="PySceneDetect" Component_="libssl1_1.dll"/>
     <ROW Feature_="mkvmerge" Component_="mkvmerge.exe"/>
     <ROW Feature_="ffmpeg" Component_="ffmpeg.exe"/>
   </COMPONENT>
