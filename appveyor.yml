@@ -22,7 +22,7 @@ deploy:
 install:
   # The commit being checked out must meet SignPath's origin verification requirements:
   # https://about.signpath.io/documentation/build-system-integration#ci-integrations-with-origin-verification
-  - git checkout bb932e28a99e3b9cef45cac8ebdb2d1873fce824
+  - git checkout 40f7d54663a76a501cd64b9e9e29d013c9734bfb
 
   - echo * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
   - echo * *                      SETTING UP PYTHON ENVIRONMENT                      * *
@@ -61,7 +61,7 @@ install:
   - appveyor-tools\secure-file -decrypt license65.dat.enc -secret %ai_license_secret% -salt %ai_license_salt%
   - appveyor DownloadFile https://www.advancedinstaller.com/downloads/advinst.msi
   - msiexec /i advinst.msi /qn
-  - 'SET PATH=%PATH%;C:\\Program Files (x86)\\Caphyon\\Advanced Installer 20.1\\bin\\x86'
+  - 'SET PATH=%PATH%;C:\\Program Files (x86)\\Caphyon\\Advanced Installer 20.1.1\\bin\\x86'
   # License path must be absolute
   - AdvancedInstaller.com /RegisterOffline "%cd%\license65.dat"
   # Create MSI installer
