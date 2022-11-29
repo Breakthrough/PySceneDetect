@@ -83,6 +83,45 @@
     <ROW Component="__init__.py" ComponentId="{87336677-B6D8-4844-8A1F-83CD613210F1}" Directory_="data_1_Dir" Attributes="0" KeyPath="__init__.py" Type="0"/>
     <ROW Component="_multiarray_tests.cp39win_amd64.pyd" ComponentId="{6E3D1284-FAF4-4B8F-91F6-E11F4B8A1743}" Directory_="core_Dir" Attributes="256" KeyPath="_multiarray_tests.cp39win_amd64.pyd" Type="0"/>
     <ROW Component="_pocketfft_internal.cp39win_amd64.pyd" ComponentId="{3B5F81C0-46B7-4160-A1CC-F99A174DD69B}" Directory_="fft_Dir" Attributes="256" KeyPath="_pocketfft_internal.cp39win_amd64.pyd" Type="0"/>
+    <ROW Component="apimswincoreconsolel110.dll" ComponentId="{BEC97184-3441-47F0-984B-82CB97AFD5F6}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincoreconsolel110.dll"/>
+    <ROW Component="apimswincoredatetimel110.dll" ComponentId="{A857302F-89B5-4D2B-BAEC-6365A8132EBF}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincoredatetimel110.dll"/>
+    <ROW Component="apimswincoredebugl110.dll" ComponentId="{AC4B691B-9AF5-4B49-BC6A-89D8DA2B21E1}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincoredebugl110.dll"/>
+    <ROW Component="apimswincoreerrorhandlingl110.dll" ComponentId="{296712E8-335F-4701-BFB3-8934C1AF5DF3}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincoreerrorhandlingl110.dll"/>
+    <ROW Component="apimswincorefibersl110.dll" ComponentId="{7E6A667F-8CA1-4D7A-BEA7-4B0E5AB02DD0}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincorefibersl110.dll"/>
+    <ROW Component="apimswincorefilel110.dll" ComponentId="{E57775A3-74F0-479E-90A9-DA6509CD9996}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincorefilel110.dll"/>
+    <ROW Component="apimswincorefilel120.dll" ComponentId="{22EEB129-6A87-4C7F-8FDF-257F59EA62AF}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincorefilel120.dll"/>
+    <ROW Component="apimswincorefilel210.dll" ComponentId="{7C5DD53D-9527-461C-AA96-28650486C574}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincorefilel210.dll"/>
+    <ROW Component="apimswincorehandlel110.dll" ComponentId="{739E63CF-3150-472A-B2CE-C07DA0C78014}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincorehandlel110.dll"/>
+    <ROW Component="apimswincoreheapl110.dll" ComponentId="{9A225BF2-8DEB-4043-9911-080980FE050E}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincoreheapl110.dll"/>
+    <ROW Component="apimswincoreinterlockedl110.dll" ComponentId="{50DBADE5-55EB-4446-9072-A31B41771993}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincoreinterlockedl110.dll"/>
+    <ROW Component="apimswincorelibraryloaderl110.dll" ComponentId="{43687AEF-D02C-4010-A4CC-8CD557511C41}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincorelibraryloaderl110.dll"/>
+    <ROW Component="apimswincorelocalizationl120.dll" ComponentId="{457E3BAC-E3B5-447A-8319-FE321B69FD4A}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincorelocalizationl120.dll"/>
+    <ROW Component="apimswincorememoryl110.dll" ComponentId="{17373AE1-8ECC-47C5-99DE-A3E377AFCEC4}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincorememoryl110.dll"/>
+    <ROW Component="apimswincorenamedpipel110.dll" ComponentId="{9C78A4A9-1C78-4ED8-BC3E-760C10DA0832}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincorenamedpipel110.dll"/>
+    <ROW Component="apimswincoreprocessenvironmentl110.dll" ComponentId="{9819B899-0CB4-4CDF-8298-8D96C117BC89}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincoreprocessenvironmentl110.dll"/>
+    <ROW Component="apimswincoreprocessthreadsl110.dll" ComponentId="{C0AE37A6-12DE-491E-8EB8-D4F203826354}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincoreprocessthreadsl110.dll"/>
+    <ROW Component="apimswincoreprocessthreadsl111.dll" ComponentId="{48CDCBA2-0FD4-4706-8D20-FCA72C042E62}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincoreprocessthreadsl111.dll"/>
+    <ROW Component="apimswincoreprofilel110.dll" ComponentId="{76D48441-F383-4981-8475-3F46A3B67811}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincoreprofilel110.dll"/>
+    <ROW Component="apimswincorertlsupportl110.dll" ComponentId="{C1A46FE3-171F-4D6D-B780-28B4B61F8630}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincorertlsupportl110.dll"/>
+    <ROW Component="apimswincorestringl110.dll" ComponentId="{AC23C513-9345-4471-A4A9-B50D1E189D5B}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincorestringl110.dll"/>
+    <ROW Component="apimswincoresynchl110.dll" ComponentId="{98DA6D37-1C32-49CF-9B15-9CD15413A93D}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincoresynchl110.dll"/>
+    <ROW Component="apimswincoresynchl120.dll" ComponentId="{CC470E13-7383-49A0-B05E-53A762691838}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincoresynchl120.dll"/>
+    <ROW Component="apimswincoresysinfol110.dll" ComponentId="{D0260FA4-AB78-4ED4-A872-C8A7C1F6AC9B}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincoresysinfol110.dll"/>
+    <ROW Component="apimswincoretimezonel110.dll" ComponentId="{BC5A11C6-0F8B-4854-B118-F0B77CFC46BB}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincoretimezonel110.dll"/>
+    <ROW Component="apimswincoreutill110.dll" ComponentId="{F7191F5A-CD26-4BDF-8B6B-658EC7B0541F}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincoreutill110.dll"/>
+    <ROW Component="apimswincrtconiol110.dll" ComponentId="{8A44BEBB-CEF9-4BAD-A256-F6E88974C8B6}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincrtconiol110.dll"/>
+    <ROW Component="apimswincrtconvertl110.dll" ComponentId="{9C256A04-0202-4864-B1C8-F52EAA1BF5F1}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincrtconvertl110.dll"/>
+    <ROW Component="apimswincrtenvironmentl110.dll" ComponentId="{DA55EC85-70EB-4970-9728-6E2BB9E36E2A}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincrtenvironmentl110.dll"/>
+    <ROW Component="apimswincrtfilesysteml110.dll" ComponentId="{16CC0D05-B7F9-4548-8E9B-94407315D2D2}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincrtfilesysteml110.dll"/>
+    <ROW Component="apimswincrtheapl110.dll" ComponentId="{063BE62F-D977-4BF7-9215-76EBD7EEBB37}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincrtheapl110.dll"/>
+    <ROW Component="apimswincrtlocalel110.dll" ComponentId="{CED6C5E7-1C06-4306-A355-54BE26843CC2}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincrtlocalel110.dll"/>
+    <ROW Component="apimswincrtmathl110.dll" ComponentId="{D3E79894-1F4F-4BA0-85D2-DEE5FD8F2776}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincrtmathl110.dll"/>
+    <ROW Component="apimswincrtprocessl110.dll" ComponentId="{765C9ED4-B0D6-4B77-8515-ED5067556891}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincrtprocessl110.dll"/>
+    <ROW Component="apimswincrtruntimel110.dll" ComponentId="{711A26DB-1407-4932-9F7B-D59AB95F9543}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincrtruntimel110.dll"/>
+    <ROW Component="apimswincrtstdiol110.dll" ComponentId="{83AE3AD6-26D4-42C8-8E95-45032AC93A94}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincrtstdiol110.dll"/>
+    <ROW Component="apimswincrtstringl110.dll" ComponentId="{66B25CD0-1196-4F74-BBAC-9BA7DE527446}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincrtstringl110.dll"/>
+    <ROW Component="apimswincrttimel110.dll" ComponentId="{249F431B-A5D4-456E-8C56-01BAB92C3DF8}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincrttimel110.dll"/>
+    <ROW Component="apimswincrtutilityl110.dll" ComponentId="{A0F0EED7-C990-4EB4-B46F-F01D51AB30C0}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincrtutilityl110.dll"/>
     <ROW Component="avcodec58ef69f9bd.dll" ComponentId="{647153E1-EBCD-40F4-89E7-5D6E24B52763}" Directory_="av.libs_Dir" Attributes="256" KeyPath="avcodec58ef69f9bd.dll"/>
     <ROW Component="avdevice581b474226.dll" ComponentId="{C6C23586-A37B-4449-AE69-9D135EF3AE40}" Directory_="av.libs_Dir" Attributes="256" KeyPath="avdevice581b474226.dll"/>
     <ROW Component="avfilter790346677.dll" ComponentId="{02B1671A-4C94-44B0-8E9A-568975935F4B}" Directory_="av.libs_Dir" Attributes="256" KeyPath="avfilter790346677.dll"/>
@@ -151,6 +190,7 @@
     <ROW Component="stream.cp39win_amd64.pyd" ComponentId="{2AE34951-A59C-4628-B9AB-9A59D7C58670}" Directory_="data_Dir" Attributes="256" KeyPath="stream.cp39win_amd64.pyd_1" Type="0"/>
     <ROW Component="swresample36975e3c3.dll" ComponentId="{6999A7F0-6DC1-42C6-933D-D1FC1A8F810A}" Directory_="av.libs_Dir" Attributes="256" KeyPath="swresample36975e3c3.dll"/>
     <ROW Component="swscale5a27d1997.dll" ComponentId="{133B4F23-33BD-48BD-9DE8-86B36A5AC67E}" Directory_="av.libs_Dir" Attributes="256" KeyPath="swscale5a27d1997.dll"/>
+    <ROW Component="ucrtbase.dll" ComponentId="{845828EF-FA54-4408-85BB-F313F9F552EE}" Directory_="APPDIR" Attributes="256" KeyPath="ucrtbase.dll"/>
     <ROW Component="usageexample.md" ComponentId="{ECCB744F-4A7A-4F6C-9662-796B80B0943B}" Directory_="examples_Dir" Attributes="0" KeyPath="usageexample.md" Type="0"/>
     <ROW Component="xvidcore7c3d0e75.dll" ComponentId="{6FCC21A3-5C91-4B07-8FF8-3BDC517CB030}" Directory_="av.libs_Dir" Attributes="256" KeyPath="xvidcore7c3d0e75.dll"/>
     <ROW Component="zlib1d1697865.dll" ComponentId="{735694CF-3F7C-4B1E-A0FB-02B3210F345E}" Directory_="av.libs_Dir" Attributes="256" KeyPath="zlib1d1697865.dll"/>
@@ -321,6 +361,46 @@
     <ROW File="libffi7.dll" Component_="libffi7.dll" FileName="libffi-7.dll" Attributes="0" SourcePath="..\scenedetect\libffi-7.dll" SelfReg="false"/>
     <ROW File="libopenblas.FB5AE2TYXYH2IJRDKGDGQ3XBKLKTF43H.gfortranwin_amd64.dll" Component_="libopenblas.FB5AE2TYXYH2IJRDKGDGQ3XBKLKTF43H.gfortranwin_amd64.dll" FileName="LIBOPE~1.DLL|libopenblas.FB5AE2TYXYH2IJRDKGDGQ3XBKLKTF43H.gfortran-win_amd64.dll" Attributes="0" SourcePath="..\scenedetect\libopenblas.FB5AE2TYXYH2IJRDKGDGQ3XBKLKTF43H.gfortran-win_amd64.dll" SelfReg="false"/>
     <ROW File="libssl1_1.dll" Component_="libssl1_1.dll" FileName="LIBSSL~1.DLL|libssl-1_1.dll" Attributes="0" SourcePath="..\scenedetect\libssl-1_1.dll" SelfReg="false"/>
+    <ROW File="apimswincoreconsolel110.dll" Component_="apimswincoreconsolel110.dll" FileName="API-MS~1.DLL|api-ms-win-core-console-l1-1-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-core-console-l1-1-0.dll" SelfReg="false"/>
+    <ROW File="apimswincoredatetimel110.dll" Component_="apimswincoredatetimel110.dll" FileName="API-MS~2.DLL|api-ms-win-core-datetime-l1-1-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-core-datetime-l1-1-0.dll" SelfReg="false"/>
+    <ROW File="apimswincoredebugl110.dll" Component_="apimswincoredebugl110.dll" FileName="API-MS~3.DLL|api-ms-win-core-debug-l1-1-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-core-debug-l1-1-0.dll" SelfReg="false"/>
+    <ROW File="apimswincoreerrorhandlingl110.dll" Component_="apimswincoreerrorhandlingl110.dll" FileName="API-MS~4.DLL|api-ms-win-core-errorhandling-l1-1-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-core-errorhandling-l1-1-0.dll" SelfReg="false"/>
+    <ROW File="apimswincorefibersl110.dll" Component_="apimswincorefibersl110.dll" FileName="API-MS~5.DLL|api-ms-win-core-fibers-l1-1-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-core-fibers-l1-1-0.dll" SelfReg="false"/>
+    <ROW File="apimswincorefilel110.dll" Component_="apimswincorefilel110.dll" FileName="API-MS~6.DLL|api-ms-win-core-file-l1-1-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-core-file-l1-1-0.dll" SelfReg="false"/>
+    <ROW File="apimswincorefilel120.dll" Component_="apimswincorefilel120.dll" FileName="API-MS~7.DLL|api-ms-win-core-file-l1-2-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-core-file-l1-2-0.dll" SelfReg="false"/>
+    <ROW File="apimswincorefilel210.dll" Component_="apimswincorefilel210.dll" FileName="API-MS~8.DLL|api-ms-win-core-file-l2-1-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-core-file-l2-1-0.dll" SelfReg="false"/>
+    <ROW File="apimswincorehandlel110.dll" Component_="apimswincorehandlel110.dll" FileName="API-MS~9.DLL|api-ms-win-core-handle-l1-1-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-core-handle-l1-1-0.dll" SelfReg="false"/>
+    <ROW File="apimswincoreheapl110.dll" Component_="apimswincoreheapl110.dll" FileName="API-M~10.DLL|api-ms-win-core-heap-l1-1-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-core-heap-l1-1-0.dll" SelfReg="false"/>
+    <ROW File="apimswincoreinterlockedl110.dll" Component_="apimswincoreinterlockedl110.dll" FileName="API-M~11.DLL|api-ms-win-core-interlocked-l1-1-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-core-interlocked-l1-1-0.dll" SelfReg="false"/>
+    <ROW File="apimswincorelibraryloaderl110.dll" Component_="apimswincorelibraryloaderl110.dll" FileName="API-M~12.DLL|api-ms-win-core-libraryloader-l1-1-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-core-libraryloader-l1-1-0.dll" SelfReg="false"/>
+    <ROW File="apimswincorelocalizationl120.dll" Component_="apimswincorelocalizationl120.dll" FileName="API-M~13.DLL|api-ms-win-core-localization-l1-2-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-core-localization-l1-2-0.dll" SelfReg="false"/>
+    <ROW File="apimswincorememoryl110.dll" Component_="apimswincorememoryl110.dll" FileName="API-M~14.DLL|api-ms-win-core-memory-l1-1-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-core-memory-l1-1-0.dll" SelfReg="false"/>
+    <ROW File="apimswincorenamedpipel110.dll" Component_="apimswincorenamedpipel110.dll" FileName="API-M~15.DLL|api-ms-win-core-namedpipe-l1-1-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-core-namedpipe-l1-1-0.dll" SelfReg="false"/>
+    <ROW File="apimswincoreprocessenvironmentl110.dll" Component_="apimswincoreprocessenvironmentl110.dll" FileName="API-M~16.DLL|api-ms-win-core-processenvironment-l1-1-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-core-processenvironment-l1-1-0.dll" SelfReg="false"/>
+    <ROW File="apimswincoreprocessthreadsl110.dll" Component_="apimswincoreprocessthreadsl110.dll" FileName="API-M~17.DLL|api-ms-win-core-processthreads-l1-1-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-core-processthreads-l1-1-0.dll" SelfReg="false"/>
+    <ROW File="apimswincoreprocessthreadsl111.dll" Component_="apimswincoreprocessthreadsl111.dll" FileName="API-M~18.DLL|api-ms-win-core-processthreads-l1-1-1.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-core-processthreads-l1-1-1.dll" SelfReg="false"/>
+    <ROW File="apimswincoreprofilel110.dll" Component_="apimswincoreprofilel110.dll" FileName="API-M~19.DLL|api-ms-win-core-profile-l1-1-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-core-profile-l1-1-0.dll" SelfReg="false"/>
+    <ROW File="apimswincorertlsupportl110.dll" Component_="apimswincorertlsupportl110.dll" FileName="API-M~20.DLL|api-ms-win-core-rtlsupport-l1-1-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-core-rtlsupport-l1-1-0.dll" SelfReg="false"/>
+    <ROW File="apimswincorestringl110.dll" Component_="apimswincorestringl110.dll" FileName="API-M~21.DLL|api-ms-win-core-string-l1-1-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-core-string-l1-1-0.dll" SelfReg="false"/>
+    <ROW File="apimswincoresynchl110.dll" Component_="apimswincoresynchl110.dll" FileName="API-M~22.DLL|api-ms-win-core-synch-l1-1-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-core-synch-l1-1-0.dll" SelfReg="false"/>
+    <ROW File="apimswincoresynchl120.dll" Component_="apimswincoresynchl120.dll" FileName="API-M~23.DLL|api-ms-win-core-synch-l1-2-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-core-synch-l1-2-0.dll" SelfReg="false"/>
+    <ROW File="apimswincoresysinfol110.dll" Component_="apimswincoresysinfol110.dll" FileName="API-M~24.DLL|api-ms-win-core-sysinfo-l1-1-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-core-sysinfo-l1-1-0.dll" SelfReg="false"/>
+    <ROW File="apimswincoretimezonel110.dll" Component_="apimswincoretimezonel110.dll" FileName="API-M~25.DLL|api-ms-win-core-timezone-l1-1-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-core-timezone-l1-1-0.dll" SelfReg="false"/>
+    <ROW File="apimswincoreutill110.dll" Component_="apimswincoreutill110.dll" FileName="API-M~26.DLL|api-ms-win-core-util-l1-1-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-core-util-l1-1-0.dll" SelfReg="false"/>
+    <ROW File="apimswincrtconiol110.dll" Component_="apimswincrtconiol110.dll" FileName="API-M~27.DLL|api-ms-win-crt-conio-l1-1-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-crt-conio-l1-1-0.dll" SelfReg="false"/>
+    <ROW File="apimswincrtconvertl110.dll" Component_="apimswincrtconvertl110.dll" FileName="API-M~28.DLL|api-ms-win-crt-convert-l1-1-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-crt-convert-l1-1-0.dll" SelfReg="false"/>
+    <ROW File="apimswincrtenvironmentl110.dll" Component_="apimswincrtenvironmentl110.dll" FileName="API-M~29.DLL|api-ms-win-crt-environment-l1-1-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-crt-environment-l1-1-0.dll" SelfReg="false"/>
+    <ROW File="apimswincrtfilesysteml110.dll" Component_="apimswincrtfilesysteml110.dll" FileName="API-M~30.DLL|api-ms-win-crt-filesystem-l1-1-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-crt-filesystem-l1-1-0.dll" SelfReg="false"/>
+    <ROW File="apimswincrtheapl110.dll" Component_="apimswincrtheapl110.dll" FileName="API-M~31.DLL|api-ms-win-crt-heap-l1-1-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-crt-heap-l1-1-0.dll" SelfReg="false"/>
+    <ROW File="apimswincrtlocalel110.dll" Component_="apimswincrtlocalel110.dll" FileName="API-M~32.DLL|api-ms-win-crt-locale-l1-1-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-crt-locale-l1-1-0.dll" SelfReg="false"/>
+    <ROW File="apimswincrtmathl110.dll" Component_="apimswincrtmathl110.dll" FileName="API-M~33.DLL|api-ms-win-crt-math-l1-1-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-crt-math-l1-1-0.dll" SelfReg="false"/>
+    <ROW File="apimswincrtprocessl110.dll" Component_="apimswincrtprocessl110.dll" FileName="API-M~34.DLL|api-ms-win-crt-process-l1-1-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-crt-process-l1-1-0.dll" SelfReg="false"/>
+    <ROW File="apimswincrtruntimel110.dll" Component_="apimswincrtruntimel110.dll" FileName="API-M~35.DLL|api-ms-win-crt-runtime-l1-1-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-crt-runtime-l1-1-0.dll" SelfReg="false"/>
+    <ROW File="apimswincrtstdiol110.dll" Component_="apimswincrtstdiol110.dll" FileName="API-M~36.DLL|api-ms-win-crt-stdio-l1-1-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-crt-stdio-l1-1-0.dll" SelfReg="false"/>
+    <ROW File="apimswincrtstringl110.dll" Component_="apimswincrtstringl110.dll" FileName="API-M~37.DLL|api-ms-win-crt-string-l1-1-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-crt-string-l1-1-0.dll" SelfReg="false"/>
+    <ROW File="apimswincrttimel110.dll" Component_="apimswincrttimel110.dll" FileName="API-M~38.DLL|api-ms-win-crt-time-l1-1-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-crt-time-l1-1-0.dll" SelfReg="false"/>
+    <ROW File="apimswincrtutilityl110.dll" Component_="apimswincrtutilityl110.dll" FileName="API-M~39.DLL|api-ms-win-crt-utility-l1-1-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-crt-utility-l1-1-0.dll" SelfReg="false"/>
+    <ROW File="ucrtbase.dll" Component_="ucrtbase.dll" FileName="ucrtbase.dll" Attributes="0" SourcePath="..\scenedetect\ucrtbase.dll" SelfReg="false"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.BootstrOptComponent">
     <ROW BootstrOptKey="GlobalOptions" DownloadFolder="[LocalAppDataFolder]\[|ProductName]\prerequisites"/>
@@ -513,6 +593,46 @@
     <ROW Feature_="PySceneDetect" Component_="libopenblas.FB5AE2TYXYH2IJRDKGDGQ3XBKLKTF43H.gfortranwin_amd64.dll"/>
     <ROW Feature_="PySceneDetect" Component_="libssl1_1.dll"/>
     <ROW Feature_="PySceneDetect" Component_="AI_ExePath"/>
+    <ROW Feature_="PySceneDetect" Component_="apimswincoreconsolel110.dll"/>
+    <ROW Feature_="PySceneDetect" Component_="apimswincoredatetimel110.dll"/>
+    <ROW Feature_="PySceneDetect" Component_="apimswincoredebugl110.dll"/>
+    <ROW Feature_="PySceneDetect" Component_="apimswincoreerrorhandlingl110.dll"/>
+    <ROW Feature_="PySceneDetect" Component_="apimswincorefibersl110.dll"/>
+    <ROW Feature_="PySceneDetect" Component_="apimswincorefilel110.dll"/>
+    <ROW Feature_="PySceneDetect" Component_="apimswincorefilel120.dll"/>
+    <ROW Feature_="PySceneDetect" Component_="apimswincorefilel210.dll"/>
+    <ROW Feature_="PySceneDetect" Component_="apimswincorehandlel110.dll"/>
+    <ROW Feature_="PySceneDetect" Component_="apimswincoreheapl110.dll"/>
+    <ROW Feature_="PySceneDetect" Component_="apimswincoreinterlockedl110.dll"/>
+    <ROW Feature_="PySceneDetect" Component_="apimswincorelibraryloaderl110.dll"/>
+    <ROW Feature_="PySceneDetect" Component_="apimswincorelocalizationl120.dll"/>
+    <ROW Feature_="PySceneDetect" Component_="apimswincorememoryl110.dll"/>
+    <ROW Feature_="PySceneDetect" Component_="apimswincorenamedpipel110.dll"/>
+    <ROW Feature_="PySceneDetect" Component_="apimswincoreprocessenvironmentl110.dll"/>
+    <ROW Feature_="PySceneDetect" Component_="apimswincoreprocessthreadsl110.dll"/>
+    <ROW Feature_="PySceneDetect" Component_="apimswincoreprocessthreadsl111.dll"/>
+    <ROW Feature_="PySceneDetect" Component_="apimswincoreprofilel110.dll"/>
+    <ROW Feature_="PySceneDetect" Component_="apimswincorertlsupportl110.dll"/>
+    <ROW Feature_="PySceneDetect" Component_="apimswincorestringl110.dll"/>
+    <ROW Feature_="PySceneDetect" Component_="apimswincoresynchl110.dll"/>
+    <ROW Feature_="PySceneDetect" Component_="apimswincoresynchl120.dll"/>
+    <ROW Feature_="PySceneDetect" Component_="apimswincoresysinfol110.dll"/>
+    <ROW Feature_="PySceneDetect" Component_="apimswincoretimezonel110.dll"/>
+    <ROW Feature_="PySceneDetect" Component_="apimswincoreutill110.dll"/>
+    <ROW Feature_="PySceneDetect" Component_="apimswincrtconiol110.dll"/>
+    <ROW Feature_="PySceneDetect" Component_="apimswincrtconvertl110.dll"/>
+    <ROW Feature_="PySceneDetect" Component_="apimswincrtenvironmentl110.dll"/>
+    <ROW Feature_="PySceneDetect" Component_="apimswincrtfilesysteml110.dll"/>
+    <ROW Feature_="PySceneDetect" Component_="apimswincrtheapl110.dll"/>
+    <ROW Feature_="PySceneDetect" Component_="apimswincrtlocalel110.dll"/>
+    <ROW Feature_="PySceneDetect" Component_="apimswincrtmathl110.dll"/>
+    <ROW Feature_="PySceneDetect" Component_="apimswincrtprocessl110.dll"/>
+    <ROW Feature_="PySceneDetect" Component_="apimswincrtruntimel110.dll"/>
+    <ROW Feature_="PySceneDetect" Component_="apimswincrtstdiol110.dll"/>
+    <ROW Feature_="PySceneDetect" Component_="apimswincrtstringl110.dll"/>
+    <ROW Feature_="PySceneDetect" Component_="apimswincrttimel110.dll"/>
+    <ROW Feature_="PySceneDetect" Component_="apimswincrtutilityl110.dll"/>
+    <ROW Feature_="PySceneDetect" Component_="ucrtbase.dll"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiIconsComponent">
     <ROW Name="psd_square_small.exe" SourcePath="psd_square_small.ico" Index="0"/>
