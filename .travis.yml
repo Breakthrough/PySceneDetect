@@ -6,7 +6,7 @@ matrix:
     - os: linux
       dist: xenial
       language: python
-      python: "3.10"
+      python: "3.9"
 
     - os: linux
       dist: bionic
@@ -31,8 +31,10 @@ matrix:
       python: "3.10"
 
 install:
+  # `setuptools` is pinned for the Python 3.7 builder to work correctly.
   - "python -m pip install --upgrade pip build wheel virtualenv setuptools==62.3.4"
   # Make sure we get latest binary packages of the video input libraries.
+  # TODO(#292): Add a Python 3.11 builder once newer versions of the `av` package are supported. 
   - "python -m pip install av==9.2 opencv-python-headless --only-binary :all:"
   # Install other required packages and download required test resources.
   - "python -m pip install -r requirements_headless.txt"
