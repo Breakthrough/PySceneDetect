@@ -6,7 +6,7 @@ matrix:
     - os: linux
       dist: xenial
       language: python
-      python: "3.8"
+      python: "3.10"
 
     - os: linux
       dist: bionic
@@ -15,7 +15,7 @@ matrix:
     - os: linux
       dist: bionic
       language: python
-      python: "3.9"
+      python: "3.10"
 
     - os: linux
       dist: focal
