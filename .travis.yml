@@ -45,6 +45,7 @@ install:
   - "python -m build"
 
 script:
+  # TODO: Run tests in parallel.
   - python -m pytest tests/
   # TODO: Install ffmpeg/mkvtoolnix to run split-video tests.
 

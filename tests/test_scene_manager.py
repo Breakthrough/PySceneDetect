@@ -48,7 +48,7 @@ def test_scene_list(test_video_file):
 
     num_frames = sm.detect_scenes(video=video, end_time=end_time)
 
-    assert num_frames == (1 + end_time.get_frames() - start_time.get_frames())
+    assert num_frames == (end_time.get_frames() - start_time.get_frames())
 
     scene_list = sm.get_scene_list()
     assert scene_list
