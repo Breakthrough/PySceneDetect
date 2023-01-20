@@ -709,10 +709,6 @@ class CliContext:
         logger.debug('Setting video time:\n    start: %s, duration: %s, end: %s', start, duration,
                      end)
 
-        # TODO: This math might have to be changed for --end/--duration versus how it's used for
-        # minimum scene length for example. One extra frame is always processed, but it should
-        # actually be excluded (i.e. if we stop on frame 2, the end frame of the last scene should
-        # be 2.  Likewise if we stop at 0.5s, the last frame on the last scene should be 0.5s).
         self.start_time = parse_timecode(
             start, self.video_stream.frame_rate, first_index_is_one=True)
         self.end_time = parse_timecode(end, self.video_stream.frame_rate, first_index_is_one=True)

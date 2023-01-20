@@ -33,12 +33,12 @@ StringFileInfo(
     u'040904B0',
     [StringStruct(u'CompanyName', u'github.com/Breakthrough'),
     StringStruct(u'FileDescription', u'www.scenedetect.com'),
-    StringStruct(u'FileVersion', u'v0.6.2-dev'),
+    StringStruct(u'FileVersion', u'v0.6.2.dev0'),
     StringStruct(u'InternalName', u'PySceneDetect'),
     StringStruct(u'LegalCopyright', u'Copyright © 2023 Brandon Castellano'),
     StringStruct(u'OriginalFilename', u'scenedetect.exe'),
     StringStruct(u'ProductName', u'PySceneDetect'),
-    StringStruct(u'ProductVersion', u'v0.6.2-dev')])
+    StringStruct(u'ProductVersion', u'v0.6.2.dev0')])
   ]),
 VarFileInfo([VarStruct(u'Translation', [1033, 1200])])
   ]
