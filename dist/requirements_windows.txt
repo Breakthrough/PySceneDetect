@@ -6,7 +6,7 @@
 # distribution (e.g. via pip or setup.py), use requirements.txt instead.
 appdirs
 av==9.2.0
-click
+click>=8.0
 numpy
 opencv-python-headless==4.5.1.48
 pytest
