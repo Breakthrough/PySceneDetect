@@ -28,7 +28,7 @@ install:
   - python -m pip install --upgrade pip build wheel virtualenv setuptools
 
   # Make sure we get latest binary packages of the video input libraries.
-  - python -m pip install av==9.2 opencv-python-headless --only-binary ":all:"
+  - python -m pip install av opencv-python-headless --only-binary ":all:"
 
   # Install other PySceneDetect dependencies and checkout resources required for tests.
   - python -m pip install -r requirements_headless.txt
@@ -60,7 +60,7 @@ test_script:
   - python -m scenedetect version
   - python -m scenedetect -i tests/resources/testvideo.mp4 -b opencv detect-content time -e 2s
   # Test with optional PyAV backend
-  - python -m pip install av==9.2
+  - python -m pip install av
   - python -m scenedetect -i tests/resources/testvideo.mp4 -b pyav detect-content time -e 2s
   # Cleanup
   - python -m pip uninstall -y scenedetect av

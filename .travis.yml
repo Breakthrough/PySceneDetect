@@ -29,15 +29,18 @@ matrix:
       dist: focal
       language: python
       python: "3.10"
+    - os: linux
+      dist: focal
+      language: python
+      python: "3.11"
 
 install:
   # TODO: `setuptools` is pinned for the Python 3.7 builder and can be unpinned when removed.
   - "python -m pip install --upgrade pip build wheel virtualenv setuptools==62.3.4"
   # Make sure we get latest binary packages of the video input libraries.
-  # TODO(#292): Add a Python 3.11 builder once newer versions of the `av` package are supported.
   # TODO: `opencv-python-headless` is pinned for the xenial build. Unpin `opencv-python-headless`
   # when https://github.com/opencv/opencv/issues/23090 is resolved.
-  - "python -m pip install av==9.2 opencv-python-headless==4.6.0.66 --only-binary :all:"
+  - "python -m pip install av opencv-python-headless==4.6.0.66 --only-binary :all:"
   # Install other required packages and download required test resources.
   - "python -m pip install -r requirements_headless.txt"
   - "git fetch --depth=1 https://github.com/Breakthrough/PySceneDetect.git refs/heads/resources:refs/remotes/origin/resources"
