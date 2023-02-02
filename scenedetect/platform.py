@@ -316,16 +316,16 @@ def get_system_version_info() -> str:
 
     # Third-Party Packages
     out_lines += ['', 'Package Version Info', line_separator]
-    backend_modules = (
-        'appdirs',
+    third_party_packages = (
         'av',
         'click',
         'cv2',
         'moviepy',
         'numpy',
+        'platformdirs',
         'tqdm',
     )
-    for module_name in backend_modules:
+    for module_name in third_party_packages:
         try:
             module = importlib.import_module(module_name)
             out_lines.append(output_template.format(module_name, module.__version__))

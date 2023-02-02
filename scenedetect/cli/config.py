@@ -24,7 +24,7 @@ import os.path
 from configparser import ConfigParser, ParsingError
 from typing import Any, AnyStr, Dict, List, Optional, Tuple, Union
 
-from appdirs import user_config_dir
+from platformdirs import user_config_dir
 
 from scenedetect.detectors import ContentDetector
 from scenedetect.frame_timecode import FrameTimecode
