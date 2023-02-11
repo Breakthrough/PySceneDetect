@@ -59,7 +59,7 @@ class ThresholdDetector(SceneDetector):
     is chosen (especially taking into account the minimum grey/black level).
     """
 
-    THRESHOLD_VALUE_KEY = 'delta_rgb'
+    THRESHOLD_VALUE_KEY = 'average_rgb'
 
     def __init__(
         self,

@@ -17,6 +17,7 @@ PySceneDetect Releases
  - [bugfix] Fix incorrect end timecode for last scene when `start_in_scene` is `True` or the final scene contains a single frame [#307](https://github.com/Breakthrough/PySceneDetect/issues/307)
  - [general] Add support for PyAV 10.0 [#292](https://github.com/Breakthrough/PySceneDetect/issues/292)
  - [general] Use platformdirs package instead of appdirs [#309](https://github.com/Breakthrough/PySceneDetect/issues/309)
+ - [bugfix] Rename `ThresholdDetector` metric `delta_rgb` metric to `average_rgb`
 
 
 ### 0.6.1 (November 28, 2022)
