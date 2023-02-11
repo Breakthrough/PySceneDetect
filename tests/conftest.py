@@ -94,3 +94,9 @@ def rotated_video_file() -> str:
 def test_image_sequence() -> str:
     """Path to a short image sequence (from counter.mp4)."""
     return "tests/resources/counter/frame%03d.png"
+
+
+@pytest.fixture
+def test_fades_clip() -> str:
+    """Clip containing fades in/out."""
+    return check_exists("tests/resources/fades.mp4")

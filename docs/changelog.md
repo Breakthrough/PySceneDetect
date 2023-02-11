@@ -18,6 +18,7 @@ PySceneDetect Releases
  - [general] Add support for PyAV 10.0 [#292](https://github.com/Breakthrough/PySceneDetect/issues/292)
  - [general] Use platformdirs package instead of appdirs [#309](https://github.com/Breakthrough/PySceneDetect/issues/309)
  - [bugfix] Rename `ThresholdDetector` metric `delta_rgb` metric to `average_rgb`
+ - [feature] Add ability for `ThresholdDetector` to detect fade out to white [#143](https://github.com/Breakthrough/PySceneDetect/issues/143)
 
 
 ### 0.6.1 (November 28, 2022)

@@ -16,6 +16,7 @@ triggered when the average pixel intensity exceeds or falls below this threshold
 This detector is available from the command-line as the `detect-threshold` command.
 """
 
+from enum import Enum
 from logging import getLogger
 from typing import List, Optional
 
@@ -59,6 +60,13 @@ class ThresholdDetector(SceneDetector):
     is chosen (especially taking into account the minimum grey/black level).
     """
 
+    class Method(Enum):
+        """Method for ThresholdDetector to use when comparing frame brightness to the threshold."""
+        FLOOR = 0
+        """Fade out happens when frame brightness falls below threshold."""
+        CEILING = 1
+        """Fade out happens when frame brightness rises above threshold."""
+
     THRESHOLD_VALUE_KEY = 'average_rgb'
 
     def __init__(
@@ -67,6 +75,7 @@ class ThresholdDetector(SceneDetector):
         min_scene_len: int = 15,
         fade_bias: float = 0.0,
         add_final_scene: bool = False,
+        method: Method = Method.FLOOR,
         block_size=None,
     ):
         """
@@ -81,6 +90,7 @@ class ThresholdDetector(SceneDetector):
                 right at the position where the threshold is passed).
             add_final_scene:  Boolean indicating if the video ends on a fade-out to
                 generate an additional scene at this timecode.
+            method: How to treat `threshold` when detecting fade events.
             block_size: [DEPRECATED] DO NOT USE. For backwards compatibility.
         """
         # TODO(v0.7): Replace with DeprecationWarning that `block_size` will be removed in v0.8.
@@ -89,6 +99,7 @@ class ThresholdDetector(SceneDetector):
 
         super().__init__()
         self.threshold = int(threshold)
+        self.method = ThresholdDetector.Method(method)
         self.fade_bias = fade_bias
         self.min_scene_len = min_scene_len
         self.processed_frame = False
@@ -142,11 +153,16 @@ class ThresholdDetector(SceneDetector):
                 self.stats_manager.set_metrics(frame_num, {self._metric_keys[0]: frame_avg})
 
         if self.processed_frame:
-            if self.last_fade['type'] == 'in' and frame_avg < self.threshold:
+            if self.last_fade['type'] == 'in' and ((
+                (self.method == ThresholdDetector.Method.FLOOR and frame_avg < self.threshold) or
+                (self.method == ThresholdDetector.Method.CEILING and frame_avg >= self.threshold))):
                 # Just faded out of a scene, wait for next fade in.
                 self.last_fade['type'] = 'out'
                 self.last_fade['frame'] = frame_num
-            elif self.last_fade['type'] == 'out' and frame_avg >= self.threshold:
+
+            elif self.last_fade['type'] == 'out' and (
+                (self.method == ThresholdDetector.Method.FLOOR and frame_avg >= self.threshold) or
+                (self.method == ThresholdDetector.Method.CEILING and frame_avg < self.threshold)):
                 # Only add the scene if min_scene_len frames have passed.
                 if (frame_num - self.last_scene_cut) >= self.min_scene_len:
                     # Just faded into a new scene, compute timecode for the scene
