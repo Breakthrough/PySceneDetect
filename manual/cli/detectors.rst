@@ -59,13 +59,6 @@ Edge detection is not enabled by default. Current default parameters are `-w
 1.0 1.0 1.0 0.0 -t 27`. The final weighted sum is normalized based on the
 weight of the components, so they do not need to equal 100%.
 
-Examples:
-
-    ``detect-content``
-
-    ``detect-content --threshold 27.5``
-
-
 Detector Options
 -----------------------------------------------------------------------
 
@@ -97,6 +90,13 @@ Detector Options
                                   timecode in the format HH:MM:SS or
                                   HH:MM:SS.nnn.
 
+Examples
+-----------------------------------------------------------------------
+
+    ``detect-content``
+
+    ``detect-content --threshold 27.5``
+
 
 =======================================================================
 ``detect-threshold``
@@ -106,12 +106,6 @@ Perform threshold detection algorithm on input video.
 
 Detects fades in/out based on average frame pixel value compared against
 `-t`/`--threshold`.
-
-Examples:
-
-  ``detect-threshold``
-
-  ``detect-threshold --threshold 15``
 
 Detector Options
 -----------------------------------------------------------------------
@@ -150,13 +144,48 @@ Usage Examples
 ``detect-adaptive``
 =======================================================================
 
-Perform adaptive detection algorithm on input video.
-
 Two-pass algorithm that first calculates frame scores with `detect-content`,
 and then applies a rolling average when processing the result. This can help
 mitigate false detections in situations such as camera movement.
 
-Examples:
+Detector Options
+-----------------------------------------------------------------------
+
+  -t, --threshold VAL             Threshold value (float) that the calculated
+                                  frame score must exceed to trigger a new
+                                  scene (see frame metric adaptive_ratio in
+                                  stats file). [default: 3.0]
+  -c, --min-content-val VAL       Minimum threshold (float) that the
+                                  content_val must exceed in order to register
+                                  as a new scene. This is calculated the same
+                                  way that `detect-content` calculates frame
+                                  score. [default: 15.0]
+  -f, --frame-window VAL          Size of window (number of frames) before and
+                                  after each frame to average together in
+                                  order to detect deviations from the mean.
+                                  [default: 2]
+  -w, --weights <FLOAT FLOAT FLOAT FLOAT>...
+                                  Weights of the 4 components used to
+                                  calculate content_val in the form
+                                  (delta_hue, delta_sat, delta_lum,
+                                  delta_edges). [default: 1.000, 1.000, 1.000,
+                                  0.000]
+  -l, --luma-only                 Only consider luma (brightness) channel.
+                                  Useful for greyscale videos. Equivalent
+                                  tosetting -w/--weights to 0, 0, 1, 0.
+  -k, --kernel-size N             Size of kernel for expanding detected edges.
+                                  Must be odd integer greater than or equal to
+                                  3. If unset, kernel size is estimated using
+                                  video resolution. [default: auto]
+  -m, --min-scene-len TIMECODE    Minimum length of any scene. Overrides
+                                  global min-scene-len (-m) setting. TIMECODE
+                                  can be specified as exact number of frames,
+                                  a time in seconds followed by s, or a
+                                  timecode in the format HH:MM:SS or
+                                  HH:MM:SS.nnn.
+
+Usage Examples
+-----------------------------------------------------------------------
 
     ``detect-adaptive``
 
@@ -207,13 +236,6 @@ exceeds the threshold value, a new scene is triggered.
 The input video for the ``detect-hist`` must be an 8-bit color video due to the
 bit shifting calculations that are done.
 
-Examples:
-
-    ``detect-hist``
-
-    ``detect-hist --threshold 25000.0``
-
-
 Detector Options
 -----------------------------------------------------------------------
 
@@ -234,3 +256,10 @@ Detector Options
                                 specified as exact number of frames, a time in
                                 seconds followed by s, or a timecode in the
                                 format HH:MM:SS or HH:MM:SS.nnn.
+
+Usage Examples
+-----------------------------------------------------------------------
+
+    ``detect-hist``
+
+    ``detect-hist --threshold 25000.0``

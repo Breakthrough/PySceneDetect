@@ -68,7 +68,7 @@ Usage Examples
 
     ``scenedetect help``
 
-    ``scenedetect help detect-content``
+    ``scenedetect help detect-adaptive``
 
     ``scenedetect help all``
 

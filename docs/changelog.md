@@ -4,15 +4,16 @@ PySceneDetect Releases
 
 ## PySceneDetect 0.6
 
-### 0.6.1 (TBD)
+### 0.6.1 (November 28, 2022)
 
 #### Release Notes
 
- - In development.
+Includes [MoviePy support](https://github.com/Zulko/moviepy), edge detection capability for fast cuts, and several enhancements/bugfixes.
 
 #### Changelog
 
 **Command-Line Changes:**
+
  - [feature] Add `moviepy` backend wrapping the MoviePy package, uses `ffmpeg` binary on the system for video decoding
  - [feature] Edge detection can now be enabled with `detect-content` and `detect-adaptive` to improve accuracy in some cases, especially under lighting changes, see [new `-w`/`--weights` option](http://scenedetect.com/projects/Manual/en/latest/cli/detectors.html#detect-content) for more information
     - A good starting point is to place 100% weight on the change in a frame's hue, 50% on saturation change, 100% on luma (brightness) change, and 25% on change in edges, with a threshold of 32:
@@ -30,6 +31,7 @@ PySceneDetect Releases
 
 **General:**
 
+ - [general] Recommend `detect-adaptive` over `detect-content`
  - [feature] Add new backend `VideoStreamMoviePy` using the MoviePy package`
  - [feature] Add edge detection to `ContentDetector` and `AdaptiveDetector` ([#35](https://github.com/Breakthrough/PySceneDetect/issues/35))
     - Add ability to specify content score weights of hue, saturation, luma, and edge differences between frames
@@ -38,6 +40,7 @@ PySceneDetect Releases
  - [feature] `AdaptiveDetector` no longer requires a `StatsManager` and can now be used with `frame_skip` ([#283](https://github.com/Breakthrough/PySceneDetect/issues/283))
  - [bugfix] Fix `scenedetect.detect()` throwing `TypeError` when specifying `stats_file_path`
  - [bugfix] Fix off-by-one error in end event timecode when `end_time` was set (reported end time was always one extra frame)
+ - [bugfix] Fix a named argument that was incorrect ([#299](https://github.com/Breakthrough/PySceneDetect/issues/299))
  - [enhancement] Add optional `start_time`, `end_time`, and `start_in_scene` arguments to `scenedetect.detect()` ([#282](https://github.com/Breakthrough/PySceneDetect/issues/282))
  - [enhancement] Add `-map 0` option to default arguments of `split_video_ffmpeg` to include all audio tracks by default ([#271](https://github.com/Breakthrough/PySceneDetect/issues/271))
  - [docs] Add example for [using a callback](http://scenedetect.com/projects/Manual/en/v0.6.1/api/scene_manager.html#usage) ([#273](https://github.com/Breakthrough/PySceneDetect/issues/273))

@@ -39,13 +39,13 @@ class FakeTqdmObject:
     def __init__(self, **kawrgs):
         """No-op."""
 
-    def update(self, _):
+    def update(self, n=1):
         """No-op."""
 
     def close(self):
         """No-op."""
 
-    def set_description(self, _):
+    def set_description(self, desc=None, refresh=True):
         """No-op."""
 
     # pylint: enable=unused-argument
