@@ -6,7 +6,7 @@ matrix:
     - os: linux
       dist: xenial
       language: python
-      python: "3.8"
+      python: "3.9"
 
     - os: linux
       dist: bionic
@@ -15,7 +15,7 @@ matrix:
     - os: linux
       dist: bionic
       language: python
-      python: "3.9"
+      python: "3.10"
 
     - os: linux
       dist: focal
@@ -31,9 +31,13 @@ matrix:
       python: "3.10"
 
 install:
+  # TODO: `setuptools` is pinned for the Python 3.7 builder and can be unpinned when removed.
   - "python -m pip install --upgrade pip build wheel virtualenv setuptools==62.3.4"
   # Make sure we get latest binary packages of the video input libraries.
-  - "python -m pip install av==9.2 opencv-python-headless --only-binary :all:"
+  # TODO(#292): Add a Python 3.11 builder once newer versions of the `av` package are supported.
+  # TODO: `opencv-python-headless` is pinned for the xenial build. Unpin `opencv-python-headless`
+  # when https://github.com/opencv/opencv/issues/23090 is resolved.
+  - "python -m pip install av==9.2 opencv-python-headless==4.6.0.66 --only-binary :all:"
   # Install other required packages and download required test resources.
   - "python -m pip install -r requirements_headless.txt"
   - "git fetch --depth=1 https://github.com/Breakthrough/PySceneDetect.git refs/heads/resources:refs/remotes/origin/resources"
@@ -44,9 +48,6 @@ script:
   - python -m pytest tests/
   # TODO: Install ffmpeg/mkvtoolnix to run split-video tests.
 
-  # Remove optional dependencies before performing CLI tests
-  - python -m pip uninstall -y av
-
   #
   # Test CLI using source code
   #
@@ -55,10 +56,9 @@ script:
   - python -m scenedetect version
   - python -m scenedetect -i tests/resources/testvideo.mp4 -b opencv detect-content time -e 2s
   # Test with optional backends
-  - "python -m pip install -r requirements_headless.txt --only-binary :all:"
   - python -m scenedetect -i tests/resources/testvideo.mp4 -b pyav detect-content time -e 2s
   # Cleanup
-  - python -m pip uninstall -y scenedetect av
+  - python -m pip uninstall -y scenedetect
 
   # Test CLI using source distribution
   - python -m pip install dist/scenedetect-$PACKAGE_VERSION.tar.gz
@@ -66,10 +66,9 @@ script:
   - scenedetect version
   - scenedetect -i tests/resources/testvideo.mp4 -b opencv detect-content time -e 2s
   # Test with optional backends
-  - "python -m pip install -r requirements_headless.txt --only-binary :all:"
   - scenedetect -i tests/resources/testvideo.mp4 -b pyav detect-content time -e 2s
   # Cleanup
-  - python -m pip uninstall -y scenedetect av
+  - python -m pip uninstall -y scenedetect
 
   # Test CLI using binary wheel
   - python -m pip install dist/scenedetect-$PACKAGE_VERSION-py3-none-any.whl
@@ -77,7 +76,6 @@ script:
   - scenedetect version
   - scenedetect -i tests/resources/testvideo.mp4 -b opencv detect-content time -e 2s
   # Test with optional backends
-  - "python -m pip install -r requirements_headless.txt --only-binary :all:"
   - scenedetect -i tests/resources/testvideo.mp4 -b pyav detect-content time -e 2s
   # Cleanup
-  - python -m pip uninstall -y scenedetect av
+  - python -m pip uninstall -y scenedetect

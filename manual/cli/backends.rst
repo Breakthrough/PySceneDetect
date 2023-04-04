@@ -27,10 +27,3 @@ PyAV
 The `PyAV <https://github.com/PyAV-Org/PyAV>`_ backend (package `av <https://pypi.org/project/av/>_`) is a more robust backend that handles multiple audio tracks and frame decode errors gracefully.
 
 This backend can be used by specifying ``-b pyav`` via command line, or setting ``backend = pyav`` under the ``[global]`` section of your :ref:`config file <scenedetect_cli-config_file>`.
-
-
-=======================================================================
-MoviePy
-=======================================================================
-
-The `MoviePy <https://zulko.github.io/moviepy/>`_ backend (package `moviepy <https://pypi.org/project/moviepy/>_`) uses an external `ffmpeg` binary to decode video frames and pipe them to PySceneDetect. Can be used by specifying ``-b moviepy`` via command line, or setting ``backend = moviepy`` under the ``[global]`` section of your :ref:`config file <scenedetect_cli-config_file>`.

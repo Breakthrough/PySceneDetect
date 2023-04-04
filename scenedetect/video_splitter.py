@@ -161,7 +161,7 @@ def split_video_mkvmerge(
         ]
         total_frames = scene_list[-1][1].get_frames() - scene_list[0][0].get_frames()
         processing_start_time = time.time()
-        # TODO(v0.6.1): Capture stdout/stderr and show that if the command fails.
+        # TODO(v0.6.2): Capture stdout/stderr and show that if the command fails.
         ret_val = invoke_command(call_list)
         if show_output:
             logger.info('Average processing speed %.2f frames/sec.',
@@ -246,17 +246,14 @@ def split_video_ffmpeg(
         processing_start_time = time.time()
         for i, (start_time, end_time) in enumerate(scene_list):
             duration = (end_time - start_time)
-            # Format output filename with template variables
+            # Format output filename with template variable
             output_file_template_iter = Template(output_file_template).safe_substitute(
                 VIDEO_NAME=video_name,
                 SCENE_NUMBER=scene_num_format % (i + 1),
-                START_TIME=str(start_time.get_timecode()),
-                END_TIME=str(end_time.get_timecode()),
+                START_TIME=str(start_time.get_timecode().replace(":", ";")),
+                END_TIME=str(end_time.get_timecode().replace(":", ";")),
                 START_FRAME=str(start_time.get_frames()),
                 END_FRAME=str(end_time.get_frames()))
-
-            # Remove : character or else ffmpeg will error out
-            output_file_template_iter = output_file_template_iter.replace(":", ";")
 
             # Gracefully handle case where FFMPEG_PATH might be unset.
             call_list = [FFMPEG_PATH if FFMPEG_PATH is not None else 'ffmpeg']
@@ -280,7 +277,7 @@ def split_video_ffmpeg(
                 logger.info(
                     'Output from ffmpeg for Scene 1 shown above, splitting remaining scenes...')
             if ret_val != 0:
-                # TODO(v0.6.1): Capture stdout/stderr and display it on any failed calls.
+                # TODO(v0.6.2): Capture stdout/stderr and display it on any failed calls.
                 logger.error('Error splitting video (ffmpeg returned %d).', ret_val)
                 break
             if progress_bar:
