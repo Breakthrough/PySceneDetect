@@ -5,9 +5,8 @@
 # using pyinstaller. If you are installing PySceneDetect directly as a Python
 # distribution (e.g. via pip or setup.py), use requirements.txt instead.
 appdirs
-av==9.1.0
+av==9.2.0
 click
-moviepy
 numpy
 opencv-python-headless==4.5.1.48
 pytest

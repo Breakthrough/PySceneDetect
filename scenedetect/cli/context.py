@@ -325,7 +325,6 @@ class CliContext:
         self._add_detector(scenedetect.detectors.ContentDetector(**detector_args))
         self.options_processed = options_processed_orig
 
-    # TODO(v0.6.1): Add weights.
     def handle_detect_adaptive(
         self,
         threshold: Optional[float],

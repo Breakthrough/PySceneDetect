@@ -13,6 +13,10 @@
 """:py:class:`VideoStreamMoviePy` provides an adapter for MoviePy's `FFMPEG_VideoReader`.
 
 Uses string identifier ``'moviepy'``.
+
+.. warning::
+
+    The MoviePy backend is still under development. Some features are not yet supported.
 """
 
 from logging import getLogger
@@ -47,16 +51,16 @@ class VideoStreamMoviePy(VideoStream):
         """
         super().__init__()
 
-        # TODO(v0.6.1) - Investigate how MoviePy handles ffmpeg not being on PATH.
+        # TODO(v0.6.2) - Investigate how MoviePy handles ffmpeg not being on PATH.
         #if not is_ffmpeg_available():
         #    raise VideoOpenFailure("ffmpeg was not found on the system!")
 
-        # TODO(v0.6.1): Add framerate override.
+        # TODO(v0.6.2): Add framerate override.
         if framerate is not None:
-            raise NotImplementedError("TODO(v0.6.1)")
+            raise NotImplementedError("TODO(v0.6.2)")
 
         self._path = path
-        # TODO(v0.6.1): Need to map errors based on the strings, since several failure
+        # TODO(v0.6.2): Need to map errors based on the strings, since several failure
         # cases return IOErrors (e.g. could not read duration/video resolution). These
         # should be mapped to specific errors, e.g. write a function to map MoviePy
         # exceptions to a new set of equivalents.

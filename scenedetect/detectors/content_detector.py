@@ -120,7 +120,6 @@ class ContentDetector(SceneDetector):
             kernel_size: Size of kernel for expanding detected edges. Must be odd integer
                 greater than or equal to 3. If None, automatically set using video resolution.
         """
-        # TODO(v0.6.1): Mark luma_only as deprecated and warn if set.
         super().__init__()
         self._threshold: float = threshold
         self._min_scene_len: int = min_scene_len
@@ -129,10 +128,6 @@ class ContentDetector(SceneDetector):
         self._weights: ContentDetector.Components = weights
         if luma_only:
             self._weights = ContentDetector.LUMA_ONLY_WEIGHTS
-        # TODO(v0.6.1): Remove debug_mode or figure out a better way of keeping it, as file
-        # paths for the edge mask video are hard-coded currently.
-        self._debug_mode = False
-        self._edge_mask_out: Optional[cv2.VideoWriter] = None
         self._kernel: Optional[numpy.ndarray] = None
         if kernel_size is not None:
             print(kernel_size)
@@ -158,8 +153,8 @@ class ContentDetector(SceneDetector):
         hue, sat, lum = cv2.split(cv2.cvtColor(frame_img, cv2.COLOR_BGR2HSV))
 
         # Performance: Only calculate edges if we have to.
-        calculate_edges: bool = ((self._weights.delta_edges > 0.0) or self.stats_manager is not None
-                                 or self._debug_mode)
+        calculate_edges: bool = ((self._weights.delta_edges > 0.0)
+                                 or self.stats_manager is not None)
         edges = self._detect_edges(lum) if calculate_edges else None
 
         if self._last_frame is None:
@@ -185,16 +180,6 @@ class ContentDetector(SceneDetector):
             metrics.update(score_components._asdict())
             self.stats_manager.set_metrics(frame_num, metrics)
 
-        # TODO(v0.6.1): Try to add debug mode params to the config file,
-        # e.g. allow edge_mask_file = video.avi in [detect-content].
-        if self._debug_mode:
-            out_frame = cv2.cvtColor(edges, cv2.COLOR_GRAY2BGR)
-            if self._edge_mask_out is None:
-                self._edge_mask_out = cv2.VideoWriter('debug.avi', cv2.VideoWriter_fourcc(*'XVID'),
-                                                      23.976,
-                                                      (out_frame.shape[1], out_frame.shape[0]))
-            self._edge_mask_out.write(out_frame)
-
         # Store all data required to calculate the next frame's score.
         self._last_frame = ContentDetector._FrameData(hue, sat, lum, edges)
         return frame_score
@@ -214,7 +199,7 @@ class ContentDetector(SceneDetector):
             or more frames in the list, and not necessarily the same as frame_num.
         """
         if frame_img is None:
-            # TODO(v0.6.1): Make frame_img a required argument in the interface. Log a warning
+            # TODO(v0.6.2): Make frame_img a required argument in the interface. Log a warning
             # that passing None is deprecated and results will be incorrect if this is the case.
             return []
 
@@ -261,9 +246,8 @@ class ContentDetector(SceneDetector):
             self._kernel = numpy.ones((kernel_size, kernel_size), numpy.uint8)
 
         # Estimate levels for thresholding.
-        # TODO(v0.6.1): Give default sigma a named constant.
+        # TODO(v0.6.2): Add config file entries for sigma, aperture/kernel size, etc.
         sigma: float = 1.0 / 3.0
-        # TODO: Add config file entries for sigma, aperture/kernel size, etc.
         median = numpy.median(lum)
         low = int(max(0, (1.0 - sigma) * median))
         high = int(min(255, (1.0 + sigma) * median))

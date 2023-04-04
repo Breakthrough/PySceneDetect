@@ -49,7 +49,7 @@ from scenedetect.video_manager import VideoManager
 
 # Used for module identification and when printing version & about info
 # (e.g. calling `scenedetect version` or `scenedetect about`).
-__version__ = 'v0.6.1-dev0'
+__version__ = 'v0.6.1'
 # About & copyright message string shown for the 'about' CLI command (scenedetect about).
 
 ABOUT_STRING = """
@@ -211,5 +211,5 @@ def detect(
         end_time=end_time,
     )
     if not scene_manager.stats_manager is None:
-        scene_manager.stats_manager.save_to_csv(stats_file_path)
+        scene_manager.stats_manager.save_to_csv(csv_file=stats_file_path)
     return scene_manager.get_scene_list(start_in_scene=start_in_scene)
