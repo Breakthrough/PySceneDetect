@@ -2,12 +2,12 @@
 # PySceneDetect Requirements
 #
 
-# TODO: Replace appdirs with platformdirs.
-appdirs
+# TODO: Rep
 av<=8.0.3; python_version <= "3.6"
-av<10.0; python_version > "3.6"
-click
+av<11.0; python_version > "3.6"
+click>=8.0
 numpy
 opencv-python
+platformdirs
 pytest>=7.0
 tqdm
