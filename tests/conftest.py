@@ -6,7 +6,7 @@
 #     [  Docs:   http://manual.scenedetect.scenedetect.com/      ]
 #     [  Github: https://github.com/Breakthrough/PySceneDetect/  ]
 #
-# Copyright (C) 2014-2022 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2014-2023 Brandon Castellano <http://www.bcastell.com>.
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
@@ -94,3 +94,9 @@ def rotated_video_file() -> str:
 def test_image_sequence() -> str:
     """Path to a short image sequence (from counter.mp4)."""
     return "tests/resources/counter/frame%03d.png"
+
+
+@pytest.fixture
+def test_fades_clip() -> str:
+    """Clip containing fades in/out."""
+    return check_exists("tests/resources/fades.mp4")
