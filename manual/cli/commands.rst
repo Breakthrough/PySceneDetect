@@ -242,14 +242,14 @@ Command Options
                         width, -w, values are specified.
 
   -H, --height H        Optional value for the height of the saved images.
-                        Specifying both the height and width, -w, will resize
+                        Specifying both the height and width, -W, will resize
                         images to an exact size, regardless of aspect ratio.
                         Specifying only height will rescale the image to that
                         number of pixels in height while preserving the aspect
                         ratio.
 
   -W, --width W         Optional value for the width of the saved images.
-                        Specifying both the width and height, -h, will resize
+                        Specifying both the width and height, -H, will resize
                         images to an exact size, regardless of aspect ratio.
                         Specifying only width will rescale the image to that
                         number of pixels wide while preserving the aspect
