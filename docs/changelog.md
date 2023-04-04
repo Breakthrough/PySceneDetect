@@ -4,6 +4,23 @@ PySceneDetect Releases
 
 ## PySceneDetect 0.6
 
+### 0.6.2 (TBD)
+
+**Command-Line Changes:**
+
+ - [bugfix] Fix `-d`/`--duration` and `-e`/`--end` options of `time` command consuming one extra frame [#307](https://github.com/Breakthrough/PySceneDetect/issues/307)
+ - [bugfix] Fix incorrect end timecode for final scene when last frame of video is a new scene [#307](https://github.com/Breakthrough/PySceneDetect/issues/307)
+
+**General:**
+
+ - [bugfix] Fix `end_time` always consuming one extra frame [#307](https://github.com/Breakthrough/PySceneDetect/issues/307)
+ - [bugfix] Fix incorrect end timecode for last scene when `start_in_scene` is `True` or the final scene contains a single frame [#307](https://github.com/Breakthrough/PySceneDetect/issues/307)
+ - [general] Add support for PyAV 10.0 [#292](https://github.com/Breakthrough/PySceneDetect/issues/292)
+ - [general] Use platformdirs package instead of appdirs [#309](https://github.com/Breakthrough/PySceneDetect/issues/309)
+ - [bugfix] Rename `ThresholdDetector` metric `delta_rgb` metric to `average_rgb`
+ - [feature] Add ability for `ThresholdDetector` to detect fade out to white [#143](https://github.com/Breakthrough/PySceneDetect/issues/143)
+
+
 ### 0.6.1 (November 28, 2022)
 
 #### Release Notes

@@ -6,7 +6,7 @@
 #     [  Docs:   http://manual.scenedetect.scenedetect.com/      ]
 #     [  Github: https://github.com/Breakthrough/PySceneDetect/  ]
 #
-# Copyright (C) 2014-2022 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2014-2023 Brandon Castellano <http://www.bcastell.com>.
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
@@ -99,6 +99,27 @@ def test_cli_info_command(info_command):
 def test_cli_version_info():
     """Test `scenedetect` version command with the `-a`/`--show-all` flag."""
     assert invoke_scenedetect('version -a') == 0
+
+
+def test_cli_frame_numbers():
+    """Validate frame numbers and timecodes align as expected for the scene list.
+
+    The end timecode must include the presentation time of the end frame itself.
+    """
+    output = subprocess.check_output(
+        SCENEDETECT_CMD.split(' ') +
+        ['-i', VIDEO_PATH, 'detect-content', 'list-scenes', '-n', 'time', '-s', '1872'],
+        text=True)
+    assert """
+-----------------------------------------------------------------------
+ | Scene # | Start Frame |  Start Time  |  End Frame  |   End Time   |
+-----------------------------------------------------------------------
+ |      1  |        1872 | 00:01:18.036 |        1916 | 00:01:19.913 |
+ |      2  |        1917 | 00:01:19.913 |        1966 | 00:01:21.999 |
+ |      3  |        1967 | 00:01:21.999 |        1980 | 00:01:22.582 |
+-----------------------------------------------------------------------
+""" in output
+    assert "00:01:19.913,00:01:21.999" in output
 
 
 @pytest.mark.parametrize('detector_command', ALL_DETECTORS)

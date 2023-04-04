@@ -6,7 +6,7 @@
 #     [  Docs:   http://manual.scenedetect.scenedetect.com/      ]
 #     [  Github: https://github.com/Breakthrough/PySceneDetect/  ]
 #
-# Copyright (C) 2014-2022 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2014-2023 Brandon Castellano <http://www.bcastell.com>.
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
@@ -121,11 +121,14 @@ class VideoStreamAv(VideoStream):
             raise VideoOpenFailure(str(ex)) from ex
 
         if framerate is None:
-            # Calculate framerate from video container.
-            if self._codec_context.framerate.denominator == 0:
+            # Calculate framerate from video container. `guessed_rate` below appears in PyAV 9.
+            frame_rate = self._video_stream.guessed_rate if hasattr(
+                self._video_stream, 'guessed_rate') else self._codec_context.framerate
+            if frame_rate is None or frame_rate == 0:
                 raise FrameRateUnavailable()
-            frame_rate = self._codec_context.framerate.numerator / float(
-                self._codec_context.framerate.denominator)
+            # TODO: Refactor FrameTimecode to support raw timing rather than framerate based calculations.
+            # See https://pyav.org/docs/develop/api/stream.html for details.
+            frame_rate = frame_rate.numerator / float(frame_rate.denominator)
             if frame_rate < MAX_FPS_DELTA:
                 raise FrameRateUnavailable()
             self._frame_rate: float = frame_rate
@@ -165,7 +168,7 @@ class VideoStreamAv(VideoStream):
     @property
     def frame_size(self) -> Tuple[int, int]:
         """Size of each video frame in pixels as a tuple of (width, height)."""
-        return (self._codec_context.coded_width, self._codec_context.coded_height)
+        return (self._codec_context.width, self._codec_context.height)
 
     @property
     def duration(self) -> FrameTimecode:

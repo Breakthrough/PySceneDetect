@@ -41,11 +41,11 @@ To get familiar with PySceneDetect, try running `scenedetect help`, or continue 
 
 PySceneDetect requires [Python 3](https://www.python.org/) and the following packages:
 
- - [OpenCV](http://opencv.org/): `pip install opencv-python`
- - [Numpy](https://numpy.org/): `pip install numpy`
  - [Click](https://click.palletsprojects.com): `pip install Click`
+ - [Numpy](https://numpy.org/): `pip install numpy`
+ - [OpenCV](http://opencv.org/): `pip install opencv-python`
+ - [platformdirs](https://github.com/platformdirs/platformdirs): `pip install platformdirs`
  - [tqdm](https://github.com/tqdm/tqdm): `pip install tqdm`
- - [appdirs](https://github.com/ActiveState/appdirs): `pip install appdirs`
 
 Optional packages:
 

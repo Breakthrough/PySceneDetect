@@ -6,7 +6,7 @@
 #     [  Docs:   http://manual.scenedetect.scenedetect.com/      ]
 #     [  Github: https://github.com/Breakthrough/PySceneDetect/  ]
 #
-# Copyright (C) 2014-2022 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2014-2023 Brandon Castellano <http://www.bcastell.com>.
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
@@ -316,16 +316,16 @@ def get_system_version_info() -> str:
 
     # Third-Party Packages
     out_lines += ['', 'Package Version Info', line_separator]
-    backend_modules = (
-        'appdirs',
+    third_party_packages = (
         'av',
         'click',
         'cv2',
         'moviepy',
         'numpy',
+        'platformdirs',
         'tqdm',
     )
-    for module_name in backend_modules:
+    for module_name in third_party_packages:
         try:
             module = importlib.import_module(module_name)
             out_lines.append(output_template.format(module_name, module.__version__))
