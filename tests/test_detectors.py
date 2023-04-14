@@ -6,7 +6,7 @@
 #     [  Docs:   http://manual.scenedetect.scenedetect.com/      ]
 #     [  Github: https://github.com/Breakthrough/PySceneDetect/  ]
 #
-# Copyright (C) 2014-2022 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2014-2023 Brandon Castellano <http://www.bcastell.com>.
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
@@ -33,6 +33,12 @@ TEST_MOVIE_CLIP_START_FRAMES_ACTUAL = [1199, 1226, 1260, 1281, 1334, 1365, 1590,
 
 TEST_VIDEO_FILE_START_FRAMES_ACTUAL = [0, 15, 198, 376]
 """Results for `test_video_file` with default ThresholdDetector values."""
+
+FADES_FLOOR_START_FRAMES = [0, 84, 167, 245]
+"""Results for `test_fades_clip` with default ThresholdDetector values."""
+
+FADES_CEILING_START_FRAMES = [0, 42, 125, 209]
+"""Results for `test_fades_clip` with ThresholdDetector fade to light with threshold 243."""
 
 
 def test_detect(test_video_file):
@@ -136,3 +142,31 @@ def test_detectors_with_stats(test_video_file):
         print("No Stats:\t%2.1fs" % time_no_stats)
         print("With Stats:\t%2.1fs" % time_with_stats)
         print("--------------------------------------------------------------------")
+
+
+def test_threshold_detector_fade_out(test_fades_clip):
+    """Test ThresholdDetector handles fading out to black."""
+    video = VideoStreamCv2(test_fades_clip)
+    scene_manager = SceneManager()
+    scene_manager.add_detector(ThresholdDetector(add_final_scene=True))
+    scene_manager.auto_downscale = True
+    scene_manager.detect_scenes(video)
+    scene_list = scene_manager.get_scene_list()
+    assert len(scene_list) == len(FADES_FLOOR_START_FRAMES)
+    detected_start_frames = [timecode.get_frames() for timecode, _ in scene_list]
+    assert all(x == y for (x, y) in zip(FADES_FLOOR_START_FRAMES, detected_start_frames))
+
+
+def test_threshold_detector_fade_in(test_fades_clip):
+    """Test ThresholdDetector handles fading in from white."""
+    video = VideoStreamCv2(test_fades_clip)
+    scene_manager = SceneManager()
+    scene_manager.add_detector(
+        ThresholdDetector(
+            threshold=243, method=ThresholdDetector.Method.CEILING, add_final_scene=True))
+    scene_manager.auto_downscale = True
+    scene_manager.detect_scenes(video)
+    scene_list = scene_manager.get_scene_list()
+    assert len(scene_list) == len(FADES_CEILING_START_FRAMES)
+    detected_start_frames = [timecode.get_frames() for timecode, _ in scene_list]
+    assert all(x == y for (x, y) in zip(FADES_CEILING_START_FRAMES, detected_start_frames))

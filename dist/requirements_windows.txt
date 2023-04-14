@@ -4,10 +4,10 @@
 # These are pinned to the versions required for the Windows build to work
 # using pyinstaller. If you are installing PySceneDetect directly as a Python
 # distribution (e.g. via pip or setup.py), use requirements.txt instead.
-appdirs
 av==9.2.0
-click
+click>=8.0
 numpy
 opencv-python-headless==4.5.1.48
+platformdirs
 pytest
 tqdm

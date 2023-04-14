@@ -6,7 +6,7 @@
 #     [  Docs:   http://manual.scenedetect.scenedetect.com/      ]
 #     [  Github: https://github.com/Breakthrough/PySceneDetect/  ]
 #
-# Copyright (C) 2014-2022 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2014-2023 Brandon Castellano <http://www.bcastell.com>.
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
@@ -689,7 +689,7 @@ class SceneManager:
             return []
         cut_list = self._get_cutting_list()
         scene_list = get_scenes_from_cuts(
-            cut_list=cut_list, start_pos=self._start_pos, end_pos=self._last_pos)
+            cut_list=cut_list, start_pos=self._start_pos, end_pos=self._last_pos + 1)
         # If we didn't actually detect any cuts, make sure the resulting scene_list is empty
         # unless start_in_scene is True.
         if not cut_list and not start_in_scene:
@@ -770,10 +770,9 @@ class SceneManager:
         Arguments:
             video: VideoStream obtained from either `scenedetect.open_video`, or by creating
                 one directly (e.g. `scenedetect.backends.opencv.VideoStreamCv2`).
-            duration: Maximum amount of frames to detect. If not specified,
-                stream will be processed until end. Cannot be specified if `end_time` is set.
-            end_time: Last frame number to process. If not specified,
-                stream will be processed until end. Cannot be specified if `duration` is set.
+            duration: Amount of time to detect from current video position. Cannot be
+                specified if `end_time` is set.
+            end_time: Time to stop processing at. Cannot be specified if `duration` is set.
             frame_skip: Not recommended except for extremely high framerate videos.
                 Number of frames to skip (i.e. process every 1 in N+1 frames,
                 where N is frame_skip, processing only 1/N+1 percent of the video,
@@ -924,8 +923,9 @@ class SceneManager:
                     for _ in range(frame_skip):
                         if not video.read(decode=False):
                             break
-
-                if end_time is not None and video.position >= end_time:
+                # End time includes the presentation time of the frame, but the `position`
+                # property of a VideoStream references the beginning of the frame in time.
+                if end_time is not None and not (video.position + 1) < end_time:
                     break
 
         # If *any* exceptions occur, we re-raise them in the main thread so that the caller of
