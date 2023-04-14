@@ -210,9 +210,12 @@ Command Options
   -f, --filename NAME   Filename format, *without* extension, to use when
                         saving image files. You can use the $VIDEO_NAME,
                         $SCENE_NUMBER, $IMAGE_NUMBER, and $FRAME_NUMBER macros
-                        in the file name. Note that you may have to wrap the
-                        format in single quotes. [default: $VIDEO_NAME-
-                        Scene-$SCENE_NUMBER-$IMAGE_NUMBER]
+                        in the file name. Note that depending on the specifics
+                        of your computing environment, non-standard characters
+                        in image filenames may not be preserved due to an OpenCV
+                        issue. Also note that you may have to wrap the format in
+                        single quotes. [default: $VIDEO_NAME-Scene-
+                        $SCENE_NUMBER-$IMAGE_NUMBER]
 
   -n, --num-images N    Number of images to generate. Will always include
                         start/end frame, unless N = 1, in which case the image
