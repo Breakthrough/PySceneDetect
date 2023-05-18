@@ -107,16 +107,14 @@ In general, use `detect-threshold` mode if you want to detect scene boundaries u
 For help or other issues, you can join [the official PySceneDetect Discord Server](https://discord.gg/H83HbJngk7), submit an issue/bug report [here on Github](https://github.com/Breakthrough/PySceneDetect/issues), or contact me via [my website](http://www.bcastell.com/about/).
 
 
-Usage
-----------------------------------------------------------
+## Usage
 
  - [Basic Usage](https://scenedetect.com/en/latest/examples/usage/)
  - [PySceneDetect Manual](https://manual.scenedetect.com/), covers `scenedetect` command and Python API
  - [Example: Detecting and Splitting Scenes in Movie Clip](https://scenedetect.com/en/latest/examples/usage-example/)
 
 
-Features & Roadmap
-----------------------------------------------------------
+## Features & Roadmap
 
 You can [view the latest features and version roadmap on Readthedocs](http://pyscenedetect.readthedocs.org/en/latest/features/).
 See [`docs/changelog.md`](https://github.com/Breakthrough/PySceneDetect/blob/master/docs/changelog.md) for a list of changes in each version, or visit [the Releases page](https://github.com/Breakthrough/PySceneDetect/releases) to download a specific version.  Feel free to submit any bugs/issues or feature requests to [the Issue Tracker](https://github.com/Breakthrough/PySceneDetect/issues).
@@ -124,8 +122,12 @@ See [`docs/changelog.md`](https://github.com/Breakthrough/PySceneDetect/blob/mas
 Additional features being planned or in development can be found [here (tagged as `feature`) in the issue tracker](https://github.com/Breakthrough/PySceneDetect/issues?q=is%3Aissue+is%3Aopen+label%3Afeature).  You can also find additional information about PySceneDetect at [http://www.bcastell.com/projects/PySceneDetect/](http://www.bcastell.com/projects/PySceneDetect/).
 
 
-License
-----------------------------------------------------------
+## Code Signing
+
+This program uses free code signing provided by [SignPath.io](https://signpath.io?utm_source=foundation&utm_medium=github&utm_campaign=PySceneDetect), and a free code signing certificate by the [SignPath Foundation](https://signpath.org?utm_source=foundation&utm_medium=github&utm_campaign=PySceneDetect)
+
+
+## License
 
 Licensed under BSD 3-Clause (see the `LICENSE` file for details).
 
