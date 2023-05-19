@@ -221,7 +221,7 @@ class VideoStreamMoviePy(VideoStream):
             self._eof = True
         self._frame_number += 1
         if decode:
-            if self._last_frame_rgb is None:
+            if self._last_frame is not None:
                 self._last_frame_rgb = cv2.cvtColor(self._last_frame, cv2.COLOR_BGR2RGB)
             return self._last_frame_rgb
         return True
