@@ -1039,7 +1039,7 @@ def split_video_command(
 )
 @click.option(
     '--height',
-    '-h',
+    '-H',
     metavar='H',
     default=None,
     type=click.INT,
@@ -1051,7 +1051,7 @@ def split_video_command(
 )
 @click.option(
     '--width',
-    '-w',
+    '-W',
     metavar='W',
     default=None,
     type=click.INT,
