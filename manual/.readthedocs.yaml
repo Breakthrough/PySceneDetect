@@ -7,7 +7,7 @@ build:
     python: "3.10"
 
 sphinx:
-  configuration: conf.py
+  configuration: manual/conf.py
 
 python:
   install:
