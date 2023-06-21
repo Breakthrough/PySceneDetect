@@ -710,6 +710,54 @@ Examples:
     )
 
 
+@click.command('load-scenes')
+@click.option(
+    '--input',
+    '-i',
+    multiple=False,
+    metavar='CSV',
+    type=click.Path(exists=True, file_okay=True, readable=True, resolve_path=True),
+    help='Input csv file that contains csv information.')
+@click.option(
+    '--start-col',
+    '-s',
+    metavar='START-HEADER',
+    type=click.STRING,
+    default=None,
+    help='Header for column used to mark scene start points')
+@click.option(
+    '--end-col',
+    '-e',
+    metavar='END-HEADER',
+    type=click.STRING,
+    default=None,
+    help='Header for column used to mark scene end points')
+@click.option(
+    '--framerate',
+    '-f',
+    metavar='FPS',
+    type=click.FLOAT,
+    default=None,
+    help='Framerate in frames/sec for input video used for timecode to frame number conversions.')
+@click.pass_context
+def load_scenes_command(ctx: click.Context, input: Optional[str], start_col: Optional[str],
+                        end_col: Optional[str], framerate: Optional[float]):
+    """A detector that is used to read an input csv file and only detect the scenes from the given
+    input file. Useful for instances in which a csv file is manually edited and then used to split
+    the video based on the manually edited csv file.
+
+    Examples:
+
+        load-scenes -i scenes.csv
+
+        load-scenes -i scenes.csv -s 'Start Timecode' -f 30
+    """
+    assert isinstance(ctx.obj, CliContext)
+
+    ctx.obj.handle_load_scenes(
+        input=input, start_col=start_col, end_col=end_col, framerate=framerate)
+
+
 @click.command('export-html')
 @click.option(
     '--filename',
@@ -1125,3 +1173,4 @@ _add_cli_command(scenedetect_cli, split_video_command)
 _add_cli_command(scenedetect_cli, detect_content_command)
 _add_cli_command(scenedetect_cli, detect_threshold_command)
 _add_cli_command(scenedetect_cli, detect_adaptive_command)
+_add_cli_command(scenedetect_cli, load_scenes_command)

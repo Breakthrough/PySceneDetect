@@ -255,6 +255,12 @@ CONFIG_MAP: ConfigDict = {
         'min-scene-len': TimecodeValue(0),
         'threshold': RangeValue(12.0, min_val=0.0, max_val=255.0),
     },
+    'load-scenes': {
+        'input': '',
+        'start_col': 'Start Frame',
+        'end_col': 'End Frame',
+        'framerate': False
+    },
     'export-html': {
         'filename': '$VIDEO_NAME-Scenes.html',
         'image-height': 0,
