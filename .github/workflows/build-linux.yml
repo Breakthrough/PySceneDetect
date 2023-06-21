@@ -8,7 +8,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-20.04, ubuntu-22.04, ubuntu-latest]
+        os: [ubuntu-20.04, ubuntu-latest]
+        # TODO(#292): Add a Python 3.11 builder once binary wheels of PyAV are available.
         python-version: ["3.7", "3.8", "3.9", "3.10"]
 
     steps:
@@ -18,9 +19,12 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
+          cache: 'pip'
 
-      # TODO: `setuptools` is pinned for the Python 3.7 builder and can be unpinned when removed.
       - name: Install Dependencies
+        # TODO: `opencv-python-headless` is pinned for the xenial build. Unpin `opencv-python-headless`
+        # when https://github.com/opencv/opencv/issues/23090 is resolved.
+        # TODO: `setuptools` is pinned for the Python 3.7 builder and can be unpinned when removed.
         run: |
           python -m pip install --upgrade pip build wheel virtualenv setuptools==62.3.4
           pip install av==9.2 opencv-python-headless==4.6.0.66 --only-binary :all:
@@ -39,6 +43,7 @@ jobs:
       - name: Unit Tests
         run: |
           python -m pytest tests/
+      # TODO: Install ffmpeg/mkvtoolnix to run split-video tests. They will be skipped if the tools are unavailable.
 
       - name: Smoke Test (Module)
         run: |
