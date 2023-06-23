@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <meta name="author" content="Brandon Castellano">
+  
+  <link rel="shortcut icon" href="../../img/favicon.ico">
+  <title>Usage Example - PySceneDetect</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700" />
+
+  <link rel="stylesheet" href="../../css/theme.css" />
+  <link rel="stylesheet" href="../../css/theme_extra.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Usage Example";
+    var mkdocs_page_input_path = "examples\\usage-example.md";
+    var mkdocs_page_url = null;
+  </script>
+  
+  <script src="../../js/jquery-2.1.1.min.js" defer></script>
+  <script src="../../js/modernizr-2.8.3.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script> 
+  <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-72551323-1', 'auto');
+      ga('send', 'pageview');
+  </script>
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+        <a href="../.." class="icon icon-home"> PySceneDetect</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                <p class="caption"><span class="caption-text">PySceneDetect</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../features/">Features & Roadmap</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../download/">Download</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../changelog/">Releases (Changelog)</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../faq/">Frequently Asked Questions (FAQ)</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../contributing/">Bug Reports & Contributing</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../supporting/">Supporting Development</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Quickstart:</span></p>
+                <ul class="current">
+                    <li class="toctree-l1 current"><a class="reference internal current" href="./">Usage Example</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#content-aware-detection">Content-Aware Detection</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#splitting-video-into-clips">Splitting Video into Clips</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#tweaking-detection-parameters">Tweaking Detection Parameters</a>
+    </li>
+    </ul>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../usage/">Command Line Interface</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Documentation:</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../../reference/command-line/">Command-Line Options</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../reference/config/">Configuration File</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../reference/detection-methods/">Scene Detection Algorithms</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../reference/video-splitting/">Video Splitting Support</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../reference/python-api/">Python API</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Resources</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../../other/similar/">Similar Programs & Tools</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../other/literature/">Research & Literature</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../other/copyright/">License & Copyright Info</a>
+                    </li>
+                </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../..">PySceneDetect</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../..">Docs</a> &raquo;</li>
+    
+      
+        
+          <li>Quickstart: &raquo;</li>
+        
+      
+    
+    <li>Usage Example</li>
+    <li class="wy-breadcrumbs-aside">
+      
+        <a href="https://github.com/Breakthrough/PySceneDetect/edit/master/docs/examples/usage-example.md"> Edit on PySceneDetect on Github</a>
+      
+    </li>
+  </ul>
+  
+  <hr/>
+</div>
+
+          <div role="main">
+            <div class="section">
+              
+                <h1 id="getting-started">Getting Started</h1>
+<p>As a concrete example to become familiar with PySceneDetect, let's use the following short clip from the James Bond movie, GoldenEye (Copyright &copy; 1995 MGM):</p>
+<p><a href="https://www.youtube.com/watch?v=OMgIPnCnlbQ">https://www.youtube.com/watch?v=OMgIPnCnlbQ</a></p>
+<p>You can <a href="https://github.com/Breakthrough/PySceneDetect/raw/resources/tests/resources/goldeneye/goldeneye.mp4">download the clip from here</a> (may have to right-click and save-as, put the video in your working directory as <code>goldeneye.mp4</code>).</p>
+<h2 id="content-aware-detection">Content-Aware Detection</h2>
+<p>In this case, we want to split this clip up into each individual scene - at each location where a fast cut occurs.  This means we need to use content-aware detecton mode (<code>detect-content</code>) or adaptive mode (<code>detect-adaptive</code>).  If the video instead contains fade-in/fade-out transitions you want to find, you can use <code>detect-threshold</code> instead.</p>
+<p>Using the following command, let's run PySceneDetect on the video, and also save a scene list CSV file and some images of each scene:</p>
+<pre><code class="language-rst">scenedetect --input goldeneye.mp4 detect-adaptive list-scenes save-images
+</code></pre>
+<p>Running the above command, in the working directory, you should see a file <code>goldeneye.scenes.csv</code>, as well as individual frames for the start/middle/end of each scene as <code>goldeneye-XXXX-00/01.jpg</code>.  The results should appear as follows:</p>
+<table>
+<thead>
+<tr>
+<th>Scene #</th>
+<th>Start Time</th>
+<th>Preview</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>00:00:00.000</td>
+<td><img src="https://raw.githubusercontent.com/Breakthrough/PySceneDetect/resources/tests/resources/goldeneye/d-content-t-27/goldeneye-Scene-001-01.jpg" width="480" /></td>
+</tr>
+<tr>
+<td>2</td>
+<td>00:00:03.754</td>
+<td><img src="https://raw.githubusercontent.com/Breakthrough/PySceneDetect/resources/tests/resources/goldeneye/d-content-t-27/goldeneye-Scene-002-01.jpg" width="480" /></td>
+</tr>
+<tr>
+<td>3</td>
+<td>00:00:08.759</td>
+<td><img src="https://raw.githubusercontent.com/Breakthrough/PySceneDetect/resources/tests/resources/goldeneye/d-content-t-27/goldeneye-Scene-003-01.jpg" width="480" /></td>
+</tr>
+<tr>
+<td>4</td>
+<td>00:00:10.802</td>
+<td><img src="https://raw.githubusercontent.com/Breakthrough/PySceneDetect/resources/tests/resources/goldeneye/d-content-t-27/goldeneye-Scene-004-01.jpg" width="480" /></td>
+</tr>
+<tr>
+<td>5</td>
+<td>00:00:15.599</td>
+<td><img src="https://raw.githubusercontent.com/Breakthrough/PySceneDetect/resources/tests/resources/goldeneye/d-content-t-27/goldeneye-Scene-005-01.jpg" width="480" /></td>
+</tr>
+<tr>
+<td>6</td>
+<td>00:00:27.110</td>
+<td><img src="https://raw.githubusercontent.com/Breakthrough/PySceneDetect/resources/tests/resources/goldeneye/d-content-t-27/goldeneye-Scene-006-01.jpg" width="480" /></td>
+</tr>
+<tr>
+<td>7</td>
+<td>00:00:34.117</td>
+<td><img src="https://raw.githubusercontent.com/Breakthrough/PySceneDetect/resources/tests/resources/goldeneye/d-content-t-27/goldeneye-Scene-007-01.jpg" width="480" /></td>
+</tr>
+<tr>
+<td>8</td>
+<td>00:00:36.536</td>
+<td><img src="https://raw.githubusercontent.com/Breakthrough/PySceneDetect/resources/tests/resources/goldeneye/d-content-t-27/goldeneye-Scene-008-01.jpg" width="480" /></td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr>
+<td>18</td>
+<td>00:01:06.316</td>
+<td><img src="https://raw.githubusercontent.com/Breakthrough/PySceneDetect/resources/tests/resources/goldeneye/d-content-t-27/goldeneye-Scene-018-01.jpg" width="480" /></td>
+</tr>
+<tr>
+<td>19</td>
+<td>00:01:10.779</td>
+<td><img src="https://raw.githubusercontent.com/Breakthrough/PySceneDetect/resources/tests/resources/goldeneye/d-content-t-27/goldeneye-Scene-019-01.jpg" width="480" /></td>
+</tr>
+<tr>
+<td>20</td>
+<td>00:01:18.036</td>
+<td><img src="https://raw.githubusercontent.com/Breakthrough/PySceneDetect/resources/tests/resources/goldeneye/d-content-t-27/goldeneye-Scene-020-01.jpg" width="480" /></td>
+</tr>
+<tr>
+<td>21</td>
+<td>00:01:19.913</td>
+<td><img src="https://raw.githubusercontent.com/Breakthrough/PySceneDetect/resources/tests/resources/goldeneye/d-content-t-27/goldeneye-Scene-021-01.jpg" width="480" /></td>
+</tr>
+<tr>
+<td>22</td>
+<td>00:01:21.999</td>
+<td><img src="https://raw.githubusercontent.com/Breakthrough/PySceneDetect/resources/tests/resources/goldeneye/d-content-t-27/goldeneye-Scene-022-01.jpg" width="480" /></td>
+</tr>
+</tbody>
+</table>
+<h2 id="splitting-video-into-clips">Splitting Video into Clips</h2>
+<p>The <code>split-video</code> command can be used to automatically split the input video using <code>ffmpeg</code> or <code>mkvmerge</code>. For example:</p>
+<pre><code class="language-rst">scenedetect -i goldeneye.mp4 detect-adaptive split-video
+</code></pre>
+<p>Type <code>scenedetect help split-video</code> for a full list of options which can be specified for video splitting, including high quality mode (<code>-hq/--high-quality</code>) or copy mode (<code>-c/--copy</code>).</p>
+<h2 id="tweaking-detection-parameters">Tweaking Detection Parameters</h2>
+<p>Detectors take a variety of parameters, which can be <a href="http://scenedetect.com/projects/Manual/en/latest/cli/detectors.html">configured via command-line</a> or by <a href="http://scenedetect.com/projects/Manual/en/latest/cli/config_file.html">using a config file</a>. If the default parameters do not produce correct results, you can generate a stats file using the <code>-s</code> / <code>--stats</code> option.</p>
+<p>For example, with <code>detect-content</code>, if the default threshold of <code>27</code> does not produce correct results, we can determine the proper threshold by first generating a stats file:</p>
+<pre><code class="language-rst">scenedetect --input goldeneye.mp4 --stats goldeneye.stats.csv detect-adaptive
+</code></pre>
+<p>We can then plot the values of the <code>content_val</code> column:</p>
+<p><img src="https://raw.githubusercontent.com/Breakthrough/PySceneDetect/master/docs/img/goldeneye-stats.png" alt="goldeneye.mp4 statistics graph" /></p>
+<p>The peaks in values correspond to the scene breaks in the input video. In some cases the threshold may need to be raised or lowered accordingly.</p>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../usage/" class="btn btn-neutral float-right" title="Command Line Interface">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="../../supporting/" class="btn btn-neutral" title="Supporting Development"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+      <p>Copyright &copy; 2014-2023 Brandon Castellano.  All rights reserved.<br />Licensed under BSD 3-Clause (see the <a href="https://github.com/Breakthrough/PySceneDetect/blob/master/LICENSE" alt="link to latest LICENSE file on Github">LICENSE file</a> for details).</p>
+    
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../../supporting/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../usage/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script>var base_url = '../..';</script>
+    <script src="../../js/theme_extra.js" defer></script>
+    <script src="../../js/theme.js" defer></script>
+      <script src="../../search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>

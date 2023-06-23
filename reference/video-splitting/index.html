@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <meta name="author" content="Brandon Castellano">
+  
+  <link rel="shortcut icon" href="../../img/favicon.ico">
+  <title>Video Splitting Support - PySceneDetect</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700" />
+
+  <link rel="stylesheet" href="../../css/theme.css" />
+  <link rel="stylesheet" href="../../css/theme_extra.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Video Splitting Support";
+    var mkdocs_page_input_path = "reference\\video-splitting.md";
+    var mkdocs_page_url = null;
+  </script>
+  
+  <script src="../../js/jquery-2.1.1.min.js" defer></script>
+  <script src="../../js/modernizr-2.8.3.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script> 
+  <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-72551323-1', 'auto');
+      ga('send', 'pageview');
+  </script>
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+        <a href="../.." class="icon icon-home"> PySceneDetect</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                <p class="caption"><span class="caption-text">PySceneDetect</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../features/">Features & Roadmap</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../download/">Download</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../changelog/">Releases (Changelog)</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../faq/">Frequently Asked Questions (FAQ)</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../contributing/">Bug Reports & Contributing</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../supporting/">Supporting Development</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Quickstart:</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../../examples/usage-example/">Usage Example</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../examples/usage/">Command Line Interface</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Documentation:</span></p>
+                <ul class="current">
+                    <li class="toctree-l1"><a class="reference internal" href="../command-line/">Command-Line Options</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../config/">Configuration File</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../detection-methods/">Scene Detection Algorithms</a>
+                    </li>
+                    <li class="toctree-l1 current"><a class="reference internal current" href="./">Video Splitting Support</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#ffmpeg">FFmpeg</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#mkvmerge">mkvmerge</a>
+    </li>
+    </ul>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../python-api/">Python API</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Resources</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../../other/similar/">Similar Programs & Tools</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../other/literature/">Research & Literature</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../other/copyright/">License & Copyright Info</a>
+                    </li>
+                </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../..">PySceneDetect</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../..">Docs</a> &raquo;</li>
+    
+      
+        
+          <li>Documentation: &raquo;</li>
+        
+      
+    
+    <li>Video Splitting Support</li>
+    <li class="wy-breadcrumbs-aside">
+      
+        <a href="https://github.com/Breakthrough/PySceneDetect/edit/master/docs/reference/video-splitting.md"> Edit on PySceneDetect on Github</a>
+      
+    </li>
+  </ul>
+  
+  <hr/>
+</div>
+
+          <div role="main">
+            <div class="section">
+              
+                <h2 id="video-splitting-support-requirements"><span class="fa fa-keyboard-o"></span>&nbsp; Video Splitting Support Requirements</h2>
+<p>PySceneDetect can use either <code>ffmpeg</code> or <code>mkvmerge</code> to split videos automatically.</p>
+<p>By default, when specifying the <code>split-video</code> command, <code>ffmpeg</code> will be used to split the video.  If the <code>-c</code>/<code>--copy</code> option is also set (e.g. <code>split-video --copy</code>), <code>mkvmerge</code> will be used to split the video instead.</p>
+<h3 id="ffmpeg">FFmpeg</h3>
+<p>You can download <code>ffmpeg</code> from: <a href="https://ffmpeg.org/download.html">https://ffmpeg.org/download.html</a></p>
+<p>Note that Linux users should use a package manager (e.g. <code>sudo apt-get install ffmpeg</code>). Windows users may require additional steps in order for PySceneDetect to detect <code>ffmpeg</code> - see the section Manually Enabling <code>split-video</code> Support below for details.</p>
+<h3 id="mkvmerge">mkvmerge</h3>
+<p>You can download and install <code>mkvmerge</code> as part of the mkvtoolnix package from:
+<a href="https://mkvtoolnix.download/downloads.html">https://mkvtoolnix.download/downloads.html</a></p>
+<p>Note that Windows users should use the installer/setup, and Linux users should use their system package manager, otherwise PySceneDetect may not be able to find <code>mkvmerge</code>.  If this is the case, see the section below to enable support for the <code>split-video --copy</code> command manually.</p>
+<h2 id="manually-enabling-split-video-support">Manually Enabling <code>split-video</code> Support</h2>
+<p>If PySceneDetect cannot find the respective tool installed on your system, you have three options:</p>
+<ol>
+<li>
+<p>Place the tool in the same location that PySceneDetect is installed (e.g. copy and paste mkvmerge.exe into the same place scenedetect.exe is located).  This is the easiest solution for most users.</p>
+</li>
+<li>
+<p>Add the directory where you installed ffmpeg/mkvmerge to your system's PATH environment variable, ensuring that you can use the ffmpeg/mkvmerge command from any terminal/command prompt.  This is the best solution for advanced users.</p>
+</li>
+<li>
+<p>Place the tool in a location already in your system's PATH variable (e.g. C:/Windows).  This is not recommended, but may be the only solution on systems without administrative rights.</p>
+</li>
+</ol>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../python-api/" class="btn btn-neutral float-right" title="Python API">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="../detection-methods/" class="btn btn-neutral" title="Scene Detection Algorithms"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+      <p>Copyright &copy; 2014-2023 Brandon Castellano.  All rights reserved.<br />Licensed under BSD 3-Clause (see the <a href="https://github.com/Breakthrough/PySceneDetect/blob/master/LICENSE" alt="link to latest LICENSE file on Github">LICENSE file</a> for details).</p>
+    
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../detection-methods/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../python-api/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script>var base_url = '../..';</script>
+    <script src="../../js/theme_extra.js" defer></script>
+    <script src="../../js/theme.js" defer></script>
+      <script src="../../search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>

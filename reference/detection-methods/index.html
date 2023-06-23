@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <meta name="author" content="Brandon Castellano">
+  
+  <link rel="shortcut icon" href="../../img/favicon.ico">
+  <title>Scene Detection Algorithms - PySceneDetect</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700" />
+
+  <link rel="stylesheet" href="../../css/theme.css" />
+  <link rel="stylesheet" href="../../css/theme_extra.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Scene Detection Algorithms";
+    var mkdocs_page_input_path = "reference\\detection-methods.md";
+    var mkdocs_page_url = null;
+  </script>
+  
+  <script src="../../js/jquery-2.1.1.min.js" defer></script>
+  <script src="../../js/modernizr-2.8.3.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script> 
+  <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-72551323-1', 'auto');
+      ga('send', 'pageview');
+  </script>
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+        <a href="../.." class="icon icon-home"> PySceneDetect</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                <p class="caption"><span class="caption-text">PySceneDetect</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../features/">Features & Roadmap</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../download/">Download</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../changelog/">Releases (Changelog)</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../faq/">Frequently Asked Questions (FAQ)</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../contributing/">Bug Reports & Contributing</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../supporting/">Supporting Development</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Quickstart:</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../../examples/usage-example/">Usage Example</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../examples/usage/">Command Line Interface</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Documentation:</span></p>
+                <ul class="current">
+                    <li class="toctree-l1"><a class="reference internal" href="../command-line/">Command-Line Options</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../config/">Configuration File</a>
+                    </li>
+                    <li class="toctree-l1 current"><a class="reference internal current" href="./">Scene Detection Algorithms</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#content-aware-detector">Content-Aware Detector</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#adaptive-content-detector">Adaptive Content Detector</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#threshold-detector">Threshold Detector</a>
+    </li>
+    </ul>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../video-splitting/">Video Splitting Support</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../python-api/">Python API</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Resources</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../../other/similar/">Similar Programs & Tools</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../other/literature/">Research & Literature</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../other/copyright/">License & Copyright Info</a>
+                    </li>
+                </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../..">PySceneDetect</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../..">Docs</a> &raquo;</li>
+    
+      
+        
+          <li>Documentation: &raquo;</li>
+        
+      
+    
+    <li>Scene Detection Algorithms</li>
+    <li class="wy-breadcrumbs-aside">
+      
+        <a href="https://github.com/Breakthrough/PySceneDetect/edit/master/docs/reference/detection-methods.md"> Edit on PySceneDetect on Github</a>
+      
+    </li>
+  </ul>
+  
+  <hr/>
+</div>
+
+          <div role="main">
+            <div class="section">
+              
+                <h1 id="scene-detection-algorithms">Scene Detection Algorithms</h1>
+<p>This page discusses the scene detection methods/algorithms available for use in PySceneDetect, including details describing the operation of the detection method, as well as relevant command-line arguments and recommended values.</p>
+<h2 id="content-aware-detector">Content-Aware Detector</h2>
+<p>The content-aware scene detector (<code>detect-content</code>) detects <a href="https://en.wikipedia.org/wiki/Jump_cut">jump cuts</a> in the input video.  This is typically what people think of as "cuts" between scenes in a movie - given two adjacent frames, do they belong to the same scene?  The content-aware scene detector finds areas where the <em>difference</em> between two subsequent frames exceeds the threshold value that is set (a good value to start with is <code>--threshold 27</code>).</p>
+<p>Internally, this detector functions by converting the colorspace of each decoded frame from <a href="https://en.wikipedia.org/wiki/RGB_color_space">RGB</a> into <a href="https://en.wikipedia.org/wiki/HSL_and_HSV">HSV</a>.  It then takes the average difference across all channels (or optionally just the <em>value</em> channel) from frame to frame.  When this exceeds a set threshold, a scene change is triggered.</p>
+<p><code>detect-content</code> also has edge detection, which can be enabled by providing a set of 4 numbers in the form (<em>delta_hue</em>, <em>delta_sat</em>, <em>delta_lum</em>, <em>delta_edges</em>). Changes in edges are typically larger than the other components, so threshold may need to be increased accordingly.  For example, <code>-w 1.0 0.5 1.0 0.2 -t 32</code> is a good starting point to use with edge detection.  The default weights are <code>--weights 1.0 1.0 1.0 0.0</code> which does not include edges, but this may change in the future.</p>
+<p>See <a href="http://scenedetect.com/projects/Manual/en/latest/cli/detectors.html#detect-content">the documentation for detect-content</a> for details.</p>
+<h2 id="adaptive-content-detector">Adaptive Content Detector</h2>
+<p>The adaptive content detector (<code>detect-adaptive</code>) compares the difference in content between adjacent frames similar to <code>detect-content</code> but instead using a rolling average of adjacent frame changes. This helps mitigate false detections where there is fast camera motion.</p>
+<h2 id="threshold-detector">Threshold Detector</h2>
+<p>The threshold-based scene detector (<code>detect-threshold</code>) is how most traditional scene detection methods work (e.g. the <code>ffmpeg blackframe</code> filter), by comparing the intensity/brightness of the current frame with a set threshold, and triggering a scene cut/break when this value crosses the threshold.  In PySceneDetect, this value is computed by averaging the R, G, and B values for every pixel in the frame, yielding a single floating point number representing the average pixel value (from 0.0 to 255.0).</p>
+<h1 id="creating-new-detection-algorithms">Creating New Detection Algorithms</h1>
+<p>All scene detection algorithms must inherit from <a href="https://scenedetect.com/projects/Manual/en/latest/api/scene_detector.html">the base <code>SceneDetector</code> class</a>. Note that the current SceneDetector API is under development and expected to change somewhat before v1.0 is released, so make sure to pin your <code>scenedetect</code> dependency to the correct API version (e.g. <code>scenedetect &lt; 0.6</code>, <code>scenedetect &lt; 0.7</code>, etc...).</p>
+<p>Creating a new scene detection method can be as simple as implementing the <code>process_frame</code> function, and optionally <code>post_process</code>:</p>
+<pre><code class="language-python">from scenedetect.scene_detector import SceneDetector
+
+class CustomDetector(SceneDetector):
+    &quot;&quot;&quot;CustomDetector class to implement a scene detection algorithm.&quot;&quot;&quot;
+    def __init__(self):
+        pass
+
+    def process_frame(self, frame_num, frame_img, frame_metrics, scene_list):
+        &quot;&quot;&quot;Computes/stores metrics and detects any scene changes.
+
+        Returns:
+            A list containing 1 or more the frame numbers of any detected scenes.
+        &quot;&quot;&quot;
+        return []
+
+    def post_process(self, scene_list):
+        pass
+</code></pre>
+<p><code>process_frame</code> is called on every frame in the input video, which will be called after the final frame of the video is passed to <code>process_frame</code>. This may be useful for multi-pass algorithms, or detectors which are waiting on some condition but still wish to output an event on the final frame.</p>
+<p>For example, a detector may output at most 1 cuts for every call to <code>process_frame</code>, it may output the entire scene list in <code>post_process</code>, or a combination of both.  Note that the latter will not work in cases where a live video stream or camera input device is being used. See the <a href="https://scenedetect.com/projects/Manual/en/latest/api/scene_detector.html#scenedetect.scene_detector.SceneDetector">API documentation for the <code>SceneDetector</code> class</a> for details. Alternatively, you can call <code>help(SceneDetector)</code> from a Python REPL. For examples of actual detection algorithm implementations, see the source files in the <code>scenedetect/detectors/</code> directory (e.g. <code>threshold_detector.py</code>, <code>content_detector.py</code>).</p>
+<p>Processing is done by calling the <code>process_frame(...)</code> function for all frames in the video, followed by <code>post_process(...)</code> (optional) after the final frame.  Scene cuts are detected and added to the passed list object in both cases.</p>
+<p><code>process_frame(...)</code> is called for each frame in sequence, passing the following arguments:</p>
+<ul>
+<li><code>frame_num</code>: the number of the current frame being processed</li>
+<li><code>frame_img</code>: frame returned video file or stream (accessible as NumPy array)</li>
+<li><code>frame_metrics</code>: dictionary for memoizing results of detection algorithm calculations for quicker subsequent analyses (if possible)</li>
+<li><code>scene_list</code>: List containing the frame numbers where all scene cuts/breaks occur in the video.</li>
+</ul>
+<p><code>post_process(...)</code> is called <strong>after</strong> the final frame has been processed, to allow for any stored scene cuts to be written <em>if required</em> (e.g. in the case of the <code>ThresholdDetector</code>).</p>
+<p>You may also want to look into the implementation of current detectors to understand how frame metrics are saved/loaded to/from a <a href="https://pyscenedetect.readthedocs.io/projects/Manual/en/stable/api/stats_manager.html"><code>StatsManager</code></a> for caching and allowing values to be written to a stats file for users to graph and find trends in to tweak detector options.  Also see the documentation for the <a href="https://pyscenedetect.readthedocs.io/projects/Manual/en/stable/api/scene_manager.html"><code>SceneManager</code></a> for details.</p>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../video-splitting/" class="btn btn-neutral float-right" title="Video Splitting Support">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="../config/" class="btn btn-neutral" title="Configuration File"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+      <p>Copyright &copy; 2014-2023 Brandon Castellano.  All rights reserved.<br />Licensed under BSD 3-Clause (see the <a href="https://github.com/Breakthrough/PySceneDetect/blob/master/LICENSE" alt="link to latest LICENSE file on Github">LICENSE file</a> for details).</p>
+    
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../config/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../video-splitting/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script>var base_url = '../..';</script>
+    <script src="../../js/theme_extra.js" defer></script>
+    <script src="../../js/theme.js" defer></script>
+      <script src="../../search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>

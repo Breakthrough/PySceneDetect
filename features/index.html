@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <meta name="author" content="Brandon Castellano">
+  
+  <link rel="shortcut icon" href="../img/favicon.ico">
+  <title>Features & Roadmap - PySceneDetect</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700" />
+
+  <link rel="stylesheet" href="../css/theme.css" />
+  <link rel="stylesheet" href="../css/theme_extra.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Features & Roadmap";
+    var mkdocs_page_input_path = "features.md";
+    var mkdocs_page_url = null;
+  </script>
+  
+  <script src="../js/jquery-2.1.1.min.js" defer></script>
+  <script src="../js/modernizr-2.8.3.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script> 
+  <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-72551323-1', 'auto');
+      ga('send', 'pageview');
+  </script>
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+        <a href=".." class="icon icon-home"> PySceneDetect</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                <p class="caption"><span class="caption-text">PySceneDetect</span></p>
+                <ul class="current">
+                    <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                    </li>
+                    <li class="toctree-l1 current"><a class="reference internal current" href="./">Features & Roadmap</a>
+    <ul class="current">
+    </ul>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../download/">Download</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../changelog/">Releases (Changelog)</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../faq/">Frequently Asked Questions (FAQ)</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../contributing/">Bug Reports & Contributing</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../supporting/">Supporting Development</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Quickstart:</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../examples/usage-example/">Usage Example</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../examples/usage/">Command Line Interface</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Documentation:</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../reference/command-line/">Command-Line Options</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../reference/config/">Configuration File</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../reference/detection-methods/">Scene Detection Algorithms</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../reference/video-splitting/">Video Splitting Support</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../reference/python-api/">Python API</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Resources</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../other/similar/">Similar Programs & Tools</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../other/literature/">Research & Literature</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../other/copyright/">License & Copyright Info</a>
+                    </li>
+                </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="..">PySceneDetect</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="..">Docs</a> &raquo;</li>
+    
+      
+        
+          <li>PySceneDetect &raquo;</li>
+        
+      
+    
+    <li>Features & Roadmap</li>
+    <li class="wy-breadcrumbs-aside">
+      
+        <a href="https://github.com/Breakthrough/PySceneDetect/edit/master/docs/features.md"> Edit on PySceneDetect on Github</a>
+      
+    </li>
+  </ul>
+  
+  <hr/>
+</div>
+
+          <div role="main">
+            <div class="section">
+              
+                <h2 id="overview-of-features">Overview of Features</h2>
+<div class="warning">
+<h3><span class="fa fa-eye wy-text-neutral"></span>&nbsp; Content-Aware Scene Detection</h3>
+&nbsp;<span class="fa fa-info-circle wy-text-info"></span>&nbsp;&nbsp; Detects breaks in-between <i>content</i>, not only when the video fades to black (although a threshold mode is available as well for those cases).
+</div>
+
+<div class="important">
+<h3><span class="fa fa-desktop wy-text-info"></span>&nbsp; Compatible With Many External Tools</h3>
+&nbsp;<span class="fa fa-info-circle wy-text-info"></span>&nbsp;&nbsp; The detected scene boundaries/cuts can be exported in a variety of formats, with the default type (comma-separated HH:MM:SS.nnn values) being ready to copy-and-paste directly into other tools (such as ffmpeg, mkvmerge, etc...) for splitting and/or re-encoding the video.
+</div>
+
+<div class="danger">
+<h3><span class="fa fa-bar-chart-o wy-text-warning"></span>&nbsp; Statistical Video Analysis</h3>
+&nbsp;<span class="fa fa-info-circle wy-text-info"></span>&nbsp;&nbsp; Can output a spreadsheet-compatible file for analyzing trends in a particular video file, to determine the optimal threshold values to use with specific scene detection methods/algorithms.
+</div>
+
+<div class="warning">
+<h3><span class="fa fa-code wy-text-danger"></span>&nbsp; Extendible and Embeddable</h3>
+&nbsp;<span class="fa fa-info-circle wy-text-info"></span>&nbsp;&nbsp; Written in Python, and designed with an easy-to-use and extendable API, PySceneDetect is ideal for embedding into other programs, or to implement custom methods/algorithms of scene detection for specific applications (e.g. analyzing security camera footage).
+</div>
+
+<hr />
+<h2 id="features-in-current-release">Features in Current Release</h2>
+<ul>
+<li>exports list of scenes to .CSV file and terminal (both timecodes and frame numbers) with <code>list-scenes</code> command</li>
+<li>exports timecodes in standard format (HH:MM:SS.nnn), comma-separated for easy copy-and-paste into external tools and analysis with spreadsheet software</li>
+<li>statistics/analysis mode to export frame-by-frame video metrics via the <code>-s [FILE]</code>/<code>--stats [FILE]</code> argument (e.g. <code>--stats metrics.csv</code>)</li>
+<li>output-suppression (quiet) mode for better automation with external scripts/programs (<code>-q</code>/<code>--quiet</code>)</li>
+<li>save an image of the first and last frame of each detected scene via the <code>save-images</code> command</li>
+<li>split the input video automatically if <code>ffmpeg</code> or <code>mkvmerge</code> is available via the <code>split-video</code> command</li>
+</ul>
+<h3 id="scene-detection-methods">Scene Detection Methods</h3>
+<ul>
+<li><strong>threshold scene detection</strong> (<code>detect-threshold</code>): analyzes video for changes in average frame intensity/brightness</li>
+<li><strong>content-aware scene detection</strong> (<code>detect-content</code>): based on changes between frames in the HSV color space</li>
+<li><strong>adaptive content scene detection</strong> (<code>detect-adaptive</code>): based on <code>detect-content</code> but handles fast camera movement better in some cases</li>
+</ul>
+<p>For a detailed explanation of how a particular scene detection method/algorithm works, see the <a href="../reference/detection-methods/">Scene Detection Method Details Section</a> in the Documentation &amp; Reference.</p>
+<hr />
+<h2 id="version-roadmap">Version Roadmap</h2>
+<p>Future version roadmaps are now <a href="https://github.com/Breakthrough/PySceneDetect/milestones">tracked as milestones (link)</a>.  Specific issues/features that are queued up for the very next release will have <a href="https://github.com/Breakthrough/PySceneDetect/issues?q=is%3Aissue+is%3Aopen+label%3A%22status%3A+backlog%22">the <code>backlog</code> tag</a>, and issues/features being worked on will have <a href="https://github.com/Breakthrough/PySceneDetect/issues?q=is%3Aissue+is%3Aopen+label%3A%22status%3A+in+progress%22">the <code>status: in progress</code> tag</a>.  Also note that bug reports as well as additional feature requests can be submitted via <a href="https://github.com/Breakthrough/PySceneDetect/issues">the issue tracker</a>; read <a href="../contributing/">the Bug Reports and Contributing page</a> for details.</p>
+<h3 id="planned-features-for-future-releases">Planned Features for Future Releases</h3>
+<p>The following features are under consideration for future releases of PySceneDetect.  Feel free to jump in and help out!</p>
+<ul>
+<li>automatic threshold detection for the current scene detection methods (can simply be an ouptut message indicating "Predicted Best Threshold: X")</li>
+<li>optional suppression of short-length flashes/bursts of light <a href="https://github.com/Breakthrough/PySceneDetect/issues/35"> [#35] </a></li>
+<li>colour histogram-based scene detection algorithm in the HSV/HSL colourspace <a href="https://github.com/Breakthrough/PySceneDetect/issues/53"> [#53] </a></li>
+<li><a href="https://en.wikipedia.org/wiki/Perceptual_hashing">perceptual hash</a> based scene detection</li>
+<li>improve robustness of content-aware detection by combining with edge detection (similar to MATLAB-based scene change detector)</li>
+<li>adaptive bias for fade in/out interpolation</li>
+<li>multithreaded implementation of detection algorithms for improved performance</li>
+<li>GUI for easier previewing and threshold setting (will be GTK+ 3 based via PyGObject)</li>
+<li>export scenes in chapter/XML format</li>
+<li>additional timecode formats</li>
+</ul>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../download/" class="btn btn-neutral float-right" title="Download">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href=".." class="btn btn-neutral" title="Home"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+      <p>Copyright &copy; 2014-2023 Brandon Castellano.  All rights reserved.<br />Licensed under BSD 3-Clause (see the <a href="https://github.com/Breakthrough/PySceneDetect/blob/master/LICENSE" alt="link to latest LICENSE file on Github">LICENSE file</a> for details).</p>
+    
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href=".." style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../download/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script>var base_url = '..';</script>
+    <script src="../js/theme_extra.js" defer></script>
+    <script src="../js/theme.js" defer></script>
+      <script src="../search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>
