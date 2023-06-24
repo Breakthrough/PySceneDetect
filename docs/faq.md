@@ -19,11 +19,9 @@ pip install scenedetect[opencv-headless]
 
 Unlike calling `pip install opencv-python`, the above commands will download and install the correct OpenCV version based on the Python version you are running.
 
-
 #### How can I enable video splitting support?
 
-To enable video splitting support, you will also need to have `mkvmerge` or `ffmpeg` installed on your system. See the documentation on [Video Splitting Support](https://scenedetect.com/en/latest/examples/video-splitting/) after installation for details.
-
+Video splitting is performed by `ffmpeg` ([https://ffmpeg.org/download.html](https://ffmpeg.org/download.html)) or `mkvmerge` (https://mkvtoolnix.download/downloads.html) depending on which command line arguments are used. Ensure the tool is available and somewhere in your system's PATH folder.
 
 #### How can I fix the error `Cannot split video due to too many scenes`?
 
