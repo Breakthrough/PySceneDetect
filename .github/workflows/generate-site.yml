@@ -1,0 +1,43 @@
+
+name: Generate Website
+
+on: [workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: site
+
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip build wheel virtualenv
+          pip install -r requirements.txt
+
+      - name: Generate Website
+        run: |
+          mkdocs build
+
+      - name: Update Website
+        run: |
+          git fetch origin gh-pages
+          git checkout gh-pages
+          git rm * -r --ignore-unmatch
+          git checkout HEAD -- .nojekyll
+          git checkout HEAD -- docs/
+          git add build/
+          git mv build/* . -f -k
+          git rm build/* -r -f
+          git config --global user.name github-actions
+          git config --global user.email github-actions@github.com
+          git commit -a -m "[docs] @${{ github.triggering_actor }}: Generate Website"
+          git push
