@@ -1,7 +1,7 @@
 
 # Obtaining PySceneDetect
 
-PySceneDetect is completely free software, and can be downloaded from the links below.  See the [license and copyright information](copyright.md) page for details.  If you have trouble running PySceneDetect, ensure that you have all the required dependencies listed in the [Dependencies](#dependencies) section below.
+PySceneDetect is completely free software, and can be downloaded from the links below.  See the [license and copyright information](other/copyright.md) page for details.  If you have trouble running PySceneDetect, ensure that you have all the required dependencies listed in the [Dependencies](#dependencies) section below.
 
 PySceneDetect requires at least Python 3.6 or higher.
 

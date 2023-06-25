@@ -125,7 +125,7 @@ The optimal threshold can be determined by generating a statsfile (`-s`), openin
 
 ### Adaptive Detection
 
-The `detect-adaptive` mode compares each frame's score as calculated by `detect-content` wigh its neighbors. This score is what forms the `adaptive_ratio` metric in the statsfile. You can also configure the amount of neighboring frames via the `frame-window` option, as well as the minimum change in `content_val` score using `min-content-val`.
+The `detect-adaptive` mode compares each frame's score as calculated by `detect-content` with its neighbors. This score is what forms the `adaptive_ratio` metric in the statsfile. You can also configure the amount of neighboring frames via the `frame-window` option, as well as the minimum change in `content_val` score using `min-content-val`.
 
 
 ## Actions / Commands
