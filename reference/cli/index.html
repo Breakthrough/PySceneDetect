@@ -9,7 +9,7 @@
   <meta name="author" content="Brandon Castellano">
   
   <link rel="shortcut icon" href="../../img/favicon.ico">
-  <title>CLI Example - PySceneDetect</title>
+  <title>Command-Line - PySceneDetect</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700" />
 
   <link rel="stylesheet" href="../../css/theme.css" />
@@ -18,7 +18,7 @@
   
   <script>
     // Current page data
-    var mkdocs_page_name = "CLI Example";
+    var mkdocs_page_name = "Command-Line";
     var mkdocs_page_input_path = "reference/cli.md";
     var mkdocs_page_url = null;
   </script>
@@ -71,9 +71,9 @@
                 <ul class="current">
                     <li class="toctree-l1"><a class="reference internal" href="../../docs/">Documentation</a>
                     </li>
-                    <li class="toctree-l1 current"><a class="reference internal current" href="./">CLI Example</a>
+                    <li class="toctree-l1 current"><a class="reference internal current" href="./">Command-Line</a>
     <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#getting-started">Getting Started</a>
+    <li class="toctree-l2"><a class="reference internal" href="#example">Example</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#splitting-video-into-clips">Splitting Video into Clips</a>
     </li>
@@ -97,19 +97,19 @@
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#config-file">Config File</a>
         <ul>
-    <li class="toctree-l3"><a class="reference internal" href="#example">Example</a>
+    <li class="toctree-l3"><a class="reference internal" href="#example_1">Example</a>
     </li>
         </ul>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#video-splitting-support-requirements">&nbsp; Video Splitting Support Requirements</a>
+    <li class="toctree-l2"><a class="reference internal" href="#video-splitting-requirements">&nbsp; Video Splitting Requirements</a>
         <ul>
     <li class="toctree-l3"><a class="reference internal" href="#ffmpeg">FFmpeg</a>
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#mkvmerge">mkvmerge</a>
     </li>
-        </ul>
+    <li class="toctree-l3"><a class="reference internal" href="#enabling-split-video-support">Enabling split-video Support</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#manually-enabling-split-video-support">Manually Enabling split-video Support</a>
+        </ul>
     </li>
     </ul>
                     </li>
@@ -120,9 +120,9 @@
                 <ul>
                     <li class="toctree-l1"><a class="reference internal" href="../../faq/">FAQ</a>
                     </li>
-                    <li class="toctree-l1"><a class="reference internal" href="../../contributing/">Bugs/Contributing</a>
+                    <li class="toctree-l1"><a class="reference internal" href="../../contributing/">Bugs & Contributing</a>
                     </li>
-                    <li class="toctree-l1"><a class="reference internal" href="../../supporting/">Supporting Development</a>
+                    <li class="toctree-l1"><a class="reference internal" href="../../supporting/">Development & Support</a>
                     </li>
                 </ul>
                 <p class="caption"><span class="caption-text">Resources</span></p>
@@ -131,7 +131,7 @@
                     </li>
                     <li class="toctree-l1"><a class="reference internal" href="../../other/literature/">Research & Literature</a>
                     </li>
-                    <li class="toctree-l1"><a class="reference internal" href="../../other/copyright/">License & Copyright Info</a>
+                    <li class="toctree-l1"><a class="reference internal" href="../../other/copyright/">License & Copyright</a>
                     </li>
                 </ul>
       </div>
@@ -159,7 +159,7 @@
         
       
     
-    <li>CLI Example</li>
+    <li>Command-Line</li>
     <li class="wy-breadcrumbs-aside">
       
         <a href="https://github.com/Breakthrough/PySceneDetect/edit/master/docs/reference/cli.md"> Edit on PySceneDetect on Github</a>
@@ -174,8 +174,8 @@
             <div class="section">
               
                 <h1 id="pyscenedetect-cli">PySceneDetect CLI</h1>
-<p>See <a href="docs/stable/">the documentation</a> for a complete reference to the <code>scenedetect</code> command with <a href="docs/stable/cli/commands.html">more examples</a>.</p>
-<h2 id="getting-started">Getting Started</h2>
+<p>See <a href="../docs/stable/">the documentation</a> for a complete reference to the <code>scenedetect</code> command with <a href="../docs/stable/cli/commands.html">more examples</a>.</p>
+<h2 id="example">Example</h2>
 <p>As a concrete example to become familiar with PySceneDetect, let's use the following short clip from the James Bond movie, GoldenEye (Copyright &copy; 1995 MGM):</p>
 <p><a href="https://www.youtube.com/watch?v=OMgIPnCnlbQ">https://www.youtube.com/watch?v=OMgIPnCnlbQ</a></p>
 <p>You can <a href="https://github.com/Breakthrough/PySceneDetect/raw/resources/tests/resources/goldeneye/goldeneye.mp4">download the clip from here</a> (may have to right-click and save-as, put the video in your working directory as <code>goldeneye.mp4</code>).</p>
@@ -359,7 +359,7 @@ option_a = value
 #comment
 option_b = 1
 </code></pre>
-<h3 id="example">Example</h3>
+<h3 id="example_1">Example</h3>
 <pre><code>[global]
 min-scene-len = 0.8s
 
@@ -379,7 +379,7 @@ quality = 80
 num-images = 3
 </code></pre>
 <p>See the <code>scenedetect.cfg</code> file in the location you installed PySceneDetect or <a href="https://raw.githubusercontent.com/Breakthrough/PySceneDetect/v0.6.1-release/scenedetect.cfg">download it from Github</a> for a complete listing of all configuration options.</p>
-<h2 id="video-splitting-support-requirements"><span class="fa fa-keyboard-o"></span>&nbsp; Video Splitting Support Requirements</h2>
+<h2 id="video-splitting-requirements"><span class="fa fa-keyboard-o"></span>&nbsp; Video Splitting Requirements</h2>
 <p>PySceneDetect can use either <code>ffmpeg</code> or <code>mkvmerge</code> to split videos automatically.</p>
 <p>By default, when specifying the <code>split-video</code> command, <code>ffmpeg</code> will be used to split the video.  If the <code>-c</code>/<code>--copy</code> option is also set (e.g. <code>split-video --copy</code>), <code>mkvmerge</code> will be used to split the video instead.</p>
 <h3 id="ffmpeg">FFmpeg</h3>
@@ -389,7 +389,7 @@ num-images = 3
 <p>You can download and install <code>mkvmerge</code> as part of the mkvtoolnix package from:
 <a href="https://mkvtoolnix.download/downloads.html">https://mkvtoolnix.download/downloads.html</a></p>
 <p>Note that Windows users should use the installer/setup, and Linux users should use their system package manager, otherwise PySceneDetect may not be able to find <code>mkvmerge</code>.  If this is the case, see the section below to enable support for the <code>split-video --copy</code> command manually.</p>
-<h2 id="manually-enabling-split-video-support">Manually Enabling <code>split-video</code> Support</h2>
+<h3 id="enabling-split-video-support">Enabling <code>split-video</code> Support</h3>
 <p>If PySceneDetect cannot find the respective tool installed on your system, you have three options:</p>
 <ol>
 <li>
