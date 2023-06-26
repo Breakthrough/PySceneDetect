@@ -73,16 +73,14 @@
                 <ul>
                     <li class="toctree-l1"><a class="reference internal" href="../docs/">Documentation</a>
                     </li>
-                    <li class="toctree-l1"><a class="reference internal" href="../examples/usage-example/">CLI Example</a>
+                    <li class="toctree-l1"><a class="reference internal" href="../reference/cli/">CLI Example</a>
                     </li>
-                    <li class="toctree-l1"><a class="reference internal" href="../reference/python-api/">Python API</a>
+                    <li class="toctree-l1"><a class="reference internal" href="../reference/api/">Python API</a>
                     </li>
                 </ul>
                 <p class="caption"><span class="caption-text">Support:</span></p>
                 <ul>
                     <li class="toctree-l1"><a class="reference internal" href="../faq/">FAQ</a>
-                    </li>
-                    <li class="toctree-l1"><a class="reference internal" href="../reference/detection-methods/">Detection Algorithms</a>
                     </li>
                     <li class="toctree-l1"><a class="reference internal" href="../contributing/">Bugs/Contributing</a>
                     </li>
@@ -172,9 +170,8 @@
 <ul>
 <li><strong>threshold scene detection</strong> (<code>detect-threshold</code>): analyzes video for changes in average frame intensity/brightness</li>
 <li><strong>content-aware scene detection</strong> (<code>detect-content</code>): based on changes between frames in the HSV color space</li>
-<li><strong>adaptive content scene detection</strong> (<code>detect-adaptive</code>): based on <code>detect-content</code> but handles fast camera movement better in some cases</li>
+<li><strong>adaptive content scene detection</strong> (<code>detect-adaptive</code>): based on <code>detect-content</code>, handles fast camera movement better by comparing neighboring frames in a rolling window</li>
 </ul>
-<p>For a detailed explanation of how a particular scene detection method/algorithm works, see the <a href="../reference/detection-methods/">Scene Detection Method Details Section</a> in the Documentation &amp; Reference.</p>
 <hr />
 <h2 id="version-roadmap">Version Roadmap</h2>
 <p>Future version roadmaps are now <a href="https://github.com/Breakthrough/PySceneDetect/milestones">tracked as milestones (link)</a>.  Specific issues/features that are queued up for the very next release will have <a href="https://github.com/Breakthrough/PySceneDetect/issues?q=is%3Aissue+is%3Aopen+label%3A%22status%3A+backlog%22">the <code>backlog</code> tag</a>, and issues/features being worked on will have <a href="https://github.com/Breakthrough/PySceneDetect/issues?q=is%3Aissue+is%3Aopen+label%3A%22status%3A+in+progress%22">the <code>status: in progress</code> tag</a>.  Also note that bug reports as well as additional feature requests can be submitted via <a href="https://github.com/Breakthrough/PySceneDetect/issues">the issue tracker</a>; read <a href="../contributing/">the Bug Reports and Contributing page</a> for details.</p>

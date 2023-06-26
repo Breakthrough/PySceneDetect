@@ -71,16 +71,14 @@
                 <ul>
                     <li class="toctree-l1"><a class="reference internal" href="docs/">Documentation</a>
                     </li>
-                    <li class="toctree-l1"><a class="reference internal" href="examples/usage-example/">CLI Example</a>
+                    <li class="toctree-l1"><a class="reference internal" href="reference/cli/">CLI Example</a>
                     </li>
-                    <li class="toctree-l1"><a class="reference internal" href="reference/python-api/">Python API</a>
+                    <li class="toctree-l1"><a class="reference internal" href="reference/api/">Python API</a>
                     </li>
                 </ul>
                 <p class="caption"><span class="caption-text">Support:</span></p>
                 <ul>
                     <li class="toctree-l1"><a class="reference internal" href="faq/">FAQ</a>
-                    </li>
-                    <li class="toctree-l1"><a class="reference internal" href="reference/detection-methods/">Detection Algorithms</a>
                     </li>
                     <li class="toctree-l1"><a class="reference internal" href="contributing/">Bugs/Contributing</a>
                     </li>
@@ -140,12 +138,12 @@
 
 <div class="important">
 <h3 class="wy-text-neutral"><span class="fa fa-info-circle wy-text-info"></span>&nbsp; Latest Release: <b>v0.6.1</b> (November 28, 2022)</h3>
-<a href="download/" class="btn btn-success" style="margin-bottom:8px;" role="button"><span class="fa fa-download"></span>&nbsp; <b>Download</b></a> &nbsp;&nbsp;&nbsp;&nbsp; <a href="changelog/" class="btn btn-info" style="margin-bottom:8px;" role="button"><span class="fa fa-reorder"></span>&nbsp; <b>Changelog</b></a> &nbsp;&nbsp;&nbsp;&nbsp; <a href="http://pyscenedetect-manual.readthedocs.io/en/latest/" class="btn btn-warning" style="margin-bottom:8px;" role="button"><span class="fa fa-gear"></span>&nbsp; <b>Manual</b></a> &nbsp;&nbsp;&nbsp;&nbsp; <a href="examples/usage-example/" class="btn btn-danger" style="margin-bottom:8px;" role="button"><span class="fa fa-book"></span>&nbsp; <b>Getting Started</b></a>
+<a href="download/" class="btn btn-success" style="margin-bottom:8px;" role="button"><span class="fa fa-download"></span>&nbsp; <b>Download</b></a> &nbsp;&nbsp;&nbsp;&nbsp; <a href="changelog/" class="btn btn-info" style="margin-bottom:8px;" role="button"><span class="fa fa-reorder"></span>&nbsp; <b>Changelog</b></a> &nbsp;&nbsp;&nbsp;&nbsp; <a href="docs/" class="btn btn-warning" style="margin-bottom:8px;" role="button"><span class="fa fa-gear"></span>&nbsp; <b>Documentation</b></a> &nbsp;&nbsp;&nbsp;&nbsp; <a href="reference/cli/" class="btn btn-danger" style="margin-bottom:8px;" role="button"><span class="fa fa-book"></span>&nbsp; <b>Getting Started</b></a>
 <br/>
 See the changelog for the latest release notes and known issues.
 </div>
 
-<p><strong>PySceneDetect</strong> is a command-line application and a Python library for <strong>detecting shot changes in videos</strong> (<a href="examples/usage-example/">example</a>), and <strong>automatically splitting the video into separate clips</strong>.  Not only is it free and open-source software (FOSS), but there are several detection methods available (<a href="features/">see Features</a>), from simple threshold-based fade in/out detection, to advanced content aware fast-cut detection of each shot.</p>
+<p><strong>PySceneDetect</strong> is a command-line application and a Python library for <strong>detecting shot changes in videos</strong> (<a href="reference/cli/">example</a>), and <strong>automatically splitting the video into separate clips</strong>.  Not only is it free and open-source software (FOSS), but there are several detection methods available (<a href="features/">see Features</a>), from simple threshold-based fade in/out detection, to advanced content aware fast-cut detection of each shot.</p>
 <p>PySceneDetect can be used on its own as a stand-alone executable, with other applications as part of a video processing pipeline, or integrated directly into other programs/scripts via the Python API.  PySceneDetect is written in Python, and requires the OpenCV and Numpy software libraries.</p>
 <h3>Examples and Use Cases</h3>
 
@@ -158,6 +156,23 @@ See the changelog for the latest release notes and known issues.
 <li>academic analysis of film and video (e.g. finding mean shot length)</li>
 </ul>
 <p>Of course, this is just a small slice of what you can do with PySceneDetect, so why not <a href="download/" alt="Download PySceneDetect">try it out for yourself</a>!  The timecode format used by default (<code>HH:MM:SS.nnnn</code>) is compatible with most popular video tools, so in most cases the output scene list from PySceneDetect can be directly copied and pasted into another tool of your choice (e.g. <code>ffmpeg</code>, <code>avconv</code> or the <code>mkvtoolnix</code> suite).</p>
+<h3>Quickstart</h3>
+
+<p>Split the input video wherever a new scene is detected:</p>
+<pre><code class="language-rst">scenedetect -i video.mp4 detect-adaptive split-video
+</code></pre>
+<p>Save some frames from each scene:</p>
+<pre><code class="language-rst">scenedetect -i video.mp4 detect-adaptive save-images
+</code></pre>
+<p>Skip the first 10 seconds of the input video:</p>
+<pre><code class="language-rst">scenedetect -i video.mp4 time -s 10s detect-adaptive
+</code></pre>
+<p>List all commands:</p>
+<pre><code class="language-rst">scenedetect help
+</code></pre>
+<p>Display help manual:</p>
+<pre><code class="language-rst">scenedetect help all
+</code></pre>
               
             </div>
           </div>
