@@ -95,9 +95,9 @@
                 <ul>
                     <li class="toctree-l1"><a class="reference internal" href="../docs/">Documentation</a>
                     </li>
-                    <li class="toctree-l1"><a class="reference internal" href="../reference/cli/">Command-Line</a>
+                    <li class="toctree-l1"><a class="reference internal" href="../cli/">Command-Line</a>
                     </li>
-                    <li class="toctree-l1"><a class="reference internal" href="../reference/api/">Python API</a>
+                    <li class="toctree-l1"><a class="reference internal" href="../api/">Python API</a>
                     </li>
                 </ul>
                 <p class="caption"><span class="caption-text">Support:</span></p>
@@ -111,11 +111,11 @@
                 </ul>
                 <p class="caption"><span class="caption-text">Resources</span></p>
                 <ul>
-                    <li class="toctree-l1"><a class="reference internal" href="../other/similar/">Similar Projects</a>
+                    <li class="toctree-l1"><a class="reference internal" href="../similar/">Similar Projects</a>
                     </li>
-                    <li class="toctree-l1"><a class="reference internal" href="../other/literature/">Research & Literature</a>
+                    <li class="toctree-l1"><a class="reference internal" href="../literature/">Research & Literature</a>
                     </li>
-                    <li class="toctree-l1"><a class="reference internal" href="../other/copyright/">License & Copyright</a>
+                    <li class="toctree-l1"><a class="reference internal" href="../copyright/">License & Copyright</a>
                     </li>
                 </ul>
       </div>
@@ -158,7 +158,7 @@
             <div class="section">
               
                 <h1 id="obtaining-pyscenedetect">Obtaining PySceneDetect</h1>
-<p>PySceneDetect is completely free software, and can be downloaded from the links below.  See the <a href="../other/copyright/">license and copyright information</a> page for details.  If you have trouble running PySceneDetect, ensure that you have all the required dependencies listed in the <a href="#dependencies">Dependencies</a> section below.</p>
+<p>PySceneDetect is completely free software, and can be downloaded from the links below.  See the <a href="../copyright/">license and copyright information</a> page for details.  If you have trouble running PySceneDetect, ensure that you have all the required dependencies listed in the <a href="#dependencies">Dependencies</a> section below.</p>
 <p>PySceneDetect requires at least Python 3.6 or higher.</p>
 <h2 id="download-and-installation">Download and Installation</h2>
 <h3 id="install-via-pip">Install via pip &nbsp; <span class="wy-text-neutral"><span class="fa fa-windows"></span> &nbsp; <span class="fa fa-linux"></span> &nbsp; <span class="fa fa-apple"></span></span></h3></h3>
@@ -176,7 +176,7 @@
 <h4 class="wy-text-neutral"><span class="fa fa-calendar wy-text-info"></span>&nbsp; Release Date:&nbsp; <b>November 28, 2022</b></h4>
 <a href="https://github.com/Breakthrough/PySceneDetect/releases/download/v0.6.1-release/PySceneDetect-0.6.1-win64.msi" class="btn btn-info" style="margin-bottom:8px;" role="button"><span class="fa fa-download"></span>&nbsp; <b>Installer</b>&nbsp;&nbsp;(recommended)</a> &nbsp;&nbsp;&nbsp;&nbsp;
 <a href="https://github.com/Breakthrough/PySceneDetect/releases/download/v0.6.1-release/PySceneDetect-0.6.1-win64-portable.zip" class="btn btn-info" style="margin-bottom:8px;" role="button"><span class="fa fa-download"></span>&nbsp; <b>Portable .zip</b></a> &nbsp;&nbsp;&nbsp;&nbsp;
-<a href="../examples/usage/" class="btn btn-success" style="margin-bottom:8px;" role="button"><span class="fa fa-book"></span>&nbsp; <b>Getting Started</b></a>
+<a href="../cli/" class="btn btn-success" style="margin-bottom:8px;" role="button"><span class="fa fa-book"></span>&nbsp; <b>Getting Started</b></a>
 </div>
 
 <h3 id="post-installation">Post Installation</h3>
@@ -201,8 +201,7 @@
 <li><a href="https://ffmpeg.org/download.html">ffmpeg</a>, required to split video files (<code>split-video</code> or <code>split-video -c/--copy</code>)</li>
 <li><a href="https://mkvtoolnix.download/">mkvmerge</a>, part of mkvtoolnix, command-line tool, required to split video files in stream copy mode (<code>split-video -c/--copy</code> only)</li>
 </ul>
-<p>The <code>ffmpeg</code> and/or <code>mkvmerge</code> command must be available system wide (e.g. in a directory in <code>PATH</code>, so it can be used from any terminal/console by typing the command), or alternatively, placed in the same directory where PySceneDetect is installed.  On Windows this is usually <code>C:\PythonXY\Scripts</code>, where <code>XY</code> is your Python version.</p>
-<p>If you have trouble getting PySceneDetect to find <code>ffmpeg</code> or <code>mkvmerge</code>, see the section on Manually Enabling <code>split-video</code> Support on <a href="examples/video-splitting">Getting Started: Video Splitting Support Requirements</a>.</p>
+<p>The <code>ffmpeg</code> and/or <code>mkvmerge</code> command must be available system wide (e.g. in a directory in <code>PATH</code>, so it can be used from any terminal/console by typing the command), or alternatively, placed in the same directory where PySceneDetect is installed.  On Windows this is usually <code>C:\PythonXY\Scripts</code>, where <code>XY</code> is your Python version. For more information, <a href="../cli/">see the CLI documentation</a>.</p>
 <h3 id="building-opencv-from-source">Building OpenCV from Source</h3>
 <p>If you have installed OpenCV using <code>pip</code>, you will need to uninstall it before installing a different version of OpenCV, or building and installing it from source.</p>
 <p>You can <a href="http://breakthrough.github.io/Installing-OpenCV/">click here</a> for a quick guide (OpenCV + Numpy on Windows &amp; Linux) on installing OpenCV/Numpy on <a href="http://breakthrough.github.io/Installing-OpenCV/#installing-on-windows-pre-built-binaries">Windows (using pre-built binaries)</a> and <a href="http://breakthrough.github.io/Installing-OpenCV/#installing-on-linux-compiling-from-source">Linux (compiling from source)</a>.  If the Python module that comes with OpenCV on Windows is incompatible with your system architecture or Python version, <a href="http://www.lfd.uci.edu/~gohlke/pythonlibs/#opencv">see this page</a> to obtain a pre-compiled (unofficial) module.</p>
