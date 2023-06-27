@@ -7,8 +7,8 @@ build:
     python: "3.10"
 
 sphinx:
-  configuration: manual/conf.py
+  configuration: docs/conf.py
 
 python:
   install:
-  - requirements: manual/requirements.txt
+  - requirements: docs/requirements.txt
