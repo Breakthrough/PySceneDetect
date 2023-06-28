@@ -1,7 +1,7 @@
 recursive-exclude .github *
 recursive-exclude dist *
-recursive-exclude manual *
-exclude manual/requirements.txt
+recursive-exclude docs *
+exclude docs/requirements.txt
 exclude *
 include README.md
 include LICENSE
