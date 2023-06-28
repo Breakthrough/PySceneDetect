@@ -5,7 +5,7 @@
 #   ---------------------------------------------------------------
 #     [  Site: http://www.bcastell.com/projects/PySceneDetect/   ]
 #     [  Github: https://github.com/Breakthrough/PySceneDetect/  ]
-#     [  Documentation: http://pyscenedetect.readthedocs.org/    ]
+#     [  Documentation: http://scenedetect.com/                  ]
 #
 # Copyright (C) 2014-2023 Brandon Castellano <http://www.bcastell.com>.
 #

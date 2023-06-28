@@ -7,7 +7,7 @@ Video Scene Cut Detection and Analysis Tool
 [![Build Status](https://img.shields.io/github/actions/workflow/status/Breakthrough/PySceneDetect/build-linux.yml)](https://github.com/Breakthrough/PySceneDetect/actions)
 [![PyPI Status](https://img.shields.io/pypi/status/scenedetect.svg)](https://pypi.python.org/pypi/scenedetect/)
 [![PyPI Version](https://img.shields.io/pypi/v/scenedetect?color=blue)](https://pypi.python.org/pypi/scenedetect/)
-[![PyPI License](https://img.shields.io/pypi/l/scenedetect.svg)](http://pyscenedetect.readthedocs.org/en/latest/copyright/)
+[![PyPI License](https://img.shields.io/pypi/l/scenedetect.svg)](http://scenedetect.com/en/latest/other/copyright/)
 
 ----------------------------------------------------------
 
@@ -45,7 +45,7 @@ Help:
 
     scenedetect help
 
-You can find more examples [on the website](https://scenedetect.com/en/latest/examples/usage-example/) or [in the manual](https://scenedetect.com/projects/Manual/en/latest/cli/global_options.html).
+You can find more examples [on the website](https://scenedetect.com/en/latest/examples/usage-example/) or [in the manual](https://manual.scenedetect.com/projects/en/latest/cli/global_options.html).
 
 **Quick Start (Python API)**:
 
@@ -78,7 +78,7 @@ scene_list = detect('my_video.mp4', ContentDetector())
 split_video_ffmpeg('my_video.mp4', scene_list)
 ```
 
-For more advanced usage, the API is highly configurable, and can easily integrate with any pipeline. This includes using different detection algorithms, splitting the input video, and much more. The following example shows how to implement a function similar to the above, but using [the `scenedetect` API](https://scenedetect.com/projects/Manual/en/latest/api.html):
+For more advanced usage, the API is highly configurable, and can easily integrate with any pipeline. This includes using different detection algorithms, splitting the input video, and much more. The following example shows how to implement a function similar to the above, but using [the `scenedetect` API](https://manual.scenedetect.com/projects/en/latest/api.html):
 
 ```python
 from scenedetect import open_video, SceneManager, split_video_ffmpeg
@@ -96,7 +96,7 @@ def split_video_into_scenes(video_path, threshold=27.0):
     split_video_ffmpeg(video_path, scene_list, show_progress=True)
 ```
 
-See [the manual](https://scenedetect.com/projects/Manual/en/latest/api.html) for the
+See [the manual](https://manual.scenedetect.com/projects/en/latest/api.html) for the
 full PySceneDetect API documentation.
 
 ----------------------------------------------------------
@@ -119,8 +119,7 @@ For help or other issues, you can join [the official PySceneDetect Discord Serve
 
 ## Features & Roadmap
 
-You can [view the latest features and version roadmap on Readthedocs](http://pyscenedetect.readthedocs.org/en/latest/features/).
-See [`docs/changelog.md`](https://github.com/Breakthrough/PySceneDetect/blob/master/docs/changelog.md) for a list of changes in each version, or visit [the Releases page](https://github.com/Breakthrough/PySceneDetect/releases) to download a specific version.  Feel free to submit any bugs/issues or feature requests to [the Issue Tracker](https://github.com/Breakthrough/PySceneDetect/issues).
+You can view the [latest features on the main website](https://scenedetect.com/en/latest/features/) and [the version roadmap on Github](https://github.com/Breakthrough/PySceneDetect/milestones). See [`docs/changelog.md`](https://github.com/Breakthrough/PySceneDetect/blob/master/docs/changelog.md) for a list of changes in each version, or visit [the Releases page](https://github.com/Breakthrough/PySceneDetect/releases) to download a specific version.  Feel free to submit any bugs/issues or feature requests to [the Issue Tracker](https://github.com/Breakthrough/PySceneDetect/issues).
 
 Additional features being planned or in development can be found [here (tagged as `feature`) in the issue tracker](https://github.com/Breakthrough/PySceneDetect/issues?q=is%3Aissue+is%3Aopen+label%3Afeature).  You can also find additional information about PySceneDetect at [http://www.bcastell.com/projects/PySceneDetect/](http://www.bcastell.com/projects/PySceneDetect/).
 

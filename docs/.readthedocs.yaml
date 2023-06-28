@@ -3,10 +3,11 @@ version: 2
 build:
   os: ubuntu-22.04
   tools:
-    python: "3.11"
+    # TODO: Support Python 3.11.
+    python: "3.10"
 
-mkdocs:
-  configuration: docs/mkdocs.yml
+sphinx:
+  configuration: docs/conf.py
 
 python:
   install:

@@ -53,8 +53,9 @@ __version__ = 'v0.6.2.dev0'
 # About & copyright message string shown for the 'about' CLI command (scenedetect about).
 
 ABOUT_STRING = """
-Site/Updates: https://github.com/Breakthrough/PySceneDetect/
-Documentation: http://pyscenedetect.readthedocs.org/
+Site: http://scenedetect.com/
+Docs: http://manual.scenedetect.com/
+Code: https://github.com/Breakthrough/PySceneDetect/
 
 Copyright (C) 2014-2023 Brandon Castellano. All rights reserved.
 

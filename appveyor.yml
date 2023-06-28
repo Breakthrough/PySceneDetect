@@ -1,8 +1,8 @@
 
 skip_commits:
   files:
-    - docs/*
-    - 'manual/*'
+    - '.github/*'
+    - 'docs/*'
     - '**/*.rst'
     - '**/*.md'
 

@@ -1,4 +1,4 @@
-manual/_build/
+docs/_build/
 tests/resources/*
 *.mp4
 *.jpg
