@@ -9,7 +9,7 @@ This page details how to transition a program written using PySceneDetect 0.5 to
 
 PySceneDetect v0.6 is a major step towards a more stable and simplified API.  The biggest change to existing workflows is how video input is handled, and that Python 3.6 or above is now required.
 
-This page covers commonly used APIs which require updates to work with v0.6.  Note that this page is not an exhaustive set of changes.  For a complete list of breaking API changes, see `the changelog <https://scenedetect.com/changelog/>`_.
+This page covers commonly used APIs which require updates to work with v0.6.  Note that this page is not an exhaustive set of changes.  For a complete list of breaking API changes, see `the changelog <https://www.scenedetect.com/changelog/>`_.
 
 In some places, a backwards compatibility layer has been added to avoid breaking most applications upon release. This should not be relied upon, and will be removed in the future. You can call ``scenedetect.platform.init_logger(show_stdout=True)`` or attach a custom log handler to the ``'pyscenedetect'`` logger to help find these cases.
 
