@@ -6,7 +6,7 @@
 PySceneDetect Manual
 #######################################################################
 
-This manual refers to both the PySceneDetect command-line interface (the `scenedetect` command) and the PySceneDetect Python API (the `scenedetect` module).  The latest release of PySceneDetect can be installed via `pip install scenedetect[opencv]`, or Windows builds and source releases can be found at `scenedetect.com <http://scenedetect.com/>`_. Note that PySceneDetect requires `ffmpeg` or `mkvmerge` for video splitting support.
+This manual refers to both the PySceneDetect command-line interface (the `scenedetect` command) and the PySceneDetect Python API (the `scenedetect` module).  The latest release of PySceneDetect can be installed via `pip install scenedetect[opencv]`, or Windows builds and source releases can be found at `scenedetect.com/download <http://www.scenedetect.com/download/>`_. Note that PySceneDetect requires `ffmpeg` or `mkvmerge` for video splitting support.
 
 .. note::
 
@@ -29,8 +29,8 @@ Table of Contents
     :name: clitoc
 
     cli/global_options
-    cli/commands
     cli/detectors
+    cli/commands
     cli/config_file
     cli/backends
 
