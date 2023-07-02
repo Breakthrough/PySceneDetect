@@ -33,6 +33,7 @@ jobs:
           git checkout gh-pages
           git rm * -r -f --ignore-unmatch
           git checkout HEAD -- .nojekyll
+          git checkout HEAD -- CNAME
           git checkout HEAD -- docs/
           git add build/
           git mv build/* . -f -k
