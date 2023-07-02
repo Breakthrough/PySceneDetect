@@ -725,21 +725,21 @@ Examples:
     metavar='STRING',
     type=click.STRING,
     default=None,
-    help='Name of column used to mark scene start points')
+    help='Name of column used to mark scene start points.')
 @click.option(
     '--end-col',
     '-e',
     metavar='STRING',
     type=click.STRING,
     default=None,
-    help='Name of column used to mark scene end points')
+    help='Name of column used to mark scene end points.')
 @click.option(
     '--framerate',
     '-f',
     metavar='FPS',
     type=click.FLOAT,
     default=None,
-    help='Framerate in frames/sec for input video used for timecode to frame number conversions.')
+    help='Override framerate to use when doing timecode to frame number conversion.')
 @click.pass_context
 def load_scenes_command(ctx: click.Context, input: Optional[str], start_col: Optional[str],
                         end_col: Optional[str], framerate: Optional[float]):

@@ -450,9 +450,12 @@ class CliContext:
         self.options_processed = False
 
         input = self.config.get_value("load-scenes", "input", input)
-        start_col = self.config.get_value("load-scenes", "start_col", start_col)
-        end_col = self.config.get_value("load-scenes", "end_col", end_col)
+        start_col = self.config.get_value("load-scenes", "start-col", start_col)
+        end_col = self.config.get_value("load-scenes", "end-col", end_col)
         framerate = self.config.get_value("load-scenes", "framerate", framerate)
+
+        if framerate is None:
+            framerate = self.video_stream.frame_rate
 
         self._add_detector(
             scenedetect.detectors.SceneLoader(
