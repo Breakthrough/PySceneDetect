@@ -62,6 +62,7 @@ def invoke_scenedetect(
 
     Default values are set for any arguments found in the command:
         VIDEO -> VIDEO_PATH
+        VIDEO_NAME -> basename of VIDEO_PATH
         DETECTOR -> DEFAULT_DETECTOR
         TIME -> DEFAULT_TIME
         STATS -> DEFAULT_STATSFILE
@@ -70,6 +71,7 @@ def invoke_scenedetect(
     """
     value_dict = dict(
         VIDEO=VIDEO_PATH,
+        VIDEO_NAME=os.path.splitext(os.path.basename(VIDEO_PATH))[0],
         TIME=DEFAULT_TIME,
         DETECTOR=DEFAULT_DETECTOR,
         STATS=DEFAULT_STATSFILE,
@@ -265,3 +267,10 @@ def test_cli_backend_unsupported():
     # Ensure setting an invalid backend returns an error.
     assert invoke_scenedetect(
         '-i {VIDEO} -b {BACKEND} {DETECTOR}', BACKEND='unknown_backend_type') != 0
+
+
+def test_cli_load_scenes():
+    # Ensure we can load scenes both with and without the cut row.
+    assert invoke_scenedetect('-i {VIDEO} {DETECTOR} list-scenes') == 0
+    assert invoke_scenedetect('-i {VIDEO} load-scenes -i {VIDEO_NAME}-Scenes.csv') == 0
+    assert invoke_scenedetect('-i {VIDEO} {DETECTOR} list-scenes -s') == 0

@@ -715,23 +715,24 @@ Examples:
     '--input',
     '-i',
     multiple=False,
-    metavar='CSV',
+    metavar='FILE',
     type=click.Path(exists=True, file_okay=True, readable=True, resolve_path=True),
-    help='Input csv file that contains csv information.')
+    help='Scene list similar to format of `list-scenes`. Requires a start/end time or frame number '
+    'column for each scene.')
 @click.option(
     '--start-col',
     '-s',
-    metavar='START-HEADER',
+    metavar='STRING',
     type=click.STRING,
     default=None,
-    help='Header for column used to mark scene start points')
+    help='Name of column used to mark scene start points')
 @click.option(
     '--end-col',
     '-e',
-    metavar='END-HEADER',
+    metavar='STRING',
     type=click.STRING,
     default=None,
-    help='Header for column used to mark scene end points')
+    help='Name of column used to mark scene end points')
 @click.option(
     '--framerate',
     '-f',
@@ -865,7 +866,7 @@ def list_scenes_command(
     quiet: bool,
     skip_cuts: bool,
 ):
-    """Print scene list and outputs to a CSV file. Ddefault filename is $VIDEO_NAME-Scenes.csv."""
+    """Print scene list and outputs to a CSV file. Default filename is $VIDEO_NAME-Scenes.csv."""
     assert isinstance(ctx.obj, CliContext)
     ctx.obj.handle_list_scenes(
         output=output,

@@ -456,7 +456,7 @@ class CliContext:
 
         self._add_detector(
             scenedetect.detectors.SceneLoader(
-                csv_file=input, start_col=start_col, end_col=end_col, framerate=framerate))
+                file=input, start_col=start_col, end_col=end_col, framerate=framerate))
 
         self.options_processed = options_processed_orig
 

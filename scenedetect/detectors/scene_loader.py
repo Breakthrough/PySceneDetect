@@ -35,13 +35,13 @@ class SceneLoader(SceneDetector):
     Incompatible with other detectors.
     """
 
-    def __init__(self, csv_file=None, start_col="Start Frame", end_col="End Frame", framerate=None):
+    def __init__(self, file=None, start_col="Start Frame", end_col="End Frame", framerate=None):
         """
         Arguments:
-            csv_file:   Path to csv file containing scene data for video
+            file:   Path to csv file containing scene data for video
             start_col:  Header for the column containing the frame or timecode for the beginning of
                 each scene
-            end_col:    Optional header for the column containing the frame or timecode for the end 
+            end_col:    Optional header for the column containing the frame or timecode for the end
                 of each scene.
             framerate:  Framerate for the input video, used for handling timecode <-> frame number
                 conversions if timecodes are used as input for marking cut points
@@ -50,12 +50,12 @@ class SceneLoader(SceneDetector):
         self.framerate = framerate
 
         # Check to make specified csv file exists
-        if not csv_file:
+        if not file:
             raise ValueError('file path to csv file must be specified')
-        if not os.path.exists(csv_file):
+        if not os.path.exists(file):
             raise ValueError('specified csv file does not exist')
 
-        self.csv_file = csv_file
+        self.csv_file = file
 
         # Open csv and check and read first row for column headers
         self.file_reader = self._open_csv(self.csv_file)
@@ -77,6 +77,11 @@ class SceneLoader(SceneDetector):
         self._scene_start = None
         self._scene_end = None
 
+        self._get_next_scene(self.file_reader, self.framerate)
+        # PySceneDetect works on cuts, so we have to skip the first scene and use the first frame
+        # of the next scene as the cut point.
+        self._get_next_scene(self.file_reader, self.framerate)
+
     def _open_csv(self, csv_file):
         """Opens the specified csv file for reading.
 
@@ -87,8 +92,10 @@ class SceneLoader(SceneDetector):
             file_reader:    csv.reader object
         """
         input_file = open(csv_file, 'r')
+        header_row = input_file.readline()
+        if not header_row.startswith("Timecode List"):
+            input_file.seek(0)
         file_reader = csv.reader(input_file)
-
         return file_reader
 
     def _get_next_scene(self, file_reader, framerate=None):
@@ -129,23 +136,12 @@ class SceneLoader(SceneDetector):
         """
         cut_list = []
 
-        # First time through, read first row of input csv and get beginning/end frames
-        if not self._last_scene_row:
-            self._get_next_scene(self.file_reader, self.framerate)
-            # return cut_list
-
         # If frame_num is earlier than the first input scene, just return empty cut
         if frame_num < self._scene_start:
             return cut_list
 
         # If frame_num is at the beginning of the input scene, mark a cut and get next scene info
         if frame_num == self._scene_start:
-            # To avoid duplication of beginning scene, check if next scene begins at frame 1
-            # If so, just ignore this scene and get the next since it is added automatically
-            if frame_num == 0:
-                self._get_next_scene(self.file_reader, self.framerate)
-                return cut_list
-
             # We have hit a cut point, add it to the cut_list and get the next scene
             cut_list.append(frame_num)
             self._get_next_scene(self.file_reader, self.framerate)
