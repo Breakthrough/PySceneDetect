@@ -148,10 +148,10 @@ See the changelog for the latest release notes and known issues.
 <pre><code class="language-rst">scenedetect -i video.mp4 detect-adaptive split-video
 </code></pre>
 <p>Split video on each fast cut using <a href="docs/">Python API (docs)</a>:</p>
-<p><code>python=
-from scenedetect import detect, AdaptiveDetector, split_video_ffmpeg
+<pre><code class="language-python">from scenedetect import detect, AdaptiveDetector, split_video_ffmpeg
 scene_list = detect('my_video.mp4', AdaptiveDetector())
-split_video_ffmpeg('my_video.mp4', scene_list)</code></p>
+split_video_ffmpeg('my_video.mp4', scene_list)
+</code></pre>
 <h3>Examples and Use Cases</h3>
 
 <p>Here are some of the things people are using PySceneDetect for:</p>
