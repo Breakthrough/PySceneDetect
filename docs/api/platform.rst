@@ -22,6 +22,8 @@ Functions
 
 .. autofunction:: scenedetect.platform.get_ffmpeg_version
 
+.. autofunction:: scenedetect.platform.get_ffmpeg_path
+
 .. autofunction:: scenedetect.platform.get_mkvmerge_version
 
 .. autofunction:: scenedetect.platform.get_system_version_info
