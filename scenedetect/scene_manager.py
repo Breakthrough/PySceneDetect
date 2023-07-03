@@ -55,6 +55,28 @@ An optional callback can also be invoked on each detected scene, for example:
 To use a `SceneManager` with a webcam/device or existing `cv2.VideoCapture` device, use the
 :py:class:`VideoCaptureAdapter <scenedetect.backends.opencv.VideoCaptureAdapter>` instead of
 `open_video`.
+
+=======================================================================
+Storing Per-Frame Statistics
+=======================================================================
+
+`SceneManager` can use an optional
+:py:class:`StatsManager <scenedetect.stats_manager.StatsManager>` to save frame statistics to disk:
+
+.. code:: python
+
+    from scenedetect import open_video, ContentDetector, SceneManager, StatsManager
+    video = open_video(test_video_file)
+    scene_manager = SceneManager(stats_manager=StatsManager())
+    scene_manager.add_detector(ContentDetector())
+    scene_manager.detect_scenes(video=video)
+    scene_list = scene_manager.get_scene_list()
+    print_scenes(scene_list=scene_list)
+    # Save per-frame statistics to disk.
+    scene_manager.stats_manager.save_to_csv(csv_file=STATS_FILE_PATH)
+
+The statsfile can be used to find a better threshold for certain inputs, or perform statistical
+analysis of the video.
 """
 
 import csv

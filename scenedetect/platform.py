@@ -211,7 +211,7 @@ class CommandTooLong(Exception):
 
 
 def invoke_command(args: List[str]) -> int:
-    """ Same as calling Python's subprocess.call() method, but explicitly
+    """Same as calling Python's subprocess.call() method, but explicitly
     raises a different exception when the command length is too long.
 
     See https://github.com/Breakthrough/PySceneDetect/issues/164 for details.
@@ -240,8 +240,9 @@ def invoke_command(args: List[str]) -> int:
 
 
 def get_ffmpeg_path() -> Optional[str]:
-    """Get path to ffmpeg if available on the current system, or None if not available."""
-    # Prefer using ffmpeg if it already exists in PATH.
+    """Get path to ffmpeg if available on the current system. First looks at PATH, then checks if
+    one is available from the `imageio_ffmpeg` package. Returns None if ffmpeg couldn't be found.
+    """
     try:
         subprocess.call(['ffmpeg', '-v', 'quiet'])
         return 'ffmpeg'

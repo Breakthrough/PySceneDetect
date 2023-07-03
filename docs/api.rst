@@ -112,7 +112,7 @@ In this example, we create a function ``find_scenes()`` which will load a video,
 
 Using a :py:class:`SceneManager <scenedetect.scene_manager.SceneManager>` directly allows tweaking the Parameters passed to :py:meth:`detect_scenes <scenedetect.scene_manager.SceneManager.detect_scenes>` including setting a limit to the number of frames to process, which is useful for live streams/camera devices.  You can also combine detection algorithms or create new ones from scratch.
 
-For a more advanced example of using the PySceneDetect API to with a stats file (to save per-frame metrics to disk and/or speed up multiple passes of the same video), take a look at the :ref:`example in the SceneManager reference<scenemanager-example>`.
+For a more advanced example of using the PySceneDetect API to with a stats file (to save per-frame metrics to disk and/or speed up multiple passes of the same video), take a look at the :ref:`example in the SceneManager reference<scenedetect-scene_manager>`.
 
 In addition to module-level examples, demonstrations of some common use cases can be found in the `tests/test_api.py <https://github.com/Breakthrough/PySceneDetect/blob/v0.6.1-release/tests/test_api.py>`_ file.
 
