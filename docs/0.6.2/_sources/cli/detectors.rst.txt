@@ -41,15 +41,11 @@ recorded in the statsfile if set. Currently there are four components:
 
   - *delta_hue*: Difference between pixel hue values of adjacent frames.
 
-  - *delta_sat*: Difference between pixel saturation values of adjacent
-  frames.
+  - *delta_sat*: Difference between pixel saturation values of adjacent frames.
 
-  - *delta_lum*: Difference between pixel luma (brightness) values of
-  adjacent frames.
+  - *delta_lum*: Difference between pixel luma (brightness) values of adjacent frames.
 
-  - *delta_edges*: Difference between calculated edges of adjacent frames.
-  Typically larger than other components, so threshold may need to be
-  increased to compensate.
+  - *delta_edges*: Difference between calculated edges of adjacent frames. Typically larger than other components, so threshold may need to be increased to compensate.
 
 Weights are set as a set of 4 numbers in the form (*delta_hue*, *delta_sat*,
 *delta_lum*, *delta_edges*). For example, `-w 1.0 0.5 1.0 0.2 -t 32` is a

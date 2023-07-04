@@ -64,18 +64,10 @@ recorded in the statsfile if set. Currently there are four components:</p>
 <blockquote>
 <div><ul class="simple">
 <li><p><em>delta_hue</em>: Difference between pixel hue values of adjacent frames.</p></li>
-<li><p><em>delta_sat</em>: Difference between pixel saturation values of adjacent</p></li>
+<li><p><em>delta_sat</em>: Difference between pixel saturation values of adjacent frames.</p></li>
+<li><p><em>delta_lum</em>: Difference between pixel luma (brightness) values of adjacent frames.</p></li>
+<li><p><em>delta_edges</em>: Difference between calculated edges of adjacent frames. Typically larger than other components, so threshold may need to be increased to compensate.</p></li>
 </ul>
-<p>frames.</p>
-<ul class="simple">
-<li><p><em>delta_lum</em>: Difference between pixel luma (brightness) values of</p></li>
-</ul>
-<p>adjacent frames.</p>
-<ul class="simple">
-<li><p><em>delta_edges</em>: Difference between calculated edges of adjacent frames.</p></li>
-</ul>
-<p>Typically larger than other components, so threshold may need to be
-increased to compensate.</p>
 </div></blockquote>
 <p>Weights are set as a set of 4 numbers in the form (<em>delta_hue</em>, <em>delta_sat</em>,
 <em>delta_lum</em>, <em>delta_edges</em>). For example, <cite>-w 1.0 0.5 1.0 0.2 -t 32</cite> is a

@@ -275,18 +275,18 @@ Command Options
                             global option -o/--output if set.
 
   -f, --filename NAME       File name format to use when saving videos (with
-                            or without extension). You can use the $VIDEO_NAME 
-                            or $SCENE_NUMBER macros. Additional macros that are 
-                            available only with the ffmpeg backend include 
-                            $START_TIME, $END_TIME, $START_FRAME, and 
-                            $END_FRAME. A potential formatting pitfall is that 
+                            or without extension). You can use the $VIDEO_NAME
+                            or $SCENE_NUMBER macros. Additional macros that are
+                            available only with the ffmpeg backend include
+                            $START_TIME, $END_TIME, $START_FRAME, and
+                            $END_FRAME. A potential formatting pitfall is that
                             macros cannot be followed by an underscore character
-                             in order to be replaced correctly. For example, the
-                             value Scene-$SCENE_NUMBER-Frame-$FRAME_NUMBER will 
-                            properly replace both macro values. However, using 
-                            Scene_$SCENE_NUMBER_Frame_$FRAME_NUMBER will not. 
-                            Note that you may have to wrap the format in single 
-                            quotes to avoid variable expansion. [default: 
+                            in order to be replaced correctly. For example, the
+                            value Scene-$SCENE_NUMBER-Frame-$FRAME_NUMBER will
+                            properly replace both macro values. However, using
+                            Scene_$SCENE_NUMBER_Frame_$FRAME_NUMBER will not.
+                            Note that you may have to wrap the format in single
+                            quotes to avoid variable expansion. [default:
                             $VIDEO_NAME-Scene-$SCENE_NUMBER]
 
   -q, --quiet               Hides any output from the external video splitting

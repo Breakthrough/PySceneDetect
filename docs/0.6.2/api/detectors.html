@@ -545,37 +545,11 @@ each pixel, and dividing by the number of pixels multiplied by 3.</p>
 <li class="toctree-l1"><a class="reference internal" href="../api.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="scene_manager.html">SceneManager</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Detection Algorithms</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#scenedetect.detectors.content_detector.ContentDetector"><code class="docutils literal notranslate"><span class="pre">ContentDetector</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#scenedetect.detectors.content_detector.ContentDetector.Components"><code class="docutils literal notranslate"><span class="pre">ContentDetector.Components</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#scenedetect.detectors.content_detector.ContentDetector.DEFAULT_COMPONENT_WEIGHTS"><code class="docutils literal notranslate"><span class="pre">ContentDetector.DEFAULT_COMPONENT_WEIGHTS</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#scenedetect.detectors.content_detector.ContentDetector.FRAME_SCORE_KEY"><code class="docutils literal notranslate"><span class="pre">ContentDetector.FRAME_SCORE_KEY</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#scenedetect.detectors.content_detector.ContentDetector.LUMA_ONLY_WEIGHTS"><code class="docutils literal notranslate"><span class="pre">ContentDetector.LUMA_ONLY_WEIGHTS</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#scenedetect.detectors.content_detector.ContentDetector.METRIC_KEYS"><code class="docutils literal notranslate"><span class="pre">ContentDetector.METRIC_KEYS</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#scenedetect.detectors.content_detector.ContentDetector.get_metrics"><code class="docutils literal notranslate"><span class="pre">ContentDetector.get_metrics()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#scenedetect.detectors.content_detector.ContentDetector.is_processing_required"><code class="docutils literal notranslate"><span class="pre">ContentDetector.is_processing_required()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#scenedetect.detectors.content_detector.ContentDetector.process_frame"><code class="docutils literal notranslate"><span class="pre">ContentDetector.process_frame()</span></code></a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="#scenedetect.detectors.content_detector.ContentDetector"><code class="docutils literal notranslate"><span class="pre">ContentDetector</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.detectors.content_detector.estimated_kernel_size"><code class="docutils literal notranslate"><span class="pre">estimated_kernel_size()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.detectors.content_detector.mean_pixel_distance"><code class="docutils literal notranslate"><span class="pre">mean_pixel_distance()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#scenedetect.detectors.adaptive_detector.AdaptiveDetector"><code class="docutils literal notranslate"><span class="pre">AdaptiveDetector</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#scenedetect.detectors.adaptive_detector.AdaptiveDetector.ADAPTIVE_RATIO_KEY_TEMPLATE"><code class="docutils literal notranslate"><span class="pre">AdaptiveDetector.ADAPTIVE_RATIO_KEY_TEMPLATE</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#scenedetect.detectors.adaptive_detector.AdaptiveDetector.event_buffer_length"><code class="docutils literal notranslate"><span class="pre">AdaptiveDetector.event_buffer_length</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#scenedetect.detectors.adaptive_detector.AdaptiveDetector.get_content_val"><code class="docutils literal notranslate"><span class="pre">AdaptiveDetector.get_content_val()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#scenedetect.detectors.adaptive_detector.AdaptiveDetector.get_metrics"><code class="docutils literal notranslate"><span class="pre">AdaptiveDetector.get_metrics()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#scenedetect.detectors.adaptive_detector.AdaptiveDetector.post_process"><code class="docutils literal notranslate"><span class="pre">AdaptiveDetector.post_process()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#scenedetect.detectors.adaptive_detector.AdaptiveDetector.process_frame"><code class="docutils literal notranslate"><span class="pre">AdaptiveDetector.process_frame()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#scenedetect.detectors.adaptive_detector.AdaptiveDetector.stats_manager_required"><code class="docutils literal notranslate"><span class="pre">AdaptiveDetector.stats_manager_required()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#scenedetect.detectors.threshold_detector.ThresholdDetector"><code class="docutils literal notranslate"><span class="pre">ThresholdDetector</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#scenedetect.detectors.threshold_detector.ThresholdDetector.Method"><code class="docutils literal notranslate"><span class="pre">ThresholdDetector.Method</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#scenedetect.detectors.threshold_detector.ThresholdDetector.THRESHOLD_VALUE_KEY"><code class="docutils literal notranslate"><span class="pre">ThresholdDetector.THRESHOLD_VALUE_KEY</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#scenedetect.detectors.threshold_detector.ThresholdDetector.get_metrics"><code class="docutils literal notranslate"><span class="pre">ThresholdDetector.get_metrics()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#scenedetect.detectors.threshold_detector.ThresholdDetector.post_process"><code class="docutils literal notranslate"><span class="pre">ThresholdDetector.post_process()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#scenedetect.detectors.threshold_detector.ThresholdDetector.process_frame"><code class="docutils literal notranslate"><span class="pre">ThresholdDetector.process_frame()</span></code></a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="#scenedetect.detectors.adaptive_detector.AdaptiveDetector"><code class="docutils literal notranslate"><span class="pre">AdaptiveDetector</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scenedetect.detectors.threshold_detector.ThresholdDetector"><code class="docutils literal notranslate"><span class="pre">ThresholdDetector</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.detectors.threshold_detector.compute_frame_average"><code class="docutils literal notranslate"><span class="pre">compute_frame_average()</span></code></a></li>
 </ul>
 </li>
