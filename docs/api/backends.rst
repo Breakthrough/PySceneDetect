@@ -9,28 +9,13 @@ Backends
    :members:
    :undoc-members:
 
-
-=========================================
-OpenCV
-=========================================
-
 .. automodule:: scenedetect.backends.opencv
    :members:
    :undoc-members:
 
-
-=========================================
-PyAV
-=========================================
-
 .. automodule:: scenedetect.backends.pyav
    :members:
    :undoc-members:
-
-
-=========================================
-MoviePy
-=========================================
 
 .. automodule:: scenedetect.backends.moviepy
    :members:

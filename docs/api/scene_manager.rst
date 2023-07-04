@@ -7,17 +7,13 @@ SceneManager
 
 .. automodule:: scenedetect.scene_manager
 
-=======================================================================
-``SceneManager`` Class
-=======================================================================
-
 .. autoclass:: scenedetect.scene_manager.SceneManager
    :members:
    :undoc-members:
 
-=======================================================================
-``scene_manager`` Functions
-=======================================================================
+.. autoclass:: scenedetect.scene_manager.Interpolation
+   :members:
+   :undoc-members:
 
 .. autofunction:: scenedetect.scene_manager.save_images
 

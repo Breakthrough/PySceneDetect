@@ -12,9 +12,10 @@
 #
 """ ``scenedetect.scene_manager`` Module
 
-This module implements the :py:class:`SceneManager` object, which is used to perform scene detection
-(using a detector from :py:mod:`scenedetect.detectors`) on videos. Video decoding is done in a
-separate thread to improve performance.
+This module implements :py:class:`SceneManager`, coordinates running a
+:py:mod:`SceneDetector <scenedetect.detectors>` over the frames of a video
+(:py:mod:`VideoStream <scenedetect.video_stream>`). Video decoding is done in a separate thread to
+improve performance.
 
 This module also contains other helper functions (e.g. :py:func:`save_images`) which can be used to
 process the resulting scene list.
@@ -101,10 +102,6 @@ from scenedetect.scene_detector import SceneDetector, SparseSceneDetector
 from scenedetect.stats_manager import StatsManager, FrameMetricRegistered
 
 logger = logging.getLogger('pyscenedetect')
-
-##
-## SceneManager Helper Functions
-##
 
 # TODO: This value can and should be tuned for performance improvements as much as possible,
 # until accuracy falls, on a large enough dataset. This has yet to be done, but the current

@@ -33,6 +33,7 @@ tested by adding it to the test suite in `tests/test_video_stream.py`.
 """
 
 from abc import ABC, abstractmethod
+from logging import getLogger
 from typing import Tuple, Optional, Union
 
 from numpy import ndarray
@@ -78,27 +79,15 @@ class FrameRateUnavailable(VideoOpenFailure):
 ## VideoStream Constants & Helper Functions
 ##
 
-# TODO: This value can and should be tuned for performance improvements as much as possible,
-# until accuracy falls, on a large enough dataset. This has yet to be done, but the current
-# value doesn't seem to have caused any issues at least.
-DEFAULT_MIN_WIDTH: int = 260
-"""The default minimum width a frame will be downscaled to when calculating a downscale factor."""
+# TODO(v0.7): Remove.
+DEFAULT_MIN_WIDTH: int = 256
 
-
+# TODO(v0.7): Remove.
 def compute_downscale_factor(frame_width: int, effective_width: int = DEFAULT_MIN_WIDTH) -> int:
-    """Get the optimal default downscale factor based on a video's resolution (currently only
-    the width in pixels is considered).
-
-    The resulting effective width of the video will be between frame_width and 1.5 * frame_width
-    pixels (e.g. if frame_width is 200, the range of effective widths will be between 200 and 300).
-
-    Arguments:
-        frame_width: Actual width of the video frame in pixels.
-        effective_width: Desired minimum width in pixels.
-
-    Returns:
-        int: The defalt downscale factor to use to achieve at least the target effective_width.
-    """
+    """[DEPRECATED] Use :py:func:`scenedetect.scene_manager.compute_downscale_factor` instead."""
+    getLogger('pyscenedetect').error(
+        'This function is deprecated and will be removed. '
+        'Use scenedetect.scene_manager.compute_downscale_factor instead.')
     assert not (frame_width < 1 or effective_width < 1)
     if frame_width < effective_width:
         return 1
