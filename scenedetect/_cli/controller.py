@@ -27,7 +27,7 @@ from scenedetect.scene_manager import save_images, write_scene_list, write_scene
 from scenedetect.video_splitter import split_video_mkvmerge, split_video_ffmpeg
 from scenedetect.video_stream import SeekError
 
-from scenedetect.cli.context import CliContext, check_split_video_requirements
+from scenedetect._cli.context import CliContext, check_split_video_requirements
 
 logger = logging.getLogger('pyscenedetect')
 

@@ -10,13 +10,11 @@
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
-""":py:class:`VideoStreamCv2` provides an adapter for the OpenCV `cv2.VideoCapture` object. Works
-with video files, image sequences, and network streams/URLs.
+""":py:class:`VideoStreamCv2` is backed by the OpenCV `VideoCapture` object. This is the default
+backend. Works with video files, image sequences, and network streams/URLs.
 
-Uses string identifier ``'opencv'``.
-
-For wrapping input devices or pipes, there is also the :py:class:`VideoCaptureAdapter` which can
-be created from an existing `cv2.VideoCapture`. This allows performing scene detection on inputs
+For wrapping input devices or pipes, there is also :py:class:`VideoCaptureAdapter` which can be
+constructed from an existing `cv2.VideoCapture`. This allows performing scene detection on inputs
 which do not support seeking.
 """
 
@@ -43,7 +41,7 @@ NON_VIDEO_FILE_INPUT_IDENTIFIERS = (
 )
 
 
-def get_aspect_ratio(cap: cv2.VideoCapture, epsilon: float = 0.0001) -> float:
+def _get_aspect_ratio(cap: cv2.VideoCapture, epsilon: float = 0.0001) -> float:
     """Display/pixel aspect ratio of the VideoCapture as a float (1.0 represents square pixels)."""
     # Versions of OpenCV < 3.4.1 do not support this, so we fall back to 1.0.
     if not 'CAP_PROP_SAR_NUM' in dir(cv2):
@@ -185,7 +183,7 @@ class VideoStreamCv2(VideoStream):
     @property
     def aspect_ratio(self) -> float:
         """Display/pixel aspect ratio as a float (1.0 represents square pixels)."""
-        return get_aspect_ratio(self._cap)
+        return _get_aspect_ratio(self._cap)
 
     @property
     def position(self) -> FrameTimecode:
@@ -458,7 +456,7 @@ class VideoCaptureAdapter(VideoStream):
     @property
     def aspect_ratio(self) -> float:
         """Display/pixel aspect ratio as a float (1.0 represents square pixels)."""
-        return get_aspect_ratio(self._cap)
+        return _get_aspect_ratio(self._cap)
 
     @property
     def position(self) -> FrameTimecode:

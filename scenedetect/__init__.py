@@ -10,12 +10,8 @@
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
-"""``scenedetect`` Module
-
-This is the main PySceneDetect module. This file contains the following:
- - imports of commonly used classes for importing directly from `scenedetect`
- - high level functions to simplify common use cases (e.g. `detect` and `open_video`)
- - version and copyright/license information
+"""The main ``scenedetect`` module contains imports of commonly used classes, and some high level
+functions to simplify common use cases (e.g. :py:func:`detect` and :py:func:`open_video`).
 """
 
 from logging import getLogger

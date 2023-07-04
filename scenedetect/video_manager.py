@@ -30,7 +30,7 @@ import cv2
 from scenedetect.platform import get_file_name
 from scenedetect.frame_timecode import FrameTimecode, MAX_FPS_DELTA
 from scenedetect.video_stream import VideoStream, VideoOpenFailure, FrameRateUnavailable
-from scenedetect.backends.opencv import get_aspect_ratio
+from scenedetect.backends.opencv import _get_aspect_ratio
 
 ##
 ## VideoManager Exceptions
@@ -309,7 +309,7 @@ class VideoManager(VideoStream):
         self._started = False
         self._frame_length = self.get_base_timecode() + get_num_frames(self._cap_list)
         self._first_cap_len = self.get_base_timecode() + get_num_frames([self._cap_list[0]])
-        self._aspect_ratio = get_aspect_ratio(self._cap_list[0])
+        self._aspect_ratio = _get_aspect_ratio(self._cap_list[0])
 
     def set_downscale_factor(self, downscale_factor=None):
         """No-op. Set downscale_factor in `SceneManager` instead."""

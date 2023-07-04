@@ -92,8 +92,8 @@ import sys
 
 import cv2
 import numpy as np
-from scenedetect.thirdparty.simpletable import (SimpleTableCell, SimpleTableImage, SimpleTableRow,
-                                                SimpleTable, HTMLPage)
+from scenedetect._thirdparty.simpletable import (SimpleTableCell, SimpleTableImage, SimpleTableRow,
+                                                 SimpleTable, HTMLPage)
 
 from scenedetect.platform import (tqdm, get_and_create_path, get_cv2_imwrite_params)
 from scenedetect.frame_timecode import FrameTimecode
@@ -110,7 +110,7 @@ DEFAULT_MIN_WIDTH: int = 256
 """The default minimum width a frame will be downscaled to when calculating a downscale factor."""
 
 MAX_FRAME_QUEUE_LENGTH: int = 4
-"""Maximum size of the queue of frames waiting to be processed after decoding."""
+"""Maximum number of decoded frames which can be buffered while waiting to be processed."""
 
 PROGRESS_BAR_DESCRIPTION = 'Detected: %d | Progress'
 """Template to use for progress bar."""
@@ -551,8 +551,7 @@ class SceneManager:
         """
         Arguments:
             stats_manager: :py:class:`StatsManager` to bind to this `SceneManager`. Can be
-                accessed via the `stats_manager` property of the resulting object to load
-                from or save to a file on disk.
+                accessed via the `stats_manager` property of the resulting object to save to disk.
         """
         self._cutting_list = []
         self._event_list = []

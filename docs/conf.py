@@ -42,7 +42,7 @@ extensions = [
 ]
 
 autoclass_content = "both"
-
+autodoc_member_order = "groupwise"
 autodoc_typehints = 'description'
 autodoc_typehints_format = 'short'
 
@@ -146,7 +146,7 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
     (root_doc, 'PySceneDetect', 'PySceneDetect Documentation',
-     author, 'PySceneDetect', 'One line description of project.',
+     author, 'PySceneDetect', 'Python API and `scenedetect` command reference.',
      'Miscellaneous'),
 ]
 
@@ -159,7 +159,7 @@ texinfo_documents = [
 html_theme = 'alabaster'
 html_theme_options = {
     'sidebar_width': '235px',
-    'description': 'CLI/API Reference Manual [%s]' % (release),
+    'description': 'CLI/API Documentation [%s]' % (release),
     'show_relbar_bottom': True,
     'show_relbar_top': False,
 

@@ -10,7 +10,7 @@
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
-""" ``scenedetect.thirdparty`` Module
+""" ``scenedetect._thirdparty`` Module
 
 This module includes all third-party libraries/dependencies that are distributed
 with PySceneDetect.  The source directory also includes the license files for all

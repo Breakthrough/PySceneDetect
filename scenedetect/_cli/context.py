@@ -22,6 +22,7 @@ from typing import AnyStr, Optional, Tuple
 import click
 
 from scenedetect import open_video, AVAILABLE_BACKENDS
+from scenedetect._scene_loader import SceneLoader
 from scenedetect.platform import get_and_create_path, get_cv2_imwrite_params, init_logger
 from scenedetect.frame_timecode import FrameTimecode, MAX_FPS_DELTA
 from scenedetect.video_stream import VideoStream, VideoOpenFailure, FrameRateUnavailable
@@ -30,7 +31,7 @@ import scenedetect.detectors
 from scenedetect.stats_manager import StatsManager
 from scenedetect.scene_manager import SceneManager, Interpolation
 
-from scenedetect.cli.config import ConfigRegistry, ConfigLoadFailure, CHOICE_MAP
+from scenedetect._cli.config import ConfigRegistry, ConfigLoadFailure, CHOICE_MAP
 
 logger = logging.getLogger('pyscenedetect')
 
@@ -456,8 +457,7 @@ class CliContext:
             framerate = self.video_stream.frame_rate
 
         self._add_detector(
-            scenedetect.detectors.SceneLoader(
-                file=input, start_col=start_col, end_col=end_col, framerate=framerate))
+            SceneLoader(file=input, start_col=start_col, end_col=end_col, framerate=framerate))
 
         self.options_processed = options_processed_orig
 

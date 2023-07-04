@@ -76,26 +76,6 @@ class FrameRateUnavailable(VideoOpenFailure):
 
 
 ##
-## VideoStream Constants & Helper Functions
-##
-
-# TODO(v0.7): Remove.
-DEFAULT_MIN_WIDTH: int = 256
-
-
-# TODO(v0.7): Remove.
-def compute_downscale_factor(frame_width: int, effective_width: int = DEFAULT_MIN_WIDTH) -> int:
-    """[DEPRECATED] Use :py:func:`scenedetect.scene_manager.compute_downscale_factor` instead."""
-    getLogger('pyscenedetect').error(
-        'This function is deprecated and will be removed. '
-        'Use scenedetect.scene_manager.compute_downscale_factor instead.')
-    assert not (frame_width < 1 or effective_width < 1)
-    if frame_width < effective_width:
-        return 1
-    return frame_width // effective_width
-
-
-##
 ## VideoStream Interface (Base Class)
 ##
 

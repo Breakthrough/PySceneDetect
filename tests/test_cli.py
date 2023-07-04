@@ -34,7 +34,7 @@ from scenedetect.video_splitter import is_ffmpeg_available, is_mkvmerge_availabl
 
 # TODO: These tests are very expensive since they spin up new Python interpreters.
 # Move most of these test cases (e.g. argument validation) to ones that interface directly
-# with the scenedetect.cli module.
+# with the scenedetect._cli module.
 
 SCENEDETECT_CMD = 'python -m scenedetect'
 VIDEO_PATH = 'tests/resources/goldeneye.mp4'

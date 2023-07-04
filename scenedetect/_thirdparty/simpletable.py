@@ -22,7 +22,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-""" ``scenedetect.thirdparty.simpletable`` Module
+""" ``scenedetect._thirdparty.simpletable`` Module
 
 simpletable.py - v0.1 2014-07-31 Matheus Vieira Portela
 

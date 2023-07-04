@@ -6,7 +6,7 @@
 #     [  Docs:   http://manual.scenedetect.scenedetect.com/      ]
 #     [  Github: https://github.com/Breakthrough/PySceneDetect/  ]
 #
-# Copyright (C) 2014-2022 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2014-2023 Brandon Castellano <http://www.bcastell.com>.
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
@@ -58,8 +58,7 @@ class SceneLoader(SceneDetector):
         self.csv_file = file
 
         # Open csv and check and read first row for column headers
-        self.file_reader = self._open_csv(self.csv_file)
-        csv_headers = next(self.file_reader)
+        (self.file_reader, csv_headers) = self._open_csv(self.csv_file, start_col)
 
         # Check to make sure column headers are present
         if start_col not in csv_headers:
@@ -82,21 +81,21 @@ class SceneLoader(SceneDetector):
         # of the next scene as the cut point.
         self._get_next_scene(self.file_reader, self.framerate)
 
-    def _open_csv(self, csv_file):
+    def _open_csv(self, csv_file, start_col):
         """Opens the specified csv file for reading.
 
         Arguments:
             csv_file:       Path to csv file containing scene data for video
 
         Returns:
-            file_reader:    csv.reader object
+            (reader, headers):    csv.reader object and headers
         """
         input_file = open(csv_file, 'r')
-        header_row = input_file.readline()
-        if not header_row.startswith("Timecode List"):
-            input_file.seek(0)
         file_reader = csv.reader(input_file)
-        return file_reader
+        csv_headers = next(file_reader)
+        if not start_col in csv_headers:
+            csv_headers = next(file_reader)
+        return (file_reader, csv_headers)
 
     def _get_next_scene(self, file_reader, framerate=None):
         """Reads the next scene information from the input csv file.

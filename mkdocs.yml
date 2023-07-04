@@ -6,10 +6,6 @@ site_dir: "site"
 
 repo_url: https://github.com/Breakthrough/PySceneDetect
 repo_name: "PySceneDetect on Github"
-<<<<<<< HEAD
-=======
-
->>>>>>> master
 copyright: 'Copyright &copy; 2014-2023 Brandon Castellano.  All rights reserved.<br />Licensed under BSD 3-Clause (see the <a href="https://github.com/Breakthrough/PySceneDetect/blob/master/LICENSE" alt="link to latest LICENSE file on Github">LICENSE file</a> for details).'
 
 theme: readthedocs

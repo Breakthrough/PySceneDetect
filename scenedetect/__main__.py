@@ -16,18 +16,18 @@ Provides entry point for PySceneDetect's command-line interface.
 """
 
 # PySceneDetect Library Imports
-from scenedetect.cli import scenedetect_cli as cli
-from scenedetect.cli.context import CliContext
+from scenedetect._cli import scenedetect_cli as cli
+from scenedetect._cli.context import CliContext
 
 
 def main():
     """PySceneDetect command-line interface (CLI) entry point.
 
     Passes control flow to the CLI parser (using the click library), whose
-    entry point is the decorated scenedetect.cli.scenedetect_cli function.
+    entry point is the decorated scenedetect._cli.scenedetect_cli function.
 
     Once options have been processed, the main program logic is executed in the
-    :py:func:`scenedetect.cli.controller.run_scenedetect` function.
+    :py:func:`scenedetect._cli.controller.run_scenedetect` function.
     """
     cli_ctx = CliContext() # CliContext object passed between CLI commands.
     cli.main(obj=cli_ctx)  # Parse CLI arguments with registered callbacks.

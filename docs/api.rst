@@ -118,29 +118,21 @@ In addition to module-level examples, demonstrations of some common use cases ca
 
 
 =======================================================================
-Migrating From 0.5
+Functions
 =======================================================================
 
-PySceneDetect 0.6 introduces several breaking changes which are incompatible with 0.5. See :ref:`Migration Guide <scenedetect-migration_guide>` for details on how to update your application. In addition, demonstrations of common use cases can be found in the `tests/test_api.py <https://github.com/Breakthrough/PySceneDetect/blob/v0.6.1-release/tests/test_api.py>`_ file.
-
-
-=======================================================================
-Module-Level Functions
-=======================================================================
-
-
-`detect`
-===============================================================
-
-.. autofunction:: scenedetect.detect
-
-`open_video`
-===============================================================
-.. autofunction:: scenedetect.open_video
-
+.. automodule:: scenedetect
+    :members:
 
 =======================================================================
 Logging
 =======================================================================
 
 PySceneDetect outputs messages to a logger named ``pyscenedetect`` which does not have any default handlers. You can use :py:func:`scenedetect.init_logger <scenedetect.platform.init_logger>` with ``show_stdout=True`` or specify a log file (verbosity can also be specified) to attach some common handlers, or use ``logging.getLogger('pyscenedetect')`` and attach log handlers manually.
+
+
+=======================================================================
+Migrating From 0.5
+=======================================================================
+
+PySceneDetect 0.6 introduces several breaking changes which are incompatible with 0.5. See :ref:`Migration Guide <scenedetect-migration_guide>` for details on how to update your application. In addition, demonstrations of common use cases can be found in the `tests/test_api.py <https://github.com/Breakthrough/PySceneDetect/blob/v0.6.1-release/tests/test_api.py>`_ file.

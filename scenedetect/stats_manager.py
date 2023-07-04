@@ -81,6 +81,8 @@ class StatsFileCorrupt(Exception):
 ##
 
 
+# TODO(v1.0): Relax restriction on metric types only being float or int when loading from disk
+# is fully deprecated.
 class StatsManager:
     """Provides a key-value store for frame metrics/calculations which can be used
     for two-pass detection algorithms, as well as saving stats to a CSV file.
@@ -92,8 +94,7 @@ class StatsManager:
     after having called the detect_scenes(...) method on the SceneManager object
     which owns the given StatsManager instance.
 
-    Only metrics consisting of `float` or `int` should be used currently. All metrics loaded
-    from disk are treated as `float`.
+    Only metrics consisting of `float` or `int` should be used currently.
     """
 
     def __init__(self, base_timecode: FrameTimecode = None):

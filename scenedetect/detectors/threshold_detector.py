@@ -31,7 +31,7 @@ logger = getLogger('pyscenedetect')
 ##
 
 
-def compute_frame_average(frame: numpy.ndarray) -> float:
+def _compute_frame_average(frame: numpy.ndarray) -> float:
     """Computes the average pixel value/intensity for all pixels in a frame.
 
     The value is computed by adding up the 8-bit R, G, and B values for
@@ -148,7 +148,7 @@ class ThresholdDetector(SceneDetector):
                 frame_num, self._metric_keys)):
             frame_avg = self.stats_manager.get_metrics(frame_num, self._metric_keys)[0]
         else:
-            frame_avg = compute_frame_average(frame_img)
+            frame_avg = _compute_frame_average(frame_img)
             if self.stats_manager is not None:
                 self.stats_manager.set_metrics(frame_num, {self._metric_keys[0]: frame_avg})
 

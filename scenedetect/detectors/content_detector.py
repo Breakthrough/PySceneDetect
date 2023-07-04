@@ -25,7 +25,7 @@ import cv2
 from scenedetect.scene_detector import SceneDetector
 
 
-def mean_pixel_distance(left: numpy.ndarray, right: numpy.ndarray) -> float:
+def _mean_pixel_distance(left: numpy.ndarray, right: numpy.ndarray) -> float:
     """Return the mean average distance in pixel values between `left` and `right`.
     Both `left and `right` should be 2 dimensional 8-bit images of the same shape.
     """
@@ -35,7 +35,7 @@ def mean_pixel_distance(left: numpy.ndarray, right: numpy.ndarray) -> float:
     return (numpy.sum(numpy.abs(left.astype(numpy.int32) - right.astype(numpy.int32))) / num_pixels)
 
 
-def estimated_kernel_size(frame_width: int, frame_height: int) -> int:
+def _estimated_kernel_size(frame_width: int, frame_height: int) -> int:
     """Estimate kernel size based on video resolution."""
     # TODO: This equation is based on manual estimation from a few videos.
     # Create a more comprehensive test suite to optimize against.
@@ -163,10 +163,10 @@ class ContentDetector(SceneDetector):
             return 0.0
 
         score_components = ContentDetector.Components(
-            delta_hue=mean_pixel_distance(hue, self._last_frame.hue),
-            delta_sat=mean_pixel_distance(sat, self._last_frame.sat),
-            delta_lum=mean_pixel_distance(lum, self._last_frame.lum),
-            delta_edges=(0.0 if edges is None else mean_pixel_distance(
+            delta_hue=_mean_pixel_distance(hue, self._last_frame.hue),
+            delta_sat=_mean_pixel_distance(sat, self._last_frame.sat),
+            delta_lum=_mean_pixel_distance(lum, self._last_frame.lum),
+            delta_edges=(0.0 if edges is None else _mean_pixel_distance(
                 edges, self._last_frame.edges)),
         )
 
@@ -242,7 +242,7 @@ class ContentDetector(SceneDetector):
         """
         # Initialize kernel.
         if self._kernel is None:
-            kernel_size = estimated_kernel_size(lum.shape[1], lum.shape[0])
+            kernel_size = _estimated_kernel_size(lum.shape[1], lum.shape[0])
             self._kernel = numpy.ones((kernel_size, kernel_size), numpy.uint8)
 
         # Estimate levels for thresholding.

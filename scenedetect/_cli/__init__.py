@@ -13,7 +13,7 @@
 """``scenedetect.cli`` Module
 
 This file contains the implementation of the PySceneDetect command-line interface (CLI) parser
-logic for the PySceneDetect application ("business logic"), The main CLI entry-point function is
+logic for the PySceneDetect application ("business logic"). The main CLI entry-point function is
 the function scenedetect_cli, which is a chained command group.
 
 The scenedetect.cli module coordinates first parsing all commands and their options using a
@@ -33,9 +33,9 @@ import scenedetect
 from scenedetect.backends import AVAILABLE_BACKENDS
 from scenedetect.platform import get_system_version_info
 
-from scenedetect.cli.config import CHOICE_MAP, CONFIG_FILE_PATH, CONFIG_MAP
-from scenedetect.cli.context import CliContext, USER_CONFIG
-from scenedetect.cli.controller import run_scenedetect
+from scenedetect._cli.config import CHOICE_MAP, CONFIG_FILE_PATH, CONFIG_MAP
+from scenedetect._cli.context import CliContext, USER_CONFIG
+from scenedetect._cli.controller import run_scenedetect
 
 logger = logging.getLogger('pyscenedetect')
 
