@@ -82,6 +82,7 @@ class FrameRateUnavailable(VideoOpenFailure):
 # TODO(v0.7): Remove.
 DEFAULT_MIN_WIDTH: int = 256
 
+
 # TODO(v0.7): Remove.
 def compute_downscale_factor(frame_width: int, effective_width: int = DEFAULT_MIN_WIDTH) -> int:
     """[DEPRECATED] Use :py:func:`scenedetect.scene_manager.compute_downscale_factor` instead."""
