@@ -39,37 +39,36 @@ logger = logging.getLogger('pyscenedetect')
 def _get_help_command_preface(command_name='scenedetect'):
     """Preface/intro help message shown at the beginning of the help command."""
     return """
-The PySceneDetect command-line interface is grouped into commands which
-can be combined together, each containing its own set of arguments:
+PySceneDetect is a scene cut/transition detection program. PySceneDetect
+takes an input video, runs detection on it, and uses the resulting scene
+information to generate output. The syntax for using PySceneDetect is:
 
- > {command_name} ([options]) [command] ([options]) ([...other command(s)...])
+    {command_name} -i video.mp4 [detector] [commands]
 
-Where [command] is the name of the command, and ([options]) are the
-arguments/options associated with the command, if any. Options
-associated with the {command_name} command below (e.g. --input,
---framerate) must be specified before any commands. The order of
-commands is not strict, but each command should only be specified once.
+For [detector] use `detect-adaptive` or `detect-content` to find fast
+cuts, and `detect-threshold` for fades in/out. Each detector has
+parameters which can be configured.
 
-Commands can also be combined, for example, running the 'detect-content'
-and 'list-scenes' (specifying options for the latter):
+The following [commands] commands can be specified to generate output:
 
- > {command_name} -i vid0001.mp4 detect-content list-scenes -n
+ - export scenes to CSV (`list-scenes`)
+ - split input video (`split-video`)
+ - save images for each scene (`save-images`)
+ - export scenes to HTML (`export-html`)
 
-A list of all commands is printed below. Help for a particular command
-can be printed by specifying 'help [command]', or 'help all' to print
-the help information for every command.
+Usage, options, and examples for detectors/commands can be displayed by:
 
-Lastly, there are several commands used for displaying application
-version and copyright information (e.g. {command_name} about):
+    {command_name} help [command]
 
-    help:    Display help information (e.g. `help [command]`).
-    version: Display version of PySceneDetect being used.
-    about:   Display license and copyright information.
+The order of commands is not strict, but each command should only be
+specified once.
 """.format(command_name=command_name)
 
 
 _COMMAND_DICT = []
 """All commands registered with the CLI. Used for generating help contexts."""
+
+_LINE_SEPARATOR = '-' * 72
 
 
 def _print_command_help(ctx: click.Context, command: click.Command):
@@ -78,7 +77,7 @@ def _print_command_help(ctx: click.Context, command: click.Command):
     ctx_name = ctx.info_name
     ctx.info_name = command.name
     click.echo(click.style('`%s` Command' % command.name, fg='cyan'))
-    click.echo(click.style('----------------------------------------------------', fg='cyan'))
+    click.echo(click.style(_LINE_SEPARATOR, fg='cyan'))
     click.echo(command.get_help(ctx))
     click.echo('')
     ctx.info_name = ctx_name
@@ -86,16 +85,16 @@ def _print_command_help(ctx: click.Context, command: click.Command):
 
 def _print_command_list_header() -> None:
     """Print header shown before the option/command list."""
-    click.echo(click.style('PySceneDetect Options & Commands', fg='green'))
-    click.echo(click.style('----------------------------------------------------', fg='green'))
+    click.echo(click.style('Command Reference', fg='green'))
+    click.echo(click.style(_LINE_SEPARATOR, fg='green'))
     click.echo('')
 
 
 def _print_help_header() -> None:
     """Print header shown before the help command."""
-    click.echo(click.style('----------------------------------------------------', fg='yellow'))
-    click.echo(click.style(' PySceneDetect %s Help' % scenedetect.__version__, fg='yellow'))
-    click.echo(click.style('----------------------------------------------------', fg='yellow'))
+    click.echo(click.style(_LINE_SEPARATOR, fg='yellow'))
+    click.echo(click.style(' PySceneDetect Help', fg='yellow'))
+    click.echo(click.style(_LINE_SEPARATOR, fg='yellow'))
 
 
 @click.group(
@@ -123,35 +122,26 @@ def _print_help_header() -> None:
     (USER_CONFIG.get_help_string("global", "output", show_default=False)),
 )
 @click.option(
+    '--config',
+    '-c',
+    metavar='FILE',
+    type=click.Path(exists=True, file_okay=True, readable=True, resolve_path=False),
+    help='Path to config file. If not set, tries to load one from %s' % (CONFIG_FILE_PATH),
+)
+@click.option(
+    '--stats',
+    '-s',
+    metavar='CSV',
+    type=click.Path(exists=False, file_okay=True, writable=True, resolve_path=False),
+    help='Stats file (.csv) path to write frame metrics. If the file exists, existing metrics will be overwritten. Can be used to find optimal detector options or for data analysis.',
+)
+@click.option(
     '--framerate',
     '-f',
     metavar='FPS',
     type=click.FLOAT,
     default=None,
-    help='Force framerate, in frames/sec (e.g. -f 29.97). Disables check to ensure that all'
-    ' input videos have the same framerates.',
-)
-@click.option(
-    '--downscale',
-    '-d',
-    metavar='N',
-    type=click.INT,
-    default=None,
-    help='Integer factor to downscale frames by (e.g. 2, 3, 4...), where the frame is scaled'
-    ' to width/N x height/N (thus -d 1 implies no downscaling). Leave unset for automatic'
-    ' downscaling based on source resolution.%s' %
-    (USER_CONFIG.get_help_string("global", "downscale", show_default=False)),
-)
-@click.option(
-    '--frame-skip',
-    '-fs',
-    metavar='N',
-    type=click.INT,
-    default=None,
-    help='Skips N frames during processing (-fs 1 skips every other frame, processing 50%%'
-    ' of the video, -fs 2 processes 33%% of the frames, -fs 3 processes 25%%, etc...).'
-    ' Reduces processing speed at expense of accuracy.%s' %
-    USER_CONFIG.get_help_string("global", "frame-skip"),
+    help='Override framerate with value as frames/sec (e.g. `-f 29.97`).',
 )
 @click.option(
     '--min-scene-len',
@@ -167,25 +157,47 @@ def _print_help_header() -> None:
     '--drop-short-scenes',
     is_flag=True,
     flag_value=True,
-    help='Drop scenes shorter than `min-scene-len` instead of combining them with neighbors.%s' %
+    help='Drop scenes shorter than `--min-scene-len` instead of combining them with neighbors.%s' %
     (USER_CONFIG.get_help_string('global', 'drop-short-scenes')),
 )
 @click.option(
     '--merge-last-scene',
     is_flag=True,
     flag_value=True,
-    help='Merge last scene with previous if shorter than min-scene-len.%s' %
+    help='Merge last scene with previous if shorter than `--min-scene-len`.%s' %
     (USER_CONFIG.get_help_string('global', 'merge-last-scene')),
 )
 @click.option(
-    '--stats',
-    '-s',
-    metavar='CSV',
-    type=click.Path(exists=False, file_okay=True, writable=True, resolve_path=False),
-    help='Path to stats file (.csv) for writing frame metrics to. If the file exists, any'
-    ' metrics will be processed, otherwise a new file will be created. Can be used to determine'
-    ' optimal values for various scene detector options, and to cache frame calculations in order'
-    ' to speed up multiple detection runs.',
+    '--backend',
+    '-b',
+    metavar='BACKEND',
+    type=click.Choice(CHOICE_MAP["global"]["backend"]),
+    default=None,
+    help='Backend to use for video input. Backend options can be set using a config file'
+    ' (`-c`/`--config`). [available: %s]%s.' %
+    (', '.join(AVAILABLE_BACKENDS.keys()), USER_CONFIG.get_help_string("global", "backend")),
+)
+@click.option(
+    '--downscale',
+    '-d',
+    metavar='N',
+    type=click.INT,
+    default=None,
+    help='Integer factor to downscale video by (e.g. 2, 3, 4...) before processing. Frame is scaled'
+    ' to width/N x height/N. If unset, value is auto selected based on resolution. Set to 1 to'
+    ' disable downscaling.%s' %
+    (USER_CONFIG.get_help_string("global", "downscale", show_default=False)),
+)
+@click.option(
+    '--frame-skip',
+    '-fs',
+    metavar='N',
+    type=click.INT,
+    default=None,
+    help='Skips N frames during processing (-fs 1 skips every other frame, processing 50%%'
+    ' of the video, -fs 2 processes 33%% of the frames, -fs 3 processes 25%%, etc...).'
+    ' Reduces processing speed at expense of accuracy.%s' %
+    USER_CONFIG.get_help_string("global", "frame-skip"),
 )
 @click.option(
     '--verbosity',
@@ -213,51 +225,26 @@ def _print_help_header() -> None:
     flag_value=True,
     help='Suppresses all output of PySceneDetect to the terminal/stdout. Equivalent to `-v none`.',
 )
-@click.option(
-    '--backend',
-    '-b',
-    metavar='BACKEND',
-    type=click.Choice(CHOICE_MAP["global"]["backend"]),
-    default=None,
-    help='Backend to use for video input. Backends can be configured using -c/--config. Backends'
-    ' available on this system: %s.%s.' %
-    (', '.join(AVAILABLE_BACKENDS.keys()), USER_CONFIG.get_help_string("global", "backend")),
-)
-@click.option(
-    '--config',
-    '-c',
-    metavar='FILE',
-    type=click.Path(exists=True, file_okay=True, readable=True, resolve_path=False),
-    help='Path to config file. If not set, tries to load one from %s' % (CONFIG_FILE_PATH),
-)
 @click.pass_context
 # pylint: disable=redefined-builtin
 def scenedetect_cli(
     ctx: click.Context,
     input: Optional[AnyStr],
     output: Optional[AnyStr],
+    stats: Optional[AnyStr],
+    config: Optional[AnyStr],
     framerate: Optional[float],
-    downscale: Optional[int],
-    frame_skip: Optional[int],
     min_scene_len: Optional[str],
     drop_short_scenes: bool,
     merge_last_scene: bool,
-    stats: Optional[AnyStr],
+    backend: Optional[str],
+    downscale: Optional[int],
+    frame_skip: Optional[int],
     verbosity: Optional[str],
     logfile: Optional[AnyStr],
     quiet: bool,
-    backend: Optional[str],
-    config: Optional[AnyStr],
 ):
-    """For example:
-
-    scenedetect -i video.mp4 -s video.stats.csv detect-content list-scenes
-
-    Note that the following options represent [OPTIONS] above. To list the optional
-    [ARGS] for a particular COMMAND, type `scenedetect help COMMAND`. You can also
-    combine commands (e.g. scenedetect [...] detect-content save-images --png split-video).
-
-
+    """
     """
     assert isinstance(ctx.obj, CliContext)
     ctx.call_on_close(lambda: run_scenedetect(ctx.obj))
@@ -322,9 +309,9 @@ def help_command(ctx: click.Context, command_name: str):
         click.echo(_get_help_command_preface(ctx.parent.info_name))
         _print_command_list_header()
         click.echo(ctx.parent.get_help())
-        click.echo("\nType '%s help [command]' for usage/help of [command], or" %
+        click.echo("\nType `%s help [command]` for examples and config options" %
                    ctx.parent.info_name)
-        click.echo("'%s help all' to list usage information for every command." %
+        click.echo("for [command], or `%s help all` for full command reference." %
                    (ctx.parent.info_name))
     ctx.exit()
 
@@ -336,9 +323,9 @@ def about_command(ctx: click.Context):
     assert isinstance(ctx.obj, CliContext)
     ctx.obj.process_input_flag = False
     click.echo('')
-    click.echo(click.style('----------------------------------------------------', fg='cyan'))
+    click.echo(click.style(_LINE_SEPARATOR, fg='cyan'))
     click.echo(click.style(' About PySceneDetect %s' % scenedetect.__version__, fg='yellow'))
-    click.echo(click.style('----------------------------------------------------', fg='cyan'))
+    click.echo(click.style(_LINE_SEPARATOR, fg='cyan'))
     click.echo(scenedetect.ABOUT_STRING)
     ctx.exit()
 
@@ -403,11 +390,11 @@ def time_command(
 ):
     """Set start/end/duration of input video.
 
-    Time values can be specified as frames (NNNN), seconds (NNNN.NNs), or as
-    a timecode (HH:MM:SS.nnn). For example, to start scene detection at 1 minute,
-    and stop after 100 seconds:
+Values can be specified as frames (NNNN), seconds (NNNN.NNs), or timecode (HH:MM:SS.nnn). For example, to process only the first minute of a video:
 
-    time --start 00:01:00 --duration 100s
+    time --end 00:01:00
+
+    time --duration 60s
 
     Note that --end and --duration are mutually exclusive (i.e. only one of the two
     can be set). Lastly, the following is an example using absolute frame numbers
@@ -713,46 +700,35 @@ Examples:
     multiple=False,
     metavar='FILE',
     type=click.Path(exists=True, file_okay=True, readable=True, resolve_path=True),
-    help='Scene list similar to format of `list-scenes`. Requires a start/end time or frame number '
-    'column for each scene.')
+    help='Scene list to read cut information from.')
 @click.option(
-    '--start-col',
-    '-s',
+    '--cut-col-name',
+    '-c',
     metavar='STRING',
     type=click.STRING,
     default=None,
-    help='Name of column used to mark scene start points.')
-@click.option(
-    '--end-col',
-    '-e',
-    metavar='STRING',
-    type=click.STRING,
-    default=None,
-    help='Name of column used to mark scene end points.')
+    help='Name of column used to mark scene cuts.')
 @click.option(
     '--framerate',
     '-f',
     metavar='FPS',
     type=click.FLOAT,
     default=None,
-    help='Override framerate to use when doing timecode to frame number conversion.')
+    help='Override framerate to use when performing timecode to frame number conversion.')
 @click.pass_context
-def load_scenes_command(ctx: click.Context, input: Optional[str], start_col: Optional[str],
-                        end_col: Optional[str], framerate: Optional[float]):
-    """A detector that is used to read an input csv file and only detect the scenes from the given
-    input file. Useful for instances in which a csv file is manually edited and then used to split
-    the video based on the manually edited csv file.
+def load_scenes_command(ctx: click.Context, input: Optional[str], cut_col_name: Optional[str],
+                        framerate: Optional[float]):
+    """Load scenes from CSV generated by `list-scenes`. Only the start time column is required.
 
-    Examples:
+Examples:
 
-        load-scenes -i scenes.csv
+    load-scenes -i scenes.csv
 
-        load-scenes -i scenes.csv -s 'Start Timecode' -f 30
+    load-scenes -i scenes.csv --cut-col-name "Start Timecode"
     """
     assert isinstance(ctx.obj, CliContext)
 
-    ctx.obj.handle_load_scenes(
-        input=input, start_col=start_col, end_col=end_col, framerate=framerate)
+    ctx.obj.handle_load_scenes(input=input, cut_col_name=cut_col_name, framerate=framerate)
 
 
 @click.command('export-html')

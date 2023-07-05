@@ -29,22 +29,18 @@ from scenedetect.frame_timecode import FrameTimecode
 
 
 class SceneLoader(SceneDetector):
-    """Used for cases in which scenes are read from a csv file. Does not
-    actually detect scene boundaries.
-
-    Incompatible with other detectors.
+    """Detector which load a list of predefined cuts from a CSV file. Used by the CLI to implement
+    the `load-scenes` functionality. Incompatible with other detectors.
     """
 
-    def __init__(self, file=None, start_col="Start Frame", end_col="End Frame", framerate=None):
+    def __init__(self, file=None, cut_col_name="Start Frame", framerate=None):
         """
         Arguments:
             file:   Path to csv file containing scene data for video
-            start_col:  Header for the column containing the frame or timecode for the beginning of
-                each scene
-            end_col:    Optional header for the column containing the frame or timecode for the end
-                of each scene.
-            framerate:  Framerate for the input video, used for handling timecode <-> frame number
-                conversions if timecodes are used as input for marking cut points
+            cut_col_name:  Header for the column containing the frame or timecode where new scenes
+                should start.
+            framerate:  Framerate for the input video, used for handling timecode to frame number
+                conversions. Only used if timecodes are used as input for cut points.
         """
         super().__init__()
         self.framerate = framerate
@@ -58,30 +54,22 @@ class SceneLoader(SceneDetector):
         self.csv_file = file
 
         # Open csv and check and read first row for column headers
-        (self.file_reader, csv_headers) = self._open_csv(self.csv_file, start_col)
+        (self.file_reader, csv_headers) = self._open_csv(self.csv_file, cut_col_name)
 
         # Check to make sure column headers are present
-        if start_col not in csv_headers:
+        if cut_col_name not in csv_headers:
             raise ValueError('specified column header for scene start is not present')
-        if end_col not in csv_headers:
-            raise ValueError('specified column header for scene end is not present')
 
-        self.start_col = start_col
-        self.start_col_idx = csv_headers.index(start_col)
-        self.end_col = end_col
-        self.end_col_idx = csv_headers.index(end_col)
-
-        self._last_scene_cut = None
+        self._col_idx = csv_headers.index(cut_col_name)
         self._last_scene_row = None
         self._scene_start = None
-        self._scene_end = None
 
         self._get_next_scene(self.file_reader, self.framerate)
         # PySceneDetect works on cuts, so we have to skip the first scene and use the first frame
         # of the next scene as the cut point.
         self._get_next_scene(self.file_reader, self.framerate)
 
-    def _open_csv(self, csv_file, start_col):
+    def _open_csv(self, csv_file, cut_col_name):
         """Opens the specified csv file for reading.
 
         Arguments:
@@ -93,7 +81,7 @@ class SceneLoader(SceneDetector):
         input_file = open(csv_file, 'r')
         file_reader = csv.reader(input_file)
         csv_headers = next(file_reader)
-        if not start_col in csv_headers:
+        if not cut_col_name in csv_headers:
             csv_headers = next(file_reader)
         return (file_reader, csv_headers)
 
@@ -113,12 +101,9 @@ class SceneLoader(SceneDetector):
 
         if framerate:
             self._scene_start = FrameTimecode(
-                self._last_scene_row[self.start_col_idx], fps=self.framerate).frame_num
-            self._scene_end = FrameTimecode(
-                self._last_scene_row[self.end_col_idx], fps=self.framerate).frame_num
+                self._last_scene_row[self._col_idx], fps=self.framerate).frame_num
         else:
-            self._scene_start = int(self._last_scene_row[self.start_col_idx]) - 1
-            self._scene_end = int(self._last_scene_row[self.end_col_idx]) - 1
+            self._scene_start = int(self._last_scene_row[self._col_idx]) - 1
 
     def process_frame(self, frame_num: int, frame_img: numpy.ndarray) -> List[int]:
         """Simply reads cut data from a given csv file. Video is not analyzed. Therefore this
