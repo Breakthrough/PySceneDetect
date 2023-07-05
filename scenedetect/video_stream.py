@@ -10,10 +10,10 @@
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
-""" ``scenedetect.video_stream`` Module
+"""``scenedetect.video_stream`` Module
 
-This module contains the :py:class:`VideoStream` class, which provides a library agnostic
-interface for video input. To open a video by path, use :py:func:`scenedetect.open_video`:
+This module contains the :class:`VideoStream` class, which provides a library agnostic
+interface for video input. To open a video by path, use :func:`scenedetect.open_video`:
 
 .. code:: python
 
@@ -26,9 +26,9 @@ interface for video input. To open a video by path, use :py:func:`scenedetect.op
     print("Read %d frames" % video.frame_number)
 
 You can also optionally specify a framerate and a specific backend library to use. Unless specified,
-OpenCV will be used as the video backend. See :py:mod:`scenedetect.backends` for a detailed example.
+OpenCV will be used as the video backend. See :mod:`scenedetect.backends` for a detailed example.
 
-New :py:class:`VideoStream <scenedetect.video_stream.VideoStream>` implementations can be
+New :class:`VideoStream <scenedetect.video_stream.VideoStream>` implementations can be
 tested by adding it to the test suite in `tests/test_video_stream.py`.
 """
 

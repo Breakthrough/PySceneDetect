@@ -10,10 +10,10 @@
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
-""":py:class:`VideoStreamCv2` is backed by the OpenCV `VideoCapture` object. This is the default
+""":class:`VideoStreamCv2` is backed by the OpenCV `VideoCapture` object. This is the default
 backend. Works with video files, image sequences, and network streams/URLs.
 
-For wrapping input devices or pipes, there is also :py:class:`VideoCaptureAdapter` which can be
+For wrapping input devices or pipes, there is also :class:`VideoCaptureAdapter` which can be
 constructed from an existing `cv2.VideoCapture`. This allows performing scene detection on inputs
 which do not support seeking.
 """
@@ -460,7 +460,7 @@ class VideoCaptureAdapter(VideoStream):
 
     @property
     def position(self) -> FrameTimecode:
-        """Current position within stream as FrameTimecode. Use the :py:meth:`position_ms`
+        """Current position within stream as FrameTimecode. Use the :meth:`position_ms`
         if an accurate duration of elapsed time is required, as `position` is currently
         based off of the number of frames, and may not be accurate for devicesor live streams.
 

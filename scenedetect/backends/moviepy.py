@@ -10,7 +10,7 @@
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
-""":py:class:`VideoStreamMoviePy` provides an adapter for MoviePy's `FFMPEG_VideoReader`.
+""":class:`VideoStreamMoviePy` provides an adapter for MoviePy's `FFMPEG_VideoReader`.
 
 Uses string identifier ``'moviepy'``.
 

@@ -10,10 +10,7 @@
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
-"""``scenedetect.__main__`` Module
-
-Provides entry point for PySceneDetect's command-line interface.
-"""
+"""Entry point for PySceneDetect's command-line interface."""
 
 # PySceneDetect Library Imports
 from scenedetect._cli import scenedetect_cli as cli
@@ -27,7 +24,7 @@ def main():
     entry point is the decorated scenedetect._cli.scenedetect_cli function.
 
     Once options have been processed, the main program logic is executed in the
-    :py:func:`scenedetect._cli.controller.run_scenedetect` function.
+    :func:`scenedetect._cli.controller.run_scenedetect` function.
     """
     cli_ctx = CliContext() # CliContext object passed between CLI commands.
     cli.main(obj=cli_ctx)  # Parse CLI arguments with registered callbacks.

@@ -30,7 +30,6 @@ version = '0.6.2'
 # The full version, including alpha/beta/rc tags
 release = 'v0.6.2.dev0'
 
-
 # -- General configuration ---------------------------------------------------
 
 # Add any Sphinx extension module names here, as strings. They can be

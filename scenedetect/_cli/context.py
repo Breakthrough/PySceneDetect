@@ -10,10 +10,7 @@
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
-""" ``scenedetect.cli.context`` Module
-
-This module contains :py:class:`CliContext` which encapsulates the command-line options.
-"""
+"""Context of which command-line options and config settings the user provided."""
 
 import logging
 import os

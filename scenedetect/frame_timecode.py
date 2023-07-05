@@ -12,18 +12,18 @@
 #
 """``scenedetect.frame_timecode`` Module
 
-This module contains the :py:class:`FrameTimecode` object, which is used as a way for PySceneDetect
-to store frame-accurate timestamps of each cut. This is done by also specifying the video framerate
-with the timecode, allowing a frame number to be converted to/from a floating-point number of
-seconds, or string in the form `"HH:MM:SS[.nnn]"` where the `[.nnn]` part is optional.
+This module implements :class:`FrameTimecode` which is used as a way for PySceneDetect to store
+frame-accurate timestamps of each cut. This is done by also specifying the video framerate with the
+timecode, allowing a frame number to be converted to/from a floating-point number of seconds, or
+string in the form `"HH:MM:SS[.nnn]"` where the `[.nnn]` part is optional.
 
-See the following examples, or the :py:class:`FrameTimecode constructor <FrameTimecode>`.
+See the following examples, or the :class:`FrameTimecode constructor <FrameTimecode>`.
 
 ===============================================================
 Usage Examples
 ===============================================================
 
-A :py:class:`FrameTimecode` can be created by specifying a timecode (`int` for number of frames,
+A :class:`FrameTimecode` can be created by specifying a timecode (`int` for number of frames,
 `float` for number of seconds, or `str` in the form "HH:MM:SS" or "HH:MM:SS.nnn") with a framerate:
 
 .. code:: python
@@ -33,7 +33,7 @@ A :py:class:`FrameTimecode` can be created by specifying a timecode (`int` for n
     timecode_str = FrameTimecode(timecode = "00:00:10.000", fps = 10.0)
 
 
-Arithmetic/comparison operations with :py:class:`FrameTimecode` objects is also possible, and the
+Arithmetic/comparison operations with :class:`FrameTimecode` objects is also possible, and the
 other operand can also be of the above types:
 
 .. code:: python
@@ -47,12 +47,12 @@ other operand can also be of the above types:
     print((x + 10.0) == "00:01:10.000")
 
 
-:py:class:`FrameTimecode` objects can be added and subtracted, however the current implementation
+:class:`FrameTimecode` objects can be added and subtracted, however the current implementation
 disallows negative values, and will clamp negative results to 0.
 
 .. warning::
 
-    Be careful when subtracting :py:class:`FrameTimecode` objects or adding negative
+    Be careful when subtracting :class:`FrameTimecode` objects or adding negative
     amounts of frames/seconds. In the example below, ``c`` will be at frame 0 since
     ``b > a``, but ``d`` will be at frame 5:
 
@@ -145,9 +145,9 @@ class FrameTimecode:
         """Get the current time/position in number of frames.  This is the
         equivalent of accessing the self.frame_num property (which, along
         with the specified framerate, forms the base for all of the other
-        time measurement calculations, e.g. the :py:meth:`get_seconds` method).
+        time measurement calculations, e.g. the :meth:`get_seconds` method).
 
-        If using to compare a :py:class:`FrameTimecode` with a frame number,
+        If using to compare a :class:`FrameTimecode` with a frame number,
         you can do so directly against the object (e.g. ``FrameTimecode(10, 10.0) <= 10``).
 
         Returns:
@@ -169,7 +169,7 @@ class FrameTimecode:
 
         Arguments:
             fps: Framerate to compare against within the precision constant defined in this module
-                (see :py:data:`MAX_FPS_DELTA`).
+                (see :data:`MAX_FPS_DELTA`).
         Returns:
             bool: True if passed fps matches the FrameTimecode object's framerate, False otherwise.
 
@@ -180,7 +180,7 @@ class FrameTimecode:
     def get_seconds(self) -> float:
         """Get the frame's position in number of seconds.
 
-        If using to compare a :py:class:`FrameTimecode` with a frame number,
+        If using to compare a :class:`FrameTimecode` with a frame number,
         you can do so directly against the object (e.g. ``FrameTimecode(10, 10.0) <= 1.0``).
 
         Returns:

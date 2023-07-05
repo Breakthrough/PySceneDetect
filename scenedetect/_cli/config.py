@@ -10,9 +10,7 @@
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
-"""``scenedetect.cli.config`` Module
-
-Handles loading configuration files from disk and validating each section. Only validation of the
+"""Handles loading configuration files from disk and validating each section. Only validation of the
 config file schema and data types are performed. Constants/defaults are also defined here where
 possible and re-used by the CLI so that there is one source of truth.
 """

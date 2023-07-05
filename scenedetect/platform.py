@@ -10,7 +10,7 @@
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
-""" ``scenedetect.platform`` Module
+"""``scenedetect.platform`` Module
 
 This moduke contains all platform/library specific compatibility fixes, as well as some utility
 functions to handle logging and invoking external commands.

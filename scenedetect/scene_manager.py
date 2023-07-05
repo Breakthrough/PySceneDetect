@@ -10,21 +10,21 @@
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
-""" ``scenedetect.scene_manager`` Module
+"""``scenedetect.scene_manager`` Module
 
-This module implements :py:class:`SceneManager`, coordinates running a
-:py:mod:`SceneDetector <scenedetect.detectors>` over the frames of a video
-(:py:mod:`VideoStream <scenedetect.video_stream>`). Video decoding is done in a separate thread to
+This module implements :class:`SceneManager`, coordinates running a
+:mod:`SceneDetector <scenedetect.detectors>` over the frames of a video
+(:mod:`VideoStream <scenedetect.video_stream>`). Video decoding is done in a separate thread to
 improve performance.
 
-This module also contains other helper functions (e.g. :py:func:`save_images`) which can be used to
+This module also contains other helper functions (e.g. :func:`save_images`) which can be used to
 process the resulting scene list.
 
 ===============================================================
 Usage
 ===============================================================
 
-The following example shows basic usage of a :py:class:`SceneManager`:
+The following example shows basic usage of a :class:`SceneManager`:
 
 .. code:: python
 
@@ -54,7 +54,7 @@ An optional callback can also be invoked on each detected scene, for example:
     scene_manager.detect_scenes(video=video, callback=on_new_scene)
 
 To use a `SceneManager` with a webcam/device or existing `cv2.VideoCapture` device, use the
-:py:class:`VideoCaptureAdapter <scenedetect.backends.opencv.VideoCaptureAdapter>` instead of
+:class:`VideoCaptureAdapter <scenedetect.backends.opencv.VideoCaptureAdapter>` instead of
 `open_video`.
 
 =======================================================================
@@ -62,7 +62,7 @@ Storing Per-Frame Statistics
 =======================================================================
 
 `SceneManager` can use an optional
-:py:class:`StatsManager <scenedetect.stats_manager.StatsManager>` to save frame statistics to disk:
+:class:`StatsManager <scenedetect.stats_manager.StatsManager>` to save frame statistics to disk:
 
 .. code:: python
 
@@ -159,8 +159,8 @@ def get_scenes_from_cuts(
     """Returns a list of tuples of start/end FrameTimecodes for each scene based on a
     list of detected scene cuts/breaks.
 
-    This function is called when using the :py:meth:`SceneManager.get_scene_list` method.
-    The scene list is generated from a cutting list (:py:meth:`SceneManager.get_cut_list`),
+    This function is called when using the :meth:`SceneManager.get_scene_list` method.
+    The scene list is generated from a cutting list (:meth:`SceneManager.get_cut_list`),
     noting that each scene is contiguous, starting from the first to last frame of the input.
     If `cut_list` is empty, the resulting scene will span from `start_pos` to `end_pos`.
 
@@ -537,11 +537,9 @@ def save_images(scene_list: List[Tuple[FrameTimecode, FrameTimecode]],
 
 
 class SceneManager:
-    """The SceneManager facilitates detection of scenes via the :py:meth:`detect_scenes`
-    method, given a video source (:py:class:`VideoStream <scenedetect.video.VideoStream>`),
-    and SceneDetector algorithms added via the :py:meth:`add_detector` method. Scene
-    detection is performed in parallel with decoding the video by reading frames from the
-    `VideoStream` in a background thread.
+    """The SceneManager facilitates detection of scenes (:meth:`detect_scenes`) on a video
+    (:class:`VideoStream <scenedetect.video_stream.VideoStream>`) using a detector
+    (:meth:`add_detector`). Video decoding is done in parallel in a background thread.
     """
 
     def __init__(
@@ -550,7 +548,7 @@ class SceneManager:
     ):
         """
         Arguments:
-            stats_manager: :py:class:`StatsManager` to bind to this `SceneManager`. Can be
+            stats_manager: :class:`StatsManager` to bind to this `SceneManager`. Can be
                 accessed via the `stats_manager` property of the resulting object to save to disk.
         """
         self._cutting_list = []
@@ -766,7 +764,7 @@ class SceneManager:
             self._cutting_list += detector.post_process(frame_num)
 
     def stop(self) -> None:
-        """Stop the current :py:meth:`detect_scenes` call, if any. Thread-safe."""
+        """Stop the current :meth:`detect_scenes` call, if any. Thread-safe."""
         self._stop.set()
 
     def detect_scenes(self,
@@ -778,12 +776,12 @@ class SceneManager:
                       callback: Optional[Callable[[np.ndarray, int], None]] = None,
                       frame_source: Optional[VideoStream] = None) -> int:
         """Perform scene detection on the given video using the added SceneDetectors, returning the
-        number of frames processed. Results can be obtained by calling :py:meth:`get_scene_list` or
-        :py:meth:`get_cut_list`.
+        number of frames processed. Results can be obtained by calling :meth:`get_scene_list` or
+        :meth:`get_cut_list`.
 
         Video decoding is performed in a background thread to allow scene detection and frame
         decoding to happen in parallel. Detection will continue until no more frames are left,
-        the specified duration or end time has been reached, or :py:meth:`stop` was called.
+        the specified duration or end time has been reached, or :meth:`stop` was called.
 
         Arguments:
             video: VideoStream obtained from either `scenedetect.open_video`, or by creating

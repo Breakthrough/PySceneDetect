@@ -10,17 +10,17 @@
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
-""" ``scenedetect.backends`` Module
+"""``scenedetect.backends`` Module
 
-This module contains :py:class:`VideoStream <scenedetect.video_stream.VideoStream>` implementations
+This module contains :class:`VideoStream <scenedetect.video_stream.VideoStream>` implementations
 backed by various Python multimedia libraries. In addition to creating backend objects directly,
-:py:func:`scenedetect.open_video` can be used to open a video with a specified backend, falling
+:func:`scenedetect.open_video` can be used to open a video with a specified backend, falling
 back to OpenCV if not available.
 
-All backends available on the current system can be found via :py:data:`AVAILABLE_BACKENDS`.
+All backends available on the current system can be found via :data:`AVAILABLE_BACKENDS`.
 
 If you already have a `cv2.VideoCapture` object you want to use for scene detection, you can
-use a :py:class:`VideoCaptureAdapter <scenedetect.backends.opencv.VideoCaptureAdapter>` instead
+use a :class:`VideoCaptureAdapter <scenedetect.backends.opencv.VideoCaptureAdapter>` instead
 of a backend. This is useful when working with devices or streams, for example.
 
 ===============================================================
@@ -28,15 +28,15 @@ Video Files
 ===============================================================
 
 Assuming we have a file `video.mp4` in our working directory, we can load it and perform scene
-detection on it using :py:func:`open_video`:
+detection on it using :func:`open_video`:
 
 .. code:: python
 
     from scenedetect import open_video
     video = open_video('video.mp4')
 
-An optional backend from :py:data:`AVAILABLE_BACKENDS` can be passed to :py:func:`open_video`
-(e.g. `backend='opencv'`). Additional keyword arguments passed to :py:func:`open_video`
+An optional backend from :data:`AVAILABLE_BACKENDS` can be passed to :func:`open_video`
+(e.g. `backend='opencv'`). Additional keyword arguments passed to :func:`open_video`
 will be forwarded to the backend constructor. If the specified backend is unavailable, or
 loading the video fails, ``opencv`` will be tried as a fallback.
 
@@ -49,15 +49,15 @@ Lastly, to use a specific backend directly:
     video = VideoStreamCv2('video.mp4')
 
 In both examples above, the resulting ``video`` can be used with
-:py:meth:`SceneManager.detect_scenes() <scenedetect.scene_manager.SceneManager.detect_scenes>`.
+:meth:`SceneManager.detect_scenes() <scenedetect.scene_manager.SceneManager.detect_scenes>`.
 
 ===============================================================
 Devices / Cameras / Pipes
 ===============================================================
 
 You can use an existing `cv2.VideoCapture` object with the PySceneDetect API using a
-:py:class:`VideoCaptureAdapter <scenedetect.backends.opencv.VideoCaptureAdapter>`. For example,
-to use a :py:class:`SceneManager <scenedetect.scene_manager.SceneManager>` with a webcam device:
+:class:`VideoCaptureAdapter <scenedetect.backends.opencv.VideoCaptureAdapter>`. For example,
+to use a :class:`SceneManager <scenedetect.scene_manager.SceneManager>` with a webcam device:
 
 .. code:: python
 
@@ -72,8 +72,8 @@ to use a :py:class:`SceneManager <scenedetect.scene_manager.SceneManager>` with 
     scene_manager.detect_scenes(video=video, duration=total_frames)
 
 When working with live inputs, note that you can pass a callback to
-:py:meth:`detect_scenes() <scenedetect.scene_manager.SceneManager.detect_scenes>` to be
-called on every scene detection event. See the :py:mod:`SceneManager <scenedetect.scene_manager>`
+:meth:`detect_scenes() <scenedetect.scene_manager.SceneManager.detect_scenes>` to be
+called on every scene detection event. See the :mod:`SceneManager <scenedetect.scene_manager>`
 examples for details.
 """
 
@@ -99,6 +99,7 @@ try:
 except ImportError:
     VideoStreamMoviePy = None
 
+# TODO(v0.6.3): Replace this with a function named `get_available_backends`.
 AVAILABLE_BACKENDS: Dict[str, Type] = {
     backend.BACKEND_NAME: backend for backend in filter(None, [
         VideoStreamCv2,
@@ -106,7 +107,7 @@ AVAILABLE_BACKENDS: Dict[str, Type] = {
         VideoStreamMoviePy,
     ])
 }
-"""All available backends that :py:func:`scenedetect.open_video` can consider for the `backend`
+"""All available backends that :func:`scenedetect.open_video` can consider for the `backend`
 parameter. These backends must support construction with the following signature:
 
     BackendType(path: str, framerate: Optional[float])

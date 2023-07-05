@@ -10,7 +10,7 @@
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
-""":py:class:`SceneLoader` is a class designed for use cases in which a list of
+""":class:`SceneLoader` is a class designed for use cases in which a list of
 scenes is read from a csv file and actual detection of scene boundaries does not
 need to occur.
 

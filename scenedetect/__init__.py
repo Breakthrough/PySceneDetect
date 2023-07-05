@@ -10,8 +10,10 @@
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
-"""The main ``scenedetect`` module contains imports of commonly used classes, and some high level
-functions to simplify common use cases (e.g. :py:func:`detect` and :py:func:`open_video`).
+"""The ``scenedetect`` module comes with helper functions to simplify common use cases.
+:func:`detect` can be used to perform scene detection on a video by path.  :func:`open_video`
+can be used to open a video for a
+:class:`SceneManager <scenedetect.scene_manager.SceneManager>`.
 """
 
 from logging import getLogger
@@ -115,7 +117,7 @@ def open_video(
         path: Path to video file to open.
         framerate: Overrides detected framerate if set.
         backend: Name of specific backend to use, if possible. See
-            :py:data:`scenedetect.backends.AVAILABLE_BACKENDS` for backends available on the current
+            :data:`scenedetect.backends.AVAILABLE_BACKENDS` for backends available on the current
             system. If the backend fails to open the video, OpenCV will be used as a fallback.
         kwargs: Optional named arguments to pass to the specified `backend` constructor for
             overriding backend-specific options.
@@ -124,7 +126,7 @@ def open_video(
         Backend object created with the specified video path.
 
     Raises:
-        :py:class:`VideoOpenFailure`: Constructing the VideoStream fails. If multiple backends have
+        :class:`VideoOpenFailure`: Constructing the VideoStream fails. If multiple backends have
             been attempted, the error from the first backend will be returned.
     """
     last_error: Exception = None
@@ -168,7 +170,7 @@ def detect(
 
     Arguments:
         video_path: Path to input video (absolute or relative to working directory).
-        detector: A `SceneDetector` instance (see :py:mod:`scenedetect.detectors` for a full list
+        detector: A `SceneDetector` instance (see :mod:`scenedetect.detectors` for a full list
             of detectors).
         stats_file_path: Path to save per-frame metrics to for statistical analysis or to
             determine a better threshold value.
@@ -184,11 +186,11 @@ def detect(
             will always be included until the first fade-out event is detected.
 
     Returns:
-        List of scenes (pairs of :py:class:`FrameTimecode` objects).
+        List of scenes (pairs of :class:`FrameTimecode` objects).
 
     Raises:
-        :py:class:`VideoOpenFailure`: `video_path` could not be opened.
-        :py:class:`StatsFileCorrupt`: `stats_file_path` is an invalid stats file
+        :class:`VideoOpenFailure`: `video_path` could not be opened.
+        :class:`StatsFileCorrupt`: `stats_file_path` is an invalid stats file
         ValueError: `start_time` or `end_time` are incorrectly formatted.
         TypeError: `start_time` or `end_time` are invalid types.
     """

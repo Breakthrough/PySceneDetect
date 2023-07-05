@@ -361,7 +361,7 @@ class VideoManager(VideoStream):
 
         The timecode returned by this method can be used to perform arithmetic (e.g.
         addition), passing the resulting values back to the VideoManager (e.g. for the
-        :py:meth:`set_duration()` method), as the framerate of the returned FrameTimecode
+        :meth:`set_duration()` method), as the framerate of the returned FrameTimecode
         object matches that of the VideoManager.
 
         As such, this method is equivalent to creating a FrameTimecode at frame 0 with
@@ -409,9 +409,9 @@ class VideoManager(VideoStream):
                      start_time: Optional[FrameTimecode] = None,
                      end_time: Optional[FrameTimecode] = None) -> None:
         """ Set Duration - sets the duration/length of the video(s) to decode, as well as
-        the start/end times.  Must be called before :py:meth:`start()` is called, otherwise
+        the start/end times.  Must be called before :meth:`start()` is called, otherwise
         a VideoDecodingInProgress exception will be thrown.  May be called after
-        :py:meth:`reset()` as well.
+        :meth:`reset()` as well.
 
         Arguments:
             duration (Optional[FrameTimecode]): The (maximum) duration in time to
@@ -464,7 +464,7 @@ class VideoManager(VideoStream):
         """ Get Duration - gets the duration/length of the video(s) to decode,
         as well as the start/end times.
 
-        If the end time was not set by :py:meth:`set_duration()`, the end timecode
+        If the end time was not set by :meth:`set_duration()`, the end timecode
         is calculated as the start timecode + total duration.
 
         Returns:
@@ -482,8 +482,8 @@ class VideoManager(VideoStream):
         decoder process has already been started.
 
         Raises:
-            VideoDecodingInProgress: Must call :py:meth:`stop()` before this
-                method if :py:meth:`start()` has already been called after
+            VideoDecodingInProgress: Must call :meth:`stop()` before this
+                method if :meth:`start()` has already been called after
                 initial construction.
         """
         if self._started:
@@ -502,7 +502,7 @@ class VideoManager(VideoStream):
         """Seek forwards to the passed timecode.
 
         Only supports seeking forwards (i.e. timecode must be greater than the
-        current position).  Can only be used after the :py:meth:`start()`
+        current position).  Can only be used after the :meth:`start()`
         method has been called.
 
         Arguments:
@@ -563,10 +563,10 @@ class VideoManager(VideoStream):
     def reset(self) -> None:
         """ Reset - Reopens captures passed to the constructor of the VideoManager.
 
-        Can only be called after the :py:meth:`release()` method has been called.
+        Can only be called after the :meth:`release()` method has been called.
 
         Raises:
-            VideoDecodingInProgress: Must call :py:meth:`release()` before this method.
+            VideoDecodingInProgress: Must call :meth:`release()` before this method.
         """
         if self._started:
             self.release()
@@ -633,7 +633,7 @@ class VideoManager(VideoStream):
     def retrieve(self) -> Tuple[bool, Optional[ndarray]]:
         """ Retrieve (cv2.VideoCapture method) - retrieves and returns a frame.
 
-        Frame returned corresponds to last call to :py:meth:`grab()`.
+        Frame returned corresponds to last call to :meth:`grab()`.
 
         Returns:
             Tuple of (True, frame_image) if a frame was grabbed during the last call to grab(),

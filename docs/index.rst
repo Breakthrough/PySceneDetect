@@ -24,7 +24,7 @@ Table of Contents
 =======================================================================
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 3
     :caption: Command-Line Interface [CLI]:
     :name: clitoc
 

@@ -10,13 +10,8 @@
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
-""" ``scenedetect.detectors.motion_detector`` Module
-
-This module implements the :py:class:`MotionDetector`, which detects motion events using background
-subtraction, morphological transforms, and thresholding.
-
-This detector is available from the command-line interface by using the `detect-motion` command.
-"""
+""":class:`MotionDetector`, detects motion events using background subtraction, morphological
+transforms, and thresholding."""
 
 # Third-Party Library Imports
 import cv2

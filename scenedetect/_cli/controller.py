@@ -10,10 +10,7 @@
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
-""" ``scenedetect.cli.controller`` Module
-
-This file contains the implementation of the PySceneDetect command-line logic.
-"""
+"""Logic for the PySceneDetect command."""
 
 import logging
 import os

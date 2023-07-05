@@ -16,7 +16,7 @@
 # Certain distributions of PySceneDetect may include the above software;
 # see the included LICENSE-FFMPEG and LICENSE-MKVMERGE files.
 #
-""" ``scenedetect.video_splitter`` Module
+"""``scenedetect.video_splitter`` Module
 
 The `scenedetect.video_splitter` module contains functions to split existing videos into clips
 using ffmpeg or mkvmerge.

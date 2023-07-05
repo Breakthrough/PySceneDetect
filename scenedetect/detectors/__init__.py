@@ -14,18 +14,18 @@
 
 This module contains the following scene detection algorithms:
 
- * :py:mod:`ContentDetector <scenedetect.detectors.content_detector>`:
+ * :mod:`ContentDetector <scenedetect.detectors.content_detector>`:
     Detects shot changes by considering pixel changes in the HSV colorspace.
 
- * :py:mod:`ThresholdDetector <scenedetect.detectors.threshold_detector>`:
+ * :mod:`ThresholdDetector <scenedetect.detectors.threshold_detector>`:
     Detects transitions below a set pixel intensity (cuts or fades to black).
 
- * :py:mod:`AdaptiveDetector <scenedetect.detectors.adaptive_detector>`:
+ * :mod:`AdaptiveDetector <scenedetect.detectors.adaptive_detector>`:
     Two-pass version of `ContentDetector` that handles fast camera movement better in some cases.
 
 Detection algorithms are created by implementing the
-:py:class:`SceneDetector <scenedetect.scene_detector.SceneDetector>` interface. Detectors are
-typically attached to a :py:class:`SceneManager <scenedetect.scene_manager.SceneManager>` when
+:class:`SceneDetector <scenedetect.scene_detector.SceneDetector>` interface. Detectors are
+typically attached to a :class:`SceneManager <scenedetect.scene_manager.SceneManager>` when
 processing videos, however they can also be used to process frames directly.
 """
 

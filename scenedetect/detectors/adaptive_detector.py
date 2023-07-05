@@ -10,7 +10,7 @@
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
-""":py:class:`AdaptiveDetector` compares the difference in content between adjacent frames similar
+""":class:`AdaptiveDetector` compares the difference in content between adjacent frames similar
 to `ContentDetector` except the threshold isn't fixed, but is a rolling average of adjacent frame
 changes. This can help mitigate false detections in situations such as fast camera motions.
 
@@ -61,7 +61,7 @@ class AdaptiveDetector(ContentDetector):
                 (`content_val` in a statsfile, the value `threshold` is compared against).
                 If omitted, the default ContentDetector weights are used.
             luma_only: If True, only considers changes in the luminance channel of the video.
-                Equivalent to specifying `weights` as :py:data:`ContentDetector.LUMA_ONLY`.
+                Equivalent to specifying `weights` as :data:`ContentDetector.LUMA_ONLY`.
                 Overrides `weights` if both are set.
             kernel_size: Size of kernel to use for post edge detection filtering. If None,
                 automatically set based on video resolution.

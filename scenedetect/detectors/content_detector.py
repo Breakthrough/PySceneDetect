@@ -10,7 +10,7 @@
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
-""":py:class:`ContentDetector` compares the difference in content between adjacent frames against a
+""":class:`ContentDetector` compares the difference in content between adjacent frames against a
 set threshold/score, which if exceeded, triggers a scene cut.
 
 This detector is available from the command-line as the `detect-content` command.
@@ -70,7 +70,7 @@ class ContentDetector(SceneDetector):
         threshold may need to be adjusted accordingly."""
 
     DEFAULT_COMPONENT_WEIGHTS = Components()
-    """Default component weights. Actual default values are specified in :py:class:`Components`
+    """Default component weights. Actual default values are specified in :class:`Components`
     to allow adding new components without breaking existing usage."""
 
     LUMA_ONLY_WEIGHTS = Components(
@@ -115,7 +115,7 @@ class ContentDetector(SceneDetector):
             weights: Weight to place on each component when calculating frame score
                 (`content_val` in a statsfile, the value `threshold` is compared against).
             luma_only: If True, only considers changes in the luminance channel of the video.
-                Equivalent to specifying `weights` as :py:data:`ContentDetector.LUMA_ONLY`.
+                Equivalent to specifying `weights` as :data:`ContentDetector.LUMA_ONLY`.
                 Overrides `weights` if both are set.
             kernel_size: Size of kernel for expanding detected edges. Must be odd integer
                 greater than or equal to 3. If None, automatically set using video resolution.
