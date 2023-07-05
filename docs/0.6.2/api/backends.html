@@ -14,7 +14,7 @@
     <script src="../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Video Splitting" href="video_splitter.html" />
+    <link rel="next" title="SceneManager" href="scene_manager.html" />
     <link rel="prev" title="Detection Algorithms" href="detectors.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
@@ -95,11 +95,10 @@ parameter. These backends must support construction with the following signature
 </div></blockquote>
 </dd></dl>
 
-<span class="target" id="module-scenedetect.backends.opencv"></span><p><a class="reference internal" href="#scenedetect.backends.opencv.VideoStreamCv2" title="scenedetect.backends.opencv.VideoStreamCv2"><code class="xref py py-class docutils literal notranslate"><span class="pre">VideoStreamCv2</span></code></a> provides an adapter for the OpenCV <cite>cv2.VideoCapture</cite> object. Works
-with video files, image sequences, and network streams/URLs.</p>
-<p>Uses string identifier <code class="docutils literal notranslate"><span class="pre">'opencv'</span></code>.</p>
-<p>For wrapping input devices or pipes, there is also the <a class="reference internal" href="#scenedetect.backends.opencv.VideoCaptureAdapter" title="scenedetect.backends.opencv.VideoCaptureAdapter"><code class="xref py py-class docutils literal notranslate"><span class="pre">VideoCaptureAdapter</span></code></a> which can
-be created from an existing <cite>cv2.VideoCapture</cite>. This allows performing scene detection on inputs
+<span class="target" id="module-scenedetect.backends.opencv"></span><p><a class="reference internal" href="#scenedetect.backends.opencv.VideoStreamCv2" title="scenedetect.backends.opencv.VideoStreamCv2"><code class="xref py py-class docutils literal notranslate"><span class="pre">VideoStreamCv2</span></code></a> is backed by the OpenCV <cite>VideoCapture</cite> object. This is the default
+backend. Works with video files, image sequences, and network streams/URLs.</p>
+<p>For wrapping input devices or pipes, there is also <a class="reference internal" href="#scenedetect.backends.opencv.VideoCaptureAdapter" title="scenedetect.backends.opencv.VideoCaptureAdapter"><code class="xref py py-class docutils literal notranslate"><span class="pre">VideoCaptureAdapter</span></code></a> which can be
+constructed from an existing <cite>cv2.VideoCapture</cite>. This allows performing scene detection on inputs
 which do not support seeking.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="scenedetect.backends.opencv.VideoCaptureAdapter">
@@ -125,6 +124,45 @@ decoding will stop and emit an error.</p></li>
 <dd class="field-even"><p><strong>ValueError</strong> – capture is not open, framerate or max_read_attempts is invalid</p>
 </dd>
 </dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="scenedetect.backends.opencv.VideoCaptureAdapter.read">
+<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">decode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">advance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.backends.opencv.VideoCaptureAdapter.read" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read and decode the next frame as a numpy.ndarray. Returns False when video ends,
+or the maximum number of decode attempts has passed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>decode</strong> (<em>bool</em>) – Decode and return the frame.</p></li>
+<li><p><strong>advance</strong> (<em>bool</em>) – Seek to the next frame. If False, will return the current (last) frame.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>If decode = True, the decoded frame (numpy.ndarray), or False (bool) if end of video.
+If decode = False, a bool indicating if advancing to the the next frame succeeded.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>ndarray</em> | bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scenedetect.backends.opencv.VideoCaptureAdapter.reset">
+<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.backends.opencv.VideoCaptureAdapter.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Not supported.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scenedetect.backends.opencv.VideoCaptureAdapter.seek">
+<span class="sig-name descname"><span class="pre">seek</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.backends.opencv.VideoCaptureAdapter.seek" title="Permalink to this definition">¶</a></dt>
+<dd><p>The underlying VideoCapture is assumed to not support seeking.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>target</strong> (<a class="reference internal" href="frame_timecode.html#scenedetect.frame_timecode.FrameTimecode" title="scenedetect.frame_timecode.FrameTimecode"><em>FrameTimecode</em></a><em> | </em><em>float</em><em> | </em><em>int</em>) – </p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="scenedetect.backends.opencv.VideoCaptureAdapter.BACKEND_NAME">
 <span class="sig-name descname"><span class="pre">BACKEND_NAME</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'opencv_adapter'</span></em><a class="headerlink" href="#scenedetect.backends.opencv.VideoCaptureAdapter.BACKEND_NAME" title="Permalink to this definition">¶</a></dt>
@@ -209,45 +247,6 @@ The first frame has a time of 0.0 ms.</p>
 <p>This method will always return 0.0 if no frames have been <cite>read</cite>.</p>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="scenedetect.backends.opencv.VideoCaptureAdapter.read">
-<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">decode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">advance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.backends.opencv.VideoCaptureAdapter.read" title="Permalink to this definition">¶</a></dt>
-<dd><p>Read and decode the next frame as a numpy.ndarray. Returns False when video ends,
-or the maximum number of decode attempts has passed.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>decode</strong> (<em>bool</em>) – Decode and return the frame.</p></li>
-<li><p><strong>advance</strong> (<em>bool</em>) – Seek to the next frame. If False, will return the current (last) frame.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>If decode = True, the decoded frame (numpy.ndarray), or False (bool) if end of video.
-If decode = False, a bool indicating if advancing to the the next frame succeeded.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><em>ndarray</em> | bool</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="scenedetect.backends.opencv.VideoCaptureAdapter.reset">
-<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.backends.opencv.VideoCaptureAdapter.reset" title="Permalink to this definition">¶</a></dt>
-<dd><p>Not supported.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="scenedetect.backends.opencv.VideoCaptureAdapter.seek">
-<span class="sig-name descname"><span class="pre">seek</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.backends.opencv.VideoCaptureAdapter.seek" title="Permalink to this definition">¶</a></dt>
-<dd><p>The underlying VideoCapture is assumed to not support seeking.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>target</strong> (<a class="reference internal" href="frame_timecode.html#scenedetect.frame_timecode.FrameTimecode" title="scenedetect.frame_timecode.FrameTimecode"><em>FrameTimecode</em></a><em> | </em><em>float</em><em> | </em><em>int</em>) – </p>
-</dd>
-</dl>
-</dd></dl>
-
 </dd></dl>
 
 <dl class="py class">
@@ -278,6 +277,59 @@ network streams/URLs.  Use <cite>VideoCaptureAdapter</cite> for devices/pipes.</
 </ul>
 </dd>
 </dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="scenedetect.backends.opencv.VideoStreamCv2.read">
+<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">decode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">advance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.backends.opencv.VideoStreamCv2.read" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read and decode the next frame as a numpy.ndarray. Returns False when video ends,
+or the maximum number of decode attempts has passed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>decode</strong> (<em>bool</em>) – Decode and return the frame.</p></li>
+<li><p><strong>advance</strong> (<em>bool</em>) – Seek to the next frame. If False, will return the current (last) frame.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>If decode = True, the decoded frame (numpy.ndarray), or False (bool) if end of video.
+If decode = False, a bool indicating if advancing to the the next frame succeeded.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>ndarray</em> | bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scenedetect.backends.opencv.VideoStreamCv2.reset">
+<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.backends.opencv.VideoStreamCv2.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Close and re-open the VideoStream (should be equivalent to calling <cite>seek(0)</cite>).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scenedetect.backends.opencv.VideoStreamCv2.seek">
+<span class="sig-name descname"><span class="pre">seek</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.backends.opencv.VideoStreamCv2.seek" title="Permalink to this definition">¶</a></dt>
+<dd><p>Seek to the given timecode. If given as a frame number, represents the current seek
+pointer (e.g. if seeking to 0, the next frame decoded will be the first frame of the video).</p>
+<p>For 1-based indices (first frame is frame #1), the target frame number needs to be converted
+to 0-based by subtracting one. For example, if we want to seek to the first frame, we call
+seek(0) followed by read(). If we want to seek to the 5th frame, we call seek(4) followed
+by read(), at which point frame_number will be 5.</p>
+<p>Not supported if the VideoStream is a device/camera. Untested with web streams.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>target</strong> (<a class="reference internal" href="frame_timecode.html#scenedetect.frame_timecode.FrameTimecode" title="scenedetect.frame_timecode.FrameTimecode"><em>FrameTimecode</em></a><em> | </em><em>float</em><em> | </em><em>int</em>) – Target position in video stream to seek to.
+If float, interpreted as time in seconds.
+If int, interpreted as frame number.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference internal" href="video_stream.html#scenedetect.video_stream.SeekError" title="scenedetect.video_stream.SeekError"><strong>SeekError</strong></a> – An error occurs while seeking, or seeking is not supported.</p></li>
+<li><p><strong>ValueError</strong> – <cite>target</cite> is not a valid value (i.e. it is negative).</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="scenedetect.backends.opencv.VideoStreamCv2.BACKEND_NAME">
 <span class="sig-name descname"><span class="pre">BACKEND_NAME</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'opencv'</span></em><a class="headerlink" href="#scenedetect.backends.opencv.VideoStreamCv2.BACKEND_NAME" title="Permalink to this definition">¶</a></dt>
@@ -363,76 +415,6 @@ The first frame has a time of 0.0 ms.</p>
 <p>This method will always return 0.0 if no frames have been <cite>read</cite>.</p>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="scenedetect.backends.opencv.VideoStreamCv2.read">
-<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">decode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">advance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.backends.opencv.VideoStreamCv2.read" title="Permalink to this definition">¶</a></dt>
-<dd><p>Read and decode the next frame as a numpy.ndarray. Returns False when video ends,
-or the maximum number of decode attempts has passed.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>decode</strong> (<em>bool</em>) – Decode and return the frame.</p></li>
-<li><p><strong>advance</strong> (<em>bool</em>) – Seek to the next frame. If False, will return the current (last) frame.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>If decode = True, the decoded frame (numpy.ndarray), or False (bool) if end of video.
-If decode = False, a bool indicating if advancing to the the next frame succeeded.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><em>ndarray</em> | bool</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="scenedetect.backends.opencv.VideoStreamCv2.reset">
-<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.backends.opencv.VideoStreamCv2.reset" title="Permalink to this definition">¶</a></dt>
-<dd><p>Close and re-open the VideoStream (should be equivalent to calling <cite>seek(0)</cite>).</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="scenedetect.backends.opencv.VideoStreamCv2.seek">
-<span class="sig-name descname"><span class="pre">seek</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.backends.opencv.VideoStreamCv2.seek" title="Permalink to this definition">¶</a></dt>
-<dd><p>Seek to the given timecode. If given as a frame number, represents the current seek
-pointer (e.g. if seeking to 0, the next frame decoded will be the first frame of the video).</p>
-<p>For 1-based indices (first frame is frame #1), the target frame number needs to be converted
-to 0-based by subtracting one. For example, if we want to seek to the first frame, we call
-seek(0) followed by read(). If we want to seek to the 5th frame, we call seek(4) followed
-by read(), at which point frame_number will be 5.</p>
-<p>Not supported if the VideoStream is a device/camera. Untested with web streams.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>target</strong> (<a class="reference internal" href="frame_timecode.html#scenedetect.frame_timecode.FrameTimecode" title="scenedetect.frame_timecode.FrameTimecode"><em>FrameTimecode</em></a><em> | </em><em>float</em><em> | </em><em>int</em>) – Target position in video stream to seek to.
-If float, interpreted as time in seconds.
-If int, interpreted as frame number.</p>
-</dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><ul class="simple">
-<li><p><a class="reference internal" href="video_stream.html#scenedetect.video_stream.SeekError" title="scenedetect.video_stream.SeekError"><strong>SeekError</strong></a> – An error occurs while seeking, or seeking is not supported.</p></li>
-<li><p><strong>ValueError</strong> – <cite>target</cite> is not a valid value (i.e. it is negative).</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="scenedetect.backends.opencv.get_aspect_ratio">
-<span class="sig-prename descclassname"><span class="pre">scenedetect.backends.opencv.</span></span><span class="sig-name descname"><span class="pre">get_aspect_ratio</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cap</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0001</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.backends.opencv.get_aspect_ratio" title="Permalink to this definition">¶</a></dt>
-<dd><p>Display/pixel aspect ratio of the VideoCapture as a float (1.0 represents square pixels).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>cap</strong> (<em>VideoCapture</em>) – </p></li>
-<li><p><strong>epsilon</strong> (<em>float</em>) – </p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>float</p>
-</dd>
-</dl>
 </dd></dl>
 
 <span class="target" id="module-scenedetect.backends.pyav"></span><p><a class="reference internal" href="#scenedetect.backends.pyav.VideoStreamAv" title="scenedetect.backends.pyav.VideoStreamAv"><code class="xref py py-class docutils literal notranslate"><span class="pre">VideoStreamAv</span></code></a> provides an adapter for the PyAV av.InputContainer object.</p>
@@ -473,6 +455,58 @@ for details: <a class="reference external" href="https://pyav.org/docs/stable/ov
 </ul>
 </dd>
 </dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="scenedetect.backends.pyav.VideoStreamAv.read">
+<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">decode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">advance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.backends.pyav.VideoStreamAv.read" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read and decode the next frame as a numpy.ndarray. Returns False when video ends.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>decode</strong> (<em>bool</em>) – Decode and return the frame.</p></li>
+<li><p><strong>advance</strong> (<em>bool</em>) – Seek to the next frame. If False, will return the current (last) frame.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>If decode = True, the decoded frame (numpy.ndarray), or False (bool) if end of video.
+If decode = False, a bool indicating if advancing to the the next frame succeeded.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>ndarray</em> | bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scenedetect.backends.pyav.VideoStreamAv.reset">
+<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.backends.pyav.VideoStreamAv.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Close and re-open the VideoStream (should be equivalent to calling <cite>seek(0)</cite>).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scenedetect.backends.pyav.VideoStreamAv.seek">
+<span class="sig-name descname"><span class="pre">seek</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.backends.pyav.VideoStreamAv.seek" title="Permalink to this definition">¶</a></dt>
+<dd><p>Seek to the given timecode. If given as a frame number, represents the current seek
+pointer (e.g. if seeking to 0, the next frame decoded will be the first frame of the video).</p>
+<p>For 1-based indices (first frame is frame #1), the target frame number needs to be converted
+to 0-based by subtracting one. For example, if we want to seek to the first frame, we call
+seek(0) followed by read(). If we want to seek to the 5th frame, we call seek(4) followed
+by read(), at which point frame_number will be 5.</p>
+<p>May not be supported on all input codecs (see <cite>is_seekable</cite>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>target</strong> (<a class="reference internal" href="frame_timecode.html#scenedetect.frame_timecode.FrameTimecode" title="scenedetect.frame_timecode.FrameTimecode"><em>FrameTimecode</em></a><em> | </em><em>float</em><em> | </em><em>int</em>) – Target position in video stream to seek to.
+If float, interpreted as time in seconds.
+If int, interpreted as frame number.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – <cite>target</cite> is not a valid value (i.e. it is negative).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="scenedetect.backends.pyav.VideoStreamAv.BACKEND_NAME">
 <span class="sig-name descname"><span class="pre">BACKEND_NAME</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'pyav'</span></em><a class="headerlink" href="#scenedetect.backends.pyav.VideoStreamAv.BACKEND_NAME" title="Permalink to this definition">¶</a></dt>
@@ -543,58 +577,6 @@ to the presentation time 0.  Returns 0 even if <cite>frame_number</cite> is 1.</
 milliseconds. The first frame has a PTS of 0.</p>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="scenedetect.backends.pyav.VideoStreamAv.read">
-<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">decode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">advance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.backends.pyav.VideoStreamAv.read" title="Permalink to this definition">¶</a></dt>
-<dd><p>Read and decode the next frame as a numpy.ndarray. Returns False when video ends.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>decode</strong> (<em>bool</em>) – Decode and return the frame.</p></li>
-<li><p><strong>advance</strong> (<em>bool</em>) – Seek to the next frame. If False, will return the current (last) frame.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>If decode = True, the decoded frame (numpy.ndarray), or False (bool) if end of video.
-If decode = False, a bool indicating if advancing to the the next frame succeeded.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><em>ndarray</em> | bool</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="scenedetect.backends.pyav.VideoStreamAv.reset">
-<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.backends.pyav.VideoStreamAv.reset" title="Permalink to this definition">¶</a></dt>
-<dd><p>Close and re-open the VideoStream (should be equivalent to calling <cite>seek(0)</cite>).</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="scenedetect.backends.pyav.VideoStreamAv.seek">
-<span class="sig-name descname"><span class="pre">seek</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.backends.pyav.VideoStreamAv.seek" title="Permalink to this definition">¶</a></dt>
-<dd><p>Seek to the given timecode. If given as a frame number, represents the current seek
-pointer (e.g. if seeking to 0, the next frame decoded will be the first frame of the video).</p>
-<p>For 1-based indices (first frame is frame #1), the target frame number needs to be converted
-to 0-based by subtracting one. For example, if we want to seek to the first frame, we call
-seek(0) followed by read(). If we want to seek to the 5th frame, we call seek(4) followed
-by read(), at which point frame_number will be 5.</p>
-<p>May not be supported on all input codecs (see <cite>is_seekable</cite>).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>target</strong> (<a class="reference internal" href="frame_timecode.html#scenedetect.frame_timecode.FrameTimecode" title="scenedetect.frame_timecode.FrameTimecode"><em>FrameTimecode</em></a><em> | </em><em>float</em><em> | </em><em>int</em>) – Target position in video stream to seek to.
-If float, interpreted as time in seconds.
-If int, interpreted as frame number.</p>
-</dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>ValueError</strong> – <cite>target</cite> is not a valid value (i.e. it is negative).</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>None</p>
-</dd>
-</dl>
-</dd></dl>
-
 </dd></dl>
 
 </section>
@@ -610,7 +592,7 @@ If int, interpreted as frame number.</p>
           <a href="detectors.html" title="Previous document">Detection Algorithms</a>
         </li>
         <li>
-          <a href="video_splitter.html" title="Next document">Video Splitting</a>
+          <a href="scene_manager.html" title="Next document">SceneManager</a>
           &rarr;
         </li>
     </ul>
@@ -630,7 +612,7 @@ If int, interpreted as frame number.</p>
 
 
 
-<p class="blurb">CLI/API Reference Manual [v0.6.2.dev0]</p>
+<p class="blurb">CLI/API Documentation [v0.6.2.dev0]</p>
 
 
 
@@ -656,7 +638,6 @@ If int, interpreted as frame number.</p>
 <p class="caption" role="heading"><span class="caption-text">Python API Documentation:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../api.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="scene_manager.html">SceneManager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="detectors.html">Detection Algorithms</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Backends</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#video-files">Video Files</a></li>
@@ -664,14 +645,14 @@ If int, interpreted as frame number.</p>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.backends.AVAILABLE_BACKENDS"><code class="docutils literal notranslate"><span class="pre">AVAILABLE_BACKENDS</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.backends.opencv.VideoCaptureAdapter"><code class="docutils literal notranslate"><span class="pre">VideoCaptureAdapter</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.backends.opencv.VideoStreamCv2"><code class="docutils literal notranslate"><span class="pre">VideoStreamCv2</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#scenedetect.backends.opencv.get_aspect_ratio"><code class="docutils literal notranslate"><span class="pre">get_aspect_ratio()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.backends.pyav.VideoStreamAv"><code class="docutils literal notranslate"><span class="pre">VideoStreamAv</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="scene_manager.html">SceneManager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="video_splitter.html">Video Splitting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stats_manager.html">StatsManager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="frame_timecode.html">FrameTimecode</a></li>
 <li class="toctree-l1"><a class="reference internal" href="scene_detector.html">SceneDetector</a></li>
-<li class="toctree-l1"><a class="reference internal" href="stats_manager.html">StatsManager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="video_stream.html">VideoStream</a></li>
 <li class="toctree-l1"><a class="reference internal" href="platform.html">Platform &amp; Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="migration_guide.html">Migration Guide</a></li>
@@ -681,8 +662,10 @@ If int, interpreted as frame number.</p>
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="../api.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Package</a><ul>
       <li>Previous: <a href="detectors.html" title="previous chapter">Detection Algorithms</a></li>
-      <li>Next: <a href="video_splitter.html" title="next chapter">Video Splitting</a></li>
+      <li>Next: <a href="scene_manager.html" title="next chapter">SceneManager</a></li>
+  </ul></li>
   </ul></li>
 </ul>
 </div>

@@ -62,6 +62,11 @@
 </dl>
 </li>
 <li><dl class="simple">
+<dt><a class="reference internal" href="#load-scenes-command"><span class="std std-ref">load-scenes</span></a> - Save start/end/duration of each scene in .CSV format</dt><dd><p><code class="docutils literal notranslate"><span class="pre">load-scenes</span> <span class="pre">-i</span> <span class="pre">video-Scenes.csv</span></code></p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
 <dt><a class="reference internal" href="#save-images-command"><span class="std std-ref">save-images</span></a> - Extract frames from every detected scene as images</dt><dd><p><code class="docutils literal notranslate"><span class="pre">save-images</span></code> or <code class="docutils literal notranslate"><span class="pre">save-images</span> <span class="pre">--num-images</span> <span class="pre">5</span></code></p>
 </dd>
 </dl>
@@ -104,37 +109,12 @@
 </li>
 </ul>
 </div></blockquote>
-<p><strong>The</strong> <code class="docutils literal notranslate"><span class="pre">version</span></code> <strong>command</strong> command prints the version of PySceneDetect that is installed.</p>
+<p><strong>The</strong> <code class="docutils literal notranslate"><span class="pre">version</span></code> <strong>command</strong> command prints the version of PySceneDetect that is installed.
+You can also specify <code class="docutils literal notranslate"><span class="pre">--all</span></code> to print out system dependencies.</p>
 <p><strong>The</strong> <code class="docutils literal notranslate"><span class="pre">about</span></code> <strong>command</strong> prints PySceneDetect copyright, licensing, and redistribution
 information.  This includes a list of all third-party software components that
 PySceneDetect uses or interacts with, as well as a reference to the license and
 copyright information for each component.</p>
-<section id="usage-examples">
-<h3>Usage Examples<a class="headerlink" href="#usage-examples" title="Permalink to this heading">¶</a></h3>
-<p><code class="docutils literal notranslate"><span class="pre">help</span></code> command (show help for global options/command):</p>
-<blockquote>
-<div><p><code class="docutils literal notranslate"><span class="pre">scenedetect</span> <span class="pre">help</span></code></p>
-<p><code class="docutils literal notranslate"><span class="pre">scenedetect</span> <span class="pre">help</span> <span class="pre">detect-adaptive</span></code></p>
-<p><code class="docutils literal notranslate"><span class="pre">scenedetect</span> <span class="pre">help</span> <span class="pre">all</span></code></p>
-</div></blockquote>
-<p><code class="docutils literal notranslate"><span class="pre">about</span></code> command (show license/copyright info):</p>
-<blockquote>
-<div><p><code class="docutils literal notranslate"><span class="pre">scenedetect</span> <span class="pre">about</span></code></p>
-</div></blockquote>
-<p><code class="docutils literal notranslate"><span class="pre">version</span></code> command (show software or system version info):</p>
-<blockquote>
-<div><p><code class="docutils literal notranslate"><span class="pre">scenedetect</span> <span class="pre">version</span></code></p>
-<p><code class="docutils literal notranslate"><span class="pre">scenedetect</span> <span class="pre">version</span> <span class="pre">--all</span></code></p>
-</div></blockquote>
-</section>
-<section id="system-dependencies">
-<h3>System Dependencies<a class="headerlink" href="#system-dependencies" title="Permalink to this heading">¶</a></h3>
-<p>You can use the <code class="docutils literal notranslate"><span class="pre">version</span></code> command with  <code class="docutils literal notranslate"><span class="pre">-a</span></code> / <code class="docutils literal notranslate"><span class="pre">--all</span></code> to check installed software dependencies:</p>
-<blockquote>
-<div><p><code class="docutils literal notranslate"><span class="pre">scenedetect</span> <span class="pre">version</span> <span class="pre">--all</span></code></p>
-</div></blockquote>
-<p>Please include this information when submitting bug reports.</p>
-</section>
 </section>
 <section id="time">
 <span id="time-command"></span><h2><code class="docutils literal notranslate"><span class="pre">time</span></code><a class="headerlink" href="#time" title="Permalink to this heading">¶</a></h2>
@@ -178,8 +158,8 @@ exclusive with –duration / -d.</p>
 </dl>
 </div></blockquote>
 </section>
-<section id="id1">
-<h3>Usage Examples<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h3>
+<section id="example">
+<h3>Example<a class="headerlink" href="#example" title="Permalink to this heading">¶</a></h3>
 <p>Using the <cite>detect-content</cite> detector, we start at 1 minute in and parse 30.5 seconds of <cite>video.mp4</cite>:</p>
 <blockquote>
 <div><p><code class="docutils literal notranslate"><span class="pre">scenedetect</span> <span class="pre">--input</span> <span class="pre">video.mp4</span> <span class="pre">time</span> <span class="pre">--start</span> <span class="pre">00:01:00</span> <span class="pre">--duration</span> <span class="pre">30.5s</span> <span class="pre">detect-content</span></code></p>
@@ -199,8 +179,8 @@ exclusive with –duration / -d.</p>
 <p><strong>The</strong> <code class="docutils literal notranslate"><span class="pre">list-scenes</span></code> <strong>command</strong> is used to print out and write to a CSV file
 a table of all scenes, their start/end timecodes, and frame numbers. The file also
 includes the cut list, which is a list of timecodes of each scene boundary.</p>
-<section id="id2">
-<h3>Command Options<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h3>
+<section id="id1">
+<h3>Command Options<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h3>
 <blockquote>
 <div><dl class="option-list">
 <dt><kbd><span class="option">-o</span>, <span class="option">--output <var>DIR</var></span></kbd></dt>
@@ -229,8 +209,8 @@ CSV file. Set this option if compliance with RFC
 </dl>
 </div></blockquote>
 </section>
-<section id="id3">
-<h3>Usage Examples<a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h3>
+<section id="id2">
+<h3>Example<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h3>
 <p>Print table of detected scenes for <cite>video.mp4</cite> and save to CSV file <cite>video-Scenes.csv</cite>:</p>
 <blockquote>
 <div><p><code class="docutils literal notranslate"><span class="pre">scenedetect</span> <span class="pre">--input</span> <span class="pre">video.mp4</span> <span class="pre">detect-content</span> <span class="pre">list-scenes</span></code></p>
@@ -241,13 +221,45 @@ CSV file. Set this option if compliance with RFC
 </div></blockquote>
 </section>
 </section>
+<section id="load-scenes">
+<span id="load-scenes-command"></span><h2><code class="docutils literal notranslate"><span class="pre">load-scenes</span></code><a class="headerlink" href="#load-scenes" title="Permalink to this heading">¶</a></h2>
+<p><strong>The</strong> <code class="docutils literal notranslate"><span class="pre">load-scenes</span></code> <strong>command</strong> load scenes from CSV instead of detecting. It can be used with CSV files generated by <cite>list-scenes &lt;list-scenes Command&gt;</cite>. Scenes are loaded using the specified column as cut locations (frame number or timecode).</p>
+<section id="id3">
+<h3>Command Options<a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h3>
+<blockquote>
+<div><dl class="option-list">
+<dt><kbd><span class="option">-i</span>, <span class="option">--input <var>FILE</var></span></kbd></dt>
+<dd><p>Scene list to read cut information from.</p>
+</dd>
+<dt><kbd><span class="option">-c</span>, <span class="option">--start-col-name <var>STRING</var></span></kbd></dt>
+<dd><p>Name of column used to mark scene cuts. [default: “Start Frame”]</p>
+</dd>
+<dt><kbd><span class="option">-f</span>, <span class="option">--framerate <var>FPS</var></span></kbd></dt>
+<dd><p>Override framerate to use when performing
+timecode to frame number conversion.</p>
+</dd>
+</dl>
+</div></blockquote>
+</section>
+<section id="id4">
+<h3>Example<a class="headerlink" href="#id4" title="Permalink to this heading">¶</a></h3>
+<p>To manually edit the cut points when generating output (e.g. using <cite>split-video</cite>), first generate a <cite>video-Scenes.csv</cite> file using <cite>list-scenes</cite>:</p>
+<blockquote>
+<div><p><code class="docutils literal notranslate"><span class="pre">scenedetect</span> <span class="pre">--input</span> <span class="pre">video.mp4</span> <span class="pre">detect-content</span> <span class="pre">list-scenes</span></code></p>
+</div></blockquote>
+<p>Once <cite>video-Scenes.csv</cite> has been edited, re-run PySceneDetect with <cite>load-scenes</cite> instead of the scene detector, and use output commands as normal:</p>
+<blockquote>
+<div><p><code class="docutils literal notranslate"><span class="pre">scenedetect</span> <span class="pre">--input</span> <span class="pre">video.mp4</span> <span class="pre">load-scenes</span> <span class="pre">-i</span> <span class="pre">video-Scenes.csv</span> <span class="pre">split-video</span></code></p>
+</div></blockquote>
+</section>
+</section>
 <section id="save-images">
 <span id="save-images-command"></span><h2><code class="docutils literal notranslate"><span class="pre">save-images</span></code><a class="headerlink" href="#save-images" title="Permalink to this heading">¶</a></h2>
 <p><strong>The</strong> <code class="docutils literal notranslate"><span class="pre">save-images</span></code> <strong>command</strong> creates images for each detected scene.
 It saves a set number of images for each detected scene, always including
 the first and last frames.</p>
-<section id="id4">
-<h3>Command Options<a class="headerlink" href="#id4" title="Permalink to this heading">¶</a></h3>
+<section id="id5">
+<h3>Command Options<a class="headerlink" href="#id5" title="Permalink to this heading">¶</a></h3>
 <blockquote>
 <div><dl class="option-list">
 <dt><kbd><span class="option">-o</span>, <span class="option">--output <var>DIR</var></span></kbd></dt>
@@ -327,8 +339,8 @@ ratio.</p>
 <span id="split-video-command"></span><h2><code class="docutils literal notranslate"><span class="pre">split-video</span></code><a class="headerlink" href="#split-video" title="Permalink to this heading">¶</a></h2>
 <p><strong>The</strong> <code class="docutils literal notranslate"><span class="pre">split-video</span></code> <strong>command</strong> splits the input video into individual clips,
 by creating a new video clip for each detected scene.</p>
-<section id="id5">
-<h3>Command Options<a class="headerlink" href="#id5" title="Permalink to this heading">¶</a></h3>
+<section id="id6">
+<h3>Command Options<a class="headerlink" href="#id6" title="Permalink to this heading">¶</a></h3>
 <blockquote>
 <div><dl class="option-list">
 <dt><kbd><span class="option">-o</span>, <span class="option">--output <var>DIR</var></span></kbd></dt>
@@ -404,8 +416,8 @@ automatically appends asuffix of “-$SCENE_NUMBER”.</p>
 all detected scenes in tabular format, including thumbnails by default.
 This requires the <code class="docutils literal notranslate"><span class="pre">save-images</span></code> command to also be specified.
 If images are not required, specify the <cite>–no-images</cite> option.</p>
-<section id="id6">
-<h3>Command Options<a class="headerlink" href="#id6" title="Permalink to this heading">¶</a></h3>
+<section id="id7">
+<h3>Command Options<a class="headerlink" href="#id7" title="Permalink to this heading">¶</a></h3>
 <blockquote>
 <div><dl class="option-list">
 <dt><kbd><span class="option">-f</span>, <span class="option">--filename <var>NAME</var></span></kbd></dt>
@@ -466,7 +478,7 @@ HTML table.</p>
 
 
 
-<p class="blurb">CLI/API Reference Manual [v0.6.2.dev0]</p>
+<p class="blurb">CLI/API Documentation [v0.6.2.dev0]</p>
 
 
 
@@ -489,6 +501,7 @@ HTML table.</p>
 <li class="toctree-l2"><a class="reference internal" href="#help-version-and-about"><code class="docutils literal notranslate"><span class="pre">help</span></code>, <code class="docutils literal notranslate"><span class="pre">version</span></code>, and <code class="docutils literal notranslate"><span class="pre">about</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#time"><code class="docutils literal notranslate"><span class="pre">time</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#list-scenes"><code class="docutils literal notranslate"><span class="pre">list-scenes</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#load-scenes"><code class="docutils literal notranslate"><span class="pre">load-scenes</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#save-images"><code class="docutils literal notranslate"><span class="pre">save-images</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#split-video"><code class="docutils literal notranslate"><span class="pre">split-video</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#export-html"><code class="docutils literal notranslate"><span class="pre">export-html</span></code></a></li>
@@ -500,13 +513,13 @@ HTML table.</p>
 <p class="caption" role="heading"><span class="caption-text">Python API Documentation:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../api.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../api/scene_manager.html">SceneManager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api/detectors.html">Detection Algorithms</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api/backends.html">Backends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/scene_manager.html">SceneManager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api/video_splitter.html">Video Splitting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/stats_manager.html">StatsManager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api/frame_timecode.html">FrameTimecode</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api/scene_detector.html">SceneDetector</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../api/stats_manager.html">StatsManager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api/video_stream.html">VideoStream</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api/platform.html">Platform &amp; Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api/migration_guide.html">Migration Guide</a></li>

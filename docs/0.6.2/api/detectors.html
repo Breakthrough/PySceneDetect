@@ -15,7 +15,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Backends" href="backends.html" />
-    <link rel="prev" title="SceneManager" href="scene_manager.html" />
+    <link rel="prev" title="scenedetect 🎬 Package" href="../api.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
@@ -39,17 +39,17 @@
 <blockquote>
 <div><ul class="simple">
 <li><dl class="simple">
-<dt><a class="reference internal" href="#scenedetect.detectors.content_detector.ContentDetector" title="scenedetect.detectors.content_detector.ContentDetector"><code class="xref py py-class docutils literal notranslate"><span class="pre">ContentDetector</span></code></a>:</dt><dd><p>Detects shot changes by considering pixel changes in the HSV colorspace.</p>
+<dt><a class="reference internal" href="#module-scenedetect.detectors.content_detector" title="scenedetect.detectors.content_detector"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ContentDetector</span></code></a>:</dt><dd><p>Detects shot changes by considering pixel changes in the HSV colorspace.</p>
 </dd>
 </dl>
 </li>
 <li><dl class="simple">
-<dt><a class="reference internal" href="#scenedetect.detectors.threshold_detector.ThresholdDetector" title="scenedetect.detectors.threshold_detector.ThresholdDetector"><code class="xref py py-class docutils literal notranslate"><span class="pre">ThresholdDetector</span></code></a>:</dt><dd><p>Detects transitions below a set pixel intensity (cuts or fades to black).</p>
+<dt><a class="reference internal" href="#module-scenedetect.detectors.threshold_detector" title="scenedetect.detectors.threshold_detector"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ThresholdDetector</span></code></a>:</dt><dd><p>Detects transitions below a set pixel intensity (cuts or fades to black).</p>
 </dd>
 </dl>
 </li>
 <li><dl class="simple">
-<dt><a class="reference internal" href="#scenedetect.detectors.adaptive_detector.AdaptiveDetector" title="scenedetect.detectors.adaptive_detector.AdaptiveDetector"><code class="xref py py-class docutils literal notranslate"><span class="pre">AdaptiveDetector</span></code></a>:</dt><dd><p>Two-pass version of <cite>ContentDetector</cite> that handles fast camera movement better in some cases.</p>
+<dt><a class="reference internal" href="#module-scenedetect.detectors.adaptive_detector" title="scenedetect.detectors.adaptive_detector"><code class="xref py py-mod docutils literal notranslate"><span class="pre">AdaptiveDetector</span></code></a>:</dt><dd><p>Two-pass version of <cite>ContentDetector</cite> that handles fast camera movement better in some cases.</p>
 </dd>
 </dl>
 </li>
@@ -128,31 +128,6 @@ threshold may need to be adjusted accordingly.</p>
 
 </dd></dl>
 
-<dl class="py attribute">
-<dt class="sig sig-object py" id="scenedetect.detectors.content_detector.ContentDetector.DEFAULT_COMPONENT_WEIGHTS">
-<span class="sig-name descname"><span class="pre">DEFAULT_COMPONENT_WEIGHTS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Components(delta_hue=1.0,</span> <span class="pre">delta_sat=1.0,</span> <span class="pre">delta_lum=1.0,</span> <span class="pre">delta_edges=0.0)</span></em><a class="headerlink" href="#scenedetect.detectors.content_detector.ContentDetector.DEFAULT_COMPONENT_WEIGHTS" title="Permalink to this definition">¶</a></dt>
-<dd><p>Default component weights. Actual default values are specified in <a class="reference internal" href="#scenedetect.detectors.content_detector.ContentDetector.Components" title="scenedetect.detectors.content_detector.ContentDetector.Components"><code class="xref py py-class docutils literal notranslate"><span class="pre">Components</span></code></a>
-to allow adding new components without breaking existing usage.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="scenedetect.detectors.content_detector.ContentDetector.FRAME_SCORE_KEY">
-<span class="sig-name descname"><span class="pre">FRAME_SCORE_KEY</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'content_val'</span></em><a class="headerlink" href="#scenedetect.detectors.content_detector.ContentDetector.FRAME_SCORE_KEY" title="Permalink to this definition">¶</a></dt>
-<dd><p>Key in statsfile representing the final frame score after weighed by specified components.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="scenedetect.detectors.content_detector.ContentDetector.LUMA_ONLY_WEIGHTS">
-<span class="sig-name descname"><span class="pre">LUMA_ONLY_WEIGHTS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Components(delta_hue=0.0,</span> <span class="pre">delta_sat=0.0,</span> <span class="pre">delta_lum=1.0,</span> <span class="pre">delta_edges=0.0)</span></em><a class="headerlink" href="#scenedetect.detectors.content_detector.ContentDetector.LUMA_ONLY_WEIGHTS" title="Permalink to this definition">¶</a></dt>
-<dd><p>Component weights to use if <cite>luma_only</cite> is set.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="scenedetect.detectors.content_detector.ContentDetector.METRIC_KEYS">
-<span class="sig-name descname"><span class="pre">METRIC_KEYS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['content_val',</span> <span class="pre">'delta_hue',</span> <span class="pre">'delta_sat',</span> <span class="pre">'delta_lum',</span> <span class="pre">'delta_edges']</span></em><a class="headerlink" href="#scenedetect.detectors.content_detector.ContentDetector.METRIC_KEYS" title="Permalink to this definition">¶</a></dt>
-<dd><p>All statsfile keys this detector produces.</p>
-</dd></dl>
-
 <dl class="py method">
 <dt class="sig sig-object py" id="scenedetect.detectors.content_detector.ContentDetector.get_metrics">
 <span class="sig-name descname"><span class="pre">get_metrics</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.detectors.content_detector.ContentDetector.get_metrics" title="Permalink to this definition">¶</a></dt>
@@ -207,41 +182,31 @@ or more frames in the list, and not necessarily the same as frame_num.</p>
 </dl>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scenedetect.detectors.content_detector.ContentDetector.DEFAULT_COMPONENT_WEIGHTS">
+<span class="sig-name descname"><span class="pre">DEFAULT_COMPONENT_WEIGHTS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Components(delta_hue=1.0,</span> <span class="pre">delta_sat=1.0,</span> <span class="pre">delta_lum=1.0,</span> <span class="pre">delta_edges=0.0)</span></em><a class="headerlink" href="#scenedetect.detectors.content_detector.ContentDetector.DEFAULT_COMPONENT_WEIGHTS" title="Permalink to this definition">¶</a></dt>
+<dd><p>Default component weights. Actual default values are specified in <a class="reference internal" href="#scenedetect.detectors.content_detector.ContentDetector.Components" title="scenedetect.detectors.content_detector.ContentDetector.Components"><code class="xref py py-class docutils literal notranslate"><span class="pre">Components</span></code></a>
+to allow adding new components without breaking existing usage.</p>
 </dd></dl>
 
-<dl class="py function">
-<dt class="sig sig-object py" id="scenedetect.detectors.content_detector.estimated_kernel_size">
-<span class="sig-prename descclassname"><span class="pre">scenedetect.detectors.content_detector.</span></span><span class="sig-name descname"><span class="pre">estimated_kernel_size</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame_width</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_height</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.detectors.content_detector.estimated_kernel_size" title="Permalink to this definition">¶</a></dt>
-<dd><p>Estimate kernel size based on video resolution.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>frame_width</strong> (<em>int</em>) – </p></li>
-<li><p><strong>frame_height</strong> (<em>int</em>) – </p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>int</p>
-</dd>
-</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scenedetect.detectors.content_detector.ContentDetector.FRAME_SCORE_KEY">
+<span class="sig-name descname"><span class="pre">FRAME_SCORE_KEY</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'content_val'</span></em><a class="headerlink" href="#scenedetect.detectors.content_detector.ContentDetector.FRAME_SCORE_KEY" title="Permalink to this definition">¶</a></dt>
+<dd><p>Key in statsfile representing the final frame score after weighed by specified components.</p>
 </dd></dl>
 
-<dl class="py function">
-<dt class="sig sig-object py" id="scenedetect.detectors.content_detector.mean_pixel_distance">
-<span class="sig-prename descclassname"><span class="pre">scenedetect.detectors.content_detector.</span></span><span class="sig-name descname"><span class="pre">mean_pixel_distance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">left</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">right</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.detectors.content_detector.mean_pixel_distance" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return the mean average distance in pixel values between <cite>left</cite> and <cite>right</cite>.
-Both <cite>left and `right</cite> should be 2 dimensional 8-bit images of the same shape.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>left</strong> (<em>ndarray</em>) – </p></li>
-<li><p><strong>right</strong> (<em>ndarray</em>) – </p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>float</p>
-</dd>
-</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scenedetect.detectors.content_detector.ContentDetector.LUMA_ONLY_WEIGHTS">
+<span class="sig-name descname"><span class="pre">LUMA_ONLY_WEIGHTS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Components(delta_hue=0.0,</span> <span class="pre">delta_sat=0.0,</span> <span class="pre">delta_lum=1.0,</span> <span class="pre">delta_edges=0.0)</span></em><a class="headerlink" href="#scenedetect.detectors.content_detector.ContentDetector.LUMA_ONLY_WEIGHTS" title="Permalink to this definition">¶</a></dt>
+<dd><p>Component weights to use if <cite>luma_only</cite> is set.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scenedetect.detectors.content_detector.ContentDetector.METRIC_KEYS">
+<span class="sig-name descname"><span class="pre">METRIC_KEYS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['content_val',</span> <span class="pre">'delta_hue',</span> <span class="pre">'delta_sat',</span> <span class="pre">'delta_lum',</span> <span class="pre">'delta_edges']</span></em><a class="headerlink" href="#scenedetect.detectors.content_detector.ContentDetector.METRIC_KEYS" title="Permalink to this definition">¶</a></dt>
+<dd><p>All statsfile keys this detector produces.</p>
+</dd></dl>
+
 </dd></dl>
 
 <span class="target" id="module-scenedetect.detectors.adaptive_detector"></span><p><a class="reference internal" href="#scenedetect.detectors.adaptive_detector.AdaptiveDetector" title="scenedetect.detectors.adaptive_detector.AdaptiveDetector"><code class="xref py py-class docutils literal notranslate"><span class="pre">AdaptiveDetector</span></code></a> compares the difference in content between adjacent frames similar
@@ -278,17 +243,6 @@ automatically set based on video resolution.</p></li>
 </ul>
 </dd>
 </dl>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="scenedetect.detectors.adaptive_detector.AdaptiveDetector.ADAPTIVE_RATIO_KEY_TEMPLATE">
-<span class="sig-name descname"><span class="pre">ADAPTIVE_RATIO_KEY_TEMPLATE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'adaptive_ratio{luma_only}</span> <span class="pre">(w={window_width})'</span></em><a class="headerlink" href="#scenedetect.detectors.adaptive_detector.AdaptiveDetector.ADAPTIVE_RATIO_KEY_TEMPLATE" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="scenedetect.detectors.adaptive_detector.AdaptiveDetector.event_buffer_length">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">event_buffer_length</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#scenedetect.detectors.adaptive_detector.AdaptiveDetector.event_buffer_length" title="Permalink to this definition">¶</a></dt>
-<dd><p>Number of frames any detected cuts will be behind the current frame due to buffering.</p>
-</dd></dl>
-
 <dl class="py method">
 <dt class="sig sig-object py" id="scenedetect.detectors.adaptive_detector.AdaptiveDetector.get_content_val">
 <span class="sig-name descname"><span class="pre">get_content_val</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame_num</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.detectors.adaptive_detector.AdaptiveDetector.get_content_val" title="Permalink to this definition">¶</a></dt>
@@ -359,6 +313,12 @@ detection on. Can be None <em>only</em> if the self.is_processing_required() met
 </dl>
 </dd></dl>
 
+<dl class="py property">
+<dt class="sig sig-object py" id="scenedetect.detectors.adaptive_detector.AdaptiveDetector.event_buffer_length">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">event_buffer_length</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#scenedetect.detectors.adaptive_detector.AdaptiveDetector.event_buffer_length" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of frames any detected cuts will be behind the current frame due to buffering.</p>
+</dd></dl>
+
 </dd></dl>
 
 <span class="target" id="module-scenedetect.detectors.threshold_detector"></span><p><a class="reference internal" href="#scenedetect.detectors.threshold_detector.ThresholdDetector" title="scenedetect.detectors.threshold_detector.ThresholdDetector"><code class="xref py py-class docutils literal notranslate"><span class="pre">ThresholdDetector</span></code></a> uses a set intensity as a threshold to detect cuts, which are
@@ -405,11 +365,6 @@ generate an additional scene at this timecode.</p></li>
 </dd></dl>
 
 </dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="scenedetect.detectors.threshold_detector.ThresholdDetector.THRESHOLD_VALUE_KEY">
-<span class="sig-name descname"><span class="pre">THRESHOLD_VALUE_KEY</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'average_rgb'</span></em><a class="headerlink" href="#scenedetect.detectors.threshold_detector.ThresholdDetector.THRESHOLD_VALUE_KEY" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="scenedetect.detectors.threshold_detector.ThresholdDetector.get_metrics">
@@ -465,25 +420,6 @@ or more frames in the list, and not necessarily the same as frame_num.</p>
 
 </dd></dl>
 
-<dl class="py function">
-<dt class="sig sig-object py" id="scenedetect.detectors.threshold_detector.compute_frame_average">
-<span class="sig-prename descclassname"><span class="pre">scenedetect.detectors.threshold_detector.</span></span><span class="sig-name descname"><span class="pre">compute_frame_average</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.detectors.threshold_detector.compute_frame_average" title="Permalink to this definition">¶</a></dt>
-<dd><p>Computes the average pixel value/intensity for all pixels in a frame.</p>
-<p>The value is computed by adding up the 8-bit R, G, and B values for
-each pixel, and dividing by the number of pixels multiplied by 3.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>frame</strong> (<em>ndarray</em>) – Frame representing the RGB pixels to average.</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Average pixel intensity across all 3 channels of <cite>frame</cite></p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>float</p>
-</dd>
-</dl>
-</dd></dl>
-
 </section>
 
 
@@ -494,7 +430,7 @@ each pixel, and dividing by the number of pixels multiplied by 3.</p>
     <ul>
         <li>
           &larr;
-          <a href="scene_manager.html" title="Previous document">SceneManager</a>
+          <a href="../api.html" title="Previous document"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Package</a>
         </li>
         <li>
           <a href="backends.html" title="Next document">Backends</a>
@@ -517,7 +453,7 @@ each pixel, and dividing by the number of pixels multiplied by 3.</p>
 
 
 
-<p class="blurb">CLI/API Reference Manual [v0.6.2.dev0]</p>
+<p class="blurb">CLI/API Documentation [v0.6.2.dev0]</p>
 
 
 
@@ -543,21 +479,18 @@ each pixel, and dividing by the number of pixels multiplied by 3.</p>
 <p class="caption" role="heading"><span class="caption-text">Python API Documentation:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../api.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="scene_manager.html">SceneManager</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Detection Algorithms</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.detectors.content_detector.ContentDetector"><code class="docutils literal notranslate"><span class="pre">ContentDetector</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#scenedetect.detectors.content_detector.estimated_kernel_size"><code class="docutils literal notranslate"><span class="pre">estimated_kernel_size()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#scenedetect.detectors.content_detector.mean_pixel_distance"><code class="docutils literal notranslate"><span class="pre">mean_pixel_distance()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.detectors.adaptive_detector.AdaptiveDetector"><code class="docutils literal notranslate"><span class="pre">AdaptiveDetector</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.detectors.threshold_detector.ThresholdDetector"><code class="docutils literal notranslate"><span class="pre">ThresholdDetector</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#scenedetect.detectors.threshold_detector.compute_frame_average"><code class="docutils literal notranslate"><span class="pre">compute_frame_average()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="backends.html">Backends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scene_manager.html">SceneManager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="video_splitter.html">Video Splitting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stats_manager.html">StatsManager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="frame_timecode.html">FrameTimecode</a></li>
 <li class="toctree-l1"><a class="reference internal" href="scene_detector.html">SceneDetector</a></li>
-<li class="toctree-l1"><a class="reference internal" href="stats_manager.html">StatsManager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="video_stream.html">VideoStream</a></li>
 <li class="toctree-l1"><a class="reference internal" href="platform.html">Platform &amp; Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="migration_guide.html">Migration Guide</a></li>
@@ -567,8 +500,10 @@ each pixel, and dividing by the number of pixels multiplied by 3.</p>
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="scene_manager.html" title="previous chapter">SceneManager</a></li>
+  <li><a href="../api.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Package</a><ul>
+      <li>Previous: <a href="../api.html" title="previous chapter"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Package</a></li>
       <li>Next: <a href="backends.html" title="next chapter">Backends</a></li>
+  </ul></li>
   </ul></li>
 </ul>
 </div>

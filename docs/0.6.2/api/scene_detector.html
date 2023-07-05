@@ -14,7 +14,7 @@
     <script src="../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="StatsManager" href="stats_manager.html" />
+    <link rel="next" title="VideoStream" href="video_stream.html" />
     <link rel="prev" title="FrameTimecode" href="frame_timecode.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
@@ -54,13 +54,6 @@ event (in, out, cut, etc…).</p>
 the next scene/shot begins in a video.</p>
 <p>Also see the implemented scene detectors in the scenedetect.detectors module
 to get an idea of how a particular detector can be created.</p>
-<dl class="py property">
-<dt class="sig sig-object py" id="scenedetect.scene_detector.SceneDetector.event_buffer_length">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">event_buffer_length</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#scenedetect.scene_detector.SceneDetector.event_buffer_length" title="Permalink to this definition">¶</a></dt>
-<dd><p>The amount of frames a given event can be buffered for, in time. Represents maximum
-amount any event can be behind <cite>frame_number</cite> in the result of <a class="reference internal" href="#scenedetect.scene_detector.SceneDetector.process_frame" title="scenedetect.scene_detector.SceneDetector.process_frame"><code class="xref py py-meth docutils literal notranslate"><span class="pre">process_frame()</span></code></a>.</p>
-</dd></dl>
-
 <dl class="py method">
 <dt class="sig sig-object py" id="scenedetect.scene_detector.SceneDetector.get_metrics">
 <span class="sig-name descname"><span class="pre">get_metrics</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.scene_detector.SceneDetector.get_metrics" title="Permalink to this definition">¶</a></dt>
@@ -139,13 +132,6 @@ to be passed to process_frame for the given frame_num).</p>
 </dl>
 </dd></dl>
 
-<dl class="py attribute">
-<dt class="sig sig-object py" id="scenedetect.scene_detector.SceneDetector.stats_manager">
-<span class="sig-name descname"><span class="pre">stats_manager</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="stats_manager.html#scenedetect.stats_manager.StatsManager" title="scenedetect.stats_manager.StatsManager"><span class="pre">StatsManager</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#scenedetect.scene_detector.SceneDetector.stats_manager" title="Permalink to this definition">¶</a></dt>
-<dd><p>Optional <a class="reference internal" href="stats_manager.html#scenedetect.stats_manager.StatsManager" title="scenedetect.stats_manager.StatsManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">StatsManager</span></code></a> to
-use for caching frame metrics to and from.</p>
-</dd></dl>
-
 <dl class="py method">
 <dt class="sig sig-object py" id="scenedetect.scene_detector.SceneDetector.stats_manager_required">
 <span class="sig-name descname"><span class="pre">stats_manager_required</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.scene_detector.SceneDetector.stats_manager_required" title="Permalink to this definition">¶</a></dt>
@@ -158,6 +144,20 @@ use for caching frame metrics to and from.</p>
 <dd class="field-even"><p>bool</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="scenedetect.scene_detector.SceneDetector.event_buffer_length">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">event_buffer_length</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#scenedetect.scene_detector.SceneDetector.event_buffer_length" title="Permalink to this definition">¶</a></dt>
+<dd><p>The amount of frames a given event can be buffered for, in time. Represents maximum
+amount any event can be behind <cite>frame_number</cite> in the result of <a class="reference internal" href="#scenedetect.scene_detector.SceneDetector.process_frame" title="scenedetect.scene_detector.SceneDetector.process_frame"><code class="xref py py-meth docutils literal notranslate"><span class="pre">process_frame()</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scenedetect.scene_detector.SceneDetector.stats_manager">
+<span class="sig-name descname"><span class="pre">stats_manager</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="stats_manager.html#scenedetect.stats_manager.StatsManager" title="scenedetect.stats_manager.StatsManager"><span class="pre">StatsManager</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#scenedetect.scene_detector.SceneDetector.stats_manager" title="Permalink to this definition">¶</a></dt>
+<dd><p>Optional <a class="reference internal" href="stats_manager.html#scenedetect.stats_manager.StatsManager" title="scenedetect.stats_manager.StatsManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">StatsManager</span></code></a> to
+use for caching frame metrics to and from.</p>
 </dd></dl>
 
 </dd></dl>
@@ -226,7 +226,7 @@ to be added to the output scene list directly.</p>
           <a href="frame_timecode.html" title="Previous document">FrameTimecode</a>
         </li>
         <li>
-          <a href="stats_manager.html" title="Next document">StatsManager</a>
+          <a href="video_stream.html" title="Next document">VideoStream</a>
           &rarr;
         </li>
     </ul>
@@ -246,7 +246,7 @@ to be added to the output scene list directly.</p>
 
 
 
-<p class="blurb">CLI/API Reference Manual [v0.6.2.dev0]</p>
+<p class="blurb">CLI/API Documentation [v0.6.2.dev0]</p>
 
 
 
@@ -272,17 +272,17 @@ to be added to the output scene list directly.</p>
 <p class="caption" role="heading"><span class="caption-text">Python API Documentation:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../api.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="scene_manager.html">SceneManager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="detectors.html">Detection Algorithms</a></li>
 <li class="toctree-l1"><a class="reference internal" href="backends.html">Backends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scene_manager.html">SceneManager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="video_splitter.html">Video Splitting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stats_manager.html">StatsManager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="frame_timecode.html">FrameTimecode</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">SceneDetector</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.scene_detector.SceneDetector"><code class="docutils literal notranslate"><span class="pre">SceneDetector</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.scene_detector.SparseSceneDetector"><code class="docutils literal notranslate"><span class="pre">SparseSceneDetector</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="stats_manager.html">StatsManager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="video_stream.html">VideoStream</a></li>
 <li class="toctree-l1"><a class="reference internal" href="platform.html">Platform &amp; Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="migration_guide.html">Migration Guide</a></li>
@@ -292,8 +292,10 @@ to be added to the output scene list directly.</p>
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="../api.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Package</a><ul>
       <li>Previous: <a href="frame_timecode.html" title="previous chapter">FrameTimecode</a></li>
-      <li>Next: <a href="stats_manager.html" title="next chapter">StatsManager</a></li>
+      <li>Next: <a href="video_stream.html" title="next chapter">VideoStream</a></li>
+  </ul></li>
   </ul></li>
 </ul>
 </div>

@@ -19,24 +19,37 @@ Skip the first 10 seconds of the input video:
 
     ``scenedetect -i video.mp4 time -s 10s detect-content``
 
-To show a summary of all options and commands:
+Show summary of all options and commands:
 
     ``scenedetect help``
-
-You can also type `help [command]` where `[command]` is a specific command or detection algorithm (e.g. `scenedetect help detect-content` or `scenedetect help split-video`). To show a complete help listing for every command:
-
-    ``scenedetect help all``
 
 
 =======================================================================
 Overview
 =======================================================================
 
-The PySceneDetect command-line interface is grouped into commands which can be combined together, each containing its own set of arguments:
+PySceneDetect is used by specifying a detector and some commands to process a video with:
 
-    ``scenedetect [global options] [detectors] [commands]``
+    ``scenedetect -i video.mp4 [detectors] [commands]``
 
-Where [command] is the name of the command, and ([options]) are the arguments/options associated with the command, if any. Global options (e.g. `--input`, `--framerate`) must be specified before any commands. The order of commands is not strict, but each command should only be specified once.
+Global options (e.g. `--input`, `--config`) must be specified before any commands. The order of commands is not strict, but each command should only be specified once. Detectors and commands can also have options:
+
+    ``scenedetect -i video.mp4 detect-content -t 30 list-scenes -n``
+
+You can use `help [command]` where `[command]` is a specific command or detection algorithm (e.g. `scenedetect help detect-content` or `scenedetect help split-video`). To show the complete help reference for the program you can run:
+
+    ``scenedetect help all``
+
+
+=======================================================================
+System Dependencies
+=======================================================================
+
+If you are having trouble running PySceneDetect, check installed software dependencies with:
+
+    ``scenedetect version --all``
+
+Please include this information when submitting bug reports.
 
 
 =======================================================================
@@ -54,21 +67,18 @@ The ``scenedetect`` command takes the following global options:
                                 set defaults to working directory. Some
                                 commands allow overriding this value.
 
+  -c, --config FILE             Path to config file. If not set, tries to load
+                                one from a location based on your operating system.
+                                Type `scenedetect help` and this option will show
+                                the correct path on your system.
+
+  -s, --stats CSV               Stats file (.csv) path to write frame metrics. If
+                                the file exists, existing metrics will be overwritten.
+                                Can be used to find optimal detector options or for data analysis.
+
   -f, --framerate FPS           Force framerate, in frames/sec (e.g. -f
                                 29.97). Disables check to ensure that all
                                 input videos have the same framerates.
-
-  -d, --downscale N             Integer factor to downscale frames by (e.g. 2,
-                                3, 4...), where the frame is scaled to width/N
-                                x height/N (thus -d 1 implies no downscaling).
-                                Leave unset for automatic downscaling based on
-                                source resolution.
-
-  -fs, --frame-skip N           Skips N frames during processing (-fs 1 skips
-                                every other frame, processing 50% of the
-                                video, -fs 2 processes 33% of the frames, -fs
-                                3 processes 25%, etc...). Reduces processing
-                                speed at expense of accuracy. [default: 0]
 
   -m, --min-scene-len TIMECODE  Minimum length of any scene. TIMECODE can be
                                 specified as exact number of frames, a time in
@@ -76,19 +86,27 @@ The ``scenedetect`` command takes the following global options:
                                 format HH:MM:SS or HH:MM:SS.nnn. [default:
                                 0.6s]
 
-  --drop-short-scenes           Drop scenes shorter than `min-scene-len`
+  --drop-short-scenes           Drop scenes shorter than `--min-scene-len`
                                 instead of combining them with neighbors.
 
   --merge-last-scene            Merge last scene with previous if shorter than
-                                min-scene-len.
+                                `--min-scene-len`.
 
-  -s, --stats CSV               Path to stats file (.csv) for writing frame
-                                metrics to. If the file exists, any metrics
-                                will be processed, otherwise a new file will
-                                be created. Can be used to determine optimal
-                                values for various scene detector options, and
-                                to cache frame calculations in order to speed
-                                up multiple detection runs.
+  -b, --backend BACKEND         Name of backend to use for video input. Some
+                                backends require certain dependencies to be
+                                available before they can be used. Options
+                                are `opencv`, `pyav`, `moviepy`. [default: `opencv`]
+
+  -d, --downscale N             Integer factor to downscale video by (e.g. 2, 3, 4...)
+                                before processing. Frame is scaled to width/N x height/N.
+                                Leave unset for automatic downscaling based on resolution.
+                                Set to 1 to disable downscaling. [default: auto]
+
+  -fs, --frame-skip N           Skips N frames during processing (-fs 1 skips
+                                every other frame, processing 50% of the
+                                video, -fs 2 processes 33% of the frames, -fs
+                                3 processes 25%, etc...). Reduces processing
+                                speed at expense of accuracy. [default: 0]
 
   -v, --verbosity LEVEL         Level of debug/info/error information to show.
                                 Must be one of: debug, info, warning, error,
@@ -103,13 +121,3 @@ The ``scenedetect`` command takes the following global options:
 
   -q, --quiet                   Suppresses all output of PySceneDetect to the
                                 terminal/stdout. Equivalent to `-v none`.
-
-  -b, --backend BACKEND         Name of backend to use for video input.
-                                Backends available on this system:
-                                dict_keys(['opencv', 'pyav']) [default:
-                                opencv]
-
-  -c, --config FILE             Path to config file. If not set, tries to load
-                                one from a location based on your operating system.
-                                Type `scenedetect help` and this option will show
-                                the correct path on your system.

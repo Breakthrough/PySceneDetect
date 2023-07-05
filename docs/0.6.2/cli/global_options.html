@@ -15,7 +15,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Detectors" href="detectors.html" />
-    <link rel="prev" title="PySceneDetect Manual" href="../index.html" />
+    <link rel="prev" title="PySceneDetect Documentation" href="../index.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
@@ -48,22 +48,33 @@
 <blockquote>
 <div><p><code class="docutils literal notranslate"><span class="pre">scenedetect</span> <span class="pre">-i</span> <span class="pre">video.mp4</span> <span class="pre">time</span> <span class="pre">-s</span> <span class="pre">10s</span> <span class="pre">detect-content</span></code></p>
 </div></blockquote>
-<p>To show a summary of all options and commands:</p>
+<p>Show summary of all options and commands:</p>
 <blockquote>
 <div><p><code class="docutils literal notranslate"><span class="pre">scenedetect</span> <span class="pre">help</span></code></p>
-</div></blockquote>
-<p>You can also type <cite>help [command]</cite> where <cite>[command]</cite> is a specific command or detection algorithm (e.g. <cite>scenedetect help detect-content</cite> or <cite>scenedetect help split-video</cite>). To show a complete help listing for every command:</p>
-<blockquote>
-<div><p><code class="docutils literal notranslate"><span class="pre">scenedetect</span> <span class="pre">help</span> <span class="pre">all</span></code></p>
 </div></blockquote>
 </section>
 <section id="overview">
 <h2>Overview<a class="headerlink" href="#overview" title="Permalink to this heading">¶</a></h2>
-<p>The PySceneDetect command-line interface is grouped into commands which can be combined together, each containing its own set of arguments:</p>
+<p>PySceneDetect is used by specifying a detector and some commands to process a video with:</p>
 <blockquote>
-<div><p><code class="docutils literal notranslate"><span class="pre">scenedetect</span> <span class="pre">[global</span> <span class="pre">options]</span> <span class="pre">[detectors]</span> <span class="pre">[commands]</span></code></p>
+<div><p><code class="docutils literal notranslate"><span class="pre">scenedetect</span> <span class="pre">-i</span> <span class="pre">video.mp4</span> <span class="pre">[detectors]</span> <span class="pre">[commands]</span></code></p>
 </div></blockquote>
-<p>Where [command] is the name of the command, and ([options]) are the arguments/options associated with the command, if any. Global options (e.g. <cite>–input</cite>, <cite>–framerate</cite>) must be specified before any commands. The order of commands is not strict, but each command should only be specified once.</p>
+<p>Global options (e.g. <cite>–input</cite>, <cite>–config</cite>) must be specified before any commands. The order of commands is not strict, but each command should only be specified once. Detectors and commands can also have options:</p>
+<blockquote>
+<div><p><code class="docutils literal notranslate"><span class="pre">scenedetect</span> <span class="pre">-i</span> <span class="pre">video.mp4</span> <span class="pre">detect-content</span> <span class="pre">-t</span> <span class="pre">30</span> <span class="pre">list-scenes</span> <span class="pre">-n</span></code></p>
+</div></blockquote>
+<p>You can use <cite>help [command]</cite> where <cite>[command]</cite> is a specific command or detection algorithm (e.g. <cite>scenedetect help detect-content</cite> or <cite>scenedetect help split-video</cite>). To show the complete help reference for the program you can run:</p>
+<blockquote>
+<div><p><code class="docutils literal notranslate"><span class="pre">scenedetect</span> <span class="pre">help</span> <span class="pre">all</span></code></p>
+</div></blockquote>
+</section>
+<section id="system-dependencies">
+<h2>System Dependencies<a class="headerlink" href="#system-dependencies" title="Permalink to this heading">¶</a></h2>
+<p>If you are having trouble running PySceneDetect, check installed software dependencies with:</p>
+<blockquote>
+<div><p><code class="docutils literal notranslate"><span class="pre">scenedetect</span> <span class="pre">version</span> <span class="pre">--all</span></code></p>
+</div></blockquote>
+<p>Please include this information when submitting bug reports.</p>
 </section>
 <section id="global-options">
 <h2>Global Options<a class="headerlink" href="#global-options" title="Permalink to this heading">¶</a></h2>
@@ -80,24 +91,21 @@ file, output videos, images, etc…). If not
 set defaults to working directory. Some
 commands allow overriding this value.</p>
 </dd>
+<dt><kbd><span class="option">-c</span>, <span class="option">--config <var>FILE</var></span></kbd></dt>
+<dd><p>Path to config file. If not set, tries to load
+one from a location based on your operating system.
+Type <cite>scenedetect help</cite> and this option will show
+the correct path on your system.</p>
+</dd>
+<dt><kbd><span class="option">-s</span>, <span class="option">--stats <var>CSV</var></span></kbd></dt>
+<dd><p>Stats file (.csv) path to write frame metrics. If
+the file exists, existing metrics will be overwritten.
+Can be used to find optimal detector options or for data analysis.</p>
+</dd>
 <dt><kbd><span class="option">-f</span>, <span class="option">--framerate <var>FPS</var></span></kbd></dt>
 <dd><p>Force framerate, in frames/sec (e.g. -f
 29.97). Disables check to ensure that all
 input videos have the same framerates.</p>
-</dd>
-<dt><kbd><span class="option">-d</span>, <span class="option">--downscale <var>N</var></span></kbd></dt>
-<dd><p>Integer factor to downscale frames by (e.g. 2,
-3, 4…), where the frame is scaled to width/N
-x height/N (thus -d 1 implies no downscaling).
-Leave unset for automatic downscaling based on
-source resolution.</p>
-</dd>
-<dt><kbd><span class="option">-f<var>s</var></span>, <span class="option">--frame-skip <var>N</var></span></kbd></dt>
-<dd><p>Skips N frames during processing (-fs 1 skips
-every other frame, processing 50% of the
-video, -fs 2 processes 33% of the frames, -fs
-3 processes 25%, etc…). Reduces processing
-speed at expense of accuracy. [default: 0]</p>
 </dd>
 <dt><kbd><span class="option">-m</span>, <span class="option">--min-scene-len <var>TIMECODE</var></span></kbd></dt>
 <dd><p>Minimum length of any scene. TIMECODE can be
@@ -107,23 +115,33 @@ format HH:MM:SS or HH:MM:SS.nnn. [default:
 0.6s]</p>
 </dd>
 </dl>
-<p class="attribution">—drop-short-scenes           Drop scenes shorter than <cite>min-scene-len</cite>
+<p class="attribution">—drop-short-scenes           Drop scenes shorter than <cite>–min-scene-len</cite>
 instead of combining them with neighbors.</p>
 </div></blockquote>
 <blockquote>
 <div><dl class="option-list">
 <dt><kbd><span class="option">--merge-last-scene</span></kbd></dt>
 <dd><p>Merge last scene with previous if shorter than
-min-scene-len.</p>
+<cite>–min-scene-len</cite>.</p>
 </dd>
-<dt><kbd><span class="option">-s</span>, <span class="option">--stats <var>CSV</var></span></kbd></dt>
-<dd><p>Path to stats file (.csv) for writing frame
-metrics to. If the file exists, any metrics
-will be processed, otherwise a new file will
-be created. Can be used to determine optimal
-values for various scene detector options, and
-to cache frame calculations in order to speed
-up multiple detection runs.</p>
+<dt><kbd><span class="option">-b</span>, <span class="option">--backend <var>BACKEND</var></span></kbd></dt>
+<dd><p>Name of backend to use for video input. Some
+backends require certain dependencies to be
+available before they can be used. Options
+are <cite>opencv</cite>, <cite>pyav</cite>, <cite>moviepy</cite>. [default: <cite>opencv</cite>]</p>
+</dd>
+<dt><kbd><span class="option">-d</span>, <span class="option">--downscale <var>N</var></span></kbd></dt>
+<dd><p>Integer factor to downscale video by (e.g. 2, 3, 4…)
+before processing. Frame is scaled to width/N x height/N.
+Leave unset for automatic downscaling based on resolution.
+Set to 1 to disable downscaling. [default: auto]</p>
+</dd>
+<dt><kbd><span class="option">-f<var>s</var></span>, <span class="option">--frame-skip <var>N</var></span></kbd></dt>
+<dd><p>Skips N frames during processing (-fs 1 skips
+every other frame, processing 50% of the
+video, -fs 2 processes 33% of the frames, -fs
+3 processes 25%, etc…). Reduces processing
+speed at expense of accuracy. [default: 0]</p>
 </dd>
 <dt><kbd><span class="option">-v</span>, <span class="option">--verbosity <var>LEVEL</var></span></kbd></dt>
 <dd><p>Level of debug/info/error information to show.
@@ -142,18 +160,6 @@ be generated with info-level verbosity.</p>
 <dd><p>Suppresses all output of PySceneDetect to the
 terminal/stdout. Equivalent to <cite>-v none</cite>.</p>
 </dd>
-<dt><kbd><span class="option">-b</span>, <span class="option">--backend <var>BACKEND</var></span></kbd></dt>
-<dd><p>Name of backend to use for video input.
-Backends available on this system:
-dict_keys([‘opencv’, ‘pyav’]) [default:
-opencv]</p>
-</dd>
-<dt><kbd><span class="option">-c</span>, <span class="option">--config <var>FILE</var></span></kbd></dt>
-<dd><p>Path to config file. If not set, tries to load
-one from a location based on your operating system.
-Type <cite>scenedetect help</cite> and this option will show
-the correct path on your system.</p>
-</dd>
 </dl>
 </div></blockquote>
 </section>
@@ -167,7 +173,7 @@ the correct path on your system.</p>
     <ul>
         <li>
           &larr;
-          <a href="../index.html" title="Previous document">PySceneDetect Manual</a>
+          <a href="../index.html" title="Previous document">PySceneDetect Documentation</a>
         </li>
         <li>
           <a href="detectors.html" title="Next document">Detectors</a>
@@ -190,7 +196,7 @@ the correct path on your system.</p>
 
 
 
-<p class="blurb">CLI/API Reference Manual [v0.6.2.dev0]</p>
+<p class="blurb">CLI/API Documentation [v0.6.2.dev0]</p>
 
 
 
@@ -210,6 +216,7 @@ the correct path on your system.</p>
 <li class="toctree-l1 current"><a class="current reference internal" href="#"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Application</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#quickstart">Quickstart</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#system-dependencies">System Dependencies</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#global-options">Global Options</a></li>
 </ul>
 </li>
@@ -221,13 +228,13 @@ the correct path on your system.</p>
 <p class="caption" role="heading"><span class="caption-text">Python API Documentation:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../api.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../api/scene_manager.html">SceneManager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api/detectors.html">Detection Algorithms</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api/backends.html">Backends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/scene_manager.html">SceneManager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api/video_splitter.html">Video Splitting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/stats_manager.html">StatsManager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api/frame_timecode.html">FrameTimecode</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api/scene_detector.html">SceneDetector</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../api/stats_manager.html">StatsManager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api/video_stream.html">VideoStream</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api/platform.html">Platform &amp; Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api/migration_guide.html">Migration Guide</a></li>
@@ -237,7 +244,7 @@ the correct path on your system.</p>
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="../index.html" title="previous chapter">PySceneDetect Manual</a></li>
+      <li>Previous: <a href="../index.html" title="previous chapter">PySceneDetect Documentation</a></li>
       <li>Next: <a href="detectors.html" title="next chapter">Detectors</a></li>
   </ul></li>
 </ul>

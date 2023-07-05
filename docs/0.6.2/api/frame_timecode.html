@@ -15,7 +15,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="SceneDetector" href="scene_detector.html" />
-    <link rel="prev" title="Video Splitting" href="video_splitter.html" />
+    <link rel="prev" title="StatsManager" href="stats_manager.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
@@ -35,10 +35,10 @@
   <section id="module-scenedetect.frame_timecode">
 <span id="frametimecode"></span><span id="scenedetect-frame-timecode"></span><h1>FrameTimecode<a class="headerlink" href="#module-scenedetect.frame_timecode" title="Permalink to this heading">¶</a></h1>
 <p><code class="docutils literal notranslate"><span class="pre">scenedetect.frame_timecode</span></code> Module</p>
-<p>This module contains the <a class="reference internal" href="#scenedetect.frame_timecode.FrameTimecode" title="scenedetect.frame_timecode.FrameTimecode"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrameTimecode</span></code></a> object, which is used as a way for PySceneDetect
-to store frame-accurate timestamps of each cut. This is done by also specifying the video framerate
-with the timecode, allowing a frame number to be converted to/from a floating-point number of
-seconds, or string in the form <cite>“HH:MM:SS[.nnn]”</cite> where the <cite>[.nnn]</cite> part is optional.</p>
+<p>This module implements <a class="reference internal" href="#scenedetect.frame_timecode.FrameTimecode" title="scenedetect.frame_timecode.FrameTimecode"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrameTimecode</span></code></a> which is used as a way for PySceneDetect to store
+frame-accurate timestamps of each cut. This is done by also specifying the video framerate with the
+timecode, allowing a frame number to be converted to/from a floating-point number of seconds, or
+string in the form <cite>“HH:MM:SS[.nnn]”</cite> where the <cite>[.nnn]</cite> part is optional.</p>
 <p>See the following examples, or the <a class="reference internal" href="#scenedetect.frame_timecode.FrameTimecode" title="scenedetect.frame_timecode.FrameTimecode"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrameTimecode</span> <span class="pre">constructor</span></code></a>.</p>
 <section id="usage-examples">
 <h2>Usage Examples<a class="headerlink" href="#usage-examples" title="Permalink to this heading">¶</a></h2>
@@ -212,6 +212,18 @@ will be truncated to the specified precision.</p></li>
 <dd><p>Maximum amount two framerates can differ by for equality testing.</p>
 </dd></dl>
 
+<dl class="py data">
+<dt class="sig sig-object py" id="scenedetect.frame_timecode.TimecodeValue">
+<span class="sig-prename descclassname"><span class="pre">scenedetect.frame_timecode.</span></span><span class="sig-name descname"><span class="pre">TimecodeValue</span></span><a class="headerlink" href="#scenedetect.frame_timecode.TimecodeValue" title="Permalink to this definition">¶</a></dt>
+<dd><p>Named type for values representing timecodes. Must be in one of the following forms:</p>
+<ol class="arabic simple">
+<li><p>Timecode as <cite>str</cite> in the form ‘HH:MM:SS[.nnn]’ (<cite>‘01:23:45’</cite> or <cite>‘01:23:45.678’</cite>)</p></li>
+<li><p>Number of seconds as <cite>float</cite>, or <cite>str</cite> in form ‘Ss’ or ‘S.SSSs’ (<cite>‘2s’</cite> or <cite>‘2.3456s’</cite>)</p></li>
+<li><p>Exact number of frames as <cite>int</cite>, or <cite>str</cite> in form NNNNN (<cite>123</cite> or <cite>‘123’</cite>)</p></li>
+</ol>
+<p>alias of <code class="xref py py-obj docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</p>
+</dd></dl>
+
 </section>
 
 
@@ -222,7 +234,7 @@ will be truncated to the specified precision.</p></li>
     <ul>
         <li>
           &larr;
-          <a href="video_splitter.html" title="Previous document">Video Splitting</a>
+          <a href="stats_manager.html" title="Previous document">StatsManager</a>
         </li>
         <li>
           <a href="scene_detector.html" title="Next document">SceneDetector</a>
@@ -245,7 +257,7 @@ will be truncated to the specified precision.</p></li>
 
 
 
-<p class="blurb">CLI/API Reference Manual [v0.6.2.dev0]</p>
+<p class="blurb">CLI/API Documentation [v0.6.2.dev0]</p>
 
 
 
@@ -271,18 +283,19 @@ will be truncated to the specified precision.</p></li>
 <p class="caption" role="heading"><span class="caption-text">Python API Documentation:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../api.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="scene_manager.html">SceneManager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="detectors.html">Detection Algorithms</a></li>
 <li class="toctree-l1"><a class="reference internal" href="backends.html">Backends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scene_manager.html">SceneManager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="video_splitter.html">Video Splitting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stats_manager.html">StatsManager</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">FrameTimecode</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#usage-examples">Usage Examples</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.frame_timecode.FrameTimecode"><code class="docutils literal notranslate"><span class="pre">FrameTimecode</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.frame_timecode.MAX_FPS_DELTA"><code class="docutils literal notranslate"><span class="pre">MAX_FPS_DELTA</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scenedetect.frame_timecode.TimecodeValue"><code class="docutils literal notranslate"><span class="pre">TimecodeValue</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="scene_detector.html">SceneDetector</a></li>
-<li class="toctree-l1"><a class="reference internal" href="stats_manager.html">StatsManager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="video_stream.html">VideoStream</a></li>
 <li class="toctree-l1"><a class="reference internal" href="platform.html">Platform &amp; Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="migration_guide.html">Migration Guide</a></li>
@@ -292,8 +305,10 @@ will be truncated to the specified precision.</p></li>
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="video_splitter.html" title="previous chapter">Video Splitting</a></li>
+  <li><a href="../api.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Package</a><ul>
+      <li>Previous: <a href="stats_manager.html" title="previous chapter">StatsManager</a></li>
       <li>Next: <a href="scene_detector.html" title="next chapter">SceneDetector</a></li>
+  </ul></li>
   </ul></li>
 </ul>
 </div>
