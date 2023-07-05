@@ -46,12 +46,12 @@ Table of Contents
 
     api
     api/detectors
-    api/scene_manager
     api/backends
+    api/scene_manager
     api/video_splitter
+    api/stats_manager
     api/frame_timecode
     api/scene_detector
-    api/stats_manager
     api/video_stream
     api/platform
     api/migration_guide
