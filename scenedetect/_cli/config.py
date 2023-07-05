@@ -254,7 +254,7 @@ CONFIG_MAP: ConfigDict = {
         'threshold': RangeValue(12.0, min_val=0.0, max_val=255.0),
     },
     'load-scenes': {
-        'cut-col-name': 'Start Frame',
+        'start-col-name': 'Start Frame',
     },
     'export-html': {
         'filename': '$VIDEO_NAME-Scenes.html',

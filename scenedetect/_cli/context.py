@@ -440,19 +440,20 @@ class CliContext:
 
         self.options_processed = options_processed_orig
 
-    def handle_load_scenes(self, input: AnyStr, cut_col_name: Optional[str],
+    def handle_load_scenes(self, input: AnyStr, start_col_name: Optional[str],
                            framerate: Optional[float]):
         """Handle `load-scenes` command options."""
         self._check_input_open()
         options_processed_orig = self.options_processed
         self.options_processed = False
 
-        cut_col_name = self.config.get_value("load-scenes", "cut-col-name", cut_col_name)
+        start_col_name = self.config.get_value("load-scenes", "start-col-name", start_col_name)
 
         if framerate is None:
             framerate = self.video_stream.frame_rate
 
-        self._add_detector(SceneLoader(file=input, cut_col_name=cut_col_name, framerate=framerate))
+        self._add_detector(
+            SceneLoader(file=input, start_col_name=start_col_name, framerate=framerate))
 
         self.options_processed = options_processed_orig
 

@@ -33,11 +33,11 @@ class SceneLoader(SceneDetector):
     the `load-scenes` functionality. Incompatible with other detectors.
     """
 
-    def __init__(self, file=None, cut_col_name="Start Frame", framerate=None):
+    def __init__(self, file=None, start_col_name="Start Frame", framerate=None):
         """
         Arguments:
             file:   Path to csv file containing scene data for video
-            cut_col_name:  Header for the column containing the frame or timecode where new scenes
+            start_col_name:  Header for the column containing the frame or timecode where new scenes
                 should start.
             framerate:  Framerate for the input video, used for handling timecode to frame number
                 conversions. Only used if timecodes are used as input for cut points.
@@ -54,22 +54,23 @@ class SceneLoader(SceneDetector):
         self.csv_file = file
 
         # Open csv and check and read first row for column headers
-        (self.file_reader, csv_headers) = self._open_csv(self.csv_file, cut_col_name)
+        (self.file_reader, csv_headers) = self._open_csv(self.csv_file, start_col_name)
 
         # Check to make sure column headers are present
-        if cut_col_name not in csv_headers:
+        if start_col_name not in csv_headers:
             raise ValueError('specified column header for scene start is not present')
 
-        self._col_idx = csv_headers.index(cut_col_name)
+        self._col_idx = csv_headers.index(start_col_name)
         self._last_scene_row = None
         self._scene_start = None
 
         self._get_next_scene(self.file_reader, self.framerate)
-        # PySceneDetect works on cuts, so we have to skip the first scene and use the first frame
-        # of the next scene as the cut point.
+        # `SceneDetector` works on cuts, so we have to skip the first scene and use the first frame
+        # of the next scene as the cut point. This can be fixed if we used `SparseSceneDetector`
+        # but this part of the API is being reworked and hasn't been used by any detectors yet.
         self._get_next_scene(self.file_reader, self.framerate)
 
-    def _open_csv(self, csv_file, cut_col_name):
+    def _open_csv(self, csv_file, start_col_name):
         """Opens the specified csv file for reading.
 
         Arguments:
@@ -81,7 +82,7 @@ class SceneLoader(SceneDetector):
         input_file = open(csv_file, 'r')
         file_reader = csv.reader(input_file)
         csv_headers = next(file_reader)
-        if not cut_col_name in csv_headers:
+        if not start_col_name in csv_headers:
             csv_headers = next(file_reader)
         return (file_reader, csv_headers)
 
