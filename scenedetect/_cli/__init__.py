@@ -244,8 +244,7 @@ def scenedetect_cli(
     logfile: Optional[AnyStr],
     quiet: bool,
 ):
-    """
-    """
+    """"""
     assert isinstance(ctx.obj, CliContext)
     ctx.call_on_close(lambda: run_scenedetect(ctx.obj))
     ctx.obj.handle_options(
@@ -396,9 +395,9 @@ Values can be specified as frames (NNNN), seconds (NNNN.NNs), or timecode (HH:MM
 
     time --duration 60s
 
-    Note that --end and --duration are mutually exclusive (i.e. only one of the two
-    can be set). Lastly, the following is an example using absolute frame numbers
-    to process frames 0 through 1000:
+Note that --end and --duration are mutually exclusive (i.e. only one of the two
+can be set). Lastly, the following is an example using absolute frame numbers
+to process frames 0 through 1000:
 
     time --start 0 --end 1000
     """

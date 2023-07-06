@@ -5,27 +5,17 @@
 Commands
 ***********************************************************************
 
-The following commands are available when using ``scenedetect``. Several commands can be combined together (the order does not matter) to control various input/output options.
-
-The following is a list of the available commands along with a brief description of the command's function and an example.
-
-
-Help/information commands:
-
- - :ref:`help <info Commands>` - Prints help and usage information for commands
-    ``help`` or ``help split-video`` or ``help all``
- - :ref:`about <info Commands>` - Prints license and copyright information about PySceneDetect
- - :ref:`version <info Commands>` - Print PySceneDetect version Number
+Commands can be combined together (order does not matter) to control various input/output options.
 
 Input/output commands (applies to input videos and detected scenes):
 
  - :ref:`time <time Command>` - Set start time/end time/duration of input video
     ``time --start 00:01:00 --end 00:02:00``
 
- - :ref:`list-scenes <list-scenes Command>` - Save start/end/duration of each scene in .CSV format
+ - :ref:`list-scenes <list-scenes Command>` - Save scene start/end times in CSV format
     ``list-scenes`` or ``list-scenes --no-output-file``
 
- - :ref:`load-scenes <load-scenes Command>` - Save start/end/duration of each scene in .CSV format
+ - :ref:`load-scenes <load-scenes Command>` - Load edited scenes from ``list-scenes``
     ``load-scenes -i video-Scenes.csv``
 
  - :ref:`save-images <save-images Command>` - Extract frames from every detected scene as images
@@ -36,6 +26,15 @@ Input/output commands (applies to input videos and detected scenes):
 
  - :ref:`export-html <export-html Command>` - Export scene list to HTML file
     ``export-html`` or ``export-html --no-images``
+
+Help/information commands:
+
+ - :ref:`help <info Commands>` - Prints help and usage information for commands
+    ``help`` or ``help split-video`` or ``help all``
+
+ - :ref:`about <info Commands>` - Prints license and copyright information about PySceneDetect
+
+ - :ref:`version <info Commands>` - Print PySceneDetect version Number
 
 .. note:: When using multiple commands, make sure to not specify the same command twice. The order of commands does not matter, but each command should only be specified once.
 

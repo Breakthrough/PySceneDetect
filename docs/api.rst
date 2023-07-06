@@ -131,7 +131,7 @@ Module Reference
 .. toctree::
     :maxdepth: 3
     :caption: PySceneDetect Module Documentation
-    :name: apitoc
+    :name: fullapitoc
 
     api/detectors
     api/backends
