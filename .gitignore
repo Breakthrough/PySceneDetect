@@ -1,4 +1,5 @@
 docs/_build/
+website/build/
 tests/resources/*
 *.mp4
 *.jpg
@@ -6,8 +7,6 @@ tests/resources/*
 *.patch
 *.exe
 *.mkv
-*.rtf
-*.txt
 *.m4v
 *.csv
 
