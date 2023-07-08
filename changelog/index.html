@@ -68,8 +68,6 @@
     <ul class="current">
     <li class="toctree-l2"><a class="reference internal" href="#pyscenedetect-06">PySceneDetect 0.6</a>
         <ul>
-    <li class="toctree-l3"><a class="reference internal" href="#062-in-development">0.6.2 (In Development)</a>
-    </li>
     <li class="toctree-l3"><a class="reference internal" href="#061-november-28-2022">0.6.1 (November 28, 2022)</a>
         <ul>
     <li class="toctree-l4"><a class="reference internal" href="#release-notes">Release Notes</a>
@@ -261,22 +259,6 @@
               
                 <h1 id="pyscenedetect-releases">PySceneDetect Releases</h1>
 <h2 id="pyscenedetect-06">PySceneDetect 0.6</h2>
-<h3 id="062-in-development">0.6.2 (<em>In Development</em>)</h3>
-<p><strong>Command-Line Changes:</strong></p>
-<ul>
-<li>[bugfix] Fix <code>-d</code>/<code>--duration</code> and <code>-e</code>/<code>--end</code> options of <code>time</code> command consuming one extra frame <a href="https://github.com/Breakthrough/PySceneDetect/issues/307">#307</a></li>
-<li>[bugfix] Fix incorrect end timecode for final scene when last frame of video is a new scene <a href="https://github.com/Breakthrough/PySceneDetect/issues/307">#307</a></li>
-</ul>
-<p><strong>General:</strong></p>
-<ul>
-<li>[bugfix] Fix <code>end_time</code> always consuming one extra frame <a href="https://github.com/Breakthrough/PySceneDetect/issues/307">#307</a></li>
-<li>[bugfix] Fix incorrect end timecode for last scene when <code>start_in_scene</code> is <code>True</code> or the final scene contains a single frame <a href="https://github.com/Breakthrough/PySceneDetect/issues/307">#307</a></li>
-<li>[bugfix] Fix MoviePy read next frame <a href="https://github.com/Breakthrough/PySceneDetect/issues/320">#320</a></li>
-<li>[bugfix] Rename <code>ThresholdDetector</code> metric <code>delta_rgb</code> metric to <code>average_rgb</code></li>
-<li>[general] Add support for PyAV 10.0 <a href="https://github.com/Breakthrough/PySceneDetect/issues/292">#292</a></li>
-<li>[general] Use platformdirs package instead of appdirs <a href="https://github.com/Breakthrough/PySceneDetect/issues/309">#309</a></li>
-<li>[feature] Add ability for <code>ThresholdDetector</code> to detect fade out to white <a href="https://github.com/Breakthrough/PySceneDetect/issues/143">#143</a></li>
-</ul>
 <h3 id="061-november-28-2022">0.6.1 (November 28, 2022)</h3>
 <h4 id="release-notes">Release Notes</h4>
 <p>Includes <a href="https://github.com/Zulko/moviepy">MoviePy support</a>, edge detection capability for fast cuts, and several enhancements/bugfixes.</p>
