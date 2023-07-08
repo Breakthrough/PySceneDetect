@@ -31,7 +31,6 @@ from scenedetect.platform import get_system_version_info
 
 from scenedetect._cli.config import CHOICE_MAP, CONFIG_FILE_PATH, CONFIG_MAP
 from scenedetect._cli.context import CliContext, USER_CONFIG
-from scenedetect._cli.controller import run_scenedetect
 
 logger = logging.getLogger('pyscenedetect')
 
@@ -100,7 +99,10 @@ def _print_help_header() -> None:
 @click.group(
     chain=True,
     context_settings=dict(help_option_names=['-h', '--help']),
+    invoke_without_command=True,
 )
+# We cannot make this a required argument otherwise we will reject commands of the form
+# `scenedetect help detect-content` or `scenedetect detect-content --help`.
 @click.option(
     '--input',
     '-i',
@@ -227,7 +229,7 @@ def _print_help_header() -> None:
 )
 @click.pass_context
 # pylint: disable=redefined-builtin
-def scenedetect_cli(
+def scenedetect_command(
     ctx: click.Context,
     input: Optional[AnyStr],
     output: Optional[AnyStr],
@@ -246,7 +248,6 @@ def scenedetect_cli(
 ):
     """"""
     assert isinstance(ctx.obj, CliContext)
-    ctx.call_on_close(lambda: run_scenedetect(ctx.obj))
     ctx.obj.handle_options(
         input_path=input,
         output=output,
@@ -698,6 +699,7 @@ Examples:
     '-i',
     multiple=False,
     metavar='FILE',
+    required=True,
     type=click.Path(exists=True, file_okay=True, readable=True, resolve_path=True),
     help='Scene list to read cut information from.')
 @click.option(
@@ -1128,23 +1130,23 @@ def _add_cli_command(cli: click.Group, command: click.Command):
 # ----------------------------------------------------------------------
 
 # Info Commands
-_add_cli_command(scenedetect_cli, help_command)
-_add_cli_command(scenedetect_cli, version_command)
-_add_cli_command(scenedetect_cli, about_command)
+_add_cli_command(scenedetect_command, help_command)
+_add_cli_command(scenedetect_command, version_command)
+_add_cli_command(scenedetect_command, about_command)
 
 # ----------------------------------------------------------------------
 # Commands Added To Help List
 # ----------------------------------------------------------------------
 
 # Input / Output
-_add_cli_command(scenedetect_cli, time_command)
-_add_cli_command(scenedetect_cli, export_html_command)
-_add_cli_command(scenedetect_cli, list_scenes_command)
-_add_cli_command(scenedetect_cli, save_images_command)
-_add_cli_command(scenedetect_cli, split_video_command)
+_add_cli_command(scenedetect_command, time_command)
+_add_cli_command(scenedetect_command, export_html_command)
+_add_cli_command(scenedetect_command, list_scenes_command)
+_add_cli_command(scenedetect_command, save_images_command)
+_add_cli_command(scenedetect_command, split_video_command)
 
 # Detection Algorithms
-_add_cli_command(scenedetect_cli, detect_content_command)
-_add_cli_command(scenedetect_cli, detect_threshold_command)
-_add_cli_command(scenedetect_cli, detect_adaptive_command)
-_add_cli_command(scenedetect_cli, load_scenes_command)
+_add_cli_command(scenedetect_command, detect_content_command)
+_add_cli_command(scenedetect_command, detect_threshold_command)
+_add_cli_command(scenedetect_command, detect_adaptive_command)
+_add_cli_command(scenedetect_command, load_scenes_command)

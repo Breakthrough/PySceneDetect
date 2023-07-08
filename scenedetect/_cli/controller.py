@@ -18,6 +18,7 @@ from string import Template
 import time
 from typing import Dict, List, Tuple, Optional
 
+from scenedetect.detectors import AdaptiveDetector
 from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.platform import get_and_create_path, logging_redirect_tqdm, FakeTqdmLoggingRedirect
 from scenedetect.scene_manager import save_images, write_scene_list, write_scene_list_html
@@ -36,16 +37,12 @@ def run_scenedetect(context: CliContext):
     Arguments:
         context: Prevalidated command-line option context to use for processing.
     """
-    if not context.process_input_flag:
-        logger.debug('No input to process.')
-        return
-    if not context.options_processed:
-        logger.debug('CLI options were not parsed successfully.')
+    # No input may have been specified if we printed help for example.
+    if context.scene_manager is None:
         return
     if context.scene_manager.get_num_detectors() == 0:
-        logger.error('No scene detectors specified (detect-content, detect-threshold, etc...),\n'
-                     ' or failed to process all command line arguments.')
-        return
+        # TODO(#329): Make this configurable.
+        context.scene_manager.add_detector(AdaptiveDetector())
 
     perf_start_time = time.time()
     if context.start_time is not None:

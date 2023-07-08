@@ -12,22 +12,27 @@
 #
 """Entry point for PySceneDetect's command-line interface."""
 
-# PySceneDetect Library Imports
-from scenedetect._cli import scenedetect_cli as cli
+import sys
+
+from scenedetect._cli import scenedetect_command
 from scenedetect._cli.context import CliContext
+from scenedetect._cli.controller import run_scenedetect
 
 
 def main():
-    """PySceneDetect command-line interface (CLI) entry point.
+    """PySceneDetect command-line interface (CLI) entry point."""
+    cli_ctx = CliContext()
+    try:
+        # Process command line arguments and subcommands to initialize the context.
+        scenedetect_command.main(obj=cli_ctx) # Parse CLI arguments with registered callbacks.
+    except SystemExit as exit:
+        if exit.code != 0:
+            raise
 
-    Passes control flow to the CLI parser (using the click library), whose
-    entry point is the decorated scenedetect._cli.scenedetect_cli function.
-
-    Once options have been processed, the main program logic is executed in the
-    :func:`scenedetect._cli.controller.run_scenedetect` function.
-    """
-    cli_ctx = CliContext() # CliContext object passed between CLI commands.
-    cli.main(obj=cli_ctx)  # Parse CLI arguments with registered callbacks.
+    # If we get here, processing the command line and loading the context worked. Let's run
+    # the controller if we didn't process any help requests.
+    if not ('-h' in sys.argv or '--help' in sys.argv):
+        run_scenedetect(cli_ctx)
 
 
 if __name__ == '__main__':

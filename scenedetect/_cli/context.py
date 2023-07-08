@@ -103,9 +103,6 @@ class CliContext:
 
     def __init__(self):
         self.config = USER_CONFIG
-        self.options_processed: bool = False # True when CLI option parsing is complete.
-        self.process_input_flag: bool = True # If False, skips video processing.
-
         self.video_stream: VideoStream = None
         self.scene_manager: SceneManager = None
         self.stats_manager: StatsManager = None
@@ -162,9 +159,6 @@ class CliContext:
         self.image_width: int = None          # export-html -w/--image-width
         self.image_height: int = None         # export-html -h/--image-height
 
-        # Internal variables
-        self._check_input_open_failed = False # Used to avoid excessive log messages
-
     #
     # Command Handlers
     #
@@ -195,7 +189,6 @@ class CliContext:
             click.BadParameter: One of the given options/parameters is invalid.
             click.Abort: Fatal initialization failure.
         """
-        self.options_processed = False
 
         # TODO(v1.0): Make the stats value optional (e.g. allow -s only), and allow use of
         # $VIDEO_NAME macro in the name.  Default to $VIDEO_NAME.csv.
@@ -273,22 +266,21 @@ class CliContext:
             self.stats_manager = StatsManager()
 
         logger.debug('Initializing SceneManager.')
-        self.scene_manager = SceneManager(self.stats_manager)
+        scene_manager = SceneManager(self.stats_manager)
 
         if downscale is None and self.config.is_default("global", "downscale"):
-            self.scene_manager.auto_downscale = True
+            scene_manager.auto_downscale = True
         else:
-            self.scene_manager.auto_downscale = False
+            scene_manager.auto_downscale = False
             downscale = self.config.get_value("global", "downscale", downscale)
             try:
-                self.scene_manager.downscale = downscale
+                scene_manager.downscale = downscale
             except ValueError as ex:
                 logger.debug(str(ex))
                 raise click.BadParameter(str(ex), param_hint='downscale factor')
-        self.scene_manager.interpolation = Interpolation[self.config.get_value(
+        scene_manager.interpolation = Interpolation[self.config.get_value(
             'global', 'downscale-method').upper()]
-        # This is the *only* place self.options_processed should be set to True.
-        self.options_processed = True
+        self.scene_manager = scene_manager
 
     def handle_detect_content(
         self,
@@ -299,9 +291,7 @@ class CliContext:
         kernel_size: Optional[int],
     ):
         """Handle detect-content command options."""
-        self._check_input_open()
-        options_processed_orig = self.options_processed
-        self.options_processed = False
+        self._ensure_input_open()
 
         if self.drop_short_scenes:
             min_scene_len = 0
@@ -329,7 +319,6 @@ class CliContext:
         }
         logger.debug('Adding detector: ContentDetector(%s)', detector_args)
         self._add_detector(scenedetect.detectors.ContentDetector(**detector_args))
-        self.options_processed = options_processed_orig
 
     def handle_detect_adaptive(
         self,
@@ -343,9 +332,7 @@ class CliContext:
         min_delta_hsv: Optional[float],
     ):
         """Handle detect-adaptive command options."""
-        self._check_input_open()
-        options_processed_orig = self.options_processed
-        self.options_processed = False
+        self._ensure_input_open()
 
         # TODO(v0.7): Remove these branches when removing -d/--min-delta-hsv.
         if min_delta_hsv is not None:
@@ -395,7 +382,6 @@ class CliContext:
         }
         logger.debug('Adding detector: AdaptiveDetector(%s)', detector_args)
         self._add_detector(scenedetect.detectors.AdaptiveDetector(**detector_args))
-        self.options_processed = options_processed_orig
 
     def handle_detect_threshold(
         self,
@@ -405,9 +391,7 @@ class CliContext:
         min_scene_len: Optional[str],
     ):
         """Handle detect-threshold command options."""
-        self._check_input_open()
-        options_processed_orig = self.options_processed
-        self.options_processed = False
+        self._ensure_input_open()
 
         if self.drop_short_scenes:
             min_scene_len = 0
@@ -438,14 +422,10 @@ class CliContext:
                 add_final_scene=add_last_scene,
             ))
 
-        self.options_processed = options_processed_orig
-
     def handle_load_scenes(self, input: AnyStr, start_col_name: Optional[str],
                            framerate: Optional[float]):
         """Handle `load-scenes` command options."""
-        self._check_input_open()
-        options_processed_orig = self.options_processed
-        self.options_processed = False
+        self._ensure_input_open()
 
         start_col_name = self.config.get_value("load-scenes", "start-col-name", start_col_name)
 
@@ -455,8 +435,6 @@ class CliContext:
         self._add_detector(
             SceneLoader(file=input, start_col_name=start_col_name, framerate=framerate))
 
-        self.options_processed = options_processed_orig
-
     def handle_export_html(
         self,
         filename: Optional[AnyStr],
@@ -465,9 +443,7 @@ class CliContext:
         image_height: Optional[int],
     ):
         """Handle `export-html` command options."""
-        self._check_input_open()
-        options_processed_orig = self.options_processed
-        self.options_processed = False
+        self._ensure_input_open()
         if self.export_html:
             self._on_duplicate_command('export_html')
 
@@ -479,15 +455,12 @@ class CliContext:
         self.image_height = self.config.get_value('export-html', 'image-height', image_height)
 
         if not self.save_images and not no_images:
-            self.options_processed = False
             raise click.BadArgumentUsage(
                 'The export-html command requires that the save-images command\n'
                 'is specified before it, unless --no-images is specified.')
         logger.info('HTML file name format:\n %s', filename)
 
         self.export_html = True
-
-        self.options_processed = options_processed_orig
 
     def handle_list_scenes(
         self,
@@ -498,9 +471,7 @@ class CliContext:
         skip_cuts: bool,
     ):
         """Handle `list-scenes` command options."""
-        self._check_input_open()
-        options_processed_orig = self.options_processed
-        self.options_processed = False
+        self._ensure_input_open()
         if self.list_scenes:
             self._on_duplicate_command('list-scenes')
 
@@ -519,8 +490,6 @@ class CliContext:
 
         self.list_scenes = True
 
-        self.options_processed = options_processed_orig
-
     def handle_split_video(
         self,
         output: Optional[AnyStr],
@@ -534,9 +503,7 @@ class CliContext:
         mkvmerge: bool,
     ):
         """Handle `split-video` command options."""
-        self._check_input_open()
-        options_processed_orig = self.options_processed
-        self.options_processed = False
+        self._ensure_input_open()
         if self.split_video:
             self._on_duplicate_command('split-video')
 
@@ -595,7 +562,6 @@ class CliContext:
                 logger.warning('copy mode (-c) ignored due to mkvmerge mode (-m).')
             self.split_mkvmerge = True
             logger.info('Using mkvmerge for video splitting.')
-            self.options_processed = options_processed_orig
             return
 
         ##
@@ -616,8 +582,6 @@ class CliContext:
         if filename:
             logger.info('Output file name format: %s', filename)
 
-        self.options_processed = options_processed_orig
-
     def handle_save_images(
         self,
         num_images: Optional[int],
@@ -634,11 +598,9 @@ class CliContext:
         width: Optional[int],
     ):
         """Handle `save-images` command options."""
-        self._check_input_open()
+        self._ensure_input_open()
         if self.save_images:
             self._on_duplicate_command('save-images')
-        options_processed_orig = self.options_processed
-        self.options_processed = False
 
         if '://' in self.video_stream.path:
             error_str = '\nThe save-images command is incompatible with URLs.'
@@ -706,13 +668,9 @@ class CliContext:
 
         self.save_images = True
 
-        self.options_processed = options_processed_orig
-
     def handle_time(self, start, duration, end):
         """Handle `time` command options."""
-        self._check_input_open()
-        options_processed_orig = self.options_processed
-        self.options_processed = False
+        self._ensure_input_open()
         if self.time:
             self._on_duplicate_command('time')
 
@@ -730,8 +688,6 @@ class CliContext:
         self.duration = parse_timecode(
             duration, self.video_stream.frame_rate, first_index_is_one=True)
         self.time = True
-
-        self.options_processed = options_processed_orig
 
     #
     # Private Methods
@@ -772,7 +728,7 @@ class CliContext:
 
     def _add_detector(self, detector):
         """ Add Detector: Adds a detection algorithm to the CliContext's SceneManager. """
-        self._check_input_open()
+        self._ensure_input_open()
         try:
             self.scene_manager.add_detector(detector)
         except scenedetect.stats_manager.FrameMetricRegistered as ex:
@@ -780,7 +736,7 @@ class CliContext:
                 message='Cannot specify detection algorithm twice.',
                 param_hint=detector.cli_name) from ex
 
-    def _check_input_open(self) -> None:
+    def _ensure_input_open(self) -> None:
         """Ensure self.video_stream was initialized (i.e. -i/--input was specified),
         otherwise raises an exception. Should only be used from commands that require an
         input video to process the options (e.g. those that require a timecode).
@@ -789,11 +745,7 @@ class CliContext:
             click.BadParameter: self.video_stream was not initialized.
         """
         if self.video_stream is None:
-            if not self._check_input_open_failed:
-                logger.error('Error: No input video (-i/--input) was specified.')
-            self._check_input_open_failed = True
-            self.options_processed = False
-            raise click.Abort()
+            raise click.ClickException('No input video (-i/--input) was specified.')
 
     def _open_video_stream(self, input_path: AnyStr, framerate: Optional[float],
                            backend: Optional[str]):
@@ -858,7 +810,6 @@ class CliContext:
         Raises:
             click.BadParameter
         """
-        self.options_processed = False
         error_strs = []
         error_strs.append('Error: Command %s specified multiple times.' % command)
         error_strs.append('The %s command may appear only one time.')
