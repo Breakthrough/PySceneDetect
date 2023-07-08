@@ -37,11 +37,14 @@ def run_scenedetect(context: CliContext):
     Arguments:
         context: Prevalidated command-line option context to use for processing.
     """
-    # No input may have been specified if we printed help for example.
+    # No input may have been specified depending on the commands/args that were used.
+    logger.debug("Running controller.")
     if context.scene_manager is None:
+        logger.debug("No input specified.")
         return
     if context.scene_manager.get_num_detectors() == 0:
         # TODO(#329): Make this configurable.
+        logger.debug("No detector specified, using `detect-adaptive`.")
         context.scene_manager.add_detector(AdaptiveDetector())
 
     perf_start_time = time.time()
