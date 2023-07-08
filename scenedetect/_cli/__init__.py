@@ -335,6 +335,7 @@ def about_command(ctx: click.Context):
 @click.option(
     '-a',
     '--all',
+    'show_all',      # Override argument name to avoid conflict with builtin.
     is_flag=True,
     flag_value=True,
     help='Include system and package version information. Useful for troubleshooting.')
