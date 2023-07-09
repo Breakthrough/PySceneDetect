@@ -1,5 +1,5 @@
 
-![PySceneDetect](https://raw.githubusercontent.com/Breakthrough/PySceneDetect/main/docs/img/pyscenedetect_logo_small.png)
+![PySceneDetect](https://raw.githubusercontent.com/Breakthrough/PySceneDetect/main/website/pages/img/pyscenedetect_logo_small.png)
 ==========================================================
 Video Scene Cut Detection and Analysis Tool
 ----------------------------------------------------------
