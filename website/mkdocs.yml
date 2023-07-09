@@ -1,5 +1,3 @@
-# TODO: Consider moving this back into the main branch.
-
 site_name: PySceneDetect
 site_description: "Website and documentation for PySceneDetect, a program to automatically detect scene cuts and split videos.  Written in Python, and also provides Python API in addition to command-line interface for use within other programs."
 site_author: "Brandon Castellano"
@@ -7,7 +5,7 @@ docs_dir: "pages"
 site_dir: "build"
 repo_url: https://github.com/Breakthrough/PySceneDetect
 repo_name: "PySceneDetect on Github"
-copyright: 'Copyright &copy; 2014-2023 Brandon Castellano.  All rights reserved.<br />Licensed under BSD 3-Clause (see the <a href="https://github.com/Breakthrough/PySceneDetect/blob/master/LICENSE" alt="link to latest LICENSE file on Github">LICENSE file</a> for details).'
+copyright: 'Copyright &copy; 2014-2023 Brandon Castellano.  All rights reserved.<br />Licensed under BSD 3-Clause (see the <a href="https://github.com/Breakthrough/PySceneDetect/blob/releases/v0.6.1/LICENSE" alt="link to latest LICENSE file on Github">LICENSE file</a> for details).'
 theme: readthedocs
 # TODO: deprecated option for this theme
 google_analytics: ['UA-72551323-1', 'auto']

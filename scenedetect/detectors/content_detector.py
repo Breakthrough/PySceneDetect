@@ -213,8 +213,8 @@ class ContentDetector(SceneDetector):
 
         # We consider any frame over the threshold a new scene, but only if
         # the minimum scene length has been reached (otherwise it is ignored).
-        if self._frame_score >= self._threshold and (
-            (frame_num - self._last_scene_cut) >= self._min_scene_len):
+        if self._frame_score >= self._threshold and ((frame_num - self._last_scene_cut)
+                                                     >= self._min_scene_len):
             self._last_scene_cut = frame_num
             return [frame_num]
 
