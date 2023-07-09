@@ -4,7 +4,7 @@ name: Generate Website
 on:
   push:
     branches:
-      - master
+      - main
     paths:
       - 'website/**'
   workflow_dispatch:
