@@ -143,7 +143,7 @@ scenedetect --input goldeneye.mp4 --stats goldeneye.stats.csv detect-adaptive
 
 We can then plot the values of the `content_val` column:
 
-<img src="https://raw.githubusercontent.com/Breakthrough/PySceneDetect/master/docs/img/goldeneye-stats.png" alt="goldeneye.mp4 statistics graph" />
+<img src="https://raw.githubusercontent.com/Breakthrough/PySceneDetect/main/docs/img/goldeneye-stats.png" alt="goldeneye.mp4 statistics graph" />
 
 The peaks in values correspond to the scene breaks in the input video. In some cases the threshold may need to be raised or lowered accordingly.
 
