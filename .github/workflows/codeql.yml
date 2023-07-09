@@ -6,11 +6,21 @@ on:
      - main
      - develop
      - releases/**
+    paths-ignore:
+      - '**.md'
+      - '**.rst'
+      - docs/**
+      - website/**
   pull_request:
     branches:
      - main
      - develop
-     - releases/**
+     - releases/*
+    paths-ignore:
+      - '**.md'
+      - '**.rst'
+      - docs/**
+      - website/**
   schedule:
     - cron: "20 7 * * 4"
 

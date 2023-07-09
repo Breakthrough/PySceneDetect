@@ -1,7 +1,19 @@
 
 name: Check Code Format
 
-on: [pull_request, push]
+on:
+  pull_request:
+    paths-ignore:
+      - '**.md'
+      - '**.rst'
+      - docs/**
+      - website/**
+  push:
+    paths-ignore:
+      - '**.md'
+      - '**.rst'
+      - docs/**
+      - website/**
 
 jobs:
   build:
