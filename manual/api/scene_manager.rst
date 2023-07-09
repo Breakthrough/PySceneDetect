@@ -22,7 +22,7 @@ In the code example below, we create a function ``find_scenes()`` which performs
  * ``print()`` out a table of detected scenes to the terminal/console
  * returns a list of tuples of :py:class:`FrameTimecode <scenedetect.frame_timecode.FrameTimecode>` objects of the start and end times for each detected scene
 
-This example is a modified version of `the api_test.py file <https://github.com/Breakthrough/PySceneDetect/blob/master/tests/test_api.py>`_, and shows complete usage of a :py:class:`SceneManager <scenedetect.scene_manager.SceneManager>` object to perform content-aware scene detection using the :py:class:`ContentDetector <scenedetect.detectors.content_detector.ContentDetector>`, printing a list of scenes, then saving the calculated per-frame metrics to disk:
+This example is a modified version of `the api_test.py file <https://github.com/Breakthrough/PySceneDetect/blob/main/tests/test_api.py>`_, and shows complete usage of a :py:class:`SceneManager <scenedetect.scene_manager.SceneManager>` object to perform content-aware scene detection using the :py:class:`ContentDetector <scenedetect.detectors.content_detector.ContentDetector>`, printing a list of scenes, then saving the calculated per-frame metrics to disk:
 
 .. code:: python
 
