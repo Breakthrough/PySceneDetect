@@ -108,17 +108,17 @@ Command Options
 Example
 -----------------------------------------------------------------------
 
-Using the `detect-content` detector, we start at 1 minute in and parse 30.5 seconds of `video.mp4`:
+Start at 1 minute in and parse 30.5 seconds of `video.mp4`:
 
-    ``scenedetect --input video.mp4 time --start 00:01:00 --duration 30.5s detect-content``
+    ``scenedetect -i video.mp4 time --start 00:01:00 --duration 30.5s``
 
 Same as above, but setting the end time instead of duration:
 
-    ``scenedetect --input video.mp4 time --start 00:01:00 --end 00:01:30.500 detect-content``
+    ``scenedetect -i video.mp4 time --start 00:01:00 --end 00:01:30.500``
 
 Process the first 1000 frames only:
 
-    ``scenedetect --input video.mp4 time --duration 1000 detect-content``
+    ``scenedetect -i video.mp4 time --duration 1000``
 
 
 .. _list-scenes Command:
@@ -157,11 +157,11 @@ Example
 
 Print table of detected scenes for `video.mp4` and save to CSV file `video-Scenes.csv`:
 
-    ``scenedetect --input video.mp4 detect-content list-scenes``
+    ``scenedetect -i video.mp4 list-scenes``
 
 Same as above, but *don't* create output file:
 
-    ``scenedetect --input video.mp4 detect-content list-scenes -n``
+    ``scenedetect -i video.mp4 list-scenes -n``
 
 
 .. _load-scenes Command:
@@ -189,11 +189,11 @@ Example
 
 To manually edit the cut points when generating output (e.g. using :ref:`split-video <split-video Command>`), first generate a `video-Scenes.csv` file using :ref:`list-scenes <list-scenes Command>`:
 
-    ``scenedetect --input video.mp4 detect-content list-scenes``
+    ``scenedetect -i video.mp4 list-scenes``
 
-Once `video-Scenes.csv` has been edited, re-run PySceneDetect with ``load-scenes`` instead of the scene detector, and use output commands as normal:
+Once `video-Scenes.csv` has been edited, re-run PySceneDetect with ``load-scenes`` instead of a scene detector, and use output commands as normal:
 
-    ``scenedetect --input video.mp4 load-scenes -i video-Scenes.csv split-video``
+    ``scenedetect -i video.mp4 load-scenes -i video-Scenes.csv split-video``
 
 
 .. _save-images Command:

@@ -16,7 +16,7 @@ See the changelog for the latest release notes and known issues.
 Split video on each fast cut using [command line (more examples)](cli.md):
 
 ```rst
-scenedetect -i video.mp4 detect-adaptive split-video
+scenedetect -i video.mp4 split-video
 ```
 
 Split video on each fast cut using [Python API (docs)](docs.md):

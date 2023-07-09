@@ -42,10 +42,11 @@ def run_scenedetect(context: CliContext):
     if context.scene_manager is None:
         logger.debug("No input specified.")
         return
+    # Use default detector if one was not specified.
     if context.scene_manager.get_num_detectors() == 0:
-        # TODO(#329): Make this configurable.
-        logger.debug("No detector specified, using `detect-adaptive`.")
-        context.scene_manager.add_detector(AdaptiveDetector())
+        detector_type, detector_args = context.default_detector
+        logger.debug('Using default detector: %s(%s)' % (detector_type.__name__, detector_args))
+        context.scene_manager.add_detector(detector_type(**detector_args))
 
     perf_start_time = time.time()
     if context.start_time is not None:

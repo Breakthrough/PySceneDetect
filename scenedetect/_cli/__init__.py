@@ -27,6 +27,7 @@ from typing import AnyStr, Optional, Tuple
 import click
 
 import scenedetect
+from scenedetect.detectors import AdaptiveDetector, ContentDetector, ThresholdDetector
 from scenedetect.backends import AVAILABLE_BACKENDS
 from scenedetect.platform import get_system_version_info
 
@@ -483,12 +484,14 @@ Examples:
     {scenedetect} detect-content --threshold 27.5
     """
     assert isinstance(ctx.obj, CliContext)
-    ctx.obj.handle_detect_content(
+    detector_args = ctx.obj.get_detect_content_params(
         threshold=threshold,
         luma_only=luma_only,
         min_scene_len=min_scene_len,
         weights=weights,
         kernel_size=kernel_size)
+    logger.debug('Adding detector: ContentDetector(%s)', detector_args)
+    ctx.obj.add_detector(ContentDetector(**detector_args))
 
 
 @click.command('detect-adaptive', cls=_Command)
@@ -587,8 +590,7 @@ Examples:
     {scenedetect} detect-adaptive --threshold 3.2
     """
     assert isinstance(ctx.obj, CliContext)
-
-    ctx.obj.handle_detect_adaptive(
+    detector_args = ctx.obj.get_detect_adaptive_params(
         threshold=threshold,
         min_content_val=min_content_val,
         min_delta_hsv=min_delta_hsv,
@@ -598,6 +600,8 @@ Examples:
         weights=weights,
         kernel_size=kernel_size,
     )
+    logger.debug('Adding detector: AdaptiveDetector(%s)', detector_args)
+    ctx.obj.add_detector(AdaptiveDetector(**detector_args))
 
 
 @click.command('detect-threshold', cls=_Command)
@@ -658,13 +662,14 @@ Examples:
     {scenedetect} detect-threshold --threshold 15
     """
     assert isinstance(ctx.obj, CliContext)
-
-    ctx.obj.handle_detect_threshold(
+    detector_args = ctx.obj.get_detect_threshold_params(
         threshold=threshold,
         fade_bias=fade_bias,
         add_last_scene=add_last_scene,
         min_scene_len=min_scene_len,
     )
+    logger.debug('Adding detector: ThresholdDetector(%s)', detector_args)
+    ctx.obj.add_detector(ThresholdDetector(**detector_args))
 
 
 @click.command('load-scenes', cls=_Command)

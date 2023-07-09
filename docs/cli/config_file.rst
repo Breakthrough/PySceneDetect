@@ -38,6 +38,7 @@ Example
 .. code:: ini
 
     [global]
+    default-detector = detect-content
     min-scene-len = 0.8s
 
     [detect-content]

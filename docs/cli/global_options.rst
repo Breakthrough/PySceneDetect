@@ -9,15 +9,15 @@ Quickstart
 
 Split the input video wherever a new scene is detected:
 
-    ``scenedetect -i video.mp4 detect-content split-video``
+    ``scenedetect -i video.mp4 split-video``
 
-Print a table of detected scenes to the terminal, and save an image at the start, middle, and end frame of each scene:
+Save scene list in CSV format with images at the start, middle, and end of each scene:
 
-    ``scenedetect -i video.mp4 detect-content list-scenes -n save-images``
+    ``scenedetect -i video.mp4 list-scenes save-images``
 
 Skip the first 10 seconds of the input video:
 
-    ``scenedetect -i video.mp4 time -s 10s detect-content``
+    ``scenedetect -i video.mp4 time --start 10s detect-content``
 
 Show summary of all options and commands:
 
@@ -34,7 +34,9 @@ PySceneDetect is used by specifying a detector and some commands to process a vi
 
 Global options (e.g. `--input`, `--config`) must be specified before any commands. The order of commands is not strict, but each command should only be specified once. Detectors and commands can also have options:
 
-    ``scenedetect -i video.mp4 detect-content -t 30 list-scenes -n``
+    ``scenedetect -i video.mp4 detect-adaptive -t 30 list-scenes -n``
+
+If a detector is not specified, ``detect-adaptive`` is used. This can be configured using a :ref:`a config file <scenedetect_cli-config_file>`.
 
 You can use `help [command]` where `[command]` is a specific command or detection algorithm (e.g. `scenedetect help detect-content` or `scenedetect help split-video`). To show the complete help reference for the program you can run:
 

@@ -14,17 +14,21 @@
 
 import logging
 import os
-from typing import AnyStr, Optional, Tuple
+from typing import Any, AnyStr, Dict, Optional, Tuple, Type
 
 import click
 
+import scenedetect
+
 from scenedetect import open_video, AVAILABLE_BACKENDS
 from scenedetect._scene_loader import SceneLoader
+
+from scenedetect.scene_detector import SceneDetector
 from scenedetect.platform import get_and_create_path, get_cv2_imwrite_params, init_logger
 from scenedetect.frame_timecode import FrameTimecode, MAX_FPS_DELTA
 from scenedetect.video_stream import VideoStream, VideoOpenFailure, FrameRateUnavailable
 from scenedetect.video_splitter import is_mkvmerge_available, is_ffmpeg_available
-import scenedetect.detectors
+from scenedetect.detectors import AdaptiveDetector, ContentDetector, ThresholdDetector
 from scenedetect.stats_manager import StatsManager
 from scenedetect.scene_manager import SceneManager, Interpolation
 
@@ -91,9 +95,9 @@ def check_split_video_requirements(use_mkvmerge: bool) -> None:
 
 # pylint: disable=too-many-instance-attributes,too-many-arguments,too-many-locals
 class CliContext:
-    """Context of the command-line interface passed between the various sub-commands.
+    """Context of the command-line interface and config file parameters passed between sub-commands.
 
-    Handles validation of options taken in from the CLI and configuration files.
+    Handles validation of options taken in from the CLI *and* configuration files.
 
     After processing the main program options via `handle_options`, the CLI will then call
     the respective `handle_*` method for each command. Once all commands have been
@@ -107,14 +111,16 @@ class CliContext:
         self.scene_manager: SceneManager = None
         self.stats_manager: StatsManager = None
 
-        # Main `scenedetect` Options
-        self.output_directory: str = None        # -o/--output
-        self.quiet_mode: bool = None             # -q/--quiet or -v/--verbosity quiet
-        self.stats_file_path: str = None         # -s/--stats
-        self.drop_short_scenes: bool = None      # --drop-short-scenes
-        self.merge_last_scene: bool = None       # --merge-last-scene
-        self.min_scene_len: FrameTimecode = None # -m/--min-scene-len
-        self.frame_skip: int = None              # -fs/--frame-skip
+        # Global `scenedetect` Options
+        self.output_directory: str = None                   # -o/--output
+        self.quiet_mode: bool = None                        # -q/--quiet or -v/--verbosity quiet
+        self.stats_file_path: str = None                    # -s/--stats
+        self.drop_short_scenes: bool = None                 # --drop-short-scenes
+        self.merge_last_scene: bool = None                  # --merge-last-scene
+        self.min_scene_len: FrameTimecode = None            # -m/--min-scene-len
+        self.frame_skip: int = None                         # -fs/--frame-skip
+        self.default_detector: Tuple[Type[SceneDetector],
+                                     Dict[str, Any]] = None # [global] default-detector
 
         # `time` Command Options
         self.time: bool = False
@@ -124,17 +130,17 @@ class CliContext:
 
         # `save-images` Command Options
         self.save_images: bool = False
-        self.image_extension: str = None   # save-images -j/--jpeg, -w/--webp, -p/--png
-        self.image_directory: str = None   # save-images -o/--output
-        self.image_param: int = None       # save-images -q/--quality if -j/-w,
-                                           #   otherwise -c/--compression if -p
-        self.image_name_format: str = None # save-images -f/--name-format
-        self.num_images: int = None        # save-images -n/--num-images
-        self.frame_margin: int = 1         # save-images -m/--frame-margin
-        self.scale: float = None           # save-images -s/--scale
-        self.height: int = None            # save-images -h/--height
-        self.width: int = None             # save-images -w/--width
-        self.scale_method: Interpolation = None
+        self.image_extension: str = None        # save-images -j/--jpeg, -w/--webp, -p/--png
+        self.image_directory: str = None        # save-images -o/--output
+        self.image_param: int = None            # save-images -q/--quality if -j/-w,
+                                                #   otherwise -c/--compression if -p
+        self.image_name_format: str = None      # save-images -f/--name-format
+        self.num_images: int = None             # save-images -n/--num-images
+        self.frame_margin: int = 1              # save-images -m/--frame-margin
+        self.scale: float = None                # save-images -s/--scale
+        self.height: int = None                 # save-images -h/--height
+        self.width: int = None                  # save-images -w/--width
+        self.scale_method: Interpolation = None # [save-images] scale-method
 
         # `split-video` Command Options
         self.split_video: bool = False
@@ -265,6 +271,17 @@ class CliContext:
             self.stats_file_path = get_and_create_path(stats_file, self.output_directory)
             self.stats_manager = StatsManager()
 
+        # Initialize default detector with values in the config file.
+        default_detector = self.config.get_value("global", "default-detector")
+        if default_detector == 'detect-adaptive':
+            self.default_detector = (AdaptiveDetector, self.get_detect_adaptive_params())
+        elif default_detector == 'detect-content':
+            self.default_detector = (ContentDetector, self.get_detect_content_params())
+        elif default_detector == 'detect-threshold':
+            self.default_detector = (ThresholdDetector, self.get_detect_threshold_params())
+        else:
+            raise click.BadParameter("Unknown detector type!", param_hint='default-detector')
+
         logger.debug('Initializing SceneManager.')
         scene_manager = SceneManager(self.stats_manager)
 
@@ -282,15 +299,15 @@ class CliContext:
             'global', 'downscale-method').upper()]
         self.scene_manager = scene_manager
 
-    def handle_detect_content(
+    def get_detect_content_params(
         self,
-        threshold: Optional[float],
-        luma_only: bool,
-        min_scene_len: Optional[str],
-        weights: Optional[Tuple[float, float, float, float]],
-        kernel_size: Optional[int],
-    ):
-        """Handle detect-content command options."""
+        threshold: Optional[float] = None,
+        luma_only: bool = None,
+        min_scene_len: Optional[str] = None,
+        weights: Optional[Tuple[float, float, float, float]] = None,
+        kernel_size: Optional[int] = None,
+    ) -> Dict[str, Any]:
+        """Handle detect-content command options and return dict to construct one with."""
         self._ensure_input_open()
 
         if self.drop_short_scenes:
@@ -305,33 +322,30 @@ class CliContext:
 
         if weights is not None:
             try:
-                weights = scenedetect.detectors.ContentDetector.Components(*weights)
+                weights = ContentDetector.Components(*weights)
             except ValueError as ex:
                 logger.debug(str(ex))
                 raise click.BadParameter(str(ex), param_hint='weights')
-        # Log detector args for debugging before we construct it.
-        detector_args = {
+        return {
             'weights': self.config.get_value('detect-content', 'weights', weights),
             'kernel_size': self.config.get_value('detect-content', 'kernel-size', kernel_size),
             'luma_only': luma_only or self.config.get_value('detect-content', 'luma-only'),
             'min_scene_len': min_scene_len,
             'threshold': self.config.get_value('detect-content', 'threshold', threshold),
         }
-        logger.debug('Adding detector: ContentDetector(%s)', detector_args)
-        self._add_detector(scenedetect.detectors.ContentDetector(**detector_args))
 
-    def handle_detect_adaptive(
+    def get_detect_adaptive_params(
         self,
-        threshold: Optional[float],
-        min_content_val: Optional[float],
-        frame_window: Optional[int],
-        luma_only: bool,
-        min_scene_len: Optional[str],
-        weights: Optional[Tuple[float, float, float, float]],
-        kernel_size: Optional[int],
-        min_delta_hsv: Optional[float],
-    ):
-        """Handle detect-adaptive command options."""
+        threshold: Optional[float] = None,
+        min_content_val: Optional[float] = None,
+        frame_window: Optional[int] = None,
+        luma_only: bool = None,
+        min_scene_len: Optional[str] = None,
+        weights: Optional[Tuple[float, float, float, float]] = None,
+        kernel_size: Optional[int] = None,
+        min_delta_hsv: Optional[float] = None,
+    ) -> Dict[str, Any]:
+        """Handle detect-adaptive command options and return dict to construct one with."""
         self._ensure_input_open()
 
         # TODO(v0.7): Remove these branches when removing -d/--min-delta-hsv.
@@ -359,12 +373,11 @@ class CliContext:
 
         if weights is not None:
             try:
-                weights = scenedetect.detectors.ContentDetector.Components(*weights)
+                weights = ContentDetector.Components(*weights)
             except ValueError as ex:
                 logger.debug(str(ex))
                 raise click.BadParameter(str(ex), param_hint='weights')
-        # Log detector args for debugging before we construct it.
-        detector_args = {
+        return {
             'adaptive_threshold':
                 self.config.get_value("detect-adaptive", "threshold", threshold),
             'weights':
@@ -380,17 +393,15 @@ class CliContext:
             'window_width':
                 self.config.get_value("detect-adaptive", "frame-window", frame_window),
         }
-        logger.debug('Adding detector: AdaptiveDetector(%s)', detector_args)
-        self._add_detector(scenedetect.detectors.AdaptiveDetector(**detector_args))
 
-    def handle_detect_threshold(
+    def get_detect_threshold_params(
         self,
-        threshold: Optional[float],
-        fade_bias: Optional[float],
-        add_last_scene: bool,
-        min_scene_len: Optional[str],
-    ):
-        """Handle detect-threshold command options."""
+        threshold: Optional[float] = None,
+        fade_bias: Optional[float] = None,
+        add_last_scene: bool = None,
+        min_scene_len: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Handle detect-threshold command options and return dict to construct one with."""
         self._ensure_input_open()
 
         if self.drop_short_scenes:
@@ -403,24 +414,17 @@ class CliContext:
                     min_scene_len = self.config.get_value("detect-threshold", "min-scene-len")
             min_scene_len = parse_timecode(min_scene_len, self.video_stream.frame_rate).frame_num
 
-        threshold = self.config.get_value("detect-threshold", "threshold", threshold)
-        fade_bias = self.config.get_value("detect-threshold", "fade-bias", fade_bias)
-        # TODO(v1.0): This cannot be disabled right now.
-        add_last_scene = add_last_scene or self.config.get_value("detect-threshold",
-                                                                 "add-last-scene")
-        # Log detector args for debugging before we construct it.
-        logger.debug(
-            'Adding detector: ThresholdDetector(threshold=%f, fade_bias=%f,'
-            ' min_scene_len=%d, add_last_scene=%s)', threshold, fade_bias, min_scene_len,
-            add_last_scene)
-
-        self._add_detector(
-            scenedetect.detectors.ThresholdDetector(
-                threshold=threshold,
-                fade_bias=fade_bias,
-                min_scene_len=min_scene_len,
-                add_final_scene=add_last_scene,
-            ))
+        return {
+                                                                                                # TODO(v1.0): add_last_scene cannot be disabled right now.
+            'add_final_scene':
+                add_last_scene or self.config.get_value("detect-threshold", "add-last-scene"),
+            'fade_bias':
+                self.config.get_value("detect-threshold", "fade-bias", fade_bias),
+            'min_scene_len':
+                min_scene_len,
+            'threshold':
+                self.config.get_value("detect-threshold", "threshold", threshold),
+        }
 
     def handle_load_scenes(self, input: AnyStr, start_col_name: Optional[str],
                            framerate: Optional[float]):
@@ -432,7 +436,7 @@ class CliContext:
         if framerate is None:
             framerate = self.video_stream.frame_rate
 
-        self._add_detector(
+        self.add_detector(
             SceneLoader(file=input, start_col_name=start_col_name, framerate=framerate))
 
     def handle_export_html(
@@ -726,7 +730,7 @@ class CliContext:
         # Initialize logger with the set CLI args / user configuration.
         init_logger(log_level=curr_verbosity, show_stdout=not self.quiet_mode, log_file=logfile)
 
-    def _add_detector(self, detector):
+    def add_detector(self, detector):
         """ Add Detector: Adds a detection algorithm to the CliContext's SceneManager. """
         self._ensure_input_open()
         try:

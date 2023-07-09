@@ -8,18 +8,21 @@ PySceneDetect Releases
 
 **Command-Line Changes:**
 
+ - [feature] Add [`load-scenes` command](https://www.scenedetect.com/docs/0.6.2/cli/commands.html#load-scenes) to load cuts from `list-scenes` CSV output [#235](https://github.com/Breakthrough/PySceneDetect/issues/235)
+ - [feature] Use `detect-adaptive` by default if a detector is not specified [#329](https://github.com/Breakthrough/PySceneDetect/issues/329)
+   - Default detector can be set by [config file](https://www.scenedetect.com/docs/latest/cli/config_file.html) with the `default-detector` option under `[global]`
  - [bugfix] Fix `-d`/`--duration` and `-e`/`--end` options of `time` command consuming one extra frame [#307](https://github.com/Breakthrough/PySceneDetect/issues/307)
  - [bugfix] Fix incorrect end timecode for final scene when last frame of video is a new scene [#307](https://github.com/Breakthrough/PySceneDetect/issues/307)
+ - [general] Rename `ThresholdDetector` (`detect-threshold`) metric `delta_rgb` metric to `average_rgb`
 
 **General:**
 
  - [bugfix] Fix `end_time` always consuming one extra frame [#307](https://github.com/Breakthrough/PySceneDetect/issues/307)
  - [bugfix] Fix incorrect end timecode for last scene when `start_in_scene` is `True` or the final scene contains a single frame [#307](https://github.com/Breakthrough/PySceneDetect/issues/307)
  - [bugfix] Fix MoviePy read next frame [#320](https://github.com/Breakthrough/PySceneDetect/issues/320)
- - [bugfix] Rename `ThresholdDetector` metric `delta_rgb` metric to `average_rgb`
  - [general] Add support for PyAV 10.0 [#292](https://github.com/Breakthrough/PySceneDetect/issues/292)
  - [general] Use platformdirs package instead of appdirs [#309](https://github.com/Breakthrough/PySceneDetect/issues/309)
- - [feature] Add ability for `ThresholdDetector` to detect fade out to white [#143](https://github.com/Breakthrough/PySceneDetect/issues/143)
+ - [feature] Add floor or ceiling method selection when constructing [`ThresholdDetector`](https://www.scenedetect.com/docs/0.6.2/api/detectors.html#scenedetect.detectors.threshold_detector.ThresholdDetector) to allow fade to white detection [#143](https://github.com/Breakthrough/PySceneDetect/issues/143)
  - [api] Made previously public functions/methods private (prefixed with `_`):
    - `get_aspect_ratio` function in `scenedetect.backends.opencv`
    - `mean_pixel_distance` and `estimated_kernel_size` functions in `scenedetect.detectors.content_detector`

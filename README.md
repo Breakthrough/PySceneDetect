@@ -11,7 +11,7 @@ Video Scene Cut Detection and Analysis Tool
 
 ----------------------------------------------------------
 
-### Latest Release: v0.6.1 (November 28, 2022)
+### Latest Release: v0.6.2 (In Development)
 
 **Website**:  [scenedetect.com](https://www.scenedetect.com)
 
@@ -33,19 +33,19 @@ Requires ffmpeg/mkvmerge for video splitting support. Windows builds (MSI instal
 
 **Quick Start (Command Line)**:
 
-Split the input video wherever a new scene is detected:
+Split input video on each fast cut using `ffmpeg`:
 
-    scenedetect -i video.mp4 detect-adaptive split-video
+    scenedetect -i video.mp4 split-video
 
-Skip the first 10 seconds of the input video, and output a list of scenes to the terminal:
+Save some frames from each cut:
 
-    scenedetect -i video.mp4 time -s 10s detect-adaptive list-scenes
+    scenedetect -i video.mp4 save-images
 
-Help:
+Skip the first 10 seconds of the input video:
 
-    scenedetect help
+    scenedetect -i video.mp4 time -s 10s
 
-You can find more examples [on the website](https://www.scenedetect.com/cli/) or [in the documentation](https://www.scenedetect.com/docs/latest/cli/global_options.html).
+More examples can be found throughout [the documentation](https://www.scenedetect.com/docs/latest/cli/global_options.html).
 
 **Quick Start (Python API)**:
 
@@ -102,7 +102,7 @@ See [the documentation](https://www.scenedetect.com/docs/latest/api.html) for mo
 
  - [Documentation](https://www.scenedetect.com/docs/) (covers application and Python API)
  - [CLI Example](https://www.scenedetect.com/cli/)
- - [Config File](https://www.scenedetect.com/docs/0.6.1/cli/config_file.html)
+ - [Config File](https://www.scenedetect.com/docs/0.6.2/cli/config_file.html)
 
 ## Help & Contributing
 

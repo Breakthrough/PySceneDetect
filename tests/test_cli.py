@@ -92,6 +92,11 @@ def test_cli_no_args():
     assert invoke_scenedetect(config_file=None) == 0
 
 
+def test_cli_default_detector():
+    """Test `scenedetect` command invoked without a detector."""
+    assert invoke_scenedetect('-i {VIDEO} time {TIME}', config_file=None) == 0
+
+
 @pytest.mark.parametrize('info_command', ['help', 'about', 'version'])
 def test_cli_info_command(info_command):
     """Test `scenedetect` info commands (e.g. help, about)."""
