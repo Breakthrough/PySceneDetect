@@ -41,12 +41,12 @@ jobs:
         run: |
           git fetch origin gh-pages
           git checkout gh-pages
-          git rm "docs/$DEST_DOCS_DIR" -r -f --ignore-unmatch
+          git rm "docs/${{ inputs.dest_dir }}" -r -f --ignore-unmatch
           git add build/
-          git mv build "docs/$DEST_DOCS_DIR"
+          git mv build "docs/${{ inputs.dest_dir }}"
           git config --global user.name github-actions
           git config --global user.email github-actions@github.com
-          git commit -a -m "[docs] @${{ github.triggering_actor }}: Generate Website"
+          git commit -a -m "[docs] @${{ github.triggering_actor }}: Generate Documentation" \
+            -m "Source: ${{ inputs.source_ref }} (${{ github.sha }})" \
+            -m "Destination: ${{ inputs.dest_dir }}"
           git push
-        env:
-          DEST_DOCS_DIR: ${{ inputs.dest_dir }}
