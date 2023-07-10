@@ -115,7 +115,6 @@ For help or other issues, you can join [the official PySceneDetect Discord Serve
 
 This program uses free code signing provided by [SignPath.io](https://signpath.io?utm_source=foundation&utm_medium=github&utm_campaign=PySceneDetect), and a free code signing certificate by the [SignPath Foundation](https://signpath.org?utm_source=foundation&utm_medium=github&utm_campaign=PySceneDetect)
 
-
 ## License
 
 Licensed under BSD 3-Clause (see the `LICENSE` file for details).

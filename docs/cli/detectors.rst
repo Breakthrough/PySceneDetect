@@ -5,184 +5,142 @@
 Detectors
 ***********************************************************************
 
-There are currently two implemented scene detection algorithms, threshold
-based detection (``detect-threshold``), and content-aware detection
-(``detect-content``).  Each detector can be selected by adding the
-respective `detect-` command, and any relevant options, after setting
-the main ``scenedetect`` command global options.  In general, commands
-should follow the form:
+There are three scene detection algorithms: threshold based detection (``detect-threshold``), content-aware detection (``detect-content``), and adaptive detection (``detect-adaptive``).
 
-    ``scenedetect [global options] [detector] [commands]``
-
-For example, to use the `detect-content` detector on a file `video.mp4`,
-writing a stats file to file `video.stats.csv`, and printing a list of
-detected scenes to the terminal:
-
-    ``scenedetect -i video.mp4 -s video.stats.csv detect-content list-scenes -n``
-
-Several more command line interface examples are shown in the following section.
+In general, use ``detect-adaptive`` or ``detect-content`` for fast cuts, and ``detect-threshold`` for detecting fade in/out transitions.
 
 
-=======================================================================
+``detect-adaptive``
+========================================================================
+
+Perform adaptive detection algorithm on input video.
+
+Two-pass algorithm that first calculates frame scores with `detect-content`, and then applies a rolling average when processing the result. This can help mitigate false detections in situations such as camera movement.
+
+Examples:
+------------------------------------------------------------------------
+
+    ``scenedetect -i video.mp4 detect-adaptive``
+
+    ``scenedetect -i video.mp4 detect-adaptive --threshold 3.2``
+
+Options:
+------------------------------------------------------------------------
+
+.. option:: --threshold VAL, -t VAL
+
+  Threshold value (float) that the calculated frame score must exceed to trigger a new scene (see frame metric adaptive_ratio in stats file). [default: `3.0`]
+
+.. option:: --min-content-val VAL, -c VAL
+
+  Minimum threshold (float) that the content_val must exceed in order to register as a new cene. This is calculated the same way that `detect-content` calculates frame score. [default: `15.0`]
+
+.. option:: --min-delta-hsv VAL, -d VAL
+
+  [DEPRECATED] Use -c/--min-content-val instead. [default: `15.0`]
+
+.. option:: --frame-window VAL, -f VAL
+
+  Size of window (number of frames) before and after each frame to average together in order to detect deviations from the mean. [default: `2`]
+
+.. option:: --weights, -w
+
+  Weights of the 4 components used to calculate content_val in the form (delta_hue, delta_sat, delta_lum, delta_edges). [default: `1.000, 1.000, 1.000, 0.000`]
+
+.. option:: --luma-only, -l
+
+  Only consider luma (brightness) channel. Useful for greyscale videos. Equivalent to setting -w/--weights to 0, 0, 1, 0.
+
+.. option:: --kernel-size N, -k N
+
+  Size of kernel for expanding detected edges. Must be odd integer greater than or equal to 3. If unset, kernel size is estimated using video resolution. [default: `auto`]
+
+.. option:: --min-scene-len TIMECODE, -m TIMECODE
+
+  Minimum length of any scene. Overrides global min-scene-len (-m) setting. TIMECODE can be specified as exact number of frames, a time in seconds followed by s, or a timecode in the format HH:MM:SS or HH:MM:SS.nnn.
+
+
 ``detect-content``
-=======================================================================
+========================================================================
 
 Perform content detection algorithm on input video.
 
-When processing each frame, a score (from 0 to 255.0) is calculated
-representing the difference in content from the previous frame (higher =
-more difference). A change in scene is triggered when this value exceeds the
-value set for `-t`/`--threshold`. This value is the *content_val* column in
-a statsfile.
+When processing each frame, a score (from 0 to 255.0) is calculated representing the difference in content from the previous frame (higher = more difference). A change in scene is triggered when this value exceeds the value set for `-t`/`--threshold`. This value is the *content_val* column in a statsfile.
 
-Frame scores are calculated from several components, which are used to
-generate a final weighted value with `-w`/`--weights`. These are also
-recorded in the statsfile if set. Currently there are four components:
+Frame scores are calculated from several components, which are used to generate a final weighted value with `-w`/`--weights`. These are also recorded in the statsfile if set. Currently there are four components:
 
-  - *delta_hue*: Difference between pixel hue values of adjacent frames.
+ - *delta_hue*: Difference between pixel hue values of adjacent frames.
 
-  - *delta_sat*: Difference between pixel saturation values of adjacent frames.
+ - *delta_sat*: Difference between pixel saturation values of adjacent frames.
 
-  - *delta_lum*: Difference between pixel luma (brightness) values of adjacent frames.
+ - *delta_lum*: Difference between pixel luma (brightness) values of adjacent frames.
 
-  - *delta_edges*: Difference between calculated edges of adjacent frames. Typically larger than other components, so threshold may need to be increased to compensate.
+ - *delta_edges*: Difference between calculated edges of adjacent frames. Typically larger than other components, so threshold may need to be increased to compensate.
 
-Weights are set as a set of 4 numbers in the form (*delta_hue*, *delta_sat*,
-*delta_lum*, *delta_edges*). For example, `-w 1.0 0.5 1.0 0.2 -t 32` is a
-good starting point to use with edge detection.
+Weights are set as a set of 4 numbers in the form (*delta_hue*, *delta_sat*, *delta_lum*, *delta_edges*). For example, `-w 1.0 0.5 1.0 0.2 -t 32` is a good starting point to use with edge detection.
 
-Edge detection is not enabled by default. Current default parameters are `-w
-1.0 1.0 1.0 0.0 -t 27`. The final weighted sum is normalized based on the
-weight of the components, so they do not need to equal 100%.
+Edge detection is not enabled by default. Current default parameters are `-w 1.0 1.0 1.0 0.0 -t 27`. The final weighted sum is normalized based on the weight of the components, so they do not need to equal 100%.
 
-Detector Options
------------------------------------------------------------------------
+Examples:
+------------------------------------------------------------------------
 
-  -t, --threshold VAL             Threshold value that the content_val frame
-                                  metric must exceed to trigger a new scene.
-                                  Refers to frame metric content_val in stats
-                                  file. [default: 27.0]  [0.0<=x<=255.0]
+    ``scenedetect -i video.mp4 detect-content``
 
-  -w, --weights <FLOAT FLOAT FLOAT FLOAT>...
-                                  Weights of the 4 components used to
-                                  calculate content_val in the form
-                                  (delta_hue, delta_sat, delta_lum,
-                                  delta_edges). [default: 1.000, 1.000, 1.000,
-                                  0.000]
+    ``scenedetect -i video.mp4 detect-content --threshold 27.5``
 
-  -l, --luma-only                 Only consider luma (brightness) channel.
-                                  Useful for greyscale videos. Equivalent
-                                  tosetting -w/--weights to 0, 0, 1, 0.
+Options:
+------------------------------------------------------------------------
 
-  -k, --kernel-size N             Size of kernel for expanding detected edges.
-                                  Must be odd integer greater than or equal to
-                                  3. If unset, kernel size is estimated using
-                                  video resolution. [default: auto]
+.. option:: --threshold VAL, -t VAL
 
-  -m, --min-scene-len TIMECODE    Minimum length of any scene. Overrides
-                                  global min-scene-len (-m) setting. TIMECODE
-                                  can be specified as exact number of frames,
-                                  a time in seconds followed by s, or a
-                                  timecode in the format HH:MM:SS or
-                                  HH:MM:SS.nnn.
+  Threshold value that the content_val frame metric must exceed to trigger a new scene. Refers to frame metric content_val in stats file. [default: `27.0`]
 
-Examples
------------------------------------------------------------------------
+.. option:: --weights, -w
 
-    ``detect-content``
+  Weights of the 4 components used to calculate content_val in the form (delta_hue, delta_sat, delta_lum, delta_edges). [default: `1.000, 1.000, 1.000, 0.000`]
 
-    ``detect-content --threshold 27.5``
+.. option:: --luma-only, -l
+
+  Only consider luma (brightness) channel. Useful for greyscale videos. Equivalent to setting -w/--weights to 0, 0, 1, 0.
+
+.. option:: --kernel-size N, -k N
+
+  Size of kernel for expanding detected edges. Must be odd integer greater than or equal to 3. If unset, kernel size is estimated using video resolution. [default: `auto`]
+
+.. option:: --min-scene-len TIMECODE, -m TIMECODE
+
+  Minimum length of any scene. Overrides global min-scene-len (-m) setting. TIMECODE can be specified as exact number of frames, a time in seconds followed by s, or a timecode in the format HH:MM:SS or HH:MM:SS.nnn.
 
 
-=======================================================================
 ``detect-threshold``
-=======================================================================
+========================================================================
 
 Perform threshold detection algorithm on input video.
 
-Detects fades in/out based on average frame pixel value compared against
-`-t`/`--threshold`.
+Detects fades in/out based on average frame pixel value compared against `-t`/`--threshold`.
 
-Detector Options
------------------------------------------------------------------------
+Examples:
+------------------------------------------------------------------------
 
-  -t, --threshold VAL           Threshold value (integer) that the delta_rgb
-                                frame metric must exceed to trigger a new
-                                scene. Refers to frame metric delta_rgb in
-                                stats file. [default: 12.0]
+    ``scenedetect -i video.mp4 detect-threshold``
 
-  -f, --fade-bias PERCENT       Percent (%) from -100 to 100 of timecode skew
-                                for where cuts should be placed. -100
-                                indicates the start frame, +100 indicates the
-                                end frame, and 0 is the middle of both.
-                                [default: 0]
+    ``scenedetect -i video.mp4 detect-threshold --threshold 15``
 
-  -l, --add-last-scene          If set, if the video ends on a fade-out, a
-                                final scene will be generated from the last
-                                fade-out position to the end of the video.
-                                [default: True]
+Options:
+------------------------------------------------------------------------
 
-  -m, --min-scene-len TIMECODE  Minimum length of any scene. Overrides global
-                                min-scene-len (-m) setting. TIMECODE can be
-                                specified as exact number of frames, a time in
-                                seconds followed by s, or a timecode in the
-                                format HH:MM:SS or HH:MM:SS.nnn.
+.. option:: --threshold VAL, -t VAL
 
-Usage Examples
------------------------------------------------------------------------
+  Threshold value (integer) that the delta_rgb frame metric must exceed to trigger a new scene. Refers to frame metric delta_rgb in stats file. [default: `12.0`]
 
-  ``detect-threshold``
+.. option:: --fade-bias PERCENT, -f PERCENT
 
-  ``detect-threshold --threshold 15``
+  Percent (%) from -100 to 100 of timecode skew for where cuts should be placed. -100 indicates the start frame, +100 indicates the end frame, and 0 is the middle of both. [default: `0`]
 
+.. option:: --add-last-scene, -l
 
-=======================================================================
-``detect-adaptive``
-=======================================================================
+  If set, if the video ends on a fade-out, a final scene will be generated from the last fade-out position to the end of the video. [default: `True`]
 
-Two-pass algorithm that first calculates frame scores with `detect-content`,
-and then applies a rolling average when processing the result. This can help
-mitigate false detections in situations such as camera movement.
+.. option:: --min-scene-len TIMECODE, -m TIMECODE
 
-Detector Options
------------------------------------------------------------------------
-
-  -t, --threshold VAL             Threshold value (float) that the calculated
-                                  frame score must exceed to trigger a new
-                                  scene (see frame metric adaptive_ratio in
-                                  stats file). [default: 3.0]
-  -c, --min-content-val VAL       Minimum threshold (float) that the
-                                  content_val must exceed in order to register
-                                  as a new scene. This is calculated the same
-                                  way that `detect-content` calculates frame
-                                  score. [default: 15.0]
-  -f, --frame-window VAL          Size of window (number of frames) before and
-                                  after each frame to average together in
-                                  order to detect deviations from the mean.
-                                  [default: 2]
-  -w, --weights <FLOAT FLOAT FLOAT FLOAT>...
-                                  Weights of the 4 components used to
-                                  calculate content_val in the form
-                                  (delta_hue, delta_sat, delta_lum,
-                                  delta_edges). [default: 1.000, 1.000, 1.000,
-                                  0.000]
-  -l, --luma-only                 Only consider luma (brightness) channel.
-                                  Useful for greyscale videos. Equivalent
-                                  tosetting -w/--weights to 0, 0, 1, 0.
-  -k, --kernel-size N             Size of kernel for expanding detected edges.
-                                  Must be odd integer greater than or equal to
-                                  3. If unset, kernel size is estimated using
-                                  video resolution. [default: auto]
-  -m, --min-scene-len TIMECODE    Minimum length of any scene. Overrides
-                                  global min-scene-len (-m) setting. TIMECODE
-                                  can be specified as exact number of frames,
-                                  a time in seconds followed by s, or a
-                                  timecode in the format HH:MM:SS or
-                                  HH:MM:SS.nnn.
-
-Usage Examples
------------------------------------------------------------------------
-
-    ``detect-adaptive``
-
-    ``detect-adaptive --threshold 3.2``
+  Minimum length of any scene. Overrides global min-scene-len (-m) setting. TIMECODE can be specified as exact number of frames, a time in seconds followed by s, or a timecode in the format HH:MM:SS or HH:MM:SS.nnn.

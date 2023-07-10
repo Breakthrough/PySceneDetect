@@ -28,12 +28,12 @@ Includes new [`load-scenes` command](https://www.scenedetect.com/docs/0.6.2/cli/
  - [bugfix] Fix `end_time` always consuming one extra frame [#307](https://github.com/Breakthrough/PySceneDetect/issues/307)
  - [bugfix] Fix incorrect end timecode for last scene when `start_in_scene` is `True` or the final scene contains a single frame [#307](https://github.com/Breakthrough/PySceneDetect/issues/307)
  - [bugfix] Fix MoviePy read next frame [#320](https://github.com/Breakthrough/PySceneDetect/issues/320)
- - [api] Made previously public functions/methods private (prefixed with `_`):
+ - [api] Make some public functions/methods private (prefixed with `_`):
    - `get_aspect_ratio` function in `scenedetect.backends.opencv`
    - `mean_pixel_distance` and `estimated_kernel_size` functions in `scenedetect.detectors.content_detector`
    - `compute_frame_average` function in `scenedetect.detectors.threshold_detector`
    - `scenedetect.cli` and `scenedetect.thirdparty` modules
- - [api] Removed `compute_downscale_factor` in `scenedetect.video_stream` (use `scenedetect.scene_manager.compute_downscale_factor` instead)
+ - [api] Remove `compute_downscale_factor` in `scenedetect.video_stream` (use `scenedetect.scene_manager.compute_downscale_factor` instead)
 
 ### 0.6.1 (November 28, 2022)
 

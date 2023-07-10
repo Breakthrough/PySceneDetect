@@ -36,7 +36,7 @@ Global options (e.g. `--input`, `--config`) must be specified before any command
 
     ``scenedetect -i video.mp4 detect-adaptive -t 30 list-scenes -n``
 
-If a detector is not specified, ``detect-adaptive`` is used. This can be configured using a :ref:`a config file <scenedetect_cli-config_file>`.
+If a detector is not specified, ``detect-adaptive`` will be used by default. The default detector can be configured using a :ref:`a config file <scenedetect_cli-config_file>`.
 
 You can use `help [command]` where `[command]` is a specific command or detection algorithm (e.g. `scenedetect help detect-content` or `scenedetect help split-video`). To show the complete help reference for the program you can run:
 

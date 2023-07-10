@@ -1,6 +1,8 @@
 
 name: Generate Documentation
 
+# TODO: Run action when the docs change for a given release branch automatically (github.ref_name).
+
 on:
   workflow_dispatch:
     inputs:
