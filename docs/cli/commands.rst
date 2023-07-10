@@ -7,41 +7,6 @@ Commands
 
 Commands can be combined together (order does not matter) to control various input/output options.
 
-Input/output commands (applies to input videos and detected scenes):
-
- - :ref:`time <time Command>` - Set start time/end time/duration of input video
-    ``time --start 00:01:00 --end 00:02:00``
-
- - :ref:`list-scenes <list-scenes Command>` - Save scene start/end times in CSV format
-    ``list-scenes`` or ``list-scenes --no-output-file``
-
- - :ref:`load-scenes <load-scenes Command>` - Load edited scenes from ``list-scenes``
-    ``load-scenes -i video-Scenes.csv``
-
- - :ref:`save-images <save-images Command>` - Extract frames from every detected scene as images
-    ``save-images`` or ``save-images --num-images 5``
-
- - :ref:`split-video <split-video Command>` - Automatically split video with ffmpeg/mkvmerge
-    ``split-video`` or ``split-video --copy``
-
- - :ref:`export-html <export-html Command>` - Export scene list to HTML file
-    ``export-html`` or ``export-html --no-images``
-
-Help/information commands:
-
- - :ref:`help <info Commands>` - Prints help and usage information for commands
-    ``help`` or ``help split-video`` or ``help all``
-
- - :ref:`about <info Commands>` - Prints license and copyright information about PySceneDetect
-
- - :ref:`version <info Commands>` - Print PySceneDetect version Number
-
-.. note:: When using multiple commands, make sure to not specify the same command twice. The order of commands does not matter, but each command should only be specified once.
-
-
-.. _info Commands:
-
-=======================================================================
 ``help``, ``version``, and ``about``
 =======================================================================
 
@@ -65,297 +30,231 @@ PySceneDetect uses or interacts with, as well as a reference to the license and
 copyright information for each component.
 
 
-.. _time Command:
-
-=======================================================================
-``time``
-=======================================================================
-
-**The** ``time`` **command** is used for seeking the input video source, allowing you
-to set the start time, end time, and duration.
-
-
-Timecode Formats
------------------------------------------------------------------------
-
-Timecodes can be specified in the following formats:
-
- * Timestamp of hours/minutes/seconds in format ``HH:MM:SS`` or ``HH:MM:SS.nnn``
-   (`00:01:40` indicates 1 minute and 40 seconds).  The `HH`, `MM`, and `SS` fields
-   are all required; `.nnn` is optional.
- * Exact number of frames ``NNNN`` (`100` indicates frame 100)
- * Time in seconds ``SSSS.SSSs`` followed by lowercase `s` (`100s` indicates 100 seconds)
-
-
-Command Options
------------------------------------------------------------------------
-
-  -s, --start TIMECODE     Time in video to begin detecting scenes. TIMECODE
-                           can be specified as exact number of frames (-s 100
-                           to start at frame 100), time in seconds followed by
-                           s (-s 100s to start at 100 seconds), or a timecode
-                           in the format HH:MM:SS or HH:MM:SS.nnn (-s 00:01:40
-                           to start at 1m40s).
-
-  -d, --duration TIMECODE  Maximum time in video to process. TIMECODE format
-                           is the same as other arguments. Mutually exclusive
-                           with --end / -e.
-
-  -e, --end TIMECODE       Time in video to end detecting scenes. TIMECODE
-                           format is the same as other arguments. Mutually
-                           exclusive with --duration / -d.
-
-Example
------------------------------------------------------------------------
-
-Start at 1 minute in and parse 30.5 seconds of `video.mp4`:
-
-    ``scenedetect -i video.mp4 time --start 00:01:00 --duration 30.5s``
-
-Same as above, but setting the end time instead of duration:
-
-    ``scenedetect -i video.mp4 time --start 00:01:00 --end 00:01:30.500``
-
-Process the first 1000 frames only:
-
-    ``scenedetect -i video.mp4 time --duration 1000``
-
-
-.. _list-scenes Command:
-
-=======================================================================
-``list-scenes``
-=======================================================================
-
-**The** ``list-scenes`` **command** is used to print out and write to a CSV file
-a table of all scenes, their start/end timecodes, and frame numbers. The file also
-includes the cut list, which is a list of timecodes of each scene boundary.
-
-Command Options
------------------------------------------------------------------------
-
-  -o, --output DIR      Output directory to save videos to. Overrides global
-                        option -o/--output if set.
-
-  -f, --filename NAME   Filename format to use for the scene list CSV file.
-                        You can use the $VIDEO_NAME macro in the file name.
-                        Note that you may have to wrap the name using single
-                        quotes. [default: $VIDEO_NAME-Scenes.csv]
-
-  -n, --no-output-file  Disable writing scene list CSV file to disk.  If set,
-                        -o/--output and -f/--filename are ignored.
-
-  -q, --quiet           Suppresses output of the table printed by the list-
-                        scenes command.
-
-  -s, --skip-cuts       Skips outputting the cut list as the first row in the
-                        CSV file. Set this option if compliance with RFC
-                        4180 is required.
-
-Example
------------------------------------------------------------------------
-
-Print table of detected scenes for `video.mp4` and save to CSV file `video-Scenes.csv`:
-
-    ``scenedetect -i video.mp4 list-scenes``
-
-Same as above, but *don't* create output file:
-
-    ``scenedetect -i video.mp4 list-scenes -n``
-
-
-.. _load-scenes Command:
-
-=======================================================================
-``load-scenes``
-=======================================================================
-
-**The** ``load-scenes`` **command** load scenes from CSV instead of detecting. It can be used with CSV files generated by :ref:`list-scenes <list-scenes Command>`. Scenes are loaded using the specified column as cut locations (frame number or timecode).
-
-
-Command Options
------------------------------------------------------------------------
-
-  -i, --input FILE             Scene list to read cut information from.
-
-  -c, --start-col-name STRING  Name of column used to mark scene cuts. [default: "Start Frame"]
-
-  -f, --framerate FPS          Override framerate to use when performing
-                               timecode to frame number conversion.
-
-
-Example
------------------------------------------------------------------------
-
-To manually edit the cut points when generating output (e.g. using :ref:`split-video <split-video Command>`), first generate a `video-Scenes.csv` file using :ref:`list-scenes <list-scenes Command>`:
-
-    ``scenedetect -i video.mp4 list-scenes``
-
-Once `video-Scenes.csv` has been edited, re-run PySceneDetect with ``load-scenes`` instead of a scene detector, and use output commands as normal:
-
-    ``scenedetect -i video.mp4 load-scenes -i video-Scenes.csv split-video``
-
-
-.. _save-images Command:
-
-=======================================================================
-``save-images``
-=======================================================================
-
-**The** ``save-images`` **command** creates images for each detected scene.
-It saves a set number of images for each detected scene, always including
-the first and last frames.
-
-Command Options
------------------------------------------------------------------------
-
-  -o, --output DIR      Output directory to save images to. Overrides global
-                        option -o/--output if set.
-
-  -f, --filename NAME   Filename format, *without* extension, to use when
-                        saving image files. You can use the $VIDEO_NAME,
-                        $SCENE_NUMBER, $IMAGE_NUMBER, and $FRAME_NUMBER macros
-                        in the file name. Note that depending on the specifics
-                        of your computing environment, non-standard characters
-                        in image filenames may not be preserved due to an OpenCV
-                        issue. Also note that you may have to wrap the format in
-                        single quotes. [default: $VIDEO_NAME-Scene-
-                        $SCENE_NUMBER-$IMAGE_NUMBER]
-
-  -n, --num-images N    Number of images to generate. Will always include
-                        start/end frame, unless N = 1, in which case the image
-                        will be the frame at the mid-point in the scene.
-                        [default: 3]
-
-  -j, --jpeg            Set output format to JPEG (default).
-  -w, --webp            Set output format to WebP
-  -q, --quality Q       JPEG/WebP encoding quality, from 0-100 (higher
-                        indicates better quality). For WebP, 100 indicates
-                        lossless. [default: JPEG: 95, WebP: 100]
-
-  -p, --png             Set output format to PNG.
-  -c, --compression C   PNG compression rate, from 0-9. Higher values produce
-                        smaller files but result in longer compression time.
-                        This setting does not affect image quality, only file
-                        size. [default: 3]
-
-  -m, --frame-margin N  Number of frames to ignore at the beginning and end of
-                        scenes when saving images. [default: 3]
-
-  -s, --scale S         Optional factor by which saved images are rescaled. A
-                        scaling factor of 1 would not result in rescaling. A
-                        value <1 results in a smaller saved image, while a
-                        value >1 results in an image larger than the original.
-                        This value is ignored if either the height, -h, or
-                        width, -w, values are specified.
-
-  -H, --height H        Optional value for the height of the saved images.
-                        Specifying both the height and width, -W, will resize
-                        images to an exact size, regardless of aspect ratio.
-                        Specifying only height will rescale the image to that
-                        number of pixels in height while preserving the aspect
-                        ratio.
-
-  -W, --width W         Optional value for the width of the saved images.
-                        Specifying both the width and height, -H, will resize
-                        images to an exact size, regardless of aspect ratio.
-                        Specifying only width will rescale the image to that
-                        number of pixels wide while preserving the aspect
-                        ratio.
-
-
-.. _split-video Command:
-
-=======================================================================
-``split-video``
-=======================================================================
-
-**The** ``split-video`` **command** splits the input video into individual clips,
-by creating a new video clip for each detected scene.
-
-Command Options
------------------------------------------------------------------------
-
-  -o, --output DIR          Output directory to save videos to. Overrides
-                            global option -o/--output if set.
-
-  -f, --filename NAME       File name format to use when saving videos (with
-                            or without extension). You can use the $VIDEO_NAME
-                            or $SCENE_NUMBER macros. Additional macros that are
-                            available only with the ffmpeg backend include
-                            $START_TIME, $END_TIME, $START_FRAME, and
-                            $END_FRAME. A potential formatting pitfall is that
-                            macros cannot be followed by an underscore character
-                            in order to be replaced correctly. For example, the
-                            value Scene-$SCENE_NUMBER-Frame-$FRAME_NUMBER will
-                            properly replace both macro values. However, using
-                            Scene_$SCENE_NUMBER_Frame_$FRAME_NUMBER will not.
-                            Note that you may have to wrap the format in single
-                            quotes to avoid variable expansion. [default:
-                            $VIDEO_NAME-Scene-$SCENE_NUMBER]
-
-  -q, --quiet               Hides any output from the external video splitting
-                            tool. [setting: off]
-
-  -c, --copy                Copy instead of re-encode. Much faster, but less
-                            precise. Equivalent to specifying -a "-map 0 -c:v
-                            copy -c:a copy ".
-
-  -hq, --high-quality       Encode video with higher quality, overrides -f
-                            option if present. Equivalent to specifying
-                            --rate-factor 17 and --preset slow.
-
-  -crf, --rate-factor RATE  Video encoding quality (x264 constant rate
-                            factor), from 0-100, where lower values represent
-                            better quality, with 0 indicating lossless.
-                            [setting: 20]
-
-  -p, --preset LEVEL        Video compression quality preset (x264 preset).
-                            Can be one of: ultrafast, superfast, veryfast,
-                            faster, fast, medium, slow, slower, and veryslow.
-                            Faster modes take less time to run, but the output
-                            files may be larger. [default: veryfast]
-
-  -a, --args ARGS           Override codec arguments/options passed to FFmpeg
-                            when splitting and re-encoding scenes. Use double
-                            quotes (") around specified arguments. Must
-                            specify at least audio/video codec to use (e.g. -a
-                            "-c:v [...] -c:a [...]"). [default: -map 0 -c:v
-                            libx264 -preset veryfast -crf 22 -c:a aac]
-
-  -m, --mkvmerge            Split the video using mkvmerge. Faster than re-
-                            encoding, but less precise. The output will be
-                            named $VIDEO_NAME-$SCENE_NUMBER.mkv. If set, all
-                            options other than -f/--filename, -q/--quiet and
-                            -o/--output will be ignored. Note that mkvmerge
-                            automatically appends asuffix of "-$SCENE_NUMBER".
-
-
-.. _export-html Command:
-
-=======================================================================
 ``export-html``
-=======================================================================
+========================================================================
 
-**The** ``export-html`` **command** generates an HTML file containing
-all detected scenes in tabular format, including thumbnails by default.
-This requires the ``save-images`` command to also be specified.
-If images are not required, specify the `--no-images` option.
+Export scene list to HTML file. Requires ``save-images`` unless --no-images is specified.
 
-Command Options
------------------------------------------------------------------------
+Options
+------------------------------------------------------------------------
 
-  -f, --filename NAME        Filename format to use for the scene list HTML
-                             file. You can use the $VIDEO_NAME macro in the
-                             file name. Note that you may have to wrap the
-                             format name using single quotes. [default:
-                             $VIDEO_NAME-Scenes.html]
+.. option:: --filename NAME, -f NAME
 
-  --no-images                Export the scene list including or excluding the
-                             saved images.
+  Filename format to use for the scene list HTML file. You can use the $VIDEO_NAME macro in the file name. Note that you may have to wrap the format name using single quotes. [default: ``$VIDEO_NAME-Scenes.html``]
 
-  -w, --image-width pixels   Width in pixels of the images in the resulting
-                             HTML table.
+.. option:: --no-images
 
-  -h, --image-height pixels  Height in pixels of the images in the resulting
-                             HTML table.
+  Export the scene list including or excluding the saved images.
+
+.. option:: --image-width pixels, -w pixels
+
+  Width in pixels of the images in the resulting HTML table.
+
+.. option:: --image-height pixels, -h pixels
+
+  Height in pixels of the images in the resulting HTML table.
+
+
+``list-scenes``
+========================================================================
+
+Print scene list and outputs to a CSV file. Default filename is $VIDEO_NAME-Scenes.csv.
+
+Options
+------------------------------------------------------------------------
+
+.. option:: --output DIR, -o DIR
+
+  Output directory to save videos to. Overrides global option -o/--output if set.
+
+.. option:: --filename NAME, -f NAME
+
+  Filename format to use for the scene list CSV file. You can use the $VIDEO_NAME macro in the file name. Note that you may have to wrap the name using single quotes. [default: ``$VIDEO_NAME-Scenes.csv``]
+
+.. option:: --no-output-file, -n
+
+  Disable writing scene list CSV file to disk.  If set, -o/--output and -f/--filename are ignored.
+
+.. option:: --quiet, -q
+
+  Suppresses output of the table printed by the list-scenes command.
+
+.. option:: --skip-cuts, -s
+
+  Skips outputting the cutting list as the first row in the CSV file. Set this option if compliance with RFC 4180 is required.
+
+
+``load-scenes``
+========================================================================
+
+Load scenes from CSV instead of detecting. Can be used with CSV generated by ``list-scenes``.
+Scenes are loaded using the specified column as cut locations (frame number or timecode).
+
+Examples
+------------------------------------------------------------------------
+
+    ``scenedetect -i video.mp4 load-scenes -i scenes.csv``
+
+    ``scenedetect -i video.mp4 load-scenes -i scenes.csv --start-col-name "Start Timecode"``
+
+Options
+------------------------------------------------------------------------
+
+.. option:: --input FILE, -i FILE
+
+  Scene list to read cut information from.
+
+.. option:: --start-col-name STRING, -c STRING
+
+  Name of column used to mark scene cuts. [default: ``Start Frame``]
+
+.. option:: --framerate FPS, -f FPS
+
+  Override framerate to use when performing timecode to frame number conversion.
+
+
+``save-images``
+========================================================================
+
+Create images for each detected scene.
+
+Examples
+------------------------------------------------------------------------
+
+    ``scenedetect -i video.mp4 save-images``
+
+    ``scenedetect -i video.mp4 save-images --width=1024``
+
+Options
+------------------------------------------------------------------------
+
+.. option:: --output DIR, -o DIR
+
+  Output directory to save images to. Overrides global option -o/--output if set.
+
+.. option:: --filename NAME, -f NAME
+
+  Filename format, *without* extension, to use when saving image files. You can use the $VIDEO_NAME, $SCENE_NUMBER, $IMAGE_NUMBER, and $FRAME_NUMBER macros in the file name. Note that you may have to wrap the format in single quotes. [default: ``$VIDEO_NAME-Scene-$SCENE_NUMBER-$IMAGE_NUMBER``]
+
+.. option:: --num-images N, -n N
+
+  Number of images to generate. Will always include start/end frame, unless N = 1, in which case the image will be the frame at the mid-point in the scene. [default: ``3``]
+
+.. option:: --jpeg, -j
+
+  Set output format to JPEG (default).
+
+.. option:: --webp, -w
+
+  Set output format to WebP
+
+.. option:: --quality Q, -q Q
+
+  JPEG/WebP encoding quality, from 0-100 (higher indicates better quality). For WebP, 100 indicates lossless. [default: ``JPEG: 95, WebP: 100``]
+
+.. option:: --png, -p
+
+  Set output format to PNG.
+
+.. option:: --compression C, -c C
+
+  PNG compression rate, from 0-9. Higher values produce smaller files but result in longer compression time. This setting does not affect image quality, only file size. [default: ``3``]
+
+.. option:: --frame-margin N, -m N
+
+  Number of frames to ignore at the beginning and end of scenes when saving images. [default: ``3``]
+
+.. option:: --scale S, -s S
+
+  Optional factor by which saved images are rescaled. A scaling factor of 1 would not result in rescaling. A value <1 results in a smaller saved image, while a value >1 results in an image larger than the original. This value is ignored if either the height, -h, or width, -w, values are specified.
+
+.. option:: --height H, -H H
+
+  Optional value for the height of the saved images. Specifying both the height and width, -w, will resize images to an exact size, regardless of aspect ratio. Specifying only height will rescale the image to that number of pixels in height while preserving the aspect ratio.
+
+.. option:: --width W, -W W
+
+  Optional value for the width of the saved images. Specifying both the width and height, -h, will resize images to an exact size, regardless of aspect ratio. Specifying only width will rescale the image to that number of pixels wide while preserving the aspect ratio.
+
+
+``split-video``
+========================================================================
+
+Split input video using ffmpeg or mkvmerge.
+
+Examples
+------------------------------------------------------------------------
+
+    ``scenedetect -i video.mp4 split-video``
+
+    ``scenedetect -i video.mp4 split-video --copy``
+
+Options
+------------------------------------------------------------------------
+
+.. option:: --output DIR, -o DIR
+
+  Output directory to save videos to. Overrides global option -o/--output if set.
+
+.. option:: --filename NAME, -f NAME
+
+  File name format to use when saving videos (with or without extension). You can use the $VIDEO_NAME and $SCENE_NUMBER macros in the filename (e.g. $VIDEO_NAME-Part-$SCENE_NUMBER). Note that you may have to wrap the format in single quotes to avoid variable expansion. [default: ``$VIDEO_NAME-Scene-$SCENE_NUMBER``]
+
+.. option:: --quiet, -q
+
+  Hides any output from the external video splitting tool.
+
+.. option:: --copy, -c
+
+  Copy instead of re-encode. Much faster, but less precise. Equivalent to specifying -a "-map 0 -c:v copy -c:a copy".
+
+.. option:: --high-quality, -hq
+
+  Encode video with higher quality, overrides -f option if present. Equivalent to specifying --rate-factor 17 and --preset slow.
+
+.. option:: --rate-factor RATE, -crf RATE
+
+  Video encoding quality (x264 constant rate factor), from 0-100, where lower values represent better quality, with 0 indicating lossless. [default: ``22``]
+
+.. option:: --preset LEVEL, -p LEVEL
+
+  Video compression quality preset (x264 preset). Can be one of: ultrafast, superfast, veryfast, faster, fast, medium, slow, slower, and veryslow. Faster modes take less time to run, but the output files may be larger. [default: ``veryfast``]
+
+.. option:: --args ARGS, -a ARGS
+
+  Override codec arguments/options passed to FFmpeg when splitting and re-encoding scenes. Use double quotes (") around specified arguments. Must specify at least audio/video codec to use (e.g. -a "-c:v [...] -c:a [...]"). [default: ``-map 0 -c:v libx264 -preset veryfast -crf 22 -c:a aac``]
+
+.. option:: --mkvmerge, -m
+
+  Split the video using mkvmerge. Faster than re-encoding, but less precise. The output will be named $VIDEO_NAME-$SCENE_NUMBER.mkv. If set, all options other than -f/--filename, -q/--quiet and -o/--output will be ignored. Note that mkvmerge automatically appends a suffix of "-$SCENE_NUMBER".
+
+
+``time``
+========================================================================
+
+Set start/end/duration of input video.
+
+Values can be specified as frames (NNNN), seconds (NNNN.NNs), or timecode (HH:MM:SS.nnn). For example, to process only the first minute of a video:
+
+    ``scenedetect -i video.mp4 time --end 00:01:00``
+
+    ``scenedetect -i video.mp4 time --duration 60s``
+
+Note that --end and --duration are mutually exclusive (i.e. only one of the two can be set). Lastly, the following is an example using absolute frame numbers to process frames 0 through 1000:
+
+    ``scenedetect -i video.mp4 time --start 0 --end 1000``
+
+Options
+------------------------------------------------------------------------
+
+.. option:: --start TIMECODE, -s TIMECODE
+
+  Time in video to begin detecting scenes. TIMECODE can be specified as exact number of frames (-s 100 to start at frame 100), time in seconds followed by s (-s 100s to start at 100 seconds), or a timecode in the format HH:MM:SS or HH:MM:SS.nnn (-s 00:01:40 to start at 1m40s).
+
+.. option:: --duration TIMECODE, -d TIMECODE
+
+  Maximum time in video to process. TIMECODE format is the same as other arguments. Mutually exclusive with --end / -e.
+
+.. option:: --end TIMECODE, -e TIMECODE
+
+  Time in video to end detecting scenes. TIMECODE format is the same as other arguments. Mutually exclusive with --duration / -d.

@@ -28,16 +28,6 @@ TITLE_SEP = '=' * 72
 HEADING_SEP = '-' * 72
 
 
-def _indent(text: str, amount: int = 1) -> str:
-    prefix = ' ' * (4 * amount)
-
-    def prefixed() -> StringGenerator:
-        for line in text.splitlines(True):
-            yield (prefix + line)
-
-    return ''.join(prefixed())
-
-
 def format_option(opt: click.Option) -> StringGenerator:
     if isinstance(opt, click.Argument):
         yield '\n.. option:: %s\n' % opt.name
@@ -45,35 +35,34 @@ def format_option(opt: click.Option) -> StringGenerator:
     yield '\n.. option:: %s\n' % ', '.join(
         arg if opt.metavar is None else '%s %s' % (arg, opt.metavar) for arg in sorted(opt.opts))
     help = opt.help
+    # TODO: Escape ':' in all help strings
     if help.endswith(']') and help.find('[default: '):
         help = help.replace('[default: ', '[default: `')
         help = '%s`]' % help[:-1]
-    yield '\n  %s\n' % help
-
-
-def _patch_help(help: str):
-    return help.replace('Examples:\n', 'Examples:\n%s\n' %
-                        HEADING_SEP).format(scenedetect='scenedetect -i video.mp4')
+    yield '\n  %s\n' % help.replace('``', '`').replace('`', '``')
 
 
 def _generate_command_help(command: click.Command) -> StringGenerator:
     yield '\n\n``%s``\n%s\n\n' % (command.name, TITLE_SEP)
-    help = _patch_help(command.help)
+    help = command.help.replace('Examples:\n', 'Examples\n%s\n' %
+                        HEADING_SEP).replace('``', '`').replace('`', '``').replace('\b\n', '').format(scenedetect='scenedetect -i video.mp4')
+
     for line in help.splitlines(keepends=True):
         if line.startswith(INDENT):
             indent = line.count(INDENT)
             line = line.strip()
-            yield '%s``%s``\n' % (indent * INDENT, line) if line else '\n'
+            yield '%s``%s``' % (indent * INDENT, line) if line else ''
         else:
             yield line
+        if not line.endswith('\n'):
+            yield '\n'
 
     if command.params:
-        yield 'Options:\n%s\n' % (HEADING_SEP)
+        yield '\n'
+        yield 'Options\n%s\n' % (HEADING_SEP)
 
         for param in command.params:
             yield from format_option(param)
-    else:
-        yield '\n'
 
 
 def generate_subcommands(ctx: click.Context) -> StringGenerator:
@@ -86,6 +75,7 @@ def create_help() -> str:
     lines = [
         '%s\n``scenedetect`` Command Reference\n%s' % (PAGE_SEP, PAGE_SEP),
     ]
+    lines.extend(_generate_command_help(ctx.command))
     lines.extend(generate_subcommands(ctx))
 
     return ''.join(lines)

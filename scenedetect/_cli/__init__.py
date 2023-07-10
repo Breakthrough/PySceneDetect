@@ -239,9 +239,7 @@ def scenedetect_command(
     logfile: Optional[AnyStr],
     quiet: bool,
 ):
-    """PySceneDetect is a scene cut/transition detection program. PySceneDetect
-takes an input video, runs detection on it, and uses the resulting scene
-information to generate output. The syntax for using PySceneDetect is:
+    """PySceneDetect is a scene cut/transition detection program. PySceneDetect takes an input video, runs detection on it, and uses the resulting scene information to generate output. The syntax for using PySceneDetect is:
 
     {scenedetect} [detector] [commands]
 
@@ -249,12 +247,11 @@ For example, to split a video on each fast-cut:
 
     {scenedetect} detect-adaptive split-video
 
-For [detector] use `detect-adaptive` or `detect-content` to find fast
-cuts, and `detect-threshold` for fades in/out. If [detector] is omitted,
-a default detector will be used.
+For [detector] use `detect-adaptive` or `detect-content` to find fast cuts, and `detect-threshold` for fades in/out. If [detector] is omitted, a default detector will be used.
 
 The following [commands] can be specified to generate output:
 
+\b
  - export scenes to CSV (`list-scenes`)
  - split input video (`split-video`)
  - save images for each scene (`save-images`)
@@ -395,7 +392,7 @@ Values can be specified as frames (NNNN), seconds (NNNN.NNs), or timecode (HH:MM
 Note that --end and --duration are mutually exclusive (i.e. only one of the two can be set). Lastly, the following is an example using absolute frame numbers to process frames 0 through 1000:
 
     {scenedetect} time --start 0 --end 1000
-    """
+"""
     assert isinstance(ctx.obj, CliContext)
     ctx.obj.handle_time(
         start=start,
@@ -482,7 +479,7 @@ Examples:
     {scenedetect} detect-content
 
     {scenedetect} detect-content --threshold 27.5
-    """
+"""
     assert isinstance(ctx.obj, CliContext)
     detector_args = ctx.obj.get_detect_content_params(
         threshold=threshold,
@@ -588,7 +585,7 @@ Examples:
     {scenedetect} detect-adaptive
 
     {scenedetect} detect-adaptive --threshold 3.2
-    """
+"""
     assert isinstance(ctx.obj, CliContext)
     detector_args = ctx.obj.get_detect_adaptive_params(
         threshold=threshold,
@@ -660,7 +657,7 @@ Examples:
     {scenedetect} detect-threshold
 
     {scenedetect} detect-threshold --threshold 15
-    """
+"""
     assert isinstance(ctx.obj, CliContext)
     detector_args = ctx.obj.get_detect_threshold_params(
         threshold=threshold,
@@ -707,7 +704,7 @@ Examples:
     {scenedetect} load-scenes -i scenes.csv
 
     {scenedetect} load-scenes -i scenes.csv --start-col-name "Start Timecode"
-    """
+"""
     assert isinstance(ctx.obj, CliContext)
 
     ctx.obj.handle_load_scenes(input=input, start_col_name=start_col_name, framerate=framerate)
