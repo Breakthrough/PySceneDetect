@@ -16,7 +16,7 @@ In general, use ``detect-adaptive`` or ``detect-content`` for fast cuts, and ``d
 
 Perform adaptive detection algorithm on input video.
 
-Two-pass algorithm that first calculates frame scores with :program:`detect-content <scenedetect detect-content>`, and then applies a rolling average when processing the result. This can help mitigate false detections in situations such as camera movement.
+Two-pass algorithm that first calculates frame scores with ``detect-content``, and then applies a rolling average when processing the result. This can help mitigate false detections in situations such as camera movement.
 
 Examples
 ------------------------------------------------------------------------

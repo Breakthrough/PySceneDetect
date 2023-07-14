@@ -49,13 +49,6 @@ def transform_backquotes(s: str) -> str:
     return s.replace('``', '`').replace('`', '``')
 
 
-def transform_add_command_refs(s: str, ctx: click.Context) -> str:
-    commands = ctx.command.list_commands(ctx)
-    for command in commands:
-        s = s.replace('``%s``' % command, ':program:`%s <scenedetect %s>`' % (command, command))
-    return s
-
-
 def add_backquotes(match: re.Match) -> str:
     return '``%s``' % match.string[match.start():match.end()]
 
@@ -92,7 +85,7 @@ def extract_default_value(s: str) -> ty.Tuple[str, ty.Optional[str]]:
 
 def transform_add_option_refs(s: str, refs: ty.List[str]) -> str:
     transform = add_backquotes_with_refs(refs)
-    # TODO: Find `global option -c/--command` and add ref to parent instead.
+    # TODO: Match prefix of `global option` and add ref to parent `scenedetect` command option.
     #  -c/--command
     s = re.sub('-\w/--\w[\w-]*', transform, s)
     #  --arg=value, --arg=1.2.3, --arg=1,2,3
@@ -129,6 +122,7 @@ def generate_command_help(ctx: click.Context,
         command.name if parent_name is None else '%s %s' % (parent_name, command.name))
     yield '\n\n``%s``\n%s\n\n' % (command.name, TITLE_SEP)
     # TODO: Add references to long options. Requires splitting out examples.
+    # TODO: Add references to subcommands. Need to add actual refs, since programs can't be ref'd.
     help = command.help.replace('Examples:\n', 'Examples\n%s\n' % HEADING_SEP).replace(
         '\b\n', '').format(scenedetect='scenedetect -i video.mp4')
 
@@ -139,7 +133,6 @@ def generate_command_help(ctx: click.Context,
         for opt in opts
     ]
 
-    help = transform_add_command_refs(help, ctx)
     help = transform_add_option_refs(help, replacements)
 
     for line in help.strip().splitlines():
