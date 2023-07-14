@@ -40,7 +40,7 @@ The `scenedetect` API is designed to be extensible and easy to integrate with mo
 
 Most types/functions are also available directly from the `scenedetect` package to make imports simpler.
 
-.. note::
+.. warning::
 
     The PySceneDetect API is still under development. It is recommended that you pin the `scenedetect` version in your requirements to below the next major release:
 
@@ -131,7 +131,7 @@ Module Reference
 .. toctree::
     :maxdepth: 3
     :caption: PySceneDetect Module Documentation
-    :name: apitoc
+    :name: fullapitoc
 
     api/detectors
     api/backends

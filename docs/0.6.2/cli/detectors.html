@@ -34,33 +34,82 @@
             
   <section id="detectors">
 <span id="cli-detectors"></span><h1>Detectors<a class="headerlink" href="#detectors" title="Permalink to this heading">¶</a></h1>
-<p>There are currently two implemented scene detection algorithms, threshold
-based detection (<code class="docutils literal notranslate"><span class="pre">detect-threshold</span></code>), and content-aware detection
-(<code class="docutils literal notranslate"><span class="pre">detect-content</span></code>).  Each detector can be selected by adding the
-respective <cite>detect-</cite> command, and any relevant options, after setting
-the main <code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> command global options.  In general, commands
-should follow the form:</p>
+<p>There are three scene detection algorithms: threshold based detection (<code class="docutils literal notranslate"><span class="pre">detect-threshold</span></code>), content-aware detection (<code class="docutils literal notranslate"><span class="pre">detect-content</span></code>), and adaptive detection (<code class="docutils literal notranslate"><span class="pre">detect-adaptive</span></code>).</p>
+<p>In general, use <code class="docutils literal notranslate"><span class="pre">detect-adaptive</span></code> or <code class="docutils literal notranslate"><span class="pre">detect-content</span></code> for fast cuts, and <code class="docutils literal notranslate"><span class="pre">detect-threshold</span></code> for detecting fade in/out transitions.</p>
+<section id="detect-adaptive">
+<h2><code class="docutils literal notranslate"><span class="pre">detect-adaptive</span></code><a class="headerlink" href="#detect-adaptive" title="Permalink to this heading">¶</a></h2>
+<p>Perform adaptive detection algorithm on input video.</p>
+<p>Two-pass algorithm that first calculates frame scores with <strong class="program">detect-content &lt;scenedetect detect-content&gt;</strong>, and then applies a rolling average when processing the result. This can help mitigate false detections in situations such as camera movement.</p>
+<section id="examples">
+<h3>Examples<a class="headerlink" href="#examples" title="Permalink to this heading">¶</a></h3>
 <blockquote>
-<div><p><code class="docutils literal notranslate"><span class="pre">scenedetect</span> <span class="pre">[global</span> <span class="pre">options]</span> <span class="pre">[detector]</span> <span class="pre">[commands]</span></code></p>
+<div><p><code class="docutils literal notranslate"><span class="pre">scenedetect</span> <span class="pre">-i</span> <span class="pre">video.mp4</span> <span class="pre">detect-adaptive</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">scenedetect</span> <span class="pre">-i</span> <span class="pre">video.mp4</span> <span class="pre">detect-adaptive</span> <span class="pre">--threshold</span> <span class="pre">3.2</span></code></p>
 </div></blockquote>
-<p>For example, to use the <cite>detect-content</cite> detector on a file <cite>video.mp4</cite>,
-writing a stats file to file <cite>video.stats.csv</cite>, and printing a list of
-detected scenes to the terminal:</p>
-<blockquote>
-<div><p><code class="docutils literal notranslate"><span class="pre">scenedetect</span> <span class="pre">-i</span> <span class="pre">video.mp4</span> <span class="pre">-s</span> <span class="pre">video.stats.csv</span> <span class="pre">detect-content</span> <span class="pre">list-scenes</span> <span class="pre">-n</span></code></p>
-</div></blockquote>
-<p>Several more command line interface examples are shown in the following section.</p>
+</section>
+<section id="options">
+<h3>Options<a class="headerlink" href="#options" title="Permalink to this heading">¶</a></h3>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-detect-adaptive-t">
+<span id="cmdoption-scenedetect-detect-adaptive-threshold"></span><span class="sig-name descname"><span class="pre">-t</span></span><span class="sig-prename descclassname"> <span class="pre">VAL</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--threshold</span></span><span class="sig-prename descclassname"> <span class="pre">VAL</span></span><a class="headerlink" href="#cmdoption-scenedetect-detect-adaptive-t" title="Permalink to this definition">¶</a></dt>
+<dd><p>Threshold (float) that frame score must exceed to trigger a cut. Refers to “adaptive_ratio” in stats file.</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">3.0</span></code></p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-detect-adaptive-c">
+<span id="cmdoption-scenedetect-detect-adaptive-min-content-val"></span><span class="sig-name descname"><span class="pre">-c</span></span><span class="sig-prename descclassname"> <span class="pre">VAL</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--min-content-val</span></span><span class="sig-prename descclassname"> <span class="pre">VAL</span></span><a class="headerlink" href="#cmdoption-scenedetect-detect-adaptive-c" title="Permalink to this definition">¶</a></dt>
+<dd><p>Minimum threshold (float) that “content_val” must exceed to trigger a cut.</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">15.0</span></code></p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-detect-adaptive-d">
+<span id="cmdoption-scenedetect-detect-adaptive-min-delta-hsv"></span><span class="sig-name descname"><span class="pre">-d</span></span><span class="sig-prename descclassname"> <span class="pre">VAL</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--min-delta-hsv</span></span><span class="sig-prename descclassname"> <span class="pre">VAL</span></span><a class="headerlink" href="#cmdoption-scenedetect-detect-adaptive-d" title="Permalink to this definition">¶</a></dt>
+<dd><p>[DEPRECATED] Use <a class="reference internal" href="#cmdoption-scenedetect-detect-adaptive-c"><code class="xref std std-option docutils literal notranslate"><span class="pre">-c/--min-content-val</span></code></a> instead.</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">15.0</span></code></p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-detect-adaptive-f">
+<span id="cmdoption-scenedetect-detect-adaptive-frame-window"></span><span class="sig-name descname"><span class="pre">-f</span></span><span class="sig-prename descclassname"> <span class="pre">VAL</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--frame-window</span></span><span class="sig-prename descclassname"> <span class="pre">VAL</span></span><a class="headerlink" href="#cmdoption-scenedetect-detect-adaptive-f" title="Permalink to this definition">¶</a></dt>
+<dd><p>Size of window to detect deviations from mean. Represents how many frames before/after the current one to use for mean.</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">2</span></code></p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-detect-adaptive-w">
+<span id="cmdoption-scenedetect-detect-adaptive-weights"></span><span class="sig-name descname"><span class="pre">-w</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--weights</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-scenedetect-detect-adaptive-w" title="Permalink to this definition">¶</a></dt>
+<dd><p>Weights of 4 components (“delta_hue”, “delta_sat”, “delta_lum”, “delta_edges”) used to calculate “content_val”.</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">1.000,</span> <span class="pre">1.000,</span> <span class="pre">1.000,</span> <span class="pre">0.000</span></code></p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-detect-adaptive-l">
+<span id="cmdoption-scenedetect-detect-adaptive-luma-only"></span><span class="sig-name descname"><span class="pre">-l</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--luma-only</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-scenedetect-detect-adaptive-l" title="Permalink to this definition">¶</a></dt>
+<dd><p>Only use luma (brightness) channel. Useful for greyscale videos. Equivalent to “–weights 0 0 1 0”.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-detect-adaptive-k">
+<span id="cmdoption-scenedetect-detect-adaptive-kernel-size"></span><span class="sig-name descname"><span class="pre">-k</span></span><span class="sig-prename descclassname"> <span class="pre">N</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--kernel-size</span></span><span class="sig-prename descclassname"> <span class="pre">N</span></span><a class="headerlink" href="#cmdoption-scenedetect-detect-adaptive-k" title="Permalink to this definition">¶</a></dt>
+<dd><p>Size of kernel for expanding detected edges. Must be odd number &gt;= 3. If unset, size is estimated using video resolution.</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">auto</span></code></p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-detect-adaptive-m">
+<span id="cmdoption-scenedetect-detect-adaptive-min-scene-len"></span><span class="sig-name descname"><span class="pre">-m</span></span><span class="sig-prename descclassname"> <span class="pre">TIMECODE</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--min-scene-len</span></span><span class="sig-prename descclassname"> <span class="pre">TIMECODE</span></span><a class="headerlink" href="#cmdoption-scenedetect-detect-adaptive-m" title="Permalink to this definition">¶</a></dt>
+<dd><p>Minimum length of any scene. Overrides global option <a class="reference internal" href="global_options.html#cmdoption-scenedetect-m"><code class="xref std std-option docutils literal notranslate"><span class="pre">-m/--min-scene-len</span></code></a>. TIMECODE can be specified in frames (<a class="reference internal" href="#cmdoption-scenedetect-detect-adaptive-m"><code class="xref std std-option docutils literal notranslate"><span class="pre">-m=100</span></code></a>), in seconds with <cite>s</cite> suffix (<a class="reference internal" href="#cmdoption-scenedetect-detect-adaptive-m"><code class="xref std std-option docutils literal notranslate"><span class="pre">-m=3.5s</span></code></a>), or timecode (<a class="reference internal" href="#cmdoption-scenedetect-detect-adaptive-m"><code class="xref std std-option docutils literal notranslate"><span class="pre">-m=00:01:52.778</span></code></a>).</p>
+</dd></dl>
+
+</section>
+</section>
 <section id="detect-content">
 <h2><code class="docutils literal notranslate"><span class="pre">detect-content</span></code><a class="headerlink" href="#detect-content" title="Permalink to this heading">¶</a></h2>
 <p>Perform content detection algorithm on input video.</p>
-<p>When processing each frame, a score (from 0 to 255.0) is calculated
-representing the difference in content from the previous frame (higher =
-more difference). A change in scene is triggered when this value exceeds the
-value set for <cite>-t</cite>/<cite>–threshold</cite>. This value is the <em>content_val</em> column in
-a statsfile.</p>
-<p>Frame scores are calculated from several components, which are used to
-generate a final weighted value with <cite>-w</cite>/<cite>–weights</cite>. These are also
-recorded in the statsfile if set. Currently there are four components:</p>
+<p>For each frame, a score from 0 to 255.0 is calculated which represents the difference in content between the current and previous frame (higher = more different). A cut is generated when a frame score exceeds <a class="reference internal" href="#cmdoption-scenedetect-detect-content-t"><code class="xref std std-option docutils literal notranslate"><span class="pre">-t/--threshold</span></code></a>. Frame scores are saved under the “content_val” column in a statsfile.</p>
+<p>Scores are calculated from several components which are also recorded in the statsfile:</p>
 <blockquote>
 <div><ul class="simple">
 <li><p><em>delta_hue</em>: Difference between pixel hue values of adjacent frames.</p></li>
@@ -69,174 +118,91 @@ recorded in the statsfile if set. Currently there are four components:</p>
 <li><p><em>delta_edges</em>: Difference between calculated edges of adjacent frames. Typically larger than other components, so threshold may need to be increased to compensate.</p></li>
 </ul>
 </div></blockquote>
-<p>Weights are set as a set of 4 numbers in the form (<em>delta_hue</em>, <em>delta_sat</em>,
-<em>delta_lum</em>, <em>delta_edges</em>). For example, <cite>-w 1.0 0.5 1.0 0.2 -t 32</cite> is a
-good starting point to use with edge detection.</p>
-<p>Edge detection is not enabled by default. Current default parameters are <cite>-w
-1.0 1.0 1.0 0.0 -t 27</cite>. The final weighted sum is normalized based on the
-weight of the components, so they do not need to equal 100%.</p>
-<section id="detector-options">
-<h3>Detector Options<a class="headerlink" href="#detector-options" title="Permalink to this heading">¶</a></h3>
+<p>Once calculated, these components are multiplied by the specified <a class="reference internal" href="#cmdoption-scenedetect-detect-content-w"><code class="xref std std-option docutils literal notranslate"><span class="pre">-w/--weights</span></code></a> to calculate the final frame score (“content_val”).  Weights are set as a set of 4 numbers in the form (<em>delta_hue</em>, <em>delta_sat</em>, <em>delta_lum</em>, <em>delta_edges</em>). For example, “–weights 1.0 0.5 1.0 0.2 –threshold 32” is a good starting point for trying edge detection. The final sum is normalized by the weight of all components, so they need not equal 100%. Edge detection is disabled by default to improve performance.</p>
+<section id="id1">
+<h3>Examples<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h3>
 <blockquote>
-<div><dl class="option-list">
-<dt><kbd><span class="option">-t</span>, <span class="option">--threshold <var>VAL</var></span></kbd></dt>
-<dd><p>Threshold value that the content_val frame
-metric must exceed to trigger a new scene.
-Refers to frame metric content_val in stats
-file. [default: 27.0]  [0.0&lt;=x&lt;=255.0]</p>
-</dd>
-</dl>
-<dl class="simple">
-<dt>-w, –weights &lt;FLOAT FLOAT FLOAT FLOAT&gt;…</dt><dd><p>Weights of the 4 components used to
-calculate content_val in the form
-(delta_hue, delta_sat, delta_lum,
-delta_edges). [default: 1.000, 1.000, 1.000,
-0.000]</p>
-</dd>
-</dl>
-<dl class="option-list">
-<dt><kbd><span class="option">-l</span>, <span class="option">--luma-only</span></kbd></dt>
-<dd><p>Only consider luma (brightness) channel.
-Useful for greyscale videos. Equivalent
-tosetting -w/–weights to 0, 0, 1, 0.</p>
-</dd>
-<dt><kbd><span class="option">-k</span>, <span class="option">--kernel-size <var>N</var></span></kbd></dt>
-<dd><p>Size of kernel for expanding detected edges.
-Must be odd integer greater than or equal to
-3. If unset, kernel size is estimated using
-video resolution. [default: auto]</p>
-</dd>
-<dt><kbd><span class="option">-m</span>, <span class="option">--min-scene-len <var>TIMECODE</var></span></kbd></dt>
-<dd><p>Minimum length of any scene. Overrides
-global min-scene-len (-m) setting. TIMECODE
-can be specified as exact number of frames,
-a time in seconds followed by s, or a
-timecode in the format HH:MM:SS or
-HH:MM:SS.nnn.</p>
-</dd>
-</dl>
+<div><p><code class="docutils literal notranslate"><span class="pre">scenedetect</span> <span class="pre">-i</span> <span class="pre">video.mp4</span> <span class="pre">detect-content</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">scenedetect</span> <span class="pre">-i</span> <span class="pre">video.mp4</span> <span class="pre">detect-content</span> <span class="pre">--threshold</span> <span class="pre">27.5</span></code></p>
 </div></blockquote>
 </section>
-<section id="examples">
-<h3>Examples<a class="headerlink" href="#examples" title="Permalink to this heading">¶</a></h3>
-<blockquote>
-<div><p><code class="docutils literal notranslate"><span class="pre">detect-content</span></code></p>
-<p><code class="docutils literal notranslate"><span class="pre">detect-content</span> <span class="pre">--threshold</span> <span class="pre">27.5</span></code></p>
-</div></blockquote>
+<section id="id2">
+<h3>Options<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h3>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-detect-content-t">
+<span id="cmdoption-scenedetect-detect-content-threshold"></span><span class="sig-name descname"><span class="pre">-t</span></span><span class="sig-prename descclassname"> <span class="pre">VAL</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--threshold</span></span><span class="sig-prename descclassname"> <span class="pre">VAL</span></span><a class="headerlink" href="#cmdoption-scenedetect-detect-content-t" title="Permalink to this definition">¶</a></dt>
+<dd><p>Threshold (float) that frame score must exceed to trigger a cut. Refers to “content_val” in stats file.</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">27.0</span></code></p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-detect-content-w">
+<span id="cmdoption-scenedetect-detect-content-weights"></span><span class="sig-name descname"><span class="pre">-w</span></span><span class="sig-prename descclassname"> <span class="pre">HUE</span> <span class="pre">SAT</span> <span class="pre">LUM</span> <span class="pre">EDGE</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--weights</span></span><span class="sig-prename descclassname"> <span class="pre">HUE</span> <span class="pre">SAT</span> <span class="pre">LUM</span> <span class="pre">EDGE</span></span><a class="headerlink" href="#cmdoption-scenedetect-detect-content-w" title="Permalink to this definition">¶</a></dt>
+<dd><p>Weights of 4 components used to calculate frame score from (delta_hue, delta_sat, delta_lum, delta_edges).</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">1.000,</span> <span class="pre">1.000,</span> <span class="pre">1.000,</span> <span class="pre">0.000</span></code></p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-detect-content-l">
+<span id="cmdoption-scenedetect-detect-content-luma-only"></span><span class="sig-name descname"><span class="pre">-l</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--luma-only</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-scenedetect-detect-content-l" title="Permalink to this definition">¶</a></dt>
+<dd><p>Only use luma (brightness) channel. Useful for greyscale videos. Equivalent to setting “-w 0 0 1 0”.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-detect-content-k">
+<span id="cmdoption-scenedetect-detect-content-kernel-size"></span><span class="sig-name descname"><span class="pre">-k</span></span><span class="sig-prename descclassname"> <span class="pre">N</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--kernel-size</span></span><span class="sig-prename descclassname"> <span class="pre">N</span></span><a class="headerlink" href="#cmdoption-scenedetect-detect-content-k" title="Permalink to this definition">¶</a></dt>
+<dd><p>Size of kernel for expanding detected edges. Must be odd integer greater than or equal to 3. If unset, kernel size is estimated using video resolution.</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">auto</span></code></p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-detect-content-m">
+<span id="cmdoption-scenedetect-detect-content-min-scene-len"></span><span class="sig-name descname"><span class="pre">-m</span></span><span class="sig-prename descclassname"> <span class="pre">TIMECODE</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--min-scene-len</span></span><span class="sig-prename descclassname"> <span class="pre">TIMECODE</span></span><a class="headerlink" href="#cmdoption-scenedetect-detect-content-m" title="Permalink to this definition">¶</a></dt>
+<dd><p>Minimum length of any scene. Overrides global option <a class="reference internal" href="global_options.html#cmdoption-scenedetect-m"><code class="xref std std-option docutils literal notranslate"><span class="pre">-m/--min-scene-len</span></code></a>. TIMECODE can be specified in frames (<a class="reference internal" href="#cmdoption-scenedetect-detect-content-m"><code class="xref std std-option docutils literal notranslate"><span class="pre">-m=100</span></code></a>), in seconds with <cite>s</cite> suffix (<a class="reference internal" href="#cmdoption-scenedetect-detect-content-m"><code class="xref std std-option docutils literal notranslate"><span class="pre">-m=3.5s</span></code></a>), or timecode (<a class="reference internal" href="#cmdoption-scenedetect-detect-content-m"><code class="xref std std-option docutils literal notranslate"><span class="pre">-m=00:01:52.778</span></code></a>).</p>
+</dd></dl>
+
 </section>
 </section>
 <section id="detect-threshold">
 <h2><code class="docutils literal notranslate"><span class="pre">detect-threshold</span></code><a class="headerlink" href="#detect-threshold" title="Permalink to this heading">¶</a></h2>
 <p>Perform threshold detection algorithm on input video.</p>
-<p>Detects fades in/out based on average frame pixel value compared against
-<cite>-t</cite>/<cite>–threshold</cite>.</p>
-<section id="id1">
-<h3>Detector Options<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h3>
-<blockquote>
-<div><dl class="option-list">
-<dt><kbd><span class="option">-t</span>, <span class="option">--threshold <var>VAL</var></span></kbd></dt>
-<dd><p>Threshold value (integer) that the delta_rgb
-frame metric must exceed to trigger a new
-scene. Refers to frame metric delta_rgb in
-stats file. [default: 12.0]</p>
-</dd>
-<dt><kbd><span class="option">-f</span>, <span class="option">--fade-bias <var>PERCENT</var></span></kbd></dt>
-<dd><p>Percent (%) from -100 to 100 of timecode skew
-for where cuts should be placed. -100
-indicates the start frame, +100 indicates the
-end frame, and 0 is the middle of both.
-[default: 0]</p>
-</dd>
-<dt><kbd><span class="option">-l</span>, <span class="option">--add-last-scene</span></kbd></dt>
-<dd><p>If set, if the video ends on a fade-out, a
-final scene will be generated from the last
-fade-out position to the end of the video.
-[default: True]</p>
-</dd>
-<dt><kbd><span class="option">-m</span>, <span class="option">--min-scene-len <var>TIMECODE</var></span></kbd></dt>
-<dd><p>Minimum length of any scene. Overrides global
-min-scene-len (-m) setting. TIMECODE can be
-specified as exact number of frames, a time in
-seconds followed by s, or a timecode in the
-format HH:MM:SS or HH:MM:SS.nnn.</p>
-</dd>
-</dl>
-</div></blockquote>
-</section>
-<section id="usage-examples">
-<h3>Usage Examples<a class="headerlink" href="#usage-examples" title="Permalink to this heading">¶</a></h3>
-<blockquote>
-<div><p><code class="docutils literal notranslate"><span class="pre">detect-threshold</span></code></p>
-<p><code class="docutils literal notranslate"><span class="pre">detect-threshold</span> <span class="pre">--threshold</span> <span class="pre">15</span></code></p>
-</div></blockquote>
-</section>
-</section>
-<section id="detect-adaptive">
-<h2><code class="docutils literal notranslate"><span class="pre">detect-adaptive</span></code><a class="headerlink" href="#detect-adaptive" title="Permalink to this heading">¶</a></h2>
-<p>Two-pass algorithm that first calculates frame scores with <cite>detect-content</cite>,
-and then applies a rolling average when processing the result. This can help
-mitigate false detections in situations such as camera movement.</p>
-<section id="id2">
-<h3>Detector Options<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h3>
-<blockquote>
-<div><dl class="option-list">
-<dt><kbd><span class="option">-t</span>, <span class="option">--threshold <var>VAL</var></span></kbd></dt>
-<dd><p>Threshold value (float) that the calculated
-frame score must exceed to trigger a new
-scene (see frame metric adaptive_ratio in
-stats file). [default: 3.0]</p>
-</dd>
-<dt><kbd><span class="option">-c</span>, <span class="option">--min-content-val <var>VAL</var></span></kbd></dt>
-<dd><p>Minimum threshold (float) that the
-content_val must exceed in order to register
-as a new scene. This is calculated the same
-way that <cite>detect-content</cite> calculates frame
-score. [default: 15.0]</p>
-</dd>
-<dt><kbd><span class="option">-f</span>, <span class="option">--frame-window <var>VAL</var></span></kbd></dt>
-<dd><p>Size of window (number of frames) before and
-after each frame to average together in
-order to detect deviations from the mean.
-[default: 2]</p>
-</dd>
-</dl>
-<dl class="simple">
-<dt>-w, –weights &lt;FLOAT FLOAT FLOAT FLOAT&gt;…</dt><dd><p>Weights of the 4 components used to
-calculate content_val in the form
-(delta_hue, delta_sat, delta_lum,
-delta_edges). [default: 1.000, 1.000, 1.000,
-0.000]</p>
-</dd>
-</dl>
-<dl class="option-list">
-<dt><kbd><span class="option">-l</span>, <span class="option">--luma-only</span></kbd></dt>
-<dd><p>Only consider luma (brightness) channel.
-Useful for greyscale videos. Equivalent
-tosetting -w/–weights to 0, 0, 1, 0.</p>
-</dd>
-<dt><kbd><span class="option">-k</span>, <span class="option">--kernel-size <var>N</var></span></kbd></dt>
-<dd><p>Size of kernel for expanding detected edges.
-Must be odd integer greater than or equal to
-3. If unset, kernel size is estimated using
-video resolution. [default: auto]</p>
-</dd>
-<dt><kbd><span class="option">-m</span>, <span class="option">--min-scene-len <var>TIMECODE</var></span></kbd></dt>
-<dd><p>Minimum length of any scene. Overrides
-global min-scene-len (-m) setting. TIMECODE
-can be specified as exact number of frames,
-a time in seconds followed by s, or a
-timecode in the format HH:MM:SS or
-HH:MM:SS.nnn.</p>
-</dd>
-</dl>
-</div></blockquote>
-</section>
+<p>Detects fade-in and fade-out events using average pixel values. Resulting cuts are placed between adjacent fade-out and fade-in events.</p>
 <section id="id3">
-<h3>Usage Examples<a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h3>
+<h3>Examples<a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h3>
 <blockquote>
-<div><p><code class="docutils literal notranslate"><span class="pre">detect-adaptive</span></code></p>
-<p><code class="docutils literal notranslate"><span class="pre">detect-adaptive</span> <span class="pre">--threshold</span> <span class="pre">3.2</span></code></p>
+<div><p><code class="docutils literal notranslate"><span class="pre">scenedetect</span> <span class="pre">-i</span> <span class="pre">video.mp4</span> <span class="pre">detect-threshold</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">scenedetect</span> <span class="pre">-i</span> <span class="pre">video.mp4</span> <span class="pre">detect-threshold</span> <span class="pre">--threshold</span> <span class="pre">15</span></code></p>
 </div></blockquote>
+</section>
+<section id="id4">
+<h3>Options<a class="headerlink" href="#id4" title="Permalink to this heading">¶</a></h3>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-detect-threshold-t">
+<span id="cmdoption-scenedetect-detect-threshold-threshold"></span><span class="sig-name descname"><span class="pre">-t</span></span><span class="sig-prename descclassname"> <span class="pre">VAL</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--threshold</span></span><span class="sig-prename descclassname"> <span class="pre">VAL</span></span><a class="headerlink" href="#cmdoption-scenedetect-detect-threshold-t" title="Permalink to this definition">¶</a></dt>
+<dd><p>Threshold (integer) that frame score must exceed to start a new scene. Refers to “delta_rgb” in stats file.</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">12.0</span></code></p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-detect-threshold-f">
+<span id="cmdoption-scenedetect-detect-threshold-fade-bias"></span><span class="sig-name descname"><span class="pre">-f</span></span><span class="sig-prename descclassname"> <span class="pre">PERCENT</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--fade-bias</span></span><span class="sig-prename descclassname"> <span class="pre">PERCENT</span></span><a class="headerlink" href="#cmdoption-scenedetect-detect-threshold-f" title="Permalink to this definition">¶</a></dt>
+<dd><p>Percent (%) from -100 to 100 of timecode skew of cut placement. -100 indicates the start frame, +100 indicates the end frame, and 0 is the middle of both.</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">0</span></code></p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-detect-threshold-l">
+<span id="cmdoption-scenedetect-detect-threshold-add-last-scene"></span><span class="sig-name descname"><span class="pre">-l</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--add-last-scene</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-scenedetect-detect-threshold-l" title="Permalink to this definition">¶</a></dt>
+<dd><p>If set and video ends after a fade-out event, generate a final cut at the last fade-out position.</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">True</span></code></p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-detect-threshold-m">
+<span id="cmdoption-scenedetect-detect-threshold-min-scene-len"></span><span class="sig-name descname"><span class="pre">-m</span></span><span class="sig-prename descclassname"> <span class="pre">TIMECODE</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--min-scene-len</span></span><span class="sig-prename descclassname"> <span class="pre">TIMECODE</span></span><a class="headerlink" href="#cmdoption-scenedetect-detect-threshold-m" title="Permalink to this definition">¶</a></dt>
+<dd><p>Minimum length of any scene. Overrides global option <a class="reference internal" href="global_options.html#cmdoption-scenedetect-m"><code class="xref std std-option docutils literal notranslate"><span class="pre">-m/--min-scene-len</span></code></a>. TIMECODE can be specified in frames (<a class="reference internal" href="#cmdoption-scenedetect-detect-threshold-m"><code class="xref std std-option docutils literal notranslate"><span class="pre">-m=100</span></code></a>), in seconds with <cite>s</cite> suffix (<a class="reference internal" href="#cmdoption-scenedetect-detect-threshold-m"><code class="xref std std-option docutils literal notranslate"><span class="pre">-m=3.5s</span></code></a>), or timecode (<a class="reference internal" href="#cmdoption-scenedetect-detect-threshold-m"><code class="xref std std-option docutils literal notranslate"><span class="pre">-m=00:01:52.778</span></code></a>).</p>
+</dd></dl>
+
 </section>
 </section>
 </section>
@@ -291,9 +257,9 @@ HH:MM:SS.nnn.</p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="global_options.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Application</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Detectors</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#detect-adaptive"><code class="docutils literal notranslate"><span class="pre">detect-adaptive</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#detect-content"><code class="docutils literal notranslate"><span class="pre">detect-content</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#detect-threshold"><code class="docutils literal notranslate"><span class="pre">detect-threshold</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#detect-adaptive"><code class="docutils literal notranslate"><span class="pre">detect-adaptive</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="commands.html">Commands</a></li>

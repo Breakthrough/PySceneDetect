@@ -75,6 +75,12 @@ functions to handle logging and invoking external commands.</p>
 
 </dd></dl>
 
+<dl class="py class">
+<dt class="sig sig-object py" id="scenedetect.platform.Template">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scenedetect.platform.</span></span><span class="sig-name descname"><span class="pre">Template</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">template</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.platform.Template" title="Permalink to this definition">¶</a></dt>
+<dd><p>Template matcher used to replace instances of $TEMPLATES in filenames.</p>
+</dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="scenedetect.platform.logging_redirect_tqdm">
 <span class="sig-prename descclassname"><span class="pre">scenedetect.platform.</span></span><span class="sig-name descname"><span class="pre">logging_redirect_tqdm</span></span><a class="headerlink" href="#scenedetect.platform.logging_redirect_tqdm" title="Permalink to this definition">¶</a></dt>
@@ -208,7 +214,7 @@ every time this function is invoked.</p>
 <li><p><strong>log_level</strong> (<em>int</em>) – Verbosity of log messages. Should be one of [logging.INFO, logging.DEBUG,
 logging.WARNING, logging.ERROR, logging.CRITICAL].</p></li>
 <li><p><strong>show_stdout</strong> (<em>bool</em>) – If True, add handler to show log messages on stdout (default: False).</p></li>
-<li><p><strong>log_file</strong> (<em>str</em><em> | </em><em>None</em>) – If set, add handler to dump log messages to given file path.</p></li>
+<li><p><strong>log_file</strong> (<em>str</em><em> | </em><em>None</em>) – If set, add handler to dump debug log messages to given file path.</p></li>
 </ul>
 </dd>
 </dl>
@@ -307,6 +313,7 @@ raises a different exception when the command length is too long.</p>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.platform.CommandTooLong"><code class="docutils literal notranslate"><span class="pre">CommandTooLong</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.platform.FakeTqdmLoggingRedirect"><code class="docutils literal notranslate"><span class="pre">FakeTqdmLoggingRedirect</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.platform.FakeTqdmObject"><code class="docutils literal notranslate"><span class="pre">FakeTqdmObject</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scenedetect.platform.Template"><code class="docutils literal notranslate"><span class="pre">Template</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.platform.logging_redirect_tqdm"><code class="docutils literal notranslate"><span class="pre">logging_redirect_tqdm</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.platform.tqdm"><code class="docutils literal notranslate"><span class="pre">tqdm</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.platform.get_and_create_path"><code class="docutils literal notranslate"><span class="pre">get_and_create_path()</span></code></a></li>

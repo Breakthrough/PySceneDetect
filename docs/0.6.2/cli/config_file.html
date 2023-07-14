@@ -61,8 +61,7 @@
 </li>
 </ul>
 </div></blockquote>
-<p>Run <cite>scenedetect help</cite> to see the exact path on your system which will be used.  Values set on the command line take precedence over those set in the config file.</p>
-<p>Most command line parameters can be set using a configuration file. See the <a class="reference internal" href="#config-file-template"><span class="std std-ref">Template</span></a> below for an example <code class="docutils literal notranslate"><span class="pre">scenedetect.cfg</span></code> file containing every possible option, along with comments that describe each one.  Note that lines starting with a <code class="docutils literal notranslate"><span class="pre">#</span></code> are comments and will be ignored.</p>
+<p>Run <cite>scenedetect –help</cite> to see the exact path on your system which will be used.  Values set on the command line take precedence over those set in the config file.  Most (but not all) command line parameters can be set using a configuration file, and some options can <em>only</em> be set using a config file. See the <a class="reference internal" href="#config-file-template"><span class="std std-ref">Template</span></a> below for a <code class="docutils literal notranslate"><span class="pre">scenedetect.cfg</span></code> file that describes each option, which you can use to create a new config file.  Note that lines starting with a <code class="docutils literal notranslate"><span class="pre">#</span></code> are comments and will be ignored.</p>
 <p>The syntax of a configuration file is:</p>
 <div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[command]</span>
 <span class="na">option_a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">value</span>
@@ -73,6 +72,7 @@
 <section id="example">
 <h2>Example<a class="headerlink" href="#example" title="Permalink to this heading">¶</a></h2>
 <div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[global]</span>
+<span class="na">default-detector</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">detect-content</span>
 <span class="na">min-scene-len</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">0.8s</span>
 
 <span class="k">[detect-content]</span>
@@ -107,7 +107,7 @@
 <span class="c1">#</span>
 <span class="c1">#   Mac:     ~/Library/Preferences/PySceneDetect/scenedetect.cfg</span>
 <span class="c1">#</span>
-<span class="c1"># Run `scenedetect help` to see the exact path on your system which will be</span>
+<span class="c1"># Run `scenedetect --help` to see the exact path on your system which will be</span>
 <span class="c1"># used (it will be listed under the help text for the -c/--config option).</span>
 <span class="c1">#</span>
 
@@ -119,6 +119,9 @@
 <span class="k">[global]</span>
 <span class="c1"># Output directory for written files. If unset, defaults to working directory.</span>
 <span class="c1">#output = /usr/tmp/scenedetect/</span>
+
+<span class="c1"># Default detector to use, must be one of: detect-adaptive, detect-content, detect-threshold.</span>
+<span class="c1">#default-detector = detect-adaptive</span>
 
 <span class="c1"># Video backend interface, must be one of: opencv, pyav.</span>
 <span class="c1">#backend = opencv</span>
@@ -199,7 +202,7 @@
 
 <span class="k">[detect-adaptive]</span>
 <span class="c1"># Frame score threshold, refers to the `adaptive_ratio` metric in stats file.</span>
-<span class="c1">#threshold = 27</span>
+<span class="c1">#threshold = 3</span>
 
 <span class="c1"># Minimum threshold that `content_val` metric from detect-content must exceed.</span>
 <span class="c1">#min-content-val = 15</span>
