@@ -230,7 +230,8 @@ class CliContext:
                 logger.critical("Error processing configuration file.")
                 raise click.Abort()
 
-        logger.debug("Current configuration:\n%s", str(self.config.config_dict))
+        if self.config.config_dict:
+            logger.debug("Current configuration:\n%s", str(self.config.config_dict))
 
         logger.debug('Parsing program options.')
         if stats is not None and frame_skip:

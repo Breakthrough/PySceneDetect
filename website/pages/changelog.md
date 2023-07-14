@@ -17,7 +17,9 @@ Includes new [`load-scenes` command](https://www.scenedetect.com/docs/0.6.2/cli/
    - Default detector can be set by [config file](https://www.scenedetect.com/docs/latest/cli/config_file.html) with the `default-detector` option under `[global]`
  - [bugfix] Fix `-d`/`--duration` and `-e`/`--end` options of `time` command consuming one extra frame [#307](https://github.com/Breakthrough/PySceneDetect/issues/307)
  - [bugfix] Fix incorrect end timecode for final scene when last frame of video is a new scene [#307](https://github.com/Breakthrough/PySceneDetect/issues/307)
+ - [bugfix] Expand `$VIDEO_NAME` before creating output directory for `-f`/`--filename` option of `split-video`, now allows absolute paths
  - [general] Rename `ThresholdDetector` (`detect-threshold`) metric `delta_rgb` metric to `average_rgb`
+ - [general] `-l`/`--logfile` always produces debug logs now
 
 **General:**
 
@@ -28,6 +30,7 @@ Includes new [`load-scenes` command](https://www.scenedetect.com/docs/0.6.2/cli/
  - [bugfix] Fix `end_time` always consuming one extra frame [#307](https://github.com/Breakthrough/PySceneDetect/issues/307)
  - [bugfix] Fix incorrect end timecode for last scene when `start_in_scene` is `True` or the final scene contains a single frame [#307](https://github.com/Breakthrough/PySceneDetect/issues/307)
  - [bugfix] Fix MoviePy read next frame [#320](https://github.com/Breakthrough/PySceneDetect/issues/320)
+ - [bugfix] Template replacement when generating output now allows lower-case letters to be used as separators in addition to other characters
  - [api] Make some public functions/methods private (prefixed with `_`):
    - `get_aspect_ratio` function in `scenedetect.backends.opencv`
    - `mean_pixel_distance` and `estimated_kernel_size` functions in `scenedetect.detectors.content_detector`

@@ -21,6 +21,8 @@ import logging
 import os
 import os.path
 import platform
+import re
+import string
 import subprocess
 import sys
 from typing import AnyStr, Dict, List, Optional, Union
@@ -176,12 +178,11 @@ def init_logger(log_level: int = logging.INFO,
         log_level: Verbosity of log messages. Should be one of [logging.INFO, logging.DEBUG,
             logging.WARNING, logging.ERROR, logging.CRITICAL].
         show_stdout: If True, add handler to show log messages on stdout (default: False).
-        log_file: If set, add handler to dump log messages to given file path.
+        log_file: If set, add handler to dump debug log messages to given file path.
     """
     # Format of log messages depends on verbosity.
-    format_str = '[PySceneDetect] %(message)s'
-    if log_level == logging.DEBUG:
-        format_str = '%(levelname)s: %(module)s.%(funcName)s(): %(message)s'
+    INFO_TEMPLATE = '[PySceneDetect] %(message)s'
+    DEBUG_TEMPLATE = '%(levelname)s: %(module)s.%(funcName)s(): %(message)s'
     # Get the named logger and remove any existing handlers.
     logger_instance = logging.getLogger('pyscenedetect')
     logger_instance.handlers = []
@@ -190,14 +191,15 @@ def init_logger(log_level: int = logging.INFO,
     if show_stdout:
         handler = logging.StreamHandler(stream=sys.stdout)
         handler.setLevel(log_level)
-        handler.setFormatter(logging.Formatter(fmt=format_str))
+        handler.setFormatter(
+            logging.Formatter(fmt=DEBUG_TEMPLATE if log_level == logging.DEBUG else INFO_TEMPLATE))
         logger_instance.addHandler(handler)
-    # Add file handler if required.
+    # Add debug log handler if required.
     if log_file:
         log_file = get_and_create_path(log_file)
         handler = logging.FileHandler(log_file)
-        handler.setLevel(log_level)
-        handler.setFormatter(logging.Formatter(fmt=format_str))
+        handler.setLevel(logging.DEBUG)
+        handler.setFormatter(logging.Formatter(fmt=DEBUG_TEMPLATE))
         logger_instance.addHandler(handler)
 
 
@@ -346,3 +348,9 @@ def get_system_version_info() -> str:
             output_template.format(tool_name, tool_version if tool_version else not_found_str))
 
     return '\n'.join(out_lines)
+
+
+class Template(string.Template):
+    """Template matcher used to replace instances of $TEMPLATES in filenames."""
+    idpattern = '[A-Z0-9_]+'
+    flags = re.ASCII

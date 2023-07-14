@@ -38,10 +38,9 @@ import subprocess
 import math
 import time
 from typing import Iterable, Optional, Tuple
-from string import Template
 
 from scenedetect.platform import (tqdm, invoke_command, CommandTooLong, get_file_name,
-                                  get_ffmpeg_path)
+                                  get_ffmpeg_path, Template)
 from scenedetect.frame_timecode import FrameTimecode
 
 logger = logging.getLogger('pyscenedetect')

@@ -48,57 +48,6 @@ from scenedetect.video_manager import VideoManager
 # Used for module identification and when printing version & about info
 # (e.g. calling `scenedetect version` or `scenedetect about`).
 __version__ = 'v0.6.2.dev0'
-# About & copyright message string shown for the 'about' CLI command (scenedetect about).
-
-ABOUT_STRING = """
-Site: http://scenedetect.com/
-Docs: http://manual.scenedetect.com/
-Code: https://github.com/Breakthrough/PySceneDetect/
-
-Copyright (C) 2014-2023 Brandon Castellano. All rights reserved.
-
-PySceneDetect is released under the BSD 3-Clause license. See the
-included LICENSE file or visit the PySceneDetect website for details.
-This software uses the following third-party components:
-
-  > NumPy [Copyright (C) 2018, Numpy Developers]
-  > OpenCV [Copyright (C) 2018, OpenCV Team]
-  > click [Copyright (C) 2018, Armin Ronacher]
-  > simpletable [Copyright (C) 2014 Matheus Vieira Portela]
-
-This software may also invoke the following third-party executables:
-
-  > FFmpeg [Copyright (C) 2018, Fabrice Bellard]
-  > mkvmerge [Copyright (C) 2005-2016, Matroska]
-
-If included with your distribution of PySceneDetect, see the included
-LICENSE-FFMPEG and LICENSE-MKVMERGE or visit:
-  [ https://scenedetect.com/copyright/ ]
-
-FFmpeg and mkvmerge are distributed only with certain PySceneDetect
-releases, in order to allow for automatic video splitting capability.
-If they were not included with your distribution, they can usually be
-installed from your operating system's package manager, or downloaded
-from the following URLs:
-
-    FFmpeg:   [ https://ffmpeg.org/download.html ]
-    mkvmerge: [ https://mkvtoolnix.download/downloads.html ]
-        (Note that mkvmerge is a part of the mkvtoolnix package.)
-
-Once installed, ensure the respective program can be accessed from the
-same location running PySceneDetect by calling the `ffmpeg` or
-`mkvmerge` command from a terminal/command prompt.
-
-PySceneDetect will automatically use whichever program is available on
-the computer, depending on the specified command-line options.
-
-Additionally, certain Windows distributions may include a compiled
-Python distribution. For license information regarding the distributed
-version of Python, see the included LICENSE-PYTHON file for details,
-or visit the following URL: [ https://docs.python.org/3/license.html ]
-
-THE SOFTWARE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, EXPRESS OR IMPLIED.
-"""
 
 init_logger()
 logger = getLogger('pyscenedetect')

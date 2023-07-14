@@ -34,12 +34,66 @@ from scenedetect.platform import get_system_version_info
 from scenedetect._cli.config import CHOICE_MAP, CONFIG_FILE_PATH, CONFIG_MAP
 from scenedetect._cli.context import CliContext, USER_CONFIG
 
+_PROGRAM_VERSION = scenedetect.__version__
+"""Used to avoid name conflict with named command below."""
+
 logger = logging.getLogger('pyscenedetect')
 
 _COMMAND_DICT = []
 """All commands registered with the CLI. Used for generating help contexts."""
 
 _LINE_SEPARATOR = '-' * 72
+
+# About & copyright message string shown for the 'about' CLI command (scenedetect about).
+_ABOUT_STRING = """
+Site: http://scenedetect.com/
+Docs: http://manual.scenedetect.com/
+Code: https://github.com/Breakthrough/PySceneDetect/
+
+Copyright (C) 2014-2023 Brandon Castellano. All rights reserved.
+
+PySceneDetect is released under the BSD 3-Clause license. See the
+included LICENSE file or visit the PySceneDetect website for details.
+This software uses the following third-party components:
+
+  > NumPy [Copyright (C) 2018, Numpy Developers]
+  > OpenCV [Copyright (C) 2018, OpenCV Team]
+  > click [Copyright (C) 2018, Armin Ronacher]
+  > simpletable [Copyright (C) 2014 Matheus Vieira Portela]
+
+This software may also invoke the following third-party executables:
+
+  > FFmpeg [Copyright (C) 2018, Fabrice Bellard]
+  > mkvmerge [Copyright (C) 2005-2016, Matroska]
+
+If included with your distribution of PySceneDetect, see the included
+LICENSE-FFMPEG and LICENSE-MKVMERGE or visit:
+  [ https://scenedetect.com/copyright/ ]
+
+FFmpeg and mkvmerge are distributed only with certain PySceneDetect
+releases, in order to allow for automatic video splitting capability.
+If they were not included with your distribution, they can usually be
+installed from your operating system's package manager, or downloaded
+from the following URLs:
+
+    FFmpeg:   [ https://ffmpeg.org/download.html ]
+    mkvmerge: [ https://mkvtoolnix.download/downloads.html ]
+        (Note that mkvmerge is a part of the mkvtoolnix package.)
+
+Once installed, ensure the respective program can be accessed from the
+same location running PySceneDetect by calling the `ffmpeg` or
+`mkvmerge` command from a terminal/command prompt.
+
+PySceneDetect will automatically use whichever program is available on
+the computer, depending on the specified command-line options.
+
+Additionally, certain Windows distributions may include a compiled
+Python distribution. For license information regarding the distributed
+version of Python, see the included LICENSE-PYTHON file for details,
+or visit the following URL: [ https://docs.python.org/3/license.html ]
+
+THE SOFTWARE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, EXPRESS OR IMPLIED.
+"""
 
 
 class _Command(click.Command):
@@ -101,7 +155,7 @@ def _print_command_help(ctx: click.Context, command: click.Command):
     chain=True,
     context_settings=dict(help_option_names=['-h', '--help']),
     invoke_without_command=True,
-    epilog="""Type `scenedetect [command] --help` for command usage, or `scenedetect help all` for all commands. See https://scenedetect.com/docs/ for online docs."""
+    epilog="""Type "scenedetect [command] --help" for command usage. See https://scenedetect.com/docs/ for online docs."""
 )
 # We cannot make this a required argument otherwise we will reject commands of the form
 # `scenedetect help detect-content` or `scenedetect detect-content --help`.
@@ -112,7 +166,7 @@ def _print_command_help(ctx: click.Context, command: click.Command):
     required=False,
     metavar='VIDEO',
     type=click.STRING,
-    help='[Required] Input video file. Also supports image sequences and URLs.',
+    help='[REQUIRED] Input video file. Image sequences and URLs are supported.',
 )
 @click.option(
     '--output',
@@ -121,7 +175,7 @@ def _print_command_help(ctx: click.Context, command: click.Command):
     required=False,
     metavar='DIR',
     type=click.Path(exists=False, dir_okay=True, writable=True, resolve_path=True),
-    help='Output directory for created files (stats file, output videos, images, etc...). If not set defaults to working directory. Some commands allow overriding this value.%s'
+    help='Output directory for created files. If unset, working directory will be used. May be overriden by command options.%s'
     % (USER_CONFIG.get_help_string("global", "output", show_default=False)),
 )
 @click.option(
@@ -129,14 +183,14 @@ def _print_command_help(ctx: click.Context, command: click.Command):
     '-c',
     metavar='FILE',
     type=click.Path(exists=True, file_okay=True, readable=True, resolve_path=False),
-    help='Path to config file. If not set, tries to load one from %s' % (CONFIG_FILE_PATH),
+    help='Path to config file. If unset, tries to load config from %s' % (CONFIG_FILE_PATH),
 )
 @click.option(
     '--stats',
     '-s',
     metavar='CSV',
     type=click.Path(exists=False, file_okay=True, writable=True, resolve_path=False),
-    help='Stats file (.csv) path to write frame metrics. If the file exists, existing metrics will be overwritten. Can be used to find optimal detector options or for data analysis.',
+    help='Stats file (.csv) to write frame metrics. Existing files will be overwritten. Used for tuning detection parameters and data analysis.',
 )
 @click.option(
     '--framerate',
@@ -144,7 +198,7 @@ def _print_command_help(ctx: click.Context, command: click.Command):
     metavar='FPS',
     type=click.FLOAT,
     default=None,
-    help='Override framerate with value as frames/sec (e.g. `-f 29.97`).',
+    help='Override framerate with value as frames/sec.',
 )
 @click.option(
     '--min-scene-len',
@@ -152,21 +206,21 @@ def _print_command_help(ctx: click.Context, command: click.Command):
     metavar='TIMECODE',
     type=click.STRING,
     default=None,
-    help='Minimum length of any scene. TIMECODE can be specified as exact number of frames, a time in seconds followed by s, or a timecode in the format HH:MM:SS or HH:MM:SS.nnn.%s'
+    help='Minimum length of any scene. TIMECODE can be specified as number of frames (-m=10), time in seconds followed by "s" (-m=2.5s), or timecode (-m=00:02:53.633).%s'
     % USER_CONFIG.get_help_string("global", "min-scene-len"),
 )
 @click.option(
     '--drop-short-scenes',
     is_flag=True,
     flag_value=True,
-    help='Drop scenes shorter than `--min-scene-len` instead of combining them with neighbors.%s' %
+    help='Drop scenes shorter than -m/--min-scene-len, instead of combining with neighbors.%s' %
     (USER_CONFIG.get_help_string('global', 'drop-short-scenes')),
 )
 @click.option(
     '--merge-last-scene',
     is_flag=True,
     flag_value=True,
-    help='Merge last scene with previous if shorter than `--min-scene-len`.%s' %
+    help='Merge last scene with previous if shorter than -m/--min-scene-len.%s' %
     (USER_CONFIG.get_help_string('global', 'merge-last-scene')),
 )
 @click.option(
@@ -175,7 +229,7 @@ def _print_command_help(ctx: click.Context, command: click.Command):
     metavar='BACKEND',
     type=click.Choice(CHOICE_MAP["global"]["backend"]),
     default=None,
-    help='Backend to use for video input. Backend options can be set using a config file (`-c`/`--config`). [available: %s]%s.'
+    help='Backend to use for video input. Backend options can be set using a config file (-c/--config). [available: %s]%s'
     % (', '.join(AVAILABLE_BACKENDS.keys()), USER_CONFIG.get_help_string("global", "backend")),
 )
 @click.option(
@@ -184,7 +238,7 @@ def _print_command_help(ctx: click.Context, command: click.Command):
     metavar='N',
     type=click.INT,
     default=None,
-    help='Integer factor to downscale video by (e.g. 2, 3, 4...) before processing. Frame is scaled to width/N x height/N. If unset, value is auto selected based on resolution. Set to 1 to disable downscaling.%s'
+    help='Integer factor to downscale video by before processing. If unset, value is selected based on resolution. Set -d=1 to disable downscaling.%s'
     % (USER_CONFIG.get_help_string("global", "downscale", show_default=False)),
 )
 @click.option(
@@ -193,7 +247,7 @@ def _print_command_help(ctx: click.Context, command: click.Command):
     metavar='N',
     type=click.INT,
     default=None,
-    help='Skips N frames during processing (-fs 1 skips every other frame, processing 50%% of the video, -fs 2 processes 33%% of the frames, -fs 3 processes 25%%, etc...). Reduces processing speed at expense of accuracy.%s'
+    help='Skip N frames during processing. Reduces processing speed at expense of accuracy. -fs=1 skips every other frame processing 50%% of the video, -fs=2 processes 33%% of the video frames, -fs=3 processes 25%%, etc... %s'
     % USER_CONFIG.get_help_string("global", "frame-skip"),
 )
 @click.option(
@@ -202,27 +256,26 @@ def _print_command_help(ctx: click.Context, command: click.Command):
     metavar='LEVEL',
     type=click.Choice(CHOICE_MAP['global']['verbosity'], False),
     default=None,
-    help='Level of debug/info/error information to show. Must be one of: %s. Overrides `-q`/`--quiet`. Use `-v debug` for bug reports.%s'
-    % (', '.join(
+    help='Amount of information to show. Must be one of: %s. Overrides -q/--quiet.%s' % (', '.join(
         CHOICE_MAP["global"]["verbosity"]), USER_CONFIG.get_help_string("global", "verbosity")),
 )
 @click.option(
     '--logfile',
     '-l',
-    metavar='LOG',
+    metavar='FILE',
     type=click.Path(exists=False, file_okay=True, writable=True, resolve_path=False),
-    help='Path to log file for writing application logging information, mainly for debugging. Set `-v debug` as well if you are submitting a bug report. If verbosity is none, logfile is still be generated with info-level verbosity.',
+    help='Save debug log to FILE. Appends to existing file if present.',
 )
 @click.option(
     '--quiet',
     '-q',
     is_flag=True,
     flag_value=True,
-    help='Suppresses all output of PySceneDetect to the terminal/stdout. Equivalent to `-v none`.',
+    help='Suppress output to terminal/stdout. Equivalent to setting --verbosity=none.',
 )
 @click.pass_context
 # pylint: disable=redefined-builtin
-def scenedetect_command(
+def scenedetect(
     ctx: click.Context,
     input: Optional[AnyStr],
     output: Optional[AnyStr],
@@ -282,6 +335,8 @@ Command order is not strict, but each should only be specified once.
 # pylint: enable=redefined-builtin
 
 
+# TODO: Make the help command the equivalent of `scenedetect help all` and recommend use of
+# `scenedetect command --help for command help.
 @click.command('help', cls=_Command)
 @click.argument(
     'command_name',
@@ -323,9 +378,9 @@ def about_command(ctx: click.Context):
     assert isinstance(ctx.obj, CliContext)
     click.echo('')
     click.echo(click.style(_LINE_SEPARATOR, fg='cyan'))
-    click.echo(click.style(' About PySceneDetect %s' % scenedetect.__version__, fg='yellow'))
+    click.echo(click.style(' About PySceneDetect %s' % _PROGRAM_VERSION, fg='yellow'))
     click.echo(click.style(_LINE_SEPARATOR, fg='cyan'))
-    click.echo(scenedetect.ABOUT_STRING)
+    click.echo(_ABOUT_STRING)
     ctx.exit()
 
 
@@ -336,13 +391,13 @@ def about_command(ctx: click.Context):
     'show_all',      # Override argument name to avoid conflict with builtin.
     is_flag=True,
     flag_value=True,
-    help='Include system and package version information. Useful for troubleshooting.')
+    help='Include system -a d package version information. Useful for troubleshooting.')
 @click.pass_context
 def version_command(ctx: click.Context, show_all: bool):
     """Print PySceneDetect version."""
     assert isinstance(ctx.obj, CliContext)
     click.echo('')
-    click.echo(click.style('PySceneDetect %s' % scenedetect.__version__, fg='yellow'))
+    click.echo(click.style('PySceneDetect %s' % _PROGRAM_VERSION, fg='yellow'))
     if show_all:
         click.echo('')
         click.echo(get_system_version_info())
@@ -356,7 +411,7 @@ def version_command(ctx: click.Context, show_all: bool):
     metavar='TIMECODE',
     type=click.STRING,
     default=None,
-    help='Time in video to begin detecting scenes. TIMECODE can be specified as exact number of frames (-s 100 to start at frame 100), time in seconds followed by s (-s 100s to start at 100 seconds), or a timecode in the format HH:MM:SS or HH:MM:SS.nnn (-s 00:01:40 to start at 1m40s).',
+    help='Time in video to start detection. TIMECODE can be specified as number of frames (--start=100 for frame 100), time in seconds followed by "s" (--start=100s for 100 seconds), or timecode (--start=00:01:40 for 1m40s).',
 )
 @click.option(
     '--duration',
@@ -364,7 +419,7 @@ def version_command(ctx: click.Context, show_all: bool):
     metavar='TIMECODE',
     type=click.STRING,
     default=None,
-    help='Maximum time in video to process. TIMECODE format is the same as other arguments. Mutually exclusive with --end / -e.',
+    help='Maximum time in video to process. TIMECODE format is the same as other arguments. Mutually exclusive with -e/--end.',
 )
 @click.option(
     '--end',
@@ -372,7 +427,7 @@ def version_command(ctx: click.Context, show_all: bool):
     metavar='TIMECODE',
     type=click.STRING,
     default=None,
-    help='Time in video to end detecting scenes. TIMECODE format is the same as other arguments. Mutually exclusive with --duration / -d.',
+    help='Time in video to end detecting scenes. TIMECODE format is the same as other arguments. Mutually exclusive with -d/--duration',
 )
 @click.pass_context
 def time_command(
@@ -409,7 +464,7 @@ Note that --end and --duration are mutually exclusive (i.e. only one of the two 
     type=click.FloatRange(CONFIG_MAP['detect-content']['threshold'].min_val,
                           CONFIG_MAP['detect-content']['threshold'].max_val),
     default=None,
-    help='Threshold value that the content_val frame metric must exceed to trigger a new scene. Refers to frame metric content_val in stats file.%s'
+    help='Threshold (float) that frame score must exceed to trigger a cut. Refers to "content_val" in stats file.%s'
     % (USER_CONFIG.get_help_string("detect-content", "threshold")),
 )
 @click.option(
@@ -417,7 +472,7 @@ Note that --end and --duration are mutually exclusive (i.e. only one of the two 
     '-w',
     type=(float, float, float, float),
     default=None,
-    help='Weights of the 4 components used to calculate content_val in the form (delta_hue, delta_sat, delta_lum, delta_edges).%s'
+    help='Weights of 4 components used to calculate frame score from (delta_hue, delta_sat, delta_lum, delta_edges).%s'
     % (USER_CONFIG.get_help_string("detect-content", "weights")),
 )
 @click.option(
@@ -425,7 +480,7 @@ Note that --end and --duration are mutually exclusive (i.e. only one of the two 
     '-l',
     is_flag=True,
     flag_value=True,
-    help='Only consider luma (brightness) channel. Useful for greyscale videos. Equivalent to setting -w/--weights to 0, 0, 1, 0.%s'
+    help='Only use luma (brightness) channel. Useful for greyscale videos. Equivalent to setting "-w 0 0 1 0".%s'
     % (USER_CONFIG.get_help_string("detect-content", "luma-only")),
 )
 @click.option(
@@ -443,7 +498,7 @@ Note that --end and --duration are mutually exclusive (i.e. only one of the two 
     metavar='TIMECODE',
     type=click.STRING,
     default=None,
-    help='Minimum length of any scene. Overrides global min-scene-len (-m) setting. TIMECODE can be specified as exact number of frames, a time in seconds followed by s, or a timecode in the format HH:MM:SS or HH:MM:SS.nnn.%s'
+    help='Minimum length of any scene. Overrides global setting for -m/--min-scene-len. TIMECODE can be specified in frames (-m=100), in seconds with `s` suffix (-m=3.5s), or timecode (-m=00:01:52.778).%s'
     % ('' if USER_CONFIG.is_default('detect-content', 'min-scene-len') else
        USER_CONFIG.get_help_string('detect-content', 'min-scene-len')),
 )
@@ -458,9 +513,9 @@ def detect_content_command(
 ):
     """Perform content detection algorithm on input video.
 
-When processing each frame, a score (from 0 to 255.0) is calculated representing the difference in content from the previous frame (higher = more difference). A change in scene is triggered when this value exceeds the value set for `-t`/`--threshold`. This value is the *content_val* column in a statsfile.
+For each frame, a score from 0 to 255.0 is calculated which represents the difference in content between the current and previous frame (higher = more different). A cut is generated when a frame score exceeds -t/--threshold. Frame scores are saved under the "content_val" column in a statsfile.
 
-Frame scores are calculated from several components, which are used to generate a final weighted value with `-w`/`--weights`. These are also recorded in the statsfile if set. Currently there are four components:
+Scores are calculated from several components which are also recorded in the statsfile:
 
  - *delta_hue*: Difference between pixel hue values of adjacent frames.
 
@@ -470,9 +525,7 @@ Frame scores are calculated from several components, which are used to generate 
 
  - *delta_edges*: Difference between calculated edges of adjacent frames. Typically larger than other components, so threshold may need to be increased to compensate.
 
-Weights are set as a set of 4 numbers in the form (*delta_hue*, *delta_sat*, *delta_lum*, *delta_edges*). For example, `-w 1.0 0.5 1.0 0.2 -t 32` is a good starting point to use with edge detection.
-
-Edge detection is not enabled by default. Current default parameters are `-w 1.0 1.0 1.0 0.0 -t 27`. The final weighted sum is normalized based on the weight of the components, so they do not need to equal 100%.
+Once calculated, these components are multiplied by the specified -w/--weights to calculate the final frame score ("content_val").  Weights are set as a set of 4 numbers in the form (*delta_hue*, *delta_sat*, *delta_lum*, *delta_edges*). For example, "--weights 1.0 0.5 1.0 0.2 --threshold 32" is a good starting point for trying edge detection. The final sum is normalized by the weight of all components, so they need not equal 100%. Edge detection is disabled by default to improve performance.
 
 Examples:
 
@@ -498,7 +551,7 @@ Examples:
     metavar='VAL',
     type=click.FLOAT,
     default=None,
-    help='Threshold value (float) that the calculated frame score must exceed to trigger a new scene (see frame metric adaptive_ratio in stats file).%s'
+    help='Threshold (float) that frame score must exceed to trigger a cut. Refers to "adaptive_ratio" in stats file.%s'
     % (USER_CONFIG.get_help_string('detect-adaptive', 'threshold')),
 )
 @click.option(
@@ -507,8 +560,8 @@ Examples:
     metavar='VAL',
     type=click.FLOAT,
     default=None,
-    help='Minimum threshold (float) that the content_val must exceed in order to register as a new cene. This is calculated the same way that `detect-content` calculates frame score.%s'
-    % (USER_CONFIG.get_help_string('detect-adaptive', 'min-content-val')),
+    help='Minimum threshold (float) that "content_val" must exceed to trigger a cut.%s' %
+    (USER_CONFIG.get_help_string('detect-adaptive', 'min-content-val')),
 )
 @click.option(
     '--min-delta-hsv',
@@ -526,7 +579,7 @@ Examples:
     metavar='VAL',
     type=click.INT,
     default=None,
-    help='Size of window (number of frames) before and after each frame to average together in order to detect deviations from the mean.%s'
+    help='Size of window to detect deviations from mean. Represents how many frames before/after the current one to use for mean.%s'
     % (USER_CONFIG.get_help_string('detect-adaptive', 'frame-window')),
 )
 @click.option(
@@ -534,7 +587,7 @@ Examples:
     '-w',
     type=(float, float, float, float),
     default=None,
-    help='Weights of the 4 components used to calculate content_val in the form (delta_hue, delta_sat, delta_lum, delta_edges).%s'
+    help='Weights of 4 components ("delta_hue", "delta_sat", "delta_lum", "delta_edges") used to calculate "content_val".%s'
     % (USER_CONFIG.get_help_string("detect-content", "weights")),
 )
 @click.option(
@@ -542,7 +595,7 @@ Examples:
     '-l',
     is_flag=True,
     flag_value=True,
-    help='Only consider luma (brightness) channel. Useful for greyscale videos. Equivalent to setting -w/--weights to 0, 0, 1, 0.%s'
+    help='Only use luma (brightness) channel. Useful for greyscale videos. Equivalent to "--weights 0 0 1 0".%s'
     % (USER_CONFIG.get_help_string("detect-content", "luma-only")),
 )
 @click.option(
@@ -551,7 +604,7 @@ Examples:
     metavar='N',
     type=click.INT,
     default=None,
-    help='Size of kernel for expanding detected edges. Must be odd integer greater than or equal to 3. If unset, kernel size is estimated using video resolution.%s'
+    help='Size of kernel for expanding detected edges. Must be odd number >= 3. If unset, size is estimated using video resolution.%s'
     % (USER_CONFIG.get_help_string("detect-content", "kernel-size")),
 )
 @click.option(
@@ -560,7 +613,7 @@ Examples:
     metavar='TIMECODE',
     type=click.STRING,
     default=None,
-    help='Minimum length of any scene. Overrides global min-scene-len (-m) setting. TIMECODE can be specified as exact number of frames, a time in seconds followed by s, or a timecode in the format HH:MM:SS or HH:MM:SS.nnn.%s'
+    help='Minimum length of any scene. Overrides global setting for -m/--min-scene-len. TIMECODE can be specified in frames (-m=100), in seconds with `s` suffix (-m=3.5s), or timecode (-m=00:01:52.778).%s'
     % ('' if USER_CONFIG.is_default('detect-adaptive', 'min-scene-len') else
        USER_CONFIG.get_help_string('detect-adaptive', 'min-scene-len')),
 )
@@ -609,7 +662,7 @@ Examples:
     type=click.FloatRange(CONFIG_MAP['detect-threshold']['threshold'].min_val,
                           CONFIG_MAP['detect-threshold']['threshold'].max_val),
     default=None,
-    help='Threshold value (integer) that the delta_rgb frame metric must exceed to trigger a new scene. Refers to frame metric delta_rgb in stats file.%s'
+    help='Threshold (integer) that frame score must exceed to start a new scene. Refers to "delta_rgb" in stats file.%s'
     % (USER_CONFIG.get_help_string('detect-threshold', 'threshold')),
 )
 @click.option(
@@ -619,7 +672,7 @@ Examples:
     type=click.FloatRange(CONFIG_MAP['detect-threshold']['fade-bias'].min_val,
                           CONFIG_MAP['detect-threshold']['fade-bias'].max_val),
     default=None,
-    help='Percent (%%) from -100 to 100 of timecode skew for where cuts should be placed. -100 indicates the start frame, +100 indicates the end frame, and 0 is the middle of both.%s'
+    help='Percent (%%) from -100 to 100 of timecode skew of cut placement. -100 indicates the start frame, +100 indicates the end frame, and 0 is the middle of both.%s'
     % (USER_CONFIG.get_help_string('detect-threshold', 'fade-bias')),
 )
 @click.option(
@@ -627,7 +680,7 @@ Examples:
     '-l',
     is_flag=True,
     flag_value=True,
-    help='If set, if the video ends on a fade-out, a final scene will be generated from the last fade-out position to the end of the video.%s'
+    help='If set and video ends after a fade-out event, generate a final cut at the last fade-out position.%s'
     % (USER_CONFIG.get_help_string('detect-threshold', 'add-last-scene')),
 )
 @click.option(
@@ -636,7 +689,7 @@ Examples:
     metavar='TIMECODE',
     type=click.STRING,
     default=None,
-    help='Minimum length of any scene. Overrides global min-scene-len (-m) setting. TIMECODE can be specified as exact number of frames, a time in seconds followed by s, or a timecode in the format HH:MM:SS or HH:MM:SS.nnn.%s'
+    help='Minimum length of any scene. Overrides global setting for -m/--min-scene-len. TIMECODE can be specified in frames (-m=100), in seconds with `s` suffix (-m=3.5s), or timecode (-m=00:01:52.778).%s'
     % ('' if USER_CONFIG.is_default('detect-threshold', 'min-scene-len') else
        USER_CONFIG.get_help_string('detect-threshold', 'min-scene-len')),
 )
@@ -650,7 +703,7 @@ def detect_threshold_command(
 ):
     """Perform threshold detection algorithm on input video.
 
-Detects fades in/out based on average frame pixel value compared against `-t`/`--threshold`.
+Detects fade-in and fade-out events using average pixel values. Resulting cuts are placed between adjacent fade-out and fade-in events.
 
 Examples:
 
@@ -696,8 +749,7 @@ Examples:
 @click.pass_context
 def load_scenes_command(ctx: click.Context, input: Optional[str], start_col_name: Optional[str],
                         framerate: Optional[float]):
-    """Load scenes from CSV instead of detecting. Can be used with CSV generated by `list-scenes`.
-Scenes are loaded using the specified column as cut locations (frame number or timecode).
+    """Load scenes from CSV instead of detecting. Can be used with CSV generated by `list-scenes`. Scenes are loaded using the specified column as cut locations (frame number or timecode).
 
 Examples:
 
@@ -751,7 +803,7 @@ def export_html_command(
     image_width: Optional[int],
     image_height: Optional[int],
 ):
-    """Export scene list to HTML file. Requires `save-images` unless --no-images is specified."""
+    """Export scene list to HTML file. Requires save-images unless --no-images is specified."""
     assert isinstance(ctx.obj, CliContext)
     ctx.obj.handle_export_html(
         filename=filename,
@@ -776,7 +828,7 @@ def export_html_command(
     metavar='NAME',
     default='$VIDEO_NAME-Scenes.csv',
     type=click.STRING,
-    help='Filename format to use for the scene list CSV file. You can use the $VIDEO_NAME macro in the file name. Note that you may have to wrap the name using single quotes.%s'
+    help='Filename format to use for the scene list CSV file. You can use the $VIDEO_NAME macro in the file name. Note that you may have to wrap the name using single quotes or use escape characters (e.g. -f=\$VIDEO_NAME-Scenes.csv).%s'
     % (USER_CONFIG.get_help_string('list-scenes', 'filename')),
 )
 @click.option(
@@ -784,24 +836,23 @@ def export_html_command(
     '-n',
     is_flag=True,
     flag_value=True,
-    help='Disable writing scene list CSV file to disk.  If set, -o/--output and -f/--filename are ignored.%s'
-    % (USER_CONFIG.get_help_string('list-scenes', 'no-output-file')),
+    help='Only print scene list.%s' %
+    (USER_CONFIG.get_help_string('list-scenes', 'no-output-file')),
 )
 @click.option(
     '--quiet',
     '-q',
     is_flag=True,
     flag_value=True,
-    help='Suppresses output of the table printed by the list-scenes command.%s' %
-    (USER_CONFIG.get_help_string('list-scenes', 'quiet')),
+    help='Suppress printing scene list.%s' % (USER_CONFIG.get_help_string('list-scenes', 'quiet')),
 )
 @click.option(
     '--skip-cuts',
     '-s',
     is_flag=True,
     flag_value=True,
-    help='Skips outputting the cutting list as the first row in the CSV file. Set this option if compliance with RFC 4180 is required.%s'
-    % (USER_CONFIG.get_help_string('list-scenes', 'skip-cuts')),
+    help='Skip cutting list as first row in the CSV file. Set for RFC 4180 compliant output.%s' %
+    (USER_CONFIG.get_help_string('list-scenes', 'skip-cuts')),
 )
 @click.pass_context
 def list_scenes_command(
@@ -812,7 +863,7 @@ def list_scenes_command(
     quiet: bool,
     skip_cuts: bool,
 ):
-    """Print scene list and outputs to a CSV file. Default filename is $VIDEO_NAME-Scenes.csv."""
+    """Create scene list CSV file (will be named $VIDEO_NAME-Scenes.csv by default)."""
     assert isinstance(ctx.obj, CliContext)
     ctx.obj.handle_list_scenes(
         output=output,
@@ -838,7 +889,7 @@ def list_scenes_command(
     metavar='NAME',
     default=None,
     type=click.STRING,
-    help='File name format to use when saving videos (with or without extension). You can use the $VIDEO_NAME and $SCENE_NUMBER macros in the filename (e.g. $VIDEO_NAME-Part-$SCENE_NUMBER). Note that you may have to wrap the format in single quotes to avoid variable expansion.%s'
+    help='File name format to use when saving videos, with or without extension. You can use $VIDEO_NAME and $SCENE_NUMBER macros in the filename. You may have to wrap the format in single quotes or use escape characters to avoid variable expansion (e.g. -f=\\$VIDEO_NAME-Scene-\\$SCENE_NUMBER).%s'
     % (USER_CONFIG.get_help_string('split-video', 'filename')),
 )
 @click.option(
@@ -846,7 +897,7 @@ def list_scenes_command(
     '-q',
     is_flag=True,
     flag_value=True,
-    help='Hides any output from the external video splitting tool.%s' %
+    help='Hide output from external video splitting tool.%s' %
     (USER_CONFIG.get_help_string('split-video', 'quiet')),
 )
 @click.option(
@@ -854,7 +905,7 @@ def list_scenes_command(
     '-c',
     is_flag=True,
     flag_value=True,
-    help='Copy instead of re-encode. Much faster, but less precise. Equivalent to specifying -a "-map 0 -c:v copy -c:a copy".%s'
+    help='Copy instead of re-encode. Faster but less precise. Equivalent to: --args="-map 0 -c:v copy -c:a copy"%s'
     % (USER_CONFIG.get_help_string('split-video', 'copy')),
 )
 @click.option(
@@ -862,7 +913,7 @@ def list_scenes_command(
     '-hq',
     is_flag=True,
     flag_value=True,
-    help='Encode video with higher quality, overrides -f option if present. Equivalent to specifying --rate-factor 17 and --preset slow.%s'
+    help='Encode video with higher quality, overrides -f option if present. Equivalent to: --rate-factor=17 --preset=slow%s'
     % (USER_CONFIG.get_help_string('split-video', 'high-quality')),
 )
 @click.option(
@@ -872,7 +923,7 @@ def list_scenes_command(
     default=None,
     type=click.IntRange(CONFIG_MAP['split-video']['rate-factor'].min_val,
                         CONFIG_MAP['split-video']['rate-factor'].max_val),
-    help='Video encoding quality (x264 constant rate factor), from 0-100, where lower values represent better quality, with 0 indicating lossless.%s'
+    help='Video encoding quality (x264 constant rate factor), from 0-100, where lower is higher quality (larger output). 0 indicates lossless.%s'
     % (USER_CONFIG.get_help_string('split-video', 'rate-factor')),
 )
 @click.option(
@@ -881,8 +932,9 @@ def list_scenes_command(
     metavar='LEVEL',
     default=None,
     type=click.Choice(CHOICE_MAP['split-video']['preset']),
-    help='Video compression quality preset (x264 preset). Can be one of: ultrafast, superfast, veryfast, faster, fast, medium, slow, slower, and veryslow. Faster modes take less time to run, but the output files may be larger.%s'
-    % (USER_CONFIG.get_help_string('split-video', 'preset')),
+    help='Video compression quality (x264 preset). Can be one of: %s. Faster modes take less time but output may be larger.%s'
+    % (', '.join(
+        CHOICE_MAP['split-video']['preset']), USER_CONFIG.get_help_string('split-video', 'preset')),
 )
 @click.option(
     '--args',
@@ -890,7 +942,7 @@ def list_scenes_command(
     metavar='ARGS',
     type=click.STRING,
     default=None,
-    help='Override codec arguments/options passed to FFmpeg when splitting and re-encoding scenes. Use double quotes (") around specified arguments. Must specify at least audio/video codec to use (e.g. -a "-c:v [...] -c:a [...]").%s'
+    help='Override codec arguments passed to FFmpeg when splitting scenes. Use double quotes (") around arguments. Must specify at least audio/video codec.%s'
     % (USER_CONFIG.get_help_string('split-video', 'args')),
 )
 @click.option(
@@ -898,7 +950,7 @@ def list_scenes_command(
     '-m',
     is_flag=True,
     flag_value=True,
-    help='Split the video using mkvmerge. Faster than re-encoding, but less precise. The output will be named $VIDEO_NAME-$SCENE_NUMBER.mkv. If set, all options other than -f/--filename, -q/--quiet and -o/--output will be ignored. Note that mkvmerge automatically appends a suffix of "-$SCENE_NUMBER".%s'
+    help='Split video using mkvmerge. Faster than re-encoding, but less precise. If set, options other than -f/--filename, -q/--quiet and -o/--output will be ignored. Note that mkvmerge automatically appends the $SCENE_NUMBER suffix.%s'
     % (USER_CONFIG.get_help_string('split-video', 'mkvmerge')),
 )
 @click.pass_context
@@ -921,6 +973,8 @@ Examples:
     {scenedetect} split-video
 
     {scenedetect} split-video --copy
+
+    {scenedetect} split-video --filename \$VIDEO_NAME-Clip-\$SCENE_NUMBER
 """
     assert isinstance(ctx.obj, CliContext)
     ctx.obj.handle_split_video(
@@ -942,7 +996,7 @@ Examples:
     '-o',
     metavar='DIR',
     type=click.Path(exists=False, dir_okay=True, writable=True, resolve_path=False),
-    help='Output directory to save images to. Overrides global option -o/--output if set.%s' %
+    help='Output directory for images. Overrides global option -o/--output if set.%s' %
     (USER_CONFIG.get_help_string('save-images', 'output', show_default=False)),
 )
 @click.option(
@@ -951,7 +1005,7 @@ Examples:
     metavar='NAME',
     default=None,
     type=click.STRING,
-    help='Filename format, *without* extension, to use when saving image files. You can use the $VIDEO_NAME, $SCENE_NUMBER, $IMAGE_NUMBER, and $FRAME_NUMBER macros in the file name. Note that you may have to wrap the format in single quotes.%s'
+    help='Filename format *without* extension to use when saving images. You can use the $VIDEO_NAME, $SCENE_NUMBER, $IMAGE_NUMBER, and $FRAME_NUMBER macros in the file name. You may have to use escape characters (e.g. -f=\\$SCENE_NUMBER-Image-\\$IMAGE_NUMBER) or single quotes.%s'
     % (USER_CONFIG.get_help_string('save-images', 'filename')),
 )
 @click.option(
@@ -960,7 +1014,7 @@ Examples:
     metavar='N',
     default=None,
     type=click.INT,
-    help='Number of images to generate. Will always include start/end frame, unless N = 1, in which case the image will be the frame at the mid-point in the scene.%s'
+    help='Number of images to generate per scene. Will always include start/end frame, unless -n=1, in which case the image will be the frame at the mid-point of the scene.%s'
     % (USER_CONFIG.get_help_string('save-images', 'num-images')),
 )
 @click.option(
@@ -1009,8 +1063,8 @@ Examples:
     metavar='N',
     default=None,
     type=click.INT,
-    help='Number of frames to ignore at the beginning and end of scenes when saving images.%s' %
-    (USER_CONFIG.get_help_string('save-images', 'num-images')),
+    help='Number of frames to ignore at beginning/end of scenes when saving images. Controls temporal padding on scene boundaries.%s'
+    % (USER_CONFIG.get_help_string('save-images', 'num-images')),
 )
 @click.option(
     '--scale',
@@ -1018,8 +1072,8 @@ Examples:
     metavar='S',
     default=None,
     type=click.FLOAT,
-    help='Optional factor by which saved images are rescaled. A scaling factor of 1 would not result in rescaling. A value <1 results in a smaller saved image, while a value >1 results in an image larger than the original. This value is ignored if either the height, -h, or width, -w, values are specified.%s'
-    % (USER_CONFIG.get_help_string('save-images', 'scale', show_default=False)),
+    help='Factor to scale images by. Ignored if -W/--width or -H/--height is set.%s' %
+    (USER_CONFIG.get_help_string('save-images', 'scale', show_default=False)),
 )
 @click.option(
     '--height',
@@ -1027,8 +1081,8 @@ Examples:
     metavar='H',
     default=None,
     type=click.INT,
-    help='Optional value for the height of the saved images. Specifying both the height and width, -w, will resize images to an exact size, regardless of aspect ratio. Specifying only height will rescale the image to that number of pixels in height while preserving the aspect ratio.%s'
-    % (USER_CONFIG.get_help_string('save-images', 'height', show_default=False)),
+    help='Height (pixels) of images.%s' %
+    (USER_CONFIG.get_help_string('save-images', 'height', show_default=False)),
 )
 @click.option(
     '--width',
@@ -1036,8 +1090,8 @@ Examples:
     metavar='W',
     default=None,
     type=click.INT,
-    help='Optional value for the width of the saved images. Specifying both the width and height, -h, will resize images to an exact size, regardless of aspect ratio. Specifying only width will rescale the image to that number of pixels wide while preserving the aspect ratio.%s'
-    % (USER_CONFIG.get_help_string('save-images', 'width', show_default=False)),
+    help='Width (pixels) of images.%s' %
+    (USER_CONFIG.get_help_string('save-images', 'width', show_default=False)),
 )
 @click.pass_context
 def save_images_command(
@@ -1057,11 +1111,16 @@ def save_images_command(
 ):
     """Create images for each detected scene.
 
+Images can be resized
+
 Examples:
 
     {scenedetect} save-images
 
-    {scenedetect} save-images --width=1024"""
+    {scenedetect} save-images --width 1024
+
+    {scenedetect} save-images --filename \$SCENE_NUMBER-img\$IMAGE_NUMBER
+"""
     assert isinstance(ctx.obj, CliContext)
     ctx.obj.handle_save_images(
         num_images=num_images,
@@ -1090,23 +1149,23 @@ def _add_cli_command(cli: click.Group, command: click.Command):
 # ----------------------------------------------------------------------
 
 # Info Commands
-_add_cli_command(scenedetect_command, help_command)
-_add_cli_command(scenedetect_command, version_command)
-_add_cli_command(scenedetect_command, about_command)
+_add_cli_command(scenedetect, help_command)
+_add_cli_command(scenedetect, version_command)
+_add_cli_command(scenedetect, about_command)
 
 # ----------------------------------------------------------------------
 # Commands Added To Help List
 # ----------------------------------------------------------------------
 
 # Input / Output
-_add_cli_command(scenedetect_command, time_command)
-_add_cli_command(scenedetect_command, export_html_command)
-_add_cli_command(scenedetect_command, list_scenes_command)
-_add_cli_command(scenedetect_command, save_images_command)
-_add_cli_command(scenedetect_command, split_video_command)
+_add_cli_command(scenedetect, time_command)
+_add_cli_command(scenedetect, export_html_command)
+_add_cli_command(scenedetect, list_scenes_command)
+_add_cli_command(scenedetect, save_images_command)
+_add_cli_command(scenedetect, split_video_command)
 
 # Detection Algorithms
-_add_cli_command(scenedetect_command, detect_content_command)
-_add_cli_command(scenedetect_command, detect_threshold_command)
-_add_cli_command(scenedetect_command, detect_adaptive_command)
-_add_cli_command(scenedetect_command, load_scenes_command)
+_add_cli_command(scenedetect, detect_content_command)
+_add_cli_command(scenedetect, detect_threshold_command)
+_add_cli_command(scenedetect, detect_adaptive_command)
+_add_cli_command(scenedetect, load_scenes_command)

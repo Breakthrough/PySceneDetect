@@ -17,10 +17,12 @@ import os
 from string import Template
 import time
 from typing import Dict, List, Tuple, Optional
+from string import Template
 
 from scenedetect.detectors import AdaptiveDetector
 from scenedetect.frame_timecode import FrameTimecode
-from scenedetect.platform import get_and_create_path, logging_redirect_tqdm, FakeTqdmLoggingRedirect
+from scenedetect.platform import (get_and_create_path, get_file_name, logging_redirect_tqdm,
+                                  FakeTqdmLoggingRedirect)
 from scenedetect.scene_manager import save_images, write_scene_list, write_scene_list_html
 from scenedetect.video_splitter import split_video_mkvmerge, split_video_ffmpeg
 from scenedetect.video_stream import SeekError
@@ -250,6 +252,10 @@ def _split_video(context: CliContext, scene_list: List[Tuple[FrameTimecode,
     # Otherwise, if using ffmpeg, only add an extension if one doesn't exist.
     elif not 2 <= extension_length <= 4:
         output_path_template += '.mp4'
+    # Pre-expand $VIDEO_NAME so it can be used for a directory.
+    # TODO: Do this elsewhere in a future version for all output options.
+    output_path_template = Template(output_path_template).safe_substitute(
+        VIDEO_NAME=get_file_name(context.video_stream.path, include_extension=False))
     output_path_template = get_and_create_path(
         output_path_template, context.split_directory
         if context.split_directory is not None else context.output_directory)
@@ -272,4 +278,4 @@ def _split_video(context: CliContext, scene_list: List[Tuple[FrameTimecode,
             show_output=not (context.quiet_mode or context.split_quiet),
         )
     if scene_list:
-        logger.info('Video splitting completed, individual scenes written to disk.')
+        logger.info('Video splitting completed, scenes written to disk.')

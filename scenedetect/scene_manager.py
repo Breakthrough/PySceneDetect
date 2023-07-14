@@ -82,7 +82,6 @@ analysis of the video.
 
 import csv
 from enum import Enum
-from string import Template
 from typing import Iterable, List, Tuple, Optional, Dict, Callable, Union, TextIO
 import threading
 import queue
@@ -95,7 +94,7 @@ import numpy as np
 from scenedetect._thirdparty.simpletable import (SimpleTableCell, SimpleTableImage, SimpleTableRow,
                                                  SimpleTable, HTMLPage)
 
-from scenedetect.platform import (tqdm, get_and_create_path, get_cv2_imwrite_params)
+from scenedetect.platform import (tqdm, get_and_create_path, get_cv2_imwrite_params, Template)
 from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.video_stream import VideoStream
 from scenedetect.scene_detector import SceneDetector, SparseSceneDetector
@@ -479,11 +478,13 @@ def save_images(scene_list: List[Tuple[FrameTimecode, FrameTimecode]],
     if abs(aspect_ratio - 1.0) < 0.01:
         aspect_ratio = None
 
+    logger.debug('Writing images with template %s', filename_template.template)
     for i, scene_timecodes in enumerate(timecode_list):
         for j, image_timecode in enumerate(scene_timecodes):
             video.seek(image_timecode)
             frame_im = video.read()
             if frame_im is not None:
+                # TODO: Allow NUM to be a valid suffix in addition to NUMBER.
                 file_path = '%s.%s' % (filename_template.safe_substitute(
                     VIDEO_NAME=video.name,
                     SCENE_NUMBER=scene_num_format % (i + 1),

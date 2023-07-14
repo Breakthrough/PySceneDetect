@@ -3,7 +3,7 @@
 
 Bugs, issues, features, and improvements to PySceneDetect are handled through [the issue tracker on Github](https://github.com/Breakthrough/PySceneDetect/issues).  If you run into any bugs using PySceneDetect, please [create a new issue](https://github.com/Breakthrough/PySceneDetect/issues/new).  Provide as much detail as you can - include an example that clearly demonstrates the problem (if possible), and make sure to include any/all relevant program output or error messages.
 
-When submitting bug reports, please add the command-line options `-v debug -l BUG_REPORT.txt` to the very beginning of the `scenedetect` command you are using, and attach the generated `BUG_REPORT.txt` file.
+When submitting bug reports, please provide debug logs by adding `-l BUG_REPORT.txt` to your `scenedetect` command, and attach the generated `BUG_REPORT.txt` file.
 
 Before opening a new issue, please do [search for any existing issues](https://github.com/Breakthrough/PySceneDetect/issues?q=) (both open and closed) which might report similar issues/bugs to avoid creating duplicate entries.  If you do find a duplicate report, feel free to add any additional information you feel may be relevant.
 

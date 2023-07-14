@@ -14,7 +14,7 @@
 
 import sys
 
-from scenedetect._cli import scenedetect_command
+from scenedetect._cli import scenedetect
 from scenedetect._cli.context import CliContext
 from scenedetect._cli.controller import run_scenedetect
 
@@ -24,7 +24,7 @@ def main():
     cli_ctx = CliContext()
     try:
         # Process command line arguments and subcommands to initialize the context.
-        scenedetect_command.main(obj=cli_ctx) # Parse CLI arguments with registered callbacks.
+        scenedetect.main(obj=cli_ctx) # Parse CLI arguments with registered callbacks.
     except SystemExit as exit:
         if exit.code != 0:
             raise
