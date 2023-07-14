@@ -35,12 +35,9 @@ from scenedetect._cli.config import CHOICE_MAP, CONFIG_FILE_PATH, CONFIG_MAP
 from scenedetect._cli.context import CliContext, USER_CONFIG
 
 _PROGRAM_VERSION = scenedetect.__version__
-"""Used to avoid name conflict with named command below."""
+"""Used to avoid name conflict with named `scenedetect` command below."""
 
 logger = logging.getLogger('pyscenedetect')
-
-_COMMAND_DICT = []
-"""All commands registered with the CLI. Used for generating help contexts."""
 
 _LINE_SEPARATOR = '-' * 72
 
@@ -335,8 +332,8 @@ Command order is not strict, but each should only be specified once.
 # pylint: enable=redefined-builtin
 
 
-# TODO: Make the help command the equivalent of `scenedetect help all` and recommend use of
-# `scenedetect command --help for command help.
+# TODO: Make the help command the equivalent of `scenedetect help all` now that `--help` can be
+# used on all commands individually.
 @click.command('help', cls=_Command)
 @click.argument(
     'command_name',
@@ -347,25 +344,23 @@ Command order is not strict, but each should only be specified once.
 def help_command(ctx: click.Context, command_name: str):
     """Print help for command (`help [command]`)."""
     assert isinstance(ctx.obj, CliContext)
+    assert isinstance(ctx.parent.command, click.MultiCommand)
+    parent_command = ctx.parent.command
     if command_name is not None:
+        all_commands = set(parent_command.list_commands(ctx))
         if command_name.lower() == 'all':
             click.echo(ctx.parent.get_help())
-            for command in _COMMAND_DICT:
-                _print_command_help(ctx, command)
+            for command in sorted(all_commands):
+                _print_command_help(ctx, parent_command.get_command(ctx, command))
         else:
-            command = None
-            for command_ref in _COMMAND_DICT:
-                if command_name == command_ref.name:
-                    command = command_ref
-                    break
-            if command is None:
+            if not command_name in all_commands:
                 error_strs = [
-                    'unknown command.', 'List of valid commands:',
-                    '  %s' % ', '.join([command.name for command in _COMMAND_DICT])
+                    'unknown command. List of valid commands:',
+                    '  %s' % ', '.join(sorted(all_commands))
                 ]
                 raise click.BadParameter('\n'.join(error_strs), param_hint='command')
             click.echo('')
-            _print_command_help(ctx, command)
+            _print_command_help(ctx, parent_command.get_command(ctx, command_name))
     else:
         click.echo(ctx.parent.get_help())
     ctx.exit()
@@ -384,6 +379,7 @@ def about_command(ctx: click.Context):
     ctx.exit()
 
 
+# TODO: Add a -V/--version flag which does the same thing as `version all`, and deprecate `version`.
 @click.command('version', cls=_Command)
 @click.option(
     '-a',
@@ -391,7 +387,7 @@ def about_command(ctx: click.Context):
     'show_all',      # Override argument name to avoid conflict with builtin.
     is_flag=True,
     flag_value=True,
-    help='Include system -a d package version information. Useful for troubleshooting.')
+    help='Include system and package version information. Useful for troubleshooting.')
 @click.pass_context
 def version_command(ctx: click.Context, show_all: bool):
     """Print PySceneDetect version."""
@@ -472,6 +468,7 @@ Note that --end and --duration are mutually exclusive (i.e. only one of the two 
     '-w',
     type=(float, float, float, float),
     default=None,
+    metavar='HUE SAT LUM EDGE',
     help='Weights of 4 components used to calculate frame score from (delta_hue, delta_sat, delta_lum, delta_edges).%s'
     % (USER_CONFIG.get_help_string("detect-content", "weights")),
 )
@@ -498,7 +495,7 @@ Note that --end and --duration are mutually exclusive (i.e. only one of the two 
     metavar='TIMECODE',
     type=click.STRING,
     default=None,
-    help='Minimum length of any scene. Overrides global setting for -m/--min-scene-len. TIMECODE can be specified in frames (-m=100), in seconds with `s` suffix (-m=3.5s), or timecode (-m=00:01:52.778).%s'
+    help='Minimum length of any scene. Overrides global option -m/--min-scene-len. TIMECODE can be specified in frames (-m=100), in seconds with `s` suffix (-m=3.5s), or timecode (-m=00:01:52.778).%s'
     % ('' if USER_CONFIG.is_default('detect-content', 'min-scene-len') else
        USER_CONFIG.get_help_string('detect-content', 'min-scene-len')),
 )
@@ -613,7 +610,7 @@ Examples:
     metavar='TIMECODE',
     type=click.STRING,
     default=None,
-    help='Minimum length of any scene. Overrides global setting for -m/--min-scene-len. TIMECODE can be specified in frames (-m=100), in seconds with `s` suffix (-m=3.5s), or timecode (-m=00:01:52.778).%s'
+    help='Minimum length of any scene. Overrides global option -m/--min-scene-len. TIMECODE can be specified in frames (-m=100), in seconds with `s` suffix (-m=3.5s), or timecode (-m=00:01:52.778).%s'
     % ('' if USER_CONFIG.is_default('detect-adaptive', 'min-scene-len') else
        USER_CONFIG.get_help_string('detect-adaptive', 'min-scene-len')),
 )
@@ -689,7 +686,7 @@ Examples:
     metavar='TIMECODE',
     type=click.STRING,
     default=None,
-    help='Minimum length of any scene. Overrides global setting for -m/--min-scene-len. TIMECODE can be specified in frames (-m=100), in seconds with `s` suffix (-m=3.5s), or timecode (-m=00:01:52.778).%s'
+    help='Minimum length of any scene. Overrides global option -m/--min-scene-len. TIMECODE can be specified in frames (-m=100), in seconds with `s` suffix (-m=3.5s), or timecode (-m=00:01:52.778).%s'
     % ('' if USER_CONFIG.is_default('detect-threshold', 'min-scene-len') else
        USER_CONFIG.get_help_string('detect-threshold', 'min-scene-len')),
 )
@@ -1138,34 +1135,28 @@ Examples:
     )
 
 
-def _add_cli_command(cli: click.Group, command: click.Command):
-    """Add the given `command` to the `cli` group as well as the global `_COMMAND_DICT`."""
-    cli.add_command(command)
-    _COMMAND_DICT.append(command)
-
-
 # ----------------------------------------------------------------------
 # Commands Omitted From Help List
 # ----------------------------------------------------------------------
 
 # Info Commands
-_add_cli_command(scenedetect, help_command)
-_add_cli_command(scenedetect, version_command)
-_add_cli_command(scenedetect, about_command)
+scenedetect.add_command(help_command)
+scenedetect.add_command(version_command)
+scenedetect.add_command(about_command)
 
 # ----------------------------------------------------------------------
 # Commands Added To Help List
 # ----------------------------------------------------------------------
 
 # Input / Output
-_add_cli_command(scenedetect, time_command)
-_add_cli_command(scenedetect, export_html_command)
-_add_cli_command(scenedetect, list_scenes_command)
-_add_cli_command(scenedetect, save_images_command)
-_add_cli_command(scenedetect, split_video_command)
+scenedetect.add_command(time_command)
+scenedetect.add_command(export_html_command)
+scenedetect.add_command(list_scenes_command)
+scenedetect.add_command(save_images_command)
+scenedetect.add_command(split_video_command)
 
 # Detection Algorithms
-_add_cli_command(scenedetect, detect_content_command)
-_add_cli_command(scenedetect, detect_threshold_command)
-_add_cli_command(scenedetect, detect_adaptive_command)
-_add_cli_command(scenedetect, load_scenes_command)
+scenedetect.add_command(detect_content_command)
+scenedetect.add_command(detect_threshold_command)
+scenedetect.add_command(detect_adaptive_command)
+scenedetect.add_command(load_scenes_command)

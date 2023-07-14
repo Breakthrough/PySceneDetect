@@ -9,13 +9,14 @@ There are three scene detection algorithms: threshold based detection (``detect-
 
 In general, use ``detect-adaptive`` or ``detect-content`` for fast cuts, and ``detect-threshold`` for detecting fade in/out transitions.
 
+.. program:: scenedetect detect-adaptive
 
 ``detect-adaptive``
 ========================================================================
 
 Perform adaptive detection algorithm on input video.
 
-Two-pass algorithm that first calculates frame scores with ``detect-content``, and then applies a rolling average when processing the result. This can help mitigate false detections in situations such as camera movement.
+Two-pass algorithm that first calculates frame scores with :program:`detect-content <scenedetect detect-content>`, and then applies a rolling average when processing the result. This can help mitigate false detections in situations such as camera movement.
 
 Examples
 ------------------------------------------------------------------------
@@ -27,47 +28,61 @@ Examples
 Options
 ------------------------------------------------------------------------
 
-.. option:: --threshold VAL, -t VAL
+.. option:: -t VAL, --threshold VAL
 
-  Threshold value (float) that the calculated frame score must exceed to trigger a new scene (see frame metric adaptive_ratio in stats file). [default: ``3.0``]
+  Threshold (float) that frame score must exceed to trigger a cut. Refers to "adaptive_ratio" in stats file.
 
-.. option:: --min-content-val VAL, -c VAL
+  Default: ``3.0``
 
-  Minimum threshold (float) that the content_val must exceed in order to register as a new cene. This is calculated the same way that ``detect-content`` calculates frame score. [default: ``15.0``]
+.. option:: -c VAL, --min-content-val VAL
 
-.. option:: --min-delta-hsv VAL, -d VAL
+  Minimum threshold (float) that "content_val" must exceed to trigger a cut.
 
-  [DEPRECATED] Use -c/--min-content-val instead. [default: ``15.0``]
+  Default: ``15.0``
 
-.. option:: --frame-window VAL, -f VAL
+.. option:: -d VAL, --min-delta-hsv VAL
 
-  Size of window (number of frames) before and after each frame to average together in order to detect deviations from the mean. [default: ``2``]
+  [DEPRECATED] Use :option:`-c/--min-content-val <-c>` instead.
 
-.. option:: --weights, -w
+  Default: ``15.0``
 
-  Weights of the 4 components used to calculate content_val in the form (delta_hue, delta_sat, delta_lum, delta_edges). [default: ``1.000, 1.000, 1.000, 0.000``]
+.. option:: -f VAL, --frame-window VAL
 
-.. option:: --luma-only, -l
+  Size of window to detect deviations from mean. Represents how many frames before/after the current one to use for mean.
 
-  Only consider luma (brightness) channel. Useful for greyscale videos. Equivalent to setting -w/--weights to 0, 0, 1, 0.
+  Default: ``2``
 
-.. option:: --kernel-size N, -k N
+.. option:: -w, --weights
 
-  Size of kernel for expanding detected edges. Must be odd integer greater than or equal to 3. If unset, kernel size is estimated using video resolution. [default: ``auto``]
+  Weights of 4 components ("delta_hue", "delta_sat", "delta_lum", "delta_edges") used to calculate "content_val".
 
-.. option:: --min-scene-len TIMECODE, -m TIMECODE
+  Default: ``1.000, 1.000, 1.000, 0.000``
 
-  Minimum length of any scene. Overrides global min-scene-len (-m) setting. TIMECODE can be specified as exact number of frames, a time in seconds followed by s, or a timecode in the format HH:MM:SS or HH:MM:SS.nnn.
+.. option:: -l, --luma-only
 
+  Only use luma (brightness) channel. Useful for greyscale videos. Equivalent to "--weights 0 0 1 0".
+
+.. option:: -k N, --kernel-size N
+
+  Size of kernel for expanding detected edges. Must be odd number >= 3. If unset, size is estimated using video resolution.
+
+  Default: ``auto``
+
+.. option:: -m TIMECODE, --min-scene-len TIMECODE
+
+  Minimum length of any scene. Overrides global option :option:`-m/--min-scene-len <scenedetect -m>`. TIMECODE can be specified in frames (:option:`-m=100 <-m>`), in seconds with `s` suffix (:option:`-m=3.5s <-m>`), or timecode (:option:`-m=00:01:52.778 <-m>`).
+
+
+.. program:: scenedetect detect-content
 
 ``detect-content``
 ========================================================================
 
 Perform content detection algorithm on input video.
 
-When processing each frame, a score (from 0 to 255.0) is calculated representing the difference in content from the previous frame (higher = more difference). A change in scene is triggered when this value exceeds the value set for ``-t``/``--threshold``. This value is the *content_val* column in a statsfile.
+For each frame, a score from 0 to 255.0 is calculated which represents the difference in content between the current and previous frame (higher = more different). A cut is generated when a frame score exceeds :option:`-t/--threshold <-t>`. Frame scores are saved under the "content_val" column in a statsfile.
 
-Frame scores are calculated from several components, which are used to generate a final weighted value with ``-w``/``--weights``. These are also recorded in the statsfile if set. Currently there are four components:
+Scores are calculated from several components which are also recorded in the statsfile:
 
  - *delta_hue*: Difference between pixel hue values of adjacent frames.
 
@@ -77,9 +92,7 @@ Frame scores are calculated from several components, which are used to generate 
 
  - *delta_edges*: Difference between calculated edges of adjacent frames. Typically larger than other components, so threshold may need to be increased to compensate.
 
-Weights are set as a set of 4 numbers in the form (*delta_hue*, *delta_sat*, *delta_lum*, *delta_edges*). For example, ``-w 1.0 0.5 1.0 0.2 -t 32`` is a good starting point to use with edge detection.
-
-Edge detection is not enabled by default. Current default parameters are ``-w 1.0 1.0 1.0 0.0 -t 27``. The final weighted sum is normalized based on the weight of the components, so they do not need to equal 100%.
+Once calculated, these components are multiplied by the specified :option:`-w/--weights <-w>` to calculate the final frame score ("content_val").  Weights are set as a set of 4 numbers in the form (*delta_hue*, *delta_sat*, *delta_lum*, *delta_edges*). For example, "--weights 1.0 0.5 1.0 0.2 --threshold 32" is a good starting point for trying edge detection. The final sum is normalized by the weight of all components, so they need not equal 100%. Edge detection is disabled by default to improve performance.
 
 Examples
 ------------------------------------------------------------------------
@@ -91,33 +104,41 @@ Examples
 Options
 ------------------------------------------------------------------------
 
-.. option:: --threshold VAL, -t VAL
+.. option:: -t VAL, --threshold VAL
 
-  Threshold value that the content_val frame metric must exceed to trigger a new scene. Refers to frame metric content_val in stats file. [default: ``27.0``]
+  Threshold (float) that frame score must exceed to trigger a cut. Refers to "content_val" in stats file.
 
-.. option:: --weights, -w
+  Default: ``27.0``
 
-  Weights of the 4 components used to calculate content_val in the form (delta_hue, delta_sat, delta_lum, delta_edges). [default: ``1.000, 1.000, 1.000, 0.000``]
+.. option:: -w HUE SAT LUM EDGE, --weights HUE SAT LUM EDGE
 
-.. option:: --luma-only, -l
+  Weights of 4 components used to calculate frame score from (delta_hue, delta_sat, delta_lum, delta_edges).
 
-  Only consider luma (brightness) channel. Useful for greyscale videos. Equivalent to setting -w/--weights to 0, 0, 1, 0.
+  Default: ``1.000, 1.000, 1.000, 0.000``
 
-.. option:: --kernel-size N, -k N
+.. option:: -l, --luma-only
 
-  Size of kernel for expanding detected edges. Must be odd integer greater than or equal to 3. If unset, kernel size is estimated using video resolution. [default: ``auto``]
+  Only use luma (brightness) channel. Useful for greyscale videos. Equivalent to setting "-w 0 0 1 0".
 
-.. option:: --min-scene-len TIMECODE, -m TIMECODE
+.. option:: -k N, --kernel-size N
 
-  Minimum length of any scene. Overrides global min-scene-len (-m) setting. TIMECODE can be specified as exact number of frames, a time in seconds followed by s, or a timecode in the format HH:MM:SS or HH:MM:SS.nnn.
+  Size of kernel for expanding detected edges. Must be odd integer greater than or equal to 3. If unset, kernel size is estimated using video resolution.
 
+  Default: ``auto``
+
+.. option:: -m TIMECODE, --min-scene-len TIMECODE
+
+  Minimum length of any scene. Overrides global option :option:`-m/--min-scene-len <scenedetect -m>`. TIMECODE can be specified in frames (:option:`-m=100 <-m>`), in seconds with `s` suffix (:option:`-m=3.5s <-m>`), or timecode (:option:`-m=00:01:52.778 <-m>`).
+
+
+.. program:: scenedetect detect-threshold
 
 ``detect-threshold``
 ========================================================================
 
 Perform threshold detection algorithm on input video.
 
-Detects fades in/out based on average frame pixel value compared against ``-t``/``--threshold``.
+Detects fade-in and fade-out events using average pixel values. Resulting cuts are placed between adjacent fade-out and fade-in events.
 
 Examples
 ------------------------------------------------------------------------
@@ -129,18 +150,24 @@ Examples
 Options
 ------------------------------------------------------------------------
 
-.. option:: --threshold VAL, -t VAL
+.. option:: -t VAL, --threshold VAL
 
-  Threshold value (integer) that the delta_rgb frame metric must exceed to trigger a new scene. Refers to frame metric delta_rgb in stats file. [default: ``12.0``]
+  Threshold (integer) that frame score must exceed to start a new scene. Refers to "delta_rgb" in stats file.
 
-.. option:: --fade-bias PERCENT, -f PERCENT
+  Default: ``12.0``
 
-  Percent (%) from -100 to 100 of timecode skew for where cuts should be placed. -100 indicates the start frame, +100 indicates the end frame, and 0 is the middle of both. [default: ``0``]
+.. option:: -f PERCENT, --fade-bias PERCENT
 
-.. option:: --add-last-scene, -l
+  Percent (%) from -100 to 100 of timecode skew of cut placement. -100 indicates the start frame, +100 indicates the end frame, and 0 is the middle of both.
 
-  If set, if the video ends on a fade-out, a final scene will be generated from the last fade-out position to the end of the video. [default: ``True``]
+  Default: ``0``
 
-.. option:: --min-scene-len TIMECODE, -m TIMECODE
+.. option:: -l, --add-last-scene
 
-  Minimum length of any scene. Overrides global min-scene-len (-m) setting. TIMECODE can be specified as exact number of frames, a time in seconds followed by s, or a timecode in the format HH:MM:SS or HH:MM:SS.nnn.
+  If set and video ends after a fade-out event, generate a final cut at the last fade-out position.
+
+  Default: ``True``
+
+.. option:: -m TIMECODE, --min-scene-len TIMECODE
+
+  Minimum length of any scene. Overrides global option :option:`-m/--min-scene-len <scenedetect -m>`. TIMECODE can be specified in frames (:option:`-m=100 <-m>`), in seconds with `s` suffix (:option:`-m=3.5s <-m>`), or timecode (:option:`-m=00:01:52.778 <-m>`).

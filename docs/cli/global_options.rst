@@ -21,7 +21,7 @@ Skip the first 10 seconds of the input video:
 
 Show summary of all options and commands:
 
-    ``scenedetect help``
+    ``scenedetect --help``
 
 
 =======================================================================
@@ -38,7 +38,7 @@ Global options (e.g. `--input`, `--config`) must be specified before any command
 
 If a detector is not specified, ``detect-adaptive`` will be used by default. The default detector can be configured using a :ref:`a config file <scenedetect_cli-config_file>`.
 
-You can use `help [command]` where `[command]` is a specific command or detection algorithm (e.g. `scenedetect help detect-content` or `scenedetect help split-video`). To show the complete help reference for the program you can run:
+You can use `[command] --help` where `[command]` is a specific command or detector (e.g. `scenedetect detect-content --help`). To show the complete help reference for the program you can run:
 
     ``scenedetect help all``
 
@@ -54,62 +54,72 @@ If you are having trouble running PySceneDetect, check installed software depend
 Please include this information when submitting bug reports.
 
 
+.. program:: scenedetect
+
 =======================================================================
 Global Options
 =======================================================================
 
-.. option:: --input VIDEO, -i VIDEO
+.. option:: -i VIDEO, --input VIDEO
 
-  [Required] Input video file. Also supports image sequences and URLs.
+  [REQUIRED] Input video file. Image sequences and URLs are supported.
 
-.. option:: --output DIR, -o DIR
+.. option:: -o DIR, --output DIR
 
-  Output directory for created files (stats file, output videos, images, etc...). If not set defaults to working directory. Some commands allow overriding this value.
+  Output directory for created files. If unset, working directory will be used. May be overriden by command options.
 
-.. option:: --config FILE, -c FILE
+.. option:: -c FILE, --config FILE
 
-  Path to config file.
+  Path to config file. See :ref:`config file reference <scenedetect_cli-config_file>` for details.
 
-.. option:: --stats CSV, -s CSV
+.. option:: -s CSV, --stats CSV
 
-  Stats file (.csv) path to write frame metrics. If the file exists, existing metrics will be overwritten. Can be used to find optimal detector options or for data analysis.
+  Stats file (.csv) to write frame metrics. Existing files will be overwritten. Used for tuning detection parameters and data analysis.
 
-.. option:: --framerate FPS, -f FPS
+.. option:: -f FPS, --framerate FPS
 
-  Override framerate with value as frames/sec (e.g. ``-f 29.97``).
+  Override framerate with value as frames/sec.
 
-.. option:: --min-scene-len TIMECODE, -m TIMECODE
+.. option:: -m TIMECODE, --min-scene-len TIMECODE
 
-  Minimum length of any scene. TIMECODE can be specified as exact number of frames, a time in seconds followed by s, or a timecode in the format HH:MM:SS or HH:MM:SS.nnn. [default: ``0.6s``]
+  Minimum length of any scene. TIMECODE can be specified as number of frames (:option:`-m=10 <-m>`), time in seconds followed by "s" (:option:`-m=2.5s <-m>`), or timecode (:option:`-m=00:02:53.633 <-m>`).
+
+  Default: ``0.6s``
 
 .. option:: --drop-short-scenes
 
-  Drop scenes shorter than ``--min-scene-len`` instead of combining them with neighbors.
+  Drop scenes shorter than :option:`-m/--min-scene-len <-m>`, instead of combining with neighbors.
 
 .. option:: --merge-last-scene
 
-  Merge last scene with previous if shorter than ``--min-scene-len``.
+  Merge last scene with previous if shorter than :option:`-m/--min-scene-len <-m>`.
 
-.. option:: --backend BACKEND, -b BACKEND
+.. option:: -b BACKEND, --backend BACKEND
 
-  Backend to use for video input. Backend options can be set using a config file (``-c``/``--config``). [available\: opencv, pyav, moviepy] [default: opencv].
+  Backend to use for video input. Backend options can be set using a config file (:option:`-c/--config <-c>`). [available: opencv, pyav, moviepy]
 
-.. option:: --downscale N, -d N
+  Default: ``opencv``
 
-  Integer factor to downscale video by (e.g. 2, 3, 4...) before processing. Frame is scaled to width/N x height/N. If unset, value is auto selected based on resolution. Set to 1 to disable downscaling.
+.. option:: -d N, --downscale N
 
-.. option:: --frame-skip N, -fs N
+  Integer factor to downscale video by before processing. If unset, value is selected based on resolution. Set :option:`-d=1 <-d>` to disable downscaling.
 
-  Skips N frames during processing (-fs 1 skips every other frame, processing 50% of the video, -fs 2 processes 33% of the frames, -fs 3 processes 25%, etc...). Reduces processing speed at expense of accuracy. [default: ``0``]
+.. option:: -fs N, --frame-skip N
 
-.. option:: --verbosity LEVEL, -v LEVEL
+  Skip N frames during processing. Reduces processing speed at expense of accuracy. :option:`-fs=1 <-fs>` skips every other frame processing 50% of the video, :option:`-fs=2 <-fs>` processes 33% of the video frames, :option:`-fs=3 <-fs>` processes 25%, etc...
 
-  Level of debug/info/error information to show. Must be one of\: debug, info, warning, error, none. Overrides ``-q``/``--quiet``. Use ``-v debug`` for bug reports. [default: ``info``]
+  Default: ``0``
 
-.. option:: --logfile LOG, -l LOG
+.. option:: -v LEVEL, --verbosity LEVEL
 
-  Path to log file for writing application logging information, mainly for debugging. Set ``-v debug`` as well if you are submitting a bug report. If verbosity is none, logfile is still be generated with info-level verbosity.
+  Amount of information to show. Must be one of: debug, info, warning, error, none. Overrides :option:`-q/--quiet <-q>`.
 
-.. option:: --quiet, -q
+  Default: ``info``
 
-  Suppresses all output of PySceneDetect to the terminal/stdout. Equivalent to ``-v none``.
+.. option:: -l FILE, --logfile FILE
+
+  Save debug log to FILE. Appends to existing file if present.
+
+.. option:: -q, --quiet
+
+  Suppress output to terminal/stdout. Equivalent to setting :option:`--verbosity=none <--verbosity>`.

@@ -13,22 +13,30 @@ import typing as ty
 import re
 from dataclasses import dataclass
 
+# Add parent folder to path so we can resolve `scenedetect` imports.
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir)
-
-import click
-import json
-import typing as ty
 from scenedetect._cli import scenedetect
 
-StringGenerator = ty.Generator[str, None, None]
+# Third-party imports
+import click
+
+StrGenerator = ty.Generator[str, None, None]
 
 INDENT = ' ' * 4
 
 PAGE_SEP = '*' * 72
 TITLE_SEP = '=' * 72
 HEADING_SEP = '-' * 72
+
+OPTION_HELP_OVERRIDES = {
+    'scenedetect': {
+        'config':
+            'Path to config file. See :ref:`config file reference <scenedetect_cli-config_file>` for details.'
+    },
+}
+
 
 @dataclass
 class ReplaceWithReference:
@@ -37,77 +45,102 @@ class ReplaceWithReference:
     ref_type: str
 
 
-
-
-
-
 def transform_backquotes(s: str) -> str:
     return s.replace('``', '`').replace('`', '``')
 
-def add_backquotes_to_match(s: re.Match) -> str:
-    return '``%s``' % s.string[s.start():s.end()]
+
+def transform_add_command_refs(s: str, ctx: click.Context) -> str:
+    commands = ctx.command.list_commands(ctx)
+    for command in commands:
+        s = s.replace('``%s``' % command, ':program:`%s <scenedetect %s>`' % (command, command))
+    return s
+
+
+def add_backquotes(match: re.Match) -> str:
+    return '``%s``' % match.string[match.start():match.end()]
+
 
 def add_backquotes_with_refs(refs: ty.Set[str]) -> ty.Callable[[str], str]:
+    """Returns a transformation function that backquotes command examples, adding backquotes and
+    references to any found options."""
+
     def _add_backquotes(s: re.Match) -> str:
         to_add: str = s.string[s.start():s.end()]
         flag = re.search('-+[\w-]+[^\.\=\s\/]*', to_add)
         if flag is not None and flag.string[flag.start():flag.end()] in refs:
-            print("Found cross ref for %s -> %s" % (to_add, flag.string[flag.start():flag.end()]))
-            return ':option:`TODO %s`' % to_add
-        return to_add
+            # add cross reference
+            cross_ref = flag.string[flag.start():flag.end()]
+            option = s.string[s.start():s.end()]
+            return ':option:`%s <%s>`' % (option, cross_ref)
+        else:
+            return add_backquotes(s)
+
     return _add_backquotes
 
 
+def extract_default_value(s: str) -> ty.Tuple[str, ty.Optional[str]]:
+    default = re.search('\[default: .*\]', s)
+    if default is not None:
+        span = default.span()
+        assert span[1] == len(s)
+        s, default = s[:span[0]].strip(), s[span[0]:span[1]][len('[default: '):-1]
+        # Double-quote any default values that contain spaces.
+        if ' ' in default and not '"' in default and not ',' in default:
+            default = '"%s"' % default
+    return (s, default)
 
-# TODO: Remove backquotes from CLI docstrings. Add in :option: links when detecting an option
-# in the same command.
 
-# TODO: Override help for config file path.
+def transform_add_option_refs(s: str, refs: ty.List[str]) -> str:
+    transform = add_backquotes_with_refs(refs)
+    # TODO: Find `global option -c/--command` and add ref to parent instead.
+    #  -c/--command
+    s = re.sub('-\w/--\w[\w-]*', transform, s)
+    #  --arg=value, --arg=1.2.3, --arg=1,2,3
+    s = re.sub('-+[\w-]+=[^"\s\)]+(?<![\.\,])', transform, s)
+    # --args=" command with spaces"
+    s = re.sub('--[\w-]+[=]+\".*?"', transform, s)
+    return s
 
-def format_option(opt: click.Option, flags: ty.List[str]) -> StringGenerator:
+
+def format_option(command: click.Command, opt: click.Option, flags: ty.List[str]) -> StrGenerator:
     if isinstance(opt, click.Argument):
         yield '\n.. option:: %s\n' % opt.name
         return
-    yield '\n.. option:: %s\n' % ', '.join(
-        arg if opt.metavar is None else '%s %s' % (arg, opt.metavar) for arg in sorted(opt.opts, reverse=True))
-    help = opt.help.strip()
+    yield '\n.. option:: %s\n' % ', '.join(arg if opt.metavar is None else '%s %s' %
+                                           (arg, opt.metavar)
+                                           for arg in sorted(opt.opts, reverse=True))
 
-    default = re.search('\[default: .*\]', help)
-    if default is not None:
-        span = default.span()
-        assert span[1] == len(help)
-        help, default = help[:span[0]], help[span[0]:span[1]][len('[default: '):-1]
-        # Double-quote any default values that contain spaces.
-        if ' ' in default and not '"' in default:
-            default = '"%s"' % default
-        print(default)
+    help = OPTION_HELP_OVERRIDES[command.name][
+        opt.name] if command.name in OPTION_HELP_OVERRIDES and opt.name in OPTION_HELP_OVERRIDES[
+            command.name] else opt.help.strip()
 
-    # Add backquotes to:
-    # [default: ...]
-    add_backquotes = add_backquotes_with_refs(flags)
-
-    # TODO: need to return list of spans that need to be backquoted or ref'd. do transformation lazily after finding all.
-
-    #  -c/--command
-    help = re.sub('(?<=[\s"(])-\w/--\w[\w-]*', add_backquotes, help)
-    #  --arg=value
-    help = re.sub('(?<=[\s"(])-+[\w-]+=[^"\.\s\)]+', add_backquotes, help)
-    # --args=" command with spaces" and --args "command with spaces"
-    help = re.sub('(?<=[\s"(])--[\w-]+[\s=]+\".*?"', add_backquotes, help)
+    help, default = extract_default_value(help)
+    help = transform_add_option_refs(help, flags)
 
     yield '\n  %s\n' % help
     if default is not None:
         yield '\n  Default: ``%s``\n' % default
 
 
-def generate_command_help(command: click.Command,
-                          parent_name: ty.Optional[str] = None) -> StringGenerator:
+def generate_command_help(ctx: click.Context,
+                          command: click.Command,
+                          parent_name: ty.Optional[str] = None) -> StrGenerator:
     yield '\n\n.. program:: %s' % (
         command.name if parent_name is None else '%s %s' % (parent_name, command.name))
     yield '\n\n``%s``\n%s\n\n' % (command.name, TITLE_SEP)
+    # TODO: Add references to long options. Requires splitting out examples.
     help = command.help.replace('Examples:\n', 'Examples\n%s\n' % HEADING_SEP).replace(
         '\b\n', '').format(scenedetect='scenedetect -i video.mp4')
+
     help = transform_backquotes(help)
+
+    replacements = [
+        opt for opts in [param.opts for param in command.params if hasattr(param, 'opts')]
+        for opt in opts
+    ]
+
+    help = transform_add_command_refs(help, ctx)
+    help = transform_add_option_refs(help, replacements)
 
     for line in help.strip().splitlines():
         if line.startswith(INDENT):
@@ -120,20 +153,14 @@ def generate_command_help(command: click.Command,
     if command.params:
         yield '\n'
         yield 'Options\n%s\n' % (HEADING_SEP)
-
-        # Generate list of argument short/long flags in the form -s/--short-arg.
-        replacements = []
         for param in command.params:
-            if not hasattr(param, 'opts'):
-                continue
-            replacements += param.opts
-        for param in command.params:
-            yield from format_option(param, replacements)
+            yield from format_option(command, param, replacements)
 
 
-def generate_subcommands(ctx: click.Context) -> StringGenerator:
+def generate_subcommands(ctx: click.Context) -> StrGenerator:
     for command_name in ctx.command.list_commands(ctx):
-        yield from generate_command_help(ctx.command.get_command(ctx, command_name), ctx.info_name)
+        yield from generate_command_help(ctx, ctx.command.get_command(ctx, command_name),
+                                         ctx.info_name)
 
 
 def create_help() -> str:
@@ -142,7 +169,7 @@ def create_help() -> str:
     lines = [
         '%s\n``scenedetect`` Command Reference\n%s' % (PAGE_SEP, PAGE_SEP),
     ]
-    lines.extend(generate_command_help(ctx.command))
+    lines.extend(generate_command_help(ctx, ctx.command))
     lines.extend(generate_subcommands(ctx))
 
     return ''.join(lines)

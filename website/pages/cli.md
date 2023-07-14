@@ -68,9 +68,9 @@ The `split-video` command can be used to automatically split the input video usi
 scenedetect -i goldeneye.mp4 split-video
 ```
 
-Type `scenedetect help split-video` for a full list of options which can be specified for video splitting, including high quality mode (`-hq/--high-quality`) or copy mode (`-c/--copy`).
+Type `scenedetect split-video --help` for a full list of options which can be specified for video splitting, including high quality mode (`-hq/--high-quality`) or copy mode (`-c/--copy`).
 
-You can also specify `-h` / `--high-quality` to produces near lossless results, or `-p`/`--preset` and `-crf`/`--rate-factor` (call `scenedetect help split-video` for details). If either `-c`/`--copy` or `-m`/`--mkvmerge` is specified, codec copying mode is used, at the expense of frame accurate cuts.  Optionally, you can also specify the x264 `-p`/`--preset` and `-crf`/`--rate-factor` (call `scenedetect help split-video` for details).
+You can also specify `-h` / `--high-quality` to produces near lossless results, or `-p`/`--preset` and `-crf`/`--rate-factor` (call `scenedetect help split-video` for details). If either `-c`/`--copy` or `-m`/`--mkvmerge` is specified, codec copying mode is used, at the expense of frame accurate cuts.  Optionally, you can also specify the x264 `-p`/`--preset` and `-crf`/`--rate-factor` (see `scenedetect split-video --help` for details).
 
 
 ## Detection Methods
@@ -192,7 +192,7 @@ A configuration file path can be specified using the `-c`/`--config` argument. P
  * Mac:
      * `~/Library/Preferences/PySceneDetect/scenedetect.cfg`
 
-Run `scenedetect help` to see the exact path on your system which will be used (it will be listed under the help text for the -c/--config option).  You can [click here to download a `scenedetect.cfg` config file](https://raw.githubusercontent.com/Breakthrough/PySceneDetect/v0.6.1-release/scenedetect.cfg) to use as a template. Note that lines starting with a `#` are comments and will be ignored.  The `scenedetect.cfg` template file is also available in the folder where PySceneDetect is installed.
+Run `scenedetect --help` to see the exact path on your system which will be used (it will be listed under the help text for the -c/--config option).  You can [click here to download a `scenedetect.cfg` config file](https://raw.githubusercontent.com/Breakthrough/PySceneDetect/v0.6.1-release/scenedetect.cfg) to use as a template. Note that lines starting with a `#` are comments and will be ignored.  The `scenedetect.cfg` template file is also available in the folder where PySceneDetect is installed.
 
 Specifying a config file path using -c/--config overrides the user config file. Specifying values on the command line will override those values in the config file.
 
