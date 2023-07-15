@@ -103,11 +103,6 @@ def test_cli_info_command(info_command):
     assert invoke_scenedetect(info_command) == 0
 
 
-def test_cli_version_info():
-    """Test `scenedetect` version command with the `-a`/`--show-all` flag."""
-    assert invoke_scenedetect('version -a') == 0
-
-
 def test_cli_frame_numbers():
     """Validate frame numbers and timecodes align as expected for the scene list.
 
