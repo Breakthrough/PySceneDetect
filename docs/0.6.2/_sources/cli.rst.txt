@@ -1,0 +1,633 @@
+
+************************************************************************
+``scenedetect`` 🎬 Command
+************************************************************************
+
+
+.. _command-scenedetect:
+
+.. program:: scenedetect
+
+PySceneDetect is a scene cut/transition detection program. PySceneDetect takes an input video, runs detection on it, and uses the resulting scene information to generate output. The syntax for using PySceneDetect is:
+
+    ``scenedetect -i video.mp4 [detector] [commands]``
+
+For [detector] use :ref:`detect-adaptive <command-detect-adaptive>` or :ref:`detect-content <command-detect-content>` to find fast cuts, and :ref:`detect-threshold <command-detect-threshold>` for fades in/out. If [detector] is not specified, a default detector will be used.
+
+
+************************************************************************
+Examples
+************************************************************************
+
+
+Split video wherever a new scene is detected:
+
+    ``scenedetect -i video.mp4 -i video.mp4 split-video``
+
+Save scene list in CSV format with images at the start, middle, and end of each scene:
+
+    ``scenedetect -i video.mp4 -i video.mp4 list-scenes save-images``
+
+Skip the first 10 seconds of the input video:
+
+    ``scenedetect -i video.mp4 -i video.mp4 time --start 10s detect-content``
+
+Show summary of all options and commands:
+
+    ``scenedetect -i video.mp4 --help``
+
+Global options (e.g. :option:`-i/--input <-i>`, :option:`-c/--config <-c>`) must be specified before any commands and their options. The order of commands is not strict, but each command must only be specified once.
+
+
+************************************************************************
+Options
+************************************************************************
+
+
+.. option:: -i VIDEO, --input VIDEO
+
+  [REQUIRED] Input video file. Image sequences and URLs are supported.
+
+.. option:: -o DIR, --output DIR
+
+  Output directory for created files. If unset, working directory will be used. May be overriden by command options.
+
+.. option:: -c FILE, --config FILE
+
+  Path to config file. See :ref:`config file reference <scenedetect_cli-config_file>` for details.
+
+.. option:: -s CSV, --stats CSV
+
+  Stats file (.csv) to write frame metrics. Existing files will be overwritten. Used for tuning detection parameters and data analysis.
+
+.. option:: -f FPS, --framerate FPS
+
+  Override framerate with value as frames/sec.
+
+.. option:: -m TIMECODE, --min-scene-len TIMECODE
+
+  Minimum length of any scene. TIMECODE can be specified as number of frames (:option:`-m=10 <-m>`), time in seconds followed by "s" (:option:`-m=2.5s <-m>`), or timecode (:option:`-m=00:02:53.633 <-m>`).
+
+  Default: ``0.6s``
+
+.. option:: --drop-short-scenes
+
+  Drop scenes shorter than :option:`-m/--min-scene-len <-m>`, instead of combining with neighbors.
+
+.. option:: --merge-last-scene
+
+  Merge last scene with previous if shorter than :option:`-m/--min-scene-len <-m>`.
+
+.. option:: -b BACKEND, --backend BACKEND
+
+  Backend to use for video input. Backend options can be set using a config file (:option:`-c/--config <-c>`). [available: opencv, pyav, moviepy]
+
+  Default: ``opencv``
+
+.. option:: -d N, --downscale N
+
+  Integer factor to downscale video by before processing. If unset, value is selected based on resolution. Set :option:`-d=1 <-d>` to disable downscaling.
+
+.. option:: -fs N, --frame-skip N
+
+  Skip N frames during processing. Reduces processing speed at expense of accuracy. :option:`-fs=1 <-fs>` skips every other frame processing 50% of the video, :option:`-fs=2 <-fs>` processes 33% of the video frames, :option:`-fs=3 <-fs>` processes 25%, etc...
+
+  Default: ``0``
+
+.. option:: -v LEVEL, --verbosity LEVEL
+
+  Amount of information to show. LEVEL must be one of: debug, info, warning, error, none. Overrides :option:`-q/--quiet <-q>`.
+
+  Default: ``info``
+
+.. option:: -l FILE, --logfile FILE
+
+  Save debug log to FILE. Appends to existing file if present.
+
+.. option:: -q, --quiet
+
+  Suppress output to terminal/stdout. Equivalent to setting :option:`--verbosity=none <--verbosity>`.
+
+
+.. _command-help:
+
+``help``, ``version``, and ``about``
+=======================================================================
+
+.. program:: scenedetect help
+
+``scenedetect --help`` will print PySceneDetect options, commands, and examples. You can also specify:
+
+ * ``scenedetect [command] --help`` to show options and examples *for* a command or detector
+
+ * ``scenedetect help`` command to print full reference of all options, commands, and examples
+
+.. program:: scenedetect version
+
+``scenedetect version`` prints the version of PySceneDetect that is installed, as well as system dependencies.
+
+.. program:: scenedetect about
+
+``scenedetect about`` prints PySceneDetect copyright, licensing, and redistribution information. This includes a list of all third-party software components that PySceneDetect uses or interacts with, as well as a reference to the license and copyright information for each component.
+
+************************************************************************
+Detectors
+************************************************************************
+
+
+.. _command-detect-adaptive:
+
+.. program:: scenedetect detect-adaptive
+
+
+``detect-adaptive``
+========================================================================
+
+Perform adaptive detection algorithm on input video.
+
+Two-pass algorithm that first calculates frame scores with :ref:`detect-content <command-detect-content>`, and then applies a rolling average when processing the result. This can help mitigate false detections in situations such as camera movement.
+
+
+Examples
+------------------------------------------------------------------------
+
+
+    ``scenedetect -i video.mp4 detect-adaptive``
+
+    ``scenedetect -i video.mp4 detect-adaptive --threshold 3.2``
+
+
+Options
+------------------------------------------------------------------------
+
+
+.. option:: -t VAL, --threshold VAL
+
+  Threshold (float) that frame score must exceed to trigger a cut. Refers to "adaptive_ratio" in stats file.
+
+  Default: ``3.0``
+
+.. option:: -c VAL, --min-content-val VAL
+
+  Minimum threshold (float) that "content_val" must exceed to trigger a cut.
+
+  Default: ``15.0``
+
+.. option:: -d VAL, --min-delta-hsv VAL
+
+  [DEPRECATED] Use :option:`-c/--min-content-val <-c>` instead.
+
+  Default: ``15.0``
+
+.. option:: -f VAL, --frame-window VAL
+
+  Size of window to detect deviations from mean. Represents how many frames before/after the current one to use for mean.
+
+  Default: ``2``
+
+.. option:: -w, --weights
+
+  Weights of 4 components ("delta_hue", "delta_sat", "delta_lum", "delta_edges") used to calculate "content_val".
+
+  Default: ``1.000, 1.000, 1.000, 0.000``
+
+.. option:: -l, --luma-only
+
+  Only use luma (brightness) channel. Useful for greyscale videos. Equivalent to "--weights 0 0 1 0".
+
+.. option:: -k N, --kernel-size N
+
+  Size of kernel for expanding detected edges. Must be odd number >= 3. If unset, size is estimated using video resolution.
+
+  Default: ``auto``
+
+.. option:: -m TIMECODE, --min-scene-len TIMECODE
+
+  Minimum length of any scene. Overrides global option :option:`-m/--min-scene-len <scenedetect -m>`. TIMECODE can be specified in frames (:option:`-m=100 <-m>`), in seconds with `s` suffix (:option:`-m=3.5s <-m>`), or timecode (:option:`-m=00:01:52.778 <-m>`).
+
+
+.. _command-detect-content:
+
+.. program:: scenedetect detect-content
+
+
+``detect-content``
+========================================================================
+
+Perform content detection algorithm on input video.
+
+For each frame, a score from 0 to 255.0 is calculated which represents the difference in content between the current and previous frame (higher = more different). A cut is generated when a frame score exceeds :option:`-t/--threshold <-t>`. Frame scores are saved under the "content_val" column in a statsfile.
+
+Scores are calculated from several components which are also recorded in the statsfile:
+
+ - *delta_hue*: Difference between pixel hue values of adjacent frames.
+
+ - *delta_sat*: Difference between pixel saturation values of adjacent frames.
+
+ - *delta_lum*: Difference between pixel luma (brightness) values of adjacent frames.
+
+ - *delta_edges*: Difference between calculated edges of adjacent frames. Typically larger than other components, so threshold may need to be increased to compensate.
+
+Once calculated, these components are multiplied by the specified :option:`-w/--weights <-w>` to calculate the final frame score ("content_val").  Weights are set as a set of 4 numbers in the form (*delta_hue*, *delta_sat*, *delta_lum*, *delta_edges*). For example, "--weights 1.0 0.5 1.0 0.2 --threshold 32" is a good starting point for trying edge detection. The final sum is normalized by the weight of all components, so they need not equal 100%. Edge detection is disabled by default to improve performance.
+
+
+Examples
+------------------------------------------------------------------------
+
+
+    ``scenedetect -i video.mp4 detect-content``
+
+    ``scenedetect -i video.mp4 detect-content --threshold 27.5``
+
+
+Options
+------------------------------------------------------------------------
+
+
+.. option:: -t VAL, --threshold VAL
+
+  Threshold (float) that frame score must exceed to trigger a cut. Refers to "content_val" in stats file.
+
+  Default: ``27.0``
+
+.. option:: -w HUE SAT LUM EDGE, --weights HUE SAT LUM EDGE
+
+  Weights of 4 components used to calculate frame score from (delta_hue, delta_sat, delta_lum, delta_edges).
+
+  Default: ``1.000, 1.000, 1.000, 0.000``
+
+.. option:: -l, --luma-only
+
+  Only use luma (brightness) channel. Useful for greyscale videos. Equivalent to setting "-w 0 0 1 0".
+
+.. option:: -k N, --kernel-size N
+
+  Size of kernel for expanding detected edges. Must be odd integer greater than or equal to 3. If unset, kernel size is estimated using video resolution.
+
+  Default: ``auto``
+
+.. option:: -m TIMECODE, --min-scene-len TIMECODE
+
+  Minimum length of any scene. Overrides global option :option:`-m/--min-scene-len <scenedetect -m>`. TIMECODE can be specified in frames (:option:`-m=100 <-m>`), in seconds with `s` suffix (:option:`-m=3.5s <-m>`), or timecode (:option:`-m=00:01:52.778 <-m>`).
+
+
+.. _command-detect-threshold:
+
+.. program:: scenedetect detect-threshold
+
+
+``detect-threshold``
+========================================================================
+
+Perform threshold detection algorithm on input video.
+
+Detects fade-in and fade-out events using average pixel values. Resulting cuts are placed between adjacent fade-out and fade-in events.
+
+
+Examples
+------------------------------------------------------------------------
+
+
+    ``scenedetect -i video.mp4 detect-threshold``
+
+    ``scenedetect -i video.mp4 detect-threshold --threshold 15``
+
+
+Options
+------------------------------------------------------------------------
+
+
+.. option:: -t VAL, --threshold VAL
+
+  Threshold (integer) that frame score must exceed to start a new scene. Refers to "delta_rgb" in stats file.
+
+  Default: ``12.0``
+
+.. option:: -f PERCENT, --fade-bias PERCENT
+
+  Percent (%) from -100 to 100 of timecode skew of cut placement. -100 indicates the start frame, +100 indicates the end frame, and 0 is the middle of both.
+
+  Default: ``0``
+
+.. option:: -l, --add-last-scene
+
+  If set and video ends after a fade-out event, generate a final cut at the last fade-out position.
+
+  Default: ``True``
+
+.. option:: -m TIMECODE, --min-scene-len TIMECODE
+
+  Minimum length of any scene. Overrides global option :option:`-m/--min-scene-len <scenedetect -m>`. TIMECODE can be specified in frames (:option:`-m=100 <-m>`), in seconds with `s` suffix (:option:`-m=3.5s <-m>`), or timecode (:option:`-m=00:01:52.778 <-m>`).
+
+
+************************************************************************
+Commands
+************************************************************************
+
+
+.. _command-export-html:
+
+.. program:: scenedetect export-html
+
+
+``export-html``
+========================================================================
+
+Export scene list to HTML file. Requires save-images unless --no-images is specified.
+
+
+Options
+------------------------------------------------------------------------
+
+
+.. option:: -f NAME, --filename NAME
+
+  Filename format to use for the scene list HTML file. You can use the $VIDEO_NAME macro in the file name. Note that you may have to wrap the format name using single quotes.
+
+  Default: ``$VIDEO_NAME-Scenes.html``
+
+.. option:: --no-images
+
+  Export the scene list including or excluding the saved images.
+
+.. option:: -w pixels, --image-width pixels
+
+  Width in pixels of the images in the resulting HTML table.
+
+.. option:: -h pixels, --image-height pixels
+
+  Height in pixels of the images in the resulting HTML table.
+
+
+.. _command-list-scenes:
+
+.. program:: scenedetect list-scenes
+
+
+``list-scenes``
+========================================================================
+
+Create scene list CSV file (will be named $VIDEO_NAME-Scenes.csv by default).
+
+
+Options
+------------------------------------------------------------------------
+
+
+.. option:: -o DIR, --output DIR
+
+  Output directory to save videos to. Overrides global option :option:`-o/--output <scenedetect -o>` if set.
+
+.. option:: -f NAME, --filename NAME
+
+  Filename format to use for the scene list CSV file. You can use the $VIDEO_NAME macro in the file name. Note that you may have to wrap the name using single quotes or use escape characters (e.g. :option:`-f=\$VIDEO_NAME-Scenes.csv <-f>`).
+
+  Default: ``$VIDEO_NAME-Scenes.csv``
+
+.. option:: -n, --no-output-file
+
+  Only print scene list.
+
+.. option:: -q, --quiet
+
+  Suppress printing scene list.
+
+.. option:: -s, --skip-cuts
+
+  Skip cutting list as first row in the CSV file. Set for RFC 4180 compliant output.
+
+
+.. _command-load-scenes:
+
+.. program:: scenedetect load-scenes
+
+
+``load-scenes``
+========================================================================
+
+Load scenes from CSV instead of detecting. Can be used with CSV generated by :ref:`list-scenes <command-list-scenes>`. Scenes are loaded using the specified column as cut locations (frame number or timecode).
+
+
+Examples
+------------------------------------------------------------------------
+
+
+    ``scenedetect -i video.mp4 load-scenes -i scenes.csv``
+
+    ``scenedetect -i video.mp4 load-scenes -i scenes.csv --start-col-name "Start Timecode"``
+
+
+Options
+------------------------------------------------------------------------
+
+
+.. option:: -i FILE, --input FILE
+
+  Scene list to read cut information from.
+
+.. option:: -c STRING, --start-col-name STRING
+
+  Name of column used to mark scene cuts.
+
+  Default: ``"Start Frame"``
+
+.. option:: -f FPS, --framerate FPS
+
+  Override framerate to use when performing timecode to frame number conversion.
+
+
+.. _command-save-images:
+
+.. program:: scenedetect save-images
+
+
+``save-images``
+========================================================================
+
+Create images for each detected scene.
+
+Images can be resized
+
+
+Examples
+------------------------------------------------------------------------
+
+
+    ``scenedetect -i video.mp4 save-images``
+
+    ``scenedetect -i video.mp4 save-images --width 1024``
+
+    ``scenedetect -i video.mp4 save-images --filename \$SCENE_NUMBER-img\$IMAGE_NUMBER``
+
+
+Options
+------------------------------------------------------------------------
+
+
+.. option:: -o DIR, --output DIR
+
+  Output directory for images. Overrides global option :option:`-o/--output <scenedetect -o>` if set.
+
+.. option:: -f NAME, --filename NAME
+
+  Filename format *without* extension to use when saving images. You can use the $VIDEO_NAME, $SCENE_NUMBER, $IMAGE_NUMBER, and $FRAME_NUMBER macros in the file name. You may have to use escape characters (e.g. :option:`-f=\$SCENE_NUMBER-Image-\$IMAGE_NUMBER <-f>`) or single quotes.
+
+  Default: ``$VIDEO_NAME-Scene-$SCENE_NUMBER-$IMAGE_NUMBER``
+
+.. option:: -n N, --num-images N
+
+  Number of images to generate per scene. Will always include start/end frame, unless :option:`-n=1 <-n>`, in which case the image will be the frame at the mid-point of the scene.
+
+  Default: ``3``
+
+.. option:: -j, --jpeg
+
+  Set output format to JPEG (default).
+
+.. option:: -w, --webp
+
+  Set output format to WebP
+
+.. option:: -q Q, --quality Q
+
+  JPEG/WebP encoding quality, from 0-100 (higher indicates better quality). For WebP, 100 indicates lossless.
+
+  Default: ``JPEG: 95, WebP: 100``
+
+.. option:: -p, --png
+
+  Set output format to PNG.
+
+.. option:: -c C, --compression C
+
+  PNG compression rate, from 0-9. Higher values produce smaller files but result in longer compression time. This setting does not affect image quality, only file size.
+
+  Default: ``3``
+
+.. option:: -m N, --frame-margin N
+
+  Number of frames to ignore at beginning/end of scenes when saving images. Controls temporal padding on scene boundaries.
+
+  Default: ``3``
+
+.. option:: -s S, --scale S
+
+  Factor to scale images by. Ignored if :option:`-W/--width <-W>` or :option:`-H/--height <-H>` is set.
+
+.. option:: -H H, --height H
+
+  Height (pixels) of images.
+
+.. option:: -W W, --width W
+
+  Width (pixels) of images.
+
+
+.. _command-split-video:
+
+.. program:: scenedetect split-video
+
+
+``split-video``
+========================================================================
+
+Split input video using ffmpeg or mkvmerge.
+
+
+Examples
+------------------------------------------------------------------------
+
+
+    ``scenedetect -i video.mp4 split-video``
+
+    ``scenedetect -i video.mp4 split-video --copy``
+
+    ``scenedetect -i video.mp4 split-video --filename \$VIDEO_NAME-Clip-\$SCENE_NUMBER``
+
+
+Options
+------------------------------------------------------------------------
+
+
+.. option:: -o DIR, --output DIR
+
+  Output directory to save videos to. Overrides global option :option:`-o/--output <scenedetect -o>` if set.
+
+.. option:: -f NAME, --filename NAME
+
+  File name format to use when saving videos, with or without extension. You can use $VIDEO_NAME and $SCENE_NUMBER macros in the filename. You may have to wrap the format in single quotes or use escape characters to avoid variable expansion (e.g. :option:`-f=\$VIDEO_NAME-Scene-\$SCENE_NUMBER <-f>`).
+
+  Default: ``$VIDEO_NAME-Scene-$SCENE_NUMBER``
+
+.. option:: -q, --quiet
+
+  Hide output from external video splitting tool.
+
+.. option:: -c, --copy
+
+  Copy instead of re-encode. Faster but less precise. Equivalent to: :option:`--args="-map 0 -c:v copy -c:a copy" <--args>`
+
+.. option:: -hq, --high-quality
+
+  Encode video with higher quality, overrides -f option if present. Equivalent to: :option:`--rate-factor=17 <--rate-factor>` :option:`--preset=slow <--preset>`
+
+.. option:: -crf RATE, --rate-factor RATE
+
+  Video encoding quality (x264 constant rate factor), from 0-100, where lower is higher quality (larger output). 0 indicates lossless.
+
+  Default: ``22``
+
+.. option:: -p LEVEL, --preset LEVEL
+
+  Video compression quality (x264 preset). Can be one of: ultrafast, superfast, veryfast, faster, fast, medium, slow, slower, veryslow. Faster modes take less time but output may be larger.
+
+  Default: ``veryfast``
+
+.. option:: -a ARGS, --args ARGS
+
+  Override codec arguments passed to FFmpeg when splitting scenes. Use double quotes (") around arguments. Must specify at least audio/video codec.
+
+  Default: ``"-map 0 -c:v libx264 -preset veryfast -crf 22 -c:a aac"``
+
+.. option:: -m, --mkvmerge
+
+  Split video using mkvmerge. Faster than re-encoding, but less precise. If set, options other than :option:`-f/--filename <-f>`, :option:`-q/--quiet <-q>` and :option:`-o/--output <-o>` will be ignored. Note that mkvmerge automatically appends the $SCENE_NUMBER suffix.
+
+
+.. _command-time:
+
+.. program:: scenedetect time
+
+
+``time``
+========================================================================
+
+Set start/end/duration of input video.
+
+Values can be specified as frames (NNNN), seconds (NNNN.NNs), or timecode (HH:MM:SS.nnn). For example, to process only the first minute of a video:
+
+    ``scenedetect -i video.mp4 time --end 00:01:00``
+
+    ``scenedetect -i video.mp4 time --duration 60s``
+
+Note that --end and --duration are mutually exclusive (i.e. only one of the two can be set). Lastly, the following is an example using absolute frame numbers to process frames 0 through 1000:
+
+    ``scenedetect -i video.mp4 time --start 0 --end 1000``
+
+
+Options
+------------------------------------------------------------------------
+
+
+.. option:: -s TIMECODE, --start TIMECODE
+
+  Time in video to start detection. TIMECODE can be specified as number of frames (:option:`--start=100 <--start>` for frame 100), time in seconds followed by "s" (:option:`--start=100s <--start>` for 100 seconds), or timecode (:option:`--start=00:01:40 <--start>` for 1m40s).
+
+.. option:: -d TIMECODE, --duration TIMECODE
+
+  Maximum time in video to process. TIMECODE format is the same as other arguments. Mutually exclusive with :option:`-e/--end <-e>`.
+
+.. option:: -e TIMECODE, --end TIMECODE
+
+  Time in video to end detecting scenes. TIMECODE format is the same as other arguments. Mutually exclusive with :option:`-d/--duration <-d>`
+
