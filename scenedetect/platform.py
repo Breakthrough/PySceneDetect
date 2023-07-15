@@ -309,7 +309,7 @@ def get_system_version_info() -> str:
     out_lines = []
 
     # System (Python, OS)
-    out_lines += ['System Version Info', line_separator]
+    out_lines += ['System Info', line_separator]
     out_lines += [
         output_template.format(name, version) for name, version in (
             ('OS', '%s' % platform.platform()),
@@ -318,7 +318,7 @@ def get_system_version_info() -> str:
     ]
 
     # Third-Party Packages
-    out_lines += ['', 'Package Version Info', line_separator]
+    out_lines += ['', 'Packages', line_separator]
     third_party_packages = (
         'av',
         'click',
@@ -326,6 +326,7 @@ def get_system_version_info() -> str:
         'moviepy',
         'numpy',
         'platformdirs',
+        'scenedetect',
         'tqdm',
     )
     for module_name in third_party_packages:
@@ -336,7 +337,7 @@ def get_system_version_info() -> str:
             out_lines.append(output_template.format(module_name, not_found_str))
 
     # External Tools
-    out_lines += ['', 'Tool Version Info', line_separator]
+    out_lines += ['', 'Tools', line_separator]
 
     tool_version_info = (
         ('ffmpeg', get_ffmpeg_version()),

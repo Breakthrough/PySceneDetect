@@ -20,6 +20,10 @@ Includes new [`load-scenes` command](https://www.scenedetect.com/docs/0.6.2/cli/
  - [bugfix] Expand `$VIDEO_NAME` before creating output directory for `-f`/`--filename` option of `split-video`, now allows absolute paths
  - [general] Rename `ThresholdDetector` (`detect-threshold`) metric `delta_rgb` metric to `average_rgb`
  - [general] `-l`/`--logfile` always produces debug logs now
+ - [general] Remove `-a`/`--all` flag from `scenedetect version` command, now prints all information by default (can still call `scenedetect` for version number alone)
+ - [general] Add `-h`/`--help` options globally and for each command
+ - [general] Remove `all` option from `scenedetect help` command (can now call `scenedetect help` for full reference)
+
 
 **General:**
 

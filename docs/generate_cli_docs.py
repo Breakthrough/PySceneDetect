@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Generate formatted CLI documentation for PySceneDetect.
 #
 # Inspired by sphinx-click: https://github.com/click-contrib/sphinx-click
@@ -5,6 +6,9 @@
 # Copyright (C) 2014-2023 Brandon Castellano <http://www.bcastell.com>.
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
+"""Generates CLI reference documentation file docs/cli.rst.
+
+Run from main repo folder as working directory."""
 
 import os
 import sys
@@ -36,6 +40,59 @@ OPTION_HELP_OVERRIDES = {
             'Path to config file. See :ref:`config file reference <scenedetect_cli-config_file>` for details.'
     },
 }
+
+TITLE_LEVELS = ['*', '=', '-']
+
+INFO_COMMANDS = ['help', 'about', 'version']
+
+INFO_COMMAND_OVERRIDE = """
+.. _command-help:
+
+``help``, ``version``, and ``about``
+=======================================================================
+
+.. program:: scenedetect help
+
+``scenedetect --help`` will print PySceneDetect options, commands, and examples. You can also specify:
+
+ * ``scenedetect [command] --help`` to show options and examples *for* a command or detector
+
+ * ``scenedetect help`` command to print full reference of all options, commands, and examples
+
+.. program:: scenedetect version
+
+``scenedetect version`` prints the version of PySceneDetect that is installed, as well as system dependencies.
+
+.. program:: scenedetect about
+
+``scenedetect about`` prints PySceneDetect copyright, licensing, and redistribution information. This includes a list of all third-party software components that PySceneDetect uses or interacts with, as well as a reference to the license and copyright information for each component.
+"""
+
+
+def patch_help(s: str, commands: ty.List[str]) -> str:
+    # Patch some TODOs still not handled correctly below.
+    pos = 0
+    while True:
+        pos = s.find('global option :option:', pos)
+        if pos < 0:
+            break
+        pos = s.find('<-', pos)
+        assert pos > 0
+        s = s[:pos + 1] + 'scenedetect ' + s[pos + 1:]
+
+    for command in [command for command in commands if not command in INFO_COMMANDS]:
+        def add_link(_match: re.Match) -> str:
+            return ':ref:`%s <command-%s>`' % (command, command)
+        s = re.sub('``%s``(?!\\n)' % command, add_link, s)
+    return s
+
+
+def generate_title(s: str, level: int = 0, len: int = 72) -> StrGenerator:
+    yield '\n'
+    if level == 0:
+        yield TITLE_LEVELS[level] * len + '\n'
+    yield s + '\n'
+    yield TITLE_LEVELS[level] * len + '\n\n'
 
 
 @dataclass
@@ -86,6 +143,7 @@ def extract_default_value(s: str) -> ty.Tuple[str, ty.Optional[str]]:
 def transform_add_option_refs(s: str, refs: ty.List[str]) -> str:
     transform = add_backquotes_with_refs(refs)
     # TODO: Match prefix of `global option` and add ref to parent `scenedetect` command option.
+    # Replace patch to complete this.
     #  -c/--command
     s = re.sub('-\w/--\w[\w-]*', transform, s)
     #  --arg=value, --arg=1.2.3, --arg=1,2,3
@@ -107,6 +165,7 @@ def format_option(command: click.Command, opt: click.Option, flags: ty.List[str]
         opt.name] if command.name in OPTION_HELP_OVERRIDES and opt.name in OPTION_HELP_OVERRIDES[
             command.name] else opt.help.strip()
 
+    # TODO: Make metavars link to the option as well.
     help, default = extract_default_value(help)
     help = transform_add_option_refs(help, flags)
 
@@ -118,21 +177,26 @@ def format_option(command: click.Command, opt: click.Option, flags: ty.List[str]
 def generate_command_help(ctx: click.Context,
                           command: click.Command,
                           parent_name: ty.Optional[str] = None) -> StrGenerator:
-    yield '\n\n.. program:: %s' % (
-        command.name if parent_name is None else '%s %s' % (parent_name, command.name))
-    yield '\n\n``%s``\n%s\n\n' % (command.name, TITLE_SEP)
     # TODO: Add references to long options. Requires splitting out examples.
     # TODO: Add references to subcommands. Need to add actual refs, since programs can't be ref'd.
-    help = command.help.replace('Examples:\n', 'Examples\n%s\n' % HEADING_SEP).replace(
-        '\b\n', '').format(scenedetect='scenedetect -i video.mp4')
-
-    help = transform_backquotes(help)
+    # TODO: Handle dollar signs in examples by having both escaped and unescaped versions
+    yield '\n.. _command-%s:\n' % command.name
+    yield '\n.. program:: %s\n\n' % (
+        command.name if parent_name is None else '%s %s' % (parent_name, command.name))
+    if parent_name:
+        yield from generate_title('``%s``' % command.name, 1)
 
     replacements = [
         opt for opts in [param.opts for param in command.params if hasattr(param, 'opts')]
         for opt in opts
     ]
 
+    help = command.help
+    help = help.replace('Examples:\n',
+                        ''.join(generate_title('Examples', 0 if not parent_name else 2)))
+    help = help.replace('\b\n', '')
+    help = help.format(scenedetect='scenedetect -i video.mp4')
+    help = transform_backquotes(help)
     help = transform_add_option_refs(help, replacements)
 
     for line in help.strip().splitlines():
@@ -145,32 +209,60 @@ def generate_command_help(ctx: click.Context,
 
     if command.params:
         yield '\n'
-        yield 'Options\n%s\n' % (HEADING_SEP)
+        yield from generate_title('Options', 0 if not parent_name else 2)
         for param in command.params:
             yield from format_option(command, param, replacements)
+    yield '\n'
 
 
-def generate_subcommands(ctx: click.Context) -> StrGenerator:
-    for command_name in ctx.command.list_commands(ctx):
-        yield from generate_command_help(ctx, ctx.command.get_command(ctx, command_name),
-                                         ctx.info_name)
+def generate_subcommands(ctx: click.Context, commands: ty.List[str]) -> StrGenerator:
 
+    processed = set()
 
-def create_help() -> str:
-    ctx = click.Context(scenedetect, info_name=scenedetect.name)
-    #ctx.to_info_dict lacks metavar
-    lines = [
-        '%s\n``scenedetect`` Command Reference\n%s' % (PAGE_SEP, PAGE_SEP),
+    for info_command in INFO_COMMANDS:
+        assert info_command in commands
+        processed.add(info_command)
+    yield INFO_COMMAND_OVERRIDE
+
+    yield from generate_title('Detectors', 0)
+    detectors = [command for command in commands if command.startswith('detect-')]
+    for detector in detectors:
+        yield from generate_command_help(ctx, ctx.command.get_command(ctx, detector), ctx.info_name)
+        processed.add(detector)
+
+    yield from generate_title('Commands', 0)
+    output_commands = [
+        command for command in commands
+        if (not command.startswith('detect-') and not command in INFO_COMMANDS)
     ]
-    lines.extend(generate_command_help(ctx, ctx.command))
-    lines.extend(generate_subcommands(ctx))
+    for command in output_commands:
+        yield from generate_command_help(ctx, ctx.command.get_command(ctx, command), ctx.info_name)
+        processed.add(command)
 
-    return ''.join(lines)
+    assert set(commands) == processed
+
+
+def create_help() -> ty.Tuple[str, ty.List[str]]:
+    ctx = click.Context(scenedetect, info_name=scenedetect.name)
+
+    commands: ty.List[str] = ctx.command.list_commands(ctx)
+    #ctx.to_info_dict lacks metavar so we have to use the context directly.
+    actions = [
+        generate_title('``scenedetect`` 🎬 Command', level=0),
+        generate_command_help(ctx, ctx.command),
+        generate_subcommands(ctx, commands),
+    ]
+    lines = []
+    for action in actions:
+        lines.extend(action)
+    return ''.join(lines), commands
 
 
 def main():
-    help = create_help()
-    print(help)
+    help, commands = create_help()
+    help = patch_help(help, commands)
+    with open('docs/cli.rst', 'wb') as f:
+        f.write(help.encode())
 
 
 if __name__ == "__main__":

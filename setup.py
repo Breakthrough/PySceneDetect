@@ -14,5 +14,7 @@
 Build using `python -m build` and installing the resulting .whl using `pip`.
 """
 
-from setuptools import setup
-setup()
+import setuptools
+
+if __name__ == "__main__":
+    setuptools.setup(name="scenedetect")

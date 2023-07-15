@@ -28,9 +28,7 @@ Table of Contents
     :caption: Command-Line Interface [CLI]:
     :name: clitoc
 
-    cli/global_options
-    cli/detectors
-    cli/commands
+    cli
     cli/config_file
     cli/backends
 

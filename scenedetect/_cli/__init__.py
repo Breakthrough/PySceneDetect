@@ -253,8 +253,9 @@ def _print_command_help(ctx: click.Context, command: click.Command):
     metavar='LEVEL',
     type=click.Choice(CHOICE_MAP['global']['verbosity'], False),
     default=None,
-    help='Amount of information to show. Must be one of: %s. Overrides -q/--quiet.%s' % (', '.join(
-        CHOICE_MAP["global"]["verbosity"]), USER_CONFIG.get_help_string("global", "verbosity")),
+    help='Amount of information to show. LEVEL must be one of: %s. Overrides -q/--quiet.%s' %
+    (', '.join(CHOICE_MAP["global"]["verbosity"]), USER_CONFIG.get_help_string(
+        "global", "verbosity")),
 )
 @click.option(
     '--logfile',
@@ -293,21 +294,27 @@ def scenedetect(
 
     {scenedetect} [detector] [commands]
 
-For example, to split a video on each fast-cut:
+For [detector] use `detect-adaptive` or `detect-content` to find fast cuts, and `detect-threshold` for fades in/out. If [detector] is not specified, a default detector will be used.
 
-    {scenedetect} detect-adaptive split-video
+Examples:
 
-For [detector] use `detect-adaptive` or `detect-content` to find fast cuts, and `detect-threshold` for fades in/out. If [detector] is omitted, a default detector will be used.
+Split video wherever a new scene is detected:
 
-The following [commands] can be specified to generate output:
+    {scenedetect} -i video.mp4 split-video
 
-\b
- - export scenes to CSV (`list-scenes`)
- - split input video (`split-video`)
- - save images for each scene (`save-images`)
- - export scenes to HTML (`export-html`)
+Save scene list in CSV format with images at the start, middle, and end of each scene:
 
-Command order is not strict, but each should only be specified once.
+    {scenedetect} -i video.mp4 list-scenes save-images
+
+Skip the first 10 seconds of the input video:
+
+    {scenedetect} -i video.mp4 time --start 10s detect-content
+
+Show summary of all options and commands:
+
+    {scenedetect} --help
+
+Global options (e.g. -i/--input, -c/--config) must be specified before any commands and their options. The order of commands is not strict, but each command must only be specified once.
 """
     assert isinstance(ctx.obj, CliContext)
     ctx.obj.handle_options(
@@ -332,8 +339,6 @@ Command order is not strict, but each should only be specified once.
 # pylint: enable=redefined-builtin
 
 
-# TODO: Make the help command the equivalent of `scenedetect help all` now that `--help` can be
-# used on all commands individually.
 @click.command('help', cls=_Command)
 @click.argument(
     'command_name',
@@ -346,23 +351,20 @@ def help_command(ctx: click.Context, command_name: str):
     assert isinstance(ctx.obj, CliContext)
     assert isinstance(ctx.parent.command, click.MultiCommand)
     parent_command = ctx.parent.command
+    all_commands = set(parent_command.list_commands(ctx))
     if command_name is not None:
-        all_commands = set(parent_command.list_commands(ctx))
-        if command_name.lower() == 'all':
-            click.echo(ctx.parent.get_help())
-            for command in sorted(all_commands):
-                _print_command_help(ctx, parent_command.get_command(ctx, command))
-        else:
-            if not command_name in all_commands:
-                error_strs = [
-                    'unknown command. List of valid commands:',
-                    '  %s' % ', '.join(sorted(all_commands))
-                ]
-                raise click.BadParameter('\n'.join(error_strs), param_hint='command')
-            click.echo('')
-            _print_command_help(ctx, parent_command.get_command(ctx, command_name))
+        if not command_name in all_commands:
+            error_strs = [
+                'unknown command. List of valid commands:',
+                '  %s' % ', '.join(sorted(all_commands))
+            ]
+            raise click.BadParameter('\n'.join(error_strs), param_hint='command')
+        click.echo('')
+        _print_command_help(ctx, parent_command.get_command(ctx, command_name))
     else:
         click.echo(ctx.parent.get_help())
+        for command in sorted(all_commands):
+            _print_command_help(ctx, parent_command.get_command(ctx, command))
     ctx.exit()
 
 
@@ -379,24 +381,13 @@ def about_command(ctx: click.Context):
     ctx.exit()
 
 
-# TODO: Add a -V/--version flag which does the same thing as `version all`, and deprecate `version`.
 @click.command('version', cls=_Command)
-@click.option(
-    '-a',
-    '--all',
-    'show_all',      # Override argument name to avoid conflict with builtin.
-    is_flag=True,
-    flag_value=True,
-    help='Include system and package version information. Useful for troubleshooting.')
 @click.pass_context
-def version_command(ctx: click.Context, show_all: bool):
+def version_command(ctx: click.Context):
     """Print PySceneDetect version."""
     assert isinstance(ctx.obj, CliContext)
     click.echo('')
-    click.echo(click.style('PySceneDetect %s' % _PROGRAM_VERSION, fg='yellow'))
-    if show_all:
-        click.echo('')
-        click.echo(get_system_version_info())
+    click.echo(get_system_version_info())
     ctx.exit()
 
 
