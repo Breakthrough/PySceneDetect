@@ -195,7 +195,7 @@ def generate_command_help(ctx: click.Context,
     help = help.replace('Examples:\n',
                         ''.join(generate_title('Examples', 0 if not parent_name else 2)))
     help = help.replace('\b\n', '')
-    help = help.format(scenedetect='scenedetect -i video.mp4')
+    help = help.format(scenedetect='scenedetect', scenedetect_with_video='scenedetect -i video.mp4')
     help = transform_backquotes(help)
     help = transform_add_option_refs(help, replacements)
 

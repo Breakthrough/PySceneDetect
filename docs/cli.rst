@@ -22,19 +22,19 @@ Examples
 
 Split video wherever a new scene is detected:
 
-    ``scenedetect -i video.mp4 -i video.mp4 split-video``
+    ``scenedetect -i video.mp4 split-video``
 
 Save scene list in CSV format with images at the start, middle, and end of each scene:
 
-    ``scenedetect -i video.mp4 -i video.mp4 list-scenes save-images``
+    ``scenedetect -i video.mp4 list-scenes save-images``
 
 Skip the first 10 seconds of the input video:
 
-    ``scenedetect -i video.mp4 -i video.mp4 time --start 10s detect-content``
+    ``scenedetect -i video.mp4 time --start 10s detect-content``
 
 Show summary of all options and commands:
 
-    ``scenedetect -i video.mp4 --help``
+    ``scenedetect --help``
 
 Global options (e.g. :option:`-i/--input <-i>`, :option:`-c/--config <-c>`) must be specified before any commands and their options. The order of commands is not strict, but each command must only be specified once.
 

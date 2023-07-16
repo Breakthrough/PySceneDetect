@@ -119,9 +119,9 @@ class _Command(click.Command):
     def format_help_text(self, ctx: click.Context, formatter: click.HelpFormatter) -> None:
         """Writes the help text to the formatter if it exists."""
         if self.help:
-            base_command = '%s -i video.mp4' % (
-                ctx.parent.info_name if ctx.parent is not None else ctx.info_name)
-            formatted_help = self.help.format(scenedetect=base_command)
+            base_command = (ctx.parent.info_name if ctx.parent is not None else ctx.info_name)
+            formatted_help = self.help.format(
+                scenedetect=base_command, scenedetect_with_video='%s -i video.mp4' % base_command)
             text = inspect.cleandoc(formatted_help).partition("\f")[0]
             formatter.write_paragraph()
             formatter.write_text(text)
@@ -292,7 +292,7 @@ def scenedetect(
 ):
     """PySceneDetect is a scene cut/transition detection program. PySceneDetect takes an input video, runs detection on it, and uses the resulting scene information to generate output. The syntax for using PySceneDetect is:
 
-    {scenedetect} [detector] [commands]
+    {scenedetect_with_video} [detector] [commands]
 
 For [detector] use `detect-adaptive` or `detect-content` to find fast cuts, and `detect-threshold` for fades in/out. If [detector] is not specified, a default detector will be used.
 
@@ -300,15 +300,15 @@ Examples:
 
 Split video wherever a new scene is detected:
 
-    {scenedetect} -i video.mp4 split-video
+    {scenedetect_with_video} split-video
 
 Save scene list in CSV format with images at the start, middle, and end of each scene:
 
-    {scenedetect} -i video.mp4 list-scenes save-images
+    {scenedetect_with_video} list-scenes save-images
 
 Skip the first 10 seconds of the input video:
 
-    {scenedetect} -i video.mp4 time --start 10s detect-content
+    {scenedetect_with_video} time --start 10s detect-content
 
 Show summary of all options and commands:
 
@@ -368,7 +368,7 @@ def help_command(ctx: click.Context, command_name: str):
     ctx.exit()
 
 
-@click.command('about', cls=_Command)
+@click.command('about', cls=_Command, add_help_option=False)
 @click.pass_context
 def about_command(ctx: click.Context):
     """Print license/copyright info."""
@@ -381,7 +381,7 @@ def about_command(ctx: click.Context):
     ctx.exit()
 
 
-@click.command('version', cls=_Command)
+@click.command('version', cls=_Command, add_help_option=False)
 @click.pass_context
 def version_command(ctx: click.Context):
     """Print PySceneDetect version."""
@@ -427,13 +427,13 @@ def time_command(
 
 Values can be specified as frames (NNNN), seconds (NNNN.NNs), or timecode (HH:MM:SS.nnn). For example, to process only the first minute of a video:
 
-    {scenedetect} time --end 00:01:00
+    {scenedetect_with_video} time --end 00:01:00
 
-    {scenedetect} time --duration 60s
+    {scenedetect_with_video} time --duration 60s
 
 Note that --end and --duration are mutually exclusive (i.e. only one of the two can be set). Lastly, the following is an example using absolute frame numbers to process frames 0 through 1000:
 
-    {scenedetect} time --start 0 --end 1000
+    {scenedetect_with_video} time --start 0 --end 1000
 """
     assert isinstance(ctx.obj, CliContext)
     ctx.obj.handle_time(
@@ -517,9 +517,9 @@ Once calculated, these components are multiplied by the specified -w/--weights t
 
 Examples:
 
-    {scenedetect} detect-content
+    {scenedetect_with_video} detect-content
 
-    {scenedetect} detect-content --threshold 27.5
+    {scenedetect_with_video} detect-content --threshold 27.5
 """
     assert isinstance(ctx.obj, CliContext)
     detector_args = ctx.obj.get_detect_content_params(
@@ -623,9 +623,9 @@ Two-pass algorithm that first calculates frame scores with `detect-content`, and
 
 Examples:
 
-    {scenedetect} detect-adaptive
+    {scenedetect_with_video} detect-adaptive
 
-    {scenedetect} detect-adaptive --threshold 3.2
+    {scenedetect_with_video} detect-adaptive --threshold 3.2
 """
     assert isinstance(ctx.obj, CliContext)
     detector_args = ctx.obj.get_detect_adaptive_params(
@@ -695,9 +695,9 @@ Detects fade-in and fade-out events using average pixel values. Resulting cuts a
 
 Examples:
 
-    {scenedetect} detect-threshold
+    {scenedetect_with_video} detect-threshold
 
-    {scenedetect} detect-threshold --threshold 15
+    {scenedetect_with_video} detect-threshold --threshold 15
 """
     assert isinstance(ctx.obj, CliContext)
     detector_args = ctx.obj.get_detect_threshold_params(
@@ -741,9 +741,9 @@ def load_scenes_command(ctx: click.Context, input: Optional[str], start_col_name
 
 Examples:
 
-    {scenedetect} load-scenes -i scenes.csv
+    {scenedetect_with_video} load-scenes -i scenes.csv
 
-    {scenedetect} load-scenes -i scenes.csv --start-col-name "Start Timecode"
+    {scenedetect_with_video} load-scenes -i scenes.csv --start-col-name "Start Timecode"
 """
     assert isinstance(ctx.obj, CliContext)
 
@@ -958,11 +958,11 @@ def split_video_command(
 
 Examples:
 
-    {scenedetect} split-video
+    {scenedetect_with_video} split-video
 
-    {scenedetect} split-video --copy
+    {scenedetect_with_video} split-video --copy
 
-    {scenedetect} split-video --filename \$VIDEO_NAME-Clip-\$SCENE_NUMBER
+    {scenedetect_with_video} split-video --filename \$VIDEO_NAME-Clip-\$SCENE_NUMBER
 """
     assert isinstance(ctx.obj, CliContext)
     ctx.obj.handle_split_video(
@@ -1103,11 +1103,11 @@ Images can be resized
 
 Examples:
 
-    {scenedetect} save-images
+    {scenedetect_with_video} save-images
 
-    {scenedetect} save-images --width 1024
+    {scenedetect_with_video} save-images --width 1024
 
-    {scenedetect} save-images --filename \$SCENE_NUMBER-img\$IMAGE_NUMBER
+    {scenedetect_with_video} save-images --filename \$SCENE_NUMBER-img\$IMAGE_NUMBER
 """
     assert isinstance(ctx.obj, CliContext)
     ctx.obj.handle_save_images(
