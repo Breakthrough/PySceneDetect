@@ -42,7 +42,7 @@ jobs:
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip build wheel virtualenv setuptools
-          pip install -r requirements_headless.txt
+          pip install av==9.2 opencv-python-headless==4.5.1.48 --only-binary :all:
           pip install -r dist/requirements_windows.txt
 
       - name: Checkout test and build resources
