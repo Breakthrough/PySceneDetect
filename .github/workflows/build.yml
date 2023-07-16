@@ -1,5 +1,5 @@
-
-name: Linux Build
+# Test PySceneDetect on Linux/OSX/Windows and generate Python distribution (sdist/wheel).
+name: Test and Build Package
 
 on:
   pull_request:
@@ -20,8 +20,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-20.04, ubuntu-latest]
-        # TODO(#292): Add a Python 3.11 builder once binary wheels of PyAV are available.
+        os: [macos-latest, ubuntu-20.04, ubuntu-latest, windows-latest]
         python-version: ["3.7", "3.8", "3.9", "3.10"]
 
     steps:
@@ -34,23 +33,16 @@ jobs:
           cache: 'pip'
 
       - name: Install Dependencies
-        # TODO: `opencv-python-headless` is pinned for the xenial build. Unpin `opencv-python-headless`
-        # when https://github.com/opencv/opencv/issues/23090 is resolved.
         # TODO: `setuptools` is pinned for the Python 3.7 builder and can be unpinned when removed.
         run: |
           python -m pip install --upgrade pip build wheel virtualenv setuptools==62.3.4
-          pip install av==9.2 opencv-python-headless==4.6.0.66 --only-binary :all:
+          pip install av==9.2 opencv-python-headless --only-binary :all:
           pip install -r requirements_headless.txt
 
       - name: Checkout test resources
         run: |
           git fetch --depth=1 https://github.com/Breakthrough/PySceneDetect.git refs/heads/resources:refs/remotes/origin/resources
           git checkout refs/remotes/origin/resources -- tests/resources/
-
-      - name: Build Package
-        run: |
-          python -m build
-          echo "scenedetect_version=`python -c \"import scenedetect; print(scenedetect.__version__[1:].replace('-', '.'))\"`" >> "$GITHUB_ENV"
 
       - name: Unit Tests
         run: |
@@ -64,7 +56,15 @@ jobs:
           python -m scenedetect -i tests/resources/testvideo.mp4 -b pyav detect-content time -e 2s
           python -m pip uninstall -y scenedetect
 
-      - name: Smoke Test (Source Dist)
+      # TODO: Make the version extraction work on powershell so the package smoke tests also run on Windows.
+      - name: Build Package
+        if: ${{ matrix.os != 'windows-latest' }}
+        run: |
+          python -m build
+          echo "scenedetect_version=`python -c \"import scenedetect; print(scenedetect.__version__[1:].replace('-', '.'))\"`" >> "$GITHUB_ENV"
+
+      - name: Smoke Test Package (Source Dist)
+        if: ${{ matrix.os != 'windows-latest' }}
         run: |
           python -m pip install dist/scenedetect-${{ env.scenedetect_version }}.tar.gz
           scenedetect version
@@ -72,10 +72,20 @@ jobs:
           scenedetect -i tests/resources/testvideo.mp4 -b pyav detect-content time -e 2s
           python -m pip uninstall -y scenedetect
 
-      - name: Smoke Test (Wheel)
+      - name: Smoke Test Package (Wheel)
+        if: ${{ matrix.os != 'windows-latest' }}
         run: |
           python -m pip install dist/scenedetect-${{ env.scenedetect_version }}-py3-none-any.whl
           scenedetect version
           scenedetect -i tests/resources/testvideo.mp4 -b opencv detect-content time -e 2s
           scenedetect -i tests/resources/testvideo.mp4 -b pyav detect-content time -e 2s
           python -m pip uninstall -y scenedetect
+
+      - name: Upload Package
+        if: ${{ matrix.python-version == '3.11' && matrix.os == 'ubuntu-latest' }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: scenedetect-dist
+          path: |
+            dist/*.tar.gz
+            dist/*.zip
