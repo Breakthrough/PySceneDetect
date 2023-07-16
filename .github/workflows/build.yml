@@ -1,5 +1,5 @@
 # Test PySceneDetect on Linux/OSX/Windows and generate Python distribution (sdist/wheel).
-name: Test and Build Package
+name: Python Distribution
 
 on:
   pull_request:

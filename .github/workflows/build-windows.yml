@@ -5,7 +5,7 @@
 
 # **TODO**: Skip running unit tests below and instead only run this job if `build-windows.yml` passes.
 
-name: Windows Build (Portable EXE)
+name: Windows Distribution
 
 on:
   pull_request:

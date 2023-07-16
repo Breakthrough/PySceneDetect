@@ -14,7 +14,7 @@ on:
         type: string
 
 jobs:
-  build:
+  update_docs:
     runs-on: ubuntu-latest
 
     steps:
