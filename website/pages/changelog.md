@@ -24,7 +24,6 @@ Includes new [`load-scenes` command](https://www.scenedetect.com/docs/0.6.2/cli/
  - [general] Add `-h`/`--help` options globally and for each command
  - [general] Remove `all` option from `scenedetect help` command (can now call `scenedetect help` for full reference)
 
-
 **General:**
 
  - [feature] Add ability to specify method (floor/ceiling) when creating [`ThresholdDetector`](https://www.scenedetect.com/docs/0.6.2/api/detectors.html#scenedetect.detectors.threshold_detector.ThresholdDetector), allows fade to white detection [#143](https://github.com/Breakthrough/PySceneDetect/issues/143)
@@ -41,6 +40,13 @@ Includes new [`load-scenes` command](https://www.scenedetect.com/docs/0.6.2/cli/
    - `compute_frame_average` function in `scenedetect.detectors.threshold_detector`
    - `scenedetect.cli` and `scenedetect.thirdparty` modules
  - [api] Remove `compute_downscale_factor` in `scenedetect.video_stream` (use `scenedetect.scene_manager.compute_downscale_factor` instead)
+
+#### Project Updates
+
+ - Website and documentation is now hosted on Github Pages, documentation can be found at [scenedetect.com/docs](https://www.scenedetect.com/docs)
+ - Windows and Linux builds are now done on Github Actions, add OSX builds as well
+ - Build matrix has been updated to support Python 3.7 through 3.11 for all operating systems for Python distributions
+ - Windows portable builds have been moved to Github Actions, signed builds/installer is still done on Appveyor
 
 ### 0.6.1 (November 28, 2022)
 

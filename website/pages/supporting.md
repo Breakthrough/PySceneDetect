@@ -8,9 +8,8 @@ This page is dedicated to the various people, tools, technologies, and companies
 
 The development of PySceneDetect is supported by the following tools, technologies, and companies:
 
- - [Github](https://github.com/) - Source code hosting, review, and linting
- - [Travis.CI](https://www.travis-ci.com/) - Linux builds and testing
- - [AppVeyor](https://www.appveyor.com/) - Windows builds and testing
+ - [Github](https://github.com/) - Git and website hosting, code review, issue tracking, Linux/Windows/OSX builds
+ - [AppVeyor](https://www.appveyor.com/) - Windows builds (portable + MSI)
  - [AdvancedInstaller](https://www.advancedinstaller.com/) - MSI installer
  - [SignPath](https://signpath.io/) - Code signing for Windows builds
 
