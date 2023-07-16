@@ -9,5 +9,6 @@ av==9.2.0
 click
 numpy
 opencv-python-headless==4.5.1.48
+pyinstaller
 pytest
 tqdm
