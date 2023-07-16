@@ -102,10 +102,6 @@ Remember to supply the `list-scenes` command, after all main program options, to
 
 The optimal threshold can be determined by generating a stats file (`-s`), opening it with a spreadsheet editor (e.g. Excel), and examining the `content_val` column.  This value should be very small between similar frames, and grow large when a big change in content is noticed (look at the values near frame numbers/times where you know a scene change occurs).  The threshold value should be set so that most scenes fall below the threshold value, and scenes where changes occur should *exceed* the threshold value (thus triggering a scene change).
 
-You can supply the same stats file in subsequent calls to `scenedetect` with different threshold values to speed the processing time up significantly when experimenting with different values on the **same** video (or set of videos).  You *can* use multiple detectors with the same stats file, so long as you supply the *exact* same `-i` / `--input` video file(s) each time.
-
-*Remember*: once a stats file is created, it can only be used with the **same** input video.  If you want to process a different input video (or set of videos), change the name of the stats file supplied to `-s` / `--stats`, or delete the existing stats file on disk.
-
 
 ### Threshold Detection
 
@@ -116,19 +112,17 @@ scenedetect -i my_video.mp4 -s my_video.stats.mp4 detect-threshold
 ```
 
 ```rst
-scenedetect -i my_video.mp4 -s my_video.stats.mp4 detect-threshold -t 12 -p 95
+scenedetect -i my_video.mp4 -s my_video.stats.mp4 detect-threshold -t 20
 ```
 
-For most videos, the minimum percentage (`-p` / `--min-percent`) should always be at *least* 90% (`-p 90`, the default value is `95`).  Also, using values for threshold less than `8` may cause problems with some videos, especially those encoded at lower bitrates or with limited dynamic range.
+Using values for threshold less than `8` may cause problems with some videos, especially those encoded at lower bitrates or with limited dynamic range.
 
-As with `detect-content`, the optimal threshold can be determined by generating a statsfile (`-s`), opening it with a spreadsheet editor (e.g. Excel), and examining the `delta_rgb` column.  These values represent the average intensity of the pixels for that particular frame (taken by averaging the R, G, and B values over the whole frame).  The threshold value should be set so that the average intensity of most frames in content scenes lie above the threshold value, and scenes where scene changes/breaks occur should fall *under* the threshold value (thus triggering a scene change).
+The optimal threshold can be determined by generating a statsfile (`-s`), opening it with a spreadsheet editor (e.g. Excel), and examining the `delta_rgb` column.  These values represent the average intensity of the pixels for that particular frame (taken by averaging the R, G, and B values over the whole frame).  The threshold value should be set so that the average intensity of most frames in content scenes lie above the threshold value, and scenes where scene changes/breaks occur should fall *under* the threshold value (thus triggering a scene change).
 
 
 ### Adaptive Detection
 
 The `detect-adaptive` mode compares each frame's score as calculated by `detect-content` with its neighbors. This score is what forms the `adaptive_ratio` metric in the statsfile. You can also configure the amount of neighboring frames via the `frame-window` option, as well as the minimum change in `content_val` score using `min-content-val`.
-
-
 
 
 ## Tweaking Detection Parameters
@@ -143,7 +137,7 @@ scenedetect --input goldeneye.mp4 --stats goldeneye.stats.csv detect-adaptive
 
 We can then plot the values of the `content_val` column:
 
-<img src="https://raw.githubusercontent.com/Breakthrough/PySceneDetect/v0.6.1/website/pages/img/goldeneye-stats.png" alt="goldeneye.mp4 statistics graph" />
+<img src="../img/goldeneye-stats.png" alt="goldeneye.mp4 statistics graph" />
 
 The peaks in values correspond to the scene breaks in the input video. In some cases the threshold may need to be raised or lowered accordingly.
 

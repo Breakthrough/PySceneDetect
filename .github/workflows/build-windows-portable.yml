@@ -1,0 +1,78 @@
+# Build Portable Windows EXE (x64) Distribution for PySceneDetect
+
+# **TODO**: Create a follow-up workflow that tests the produced portable archive functions correctly on
+# a system without any dependencies.
+
+# **TODO**: Skip running unit tests below and instead only run this job if `build-windows.yml` passes.
+
+name: Windows Build (Portable EXE)
+
+on:
+  pull_request:
+    paths-ignore:
+      - '**.md'
+      - '**.rst'
+      - docs/**
+      - website/**
+  push:
+    paths-ignore:
+      - '**.md'
+      - '**.rst'
+      - docs/**
+      - website/**
+
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest]
+        python-version: ["3.9"]
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip build wheel virtualenv setuptools
+          pip install av==9.2 opencv-python-headless==4.5.1.48 --only-binary :all:
+          pip install -r dist/requirements_windows.txt
+
+      - name: Checkout test and build resources
+        run: |
+          git fetch --depth=1 https://github.com/Breakthrough/PySceneDetect.git refs/heads/resources:refs/remotes/origin/resources
+          git checkout refs/remotes/origin/resources -- tests/resources/
+          git fetch --depth=1 https://github.com/Breakthrough/PySceneDetect.git refs/heads/build-windows:refs/remotes/origin/build-windows
+          git checkout refs/remotes/origin/build-windows -- dist/
+          7z e dist/windows_thirdparty.7z
+
+      - name: Unit Tests
+        run: |
+          python -m pytest tests/
+
+      - name: Build EXE
+        run: |
+          pyinstaller dist/scenedetect.spec
+
+      - name: Assemble Portable EXE
+        run: |
+          python dist/cleanup_dependencies.py
+          COPY ffmpeg.exe dist/scenedetect
+          COPY mkvmerge.exe dist/scenedetect
+
+      - name: Test Portable EXE
+        run: |
+          ./dist/scenedetect/scenedetect -i tests/resources/goldeneye.mp4 time -e 2s
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: PySceneDetect-win64_portable
+          path: dist/scenedetect
