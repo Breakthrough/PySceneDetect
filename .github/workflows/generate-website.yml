@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  update_site:
     runs-on: ubuntu-latest
 
     steps:

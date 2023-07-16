@@ -4,7 +4,7 @@
 Video Scene Cut Detection and Analysis Tool
 ----------------------------------------------------------
 
-[![Build Status](https://img.shields.io/github/actions/workflow/status/Breakthrough/PySceneDetect/build-linux.yml)](https://github.com/Breakthrough/PySceneDetect/actions)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/Breakthrough/PySceneDetect/build.yml)](https://github.com/Breakthrough/PySceneDetect/actions)
 [![PyPI Status](https://img.shields.io/pypi/status/scenedetect.svg)](https://pypi.python.org/pypi/scenedetect/)
 [![PyPI Version](https://img.shields.io/pypi/v/scenedetect?color=blue)](https://pypi.python.org/pypi/scenedetect/)
 [![PyPI License](https://img.shields.io/pypi/l/scenedetect.svg)](https://scenedetect.com/copyright/)
