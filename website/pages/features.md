@@ -1,5 +1,5 @@
 
-## Overview of Features
+## Overview
 
 <div class="warning">
 <h3><span class="fa fa-eye wy-text-neutral"></span>&nbsp; Content-Aware Scene Detection</h3>
@@ -25,7 +25,7 @@
 ------------------------------------------------------------------------
 
 
-## Features in Current Release
+## Features
 
  - exports list of scenes to .CSV file and terminal (both timecodes and frame numbers) with `list-scenes` command
  - exports timecodes in standard format (HH:MM:SS.nnn), comma-separated for easy copy-and-paste into external tools and analysis with spreadsheet software
@@ -35,10 +35,10 @@
  - split the input video automatically if `ffmpeg` or `mkvmerge` is available via the `split-video` command
 
 
-### Scene Detection Methods
+### Detection Methods
 
  - **threshold scene detection** (`detect-threshold`): analyzes video for changes in average frame intensity/brightness
- - **content-aware scene detection** (`detect-content`): based on changes between frames in the HSV color space
+ - **content-aware scene detection** (`detect-content`): based on changes between frames in the HSV color space to find fast cuts
  - **adaptive content scene detection** (`detect-adaptive`): based on `detect-content`, handles fast camera movement better by comparing neighboring frames in a rolling window
 
 
@@ -50,18 +50,14 @@
 Future version roadmaps are now [tracked as milestones (link)](https://github.com/Breakthrough/PySceneDetect/milestones).  Specific issues/features that are queued up for the very next release will have [the `backlog` tag](https://github.com/Breakthrough/PySceneDetect/issues?q=is%3Aissue+is%3Aopen+label%3A%22status%3A+backlog%22), and issues/features being worked on will have [the `status: in progress` tag](https://github.com/Breakthrough/PySceneDetect/issues?q=is%3Aissue+is%3Aopen+label%3A%22status%3A+in+progress%22).  Also note that bug reports as well as additional feature requests can be submitted via [the issue tracker](https://github.com/Breakthrough/PySceneDetect/issues); read [the Bug Reports and Contributing page](contributing.md) for details.
 
 
-### Planned Features for Future Releases
+### Planned Features
 
-The following features are under consideration for future releases of PySceneDetect.  Feel free to jump in and help out!
+The following features are under consideration for future releases. Any contributions towards completing these features are most welcome (pull requests may be accpeted via Github).
 
- - automatic threshold detection for the current scene detection methods (can simply be an ouptut message indicating "Predicted Best Threshold: X")
- - optional suppression of short-length flashes/bursts of light [ [#35] ](https://github.com/Breakthrough/PySceneDetect/issues/35)
- - colour histogram-based scene detection algorithm in the HSV/HSL colourspace [ [#53] ](https://github.com/Breakthrough/PySceneDetect/issues/53)
- - [perceptual hash](https://en.wikipedia.org/wiki/Perceptual_hashing) based scene detection
- - improve robustness of content-aware detection by combining with edge detection (similar to MATLAB-based scene change detector)
+ - graphical interface (GUI)
+ - automatic threshold detection for the current scene detection methods (or just ouptut message indicating "Predicted Threshold: X")
+ - suppression of short-length flashes/bursts of light [#35](https://github.com/Breakthrough/PySceneDetect/issues/35)
+ - histogram-based detection algorithm in HSV/HSL color space [#53](https://github.com/Breakthrough/PySceneDetect/issues/53)
+ - [perceptual hash](https://en.wikipedia.org/wiki/Perceptual_hashing) based scene detection ([prototype by @wjs018 in PR#290](https://github.com/Breakthrough/PySceneDetect/pull/290))
  - adaptive bias for fade in/out interpolation
- - multithreaded implementation of detection algorithms for improved performance
- - GUI for easier previewing and threshold setting (will be GTK+ 3 based via PyGObject)
- - export scenes in chapter/XML format
- - additional timecode formats
-
+ - export scenes in chapter/XML format [#323](https://github.com/Breakthrough/PySceneDetect/issues/323)
