@@ -135,7 +135,7 @@
           <div role="main">
             <div class="section">
               
-                <h2 id="overview-of-features">Overview of Features</h2>
+                <h2 id="overview">Overview</h2>
 <div class="warning">
 <h3><span class="fa fa-eye wy-text-neutral"></span>&nbsp; Content-Aware Scene Detection</h3>
 &nbsp;<span class="fa fa-info-circle wy-text-info"></span>&nbsp;&nbsp; Detects breaks in-between <i>content</i>, not only when the video fades to black (although a threshold mode is available as well for those cases).
@@ -157,7 +157,7 @@
 </div>
 
 <hr />
-<h2 id="features-in-current-release">Features in Current Release</h2>
+<h2 id="features">Features</h2>
 <ul>
 <li>exports list of scenes to .CSV file and terminal (both timecodes and frame numbers) with <code>list-scenes</code> command</li>
 <li>exports timecodes in standard format (HH:MM:SS.nnn), comma-separated for easy copy-and-paste into external tools and analysis with spreadsheet software</li>
@@ -166,28 +166,25 @@
 <li>save an image of the first and last frame of each detected scene via the <code>save-images</code> command</li>
 <li>split the input video automatically if <code>ffmpeg</code> or <code>mkvmerge</code> is available via the <code>split-video</code> command</li>
 </ul>
-<h3 id="scene-detection-methods">Scene Detection Methods</h3>
+<h3 id="detection-methods">Detection Methods</h3>
 <ul>
 <li><strong>threshold scene detection</strong> (<code>detect-threshold</code>): analyzes video for changes in average frame intensity/brightness</li>
-<li><strong>content-aware scene detection</strong> (<code>detect-content</code>): based on changes between frames in the HSV color space</li>
+<li><strong>content-aware scene detection</strong> (<code>detect-content</code>): based on changes between frames in the HSV color space to find fast cuts</li>
 <li><strong>adaptive content scene detection</strong> (<code>detect-adaptive</code>): based on <code>detect-content</code>, handles fast camera movement better by comparing neighboring frames in a rolling window</li>
 </ul>
 <hr />
 <h2 id="version-roadmap">Version Roadmap</h2>
 <p>Future version roadmaps are now <a href="https://github.com/Breakthrough/PySceneDetect/milestones">tracked as milestones (link)</a>.  Specific issues/features that are queued up for the very next release will have <a href="https://github.com/Breakthrough/PySceneDetect/issues?q=is%3Aissue+is%3Aopen+label%3A%22status%3A+backlog%22">the <code>backlog</code> tag</a>, and issues/features being worked on will have <a href="https://github.com/Breakthrough/PySceneDetect/issues?q=is%3Aissue+is%3Aopen+label%3A%22status%3A+in+progress%22">the <code>status: in progress</code> tag</a>.  Also note that bug reports as well as additional feature requests can be submitted via <a href="https://github.com/Breakthrough/PySceneDetect/issues">the issue tracker</a>; read <a href="../contributing/">the Bug Reports and Contributing page</a> for details.</p>
-<h3 id="planned-features-for-future-releases">Planned Features for Future Releases</h3>
-<p>The following features are under consideration for future releases of PySceneDetect.  Feel free to jump in and help out!</p>
+<h3 id="planned-features">Planned Features</h3>
+<p>The following features are under consideration for future releases. Any contributions towards completing these features are most welcome (pull requests may be accpeted via Github).</p>
 <ul>
-<li>automatic threshold detection for the current scene detection methods (can simply be an ouptut message indicating "Predicted Best Threshold: X")</li>
-<li>optional suppression of short-length flashes/bursts of light <a href="https://github.com/Breakthrough/PySceneDetect/issues/35"> [#35] </a></li>
-<li>colour histogram-based scene detection algorithm in the HSV/HSL colourspace <a href="https://github.com/Breakthrough/PySceneDetect/issues/53"> [#53] </a></li>
-<li><a href="https://en.wikipedia.org/wiki/Perceptual_hashing">perceptual hash</a> based scene detection</li>
-<li>improve robustness of content-aware detection by combining with edge detection (similar to MATLAB-based scene change detector)</li>
+<li>graphical interface (GUI)</li>
+<li>automatic threshold detection for the current scene detection methods (or just ouptut message indicating "Predicted Threshold: X")</li>
+<li>suppression of short-length flashes/bursts of light <a href="https://github.com/Breakthrough/PySceneDetect/issues/35">#35</a></li>
+<li>histogram-based detection algorithm in HSV/HSL color space <a href="https://github.com/Breakthrough/PySceneDetect/issues/53">#53</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Perceptual_hashing">perceptual hash</a> based scene detection (<a href="https://github.com/Breakthrough/PySceneDetect/pull/290">prototype by @wjs018 in PR#290</a>)</li>
 <li>adaptive bias for fade in/out interpolation</li>
-<li>multithreaded implementation of detection algorithms for improved performance</li>
-<li>GUI for easier previewing and threshold setting (will be GTK+ 3 based via PyGObject)</li>
-<li>export scenes in chapter/XML format</li>
-<li>additional timecode formats</li>
+<li>export scenes in chapter/XML format <a href="https://github.com/Breakthrough/PySceneDetect/issues/323">#323</a></li>
 </ul>
               
             </div>
