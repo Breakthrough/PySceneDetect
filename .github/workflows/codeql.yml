@@ -1,3 +1,4 @@
+# CodeQL for PySceneDetect
 name: "CodeQL"
 
 on:

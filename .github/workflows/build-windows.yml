@@ -1,10 +1,4 @@
 # Build Portable Windows EXE (x64) Distribution for PySceneDetect
-
-# **TODO**: Create a follow-up workflow that tests the produced portable archive functions correctly on
-# a system without any dependencies.
-
-# **TODO**: Skip running unit tests below and instead only run this job if `build-windows.yml` passes.
-
 name: Windows Distribution
 
 on:
@@ -20,7 +14,6 @@ on:
       - '**.rst'
       - docs/**
       - website/**
-
 
 jobs:
   build:
@@ -68,7 +61,7 @@ jobs:
 
       - name: Test Portable EXE
         run: |
-          ./dist/scenedetect/scenedetect -i tests/resources/goldeneye.mp4 time -e 2s
+          ./dist/scenedetect/scenedetect -i tests/resources/goldeneye.mp4 detect-content time -e 2s
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v3
