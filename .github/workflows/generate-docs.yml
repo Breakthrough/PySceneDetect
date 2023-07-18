@@ -30,15 +30,19 @@ jobs:
           python -m pip install --upgrade pip build wheel virtualenv
           pip install -r docs/requirements.txt
 
-      - name: Generate Docs
+      - name: Set Destination (Latest)
+        if: ${{ github.ref_name == 'main' }}
         run: |
           echo "scenedetect_docs_dest=latest" >> "$GITHUB_ENV"
-          sphinx-build -b html docs build
 
-      - name: Set Destination
+      - name: Set Destination (Releases)
         if: ${{ github.ref_name != 'main' }}
         run: |
           echo "scenedetect_docs_dest=${{ github.ref_name }}" | cut -b 10- >> "$GITHUB_ENV"
+
+      - name: Generate Docs
+        run: |
+          sphinx-build -b html docs build
 
       - name: Add/Update Docs
         run: |
