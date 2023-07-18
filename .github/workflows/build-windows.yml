@@ -1,10 +1,4 @@
 # Build Portable Windows EXE (x64) Distribution for PySceneDetect
-
-# **TODO**: Create a follow-up workflow that tests the produced portable archive functions correctly on
-# a system without any dependencies.
-
-# **TODO**: Skip running unit tests below and instead only run this job if `build-windows.yml` passes.
-
 name: Windows Distribution
 
 on:
@@ -21,13 +15,11 @@ on:
       - docs/**
       - website/**
 
-
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
+    runs-on: windows-latest
     strategy:
       matrix:
-        os: [windows-latest]
         python-version: ["3.9"]
 
     steps:
@@ -69,10 +61,31 @@ jobs:
 
       - name: Test Portable EXE
         run: |
-          ./dist/scenedetect/scenedetect -i tests/resources/goldeneye.mp4 time -e 2s
+          ./dist/scenedetect/scenedetect -i tests/resources/goldeneye.mp4 detect-content time -e 2s
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v3
         with:
           name: PySceneDetect-win64_portable
           path: dist/scenedetect
+
+  test:
+    runs-on: windows-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: resources
+
+      - uses: actions/download-artifact@v3
+        with:
+          name: PySceneDetect-win64_portable
+          path: build
+
+      - name: Test
+        run: |
+          ./build/scenedetect version
+          ./build/scenedetect -i tests/resources/goldeneye.mp4 -b opencv detect-content time --end 00:10:00
+          ./build/scenedetect -i tests/resources/goldeneye.mp4 -b pyav detect-content time --end 00:10:00
+          ./build/scenedetect -i tests/resources/goldeneye.mp4 detect-content time --end 00:10:00 split-video
+          ./build/scenedetect -i tests/resources/goldeneye.mp4 detect-content time --end 00:10:00 split-video -m

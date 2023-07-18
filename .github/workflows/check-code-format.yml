@@ -1,4 +1,4 @@
-
+# Use YAPF to format PySceneDetect.
 name: Check Code Format
 
 on:
