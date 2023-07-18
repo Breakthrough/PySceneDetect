@@ -3,7 +3,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>PySceneDetect Manual &#8212; PySceneDetect v0.6.1 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
@@ -33,7 +33,7 @@
             
   <section id="pyscenedetect-manual">
 <h1>PySceneDetect Manual<a class="headerlink" href="#pyscenedetect-manual" title="Permalink to this heading">¶</a></h1>
-<p>This manual refers to both the PySceneDetect command-line interface (the <cite>scenedetect</cite> command) and the PySceneDetect Python API (the <cite>scenedetect</cite> module).  The latest release of PySceneDetect can be installed via <cite>pip install scenedetect[opencv]</cite>, or Windows builds and source releases can be found at <a class="reference external" href="http://scenedetect.com/">scenedetect.com</a>. Note that PySceneDetect requires <cite>ffmpeg</cite> or <cite>mkvmerge</cite> for video splitting support.</p>
+<p>This manual refers to both the PySceneDetect command-line interface (the <cite>scenedetect</cite> command) and the PySceneDetect Python API (the <cite>scenedetect</cite> module).  The latest release of PySceneDetect can be installed via <cite>pip install scenedetect[opencv]</cite>, or Windows builds and source releases can be found at <a class="reference external" href="http://www.scenedetect.com/download/">scenedetect.com/download</a>. Note that PySceneDetect requires <cite>ffmpeg</cite> or <cite>mkvmerge</cite> for video splitting support.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>If you see any errors in this manual, or have any recommendations, feel free to raise an issue on <a class="reference external" href="https://github.com/Breakthrough/PySceneDetect/issues">the PySceneDetect issue tracker</a>.</p>
@@ -52,6 +52,12 @@
 <li class="toctree-l2"><a class="reference internal" href="cli/global_options.html#global-options">Global Options</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="cli/detectors.html">Detectors</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="cli/detectors.html#detect-content"><code class="docutils literal notranslate"><span class="pre">detect-content</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="cli/detectors.html#detect-threshold"><code class="docutils literal notranslate"><span class="pre">detect-threshold</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="cli/detectors.html#detect-adaptive"><code class="docutils literal notranslate"><span class="pre">detect-adaptive</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="cli/commands.html">Commands</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="cli/commands.html#help-version-and-about"><code class="docutils literal notranslate"><span class="pre">help</span></code>, <code class="docutils literal notranslate"><span class="pre">version</span></code>, and <code class="docutils literal notranslate"><span class="pre">about</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="cli/commands.html#time"><code class="docutils literal notranslate"><span class="pre">time</span></code></a></li>
@@ -59,12 +65,6 @@
 <li class="toctree-l2"><a class="reference internal" href="cli/commands.html#save-images"><code class="docutils literal notranslate"><span class="pre">save-images</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="cli/commands.html#split-video"><code class="docutils literal notranslate"><span class="pre">split-video</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="cli/commands.html#export-html"><code class="docutils literal notranslate"><span class="pre">export-html</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="cli/detectors.html">Detectors</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="cli/detectors.html#detect-content"><code class="docutils literal notranslate"><span class="pre">detect-content</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="cli/detectors.html#detect-threshold"><code class="docutils literal notranslate"><span class="pre">detect-threshold</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="cli/detectors.html#detect-adaptive"><code class="docutils literal notranslate"><span class="pre">detect-adaptive</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="cli/config_file.html">Configuration File</a><ul>
@@ -146,10 +146,7 @@
 <li class="toctree-l3"><a class="reference internal" href="api/backends.html#scenedetect.backends.pyav.VideoStreamAv"><code class="docutils literal notranslate"><span class="pre">VideoStreamAv</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="api/backends.html#module-scenedetect.backends.moviepy">MoviePy</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="api/backends.html#scenedetect.backends.moviepy.VideoStreamMoviePy"><code class="docutils literal notranslate"><span class="pre">VideoStreamMoviePy</span></code></a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="api/backends.html#moviepy">MoviePy</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="api/video_splitter.html">Video Splitting</a><ul>
@@ -314,8 +311,8 @@
 <p class="caption" role="heading"><span class="caption-text">Command-Line Interface [CLI]:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="cli/global_options.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Application</a></li>
-<li class="toctree-l1"><a class="reference internal" href="cli/commands.html">Commands</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cli/detectors.html">Detectors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli/commands.html">Commands</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cli/config_file.html">Configuration File</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cli/backends.html">Backends</a></li>
 </ul>

@@ -3,7 +3,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>Commands &#8212; PySceneDetect v0.6.1 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
@@ -14,8 +14,8 @@
     <script src="../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Detectors" href="detectors.html" />
-    <link rel="prev" title="scenedetect 🎬 Application" href="global_options.html" />
+    <link rel="next" title="Configuration File" href="config_file.html" />
+    <link rel="prev" title="Detectors" href="detectors.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
@@ -342,12 +342,10 @@ or $SCENE_NUMBER macros. Additional macros that are
 available only with the ffmpeg backend include
 $START_TIME, $END_TIME, $START_FRAME, and
 $END_FRAME. A potential formatting pitfall is that
-macros cannot be followed by an underscore character</p>
-<blockquote>
-<div><p>in order to be replaced correctly. For example, the
-value Scene-$SCENE_NUMBER-Frame-$FRAME_NUMBER will</p>
-</div></blockquote>
-<p>properly replace both macro values. However, using
+macros cannot be followed by an underscore character
+in order to be replaced correctly. For example, the
+value Scene-$SCENE_NUMBER-Frame-$FRAME_NUMBER will
+properly replace both macro values. However, using
 Scene_$SCENE_NUMBER_Frame_$FRAME_NUMBER will not.
 Note that you may have to wrap the format in single
 quotes to avoid variable expansion. [default:
@@ -445,10 +443,10 @@ HTML table.</p>
     <ul>
         <li>
           &larr;
-          <a href="global_options.html" title="Previous document"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Application</a>
+          <a href="detectors.html" title="Previous document">Detectors</a>
         </li>
         <li>
-          <a href="detectors.html" title="Next document">Detectors</a>
+          <a href="config_file.html" title="Next document">Configuration File</a>
           &rarr;
         </li>
     </ul>
@@ -486,6 +484,7 @@ HTML table.</p>
 <p class="caption" role="heading"><span class="caption-text">Command-Line Interface [CLI]:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="global_options.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="detectors.html">Detectors</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Commands</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#help-version-and-about"><code class="docutils literal notranslate"><span class="pre">help</span></code>, <code class="docutils literal notranslate"><span class="pre">version</span></code>, and <code class="docutils literal notranslate"><span class="pre">about</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#time"><code class="docutils literal notranslate"><span class="pre">time</span></code></a></li>
@@ -495,7 +494,6 @@ HTML table.</p>
 <li class="toctree-l2"><a class="reference internal" href="#export-html"><code class="docutils literal notranslate"><span class="pre">export-html</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="detectors.html">Detectors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="config_file.html">Configuration File</a></li>
 <li class="toctree-l1"><a class="reference internal" href="backends.html">Backends</a></li>
 </ul>
@@ -518,8 +516,8 @@ HTML table.</p>
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="global_options.html" title="previous chapter"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Application</a></li>
-      <li>Next: <a href="detectors.html" title="next chapter">Detectors</a></li>
+      <li>Previous: <a href="detectors.html" title="previous chapter">Detectors</a></li>
+      <li>Next: <a href="config_file.html" title="next chapter">Configuration File</a></li>
   </ul></li>
 </ul>
 </div>
