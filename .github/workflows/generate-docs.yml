@@ -1,20 +1,19 @@
-
+# Generate PySceneDetect documentation. Inputs are currently <commit_ref> <output_dir>, where
+# <commit_ref> is what commit/branch/tag to use for the build, and <output_dir> is the same as
+# scenedetect.com/docs/<output_dir>
 name: Generate Documentation
 
 # TODO: Run action when the docs change for a given release branch automatically (github.ref_name).
 # Move docs for releases to folders matching their branch names (e.g. docs/releases/0.6.1/)
 
 on:
+  push:
+    branches:
+      - main
+      - 'releases/**'
+    paths:
+      - 'docs/**'
   workflow_dispatch:
-    inputs:
-      source_ref:
-        description: 'Branch/commit/tag to checkout.'
-        required: true
-        type: string
-      dest_dir:
-        description: 'Destination directory to produce output in `docs/` folder.'
-        required: true
-        type: string
 
 jobs:
   update_docs:
@@ -22,8 +21,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-        with:
-          ref: ${{ inputs.source_ref }}
 
       - name: Set up Python 3.10
         uses: actions/setup-python@v4
@@ -36,6 +33,16 @@ jobs:
           python -m pip install --upgrade pip build wheel virtualenv
           pip install -r docs/requirements.txt
 
+      - name: Set Destination (Latest)
+        if: ${{ github.ref_name == 'main' }}
+        run: |
+          echo "scenedetect_docs_dest=latest" >> "$GITHUB_ENV"
+
+      - name: Set Destination (Releases)
+        if: ${{ github.ref_name != 'main' }}
+        run: |
+          echo "scenedetect_docs_dest=$(echo ${{ github.ref_name }} | cut -b 10-)" >> "$GITHUB_ENV"
+
       - name: Generate Docs
         run: |
           sphinx-build -b html docs build
@@ -44,12 +51,12 @@ jobs:
         run: |
           git fetch origin gh-pages
           git checkout gh-pages
-          git rm "docs/${{ inputs.dest_dir }}" -r -f --ignore-unmatch
+          git rm "docs/${{ env.scenedetect_docs_dest }}" -r -f --ignore-unmatch
           git add build/
-          git mv build "docs/${{ inputs.dest_dir }}"
+          git mv build "docs/${{ env.scenedetect_docs_dest }}"
           git config --global user.name github-actions
           git config --global user.email github-actions@github.com
           git commit -a -m "[docs] @${{ github.triggering_actor }}: Generate Documentation" \
-            -m "Source: ${{ inputs.source_ref }} (${{ github.sha }})" \
-            -m "Destination: ${{ inputs.dest_dir }}"
+            -m "Source: ${{ github.ref_name }} (${{ github.sha }})" \
+            -m "Destination: ${{ env.scenedetect_docs_dest }}"
           git push
