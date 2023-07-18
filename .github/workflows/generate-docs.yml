@@ -38,7 +38,7 @@ jobs:
       - name: Set Destination (Releases)
         if: ${{ github.ref_name != 'main' }}
         run: |
-          echo "scenedetect_docs_dest=${{ github.ref_name }}" | cut -b 10- >> "$GITHUB_ENV"
+          echo "scenedetect_docs_dest=$(echo ${{ github.ref_name }} | cut -b 10-)" >> "$GITHUB_ENV"
 
       - name: Generate Docs
         run: |
