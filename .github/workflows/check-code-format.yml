@@ -3,17 +3,13 @@ name: Check Code Format
 
 on:
   pull_request:
-    paths-ignore:
-      - '**.md'
-      - '**.rst'
-      - docs/**
-      - website/**
+    paths:
+      - scenedetect/**
+      - tests/**
   push:
-    paths-ignore:
-      - '**.md'
-      - '**.rst'
-      - docs/**
-      - website/**
+    paths:
+      - scenedetect/**
+      - tests/**
 
 jobs:
   check_format:

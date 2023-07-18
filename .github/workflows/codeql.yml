@@ -7,21 +7,17 @@ on:
      - main
      - develop
      - releases/**
-    paths-ignore:
-      - '**.md'
-      - '**.rst'
-      - docs/**
-      - website/**
+    paths:
+      - scenedetect/**
+      - tests/**
   pull_request:
     branches:
      - main
      - develop
      - releases/*
-    paths-ignore:
-      - '**.md'
-      - '**.rst'
-      - docs/**
-      - website/**
+    paths:
+      - scenedetect/**
+      - tests/**
   schedule:
     - cron: "20 7 * * 4"
 
