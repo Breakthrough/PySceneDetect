@@ -24,10 +24,9 @@ on:
 
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
+    runs-on: windows-latest
     strategy:
       matrix:
-        os: [windows-latest]
         python-version: ["3.9"]
 
     steps:
@@ -76,3 +75,24 @@ jobs:
         with:
           name: PySceneDetect-win64_portable
           path: dist/scenedetect
+
+  test:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: resources
+
+      - uses: actions/download-artifact@v3
+        with:
+          name: PySceneDetect-win64_portable
+          path: build
+
+      - name: Test
+        run: |
+          ./build/scenedetect version
+          ./build/scenedetect -i tests/resources/goldeneye.mp4 -b opencv detect-content time --end 00:10:00
+          ./build/scenedetect -i tests/resources/goldeneye.mp4 -b pyav detect-content time --end 00:10:00
+          ./build/scenedetect -i tests/resources/goldeneye.mp4 detect-content time --end 00:10:00 split-video
+          ./build/scenedetect -i tests/resources/goldeneye.mp4 detect-content time --end 00:10:00 split-video -m
