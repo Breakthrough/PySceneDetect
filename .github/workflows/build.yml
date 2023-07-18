@@ -3,17 +3,15 @@ name: Python Distribution
 
 on:
   pull_request:
-    paths-ignore:
-      - '**.md'
-      - '**.rst'
-      - docs/**
-      - website/**
+    paths:
+      - dist/**
+      - scenedetect/**
+      - tests/**
   push:
-    paths-ignore:
-      - '**.md'
-      - '**.rst'
-      - docs/**
-      - website/**
+    paths:
+      - dist/**
+      - scenedetect/**
+      - tests/**
 
 jobs:
   build:
