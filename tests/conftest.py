@@ -25,6 +25,8 @@ following from the root of the repo:
 Note that currently these tests create some temporary files which are not yet cleaned up.
 """
 
+# TODO: Properly cleanup temporary files.
+
 from typing import AnyStr
 import logging
 import os

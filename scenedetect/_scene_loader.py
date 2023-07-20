@@ -64,11 +64,14 @@ class SceneLoader(SceneDetector):
         self._last_scene_row = None
         self._scene_start = None
 
-        self._get_next_scene(self.file_reader, self.framerate)
         # `SceneDetector` works on cuts, so we have to skip the first scene and use the first frame
         # of the next scene as the cut point. This can be fixed if we used `SparseSceneDetector`
         # but this part of the API is being reworked and hasn't been used by any detectors yet.
-        self._get_next_scene(self.file_reader, self.framerate)
+        self._cut_list = sorted(
+            FrameTimecode(row[self._col_idx], fps=self.framerate).frame_num - 1
+            for row in self.file_reader)
+        if self._cut_list:
+            self._cut_list = self._cut_list[1:]
 
     def _open_csv(self, csv_file, start_col_name):
         """Opens the specified csv file for reading.
@@ -86,26 +89,6 @@ class SceneLoader(SceneDetector):
             csv_headers = next(file_reader)
         return (file_reader, csv_headers)
 
-    def _get_next_scene(self, file_reader, framerate=None):
-        """Reads the next scene information from the input csv file.
-
-        Arguments:
-            file_reader:    The csv.reader object for the detector
-            framerate:      If timecodes are used as an input, a framerate is required for
-                timecode <-> frame number conversions
-        """
-        try:
-            self._last_scene_row = next(file_reader)
-        except StopIteration:
-            # We have reached the end of the csv file, do not modify scene list
-            pass
-
-        if framerate:
-            self._scene_start = FrameTimecode(
-                self._last_scene_row[self._col_idx], fps=self.framerate).frame_num
-        else:
-            self._scene_start = int(self._last_scene_row[self._col_idx]) - 1
-
     def process_frame(self, frame_num: int, frame_img: numpy.ndarray) -> List[int]:
         """Simply reads cut data from a given csv file. Video is not analyzed. Therefore this
         detector is incompatible with other detectors or a StatsManager.
@@ -119,19 +102,9 @@ class SceneLoader(SceneDetector):
         Returns:
             cut_list:   List of cuts (as provided by input csv file)
         """
-        cut_list = []
-
-        # If frame_num is earlier than the first input scene, just return empty cut
-        if frame_num < self._scene_start:
-            return cut_list
-
-        # If frame_num is at the beginning of the input scene, mark a cut and get next scene info
-        if frame_num == self._scene_start:
-            # We have hit a cut point, add it to the cut_list and get the next scene
-            cut_list.append(frame_num)
-            self._get_next_scene(self.file_reader, self.framerate)
-
-        return cut_list
+        if frame_num in self._cut_list:
+            return [frame_num]
+        return []
 
     def is_processing_required(self, frame_num):
-        return True
+        return False

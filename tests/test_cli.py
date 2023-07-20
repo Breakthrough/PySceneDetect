@@ -264,13 +264,79 @@ def test_cli_backend(backend_type: str):
 
 
 def test_cli_backend_unsupported():
-    # Ensure setting an invalid backend returns an error.
+    """Ensure setting an invalid backend returns an error."""
     assert invoke_scenedetect(
         '-i {VIDEO} -b {BACKEND} {DETECTOR}', BACKEND='unknown_backend_type') != 0
 
 
 def test_cli_load_scenes():
-    # Ensure we can load scenes both with and without the cut row.
-    assert invoke_scenedetect('-i {VIDEO} {DETECTOR} list-scenes') == 0
-    assert invoke_scenedetect('-i {VIDEO} load-scenes -i {VIDEO_NAME}-Scenes.csv') == 0
-    assert invoke_scenedetect('-i {VIDEO} {DETECTOR} list-scenes -s') == 0
+    """Ensure we can load scenes both with and without the cut row."""
+    assert invoke_scenedetect('-i {VIDEO} time {TIME} {DETECTOR} list-scenes') == 0
+    assert invoke_scenedetect('-i {VIDEO} time {TIME} load-scenes -i {VIDEO_NAME}-Scenes.csv') == 0
+    assert invoke_scenedetect('-i {VIDEO} time {TIME} {DETECTOR} list-scenes -s') == 0
+
+
+def test_cli_load_scenes_with_time_frames():
+    """Verify we can use `load-scenes` with the `time` command and get the desired output."""
+    scenes_csv = """
+Scene Number,Start Frame
+1,49
+2,91
+3,211
+"""
+    with open('test_scene_list.csv', 'w') as f:
+        f.write(scenes_csv)
+    output = subprocess.check_output(
+        SCENEDETECT_CMD.split(' ') + [
+            '-i',
+            VIDEO_PATH,
+            'load-scenes',
+            '-i',
+            'test_scene_list.csv',
+            'time',
+            '-s',
+            '2s',
+            '-e',
+            '10s',
+            'list-scenes',
+        ],
+        text=True)
+    print(output)
+    assert """
+-----------------------------------------------------------------------
+ | Scene # | Start Frame |  Start Time  |  End Frame  |   End Time   |
+-----------------------------------------------------------------------
+ |      1  |          49 | 00:00:02.002 |          90 | 00:00:03.754 |
+ |      2  |          91 | 00:00:03.754 |         210 | 00:00:08.759 |
+ |      3  |         211 | 00:00:08.759 |         240 | 00:00:10.010 |
+-----------------------------------------------------------------------
+""" in output
+    assert "00:00:03.754,00:00:08.759" in output
+
+
+def test_cli_load_scenes_round_trip():
+    """Verify we can use `load-scenes` with the `time` command and get the desired output."""
+    scenes_csv = """
+Scene Number,Start Frame
+1,49
+2,91
+3,211
+"""
+    with open('test_scene_list.csv', 'w') as f:
+        f.write(scenes_csv)
+    ground_truth = subprocess.check_output(
+        SCENEDETECT_CMD.split(' ') + [
+            '-i', VIDEO_PATH, 'detect-content', 'list-scenes', '-f', 'testout.csv', 'time', '-s',
+            '200', '-e', '400'
+        ],
+        text=True)
+    loaded_first_pass = subprocess.check_output(
+        SCENEDETECT_CMD.split(' ') + [
+            '-i', VIDEO_PATH, 'load-scenes', '-i', 'testout.csv', 'time', '-s', '200', '-e', '400',
+            'list-scenes', '-f', 'testout2.csv'
+        ],
+        text=True)
+    SPLIT_POINT = ' | Scene # | Start Frame |  Start Time  |  End Frame  |   End Time   |'
+    assert ground_truth.split(SPLIT_POINT)[1] == loaded_first_pass.split(SPLIT_POINT)[1]
+    with open('testout.csv') as first, open('testout2.csv') as second:
+        assert first.readlines() == second.readlines()
