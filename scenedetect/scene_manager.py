@@ -467,7 +467,11 @@ def save_images(scene_list: List[Tuple[FrameTimecode, FrameTimecode]],
             r if 1 + r[-1] - r[0] >= num_images else list(r) + [r[-1]] * (num_images - len(r))
                                                                                                # create range of frames in scene
             for r in (
-                range(start.get_frames(), end.get_frames())
+                range(
+                    start.get_frames(),
+                    start.get_frames() + max(
+                        1,                                                                     # guard against zero length scenes
+                        end.get_frames() - start.get_frames()))
                                                                                                # for each scene in scene list
                 for start, end in scene_list)
         ])
