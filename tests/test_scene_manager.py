@@ -274,7 +274,7 @@ def test_scene_loader(tmp_path, test_movie_clip):
         write_scene_list(csv_file, scene_list, include_cut_list=True)
     from_csv = _detect(
         video=VideoStreamCv2(test_movie_clip),
-        detector=SceneLoader(tmp_path / "scenes.csv"),
+        detector=SceneLoader(tmp_path / "scenes.csv", framerate=video.frame_rate),
         start=FrameTimecode('00:00:50', video.frame_rate),
         end=FrameTimecode('00:01:19', video.frame_rate))
     assert from_csv == scene_list
@@ -284,7 +284,7 @@ def test_scene_loader(tmp_path, test_movie_clip):
         write_scene_list(csv_file, scene_list, include_cut_list=False)
     from_csv = _detect(
         video=VideoStreamCv2(test_movie_clip),
-        detector=SceneLoader(tmp_path / "scenes-nocuts.csv"),
+        detector=SceneLoader(tmp_path / "scenes-nocuts.csv", framerate=video.frame_rate),
         start=FrameTimecode('00:00:50', video.frame_rate),
         end=FrameTimecode('00:01:19', video.frame_rate))
     assert from_csv == scene_list

@@ -20,7 +20,7 @@ This is available from the command-line as the `load-scenes` command.
 import os
 import csv
 
-from typing import List
+import typing as ty
 
 import numpy
 
@@ -33,17 +33,14 @@ class SceneLoader(SceneDetector):
     the `load-scenes` functionality. Incompatible with other detectors.
     """
 
-    def __init__(self, file=None, start_col_name="Start Frame", framerate=None):
+    def __init__(self, file: ty.TextIO, framerate: float, start_col_name: str = "Start Frame"):
         """
         Arguments:
-            file:   Path to csv file containing scene data for video
-            start_col_name:  Header for the column containing the frame or timecode where new scenes
-                should start.
-            framerate:  Framerate for the input video, used for handling timecode to frame number
-                conversions. Only used if timecodes are used as input for cut points.
+            file: Path to csv file containing scene data for video
+            framerate: Framerate used to construct `FrameTimecode` for parsing input.
+            start_col_name: Header for column containing the frame/timecode where cuts occur.
         """
         super().__init__()
-        self.framerate = framerate
 
         # Check to make specified csv file exists
         if not file:
@@ -68,7 +65,7 @@ class SceneLoader(SceneDetector):
         # of the next scene as the cut point. This can be fixed if we used `SparseSceneDetector`
         # but this part of the API is being reworked and hasn't been used by any detectors yet.
         self._cut_list = sorted(
-            FrameTimecode(row[self._col_idx], fps=self.framerate).frame_num - 1
+            FrameTimecode(row[self._col_idx], fps=framerate).frame_num - 1
             for row in self.file_reader)
         if self._cut_list:
             self._cut_list = self._cut_list[1:]
@@ -89,7 +86,7 @@ class SceneLoader(SceneDetector):
             csv_headers = next(file_reader)
         return (file_reader, csv_headers)
 
-    def process_frame(self, frame_num: int, frame_img: numpy.ndarray) -> List[int]:
+    def process_frame(self, frame_num: int, frame_img: numpy.ndarray) -> ty.List[int]:
         """Simply reads cut data from a given csv file. Video is not analyzed. Therefore this
         detector is incompatible with other detectors or a StatsManager.
 

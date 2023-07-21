@@ -427,18 +427,13 @@ class CliContext:
                 self.config.get_value("detect-threshold", "threshold", threshold),
         }
 
-    def handle_load_scenes(self, input: AnyStr, start_col_name: Optional[str],
-                           framerate: Optional[float]):
+    def handle_load_scenes(self, input: AnyStr, start_col_name: Optional[str]):
         """Handle `load-scenes` command options."""
         self._ensure_input_open()
-
         start_col_name = self.config.get_value("load-scenes", "start-col-name", start_col_name)
-
-        if framerate is None:
-            framerate = self.video_stream.frame_rate
-
         self.add_detector(
-            SceneLoader(file=input, start_col_name=start_col_name, framerate=framerate))
+            SceneLoader(
+                file=input, framerate=self.video_stream.frame_rate, start_col_name=start_col_name))
 
     def handle_export_html(
         self,
