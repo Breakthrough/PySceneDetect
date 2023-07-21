@@ -34,7 +34,10 @@ from scenedetect.video_splitter import is_ffmpeg_available, is_mkvmerge_availabl
 
 # TODO: These tests are very expensive since they spin up new Python interpreters.
 # Move most of these test cases (e.g. argument validation) to ones that interface directly
-# with the scenedetect._cli module.
+# with the scenedetect._cli module. Click also supports unit testing directly, so we should
+# probably use that instead of spinning up new subprocesses for each run of the controller.
+# That will also allow splitting up the validation of argument parsing logic from the controller
+# logic by creating a CLI context with the desired parameters.
 
 SCENEDETECT_CMD = 'python -m scenedetect'
 VIDEO_PATH = 'tests/resources/goldeneye.mp4'

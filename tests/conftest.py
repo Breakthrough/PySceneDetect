@@ -63,8 +63,13 @@ git reset
 @pytest.fixture(autouse=True)
 def no_logs_gte_error(caplog):
     """Ensure no log messages with error severity or higher were reported during test execution."""
+    # TODO: Remove exclusion for VideoManager module when removed from codebase.
+    EXCLUDED_MODULES = {'video_manager'}
     yield
-    errors = [record for record in caplog.get_records('call') if record.levelno >= logging.ERROR]
+    errors = [
+        record for record in caplog.get_records('call')
+        if record.levelno >= logging.ERROR and not record.module in EXCLUDED_MODULES
+    ]
     assert not errors, "Test failed due to presence of one or more logs with ERROR severity."
 
 
