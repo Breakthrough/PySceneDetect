@@ -99,7 +99,7 @@ try:
 except ImportError:
     VideoStreamMoviePy = None
 
-# TODO(v0.6.3): Replace this with a function named `get_available_backends`.
+# TODO(0.6.3): Replace this with a function named `get_available_backends`.
 AVAILABLE_BACKENDS: Dict[str, Type] = {
     backend.BACKEND_NAME: backend for backend in filter(None, [
         VideoStreamCv2,

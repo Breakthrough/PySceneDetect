@@ -172,7 +172,7 @@ class AdaptiveDetector(ContentDetector):
 
         return cut_list
 
-    # TODO(v0.6.2): Deprecate & remove this method.
+    # TODO(0.6.3): Deprecate & remove this method.
     def get_content_val(self, frame_num: int) -> Optional[float]:
         """Returns the average content change for a frame."""
         if self.stats_manager is not None:

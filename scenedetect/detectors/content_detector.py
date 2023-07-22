@@ -199,7 +199,7 @@ class ContentDetector(SceneDetector):
             or more frames in the list, and not necessarily the same as frame_num.
         """
         if frame_img is None:
-            # TODO(v0.6.2): Make frame_img a required argument in the interface. Log a warning
+            # TODO(0.6.3): Make frame_img a required argument in the interface. Log a warning
             # that passing None is deprecated and results will be incorrect if this is the case.
             return []
 
@@ -246,7 +246,7 @@ class ContentDetector(SceneDetector):
             self._kernel = numpy.ones((kernel_size, kernel_size), numpy.uint8)
 
         # Estimate levels for thresholding.
-        # TODO(v0.6.2): Add config file entries for sigma, aperture/kernel size, etc.
+        # TODO(0.6.3): Add config file entries for sigma, aperture/kernel size, etc.
         sigma: float = 1.0 / 3.0
         median = numpy.median(lum)
         low = int(max(0, (1.0 - sigma) * median))

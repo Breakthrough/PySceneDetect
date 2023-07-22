@@ -495,7 +495,7 @@ def save_images(scene_list: List[Tuple[FrameTimecode, FrameTimecode]],
                     IMAGE_NUMBER=image_num_format % (j + 1),
                     FRAME_NUMBER=image_timecode.get_frames()), image_extension)
                 image_filenames[i].append(file_path)
-                # TODO(v0.6.2): Combine this resize with the ones below.
+                # TODO(0.6.3): Combine this resize with the ones below.
                 if aspect_ratio is not None:
                     frame_im = cv2.resize(
                         frame_im, (0, 0),
@@ -647,12 +647,13 @@ class SceneManager:
 
         detector.stats_manager = self._stats_manager
         if self._stats_manager is not None:
-            # Allow multiple detection algorithms of the same type to be added
-            # by suppressing any FrameMetricRegistered exceptions due to attempts
-            # to re-register the same frame metric keys.
             try:
                 self._stats_manager.register_metrics(detector.get_metrics())
             except FrameMetricRegistered:
+                # Allow multiple detection algorithms of the same type to be added
+                # by suppressing any FrameMetricRegistered exceptions due to attempts
+                # to re-register the same frame metric keys.
+                # TODO(#334): Fix this, this should not be part of regular control flow.
                 pass
 
         if not issubclass(type(detector), SparseSceneDetector):

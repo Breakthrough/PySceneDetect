@@ -219,4 +219,4 @@ class VideoStream(ABC):
         raise NotImplementedError
 
 
-# TODO(v0.6.2): Add a StreamJoiner class to concatenate multiple videos using a specified backend.
+# TODO(0.6.3): Add a StreamJoiner class to concatenate multiple videos using a specified backend.

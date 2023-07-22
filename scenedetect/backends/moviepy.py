@@ -54,7 +54,7 @@ class VideoStreamMoviePy(VideoStream):
         # TODO(0.6.3) - Investigate how MoviePy handles ffmpeg not being on PATH.
         # TODO(0.6.3): Add framerate override.
         if framerate is not None:
-            raise NotImplementedError("TODO(v0.6.2)")
+            raise NotImplementedError("TODO(0.6.3)")
 
         self._path = path
         # TODO(0.6.3): Need to map errors based on the strings, since several failure
