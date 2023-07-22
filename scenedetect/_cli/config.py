@@ -481,7 +481,8 @@ class ConfigRegistry:
         # Try to load and parse the config file at `path`.
         config = ConfigParser()
         try:
-            config_file_contents = open(path, 'r').read()
+            with open(path, 'r') as config_file:
+                config_file_contents = config_file.read()
             config.read_string(config_file_contents, source=path)
         except ParsingError as ex:
             raise ConfigLoadFailure(self._init_log, reason=ex)
