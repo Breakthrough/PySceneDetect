@@ -203,10 +203,10 @@ class StatsManager:
         # again but with file handle instead of path.
         if isinstance(csv_file, (str, bytes)):
             with open(csv_file, 'w') as file:
-                return self.save_to_csv(csv_file=file, force_save=force_save)
-        csv_writer = csv.writer(csv_file, lineterminator='\n')
+                self.save_to_csv(csv_file=file, force_save=force_save)
+                return
 
-        # Header rows.
+        csv_writer = csv.writer(csv_file, lineterminator='\n')
         metric_keys = sorted(list(self._registered_metrics.union(self._loaded_metrics)))
         csv_writer.writerow([COLUMN_NAME_FRAME_NUMBER, COLUMN_NAME_TIMECODE] + metric_keys)
         frame_keys = sorted(self._frame_metrics.keys())
