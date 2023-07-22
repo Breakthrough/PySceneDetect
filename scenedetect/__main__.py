@@ -12,11 +12,14 @@
 #
 """Entry point for PySceneDetect's command-line interface."""
 
+from logging import getLogger
 import sys
 
 from scenedetect._cli import scenedetect
 from scenedetect._cli.context import CliContext
 from scenedetect._cli.controller import run_scenedetect
+
+from scenedetect.platform import logging_redirect_tqdm, FakeTqdmLoggingRedirect
 
 
 def main():
@@ -26,13 +29,32 @@ def main():
         # Process command line arguments and subcommands to initialize the context.
         scenedetect.main(obj=cli_ctx) # Parse CLI arguments with registered callbacks.
     except SystemExit as exit:
-        if exit.code != 0:
+        help_command = any(arg in sys.argv for arg in ['-h', '--help'])
+        if help_command or exit.code != 0:
             raise
 
     # If we get here, processing the command line and loading the context worked. Let's run
     # the controller if we didn't process any help requests.
-    if not ('-h' in sys.argv or '--help' in sys.argv):
-        run_scenedetect(cli_ctx)
+    logger = getLogger('pyscenedetect')
+    # Ensure log messages don't conflict with any progress bars. If we're in quiet mode, where
+    # no progress bars get created, we instead create a fake context manager. This is done here
+    # to avoid needing a separate context manager at each point a progress bar is created.
+    log_redirect = FakeTqdmLoggingRedirect() if cli_ctx.quiet_mode else logging_redirect_tqdm(
+        loggers=[logger])
+
+    with log_redirect:
+        try:
+            run_scenedetect(cli_ctx)
+        except KeyboardInterrupt:
+            logger.info('Stopped.')
+            if __debug__:
+                raise
+        except BaseException as ex:
+            if __debug__:
+                raise
+            else:
+                logger.critical('Unhandled exception:', exc_info=ex)
+                raise SystemExit(1)
 
 
 if __name__ == '__main__':

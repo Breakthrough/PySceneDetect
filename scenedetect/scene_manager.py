@@ -951,8 +951,10 @@ class SceneManager:
 
         # If *any* exceptions occur, we re-raise them in the main thread so that the caller of
         # detect_scenes can handle it.
-        # pylint: disable=bare-except
-        except:
+        except KeyboardInterrupt:
+            logger.debug("Received KeyboardInterrupt.")
+            self._stop.set()
+        except BaseException:
             logger.critical('Fatal error: Exception raised in decode thread.')
             self._exception_info = sys.exc_info()
             self._stop.set()

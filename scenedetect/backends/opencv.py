@@ -321,8 +321,7 @@ class VideoStreamCv2(VideoStream):
         cap = cv2.VideoCapture(self._path_or_device)
         if not cap.isOpened():
             raise VideoOpenFailure(
-                'VideoCapture.isOpened() returned False. Ensure the input file is a valid video,'
-                ' and check that OpenCV is installed correctly.\n')
+                'Ensure file is valid video and system dependencies are up to date.\n')
 
         # Display an error if the video codec type seems unsupported (#86) as this indicates
         # potential video corruption, or may explain missing frames. We only perform this check
