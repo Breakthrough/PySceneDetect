@@ -1,3 +1,5 @@
+# Build signed releases for PySceneDetect Windows x64
+
 # We have to disable the `build` command explicitly otherwise the default is
 # MSBuild which assumes this is a Visual Studio project. Python source/binary
 # wheels a Windows .exe are generated below in `install`.
@@ -20,12 +22,6 @@ deploy:
      secure: NPMogMcEb5S/ASMEiL275H79D+Pj9cgUqx8kjTPGXtF9drZW41nljczuhF1XvcxFgI0q9TA1BUX9YuCoTQ3mEQ==
 
 install:
-  # The commit being checked out must meet SignPath's origin verification requirements:
-  # https://about.signpath.io/documentation/build-system-integration#ci-integrations-with-origin-verification
-  # To ensure this, we checkout a specific commit hash. Eventually this branch will be merged and
-  # builds will be done directly from the release branch.
-  - git checkout 30dd61ba384518bc4ca6e6fea2fe37c560461738
-
   - echo * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
   - echo * *                      SETTING UP PYTHON ENVIRONMENT                      * *
   - echo * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -36,7 +32,6 @@ install:
   - python -m pip install -r docs/requirements.txt
   # Checkout build resources and third party software used for testing.
   - git checkout refs/remotes/origin/resources -- dist/
-  - git checkout refs/remotes/origin/build-windows -- dist/
   - appveyor DownloadFile https://github.com/GyanD/codexffmpeg/releases/download/6.0/ffmpeg-6.0-full_build.7z
   - 7z e ffmpeg-6.0-full_build.7z -odist/ffmpeg ffmpeg.exe LICENSE -r
 
