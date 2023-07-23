@@ -64,7 +64,7 @@ jobs:
           python dist/cleanup_dependencies.py
           7z e -odist/ffmpeg ffmpeg-6.0-full_build.7z LICENSE -r
           Move-Item -Path ffmpeg.exe -Destination dist/scenedetect/ffmpeg.exe
-          Move-Item -Path dist/ffmpeg/LICENSE -Destination dist/scenedetect/LICENSE-FFMPEG
+          Move-Item -Path dist/ffmpeg/LICENSE -Destination dist/scenedetect/LICENSE-FFMPEG -Force
 
       - name: Test Portable EXE
         run: |
