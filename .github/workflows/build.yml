@@ -68,8 +68,13 @@ jobs:
           python -m scenedetect -i tests/resources/testvideo.mp4 -b pyav time --end 2s
           python -m pip uninstall -y scenedetect
 
-      # TODO: Make the version extraction work on powershell so the package smoke tests also run on Windows.
-      # TODO: Build documentation and replace the one included in the package.
+      - name: Build Documentation
+        run: |
+          pip install -r docs/requirements.txt
+          git mv docs docs_src
+          sphinx-build -b singlehtml docs_src docs
+
+      # TODO: Make the version extraction work on powershell so package smoke tests can run on Windows.
       - name: Build Package
         if: ${{ matrix.os != 'windows-latest' }}
         run: |
