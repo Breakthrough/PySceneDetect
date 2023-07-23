@@ -21,6 +21,7 @@ install:
   - python --version
   - python -m pip install --upgrade pip
   - python -m pip install -r dist/requirements_windows.txt
+  - python -m pip install -r docs/requirements_windows.txt
   # Checkout build resources and download third party software
   - git checkout refs/remotes/origin/resources -- dist/
   - git checkout refs/remotes/origin/build-windows -- dist/
@@ -32,6 +33,7 @@ install:
   - echo * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
   # Build Windows .EXE and create portable .ZIP
   - pyinstaller dist/scenedetect.spec
+  - sphinx -b singlehtml docs dist/scenedetect/docs
   - python dist/cleanup_dependencies.py
   - move dist\ffmpeg\ffmpeg.exe dist\scenedetect\
   - move dist\ffmpeg\LICENSE dist\scenedetect\LICENSE-FFMPEG

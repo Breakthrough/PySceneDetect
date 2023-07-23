@@ -47,12 +47,11 @@
     <ROW Directory="APPDIR" Directory_Parent="TARGETDIR" DefaultDir="APPDIR:." IsPseudoRoot="1"/>
     <ROW Directory="TARGETDIR" DefaultDir="SourceDir"/>
     <ROW Directory="_static_Dir" Directory_Parent="docs_Dir" DefaultDir="_static"/>
-    <ROW Directory="_templates_Dir" Directory_Parent="docs_Dir" DefaultDir="_TEMPL~1|_templates"/>
-    <ROW Directory="api_Dir" Directory_Parent="docs_Dir" DefaultDir="api"/>
+    <ROW Directory="api_Dir" Directory_Parent="doctrees_Dir" DefaultDir="api"/>
     <ROW Directory="audio_Dir" Directory_Parent="av_Dir" DefaultDir="audio"/>
     <ROW Directory="av.libs_Dir" Directory_Parent="APPDIR" DefaultDir="AV~1.LIB|av.libs"/>
     <ROW Directory="av_Dir" Directory_Parent="APPDIR" DefaultDir="av"/>
-    <ROW Directory="cli_Dir" Directory_Parent="docs_Dir" DefaultDir="cli"/>
+    <ROW Directory="cli_Dir" Directory_Parent="doctrees_Dir" DefaultDir="cli"/>
     <ROW Directory="codec_Dir" Directory_Parent="av_Dir" DefaultDir="codec"/>
     <ROW Directory="container_Dir" Directory_Parent="av_Dir" DefaultDir="CONTAI~1|container"/>
     <ROW Directory="core_Dir" Directory_Parent="numpy_Dir" DefaultDir="core"/>
@@ -60,6 +59,7 @@
     <ROW Directory="data_1_Dir" Directory_Parent="cv2_Dir" DefaultDir="data"/>
     <ROW Directory="data_Dir" Directory_Parent="av_Dir" DefaultDir="data"/>
     <ROW Directory="docs_Dir" Directory_Parent="APPDIR" DefaultDir="docs"/>
+    <ROW Directory="doctrees_Dir" Directory_Parent="docs_Dir" DefaultDir="DOCTRE~1|.doctrees"/>
     <ROW Directory="fft_Dir" Directory_Parent="numpy_Dir" DefaultDir="fft"/>
     <ROW Directory="filter_Dir" Directory_Parent="av_Dir" DefaultDir="filter"/>
     <ROW Directory="gapi_Dir" Directory_Parent="cv2_Dir" DefaultDir="gapi"/>
@@ -88,6 +88,8 @@
     <ROW Component="__init__.py_3" ComponentId="{C398970E-FB3C-4C0D-8139-9835B84AFE8E}" Directory_="utils_Dir" Attributes="0" KeyPath="__init__.py_4" Type="0"/>
     <ROW Component="_multiarray_tests.cp39win_amd64.pyd" ComponentId="{851268F8-F20D-4AF7-9C64-3C1733DFEC61}" Directory_="core_Dir" Attributes="256" KeyPath="_multiarray_tests.cp39win_amd64.pyd" Type="0"/>
     <ROW Component="_pocketfft_internal.cp39win_amd64.pyd" ComponentId="{E7E2A0F6-AA95-4B45-832D-7908CF9832CE}" Directory_="fft_Dir" Attributes="256" KeyPath="_pocketfft_internal.cp39win_amd64.pyd" Type="0"/>
+    <ROW Component="alabaster.css" ComponentId="{D2B0488C-E0E9-4F74-91CC-8A7844E7C862}" Directory_="_static_Dir" Attributes="0" KeyPath="alabaster.css" Type="0"/>
+    <ROW Component="api.doctree" ComponentId="{8B099BDA-0D9D-46EE-A779-7C1884B73ACA}" Directory_="doctrees_Dir" Attributes="0" KeyPath="api.doctree" Type="0"/>
     <ROW Component="apimswincoreconsolel110.dll" ComponentId="{BEC97184-3441-47F0-984B-82CB97AFD5F6}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincoreconsolel110.dll"/>
     <ROW Component="apimswincoredatetimel110.dll" ComponentId="{A857302F-89B5-4D2B-BAEC-6365A8132EBF}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincoredatetimel110.dll"/>
     <ROW Component="apimswincoredebugl110.dll" ComponentId="{AC4B691B-9AF5-4B49-BC6A-89D8DA2B21E1}" Directory_="APPDIR" Attributes="256" KeyPath="apimswincoredebugl110.dll"/>
@@ -132,10 +134,11 @@
     <ROW Component="avfilter8b6824456277e4a9e209bc960e8d6098e.dll" ComponentId="{E7F3FCAB-ED60-4CB2-933F-BB763ABDE1C6}" Directory_="av.libs_Dir" Attributes="256" KeyPath="avfilter8b6824456277e4a9e209bc960e8d6098e.dll"/>
     <ROW Component="avformat597da4c8048d393c7c213a488528e8d967.dll" ComponentId="{E6877005-EBD0-41F5-BBD9-62D3C1D10E66}" Directory_="av.libs_Dir" Attributes="256" KeyPath="avformat597da4c8048d393c7c213a488528e8d967.dll"/>
     <ROW Component="avutil57d6cf4caa4e5384d846dfb959da0aa8fc.dll" ComponentId="{E623F5D8-7192-4BCC-A252-5EC0577250D1}" Directory_="av.libs_Dir" Attributes="256" KeyPath="avutil57d6cf4caa4e5384d846dfb959da0aa8fc.dll"/>
-    <ROW Component="backends.rst" ComponentId="{F9777D52-020B-4410-9744-1D16D5CC20AE}" Directory_="api_Dir" Attributes="0" KeyPath="backends.rst" Type="0"/>
-    <ROW Component="backends.rst_1" ComponentId="{A1146D31-933B-409F-A7E0-872EB4F48204}" Directory_="cli_Dir" Attributes="0" KeyPath="backends.rst_1" Type="0"/>
+    <ROW Component="backends.doctree" ComponentId="{68FB62C7-A11F-4A83-B70F-0B9CE9DF58D9}" Directory_="api_Dir" Attributes="0" KeyPath="backends.doctree" Type="0"/>
+    <ROW Component="backends.doctree_1" ComponentId="{EF847445-1139-4790-B1DD-C05B1F93338F}" Directory_="cli_Dir" Attributes="0" KeyPath="backends.doctree_1" Type="0"/>
     <ROW Component="bit_generator.cp39win_amd64.pyd" ComponentId="{802FCBD0-4DBA-4498-A6B1-79A4A7B9A8FC}" Directory_="random_Dir" Attributes="256" KeyPath="bit_generator.cp39win_amd64.pyd" Type="0"/>
     <ROW Component="buffer.cp39win_amd64.pyd" ComponentId="{792D0186-F438-4AFE-9FC9-1091C1565722}" Directory_="av_Dir" Attributes="256" KeyPath="buffer.cp39win_amd64.pyd" Type="0"/>
+    <ROW Component="buildinfo" ComponentId="{F1F2CF0B-ADA3-4E3A-BF9B-F0DECAF4DC43}" Directory_="docs_Dir" Attributes="0" KeyPath="buildinfo" Type="0"/>
     <ROW Component="codec.cp39win_amd64.pyd" ComponentId="{57B4C5D7-FB8B-4DA6-B75F-75B33BB94A23}" Directory_="codec_Dir" Attributes="256" KeyPath="codec.cp39win_amd64.pyd" Type="0"/>
     <ROW Component="codeccontext.cp39win_amd64.pyd" ComponentId="{832B0CD8-8288-4747-AA17-FA862B9CC1FF}" Directory_="audio_Dir" Attributes="256" KeyPath="codeccontext.cp39win_amd64.pyd" Type="0"/>
     <ROW Component="codeccontext.cp39win_amd64.pyd_1" ComponentId="{047F1F28-ABF0-42C9-B183-7DC5ED41C35D}" Directory_="subtitles_Dir" Attributes="256" KeyPath="codeccontext.cp39win_amd64.pyd_1" Type="0"/>
@@ -182,13 +185,10 @@
     <ROW Component="libxml22d596991493c6defab3e6bd0ef87481ec.dll" ComponentId="{8ABE639C-1F63-4BE7-9898-023BE59915DF}" Directory_="av.libs_Dir" Attributes="256" KeyPath="libxml22d596991493c6defab3e6bd0ef87481ec.dll"/>
     <ROW Component="loadorderav10.0.0" ComponentId="{4B18D98F-071D-49B6-9C0B-CF1D645FC57F}" Directory_="av.libs_Dir" Attributes="0" KeyPath="loadorderav10.0.0" Type="0"/>
     <ROW Component="motionvectors.cp39win_amd64.pyd" ComponentId="{535F6569-121D-4E33-B148-6005A1F30205}" Directory_="sidedata_Dir" Attributes="256" KeyPath="motionvectors.cp39win_amd64.pyd" Type="0"/>
-    <ROW Component="navigation.html" ComponentId="{4AC6DC29-6B16-4915-97FC-7EA843279CA6}" Directory_="_templates_Dir" Attributes="0" KeyPath="navigation.html" Type="0"/>
     <ROW Component="opencv_videoio_ffmpeg480_64.dll" ComponentId="{59E9B5D7-4EEC-4A9E-A34E-A0D4D069E591}" Directory_="cv2_Dir" Attributes="256" KeyPath="opencv_videoio_ffmpeg480_64.dll"/>
     <ROW Component="postproc564b19871e028a782e5cda4f0786e4347b.dll" ComponentId="{935B3232-24B8-4654-84B5-177EC6372771}" Directory_="av.libs_Dir" Attributes="256" KeyPath="postproc564b19871e028a782e5cda4f0786e4347b.dll"/>
-    <ROW Component="pyscenedetect.css" ComponentId="{434C7642-F0F7-4F7E-AD7E-E2D37F2AF890}" Directory_="_static_Dir" Attributes="0" KeyPath="pyscenedetect.css" Type="0"/>
     <ROW Component="python3.dll" ComponentId="{9549764C-F57E-486E-928E-8C462D132AC5}" Directory_="APPDIR" Attributes="256" KeyPath="python3.dll"/>
     <ROW Component="python39.dll" ComponentId="{424A91D9-1E1A-4ADD-A042-1F60A0AEEDEC}" Directory_="APPDIR" Attributes="256" KeyPath="python39.dll"/>
-    <ROW Component="readthedocs.yaml" ComponentId="{ED3A671F-A78C-4E59-B72F-589D54C4B356}" Directory_="docs_Dir" Attributes="0" KeyPath="readthedocs.yaml" Type="0"/>
     <ROW Component="scenedetect.exe" ComponentId="{269D8948-5DDE-4320-84BB-943588A63DB7}" Directory_="APPDIR" Attributes="256" KeyPath="scenedetect.exe"/>
     <ROW Component="stream.cp39win_amd64.pyd" ComponentId="{075D030F-0C39-47D3-84A1-304313CC412F}" Directory_="data_Dir" Attributes="256" KeyPath="stream.cp39win_amd64.pyd_1" Type="0"/>
     <ROW Component="swresample47bc8a7e576b0d304109965ff7fcaa525.dll" ComponentId="{01462436-878D-42DB-A9DB-EC6002AB9199}" Directory_="av.libs_Dir" Attributes="256" KeyPath="swresample47bc8a7e576b0d304109965ff7fcaa525.dll"/>
@@ -376,31 +376,6 @@
     <ROW File="__init__.py_4" Component_="__init__.py_3" FileName="__init__.py" Attributes="0" SourcePath="..\scenedetect\cv2\utils\__init__.py" SelfReg="false"/>
     <ROW File="version.py_1" Component_="config3.py" FileName="version.py" Attributes="0" SourcePath="..\scenedetect\cv2\version.py" SelfReg="false"/>
     <ROW File="__init__.py_5" Component_="config3.py" FileName="__init__.py" Attributes="0" SourcePath="..\scenedetect\cv2\__init__.py" SelfReg="false"/>
-    <ROW File="readthedocs.yaml" Component_="readthedocs.yaml" FileName="READTH~1.YAM|.readthedocs.yaml" Attributes="0" SourcePath="..\scenedetect\docs\.readthedocs.yaml" SelfReg="false"/>
-    <ROW File="backends.rst" Component_="backends.rst" FileName="backends.rst" Attributes="0" SourcePath="..\scenedetect\docs\api\backends.rst" SelfReg="false"/>
-    <ROW File="detectors.rst" Component_="backends.rst" FileName="DETECT~1.RST|detectors.rst" Attributes="0" SourcePath="..\scenedetect\docs\api\detectors.rst" SelfReg="false"/>
-    <ROW File="frame_timecode.rst" Component_="backends.rst" FileName="FRAME_~1.RST|frame_timecode.rst" Attributes="0" SourcePath="..\scenedetect\docs\api\frame_timecode.rst" SelfReg="false"/>
-    <ROW File="migration_guide.rst" Component_="backends.rst" FileName="MIGRAT~1.RST|migration_guide.rst" Attributes="0" SourcePath="..\scenedetect\docs\api\migration_guide.rst" SelfReg="false"/>
-    <ROW File="platform.rst" Component_="backends.rst" FileName="platform.rst" Attributes="0" SourcePath="..\scenedetect\docs\api\platform.rst" SelfReg="false"/>
-    <ROW File="scene_detector.rst" Component_="backends.rst" FileName="SCENE_~1.RST|scene_detector.rst" Attributes="0" SourcePath="..\scenedetect\docs\api\scene_detector.rst" SelfReg="false"/>
-    <ROW File="scene_manager.rst" Component_="backends.rst" FileName="SCENE_~2.RST|scene_manager.rst" Attributes="0" SourcePath="..\scenedetect\docs\api\scene_manager.rst" SelfReg="false"/>
-    <ROW File="stats_manager.rst" Component_="backends.rst" FileName="STATS_~1.RST|stats_manager.rst" Attributes="0" SourcePath="..\scenedetect\docs\api\stats_manager.rst" SelfReg="false"/>
-    <ROW File="video_splitter.rst" Component_="backends.rst" FileName="VIDEO_~1.RST|video_splitter.rst" Attributes="0" SourcePath="..\scenedetect\docs\api\video_splitter.rst" SelfReg="false"/>
-    <ROW File="video_stream.rst" Component_="backends.rst" FileName="VIDEO_~2.RST|video_stream.rst" Attributes="0" SourcePath="..\scenedetect\docs\api\video_stream.rst" SelfReg="false"/>
-    <ROW File="api.rst" Component_="readthedocs.yaml" FileName="api.rst" Attributes="0" SourcePath="..\scenedetect\docs\api.rst" SelfReg="false"/>
-    <ROW File="backends.rst_1" Component_="backends.rst_1" FileName="backends.rst" Attributes="0" SourcePath="..\scenedetect\docs\cli\backends.rst" SelfReg="false"/>
-    <ROW File="config_file.rst" Component_="backends.rst_1" FileName="CONFIG~1.RST|config_file.rst" Attributes="0" SourcePath="..\scenedetect\docs\cli\config_file.rst" SelfReg="false"/>
-    <ROW File="cli.rst" Component_="readthedocs.yaml" FileName="cli.rst" Attributes="0" SourcePath="..\scenedetect\docs\cli.rst" SelfReg="false"/>
-    <ROW File="conf.py" Component_="readthedocs.yaml" FileName="conf.py" Attributes="0" SourcePath="..\scenedetect\docs\conf.py" SelfReg="false"/>
-    <ROW File="generate_cli_docs.py" Component_="readthedocs.yaml" FileName="GENERA~1.PY|generate_cli_docs.py" Attributes="0" SourcePath="..\scenedetect\docs\generate_cli_docs.py" SelfReg="false"/>
-    <ROW File="index.rst" Component_="readthedocs.yaml" FileName="index.rst" Attributes="0" SourcePath="..\scenedetect\docs\index.rst" SelfReg="false"/>
-    <ROW File="make.bat" Component_="readthedocs.yaml" FileName="make.bat" Attributes="0" SourcePath="..\scenedetect\docs\make.bat" SelfReg="false"/>
-    <ROW File="Makefile" Component_="readthedocs.yaml" FileName="Makefile" Attributes="0" SourcePath="..\scenedetect\docs\Makefile" SelfReg="false"/>
-    <ROW File="requirements.txt" Component_="readthedocs.yaml" FileName="REQUIR~1.TXT|requirements.txt" Attributes="0" SourcePath="..\scenedetect\docs\requirements.txt" SelfReg="false"/>
-    <ROW File="pyscenedetect.css" Component_="pyscenedetect.css" FileName="PYSCEN~1.CSS|pyscenedetect.css" Attributes="0" SourcePath="..\scenedetect\docs\_static\pyscenedetect.css" SelfReg="false"/>
-    <ROW File="pyscenedetect_logo.png" Component_="pyscenedetect.css" FileName="PYSCEN~1.PNG|pyscenedetect_logo.png" Attributes="0" SourcePath="..\scenedetect\docs\_static\pyscenedetect_logo.png" SelfReg="false"/>
-    <ROW File="pyscenedetect_logo_small.png" Component_="pyscenedetect.css" FileName="PYSCEN~2.PNG|pyscenedetect_logo_small.png" Attributes="0" SourcePath="..\scenedetect\docs\_static\pyscenedetect_logo_small.png" SelfReg="false"/>
-    <ROW File="navigation.html" Component_="navigation.html" FileName="NAVIGA~1.HTM|navigation.html" Attributes="0" SourcePath="..\scenedetect\docs\_templates\navigation.html" SelfReg="false"/>
     <ROW File="_multiarray_tests.cp39win_amd64.pyd" Component_="_multiarray_tests.cp39win_amd64.pyd" FileName="_MULTI~1.PYD|_multiarray_tests.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\numpy\core\_multiarray_tests.cp39-win_amd64.pyd" SelfReg="false"/>
     <ROW File="_multiarray_umath.cp39win_amd64.pyd" Component_="_multiarray_tests.cp39win_amd64.pyd" FileName="_MULTI~2.PYD|_multiarray_umath.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\numpy\core\_multiarray_umath.cp39-win_amd64.pyd" SelfReg="false"/>
     <ROW File="_pocketfft_internal.cp39win_amd64.pyd" Component_="_pocketfft_internal.cp39win_amd64.pyd" FileName="_POCKE~1.PYD|_pocketfft_internal.cp39-win_amd64.pyd" Attributes="0" SourcePath="..\scenedetect\numpy\fft\_pocketfft_internal.cp39-win_amd64.pyd" SelfReg="false"/>
@@ -418,6 +393,40 @@
     <ROW File="apimswincrtprivatel110.dll" Component_="apimswincrtprivatel110.dll" FileName="API-MS~5.DLL|api-ms-win-crt-private-l1-1-0.dll" Attributes="0" SourcePath="..\scenedetect\api-ms-win-crt-private-l1-1-0.dll" SelfReg="false"/>
     <ROW File="libopenblas64__v0.3.23gcc_10_3_0.dll" Component_="libopenblas64__v0.3.23gcc_10_3_0.dll" FileName="LIBOPE~1.DLL|libopenblas64__v0.3.23-gcc_10_3_0.dll" Attributes="0" SourcePath="..\scenedetect\libopenblas64__v0.3.23-gcc_10_3_0.dll" SelfReg="false"/>
     <ROW File="LICENSECLICK" Component_="LICENSE" FileName="LICEN~10|LICENSE-CLICK" Attributes="0" SourcePath="..\scenedetect\LICENSE-CLICK" SelfReg="false"/>
+    <ROW File="buildinfo" Component_="buildinfo" FileName="BUILDI~1|.buildinfo" Attributes="0" SourcePath="..\scenedetect\docs\.buildinfo" SelfReg="false"/>
+    <ROW File="backends.doctree" Component_="backends.doctree" FileName="BACKEN~1.DOC|backends.doctree" Attributes="0" SourcePath="..\scenedetect\docs\.doctrees\api\backends.doctree" SelfReg="false"/>
+    <ROW File="detectors.doctree" Component_="backends.doctree" FileName="DETECT~1.DOC|detectors.doctree" Attributes="0" SourcePath="..\scenedetect\docs\.doctrees\api\detectors.doctree" SelfReg="false"/>
+    <ROW File="frame_timecode.doctree" Component_="backends.doctree" FileName="FRAME_~1.DOC|frame_timecode.doctree" Attributes="0" SourcePath="..\scenedetect\docs\.doctrees\api\frame_timecode.doctree" SelfReg="false"/>
+    <ROW File="migration_guide.doctree" Component_="backends.doctree" FileName="MIGRAT~1.DOC|migration_guide.doctree" Attributes="0" SourcePath="..\scenedetect\docs\.doctrees\api\migration_guide.doctree" SelfReg="false"/>
+    <ROW File="platform.doctree" Component_="backends.doctree" FileName="PLATFO~1.DOC|platform.doctree" Attributes="0" SourcePath="..\scenedetect\docs\.doctrees\api\platform.doctree" SelfReg="false"/>
+    <ROW File="scene_detector.doctree" Component_="backends.doctree" FileName="SCENE_~1.DOC|scene_detector.doctree" Attributes="0" SourcePath="..\scenedetect\docs\.doctrees\api\scene_detector.doctree" SelfReg="false"/>
+    <ROW File="scene_manager.doctree" Component_="backends.doctree" FileName="SCENE_~2.DOC|scene_manager.doctree" Attributes="0" SourcePath="..\scenedetect\docs\.doctrees\api\scene_manager.doctree" SelfReg="false"/>
+    <ROW File="stats_manager.doctree" Component_="backends.doctree" FileName="STATS_~1.DOC|stats_manager.doctree" Attributes="0" SourcePath="..\scenedetect\docs\.doctrees\api\stats_manager.doctree" SelfReg="false"/>
+    <ROW File="video_splitter.doctree" Component_="backends.doctree" FileName="VIDEO_~1.DOC|video_splitter.doctree" Attributes="0" SourcePath="..\scenedetect\docs\.doctrees\api\video_splitter.doctree" SelfReg="false"/>
+    <ROW File="video_stream.doctree" Component_="backends.doctree" FileName="VIDEO_~2.DOC|video_stream.doctree" Attributes="0" SourcePath="..\scenedetect\docs\.doctrees\api\video_stream.doctree" SelfReg="false"/>
+    <ROW File="api.doctree" Component_="api.doctree" FileName="API~1.DOC|api.doctree" Attributes="0" SourcePath="..\scenedetect\docs\.doctrees\api.doctree" SelfReg="false"/>
+    <ROW File="backends.doctree_1" Component_="backends.doctree_1" FileName="BACKEN~1.DOC|backends.doctree" Attributes="0" SourcePath="..\scenedetect\docs\.doctrees\cli\backends.doctree" SelfReg="false"/>
+    <ROW File="config_file.doctree" Component_="backends.doctree_1" FileName="CONFIG~1.DOC|config_file.doctree" Attributes="0" SourcePath="..\scenedetect\docs\.doctrees\cli\config_file.doctree" SelfReg="false"/>
+    <ROW File="cli.doctree" Component_="api.doctree" FileName="CLI~1.DOC|cli.doctree" Attributes="0" SourcePath="..\scenedetect\docs\.doctrees\cli.doctree" SelfReg="false"/>
+    <ROW File="environment.pickle" Component_="api.doctree" FileName="ENVIRO~1.PIC|environment.pickle" Attributes="0" SourcePath="..\scenedetect\docs\.doctrees\environment.pickle" SelfReg="false"/>
+    <ROW File="index.doctree" Component_="api.doctree" FileName="INDEX~1.DOC|index.doctree" Attributes="0" SourcePath="..\scenedetect\docs\.doctrees\index.doctree" SelfReg="false"/>
+    <ROW File="index.html" Component_="buildinfo" FileName="INDEX~1.HTM|index.html" Attributes="0" SourcePath="..\scenedetect\docs\index.html" SelfReg="false"/>
+    <ROW File="objects.inv" Component_="buildinfo" FileName="objects.inv" Attributes="0" SourcePath="..\scenedetect\docs\objects.inv" SelfReg="false"/>
+    <ROW File="alabaster.css" Component_="alabaster.css" FileName="ALABAS~1.CSS|alabaster.css" Attributes="0" SourcePath="..\scenedetect\docs\_static\alabaster.css" SelfReg="false"/>
+    <ROW File="basic.css" Component_="alabaster.css" FileName="basic.css" Attributes="0" SourcePath="..\scenedetect\docs\_static\basic.css" SelfReg="false"/>
+    <ROW File="custom.css" Component_="alabaster.css" FileName="custom.css" Attributes="0" SourcePath="..\scenedetect\docs\_static\custom.css" SelfReg="false"/>
+    <ROW File="doctools.js" Component_="alabaster.css" FileName="doctools.js" Attributes="0" SourcePath="..\scenedetect\docs\_static\doctools.js" SelfReg="false"/>
+    <ROW File="documentation_options.js" Component_="alabaster.css" FileName="DOCUME~1.JS|documentation_options.js" Attributes="0" SourcePath="..\scenedetect\docs\_static\documentation_options.js" SelfReg="false"/>
+    <ROW File="file.png" Component_="alabaster.css" FileName="file.png" Attributes="0" SourcePath="..\scenedetect\docs\_static\file.png" SelfReg="false"/>
+    <ROW File="language_data.js" Component_="alabaster.css" FileName="LANGUA~1.JS|language_data.js" Attributes="0" SourcePath="..\scenedetect\docs\_static\language_data.js" SelfReg="false"/>
+    <ROW File="minus.png" Component_="alabaster.css" FileName="minus.png" Attributes="0" SourcePath="..\scenedetect\docs\_static\minus.png" SelfReg="false"/>
+    <ROW File="plus.png" Component_="alabaster.css" FileName="plus.png" Attributes="0" SourcePath="..\scenedetect\docs\_static\plus.png" SelfReg="false"/>
+    <ROW File="pygments.css" Component_="alabaster.css" FileName="pygments.css" Attributes="0" SourcePath="..\scenedetect\docs\_static\pygments.css" SelfReg="false"/>
+    <ROW File="pyscenedetect.css" Component_="alabaster.css" FileName="PYSCEN~1.CSS|pyscenedetect.css" Attributes="0" SourcePath="..\scenedetect\docs\_static\pyscenedetect.css" SelfReg="false"/>
+    <ROW File="pyscenedetect_logo.png" Component_="alabaster.css" FileName="PYSCEN~1.PNG|pyscenedetect_logo.png" Attributes="0" SourcePath="..\scenedetect\docs\_static\pyscenedetect_logo.png" SelfReg="false"/>
+    <ROW File="pyscenedetect_logo_small.png" Component_="alabaster.css" FileName="PYSCEN~2.PNG|pyscenedetect_logo_small.png" Attributes="0" SourcePath="..\scenedetect\docs\_static\pyscenedetect_logo_small.png" SelfReg="false"/>
+    <ROW File="searchtools.js" Component_="alabaster.css" FileName="SEARCH~1.JS|searchtools.js" Attributes="0" SourcePath="..\scenedetect\docs\_static\searchtools.js" SelfReg="false"/>
+    <ROW File="sphinx_highlight.js" Component_="alabaster.css" FileName="SPHINX~1.JS|sphinx_highlight.js" Attributes="0" SourcePath="..\scenedetect\docs\_static\sphinx_highlight.js" SelfReg="false"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.BootstrOptComponent">
     <ROW BootstrOptKey="GlobalOptions" DownloadFolder="[LocalAppDataFolder]\[|ProductName]\prerequisites"/>
@@ -640,17 +649,17 @@
     <ROW Feature_="PySceneDetect" Component_="version.py"/>
     <ROW Feature_="PySceneDetect" Component_="opencv_videoio_ffmpeg480_64.dll"/>
     <ROW Feature_="PySceneDetect" Component_="__init__.py_3"/>
-    <ROW Feature_="PySceneDetect" Component_="readthedocs.yaml"/>
-    <ROW Feature_="PySceneDetect" Component_="backends.rst"/>
-    <ROW Feature_="PySceneDetect" Component_="backends.rst_1"/>
-    <ROW Feature_="PySceneDetect" Component_="pyscenedetect.css"/>
-    <ROW Feature_="PySceneDetect" Component_="navigation.html"/>
     <ROW Feature_="PySceneDetect" Component_="_multiarray_tests.cp39win_amd64.pyd"/>
     <ROW Feature_="PySceneDetect" Component_="_pocketfft_internal.cp39win_amd64.pyd"/>
     <ROW Feature_="PySceneDetect" Component_="lapack_lite.cp39win_amd64.pyd"/>
     <ROW Feature_="PySceneDetect" Component_="bit_generator.cp39win_amd64.pyd"/>
     <ROW Feature_="PySceneDetect" Component_="apimswincrtprivatel110.dll"/>
     <ROW Feature_="PySceneDetect" Component_="libopenblas64__v0.3.23gcc_10_3_0.dll"/>
+    <ROW Feature_="PySceneDetect" Component_="buildinfo"/>
+    <ROW Feature_="PySceneDetect" Component_="backends.doctree"/>
+    <ROW Feature_="PySceneDetect" Component_="api.doctree"/>
+    <ROW Feature_="PySceneDetect" Component_="backends.doctree_1"/>
+    <ROW Feature_="PySceneDetect" Component_="alabaster.css"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiIconsComponent">
     <ROW Name="psd_square_small.exe" SourcePath="psd_square_small.ico" Index="0"/>
