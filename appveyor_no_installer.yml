@@ -33,7 +33,7 @@ install:
   - echo * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
   # Build Windows .EXE and create portable .ZIP
   - pyinstaller dist/scenedetect.spec
-  - sphinx -b singlehtml docs dist/scenedetect/docs
+  - sphinx-build -b singlehtml docs dist/scenedetect/docs
   - python dist/cleanup_dependencies.py
   - move dist\ffmpeg\ffmpeg.exe dist\scenedetect\
   - move dist\ffmpeg\LICENSE dist\scenedetect\LICENSE-FFMPEG
