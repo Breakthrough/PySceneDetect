@@ -34,6 +34,7 @@ install:
   - python --version
   - python -m pip install --upgrade pip
   - python -m pip install -r dist/requirements_windows.txt
+  - python -m pip install -r docs/requirements.txt
   # Checkout build resources and download third party software
   - git checkout refs/remotes/origin/resources -- dist/
   - git checkout refs/remotes/origin/build-windows -- dist/
