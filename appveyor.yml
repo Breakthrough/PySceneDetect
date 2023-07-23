@@ -49,8 +49,10 @@ test_script:
   - git fetch --depth=1 https://github.com/Breakthrough/PySceneDetect.git refs/heads/resources:refs/remotes/origin/resources
   - git checkout refs/remotes/origin/resources -- tests/resources/
   # Run unit tests
+  - move dist\scenedetect\ffmpeg.exe ffmpeg.exe
   - pytest
   # Test Windows build
+  - move ffmpeg.exe dist\scenedetect\ffmpeg.exe
   - cd dist/scenedetect
   - scenedetect.exe version
   - scenedetect.exe -i ../../tests/resources/testvideo.mp4 -b opencv time -e 2s
