@@ -15,17 +15,16 @@ environment:
 # SignPath Config for Code Signing
 deploy:
 - provider: Webhook
-  #url: https://app.signpath.io/API/v1/f2efa44c-5b5c-45f2-b44f-8f9dde708313/Integrations/AppVeyor?ProjectSlug=PySceneDetect&SigningPolicySlug=release-signing
-  url: https://app.signpath.io/API/v1/f2efa44c-5b5c-45f2-b44f-8f9dde708313/Integrations/AppVeyor?ProjectSlug=PySceneDetect&SigningPolicySlug=test-signing
+  url: https://app.signpath.io/API/v1/f2efa44c-5b5c-45f2-b44f-8f9dde708313/Integrations/AppVeyor?ProjectSlug=PySceneDetect&SigningPolicySlug=release-signing
   authorization:
      secure: NPMogMcEb5S/ASMEiL275H79D+Pj9cgUqx8kjTPGXtF9drZW41nljczuhF1XvcxFgI0q9TA1BUX9YuCoTQ3mEQ==
 
 install:
   # The commit being checked out must meet SignPath's origin verification requirements:
   # https://about.signpath.io/documentation/build-system-integration#ci-integrations-with-origin-verification
-
-  # TODO: REPLACE WITH COMMIT HASH
-  - git checkout develop
+  # To ensure this, we checkout a specific commit hash. Eventually this branch will be merged and
+  # builds will be done directly from the release branch.
+  - git checkout 4231c9579b3dd0565a08c85629ccd798bc46df39
 
   - echo * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
   - echo * *                      SETTING UP PYTHON ENVIRONMENT                      * *
@@ -35,7 +34,8 @@ install:
   - python -m pip install --upgrade pip
   - python -m pip install -r dist/requirements_windows.txt
   - python -m pip install -r docs/requirements.txt
-  # Checkout build resources and download third party software
+  # Checkout build resources and download third party software.
+  # Only `scenedetect.exe` will be code signed.
   - git checkout refs/remotes/origin/resources -- dist/
   - git checkout refs/remotes/origin/build-windows -- dist/
   - appveyor DownloadFile https://github.com/GyanD/codexffmpeg/releases/download/6.0/ffmpeg-6.0-full_build.7z
