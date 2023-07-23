@@ -69,6 +69,7 @@ jobs:
           python -m pip uninstall -y scenedetect
 
       # TODO: Make the version extraction work on powershell so the package smoke tests also run on Windows.
+      # TODO: Build documentation and replace the one included in the package.
       - name: Build Package
         if: ${{ matrix.os != 'windows-latest' }}
         run: |
