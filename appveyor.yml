@@ -1,9 +1,14 @@
 # Build signed releases for PySceneDetect Windows x64
 
-# We have to disable the `build` command explicitly otherwise the default is
-# MSBuild which assumes this is a Visual Studio project. Python source/binary
-# wheels a Windows .exe are generated below in `install`.
 build: false
+
+branches:
+  only:
+    - main
+    - releases/.*
+
+skip_tags: false
+skip_non_tags: true
 
 environment:
   matrix:
