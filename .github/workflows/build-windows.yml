@@ -50,6 +50,7 @@ jobs:
 
       - name: Unit Tests
         run: |
+          7z e ffmpeg-6.0-full_build.7z ffmpeg.exe -r
           python -m pytest tests/
 
       - name: Build EXE
@@ -58,11 +59,10 @@ jobs:
 
       - name: Assemble Portable EXE
         run: |
-          MKDIR dist/ffmpeg
-          7z e -odist/ffmpeg ffmpeg-6.0-full_build.7z bin/ffmpeg.exe LICENSE
           python dist/cleanup_dependencies.py
-          COPY dist/ffmpeg/ffmpeg.exe dist/scenedetect/ffmpeg.exe
-          COPY dist/ffmpeg/LICENSE dist/scenedetect/LICENSE-FFMPEG
+          7z e ffmpeg-6.0-full_build.7z -odist/ffmpeg LICENSE
+          MOVE ffmpeg.exe dist\scenedetect\ffmpeg.exe
+          MOVE dist\ffmpeg\LICENSE dist\scenedetect\LICENSE-FFMPEG
 
       - name: Test Portable EXE
         run: |

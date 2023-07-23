@@ -305,7 +305,7 @@ def get_system_version_info() -> str:
     """
     output_template = '{:<12} {}'
     line_separator = '-' * 60
-    not_found_str = '[Not Found]'
+    not_found_str = 'Not Installed'
     out_lines = []
 
     # System (Python, OS)
