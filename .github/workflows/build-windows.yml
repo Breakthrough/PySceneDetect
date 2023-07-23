@@ -62,7 +62,7 @@ jobs:
 
       - name: Build Documentation
         run: |
-          sphinx -b singlehtml docs dist/scenedetect/docs
+          sphinx-build -b singlehtml docs dist/scenedetect/docs
 
       - name: Assemble Portable Distribution
         run: |
