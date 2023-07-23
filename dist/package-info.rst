@@ -38,11 +38,11 @@ Split video via CLI: ``scenedetect -i video.mp4 split-video``
 
 Split video using Python API:
 
-```python
-from scenedetect import detect, AdaptiveDetector, split_video_ffmpeg
-scene_list = detect('my_video.mp4', AdaptiveDetector())
-split_video_ffmpeg('my_video.mp4', scene_list)
-```
+.. code-block:: python
+
+    from scenedetect import detect, AdaptiveDetector, split_video_ffmpeg
+    scene_list = detect('my_video.mp4', AdaptiveDetector())
+    split_video_ffmpeg('my_video.mp4', scene_list)
 
 ----------------------------------------------------------
 
