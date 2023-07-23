@@ -24,7 +24,7 @@ install:
   # https://about.signpath.io/documentation/build-system-integration#ci-integrations-with-origin-verification
   # To ensure this, we checkout a specific commit hash. Eventually this branch will be merged and
   # builds will be done directly from the release branch.
-  - git checkout 4231c9579b3dd0565a08c85629ccd798bc46df39
+  - git checkout 30dd61ba384518bc4ca6e6fea2fe37c560461738
 
   - echo * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
   - echo * *                      SETTING UP PYTHON ENVIRONMENT                      * *
@@ -34,8 +34,7 @@ install:
   - python -m pip install --upgrade pip
   - python -m pip install -r dist/requirements_windows.txt
   - python -m pip install -r docs/requirements.txt
-  # Checkout build resources and download third party software.
-  # Only `scenedetect.exe` will be code signed.
+  # Checkout build resources and third party software used for testing.
   - git checkout refs/remotes/origin/resources -- dist/
   - git checkout refs/remotes/origin/build-windows -- dist/
   - appveyor DownloadFile https://github.com/GyanD/codexffmpeg/releases/download/6.0/ffmpeg-6.0-full_build.7z
