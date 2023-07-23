@@ -8,11 +8,11 @@ PySceneDetect Releases
 
 #### Release Notes
 
-Includes new [`load-scenes` command](https://www.scenedetect.com/docs/0.6.2/cli/commands.html#load-scenes), ability to specify a default detector, PyAV 10 support, and several bugfixes. Minimum supported Python version is now **Python 3.7**.
+Includes new [`load-scenes` command](https://www.scenedetect.com/docs/0.6.2/cli.html#load-scenes), ability to specify a default detector, PyAV 10 support, and several bugfixes. Minimum supported Python version is now **Python 3.7**.
 
 **Command-Line Changes:**
 
- - [feature] Add [`load-scenes` command](https://www.scenedetect.com/docs/0.6.2/cli/commands.html#load-scenes) to load cuts from `list-scenes` CSV output [#235](https://github.com/Breakthrough/PySceneDetect/issues/235)
+ - [feature] Add [`load-scenes` command](https://www.scenedetect.com/docs/0.6.2/cli.html#load-scenes) to load cuts from `list-scenes` CSV output [#235](https://github.com/Breakthrough/PySceneDetect/issues/235)
  - [feature] Use `detect-adaptive` by default if a detector is not specified [#329](https://github.com/Breakthrough/PySceneDetect/issues/329)
    - Default detector can be set by [config file](https://www.scenedetect.com/docs/latest/cli/config_file.html) with the `default-detector` option under `[global]`
  - [bugfix] Fix `-d`/`--duration` and `-e`/`--end` options of `time` command consuming one extra frame [#307](https://github.com/Breakthrough/PySceneDetect/issues/307)
