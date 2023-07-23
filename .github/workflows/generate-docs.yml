@@ -3,9 +3,6 @@
 # scenedetect.com/docs/<output_dir>
 name: Generate Documentation
 
-# TODO: Run action when the docs change for a given release branch automatically (github.ref_name).
-# Move docs for releases to folders matching their branch names (e.g. docs/releases/0.6.1/)
-
 on:
   push:
     branches:

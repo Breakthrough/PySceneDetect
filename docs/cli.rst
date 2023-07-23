@@ -431,10 +431,6 @@ Options
 
   Default: ``"Start Frame"``
 
-.. option:: -f FPS, --framerate FPS
-
-  Override framerate to use when performing timecode to frame number conversion.
-
 
 .. _command-save-images:
 

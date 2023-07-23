@@ -80,7 +80,7 @@ jobs:
         if: ${{ matrix.os != 'windows-latest' }}
         run: |
           python -m build
-          echo "scenedetect_version=`python -c \"import scenedetect; print(scenedetect.__version__[1:].replace('-', '.'))\"`" >> "$GITHUB_ENV"
+          echo "scenedetect_version=`python -c \"import scenedetect; print(scenedetect.__version__.replace('-', '.'))\"`" >> "$GITHUB_ENV"
 
       - name: Smoke Test Package (Source Dist)
         if: ${{ matrix.os != 'windows-latest' }}

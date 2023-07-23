@@ -21,10 +21,10 @@ PySceneDetect is available via `pip` as [the `scenedetect` package](https://pypi
 ### Windows Build (64-bit Only) &nbsp; <span class="wy-text-neutral"><span class="fa fa-windows"></span></span>
 
 <div class="important">
-<h3 class="wy-text-neutral"><span class="fa fa-forward wy-text-info"></span> Latest Release: <b class="wy-text-neutral">v0.6.1</b></h3>
-<h4 class="wy-text-neutral"><span class="fa fa-calendar wy-text-info"></span>&nbsp; Release Date:&nbsp; <b>November 28, 2022</b></h4>
-<a href="https://github.com/Breakthrough/PySceneDetect/releases/download/v0.6.1-release/PySceneDetect-0.6.1-win64.msi" class="btn btn-info" style="margin-bottom:8px;" role="button"><span class="fa fa-download"></span>&nbsp; <b>Installer</b>&nbsp;&nbsp;(recommended)</a> &nbsp;&nbsp;&nbsp;&nbsp;
-<a href="https://github.com/Breakthrough/PySceneDetect/releases/download/v0.6.1-release/PySceneDetect-0.6.1-win64-portable.zip" class="btn btn-info" style="margin-bottom:8px;" role="button"><span class="fa fa-download"></span>&nbsp; <b>Portable .zip</b></a> &nbsp;&nbsp;&nbsp;&nbsp;
+<h3 class="wy-text-neutral"><span class="fa fa-forward wy-text-info"></span> Latest Release: <b class="wy-text-neutral">v0.6.2</b></h3>
+<h4 class="wy-text-neutral"><span class="fa fa-calendar wy-text-info"></span>&nbsp; Release Date:&nbsp; <b>July 23, 2023</b></h4>
+<a href="https://github.com/Breakthrough/PySceneDetect/releases/download/v0.6.2-release/PySceneDetect-0.6.2-win64.msi" class="btn btn-info" style="margin-bottom:8px;" role="button"><span class="fa fa-download"></span>&nbsp; <b>Installer</b>&nbsp;&nbsp;(recommended)</a> &nbsp;&nbsp;&nbsp;&nbsp;
+<a href="https://github.com/Breakthrough/PySceneDetect/releases/download/v0.6.2-release/PySceneDetect-0.6.2-win64-portable.zip" class="btn btn-info" style="margin-bottom:8px;" role="button"><span class="fa fa-download"></span>&nbsp; <b>Portable .zip</b></a> &nbsp;&nbsp;&nbsp;&nbsp;
 <a href="../cli/" class="btn btn-success" style="margin-bottom:8px;" role="button"><span class="fa fa-book"></span>&nbsp; <b>Getting Started</b></a>
 </div>
 
