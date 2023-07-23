@@ -107,4 +107,4 @@ jobs:
           name: scenedetect-dist
           path: |
             dist/*.tar.gz
-            dist/*.zip
+            dist/*.whl
