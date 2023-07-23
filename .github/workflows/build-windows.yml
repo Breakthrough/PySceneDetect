@@ -32,8 +32,14 @@ jobs:
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip build wheel virtualenv setuptools
-          pip install av==9.2 opencv-python-headless==4.5.1.48 --only-binary :all:
           pip install -r dist/requirements_windows.txt
+
+      - name: Download FFMPEG
+        uses: dsaltares/fetch-gh-release-asset@1.1.1
+        with:
+          repo: 'GyanD/codexffmpeg'
+          version: 'tags/6.0'
+          file: 'ffmpeg-6.0-full_build.7z'
 
       - name: Checkout test and build resources
         run: |
@@ -41,7 +47,6 @@ jobs:
           git checkout refs/remotes/origin/resources -- tests/resources/
           git fetch --depth=1 https://github.com/Breakthrough/PySceneDetect.git refs/heads/build-windows:refs/remotes/origin/build-windows
           git checkout refs/remotes/origin/build-windows -- dist/
-          7z e dist/windows_thirdparty.7z
 
       - name: Unit Tests
         run: |
@@ -53,9 +58,11 @@ jobs:
 
       - name: Assemble Portable EXE
         run: |
+          MKDIR dist/ffmpeg
+          7z e -odist/ffmpeg ffmpeg-6.0-full_build.7z bin/ffmpeg.exe LICENSE
           python dist/cleanup_dependencies.py
-          COPY ffmpeg.exe dist/scenedetect
-          COPY mkvmerge.exe dist/scenedetect
+          COPY dist/ffmpeg/ffmpeg.exe dist/scenedetect/ffmpeg.exe
+          COPY dist/ffmpeg/LICENSE dist/scenedetect/LICENSE-FFMPEG
 
       - name: Test Portable EXE
         run: |
