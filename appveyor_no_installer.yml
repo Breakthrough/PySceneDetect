@@ -1,0 +1,63 @@
+# This builds a portable Windows .exe (unsigned).
+# TODO: Set this up on Github Actions to run as part of CI to make sure dependencies are up to date.
+build: false
+
+environment:
+  matrix:
+    - PYTHON: "C:\\Python39-x64"
+  # Encrypted AdvancedInstaller License
+  ai_license_secret:
+    secure: lulTujjpNX3A1RKIvj834/Czn6etzevma6oqlA5Xia5tgrg75SPXcs1lPNlu5YPU
+  ai_license_salt:
+    secure: kMv/7J3wqaRGUJYwnfaY6edw0VW39uX7oM9Od9PQ2wwlCmTZcwAh4kEUxhB5u91QbXmp4McMuwcXAO4UdVoSGg==
+
+install:
+  - git checkout develop
+
+  - echo * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+  - echo * *                      SETTING UP PYTHON ENVIRONMENT                      * *
+  - echo * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+  - 'SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%'
+  - python --version
+  - python -m pip install --upgrade pip
+  - python -m pip install -r dist/requirements_windows.txt
+  # Checkout build resources and download third party software
+  - git checkout refs/remotes/origin/resources -- dist/
+  - git checkout refs/remotes/origin/build-windows -- dist/
+  - appveyor DownloadFile https://github.com/GyanD/codexffmpeg/releases/download/6.0/ffmpeg-6.0-full_build.7z
+  - 7z e ffmpeg-6.0-full_build.7z -odist/ffmpeg ffmpeg.exe LICENSE -r
+
+  - echo * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+  - echo * *                          BUILDING WINDOWS EXE                           * *
+  - echo * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+  # Build Windows .EXE and create portable .ZIP
+  - pyinstaller dist/scenedetect.spec
+  - python dist/cleanup_dependencies.py
+  - move dist\ffmpeg\ffmpeg.exe dist\scenedetect\
+  - move dist\ffmpeg\LICENSE dist\scenedetect\LICENSE-FFMPEG
+  - copy scenedetect\_thirdparty\LICENSE* dist\scenedetect\
+  - cd dist/scenedetect
+  - 7z a ../scenedetect-win64.zip *
+  - cd ../..
+
+test_script:
+  - echo * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+  - echo * *                              TESTING BUILD                              * *
+  - echo * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+  # Checkout required test resources
+  - git fetch --depth=1 https://github.com/Breakthrough/PySceneDetect.git refs/heads/resources:refs/remotes/origin/resources
+  - git checkout refs/remotes/origin/resources -- tests/resources/
+  # Run unit tests
+  - move dist\scenedetect\ffmpeg.exe ffmpeg.exe
+  - pytest
+  # Test Windows build
+  - move ffmpeg.exe dist\scenedetect\ffmpeg.exe
+  - cd dist/scenedetect
+  - scenedetect.exe version
+  - scenedetect.exe -i ../../tests/resources/testvideo.mp4 -b opencv time -e 2s
+  - scenedetect.exe -i ../../tests/resources/testvideo.mp4 -b pyav time -e 2s
+
+artifacts:
+  # Portable ZIP
+  - path: dist/scenedetect-win64.zip
+    name: PySceneDetect-win64_portable
