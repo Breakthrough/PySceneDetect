@@ -23,7 +23,9 @@ deploy:
 install:
   # The commit being checked out must meet SignPath's origin verification requirements:
   # https://about.signpath.io/documentation/build-system-integration#ci-integrations-with-origin-verification
-  - git checkout dfdea9817d8397c972d0a77cbf92617ba4c4dd25
+
+  # TODO: REPLACE WITH COMMIT HASH
+  - git checkout develop
 
   - echo * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
   - echo * *                      SETTING UP PYTHON ENVIRONMENT                      * *
