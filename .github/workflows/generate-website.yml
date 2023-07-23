@@ -38,7 +38,8 @@ jobs:
           git rm * -r -f --ignore-unmatch
           git checkout HEAD -- .nojekyll
           git checkout HEAD -- CNAME
-          git checkout HEAD -- docs/
+          git checkout HEAD -- docs/*/
+          git rm docs/index.html --ignore-unmatch
           git add website/build/
           git mv website/build/* . -f -k
           git rm website/build/* -r -f
