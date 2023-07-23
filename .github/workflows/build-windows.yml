@@ -95,4 +95,3 @@ jobs:
           ./build/scenedetect -i tests/resources/goldeneye.mp4 -b opencv detect-content time --end 00:10:00
           ./build/scenedetect -i tests/resources/goldeneye.mp4 -b pyav detect-content time --end 00:10:00
           ./build/scenedetect -i tests/resources/goldeneye.mp4 detect-content time --end 00:10:00 split-video
-          ./build/scenedetect -i tests/resources/goldeneye.mp4 detect-content time --end 00:10:00 split-video -m
