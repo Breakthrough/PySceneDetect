@@ -12,6 +12,7 @@ on:
       - dist/**
       - scenedetect/**
       - tests/**
+  workflow_dispatch:
 
 jobs:
   build:
