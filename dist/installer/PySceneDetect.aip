@@ -80,6 +80,7 @@
     <ROW Component="APPDIR" ComponentId="{088A429B-96BF-40BE-9BA2-B2CA5EB76862}" Directory_="APPDIR" Attributes="0"/>
     <ROW Component="C4FE6FD5B7C4D07B3A313E754A9A6A8" ComponentId="{0DC87E5B-5F60-4A9A-AB46-BF92FDC477F3}" Directory_="APPDIR" Attributes="260" KeyPath="C4FE6FD5B7C4D07B3A313E754A9A6A8" Options="2"/>
     <ROW Component="LICENSE" ComponentId="{473DDF59-1E9A-47EE-B059-69FD328896C5}" Directory_="APPDIR" Attributes="0" KeyPath="LICENSE" Type="0"/>
+    <ROW Component="LICENSEFFMPEG" ComponentId="{8620E83A-4470-44E6-8AF9-2769F6BE998A}" Directory_="APPDIR" Attributes="0" KeyPath="LICENSEFFMPEG"/>
     <ROW Component="ProductInformation" ComponentId="{C45D033C-5DD4-40D4-AABA-C6639AF83796}" Directory_="APPDIR" Attributes="4" KeyPath="Version"/>
     <ROW Component="VCRUNTIME140.dll" ComponentId="{5CED409B-70A7-4504-95F7-F775A13D43C0}" Directory_="APPDIR" Attributes="256" KeyPath="VCRUNTIME140.dll"/>
     <ROW Component="__init__.py" ComponentId="{CC1504DF-1190-4CA4-B105-BC7F48CEC6D1}" Directory_="data_1_Dir" Attributes="0" KeyPath="__init__.py" Type="0"/>
@@ -207,12 +208,10 @@
   <COMPONENT cid="caphyon.advinst.msicomp.MsiFilesComponent">
     <ROW File="ffmpeg.exe" Component_="ffmpeg.exe" FileName="ffmpeg.exe" Attributes="0" SourcePath="..\scenedetect\ffmpeg.exe" SelfReg="false" DigSign="true"/>
     <ROW File="LICENSE" Component_="LICENSE" FileName="LICENSE" Attributes="0" SourcePath="..\scenedetect\LICENSE" SelfReg="false"/>
-    <ROW File="LICENSEFFMPEG" Component_="LICENSE" FileName="LICENS~1|LICENSE-FFMPEG" Attributes="0" SourcePath="..\scenedetect\LICENSE-FFMPEG" SelfReg="false"/>
-    <ROW File="LICENSEMKVMERGE" Component_="LICENSE" FileName="LICENS~2|LICENSE-MKVMERGE" Attributes="0" SourcePath="..\scenedetect\LICENSE-MKVMERGE" SelfReg="false"/>
+    <ROW File="LICENSEFFMPEG" Component_="LICENSEFFMPEG" FileName="LICENS~1|LICENSE-FFMPEG" Attributes="0" SourcePath="..\scenedetect\LICENSE-FFMPEG" SelfReg="false"/>
     <ROW File="LICENSEPYTHON" Component_="LICENSE" FileName="LICENS~3|LICENSE-PYTHON" Attributes="0" SourcePath="..\scenedetect\LICENSE-PYTHON" SelfReg="false"/>
     <ROW File="pyexpat.pyd" Component_="LICENSE" FileName="pyexpat.pyd" Attributes="0" SourcePath="..\scenedetect\pyexpat.pyd" SelfReg="false"/>
     <ROW File="python39.dll" Component_="python39.dll" FileName="python39.dll" Attributes="0" SourcePath="..\scenedetect\python39.dll" SelfReg="false"/>
-    <ROW File="README.md" Component_="LICENSE" FileName="README.md" Attributes="0" SourcePath="..\scenedetect\README.md" SelfReg="false"/>
     <ROW File="scenedetect.cfg" Component_="LICENSE" FileName="SCENED~1.CFG|scenedetect.cfg" Attributes="0" SourcePath="..\scenedetect\scenedetect.cfg" SelfReg="false"/>
     <ROW File="scenedetect.exe" Component_="scenedetect.exe" FileName="SCENED~1.EXE|scenedetect.exe" Attributes="0" SourcePath="..\scenedetect\scenedetect.exe" SelfReg="false" DigSign="true"/>
     <ROW File="select.pyd" Component_="LICENSE" FileName="select.pyd" Attributes="0" SourcePath="..\scenedetect\select.pyd" SelfReg="false"/>
@@ -427,6 +426,7 @@
     <ROW File="pyscenedetect_logo_small.png" Component_="alabaster.css" FileName="PYSCEN~2.PNG|pyscenedetect_logo_small.png" Attributes="0" SourcePath="..\scenedetect\docs\_static\pyscenedetect_logo_small.png" SelfReg="false"/>
     <ROW File="searchtools.js" Component_="alabaster.css" FileName="SEARCH~1.JS|searchtools.js" Attributes="0" SourcePath="..\scenedetect\docs\_static\searchtools.js" SelfReg="false"/>
     <ROW File="sphinx_highlight.js" Component_="alabaster.css" FileName="SPHINX~1.JS|sphinx_highlight.js" Attributes="0" SourcePath="..\scenedetect\docs\_static\sphinx_highlight.js" SelfReg="false"/>
+    <ROW File="README.txt" Component_="LICENSE" FileName="README.txt" Attributes="0" SourcePath="..\scenedetect\README.txt" SelfReg="false"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.BootstrOptComponent">
     <ROW BootstrOptKey="GlobalOptions" DownloadFolder="[LocalAppDataFolder]\[|ProductName]\prerequisites"/>
@@ -660,6 +660,7 @@
     <ROW Feature_="PySceneDetect" Component_="api.doctree"/>
     <ROW Feature_="PySceneDetect" Component_="backends.doctree_1"/>
     <ROW Feature_="PySceneDetect" Component_="alabaster.css"/>
+    <ROW Feature_="ffmpeg" Component_="LICENSEFFMPEG"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiIconsComponent">
     <ROW Name="psd_square_small.exe" SourcePath="psd_square_small.ico" Index="0"/>
