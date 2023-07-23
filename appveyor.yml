@@ -5,6 +5,8 @@ build: false
 # Branches applies to tags as well. We only build on tagged releases of the form vX.Y.Z-release
 branches:
   only:
+    - main
+    - /releases\/.+/
     - /v.+-release/
 
 skip_tags: false
