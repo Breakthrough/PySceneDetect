@@ -1,4 +1,5 @@
 # Build Portable Windows EXE (x64) Distribution for PySceneDetect
+
 name: Windows Distribution
 
 on:
