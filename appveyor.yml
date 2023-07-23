@@ -24,9 +24,8 @@ install:
   # Checkout build resources and download third party software
   - git checkout refs/remotes/origin/resources -- dist/
   - git checkout refs/remotes/origin/build-windows -- dist/
-  - mkdir dist/ffmpeg
   - appveyor DownloadFile https://github.com/GyanD/codexffmpeg/releases/download/6.0/ffmpeg-6.0-full_build.7z
-  - 7z e -odist/ffmpeg ffmpeg-6.0-full_build.7z bin/ffmpeg.exe LICENSE
+  - 7z e -odist ffmpeg-6.0-full_build.7z bin/ffmpeg.exe LICENSE
 
   - echo * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
   - echo * *                          BUILDING WINDOWS EXE                           * *
@@ -34,8 +33,8 @@ install:
   # Build Windows .EXE and create portable .ZIP
   - pyinstaller dist/scenedetect.spec
   - python dist/cleanup_dependencies.py
-  - cp dist/ffmpeg/ffmpeg.exe dist/scenedetect/ffmpeg.exe
-  - cp dist/ffmpeg/LICENSE dist/scenedetect/LICENSE-FFMPEG
+  - move dist/ffmpeg.exe dist/scenedetect/ffmpeg.exe
+  - move dist/LICENSE dist/scenedetect/LICENSE-FFMPEG
   - cd dist/scenedetect
   - 7z a ../scenedetect-win64.zip *
   - cd ../..
