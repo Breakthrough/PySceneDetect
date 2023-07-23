@@ -21,11 +21,12 @@ install:
   - python --version
   - python -m pip install --upgrade pip
   - python -m pip install -r dist/requirements_windows.txt
-
-  # Checkout all Windows build dependencies and extract them.
+  # Checkout build resources and download third party software
   - git checkout refs/remotes/origin/resources -- dist/
   - git checkout refs/remotes/origin/build-windows -- dist/
-  - 7z e dist/windows_thirdparty.7z
+  - mkdir dist/ffmpeg
+  - appveyor DownloadFile https://github.com/GyanD/codexffmpeg/releases/download/6.0/ffmpeg-6.0-full_build.7z
+  - 7z e -odist/ffmpeg ffmpeg-6.0-full_build.7z bin/ffmpeg.exe LICENSE
 
   - echo * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
   - echo * *                          BUILDING WINDOWS EXE                           * *
@@ -33,8 +34,8 @@ install:
   # Build Windows .EXE and create portable .ZIP
   - pyinstaller dist/scenedetect.spec
   - python dist/cleanup_dependencies.py
-  - cp ffmpeg.exe dist/scenedetect
-  - cp mkvmerge.exe dist/scenedetect
+  - cp dist/ffmpeg/ffmpeg.exe dist/scenedetect/ffmpeg.exe
+  - cp dist/ffmpeg/LICENSE dist/scenedetect/LICENSE-FFMPEG
   - cd dist/scenedetect
   - 7z a ../scenedetect-win64.zip *
   - cd ../..
@@ -51,8 +52,8 @@ test_script:
   # Test Windows build
   - cd dist/scenedetect
   - scenedetect.exe version
-  - scenedetect.exe -i ../../tests/resources/testvideo.mp4 -b opencv detect-content time -e 2s
-  - scenedetect.exe -i ../../tests/resources/testvideo.mp4 -b pyav detect-content time -e 2s
+  - scenedetect.exe -i ../../tests/resources/testvideo.mp4 -b opencv time -e 2s
+  - scenedetect.exe -i ../../tests/resources/testvideo.mp4 -b pyav time -e 2s
 
 artifacts:
   # Portable ZIP
