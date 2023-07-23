@@ -43,11 +43,7 @@ jobs:
           git fetch --depth=1 https://github.com/Breakthrough/PySceneDetect.git refs/heads/resources:refs/remotes/origin/resources
           git checkout refs/remotes/origin/resources -- tests/resources/
 
-      - name: Unit Tests
-        run: |
-          python -m pytest tests/
       # TODO: Install ffmpeg/mkvtoolnix on all runners.
-
       - name: Download FFMPEG
         if: ${{ matrix.os == 'windows-latest' }}
         uses: dsaltares/fetch-gh-release-asset@1.1.1
@@ -60,6 +56,10 @@ jobs:
         if: ${{ matrix.os == 'windows-latest' }}
         run: |
           7z e ffmpeg-6.0-full_build.7z ffmpeg.exe -r
+
+      - name: Unit Tests
+        run: |
+          python -m pytest tests/
 
       - name: Smoke Test (Module)
         run: |
