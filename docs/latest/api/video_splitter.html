@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Video Splitting &#8212; PySceneDetect v0.6.1 documentation</title>
+    <title>Video Splitting &#8212; PySceneDetect 0.6.2 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
     <link rel="stylesheet" type="text/css" href="../_static/pyscenedetect.css" />
@@ -14,8 +14,8 @@
     <script src="../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="FrameTimecode" href="frame_timecode.html" />
-    <link rel="prev" title="Backends" href="backends.html" />
+    <link rel="next" title="StatsManager" href="stats_manager.html" />
+    <link rel="prev" title="SceneManager" href="scene_manager.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
@@ -48,25 +48,6 @@ using ffmpeg or mkvmerge.</p>
 <p>Once installed, ensure the program can be accessed system-wide by calling the <cite>mkvmerge</cite> or <cite>ffmpeg</cite>
 command from a terminal/command prompt. PySceneDetect will automatically use whichever program is
 available on the computer, depending on the specified command-line options.</p>
-<dl class="py data">
-<dt class="sig sig-object py" id="scenedetect.video_splitter.DEFAULT_FFMPEG_ARGS">
-<span class="sig-prename descclassname"><span class="pre">scenedetect.video_splitter.</span></span><span class="sig-name descname"><span class="pre">DEFAULT_FFMPEG_ARGS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'-map</span> <span class="pre">0</span> <span class="pre">-c:v</span> <span class="pre">libx264</span> <span class="pre">-preset</span> <span class="pre">veryfast</span> <span class="pre">-crf</span> <span class="pre">22</span> <span class="pre">-c:a</span> <span class="pre">aac'</span></em><a class="headerlink" href="#scenedetect.video_splitter.DEFAULT_FFMPEG_ARGS" title="Permalink to this definition">¶</a></dt>
-<dd><p>Default arguments passed to ffmpeg when invoking the <cite>split_video_ffmpeg</cite> function.</p>
-</dd></dl>
-
-<dl class="py data">
-<dt class="sig sig-object py" id="scenedetect.video_splitter.FFMPEG_PATH">
-<span class="sig-prename descclassname"><span class="pre">scenedetect.video_splitter.</span></span><span class="sig-name descname"><span class="pre">FFMPEG_PATH</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#scenedetect.video_splitter.FFMPEG_PATH" title="Permalink to this definition">¶</a></dt>
-<dd><p>Relative path to the Ffmpeg binary on this system, if any (will be None if not available).</p>
-</dd></dl>
-
-<dl class="py data">
-<dt class="sig sig-object py" id="scenedetect.video_splitter.TimecodePair">
-<span class="sig-prename descclassname"><span class="pre">scenedetect.video_splitter.</span></span><span class="sig-name descname"><span class="pre">TimecodePair</span></span><a class="headerlink" href="#scenedetect.video_splitter.TimecodePair" title="Permalink to this definition">¶</a></dt>
-<dd><p>Named type for pairs of timecodes, which typically represents the start/end of a scene.</p>
-<p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">Tuple</span></code>[<a class="reference internal" href="frame_timecode.html#scenedetect.frame_timecode.FrameTimecode" title="scenedetect.frame_timecode.FrameTimecode"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrameTimecode</span></code></a>, <a class="reference internal" href="frame_timecode.html#scenedetect.frame_timecode.FrameTimecode" title="scenedetect.frame_timecode.FrameTimecode"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrameTimecode</span></code></a>]</p>
-</dd></dl>
-
 <dl class="py function">
 <dt class="sig sig-object py" id="scenedetect.video_splitter.is_ffmpeg_available">
 <span class="sig-prename descclassname"><span class="pre">scenedetect.video_splitter.</span></span><span class="sig-name descname"><span class="pre">is_ffmpeg_available</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.video_splitter.is_ffmpeg_available" title="Permalink to this definition">¶</a></dt>
@@ -150,6 +131,25 @@ still return 0, but no commands will be invoked.</p>
 </dl>
 </dd></dl>
 
+<dl class="py data">
+<dt class="sig sig-object py" id="scenedetect.video_splitter.DEFAULT_FFMPEG_ARGS">
+<span class="sig-prename descclassname"><span class="pre">scenedetect.video_splitter.</span></span><span class="sig-name descname"><span class="pre">DEFAULT_FFMPEG_ARGS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'-map</span> <span class="pre">0</span> <span class="pre">-c:v</span> <span class="pre">libx264</span> <span class="pre">-preset</span> <span class="pre">veryfast</span> <span class="pre">-crf</span> <span class="pre">22</span> <span class="pre">-c:a</span> <span class="pre">aac'</span></em><a class="headerlink" href="#scenedetect.video_splitter.DEFAULT_FFMPEG_ARGS" title="Permalink to this definition">¶</a></dt>
+<dd><p>Default arguments passed to ffmpeg when invoking the <cite>split_video_ffmpeg</cite> function.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="scenedetect.video_splitter.FFMPEG_PATH">
+<span class="sig-prename descclassname"><span class="pre">scenedetect.video_splitter.</span></span><span class="sig-name descname"><span class="pre">FFMPEG_PATH</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#scenedetect.video_splitter.FFMPEG_PATH" title="Permalink to this definition">¶</a></dt>
+<dd><p>Relative path to the Ffmpeg binary on this system, if any (will be None if not available).</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="scenedetect.video_splitter.TimecodePair">
+<span class="sig-prename descclassname"><span class="pre">scenedetect.video_splitter.</span></span><span class="sig-name descname"><span class="pre">TimecodePair</span></span><a class="headerlink" href="#scenedetect.video_splitter.TimecodePair" title="Permalink to this definition">¶</a></dt>
+<dd><p>Named type for pairs of timecodes, which typically represents the start/end of a scene.</p>
+<p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">Tuple</span></code>[<a class="reference internal" href="frame_timecode.html#scenedetect.frame_timecode.FrameTimecode" title="scenedetect.frame_timecode.FrameTimecode"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrameTimecode</span></code></a>, <a class="reference internal" href="frame_timecode.html#scenedetect.frame_timecode.FrameTimecode" title="scenedetect.frame_timecode.FrameTimecode"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrameTimecode</span></code></a>]</p>
+</dd></dl>
+
 </section>
 
 
@@ -160,10 +160,10 @@ still return 0, but no commands will be invoked.</p>
     <ul>
         <li>
           &larr;
-          <a href="backends.html" title="Previous document">Backends</a>
+          <a href="scene_manager.html" title="Previous document">SceneManager</a>
         </li>
         <li>
-          <a href="frame_timecode.html" title="Next document">FrameTimecode</a>
+          <a href="stats_manager.html" title="Next document">StatsManager</a>
           &rarr;
         </li>
     </ul>
@@ -183,7 +183,7 @@ still return 0, but no commands will be invoked.</p>
 
 
 
-<p class="blurb">CLI/API Reference Manual [v0.6.1]</p>
+<p class="blurb">CLI/API Documentation [0.6.2]</p>
 
 
 
@@ -200,31 +200,33 @@ still return 0, but no commands will be invoked.</p>
 <h3>Navigation</h3>
 <p class="caption" role="heading"><span class="caption-text">Command-Line Interface [CLI]:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../cli/global_options.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Application</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../cli/detectors.html">Detectors</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../cli/commands.html">Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cli.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Command</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cli.html#examples">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cli.html#options">Options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cli.html#detectors">Detectors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cli.html#commands">Commands</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../cli/config_file.html">Configuration File</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../cli/backends.html">Backends</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Python API Documentation:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../api.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="scene_manager.html">SceneManager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="detectors.html">Detection Algorithms</a></li>
 <li class="toctree-l1"><a class="reference internal" href="backends.html">Backends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scene_manager.html">SceneManager</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Video Splitting</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#scenedetect.video_splitter.DEFAULT_FFMPEG_ARGS"><code class="docutils literal notranslate"><span class="pre">DEFAULT_FFMPEG_ARGS</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#scenedetect.video_splitter.FFMPEG_PATH"><code class="docutils literal notranslate"><span class="pre">FFMPEG_PATH</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#scenedetect.video_splitter.TimecodePair"><code class="docutils literal notranslate"><span class="pre">TimecodePair</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.video_splitter.is_ffmpeg_available"><code class="docutils literal notranslate"><span class="pre">is_ffmpeg_available()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.video_splitter.is_mkvmerge_available"><code class="docutils literal notranslate"><span class="pre">is_mkvmerge_available()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.video_splitter.split_video_ffmpeg"><code class="docutils literal notranslate"><span class="pre">split_video_ffmpeg()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.video_splitter.split_video_mkvmerge"><code class="docutils literal notranslate"><span class="pre">split_video_mkvmerge()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scenedetect.video_splitter.DEFAULT_FFMPEG_ARGS"><code class="docutils literal notranslate"><span class="pre">DEFAULT_FFMPEG_ARGS</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scenedetect.video_splitter.FFMPEG_PATH"><code class="docutils literal notranslate"><span class="pre">FFMPEG_PATH</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scenedetect.video_splitter.TimecodePair"><code class="docutils literal notranslate"><span class="pre">TimecodePair</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="stats_manager.html">StatsManager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="frame_timecode.html">FrameTimecode</a></li>
 <li class="toctree-l1"><a class="reference internal" href="scene_detector.html">SceneDetector</a></li>
-<li class="toctree-l1"><a class="reference internal" href="stats_manager.html">StatsManager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="video_stream.html">VideoStream</a></li>
 <li class="toctree-l1"><a class="reference internal" href="platform.html">Platform &amp; Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="migration_guide.html">Migration Guide</a></li>
@@ -234,8 +236,10 @@ still return 0, but no commands will be invoked.</p>
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="backends.html" title="previous chapter">Backends</a></li>
-      <li>Next: <a href="frame_timecode.html" title="next chapter">FrameTimecode</a></li>
+  <li><a href="../api.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Package</a><ul>
+      <li>Previous: <a href="scene_manager.html" title="previous chapter">SceneManager</a></li>
+      <li>Next: <a href="stats_manager.html" title="next chapter">StatsManager</a></li>
+  </ul></li>
   </ul></li>
 </ul>
 </div>

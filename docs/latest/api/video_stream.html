@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>VideoStream &#8212; PySceneDetect v0.6.1 documentation</title>
+    <title>VideoStream &#8212; PySceneDetect 0.6.2 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
     <link rel="stylesheet" type="text/css" href="../_static/pyscenedetect.css" />
@@ -15,7 +15,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Platform &amp; Logging" href="platform.html" />
-    <link rel="prev" title="StatsManager" href="stats_manager.html" />
+    <link rel="prev" title="SceneDetector" href="scene_detector.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
@@ -50,8 +50,37 @@ interface for video input. To open a video by path, use <a class="reference inte
 OpenCV will be used as the video backend. See <a class="reference internal" href="backends.html#module-scenedetect.backends" title="scenedetect.backends"><code class="xref py py-mod docutils literal notranslate"><span class="pre">scenedetect.backends</span></code></a> for a detailed example.</p>
 <p>New <a class="reference internal" href="#scenedetect.video_stream.VideoStream" title="scenedetect.video_stream.VideoStream"><code class="xref py py-class docutils literal notranslate"><span class="pre">VideoStream</span></code></a> implementations can be
 tested by adding it to the test suite in <cite>tests/test_video_stream.py</cite>.</p>
-<section id="videostream-interface">
-<h2><code class="docutils literal notranslate"><span class="pre">VideoStream</span></code> Interface<a class="headerlink" href="#videostream-interface" title="Permalink to this heading">¶</a></h2>
+<dl class="py exception">
+<dt class="sig sig-object py" id="scenedetect.video_stream.FrameRateUnavailable">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scenedetect.video_stream.</span></span><span class="sig-name descname"><span class="pre">FrameRateUnavailable</span></span><a class="headerlink" href="#scenedetect.video_stream.FrameRateUnavailable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Exception instance to provide consistent error messaging across backends when the video frame
+rate is unavailable or cannot be calculated. Subclass of VideoOpenFailure.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>message</strong> – Additional context the backend can provide for the open failure.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="scenedetect.video_stream.SeekError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scenedetect.video_stream.</span></span><span class="sig-name descname"><span class="pre">SeekError</span></span><a class="headerlink" href="#scenedetect.video_stream.SeekError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Either an unrecoverable error happened while attempting to seek, or the underlying
+stream is not seekable (additional information will be provided when possible).</p>
+<p>The stream is guaranteed to be left in a valid state, but the position may be reset.</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="scenedetect.video_stream.VideoOpenFailure">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scenedetect.video_stream.</span></span><span class="sig-name descname"><span class="pre">VideoOpenFailure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Unknown</span> <span class="pre">backend</span> <span class="pre">error.'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.video_stream.VideoOpenFailure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raised by a backend if opening a video fails.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>message</strong> (<em>str</em>) – Additional context the backend can provide for the open failure.</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py class">
 <dt class="sig sig-object py" id="scenedetect.video_stream.VideoStream">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scenedetect.video_stream.</span></span><span class="sig-name descname"><span class="pre">VideoStream</span></span><a class="headerlink" href="#scenedetect.video_stream.VideoStream" title="Permalink to this definition">¶</a></dt>
@@ -64,6 +93,66 @@ classes (<cite>BACKEND_NAME = ‘backend_identifier’</cite>).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scenedetect.video_stream.VideoStream.read">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">decode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">advance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.video_stream.VideoStream.read" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read and decode the next frame as a numpy.ndarray. Returns False when video ends.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>decode</strong> (<em>bool</em>) – Decode and return the frame.</p></li>
+<li><p><strong>advance</strong> (<em>bool</em>) – Seek to the next frame. If False, will return the current (last) frame.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>If decode = True, the decoded frame (numpy.ndarray), or False (bool) if end of video.
+If decode = False, a bool indicating if advancing to the the next frame succeeded.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>ndarray</em> | bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scenedetect.video_stream.VideoStream.reset">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.video_stream.VideoStream.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Close and re-open the VideoStream (equivalent to seeking back to beginning).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scenedetect.video_stream.VideoStream.seek">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">seek</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.video_stream.VideoStream.seek" title="Permalink to this definition">¶</a></dt>
+<dd><p>Seek to the given timecode. If given as a frame number, represents the current seek
+pointer (e.g. if seeking to 0, the next frame decoded will be the first frame of the video).</p>
+<p>For 1-based indices (first frame is frame #1), the target frame number needs to be converted
+to 0-based by subtracting one. For example, if we want to seek to the first frame, we call
+seek(0) followed by read(). If we want to seek to the 5th frame, we call seek(4) followed
+by read(), at which point frame_number will be 5.</p>
+<p>May not be supported on all backend types or inputs (e.g. cameras).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>target</strong> (<a class="reference internal" href="frame_timecode.html#scenedetect.frame_timecode.FrameTimecode" title="scenedetect.frame_timecode.FrameTimecode"><em>FrameTimecode</em></a><em> | </em><em>float</em><em> | </em><em>int</em>) – Target position in video stream to seek to.
+If float, interpreted as time in seconds.
+If int, interpreted as frame number.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference internal" href="#scenedetect.video_stream.SeekError" title="scenedetect.video_stream.SeekError"><strong>SeekError</strong></a> – An error occurs while seeking, or seeking is not supported.</p></li>
+<li><p><strong>ValueError</strong> – <cite>target</cite> is not a valid value (i.e. it is negative).</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
 </dd>
 </dl>
 </dd></dl>
@@ -138,124 +227,8 @@ to the presentation time 0.  Returns 0 even if <cite>frame_number</cite> is 1.</
 milliseconds. The first frame has a PTS of 0.</p>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="scenedetect.video_stream.VideoStream.read">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">decode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">advance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.video_stream.VideoStream.read" title="Permalink to this definition">¶</a></dt>
-<dd><p>Read and decode the next frame as a numpy.ndarray. Returns False when video ends.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>decode</strong> (<em>bool</em>) – Decode and return the frame.</p></li>
-<li><p><strong>advance</strong> (<em>bool</em>) – Seek to the next frame. If False, will return the current (last) frame.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>If decode = True, the decoded frame (numpy.ndarray), or False (bool) if end of video.
-If decode = False, a bool indicating if advancing to the the next frame succeeded.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><em>ndarray</em> | bool</p>
-</dd>
-</dl>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="scenedetect.video_stream.VideoStream.reset">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.video_stream.VideoStream.reset" title="Permalink to this definition">¶</a></dt>
-<dd><p>Close and re-open the VideoStream (equivalent to seeking back to beginning).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>None</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="scenedetect.video_stream.VideoStream.seek">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">seek</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.video_stream.VideoStream.seek" title="Permalink to this definition">¶</a></dt>
-<dd><p>Seek to the given timecode. If given as a frame number, represents the current seek
-pointer (e.g. if seeking to 0, the next frame decoded will be the first frame of the video).</p>
-<p>For 1-based indices (first frame is frame #1), the target frame number needs to be converted
-to 0-based by subtracting one. For example, if we want to seek to the first frame, we call
-seek(0) followed by read(). If we want to seek to the 5th frame, we call seek(4) followed
-by read(), at which point frame_number will be 5.</p>
-<p>May not be supported on all backend types or inputs (e.g. cameras).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>target</strong> (<a class="reference internal" href="frame_timecode.html#scenedetect.frame_timecode.FrameTimecode" title="scenedetect.frame_timecode.FrameTimecode"><em>FrameTimecode</em></a><em> | </em><em>float</em><em> | </em><em>int</em>) – Target position in video stream to seek to.
-If float, interpreted as time in seconds.
-If int, interpreted as frame number.</p>
-</dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><ul class="simple">
-<li><p><a class="reference internal" href="#scenedetect.video_stream.SeekError" title="scenedetect.video_stream.SeekError"><strong>SeekError</strong></a> – An error occurs while seeking, or seeking is not supported.</p></li>
-<li><p><strong>ValueError</strong> – <cite>target</cite> is not a valid value (i.e. it is negative).</p></li>
-</ul>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>None</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-</section>
-<section id="video-stream-functions-and-constants">
-<h2><code class="docutils literal notranslate"><span class="pre">video_stream</span></code> Functions and Constants<a class="headerlink" href="#video-stream-functions-and-constants" title="Permalink to this heading">¶</a></h2>
-<p>The following functions and constants are available in the <code class="docutils literal notranslate"><span class="pre">scenedetect.video_stream</span></code> module.</p>
-<dl class="py data">
-<dt class="sig sig-object py" id="scenedetect.video_stream.DEFAULT_MIN_WIDTH">
-<span class="sig-prename descclassname"><span class="pre">scenedetect.video_stream.</span></span><span class="sig-name descname"><span class="pre">DEFAULT_MIN_WIDTH</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">260</span></em><a class="headerlink" href="#scenedetect.video_stream.DEFAULT_MIN_WIDTH" title="Permalink to this definition">¶</a></dt>
-<dd><p>The default minimum width a frame will be downscaled to when calculating a downscale factor.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="scenedetect.video_stream.compute_downscale_factor">
-<span class="sig-prename descclassname"><span class="pre">scenedetect.video_stream.</span></span><span class="sig-name descname"><span class="pre">compute_downscale_factor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame_width</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">effective_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">260</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.video_stream.compute_downscale_factor" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get the optimal default downscale factor based on a video’s resolution (currently only
-the width in pixels is considered).</p>
-<p>The resulting effective width of the video will be between frame_width and 1.5 * frame_width
-pixels (e.g. if frame_width is 200, the range of effective widths will be between 200 and 300).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>frame_width</strong> (<em>int</em>) – Actual width of the video frame in pixels.</p></li>
-<li><p><strong>effective_width</strong> (<em>int</em>) – Desired minimum width in pixels.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>The defalt downscale factor to use to achieve at least the target effective_width.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>int</p>
-</dd>
-</dl>
-</dd></dl>
-
-</section>
-<section id="exceptions">
-<h2>Exceptions<a class="headerlink" href="#exceptions" title="Permalink to this heading">¶</a></h2>
-<dl class="py exception">
-<dt class="sig sig-object py" id="scenedetect.video_stream.VideoOpenFailure">
-<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scenedetect.video_stream.</span></span><span class="sig-name descname"><span class="pre">VideoOpenFailure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Unknown</span> <span class="pre">backend</span> <span class="pre">error.'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.video_stream.VideoOpenFailure" title="Permalink to this definition">¶</a></dt>
-<dd><p>Raised by a backend if opening a video fails.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>message</strong> (<em>str</em>) – Additional context the backend can provide for the open failure.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py exception">
-<dt class="sig sig-object py" id="scenedetect.video_stream.SeekError">
-<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scenedetect.video_stream.</span></span><span class="sig-name descname"><span class="pre">SeekError</span></span><a class="headerlink" href="#scenedetect.video_stream.SeekError" title="Permalink to this definition">¶</a></dt>
-<dd><p>Either an unrecoverable error happened while attempting to seek, or the underlying
-stream is not seekable (additional information will be provided when possible).</p>
-<p>The stream is guaranteed to be left in a valid state, but the position may be reset.</p>
-</dd></dl>
-
-</section>
 </section>
 
 
@@ -266,7 +239,7 @@ stream is not seekable (additional information will be provided when possible).<
     <ul>
         <li>
           &larr;
-          <a href="stats_manager.html" title="Previous document">StatsManager</a>
+          <a href="scene_detector.html" title="Previous document">SceneDetector</a>
         </li>
         <li>
           <a href="platform.html" title="Next document">Platform &amp; Logging</a>
@@ -289,7 +262,7 @@ stream is not seekable (additional information will be provided when possible).<
 
 
 
-<p class="blurb">CLI/API Reference Manual [v0.6.1]</p>
+<p class="blurb">CLI/API Documentation [0.6.2]</p>
 
 
 
@@ -306,37 +279,29 @@ stream is not seekable (additional information will be provided when possible).<
 <h3>Navigation</h3>
 <p class="caption" role="heading"><span class="caption-text">Command-Line Interface [CLI]:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../cli/global_options.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Application</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../cli/detectors.html">Detectors</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../cli/commands.html">Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cli.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Command</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cli.html#examples">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cli.html#options">Options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cli.html#detectors">Detectors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cli.html#commands">Commands</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../cli/config_file.html">Configuration File</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../cli/backends.html">Backends</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Python API Documentation:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../api.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="scene_manager.html">SceneManager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="detectors.html">Detection Algorithms</a></li>
 <li class="toctree-l1"><a class="reference internal" href="backends.html">Backends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scene_manager.html">SceneManager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="video_splitter.html">Video Splitting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stats_manager.html">StatsManager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="frame_timecode.html">FrameTimecode</a></li>
 <li class="toctree-l1"><a class="reference internal" href="scene_detector.html">SceneDetector</a></li>
-<li class="toctree-l1"><a class="reference internal" href="stats_manager.html">StatsManager</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">VideoStream</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#videostream-interface"><code class="docutils literal notranslate"><span class="pre">VideoStream</span></code> Interface</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#scenedetect.video_stream.VideoStream"><code class="docutils literal notranslate"><span class="pre">VideoStream</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#video-stream-functions-and-constants"><code class="docutils literal notranslate"><span class="pre">video_stream</span></code> Functions and Constants</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#scenedetect.video_stream.DEFAULT_MIN_WIDTH"><code class="docutils literal notranslate"><span class="pre">DEFAULT_MIN_WIDTH</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#scenedetect.video_stream.compute_downscale_factor"><code class="docutils literal notranslate"><span class="pre">compute_downscale_factor()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#exceptions">Exceptions</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#scenedetect.video_stream.VideoOpenFailure"><code class="docutils literal notranslate"><span class="pre">VideoOpenFailure</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#scenedetect.video_stream.SeekError"><code class="docutils literal notranslate"><span class="pre">SeekError</span></code></a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="#scenedetect.video_stream.FrameRateUnavailable"><code class="docutils literal notranslate"><span class="pre">FrameRateUnavailable</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scenedetect.video_stream.SeekError"><code class="docutils literal notranslate"><span class="pre">SeekError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scenedetect.video_stream.VideoOpenFailure"><code class="docutils literal notranslate"><span class="pre">VideoOpenFailure</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scenedetect.video_stream.VideoStream"><code class="docutils literal notranslate"><span class="pre">VideoStream</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="platform.html">Platform &amp; Logging</a></li>
@@ -347,8 +312,10 @@ stream is not seekable (additional information will be provided when possible).<
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="stats_manager.html" title="previous chapter">StatsManager</a></li>
+  <li><a href="../api.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Package</a><ul>
+      <li>Previous: <a href="scene_detector.html" title="previous chapter">SceneDetector</a></li>
       <li>Next: <a href="platform.html" title="next chapter">Platform &amp; Logging</a></li>
+  </ul></li>
   </ul></li>
 </ul>
 </div>
