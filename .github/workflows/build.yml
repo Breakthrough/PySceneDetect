@@ -69,6 +69,7 @@ jobs:
           python -m pip uninstall -y scenedetect
 
       - name: Build Documentation
+        if: ${{ matrix.python-version == '3.11' && matrix.os == 'ubuntu-latest' }}
         run: |
           pip install -r docs/requirements.txt
           git mv docs docs_src
