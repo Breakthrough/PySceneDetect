@@ -42,7 +42,7 @@ jobs:
           git rm docs/index.html --ignore-unmatch
           git add website/build/
           git mv website/build/* . -f -k
-          git mv website/build/docs/index.html docs/index.html --ignore-unmatch
+          git mv website/build/docs/index.html docs/index.html -k
           git rm website/build/* -r -f --ignore-unmatch
           git config --global user.name github-actions
           git config --global user.email github-actions@github.com
