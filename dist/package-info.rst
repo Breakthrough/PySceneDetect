@@ -5,7 +5,7 @@ PySceneDetect
 Video Scene Cut Detection and Analysis Tool
 ----------------------------------------------------------
 
-.. image:: https://img.shields.io/github/actions/workflow/status/Breakthrough/PySceneDetect/build-linux.yml
+.. image:: https://img.shields.io/github/actions/workflow/status/Breakthrough/PySceneDetect/build.yml
    :target: https://github.com/Breakthrough/PySceneDetect/actions
 
 .. image:: https://img.shields.io/github/release/Breakthrough/PySceneDetect.svg
