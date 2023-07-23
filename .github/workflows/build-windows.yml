@@ -13,6 +13,8 @@ on:
       - dist/**
       - scenedetect/**
       - tests/**
+    tags:
+      - v*-release
   workflow_dispatch:
 
 jobs:
