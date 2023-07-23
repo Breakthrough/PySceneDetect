@@ -62,7 +62,7 @@ jobs:
       - name: Assemble Portable EXE
         run: |
           python dist/cleanup_dependencies.py
-          7z e ffmpeg-6.0-full_build.7z -odist/ffmpeg LICENSE
+          7z e ffmpeg-6.0-full_build.7z -odist/ffmpeg LICENSE -r
           MOVE ffmpeg.exe dist\scenedetect\ffmpeg.exe
           MOVE dist\ffmpeg\LICENSE dist\scenedetect\LICENSE-FFMPEG
 

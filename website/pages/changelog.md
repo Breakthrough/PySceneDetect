@@ -40,7 +40,7 @@ Includes new [`load-scenes` command](https://www.scenedetect.com/docs/0.6.2/cli/
    - `compute_frame_average` function in `scenedetect.detectors.threshold_detector`
    - `scenedetect.cli` and `scenedetect.thirdparty` modules
  - [api] Remove `compute_downscale_factor` in `scenedetect.video_stream` (use `scenedetect.scene_manager.compute_downscale_factor` instead)
- - [dist] Updated dependencies in Windows distributions: ffmpeg 6.0, PyAV 10, OpenCV 4.8
+ - [dist] Updated dependencies in Windows distributions: ffmpeg 6.0, PyAV 10, OpenCV 4.8, removed mkvmerge
 
 #### Project Updates
 
@@ -48,6 +48,7 @@ Includes new [`load-scenes` command](https://www.scenedetect.com/docs/0.6.2/cli/
  - Windows and Linux builds are now done on Github Actions, add OSX builds as well
  - Build matrix has been updated to support Python 3.7 through 3.11 for all operating systems for Python distributions
  - Windows portable builds have been moved to Github Actions, signed builds/installer is still done on Appveyor
+ - Windows distributions no longer include mkvmerge (can still [download for Windows here](https://mkvtoolnix.download/downloads.html#windows))
 
 
 ### 0.6.1 (November 28, 2022)
