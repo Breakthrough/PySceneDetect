@@ -6,6 +6,7 @@ site_author: "Brandon Castellano"
 docs_dir: "pages"
 site_dir: "build"
 repo_url: https://github.com/Breakthrough/PySceneDetect
+edit_uri:  'blob/main/website/pages/'
 repo_name: "PySceneDetect on Github"
 copyright: 'Copyright &copy; 2014-2023 Brandon Castellano.  All rights reserved.<br />Licensed under BSD 3-Clause (see the <a href="https://github.com/Breakthrough/PySceneDetect/blob/main/LICENSE" alt="link to latest LICENSE file on Github">LICENSE file</a> for details).'
 theme: readthedocs
