@@ -1,5 +1,5 @@
 
-PySceneDetect Releases
+Releases
 ==========================================================
 
 ## PySceneDetect 0.6
