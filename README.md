@@ -45,7 +45,7 @@ Skip the first 10 seconds of the input video:
 
     scenedetect -i video.mp4 time -s 10s
 
-More examples can be found throughout [the documentation](https://www.scenedetect.com/docs/latest/cli/global_options.html).
+More examples can be found throughout [the documentation](https://www.scenedetect.com/docs/latest/cli.html).
 
 **Quick Start (Python API)**:
 
