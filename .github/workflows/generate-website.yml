@@ -1,0 +1,51 @@
+
+name: Generate Website
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'website/**'
+  workflow_dispatch:
+
+jobs:
+  update_site:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip build wheel virtualenv
+          pip install -r website/requirements.txt
+
+      - name: Generate Website
+        run: |
+          mkdocs build -f website/mkdocs.yml
+
+      - name: Update Website
+        run: |
+          git fetch origin gh-pages
+          git checkout gh-pages
+          git rm * -r -f --ignore-unmatch
+          git checkout HEAD -- .nojekyll
+          git checkout HEAD -- CNAME
+          git checkout HEAD -- docs/
+          git rm docs/index.html --ignore-unmatch
+          git add website/build/
+          git mv website/build/* . -f -k
+          git mv website/build/docs/index.html docs/index.html -k
+          git rm website/build/* -r -f --ignore-unmatch
+          git config --global user.name github-actions
+          git config --global user.email github-actions@github.com
+          git commit -a -m "[docs] @${{ github.triggering_actor }}: Generate Website" \
+            -m "Commit: ${{ github.sha }}"
+          git push

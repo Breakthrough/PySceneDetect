@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 #
-#         PySceneDetect: Python-Based Video Scene Detector
-#   ---------------------------------------------------------------
-#     [  Site:   http://www.scenedetect.scenedetect.com/         ]
-#     [  Docs:   http://manual.scenedetect.scenedetect.com/      ]
-#     [  Github: https://github.com/Breakthrough/PySceneDetect/  ]
+#            PySceneDetect: Python-Based Video Scene Detector
+#   -------------------------------------------------------------------
+#     [  Site:    https://scenedetect.com                           ]
+#     [  Docs:    https://scenedetect.com/docs/                     ]
+#     [  Github:  https://github.com/Breakthrough/PySceneDetect/    ]
 #
 # Copyright (C) 2014-2023 Brandon Castellano <http://www.bcastell.com>.
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
@@ -16,7 +16,7 @@
 # Certain distributions of PySceneDetect may include the above software;
 # see the included LICENSE-FFMPEG and LICENSE-MKVMERGE files.
 #
-""" ``scenedetect.video_splitter`` Module
+"""``scenedetect.video_splitter`` Module
 
 The `scenedetect.video_splitter` module contains functions to split existing videos into clips
 using ffmpeg or mkvmerge.
@@ -38,10 +38,9 @@ import subprocess
 import math
 import time
 from typing import Iterable, Optional, Tuple
-from string import Template
 
 from scenedetect.platform import (tqdm, invoke_command, CommandTooLong, get_file_name,
-                                  get_ffmpeg_path)
+                                  get_ffmpeg_path, Template)
 from scenedetect.frame_timecode import FrameTimecode
 
 logger = logging.getLogger('pyscenedetect')

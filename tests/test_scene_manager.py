@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 #
-#         PySceneDetect: Python-Based Video Scene Detector
-#   ---------------------------------------------------------------
-#     [  Site:   http://www.scenedetect.scenedetect.com/         ]
-#     [  Docs:   http://manual.scenedetect.scenedetect.com/      ]
-#     [  Github: https://github.com/Breakthrough/PySceneDetect/  ]
+#            PySceneDetect: Python-Based Video Scene Detector
+#   -------------------------------------------------------------------
+#     [  Site:    https://scenedetect.com                           ]
+#     [  Docs:    https://scenedetect.com/docs/                     ]
+#     [  Github:  https://github.com/Breakthrough/PySceneDetect/    ]
 #
 # Copyright (C) 2014 Brandon Castellano <http://www.bcastell.com>.
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
@@ -23,10 +23,11 @@ import os
 import os.path
 from typing import List
 
+from scenedetect._scene_loader import SceneLoader
 from scenedetect.backends.opencv import VideoStreamCv2
 from scenedetect.detectors import AdaptiveDetector, ContentDetector
 from scenedetect.frame_timecode import FrameTimecode
-from scenedetect.scene_manager import SceneManager, save_images
+from scenedetect.scene_manager import SceneManager, save_images, write_scene_list
 
 TEST_VIDEO_START_FRAMES_ACTUAL = [150, 180, 394]
 
@@ -94,16 +95,8 @@ def test_save_images(test_video_file):
 
     try:
         video_fps = video.frame_rate
-        start_time = FrameTimecode('00:00:05', video_fps)
-        end_time = FrameTimecode('00:00:15', video_fps)
-
-        video.seek(start_time)
-        sm.auto_downscale = True
-
-        sm.detect_scenes(video=video, end_time=end_time)
-
-        scene_list = sm.get_scene_list()
-        assert scene_list
+        scene_list = [(FrameTimecode(start, video_fps), FrameTimecode(end, video_fps))
+                      for start, end in [(0, 100), (200, 300), (300, 400)]]
 
         image_filenames = save_images(
             scene_list=scene_list,
@@ -121,6 +114,36 @@ def test_save_images(test_video_file):
 
         assert total_images == len(glob.glob(image_name_glob))
 
+    finally:
+        for path in glob.glob(image_name_glob):
+            os.remove(path)
+
+
+# TODO: Test other functionality against zero width scenes.
+def test_save_images_zero_width_scene(test_video_file):
+    """Test scenedetect.scene_manager.save_images guards against zero width scenes."""
+    video = VideoStreamCv2(test_video_file)
+    image_name_glob = 'scenedetect.tempfile.*.jpg'
+    image_name_template = 'scenedetect.tempfile.$SCENE_NUMBER.$IMAGE_NUMBER'
+    try:
+        video_fps = video.frame_rate
+        scene_list = [(FrameTimecode(start, video_fps), FrameTimecode(end, video_fps))
+                      for start, end in [(0, 0), (1, 1), (2, 3)]]
+        NUM_IMAGES = 10
+        image_filenames = save_images(
+            scene_list=scene_list,
+            video=video,
+            num_images=10,
+            image_extension='jpg',
+            image_name_template=image_name_template)
+        assert len(image_filenames) == 3
+        assert all(len(image_filenames[scene]) == NUM_IMAGES for scene in image_filenames)
+        total_images = 0
+        for scene_number in image_filenames:
+            for path in image_filenames[scene_number]:
+                assert os.path.exists(path)
+                total_images += 1
+        assert total_images == len(glob.glob(image_name_glob))
     finally:
         for path in glob.glob(image_name_glob):
             os.remove(path)
@@ -224,3 +247,44 @@ def test_detect_scenes_callback_adaptive(test_video_file):
     scene_list = sm.get_scene_list()
     assert [start for start, end in scene_list] == TEST_VIDEO_START_FRAMES_ACTUAL
     assert fake_callback.scene_list == TEST_VIDEO_START_FRAMES_ACTUAL[1:]
+
+
+def test_scene_loader(tmp_path, test_movie_clip):
+    """Test `SceneLoader` loading from CSV written by `write_scene_list`."""
+
+    def _detect(video, detector, start, end):
+        """Helper function similar to `scenedetect.detect()` but using an existing VideoStream."""
+        scene_manager = SceneManager()
+        scene_manager.add_detector(detector)
+        scene_manager.auto_downscale = True
+        video.seek(start)
+        scene_manager.detect_scenes(video=video, end_time=end)
+        return scene_manager.get_scene_list()
+
+    # Generate scene list.
+    video = VideoStreamCv2(test_movie_clip)
+    scene_list = _detect(
+        video=video,
+        detector=ContentDetector(),
+        start=FrameTimecode('00:00:50', video.frame_rate),
+        end=FrameTimecode('00:01:19', video.frame_rate))
+
+    # Save and see if we get the same result.
+    with open(tmp_path / "scenes.csv", "w") as csv_file:
+        write_scene_list(csv_file, scene_list, include_cut_list=True)
+    from_csv = _detect(
+        video=VideoStreamCv2(test_movie_clip),
+        detector=SceneLoader(tmp_path / "scenes.csv", framerate=video.frame_rate),
+        start=FrameTimecode('00:00:50', video.frame_rate),
+        end=FrameTimecode('00:01:19', video.frame_rate))
+    assert from_csv == scene_list
+
+    # Test without the cut list as a header as well.
+    with open(tmp_path / "scenes-nocuts.csv", "w") as csv_file:
+        write_scene_list(csv_file, scene_list, include_cut_list=False)
+    from_csv = _detect(
+        video=VideoStreamCv2(test_movie_clip),
+        detector=SceneLoader(tmp_path / "scenes-nocuts.csv", framerate=video.frame_rate),
+        start=FrameTimecode('00:00:50', video.frame_rate),
+        end=FrameTimecode('00:01:19', video.frame_rate))
+    assert from_csv == scene_list

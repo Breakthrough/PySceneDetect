@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 #
-#         PySceneDetect: Python-Based Video Scene Detector
-#   ---------------------------------------------------------------
-#     [  Site:   http://www.scenedetect.scenedetect.com/         ]
-#     [  Docs:   http://manual.scenedetect.scenedetect.com/      ]
-#     [  Github: https://github.com/Breakthrough/PySceneDetect/  ]
+#            PySceneDetect: Python-Based Video Scene Detector
+#   -------------------------------------------------------------------
+#     [  Site:    https://scenedetect.com                           ]
+#     [  Docs:    https://scenedetect.com/docs/                     ]
+#     [  Github:  https://github.com/Breakthrough/PySceneDetect/    ]
 #
 # Copyright (C) 2014-2023 Brandon Castellano <http://www.bcastell.com>.
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
-""":py:class:`ThresholdDetector` uses a set intensity as a threshold to detect cuts, which are
+""":class:`ThresholdDetector` uses a set intensity as a threshold to detect cuts, which are
 triggered when the average pixel intensity exceeds or falls below this threshold.
 
 This detector is available from the command-line as the `detect-threshold` command.
@@ -31,7 +31,7 @@ logger = getLogger('pyscenedetect')
 ##
 
 
-def compute_frame_average(frame: numpy.ndarray) -> float:
+def _compute_frame_average(frame: numpy.ndarray) -> float:
     """Computes the average pixel value/intensity for all pixels in a frame.
 
     The value is computed by adding up the 8-bit R, G, and B values for
@@ -148,7 +148,7 @@ class ThresholdDetector(SceneDetector):
                 frame_num, self._metric_keys)):
             frame_avg = self.stats_manager.get_metrics(frame_num, self._metric_keys)[0]
         else:
-            frame_avg = compute_frame_average(frame_img)
+            frame_avg = _compute_frame_average(frame_img)
             if self.stats_manager is not None:
                 self.stats_manager.set_metrics(frame_num, {self._metric_keys[0]: frame_avg})
 

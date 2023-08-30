@@ -1,10 +1,23 @@
+# CodeQL for PySceneDetect
 name: "CodeQL"
 
 on:
   push:
-    branches: [ "master" ]
+    branches:
+     - main
+     - develop
+     - releases/**
+    paths:
+      - scenedetect/**
+      - tests/**
   pull_request:
-    branches: [ "master" ]
+    branches:
+     - main
+     - develop
+     - releases/*
+    paths:
+      - scenedetect/**
+      - tests/**
   schedule:
     - cron: "20 7 * * 4"
 

@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 #
-#         PySceneDetect: Python-Based Video Scene Detector
-#   ---------------------------------------------------------------
-#     [  Site:   http://www.scenedetect.scenedetect.com/         ]
-#     [  Docs:   http://manual.scenedetect.scenedetect.com/      ]
-#     [  Github: https://github.com/Breakthrough/PySceneDetect/  ]
+#            PySceneDetect: Python-Based Video Scene Detector
+#   -------------------------------------------------------------------
+#     [  Site:    https://scenedetect.com                           ]
+#     [  Docs:    https://scenedetect.com/docs/                     ]
+#     [  Github:  https://github.com/Breakthrough/PySceneDetect/    ]
 #
 # Copyright (C) 2014-2023 Brandon Castellano <http://www.bcastell.com>.
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
-""":py:class:`ContentDetector` compares the difference in content between adjacent frames against a
+""":class:`ContentDetector` compares the difference in content between adjacent frames against a
 set threshold/score, which if exceeded, triggers a scene cut.
 
 This detector is available from the command-line as the `detect-content` command.
@@ -25,7 +25,7 @@ import cv2
 from scenedetect.scene_detector import SceneDetector
 
 
-def mean_pixel_distance(left: numpy.ndarray, right: numpy.ndarray) -> float:
+def _mean_pixel_distance(left: numpy.ndarray, right: numpy.ndarray) -> float:
     """Return the mean average distance in pixel values between `left` and `right`.
     Both `left and `right` should be 2 dimensional 8-bit images of the same shape.
     """
@@ -35,7 +35,7 @@ def mean_pixel_distance(left: numpy.ndarray, right: numpy.ndarray) -> float:
     return (numpy.sum(numpy.abs(left.astype(numpy.int32) - right.astype(numpy.int32))) / num_pixels)
 
 
-def estimated_kernel_size(frame_width: int, frame_height: int) -> int:
+def _estimated_kernel_size(frame_width: int, frame_height: int) -> int:
     """Estimate kernel size based on video resolution."""
     # TODO: This equation is based on manual estimation from a few videos.
     # Create a more comprehensive test suite to optimize against.
@@ -70,7 +70,7 @@ class ContentDetector(SceneDetector):
         threshold may need to be adjusted accordingly."""
 
     DEFAULT_COMPONENT_WEIGHTS = Components()
-    """Default component weights. Actual default values are specified in :py:class:`Components`
+    """Default component weights. Actual default values are specified in :class:`Components`
     to allow adding new components without breaking existing usage."""
 
     LUMA_ONLY_WEIGHTS = Components(
@@ -115,7 +115,7 @@ class ContentDetector(SceneDetector):
             weights: Weight to place on each component when calculating frame score
                 (`content_val` in a statsfile, the value `threshold` is compared against).
             luma_only: If True, only considers changes in the luminance channel of the video.
-                Equivalent to specifying `weights` as :py:data:`ContentDetector.LUMA_ONLY`.
+                Equivalent to specifying `weights` as :data:`ContentDetector.LUMA_ONLY`.
                 Overrides `weights` if both are set.
             kernel_size: Size of kernel for expanding detected edges. Must be odd integer
                 greater than or equal to 3. If None, automatically set using video resolution.
@@ -163,10 +163,10 @@ class ContentDetector(SceneDetector):
             return 0.0
 
         score_components = ContentDetector.Components(
-            delta_hue=mean_pixel_distance(hue, self._last_frame.hue),
-            delta_sat=mean_pixel_distance(sat, self._last_frame.sat),
-            delta_lum=mean_pixel_distance(lum, self._last_frame.lum),
-            delta_edges=(0.0 if edges is None else mean_pixel_distance(
+            delta_hue=_mean_pixel_distance(hue, self._last_frame.hue),
+            delta_sat=_mean_pixel_distance(sat, self._last_frame.sat),
+            delta_lum=_mean_pixel_distance(lum, self._last_frame.lum),
+            delta_edges=(0.0 if edges is None else _mean_pixel_distance(
                 edges, self._last_frame.edges)),
         )
 
@@ -199,7 +199,7 @@ class ContentDetector(SceneDetector):
             or more frames in the list, and not necessarily the same as frame_num.
         """
         if frame_img is None:
-            # TODO(v0.6.2): Make frame_img a required argument in the interface. Log a warning
+            # TODO(0.6.3): Make frame_img a required argument in the interface. Log a warning
             # that passing None is deprecated and results will be incorrect if this is the case.
             return []
 
@@ -213,8 +213,8 @@ class ContentDetector(SceneDetector):
 
         # We consider any frame over the threshold a new scene, but only if
         # the minimum scene length has been reached (otherwise it is ignored).
-        if self._frame_score >= self._threshold and (
-            (frame_num - self._last_scene_cut) >= self._min_scene_len):
+        min_length_met = (frame_num - self._last_scene_cut) >= self._min_scene_len
+        if self._frame_score >= self._threshold and min_length_met:
             self._last_scene_cut = frame_num
             return [frame_num]
 
@@ -242,11 +242,11 @@ class ContentDetector(SceneDetector):
         """
         # Initialize kernel.
         if self._kernel is None:
-            kernel_size = estimated_kernel_size(lum.shape[1], lum.shape[0])
+            kernel_size = _estimated_kernel_size(lum.shape[1], lum.shape[0])
             self._kernel = numpy.ones((kernel_size, kernel_size), numpy.uint8)
 
         # Estimate levels for thresholding.
-        # TODO(v0.6.2): Add config file entries for sigma, aperture/kernel size, etc.
+        # TODO(0.6.3): Add config file entries for sigma, aperture/kernel size, etc.
         sigma: float = 1.0 / 3.0
         median = numpy.median(lum)
         low = int(max(0, (1.0 - sigma) * median))

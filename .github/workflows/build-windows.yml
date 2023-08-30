@@ -1,0 +1,104 @@
+# Build Portable Windows EXE (x64) Distribution for PySceneDetect
+
+name: Windows Distribution
+
+on:
+  pull_request:
+    paths:
+      - dist/**
+      - scenedetect/**
+      - tests/**
+  push:
+    paths:
+      - dist/**
+      - scenedetect/**
+      - tests/**
+    tags:
+      - v*-release
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        python-version: ["3.9"]
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip build wheel virtualenv setuptools
+          pip install -r dist/requirements_windows.txt
+          pip install -r docs/requirements.txt
+
+      - name: Download Resources
+        run: |
+          git fetch --depth=1 https://github.com/Breakthrough/PySceneDetect.git refs/heads/resources:refs/remotes/origin/resources
+          git checkout refs/remotes/origin/resources -- tests/resources/
+          git fetch --depth=1 https://github.com/Breakthrough/PySceneDetect.git refs/heads/build-windows:refs/remotes/origin/build-windows
+          git checkout refs/remotes/origin/build-windows -- dist/
+
+      - name: Download FFMPEG
+        uses: dsaltares/fetch-gh-release-asset@1.1.1
+        with:
+          repo: 'GyanD/codexffmpeg'
+          version: 'tags/6.0'
+          file: 'ffmpeg-6.0-full_build.7z'
+
+      - name: Unit Test
+        run: |
+          7z e ffmpeg-6.0-full_build.7z ffmpeg.exe -r
+          python -m pytest tests/
+
+      - name: Build PySceneDetect
+        run: |
+          pyinstaller dist/scenedetect.spec
+
+      - name: Build Documentation
+        run: |
+          sphinx-build -b singlehtml docs dist/scenedetect/docs
+
+      - name: Assemble Portable Distribution
+        run: |
+          python dist/cleanup_dependencies.py
+          7z e -odist/ffmpeg ffmpeg-6.0-full_build.7z LICENSE -r
+          Move-Item -Path ffmpeg.exe -Destination dist/scenedetect/ffmpeg.exe
+          Move-Item -Path dist/ffmpeg/LICENSE -Destination dist/scenedetect/LICENSE-FFMPEG -Force
+
+      - name: Test Portable Distribution
+        run: |
+          ./dist/scenedetect/scenedetect -i tests/resources/goldeneye.mp4 detect-content time -e 2s
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: PySceneDetect-win64_portable
+          path: dist/scenedetect
+
+  test:
+    runs-on: windows-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: resources
+
+      - uses: actions/download-artifact@v3
+        with:
+          name: PySceneDetect-win64_portable
+          path: build
+
+      - name: Test
+        run: |
+          ./build/scenedetect version
+          ./build/scenedetect -i tests/resources/goldeneye.mp4 -b opencv detect-content time --end 00:10:00
+          ./build/scenedetect -i tests/resources/goldeneye.mp4 -b pyav detect-content time --end 00:10:00
+          ./build/scenedetect -i tests/resources/goldeneye.mp4 detect-content time --end 00:10:00 split-video

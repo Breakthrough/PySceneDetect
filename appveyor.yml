@@ -1,82 +1,108 @@
+# Build signed releases for PySceneDetect Windows x64
 
-skip_commits:
-  files:
-    - docs/*
-    - 'manual/*'
-    - '**/*.rst'
-    - '**/*.md'
-
-
-# We have to disable the `build` command explicitly otherwise the default is
-# MSBuild which assumes this is a Visual Studio project. Python source/binary
-# wheels a Windows .exe are generated below in `install`.
 build: false
 
+# Branches applies to tags as well. We only build on tagged releases of the form vX.Y.Z-release
+branches:
+  only:
+    - main
+    - /releases\/.+/
+    - /v.+-release/
+
+skip_tags: false
+skip_non_tags: true
 
 environment:
   matrix:
-    - PYTHON: "C:\\Python37-x64"
-    - PYTHON: "C:\\Python38-x64"
     - PYTHON: "C:\\Python39-x64"
-    - PYTHON: "C:\\Python310-x64"
-    - PYTHON: "C:\\Python311-x64"
+  # Encrypted AdvancedInstaller License
+  ai_license_secret:
+    secure: lulTujjpNX3A1RKIvj834/Czn6etzevma6oqlA5Xia5tgrg75SPXcs1lPNlu5YPU
+  ai_license_salt:
+    secure: kMv/7J3wqaRGUJYwnfaY6edw0VW39uX7oM9Od9PQ2wwlCmTZcwAh4kEUxhB5u91QbXmp4McMuwcXAO4UdVoSGg==
 
+# SignPath Config for Code Signing
+deploy:
+- provider: Webhook
+  url: https://app.signpath.io/API/v1/f2efa44c-5b5c-45f2-b44f-8f9dde708313/Integrations/AppVeyor?ProjectSlug=PySceneDetect&SigningPolicySlug=release-signing
+  authorization:
+     secure: NPMogMcEb5S/ASMEiL275H79D+Pj9cgUqx8kjTPGXtF9drZW41nljczuhF1XvcxFgI0q9TA1BUX9YuCoTQ3mEQ==
 
 install:
-  # Setup Python environment and update basic packages.
+  - echo * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+  - echo * *                      SETTING UP PYTHON ENVIRONMENT                      * *
+  - echo * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
   - 'SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%'
   - python --version
-  - python -m pip install --upgrade pip build wheel virtualenv setuptools
-
-  # Make sure we get latest binary packages of the video input libraries.
-  - python -m pip install av opencv-python-headless --only-binary ":all:"
-
-  # Install other PySceneDetect dependencies and checkout resources required for tests.
-  - python -m pip install -r requirements_headless.txt
-  - python -m pip install moviepy
-  - git fetch --depth=1 https://github.com/Breakthrough/PySceneDetect.git refs/heads/resources:refs/remotes/origin/resources
-  - git checkout refs/remotes/origin/resources -- tests/resources/
+  - python -m pip install --upgrade pip
+  - python -m pip install -r dist/requirements_windows.txt
+  - python -m pip install -r docs/requirements.txt
+  # Checkout build resources and third party software used for testing.
   - git checkout refs/remotes/origin/resources -- dist/
+  - appveyor DownloadFile https://github.com/GyanD/codexffmpeg/releases/download/6.0/ffmpeg-6.0-full_build.7z
+  - 7z e ffmpeg-6.0-full_build.7z -odist/ffmpeg ffmpeg.exe LICENSE -r
 
-  # Build Python package
-  - python -m build
+  - echo * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+  - echo * *                          BUILDING WINDOWS EXE                           * *
+  - echo * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+  # Build Windows .EXE and create portable .ZIP
+  - pyinstaller dist/scenedetect.spec
+  - sphinx-build -b singlehtml docs dist/scenedetect/docs
+  - python dist/cleanup_dependencies.py
+  - move dist\ffmpeg\ffmpeg.exe dist\scenedetect\
+  - move dist\ffmpeg\LICENSE dist\scenedetect\LICENSE-FFMPEG
+  - copy scenedetect\_thirdparty\LICENSE* dist\scenedetect\
+  - cd dist/scenedetect
+  - 7z a ../scenedetect-win64.zip *
+  - cd ../..
 
+  - echo * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+  - echo * *                         BUILDING MSI INSTALLER                          * *
+  - echo * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+  # Download, install, and register AdvancedInstaller
+  - cd dist/installer
+  - ps: iex ((New-Object Net.WebClient).DownloadString('https://raw.githubusercontent.com/appveyor/secure-file/master/install.ps1'))
+  - appveyor-tools\secure-file -decrypt license65.dat.enc -secret %ai_license_secret% -salt %ai_license_salt%
+  - appveyor DownloadFile https://www.advancedinstaller.com/downloads/advinst.msi
+  - msiexec /i advinst.msi /qn
+  - 'SET PATH=%PATH%;C:\\Program Files (x86)\\Caphyon\\Advanced Installer 20.8\\bin\\x86'
+  # License path must be absolute
+  - AdvancedInstaller.com /RegisterOffline "%cd%\license65.dat"
+  # Create MSI installer
+  - AdvancedInstaller.com /build PySceneDetect.aip
+  - cd ../..
+
+  - echo * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+  - echo * *                        PACKAGING BUILD ARTIFACTS                        * *
+  - echo * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+  # Zip all resources together for code signing
+  - cd dist
+  - move installer\PySceneDetect-*.msi .
+  - cp scenedetect\scenedetect.exe .
+  - 7z a scenedetect-signed.zip scenedetect.exe PySceneDetect-*.msi
+  - cd ..
 
 test_script:
-  # Checkout Windows dependencies and extract them.
-  - git checkout refs/remotes/origin/resources -- dist/
-  - git checkout refs/remotes/origin/build-windows -- dist/
-  - 7z e dist/windows_thirdparty.7z
-
-  # Run Unit Tests
-  - python -m pytest tests/
-
-  # Remove optional dependencies before performing CLI tests
-  - python -m pip uninstall -y av
-
-  #
-  # Test CLI using source code
-  #
-  # Test with OpenCV backend
-  - python -m scenedetect version
-  - python -m scenedetect -i tests/resources/testvideo.mp4 -b opencv detect-content time -e 2s
-  # Test with optional PyAV backend
-  - python -m pip install av
-  - python -m scenedetect -i tests/resources/testvideo.mp4 -b pyav detect-content time -e 2s
-  # Cleanup
-  - python -m pip uninstall -y scenedetect av
-
-  # TODO: Test Python Distributions install and function correctly. There's coverage for
-  # this on the Linux builds (.travis.yml), but should also do that here too.
-  # Wildcard expansion doesn't seem to work with pip here, e.g. the following fails:
-  #- python -m pip install dist\*.whl
+  - echo * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+  - echo * *                              TESTING BUILD                              * *
+  - echo * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+  # Checkout required test resources
+  - git fetch --depth=1 https://github.com/Breakthrough/PySceneDetect.git refs/heads/resources:refs/remotes/origin/resources
+  - git checkout refs/remotes/origin/resources -- tests/resources/
+  - move dist\scenedetect\ffmpeg.exe ffmpeg.exe
+  # Run unit tests
+  - pytest
+  # Test Windows build
+  - move ffmpeg.exe dist\scenedetect\ffmpeg.exe
+  - cd dist/scenedetect
+  - scenedetect.exe version
+  - scenedetect.exe -i ../../tests/resources/testvideo.mp4 -b opencv detect-content time -e 2s
+  - scenedetect.exe -i ../../tests/resources/testvideo.mp4 -b pyav detect-content time -e 2s
 
 artifacts:
-  # TODO: Need to incorporate the build number into the package version. Use a custom setup.py
-  # that modifies the version number in the package before building using an environment variable.
-
-  - path: dist/*.tar.gz
-    name: PySceneDetect-sdist
-
-  - path: dist/*.whl
-    name: PySceneDetect-bdist_wheel
+  # Portable ZIP
+  - path: dist/scenedetect-win64.zip
+    name: PySceneDetect-win64_portable
+  # MSI Installer + .EXE Bundle for Signing
+  - path: dist/scenedetect-signed.zip
+    name: PySceneDetect-win64_installer

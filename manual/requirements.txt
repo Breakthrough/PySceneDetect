@@ -1,4 +1,0 @@
-Sphinx == 4.4.0
-opencv-python
-numpy
-av

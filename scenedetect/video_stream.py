@@ -1,19 +1,19 @@
 # -*- coding: utf-8 -*-
 #
-#         PySceneDetect: Python-Based Video Scene Detector
-#   ---------------------------------------------------------------
-#     [  Site:   http://www.scenedetect.scenedetect.com/         ]
-#     [  Docs:   http://manual.scenedetect.scenedetect.com/      ]
-#     [  Github: https://github.com/Breakthrough/PySceneDetect/  ]
+#            PySceneDetect: Python-Based Video Scene Detector
+#   -------------------------------------------------------------------
+#     [  Site:    https://scenedetect.com                           ]
+#     [  Docs:    https://scenedetect.com/docs/                     ]
+#     [  Github:  https://github.com/Breakthrough/PySceneDetect/    ]
 #
 # Copyright (C) 2014-2023 Brandon Castellano <http://www.bcastell.com>.
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
-""" ``scenedetect.video_stream`` Module
+"""``scenedetect.video_stream`` Module
 
-This module contains the :py:class:`VideoStream` class, which provides a library agnostic
-interface for video input. To open a video by path, use :py:func:`scenedetect.open_video`:
+This module contains the :class:`VideoStream` class, which provides a library agnostic
+interface for video input. To open a video by path, use :func:`scenedetect.open_video`:
 
 .. code:: python
 
@@ -26,13 +26,14 @@ interface for video input. To open a video by path, use :py:func:`scenedetect.op
     print("Read %d frames" % video.frame_number)
 
 You can also optionally specify a framerate and a specific backend library to use. Unless specified,
-OpenCV will be used as the video backend. See :py:mod:`scenedetect.backends` for a detailed example.
+OpenCV will be used as the video backend. See :mod:`scenedetect.backends` for a detailed example.
 
-New :py:class:`VideoStream <scenedetect.video_stream.VideoStream>` implementations can be
+New :class:`VideoStream <scenedetect.video_stream.VideoStream>` implementations can be
 tested by adding it to the test suite in `tests/test_video_stream.py`.
 """
 
 from abc import ABC, abstractmethod
+from logging import getLogger
 from typing import Tuple, Optional, Union
 
 from numpy import ndarray
@@ -72,37 +73,6 @@ class FrameRateUnavailable(VideoOpenFailure):
     def __init__(self):
         super().__init__('Unable to obtain video framerate! Specify `framerate` manually, or'
                          ' re-encode/re-mux the video and try again.')
-
-
-##
-## VideoStream Constants & Helper Functions
-##
-
-# TODO: This value can and should be tuned for performance improvements as much as possible,
-# until accuracy falls, on a large enough dataset. This has yet to be done, but the current
-# value doesn't seem to have caused any issues at least.
-DEFAULT_MIN_WIDTH: int = 260
-"""The default minimum width a frame will be downscaled to when calculating a downscale factor."""
-
-
-def compute_downscale_factor(frame_width: int, effective_width: int = DEFAULT_MIN_WIDTH) -> int:
-    """Get the optimal default downscale factor based on a video's resolution (currently only
-    the width in pixels is considered).
-
-    The resulting effective width of the video will be between frame_width and 1.5 * frame_width
-    pixels (e.g. if frame_width is 200, the range of effective widths will be between 200 and 300).
-
-    Arguments:
-        frame_width: Actual width of the video frame in pixels.
-        effective_width: Desired minimum width in pixels.
-
-    Returns:
-        int: The defalt downscale factor to use to achieve at least the target effective_width.
-    """
-    assert not (frame_width < 1 or effective_width < 1)
-    if frame_width < effective_width:
-        return 1
-    return frame_width // effective_width
 
 
 ##
@@ -249,4 +219,4 @@ class VideoStream(ABC):
         raise NotImplementedError
 
 
-# TODO(v0.6.2): Add a StreamJoiner class to concatenate multiple videos using a specified backend.
+# TODO(0.6.3): Add a StreamJoiner class to concatenate multiple videos using a specified backend.

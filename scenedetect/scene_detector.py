@@ -1,19 +1,19 @@
 # -*- coding: utf-8 -*-
 #
-#         PySceneDetect: Python-Based Video Scene Detector
-#   ---------------------------------------------------------------
-#     [  Site:   http://www.scenedetect.scenedetect.com/         ]
-#     [  Docs:   http://manual.scenedetect.scenedetect.com/      ]
-#     [  Github: https://github.com/Breakthrough/PySceneDetect/  ]
+#            PySceneDetect: Python-Based Video Scene Detector
+#   -------------------------------------------------------------------
+#     [  Site:    https://scenedetect.com                           ]
+#     [  Docs:    https://scenedetect.com/docs/                     ]
+#     [  Github:  https://github.com/Breakthrough/PySceneDetect/    ]
 #
 # Copyright (C) 2014-2023 Brandon Castellano <http://www.bcastell.com>.
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
-""" ``scenedetect.scene_detector`` Module
+"""``scenedetect.scene_detector`` Module
 
-This module contains the :py:class:`SceneDetector` interface, from which all scene detectors in
-:py:mod:`scenedetect.detectors` module are derived from.
+This module contains the :class:`SceneDetector` interface, from which all scene detectors in
+:mod:`scenedetect.detectors` module are derived from.
 
 The SceneDetector class represents the interface which detection algorithms are expected to provide
 in order to be compatible with PySceneDetect.
@@ -47,7 +47,7 @@ class SceneDetector:
     # TODO(v0.7): Make this a proper abstract base class.
 
     stats_manager: Optional[StatsManager] = None
-    """Optional :py:class:`StatsManager <scenedetect.stats_manager.StatsManager>` to
+    """Optional :class:`StatsManager <scenedetect.stats_manager.StatsManager>` to
     use for caching frame metrics to and from."""
 
     # TODO(v1.0): Remove - this is a rarely used case for what is now a neglegible performance gain.
@@ -109,7 +109,7 @@ class SceneDetector:
     @property
     def event_buffer_length(self) -> int:
         """The amount of frames a given event can be buffered for, in time. Represents maximum
-        amount any event can be behind `frame_number` in the result of :py:meth:`process_frame`.
+        amount any event can be behind `frame_number` in the result of :meth:`process_frame`.
         """
         return 0
 

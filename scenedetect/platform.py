@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 #
-#         PySceneDetect: Python-Based Video Scene Detector
-#   ---------------------------------------------------------------
-#     [  Site:   http://www.scenedetect.scenedetect.com/         ]
-#     [  Docs:   http://manual.scenedetect.scenedetect.com/      ]
-#     [  Github: https://github.com/Breakthrough/PySceneDetect/  ]
+#            PySceneDetect: Python-Based Video Scene Detector
+#   -------------------------------------------------------------------
+#     [  Site:    https://scenedetect.com                           ]
+#     [  Docs:    https://scenedetect.com/docs/                     ]
+#     [  Github:  https://github.com/Breakthrough/PySceneDetect/    ]
 #
 # Copyright (C) 2014-2023 Brandon Castellano <http://www.bcastell.com>.
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
-""" ``scenedetect.platform`` Module
+"""``scenedetect.platform`` Module
 
 This moduke contains all platform/library specific compatibility fixes, as well as some utility
 functions to handle logging and invoking external commands.
@@ -21,6 +21,8 @@ import logging
 import os
 import os.path
 import platform
+import re
+import string
 import subprocess
 import sys
 from typing import AnyStr, Dict, List, Optional, Union
@@ -176,12 +178,11 @@ def init_logger(log_level: int = logging.INFO,
         log_level: Verbosity of log messages. Should be one of [logging.INFO, logging.DEBUG,
             logging.WARNING, logging.ERROR, logging.CRITICAL].
         show_stdout: If True, add handler to show log messages on stdout (default: False).
-        log_file: If set, add handler to dump log messages to given file path.
+        log_file: If set, add handler to dump debug log messages to given file path.
     """
     # Format of log messages depends on verbosity.
-    format_str = '[PySceneDetect] %(message)s'
-    if log_level == logging.DEBUG:
-        format_str = '%(levelname)s: %(module)s.%(funcName)s(): %(message)s'
+    INFO_TEMPLATE = '[PySceneDetect] %(message)s'
+    DEBUG_TEMPLATE = '%(levelname)s: %(module)s.%(funcName)s(): %(message)s'
     # Get the named logger and remove any existing handlers.
     logger_instance = logging.getLogger('pyscenedetect')
     logger_instance.handlers = []
@@ -190,14 +191,15 @@ def init_logger(log_level: int = logging.INFO,
     if show_stdout:
         handler = logging.StreamHandler(stream=sys.stdout)
         handler.setLevel(log_level)
-        handler.setFormatter(logging.Formatter(fmt=format_str))
+        handler.setFormatter(
+            logging.Formatter(fmt=DEBUG_TEMPLATE if log_level == logging.DEBUG else INFO_TEMPLATE))
         logger_instance.addHandler(handler)
-    # Add file handler if required.
+    # Add debug log handler if required.
     if log_file:
         log_file = get_and_create_path(log_file)
         handler = logging.FileHandler(log_file)
-        handler.setLevel(log_level)
-        handler.setFormatter(logging.Formatter(fmt=format_str))
+        handler.setLevel(logging.DEBUG)
+        handler.setFormatter(logging.Formatter(fmt=DEBUG_TEMPLATE))
         logger_instance.addHandler(handler)
 
 
@@ -211,7 +213,7 @@ class CommandTooLong(Exception):
 
 
 def invoke_command(args: List[str]) -> int:
-    """ Same as calling Python's subprocess.call() method, but explicitly
+    """Same as calling Python's subprocess.call() method, but explicitly
     raises a different exception when the command length is too long.
 
     See https://github.com/Breakthrough/PySceneDetect/issues/164 for details.
@@ -240,8 +242,9 @@ def invoke_command(args: List[str]) -> int:
 
 
 def get_ffmpeg_path() -> Optional[str]:
-    """Get path to ffmpeg if available on the current system, or None if not available."""
-    # Prefer using ffmpeg if it already exists in PATH.
+    """Get path to ffmpeg if available on the current system. First looks at PATH, then checks if
+    one is available from the `imageio_ffmpeg` package. Returns None if ffmpeg couldn't be found.
+    """
     try:
         subprocess.call(['ffmpeg', '-v', 'quiet'])
         return 'ffmpeg'
@@ -302,11 +305,11 @@ def get_system_version_info() -> str:
     """
     output_template = '{:<12} {}'
     line_separator = '-' * 60
-    not_found_str = '[Not Found]'
+    not_found_str = 'Not Installed'
     out_lines = []
 
     # System (Python, OS)
-    out_lines += ['System Version Info', line_separator]
+    out_lines += ['System Info', line_separator]
     out_lines += [
         output_template.format(name, version) for name, version in (
             ('OS', '%s' % platform.platform()),
@@ -315,7 +318,7 @@ def get_system_version_info() -> str:
     ]
 
     # Third-Party Packages
-    out_lines += ['', 'Package Version Info', line_separator]
+    out_lines += ['', 'Packages', line_separator]
     third_party_packages = (
         'av',
         'click',
@@ -323,6 +326,7 @@ def get_system_version_info() -> str:
         'moviepy',
         'numpy',
         'platformdirs',
+        'scenedetect',
         'tqdm',
     )
     for module_name in third_party_packages:
@@ -333,7 +337,7 @@ def get_system_version_info() -> str:
             out_lines.append(output_template.format(module_name, not_found_str))
 
     # External Tools
-    out_lines += ['', 'Tool Version Info', line_separator]
+    out_lines += ['', 'Tools', line_separator]
 
     tool_version_info = (
         ('ffmpeg', get_ffmpeg_version()),
@@ -345,3 +349,9 @@ def get_system_version_info() -> str:
             output_template.format(tool_name, tool_version if tool_version else not_found_str))
 
     return '\n'.join(out_lines)
+
+
+class Template(string.Template):
+    """Template matcher used to replace instances of $TEMPLATES in filenames."""
+    idpattern = '[A-Z0-9_]+'
+    flags = re.ASCII
