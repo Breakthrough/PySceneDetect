@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 #
-#         PySceneDetect: Python-Based Video Scene Detector
-#   ---------------------------------------------------------------
-#     [  Site:   http://www.scenedetect.scenedetect.com/         ]
-#     [  Docs:   http://manual.scenedetect.scenedetect.com/      ]
-#     [  Github: https://github.com/Breakthrough/PySceneDetect/  ]
+#            PySceneDetect: Python-Based Video Scene Detector
+#   -------------------------------------------------------------------
+#     [  Site:    https://scenedetect.com                           ]
+#     [  Docs:    https://scenedetect.com/docs/                     ]
+#     [  Github:  https://github.com/Breakthrough/PySceneDetect/    ]
 #
 # Copyright (C) 2014-2023 Brandon Castellano <http://www.bcastell.com>.
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
-""":py:class:`VideoStreamMoviePy` provides an adapter for MoviePy's `FFMPEG_VideoReader`.
+""":class:`VideoStreamMoviePy` provides an adapter for MoviePy's `FFMPEG_VideoReader`.
 
 Uses string identifier ``'moviepy'``.
 
@@ -51,16 +51,13 @@ class VideoStreamMoviePy(VideoStream):
         """
         super().__init__()
 
-        # TODO(v0.6.2) - Investigate how MoviePy handles ffmpeg not being on PATH.
-        #if not is_ffmpeg_available():
-        #    raise VideoOpenFailure("ffmpeg was not found on the system!")
-
-        # TODO(v0.6.2): Add framerate override.
+        # TODO(0.6.3) - Investigate how MoviePy handles ffmpeg not being on PATH.
+        # TODO(0.6.3): Add framerate override.
         if framerate is not None:
-            raise NotImplementedError("TODO(v0.6.2)")
+            raise NotImplementedError("TODO(0.6.3)")
 
         self._path = path
-        # TODO(v0.6.2): Need to map errors based on the strings, since several failure
+        # TODO(0.6.3): Need to map errors based on the strings, since several failure
         # cases return IOErrors (e.g. could not read duration/video resolution). These
         # should be mapped to specific errors, e.g. write a function to map MoviePy
         # exceptions to a new set of equivalents.
@@ -221,7 +218,7 @@ class VideoStreamMoviePy(VideoStream):
             self._eof = True
         self._frame_number += 1
         if decode:
-            if self._last_frame_rgb is None:
+            if self._last_frame is not None:
                 self._last_frame_rgb = cv2.cvtColor(self._last_frame, cv2.COLOR_BGR2RGB)
             return self._last_frame_rgb
         return True

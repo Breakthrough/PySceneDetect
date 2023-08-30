@@ -1,0 +1,112 @@
+# Test PySceneDetect on Linux/OSX/Windows and generate Python distribution (sdist/wheel).
+name: Python Distribution
+
+on:
+  pull_request:
+    paths:
+      - dist/**
+      - scenedetect/**
+      - tests/**
+  push:
+    paths:
+      - dist/**
+      - scenedetect/**
+      - tests/**
+    tags:
+      - v*-release
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-latest, ubuntu-20.04, ubuntu-latest, windows-latest]
+        python-version: ["3.7", "3.8", "3.9", "3.10", "3.11"]
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+
+      - name: Install Dependencies
+        # TODO: `setuptools` is pinned for the Python 3.7 builder and can be unpinned when removed.
+        run: |
+          python -m pip install --upgrade pip build wheel virtualenv setuptools==62.3.4
+          pip install av opencv-python-headless --only-binary :all:
+          pip install -r requirements_headless.txt
+
+      - name: Checkout test resources
+        run: |
+          git fetch --depth=1 https://github.com/Breakthrough/PySceneDetect.git refs/heads/resources:refs/remotes/origin/resources
+          git checkout refs/remotes/origin/resources -- tests/resources/
+
+      # TODO: Install ffmpeg/mkvtoolnix on all runners.
+      - name: Download FFMPEG
+        if: ${{ matrix.os == 'windows-latest' }}
+        uses: dsaltares/fetch-gh-release-asset@1.1.1
+        with:
+          repo: 'GyanD/codexffmpeg'
+          version: 'tags/6.0'
+          file: 'ffmpeg-6.0-full_build.7z'
+
+      - name: Extract FFMPEG
+        if: ${{ matrix.os == 'windows-latest' }}
+        run: |
+          7z e ffmpeg-6.0-full_build.7z ffmpeg.exe -r
+
+      - name: Unit Tests
+        run: |
+          python -m pytest tests/
+
+      - name: Smoke Test (Module)
+        run: |
+          python -m scenedetect version
+          python -m scenedetect -i tests/resources/testvideo.mp4 -b opencv time --end 2s
+          python -m scenedetect -i tests/resources/testvideo.mp4 -b pyav time --end 2s
+          python -m pip uninstall -y scenedetect
+
+      - name: Build Documentation
+        if: ${{ matrix.python-version == '3.11' && matrix.os == 'ubuntu-latest' }}
+        run: |
+          pip install -r docs/requirements.txt
+          git mv docs docs_src
+          sphinx-build -b singlehtml docs_src docs
+
+      # TODO: Make the version extraction work on powershell so package smoke tests can run on Windows.
+      - name: Build Package
+        if: ${{ matrix.os != 'windows-latest' }}
+        run: |
+          python -m build
+          echo "scenedetect_version=`python -c \"import scenedetect; print(scenedetect.__version__.replace('-', '.'))\"`" >> "$GITHUB_ENV"
+
+      - name: Smoke Test Package (Source Dist)
+        if: ${{ matrix.os != 'windows-latest' }}
+        run: |
+          python -m pip install dist/scenedetect-${{ env.scenedetect_version }}.tar.gz
+          scenedetect version
+          scenedetect -i tests/resources/testvideo.mp4 -b opencv time --end 2s
+          scenedetect -i tests/resources/testvideo.mp4 -b pyav time --end 2s
+          python -m pip uninstall -y scenedetect
+
+      - name: Smoke Test Package (Wheel)
+        if: ${{ matrix.os != 'windows-latest' }}
+        run: |
+          python -m pip install dist/scenedetect-${{ env.scenedetect_version }}-py3-none-any.whl
+          scenedetect version
+          scenedetect -i tests/resources/testvideo.mp4 -b opencv time --end 2s
+          scenedetect -i tests/resources/testvideo.mp4 -b pyav time --end 2s
+          python -m pip uninstall -y scenedetect
+
+      - name: Upload Package
+        if: ${{ matrix.python-version == '3.11' && matrix.os == 'ubuntu-latest' }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: scenedetect-dist
+          path: |
+            dist/*.tar.gz
+            dist/*.whl

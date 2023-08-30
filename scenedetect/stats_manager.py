@@ -1,23 +1,23 @@
 # -*- coding: utf-8 -*-
 #
-#         PySceneDetect: Python-Based Video Scene Detector
-#   ---------------------------------------------------------------
-#     [  Site:   http://www.scenedetect.scenedetect.com/         ]
-#     [  Docs:   http://manual.scenedetect.scenedetect.com/      ]
-#     [  Github: https://github.com/Breakthrough/PySceneDetect/  ]
+#            PySceneDetect: Python-Based Video Scene Detector
+#   -------------------------------------------------------------------
+#     [  Site:    https://scenedetect.com                           ]
+#     [  Docs:    https://scenedetect.com/docs/                     ]
+#     [  Github:  https://github.com/Breakthrough/PySceneDetect/    ]
 #
 # Copyright (C) 2014-2023 Brandon Castellano <http://www.bcastell.com>.
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
-""" ``scenedetect.stats_manager`` Module
+"""``scenedetect.stats_manager`` Module
 
-This module contains the :py:class:`StatsManager` class, which provides a key-value store for each
-:py:class:`SceneDetector <scenedetect.scene_detector.SceneDetector>` to write the metrics calculated
-for each frame. The :py:class:`StatsManager` must be registered to a
-:py:class:`SceneManager <scenedetect.scene_manager.SceneManager>` upon construction.
+This module contains the :class:`StatsManager` class, which provides a key-value store for each
+:class:`SceneDetector <scenedetect.scene_detector.SceneDetector>` to write the metrics calculated
+for each frame. The :class:`StatsManager` must be registered to a
+:class:`SceneManager <scenedetect.scene_manager.SceneManager>` upon construction.
 
-The entire :py:class:`StatsManager` can be :py:meth:`saved to <StatsManager.save_to_csv>` a
+The entire :class:`StatsManager` can be :meth:`saved to <StatsManager.save_to_csv>` a
 human-readable CSV file, allowing for precise determination of the ideal threshold (or other
 detection parameters) for the given input.
 """
@@ -81,6 +81,8 @@ class StatsFileCorrupt(Exception):
 ##
 
 
+# TODO(v1.0): Relax restriction on metric types only being float or int when loading from disk
+# is fully deprecated.
 class StatsManager:
     """Provides a key-value store for frame metrics/calculations which can be used
     for two-pass detection algorithms, as well as saving stats to a CSV file.
@@ -92,8 +94,7 @@ class StatsManager:
     after having called the detect_scenes(...) method on the SceneManager object
     which owns the given StatsManager instance.
 
-    Only metrics consisting of `float` or `int` should be used currently. All metrics loaded
-    from disk are treated as `float`.
+    Only metrics consisting of `float` or `int` should be used currently.
     """
 
     def __init__(self, base_timecode: FrameTimecode = None):
@@ -202,10 +203,10 @@ class StatsManager:
         # again but with file handle instead of path.
         if isinstance(csv_file, (str, bytes)):
             with open(csv_file, 'w') as file:
-                return self.save_to_csv(csv_file=file, force_save=force_save)
-        csv_writer = csv.writer(csv_file, lineterminator='\n')
+                self.save_to_csv(csv_file=file, force_save=force_save)
+                return
 
-        # Header rows.
+        csv_writer = csv.writer(csv_file, lineterminator='\n')
         metric_keys = sorted(list(self._registered_metrics.union(self._loaded_metrics)))
         csv_writer.writerow([COLUMN_NAME_FRAME_NUMBER, COLUMN_NAME_TIMECODE] + metric_keys)
         frame_keys = sorted(self._frame_metrics.keys())

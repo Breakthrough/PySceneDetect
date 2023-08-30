@@ -1,29 +1,30 @@
 # -*- coding: utf-8 -*-
 #
-#         PySceneDetect: Python-Based Video Scene Detector
-#   ---------------------------------------------------------------
-#     [  Site:   http://www.scenedetect.scenedetect.com/         ]
-#     [  Docs:   http://manual.scenedetect.scenedetect.com/      ]
-#     [  Github: https://github.com/Breakthrough/PySceneDetect/  ]
+#            PySceneDetect: Python-Based Video Scene Detector
+#   -------------------------------------------------------------------
+#     [  Site:    https://scenedetect.com                           ]
+#     [  Docs:    https://scenedetect.com/docs/                     ]
+#     [  Github:  https://github.com/Breakthrough/PySceneDetect/    ]
 #
 # Copyright (C) 2014-2023 Brandon Castellano <http://www.bcastell.com>.
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
-""" ``scenedetect.scene_manager`` Module
+"""``scenedetect.scene_manager`` Module
 
-This module implements the :py:class:`SceneManager` object, which is used to perform scene detection
-(using a detector from :py:mod:`scenedetect.detectors`) on videos. Video decoding is done in a
-separate thread to improve performance.
+This module implements :class:`SceneManager`, coordinates running a
+:mod:`SceneDetector <scenedetect.detectors>` over the frames of a video
+(:mod:`VideoStream <scenedetect.video_stream>`). Video decoding is done in a separate thread to
+improve performance.
 
-This module also contains other helper functions (e.g. :py:func:`save_images`) which can be used to
+This module also contains other helper functions (e.g. :func:`save_images`) which can be used to
 process the resulting scene list.
 
 ===============================================================
 Usage
 ===============================================================
 
-The following example shows basic usage of a :py:class:`SceneManager`:
+The following example shows basic usage of a :class:`SceneManager`:
 
 .. code:: python
 
@@ -53,13 +54,34 @@ An optional callback can also be invoked on each detected scene, for example:
     scene_manager.detect_scenes(video=video, callback=on_new_scene)
 
 To use a `SceneManager` with a webcam/device or existing `cv2.VideoCapture` device, use the
-:py:class:`VideoCaptureAdapter <scenedetect.backends.opencv.VideoCaptureAdapter>` instead of
+:class:`VideoCaptureAdapter <scenedetect.backends.opencv.VideoCaptureAdapter>` instead of
 `open_video`.
+
+=======================================================================
+Storing Per-Frame Statistics
+=======================================================================
+
+`SceneManager` can use an optional
+:class:`StatsManager <scenedetect.stats_manager.StatsManager>` to save frame statistics to disk:
+
+.. code:: python
+
+    from scenedetect import open_video, ContentDetector, SceneManager, StatsManager
+    video = open_video(test_video_file)
+    scene_manager = SceneManager(stats_manager=StatsManager())
+    scene_manager.add_detector(ContentDetector())
+    scene_manager.detect_scenes(video=video)
+    scene_list = scene_manager.get_scene_list()
+    print_scenes(scene_list=scene_list)
+    # Save per-frame statistics to disk.
+    scene_manager.stats_manager.save_to_csv(csv_file=STATS_FILE_PATH)
+
+The statsfile can be used to find a better threshold for certain inputs, or perform statistical
+analysis of the video.
 """
 
 import csv
 from enum import Enum
-from string import Template
 from typing import Iterable, List, Tuple, Optional, Dict, Callable, Union, TextIO
 import threading
 import queue
@@ -69,20 +91,16 @@ import sys
 
 import cv2
 import numpy as np
-from scenedetect.thirdparty.simpletable import (SimpleTableCell, SimpleTableImage, SimpleTableRow,
-                                                SimpleTable, HTMLPage)
+from scenedetect._thirdparty.simpletable import (SimpleTableCell, SimpleTableImage, SimpleTableRow,
+                                                 SimpleTable, HTMLPage)
 
-from scenedetect.platform import (tqdm, get_and_create_path, get_cv2_imwrite_params)
+from scenedetect.platform import (tqdm, get_and_create_path, get_cv2_imwrite_params, Template)
 from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.video_stream import VideoStream
 from scenedetect.scene_detector import SceneDetector, SparseSceneDetector
 from scenedetect.stats_manager import StatsManager, FrameMetricRegistered
 
 logger = logging.getLogger('pyscenedetect')
-
-##
-## SceneManager Helper Functions
-##
 
 # TODO: This value can and should be tuned for performance improvements as much as possible,
 # until accuracy falls, on a large enough dataset. This has yet to be done, but the current
@@ -91,7 +109,7 @@ DEFAULT_MIN_WIDTH: int = 256
 """The default minimum width a frame will be downscaled to when calculating a downscale factor."""
 
 MAX_FRAME_QUEUE_LENGTH: int = 4
-"""Maximum size of the queue of frames waiting to be processed after decoding."""
+"""Maximum number of decoded frames which can be buffered while waiting to be processed."""
 
 PROGRESS_BAR_DESCRIPTION = 'Detected: %d | Progress'
 """Template to use for progress bar."""
@@ -140,8 +158,8 @@ def get_scenes_from_cuts(
     """Returns a list of tuples of start/end FrameTimecodes for each scene based on a
     list of detected scene cuts/breaks.
 
-    This function is called when using the :py:meth:`SceneManager.get_scene_list` method.
-    The scene list is generated from a cutting list (:py:meth:`SceneManager.get_cut_list`),
+    This function is called when using the :meth:`SceneManager.get_scene_list` method.
+    The scene list is generated from a cutting list (:meth:`SceneManager.get_cut_list`),
     noting that each scene is contiguous, starting from the first to last frame of the input.
     If `cut_list` is empty, the resulting scene will span from `start_pos` to `end_pos`.
 
@@ -449,7 +467,11 @@ def save_images(scene_list: List[Tuple[FrameTimecode, FrameTimecode]],
             r if 1 + r[-1] - r[0] >= num_images else list(r) + [r[-1]] * (num_images - len(r))
                                                                                                # create range of frames in scene
             for r in (
-                range(start.get_frames(), end.get_frames())
+                range(
+                    start.get_frames(),
+                    start.get_frames() + max(
+                        1,                                                                     # guard against zero length scenes
+                        end.get_frames() - start.get_frames()))
                                                                                                # for each scene in scene list
                 for start, end in scene_list)
         ])
@@ -460,18 +482,20 @@ def save_images(scene_list: List[Tuple[FrameTimecode, FrameTimecode]],
     if abs(aspect_ratio - 1.0) < 0.01:
         aspect_ratio = None
 
+    logger.debug('Writing images with template %s', filename_template.template)
     for i, scene_timecodes in enumerate(timecode_list):
         for j, image_timecode in enumerate(scene_timecodes):
             video.seek(image_timecode)
             frame_im = video.read()
             if frame_im is not None:
+                # TODO: Allow NUM to be a valid suffix in addition to NUMBER.
                 file_path = '%s.%s' % (filename_template.safe_substitute(
                     VIDEO_NAME=video.name,
                     SCENE_NUMBER=scene_num_format % (i + 1),
                     IMAGE_NUMBER=image_num_format % (j + 1),
                     FRAME_NUMBER=image_timecode.get_frames()), image_extension)
                 image_filenames[i].append(file_path)
-                # TODO(v0.6.2): Combine this resize with the ones below.
+                # TODO(0.6.3): Combine this resize with the ones below.
                 if aspect_ratio is not None:
                     frame_im = cv2.resize(
                         frame_im, (0, 0),
@@ -518,11 +542,9 @@ def save_images(scene_list: List[Tuple[FrameTimecode, FrameTimecode]],
 
 
 class SceneManager:
-    """The SceneManager facilitates detection of scenes via the :py:meth:`detect_scenes`
-    method, given a video source (:py:class:`VideoStream <scenedetect.video.VideoStream>`),
-    and SceneDetector algorithms added via the :py:meth:`add_detector` method. Scene
-    detection is performed in parallel with decoding the video by reading frames from the
-    `VideoStream` in a background thread.
+    """The SceneManager facilitates detection of scenes (:meth:`detect_scenes`) on a video
+    (:class:`VideoStream <scenedetect.video_stream.VideoStream>`) using a detector
+    (:meth:`add_detector`). Video decoding is done in parallel in a background thread.
     """
 
     def __init__(
@@ -531,9 +553,8 @@ class SceneManager:
     ):
         """
         Arguments:
-            stats_manager: :py:class:`StatsManager` to bind to this `SceneManager`. Can be
-                accessed via the `stats_manager` property of the resulting object to load
-                from or save to a file on disk.
+            stats_manager: :class:`StatsManager` to bind to this `SceneManager`. Can be
+                accessed via the `stats_manager` property of the resulting object to save to disk.
         """
         self._cutting_list = []
         self._event_list = []
@@ -626,12 +647,13 @@ class SceneManager:
 
         detector.stats_manager = self._stats_manager
         if self._stats_manager is not None:
-            # Allow multiple detection algorithms of the same type to be added
-            # by suppressing any FrameMetricRegistered exceptions due to attempts
-            # to re-register the same frame metric keys.
             try:
                 self._stats_manager.register_metrics(detector.get_metrics())
             except FrameMetricRegistered:
+                # Allow multiple detection algorithms of the same type to be added
+                # by suppressing any FrameMetricRegistered exceptions due to attempts
+                # to re-register the same frame metric keys.
+                # TODO(#334): Fix this, this should not be part of regular control flow.
                 pass
 
         if not issubclass(type(detector), SparseSceneDetector):
@@ -748,7 +770,7 @@ class SceneManager:
             self._cutting_list += detector.post_process(frame_num)
 
     def stop(self) -> None:
-        """Stop the current :py:meth:`detect_scenes` call, if any. Thread-safe."""
+        """Stop the current :meth:`detect_scenes` call, if any. Thread-safe."""
         self._stop.set()
 
     def detect_scenes(self,
@@ -760,12 +782,12 @@ class SceneManager:
                       callback: Optional[Callable[[np.ndarray, int], None]] = None,
                       frame_source: Optional[VideoStream] = None) -> int:
         """Perform scene detection on the given video using the added SceneDetectors, returning the
-        number of frames processed. Results can be obtained by calling :py:meth:`get_scene_list` or
-        :py:meth:`get_cut_list`.
+        number of frames processed. Results can be obtained by calling :meth:`get_scene_list` or
+        :meth:`get_cut_list`.
 
         Video decoding is performed in a background thread to allow scene detection and frame
         decoding to happen in parallel. Detection will continue until no more frames are left,
-        the specified duration or end time has been reached, or :py:meth:`stop` was called.
+        the specified duration or end time has been reached, or :meth:`stop` was called.
 
         Arguments:
             video: VideoStream obtained from either `scenedetect.open_video`, or by creating
@@ -930,8 +952,10 @@ class SceneManager:
 
         # If *any* exceptions occur, we re-raise them in the main thread so that the caller of
         # detect_scenes can handle it.
-        # pylint: disable=bare-except
-        except:
+        except KeyboardInterrupt:
+            logger.debug("Received KeyboardInterrupt.")
+            self._stop.set()
+        except BaseException:
             logger.critical('Fatal error: Exception raised in decode thread.')
             self._exception_info = sys.exc_info()
             self._stop.set()

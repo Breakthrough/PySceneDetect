@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 #
-#         PySceneDetect: Python-Based Video Scene Detector
-#   ---------------------------------------------------------------
-#     [  Site:   http://www.scenedetect.scenedetect.com/         ]
-#     [  Docs:   http://manual.scenedetect.scenedetect.com/      ]
-#     [  Github: https://github.com/Breakthrough/PySceneDetect/  ]
+#            PySceneDetect: Python-Based Video Scene Detector
+#   -------------------------------------------------------------------
+#     [  Site:    https://scenedetect.com                           ]
+#     [  Docs:    https://scenedetect.com/docs/                     ]
+#     [  Github:  https://github.com/Breakthrough/PySceneDetect/    ]
 #
 # Copyright (C) 2014-2023 Brandon Castellano <http://www.bcastell.com>.
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
@@ -34,7 +34,10 @@ from scenedetect.video_splitter import is_ffmpeg_available, is_mkvmerge_availabl
 
 # TODO: These tests are very expensive since they spin up new Python interpreters.
 # Move most of these test cases (e.g. argument validation) to ones that interface directly
-# with the scenedetect.cli module.
+# with the scenedetect._cli module. Click also supports unit testing directly, so we should
+# probably use that instead of spinning up new subprocesses for each run of the controller.
+# That will also allow splitting up the validation of argument parsing logic from the controller
+# logic by creating a CLI context with the desired parameters.
 
 SCENEDETECT_CMD = 'python -m scenedetect'
 VIDEO_PATH = 'tests/resources/goldeneye.mp4'
@@ -62,6 +65,7 @@ def invoke_scenedetect(
 
     Default values are set for any arguments found in the command:
         VIDEO -> VIDEO_PATH
+        VIDEO_NAME -> basename of VIDEO_PATH
         DETECTOR -> DEFAULT_DETECTOR
         TIME -> DEFAULT_TIME
         STATS -> DEFAULT_STATSFILE
@@ -70,6 +74,7 @@ def invoke_scenedetect(
     """
     value_dict = dict(
         VIDEO=VIDEO_PATH,
+        VIDEO_NAME=os.path.splitext(os.path.basename(VIDEO_PATH))[0],
         TIME=DEFAULT_TIME,
         DETECTOR=DEFAULT_DETECTOR,
         STATS=DEFAULT_STATSFILE,
@@ -90,15 +95,15 @@ def test_cli_no_args():
     assert invoke_scenedetect(config_file=None) == 0
 
 
+def test_cli_default_detector():
+    """Test `scenedetect` command invoked without a detector."""
+    assert invoke_scenedetect('-i {VIDEO} time {TIME}', config_file=None) == 0
+
+
 @pytest.mark.parametrize('info_command', ['help', 'about', 'version'])
 def test_cli_info_command(info_command):
     """Test `scenedetect` info commands (e.g. help, about)."""
     assert invoke_scenedetect(info_command) == 0
-
-
-def test_cli_version_info():
-    """Test `scenedetect` version command with the `-a`/`--show-all` flag."""
-    assert invoke_scenedetect('version -a') == 0
 
 
 def test_cli_frame_numbers():
@@ -262,6 +267,79 @@ def test_cli_backend(backend_type: str):
 
 
 def test_cli_backend_unsupported():
-    # Ensure setting an invalid backend returns an error.
+    """Ensure setting an invalid backend returns an error."""
     assert invoke_scenedetect(
         '-i {VIDEO} -b {BACKEND} {DETECTOR}', BACKEND='unknown_backend_type') != 0
+
+
+def test_cli_load_scenes():
+    """Ensure we can load scenes both with and without the cut row."""
+    assert invoke_scenedetect('-i {VIDEO} time {TIME} {DETECTOR} list-scenes') == 0
+    assert invoke_scenedetect('-i {VIDEO} time {TIME} load-scenes -i {VIDEO_NAME}-Scenes.csv') == 0
+    assert invoke_scenedetect('-i {VIDEO} time {TIME} {DETECTOR} list-scenes -s') == 0
+
+
+def test_cli_load_scenes_with_time_frames():
+    """Verify we can use `load-scenes` with the `time` command and get the desired output."""
+    scenes_csv = """
+Scene Number,Start Frame
+1,49
+2,91
+3,211
+"""
+    with open('test_scene_list.csv', 'w') as f:
+        f.write(scenes_csv)
+    output = subprocess.check_output(
+        SCENEDETECT_CMD.split(' ') + [
+            '-i',
+            VIDEO_PATH,
+            'load-scenes',
+            '-i',
+            'test_scene_list.csv',
+            'time',
+            '-s',
+            '2s',
+            '-e',
+            '10s',
+            'list-scenes',
+        ],
+        text=True)
+    print(output)
+    assert """
+-----------------------------------------------------------------------
+ | Scene # | Start Frame |  Start Time  |  End Frame  |   End Time   |
+-----------------------------------------------------------------------
+ |      1  |          49 | 00:00:02.002 |          90 | 00:00:03.754 |
+ |      2  |          91 | 00:00:03.754 |         210 | 00:00:08.759 |
+ |      3  |         211 | 00:00:08.759 |         240 | 00:00:10.010 |
+-----------------------------------------------------------------------
+""" in output
+    assert "00:00:03.754,00:00:08.759" in output
+
+
+def test_cli_load_scenes_round_trip():
+    """Verify we can use `load-scenes` with the `time` command and get the desired output."""
+    scenes_csv = """
+Scene Number,Start Frame
+1,49
+2,91
+3,211
+"""
+    with open('test_scene_list.csv', 'w') as f:
+        f.write(scenes_csv)
+    ground_truth = subprocess.check_output(
+        SCENEDETECT_CMD.split(' ') + [
+            '-i', VIDEO_PATH, 'detect-content', 'list-scenes', '-f', 'testout.csv', 'time', '-s',
+            '200', '-e', '400'
+        ],
+        text=True)
+    loaded_first_pass = subprocess.check_output(
+        SCENEDETECT_CMD.split(' ') + [
+            '-i', VIDEO_PATH, 'load-scenes', '-i', 'testout.csv', 'time', '-s', '200', '-e', '400',
+            'list-scenes', '-f', 'testout2.csv'
+        ],
+        text=True)
+    SPLIT_POINT = ' | Scene # | Start Frame |  Start Time  |  End Frame  |   End Time   |'
+    assert ground_truth.split(SPLIT_POINT)[1] == loaded_first_pass.split(SPLIT_POINT)[1]
+    with open('testout.csv') as first, open('testout2.csv') as second:
+        assert first.readlines() == second.readlines()

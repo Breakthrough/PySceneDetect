@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 #
-#         PySceneDetect: Python-Based Video Scene Detector
-#   ---------------------------------------------------------------
-#     [  Site:   http://www.scenedetect.scenedetect.com/         ]
-#     [  Docs:   http://manual.scenedetect.scenedetect.com/      ]
-#     [  Github: https://github.com/Breakthrough/PySceneDetect/  ]
+#            PySceneDetect: Python-Based Video Scene Detector
+#   -------------------------------------------------------------------
+#     [  Site:    https://scenedetect.com                           ]
+#     [  Docs:    https://scenedetect.com/docs/                     ]
+#     [  Github:  https://github.com/Breakthrough/PySceneDetect/    ]
 #
 # Copyright (C) 2014-2023 Brandon Castellano <http://www.bcastell.com>.
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
-""":py:class:`AdaptiveDetector` compares the difference in content between adjacent frames similar
+""":class:`AdaptiveDetector` compares the difference in content between adjacent frames similar
 to `ContentDetector` except the threshold isn't fixed, but is a rolling average of adjacent frame
 changes. This can help mitigate false detections in situations such as fast camera motions.
 
@@ -61,7 +61,7 @@ class AdaptiveDetector(ContentDetector):
                 (`content_val` in a statsfile, the value `threshold` is compared against).
                 If omitted, the default ContentDetector weights are used.
             luma_only: If True, only considers changes in the luminance channel of the video.
-                Equivalent to specifying `weights` as :py:data:`ContentDetector.LUMA_ONLY`.
+                Equivalent to specifying `weights` as :data:`ContentDetector.LUMA_ONLY`.
                 Overrides `weights` if both are set.
             kernel_size: Size of kernel to use for post edge detection filtering. If None,
                 automatically set based on video resolution.
@@ -172,7 +172,7 @@ class AdaptiveDetector(ContentDetector):
 
         return cut_list
 
-    # TODO(v0.6.2): Deprecate & remove this method.
+    # TODO(0.6.3): Deprecate & remove this method.
     def get_content_val(self, frame_num: int) -> Optional[float]:
         """Returns the average content change for a frame."""
         if self.stats_manager is not None:

@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 #
-#         PySceneDetect: Python-Based Video Scene Detector
-#   ---------------------------------------------------------------
-#     [  Site:   http://www.scenedetect.scenedetect.com/         ]
-#     [  Docs:   http://manual.scenedetect.scenedetect.com/      ]
-#     [  Github: https://github.com/Breakthrough/PySceneDetect/  ]
+#            PySceneDetect: Python-Based Video Scene Detector
+#   -------------------------------------------------------------------
+#     [  Site:    https://scenedetect.com                           ]
+#     [  Docs:    https://scenedetect.com/docs/                     ]
+#     [  Github:  https://github.com/Breakthrough/PySceneDetect/    ]
 #
 # Copyright (C) 2014-2023 Brandon Castellano <http://www.bcastell.com>.
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
@@ -24,6 +24,8 @@ following from the root of the repo:
 
 Note that currently these tests create some temporary files which are not yet cleaned up.
 """
+
+# TODO: Properly cleanup temporary files.
 
 from typing import AnyStr
 import logging
@@ -61,8 +63,13 @@ git reset
 @pytest.fixture(autouse=True)
 def no_logs_gte_error(caplog):
     """Ensure no log messages with error severity or higher were reported during test execution."""
+    # TODO: Remove exclusion for VideoManager module when removed from codebase.
+    EXCLUDED_MODULES = {'video_manager'}
     yield
-    errors = [record for record in caplog.get_records('call') if record.levelno >= logging.ERROR]
+    errors = [
+        record for record in caplog.get_records('call')
+        if record.levelno >= logging.ERROR and not record.module in EXCLUDED_MODULES
+    ]
     assert not errors, "Test failed due to presence of one or more logs with ERROR severity."
 
 

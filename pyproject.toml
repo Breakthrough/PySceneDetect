@@ -1,3 +1,6 @@
+
+# TODO: Switch to poetry to try and fix dependents graph. Example:
+# https://github.com/Textualize/rich/blob/master/pyproject.toml
 [build-system]
 requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
