@@ -45,6 +45,7 @@ jobs:
           git fetch --depth=1 https://github.com/Breakthrough/PySceneDetect.git refs/heads/resources:refs/remotes/origin/resources
           git checkout refs/remotes/origin/resources -- tests/resources/
 
+      # TODO: Cache this: https://github.com/actions/cache
       # TODO: Install ffmpeg/mkvtoolnix on all runners.
       - name: Download FFMPEG
         if: ${{ matrix.os == 'windows-latest' }}

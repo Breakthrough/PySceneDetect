@@ -10,10 +10,7 @@
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
-""":class:`VideoStreamAv` provides an adapter for the PyAV av.InputContainer object.
-
-Uses string identifier ``'pyav'``.
-"""
+""":class:`VideoStreamAv` provides an adapter for the PyAV av.InputContainer object."""
 
 from logging import getLogger
 from typing import AnyStr, BinaryIO, Optional, Tuple, Union
