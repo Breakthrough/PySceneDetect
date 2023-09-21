@@ -12,11 +12,9 @@
 #
 """:class:`VideoStreamMoviePy` provides an adapter for MoviePy's `FFMPEG_VideoReader`.
 
-Uses string identifier ``'moviepy'``.
-
-.. warning::
-
-    The MoviePy backend is still under development. Some features are not yet supported.
+MoviePy launches ffmpeg as a subprocess, and can be used with various types of inputs. Generally,
+the input should support seeking, but does not necessarily have to be a video. For example,
+image sequences or AviSynth scripts are supported as inputs.
 """
 
 from logging import getLogger
@@ -72,13 +70,7 @@ class VideoStreamMoviePy(VideoStream):
         self._frame_number = 0
         # We need to manually keep track of EOF as duration may not be accurate.
         self._eof = False
-        # MoviePy doesn't support extracting the aspect ratio yet, so for now we just fall
-        # back to using OpenCV to determine it.
-        try:
-            self._aspect_ratio = VideoStreamCv2(self._path).aspect_ratio
-        except VideoOpenFailure as ex:
-            logger.warning("Unable to determine aspect ratio: %s", str(ex))
-            self._aspect_ratio = 1.0
+        self._aspect_ratio: float = None
 
     #
     # VideoStream Methods/Properties
@@ -121,6 +113,15 @@ class VideoStreamMoviePy(VideoStream):
     @property
     def aspect_ratio(self) -> float:
         """Display/pixel aspect ratio as a float (1.0 represents square pixels)."""
+        # TODO: Use cached_property once Python 3.7 support is deprecated.
+        if self._aspect_ratio is None:
+            # MoviePy doesn't support extracting the aspect ratio yet, so for now we just fall
+            # back to using OpenCV to determine it.
+            try:
+                self._aspect_ratio = VideoStreamCv2(self._path).aspect_ratio
+            except VideoOpenFailure as ex:
+                logger.warning("Unable to determine aspect ratio: %s", str(ex))
+                self._aspect_ratio = 1.0
         return self._aspect_ratio
 
     @property
