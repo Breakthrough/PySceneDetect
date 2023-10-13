@@ -79,7 +79,7 @@ PySceneDetect can look for fades in/out using `detect-threshold` (comparing each
 
 Each mode has slightly different parameters, and is described in detail below. Most detector parameters can also be [set with a config file](http://scenedetect.com/projects/Manual/en/latest/cli/config_file.html).
 
-In general, use `detect-threshold` mode if you want to detect scene boundaries using fades/cuts in/out to black.  If the video uses a lot of fast cuts between content, and has no well-defined scene boundaries, you should use the `detect-adaptive` or  `detect-content` modes.  Once you know what detection mode to use, you can try the parameters recommended below, or generate a statistics file (using the `-s` / `--stats` flag) in order to determine the correct paramters - specifically, the proper threshold value.
+In general, use `detect-threshold` mode if you want to detect scene boundaries using fades/cuts in/out to black.  If the video uses a lot of fast cuts between content, and has no well-defined scene boundaries, you should use the `detect-adaptive` or  `detect-content` modes.  Once you know what detection mode to use, you can try the parameters recommended below, or generate a statistics file (using the `-s` / `--stats` flag) in order to determine the correct parameters - specifically, the proper threshold value.
 
 
 ### Content-Aware Detection
@@ -140,7 +140,7 @@ Coming soon: If more are specified via the `-n` flag, they will start from `00` 
 
 The following arguments are global program options, and need to be applied before any commands (e.g. `detect-content`, `list-scenes`).  They can be used to achieve performance gains for some source material with a variable loss of accuracy.
 
-Assuming the input video is of a high enough resolution, a significant performance gain can be achieved by sub-sampling (down-scaling) the input image by a specific integer factor (2x, 3x, 4x, 5x...).  This is applied automatically to some degree based on the input video size, but can be overriden manually with the `-d` / `--downscale` option.
+Assuming the input video is of a high enough resolution, a significant performance gain can be achieved by sub-sampling (down-scaling) the input image by a specific integer factor (2x, 3x, 4x, 5x...).  This is applied automatically to some degree based on the input video size, but can be overridden manually with the `-d` / `--downscale` option.
 
 This factor represents how many pixels are "skipped" in both the x- and y- directions, effectively down-scaling the image (using nearest-neighbor sampling) by the factor specified (the new resolution being `W/factor x H/factor` if the old resolution is `W x H`).
 

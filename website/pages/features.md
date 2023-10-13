@@ -55,7 +55,7 @@ Future version roadmaps are now [tracked as milestones (link)](https://github.co
 The following features are under consideration for future releases. Any contributions towards completing these features are most welcome (pull requests may be accpeted via Github).
 
  - graphical interface (GUI)
- - automatic threshold detection for the current scene detection methods (or just ouptut message indicating "Predicted Threshold: X")
+ - automatic threshold detection for the current scene detection methods (or just output message indicating "Predicted Threshold: X")
  - suppression of short-length flashes/bursts of light [#35](https://github.com/Breakthrough/PySceneDetect/issues/35)
  - histogram-based detection algorithm in HSV/HSL color space [#53](https://github.com/Breakthrough/PySceneDetect/issues/53)
  - [perceptual hash](https://en.wikipedia.org/wiki/Perceptual_hashing) based scene detection ([prototype by @wjs018 in PR#290](https://github.com/Breakthrough/PySceneDetect/pull/290))
