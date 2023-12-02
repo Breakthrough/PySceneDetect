@@ -6,14 +6,17 @@ site_author: "Brandon Castellano"
 docs_dir: "pages"
 site_dir: "build"
 repo_url: https://github.com/Breakthrough/PySceneDetect
+edit_uri:  'blob/main/website/pages/'
 repo_name: "PySceneDetect on Github"
 copyright: 'Copyright &copy; 2014-2023 Brandon Castellano.  All rights reserved.<br />Licensed under BSD 3-Clause (see the <a href="https://github.com/Breakthrough/PySceneDetect/blob/main/LICENSE" alt="link to latest LICENSE file on Github">LICENSE file</a> for details).'
-theme: readthedocs
+theme:
+    name: readthedocs
+    logo: img/pyscenedetect_logo_small.png
+    custom_dir: overrides
 # TODO: deprecated option for this theme
 google_analytics: ['UA-72551323-1', 'auto']
 
-# TODO: `pages` is deprecated, use `nav` instead
-pages:
+nav:
 - 'PySceneDetect':
     - 'Home': 'index.md'
     - 'Features': 'features.md'
@@ -33,3 +36,6 @@ pages:
     - 'License & Copyright': 'copyright.md'
 
 markdown_extensions: [fenced_code]
+
+extra_css:
+  - style.css
