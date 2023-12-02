@@ -13,6 +13,7 @@ Releases
 **API Changes:**
 
  - [bugfix] Fix `AttributeError` thrown when accessing `aspect_ratio` on certain videos using `VideoStreamAv` [#355](https://github.com/Breakthrough/PySceneDetect/issues/355)
+ - [bugfix] Fix circular imports due to partially initialized module for some development environments [#350](https://github.com/Breakthrough/PySceneDetect/issues/350)
 
 
 ### 0.6.2 (July 23, 2023)

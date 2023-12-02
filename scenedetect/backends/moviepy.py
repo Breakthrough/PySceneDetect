@@ -22,7 +22,7 @@ from typing import AnyStr, Tuple, Union, Optional
 
 import cv2
 from moviepy.video.io.ffmpeg_reader import FFMPEG_VideoReader
-from numpy import ndarray
+import numpy as np
 
 from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.platform import get_file_name
@@ -63,8 +63,8 @@ class VideoStreamMoviePy(VideoStream):
         # This will always be one behind self._reader.lastread when we finally call read()
         # as MoviePy caches the first frame when opening the video. Thus self._last_frame
         # will always be the current frame, and self._reader.lastread will be the next.
-        self._last_frame: Union[bool, ndarray] = False
-        self._last_frame_rgb: Optional[ndarray] = None
+        self._last_frame: Union[bool, np.ndarray] = False
+        self._last_frame_rgb: Optional[np.ndarray] = None
         # Older versions don't track the video position when calling read_frame so we need
         # to keep track of the current frame number.
         self._frame_number = 0
@@ -193,15 +193,15 @@ class VideoStreamMoviePy(VideoStream):
         self._frame_number = 0
         self._eof = False
 
-    def read(self, decode: bool = True, advance: bool = True) -> Union[ndarray, bool]:
-        """Read and decode the next frame as a numpy.ndarray. Returns False when video ends.
+    def read(self, decode: bool = True, advance: bool = True) -> Union[np.ndarray, bool]:
+        """Read and decode the next frame as a np.ndarray. Returns False when video ends.
 
         Arguments:
             decode: Decode and return the frame.
             advance: Seek to the next frame. If False, will return the current (last) frame.
 
         Returns:
-            If decode = True, the decoded frame (numpy.ndarray), or False (bool) if end of video.
+            If decode = True, the decoded frame (np.ndarray), or False (bool) if end of video.
             If decode = False, a bool indicating if advancing to the the next frame succeeded.
         """
         if not advance:

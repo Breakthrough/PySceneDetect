@@ -36,7 +36,7 @@ from abc import ABC, abstractmethod
 from logging import getLogger
 from typing import Tuple, Optional, Union
 
-from numpy import ndarray
+import numpy as np
 
 from scenedetect.frame_timecode import FrameTimecode
 
@@ -178,15 +178,15 @@ class VideoStream(ABC):
     #
 
     @abstractmethod
-    def read(self, decode: bool = True, advance: bool = True) -> Union[ndarray, bool]:
-        """Read and decode the next frame as a numpy.ndarray. Returns False when video ends.
+    def read(self, decode: bool = True, advance: bool = True) -> Union[np.ndarray, bool]:
+        """Read and decode the next frame as a np.ndarray. Returns False when video ends.
 
         Arguments:
             decode: Decode and return the frame.
             advance: Seek to the next frame. If False, will return the current (last) frame.
 
         Returns:
-            If decode = True, the decoded frame (numpy.ndarray), or False (bool) if end of video.
+            If decode = True, the decoded frame (np.ndarray), or False (bool) if end of video.
             If decode = False, a bool indicating if advancing to the the next frame succeeded.
         """
         raise NotImplementedError
