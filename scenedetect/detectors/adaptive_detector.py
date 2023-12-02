@@ -20,7 +20,7 @@ This detector is available from the command-line as the `detect-adaptive` comman
 from logging import getLogger
 from typing import List, Optional
 
-from numpy import ndarray
+import numpy as np
 
 from scenedetect.detectors import ContentDetector
 
@@ -114,14 +114,14 @@ class AdaptiveDetector(ContentDetector):
         """Not required for AdaptiveDetector."""
         return False
 
-    def process_frame(self, frame_num: int, frame_img: Optional[ndarray]) -> List[int]:
+    def process_frame(self, frame_num: int, frame_img: Optional[np.ndarray]) -> List[int]:
         """ Similar to ThresholdDetector, but using the HSV colour space DIFFERENCE instead
         of single-frame RGB/grayscale intensity (thus cannot detect slow fades with this method).
 
         Arguments:
             frame_num: Frame number of frame that is being passed.
 
-            frame_img: Decoded frame image (numpy.ndarray) to perform scene
+            frame_img: Decoded frame image (np.ndarray) to perform scene
                 detection on. Can be None *only* if the self.is_processing_required() method
                 (inhereted from the base SceneDetector class) returns True.
 
