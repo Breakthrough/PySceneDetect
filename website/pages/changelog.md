@@ -4,6 +4,17 @@ Releases
 
 ## PySceneDetect 0.6
 
+### 0.6.3 (In Development)
+
+**Program Changes:**
+
+ - [bugfix] Fix crash for some WebM videos when using `save-images` with `--backend pyav` [#355](https://github.com/Breakthrough/PySceneDetect/issues/355)
+
+**API Changes:**
+
+ - [bugfix] Fix `AttributeError` thrown when accessing `aspect_ratio` on certain videos using `VideoStreamAv` [#355](https://github.com/Breakthrough/PySceneDetect/issues/355)
+
+
 ### 0.6.2 (July 23, 2023)
 
 #### Release Notes

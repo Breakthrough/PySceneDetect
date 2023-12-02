@@ -207,9 +207,14 @@ class VideoStreamAv(VideoStream):
     @property
     def aspect_ratio(self) -> float:
         """Pixel aspect ratio as a float (1.0 represents square pixels)."""
-        display_aspect_ratio = (
-            self._codec_context.display_aspect_ratio.numerator /
-            self._codec_context.display_aspect_ratio.denominator)
+        if not hasattr(self._codec_context,
+                       "display_aspect_ratio") or self._codec_context.display_aspect_ratio is None:
+            return 1.0
+        ar_denom = self._codec_context.display_aspect_ratio.denominator
+        if ar_denom <= 0:
+            return 1.0
+        display_aspect_ratio = self._codec_context.display_aspect_ratio.numerator / ar_denom
+        assert self.frame_size[0] > 0 and self.frame_size[1] > 0
         frame_aspect_ratio = self.frame_size[0] / self.frame_size[1]
         return display_aspect_ratio / frame_aspect_ratio
 
