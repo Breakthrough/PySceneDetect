@@ -274,7 +274,7 @@ def get_ffmpeg_version() -> Optional[str]:
     ffmpeg_path = get_ffmpeg_path()
     if ffmpeg_path is None:
         return None
-    # If get_ffmpeg_path() returns a value, the path it returns should be invokable.
+    # If get_ffmpeg_path() returns a value, the path it returns should be invocable.
     output = subprocess.check_output(args=[ffmpeg_path, '-version'], text=True)
     output_split = output.split()
     if len(output_split) >= 3 and output_split[1] == 'version':

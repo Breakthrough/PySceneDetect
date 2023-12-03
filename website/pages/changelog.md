@@ -89,7 +89,7 @@ Includes [MoviePy support](https://github.com/Zulko/moviepy), edge detection cap
     - Edge differences are typically larger than other components, so you may need to increase `-t`/`--threshold` higher when increasing the edge weight (the last component) with `detect-content, for example:
     `detect-content -w 1.0 0.5 1.0 0.25 -t 32`
     - May be enabled by default in the future once it has been more thoroughly tested, further improvements for `detect-content` are being investigated as well (e.g. motion compensation, flash suppression)
-   - Short-form of `detect-content` option `--frame-window` has been changed from `-w` to `-f` to accomodate this change
+   - Short-form of `detect-content` option `--frame-window` has been changed from `-w` to `-f` to accommodate this change
  - [enhancement] Progress bar now displays number of detections while processing, no longer conflicts with log message output
  - [enhancement] When using ffmpeg to split videos, `-map 0` has been added to the default arguments so other audio tracks are also included when present ([#271](https://github.com/Breakthrough/PySceneDetect/issues/271))
  - [enhancement] Add `-a` flag to `version` command to print more information about versions of dependencies/tools being used
@@ -299,7 +299,7 @@ Both the Windows installer and portable distributions now include signed executa
  * [api] Support for live video stream callbacks by adding new `callback` argument to the `detect_scenes()` method of `SceneManager` ([#5](https://github.com/Breakthrough/PySceneDetect/issues/5), thanks @mhashim6)
  * [bugfix] Fix unhandled exception causing improper error message when a video fails to load on non-Windows platforms ([#192](https://github.com/Breakthrough/PySceneDetect/issues/192))
  * [enhancement] Enabled dynamic resizing for progress bar ([#193](https://github.com/Breakthrough/PySceneDetect/issues/193))
- * [enhancement] Always ouptut version number via logger to assist with debugging ([#171](https://github.com/Breakthrough/PySceneDetect/issues/171))
+ * [enhancement] Always output version number via logger to assist with debugging ([#171](https://github.com/Breakthrough/PySceneDetect/issues/171))
  * [bugfix] Resolve RuntimeWarning when running as module ([#181](https://github.com/Breakthrough/PySceneDetect/issues/181))
  * [api] Add `save_images()` function to `scenedetect.scene_manager` module which exposes the same functionality as the CLI `save-images` command ([#88](https://github.com/Breakthrough/PySceneDetect/issues/88))
  * [api] Removed `close_captures()` and `release_captures()` functions from `scenedetect.video_manager` module
@@ -343,7 +343,7 @@ Both the Windows installer and portable distributions now include signed executa
 
  * Resolved long-standing bug where `split-video` command would duplicate certain frames at the beginning/end of the output ([#93](https://github.com/Breakthrough/PySceneDetect/issues/93))
  * This was determined to be caused by copying (instead of re-encoding) the audio track, causing extra frames to be brought in when the audio samples did not line up on a frame boundary (thank you @joshcoales for your assistance)
- * Default behavior is to now re-encode audio tracks using the `aac` codec when using `split-video` (it can be overriden in both the command line and Python interface)
+ * Default behavior is to now re-encode audio tracks using the `aac` codec when using `split-video` (it can be overridden in both the command line and Python interface)
  * Improved timestamp accuracy when using `split-video` command to further reduce instances of duplicated or off-by-one frame issues
  * Fixed application crash when using the `-l`/`--logfile` argument
 

@@ -50,7 +50,7 @@ Options
 
 .. option:: -o DIR, --output DIR
 
-  Output directory for created files. If unset, working directory will be used. May be overriden by command options.
+  Output directory for created files. If unset, working directory will be used. May be overridden by command options.
 
 .. option:: -c FILE, --config FILE
 
