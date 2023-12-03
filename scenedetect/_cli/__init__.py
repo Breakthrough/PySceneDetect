@@ -172,7 +172,7 @@ def _print_command_help(ctx: click.Context, command: click.Command):
     required=False,
     metavar='DIR',
     type=click.Path(exists=False, dir_okay=True, writable=True, resolve_path=True),
-    help='Output directory for created files. If unset, working directory will be used. May be overriden by command options.%s'
+    help='Output directory for created files. If unset, working directory will be used. May be overridden by command options.%s'
     % (USER_CONFIG.get_help_string("global", "output", show_default=False)),
 )
 @click.option(

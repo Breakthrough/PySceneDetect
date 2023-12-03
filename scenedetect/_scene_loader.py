@@ -94,7 +94,7 @@ class SceneLoader(SceneDetector):
             frame_num:  Frame number of frame that is being passed.
             frame_img:  Decoded frame image (numpy.ndarray) to perform scene detection on. This is
                 unused for this detector as the video is not analyzed, but is allowed for
-                compatiblity.
+                compatibility.
 
         Returns:
             cut_list:   List of cuts (as provided by input csv file)

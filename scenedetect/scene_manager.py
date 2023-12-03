@@ -141,7 +141,7 @@ def compute_downscale_factor(frame_width: int, effective_width: int = DEFAULT_MI
         effective_width: Desired minimum width in pixels.
 
     Returns:
-        int: The defalt downscale factor to use to achieve at least the target effective_width.
+        int: The default downscale factor to use to achieve at least the target effective_width.
     """
     assert not (frame_width < 1 or effective_width < 1)
     if frame_width < effective_width:
