@@ -178,6 +178,7 @@ def split_video_mkvmerge(
 def split_video_ffmpeg(
     input_video_path: str,
     scene_list: Iterable[TimecodePair],
+    output_dir: Optional[str] = None,
     output_file_template: str = '$VIDEO_NAME-Scene-$SCENE_NUMBER.mp4',
     video_name: Optional[str] = None,
     arg_override: str = DEFAULT_FFMPEG_ARGS,
@@ -193,6 +194,8 @@ def split_video_ffmpeg(
         input_video_path: Path to the video to be split.
         scene_list (List[Tuple[FrameTimecode, FrameTimecode]]): List of scenes
             (pairs of FrameTimecodes) denoting the start/end frames of each scene.
+        output_dir: Directory to output videos. If not set, the output is created in the working
+            directory.
         output_file_template (str): Template to use for generating the output filenames.
             Can use $VIDEO_NAME and $SCENE_NUMBER in this format, for example:
             `$VIDEO_NAME - Scene $SCENE_NUMBER.mp4`
