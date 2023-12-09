@@ -9,6 +9,11 @@ Releases
 **Program Changes:**
 
  - [bugfix] Fix crash for some WebM videos when using `save-images` with `--backend pyav` [#355](https://github.com/Breakthrough/PySceneDetect/issues/355)
+ - [general] Comma-separated timecode list is now only printed when the `list-scenes` command is specified [#356](https://github.com/Breakthrough/PySceneDetect/issues/356)
+ - TODO: [general] Add `output-format` option under `[list-scenes]` to configure output of `list-scenes`
+    - Valid values: `scenes`, `cuts`, `both`
+ - TODO: [general] Add `cut-format` option under `[list-scenes]` to configure cut list format for `list-scenes` [#349](https://github.com/Breakthrough/PySceneDetect/issues/349)
+    - Valid values: `frames`, `timecode`, `seconds`
 
 **API Changes:**
 
