@@ -263,9 +263,11 @@ CONFIG_MAP: ConfigDict = {
         'no-images': False,
     },
     'list-scenes': {
-        'output': '',
+        'display-cuts': True,
+        'display-scenes': True,
         'filename': '$VIDEO_NAME-Scenes.csv',
-        'no-output-file': False,
+        'output': '',
+        'no-output-file': False,                                                 # TODO(v0.6.3): Rename this to 'save'.
         'quiet': False,
         'skip-cuts': False,
     },

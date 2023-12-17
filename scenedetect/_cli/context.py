@@ -152,11 +152,13 @@ class CliContext:
 
         # `list-scenes` Command Options
         self.list_scenes: bool = False
-        self.print_scene_list: bool = None      # list-scenes -q/--quiet
+        self.list_scenes_quiet: bool = None     # list-scenes -q/--quiet
         self.scene_list_directory: str = None   # list-scenes -o/--output
         self.scene_list_name_format: str = None # list-scenes -f/--filename
         self.scene_list_output: bool = None     # list-scenes -n/--no-output
         self.skip_cuts: bool = None             # list-scenes -s/--skip-cuts
+        self.display_cuts: bool = True          # [list-scenes] display-cuts
+        self.display_scenes: bool = True        # [list-scenes] display-scenes
 
         # `export-html` Command Options
         self.export_html: bool = False
@@ -473,20 +475,22 @@ class CliContext:
         """Handle `list-scenes` command options."""
         self._ensure_input_open()
         if self.list_scenes:
-            self._on_duplicate_command('list-scenes')
+            self._on_duplicate_command("list-scenes")
 
-        self.skip_cuts = skip_cuts or self.config.get_value('list-scenes', 'skip-cuts')
-        self.print_scene_list = not (quiet or self.config.get_value('list-scenes', 'quiet'))
-        no_output_file = no_output_file or self.config.get_value('list-scenes', 'no-output-file')
+        self.display_cuts = self.config.get_value("list-scenes", "display-cuts")
+        self.display_scenes = self.config.get_value("list-scenes", "display-scenes")
+        self.skip_cuts = skip_cuts or self.config.get_value("list-scenes", "skip-cuts")
+        self.list_scenes_quiet = quiet or self.config.get_value("list-scenes", "quiet")
+        no_output_file = no_output_file or self.config.get_value("list-scenes", "no-output-file")
 
         self.scene_list_directory = self.config.get_value(
-            'list-scenes', 'output', output, ignore_default=True)
-        self.scene_list_name_format = self.config.get_value('list-scenes', 'filename', filename)
+            "list-scenes", "output", output, ignore_default=True)
+        self.scene_list_name_format = self.config.get_value("list-scenes", "filename", filename)
         if self.scene_list_name_format is not None and not no_output_file:
-            logger.info('Scene list filename format:\n  %s', self.scene_list_name_format)
+            logger.info("Scene list filename format:\n  %s", self.scene_list_name_format)
         self.scene_list_output = not no_output_file
         if self.scene_list_directory is not None:
-            logger.info('Scene list output directory:\n  %s', self.scene_list_directory)
+            logger.info("Scene list output directory:\n  %s", self.scene_list_directory)
 
         self.list_scenes = True
 

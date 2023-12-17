@@ -154,24 +154,24 @@ def _list_scenes(context: CliContext, scene_list: List[Tuple[FrameTimecode, Fram
                 scene_list=scene_list,
                 include_cut_list=not context.skip_cuts,
                 cut_list=cut_list)
-
-    if context.print_scene_list:
-        logger.info(
-            """Scene List:
+    if not context.list_scenes_quiet:
+        if context.display_scenes:
+            logger.info(
+                """Scene List:
 -----------------------------------------------------------------------
  | Scene # | Start Frame |  Start Time  |  End Frame  |   End Time   |
 -----------------------------------------------------------------------
 %s
 -----------------------------------------------------------------------""", '\n'.join([
-                ' |  %5d  | %11d | %s | %11d | %s |' %
-                (i + 1, start_time.get_frames() + 1, start_time.get_timecode(),
-                 end_time.get_frames(), end_time.get_timecode())
-                for i, (start_time, end_time) in enumerate(scene_list)
-            ]))
+                    " |  %5d  | %11d | %s | %11d | %s |" %
+                    (i + 1, start_time.get_frames() + 1, start_time.get_timecode(),
+                     end_time.get_frames(), end_time.get_timecode())
+                    for i, (start_time, end_time) in enumerate(scene_list)
+                ]))
 
-        if cut_list:
-            logger.info('Comma-separated timecode list:\n  %s',
-                        ','.join([cut.get_timecode() for cut in cut_list]))
+        if cut_list and context.display_cuts:
+            logger.info("Comma-separated timecode list:\n  %s",
+                        ",".join([cut.get_timecode() for cut in cut_list]))
 
 
 def _save_images(
