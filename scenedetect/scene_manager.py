@@ -111,7 +111,7 @@ DEFAULT_MIN_WIDTH: int = 256
 MAX_FRAME_QUEUE_LENGTH: int = 4
 """Maximum number of decoded frames which can be buffered while waiting to be processed."""
 
-PROGRESS_BAR_DESCRIPTION = 'Detected: %d | Progress'
+PROGRESS_BAR_DESCRIPTION = '  Detected: %d | Progress'
 """Template to use for progress bar."""
 
 
@@ -892,6 +892,8 @@ class SceneManager:
                 progress_bar.update(1 + frame_skip)
 
         if progress_bar is not None:
+            progress_bar.set_description(
+                PROGRESS_BAR_DESCRIPTION % len(self._cutting_list), refresh=True)
             progress_bar.close()
         # Unblock any puts in the decode thread before joining. This can happen if the main
         # processing thread stops before the decode thread.

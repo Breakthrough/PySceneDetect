@@ -15,6 +15,7 @@ Releases
    - [TODO] Rename `no-output-file` to `save`
    - [TODO] Add `cut-format` to control formatting of cut points [#349](https://github.com/Breakthrough/PySceneDetect/issues/349)
       - Valid values: `frames`, `timecode`, `seconds`
+ - [general] Increase progress bar indent to improve visibility and visual alignment
 
 **API Changes:**
 
