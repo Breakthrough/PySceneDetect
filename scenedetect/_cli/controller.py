@@ -243,19 +243,15 @@ def _split_video(context: CliContext, scene_list: List[Tuple[FrameTimecode,
     # Otherwise, if using ffmpeg, only add an extension if one doesn't exist.
     elif not 2 <= extension_length <= 4:
         output_path_template += '.mp4'
-    # Pre-expand $VIDEO_NAME so it can be used for a directory.
-    # TODO: Do this elsewhere in a future version for all output options.
-    output_path_template = Template(output_path_template).safe_substitute(
-        VIDEO_NAME=get_file_name(context.video_stream.path, include_extension=False))
-    output_path_template = get_and_create_path(
-        output_path_template, context.split_directory
-        if context.split_directory is not None else context.output_directory)
+
     # Ensure the appropriate tool is available before handling split-video.
     check_split_video_requirements(context.split_mkvmerge)
+
     if context.split_mkvmerge:
         split_video_mkvmerge(
             input_video_path=context.video_stream.path,
             scene_list=scene_list,
+            output_dir=context.split_directory,
             output_file_template=output_path_template,
             show_output=not (context.quiet_mode or context.split_quiet),
         )
@@ -263,6 +259,7 @@ def _split_video(context: CliContext, scene_list: List[Tuple[FrameTimecode,
         split_video_ffmpeg(
             input_video_path=context.video_stream.path,
             scene_list=scene_list,
+            output_dir=context.split_directory,
             output_file_template=output_path_template,
             arg_override=context.split_args,
             show_progress=not context.quiet_mode,

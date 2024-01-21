@@ -33,19 +33,20 @@ command from a terminal/command prompt. PySceneDetect will automatically use whi
 available on the computer, depending on the specified command-line options.
 """
 
+from dataclasses import dataclass
 import logging
-import subprocess
 import math
+from pathlib import Path
+import subprocess
 import time
-from typing import Iterable, Optional, Tuple
+import typing as ty
 
-from scenedetect.platform import (tqdm, invoke_command, CommandTooLong, get_file_name,
-                                  get_ffmpeg_path, Template)
+from scenedetect.platform import (tqdm, invoke_command, CommandTooLong, get_ffmpeg_path, Template)
 from scenedetect.frame_timecode import FrameTimecode
 
 logger = logging.getLogger('pyscenedetect')
 
-TimecodePair = Tuple[FrameTimecode, FrameTimecode]
+TimecodePair = ty.Tuple[FrameTimecode, FrameTimecode]
 """Named type for pairs of timecodes, which typically represents the start/end of a scene."""
 
 COMMAND_TOO_LONG_STRING = """
@@ -57,8 +58,8 @@ See https://github.com/Breakthrough/PySceneDetect/issues/164
 for details.  Sorry about that!
 """
 
-FFMPEG_PATH: Optional[str] = get_ffmpeg_path()
-"""Relative path to the Ffmpeg binary on this system, if any (will be None if not available)."""
+FFMPEG_PATH: ty.Optional[str] = get_ffmpeg_path()
+"""Relative path to the ffmpeg binary on this system, if any (will be None if not available)."""
 
 DEFAULT_FFMPEG_ARGS = '-map 0 -c:v libx264 -preset veryfast -crf 22 -c:a aac'
 """Default arguments passed to ffmpeg when invoking the `split_video_ffmpeg` function."""
@@ -94,15 +95,66 @@ def is_ffmpeg_available() -> bool:
 
 
 ##
+## Output Naming
+##
+
+
+@dataclass
+class SceneMetadata:
+    """Information about the scenes being exported."""
+    index: int
+    """0-based index of this scene."""
+    start: FrameTimecode
+    """First frame."""
+    end: FrameTimecode
+    """Last frame."""
+
+
+@dataclass
+class VideoMetadata:
+    """Information about the video."""
+    name: str
+    """Expected name of the video. May differ from `path`."""
+    path: Path
+    """Path to the input file."""
+    total_scenes: int
+    """Total number of scenes that will be written."""
+
+
+PathFormatter = ty.Callable[[SceneMetadata, VideoMetadata], ty.AnyStr]
+
+
+def default_formatter(template: str) -> PathFormatter:
+    """Formats filenames using a template string which allows the following variables:
+
+        `$VIDEO_NAME`, `$SCENE_NUMBER`, `$START_TIME`, `$END_TIME`, `$START_FRAME`, `$END_FRAME`
+    """
+    MIN_DIGITS = 3
+    format_scene_number: PathFormatter = lambda scene, video: (
+        ('%0' + str(max(MIN_DIGITS,
+                        math.floor(math.log(video.total_scenes, 10)) + 1)) + 'd') %
+        (scene.index + 1))
+    formatter: PathFormatter = lambda scene, video: Template(template).safe_substitute(
+        VIDEO_NAME=video.name,
+        SCENE_NUMBER=format_scene_number(scene, video),
+        START_TIME=str(scene.start.get_timecode().replace(":", ";")),
+        END_TIME=str(scene.end.get_timecode().replace(":", ";")),
+        START_FRAME=str(scene.start.get_frames()),
+        END_FRAME=str(scene.end.get_frames()))
+    return formatter
+
+
+##
 ## Split Video Functions
 ##
 
 
 def split_video_mkvmerge(
     input_video_path: str,
-    scene_list: Iterable[TimecodePair],
+    scene_list: ty.Iterable[TimecodePair],
+    output_dir: ty.Optional[Path] = None,
     output_file_template: str = '$VIDEO_NAME.mkv',
-    video_name: Optional[str] = None,
+    video_name: ty.Optional[str] = None,
     show_output: bool = False,
     suppress_output=None,
 ):
@@ -112,8 +164,10 @@ def split_video_mkvmerge(
     Arguments:
         input_video_path: Path to the video to be split.
         scene_list : List of scenes as pairs of FrameTimecodes denoting the start/end times.
-        output_file_template: Template to use for output files. Mkvmerge always adds the suffix
-            "-$SCENE_NUMBER". Can use $VIDEO_NAME as a template parameter (e.g. "$VIDEO_NAME.mkv").
+        output_dir: Directory to output videos. If not set, output will be in working directory.
+        output_file_template: Template to use for generating output files. Note that mkvmerge always
+            adds the suffix "-$SCENE_NUMBER" to the output paths. Only the $VIDEO_NAME variable
+            is supported by this function.
         video_name (str): Name of the video to be substituted in output_file_template for
             $VIDEO_NAME. If not specified, will be obtained from the filename.
         show_output: If False, adds the --quiet flag when invoking `mkvmerge`..
@@ -139,20 +193,25 @@ def split_video_mkvmerge(
                 output_file_template)
 
     if video_name is None:
-        video_name = get_file_name(input_video_path, include_extension=False)
+        video_name = Path(input_video_path).stem
 
     ret_val = 0
-    # mkvmerge automatically appends '-$SCENE_NUMBER', so we remove it if present.
-    output_file_template = output_file_template.replace('-$SCENE_NUMBER',
-                                                        '').replace('$SCENE_NUMBER', '')
-    output_file_name = Template(output_file_template).safe_substitute(VIDEO_NAME=video_name)
+
+    # mkvmerge doesn't support adding scene metadata to filenames. It always adds the scene
+    # number prefixed with a dash to the filenames.
+    template = Template(output_file_template)
+    output_path = template.safe_substitute(VIDEO_NAME=video_name)
+    if output_dir:
+        output_path = Path(output_dir) / output_path
+    output_path.parent.mkdir(parents=True, exist_ok=True)
 
     try:
         call_list = ['mkvmerge']
         if not show_output:
             call_list.append('--quiet')
         call_list += [
-            '-o', output_file_name, '--split',
+            '-o',
+            str(output_path), '--split',
             'parts:%s' % ','.join([
                 '%s-%s' % (start_time.get_timecode(), end_time.get_timecode())
                 for start_time, end_time in scene_list
@@ -177,28 +236,28 @@ def split_video_mkvmerge(
 
 def split_video_ffmpeg(
     input_video_path: str,
-    scene_list: Iterable[TimecodePair],
-    output_dir: Optional[str] = None,
+    scene_list: ty.Iterable[TimecodePair],
+    output_dir: ty.Optional[Path] = None,
     output_file_template: str = '$VIDEO_NAME-Scene-$SCENE_NUMBER.mp4',
-    video_name: Optional[str] = None,
+    video_name: ty.Optional[str] = None,
     arg_override: str = DEFAULT_FFMPEG_ARGS,
     show_progress: bool = False,
     show_output: bool = False,
     suppress_output=None,
     hide_progress=None,
+    formatter: ty.Optional[PathFormatter] = None,
 ):
     """ Calls the ffmpeg command on the input video, generating a new video for
     each scene based on the start/end timecodes.
 
     Arguments:
         input_video_path: Path to the video to be split.
-        scene_list (List[Tuple[FrameTimecode, FrameTimecode]]): List of scenes
+        scene_list (List[ty.Tuple[FrameTimecode, FrameTimecode]]): List of scenes
             (pairs of FrameTimecodes) denoting the start/end frames of each scene.
-        output_dir: Directory to output videos. If not set, the output is created in the working
-            directory.
-        output_file_template (str): Template to use for generating the output filenames.
-            Can use $VIDEO_NAME and $SCENE_NUMBER in this format, for example:
-            `$VIDEO_NAME - Scene $SCENE_NUMBER.mp4`
+        output_dir: Directory to output videos. If not set, output will be in working directory.
+        output_file_template (str): Template to use for generating output filenames.
+            The following variables will be replaced in the template for each scene:
+            $VIDEO_NAME, $SCENE_NUMBER, $START_TIME, $END_TIME, $START_FRAME, $END_FRAME
         video_name (str): Name of the video to be substituted in output_file_template. If not
             passed will be calculated from input_video_path automatically.
         arg_override (str): Allows overriding the arguments passed to ffmpeg for encoding.
@@ -206,6 +265,7 @@ def split_video_ffmpeg(
         show_output (bool): If True, will show output from ffmpeg for first split.
         suppress_output: [DEPRECATED] DO NOT USE. For backwards compatibility only.
         hide_progress: [DEPRECATED] DO NOT USE. For backwards compatibility only.
+        formatter: Custom formatter callback. Overrides `output_file_template`.
 
     Returns:
         Return code of invoking ffmpeg (0 on success). If scene_list is empty, will
@@ -231,7 +291,7 @@ def split_video_ffmpeg(
                 output_file_template)
 
     if video_name is None:
-        video_name = get_file_name(input_video_path, include_extension=False)
+        video_name = Path(input_video_path).stem
 
     arg_override = arg_override.replace('\\"', '"')
 
@@ -239,6 +299,11 @@ def split_video_ffmpeg(
     arg_override = arg_override.split(' ')
     scene_num_format = '%0'
     scene_num_format += str(max(3, math.floor(math.log(len(scene_list), 10)) + 1)) + 'd'
+
+    if formatter is None:
+        formatter = default_formatter(output_file_template)
+    video_metadata = VideoMetadata(
+        name=video_name, path=input_video_path, total_scenes=len(scene_list))
 
     try:
         progress_bar = None
@@ -248,14 +313,11 @@ def split_video_ffmpeg(
         processing_start_time = time.time()
         for i, (start_time, end_time) in enumerate(scene_list):
             duration = (end_time - start_time)
-            # Format output filename with template variable
-            output_file_template_iter = Template(output_file_template).safe_substitute(
-                VIDEO_NAME=video_name,
-                SCENE_NUMBER=scene_num_format % (i + 1),
-                START_TIME=str(start_time.get_timecode().replace(":", ";")),
-                END_TIME=str(end_time.get_timecode().replace(":", ";")),
-                START_FRAME=str(start_time.get_frames()),
-                END_FRAME=str(end_time.get_frames()))
+            scene_metadata = SceneMetadata(index=i, start=start_time, end=end_time)
+            output_path = Path(formatter(scene=scene_metadata, video=video_metadata))
+            if output_dir:
+                output_path = Path(output_dir) / output_path
+            output_path.parent.mkdir(parents=True, exist_ok=True)
 
             # Gracefully handle case where FFMPEG_PATH might be unset.
             call_list = [FFMPEG_PATH if FFMPEG_PATH is not None else 'ffmpeg']
@@ -273,7 +335,7 @@ def split_video_ffmpeg(
             ]
             call_list += arg_override
             call_list += ['-sn']
-            call_list += [output_file_template_iter]
+            call_list += [str(output_path)]
             ret_val = invoke_command(call_list)
             if show_output and i == 0 and len(scene_list) > 1:
                 logger.info(
