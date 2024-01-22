@@ -36,6 +36,11 @@ jobs:
         run: |
           echo "scenedetect_docs_dest=latest" >> "$GITHUB_ENV"
 
+      - name: Set Destination (Develop)
+        if: ${{ github.ref_name == 'develop' }}
+        run: |
+          echo "scenedetect_docs_dest=develop" >> "$GITHUB_ENV"
+
       - name: Set Destination (Releases)
         if: ${{ github.ref_name != 'main' }}
         run: |
