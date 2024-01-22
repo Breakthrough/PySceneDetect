@@ -115,7 +115,7 @@ class SceneDetector:
 
 
 class SparseSceneDetector(SceneDetector):
-    """Base class to inheret from when implementing a sparse scene detection algorithm.
+    """Base class to inherit from when implementing a sparse scene detection algorithm.
 
     This class will be removed in v1.0 and should not be used.
 
