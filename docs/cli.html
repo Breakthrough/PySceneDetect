@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>scenedetect 🎬 Command &#8212; PySceneDetect 0.6.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="_static/pyscenedetect.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Configuration File" href="cli/config_file.html" />
+    <link rel="prev" title="PySceneDetect Documentation" href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="scenedetect-command">
+<h1><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Command<a class="headerlink" href="#scenedetect-command" title="Permalink to this heading">¶</a></h1>
+<p id="command-scenedetect">PySceneDetect is a scene cut/transition detection program. PySceneDetect takes an input video, runs detection on it, and uses the resulting scene information to generate output. The syntax for using PySceneDetect is:</p>
+<blockquote>
+<div><p><code class="docutils literal notranslate"><span class="pre">scenedetect</span> <span class="pre">-i</span> <span class="pre">video.mp4</span> <span class="pre">[detector]</span> <span class="pre">[commands]</span></code></p>
+</div></blockquote>
+<p>For [detector] use <a class="reference internal" href="#command-detect-adaptive"><span class="std std-ref">detect-adaptive</span></a> or <a class="reference internal" href="#command-detect-content"><span class="std std-ref">detect-content</span></a> to find fast cuts, and <a class="reference internal" href="#command-detect-threshold"><span class="std std-ref">detect-threshold</span></a> for fades in/out. If [detector] is not specified, a default detector will be used.</p>
+</section>
+<section id="examples">
+<h1>Examples<a class="headerlink" href="#examples" title="Permalink to this heading">¶</a></h1>
+<p>Split video wherever a new scene is detected:</p>
+<blockquote>
+<div><p><code class="docutils literal notranslate"><span class="pre">scenedetect</span> <span class="pre">-i</span> <span class="pre">video.mp4</span> <span class="pre">split-video</span></code></p>
+</div></blockquote>
+<p>Save scene list in CSV format with images at the start, middle, and end of each scene:</p>
+<blockquote>
+<div><p><code class="docutils literal notranslate"><span class="pre">scenedetect</span> <span class="pre">-i</span> <span class="pre">video.mp4</span> <span class="pre">list-scenes</span> <span class="pre">save-images</span></code></p>
+</div></blockquote>
+<p>Skip the first 10 seconds of the input video:</p>
+<blockquote>
+<div><p><code class="docutils literal notranslate"><span class="pre">scenedetect</span> <span class="pre">-i</span> <span class="pre">video.mp4</span> <span class="pre">time</span> <span class="pre">--start</span> <span class="pre">10s</span> <span class="pre">detect-content</span></code></p>
+</div></blockquote>
+<p>Show summary of all options and commands:</p>
+<blockquote>
+<div><p><code class="docutils literal notranslate"><span class="pre">scenedetect</span> <span class="pre">--help</span></code></p>
+</div></blockquote>
+<p>Global options (e.g. <a class="reference internal" href="#cmdoption-scenedetect-i"><code class="xref std std-option docutils literal notranslate"><span class="pre">-i/--input</span></code></a>, <a class="reference internal" href="#cmdoption-scenedetect-c"><code class="xref std std-option docutils literal notranslate"><span class="pre">-c/--config</span></code></a>) must be specified before any commands and their options. The order of commands is not strict, but each command must only be specified once.</p>
+</section>
+<section id="options">
+<h1>Options<a class="headerlink" href="#options" title="Permalink to this heading">¶</a></h1>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-i">
+<span id="cmdoption-scenedetect-input"></span><span class="sig-name descname"><span class="pre">-i</span></span><span class="sig-prename descclassname"> <span class="pre">VIDEO</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--input</span></span><span class="sig-prename descclassname"> <span class="pre">VIDEO</span></span><a class="headerlink" href="#cmdoption-scenedetect-i" title="Permalink to this definition">¶</a></dt>
+<dd><p>[REQUIRED] Input video file. Image sequences and URLs are supported.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-o">
+<span id="cmdoption-scenedetect-output"></span><span class="sig-name descname"><span class="pre">-o</span></span><span class="sig-prename descclassname"> <span class="pre">DIR</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--output</span></span><span class="sig-prename descclassname"> <span class="pre">DIR</span></span><a class="headerlink" href="#cmdoption-scenedetect-o" title="Permalink to this definition">¶</a></dt>
+<dd><p>Output directory for created files. If unset, working directory will be used. May be overridden by command options.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-c">
+<span id="cmdoption-scenedetect-config"></span><span class="sig-name descname"><span class="pre">-c</span></span><span class="sig-prename descclassname"> <span class="pre">FILE</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--config</span></span><span class="sig-prename descclassname"> <span class="pre">FILE</span></span><a class="headerlink" href="#cmdoption-scenedetect-c" title="Permalink to this definition">¶</a></dt>
+<dd><p>Path to config file. See <a class="reference internal" href="cli/config_file.html#scenedetect-cli-config-file"><span class="std std-ref">config file reference</span></a> for details.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-s">
+<span id="cmdoption-scenedetect-stats"></span><span class="sig-name descname"><span class="pre">-s</span></span><span class="sig-prename descclassname"> <span class="pre">CSV</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--stats</span></span><span class="sig-prename descclassname"> <span class="pre">CSV</span></span><a class="headerlink" href="#cmdoption-scenedetect-s" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stats file (.csv) to write frame metrics. Existing files will be overwritten. Used for tuning detection parameters and data analysis.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-f">
+<span id="cmdoption-scenedetect-framerate"></span><span class="sig-name descname"><span class="pre">-f</span></span><span class="sig-prename descclassname"> <span class="pre">FPS</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--framerate</span></span><span class="sig-prename descclassname"> <span class="pre">FPS</span></span><a class="headerlink" href="#cmdoption-scenedetect-f" title="Permalink to this definition">¶</a></dt>
+<dd><p>Override framerate with value as frames/sec.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-m">
+<span id="cmdoption-scenedetect-min-scene-len"></span><span class="sig-name descname"><span class="pre">-m</span></span><span class="sig-prename descclassname"> <span class="pre">TIMECODE</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--min-scene-len</span></span><span class="sig-prename descclassname"> <span class="pre">TIMECODE</span></span><a class="headerlink" href="#cmdoption-scenedetect-m" title="Permalink to this definition">¶</a></dt>
+<dd><p>Minimum length of any scene. TIMECODE can be specified as number of frames (<a class="reference internal" href="#cmdoption-scenedetect-m"><code class="xref std std-option docutils literal notranslate"><span class="pre">-m=10</span></code></a>), time in seconds followed by “s” (<a class="reference internal" href="#cmdoption-scenedetect-m"><code class="xref std std-option docutils literal notranslate"><span class="pre">-m=2.5s</span></code></a>), or timecode (<a class="reference internal" href="#cmdoption-scenedetect-m"><code class="xref std std-option docutils literal notranslate"><span class="pre">-m=00:02:53.633</span></code></a>).</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">0.6s</span></code></p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-drop-short-scenes">
+<span class="sig-name descname"><span class="pre">--drop-short-scenes</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-scenedetect-drop-short-scenes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Drop scenes shorter than <a class="reference internal" href="#cmdoption-scenedetect-m"><code class="xref std std-option docutils literal notranslate"><span class="pre">-m/--min-scene-len</span></code></a>, instead of combining with neighbors.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-merge-last-scene">
+<span class="sig-name descname"><span class="pre">--merge-last-scene</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-scenedetect-merge-last-scene" title="Permalink to this definition">¶</a></dt>
+<dd><p>Merge last scene with previous if shorter than <a class="reference internal" href="#cmdoption-scenedetect-m"><code class="xref std std-option docutils literal notranslate"><span class="pre">-m/--min-scene-len</span></code></a>.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-b">
+<span id="cmdoption-scenedetect-backend"></span><span class="sig-name descname"><span class="pre">-b</span></span><span class="sig-prename descclassname"> <span class="pre">BACKEND</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--backend</span></span><span class="sig-prename descclassname"> <span class="pre">BACKEND</span></span><a class="headerlink" href="#cmdoption-scenedetect-b" title="Permalink to this definition">¶</a></dt>
+<dd><p>Backend to use for video input. Backend options can be set using a config file (<a class="reference internal" href="#cmdoption-scenedetect-c"><code class="xref std std-option docutils literal notranslate"><span class="pre">-c/--config</span></code></a>). [available: opencv, pyav, moviepy]</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">opencv</span></code></p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-d">
+<span id="cmdoption-scenedetect-downscale"></span><span class="sig-name descname"><span class="pre">-d</span></span><span class="sig-prename descclassname"> <span class="pre">N</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--downscale</span></span><span class="sig-prename descclassname"> <span class="pre">N</span></span><a class="headerlink" href="#cmdoption-scenedetect-d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Integer factor to downscale video by before processing. If unset, value is selected based on resolution. Set <a class="reference internal" href="#cmdoption-scenedetect-d"><code class="xref std std-option docutils literal notranslate"><span class="pre">-d=1</span></code></a> to disable downscaling.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-fs">
+<span id="cmdoption-scenedetect-frame-skip"></span><span class="sig-name descname"><span class="pre">-fs</span></span><span class="sig-prename descclassname"> <span class="pre">N</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--frame-skip</span></span><span class="sig-prename descclassname"> <span class="pre">N</span></span><a class="headerlink" href="#cmdoption-scenedetect-fs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Skip N frames during processing. Reduces processing speed at expense of accuracy. <a class="reference internal" href="#cmdoption-scenedetect-fs"><code class="xref std std-option docutils literal notranslate"><span class="pre">-fs=1</span></code></a> skips every other frame processing 50% of the video, <a class="reference internal" href="#cmdoption-scenedetect-fs"><code class="xref std std-option docutils literal notranslate"><span class="pre">-fs=2</span></code></a> processes 33% of the video frames, <a class="reference internal" href="#cmdoption-scenedetect-fs"><code class="xref std std-option docutils literal notranslate"><span class="pre">-fs=3</span></code></a> processes 25%, etc…</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">0</span></code></p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-v">
+<span id="cmdoption-scenedetect-verbosity"></span><span class="sig-name descname"><span class="pre">-v</span></span><span class="sig-prename descclassname"> <span class="pre">LEVEL</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--verbosity</span></span><span class="sig-prename descclassname"> <span class="pre">LEVEL</span></span><a class="headerlink" href="#cmdoption-scenedetect-v" title="Permalink to this definition">¶</a></dt>
+<dd><p>Amount of information to show. LEVEL must be one of: debug, info, warning, error, none. Overrides <a class="reference internal" href="#cmdoption-scenedetect-q"><code class="xref std std-option docutils literal notranslate"><span class="pre">-q/--quiet</span></code></a>.</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">info</span></code></p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-l">
+<span id="cmdoption-scenedetect-logfile"></span><span class="sig-name descname"><span class="pre">-l</span></span><span class="sig-prename descclassname"> <span class="pre">FILE</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--logfile</span></span><span class="sig-prename descclassname"> <span class="pre">FILE</span></span><a class="headerlink" href="#cmdoption-scenedetect-l" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save debug log to FILE. Appends to existing file if present.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-q">
+<span id="cmdoption-scenedetect-quiet"></span><span class="sig-name descname"><span class="pre">-q</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--quiet</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-scenedetect-q" title="Permalink to this definition">¶</a></dt>
+<dd><p>Suppress output to terminal/stdout. Equivalent to setting <a class="reference internal" href="#cmdoption-scenedetect-v"><code class="xref std std-option docutils literal notranslate"><span class="pre">--verbosity=none</span></code></a>.</p>
+</dd></dl>
+
+<section id="help-version-and-about">
+<span id="command-help"></span><h2><code class="docutils literal notranslate"><span class="pre">help</span></code>, <code class="docutils literal notranslate"><span class="pre">version</span></code>, and <code class="docutils literal notranslate"><span class="pre">about</span></code><a class="headerlink" href="#help-version-and-about" title="Permalink to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">scenedetect</span> <span class="pre">--help</span></code> will print PySceneDetect options, commands, and examples. You can also specify:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">scenedetect</span> <span class="pre">[command]</span> <span class="pre">--help</span></code> to show options and examples <em>for</em> a command or detector</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">scenedetect</span> <span class="pre">help</span></code> command to print full reference of all options, commands, and examples</p></li>
+</ul>
+</div></blockquote>
+<p><code class="docutils literal notranslate"><span class="pre">scenedetect</span> <span class="pre">version</span></code> prints the version of PySceneDetect that is installed, as well as system dependencies.</p>
+<p><code class="docutils literal notranslate"><span class="pre">scenedetect</span> <span class="pre">about</span></code> prints PySceneDetect copyright, licensing, and redistribution information. This includes a list of all third-party software components that PySceneDetect uses or interacts with, as well as a reference to the license and copyright information for each component.</p>
+</section>
+</section>
+<section id="detectors">
+<h1>Detectors<a class="headerlink" href="#detectors" title="Permalink to this heading">¶</a></h1>
+<section id="detect-adaptive">
+<span id="command-detect-adaptive"></span><h2><code class="docutils literal notranslate"><span class="pre">detect-adaptive</span></code><a class="headerlink" href="#detect-adaptive" title="Permalink to this heading">¶</a></h2>
+<p>Perform adaptive detection algorithm on input video.</p>
+<p>Two-pass algorithm that first calculates frame scores with <a class="reference internal" href="#command-detect-content"><span class="std std-ref">detect-content</span></a>, and then applies a rolling average when processing the result. This can help mitigate false detections in situations such as camera movement.</p>
+<section id="id1">
+<h3>Examples<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h3>
+<blockquote>
+<div><p><code class="docutils literal notranslate"><span class="pre">scenedetect</span> <span class="pre">-i</span> <span class="pre">video.mp4</span> <span class="pre">detect-adaptive</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">scenedetect</span> <span class="pre">-i</span> <span class="pre">video.mp4</span> <span class="pre">detect-adaptive</span> <span class="pre">--threshold</span> <span class="pre">3.2</span></code></p>
+</div></blockquote>
+</section>
+<section id="id2">
+<h3>Options<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h3>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-detect-adaptive-t">
+<span id="cmdoption-scenedetect-detect-adaptive-threshold"></span><span class="sig-name descname"><span class="pre">-t</span></span><span class="sig-prename descclassname"> <span class="pre">VAL</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--threshold</span></span><span class="sig-prename descclassname"> <span class="pre">VAL</span></span><a class="headerlink" href="#cmdoption-scenedetect-detect-adaptive-t" title="Permalink to this definition">¶</a></dt>
+<dd><p>Threshold (float) that frame score must exceed to trigger a cut. Refers to “adaptive_ratio” in stats file.</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">3.0</span></code></p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-detect-adaptive-c">
+<span id="cmdoption-scenedetect-detect-adaptive-min-content-val"></span><span class="sig-name descname"><span class="pre">-c</span></span><span class="sig-prename descclassname"> <span class="pre">VAL</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--min-content-val</span></span><span class="sig-prename descclassname"> <span class="pre">VAL</span></span><a class="headerlink" href="#cmdoption-scenedetect-detect-adaptive-c" title="Permalink to this definition">¶</a></dt>
+<dd><p>Minimum threshold (float) that “content_val” must exceed to trigger a cut.</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">15.0</span></code></p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-detect-adaptive-d">
+<span id="cmdoption-scenedetect-detect-adaptive-min-delta-hsv"></span><span class="sig-name descname"><span class="pre">-d</span></span><span class="sig-prename descclassname"> <span class="pre">VAL</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--min-delta-hsv</span></span><span class="sig-prename descclassname"> <span class="pre">VAL</span></span><a class="headerlink" href="#cmdoption-scenedetect-detect-adaptive-d" title="Permalink to this definition">¶</a></dt>
+<dd><p>[DEPRECATED] Use <a class="reference internal" href="#cmdoption-scenedetect-detect-adaptive-c"><code class="xref std std-option docutils literal notranslate"><span class="pre">-c/--min-content-val</span></code></a> instead.</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">15.0</span></code></p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-detect-adaptive-f">
+<span id="cmdoption-scenedetect-detect-adaptive-frame-window"></span><span class="sig-name descname"><span class="pre">-f</span></span><span class="sig-prename descclassname"> <span class="pre">VAL</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--frame-window</span></span><span class="sig-prename descclassname"> <span class="pre">VAL</span></span><a class="headerlink" href="#cmdoption-scenedetect-detect-adaptive-f" title="Permalink to this definition">¶</a></dt>
+<dd><p>Size of window to detect deviations from mean. Represents how many frames before/after the current one to use for mean.</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">2</span></code></p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-detect-adaptive-w">
+<span id="cmdoption-scenedetect-detect-adaptive-weights"></span><span class="sig-name descname"><span class="pre">-w</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--weights</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-scenedetect-detect-adaptive-w" title="Permalink to this definition">¶</a></dt>
+<dd><p>Weights of 4 components (“delta_hue”, “delta_sat”, “delta_lum”, “delta_edges”) used to calculate “content_val”.</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">1.000,</span> <span class="pre">1.000,</span> <span class="pre">1.000,</span> <span class="pre">0.000</span></code></p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-detect-adaptive-l">
+<span id="cmdoption-scenedetect-detect-adaptive-luma-only"></span><span class="sig-name descname"><span class="pre">-l</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--luma-only</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-scenedetect-detect-adaptive-l" title="Permalink to this definition">¶</a></dt>
+<dd><p>Only use luma (brightness) channel. Useful for greyscale videos. Equivalent to “–weights 0 0 1 0”.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-detect-adaptive-k">
+<span id="cmdoption-scenedetect-detect-adaptive-kernel-size"></span><span class="sig-name descname"><span class="pre">-k</span></span><span class="sig-prename descclassname"> <span class="pre">N</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--kernel-size</span></span><span class="sig-prename descclassname"> <span class="pre">N</span></span><a class="headerlink" href="#cmdoption-scenedetect-detect-adaptive-k" title="Permalink to this definition">¶</a></dt>
+<dd><p>Size of kernel for expanding detected edges. Must be odd number &gt;= 3. If unset, size is estimated using video resolution.</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">auto</span></code></p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-detect-adaptive-m">
+<span id="cmdoption-scenedetect-detect-adaptive-min-scene-len"></span><span class="sig-name descname"><span class="pre">-m</span></span><span class="sig-prename descclassname"> <span class="pre">TIMECODE</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--min-scene-len</span></span><span class="sig-prename descclassname"> <span class="pre">TIMECODE</span></span><a class="headerlink" href="#cmdoption-scenedetect-detect-adaptive-m" title="Permalink to this definition">¶</a></dt>
+<dd><p>Minimum length of any scene. Overrides global option <a class="reference internal" href="#cmdoption-scenedetect-m"><code class="xref std std-option docutils literal notranslate"><span class="pre">-m/--min-scene-len</span></code></a>. TIMECODE can be specified in frames (<a class="reference internal" href="#cmdoption-scenedetect-detect-adaptive-m"><code class="xref std std-option docutils literal notranslate"><span class="pre">-m=100</span></code></a>), in seconds with <cite>s</cite> suffix (<a class="reference internal" href="#cmdoption-scenedetect-detect-adaptive-m"><code class="xref std std-option docutils literal notranslate"><span class="pre">-m=3.5s</span></code></a>), or timecode (<a class="reference internal" href="#cmdoption-scenedetect-detect-adaptive-m"><code class="xref std std-option docutils literal notranslate"><span class="pre">-m=00:01:52.778</span></code></a>).</p>
+</dd></dl>
+
+</section>
+</section>
+<section id="detect-content">
+<span id="command-detect-content"></span><h2><code class="docutils literal notranslate"><span class="pre">detect-content</span></code><a class="headerlink" href="#detect-content" title="Permalink to this heading">¶</a></h2>
+<p>Perform content detection algorithm on input video.</p>
+<p>For each frame, a score from 0 to 255.0 is calculated which represents the difference in content between the current and previous frame (higher = more different). A cut is generated when a frame score exceeds <a class="reference internal" href="#cmdoption-scenedetect-detect-content-t"><code class="xref std std-option docutils literal notranslate"><span class="pre">-t/--threshold</span></code></a>. Frame scores are saved under the “content_val” column in a statsfile.</p>
+<p>Scores are calculated from several components which are also recorded in the statsfile:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><em>delta_hue</em>: Difference between pixel hue values of adjacent frames.</p></li>
+<li><p><em>delta_sat</em>: Difference between pixel saturation values of adjacent frames.</p></li>
+<li><p><em>delta_lum</em>: Difference between pixel luma (brightness) values of adjacent frames.</p></li>
+<li><p><em>delta_edges</em>: Difference between calculated edges of adjacent frames. Typically larger than other components, so threshold may need to be increased to compensate.</p></li>
+</ul>
+</div></blockquote>
+<p>Once calculated, these components are multiplied by the specified <a class="reference internal" href="#cmdoption-scenedetect-detect-content-w"><code class="xref std std-option docutils literal notranslate"><span class="pre">-w/--weights</span></code></a> to calculate the final frame score (“content_val”).  Weights are set as a set of 4 numbers in the form (<em>delta_hue</em>, <em>delta_sat</em>, <em>delta_lum</em>, <em>delta_edges</em>). For example, “–weights 1.0 0.5 1.0 0.2 –threshold 32” is a good starting point for trying edge detection. The final sum is normalized by the weight of all components, so they need not equal 100%. Edge detection is disabled by default to improve performance.</p>
+<section id="id3">
+<h3>Examples<a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h3>
+<blockquote>
+<div><p><code class="docutils literal notranslate"><span class="pre">scenedetect</span> <span class="pre">-i</span> <span class="pre">video.mp4</span> <span class="pre">detect-content</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">scenedetect</span> <span class="pre">-i</span> <span class="pre">video.mp4</span> <span class="pre">detect-content</span> <span class="pre">--threshold</span> <span class="pre">27.5</span></code></p>
+</div></blockquote>
+</section>
+<section id="id4">
+<h3>Options<a class="headerlink" href="#id4" title="Permalink to this heading">¶</a></h3>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-detect-content-t">
+<span id="cmdoption-scenedetect-detect-content-threshold"></span><span class="sig-name descname"><span class="pre">-t</span></span><span class="sig-prename descclassname"> <span class="pre">VAL</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--threshold</span></span><span class="sig-prename descclassname"> <span class="pre">VAL</span></span><a class="headerlink" href="#cmdoption-scenedetect-detect-content-t" title="Permalink to this definition">¶</a></dt>
+<dd><p>Threshold (float) that frame score must exceed to trigger a cut. Refers to “content_val” in stats file.</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">27.0</span></code></p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-detect-content-w">
+<span id="cmdoption-scenedetect-detect-content-weights"></span><span class="sig-name descname"><span class="pre">-w</span></span><span class="sig-prename descclassname"> <span class="pre">HUE</span> <span class="pre">SAT</span> <span class="pre">LUM</span> <span class="pre">EDGE</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--weights</span></span><span class="sig-prename descclassname"> <span class="pre">HUE</span> <span class="pre">SAT</span> <span class="pre">LUM</span> <span class="pre">EDGE</span></span><a class="headerlink" href="#cmdoption-scenedetect-detect-content-w" title="Permalink to this definition">¶</a></dt>
+<dd><p>Weights of 4 components used to calculate frame score from (delta_hue, delta_sat, delta_lum, delta_edges).</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">1.000,</span> <span class="pre">1.000,</span> <span class="pre">1.000,</span> <span class="pre">0.000</span></code></p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-detect-content-l">
+<span id="cmdoption-scenedetect-detect-content-luma-only"></span><span class="sig-name descname"><span class="pre">-l</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--luma-only</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-scenedetect-detect-content-l" title="Permalink to this definition">¶</a></dt>
+<dd><p>Only use luma (brightness) channel. Useful for greyscale videos. Equivalent to setting “-w 0 0 1 0”.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-detect-content-k">
+<span id="cmdoption-scenedetect-detect-content-kernel-size"></span><span class="sig-name descname"><span class="pre">-k</span></span><span class="sig-prename descclassname"> <span class="pre">N</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--kernel-size</span></span><span class="sig-prename descclassname"> <span class="pre">N</span></span><a class="headerlink" href="#cmdoption-scenedetect-detect-content-k" title="Permalink to this definition">¶</a></dt>
+<dd><p>Size of kernel for expanding detected edges. Must be odd integer greater than or equal to 3. If unset, kernel size is estimated using video resolution.</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">auto</span></code></p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-detect-content-m">
+<span id="cmdoption-scenedetect-detect-content-min-scene-len"></span><span class="sig-name descname"><span class="pre">-m</span></span><span class="sig-prename descclassname"> <span class="pre">TIMECODE</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--min-scene-len</span></span><span class="sig-prename descclassname"> <span class="pre">TIMECODE</span></span><a class="headerlink" href="#cmdoption-scenedetect-detect-content-m" title="Permalink to this definition">¶</a></dt>
+<dd><p>Minimum length of any scene. Overrides global option <a class="reference internal" href="#cmdoption-scenedetect-m"><code class="xref std std-option docutils literal notranslate"><span class="pre">-m/--min-scene-len</span></code></a>. TIMECODE can be specified in frames (<a class="reference internal" href="#cmdoption-scenedetect-detect-content-m"><code class="xref std std-option docutils literal notranslate"><span class="pre">-m=100</span></code></a>), in seconds with <cite>s</cite> suffix (<a class="reference internal" href="#cmdoption-scenedetect-detect-content-m"><code class="xref std std-option docutils literal notranslate"><span class="pre">-m=3.5s</span></code></a>), or timecode (<a class="reference internal" href="#cmdoption-scenedetect-detect-content-m"><code class="xref std std-option docutils literal notranslate"><span class="pre">-m=00:01:52.778</span></code></a>).</p>
+</dd></dl>
+
+</section>
+</section>
+<section id="detect-threshold">
+<span id="command-detect-threshold"></span><h2><code class="docutils literal notranslate"><span class="pre">detect-threshold</span></code><a class="headerlink" href="#detect-threshold" title="Permalink to this heading">¶</a></h2>
+<p>Perform threshold detection algorithm on input video.</p>
+<p>Detects fade-in and fade-out events using average pixel values. Resulting cuts are placed between adjacent fade-out and fade-in events.</p>
+<section id="id5">
+<h3>Examples<a class="headerlink" href="#id5" title="Permalink to this heading">¶</a></h3>
+<blockquote>
+<div><p><code class="docutils literal notranslate"><span class="pre">scenedetect</span> <span class="pre">-i</span> <span class="pre">video.mp4</span> <span class="pre">detect-threshold</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">scenedetect</span> <span class="pre">-i</span> <span class="pre">video.mp4</span> <span class="pre">detect-threshold</span> <span class="pre">--threshold</span> <span class="pre">15</span></code></p>
+</div></blockquote>
+</section>
+<section id="id6">
+<h3>Options<a class="headerlink" href="#id6" title="Permalink to this heading">¶</a></h3>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-detect-threshold-t">
+<span id="cmdoption-scenedetect-detect-threshold-threshold"></span><span class="sig-name descname"><span class="pre">-t</span></span><span class="sig-prename descclassname"> <span class="pre">VAL</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--threshold</span></span><span class="sig-prename descclassname"> <span class="pre">VAL</span></span><a class="headerlink" href="#cmdoption-scenedetect-detect-threshold-t" title="Permalink to this definition">¶</a></dt>
+<dd><p>Threshold (integer) that frame score must exceed to start a new scene. Refers to “delta_rgb” in stats file.</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">12.0</span></code></p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-detect-threshold-f">
+<span id="cmdoption-scenedetect-detect-threshold-fade-bias"></span><span class="sig-name descname"><span class="pre">-f</span></span><span class="sig-prename descclassname"> <span class="pre">PERCENT</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--fade-bias</span></span><span class="sig-prename descclassname"> <span class="pre">PERCENT</span></span><a class="headerlink" href="#cmdoption-scenedetect-detect-threshold-f" title="Permalink to this definition">¶</a></dt>
+<dd><p>Percent (%) from -100 to 100 of timecode skew of cut placement. -100 indicates the start frame, +100 indicates the end frame, and 0 is the middle of both.</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">0</span></code></p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-detect-threshold-l">
+<span id="cmdoption-scenedetect-detect-threshold-add-last-scene"></span><span class="sig-name descname"><span class="pre">-l</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--add-last-scene</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-scenedetect-detect-threshold-l" title="Permalink to this definition">¶</a></dt>
+<dd><p>If set and video ends after a fade-out event, generate a final cut at the last fade-out position.</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">True</span></code></p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-detect-threshold-m">
+<span id="cmdoption-scenedetect-detect-threshold-min-scene-len"></span><span class="sig-name descname"><span class="pre">-m</span></span><span class="sig-prename descclassname"> <span class="pre">TIMECODE</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--min-scene-len</span></span><span class="sig-prename descclassname"> <span class="pre">TIMECODE</span></span><a class="headerlink" href="#cmdoption-scenedetect-detect-threshold-m" title="Permalink to this definition">¶</a></dt>
+<dd><p>Minimum length of any scene. Overrides global option <a class="reference internal" href="#cmdoption-scenedetect-m"><code class="xref std std-option docutils literal notranslate"><span class="pre">-m/--min-scene-len</span></code></a>. TIMECODE can be specified in frames (<a class="reference internal" href="#cmdoption-scenedetect-detect-threshold-m"><code class="xref std std-option docutils literal notranslate"><span class="pre">-m=100</span></code></a>), in seconds with <cite>s</cite> suffix (<a class="reference internal" href="#cmdoption-scenedetect-detect-threshold-m"><code class="xref std std-option docutils literal notranslate"><span class="pre">-m=3.5s</span></code></a>), or timecode (<a class="reference internal" href="#cmdoption-scenedetect-detect-threshold-m"><code class="xref std std-option docutils literal notranslate"><span class="pre">-m=00:01:52.778</span></code></a>).</p>
+</dd></dl>
+
+</section>
+</section>
+</section>
+<section id="commands">
+<h1>Commands<a class="headerlink" href="#commands" title="Permalink to this heading">¶</a></h1>
+<section id="export-html">
+<span id="command-export-html"></span><h2><code class="docutils literal notranslate"><span class="pre">export-html</span></code><a class="headerlink" href="#export-html" title="Permalink to this heading">¶</a></h2>
+<p>Export scene list to HTML file. Requires save-images unless –no-images is specified.</p>
+<section id="id7">
+<h3>Options<a class="headerlink" href="#id7" title="Permalink to this heading">¶</a></h3>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-export-html-f">
+<span id="cmdoption-scenedetect-export-html-filename"></span><span class="sig-name descname"><span class="pre">-f</span></span><span class="sig-prename descclassname"> <span class="pre">NAME</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--filename</span></span><span class="sig-prename descclassname"> <span class="pre">NAME</span></span><a class="headerlink" href="#cmdoption-scenedetect-export-html-f" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filename format to use for the scene list HTML file. You can use the $VIDEO_NAME macro in the file name. Note that you may have to wrap the format name using single quotes.</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">$VIDEO_NAME-Scenes.html</span></code></p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-export-html-no-images">
+<span class="sig-name descname"><span class="pre">--no-images</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-scenedetect-export-html-no-images" title="Permalink to this definition">¶</a></dt>
+<dd><p>Export the scene list including or excluding the saved images.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-export-html-w">
+<span id="cmdoption-scenedetect-export-html-image-width"></span><span class="sig-name descname"><span class="pre">-w</span></span><span class="sig-prename descclassname"> <span class="pre">pixels</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--image-width</span></span><span class="sig-prename descclassname"> <span class="pre">pixels</span></span><a class="headerlink" href="#cmdoption-scenedetect-export-html-w" title="Permalink to this definition">¶</a></dt>
+<dd><p>Width in pixels of the images in the resulting HTML table.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-export-html-h">
+<span id="cmdoption-scenedetect-export-html-image-height"></span><span class="sig-name descname"><span class="pre">-h</span></span><span class="sig-prename descclassname"> <span class="pre">pixels</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--image-height</span></span><span class="sig-prename descclassname"> <span class="pre">pixels</span></span><a class="headerlink" href="#cmdoption-scenedetect-export-html-h" title="Permalink to this definition">¶</a></dt>
+<dd><p>Height in pixels of the images in the resulting HTML table.</p>
+</dd></dl>
+
+</section>
+</section>
+<section id="list-scenes">
+<span id="command-list-scenes"></span><h2><code class="docutils literal notranslate"><span class="pre">list-scenes</span></code><a class="headerlink" href="#list-scenes" title="Permalink to this heading">¶</a></h2>
+<p>Create scene list CSV file (will be named $VIDEO_NAME-Scenes.csv by default).</p>
+<section id="id8">
+<h3>Options<a class="headerlink" href="#id8" title="Permalink to this heading">¶</a></h3>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-list-scenes-o">
+<span id="cmdoption-scenedetect-list-scenes-output"></span><span class="sig-name descname"><span class="pre">-o</span></span><span class="sig-prename descclassname"> <span class="pre">DIR</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--output</span></span><span class="sig-prename descclassname"> <span class="pre">DIR</span></span><a class="headerlink" href="#cmdoption-scenedetect-list-scenes-o" title="Permalink to this definition">¶</a></dt>
+<dd><p>Output directory to save videos to. Overrides global option <a class="reference internal" href="#cmdoption-scenedetect-o"><code class="xref std std-option docutils literal notranslate"><span class="pre">-o/--output</span></code></a> if set.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-list-scenes-f">
+<span id="cmdoption-scenedetect-list-scenes-filename"></span><span class="sig-name descname"><span class="pre">-f</span></span><span class="sig-prename descclassname"> <span class="pre">NAME</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--filename</span></span><span class="sig-prename descclassname"> <span class="pre">NAME</span></span><a class="headerlink" href="#cmdoption-scenedetect-list-scenes-f" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filename format to use for the scene list CSV file. You can use the $VIDEO_NAME macro in the file name. Note that you may have to wrap the name using single quotes or use escape characters (e.g. <a class="reference internal" href="#cmdoption-scenedetect-list-scenes-f"><code class="xref std std-option docutils literal notranslate"><span class="pre">-f=$VIDEO_NAME-Scenes.csv</span></code></a>).</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">$VIDEO_NAME-Scenes.csv</span></code></p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-list-scenes-n">
+<span id="cmdoption-scenedetect-list-scenes-no-output-file"></span><span class="sig-name descname"><span class="pre">-n</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--no-output-file</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-scenedetect-list-scenes-n" title="Permalink to this definition">¶</a></dt>
+<dd><p>Only print scene list.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-list-scenes-q">
+<span id="cmdoption-scenedetect-list-scenes-quiet"></span><span class="sig-name descname"><span class="pre">-q</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--quiet</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-scenedetect-list-scenes-q" title="Permalink to this definition">¶</a></dt>
+<dd><p>Suppress printing scene list.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-list-scenes-s">
+<span id="cmdoption-scenedetect-list-scenes-skip-cuts"></span><span class="sig-name descname"><span class="pre">-s</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--skip-cuts</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-scenedetect-list-scenes-s" title="Permalink to this definition">¶</a></dt>
+<dd><p>Skip cutting list as first row in the CSV file. Set for RFC 4180 compliant output.</p>
+</dd></dl>
+
+</section>
+</section>
+<section id="load-scenes">
+<span id="command-load-scenes"></span><h2><code class="docutils literal notranslate"><span class="pre">load-scenes</span></code><a class="headerlink" href="#load-scenes" title="Permalink to this heading">¶</a></h2>
+<p>Load scenes from CSV instead of detecting. Can be used with CSV generated by <a class="reference internal" href="#command-list-scenes"><span class="std std-ref">list-scenes</span></a>. Scenes are loaded using the specified column as cut locations (frame number or timecode).</p>
+<section id="id9">
+<h3>Examples<a class="headerlink" href="#id9" title="Permalink to this heading">¶</a></h3>
+<blockquote>
+<div><p><code class="docutils literal notranslate"><span class="pre">scenedetect</span> <span class="pre">-i</span> <span class="pre">video.mp4</span> <span class="pre">load-scenes</span> <span class="pre">-i</span> <span class="pre">scenes.csv</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">scenedetect</span> <span class="pre">-i</span> <span class="pre">video.mp4</span> <span class="pre">load-scenes</span> <span class="pre">-i</span> <span class="pre">scenes.csv</span> <span class="pre">--start-col-name</span> <span class="pre">&quot;Start</span> <span class="pre">Timecode&quot;</span></code></p>
+</div></blockquote>
+</section>
+<section id="id10">
+<h3>Options<a class="headerlink" href="#id10" title="Permalink to this heading">¶</a></h3>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-load-scenes-i">
+<span id="cmdoption-scenedetect-load-scenes-input"></span><span class="sig-name descname"><span class="pre">-i</span></span><span class="sig-prename descclassname"> <span class="pre">FILE</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--input</span></span><span class="sig-prename descclassname"> <span class="pre">FILE</span></span><a class="headerlink" href="#cmdoption-scenedetect-load-scenes-i" title="Permalink to this definition">¶</a></dt>
+<dd><p>Scene list to read cut information from.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-load-scenes-c">
+<span id="cmdoption-scenedetect-load-scenes-start-col-name"></span><span class="sig-name descname"><span class="pre">-c</span></span><span class="sig-prename descclassname"> <span class="pre">STRING</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--start-col-name</span></span><span class="sig-prename descclassname"> <span class="pre">STRING</span></span><a class="headerlink" href="#cmdoption-scenedetect-load-scenes-c" title="Permalink to this definition">¶</a></dt>
+<dd><p>Name of column used to mark scene cuts.</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">&quot;Start</span> <span class="pre">Frame&quot;</span></code></p>
+</dd></dl>
+
+</section>
+</section>
+<section id="save-images">
+<span id="command-save-images"></span><h2><code class="docutils literal notranslate"><span class="pre">save-images</span></code><a class="headerlink" href="#save-images" title="Permalink to this heading">¶</a></h2>
+<p>Create images for each detected scene.</p>
+<p>Images can be resized</p>
+<section id="id11">
+<h3>Examples<a class="headerlink" href="#id11" title="Permalink to this heading">¶</a></h3>
+<blockquote>
+<div><p><code class="docutils literal notranslate"><span class="pre">scenedetect</span> <span class="pre">-i</span> <span class="pre">video.mp4</span> <span class="pre">save-images</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">scenedetect</span> <span class="pre">-i</span> <span class="pre">video.mp4</span> <span class="pre">save-images</span> <span class="pre">--width</span> <span class="pre">1024</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">scenedetect</span> <span class="pre">-i</span> <span class="pre">video.mp4</span> <span class="pre">save-images</span> <span class="pre">--filename</span> <span class="pre">\$SCENE_NUMBER-img\$IMAGE_NUMBER</span></code></p>
+</div></blockquote>
+</section>
+<section id="id12">
+<h3>Options<a class="headerlink" href="#id12" title="Permalink to this heading">¶</a></h3>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-save-images-o">
+<span id="cmdoption-scenedetect-save-images-output"></span><span class="sig-name descname"><span class="pre">-o</span></span><span class="sig-prename descclassname"> <span class="pre">DIR</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--output</span></span><span class="sig-prename descclassname"> <span class="pre">DIR</span></span><a class="headerlink" href="#cmdoption-scenedetect-save-images-o" title="Permalink to this definition">¶</a></dt>
+<dd><p>Output directory for images. Overrides global option <a class="reference internal" href="#cmdoption-scenedetect-o"><code class="xref std std-option docutils literal notranslate"><span class="pre">-o/--output</span></code></a> if set.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-save-images-f">
+<span id="cmdoption-scenedetect-save-images-filename"></span><span class="sig-name descname"><span class="pre">-f</span></span><span class="sig-prename descclassname"> <span class="pre">NAME</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--filename</span></span><span class="sig-prename descclassname"> <span class="pre">NAME</span></span><a class="headerlink" href="#cmdoption-scenedetect-save-images-f" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filename format <em>without</em> extension to use when saving images. You can use the $VIDEO_NAME, $SCENE_NUMBER, $IMAGE_NUMBER, and $FRAME_NUMBER macros in the file name. You may have to use escape characters (e.g. <a class="reference internal" href="#cmdoption-scenedetect-save-images-f"><code class="xref std std-option docutils literal notranslate"><span class="pre">-f=$SCENE_NUMBER-Image-$IMAGE_NUMBER</span></code></a>) or single quotes.</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">$VIDEO_NAME-Scene-$SCENE_NUMBER-$IMAGE_NUMBER</span></code></p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-save-images-n">
+<span id="cmdoption-scenedetect-save-images-num-images"></span><span class="sig-name descname"><span class="pre">-n</span></span><span class="sig-prename descclassname"> <span class="pre">N</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--num-images</span></span><span class="sig-prename descclassname"> <span class="pre">N</span></span><a class="headerlink" href="#cmdoption-scenedetect-save-images-n" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of images to generate per scene. Will always include start/end frame, unless <a class="reference internal" href="#cmdoption-scenedetect-save-images-n"><code class="xref std std-option docutils literal notranslate"><span class="pre">-n=1</span></code></a>, in which case the image will be the frame at the mid-point of the scene.</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">3</span></code></p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-save-images-j">
+<span id="cmdoption-scenedetect-save-images-jpeg"></span><span class="sig-name descname"><span class="pre">-j</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--jpeg</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-scenedetect-save-images-j" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set output format to JPEG (default).</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-save-images-w">
+<span id="cmdoption-scenedetect-save-images-webp"></span><span class="sig-name descname"><span class="pre">-w</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--webp</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-scenedetect-save-images-w" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set output format to WebP</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-save-images-q">
+<span id="cmdoption-scenedetect-save-images-quality"></span><span class="sig-name descname"><span class="pre">-q</span></span><span class="sig-prename descclassname"> <span class="pre">Q</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--quality</span></span><span class="sig-prename descclassname"> <span class="pre">Q</span></span><a class="headerlink" href="#cmdoption-scenedetect-save-images-q" title="Permalink to this definition">¶</a></dt>
+<dd><p>JPEG/WebP encoding quality, from 0-100 (higher indicates better quality). For WebP, 100 indicates lossless.</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">JPEG:</span> <span class="pre">95,</span> <span class="pre">WebP:</span> <span class="pre">100</span></code></p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-save-images-p">
+<span id="cmdoption-scenedetect-save-images-png"></span><span class="sig-name descname"><span class="pre">-p</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--png</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-scenedetect-save-images-p" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set output format to PNG.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-save-images-c">
+<span id="cmdoption-scenedetect-save-images-compression"></span><span class="sig-name descname"><span class="pre">-c</span></span><span class="sig-prename descclassname"> <span class="pre">C</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--compression</span></span><span class="sig-prename descclassname"> <span class="pre">C</span></span><a class="headerlink" href="#cmdoption-scenedetect-save-images-c" title="Permalink to this definition">¶</a></dt>
+<dd><p>PNG compression rate, from 0-9. Higher values produce smaller files but result in longer compression time. This setting does not affect image quality, only file size.</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">3</span></code></p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-save-images-m">
+<span id="cmdoption-scenedetect-save-images-frame-margin"></span><span class="sig-name descname"><span class="pre">-m</span></span><span class="sig-prename descclassname"> <span class="pre">N</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--frame-margin</span></span><span class="sig-prename descclassname"> <span class="pre">N</span></span><a class="headerlink" href="#cmdoption-scenedetect-save-images-m" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of frames to ignore at beginning/end of scenes when saving images. Controls temporal padding on scene boundaries.</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">3</span></code></p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-save-images-s">
+<span id="cmdoption-scenedetect-save-images-scale"></span><span class="sig-name descname"><span class="pre">-s</span></span><span class="sig-prename descclassname"> <span class="pre">S</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--scale</span></span><span class="sig-prename descclassname"> <span class="pre">S</span></span><a class="headerlink" href="#cmdoption-scenedetect-save-images-s" title="Permalink to this definition">¶</a></dt>
+<dd><p>Factor to scale images by. Ignored if <a class="reference internal" href="#cmdoption-scenedetect-save-images-W"><code class="xref std std-option docutils literal notranslate"><span class="pre">-W/--width</span></code></a> or <a class="reference internal" href="#cmdoption-scenedetect-save-images-H"><code class="xref std std-option docutils literal notranslate"><span class="pre">-H/--height</span></code></a> is set.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-save-images-H">
+<span id="cmdoption-scenedetect-save-images-height"></span><span class="sig-name descname"><span class="pre">-H</span></span><span class="sig-prename descclassname"> <span class="pre">H</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--height</span></span><span class="sig-prename descclassname"> <span class="pre">H</span></span><a class="headerlink" href="#cmdoption-scenedetect-save-images-H" title="Permalink to this definition">¶</a></dt>
+<dd><p>Height (pixels) of images.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-save-images-W">
+<span id="cmdoption-scenedetect-save-images-width"></span><span class="sig-name descname"><span class="pre">-W</span></span><span class="sig-prename descclassname"> <span class="pre">W</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--width</span></span><span class="sig-prename descclassname"> <span class="pre">W</span></span><a class="headerlink" href="#cmdoption-scenedetect-save-images-W" title="Permalink to this definition">¶</a></dt>
+<dd><p>Width (pixels) of images.</p>
+</dd></dl>
+
+</section>
+</section>
+<section id="split-video">
+<span id="command-split-video"></span><h2><code class="docutils literal notranslate"><span class="pre">split-video</span></code><a class="headerlink" href="#split-video" title="Permalink to this heading">¶</a></h2>
+<p>Split input video using ffmpeg or mkvmerge.</p>
+<section id="id13">
+<h3>Examples<a class="headerlink" href="#id13" title="Permalink to this heading">¶</a></h3>
+<blockquote>
+<div><p><code class="docutils literal notranslate"><span class="pre">scenedetect</span> <span class="pre">-i</span> <span class="pre">video.mp4</span> <span class="pre">split-video</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">scenedetect</span> <span class="pre">-i</span> <span class="pre">video.mp4</span> <span class="pre">split-video</span> <span class="pre">--copy</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">scenedetect</span> <span class="pre">-i</span> <span class="pre">video.mp4</span> <span class="pre">split-video</span> <span class="pre">--filename</span> <span class="pre">\$VIDEO_NAME-Clip-\$SCENE_NUMBER</span></code></p>
+</div></blockquote>
+</section>
+<section id="id14">
+<h3>Options<a class="headerlink" href="#id14" title="Permalink to this heading">¶</a></h3>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-split-video-o">
+<span id="cmdoption-scenedetect-split-video-output"></span><span class="sig-name descname"><span class="pre">-o</span></span><span class="sig-prename descclassname"> <span class="pre">DIR</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--output</span></span><span class="sig-prename descclassname"> <span class="pre">DIR</span></span><a class="headerlink" href="#cmdoption-scenedetect-split-video-o" title="Permalink to this definition">¶</a></dt>
+<dd><p>Output directory to save videos to. Overrides global option <a class="reference internal" href="#cmdoption-scenedetect-o"><code class="xref std std-option docutils literal notranslate"><span class="pre">-o/--output</span></code></a> if set.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-split-video-f">
+<span id="cmdoption-scenedetect-split-video-filename"></span><span class="sig-name descname"><span class="pre">-f</span></span><span class="sig-prename descclassname"> <span class="pre">NAME</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--filename</span></span><span class="sig-prename descclassname"> <span class="pre">NAME</span></span><a class="headerlink" href="#cmdoption-scenedetect-split-video-f" title="Permalink to this definition">¶</a></dt>
+<dd><p>File name format to use when saving videos, with or without extension. You can use $VIDEO_NAME and $SCENE_NUMBER macros in the filename. You may have to wrap the format in single quotes or use escape characters to avoid variable expansion (e.g. <a class="reference internal" href="#cmdoption-scenedetect-split-video-f"><code class="xref std std-option docutils literal notranslate"><span class="pre">-f=$VIDEO_NAME-Scene-$SCENE_NUMBER</span></code></a>).</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">$VIDEO_NAME-Scene-$SCENE_NUMBER</span></code></p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-split-video-q">
+<span id="cmdoption-scenedetect-split-video-quiet"></span><span class="sig-name descname"><span class="pre">-q</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--quiet</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-scenedetect-split-video-q" title="Permalink to this definition">¶</a></dt>
+<dd><p>Hide output from external video splitting tool.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-split-video-c">
+<span id="cmdoption-scenedetect-split-video-copy"></span><span class="sig-name descname"><span class="pre">-c</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--copy</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-scenedetect-split-video-c" title="Permalink to this definition">¶</a></dt>
+<dd><p>Copy instead of re-encode. Faster but less precise. Equivalent to: <a class="reference internal" href="#cmdoption-scenedetect-split-video-a"><code class="xref std std-option docutils literal notranslate"><span class="pre">--args=&quot;-map</span> <span class="pre">0</span> <span class="pre">-c:v</span> <span class="pre">copy</span> <span class="pre">-c:a</span> <span class="pre">copy&quot;</span></code></a></p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-split-video-hq">
+<span id="cmdoption-scenedetect-split-video-high-quality"></span><span class="sig-name descname"><span class="pre">-hq</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--high-quality</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-scenedetect-split-video-hq" title="Permalink to this definition">¶</a></dt>
+<dd><p>Encode video with higher quality, overrides -f option if present. Equivalent to: <a class="reference internal" href="#cmdoption-scenedetect-split-video-crf"><code class="xref std std-option docutils literal notranslate"><span class="pre">--rate-factor=17</span></code></a> <a class="reference internal" href="#cmdoption-scenedetect-split-video-p"><code class="xref std std-option docutils literal notranslate"><span class="pre">--preset=slow</span></code></a></p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-split-video-crf">
+<span id="cmdoption-scenedetect-split-video-rate-factor"></span><span class="sig-name descname"><span class="pre">-crf</span></span><span class="sig-prename descclassname"> <span class="pre">RATE</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--rate-factor</span></span><span class="sig-prename descclassname"> <span class="pre">RATE</span></span><a class="headerlink" href="#cmdoption-scenedetect-split-video-crf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Video encoding quality (x264 constant rate factor), from 0-100, where lower is higher quality (larger output). 0 indicates lossless.</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">22</span></code></p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-split-video-p">
+<span id="cmdoption-scenedetect-split-video-preset"></span><span class="sig-name descname"><span class="pre">-p</span></span><span class="sig-prename descclassname"> <span class="pre">LEVEL</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--preset</span></span><span class="sig-prename descclassname"> <span class="pre">LEVEL</span></span><a class="headerlink" href="#cmdoption-scenedetect-split-video-p" title="Permalink to this definition">¶</a></dt>
+<dd><p>Video compression quality (x264 preset). Can be one of: ultrafast, superfast, veryfast, faster, fast, medium, slow, slower, veryslow. Faster modes take less time but output may be larger.</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">veryfast</span></code></p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-split-video-a">
+<span id="cmdoption-scenedetect-split-video-args"></span><span class="sig-name descname"><span class="pre">-a</span></span><span class="sig-prename descclassname"> <span class="pre">ARGS</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--args</span></span><span class="sig-prename descclassname"> <span class="pre">ARGS</span></span><a class="headerlink" href="#cmdoption-scenedetect-split-video-a" title="Permalink to this definition">¶</a></dt>
+<dd><p>Override codec arguments passed to FFmpeg when splitting scenes. Use double quotes (”) around arguments. Must specify at least audio/video codec.</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">&quot;-map</span> <span class="pre">0</span> <span class="pre">-c:v</span> <span class="pre">libx264</span> <span class="pre">-preset</span> <span class="pre">veryfast</span> <span class="pre">-crf</span> <span class="pre">22</span> <span class="pre">-c:a</span> <span class="pre">aac&quot;</span></code></p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-split-video-m">
+<span id="cmdoption-scenedetect-split-video-mkvmerge"></span><span class="sig-name descname"><span class="pre">-m</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--mkvmerge</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-scenedetect-split-video-m" title="Permalink to this definition">¶</a></dt>
+<dd><p>Split video using mkvmerge. Faster than re-encoding, but less precise. If set, options other than <a class="reference internal" href="#cmdoption-scenedetect-split-video-f"><code class="xref std std-option docutils literal notranslate"><span class="pre">-f/--filename</span></code></a>, <a class="reference internal" href="#cmdoption-scenedetect-split-video-q"><code class="xref std std-option docutils literal notranslate"><span class="pre">-q/--quiet</span></code></a> and <a class="reference internal" href="#cmdoption-scenedetect-split-video-o"><code class="xref std std-option docutils literal notranslate"><span class="pre">-o/--output</span></code></a> will be ignored. Note that mkvmerge automatically appends the $SCENE_NUMBER suffix.</p>
+</dd></dl>
+
+</section>
+</section>
+<section id="time">
+<span id="command-time"></span><h2><code class="docutils literal notranslate"><span class="pre">time</span></code><a class="headerlink" href="#time" title="Permalink to this heading">¶</a></h2>
+<p>Set start/end/duration of input video.</p>
+<p>Values can be specified as frames (NNNN), seconds (NNNN.NNs), or timecode (HH:MM:SS.nnn). For example, to process only the first minute of a video:</p>
+<blockquote>
+<div><p><code class="docutils literal notranslate"><span class="pre">scenedetect</span> <span class="pre">-i</span> <span class="pre">video.mp4</span> <span class="pre">time</span> <span class="pre">--end</span> <span class="pre">00:01:00</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">scenedetect</span> <span class="pre">-i</span> <span class="pre">video.mp4</span> <span class="pre">time</span> <span class="pre">--duration</span> <span class="pre">60s</span></code></p>
+</div></blockquote>
+<p>Note that –end and –duration are mutually exclusive (i.e. only one of the two can be set). Lastly, the following is an example using absolute frame numbers to process frames 0 through 1000:</p>
+<blockquote>
+<div><p><code class="docutils literal notranslate"><span class="pre">scenedetect</span> <span class="pre">-i</span> <span class="pre">video.mp4</span> <span class="pre">time</span> <span class="pre">--start</span> <span class="pre">0</span> <span class="pre">--end</span> <span class="pre">1000</span></code></p>
+</div></blockquote>
+<section id="id15">
+<h3>Options<a class="headerlink" href="#id15" title="Permalink to this heading">¶</a></h3>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-time-s">
+<span id="cmdoption-scenedetect-time-start"></span><span class="sig-name descname"><span class="pre">-s</span></span><span class="sig-prename descclassname"> <span class="pre">TIMECODE</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--start</span></span><span class="sig-prename descclassname"> <span class="pre">TIMECODE</span></span><a class="headerlink" href="#cmdoption-scenedetect-time-s" title="Permalink to this definition">¶</a></dt>
+<dd><p>Time in video to start detection. TIMECODE can be specified as number of frames (<a class="reference internal" href="#cmdoption-scenedetect-time-s"><code class="xref std std-option docutils literal notranslate"><span class="pre">--start=100</span></code></a> for frame 100), time in seconds followed by “s” (<a class="reference internal" href="#cmdoption-scenedetect-time-s"><code class="xref std std-option docutils literal notranslate"><span class="pre">--start=100s</span></code></a> for 100 seconds), or timecode (<a class="reference internal" href="#cmdoption-scenedetect-time-s"><code class="xref std std-option docutils literal notranslate"><span class="pre">--start=00:01:40</span></code></a> for 1m40s).</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-time-d">
+<span id="cmdoption-scenedetect-time-duration"></span><span class="sig-name descname"><span class="pre">-d</span></span><span class="sig-prename descclassname"> <span class="pre">TIMECODE</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--duration</span></span><span class="sig-prename descclassname"> <span class="pre">TIMECODE</span></span><a class="headerlink" href="#cmdoption-scenedetect-time-d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Maximum time in video to process. TIMECODE format is the same as other arguments. Mutually exclusive with <a class="reference internal" href="#cmdoption-scenedetect-time-e"><code class="xref std std-option docutils literal notranslate"><span class="pre">-e/--end</span></code></a>.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-time-e">
+<span id="cmdoption-scenedetect-time-end"></span><span class="sig-name descname"><span class="pre">-e</span></span><span class="sig-prename descclassname"> <span class="pre">TIMECODE</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--end</span></span><span class="sig-prename descclassname"> <span class="pre">TIMECODE</span></span><a class="headerlink" href="#cmdoption-scenedetect-time-e" title="Permalink to this definition">¶</a></dt>
+<dd><p>Time in video to end detecting scenes. TIMECODE format is the same as other arguments. Mutually exclusive with <a class="reference internal" href="#cmdoption-scenedetect-time-d"><code class="xref std std-option docutils literal notranslate"><span class="pre">-d/--duration</span></code></a></p>
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+          </div>
+              <div class="related bottom">
+                &nbsp;
+  <nav id="rellinks">
+    <ul>
+        <li>
+          &larr;
+          <a href="index.html" title="Previous document">PySceneDetect Documentation</a>
+        </li>
+        <li>
+          <a href="cli/config_file.html" title="Next document">Configuration File</a>
+          &rarr;
+        </li>
+    </ul>
+  </nav>
+              </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="index.html">
+    <img class="logo" src="_static/pyscenedetect_logo.png" alt="Logo" />
+    
+  </a>
+</p>
+
+
+
+<p class="blurb">CLI/API Documentation [0.6.2]</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=Breakthrough&repo=PySceneDetect&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Command-Line Interface [CLI]:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Command</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#examples">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#options">Options</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#help-version-and-about"><code class="docutils literal notranslate"><span class="pre">help</span></code>, <code class="docutils literal notranslate"><span class="pre">version</span></code>, and <code class="docutils literal notranslate"><span class="pre">about</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#detectors">Detectors</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#detect-adaptive"><code class="docutils literal notranslate"><span class="pre">detect-adaptive</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#detect-content"><code class="docutils literal notranslate"><span class="pre">detect-content</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#detect-threshold"><code class="docutils literal notranslate"><span class="pre">detect-threshold</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#commands">Commands</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#export-html"><code class="docutils literal notranslate"><span class="pre">export-html</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#list-scenes"><code class="docutils literal notranslate"><span class="pre">list-scenes</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#load-scenes"><code class="docutils literal notranslate"><span class="pre">load-scenes</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#save-images"><code class="docutils literal notranslate"><span class="pre">save-images</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#split-video"><code class="docutils literal notranslate"><span class="pre">split-video</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#time"><code class="docutils literal notranslate"><span class="pre">time</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="cli/config_file.html">Configuration File</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli/backends.html">Backends</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Python API Documentation:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/detectors.html">Detection Algorithms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/backends.html">Backends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/scene_manager.html">SceneManager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/video_splitter.html">Video Splitting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/stats_manager.html">StatsManager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/frame_timecode.html">FrameTimecode</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/scene_detector.html">SceneDetector</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/video_stream.html">VideoStream</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/platform.html">Platform &amp; Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/migration_guide.html">Migration Guide</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">PySceneDetect Documentation</a></li>
+      <li>Next: <a href="cli/config_file.html" title="next chapter">Configuration File</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2014-2023, Brandon Castellano.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.0.1</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="_sources/cli.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
