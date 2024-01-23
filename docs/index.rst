@@ -1,6 +1,6 @@
 
 .. PySceneDetect documentation index file (contains toctree directive).
-    Copyright (C) 2014-2023 Brandon Castellano.  All rights reserved.
+    Copyright (C) 2014-2024 Brandon Castellano.  All rights reserved.
 
 #######################################################################
 PySceneDetect Documentation
@@ -25,7 +25,7 @@ Table of Contents
 
 .. toctree::
     :maxdepth: 2
-    :caption: Command-Line Interface [CLI]:
+    :caption: Command-Line Interface:
     :name: clitoc
 
     cli
@@ -39,7 +39,7 @@ Table of Contents
 
 .. toctree::
     :maxdepth: 2
-    :caption: Python API Documentation:
+    :caption: API Documentation:
     :name: apitoc
 
     api
