@@ -100,19 +100,8 @@ def is_ffmpeg_available() -> bool:
 
 
 @dataclass
-class SceneMetadata:
-    """Information about the scenes being exported."""
-    index: int
-    """0-based index of this scene."""
-    start: FrameTimecode
-    """First frame."""
-    end: FrameTimecode
-    """Last frame."""
-
-
-@dataclass
 class VideoMetadata:
-    """Information about the video."""
+    """Information about the video being split."""
     name: str
     """Expected name of the video. May differ from `path`."""
     path: Path
@@ -121,7 +110,18 @@ class VideoMetadata:
     """Total number of scenes that will be written."""
 
 
-PathFormatter = ty.Callable[[SceneMetadata, VideoMetadata], ty.AnyStr]
+@dataclass
+class SceneMetadata:
+    """Information about the scene being extracted."""
+    index: int
+    """0-based index of this scene."""
+    start: FrameTimecode
+    """First frame."""
+    end: FrameTimecode
+    """Last frame."""
+
+
+PathFormatter = ty.Callable[[VideoMetadata, SceneMetadata], ty.AnyStr]
 
 
 def default_formatter(template: str) -> PathFormatter:
@@ -130,13 +130,13 @@ def default_formatter(template: str) -> PathFormatter:
         `$VIDEO_NAME`, `$SCENE_NUMBER`, `$START_TIME`, `$END_TIME`, `$START_FRAME`, `$END_FRAME`
     """
     MIN_DIGITS = 3
-    format_scene_number: PathFormatter = lambda scene, video: (
+    format_scene_number: PathFormatter = lambda video, scene: (
         ('%0' + str(max(MIN_DIGITS,
                         math.floor(math.log(video.total_scenes, 10)) + 1)) + 'd') %
         (scene.index + 1))
-    formatter: PathFormatter = lambda scene, video: Template(template).safe_substitute(
+    formatter: PathFormatter = lambda video, scene: Template(template).safe_substitute(
         VIDEO_NAME=video.name,
-        SCENE_NUMBER=format_scene_number(scene, video),
+        SCENE_NUMBER=format_scene_number(video, scene),
         START_TIME=str(scene.start.get_timecode().replace(":", ";")),
         END_TIME=str(scene.end.get_timecode().replace(":", ";")),
         START_FRAME=str(scene.start.get_frames()),
@@ -157,7 +157,7 @@ def split_video_mkvmerge(
     video_name: ty.Optional[str] = None,
     show_output: bool = False,
     suppress_output=None,
-):
+) -> int:
     """ Calls the mkvmerge command on the input video, splitting it at the
     passed timecodes, where each scene is written in sequence from 001.
 
@@ -246,7 +246,7 @@ def split_video_ffmpeg(
     suppress_output=None,
     hide_progress=None,
     formatter: ty.Optional[PathFormatter] = None,
-):
+) -> int:
     """ Calls the ffmpeg command on the input video, generating a new video for
     each scene based on the start/end timecodes.
 

@@ -112,7 +112,7 @@ class CliContext:
         self.stats_manager: StatsManager = None
 
         # Global `scenedetect` Options
-        self.output_directory: str = None                   # -o/--output
+        self.output_dir: str = None                         # -o/--output
         self.quiet_mode: bool = None                        # -q/--quiet or -v/--verbosity quiet
         self.stats_file_path: str = None                    # -s/--stats
         self.drop_short_scenes: bool = None                 # --drop-short-scenes
@@ -131,7 +131,7 @@ class CliContext:
         # `save-images` Command Options
         self.save_images: bool = False
         self.image_extension: str = None        # save-images -j/--jpeg, -w/--webp, -p/--png
-        self.image_directory: str = None        # save-images -o/--output
+        self.image_dir: str = None              # save-images -o/--output
         self.image_param: int = None            # save-images -q/--quality if -j/-w,
                                                 #   otherwise -c/--compression if -p
         self.image_name_format: str = None      # save-images -f/--name-format
@@ -146,14 +146,14 @@ class CliContext:
         self.split_video: bool = False
         self.split_mkvmerge: bool = None   # split-video -m/--mkvmerge
         self.split_args: str = None        # split-video -a/--args, -c/--copy
-        self.split_directory: str = None   # split-video -o/--output
+        self.split_dir: str = None         # split-video -o/--output
         self.split_name_format: str = None # split-video -f/--filename
         self.split_quiet: bool = None      # split-video -q/--quiet
 
         # `list-scenes` Command Options
         self.list_scenes: bool = False
         self.list_scenes_quiet: bool = None     # list-scenes -q/--quiet
-        self.scene_list_directory: str = None   # list-scenes -o/--output
+        self.scene_list_dir: str = None         # list-scenes -o/--output
         self.scene_list_name_format: str = None # list-scenes -f/--filename
         self.scene_list_output: bool = None     # list-scenes -n/--no-output
         self.skip_cuts: bool = None             # list-scenes -s/--skip-cuts
@@ -256,9 +256,9 @@ class CliContext:
             framerate=framerate,
             backend=self.config.get_value("global", "backend", backend, ignore_default=True))
 
-        self.output_directory = output if output else self.config.get_value("global", "output")
-        if self.output_directory:
-            logger.info('Output directory set:\n  %s', self.output_directory)
+        self.output_dir = output if output else self.config.get_value("global", "output")
+        if self.output_dir:
+            logger.info('Output directory set:\n  %s', self.output_dir)
 
         self.min_scene_len = parse_timecode(
             min_scene_len if min_scene_len is not None else self.config.get_value(
@@ -271,7 +271,7 @@ class CliContext:
 
         # Create StatsManager if --stats is specified.
         if stats_file:
-            self.stats_file_path = get_and_create_path(stats_file, self.output_directory)
+            self.stats_file_path = get_and_create_path(stats_file, self.output_dir)
             self.stats_manager = StatsManager()
 
         # Initialize default detector with values in the config file.
@@ -483,14 +483,14 @@ class CliContext:
         self.list_scenes_quiet = quiet or self.config.get_value("list-scenes", "quiet")
         no_output_file = no_output_file or self.config.get_value("list-scenes", "no-output-file")
 
-        self.scene_list_directory = self.config.get_value(
+        self.scene_list_dir = self.config.get_value(
             "list-scenes", "output", output, ignore_default=True)
         self.scene_list_name_format = self.config.get_value("list-scenes", "filename", filename)
         if self.scene_list_name_format is not None and not no_output_file:
             logger.info("Scene list filename format:\n  %s", self.scene_list_name_format)
         self.scene_list_output = not no_output_file
-        if self.scene_list_directory is not None:
-            logger.info("Scene list output directory:\n  %s", self.scene_list_directory)
+        if self.scene_list_dir is not None:
+            logger.info("Scene list output directory:\n  %s", self.scene_list_dir)
 
         self.list_scenes = True
 
@@ -523,10 +523,9 @@ class CliContext:
 
         self.split_video = True
         self.split_quiet = quiet or self.config.get_value('split-video', 'quiet')
-        self.split_directory = self.config.get_value(
-            'split-video', 'output', output, ignore_default=True)
-        if self.split_directory is not None:
-            logger.info('Video output path set:  \n%s', self.split_directory)
+        self.split_dir = self.config.get_value('split-video', 'output', output, ignore_default=True)
+        if self.split_dir is not None:
+            logger.info('Video output path set:  \n%s', self.split_dir)
         self.split_name_format = self.config.get_value('split-video', 'filename', filename)
 
         # We only load the config values for these flags/options if none of the other
@@ -656,8 +655,7 @@ class CliContext:
             logger.debug('\n'.join(error_strs))
             raise click.BadParameter('\n'.join(error_strs), param_hint='save-images')
 
-        self.image_directory = self.config.get_value(
-            'save-images', 'output', output, ignore_default=True)
+        self.image_dir = self.config.get_value('save-images', 'output', output, ignore_default=True)
 
         self.image_name_format = self.config.get_value('save-images', 'filename', filename)
         self.num_images = self.config.get_value('save-images', 'num-images', num_images)
@@ -667,8 +665,8 @@ class CliContext:
         image_param_type = 'Compression' if png else 'Quality'
         image_param_type = ' [%s: %d]' % (image_param_type, self.image_param)
         logger.info('Image output format set: %s%s', image_type, image_param_type)
-        if self.image_directory is not None:
-            logger.info('Image output directory set:\n  %s', os.path.abspath(self.image_directory))
+        if self.image_dir is not None:
+            logger.info('Image output directory set:\n  %s', os.path.abspath(self.image_dir))
 
         self.save_images = True
 
