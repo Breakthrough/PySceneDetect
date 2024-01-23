@@ -15,20 +15,20 @@
 import os
 import sys
 
-
 sys.path.insert(0, os.path.abspath('..'))
 
+from scenedetect import __version__ as scenedetect_version
 
 # -- Project information -----------------------------------------------------
 
 project = 'PySceneDetect'
-copyright = '2014-2023, Brandon Castellano'
+copyright = '2014-2024, Brandon Castellano'
 author = 'Brandon Castellano'
 
 # The short X.Y version
-version = '0.6.2'
+version = scenedetect_version
 # The full version, including alpha/beta/rc tags
-release = '0.6.2'
+release = scenedetect_version
 
 # -- General configuration ---------------------------------------------------
 
@@ -47,7 +47,6 @@ autodoc_typehints_format = 'short'
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
-
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
@@ -73,7 +72,6 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
 
-
 # -- Options for HTML output -------------------------------------------------
 
 # Add any paths that contain custom static files (such as style sheets) here,
@@ -92,51 +90,43 @@ html_css_files = ['pyscenedetect.css']
 #
 # html_sidebars = {}
 
-
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'PySceneDetectdoc'
 
-
 # -- Options for LaTeX output ------------------------------------------------
 
 latex_elements = {
-    # The paper size ('letterpaper' or 'a4paper').
-    #
-    # 'papersize': 'letterpaper',
+                   # The paper size ('letterpaper' or 'a4paper').
+                   #
+                   # 'papersize': 'letterpaper',
 
-    # The font size ('10pt', '11pt' or '12pt').
-    #
-    # 'pointsize': '10pt',
+                   # The font size ('10pt', '11pt' or '12pt').
+                   #
+                   # 'pointsize': '10pt',
 
-    # Additional stuff for the LaTeX preamble.
-    #
-    # 'preamble': '',
+                   # Additional stuff for the LaTeX preamble.
+                   #
+                   # 'preamble': '',
 
-    # Latex figure (float) alignment
-    #
-    # 'figure_align': 'htbp',
+                   # Latex figure (float) alignment
+                   #
+                   # 'figure_align': 'htbp',
 }
 
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (root_doc, 'PySceneDetect.tex', 'PySceneDetect Documentation',
-     'Brandon Castellano', 'manual'),
+    (root_doc, 'PySceneDetect.tex', 'PySceneDetect Documentation', 'Brandon Castellano', 'manual'),
 ]
-
 
 # -- Options for manual page output ------------------------------------------
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [
-    (root_doc, 'pyscenedetect', 'PySceneDetect Documentation',
-     [author], 1)
-]
-
+man_pages = [(root_doc, 'pyscenedetect', 'PySceneDetect Documentation', [author], 1)]
 
 # -- Options for Texinfo output ----------------------------------------------
 
@@ -144,28 +134,23 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (root_doc, 'PySceneDetect', 'PySceneDetect Documentation',
-     author, 'PySceneDetect', 'Python API and `scenedetect` command reference.',
-     'Miscellaneous'),
+    (root_doc, 'PySceneDetect', 'PySceneDetect Documentation', author, 'PySceneDetect',
+     'Python API and `scenedetect` command reference.', 'Miscellaneous'),
 ]
-
 
 # -- Theme -------------------------------------------------
 
 # TODO: Consider switching to sphinx_material.
 
-
 html_theme = 'alabaster'
 html_theme_options = {
     'sidebar_width': '235px',
-    'description': 'CLI/API Documentation [%s]' % (release),
+    'description': 'Version: [%s]' % (release),
     'show_relbar_bottom': True,
     'show_relbar_top': False,
-
     'github_user': 'Breakthrough',
     'github_repo': 'PySceneDetect',
     'github_type': 'star',
-
     'tip_bg': '#f0f6fa',
     'tip_border': '#c2dcf2',
     'hint_bg': '#f0faf0',
@@ -176,5 +161,4 @@ html_theme_options = {
     'attention_border': '#ffaaaa',
     'logo': 'pyscenedetect_logo.png',
     'logo_name': False,
-    #'logo_name': True,
 }
