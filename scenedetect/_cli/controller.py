@@ -145,8 +145,8 @@ def _list_scenes(context: CliContext, scene_list: List[Tuple[FrameTimecode, Fram
         if not scene_list_filename.lower().endswith('.csv'):
             scene_list_filename += '.csv'
         scene_list_path = get_and_create_path(
-            scene_list_filename, context.scene_list_directory
-            if context.scene_list_directory is not None else context.output_directory)
+            scene_list_filename,
+            context.scene_list_dir if context.scene_list_dir is not None else context.output_dir)
         logger.info('Writing scene list to CSV file:\n  %s', scene_list_path)
         with open(scene_list_path, 'wt') as scene_list_file:
             write_scene_list(
@@ -180,11 +180,8 @@ def _save_images(
     """Handles the `save-images` command."""
     if not context.save_images:
         return None
-
-    image_output_dir = context.output_directory
-    if context.image_directory is not None:
-        image_output_dir = context.image_directory
-
+    # Command can override global output directory setting.
+    output_dir = (context.output_dir if context.image_dir is None else context.image_dir)
     return save_images(
         scene_list=scene_list,
         video=context.video_stream,
@@ -193,7 +190,7 @@ def _save_images(
         image_extension=context.image_extension,
         encoder_param=context.image_param,
         image_name_template=context.image_name_format,
-        output_dir=image_output_dir,
+        output_dir=output_dir,
         show_progress=not context.quiet_mode,
         scale=context.scale,
         height=context.height,
@@ -207,14 +204,13 @@ def _export_html(context: CliContext, scene_list: List[Tuple[FrameTimecode, Fram
     """Handles the `export-html` command."""
     if not context.export_html:
         return
-
+    # Command can override global output directory setting.
+    output_dir = (context.output_dir if context.image_dir is None else context.image_dir)
     html_filename = Template(
         context.html_name_format).safe_substitute(VIDEO_NAME=context.video_stream.name)
     if not html_filename.lower().endswith('.html'):
         html_filename += '.html'
-    html_path = get_and_create_path(
-        html_filename, context.image_directory
-        if context.image_directory is not None else context.output_directory)
+    html_path = get_and_create_path(html_filename, output_dir)
     logger.info('Exporting to html file:\n %s:', html_path)
     if not context.html_include_images:
         image_filenames = None
@@ -232,7 +228,6 @@ def _split_video(context: CliContext, scene_list: List[Tuple[FrameTimecode,
     """Handles the `split-video` command."""
     if not context.split_video:
         return
-
     output_path_template = context.split_name_format
     # Add proper extension to filename template if required.
     dot_pos = output_path_template.rfind('.')
@@ -243,15 +238,15 @@ def _split_video(context: CliContext, scene_list: List[Tuple[FrameTimecode,
     # Otherwise, if using ffmpeg, only add an extension if one doesn't exist.
     elif not 2 <= extension_length <= 4:
         output_path_template += '.mp4'
-
     # Ensure the appropriate tool is available before handling split-video.
     check_split_video_requirements(context.split_mkvmerge)
-
+    # Command can override global output directory setting.
+    output_dir = context.output_dir if context.split_dir is None else context.split_dir
     if context.split_mkvmerge:
         split_video_mkvmerge(
             input_video_path=context.video_stream.path,
             scene_list=scene_list,
-            output_dir=context.split_directory,
+            output_dir=output_dir,
             output_file_template=output_path_template,
             show_output=not (context.quiet_mode or context.split_quiet),
         )
@@ -259,7 +254,7 @@ def _split_video(context: CliContext, scene_list: List[Tuple[FrameTimecode,
         split_video_ffmpeg(
             input_video_path=context.video_stream.path,
             scene_list=scene_list,
-            output_dir=context.split_directory,
+            output_dir=output_dir,
             output_file_template=output_path_template,
             arg_override=context.split_args,
             show_progress=not context.quiet_mode,

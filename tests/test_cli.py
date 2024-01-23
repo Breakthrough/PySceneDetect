@@ -16,6 +16,7 @@ import os
 from typing import Optional
 import subprocess
 import pytest
+from pathlib import Path
 
 import cv2
 
@@ -40,14 +41,17 @@ from scenedetect.video_splitter import is_ffmpeg_available, is_mkvmerge_availabl
 # logic by creating a CLI context with the desired parameters.
 
 SCENEDETECT_CMD = 'python -m scenedetect'
-VIDEO_PATH = 'tests/resources/goldeneye.mp4'
+ALL_DETECTORS = ['detect-content', 'detect-threshold', 'detect-adaptive']
+ALL_BACKENDS = ['opencv', 'pyav']
+
+DEFAULT_VIDEO_PATH = 'tests/resources/goldeneye.mp4'
+DEFAULT_VIDEO_NAME = Path(DEFAULT_VIDEO_PATH).stem
 DEFAULT_BACKEND = 'opencv'
 DEFAULT_STATSFILE = 'statsfile.csv'
 DEFAULT_TIME = '-s 2s -d 4s'            # Seek forward a bit but limit the amount we process.
 DEFAULT_DETECTOR = 'detect-content'
 DEFAULT_CONFIG_FILE = 'scenedetect.cfg' # Ensure we default to a "blank" config file.
-ALL_DETECTORS = ['detect-content', 'detect-threshold', 'detect-adaptive']
-ALL_BACKENDS = ['opencv', 'pyav']
+DEFAULT_NUM_SCENES = 2                  # Number of scenes we expect to detect given above params.
 
 
 def invoke_scenedetect(
@@ -65,7 +69,7 @@ def invoke_scenedetect(
 
     Default values are set for any arguments found in the command:
         VIDEO -> VIDEO_PATH
-        VIDEO_NAME -> basename of VIDEO_PATH
+        VIDEO_NAME -> VIDEO_NAME
         DETECTOR -> DEFAULT_DETECTOR
         TIME -> DEFAULT_TIME
         STATS -> DEFAULT_STATSFILE
@@ -73,8 +77,8 @@ def invoke_scenedetect(
         CONFIG_FILE -> DEFAULT_CONFIG_FILE
     """
     value_dict = dict(
-        VIDEO=VIDEO_PATH,
-        VIDEO_NAME=os.path.splitext(os.path.basename(VIDEO_PATH))[0],
+        VIDEO=DEFAULT_VIDEO_PATH,
+        VIDEO_NAME=DEFAULT_VIDEO_NAME,
         TIME=DEFAULT_TIME,
         DETECTOR=DEFAULT_DETECTOR,
         STATS=DEFAULT_STATSFILE,
@@ -113,7 +117,7 @@ def test_cli_frame_numbers():
     """
     output = subprocess.check_output(
         SCENEDETECT_CMD.split(' ') +
-        ['-i', VIDEO_PATH, 'detect-content', 'list-scenes', '-n', 'time', '-s', '1872'],
+        ['-i', DEFAULT_VIDEO_PATH, 'detect-content', 'list-scenes', '-n', 'time', '-s', '1872'],
         text=True)
     assert """
 -----------------------------------------------------------------------
@@ -167,7 +171,7 @@ def test_cli_time():
     assert invoke_scenedetect(base_command, TIME='-s 2s -e 8s -d 6s ') != 0
 
 
-def test_cli_list_scenes(tmp_path):
+def test_cli_list_scenes(tmp_path: Path):
     """Test `list-scenes` command."""
     # Regular invocation
     assert invoke_scenedetect(
@@ -189,24 +193,36 @@ def test_cli_list_scenes(tmp_path):
 
 
 @pytest.mark.skipif(condition=not is_ffmpeg_available(), reason="ffmpeg is not available")
-def test_cli_split_video_ffmpeg(tmp_path):
+def test_cli_split_video_ffmpeg(tmp_path: Path):
     """Test `split-video` command using ffmpeg."""
+    # Assumption: The default filename format is VIDEO_NAME-Scene-SCENE_NUMBER.
     assert invoke_scenedetect(
         '-i {VIDEO} -s {STATS} time {TIME} {DETECTOR} split-video', output_dir=tmp_path) == 0
+    entries = sorted(tmp_path.glob(f"{DEFAULT_VIDEO_NAME}-Scene-*"))
+    assert (len(entries) == DEFAULT_NUM_SCENES), entries
+    [entry.unlink() for entry in entries]
+
     assert invoke_scenedetect(
         '-i {VIDEO} -s {STATS} time {TIME} {DETECTOR} split-video -c', output_dir=tmp_path) == 0
+    entries = sorted(tmp_path.glob(f"{DEFAULT_VIDEO_NAME}-Scene-*"))
+    assert (len(entries) == DEFAULT_NUM_SCENES)
+    [entry.unlink() for entry in entries]
+
     assert invoke_scenedetect(
         '-i {VIDEO} -s {STATS} time {TIME} {DETECTOR} split-video -f abc$VIDEO_NAME-123$SCENE_NUMBER',
         output_dir=tmp_path) == 0
-    # -a/--args and -c/--copy are mutually exclusive
+    entries = sorted(tmp_path.glob(f"abc{DEFAULT_VIDEO_NAME}-123*"))
+    assert (len(entries) == DEFAULT_NUM_SCENES), entries
+    [entry.unlink() for entry in entries]
+
+    # -a/--args and -c/--copy are mutually exclusive, so this command should fail (return nonzero)
     assert invoke_scenedetect(
-        '-i {VIDEO} -s {STATS} time {TIME} {DETECTOR} split-video -c -a "-c:v libx264"',
+        "-i {VIDEO} -s {STATS} time {TIME} {DETECTOR} split-video -c -a \"-c:v libx264\"",
         output_dir=tmp_path)
-    # TODO: Check for existence of split video files.
 
 
 @pytest.mark.skipif(condition=not is_mkvmerge_available(), reason="mkvmerge is not available")
-def test_cli_split_video_mkvmerge(tmp_path):
+def test_cli_split_video_mkvmerge(tmp_path: Path):
     """Test `split-video` command using mkvmerge."""
     assert invoke_scenedetect(
         '-i {VIDEO} -s {STATS} time {TIME} {DETECTOR} split-video -m', output_dir=tmp_path) == 0
@@ -222,7 +238,7 @@ def test_cli_split_video_mkvmerge(tmp_path):
     # TODO: Check for existence of split video files.
 
 
-def test_cli_save_images(tmp_path):
+def test_cli_save_images(tmp_path: Path):
     """Test `save-images` command."""
     assert invoke_scenedetect(
         '-i {VIDEO} -s {STATS} time {TIME} {DETECTOR} save-images', output_dir=tmp_path) == 0
@@ -249,7 +265,7 @@ def test_cli_save_images_rotation(rotated_video_file, tmp_path):
     assert image.shape == (1280, 544, 3)
 
 
-def test_cli_export_html(tmp_path):
+def test_cli_export_html(tmp_path: Path):
     """Test `export-html` command."""
     base_command = '-i {VIDEO} -s {STATS} time {TIME} {DETECTOR} {COMMAND}'
     assert invoke_scenedetect(
@@ -292,7 +308,7 @@ Scene Number,Start Frame
     output = subprocess.check_output(
         SCENEDETECT_CMD.split(' ') + [
             '-i',
-            VIDEO_PATH,
+            DEFAULT_VIDEO_PATH,
             'load-scenes',
             '-i',
             'test_scene_list.csv',
@@ -329,14 +345,14 @@ Scene Number,Start Frame
         f.write(scenes_csv)
     ground_truth = subprocess.check_output(
         SCENEDETECT_CMD.split(' ') + [
-            '-i', VIDEO_PATH, 'detect-content', 'list-scenes', '-f', 'testout.csv', 'time', '-s',
-            '200', '-e', '400'
+            '-i', DEFAULT_VIDEO_PATH, 'detect-content', 'list-scenes', '-f', 'testout.csv', 'time',
+            '-s', '200', '-e', '400'
         ],
         text=True)
     loaded_first_pass = subprocess.check_output(
         SCENEDETECT_CMD.split(' ') + [
-            '-i', VIDEO_PATH, 'load-scenes', '-i', 'testout.csv', 'time', '-s', '200', '-e', '400',
-            'list-scenes', '-f', 'testout2.csv'
+            '-i', DEFAULT_VIDEO_PATH, 'load-scenes', '-i', 'testout.csv', 'time', '-s', '200', '-e',
+            '400', 'list-scenes', '-f', 'testout2.csv'
         ],
         text=True)
     SPLIT_POINT = ' | Scene # | Start Frame |  Start Time  |  End Frame  |   End Time   |'
