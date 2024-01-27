@@ -33,7 +33,6 @@ tested by adding it to the test suite in `tests/test_video_stream.py`.
 """
 
 from abc import ABC, abstractmethod
-from logging import getLogger
 from typing import Tuple, Optional, Union
 
 import numpy as np
