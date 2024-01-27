@@ -88,10 +88,8 @@ def test_backwards_compatibility_with_stats(test_video_file: str):
     """Runs equivalent code to `tests/api_test.py` from v0.5 twice to also
     exercise loading a statsfile from disk."""
     stats_file_path = test_video_file + '.csv'
-    try:
+    if os.path.exists(stats_file_path):
         os.remove(stats_file_path)
-    except FileNotFoundError:
-        pass
     scenes = validate_backwards_compatibility(test_video_file, stats_file_path)
     assert scenes
     assert os.path.exists(stats_file_path)

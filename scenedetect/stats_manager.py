@@ -24,6 +24,8 @@ detection parameters) for the given input.
 
 import csv
 from logging import getLogger
+import typing as ty
+# TODO: Replace below imports with `ty.` prefix.
 from typing import Any, Dict, Iterable, List, Optional, Set, TextIO, Union
 import os.path
 
@@ -47,25 +49,13 @@ COLUMN_NAME_TIMECODE = "Timecode"
 
 
 class FrameMetricRegistered(Exception):
-    """ Raised when attempting to register a frame metric key which has
-    already been registered. """
-
-    def __init__(self,
-                 metric_key: str,
-                 message: str = "Attempted to re-register frame metric key."):
-        super().__init__(message)
-        self.metric_key = metric_key
+    """[DEPRECATED - DO NOT USE] No longer used."""
+    pass
 
 
 class FrameMetricNotRegistered(Exception):
-    """ Raised when attempting to call get_metrics(...)/set_metrics(...) with a
-    frame metric that does not exist, or has not been registered. """
-
-    def __init__(self,
-                 metric_key: str,
-                 message: str = "Attempted to get/set frame metrics for unregistered metric key."):
-        super().__init__(message)
-        self.metric_key = metric_key
+    """[DEPRECATED - DO NOT USE] No longer used."""
+    pass
 
 
 class StatsFileCorrupt(Exception):
@@ -107,30 +97,21 @@ class StatsManager:
         # Frame metrics is a dict of frame (int): metric_dict (Dict[str, float])
         # of each frame metric key and the value it represents (usually float).
         self._frame_metrics: Dict[FrameTimecode, Dict[str, float]] = dict()
-        self._registered_metrics: Set[str] = set()                   # Set of frame metric keys.
-        self._loaded_metrics: Set[str] = set()                       # Metric keys loaded from stats file.
+        self._metric_keys: Set[str] = set()
         self._metrics_updated: bool = False                          # Flag indicating if metrics require saving.
         self._base_timecode: Optional[FrameTimecode] = base_timecode # Used for timing calculations.
 
+    @property
+    def metric_keys(self) -> ty.Iterable[str]:
+        return self._metric_keys
+
     def register_metrics(self, metric_keys: Iterable[str]) -> None:
-        """Register a list of metric keys that will be used by the detector.
-
-        Used to ensure that multiple detector keys don't overlap.
-
-        Raises:
-            FrameMetricRegistered: A particular metric_key has already been registered/added
-                to the StatsManager. Only if the StatsManager is being used for read-only
-                access (i.e. all frames in the video have already been processed for the given
-                metric_key in the exception) is this behavior desirable.
-        """
-        for metric_key in metric_keys:
-            if metric_key not in self._registered_metrics:
-                self._registered_metrics.add(metric_key)
-            else:
-                raise FrameMetricRegistered(metric_key)
+        """Register a list of metric keys that will be used by the detector."""
+        self._metric_keys = self._metric_keys.union(set(metric_keys))
 
     # TODO(v1.0): Change frame_number to a FrameTimecode now that it is just a hash and will
-    # be required for VFR support.
+    # be required for VFR support. This API is also really difficult to use, this type should just
+    # function like a dictionary.
     def get_metrics(self, frame_number: int, metric_keys: Iterable[str]) -> List[Any]:
         """Return the requested statistics/metrics for a given frame.
 
@@ -189,15 +170,11 @@ class StatsManager:
         """
         # TODO(v0.7): Replace with DeprecationWarning that `base_timecode` will be removed in v0.8.
         if base_timecode is not None:
-            logger.error('base_timecode is deprecated.')
+            logger.error('base_timecode is deprecated and has no effect.')
 
-        # Ensure we need to write to the file, and that we have data to do so with.
-        if not ((self.is_save_required() or force_save) and self._registered_metrics
-                and self._frame_metrics):
-            logger.info("No metrics to save.")
+        if not (force_save or self.is_save_required()):
+            logger.info("No metrics to write.")
             return
-
-        assert self._base_timecode is not None
 
         # If we get a path instead of an open file handle, recursively call ourselves
         # again but with file handle instead of path.
@@ -207,7 +184,7 @@ class StatsManager:
                 return
 
         csv_writer = csv.writer(csv_file, lineterminator='\n')
-        metric_keys = sorted(list(self._registered_metrics.union(self._loaded_metrics)))
+        metric_keys = sorted(list(self._metric_keys))
         csv_writer.writerow([COLUMN_NAME_FRAME_NUMBER, COLUMN_NAME_TIMECODE] + metric_keys)
         frame_keys = sorted(self._frame_metrics.keys())
         logger.info("Writing %d frames to CSV...", len(frame_keys))
@@ -234,7 +211,8 @@ class StatsManager:
             return False
         return True
 
-    # TODO(v1.0): Remove.
+    # TODO(v1.0): Create a replacement for a calculation cache that functions like load_from_csv
+    # did, but is better integrated with detectors for cached calculations instead of statistics.
     def load_from_csv(self, csv_file: Union[str, bytes, TextIO]) -> Optional[int]:
         """[DEPRECATED] DO NOT USE
 
@@ -285,28 +263,31 @@ class StatsManager:
         num_metrics = num_cols - 2
         if not num_metrics > 0:
             raise StatsFileCorrupt('No metrics defined in CSV file.')
-        self._loaded_metrics = row[2:]
+        loaded_metrics = list(row[2:])
         num_frames = 0
         for row in csv_reader:
             metric_dict = {}
             if not len(row) == num_cols:
                 raise StatsFileCorrupt('Wrong number of columns detected in stats file row.')
-            for i, metric_str in enumerate(row[2:]):
-                if metric_str and metric_str != 'None':
-                    try:
-                        metric_dict[self._loaded_metrics[i]] = float(metric_str)
-                    except ValueError:
-                        raise StatsFileCorrupt('Corrupted value in stats file: %s' %
-                                               metric_str) from ValueError
             frame_number = int(row[0])
             # Switch from 1-based to 0-based frame numbers.
             if frame_number > 0:
                 frame_number -= 1
             self.set_metrics(frame_number, metric_dict)
+            for i, metric in enumerate(row[2:]):
+                if metric and metric != 'None':
+                    try:
+                        self._set_metric(frame_number, loaded_metrics[i], float(metric))
+                    except ValueError:
+                        raise StatsFileCorrupt('Corrupted value in stats file: %s' %
+                                               metric) from ValueError
             num_frames += 1
+        self._metric_keys = self._metric_keys.union(set(loaded_metrics))
         logger.info('Loaded %d metrics for %d frames.', num_metrics, num_frames)
         self._metrics_updated = False
         return num_frames
+
+    # TODO: Get rid of these functions and simplify the implementation of this class.
 
     def _get_metric(self, frame_number: int, metric_key: str) -> Optional[Any]:
         if self._metric_exists(frame_number, metric_key):
