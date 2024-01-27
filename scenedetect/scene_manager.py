@@ -647,14 +647,7 @@ class SceneManager:
 
         detector.stats_manager = self._stats_manager
         if self._stats_manager is not None:
-            try:
-                self._stats_manager.register_metrics(detector.get_metrics())
-            except FrameMetricRegistered:
-                # Allow multiple detection algorithms of the same type to be added
-                # by suppressing any FrameMetricRegistered exceptions due to attempts
-                # to re-register the same frame metric keys.
-                # TODO(#334): Fix this, this should not be part of regular control flow.
-                pass
+            self._stats_manager.register_metrics(detector.get_metrics())
 
         if not issubclass(type(detector), SparseSceneDetector):
             self._detector_list.append(detector)
