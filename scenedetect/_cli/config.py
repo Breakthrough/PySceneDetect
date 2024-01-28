@@ -16,6 +16,7 @@ possible and re-used by the CLI so that there is one source of truth.
 """
 
 from abc import ABC, abstractmethod
+from enum import Enum
 import logging
 import os
 import os.path
@@ -213,6 +214,25 @@ class KernelSizeValue(ValidatedValue):
             ) from ex
 
 
+class TimecodeFormat(Enum):
+    """Format to display timecodes."""
+    FRAMES = 0
+    """Print timecodes as exact frame number."""
+    TIMECODE = 1
+    """Print timecodes in format HH:MM:SS.nnn."""
+    SECONDS = 2
+    """Print timecodes in seconds SSS.sss."""
+
+    def format(self, timecode: FrameTimecode) -> str:
+        if self == TimecodeFormat.FRAMES:
+            return str(timecode.get_frames())
+        if self == TimecodeFormat.TIMECODE:
+            return timecode.get_timecode()
+        if self == TimecodeFormat.SECONDS:
+            return '%.3f' % timecode.get_seconds()
+        assert False
+
+
 ConfigValue = Union[bool, int, float, str]
 ConfigDict = Dict[str, Dict[str, ConfigValue]]
 
@@ -263,11 +283,12 @@ CONFIG_MAP: ConfigDict = {
         'no-images': False,
     },
     'list-scenes': {
+        'cut-format': 'timecode',
         'display-cuts': True,
         'display-scenes': True,
         'filename': '$VIDEO_NAME-Scenes.csv',
         'output': '',
-        'no-output-file': False,                                                 # TODO(v0.6.3): Rename this to 'save'.
+        'no-output-file': False,
         'quiet': False,
         'skip-cuts': False,
     },
@@ -313,11 +334,21 @@ The types of these values are used when decoding the configuration file. Valid c
 certain string options are stored in `CHOICE_MAP`."""
 
 CHOICE_MAP: Dict[str, Dict[str, List[str]]] = {
+    'backend-pyav': {
+        'threading_mode': [str(mode).lower() for mode in VALID_PYAV_THREAD_MODES],
+    },
     'global': {
         'backend': ['opencv', 'pyav', 'moviepy'],
         'default-detector': ['detect-adaptive', 'detect-content', 'detect-threshold'],
         'downscale-method': [value.name.lower() for value in Interpolation],
         'verbosity': ['debug', 'info', 'warning', 'error', 'none'],
+    },
+    'list-scenes': {
+        'cut-format': [value.name.lower() for value in TimecodeFormat],
+    },
+    'save-images': {
+        'format': ['jpeg', 'png', 'webp'],
+        'scale-method': [value.name.lower() for value in Interpolation],
     },
     'split-video': {
         'preset': [
@@ -325,17 +356,12 @@ CHOICE_MAP: Dict[str, Dict[str, List[str]]] = {
             'veryslow'
         ],
     },
-    'save-images': {
-        'format': ['jpeg', 'png', 'webp'],
-        'scale-method': [value.name.lower() for value in Interpolation],
-    },
-    'backend-pyav': {
-        'threading_mode': [str(mode).lower() for mode in VALID_PYAV_THREAD_MODES],
-    },
 }
 """Mapping of string options which can only be of a particular set of values. We use a list instead
 of a set to preserve order when generating error contexts. Values are case-insensitive, and must be
 in lowercase in this map."""
+
+# TODO: This isn't ideal for enums since this could be derived from the type directly, but it works.
 
 
 def _validate_structure(config: ConfigParser) -> List[str]:

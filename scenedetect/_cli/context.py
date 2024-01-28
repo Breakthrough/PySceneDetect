@@ -32,7 +32,7 @@ from scenedetect.detectors import AdaptiveDetector, ContentDetector, ThresholdDe
 from scenedetect.stats_manager import StatsManager
 from scenedetect.scene_manager import SceneManager, Interpolation
 
-from scenedetect._cli.config import ConfigRegistry, ConfigLoadFailure, CHOICE_MAP
+from scenedetect._cli.config import ConfigRegistry, ConfigLoadFailure, TimecodeFormat, CHOICE_MAP
 
 logger = logging.getLogger('pyscenedetect')
 
@@ -159,6 +159,7 @@ class CliContext:
         self.skip_cuts: bool = None             # list-scenes -s/--skip-cuts
         self.display_cuts: bool = True          # [list-scenes] display-cuts
         self.display_scenes: bool = True        # [list-scenes] display-scenes
+        self.cut_format: TimecodeFormat = None  # [list-scenes] cut-format
 
         # `export-html` Command Options
         self.export_html: bool = False
@@ -480,6 +481,7 @@ class CliContext:
         self.display_cuts = self.config.get_value("list-scenes", "display-cuts")
         self.display_scenes = self.config.get_value("list-scenes", "display-scenes")
         self.skip_cuts = skip_cuts or self.config.get_value("list-scenes", "skip-cuts")
+        self.cut_format = TimecodeFormat[self.config.get_value("list-scenes", "cut-format").upper()]
         self.list_scenes_quiet = quiet or self.config.get_value("list-scenes", "quiet")
         no_output_file = no_output_file or self.config.get_value("list-scenes", "no-output-file")
 
