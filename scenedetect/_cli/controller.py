@@ -171,7 +171,7 @@ def _list_scenes(context: CliContext, scene_list: List[Tuple[FrameTimecode, Fram
 
         if cut_list and context.display_cuts:
             logger.info("Comma-separated timecode list:\n  %s",
-                        ",".join([cut.get_timecode() for cut in cut_list]))
+                        ",".join([context.cut_format.format(cut) for cut in cut_list]))
 
 
 def _save_images(
