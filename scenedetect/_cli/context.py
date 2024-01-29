@@ -32,7 +32,8 @@ from scenedetect.detectors import AdaptiveDetector, ContentDetector, ThresholdDe
 from scenedetect.stats_manager import StatsManager
 from scenedetect.scene_manager import SceneManager, Interpolation
 
-from scenedetect._cli.config import ConfigRegistry, ConfigLoadFailure, TimecodeFormat, CHOICE_MAP
+from scenedetect._cli.config import (ConfigRegistry, ConfigLoadFailure, TimecodeFormat, CHOICE_MAP,
+                                     DEFAULT_JPG_QUALITY, DEFAULT_WEBP_QUALITY)
 
 logger = logging.getLogger('pyscenedetect')
 
@@ -152,14 +153,14 @@ class CliContext:
 
         # `list-scenes` Command Options
         self.list_scenes: bool = False
-        self.list_scenes_quiet: bool = None     # list-scenes -q/--quiet
-        self.scene_list_dir: str = None         # list-scenes -o/--output
-        self.scene_list_name_format: str = None # list-scenes -f/--filename
-        self.scene_list_output: bool = None     # list-scenes -n/--no-output
-        self.skip_cuts: bool = None             # list-scenes -s/--skip-cuts
-        self.display_cuts: bool = True          # [list-scenes] display-cuts
-        self.display_scenes: bool = True        # [list-scenes] display-scenes
-        self.cut_format: TimecodeFormat = None  # [list-scenes] cut-format
+        self.list_scenes_quiet: bool = None                       # list-scenes -q/--quiet
+        self.scene_list_dir: str = None                           # list-scenes -o/--output
+        self.scene_list_name_format: str = None                   # list-scenes -f/--filename
+        self.scene_list_output: bool = None                       # list-scenes -n/--no-output
+        self.skip_cuts: bool = None                               # list-scenes -s/--skip-cuts
+        self.display_cuts: bool = False                           # [list-scenes] display-cuts
+        self.display_scenes: bool = True                          # [list-scenes] display-scenes
+        self.cut_format: TimecodeFormat = TimecodeFormat.TIMECODE # [list-scenes] cut-format
 
         # `export-html` Command Options
         self.export_html: bool = False
@@ -637,7 +638,7 @@ class CliContext:
         self.scale_method = Interpolation[self.config.get_value('save-images',
                                                                 'scale-method').upper()]
 
-        default_quality = 100 if webp else 95
+        default_quality = DEFAULT_WEBP_QUALITY if webp else DEFAULT_JPG_QUALITY
         quality = (
             default_quality if self.config.is_default('save-images', 'quality') else
             self.config.get_value('save-images', 'quality'))
