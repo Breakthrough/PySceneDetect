@@ -238,9 +238,13 @@ ConfigDict = Dict[str, Dict[str, ConfigValue]]
 
 _CONFIG_FILE_NAME: AnyStr = 'scenedetect.cfg'
 _CONFIG_FILE_DIR: AnyStr = user_config_dir("PySceneDetect", False)
+_PLACEHOLDER = 0   # Placeholder for image quality default, as the value depends on output format
 
 CONFIG_FILE_PATH: AnyStr = os.path.join(_CONFIG_FILE_DIR, _CONFIG_FILE_NAME)
+DEFAULT_JPG_QUALITY = 95
+DEFAULT_WEBP_QUALITY = 100
 
+# TODO(v0.7): Remove [detect-adaptive] min-delta-hsv
 CONFIG_MAP: ConfigDict = {
     'backend-opencv': {
         'max-decode-attempts': 5,
@@ -257,7 +261,6 @@ CONFIG_MAP: ConfigDict = {
         'min-scene-len': TimecodeValue(0),
         'threshold': RangeValue(3.0, min_val=0.0, max_val=255.0),
         'weights': ScoreWeightsValue(ContentDetector.DEFAULT_COMPONENT_WEIGHTS),
-                                                                                   # TODO(v0.7): Remove `min-delta-hsv``.
         'min-delta-hsv': RangeValue(15.0, min_val=0.0, max_val=255.0),
     },
     'detect-content': {
@@ -312,7 +315,7 @@ CONFIG_MAP: ConfigDict = {
         'height': 0,
         'num-images': 3,
         'output': '',
-        'quality': RangeValue(0, min_val=0, max_val=100),                        # Default depends on format
+        'quality': RangeValue(_PLACEHOLDER, min_val=0, max_val=100),
         'scale': 1.0,
         'scale-method': 'linear',
         'width': 0,
