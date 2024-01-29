@@ -6,6 +6,10 @@ Releases
 
 ### 0.6.3 (In Development)
 
+#### Release Notes
+
+This release focuses on bugfixes and quality of life improvements. This has helped identify certain areas of focus for the next major release. Feedback is always welcome for command-line and API improvements.
+
 **Program Changes:**
 
  - [bugfix] Fix crash for some WebM videos when using `save-images` with `--backend pyav` [#355](https://github.com/Breakthrough/PySceneDetect/issues/355)
@@ -28,7 +32,7 @@ Releases
    - The `StatsManager.register_metrics()` method no longer throws any exceptions
    - Add `StatsManager.metric_keys` property to query registered metric keys
    - Deprecate `FrameMetricRegistered` and `FrameMetricNotRegistered` exceptions (no longer used)
-
+ - [bugfix] Fix `SceneManager.detect_scenes` warning when `duration` or `end_time` are specified as timecode strings [#346](https://github.com/Breakthrough/PySceneDetect/issues/346)
 
 ### 0.6.2 (July 23, 2023)
 

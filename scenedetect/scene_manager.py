@@ -810,28 +810,27 @@ class SceneManager:
             video = frame_source
         if video is None:
             raise TypeError("detect_scenes() missing 1 required positional argument: 'video'")
-
         if frame_skip > 0 and self.stats_manager is not None:
             raise ValueError('frame_skip must be 0 when using a StatsManager.')
         if duration is not None and end_time is not None:
             raise ValueError('duration and end_time cannot be set at the same time!')
-        if duration is not None and duration < 0:
+        if duration is not None and isinstance(duration, (int, float)) and duration < 0:
             raise ValueError('duration must be greater than or equal to 0!')
-        if end_time is not None and end_time < 0:
+        if end_time is not None and isinstance(end_time, (int, float)) and end_time < 0:
             raise ValueError('end_time must be greater than or equal to 0!')
 
         self._base_timecode = video.base_timecode
+
         # TODO(v1.0): Fix this properly by making SceneManager create and own a StatsManager,
         # and requiring the framerate to be passed to the StatsManager the constructor.
         if self._stats_manager is not None:
             self._stats_manager._base_timecode = self._base_timecode
         start_frame_num: int = video.frame_number
 
-        if duration is not None:
-            end_time: Union[int, FrameTimecode] = duration + start_frame_num
-
         if end_time is not None:
-            end_time: FrameTimecode = self._base_timecode + end_time
+            end_time = self._base_timecode + end_time
+        elif duration is not None:
+            end_time = (self._base_timecode + duration) + start_frame_num
 
         # Can only calculate total number of frames we expect to process if the duration of
         # the video is available.
