@@ -139,6 +139,9 @@ def _save_stats(context: CliContext) -> None:
 def _list_scenes(context: CliContext, scene_list: List[Tuple[FrameTimecode, FrameTimecode]],
                  cut_list: List[FrameTimecode]) -> None:
     """Handles the `list-scenes` command."""
+    if not context.list_scenes:
+        return
+    # Write scene list CSV to if required.
     if context.scene_list_output:
         scene_list_filename = Template(
             context.scene_list_name_format).safe_substitute(VIDEO_NAME=context.video_stream.name)
@@ -154,24 +157,27 @@ def _list_scenes(context: CliContext, scene_list: List[Tuple[FrameTimecode, Fram
                 scene_list=scene_list,
                 include_cut_list=not context.skip_cuts,
                 cut_list=cut_list)
-    if not context.list_scenes_quiet:
-        if context.display_scenes:
-            logger.info(
-                """Scene List:
+    # Suppress output if requested.
+    if context.list_scenes_quiet:
+        return
+    # Print scene list.
+    if context.display_scenes:
+        logger.info(
+            """Scene List:
 -----------------------------------------------------------------------
- | Scene # | Start Frame |  Start Time  |  End Frame  |   End Time   |
+| Scene # | Start Frame |  Start Time  |  End Frame  |   End Time   |
 -----------------------------------------------------------------------
 %s
 -----------------------------------------------------------------------""", '\n'.join([
-                    " |  %5d  | %11d | %s | %11d | %s |" %
-                    (i + 1, start_time.get_frames() + 1, start_time.get_timecode(),
-                     end_time.get_frames(), end_time.get_timecode())
-                    for i, (start_time, end_time) in enumerate(scene_list)
-                ]))
-
-        if cut_list and context.display_cuts:
-            logger.info("Comma-separated timecode list:\n  %s",
-                        ",".join([context.cut_format.format(cut) for cut in cut_list]))
+                " |  %5d  | %11d | %s | %11d | %s |" %
+                (i + 1, start_time.get_frames() + 1, start_time.get_timecode(),
+                 end_time.get_frames(), end_time.get_timecode())
+                for i, (start_time, end_time) in enumerate(scene_list)
+            ]))
+    # Print cut list.
+    if cut_list and context.display_cuts:
+        logger.info("Comma-separated timecode list:\n  %s",
+                    ",".join([context.cut_format.format(cut) for cut in cut_list]))
 
 
 def _save_images(

@@ -156,9 +156,9 @@ class CliContext:
         self.list_scenes_quiet: bool = None                       # list-scenes -q/--quiet
         self.scene_list_dir: str = None                           # list-scenes -o/--output
         self.scene_list_name_format: str = None                   # list-scenes -f/--filename
-        self.scene_list_output: bool = None                       # list-scenes -n/--no-output
+        self.scene_list_output: bool = None                       # list-scenes -n/--no-output-file
         self.skip_cuts: bool = None                               # list-scenes -s/--skip-cuts
-        self.display_cuts: bool = False                           # [list-scenes] display-cuts
+        self.display_cuts: bool = True                            # [list-scenes] display-cuts
         self.display_scenes: bool = True                          # [list-scenes] display-scenes
         self.cut_format: TimecodeFormat = TimecodeFormat.TIMECODE # [list-scenes] cut-format
 

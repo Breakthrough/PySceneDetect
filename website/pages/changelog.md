@@ -25,8 +25,8 @@ This release focuses on bugfixes and quality of life improvements. This has help
 
  - [bugfix] Fix `AttributeError` thrown when accessing `aspect_ratio` on certain videos using `VideoStreamAv` [#355](https://github.com/Breakthrough/PySceneDetect/issues/355)
  - [bugfix] Fix circular imports due to partially initialized module for some development environments [#350](https://github.com/Breakthrough/PySceneDetect/issues/350)
- - [feature] Add `output_dir` argument to split_video_* functions to customize output directory [#298](https://github.com/Breakthrough/PySceneDetect/issues/298)
- - [feature] Add `formatter` argument to split_video_ffmpeg to customize filename generation [#359](https://github.com/
+ - [feature] Add `output_dir` argument to `split_video_ffmpeg` and `split_video_mkvmerge` functions to set output directory [#298](https://github.com/Breakthrough/PySceneDetect/issues/298)
+ - [feature] Add `formatter` argument to `split_video_ffmpeg` to allow formatting filenames via callback [#359](https://github.com/
  Breakthrough/PySceneDetect/issues/359)
  - [improvement] `scenedetect.stats_manager` module improvements:
    - The `StatsManager.register_metrics()` method no longer throws any exceptions
