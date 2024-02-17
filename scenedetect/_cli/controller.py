@@ -165,7 +165,7 @@ def _list_scenes(context: CliContext, scene_list: List[Tuple[FrameTimecode, Fram
         logger.info(
             """Scene List:
 -----------------------------------------------------------------------
-| Scene # | Start Frame |  Start Time  |  End Frame  |   End Time   |
+ | Scene # | Start Frame |  Start Time  |  End Frame  |   End Time   |
 -----------------------------------------------------------------------
 %s
 -----------------------------------------------------------------------""", '\n'.join([
