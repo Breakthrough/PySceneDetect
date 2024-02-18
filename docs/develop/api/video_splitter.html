@@ -52,7 +52,7 @@ available on the computer, depending on the specified command-line options.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="scenedetect.video_splitter.SceneMetadata">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scenedetect.video_splitter.</span></span><span class="sig-name descname"><span class="pre">SceneMetadata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.video_splitter.SceneMetadata" title="Permalink to this definition">¶</a></dt>
-<dd><p>Information about the scenes being exported.</p>
+<dd><p>Information about the scene being extracted.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -85,7 +85,7 @@ available on the computer, depending on the specified command-line options.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="scenedetect.video_splitter.VideoMetadata">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scenedetect.video_splitter.</span></span><span class="sig-name descname"><span class="pre">VideoMetadata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">total_scenes</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.video_splitter.VideoMetadata" title="Permalink to this definition">¶</a></dt>
-<dd><p>Information about the video.</p>
+<dd><p>Information about the video being split.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -125,7 +125,7 @@ available on the computer, depending on the specified command-line options.</p>
 <dd class="field-odd"><p><strong>template</strong> (<em>str</em>) – </p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><em>Callable</em>[[<a class="reference internal" href="#scenedetect.video_splitter.SceneMetadata" title="scenedetect.video_splitter.SceneMetadata"><em>SceneMetadata</em></a>, <a class="reference internal" href="#scenedetect.video_splitter.VideoMetadata" title="scenedetect.video_splitter.VideoMetadata"><em>VideoMetadata</em></a>], AnyStr]</p>
+<dd class="field-even"><p><em>Callable</em>[[<a class="reference internal" href="#scenedetect.video_splitter.VideoMetadata" title="scenedetect.video_splitter.VideoMetadata"><em>VideoMetadata</em></a>, <a class="reference internal" href="#scenedetect.video_splitter.SceneMetadata" title="scenedetect.video_splitter.SceneMetadata"><em>SceneMetadata</em></a>], AnyStr]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -180,12 +180,15 @@ passed will be calculated from input_video_path automatically.</p></li>
 <li><p><strong>show_output</strong> (<em>bool</em>) – If True, will show output from ffmpeg for first split.</p></li>
 <li><p><strong>suppress_output</strong> – [DEPRECATED] DO NOT USE. For backwards compatibility only.</p></li>
 <li><p><strong>hide_progress</strong> – [DEPRECATED] DO NOT USE. For backwards compatibility only.</p></li>
-<li><p><strong>formatter</strong> (<em>Callable</em><em>[</em><em>[</em><a class="reference internal" href="#scenedetect.video_splitter.SceneMetadata" title="scenedetect.video_splitter.SceneMetadata"><em>SceneMetadata</em></a><em>, </em><a class="reference internal" href="#scenedetect.video_splitter.VideoMetadata" title="scenedetect.video_splitter.VideoMetadata"><em>VideoMetadata</em></a><em>]</em><em>, </em><em>AnyStr</em><em>] </em><em>| </em><em>None</em>) – Custom formatter callback. Overrides <cite>output_file_template</cite>.</p></li>
+<li><p><strong>formatter</strong> (<em>Callable</em><em>[</em><em>[</em><a class="reference internal" href="#scenedetect.video_splitter.VideoMetadata" title="scenedetect.video_splitter.VideoMetadata"><em>VideoMetadata</em></a><em>, </em><a class="reference internal" href="#scenedetect.video_splitter.SceneMetadata" title="scenedetect.video_splitter.SceneMetadata"><em>SceneMetadata</em></a><em>]</em><em>, </em><em>AnyStr</em><em>] </em><em>| </em><em>None</em>) – Custom formatter callback. Overrides <cite>output_file_template</cite>.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Return code of invoking ffmpeg (0 on success). If scene_list is empty, will
 still return 0, but no commands will be invoked.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
 </dd>
 </dl>
 </dd></dl>
@@ -213,6 +216,9 @@ $VIDEO_NAME. If not specified, will be obtained from the filename.</p></li>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Return code of invoking mkvmerge (0 on success). If scene_list is empty, will
 still return 0, but no commands will be invoked.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
 </dd>
 </dl>
 </dd></dl>

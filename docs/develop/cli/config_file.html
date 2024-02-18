@@ -305,8 +305,9 @@
 
 
 <span class="k">[list-scenes]</span>
-<span class="c1"># Save scene/cut list as a CSV file.</span>
-<span class="c1">#save = yes</span>
+<span class="c1"># By default, list-scenes will create a CSV file. Enable this option</span>
+<span class="c1"># to suppress creating the CSV file.</span>
+<span class="c1">#no-output-file = no</span>
 
 <span class="c1"># Folder to output scene list. Overrides [global] output option.</span>
 <span class="c1">#output = /usr/tmp/images</span>
@@ -321,12 +322,12 @@
 <span class="c1"># Display list of cut points generated from scene boundaries (yes/no).</span>
 <span class="c1">#display-cuts = yes</span>
 
+<span class="c1"># Format to use for list of cut points (frames, seconds, timecode).</span>
+<span class="c1">#cut-format = timecode</span>
+
 <span class="c1"># Skip writing cut points as the first row in the CSV file (yes/no).</span>
 <span class="c1"># Set for RFC 4180 compliance.</span>
 <span class="c1">#skip-cuts = no</span>
-
-<span class="c1"># Format to use for list of cut points (frames, seconds, timecode).</span>
-<span class="c1">#cut-format = timecode</span>
 
 <span class="c1"># Suppress all display output of list-scenes command.</span>
 <span class="c1"># Overrides `display-scenes` and `display-cuts`.</span>

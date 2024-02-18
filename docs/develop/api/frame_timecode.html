@@ -83,14 +83,14 @@ amounts of frames/seconds. In the example below, <code class="docutils literal n
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scenedetect.frame_timecode.</span></span><span class="sig-name descname"><span class="pre">FrameTimecode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timecode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.frame_timecode.FrameTimecode" title="Permalink to this definition">¶</a></dt>
 <dd><p>Object for frame-based timecodes, using the video framerate to compute back and
 forth between frame number and seconds/timecode.</p>
-<p>A timecode is valid only if it complies with one of the following three types/formats:</p>
-<blockquote>
-<div><ol class="arabic simple">
-<li><p>Timecode as <cite>str</cite> in the form ‘HH:MM:SS[.nnn]’ (<cite>‘01:23:45’</cite> or <cite>‘01:23:45.678’</cite>)</p></li>
-<li><p>Number of seconds as <cite>float</cite>, or <cite>str</cite> in form ‘Ss’ or ‘S.SSSs’ (<cite>‘2s’</cite> or <cite>‘2.3456s’</cite>)</p></li>
-<li><p>Exact number of frames as <cite>int</cite>, or <cite>str</cite> in form NNNNN (<cite>123</cite> or <cite>‘123’</cite>)</p></li>
+<dl class="simple">
+<dt>A timecode is valid only if it complies with one of the following three types/formats:</dt><dd><ol class="arabic simple">
+<li><p>Timecode as <cite>str</cite> in the form “HH:MM:SS[.nnn]” (<cite>“01:23:45”</cite> or <cite>“01:23:45.678”</cite>)</p></li>
+<li><p>Number of seconds as <cite>float</cite>, or <cite>str</cite> in form  “SSSS.nnnn” (<cite>“45.678”</cite>)</p></li>
+<li><p>Exact number of frames as <cite>int</cite>, or <cite>str</cite> in form NNNNN (<cite>456</cite> or <cite>“456”</cite>)</p></li>
 </ol>
-</div></blockquote>
+</dd>
+</dl>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -218,9 +218,9 @@ will be truncated to the specified precision.</p></li>
 <span class="sig-prename descclassname"><span class="pre">scenedetect.frame_timecode.</span></span><span class="sig-name descname"><span class="pre">TimecodeValue</span></span><a class="headerlink" href="#scenedetect.frame_timecode.TimecodeValue" title="Permalink to this definition">¶</a></dt>
 <dd><p>Named type for values representing timecodes. Must be in one of the following forms:</p>
 <ol class="arabic simple">
-<li><p>Timecode as <cite>str</cite> in the form ‘HH:MM:SS[.nnn]’ (<cite>‘01:23:45’</cite> or <cite>‘01:23:45.678’</cite>)</p></li>
-<li><p>Number of seconds as <cite>float</cite>, or <cite>str</cite> in form ‘Ss’ or ‘S.SSSs’ (<cite>‘2s’</cite> or <cite>‘2.3456s’</cite>)</p></li>
-<li><p>Exact number of frames as <cite>int</cite>, or <cite>str</cite> in form NNNNN (<cite>123</cite> or <cite>‘123’</cite>)</p></li>
+<li><p>Timecode as <cite>str</cite> in the form “HH:MM:SS[.nnn]” (<cite>“01:23:45”</cite> or <cite>“01:23:45.678”</cite>)</p></li>
+<li><p>Number of seconds as <cite>float</cite>, or <cite>str</cite> in form  “SSSS.nnnn” (<cite>“45.678”</cite>)</p></li>
+<li><p>Exact number of frames as <cite>int</cite>, or <cite>str</cite> in form NNNNN (<cite>456</cite> or <cite>“456”</cite>)</p></li>
 </ol>
 <p>alias of <code class="xref py py-obj docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</p>
 </dd></dl>

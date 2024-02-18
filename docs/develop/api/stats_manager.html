@@ -45,32 +45,14 @@ human-readable CSV file, allowing for precise determination of the ideal thresho
 detection parameters) for the given input.</p>
 <dl class="py exception">
 <dt class="sig sig-object py" id="scenedetect.stats_manager.FrameMetricNotRegistered">
-<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scenedetect.stats_manager.</span></span><span class="sig-name descname"><span class="pre">FrameMetricNotRegistered</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric_key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Attempted</span> <span class="pre">to</span> <span class="pre">get/set</span> <span class="pre">frame</span> <span class="pre">metrics</span> <span class="pre">for</span> <span class="pre">unregistered</span> <span class="pre">metric</span> <span class="pre">key.'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.stats_manager.FrameMetricNotRegistered" title="Permalink to this definition">¶</a></dt>
-<dd><p>Raised when attempting to call get_metrics(…)/set_metrics(…) with a
-frame metric that does not exist, or has not been registered.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>metric_key</strong> (<em>str</em>) – </p></li>
-<li><p><strong>message</strong> (<em>str</em>) – </p></li>
-</ul>
-</dd>
-</dl>
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scenedetect.stats_manager.</span></span><span class="sig-name descname"><span class="pre">FrameMetricNotRegistered</span></span><a class="headerlink" href="#scenedetect.stats_manager.FrameMetricNotRegistered" title="Permalink to this definition">¶</a></dt>
+<dd><p>[DEPRECATED - DO NOT USE] No longer used.</p>
 </dd></dl>
 
 <dl class="py exception">
 <dt class="sig sig-object py" id="scenedetect.stats_manager.FrameMetricRegistered">
-<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scenedetect.stats_manager.</span></span><span class="sig-name descname"><span class="pre">FrameMetricRegistered</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric_key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Attempted</span> <span class="pre">to</span> <span class="pre">re-register</span> <span class="pre">frame</span> <span class="pre">metric</span> <span class="pre">key.'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.stats_manager.FrameMetricRegistered" title="Permalink to this definition">¶</a></dt>
-<dd><p>Raised when attempting to register a frame metric key which has
-already been registered.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>metric_key</strong> (<em>str</em>) – </p></li>
-<li><p><strong>message</strong> (<em>str</em>) – </p></li>
-</ul>
-</dd>
-</dl>
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scenedetect.stats_manager.</span></span><span class="sig-name descname"><span class="pre">FrameMetricRegistered</span></span><a class="headerlink" href="#scenedetect.stats_manager.FrameMetricRegistered" title="Permalink to this definition">¶</a></dt>
+<dd><p>[DEPRECATED - DO NOT USE] No longer used.</p>
 </dd></dl>
 
 <dl class="py exception">
@@ -188,19 +170,12 @@ input file was blank or could not be found.</p>
 <dt class="sig sig-object py" id="scenedetect.stats_manager.StatsManager.register_metrics">
 <span class="sig-name descname"><span class="pre">register_metrics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric_keys</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.stats_manager.StatsManager.register_metrics" title="Permalink to this definition">¶</a></dt>
 <dd><p>Register a list of metric keys that will be used by the detector.</p>
-<p>Used to ensure that multiple detector keys don’t overlap.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="#scenedetect.stats_manager.FrameMetricRegistered" title="scenedetect.stats_manager.FrameMetricRegistered"><strong>FrameMetricRegistered</strong></a> – A particular metric_key has already been registered/added
-    to the StatsManager. Only if the StatsManager is being used for read-only
-    access (i.e. all frames in the video have already been processed for the given
-    metric_key in the exception) is this behavior desirable.</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>metric_keys</strong> (<em>Iterable</em><em>[</em><em>str</em><em>]</em>) – </p>
 </dd>
-<dt class="field-even">Parameters<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>metric_keys</strong> (<em>Iterable</em><em>[</em><em>str</em><em>]</em>) – </p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>None</p>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
 </dd>
 </dl>
 </dd></dl>
