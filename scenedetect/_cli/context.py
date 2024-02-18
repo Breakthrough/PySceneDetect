@@ -60,8 +60,7 @@ def parse_timecode(value: str,
         return FrameTimecode(timecode=value, fps=frame_rate)
     except ValueError as ex:
         raise click.BadParameter(
-            'timecode must be in frames (1234), seconds (123.4s), or HH:MM:SS (00:02:03.400)'
-        ) from ex
+            'timecode must be in seconds (100.0), frames (100), or HH:MM:SS') from ex
 
 
 def contains_sequence_or_url(video_path: str) -> bool:

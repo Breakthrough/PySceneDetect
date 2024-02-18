@@ -20,6 +20,7 @@ This release focuses on bugfixes and quality of life improvements. This has help
    - Add `cut-format` to control formatting of cut points [#349](https://github.com/Breakthrough/PySceneDetect/issues/349)
       - Valid values: `frames`, `timecode`, `seconds`
  - [general] Increase progress bar indent to improve visibility and visual alignment
+ - [improvement] The `s` suffix for setting timecode values in seconds is no longer required (values without decimal places are still interpreted as frame numbers)
 
 **API Changes:**
 
@@ -33,6 +34,7 @@ This release focuses on bugfixes and quality of life improvements. This has help
    - Add `StatsManager.metric_keys` property to query registered metric keys
    - Deprecate `FrameMetricRegistered` and `FrameMetricNotRegistered` exceptions (no longer used)
  - [bugfix] Fix `SceneManager.detect_scenes` warning when `duration` or `end_time` are specified as timecode strings [#346](https://github.com/Breakthrough/PySceneDetect/issues/346)
+ - [improvement] When converting strings representing seconds to `FrameTimecode`, the `s` suffix is now optional, and whitespace is ignored (note that values without decimal places are still interpreted as frame numbers)
 
 ### 0.6.2 (July 23, 2023)
 

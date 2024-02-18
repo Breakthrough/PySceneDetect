@@ -155,7 +155,7 @@ This makes the two harder to distinguish, and can cause additional false scene c
 
 ## Seeking, Duration, and Setting Start / Stop Times
 
-Specifying the `time` command allows control over what portion of the video PySceneDetect processes.  The `time` command accepts three options: start time (`-s` / `-start`), end time (`-e` / `-end`), and duration (`-d` / `--duration`).  Specifying both end time and duration is redundant, and in this case, duration overrides end time.  Timecodes can be given in three formats:  exact frame number (e.g. `12345`), number of seconds followed by `s` (e.g. `123s`, `123.45s`), or standard format (HH:MM:SS[.nnn], e.g. `12:34:56`, `12:34:56.789`).
+Specifying the `time` command allows control over what portion of the video PySceneDetect processes.  The `time` command accepts three options: start time (`-s` / `-start`), end time (`-e` / `-end`), and duration (`-d` / `--duration`).  Specifying both end time and duration is redundant, and in this case, duration overrides end time.  Timecodes can be given in seconds (`100.0`), frames (no decimal place, `100`), or timecode as `HH:MM:SS[.nnn]` (`12:34:56.789`).
 
 For example, let's say we have a video shot at 30 FPS, and want to analyze only the segment from the 5 to the 6.5 minute mark in the video (we want to analyze the 90 seconds [2700 frames] between 00:05:00 and 00:06:30).  The following commands are all thus equivalent in this regard (assuming we are using the content detector):
 

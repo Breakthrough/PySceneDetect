@@ -56,6 +56,26 @@ git reset
 
 
 #
+# Pytest Hooks
+#
+
+
+def pytest_assertrepr_compare(op, left, right):
+    if isinstance(left, str) and isinstance(right, str) and op == "in":
+        return [
+            "Did not find expected output in test.",
+            "",
+            "Expected to find:",
+            "",
+            *left.splitlines(),
+            "",
+            "Actual output:",
+            "",
+            *right.splitlines(),
+        ]
+
+
+#
 # Test Case Fixtures
 #
 

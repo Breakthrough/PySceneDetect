@@ -60,7 +60,7 @@ jobs:
       - name: Unit Test
         run: |
           7z e ffmpeg-6.0-full_build.7z ffmpeg.exe -r
-          python -m pytest tests/
+          python -m pytest -vv
 
       - name: Build PySceneDetect
         run: |
