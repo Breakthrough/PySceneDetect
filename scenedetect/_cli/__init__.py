@@ -203,7 +203,7 @@ def _print_command_help(ctx: click.Context, command: click.Command):
     metavar='TIMECODE',
     type=click.STRING,
     default=None,
-    help='Minimum length of any scene. TIMECODE can be specified as number of frames (-m=10), time in seconds followed by "s" (-m=2.5s), or timecode (-m=00:02:53.633).%s'
+    help='Minimum length of any scene. TIMECODE can be specified as number of frames (-m=10), time in seconds (-m=2.5), or timecode (-m=00:02:53.633).%s'
     % USER_CONFIG.get_help_string("global", "min-scene-len"),
 )
 @click.option(
@@ -398,7 +398,7 @@ def version_command(ctx: click.Context):
     metavar='TIMECODE',
     type=click.STRING,
     default=None,
-    help='Time in video to start detection. TIMECODE can be specified as number of frames (--start=100 for frame 100), time in seconds followed by "s" (--start=100s for 100 seconds), or timecode (--start=00:01:40 for 1m40s).',
+    help='Time in video to start detection. TIMECODE can be specified as seconds (--start=100.0), frames (--start=100), or timecode (--start=00:01:40.000).',
 )
 @click.option(
     '--duration',
@@ -425,11 +425,11 @@ def time_command(
 ):
     """Set start/end/duration of input video.
 
-Values can be specified as frames (NNNN), seconds (NNNN.NNs), or timecode (HH:MM:SS.nnn). For example, to process only the first minute of a video:
+Values can be specified as seconds (SSSS.nn), frames (NNNN), or timecode (HH:MM:SS.nnn). For example, to process only the first minute of a video:
 
     {scenedetect_with_video} time --end 00:01:00
 
-    {scenedetect_with_video} time --duration 60s
+    {scenedetect_with_video} time --duration 60.0
 
 Note that --end and --duration are mutually exclusive (i.e. only one of the two can be set). Lastly, the following is an example using absolute frame numbers to process frames 0 through 1000:
 

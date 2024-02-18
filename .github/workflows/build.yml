@@ -68,7 +68,7 @@ jobs:
 
       - name: Unit Tests
         run: |
-          python -m pytest tests/
+          python -m pytest -vv
 
       - name: Smoke Test (Module)
         run: |

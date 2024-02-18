@@ -62,7 +62,7 @@ class ValidatedValue(ABC):
 
 
 class TimecodeValue(ValidatedValue):
-    """Validator for timecode values in frames (1234), seconds (123.4s), or HH:MM:SS.
+    """Validator for timecode values in seconds (100.0), frames (100), or HH:MM:SS.
 
     Stores value in original representation."""
 
@@ -87,8 +87,7 @@ class TimecodeValue(ValidatedValue):
             return TimecodeValue(config_value)
         except ValueError as ex:
             raise OptionParseFailure(
-                'Timecodes must be in frames (1234), seconds (123.4s), or HH:MM:SS (00:02:03.400).'
-            ) from ex
+                'Timecodes must be in seconds (100.0), frames (100), or HH:MM:SS.') from ex
 
 
 class RangeValue(ValidatedValue):

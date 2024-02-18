@@ -90,8 +90,6 @@ def test_timecode_string():
     with pytest.raises(ValueError):
         FrameTimecode(timecode='-0.1', fps=1.0)
     with pytest.raises(ValueError):
-        FrameTimecode(timecode='1.0', fps=1.0)
-    with pytest.raises(ValueError):
         FrameTimecode(timecode='1.9x', fps=1)
     with pytest.raises(ValueError):
         FrameTimecode(timecode='1x', fps=1.0)
@@ -104,6 +102,14 @@ def test_timecode_string():
     assert FrameTimecode(timecode='0', fps=1).frame_num == 0
     assert FrameTimecode(timecode='1', fps=1).frame_num == 1
     assert FrameTimecode(timecode='10', fps=1.0).frame_num == 10
+
+    # Seconds format [float->str] ('%f', number as string)
+    assert FrameTimecode(timecode='0.0', fps=1).frame_num == 0
+    assert FrameTimecode(timecode='1.0', fps=1).frame_num == 1
+    assert FrameTimecode(timecode='10.0', fps=1.0).frame_num == 10
+    assert FrameTimecode(timecode='10.0000000000', fps=1.0).frame_num == 10
+    assert FrameTimecode(timecode='10.100', fps=1.0).frame_num == 10
+    assert FrameTimecode(timecode='1.100', fps=10.0).frame_num == 11
 
     # Seconds format [float->str] ('%fs', number as string followed by 's' for seconds)
     assert FrameTimecode(timecode='0s', fps=1).frame_num == 0

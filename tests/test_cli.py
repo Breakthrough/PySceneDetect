@@ -11,7 +11,6 @@
 # included LICENSE file, or visit one of the above pages for details.
 #
 
-from dataclasses import dataclass
 import glob
 import os
 import typing as ty
@@ -136,17 +135,19 @@ def test_cli_frame_numbers():
 def test_cli_time_usage():
     """Validate behavior of setting parameters via the `time` command."""
 
-    # TODO: Add test for timecode formats.
+    # TODO: Add tests for more timecode formats.
     base_command = '-i {VIDEO} time {TIME} {DETECTOR}'
 
     # Test setting start/end.
-    assert invoke_scenedetect(base_command, TIME='-s 2s -e 4s') == 0
+    assert invoke_scenedetect(base_command, TIME='-s 2.0 -e 4.0') == 0
+    assert invoke_scenedetect(base_command, TIME='-s 2.0s -e 4.0s') == 0
     # Test setting start/duration.
-    assert invoke_scenedetect(base_command, TIME='-s 2s -d 2s') == 0
+    assert invoke_scenedetect(base_command, TIME='-s 2.0 -d 2.0') == 0
+    assert invoke_scenedetect(base_command, TIME='-s 2.0s -d 2.0s') == 0
 
     # Ensure cannot set end and duration at the same time.
-    assert invoke_scenedetect(base_command, TIME='-s 2s -d 6s -e 8s') != 0
-    assert invoke_scenedetect(base_command, TIME='-s 2s -e 8s -d 6s ') != 0
+    assert invoke_scenedetect(base_command, TIME='-s 2.0 -d 6.0 -e 8.0') != 0
+    assert invoke_scenedetect(base_command, TIME='-s 2.0 -e 8.0 -d 6.0 ') != 0
 
 
 def test_cli_time_end():
@@ -158,7 +159,14 @@ def test_cli_time_end():
  |      1  |           1 | 00:00:00.000 |          10 | 00:00:00.417 |
 -----------------------------------------------------------------------
 """
-    TEST_CASES = ["time --end 11"]
+    TEST_CASES = [
+        "time --end 11",
+        "time --end 00:00:00.417",
+        "time --end 0.417",
+        "time --duration 11",
+        "time --duration 00:00:00.417",
+        "time --duration 0.417",
+    ]
 
     for test_case in TEST_CASES:
         output = subprocess.check_output(
@@ -166,7 +174,7 @@ def test_cli_time_end():
             ["-i", DEFAULT_VIDEO_PATH, "-m", "0", "detect-content", "list-scenes", "-n"] +
             test_case.split(),
             text=True)
-        assert EXPECTED in output
+        assert EXPECTED in output, test_case
 
 
 def test_cli_time_start():
@@ -178,15 +186,22 @@ def test_cli_time_start():
  |      1  |           4 | 00:00:00.125 |          10 | 00:00:00.417 |
 -----------------------------------------------------------------------
 """
-    TEST_CASES = ["time --start 4 --duration 8"]
-
+    # TODO(v0.6.3): Duration is incorrectly applied when used with start time.
+    TEST_CASES = [
+        "time --start 4 --duration 8",
+        "time --start 4 --duration 0.292",
+        "time --start 4 --duration 00:00:00.292",
+        "time --start 4 --end 11",
+        "time --start 4 --end 00:00:00.417",
+        "time --start 4 --end 0.417",
+    ]
     for test_case in TEST_CASES:
         output = subprocess.check_output(
             SCENEDETECT_CMD.split(' ') +
             ["-i", DEFAULT_VIDEO_PATH, "-m", "0", "detect-content", "list-scenes", "-n"] +
             test_case.split(),
             text=True)
-        assert EXPECTED in output
+        assert EXPECTED in output, test_case
 
 
 def test_cli_time_scene_boundary():
@@ -219,10 +234,10 @@ def test_cli_time_scene_boundary():
     TEST_CASES = [
         "time --start 86 --end 97",
         "time --start 00:00:03.545 --end 00:00:04.004",
-        "time --start 3.545s --end 4.004s",
+        "time --start 3.545 --end 4.004",
         "time --start 86 --duration 12",
         "time --start 00:00:03.545 --duration 00:00:00.459",
-        "time --start 3.545s --duration 0.459s",
+        "time --start 3.545 --duration 0.459",
     ]
 
     for test_case in TEST_CASES:
@@ -231,7 +246,7 @@ def test_cli_time_scene_boundary():
             ["-i", DEFAULT_VIDEO_PATH, "-m", "0", "detect-content", "list-scenes", "-n"] +
             test_case.split(),
             text=True)
-        assert EXPECTED in output
+        assert EXPECTED in output, test_case
 
 
 @pytest.mark.parametrize('detector_command', ALL_DETECTORS)
@@ -408,7 +423,6 @@ Scene Number,Start Frame
             'list-scenes',
         ],
         text=True)
-    print(output)
     assert """
 -----------------------------------------------------------------------
  | Scene # | Start Frame |  Start Time  |  End Frame  |   End Time   |
