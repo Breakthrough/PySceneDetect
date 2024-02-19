@@ -180,6 +180,10 @@ class VideoStreamMoviePy(VideoStream):
         except IOError as ex:
             # Leave the object in a valid state.
             self.reset()
+            # TODO(#380): Other backends do not currently throw an exception if attempting to seek
+            # past EOF. We need to ensure consistency for seeking past end of video with respect to
+            # errors and behaviour, and should probably gracefully stop at the last frame instead
+            # of throwing an exception.
             if target >= self.duration:
                 raise SeekError("Target frame is beyond end of video!") from ex
             raise

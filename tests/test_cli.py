@@ -111,12 +111,115 @@ def test_cli_info_command(info_command):
     assert invoke_scenedetect(info_command) == 0
 
 
-def test_cli_frame_numbers():
-    """Validate frame numbers and timecodes align as expected for the scene list.
+def test_cli_time_validate_options():
+    """Validate behavior of setting parameters via the `time` command."""
+    base_command = '-i {VIDEO} time {TIME} {DETECTOR}'
+    # Ensure cannot set end and duration together.
+    assert invoke_scenedetect(base_command, TIME='-s 2.0 -d 6.0 -e 8.0') != 0
+    assert invoke_scenedetect(base_command, TIME='-s 2.0 -e 8.0 -d 6.0 ') != 0
 
-    The end timecode must include the presentation time of the end frame itself so it is the full
-    duration of the video.
-    """
+
+def test_cli_time_end():
+    """Validate processed frames without start time being set. End time is the end frame to stop at,
+    but with duration, we stop at start + duration - 1."""
+    EXPECTED = """[PySceneDetect] Scene List:
+-----------------------------------------------------------------------
+ | Scene # | Start Frame |  Start Time  |  End Frame  |   End Time   |
+-----------------------------------------------------------------------
+ |      1  |           1 | 00:00:00.000 |          10 | 00:00:00.417 |
+-----------------------------------------------------------------------
+"""
+    TEST_CASES = [
+        "time --end 10",
+        "time --end 00:00:00.417",
+        "time --end 0.417",
+        "time --duration 10",
+        "time --duration 00:00:00.417",
+        "time --duration 0.417",
+    ]
+    for test_case in TEST_CASES:
+        output = subprocess.check_output(
+            SCENEDETECT_CMD.split(' ') +
+            ["-i", DEFAULT_VIDEO_PATH, "-m", "0", "detect-content", "list-scenes", "-n"] +
+            test_case.split(),
+            text=True)
+        assert EXPECTED in output, test_case
+
+
+def test_cli_time_start():
+    """Validate processed frames with both start and end/duration set. End time is the end frame to
+    stop at, but with duration, we stop at start + duration - 1."""
+    EXPECTED = """[PySceneDetect] Scene List:
+-----------------------------------------------------------------------
+ | Scene # | Start Frame |  Start Time  |  End Frame  |   End Time   |
+-----------------------------------------------------------------------
+ |      1  |           4 | 00:00:00.125 |          10 | 00:00:00.417 |
+-----------------------------------------------------------------------
+"""
+    TEST_CASES = [
+        "time --start 4 --end 10",
+        "time --start 4 --end 00:00:00.417",
+        "time --start 4 --end 0.417",
+        "time --start 4 --duration 7",
+        "time --start 4 --duration 0.292",
+        "time --start 4 --duration 00:00:00.292",
+    ]
+    for test_case in TEST_CASES:
+        output = subprocess.check_output(
+            SCENEDETECT_CMD.split(' ') +
+            ["-i", DEFAULT_VIDEO_PATH, "-m", "0", "detect-content", "list-scenes", "-n"] +
+            test_case.split(),
+            text=True)
+        assert EXPECTED in output, test_case
+
+
+def test_cli_time_scene_boundary():
+    """Validate frames that are processed when crossing a scene boundary. End time is the end frame
+    to stop at, but with duration, we stop at start + duration - 1."""
+    # -------------------------------------------------------------------------------------
+    # |   Scene   |   Frame    |       PTS        |  PTS + Duration  |     Annotation     |
+    # -------------------------------------------------------------------------------------
+    # |     1     |     86     |   00:00:03.545   |   00:00:03.587   |    Start Frame     |
+    # |     1     |     87     |   00:00:03.587   |   00:00:03.629   |                    |
+    # |     1     |     88     |   00:00:03.629   |   00:00:03.670   |                    |
+    # |     1     |     89     |   00:00:03.670   |   00:00:03.712   |                    |
+    # |     1     |     90     |   00:00:03.712   |   00:00:03.754   |    Scene 1 End     |
+    # |     2     |     91     |   00:00:03.754   |   00:00:03.795   |   Scene 2 Start    |
+    # |     2     |     92     |   00:00:03.795   |   00:00:03.837   |                    |
+    # |     2     |     93     |   00:00:03.837   |   00:00:03.879   |                    |
+    # |     2     |     94     |   00:00:03.879   |   00:00:03.921   |                    |
+    # |     2     |     95     |   00:00:03.921   |   00:00:03.962   |                    |
+    # |     2     |     96     |   00:00:03.962   |   00:00:04.004   |     End Frame      |
+    # -------------------------------------------------------------------------------------
+    EXPECTED = """
+-----------------------------------------------------------------------
+ | Scene # | Start Frame |  Start Time  |  End Frame  |   End Time   |
+-----------------------------------------------------------------------
+ |      1  |          86 | 00:00:03.545 |          90 | 00:00:03.754 |
+ |      2  |          91 | 00:00:03.754 |          96 | 00:00:04.004 |
+-----------------------------------------------------------------------
+"""
+    # End time is the end frame to stop at, but with duration, we stop at start + duration - 1.
+    TEST_CASES = [
+        "time --start 86 --end 96",
+        "time --start 00:00:03.545 --end 00:00:04.004",
+        "time --start 3.545 --end 4.004",
+        "time --start 86 --duration 11",
+        "time --start 00:00:03.545 --duration 00:00:00.459",
+        "time --start 3.545 --duration 0.459",
+    ]
+    for test_case in TEST_CASES:
+        output = subprocess.check_output(
+            SCENEDETECT_CMD.split(' ') +
+            ["-i", DEFAULT_VIDEO_PATH, "-m", "0", "detect-content", "list-scenes", "-n"] +
+            test_case.split(),
+            text=True)
+        assert EXPECTED in output, test_case
+
+
+def test_cli_time_end_of_video():
+    """Validate frame number/timecode alignment at the end of the video. The end timecode includes
+    presentation time and therefore should represent the full length of the video."""
     output = subprocess.check_output(
         SCENEDETECT_CMD.split(' ') +
         ['-i', DEFAULT_VIDEO_PATH, 'detect-content', 'list-scenes', '-n', 'time', '-s', '1872'],
@@ -131,123 +234,6 @@ def test_cli_frame_numbers():
 -----------------------------------------------------------------------
 """ in output
     assert "00:01:19.913,00:01:21.999" in output
-
-
-def test_cli_time_usage():
-    """Validate behavior of setting parameters via the `time` command."""
-
-    # TODO: Add tests for more timecode formats.
-    base_command = '-i {VIDEO} time {TIME} {DETECTOR}'
-
-    # Test setting start/end.
-    assert invoke_scenedetect(base_command, TIME='-s 2.0 -e 4.0') == 0
-    assert invoke_scenedetect(base_command, TIME='-s 2.0s -e 4.0s') == 0
-    # Test setting start/duration.
-    assert invoke_scenedetect(base_command, TIME='-s 2.0 -d 2.0') == 0
-    assert invoke_scenedetect(base_command, TIME='-s 2.0s -d 2.0s') == 0
-
-    # Ensure cannot set end and duration at the same time.
-    assert invoke_scenedetect(base_command, TIME='-s 2.0 -d 6.0 -e 8.0') != 0
-    assert invoke_scenedetect(base_command, TIME='-s 2.0 -e 8.0 -d 6.0 ') != 0
-
-
-def test_cli_time_end():
-    """Validate processed frames without start time being set."""
-    EXPECTED = """[PySceneDetect] Scene List:
------------------------------------------------------------------------
- | Scene # | Start Frame |  Start Time  |  End Frame  |   End Time   |
------------------------------------------------------------------------
- |      1  |           1 | 00:00:00.000 |          10 | 00:00:00.417 |
------------------------------------------------------------------------
-"""
-    TEST_CASES = [
-        "time --end 11",
-        "time --end 00:00:00.417",
-        "time --end 0.417",
-        "time --duration 11",
-        "time --duration 00:00:00.417",
-        "time --duration 0.417",
-    ]
-
-    for test_case in TEST_CASES:
-        output = subprocess.check_output(
-            SCENEDETECT_CMD.split(' ') +
-            ["-i", DEFAULT_VIDEO_PATH, "-m", "0", "detect-content", "list-scenes", "-n"] +
-            test_case.split(),
-            text=True)
-        assert EXPECTED in output, test_case
-
-
-def test_cli_time_start():
-    """Validate processed frames without start time being set."""
-    EXPECTED = """[PySceneDetect] Scene List:
------------------------------------------------------------------------
- | Scene # | Start Frame |  Start Time  |  End Frame  |   End Time   |
------------------------------------------------------------------------
- |      1  |           4 | 00:00:00.125 |          10 | 00:00:00.417 |
------------------------------------------------------------------------
-"""
-    # TODO(v0.6.3): Duration is incorrectly applied when used with start time.
-    TEST_CASES = [
-        "time --start 4 --duration 8",
-        "time --start 4 --duration 0.292",
-        "time --start 4 --duration 00:00:00.292",
-        "time --start 4 --end 11",
-        "time --start 4 --end 00:00:00.417",
-        "time --start 4 --end 0.417",
-    ]
-    for test_case in TEST_CASES:
-        output = subprocess.check_output(
-            SCENEDETECT_CMD.split(' ') +
-            ["-i", DEFAULT_VIDEO_PATH, "-m", "0", "detect-content", "list-scenes", "-n"] +
-            test_case.split(),
-            text=True)
-        assert EXPECTED in output, test_case
-
-
-def test_cli_time_scene_boundary():
-    """Validate frames that are processed when crossing a scene boundary."""
-    # --------------------------------------------------------------------------------------------
-    # |   Scene   |   Frame    |       PTS        |  PTS + Duration  |     Annotation
-    # --------------------------------------------------------------------------------------------
-    # |     1     |     86     |   00:00:03.545   |   00:00:03.587   | Start Frame
-    # |     1     |     87     |   00:00:03.587   |   00:00:03.629   |
-    # |     1     |     88     |   00:00:03.629   |   00:00:03.670   |
-    # |     1     |     89     |   00:00:03.670   |   00:00:03.712   |
-    # |     1     |     90     |   00:00:03.712   |   00:00:03.754   | Scene 1 End
-    # |     2     |     91     |   00:00:03.754   |   00:00:03.795   | Scene 2 Start
-    # |     2     |     92     |   00:00:03.795   |   00:00:03.837   |
-    # |     2     |     93     |   00:00:03.837   |   00:00:03.879   |
-    # |     2     |     94     |   00:00:03.879   |   00:00:03.921   |
-    # |     2     |     95     |   00:00:03.921   |   00:00:03.962   |
-    # |     2     |     96     |   00:00:03.962   |   00:00:04.004   | End Frame
-    # --------------------------------------------------------------------------------------------
-
-    EXPECTED = """
------------------------------------------------------------------------
- | Scene # | Start Frame |  Start Time  |  End Frame  |   End Time   |
------------------------------------------------------------------------
- |      1  |          86 | 00:00:03.545 |          90 | 00:00:03.754 |
- |      2  |          91 | 00:00:03.754 |          96 | 00:00:04.004 |
------------------------------------------------------------------------
-"""
-
-    TEST_CASES = [
-        "time --start 86 --end 97",
-        "time --start 00:00:03.545 --end 00:00:04.004",
-        "time --start 3.545 --end 4.004",
-        "time --start 86 --duration 12",
-        "time --start 00:00:03.545 --duration 00:00:00.459",
-        "time --start 3.545 --duration 0.459",
-    ]
-
-    for test_case in TEST_CASES:
-        output = subprocess.check_output(
-            SCENEDETECT_CMD.split(' ') +
-            ["-i", DEFAULT_VIDEO_PATH, "-m", "0", "detect-content", "list-scenes", "-n"] +
-            test_case.split(),
-            text=True)
-        assert EXPECTED in output, test_case
 
 
 @pytest.mark.parametrize('detector_command', ALL_DETECTORS)

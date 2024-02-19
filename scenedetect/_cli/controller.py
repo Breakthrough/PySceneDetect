@@ -55,6 +55,7 @@ def run_scenedetect(context: CliContext):
         try:
             context.video_stream.seek(target=context.start_time)
         except SeekError as ex:
+            # TODO(#380): Use `logger` instead of `logger`.
             logging.critical('Failed to seek to %s / frame %d: %s',
                              context.start_time.get_timecode(), context.start_time.get_frames(),
                              str(ex))
@@ -68,6 +69,7 @@ def run_scenedetect(context: CliContext):
         show_progress=not context.quiet_mode)
 
     # Handle case where video failure is most likely due to multiple audio tracks (#179).
+    # TODO(#380): Ensure this does not erroneusly fire.
     if num_frames <= 0 and context.video_stream.BACKEND_NAME == 'opencv':
         logger.critical(
             'Failed to read any frames from video file. This could be caused by the video'

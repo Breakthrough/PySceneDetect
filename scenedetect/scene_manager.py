@@ -805,15 +805,16 @@ class SceneManager:
                 was constructed with a StatsManager object.
         """
         # TODO(v0.7): Add DeprecationWarning that `frame_source` will be removed in v0.8.
-        # TODO(v0.8): Remove default value for `video`` when removing `frame_source`.
         if frame_source is not None:
             video = frame_source
+        # TODO(v0.8): Remove default value for `video` after `frame_source` is removed.
         if video is None:
             raise TypeError("detect_scenes() missing 1 required positional argument: 'video'")
         if frame_skip > 0 and self.stats_manager is not None:
             raise ValueError('frame_skip must be 0 when using a StatsManager.')
         if duration is not None and end_time is not None:
             raise ValueError('duration and end_time cannot be set at the same time!')
+        # TODO: These checks should be handled by the FrameTimecode constructor.
         if duration is not None and isinstance(duration, (int, float)) and duration < 0:
             raise ValueError('duration must be greater than or equal to 0!')
         if end_time is not None and isinstance(end_time, (int, float)) and end_time < 0:
@@ -821,23 +822,20 @@ class SceneManager:
 
         self._base_timecode = video.base_timecode
 
-        # TODO(v1.0): Fix this properly by making SceneManager create and own a StatsManager,
-        # and requiring the framerate to be passed to the StatsManager the constructor.
+        # TODO: Figure out a better solution for communicating framerate to StatsManager.
         if self._stats_manager is not None:
             self._stats_manager._base_timecode = self._base_timecode
-        start_frame_num: int = video.frame_number
 
+        start_frame_num: int = video.frame_number
         if end_time is not None:
             end_time = self._base_timecode + end_time
         elif duration is not None:
             end_time = (self._base_timecode + duration) + start_frame_num
 
-        # Can only calculate total number of frames we expect to process if the duration of
-        # the video is available.
         total_frames = 0
         if video.duration is not None:
             if end_time is not None and end_time < video.duration:
-                total_frames = (end_time - start_frame_num) + 1
+                total_frames = (end_time - start_frame_num)
             else:
                 total_frames = (video.duration.get_frames() - start_frame_num)
 
