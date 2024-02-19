@@ -13,6 +13,8 @@ This release focuses on bugfixes and quality of life improvements. This has help
 **Program Changes:**
 
  - [bugfix] Fix crash for some WebM videos when using `save-images` with `--backend pyav` [#355](https://github.com/Breakthrough/PySceneDetect/issues/355)
+ - [bugfix] Correct `--duration` and `--end` for presentation time when specified as frame numbers [#341](https://github.com/Breakthrough/PySceneDetect/issues/341)
+ - [bugfix] Progress bar now has correct frame accounting when `--duration` or `--end` are set [#341](https://github.com/Breakthrough/PySceneDetect/issues/341)
  - [general] Comma-separated timecode list is now only printed when the `list-scenes` command is specified [#356](https://github.com/Breakthrough/PySceneDetect/issues/356)
  - [general] Rename `list-scenes` flag `--no-output-file` to `--save`
  - [general] Several changes to `[list-scenes]` config file options:

@@ -14,6 +14,7 @@
 
 import logging
 import os
+import typing as ty
 from typing import Any, AnyStr, Dict, Optional, Tuple, Type
 
 import click
@@ -40,9 +41,9 @@ logger = logging.getLogger('pyscenedetect')
 USER_CONFIG = ConfigRegistry(throw_exception=False)
 
 
-def parse_timecode(value: str,
+def parse_timecode(value: ty.Optional[str],
                    frame_rate: float,
-                   first_index_is_one: bool = False) -> FrameTimecode:
+                   correct_pts: bool = False) -> FrameTimecode:
     """Parses a user input string into a FrameTimecode assuming the given framerate.
 
     If value is None, None will be returned instead of processing the value.
@@ -53,7 +54,7 @@ def parse_timecode(value: str,
     if value is None:
         return None
     try:
-        if first_index_is_one and value.isdigit():
+        if correct_pts and value.isdigit():
             value = int(value)
             if value >= 1:
                 value -= 1
@@ -686,11 +687,12 @@ class CliContext:
         logger.debug('Setting video time:\n    start: %s, duration: %s, end: %s', start, duration,
                      end)
 
-        self.start_time = parse_timecode(
-            start, self.video_stream.frame_rate, first_index_is_one=True)
-        self.end_time = parse_timecode(end, self.video_stream.frame_rate, first_index_is_one=True)
-        self.duration = parse_timecode(
-            duration, self.video_stream.frame_rate, first_index_is_one=True)
+        # *NOTE*: The Python API uses 0-based frame indices, but the CLI uses 1-based indices to
+        # match the default start number used by `ffmpeg` when saving frames as images. As such,
+        # we must correct start time if set as frames. See the test_cli_time* tests for for details.
+        self.start_time = parse_timecode(start, self.video_stream.frame_rate, correct_pts=True)
+        self.end_time = parse_timecode(end, self.video_stream.frame_rate)
+        self.duration = parse_timecode(duration, self.video_stream.frame_rate)
         self.time = True
 
     #
