@@ -37,6 +37,7 @@ This release focuses on bugfixes and quality of life improvements. This has help
    - Deprecate `FrameMetricRegistered` and `FrameMetricNotRegistered` exceptions (no longer used)
  - [bugfix] Fix `SceneManager.detect_scenes` warning when `duration` or `end_time` are specified as timecode strings [#346](https://github.com/Breakthrough/PySceneDetect/issues/346)
  - [improvement] When converting strings representing seconds to `FrameTimecode`, the `s` suffix is now optional, and whitespace is ignored (note that values without decimal places are still interpreted as frame numbers)
+ - [improvement] The `VideoCaptureAdapter` in `scenedetect.backends.opencv` now attempts to report duration if known
 
 ### 0.6.2 (July 23, 2023)
 
