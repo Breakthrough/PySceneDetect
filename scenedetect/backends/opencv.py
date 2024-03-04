@@ -449,8 +449,11 @@ class VideoCaptureAdapter(VideoStream):
 
     @property
     def duration(self) -> Optional[FrameTimecode]:
-        """Always None, as the underlying VideoCapture is assumed to not have a known duration."""
-        None
+        """Duration of the stream as a FrameTimecode, or None if non terminating."""
+        frame_count = math.trunc(self._cap.get(cv2.CAP_PROP_FRAME_COUNT))
+        if frame_count > 0:
+            return self.base_timecode + frame_count
+        return None
 
     @property
     def aspect_ratio(self) -> float:
