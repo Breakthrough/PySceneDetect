@@ -73,6 +73,10 @@ from typing import Union
 MAX_FPS_DELTA: float = 1.0 / 100000
 """Maximum amount two framerates can differ by for equality testing."""
 
+_SECONDS_PER_MINUTE = 60.0
+_SECONDS_PER_HOUR = 60.0 * _SECONDS_PER_MINUTE
+_MINUTES_PER_HOUR = 60.0
+
 # TODO(0.6.3): Replace uses of Union[int, float, str] with TimecodeValue.
 TimecodeValue = Union[int, float, str]
 """Named type for values representing timecodes. Must be in one of the following forms:
@@ -201,22 +205,27 @@ class FrameTimecode:
         """
         # Compute hours and minutes based off of seconds, and update seconds.
         secs = self.get_seconds()
-        base = 60.0 * 60.0
-        hrs = int(secs / base)
-        secs -= (hrs * base)
-        base = 60.0
-        mins = int(secs / base)
-        secs -= (mins * base)
-        # Convert seconds into string based on required precision.
-        if precision > 0:
-            if use_rounding:
-                secs = round(secs, precision)
-            msec = format(secs, '.%df' % precision)[-precision:]
-            secs = '%02d.%s' % (int(secs), msec)
-        else:
-            secs = '%02d' % int(round(secs, 0)) if use_rounding else '%02d' % int(secs)
+        hrs = int(secs / _SECONDS_PER_HOUR)
+        secs -= (hrs * _SECONDS_PER_HOUR)
+        mins = int(secs / _SECONDS_PER_MINUTE)
+        secs = max(0.0, secs - (mins * _SECONDS_PER_MINUTE))
+        if use_rounding:
+            secs = round(secs, precision)
+        secs = min(_SECONDS_PER_MINUTE, secs)
+        # Guard against emitting timecodes with 60 seconds after rounding/floating point errors.
+        if int(secs) == _SECONDS_PER_MINUTE:
+            secs = 0.0
+            mins += 1
+            if mins >= _MINUTES_PER_HOUR:
+                mins = 0
+                hrs += 1
+        # We have to extend the precision by 1 here, since `format` will round up.
+        msec = format(secs, '.%df' % (precision + 1)) if precision else ''
+        # Need to include decimal place in `msec_str`.
+        msec_str = msec[-(2 + precision):-1]
+        secs_str = f"{int(secs):02d}{msec_str}"
         # Return hours, minutes, and seconds as a formatted timecode string.
-        return '%02d:%02d:%s' % (hrs, mins, secs)
+        return '%02d:%02d:%s' % (hrs, mins, secs_str)
 
     # TODO(v1.0): Add a `previous` property to replace the existing one and deprecate this getter.
     def previous_frame(self) -> 'FrameTimecode':

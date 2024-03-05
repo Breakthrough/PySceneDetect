@@ -275,3 +275,23 @@ def test_identity(frame_num, fps):
     assert FrameTimecode(frame_time_code.get_frames(), fps=fps) == frame_time_code
     assert FrameTimecode(frame_time_code.get_seconds(), fps=fps) == frame_time_code
     assert FrameTimecode(frame_time_code.get_timecode(), fps=fps) == frame_time_code
+
+
+def test_precision():
+    """Test rounding and precision, which has implications for rounding behavior."""
+
+    fps = 1000.0
+
+    assert FrameTimecode(110, fps).get_timecode(precision=2, use_rounding=True) == "00:00:00.11"
+    assert FrameTimecode(110, fps).get_timecode(precision=2, use_rounding=False) == "00:00:00.11"
+    assert FrameTimecode(110, fps).get_timecode(precision=1, use_rounding=True) == "00:00:00.1"
+    assert FrameTimecode(110, fps).get_timecode(precision=1, use_rounding=False) == "00:00:00.1"
+    assert FrameTimecode(110, fps).get_timecode(precision=0, use_rounding=True) == "00:00:00"
+    assert FrameTimecode(110, fps).get_timecode(precision=0, use_rounding=False) == "00:00:00"
+
+    assert FrameTimecode(990, fps).get_timecode(precision=2, use_rounding=True) == "00:00:00.99"
+    assert FrameTimecode(990, fps).get_timecode(precision=2, use_rounding=False) == "00:00:00.99"
+    assert FrameTimecode(990, fps).get_timecode(precision=1, use_rounding=True) == "00:00:01.0"
+    assert FrameTimecode(990, fps).get_timecode(precision=1, use_rounding=False) == "00:00:00.9"
+    assert FrameTimecode(990, fps).get_timecode(precision=0, use_rounding=True) == "00:00:01"
+    assert FrameTimecode(990, fps).get_timecode(precision=0, use_rounding=False) == "00:00:00"
