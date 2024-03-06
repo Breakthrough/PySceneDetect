@@ -23,7 +23,9 @@ This release focuses on bugfixes and quality of life improvements. This has help
       - Valid values: `frames`, `timecode`, `seconds`
  - [general] Increase progress bar indent to improve visibility and visual alignment
  - [improvement] The `s` suffix for setting timecode values in seconds is no longer required (values without decimal places are still interpreted as frame numbers)
- - [general] The `load-scenes` command may only be specified once, and is now disallowed with other `detect-*` commands [#347](https://github.com/Breakthrough/PySceneDetect/issues/347)
+ - [improvement] `load-scenes` now skips detection, generating output much faster [#347](https://github.com/Breakthrough/PySceneDetect/issues/347)
+ - [bugfix] Only allow `load-scenes` to be specified once, and disallow with other `detect-*` commands [#347](https://github.com/Breakthrough/PySceneDetect/issues/347)
+ - [bugfix] `-s`/`--start` must now be greater than `-e`/`--end` for the `time` command
 
 **API Changes:**
 
