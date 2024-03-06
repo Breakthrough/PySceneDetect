@@ -418,9 +418,8 @@ class CliContext:
                 else:
                     min_scene_len = self.config.get_value("detect-threshold", "min-scene-len")
             min_scene_len = parse_timecode(min_scene_len, self.video_stream.frame_rate).frame_num
-
+        # TODO(v1.0): add_last_scene cannot be disabled right now.
         return {
-                                                                                                # TODO(v1.0): add_last_scene cannot be disabled right now.
             'add_final_scene':
                 add_last_scene or self.config.get_value("detect-threshold", "add-last-scene"),
             'fade_bias':
@@ -434,6 +433,10 @@ class CliContext:
     def handle_load_scenes(self, input: AnyStr, start_col_name: Optional[str]):
         """Handle `load-scenes` command options."""
         self._ensure_input_open()
+        if self.scene_manager._detector_list:
+            raise click.ClickException(
+                "The load-scenes command cannot be used with other detectors, and may only be "
+                "specified once.")
         start_col_name = self.config.get_value("load-scenes", "start-col-name", start_col_name)
         self.add_detector(
             SceneLoader(
@@ -735,12 +738,7 @@ class CliContext:
     def add_detector(self, detector):
         """ Add Detector: Adds a detection algorithm to the CliContext's SceneManager. """
         self._ensure_input_open()
-        try:
-            self.scene_manager.add_detector(detector)
-        except scenedetect.stats_manager.FrameMetricRegistered as ex:
-            raise click.BadParameter(
-                message='Cannot specify detection algorithm twice.',
-                param_hint=detector.cli_name) from ex
+        self.scene_manager.add_detector(detector)
 
     def _ensure_input_open(self) -> None:
         """Ensure self.video_stream was initialized (i.e. -i/--input was specified),

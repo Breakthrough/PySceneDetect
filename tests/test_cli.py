@@ -382,7 +382,17 @@ def test_cli_load_scenes():
     """Ensure we can load scenes both with and without the cut row."""
     assert invoke_scenedetect('-i {VIDEO} time {TIME} {DETECTOR} list-scenes') == 0
     assert invoke_scenedetect('-i {VIDEO} time {TIME} load-scenes -i {VIDEO_NAME}-Scenes.csv') == 0
+    # Specifying a detector with load-scenes should be disallowed.
+    assert invoke_scenedetect(
+        '-i {VIDEO} time {TIME} {DETECTOR} load-scenes -i {VIDEO_NAME}-Scenes.csv')
+    # Specifying load-scenes several times should be disallowed.
+    assert invoke_scenedetect(
+        '-i {VIDEO} time {TIME} load-scenes -i {VIDEO_NAME}-Scenes.csv load-scenes -i {VIDEO_NAME}-Scenes.csv'
+    )
+    # If `-s`/`--skip-cuts` is specified, the resulting scene list should still be compatible with
+    # the `load-scenes` command.
     assert invoke_scenedetect('-i {VIDEO} time {TIME} {DETECTOR} list-scenes -s') == 0
+    assert invoke_scenedetect('-i {VIDEO} time {TIME} load-scenes -i {VIDEO_NAME}-Scenes.csv') == 0
 
 
 def test_cli_load_scenes_with_time_frames():
