@@ -23,11 +23,10 @@ import os
 import os.path
 from typing import List
 
-from scenedetect._scene_loader import SceneLoader
 from scenedetect.backends.opencv import VideoStreamCv2
 from scenedetect.detectors import AdaptiveDetector, ContentDetector
 from scenedetect.frame_timecode import FrameTimecode
-from scenedetect.scene_manager import SceneManager, save_images, write_scene_list
+from scenedetect.scene_manager import SceneManager, save_images
 
 TEST_VIDEO_START_FRAMES_ACTUAL = [150, 180, 394]
 
@@ -247,44 +246,3 @@ def test_detect_scenes_callback_adaptive(test_video_file):
     scene_list = sm.get_scene_list()
     assert [start for start, end in scene_list] == TEST_VIDEO_START_FRAMES_ACTUAL
     assert fake_callback.scene_list == TEST_VIDEO_START_FRAMES_ACTUAL[1:]
-
-
-def test_scene_loader(tmp_path, test_movie_clip):
-    """Test `SceneLoader` loading from CSV written by `write_scene_list`."""
-
-    def _detect(video, detector, start, end):
-        """Helper function similar to `scenedetect.detect()` but using an existing VideoStream."""
-        scene_manager = SceneManager()
-        scene_manager.add_detector(detector)
-        scene_manager.auto_downscale = True
-        video.seek(start)
-        scene_manager.detect_scenes(video=video, end_time=end)
-        return scene_manager.get_scene_list()
-
-    # Generate scene list.
-    video = VideoStreamCv2(test_movie_clip)
-    scene_list = _detect(
-        video=video,
-        detector=ContentDetector(),
-        start=FrameTimecode('00:00:50', video.frame_rate),
-        end=FrameTimecode('00:01:19', video.frame_rate))
-
-    # Save and see if we get the same result.
-    with open(tmp_path / "scenes.csv", "w") as csv_file:
-        write_scene_list(csv_file, scene_list, include_cut_list=True)
-    from_csv = _detect(
-        video=VideoStreamCv2(test_movie_clip),
-        detector=SceneLoader(tmp_path / "scenes.csv", framerate=video.frame_rate),
-        start=FrameTimecode('00:00:50', video.frame_rate),
-        end=FrameTimecode('00:01:19', video.frame_rate))
-    assert from_csv == scene_list
-
-    # Test without the cut list as a header as well.
-    with open(tmp_path / "scenes-nocuts.csv", "w") as csv_file:
-        write_scene_list(csv_file, scene_list, include_cut_list=False)
-    from_csv = _detect(
-        video=VideoStreamCv2(test_movie_clip),
-        detector=SceneLoader(tmp_path / "scenes-nocuts.csv", framerate=video.frame_rate),
-        start=FrameTimecode('00:00:50', video.frame_rate),
-        end=FrameTimecode('00:01:19', video.frame_rate))
-    assert from_csv == scene_list

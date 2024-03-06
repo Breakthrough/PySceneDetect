@@ -22,7 +22,6 @@ import click
 import scenedetect
 
 from scenedetect import open_video, AVAILABLE_BACKENDS
-from scenedetect._scene_loader import SceneLoader
 
 from scenedetect.scene_detector import SceneDetector
 from scenedetect.platform import get_and_create_path, get_cv2_imwrite_params, init_logger
@@ -111,6 +110,7 @@ class CliContext:
         self.video_stream: VideoStream = None
         self.scene_manager: SceneManager = None
         self.stats_manager: StatsManager = None
+        self.added_detector: bool = False
 
         # Global `scenedetect` Options
         self.output_dir: str = None                         # -o/--output
@@ -168,6 +168,10 @@ class CliContext:
         self.html_include_images: bool = None # export-html --no-images
         self.image_width: int = None          # export-html -w/--image-width
         self.image_height: int = None         # export-html -h/--image-height
+
+        # `load-scenes` Command Options
+        self.load_scenes_input: str = None       # load-scenes -i/--input
+        self.load_scenes_column_name: str = None # load-scenes -c/--start-col-name
 
     #
     # Command Handlers
@@ -273,7 +277,7 @@ class CliContext:
 
         # Create StatsManager if --stats is specified.
         if stats_file:
-            self.stats_file_path = get_and_create_path(stats_file, self.output_dir)
+            self.stats_file_path = stats_file
             self.stats_manager = StatsManager()
 
         # Initialize default detector with values in the config file.
@@ -433,14 +437,17 @@ class CliContext:
     def handle_load_scenes(self, input: AnyStr, start_col_name: Optional[str]):
         """Handle `load-scenes` command options."""
         self._ensure_input_open()
-        if self.scene_manager._detector_list:
-            raise click.ClickException(
-                "The load-scenes command cannot be used with other detectors, and may only be "
-                "specified once.")
-        start_col_name = self.config.get_value("load-scenes", "start-col-name", start_col_name)
-        self.add_detector(
-            SceneLoader(
-                file=input, framerate=self.video_stream.frame_rate, start_col_name=start_col_name))
+        if self.added_detector:
+            raise click.ClickException("The load-scenes command cannot be used with detectors.")
+        if self.load_scenes_input:
+            raise click.ClickException("The load-scenes command must only be specified once.")
+        input = os.path.abspath(input)
+        if not os.path.exists(input):
+            raise click.BadParameter(
+                f'Could not load scenes, file does not exist: {input}', param_hint='-i/--input')
+        self.load_scenes_input = input
+        self.load_scenes_column_name = self.config.get_value("load-scenes", "start-col-name",
+                                                             start_col_name)
 
     def handle_export_html(
         self,
@@ -681,21 +688,20 @@ class CliContext:
         self._ensure_input_open()
         if self.time:
             self._on_duplicate_command('time')
-
         if duration is not None and end is not None:
             raise click.BadParameter(
                 'Only one of --duration/-d or --end/-e can be specified, not both.',
                 param_hint='time')
-
         logger.debug('Setting video time:\n    start: %s, duration: %s, end: %s', start, duration,
                      end)
-
         # *NOTE*: The Python API uses 0-based frame indices, but the CLI uses 1-based indices to
         # match the default start number used by `ffmpeg` when saving frames as images. As such,
         # we must correct start time if set as frames. See the test_cli_time* tests for for details.
         self.start_time = parse_timecode(start, self.video_stream.frame_rate, correct_pts=True)
         self.end_time = parse_timecode(end, self.video_stream.frame_rate)
         self.duration = parse_timecode(duration, self.video_stream.frame_rate)
+        if self.start_time and self.end_time and (self.start_time + 1) > self.end_time:
+            raise click.BadParameter("-e/--end time must be greater than -s/--start")
         self.time = True
 
     #
@@ -737,8 +743,11 @@ class CliContext:
 
     def add_detector(self, detector):
         """ Add Detector: Adds a detection algorithm to the CliContext's SceneManager. """
+        if self.load_scenes_input:
+            raise click.ClickException("The load-scenes command cannot be used with detectors.")
         self._ensure_input_open()
         self.scene_manager.add_detector(detector)
+        self.added_detector = True
 
     def _ensure_input_open(self) -> None:
         """Ensure self.video_stream was initialized (i.e. -i/--input was specified),
