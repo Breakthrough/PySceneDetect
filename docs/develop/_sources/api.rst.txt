@@ -7,11 +7,11 @@
 Overview
 =======================================================================
 
-The `scenedetect` API is designed to be extensible and easy to integrate with most application workflows.  Many use cases are covered by the `Quickstart`_ and `Example`_ sections below.  The `scenedetect` package provides:
+The `scenedetect` API is easy to integrate with most application workflows, while also being highly extensible. See the `Quickstart`_ and `Example`_ sections below for some common use cases and integrations. The `scenedetect` package contains several modules:
 
-    * :ref:`scenedetect.scene_manager 🎞️ <scenedetect-scene_manager>`: The :class:`SceneManager <scenedetect.scene_manager.SceneManager>` class applies `SceneDetector` objects on video frames from a :ref:`VideoStream <scenedetect-video_stream>`. Also contains the :func:`save_images <scenedetect.scene_manager.save_images>` and :func:`write_scene_list <scenedetect.scene_manager.write_scene_list>` / :func:`write_scene_list_html <scenedetect.scene_manager.write_scene_list_html>` functions to export information about the detected scenes in various formats.
+    * :ref:`scenedetect.scene_manager 🎞️ <scenedetect-scene_manager>`: The :class:`SceneManager <scenedetect.scene_manager.SceneManager>` acts as a way to coordinate detecting scenes (via `SceneDetector` instances) on video frames (via :ref:`VideoStream <scenedetect-video_stream>` instances). This module also contains functionality to export information about scenes in various formats: :func:`save_images <scenedetect.scene_manager.save_images>` to save images for each scene, :func:`write_scene_list <scenedetect.scene_manager.write_scene_list>` to save scene/cut info as CSV, and :func:`write_scene_list_html <scenedetect.scene_manager.write_scene_list_html>` to export scenes in viewable HTML format.
 
-    * :ref:`scenedetect.detectors 🕵️ <scenedetect-detectors>`: Scene/shot detection algorithms:
+    * :ref:`scenedetect.detectors 🕵️ <scenedetect-detectors>`: Detection algorithms:
 
         * :mod:`ContentDetector <scenedetect.detectors.content_detector>`: detects fast changes/cuts in video content.
 
@@ -19,10 +19,11 @@ The `scenedetect` API is designed to be extensible and easy to integrate with mo
 
         * :mod:`AdaptiveDetector <scenedetect.detectors.adaptive_detector>`: similar to `ContentDetector` but may result in less false negatives during rapid camera movement.
 
-    * :ref:`scenedetect.video_stream 🎥 <scenedetect-video_stream>`: Contains :class:`VideoStream <scenedetect.video_stream.VideoStream>` interface for video decoding using different backends (:mod:`scenedetect.backends`). Current supported backends:
+    * :ref:`scenedetect.video_stream 🎥 <scenedetect-video_stream>`: Video input is handled through the :class:`VideoStream <scenedetect.video_stream.VideoStream>` interface. Implementations for common video libraries are provided in :mod:`scenedetect.backends`:
 
         * OpenCV: :class:`VideoStreamCv2 <scenedetect.backends.opencv.ideoStreamCv2>`
-        * PyAV: In Development
+        * PyAV: :class:`VideoStreamAv <scenedetect.backends.pyav.VideoStreamAv>`
+        * MoviePy: :class:`VideoStreamMoviePy <scenedetect.backends.moviepy.VideoStreamMoviePy>`
 
     * :ref:`scenedetect.video_splitter ✂️ <scenedetect-video_splitter>`: Contains :func:`split_video_ffmpeg <scenedetect.video_splitter.split_video_ffmpeg>` and :func:`split_video_mkvmerge <scenedetect.video_splitter.split_video_mkvmerge>` to split a video based on the detected scenes.
 
@@ -31,7 +32,7 @@ The `scenedetect` API is designed to be extensible and easy to integrate with mo
       class for storing, converting, and performing arithmetic on timecodes
       with frame-accurate precision.
 
-    * :ref:`scenedetect.scene_detector 🌐 <scenedetect-scene_detector>`: Contains :class:`SceneDetector <scenedetect.scene_detector.SceneDetector>` base class for implementing scene detection algorithms.
+    * :ref:`scenedetect.scene_detector 🌐 <scenedetect-scene_detector>`: Contains :class:`SceneDetector <scenedetect.scene_detector.SceneDetector>` interface which detection algorithms must implement.
 
     * :ref:`scenedetect.stats_manager 🧮 <scenedetect-stats_manager>`: Contains :class:`StatsManager <scenedetect.stats_manager.StatsManager>` class for caching frame metrics and loading/saving them to disk in CSV format for analysis. Also used as a persistent cache to make multiple passes on the same video significantly faster.
 

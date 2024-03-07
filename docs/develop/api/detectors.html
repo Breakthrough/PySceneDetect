@@ -67,9 +67,8 @@ set threshold/score, which if exceeded, triggers a scene cut.</p>
 <dt class="sig sig-object py" id="scenedetect.detectors.content_detector.ContentDetector">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scenedetect.detectors.content_detector.</span></span><span class="sig-name descname"><span class="pre">ContentDetector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">27.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_scene_len</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">15</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Components(delta_hue=1.0,</span> <span class="pre">delta_sat=1.0,</span> <span class="pre">delta_lum=1.0,</span> <span class="pre">delta_edges=0.0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">luma_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.detectors.content_detector.ContentDetector" title="Permalink to this definition">¶</a></dt>
 <dd><p>Detects fast cuts using changes in colour and intensity between frames.</p>
-<p>Since the difference between frames is used, unlike the ThresholdDetector,
-only fast cuts are detected with this method.  To detect slow fades between
-content scenes still using HSV information, use the DissolveDetector.</p>
+<p>The difference is calculated in the HSV color space, and compared against a set threshold to
+determine when a fast cut has occurred.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -162,15 +161,13 @@ to be passed to process_frame for the given frame_num).</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="scenedetect.detectors.content_detector.ContentDetector.process_frame">
 <span class="sig-name descname"><span class="pre">process_frame</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame_num</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_img</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.detectors.content_detector.ContentDetector.process_frame" title="Permalink to this definition">¶</a></dt>
-<dd><p>Similar to ThresholdDetector, but using the HSV colour space DIFFERENCE instead
-of single-frame RGB/grayscale intensity (thus cannot detect slow fades with this method).</p>
+<dd><p>Process the next frame. <cite>frame_num</cite> is assumed to be sequential.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>frame_num</strong> (<em>int</em>) – Frame number of frame that is being passed.</p></li>
-<li><p><strong>frame_img</strong> (<em>ndarray</em>) – Decoded frame image (numpy.ndarray) to perform scene
-detection on. Can be None <em>only</em> if the self.is_processing_required() method
-(inhereted from the base SceneDetector class) returns True.</p></li>
+<li><p><strong>frame_num</strong> (<em>int</em>) – Frame number of frame that is being passed. Can start from any value
+but must remain sequential.</p></li>
+<li><p><strong>frame_img</strong> (<em>numpy.ndarray</em><em> or </em><em>None</em>) – Video frame corresponding to <cite>frame_img</cite>.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -178,7 +175,7 @@ detection on. Can be None <em>only</em> if the self.is_processing_required() met
 or more frames in the list, and not necessarily the same as frame_num.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><em>List</em>[int]</p>
+<dd class="field-odd"><p>List[int]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -283,22 +280,21 @@ automatically set based on video resolution.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="scenedetect.detectors.adaptive_detector.AdaptiveDetector.process_frame">
 <span class="sig-name descname"><span class="pre">process_frame</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame_num</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_img</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.detectors.adaptive_detector.AdaptiveDetector.process_frame" title="Permalink to this definition">¶</a></dt>
-<dd><p>Similar to ThresholdDetector, but using the HSV colour space DIFFERENCE instead
-of single-frame RGB/grayscale intensity (thus cannot detect slow fades with this method).</p>
+<dd><p>Process the next frame. <cite>frame_num</cite> is assumed to be sequential.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>frame_num</strong> (<em>int</em>) – Frame number of frame that is being passed.</p></li>
-<li><p><strong>frame_img</strong> (<em>ndarray</em><em> | </em><em>None</em>) – Decoded frame image (np.ndarray) to perform scene
-detection on. Can be None <em>only</em> if the self.is_processing_required() method
-(inhereted from the base SceneDetector class) returns True.</p></li>
+<li><p><strong>frame_num</strong> (<em>int</em>) – Frame number of frame that is being passed. Can start from any value
+but must remain sequential.</p></li>
+<li><p><strong>frame_img</strong> (<em>numpy.ndarray</em><em> or </em><em>None</em>) – Video frame corresponding to <cite>frame_img</cite>.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Empty list</p>
+<dd class="field-even"><p>List of frames where scene cuts have been detected. There may be 0
+or more frames in the list, and not necessarily the same as frame_num.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><em>List</em>[int]</p>
+<dd class="field-odd"><p>List[int]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -400,13 +396,13 @@ exact frame where the fade-out crossed the detection threshold.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="scenedetect.detectors.threshold_detector.ThresholdDetector.process_frame">
 <span class="sig-name descname"><span class="pre">process_frame</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame_num</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_img</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.detectors.threshold_detector.ThresholdDetector.process_frame" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Process the next frame. <cite>frame_num</cite> is assumed to be sequential.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>frame_num</strong> (<em>int</em>) – Frame number of frame that is being passed.</p></li>
-<li><p><strong>frame_img</strong> (<em>numpy.ndarray</em><em> or </em><em>None</em>) – Decoded frame image (numpy.ndarray) to perform
-scene detection with. Can be None <em>only</em> if the self.is_processing_required()
-method (inhereted from the base SceneDetector class) returns True.</p></li>
+<li><p><strong>frame_num</strong> (<em>int</em>) – Frame number of frame that is being passed. Can start from any value
+but must remain sequential.</p></li>
+<li><p><strong>frame_img</strong> (<em>numpy.ndarray</em><em> or </em><em>None</em>) – Video frame corresponding to <cite>frame_img</cite>.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
