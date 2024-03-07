@@ -6,7 +6,7 @@
 #     [  Docs:    https://scenedetect.com/docs/                     ]
 #     [  Github:  https://github.com/Breakthrough/PySceneDetect/    ]
 #
-# Copyright (C) 2014-2023 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2014-2024 Brandon Castellano <http://www.bcastell.com>.
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
@@ -39,6 +39,8 @@ from scenedetect.video_splitter import is_ffmpeg_available, is_mkvmerge_availabl
 # probably use that instead of spinning up new subprocesses for each run of the controller.
 # That will also allow splitting up the validation of argument parsing logic from the controller
 # logic by creating a CLI context with the desired parameters.
+
+# TODO: Missing tests for --min-scene-len and --drop-short-scenes.
 
 SCENEDETECT_CMD = 'python -m scenedetect'
 ALL_DETECTORS = ['detect-content', 'detect-threshold', 'detect-adaptive']

@@ -1,5 +1,5 @@
 # PySceneDetect Website (https://www.scenedetect.com)
-# Copyright (C) 2014-2023 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2014-2024 Brandon Castellano <http://www.bcastell.com>.
 site_name: PySceneDetect
 site_description: "Website and documentation for PySceneDetect, a program to automatically detect scene cuts and split videos.  Written in Python, and also provides Python API in addition to command-line interface for use within other programs."
 site_author: "Brandon Castellano"
@@ -8,7 +8,7 @@ site_dir: "build"
 repo_url: https://github.com/Breakthrough/PySceneDetect
 edit_uri:  'blob/main/website/pages/'
 repo_name: "PySceneDetect on Github"
-copyright: 'Copyright &copy; 2014-2023 Brandon Castellano.  All rights reserved.<br />Licensed under BSD 3-Clause (see the <a href="https://github.com/Breakthrough/PySceneDetect/blob/main/LICENSE" alt="link to latest LICENSE file on Github">LICENSE file</a> for details).'
+copyright: 'Copyright &copy; 2014-2024 Brandon Castellano.  All rights reserved.<br />Licensed under BSD 3-Clause (see the <a href="https://github.com/Breakthrough/PySceneDetect/blob/main/LICENSE" alt="link to latest LICENSE file on Github">LICENSE file</a> for details).'
 theme:
     name: readthedocs
     logo: img/pyscenedetect_logo_small.png

@@ -6,7 +6,7 @@
 #     [  Docs:    https://scenedetect.com/docs/                     ]
 #     [  Github:  https://github.com/Breakthrough/PySceneDetect/    ]
 #
-# Copyright (C) 2014-2023 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2014-2024 Brandon Castellano <http://www.bcastell.com>.
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
@@ -99,7 +99,8 @@ try:
 except ImportError:
     VideoStreamMoviePy = None
 
-# TODO(0.6.3): Replace this with a function named `get_available_backends`.
+# TODO: Lazy-loading backends would improve startup performance. However, this requires removing
+# some of the re-exported types above from the public API.
 AVAILABLE_BACKENDS: Dict[str, Type] = {
     backend.BACKEND_NAME: backend for backend in filter(None, [
         VideoStreamCv2,

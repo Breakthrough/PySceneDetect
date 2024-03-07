@@ -6,7 +6,7 @@
 #     [  Docs:    https://scenedetect.com/docs/                     ]
 #     [  Github:  https://github.com/Breakthrough/PySceneDetect/    ]
 #
-# Copyright (C) 2014-2023 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2014-2024 Brandon Castellano <http://www.bcastell.com>.
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
@@ -47,7 +47,7 @@ Site: http://scenedetect.com/
 Docs: http://manual.scenedetect.com/
 Code: https://github.com/Breakthrough/PySceneDetect/
 
-Copyright (C) 2014-2023 Brandon Castellano. All rights reserved.
+Copyright (C) 2014-2024 Brandon Castellano. All rights reserved.
 
 PySceneDetect is released under the BSD 3-Clause license. See the
 included LICENSE file or visit the PySceneDetect website for details.
