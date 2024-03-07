@@ -6,7 +6,7 @@
 #     [  Docs:    https://scenedetect.com/docs/                     ]
 #     [  Github:  https://github.com/Breakthrough/PySceneDetect/    ]
 #
-# Copyright (C) 2014-2023 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2014-2024 Brandon Castellano <http://www.bcastell.com>.
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
@@ -495,7 +495,7 @@ def save_images(scene_list: List[Tuple[FrameTimecode, FrameTimecode]],
                     IMAGE_NUMBER=image_num_format % (j + 1),
                     FRAME_NUMBER=image_timecode.get_frames()), image_extension)
                 image_filenames[i].append(file_path)
-                # TODO(0.6.3): Combine this resize with the ones below.
+                # TODO: Combine this resize with the ones below.
                 if aspect_ratio is not None:
                     frame_im = cv2.resize(
                         frame_im, (0, 0),

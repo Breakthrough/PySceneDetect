@@ -6,7 +6,7 @@
 #     [  Docs:    https://scenedetect.com/docs/                     ]
 #     [  Github:  https://github.com/Breakthrough/PySceneDetect/    ]
 #
-# Copyright (C) 2014-2023 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2014-2024 Brandon Castellano <http://www.bcastell.com>.
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
@@ -23,10 +23,10 @@ from scenedetect import detect, SceneManager, FrameTimecode, StatsManager
 from scenedetect.detectors import AdaptiveDetector, ContentDetector, ThresholdDetector, HashDetector
 from scenedetect.backends.opencv import VideoStreamCv2
 
-# TODO(v1.0): Parameterize these tests like VideoStreams are.
-# Current test output cannot be used for profiling cases which iterate over multiple detectors.
-
-# TODO(v1.0): Add new test video.
+# TODO: Test more parameters and add more videos. Parameterize the tests below such that
+# a detector instance is combined with the other parameters like ground truth that go along
+# with a specific video and detector values. E.g. Use Video-000, Video-001, etc..., and map
+# that to a particular filename.
 
 TEST_MOVIE_CLIP_START_FRAMES_ACTUAL = [1199, 1226, 1260, 1281, 1334, 1365, 1590, 1697, 1871]
 """Ground truth of start frame for each fast cut in `test_movie_clip`."""

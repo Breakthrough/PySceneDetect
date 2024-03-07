@@ -6,7 +6,7 @@
 #     [  Docs:    https://scenedetect.com/docs/                     ]
 #     [  Github:  https://github.com/Breakthrough/PySceneDetect/    ]
 #
-# Copyright (C) 2014-2023 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2014-2024 Brandon Castellano <http://www.bcastell.com>.
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
@@ -49,13 +49,14 @@ class VideoStreamMoviePy(VideoStream):
         """
         super().__init__()
 
-        # TODO(0.6.3) - Investigate how MoviePy handles ffmpeg not being on PATH.
-        # TODO(0.6.3): Add framerate override.
+        # TODO: Investigate how MoviePy handles ffmpeg not being on PATH.
+        # TODO: Add framerate override.
         if framerate is not None:
-            raise NotImplementedError("TODO(0.6.3)")
+            raise NotImplementedError(
+                "VideoStreamMoviePy does not support the `framerate` argument yet.")
 
         self._path = path
-        # TODO(0.6.3): Need to map errors based on the strings, since several failure
+        # TODO: Need to map errors based on the strings, since several failure
         # cases return IOErrors (e.g. could not read duration/video resolution). These
         # should be mapped to specific errors, e.g. write a function to map MoviePy
         # exceptions to a new set of equivalents.

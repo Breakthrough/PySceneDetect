@@ -6,7 +6,7 @@
 #     [  Docs:    https://scenedetect.com/docs/                     ]
 #     [  Github:  https://github.com/Breakthrough/PySceneDetect/    ]
 #
-# Copyright (C) 2014-2023 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2014-2024 Brandon Castellano <http://www.bcastell.com>.
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
@@ -115,18 +115,16 @@ class AdaptiveDetector(ContentDetector):
         return False
 
     def process_frame(self, frame_num: int, frame_img: Optional[np.ndarray]) -> List[int]:
-        """ Similar to ThresholdDetector, but using the HSV colour space DIFFERENCE instead
-        of single-frame RGB/grayscale intensity (thus cannot detect slow fades with this method).
+        """Process the next frame. `frame_num` is assumed to be sequential.
 
-        Arguments:
-            frame_num: Frame number of frame that is being passed.
-
-            frame_img: Decoded frame image (np.ndarray) to perform scene
-                detection on. Can be None *only* if the self.is_processing_required() method
-                (inhereted from the base SceneDetector class) returns True.
+        Args:
+            frame_num (int): Frame number of frame that is being passed. Can start from any value
+                but must remain sequential.
+            frame_img (numpy.ndarray or None): Video frame corresponding to `frame_img`.
 
         Returns:
-            Empty list
+            List[int]: List of frames where scene cuts have been detected. There may be 0
+            or more frames in the list, and not necessarily the same as frame_num.
         """
 
         # TODO(#283): Merge this with ContentDetector and turn it on by default.
@@ -172,9 +170,11 @@ class AdaptiveDetector(ContentDetector):
 
         return cut_list
 
-    # TODO(0.6.3): Deprecate & remove this method.
     def get_content_val(self, frame_num: int) -> Optional[float]:
         """Returns the average content change for a frame."""
+        # TODO(v0.7): Add DeprecationWarning that `get_content_val` will be removed in v0.7.
+        logger.error("get_content_val is deprecated and will be removed. Lookup the value"
+                     " using a StatsManager with ContentDetector.FRAME_SCORE_KEY.")
         if self.stats_manager is not None:
             return self.stats_manager.get_metrics(frame_num, [ContentDetector.FRAME_SCORE_KEY])[0]
         return 0.0

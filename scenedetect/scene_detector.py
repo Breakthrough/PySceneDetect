@@ -6,7 +6,7 @@
 #     [  Docs:    https://scenedetect.com/docs/                     ]
 #     [  Github:  https://github.com/Breakthrough/PySceneDetect/    ]
 #
-# Copyright (C) 2014-2023 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2014-2024 Brandon Castellano <http://www.bcastell.com>.
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
@@ -86,10 +86,17 @@ class SceneDetector:
         """
         return []
 
-    def process_frame(self, frame_num: int, frame_img: Optional[numpy.ndarray]) -> List[int]:
-        """Process Frame: Computes/stores metrics and detects any scene changes.
+    def process_frame(self, frame_num: int, frame_img: numpy.ndarray) -> List[int]:
+        """Process the next frame. `frame_num` is assumed to be sequential.
 
-        Prototype method, no actual detection.
+        Args:
+            frame_num (int): Frame number of frame that is being passed. Can start from any value
+                but must remain sequential.
+            frame_img (numpy.ndarray or None): Video frame corresponding to `frame_img`.
+
+        Returns:
+            List[int]: List of frames where scene cuts have been detected. There may be 0
+            or more frames in the list, and not necessarily the same as frame_num.
 
         Returns:
             List of frame numbers of cuts to be added to the cutting list.

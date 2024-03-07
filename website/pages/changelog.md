@@ -8,13 +8,15 @@ Releases
 
 #### Release Notes
 
-This release focuses on bugfixes and quality of life improvements. This has helped identify certain areas of focus for the next major release. Feedback is always welcome for command-line and API improvements.
+This release of PySceneDetect includes quite a few bugfixes, as well as some performance improvements with the `load-scenes` command. Thanks for everyone who contributed to the release.
 
 **Program Changes:**
 
  - [bugfix] Fix crash for some WebM videos when using `save-images` with `--backend pyav` [#355](https://github.com/Breakthrough/PySceneDetect/issues/355)
  - [bugfix] Correct `--duration` and `--end` for presentation time when specified as frame numbers [#341](https://github.com/Breakthrough/PySceneDetect/issues/341)
  - [bugfix] Progress bar now has correct frame accounting when `--duration` or `--end` are set [#341](https://github.com/Breakthrough/PySceneDetect/issues/341)
+ - [bugfix] Only allow `load-scenes` to be specified once, and disallow with other `detect-*` commands [#347](https://github.com/Breakthrough/PySceneDetect/issues/347)
+ - [bugfix] Disallow `-s`/`--start` being larger than `-e`/`--end` for the `time` command
  - [general] Comma-separated timecode list is now only printed when the `list-scenes` command is specified [#356](https://github.com/Breakthrough/PySceneDetect/issues/356)
  - [general] Rename `list-scenes` flag `--no-output-file` to `--save`
  - [general] Several changes to `[list-scenes]` config file options:
@@ -24,24 +26,27 @@ This release focuses on bugfixes and quality of life improvements. This has help
  - [general] Increase progress bar indent to improve visibility and visual alignment
  - [improvement] The `s` suffix for setting timecode values in seconds is no longer required (values without decimal places are still interpreted as frame numbers)
  - [improvement] `load-scenes` now skips detection, generating output much faster [#347](https://github.com/Breakthrough/PySceneDetect/issues/347)
- - [bugfix] Only allow `load-scenes` to be specified once, and disallow with other `detect-*` commands [#347](https://github.com/Breakthrough/PySceneDetect/issues/347)
- - [bugfix] `-s`/`--start` must now be greater than `-e`/`--end` for the `time` command
 
 **API Changes:**
 
  - [bugfix] Fix `AttributeError` thrown when accessing `aspect_ratio` on certain videos using `VideoStreamAv` [#355](https://github.com/Breakthrough/PySceneDetect/issues/355)
  - [bugfix] Fix circular imports due to partially initialized module for some development environments [#350](https://github.com/Breakthrough/PySceneDetect/issues/350)
+ - [bugfix] Fix `SceneManager.detect_scenes` warning when `duration` or `end_time` are specified as timecode strings [#346](https://github.com/Breakthrough/PySceneDetect/issues/346)
+ - [bugfix] Ensure correct string conversion behavior for `FrameTimecode` when rounding is enabled [#354](https://github.com/Breakthrough/PySceneDetect/issues/354)
  - [feature] Add `output_dir` argument to `split_video_ffmpeg` and `split_video_mkvmerge` functions to set output directory [#298](https://github.com/Breakthrough/PySceneDetect/issues/298)
  - [feature] Add `formatter` argument to `split_video_ffmpeg` to allow formatting filenames via callback [#359](https://github.com/
  Breakthrough/PySceneDetect/issues/359)
+ - [general] The `frame_img` argument to `SceneDetector.process_frame()` is now required
+ - [general] Remove some unused or unimplemented APIs:
+   - Remove `TimecodeValue` from `scenedetect.frame_timecode` (use `typing.Union[int, float, str]`)
+   - Remove `MotionDetector` and `scenedetect.detectors.motion_detector` module (will be reintroduced after `SceneDetector` interface is stable)
  - [improvement] `scenedetect.stats_manager` module improvements:
    - The `StatsManager.register_metrics()` method no longer throws any exceptions
    - Add `StatsManager.metric_keys` property to query registered metric keys
    - Deprecate `FrameMetricRegistered` and `FrameMetricNotRegistered` exceptions (no longer used)
- - [bugfix] Fix `SceneManager.detect_scenes` warning when `duration` or `end_time` are specified as timecode strings [#346](https://github.com/Breakthrough/PySceneDetect/issues/346)
  - [improvement] When converting strings representing seconds to `FrameTimecode`, the `s` suffix is now optional, and whitespace is ignored (note that values without decimal places are still interpreted as frame numbers)
  - [improvement] The `VideoCaptureAdapter` in `scenedetect.backends.opencv` now attempts to report duration if known
- - [bugfix] Ensure correct string conversion behavior for `FrameTimecode` when rounding is enabled [#354](https://github.com/Breakthrough/PySceneDetect/issues/354)
+
 
 ### 0.6.2 (July 23, 2023)
 

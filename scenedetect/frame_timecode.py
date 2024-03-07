@@ -6,7 +6,7 @@
 #     [  Docs:    https://scenedetect.com/docs/                     ]
 #     [  Github:  https://github.com/Breakthrough/PySceneDetect/    ]
 #
-# Copyright (C) 2014-2023 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2014-2024 Brandon Castellano <http://www.bcastell.com>.
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
@@ -76,15 +76,6 @@ MAX_FPS_DELTA: float = 1.0 / 100000
 _SECONDS_PER_MINUTE = 60.0
 _SECONDS_PER_HOUR = 60.0 * _SECONDS_PER_MINUTE
 _MINUTES_PER_HOUR = 60.0
-
-# TODO(0.6.3): Replace uses of Union[int, float, str] with TimecodeValue.
-TimecodeValue = Union[int, float, str]
-"""Named type for values representing timecodes. Must be in one of the following forms:
-
-  1. Timecode as `str` in the form "HH:MM:SS[.nnn]" (`"01:23:45"` or `"01:23:45.678"`)
-  2. Number of seconds as `float`, or `str` in form  "SSSS.nnnn" (`"45.678"`)
-  3. Exact number of frames as `int`, or `str` in form NNNNN (`456` or `"456"`)
-"""
 
 
 class FrameTimecode:

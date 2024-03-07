@@ -6,7 +6,7 @@
 #     [  Docs:    https://scenedetect.com/docs/                     ]
 #     [  Github:  https://github.com/Breakthrough/PySceneDetect/    ]
 #
-# Copyright (C) 2014-2023 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2014-2024 Brandon Castellano <http://www.bcastell.com>.
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
@@ -51,12 +51,12 @@ def run_scenedetect(context: CliContext):
         if context.stats_file_path:
             logger.warning("WARNING: -s/--stats will be ignored due to load-scenes.")
         scene_list, cut_list = _load_scenes(context)
-        _postprocess_scene_list(context, scene_list)
+        scene_list = _postprocess_scene_list(context, scene_list)
         logger.info("Loaded %d scenes.", len(scene_list))
     else:
         # Perform scene detection on input.
         scene_list, cut_list = _detect(context)
-        _postprocess_scene_list(context, scene_list)
+        scene_list = _postprocess_scene_list(context, scene_list)
         # Handle -s/--stats option.
         _save_stats(context)
         if scene_list:
@@ -326,7 +326,8 @@ def _postprocess_scene_list(
     context: CliContext, scene_list: ty.List[ty.Tuple[FrameTimecode, FrameTimecode]]
 ) -> ty.List[ty.Tuple[FrameTimecode, FrameTimecode]]:
 
-    # Handle --merge-last-scene.
+    # Handle --merge-last-scene. If set, when the last scene is shorter than --min-scene-len,
+    # it will be merged with the previous one.
     if context.merge_last_scene and context.min_scene_len is not None and context.min_scene_len > 0:
         if len(scene_list) > 1 and (scene_list[-1][1] - scene_list[-1][0]) < context.min_scene_len:
             new_last_scene = (scene_list[-2][0], scene_list[-1][1])
@@ -334,6 +335,9 @@ def _postprocess_scene_list(
 
     # Handle --drop-short-scenes.
     if context.drop_short_scenes and context.min_scene_len > 0:
+        print([str(s[1] - s[0]) for s in scene_list].__str__())
+        print(context.min_scene_len)
         scene_list = [s for s in scene_list if (s[1] - s[0]) >= context.min_scene_len]
+        print([str(s[1] - s[0]) for s in scene_list].__str__())
 
     return scene_list
