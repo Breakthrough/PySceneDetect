@@ -11,7 +11,7 @@ Video Scene Cut Detection and Analysis Tool
 
 ----------------------------------------------------------
 
-### Latest Release: v0.6.2 (July 23, 2023)
+### Latest Release: v0.6.3 (March 8, 2024)
 
 **Website**:  [scenedetect.com](https://www.scenedetect.com)
 
@@ -102,7 +102,7 @@ See [the documentation](https://www.scenedetect.com/docs/latest/api.html) for mo
 
  - [Documentation](https://www.scenedetect.com/docs/) (covers application and Python API)
  - [CLI Example](https://www.scenedetect.com/cli/)
- - [Config File](https://www.scenedetect.com/docs/0.6.2/cli/config_file.html)
+ - [Config File](https://www.scenedetect.com/docs/0.6.3/cli/config_file.html)
 
 ## Help & Contributing
 
