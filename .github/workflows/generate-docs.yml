@@ -66,7 +66,7 @@ jobs:
         run: |
           git rm "docs/latest" -r -f --ignore-unmatch
           mkdir -p latest
-          cp -r -f "docs/${{ env.scenedetect_docs_dest }}/*" docs/latest
+          cp -r -f "docs/${{ env.scenedetect_docs_dest }}" docs/latest
           git add docs/latest
           echo "scenedetect_docs_dest='${{ env.scenedetect_docs_dest }} (latest)'" >> "$GITHUB_ENV"
 
