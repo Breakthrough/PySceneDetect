@@ -48,9 +48,9 @@ install:
   # Build Windows .EXE and create portable .ZIP
   - pyinstaller dist/scenedetect.spec
   - sphinx-build -b singlehtml docs dist/scenedetect/docs
-  - python dist/cleanup_dependencies.py
   - move dist\ffmpeg\ffmpeg.exe dist\scenedetect\
   - move dist\ffmpeg\LICENSE dist\scenedetect\LICENSE-FFMPEG
+  - move dist\windows\* dist\scenedetect\
   - copy scenedetect\_thirdparty\LICENSE* dist\scenedetect\
   - cd dist/scenedetect
   - 7z a ../scenedetect-win64.zip *
@@ -65,7 +65,7 @@ install:
   - appveyor-tools\secure-file -decrypt license65.dat.enc -secret %ai_license_secret% -salt %ai_license_salt%
   - appveyor DownloadFile https://www.advancedinstaller.com/downloads/advinst.msi
   - msiexec /i advinst.msi /qn
-  - 'SET PATH=%PATH%;C:\\Program Files (x86)\\Caphyon\\Advanced Installer 20.8\\bin\\x86'
+  - 'SET PATH=%PATH%;C:\\Program Files (x86)\\Caphyon\\Advanced Installer 21.5\\bin\\x86'
   # License path must be absolute
   - AdvancedInstaller.com /RegisterOffline "%cd%\license65.dat"
   # Create MSI installer
