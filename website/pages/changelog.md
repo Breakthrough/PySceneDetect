@@ -18,14 +18,13 @@ This release of PySceneDetect includes quite a few bugfixes, as well as some per
  - [bugfix] Only allow `load-scenes` to be specified once, and disallow with other `detect-*` commands [#347](https://github.com/Breakthrough/PySceneDetect/issues/347)
  - [bugfix] Disallow `-s`/`--start` being larger than `-e`/`--end` for the `time` command
  - [general] Comma-separated timecode list is now only printed when the `list-scenes` command is specified [#356](https://github.com/Breakthrough/PySceneDetect/issues/356)
- - [general] Rename `list-scenes` flag `--no-output-file` to `--save`
  - [general] Several changes to `[list-scenes]` config file options:
    - Add `display-scenes` and `display-cuts` options to control output
    - Add `cut-format` to control formatting of cut points [#349](https://github.com/Breakthrough/PySceneDetect/issues/349)
       - Valid values: `frames`, `timecode`, `seconds`
  - [general] Increase progress bar indent to improve visibility and visual alignment
  - [improvement] The `s` suffix for setting timecode values in seconds is no longer required (values without decimal places are still interpreted as frame numbers)
- - [improvement] `load-scenes` now skips detection, generating output much faster [#347](https://github.com/Breakthrough/PySceneDetect/issues/347)
+ - [improvement] `load-scenes` now skips detection, generating output much faster [#347](https://github.com/Breakthrough/PySceneDetect/issues/347) (thanks @wjs018 for the initial implementation)
 
 **API Changes:**
 
@@ -37,9 +36,8 @@ This release of PySceneDetect includes quite a few bugfixes, as well as some per
  - [feature] Add `formatter` argument to `split_video_ffmpeg` to allow formatting filenames via callback [#359](https://github.com/
  Breakthrough/PySceneDetect/issues/359)
  - [general] The `frame_img` argument to `SceneDetector.process_frame()` is now required
- - [general] Remove some unused or unimplemented APIs:
-   - Remove `TimecodeValue` from `scenedetect.frame_timecode` (use `typing.Union[int, float, str]`)
-   - Remove `MotionDetector` and `scenedetect.detectors.motion_detector` module (will be reintroduced after `SceneDetector` interface is stable)
+ - [general] Remove `TimecodeValue` from `scenedetect.frame_timecode` (use `typing.Union[int, float, str]`)
+-  [general] Remove `MotionDetector` and `scenedetect.detectors.motion_detector` module (will be reintroduced after `SceneDetector` interface is stable)
  - [improvement] `scenedetect.stats_manager` module improvements:
    - The `StatsManager.register_metrics()` method no longer throws any exceptions
    - Add `StatsManager.metric_keys` property to query registered metric keys

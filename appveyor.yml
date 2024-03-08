@@ -17,9 +17,9 @@ environment:
     - PYTHON: "C:\\Python39-x64"
   # Encrypted AdvancedInstaller License
   ai_license_secret:
-    secure: lulTujjpNX3A1RKIvj834/Czn6etzevma6oqlA5Xia5tgrg75SPXcs1lPNlu5YPU
+    secure: MOkULlGPSi0C1Hg2PU1h2SZg/eyQnPQhRJ1XFlavfMKMOoX9hY4pSjpdgW3psSau
   ai_license_salt:
-    secure: kMv/7J3wqaRGUJYwnfaY6edw0VW39uX7oM9Od9PQ2wwlCmTZcwAh4kEUxhB5u91QbXmp4McMuwcXAO4UdVoSGg==
+    secure: /LlGOUGZk8HQgrW6txtssTt8I6Z6pU7K3XOcqTqr2iKX4vLO3ZTdILgL/6M6u7gWVdRoUYfbxm4JVYjs4hfcmQ==
 
 # SignPath Config for Code Signing
 deploy:
