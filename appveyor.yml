@@ -49,7 +49,9 @@ install:
   - pyinstaller dist/scenedetect.spec
   - sphinx-build -b singlehtml docs dist/scenedetect/docs
   - mkdir dist\scenedetect\thirdparty
-  - move dist\windows\* dist\scenedetect\thirdparty\
+  - move LICENSE dist\scenedetect\
+  - move dist\windows\README* dist\scenedetect\
+  - move dist\windows\LICENSE* dist\scenedetect\thirdparty\
   - move scenedetect\_thirdparty\LICENSE* dist\scenedetect\thirdparty\
   - move dist\ffmpeg\ffmpeg.exe dist\scenedetect\
   - move dist\ffmpeg\LICENSE dist\scenedetect\thirdparty\LICENSE-FFMPEG
