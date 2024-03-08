@@ -48,6 +48,6 @@ Split video using Python API:
 
 Licensed under BSD 3-Clause (see the ``LICENSE`` file for details).
 
-Copyright (C) 2014-2023 Brandon Castellano.
+Copyright (C) 2014-2024 Brandon Castellano.
 All rights reserved.
 
