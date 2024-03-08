@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>scenedetect 🎬 Package &#8212; PySceneDetect 0.6.3.dev0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="_static/pyscenedetect.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Detection Algorithms" href="api/detectors.html" />
+    <link rel="prev" title="Backends" href="cli/backends.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="scenedetect-package">
+<h1><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Package<a class="headerlink" href="#scenedetect-package" title="Permalink to this heading">¶</a></h1>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this heading">¶</a></h2>
+<p>The <cite>scenedetect</cite> API is easy to integrate with most application workflows, while also being highly extensible. See the <a class="reference internal" href="#quickstart">Quickstart</a> and <a class="reference internal" href="#example">Example</a> sections below for some common use cases and integrations. The <cite>scenedetect</cite> package contains several modules:</p>
+<blockquote>
+<div><ul>
+<li><p><a class="reference internal" href="api/scene_manager.html#scenedetect-scene-manager"><span class="std std-ref">scenedetect.scene_manager 🎞️</span></a>: The <a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.SceneManager" title="scenedetect.scene_manager.SceneManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">SceneManager</span></code></a> acts as a way to coordinate detecting scenes (via <cite>SceneDetector</cite> instances) on video frames (via <a class="reference internal" href="api/video_stream.html#scenedetect-video-stream"><span class="std std-ref">VideoStream</span></a> instances). This module also contains functionality to export information about scenes in various formats: <a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.save_images" title="scenedetect.scene_manager.save_images"><code class="xref py py-func docutils literal notranslate"><span class="pre">save_images</span></code></a> to save images for each scene, <a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.write_scene_list" title="scenedetect.scene_manager.write_scene_list"><code class="xref py py-func docutils literal notranslate"><span class="pre">write_scene_list</span></code></a> to save scene/cut info as CSV, and <a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.write_scene_list_html" title="scenedetect.scene_manager.write_scene_list_html"><code class="xref py py-func docutils literal notranslate"><span class="pre">write_scene_list_html</span></code></a> to export scenes in viewable HTML format.</p></li>
+<li><p><a class="reference internal" href="api/detectors.html#scenedetect-detectors"><span class="std std-ref">scenedetect.detectors 🕵️</span></a>: Detection algorithms:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><a class="reference internal" href="api/detectors.html#module-scenedetect.detectors.content_detector" title="scenedetect.detectors.content_detector"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ContentDetector</span></code></a>: detects fast changes/cuts in video content.</p></li>
+<li><p><a class="reference internal" href="api/detectors.html#module-scenedetect.detectors.threshold_detector" title="scenedetect.detectors.threshold_detector"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ThresholdDetector</span></code></a>: detects changes in video brightness/intensity.</p></li>
+<li><p><a class="reference internal" href="api/detectors.html#module-scenedetect.detectors.adaptive_detector" title="scenedetect.detectors.adaptive_detector"><code class="xref py py-mod docutils literal notranslate"><span class="pre">AdaptiveDetector</span></code></a>: similar to <cite>ContentDetector</cite> but may result in less false negatives during rapid camera movement.</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p><a class="reference internal" href="api/video_stream.html#scenedetect-video-stream"><span class="std std-ref">scenedetect.video_stream 🎥</span></a>: Video input is handled through the <a class="reference internal" href="api/video_stream.html#scenedetect.video_stream.VideoStream" title="scenedetect.video_stream.VideoStream"><code class="xref py py-class docutils literal notranslate"><span class="pre">VideoStream</span></code></a> interface. Implementations for common video libraries are provided in <a class="reference internal" href="api/backends.html#module-scenedetect.backends" title="scenedetect.backends"><code class="xref py py-mod docutils literal notranslate"><span class="pre">scenedetect.backends</span></code></a>:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>OpenCV: <code class="xref py py-class docutils literal notranslate"><span class="pre">VideoStreamCv2</span></code></p></li>
+<li><p>PyAV: <a class="reference internal" href="api/backends.html#scenedetect.backends.pyav.VideoStreamAv" title="scenedetect.backends.pyav.VideoStreamAv"><code class="xref py py-class docutils literal notranslate"><span class="pre">VideoStreamAv</span></code></a></p></li>
+<li><p>MoviePy: <code class="xref py py-class docutils literal notranslate"><span class="pre">VideoStreamMoviePy</span></code></p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p><a class="reference internal" href="api/video_splitter.html#scenedetect-video-splitter"><span class="std std-ref">scenedetect.video_splitter ✂️</span></a>: Contains <a class="reference internal" href="api/video_splitter.html#scenedetect.video_splitter.split_video_ffmpeg" title="scenedetect.video_splitter.split_video_ffmpeg"><code class="xref py py-func docutils literal notranslate"><span class="pre">split_video_ffmpeg</span></code></a> and <a class="reference internal" href="api/video_splitter.html#scenedetect.video_splitter.split_video_mkvmerge" title="scenedetect.video_splitter.split_video_mkvmerge"><code class="xref py py-func docutils literal notranslate"><span class="pre">split_video_mkvmerge</span></code></a> to split a video based on the detected scenes.</p></li>
+<li><p><a class="reference internal" href="api/frame_timecode.html#scenedetect-frame-timecode"><span class="std std-ref">scenedetect.frame_timecode ⏱️</span></a>: Contains
+<a class="reference internal" href="api/frame_timecode.html#scenedetect.frame_timecode.FrameTimecode" title="scenedetect.frame_timecode.FrameTimecode"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrameTimecode</span></code></a>
+class for storing, converting, and performing arithmetic on timecodes
+with frame-accurate precision.</p></li>
+<li><p><a class="reference internal" href="api/scene_detector.html#scenedetect-scene-detector"><span class="std std-ref">scenedetect.scene_detector 🌐</span></a>: Contains <a class="reference internal" href="api/scene_detector.html#scenedetect.scene_detector.SceneDetector" title="scenedetect.scene_detector.SceneDetector"><code class="xref py py-class docutils literal notranslate"><span class="pre">SceneDetector</span></code></a> interface which detection algorithms must implement.</p></li>
+<li><p><a class="reference internal" href="api/stats_manager.html#scenedetect-stats-manager"><span class="std std-ref">scenedetect.stats_manager 🧮</span></a>: Contains <a class="reference internal" href="api/stats_manager.html#scenedetect.stats_manager.StatsManager" title="scenedetect.stats_manager.StatsManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">StatsManager</span></code></a> class for caching frame metrics and loading/saving them to disk in CSV format for analysis. Also used as a persistent cache to make multiple passes on the same video significantly faster.</p></li>
+<li><p><a class="reference internal" href="api/platform.html#scenedetect-platform"><span class="std std-ref">scenedetect.platform 🐱‍💻</span></a>: Logging and utility functions.</p></li>
+</ul>
+</div></blockquote>
+<p>Most types/functions are also available directly from the <cite>scenedetect</cite> package to make imports simpler.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The PySceneDetect API is still under development. It is recommended that you pin the <cite>scenedetect</cite> version in your requirements to below the next major release:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">scenedetect</span><span class="o">&lt;</span><span class="mf">0.7</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="quickstart">
+<span id="scenedetect-quickstart"></span><h2>Quickstart<a class="headerlink" href="#quickstart" title="Permalink to this heading">¶</a></h2>
+<p>To get started, the <a class="reference internal" href="#scenedetect.detect" title="scenedetect.detect"><code class="xref py py-func docutils literal notranslate"><span class="pre">scenedetect.detect()</span></code></a> function takes a path to a video and a <a class="reference internal" href="api/detectors.html#scenedetect-detectors"><span class="std std-ref">scene detector object</span></a>, and returns a list of start/end timecodes.  For detecting fast cuts (shot changes), we use the <a class="reference internal" href="api/detectors.html#scenedetect.detectors.content_detector.ContentDetector" title="scenedetect.detectors.content_detector.ContentDetector"><code class="xref py py-class docutils literal notranslate"><span class="pre">ContentDetector</span></code></a>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">scenedetect</span> <span class="kn">import</span> <span class="n">detect</span><span class="p">,</span> <span class="n">ContentDetector</span>
+<span class="n">scene_list</span> <span class="o">=</span> <span class="n">detect</span><span class="p">(</span><span class="s1">&#39;my_video.mp4&#39;</span><span class="p">,</span> <span class="n">ContentDetector</span><span class="p">())</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">scene_list</span></code> is now a list of <a class="reference internal" href="api/frame_timecode.html#scenedetect.frame_timecode.FrameTimecode" title="scenedetect.frame_timecode.FrameTimecode"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrameTimecode</span></code></a> pairs representing the start/end of each scene (try calling <code class="docutils literal notranslate"><span class="pre">print(scene_list)</span></code>). Note that you can set <code class="docutils literal notranslate"><span class="pre">show_progress=True</span></code> when calling <a class="reference internal" href="#scenedetect.detect" title="scenedetect.detect"><code class="xref py py-func docutils literal notranslate"><span class="pre">detect</span></code></a> to display a progress bar with estimated time remaining.</p>
+<p>Next, let’s print the scene list in a more readable format by iterating over it:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">scene</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">scene_list</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Scene </span><span class="si">%2d</span><span class="s1">: Start </span><span class="si">%s</span><span class="s1"> / Frame </span><span class="si">%d</span><span class="s1">, End </span><span class="si">%s</span><span class="s1"> / Frame </span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">scene</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get_timecode</span><span class="p">(),</span> <span class="n">scene</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get_frames</span><span class="p">(),</span>
+        <span class="n">scene</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">get_timecode</span><span class="p">(),</span> <span class="n">scene</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">get_frames</span><span class="p">(),))</span>
+</pre></div>
+</div>
+<p>Now that we know where each scene is, we can also <a class="reference internal" href="api/video_splitter.html#scenedetect-video-splitter"><span class="std std-ref">split the input video</span></a> automatically using <cite>ffmpeg</cite> (<cite>mkvmerge</cite> is also supported):</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">scenedetect</span> <span class="kn">import</span> <span class="n">detect</span><span class="p">,</span> <span class="n">ContentDetector</span><span class="p">,</span> <span class="n">split_video_ffmpeg</span>
+<span class="n">scene_list</span> <span class="o">=</span> <span class="n">detect</span><span class="p">(</span><span class="s1">&#39;my_video.mp4&#39;</span><span class="p">,</span> <span class="n">ContentDetector</span><span class="p">())</span>
+<span class="n">split_video_ffmpeg</span><span class="p">(</span><span class="s1">&#39;my_video.mp4&#39;</span><span class="p">,</span> <span class="n">scene_list</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This is just a small snippet of what PySceneDetect offers. The library is very modular, and can integrate with most application workflows easily.</p>
+<p>In the next example, we show how the library components can be used to create a more customizable scene cut/shot detection pipeline.  Additional demonstrations/recipes can be found in the <a class="reference external" href="https://github.com/Breakthrough/PySceneDetect/blob/v0.6.2-release/tests/test_api.py">tests/test_api.py</a> file.</p>
+</section>
+<section id="example">
+<span id="scenedetect-detailed-example"></span><h2>Example<a class="headerlink" href="#example" title="Permalink to this heading">¶</a></h2>
+<p>In this example, we create a function <code class="docutils literal notranslate"><span class="pre">find_scenes()</span></code> which will load a video, detect the scenes, and return a list of tuples containing the (start, end) timecodes of each detected scene.  Note that you can modify the <cite>threshold</cite> argument to modify the sensitivity of the <a class="reference internal" href="api/detectors.html#scenedetect.detectors.content_detector.ContentDetector" title="scenedetect.detectors.content_detector.ContentDetector"><code class="xref py py-class docutils literal notranslate"><span class="pre">ContentDetector</span></code></a>, or use other detection algorithms (e.g. <a class="reference internal" href="api/detectors.html#scenedetect.detectors.threshold_detector.ThresholdDetector" title="scenedetect.detectors.threshold_detector.ThresholdDetector"><code class="xref py py-class docutils literal notranslate"><span class="pre">ThresholdDetector</span></code></a>, <a class="reference internal" href="api/detectors.html#scenedetect.detectors.adaptive_detector.AdaptiveDetector" title="scenedetect.detectors.adaptive_detector.AdaptiveDetector"><code class="xref py py-class docutils literal notranslate"><span class="pre">AdaptiveDetector</span></code></a>).</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">scenedetect</span> <span class="kn">import</span> <span class="n">SceneManager</span><span class="p">,</span> <span class="n">open_video</span><span class="p">,</span> <span class="n">ContentDetector</span>
+
+<span class="k">def</span> <span class="nf">find_scenes</span><span class="p">(</span><span class="n">video_path</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mf">27.0</span><span class="p">):</span>
+    <span class="n">video</span> <span class="o">=</span> <span class="n">open_video</span><span class="p">(</span><span class="n">video_path</span><span class="p">)</span>
+    <span class="n">scene_manager</span> <span class="o">=</span> <span class="n">SceneManager</span><span class="p">()</span>
+    <span class="n">scene_manager</span><span class="o">.</span><span class="n">add_detector</span><span class="p">(</span>
+        <span class="n">ContentDetector</span><span class="p">(</span><span class="n">threshold</span><span class="o">=</span><span class="n">threshold</span><span class="p">))</span>
+    <span class="c1"># Detect all scenes in video from current position to end.</span>
+    <span class="n">scene_manager</span><span class="o">.</span><span class="n">detect_scenes</span><span class="p">(</span><span class="n">video</span><span class="p">)</span>
+    <span class="c1"># `get_scene_list` returns a list of start/end timecode pairs</span>
+    <span class="c1"># for each scene that was found.</span>
+    <span class="k">return</span> <span class="n">scene_manager</span><span class="o">.</span><span class="n">get_scene_list</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Using a <a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.SceneManager" title="scenedetect.scene_manager.SceneManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">SceneManager</span></code></a> directly allows tweaking the Parameters passed to <a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.SceneManager.detect_scenes" title="scenedetect.scene_manager.SceneManager.detect_scenes"><code class="xref py py-meth docutils literal notranslate"><span class="pre">detect_scenes</span></code></a> including setting a limit to the number of frames to process, which is useful for live streams/camera devices.  You can also combine detection algorithms or create new ones from scratch.</p>
+<p>For a more advanced example of using the PySceneDetect API to with a stats file (to save per-frame metrics to disk and/or speed up multiple passes of the same video), take a look at the <a class="reference internal" href="api/scene_manager.html#scenedetect-scene-manager"><span class="std std-ref">example in the SceneManager reference</span></a>.</p>
+<p>In addition to module-level examples, demonstrations of some common use cases can be found in the <a class="reference external" href="https://github.com/Breakthrough/PySceneDetect/blob/v0.6.2-release/tests/test_api.py">tests/test_api.py</a> file.</p>
+</section>
+<section id="module-scenedetect">
+<span id="functions"></span><h2>Functions<a class="headerlink" href="#module-scenedetect" title="Permalink to this heading">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> module comes with helper functions to simplify common use cases.
+<a class="reference internal" href="#scenedetect.detect" title="scenedetect.detect"><code class="xref py py-func docutils literal notranslate"><span class="pre">detect()</span></code></a> can be used to perform scene detection on a video by path.  <a class="reference internal" href="#scenedetect.open_video" title="scenedetect.open_video"><code class="xref py py-func docutils literal notranslate"><span class="pre">open_video()</span></code></a>
+can be used to open a video for a
+<a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.SceneManager" title="scenedetect.scene_manager.SceneManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">SceneManager</span></code></a>.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="scenedetect.detect">
+<span class="sig-prename descclassname"><span class="pre">scenedetect.</span></span><span class="sig-name descname"><span class="pre">detect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">video_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">detector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stats_file_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_progress</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_in_scene</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.detect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform scene detection on a given video <cite>path</cite> using the specified <cite>detector</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>video_path</strong> (<em>str</em>) – Path to input video (absolute or relative to working directory).</p></li>
+<li><p><strong>detector</strong> (<a class="reference internal" href="api/scene_detector.html#scenedetect.scene_detector.SceneDetector" title="scenedetect.scene_detector.SceneDetector"><em>SceneDetector</em></a>) – A <cite>SceneDetector</cite> instance (see <a class="reference internal" href="api/detectors.html#module-scenedetect.detectors" title="scenedetect.detectors"><code class="xref py py-mod docutils literal notranslate"><span class="pre">scenedetect.detectors</span></code></a> for a full list
+of detectors).</p></li>
+<li><p><strong>stats_file_path</strong> (<em>str</em><em> | </em><em>None</em>) – Path to save per-frame metrics to for statistical analysis or to
+determine a better threshold value.</p></li>
+<li><p><strong>show_progress</strong> (<em>bool</em>) – Show a progress bar with estimated time remaining. Default is False.</p></li>
+<li><p><strong>start_time</strong> (<em>str</em><em> | </em><em>float</em><em> | </em><em>int</em><em> | </em><em>None</em>) – Starting point in video, in the form of a timecode <code class="docutils literal notranslate"><span class="pre">HH:MM:SS[.nnn]</span></code> (<cite>str</cite>),
+number of seconds <code class="docutils literal notranslate"><span class="pre">123.45</span></code> (<cite>float</cite>), or number of frames <code class="docutils literal notranslate"><span class="pre">200</span></code> (<cite>int</cite>).</p></li>
+<li><p><strong>end_time</strong> (<em>str</em><em> | </em><em>float</em><em> | </em><em>int</em><em> | </em><em>None</em>) – Starting point in video, in the form of a timecode <code class="docutils literal notranslate"><span class="pre">HH:MM:SS[.nnn]</span></code> (<cite>str</cite>),
+number of seconds <code class="docutils literal notranslate"><span class="pre">123.45</span></code> (<cite>float</cite>), or number of frames <code class="docutils literal notranslate"><span class="pre">200</span></code> (<cite>int</cite>).</p></li>
+<li><p><strong>start_in_scene</strong> (<em>bool</em>) – Assume the video begins in a scene. This means that when detecting
+fast cuts with <cite>ContentDetector</cite>, if no cuts are found, the resulting scene list
+will contain a single scene spanning the entire video (instead of no scenes).
+When detecting fades with <cite>ThresholdDetector</cite>, the beginning portion of the video
+will always be included until the first fade-out event is detected.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of scenes (pairs of <code class="xref py py-class docutils literal notranslate"><span class="pre">FrameTimecode</span></code> objects).</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="api/video_stream.html#scenedetect.video_stream.VideoOpenFailure" title="scenedetect.video_stream.VideoOpenFailure"><strong>VideoOpenFailure</strong></a> – <cite>video_path</cite> could not be opened.</p></li>
+<li><p><a class="reference internal" href="api/stats_manager.html#scenedetect.stats_manager.StatsFileCorrupt" title="scenedetect.stats_manager.StatsFileCorrupt"><strong>StatsFileCorrupt</strong></a> – <cite>stats_file_path</cite> is an invalid stats file</p></li>
+<li><p><strong>ValueError</strong> – <cite>start_time</cite> or <cite>end_time</cite> are incorrectly formatted.</p></li>
+<li><p><strong>TypeError</strong> – <cite>start_time</cite> or <cite>end_time</cite> are invalid types.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>List</em>[<em>Tuple</em>[<a class="reference internal" href="api/frame_timecode.html#scenedetect.frame_timecode.FrameTimecode" title="scenedetect.frame_timecode.FrameTimecode"><em>FrameTimecode</em></a>, <a class="reference internal" href="api/frame_timecode.html#scenedetect.frame_timecode.FrameTimecode" title="scenedetect.frame_timecode.FrameTimecode"><em>FrameTimecode</em></a>]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scenedetect.open_video">
+<span class="sig-prename descclassname"><span class="pre">scenedetect.</span></span><span class="sig-name descname"><span class="pre">open_video</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">framerate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'opencv'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.open_video" title="Permalink to this definition">¶</a></dt>
+<dd><p>Open a video at the given path. If <cite>backend</cite> is specified but not available on the current
+system, OpenCV (<cite>VideoStreamCv2</cite>) will be used as a fallback.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<em>str</em>) – Path to video file to open.</p></li>
+<li><p><strong>framerate</strong> (<em>float</em><em> | </em><em>None</em>) – Overrides detected framerate if set.</p></li>
+<li><p><strong>backend</strong> (<em>str</em>) – Name of specific backend to use, if possible. See
+<a class="reference internal" href="api/backends.html#scenedetect.backends.AVAILABLE_BACKENDS" title="scenedetect.backends.AVAILABLE_BACKENDS"><code class="xref py py-data docutils literal notranslate"><span class="pre">scenedetect.backends.AVAILABLE_BACKENDS</span></code></a> for backends available on the current
+system. If the backend fails to open the video, OpenCV will be used as a fallback.</p></li>
+<li><p><strong>kwargs</strong> – Optional named arguments to pass to the specified <cite>backend</cite> constructor for
+overriding backend-specific options.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Backend object created with the specified video path.</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="api/video_stream.html#scenedetect.video_stream.VideoOpenFailure" title="scenedetect.video_stream.VideoOpenFailure"><strong>VideoOpenFailure</strong></a> – Constructing the VideoStream fails. If multiple backends have
+    been attempted, the error from the first backend will be returned.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="api/video_stream.html#scenedetect.video_stream.VideoStream" title="scenedetect.video_stream.VideoStream"><em>VideoStream</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-reference">
+<h2>Module Reference<a class="headerlink" href="#module-reference" title="Permalink to this heading">¶</a></h2>
+<div class="toctree-wrapper compound" id="fullapitoc">
+<p class="caption" role="heading"><span class="caption-text">PySceneDetect Module Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api/detectors.html">Detection Algorithms</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/detectors.html#scenedetect.detectors.content_detector.ContentDetector"><code class="docutils literal notranslate"><span class="pre">ContentDetector</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/detectors.html#scenedetect.detectors.content_detector.ContentDetector.Components"><code class="docutils literal notranslate"><span class="pre">ContentDetector.Components</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/detectors.html#scenedetect.detectors.content_detector.ContentDetector.get_metrics"><code class="docutils literal notranslate"><span class="pre">ContentDetector.get_metrics()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/detectors.html#scenedetect.detectors.content_detector.ContentDetector.is_processing_required"><code class="docutils literal notranslate"><span class="pre">ContentDetector.is_processing_required()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/detectors.html#scenedetect.detectors.content_detector.ContentDetector.process_frame"><code class="docutils literal notranslate"><span class="pre">ContentDetector.process_frame()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/detectors.html#scenedetect.detectors.content_detector.ContentDetector.DEFAULT_COMPONENT_WEIGHTS"><code class="docutils literal notranslate"><span class="pre">ContentDetector.DEFAULT_COMPONENT_WEIGHTS</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/detectors.html#scenedetect.detectors.content_detector.ContentDetector.FRAME_SCORE_KEY"><code class="docutils literal notranslate"><span class="pre">ContentDetector.FRAME_SCORE_KEY</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/detectors.html#scenedetect.detectors.content_detector.ContentDetector.LUMA_ONLY_WEIGHTS"><code class="docutils literal notranslate"><span class="pre">ContentDetector.LUMA_ONLY_WEIGHTS</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/detectors.html#scenedetect.detectors.content_detector.ContentDetector.METRIC_KEYS"><code class="docutils literal notranslate"><span class="pre">ContentDetector.METRIC_KEYS</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api/detectors.html#scenedetect.detectors.adaptive_detector.AdaptiveDetector"><code class="docutils literal notranslate"><span class="pre">AdaptiveDetector</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/detectors.html#scenedetect.detectors.adaptive_detector.AdaptiveDetector.get_content_val"><code class="docutils literal notranslate"><span class="pre">AdaptiveDetector.get_content_val()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/detectors.html#scenedetect.detectors.adaptive_detector.AdaptiveDetector.get_metrics"><code class="docutils literal notranslate"><span class="pre">AdaptiveDetector.get_metrics()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/detectors.html#scenedetect.detectors.adaptive_detector.AdaptiveDetector.post_process"><code class="docutils literal notranslate"><span class="pre">AdaptiveDetector.post_process()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/detectors.html#scenedetect.detectors.adaptive_detector.AdaptiveDetector.process_frame"><code class="docutils literal notranslate"><span class="pre">AdaptiveDetector.process_frame()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/detectors.html#scenedetect.detectors.adaptive_detector.AdaptiveDetector.stats_manager_required"><code class="docutils literal notranslate"><span class="pre">AdaptiveDetector.stats_manager_required()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/detectors.html#scenedetect.detectors.adaptive_detector.AdaptiveDetector.event_buffer_length"><code class="docutils literal notranslate"><span class="pre">AdaptiveDetector.event_buffer_length</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api/detectors.html#scenedetect.detectors.threshold_detector.ThresholdDetector"><code class="docutils literal notranslate"><span class="pre">ThresholdDetector</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/detectors.html#scenedetect.detectors.threshold_detector.ThresholdDetector.Method"><code class="docutils literal notranslate"><span class="pre">ThresholdDetector.Method</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/detectors.html#scenedetect.detectors.threshold_detector.ThresholdDetector.get_metrics"><code class="docutils literal notranslate"><span class="pre">ThresholdDetector.get_metrics()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/detectors.html#scenedetect.detectors.threshold_detector.ThresholdDetector.post_process"><code class="docutils literal notranslate"><span class="pre">ThresholdDetector.post_process()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/detectors.html#scenedetect.detectors.threshold_detector.ThresholdDetector.process_frame"><code class="docutils literal notranslate"><span class="pre">ThresholdDetector.process_frame()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/backends.html">Backends</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/backends.html#video-files">Video Files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/backends.html#devices-cameras-pipes">Devices / Cameras / Pipes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/backends.html#scenedetect.backends.AVAILABLE_BACKENDS"><code class="docutils literal notranslate"><span class="pre">AVAILABLE_BACKENDS</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/backends.html#scenedetect.backends.opencv.VideoCaptureAdapter"><code class="docutils literal notranslate"><span class="pre">VideoCaptureAdapter</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/backends.html#scenedetect.backends.opencv.VideoCaptureAdapter.read"><code class="docutils literal notranslate"><span class="pre">VideoCaptureAdapter.read()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/backends.html#scenedetect.backends.opencv.VideoCaptureAdapter.reset"><code class="docutils literal notranslate"><span class="pre">VideoCaptureAdapter.reset()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/backends.html#scenedetect.backends.opencv.VideoCaptureAdapter.seek"><code class="docutils literal notranslate"><span class="pre">VideoCaptureAdapter.seek()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/backends.html#scenedetect.backends.opencv.VideoCaptureAdapter.BACKEND_NAME"><code class="docutils literal notranslate"><span class="pre">VideoCaptureAdapter.BACKEND_NAME</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/backends.html#scenedetect.backends.opencv.VideoCaptureAdapter.aspect_ratio"><code class="docutils literal notranslate"><span class="pre">VideoCaptureAdapter.aspect_ratio</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/backends.html#scenedetect.backends.opencv.VideoCaptureAdapter.capture"><code class="docutils literal notranslate"><span class="pre">VideoCaptureAdapter.capture</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/backends.html#scenedetect.backends.opencv.VideoCaptureAdapter.duration"><code class="docutils literal notranslate"><span class="pre">VideoCaptureAdapter.duration</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/backends.html#scenedetect.backends.opencv.VideoCaptureAdapter.frame_number"><code class="docutils literal notranslate"><span class="pre">VideoCaptureAdapter.frame_number</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/backends.html#scenedetect.backends.opencv.VideoCaptureAdapter.frame_rate"><code class="docutils literal notranslate"><span class="pre">VideoCaptureAdapter.frame_rate</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/backends.html#scenedetect.backends.opencv.VideoCaptureAdapter.frame_size"><code class="docutils literal notranslate"><span class="pre">VideoCaptureAdapter.frame_size</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/backends.html#scenedetect.backends.opencv.VideoCaptureAdapter.is_seekable"><code class="docutils literal notranslate"><span class="pre">VideoCaptureAdapter.is_seekable</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/backends.html#scenedetect.backends.opencv.VideoCaptureAdapter.name"><code class="docutils literal notranslate"><span class="pre">VideoCaptureAdapter.name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/backends.html#scenedetect.backends.opencv.VideoCaptureAdapter.path"><code class="docutils literal notranslate"><span class="pre">VideoCaptureAdapter.path</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/backends.html#scenedetect.backends.opencv.VideoCaptureAdapter.position"><code class="docutils literal notranslate"><span class="pre">VideoCaptureAdapter.position</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/backends.html#scenedetect.backends.opencv.VideoCaptureAdapter.position_ms"><code class="docutils literal notranslate"><span class="pre">VideoCaptureAdapter.position_ms</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api/backends.html#scenedetect.backends.opencv.VideoStreamCv2"><code class="docutils literal notranslate"><span class="pre">VideoStreamCv2</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/backends.html#scenedetect.backends.opencv.VideoStreamCv2.read"><code class="docutils literal notranslate"><span class="pre">VideoStreamCv2.read()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/backends.html#scenedetect.backends.opencv.VideoStreamCv2.reset"><code class="docutils literal notranslate"><span class="pre">VideoStreamCv2.reset()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/backends.html#scenedetect.backends.opencv.VideoStreamCv2.seek"><code class="docutils literal notranslate"><span class="pre">VideoStreamCv2.seek()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/backends.html#scenedetect.backends.opencv.VideoStreamCv2.BACKEND_NAME"><code class="docutils literal notranslate"><span class="pre">VideoStreamCv2.BACKEND_NAME</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/backends.html#scenedetect.backends.opencv.VideoStreamCv2.aspect_ratio"><code class="docutils literal notranslate"><span class="pre">VideoStreamCv2.aspect_ratio</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/backends.html#scenedetect.backends.opencv.VideoStreamCv2.capture"><code class="docutils literal notranslate"><span class="pre">VideoStreamCv2.capture</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/backends.html#scenedetect.backends.opencv.VideoStreamCv2.duration"><code class="docutils literal notranslate"><span class="pre">VideoStreamCv2.duration</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/backends.html#scenedetect.backends.opencv.VideoStreamCv2.frame_number"><code class="docutils literal notranslate"><span class="pre">VideoStreamCv2.frame_number</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/backends.html#scenedetect.backends.opencv.VideoStreamCv2.frame_rate"><code class="docutils literal notranslate"><span class="pre">VideoStreamCv2.frame_rate</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/backends.html#scenedetect.backends.opencv.VideoStreamCv2.frame_size"><code class="docutils literal notranslate"><span class="pre">VideoStreamCv2.frame_size</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/backends.html#scenedetect.backends.opencv.VideoStreamCv2.is_seekable"><code class="docutils literal notranslate"><span class="pre">VideoStreamCv2.is_seekable</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/backends.html#scenedetect.backends.opencv.VideoStreamCv2.name"><code class="docutils literal notranslate"><span class="pre">VideoStreamCv2.name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/backends.html#scenedetect.backends.opencv.VideoStreamCv2.path"><code class="docutils literal notranslate"><span class="pre">VideoStreamCv2.path</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/backends.html#scenedetect.backends.opencv.VideoStreamCv2.position"><code class="docutils literal notranslate"><span class="pre">VideoStreamCv2.position</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/backends.html#scenedetect.backends.opencv.VideoStreamCv2.position_ms"><code class="docutils literal notranslate"><span class="pre">VideoStreamCv2.position_ms</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api/backends.html#scenedetect.backends.pyav.VideoStreamAv"><code class="docutils literal notranslate"><span class="pre">VideoStreamAv</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/backends.html#scenedetect.backends.pyav.VideoStreamAv.read"><code class="docutils literal notranslate"><span class="pre">VideoStreamAv.read()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/backends.html#scenedetect.backends.pyav.VideoStreamAv.reset"><code class="docutils literal notranslate"><span class="pre">VideoStreamAv.reset()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/backends.html#scenedetect.backends.pyav.VideoStreamAv.seek"><code class="docutils literal notranslate"><span class="pre">VideoStreamAv.seek()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/backends.html#scenedetect.backends.pyav.VideoStreamAv.BACKEND_NAME"><code class="docutils literal notranslate"><span class="pre">VideoStreamAv.BACKEND_NAME</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/backends.html#scenedetect.backends.pyav.VideoStreamAv.aspect_ratio"><code class="docutils literal notranslate"><span class="pre">VideoStreamAv.aspect_ratio</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/backends.html#scenedetect.backends.pyav.VideoStreamAv.duration"><code class="docutils literal notranslate"><span class="pre">VideoStreamAv.duration</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/backends.html#scenedetect.backends.pyav.VideoStreamAv.frame_number"><code class="docutils literal notranslate"><span class="pre">VideoStreamAv.frame_number</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/backends.html#scenedetect.backends.pyav.VideoStreamAv.frame_rate"><code class="docutils literal notranslate"><span class="pre">VideoStreamAv.frame_rate</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/backends.html#scenedetect.backends.pyav.VideoStreamAv.frame_size"><code class="docutils literal notranslate"><span class="pre">VideoStreamAv.frame_size</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/backends.html#scenedetect.backends.pyav.VideoStreamAv.is_seekable"><code class="docutils literal notranslate"><span class="pre">VideoStreamAv.is_seekable</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/backends.html#scenedetect.backends.pyav.VideoStreamAv.name"><code class="docutils literal notranslate"><span class="pre">VideoStreamAv.name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/backends.html#scenedetect.backends.pyav.VideoStreamAv.path"><code class="docutils literal notranslate"><span class="pre">VideoStreamAv.path</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/backends.html#scenedetect.backends.pyav.VideoStreamAv.position"><code class="docutils literal notranslate"><span class="pre">VideoStreamAv.position</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/backends.html#scenedetect.backends.pyav.VideoStreamAv.position_ms"><code class="docutils literal notranslate"><span class="pre">VideoStreamAv.position_ms</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/scene_manager.html">SceneManager</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/scene_manager.html#usage">Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/scene_manager.html#storing-per-frame-statistics">Storing Per-Frame Statistics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.Interpolation"><code class="docutils literal notranslate"><span class="pre">Interpolation</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.Interpolation.AREA"><code class="docutils literal notranslate"><span class="pre">Interpolation.AREA</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.Interpolation.CUBIC"><code class="docutils literal notranslate"><span class="pre">Interpolation.CUBIC</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.Interpolation.LANCZOS4"><code class="docutils literal notranslate"><span class="pre">Interpolation.LANCZOS4</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.Interpolation.LINEAR"><code class="docutils literal notranslate"><span class="pre">Interpolation.LINEAR</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.Interpolation.NEAREST"><code class="docutils literal notranslate"><span class="pre">Interpolation.NEAREST</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.SceneManager"><code class="docutils literal notranslate"><span class="pre">SceneManager</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.SceneManager.add_detector"><code class="docutils literal notranslate"><span class="pre">SceneManager.add_detector()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.SceneManager.clear"><code class="docutils literal notranslate"><span class="pre">SceneManager.clear()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.SceneManager.clear_detectors"><code class="docutils literal notranslate"><span class="pre">SceneManager.clear_detectors()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.SceneManager.detect_scenes"><code class="docutils literal notranslate"><span class="pre">SceneManager.detect_scenes()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.SceneManager.get_cut_list"><code class="docutils literal notranslate"><span class="pre">SceneManager.get_cut_list()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.SceneManager.get_event_list"><code class="docutils literal notranslate"><span class="pre">SceneManager.get_event_list()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.SceneManager.get_num_detectors"><code class="docutils literal notranslate"><span class="pre">SceneManager.get_num_detectors()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.SceneManager.get_scene_list"><code class="docutils literal notranslate"><span class="pre">SceneManager.get_scene_list()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.SceneManager.stop"><code class="docutils literal notranslate"><span class="pre">SceneManager.stop()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.SceneManager.auto_downscale"><code class="docutils literal notranslate"><span class="pre">SceneManager.auto_downscale</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.SceneManager.downscale"><code class="docutils literal notranslate"><span class="pre">SceneManager.downscale</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.SceneManager.interpolation"><code class="docutils literal notranslate"><span class="pre">SceneManager.interpolation</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.SceneManager.stats_manager"><code class="docutils literal notranslate"><span class="pre">SceneManager.stats_manager</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.compute_downscale_factor"><code class="docutils literal notranslate"><span class="pre">compute_downscale_factor()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.get_scenes_from_cuts"><code class="docutils literal notranslate"><span class="pre">get_scenes_from_cuts()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.save_images"><code class="docutils literal notranslate"><span class="pre">save_images()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.write_scene_list"><code class="docutils literal notranslate"><span class="pre">write_scene_list()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.write_scene_list_html"><code class="docutils literal notranslate"><span class="pre">write_scene_list_html()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.DEFAULT_MIN_WIDTH"><code class="docutils literal notranslate"><span class="pre">DEFAULT_MIN_WIDTH</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.MAX_FRAME_QUEUE_LENGTH"><code class="docutils literal notranslate"><span class="pre">MAX_FRAME_QUEUE_LENGTH</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.PROGRESS_BAR_DESCRIPTION"><code class="docutils literal notranslate"><span class="pre">PROGRESS_BAR_DESCRIPTION</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/video_splitter.html">Video Splitting</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/video_splitter.html#scenedetect.video_splitter.SceneMetadata"><code class="docutils literal notranslate"><span class="pre">SceneMetadata</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/video_splitter.html#scenedetect.video_splitter.SceneMetadata.end"><code class="docutils literal notranslate"><span class="pre">SceneMetadata.end</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/video_splitter.html#scenedetect.video_splitter.SceneMetadata.index"><code class="docutils literal notranslate"><span class="pre">SceneMetadata.index</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/video_splitter.html#scenedetect.video_splitter.SceneMetadata.start"><code class="docutils literal notranslate"><span class="pre">SceneMetadata.start</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api/video_splitter.html#scenedetect.video_splitter.VideoMetadata"><code class="docutils literal notranslate"><span class="pre">VideoMetadata</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/video_splitter.html#scenedetect.video_splitter.VideoMetadata.name"><code class="docutils literal notranslate"><span class="pre">VideoMetadata.name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/video_splitter.html#scenedetect.video_splitter.VideoMetadata.path"><code class="docutils literal notranslate"><span class="pre">VideoMetadata.path</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/video_splitter.html#scenedetect.video_splitter.VideoMetadata.total_scenes"><code class="docutils literal notranslate"><span class="pre">VideoMetadata.total_scenes</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api/video_splitter.html#scenedetect.video_splitter.default_formatter"><code class="docutils literal notranslate"><span class="pre">default_formatter()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/video_splitter.html#scenedetect.video_splitter.is_ffmpeg_available"><code class="docutils literal notranslate"><span class="pre">is_ffmpeg_available()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/video_splitter.html#scenedetect.video_splitter.is_mkvmerge_available"><code class="docutils literal notranslate"><span class="pre">is_mkvmerge_available()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/video_splitter.html#scenedetect.video_splitter.split_video_ffmpeg"><code class="docutils literal notranslate"><span class="pre">split_video_ffmpeg()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/video_splitter.html#scenedetect.video_splitter.split_video_mkvmerge"><code class="docutils literal notranslate"><span class="pre">split_video_mkvmerge()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/video_splitter.html#scenedetect.video_splitter.DEFAULT_FFMPEG_ARGS"><code class="docutils literal notranslate"><span class="pre">DEFAULT_FFMPEG_ARGS</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/video_splitter.html#scenedetect.video_splitter.FFMPEG_PATH"><code class="docutils literal notranslate"><span class="pre">FFMPEG_PATH</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/video_splitter.html#scenedetect.video_splitter.TimecodePair"><code class="docutils literal notranslate"><span class="pre">TimecodePair</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/stats_manager.html">StatsManager</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/stats_manager.html#scenedetect.stats_manager.FrameMetricNotRegistered"><code class="docutils literal notranslate"><span class="pre">FrameMetricNotRegistered</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/stats_manager.html#scenedetect.stats_manager.FrameMetricRegistered"><code class="docutils literal notranslate"><span class="pre">FrameMetricRegistered</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/stats_manager.html#scenedetect.stats_manager.StatsFileCorrupt"><code class="docutils literal notranslate"><span class="pre">StatsFileCorrupt</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/stats_manager.html#scenedetect.stats_manager.StatsManager"><code class="docutils literal notranslate"><span class="pre">StatsManager</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/stats_manager.html#scenedetect.stats_manager.StatsManager.get_metrics"><code class="docutils literal notranslate"><span class="pre">StatsManager.get_metrics()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/stats_manager.html#scenedetect.stats_manager.StatsManager.is_save_required"><code class="docutils literal notranslate"><span class="pre">StatsManager.is_save_required()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/stats_manager.html#scenedetect.stats_manager.StatsManager.load_from_csv"><code class="docutils literal notranslate"><span class="pre">StatsManager.load_from_csv()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/stats_manager.html#scenedetect.stats_manager.StatsManager.metrics_exist"><code class="docutils literal notranslate"><span class="pre">StatsManager.metrics_exist()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/stats_manager.html#scenedetect.stats_manager.StatsManager.register_metrics"><code class="docutils literal notranslate"><span class="pre">StatsManager.register_metrics()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/stats_manager.html#scenedetect.stats_manager.StatsManager.save_to_csv"><code class="docutils literal notranslate"><span class="pre">StatsManager.save_to_csv()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/stats_manager.html#scenedetect.stats_manager.StatsManager.set_metrics"><code class="docutils literal notranslate"><span class="pre">StatsManager.set_metrics()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/stats_manager.html#scenedetect.stats_manager.StatsManager.valid_header"><code class="docutils literal notranslate"><span class="pre">StatsManager.valid_header()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api/stats_manager.html#scenedetect.stats_manager.COLUMN_NAME_FRAME_NUMBER"><code class="docutils literal notranslate"><span class="pre">COLUMN_NAME_FRAME_NUMBER</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/stats_manager.html#scenedetect.stats_manager.COLUMN_NAME_TIMECODE"><code class="docutils literal notranslate"><span class="pre">COLUMN_NAME_TIMECODE</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/frame_timecode.html">FrameTimecode</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/frame_timecode.html#usage-examples">Usage Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/frame_timecode.html#scenedetect.frame_timecode.FrameTimecode"><code class="docutils literal notranslate"><span class="pre">FrameTimecode</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/frame_timecode.html#scenedetect.frame_timecode.FrameTimecode.equal_framerate"><code class="docutils literal notranslate"><span class="pre">FrameTimecode.equal_framerate()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/frame_timecode.html#scenedetect.frame_timecode.FrameTimecode.get_framerate"><code class="docutils literal notranslate"><span class="pre">FrameTimecode.get_framerate()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/frame_timecode.html#scenedetect.frame_timecode.FrameTimecode.get_frames"><code class="docutils literal notranslate"><span class="pre">FrameTimecode.get_frames()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/frame_timecode.html#scenedetect.frame_timecode.FrameTimecode.get_seconds"><code class="docutils literal notranslate"><span class="pre">FrameTimecode.get_seconds()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/frame_timecode.html#scenedetect.frame_timecode.FrameTimecode.get_timecode"><code class="docutils literal notranslate"><span class="pre">FrameTimecode.get_timecode()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/frame_timecode.html#scenedetect.frame_timecode.FrameTimecode.previous_frame"><code class="docutils literal notranslate"><span class="pre">FrameTimecode.previous_frame()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api/frame_timecode.html#scenedetect.frame_timecode.MAX_FPS_DELTA"><code class="docutils literal notranslate"><span class="pre">MAX_FPS_DELTA</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/scene_detector.html">SceneDetector</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/scene_detector.html#scenedetect.scene_detector.SceneDetector"><code class="docutils literal notranslate"><span class="pre">SceneDetector</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/scene_detector.html#scenedetect.scene_detector.SceneDetector.get_metrics"><code class="docutils literal notranslate"><span class="pre">SceneDetector.get_metrics()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/scene_detector.html#scenedetect.scene_detector.SceneDetector.is_processing_required"><code class="docutils literal notranslate"><span class="pre">SceneDetector.is_processing_required()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/scene_detector.html#scenedetect.scene_detector.SceneDetector.post_process"><code class="docutils literal notranslate"><span class="pre">SceneDetector.post_process()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/scene_detector.html#scenedetect.scene_detector.SceneDetector.process_frame"><code class="docutils literal notranslate"><span class="pre">SceneDetector.process_frame()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/scene_detector.html#scenedetect.scene_detector.SceneDetector.stats_manager_required"><code class="docutils literal notranslate"><span class="pre">SceneDetector.stats_manager_required()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/scene_detector.html#scenedetect.scene_detector.SceneDetector.event_buffer_length"><code class="docutils literal notranslate"><span class="pre">SceneDetector.event_buffer_length</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/scene_detector.html#scenedetect.scene_detector.SceneDetector.stats_manager"><code class="docutils literal notranslate"><span class="pre">SceneDetector.stats_manager</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api/scene_detector.html#scenedetect.scene_detector.SparseSceneDetector"><code class="docutils literal notranslate"><span class="pre">SparseSceneDetector</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/scene_detector.html#scenedetect.scene_detector.SparseSceneDetector.post_process"><code class="docutils literal notranslate"><span class="pre">SparseSceneDetector.post_process()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/scene_detector.html#scenedetect.scene_detector.SparseSceneDetector.process_frame"><code class="docutils literal notranslate"><span class="pre">SparseSceneDetector.process_frame()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/video_stream.html">VideoStream</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/video_stream.html#scenedetect.video_stream.FrameRateUnavailable"><code class="docutils literal notranslate"><span class="pre">FrameRateUnavailable</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/video_stream.html#scenedetect.video_stream.SeekError"><code class="docutils literal notranslate"><span class="pre">SeekError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/video_stream.html#scenedetect.video_stream.VideoOpenFailure"><code class="docutils literal notranslate"><span class="pre">VideoOpenFailure</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/video_stream.html#scenedetect.video_stream.VideoStream"><code class="docutils literal notranslate"><span class="pre">VideoStream</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/video_stream.html#scenedetect.video_stream.VideoStream.BACKEND_NAME"><code class="docutils literal notranslate"><span class="pre">VideoStream.BACKEND_NAME()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/video_stream.html#scenedetect.video_stream.VideoStream.read"><code class="docutils literal notranslate"><span class="pre">VideoStream.read()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/video_stream.html#scenedetect.video_stream.VideoStream.reset"><code class="docutils literal notranslate"><span class="pre">VideoStream.reset()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/video_stream.html#scenedetect.video_stream.VideoStream.seek"><code class="docutils literal notranslate"><span class="pre">VideoStream.seek()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/video_stream.html#scenedetect.video_stream.VideoStream.aspect_ratio"><code class="docutils literal notranslate"><span class="pre">VideoStream.aspect_ratio</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/video_stream.html#scenedetect.video_stream.VideoStream.base_timecode"><code class="docutils literal notranslate"><span class="pre">VideoStream.base_timecode</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/video_stream.html#scenedetect.video_stream.VideoStream.duration"><code class="docutils literal notranslate"><span class="pre">VideoStream.duration</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/video_stream.html#scenedetect.video_stream.VideoStream.frame_number"><code class="docutils literal notranslate"><span class="pre">VideoStream.frame_number</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/video_stream.html#scenedetect.video_stream.VideoStream.frame_rate"><code class="docutils literal notranslate"><span class="pre">VideoStream.frame_rate</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/video_stream.html#scenedetect.video_stream.VideoStream.frame_size"><code class="docutils literal notranslate"><span class="pre">VideoStream.frame_size</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/video_stream.html#scenedetect.video_stream.VideoStream.is_seekable"><code class="docutils literal notranslate"><span class="pre">VideoStream.is_seekable</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/video_stream.html#scenedetect.video_stream.VideoStream.name"><code class="docutils literal notranslate"><span class="pre">VideoStream.name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/video_stream.html#scenedetect.video_stream.VideoStream.path"><code class="docutils literal notranslate"><span class="pre">VideoStream.path</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/video_stream.html#scenedetect.video_stream.VideoStream.position"><code class="docutils literal notranslate"><span class="pre">VideoStream.position</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/video_stream.html#scenedetect.video_stream.VideoStream.position_ms"><code class="docutils literal notranslate"><span class="pre">VideoStream.position_ms</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/platform.html">Platform &amp; Logging</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/platform.html#scenedetect.platform.CommandTooLong"><code class="docutils literal notranslate"><span class="pre">CommandTooLong</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/platform.html#scenedetect.platform.FakeTqdmLoggingRedirect"><code class="docutils literal notranslate"><span class="pre">FakeTqdmLoggingRedirect</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/platform.html#scenedetect.platform.FakeTqdmObject"><code class="docutils literal notranslate"><span class="pre">FakeTqdmObject</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/platform.html#scenedetect.platform.FakeTqdmObject.close"><code class="docutils literal notranslate"><span class="pre">FakeTqdmObject.close()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/platform.html#scenedetect.platform.FakeTqdmObject.set_description"><code class="docutils literal notranslate"><span class="pre">FakeTqdmObject.set_description()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/platform.html#scenedetect.platform.FakeTqdmObject.update"><code class="docutils literal notranslate"><span class="pre">FakeTqdmObject.update()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api/platform.html#scenedetect.platform.Template"><code class="docutils literal notranslate"><span class="pre">Template</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/platform.html#scenedetect.platform.logging_redirect_tqdm"><code class="docutils literal notranslate"><span class="pre">logging_redirect_tqdm</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/platform.html#scenedetect.platform.tqdm"><code class="docutils literal notranslate"><span class="pre">tqdm</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/platform.html#scenedetect.platform.get_and_create_path"><code class="docutils literal notranslate"><span class="pre">get_and_create_path()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/platform.html#scenedetect.platform.get_cv2_imwrite_params"><code class="docutils literal notranslate"><span class="pre">get_cv2_imwrite_params()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/platform.html#scenedetect.platform.get_ffmpeg_path"><code class="docutils literal notranslate"><span class="pre">get_ffmpeg_path()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/platform.html#scenedetect.platform.get_ffmpeg_version"><code class="docutils literal notranslate"><span class="pre">get_ffmpeg_version()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/platform.html#scenedetect.platform.get_file_name"><code class="docutils literal notranslate"><span class="pre">get_file_name()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/platform.html#scenedetect.platform.get_mkvmerge_version"><code class="docutils literal notranslate"><span class="pre">get_mkvmerge_version()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/platform.html#scenedetect.platform.get_system_version_info"><code class="docutils literal notranslate"><span class="pre">get_system_version_info()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/platform.html#scenedetect.platform.init_logger"><code class="docutils literal notranslate"><span class="pre">init_logger()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/platform.html#scenedetect.platform.invoke_command"><code class="docutils literal notranslate"><span class="pre">invoke_command()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="logging">
+<h2>Logging<a class="headerlink" href="#logging" title="Permalink to this heading">¶</a></h2>
+<p>PySceneDetect outputs messages to a logger named <code class="docutils literal notranslate"><span class="pre">pyscenedetect</span></code> which does not have any default handlers. You can use <a class="reference internal" href="api/platform.html#scenedetect.platform.init_logger" title="scenedetect.platform.init_logger"><code class="xref py py-func docutils literal notranslate"><span class="pre">scenedetect.init_logger</span></code></a> with <code class="docutils literal notranslate"><span class="pre">show_stdout=True</span></code> or specify a log file (verbosity can also be specified) to attach some common handlers, or use <code class="docutils literal notranslate"><span class="pre">logging.getLogger('pyscenedetect')</span></code> and attach log handlers manually.</p>
+</section>
+<section id="migrating-from-0-5">
+<h2>Migrating From 0.5<a class="headerlink" href="#migrating-from-0-5" title="Permalink to this heading">¶</a></h2>
+<p>PySceneDetect 0.6 introduces several breaking changes which are incompatible with 0.5. See <a class="reference internal" href="api/migration_guide.html#scenedetect-migration-guide"><span class="std std-ref">Migration Guide</span></a> for details on how to update your application. In addition, demonstrations of common use cases can be found in the <a class="reference external" href="https://github.com/Breakthrough/PySceneDetect/blob/v0.6.2-release/tests/test_api.py">tests/test_api.py</a> file.</p>
+</section>
+</section>
+
+
+          </div>
+              <div class="related bottom">
+                &nbsp;
+  <nav id="rellinks">
+    <ul>
+        <li>
+          &larr;
+          <a href="cli/backends.html" title="Previous document">Backends</a>
+        </li>
+        <li>
+          <a href="api/detectors.html" title="Next document">Detection Algorithms</a>
+          &rarr;
+        </li>
+    </ul>
+  </nav>
+              </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="index.html">
+    <img class="logo" src="_static/pyscenedetect_logo.png" alt="Logo" />
+    
+  </a>
+</p>
+
+
+
+<p class="blurb">Version: [0.6.3.dev0]</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=Breakthrough&repo=PySceneDetect&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Command-Line Interface:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="cli.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Command</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli.html#examples">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli.html#options">Options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli.html#detectors">Detectors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli.html#commands">Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli/config_file.html">Configuration File</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli/backends.html">Backends</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Documentation:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#quickstart">Quickstart</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#example">Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-scenedetect">Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-reference">Module Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#logging">Logging</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#migrating-from-0-5">Migrating From 0.5</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/detectors.html">Detection Algorithms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/backends.html">Backends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/scene_manager.html">SceneManager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/video_splitter.html">Video Splitting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/stats_manager.html">StatsManager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/frame_timecode.html">FrameTimecode</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/scene_detector.html">SceneDetector</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/video_stream.html">VideoStream</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/platform.html">Platform &amp; Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/migration_guide.html">Migration Guide</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="cli/backends.html" title="previous chapter">Backends</a></li>
+      <li>Next: <a href="api/detectors.html" title="next chapter">Detection Algorithms</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2014-2024, Brandon Castellano.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.0.1</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="_sources/api.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
