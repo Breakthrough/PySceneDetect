@@ -72,13 +72,13 @@ jobs:
 
       - name: Assemble Portable Distribution
         run: |
-          Move-Item -Path dist/windows/README.txt -Destination dist/scenedetect/README.txt -Force
-          Move-Item -Path dist/windows/LICENSE-PYTHON -Destination dist/scenedetect/LICENSE-PYTHON -Force
-          Move-Item -Path scenedetect/_thirdparty/LICENSE* -Destination dist/scenedetect -Force
+          New-Item -Path dist/scenedetect/ -Name thirdparty -ItemType Directory
           Move-Item -Path LICENSE -Destination dist/scenedetect/LICENSE -Force
+          Move-Item -Path dist/windows/* -Destination dist/scenedetect/thirdparty/ -Force
+          Move-Item -Path scenedetect/_thirdparty/LICENSE* -Destination dist/scenedetect/thirdparty/ -Force
           7z e -odist/ffmpeg ffmpeg-6.0-full_build.7z LICENSE -r
           Move-Item -Path ffmpeg.exe -Destination dist/scenedetect/ffmpeg.exe
-          Move-Item -Path dist/ffmpeg/LICENSE -Destination dist/scenedetect/LICENSE-FFMPEG -Force
+          Move-Item -Path dist/ffmpeg/LICENSE -Destination dist/scenedetect/thirdparty/LICENSE-FFMPEG -Force
 
       - name: Test Portable Distribution
         run: |

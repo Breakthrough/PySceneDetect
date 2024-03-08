@@ -219,7 +219,7 @@ def split_video_mkvmerge(
         ]
         total_frames = scene_list[-1][1].get_frames() - scene_list[0][0].get_frames()
         processing_start_time = time.time()
-        # TODO(v0.6.2): Capture stdout/stderr and show that if the command fails.
+        # TODO: Capture stdout/stderr and show that if the command fails.
         ret_val = invoke_command(call_list)
         if show_output:
             logger.info('Average processing speed %.2f frames/sec.',
@@ -341,7 +341,7 @@ def split_video_ffmpeg(
                 logger.info(
                     'Output from ffmpeg for Scene 1 shown above, splitting remaining scenes...')
             if ret_val != 0:
-                # TODO(v0.6.2): Capture stdout/stderr and display it on any failed calls.
+                # TODO: Capture stdout/stderr and display it on any failed calls.
                 logger.error('Error splitting video (ffmpeg returned %d).', ret_val)
                 break
             if progress_bar:
