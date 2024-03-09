@@ -11,7 +11,7 @@ Video Scene Cut Detection and Analysis Tool
 
 ----------------------------------------------------------
 
-### Latest Release: v0.6.3 (March 8, 2024)
+### Latest Release: v0.6.3 (March 9, 2024)
 
 **Website**:  [scenedetect.com](https://www.scenedetect.com)
 

@@ -55,6 +55,10 @@ def test_scene_list(test_video_file):
     # Each scene is in the format (Start Timecode, End Timecode)
     assert len(scene_list[0]) == 2
 
+    # First scene should start at start_time and last scene should end at end_time.
+    assert scene_list[0][0] == start_time
+    assert scene_list[-1][1] == end_time
+
     for i, _ in enumerate(scene_list):
         assert scene_list[i][0].get_frames() < scene_list[i][1].get_frames()
         if i > 0:

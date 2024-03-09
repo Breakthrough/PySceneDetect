@@ -4,11 +4,11 @@ Releases
 
 ## PySceneDetect 0.6
 
-### 0.6.3 (March 8, 2024)
+### 0.6.3 (March 9, 2024)
 
 #### Release Notes
 
-This release of PySceneDetect includes quite a few bugfixes, as well as some performance improvements with the `load-scenes` command. Thanks for everyone who contributed to the release.
+In addition to some perfromance improvements with the `load-scenes` command, this release of PySceneDetect includes a significant amount of bugfixes. Thanks to everyone who contributed to the release, including those who filed bug reports and helped with debugging!
 
 **Program Changes:**
 
@@ -17,6 +17,7 @@ This release of PySceneDetect includes quite a few bugfixes, as well as some per
  - [bugfix] Progress bar now has correct frame accounting when `--duration` or `--end` are set [#341](https://github.com/Breakthrough/PySceneDetect/issues/341)
  - [bugfix] Only allow `load-scenes` to be specified once, and disallow with other `detect-*` commands [#347](https://github.com/Breakthrough/PySceneDetect/issues/347)
  - [bugfix] Disallow `-s`/`--start` being larger than `-e`/`--end` for the `time` command
+ - [bugfix] Fix `detect-adaptive` not respecting `--min-scene-len` for the first scene
  - [general] Comma-separated timecode list is now only printed when the `list-scenes` command is specified [#356](https://github.com/Breakthrough/PySceneDetect/issues/356)
  - [general] Several changes to `[list-scenes]` config file options:
    - Add `display-scenes` and `display-cuts` options to control output
@@ -32,6 +33,7 @@ This release of PySceneDetect includes quite a few bugfixes, as well as some per
  - [bugfix] Fix circular imports due to partially initialized module for some development environments [#350](https://github.com/Breakthrough/PySceneDetect/issues/350)
  - [bugfix] Fix `SceneManager.detect_scenes` warning when `duration` or `end_time` are specified as timecode strings [#346](https://github.com/Breakthrough/PySceneDetect/issues/346)
  - [bugfix] Ensure correct string conversion behavior for `FrameTimecode` when rounding is enabled [#354](https://github.com/Breakthrough/PySceneDetect/issues/354)
+ - [bugfix] Fix `AdaptiveDetector` not respecting `min_scene_len` for the first scene
  - [feature] Add `output_dir` argument to `split_video_ffmpeg` and `split_video_mkvmerge` functions to set output directory [#298](https://github.com/Breakthrough/PySceneDetect/issues/298)
  - [feature] Add `formatter` argument to `split_video_ffmpeg` to allow formatting filenames via callback [#359](https://github.com/
  Breakthrough/PySceneDetect/issues/359)
