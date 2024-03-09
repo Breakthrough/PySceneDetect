@@ -95,8 +95,8 @@ class AdaptiveDetector(ContentDetector):
         self._adaptive_ratio_key = AdaptiveDetector.ADAPTIVE_RATIO_KEY_TEMPLATE.format(
             window_width=window_width, luma_only='' if not luma_only else '_lum')
         self._first_frame_num = None
-        self._last_frame_num = None
 
+        # NOTE: This must be different than `self._last_scene_cut` which is used by the base class.
         self._last_cut: Optional[int] = None
 
         self._buffer = []
@@ -131,6 +131,10 @@ class AdaptiveDetector(ContentDetector):
 
         super().process_frame(frame_num=frame_num, frame_img=frame_img)
 
+        # Initialize last scene cut point at the beginning of the frames of interest.
+        if self._last_cut is None:
+            self._last_cut = frame_num
+
         required_frames = 1 + (2 * self.window_width)
         self._buffer.append((frame_num, self._frame_score))
         if not len(self._buffer) >= required_frames:
@@ -152,23 +156,15 @@ class AdaptiveDetector(ContentDetector):
         if self.stats_manager is not None:
             self.stats_manager.set_metrics(target[0], {self._adaptive_ratio_key: adaptive_ratio})
 
-        cut_list = []
         # Check to see if adaptive_ratio exceeds the adaptive_threshold as well as there
         # being a large enough content_val to trigger a cut
-        if (adaptive_ratio >= self.adaptive_threshold and target[1] >= self.min_content_val):
-
-            if self._last_cut is None:
-                # No previously detected cuts
-                cut_list.append(target[0])
-                self._last_cut = target[0]
-            elif (target[0] - self._last_cut) >= self.min_scene_len:
-                # Respect the min_scene_len parameter
-                cut_list.append(target[0])
-                # TODO: Should this be updated every time the threshold is exceeded?
-                # It might help with flash suppression for example.
-                self._last_cut = target[0]
-
-        return cut_list
+        threshold_met: bool = (
+            adaptive_ratio >= self.adaptive_threshold and target[1] >= self.min_content_val)
+        min_length_met: bool = (frame_num - self._last_cut) >= self.min_scene_len
+        if threshold_met and min_length_met:
+            self._last_cut = target[0]
+            return [target[0]]
+        return []
 
     def get_content_val(self, frame_num: int) -> Optional[float]:
         """Returns the average content change for a frame."""

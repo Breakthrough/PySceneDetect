@@ -47,7 +47,7 @@ def run_scenedetect(context: CliContext):
 
     if context.load_scenes_input:
         # Skip detection if load-scenes was used.
-        logger.info("Loading scenes from file: %s", context.load_scenes_input)
+        logger.info("Skipping detection, loading scenes from: %s", context.load_scenes_input)
         if context.stats_file_path:
             logger.warning("WARNING: -s/--stats will be ignored due to load-scenes.")
         scene_list, cut_list = _load_scenes(context)

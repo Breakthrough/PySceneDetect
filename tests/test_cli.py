@@ -238,9 +238,9 @@ def test_cli_time_end_of_video():
 
 
 @pytest.mark.parametrize('detector_command', ALL_DETECTORS)
-def test_cli_detector(detector_command: str): #
+def test_cli_detector(detector_command: str):
     """Test each detection algorithm."""
-                                              # Ensure all detectors work without a statsfile.
+    # Ensure all detectors work without a statsfile.
     assert invoke_scenedetect('-i {VIDEO} time {TIME} {DETECTOR}', DETECTOR=detector_command) == 0
 
 
