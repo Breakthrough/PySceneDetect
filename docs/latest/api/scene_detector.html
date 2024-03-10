@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>SceneDetector &#8212; PySceneDetect 0.6.2 documentation</title>
+    <title>SceneDetector &#8212; PySceneDetect 0.6.3 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
     <link rel="stylesheet" type="text/css" href="../_static/pyscenedetect.css" />
@@ -115,20 +115,24 @@ to be passed to process_frame for the given frame_num).</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="scenedetect.scene_detector.SceneDetector.process_frame">
 <span class="sig-name descname"><span class="pre">process_frame</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame_num</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_img</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.scene_detector.SceneDetector.process_frame" title="Permalink to this definition">¶</a></dt>
-<dd><p>Process Frame: Computes/stores metrics and detects any scene changes.</p>
-<p>Prototype method, no actual detection.</p>
+<dd><p>Process the next frame. <cite>frame_num</cite> is assumed to be sequential.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>List of frame numbers of cuts to be added to the cutting list.</p>
-</dd>
-<dt class="field-even">Parameters<span class="colon">:</span></dt>
-<dd class="field-even"><ul class="simple">
-<li><p><strong>frame_num</strong> (<em>int</em>) – </p></li>
-<li><p><strong>frame_img</strong> (<em>ndarray</em><em> | </em><em>None</em>) – </p></li>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>frame_num</strong> (<em>int</em>) – Frame number of frame that is being passed. Can start from any value
+but must remain sequential.</p></li>
+<li><p><strong>frame_img</strong> (<em>numpy.ndarray</em><em> or </em><em>None</em>) – Video frame corresponding to <cite>frame_img</cite>.</p></li>
 </ul>
 </dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of frames where scene cuts have been detected. There may be 0
+or more frames in the list, and not necessarily the same as frame_num.</p>
+</dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><em>List</em>[int]</p>
+<dd class="field-odd"><p>List[int]</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of frame numbers of cuts to be added to the cutting list.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -247,7 +251,7 @@ to be added to the output scene list directly.</p>
 
 
 
-<p class="blurb">CLI/API Documentation [0.6.2]</p>
+<p class="blurb">Version: [0.6.3]</p>
 
 
 
@@ -262,7 +266,7 @@ to be added to the output scene list directly.</p>
 
 
 <h3>Navigation</h3>
-<p class="caption" role="heading"><span class="caption-text">Command-Line Interface [CLI]:</span></p>
+<p class="caption" role="heading"><span class="caption-text">Command-Line Interface:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../cli.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Command</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../cli.html#examples">Examples</a></li>
@@ -272,7 +276,7 @@ to be added to the output scene list directly.</p>
 <li class="toctree-l1"><a class="reference internal" href="../cli/config_file.html">Configuration File</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../cli/backends.html">Backends</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Python API Documentation:</span></p>
+<p class="caption" role="heading"><span class="caption-text">API Documentation:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../api.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="detectors.html">Detection Algorithms</a></li>
@@ -325,7 +329,7 @@ to be added to the output scene list directly.</p>
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &#169;2014-2023, Brandon Castellano.
+      &#169;2014-2024, Brandon Castellano.
       
       |
       Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.0.1</a>
