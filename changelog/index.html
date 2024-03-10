@@ -68,9 +68,15 @@
     <ul class="current">
     <li class="toctree-l2"><a class="reference internal" href="#pyscenedetect-06">PySceneDetect 0.6</a>
         <ul>
-    <li class="toctree-l3"><a class="reference internal" href="#062-july-23-2023">0.6.2 (July 23, 2023)</a>
+    <li class="toctree-l3"><a class="reference internal" href="#063-march-9-2024">0.6.3 (March 9, 2024)</a>
         <ul>
     <li class="toctree-l4"><a class="reference internal" href="#release-notes">Release Notes</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#062-july-23-2023">0.6.2 (July 23, 2023)</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#release-notes_1">Release Notes</a>
     </li>
     <li class="toctree-l4"><a class="reference internal" href="#project-updates">Project Updates</a>
     </li>
@@ -78,7 +84,7 @@
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#061-november-28-2022">0.6.1 (November 28, 2022)</a>
         <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#release-notes_1">Release Notes</a>
+    <li class="toctree-l4"><a class="reference internal" href="#release-notes_2">Release Notes</a>
     </li>
     <li class="toctree-l4"><a class="reference internal" href="#changelog">Changelog</a>
     </li>
@@ -86,7 +92,7 @@
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#06-may-29-2022">0.6 (May 29, 2022)</a>
         <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#release-notes_2">Release Notes</a>
+    <li class="toctree-l4"><a class="reference internal" href="#release-notes_3">Release Notes</a>
     </li>
     <li class="toctree-l4"><a class="reference internal" href="#changelog_1">Changelog</a>
     </li>
@@ -104,7 +110,7 @@
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#056-august-15-2021">0.5.6 (August 15, 2021)</a>
         <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#release-notes_3">Release Notes</a>
+    <li class="toctree-l4"><a class="reference internal" href="#release-notes_4">Release Notes</a>
     </li>
     <li class="toctree-l4"><a class="reference internal" href="#changelog_2">Changelog</a>
     </li>
@@ -114,7 +120,7 @@
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#055-january-17-2021">0.5.5 (January 17, 2021)</a>
         <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#release-notes_4">Release Notes</a>
+    <li class="toctree-l4"><a class="reference internal" href="#release-notes_5">Release Notes</a>
     </li>
     <li class="toctree-l4"><a class="reference internal" href="#changelog_3">Changelog</a>
     </li>
@@ -124,7 +130,7 @@
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#054-september-14-2020">0.5.4 (September 14, 2020)</a>
         <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#release-notes_5">Release Notes</a>
+    <li class="toctree-l4"><a class="reference internal" href="#release-notes_6">Release Notes</a>
     </li>
     <li class="toctree-l4"><a class="reference internal" href="#changelog_4">Changelog</a>
     </li>
@@ -134,7 +140,7 @@
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#053-july-12-2020">0.5.3 (July 12, 2020)</a>
         <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#release-notes_6">Release Notes</a>
+    <li class="toctree-l4"><a class="reference internal" href="#release-notes_7">Release Notes</a>
     </li>
     <li class="toctree-l4"><a class="reference internal" href="#changelog_5">Changelog</a>
     </li>
@@ -253,8 +259,50 @@
               
                 <h1 id="releases">Releases</h1>
 <h2 id="pyscenedetect-06">PySceneDetect 0.6</h2>
-<h3 id="062-july-23-2023">0.6.2 (July 23, 2023)</h3>
+<h3 id="063-march-9-2024">0.6.3 (March 9, 2024)</h3>
 <h4 id="release-notes">Release Notes</h4>
+<p>In addition to some perfromance improvements with the <code>load-scenes</code> command, this release of PySceneDetect includes a significant amount of bugfixes. Thanks to everyone who contributed to the release, including those who filed bug reports and helped with debugging!</p>
+<p><strong>Program Changes:</strong></p>
+<ul>
+<li>[bugfix] Fix crash for some WebM videos when using <code>save-images</code> with <code>--backend pyav</code> <a href="https://github.com/Breakthrough/PySceneDetect/issues/355">#355</a></li>
+<li>[bugfix] Correct <code>--duration</code> and <code>--end</code> for presentation time when specified as frame numbers <a href="https://github.com/Breakthrough/PySceneDetect/issues/341">#341</a></li>
+<li>[bugfix] Progress bar now has correct frame accounting when <code>--duration</code> or <code>--end</code> are set <a href="https://github.com/Breakthrough/PySceneDetect/issues/341">#341</a></li>
+<li>[bugfix] Only allow <code>load-scenes</code> to be specified once, and disallow with other <code>detect-*</code> commands <a href="https://github.com/Breakthrough/PySceneDetect/issues/347">#347</a></li>
+<li>[bugfix] Disallow <code>-s</code>/<code>--start</code> being larger than <code>-e</code>/<code>--end</code> for the <code>time</code> command</li>
+<li>[bugfix] Fix <code>detect-adaptive</code> not respecting <code>--min-scene-len</code> for the first scene</li>
+<li>[general] Comma-separated timecode list is now only printed when the <code>list-scenes</code> command is specified <a href="https://github.com/Breakthrough/PySceneDetect/issues/356">#356</a></li>
+<li>[general] Several changes to <code>[list-scenes]</code> config file options:</li>
+<li>Add <code>display-scenes</code> and <code>display-cuts</code> options to control output</li>
+<li>Add <code>cut-format</code> to control formatting of cut points <a href="https://github.com/Breakthrough/PySceneDetect/issues/349">#349</a><ul>
+<li>Valid values: <code>frames</code>, <code>timecode</code>, <code>seconds</code></li>
+</ul>
+</li>
+<li>[general] Increase progress bar indent to improve visibility and visual alignment</li>
+<li>[improvement] The <code>s</code> suffix for setting timecode values in seconds is no longer required (values without decimal places are still interpreted as frame numbers)</li>
+<li>[improvement] <code>load-scenes</code> now skips detection, generating output much faster <a href="https://github.com/Breakthrough/PySceneDetect/issues/347">#347</a> (thanks @wjs018 for the initial implementation)</li>
+</ul>
+<p><strong>API Changes:</strong></p>
+<ul>
+<li>[bugfix] Fix <code>AttributeError</code> thrown when accessing <code>aspect_ratio</code> on certain videos using <code>VideoStreamAv</code> <a href="https://github.com/Breakthrough/PySceneDetect/issues/355">#355</a></li>
+<li>[bugfix] Fix circular imports due to partially initialized module for some development environments <a href="https://github.com/Breakthrough/PySceneDetect/issues/350">#350</a></li>
+<li>[bugfix] Fix <code>SceneManager.detect_scenes</code> warning when <code>duration</code> or <code>end_time</code> are specified as timecode strings <a href="https://github.com/Breakthrough/PySceneDetect/issues/346">#346</a></li>
+<li>[bugfix] Ensure correct string conversion behavior for <code>FrameTimecode</code> when rounding is enabled <a href="https://github.com/Breakthrough/PySceneDetect/issues/354">#354</a></li>
+<li>[bugfix] Fix <code>AdaptiveDetector</code> not respecting <code>min_scene_len</code> for the first scene</li>
+<li>[feature] Add <code>output_dir</code> argument to <code>split_video_ffmpeg</code> and <code>split_video_mkvmerge</code> functions to set output directory <a href="https://github.com/Breakthrough/PySceneDetect/issues/298">#298</a></li>
+<li>[feature] Add <code>formatter</code> argument to <code>split_video_ffmpeg</code> to allow formatting filenames via callback <a href="https://github.com/
+ Breakthrough/PySceneDetect/issues/359">#359</a></li>
+<li>[general] The <code>frame_img</code> argument to <code>SceneDetector.process_frame()</code> is now required</li>
+<li>[general] Remove <code>TimecodeValue</code> from <code>scenedetect.frame_timecode</code> (use <code>typing.Union[int, float, str]</code>)</li>
+<li>[general] Remove <code>MotionDetector</code> and <code>scenedetect.detectors.motion_detector</code> module (will be reintroduced after <code>SceneDetector</code> interface is stable)</li>
+<li>[improvement] <code>scenedetect.stats_manager</code> module improvements:</li>
+<li>The <code>StatsManager.register_metrics()</code> method no longer throws any exceptions</li>
+<li>Add <code>StatsManager.metric_keys</code> property to query registered metric keys</li>
+<li>Deprecate <code>FrameMetricRegistered</code> and <code>FrameMetricNotRegistered</code> exceptions (no longer used)</li>
+<li>[improvement] When converting strings representing seconds to <code>FrameTimecode</code>, the <code>s</code> suffix is now optional, and whitespace is ignored (note that values without decimal places are still interpreted as frame numbers)</li>
+<li>[improvement] The <code>VideoCaptureAdapter</code> in <code>scenedetect.backends.opencv</code> now attempts to report duration if known</li>
+</ul>
+<h3 id="062-july-23-2023">0.6.2 (July 23, 2023)</h3>
+<h4 id="release-notes_1">Release Notes</h4>
 <p>Includes new <a href="https://www.scenedetect.com/docs/0.6.2/cli.html#load-scenes"><code>load-scenes</code> command</a>, ability to specify a default detector, PyAV 10 support, and several bugfixes. Minimum supported Python version is now <strong>Python 3.7</strong>.</p>
 <p><strong>Command-Line Changes:</strong></p>
 <ul>
@@ -297,7 +345,7 @@
 <li>Windows distributions no longer include mkvmerge (can still <a href="https://mkvtoolnix.download/downloads.html#windows">download for Windows here</a>)</li>
 </ul>
 <h3 id="061-november-28-2022">0.6.1 (November 28, 2022)</h3>
-<h4 id="release-notes_1">Release Notes</h4>
+<h4 id="release-notes_2">Release Notes</h4>
 <p>Includes <a href="https://github.com/Zulko/moviepy">MoviePy support</a>, edge detection capability for fast cuts, and several enhancements/bugfixes.</p>
 <h4 id="changelog">Changelog</h4>
 <p><strong>Command-Line Changes:</strong></p>
@@ -348,7 +396,7 @@
 <li>[enhancement] Add <code>interpolation</code> argument to <code>save_images</code> to allow setting image resize method (default remains bicubic)</li>
 </ul>
 <h3 id="06-may-29-2022">0.6 (May 29, 2022)</h3>
-<h4 id="release-notes_2">Release Notes</h4>
+<h4 id="release-notes_3">Release Notes</h4>
 <p>PySceneDetect v0.6 is a <strong>major breaking change</strong> including better performance, configuration file support, and a more ergonomic API.  The new <strong>minimum Python version is now 3.6</strong>. See the <a href="https://scenedetect.com/projects/Manual/en/latest/api/migration_guide.html">Migration Guide</a> for information on how to port existing applications to the new API.  Most users will see performance improvements after updating, and changes to the command-line are not expected to break most workflows.</p>
 <p>The main goals of v0.6 are reliability and performance. To achieve this required several breaking changes.  The video input API was refactored, and <em>many</em> technical debt items were addressed. This should help the eventual transition to the first planned stable release (v1.0) where the goal is an improved scene detection API.</p>
 <p>Both the Windows installer and portable distributions now include signed executables. Many thanks to SignPath, AppVeyor, and AdvancedInstaller for their support.</p>
@@ -479,7 +527,7 @@
 <li>Fix crash when using <code>detect-content</code> or <code>detect-adaptive</code> with latest version of OpenCV (thanks @bilde2910)</li>
 </ul>
 <h3 id="056-august-15-2021">0.5.6 (August 15, 2021)</h3>
-<h4 id="release-notes_3">Release Notes</h4>
+<h4 id="release-notes_4">Release Notes</h4>
 <ul>
 <li><strong>New detection algorithm</strong>: <code>detect-adaptive</code> which works similar to <code>detect-content</code>, but with reduced false negatives during fast camera movement (thanks @scarwire and @wjs018)</li>
 <li>Images generated by <code>save-images</code> can now be resized via the command line</li>
@@ -511,7 +559,7 @@
 <li>Due to the use of truncation for frame number calculation, FrameTimecode objects may be off-by-one when constructed using a float value (<a href="https://github.com/Breakthrough/PySceneDetect/issues/268">#268</a>, fixed in v0.6)</li>
 </ul>
 <h3 id="055-january-17-2021">0.5.5 (January 17, 2021)</h3>
-<h4 id="release-notes_4">Release Notes</h4>
+<h4 id="release-notes_5">Release Notes</h4>
 <ul>
 <li>One of the last major updates before transitioning to the new v0.6.x API</li>
 <li>The <code>--min-scene-len</code>/<code>-m</code> option is now global rather than per-detector</li>
@@ -552,7 +600,7 @@
 <li>Variable framerate videos (VFR) are not fully supported, and will yield incorrect timestamps (<a href="https://github.com/Breakthrough/PySceneDetect/issues/168">#168</a>)</li>
 </ul>
 <h3 id="054-september-14-2020">0.5.4 (September 14, 2020)</h3>
-<h4 id="release-notes_5">Release Notes</h4>
+<h4 id="release-notes_6">Release Notes</h4>
 <ul>
 <li>Improved performance when using <code>time</code> and <code>save-images</code> commands</li>
 <li>Improved performance of <code>detect-threshold</code> when using a small minimum percent</li>
@@ -576,7 +624,7 @@
 <li>Variable framerate videos are not supported properly currently (#168), a warning may be added in the next release to indicate when a VFR video is detected, until this can be properly resolved (<a href="https://github.com/Breakthrough/PySceneDetect/issues/168">#168</a>)</li>
 </ul>
 <h3 id="053-july-12-2020">0.5.3 (July 12, 2020)</h3>
-<h4 id="release-notes_6">Release Notes</h4>
+<h4 id="release-notes_7">Release Notes</h4>
 <ul>
 <li>Resolved long-standing bug where <code>split-video</code> command would duplicate certain frames at the beginning/end of the output (<a href="https://github.com/Breakthrough/PySceneDetect/issues/93">#93</a>)</li>
 <li>This was determined to be caused by copying (instead of re-encoding) the audio track, causing extra frames to be brought in when the audio samples did not line up on a frame boundary (thank you @joshcoales for your assistance)</li>
@@ -745,7 +793,7 @@
 
   <div role="contentinfo">
     <!-- Copyright etc -->
-      <p>Copyright &copy; 2014-2023 Brandon Castellano.  All rights reserved.<br />Licensed under BSD 3-Clause (see the <a href="https://github.com/Breakthrough/PySceneDetect/blob/main/LICENSE" alt="link to latest LICENSE file on Github">LICENSE file</a> for details).</p>
+      <p>Copyright &copy; 2014-2024 Brandon Castellano.  All rights reserved.<br />Licensed under BSD 3-Clause (see the <a href="https://github.com/Breakthrough/PySceneDetect/blob/main/LICENSE" alt="link to latest LICENSE file on Github">LICENSE file</a> for details).</p>
   </div>
 
   Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.

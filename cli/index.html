@@ -307,7 +307,7 @@
 <p>If set too large, enough frames may be skipped each time that the threshold is met during every iteration, continually triggering scene changes.  This is because frame skipping essentially raises the threshold between frames in the same scene (making them more likely to appear as <em>cuts</em>) while not affecting the threshold between frames of different scenes.</p>
 <p>This makes the two harder to distinguish, and can cause additional false scene cuts to be detected.  While this can be compensated for by raising the threshold value, this increases the probability of missing a real/true scene cut - thus, the use of the <code>-fs</code> / <code>--frame-skip</code> option is discouraged.</p>
 <h2 id="seeking-duration-and-setting-start-stop-times">Seeking, Duration, and Setting Start / Stop Times</h2>
-<p>Specifying the <code>time</code> command allows control over what portion of the video PySceneDetect processes.  The <code>time</code> command accepts three options: start time (<code>-s</code> / <code>-start</code>), end time (<code>-e</code> / <code>-end</code>), and duration (<code>-d</code> / <code>--duration</code>).  Specifying both end time and duration is redundant, and in this case, duration overrides end time.  Timecodes can be given in three formats:  exact frame number (e.g. <code>12345</code>), number of seconds followed by <code>s</code> (e.g. <code>123s</code>, <code>123.45s</code>), or standard format (HH:MM:SS[.nnn], e.g. <code>12:34:56</code>, <code>12:34:56.789</code>).</p>
+<p>Specifying the <code>time</code> command allows control over what portion of the video PySceneDetect processes.  The <code>time</code> command accepts three options: start time (<code>-s</code> / <code>-start</code>), end time (<code>-e</code> / <code>-end</code>), and duration (<code>-d</code> / <code>--duration</code>).  Specifying both end time and duration is redundant, and in this case, duration overrides end time.  Timecodes can be given in seconds (<code>100.0</code>), frames (no decimal place, <code>100</code>), or timecode as <code>HH:MM:SS[.nnn]</code> (<code>12:34:56.789</code>).</p>
 <p>For example, let's say we have a video shot at 30 FPS, and want to analyze only the segment from the 5 to the 6.5 minute mark in the video (we want to analyze the 90 seconds [2700 frames] between 00:05:00 and 00:06:30).  The following commands are all thus equivalent in this regard (assuming we are using the content detector):</p>
 <pre><code class="language-rst">scenedetect -i my_video.mp4 time --start 00:05:00 --end 00:06:30
 </code></pre>
@@ -341,7 +341,7 @@
 </ul>
 </li>
 </ul>
-<p>Run <code>scenedetect --help</code> to see the exact path on your system which will be used (it will be listed under the help text for the -c/--config option).  You can <a href="https://raw.githubusercontent.com/Breakthrough/PySceneDetect/v0.6.2-release/scenedetect.cfg">click here to download a <code>scenedetect.cfg</code> config file</a> to use as a template. Note that lines starting with a <code>#</code> are comments and will be ignored.  The <code>scenedetect.cfg</code> template file is also available in the folder where PySceneDetect is installed.</p>
+<p>Run <code>scenedetect --help</code> to see the exact path on your system which will be used (it will be listed under the help text for the -c/--config option).  You can <a href="https://raw.githubusercontent.com/Breakthrough/PySceneDetect/v0.6.3-release/scenedetect.cfg">click here to download a <code>scenedetect.cfg</code> config file</a> to use as a template. Note that lines starting with a <code>#</code> are comments and will be ignored.  The <code>scenedetect.cfg</code> template file is also available in the folder where PySceneDetect is installed.</p>
 <p>Specifying a config file path using -c/--config overrides the user config file. Specifying values on the command line will override those values in the config file.</p>
 <p>The syntax of a configuration file is:</p>
 <pre><code>[command]
@@ -369,7 +369,7 @@ format = jpeg
 quality = 80
 num-images = 3
 </code></pre>
-<p>See the <code>scenedetect.cfg</code> file in the location you installed PySceneDetect or <a href="https://raw.githubusercontent.com/Breakthrough/PySceneDetect/v0.6.2-release/scenedetect.cfg">download it from Github</a> for a complete listing of all configuration options.</p>
+<p>See the <code>scenedetect.cfg</code> file in the location you installed PySceneDetect or <a href="https://raw.githubusercontent.com/Breakthrough/PySceneDetect/v0.6.3-release/scenedetect.cfg">download it from Github</a> for a complete listing of all configuration options.</p>
 <h2 id="video-splitting-requirements"><span class="fa fa-keyboard-o"></span>&nbsp; Video Splitting Requirements</h2>
 <p>PySceneDetect can use either <code>ffmpeg</code> or <code>mkvmerge</code> to split videos automatically.</p>
 <p>By default, when specifying the <code>split-video</code> command, <code>ffmpeg</code> will be used to split the video.  If the <code>-c</code>/<code>--copy</code> option is also set (e.g. <code>split-video --copy</code>), <code>mkvmerge</code> will be used to split the video instead.</p>
@@ -405,7 +405,7 @@ num-images = 3
 
   <div role="contentinfo">
     <!-- Copyright etc -->
-      <p>Copyright &copy; 2014-2023 Brandon Castellano.  All rights reserved.<br />Licensed under BSD 3-Clause (see the <a href="https://github.com/Breakthrough/PySceneDetect/blob/main/LICENSE" alt="link to latest LICENSE file on Github">LICENSE file</a> for details).</p>
+      <p>Copyright &copy; 2014-2024 Brandon Castellano.  All rights reserved.<br />Licensed under BSD 3-Clause (see the <a href="https://github.com/Breakthrough/PySceneDetect/blob/main/LICENSE" alt="link to latest LICENSE file on Github">LICENSE file</a> for details).</p>
   </div>
 
   Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
