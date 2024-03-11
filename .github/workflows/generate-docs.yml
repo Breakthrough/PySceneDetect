@@ -20,10 +20,10 @@ jobs:
       scenedetect_docs_dest: ''
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
 
       - name: Set up Python 3.11
-        uses: actions/checkout@v5
+        uses: actions/setup-python@v4
         with:
           python-version: '3.11'
           cache: 'pip'
