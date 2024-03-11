@@ -3,13 +3,12 @@
 
 <div class="important">
 <h3 class="wy-text-neutral"><span class="fa fa-info-circle wy-text-info"></span>&nbsp; Latest Release: <b>v0.6.3</b> (March 9, 2024)</h3>
-<a href="download/" class="btn btn-success" style="margin-bottom:8px;" role="button"><span class="fa fa-download"></span>&nbsp; <b>Download</b></a> &nbsp;&nbsp;&nbsp;&nbsp; <a href="changelog/" class="btn btn-info" style="margin-bottom:8px;" role="button"><span class="fa fa-reorder"></span>&nbsp; <b>Changelog</b></a> &nbsp;&nbsp;&nbsp;&nbsp; <a href="docs/" class="btn btn-warning" style="margin-bottom:8px;" role="button"><span class="fa fa-gear"></span>&nbsp; <b>Documentation</b></a> &nbsp;&nbsp;&nbsp;&nbsp; <a href="cli/" class="btn btn-danger" style="margin-bottom:8px;" role="button"><span class="fa fa-book"></span>&nbsp; <b>Getting Started</b></a>
+<a href="download/" class="btn btn-success" style="margin-bottom:8px;" role="button"><span class="fa fa-download"></span>&nbsp; <b>Download</b></a> &nbsp;&nbsp;&nbsp;&nbsp; <a href="changelog/" class="btn btn-info" style="margin-bottom:8px;" role="button"><span class="fa fa-reorder"></span>&nbsp; <b>Changelog</b></a> &nbsp;&nbsp;&nbsp;&nbsp; <a href="docs/latest/" class="btn btn-warning" style="margin-bottom:8px;" role="button"><span class="fa fa-gear"></span>&nbsp; <b>Documentation</b></a> &nbsp;&nbsp;&nbsp;&nbsp; <a href="cli/" class="btn btn-danger" style="margin-bottom:8px;" role="button"><span class="fa fa-book"></span>&nbsp; <b>Getting Started</b></a>
 <br/>
 See the changelog for the latest release notes and known issues.
 </div>
 
-**PySceneDetect** is a tool/library for **detecting shot changes in videos** ([example](cli.md)), and **automatically splitting the video into separate clips**.  PySceneDetect is free and open-source software, and there are [several detection methods available](features.md) - from simple threshold-based fade in/out detection, to advanced content aware fast-cut detection of each shot.
-
+**PySceneDetect** is a tool for **detecting shot changes in videos** ([example](cli.md)), and can **automatically split the video into separate clips**.  PySceneDetect is free and open-source software, and has several [detection methods](features.md#detection-methods) to find fast-cuts and threshold-based fades.
 
 <h3>Quickstart</h3>
 
