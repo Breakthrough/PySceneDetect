@@ -1,7 +1,7 @@
 
 # PySceneDetect CLI
 
-See [the documentation](../docs/stable/) for a complete reference to the `scenedetect` command with more examples.
+See [the documentation](../docs/latest/) for a complete reference to the `scenedetect` command with more examples.
 
 ## Quickstart
 
