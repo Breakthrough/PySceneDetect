@@ -27,7 +27,7 @@ from typing import AnyStr, Optional, Tuple
 import click
 
 import scenedetect
-from scenedetect.detectors import AdaptiveDetector, ContentDetector, ThresholdDetector
+from scenedetect.detectors import AdaptiveDetector, ContentDetector, ThresholdDetector, HistogramDetector
 from scenedetect.backends import AVAILABLE_BACKENDS
 from scenedetect.platform import get_system_version_info
 
@@ -753,7 +753,12 @@ def detect_hist_command(ctx: click.Context, threshold: Optional[float], bits: Op
         detect-hist --threshold 20000.0
     """
     assert isinstance(ctx.obj, CliContext)
-    ctx.obj.handle_detect_hist(threshold=threshold, bits=bits, min_scene_len=min_scene_len)
+
+    assert isinstance(ctx.obj, CliContext)
+    detector_args = ctx.obj.get_detect_hist_params(
+        threshold=threshold, bits=bits, min_scene_len=min_scene_len)
+    logger.debug('Adding detector: HistogramDetector(%s)', detector_args)
+    ctx.obj.add_detector(HistogramDetector(**detector_args))
 
 
 @click.command('load-scenes', cls=_Command)
@@ -1188,4 +1193,5 @@ scenedetect.add_command(split_video_command)
 scenedetect.add_command(detect_content_command)
 scenedetect.add_command(detect_threshold_command)
 scenedetect.add_command(detect_adaptive_command)
+scenedetect.add_command(detect_hist_command)
 scenedetect.add_command(load_scenes_command)

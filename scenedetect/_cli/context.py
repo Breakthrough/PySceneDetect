@@ -28,7 +28,7 @@ from scenedetect.platform import get_and_create_path, get_cv2_imwrite_params, in
 from scenedetect.frame_timecode import FrameTimecode, MAX_FPS_DELTA
 from scenedetect.video_stream import VideoStream, VideoOpenFailure, FrameRateUnavailable
 from scenedetect.video_splitter import is_mkvmerge_available, is_ffmpeg_available
-from scenedetect.detectors import AdaptiveDetector, ContentDetector, ThresholdDetector
+from scenedetect.detectors import AdaptiveDetector, ContentDetector, ThresholdDetector, HistogramDetector
 from scenedetect.stats_manager import StatsManager
 from scenedetect.scene_manager import SceneManager, Interpolation
 
@@ -288,6 +288,8 @@ class CliContext:
             self.default_detector = (ContentDetector, self.get_detect_content_params())
         elif default_detector == 'detect-threshold':
             self.default_detector = (ThresholdDetector, self.get_detect_threshold_params())
+        elif default_detector == 'detect-hist':
+            self.default_detector = (HistogramDetector, self.get_detect_hist_params())
         else:
             raise click.BadParameter("Unknown detector type!", param_hint='default-detector')
 
@@ -449,13 +451,10 @@ class CliContext:
         self.load_scenes_column_name = self.config.get_value("load-scenes", "start-col-name",
                                                              start_col_name)
 
-    def handle_detect_hist(self, threshold: Optional[float], bits: Optional[int],
-                           min_scene_len: Optional[str]):
-        """Handle `detect-hist` command options."""
-        self._check_input_open()
-        options_processed_orig = self.options_processed
-        self.options_processed = False
-
+    def get_detect_hist_params(self, threshold: Optional[float], bits: Optional[int],
+                               min_scene_len: Optional[str]) -> Dict[str, Any]:
+        """Handle detect-hist command options and return dict to construct one with."""
+        self._ensure_input_open()
         if self.drop_short_scenes:
             min_scene_len = 0
         else:
@@ -465,20 +464,11 @@ class CliContext:
                 else:
                     min_scene_len = self.config.get_value("detect-hist", "min-scene-len")
             min_scene_len = parse_timecode(min_scene_len, self.video_stream.frame_rate).frame_num
-
-        threshold = self.config.get_value("detect-hist", "threshold", threshold)
-        bits = self.config.get_value("detect-hist", "bits", bits)
-
-        # Log detector args for debugging before we construct it.
-        logger.debug(
-            'Adding detector: HistogramDetector(threshold=%f, bits=%d,'
-            ' min_scene_len=%d)', threshold, bits, min_scene_len)
-
-        self._add_detector(
-            scenedetect.detectors.HistogramDetector(
-                threshold=threshold, bits=bits, min_scene_len=min_scene_len))
-
-        self.options_processed = options_processed_orig
+        return {
+            'bits': self.config.get_value("detect-hist", "bits", bits),
+            'min_scene_len': min_scene_len,
+            'threshold': self.config.get_value("detect-hist", "threshold", threshold),
+        }
 
     def handle_export_html(
         self,

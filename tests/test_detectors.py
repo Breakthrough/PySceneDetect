@@ -29,6 +29,12 @@ from scenedetect.backends.opencv import VideoStreamCv2
 
 ALL_DETECTORS = (AdaptiveDetector, ContentDetector, HashDetector, HistogramDetector, ThresholdDetector,)
 
+# TODO(#53): Add a test that verifies algorithms output relatively consistent frame scores
+# regardless of resolution. This will ensure that threshold values will hold true for different
+# input sources. Most detectors already provide this guarantee, so this is more to prevent any
+# regressions in the future.
+
+
 # TODO: Reduce code duplication here and in `conftest.py`
 def get_absolute_path(relative_path: str) -> str:
     """ Returns the absolute path to a (relative) path of a file that
@@ -46,31 +52,6 @@ git checkout refs/remotes/origin/resources -- tests/resources/
 git reset
 """ % relative_path)
     return abs_path
-
-
-# TODO: Add a test case for this in the fixtures defined below.
-def test_histogram_detector(test_movie_clip):
-    """ Test SceneManager with VideoStreamCv2 and HistogramDetector. """
-    TEST_MOVIE_CLIP_START_FRAMES_ACTUAL = [1199, 1226, 1260, 1281, 1334, 1365, 1590, 1697, 1871]
-    """Ground truth of start frame for each fast cut in `test_movie_clip`."""
-    video = VideoStreamCv2(test_movie_clip)
-    scene_manager = SceneManager()
-    scene_manager.add_detector(HistogramDetector())
-    scene_manager.auto_downscale = True
-
-    video_fps = video.frame_rate
-    start_time = FrameTimecode('00:00:50', video_fps)
-    end_time = FrameTimecode('00:01:19', video_fps)
-
-    video.seek(start_time)
-    scene_manager.detect_scenes(video=video, end_time=end_time)
-
-    scene_list = scene_manager.get_scene_list()
-    assert len(scene_list) == len(TEST_MOVIE_CLIP_START_FRAMES_ACTUAL)
-    detected_start_frames = [timecode.get_frames() for timecode, _ in scene_list]
-    assert TEST_MOVIE_CLIP_START_FRAMES_ACTUAL == detected_start_frames
-    # Ensure last scene's end timecode matches the end time we set.
-    assert scene_list[-1][1] == end_time
 
 
 @dataclass
@@ -127,6 +108,14 @@ def get_fast_cut_test_cases():
         pytest.param(
             TestCase(
                 path=get_absolute_path("resources/goldeneye.mp4"),
+                detector=HistogramDetector(),
+                start_time=1199,
+                end_time=1450,
+                scene_boundaries=[1199, 1226, 1260, 1281, 1334, 1365]),
+            id="histogram_default"),
+        pytest.param(
+            TestCase(
+                path=get_absolute_path("resources/goldeneye.mp4"),
                 detector=ContentDetector(min_scene_len=30),
                 start_time=1199,
                 end_time=1450,
@@ -148,6 +137,14 @@ def get_fast_cut_test_cases():
                 end_time=1450,
                 scene_boundaries=[1199, 1260, 1334, 1365]),
             id="hash_min_scene_len"),
+        pytest.param(
+            TestCase(
+                path=get_absolute_path("resources/goldeneye.mp4"),
+                detector=HistogramDetector(min_scene_len=30),
+                start_time=1199,
+                end_time=1450,
+                scene_boundaries=[1199, 1260, 1334, 1365]),
+            id="histogram_min_scene_len"),
     ]
 
 
