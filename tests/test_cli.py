@@ -43,7 +43,7 @@ from scenedetect.video_splitter import is_ffmpeg_available, is_mkvmerge_availabl
 # TODO: Missing tests for --min-scene-len and --drop-short-scenes.
 
 SCENEDETECT_CMD = 'python -m scenedetect'
-ALL_DETECTORS = ['detect-content', 'detect-threshold', 'detect-adaptive']
+ALL_DETECTORS = ['detect-content', 'detect-threshold', 'detect-adaptive', 'detect-hist']
 ALL_BACKENDS = ['opencv', 'pyav']
 
 DEFAULT_VIDEO_PATH = 'tests/resources/goldeneye.mp4'
