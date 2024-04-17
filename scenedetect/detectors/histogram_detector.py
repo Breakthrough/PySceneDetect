@@ -35,7 +35,10 @@ class HistogramDetector(SceneDetector):
         """
         Arguments:
             threshold: Threshold value (float) that the calculated difference between subsequent
-                histograms must exceed to trigger a new scene.
+                        histograms must exceed to trigger a new scene.
+                        The threshold value should be between 0 and 1 (perfect positive correlation, identical histograms).
+                        Values close to 1 indicate very similar frames, while lower values suggest changes.
+
             min_scene_len:  Minimum length of any scene.
         """
         super().__init__()
@@ -84,7 +87,13 @@ class HistogramDetector(SceneDetector):
             hist_diff = cv2.compareHist(self._last_hist, hist, cv2.HISTCMP_CORREL)
 
             # Check if a new scene should be triggered
-            if hist_diff >= self._threshold and ((frame_num - self._last_scene_cut)
+            # Set a correlation threshold to determine scene changes.
+            # The threshold value should be between -1 (perfect negative correlation, not applicable here)
+            # and 1 (perfect positive correlation, identical histograms).
+            # Values close to 1 indicate very similar frames, while lower values suggest changes.
+            # Example: If `_threshold` is set to 0.8, it implies that only changes resulting in a correlation
+            # less than 0.8 between histograms will be considered significant enough to denote a scene change.
+            if hist_diff <= self._threshold and ((frame_num - self._last_scene_cut)
                                                  >= self._min_scene_len):
                 cut_list.append(frame_num)
                 self._last_scene_cut = frame_num
