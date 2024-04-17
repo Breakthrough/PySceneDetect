@@ -60,7 +60,7 @@ Example
 Template
 =======================================================================
 
-This template shows every possible configuration option and default values. It can be used as a ``scenedetect.cfg`` file. You can also `download it from Github <https://raw.githubusercontent.com/Breakthrough/PySceneDetect/v0.6.2-release/scenedetect.cfg>`_.
+This template shows every possible configuration option and default values. It can be used as a ``scenedetect.cfg`` file. You can also `download it from Github <https://raw.githubusercontent.com/Breakthrough/PySceneDetect/v0.6.3-release/scenedetect.cfg>`_.
 
 .. literalinclude:: ../../scenedetect.cfg
    :language: ini

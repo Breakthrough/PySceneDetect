@@ -6,7 +6,7 @@
 #     [  Docs:    https://scenedetect.com/docs/                     ]
 #     [  Github:  https://github.com/Breakthrough/PySceneDetect/    ]
 #
-# Copyright (C) 2014-2023 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2014-2024 Brandon Castellano <http://www.bcastell.com>.
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
@@ -33,10 +33,9 @@ tested by adding it to the test suite in `tests/test_video_stream.py`.
 """
 
 from abc import ABC, abstractmethod
-from logging import getLogger
 from typing import Tuple, Optional, Union
 
-from numpy import ndarray
+import numpy as np
 
 from scenedetect.frame_timecode import FrameTimecode
 
@@ -178,15 +177,15 @@ class VideoStream(ABC):
     #
 
     @abstractmethod
-    def read(self, decode: bool = True, advance: bool = True) -> Union[ndarray, bool]:
-        """Read and decode the next frame as a numpy.ndarray. Returns False when video ends.
+    def read(self, decode: bool = True, advance: bool = True) -> Union[np.ndarray, bool]:
+        """Read and decode the next frame as a np.ndarray. Returns False when video ends.
 
         Arguments:
             decode: Decode and return the frame.
             advance: Seek to the next frame. If False, will return the current (last) frame.
 
         Returns:
-            If decode = True, the decoded frame (numpy.ndarray), or False (bool) if end of video.
+            If decode = True, the decoded frame (np.ndarray), or False (bool) if end of video.
             If decode = False, a bool indicating if advancing to the the next frame succeeded.
         """
         raise NotImplementedError
@@ -217,6 +216,3 @@ class VideoStream(ABC):
             ValueError: `target` is not a valid value (i.e. it is negative).
         """
         raise NotImplementedError
-
-
-# TODO(0.6.3): Add a StreamJoiner class to concatenate multiple videos using a specified backend.

@@ -6,7 +6,7 @@
 #     [  Docs:    https://scenedetect.com/docs/                     ]
 #     [  Github:  https://github.com/Breakthrough/PySceneDetect/    ]
 #
-# Copyright (C) 2014-2023 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2014-2024 Brandon Castellano <http://www.bcastell.com>.
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
@@ -47,7 +47,7 @@ Site: http://scenedetect.com/
 Docs: http://manual.scenedetect.com/
 Code: https://github.com/Breakthrough/PySceneDetect/
 
-Copyright (C) 2014-2023 Brandon Castellano. All rights reserved.
+Copyright (C) 2014-2024 Brandon Castellano. All rights reserved.
 
 PySceneDetect is released under the BSD 3-Clause license. See the
 included LICENSE file or visit the PySceneDetect website for details.
@@ -172,7 +172,7 @@ def _print_command_help(ctx: click.Context, command: click.Command):
     required=False,
     metavar='DIR',
     type=click.Path(exists=False, dir_okay=True, writable=True, resolve_path=True),
-    help='Output directory for created files. If unset, working directory will be used. May be overriden by command options.%s'
+    help='Output directory for created files. If unset, working directory will be used. May be overridden by command options.%s'
     % (USER_CONFIG.get_help_string("global", "output", show_default=False)),
 )
 @click.option(
@@ -203,7 +203,7 @@ def _print_command_help(ctx: click.Context, command: click.Command):
     metavar='TIMECODE',
     type=click.STRING,
     default=None,
-    help='Minimum length of any scene. TIMECODE can be specified as number of frames (-m=10), time in seconds followed by "s" (-m=2.5s), or timecode (-m=00:02:53.633).%s'
+    help='Minimum length of any scene. TIMECODE can be specified as number of frames (-m=10), time in seconds (-m=2.5), or timecode (-m=00:02:53.633).%s'
     % USER_CONFIG.get_help_string("global", "min-scene-len"),
 )
 @click.option(
@@ -398,7 +398,7 @@ def version_command(ctx: click.Context):
     metavar='TIMECODE',
     type=click.STRING,
     default=None,
-    help='Time in video to start detection. TIMECODE can be specified as number of frames (--start=100 for frame 100), time in seconds followed by "s" (--start=100s for 100 seconds), or timecode (--start=00:01:40 for 1m40s).',
+    help='Time in video to start detection. TIMECODE can be specified as seconds (--start=100.0), frames (--start=100), or timecode (--start=00:01:40.000).',
 )
 @click.option(
     '--duration',
@@ -425,11 +425,11 @@ def time_command(
 ):
     """Set start/end/duration of input video.
 
-Values can be specified as frames (NNNN), seconds (NNNN.NNs), or timecode (HH:MM:SS.nnn). For example, to process only the first minute of a video:
+Values can be specified as seconds (SSSS.nn), frames (NNNN), or timecode (HH:MM:SS.nnn). For example, to process only the first minute of a video:
 
     {scenedetect_with_video} time --end 00:01:00
 
-    {scenedetect_with_video} time --duration 60s
+    {scenedetect_with_video} time --duration 60.0
 
 Note that --end and --duration are mutually exclusive (i.e. only one of the two can be set). Lastly, the following is an example using absolute frame numbers to process frames 0 through 1000:
 

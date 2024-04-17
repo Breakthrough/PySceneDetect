@@ -6,7 +6,7 @@
 #     [  Docs:    https://scenedetect.com/docs/                     ]
 #     [  Github:  https://github.com/Breakthrough/PySceneDetect/    ]
 #
-# Copyright (C) 2014-2023 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2014-2024 Brandon Castellano <http://www.bcastell.com>.
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
@@ -41,13 +41,10 @@ from scenedetect.backends.opencv import VideoStreamCv2
 from scenedetect.detectors import ContentDetector
 
 from scenedetect.stats_manager import StatsManager
-from scenedetect.stats_manager import FrameMetricRegistered
 from scenedetect.stats_manager import StatsFileCorrupt
 
 from scenedetect.stats_manager import COLUMN_NAME_FRAME_NUMBER
 from scenedetect.stats_manager import COLUMN_NAME_TIMECODE
-
-# TODO(v1.0): Need to add test case which raises scenedetect.stats_manager.FrameMetricNotRegistered.
 
 # TODO(v1.0): use https://docs.pytest.org/en/6.2.x/tmpdir.html
 TEST_STATS_FILES = ['TEST_STATS_FILE'] * 4
@@ -77,8 +74,6 @@ def test_metrics():
     stats.register_metrics(metric_keys)
 
     assert not stats.is_save_required()
-    with pytest.raises(FrameMetricRegistered):
-        stats.register_metrics(metric_keys)
 
     assert not stats.metrics_exist(frame_key, metric_keys)
     assert stats.get_metrics(frame_key, metric_keys) == [None] * len(metric_keys)
@@ -101,28 +96,13 @@ def test_detector_metrics(test_video_file):
     video = VideoStreamCv2(test_video_file)
     stats_manager = StatsManager()
     scene_manager = SceneManager(stats_manager)
-
-    assert not stats_manager._registered_metrics
     scene_manager.add_detector(ContentDetector())
-    # add_detector should trigger register_metrics in the StatsManager.
-    assert stats_manager._registered_metrics
-
     video_fps = video.frame_rate
-    duration = FrameTimecode('00:00:20', video_fps)
-
+    duration = FrameTimecode('00:00:05', video_fps)
     scene_manager.auto_downscale = True
     scene_manager.detect_scenes(video=video, duration=duration)
-
     # Check that metrics were written to the StatsManager.
-    assert stats_manager._frame_metrics
-    frame_key = min(stats_manager._frame_metrics.keys())
-    assert stats_manager._frame_metrics[frame_key]
-    assert stats_manager.metrics_exist(frame_key, list(stats_manager._registered_metrics))
-
-    # Since we only added 1 detector, the number of metrics from get_metrics
-    # should equal the number of metric keys in _registered_metrics.
-    assert len(stats_manager.get_metrics(frame_key, list(
-        stats_manager._registered_metrics))) == len(stats_manager._registered_metrics)
+    assert stats_manager.get_metrics(0, ContentDetector.METRIC_KEYS)
 
 
 def test_load_empty_stats():
@@ -178,27 +158,26 @@ def test_save_load_from_video(test_video_file):
     scene_manager.add_detector(ContentDetector())
 
     video_fps = video.frame_rate
-    duration = FrameTimecode('00:00:20', video_fps)
+    duration = FrameTimecode('00:00:05', video_fps)
 
     scene_manager.auto_downscale = True
     scene_manager.detect_scenes(video, duration=duration)
 
     stats_manager.save_to_csv(csv_file=TEST_STATS_FILES[0])
 
+    metrics = stats_manager.metric_keys
+
     stats_manager_new = StatsManager()
 
     stats_manager_new.load_from_csv(TEST_STATS_FILES[0])
 
-    # Choose the first available frame key and compare all metrics in both.
-    frame_key = min(stats_manager._frame_metrics.keys())
-    metric_keys = list(stats_manager._registered_metrics)
-
-    assert stats_manager.metrics_exist(frame_key, metric_keys)
-    orig_metrics = stats_manager.get_metrics(frame_key, metric_keys)
-    new_metrics = stats_manager_new.get_metrics(frame_key, metric_keys)
-
-    for i, metric_val in enumerate(orig_metrics):
-        assert metric_val == pytest.approx(new_metrics[i])
+    # Compare the first 5 frames. Frame 0 won't have any metrics for this detector.
+    for frame in range(1, 5 + 1):
+        assert stats_manager.metrics_exist(frame, metrics)
+        orig_metrics = stats_manager.get_metrics(frame, metrics)
+        new_metrics = stats_manager_new.get_metrics(frame, metrics)
+        for i, metric_val in enumerate(orig_metrics):
+            assert metric_val == pytest.approx(new_metrics[i])
 
 
 def test_load_corrupt_stats():

@@ -6,7 +6,7 @@
 #     [  Docs:    https://scenedetect.com/docs/                     ]
 #     [  Github:  https://github.com/Breakthrough/PySceneDetect/    ]
 #
-# Copyright (C) 2014-2023 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2014-2024 Brandon Castellano <http://www.bcastell.com>.
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
@@ -90,8 +90,6 @@ def test_timecode_string():
     with pytest.raises(ValueError):
         FrameTimecode(timecode='-0.1', fps=1.0)
     with pytest.raises(ValueError):
-        FrameTimecode(timecode='1.0', fps=1.0)
-    with pytest.raises(ValueError):
         FrameTimecode(timecode='1.9x', fps=1)
     with pytest.raises(ValueError):
         FrameTimecode(timecode='1x', fps=1.0)
@@ -104,6 +102,14 @@ def test_timecode_string():
     assert FrameTimecode(timecode='0', fps=1).frame_num == 0
     assert FrameTimecode(timecode='1', fps=1).frame_num == 1
     assert FrameTimecode(timecode='10', fps=1.0).frame_num == 10
+
+    # Seconds format [float->str] ('%f', number as string)
+    assert FrameTimecode(timecode='0.0', fps=1).frame_num == 0
+    assert FrameTimecode(timecode='1.0', fps=1).frame_num == 1
+    assert FrameTimecode(timecode='10.0', fps=1.0).frame_num == 10
+    assert FrameTimecode(timecode='10.0000000000', fps=1.0).frame_num == 10
+    assert FrameTimecode(timecode='10.100', fps=1.0).frame_num == 10
+    assert FrameTimecode(timecode='1.100', fps=10.0).frame_num == 11
 
     # Seconds format [float->str] ('%fs', number as string followed by 's' for seconds)
     assert FrameTimecode(timecode='0s', fps=1).frame_num == 0
@@ -269,3 +275,23 @@ def test_identity(frame_num, fps):
     assert FrameTimecode(frame_time_code.get_frames(), fps=fps) == frame_time_code
     assert FrameTimecode(frame_time_code.get_seconds(), fps=fps) == frame_time_code
     assert FrameTimecode(frame_time_code.get_timecode(), fps=fps) == frame_time_code
+
+
+def test_precision():
+    """Test rounding and precision, which has implications for rounding behavior."""
+
+    fps = 1000.0
+
+    assert FrameTimecode(110, fps).get_timecode(precision=2, use_rounding=True) == "00:00:00.11"
+    assert FrameTimecode(110, fps).get_timecode(precision=2, use_rounding=False) == "00:00:00.11"
+    assert FrameTimecode(110, fps).get_timecode(precision=1, use_rounding=True) == "00:00:00.1"
+    assert FrameTimecode(110, fps).get_timecode(precision=1, use_rounding=False) == "00:00:00.1"
+    assert FrameTimecode(110, fps).get_timecode(precision=0, use_rounding=True) == "00:00:00"
+    assert FrameTimecode(110, fps).get_timecode(precision=0, use_rounding=False) == "00:00:00"
+
+    assert FrameTimecode(990, fps).get_timecode(precision=2, use_rounding=True) == "00:00:00.99"
+    assert FrameTimecode(990, fps).get_timecode(precision=2, use_rounding=False) == "00:00:00.99"
+    assert FrameTimecode(990, fps).get_timecode(precision=1, use_rounding=True) == "00:00:01.0"
+    assert FrameTimecode(990, fps).get_timecode(precision=1, use_rounding=False) == "00:00:00.9"
+    assert FrameTimecode(990, fps).get_timecode(precision=0, use_rounding=True) == "00:00:01"
+    assert FrameTimecode(990, fps).get_timecode(precision=0, use_rounding=False) == "00:00:00"

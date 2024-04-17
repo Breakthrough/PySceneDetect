@@ -6,7 +6,7 @@
 #     [  Docs:    https://scenedetect.com/docs/                     ]
 #     [  Github:  https://github.com/Breakthrough/PySceneDetect/    ]
 #
-# Copyright (C) 2014-2023 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2014-2024 Brandon Castellano <http://www.bcastell.com>.
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
@@ -88,10 +88,8 @@ def test_backwards_compatibility_with_stats(test_video_file: str):
     """Runs equivalent code to `tests/api_test.py` from v0.5 twice to also
     exercise loading a statsfile from disk."""
     stats_file_path = test_video_file + '.csv'
-    try:
+    if os.path.exists(stats_file_path):
         os.remove(stats_file_path)
-    except FileNotFoundError:
-        pass
     scenes = validate_backwards_compatibility(test_video_file, stats_file_path)
     assert scenes
     assert os.path.exists(stats_file_path)

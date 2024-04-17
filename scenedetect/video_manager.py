@@ -6,7 +6,7 @@
 #     [  Docs:    https://scenedetect.com/docs/                     ]
 #     [  Github:  https://github.com/Breakthrough/PySceneDetect/    ]
 #
-# Copyright (C) 2014-2023 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2014-2024 Brandon Castellano <http://www.bcastell.com>.
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
@@ -24,7 +24,7 @@ import math
 from logging import getLogger
 
 from typing import Iterable, List, Optional, Tuple, Union
-from numpy import ndarray
+import numpy as np
 import cv2
 
 from scenedetect.platform import get_file_name
@@ -630,14 +630,14 @@ class VideoManager(VideoStream):
             self._correct_frame_length()
         return grabbed
 
-    def retrieve(self) -> Tuple[bool, Optional[ndarray]]:
+    def retrieve(self) -> Tuple[bool, Optional[np.ndarray]]:
         """ Retrieve (cv2.VideoCapture method) - retrieves and returns a frame.
 
         Frame returned corresponds to last call to :meth:`grab()`.
 
         Returns:
             Tuple of (True, frame_image) if a frame was grabbed during the last call to grab(),
-            and where frame_image is a numpy ndarray of the decoded frame. Otherwise (False, None).
+            and where frame_image is a numpy np.ndarray of the decoded frame. Otherwise (False, None).
         """
         if not self._started:
             self.start()
@@ -653,7 +653,7 @@ class VideoManager(VideoStream):
             self._last_frame = None
         return (retrieved, self._last_frame)
 
-    def read(self, decode: bool = True, advance: bool = True) -> Union[ndarray, bool]:
+    def read(self, decode: bool = True, advance: bool = True) -> Union[np.ndarray, bool]:
         """ Return next frame (or current if advance = False), or False if end of video.
 
         Arguments:

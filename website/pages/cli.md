@@ -79,7 +79,7 @@ PySceneDetect can look for fades in/out using `detect-threshold` (comparing each
 
 Each mode has slightly different parameters, and is described in detail below. Most detector parameters can also be [set with a config file](http://scenedetect.com/projects/Manual/en/latest/cli/config_file.html).
 
-In general, use `detect-threshold` mode if you want to detect scene boundaries using fades/cuts in/out to black.  If the video uses a lot of fast cuts between content, and has no well-defined scene boundaries, you should use the `detect-adaptive` or  `detect-content` modes.  Once you know what detection mode to use, you can try the parameters recommended below, or generate a statistics file (using the `-s` / `--stats` flag) in order to determine the correct paramters - specifically, the proper threshold value.
+In general, use `detect-threshold` mode if you want to detect scene boundaries using fades/cuts in/out to black.  If the video uses a lot of fast cuts between content, and has no well-defined scene boundaries, you should use the `detect-adaptive` or  `detect-content` modes.  Once you know what detection mode to use, you can try the parameters recommended below, or generate a statistics file (using the `-s` / `--stats` flag) in order to determine the correct parameters - specifically, the proper threshold value.
 
 
 ### Content-Aware Detection
@@ -140,7 +140,7 @@ Coming soon: If more are specified via the `-n` flag, they will start from `00` 
 
 The following arguments are global program options, and need to be applied before any commands (e.g. `detect-content`, `list-scenes`).  They can be used to achieve performance gains for some source material with a variable loss of accuracy.
 
-Assuming the input video is of a high enough resolution, a significant performance gain can be achieved by sub-sampling (down-scaling) the input image by a specific integer factor (2x, 3x, 4x, 5x...).  This is applied automatically to some degree based on the input video size, but can be overriden manually with the `-d` / `--downscale` option.
+Assuming the input video is of a high enough resolution, a significant performance gain can be achieved by sub-sampling (down-scaling) the input image by a specific integer factor (2x, 3x, 4x, 5x...).  This is applied automatically to some degree based on the input video size, but can be overridden manually with the `-d` / `--downscale` option.
 
 This factor represents how many pixels are "skipped" in both the x- and y- directions, effectively down-scaling the image (using nearest-neighbor sampling) by the factor specified (the new resolution being `W/factor x H/factor` if the old resolution is `W x H`).
 
@@ -155,7 +155,7 @@ This makes the two harder to distinguish, and can cause additional false scene c
 
 ## Seeking, Duration, and Setting Start / Stop Times
 
-Specifying the `time` command allows control over what portion of the video PySceneDetect processes.  The `time` command accepts three options: start time (`-s` / `-start`), end time (`-e` / `-end`), and duration (`-d` / `--duration`).  Specifying both end time and duration is redundant, and in this case, duration overrides end time.  Timecodes can be given in three formats:  exact frame number (e.g. `12345`), number of seconds followed by `s` (e.g. `123s`, `123.45s`), or standard format (HH:MM:SS[.nnn], e.g. `12:34:56`, `12:34:56.789`).
+Specifying the `time` command allows control over what portion of the video PySceneDetect processes.  The `time` command accepts three options: start time (`-s` / `-start`), end time (`-e` / `-end`), and duration (`-d` / `--duration`).  Specifying both end time and duration is redundant, and in this case, duration overrides end time.  Timecodes can be given in seconds (`100.0`), frames (no decimal place, `100`), or timecode as `HH:MM:SS[.nnn]` (`12:34:56.789`).
 
 For example, let's say we have a video shot at 30 FPS, and want to analyze only the segment from the 5 to the 6.5 minute mark in the video (we want to analyze the 90 seconds [2700 frames] between 00:05:00 and 00:06:30).  The following commands are all thus equivalent in this regard (assuming we are using the content detector):
 
@@ -192,7 +192,7 @@ A configuration file path can be specified using the `-c`/`--config` argument. P
  * Mac:
      * `~/Library/Preferences/PySceneDetect/scenedetect.cfg`
 
-Run `scenedetect --help` to see the exact path on your system which will be used (it will be listed under the help text for the -c/--config option).  You can [click here to download a `scenedetect.cfg` config file](https://raw.githubusercontent.com/Breakthrough/PySceneDetect/v0.6.2-release/scenedetect.cfg) to use as a template. Note that lines starting with a `#` are comments and will be ignored.  The `scenedetect.cfg` template file is also available in the folder where PySceneDetect is installed.
+Run `scenedetect --help` to see the exact path on your system which will be used (it will be listed under the help text for the -c/--config option).  You can [click here to download a `scenedetect.cfg` config file](https://raw.githubusercontent.com/Breakthrough/PySceneDetect/v0.6.3-release/scenedetect.cfg) to use as a template. Note that lines starting with a `#` are comments and will be ignored.  The `scenedetect.cfg` template file is also available in the folder where PySceneDetect is installed.
 
 Specifying a config file path using -c/--config overrides the user config file. Specifying values on the command line will override those values in the config file.
 
@@ -228,7 +228,7 @@ quality = 80
 num-images = 3
 ```
 
-See the `scenedetect.cfg` file in the location you installed PySceneDetect or [download it from Github](https://raw.githubusercontent.com/Breakthrough/PySceneDetect/v0.6.2-release/scenedetect.cfg) for a complete listing of all configuration options.
+See the `scenedetect.cfg` file in the location you installed PySceneDetect or [download it from Github](https://raw.githubusercontent.com/Breakthrough/PySceneDetect/v0.6.3-release/scenedetect.cfg) for a complete listing of all configuration options.
 
 
 ## <span class="fa fa-keyboard-o"></span>&nbsp; Video Splitting Requirements

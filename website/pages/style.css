@@ -1,0 +1,21 @@
+.wy-side-nav-search {
+    display: block;
+    width: 300px;
+    padding: .809em;
+    margin-bottom: .809em;
+    z-index: 200;
+    background-color: #CCD7E2;
+    text-align: center;
+    color: #fcfcfc
+}
+
+.wy-side-nav-search .wy-dropdown>a,
+.wy-side-nav-search>a {
+ color:#3B3F47;
+ font-size:100%;
+ font-weight:700;
+ display:inline-block;
+ padding:4px 6px;
+ margin-bottom:.809em;
+ max-width:100%
+}

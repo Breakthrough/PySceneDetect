@@ -6,7 +6,7 @@
 #     [  Docs:    https://scenedetect.com/docs/                     ]
 #     [  Github:  https://github.com/Breakthrough/PySceneDetect/    ]
 #
-# Copyright (C) 2014-2023 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2014-2024 Brandon Castellano <http://www.bcastell.com>.
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
@@ -29,24 +29,17 @@ typically attached to a :class:`SceneManager <scenedetect.scene_manager.SceneMan
 processing videos, however they can also be used to process frames directly.
 """
 
+from scenedetect.detectors.content_detector import ContentDetector
+from scenedetect.detectors.threshold_detector import ThresholdDetector
+from scenedetect.detectors.adaptive_detector import AdaptiveDetector
+from scenedetect.detectors.histogram_detector import HistogramDetector
+
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 #                                                                             #
 #          Detection Methods & Algorithms Planned or In Development           #
 #                                                                             #
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 #
-# class EdgeDetector(SceneDetector):
-#    """Detects fast cuts/slow fades by using edge detection on adjacent frames.
-#
-#    Computes the difference image between subsequent frames after applying a
-#    Sobel filter (can also use a high-pass or other edge detection filters) and
-#    comparing the result with a set threshold (may be found using -stats mode).
-#    Detects both fast cuts and slow fades, although some parameters may need to
-#    be modified for accurate slow fade detection.
-#    """
-#    def __init__(self):
-#        super(EdgeDetector, self).__init__()
-#                                                                             #
-#                                                                             #
 # class DissolveDetector(SceneDetector):
 #    """Detects slow fades (dissolve cuts) via changes in the HSV colour space.
 #
@@ -56,27 +49,17 @@ processing videos, however they can also be used to process frames directly.
 #
 #    def __init__(self):
 #        super(DissolveDetector, self).__init__()
-#                                                                             #
-#                                                                             #
-# class HistogramDetector(SceneDetector):
-#    """Detects fast cuts via histogram changes between sequential frames.
 #
-#    Detects fast cuts between content (using histogram deltas, much like the
-#    ContentDetector uses HSV colourspace deltas), as well as both fades and
-#    cuts to/from black (using a threshold, much like the ThresholdDetector).
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+#
+# class MotionDetector(SceneDetector):
+#    """Detects motion events in scenes containing a static background.
+#
+#    Uses background subtraction followed by noise removal (via morphological
+#    opening) to generate a frame score compared against the set threshold.
 #    """
 #
 #    def __init__(self):
-#        super(DissolveDetector, self).__init__()
-#                                                                             #
-#                                                                             #
+#        super(MotionDetector, self).__init__()
+#
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-
-# PySceneDetect Detection Algorithm Imports
-from scenedetect.detectors.content_detector import ContentDetector
-from scenedetect.detectors.threshold_detector import ThresholdDetector
-from scenedetect.detectors.adaptive_detector import AdaptiveDetector
-from scenedetect.detectors.histogram_detector import HistogramDetector
-
-# Algorithms being ported:
-#from scenedetect.detectors.motion_detector import MotionDetector

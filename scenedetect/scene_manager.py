@@ -6,7 +6,7 @@
 #     [  Docs:    https://scenedetect.com/docs/                     ]
 #     [  Github:  https://github.com/Breakthrough/PySceneDetect/    ]
 #
-# Copyright (C) 2014-2023 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2014-2024 Brandon Castellano <http://www.bcastell.com>.
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
@@ -111,7 +111,7 @@ DEFAULT_MIN_WIDTH: int = 256
 MAX_FRAME_QUEUE_LENGTH: int = 4
 """Maximum number of decoded frames which can be buffered while waiting to be processed."""
 
-PROGRESS_BAR_DESCRIPTION = 'Detected: %d | Progress'
+PROGRESS_BAR_DESCRIPTION = '  Detected: %d | Progress'
 """Template to use for progress bar."""
 
 
@@ -141,7 +141,7 @@ def compute_downscale_factor(frame_width: int, effective_width: int = DEFAULT_MI
         effective_width: Desired minimum width in pixels.
 
     Returns:
-        int: The defalt downscale factor to use to achieve at least the target effective_width.
+        int: The default downscale factor to use to achieve at least the target effective_width.
     """
     assert not (frame_width < 1 or effective_width < 1)
     if frame_width < effective_width:
@@ -495,7 +495,7 @@ def save_images(scene_list: List[Tuple[FrameTimecode, FrameTimecode]],
                     IMAGE_NUMBER=image_num_format % (j + 1),
                     FRAME_NUMBER=image_timecode.get_frames()), image_extension)
                 image_filenames[i].append(file_path)
-                # TODO(0.6.3): Combine this resize with the ones below.
+                # TODO: Combine this resize with the ones below.
                 if aspect_ratio is not None:
                     frame_im = cv2.resize(
                         frame_im, (0, 0),
@@ -647,14 +647,7 @@ class SceneManager:
 
         detector.stats_manager = self._stats_manager
         if self._stats_manager is not None:
-            try:
-                self._stats_manager.register_metrics(detector.get_metrics())
-            except FrameMetricRegistered:
-                # Allow multiple detection algorithms of the same type to be added
-                # by suppressing any FrameMetricRegistered exceptions due to attempts
-                # to re-register the same frame metric keys.
-                # TODO(#334): Fix this, this should not be part of regular control flow.
-                pass
+            self._stats_manager.register_metrics(detector.get_metrics())
 
         if not issubclass(type(detector), SparseSceneDetector):
             self._detector_list.append(detector)
@@ -812,40 +805,37 @@ class SceneManager:
                 was constructed with a StatsManager object.
         """
         # TODO(v0.7): Add DeprecationWarning that `frame_source` will be removed in v0.8.
-        # TODO(v0.8): Remove default value for `video`` when removing `frame_source`.
         if frame_source is not None:
             video = frame_source
+        # TODO(v0.8): Remove default value for `video` after `frame_source` is removed.
         if video is None:
             raise TypeError("detect_scenes() missing 1 required positional argument: 'video'")
-
         if frame_skip > 0 and self.stats_manager is not None:
             raise ValueError('frame_skip must be 0 when using a StatsManager.')
         if duration is not None and end_time is not None:
             raise ValueError('duration and end_time cannot be set at the same time!')
-        if duration is not None and duration < 0:
+        # TODO: These checks should be handled by the FrameTimecode constructor.
+        if duration is not None and isinstance(duration, (int, float)) and duration < 0:
             raise ValueError('duration must be greater than or equal to 0!')
-        if end_time is not None and end_time < 0:
+        if end_time is not None and isinstance(end_time, (int, float)) and end_time < 0:
             raise ValueError('end_time must be greater than or equal to 0!')
 
         self._base_timecode = video.base_timecode
-        # TODO(v1.0): Fix this properly by making SceneManager create and own a StatsManager,
-        # and requiring the framerate to be passed to the StatsManager the constructor.
+
+        # TODO: Figure out a better solution for communicating framerate to StatsManager.
         if self._stats_manager is not None:
             self._stats_manager._base_timecode = self._base_timecode
+
         start_frame_num: int = video.frame_number
-
-        if duration is not None:
-            end_time: Union[int, FrameTimecode] = duration + start_frame_num
-
         if end_time is not None:
-            end_time: FrameTimecode = self._base_timecode + end_time
+            end_time = self._base_timecode + end_time
+        elif duration is not None:
+            end_time = (self._base_timecode + duration) + start_frame_num
 
-        # Can only calculate total number of frames we expect to process if the duration of
-        # the video is available.
         total_frames = 0
         if video.duration is not None:
             if end_time is not None and end_time < video.duration:
-                total_frames = (end_time - start_frame_num) + 1
+                total_frames = (end_time - start_frame_num)
             else:
                 total_frames = (video.duration.get_frames() - start_frame_num)
 
@@ -892,6 +882,8 @@ class SceneManager:
                 progress_bar.update(1 + frame_skip)
 
         if progress_bar is not None:
+            progress_bar.set_description(
+                PROGRESS_BAR_DESCRIPTION % len(self._cutting_list), refresh=True)
             progress_bar.close()
         # Unblock any puts in the decode thread before joining. This can happen if the main
         # processing thread stops before the decode thread.

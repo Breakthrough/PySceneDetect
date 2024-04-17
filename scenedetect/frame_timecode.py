@@ -6,7 +6,7 @@
 #     [  Docs:    https://scenedetect.com/docs/                     ]
 #     [  Github:  https://github.com/Breakthrough/PySceneDetect/    ]
 #
-# Copyright (C) 2014-2023 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2014-2024 Brandon Castellano <http://www.bcastell.com>.
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
@@ -73,14 +73,9 @@ from typing import Union
 MAX_FPS_DELTA: float = 1.0 / 100000
 """Maximum amount two framerates can differ by for equality testing."""
 
-# TODO(0.6.3): Replace uses of Union[int, float, str] with TimecodeValue.
-TimecodeValue = Union[int, float, str]
-"""Named type for values representing timecodes. Must be in one of the following forms:
-
-  1. Timecode as `str` in the form 'HH:MM:SS[.nnn]' (`'01:23:45'` or `'01:23:45.678'`)
-  2. Number of seconds as `float`, or `str` in form 'Ss' or 'S.SSSs' (`'2s'` or `'2.3456s'`)
-  3. Exact number of frames as `int`, or `str` in form NNNNN (`123` or `'123'`)
-"""
+_SECONDS_PER_MINUTE = 60.0
+_SECONDS_PER_HOUR = 60.0 * _SECONDS_PER_MINUTE
+_MINUTES_PER_HOUR = 60.0
 
 
 class FrameTimecode:
@@ -88,10 +83,9 @@ class FrameTimecode:
     forth between frame number and seconds/timecode.
 
     A timecode is valid only if it complies with one of the following three types/formats:
-
-      1. Timecode as `str` in the form 'HH:MM:SS[.nnn]' (`'01:23:45'` or `'01:23:45.678'`)
-      2. Number of seconds as `float`, or `str` in form 'Ss' or 'S.SSSs' (`'2s'` or `'2.3456s'`)
-      3. Exact number of frames as `int`, or `str` in form NNNNN (`123` or `'123'`)
+        1. Timecode as `str` in the form "HH:MM:SS[.nnn]" (`"01:23:45"` or `"01:23:45.678"`)
+        2. Number of seconds as `float`, or `str` in form  "SSSS.nnnn" (`"45.678"`)
+        3. Exact number of frames as `int`, or `str` in form NNNNN (`456` or `"456"`)
     """
 
     def __init__(self,
@@ -202,22 +196,27 @@ class FrameTimecode:
         """
         # Compute hours and minutes based off of seconds, and update seconds.
         secs = self.get_seconds()
-        base = 60.0 * 60.0
-        hrs = int(secs / base)
-        secs -= (hrs * base)
-        base = 60.0
-        mins = int(secs / base)
-        secs -= (mins * base)
-        # Convert seconds into string based on required precision.
-        if precision > 0:
-            if use_rounding:
-                secs = round(secs, precision)
-            msec = format(secs, '.%df' % precision)[-precision:]
-            secs = '%02d.%s' % (int(secs), msec)
-        else:
-            secs = '%02d' % int(round(secs, 0)) if use_rounding else '%02d' % int(secs)
+        hrs = int(secs / _SECONDS_PER_HOUR)
+        secs -= (hrs * _SECONDS_PER_HOUR)
+        mins = int(secs / _SECONDS_PER_MINUTE)
+        secs = max(0.0, secs - (mins * _SECONDS_PER_MINUTE))
+        if use_rounding:
+            secs = round(secs, precision)
+        secs = min(_SECONDS_PER_MINUTE, secs)
+        # Guard against emitting timecodes with 60 seconds after rounding/floating point errors.
+        if int(secs) == _SECONDS_PER_MINUTE:
+            secs = 0.0
+            mins += 1
+            if mins >= _MINUTES_PER_HOUR:
+                mins = 0
+                hrs += 1
+        # We have to extend the precision by 1 here, since `format` will round up.
+        msec = format(secs, '.%df' % (precision + 1)) if precision else ''
+        # Need to include decimal place in `msec_str`.
+        msec_str = msec[-(2 + precision):-1]
+        secs_str = f"{int(secs):02d}{msec_str}"
         # Return hours, minutes, and seconds as a formatted timecode string.
-        return '%02d:%02d:%s' % (hrs, mins, secs)
+        return '%02d:%02d:%s' % (hrs, mins, secs_str)
 
     # TODO(v1.0): Add a `previous` property to replace the existing one and deprecate this getter.
     def previous_frame(self) -> 'FrameTimecode':
@@ -262,47 +261,44 @@ class FrameTimecode:
         else:
             raise TypeError('Timecode format/type unrecognized.')
 
-    def _parse_timecode_string(self, timecode_string: str) -> int:
+    def _parse_timecode_string(self, input: str) -> int:
         """Parses a string based on the three possible forms (in timecode format,
         as an integer number of frames, or floating-point seconds, ending with 's').
 
         Requires that the `framerate` property is set before calling this method.
         Assuming a framerate of 30.0 FPS, the strings '00:05:00.000', '00:05:00',
-        '9000', '300s', and '300.0s' are all possible valid values, all representing
+        '9000', '300s', and '300.0' are all possible valid values, all representing
         a period of time equal to 5 minutes, 300 seconds, or 9000 frames (at 30 FPS).
 
         Raises:
-            TypeError, ValueError
+            ValueError: Value could not be parsed correctly.
         """
-        if self.framerate is None:
-            raise TypeError('self.framerate must be set before calling _parse_timecode_string.')
-        # Number of seconds S
-        if timecode_string.endswith('s'):
-            secs = timecode_string[:-1]
-            if not secs.replace('.', '').isdigit():
-                raise ValueError('All characters in timecode seconds string must be digits.')
-            secs = float(secs)
-            if secs < 0.0:
-                raise ValueError('Timecode seconds value must be positive.')
-            return self._seconds_to_frames(secs)
+        assert not self.framerate is None
+        input = input.strip()
         # Exact number of frames N
-        elif timecode_string.isdigit():
-            timecode = int(timecode_string)
+        if input.isdigit():
+            timecode = int(input)
             if timecode < 0:
                 raise ValueError('Timecode frame number must be positive.')
             return timecode
-        # Standard timecode in string format 'HH:MM:SS[.nnn]'
-        else:
-            tc_val = timecode_string.split(':')
-            if not (len(tc_val) == 3 and tc_val[0].isdigit() and tc_val[1].isdigit()
-                    and tc_val[2].replace('.', '').isdigit()):
-                raise ValueError('Unrecognized or improperly formatted timecode string.')
-            hrs, mins = int(tc_val[0]), int(tc_val[1])
-            secs = float(tc_val[2]) if '.' in tc_val[2] else int(tc_val[2])
+        # Timecode in string format 'HH:MM:SS[.nnn]'
+        elif input.find(":") >= 0:
+            values = input.split(":")
+            hrs, mins = int(values[0]), int(values[1])
+            secs = float(values[2]) if '.' in values[2] else int(values[2])
             if not (hrs >= 0 and mins >= 0 and secs >= 0 and mins < 60 and secs < 60):
                 raise ValueError('Invalid timecode range (values outside allowed range).')
-            secs += (((hrs * 60.0) + mins) * 60.0)
+            secs += (hrs * 60 * 60) + (mins * 60)
             return self._seconds_to_frames(secs)
+        # Try to parse the number as seconds in the format 1234.5 or 1234s
+        if input.endswith('s'):
+            input = input[:-1]
+        if not input.replace('.', '').isdigit():
+            raise ValueError('All characters in timecode seconds string must be digits.')
+        as_float = float(input)
+        if as_float < 0.0:
+            raise ValueError('Timecode seconds value must be positive.')
+        return self._seconds_to_frames(as_float)
 
     def __iadd__(self, other: Union[int, float, str, 'FrameTimecode']) -> 'FrameTimecode':
         if isinstance(other, int):

@@ -6,17 +6,15 @@
 #     [  Docs:    https://scenedetect.com/docs/                     ]
 #     [  Github:  https://github.com/Breakthrough/PySceneDetect/    ]
 #
-# Copyright (C) 2014-2023 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2014-2024 Brandon Castellano <http://www.bcastell.com>.
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
 """:class:`VideoStreamMoviePy` provides an adapter for MoviePy's `FFMPEG_VideoReader`.
 
-Uses string identifier ``'moviepy'``.
-
-.. warning::
-
-    The MoviePy backend is still under development. Some features are not yet supported.
+MoviePy launches ffmpeg as a subprocess, and can be used with various types of inputs. Generally,
+the input should support seeking, but does not necessarily have to be a video. For example,
+image sequences or AviSynth scripts are supported as inputs.
 """
 
 from logging import getLogger
@@ -24,7 +22,7 @@ from typing import AnyStr, Tuple, Union, Optional
 
 import cv2
 from moviepy.video.io.ffmpeg_reader import FFMPEG_VideoReader
-from numpy import ndarray
+import numpy as np
 
 from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.platform import get_file_name
@@ -51,13 +49,14 @@ class VideoStreamMoviePy(VideoStream):
         """
         super().__init__()
 
-        # TODO(0.6.3) - Investigate how MoviePy handles ffmpeg not being on PATH.
-        # TODO(0.6.3): Add framerate override.
+        # TODO: Investigate how MoviePy handles ffmpeg not being on PATH.
+        # TODO: Add framerate override.
         if framerate is not None:
-            raise NotImplementedError("TODO(0.6.3)")
+            raise NotImplementedError(
+                "VideoStreamMoviePy does not support the `framerate` argument yet.")
 
         self._path = path
-        # TODO(0.6.3): Need to map errors based on the strings, since several failure
+        # TODO: Need to map errors based on the strings, since several failure
         # cases return IOErrors (e.g. could not read duration/video resolution). These
         # should be mapped to specific errors, e.g. write a function to map MoviePy
         # exceptions to a new set of equivalents.
@@ -65,20 +64,14 @@ class VideoStreamMoviePy(VideoStream):
         # This will always be one behind self._reader.lastread when we finally call read()
         # as MoviePy caches the first frame when opening the video. Thus self._last_frame
         # will always be the current frame, and self._reader.lastread will be the next.
-        self._last_frame: Union[bool, ndarray] = False
-        self._last_frame_rgb: Optional[ndarray] = None
+        self._last_frame: Union[bool, np.ndarray] = False
+        self._last_frame_rgb: Optional[np.ndarray] = None
         # Older versions don't track the video position when calling read_frame so we need
         # to keep track of the current frame number.
         self._frame_number = 0
         # We need to manually keep track of EOF as duration may not be accurate.
         self._eof = False
-        # MoviePy doesn't support extracting the aspect ratio yet, so for now we just fall
-        # back to using OpenCV to determine it.
-        try:
-            self._aspect_ratio = VideoStreamCv2(self._path).aspect_ratio
-        except VideoOpenFailure as ex:
-            logger.warning("Unable to determine aspect ratio: %s", str(ex))
-            self._aspect_ratio = 1.0
+        self._aspect_ratio: float = None
 
     #
     # VideoStream Methods/Properties
@@ -121,6 +114,15 @@ class VideoStreamMoviePy(VideoStream):
     @property
     def aspect_ratio(self) -> float:
         """Display/pixel aspect ratio as a float (1.0 represents square pixels)."""
+        # TODO: Use cached_property once Python 3.7 support is deprecated.
+        if self._aspect_ratio is None:
+            # MoviePy doesn't support extracting the aspect ratio yet, so for now we just fall
+            # back to using OpenCV to determine it.
+            try:
+                self._aspect_ratio = VideoStreamCv2(self._path).aspect_ratio
+            except VideoOpenFailure as ex:
+                logger.warning("Unable to determine aspect ratio: %s", str(ex))
+                self._aspect_ratio = 1.0
         return self._aspect_ratio
 
     @property
@@ -179,6 +181,10 @@ class VideoStreamMoviePy(VideoStream):
         except IOError as ex:
             # Leave the object in a valid state.
             self.reset()
+            # TODO(#380): Other backends do not currently throw an exception if attempting to seek
+            # past EOF. We need to ensure consistency for seeking past end of video with respect to
+            # errors and behaviour, and should probably gracefully stop at the last frame instead
+            # of throwing an exception.
             if target >= self.duration:
                 raise SeekError("Target frame is beyond end of video!") from ex
             raise
@@ -192,15 +198,15 @@ class VideoStreamMoviePy(VideoStream):
         self._frame_number = 0
         self._eof = False
 
-    def read(self, decode: bool = True, advance: bool = True) -> Union[ndarray, bool]:
-        """Read and decode the next frame as a numpy.ndarray. Returns False when video ends.
+    def read(self, decode: bool = True, advance: bool = True) -> Union[np.ndarray, bool]:
+        """Read and decode the next frame as a np.ndarray. Returns False when video ends.
 
         Arguments:
             decode: Decode and return the frame.
             advance: Seek to the next frame. If False, will return the current (last) frame.
 
         Returns:
-            If decode = True, the decoded frame (numpy.ndarray), or False (bool) if end of video.
+            If decode = True, the decoded frame (np.ndarray), or False (bool) if end of video.
             If decode = False, a bool indicating if advancing to the the next frame succeeded.
         """
         if not advance:

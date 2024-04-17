@@ -6,7 +6,7 @@
 #     [  Docs:    https://scenedetect.com/docs/                     ]
 #     [  Github:  https://github.com/Breakthrough/PySceneDetect/    ]
 #
-# Copyright (C) 2014-2023 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2014-2024 Brandon Castellano <http://www.bcastell.com>.
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
@@ -245,12 +245,14 @@ def get_ffmpeg_path() -> Optional[str]:
     """Get path to ffmpeg if available on the current system. First looks at PATH, then checks if
     one is available from the `imageio_ffmpeg` package. Returns None if ffmpeg couldn't be found.
     """
+    # Try invoking ffmpeg with the current environment.
     try:
         subprocess.call(['ffmpeg', '-v', 'quiet'])
         return 'ffmpeg'
     except OSError:
-        pass
-    # Failed to invoke ffmpeg from PATH, see if we have a copy from imageio_ffmpeg.
+        pass  # Failed to invoke ffmpeg with current environment, try another possibility.
+
+    # Try invoking ffmpeg using the one from `imageio_ffmpeg` if available.
     try:
         # pylint: disable=import-outside-toplevel
         from imageio_ffmpeg import get_ffmpeg_exe
@@ -266,6 +268,7 @@ def get_ffmpeg_path() -> Optional[str]:
     # get_ffmpeg_exe may throw a RuntimeError if the executable is not available.
     except RuntimeError:
         pass
+
     return None
 
 
@@ -274,7 +277,7 @@ def get_ffmpeg_version() -> Optional[str]:
     ffmpeg_path = get_ffmpeg_path()
     if ffmpeg_path is None:
         return None
-    # If get_ffmpeg_path() returns a value, the path it returns should be invokable.
+    # If get_ffmpeg_path() returns a value, the path it returns should be invocable.
     output = subprocess.check_output(args=[ffmpeg_path, '-version'], text=True)
     output_split = output.split()
     if len(output_split) >= 3 and output_split[1] == 'version':
@@ -289,6 +292,7 @@ def get_mkvmerge_version() -> Optional[str]:
     try:
         output = subprocess.check_output(args=[tool_name, '--version'], text=True)
     except FileNotFoundError:
+        # mkvmerge doesn't exist on the system
         return None
     output_split = output.split()
     if len(output_split) >= 1 and output_split[0] == tool_name:

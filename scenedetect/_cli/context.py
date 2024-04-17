@@ -6,7 +6,7 @@
 #     [  Docs:    https://scenedetect.com/docs/                     ]
 #     [  Github:  https://github.com/Breakthrough/PySceneDetect/    ]
 #
-# Copyright (C) 2014-2023 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2014-2024 Brandon Castellano <http://www.bcastell.com>.
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
@@ -14,6 +14,7 @@
 
 import logging
 import os
+import typing as ty
 from typing import Any, AnyStr, Dict, Optional, Tuple, Type
 
 import click
@@ -21,7 +22,6 @@ import click
 import scenedetect
 
 from scenedetect import open_video, AVAILABLE_BACKENDS
-from scenedetect._scene_loader import SceneLoader
 
 from scenedetect.scene_detector import SceneDetector
 from scenedetect.platform import get_and_create_path, get_cv2_imwrite_params, init_logger
@@ -32,16 +32,17 @@ from scenedetect.detectors import AdaptiveDetector, ContentDetector, ThresholdDe
 from scenedetect.stats_manager import StatsManager
 from scenedetect.scene_manager import SceneManager, Interpolation
 
-from scenedetect._cli.config import ConfigRegistry, ConfigLoadFailure, CHOICE_MAP
+from scenedetect._cli.config import (ConfigRegistry, ConfigLoadFailure, TimecodeFormat, CHOICE_MAP,
+                                     DEFAULT_JPG_QUALITY, DEFAULT_WEBP_QUALITY)
 
 logger = logging.getLogger('pyscenedetect')
 
 USER_CONFIG = ConfigRegistry(throw_exception=False)
 
 
-def parse_timecode(value: str,
+def parse_timecode(value: ty.Optional[str],
                    frame_rate: float,
-                   first_index_is_one: bool = False) -> FrameTimecode:
+                   correct_pts: bool = False) -> FrameTimecode:
     """Parses a user input string into a FrameTimecode assuming the given framerate.
 
     If value is None, None will be returned instead of processing the value.
@@ -52,15 +53,14 @@ def parse_timecode(value: str,
     if value is None:
         return None
     try:
-        if first_index_is_one and value.isdigit():
+        if correct_pts and value.isdigit():
             value = int(value)
             if value >= 1:
                 value -= 1
         return FrameTimecode(timecode=value, fps=frame_rate)
     except ValueError as ex:
         raise click.BadParameter(
-            'timecode must be in frames (1234), seconds (123.4s), or HH:MM:SS (00:02:03.400)'
-        ) from ex
+            'timecode must be in seconds (100.0), frames (100), or HH:MM:SS') from ex
 
 
 def contains_sequence_or_url(video_path: str) -> bool:
@@ -110,9 +110,10 @@ class CliContext:
         self.video_stream: VideoStream = None
         self.scene_manager: SceneManager = None
         self.stats_manager: StatsManager = None
+        self.added_detector: bool = False
 
         # Global `scenedetect` Options
-        self.output_directory: str = None                   # -o/--output
+        self.output_dir: str = None                         # -o/--output
         self.quiet_mode: bool = None                        # -q/--quiet or -v/--verbosity quiet
         self.stats_file_path: str = None                    # -s/--stats
         self.drop_short_scenes: bool = None                 # --drop-short-scenes
@@ -131,7 +132,7 @@ class CliContext:
         # `save-images` Command Options
         self.save_images: bool = False
         self.image_extension: str = None        # save-images -j/--jpeg, -w/--webp, -p/--png
-        self.image_directory: str = None        # save-images -o/--output
+        self.image_dir: str = None              # save-images -o/--output
         self.image_param: int = None            # save-images -q/--quality if -j/-w,
                                                 #   otherwise -c/--compression if -p
         self.image_name_format: str = None      # save-images -f/--name-format
@@ -146,17 +147,20 @@ class CliContext:
         self.split_video: bool = False
         self.split_mkvmerge: bool = None   # split-video -m/--mkvmerge
         self.split_args: str = None        # split-video -a/--args, -c/--copy
-        self.split_directory: str = None   # split-video -o/--output
+        self.split_dir: str = None         # split-video -o/--output
         self.split_name_format: str = None # split-video -f/--filename
         self.split_quiet: bool = None      # split-video -q/--quiet
 
         # `list-scenes` Command Options
         self.list_scenes: bool = False
-        self.print_scene_list: bool = None      # list-scenes -q/--quiet
-        self.scene_list_directory: str = None   # list-scenes -o/--output
-        self.scene_list_name_format: str = None # list-scenes -f/--filename
-        self.scene_list_output: bool = None     # list-scenes -n/--no-output
-        self.skip_cuts: bool = None             # list-scenes -s/--skip-cuts
+        self.list_scenes_quiet: bool = None                       # list-scenes -q/--quiet
+        self.scene_list_dir: str = None                           # list-scenes -o/--output
+        self.scene_list_name_format: str = None                   # list-scenes -f/--filename
+        self.scene_list_output: bool = None                       # list-scenes -n/--no-output-file
+        self.skip_cuts: bool = None                               # list-scenes -s/--skip-cuts
+        self.display_cuts: bool = True                            # [list-scenes] display-cuts
+        self.display_scenes: bool = True                          # [list-scenes] display-scenes
+        self.cut_format: TimecodeFormat = TimecodeFormat.TIMECODE # [list-scenes] cut-format
 
         # `export-html` Command Options
         self.export_html: bool = False
@@ -164,6 +168,10 @@ class CliContext:
         self.html_include_images: bool = None # export-html --no-images
         self.image_width: int = None          # export-html -w/--image-width
         self.image_height: int = None         # export-html -h/--image-height
+
+        # `load-scenes` Command Options
+        self.load_scenes_input: str = None       # load-scenes -i/--input
+        self.load_scenes_column_name: str = None # load-scenes -c/--start-col-name
 
     #
     # Command Handlers
@@ -254,9 +262,9 @@ class CliContext:
             framerate=framerate,
             backend=self.config.get_value("global", "backend", backend, ignore_default=True))
 
-        self.output_directory = output if output else self.config.get_value("global", "output")
-        if self.output_directory:
-            logger.info('Output directory set:\n  %s', self.output_directory)
+        self.output_dir = output if output else self.config.get_value("global", "output")
+        if self.output_dir:
+            logger.info('Output directory set:\n  %s', self.output_dir)
 
         self.min_scene_len = parse_timecode(
             min_scene_len if min_scene_len is not None else self.config.get_value(
@@ -269,7 +277,7 @@ class CliContext:
 
         # Create StatsManager if --stats is specified.
         if stats_file:
-            self.stats_file_path = get_and_create_path(stats_file, self.output_directory)
+            self.stats_file_path = stats_file
             self.stats_manager = StatsManager()
 
         # Initialize default detector with values in the config file.
@@ -414,9 +422,8 @@ class CliContext:
                 else:
                     min_scene_len = self.config.get_value("detect-threshold", "min-scene-len")
             min_scene_len = parse_timecode(min_scene_len, self.video_stream.frame_rate).frame_num
-
+        # TODO(v1.0): add_last_scene cannot be disabled right now.
         return {
-                                                                                                # TODO(v1.0): add_last_scene cannot be disabled right now.
             'add_final_scene':
                 add_last_scene or self.config.get_value("detect-threshold", "add-last-scene"),
             'fade_bias':
@@ -430,10 +437,17 @@ class CliContext:
     def handle_load_scenes(self, input: AnyStr, start_col_name: Optional[str]):
         """Handle `load-scenes` command options."""
         self._ensure_input_open()
-        start_col_name = self.config.get_value("load-scenes", "start-col-name", start_col_name)
-        self.add_detector(
-            SceneLoader(
-                file=input, framerate=self.video_stream.frame_rate, start_col_name=start_col_name))
+        if self.added_detector:
+            raise click.ClickException("The load-scenes command cannot be used with detectors.")
+        if self.load_scenes_input:
+            raise click.ClickException("The load-scenes command must only be specified once.")
+        input = os.path.abspath(input)
+        if not os.path.exists(input):
+            raise click.BadParameter(
+                f'Could not load scenes, file does not exist: {input}', param_hint='-i/--input')
+        self.load_scenes_input = input
+        self.load_scenes_column_name = self.config.get_value("load-scenes", "start-col-name",
+                                                             start_col_name)
 
     def handle_detect_hist(self, threshold: Optional[float], bits: Optional[int],
                            min_scene_len: Optional[str]):
@@ -504,20 +518,23 @@ class CliContext:
         """Handle `list-scenes` command options."""
         self._ensure_input_open()
         if self.list_scenes:
-            self._on_duplicate_command('list-scenes')
+            self._on_duplicate_command("list-scenes")
 
-        self.skip_cuts = skip_cuts or self.config.get_value('list-scenes', 'skip-cuts')
-        self.print_scene_list = not (quiet or self.config.get_value('list-scenes', 'quiet'))
-        no_output_file = no_output_file or self.config.get_value('list-scenes', 'no-output-file')
+        self.display_cuts = self.config.get_value("list-scenes", "display-cuts")
+        self.display_scenes = self.config.get_value("list-scenes", "display-scenes")
+        self.skip_cuts = skip_cuts or self.config.get_value("list-scenes", "skip-cuts")
+        self.cut_format = TimecodeFormat[self.config.get_value("list-scenes", "cut-format").upper()]
+        self.list_scenes_quiet = quiet or self.config.get_value("list-scenes", "quiet")
+        no_output_file = no_output_file or self.config.get_value("list-scenes", "no-output-file")
 
-        self.scene_list_directory = self.config.get_value(
-            'list-scenes', 'output', output, ignore_default=True)
-        self.scene_list_name_format = self.config.get_value('list-scenes', 'filename', filename)
+        self.scene_list_dir = self.config.get_value(
+            "list-scenes", "output", output, ignore_default=True)
+        self.scene_list_name_format = self.config.get_value("list-scenes", "filename", filename)
         if self.scene_list_name_format is not None and not no_output_file:
-            logger.info('Scene list filename format:\n  %s', self.scene_list_name_format)
+            logger.info("Scene list filename format:\n  %s", self.scene_list_name_format)
         self.scene_list_output = not no_output_file
-        if self.scene_list_directory is not None:
-            logger.info('Scene list output directory:\n  %s', self.scene_list_directory)
+        if self.scene_list_dir is not None:
+            logger.info("Scene list output directory:\n  %s", self.scene_list_dir)
 
         self.list_scenes = True
 
@@ -550,10 +567,9 @@ class CliContext:
 
         self.split_video = True
         self.split_quiet = quiet or self.config.get_value('split-video', 'quiet')
-        self.split_directory = self.config.get_value(
-            'split-video', 'output', output, ignore_default=True)
-        if self.split_directory is not None:
-            logger.info('Video output path set:  \n%s', self.split_directory)
+        self.split_dir = self.config.get_value('split-video', 'output', output, ignore_default=True)
+        if self.split_dir is not None:
+            logger.info('Video output path set:  \n%s', self.split_dir)
         self.split_name_format = self.config.get_value('split-video', 'filename', filename)
 
         # We only load the config values for these flags/options if none of the other
@@ -663,7 +679,7 @@ class CliContext:
         self.scale_method = Interpolation[self.config.get_value('save-images',
                                                                 'scale-method').upper()]
 
-        default_quality = 100 if webp else 95
+        default_quality = DEFAULT_WEBP_QUALITY if webp else DEFAULT_JPG_QUALITY
         quality = (
             default_quality if self.config.is_default('save-images', 'quality') else
             self.config.get_value('save-images', 'quality'))
@@ -683,8 +699,7 @@ class CliContext:
             logger.debug('\n'.join(error_strs))
             raise click.BadParameter('\n'.join(error_strs), param_hint='save-images')
 
-        self.image_directory = self.config.get_value(
-            'save-images', 'output', output, ignore_default=True)
+        self.image_dir = self.config.get_value('save-images', 'output', output, ignore_default=True)
 
         self.image_name_format = self.config.get_value('save-images', 'filename', filename)
         self.num_images = self.config.get_value('save-images', 'num-images', num_images)
@@ -694,8 +709,8 @@ class CliContext:
         image_param_type = 'Compression' if png else 'Quality'
         image_param_type = ' [%s: %d]' % (image_param_type, self.image_param)
         logger.info('Image output format set: %s%s', image_type, image_param_type)
-        if self.image_directory is not None:
-            logger.info('Image output directory set:\n  %s', os.path.abspath(self.image_directory))
+        if self.image_dir is not None:
+            logger.info('Image output directory set:\n  %s', os.path.abspath(self.image_dir))
 
         self.save_images = True
 
@@ -704,20 +719,20 @@ class CliContext:
         self._ensure_input_open()
         if self.time:
             self._on_duplicate_command('time')
-
         if duration is not None and end is not None:
             raise click.BadParameter(
                 'Only one of --duration/-d or --end/-e can be specified, not both.',
                 param_hint='time')
-
         logger.debug('Setting video time:\n    start: %s, duration: %s, end: %s', start, duration,
                      end)
-
-        self.start_time = parse_timecode(
-            start, self.video_stream.frame_rate, first_index_is_one=True)
-        self.end_time = parse_timecode(end, self.video_stream.frame_rate, first_index_is_one=True)
-        self.duration = parse_timecode(
-            duration, self.video_stream.frame_rate, first_index_is_one=True)
+        # *NOTE*: The Python API uses 0-based frame indices, but the CLI uses 1-based indices to
+        # match the default start number used by `ffmpeg` when saving frames as images. As such,
+        # we must correct start time if set as frames. See the test_cli_time* tests for for details.
+        self.start_time = parse_timecode(start, self.video_stream.frame_rate, correct_pts=True)
+        self.end_time = parse_timecode(end, self.video_stream.frame_rate)
+        self.duration = parse_timecode(duration, self.video_stream.frame_rate)
+        if self.start_time and self.end_time and (self.start_time + 1) > self.end_time:
+            raise click.BadParameter("-e/--end time must be greater than -s/--start")
         self.time = True
 
     #
@@ -759,13 +774,11 @@ class CliContext:
 
     def add_detector(self, detector):
         """ Add Detector: Adds a detection algorithm to the CliContext's SceneManager. """
+        if self.load_scenes_input:
+            raise click.ClickException("The load-scenes command cannot be used with detectors.")
         self._ensure_input_open()
-        try:
-            self.scene_manager.add_detector(detector)
-        except scenedetect.stats_manager.FrameMetricRegistered as ex:
-            raise click.BadParameter(
-                message='Cannot specify detection algorithm twice.',
-                param_hint=detector.cli_name) from ex
+        self.scene_manager.add_detector(detector)
+        self.added_detector = True
 
     def _ensure_input_open(self) -> None:
         """Ensure self.video_stream was initialized (i.e. -i/--input was specified),

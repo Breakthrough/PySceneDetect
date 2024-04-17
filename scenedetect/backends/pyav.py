@@ -6,21 +6,18 @@
 #     [  Docs:    https://scenedetect.com/docs/                     ]
 #     [  Github:  https://github.com/Breakthrough/PySceneDetect/    ]
 #
-# Copyright (C) 2014-2023 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2014-2024 Brandon Castellano <http://www.bcastell.com>.
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
-""":class:`VideoStreamAv` provides an adapter for the PyAV av.InputContainer object.
-
-Uses string identifier ``'pyav'``.
-"""
+""":class:`VideoStreamAv` provides an adapter for the PyAV av.InputContainer object."""
 
 from logging import getLogger
 from typing import AnyStr, BinaryIO, Optional, Tuple, Union
 
 # pylint: disable=c-extension-no-member
 import av
-from numpy import ndarray
+import numpy as np
 
 from scenedetect.frame_timecode import FrameTimecode, MAX_FPS_DELTA
 from scenedetect.platform import get_file_name
@@ -210,9 +207,14 @@ class VideoStreamAv(VideoStream):
     @property
     def aspect_ratio(self) -> float:
         """Pixel aspect ratio as a float (1.0 represents square pixels)."""
-        display_aspect_ratio = (
-            self._codec_context.display_aspect_ratio.numerator /
-            self._codec_context.display_aspect_ratio.denominator)
+        if not hasattr(self._codec_context,
+                       "display_aspect_ratio") or self._codec_context.display_aspect_ratio is None:
+            return 1.0
+        ar_denom = self._codec_context.display_aspect_ratio.denominator
+        if ar_denom <= 0:
+            return 1.0
+        display_aspect_ratio = self._codec_context.display_aspect_ratio.numerator / ar_denom
+        assert self.frame_size[0] > 0 and self.frame_size[1] > 0
         frame_aspect_ratio = self.frame_size[0] / self.frame_size[1]
         return display_aspect_ratio / frame_aspect_ratio
 
@@ -259,15 +261,15 @@ class VideoStreamAv(VideoStream):
         except Exception as ex:
             raise VideoOpenFailure() from ex
 
-    def read(self, decode: bool = True, advance: bool = True) -> Union[ndarray, bool]:
-        """Read and decode the next frame as a numpy.ndarray. Returns False when video ends.
+    def read(self, decode: bool = True, advance: bool = True) -> Union[np.ndarray, bool]:
+        """Read and decode the next frame as a np.ndarray. Returns False when video ends.
 
         Arguments:
             decode: Decode and return the frame.
             advance: Seek to the next frame. If False, will return the current (last) frame.
 
         Returns:
-            If decode = True, the decoded frame (numpy.ndarray), or False (bool) if end of video.
+            If decode = True, the decoded frame (np.ndarray), or False (bool) if end of video.
             If decode = False, a bool indicating if advancing to the the next frame succeeded.
         """
         has_advanced = False

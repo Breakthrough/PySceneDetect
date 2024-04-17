@@ -6,7 +6,7 @@
 #     [  Docs:    https://scenedetect.com/docs/                     ]
 #     [  Github:  https://github.com/Breakthrough/PySceneDetect/    ]
 #
-# Copyright (C) 2014-2023 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2014-2024 Brandon Castellano <http://www.bcastell.com>.
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
@@ -48,9 +48,8 @@ def _estimated_kernel_size(frame_width: int, frame_height: int) -> int:
 class ContentDetector(SceneDetector):
     """Detects fast cuts using changes in colour and intensity between frames.
 
-    Since the difference between frames is used, unlike the ThresholdDetector,
-    only fast cuts are detected with this method.  To detect slow fades between
-    content scenes still using HSV information, use the DissolveDetector.
+    The difference is calculated in the HSV color space, and compared against a set threshold to
+    determine when a fast cut has occurred.
     """
 
     # TODO: Come up with some good weights for a new default if there is one that can pass
@@ -185,24 +184,17 @@ class ContentDetector(SceneDetector):
         return frame_score
 
     def process_frame(self, frame_num: int, frame_img: numpy.ndarray) -> List[int]:
-        """ Similar to ThresholdDetector, but using the HSV colour space DIFFERENCE instead
-        of single-frame RGB/grayscale intensity (thus cannot detect slow fades with this method).
+        """Process the next frame. `frame_num` is assumed to be sequential.
 
-        Arguments:
-            frame_num: Frame number of frame that is being passed.
-            frame_img: Decoded frame image (numpy.ndarray) to perform scene
-                detection on. Can be None *only* if the self.is_processing_required() method
-                (inhereted from the base SceneDetector class) returns True.
+        Args:
+            frame_num (int): Frame number of frame that is being passed. Can start from any value
+                but must remain sequential.
+            frame_img (numpy.ndarray or None): Video frame corresponding to `frame_img`.
 
         Returns:
-            List of frames where scene cuts have been detected. There may be 0
+            List[int]: List of frames where scene cuts have been detected. There may be 0
             or more frames in the list, and not necessarily the same as frame_num.
         """
-        if frame_img is None:
-            # TODO(0.6.3): Make frame_img a required argument in the interface. Log a warning
-            # that passing None is deprecated and results will be incorrect if this is the case.
-            return []
-
         # Initialize last scene cut point at the beginning of the frames of interest.
         if self._last_scene_cut is None:
             self._last_scene_cut = frame_num
@@ -213,22 +205,12 @@ class ContentDetector(SceneDetector):
 
         # We consider any frame over the threshold a new scene, but only if
         # the minimum scene length has been reached (otherwise it is ignored).
-        min_length_met = (frame_num - self._last_scene_cut) >= self._min_scene_len
+        min_length_met: bool = (frame_num - self._last_scene_cut) >= self._min_scene_len
         if self._frame_score >= self._threshold and min_length_met:
             self._last_scene_cut = frame_num
             return [frame_num]
 
         return []
-
-    # TODO(#250): Based on the parameters passed to the ContentDetector constructor,
-    # ensure that the last scene meets the minimum length requirement, otherwise it
-    # should be merged with the previous scene. This can be done by caching the cuts
-    # for the amount of time the minimum length is set to, returning any outstanding
-    # final cuts in post_process.
-
-    #def post_process(self, frame_num):
-    #    """
-    #    return []
 
     def _detect_edges(self, lum: numpy.ndarray) -> numpy.ndarray:
         """Detect edges using the luma channel of a frame.
@@ -246,7 +228,7 @@ class ContentDetector(SceneDetector):
             self._kernel = numpy.ones((kernel_size, kernel_size), numpy.uint8)
 
         # Estimate levels for thresholding.
-        # TODO(0.6.3): Add config file entries for sigma, aperture/kernel size, etc.
+        # TODO: Add config file entries for sigma, aperture/kernel size, etc.
         sigma: float = 1.0 / 3.0
         median = numpy.median(lum)
         low = int(max(0, (1.0 - sigma) * median))

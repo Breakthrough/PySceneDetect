@@ -1,13 +1,11 @@
-# Generate PySceneDetect documentation. Inputs are currently <commit_ref> <output_dir>, where
-# <commit_ref> is what commit/branch/tag to use for the build, and <output_dir> is the same as
-# scenedetect.com/docs/<output_dir>
+# Generate PySceneDetect documentation and updates the gh-pages branch.
 name: Generate Documentation
 
 on:
   push:
     branches:
-      - main
-      - 'releases/**'
+      - develop         # docs/develop
+      - 'releases/**'   # docs/**
     paths:
       - 'docs/**'
   workflow_dispatch:
@@ -15,6 +13,11 @@ on:
 jobs:
   update_docs:
     runs-on: ubuntu-latest
+    env:
+      # TODO: Figure out a better way to handle figuring out what version /latest should be,
+      # e.g. add a latest version file in main.
+      scenedetect_docs_latest: '0.6.3'
+      scenedetect_docs_dest: ''
 
     steps:
       - uses: actions/checkout@v3
@@ -25,34 +28,51 @@ jobs:
           python-version: '3.11'
           cache: 'pip'
 
-      - name: Install Dependencies
+      - name: Set Destination (Releases)
+        if: ${{ contains(github.ref_name, 'releases') }}
+        run: |
+          echo "scenedetect_docs_dest=$(echo ${{ github.ref_name }} | cut -b 10-)" >> "$GITHUB_ENV"
+
+      - name: Set Destination (Develop)
+        if: ${{ contains(github.ref_name, 'develop') }}
+        run: |
+          echo "scenedetect_docs_dest=develop" >> "$GITHUB_ENV"
+
+      - name: Check Destination
+        if: ${{ env.scenedetect_docs_dest == '' }}
+        run: |
+          echo "Failing build: destination must be set!"
+
+      - name: Setup Environment
         run: |
           python -m pip install --upgrade pip build wheel virtualenv
           pip install -r docs/requirements.txt
-
-      - name: Set Destination (Latest)
-        if: ${{ github.ref_name == 'main' }}
-        run: |
-          echo "scenedetect_docs_dest=latest" >> "$GITHUB_ENV"
-
-      - name: Set Destination (Releases)
-        if: ${{ github.ref_name != 'main' }}
-        run: |
-          echo "scenedetect_docs_dest=$(echo ${{ github.ref_name }} | cut -b 10-)" >> "$GITHUB_ENV"
+          git config --global user.name github-actions
+          git config --global user.email github-actions@github.com
 
       - name: Generate Docs
         run: |
           sphinx-build -b html docs build
 
-      - name: Add/Update Docs
+      - name: Update gh-pages Branch
         run: |
           git fetch origin gh-pages
           git checkout gh-pages
           git rm "docs/${{ env.scenedetect_docs_dest }}" -r -f --ignore-unmatch
           git add build/
           git mv build "docs/${{ env.scenedetect_docs_dest }}"
-          git config --global user.name github-actions
-          git config --global user.email github-actions@github.com
+
+      - name: Update Latest
+        if: ${{ env.scenedetect_docs_dest == env.scenedetect_docs_latest }}
+        run: |
+          git rm "docs/latest" -r -f --ignore-unmatch
+          mkdir -p latest
+          cp -r -f "docs/${{ env.scenedetect_docs_dest }}" docs/latest
+          git add docs/latest
+          echo "scenedetect_docs_dest='${{ env.scenedetect_docs_dest }} (latest)'" >> "$GITHUB_ENV"
+
+      - name: Commit and Push
+        run: |
           git commit -a -m "[docs] @${{ github.triggering_actor }}: Generate Documentation" \
             -m "Source: ${{ github.ref_name }} (${{ github.sha }})" \
             -m "Destination: ${{ env.scenedetect_docs_dest }}"

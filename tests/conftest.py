@@ -6,7 +6,7 @@
 #     [  Docs:    https://scenedetect.com/docs/                     ]
 #     [  Github:  https://github.com/Breakthrough/PySceneDetect/    ]
 #
-# Copyright (C) 2014-2023 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2014-2024 Brandon Castellano <http://www.bcastell.com>.
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
@@ -53,6 +53,26 @@ git checkout refs/remotes/origin/resources -- tests/resources/
 git reset
 """ % path)
     return path
+
+
+#
+# Pytest Hooks
+#
+
+
+def pytest_assertrepr_compare(op, left, right):
+    if isinstance(left, str) and isinstance(right, str) and op == "in":
+        return [
+            "Did not find expected output in test.",
+            "",
+            "Expected to find:",
+            "",
+            *left.splitlines(),
+            "",
+            "Actual output:",
+            "",
+            *right.splitlines(),
+        ]
 
 
 #

@@ -2,6 +2,8 @@
 name: Python Distribution
 
 on:
+  schedule:
+    - cron: '0 0 * * *'
   pull_request:
     paths:
       - dist/**
@@ -12,6 +14,10 @@ on:
       - dist/**
       - scenedetect/**
       - tests/**
+    branches:
+      - main
+      - develop
+      - 'releases/**'
     tags:
       - v*-release
   workflow_dispatch:
@@ -45,6 +51,7 @@ jobs:
           git fetch --depth=1 https://github.com/Breakthrough/PySceneDetect.git refs/heads/resources:refs/remotes/origin/resources
           git checkout refs/remotes/origin/resources -- tests/resources/
 
+      # TODO: Cache this: https://github.com/actions/cache
       # TODO: Install ffmpeg/mkvtoolnix on all runners.
       - name: Download FFMPEG
         if: ${{ matrix.os == 'windows-latest' }}
@@ -61,7 +68,7 @@ jobs:
 
       - name: Unit Tests
         run: |
-          python -m pytest tests/
+          python -m pytest -vv
 
       - name: Smoke Test (Module)
         run: |

@@ -50,7 +50,7 @@ Options
 
 .. option:: -o DIR, --output DIR
 
-  Output directory for created files. If unset, working directory will be used. May be overriden by command options.
+  Output directory for created files. If unset, working directory will be used. May be overridden by command options.
 
 .. option:: -c FILE, --config FILE
 
@@ -66,7 +66,7 @@ Options
 
 .. option:: -m TIMECODE, --min-scene-len TIMECODE
 
-  Minimum length of any scene. TIMECODE can be specified as number of frames (:option:`-m=10 <-m>`), time in seconds followed by "s" (:option:`-m=2.5s <-m>`), or timecode (:option:`-m=00:02:53.633 <-m>`).
+  Minimum length of any scene. TIMECODE can be specified as number of frames (:option:`-m=10 <-m>`), time in seconds (:option:`-m=2.5 <-m>`), or timecode (:option:`-m=00:02:53.633 <-m>`).
 
   Default: ``0.6s``
 
@@ -617,7 +617,7 @@ Options
 
 .. option:: -s TIMECODE, --start TIMECODE
 
-  Time in video to start detection. TIMECODE can be specified as number of frames (:option:`--start=100 <--start>` for frame 100), time in seconds followed by "s" (:option:`--start=100s <--start>` for 100 seconds), or timecode (:option:`--start=00:01:40 <--start>` for 1m40s).
+  Time in video to start detection. TIMECODE can be specified as number of frames (:option:`--start=100 <--start>` for frame 100), time in seconds (:option:`--start=100.0 <--start>` for 100 seconds), or timecode (:option:`--start=00:01:40 <--start>` for 1m40s).
 
 .. option:: -d TIMECODE, --duration TIMECODE
 

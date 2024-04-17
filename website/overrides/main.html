@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block site_name %}
+{% if page.is_index %}
+  <a href="{{ nav.homepage.url|url }}">
+{% else %}
+  <a href="{{ nav.homepage.url|url }}">
+{% endif %}
+{% if page.is_index %}
+ 🎥 {{ config.site_name }}
+{% else %}
+<img src="{{ config.theme.logo|url }}" class="logo" alt="{% trans %}Logo{% endtrans %}"/>
+{% endif %}
+</a>
+{% endblock %}

@@ -6,7 +6,7 @@
 #     [  Docs:    https://scenedetect.com/docs/                     ]
 #     [  Github:  https://github.com/Breakthrough/PySceneDetect/    ]
 #
-# Copyright (C) 2014-2023 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2014-2024 Brandon Castellano <http://www.bcastell.com>.
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
@@ -20,7 +20,7 @@ This detector is available from the command-line as the `detect-adaptive` comman
 from logging import getLogger
 from typing import List, Optional
 
-from numpy import ndarray
+import numpy as np
 
 from scenedetect.detectors import ContentDetector
 
@@ -95,8 +95,8 @@ class AdaptiveDetector(ContentDetector):
         self._adaptive_ratio_key = AdaptiveDetector.ADAPTIVE_RATIO_KEY_TEMPLATE.format(
             window_width=window_width, luma_only='' if not luma_only else '_lum')
         self._first_frame_num = None
-        self._last_frame_num = None
 
+        # NOTE: This must be different than `self._last_scene_cut` which is used by the base class.
         self._last_cut: Optional[int] = None
 
         self._buffer = []
@@ -114,24 +114,26 @@ class AdaptiveDetector(ContentDetector):
         """Not required for AdaptiveDetector."""
         return False
 
-    def process_frame(self, frame_num: int, frame_img: Optional[ndarray]) -> List[int]:
-        """ Similar to ThresholdDetector, but using the HSV colour space DIFFERENCE instead
-        of single-frame RGB/grayscale intensity (thus cannot detect slow fades with this method).
+    def process_frame(self, frame_num: int, frame_img: Optional[np.ndarray]) -> List[int]:
+        """Process the next frame. `frame_num` is assumed to be sequential.
 
-        Arguments:
-            frame_num: Frame number of frame that is being passed.
-
-            frame_img: Decoded frame image (numpy.ndarray) to perform scene
-                detection on. Can be None *only* if the self.is_processing_required() method
-                (inhereted from the base SceneDetector class) returns True.
+        Args:
+            frame_num (int): Frame number of frame that is being passed. Can start from any value
+                but must remain sequential.
+            frame_img (numpy.ndarray or None): Video frame corresponding to `frame_img`.
 
         Returns:
-            Empty list
+            List[int]: List of frames where scene cuts have been detected. There may be 0
+            or more frames in the list, and not necessarily the same as frame_num.
         """
 
         # TODO(#283): Merge this with ContentDetector and turn it on by default.
 
         super().process_frame(frame_num=frame_num, frame_img=frame_img)
+
+        # Initialize last scene cut point at the beginning of the frames of interest.
+        if self._last_cut is None:
+            self._last_cut = frame_num
 
         required_frames = 1 + (2 * self.window_width)
         self._buffer.append((frame_num, self._frame_score))
@@ -154,27 +156,21 @@ class AdaptiveDetector(ContentDetector):
         if self.stats_manager is not None:
             self.stats_manager.set_metrics(target[0], {self._adaptive_ratio_key: adaptive_ratio})
 
-        cut_list = []
         # Check to see if adaptive_ratio exceeds the adaptive_threshold as well as there
         # being a large enough content_val to trigger a cut
-        if (adaptive_ratio >= self.adaptive_threshold and target[1] >= self.min_content_val):
+        threshold_met: bool = (
+            adaptive_ratio >= self.adaptive_threshold and target[1] >= self.min_content_val)
+        min_length_met: bool = (frame_num - self._last_cut) >= self.min_scene_len
+        if threshold_met and min_length_met:
+            self._last_cut = target[0]
+            return [target[0]]
+        return []
 
-            if self._last_cut is None:
-                # No previously detected cuts
-                cut_list.append(target[0])
-                self._last_cut = target[0]
-            elif (target[0] - self._last_cut) >= self.min_scene_len:
-                # Respect the min_scene_len parameter
-                cut_list.append(target[0])
-                # TODO: Should this be updated every time the threshold is exceeded?
-                # It might help with flash suppression for example.
-                self._last_cut = target[0]
-
-        return cut_list
-
-    # TODO(0.6.3): Deprecate & remove this method.
     def get_content_val(self, frame_num: int) -> Optional[float]:
         """Returns the average content change for a frame."""
+        # TODO(v0.7): Add DeprecationWarning that `get_content_val` will be removed in v0.7.
+        logger.error("get_content_val is deprecated and will be removed. Lookup the value"
+                     " using a StatsManager with ContentDetector.FRAME_SCORE_KEY.")
         if self.stats_manager is not None:
             return self.stats_manager.get_metrics(frame_num, [ContentDetector.FRAME_SCORE_KEY])[0]
         return 0.0

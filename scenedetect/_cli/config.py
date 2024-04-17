@@ -6,7 +6,7 @@
 #     [  Docs:    https://scenedetect.com/docs/                     ]
 #     [  Github:  https://github.com/Breakthrough/PySceneDetect/    ]
 #
-# Copyright (C) 2014-2023 Brandon Castellano <http://www.bcastell.com>.
+# Copyright (C) 2014-2024 Brandon Castellano <http://www.bcastell.com>.
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
@@ -16,6 +16,7 @@ possible and re-used by the CLI so that there is one source of truth.
 """
 
 from abc import ABC, abstractmethod
+from enum import Enum
 import logging
 import os
 import os.path
@@ -61,7 +62,7 @@ class ValidatedValue(ABC):
 
 
 class TimecodeValue(ValidatedValue):
-    """Validator for timecode values in frames (1234), seconds (123.4s), or HH:MM:SS.
+    """Validator for timecode values in seconds (100.0), frames (100), or HH:MM:SS.
 
     Stores value in original representation."""
 
@@ -86,8 +87,7 @@ class TimecodeValue(ValidatedValue):
             return TimecodeValue(config_value)
         except ValueError as ex:
             raise OptionParseFailure(
-                'Timecodes must be in frames (1234), seconds (123.4s), or HH:MM:SS (00:02:03.400).'
-            ) from ex
+                'Timecodes must be in seconds (100.0), frames (100), or HH:MM:SS.') from ex
 
 
 class RangeValue(ValidatedValue):
@@ -213,14 +213,37 @@ class KernelSizeValue(ValidatedValue):
             ) from ex
 
 
+class TimecodeFormat(Enum):
+    """Format to display timecodes."""
+    FRAMES = 0
+    """Print timecodes as exact frame number."""
+    TIMECODE = 1
+    """Print timecodes in format HH:MM:SS.nnn."""
+    SECONDS = 2
+    """Print timecodes in seconds SSS.sss."""
+
+    def format(self, timecode: FrameTimecode) -> str:
+        if self == TimecodeFormat.FRAMES:
+            return str(timecode.get_frames())
+        if self == TimecodeFormat.TIMECODE:
+            return timecode.get_timecode()
+        if self == TimecodeFormat.SECONDS:
+            return '%.3f' % timecode.get_seconds()
+        assert False
+
+
 ConfigValue = Union[bool, int, float, str]
 ConfigDict = Dict[str, Dict[str, ConfigValue]]
 
 _CONFIG_FILE_NAME: AnyStr = 'scenedetect.cfg'
 _CONFIG_FILE_DIR: AnyStr = user_config_dir("PySceneDetect", False)
+_PLACEHOLDER = 0   # Placeholder for image quality default, as the value depends on output format
 
 CONFIG_FILE_PATH: AnyStr = os.path.join(_CONFIG_FILE_DIR, _CONFIG_FILE_NAME)
+DEFAULT_JPG_QUALITY = 95
+DEFAULT_WEBP_QUALITY = 100
 
+# TODO(v0.7): Remove [detect-adaptive] min-delta-hsv
 CONFIG_MAP: ConfigDict = {
     'backend-opencv': {
         'max-decode-attempts': 5,
@@ -237,7 +260,6 @@ CONFIG_MAP: ConfigDict = {
         'min-scene-len': TimecodeValue(0),
         'threshold': RangeValue(3.0, min_val=0.0, max_val=255.0),
         'weights': ScoreWeightsValue(ContentDetector.DEFAULT_COMPONENT_WEIGHTS),
-                                                                                   # TODO(v0.7): Remove `min-delta-hsv``.
         'min-delta-hsv': RangeValue(15.0, min_val=0.0, max_val=255.0),
     },
     'detect-content': {
@@ -263,8 +285,11 @@ CONFIG_MAP: ConfigDict = {
         'no-images': False,
     },
     'list-scenes': {
-        'output': '',
+        'cut-format': 'timecode',
+        'display-cuts': True,
+        'display-scenes': True,
         'filename': '$VIDEO_NAME-Scenes.csv',
+        'output': '',
         'no-output-file': False,
         'quiet': False,
         'skip-cuts': False,
@@ -289,7 +314,7 @@ CONFIG_MAP: ConfigDict = {
         'height': 0,
         'num-images': 3,
         'output': '',
-        'quality': RangeValue(0, min_val=0, max_val=100),                        # Default depends on format
+        'quality': RangeValue(_PLACEHOLDER, min_val=0, max_val=100),
         'scale': 1.0,
         'scale-method': 'linear',
         'width': 0,
@@ -311,11 +336,21 @@ The types of these values are used when decoding the configuration file. Valid c
 certain string options are stored in `CHOICE_MAP`."""
 
 CHOICE_MAP: Dict[str, Dict[str, List[str]]] = {
+    'backend-pyav': {
+        'threading_mode': [str(mode).lower() for mode in VALID_PYAV_THREAD_MODES],
+    },
     'global': {
         'backend': ['opencv', 'pyav', 'moviepy'],
         'default-detector': ['detect-adaptive', 'detect-content', 'detect-threshold'],
         'downscale-method': [value.name.lower() for value in Interpolation],
         'verbosity': ['debug', 'info', 'warning', 'error', 'none'],
+    },
+    'list-scenes': {
+        'cut-format': [value.name.lower() for value in TimecodeFormat],
+    },
+    'save-images': {
+        'format': ['jpeg', 'png', 'webp'],
+        'scale-method': [value.name.lower() for value in Interpolation],
     },
     'split-video': {
         'preset': [
@@ -323,17 +358,12 @@ CHOICE_MAP: Dict[str, Dict[str, List[str]]] = {
             'veryslow'
         ],
     },
-    'save-images': {
-        'format': ['jpeg', 'png', 'webp'],
-        'scale-method': [value.name.lower() for value in Interpolation],
-    },
-    'backend-pyav': {
-        'threading_mode': [str(mode).lower() for mode in VALID_PYAV_THREAD_MODES],
-    },
 }
 """Mapping of string options which can only be of a particular set of values. We use a list instead
 of a set to preserve order when generating error contexts. Values are case-insensitive, and must be
 in lowercase in this map."""
+
+# TODO: This isn't ideal for enums since this could be derived from the type directly, but it works.
 
 
 def _validate_structure(config: ConfigParser) -> List[str]:

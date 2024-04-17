@@ -17,16 +17,16 @@ environment:
     - PYTHON: "C:\\Python39-x64"
   # Encrypted AdvancedInstaller License
   ai_license_secret:
-    secure: lulTujjpNX3A1RKIvj834/Czn6etzevma6oqlA5Xia5tgrg75SPXcs1lPNlu5YPU
+    secure: MOkULlGPSi0C1Hg2PU1h2SZg/eyQnPQhRJ1XFlavfMKMOoX9hY4pSjpdgW3psSau
   ai_license_salt:
-    secure: kMv/7J3wqaRGUJYwnfaY6edw0VW39uX7oM9Od9PQ2wwlCmTZcwAh4kEUxhB5u91QbXmp4McMuwcXAO4UdVoSGg==
+    secure: /LlGOUGZk8HQgrW6txtssTt8I6Z6pU7K3XOcqTqr2iKX4vLO3ZTdILgL/6M6u7gWVdRoUYfbxm4JVYjs4hfcmQ==
 
 # SignPath Config for Code Signing
 deploy:
 - provider: Webhook
   url: https://app.signpath.io/API/v1/f2efa44c-5b5c-45f2-b44f-8f9dde708313/Integrations/AppVeyor?ProjectSlug=PySceneDetect&SigningPolicySlug=release-signing
   authorization:
-     secure: NPMogMcEb5S/ASMEiL275H79D+Pj9cgUqx8kjTPGXtF9drZW41nljczuhF1XvcxFgI0q9TA1BUX9YuCoTQ3mEQ==
+     secure: FBgWCaxCCKOqc2spYf5NGWSNUGLbT5WeuC5U0k4Of1Ids9n51YWxhGlMyzLbdNBFe64RUcOSzk/N3emlQzbsJg==
 
 install:
   - echo * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -48,10 +48,13 @@ install:
   # Build Windows .EXE and create portable .ZIP
   - pyinstaller dist/scenedetect.spec
   - sphinx-build -b singlehtml docs dist/scenedetect/docs
-  - python dist/cleanup_dependencies.py
+  - mkdir dist\scenedetect\thirdparty
+  - move LICENSE dist\scenedetect\
+  - move dist\windows\README* dist\scenedetect\
+  - move dist\windows\LICENSE* dist\scenedetect\thirdparty\
+  - move scenedetect\_thirdparty\LICENSE* dist\scenedetect\thirdparty\
   - move dist\ffmpeg\ffmpeg.exe dist\scenedetect\
-  - move dist\ffmpeg\LICENSE dist\scenedetect\LICENSE-FFMPEG
-  - copy scenedetect\_thirdparty\LICENSE* dist\scenedetect\
+  - move dist\ffmpeg\LICENSE dist\scenedetect\thirdparty\LICENSE-FFMPEG
   - cd dist/scenedetect
   - 7z a ../scenedetect-win64.zip *
   - cd ../..
@@ -65,7 +68,7 @@ install:
   - appveyor-tools\secure-file -decrypt license65.dat.enc -secret %ai_license_secret% -salt %ai_license_salt%
   - appveyor DownloadFile https://www.advancedinstaller.com/downloads/advinst.msi
   - msiexec /i advinst.msi /qn
-  - 'SET PATH=%PATH%;C:\\Program Files (x86)\\Caphyon\\Advanced Installer 20.8\\bin\\x86'
+  - 'SET PATH=%PATH%;C:\\Program Files (x86)\\Caphyon\\Advanced Installer 21.5\\bin\\x86'
   # License path must be absolute
   - AdvancedInstaller.com /RegisterOffline "%cd%\license65.dat"
   # Create MSI installer

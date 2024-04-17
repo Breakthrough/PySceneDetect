@@ -11,7 +11,7 @@ Video Scene Cut Detection and Analysis Tool
 
 ----------------------------------------------------------
 
-### Latest Release: v0.6.2 (July 23, 2023)
+### Latest Release: v0.6.3 (March 9, 2024)
 
 **Website**:  [scenedetect.com](https://www.scenedetect.com)
 
@@ -45,7 +45,7 @@ Skip the first 10 seconds of the input video:
 
     scenedetect -i video.mp4 time -s 10s
 
-More examples can be found throughout [the documentation](https://www.scenedetect.com/docs/latest/cli/global_options.html).
+More examples can be found throughout [the documentation](https://www.scenedetect.com/docs/latest/cli.html).
 
 **Quick Start (Python API)**:
 
@@ -102,7 +102,7 @@ See [the documentation](https://www.scenedetect.com/docs/latest/api.html) for mo
 
  - [Documentation](https://www.scenedetect.com/docs/) (covers application and Python API)
  - [CLI Example](https://www.scenedetect.com/cli/)
- - [Config File](https://www.scenedetect.com/docs/0.6.2/cli/config_file.html)
+ - [Config File](https://www.scenedetect.com/docs/0.6.3/cli/config_file.html)
 
 ## Help & Contributing
 
@@ -119,5 +119,5 @@ This program uses free code signing provided by [SignPath.io](https://signpath.i
 
 Licensed under BSD 3-Clause (see the `LICENSE` file for details).
 
-Copyright (C) 2014-2023 Brandon Castellano.
+Copyright (C) 2014-2024 Brandon Castellano.
 All rights reserved.
