@@ -24,9 +24,10 @@ import typing as ty
 import pytest
 
 from scenedetect import detect, SceneManager, FrameTimecode, StatsManager, SceneDetector
-from scenedetect.detectors import AdaptiveDetector, ContentDetector, ThresholdDetector, HashDetector
+from scenedetect.detectors import *
 from scenedetect.backends.opencv import VideoStreamCv2
 
+ALL_DETECTORS = (AdaptiveDetector, ContentDetector, HashDetector, HistogramDetector, ThresholdDetector,)
 
 # TODO: Reduce code duplication here and in `conftest.py`
 def get_absolute_path(relative_path: str) -> str:
@@ -45,6 +46,31 @@ git checkout refs/remotes/origin/resources -- tests/resources/
 git reset
 """ % relative_path)
     return abs_path
+
+
+# TODO: Add a test case for this in the fixtures defined below.
+def test_histogram_detector(test_movie_clip):
+    """ Test SceneManager with VideoStreamCv2 and HistogramDetector. """
+    TEST_MOVIE_CLIP_START_FRAMES_ACTUAL = [1199, 1226, 1260, 1281, 1334, 1365, 1590, 1697, 1871]
+    """Ground truth of start frame for each fast cut in `test_movie_clip`."""
+    video = VideoStreamCv2(test_movie_clip)
+    scene_manager = SceneManager()
+    scene_manager.add_detector(HistogramDetector())
+    scene_manager.auto_downscale = True
+
+    video_fps = video.frame_rate
+    start_time = FrameTimecode('00:00:50', video_fps)
+    end_time = FrameTimecode('00:01:19', video_fps)
+
+    video.seek(start_time)
+    scene_manager.detect_scenes(video=video, end_time=end_time)
+
+    scene_list = scene_manager.get_scene_list()
+    assert len(scene_list) == len(TEST_MOVIE_CLIP_START_FRAMES_ACTUAL)
+    detected_start_frames = [timecode.get_frames() for timecode, _ in scene_list]
+    assert TEST_MOVIE_CLIP_START_FRAMES_ACTUAL == detected_start_frames
+    # Ensure last scene's end timecode matches the end time we set.
+    assert scene_list[-1][1] == end_time
 
 
 @dataclass
@@ -193,7 +219,7 @@ def test_detect_fades(test_case: TestCase):
 def test_detectors_with_stats(test_video_file):
     """ Test all detectors functionality with a StatsManager. """
     # TODO(v1.0): Parameterize this test case (move fixture from cli to test config).
-    for detector in [ContentDetector, ThresholdDetector, AdaptiveDetector, HashDetector]:
+    for detector in ALL_DETECTORS:
         video = VideoStreamCv2(test_video_file)
         stats = StatsManager()
         scene_manager = SceneManager(stats_manager=stats)

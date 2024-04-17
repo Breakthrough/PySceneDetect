@@ -25,9 +25,14 @@ The adaptive content detector (`detect-adaptive`) compares the difference in con
 
 The threshold-based scene detector (`detect-threshold`) is how most traditional scene detection methods work (e.g. the `ffmpeg blackframe` filter), by comparing the intensity/brightness of the current frame with a set threshold, and triggering a scene cut/break when this value crosses the threshold.  In PySceneDetect, this value is computed by averaging the R, G, and B values for every pixel in the frame, yielding a single floating point number representing the average pixel value (from 0.0 to 255.0).
 
+## Histogram Detector
+
+The color histogram detector uses color information to detect fast cuts. The input video for this detector must be in 8-bit color. The detection algorithm consists of separating the three RGB color channels and then quantizing them by eliminating all but the given number of most significant bits (`--bits/-b`). The resulting quantized color channels are then bit shifted and joined together into a new, composite image. A histogram is then constructed from the pixel values in the new, composite image. This histogram is compared element-wise with the histogram from the previous frame and if the total difference between the two adjacent histograms exceeds the given threshold (`--threshold/-t`), then a new scene is triggered.
+
 ## Perceptual Hash Detector
 
 The perceptual hash detector (`detect-hash`) calculates a hash for a frame and compares that hash to the previous frame's hash. If the hashes differ by more than the defined threshold, then a scene change is recorded. The hashing algorithm used for this detector is an implementation of `phash` from the [imagehash](https://github.com/JohannesBuchner/imagehash) library. In practice, this detector works similarly to `detect-content` in that it picks up large differences between adjacent frames. One important note is that the hashing algorithm converts the frames to grayscale, so this detector is insensitive to changes in colors if the brightness remains constant. In general, this algorithm is very computationally efficient compared to `detect-content` or `detect-adaptive`, especially if downscaling is not used. See [here](https://www.hackerfactor.com/blog/index.php?/archives/432-Looks-Like-It.html) for an overview of how a perceptual hashing algorithm can be used for detecting similarity (or otherwise) of images and a visual depiction of the algorithm.
+
 
 # Creating New Detection Algorithms
 

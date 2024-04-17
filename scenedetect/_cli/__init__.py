@@ -710,6 +710,52 @@ Examples:
     ctx.obj.add_detector(ThresholdDetector(**detector_args))
 
 
+@click.command('detect-hist', cls=_Command)
+@click.option(
+    '--threshold',
+    '-t',
+    metavar='VAL',
+    type=click.FloatRange(CONFIG_MAP['detect-hist']['threshold'].min_val,
+                          CONFIG_MAP['detect-hist']['threshold'].max_val),
+    default=None,
+    help='Threshold value (float) that the rgb histogram difference must exceed to trigger'
+    ' a new scene. Refer to frame metric hist_diff in stats file.%s' %
+    (USER_CONFIG.get_help_string('detect-hist', 'threshold')))
+@click.option(
+    '--bits',
+    '-b',
+    metavar='NUM',
+    type=click.INT,
+    default=None,
+    help='The number of most significant figures to keep when quantizing the RGB color channels.%s'
+    % (USER_CONFIG.get_help_string("detect-hist", "bits")))
+@click.option(
+    '--min-scene-len',
+    '-m',
+    metavar='TIMECODE',
+    type=click.STRING,
+    default=None,
+    help='Minimum length of any scene. Overrides global min-scene-len (-m) setting.'
+    ' TIMECODE can be specified as exact number of frames, a time in seconds followed by s,'
+    ' or a timecode in the format HH:MM:SS or HH:MM:SS.nnn.%s' %
+    ('' if USER_CONFIG.is_default('detect-hist', 'min-scene-len') else USER_CONFIG.get_help_string(
+        'detect-hist', 'min-scene-len')))
+@click.pass_context
+def detect_hist_command(ctx: click.Context, threshold: Optional[float], bits: Optional[int],
+                        min_scene_len: Optional[str]):
+    """Perform detection of scenes by comparing differences in the RGB histograms of adjacent
+    frames.
+
+    Examples:
+
+        detect-hist
+
+        detect-hist --threshold 20000.0
+    """
+    assert isinstance(ctx.obj, CliContext)
+    ctx.obj.handle_detect_hist(threshold=threshold, bits=bits, min_scene_len=min_scene_len)
+
+
 @click.command('load-scenes', cls=_Command)
 @click.option(
     '--input',

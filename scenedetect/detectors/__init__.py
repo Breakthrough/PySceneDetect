@@ -33,6 +33,7 @@ from scenedetect.detectors.content_detector import ContentDetector
 from scenedetect.detectors.threshold_detector import ThresholdDetector
 from scenedetect.detectors.adaptive_detector import AdaptiveDetector
 from scenedetect.detectors.hash_detector import HashDetector
+from scenedetect.detectors.histogram_detector import HistogramDetector
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 #                                                                             #
@@ -45,19 +46,6 @@ from scenedetect.detectors.hash_detector import HashDetector
 #
 #    Detects slow fades only; to detect fast cuts between content scenes, the
 #    ContentDetector should be used instead.
-#    """
-#
-#    def __init__(self):
-#        super(DissolveDetector, self).__init__()
-#
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-#
-# class HistogramDetector(SceneDetector):
-#    """Detects fast cuts via histogram changes between sequential frames.
-#
-#    Detects fast cuts between content (using histogram deltas, much like the
-#    ContentDetector uses HSV colourspace deltas), as well as both fades and
-#    cuts to/from black (using a threshold, much like the ThresholdDetector).
 #    """
 #
 #    def __init__(self):
