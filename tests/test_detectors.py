@@ -49,6 +49,7 @@ git reset
 
 @dataclass
 class TestCase:
+    __test__ = False
     """Properties for detector test cases."""
     path: str
     """Path to video for test case."""
