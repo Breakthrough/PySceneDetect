@@ -92,8 +92,8 @@ class HistogramDetector(SceneDetector):
             hist_diff = numpy.sum(numpy.fabs(self._last_hist - hist))
 
             # Check if a new scene should be triggered
-            if hist_diff >= self.threshold and (
-                (frame_num - self._last_scene_cut) >= self.min_scene_len):
+            if hist_diff >= self.threshold and ((frame_num - self._last_scene_cut)
+                                                >= self.min_scene_len):
                 cut_list.append(frame_num)
                 self._last_scene_cut = frame_num
 
