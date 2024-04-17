@@ -710,7 +710,7 @@ Examples:
     ctx.obj.add_detector(ThresholdDetector(**detector_args))
 
 
-@click.command('detect-hist')
+@click.command('detect-hist', cls=_Command)
 @click.option(
     '--threshold',
     '-t',
