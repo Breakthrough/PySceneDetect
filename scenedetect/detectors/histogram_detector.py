@@ -42,10 +42,10 @@ class HistogramDetector(SceneDetector):
             min_scene_len:  Minimum length of any scene.
         """
         super().__init__()
-        self.threshold = threshold
-        self.bits = bits
-        self.min_scene_len = min_scene_len
-        self._hist_bins = range(2**(3 * self.bits))
+        self._threshold = threshold
+        self._bits = bits
+        self._min_scene_len = min_scene_len
+        self._hist_bins = range(2**(3 * self._bits))
         self._last_hist = None
         self._last_scene_cut = None
 
@@ -78,10 +78,10 @@ class HistogramDetector(SceneDetector):
             self._last_scene_cut = frame_num
 
         # Quantize the image and separate the color channels
-        quantized_imgs = self._quantize_frame(frame_img=frame_img, bits=self.bits)
+        quantized_imgs = self._quantize_frame(frame_img=frame_img, bits=self._bits)
 
         # Perform bit shifting operations and bitwise combine color channels into one array
-        composite_img = self._shift_bits(quantized_imgs=quantized_imgs, bits=self.bits)
+        composite_img = self._shift_bits(quantized_imgs=quantized_imgs, bits=self._bits)
 
         # Create the histogram with a bin for every rgb value
         hist, _ = numpy.histogram(composite_img, bins=self._hist_bins)
@@ -92,8 +92,11 @@ class HistogramDetector(SceneDetector):
             hist_diff = numpy.sum(numpy.fabs(self._last_hist - hist))
 
             # Check if a new scene should be triggered
-            if hist_diff >= self.threshold and ((frame_num - self._last_scene_cut)
-                                                >= self.min_scene_len):
+
+            # TODO(#53): We should probably normalize the threshold based on the frame size, as
+            # larger images will have more pixels in each bin.
+            if hist_diff >= self._threshold and ((frame_num - self._last_scene_cut)
+                                                 >= self._min_scene_len):
                 cut_list.append(frame_num)
                 self._last_scene_cut = frame_num
 
