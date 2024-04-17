@@ -275,6 +275,11 @@ CONFIG_MAP: ConfigDict = {
         'min-scene-len': TimecodeValue(0),
         'threshold': RangeValue(12.0, min_val=0.0, max_val=255.0),
     },
+    'detect-hist': {
+        'bits': 4,
+        'min-scene-len': TimecodeValue(0),
+        'threshold': 20000.0,
+    },
     'load-scenes': {
         'start-col-name': 'Start Frame',
     },
