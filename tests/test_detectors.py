@@ -50,6 +50,8 @@ git reset
 # TODO: Add a test case for this in the fixtures defined below.
 def test_histogram_detector(test_movie_clip):
     """ Test SceneManager with VideoStreamCv2 and HistogramDetector. """
+    TEST_MOVIE_CLIP_START_FRAMES_ACTUAL = [1199, 1226, 1260, 1281, 1334, 1365, 1590, 1697, 1871]
+    """Ground truth of start frame for each fast cut in `test_movie_clip`."""
     video = VideoStreamCv2(test_movie_clip)
     scene_manager = SceneManager()
     scene_manager.add_detector(HistogramDetector())
