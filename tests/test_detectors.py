@@ -27,7 +27,13 @@ from scenedetect import detect, SceneManager, FrameTimecode, StatsManager, Scene
 from scenedetect.detectors import *
 from scenedetect.backends.opencv import VideoStreamCv2
 
-ALL_DETECTORS = (AdaptiveDetector, ContentDetector, HashDetector, HistogramDetector, ThresholdDetector,)
+ALL_DETECTORS = (
+    AdaptiveDetector,
+    ContentDetector,
+    HashDetector,
+    HistogramDetector,
+    ThresholdDetector,
+)
 
 # TODO(#53): Add a test that verifies algorithms output relatively consistent frame scores
 # regardless of resolution. This will ensure that threshold values will hold true for different
@@ -194,6 +200,7 @@ def get_fade_in_out_test_cases():
                 scene_boundaries=[0, 42, 125, 209]),
             id="threshold_fades_ceil"),
     ]
+
 
 @pytest.mark.parametrize("test_case", get_fast_cut_test_cases())
 def test_detect_fast_cuts(test_case: TestCase):
