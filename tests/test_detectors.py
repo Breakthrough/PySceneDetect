@@ -24,8 +24,21 @@ import typing as ty
 import pytest
 
 from scenedetect import detect, SceneManager, FrameTimecode, StatsManager, SceneDetector
-from scenedetect.detectors import AdaptiveDetector, ContentDetector, ThresholdDetector, HistogramDetector
+from scenedetect.detectors import *
 from scenedetect.backends.opencv import VideoStreamCv2
+
+
+FAST_CUT_DETECTORS: tuple[type[SceneDetector]] = (
+    AdaptiveDetector,
+    ContentDetector,
+    HashDetector,
+    HistogramDetector,
+)
+
+ALL_DETECTORS: tuple[type[SceneDetector]] = (
+    *FAST_CUT_DETECTORS,
+    ThresholdDetector
+)
 
 # TODO(#53): Add a test that verifies algorithms output relatively consistent frame scores
 # regardless of resolution. This will ensure that threshold values will hold true for different
@@ -78,57 +91,28 @@ class TestCase:
 
 def get_fast_cut_test_cases():
     """Fixture for parameterized test cases that detect fast cuts."""
-    return [
-        pytest.param(
+    test_cases = []
+    # goldeneye.mp4 with min_scene_len = 15 (default)
+    test_cases += [pytest.param(
             TestCase(
                 path=get_absolute_path("resources/goldeneye.mp4"),
-                detector=ContentDetector(),
+                detector=detector_type(min_scene_len=15),
                 start_time=1199,
                 end_time=1450,
                 scene_boundaries=[1199, 1226, 1260, 1281, 1334, 1365]),
-            id="content_default"),
-        pytest.param(
-            TestCase(
-                path=get_absolute_path("resources/goldeneye.mp4"),
-                detector=AdaptiveDetector(),
-                start_time=1199,
-                end_time=1450,
-                scene_boundaries=[1199, 1226, 1260, 1281, 1334, 1365]),
-            id="adaptive_default"),
-        pytest.param(
-            TestCase(
-                path=get_absolute_path("resources/goldeneye.mp4"),
-                detector=HistogramDetector(),
-                start_time=1199,
-                end_time=1450,
-                scene_boundaries=[1199, 1226, 1260, 1281, 1334, 1365]),
-            id="histogram_default"),
-        pytest.param(
-            TestCase(
-                path=get_absolute_path("resources/goldeneye.mp4"),
-                detector=ContentDetector(min_scene_len=30),
-                start_time=1199,
-                end_time=1450,
-                scene_boundaries=[1199, 1260, 1334, 1365]),
-            id="content_min_scene_len"),
-        pytest.param(
-            TestCase(
-                path=get_absolute_path("resources/goldeneye.mp4"),
-                detector=AdaptiveDetector(min_scene_len=30),
-                start_time=1199,
-                end_time=1450,
-                scene_boundaries=[1199, 1260, 1334, 1365]),
-            id="adaptive_min_scene_len"),
-        pytest.param(
-            TestCase(
-                path=get_absolute_path("resources/goldeneye.mp4"),
-                detector=HistogramDetector(min_scene_len=30),
-                start_time=1199,
-                end_time=1450,
-                scene_boundaries=[1199, 1260, 1334, 1365]),
-            id="histogram_min_scene_len"),
+            id="%s/default" % detector_type.__name__) for detector_type in FAST_CUT_DETECTORS
     ]
-
+    # goldeneye.mp4 with min_scene_len = 30
+    test_cases += [pytest.param(
+            TestCase(
+                path=get_absolute_path("resources/goldeneye.mp4"),
+                detector=detector_type(min_scene_len=30),
+                start_time=1199,
+                end_time=1450,
+                scene_boundaries=[1199, 1260, 1334, 1365]),
+            id="%s/m=30" % detector_type.__name__) for detector_type in FAST_CUT_DETECTORS
+    ]
+    return test_cases
 
 def get_fade_in_out_test_cases():
     """Fixture for parameterized test cases that detect fades."""
@@ -199,7 +183,7 @@ def test_detect_fades(test_case: TestCase):
 def test_detectors_with_stats(test_video_file):
     """ Test all detectors functionality with a StatsManager. """
     # TODO(v1.0): Parameterize this test case (move fixture from cli to test config).
-    for detector in [ContentDetector, ThresholdDetector, AdaptiveDetector, HistogramDetector]:
+    for detector in ALL_DETECTORS:
         video = VideoStreamCv2(test_video_file)
         stats = StatsManager()
         scene_manager = SceneManager(stats_manager=stats)

@@ -43,6 +43,7 @@ from scenedetect.video_splitter import is_ffmpeg_available, is_mkvmerge_availabl
 # TODO: Missing tests for --min-scene-len and --drop-short-scenes.
 
 SCENEDETECT_CMD = 'python -m scenedetect'
+# TODO(v0.7): Add `detect-hash` to this list.
 ALL_DETECTORS = ['detect-content', 'detect-threshold', 'detect-adaptive', 'detect-hist']
 ALL_BACKENDS = ['opencv', 'pyav']
 
