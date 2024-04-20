@@ -106,13 +106,10 @@ class AdaptiveDetector(ContentDetector):
         """Number of frames any detected cuts will be behind the current frame due to buffering."""
         return self.window_width
 
-    def get_metrics(self) -> List[str]:
+    @property
+    def metric_keys(self) -> List[str]:
         """Combines base ContentDetector metric keys with the AdaptiveDetector one."""
-        return super().get_metrics() + [self._adaptive_ratio_key]
-
-    def stats_manager_required(self) -> bool:
-        """Not required for AdaptiveDetector."""
-        return False
+        return super().metric_keys + [self._adaptive_ratio_key]
 
     def process_frame(self, frame_num: int, frame_img: Optional[np.ndarray]) -> List[int]:
         """Process the next frame. `frame_num` is assumed to be sequential.
@@ -126,9 +123,6 @@ class AdaptiveDetector(ContentDetector):
             List[int]: List of frames where scene cuts have been detected. There may be 0
             or more frames in the list, and not necessarily the same as frame_num.
         """
-
-        # TODO(#283): Merge this with ContentDetector and turn it on by default.
-
         super().process_frame(frame_num=frame_num, frame_img=frame_img)
 
         # Initialize last scene cut point at the beginning of the frames of interest.

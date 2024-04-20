@@ -11,6 +11,10 @@ Releases
     - `filter-mode = merge`, the new default mode, merges consecutive scenes shorter than `min-scene-len`
     - `filter-mode = suppress`, the  previous behavior, disables generating new scenes until `min-scene-len` has passed
  - [bugfix] Remove extraneous console output when using `--drop-short-scenes`
+ - [api] Major changes to `SceneDetector` interface:
+    - Replace `get_metrics()` function with abstract property `metric_keys` to avoid confusion with `StatsManager.get_metrics()` function
+    - Deprecate `is_processing_required()` and `stats_manager_required()` functions
+    - Replace public `stats_manager` class variable with property including setter/getter
 
 ## PySceneDetect 0.6
 

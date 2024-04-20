@@ -138,11 +138,15 @@ class ContentDetector(SceneDetector):
         self._frame_score: Optional[float] = None
         self._flash_filter = FlashFilter(mode=filter_mode, length=min_scene_len)
 
-    def get_metrics(self):
+    @property
+    def metric_keys(self) -> List[str]:
         return ContentDetector.METRIC_KEYS
 
-    def is_processing_required(self, frame_num):
-        return True
+    @property
+    def event_buffer_length(self) -> int:
+        """Number of frames any detected cuts will be behind the current frame due to buffering."""
+        # TODO(v0.7): Fixup private variables with properties.
+        return self._min_scene_len if self._flash_filter._mode == FlashFilter.Mode.MERGE else 0
 
     def _calculate_frame_score(self, frame_num: int, frame_img: numpy.ndarray) -> float:
         """Calculate score representing relative amount of motion in `frame_img` compared to

@@ -639,15 +639,9 @@ class SceneManager:
         Arguments:
             detector (SceneDetector): Scene detector to add to the SceneManager.
         """
-        if self._stats_manager is None and detector.stats_manager_required():
-            # Make sure the lists are empty so that the detectors don't get
-            # out of sync (require an explicit statsmanager instead)
-            assert not self._detector_list and not self._sparse_detector_list
-            self._stats_manager = StatsManager()
-
         detector.stats_manager = self._stats_manager
         if self._stats_manager is not None:
-            self._stats_manager.register_metrics(detector.get_metrics())
+            self._stats_manager.register_metrics(detector.metric_keys)
 
         if not issubclass(type(detector), SparseSceneDetector):
             self._detector_list.append(detector)
@@ -908,24 +902,14 @@ class SceneManager:
     ):
         try:
             while not self._stop.is_set():
-                frame_im = None
-                # We don't do any kind of locking here since the worst-case of this being wrong
-                # is that we do some extra work, and this function should never mutate any data
-                # (all of which should be modified under the GIL).
-                # TODO(v1.0): This optimization should be removed as it is an uncommon use case and
-                # greatly increases the complexity of detection algorithms using it.
-                if self._is_processing_required(video.position.frame_num):
-                    frame_im = video.read()
-                    if frame_im is False:
-                        break
-                    if downscale_factor > 1:
-                        frame_im = cv2.resize(
-                            frame_im, (round(frame_im.shape[1] / downscale_factor),
-                                       round(frame_im.shape[0] / downscale_factor)),
-                            interpolation=self._interpolation.value)
-                else:
-                    if video.read(decode=False) is False:
-                        break
+                frame_im = video.read()
+                if frame_im is False:
+                    break
+                if downscale_factor > 1:
+                    frame_im = cv2.resize(
+                        frame_im, (round(frame_im.shape[1] / downscale_factor),
+                                   round(frame_im.shape[0] / downscale_factor)),
+                        interpolation=self._interpolation.value)
 
                 # Set the start position now that we decoded at least the first frame.
                 if self._start_pos is None:
@@ -1018,9 +1002,3 @@ class SceneManager:
         return self._get_event_list()
 
     # pylint: enable=unused-argument
-
-    def _is_processing_required(self, frame_num: int) -> bool:
-        """True if frame metrics not in StatsManager, False otherwise."""
-        if self.stats_manager is None:
-            return True
-        return all([detector.is_processing_required(frame_num) for detector in self._detector_list])
