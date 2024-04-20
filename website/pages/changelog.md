@@ -7,7 +7,7 @@ Releases
 ### 0.6.4 (In Development)
 
  - [feature] New detector: `detect-hist` / `HistogramDetector`, [thanks @wjs018](https://github.com/Breakthrough/PySceneDetect/pull/295) [#53](https://github.com/Breakthrough/PySceneDetect/issues/53)
-
+ - [bugfix] Remove extraneous console output when using `--drop-short-scenes`
 
 ### 0.6.3 (March 9, 2024)
 

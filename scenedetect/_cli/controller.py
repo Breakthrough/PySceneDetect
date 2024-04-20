@@ -335,9 +335,6 @@ def _postprocess_scene_list(
 
     # Handle --drop-short-scenes.
     if context.drop_short_scenes and context.min_scene_len > 0:
-        print([str(s[1] - s[0]) for s in scene_list].__str__())
-        print(context.min_scene_len)
         scene_list = [s for s in scene_list if (s[1] - s[0]) >= context.min_scene_len]
-        print([str(s[1] - s[0]) for s in scene_list].__str__())
 
     return scene_list
