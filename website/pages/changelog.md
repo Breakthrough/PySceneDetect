@@ -2,12 +2,17 @@
 Releases
 ==========================================================
 
-## PySceneDetect 0.6
+## PySceneDetect 0.7
 
-### 0.6.4 (In Development)
+### 0.7 (In Development)
 
  - [feature] New detector: `detect-hist` / `HistogramDetector`, [thanks @wjs018](https://github.com/Breakthrough/PySceneDetect/pull/295) [#53](https://github.com/Breakthrough/PySceneDetect/issues/53)
+ - [feature] Add new flash suppression filter with `filter-mode` config option, reduces number of cuts generated during strobing/flashing effects [#35](https://github.com/Breakthrough/PySceneDetect/pull/295) [#53](https://github.com/Breakthrough/PySceneDetect/issues/35)
+    - `filter-mode = merge`, the new default mode, merges consecutive scenes shorter than `min-scene-len`
+    - `filter-mode = suppress`, the  previous behavior, disables generating new scenes until `min-scene-len` has passed
  - [bugfix] Remove extraneous console output when using `--drop-short-scenes`
+
+## PySceneDetect 0.6
 
 ### 0.6.3 (March 9, 2024)
 

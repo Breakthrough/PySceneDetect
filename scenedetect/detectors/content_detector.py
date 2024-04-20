@@ -22,7 +22,7 @@ from typing import List, NamedTuple, Optional
 import numpy
 import cv2
 
-from scenedetect.scene_detector import SceneDetector
+from scenedetect.scene_detector import SceneDetector, FlashFilter
 
 
 def _mean_pixel_distance(left: numpy.ndarray, right: numpy.ndarray) -> float:
@@ -105,6 +105,7 @@ class ContentDetector(SceneDetector):
         weights: 'ContentDetector.Components' = DEFAULT_COMPONENT_WEIGHTS,
         luma_only: bool = False,
         kernel_size: Optional[int] = None,
+        filter_mode: FlashFilter.Mode = FlashFilter.Mode.MERGE,
     ):
         """
         Arguments:
@@ -118,11 +119,12 @@ class ContentDetector(SceneDetector):
                 Overrides `weights` if both are set.
             kernel_size: Size of kernel for expanding detected edges. Must be odd integer
                 greater than or equal to 3. If None, automatically set using video resolution.
+            filter_mode: Mode to use when filtering cuts to meet `min_scene_len`.
         """
         super().__init__()
         self._threshold: float = threshold
         self._min_scene_len: int = min_scene_len
-        self._last_scene_cut: Optional[int] = None
+        self._last_above_threshold: Optional[int] = None
         self._last_frame: Optional[ContentDetector._FrameData] = None
         self._weights: ContentDetector.Components = weights
         if luma_only:
@@ -134,6 +136,7 @@ class ContentDetector(SceneDetector):
                 raise ValueError('kernel_size must be odd integer >= 3')
             self._kernel = numpy.ones((kernel_size, kernel_size), numpy.uint8)
         self._frame_score: Optional[float] = None
+        self._flash_filter = FlashFilter(mode=filter_mode, length=min_scene_len)
 
     def get_metrics(self):
         return ContentDetector.METRIC_KEYS
@@ -195,22 +198,12 @@ class ContentDetector(SceneDetector):
             List[int]: List of frames where scene cuts have been detected. There may be 0
             or more frames in the list, and not necessarily the same as frame_num.
         """
-        # Initialize last scene cut point at the beginning of the frames of interest.
-        if self._last_scene_cut is None:
-            self._last_scene_cut = frame_num
-
         self._frame_score = self._calculate_frame_score(frame_num, frame_img)
         if self._frame_score is None:
             return []
 
-        # We consider any frame over the threshold a new scene, but only if
-        # the minimum scene length has been reached (otherwise it is ignored).
-        min_length_met: bool = (frame_num - self._last_scene_cut) >= self._min_scene_len
-        if self._frame_score >= self._threshold and min_length_met:
-            self._last_scene_cut = frame_num
-            return [frame_num]
-
-        return []
+        above_threshold: bool = self._frame_score >= self._threshold
+        return self._flash_filter.filter(frame_num=frame_num, above_threshold=above_threshold)
 
     def _detect_edges(self, lum: numpy.ndarray) -> numpy.ndarray:
         """Detect edges using the luma channel of a frame.

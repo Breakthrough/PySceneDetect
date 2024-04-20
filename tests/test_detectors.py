@@ -165,7 +165,8 @@ def get_fade_in_out_test_cases():
 def test_detect_fast_cuts(test_case: TestCase):
     scene_list = test_case.detect()
     start_frames = [timecode.get_frames() for timecode, _ in scene_list]
-    assert test_case.scene_boundaries == start_frames
+
+    assert start_frames == test_case.scene_boundaries
     assert scene_list[0][0] == test_case.start_time
     assert scene_list[-1][1] == test_case.end_time
 
@@ -174,7 +175,7 @@ def test_detect_fast_cuts(test_case: TestCase):
 def test_detect_fades(test_case: TestCase):
     scene_list = test_case.detect()
     start_frames = [timecode.get_frames() for timecode, _ in scene_list]
-    assert test_case.scene_boundaries == start_frames
+    assert start_frames == test_case.scene_boundaries
     assert scene_list[0][0] == test_case.start_time
     assert scene_list[-1][1] == test_case.end_time
 
@@ -191,14 +192,12 @@ def test_detectors_with_stats(test_video_file):
         end_time = FrameTimecode('00:00:08', video.frame_rate)
         scene_manager.detect_scenes(video=video, end_time=end_time)
         initial_scene_len = len(scene_manager.get_scene_list())
-        assert initial_scene_len > 0 # test case must have at least one scene!
-                                     # Re-analyze using existing stats manager.
+        assert initial_scene_len > 0, "Test case must have at least one scene."
+        # Re-analyze using existing stats manager.
         scene_manager = SceneManager(stats_manager=stats)
         scene_manager.add_detector(detector())
-
         video.reset()
         scene_manager.auto_downscale = True
-
         scene_manager.detect_scenes(video=video, end_time=end_time)
         scene_list = scene_manager.get_scene_list()
         assert len(scene_list) == initial_scene_len
