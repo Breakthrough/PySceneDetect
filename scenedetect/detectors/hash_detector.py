@@ -34,8 +34,6 @@ This detector is available from the command-line interface by using the
 `detect-hash` command.
 """
 
-import typing as ty
-
 # Third-Party Library Imports
 import numpy
 import cv2
@@ -115,9 +113,11 @@ class HashDetector(SceneDetector):
         self._last_hash = numpy.array([])
         self._metric_keys = ['hash_dist']
 
-    @property
-    def metric_keys(self) -> ty.List[str]:
+    def get_metrics(self):
         return self._metric_keys
+
+    def is_processing_required(self, frame_num):
+        return True
 
     def process_frame(self, frame_num, frame_img):
         """ Similar to ContentDetector, but using a perceptual hashing algorithm
@@ -127,7 +127,9 @@ class HashDetector(SceneDetector):
         Arguments:
             frame_num (int): Frame number of frame that is being passed.
 
-            frame_img (numpy.ndarray): Decoded frame image (BGR) to perform scene detection on.
+            frame_img (Optional[int]): Decoded frame image (numpy.ndarray) to perform scene
+                detection on. Can be None *only* if the self.is_processing_required() method
+                (inhereted from the base SceneDetector class) returns True.
 
         Returns:
             List[int]: List of frames where scene cuts have been detected. There may be 0

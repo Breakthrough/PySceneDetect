@@ -16,7 +16,7 @@ frames. If the difference exceeds a given threshold, a cut is detected.
 This detector is available from the command-line as the `detect-hist` command.
 """
 
-import typing as ty
+from typing import List
 
 import numpy
 
@@ -49,7 +49,7 @@ class HistogramDetector(SceneDetector):
         self._last_hist = None
         self._last_scene_cut = None
 
-    def process_frame(self, frame_num: int, frame_img: numpy.ndarray) -> ty.List[int]:
+    def process_frame(self, frame_num: int, frame_img: numpy.ndarray) -> List[int]:
         """First, compress the image according to the self.bits value, then build a histogram for
         the input frame. Afterward, compare against the previously analyzed frame and check if the
         difference is large enough to trigger a cut.
@@ -185,6 +185,8 @@ class HistogramDetector(SceneDetector):
 
         return shifted_img
 
-    @property
-    def metric_keys(self) -> ty.List[str]:
+    def is_processing_required(self, frame_num: int) -> bool:
+        return True
+
+    def get_metrics(self) -> List[str]:
         return HistogramDetector.METRIC_KEYS

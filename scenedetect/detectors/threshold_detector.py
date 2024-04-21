@@ -18,7 +18,7 @@ This detector is available from the command-line as the `detect-threshold` comma
 
 from enum import Enum
 from logging import getLogger
-import typing as ty
+from typing import List, Optional
 
 import numpy
 
@@ -114,11 +114,10 @@ class ThresholdDetector(SceneDetector):
         }
         self._metric_keys = [ThresholdDetector.THRESHOLD_VALUE_KEY]
 
-    @property
-    def metric_keys(self) -> ty.List[str]:
+    def get_metrics(self) -> List[str]:
         return self._metric_keys
 
-    def process_frame(self, frame_num: int, frame_img: numpy.ndarray) -> ty.List[int]:
+    def process_frame(self, frame_num: int, frame_img: numpy.ndarray) -> List[int]:
         """Process the next frame. `frame_num` is assumed to be sequential.
 
         Args:
