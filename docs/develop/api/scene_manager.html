@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>SceneManager &#8212; PySceneDetect 0.6.3 documentation</title>
+    <title>SceneManager &#8212; PySceneDetect 0.6.4-dev0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
     <link rel="stylesheet" type="text/css" href="../_static/pyscenedetect.css" />
@@ -232,7 +232,6 @@ the point in the input video where a new scene was detected, and thus the frame
 where the input should be cut/split. The cutting list, in turn, is used to generate
 the scene list, noting that each scene is contiguous starting from the first frame
 and ending at the last frame detected.</p>
-<p>If only sparse detectors are used (e.g. MotionDetector), this will always be empty.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -255,20 +254,13 @@ for automated splitting of the input into individual scenes.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="scenedetect.scene_manager.SceneManager.get_event_list">
 <span class="sig-name descname"><span class="pre">get_event_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_timecode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.scene_manager.SceneManager.get_event_list" title="Permalink to this definition">¶</a></dt>
-<dd><p>[DEPRECATED] DO NOT USE.</p>
-<p>Get a list of start/end timecodes of sparse detection events.</p>
-<p>Unlike get_scene_list, the event list returns a list of FrameTimecodes representing
-the point in the input video where a new scene was detected only by sparse detectors,
-otherwise it is the same.</p>
+<dd><p>[DEPRECATED] DO NOT USE</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>base_timecode</strong> (<a class="reference internal" href="frame_timecode.html#scenedetect.frame_timecode.FrameTimecode" title="scenedetect.frame_timecode.FrameTimecode"><em>FrameTimecode</em></a><em> | </em><em>None</em>) – [DEPRECATED] DO NOT USE. For backwards compatibility only.</p>
+<dd class="field-odd"><p><strong>base_timecode</strong> (<a class="reference internal" href="frame_timecode.html#scenedetect.frame_timecode.FrameTimecode" title="scenedetect.frame_timecode.FrameTimecode"><em>FrameTimecode</em></a><em> | </em><em>None</em>) – </p>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>List of pairs of FrameTimecode objects denoting the detected scenes.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><em>List</em>[<em>Tuple</em>[<a class="reference internal" href="frame_timecode.html#scenedetect.frame_timecode.FrameTimecode" title="scenedetect.frame_timecode.FrameTimecode"><em>FrameTimecode</em></a>, <a class="reference internal" href="frame_timecode.html#scenedetect.frame_timecode.FrameTimecode" title="scenedetect.frame_timecode.FrameTimecode"><em>FrameTimecode</em></a>]]</p>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>List</em>[<em>Tuple</em>[<a class="reference internal" href="frame_timecode.html#scenedetect.frame_timecode.FrameTimecode" title="scenedetect.frame_timecode.FrameTimecode"><em>FrameTimecode</em></a>, <a class="reference internal" href="frame_timecode.html#scenedetect.frame_timecode.FrameTimecode" title="scenedetect.frame_timecode.FrameTimecode"><em>FrameTimecode</em></a>]]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -562,7 +554,7 @@ the n saved images from that scene)</p></li>
 
 
 
-<p class="blurb">Version: [0.6.3]</p>
+<p class="blurb">Version: [0.6.4-dev0]</p>
 
 
 

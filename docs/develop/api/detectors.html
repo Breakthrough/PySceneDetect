@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Detection Algorithms &#8212; PySceneDetect 0.6.3 documentation</title>
+    <title>Detection Algorithms &#8212; PySceneDetect 0.6.4-dev0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
     <link rel="stylesheet" type="text/css" href="../_static/pyscenedetect.css" />
@@ -65,7 +65,7 @@ set threshold/score, which if exceeded, triggers a scene cut.</p>
 <p>This detector is available from the command-line as the <cite>detect-content</cite> command.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="scenedetect.detectors.content_detector.ContentDetector">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scenedetect.detectors.content_detector.</span></span><span class="sig-name descname"><span class="pre">ContentDetector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">27.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_scene_len</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">15</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Components(delta_hue=1.0,</span> <span class="pre">delta_sat=1.0,</span> <span class="pre">delta_lum=1.0,</span> <span class="pre">delta_edges=0.0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">luma_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.detectors.content_detector.ContentDetector" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scenedetect.detectors.content_detector.</span></span><span class="sig-name descname"><span class="pre">ContentDetector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">27.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_scene_len</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">15</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Components(delta_hue=1.0,</span> <span class="pre">delta_sat=1.0,</span> <span class="pre">delta_lum=1.0,</span> <span class="pre">delta_edges=0.0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">luma_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flash_filter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.detectors.content_detector.ContentDetector" title="Permalink to this definition">¶</a></dt>
 <dd><p>Detects fast cuts using changes in colour and intensity between frames.</p>
 <p>The difference is calculated in the HSV color space, and compared against a set threshold to
 determine when a fast cut has occurred.</p>
@@ -73,15 +73,19 @@ determine when a fast cut has occurred.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>threshold</strong> (<em>float</em>) – Threshold the average change in pixel intensity must exceed to trigger a cut.</p></li>
-<li><p><strong>min_scene_len</strong> (<em>int</em>) – Once a cut is detected, this many frames must pass before a new one can
-be added to the scene list.</p></li>
-<li><p><strong>weights</strong> (<a class="reference internal" href="#scenedetect.detectors.content_detector.ContentDetector.Components" title="scenedetect.detectors.content_detector.ContentDetector.Components"><em>ContentDetector.Components</em></a>) – Weight to place on each component when calculating frame score
+<li><p><strong>min_scene_len</strong> (<em>int</em>) – Defines the minimum length of a given scene. Sequences of consecutive
+cuts that occur closer than this length will be merged. Equivalent to setting
+<cite>flash_filter = FlashFilter(length=min_scene_len)</cite>.
+Ignored if <cite>flash_filter</cite> is set.</p></li>
+<li><p><strong>weights</strong> (<a class="reference internal" href="#scenedetect.detectors.content_detector.ContentDetector.Components" title="scenedetect.detectors.content_detector.ContentDetector.Components"><em>Components</em></a>) – Weight to place on each component when calculating frame score
 (<cite>content_val</cite> in a statsfile, the value <cite>threshold</cite> is compared against).</p></li>
 <li><p><strong>luma_only</strong> (<em>bool</em>) – If True, only considers changes in the luminance channel of the video.
 Equivalent to specifying <cite>weights</cite> as <code class="xref py py-data docutils literal notranslate"><span class="pre">ContentDetector.LUMA_ONLY</span></code>.
 Overrides <cite>weights</cite> if both are set.</p></li>
 <li><p><strong>kernel_size</strong> (<em>int</em><em> | </em><em>None</em>) – Size of kernel for expanding detected edges. Must be odd integer
 greater than or equal to 3. If None, automatically set using video resolution.</p></li>
+<li><p><strong>flash_filter</strong> (<a class="reference internal" href="scene_detector.html#scenedetect.scene_detector.FlashFilter" title="scenedetect.scene_detector.FlashFilter"><em>FlashFilter</em></a><em> | </em><em>None</em>) – Filter to use for scene length compliance. If None, initialized as
+<cite>FlashFilter(length=min_scene_len)</cite>.</p></li>
 </ul>
 </dd>
 </dl>
@@ -144,18 +148,6 @@ the detector when a StatsManager is passed to process_frame.</p>
 <dt class="sig sig-object py" id="scenedetect.detectors.content_detector.ContentDetector.is_processing_required">
 <span class="sig-name descname"><span class="pre">is_processing_required</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame_num</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.detectors.content_detector.ContentDetector.is_processing_required" title="Permalink to this definition">¶</a></dt>
 <dd><p>[DEPRECATED] DO NOT USE</p>
-<p>Test if all calculations for a given frame are already done.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><p>False if the SceneDetector has assigned _metric_keys, and the
-stats_manager property is set to a valid StatsManager object containing
-the required frame metrics/calculations for the given frame - thus, not
-needing the frame to perform scene detection.</p>
-<p>True otherwise (i.e. the frame_img passed to process_frame is required
-to be passed to process_frame for the given frame_num).</p>
-</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -175,7 +167,7 @@ but must remain sequential.</p></li>
 or more frames in the list, and not necessarily the same as frame_num.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>List[int]</p>
+<dd class="field-odd"><p>ty.List[int]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -323,7 +315,7 @@ triggered when the average pixel intensity exceeds or falls below this threshold
 <p>This detector is available from the command-line as the <cite>detect-threshold</cite> command.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="scenedetect.detectors.threshold_detector.ThresholdDetector">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scenedetect.detectors.threshold_detector.</span></span><span class="sig-name descname"><span class="pre">ThresholdDetector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_scene_len</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">15</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fade_bias</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_final_scene</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Method.FLOOR</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">block_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.detectors.threshold_detector.ThresholdDetector" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scenedetect.detectors.threshold_detector.</span></span><span class="sig-name descname"><span class="pre">ThresholdDetector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_scene_len</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">15</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fade_bias</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_final_scene</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Method.FLOOR</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flash_filter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">block_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.detectors.threshold_detector.ThresholdDetector" title="Permalink to this definition">¶</a></dt>
 <dd><p>Detects fast cuts/slow fades in from and out to a given threshold level.</p>
 <p>Detects both fast cuts and slow fades so long as an appropriate threshold
 is chosen (especially taking into account the minimum grey/black level).</p>
@@ -332,8 +324,10 @@ is chosen (especially taking into account the minimum grey/black level).</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>threshold</strong> (<em>float</em>) – 8-bit intensity value that each pixel value (R, G, and B)
 must be &lt;= to in order to trigger a fade in/out.</p></li>
-<li><p><strong>min_scene_len</strong> (<em>int</em>) – FrameTimecode object or integer greater than 0 of the
-minimum length, in frames, of a scene (or subsequent scene cut).</p></li>
+<li><p><strong>min_scene_len</strong> (<em>int</em>) – Defines the minimum length of a given scene. Sequences of consecutive
+cuts that occur closer than this length will be merged. Equivalent to setting
+<cite>flash_filter = FlashFilter(length=min_scene_len)</cite>.
+Ignored if <cite>flash_filter</cite> is set.</p></li>
 <li><p><strong>fade_bias</strong> (<em>float</em>) – Float between -1.0 and +1.0 representing the percentage of
 timecode skew for the start of a scene (-1.0 causing a cut at the
 fade-to-black, 0.0 in the middle, and +1.0 causing the cut to be
@@ -341,6 +335,8 @@ right at the position where the threshold is passed).</p></li>
 <li><p><strong>add_final_scene</strong> (<em>bool</em>) – Boolean indicating if the video ends on a fade-out to
 generate an additional scene at this timecode.</p></li>
 <li><p><strong>method</strong> (<a class="reference internal" href="#scenedetect.detectors.threshold_detector.ThresholdDetector.Method" title="scenedetect.detectors.threshold_detector.ThresholdDetector.Method"><em>Method</em></a>) – How to treat <cite>threshold</cite> when detecting fade events.</p></li>
+<li><p><strong>flash_filter</strong> (<a class="reference internal" href="scene_detector.html#scenedetect.scene_detector.FlashFilter" title="scenedetect.scene_detector.FlashFilter"><em>FlashFilter</em></a><em> | </em><em>None</em>) – Filter to use for scene length compliance. If None, initialized as
+<cite>FlashFilter(length=min_scene_len)</cite>.</p></li>
 <li><p><strong>block_size</strong> – [DEPRECATED] DO NOT USE. For backwards compatibility.</p></li>
 </ul>
 </dd>
@@ -410,7 +406,7 @@ but must remain sequential.</p></li>
 or more frames in the list, and not necessarily the same as frame_num.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>List[int]</p>
+<dd class="field-odd"><p>ty.List[int]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -450,7 +446,7 @@ or more frames in the list, and not necessarily the same as frame_num.</p>
 
 
 
-<p class="blurb">Version: [0.6.3]</p>
+<p class="blurb">Version: [0.6.4-dev0]</p>
 
 
 
