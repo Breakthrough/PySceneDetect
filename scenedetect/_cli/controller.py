@@ -28,6 +28,7 @@ from scenedetect.video_splitter import split_video_mkvmerge, split_video_ffmpeg
 from scenedetect.video_stream import SeekError
 
 from scenedetect._cli.context import CliContext, check_split_video_requirements
+from scenedetect._cli.config import FlashFilterMode
 
 logger = logging.getLogger('pyscenedetect')
 
@@ -330,11 +331,13 @@ def _postprocess_scene_list(
     # it will be merged with the previous one.
     if context.merge_last_scene and context.min_scene_len is not None and context.min_scene_len > 0:
         if len(scene_list) > 1 and (scene_list[-1][1] - scene_list[-1][0]) < context.min_scene_len:
+            logger.debug("Last scene is shorter than %d frames, merging with previous.",
+                         context.min_scene_len.get_frames())
             new_last_scene = (scene_list[-2][0], scene_list[-1][1])
             scene_list = scene_list[:-2] + [new_last_scene]
 
-    # Handle --drop-short-scenes.
-    if context.drop_short_scenes and context.min_scene_len > 0:
+    if context.filter_mode == FlashFilterMode.DROP:
+        logger.debug("Dropping scenes shorter than %d frames.", context.min_scene_len.get_frames())
         scene_list = [s for s in scene_list if (s[1] - s[0]) >= context.min_scene_len]
 
     return scene_list

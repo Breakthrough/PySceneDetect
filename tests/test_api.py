@@ -87,8 +87,10 @@ def test_api_timecode_types():
     # Timecode (str, 'HH:MM:SS' or 'HH:MM:SSS.nnn')
     timecode = base_timecode + '00:00:01.500'
     assert timecode.get_frames() == 15
-    # Seconds (str, 'SSSs' or 'SSSS.SSSs')
+    # Seconds (str, 'SSSs' or 'SSSS.SSS')
     timecode = base_timecode + '1.5s'
+    assert timecode.get_frames() == 15
+    timecode = base_timecode + '1.5'
     assert timecode.get_frames() == 15
 
 

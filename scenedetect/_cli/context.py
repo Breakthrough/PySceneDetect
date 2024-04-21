@@ -23,8 +23,8 @@ import scenedetect
 
 from scenedetect import open_video, AVAILABLE_BACKENDS
 
-from scenedetect.scene_detector import SceneDetector
-from scenedetect.platform import get_and_create_path, get_cv2_imwrite_params, init_logger
+from scenedetect.scene_detector import SceneDetector, FlashFilter
+from scenedetect.platform import get_cv2_imwrite_params, init_logger
 from scenedetect.frame_timecode import FrameTimecode, MAX_FPS_DELTA
 from scenedetect.video_stream import VideoStream, VideoOpenFailure, FrameRateUnavailable
 from scenedetect.video_splitter import is_mkvmerge_available, is_ffmpeg_available
@@ -32,8 +32,9 @@ from scenedetect.detectors import AdaptiveDetector, ContentDetector, ThresholdDe
 from scenedetect.stats_manager import StatsManager
 from scenedetect.scene_manager import SceneManager, Interpolation
 
-from scenedetect._cli.config import (ConfigRegistry, ConfigLoadFailure, TimecodeFormat, CHOICE_MAP,
-                                     DEFAULT_JPG_QUALITY, DEFAULT_WEBP_QUALITY)
+from scenedetect._cli.config import (ConfigRegistry, ConfigLoadFailure, TimecodeFormat,
+                                     FlashFilterMode, CHOICE_MAP, DEFAULT_JPG_QUALITY,
+                                     DEFAULT_WEBP_QUALITY)
 
 logger = logging.getLogger('pyscenedetect')
 
@@ -116,9 +117,9 @@ class CliContext:
         self.output_dir: str = None                         # -o/--output
         self.quiet_mode: bool = None                        # -q/--quiet or -v/--verbosity quiet
         self.stats_file_path: str = None                    # -s/--stats
-        self.drop_short_scenes: bool = None                 # --drop-short-scenes
-        self.merge_last_scene: bool = None                  # --merge-last-scene
         self.min_scene_len: FrameTimecode = None            # -m/--min-scene-len
+        self.filter_mode: FlashFilterMode = None            # --filter-mode
+        self.merge_last_scene: bool = None                  # --merge-last-scene
         self.frame_skip: int = None                         # -fs/--frame-skip
         self.default_detector: Tuple[Type[SceneDetector],
                                      Dict[str, Any]] = None # [global] default-detector
@@ -186,6 +187,7 @@ class CliContext:
         downscale: Optional[int],
         frame_skip: int,
         min_scene_len: str,
+        filter_mode: Optional[str],
         drop_short_scenes: bool,
         merge_last_scene: bool,
         backend: Optional[str],
@@ -269,8 +271,15 @@ class CliContext:
         self.min_scene_len = parse_timecode(
             min_scene_len if min_scene_len is not None else self.config.get_value(
                 "global", "min-scene-len"), self.video_stream.frame_rate)
-        self.drop_short_scenes = drop_short_scenes or self.config.get_value(
-            "global", "drop-short-scenes")
+
+        if drop_short_scenes:
+            logger.warning(
+                "WARNING: --drop-short-scenes is deprecated, use --filter-mode=drop instead.")
+            if filter_mode is None:
+                self.filter_mode = FlashFilterMode.DROP
+        else:
+            self.filter_mode = FlashFilterMode[self.config.get_value("global", "filter-mode",
+                                                                     filter_mode).upper()]
         self.merge_last_scene = merge_last_scene or self.config.get_value(
             "global", "merge-last-scene")
         self.frame_skip = self.config.get_value("global", "frame-skip", frame_skip)
@@ -281,6 +290,7 @@ class CliContext:
             self.stats_manager = StatsManager()
 
         # Initialize default detector with values in the config file.
+        # TODO(v0.6.4): Integrate perceptual hash detector.
         default_detector = self.config.get_value("global", "default-detector")
         if default_detector == 'detect-adaptive':
             self.default_detector = (AdaptiveDetector, self.get_detect_adaptive_params())
@@ -320,29 +330,18 @@ class CliContext:
     ) -> Dict[str, Any]:
         """Handle detect-content command options and return dict to construct one with."""
         self._ensure_input_open()
-
-        if self.drop_short_scenes:
-            min_scene_len = 0
-        else:
-            if min_scene_len is None:
-                if self.config.is_default('detect-content', 'min-scene-len'):
-                    min_scene_len = self.min_scene_len.frame_num
-                else:
-                    min_scene_len = self.config.get_value('detect-content', 'min-scene-len')
-            min_scene_len = parse_timecode(min_scene_len, self.video_stream.frame_rate).frame_num
-
         if weights is not None:
             try:
                 weights = ContentDetector.Components(*weights)
             except ValueError as ex:
                 logger.debug(str(ex))
-                raise click.BadParameter(str(ex), param_hint='weights')
+                raise click.BadParameter(str(ex), param_hint="weights")
         return {
-            'weights': self.config.get_value('detect-content', 'weights', weights),
-            'kernel_size': self.config.get_value('detect-content', 'kernel-size', kernel_size),
-            'luma_only': luma_only or self.config.get_value('detect-content', 'luma-only'),
-            'min_scene_len': min_scene_len,
-            'threshold': self.config.get_value('detect-content', 'threshold', threshold),
+            "weights": self.config.get_value("detect-content", "weights", weights),
+            "kernel_size": self.config.get_value("detect-content", "kernel-size", kernel_size),
+            "luma_only": luma_only or self.config.get_value("detect-content", "luma-only"),
+            "flash_filter": self._init_flash_filter("detect-content", min_scene_len),
+            "threshold": self.config.get_value("detect-content", "threshold", threshold),
         }
 
     def get_detect_adaptive_params(
@@ -372,15 +371,8 @@ class CliContext:
                 self.config.config_dict["detect-adaptive"]["min-content-val"] = (
                     self.config.config_dict["detect-adaptive"]["min-deleta-hsv"])
 
-        if self.drop_short_scenes:
-            min_scene_len = 0
-        else:
-            if min_scene_len is None:
-                if self.config.is_default("detect-adaptive", "min-scene-len"):
-                    min_scene_len = self.min_scene_len.frame_num
-                else:
-                    min_scene_len = self.config.get_value("detect-adaptive", "min-scene-len")
-            min_scene_len = parse_timecode(min_scene_len, self.video_stream.frame_rate).frame_num
+        # TODO(v0.6.4): Integrate flash filter.
+        min_scene_len = self._init_flash_filter("detect-adaptive", min_scene_len)._filter_length
 
         if weights is not None:
             try:
@@ -414,16 +406,8 @@ class CliContext:
     ) -> Dict[str, Any]:
         """Handle detect-threshold command options and return dict to construct one with."""
         self._ensure_input_open()
-
-        if self.drop_short_scenes:
-            min_scene_len = 0
-        else:
-            if min_scene_len is None:
-                if self.config.is_default("detect-threshold", "min-scene-len"):
-                    min_scene_len = self.min_scene_len.frame_num
-                else:
-                    min_scene_len = self.config.get_value("detect-threshold", "min-scene-len")
-            min_scene_len = parse_timecode(min_scene_len, self.video_stream.frame_rate).frame_num
+        # TODO(v0.6.4): Integrate flash filter.
+        min_scene_len = self._init_flash_filter("detect-adaptive", min_scene_len)._filter_length
         # TODO(v1.0): add_last_scene cannot be disabled right now.
         return {
             'add_final_scene':
@@ -455,15 +439,8 @@ class CliContext:
                                min_scene_len: Optional[str]) -> Dict[str, Any]:
         """Handle detect-hist command options and return dict to construct one with."""
         self._ensure_input_open()
-        if self.drop_short_scenes:
-            min_scene_len = 0
-        else:
-            if min_scene_len is None:
-                if self.config.is_default("detect-hist", "min-scene-len"):
-                    min_scene_len = self.min_scene_len.frame_num
-                else:
-                    min_scene_len = self.config.get_value("detect-hist", "min-scene-len")
-            min_scene_len = parse_timecode(min_scene_len, self.video_stream.frame_rate).frame_num
+        # TODO(v0.6.4): Integrate flash filter.
+        min_scene_len = self._init_flash_filter("detect-adaptive", min_scene_len)._filter_length
         return {
             'bits': self.config.get_value("detect-hist", "bits", bits),
             'min_scene_len': min_scene_len,
@@ -852,3 +829,15 @@ class CliContext:
         raise click.BadParameter(
             '\n  Command %s may only be specified once.' % command,
             param_hint='%s command' % command)
+
+    def _init_flash_filter(self, detector_name: str,
+                           min_scene_len: ty.Optional[int]) -> FlashFilter:
+        if self.filter_mode == FlashFilterMode.DROP:
+            return FlashFilter(length=0)
+        if min_scene_len is None:
+            if self.config.is_default(detector_name, 'min-scene-len'):
+                min_scene_len = self.min_scene_len.frame_num
+            else:
+                min_scene_len = self.config.get_value(detector_name, 'min-scene-len')
+        min_scene_len = parse_timecode(min_scene_len, self.video_stream.frame_rate).frame_num
+        return FlashFilter(length=min_scene_len, mode=self.filter_mode.value)
