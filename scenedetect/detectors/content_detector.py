@@ -122,12 +122,10 @@ class ContentDetector(SceneDetector):
             kernel_size: Size of kernel for expanding detected edges. Must be odd integer
                 greater than or equal to 3. If None, automatically set using video resolution.
             flash_filter: Filter to use for scene length compliance. If None, initialized as
-                `FlashFilter(length=min_scene_len)`.
+                `FlashFilter(length=min_scene_len)`. If set, `min_scene_length` is ignored.
         """
         super().__init__()
         self._threshold: float = threshold
-        self._min_scene_len: int = min_scene_len
-        self._last_above_threshold: ty.Optional[int] = None
         self._last_frame: ty.Optional[ContentDetector._FrameData] = None
         self._weights: ContentDetector.Components = weights
         if luma_only:
@@ -138,7 +136,6 @@ class ContentDetector(SceneDetector):
             if kernel_size < 3 or kernel_size % 2 == 0:
                 raise ValueError('kernel_size must be odd integer >= 3')
             self._kernel = numpy.ones((kernel_size, kernel_size), numpy.uint8)
-        self._frame_score: ty.Optional[float] = None
         self._flash_filter = flash_filter if not flash_filter is None else FlashFilter(
             length=min_scene_len)
 
@@ -202,11 +199,9 @@ class ContentDetector(SceneDetector):
             ty.List[int]: List of frames where scene cuts have been detected. There may be 0
             or more frames in the list, and not necessarily the same as frame_num.
         """
-        self._frame_score = self._calculate_frame_score(frame_num, frame_img)
-        if self._frame_score is None:
-            return []
-        return self._flash_filter.filter(
-            frame_num=frame_num, found_cut=self._frame_score >= self._threshold)
+        frame_score = self._calculate_frame_score(frame_num, frame_img)
+        found_cut = frame_score >= self._threshold
+        return self._flash_filter.apply(frame_num=frame_num, found_cut=found_cut)
 
     def _detect_edges(self, lum: numpy.ndarray) -> numpy.ndarray:
         """Detect edges using the luma channel of a frame.

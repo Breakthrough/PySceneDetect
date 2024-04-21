@@ -95,7 +95,7 @@ class ThresholdDetector(SceneDetector):
                 generate an additional scene at this timecode.
             method: How to treat `threshold` when detecting fade events.
             flash_filter: Filter to use for scene length compliance. If None, initialized as
-                `FlashFilter(length=min_scene_len)`.
+                `FlashFilter(length=min_scene_len)`. If set, `min_scene_length` is ignored.
             block_size: [DEPRECATED] DO NOT USE. For backwards compatibility.
         """
         # TODO(v0.7): Replace with DeprecationWarning that `block_size` will be removed in v0.8.
@@ -103,20 +103,16 @@ class ThresholdDetector(SceneDetector):
             logger.error('block_size is deprecated.')
 
         super().__init__()
-        self.threshold = int(threshold)
-        self.method = ThresholdDetector.Method(method)
-        self.fade_bias = fade_bias
-        self.min_scene_len = min_scene_len
-        self.processed_frame = False
-        self.last_scene_cut = None
+        self._threshold = int(threshold)
+        self._method = ThresholdDetector.Method(method)
+        self._fade_bias = fade_bias
+        self._processed_frame = False
+        self._last_scene_cut = None
         # Whether to add an additional scene or not when ending on a fade out
         # (as cuts are only added on fade ins; see post_process() for details).
-        self.add_final_scene = add_final_scene
+        self._add_final_scene = add_final_scene
         # Where the last fade (threshold crossing) was detected.
-        self.last_fade = {
-            'frame': 0,                                                               # frame number where the last detected fade is
-            'type': None                                                               # type of fade, can be either 'in' or 'out'
-        }
+        self._last_fade = {'frame': 0, 'type': None}
         self._metric_keys = [ThresholdDetector.THRESHOLD_VALUE_KEY]
         self._flash_filter = flash_filter if not flash_filter is None else FlashFilter(
             length=min_scene_len)
@@ -138,8 +134,8 @@ class ThresholdDetector(SceneDetector):
         """
 
         # Initialize last scene cut point at the beginning of the frames of interest.
-        if self.last_scene_cut is None:
-            self.last_scene_cut = frame_num
+        if self._last_scene_cut is None:
+            self._last_scene_cut = frame_num
 
         # Compare the # of pixels under threshold in current_frame & last_frame.
         # If absolute value of pixel intensity delta is above the threshold,
@@ -157,43 +153,43 @@ class ThresholdDetector(SceneDetector):
             if self.stats_manager is not None:
                 self.stats_manager.set_metrics(frame_num, {self._metric_keys[0]: frame_avg})
 
-        if not self.processed_frame:
-            self.last_fade['frame'] = 0
-            if frame_avg < self.threshold:
-                self.last_fade['type'] = 'out'
+        if not self._processed_frame:
+            self._last_fade['frame'] = 0
+            if frame_avg < self._threshold:
+                self._last_fade['type'] = 'out'
             else:
-                self.last_fade['type'] = 'in'
-            self._flash_filter.filter(frame_num=frame_num, found_cut=False)
-            self.processed_frame = True
+                self._last_fade['type'] = 'in'
+            self._flash_filter.apply(frame_num=frame_num, found_cut=False)
+            self._processed_frame = True
             return []
 
         cut_list = []
-        if self.last_fade['type'] == 'in' and (
-            ((self.method == ThresholdDetector.Method.FLOOR and frame_avg < self.threshold) or
-             (self.method == ThresholdDetector.Method.CEILING and frame_avg >= self.threshold))):
+        if self._last_fade['type'] == 'in' and (
+            ((self._method == ThresholdDetector.Method.FLOOR and frame_avg < self._threshold) or
+             (self._method == ThresholdDetector.Method.CEILING and frame_avg >= self._threshold))):
             # Just faded out of a scene, wait for next fade in.
-            f_in = self.last_fade['frame']
-            self.last_fade['type'] = 'out'
-            self.last_fade['frame'] = frame_num
+            f_in = self._last_fade['frame']
+            self._last_fade['type'] = 'out'
+            self._last_fade['frame'] = frame_num
             # The next cut will be placed at at or after this frame (the fade out position), and
             # the previous cut was placed before or at the last fade in position.
             # Thus we know no new cuts were generated between the two.
             for frame_num in range(f_in + 1, frame_num):
-                cut_list += self._flash_filter.filter(frame_num=frame_num, found_cut=False)
+                cut_list += self._flash_filter.apply(frame_num=frame_num, found_cut=False)
 
-        elif self.last_fade['type'] == 'out' and (
-            (self.method == ThresholdDetector.Method.FLOOR and frame_avg >= self.threshold) or
-            (self.method == ThresholdDetector.Method.CEILING and frame_avg < self.threshold)):
+        elif self._last_fade['type'] == 'out' and (
+            (self._method == ThresholdDetector.Method.FLOOR and frame_avg >= self._threshold) or
+            (self._method == ThresholdDetector.Method.CEILING and frame_avg < self._threshold)):
             # Just faded into a new scene, compute timecode based on the fade bias.
             # f_split will be between the fade out position and frame_num.
-            f_out = self.last_fade['frame']
-            f_split = int((frame_num + f_out + int(self.fade_bias * (frame_num - f_out))) / 2)
-            self.last_scene_cut = frame_num
-            self.last_fade['type'] = 'in'
-            self.last_fade['frame'] = frame_num
+            f_out = self._last_fade['frame']
+            f_split = int((frame_num + f_out + int(self._fade_bias * (frame_num - f_out))) / 2)
+            self._last_scene_cut = frame_num
+            self._last_fade['type'] = 'in'
+            self._last_fade['frame'] = frame_num
             # Update the filter state to determine where cuts occured.
             for frame_num in range(f_out, frame_num + 1):
-                cut_list += self._flash_filter.filter(
+                cut_list += self._flash_filter.apply(
                     frame_num=frame_num, found_cut=(frame_num == f_split))
         return cut_list
 
@@ -209,9 +205,9 @@ class ThresholdDetector(SceneDetector):
         # scene break to indicate the end of the scene.  This is only done for
         # fade-outs, as a scene cut is already added when a fade-in is found.
         cut_list = []
-        if self.last_fade['type'] == 'out' and self.add_final_scene:
-            f_out = self.last_fade['frame']
-            cut_list += self._flash_filter.filter(frame_num=f_out, found_cut=True)
+        if self._last_fade['type'] == 'out' and self._add_final_scene:
+            f_out = self._last_fade['frame']
+            cut_list += self._flash_filter.apply(frame_num=f_out, found_cut=True)
             for frame_num in range(f_out + 1, frame_num + 1):
-                cut_list += self._flash_filter.filter(frame_num=frame_num, found_cut=False)
+                cut_list += self._flash_filter.apply(frame_num=frame_num, found_cut=False)
         return cut_list

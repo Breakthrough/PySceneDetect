@@ -33,6 +33,11 @@ from scenedetect.video_splitter import DEFAULT_FFMPEG_ARGS
 
 VALID_PYAV_THREAD_MODES = ['NONE', 'SLICE', 'FRAME', 'AUTO']
 
+DEPRECATED_CONFIG_OPTIONS = {
+    "global": {"drop-short-scenes"},
+    "detect-adaptive": {"min-delta-hsv"},
+}
+
 
 class OptionParseFailure(Exception):
     """Raised when a value provided in a user config file fails validation."""
@@ -251,8 +256,7 @@ CONFIG_FILE_PATH: AnyStr = os.path.join(_CONFIG_FILE_DIR, _CONFIG_FILE_NAME)
 DEFAULT_JPG_QUALITY = 95
 DEFAULT_WEBP_QUALITY = 100
 
-# TODO(v0.6.4): Warn if [detect-adaptive] min-delta-hsv and [global] drop-short-scenes are used.
-# TODO(v0.7): Remove [detect-adaptive] min-delta-hsv and [global] drop-short-scenes
+# TODO(v0.7): Remove deprecated [detect-adaptive] min-delta-hsv and [global] drop-short-scenes
 CONFIG_MAP: ConfigDict = {
     'backend-opencv': {
         'max-decode-attempts': 5,
@@ -543,6 +547,14 @@ class ConfigRegistry:
             for log_str in errors:
                 self._init_log.append((logging.ERROR, log_str))
             raise ConfigLoadFailure(self._init_log)
+        for command in self._config:
+            for option in self._config[command]:
+                if (command in DEPRECATED_CONFIG_OPTIONS
+                        and option in DEPRECATED_CONFIG_OPTIONS[command]):
+                    self._init_log.append(
+                        (logging.WARNING, "WARNING: Config file contains deprecated option:\n  "
+                         f"[{command}] {option} will be removed in a future version."))
+                    pass
 
     def is_default(self, command: str, option: str) -> bool:
         """True if specified config option is unset (i.e. the default), False otherwise."""

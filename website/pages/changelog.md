@@ -6,14 +6,15 @@ Releases
 
 ### 0.6.4 (In Development)
 
- - [feature] New detector: `detect-hist` / `HistogramDetector`, [thanks @wjs018](https://github.com/Breakthrough/PySceneDetect/pull/295) [#53](https://github.com/Breakthrough/PySceneDetect/issues/53)
- - [feature] Add new flash suppression filter with `filter-mode` config option, reduces number of cuts generated during strobing/flashing effects [#35](https://github.com/Breakthrough/PySceneDetect/pull/295) [#53](https://github.com/Breakthrough/PySceneDetect/issues/35)
+ - [feature] New detector: `detect-hist` / `HistogramDetector`, [thanks @wjs018](https://github.com/Breakthrough/PySceneDetect/pull/295)
+ - [feature] Add new flash suppression filter with `filter-mode` config option, reduces number of cuts generated during strobing/flashing [#35](https://github.com/Breakthrough/PySceneDetect/issues/35)
     - `filter-mode = merge`, the new default mode, merges consecutive scenes shorter than `min-scene-len`
     - `filter-mode = suppress`, the previous behavior, disables generating new scenes until `min-scene-len` has passed
     - `filter-mode = drop`, replaces global `--drop-short-scenes` option
  - [cli] Deprecate `--drop-short-scenes`, use `--filter-mode = drop` instead
  - [bugfix] Remove extraneous console output when using `--filter-mode drop` (previously `--drop-short-scenes`)
  - [api] Deprecate `SparseSceneDetector` and `SceneDetector.stats_manager_required()` function (no longer required)
+ - [api] All detection algorithm properties not part of the `SceneDetector` interface are now private
 
 ### 0.6.3 (March 9, 2024)
 

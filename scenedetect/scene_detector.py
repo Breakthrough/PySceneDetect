@@ -135,10 +135,8 @@ class SparseSceneDetector(SceneDetector):
 
 
 class FlashFilter:
-    """Filters scene cuts which occur too close together (less than `length` frames apart).
-
-    If filter `length` is 0, filter is disabled.
-    """
+    """Online filter used by detection algorithms to filter scene cuts which occur too close
+    together (less than `length` frames apart)."""
 
     class Mode(Enum):
         """Mode specifying how the filter operates when active."""
@@ -148,6 +146,11 @@ class FlashFilter:
         """Suppress consecutive cuts until the filter length has passed."""
 
     def __init__(self, length: int, mode: Mode = Mode.MERGE):
+        """
+        Arguments:
+            length: Number of frames defining how close cuts can be before the filter is activated.
+            mode: How the filter operates when active.
+        """
         self._mode = mode
         self._filter_length = length  # Number of frames to use for activating the filter.
         self._last_above = None       # Last frame above threshold.
@@ -163,7 +166,7 @@ class FlashFilter:
             return "FlashFilter(length=0 [DISABLED])"
         return f"FlashFilter(mode={str(self._mode)}, length={self._filter_length})"
 
-    def filter(self, frame_num: int, found_cut: bool) -> ty.List[int]:
+    def apply(self, frame_num: int, found_cut: bool) -> ty.List[int]:
         if self._filter_length <= 0:
             return [frame_num] if found_cut else []
         if self._last_above is None:
