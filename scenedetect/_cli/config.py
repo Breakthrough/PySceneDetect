@@ -27,7 +27,6 @@ from platformdirs import user_config_dir
 
 from scenedetect.detectors import ContentDetector
 from scenedetect.frame_timecode import FrameTimecode
-from scenedetect.scene_detector import FlashFilter
 from scenedetect.scene_manager import Interpolation
 from scenedetect.video_splitter import DEFAULT_FFMPEG_ARGS
 
@@ -233,13 +232,6 @@ class TimecodeFormat(Enum):
         assert False
 
 
-class FlashFilterMode(Enum):
-    """Filter mode for the CLI. Has additional DROP mode which runs as a post-processing step."""
-    MERGE = FlashFilter.Mode.MERGE
-    SUPPRESS = FlashFilter.Mode.SUPPRESS
-    DROP = -1
-
-
 ConfigValue = Union[bool, int, float, str]
 ConfigDict = Dict[str, Dict[str, ConfigValue]]
 
@@ -251,8 +243,7 @@ CONFIG_FILE_PATH: AnyStr = os.path.join(_CONFIG_FILE_DIR, _CONFIG_FILE_NAME)
 DEFAULT_JPG_QUALITY = 95
 DEFAULT_WEBP_QUALITY = 100
 
-# TODO(v0.6.4): Warn if [detect-adaptive] min-delta-hsv and [global] drop-short-scenes are used.
-# TODO(v0.7): Remove [detect-adaptive] min-delta-hsv and [global] drop-short-scenes
+# TODO(v0.7): Remove [detect-adaptive] min-delta-hsv
 CONFIG_MAP: ConfigDict = {
     'backend-opencv': {
         'max-decode-attempts': 5,
@@ -314,7 +305,6 @@ CONFIG_MAP: ConfigDict = {
         'downscale': 0,
         'downscale-method': 'linear',
         'drop-short-scenes': False,
-        'filter-mode': 'merge',
         'frame-skip': 0,
         'merge-last-scene': False,
         'min-scene-len': TimecodeValue('0.6s'),
@@ -358,7 +348,6 @@ CHOICE_MAP: Dict[str, Dict[str, List[str]]] = {
         'backend': ['opencv', 'pyav', 'moviepy'],
         'default-detector': ['detect-adaptive', 'detect-content', 'detect-threshold'],
         'downscale-method': [value.name.lower() for value in Interpolation],
-        'filter-mode': [value.name.lower() for value in FlashFilterMode],
         'verbosity': ['debug', 'info', 'warning', 'error', 'none'],
     },
     'list-scenes': {

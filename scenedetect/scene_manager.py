@@ -82,7 +82,6 @@ analysis of the video.
 
 import csv
 from enum import Enum
-import typing as ty
 from typing import Iterable, List, Tuple, Optional, Dict, Callable, Union, TextIO
 import threading
 import queue
@@ -98,8 +97,8 @@ from scenedetect._thirdparty.simpletable import (SimpleTableCell, SimpleTableIma
 from scenedetect.platform import (tqdm, get_and_create_path, get_cv2_imwrite_params, Template)
 from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.video_stream import VideoStream
-from scenedetect.scene_detector import SceneDetector
-from scenedetect.stats_manager import StatsManager
+from scenedetect.scene_detector import SceneDetector, SparseSceneDetector
+from scenedetect.stats_manager import StatsManager, FrameMetricRegistered
 
 logger = logging.getLogger('pyscenedetect')
 
@@ -550,7 +549,7 @@ class SceneManager:
 
     def __init__(
         self,
-        stats_manager: ty.Optional[StatsManager] = None,
+        stats_manager: Optional[StatsManager] = None,
     ):
         """
         Arguments:
@@ -560,13 +559,16 @@ class SceneManager:
         self._cutting_list = []
         self._event_list = []
         self._detector_list = []
+        self._sparse_detector_list = []
         # TODO(v1.0): This class should own a StatsManager instead of taking an optional one.
         # Expose a new `stats_manager` @property from the SceneManager, and either change the
         # `stats_manager` argument to to `store_stats: bool=False`, or lazy-init one.
+
         # TODO(v1.0): This class should own a VideoStream as well, instead of passing one
         # to the detect_scenes method. If concatenation is required, it can be implemented as
         # a generic VideoStream wrapper.
         self._stats_manager: Optional[StatsManager] = stats_manager
+
         # Position of video that was first passed to detect_scenes.
         self._start_pos: FrameTimecode = None
         # Position of video on the last frame processed by detect_scenes.
@@ -582,6 +584,7 @@ class SceneManager:
         # Set by decode thread when an exception occurs.
         self._exception_info = None
         self._stop = threading.Event()
+
         self._frame_buffer = []
         self._frame_buffer_size = 0
 
@@ -636,10 +639,21 @@ class SceneManager:
         Arguments:
             detector (SceneDetector): Scene detector to add to the SceneManager.
         """
+        if self._stats_manager is None and detector.stats_manager_required():
+            # Make sure the lists are empty so that the detectors don't get
+            # out of sync (require an explicit statsmanager instead)
+            assert not self._detector_list and not self._sparse_detector_list
+            self._stats_manager = StatsManager()
+
         detector.stats_manager = self._stats_manager
         if self._stats_manager is not None:
             self._stats_manager.register_metrics(detector.get_metrics())
-        self._detector_list.append(detector)
+
+        if not issubclass(type(detector), SparseSceneDetector):
+            self._detector_list.append(detector)
+        else:
+            self._sparse_detector_list.append(detector)
+
         self._frame_buffer_size = max(detector.event_buffer_length, self._frame_buffer_size)
 
     def get_num_detectors(self) -> int:
@@ -663,6 +677,7 @@ class SceneManager:
     def clear_detectors(self) -> None:
         """Remove all scene detectors added to the SceneManager via add_detector(). """
         self._detector_list.clear()
+        self._sparse_detector_list.clear()
 
     def get_scene_list(self,
                        base_timecode: Optional[FrameTimecode] = None,
@@ -733,6 +748,13 @@ class SceneManager:
                 for cut_frame_num in cuts:
                     buffer_index = cut_frame_num - (frame_num + 1)
                     callback(self._frame_buffer[buffer_index], cut_frame_num)
+        for detector in self._sparse_detector_list:
+            events = detector.process_frame(frame_num, frame_im)
+            self._event_list += events
+            if callback:
+                for event_start, _ in events:
+                    buffer_index = event_start - (frame_num + 1)
+                    callback(self._frame_buffer[buffer_index], event_start)
         return new_cuts
 
     def _post_process(self, frame_num: int) -> None:
@@ -956,6 +978,8 @@ class SceneManager:
         the scene list, noting that each scene is contiguous starting from the first frame
         and ending at the last frame detected.
 
+        If only sparse detectors are used (e.g. MotionDetector), this will always be empty.
+
         Arguments:
             base_timecode: [DEPRECATED] DO NOT USE. For backwards compatibility only.
             show_warning: If set to False, suppresses the error from being warned. In v0.7,
@@ -975,7 +999,20 @@ class SceneManager:
             self,
             base_timecode: Optional[FrameTimecode] = None
     ) -> List[Tuple[FrameTimecode, FrameTimecode]]:
-        """[DEPRECATED] DO NOT USE"""
+        """[DEPRECATED] DO NOT USE.
+
+        Get a list of start/end timecodes of sparse detection events.
+
+        Unlike get_scene_list, the event list returns a list of FrameTimecodes representing
+        the point in the input video where a new scene was detected only by sparse detectors,
+        otherwise it is the same.
+
+        Arguments:
+            base_timecode: [DEPRECATED] DO NOT USE. For backwards compatibility only.
+
+        Returns:
+            List of pairs of FrameTimecode objects denoting the detected scenes.
+        """
         # TODO(v0.7): Use the warnings module to turn this into a warning.
         logger.error('`get_event_list()` is deprecated and will be removed in a future release.')
         return self._get_event_list()

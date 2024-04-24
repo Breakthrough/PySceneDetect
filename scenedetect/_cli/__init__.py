@@ -207,18 +207,9 @@ def _print_command_help(ctx: click.Context, command: click.Command):
     % USER_CONFIG.get_help_string("global", "min-scene-len"),
 )
 @click.option(
-    "--filter-mode",
-    metavar="MODE",
-    type=click.Choice(CHOICE_MAP["global"]["filter-mode"], False),
-    default=None,
-    help='Mode used when enforcing min-scene-len. MODE must be one of: %s. %s' % (', '.join(
-        CHOICE_MAP["global"]["filter-mode"]), USER_CONFIG.get_help_string("global", "filter-mode")),
-)
-@click.option(
     '--drop-short-scenes',
     is_flag=True,
     flag_value=True,
-    hidden=True,
     help='Drop scenes shorter than -m/--min-scene-len, instead of combining with neighbors.%s' %
     (USER_CONFIG.get_help_string('global', 'drop-short-scenes')),
 )
@@ -290,7 +281,6 @@ def scenedetect(
     config: Optional[AnyStr],
     framerate: Optional[float],
     min_scene_len: Optional[str],
-    filter_mode: Optional[str],
     drop_short_scenes: bool,
     merge_last_scene: bool,
     backend: Optional[str],
@@ -335,7 +325,6 @@ Global options (e.g. -i/--input, -c/--config) must be specified before any comma
         downscale=downscale,
         frame_skip=frame_skip,
         min_scene_len=min_scene_len,
-        filter_mode=filter_mode,
         drop_short_scenes=drop_short_scenes,
         merge_last_scene=merge_last_scene,
         backend=backend,
