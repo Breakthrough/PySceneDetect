@@ -12,6 +12,7 @@ Releases
     - `--filter-mode = merge` (new default) merges consecutive scenes shorter than `min-scene-len`
     - `--filter-mode = suppress` (previous default) disables generating new scenes until `min-scene-len` has passed
  - [bugfix] Remove extraneous console output when using `--drop-short-scenes`
+ - [bugfix] Fix scene lengths being smaller than `min-scene-len` when using `detect-adaptive` / `AdaptiveDetector` with large values of `--frame-window`
 
 ### 0.6.3 (March 9, 2024)
 
