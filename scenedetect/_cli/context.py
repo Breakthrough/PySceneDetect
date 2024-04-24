@@ -275,13 +275,11 @@ class CliContext:
         if drop_short_scenes:
             logger.warning(
                 "WARNING: --drop-short-scenes is deprecated, use --filter-mode=drop instead.")
-        if self.config.get_value("global", "drop-short-scenes", drop_short_scenes):
-            logger.info("drop-short-scenes set, overriding filter-mode")
-            self.filter_mode = FlashFilterMode.DROP
+            if filter_mode is None:
+                self.filter_mode = FlashFilterMode.DROP
         else:
             self.filter_mode = FlashFilterMode[self.config.get_value("global", "filter-mode",
                                                                      filter_mode).upper()]
-
         self.merge_last_scene = merge_last_scene or self.config.get_value(
             "global", "merge-last-scene")
         self.frame_skip = self.config.get_value("global", "frame-skip", frame_skip)
@@ -362,13 +360,13 @@ class CliContext:
 
         # TODO(v0.7): Remove these branches when removing -d/--min-delta-hsv.
         if min_delta_hsv is not None:
-            logger.error("-d/--min-delta-hsv is deprecated, use -c/--min-content-val instead.")
+            logger.error('-d/--min-delta-hsv is deprecated, use -c/--min-content-val instead.')
             if min_content_val is None:
                 min_content_val = min_delta_hsv
         # Handle case where deprecated min-delta-hsv is set, and use it to set min-content-val.
         if not self.config.is_default("detect-adaptive", "min-delta-hsv"):
-            logger.error("[detect-adaptive] config file option `min-delta-hsv` is deprecated"
-                         ", use `min-delta-hsv` instead.")
+            logger.error('[detect-adaptive] config file option `min-delta-hsv` is deprecated'
+                         ', use `min-delta-hsv` instead.')
             if self.config.is_default("detect-adaptive", "min-content-val"):
                 self.config.config_dict["detect-adaptive"]["min-content-val"] = (
                     self.config.config_dict["detect-adaptive"]["min-deleta-hsv"])
@@ -381,21 +379,21 @@ class CliContext:
                 weights = ContentDetector.Components(*weights)
             except ValueError as ex:
                 logger.debug(str(ex))
-                raise click.BadParameter(str(ex), param_hint="weights")
+                raise click.BadParameter(str(ex), param_hint='weights')
         return {
-            "adaptive_threshold":
+            'adaptive_threshold':
                 self.config.get_value("detect-adaptive", "threshold", threshold),
-            "flash_filter":
-                self._init_flash_filter("detect-content", min_scene_len),
-            "kernel_size":
-                self.config.get_value("detect-adaptive", "kernel-size", kernel_size),
-            "luma_only":
-                luma_only or self.config.get_value("detect-adaptive", "luma-only"),
-            "min_content_val":
-                self.config.get_value("detect-adaptive", "min-content-val", min_content_val),
-            "weights":
+            'weights':
                 self.config.get_value("detect-adaptive", "weights", weights),
-            "window_width":
+            'kernel_size':
+                self.config.get_value("detect-adaptive", "kernel-size", kernel_size),
+            'luma_only':
+                luma_only or self.config.get_value("detect-adaptive", "luma-only"),
+            'min_content_val':
+                self.config.get_value("detect-adaptive", "min-content-val", min_content_val),
+            'min_scene_len':
+                min_scene_len,
+            'window_width':
                 self.config.get_value("detect-adaptive", "frame-window", frame_window),
         }
 

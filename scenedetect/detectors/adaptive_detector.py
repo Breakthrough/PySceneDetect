@@ -18,12 +18,11 @@ This detector is available from the command-line as the `detect-adaptive` comman
 """
 
 from logging import getLogger
-import typing as ty
+from typing import List, Optional
 
 import numpy as np
 
 from scenedetect.detectors import ContentDetector
-from scenedetect.scene_detector import FlashFilter
 
 logger = getLogger('pyscenedetect')
 
@@ -44,19 +43,15 @@ class AdaptiveDetector(ContentDetector):
         min_content_val: float = 15.0,
         weights: ContentDetector.Components = ContentDetector.DEFAULT_COMPONENT_WEIGHTS,
         luma_only: bool = False,
-        kernel_size: ty.Optional[int] = None,
-        flash_filter: ty.Optional[FlashFilter] = None,
+        kernel_size: Optional[int] = None,
         video_manager=None,
-        min_delta_hsv: ty.Optional[float] = None,
+        min_delta_hsv: Optional[float] = None,
     ):
         """
         Arguments:
             adaptive_threshold: Threshold (float) that score ratio must exceed to trigger a
                 new scene (see frame metric adaptive_ratio in stats file).
-            min_scene_len: Defines the minimum length of a given scene. Sequences of consecutive
-                cuts that occur closer than this length will be merged. Equivalent to setting
-                `flash_filter = FlashFilter(length=min_scene_len)`.
-                Ignored if `flash_filter` is set.
+            min_scene_len: Minimum length of any scene.
             window_width: Size of window (number of frames) before and after each frame to
                 average together in order to detect deviations from the mean. Must be at least 1.
             min_content_val: Minimum threshold (float) that the content_val must exceed in order to
@@ -70,10 +65,8 @@ class AdaptiveDetector(ContentDetector):
                 Overrides `weights` if both are set.
             kernel_size: Size of kernel to use for post edge detection filtering. If None,
                 automatically set based on video resolution.
-            flash_filter: Filter to use for scene length compliance. If None, initialized as
-                `FlashFilter(length=min_scene_len)`. If set, `min_scene_length` is ignored.
-            video_manager: [DEPRECATED] DO NOT USE.
-            min_delta_hsv: [DEPRECATED] DO NOT USE.
+            video_manager: [DEPRECATED] DO NOT USE. For backwards compatibility only.
+            min_delta_hsv: [DEPRECATED] DO NOT USE. Use `min_content_val` instead.
         """
         # TODO(v0.7): Replace with DeprecationWarning that `video_manager` and `min_delta_hsv` will
         # be removed in v0.8.
@@ -84,27 +77,36 @@ class AdaptiveDetector(ContentDetector):
             min_content_val = min_delta_hsv
         if window_width < 1:
             raise ValueError('window_width must be at least 1.')
+
         super().__init__(
             threshold=255.0,
-            min_scene_len=min_scene_len,
+            min_scene_len=0,
             weights=weights,
             luma_only=luma_only,
             kernel_size=kernel_size,
-            flash_filter=flash_filter,
         )
-        self._adaptive_threshold = adaptive_threshold
-        self._min_content_val = min_content_val
-        self._window_width = window_width
+
+        # TODO: Turn these options into properties.
+        self.min_scene_len = min_scene_len
+        self.adaptive_threshold = adaptive_threshold
+        self.min_content_val = min_content_val
+        self.window_width = window_width
+
         self._adaptive_ratio_key = AdaptiveDetector.ADAPTIVE_RATIO_KEY_TEMPLATE.format(
             window_width=window_width, luma_only='' if not luma_only else '_lum')
+        self._first_frame_num = None
+
+        # NOTE: This must be different than `self._last_scene_cut` which is used by the base class.
+        self._last_cut: Optional[int] = None
+
         self._buffer = []
 
     @property
     def event_buffer_length(self) -> int:
         """Number of frames any detected cuts will be behind the current frame due to buffering."""
-        return self._window_width
+        return self.window_width
 
-    def get_metrics(self) -> ty.List[str]:
+    def get_metrics(self) -> List[str]:
         """Combines base ContentDetector metric keys with the AdaptiveDetector one."""
         return super().get_metrics() + [self._adaptive_ratio_key]
 
@@ -112,7 +114,7 @@ class AdaptiveDetector(ContentDetector):
         """Not required for AdaptiveDetector."""
         return False
 
-    def process_frame(self, frame_num: int, frame_img: ty.Optional[np.ndarray]) -> ty.List[int]:
+    def process_frame(self, frame_num: int, frame_img: Optional[np.ndarray]) -> List[int]:
         """Process the next frame. `frame_num` is assumed to be sequential.
 
         Args:
@@ -124,21 +126,31 @@ class AdaptiveDetector(ContentDetector):
             List[int]: List of frames where scene cuts have been detected. There may be 0
             or more frames in the list, and not necessarily the same as frame_num.
         """
-        frame_score = self._calculate_frame_score(frame_num=frame_num, frame_img=frame_img)
-        required_frames = 1 + (2 * self._window_width)
-        self._buffer.append((frame_num, frame_score))
+
+        # TODO(#283): Merge this with ContentDetector and turn it on by default.
+
+        super().process_frame(frame_num=frame_num, frame_img=frame_img)
+
+        # Initialize last scene cut point at the beginning of the frames of interest.
+        if self._last_cut is None:
+            self._last_cut = frame_num
+
+        required_frames = 1 + (2 * self.window_width)
+        self._buffer.append((frame_num, self._frame_score))
         if not len(self._buffer) >= required_frames:
             return []
         self._buffer = self._buffer[-required_frames:]
-        target = self._buffer[self._window_width]
+        target = self._buffer[self.window_width]
         average_window_score = (
-            sum(frame[1] for i, frame in enumerate(self._buffer) if i != self._window_width) /
-            (2.0 * self._window_width))
+            sum(frame[1] for i, frame in enumerate(self._buffer) if i != self.window_width) /
+            (2.0 * self.window_width))
+
         average_is_zero = abs(average_window_score) < 0.00001
+
         adaptive_ratio = 0.0
         if not average_is_zero:
             adaptive_ratio = min(target[1] / average_window_score, 255.0)
-        elif average_is_zero and target[1] >= self._min_content_val:
+        elif average_is_zero and target[1] >= self.min_content_val:
             # if we would have divided by zero, set adaptive_ratio to the max (255.0)
             adaptive_ratio = 255.0
         if self.stats_manager is not None:
@@ -146,11 +158,15 @@ class AdaptiveDetector(ContentDetector):
 
         # Check to see if adaptive_ratio exceeds the adaptive_threshold as well as there
         # being a large enough content_val to trigger a cut
-        found_cut: bool = (
-            adaptive_ratio >= self._adaptive_threshold and target[1] >= self._min_content_val)
-        return self._flash_filter.apply(frame_num=target[0], found_cut=found_cut)
+        threshold_met: bool = (
+            adaptive_ratio >= self.adaptive_threshold and target[1] >= self.min_content_val)
+        min_length_met: bool = (frame_num - self._last_cut) >= self.min_scene_len
+        if threshold_met and min_length_met:
+            self._last_cut = target[0]
+            return [target[0]]
+        return []
 
-    def get_content_val(self, frame_num: int) -> ty.Optional[float]:
+    def get_content_val(self, frame_num: int) -> Optional[float]:
         """Returns the average content change for a frame."""
         # TODO(v0.7): Add DeprecationWarning that `get_content_val` will be removed in v0.7.
         logger.error("get_content_val is deprecated and will be removed. Lookup the value"
@@ -159,10 +175,6 @@ class AdaptiveDetector(ContentDetector):
             return self.stats_manager.get_metrics(frame_num, [ContentDetector.FRAME_SCORE_KEY])[0]
         return 0.0
 
-    def post_process(self, _frame_num: int):
-        # Already processed frame at self._window_width, process the rest. This ensures we emit any
-        # cuts the filtering mode might require.
-        cuts = []
-        for (frame_num, _) in self._buffer[self._window_width + 1:]:
-            cuts += self._flash_filter.apply(frame_num=frame_num, found_cut=False)
-        return cuts
+    def post_process(self, _unused_frame_num: int):
+        """Not required for AdaptiveDetector."""
+        return []
