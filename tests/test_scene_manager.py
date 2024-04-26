@@ -94,7 +94,8 @@ def test_save_images(test_video_file):
     sm.add_detector(ContentDetector())
 
     image_name_glob = 'scenedetect.tempfile.*.jpg'
-    image_name_template = 'scenedetect.tempfile.$SCENE_NUMBER.$IMAGE_NUMBER'
+    image_name_template = 'scenedetect.tempfile.$SCENE_NUMBER\
+                           .$IMAGE_NUMBER.$TIMESTAMP_MS'
 
     try:
         video_fps = video.frame_rate
