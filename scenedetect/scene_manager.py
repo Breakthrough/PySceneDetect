@@ -493,7 +493,10 @@ def save_images(scene_list: List[Tuple[FrameTimecode, FrameTimecode]],
                     VIDEO_NAME=video.name,
                     SCENE_NUMBER=scene_num_format % (i + 1),
                     IMAGE_NUMBER=image_num_format % (j + 1),
-                    FRAME_NUMBER=image_timecode.get_frames()), image_extension)
+                    FRAME_NUMBER=image_timecode.get_frames(),
+                    FRAME_TIMESTAMP_MS=int(image_timecode.get_seconds()*1000)),
+                    image_extension,
+                    )
                 image_filenames[i].append(file_path)
                 # TODO: Combine this resize with the ones below.
                 if aspect_ratio is not None:
