@@ -494,7 +494,7 @@ def save_images(scene_list: List[Tuple[FrameTimecode, FrameTimecode]],
                     SCENE_NUMBER=scene_num_format % (i + 1),
                     IMAGE_NUMBER=image_num_format % (j + 1),
                     FRAME_NUMBER=image_timecode.get_frames(),
-                    FRAME_TIMESTAMP_MS=int(image_timecode.get_seconds()*1000)),
+                    TIMESTAMP_MS=int(image_timecode.get_seconds()*1000)),
                     image_extension,
                     )
                 image_filenames[i].append(file_path)
