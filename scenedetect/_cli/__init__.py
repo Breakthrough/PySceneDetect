@@ -443,52 +443,62 @@ Note that --end and --duration are mutually exclusive (i.e. only one of the two 
     )
 
 
-@click.command('detect-content', cls=_Command)
+@click.command("detect-content", cls=_Command)
 @click.option(
-    '--threshold',
-    '-t',
-    metavar='VAL',
-    type=click.FloatRange(CONFIG_MAP['detect-content']['threshold'].min_val,
-                          CONFIG_MAP['detect-content']['threshold'].max_val),
+    "--threshold",
+    "-t",
+    metavar="VAL",
+    type=click.FloatRange(CONFIG_MAP["detect-content"]["threshold"].min_val,
+                          CONFIG_MAP["detect-content"]["threshold"].max_val),
     default=None,
-    help='Threshold (float) that frame score must exceed to trigger a cut. Refers to "content_val" in stats file.%s'
+    help="Threshold (float) that frame score must exceed to trigger a cut. Refers to \"content_val\" in stats file.%s"
     % (USER_CONFIG.get_help_string("detect-content", "threshold")),
 )
 @click.option(
-    '--weights',
-    '-w',
+    "--weights",
+    "-w",
     type=(float, float, float, float),
     default=None,
-    metavar='HUE SAT LUM EDGE',
-    help='Weights of 4 components used to calculate frame score from (delta_hue, delta_sat, delta_lum, delta_edges).%s'
+    metavar="HUE SAT LUM EDGE",
+    help="Weights of 4 components used to calculate frame score from (delta_hue, delta_sat, delta_lum, delta_edges).%s"
     % (USER_CONFIG.get_help_string("detect-content", "weights")),
 )
 @click.option(
-    '--luma-only',
-    '-l',
+    "--luma-only",
+    "-l",
     is_flag=True,
     flag_value=True,
-    help='Only use luma (brightness) channel. Useful for greyscale videos. Equivalent to setting "-w 0 0 1 0".%s'
+    help="Only use luma (brightness) channel. Useful for greyscale videos. Equivalent to setting -w=\"0 0 1 0\".%s"
     % (USER_CONFIG.get_help_string("detect-content", "luma-only")),
 )
 @click.option(
-    '--kernel-size',
-    '-k',
-    metavar='N',
+    "--kernel-size",
+    "-k",
+    metavar="N",
     type=click.INT,
     default=None,
-    help='Size of kernel for expanding detected edges. Must be odd integer greater than or equal to 3. If unset, kernel size is estimated using video resolution.%s'
+    help="Size of kernel for expanding detected edges. Must be odd integer greater than or equal to 3. If unset, kernel size is estimated using video resolution.%s"
     % (USER_CONFIG.get_help_string("detect-content", "kernel-size")),
 )
 @click.option(
-    '--min-scene-len',
-    '-m',
-    metavar='TIMECODE',
+    "--min-scene-len",
+    "-m",
+    metavar="TIMECODE",
     type=click.STRING,
     default=None,
-    help='Minimum length of any scene. Overrides global option -m/--min-scene-len. TIMECODE can be specified in frames (-m=100), in seconds with `s` suffix (-m=3.5s), or timecode (-m=00:01:52.778).%s'
-    % ('' if USER_CONFIG.is_default('detect-content', 'min-scene-len') else
-       USER_CONFIG.get_help_string('detect-content', 'min-scene-len')),
+    help="Minimum length of any scene. Overrides global option -m/--min-scene-len. %s" %
+    ("" if USER_CONFIG.is_default("detect-content", "min-scene-len") else
+     USER_CONFIG.get_help_string("detect-content", "min-scene-len")),
+)
+@click.option(
+    "--filter-mode",
+    "-f",
+    metavar="MODE",
+    type=click.Choice(CHOICE_MAP["detect-content"]["filter-mode"], False),
+    default=None,
+    help="Mode used to enforce -m/--min-scene-len option. Can be one of: %s. %s" %
+    (", ".join(CHOICE_MAP["detect-content"]["filter-mode"]),
+     USER_CONFIG.get_help_string("detect-content", "filter-mode")),
 )
 @click.pass_context
 def detect_content_command(
@@ -498,6 +508,7 @@ def detect_content_command(
     luma_only: bool,
     kernel_size: Optional[int],
     min_scene_len: Optional[str],
+    filter_mode: Optional[str],
 ):
     """Perform content detection algorithm on input video.
 
@@ -527,7 +538,8 @@ Examples:
         luma_only=luma_only,
         min_scene_len=min_scene_len,
         weights=weights,
-        kernel_size=kernel_size)
+        kernel_size=kernel_size,
+        filter_mode=filter_mode)
     logger.debug('Adding detector: ContentDetector(%s)', detector_args)
     ctx.obj.add_detector(ContentDetector(**detector_args))
 

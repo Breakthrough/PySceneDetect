@@ -27,6 +27,7 @@ from platformdirs import user_config_dir
 
 from scenedetect.detectors import ContentDetector
 from scenedetect.frame_timecode import FrameTimecode
+from scenedetect.scene_detector import FlashFilter
 from scenedetect.scene_manager import Interpolation
 from scenedetect.video_splitter import DEFAULT_FFMPEG_ARGS
 
@@ -263,6 +264,7 @@ CONFIG_MAP: ConfigDict = {
         'min-delta-hsv': RangeValue(15.0, min_val=0.0, max_val=255.0),
     },
     'detect-content': {
+        'filter-mode': 'merge',
         'kernel-size': KernelSizeValue(-1),
         'luma-only': False,
         'min-scene-len': TimecodeValue(0),
@@ -342,7 +344,10 @@ certain string options are stored in `CHOICE_MAP`."""
 
 CHOICE_MAP: Dict[str, Dict[str, List[str]]] = {
     'backend-pyav': {
-        'threading_mode': [str(mode).lower() for mode in VALID_PYAV_THREAD_MODES],
+        'threading_mode': [mode.lower() for mode in VALID_PYAV_THREAD_MODES],
+    },
+    'detect-content': {
+        'filter-mode': [mode.name.lower() for mode in FlashFilter.Mode],
     },
     'global': {
         'backend': ['opencv', 'pyav', 'moviepy'],

@@ -558,7 +558,7 @@ class SceneManager:
         """
         self._cutting_list = []
         self._event_list = []
-        self._detector_list = []
+        self._detector_list: List[SceneDetector] = []
         self._sparse_detector_list = []
         # TODO(v1.0): This class should own a StatsManager instead of taking an optional one.
         # Expose a new `stats_manager` @property from the SceneManager, and either change the
