@@ -30,6 +30,9 @@ jobs:
       matrix:
         python-version: ["3.9"]
 
+    env:
+      ffmpeg-version: "7.0"
+
     steps:
       - uses: actions/checkout@v4
 
@@ -54,12 +57,12 @@ jobs:
         uses: dsaltares/fetch-gh-release-asset@1.1.1
         with:
           repo: 'GyanD/codexffmpeg'
-          version: 'tags/6.0'
-          file: 'ffmpeg-6.0-full_build.7z'
+          version: 'tags/${{ env.ffmpeg-version }}'
+          file: 'ffmpeg-${{ env.ffmpeg-version }}-full_build.7z'
 
       - name: Unit Test
         run: |
-          7z e ffmpeg-6.0-full_build.7z ffmpeg.exe -r
+          7z e ffmpeg-${{ env.ffmpeg-version }}-full_build.7z ffmpeg.exe -r
           python -m pytest -vv
 
       - name: Build PySceneDetect
@@ -77,7 +80,7 @@ jobs:
           Move-Item -Path dist/windows/README* -Destination dist/scenedetect/
           Move-Item -Path dist/windows/LICENSE* -Destination dist/scenedetect/thirdparty/
           Move-Item -Path scenedetect/_thirdparty/LICENSE* -Destination dist/scenedetect/thirdparty/
-          7z e -odist/ffmpeg ffmpeg-6.0-full_build.7z LICENSE -r
+          7z e -odist/ffmpeg ffmpeg-${{ env.ffmpeg-version }}-full_build.7z LICENSE -r
           Move-Item -Path ffmpeg.exe -Destination dist/scenedetect/ffmpeg.exe
           Move-Item -Path dist/ffmpeg/LICENSE -Destination dist/scenedetect/thirdparty/LICENSE-FFMPEG
 
