@@ -37,10 +37,16 @@ jobs:
     env:
       # Version is extracted below and used to find correct package install path.
       scenedetect_version: ""
+      # Setuptools must be pinned for the Python 3.7 builders.
+      setuptools_version: "${{ matrix.python-version == '3.7' && '==62.3.4' || '' }}"
 
     steps:
       - uses: actions/checkout@v4
+
       - uses: FedericoCarboni/setup-ffmpeg@v3
+        # TODO: This action currently does not work for non-x64 builders (e.g. macos-14):
+        # https://github.com/federicocarboni/setup-ffmpeg/issues/21
+        if: ${{ runner.arch == 'X64' }}
 
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
@@ -49,17 +55,8 @@ jobs:
           cache: 'pip'
 
       - name: Install Dependencies
-        if: ${{ matrix.python-version != '3.7' }}
         run: |
-          python -m pip install --upgrade pip build wheel virtualenv setuptools
-          pip install av opencv-python-headless --only-binary :all:
-          pip install -r requirements_headless.txt
-
-      # TODO(1.6.1): Remove this branch when deprecating Python 3.7.
-      - name: Install Dependencies
-        if: ${{ matrix.python-version == '3.7' }}
-        run: |
-          python -m pip install --upgrade pip build wheel virtualenv setuptools==62.3.4
+          python -m pip install --upgrade pip build wheel virtualenv setuptools${{ env.setuptools_version }}
           pip install av opencv-python-headless --only-binary :all:
           pip install -r requirements_headless.txt
 
@@ -78,13 +75,6 @@ jobs:
           python -m scenedetect -i tests/resources/testvideo.mp4 -b opencv time --end 2s
           python -m scenedetect -i tests/resources/testvideo.mp4 -b pyav time --end 2s
           python -m pip uninstall -y scenedetect
-
-      - name: Build Documentation
-        if: ${{ matrix.python-version == '3.12' && matrix.os == 'ubuntu-latest' }}
-        run: |
-          pip install -r docs/requirements.txt
-          git mv docs docs_src
-          sphinx-build -b singlehtml docs_src docs
 
       - name: Build Package
         shell: bash
