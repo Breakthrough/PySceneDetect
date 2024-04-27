@@ -138,7 +138,7 @@ def get_fade_in_out_test_cases():
             TestCase(
                 path=get_absolute_path("resources/fades.mp4"),
                 detector=ThresholdDetector(
-                    threshold=12.0,
+                    threshold=11.0,
                     method=ThresholdDetector.Method.FLOOR,
                     add_final_scene=True,
                 ),

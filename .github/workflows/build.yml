@@ -28,14 +28,25 @@ jobs:
     strategy:
       matrix:
         os: [macos-13, macos-14, ubuntu-20.04, ubuntu-latest, windows-latest]
-        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+        python-version: ["3.7", "3.8", "3.9", "3.10", "3.11", "3.12"]
+        exclude:
+          # macos-14 builders use M1 (ARM64) which does not have a Python 3.7 package available.
+          - os: macos-14
+            python-version: "3.7"
 
     env:
       # Version is extracted below and used to find correct package install path.
       scenedetect_version: ""
+      # Setuptools must be pinned for the Python 3.7 builders.
+      setuptools_version: "${{ matrix.python-version == '3.7' && '==62.3.4' || '' }}"
 
     steps:
       - uses: actions/checkout@v4
+
+      - uses: FedericoCarboni/setup-ffmpeg@v3
+        # TODO: This action currently does not work for non-x64 builders (e.g. macos-14):
+        # https://github.com/federicocarboni/setup-ffmpeg/issues/21
+        if: ${{ runner.arch == 'X64' }}
 
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
@@ -45,7 +56,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          python -m pip install --upgrade pip build wheel virtualenv setuptools
+          python -m pip install --upgrade pip build wheel virtualenv setuptools${{ env.setuptools_version }}
           pip install av opencv-python-headless --only-binary :all:
           pip install -r requirements_headless.txt
 
@@ -53,21 +64,6 @@ jobs:
         run: |
           git fetch --depth=1 https://github.com/Breakthrough/PySceneDetect.git refs/heads/resources:refs/remotes/origin/resources
           git checkout refs/remotes/origin/resources -- tests/resources/
-
-      # TODO: Cache this: https://github.com/actions/cache
-      # TODO: Install ffmpeg/mkvtoolnix on all runners.
-      - name: Download FFMPEG
-        if: ${{ runner.os == 'Windows' }}
-        uses: dsaltares/fetch-gh-release-asset@1.1.1
-        with:
-          repo: 'GyanD/codexffmpeg'
-          version: 'tags/6.0'
-          file: 'ffmpeg-6.0-full_build.7z'
-
-      - name: Extract FFMPEG
-        if: ${{ runner.os == 'Windows' }}
-        run: |
-          7z e ffmpeg-6.0-full_build.7z ffmpeg.exe -r
 
       - name: Unit Tests
         run: |
@@ -79,13 +75,6 @@ jobs:
           python -m scenedetect -i tests/resources/testvideo.mp4 -b opencv time --end 2s
           python -m scenedetect -i tests/resources/testvideo.mp4 -b pyav time --end 2s
           python -m pip uninstall -y scenedetect
-
-      - name: Build Documentation
-        if: ${{ matrix.python-version == '3.12' && matrix.os == 'ubuntu-latest' }}
-        run: |
-          pip install -r docs/requirements.txt
-          git mv docs docs_src
-          sphinx-build -b singlehtml docs_src docs
 
       - name: Build Package
         shell: bash

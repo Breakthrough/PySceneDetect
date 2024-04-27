@@ -8,7 +8,7 @@ Releases
 
 #### Release Notes
 
-Includes new histogram and perceptual hash based detectors (thanks @wjs018 and @ash2703), adds flash filter to content detector, and includes various bugfixes. Minimum supported Python version is now **Python 3.8**.
+Includes new histogram and perceptual hash based detectors (thanks @wjs018 and @ash2703), adds flash filter to content detector, and includes various bugfixes.
 
 #### Changelog
 
