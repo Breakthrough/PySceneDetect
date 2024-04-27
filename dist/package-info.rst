@@ -5,13 +5,10 @@ PySceneDetect
 Video Scene Cut Detection and Analysis Tool
 ----------------------------------------------------------
 
-.. image:: https://img.shields.io/github/actions/workflow/status/Breakthrough/PySceneDetect/build.yml
-   :target: https://github.com/Breakthrough/PySceneDetect/actions
-
-.. image:: https://img.shields.io/github/release/Breakthrough/PySceneDetect.svg
+.. image:: https://img.shields.io/pypi/status/scenedetect.svg
    :target: https://github.com/Breakthrough/PySceneDetect
 
-.. image:: https://img.shields.io/pypi/status/scenedetect.svg
+.. image:: https://img.shields.io/github/release/Breakthrough/PySceneDetect.svg
    :target: https://github.com/Breakthrough/PySceneDetect
 
 .. image:: https://img.shields.io/pypi/l/scenedetect.svg
@@ -22,21 +19,19 @@ Video Scene Cut Detection and Analysis Tool
 
 ----------------------------------------------------------
 
-Website: https://www.scenedetect.com/
-
 Documentation: https://www.scenedetect.com/docs
 
 Github Repo: https://github.com/Breakthrough/PySceneDetect/
 
-----------------------------------------------------------
-
-PySceneDetect is a command-line tool and Python library which analyzes a video, looking for scene changes or cuts. PySceneDetect integrates with external tools (e.g. `ffmpeg`, `mkvmerge`) to automatically split the video into individual clips when using the `split-video` command and has several other features.
-
 Install: ``pip install --upgrade scenedetect[opencv]``
 
-Split video via CLI: ``scenedetect -i video.mp4 split-video``
+----------------------------------------------------------
 
-Split video using Python API:
+**PySceneDetect** is a tool for detecting shot changes in videos, and can automatically split videos into separate clips.  PySceneDetect is free and open-source software, and has several detection methods to find fast-cuts and threshold-based fades.
+
+For example, to split a video: ``scenedetect -i video.mp4 split-video``
+
+You can also use the Python API (`docs <https://www.scenedetect.com/docs/latest/>`_) to do the same:
 
 .. code-block:: python
 

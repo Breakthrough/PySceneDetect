@@ -3,6 +3,8 @@
 
 PySceneDetect is a useful tool for statistical analysis of video.  Below are links to various research articles/papers which have either used PySceneDetect as a part of their analysis, or propose more accurate detection algorithms using the current implementation as a comparison.
 
+ - [Panda-70M: Captioning 70M Videos with Multiple Cross-Modality Teachers](https://arxiv.org/abs/2402.19479) by Tsai-Shien Chen, Aliaksandr Siarohin, Willi Menapace, Ekaterina Deyneka, Hsiang-wei Chao, Byung Eun Jeon, Yuwei Fang, Hsin-Ying Lee, Jian Ren, Ming-Hsuan Yang, Sergey Tulyakov (2024)
+
  - [Stable Remaster: Bridging the Gap Between Old Content and New Displays](https://arxiv.org/pdf/2306.06803.pdf) by Nathan Paull, Shuvam Keshari, Yian Wong (2023)
 
  - [LoL-V2T: Large-Scale Esports Video Description Dataset](https://ieeexplore.ieee.org/abstract/document/9522986) by Tsunehiko Tanaka, Edgar Simo-Serra (2021)
