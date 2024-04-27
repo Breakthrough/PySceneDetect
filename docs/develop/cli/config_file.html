@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Configuration File &#8212; PySceneDetect 0.6.4-dev0 documentation</title>
+    <title>Configuration File &#8212; PySceneDetect 0.7-dev0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
     <link rel="stylesheet" type="text/css" href="../_static/pyscenedetect.css" />
@@ -135,18 +135,15 @@
 <span class="c1"># Method to use for downscaling (nearest, linear, cubic, area, lanczos4).</span>
 <span class="c1">#downscale-method = linear</span>
 
-<span class="c1"># Minimum length of a given scene. See filter-mode to control how this is enforced.</span>
+<span class="c1"># Minimum length of a given scene.</span>
 <span class="c1">#min-scene-len = 0.6s</span>
 
-<span class="c1"># Mode to use when filtering out scenes (merge, suppress, drop):</span>
-<span class="c1">#   merge: Consecutive scenes shorter than min-scene-len are combined.</span>
-<span class="c1">#   suppress: No new scenes can be generated until min-scene-len passes.</span>
-<span class="c1">#   drop: Drop all scenes shorter than global min-scene-len.</span>
-<span class="c1">#filter-mode = merge</span>
-
-<span class="c1"># If the video ends less than min-scene-len after the last cut, merge it with the</span>
-<span class="c1"># previous scene (yes/no).</span>
+<span class="c1"># Merge last scene if it is shorter than min-scene-len (yes/no). This can occur</span>
+<span class="c1"># when a cut is detected just before the video ends.</span>
 <span class="c1">#merge-last-scene = no</span>
+
+<span class="c1"># Drop scenes shorter than min-scene-len instead of merging (yes/no).</span>
+<span class="c1">#drop-short-scenes = no</span>
 
 <span class="c1"># Verbosity of console output (debug, info, warning, error, or none).</span>
 <span class="c1"># Set to none for the same behavior as specifying -q/--quiet.</span>
@@ -163,6 +160,14 @@
 <span class="k">[detect-content]</span>
 <span class="c1"># Sensitivity threshold from 0 to 255. Lower values are more sensitive.</span>
 <span class="c1">#threshold = 27</span>
+
+<span class="c1"># Minimum length of a given scene (overrides [global] option).</span>
+<span class="c1">#min-scene-len = 0.6s</span>
+
+<span class="c1"># Mode to use when filtering scenes to comply with min-scene-len:</span>
+<span class="c1">#   merge: Consecutive scenes shorter than min-scene-len are combined.</span>
+<span class="c1">#   suppress: No new scenes can be generated until min-scene-len passes.</span>
+<span class="c1">#filter-mode = merge</span>
 
 <span class="c1"># Weight to place on each component when calculating frame score (the value</span>
 <span class="c1"># `threshold` is compared against). The components are in the order</span>
@@ -183,9 +188,10 @@
 <span class="c1"># than or equal to 3. If None, automatically set using video resolution.</span>
 <span class="c1">#kernel-size = -1</span>
 
-<span class="c1"># Minimum length of a given scene. No new cuts can be emitted after one is found</span>
-<span class="c1"># until this length of time passes.</span>
-<span class="c1">#min-scene-len = 0.6s</span>
+<span class="c1"># Mode to use for enforcing min-scene-len:</span>
+<span class="c1">#   merge: Consecutive scenes shorter than min-scene-len are combined.</span>
+<span class="c1">#   suppress: No new scenes can be generated until min-scene-len passes.</span>
+<span class="c1">#filter-mode = merge</span>
 
 
 <span class="k">[detect-threshold]</span>
@@ -202,8 +208,7 @@
 <span class="c1"># Discard colour information and only use luminance (yes/no).</span>
 <span class="c1">#luma-only = no</span>
 
-<span class="c1"># Minimum length of a given scene. No new cuts can be emitted after one is found</span>
-<span class="c1"># until this length of time passes.</span>
+<span class="c1"># Minimum length of a given scene (overrides [global] option).</span>
 <span class="c1">#min-scene-len = 0.6s</span>
 
 
@@ -217,8 +222,7 @@
 <span class="c1"># Window size (number of frames) before and after each frame to average together.</span>
 <span class="c1">#frame-window = 2</span>
 
-<span class="c1"># Minimum length of a given scene. No new cuts can be emitted after one is found</span>
-<span class="c1"># until this length of time passes.</span>
+<span class="c1"># Minimum length of a given scene (overrides [global] option).</span>
 <span class="c1">#min-scene-len = 0.6s</span>
 
 <span class="c1"># The following parameters are the those used to calculate `content_val`.</span>
@@ -240,8 +244,7 @@
 <span class="c1"># Number of bits to use for image quantization before binning.</span>
 <span class="c1">#bits = 4</span>
 
-<span class="c1"># Minimum length of a given scene. No new cuts can be emitted after one is found</span>
-<span class="c1"># until this length of time passes.</span>
+<span class="c1"># Minimum length of a given scene (overrides [global] option).</span>
 <span class="c1">#min-scene-len = 0.6s</span>
 
 
@@ -419,7 +422,7 @@
 
 
 
-<p class="blurb">Version: [0.6.4-dev0]</p>
+<p class="blurb">Version: [0.7-dev0]</p>
 
 
 
