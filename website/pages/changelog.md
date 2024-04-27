@@ -6,6 +6,12 @@ Releases
 
 ### 0.6.4 (In Development)
 
+#### Release Notes
+
+Includes new histogram and perceptual hash based detectors (thanks @wjs018 and @ash2703), adds flash filter to content detector, and includes various bugfixes. Minimum supported Python version is now **Python 3.8**.
+
+#### Changelog
+
  - [feature] New detector: `detect-hist` / `HistogramDetector`, [thanks @wjs018](https://github.com/Breakthrough/PySceneDetect/pull/295) [#53](https://github.com/Breakthrough/PySceneDetect/issues/53)
  - [feature] Add flash suppression filter for `detect-content` / `ContentDetector`, greatly reduces number of cuts generated during strobing or flashing effects [#35](https://github.com/Breakthrough/PySceneDetect/pull/295) [#53](https://github.com/Breakthrough/PySceneDetect/issues/35)
     - Can be configured using `--filter-mode` option, enabled by default
