@@ -27,8 +27,13 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [macos-latest, ubuntu-20.04, ubuntu-latest, windows-latest]
-        python-version: ["3.7", "3.8", "3.9", "3.10", "3.11"]
+        # TODO(1.6.1): Deprecate Python 3.7 and support macos-14.
+        os: [macos-13, ubuntu-20.04, ubuntu-latest, windows-latest]
+        python-version: ["3.7", "3.8", "3.9", "3.10", "3.11", "3.12"]
+
+    env:
+      # Version is extracted below and used to find correct package install path.
+      scenedetect_version: ""
 
     steps:
       - uses: actions/checkout@v4
@@ -40,9 +45,9 @@ jobs:
           cache: 'pip'
 
       - name: Install Dependencies
-        # TODO: `setuptools` is pinned for the Python 3.7 builder and can be unpinned when removed.
+        # TODO(1.6.1): Unpin the following requirements when deprecating the Python 3.7 builder.
         run: |
-          python -m pip install --upgrade pip build wheel virtualenv setuptools==62.3.4
+          python -m pip install --upgrade pip build==1.1.1 wheel====0.42.0 virtualenv setuptools==62.3.4
           pip install av opencv-python-headless --only-binary :all:
           pip install -r requirements_headless.txt
 
@@ -84,15 +89,13 @@ jobs:
           git mv docs docs_src
           sphinx-build -b singlehtml docs_src docs
 
-      # TODO: Make the version extraction work on powershell so package smoke tests can run on Windows.
       - name: Build Package
-        if: ${{ matrix.os != 'windows-latest' }}
+        shell: bash
         run: |
           python -m build
           echo "scenedetect_version=`python -c \"import scenedetect; print(scenedetect.__version__.replace('-', '.'))\"`" >> "$GITHUB_ENV"
 
       - name: Smoke Test Package (Source Dist)
-        if: ${{ matrix.os != 'windows-latest' }}
         run: |
           python -m pip install dist/scenedetect-${{ env.scenedetect_version }}.tar.gz
           scenedetect version
@@ -101,7 +104,6 @@ jobs:
           python -m pip uninstall -y scenedetect
 
       - name: Smoke Test Package (Wheel)
-        if: ${{ matrix.os != 'windows-latest' }}
         run: |
           python -m pip install dist/scenedetect-${{ env.scenedetect_version }}-py3-none-any.whl
           scenedetect version
