@@ -489,14 +489,16 @@ def save_images(scene_list: List[Tuple[FrameTimecode, FrameTimecode]],
             frame_im = video.read()
             if frame_im is not None:
                 # TODO: Allow NUM to be a valid suffix in addition to NUMBER.
-                file_path = '%s.%s' % (filename_template.safe_substitute(
-                    VIDEO_NAME=video.name,
-                    SCENE_NUMBER=scene_num_format % (i + 1),
-                    IMAGE_NUMBER=image_num_format % (j + 1),
-                    FRAME_NUMBER=image_timecode.get_frames(),
-                    TIMESTAMP_MS=int(image_timecode.get_seconds()*1000)),
+                file_path = '%s.%s' % (
+                    filename_template.safe_substitute(
+                        VIDEO_NAME=video.name,
+                        SCENE_NUMBER=scene_num_format % (i + 1),
+                        IMAGE_NUMBER=image_num_format % (j + 1),
+                        FRAME_NUMBER=image_timecode.get_frames(),
+                        TIMESTAMP_MS=int(image_timecode.get_seconds() * 1000),
+                        TIMECODE=image_timecode.get_timecode()),
                     image_extension,
-                    )
+                )
                 image_filenames[i].append(file_path)
                 # TODO: Combine this resize with the ones below.
                 if aspect_ratio is not None:
