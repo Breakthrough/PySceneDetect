@@ -43,10 +43,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: FedericoCarboni/setup-ffmpeg@v3
+      - name: Setup FFmpeg
         # TODO: This action currently does not work for non-x64 builders (e.g. macos-14):
         # https://github.com/federicocarboni/setup-ffmpeg/issues/21
         if: ${{ runner.arch == 'X64' }}
+        uses: ./.github/actions/setup-ffmpeg
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
