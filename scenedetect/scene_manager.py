@@ -383,9 +383,9 @@ def save_images(scene_list: List[Tuple[FrameTimecode, FrameTimecode]],
         encoder_param: Quality/compression efficiency, based on type of image:
             'jpg' / 'webp':  Quality 0-100, higher is better quality.  100 is lossless for webp.
             'png': Compression from 1-9, where 9 achieves best filesize but is slower to encode.
-        image_name_template: Template to use when creating the images on disk. Can
-            use the macros $VIDEO_NAME, $SCENE_NUMBER, and $IMAGE_NUMBER. The image
-            extension is applied automatically as per the argument image_extension.
+        image_name_template: Template to use when creating the images on disk. Can use the macros 
+            $VIDEO_NAME, $SCENE_NUMBER, $IMAGE_NUMBER, $FRAME_NUMBER, and $TIMESTAMP_MS. 
+            The image extension is applied automatically as per the argument image_extension.
         output_dir: Directory to output the images into.  If not set, the output
             is created in the working directory.
         show_progress: If True, shows a progress bar if tqdm is installed.
