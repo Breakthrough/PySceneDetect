@@ -1,0 +1,41 @@
+name: 'Setup FFmpeg'
+inputs:
+  github-token:
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup FFmpeg (latest)
+      id: latest
+      continue-on-error: true
+      uses: FedericoCarboni/setup-ffmpeg@v3
+      with:
+        github-token: ${{ inputs.github-token }}
+
+    - name: Setup FFmpeg (7.0.0)
+      if: ${{ steps.latest.outcome == 'failure' }}
+      id: v7-0-0
+      continue-on-error: true
+      uses: FedericoCarboni/setup-ffmpeg@v3
+      with:
+        github-token: ${{ inputs.github-token }}
+        ffmpeg-version: "7.0.0"
+
+    - name: Setup FFmpeg (6.1.1)
+      if: ${{ steps.v7-0-0.outcome == 'failure' }}
+      id: v6-1-1
+      continue-on-error: true
+      uses: FedericoCarboni/setup-ffmpeg@v3
+      with:
+        github-token: ${{ inputs.github-token }}
+        ffmpeg-version: "6.1.1"
+
+  # The oldest version we allow falling back to must not have `continue-on-error: true`
+    - name: Setup FFmpeg (6.1.0)
+      if: ${{ steps.v6-1-1.outcome == 'failure' }}
+      id: v6-1-0
+      uses: FedericoCarboni/setup-ffmpeg@v3
+      with:
+        github-token: ${{ inputs.github-token }}
+        ffmpeg-version: "6.1.0"

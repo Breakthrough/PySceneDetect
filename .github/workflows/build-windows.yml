@@ -53,7 +53,7 @@ jobs:
           git fetch --depth=1 https://github.com/Breakthrough/PySceneDetect.git refs/heads/resources:refs/remotes/origin/resources
           git checkout refs/remotes/origin/resources -- tests/resources/
 
-      - name: Download FFMPEG
+      - name: Download FFMPEG ${{ env.ffmpeg-version }}
         uses: dsaltares/fetch-gh-release-asset@1.1.1
         with:
           repo: 'GyanD/codexffmpeg'
