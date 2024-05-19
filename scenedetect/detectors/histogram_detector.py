@@ -31,7 +31,7 @@ class HistogramDetector(SceneDetector):
 
     METRIC_KEYS = ['hist_diff']
 
-    def __init__(self, threshold: float = 0.95, min_scene_len: int = 15):
+    def __init__(self, threshold: float = 0.95, bins: int = 256, min_scene_len: int = 15):
         """
         Arguments:
             threshold: Threshold value (float) that the calculated difference between subsequent
@@ -43,6 +43,7 @@ class HistogramDetector(SceneDetector):
         """
         super().__init__()
         self._threshold = threshold
+        self._bins = bins
         self._min_scene_len = min_scene_len
         self._last_hist = None
         self._last_scene_cut = None
@@ -76,7 +77,7 @@ class HistogramDetector(SceneDetector):
         if not self._last_scene_cut:
             self._last_scene_cut = frame_num
 
-        hist = self.calculate_histogram(frame_img)
+        hist = self.calculate_histogram(frame_img, bins = self._bins)
 
         # We can only start detecting once we have a frame to compare with.
         if self._last_hist is not None:
@@ -108,39 +109,44 @@ class HistogramDetector(SceneDetector):
 
     def calculate_histogram(self,
                             frame_img: numpy.ndarray,
+                            bins: int = 256,
                             normalize: bool = True) -> numpy.ndarray:
-        """Calculates and  normalizes the histogram of the luma (Y) channel of an image converted from BGR to YUV color space.
-            This function extracts the Y channel from the given BGR image, 
-            computes its histogram, and optionally normalizes this histogram to have a sum of one across all bins.
+        """
+        Calculates and optionally normalizes the histogram of the luma (Y) channel of an image converted from BGR to YUV color space.
+        
+        This function extracts the Y channel from the given BGR image, computes its histogram with the specified number of bins, 
+        and optionally normalizes this histogram to have a sum of one across all bins.
 
-            Args:
-            -----------
-            frame_img : np.ndarray
-                The input image in BGR color space, assumed to have shape (height, width, 3) 
-                where the last dimension represents the BGR channels.
-            normalize : bool, optional (default=True)
-                A boolean flag that determines whether the histogram should be normalized 
-                such that the sum of all histogram bins equals 1.
+        Args:
+        -----
+        frame_img : np.ndarray
+            The input image in BGR color space, assumed to have shape (height, width, 3) 
+            where the last dimension represents the BGR channels.
+        bins : int, optional (default=256)
+            The number of bins to use for the histogram.
+        normalize : bool, optional (default=True)
+            A boolean flag that determines whether the histogram should be normalized 
+            such that the sum of all histogram bins equals 1.
 
-            Returns:
-            --------
-            np.ndarray
-                A 1D numpy array of length 256, representing the histogram of the luma channel. 
-                Each element in the array represents the count (or frequency) of a particular luma value in the image. 
-                If normalized, these values represent the relative frequency.
+        Returns:
+        --------
+        np.ndarray
+            A 1D numpy array of length equal to `bins`, representing the histogram of the luma channel. 
+            Each element in the array represents the count (or frequency) of a particular luma value in the image. 
+            If normalized, these values represent the relative frequency.
 
-            Examples:
-            ---------
-            >>> img = cv2.imread('path_to_image.jpg')
-            >>> hist = calculate_histogram(img, normalize=True)
-            >>> print(hist.shape)
-            (256,)
-       """
+        Examples:
+        ---------
+        >>> img = cv2.imread('path_to_image.jpg')
+        >>> hist = calculate_histogram(img, bins=256, normalize=True)
+        >>> print(hist.shape)
+        (256,)
+        """
         # Extract Luma channel from the frame image
         y, _, _ = cv2.split(cv2.cvtColor(frame_img, cv2.COLOR_BGR2YUV))
 
         # Create the histogram with a bin for every rgb value
-        hist = cv2.calcHist([y], [0], None, [256], [0, 256])
+        hist = cv2.calcHist([y], [0], None, [bins], [0, 256])
 
         if normalize:
             # Normalize the histogram
