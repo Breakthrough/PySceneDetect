@@ -276,9 +276,9 @@ CONFIG_MAP: ConfigDict = {
         'threshold': RangeValue(12.0, min_val=0.0, max_val=255.0),
     },
     'detect-hist': {
-        'bits': 4,
         'min-scene-len': TimecodeValue(0),
-        'threshold': RangeValue(20000.0, min_val=0.0, max_val=10000000000.0),
+        'threshold': RangeValue(0.95, min_val=0.0, max_val=1.0),
+        'bins': RangeValue(256, min_val=1, max_val=256),
     },
     'load-scenes': {
         'start-col-name': 'Start Frame',

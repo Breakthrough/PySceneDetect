@@ -38,7 +38,7 @@ class HistogramDetector(SceneDetector):
                         histograms must exceed to trigger a new scene.
                         The threshold value should be between 0 and 1 (perfect positive correlation, identical histograms).
                         Values close to 1 indicate very similar frames, while lower values suggest changes.
-
+            bins: Number of bins to use for the histogram.
             min_scene_len:  Minimum length of any scene.
         """
         super().__init__()
