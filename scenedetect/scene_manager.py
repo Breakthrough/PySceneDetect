@@ -383,9 +383,9 @@ def save_images(scene_list: List[Tuple[FrameTimecode, FrameTimecode]],
         encoder_param: Quality/compression efficiency, based on type of image:
             'jpg' / 'webp':  Quality 0-100, higher is better quality.  100 is lossless for webp.
             'png': Compression from 1-9, where 9 achieves best filesize but is slower to encode.
-        image_name_template: Template to use when creating the images on disk. Can
-            use the macros $VIDEO_NAME, $SCENE_NUMBER, and $IMAGE_NUMBER. The image
-            extension is applied automatically as per the argument image_extension.
+        image_name_template: Template to use when creating the images on disk. Can use the macros 
+            $VIDEO_NAME, $SCENE_NUMBER, $IMAGE_NUMBER, $FRAME_NUMBER, and $TIMESTAMP_MS. 
+            The image extension is applied automatically as per the argument image_extension.
         output_dir: Directory to output the images into.  If not set, the output
             is created in the working directory.
         show_progress: If True, shows a progress bar if tqdm is installed.
@@ -489,11 +489,16 @@ def save_images(scene_list: List[Tuple[FrameTimecode, FrameTimecode]],
             frame_im = video.read()
             if frame_im is not None:
                 # TODO: Allow NUM to be a valid suffix in addition to NUMBER.
-                file_path = '%s.%s' % (filename_template.safe_substitute(
-                    VIDEO_NAME=video.name,
-                    SCENE_NUMBER=scene_num_format % (i + 1),
-                    IMAGE_NUMBER=image_num_format % (j + 1),
-                    FRAME_NUMBER=image_timecode.get_frames()), image_extension)
+                file_path = '%s.%s' % (
+                    filename_template.safe_substitute(
+                        VIDEO_NAME=video.name,
+                        SCENE_NUMBER=scene_num_format % (i + 1),
+                        IMAGE_NUMBER=image_num_format % (j + 1),
+                        FRAME_NUMBER=image_timecode.get_frames(),
+                        TIMESTAMP_MS=int(image_timecode.get_seconds() * 1000),
+                        TIMECODE=image_timecode.get_timecode().replace(":", ";")),
+                    image_extension,
+                )
                 image_filenames[i].append(file_path)
                 # TODO: Combine this resize with the ones below.
                 if aspect_ratio is not None:
@@ -558,7 +563,7 @@ class SceneManager:
         """
         self._cutting_list = []
         self._event_list = []
-        self._detector_list = []
+        self._detector_list: List[SceneDetector] = []
         self._sparse_detector_list = []
         # TODO(v1.0): This class should own a StatsManager instead of taking an optional one.
         # Expose a new `stats_manager` @property from the SceneManager, and either change the

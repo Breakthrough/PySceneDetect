@@ -140,30 +140,30 @@ class AdaptiveDetector(ContentDetector):
         if not len(self._buffer) >= required_frames:
             return []
         self._buffer = self._buffer[-required_frames:]
-        target = self._buffer[self.window_width]
+        (target_frame, target_score) = self._buffer[self.window_width]
         average_window_score = (
-            sum(frame[1] for i, frame in enumerate(self._buffer) if i != self.window_width) /
+            sum(score for i, (_frame, score) in enumerate(self._buffer) if i != self.window_width) /
             (2.0 * self.window_width))
 
         average_is_zero = abs(average_window_score) < 0.00001
 
         adaptive_ratio = 0.0
         if not average_is_zero:
-            adaptive_ratio = min(target[1] / average_window_score, 255.0)
-        elif average_is_zero and target[1] >= self.min_content_val:
+            adaptive_ratio = min(target_score / average_window_score, 255.0)
+        elif average_is_zero and target_score >= self.min_content_val:
             # if we would have divided by zero, set adaptive_ratio to the max (255.0)
             adaptive_ratio = 255.0
         if self.stats_manager is not None:
-            self.stats_manager.set_metrics(target[0], {self._adaptive_ratio_key: adaptive_ratio})
+            self.stats_manager.set_metrics(target_frame, {self._adaptive_ratio_key: adaptive_ratio})
 
         # Check to see if adaptive_ratio exceeds the adaptive_threshold as well as there
         # being a large enough content_val to trigger a cut
         threshold_met: bool = (
-            adaptive_ratio >= self.adaptive_threshold and target[1] >= self.min_content_val)
+            adaptive_ratio >= self.adaptive_threshold and target_score >= self.min_content_val)
         min_length_met: bool = (frame_num - self._last_cut) >= self.min_scene_len
         if threshold_met and min_length_met:
-            self._last_cut = target[0]
-            return [target[0]]
+            self._last_cut = target_frame
+            return [target_frame]
         return []
 
     def get_content_val(self, frame_num: int) -> Optional[float]:

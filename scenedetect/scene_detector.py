@@ -25,7 +25,8 @@ in order to be compatible with PySceneDetect.
     event (in, out, cut, etc...).
 """
 
-from typing import List, Optional, Tuple
+from enum import Enum
+import typing as ty
 
 import numpy
 
@@ -46,7 +47,7 @@ class SceneDetector:
     """
     # TODO(v0.7): Make this a proper abstract base class.
 
-    stats_manager: Optional[StatsManager] = None
+    stats_manager: ty.Optional[StatsManager] = None
     """Optional :class:`StatsManager <scenedetect.stats_manager.StatsManager>` to
     use for caching frame metrics to and from."""
 
@@ -77,7 +78,7 @@ class SceneDetector:
         """
         return False
 
-    def get_metrics(self) -> List[str]:
+    def get_metrics(self) -> ty.List[str]:
         """Get Metrics:  Get a list of all metric names/keys used by the detector.
 
         Returns:
@@ -86,7 +87,7 @@ class SceneDetector:
         """
         return []
 
-    def process_frame(self, frame_num: int, frame_img: numpy.ndarray) -> List[int]:
+    def process_frame(self, frame_num: int, frame_img: numpy.ndarray) -> ty.List[int]:
         """Process the next frame. `frame_num` is assumed to be sequential.
 
         Args:
@@ -103,7 +104,7 @@ class SceneDetector:
         """
         return []
 
-    def post_process(self, frame_num: int) -> List[int]:
+    def post_process(self, frame_num: int) -> ty.List[int]:
         """Post Process: Performs any processing after the last frame has been read.
 
         Prototype method, no actual detection.
@@ -132,7 +133,8 @@ class SparseSceneDetector(SceneDetector):
     An example of a SparseSceneDetector is the MotionDetector.
     """
 
-    def process_frame(self, frame_num: int, frame_img: numpy.ndarray) -> List[Tuple[int, int]]:
+    def process_frame(self, frame_num: int,
+                      frame_img: numpy.ndarray) -> ty.List[ty.Tuple[int, int]]:
         """Process Frame: Computes/stores metrics and detects any scene changes.
 
         Prototype method, no actual detection.
@@ -143,7 +145,7 @@ class SparseSceneDetector(SceneDetector):
         """
         return []
 
-    def post_process(self, frame_num: int) -> List[Tuple[int, int]]:
+    def post_process(self, frame_num: int) -> ty.List[ty.Tuple[int, int]]:
         """Post Process: Performs any processing after the last frame has been read.
 
         Prototype method, no actual detection.
@@ -152,4 +154,67 @@ class SparseSceneDetector(SceneDetector):
             List of frame pairs representing individual scenes
             to be added to the output scene list directly.
         """
+        return []
+
+
+class FlashFilter:
+
+    class Mode(Enum):
+        MERGE = 0
+        """Merge consecutive cuts shorter than filter length."""
+        SUPPRESS = 1
+        """Suppress consecutive cuts until the filter length has passed."""
+
+    def __init__(self, mode: Mode, length: int):
+        self._mode = mode
+        self._filter_length = length  # Number of frames to use for activating the filter.
+        self._last_above = None       # Last frame above threshold.
+        self._merge_enabled = False   # Used to disable merging until at least one cut was found.
+        self._merge_triggered = False # True when the merge filter is active.
+        self._merge_start = None      # Frame number where we started the merge filte.
+
+    def filter(self, frame_num: int, above_threshold: bool) -> ty.List[int]:
+        if not self._filter_length > 0:
+            return [frame_num] if above_threshold else []
+        if self._last_above is None:
+            self._last_above = frame_num
+        if self._mode == FlashFilter.Mode.MERGE:
+            return self._filter_merge(frame_num=frame_num, above_threshold=above_threshold)
+        if self._mode == FlashFilter.Mode.SUPPRESS:
+            return self._filter_suppress(frame_num=frame_num, above_threshold=above_threshold)
+
+    def _filter_suppress(self, frame_num: int, above_threshold: bool) -> ty.List[int]:
+        min_length_met: bool = (frame_num - self._last_above) >= self._filter_length
+        if not (above_threshold and min_length_met):
+            return []
+        # Both length and threshold requirements were satisfied. Emit the cut, and wait until both
+        # requirements are met again.
+        self._last_above = frame_num
+        return [frame_num]
+
+    def _filter_merge(self, frame_num: int, above_threshold: bool) -> ty.List[int]:
+        min_length_met: bool = (frame_num - self._last_above) >= self._filter_length
+        # Ensure last frame is always advanced to the most recent one that was above the threshold.
+        if above_threshold:
+            self._last_above = frame_num
+        if self._merge_triggered:
+            # This frame was under the threshold, see if enough frames passed to disable the filter.
+            num_merged_frames = self._last_above - self._merge_start
+            if min_length_met and not above_threshold and num_merged_frames >= self._filter_length:
+                self._merge_triggered = False
+                return [self._last_above]
+            # Keep merging until enough frames pass below the threshold.
+            return []
+        # Wait for next frame above the threshold.
+        if not above_threshold:
+            return []
+        # If we met the minimum length requirement, no merging is necessary.
+        if min_length_met:
+            # Only allow the merge filter once the first cut is emitted.
+            self._merge_enabled = True
+            return [frame_num]
+        # Start merging cuts until the length requirement is met.
+        if self._merge_enabled:
+            self._merge_triggered = True
+            self._merge_start = frame_num
         return []

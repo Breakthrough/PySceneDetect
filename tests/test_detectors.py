@@ -24,8 +24,17 @@ import typing as ty
 import pytest
 
 from scenedetect import detect, SceneManager, FrameTimecode, StatsManager, SceneDetector
-from scenedetect.detectors import AdaptiveDetector, ContentDetector, ThresholdDetector, HistogramDetector
+from scenedetect.detectors import *
 from scenedetect.backends.opencv import VideoStreamCv2
+
+FAST_CUT_DETECTORS: ty.Tuple[ty.Type[SceneDetector]] = (
+    AdaptiveDetector,
+    ContentDetector,
+    HashDetector,
+    HistogramDetector,
+)
+
+ALL_DETECTORS: ty.Tuple[ty.Type[SceneDetector]] = (*FAST_CUT_DETECTORS, ThresholdDetector)
 
 # TODO(#53): Add a test that verifies algorithms output relatively consistent frame scores
 # regardless of resolution. This will ensure that threshold values will hold true for different
@@ -78,56 +87,30 @@ class TestCase:
 
 def get_fast_cut_test_cases():
     """Fixture for parameterized test cases that detect fast cuts."""
-    return [
+    test_cases = []
+    # goldeneye.mp4 with min_scene_len = 15 (default)
+    test_cases += [
         pytest.param(
             TestCase(
                 path=get_absolute_path("resources/goldeneye.mp4"),
-                detector=ContentDetector(),
+                detector=detector_type(min_scene_len=15),
                 start_time=1199,
                 end_time=1450,
                 scene_boundaries=[1199, 1226, 1260, 1281, 1334, 1365]),
-            id="content_default"),
-        pytest.param(
-            TestCase(
-                path=get_absolute_path("resources/goldeneye.mp4"),
-                detector=AdaptiveDetector(),
-                start_time=1199,
-                end_time=1450,
-                scene_boundaries=[1199, 1226, 1260, 1281, 1334, 1365]),
-            id="adaptive_default"),
-        pytest.param(
-            TestCase(
-                path=get_absolute_path("resources/goldeneye.mp4"),
-                detector=HistogramDetector(),
-                start_time=1199,
-                end_time=1450,
-                scene_boundaries=[1199, 1226, 1260, 1281, 1334, 1365]),
-            id="histogram_default"),
-        pytest.param(
-            TestCase(
-                path=get_absolute_path("resources/goldeneye.mp4"),
-                detector=ContentDetector(min_scene_len=30),
-                start_time=1199,
-                end_time=1450,
-                scene_boundaries=[1199, 1260, 1334, 1365]),
-            id="content_min_scene_len"),
-        pytest.param(
-            TestCase(
-                path=get_absolute_path("resources/goldeneye.mp4"),
-                detector=AdaptiveDetector(min_scene_len=30),
-                start_time=1199,
-                end_time=1450,
-                scene_boundaries=[1199, 1260, 1334, 1365]),
-            id="adaptive_min_scene_len"),
-        pytest.param(
-            TestCase(
-                path=get_absolute_path("resources/goldeneye.mp4"),
-                detector=HistogramDetector(min_scene_len=30),
-                start_time=1199,
-                end_time=1450,
-                scene_boundaries=[1199, 1260, 1334, 1365]),
-            id="histogram_min_scene_len"),
+            id="%s/default" % detector_type.__name__) for detector_type in FAST_CUT_DETECTORS
     ]
+    # goldeneye.mp4 with min_scene_len = 30
+    test_cases += [
+        pytest.param(
+            TestCase(
+                path=get_absolute_path("resources/goldeneye.mp4"),
+                detector=detector_type(min_scene_len=30),
+                start_time=1199,
+                end_time=1450,
+                scene_boundaries=[1199, 1260, 1334, 1365]),
+            id="%s/m=30" % detector_type.__name__) for detector_type in FAST_CUT_DETECTORS
+    ]
+    return test_cases
 
 
 def get_fade_in_out_test_cases():
@@ -155,7 +138,7 @@ def get_fade_in_out_test_cases():
             TestCase(
                 path=get_absolute_path("resources/fades.mp4"),
                 detector=ThresholdDetector(
-                    threshold=12.0,
+                    threshold=11.0,
                     method=ThresholdDetector.Method.FLOOR,
                     add_final_scene=True,
                 ),
@@ -182,7 +165,8 @@ def get_fade_in_out_test_cases():
 def test_detect_fast_cuts(test_case: TestCase):
     scene_list = test_case.detect()
     start_frames = [timecode.get_frames() for timecode, _ in scene_list]
-    assert test_case.scene_boundaries == start_frames
+
+    assert start_frames == test_case.scene_boundaries
     assert scene_list[0][0] == test_case.start_time
     assert scene_list[-1][1] == test_case.end_time
 
@@ -191,7 +175,7 @@ def test_detect_fast_cuts(test_case: TestCase):
 def test_detect_fades(test_case: TestCase):
     scene_list = test_case.detect()
     start_frames = [timecode.get_frames() for timecode, _ in scene_list]
-    assert test_case.scene_boundaries == start_frames
+    assert start_frames == test_case.scene_boundaries
     assert scene_list[0][0] == test_case.start_time
     assert scene_list[-1][1] == test_case.end_time
 
@@ -199,7 +183,7 @@ def test_detect_fades(test_case: TestCase):
 def test_detectors_with_stats(test_video_file):
     """ Test all detectors functionality with a StatsManager. """
     # TODO(v1.0): Parameterize this test case (move fixture from cli to test config).
-    for detector in [ContentDetector, ThresholdDetector, AdaptiveDetector, HistogramDetector]:
+    for detector in ALL_DETECTORS:
         video = VideoStreamCv2(test_video_file)
         stats = StatsManager()
         scene_manager = SceneManager(stats_manager=stats)
@@ -208,14 +192,12 @@ def test_detectors_with_stats(test_video_file):
         end_time = FrameTimecode('00:00:08', video.frame_rate)
         scene_manager.detect_scenes(video=video, end_time=end_time)
         initial_scene_len = len(scene_manager.get_scene_list())
-        assert initial_scene_len > 0 # test case must have at least one scene!
-                                     # Re-analyze using existing stats manager.
+        assert initial_scene_len > 0, "Test case must have at least one scene."
+        # Re-analyze using existing stats manager.
         scene_manager = SceneManager(stats_manager=stats)
         scene_manager.add_detector(detector())
-
         video.reset()
         scene_manager.auto_downscale = True
-
         scene_manager.detect_scenes(video=video, end_time=end_time)
         scene_list = scene_manager.get_scene_list()
         assert len(scene_list) == initial_scene_len

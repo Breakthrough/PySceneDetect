@@ -23,7 +23,7 @@ import scenedetect
 
 from scenedetect import open_video, AVAILABLE_BACKENDS
 
-from scenedetect.scene_detector import SceneDetector
+from scenedetect.scene_detector import SceneDetector, FlashFilter
 from scenedetect.platform import get_and_create_path, get_cv2_imwrite_params, init_logger
 from scenedetect.frame_timecode import FrameTimecode, MAX_FPS_DELTA
 from scenedetect.video_stream import VideoStream, VideoOpenFailure, FrameRateUnavailable
@@ -317,6 +317,7 @@ class CliContext:
         min_scene_len: Optional[str] = None,
         weights: Optional[Tuple[float, float, float, float]] = None,
         kernel_size: Optional[int] = None,
+        filter_mode: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Handle detect-content command options and return dict to construct one with."""
         self._ensure_input_open()
@@ -337,12 +338,21 @@ class CliContext:
             except ValueError as ex:
                 logger.debug(str(ex))
                 raise click.BadParameter(str(ex), param_hint='weights')
+
         return {
-            'weights': self.config.get_value('detect-content', 'weights', weights),
-            'kernel_size': self.config.get_value('detect-content', 'kernel-size', kernel_size),
-            'luma_only': luma_only or self.config.get_value('detect-content', 'luma-only'),
-            'min_scene_len': min_scene_len,
-            'threshold': self.config.get_value('detect-content', 'threshold', threshold),
+            'weights':
+                self.config.get_value('detect-content', 'weights', weights),
+            'kernel_size':
+                self.config.get_value('detect-content', 'kernel-size', kernel_size),
+            'luma_only':
+                luma_only or self.config.get_value('detect-content', 'luma-only'),
+            'min_scene_len':
+                min_scene_len,
+            'threshold':
+                self.config.get_value('detect-content', 'threshold', threshold),
+            'filter_mode':
+                FlashFilter.Mode[self.config.get_value("detect-content", "filter-mode",
+                                                       filter_mode).upper()],
         }
 
     def get_detect_adaptive_params(

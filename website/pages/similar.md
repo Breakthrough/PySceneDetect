@@ -8,4 +8,6 @@ The following is a list of programs or commands also performing scene cut analys
  - [Shotdetect](http://johmathe.name/shotdetect.html) - appears to be only for *NIX, content mode only
  - [Matlab Scene Change Detection](http://www.mathworks.com/help/vision/examples/scene-change-detection.html) - requires Matlab and Simulink/Computer Vision Toolbox, uses feature extraction and edge detection
  - [chaptertool](https://github.com/Mtillmann/chaptertool) - CLI/Web tool that converts PySceneDetect output to other formats
+ - [TransNetV2](https://github.com/soCzech/TransNetV2) - Shot Boundary Detection Neural Network (2020)
+ - [AutoShot] https://github.com/wentaozhu/AutoShot - Shot Boundary Detection Neural Network, based on a neural architecture search (2023)
 

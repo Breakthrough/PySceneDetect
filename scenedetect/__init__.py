@@ -36,7 +36,7 @@ from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.video_stream import VideoStream, VideoOpenFailure
 from scenedetect.video_splitter import split_video_ffmpeg, split_video_mkvmerge
 from scenedetect.scene_detector import SceneDetector
-from scenedetect.detectors import ContentDetector, AdaptiveDetector, ThresholdDetector, HistogramDetector
+from scenedetect.detectors import ContentDetector, AdaptiveDetector, ThresholdDetector, HistogramDetector, HashDetector
 from scenedetect.backends import (AVAILABLE_BACKENDS, VideoStreamCv2, VideoStreamAv,
                                   VideoStreamMoviePy, VideoCaptureAdapter)
 from scenedetect.stats_manager import StatsManager, StatsFileCorrupt
@@ -47,7 +47,7 @@ from scenedetect.video_manager import VideoManager
 
 # Used for module identification and when printing version & about info
 # (e.g. calling `scenedetect version` or `scenedetect about`).
-__version__ = '0.6.3'
+__version__ = '0.7-dev0'
 
 init_logger()
 logger = getLogger('pyscenedetect')

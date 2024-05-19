@@ -6,8 +6,19 @@ Releases
 
 ### 0.6.4 (In Development)
 
- - [feature] New detector: `detect-hist` / `HistogramDetector`, [thanks @wjs018](https://github.com/Breakthrough/PySceneDetect/pull/295) [#53](https://github.com/Breakthrough/PySceneDetect/issues/53)
+#### Release Notes
 
+Includes new histogram and perceptual hash based detectors (thanks @wjs018 and @ash2703), adds flash filter to content detector, and includes various bugfixes.
+
+#### Changelog
+
+ - [feature] New detector: `detect-hist` / `HistogramDetector`, [thanks @wjs018](https://github.com/Breakthrough/PySceneDetect/pull/295) [#53](https://github.com/Breakthrough/PySceneDetect/issues/53)
+ - [feature] Add flash suppression filter for `detect-content` / `ContentDetector`, greatly reduces number of cuts generated during strobing or flashing effects [#35](https://github.com/Breakthrough/PySceneDetect/pull/295) [#53](https://github.com/Breakthrough/PySceneDetect/issues/35)
+    - Can be configured using `--filter-mode` option, enabled by default
+    - `--filter-mode = merge` (new default) merges consecutive scenes shorter than `min-scene-len`
+    - `--filter-mode = suppress` (previous default) disables generating new scenes until `min-scene-len` has passed
+ - [bugfix] Remove extraneous console output when using `--drop-short-scenes`
+ - [bugfix] Fix scene lengths being smaller than `min-scene-len` when using `detect-adaptive` / `AdaptiveDetector` with large values of `--frame-window`
 
 ### 0.6.3 (March 9, 2024)
 
