@@ -739,8 +739,8 @@ Examples:
     metavar='NUM',
     type=click.INT,
     default=256,
-    help='The number of bins to use for the histogram calculation.%s'
-    % (USER_CONFIG.get_help_string("detect-hist", "bins")))
+    help='The number of bins to use for the histogram calculation.%s' %
+    (USER_CONFIG.get_help_string("detect-hist", "bins")))
 @click.option(
     '--min-scene-len',
     '-m',

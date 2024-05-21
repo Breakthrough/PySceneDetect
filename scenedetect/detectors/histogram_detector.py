@@ -77,7 +77,7 @@ class HistogramDetector(SceneDetector):
         if not self._last_scene_cut:
             self._last_scene_cut = frame_num
 
-        hist = self.calculate_histogram(frame_img, bins = self._bins)
+        hist = self.calculate_histogram(frame_img, bins=self._bins)
 
         # We can only start detecting once we have a frame to compare with.
         if self._last_hist is not None:
