@@ -461,7 +461,7 @@ class CliContext:
         self.load_scenes_column_name = self.config.get_value("load-scenes", "start-col-name",
                                                              start_col_name)
 
-    def get_detect_hist_params(self, threshold: Optional[float], bits: Optional[int],
+    def get_detect_hist_params(self, threshold: Optional[float], bins: Optional[int],
                                min_scene_len: Optional[str]) -> Dict[str, Any]:
         """Handle detect-hist command options and return dict to construct one with."""
         self._ensure_input_open()
@@ -475,7 +475,7 @@ class CliContext:
                     min_scene_len = self.config.get_value("detect-hist", "min-scene-len")
             min_scene_len = parse_timecode(min_scene_len, self.video_stream.frame_rate).frame_num
         return {
-            'bits': self.config.get_value("detect-hist", "bits", bits),
+            'bins': self.config.get_value("detect-hist", "bins", bins),
             'min_scene_len': min_scene_len,
             'threshold': self.config.get_value("detect-hist", "threshold", threshold),
         }

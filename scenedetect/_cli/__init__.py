@@ -730,17 +730,17 @@ Examples:
     type=click.FloatRange(CONFIG_MAP['detect-hist']['threshold'].min_val,
                           CONFIG_MAP['detect-hist']['threshold'].max_val),
     default=None,
-    help='Threshold value (float) that the rgb histogram difference must exceed to trigger'
+    help='Threshold value (float) that the YCbCr histogram difference must exceed to trigger'
     ' a new scene. Refer to frame metric hist_diff in stats file.%s' %
     (USER_CONFIG.get_help_string('detect-hist', 'threshold')))
 @click.option(
-    '--bits',
+    '--bins',
     '-b',
     metavar='NUM',
     type=click.INT,
-    default=None,
-    help='The number of most significant figures to keep when quantizing the RGB color channels.%s'
-    % (USER_CONFIG.get_help_string("detect-hist", "bits")))
+    default=256,
+    help='The number of bins to use for the histogram calculation.%s'
+    % (USER_CONFIG.get_help_string("detect-hist", "bins")))
 @click.option(
     '--min-scene-len',
     '-m',
@@ -753,7 +753,7 @@ Examples:
     ('' if USER_CONFIG.is_default('detect-hist', 'min-scene-len') else USER_CONFIG.get_help_string(
         'detect-hist', 'min-scene-len')))
 @click.pass_context
-def detect_hist_command(ctx: click.Context, threshold: Optional[float], bits: Optional[int],
+def detect_hist_command(ctx: click.Context, threshold: Optional[float], bins: Optional[int],
                         min_scene_len: Optional[str]):
     """Perform detection of scenes by comparing differences in the RGB histograms of adjacent
     frames.
@@ -762,13 +762,13 @@ def detect_hist_command(ctx: click.Context, threshold: Optional[float], bits: Op
 
         detect-hist
 
-        detect-hist --threshold 20000.0
+        detect-hist --threshold 0.8 --bins 128 
     """
     assert isinstance(ctx.obj, CliContext)
 
     assert isinstance(ctx.obj, CliContext)
     detector_args = ctx.obj.get_detect_hist_params(
-        threshold=threshold, bits=bits, min_scene_len=min_scene_len)
+        threshold=threshold, bins=bins, min_scene_len=min_scene_len)
     logger.debug('Adding detector: HistogramDetector(%s)', detector_args)
     ctx.obj.add_detector(HistogramDetector(**detector_args))
 

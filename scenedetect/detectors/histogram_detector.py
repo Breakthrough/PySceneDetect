@@ -18,6 +18,7 @@ This detector is available from the command-line as the `detect-hist` command.
 
 from typing import List
 
+import cv2
 import numpy
 
 # PySceneDetect Library Imports
@@ -30,29 +31,28 @@ class HistogramDetector(SceneDetector):
 
     METRIC_KEYS = ['hist_diff']
 
-    def __init__(self, threshold: float = 20000.0, bits: int = 4, min_scene_len: int = 15):
+    def __init__(self, threshold: float = 0.95, bins: int = 256, min_scene_len: int = 15):
         """
         Arguments:
             threshold: Threshold value (float) that the calculated difference between subsequent
-                histograms must exceed to trigger a new scene.
-            bits: Number of most significant bits to keep of the pixel values. Most videos and
-                images are 8-bit rgb (0-255) and the default is to just keep the 4 most siginificant
-                bits. This compresses the 3*8bit (24bit) image down to 3*4bits (12bits). This makes
-                quantizing the rgb histogram a bit easier and comparisons more meaningful.
+                        histograms must exceed to trigger a new scene.
+                        The threshold value should be between 0 and 1 (perfect positive correlation, identical histograms).
+                        Values close to 1 indicate very similar frames, while lower values suggest changes.
+            bins: Number of bins to use for the histogram.
             min_scene_len:  Minimum length of any scene.
         """
         super().__init__()
         self._threshold = threshold
-        self._bits = bits
+        self._bins = bins
         self._min_scene_len = min_scene_len
-        self._hist_bins = range(2**(3 * self._bits))
         self._last_hist = None
         self._last_scene_cut = None
 
     def process_frame(self, frame_num: int, frame_img: numpy.ndarray) -> List[int]:
-        """First, compress the image according to the self.bits value, then build a histogram for
-        the input frame. Afterward, compare against the previously analyzed frame and check if the
-        difference is large enough to trigger a cut.
+        """Computes the histogram of the luma channel of the frame image and compares it with the
+        histogram of the luma channel of the previous frame. If the difference between the histograms
+        exceeds the threshold, a scene cut is detected.
+        Histogram difference is computed using the correlation metric.
 
         Arguments:
             frame_num: Frame number of frame that is being passed.
@@ -77,25 +77,24 @@ class HistogramDetector(SceneDetector):
         if not self._last_scene_cut:
             self._last_scene_cut = frame_num
 
-        # Quantize the image and separate the color channels
-        quantized_imgs = self._quantize_frame(frame_img=frame_img, bits=self._bits)
-
-        # Perform bit shifting operations and bitwise combine color channels into one array
-        composite_img = self._shift_bits(quantized_imgs=quantized_imgs, bits=self._bits)
-
-        # Create the histogram with a bin for every rgb value
-        hist, _ = numpy.histogram(composite_img, bins=self._hist_bins)
+        hist = self.calculate_histogram(frame_img, bins = self._bins)
 
         # We can only start detecting once we have a frame to compare with.
         if self._last_hist is not None:
+            #TODO: We can have EMA of histograms to make it more robust
+            # ema_hist = alpha * hist + (1 - alpha) * ema_hist
+
             # Compute histogram difference between frames
-            hist_diff = numpy.sum(numpy.fabs(self._last_hist - hist))
+            hist_diff = cv2.compareHist(self._last_hist, hist, cv2.HISTCMP_CORREL)
 
             # Check if a new scene should be triggered
-
-            # TODO(#53): We should probably normalize the threshold based on the frame size, as
-            # larger images will have more pixels in each bin.
-            if hist_diff >= self._threshold and ((frame_num - self._last_scene_cut)
+            # Set a correlation threshold to determine scene changes.
+            # The threshold value should be between -1 (perfect negative correlation, not applicable here)
+            # and 1 (perfect positive correlation, identical histograms).
+            # Values close to 1 indicate very similar frames, while lower values suggest changes.
+            # Example: If `_threshold` is set to 0.8, it implies that only changes resulting in a correlation
+            # less than 0.8 between histograms will be considered significant enough to denote a scene change.
+            if hist_diff <= self._threshold and ((frame_num - self._last_scene_cut)
                                                  >= self._min_scene_len):
                 cut_list.append(frame_num)
                 self._last_scene_cut = frame_num
@@ -108,82 +107,52 @@ class HistogramDetector(SceneDetector):
 
         return cut_list
 
-    def _quantize_frame(self, frame_img, bits):
-        """Quantizes the image based on the number of most significant figures to be preserved.
+    def calculate_histogram(self,
+                            frame_img: numpy.ndarray,
+                            bins: int = 256,
+                            normalize: bool = True) -> numpy.ndarray:
+        """
+        Calculates and optionally normalizes the histogram of the luma (Y) channel of an image converted from BGR to YUV color space.
+        
+        This function extracts the Y channel from the given BGR image, computes its histogram with the specified number of bins, 
+        and optionally normalizes this histogram to have a sum of one across all bins.
 
-        Arguments:
-            frame_img: The 8-bit rgb image of the frame being analyzed.
-            bits: The number of most significant bits to keep during quantization.
+        Args:
+        -----
+        frame_img : np.ndarray
+            The input image in BGR color space, assumed to have shape (height, width, 3) 
+            where the last dimension represents the BGR channels.
+        bins : int, optional (default=256)
+            The number of bins to use for the histogram.
+        normalize : bool, optional (default=True)
+            A boolean flag that determines whether the histogram should be normalized 
+            such that the sum of all histogram bins equals 1.
 
         Returns:
-            [red_img, green_img, blue_img]:
-                The three separated color channels of the frame image that have been quantized.
+        --------
+        np.ndarray
+            A 1D numpy array of length equal to `bins`, representing the histogram of the luma channel. 
+            Each element in the array represents the count (or frequency) of a particular luma value in the image. 
+            If normalized, these values represent the relative frequency.
+
+        Examples:
+        ---------
+        >>> img = cv2.imread('path_to_image.jpg')
+        >>> hist = calculate_histogram(img, bins=256, normalize=True)
+        >>> print(hist.shape)
+        (256,)
         """
-        # First, find the value of the number of most significant bits, padding with zeroes
-        bit_value = int(bin(2**bits - 1).ljust(10, '0'), 2)
+        # Extract Luma channel from the frame image
+        y, _, _ = cv2.split(cv2.cvtColor(frame_img, cv2.COLOR_BGR2YUV))
 
-        # Separate R, G, and B color channels and cast to int for easier bitwise operations
-        red_img = frame_img[:, :, 0].astype(int)
-        green_img = frame_img[:, :, 1].astype(int)
-        blue_img = frame_img[:, :, 2].astype(int)
+        # Create the histogram with a bin for every rgb value
+        hist = cv2.calcHist([y], [0], None, [bins], [0, 256])
 
-        # Quantize the frame images
-        red_img = red_img & bit_value
-        green_img = green_img & bit_value
-        blue_img = blue_img & bit_value
+        if normalize:
+            # Normalize the histogram
+            hist = cv2.normalize(hist, hist).flatten()
 
-        return [red_img, green_img, blue_img]
-
-    def _shift_bits(self, quantized_imgs, bits):
-        """Takes care of the bit shifting operations to combine the RGB color
-        channels into a single array.
-
-        Arguments:
-            quantized_imgs: A list of the three quantized images of the RGB color channels
-                respectively.
-            bits: The number of most significant bits to use for quantizing the image.
-
-        Returns:
-            composite_img: The resulting array after all bitwise operations.
-        """
-        # First, figure out how much each shift needs to be
-        blue_shift = 8 - bits
-        green_shift = 8 - 2 * bits
-        red_shift = 8 - 3 * bits
-
-        # Separate our color channels for ease
-        red_img = quantized_imgs[0]
-        green_img = quantized_imgs[1]
-        blue_img = quantized_imgs[2]
-
-        # Perform the bit shifting for each color
-        red_img = self._shift_images(img=red_img, img_shift=red_shift)
-        green_img = self._shift_images(img=green_img, img_shift=green_shift)
-        blue_img = self._shift_images(img=blue_img, img_shift=blue_shift)
-
-        # Join our rgb arrays together
-        composite_img = numpy.bitwise_or(red_img, numpy.bitwise_or(green_img, blue_img))
-
-        return composite_img
-
-    def _shift_images(self, img, img_shift):
-        """Do bitwise shifting operations for a color channel image checking for shift direction.
-
-        Arguments:
-            img: A quantized image of a single color channel
-            img_shift: How many bits to shift the values of img. If the value is negative, the shift
-                direction is to the left and 8 is added to make it a positive value.
-
-        Returns:
-            shifted_img: The bitwise shifted image.
-        """
-        if img_shift < 0:
-            img_shift += 8
-            shifted_img = numpy.left_shift(img, img_shift)
-        else:
-            shifted_img = numpy.right_shift(img, img_shift)
-
-        return shifted_img
+        return hist
 
     def is_processing_required(self, frame_num: int) -> bool:
         return True
