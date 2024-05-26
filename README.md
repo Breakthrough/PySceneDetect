@@ -117,7 +117,9 @@ This program uses free code signing provided by [SignPath.io](https://signpath.i
 
 ## License
 
-Licensed under BSD 3-Clause (see the `LICENSE` file for details).
+BSD-3-Clause; see [`LICENSE`](LICENSE) and [`THIRD-PARTY.md`](THIRD-PARTY.md) for details.
+
+----------------------------------------------------------
 
 Copyright (C) 2014-2024 Brandon Castellano.
 All rights reserved.
