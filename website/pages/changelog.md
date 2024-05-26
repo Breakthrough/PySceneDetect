@@ -19,6 +19,8 @@ Includes new histogram and perceptual hash based detectors (thanks @wjs018 and @
     - `--filter-mode = suppress` (previous default) disables generating new scenes until `min-scene-len` has passed
  - [bugfix] Remove extraneous console output when using `--drop-short-scenes`
  - [bugfix] Fix scene lengths being smaller than `min-scene-len` when using `detect-adaptive` / `AdaptiveDetector` with large values of `--frame-window`
+ - [bugfix] Update default ffmpeg stream mapping from `-map 0` to `-map 0:v:0 -map 0:a? -map 0:s?` [#392](https://github.com/Breakthrough/PySceneDetect/issues/392)
+
 
 ### 0.6.3 (March 9, 2024)
 

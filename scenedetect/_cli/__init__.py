@@ -762,7 +762,7 @@ def detect_hist_command(ctx: click.Context, threshold: Optional[float], bins: Op
 
         detect-hist
 
-        detect-hist --threshold 0.8 --bins 128 
+        detect-hist --threshold 0.8 --bins 128
     """
     assert isinstance(ctx.obj, CliContext)
 
@@ -948,8 +948,8 @@ def list_scenes_command(
     '-c',
     is_flag=True,
     flag_value=True,
-    help='Copy instead of re-encode. Faster but less precise. Equivalent to: --args="-map 0 -c:v copy -c:a copy"%s'
-    % (USER_CONFIG.get_help_string('split-video', 'copy')),
+    help="Copy instead of re-encode. Faster but less precise.%s" %
+    (USER_CONFIG.get_help_string('split-video', 'copy')),
 )
 @click.option(
     '--high-quality',
