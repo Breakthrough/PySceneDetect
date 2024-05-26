@@ -563,7 +563,7 @@
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-scenedetect-split-video-c">
 <span id="cmdoption-scenedetect-split-video-copy"></span><span class="sig-name descname"><span class="pre">-c</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--copy</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-scenedetect-split-video-c" title="Permalink to this definition">¶</a></dt>
-<dd><p>Copy instead of re-encode. Faster but less precise. Equivalent to: <a class="reference internal" href="#cmdoption-scenedetect-split-video-a"><code class="xref std std-option docutils literal notranslate"><span class="pre">--args=&quot;-map</span> <span class="pre">0</span> <span class="pre">-c:v</span> <span class="pre">copy</span> <span class="pre">-c:a</span> <span class="pre">copy&quot;</span></code></a></p>
+<dd><p>Copy instead of re-encode. Faster but less precise. Equivalent to: <a class="reference internal" href="#cmdoption-scenedetect-split-video-a"><code class="xref std std-option docutils literal notranslate"><span class="pre">--args=&quot;-map</span> <span class="pre">0:v:0</span> <span class="pre">-map</span> <span class="pre">0:a?</span> <span class="pre">-map</span> <span class="pre">0:s?</span> <span class="pre">-c:v</span> <span class="pre">copy</span> <span class="pre">-c:a</span> <span class="pre">copy&quot;</span></code></a></p>
 </dd></dl>
 
 <dl class="std option">
@@ -590,7 +590,7 @@
 <dt class="sig sig-object std" id="cmdoption-scenedetect-split-video-a">
 <span id="cmdoption-scenedetect-split-video-args"></span><span class="sig-name descname"><span class="pre">-a</span></span><span class="sig-prename descclassname"> <span class="pre">ARGS</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--args</span></span><span class="sig-prename descclassname"> <span class="pre">ARGS</span></span><a class="headerlink" href="#cmdoption-scenedetect-split-video-a" title="Permalink to this definition">¶</a></dt>
 <dd><p>Override codec arguments passed to FFmpeg when splitting scenes. Use double quotes (”) around arguments. Must specify at least audio/video codec.</p>
-<p>Default: <code class="docutils literal notranslate"><span class="pre">&quot;-map</span> <span class="pre">0</span> <span class="pre">-c:v</span> <span class="pre">libx264</span> <span class="pre">-preset</span> <span class="pre">veryfast</span> <span class="pre">-crf</span> <span class="pre">22</span> <span class="pre">-c:a</span> <span class="pre">aac&quot;</span></code></p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">&quot;-map</span> <span class="pre">0:v:0</span> <span class="pre">-map</span> <span class="pre">0:a?</span> <span class="pre">-map</span> <span class="pre">0:s?</span> <span class="pre">-c:v</span> <span class="pre">libx264</span> <span class="pre">-preset</span> <span class="pre">veryfast</span> <span class="pre">-crf</span> <span class="pre">22</span> <span class="pre">-c:a</span> <span class="pre">aac&quot;</span></code></p>
 </dd></dl>
 
 <dl class="std option">

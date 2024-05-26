@@ -561,7 +561,7 @@ Options
 
 .. option:: -c, --copy
 
-  Copy instead of re-encode. Faster but less precise. Equivalent to: :option:`--args="-map 0 -c:v copy -c:a copy" <--args>`
+  Copy instead of re-encode. Faster but less precise. Equivalent to: :option:`--args="-map 0:v:0 -map 0:a? -map 0:s? -c:v copy -c:a copy" <--args>`
 
 .. option:: -hq, --high-quality
 
@@ -583,7 +583,7 @@ Options
 
   Override codec arguments passed to FFmpeg when splitting scenes. Use double quotes (") around arguments. Must specify at least audio/video codec.
 
-  Default: ``"-map 0 -c:v libx264 -preset veryfast -crf 22 -c:a aac"``
+  Default: ``"-map 0:v:0 -map 0:a? -map 0:s? -c:v libx264 -preset veryfast -crf 22 -c:a aac"``
 
 .. option:: -m, --mkvmerge
 

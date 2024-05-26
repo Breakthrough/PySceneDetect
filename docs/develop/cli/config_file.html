@@ -239,10 +239,9 @@
 
 <span class="c1"># Threshold value (float) that the calculated difference between subsequent</span>
 <span class="c1"># histograms must exceed to trigger a new scene.</span>
-<span class="c1">#threshold = 20000.0</span>
+<span class="c1">#threshold = 0.95</span>
+<span class="c1">#bins = 256</span>
 
-<span class="c1"># Number of bits to use for image quantization before binning.</span>
-<span class="c1">#bits = 4</span>
 
 <span class="c1"># Minimum length of a given scene (overrides [global] option).</span>
 <span class="c1">#min-scene-len = 0.6s</span>
@@ -281,7 +280,7 @@
 <span class="c1">#preset = veryfast</span>
 
 <span class="c1"># Arguments to specify to ffmpeg for encoding. Quotes are not required.</span>
-<span class="c1">#args = -map 0 -c:v libx264 -preset veryfast -crf 22 -c:a aac</span>
+<span class="c1">#args = -map 0:v:0 -map 0:a? -map 0:s? -c:v libx264 -preset veryfast -crf 22 -c:a aac</span>
 
 
 <span class="k">[save-images]</span>
