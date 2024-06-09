@@ -23,6 +23,7 @@ Includes new histogram and perceptual hash based detectors (thanks @wjs018 and @
  - [feature] Add more templates for `save-images` filename customization: `$TIMECODE`, `$FRAME_NUMBER`, `$TIMESTAMP_MS` (thanks @Veldhoen0) [#395](https://github.com/Breakthrough/PySceneDetect/pull/395)
  - [bugfix] Remove extraneous console output when using `--drop-short-scenes`
  - [bugfix] Fix scene lengths being smaller than `min-scene-len` when using `detect-adaptive` / `AdaptiveDetector` with large values of `--frame-window`
+ - [bugfix] Fix crash when decoded frames have incorrect resolution and log error instead [#319](https://github.com/Breakthrough/PySceneDetect/issues/319)
  - [bugfix] Update default ffmpeg stream mapping from `-map 0` to `-map 0:v:0 -map 0:a? -map 0:s?` [#392](https://github.com/Breakthrough/PySceneDetect/issues/392)
 
 

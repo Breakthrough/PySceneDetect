@@ -756,7 +756,7 @@ Examples:
 @click.pass_context
 def detect_hist_command(ctx: click.Context, threshold: Optional[float], bins: Optional[int],
                         min_scene_len: Optional[str]):
-    """Finds fast cuts by differencing YUV histograms.
+    """Find fast cuts by differencing YUV histograms.
 
     Uses Y channel after converting each frame to YUV to create a histogram of each frame.
     Histograms between frames are compared to determine a score for how similar they are.
