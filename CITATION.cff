@@ -1,0 +1,12 @@
+cff-version: 1.2.0
+title: PySceneDetect
+message: www.scenedetect.com
+type: software
+authors:
+  - given-names: Brandon
+    family-names: Castellano
+    affiliation: www.bcastell.com
+repository-code: 'https://github.com/Breakthrough/PySceneDetect'
+url: 'https://www.scenedetect.com'
+abstract: Video Cut Detection and Analysis Tool
+license: BSD-3-Clause
