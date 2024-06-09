@@ -208,6 +208,15 @@ overriding backend-specific options.</p></li>
 <p class="caption" role="heading"><span class="caption-text">PySceneDetect Module Documentation</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="api/detectors.html">Detection Algorithms</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/detectors.html#scenedetect.detectors.adaptive_detector.AdaptiveDetector"><code class="docutils literal notranslate"><span class="pre">AdaptiveDetector</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/detectors.html#scenedetect.detectors.adaptive_detector.AdaptiveDetector.get_content_val"><code class="docutils literal notranslate"><span class="pre">AdaptiveDetector.get_content_val()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/detectors.html#scenedetect.detectors.adaptive_detector.AdaptiveDetector.get_metrics"><code class="docutils literal notranslate"><span class="pre">AdaptiveDetector.get_metrics()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/detectors.html#scenedetect.detectors.adaptive_detector.AdaptiveDetector.post_process"><code class="docutils literal notranslate"><span class="pre">AdaptiveDetector.post_process()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/detectors.html#scenedetect.detectors.adaptive_detector.AdaptiveDetector.process_frame"><code class="docutils literal notranslate"><span class="pre">AdaptiveDetector.process_frame()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/detectors.html#scenedetect.detectors.adaptive_detector.AdaptiveDetector.stats_manager_required"><code class="docutils literal notranslate"><span class="pre">AdaptiveDetector.stats_manager_required()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/detectors.html#scenedetect.detectors.adaptive_detector.AdaptiveDetector.event_buffer_length"><code class="docutils literal notranslate"><span class="pre">AdaptiveDetector.event_buffer_length</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="api/detectors.html#scenedetect.detectors.content_detector.ContentDetector"><code class="docutils literal notranslate"><span class="pre">ContentDetector</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="api/detectors.html#scenedetect.detectors.content_detector.ContentDetector.Components"><code class="docutils literal notranslate"><span class="pre">ContentDetector.Components</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/detectors.html#scenedetect.detectors.content_detector.ContentDetector.get_metrics"><code class="docutils literal notranslate"><span class="pre">ContentDetector.get_metrics()</span></code></a></li>
@@ -219,13 +228,18 @@ overriding backend-specific options.</p></li>
 <li class="toctree-l3"><a class="reference internal" href="api/detectors.html#scenedetect.detectors.content_detector.ContentDetector.METRIC_KEYS"><code class="docutils literal notranslate"><span class="pre">ContentDetector.METRIC_KEYS</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="api/detectors.html#scenedetect.detectors.adaptive_detector.AdaptiveDetector"><code class="docutils literal notranslate"><span class="pre">AdaptiveDetector</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="api/detectors.html#scenedetect.detectors.adaptive_detector.AdaptiveDetector.get_content_val"><code class="docutils literal notranslate"><span class="pre">AdaptiveDetector.get_content_val()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="api/detectors.html#scenedetect.detectors.adaptive_detector.AdaptiveDetector.get_metrics"><code class="docutils literal notranslate"><span class="pre">AdaptiveDetector.get_metrics()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="api/detectors.html#scenedetect.detectors.adaptive_detector.AdaptiveDetector.post_process"><code class="docutils literal notranslate"><span class="pre">AdaptiveDetector.post_process()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="api/detectors.html#scenedetect.detectors.adaptive_detector.AdaptiveDetector.process_frame"><code class="docutils literal notranslate"><span class="pre">AdaptiveDetector.process_frame()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="api/detectors.html#scenedetect.detectors.adaptive_detector.AdaptiveDetector.stats_manager_required"><code class="docutils literal notranslate"><span class="pre">AdaptiveDetector.stats_manager_required()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="api/detectors.html#scenedetect.detectors.adaptive_detector.AdaptiveDetector.event_buffer_length"><code class="docutils literal notranslate"><span class="pre">AdaptiveDetector.event_buffer_length</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/detectors.html#scenedetect.detectors.hash_detector.HashDetector"><code class="docutils literal notranslate"><span class="pre">HashDetector</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/detectors.html#scenedetect.detectors.hash_detector.HashDetector.get_metrics"><code class="docutils literal notranslate"><span class="pre">HashDetector.get_metrics()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/detectors.html#scenedetect.detectors.hash_detector.HashDetector.is_processing_required"><code class="docutils literal notranslate"><span class="pre">HashDetector.is_processing_required()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/detectors.html#scenedetect.detectors.hash_detector.HashDetector.process_frame"><code class="docutils literal notranslate"><span class="pre">HashDetector.process_frame()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api/detectors.html#scenedetect.detectors.hash_detector.calculate_frame_hash"><code class="docutils literal notranslate"><span class="pre">calculate_frame_hash()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/detectors.html#scenedetect.detectors.histogram_detector.HistogramDetector"><code class="docutils literal notranslate"><span class="pre">HistogramDetector</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/detectors.html#scenedetect.detectors.histogram_detector.HistogramDetector.calculate_histogram"><code class="docutils literal notranslate"><span class="pre">HistogramDetector.calculate_histogram()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/detectors.html#scenedetect.detectors.histogram_detector.HistogramDetector.get_metrics"><code class="docutils literal notranslate"><span class="pre">HistogramDetector.get_metrics()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/detectors.html#scenedetect.detectors.histogram_detector.HistogramDetector.is_processing_required"><code class="docutils literal notranslate"><span class="pre">HistogramDetector.is_processing_required()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/detectors.html#scenedetect.detectors.histogram_detector.HistogramDetector.process_frame"><code class="docutils literal notranslate"><span class="pre">HistogramDetector.process_frame()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="api/detectors.html#scenedetect.detectors.threshold_detector.ThresholdDetector"><code class="docutils literal notranslate"><span class="pre">ThresholdDetector</span></code></a><ul>
@@ -330,6 +344,7 @@ overriding backend-specific options.</p></li>
 <li class="toctree-l2"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.write_scene_list_html"><code class="docutils literal notranslate"><span class="pre">write_scene_list_html()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.DEFAULT_MIN_WIDTH"><code class="docutils literal notranslate"><span class="pre">DEFAULT_MIN_WIDTH</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.MAX_FRAME_QUEUE_LENGTH"><code class="docutils literal notranslate"><span class="pre">MAX_FRAME_QUEUE_LENGTH</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.MAX_FRAME_SIZE_ERRORS"><code class="docutils literal notranslate"><span class="pre">MAX_FRAME_SIZE_ERRORS</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.PROGRESS_BAR_DESCRIPTION"><code class="docutils literal notranslate"><span class="pre">PROGRESS_BAR_DESCRIPTION</span></code></a></li>
 </ul>
 </li>

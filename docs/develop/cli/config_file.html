@@ -157,6 +157,26 @@
 <span class="c1"># DETECTOR OPTIONS</span>
 <span class="c1">#</span>
 
+<span class="k">[detect-adaptive]</span>
+<span class="c1"># Frame score threshold, refers to the `adaptive_ratio` metric in stats file.</span>
+<span class="c1">#threshold = 3</span>
+
+<span class="c1"># Minimum threshold that `content_val` metric from detect-content must exceed.</span>
+<span class="c1">#min-content-val = 15</span>
+
+<span class="c1"># Window size (number of frames) before and after each frame to average together.</span>
+<span class="c1">#frame-window = 2</span>
+
+<span class="c1"># Minimum length of a given scene (overrides [global] option).</span>
+<span class="c1">#min-scene-len = 0.6s</span>
+
+<span class="c1"># The following parameters are the those used to calculate `content_val`.</span>
+<span class="c1"># See [detect-content] for detailed descriptions of these parameters.</span>
+<span class="c1">#weights = 1.0, 1.0, 1.0, 0.0</span>
+<span class="c1">#luma-only = no</span>
+<span class="c1">#kernel-size = -1</span>
+
+
 <span class="k">[detect-content]</span>
 <span class="c1"># Sensitivity threshold from 0 to 255. Lower values are more sensitive.</span>
 <span class="c1">#threshold = 27</span>
@@ -194,6 +214,40 @@
 <span class="c1">#filter-mode = merge</span>
 
 
+<span class="k">[detect-hash]</span>
+<span class="c1"># Threshold value (float) that the calculated difference between subsequent</span>
+<span class="c1"># histograms must exceed to trigger a new scene.</span>
+
+<span class="c1"># Threshold value from 0.0 and 1000000000.0 representing difference between</span>
+<span class="c1"># subsequent hash values to trigger a shot change.</span>
+<span class="c1">#threshold = 101.0</span>
+
+<span class="c1"># The ratio between 1 and 256 of how much low frequency information to keep.</span>
+<span class="c1"># Represents highest frequency which will pass the filter. 1 means keep all,</span>
+<span class="c1"># 2 means keep lower 1/2 of frequency data, 4 means keep lower 1/4, etc...</span>
+<span class="c1">#lowpass = 2</span>
+
+<span class="c1"># Size between 1 and 256 representing size of square of low frequency data to</span>
+<span class="c1"># use for the direct cosine transform (DCT).</span>
+
+<span class="c1"># Minimum length of a given scene (overrides [global] option).</span>
+<span class="c1">#min-scene-len = 0.6s</span>
+
+
+<span class="k">[detect-hist]</span>
+<span class="c1"># Threshold value from 0.0 to 1.0 representing the difference between Y channel</span>
+<span class="c1"># histograms after frame is converted to YUV. Values closer to 1.0 require higher</span>
+<span class="c1"># correlation (more similar to current frame), while lower values allow lower</span>
+<span class="c1"># correlation (higher difference between current frame).</span>
+<span class="c1">#threshold = 0.95</span>
+
+<span class="c1"># Number of bins between 1 and 256 to use for the histogram.</span>
+<span class="c1">#bins = 256</span>
+
+<span class="c1"># Minimum length of a given scene (overrides [global] option).</span>
+<span class="c1">#min-scene-len = 0.6s</span>
+
+
 <span class="k">[detect-threshold]</span>
 <span class="c1"># Average pixel intensity from 0-255 at which a fade event is triggered.</span>
 <span class="c1">#threshold = 12</span>
@@ -210,42 +264,6 @@
 
 <span class="c1"># Minimum length of a given scene (overrides [global] option).</span>
 <span class="c1">#min-scene-len = 0.6s</span>
-
-
-<span class="k">[detect-adaptive]</span>
-<span class="c1"># Frame score threshold, refers to the `adaptive_ratio` metric in stats file.</span>
-<span class="c1">#threshold = 3</span>
-
-<span class="c1"># Minimum threshold that `content_val` metric from detect-content must exceed.</span>
-<span class="c1">#min-content-val = 15</span>
-
-<span class="c1"># Window size (number of frames) before and after each frame to average together.</span>
-<span class="c1">#frame-window = 2</span>
-
-<span class="c1"># Minimum length of a given scene (overrides [global] option).</span>
-<span class="c1">#min-scene-len = 0.6s</span>
-
-<span class="c1"># The following parameters are the those used to calculate `content_val`.</span>
-<span class="c1"># See [detect-content] for detailed descriptions of these parameters.</span>
-<span class="c1">#weights = 1.0, 1.0, 1.0, 0.0</span>
-<span class="c1">#luma-only = no</span>
-<span class="c1">#kernel-size = -1</span>
-
-
-<span class="k">[detect-hist]</span>
-<span class="c1">#</span>
-<span class="c1"># IN DEVELOPMENT, SUBJECT TO CHANGE</span>
-<span class="c1">#</span>
-
-<span class="c1"># Threshold value (float) that the calculated difference between subsequent</span>
-<span class="c1"># histograms must exceed to trigger a new scene.</span>
-<span class="c1">#threshold = 0.95</span>
-<span class="c1">#bins = 256</span>
-
-
-<span class="c1"># Minimum length of a given scene (overrides [global] option).</span>
-<span class="c1">#min-scene-len = 0.6s</span>
-
 
 <span class="c1">#</span>
 <span class="c1"># COMMAND OPTIONS</span>
@@ -287,15 +305,15 @@
 <span class="c1"># Folder to output videos. Overrides [global] output option.</span>
 <span class="c1">#output = /usr/tmp/images</span>
 
-<span class="c1"># Filename format of created images. Can use $VIDEO_NAME, $SCENE_NUMBER,</span>
-<span class="c1"># and $IMAGE_NUMBER in the name. Extension not required.</span>
+<span class="c1"># Filename format of created images. Can use $VIDEO_NAME, $SCENE_NUMBER, $IMAGE_NUMBER,</span>
+<span class="c1"># $TIMECODE, $FRAME_NUMBER, and $TIMESTAMP_MS. Should not include extension.</span>
 <span class="c1">#filename = $VIDEO_NAME-Scene-$SCENE_NUMBER-$IMAGE_NUMBER</span>
-
-<span class="c1"># Number of images to generate for each scene.</span>
-<span class="c1">#num-images = 3</span>
 
 <span class="c1"># Image format (jpeg, png, webp).</span>
 <span class="c1">#format = jpeg</span>
+
+<span class="c1"># Number of images to generate for each scene.</span>
+<span class="c1">#num-images = 3</span>
 
 <span class="c1"># Image quality (jpeg/webp). Default is 95 for jpeg, 100 for webp</span>
 <span class="c1">#quality = 95</span>

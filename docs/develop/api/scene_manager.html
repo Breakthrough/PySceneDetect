@@ -427,9 +427,9 @@ the very last frame.</p></li>
 <li><p><strong>encoder_param</strong> (<em>int</em>) – Quality/compression efficiency, based on type of image:
 ‘jpg’ / ‘webp’:  Quality 0-100, higher is better quality.  100 is lossless for webp.
 ‘png’: Compression from 1-9, where 9 achieves best filesize but is slower to encode.</p></li>
-<li><p><strong>image_name_template</strong> (<em>str</em>) – Template to use when creating the images on disk. Can use the macros
-$VIDEO_NAME, $SCENE_NUMBER, $IMAGE_NUMBER, $FRAME_NUMBER, and $TIMESTAMP_MS.
-The image extension is applied automatically as per the argument image_extension.</p></li>
+<li><p><strong>image_name_template</strong> (<em>str</em>) – Template to use for naming image files. Can use the template variables
+$VIDEO_NAME, $SCENE_NUMBER, $IMAGE_NUMBER, $TIMECODE, $FRAME_NUMBER, $TIMESTAMP_MS.
+Should not include an extension.</p></li>
 <li><p><strong>output_dir</strong> (<em>str</em><em> | </em><em>None</em>) – Directory to output the images into.  If not set, the output
 is created in the working directory.</p></li>
 <li><p><strong>show_progress</strong> (<em>bool</em><em> | </em><em>None</em>) – If True, shows a progress bar if tqdm is installed.</p></li>
@@ -524,6 +524,12 @@ the n saved images from that scene)</p></li>
 </dd></dl>
 
 <dl class="py data">
+<dt class="sig sig-object py" id="scenedetect.scene_manager.MAX_FRAME_SIZE_ERRORS">
+<span class="sig-prename descclassname"><span class="pre">scenedetect.scene_manager.</span></span><span class="sig-name descname"><span class="pre">MAX_FRAME_SIZE_ERRORS</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">16</span></em><a class="headerlink" href="#scenedetect.scene_manager.MAX_FRAME_SIZE_ERRORS" title="Permalink to this definition">¶</a></dt>
+<dd><p>Maximum number of frame size error messages that can be logged.</p>
+</dd></dl>
+
+<dl class="py data">
 <dt class="sig sig-object py" id="scenedetect.scene_manager.PROGRESS_BAR_DESCRIPTION">
 <span class="sig-prename descclassname"><span class="pre">scenedetect.scene_manager.</span></span><span class="sig-name descname"><span class="pre">PROGRESS_BAR_DESCRIPTION</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'</span>&#160; <span class="pre">Detected:</span> <span class="pre">%d</span> <span class="pre">|</span> <span class="pre">Progress'</span></em><a class="headerlink" href="#scenedetect.scene_manager.PROGRESS_BAR_DESCRIPTION" title="Permalink to this definition">¶</a></dt>
 <dd><p>Template to use for progress bar.</p>
@@ -604,6 +610,7 @@ the n saved images from that scene)</p></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.scene_manager.write_scene_list_html"><code class="docutils literal notranslate"><span class="pre">write_scene_list_html()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.scene_manager.DEFAULT_MIN_WIDTH"><code class="docutils literal notranslate"><span class="pre">DEFAULT_MIN_WIDTH</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.scene_manager.MAX_FRAME_QUEUE_LENGTH"><code class="docutils literal notranslate"><span class="pre">MAX_FRAME_QUEUE_LENGTH</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scenedetect.scene_manager.MAX_FRAME_SIZE_ERRORS"><code class="docutils literal notranslate"><span class="pre">MAX_FRAME_SIZE_ERRORS</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.scene_manager.PROGRESS_BAR_DESCRIPTION"><code class="docutils literal notranslate"><span class="pre">PROGRESS_BAR_DESCRIPTION</span></code></a></li>
 </ul>
 </li>

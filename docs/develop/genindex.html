@@ -42,6 +42,7 @@
  | <a href="#E"><strong>E</strong></a>
  | <a href="#F"><strong>F</strong></a>
  | <a href="#G"><strong>G</strong></a>
+ | <a href="#H"><strong>H</strong></a>
  | <a href="#I"><strong>I</strong></a>
  | <a href="#L"><strong>L</strong></a>
  | <a href="#M"><strong>M</strong></a>
@@ -743,6 +744,10 @@
 <h2 id="C">C</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/detectors.html#scenedetect.detectors.hash_detector.calculate_frame_hash">calculate_frame_hash() (in module scenedetect.detectors.hash_detector)</a>
+</li>
+      <li><a href="api/detectors.html#scenedetect.detectors.histogram_detector.HistogramDetector.calculate_histogram">calculate_histogram() (scenedetect.detectors.histogram_detector.HistogramDetector method)</a>
+</li>
       <li><a href="api/backends.html#scenedetect.backends.opencv.VideoCaptureAdapter.capture">capture (scenedetect.backends.opencv.VideoCaptureAdapter property)</a>
 
       <ul>
@@ -755,10 +760,10 @@
 </li>
       <li><a href="api/scene_manager.html#scenedetect.scene_manager.SceneManager.clear_detectors">clear_detectors() (scenedetect.scene_manager.SceneManager method)</a>
 </li>
-      <li><a href="api/platform.html#scenedetect.platform.FakeTqdmObject.close">close() (scenedetect.platform.FakeTqdmObject method)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/platform.html#scenedetect.platform.FakeTqdmObject.close">close() (scenedetect.platform.FakeTqdmObject method)</a>
+</li>
       <li><a href="api/stats_manager.html#scenedetect.stats_manager.COLUMN_NAME_FRAME_NUMBER">COLUMN_NAME_FRAME_NUMBER (in module scenedetect.stats_manager)</a>
 </li>
       <li><a href="api/stats_manager.html#scenedetect.stats_manager.COLUMN_NAME_TIMECODE">COLUMN_NAME_TIMECODE (in module scenedetect.stats_manager)</a>
@@ -918,6 +923,10 @@
       <ul>
         <li><a href="api/detectors.html#scenedetect.detectors.content_detector.ContentDetector.get_metrics">(scenedetect.detectors.content_detector.ContentDetector method)</a>
 </li>
+        <li><a href="api/detectors.html#scenedetect.detectors.hash_detector.HashDetector.get_metrics">(scenedetect.detectors.hash_detector.HashDetector method)</a>
+</li>
+        <li><a href="api/detectors.html#scenedetect.detectors.histogram_detector.HistogramDetector.get_metrics">(scenedetect.detectors.histogram_detector.HistogramDetector method)</a>
+</li>
         <li><a href="api/detectors.html#scenedetect.detectors.threshold_detector.ThresholdDetector.get_metrics">(scenedetect.detectors.threshold_detector.ThresholdDetector method)</a>
 </li>
         <li><a href="api/scene_detector.html#scenedetect.scene_detector.SceneDetector.get_metrics">(scenedetect.scene_detector.SceneDetector method)</a>
@@ -944,6 +953,18 @@
   </ul></td>
 </tr></table>
 
+<h2 id="H">H</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/detectors.html#scenedetect.detectors.hash_detector.HashDetector">HashDetector (class in scenedetect.detectors.hash_detector)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/detectors.html#scenedetect.detectors.histogram_detector.HistogramDetector">HistogramDetector (class in scenedetect.detectors.histogram_detector)</a>
+</li>
+  </ul></td>
+</tr></table>
+
 <h2 id="I">I</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -961,14 +982,18 @@
 </li>
       <li><a href="api/video_splitter.html#scenedetect.video_splitter.is_mkvmerge_available">is_mkvmerge_available() (in module scenedetect.video_splitter)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/detectors.html#scenedetect.detectors.content_detector.ContentDetector.is_processing_required">is_processing_required() (scenedetect.detectors.content_detector.ContentDetector method)</a>
 
       <ul>
+        <li><a href="api/detectors.html#scenedetect.detectors.hash_detector.HashDetector.is_processing_required">(scenedetect.detectors.hash_detector.HashDetector method)</a>
+</li>
+        <li><a href="api/detectors.html#scenedetect.detectors.histogram_detector.HistogramDetector.is_processing_required">(scenedetect.detectors.histogram_detector.HistogramDetector method)</a>
+</li>
         <li><a href="api/scene_detector.html#scenedetect.scene_detector.SceneDetector.is_processing_required">(scenedetect.scene_detector.SceneDetector method)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/stats_manager.html#scenedetect.stats_manager.StatsManager.is_save_required">is_save_required() (scenedetect.stats_manager.StatsManager method)</a>
 </li>
       <li><a href="api/backends.html#scenedetect.backends.opencv.VideoCaptureAdapter.is_seekable">is_seekable (scenedetect.backends.opencv.VideoCaptureAdapter property)</a>
@@ -1009,6 +1034,8 @@
 </li>
       <li><a href="api/scene_manager.html#scenedetect.scene_manager.MAX_FRAME_QUEUE_LENGTH">MAX_FRAME_QUEUE_LENGTH (in module scenedetect.scene_manager)</a>
 </li>
+      <li><a href="api/scene_manager.html#scenedetect.scene_manager.MAX_FRAME_SIZE_ERRORS">MAX_FRAME_SIZE_ERRORS (in module scenedetect.scene_manager)</a>
+</li>
       <li><a href="api/detectors.html#scenedetect.detectors.content_detector.ContentDetector.METRIC_KEYS">METRIC_KEYS (scenedetect.detectors.content_detector.ContentDetector attribute)</a>
 </li>
       <li><a href="api/stats_manager.html#scenedetect.stats_manager.StatsManager.metrics_exist">metrics_exist() (scenedetect.stats_manager.StatsManager method)</a>
@@ -1030,6 +1057,10 @@
         <li><a href="api/detectors.html#module-scenedetect.detectors.adaptive_detector">scenedetect.detectors.adaptive_detector</a>
 </li>
         <li><a href="api/detectors.html#module-scenedetect.detectors.content_detector">scenedetect.detectors.content_detector</a>
+</li>
+        <li><a href="api/detectors.html#module-scenedetect.detectors.hash_detector">scenedetect.detectors.hash_detector</a>
+</li>
+        <li><a href="api/detectors.html#module-scenedetect.detectors.histogram_detector">scenedetect.detectors.histogram_detector</a>
 </li>
         <li><a href="api/detectors.html#module-scenedetect.detectors.threshold_detector">scenedetect.detectors.threshold_detector</a>
 </li>
@@ -1134,6 +1165,10 @@
 
       <ul>
         <li><a href="api/detectors.html#scenedetect.detectors.content_detector.ContentDetector.process_frame">(scenedetect.detectors.content_detector.ContentDetector method)</a>
+</li>
+        <li><a href="api/detectors.html#scenedetect.detectors.hash_detector.HashDetector.process_frame">(scenedetect.detectors.hash_detector.HashDetector method)</a>
+</li>
+        <li><a href="api/detectors.html#scenedetect.detectors.histogram_detector.HistogramDetector.process_frame">(scenedetect.detectors.histogram_detector.HistogramDetector method)</a>
 </li>
         <li><a href="api/detectors.html#scenedetect.detectors.threshold_detector.ThresholdDetector.process_frame">(scenedetect.detectors.threshold_detector.ThresholdDetector method)</a>
 </li>
@@ -1541,6 +1576,20 @@
 
       <ul>
         <li><a href="api/detectors.html#module-scenedetect.detectors.content_detector">module</a>
+</li>
+      </ul></li>
+      <li>
+    scenedetect.detectors.hash_detector
+
+      <ul>
+        <li><a href="api/detectors.html#module-scenedetect.detectors.hash_detector">module</a>
+</li>
+      </ul></li>
+      <li>
+    scenedetect.detectors.histogram_detector
+
+      <ul>
+        <li><a href="api/detectors.html#module-scenedetect.detectors.histogram_detector">module</a>
 </li>
       </ul></li>
       <li>

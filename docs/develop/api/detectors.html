@@ -60,6 +60,117 @@
 <a class="reference internal" href="scene_detector.html#scenedetect.scene_detector.SceneDetector" title="scenedetect.scene_detector.SceneDetector"><code class="xref py py-class docutils literal notranslate"><span class="pre">SceneDetector</span></code></a> interface. Detectors are
 typically attached to a <a class="reference internal" href="scene_manager.html#scenedetect.scene_manager.SceneManager" title="scenedetect.scene_manager.SceneManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">SceneManager</span></code></a> when
 processing videos, however they can also be used to process frames directly.</p>
+<span class="target" id="module-scenedetect.detectors.adaptive_detector"></span><p><a class="reference internal" href="#scenedetect.detectors.adaptive_detector.AdaptiveDetector" title="scenedetect.detectors.adaptive_detector.AdaptiveDetector"><code class="xref py py-class docutils literal notranslate"><span class="pre">AdaptiveDetector</span></code></a> compares the difference in content between adjacent frames similar
+to <cite>ContentDetector</cite> except the threshold isn’t fixed, but is a rolling average of adjacent frame
+changes. This can help mitigate false detections in situations such as fast camera motions.</p>
+<p>This detector is available from the command-line as the <cite>detect-adaptive</cite> command.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="scenedetect.detectors.adaptive_detector.AdaptiveDetector">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scenedetect.detectors.adaptive_detector.</span></span><span class="sig-name descname"><span class="pre">AdaptiveDetector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adaptive_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_scene_len</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">15</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_content_val</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">15.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Components(delta_hue=1.0,</span> <span class="pre">delta_sat=1.0,</span> <span class="pre">delta_lum=1.0,</span> <span class="pre">delta_edges=0.0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">luma_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">video_manager</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_delta_hsv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.detectors.adaptive_detector.AdaptiveDetector" title="Permalink to this definition">¶</a></dt>
+<dd><p>Two-pass detector that calculates frame scores with ContentDetector, and then applies
+a rolling average when processing the result that can help mitigate false detections
+in situations such as camera movement.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>adaptive_threshold</strong> (<em>float</em>) – Threshold (float) that score ratio must exceed to trigger a
+new scene (see frame metric adaptive_ratio in stats file).</p></li>
+<li><p><strong>min_scene_len</strong> (<em>int</em>) – Minimum length of any scene.</p></li>
+<li><p><strong>window_width</strong> (<em>int</em>) – Size of window (number of frames) before and after each frame to
+average together in order to detect deviations from the mean. Must be at least 1.</p></li>
+<li><p><strong>min_content_val</strong> (<em>float</em>) – Minimum threshold (float) that the content_val must exceed in order to
+register as a new scene. This is calculated the same way that <cite>detect-content</cite>
+calculates frame score based on <cite>weights</cite>/<cite>luma_only</cite>/<cite>kernel_size</cite>.</p></li>
+<li><p><strong>weights</strong> (<a class="reference internal" href="#scenedetect.detectors.content_detector.ContentDetector.Components" title="scenedetect.detectors.content_detector.ContentDetector.Components"><em>Components</em></a>) – Weight to place on each component when calculating frame score
+(<cite>content_val</cite> in a statsfile, the value <cite>threshold</cite> is compared against).
+If omitted, the default ContentDetector weights are used.</p></li>
+<li><p><strong>luma_only</strong> (<em>bool</em>) – If True, only considers changes in the luminance channel of the video.
+Equivalent to specifying <cite>weights</cite> as <code class="xref py py-data docutils literal notranslate"><span class="pre">ContentDetector.LUMA_ONLY</span></code>.
+Overrides <cite>weights</cite> if both are set.</p></li>
+<li><p><strong>kernel_size</strong> (<em>int</em><em> | </em><em>None</em>) – Size of kernel to use for post edge detection filtering. If None,
+automatically set based on video resolution.</p></li>
+<li><p><strong>video_manager</strong> – [DEPRECATED] DO NOT USE. For backwards compatibility only.</p></li>
+<li><p><strong>min_delta_hsv</strong> (<em>float</em><em> | </em><em>None</em>) – [DEPRECATED] DO NOT USE. Use <cite>min_content_val</cite> instead.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="scenedetect.detectors.adaptive_detector.AdaptiveDetector.get_content_val">
+<span class="sig-name descname"><span class="pre">get_content_val</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame_num</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.detectors.adaptive_detector.AdaptiveDetector.get_content_val" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the average content change for a frame.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>frame_num</strong> (<em>int</em>) – </p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scenedetect.detectors.adaptive_detector.AdaptiveDetector.get_metrics">
+<span class="sig-name descname"><span class="pre">get_metrics</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.detectors.adaptive_detector.AdaptiveDetector.get_metrics" title="Permalink to this definition">¶</a></dt>
+<dd><p>Combines base ContentDetector metric keys with the AdaptiveDetector one.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>List</em>[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scenedetect.detectors.adaptive_detector.AdaptiveDetector.post_process">
+<span class="sig-name descname"><span class="pre">post_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">_unused_frame_num</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.detectors.adaptive_detector.AdaptiveDetector.post_process" title="Permalink to this definition">¶</a></dt>
+<dd><p>Not required for AdaptiveDetector.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>_unused_frame_num</strong> (<em>int</em>) – </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scenedetect.detectors.adaptive_detector.AdaptiveDetector.process_frame">
+<span class="sig-name descname"><span class="pre">process_frame</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame_num</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_img</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.detectors.adaptive_detector.AdaptiveDetector.process_frame" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process the next frame. <cite>frame_num</cite> is assumed to be sequential.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>frame_num</strong> (<em>int</em>) – Frame number of frame that is being passed. Can start from any value
+but must remain sequential.</p></li>
+<li><p><strong>frame_img</strong> (<em>numpy.ndarray</em><em> or </em><em>None</em>) – Video frame corresponding to <cite>frame_img</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of frames where scene cuts have been detected. There may be 0
+or more frames in the list, and not necessarily the same as frame_num.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List[int]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scenedetect.detectors.adaptive_detector.AdaptiveDetector.stats_manager_required">
+<span class="sig-name descname"><span class="pre">stats_manager_required</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.detectors.adaptive_detector.AdaptiveDetector.stats_manager_required" title="Permalink to this definition">¶</a></dt>
+<dd><p>Not required for AdaptiveDetector.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="scenedetect.detectors.adaptive_detector.AdaptiveDetector.event_buffer_length">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">event_buffer_length</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#scenedetect.detectors.adaptive_detector.AdaptiveDetector.event_buffer_length" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of frames any detected cuts will be behind the current frame due to buffering.</p>
+</dd></dl>
+
+</dd></dl>
+
 <span class="target" id="module-scenedetect.detectors.content_detector"></span><p><a class="reference internal" href="#scenedetect.detectors.content_detector.ContentDetector" title="scenedetect.detectors.content_detector.ContentDetector"><code class="xref py py-class docutils literal notranslate"><span class="pre">ContentDetector</span></code></a> compares the difference in content between adjacent frames against a
 set threshold/score, which if exceeded, triggers a scene cut.</p>
 <p>This detector is available from the command-line as the <cite>detect-content</cite> command.</p>
@@ -208,86 +319,78 @@ to allow adding new components without breaking existing usage.</p>
 
 </dd></dl>
 
-<span class="target" id="module-scenedetect.detectors.adaptive_detector"></span><p><a class="reference internal" href="#scenedetect.detectors.adaptive_detector.AdaptiveDetector" title="scenedetect.detectors.adaptive_detector.AdaptiveDetector"><code class="xref py py-class docutils literal notranslate"><span class="pre">AdaptiveDetector</span></code></a> compares the difference in content between adjacent frames similar
-to <cite>ContentDetector</cite> except the threshold isn’t fixed, but is a rolling average of adjacent frame
-changes. This can help mitigate false detections in situations such as fast camera motions.</p>
-<p>This detector is available from the command-line as the <cite>detect-adaptive</cite> command.</p>
+<span class="target" id="module-scenedetect.detectors.hash_detector"></span><p><code class="docutils literal notranslate"><span class="pre">scenedetect.detectors.hash_detector</span></code> Module</p>
+<p>This module implements the <a class="reference internal" href="#scenedetect.detectors.hash_detector.HashDetector" title="scenedetect.detectors.hash_detector.HashDetector"><code class="xref py py-class docutils literal notranslate"><span class="pre">HashDetector</span></code></a>, which calculates a hash
+value for each from of a video using a perceptual hashing algorithm. Then, the
+differences in hash value between frames is calculated. If this difference
+exceeds a set threshold, a scene cut is triggered.</p>
+<p>This detector is available from the command-line interface by using the
+<cite>detect-hash</cite> command.</p>
 <dl class="py class">
-<dt class="sig sig-object py" id="scenedetect.detectors.adaptive_detector.AdaptiveDetector">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scenedetect.detectors.adaptive_detector.</span></span><span class="sig-name descname"><span class="pre">AdaptiveDetector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adaptive_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_scene_len</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">15</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_content_val</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">15.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Components(delta_hue=1.0,</span> <span class="pre">delta_sat=1.0,</span> <span class="pre">delta_lum=1.0,</span> <span class="pre">delta_edges=0.0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">luma_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">video_manager</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_delta_hsv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.detectors.adaptive_detector.AdaptiveDetector" title="Permalink to this definition">¶</a></dt>
-<dd><p>Two-pass detector that calculates frame scores with ContentDetector, and then applies
-a rolling average when processing the result that can help mitigate false detections
-in situations such as camera movement.</p>
+<dt class="sig sig-object py" id="scenedetect.detectors.hash_detector.HashDetector">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scenedetect.detectors.hash_detector.</span></span><span class="sig-name descname"><span class="pre">HashDetector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">101.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lowpass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_scene_len</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">15</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.detectors.hash_detector.HashDetector" title="Permalink to this definition">¶</a></dt>
+<dd><p>Detects cuts using a perceptual hashing algorithm. Applies a direct cosine transform (DCT)
+and lowpass filter, followed by binary thresholding on the median. See references below:</p>
+<ol class="arabic simple">
+<li><p><a class="reference external" href="https://www.hackerfactor.com/blog/index.php?/archives/432-Looks-Like-It.html">https://www.hackerfactor.com/blog/index.php?/archives/432-Looks-Like-It.html</a></p></li>
+<li><p><a class="reference external" href="https://github.com/JohannesBuchner/imagehash">https://github.com/JohannesBuchner/imagehash</a></p></li>
+</ol>
+<p>Since the difference between frames is used, unlike the ThresholdDetector, only fast cuts
+are detected with this method.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>adaptive_threshold</strong> (<em>float</em>) – Threshold (float) that score ratio must exceed to trigger a
-new scene (see frame metric adaptive_ratio in stats file).</p></li>
-<li><p><strong>min_scene_len</strong> (<em>int</em>) – Minimum length of any scene.</p></li>
-<li><p><strong>window_width</strong> (<em>int</em>) – Size of window (number of frames) before and after each frame to
-average together in order to detect deviations from the mean. Must be at least 1.</p></li>
-<li><p><strong>min_content_val</strong> (<em>float</em>) – Minimum threshold (float) that the content_val must exceed in order to
-register as a new scene. This is calculated the same way that <cite>detect-content</cite>
-calculates frame score based on <cite>weights</cite>/<cite>luma_only</cite>/<cite>kernel_size</cite>.</p></li>
-<li><p><strong>weights</strong> (<a class="reference internal" href="#scenedetect.detectors.content_detector.ContentDetector.Components" title="scenedetect.detectors.content_detector.ContentDetector.Components"><em>Components</em></a>) – Weight to place on each component when calculating frame score
-(<cite>content_val</cite> in a statsfile, the value <cite>threshold</cite> is compared against).
-If omitted, the default ContentDetector weights are used.</p></li>
-<li><p><strong>luma_only</strong> (<em>bool</em>) – If True, only considers changes in the luminance channel of the video.
-Equivalent to specifying <cite>weights</cite> as <code class="xref py py-data docutils literal notranslate"><span class="pre">ContentDetector.LUMA_ONLY</span></code>.
-Overrides <cite>weights</cite> if both are set.</p></li>
-<li><p><strong>kernel_size</strong> (<em>int</em><em> | </em><em>None</em>) – Size of kernel to use for post edge detection filtering. If None,
-automatically set based on video resolution.</p></li>
-<li><p><strong>video_manager</strong> – [DEPRECATED] DO NOT USE. For backwards compatibility only.</p></li>
-<li><p><strong>min_delta_hsv</strong> (<em>float</em><em> | </em><em>None</em>) – [DEPRECATED] DO NOT USE. Use <cite>min_content_val</cite> instead.</p></li>
+<li><p><strong>threshold</strong> (<em>float</em>) – How much of a difference between subsequent hash values should trigger a cut</p></li>
+<li><p><strong>size</strong> (<em>int</em>) – Size of square of low frequency data to use for the DCT</p></li>
+<li><p><strong>lowpass</strong> (<em>int</em>) – How much high frequency information to filter from the DCT. A value of
+2 means keep lower 1/2 of the frequency data, 4 means only keep 1/4, etc…</p></li>
+<li><p><strong>min_scene_len</strong> (<em>int</em>) – Minimum length of any given scene, in frames (int) or FrameTimecode</p></li>
 </ul>
 </dd>
 </dl>
 <dl class="py method">
-<dt class="sig sig-object py" id="scenedetect.detectors.adaptive_detector.AdaptiveDetector.get_content_val">
-<span class="sig-name descname"><span class="pre">get_content_val</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame_num</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.detectors.adaptive_detector.AdaptiveDetector.get_content_val" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the average content change for a frame.</p>
+<dt class="sig sig-object py" id="scenedetect.detectors.hash_detector.HashDetector.get_metrics">
+<span class="sig-name descname"><span class="pre">get_metrics</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.detectors.hash_detector.HashDetector.get_metrics" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get Metrics:  Get a list of all metric names/keys used by the detector.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>frame_num</strong> (<em>int</em>) – </p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>float | None</p>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List of strings of frame metric key names that will be used by
+the detector when a StatsManager is passed to process_frame.</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="scenedetect.detectors.adaptive_detector.AdaptiveDetector.get_metrics">
-<span class="sig-name descname"><span class="pre">get_metrics</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.detectors.adaptive_detector.AdaptiveDetector.get_metrics" title="Permalink to this definition">¶</a></dt>
-<dd><p>Combines base ContentDetector metric keys with the AdaptiveDetector one.</p>
+<dt class="sig sig-object py" id="scenedetect.detectors.hash_detector.HashDetector.is_processing_required">
+<span class="sig-name descname"><span class="pre">is_processing_required</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame_num</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.detectors.hash_detector.HashDetector.is_processing_required" title="Permalink to this definition">¶</a></dt>
+<dd><p>[DEPRECATED] DO NOT USE</p>
+<p>Test if all calculations for a given frame are already done.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><em>List</em>[str]</p>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><p>False if the SceneDetector has assigned _metric_keys, and the
+stats_manager property is set to a valid StatsManager object containing
+the required frame metrics/calculations for the given frame - thus, not
+needing the frame to perform scene detection.</p>
+<p>True otherwise (i.e. the frame_img passed to process_frame is required
+to be passed to process_frame for the given frame_num).</p>
+</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="scenedetect.detectors.adaptive_detector.AdaptiveDetector.post_process">
-<span class="sig-name descname"><span class="pre">post_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">_unused_frame_num</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.detectors.adaptive_detector.AdaptiveDetector.post_process" title="Permalink to this definition">¶</a></dt>
-<dd><p>Not required for AdaptiveDetector.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>_unused_frame_num</strong> (<em>int</em>) – </p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="scenedetect.detectors.adaptive_detector.AdaptiveDetector.process_frame">
-<span class="sig-name descname"><span class="pre">process_frame</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame_num</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_img</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.detectors.adaptive_detector.AdaptiveDetector.process_frame" title="Permalink to this definition">¶</a></dt>
-<dd><p>Process the next frame. <cite>frame_num</cite> is assumed to be sequential.</p>
+<dt class="sig sig-object py" id="scenedetect.detectors.hash_detector.HashDetector.process_frame">
+<span class="sig-name descname"><span class="pre">process_frame</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame_num</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_img</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.detectors.hash_detector.HashDetector.process_frame" title="Permalink to this definition">¶</a></dt>
+<dd><p>Similar to ContentDetector, but using a perceptual hashing algorithm
+to calculate a hash for each frame and then calculate a hash difference
+frame to frame.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>frame_num</strong> (<em>int</em>) – Frame number of frame that is being passed. Can start from any value
-but must remain sequential.</p></li>
-<li><p><strong>frame_img</strong> (<em>numpy.ndarray</em><em> or </em><em>None</em>) – Video frame corresponding to <cite>frame_img</cite>.</p></li>
+<li><p><strong>frame_num</strong> (<em>int</em>) – Frame number of frame that is being passed.</p></li>
+<li><p><strong>frame_img</strong> (<em>Optional</em><em>[</em><em>int</em><em>]</em>) – Decoded frame image (numpy.ndarray) to perform scene
+detection on. Can be None <em>only</em> if the self.is_processing_required() method
+(inhereted from the base SceneDetector class) returns True.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -300,21 +403,151 @@ or more frames in the list, and not necessarily the same as frame_num.</p>
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="scenedetect.detectors.adaptive_detector.AdaptiveDetector.stats_manager_required">
-<span class="sig-name descname"><span class="pre">stats_manager_required</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.detectors.adaptive_detector.AdaptiveDetector.stats_manager_required" title="Permalink to this definition">¶</a></dt>
-<dd><p>Not required for AdaptiveDetector.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scenedetect.detectors.hash_detector.calculate_frame_hash">
+<span class="sig-prename descclassname"><span class="pre">scenedetect.detectors.hash_detector.</span></span><span class="sig-name descname"><span class="pre">calculate_frame_hash</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame_img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hash_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">factor</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.detectors.hash_detector.calculate_frame_hash" title="Permalink to this definition">¶</a></dt>
+<dd><p>Helper function that calculates the hash of a frame and returns it.</p>
+<p>Perceptual hashing algorithm based on phash, updated to use OpenCV instead of PIL + scipy
+<a class="reference external" href="https://github.com/JohannesBuchner/imagehash">https://github.com/JohannesBuchner/imagehash</a></p>
+</dd></dl>
+
+<span class="target" id="module-scenedetect.detectors.histogram_detector"></span><p><a class="reference internal" href="#scenedetect.detectors.histogram_detector.HistogramDetector" title="scenedetect.detectors.histogram_detector.HistogramDetector"><code class="xref py py-class docutils literal notranslate"><span class="pre">HistogramDetector</span></code></a> compares the difference in the YUV histograms of subsequent
+frames. If the difference exceeds a given threshold, a cut is detected.</p>
+<p>This detector is available from the command-line as the <cite>detect-hist</cite> command.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="scenedetect.detectors.histogram_detector.HistogramDetector">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scenedetect.detectors.histogram_detector.</span></span><span class="sig-name descname"><span class="pre">HistogramDetector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.95</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">256</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_scene_len</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">15</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.detectors.histogram_detector.HistogramDetector" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compares the difference in the YUV histograms of subsequent
+frames. If the difference exceeds a given threshold, a cut is detected.</p>
 <dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>threshold</strong> (<em>float</em>) – Threshold value (float between 0.0 and 1.0) representing the difference
+between Y channel histograms after frame is converted to YUV. Values closer to 1.0
+require higher correlation (more similar to current shot), while lower values
+allow lower correlation (higher probability of a new shot).</p></li>
+<li><p><strong>bins</strong> (<em>int</em>) – Number of bins to use for the histogram.</p></li>
+<li><p><strong>min_scene_len</strong> (<em>int</em>) – Minimum length of any scene.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="scenedetect.detectors.histogram_detector.HistogramDetector.calculate_histogram">
+<span class="sig-name descname"><span class="pre">calculate_histogram</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame_img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">256</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.detectors.histogram_detector.HistogramDetector.calculate_histogram" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates and optionally normalizes the histogram of the luma (Y) channel of an image
+converted from BGR to YUV color space.</p>
+<p>This function extracts the Y channel from the given BGR image, computes its histogram with
+the specified number of bins, and optionally normalizes this histogram to have a sum of one
+across all bins.</p>
+<section id="args">
+<h2>Args:<a class="headerlink" href="#args" title="Permalink to this heading">¶</a></h2>
+<dl class="simple">
+<dt>frame_img<span class="classifier">np.ndarray</span></dt><dd><p>The input image in BGR color space, assumed to have shape (height, width, 3)
+where the last dimension represents the BGR channels.</p>
+</dd>
+<dt>bins<span class="classifier">int, optional (default=256)</span></dt><dd><p>The number of bins to use for the histogram.</p>
+</dd>
+<dt>normalize<span class="classifier">bool, optional (default=True)</span></dt><dd><p>A boolean flag that determines whether the histogram should be normalized
+such that the sum of all histogram bins equals 1.</p>
+</dd>
+</dl>
+</section>
+<section id="returns">
+<h2>Returns:<a class="headerlink" href="#returns" title="Permalink to this heading">¶</a></h2>
+<dl class="simple">
+<dt>np.ndarray</dt><dd><p>A 1D numpy array of length equal to <cite>bins</cite>, representing the histogram of the luma
+channel. Each element in the array represents the count (or frequency) of a particular
+luma value in the image. If normalized, these values represent the relative frequency.</p>
+</dd>
+</dl>
+</section>
+<section id="examples">
+<h2>Examples:<a class="headerlink" href="#examples" title="Permalink to this heading">¶</a></h2>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">img</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="s1">&#39;path_to_image.jpg&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">hist</span> <span class="o">=</span> <span class="n">calculate_histogram</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="mi">256</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">hist</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+<span class="go">(256,)</span>
+</pre></div>
+</div>
+</section>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>frame_img</strong> (<em>ndarray</em>) – </p></li>
+<li><p><strong>bins</strong> (<em>int</em>) – </p></li>
+<li><p><strong>normalize</strong> (<em>bool</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>ndarray</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scenedetect.detectors.histogram_detector.HistogramDetector.get_metrics">
+<span class="sig-name descname"><span class="pre">get_metrics</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.detectors.histogram_detector.HistogramDetector.get_metrics" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get Metrics:  Get a list of all metric names/keys used by the detector.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List of strings of frame metric key names that will be used by
+the detector when a StatsManager is passed to process_frame.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>List</em>[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scenedetect.detectors.histogram_detector.HistogramDetector.is_processing_required">
+<span class="sig-name descname"><span class="pre">is_processing_required</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame_num</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.detectors.histogram_detector.HistogramDetector.is_processing_required" title="Permalink to this definition">¶</a></dt>
+<dd><p>[DEPRECATED] DO NOT USE</p>
+<p>Test if all calculations for a given frame are already done.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><p>False if the SceneDetector has assigned _metric_keys, and the
+stats_manager property is set to a valid StatsManager object containing
+the required frame metrics/calculations for the given frame - thus, not
+needing the frame to perform scene detection.</p>
+<p>True otherwise (i.e. the frame_img passed to process_frame is required
+to be passed to process_frame for the given frame_num).</p>
+</p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>frame_num</strong> (<em>int</em>) – </p>
+</dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>bool</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="py property">
-<dt class="sig sig-object py" id="scenedetect.detectors.adaptive_detector.AdaptiveDetector.event_buffer_length">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">event_buffer_length</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#scenedetect.detectors.adaptive_detector.AdaptiveDetector.event_buffer_length" title="Permalink to this definition">¶</a></dt>
-<dd><p>Number of frames any detected cuts will be behind the current frame due to buffering.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="scenedetect.detectors.histogram_detector.HistogramDetector.process_frame">
+<span class="sig-name descname"><span class="pre">process_frame</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame_num</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_img</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.detectors.histogram_detector.HistogramDetector.process_frame" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the histogram of the luma channel of the frame image and compares it with the
+histogram of the luma channel of the previous frame. If the difference between the histograms
+exceeds the threshold, a scene cut is detected.
+Histogram difference is computed using the correlation metric.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>frame_num</strong> (<em>int</em>) – Frame number of frame that is being passed.</p></li>
+<li><p><strong>frame_img</strong> (<em>ndarray</em>) – Decoded frame image (numpy.ndarray) to perform scene
+detection on.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of frames where scene cuts have been detected. There may be 0
+or more frames in the list, and not necessarily the same as frame_num.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>List</em>[int]</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -480,8 +713,11 @@ or more frames in the list, and not necessarily the same as frame_num.</p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../api.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Package</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Detection Algorithms</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#scenedetect.detectors.content_detector.ContentDetector"><code class="docutils literal notranslate"><span class="pre">ContentDetector</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.detectors.adaptive_detector.AdaptiveDetector"><code class="docutils literal notranslate"><span class="pre">AdaptiveDetector</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scenedetect.detectors.content_detector.ContentDetector"><code class="docutils literal notranslate"><span class="pre">ContentDetector</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scenedetect.detectors.hash_detector.HashDetector"><code class="docutils literal notranslate"><span class="pre">HashDetector</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scenedetect.detectors.hash_detector.calculate_frame_hash"><code class="docutils literal notranslate"><span class="pre">calculate_frame_hash()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scenedetect.detectors.histogram_detector.HistogramDetector"><code class="docutils literal notranslate"><span class="pre">HistogramDetector</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.detectors.threshold_detector.ThresholdDetector"><code class="docutils literal notranslate"><span class="pre">ThresholdDetector</span></code></a></li>
 </ul>
 </li>
