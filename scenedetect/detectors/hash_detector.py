@@ -42,7 +42,7 @@ import cv2
 from scenedetect.scene_detector import SceneDetector
 
 
-def calculate_frame_hash(frame_img, hash_size, highfreq_factor):
+def calculate_frame_hash(frame_img, hash_size, factor):
     """Helper function that calculates the hash of a frame and returns it.
 
     Perceptual hashing algorithm based on phash, updated to use OpenCV instead of PIL + scipy
@@ -53,7 +53,7 @@ def calculate_frame_hash(frame_img, hash_size, highfreq_factor):
     gray_img = cv2.cvtColor(frame_img, cv2.COLOR_BGR2GRAY)
 
     # Resize image to square to help with DCT
-    imsize = hash_size * highfreq_factor
+    imsize = hash_size * factor
     resized_img = cv2.resize(gray_img, (imsize, imsize), interpolation=cv2.INTER_AREA)
 
     # Check to avoid dividing by zero
@@ -79,35 +79,35 @@ def calculate_frame_hash(frame_img, hash_size, highfreq_factor):
 
 
 class HashDetector(SceneDetector):
-    """Detects cuts using a perceptual hashing algorithm. For more information
-    on the perceptual hashing algorithm see references below.
+    """Detects cuts using a perceptual hashing algorithm. Applies a direct cosine transform (DCT)
+    and lowpass filter, followed by binary thresholding on the median. See references below:
 
     1. https://www.hackerfactor.com/blog/index.php?/archives/432-Looks-Like-It.html
     2. https://github.com/JohannesBuchner/imagehash
 
-    Since the difference between frames is used, unlike the ThresholdDetector,
-    only fast cuts are detected with this method.
+    Since the difference between frames is used, unlike the ThresholdDetector, only fast cuts
+    are detected with this method.
 
     Arguments:
         threshold: How much of a difference between subsequent hash values should trigger a cut
-        min_scene_len: Minimum length of any given scene, in frames (int) or FrameTimecode
-        hash_size: Size of square of low frequency data to include from the discrete cosine transform
-        highfreq_factor:  How much high frequency information to filter from the DCT. A value of
+        size: Size of square of low frequency data to use for the DCT
+        lowpass:  How much high frequency information to filter from the DCT. A value of
             2 means keep lower 1/2 of the frequency data, 4 means only keep 1/4, etc...
+        min_scene_len: Minimum length of any given scene, in frames (int) or FrameTimecode
     """
 
     def __init__(
         self,
         threshold: float = 101.0,
+        size: int = 16,
+        lowpass: int = 2,
         min_scene_len: int = 15,
-        hash_size: int = 16,
-        highfreq_factor: int = 2,
     ):
         super(HashDetector, self).__init__()
         self._threshold = threshold
         self._min_scene_len = min_scene_len
-        self._hash_size = hash_size
-        self._highfreq_factor = highfreq_factor
+        self._size = size
+        self._factor = lowpass
         self._last_frame = None
         self._last_scene_cut = None
         self._last_hash = numpy.array([])
@@ -147,18 +147,14 @@ class HashDetector(SceneDetector):
         if self._last_frame is not None:
             # We obtain the change in hash value between subsequent frames.
             curr_hash = calculate_frame_hash(
-                frame_img=frame_img,
-                hash_size=self._hash_size,
-                highfreq_factor=self._highfreq_factor)
+                frame_img=frame_img, hash_size=self._size, factor=self._factor)
 
             last_hash = self._last_hash
 
             if last_hash.size == 0:
                 # Calculate hash of last frame
                 last_hash = calculate_frame_hash(
-                    frame_img=self._last_frame,
-                    hash_size=self._hash_size,
-                    highfreq_factor=self._highfreq_factor)
+                    frame_img=self._last_frame, hash_size=self._size, factor=self._factor)
 
             # Hamming distance is calculated to compare to last frame
             hash_dist = numpy.count_nonzero(curr_hash.flatten() != last_hash.flatten())

@@ -27,7 +27,8 @@ from typing import AnyStr, Optional, Tuple
 import click
 
 import scenedetect
-from scenedetect.detectors import AdaptiveDetector, ContentDetector, ThresholdDetector, HistogramDetector
+from scenedetect.detectors import (AdaptiveDetector, ContentDetector, HashDetector,
+                                   HistogramDetector, ThresholdDetector)
 from scenedetect.backends import AVAILABLE_BACKENDS
 from scenedetect.platform import get_system_version_info
 
@@ -510,7 +511,7 @@ def detect_content_command(
     min_scene_len: Optional[str],
     filter_mode: Optional[str],
 ):
-    """Perform content detection algorithm on input video.
+    """Find fast cuts using differences in HSL (filtered).
 
 For each frame, a score from 0 to 255.0 is calculated which represents the difference in content between the current and previous frame (higher = more different). A cut is generated when a frame score exceeds -t/--threshold. Frame scores are saved under the "content_val" column in a statsfile.
 
@@ -629,7 +630,7 @@ def detect_adaptive_command(
     kernel_size: Optional[int],
     min_scene_len: Optional[str],
 ):
-    """Perform adaptive detection algorithm on input video.
+    """Find fast cuts using diffs in HSL colorspace (rolling average).
 
 Two-pass algorithm that first calculates frame scores with `detect-content`, and then applies a rolling average when processing the result. This can help mitigate false detections in situations such as camera movement.
 
@@ -701,7 +702,7 @@ def detect_threshold_command(
     add_last_scene: bool,
     min_scene_len: Optional[str],
 ):
-    """Perform threshold detection algorithm on input video.
+    """Find fade in/out using averaging.
 
 Detects fade-in and fade-out events using average pixel values. Resulting cuts are placed between adjacent fade-out and fade-in events.
 
@@ -738,7 +739,7 @@ Examples:
     '-b',
     metavar='NUM',
     type=click.INT,
-    default=256,
+    default=None,
     help='The number of bins to use for the histogram calculation.%s' %
     (USER_CONFIG.get_help_string("detect-hist", "bins")))
 @click.option(
@@ -755,8 +756,7 @@ Examples:
 @click.pass_context
 def detect_hist_command(ctx: click.Context, threshold: Optional[float], bins: Optional[int],
                         min_scene_len: Optional[str]):
-    """Perform detection of scenes by comparing differences in the RGB histograms of adjacent
-    frames.
+    """Finds fast cuts by differencing YUV histograms.
 
     Examples:
 
@@ -771,6 +771,64 @@ def detect_hist_command(ctx: click.Context, threshold: Optional[float], bins: Op
         threshold=threshold, bins=bins, min_scene_len=min_scene_len)
     logger.debug('Adding detector: HistogramDetector(%s)', detector_args)
     ctx.obj.add_detector(HistogramDetector(**detector_args))
+
+
+@click.command("detect-hash", cls=_Command)
+@click.option(
+    "--threshold",
+    "-t",
+    metavar="VAL",
+    type=click.FloatRange(CONFIG_MAP["detect-hash"]["threshold"].min_val,
+                          CONFIG_MAP["detect-hash"]["threshold"].max_val),
+    default=None,
+    help=("How much of a difference between subsequent hash values should trigger a cut.%s" %
+          (USER_CONFIG.get_help_string("detect-hash", "threshold"))))
+@click.option(
+    "--size",
+    "-s",
+    metavar="SIZE",
+    type=click.INT,
+    default=None,
+    help="Size of square of low frequency data to include from the discrete cosine transform.%s" %
+    (USER_CONFIG.get_help_string("detect-hash", "size")))
+@click.option(
+    "--lowpass",
+    "-h",
+    metavar="FRAC",
+    type=click.INT,
+    default=None,
+    help=("How much high frequency information to filter from the DCT. 2 means keep lower 1/2 of "
+          "the frequency data, 4 means only keep 1/4, etc....%s" %
+          (USER_CONFIG.get_help_string("detect-hash", "lowpass"))))
+@click.option(
+    "--min-scene-len",
+    "-m",
+    metavar="TIMECODE",
+    type=click.STRING,
+    default=None,
+    help="Minimum length of any scene. Overrides global min-scene-len (-m) setting."
+    " TIMECODE can be specified as exact number of frames, a time in seconds followed by s,"
+    " or a timecode in the format HH:MM:SS or HH:MM:SS.nnn.%s" %
+    ("" if USER_CONFIG.is_default("detect-hist", "min-scene-len") else USER_CONFIG.get_help_string(
+        "detect-hash", "min-scene-len")))
+@click.pass_context
+def detect_hash_command(ctx: click.Context, threshold: Optional[float], size: Optional[int],
+                        lowpass: Optional[int], min_scene_len: Optional[str]):
+    """Find fast cuts using perceptual hashing.
+
+    Examples:
+
+        detect-hist
+
+        detect-hist --threshold 0.8 --bins 128
+    """
+    assert isinstance(ctx.obj, CliContext)
+
+    assert isinstance(ctx.obj, CliContext)
+    detector_args = ctx.obj.get_detect_hash_params(
+        threshold=threshold, size=size, lowpass=lowpass, min_scene_len=min_scene_len)
+    logger.debug("Adding detector: HashDetector(%s)", detector_args)
+    ctx.obj.add_detector(HashDetector(**detector_args))
 
 
 @click.command('load-scenes', cls=_Command)
@@ -1186,24 +1244,25 @@ Examples:
 # ----------------------------------------------------------------------
 
 # Info Commands
+scenedetect.add_command(about_command)
 scenedetect.add_command(help_command)
 scenedetect.add_command(version_command)
-scenedetect.add_command(about_command)
 
 # ----------------------------------------------------------------------
 # Commands Added To Help List
 # ----------------------------------------------------------------------
 
 # Input / Output
-scenedetect.add_command(time_command)
 scenedetect.add_command(export_html_command)
 scenedetect.add_command(list_scenes_command)
+scenedetect.add_command(load_scenes_command)
 scenedetect.add_command(save_images_command)
 scenedetect.add_command(split_video_command)
+scenedetect.add_command(time_command)
 
 # Detection Algorithms
-scenedetect.add_command(detect_content_command)
-scenedetect.add_command(detect_threshold_command)
 scenedetect.add_command(detect_adaptive_command)
+scenedetect.add_command(detect_content_command)
+scenedetect.add_command(detect_hash_command)
 scenedetect.add_command(detect_hist_command)
-scenedetect.add_command(load_scenes_command)
+scenedetect.add_command(detect_threshold_command)

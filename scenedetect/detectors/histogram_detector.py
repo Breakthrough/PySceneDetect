@@ -10,7 +10,7 @@
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
-""":py:class:`HistogramDetector` compares the difference in the RGB histograms of subsequent
+""":py:class:`HistogramDetector` compares the difference in the YUV histograms of subsequent
 frames. If the difference exceeds a given threshold, a cut is detected.
 
 This detector is available from the command-line as the `detect-hist` command.
@@ -26,7 +26,7 @@ from scenedetect.scene_detector import SceneDetector
 
 
 class HistogramDetector(SceneDetector):
-    """Compares the difference in the RGB histograms of subsequent
+    """Compares the difference in the YUV histograms of subsequent
     frames. If the difference exceeds a given threshold, a cut is detected."""
 
     METRIC_KEYS = ['hist_diff']
@@ -34,10 +34,10 @@ class HistogramDetector(SceneDetector):
     def __init__(self, threshold: float = 0.95, bins: int = 256, min_scene_len: int = 15):
         """
         Arguments:
-            threshold: Threshold value (float) that the calculated difference between subsequent
-                        histograms must exceed to trigger a new scene.
-                        The threshold value should be between 0 and 1 (perfect positive correlation, identical histograms).
-                        Values close to 1 indicate very similar frames, while lower values suggest changes.
+            threshold: Threshold value (float between 0.0 and 1.0) representing the difference
+                between Y channel histograms after frame is converted to YUV. Values closer to 1.0
+                require higher correlation (more similar to current shot), while lower values
+                allow lower correlation (higher probability of a new shot).
             bins: Number of bins to use for the histogram.
             min_scene_len:  Minimum length of any scene.
         """
@@ -112,28 +112,30 @@ class HistogramDetector(SceneDetector):
                             bins: int = 256,
                             normalize: bool = True) -> numpy.ndarray:
         """
-        Calculates and optionally normalizes the histogram of the luma (Y) channel of an image converted from BGR to YUV color space.
-        
-        This function extracts the Y channel from the given BGR image, computes its histogram with the specified number of bins, 
-        and optionally normalizes this histogram to have a sum of one across all bins.
+        Calculates and optionally normalizes the histogram of the luma (Y) channel of an image
+        converted from BGR to YUV color space.
+
+        This function extracts the Y channel from the given BGR image, computes its histogram with
+        the specified number of bins, and optionally normalizes this histogram to have a sum of one
+        across all bins.
 
         Args:
         -----
         frame_img : np.ndarray
-            The input image in BGR color space, assumed to have shape (height, width, 3) 
+            The input image in BGR color space, assumed to have shape (height, width, 3)
             where the last dimension represents the BGR channels.
         bins : int, optional (default=256)
             The number of bins to use for the histogram.
         normalize : bool, optional (default=True)
-            A boolean flag that determines whether the histogram should be normalized 
+            A boolean flag that determines whether the histogram should be normalized
             such that the sum of all histogram bins equals 1.
 
         Returns:
         --------
         np.ndarray
-            A 1D numpy array of length equal to `bins`, representing the histogram of the luma channel. 
-            Each element in the array represents the count (or frequency) of a particular luma value in the image. 
-            If normalized, these values represent the relative frequency.
+            A 1D numpy array of length equal to `bins`, representing the histogram of the luma
+            channel. Each element in the array represents the count (or frequency) of a particular
+            luma value in the image. If normalized, these values represent the relative frequency.
 
         Examples:
         ---------

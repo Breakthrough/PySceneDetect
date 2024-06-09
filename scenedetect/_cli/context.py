@@ -286,10 +286,12 @@ class CliContext:
             self.default_detector = (AdaptiveDetector, self.get_detect_adaptive_params())
         elif default_detector == 'detect-content':
             self.default_detector = (ContentDetector, self.get_detect_content_params())
-        elif default_detector == 'detect-threshold':
-            self.default_detector = (ThresholdDetector, self.get_detect_threshold_params())
+        elif default_detector == 'detect-hash':
+            self.default_detector = (HashDetector, self.get_detect_hash_params())
         elif default_detector == 'detect-hist':
             self.default_detector = (HistogramDetector, self.get_detect_hist_params())
+        elif default_detector == 'detect-threshold':
+            self.default_detector = (ThresholdDetector, self.get_detect_threshold_params())
         else:
             raise click.BadParameter("Unknown detector type!", param_hint='default-detector')
 
@@ -319,7 +321,7 @@ class CliContext:
         kernel_size: Optional[int] = None,
         filter_mode: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Handle detect-content command options and return dict to construct one with."""
+        """Handle detect-content command options and return args to construct one with."""
         self._ensure_input_open()
 
         if self.drop_short_scenes:
@@ -366,7 +368,7 @@ class CliContext:
         kernel_size: Optional[int] = None,
         min_delta_hsv: Optional[float] = None,
     ) -> Dict[str, Any]:
-        """Handle detect-adaptive command options and return dict to construct one with."""
+        """Handle detect-adaptive command options and return args to construct one with."""
         self._ensure_input_open()
 
         # TODO(v0.7): Remove these branches when removing -d/--min-delta-hsv.
@@ -422,7 +424,7 @@ class CliContext:
         add_last_scene: bool = None,
         min_scene_len: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Handle detect-threshold command options and return dict to construct one with."""
+        """Handle detect-threshold command options and return args to construct one with."""
         self._ensure_input_open()
 
         if self.drop_short_scenes:
@@ -463,7 +465,7 @@ class CliContext:
 
     def get_detect_hist_params(self, threshold: Optional[float], bins: Optional[int],
                                min_scene_len: Optional[str]) -> Dict[str, Any]:
-        """Handle detect-hist command options and return dict to construct one with."""
+        """Handle detect-hist command options and return args to construct one with."""
         self._ensure_input_open()
         if self.drop_short_scenes:
             min_scene_len = 0
@@ -478,6 +480,27 @@ class CliContext:
             'bins': self.config.get_value("detect-hist", "bins", bins),
             'min_scene_len': min_scene_len,
             'threshold': self.config.get_value("detect-hist", "threshold", threshold),
+        }
+
+    def get_detect_hash_params(self, threshold: Optional[float], size: Optional[int],
+                               lowpass: Optional[int],
+                               min_scene_len: Optional[str]) -> Dict[str, Any]:
+        """Handle detect-hash command options and return args to construct one with."""
+        self._ensure_input_open()
+        if self.drop_short_scenes:
+            min_scene_len = 0
+        else:
+            if min_scene_len is None:
+                if self.config.is_default("detect-hash", "min-scene-len"):
+                    min_scene_len = self.min_scene_len.frame_num
+                else:
+                    min_scene_len = self.config.get_value("detect-hash", "min-scene-len")
+            min_scene_len = parse_timecode(min_scene_len, self.video_stream.frame_rate).frame_num
+        return {
+            "lowpass": self.config.get_value("detect-hash", "lowpass", lowpass),
+            "min_scene_len": min_scene_len,
+            "size": self.config.get_value("detect-hash", "size", size),
+            "threshold": self.config.get_value("detect-hash", "threshold", threshold),
         }
 
     def handle_export_html(

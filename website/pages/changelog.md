@@ -12,11 +12,15 @@ Includes new histogram and perceptual hash based detectors (thanks @wjs018 and @
 
 #### Changelog
 
- - [feature] New detector: `detect-hist` / `HistogramDetector`, [thanks @wjs018](https://github.com/Breakthrough/PySceneDetect/pull/295) [#53](https://github.com/Breakthrough/PySceneDetect/issues/53)
- - [feature] Add flash suppression filter for `detect-content` / `ContentDetector`, greatly reduces number of cuts generated during strobing or flashing effects [#35](https://github.com/Breakthrough/PySceneDetect/pull/295) [#53](https://github.com/Breakthrough/PySceneDetect/issues/35)
-    - Can be configured using `--filter-mode` option, enabled by default
+ - [feature] New detectors:
+   - `detect-hist` / `HistogramDetector` [#295](https://github.com/Breakthrough/PySceneDetect/pull/295) [#53](https://github.com/Breakthrough/PySceneDetect/issues/53)
+   - `detect-hash` / `HashDetector` [#290](https://github.com/Breakthrough/PySceneDetect/pull/290)
+ - [feature] Add flash suppression filter for `detect-content` / `ContentDetector` (enabled by default) [#35](https://github.com/Breakthrough/PySceneDetect/pull/295) [#53](https://github.com/Breakthrough/PySceneDetect/issues/35)
+    - Reduces number of cuts generated during strobing or flashing effects
+    - Can be configured using `--filter-mode` option
     - `--filter-mode = merge` (new default) merges consecutive scenes shorter than `min-scene-len`
     - `--filter-mode = suppress` (previous default) disables generating new scenes until `min-scene-len` has passed
+ - [feature] Add more templates for `save-images` filename customization: `$TIMECODE`, `$FRAME_NUMBER`, `$TIMESTAMP_MS` (thanks @Veldhoen0) [#395](https://github.com/Breakthrough/PySceneDetect/pull/395)
  - [bugfix] Remove extraneous console output when using `--drop-short-scenes`
  - [bugfix] Fix scene lengths being smaller than `min-scene-len` when using `detect-adaptive` / `AdaptiveDetector` with large values of `--frame-window`
  - [bugfix] Update default ffmpeg stream mapping from `-map 0` to `-map 0:v:0 -map 0:a? -map 0:s?` [#392](https://github.com/Breakthrough/PySceneDetect/issues/392)
