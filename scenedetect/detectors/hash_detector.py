@@ -23,7 +23,7 @@
 # ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-""" ``scenedetect.detectors.hash_detector`` Module
+"""``scenedetect.detectors.hash_detector`` Module
 
 This module implements the :py:class:`HashDetector`, which calculates a hash
 value for each from of a video using a perceptual hashing algorithm. Then, the
@@ -42,42 +42,6 @@ import cv2
 from scenedetect.scene_detector import SceneDetector
 
 
-def calculate_frame_hash(frame_img, hash_size, factor) -> numpy.ndarray:
-    """Helper function that calculates the hash of a frame and returns it.
-
-    Perceptual hashing algorithm based on phash, updated to use OpenCV instead of PIL + scipy
-    https://github.com/JohannesBuchner/imagehash
-    """
-
-    # Transform to grayscale
-    gray_img = cv2.cvtColor(frame_img, cv2.COLOR_BGR2GRAY)
-
-    # Resize image to square to help with DCT
-    imsize = hash_size * factor
-    resized_img = cv2.resize(gray_img, (imsize, imsize), interpolation=cv2.INTER_AREA)
-
-    # Check to avoid dividing by zero
-    max_value = numpy.max(numpy.max(resized_img))
-    if max_value == 0:
-        # Just set the max to 1 to not change the values
-        max_value = 1
-
-    # Calculate discrete cosine tranformation of the image
-    resized_img = numpy.float32(resized_img) / max_value
-    dct_complete = cv2.dct(resized_img)
-
-    # Only keep the low frequency information
-    dct_low_freq = dct_complete[:hash_size, :hash_size]
-
-    # Calculate the median of the low frequency informations
-    med = numpy.median(dct_low_freq)
-
-    # Transform the low frequency information into a binary image based on > or < median
-    hash_img = dct_low_freq > med
-
-    return hash_img
-
-
 class HashDetector(SceneDetector):
     """Detects cuts using a perceptual hashing algorithm. Applies a direct cosine transform (DCT)
     and lowpass filter, followed by binary thresholding on the median. See references below:
@@ -85,15 +49,15 @@ class HashDetector(SceneDetector):
     1. https://www.hackerfactor.com/blog/index.php?/archives/432-Looks-Like-It.html
     2. https://github.com/JohannesBuchner/imagehash
 
-    Since the difference between frames is used, unlike the ThresholdDetector, only fast cuts
-    are detected with this method.
-
     Arguments:
-        threshold: Threshold value from 0.0 and 1.0 representing the normalized difference between
-            perceptual hashes that is required to trigger a shot change.
+        threshold: Value from 0.0 and 1.0 representing the relative hamming distance between
+            the perceptual hashes of adjacent frames. A distance of 0 means the image is the same,
+            and 1 means no correlation. Smaller threshold values thus require more correlation,
+            making the detector more sensitive. The hamming distance is divided by `size` x `size`
+            before comparing to `threshold` for normalization.
         size: Size of square of low frequency data to use for the DCT
-        lowpass:  How much high frequency information to filter from the DCT. A value of
-            2 means keep lower 1/2 of the frequency data, 4 means only keep 1/4, etc...
+        lowpass:  How much high frequency information to filter from the DCT. A value of 2 means
+            keep lower 1/2 of the frequency data, 4 means only keep 1/4, etc...
         min_scene_len: Minimum length of any given scene, in frames (int) or FrameTimecode
     """
 
@@ -122,7 +86,7 @@ class HashDetector(SceneDetector):
         return True
 
     def process_frame(self, frame_num, frame_img):
-        """ Similar to ContentDetector, but using a perceptual hashing algorithm
+        """Similar to ContentDetector, but using a perceptual hashing algorithm
         to calculate a hash for each frame and then calculate a hash difference
         frame to frame.
 
@@ -147,14 +111,14 @@ class HashDetector(SceneDetector):
         # We can only start detecting once we have a frame to compare with.
         if self._last_frame is not None:
             # We obtain the change in hash value between subsequent frames.
-            curr_hash = calculate_frame_hash(
+            curr_hash = self.hash_frame(
                 frame_img=frame_img, hash_size=self._size, factor=self._factor)
 
             last_hash = self._last_hash
 
             if last_hash.size == 0:
                 # Calculate hash of last frame
-                last_hash = calculate_frame_hash(
+                last_hash = self.hash_frame(
                     frame_img=self._last_frame, hash_size=self._size, factor=self._factor)
 
             # Hamming distance is calculated to compare to last frame
@@ -178,3 +142,37 @@ class HashDetector(SceneDetector):
         self._last_frame = frame_img.copy()
 
         return cut_list
+
+    @staticmethod
+    def hash_frame(frame_img, hash_size, factor) -> numpy.ndarray:
+        """Calculates the perceptual hash of a frame and returns it. Based on phash from
+        https://github.com/JohannesBuchner/imagehash.
+        """
+
+        # Transform to grayscale
+        gray_img = cv2.cvtColor(frame_img, cv2.COLOR_BGR2GRAY)
+
+        # Resize image to square to help with DCT
+        imsize = hash_size * factor
+        resized_img = cv2.resize(gray_img, (imsize, imsize), interpolation=cv2.INTER_AREA)
+
+        # Check to avoid dividing by zero
+        max_value = numpy.max(numpy.max(resized_img))
+        if max_value == 0:
+            # Just set the max to 1 to not change the values
+            max_value = 1
+
+        # Calculate discrete cosine tranformation of the image
+        resized_img = numpy.float32(resized_img) / max_value
+        dct_complete = cv2.dct(resized_img)
+
+        # Only keep the low frequency information
+        dct_low_freq = dct_complete[:hash_size, :hash_size]
+
+        # Calculate the median of the low frequency informations
+        med = numpy.median(dct_low_freq)
+
+        # Transform the low frequency information into a binary image based on > or < median
+        hash_img = dct_low_freq > med
+
+        return hash_img

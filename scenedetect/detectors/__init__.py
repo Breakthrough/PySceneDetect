@@ -15,13 +15,20 @@
 This module contains the following scene detection algorithms:
 
  * :mod:`ContentDetector <scenedetect.detectors.content_detector>`:
-    Detects shot changes by considering pixel changes in the HSV colorspace.
+   Detects shot changes using weighted average of pixel changes in the HSV colorspace.
 
  * :mod:`ThresholdDetector <scenedetect.detectors.threshold_detector>`:
-    Detects transitions below a set pixel intensity (cuts or fades to black).
+   Detects slow transitions using average pixel intensity in RGB (fade in/fade out)
 
  * :mod:`AdaptiveDetector <scenedetect.detectors.adaptive_detector>`:
-    Two-pass version of `ContentDetector` that handles fast camera movement better in some cases.
+   Performs rolling average on differences in HSV colorspace. In some cases, this can improve
+   handling of fast motion.
+
+ * :mod:`HistogramDetector <scenedetect.detectors.histogram_detector>`:
+   Uses histogram differences for Y channel in YUV space to find fast cuts.
+
+ * :mod:`HashDetector <scenedetect.detectors.hash_detector>`:
+   Uses perceptual hashing to calculate similarity between adjacent frames.
 
 Detection algorithms are created by implementing the
 :class:`SceneDetector <scenedetect.scene_detector.SceneDetector>` interface. Detectors are

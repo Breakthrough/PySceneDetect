@@ -452,7 +452,7 @@ Note that --end and --duration are mutually exclusive (i.e. only one of the two 
     type=click.FloatRange(CONFIG_MAP["detect-content"]["threshold"].min_val,
                           CONFIG_MAP["detect-content"]["threshold"].max_val),
     default=None,
-    help="Threshold (float) that frame score must exceed to trigger a cut. Refers to \"content_val\" in stats file.%s"
+    help="The max difference (0.0 to 255.0) that adjacent frames score must exceed to trigger a cut. Lower values are more sensitive to shot changes. Refers to \"content_val\" in stats file.%s"
     % (USER_CONFIG.get_help_string("detect-content", "threshold")),
 )
 @click.option(
@@ -723,56 +723,58 @@ Examples:
     ctx.obj.add_detector(ThresholdDetector(**detector_args))
 
 
-@click.command('detect-hist', cls=_Command)
+@click.command("detect-hist", cls=_Command)
 @click.option(
-    '--threshold',
-    '-t',
-    metavar='VAL',
-    type=click.FloatRange(CONFIG_MAP['detect-hist']['threshold'].min_val,
-                          CONFIG_MAP['detect-hist']['threshold'].max_val),
+    "--threshold",
+    "-t",
+    metavar="VAL",
+    type=click.FloatRange(CONFIG_MAP["detect-hist"]["threshold"].min_val,
+                          CONFIG_MAP["detect-hist"]["threshold"].max_val),
     default=None,
-    help='Threshold value (float) that the YCbCr histogram difference must exceed to trigger'
-    ' a new scene. Refer to frame metric hist_diff in stats file.%s' %
-    (USER_CONFIG.get_help_string('detect-hist', 'threshold')))
+    help="Max difference (0.0 to 1.0) between histograms of adjacent frames. Lower "
+    "values are more sensitive to changes.%s" %
+    (USER_CONFIG.get_help_string("detect-hist", "threshold")))
 @click.option(
-    '--bins',
-    '-b',
-    metavar='NUM',
-    type=click.INT,
+    "--bins",
+    "-b",
+    metavar="NUM",
+    type=click.IntRange(CONFIG_MAP["detect-hist"]["bins"].min_val,
+                        CONFIG_MAP["detect-hist"]["bins"].max_val),
     default=None,
-    help='The number of bins to use for the histogram calculation.%s' %
+    help="The number of bins to use for the histogram calculation.%s" %
     (USER_CONFIG.get_help_string("detect-hist", "bins")))
 @click.option(
-    '--min-scene-len',
-    '-m',
-    metavar='TIMECODE',
+    "--min-scene-len",
+    "-m",
+    metavar="TIMECODE",
     type=click.STRING,
     default=None,
-    help='Minimum length of any scene. Overrides global min-scene-len (-m) setting.'
-    ' TIMECODE can be specified as exact number of frames, a time in seconds followed by s,'
-    ' or a timecode in the format HH:MM:SS or HH:MM:SS.nnn.%s' %
-    ('' if USER_CONFIG.is_default('detect-hist', 'min-scene-len') else USER_CONFIG.get_help_string(
-        'detect-hist', 'min-scene-len')))
+    help="Minimum length of any scene. Overrides global min-scene-len (-m) setting."
+    " TIMECODE can be specified as exact number of frames, a time in seconds followed by s,"
+    " or a timecode in the format HH:MM:SS or HH:MM:SS.nnn.%s" %
+    ("" if USER_CONFIG.is_default("detect-hist", "min-scene-len") else USER_CONFIG.get_help_string(
+        "detect-hist", "min-scene-len")))
 @click.pass_context
 def detect_hist_command(ctx: click.Context, threshold: Optional[float], bins: Optional[int],
                         min_scene_len: Optional[str]):
     """Find fast cuts by differencing YUV histograms.
 
-    Uses Y channel after converting each frame to YUV to create a histogram of each frame.
-    Histograms between frames are compared to determine a score for how similar they are.
+Uses Y channel after converting each frame to YUV to create a histogram of each frame. Histograms between frames are compared to determine a score for how similar they are.
 
-    Examples:
+Saved as the `hist_diff` metric in a statsfile.
 
-        detect-hist
+Examples:
 
-        detect-hist --threshold 0.8 --bins 128
+    {scenedetect_with_video} detect-hist
+
+    {scenedetect_with_video} detect-hist --threshold 0.8 --size 64 --lowpass 3
     """
     assert isinstance(ctx.obj, CliContext)
 
     assert isinstance(ctx.obj, CliContext)
     detector_args = ctx.obj.get_detect_hist_params(
         threshold=threshold, bins=bins, min_scene_len=min_scene_len)
-    logger.debug('Adding detector: HistogramDetector(%s)', detector_args)
+    logger.debug("Adding detector: HistogramDetector(%s)", detector_args)
     ctx.obj.add_detector(HistogramDetector(**detector_args))
 
 
@@ -784,13 +786,15 @@ def detect_hist_command(ctx: click.Context, threshold: Optional[float], bins: Op
     type=click.FloatRange(CONFIG_MAP["detect-hash"]["threshold"].min_val,
                           CONFIG_MAP["detect-hash"]["threshold"].max_val),
     default=None,
-    help=("Represents maximum difference between hash values before a cut is triggered.%s" %
+    help=("Max distance between hash values (0.0 to 1.0) of adjacent frames. Lower values are "
+          "more sensitive to changes.%s" %
           (USER_CONFIG.get_help_string("detect-hash", "threshold"))))
 @click.option(
     "--size",
     "-s",
     metavar="SIZE",
-    type=click.INT,
+    type=click.IntRange(CONFIG_MAP["detect-hash"]["size"].min_val,
+                        CONFIG_MAP["detect-hash"]["size"].max_val),
     default=None,
     help="Size of square of low frequency data to include from the discrete cosine transform.%s" %
     (USER_CONFIG.get_help_string("detect-hash", "size")))
@@ -798,7 +802,8 @@ def detect_hist_command(ctx: click.Context, threshold: Optional[float], bins: Op
     "--lowpass",
     "-h",
     metavar="FRAC",
-    type=click.INT,
+    type=click.IntRange(CONFIG_MAP["detect-hash"]["lowpass"].min_val,
+                        CONFIG_MAP["detect-hash"]["lowpass"].max_val),
     default=None,
     help=("How much high frequency information to filter from the DCT. 2 means keep lower 1/2 of "
           "the frequency data, 4 means only keep 1/4, etc....%s" %
@@ -819,11 +824,15 @@ def detect_hash_command(ctx: click.Context, threshold: Optional[float], size: Op
                         lowpass: Optional[int], min_scene_len: Optional[str]):
     """Find fast cuts using perceptual hashing.
 
-    Examples:
+The perceptual hash is taken of adjacent frames, and used to calculate the hamming distance between them. The distance is then normalized by the squared size of the hash, and compared to the threshold.
 
-        detect-hist
+Saved as the `hash_dist` metric in a statsfile.
 
-        detect-hist --threshold 0.8 --bins 128
+Examples:
+
+    {scenedetect_with_video} detect-hash
+
+    {scenedetect_with_video} detect-hash --size 32 --lowpass 3
     """
     assert isinstance(ctx.obj, CliContext)
 

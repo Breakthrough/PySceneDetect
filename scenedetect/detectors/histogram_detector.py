@@ -31,22 +31,25 @@ class HistogramDetector(SceneDetector):
 
     METRIC_KEYS = ['hist_diff']
 
-    def __init__(self, threshold: float = 0.95, bins: int = 256, min_scene_len: int = 15):
+    def __init__(self, threshold: float = 0.05, bins: int = 256, min_scene_len: int = 15):
         """
         Arguments:
-            threshold: Threshold value (float between 0.0 and 1.0) representing the difference
-                between Y channel histograms after frame is converted to YUV. Values closer to 1.0
-                require higher correlation (more similar to current shot), while lower values
-                allow lower correlation (higher probability of a new shot).
+            threshold: maximum relative difference between 0.0 and 1.0 that the histograms can
+                differ. Histograms are calculated on the Y channel after converting the frame to
+                YUV, and normalized based on the number of bins. Higher dicfferences imply greater
+                change in content, so larger threshold values are less sensitive to cuts.
             bins: Number of bins to use for the histogram.
             min_scene_len:  Minimum length of any scene.
         """
         super().__init__()
-        self._threshold = threshold
+        # Internally, threshold represents the correlation between two histograms and has values
+        # between -1.0 and 1.0.
+        self._threshold = max(0.0, min(1.0, 1.0 - threshold))
         self._bins = bins
         self._min_scene_len = min_scene_len
         self._last_hist = None
         self._last_scene_cut = None
+        self._metric_key = f"hist_diff [bins={self._bins}]"
 
     def process_frame(self, frame_num: int, frame_img: numpy.ndarray) -> List[int]:
         """Computes the histogram of the luma channel of the frame image and compares it with the
@@ -90,7 +93,7 @@ class HistogramDetector(SceneDetector):
             # Check if a new scene should be triggered
             # Set a correlation threshold to determine scene changes.
             # The threshold value should be between -1 (perfect negative correlation, not applicable here)
-            # and 1 (perfect positive correlation, identical histograms).
+            # and +1 (perfect positive correlation, identical histograms).
             # Values close to 1 indicate very similar frames, while lower values suggest changes.
             # Example: If `_threshold` is set to 0.8, it implies that only changes resulting in a correlation
             # less than 0.8 between histograms will be considered significant enough to denote a scene change.
@@ -101,14 +104,14 @@ class HistogramDetector(SceneDetector):
 
             # Save stats to a StatsManager if it is being used
             if self.stats_manager is not None:
-                self.stats_manager.set_metrics(frame_num, {self.METRIC_KEYS[0]: hist_diff})
+                self.stats_manager.set_metrics(frame_num, {self._metric_key: hist_diff})
 
         self._last_hist = hist
 
         return cut_list
 
-    def calculate_histogram(self,
-                            frame_img: numpy.ndarray,
+    @staticmethod
+    def calculate_histogram(frame_img: numpy.ndarray,
                             bins: int = 256,
                             normalize: bool = True) -> numpy.ndarray:
         """
@@ -160,4 +163,4 @@ class HistogramDetector(SceneDetector):
         return True
 
     def get_metrics(self) -> List[str]:
-        return HistogramDetector.METRIC_KEYS
+        return [self._metric_key]

@@ -8,7 +8,11 @@ Releases
 
 #### Release Notes
 
-Includes new histogram and perceptual hash based detectors (thanks @wjs018 and @ash2703), adds flash filter to content detector, and includes various bugfixes.
+Includes new histogram and perceptual hash based detectors (thanks @wjs018 and @ash2703), adds flash filter to content detector, and includes various bugfixes. Below shows the scores of the new detectors normalized against `detect-content` for comparison on a difficult segment with 3 cuts:
+
+<a href="https://raw.githubusercontent.com/Breakthrough/PySceneDetect/gh-pages/img/0.6.4-score-comparison.png"><img src="https://raw.githubusercontent.com/Breakthrough/PySceneDetect/gh-pages/img/0.6.4-score-comparison.png" width="480" alt="comparison of new detector scores"/></a>
+
+Thanks to everyone who contributed for their help and support!
 
 #### Changelog
 
