@@ -758,6 +758,9 @@ def detect_hist_command(ctx: click.Context, threshold: Optional[float], bins: Op
                         min_scene_len: Optional[str]):
     """Finds fast cuts by differencing YUV histograms.
 
+    Uses Y channel after converting each frame to YUV to create a histogram of each frame.
+    Histograms between frames are compared to determine a score for how similar they are.
+
     Examples:
 
         detect-hist
@@ -781,7 +784,7 @@ def detect_hist_command(ctx: click.Context, threshold: Optional[float], bins: Op
     type=click.FloatRange(CONFIG_MAP["detect-hash"]["threshold"].min_val,
                           CONFIG_MAP["detect-hash"]["threshold"].max_val),
     default=None,
-    help=("How much of a difference between subsequent hash values should trigger a cut.%s" %
+    help=("Represents maximum difference between hash values before a cut is triggered.%s" %
           (USER_CONFIG.get_help_string("detect-hash", "threshold"))))
 @click.option(
     "--size",
