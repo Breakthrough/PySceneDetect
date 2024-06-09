@@ -42,7 +42,7 @@ import cv2
 from scenedetect.scene_detector import SceneDetector
 
 
-def calculate_frame_hash(frame_img, hash_size, factor):
+def calculate_frame_hash(frame_img, hash_size, factor) -> numpy.ndarray:
     """Helper function that calculates the hash of a frame and returns it.
 
     Perceptual hashing algorithm based on phash, updated to use OpenCV instead of PIL + scipy
@@ -89,7 +89,8 @@ class HashDetector(SceneDetector):
     are detected with this method.
 
     Arguments:
-        threshold: How much of a difference between subsequent hash values should trigger a cut
+        threshold: Threshold value from 0.0 and 1.0 representing the normalized difference between
+            perceptual hashes that is required to trigger a shot change.
         size: Size of square of low frequency data to use for the DCT
         lowpass:  How much high frequency information to filter from the DCT. A value of
             2 means keep lower 1/2 of the frequency data, 4 means only keep 1/4, etc...
@@ -98,7 +99,7 @@ class HashDetector(SceneDetector):
 
     def __init__(
         self,
-        threshold: float = 101.0,
+        threshold: float = 0.395,
         size: int = 16,
         lowpass: int = 2,
         min_scene_len: int = 15,
@@ -107,14 +108,15 @@ class HashDetector(SceneDetector):
         self._threshold = threshold
         self._min_scene_len = min_scene_len
         self._size = size
+        self._size_sq = float(size * size)
         self._factor = lowpass
         self._last_frame = None
         self._last_scene_cut = None
         self._last_hash = numpy.array([])
-        self._metric_keys = ['hash_dist']
+        self._metric_key = f"hash_dist [size={self._size} lowpass={self._factor}]"
 
     def get_metrics(self):
-        return self._metric_keys
+        return [self._metric_key]
 
     def is_processing_required(self, frame_num):
         return True
@@ -137,7 +139,6 @@ class HashDetector(SceneDetector):
         """
 
         cut_list = []
-        metric_keys = self._metric_keys
 
         # Initialize last scene cut point at the beginning of the frames of interest.
         if self._last_scene_cut is None:
@@ -159,15 +160,18 @@ class HashDetector(SceneDetector):
             # Hamming distance is calculated to compare to last frame
             hash_dist = numpy.count_nonzero(curr_hash.flatten() != last_hash.flatten())
 
+            # Normalize based on size of the hash
+            hash_dist_norm = hash_dist / self._size_sq
+
             if self.stats_manager is not None:
-                self.stats_manager.set_metrics(frame_num, {metric_keys[0]: hash_dist})
+                self.stats_manager.set_metrics(frame_num, {self._metric_key: hash_dist_norm})
 
             self._last_hash = curr_hash
 
             # We consider any frame over the threshold a new scene, but only if
             # the minimum scene length has been reached (otherwise it is ignored).
-            if hash_dist >= self._threshold and ((frame_num - self._last_scene_cut)
-                                                 >= self._min_scene_len):
+            if hash_dist_norm >= self._threshold and ((frame_num - self._last_scene_cut)
+                                                      >= self._min_scene_len):
                 cut_list.append(frame_num)
                 self._last_scene_cut = frame_num
 

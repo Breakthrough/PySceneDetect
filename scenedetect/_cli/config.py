@@ -275,7 +275,7 @@ CONFIG_MAP: ConfigDict = {
         "min-scene-len": TimecodeValue(0),
         "lowpass": RangeValue(2, min_val=1, max_val=256),
         "size": RangeValue(16, min_val=1, max_val=256),
-        "threshold": RangeValue(101.0, min_val=0.0, max_val=1000000000.0),
+        "threshold": RangeValue(0.395, min_val=0.0, max_val=1000000000.0),
     },
     "detect-hist": {
         "min-scene-len": TimecodeValue(0),

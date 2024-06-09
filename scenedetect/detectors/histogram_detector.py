@@ -26,8 +26,8 @@ from scenedetect.scene_detector import SceneDetector
 
 
 class HistogramDetector(SceneDetector):
-    """Compares the difference in the YUV histograms of subsequent
-    frames. If the difference exceeds a given threshold, a cut is detected."""
+    """Compares the difference in the Y channel of YUV histograms for adjacent frames. When the
+    difference exceeds a given threshold, a cut is detected."""
 
     METRIC_KEYS = ['hist_diff']
 

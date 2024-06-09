@@ -37,10 +37,15 @@
 
 ### Detection Methods
 
- - **threshold scene detection** (`detect-threshold`): analyzes video for changes in average frame intensity/brightness
- - **content-aware scene detection** (`detect-content`): based on changes between frames in the HSV color space to find fast cuts
- - **adaptive content scene detection** (`detect-adaptive`): based on `detect-content`, handles fast camera movement better by comparing neighboring frames in a rolling window
+PySceneDetect implements a variety of different detection algorithms which can be used independently or combined depending on the source material being analyzed.
 
+ - **adaptive content scene detection** (`detect-adaptive`): uses rolling average of differences in HSL colorspace combined with thresholding to detect shot changes (fast cut)
+ - **content-aware scene detection** (`detect-content`): uses differences in HSL colorspace combined with filtering to detect shot changes (fast cut)
+ - **content-aware scene detection** (`detect-hash`): uses perceptual hashing to determine differences between frames to find shot changes (fast cut)
+ - **content-aware scene detection** (`detect-hist`): uses differences in histograms of Y channel of frames after conversion to YUV (fast cut)
+ - **threshold scene detection** (`detect-threshold`): uses average frame intensity (brightness) to detect slow transitions (fade in/out)
+
+ By default, detection methods are tuned to provide high performance during processing, while maintaining reasonable accuracy. Each detection method is configurable, and different parameters can be changed for specific use cases. See [the documentation](docs.md) for details.
 
 ------------------------------------------------------------------------
 
