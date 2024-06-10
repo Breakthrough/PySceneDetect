@@ -215,12 +215,9 @@
 
 
 <span class="k">[detect-hash]</span>
-<span class="c1"># Threshold value (float) that the calculated difference between subsequent</span>
-<span class="c1"># histograms must exceed to trigger a new scene.</span>
-
-<span class="c1"># Threshold value from 0.0 and 1000000000.0 representing difference between</span>
-<span class="c1"># subsequent hash values to trigger a shot change.</span>
-<span class="c1">#threshold = 101.0</span>
+<span class="c1"># Threshold value from 0.0 and 1.0 representing the normalized difference between</span>
+<span class="c1"># perceptual hashes that is required to trigger a shot change.</span>
+<span class="c1">#threshold = 0.395</span>
 
 <span class="c1"># The ratio between 1 and 256 of how much low frequency information to keep.</span>
 <span class="c1"># Represents highest frequency which will pass the filter. 1 means keep all,</span>
@@ -229,6 +226,7 @@
 
 <span class="c1"># Size between 1 and 256 representing size of square of low frequency data to</span>
 <span class="c1"># use for the direct cosine transform (DCT).</span>
+<span class="c1">#size = 16</span>
 
 <span class="c1"># Minimum length of a given scene (overrides [global] option).</span>
 <span class="c1">#min-scene-len = 0.6s</span>

@@ -271,6 +271,98 @@ Options
   Minimum length of any scene. Overrides global option :option:`-m/--min-scene-len <scenedetect -m>`. TIMECODE can be specified in frames (:option:`-m=100 <-m>`), in seconds with `s` suffix (:option:`-m=3.5s <-m>`), or timecode (:option:`-m=00:01:52.778 <-m>`).
 
 
+.. _command-detect-hash:
+
+.. program:: scenedetect detect-hash
+
+
+``detect-hash``
+========================================================================
+
+Find fast cuts using perceptual hashing.
+
+The perceptual hash is taken of adjacent frames, and used to calculate the hamming distance between them. The distance is then normalized by the squared size of the hash, and compared to the threshold.
+
+Saved as the `hash_dist` metric in a statsfile.
+
+
+Examples
+------------------------------------------------------------------------
+
+    ``scenedetect -i video.mp4 detect-hash``
+
+    ``scenedetect -i video.mp4 detect-hash --size 32 --lowpass 3``
+
+
+Options
+------------------------------------------------------------------------
+
+.. option:: -t VAL, --threshold VAL
+
+  Max distance between hash values (0.0 to 1.0) of adjacent frames. Lower values are more sensitive to changes.
+
+  Default: ``0.395``
+
+.. option:: -s SIZE, --size SIZE
+
+  Size of square of low frequency data to include from the discrete cosine transform.
+
+  Default: ``16``
+
+.. option:: -l FRAC, --lowpass FRAC
+
+  How much high frequency information to filter from the DCT. 2 means keep lower 1/2 of the frequency data, 4 means only keep 1/4, etc...
+
+  Default: ``2``
+
+.. option:: -m TIMECODE, --min-scene-len TIMECODE
+
+  Minimum length of any scene. Overrides global option :option:`-m/--min-scene-len <scenedetect -m>`. TIMECODE can be specified in frames (:option:`-m=100 <-m>`), in seconds with `s` suffix (:option:`-m=3.5s <-m>`), or timecode (:option:`-m=00:01:52.778 <-m>`).
+
+
+.. _command-detect-hist:
+
+.. program:: scenedetect detect-hist
+
+
+``detect-hist``
+========================================================================
+
+Find fast cuts by differencing YUV histograms.
+
+Uses Y channel after converting each frame to YUV to create a histogram of each frame. Histograms between frames are compared to determine a score for how similar they are.
+
+Saved as the `hist_diff` metric in a statsfile.
+
+
+Examples
+------------------------------------------------------------------------
+
+    ``scenedetect -i video.mp4 detect-hist``
+
+    ``scenedetect -i video.mp4 detect-hist --threshold 0.1 --bins 240``
+
+
+Options
+------------------------------------------------------------------------
+
+.. option:: -t VAL, --threshold VAL
+
+  Max difference (0.0 to 1.0) between histograms of adjacent frames. Lower values are more sensitive to changes.
+
+  Default: ``0.05``
+
+.. option:: -b NUM, --bins NUM
+
+  The number of bins to use for the histogram calculation
+
+  Default: ``16``
+
+.. option:: -m TIMECODE, --min-scene-len TIMECODE
+
+  Minimum length of any scene. Overrides global option :option:`-m/--min-scene-len <scenedetect -m>`. TIMECODE can be specified in frames (:option:`-m=100 <-m>`), in seconds with `s` suffix (:option:`-m=3.5s <-m>`), or timecode (:option:`-m=00:01:52.778 <-m>`).
+
+
 .. _command-detect-threshold:
 
 .. program:: scenedetect detect-threshold

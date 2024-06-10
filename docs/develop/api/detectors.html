@@ -39,21 +39,17 @@
 <p>This module contains the following scene detection algorithms:</p>
 <blockquote>
 <div><ul class="simple">
-<li><dl class="simple">
-<dt><a class="reference internal" href="#module-scenedetect.detectors.content_detector" title="scenedetect.detectors.content_detector"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ContentDetector</span></code></a>:</dt><dd><p>Detects shot changes by considering pixel changes in the HSV colorspace.</p>
-</dd>
-</dl>
-</li>
-<li><dl class="simple">
-<dt><a class="reference internal" href="#module-scenedetect.detectors.threshold_detector" title="scenedetect.detectors.threshold_detector"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ThresholdDetector</span></code></a>:</dt><dd><p>Detects transitions below a set pixel intensity (cuts or fades to black).</p>
-</dd>
-</dl>
-</li>
-<li><dl class="simple">
-<dt><a class="reference internal" href="#module-scenedetect.detectors.adaptive_detector" title="scenedetect.detectors.adaptive_detector"><code class="xref py py-mod docutils literal notranslate"><span class="pre">AdaptiveDetector</span></code></a>:</dt><dd><p>Two-pass version of <cite>ContentDetector</cite> that handles fast camera movement better in some cases.</p>
-</dd>
-</dl>
-</li>
+<li><p><a class="reference internal" href="#module-scenedetect.detectors.content_detector" title="scenedetect.detectors.content_detector"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ContentDetector</span></code></a>:
+Detects shot changes using weighted average of pixel changes in the HSV colorspace.</p></li>
+<li><p><a class="reference internal" href="#module-scenedetect.detectors.threshold_detector" title="scenedetect.detectors.threshold_detector"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ThresholdDetector</span></code></a>:
+Detects slow transitions using average pixel intensity in RGB (fade in/fade out)</p></li>
+<li><p><a class="reference internal" href="#module-scenedetect.detectors.adaptive_detector" title="scenedetect.detectors.adaptive_detector"><code class="xref py py-mod docutils literal notranslate"><span class="pre">AdaptiveDetector</span></code></a>:
+Performs rolling average on differences in HSV colorspace. In some cases, this can improve
+handling of fast motion.</p></li>
+<li><p><a class="reference internal" href="#module-scenedetect.detectors.histogram_detector" title="scenedetect.detectors.histogram_detector"><code class="xref py py-mod docutils literal notranslate"><span class="pre">HistogramDetector</span></code></a>:
+Uses histogram differences for Y channel in YUV space to find fast cuts.</p></li>
+<li><p><a class="reference internal" href="#module-scenedetect.detectors.hash_detector" title="scenedetect.detectors.hash_detector"><code class="xref py py-mod docutils literal notranslate"><span class="pre">HashDetector</span></code></a>:
+Uses perceptual hashing to calculate similarity between adjacent frames.</p></li>
 </ul>
 </div></blockquote>
 <p>Detection algorithms are created by implementing the
@@ -328,22 +324,24 @@ exceeds a set threshold, a scene cut is triggered.</p>
 <cite>detect-hash</cite> command.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="scenedetect.detectors.hash_detector.HashDetector">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scenedetect.detectors.hash_detector.</span></span><span class="sig-name descname"><span class="pre">HashDetector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">101.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lowpass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_scene_len</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">15</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.detectors.hash_detector.HashDetector" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scenedetect.detectors.hash_detector.</span></span><span class="sig-name descname"><span class="pre">HashDetector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.395</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lowpass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_scene_len</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">15</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.detectors.hash_detector.HashDetector" title="Permalink to this definition">¶</a></dt>
 <dd><p>Detects cuts using a perceptual hashing algorithm. Applies a direct cosine transform (DCT)
 and lowpass filter, followed by binary thresholding on the median. See references below:</p>
 <ol class="arabic simple">
 <li><p><a class="reference external" href="https://www.hackerfactor.com/blog/index.php?/archives/432-Looks-Like-It.html">https://www.hackerfactor.com/blog/index.php?/archives/432-Looks-Like-It.html</a></p></li>
 <li><p><a class="reference external" href="https://github.com/JohannesBuchner/imagehash">https://github.com/JohannesBuchner/imagehash</a></p></li>
 </ol>
-<p>Since the difference between frames is used, unlike the ThresholdDetector, only fast cuts
-are detected with this method.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>threshold</strong> (<em>float</em>) – How much of a difference between subsequent hash values should trigger a cut</p></li>
+<li><p><strong>threshold</strong> (<em>float</em>) – Value from 0.0 and 1.0 representing the relative hamming distance between
+the perceptual hashes of adjacent frames. A distance of 0 means the image is the same,
+and 1 means no correlation. Smaller threshold values thus require more correlation,
+making the detector more sensitive. The hamming distance is divided by <cite>size</cite> x <cite>size</cite>
+before comparing to <cite>threshold</cite> for normalization.</p></li>
 <li><p><strong>size</strong> (<em>int</em>) – Size of square of low frequency data to use for the DCT</p></li>
-<li><p><strong>lowpass</strong> (<em>int</em>) – How much high frequency information to filter from the DCT. A value of
-2 means keep lower 1/2 of the frequency data, 4 means only keep 1/4, etc…</p></li>
+<li><p><strong>lowpass</strong> (<em>int</em>) – How much high frequency information to filter from the DCT. A value of 2 means
+keep lower 1/2 of the frequency data, 4 means only keep 1/4, etc…</p></li>
 <li><p><strong>min_scene_len</strong> (<em>int</em>) – Minimum length of any given scene, in frames (int) or FrameTimecode</p></li>
 </ul>
 </dd>
@@ -356,6 +354,18 @@ are detected with this method.</p>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>List of strings of frame metric key names that will be used by
 the detector when a StatsManager is passed to process_frame.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scenedetect.detectors.hash_detector.HashDetector.hash_frame">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">hash_frame</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame_img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hash_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">factor</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.detectors.hash_detector.HashDetector.hash_frame" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the perceptual hash of a frame and returns it. Based on phash from
+<a class="reference external" href="https://github.com/JohannesBuchner/imagehash">https://github.com/JohannesBuchner/imagehash</a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>ndarray</em></p>
 </dd>
 </dl>
 </dd></dl>
@@ -405,29 +415,21 @@ or more frames in the list, and not necessarily the same as frame_num.</p>
 
 </dd></dl>
 
-<dl class="py function">
-<dt class="sig sig-object py" id="scenedetect.detectors.hash_detector.calculate_frame_hash">
-<span class="sig-prename descclassname"><span class="pre">scenedetect.detectors.hash_detector.</span></span><span class="sig-name descname"><span class="pre">calculate_frame_hash</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame_img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hash_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">factor</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.detectors.hash_detector.calculate_frame_hash" title="Permalink to this definition">¶</a></dt>
-<dd><p>Helper function that calculates the hash of a frame and returns it.</p>
-<p>Perceptual hashing algorithm based on phash, updated to use OpenCV instead of PIL + scipy
-<a class="reference external" href="https://github.com/JohannesBuchner/imagehash">https://github.com/JohannesBuchner/imagehash</a></p>
-</dd></dl>
-
 <span class="target" id="module-scenedetect.detectors.histogram_detector"></span><p><a class="reference internal" href="#scenedetect.detectors.histogram_detector.HistogramDetector" title="scenedetect.detectors.histogram_detector.HistogramDetector"><code class="xref py py-class docutils literal notranslate"><span class="pre">HistogramDetector</span></code></a> compares the difference in the YUV histograms of subsequent
 frames. If the difference exceeds a given threshold, a cut is detected.</p>
 <p>This detector is available from the command-line as the <cite>detect-hist</cite> command.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="scenedetect.detectors.histogram_detector.HistogramDetector">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scenedetect.detectors.histogram_detector.</span></span><span class="sig-name descname"><span class="pre">HistogramDetector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.95</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">256</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_scene_len</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">15</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.detectors.histogram_detector.HistogramDetector" title="Permalink to this definition">¶</a></dt>
-<dd><p>Compares the difference in the YUV histograms of subsequent
-frames. If the difference exceeds a given threshold, a cut is detected.</p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scenedetect.detectors.histogram_detector.</span></span><span class="sig-name descname"><span class="pre">HistogramDetector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">256</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_scene_len</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">15</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.detectors.histogram_detector.HistogramDetector" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compares the difference in the Y channel of YUV histograms for adjacent frames. When the
+difference exceeds a given threshold, a cut is detected.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>threshold</strong> (<em>float</em>) – Threshold value (float between 0.0 and 1.0) representing the difference
-between Y channel histograms after frame is converted to YUV. Values closer to 1.0
-require higher correlation (more similar to current shot), while lower values
-allow lower correlation (higher probability of a new shot).</p></li>
+<li><p><strong>threshold</strong> (<em>float</em>) – maximum relative difference between 0.0 and 1.0 that the histograms can
+differ. Histograms are calculated on the Y channel after converting the frame to
+YUV, and normalized based on the number of bins. Higher dicfferences imply greater
+change in content, so larger threshold values are less sensitive to cuts.</p></li>
 <li><p><strong>bins</strong> (<em>int</em>) – Number of bins to use for the histogram.</p></li>
 <li><p><strong>min_scene_len</strong> (<em>int</em>) – Minimum length of any scene.</p></li>
 </ul>
@@ -435,7 +437,7 @@ allow lower correlation (higher probability of a new shot).</p></li>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="scenedetect.detectors.histogram_detector.HistogramDetector.calculate_histogram">
-<span class="sig-name descname"><span class="pre">calculate_histogram</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame_img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">256</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.detectors.histogram_detector.HistogramDetector.calculate_histogram" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">calculate_histogram</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame_img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">256</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.detectors.histogram_detector.HistogramDetector.calculate_histogram" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculates and optionally normalizes the histogram of the luma (Y) channel of an image
 converted from BGR to YUV color space.</p>
 <p>This function extracts the Y channel from the given BGR image, computes its histogram with
@@ -716,7 +718,6 @@ or more frames in the list, and not necessarily the same as frame_num.</p>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.detectors.adaptive_detector.AdaptiveDetector"><code class="docutils literal notranslate"><span class="pre">AdaptiveDetector</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.detectors.content_detector.ContentDetector"><code class="docutils literal notranslate"><span class="pre">ContentDetector</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.detectors.hash_detector.HashDetector"><code class="docutils literal notranslate"><span class="pre">HashDetector</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#scenedetect.detectors.hash_detector.calculate_frame_hash"><code class="docutils literal notranslate"><span class="pre">calculate_frame_hash()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.detectors.histogram_detector.HistogramDetector"><code class="docutils literal notranslate"><span class="pre">HistogramDetector</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.detectors.threshold_detector.ThresholdDetector"><code class="docutils literal notranslate"><span class="pre">ThresholdDetector</span></code></a></li>
 </ul>
