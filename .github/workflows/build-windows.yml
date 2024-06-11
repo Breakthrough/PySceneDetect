@@ -67,7 +67,7 @@ jobs:
 
       - name: Build PySceneDetect
         run: |
-          python pre_release.py --ignore-installer
+          python dist/pre_release.py --ignore-installer
           pyinstaller dist/scenedetect.spec
 
       - name: Build Documentation
