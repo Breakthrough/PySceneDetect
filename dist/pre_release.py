@@ -1,16 +1,15 @@
 # -*- coding: utf-8 -*-
 import os
 import sys
-import xml
 sys.path.append(os.path.abspath("."))
 
 import scenedetect
 VERSION = scenedetect.__version__
 
-
-installer_aip = ''
-with open("dist/installer/PySceneDetect.aip", "r") as f:
-  installer_aip = f.read()
+if len(sys.argv) <= 2 or not ("--ignore-installer" in sys.argv):
+  installer_aip = ''
+  with open("dist/installer/PySceneDetect.aip", "r") as f:
+    installer_aip = f.read()
 
 aip_version = f"<ROW Property=\"ProductVersion\" Value=\"{VERSION}\" Options=\"32\"/>"
 

@@ -1,7 +1,7 @@
 
 ![PySceneDetect](https://raw.githubusercontent.com/Breakthrough/PySceneDetect/main/website/pages/img/pyscenedetect_logo_small.png)
 ==========================================================
-Video Scene Cut Detection and Analysis Tool
+Video Cut Detection and Analysis Tool
 ----------------------------------------------------------
 
 [![Build Status](https://img.shields.io/github/actions/workflow/status/Breakthrough/PySceneDetect/build.yml)](https://github.com/Breakthrough/PySceneDetect/actions)
@@ -117,7 +117,9 @@ This program uses free code signing provided by [SignPath.io](https://signpath.i
 
 ## License
 
-Licensed under BSD 3-Clause (see the `LICENSE` file for details).
+BSD-3-Clause; see [`LICENSE`](LICENSE) and [`THIRD-PARTY.md`](THIRD-PARTY.md) for details.
+
+----------------------------------------------------------
 
 Copyright (C) 2014-2024 Brandon Castellano.
 All rights reserved.
