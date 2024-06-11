@@ -155,8 +155,8 @@ def _print_command_help(ctx: click.Context, command: click.Command):
     invoke_without_command=True,
     epilog="""Type "scenedetect [command] --help" for command usage. See https://scenedetect.com/docs/ for online docs."""
 )
-# We cannot make this a required argument otherwise we will reject commands of the form
-# `scenedetect help detect-content` or `scenedetect detect-content --help`.
+# *NOTE*: Although input is required, we cannot mark it as `required=True`, otherwise we will reject
+# commands of the form `scenedetect detect-content --help`.
 @click.option(
     '--input',
     '-i',
@@ -767,7 +767,7 @@ Examples:
 
     {scenedetect_with_video} detect-hist
 
-    {scenedetect_with_video} detect-hist --threshold 0.8 --size 64 --lowpass 3
+    {scenedetect_with_video} detect-hist --threshold 0.1 --bins 240
     """
     assert isinstance(ctx.obj, CliContext)
 
@@ -800,13 +800,13 @@ Examples:
     (USER_CONFIG.get_help_string("detect-hash", "size")))
 @click.option(
     "--lowpass",
-    "-h",
+    "-l",
     metavar="FRAC",
     type=click.IntRange(CONFIG_MAP["detect-hash"]["lowpass"].min_val,
                         CONFIG_MAP["detect-hash"]["lowpass"].max_val),
     default=None,
     help=("How much high frequency information to filter from the DCT. 2 means keep lower 1/2 of "
-          "the frequency data, 4 means only keep 1/4, etc....%s" %
+          "the frequency data, 4 means only keep 1/4, etc...%s" %
           (USER_CONFIG.get_help_string("detect-hash", "lowpass"))))
 @click.option(
     "--min-scene-len",
@@ -817,7 +817,7 @@ Examples:
     help="Minimum length of any scene. Overrides global min-scene-len (-m) setting."
     " TIMECODE can be specified as exact number of frames, a time in seconds followed by s,"
     " or a timecode in the format HH:MM:SS or HH:MM:SS.nnn.%s" %
-    ("" if USER_CONFIG.is_default("detect-hist", "min-scene-len") else USER_CONFIG.get_help_string(
+    ("" if USER_CONFIG.is_default("detect-hash", "min-scene-len") else USER_CONFIG.get_help_string(
         "detect-hash", "min-scene-len")))
 @click.pass_context
 def detect_hash_command(ctx: click.Context, threshold: Optional[float], size: Optional[int],
