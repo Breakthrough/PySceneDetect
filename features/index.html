@@ -153,11 +153,15 @@
 <li>split the input video automatically if <code>ffmpeg</code> or <code>mkvmerge</code> is available via the <code>split-video</code> command</li>
 </ul>
 <h3 id="detection-methods">Detection Methods</h3>
+<p>PySceneDetect implements a variety of different detection algorithms which can be used independently or combined depending on the source material being analyzed.</p>
 <ul>
-<li><strong>threshold scene detection</strong> (<code>detect-threshold</code>): analyzes video for changes in average frame intensity/brightness</li>
-<li><strong>content-aware scene detection</strong> (<code>detect-content</code>): based on changes between frames in the HSV color space to find fast cuts</li>
-<li><strong>adaptive content scene detection</strong> (<code>detect-adaptive</code>): based on <code>detect-content</code>, handles fast camera movement better by comparing neighboring frames in a rolling window</li>
+<li><strong>adaptive content scene detection</strong> (<code>detect-adaptive</code>): uses rolling average of differences in HSL colorspace combined with thresholding to detect shot changes (fast cut)</li>
+<li><strong>content-aware scene detection</strong> (<code>detect-content</code>): uses differences in HSL colorspace combined with filtering to detect shot changes (fast cut)</li>
+<li><strong>content-aware scene detection</strong> (<code>detect-hash</code>): uses perceptual hashing to determine differences between frames to find shot changes (fast cut)</li>
+<li><strong>content-aware scene detection</strong> (<code>detect-hist</code>): uses differences in histograms of Y channel of frames after conversion to YUV (fast cut)</li>
+<li><strong>threshold scene detection</strong> (<code>detect-threshold</code>): uses average frame intensity (brightness) to detect slow transitions (fade in/out)</li>
 </ul>
+<p>By default, detection methods are tuned to provide high performance during processing, while maintaining reasonable accuracy. Each detection method is configurable, and different parameters can be changed for specific use cases. See <a href="../docs/">the documentation</a> for details.</p>
 <hr />
 <h2 id="version-roadmap">Version Roadmap</h2>
 <p>Future version roadmaps are now <a href="https://github.com/Breakthrough/PySceneDetect/milestones">tracked as milestones (link)</a>.  Specific issues/features that are queued up for the very next release will have <a href="https://github.com/Breakthrough/PySceneDetect/issues?q=is%3Aissue+is%3Aopen+label%3A%22status%3A+backlog%22">the <code>backlog</code> tag</a>, and issues/features being worked on will have <a href="https://github.com/Breakthrough/PySceneDetect/issues?q=is%3Aissue+is%3Aopen+label%3A%22status%3A+in+progress%22">the <code>status: in progress</code> tag</a>.  Also note that bug reports as well as additional feature requests can be submitted via <a href="https://github.com/Breakthrough/PySceneDetect/issues">the issue tracker</a>; read <a href="../contributing/">the Bug Reports and Contributing page</a> for details.</p>
