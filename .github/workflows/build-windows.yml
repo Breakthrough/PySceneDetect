@@ -45,8 +45,8 @@ jobs:
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip build wheel virtualenv setuptools
+          pip install -r dist/requirements_windows.txt
           pip install -r docs/requirements.txt
-          pip install --upgrade -r dist/requirements_windows.txt
 
       - name: Download Resources
         run: |
@@ -67,11 +67,13 @@ jobs:
 
       - name: Build PySceneDetect
         run: |
+          python dist/pre_release.py --ignore-installer
           pyinstaller dist/scenedetect.spec
 
       - name: Build Documentation
         run: |
           sphinx-build -b singlehtml docs dist/scenedetect/docs
+          rm -r dist/scenedetect/docs/.doctrees
 
       - name: Assemble Portable Distribution
         run: |
