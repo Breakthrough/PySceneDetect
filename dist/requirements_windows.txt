@@ -2,7 +2,7 @@
 av==10.0
 click>=8.0
 numpy
-opencv-python-headless==4.8.0.74
+opencv-python-headless==4.10.0.82
 platformdirs
 pyinstaller
 pytest

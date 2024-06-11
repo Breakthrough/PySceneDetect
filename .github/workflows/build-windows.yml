@@ -45,8 +45,8 @@ jobs:
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip build wheel virtualenv setuptools
-          pip install -r dist/requirements_windows.txt
           pip install -r docs/requirements.txt
+          pip install --upgrade -r dist/requirements_windows.txt
 
       - name: Download Resources
         run: |
