@@ -35,8 +35,8 @@ install:
   - 'SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%'
   - python --version
   - python -m pip install --upgrade pip
-  - python -m pip install -r dist/requirements_windows.txt
   - python -m pip install -r docs/requirements.txt
+  - python -m pip install --upgrade -r dist/requirements_windows.txt
   # Checkout build resources and third party software used for testing.
   - git checkout refs/remotes/origin/resources -- dist/
   - appveyor DownloadFile https://github.com/GyanD/codexffmpeg/releases/download/6.0/ffmpeg-6.0-full_build.7z
