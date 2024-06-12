@@ -924,7 +924,7 @@ def export_html_command(
     metavar='NAME',
     default='$VIDEO_NAME-Scenes.csv',
     type=click.STRING,
-    help='Filename format to use for the scene list CSV file. You can use the $VIDEO_NAME macro in the file name. Note that you may have to wrap the name using single quotes or use escape characters (e.g. -f=\$VIDEO_NAME-Scenes.csv).%s'
+    help='Filename format to use for the scene list CSV file. You can use the $VIDEO_NAME macro in the file name. Note that you may have to wrap the name using single quotes or use escape characters (e.g. -f=\\$VIDEO_NAME-Scenes.csv).%s'
     % (USER_CONFIG.get_help_string('list-scenes', 'filename')),
 )
 @click.option(
@@ -1070,7 +1070,7 @@ Examples:
 
     {scenedetect_with_video} split-video --copy
 
-    {scenedetect_with_video} split-video --filename \$VIDEO_NAME-Clip-\$SCENE_NUMBER
+    {scenedetect_with_video} split-video --filename \\$VIDEO_NAME-Clip-\\$SCENE_NUMBER
 """
     assert isinstance(ctx.obj, CliContext)
     ctx.obj.handle_split_video(
@@ -1215,7 +1215,7 @@ Examples:
 
     {scenedetect_with_video} save-images --width 1024
 
-    {scenedetect_with_video} save-images --filename \$SCENE_NUMBER-img\$IMAGE_NUMBER
+    {scenedetect_with_video} save-images --filename \\$SCENE_NUMBER-img\\$IMAGE_NUMBER
 """
     assert isinstance(ctx.obj, CliContext)
     ctx.obj.handle_save_images(
