@@ -357,7 +357,13 @@ CHOICE_MAP: Dict[str, Dict[str, List[str]]] = {
     },
     'global': {
         'backend': ['opencv', 'pyav', 'moviepy'],
-        'default-detector': ['detect-adaptive', 'detect-content', 'detect-threshold'],
+        'default-detector': [
+            'detect-adaptive',
+            'detect-content',
+            'detect-threshold',
+            'detect-hash',
+            'detect-hist',
+        ],
         'downscale-method': [value.name.lower() for value in Interpolation],
         'verbosity': ['debug', 'info', 'warning', 'error', 'none'],
     },
