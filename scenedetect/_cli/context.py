@@ -28,7 +28,8 @@ from scenedetect.platform import get_and_create_path, get_cv2_imwrite_params, in
 from scenedetect.frame_timecode import FrameTimecode, MAX_FPS_DELTA
 from scenedetect.video_stream import VideoStream, VideoOpenFailure, FrameRateUnavailable
 from scenedetect.video_splitter import is_mkvmerge_available, is_ffmpeg_available
-from scenedetect.detectors import AdaptiveDetector, ContentDetector, ThresholdDetector, HistogramDetector
+from scenedetect.detectors import (AdaptiveDetector, ContentDetector, ThresholdDetector,
+                                   HashDetector, HistogramDetector)
 from scenedetect.stats_manager import StatsManager
 from scenedetect.scene_manager import SceneManager, Interpolation
 
@@ -463,8 +464,12 @@ class CliContext:
         self.load_scenes_column_name = self.config.get_value("load-scenes", "start-col-name",
                                                              start_col_name)
 
-    def get_detect_hist_params(self, threshold: Optional[float], bins: Optional[int],
-                               min_scene_len: Optional[str]) -> Dict[str, Any]:
+    def get_detect_hist_params(
+        self,
+        threshold: Optional[float] = None,
+        bins: Optional[int] = None,
+        min_scene_len: Optional[str] = None,
+    ) -> Dict[str, Any]:
         """Handle detect-hist command options and return args to construct one with."""
         self._ensure_input_open()
         if self.drop_short_scenes:
@@ -482,9 +487,13 @@ class CliContext:
             'threshold': self.config.get_value("detect-hist", "threshold", threshold),
         }
 
-    def get_detect_hash_params(self, threshold: Optional[float], size: Optional[int],
-                               lowpass: Optional[int],
-                               min_scene_len: Optional[str]) -> Dict[str, Any]:
+    def get_detect_hash_params(
+        self,
+        threshold: Optional[float] = None,
+        size: Optional[int] = None,
+        lowpass: Optional[int] = None,
+        min_scene_len: Optional[str] = None,
+    ) -> Dict[str, Any]:
         """Handle detect-hash command options and return args to construct one with."""
         self._ensure_input_open()
         if self.drop_short_scenes:
