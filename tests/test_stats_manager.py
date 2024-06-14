@@ -107,7 +107,8 @@ def test_detector_metrics(test_video_file):
 
 def test_load_empty_stats():
     """ Test loading an empty stats file, ensuring it results in no errors. """
-    open(TEST_STATS_FILES[0], 'w').close()
+    with open(TEST_STATS_FILES[0], 'w'):
+        pass
     stats_manager = StatsManager()
     stats_manager.load_from_csv(TEST_STATS_FILES[0])
 

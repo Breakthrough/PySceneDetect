@@ -180,8 +180,9 @@ class FlashFilter:
             self._last_above = frame_num
         if self._mode == FlashFilter.Mode.MERGE:
             return self._filter_merge(frame_num=frame_num, above_threshold=above_threshold)
-        if self._mode == FlashFilter.Mode.SUPPRESS:
+        elif self._mode == FlashFilter.Mode.SUPPRESS:
             return self._filter_suppress(frame_num=frame_num, above_threshold=above_threshold)
+        assert False, "unhandled FlashFilter Mode!"
 
     def _filter_suppress(self, frame_num: int, above_threshold: bool) -> ty.List[int]:
         min_length_met: bool = (frame_num - self._last_above) >= self._filter_length

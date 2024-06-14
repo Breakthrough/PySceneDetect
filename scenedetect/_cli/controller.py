@@ -18,7 +18,6 @@ import os
 from string import Template
 import time
 import typing as ty
-from typing import Dict, List, Tuple, Optional
 from string import Template
 
 from scenedetect.frame_timecode import FrameTimecode
@@ -30,6 +29,10 @@ from scenedetect.video_stream import SeekError
 from scenedetect._cli.context import CliContext, check_split_video_requirements
 
 logger = logging.getLogger('pyscenedetect')
+
+SceneList = ty.List[ty.Tuple[FrameTimecode, FrameTimecode]]
+
+CutList = ty.List[FrameTimecode]
 
 
 def run_scenedetect(context: CliContext):
@@ -80,7 +83,7 @@ def run_scenedetect(context: CliContext):
     _split_video(context, scene_list)
 
 
-def _detect(context: CliContext):
+def _detect(context: CliContext) -> ty.Optional[ty.Tuple[SceneList, CutList]]:
     # Use default detector if one was not specified.
     if context.scene_manager.get_num_detectors() == 0:
         detector_type, detector_args = context.default_detector
@@ -96,7 +99,7 @@ def _detect(context: CliContext):
             logger.critical('Failed to seek to %s / frame %d: %s',
                             context.start_time.get_timecode(), context.start_time.get_frames(),
                             str(ex))
-            return
+            return None
 
     num_frames = context.scene_manager.detect_scenes(
         video=context.video_stream,
@@ -116,7 +119,7 @@ def _detect(context: CliContext):
             '      ffmpeg -i input.mp4 -c copy -an output.mp4\n'
             '      mkvmerge -o output.mkv input.mp4\n'
             'For details, see https://scenedetect.com/faq/')
-        return
+        return None
 
     perf_duration = time.time() - perf_start_time
     logger.info('Processed %d frames in %.1f seconds (average %.2f FPS).', num_frames,
@@ -144,8 +147,7 @@ def _save_stats(context: CliContext) -> None:
         logger.debug('No frame metrics updated, skipping update of the stats file.')
 
 
-def _list_scenes(context: CliContext, scene_list: List[Tuple[FrameTimecode, FrameTimecode]],
-                 cut_list: List[FrameTimecode]) -> None:
+def _list_scenes(context: CliContext, scene_list: SceneList, cut_list: CutList) -> None:
     """Handles the `list-scenes` command."""
     if not context.list_scenes:
         return
@@ -188,9 +190,8 @@ def _list_scenes(context: CliContext, scene_list: List[Tuple[FrameTimecode, Fram
                     ",".join([context.cut_format.format(cut) for cut in cut_list]))
 
 
-def _save_images(
-        context: CliContext,
-        scene_list: List[Tuple[FrameTimecode, FrameTimecode]]) -> Optional[Dict[int, List[str]]]:
+def _save_images(context: CliContext,
+                 scene_list: SceneList) -> ty.Optional[ty.Dict[int, ty.List[str]]]:
     """Handles the `save-images` command."""
     if not context.save_images:
         return None
@@ -212,9 +213,8 @@ def _save_images(
         interpolation=context.scale_method)
 
 
-def _export_html(context: CliContext, scene_list: List[Tuple[FrameTimecode, FrameTimecode]],
-                 cut_list: List[FrameTimecode], image_filenames: Optional[Dict[int,
-                                                                               List[str]]]) -> None:
+def _export_html(context: CliContext, scene_list: SceneList, cut_list: CutList,
+                 image_filenames: ty.Optional[ty.Dict[int, ty.List[str]]]) -> None:
     """Handles the `export-html` command."""
     if not context.export_html:
         return
@@ -237,8 +237,7 @@ def _export_html(context: CliContext, scene_list: List[Tuple[FrameTimecode, Fram
         image_height=context.image_height)
 
 
-def _split_video(context: CliContext, scene_list: List[Tuple[FrameTimecode,
-                                                             FrameTimecode]]) -> None:
+def _split_video(context: CliContext, scene_list: SceneList) -> None:
     """Handles the `split-video` command."""
     if not context.split_video:
         return
@@ -278,9 +277,7 @@ def _split_video(context: CliContext, scene_list: List[Tuple[FrameTimecode,
         logger.info('Video splitting completed, scenes written to disk.')
 
 
-def _load_scenes(
-    context: CliContext
-) -> ty.Tuple[ty.Iterable[ty.Tuple[FrameTimecode, FrameTimecode]], ty.Iterable[FrameTimecode]]:
+def _load_scenes(context: CliContext) -> ty.Tuple[SceneList, CutList]:
     assert context.load_scenes_input
     assert os.path.exists(context.load_scenes_input)
 
@@ -322,9 +319,7 @@ def _load_scenes(
             cut_list=cut_list, start_pos=start_time, end_pos=end_time), cut_list
 
 
-def _postprocess_scene_list(
-    context: CliContext, scene_list: ty.List[ty.Tuple[FrameTimecode, FrameTimecode]]
-) -> ty.List[ty.Tuple[FrameTimecode, FrameTimecode]]:
+def _postprocess_scene_list(context: CliContext, scene_list: SceneList) -> SceneList:
 
     # Handle --merge-last-scene. If set, when the last scene is shorter than --min-scene-len,
     # it will be merged with the previous one.
