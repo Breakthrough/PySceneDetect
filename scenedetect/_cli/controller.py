@@ -18,14 +18,17 @@ import os
 from string import Template
 import time
 import typing as ty
-from string import Template
 
 from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.platform import get_and_create_path
-from scenedetect.scene_manager import get_scenes_from_cuts, save_images, write_scene_list, write_scene_list_html
+from scenedetect.scene_manager import (
+    get_scenes_from_cuts,
+    save_images,
+    write_scene_list,
+    write_scene_list_html,
+)
 from scenedetect.video_splitter import split_video_mkvmerge, split_video_ffmpeg
 from scenedetect.video_stream import SeekError
-
 from scenedetect._cli.context import CliContext, check_split_video_requirements
 
 logger = logging.getLogger('pyscenedetect')

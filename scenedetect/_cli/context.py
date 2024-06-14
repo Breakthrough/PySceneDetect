@@ -15,26 +15,33 @@
 import logging
 import os
 import typing as ty
-from typing import Any, AnyStr, Dict, Optional, Tuple, Type
 
 import click
 
-import scenedetect
-
+import scenedetect                    # Required to access __version__
 from scenedetect import open_video, AVAILABLE_BACKENDS
-
-from scenedetect.scene_detector import SceneDetector, FlashFilter
-from scenedetect.platform import get_and_create_path, get_cv2_imwrite_params, init_logger
+from scenedetect.detectors import (
+    AdaptiveDetector,
+    ContentDetector,
+    ThresholdDetector,
+    HashDetector,
+    HistogramDetector,
+)
 from scenedetect.frame_timecode import FrameTimecode, MAX_FPS_DELTA
-from scenedetect.video_stream import VideoStream, VideoOpenFailure, FrameRateUnavailable
-from scenedetect.video_splitter import is_mkvmerge_available, is_ffmpeg_available
-from scenedetect.detectors import (AdaptiveDetector, ContentDetector, ThresholdDetector,
-                                   HashDetector, HistogramDetector)
-from scenedetect.stats_manager import StatsManager
+from scenedetect.platform import get_and_create_path, get_cv2_imwrite_params, init_logger
+from scenedetect.scene_detector import SceneDetector, FlashFilter
 from scenedetect.scene_manager import SceneManager, Interpolation
-
-from scenedetect._cli.config import (ConfigRegistry, ConfigLoadFailure, TimecodeFormat, CHOICE_MAP,
-                                     DEFAULT_JPG_QUALITY, DEFAULT_WEBP_QUALITY)
+from scenedetect.stats_manager import StatsManager
+from scenedetect.video_splitter import is_mkvmerge_available, is_ffmpeg_available
+from scenedetect.video_stream import VideoStream, VideoOpenFailure, FrameRateUnavailable
+from scenedetect._cli.config import (
+    ConfigRegistry,
+    ConfigLoadFailure,
+    TimecodeFormat,
+    CHOICE_MAP,
+    DEFAULT_JPG_QUALITY,
+    DEFAULT_WEBP_QUALITY,
+)
 
 logger = logging.getLogger('pyscenedetect')
 
@@ -114,15 +121,15 @@ class CliContext:
         self.added_detector: bool = False
 
         # Global `scenedetect` Options
-        self.output_dir: str = None                         # -o/--output
-        self.quiet_mode: bool = None                        # -q/--quiet or -v/--verbosity quiet
-        self.stats_file_path: str = None                    # -s/--stats
-        self.drop_short_scenes: bool = None                 # --drop-short-scenes
-        self.merge_last_scene: bool = None                  # --merge-last-scene
-        self.min_scene_len: FrameTimecode = None            # -m/--min-scene-len
-        self.frame_skip: int = None                         # -fs/--frame-skip
-        self.default_detector: Tuple[Type[SceneDetector],
-                                     Dict[str, Any]] = None # [global] default-detector
+        self.output_dir: str = None                                  # -o/--output
+        self.quiet_mode: bool = None                                 # -q/--quiet or -v/--verbosity quiet
+        self.stats_file_path: str = None                             # -s/--stats
+        self.drop_short_scenes: bool = None                          # --drop-short-scenes
+        self.merge_last_scene: bool = None                           # --merge-last-scene
+        self.min_scene_len: FrameTimecode = None                     # -m/--min-scene-len
+        self.frame_skip: int = None                                  # -fs/--frame-skip
+        self.default_detector: ty.Tuple[ty.Type[SceneDetector],
+                                        ty.Dict[str, ty.Any]] = None # [global] default-detector
 
         # `time` Command Options
         self.time: bool = False
@@ -180,21 +187,21 @@ class CliContext:
 
     def handle_options(
         self,
-        input_path: AnyStr,
-        output: Optional[AnyStr],
+        input_path: ty.AnyStr,
+        output: ty.Optional[ty.AnyStr],
         framerate: float,
-        stats_file: Optional[AnyStr],
-        downscale: Optional[int],
+        stats_file: ty.Optional[ty.AnyStr],
+        downscale: ty.Optional[int],
         frame_skip: int,
         min_scene_len: str,
         drop_short_scenes: bool,
         merge_last_scene: bool,
-        backend: Optional[str],
+        backend: ty.Optional[str],
         quiet: bool,
-        logfile: Optional[AnyStr],
-        config: Optional[AnyStr],
-        stats: Optional[AnyStr],
-        verbosity: Optional[str],
+        logfile: ty.Optional[ty.AnyStr],
+        config: ty.Optional[ty.AnyStr],
+        stats: ty.Optional[ty.AnyStr],
+        verbosity: ty.Optional[str],
     ):
         """Parse all global options/arguments passed to the main scenedetect command,
         before other sub-commands (e.g. this function processes the [options] when calling
@@ -315,13 +322,13 @@ class CliContext:
 
     def get_detect_content_params(
         self,
-        threshold: Optional[float] = None,
+        threshold: ty.Optional[float] = None,
         luma_only: bool = None,
-        min_scene_len: Optional[str] = None,
-        weights: Optional[Tuple[float, float, float, float]] = None,
-        kernel_size: Optional[int] = None,
-        filter_mode: Optional[str] = None,
-    ) -> Dict[str, Any]:
+        min_scene_len: ty.Optional[str] = None,
+        weights: ty.Optional[ty.Tuple[float, float, float, float]] = None,
+        kernel_size: ty.Optional[int] = None,
+        filter_mode: ty.Optional[str] = None,
+    ) -> ty.Dict[str, ty.Any]:
         """Handle detect-content command options and return args to construct one with."""
         self._ensure_input_open()
 
@@ -360,15 +367,15 @@ class CliContext:
 
     def get_detect_adaptive_params(
         self,
-        threshold: Optional[float] = None,
-        min_content_val: Optional[float] = None,
-        frame_window: Optional[int] = None,
+        threshold: ty.Optional[float] = None,
+        min_content_val: ty.Optional[float] = None,
+        frame_window: ty.Optional[int] = None,
         luma_only: bool = None,
-        min_scene_len: Optional[str] = None,
-        weights: Optional[Tuple[float, float, float, float]] = None,
-        kernel_size: Optional[int] = None,
-        min_delta_hsv: Optional[float] = None,
-    ) -> Dict[str, Any]:
+        min_scene_len: ty.Optional[str] = None,
+        weights: ty.Optional[ty.Tuple[float, float, float, float]] = None,
+        kernel_size: ty.Optional[int] = None,
+        min_delta_hsv: ty.Optional[float] = None,
+    ) -> ty.Dict[str, ty.Any]:
         """Handle detect-adaptive command options and return args to construct one with."""
         self._ensure_input_open()
 
@@ -420,11 +427,11 @@ class CliContext:
 
     def get_detect_threshold_params(
         self,
-        threshold: Optional[float] = None,
-        fade_bias: Optional[float] = None,
+        threshold: ty.Optional[float] = None,
+        fade_bias: ty.Optional[float] = None,
         add_last_scene: bool = None,
-        min_scene_len: Optional[str] = None,
-    ) -> Dict[str, Any]:
+        min_scene_len: ty.Optional[str] = None,
+    ) -> ty.Dict[str, ty.Any]:
         """Handle detect-threshold command options and return args to construct one with."""
         self._ensure_input_open()
 
@@ -449,7 +456,7 @@ class CliContext:
                 self.config.get_value("detect-threshold", "threshold", threshold),
         }
 
-    def handle_load_scenes(self, input: AnyStr, start_col_name: Optional[str]):
+    def handle_load_scenes(self, input: ty.AnyStr, start_col_name: ty.Optional[str]):
         """Handle `load-scenes` command options."""
         self._ensure_input_open()
         if self.added_detector:
@@ -466,10 +473,10 @@ class CliContext:
 
     def get_detect_hist_params(
         self,
-        threshold: Optional[float] = None,
-        bins: Optional[int] = None,
-        min_scene_len: Optional[str] = None,
-    ) -> Dict[str, Any]:
+        threshold: ty.Optional[float] = None,
+        bins: ty.Optional[int] = None,
+        min_scene_len: ty.Optional[str] = None,
+    ) -> ty.Dict[str, ty.Any]:
         """Handle detect-hist command options and return args to construct one with."""
         self._ensure_input_open()
         if self.drop_short_scenes:
@@ -489,11 +496,11 @@ class CliContext:
 
     def get_detect_hash_params(
         self,
-        threshold: Optional[float] = None,
-        size: Optional[int] = None,
-        lowpass: Optional[int] = None,
-        min_scene_len: Optional[str] = None,
-    ) -> Dict[str, Any]:
+        threshold: ty.Optional[float] = None,
+        size: ty.Optional[int] = None,
+        lowpass: ty.Optional[int] = None,
+        min_scene_len: ty.Optional[str] = None,
+    ) -> ty.Dict[str, ty.Any]:
         """Handle detect-hash command options and return args to construct one with."""
         self._ensure_input_open()
         if self.drop_short_scenes:
@@ -514,10 +521,10 @@ class CliContext:
 
     def handle_export_html(
         self,
-        filename: Optional[AnyStr],
+        filename: ty.Optional[ty.AnyStr],
         no_images: bool,
-        image_width: Optional[int],
-        image_height: Optional[int],
+        image_width: ty.Optional[int],
+        image_height: ty.Optional[int],
     ):
         """Handle `export-html` command options."""
         self._ensure_input_open()
@@ -541,8 +548,8 @@ class CliContext:
 
     def handle_list_scenes(
         self,
-        output: Optional[AnyStr],
-        filename: Optional[AnyStr],
+        output: ty.Optional[ty.AnyStr],
+        filename: ty.Optional[ty.AnyStr],
         no_output_file: bool,
         quiet: bool,
         skip_cuts: bool,
@@ -572,14 +579,14 @@ class CliContext:
 
     def handle_split_video(
         self,
-        output: Optional[AnyStr],
-        filename: Optional[AnyStr],
+        output: ty.Optional[ty.AnyStr],
+        filename: ty.Optional[ty.AnyStr],
         quiet: bool,
         copy: bool,
         high_quality: bool,
-        rate_factor: Optional[int],
-        preset: Optional[str],
-        args: Optional[str],
+        rate_factor: ty.Optional[int],
+        preset: ty.Optional[str],
+        args: ty.Optional[str],
         mkvmerge: bool,
     ):
         """Handle `split-video` command options."""
@@ -663,18 +670,18 @@ class CliContext:
 
     def handle_save_images(
         self,
-        num_images: Optional[int],
-        output: Optional[AnyStr],
-        filename: Optional[AnyStr],
+        num_images: ty.Optional[int],
+        output: ty.Optional[ty.AnyStr],
+        filename: ty.Optional[ty.AnyStr],
         jpeg: bool,
         webp: bool,
-        quality: Optional[int],
+        quality: ty.Optional[int],
         png: bool,
-        compression: Optional[int],
-        frame_margin: Optional[int],
-        scale: Optional[float],
-        height: Optional[int],
-        width: Optional[int],
+        compression: ty.Optional[int],
+        frame_margin: ty.Optional[int],
+        scale: ty.Optional[float],
+        height: ty.Optional[int],
+        width: ty.Optional[int],
     ):
         """Handle `save-images` command options."""
         self._ensure_input_open()
@@ -773,9 +780,9 @@ class CliContext:
 
     def _initialize_logging(
         self,
-        quiet: Optional[bool] = None,
-        verbosity: Optional[str] = None,
-        logfile: Optional[AnyStr] = None,
+        quiet: ty.Optional[bool] = None,
+        verbosity: ty.Optional[str] = None,
+        logfile: ty.Optional[ty.AnyStr] = None,
     ):
         """Setup logging based on CLI args and user configuration settings."""
         if quiet is not None:
@@ -823,8 +830,8 @@ class CliContext:
         if self.video_stream is None:
             raise click.ClickException('No input video (-i/--input) was specified.')
 
-    def _open_video_stream(self, input_path: AnyStr, framerate: Optional[float],
-                           backend: Optional[str]):
+    def _open_video_stream(self, input_path: ty.AnyStr, framerate: ty.Optional[float],
+                           backend: ty.Optional[str]):
         if '%' in input_path and backend != 'opencv':
             raise click.BadParameter(
                 'The OpenCV backend (`--backend opencv`) must be used to process image sequences.',
