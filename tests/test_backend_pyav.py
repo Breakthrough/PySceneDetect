@@ -24,9 +24,9 @@ from scenedetect.backends.pyav import VideoStreamAv
 def test_video_stream_pyav_bytesio(test_video_file: str):
     """Test that VideoStreamAv works with a BytesIO input in addition to a path."""
     # Mode must be binary!
-    video_file = open(test_video_file, mode='rb')
-    stream = VideoStreamAv(path_or_io=video_file, threading_mode=None)
-    assert stream.is_seekable
-    stream.seek(50)
-    for _ in range(10):
-        assert stream.read() is not False
+    with open(test_video_file, mode='rb') as video_file:
+        stream = VideoStreamAv(path_or_io=video_file, threading_mode=None)
+        assert stream.is_seekable
+        stream.seek(50)
+        for _ in range(10):
+            assert stream.read() is not False

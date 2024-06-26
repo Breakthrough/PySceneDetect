@@ -22,16 +22,20 @@ performs scene detection and other required actions (`run_scenedetect`).
 
 import inspect
 import logging
-from typing import AnyStr, Optional, Tuple
+import typing as ty
 
 import click
 
 import scenedetect
-from scenedetect.detectors import (AdaptiveDetector, ContentDetector, HashDetector,
-                                   HistogramDetector, ThresholdDetector)
+from scenedetect.detectors import (
+    AdaptiveDetector,
+    ContentDetector,
+    HashDetector,
+    HistogramDetector,
+    ThresholdDetector,
+)
 from scenedetect.backends import AVAILABLE_BACKENDS
 from scenedetect.platform import get_system_version_info
-
 from scenedetect._cli.config import CHOICE_MAP, CONFIG_FILE_PATH, CONFIG_MAP
 from scenedetect._cli.context import CliContext, USER_CONFIG
 
@@ -259,19 +263,19 @@ def _print_command_help(ctx: click.Context, command: click.Command):
 # pylint: disable=redefined-builtin
 def scenedetect(
     ctx: click.Context,
-    input: Optional[AnyStr],
-    output: Optional[AnyStr],
-    stats: Optional[AnyStr],
-    config: Optional[AnyStr],
-    framerate: Optional[float],
-    min_scene_len: Optional[str],
+    input: ty.Optional[ty.AnyStr],
+    output: ty.Optional[ty.AnyStr],
+    stats: ty.Optional[ty.AnyStr],
+    config: ty.Optional[ty.AnyStr],
+    framerate: ty.Optional[float],
+    min_scene_len: ty.Optional[str],
     drop_short_scenes: bool,
     merge_last_scene: bool,
-    backend: Optional[str],
-    downscale: Optional[int],
-    frame_skip: Optional[int],
-    verbosity: Optional[str],
-    logfile: Optional[AnyStr],
+    backend: ty.Optional[str],
+    downscale: ty.Optional[int],
+    frame_skip: ty.Optional[int],
+    verbosity: ty.Optional[str],
+    logfile: ty.Optional[ty.AnyStr],
     quiet: bool,
 ):
     """PySceneDetect is a scene cut/transition detection program. PySceneDetect takes an input video, runs detection on it, and uses the resulting scene information to generate output. The syntax for using PySceneDetect is:
@@ -403,9 +407,9 @@ def version_command(ctx: click.Context):
 @click.pass_context
 def time_command(
     ctx: click.Context,
-    start: Optional[str],
-    duration: Optional[str],
-    end: Optional[str],
+    start: ty.Optional[str],
+    duration: ty.Optional[str],
+    end: ty.Optional[str],
 ):
     """Set start/end/duration of input video.
 
@@ -487,12 +491,12 @@ Note that --end and --duration are mutually exclusive (i.e. only one of the two 
 @click.pass_context
 def detect_content_command(
     ctx: click.Context,
-    threshold: Optional[float],
-    weights: Optional[Tuple[float, float, float, float]],
+    threshold: ty.Optional[float],
+    weights: ty.Optional[ty.Tuple[float, float, float, float]],
     luma_only: bool,
-    kernel_size: Optional[int],
-    min_scene_len: Optional[str],
-    filter_mode: Optional[str],
+    kernel_size: ty.Optional[int],
+    min_scene_len: ty.Optional[str],
+    filter_mode: ty.Optional[str],
 ):
     """Find fast cuts using differences in HSL (filtered).
 
@@ -604,14 +608,14 @@ Examples:
 @click.pass_context
 def detect_adaptive_command(
     ctx: click.Context,
-    threshold: Optional[float],
-    min_content_val: Optional[float],
-    min_delta_hsv: Optional[float],
-    frame_window: Optional[int],
-    weights: Optional[Tuple[float, float, float, float]],
+    threshold: ty.Optional[float],
+    min_content_val: ty.Optional[float],
+    min_delta_hsv: ty.Optional[float],
+    frame_window: ty.Optional[int],
+    weights: ty.Optional[ty.Tuple[float, float, float, float]],
     luma_only: bool,
-    kernel_size: Optional[int],
-    min_scene_len: Optional[str],
+    kernel_size: ty.Optional[int],
+    min_scene_len: ty.Optional[str],
 ):
     """Find fast cuts using diffs in HSL colorspace (rolling average).
 
@@ -680,10 +684,10 @@ Examples:
 @click.pass_context
 def detect_threshold_command(
     ctx: click.Context,
-    threshold: Optional[float],
-    fade_bias: Optional[float],
+    threshold: ty.Optional[float],
+    fade_bias: ty.Optional[float],
     add_last_scene: bool,
-    min_scene_len: Optional[str],
+    min_scene_len: ty.Optional[str],
 ):
     """Find fade in/out using averaging.
 
@@ -738,8 +742,8 @@ Examples:
     ("" if USER_CONFIG.is_default("detect-hist", "min-scene-len") else USER_CONFIG.get_help_string(
         "detect-hist", "min-scene-len")))
 @click.pass_context
-def detect_hist_command(ctx: click.Context, threshold: Optional[float], bins: Optional[int],
-                        min_scene_len: Optional[str]):
+def detect_hist_command(ctx: click.Context, threshold: ty.Optional[float], bins: ty.Optional[int],
+                        min_scene_len: ty.Optional[str]):
     """Find fast cuts by differencing YUV histograms.
 
 Uses Y channel after converting each frame to YUV to create a histogram of each frame. Histograms between frames are compared to determine a score for how similar they are.
@@ -803,8 +807,8 @@ Examples:
     ("" if USER_CONFIG.is_default("detect-hash", "min-scene-len") else USER_CONFIG.get_help_string(
         "detect-hash", "min-scene-len")))
 @click.pass_context
-def detect_hash_command(ctx: click.Context, threshold: Optional[float], size: Optional[int],
-                        lowpass: Optional[int], min_scene_len: Optional[str]):
+def detect_hash_command(ctx: click.Context, threshold: ty.Optional[float], size: ty.Optional[int],
+                        lowpass: ty.Optional[int], min_scene_len: ty.Optional[str]):
     """Find fast cuts using perceptual hashing.
 
 The perceptual hash is taken of adjacent frames, and used to calculate the hamming distance between them. The distance is then normalized by the squared size of the hash, and compared to the threshold.
@@ -844,7 +848,8 @@ Examples:
     help='Name of column used to mark scene cuts.%s' %
     (USER_CONFIG.get_help_string('load-scenes', 'start-col-name')))
 @click.pass_context
-def load_scenes_command(ctx: click.Context, input: Optional[str], start_col_name: Optional[str]):
+def load_scenes_command(ctx: click.Context, input: ty.Optional[str],
+                        start_col_name: ty.Optional[str]):
     """Load scenes from CSV instead of detecting. Can be used with CSV generated by `list-scenes`. Scenes are loaded using the specified column as cut locations (frame number or timecode).
 
 Examples:
@@ -894,10 +899,10 @@ Examples:
 @click.pass_context
 def export_html_command(
     ctx: click.Context,
-    filename: Optional[AnyStr],
+    filename: ty.Optional[ty.AnyStr],
     no_images: bool,
-    image_width: Optional[int],
-    image_height: Optional[int],
+    image_width: ty.Optional[int],
+    image_height: ty.Optional[int],
 ):
     """Export scene list to HTML file. Requires save-images unless --no-images is specified."""
     assert isinstance(ctx.obj, CliContext)
@@ -924,7 +929,7 @@ def export_html_command(
     metavar='NAME',
     default='$VIDEO_NAME-Scenes.csv',
     type=click.STRING,
-    help='Filename format to use for the scene list CSV file. You can use the $VIDEO_NAME macro in the file name. Note that you may have to wrap the name using single quotes or use escape characters (e.g. -f=\$VIDEO_NAME-Scenes.csv).%s'
+    help='Filename format to use for the scene list CSV file. You can use the $VIDEO_NAME macro in the file name. Note that you may have to wrap the name using single quotes or use escape characters (e.g. -f=\\$VIDEO_NAME-Scenes.csv).%s'
     % (USER_CONFIG.get_help_string('list-scenes', 'filename')),
 )
 @click.option(
@@ -953,8 +958,8 @@ def export_html_command(
 @click.pass_context
 def list_scenes_command(
     ctx: click.Context,
-    output: Optional[AnyStr],
-    filename: Optional[AnyStr],
+    output: ty.Optional[ty.AnyStr],
+    filename: ty.Optional[ty.AnyStr],
     no_output_file: bool,
     quiet: bool,
     skip_cuts: bool,
@@ -1052,14 +1057,14 @@ def list_scenes_command(
 @click.pass_context
 def split_video_command(
     ctx: click.Context,
-    output: Optional[AnyStr],
-    filename: Optional[AnyStr],
+    output: ty.Optional[ty.AnyStr],
+    filename: ty.Optional[ty.AnyStr],
     quiet: bool,
     copy: bool,
     high_quality: bool,
-    rate_factor: Optional[int],
-    preset: Optional[str],
-    args: Optional[str],
+    rate_factor: ty.Optional[int],
+    preset: ty.Optional[str],
+    args: ty.Optional[str],
     mkvmerge: bool,
 ):
     """Split input video using ffmpeg or mkvmerge.
@@ -1070,7 +1075,7 @@ Examples:
 
     {scenedetect_with_video} split-video --copy
 
-    {scenedetect_with_video} split-video --filename \$VIDEO_NAME-Clip-\$SCENE_NUMBER
+    {scenedetect_with_video} split-video --filename \\$VIDEO_NAME-Clip-\\$SCENE_NUMBER
 """
     assert isinstance(ctx.obj, CliContext)
     ctx.obj.handle_split_video(
@@ -1192,18 +1197,18 @@ Examples:
 @click.pass_context
 def save_images_command(
     ctx: click.Context,
-    output: Optional[AnyStr],
-    filename: Optional[AnyStr],
-    num_images: Optional[int],
+    output: ty.Optional[ty.AnyStr],
+    filename: ty.Optional[ty.AnyStr],
+    num_images: ty.Optional[int],
     jpeg: bool,
     webp: bool,
-    quality: Optional[int],
+    quality: ty.Optional[int],
     png: bool,
-    compression: Optional[int],
-    frame_margin: Optional[int],
-    scale: Optional[float],
-    height: Optional[int],
-    width: Optional[int],
+    compression: ty.Optional[int],
+    frame_margin: ty.Optional[int],
+    scale: ty.Optional[float],
+    height: ty.Optional[int],
+    width: ty.Optional[int],
 ):
     """Create images for each detected scene.
 
@@ -1215,7 +1220,7 @@ Examples:
 
     {scenedetect_with_video} save-images --width 1024
 
-    {scenedetect_with_video} save-images --filename \$SCENE_NUMBER-img\$IMAGE_NUMBER
+    {scenedetect_with_video} save-images --filename \\$SCENE_NUMBER-img\\$IMAGE_NUMBER
 """
     assert isinstance(ctx.obj, CliContext)
     ctx.obj.handle_save_images(

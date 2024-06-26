@@ -16,11 +16,11 @@ possible and re-used by the CLI so that there is one source of truth.
 """
 
 from abc import ABC, abstractmethod
+from configparser import ConfigParser, ParsingError
 from enum import Enum
 import logging
 import os
 import os.path
-from configparser import ConfigParser, ParsingError
 from typing import Any, AnyStr, Dict, List, Optional, Tuple, Union
 
 from platformdirs import user_config_dir
@@ -357,7 +357,13 @@ CHOICE_MAP: Dict[str, Dict[str, List[str]]] = {
     },
     'global': {
         'backend': ['opencv', 'pyav', 'moviepy'],
-        'default-detector': ['detect-adaptive', 'detect-content', 'detect-threshold', 'detect-hash', 'detect-hist'],
+        'default-detector': [
+            'detect-adaptive',
+            'detect-content',
+            'detect-threshold',
+            'detect-hash',
+            'detect-hist',
+        ],
         'downscale-method': [value.name.lower() for value in Interpolation],
         'verbosity': ['debug', 'info', 'warning', 'error', 'none'],
     },

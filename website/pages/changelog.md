@@ -30,6 +30,11 @@ Feedback on the new detection methods and their default values is most welcome. 
  - [bugfix] Fix crash when decoded frames have incorrect resolution and log error instead [#319](https://github.com/Breakthrough/PySceneDetect/issues/319)
  - [bugfix] Update default ffmpeg stream mapping from `-map 0` to `-map 0:v:0 -map 0:a? -map 0:s?` [#392](https://github.com/Breakthrough/PySceneDetect/issues/392)
 
+#### 0.6.4.1 (TBD)
+
+ - [bugfix] Fix `default-detector` config option not working with new detectors
+ - [bugfix] Fix SyntaxWarning due to incorrect string escaping in command-line (#400)
+
 
 ### 0.6.3 (March 9, 2024)
 

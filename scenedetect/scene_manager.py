@@ -98,7 +98,7 @@ from scenedetect.platform import (tqdm, get_and_create_path, get_cv2_imwrite_par
 from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.video_stream import VideoStream
 from scenedetect.scene_detector import SceneDetector, SparseSceneDetector
-from scenedetect.stats_manager import StatsManager, FrameMetricRegistered
+from scenedetect.stats_manager import StatsManager
 
 logger = logging.getLogger('pyscenedetect')
 
