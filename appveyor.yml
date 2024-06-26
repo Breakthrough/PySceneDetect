@@ -35,8 +35,8 @@ install:
   - 'SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%'
   - python --version
   - python -m pip install --upgrade pip
-  - python -m pip install -r dist/requirements_windows.txt
   - python -m pip install -r docs/requirements.txt
+  - python -m pip install --upgrade -r dist/requirements_windows.txt
   # Checkout build resources and third party software used for testing.
   - git checkout refs/remotes/origin/resources -- dist/
   - appveyor DownloadFile https://github.com/GyanD/codexffmpeg/releases/download/6.0/ffmpeg-6.0-full_build.7z
@@ -46,6 +46,7 @@ install:
   - echo * *                          BUILDING WINDOWS EXE                           * *
   - echo * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
   # Build Windows .EXE and create portable .ZIP
+  - python dist/pre_release.py
   - pyinstaller dist/scenedetect.spec
   - sphinx-build -b singlehtml docs dist/scenedetect/docs
   - mkdir dist\scenedetect\thirdparty
@@ -68,7 +69,7 @@ install:
   - appveyor-tools\secure-file -decrypt license65.dat.enc -secret %ai_license_secret% -salt %ai_license_salt%
   - appveyor DownloadFile https://www.advancedinstaller.com/downloads/advinst.msi
   - msiexec /i advinst.msi /qn
-  - 'SET PATH=%PATH%;C:\\Program Files (x86)\\Caphyon\\Advanced Installer 21.5\\bin\\x86'
+  - 'SET PATH=%PATH%;C:\\Program Files (x86)\\Caphyon\\Advanced Installer 21.8.1\\bin\\x86'
   # License path must be absolute
   - AdvancedInstaller.com /RegisterOffline "%cd%\license65.dat"
   # Create MSI installer

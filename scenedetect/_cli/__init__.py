@@ -45,50 +45,33 @@ _LINE_SEPARATOR = '-' * 72
 # About & copyright message string shown for the 'about' CLI command (scenedetect about).
 _ABOUT_STRING = """
 Site: http://scenedetect.com/
-Docs: http://manual.scenedetect.com/
+Docs: https://www.scenedetect.com/docs/
 Code: https://github.com/Breakthrough/PySceneDetect/
 
 Copyright (C) 2014-2024 Brandon Castellano. All rights reserved.
 
 PySceneDetect is released under the BSD 3-Clause license. See the
-included LICENSE file or visit the PySceneDetect website for details.
+LICENSE file or visit [ https://www.scenedetect.com/copyright/ ].
 This software uses the following third-party components:
 
   > NumPy [Copyright (C) 2018, Numpy Developers]
   > OpenCV [Copyright (C) 2018, OpenCV Team]
   > click [Copyright (C) 2018, Armin Ronacher]
   > simpletable [Copyright (C) 2014 Matheus Vieira Portela]
+  > PyAV [Copyright (C) 2017, Mike Boers and others]
+  > MoviePy [Copyright (C) 2015 Zulko]
 
 This software may also invoke the following third-party executables:
 
   > FFmpeg [Copyright (C) 2018, Fabrice Bellard]
   > mkvmerge [Copyright (C) 2005-2016, Matroska]
 
-If included with your distribution of PySceneDetect, see the included
-LICENSE-FFMPEG and LICENSE-MKVMERGE or visit:
-  [ https://scenedetect.com/copyright/ ]
+Certain distributions of PySceneDetect may include ffmpeg. See
+the included LICENSE-FFMPEG or visit [ https://ffmpeg.org ].
 
-FFmpeg and mkvmerge are distributed only with certain PySceneDetect
-releases, in order to allow for automatic video splitting capability.
-If they were not included with your distribution, they can usually be
-installed from your operating system's package manager, or downloaded
-from the following URLs:
-
-    FFmpeg:   [ https://ffmpeg.org/download.html ]
-    mkvmerge: [ https://mkvtoolnix.download/downloads.html ]
-        (Note that mkvmerge is a part of the mkvtoolnix package.)
-
-Once installed, ensure the respective program can be accessed from the
-same location running PySceneDetect by calling the `ffmpeg` or
-`mkvmerge` command from a terminal/command prompt.
-
-PySceneDetect will automatically use whichever program is available on
-the computer, depending on the specified command-line options.
-
-Additionally, certain Windows distributions may include a compiled
-Python distribution. For license information regarding the distributed
-version of Python, see the included LICENSE-PYTHON file for details,
-or visit the following URL: [ https://docs.python.org/3/license.html ]
+Binary distributions of PySceneDetect include a compiled Python
+distribution. See the included LICENSE-PYTHON file, or visit
+[ https://docs.python.org/3/license.html ].
 
 THE SOFTWARE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, EXPRESS OR IMPLIED.
 """
@@ -155,8 +138,8 @@ def _print_command_help(ctx: click.Context, command: click.Command):
     invoke_without_command=True,
     epilog="""Type "scenedetect [command] --help" for command usage. See https://scenedetect.com/docs/ for online docs."""
 )
-# We cannot make this a required argument otherwise we will reject commands of the form
-# `scenedetect help detect-content` or `scenedetect detect-content --help`.
+# *NOTE*: Although input is required, we cannot mark it as `required=True`, otherwise we will reject
+# commands of the form `scenedetect detect-content --help`.
 @click.option(
     '--input',
     '-i',
@@ -767,7 +750,7 @@ Examples:
 
     {scenedetect_with_video} detect-hist
 
-    {scenedetect_with_video} detect-hist --threshold 0.8 --size 64 --lowpass 3
+    {scenedetect_with_video} detect-hist --threshold 0.1 --bins 240
     """
     assert isinstance(ctx.obj, CliContext)
 
@@ -800,13 +783,13 @@ Examples:
     (USER_CONFIG.get_help_string("detect-hash", "size")))
 @click.option(
     "--lowpass",
-    "-h",
+    "-l",
     metavar="FRAC",
     type=click.IntRange(CONFIG_MAP["detect-hash"]["lowpass"].min_val,
                         CONFIG_MAP["detect-hash"]["lowpass"].max_val),
     default=None,
     help=("How much high frequency information to filter from the DCT. 2 means keep lower 1/2 of "
-          "the frequency data, 4 means only keep 1/4, etc....%s" %
+          "the frequency data, 4 means only keep 1/4, etc...%s" %
           (USER_CONFIG.get_help_string("detect-hash", "lowpass"))))
 @click.option(
     "--min-scene-len",
@@ -817,7 +800,7 @@ Examples:
     help="Minimum length of any scene. Overrides global min-scene-len (-m) setting."
     " TIMECODE can be specified as exact number of frames, a time in seconds followed by s,"
     " or a timecode in the format HH:MM:SS or HH:MM:SS.nnn.%s" %
-    ("" if USER_CONFIG.is_default("detect-hist", "min-scene-len") else USER_CONFIG.get_help_string(
+    ("" if USER_CONFIG.is_default("detect-hash", "min-scene-len") else USER_CONFIG.get_help_string(
         "detect-hash", "min-scene-len")))
 @click.pass_context
 def detect_hash_command(ctx: click.Context, threshold: Optional[float], size: Optional[int],

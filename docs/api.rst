@@ -85,7 +85,7 @@ Now that we know where each scene is, we can also :ref:`split the input video <s
 
 This is just a small snippet of what PySceneDetect offers. The library is very modular, and can integrate with most application workflows easily.
 
-In the next example, we show how the library components can be used to create a more customizable scene cut/shot detection pipeline.  Additional demonstrations/recipes can be found in the `tests/test_api.py <https://github.com/Breakthrough/PySceneDetect/blob/v0.6.3-release/tests/test_api.py>`_ file.
+In the next example, we show how the library components can be used to create a more customizable scene cut/shot detection pipeline.  Additional demonstrations/recipes can be found in the `tests/test_api.py <https://github.com/Breakthrough/PySceneDetect/blob/v0.6.4-release/tests/test_api.py>`_ file.
 
 
 .. _scenedetect-detailed_example:
@@ -115,7 +115,7 @@ Using a :class:`SceneManager <scenedetect.scene_manager.SceneManager>` directly 
 
 For a more advanced example of using the PySceneDetect API to with a stats file (to save per-frame metrics to disk and/or speed up multiple passes of the same video), take a look at the :ref:`example in the SceneManager reference<scenedetect-scene_manager>`.
 
-In addition to module-level examples, demonstrations of some common use cases can be found in the `tests/test_api.py <https://github.com/Breakthrough/PySceneDetect/blob/v0.6.3-release/tests/test_api.py>`_ file.
+In addition to module-level examples, demonstrations of some common use cases can be found in the `tests/test_api.py <https://github.com/Breakthrough/PySceneDetect/blob/v0.6.4-release/tests/test_api.py>`_ file.
 
 
 =======================================================================
@@ -156,4 +156,4 @@ PySceneDetect outputs messages to a logger named ``pyscenedetect`` which does no
 Migrating From 0.5
 =======================================================================
 
-PySceneDetect 0.6 introduces several breaking changes which are incompatible with 0.5. See :ref:`Migration Guide <scenedetect-migration_guide>` for details on how to update your application. In addition, demonstrations of common use cases can be found in the `tests/test_api.py <https://github.com/Breakthrough/PySceneDetect/blob/v0.6.3-release/tests/test_api.py>`_ file.
+PySceneDetect 0.6 introduces several breaking changes which are incompatible with 0.5. See :ref:`Migration Guide <scenedetect-migration_guide>` for details on how to update your application. In addition, demonstrations of common use cases can be found in the `tests/test_api.py <https://github.com/Breakthrough/PySceneDetect/blob/v0.6.4-release/tests/test_api.py>`_ file.
