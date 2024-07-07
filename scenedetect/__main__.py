@@ -53,7 +53,7 @@ def main():
                 raise
             else:
                 logger.critical("Unhandled exception:", exc_info=ex)
-                raise SystemExit(1)
+                raise SystemExit(1) from None
 
 
 if __name__ == "__main__":

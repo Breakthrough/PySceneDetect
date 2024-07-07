@@ -15,8 +15,6 @@ This file includes unit tests for the scenedetect.scene_manager.SceneManager cla
 which applies SceneDetector algorithms on VideoStream backends.
 """
 
-# pylint: disable=invalid-name
-
 import glob
 import os
 import os.path
@@ -163,7 +161,6 @@ def test_save_images_zero_width_scene(test_video_file):
 
 # TODO: This would be more readable if the callbacks were defined within the test case, e.g.
 # split up the callback function and callback lambda test cases.
-# pylint: disable=unused-argument, unnecessary-lambda
 class FakeCallback:
     """Fake callback used for testing. Tracks the frame numbers the callback was invoked with."""
 
@@ -185,9 +182,6 @@ class FakeCallback:
 
     def _callback(self, image, frame_num):
         self.scene_list.append(frame_num)
-
-
-# pylint: enable=unused-argument, unnecessary-lambda
 
 
 def test_detect_scenes_callback(test_video_file):

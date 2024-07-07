@@ -16,9 +16,6 @@ backends implemented in scenedetect.backends.  These tests enforce a consistent 
 all supported backends, and verify that they are functionally equivalent where possible.
 """
 
-# ruff: noqa: B011
-# pylint: disable=no-self-use,missing-function-docstring
-
 import os.path
 from dataclasses import dataclass
 from typing import List, Type
@@ -47,7 +44,7 @@ MOVIEPY_WARNING_FILTER = "ignore:.*Using the last valid frame instead.:UserWarni
 
 def calculate_frame_delta(frame_a, frame_b, roi=None) -> float:
     if roi:
-        assert False  # TODO
+        raise RuntimeError("TODO")
     assert frame_a.shape == frame_b.shape
     num_pixels = frame_a.shape[0] * frame_a.shape[1]
     return numpy.sum(numpy.abs(frame_b - frame_a)) / num_pixels

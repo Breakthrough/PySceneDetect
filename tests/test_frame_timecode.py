@@ -20,9 +20,6 @@ to and from various time formats like integer frame number, float number of seco
 or string HH:MM:SS[.nnn]. timecode format.
 """
 
-# ruff: noqa: B015
-# pylint: disable=invalid-name, expression-not-assigned, unneeded-not, pointless-statement
-
 # Third-Party Library Imports
 import pytest
 
@@ -197,9 +194,9 @@ def test_equality():
     assert x != FrameTimecode(timecode=10.0, fps=10.0)
     # Comparing FrameTimecodes with different framerates raises a TypeError.
     with pytest.raises(TypeError):
-        x == FrameTimecode(timecode=1.0, fps=100.0)
+        assert x == FrameTimecode(timecode=1.0, fps=100.0)
     with pytest.raises(TypeError):
-        x == FrameTimecode(timecode=1.0, fps=10.1)
+        assert x == FrameTimecode(timecode=1.0, fps=10.1)
 
     assert x == FrameTimecode(x)
     assert x == FrameTimecode(1.0, x)
@@ -214,17 +211,17 @@ def test_equality():
     assert x == 1.0
 
     with pytest.raises(ValueError):
-        x == "0x"
+        assert x == "0x"
     with pytest.raises(ValueError):
-        x == "x00:00:00.000"
+        assert x == "x00:00:00.000"
     with pytest.raises(TypeError):
-        x == [0]
+        assert x == [0]
     with pytest.raises(TypeError):
-        x == (0,)
+        assert x == (0,)
     with pytest.raises(TypeError):
-        x == [0, 1, 2, 3]
+        assert x == [0, 1, 2, 3]
     with pytest.raises(TypeError):
-        x == {0: 0}
+        assert x == {0: 0}
 
     assert FrameTimecode(timecode="00:00:00.5", fps=10) == "00:00:00.500"
     assert FrameTimecode(timecode="00:00:01.500", fps=10) == "00:00:01.500"
@@ -246,7 +243,7 @@ def test_addition():
     assert x + 10 == "00:00:02.000"
 
     with pytest.raises(TypeError):
-        FrameTimecode("00:00:02.000", fps=20.0) == x + 10
+        assert FrameTimecode("00:00:02.000", fps=20.0) == x + 10
 
 
 def test_subtraction():
@@ -265,7 +262,7 @@ def test_subtraction():
     assert x - 1 == FrameTimecode(timecode=0.9, fps=10.0)
 
     with pytest.raises(TypeError):
-        FrameTimecode("00:00:02.000", fps=20.0) == x - 10
+        assert FrameTimecode("00:00:02.000", fps=20.0) == x - 10
 
 
 @pytest.mark.parametrize("frame_num,fps", [(1, 1), (61, 14), (29, 25), (126, 24000 / 1001.0)])

@@ -26,8 +26,6 @@ TEST_STATS_FILE_XXXXXXXXXXXX.csv, where the X's will be replaced with random dig
 These files will be deleted, if possible, after the tests are completed running.
 """
 
-# pylint: disable=protected-access
-
 import csv
 import os
 import random

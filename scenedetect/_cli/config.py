@@ -234,7 +234,7 @@ class TimecodeFormat(Enum):
             return timecode.get_timecode()
         if self == TimecodeFormat.SECONDS:
             return "%.3f" % timecode.get_seconds()
-        assert False
+        raise RuntimeError("Unhandled format specifier.")
 
 
 ConfigValue = Union[bool, int, float, str]
@@ -558,9 +558,9 @@ class ConfigRegistry:
                 config_file_contents = config_file.read()
             config.read_string(config_file_contents, source=path)
         except ParsingError as ex:
-            raise ConfigLoadFailure(self._init_log, reason=ex)
+            raise ConfigLoadFailure(self._init_log, reason=ex) from None
         except OSError as ex:
-            raise ConfigLoadFailure(self._init_log, reason=ex)
+            raise ConfigLoadFailure(self._init_log, reason=ex) from None
         # At this point the config file syntax is correct, but we need to still validate
         # the parsed options (i.e. that the options have valid values).
         errors = _validate_structure(config)

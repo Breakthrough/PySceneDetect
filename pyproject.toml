@@ -27,26 +27,26 @@ docstring-code-format = true
 
 [tool.ruff.lint]
 select = [
+    # flake8-bugbear
+    "B",
     # pycodestyle
     "E",
     # Pyflakes
     "F",
-    # TODO - Rule sets to enable:
+    # isort
+    "I",
+    # TODO - Add additional rule sets (https://docs.astral.sh/ruff/rules/):
     # pyupgrade
     #"UP",
-    # flake8-bugbear
-    #"B",
     # flake8-simplify
     #"SIM",
-    # isort
-    #"I",
 ]
 ignore = [
     # TODO: Determine if we should use __all__, a reudndant alias, or keep this suppressed.
     "F401",
-    # Line too long
+    # TODO: Line too long
     "E501",
-    # Do not assign a `lambda` expression, use a `def`
+    # TODO: Do not assign a `lambda` expression, use a `def`
     "E731",
 ]
 fixable = ["ALL"]

@@ -11,8 +11,6 @@
 #
 """Tests for scenedetect.video_splitter module."""
 
-# pylint: disable=no-self-use,missing-function-docstring
-
 from pathlib import Path
 
 import pytest

@@ -17,7 +17,6 @@ performs scene detection and other required actions (`run_scenedetect`).
 """
 
 # Some parts of this file need word wrap to be displayed.
-# pylint: disable=line-too-long
 
 import inspect
 import logging
@@ -263,7 +262,6 @@ def _print_command_help(ctx: click.Context, command: click.Command):
     help="Suppress output to terminal/stdout. Equivalent to setting --verbosity=none.",
 )
 @click.pass_context
-# pylint: disable=redefined-builtin
 def scenedetect(
     ctx: click.Context,
     input: ty.Optional[ty.AnyStr],
@@ -325,9 +323,6 @@ def scenedetect(
         stats=stats,
         verbosity=verbosity,
     )
-
-
-# pylint: enable=redefined-builtin
 
 
 @click.command("help", cls=_Command)

@@ -36,7 +36,6 @@ import cv2
 class FakeTqdmObject:
     """Provides a no-op tqdm-like object."""
 
-    # pylint: disable=unused-argument
     def __init__(self, **kawrgs):
         """No-op."""
 
@@ -49,13 +48,10 @@ class FakeTqdmObject:
     def set_description(self, desc=None, refresh=True):
         """No-op."""
 
-    # pylint: enable=unused-argument
-
 
 class FakeTqdmLoggingRedirect:
     """Provides a no-op tqdm context manager for redirecting log messages."""
 
-    # pylint: disable=redefined-builtin,unused-argument
     def __init__(self, **kawrgs):
         """No-op."""
 
@@ -65,20 +61,14 @@ class FakeTqdmLoggingRedirect:
     def __exit__(self, type, value, traceback):
         """No-op."""
 
-    # pylint: enable=redefined-builtin,unused-argument
-
 
 # Try to import tqdm and the logging redirect, otherwise provide fake implementations..
 try:
-    # pylint: disable=unused-import
     from tqdm import tqdm
     from tqdm.contrib.logging import logging_redirect_tqdm
-    # pylint: enable=unused-import
 except ModuleNotFoundError:
-    # pylint: disable=invalid-name
     tqdm = FakeTqdmObject
     logging_redirect_tqdm = FakeTqdmLoggingRedirect
-    # pylint: enable=invalid-name
 
 ##
 ## OpenCV imwrite Supported Image Types & Quality/Compression Parameters
@@ -254,10 +244,8 @@ def get_ffmpeg_path() -> Optional[str]:
 
     # Try invoking ffmpeg using the one from `imageio_ffmpeg` if available.
     try:
-        # pylint: disable=import-outside-toplevel
         from imageio_ffmpeg import get_ffmpeg_exe
 
-        # pylint: enable=import-outside-toplevel
         subprocess.call([get_ffmpeg_exe(), "-v", "quiet"])
         return get_ffmpeg_exe()
     # Gracefully handle case where imageio_ffmpeg is not available.
