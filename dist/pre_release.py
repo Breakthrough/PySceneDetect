@@ -10,10 +10,8 @@ if len(sys.argv) <= 2 or not ("--ignore-installer" in sys.argv):
   installer_aip = ''
   with open("dist/installer/PySceneDetect.aip", "r") as f:
     installer_aip = f.read()
-
-aip_version = f"<ROW Property=\"ProductVersion\" Value=\"{VERSION}\" Options=\"32\"/>"
-
-assert aip_version in installer_aip, f"Installer project version does not match {VERSION}."
+  aip_version = f"<ROW Property=\"ProductVersion\" Value=\"{VERSION}\" Options=\"32\"/>"
+  assert aip_version in installer_aip, f"Installer project version does not match {VERSION}."
 
 with open("dist/.version_info", "wb") as f:
     v = VERSION.split(".")
