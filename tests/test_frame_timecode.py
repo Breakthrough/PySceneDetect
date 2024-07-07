@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 #            PySceneDetect: Python-Based Video Scene Detector
 #   -------------------------------------------------------------------
@@ -21,14 +20,14 @@ to and from various time formats like integer frame number, float number of seco
 or string HH:MM:SS[.nnn]. timecode format.
 """
 
+# ruff: noqa: B015
 # pylint: disable=invalid-name, expression-not-assigned, unneeded-not, pointless-statement
 
 # Third-Party Library Imports
 import pytest
 
 # Standard Library Imports
-from scenedetect.frame_timecode import FrameTimecode
-from scenedetect.frame_timecode import MAX_FPS_DELTA
+from scenedetect.frame_timecode import MAX_FPS_DELTA, FrameTimecode
 
 
 def test_framerate():
@@ -193,9 +192,9 @@ def test_equality():
     x = FrameTimecode(timecode=1.0, fps=10.0)
     assert x == x
     assert x == FrameTimecode(timecode=1.0, fps=10.0)
-    assert not x != FrameTimecode(timecode=1.0, fps=10.0)
+    assert x == FrameTimecode(timecode=1.0, fps=10.0)
     assert x != FrameTimecode(timecode=10.0, fps=10.0)
-    assert not x == FrameTimecode(timecode=10.0, fps=10.0)
+    assert x != FrameTimecode(timecode=10.0, fps=10.0)
     # Comparing FrameTimecodes with different framerates raises a TypeError.
     with pytest.raises(TypeError):
         x == FrameTimecode(timecode=1.0, fps=100.0)

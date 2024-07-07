@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 #            PySceneDetect: Python-Based Video Scene Detector
 #   -------------------------------------------------------------------
@@ -17,15 +16,21 @@ results by using known ground truths of scene cut locations in the
 test case material.
 """
 
-from dataclasses import dataclass
 import os
 import typing as ty
+from dataclasses import dataclass
 
 import pytest
 
-from scenedetect import detect, SceneManager, FrameTimecode, StatsManager, SceneDetector
-from scenedetect.detectors import *
+from scenedetect import FrameTimecode, SceneDetector, SceneManager, StatsManager, detect
 from scenedetect.backends.opencv import VideoStreamCv2
+from scenedetect.detectors import (
+    AdaptiveDetector,
+    ContentDetector,
+    HashDetector,
+    HistogramDetector,
+    ThresholdDetector,
+)
 
 FAST_CUT_DETECTORS: ty.Tuple[ty.Type[SceneDetector]] = (
     AdaptiveDetector,

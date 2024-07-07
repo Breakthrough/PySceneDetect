@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 #            PySceneDetect: Python-Based Video Scene Detector
 #   -------------------------------------------------------------------
@@ -16,14 +15,14 @@ set threshold/score, which if exceeded, triggers a scene cut.
 This detector is available from the command-line as the `detect-content` command.
 """
 
-from dataclasses import dataclass
 import math
+from dataclasses import dataclass
 from typing import List, NamedTuple, Optional
 
-import numpy
 import cv2
+import numpy
 
-from scenedetect.scene_detector import SceneDetector, FlashFilter
+from scenedetect.scene_detector import FlashFilter, SceneDetector
 
 
 def _mean_pixel_distance(left: numpy.ndarray, right: numpy.ndarray) -> float:

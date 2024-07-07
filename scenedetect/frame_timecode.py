@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 #            PySceneDetect: Python-Based Video Scene Detector
 #   -------------------------------------------------------------------
@@ -276,7 +275,7 @@ class FrameTimecode:
         Raises:
             ValueError: Value could not be parsed correctly.
         """
-        assert not self.framerate is None
+        assert self.framerate is not None
         input = input.strip()
         # Exact number of frames N
         if input.isdigit():

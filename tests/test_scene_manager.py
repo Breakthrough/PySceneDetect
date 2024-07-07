@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 #            PySceneDetect: Python-Based Video Scene Detector
 #   -------------------------------------------------------------------
@@ -165,7 +164,7 @@ def test_save_images_zero_width_scene(test_video_file):
 # TODO: This would be more readable if the callbacks were defined within the test case, e.g.
 # split up the callback function and callback lambda test cases.
 # pylint: disable=unused-argument, unnecessary-lambda
-class FakeCallback(object):
+class FakeCallback:
     """Fake callback used for testing. Tracks the frame numbers the callback was invoked with."""
 
     def __init__(self):

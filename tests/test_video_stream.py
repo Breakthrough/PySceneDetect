@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 #            PySceneDetect: Python-Based Video Scene Detector
 #   -------------------------------------------------------------------
@@ -17,20 +16,20 @@ backends implemented in scenedetect.backends.  These tests enforce a consistent 
 all supported backends, and verify that they are functionally equivalent where possible.
 """
 
+# ruff: noqa: B011
 # pylint: disable=no-self-use,missing-function-docstring
 
+import os.path
 from dataclasses import dataclass
 from typing import List, Type
-import os.path
 
 import numpy
 import pytest
 
-from scenedetect.video_stream import VideoStream, SeekError
+from scenedetect.backends import VideoStreamAv, VideoStreamMoviePy
 from scenedetect.backends.opencv import VideoStreamCv2
-from scenedetect.backends import VideoStreamAv
-from scenedetect.backends import VideoStreamMoviePy
 from scenedetect.video_manager import VideoManager
+from scenedetect.video_stream import SeekError, VideoStream
 
 # Accuracy a framerate is checked to for testing purposes.
 FRAMERATE_TOLERANCE = 0.001

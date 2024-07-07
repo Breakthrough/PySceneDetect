@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 #            PySceneDetect: Python-Based Video Scene Detector
 #   -------------------------------------------------------------------
@@ -12,14 +11,13 @@
 #
 """Entry point for PySceneDetect's command-line interface."""
 
-from logging import getLogger
 import sys
+from logging import getLogger
 
 from scenedetect._cli import scenedetect
 from scenedetect._cli.context import CliContext
 from scenedetect._cli.controller import run_scenedetect
-
-from scenedetect.platform import logging_redirect_tqdm, FakeTqdmLoggingRedirect
+from scenedetect.platform import FakeTqdmLoggingRedirect, logging_redirect_tqdm
 
 
 def main():

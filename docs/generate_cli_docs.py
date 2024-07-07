@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Generate formatted CLI documentation for PySceneDetect.
 #
 # Inspired by sphinx-click: https://github.com/click-contrib/sphinx-click
@@ -10,21 +9,21 @@
 
 Run from main repo folder as working directory."""
 
-import os
-import sys
 import inspect
-import typing as ty
+import os
 import re
+import sys
+import typing as ty
 from dataclasses import dataclass
 
 # Add parent folder to path so we can resolve `scenedetect` imports.
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir)
-from scenedetect._cli import scenedetect
-
 # Third-party imports
 import click
+
+from scenedetect._cli import scenedetect
 
 StrGenerator = ty.Generator[str, None, None]
 
@@ -79,7 +78,7 @@ def patch_help(s: str, commands: ty.List[str]) -> str:
         assert pos > 0
         s = s[: pos + 1] + "scenedetect " + s[pos + 1 :]
 
-    for command in [command for command in commands if not command in INFO_COMMANDS]:
+    for command in [command for command in commands if command not in INFO_COMMANDS]:
 
         def add_link(_match: re.Match) -> str:
             return ":ref:`%s <command-%s>`" % (command, command)
@@ -136,7 +135,7 @@ def extract_default_value(s: str) -> ty.Tuple[str, ty.Optional[str]]:
         assert span[1] == len(s)
         s, default = s[: span[0]].strip(), s[span[0] : span[1]][len("[default: ") : -1]
         # Double-quote any default values that contain spaces.
-        if " " in default and not '"' in default and not "," in default:
+        if " " in default and '"' not in default and "," not in default:
             default = '"%s"' % default
     return (s, default)
 
@@ -240,7 +239,7 @@ def generate_subcommands(ctx: click.Context, commands: ty.List[str]) -> StrGener
     output_commands = [
         command
         for command in commands
-        if (not command.startswith("detect-") and not command in INFO_COMMANDS)
+        if (not command.startswith("detect-") and command not in INFO_COMMANDS)
     ]
     for command in output_commands:
         yield from generate_command_help(ctx, ctx.command.get_command(ctx, command), ctx.info_name)

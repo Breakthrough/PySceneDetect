@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 #            PySceneDetect: Python-Based Video Scene Detector
 #   -------------------------------------------------------------------
@@ -15,10 +14,11 @@
 import csv
 import logging
 import os
-from string import Template
 import time
 import typing as ty
+from string import Template
 
+from scenedetect._cli.context import CliContext, check_split_video_requirements
 from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.platform import get_and_create_path
 from scenedetect.scene_manager import (
@@ -27,9 +27,8 @@ from scenedetect.scene_manager import (
     write_scene_list,
     write_scene_list_html,
 )
-from scenedetect.video_splitter import split_video_mkvmerge, split_video_ffmpeg
+from scenedetect.video_splitter import split_video_ffmpeg, split_video_mkvmerge
 from scenedetect.video_stream import SeekError
-from scenedetect._cli.context import CliContext, check_split_video_requirements
 
 logger = logging.getLogger("pyscenedetect")
 
@@ -176,7 +175,7 @@ def _list_scenes(context: CliContext, scene_list: SceneList, cut_list: CutList) 
             context.scene_list_dir if context.scene_list_dir is not None else context.output_dir,
         )
         logger.info("Writing scene list to CSV file:\n  %s", scene_list_path)
-        with open(scene_list_path, "wt") as scene_list_file:
+        with open(scene_list_path, "w") as scene_list_file:
             write_scene_list(
                 output_csv_file=scene_list_file,
                 scene_list=scene_list,
@@ -316,10 +315,10 @@ def _load_scenes(context: CliContext) -> ty.Tuple[SceneList, CutList]:
     assert context.load_scenes_input
     assert os.path.exists(context.load_scenes_input)
 
-    with open(context.load_scenes_input, "r") as input_file:
+    with open(context.load_scenes_input) as input_file:
         file_reader = csv.reader(input_file)
         csv_headers = next(file_reader)
-        if not context.load_scenes_column_name in csv_headers:
+        if context.load_scenes_column_name not in csv_headers:
             csv_headers = next(file_reader)
         # Check to make sure column headers are present
         if context.load_scenes_column_name not in csv_headers:

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 #            PySceneDetect: Python-Based Video Scene Detector
 #   -------------------------------------------------------------------
@@ -35,16 +34,16 @@ import random
 
 import pytest
 
-from scenedetect.scene_manager import SceneManager
-from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.backends.opencv import VideoStreamCv2
 from scenedetect.detectors import ContentDetector
-
-from scenedetect.stats_manager import StatsManager
-from scenedetect.stats_manager import StatsFileCorrupt
-
-from scenedetect.stats_manager import COLUMN_NAME_FRAME_NUMBER
-from scenedetect.stats_manager import COLUMN_NAME_TIMECODE
+from scenedetect.frame_timecode import FrameTimecode
+from scenedetect.scene_manager import SceneManager
+from scenedetect.stats_manager import (
+    COLUMN_NAME_FRAME_NUMBER,
+    COLUMN_NAME_TIMECODE,
+    StatsFileCorrupt,
+    StatsManager,
+)
 
 # TODO(v1.0): use https://docs.pytest.org/en/6.2.x/tmpdir.html
 TEST_STATS_FILES = ["TEST_STATS_FILE"] * 4
@@ -186,7 +185,7 @@ def test_load_corrupt_stats():
 
     stats_manager = StatsManager()
 
-    with open(TEST_STATS_FILES[0], "wt") as stats_file:
+    with open(TEST_STATS_FILES[0], "w") as stats_file:
         stats_writer = csv.writer(stats_file, lineterminator="\n")
 
         some_metric_key = "some_metric"

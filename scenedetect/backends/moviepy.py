@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 #            PySceneDetect: Python-Based Video Scene Detector
 #   -------------------------------------------------------------------
@@ -18,16 +17,16 @@ image sequences or AviSynth scripts are supported as inputs.
 """
 
 from logging import getLogger
-from typing import AnyStr, Tuple, Union, Optional
+from typing import AnyStr, Optional, Tuple, Union
 
 import cv2
-from moviepy.video.io.ffmpeg_reader import FFMPEG_VideoReader
 import numpy as np
+from moviepy.video.io.ffmpeg_reader import FFMPEG_VideoReader
 
+from scenedetect.backends.opencv import VideoStreamCv2
 from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.platform import get_file_name
-from scenedetect.video_stream import VideoStream, SeekError, VideoOpenFailure
-from scenedetect.backends.opencv import VideoStreamCv2
+from scenedetect.video_stream import SeekError, VideoOpenFailure, VideoStream
 
 logger = getLogger("pyscenedetect")
 
@@ -179,7 +178,7 @@ class VideoStreamMoviePy(VideoStream):
             target = FrameTimecode(target, self.frame_rate)
         try:
             self._reader.get_frame(target.get_seconds())
-        except IOError as ex:
+        except OSError as ex:
             # Leave the object in a valid state.
             self.reset()
             # TODO(#380): Other backends do not currently throw an exception if attempting to seek

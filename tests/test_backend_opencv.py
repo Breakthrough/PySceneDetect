@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 #            PySceneDetect: Python-Based Video Scene Detector
 #   -------------------------------------------------------------------
@@ -21,7 +20,7 @@ For VideoStream tests that validate conformance, see test_video_stream.py.
 import cv2
 
 from scenedetect import ContentDetector, SceneManager
-from scenedetect.backends.opencv import VideoStreamCv2, VideoCaptureAdapter
+from scenedetect.backends.opencv import VideoCaptureAdapter, VideoStreamCv2
 
 GROUND_TRUTH_CAPTURE_ADAPTER_TEST = [1, 90, 210]
 GROUND_TRUTH_CAPTURE_ADAPTER_CALLBACK_TEST = [30, 180, 394]

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 #            PySceneDetect: Python-Based Video Scene Detector
 #   -------------------------------------------------------------------
@@ -23,7 +22,7 @@ when calling `detect()` or `detect_scenes()`.
 
 def test_api_detect(test_video_file: str):
     """Demonstrate usage of the `detect()` function to process a complete video."""
-    from scenedetect import detect, ContentDetector
+    from scenedetect import ContentDetector, detect
 
     scene_list = detect(test_video_file, ContentDetector())
     for i, scene in enumerate(scene_list):
@@ -32,7 +31,7 @@ def test_api_detect(test_video_file: str):
 
 def test_api_detect_start_end_time(test_video_file: str):
     """Demonstrate usage of the `detect()` function to process a subset of a video."""
-    from scenedetect import detect, ContentDetector
+    from scenedetect import ContentDetector, detect
 
     # Times can be seconds (float), frames (int), or timecode 'HH:MM:SSS.nnn' (str).
     # See test_api_timecode_types() for examples of each format.
@@ -43,14 +42,14 @@ def test_api_detect_start_end_time(test_video_file: str):
 
 def test_api_detect_stats(test_video_file: str):
     """Demonstrate usage of the `detect()` function to generate a statsfile."""
-    from scenedetect import detect, ContentDetector
+    from scenedetect import ContentDetector, detect
 
     detect(test_video_file, ContentDetector(), stats_file_path="frame_metrics.csv")
 
 
 def test_api_scene_manager(test_video_file: str):
     """Demonstrate how to use a SceneManager to implement a function similar to `detect()`."""
-    from scenedetect import SceneManager, ContentDetector, open_video
+    from scenedetect import ContentDetector, SceneManager, open_video
 
     video = open_video(test_video_file)
     scene_manager = SceneManager()
@@ -63,7 +62,7 @@ def test_api_scene_manager(test_video_file: str):
 
 def test_api_scene_manager_start_end_time(test_video_file: str):
     """Demonstrate how to use a SceneManager to process a subset of the input video."""
-    from scenedetect import SceneManager, ContentDetector, open_video
+    from scenedetect import ContentDetector, SceneManager, open_video
 
     video = open_video(test_video_file)
     scene_manager = SceneManager()
@@ -100,7 +99,7 @@ def test_api_timecode_types():
 
 def test_api_stats_manager(test_video_file: str):
     """Demonstrate using a StatsManager to save per-frame statistics to disk."""
-    from scenedetect import SceneManager, StatsManager, ContentDetector, open_video
+    from scenedetect import ContentDetector, SceneManager, StatsManager, open_video
 
     video = open_video(test_video_file)
     scene_manager = SceneManager(stats_manager=StatsManager())
@@ -114,7 +113,8 @@ def test_api_stats_manager(test_video_file: str):
 def test_api_scene_manager_callback(test_video_file: str):
     """Demonstrate how to use a callback with the SceneManager detect_scenes method."""
     import numpy
-    from scenedetect import SceneManager, ContentDetector, open_video
+
+    from scenedetect import ContentDetector, SceneManager, open_video
 
     # Callback to invoke on the first frame of every new scene detection.
     def on_new_scene(frame_img: numpy.ndarray, frame_num: int):
@@ -132,7 +132,8 @@ def test_api_device_callback(test_video_file: str):
     wrapping it with a `VideoCaptureAdapter.`"""
     import cv2
     import numpy
-    from scenedetect import SceneManager, ContentDetector, VideoCaptureAdapter
+
+    from scenedetect import ContentDetector, SceneManager, VideoCaptureAdapter
 
     # Callback to invoke on the first frame of every new scene detection.
     def on_new_scene(frame_img: numpy.ndarray, frame_num: int):

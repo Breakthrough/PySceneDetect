@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 #            PySceneDetect: Python-Based Video Scene Detector
 #   -------------------------------------------------------------------
@@ -16,9 +15,9 @@ triggered when the average pixel intensity exceeds or falls below this threshold
 This detector is available from the command-line as the `detect-threshold` command.
 """
 
+import typing as ty
 from enum import Enum
 from logging import getLogger
-import typing as ty
 
 import numpy
 

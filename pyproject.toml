@@ -13,6 +13,9 @@ requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [tool.ruff]
+exclude = [
+    "docs"
+]
 line-length = 100
 indent-width = 4
 
@@ -21,3 +24,30 @@ quote-style = "double"
 indent-style = "space"
 skip-magic-trailing-comma = false
 docstring-code-format = true
+
+[tool.ruff.lint]
+select = [
+    # pycodestyle
+    "E",
+    # Pyflakes
+    "F",
+    # TODO - Rule sets to enable:
+    # pyupgrade
+    #"UP",
+    # flake8-bugbear
+    #"B",
+    # flake8-simplify
+    #"SIM",
+    # isort
+    #"I",
+]
+ignore = [
+    # TODO: Determine if we should use __all__, a reudndant alias, or keep this suppressed.
+    "F401",
+    # Line too long
+    "E501",
+    # Do not assign a `lambda` expression, use a `def`
+    "E731",
+]
+fixable = ["ALL"]
+unfixable = []

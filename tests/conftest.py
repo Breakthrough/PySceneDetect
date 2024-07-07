@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 #            PySceneDetect: Python-Based Video Scene Detector
 #   -------------------------------------------------------------------
@@ -27,9 +26,9 @@ Note that currently these tests create some temporary files which are not yet cl
 
 # TODO: Properly cleanup temporary files.
 
-from typing import AnyStr
 import logging
 import os
+from typing import AnyStr
 
 import pytest
 
@@ -93,7 +92,7 @@ def no_logs_gte_error(caplog):
     errors = [
         record
         for record in caplog.get_records("call")
-        if record.levelno >= logging.ERROR and not record.module in EXCLUDED_MODULES
+        if record.levelno >= logging.ERROR and record.module not in EXCLUDED_MODULES
     ]
     assert not errors, "Test failed due to presence of one or more logs with ERROR severity."
 

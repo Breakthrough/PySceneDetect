@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 #            PySceneDetect: Python-Based Video Scene Detector
 #   -------------------------------------------------------------------
@@ -15,14 +14,15 @@
 # pylint: disable=no-self-use,missing-function-docstring
 
 from pathlib import Path
+
 import pytest
 
 from scenedetect import open_video
 from scenedetect.video_splitter import (
-    split_video_ffmpeg,
-    is_ffmpeg_available,
     SceneMetadata,
     VideoMetadata,
+    is_ffmpeg_available,
+    split_video_ffmpeg,
 )
 
 

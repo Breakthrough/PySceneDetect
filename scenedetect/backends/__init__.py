@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 #            PySceneDetect: Python-Based Video Scene Detector
 #   -------------------------------------------------------------------
@@ -87,7 +86,7 @@ examples for details.
 from typing import Dict, Type
 
 # OpenCV must be available at minimum.
-from scenedetect.backends.opencv import VideoStreamCv2, VideoCaptureAdapter
+from scenedetect.backends.opencv import VideoCaptureAdapter, VideoStreamCv2
 
 try:
     from scenedetect.backends.pyav import VideoStreamAv

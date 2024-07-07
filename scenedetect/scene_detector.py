@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 #            PySceneDetect: Python-Based Video Scene Detector
 #   -------------------------------------------------------------------
@@ -25,8 +24,8 @@ in order to be compatible with PySceneDetect.
     event (in, out, cut, etc...).
 """
 
-from enum import Enum
 import typing as ty
+from enum import Enum
 
 import numpy
 

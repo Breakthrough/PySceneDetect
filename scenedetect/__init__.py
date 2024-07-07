@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 #            PySceneDetect: Python-Based Video Scene Detector
 #   -------------------------------------------------------------------
@@ -15,6 +14,7 @@
 can be used to open a video for a
 :class:`SceneManager <scenedetect.scene_manager.SceneManager>`.
 """
+# ruff: noqa: I001
 
 from logging import getLogger
 from typing import List, Optional, Tuple, Union
@@ -169,6 +169,6 @@ def detect(
         show_progress=show_progress,
         end_time=end_time,
     )
-    if not scene_manager.stats_manager is None:
+    if scene_manager.stats_manager is not None:
         scene_manager.stats_manager.save_to_csv(csv_file=stats_file_path)
     return scene_manager.get_scene_list(start_in_scene=start_in_scene)

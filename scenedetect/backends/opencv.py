@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 #            PySceneDetect: Python-Based Video Scene Detector
 #   -------------------------------------------------------------------
@@ -18,17 +17,17 @@ constructed from an existing `cv2.VideoCapture`. This allows performing scene de
 which do not support seeking.
 """
 
-from logging import getLogger
 import math
-from typing import AnyStr, Tuple, Union, Optional
 import os.path
+from logging import getLogger
+from typing import AnyStr, Optional, Tuple, Union
 
 import cv2
 import numpy as np
 
-from scenedetect.frame_timecode import FrameTimecode, MAX_FPS_DELTA
+from scenedetect.frame_timecode import MAX_FPS_DELTA, FrameTimecode
 from scenedetect.platform import get_file_name
-from scenedetect.video_stream import VideoStream, SeekError, VideoOpenFailure, FrameRateUnavailable
+from scenedetect.video_stream import FrameRateUnavailable, SeekError, VideoOpenFailure, VideoStream
 
 logger = getLogger("pyscenedetect")
 
@@ -44,7 +43,7 @@ NON_VIDEO_FILE_INPUT_IDENTIFIERS = (
 def _get_aspect_ratio(cap: cv2.VideoCapture, epsilon: float = 0.0001) -> float:
     """Display/pixel aspect ratio of the VideoCapture as a float (1.0 represents square pixels)."""
     # Versions of OpenCV < 3.4.1 do not support this, so we fall back to 1.0.
-    if not "CAP_PROP_SAR_NUM" in dir(cv2):
+    if "CAP_PROP_SAR_NUM" not in dir(cv2):
         return 1.0
     num: float = cap.get(cv2.CAP_PROP_SAR_NUM)
     den: float = cap.get(cv2.CAP_PROP_SAR_DEN)
@@ -318,9 +317,8 @@ class VideoStreamCv2(VideoStream):
         )
         # We don't have a way of querying why opening a video fails (errors are logged at least),
         # so provide a better error message if we try to open a file that doesn't exist.
-        if input_is_video_file:
-            if not os.path.exists(self._path_or_device):
-                raise OSError("Video file not found.")
+        if input_is_video_file and not os.path.exists(self._path_or_device):
+            raise OSError("Video file not found.")
 
         cap = cv2.VideoCapture(self._path_or_device)
         if not cap.isOpened():

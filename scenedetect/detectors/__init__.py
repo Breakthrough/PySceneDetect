@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 #            PySceneDetect: Python-Based Video Scene Detector
 #   -------------------------------------------------------------------
@@ -35,6 +34,8 @@ Detection algorithms are created by implementing the
 typically attached to a :class:`SceneManager <scenedetect.scene_manager.SceneManager>` when
 processing videos, however they can also be used to process frames directly.
 """
+
+# ruff: noqa: I001
 
 from scenedetect.detectors.content_detector import ContentDetector
 from scenedetect.detectors.threshold_detector import ThresholdDetector

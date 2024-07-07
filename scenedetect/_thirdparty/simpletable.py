@@ -1,5 +1,4 @@
 #!/usr/bin/python
-# -*- coding: utf-8 -*-
 
 # The MIT License (MIT)
 #
@@ -64,7 +63,7 @@ def quote(string):
         return pathname2url(string)
 
 
-class SimpleTableCell(object):
+class SimpleTableCell:
     """A table class to create table cells.
 
     Example:
@@ -89,7 +88,7 @@ class SimpleTableCell(object):
             return "<td>%s</td>" % (self.text)
 
 
-class SimpleTableImage(object):
+class SimpleTableImage:
     """A table class to create table cells with an image.
 
     Example:
@@ -128,7 +127,7 @@ class SimpleTableImage(object):
         return output
 
 
-class SimpleTableRow(object):
+class SimpleTableRow:
     """A table class to create table rows, populated by table cells.
 
     Example:
@@ -187,7 +186,7 @@ class SimpleTableRow(object):
             self.cells.append(cell)
 
 
-class SimpleTable(object):
+class SimpleTable:
     """A table class to create HTML tables, populated by HTML table rows.
 
     Example:
@@ -263,7 +262,7 @@ class SimpleTable(object):
             self.rows.append(row)
 
 
-class HTMLPage(object):
+class HTMLPage:
     """A class to create HTML pages containing CSS and tables."""
 
     def __init__(self, tables=None, css=None, encoding="utf-8"):

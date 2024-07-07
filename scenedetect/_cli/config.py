@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 #            PySceneDetect: Python-Based Video Scene Detector
 #   -------------------------------------------------------------------
@@ -15,12 +14,12 @@ config file schema and data types are performed. Constants/defaults are also def
 possible and re-used by the CLI so that there is one source of truth.
 """
 
-from abc import ABC, abstractmethod
-from configparser import ConfigParser, ParsingError
-from enum import Enum
 import logging
 import os
 import os.path
+from abc import ABC, abstractmethod
+from configparser import ConfigParser, ParsingError
+from enum import Enum
 from typing import Any, AnyStr, Dict, List, Optional, Tuple, Union
 
 from platformdirs import user_config_dir
@@ -408,11 +407,11 @@ def _validate_structure(config: ConfigParser) -> List[str]:
     """
     errors: List[str] = []
     for section in config.sections():
-        if not section in CONFIG_MAP.keys():
+        if section not in CONFIG_MAP.keys():
             errors.append("Unsupported config section: [%s]" % (section))
             continue
         for option_name, _ in config.items(section):
-            if not option_name in CONFIG_MAP[section].keys():
+            if option_name not in CONFIG_MAP[section].keys():
                 errors.append("Unsupported config option in [%s]: %s" % (section, option_name))
     return errors
 
@@ -555,7 +554,7 @@ class ConfigRegistry:
         # Try to load and parse the config file at `path`.
         config = ConfigParser()
         try:
-            with open(path, "r") as config_file:
+            with open(path) as config_file:
                 config_file_contents = config_file.read()
             config.read_string(config_file_contents, source=path)
         except ParsingError as ex:

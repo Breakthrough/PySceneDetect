@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 #            PySceneDetect: Python-Based Video Scene Detector
 #   -------------------------------------------------------------------
@@ -17,6 +16,7 @@ all platform/library/OS-specific compatibility fixes.
 """
 
 import platform
+
 import pytest
 
 from scenedetect.platform import CommandTooLong, invoke_command

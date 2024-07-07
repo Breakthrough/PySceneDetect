@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 #            PySceneDetect: Python-Based Video Scene Detector
 #   -------------------------------------------------------------------
@@ -33,16 +32,16 @@ command from a terminal/command prompt. PySceneDetect will automatically use whi
 available on the computer, depending on the specified command-line options.
 """
 
-from dataclasses import dataclass
 import logging
 import math
-from pathlib import Path
 import subprocess
 import time
 import typing as ty
+from dataclasses import dataclass
+from pathlib import Path
 
-from scenedetect.platform import tqdm, invoke_command, CommandTooLong, get_ffmpeg_path, Template
 from scenedetect.frame_timecode import FrameTimecode
+from scenedetect.platform import CommandTooLong, Template, get_ffmpeg_path, invoke_command, tqdm
 
 logger = logging.getLogger("pyscenedetect")
 

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 #            PySceneDetect: Python-Based Video Scene Detector
 #   -------------------------------------------------------------------
@@ -13,12 +12,12 @@
 
 import glob
 import os
-import typing as ty
 import subprocess
-import pytest
+import typing as ty
 from pathlib import Path
 
 import cv2
+import pytest
 
 from scenedetect.video_splitter import is_ffmpeg_available, is_mkvmerge_available
 

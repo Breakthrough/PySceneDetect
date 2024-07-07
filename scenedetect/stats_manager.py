@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 #            PySceneDetect: Python-Based Video Scene Detector
 #   -------------------------------------------------------------------
@@ -23,12 +22,12 @@ detection parameters) for the given input.
 """
 
 import csv
-from logging import getLogger
+import os.path
 import typing as ty
+from logging import getLogger
 
 # TODO: Replace below imports with `ty.` prefix.
 from typing import Any, Dict, Iterable, List, Optional, Set, TextIO, Union
-import os.path
 
 from scenedetect.frame_timecode import FrameTimecode
 
@@ -245,7 +244,7 @@ class StatsManager:
         # recursively call ourselves again but with file set instead of path.
         if isinstance(csv_file, (str, bytes)):
             if os.path.exists(csv_file):
-                with open(csv_file, "r") as file:
+                with open(csv_file) as file:
                     return self.load_from_csv(csv_file=file)
             # Path doesn't exist.
             return None
@@ -305,7 +304,7 @@ class StatsManager:
 
     def _set_metric(self, frame_number: int, metric_key: str, metric_value: Any) -> None:
         self._metrics_updated = True
-        if not frame_number in self._frame_metrics:
+        if frame_number not in self._frame_metrics:
             self._frame_metrics[frame_number] = dict()
         self._frame_metrics[frame_number][metric_key] = metric_value
 

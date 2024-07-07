@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 #            PySceneDetect: Python-Based Video Scene Detector
 #   -------------------------------------------------------------------
@@ -21,7 +20,7 @@ work without modification.
 import logging
 import os
 
-from scenedetect import SceneManager, StatsManager, VideoManager, ContentDetector
+from scenedetect import ContentDetector, SceneManager, StatsManager, VideoManager
 from scenedetect.platform import init_logger
 
 
@@ -46,7 +45,7 @@ def validate_backwards_compatibility(test_video_file: str, stats_file_path: str)
         end_time = base_timecode + 10.0  # 00:00:10.000
 
         if os.path.exists(stats_file_path):
-            with open(stats_file_path, "r") as stats_file:
+            with open(stats_file_path) as stats_file:
                 stats_manager.load_from_csv(stats_file)
             # ContentDetector requires at least 1 frame before it can calculate any metrics.
             assert stats_manager.metrics_exist(

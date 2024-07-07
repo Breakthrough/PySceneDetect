@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 #            PySceneDetect: Python-Based Video Scene Detector
 #   -------------------------------------------------------------------
@@ -19,9 +18,9 @@ from typing import AnyStr, BinaryIO, Optional, Tuple, Union
 import av
 import numpy as np
 
-from scenedetect.frame_timecode import FrameTimecode, MAX_FPS_DELTA
+from scenedetect.frame_timecode import MAX_FPS_DELTA, FrameTimecode
 from scenedetect.platform import get_file_name
-from scenedetect.video_stream import VideoStream, VideoOpenFailure, FrameRateUnavailable
+from scenedetect.video_stream import FrameRateUnavailable, VideoOpenFailure, VideoStream
 
 logger = getLogger("pyscenedetect")
 
@@ -91,7 +90,7 @@ class VideoStreamAv(VideoStream):
 
         if threading_mode:
             threading_mode = threading_mode.upper()
-            if not threading_mode in VALID_THREAD_MODES:
+            if threading_mode not in VALID_THREAD_MODES:
                 raise ValueError("Invalid threading mode! Must be one of: %s" % VALID_THREAD_MODES)
 
         if not suppress_output:
@@ -348,7 +347,7 @@ class VideoStreamAv(VideoStream):
             return False
         self._reopened = True
         # Don't re-open the video if we can't seek or aren't in AUTO/FRAME thread_type mode.
-        if not self.is_seekable or not self._video_stream.thread_type in ("AUTO", "FRAME"):
+        if not self.is_seekable or self._video_stream.thread_type not in ("AUTO", "FRAME"):
             return False
         last_frame = self.frame_number
         orig_pos = self._io.tell()

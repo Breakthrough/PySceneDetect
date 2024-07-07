@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 #         PySceneDetect: Python-Based Video Scene Detector
 #   ---------------------------------------------------------------
@@ -35,8 +34,8 @@ This detector is available from the command-line interface by using the
 """
 
 # Third-Party Library Imports
-import numpy
 import cv2
+import numpy
 
 # PySceneDetect Library Imports
 from scenedetect.scene_detector import SceneDetector

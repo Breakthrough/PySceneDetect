@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 #            PySceneDetect: Python-Based Video Scene Detector
 #   -------------------------------------------------------------------
@@ -81,29 +80,29 @@ analysis of the video.
 """
 
 import csv
-from enum import Enum
-from typing import Iterable, List, Tuple, Optional, Dict, Callable, Union, TextIO
-import threading
-import queue
 import logging
 import math
+import queue
 import sys
+import threading
+from enum import Enum
+from typing import Callable, Dict, Iterable, List, Optional, TextIO, Tuple, Union
 
 import cv2
 import numpy as np
+
 from scenedetect._thirdparty.simpletable import (
+    HTMLPage,
+    SimpleTable,
     SimpleTableCell,
     SimpleTableImage,
     SimpleTableRow,
-    SimpleTable,
-    HTMLPage,
 )
-
-from scenedetect.platform import tqdm, get_and_create_path, get_cv2_imwrite_params, Template
 from scenedetect.frame_timecode import FrameTimecode
-from scenedetect.video_stream import VideoStream
+from scenedetect.platform import Template, get_and_create_path, get_cv2_imwrite_params, tqdm
 from scenedetect.scene_detector import SceneDetector, SparseSceneDetector
 from scenedetect.stats_manager import StatsManager
+from scenedetect.video_stream import VideoStream
 
 logger = logging.getLogger("pyscenedetect")
 
@@ -943,7 +942,7 @@ class SceneManager:
             next_frame, position = frame_queue.get()
             if next_frame is None and position is None:
                 break
-            if not next_frame is None:
+            if next_frame is not None:
                 frame_im = next_frame
             new_cuts = self._process_frame(position.frame_num, frame_im, callback)
             if progress_bar is not None:
@@ -1011,7 +1010,7 @@ class SceneManager:
                             )
                         if self._frame_size_errors == MAX_FRAME_SIZE_ERRORS:
                             logger.warn(
-                                f"WARNING: Too many errors emitted, skipping future messages."
+                                "WARNING: Too many errors emitted, skipping future messages."
                             )
                         # Skip processing frames that have an incorrect size.
                         continue

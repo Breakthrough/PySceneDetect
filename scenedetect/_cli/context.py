@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 #            PySceneDetect: Python-Based Video Scene Detector
 #   -------------------------------------------------------------------
@@ -19,29 +18,29 @@ import typing as ty
 import click
 
 import scenedetect  # Required to access __version__
-from scenedetect import open_video, AVAILABLE_BACKENDS
-from scenedetect.detectors import (
-    AdaptiveDetector,
-    ContentDetector,
-    ThresholdDetector,
-    HashDetector,
-    HistogramDetector,
-)
-from scenedetect.frame_timecode import FrameTimecode, MAX_FPS_DELTA
-from scenedetect.platform import get_and_create_path, get_cv2_imwrite_params, init_logger
-from scenedetect.scene_detector import SceneDetector, FlashFilter
-from scenedetect.scene_manager import SceneManager, Interpolation
-from scenedetect.stats_manager import StatsManager
-from scenedetect.video_splitter import is_mkvmerge_available, is_ffmpeg_available
-from scenedetect.video_stream import VideoStream, VideoOpenFailure, FrameRateUnavailable
+from scenedetect import AVAILABLE_BACKENDS, open_video
 from scenedetect._cli.config import (
-    ConfigRegistry,
-    ConfigLoadFailure,
-    TimecodeFormat,
     CHOICE_MAP,
     DEFAULT_JPG_QUALITY,
     DEFAULT_WEBP_QUALITY,
+    ConfigLoadFailure,
+    ConfigRegistry,
+    TimecodeFormat,
 )
+from scenedetect.detectors import (
+    AdaptiveDetector,
+    ContentDetector,
+    HashDetector,
+    HistogramDetector,
+    ThresholdDetector,
+)
+from scenedetect.frame_timecode import MAX_FPS_DELTA, FrameTimecode
+from scenedetect.platform import get_cv2_imwrite_params, init_logger
+from scenedetect.scene_detector import FlashFilter, SceneDetector
+from scenedetect.scene_manager import Interpolation, SceneManager
+from scenedetect.stats_manager import StatsManager
+from scenedetect.video_splitter import is_ffmpeg_available, is_mkvmerge_available
+from scenedetect.video_stream import FrameRateUnavailable, VideoOpenFailure, VideoStream
 
 logger = logging.getLogger("pyscenedetect")
 
@@ -742,7 +741,7 @@ class CliContext:
 
         self.image_extension = "jpg" if jpeg else "png" if png else "webp"
         valid_params = get_cv2_imwrite_params()
-        if not self.image_extension in valid_params or valid_params[self.image_extension] is None:
+        if self.image_extension not in valid_params or valid_params[self.image_extension] is None:
             error_strs = [
                 "Image encoder type `%s` not supported." % self.image_extension.upper(),
                 "The specified encoder type could not be found in the current OpenCV module.",
@@ -860,7 +859,7 @@ class CliContext:
             if backend is None:
                 backend = self.config.get_value("global", "backend")
             else:
-                if not backend in AVAILABLE_BACKENDS:
+                if backend not in AVAILABLE_BACKENDS:
                     raise click.BadParameter(
                         "Specified backend %s is not available on this system!" % backend,
                         param_hint="-b/--backend",

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 #            PySceneDetect: Python-Based Video Scene Detector
 #   -------------------------------------------------------------------
@@ -19,18 +18,18 @@ This module exists for *some* backwards compatibility with v0.5, and will be rem
 in a future release.
 """
 
-import os
 import math
+import os
 from logging import getLogger
-
 from typing import Iterable, List, Optional, Tuple, Union
-import numpy as np
-import cv2
 
-from scenedetect.platform import get_file_name
-from scenedetect.frame_timecode import FrameTimecode, MAX_FPS_DELTA
-from scenedetect.video_stream import VideoStream, VideoOpenFailure, FrameRateUnavailable
+import cv2
+import numpy as np
+
 from scenedetect.backends.opencv import _get_aspect_ratio
+from scenedetect.frame_timecode import MAX_FPS_DELTA, FrameTimecode
+from scenedetect.platform import get_file_name
+from scenedetect.video_stream import FrameRateUnavailable, VideoOpenFailure, VideoStream
 
 ##
 ## VideoManager Exceptions
@@ -146,7 +145,7 @@ def open_captures(
             if not ("%" in video_file or "://" in video_file)
         ]
     ):
-        raise IOError("Video file(s) not found.")
+        raise OSError("Video file(s) not found.")
     cap_list = []
 
     try:

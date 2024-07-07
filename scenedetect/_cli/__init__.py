@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 #            PySceneDetect: Python-Based Video Scene Detector
 #   -------------------------------------------------------------------
@@ -27,6 +26,9 @@ import typing as ty
 import click
 
 import scenedetect
+from scenedetect._cli.config import CHOICE_MAP, CONFIG_FILE_PATH, CONFIG_MAP
+from scenedetect._cli.context import USER_CONFIG, CliContext
+from scenedetect.backends import AVAILABLE_BACKENDS
 from scenedetect.detectors import (
     AdaptiveDetector,
     ContentDetector,
@@ -34,10 +36,7 @@ from scenedetect.detectors import (
     HistogramDetector,
     ThresholdDetector,
 )
-from scenedetect.backends import AVAILABLE_BACKENDS
 from scenedetect.platform import get_system_version_info
-from scenedetect._cli.config import CHOICE_MAP, CONFIG_FILE_PATH, CONFIG_MAP
-from scenedetect._cli.context import CliContext, USER_CONFIG
 
 _PROGRAM_VERSION = scenedetect.__version__
 """Used to avoid name conflict with named `scenedetect` command below."""
@@ -345,7 +344,7 @@ def help_command(ctx: click.Context, command_name: str):
     parent_command = ctx.parent.command
     all_commands = set(parent_command.list_commands(ctx))
     if command_name is not None:
-        if not command_name in all_commands:
+        if command_name not in all_commands:
             error_strs = [
                 "unknown command. List of valid commands:",
                 "  %s" % ", ".join(sorted(all_commands)),
