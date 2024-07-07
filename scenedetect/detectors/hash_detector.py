@@ -112,14 +112,16 @@ class HashDetector(SceneDetector):
         if self._last_frame is not None:
             # We obtain the change in hash value between subsequent frames.
             curr_hash = self.hash_frame(
-                frame_img=frame_img, hash_size=self._size, factor=self._factor)
+                frame_img=frame_img, hash_size=self._size, factor=self._factor
+            )
 
             last_hash = self._last_hash
 
             if last_hash.size == 0:
                 # Calculate hash of last frame
                 last_hash = self.hash_frame(
-                    frame_img=self._last_frame, hash_size=self._size, factor=self._factor)
+                    frame_img=self._last_frame, hash_size=self._size, factor=self._factor
+                )
 
             # Hamming distance is calculated to compare to last frame
             hash_dist = numpy.count_nonzero(curr_hash.flatten() != last_hash.flatten())
@@ -134,8 +136,9 @@ class HashDetector(SceneDetector):
 
             # We consider any frame over the threshold a new scene, but only if
             # the minimum scene length has been reached (otherwise it is ignored).
-            if hash_dist_norm >= self._threshold and ((frame_num - self._last_scene_cut)
-                                                      >= self._min_scene_len):
+            if hash_dist_norm >= self._threshold and (
+                (frame_num - self._last_scene_cut) >= self._min_scene_len
+            ):
                 cut_list.append(frame_num)
                 self._last_scene_cut = frame_num
 

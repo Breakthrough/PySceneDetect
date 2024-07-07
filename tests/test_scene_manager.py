@@ -38,8 +38,8 @@ def test_scene_list(test_video_file):
     sm.add_detector(ContentDetector())
 
     video_fps = video.frame_rate
-    start_time = FrameTimecode('00:00:05', video_fps)
-    end_time = FrameTimecode('00:00:15', video_fps)
+    start_time = FrameTimecode("00:00:05", video_fps)
+    end_time = FrameTimecode("00:00:15", video_fps)
 
     assert end_time.get_frames() > start_time.get_frames()
 
@@ -93,22 +93,27 @@ def test_save_images(test_video_file):
     sm = SceneManager()
     sm.add_detector(ContentDetector())
 
-    image_name_glob = 'scenedetect.tempfile.*.jpg'
-    image_name_template = ('scenedetect.tempfile.'
-                           '$SCENE_NUMBER.$IMAGE_NUMBER.$FRAME_NUMBER.'
-                           '$TIMESTAMP_MS.$TIMECODE')
+    image_name_glob = "scenedetect.tempfile.*.jpg"
+    image_name_template = (
+        "scenedetect.tempfile."
+        "$SCENE_NUMBER.$IMAGE_NUMBER.$FRAME_NUMBER."
+        "$TIMESTAMP_MS.$TIMECODE"
+    )
 
     try:
         video_fps = video.frame_rate
-        scene_list = [(FrameTimecode(start, video_fps), FrameTimecode(end, video_fps))
-                      for start, end in [(0, 100), (200, 300), (300, 400)]]
+        scene_list = [
+            (FrameTimecode(start, video_fps), FrameTimecode(end, video_fps))
+            for start, end in [(0, 100), (200, 300), (300, 400)]
+        ]
 
         image_filenames = save_images(
             scene_list=scene_list,
             video=video,
             num_images=3,
-            image_extension='jpg',
-            image_name_template=image_name_template)
+            image_extension="jpg",
+            image_name_template=image_name_template,
+        )
 
         # Ensure images got created, and the proper number got created.
         total_images = 0
@@ -128,19 +133,22 @@ def test_save_images(test_video_file):
 def test_save_images_zero_width_scene(test_video_file):
     """Test scenedetect.scene_manager.save_images guards against zero width scenes."""
     video = VideoStreamCv2(test_video_file)
-    image_name_glob = 'scenedetect.tempfile.*.jpg'
-    image_name_template = 'scenedetect.tempfile.$SCENE_NUMBER.$IMAGE_NUMBER'
+    image_name_glob = "scenedetect.tempfile.*.jpg"
+    image_name_template = "scenedetect.tempfile.$SCENE_NUMBER.$IMAGE_NUMBER"
     try:
         video_fps = video.frame_rate
-        scene_list = [(FrameTimecode(start, video_fps), FrameTimecode(end, video_fps))
-                      for start, end in [(0, 0), (1, 1), (2, 3)]]
+        scene_list = [
+            (FrameTimecode(start, video_fps), FrameTimecode(end, video_fps))
+            for start, end in [(0, 0), (1, 1), (2, 3)]
+        ]
         NUM_IMAGES = 10
         image_filenames = save_images(
             scene_list=scene_list,
             video=video,
             num_images=10,
-            image_extension='jpg',
-            image_name_template=image_name_template)
+            image_extension="jpg",
+            image_name_template=image_name_template,
+        )
         assert len(image_filenames) == 3
         assert all(len(image_filenames[scene]) == NUM_IMAGES for scene in image_filenames)
         total_images = 0
@@ -195,13 +203,14 @@ def test_detect_scenes_callback(test_video_file):
     fake_callback = FakeCallback()
 
     video_fps = video.frame_rate
-    start_time = FrameTimecode('00:00:05', video_fps)
-    end_time = FrameTimecode('00:00:15', video_fps)
+    start_time = FrameTimecode("00:00:05", video_fps)
+    end_time = FrameTimecode("00:00:15", video_fps)
     video.seek(start_time)
     sm.auto_downscale = True
 
     _ = sm.detect_scenes(
-        video=video, end_time=end_time, callback=fake_callback.get_callback_lambda())
+        video=video, end_time=end_time, callback=fake_callback.get_callback_lambda()
+    )
     scene_list = sm.get_scene_list()
     assert [start for start, end in scene_list] == TEST_VIDEO_START_FRAMES_ACTUAL
     assert fake_callback.scene_list == TEST_VIDEO_START_FRAMES_ACTUAL[1:]
@@ -231,13 +240,14 @@ def test_detect_scenes_callback_adaptive(test_video_file):
     fake_callback = FakeCallback()
 
     video_fps = video.frame_rate
-    start_time = FrameTimecode('00:00:05', video_fps)
-    end_time = FrameTimecode('00:00:15', video_fps)
+    start_time = FrameTimecode("00:00:05", video_fps)
+    end_time = FrameTimecode("00:00:15", video_fps)
     video.seek(start_time)
     sm.auto_downscale = True
 
     _ = sm.detect_scenes(
-        video=video, end_time=end_time, callback=fake_callback.get_callback_lambda())
+        video=video, end_time=end_time, callback=fake_callback.get_callback_lambda()
+    )
     scene_list = sm.get_scene_list()
     assert [start for start, end in scene_list] == TEST_VIDEO_START_FRAMES_ACTUAL
     assert fake_callback.scene_list == TEST_VIDEO_START_FRAMES_ACTUAL[1:]

@@ -10,7 +10,7 @@
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
-""" PySceneDetect scenedetect.backend.opencv Tests
+"""PySceneDetect scenedetect.backend.opencv Tests
 
 This file includes unit tests for the scenedetect.backend.opencv module that implements the
 VideoStreamCv2 ('opencv') backend. These tests validate behaviour specific to this backend.

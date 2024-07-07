@@ -70,8 +70,10 @@ class FrameRateUnavailable(VideoOpenFailure):
     rate is unavailable or cannot be calculated. Subclass of VideoOpenFailure."""
 
     def __init__(self):
-        super().__init__('Unable to obtain video framerate! Specify `framerate` manually, or'
-                         ' re-encode/re-mux the video and try again.')
+        super().__init__(
+            "Unable to obtain video framerate! Specify `framerate` manually, or"
+            " re-encode/re-mux the video and try again."
+        )
 
 
 ##
@@ -80,7 +82,7 @@ class FrameRateUnavailable(VideoOpenFailure):
 
 
 class VideoStream(ABC):
-    """ Interface which all video backends must implement. """
+    """Interface which all video backends must implement."""
 
     #
     # Default Implementations
@@ -192,7 +194,7 @@ class VideoStream(ABC):
 
     @abstractmethod
     def reset(self) -> None:
-        """ Close and re-open the VideoStream (equivalent to seeking back to beginning). """
+        """Close and re-open the VideoStream (equivalent to seeking back to beginning)."""
         raise NotImplementedError
 
     @abstractmethod

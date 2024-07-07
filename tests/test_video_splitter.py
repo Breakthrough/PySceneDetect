@@ -18,8 +18,12 @@ from pathlib import Path
 import pytest
 
 from scenedetect import open_video
-from scenedetect.video_splitter import (split_video_ffmpeg, is_ffmpeg_available, SceneMetadata,
-                                        VideoMetadata)
+from scenedetect.video_splitter import (
+    split_video_ffmpeg,
+    is_ffmpeg_available,
+    SceneMetadata,
+    VideoMetadata,
+)
 
 
 @pytest.mark.skipif(condition=not is_ffmpeg_available(), reason="ffmpeg is not available")
@@ -35,7 +39,7 @@ def test_split_video_ffmpeg_default(tmp_path, test_movie_clip):
     # The default filename format should be VIDEO_NAME-Scene-SCENE_NUMBER.mp4.
     video_name = Path(test_movie_clip).stem
     entries = sorted(tmp_path.glob(f"{video_name}-Scene-*"))
-    assert (len(entries) == len(scenes))
+    assert len(entries) == len(scenes)
 
 
 @pytest.mark.skipif(condition=not is_ffmpeg_available(), reason="ffmpeg is not available")
@@ -55,7 +59,7 @@ def test_split_video_ffmpeg_formatter(tmp_path, test_movie_clip):
     assert split_video_ffmpeg(test_movie_clip, scenes, tmp_path, formatter=name_formatter) == 0
     video_name = Path(test_movie_clip).stem
     entries = sorted(tmp_path.glob(f"abc{video_name}-123-*"))
-    assert (len(entries) == len(scenes))
+    assert len(entries) == len(scenes)
 
 
 # TODO: Add tests for `split_video_mkvmerge`.

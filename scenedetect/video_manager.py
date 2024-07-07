@@ -38,12 +38,12 @@ from scenedetect.backends.opencv import _get_aspect_ratio
 
 
 class VideoParameterMismatch(Exception):
-    """ VideoParameterMismatch: Raised when opening multiple videos with a VideoManager, and some
-    of the video parameters (frame height, frame width, and framerate/FPS) do not match. """
+    """VideoParameterMismatch: Raised when opening multiple videos with a VideoManager, and some
+    of the video parameters (frame height, frame width, and framerate/FPS) do not match."""
 
-    def __init__(self,
-                 file_list=None,
-                 message="OpenCV VideoCapture object parameters do not match."):
+    def __init__(
+        self, file_list=None, message="OpenCV VideoCapture object parameters do not match."
+    ):
         # type: (Iterable[Tuple[int, float, float, str, str]], str) -> None
         # Pass message string to base Exception class.
         super(VideoParameterMismatch, self).__init__(message)
@@ -54,13 +54,13 @@ class VideoParameterMismatch(Exception):
 
 
 class VideoDecodingInProgress(RuntimeError):
-    """ VideoDecodingInProgress: Raised when attempting to call certain VideoManager methods that
-    must be called *before* start() has been called. """
+    """VideoDecodingInProgress: Raised when attempting to call certain VideoManager methods that
+    must be called *before* start() has been called."""
 
 
 class InvalidDownscaleFactor(ValueError):
-    """ InvalidDownscaleFactor: Raised when trying to set invalid downscale factor,
-    i.e. the supplied downscale factor was not a positive integer greater than zero. """
+    """InvalidDownscaleFactor: Raised when trying to set invalid downscale factor,
+    i.e. the supplied downscale factor was not a positive integer greater than zero."""
 
 
 ##
@@ -75,12 +75,12 @@ def get_video_name(video_file: str) -> Tuple[str, str]:
         Tuple of the form [name, video_file].
     """
     if isinstance(video_file, int):
-        return ('Device %d' % video_file, video_file)
+        return ("Device %d" % video_file, video_file)
     return (os.path.split(video_file)[1], video_file)
 
 
 def get_num_frames(cap_list: Iterable[cv2.VideoCapture]) -> int:
-    """ Get Number of Frames: Returns total number of frames in the cap_list.
+    """Get Number of Frames: Returns total number of frames in the cap_list.
 
     Calls get(CAP_PROP_FRAME_COUNT) and returns the sum for all VideoCaptures.
     """
@@ -92,7 +92,7 @@ def open_captures(
     framerate: Optional[float] = None,
     validate_parameters: bool = True,
 ) -> Tuple[List[cv2.VideoCapture], float, Tuple[int, int]]:
-    """ Open Captures - helper function to open all capture objects, set the framerate,
+    """Open Captures - helper function to open all capture objects, set the framerate,
     and ensure that all open captures have been opened and the framerates match on a list
     of video file paths, or a list containing a single device ID.
 
@@ -139,11 +139,13 @@ def open_captures(
         raise TypeError("Expected type float for parameter framerate.")
     # Check if files exist if passed video file is not an image sequence
     # (checked with presence of % in filename) or not a URL (://).
-    if not is_device and any([
+    if not is_device and any(
+        [
             not os.path.exists(video_file)
             for video_file in video_files
-            if not ('%' in video_file or '://' in video_file)
-    ]):
+            if not ("%" in video_file or "://" in video_file)
+        ]
+    ):
         raise IOError("Video file(s) not found.")
     cap_list = []
 
@@ -155,11 +157,17 @@ def open_captures(
             raise VideoOpenFailure(str(closed_caps))
 
         cap_framerates = [cap.get(cv2.CAP_PROP_FPS) for cap in cap_list]
-        cap_framerate, check_framerate = validate_capture_framerate(video_names, cap_framerates,
-                                                                    framerate)
+        cap_framerate, check_framerate = validate_capture_framerate(
+            video_names, cap_framerates, framerate
+        )
         # Store frame sizes as integers (VideoCapture.get() returns float).
-        cap_frame_sizes = [(math.trunc(cap.get(cv2.CAP_PROP_FRAME_WIDTH)),
-                            math.trunc(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))) for cap in cap_list]
+        cap_frame_sizes = [
+            (
+                math.trunc(cap.get(cv2.CAP_PROP_FRAME_WIDTH)),
+                math.trunc(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)),
+            )
+            for cap in cap_list
+        ]
         cap_frame_size = cap_frame_sizes[0]
 
         # If we need to validate the parameters, we check that the FPS and width/height
@@ -169,7 +177,8 @@ def open_captures(
                 video_names=video_names,
                 cap_frame_sizes=cap_frame_sizes,
                 check_framerate=check_framerate,
-                cap_framerates=cap_framerates)
+                cap_framerates=cap_framerates,
+            )
 
     except:
         for cap in cap_list:
@@ -203,9 +212,11 @@ def validate_capture_framerate(
         else:
             raise TypeError("Expected float for framerate, got %s." % type(framerate).__name__)
     else:
-        unavailable_framerates = [(video_names[i][0], video_names[i][1])
-                                  for i, fps in enumerate(cap_framerates)
-                                  if fps < MAX_FPS_DELTA]
+        unavailable_framerates = [
+            (video_names[i][0], video_names[i][1])
+            for i, fps in enumerate(cap_framerates)
+            if fps < MAX_FPS_DELTA
+        ]
         if unavailable_framerates:
             raise FrameRateUnavailable()
     return (cap_framerate, check_framerate)
@@ -217,7 +228,7 @@ def validate_capture_parameters(
     check_framerate: bool = False,
     cap_framerates: Optional[List[float]] = None,
 ) -> None:
-    """ Validate Capture Parameters: Ensures that all passed capture frame sizes and (optionally)
+    """Validate Capture Parameters: Ensures that all passed capture frame sizes and (optionally)
     framerates are equal.  Raises VideoParameterMismatch if there is a mismatch.
 
     Raises:
@@ -226,20 +237,35 @@ def validate_capture_parameters(
     bad_params = []
     max_framerate_delta = MAX_FPS_DELTA
     # Check heights/widths match.
-    bad_params += [(cv2.CAP_PROP_FRAME_WIDTH, frame_size[0], cap_frame_sizes[0][0],
-                    video_names[i][0], video_names[i][1])
-                   for i, frame_size in enumerate(cap_frame_sizes)
-                   if abs(frame_size[0] - cap_frame_sizes[0][0]) > 0]
-    bad_params += [(cv2.CAP_PROP_FRAME_HEIGHT, frame_size[1], cap_frame_sizes[0][1],
-                    video_names[i][0], video_names[i][1])
-                   for i, frame_size in enumerate(cap_frame_sizes)
-                   if abs(frame_size[1] - cap_frame_sizes[0][1]) > 0]
+    bad_params += [
+        (
+            cv2.CAP_PROP_FRAME_WIDTH,
+            frame_size[0],
+            cap_frame_sizes[0][0],
+            video_names[i][0],
+            video_names[i][1],
+        )
+        for i, frame_size in enumerate(cap_frame_sizes)
+        if abs(frame_size[0] - cap_frame_sizes[0][0]) > 0
+    ]
+    bad_params += [
+        (
+            cv2.CAP_PROP_FRAME_HEIGHT,
+            frame_size[1],
+            cap_frame_sizes[0][1],
+            video_names[i][0],
+            video_names[i][1],
+        )
+        for i, frame_size in enumerate(cap_frame_sizes)
+        if abs(frame_size[1] - cap_frame_sizes[0][1]) > 0
+    ]
     # Check framerates if required.
     if check_framerate:
-        bad_params += [(cv2.CAP_PROP_FPS, fps, cap_framerates[0], video_names[i][0],
-                        video_names[i][1])
-                       for i, fps in enumerate(cap_framerates)
-                       if math.fabs(fps - cap_framerates[0]) > max_framerate_delta]
+        bad_params += [
+            (cv2.CAP_PROP_FPS, fps, cap_framerates[0], video_names[i][0], video_names[i][1])
+            for i, fps in enumerate(cap_framerates)
+            if math.fabs(fps - cap_framerates[0]) > max_framerate_delta
+        ]
 
     if bad_params:
         raise VideoParameterMismatch(bad_params)
@@ -256,12 +282,14 @@ class VideoManager(VideoStream):
     Provides a cv2.VideoCapture-like interface to a set of one or more video files,
     or a single device ID. Supports seeking and setting end time/duration."""
 
-    BACKEND_NAME = 'video_manager_do_not_use'
+    BACKEND_NAME = "video_manager_do_not_use"
 
-    def __init__(self,
-                 video_files: List[str],
-                 framerate: Optional[float] = None,
-                 logger=getLogger('pyscenedetect')):
+    def __init__(
+        self,
+        video_files: List[str],
+        framerate: Optional[float] = None,
+        logger=getLogger("pyscenedetect"),
+    ):
         """[DEPRECATED] DO NOT USE.
 
         Arguments:
@@ -292,7 +320,8 @@ class VideoManager(VideoStream):
         # These VideoCaptures are only open in this process.
         self._is_device = isinstance(video_files[0], int)
         self._cap_list, self._cap_framerate, self._cap_framesize = open_captures(
-            video_files=video_files, framerate=framerate)
+            video_files=video_files, framerate=framerate
+        )
         self._path = video_files[0] if not self._is_device else video_files
         self._end_of_video = False
         self._start_time = self.get_base_timecode()
@@ -303,9 +332,13 @@ class VideoManager(VideoStream):
         self._video_file_paths = video_files
         self._logger = logger
         if self._logger is not None:
-            self._logger.info('Loaded %d video%s, framerate: %.3f FPS, resolution: %d x %d',
-                              len(self._cap_list), 's' if len(self._cap_list) > 1 else '',
-                              self.get_framerate(), *self.get_framesize())
+            self._logger.info(
+                "Loaded %d video%s, framerate: %.3f FPS, resolution: %d x %d",
+                len(self._cap_list),
+                "s" if len(self._cap_list) > 1 else "",
+                self.get_framerate(),
+                *self.get_framesize(),
+            )
         self._started = False
         self._frame_length = self.get_base_timecode() + get_num_frames(self._cap_list)
         self._first_cap_len = self.get_base_timecode() + get_num_frames([self._cap_list[0]])
@@ -340,10 +373,10 @@ class VideoManager(VideoStream):
         """
         video_paths = self.get_video_paths()
         if not video_paths:
-            return ''
+            return ""
         video_name = os.path.basename(video_paths[0])
-        if video_name.rfind('.') >= 0:
-            video_name = video_name[:video_name.rfind('.')]
+        if video_name.rfind(".") >= 0:
+            video_name = video_name[: video_name.rfind(".")]
         return video_name
 
     def get_framerate(self) -> float:
@@ -380,7 +413,7 @@ class VideoManager(VideoStream):
         return FrameTimecode(timecode=0, fps=self._cap_framerate)
 
     def get_current_timecode(self) -> FrameTimecode:
-        """ Get Current Timecode - returns a FrameTimecode object at current VideoManager position.
+        """Get Current Timecode - returns a FrameTimecode object at current VideoManager position.
 
         Returns:
             Timecode at the current VideoManager position.
@@ -396,7 +429,7 @@ class VideoManager(VideoStream):
         return self._cap_framesize
 
     def get_framesize_effective(self) -> Tuple[int, int]:
-        """ Get Frame Size - returns the frame size of the video(s) open in the
+        """Get Frame Size - returns the frame size of the video(s) open in the
         VideoManager's capture objects.
 
         Returns:
@@ -404,11 +437,13 @@ class VideoManager(VideoStream):
         """
         return self._cap_framesize
 
-    def set_duration(self,
-                     duration: Optional[FrameTimecode] = None,
-                     start_time: Optional[FrameTimecode] = None,
-                     end_time: Optional[FrameTimecode] = None) -> None:
-        """ Set Duration - sets the duration/length of the video(s) to decode, as well as
+    def set_duration(
+        self,
+        duration: Optional[FrameTimecode] = None,
+        start_time: Optional[FrameTimecode] = None,
+        end_time: Optional[FrameTimecode] = None,
+    ) -> None:
+        """Set Duration - sets the duration/length of the video(s) to decode, as well as
         the start/end times.  Must be called before :meth:`start()` is called, otherwise
         a VideoDecodingInProgress exception will be thrown.  May be called after
         :meth:`reset()` as well.
@@ -432,9 +467,11 @@ class VideoManager(VideoStream):
             raise VideoDecodingInProgress()
 
         # Ensure any passed timecodes have the proper framerate.
-        if ((duration is not None and not duration.equal_framerate(self._cap_framerate))
-                or (start_time is not None and not start_time.equal_framerate(self._cap_framerate))
-                or (end_time is not None and not end_time.equal_framerate(self._cap_framerate))):
+        if (
+            (duration is not None and not duration.equal_framerate(self._cap_framerate))
+            or (start_time is not None and not start_time.equal_framerate(self._cap_framerate))
+            or (end_time is not None and not end_time.equal_framerate(self._cap_framerate))
+        ):
             raise ValueError("FrameTimecode framerate does not match.")
 
         if duration is not None and end_time is not None:
@@ -455,13 +492,15 @@ class VideoManager(VideoStream):
         self._frame_length -= self._start_time
 
         if self._logger is not None:
-            self._logger.info('Duration set, start: %s, duration: %s, end: %s.',
-                              start_time.get_timecode() if start_time is not None else start_time,
-                              duration.get_timecode() if duration is not None else duration,
-                              end_time.get_timecode() if end_time is not None else end_time)
+            self._logger.info(
+                "Duration set, start: %s, duration: %s, end: %s.",
+                start_time.get_timecode() if start_time is not None else start_time,
+                duration.get_timecode() if duration is not None else duration,
+                end_time.get_timecode() if end_time is not None else end_time,
+            )
 
     def get_duration(self) -> FrameTimecode:
-        """ Get Duration - gets the duration/length of the video(s) to decode,
+        """Get Duration - gets the duration/length of the video(s) to decode,
         as well as the start/end times.
 
         If the end time was not set by :meth:`set_duration()`, the end timecode
@@ -477,7 +516,7 @@ class VideoManager(VideoStream):
         return (self._frame_length, self._start_time, end_time)
 
     def start(self) -> None:
-        """ Start - starts video decoding and seeks to start time.  Raises
+        """Start - starts video decoding and seeks to start time.  Raises
         exception VideoDecodingInProgress if the method is called after the
         decoder process has already been started.
 
@@ -516,9 +555,9 @@ class VideoManager(VideoStream):
             ValueError: Either none or both `timecode` and `target` were set.
         """
         if timecode is None and target is None:
-            raise ValueError('`target` must be set.')
+            raise ValueError("`target` must be set.")
         if timecode is not None and target is not None:
-            raise ValueError('Only one of `timecode` or `target` can be set.')
+            raise ValueError("Only one of `timecode` or `target` can be set.")
         if target is not None:
             timecode = target
         assert timecode is not None
@@ -539,8 +578,8 @@ class VideoManager(VideoStream):
             # TODO: This should throw an exception instead of potentially failing silently
             # if no logger was provided.
             if self._logger is not None:
-                self._logger.error('Seeking past the first input video is not currently supported.')
-                self._logger.warning('Seeking to end of first input.')
+                self._logger.error("Seeking past the first input video is not currently supported.")
+                self._logger.warning("Seeking to end of first input.")
             timecode = self._first_cap_len
         if self._curr_cap is not None and self._end_of_video is not True:
             self._curr_cap.set(cv2.CAP_PROP_POS_FRAMES, timecode.get_frames() - 1)
@@ -554,14 +593,14 @@ class VideoManager(VideoStream):
     # pylint: enable=arguments-differ
 
     def release(self) -> None:
-        """ Release (cv2.VideoCapture method), releases all open capture(s). """
+        """Release (cv2.VideoCapture method), releases all open capture(s)."""
         for cap in self._cap_list:
             cap.release()
         self._cap_list = []
         self._started = False
 
     def reset(self) -> None:
-        """ Reset - Reopens captures passed to the constructor of the VideoManager.
+        """Reset - Reopens captures passed to the constructor of the VideoManager.
 
         Can only be called after the :meth:`release()` method has been called.
 
@@ -575,11 +614,12 @@ class VideoManager(VideoStream):
         self._end_of_video = False
         self._curr_time = self.get_base_timecode()
         self._cap_list, self._cap_framerate, self._cap_framesize = open_captures(
-            video_files=self._video_file_paths, framerate=self._curr_time.get_framerate())
+            video_files=self._video_file_paths, framerate=self._curr_time.get_framerate()
+        )
         self._curr_cap, self._curr_cap_idx = None, None
 
     def get(self, capture_prop: int, index: Optional[int] = None) -> Union[float, int]:
-        """ Get (cv2.VideoCapture method) - obtains capture properties from the current
+        """Get (cv2.VideoCapture method) - obtains capture properties from the current
         VideoCapture object in use.  Index represents the same index as the original
         video_files list passed to the constructor.  Getting/setting the position (POS)
         properties has no effect; seeking is implemented using VideoDecoder methods.
@@ -607,7 +647,7 @@ class VideoManager(VideoStream):
         return self._cap_list[index].get(capture_prop)
 
     def grab(self) -> bool:
-        """ Grab (cv2.VideoCapture method) - retrieves a frame but does not return it.
+        """Grab (cv2.VideoCapture method) - retrieves a frame but does not return it.
 
         Returns:
             bool: True if a frame was grabbed, False otherwise.
@@ -631,7 +671,7 @@ class VideoManager(VideoStream):
         return grabbed
 
     def retrieve(self) -> Tuple[bool, Optional[np.ndarray]]:
-        """ Retrieve (cv2.VideoCapture method) - retrieves and returns a frame.
+        """Retrieve (cv2.VideoCapture method) - retrieves and returns a frame.
 
         Frame returned corresponds to last call to :meth:`grab()`.
 
@@ -654,7 +694,7 @@ class VideoManager(VideoStream):
         return (retrieved, self._last_frame)
 
     def read(self, decode: bool = True, advance: bool = True) -> Union[np.ndarray, bool]:
-        """ Return next frame (or current if advance = False), or False if end of video.
+        """Return next frame (or current if advance = False), or False if end of video.
 
         Arguments:
             decode: Decode and return the frame.
@@ -690,7 +730,7 @@ class VideoManager(VideoStream):
             return True
 
     def _correct_frame_length(self) -> None:
-        """ Checks if the current frame position exceeds that originally calculated,
+        """Checks if the current frame position exceeds that originally calculated,
         and adjusts the internally calculated frame length accordingly.  Called after
         exhausting all input frames from the video source(s).
         """
@@ -749,8 +789,10 @@ class VideoManager(VideoStream):
     @property
     def frame_size(self) -> Tuple[int, int]:
         """Size of each video frame in pixels as a tuple of (width, height)."""
-        return (math.trunc(self._cap_list[0].get(cv2.CAP_PROP_FRAME_WIDTH)),
-                math.trunc(self._cap_list[0].get(cv2.CAP_PROP_FRAME_HEIGHT)))
+        return (
+            math.trunc(self._cap_list[0].get(cv2.CAP_PROP_FRAME_WIDTH)),
+            math.trunc(self._cap_list[0].get(cv2.CAP_PROP_FRAME_HEIGHT)),
+        )
 
     @property
     def is_seekable(self) -> bool:
