@@ -1,5 +1,5 @@
-# Use YAPF to format PySceneDetect.
-name: Check Code Format
+# Check PySceneDetect code lint warnings and formatting.
+name: Static Analysis
 
 on:
   pull_request:
@@ -13,7 +13,6 @@ on:
 
 jobs:
   check_format:
-
     runs-on: ubuntu-latest
 
     steps:
@@ -24,17 +23,22 @@ jobs:
           python-version: '3.12'
           cache: 'pip'
 
-      - name: Update pip
-        run: python -m pip install --upgrade pip
-      - name: Install yapf
-        run: python -m pip install --upgrade yapf toml
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install av opencv-python-headless --only-binary ":all:"
+          python -m pip install -r requirements_headless.txt
 
-      - name: Install Binary Dependencies
-        run: python -m pip install av opencv-python-headless --only-binary ":all:"
-      - name: Install Remaining Dependencies
-        run: python -m pip install -r requirements_headless.txt
+      - name: Check Code Format (yapf)
+        if: ${{ hashFiles('.style.yapf') != '' }}
+        run: |
+          python -m pip install --upgrade yapf toml
+          python -m yapf --diff --recursive scenedetect/ tests/
 
-      - name: Check Code Format (scenedetect)
-        run: python -m yapf --diff --recursive scenedetect/
-      - name: Check Code Format (tests)
-        run: python -m yapf --diff --recursive tests/
+      - name: Static Analysis (ruff)
+        if: ${{ hashFiles('.style.yapf') == '' }}
+        run: |
+          python -m pip install --upgrade ruff
+          python -m ruff check
+          python -m ruff format --check
+
