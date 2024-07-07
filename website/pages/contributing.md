@@ -12,8 +12,8 @@ Development of PySceneDetect happens on [github.com/Breakthrough/PySceneDetect](
 The following checklist covers the basics of pre-submission requirements:
 
  - Code passes all unit tests (run `pytest`)
- - Code is formatted (run `python -m yapf -i -r scenedetect/ tests/` to format in place)
- - Generally follows the [Google Python Style Guide](https://google.github.io/styleguide/pyguide.html)
+ - Code passes static analysis and formatting checks (`ruff check` and `ruff format`)
+ - Follows the [Google Python Style Guide](https://google.github.io/styleguide/pyguide.html)
 
 Note that PySceneDetect is released under the BSD 3-Clause license, and submitted code should comply with this license (see [License & Copyright Information](copyright.md) for details).
 

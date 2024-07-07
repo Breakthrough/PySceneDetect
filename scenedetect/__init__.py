@@ -14,7 +14,6 @@
 can be used to open a video for a
 :class:`SceneManager <scenedetect.scene_manager.SceneManager>`.
 """
-# ruff: noqa: I001
 
 from logging import getLogger
 from typing import List, Optional, Tuple, Union
@@ -31,7 +30,7 @@ except ModuleNotFoundError as ex:
     ) from ex
 
 # Commonly used classes/functions exported under the `scenedetect` namespace for brevity.
-from scenedetect.platform import init_logger
+from scenedetect.platform import init_logger  # noqa: I001
 from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.video_stream import VideoStream, VideoOpenFailure
 from scenedetect.video_splitter import split_video_ffmpeg, split_video_mkvmerge
@@ -52,9 +51,7 @@ from scenedetect.backends import (
 )
 from scenedetect.stats_manager import StatsManager, StatsFileCorrupt
 from scenedetect.scene_manager import SceneManager, save_images
-
-# [DEPRECATED] DO NOT USE.
-from scenedetect.video_manager import VideoManager
+from scenedetect.video_manager import VideoManager  # [DEPRECATED] DO NOT USE.
 
 # Used for module identification and when printing version & about info
 # (e.g. calling `scenedetect version` or `scenedetect about`).

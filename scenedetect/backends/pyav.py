@@ -14,7 +14,6 @@
 from logging import getLogger
 from typing import AnyStr, BinaryIO, Optional, Tuple, Union
 
-# pylint: disable=c-extension-no-member
 import av
 import numpy as np
 

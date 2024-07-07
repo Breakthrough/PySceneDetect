@@ -32,7 +32,6 @@ import numpy
 from scenedetect.stats_manager import StatsManager
 
 
-# pylint: disable=unused-argument, no-self-use
 class SceneDetector:
     """Base class to inherit from when implementing a scene detection algorithm.
 
@@ -184,7 +183,7 @@ class FlashFilter:
             return self._filter_merge(frame_num=frame_num, above_threshold=above_threshold)
         elif self._mode == FlashFilter.Mode.SUPPRESS:
             return self._filter_suppress(frame_num=frame_num, above_threshold=above_threshold)
-        assert False, "unhandled FlashFilter Mode!"
+        raise RuntimeError("Unhandled FlashFilter mode.")
 
     def _filter_suppress(self, frame_num: int, above_threshold: bool) -> ty.List[int]:
         min_length_met: bool = (frame_num - self._last_above) >= self._filter_length

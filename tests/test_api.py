@@ -17,8 +17,6 @@ Python environment. When processing longer videos, it is useful to set `show_pro
 when calling `detect()` or `detect_scenes()`.
 """
 
-# pylint: disable=import-outside-toplevel, redefined-outer-name, unused-argument
-
 
 def test_api_detect(test_video_file: str):
     """Demonstrate usage of the `detect()` function to process a complete video."""

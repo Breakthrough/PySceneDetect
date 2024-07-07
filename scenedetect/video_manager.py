@@ -287,7 +287,7 @@ class VideoManager(VideoStream):
         self,
         video_files: List[str],
         framerate: Optional[float] = None,
-        logger=getLogger("pyscenedetect"),
+        logger=None,
     ):
         """[DEPRECATED] DO NOT USE.
 
@@ -310,6 +310,8 @@ class VideoManager(VideoStream):
         """
         # TODO(v0.7): Add DeprecationWarning that this class will be removed in v0.8: 'VideoManager
         # will be removed in PySceneDetect v0.8. Use VideoStreamCv2 or VideoCaptureAdapter instead.'
+        if logger is None:
+            logger = getLogger("pyscenedetect")
         logger.error("VideoManager is deprecated and will be removed.")
         if not video_files:
             raise ValueError("At least one string/integer must be passed in the video_files list.")
@@ -535,7 +537,6 @@ class VideoManager(VideoStream):
     # This overrides the seek method from the VideoStream interface, but the name was changed
     # from `timecode` to `target`. For compatibility, we allow calling seek with the form
     # seek(0), seek(timecode=0), and seek(target=0). Specifying both arguments is an error.
-    # pylint: disable=arguments-differ
     def seek(self, timecode: FrameTimecode = None, target: FrameTimecode = None) -> bool:
         """Seek forwards to the passed timecode.
 
@@ -588,8 +589,6 @@ class VideoManager(VideoStream):
             if not self.grab():
                 return False
         return True
-
-    # pylint: enable=arguments-differ
 
     def release(self) -> None:
         """Release (cv2.VideoCapture method), releases all open capture(s)."""

@@ -102,7 +102,6 @@ def check_split_video_requirements(use_mkvmerge: bool) -> None:
         raise click.BadParameter(error_str, param_hint="split-video")
 
 
-# pylint: disable=too-many-instance-attributes,too-many-arguments,too-many-locals
 class CliContext:
     """Context of the command-line interface and config file parameters passed between sub-commands.
 
@@ -324,7 +323,7 @@ class CliContext:
                 scene_manager.downscale = downscale
             except ValueError as ex:
                 logger.debug(str(ex))
-                raise click.BadParameter(str(ex), param_hint="downscale factor")
+                raise click.BadParameter(str(ex), param_hint="downscale factor") from None
         scene_manager.interpolation = Interpolation[
             self.config.get_value("global", "downscale-method").upper()
         ]
@@ -357,7 +356,7 @@ class CliContext:
                 weights = ContentDetector.Components(*weights)
             except ValueError as ex:
                 logger.debug(str(ex))
-                raise click.BadParameter(str(ex), param_hint="weights")
+                raise click.BadParameter(str(ex), param_hint="weights") from None
 
         return {
             "weights": self.config.get_value("detect-content", "weights", weights),
@@ -415,7 +414,7 @@ class CliContext:
                 weights = ContentDetector.Components(*weights)
             except ValueError as ex:
                 logger.debug(str(ex))
-                raise click.BadParameter(str(ex), param_hint="weights")
+                raise click.BadParameter(str(ex), param_hint="weights") from None
         return {
             "adaptive_threshold": self.config.get_value("detect-adaptive", "threshold", threshold),
             "weights": self.config.get_value("detect-adaptive", "weights", weights),
@@ -903,7 +902,9 @@ class CliContext:
                 param_hint="-i/--input",
             ) from ex
         except OSError as ex:
-            raise click.BadParameter("Input error:\n\n\t%s\n" % str(ex), param_hint="-i/--input")
+            raise click.BadParameter(
+                "Input error:\n\n\t%s\n" % str(ex), param_hint="-i/--input"
+            ) from None
 
     def _on_duplicate_command(self, command: str) -> None:
         """Called when a command is duplicated to stop parsing and raise an error.
