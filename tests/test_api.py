@@ -24,59 +24,79 @@ when calling `detect()` or `detect_scenes()`.
 def test_api_detect(test_video_file: str):
     """Demonstrate usage of the `detect()` function to process a complete video."""
     from scenedetect import detect, ContentDetector
+
     scene_list = detect(test_video_file, ContentDetector())
     for i, scene in enumerate(scene_list):
-        print('Scene %d: %s - %s' % (i + 1, scene[0].get_timecode(), scene[1].get_timecode()))
+        print(
+            "Scene %d: %s - %s"
+            % (i + 1, scene[0].get_timecode(), scene[1].get_timecode())
+        )
 
 
 def test_api_detect_start_end_time(test_video_file: str):
     """Demonstrate usage of the `detect()` function to process a subset of a video."""
     from scenedetect import detect, ContentDetector
+
     # Times can be seconds (float), frames (int), or timecode 'HH:MM:SSS.nnn' (str).
     # See test_api_timecode_types() for examples of each format.
-    scene_list = detect(test_video_file, ContentDetector(), start_time=10.5, end_time=15.9)
+    scene_list = detect(
+        test_video_file, ContentDetector(), start_time=10.5, end_time=15.9
+    )
     for i, scene in enumerate(scene_list):
-        print('Scene %d: %s - %s' % (i + 1, scene[0].get_timecode(), scene[1].get_timecode()))
+        print(
+            "Scene %d: %s - %s"
+            % (i + 1, scene[0].get_timecode(), scene[1].get_timecode())
+        )
 
 
 def test_api_detect_stats(test_video_file: str):
     """Demonstrate usage of the `detect()` function to generate a statsfile."""
     from scenedetect import detect, ContentDetector
+
     detect(test_video_file, ContentDetector(), stats_file_path="frame_metrics.csv")
 
 
 def test_api_scene_manager(test_video_file: str):
     """Demonstrate how to use a SceneManager to implement a function similar to `detect()`."""
     from scenedetect import SceneManager, ContentDetector, open_video
+
     video = open_video(test_video_file)
     scene_manager = SceneManager()
     scene_manager.add_detector(ContentDetector())
     scene_manager.detect_scenes(video=video)
     scene_list = scene_manager.get_scene_list()
     for i, scene in enumerate(scene_list):
-        print('Scene %d: %s - %s' % (i + 1, scene[0].get_timecode(), scene[1].get_timecode()))
+        print(
+            "Scene %d: %s - %s"
+            % (i + 1, scene[0].get_timecode(), scene[1].get_timecode())
+        )
 
 
 def test_api_scene_manager_start_end_time(test_video_file: str):
     """Demonstrate how to use a SceneManager to process a subset of the input video."""
     from scenedetect import SceneManager, ContentDetector, open_video
+
     video = open_video(test_video_file)
     scene_manager = SceneManager()
     scene_manager.add_detector(ContentDetector())
     # Times can be seconds (float), frames (int), or timecode 'HH:MM:SSS.nnn' (str).
     # See test_api_timecode_types() for examples of each format.
-    start_time = 200 # Start at frame (int) 200
+    start_time = 200  # Start at frame (int) 200
     end_time = 15.0  # End at 15 seconds (float)
     video.seek(start_time)
     scene_manager.detect_scenes(video=video, end_time=end_time)
     scene_list = scene_manager.get_scene_list()
     for i, scene in enumerate(scene_list):
-        print('Scene %d: %s - %s' % (i + 1, scene[0].get_timecode(), scene[1].get_timecode()))
+        print(
+            "Scene %d: %s - %s"
+            % (i + 1, scene[0].get_timecode(), scene[1].get_timecode())
+        )
 
 
 def test_api_timecode_types():
     """Demonstrate all different types of timecodes that can be used."""
     from scenedetect import FrameTimecode
+
     base_timecode = FrameTimecode(timecode=0, fps=10.0)
     # Frames (int)
     timecode = base_timecode + 1
@@ -85,22 +105,23 @@ def test_api_timecode_types():
     timecode = base_timecode + 1.0
     assert timecode.get_frames() == 10
     # Timecode (str, 'HH:MM:SS' or 'HH:MM:SSS.nnn')
-    timecode = base_timecode + '00:00:01.500'
+    timecode = base_timecode + "00:00:01.500"
     assert timecode.get_frames() == 15
     # Seconds (str, 'SSSs' or 'SSSS.SSSs')
-    timecode = base_timecode + '1.5s'
+    timecode = base_timecode + "1.5s"
     assert timecode.get_frames() == 15
 
 
 def test_api_stats_manager(test_video_file: str):
     """Demonstrate using a StatsManager to save per-frame statistics to disk."""
     from scenedetect import SceneManager, StatsManager, ContentDetector, open_video
+
     video = open_video(test_video_file)
     scene_manager = SceneManager(stats_manager=StatsManager())
     scene_manager.add_detector(ContentDetector())
     scene_manager.detect_scenes(video=video)
     # Save per-frame statistics to disk.
-    filename = '%s.stats.csv' % test_video_file
+    filename = "%s.stats.csv" % test_video_file
     scene_manager.stats_manager.save_to_csv(csv_file=filename)
 
 
@@ -139,4 +160,6 @@ def test_api_device_callback(test_video_file: str):
     total_frames = 1000
     scene_manager = SceneManager()
     scene_manager.add_detector(ContentDetector())
-    scene_manager.detect_scenes(video=video, duration=total_frames, callback=on_new_scene)
+    scene_manager.detect_scenes(
+        video=video, duration=total_frames, callback=on_new_scene
+    )

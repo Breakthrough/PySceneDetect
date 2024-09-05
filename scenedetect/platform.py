@@ -88,7 +88,7 @@ except ModuleNotFoundError:
 
 # TODO: Move this into scene_manager.
 def get_cv2_imwrite_params() -> Dict[str, Union[int, None]]:
-    """ Get OpenCV imwrite Params: Returns a dict of supported image formats and
+    """Get OpenCV imwrite Params: Returns a dict of supported image formats and
     their associated quality/compression parameter index, or None if that format
     is not supported.
 
@@ -100,7 +100,7 @@ def get_cv2_imwrite_params() -> Dict[str, Union[int, None]]:
     """
 
     def _get_cv2_param(param_name: str) -> Union[int, None]:
-        if param_name.startswith('CV_'):
+        if param_name.startswith("CV_"):
             param_name = param_name[3:]
         try:
             return getattr(cv2, param_name)
@@ -108,9 +108,9 @@ def get_cv2_imwrite_params() -> Dict[str, Union[int, None]]:
             return None
 
     return {
-        'jpg': _get_cv2_param('IMWRITE_JPEG_QUALITY'),
-        'png': _get_cv2_param('IMWRITE_PNG_COMPRESSION'),
-        'webp': _get_cv2_param('IMWRITE_WEBP_QUALITY')
+        "jpg": _get_cv2_param("IMWRITE_JPEG_QUALITY"),
+        "png": _get_cv2_param("IMWRITE_PNG_COMPRESSION"),
+        "webp": _get_cv2_param("IMWRITE_WEBP_QUALITY"),
     }
 
 
@@ -128,14 +128,16 @@ def get_file_name(file_path: AnyStr, include_extension=True) -> AnyStr:
     file_name = os.path.basename(file_path)
     if not include_extension:
         file_name = str(file_name)
-        last_dot_pos = file_name.rfind('.')
+        last_dot_pos = file_name.rfind(".")
         if last_dot_pos >= 0:
             file_name = file_name[:last_dot_pos]
     return file_name
 
 
-def get_and_create_path(file_path: AnyStr, output_directory: Optional[AnyStr] = None) -> AnyStr:
-    """ Get & Create Path: Gets and returns the full/absolute path to file_path
+def get_and_create_path(
+    file_path: AnyStr, output_directory: Optional[AnyStr] = None
+) -> AnyStr:
+    """Get & Create Path: Gets and returns the full/absolute path to file_path
     in the specified output_directory if set, creating any required directories
     along the way.
 
@@ -167,9 +169,11 @@ def get_and_create_path(file_path: AnyStr, output_directory: Optional[AnyStr] = 
 ##
 
 
-def init_logger(log_level: int = logging.INFO,
-                show_stdout: bool = False,
-                log_file: Optional[str] = None):
+def init_logger(
+    log_level: int = logging.INFO,
+    show_stdout: bool = False,
+    log_file: Optional[str] = None,
+):
     """Initializes logging for PySceneDetect. The logger instance used is named 'pyscenedetect'.
     By default the logger has no handlers to suppress output. All existing log handlers are replaced
     every time this function is invoked.
@@ -181,10 +185,10 @@ def init_logger(log_level: int = logging.INFO,
         log_file: If set, add handler to dump debug log messages to given file path.
     """
     # Format of log messages depends on verbosity.
-    INFO_TEMPLATE = '[PySceneDetect] %(message)s'
-    DEBUG_TEMPLATE = '%(levelname)s: %(module)s.%(funcName)s(): %(message)s'
+    INFO_TEMPLATE = "[PySceneDetect] %(message)s"
+    DEBUG_TEMPLATE = "%(levelname)s: %(module)s.%(funcName)s(): %(message)s"
     # Get the named logger and remove any existing handlers.
-    logger_instance = logging.getLogger('pyscenedetect')
+    logger_instance = logging.getLogger("pyscenedetect")
     logger_instance.handlers = []
     logger_instance.setLevel(log_level)
     # Add stdout handler if required.
@@ -192,7 +196,10 @@ def init_logger(log_level: int = logging.INFO,
         handler = logging.StreamHandler(stream=sys.stdout)
         handler.setLevel(log_level)
         handler.setFormatter(
-            logging.Formatter(fmt=DEBUG_TEMPLATE if log_level == logging.DEBUG else INFO_TEMPLATE))
+            logging.Formatter(
+                fmt=DEBUG_TEMPLATE if log_level == logging.DEBUG else INFO_TEMPLATE
+            )
+        )
         logger_instance.addHandler(handler)
     # Add debug log handler if required.
     if log_file:
@@ -230,12 +237,12 @@ def invoke_command(args: List[str]) -> int:
     try:
         return subprocess.call(args)
     except OSError as err:
-        if os.name != 'nt':
+        if os.name != "nt":
             raise
         exception_string = str(err)
         # Error 206: The filename or extension is too long
         # Error 87:  The parameter is incorrect
-        to_match = ('206', '87')
+        to_match = ("206", "87")
         if any([x in exception_string for x in to_match]):
             raise CommandTooLong() from err
         raise
@@ -247,8 +254,8 @@ def get_ffmpeg_path() -> Optional[str]:
     """
     # Try invoking ffmpeg with the current environment.
     try:
-        subprocess.call(['ffmpeg', '-v', 'quiet'])
-        return 'ffmpeg'
+        subprocess.call(["ffmpeg", "-v", "quiet"])
+        return "ffmpeg"
     except OSError:
         pass  # Failed to invoke ffmpeg with current environment, try another possibility.
 
@@ -256,8 +263,9 @@ def get_ffmpeg_path() -> Optional[str]:
     try:
         # pylint: disable=import-outside-toplevel
         from imageio_ffmpeg import get_ffmpeg_exe
+
         # pylint: enable=import-outside-toplevel
-        subprocess.call([get_ffmpeg_exe(), '-v', 'quiet'])
+        subprocess.call([get_ffmpeg_exe(), "-v", "quiet"])
         return get_ffmpeg_exe()
     # Gracefully handle case where imageio_ffmpeg is not available.
     except ModuleNotFoundError:
@@ -278,9 +286,9 @@ def get_ffmpeg_version() -> Optional[str]:
     if ffmpeg_path is None:
         return None
     # If get_ffmpeg_path() returns a value, the path it returns should be invocable.
-    output = subprocess.check_output(args=[ffmpeg_path, '-version'], text=True)
+    output = subprocess.check_output(args=[ffmpeg_path, "-version"], text=True)
     output_split = output.split()
-    if len(output_split) >= 3 and output_split[1] == 'version':
+    if len(output_split) >= 3 and output_split[1] == "version":
         return output_split[2]
     # If parsing the version fails, return the entire first line of output.
     return output.splitlines()[0]
@@ -288,15 +296,15 @@ def get_ffmpeg_version() -> Optional[str]:
 
 def get_mkvmerge_version() -> Optional[str]:
     """Get mkvmerge version identifier, or None if mkvmerge is not found in PATH."""
-    tool_name = 'mkvmerge'
+    tool_name = "mkvmerge"
     try:
-        output = subprocess.check_output(args=[tool_name, '--version'], text=True)
+        output = subprocess.check_output(args=[tool_name, "--version"], text=True)
     except FileNotFoundError:
         # mkvmerge doesn't exist on the system
         return None
     output_split = output.split()
     if len(output_split) >= 1 and output_split[0] == tool_name:
-        return ' '.join(output_split[1:])
+        return " ".join(output_split[1:])
     # If parsing the version fails, return the entire first line of output.
     return output.splitlines()[0]
 
@@ -307,31 +315,32 @@ def get_system_version_info() -> str:
 
     Used for the `scenedetect version -a` command.
     """
-    output_template = '{:<12} {}'
-    line_separator = '-' * 60
-    not_found_str = 'Not Installed'
+    output_template = "{:<12} {}"
+    line_separator = "-" * 60
+    not_found_str = "Not Installed"
     out_lines = []
 
     # System (Python, OS)
-    out_lines += ['System Info', line_separator]
+    out_lines += ["System Info", line_separator]
     out_lines += [
-        output_template.format(name, version) for name, version in (
-            ('OS', '%s' % platform.platform()),
-            ('Python', '%d.%d.%d' % sys.version_info[0:3]),
+        output_template.format(name, version)
+        for name, version in (
+            ("OS", "%s" % platform.platform()),
+            ("Python", "%d.%d.%d" % sys.version_info[0:3]),
         )
     ]
 
     # Third-Party Packages
-    out_lines += ['', 'Packages', line_separator]
+    out_lines += ["", "Packages", line_separator]
     third_party_packages = (
-        'av',
-        'click',
-        'cv2',
-        'moviepy',
-        'numpy',
-        'platformdirs',
-        'scenedetect',
-        'tqdm',
+        "av",
+        "click",
+        "cv2",
+        "moviepy",
+        "numpy",
+        "platformdirs",
+        "scenedetect",
+        "tqdm",
     )
     for module_name in third_party_packages:
         try:
@@ -341,21 +350,25 @@ def get_system_version_info() -> str:
             out_lines.append(output_template.format(module_name, not_found_str))
 
     # External Tools
-    out_lines += ['', 'Tools', line_separator]
+    out_lines += ["", "Tools", line_separator]
 
     tool_version_info = (
-        ('ffmpeg', get_ffmpeg_version()),
-        ('mkvmerge', get_mkvmerge_version()),
+        ("ffmpeg", get_ffmpeg_version()),
+        ("mkvmerge", get_mkvmerge_version()),
     )
 
-    for (tool_name, tool_version) in tool_version_info:
+    for tool_name, tool_version in tool_version_info:
         out_lines.append(
-            output_template.format(tool_name, tool_version if tool_version else not_found_str))
+            output_template.format(
+                tool_name, tool_version if tool_version else not_found_str
+            )
+        )
 
-    return '\n'.join(out_lines)
+    return "\n".join(out_lines)
 
 
 class Template(string.Template):
     """Template matcher used to replace instances of $TEMPLATES in filenames."""
-    idpattern = '[A-Z0-9_]+'
+
+    idpattern = "[A-Z0-9_]+"
     flags = re.ASCII

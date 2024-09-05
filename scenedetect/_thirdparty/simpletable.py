@@ -56,9 +56,11 @@ import codecs
 def quote(string):
     try:
         from urllib.parse import quote
+
         return quote(string)
     except ModuleNotFoundError:
         from urllib import pathname2url
+
         return pathname2url(string)
 
 
@@ -82,9 +84,9 @@ class SimpleTableCell(object):
     def __str__(self):
         """Return the HTML code for the table cell."""
         if self.header:
-            return '<th>%s</th>' % (self.text)
+            return "<th>%s</th>" % (self.text)
         else:
-            return '<td>%s</td>' % (self.text)
+            return "<td>%s</td>" % (self.text)
 
 
 class SimpleTableImage(object):
@@ -121,7 +123,7 @@ class SimpleTableImage(object):
             output += ' height="%s"' % (self.height)
         if self.width:
             output += ' width="%s"' % (self.width)
-        output += '></a>'
+        output += "></a>"
 
         return output
 
@@ -161,14 +163,14 @@ class SimpleTableRow(object):
         """Return the HTML code for the table row and its cells as a string."""
         row = []
 
-        row.append('<tr>')
+        row.append("<tr>")
 
         for cell in self.cells:
             row.append(str(cell))
 
-        row.append('</tr>')
+        row.append("</tr>")
 
-        return '\n'.join(row)
+        return "\n".join(row)
 
     def __iter__(self):
         """Iterate through row cells"""
@@ -232,9 +234,9 @@ class SimpleTable(object):
         table = []
 
         if self.css_class:
-            table.append('<table class=%s>' % self.css_class)
+            table.append("<table class=%s>" % self.css_class)
         else:
-            table.append('<table>')
+            table.append("<table>")
 
         if self.header_row:
             table.append(str(self.header_row))
@@ -242,9 +244,9 @@ class SimpleTable(object):
         for row in self.rows:
             table.append(str(row))
 
-        table.append('</table>')
+        table.append("</table>")
 
-        return '\n'.join(table)
+        return "\n".join(table)
 
     def __iter__(self):
         """Iterate through table rows"""
@@ -285,14 +287,16 @@ class HTMLPage(object):
             page.append('<style type="text/css">\n%s\n</style>' % self.css)
 
         # Set encoding
-        page.append('<meta http-equiv="Content-Type" content="text/html;'
-                    'charset=%s">' % self.encoding)
+        page.append(
+            '<meta http-equiv="Content-Type" content="text/html;'
+            'charset=%s">' % self.encoding
+        )
 
         for table in self.tables:
             page.append(str(table))
-            page.append('<br />')
+            page.append("<br />")
 
-        return '\n'.join(page)
+        return "\n".join(page)
 
     def __iter__(self):
         """Iterate through tables"""
@@ -301,7 +305,7 @@ class HTMLPage(object):
 
     def save(self, filename):
         """Save HTML page to a file using the proper encoding"""
-        with codecs.open(filename, 'w', self.encoding) as outfile:
+        with codecs.open(filename, "w", self.encoding) as outfile:
             for line in str(self):
                 outfile.write(line)
 
@@ -324,4 +328,4 @@ def fit_data_to_columns(data, num_cols):
     if len(data) % num_cols != 0:
         num_iterations += 1
 
-    return [data[num_cols * i:num_cols * i + num_cols] for i in range(num_iterations)]
+    return [data[num_cols * i : num_cols * i + num_cols] for i in range(num_iterations)]

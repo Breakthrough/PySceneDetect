@@ -29,9 +29,11 @@ class HistogramDetector(SceneDetector):
     """Compares the difference in the Y channel of YUV histograms for adjacent frames. When the
     difference exceeds a given threshold, a cut is detected."""
 
-    METRIC_KEYS = ['hist_diff']
+    METRIC_KEYS = ["hist_diff"]
 
-    def __init__(self, threshold: float = 0.05, bins: int = 256, min_scene_len: int = 15):
+    def __init__(
+        self, threshold: float = 0.05, bins: int = 256, min_scene_len: int = 15
+    ):
         """
         Arguments:
             threshold: maximum relative difference between 0.0 and 1.0 that the histograms can
@@ -71,10 +73,12 @@ class HistogramDetector(SceneDetector):
         np_data_type = frame_img.dtype
 
         if np_data_type != numpy.uint8:
-            raise ValueError('Image must be 8-bit rgb for HistogramDetector')
+            raise ValueError("Image must be 8-bit rgb for HistogramDetector")
 
         if frame_img.shape[2] != 3:
-            raise ValueError('Image must have three color channels for HistogramDetector')
+            raise ValueError(
+                "Image must have three color channels for HistogramDetector"
+            )
 
         # Initialize last scene cut point at the beginning of the frames of interest.
         if not self._last_scene_cut:
@@ -84,7 +88,7 @@ class HistogramDetector(SceneDetector):
 
         # We can only start detecting once we have a frame to compare with.
         if self._last_hist is not None:
-            #TODO: We can have EMA of histograms to make it more robust
+            # TODO: We can have EMA of histograms to make it more robust
             # ema_hist = alpha * hist + (1 - alpha) * ema_hist
 
             # Compute histogram difference between frames
@@ -97,8 +101,9 @@ class HistogramDetector(SceneDetector):
             # Values close to 1 indicate very similar frames, while lower values suggest changes.
             # Example: If `_threshold` is set to 0.8, it implies that only changes resulting in a correlation
             # less than 0.8 between histograms will be considered significant enough to denote a scene change.
-            if hist_diff <= self._threshold and ((frame_num - self._last_scene_cut)
-                                                 >= self._min_scene_len):
+            if hist_diff <= self._threshold and (
+                (frame_num - self._last_scene_cut) >= self._min_scene_len
+            ):
                 cut_list.append(frame_num)
                 self._last_scene_cut = frame_num
 
@@ -111,9 +116,9 @@ class HistogramDetector(SceneDetector):
         return cut_list
 
     @staticmethod
-    def calculate_histogram(frame_img: numpy.ndarray,
-                            bins: int = 256,
-                            normalize: bool = True) -> numpy.ndarray:
+    def calculate_histogram(
+        frame_img: numpy.ndarray, bins: int = 256, normalize: bool = True
+    ) -> numpy.ndarray:
         """
         Calculates and optionally normalizes the histogram of the luma (Y) channel of an image
         converted from BGR to YUV color space.

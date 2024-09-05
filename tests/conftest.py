@@ -10,7 +10,7 @@
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
-""" PySceneDetect Test Configuration
+"""PySceneDetect Test Configuration
 
 This file includes all pytest configuration for running PySceneDetect's tests.
 
@@ -39,19 +39,22 @@ import pytest
 
 
 def check_exists(path: AnyStr) -> AnyStr:
-    """ Returns the absolute path to a (relative) path of a file that
+    """Returns the absolute path to a (relative) path of a file that
     should exist within the tests/ directory.
 
     Throws FileNotFoundError if the file could not be found.
     """
     if not os.path.exists(path):
-        raise FileNotFoundError("""
+        raise FileNotFoundError(
+            """
 Test video file (%s) must be present to run test case. This file can be obtained by running the following commands from the root of the repository:
 
 git fetch --depth=1 https://github.com/Breakthrough/PySceneDetect.git refs/heads/resources:refs/remotes/origin/resources
 git checkout refs/remotes/origin/resources -- tests/resources/
 git reset
-""" % path)
+"""
+            % path
+        )
     return path
 
 
@@ -84,13 +87,16 @@ def pytest_assertrepr_compare(op, left, right):
 def no_logs_gte_error(caplog):
     """Ensure no log messages with error severity or higher were reported during test execution."""
     # TODO: Remove exclusion for VideoManager module when removed from codebase.
-    EXCLUDED_MODULES = {'video_manager'}
+    EXCLUDED_MODULES = {"video_manager"}
     yield
     errors = [
-        record for record in caplog.get_records('call')
+        record
+        for record in caplog.get_records("call")
         if record.levelno >= logging.ERROR and not record.module in EXCLUDED_MODULES
     ]
-    assert not errors, "Test failed due to presence of one or more logs with ERROR severity."
+    assert (
+        not errors
+    ), "Test failed due to presence of one or more logs with ERROR severity."
 
 
 @pytest.fixture

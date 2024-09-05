@@ -35,7 +35,7 @@ from scenedetect.stats_manager import StatsManager
 
 # pylint: disable=unused-argument, no-self-use
 class SceneDetector:
-    """ Base class to inherit from when implementing a scene detection algorithm.
+    """Base class to inherit from when implementing a scene detection algorithm.
 
     This API is not yet stable and subject to change.
 
@@ -45,6 +45,7 @@ class SceneDetector:
     Also see the implemented scene detectors in the scenedetect.detectors module
     to get an idea of how a particular detector can be created.
     """
+
     # TODO(v0.7): Make this a proper abstract base class.
 
     stats_manager: ty.Optional[StatsManager] = None
@@ -67,8 +68,10 @@ class SceneDetector:
             to be passed to process_frame for the given frame_num).
         """
         metric_keys = self.get_metrics()
-        return not metric_keys or not (self.stats_manager is not None
-                                       and self.stats_manager.metrics_exist(frame_num, metric_keys))
+        return not metric_keys or not (
+            self.stats_manager is not None
+            and self.stats_manager.metrics_exist(frame_num, metric_keys)
+        )
 
     def stats_manager_required(self) -> bool:
         """Stats Manager Required: Prototype indicating if detector requires stats.
@@ -133,8 +136,9 @@ class SparseSceneDetector(SceneDetector):
     An example of a SparseSceneDetector is the MotionDetector.
     """
 
-    def process_frame(self, frame_num: int,
-                      frame_img: numpy.ndarray) -> ty.List[ty.Tuple[int, int]]:
+    def process_frame(
+        self, frame_num: int, frame_img: numpy.ndarray
+    ) -> ty.List[ty.Tuple[int, int]]:
         """Process Frame: Computes/stores metrics and detects any scene changes.
 
         Prototype method, no actual detection.
@@ -158,7 +162,6 @@ class SparseSceneDetector(SceneDetector):
 
 
 class FlashFilter:
-
     class Mode(Enum):
         MERGE = 0
         """Merge consecutive cuts shorter than filter length."""
@@ -167,11 +170,15 @@ class FlashFilter:
 
     def __init__(self, mode: Mode, length: int):
         self._mode = mode
-        self._filter_length = length  # Number of frames to use for activating the filter.
-        self._last_above = None       # Last frame above threshold.
-        self._merge_enabled = False   # Used to disable merging until at least one cut was found.
-        self._merge_triggered = False # True when the merge filter is active.
-        self._merge_start = None      # Frame number where we started the merge filte.
+        self._filter_length = (
+            length  # Number of frames to use for activating the filter.
+        )
+        self._last_above = None  # Last frame above threshold.
+        self._merge_enabled = (
+            False  # Used to disable merging until at least one cut was found.
+        )
+        self._merge_triggered = False  # True when the merge filter is active.
+        self._merge_start = None  # Frame number where we started the merge filte.
 
     def filter(self, frame_num: int, above_threshold: bool) -> ty.List[int]:
         if not self._filter_length > 0:
@@ -179,9 +186,13 @@ class FlashFilter:
         if self._last_above is None:
             self._last_above = frame_num
         if self._mode == FlashFilter.Mode.MERGE:
-            return self._filter_merge(frame_num=frame_num, above_threshold=above_threshold)
+            return self._filter_merge(
+                frame_num=frame_num, above_threshold=above_threshold
+            )
         if self._mode == FlashFilter.Mode.SUPPRESS:
-            return self._filter_suppress(frame_num=frame_num, above_threshold=above_threshold)
+            return self._filter_suppress(
+                frame_num=frame_num, above_threshold=above_threshold
+            )
 
     def _filter_suppress(self, frame_num: int, above_threshold: bool) -> ty.List[int]:
         min_length_met: bool = (frame_num - self._last_above) >= self._filter_length
@@ -200,7 +211,11 @@ class FlashFilter:
         if self._merge_triggered:
             # This frame was under the threshold, see if enough frames passed to disable the filter.
             num_merged_frames = self._last_above - self._merge_start
-            if min_length_met and not above_threshold and num_merged_frames >= self._filter_length:
+            if (
+                min_length_met
+                and not above_threshold
+                and num_merged_frames >= self._filter_length
+            ):
                 self._merge_triggered = False
                 return [self._last_above]
             # Keep merging until enough frames pass below the threshold.

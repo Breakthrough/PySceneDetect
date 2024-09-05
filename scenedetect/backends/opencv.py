@@ -28,23 +28,28 @@ import numpy as np
 
 from scenedetect.frame_timecode import FrameTimecode, MAX_FPS_DELTA
 from scenedetect.platform import get_file_name
-from scenedetect.video_stream import VideoStream, SeekError, VideoOpenFailure, FrameRateUnavailable
+from scenedetect.video_stream import (
+    VideoStream,
+    SeekError,
+    VideoOpenFailure,
+    FrameRateUnavailable,
+)
 
-logger = getLogger('pyscenedetect')
+logger = getLogger("pyscenedetect")
 
-IMAGE_SEQUENCE_IDENTIFIER = '%'
+IMAGE_SEQUENCE_IDENTIFIER = "%"
 
 NON_VIDEO_FILE_INPUT_IDENTIFIERS = (
-    IMAGE_SEQUENCE_IDENTIFIER,       # image sequence
-    '://',                           # URL/network stream
-    ' ! ',                           # gstreamer pipe
+    IMAGE_SEQUENCE_IDENTIFIER,  # image sequence
+    "://",  # URL/network stream
+    " ! ",  # gstreamer pipe
 )
 
 
 def _get_aspect_ratio(cap: cv2.VideoCapture, epsilon: float = 0.0001) -> float:
     """Display/pixel aspect ratio of the VideoCapture as a float (1.0 represents square pixels)."""
     # Versions of OpenCV < 3.4.1 do not support this, so we fall back to 1.0.
-    if not 'CAP_PROP_SAR_NUM' in dir(cv2):
+    if not "CAP_PROP_SAR_NUM" in dir(cv2):
         return 1.0
     num: float = cap.get(cv2.CAP_PROP_SAR_NUM)
     den: float = cap.get(cv2.CAP_PROP_SAR_DEN)
@@ -86,21 +91,24 @@ class VideoStreamCv2(VideoStream):
         super().__init__()
         # TODO(v0.7): Replace with DeprecationWarning that `path_or_device` will be removed in v0.8.
         if path_or_device is not None:
-            logger.error('path_or_device is deprecated, use path or VideoCaptureAdapter instead.')
+            logger.error(
+                "path_or_device is deprecated, use path or VideoCaptureAdapter instead."
+            )
             path = path_or_device
         if path is None:
-            raise ValueError('Path must be specified!')
+            raise ValueError("Path must be specified!")
         if framerate is not None and framerate < MAX_FPS_DELTA:
-            raise ValueError('Specified framerate (%f) is invalid!' % framerate)
+            raise ValueError("Specified framerate (%f) is invalid!" % framerate)
         if max_decode_attempts < 0:
-            raise ValueError('Maximum decode attempts must be >= 0!')
+            raise ValueError("Maximum decode attempts must be >= 0!")
 
         self._path_or_device = path
         self._is_device = isinstance(self._path_or_device, int)
 
         # Initialized in _open_capture:
-        self._cap: Optional[
-            cv2.VideoCapture] = None # Reference to underlying cv2.VideoCapture object.
+        self._cap: Optional[cv2.VideoCapture] = (
+            None  # Reference to underlying cv2.VideoCapture object.
+        )
         self._frame_rate: Optional[float] = None
 
         # VideoCapture state
@@ -130,7 +138,7 @@ class VideoStreamCv2(VideoStream):
     # VideoStream Methods/Properties
     #
 
-    BACKEND_NAME = 'opencv'
+    BACKEND_NAME = "opencv"
     """Unique name used to identify this backend."""
 
     @property
@@ -157,7 +165,7 @@ class VideoStreamCv2(VideoStream):
         if IMAGE_SEQUENCE_IDENTIFIER in file_name:
             # file_name is an image sequence, trim everything including/after the %.
             # TODO: This excludes any suffix after the sequence identifier.
-            file_name = file_name[:file_name.rfind(IMAGE_SEQUENCE_IDENTIFIER)]
+            file_name = file_name[: file_name.rfind(IMAGE_SEQUENCE_IDENTIFIER)]
         return file_name
 
     @property
@@ -170,8 +178,10 @@ class VideoStreamCv2(VideoStream):
     @property
     def frame_size(self) -> Tuple[int, int]:
         """Size of each video frame in pixels as a tuple of (width, height)."""
-        return (math.trunc(self._cap.get(cv2.CAP_PROP_FRAME_WIDTH)),
-                math.trunc(self._cap.get(cv2.CAP_PROP_FRAME_HEIGHT)))
+        return (
+            math.trunc(self._cap.get(cv2.CAP_PROP_FRAME_WIDTH)),
+            math.trunc(self._cap.get(cv2.CAP_PROP_FRAME_HEIGHT)),
+        )
 
     @property
     def duration(self) -> Optional[FrameTimecode]:
@@ -258,11 +268,13 @@ class VideoStreamCv2(VideoStream):
                 self._has_grabbed = self._cap.grab()
 
     def reset(self):
-        """ Close and re-open the VideoStream (should be equivalent to calling `seek(0)`). """
+        """Close and re-open the VideoStream (should be equivalent to calling `seek(0)`)."""
         self._cap.release()
         self._open_capture(self._frame_rate)
 
-    def read(self, decode: bool = True, advance: bool = True) -> Union[np.ndarray, bool]:
+    def read(
+        self, decode: bool = True, advance: bool = True
+    ) -> Union[np.ndarray, bool]:
         """Read and decode the next frame as a np.ndarray. Returns False when video ends,
         or the maximum number of decode attempts has passed.
 
@@ -289,9 +301,11 @@ class VideoStreamCv2(VideoStream):
                 # Report previous failure in debug mode.
                 if has_grabbed:
                     self._decode_failures += 1
-                    logger.debug('Frame failed to decode.')
+                    logger.debug("Frame failed to decode.")
                     if not self._warning_displayed and self._decode_failures > 1:
-                        logger.warning('Failed to decode some frames, results may be inaccurate.')
+                        logger.warning(
+                            "Failed to decode some frames, results may be inaccurate."
+                        )
             # We didn't manage to grab a frame even after retrying, so just return.
             if not has_grabbed:
                 return False
@@ -309,34 +323,41 @@ class VideoStreamCv2(VideoStream):
     def _open_capture(self, framerate: Optional[float] = None):
         """Opens capture referenced by this object and resets internal state."""
         if self._is_device and self._path_or_device < 0:
-            raise ValueError('Invalid/negative device ID specified.')
+            raise ValueError("Invalid/negative device ID specified.")
         input_is_video_file = not self._is_device and not any(
-            identifier in self._path_or_device for identifier in NON_VIDEO_FILE_INPUT_IDENTIFIERS)
+            identifier in self._path_or_device
+            for identifier in NON_VIDEO_FILE_INPUT_IDENTIFIERS
+        )
         # We don't have a way of querying why opening a video fails (errors are logged at least),
         # so provide a better error message if we try to open a file that doesn't exist.
         if input_is_video_file:
             if not os.path.exists(self._path_or_device):
-                raise OSError('Video file not found.')
+                raise OSError("Video file not found.")
 
         cap = cv2.VideoCapture(self._path_or_device)
         if not cap.isOpened():
             raise VideoOpenFailure(
-                'Ensure file is valid video and system dependencies are up to date.\n')
+                "Ensure file is valid video and system dependencies are up to date.\n"
+            )
 
         # Display an error if the video codec type seems unsupported (#86) as this indicates
         # potential video corruption, or may explain missing frames. We only perform this check
         # for video files on-disk (skipped for devices, image sequences, streams, etc...).
-        codec_unsupported: bool = (int(abs(cap.get(cv2.CAP_PROP_FOURCC))) == 0)
+        codec_unsupported: bool = int(abs(cap.get(cv2.CAP_PROP_FOURCC))) == 0
         if codec_unsupported and input_is_video_file:
-            logger.error('Video codec detection failed. If output is incorrect:\n'
-                         '  - Re-encode the input video with ffmpeg\n'
-                         '  - Update OpenCV (pip install --upgrade opencv-python)\n'
-                         '  - Use the PyAV backend (--backend pyav)\n'
-                         'For details, see https://github.com/Breakthrough/PySceneDetect/issues/86')
+            logger.error(
+                "Video codec detection failed. If output is incorrect:\n"
+                "  - Re-encode the input video with ffmpeg\n"
+                "  - Update OpenCV (pip install --upgrade opencv-python)\n"
+                "  - Use the PyAV backend (--backend pyav)\n"
+                "For details, see https://github.com/Breakthrough/PySceneDetect/issues/86"
+            )
 
         # Ensure the framerate is correct to avoid potential divide by zero errors. This can be
         # addressed in the PyAV backend if required since it supports integer timebases.
-        assert framerate is None or framerate > MAX_FPS_DELTA, "Framerate must be validated if set!"
+        assert (
+            framerate is None or framerate > MAX_FPS_DELTA
+        ), "Framerate must be validated if set!"
         if framerate is None:
             framerate = cap.get(cv2.CAP_PROP_FPS)
             if framerate < MAX_FPS_DELTA:
@@ -380,11 +401,11 @@ class VideoCaptureAdapter(VideoStream):
         super().__init__()
 
         if framerate is not None and framerate < MAX_FPS_DELTA:
-            raise ValueError('Specified framerate (%f) is invalid!' % framerate)
+            raise ValueError("Specified framerate (%f) is invalid!" % framerate)
         if max_read_attempts < 0:
-            raise ValueError('Maximum decode attempts must be >= 0!')
+            raise ValueError("Maximum decode attempts must be >= 0!")
         if not cap.isOpened():
-            raise ValueError('Specified VideoCapture must already be opened!')
+            raise ValueError("Specified VideoCapture must already be opened!")
         if framerate is None:
             framerate = cap.get(cv2.CAP_PROP_FPS)
             if framerate < MAX_FPS_DELTA:
@@ -417,7 +438,7 @@ class VideoCaptureAdapter(VideoStream):
     # VideoStream Methods/Properties
     #
 
-    BACKEND_NAME = 'opencv_adapter'
+    BACKEND_NAME = "opencv_adapter"
     """Unique name used to identify this backend."""
 
     @property
@@ -429,12 +450,12 @@ class VideoCaptureAdapter(VideoStream):
     @property
     def path(self) -> str:
         """Always 'CAP_ADAPTER'."""
-        return 'CAP_ADAPTER'
+        return "CAP_ADAPTER"
 
     @property
     def name(self) -> str:
         """Always 'CAP_ADAPTER'."""
-        return 'CAP_ADAPTER'
+        return "CAP_ADAPTER"
 
     @property
     def is_seekable(self) -> bool:
@@ -444,8 +465,10 @@ class VideoCaptureAdapter(VideoStream):
     @property
     def frame_size(self) -> Tuple[int, int]:
         """Reported size of each video frame in pixels as a tuple of (width, height)."""
-        return (math.trunc(self._cap.get(cv2.CAP_PROP_FRAME_WIDTH)),
-                math.trunc(self._cap.get(cv2.CAP_PROP_FRAME_HEIGHT)))
+        return (
+            math.trunc(self._cap.get(cv2.CAP_PROP_FRAME_WIDTH)),
+            math.trunc(self._cap.get(cv2.CAP_PROP_FRAME_HEIGHT)),
+        )
 
     @property
     def duration(self) -> Optional[FrameTimecode]:
@@ -500,7 +523,9 @@ class VideoCaptureAdapter(VideoStream):
         """Not supported."""
         raise NotImplementedError("Reset is not supported.")
 
-    def read(self, decode: bool = True, advance: bool = True) -> Union[np.ndarray, bool]:
+    def read(
+        self, decode: bool = True, advance: bool = True
+    ) -> Union[np.ndarray, bool]:
         """Read and decode the next frame as a np.ndarray. Returns False when video ends,
         or the maximum number of decode attempts has passed.
 
@@ -526,9 +551,11 @@ class VideoCaptureAdapter(VideoStream):
                 # Report previous failure in debug mode.
                 if has_grabbed:
                     self._decode_failures += 1
-                    logger.debug('Frame failed to decode.')
+                    logger.debug("Frame failed to decode.")
                     if not self._warning_displayed and self._decode_failures > 1:
-                        logger.warning('Failed to decode some frames, results may be inaccurate.')
+                        logger.warning(
+                            "Failed to decode some frames, results may be inaccurate."
+                        )
             # We didn't manage to grab a frame even after retrying, so just return.
             if not has_grabbed:
                 return False
