@@ -103,7 +103,7 @@ jobs:
 
       - name: Upload Package
         if: ${{ matrix.python-version == '3.12' && matrix.os == 'ubuntu-latest' }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: scenedetect-dist
           path: |
