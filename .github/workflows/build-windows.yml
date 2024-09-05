@@ -54,7 +54,7 @@ jobs:
           git checkout refs/remotes/origin/resources -- tests/resources/
 
       - name: Download FFMPEG ${{ env.ffmpeg-version }}
-        uses: dsaltares/fetch-gh-release-asset@1.1.1
+        uses: dsaltares/fetch-gh-release-asset@1.1.2
         with:
           repo: 'GyanD/codexffmpeg'
           version: 'tags/${{ env.ffmpeg-version }}'
@@ -91,10 +91,11 @@ jobs:
           ./dist/scenedetect/scenedetect -i tests/resources/goldeneye.mp4 detect-content time -e 2s
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: PySceneDetect-win64_portable
           path: dist/scenedetect
+          include-hidden-files: true
 
   test:
     runs-on: windows-latest
