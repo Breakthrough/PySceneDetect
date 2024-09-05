@@ -29,15 +29,13 @@ from scenedetect.platform import get_file_name
 from scenedetect.video_stream import VideoStream, SeekError, VideoOpenFailure
 from scenedetect.backends.opencv import VideoStreamCv2
 
-logger = getLogger("pyscenedetect")
+logger = getLogger('pyscenedetect')
 
 
 class VideoStreamMoviePy(VideoStream):
     """MoviePy `FFMPEG_VideoReader` backend."""
 
-    def __init__(
-        self, path: AnyStr, framerate: Optional[float] = None, print_infos: bool = False
-    ):
+    def __init__(self, path: AnyStr, framerate: Optional[float] = None, print_infos: bool = False):
         """Open a video or device.
 
         Arguments:
@@ -55,8 +53,7 @@ class VideoStreamMoviePy(VideoStream):
         # TODO: Add framerate override.
         if framerate is not None:
             raise NotImplementedError(
-                "VideoStreamMoviePy does not support the `framerate` argument yet."
-            )
+                "VideoStreamMoviePy does not support the `framerate` argument yet.")
 
         self._path = path
         # TODO: Need to map errors based on the strings, since several failure
@@ -80,7 +77,7 @@ class VideoStreamMoviePy(VideoStream):
     # VideoStream Methods/Properties
     #
 
-    BACKEND_NAME = "moviepy"
+    BACKEND_NAME = 'moviepy'
     """Unique name used to identify this backend."""
 
     @property
@@ -106,13 +103,13 @@ class VideoStreamMoviePy(VideoStream):
     @property
     def frame_size(self) -> Tuple[int, int]:
         """Size of each video frame in pixels as a tuple of (width, height)."""
-        return tuple(self._reader.infos["video_size"])
+        return tuple(self._reader.infos['video_size'])
 
     @property
     def duration(self) -> Optional[FrameTimecode]:
         """Duration of the stream as a FrameTimecode, or None if non terminating."""
-        assert isinstance(self._reader.infos["duration"], float)
-        return self.base_timecode + self._reader.infos["duration"]
+        assert isinstance(self._reader.infos['duration'], float)
+        return self.base_timecode + self._reader.infos['duration']
 
     @property
     def aspect_ratio(self) -> float:
@@ -195,15 +192,13 @@ class VideoStreamMoviePy(VideoStream):
         self._frame_number = target.frame_num
 
     def reset(self):
-        """Close and re-open the VideoStream (should be equivalent to calling `seek(0)`)."""
+        """ Close and re-open the VideoStream (should be equivalent to calling `seek(0)`). """
         self._reader.initialize()
         self._last_frame = self._reader.read_frame()
         self._frame_number = 0
         self._eof = False
 
-    def read(
-        self, decode: bool = True, advance: bool = True
-    ) -> Union[np.ndarray, bool]:
+    def read(self, decode: bool = True, advance: bool = True) -> Union[np.ndarray, bool]:
         """Read and decode the next frame as a np.ndarray. Returns False when video ends.
 
         Arguments:
@@ -218,7 +213,7 @@ class VideoStreamMoviePy(VideoStream):
             if self._last_frame_rgb is None:
                 self._last_frame_rgb = cv2.cvtColor(self._last_frame, cv2.COLOR_BGR2RGB)
             return self._last_frame_rgb
-        if not hasattr(self._reader, "lastread"):
+        if not hasattr(self._reader, 'lastread'):
             return False
         self._last_frame = self._reader.lastread
         self._reader.read_frame()

@@ -23,18 +23,13 @@ from string import Template
 
 from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.platform import get_and_create_path
-from scenedetect.scene_manager import (
-    get_scenes_from_cuts,
-    save_images,
-    write_scene_list,
-    write_scene_list_html,
-)
+from scenedetect.scene_manager import get_scenes_from_cuts, save_images, write_scene_list, write_scene_list_html
 from scenedetect.video_splitter import split_video_mkvmerge, split_video_ffmpeg
 from scenedetect.video_stream import SeekError
 
 from scenedetect._cli.context import CliContext, check_split_video_requirements
 
-logger = logging.getLogger("pyscenedetect")
+logger = logging.getLogger('pyscenedetect')
 
 
 def run_scenedetect(context: CliContext):
@@ -52,9 +47,7 @@ def run_scenedetect(context: CliContext):
 
     if context.load_scenes_input:
         # Skip detection if load-scenes was used.
-        logger.info(
-            "Skipping detection, loading scenes from: %s", context.load_scenes_input
-        )
+        logger.info("Skipping detection, loading scenes from: %s", context.load_scenes_input)
         if context.stats_file_path:
             logger.warning("WARNING: -s/--stats will be ignored due to load-scenes.")
         scene_list, cut_list = _load_scenes(context)
@@ -68,18 +61,11 @@ def run_scenedetect(context: CliContext):
         _save_stats(context)
         if scene_list:
             logger.info(
-                "Detected %d scenes, average shot length %.1f seconds.",
-                len(scene_list),
-                sum(
-                    [
-                        (end_time - start_time).get_seconds()
-                        for start_time, end_time in scene_list
-                    ]
-                )
-                / float(len(scene_list)),
-            )
+                'Detected %d scenes, average shot length %.1f seconds.', len(scene_list),
+                sum([(end_time - start_time).get_seconds() for start_time, end_time in scene_list])
+                / float(len(scene_list)))
         else:
-            logger.info("No scenes detected.")
+            logger.info('No scenes detected.')
 
     # Handle list-scenes command.
     _list_scenes(context, scene_list, cut_list)
@@ -98,23 +84,18 @@ def _detect(context: CliContext):
     # Use default detector if one was not specified.
     if context.scene_manager.get_num_detectors() == 0:
         detector_type, detector_args = context.default_detector
-        logger.debug(
-            "Using default detector: %s(%s)" % (detector_type.__name__, detector_args)
-        )
+        logger.debug('Using default detector: %s(%s)' % (detector_type.__name__, detector_args))
         context.scene_manager.add_detector(detector_type(**detector_args))
 
     perf_start_time = time.time()
     if context.start_time is not None:
-        logger.debug("Seeking to start time...")
+        logger.debug('Seeking to start time...')
         try:
             context.video_stream.seek(target=context.start_time)
         except SeekError as ex:
-            logger.critical(
-                "Failed to seek to %s / frame %d: %s",
-                context.start_time.get_timecode(),
-                context.start_time.get_frames(),
-                str(ex),
-            )
+            logger.critical('Failed to seek to %s / frame %d: %s',
+                            context.start_time.get_timecode(), context.start_time.get_frames(),
+                            str(ex))
             return
 
     num_frames = context.scene_manager.detect_scenes(
@@ -122,30 +103,25 @@ def _detect(context: CliContext):
         duration=context.duration,
         end_time=context.end_time,
         frame_skip=context.frame_skip,
-        show_progress=not context.quiet_mode,
-    )
+        show_progress=not context.quiet_mode)
 
     # Handle case where video failure is most likely due to multiple audio tracks (#179).
     # TODO(#380): Ensure this does not erroneusly fire.
-    if num_frames <= 0 and context.video_stream.BACKEND_NAME == "opencv":
+    if num_frames <= 0 and context.video_stream.BACKEND_NAME == 'opencv':
         logger.critical(
-            "Failed to read any frames from video file. This could be caused by the video"
-            " having multiple audio tracks. If so, try installing the PyAV backend:\n"
-            "      pip install av\n"
-            "Or remove the audio tracks by running either:\n"
-            "      ffmpeg -i input.mp4 -c copy -an output.mp4\n"
-            "      mkvmerge -o output.mkv input.mp4\n"
-            "For details, see https://scenedetect.com/faq/"
-        )
+            'Failed to read any frames from video file. This could be caused by the video'
+            ' having multiple audio tracks. If so, try installing the PyAV backend:\n'
+            '      pip install av\n'
+            'Or remove the audio tracks by running either:\n'
+            '      ffmpeg -i input.mp4 -c copy -an output.mp4\n'
+            '      mkvmerge -o output.mkv input.mp4\n'
+            'For details, see https://scenedetect.com/faq/')
         return
 
     perf_duration = time.time() - perf_start_time
-    logger.info(
-        "Processed %d frames in %.1f seconds (average %.2f FPS).",
-        num_frames,
-        perf_duration,
-        float(num_frames) / perf_duration,
-    )
+    logger.info('Processed %d frames in %.1f seconds (average %.2f FPS).', num_frames,
+                perf_duration,
+                float(num_frames) / perf_duration)
 
     # Get list of detected cuts/scenes from the SceneManager to generate the required output
     # files, based on the given commands (list-scenes, split-video, save-images, etc...).
@@ -161,42 +137,34 @@ def _save_stats(context: CliContext) -> None:
         return
     if context.stats_manager.is_save_required():
         path = get_and_create_path(context.stats_file_path, context.output_dir)
-        logger.info("Saving frame metrics to stats file: %s", path)
+        logger.info('Saving frame metrics to stats file: %s', path)
         with open(path, mode="w") as file:
             context.stats_manager.save_to_csv(csv_file=file)
     else:
-        logger.debug("No frame metrics updated, skipping update of the stats file.")
+        logger.debug('No frame metrics updated, skipping update of the stats file.')
 
 
-def _list_scenes(
-    context: CliContext,
-    scene_list: List[Tuple[FrameTimecode, FrameTimecode]],
-    cut_list: List[FrameTimecode],
-) -> None:
+def _list_scenes(context: CliContext, scene_list: List[Tuple[FrameTimecode, FrameTimecode]],
+                 cut_list: List[FrameTimecode]) -> None:
     """Handles the `list-scenes` command."""
     if not context.list_scenes:
         return
     # Write scene list CSV to if required.
     if context.scene_list_output:
-        scene_list_filename = Template(context.scene_list_name_format).safe_substitute(
-            VIDEO_NAME=context.video_stream.name
-        )
-        if not scene_list_filename.lower().endswith(".csv"):
-            scene_list_filename += ".csv"
+        scene_list_filename = Template(
+            context.scene_list_name_format).safe_substitute(VIDEO_NAME=context.video_stream.name)
+        if not scene_list_filename.lower().endswith('.csv'):
+            scene_list_filename += '.csv'
         scene_list_path = get_and_create_path(
             scene_list_filename,
-            context.scene_list_dir
-            if context.scene_list_dir is not None
-            else context.output_dir,
-        )
-        logger.info("Writing scene list to CSV file:\n  %s", scene_list_path)
-        with open(scene_list_path, "wt") as scene_list_file:
+            context.scene_list_dir if context.scene_list_dir is not None else context.output_dir)
+        logger.info('Writing scene list to CSV file:\n  %s', scene_list_path)
+        with open(scene_list_path, 'wt') as scene_list_file:
             write_scene_list(
                 output_csv_file=scene_list_file,
                 scene_list=scene_list,
                 include_cut_list=not context.skip_cuts,
-                cut_list=cut_list,
-            )
+                cut_list=cut_list)
     # Suppress output if requested.
     if context.list_scenes_quiet:
         return
@@ -208,37 +176,26 @@ def _list_scenes(
  | Scene # | Start Frame |  Start Time  |  End Frame  |   End Time   |
 -----------------------------------------------------------------------
 %s
------------------------------------------------------------------------""",
-            "\n".join(
-                [
-                    " |  %5d  | %11d | %s | %11d | %s |"
-                    % (
-                        i + 1,
-                        start_time.get_frames() + 1,
-                        start_time.get_timecode(),
-                        end_time.get_frames(),
-                        end_time.get_timecode(),
-                    )
-                    for i, (start_time, end_time) in enumerate(scene_list)
-                ]
-            ),
-        )
+-----------------------------------------------------------------------""", '\n'.join([
+                " |  %5d  | %11d | %s | %11d | %s |" %
+                (i + 1, start_time.get_frames() + 1, start_time.get_timecode(),
+                 end_time.get_frames(), end_time.get_timecode())
+                for i, (start_time, end_time) in enumerate(scene_list)
+            ]))
     # Print cut list.
     if cut_list and context.display_cuts:
-        logger.info(
-            "Comma-separated timecode list:\n  %s",
-            ",".join([context.cut_format.format(cut) for cut in cut_list]),
-        )
+        logger.info("Comma-separated timecode list:\n  %s",
+                    ",".join([context.cut_format.format(cut) for cut in cut_list]))
 
 
 def _save_images(
-    context: CliContext, scene_list: List[Tuple[FrameTimecode, FrameTimecode]]
-) -> Optional[Dict[int, List[str]]]:
+        context: CliContext,
+        scene_list: List[Tuple[FrameTimecode, FrameTimecode]]) -> Optional[Dict[int, List[str]]]:
     """Handles the `save-images` command."""
     if not context.save_images:
         return None
     # Command can override global output directory setting.
-    output_dir = context.output_dir if context.image_dir is None else context.image_dir
+    output_dir = (context.output_dir if context.image_dir is None else context.image_dir)
     return save_images(
         scene_list=scene_list,
         video=context.video_stream,
@@ -252,28 +209,23 @@ def _save_images(
         scale=context.scale,
         height=context.height,
         width=context.width,
-        interpolation=context.scale_method,
-    )
+        interpolation=context.scale_method)
 
 
-def _export_html(
-    context: CliContext,
-    scene_list: List[Tuple[FrameTimecode, FrameTimecode]],
-    cut_list: List[FrameTimecode],
-    image_filenames: Optional[Dict[int, List[str]]],
-) -> None:
+def _export_html(context: CliContext, scene_list: List[Tuple[FrameTimecode, FrameTimecode]],
+                 cut_list: List[FrameTimecode], image_filenames: Optional[Dict[int,
+                                                                               List[str]]]) -> None:
     """Handles the `export-html` command."""
     if not context.export_html:
         return
     # Command can override global output directory setting.
-    output_dir = context.output_dir if context.image_dir is None else context.image_dir
-    html_filename = Template(context.html_name_format).safe_substitute(
-        VIDEO_NAME=context.video_stream.name
-    )
-    if not html_filename.lower().endswith(".html"):
-        html_filename += ".html"
+    output_dir = (context.output_dir if context.image_dir is None else context.image_dir)
+    html_filename = Template(
+        context.html_name_format).safe_substitute(VIDEO_NAME=context.video_stream.name)
+    if not html_filename.lower().endswith('.html'):
+        html_filename += '.html'
     html_path = get_and_create_path(html_filename, output_dir)
-    logger.info("Exporting to html file:\n %s:", html_path)
+    logger.info('Exporting to html file:\n %s:', html_path)
     if not context.html_include_images:
         image_filenames = None
     write_scene_list_html(
@@ -282,26 +234,24 @@ def _export_html(
         cut_list,
         image_filenames=image_filenames,
         image_width=context.image_width,
-        image_height=context.image_height,
-    )
+        image_height=context.image_height)
 
 
-def _split_video(
-    context: CliContext, scene_list: List[Tuple[FrameTimecode, FrameTimecode]]
-) -> None:
+def _split_video(context: CliContext, scene_list: List[Tuple[FrameTimecode,
+                                                             FrameTimecode]]) -> None:
     """Handles the `split-video` command."""
     if not context.split_video:
         return
     output_path_template = context.split_name_format
     # Add proper extension to filename template if required.
-    dot_pos = output_path_template.rfind(".")
+    dot_pos = output_path_template.rfind('.')
     extension_length = 0 if dot_pos < 0 else len(output_path_template) - (dot_pos + 1)
     # If using mkvmerge, force extension to .mkv.
-    if context.split_mkvmerge and not output_path_template.endswith(".mkv"):
-        output_path_template += ".mkv"
+    if context.split_mkvmerge and not output_path_template.endswith('.mkv'):
+        output_path_template += '.mkv'
     # Otherwise, if using ffmpeg, only add an extension if one doesn't exist.
     elif not 2 <= extension_length <= 4:
-        output_path_template += ".mp4"
+        output_path_template += '.mp4'
     # Ensure the appropriate tool is available before handling split-video.
     check_split_video_requirements(context.split_mkvmerge)
     # Command can override global output directory setting.
@@ -325,32 +275,29 @@ def _split_video(
             show_output=not (context.quiet_mode or context.split_quiet),
         )
     if scene_list:
-        logger.info("Video splitting completed, scenes written to disk.")
+        logger.info('Video splitting completed, scenes written to disk.')
 
 
 def _load_scenes(
-    context: CliContext,
-) -> ty.Tuple[
-    ty.Iterable[ty.Tuple[FrameTimecode, FrameTimecode]], ty.Iterable[FrameTimecode]
-]:
+    context: CliContext
+) -> ty.Tuple[ty.Iterable[ty.Tuple[FrameTimecode, FrameTimecode]], ty.Iterable[FrameTimecode]]:
     assert context.load_scenes_input
     assert os.path.exists(context.load_scenes_input)
 
-    with open(context.load_scenes_input, "r") as input_file:
+    with open(context.load_scenes_input, 'r') as input_file:
         file_reader = csv.reader(input_file)
         csv_headers = next(file_reader)
         if not context.load_scenes_column_name in csv_headers:
             csv_headers = next(file_reader)
         # Check to make sure column headers are present
         if context.load_scenes_column_name not in csv_headers:
-            raise ValueError("specified column header for scene start is not present")
+            raise ValueError('specified column header for scene start is not present')
 
         col_idx = csv_headers.index(context.load_scenes_column_name)
 
         cut_list = sorted(
             FrameTimecode(row[col_idx], fps=context.video_stream.frame_rate) - 1
-            for row in file_reader
-        )
+            for row in file_reader)
         # `SceneDetector` works on cuts, so we have to skip the first scene and use the first frame
         # of the next scene as the cut point. This can be fixed if we used `SparseSceneDetector`
         # but this part of the API is being reworked and hasn't been used by any detectors yet.
@@ -372,24 +319,17 @@ def _load_scenes(
         cut_list = [cut for cut in cut_list if cut < end_time]
 
         return get_scenes_from_cuts(
-            cut_list=cut_list, start_pos=start_time, end_pos=end_time
-        ), cut_list
+            cut_list=cut_list, start_pos=start_time, end_pos=end_time), cut_list
 
 
 def _postprocess_scene_list(
     context: CliContext, scene_list: ty.List[ty.Tuple[FrameTimecode, FrameTimecode]]
 ) -> ty.List[ty.Tuple[FrameTimecode, FrameTimecode]]:
+
     # Handle --merge-last-scene. If set, when the last scene is shorter than --min-scene-len,
     # it will be merged with the previous one.
-    if (
-        context.merge_last_scene
-        and context.min_scene_len is not None
-        and context.min_scene_len > 0
-    ):
-        if (
-            len(scene_list) > 1
-            and (scene_list[-1][1] - scene_list[-1][0]) < context.min_scene_len
-        ):
+    if context.merge_last_scene and context.min_scene_len is not None and context.min_scene_len > 0:
+        if len(scene_list) > 1 and (scene_list[-1][1] - scene_list[-1][0]) < context.min_scene_len:
             new_last_scene = (scene_list[-2][0], scene_list[-1][1])
             scene_list = scene_list[:-2] + [new_last_scene]
 

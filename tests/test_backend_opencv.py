@@ -10,7 +10,7 @@
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
-"""PySceneDetect scenedetect.backend.opencv Tests
+""" PySceneDetect scenedetect.backend.opencv Tests
 
 This file includes unit tests for the scenedetect.backend.opencv module that implements the
 VideoStreamCv2 ('opencv') backend. These tests validate behaviour specific to this backend.
@@ -47,14 +47,10 @@ def test_capture_adapter(test_movie_clip: str):
 
     scene_manager = SceneManager()
     scene_manager.add_detector(ContentDetector())
-    assert scene_manager.detect_scenes(
-        video=adapter, duration=adapter.base_timecode + 10.0
-    )
+    assert scene_manager.detect_scenes(video=adapter, duration=adapter.base_timecode + 10.0)
     scenes = scene_manager.get_scene_list()
     assert len(scenes) == len(GROUND_TRUTH_CAPTURE_ADAPTER_TEST)
-    assert [
-        start.get_frames() for (start, _) in scenes
-    ] == GROUND_TRUTH_CAPTURE_ADAPTER_TEST
+    assert [start.get_frames() for (start, _) in scenes] == GROUND_TRUTH_CAPTURE_ADAPTER_TEST
 
 
 def test_capture_adapter_callback(test_video_file: str):

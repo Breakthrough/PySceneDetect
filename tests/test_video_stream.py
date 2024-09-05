@@ -10,7 +10,7 @@
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
-"""PySceneDetect scenedetect.video_stream Tests
+""" PySceneDetect scenedetect.video_stream Tests
 
 This file includes unit tests for the scenedetect.video_stream module, as well as the video
 backends implemented in scenedetect.backends.  These tests enforce a consistent interface across
@@ -48,7 +48,7 @@ MOVIEPY_WARNING_FILTER = "ignore:.*Using the last valid frame instead.:UserWarni
 
 def calculate_frame_delta(frame_a, frame_b, roi=None) -> float:
     if roi:
-        assert False  # TODO
+        assert False # TODO
     assert frame_a.shape == frame_b.shape
     num_pixels = frame_a.shape[0] * frame_a.shape[1]
     return numpy.sum(numpy.abs(frame_b - frame_a)) / num_pixels
@@ -56,30 +56,26 @@ def calculate_frame_delta(frame_a, frame_b, roi=None) -> float:
 
 # TODO: Reduce code duplication here and in `conftest.py`
 def get_absolute_path(relative_path: str) -> str:
-    """Returns the absolute path to a (relative) path of a file that
+    """ Returns the absolute path to a (relative) path of a file that
     should exist within the tests/ directory.
 
     Throws FileNotFoundError if the file could not be found.
     """
     abs_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), relative_path)
     if not os.path.exists(abs_path):
-        raise FileNotFoundError(
-            """
+        raise FileNotFoundError("""
 Test video file (%s) must be present to run test case. This file can be obtained by running the following commands from the root of the repository:
 
 git fetch --depth=1 https://github.com/Breakthrough/PySceneDetect.git refs/heads/resources:refs/remotes/origin/resources
 git checkout refs/remotes/origin/resources -- tests/resources/
 git reset
-"""
-            % relative_path
-        )
+""" % relative_path)
     return abs_path
 
 
 @dataclass
 class VideoParameters:
     """Properties for each input a VideoStream is tested against."""
-
     path: str
     height: int
     width: int
@@ -124,17 +120,12 @@ pytestmark = [
     pytest.mark.parametrize(
         "vs_type",
         list(
-            filter(
-                lambda x: x is not None,
-                [
-                    VideoStreamCv2,
-                    VideoStreamAv,
-                    VideoStreamMoviePy,
-                    VideoManager,
-                ],
-            )
-        ),
-    ),
+            filter(lambda x: x is not None, [
+                VideoStreamCv2,
+                VideoStreamAv,
+                VideoStreamMoviePy,
+                VideoManager,
+            ]))),
     pytest.mark.filterwarnings(MOVIEPY_WARNING_FILTER),
 ]
 
@@ -147,16 +138,13 @@ class TestVideoStream:
         """Validate video properties: frame size, frame rate, duration, aspect ratio, etc."""
         stream = vs_type(test_video.path)
         assert stream.frame_size == (test_video.width, test_video.height)
-        assert stream.frame_rate == pytest.approx(
-            test_video.frame_rate, FRAMERATE_TOLERANCE
-        )
+        assert stream.frame_rate == pytest.approx(test_video.frame_rate, FRAMERATE_TOLERANCE)
         assert stream.duration.get_frames() == test_video.total_frames
         file_name = os.path.basename(test_video.path)
-        last_dot_pos = file_name.rfind(".")
+        last_dot_pos = file_name.rfind('.')
         assert stream.name == file_name[:last_dot_pos]
-        assert stream.aspect_ratio == pytest.approx(
-            test_video.aspect_ratio, PIXEL_ASPECT_RATIO_TOLERANCE
-        )
+        assert stream.aspect_ratio == pytest.approx(test_video.aspect_ratio,
+                                                    PIXEL_ASPECT_RATIO_TOLERANCE)
 
     def test_read(self, vs_type: Type[VideoStream], test_video: VideoParameters):
         """Validate basic `read` functionality."""
@@ -166,9 +154,7 @@ class TestVideoStream:
         assert frame.shape == (test_video.height, test_video.width, 3)
         assert stream.frame_number == 1
 
-    def test_read_no_advance(
-        self, vs_type: Type[VideoStream], test_video: VideoParameters
-    ):
+    def test_read_no_advance(self, vs_type: Type[VideoStream], test_video: VideoParameters):
         """Validate invoking `read` with `advance` set to False."""
         stream = vs_type(test_video.path)
         frame = stream.read().copy()
@@ -177,9 +163,7 @@ class TestVideoStream:
         assert stream.frame_number == 1
         assert calculate_frame_delta(frame, frame_copy) == pytest.approx(0.0)
 
-    def test_read_no_decode(
-        self, vs_type: Type[VideoStream], test_video: VideoParameters
-    ):
+    def test_read_no_decode(self, vs_type: Type[VideoStream], test_video: VideoParameters):
         """Validate invoking `read` with `decode` set to False."""
         stream = vs_type(test_video.path)
         assert stream.read(decode=False) is True
@@ -187,9 +171,7 @@ class TestVideoStream:
         stream.read(decode=False, advance=False)
         assert stream.frame_number == 1
 
-    def test_time_invariants(
-        self, vs_type: Type[VideoStream], test_video: VideoParameters
-    ):
+    def test_time_invariants(self, vs_type: Type[VideoStream], test_video: VideoParameters):
         """Validate the `frame_number`, `position`, and `position_ms` properties."""
         stream = vs_type(test_video.path)
         # The video starts "before" the first frame, with everything set to zero.
@@ -209,8 +191,7 @@ class TestVideoStream:
             assert stream.frame_number == i
             assert stream.position == stream.base_timecode + (i - 1)
             assert stream.position_ms == pytest.approx(
-                1000.0 * (i - 1) / float(stream.frame_rate), abs=TIME_TOLERANCE_MS
-            )
+                1000.0 * (i - 1) / float(stream.frame_rate), abs=TIME_TOLERANCE_MS)
 
     def test_reset(self, vs_type: Type[VideoStream], test_video: VideoParameters):
         """Test `reset()` functions as expected."""
@@ -233,14 +214,12 @@ class TestVideoStream:
         assert stream.frame_number == 200
         assert stream.position == stream.base_timecode + 199
         assert stream.position_ms == pytest.approx(
-            1000.0 * (199.0 / float(stream.frame_rate)), abs=TIME_TOLERANCE_MS
-        )
+            1000.0 * (199.0 / float(stream.frame_rate)), abs=TIME_TOLERANCE_MS)
         stream.read()
         assert stream.frame_number == 201
         assert stream.position == stream.base_timecode + 200
         assert stream.position_ms == pytest.approx(
-            1000.0 * (200.0 / float(stream.frame_rate)), abs=TIME_TOLERANCE_MS
-        )
+            1000.0 * (200.0 / float(stream.frame_rate)), abs=TIME_TOLERANCE_MS)
 
         # Seek to a time in seconds (float).
         stream.seek(2.0)
@@ -249,14 +228,11 @@ class TestVideoStream:
         # starts counting from zero. This should eventually be changed.
         assert stream.position == (stream.base_timecode + 2.0) - 1
         assert stream.position_ms == pytest.approx(
-            2000.0 - (1000.0 / stream.frame_rate), abs=1000.0 / stream.frame_rate
-        )
+            2000.0 - (1000.0 / stream.frame_rate), abs=1000.0 / stream.frame_rate)
         stream.read()
         assert stream.frame_number == 1 + round(stream.frame_rate * 2.0)
         assert stream.position == stream.base_timecode + 2.0
-        assert stream.position_ms == pytest.approx(
-            2000.0, abs=1000.0 / stream.frame_rate
-        )
+        assert stream.position_ms == pytest.approx(2000.0, abs=1000.0 / stream.frame_rate)
 
         # Seek to a FrameTimecode.
         stream.seek(stream.base_timecode + 2.0)
@@ -265,14 +241,11 @@ class TestVideoStream:
         # starts counting from zero. This should eventually be changed.
         assert stream.position == (stream.base_timecode + 2.0) - 1
         assert stream.position_ms == pytest.approx(
-            2000.0 - (1000.0 / stream.frame_rate), abs=1000.0 / stream.frame_rate
-        )
+            2000.0 - (1000.0 / stream.frame_rate), abs=1000.0 / stream.frame_rate)
         stream.read()
         assert stream.frame_number == 1 + round(stream.frame_rate * 2.0)
         assert stream.position == stream.base_timecode + 2.0
-        assert stream.position_ms == pytest.approx(
-            2000.0, abs=1000.0 / stream.frame_rate
-        )
+        assert stream.position_ms == pytest.approx(2000.0, abs=1000.0 / stream.frame_rate)
 
     def test_seek_start(self, vs_type: Type[VideoStream], test_video: VideoParameters):
         """Validate behaviour of `seek()` at the start of a video."""
@@ -292,8 +265,7 @@ class TestVideoStream:
             assert stream.frame_number == i
             assert stream.position == stream.base_timecode + (i - 1)
             assert stream.position_ms == pytest.approx(
-                1000.0 * (i - 1) / float(stream.frame_rate), abs=TIME_TOLERANCE_MS
-            )
+                1000.0 * (i - 1) / float(stream.frame_rate), abs=TIME_TOLERANCE_MS)
         stream.seek(0)
         assert stream.frame_number == 0
         assert stream.position == stream.base_timecode
@@ -318,21 +290,14 @@ class TestVideoStream:
             pass
         # TODO: On some videos, the PyAV backend seems to drop a frame. See where this occurs.
         if vs_type == VideoStreamAv:
-            assert stream.frame_number in (
-                test_video.total_frames,
-                test_video.total_frames - 1,
-            )
+            assert stream.frame_number in (test_video.total_frames, test_video.total_frames - 1)
         else:
             assert stream.frame_number == test_video.total_frames
 
-    def test_seek_past_eof(
-        self, vs_type: Type[VideoStream], test_video: VideoParameters
-    ):
+    def test_seek_past_eof(self, vs_type: Type[VideoStream], test_video: VideoParameters):
         """Validate calling `seek()` to offset past end of video."""
         if vs_type == VideoManager:
-            pytest.skip(
-                reason="VideoManager does not have compliant end-of-video seek behaviour."
-            )
+            pytest.skip(reason='VideoManager does not have compliant end-of-video seek behaviour.')
         stream = vs_type(test_video.path)
         # Seek to a large seek offset past the end of the video. Some backends only support 32-bit
         # frame numbers so that's our max offset. Certain backends disallow seek offsets past EOF,
@@ -347,16 +312,11 @@ class TestVideoStream:
         assert stream.read(advance=False) is not False
         # TODO: On some videos, the PyAV backend seems to drop a frame. See where this occurs.
         if vs_type == VideoStreamAv:
-            assert stream.frame_number in (
-                test_video.total_frames,
-                test_video.total_frames - 1,
-            )
+            assert stream.frame_number in (test_video.total_frames, test_video.total_frames - 1)
         else:
             assert stream.frame_number == test_video.total_frames
 
-    def test_seek_invalid(
-        self, vs_type: Type[VideoStream], test_video: VideoParameters
-    ):
+    def test_seek_invalid(self, vs_type: Type[VideoStream], test_video: VideoParameters):
         """Test `seek()` throws correct exception when specifying in invalid seek value."""
         stream = vs_type(test_video.path)
 
@@ -375,13 +335,13 @@ class TestVideoStream:
 def test_invalid_path(vs_type: Type[VideoStream]):
     """Ensure correct exception is thrown if the path does not exist."""
     with pytest.raises(OSError):
-        _ = vs_type("this_path_should_not_exist.mp4")
+        _ = vs_type('this_path_should_not_exist.mp4')
 
 
 def test_corrupt_video(vs_type: Type[VideoStream], corrupt_video_file: str):
     """Test that backend handles video with corrupt frame gracefully with defaults."""
     if vs_type == VideoManager:
-        pytest.skip(reason="VideoManager does not support handling corrupt videos.")
+        pytest.skip(reason='VideoManager does not support handling corrupt videos.')
 
     stream = vs_type(corrupt_video_file)
 

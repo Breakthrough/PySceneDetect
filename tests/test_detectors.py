@@ -10,7 +10,7 @@
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
-"""PySceneDetect Scene Detection Tests
+""" PySceneDetect Scene Detection Tests
 
 These tests ensure that the detection algorithms deliver consistent
 results by using known ground truths of scene cut locations in the
@@ -34,10 +34,7 @@ FAST_CUT_DETECTORS: ty.Tuple[ty.Type[SceneDetector]] = (
     HistogramDetector,
 )
 
-ALL_DETECTORS: ty.Tuple[ty.Type[SceneDetector]] = (
-    *FAST_CUT_DETECTORS,
-    ThresholdDetector,
-)
+ALL_DETECTORS: ty.Tuple[ty.Type[SceneDetector]] = (*FAST_CUT_DETECTORS, ThresholdDetector)
 
 # TODO(#53): Add a test that verifies algorithms output relatively consistent frame scores
 # regardless of resolution. This will ensure that threshold values will hold true for different
@@ -47,23 +44,20 @@ ALL_DETECTORS: ty.Tuple[ty.Type[SceneDetector]] = (
 
 # TODO: Reduce code duplication here and in `conftest.py`
 def get_absolute_path(relative_path: str) -> str:
-    """Returns the absolute path to a (relative) path of a file that
+    """ Returns the absolute path to a (relative) path of a file that
     should exist within the tests/ directory.
 
     Throws FileNotFoundError if the file could not be found.
     """
     abs_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), relative_path)
     if not os.path.exists(abs_path):
-        raise FileNotFoundError(
-            """
+        raise FileNotFoundError("""
 Test video file (%s) must be present to run test case. This file can be obtained by running the following commands from the root of the repository:
 
 git fetch --depth=1 https://github.com/Breakthrough/PySceneDetect.git refs/heads/resources:refs/remotes/origin/resources
 git checkout refs/remotes/origin/resources -- tests/resources/
 git reset
-"""
-            % relative_path
-        )
+""" % relative_path)
     return abs_path
 
 
@@ -88,8 +82,7 @@ class TestCase:
             video_path=self.path,
             detector=self.detector,
             start_time=self.start_time,
-            end_time=self.end_time,
-        )
+            end_time=self.end_time)
 
 
 def get_fast_cut_test_cases():
@@ -103,11 +96,8 @@ def get_fast_cut_test_cases():
                 detector=detector_type(min_scene_len=15),
                 start_time=1199,
                 end_time=1450,
-                scene_boundaries=[1199, 1226, 1260, 1281, 1334, 1365],
-            ),
-            id="%s/default" % detector_type.__name__,
-        )
-        for detector_type in FAST_CUT_DETECTORS
+                scene_boundaries=[1199, 1226, 1260, 1281, 1334, 1365]),
+            id="%s/default" % detector_type.__name__) for detector_type in FAST_CUT_DETECTORS
     ]
     # goldeneye.mp4 with min_scene_len = 30
     test_cases += [
@@ -117,11 +107,8 @@ def get_fast_cut_test_cases():
                 detector=detector_type(min_scene_len=30),
                 start_time=1199,
                 end_time=1450,
-                scene_boundaries=[1199, 1260, 1334, 1365],
-            ),
-            id="%s/m=30" % detector_type.__name__,
-        )
-        for detector_type in FAST_CUT_DETECTORS
+                scene_boundaries=[1199, 1260, 1334, 1365]),
+            id="%s/m=30" % detector_type.__name__) for detector_type in FAST_CUT_DETECTORS
     ]
     return test_cases
 
@@ -137,20 +124,16 @@ def get_fade_in_out_test_cases():
                 detector=ThresholdDetector(),
                 start_time=0,
                 end_time=500,
-                scene_boundaries=[0, 15, 198, 376],
-            ),
-            id="threshold_testvideo_default",
-        ),
+                scene_boundaries=[0, 15, 198, 376]),
+            id="threshold_testvideo_default"),
         pytest.param(
             TestCase(
                 path=get_absolute_path("resources/fades.mp4"),
                 detector=ThresholdDetector(),
                 start_time=0,
                 end_time=250,
-                scene_boundaries=[0, 84, 167],
-            ),
-            id="threshold_fades_default",
-        ),
+                scene_boundaries=[0, 84, 167]),
+            id="threshold_fades_default"),
         pytest.param(
             TestCase(
                 path=get_absolute_path("resources/fades.mp4"),
@@ -161,10 +144,8 @@ def get_fade_in_out_test_cases():
                 ),
                 start_time=0,
                 end_time=250,
-                scene_boundaries=[0, 84, 167, 245],
-            ),
-            id="threshold_fades_floor",
-        ),
+                scene_boundaries=[0, 84, 167, 245]),
+            id="threshold_fades_floor"),
         pytest.param(
             TestCase(
                 path=get_absolute_path("resources/fades.mp4"),
@@ -175,10 +156,8 @@ def get_fade_in_out_test_cases():
                 ),
                 start_time=0,
                 end_time=250,
-                scene_boundaries=[0, 42, 125, 209],
-            ),
-            id="threshold_fades_ceil",
-        ),
+                scene_boundaries=[0, 42, 125, 209]),
+            id="threshold_fades_ceil"),
     ]
 
 
@@ -202,7 +181,7 @@ def test_detect_fades(test_case: TestCase):
 
 
 def test_detectors_with_stats(test_video_file):
-    """Test all detectors functionality with a StatsManager."""
+    """ Test all detectors functionality with a StatsManager. """
     # TODO(v1.0): Parameterize this test case (move fixture from cli to test config).
     for detector in ALL_DETECTORS:
         video = VideoStreamCv2(test_video_file)
@@ -210,7 +189,7 @@ def test_detectors_with_stats(test_video_file):
         scene_manager = SceneManager(stats_manager=stats)
         scene_manager.add_detector(detector())
         scene_manager.auto_downscale = True
-        end_time = FrameTimecode("00:00:08", video.frame_rate)
+        end_time = FrameTimecode('00:00:08', video.frame_rate)
         scene_manager.detect_scenes(video=video, end_time=end_time)
         initial_scene_len = len(scene_manager.get_scene_list())
         assert initial_scene_len > 0, "Test case must have at least one scene."
