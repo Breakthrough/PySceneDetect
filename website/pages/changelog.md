@@ -4,11 +4,6 @@ Releases
 
 ## PySceneDetect 0.6
 
-### 0.6.5 (TBD)
-
- - [bugfix] Fix new detectors not working with `default-detector` config option
- - [bugfix] Fix SyntaxWarning due to incorrect escaping [#400](https://github.com/Breakthrough/PySceneDetect/pull/295) [#400](https://github.com/Breakthrough/PySceneDetect/issues/35)
-
 ### 0.6.4 (June 10, 2024)
 
 #### Release Notes
@@ -583,3 +578,15 @@ Both the Windows installer and portable distributions now include signed executa
 
  * first public release
  * [feature] threshold-based fade in/out detection
+
+
+----------------------------------------------------------------
+
+
+Development
+==========================================================
+
+## PySceneDetect 0.6.5 (TBD)
+
+ - [bugfix] Fix new detectors not working with `default-detector` config option
+ - [bugfix] Fix SyntaxWarning due to incorrect escaping [#400](https://github.com/Breakthrough/PySceneDetect/pull/295) [#400](https://github.com/Breakthrough/PySceneDetect/issues/35)
