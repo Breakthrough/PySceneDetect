@@ -35,7 +35,7 @@ select = [
     "F",
     # isort
     "I",
-    # TODO - Rule sets to enable:
+    # TODO - Add additional rule sets (https://docs.astral.sh/ruff/rules/):
     # pyupgrade
     #"UP",
     # flake8-simplify
