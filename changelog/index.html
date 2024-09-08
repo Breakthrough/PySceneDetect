@@ -68,11 +68,15 @@
     <ul class="current">
     <li class="toctree-l2"><a class="reference internal" href="#pyscenedetect-06">PySceneDetect 0.6</a>
         <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#065-tbd">0.6.5 (TBD)</a>
+    </li>
     <li class="toctree-l3"><a class="reference internal" href="#064-june-10-2024">0.6.4 (June 10, 2024)</a>
         <ul>
     <li class="toctree-l4"><a class="reference internal" href="#release-notes">Release Notes</a>
     </li>
     <li class="toctree-l4"><a class="reference internal" href="#changelog">Changelog</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#0641-tbd">0.6.4.1 (TBD)</a>
     </li>
         </ul>
     </li>
@@ -267,6 +271,11 @@
               
                 <h1 id="releases">Releases</h1>
 <h2 id="pyscenedetect-06">PySceneDetect 0.6</h2>
+<h3 id="065-tbd">0.6.5 (TBD)</h3>
+<ul>
+<li>[bugfix] Fix new detectors not working with <code>default-detector</code> config option</li>
+<li>[bugfix] Fix SyntaxWarning due to incorrect escaping <a href="https://github.com/Breakthrough/PySceneDetect/pull/295">#400</a> <a href="https://github.com/Breakthrough/PySceneDetect/issues/35">#400</a></li>
+</ul>
 <h3 id="064-june-10-2024">0.6.4 (June 10, 2024)</h3>
 <h4 id="release-notes">Release Notes</h4>
 <p>Includes new histogram and perceptual hash based detectors (thanks @wjs018 and @ash2703), adds flash filter to content detector, and includes various bugfixes. Below shows the scores of the new detectors normalized against <code>detect-content</code> for comparison on a difficult segment with 3 cuts:</p>
@@ -289,6 +298,11 @@
 <li>[bugfix] Fix scene lengths being smaller than <code>min-scene-len</code> when using <code>detect-adaptive</code> / <code>AdaptiveDetector</code> with large values of <code>--frame-window</code></li>
 <li>[bugfix] Fix crash when decoded frames have incorrect resolution and log error instead <a href="https://github.com/Breakthrough/PySceneDetect/issues/319">#319</a></li>
 <li>[bugfix] Update default ffmpeg stream mapping from <code>-map 0</code> to <code>-map 0:v:0 -map 0:a? -map 0:s?</code> <a href="https://github.com/Breakthrough/PySceneDetect/issues/392">#392</a></li>
+</ul>
+<h4 id="0641-tbd">0.6.4.1 (TBD)</h4>
+<ul>
+<li>[bugfix] Fix <code>default-detector</code> config option not working with new detectors</li>
+<li>[bugfix] Fix SyntaxWarning due to incorrect string escaping in command-line (#400)</li>
 </ul>
 <h3 id="063-march-9-2024">0.6.3 (March 9, 2024)</h3>
 <h4 id="release-notes_1">Release Notes</h4>
