@@ -4,7 +4,7 @@ name: Generate Documentation
 on:
   push:
     branches:
-      - develop         # docs/develop
+      - main            # docs/head
       - 'releases/**'   # docs/**
     paths:
       - 'docs/**'
@@ -33,10 +33,10 @@ jobs:
         run: |
           echo "scenedetect_docs_dest=$(echo ${{ github.ref_name }} | cut -b 10-)" >> "$GITHUB_ENV"
 
-      - name: Set Destination (Develop)
-        if: ${{ contains(github.ref_name, 'develop') }}
+      - name: Set Destination (Head)
+        if: ${{ contains(github.ref_name, 'main') }}
         run: |
-          echo "scenedetect_docs_dest=develop" >> "$GITHUB_ENV"
+          echo "scenedetect_docs_dest=head" >> "$GITHUB_ENV"
 
       - name: Check Destination
         if: ${{ env.scenedetect_docs_dest == '' }}
