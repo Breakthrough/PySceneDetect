@@ -234,3 +234,7 @@ class ContentDetector(SceneDetector):
         # camera movement. Note that very large kernel sizes can negatively affect accuracy.
         edges = cv2.Canny(lum, low, high)
         return cv2.dilate(edges, self._kernel)
+
+    @property
+    def event_buffer_length(self) -> int:
+        return self._flash_filter.max_behind
