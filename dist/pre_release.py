@@ -4,9 +4,13 @@ import sys
 sys.path.append(os.path.abspath("."))
 
 import scenedetect
+
+
 VERSION = scenedetect.__version__
 
-if len(sys.argv) <= 2 or not ("--ignore-installer" in sys.argv):
+run_version_check = ("--ignore-installer" not in sys.argv)
+
+if run_version_check:
   installer_aip = ''
   with open("dist/installer/PySceneDetect.aip", "r") as f:
     installer_aip = f.read()
@@ -16,12 +20,19 @@ if len(sys.argv) <= 2 or not ("--ignore-installer" in sys.argv):
 with open("dist/.version_info", "wb") as f:
     v = VERSION.split(".")
     assert 2 <= len(v) <= 3, f"Unrecognized version format: {VERSION}"
-
-    if len(v) == 3:
-        (maj, min, pat) = int(v[0]), int(v[1]), int(v[2])
-    else:
-        (maj, min, pat) = int(v[0]), int(v[1]), 0
-
+    if len(v) < 3:
+       v.append("0")
+    (maj, min, pat, bld) = v[0], v[1], v[2], 0
+    # If either major or minor have suffixes, assume it's a dev/beta build and set
+    # the final component to 999.
+    if not min.isdigit():
+       assert "-" in min
+       min = min[:min.find("-")]
+       bld = 999
+    if not pat.isdigit():
+       assert "-" in pat
+       pat = pat[:pat.find("-")]
+       bld = 999
     f.write(f"""# UTF-8
 #
 # For more details about fixed file info 'ffi' see:
@@ -30,8 +41,8 @@ VSVersionInfo(
   ffi=FixedFileInfo(
 # filevers and prodvers should be always a tuple with four items: (1, 2, 3, 4)
 # Set not needed items to zero 0.
-filevers=(0, {maj}, {min}, {pat}),
-prodvers=(0, {maj}, {min}, {pat}),
+filevers=({maj}, {min}, {pat}, {bld}),
+prodvers=({maj}, {min}, {pat}, {bld}),
 # Contains a bitmask that specifies the valid bits 'flags'r
 mask=0x3f,
 # Contains a bitmask that specifies the Boolean attributes of the file.
