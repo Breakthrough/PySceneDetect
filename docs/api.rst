@@ -61,7 +61,7 @@ To get started, the :func:`scenedetect.detect` function takes a path to a video 
 .. code:: python
 
     from scenedetect import detect, ContentDetector
-    scene_list = detect('my_video.mp4', ContentDetector())
+    scene_list = detect("my_video.mp4", ContentDetector())
 
 ``scene_list`` is now a list of :class:`FrameTimecode <scenedetect.frame_timecode.FrameTimecode>` pairs representing the start/end of each scene (try calling ``print(scene_list)``). Note that you can set ``show_progress=True`` when calling :func:`detect <scenedetect.detect>` to display a progress bar with estimated time remaining.
 
@@ -70,7 +70,7 @@ Next, let's print the scene list in a more readable format by iterating over it:
 .. code:: python
 
     for i, scene in enumerate(scene_list):
-        print('Scene %2d: Start %s / Frame %d, End %s / Frame %d' % (
+        print("Scene %2d: Start %s / Frame %d, End %s / Frame %d" % (
             i+1,
             scene[0].get_timecode(), scene[0].get_frames(),
             scene[1].get_timecode(), scene[1].get_frames(),))
@@ -80,8 +80,8 @@ Now that we know where each scene is, we can also :ref:`split the input video <s
 .. code:: python
 
     from scenedetect import detect, ContentDetector, split_video_ffmpeg
-    scene_list = detect('my_video.mp4', ContentDetector())
-    split_video_ffmpeg('my_video.mp4', scene_list)
+    scene_list = detect("my_video.mp4", ContentDetector())
+    split_video_ffmpeg("my_video.mp4", scene_list)
 
 This is just a small snippet of what PySceneDetect offers. The library is very modular, and can integrate with most application workflows easily.
 
@@ -149,7 +149,7 @@ Module Reference
 Logging
 =======================================================================
 
-PySceneDetect outputs messages to a logger named ``pyscenedetect`` which does not have any default handlers. You can use :func:`scenedetect.init_logger <scenedetect.platform.init_logger>` with ``show_stdout=True`` or specify a log file (verbosity can also be specified) to attach some common handlers, or use ``logging.getLogger('pyscenedetect')`` and attach log handlers manually.
+PySceneDetect outputs messages to a logger named ``pyscenedetect`` which does not have any default handlers. You can use :func:`scenedetect.init_logger <scenedetect.platform.init_logger>` with ``show_stdout=True`` or specify a log file (verbosity can also be specified) to attach some common handlers, or use ``logging.getLogger("pyscenedetect")`` and attach log handlers manually.
 
 
 =======================================================================

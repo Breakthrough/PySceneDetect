@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 #            PySceneDetect: Python-Based Video Scene Detector
 #   -------------------------------------------------------------------
@@ -24,7 +23,7 @@ import numpy as np
 
 from scenedetect.detectors import ContentDetector
 
-logger = getLogger('pyscenedetect')
+logger = getLogger("pyscenedetect")
 
 
 class AdaptiveDetector(ContentDetector):
@@ -71,12 +70,12 @@ class AdaptiveDetector(ContentDetector):
         # TODO(v0.7): Replace with DeprecationWarning that `video_manager` and `min_delta_hsv` will
         # be removed in v0.8.
         if video_manager is not None:
-            logger.error('video_manager is deprecated, use video instead.')
+            logger.error("video_manager is deprecated, use video instead.")
         if min_delta_hsv is not None:
-            logger.error('min_delta_hsv is deprecated, use min_content_val instead.')
+            logger.error("min_delta_hsv is deprecated, use min_content_val instead.")
             min_content_val = min_delta_hsv
         if window_width < 1:
-            raise ValueError('window_width must be at least 1.')
+            raise ValueError("window_width must be at least 1.")
 
         super().__init__(
             threshold=255.0,
@@ -93,7 +92,8 @@ class AdaptiveDetector(ContentDetector):
         self.window_width = window_width
 
         self._adaptive_ratio_key = AdaptiveDetector.ADAPTIVE_RATIO_KEY_TEMPLATE.format(
-            window_width=window_width, luma_only='' if not luma_only else '_lum')
+            window_width=window_width, luma_only="" if not luma_only else "_lum"
+        )
         self._first_frame_num = None
 
         # NOTE: This must be different than `self._last_scene_cut` which is used by the base class.
@@ -141,9 +141,9 @@ class AdaptiveDetector(ContentDetector):
             return []
         self._buffer = self._buffer[-required_frames:]
         (target_frame, target_score) = self._buffer[self.window_width]
-        average_window_score = (
-            sum(score for i, (_frame, score) in enumerate(self._buffer) if i != self.window_width) /
-            (2.0 * self.window_width))
+        average_window_score = sum(
+            score for i, (_frame, score) in enumerate(self._buffer) if i != self.window_width
+        ) / (2.0 * self.window_width)
 
         average_is_zero = abs(average_window_score) < 0.00001
 
@@ -159,7 +159,8 @@ class AdaptiveDetector(ContentDetector):
         # Check to see if adaptive_ratio exceeds the adaptive_threshold as well as there
         # being a large enough content_val to trigger a cut
         threshold_met: bool = (
-            adaptive_ratio >= self.adaptive_threshold and target_score >= self.min_content_val)
+            adaptive_ratio >= self.adaptive_threshold and target_score >= self.min_content_val
+        )
         min_length_met: bool = (frame_num - self._last_cut) >= self.min_scene_len
         if threshold_met and min_length_met:
             self._last_cut = target_frame
@@ -169,8 +170,10 @@ class AdaptiveDetector(ContentDetector):
     def get_content_val(self, frame_num: int) -> Optional[float]:
         """Returns the average content change for a frame."""
         # TODO(v0.7): Add DeprecationWarning that `get_content_val` will be removed in v0.7.
-        logger.error("get_content_val is deprecated and will be removed. Lookup the value"
-                     " using a StatsManager with ContentDetector.FRAME_SCORE_KEY.")
+        logger.error(
+            "get_content_val is deprecated and will be removed. Lookup the value"
+            " using a StatsManager with ContentDetector.FRAME_SCORE_KEY."
+        )
         if self.stats_manager is not None:
             return self.stats_manager.get_metrics(frame_num, [ContentDetector.FRAME_SCORE_KEY])[0]
         return 0.0

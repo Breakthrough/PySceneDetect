@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 #            PySceneDetect: Python-Based Video Scene Detector
 #   -------------------------------------------------------------------
@@ -36,7 +35,7 @@ typically attached to a :class:`SceneManager <scenedetect.scene_manager.SceneMan
 processing videos, however they can also be used to process frames directly.
 """
 
-from scenedetect.detectors.content_detector import ContentDetector
+from scenedetect.detectors.content_detector import ContentDetector  # noqa: I001
 from scenedetect.detectors.threshold_detector import ThresholdDetector
 from scenedetect.detectors.adaptive_detector import AdaptiveDetector
 from scenedetect.detectors.hash_detector import HashDetector

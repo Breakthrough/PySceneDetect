@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 #            PySceneDetect: Python-Based Video Scene Detector
 #   -------------------------------------------------------------------
@@ -87,7 +86,7 @@ examples for details.
 from typing import Dict, Type
 
 # OpenCV must be available at minimum.
-from scenedetect.backends.opencv import VideoStreamCv2, VideoCaptureAdapter
+from scenedetect.backends.opencv import VideoCaptureAdapter, VideoStreamCv2
 
 try:
     from scenedetect.backends.pyav import VideoStreamAv
@@ -102,11 +101,15 @@ except ImportError:
 # TODO: Lazy-loading backends would improve startup performance. However, this requires removing
 # some of the re-exported types above from the public API.
 AVAILABLE_BACKENDS: Dict[str, Type] = {
-    backend.BACKEND_NAME: backend for backend in filter(None, [
-        VideoStreamCv2,
-        VideoStreamAv,
-        VideoStreamMoviePy,
-    ])
+    backend.BACKEND_NAME: backend
+    for backend in filter(
+        None,
+        [
+            VideoStreamCv2,
+            VideoStreamAv,
+            VideoStreamMoviePy,
+        ],
+    )
 }
 """All available backends that :func:`scenedetect.open_video` can consider for the `backend`
 parameter. These backends must support construction with the following signature:

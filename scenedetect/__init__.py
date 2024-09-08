@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 #            PySceneDetect: Python-Based Video Scene Detector
 #   -------------------------------------------------------------------
@@ -27,36 +26,45 @@ try:
 except ModuleNotFoundError as ex:
     raise ModuleNotFoundError(
         "OpenCV could not be found, try installing opencv-python:\n\npip install opencv-python",
-        name='cv2',
+        name="cv2",
     ) from ex
 
 # Commonly used classes/functions exported under the `scenedetect` namespace for brevity.
-from scenedetect.platform import init_logger
+from scenedetect.platform import init_logger  # noqa: I001
 from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.video_stream import VideoStream, VideoOpenFailure
 from scenedetect.video_splitter import split_video_ffmpeg, split_video_mkvmerge
 from scenedetect.scene_detector import SceneDetector
-from scenedetect.detectors import ContentDetector, AdaptiveDetector, ThresholdDetector, HistogramDetector, HashDetector
-from scenedetect.backends import (AVAILABLE_BACKENDS, VideoStreamCv2, VideoStreamAv,
-                                  VideoStreamMoviePy, VideoCaptureAdapter)
+from scenedetect.detectors import (
+    ContentDetector,
+    AdaptiveDetector,
+    ThresholdDetector,
+    HistogramDetector,
+    HashDetector,
+)
+from scenedetect.backends import (
+    AVAILABLE_BACKENDS,
+    VideoStreamCv2,
+    VideoStreamAv,
+    VideoStreamMoviePy,
+    VideoCaptureAdapter,
+)
 from scenedetect.stats_manager import StatsManager, StatsFileCorrupt
 from scenedetect.scene_manager import SceneManager, save_images
-
-# [DEPRECATED] DO NOT USE.
-from scenedetect.video_manager import VideoManager
+from scenedetect.video_manager import VideoManager  # [DEPRECATED] DO NOT USE.
 
 # Used for module identification and when printing version & about info
 # (e.g. calling `scenedetect version` or `scenedetect about`).
-__version__ = '0.6.4'
+__version__ = "0.6.5-dev1"
 
 init_logger()
-logger = getLogger('pyscenedetect')
+logger = getLogger("pyscenedetect")
 
 
 def open_video(
     path: str,
     framerate: Optional[float] = None,
-    backend: str = 'opencv',
+    backend: str = "opencv",
     **kwargs,
 ) -> VideoStream:
     """Open a video at the given path. If `backend` is specified but not available on the current
@@ -83,22 +91,22 @@ def open_video(
     if backend in AVAILABLE_BACKENDS:
         backend_type = AVAILABLE_BACKENDS[backend]
         try:
-            logger.debug('Opening video with %s...', backend_type.BACKEND_NAME)
+            logger.debug("Opening video with %s...", backend_type.BACKEND_NAME)
             return backend_type(path, framerate, **kwargs)
         except VideoOpenFailure as ex:
-            logger.warning('Failed to open video with %s: %s', backend_type.BACKEND_NAME, str(ex))
+            logger.warning("Failed to open video with %s: %s", backend_type.BACKEND_NAME, str(ex))
             if backend == VideoStreamCv2.BACKEND_NAME:
                 raise
             last_error = ex
     else:
-        logger.warning('Backend %s not available.', backend)
+        logger.warning("Backend %s not available.", backend)
     # Fallback to OpenCV if `backend` is unavailable, or specified backend failed to open `path`.
     backend_type = VideoStreamCv2
-    logger.warning('Trying another backend: %s', backend_type.BACKEND_NAME)
+    logger.warning("Trying another backend: %s", backend_type.BACKEND_NAME)
     try:
         return backend_type(path, framerate)
     except VideoOpenFailure as ex:
-        logger.debug('Failed to open video: %s', str(ex))
+        logger.debug("Failed to open video: %s", str(ex))
         if last_error is None:
             last_error = ex
     # Propagate any exceptions raised from specified backend, instead of errors from the fallback.
@@ -158,6 +166,6 @@ def detect(
         show_progress=show_progress,
         end_time=end_time,
     )
-    if not scene_manager.stats_manager is None:
+    if scene_manager.stats_manager is not None:
         scene_manager.stats_manager.save_to_csv(csv_file=stats_file_path)
     return scene_manager.get_scene_list(start_in_scene=start_in_scene)

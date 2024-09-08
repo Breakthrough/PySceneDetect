@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 #            PySceneDetect: Python-Based Video Scene Detector
 #   -------------------------------------------------------------------
@@ -15,14 +14,15 @@ set threshold/score, which if exceeded, triggers a scene cut.
 
 This detector is available from the command-line as the `detect-content` command.
 """
-from dataclasses import dataclass
+
 import math
+from dataclasses import dataclass
 from typing import List, NamedTuple, Optional
 
-import numpy
 import cv2
+import numpy
 
-from scenedetect.scene_detector import SceneDetector, FlashFilter
+from scenedetect.scene_detector import FlashFilter, SceneDetector
 
 
 def _mean_pixel_distance(left: numpy.ndarray, right: numpy.ndarray) -> float:
@@ -32,7 +32,7 @@ def _mean_pixel_distance(left: numpy.ndarray, right: numpy.ndarray) -> float:
     assert len(left.shape) == 2 and len(right.shape) == 2
     assert left.shape == right.shape
     num_pixels: float = float(left.shape[0] * left.shape[1])
-    return (numpy.sum(numpy.abs(left.astype(numpy.int32) - right.astype(numpy.int32))) / num_pixels)
+    return numpy.sum(numpy.abs(left.astype(numpy.int32) - right.astype(numpy.int32))) / num_pixels
 
 
 def _estimated_kernel_size(frame_width: int, frame_height: int) -> int:
@@ -56,6 +56,7 @@ class ContentDetector(SceneDetector):
     # a wider variety of test cases.
     class Components(NamedTuple):
         """Components that make up a frame's score, and their default values."""
+
         delta_hue: float = 1.0
         """Difference between pixel hue values of adjacent frames."""
         delta_sat: float = 1.0
@@ -80,7 +81,7 @@ class ContentDetector(SceneDetector):
     )
     """Component weights to use if `luma_only` is set."""
 
-    FRAME_SCORE_KEY = 'content_val'
+    FRAME_SCORE_KEY = "content_val"
     """Key in statsfile representing the final frame score after weighed by specified components."""
 
     METRIC_KEYS = [FRAME_SCORE_KEY, *Components._fields]
@@ -89,6 +90,7 @@ class ContentDetector(SceneDetector):
     @dataclass
     class _FrameData:
         """Data calculated for a given frame."""
+
         hue: numpy.ndarray
         """Frame hue map [2D 8-bit]."""
         sat: numpy.ndarray
@@ -102,7 +104,7 @@ class ContentDetector(SceneDetector):
         self,
         threshold: float = 27.0,
         min_scene_len: int = 15,
-        weights: 'ContentDetector.Components' = DEFAULT_COMPONENT_WEIGHTS,
+        weights: "ContentDetector.Components" = DEFAULT_COMPONENT_WEIGHTS,
         luma_only: bool = False,
         kernel_size: Optional[int] = None,
         filter_mode: FlashFilter.Mode = FlashFilter.Mode.MERGE,
@@ -133,7 +135,7 @@ class ContentDetector(SceneDetector):
         if kernel_size is not None:
             print(kernel_size)
             if kernel_size < 3 or kernel_size % 2 == 0:
-                raise ValueError('kernel_size must be odd integer >= 3')
+                raise ValueError("kernel_size must be odd integer >= 3")
             self._kernel = numpy.ones((kernel_size, kernel_size), numpy.uint8)
         self._frame_score: Optional[float] = None
         self._flash_filter = FlashFilter(mode=filter_mode, length=min_scene_len)
@@ -155,8 +157,7 @@ class ContentDetector(SceneDetector):
         hue, sat, lum = cv2.split(cv2.cvtColor(frame_img, cv2.COLOR_BGR2HSV))
 
         # Performance: Only calculate edges if we have to.
-        calculate_edges: bool = ((self._weights.delta_edges > 0.0)
-                                 or self.stats_manager is not None)
+        calculate_edges: bool = (self._weights.delta_edges > 0.0) or self.stats_manager is not None
         edges = self._detect_edges(lum) if calculate_edges else None
 
         if self._last_frame is None:
@@ -168,13 +169,14 @@ class ContentDetector(SceneDetector):
             delta_hue=_mean_pixel_distance(hue, self._last_frame.hue),
             delta_sat=_mean_pixel_distance(sat, self._last_frame.sat),
             delta_lum=_mean_pixel_distance(lum, self._last_frame.lum),
-            delta_edges=(0.0 if edges is None else _mean_pixel_distance(
-                edges, self._last_frame.edges)),
+            delta_edges=(
+                0.0 if edges is None else _mean_pixel_distance(edges, self._last_frame.edges)
+            ),
         )
 
-        frame_score: float = (
-            sum(component * weight for (component, weight) in zip(score_components, self._weights))
-            / sum(abs(weight) for weight in self._weights))
+        frame_score: float = sum(
+            component * weight for (component, weight) in zip(score_components, self._weights)
+        ) / sum(abs(weight) for weight in self._weights)
 
         # Record components and frame score if needed for analysis.
         if self.stats_manager is not None:

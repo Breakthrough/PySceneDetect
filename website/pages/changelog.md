@@ -4,6 +4,11 @@ Releases
 
 ## PySceneDetect 0.6
 
+### 0.6.5 (TBD)
+
+ - [bugfix] Fix new detectors not working with `default-detector` config option
+ - [bugfix] Fix SyntaxWarning due to incorrect escaping [#400](https://github.com/Breakthrough/PySceneDetect/pull/295) [#400](https://github.com/Breakthrough/PySceneDetect/issues/35)
+
 ### 0.6.4 (June 10, 2024)
 
 #### Release Notes
@@ -29,6 +34,11 @@ Feedback on the new detection methods and their default values is most welcome. 
  - [bugfix] Fix scene lengths being smaller than `min-scene-len` when using `detect-adaptive` / `AdaptiveDetector` with large values of `--frame-window`
  - [bugfix] Fix crash when decoded frames have incorrect resolution and log error instead [#319](https://github.com/Breakthrough/PySceneDetect/issues/319)
  - [bugfix] Update default ffmpeg stream mapping from `-map 0` to `-map 0:v:0 -map 0:a? -map 0:s?` [#392](https://github.com/Breakthrough/PySceneDetect/issues/392)
+
+#### 0.6.4.1 (TBD)
+
+ - [bugfix] Fix `default-detector` config option not working with new detectors
+ - [bugfix] Fix SyntaxWarning due to incorrect string escaping in command-line (#400)
 
 
 ### 0.6.3 (March 9, 2024)

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 #            PySceneDetect: Python-Based Video Scene Detector
 #   -------------------------------------------------------------------
@@ -33,7 +32,7 @@ tested by adding it to the test suite in `tests/test_video_stream.py`.
 """
 
 from abc import ABC, abstractmethod
-from typing import Tuple, Optional, Union
+from typing import Optional, Tuple, Union
 
 import numpy as np
 
@@ -54,7 +53,6 @@ class SeekError(Exception):
 class VideoOpenFailure(Exception):
     """Raised by a backend if opening a video fails."""
 
-    # pylint: disable=useless-super-delegation
     def __init__(self, message: str = "Unknown backend error."):
         """
         Arguments:
@@ -62,16 +60,16 @@ class VideoOpenFailure(Exception):
         """
         super().__init__(message)
 
-    # pylint: enable=useless-super-delegation
-
 
 class FrameRateUnavailable(VideoOpenFailure):
     """Exception instance to provide consistent error messaging across backends when the video frame
     rate is unavailable or cannot be calculated. Subclass of VideoOpenFailure."""
 
     def __init__(self):
-        super().__init__('Unable to obtain video framerate! Specify `framerate` manually, or'
-                         ' re-encode/re-mux the video and try again.')
+        super().__init__(
+            "Unable to obtain video framerate! Specify `framerate` manually, or"
+            " re-encode/re-mux the video and try again."
+        )
 
 
 ##
@@ -80,7 +78,7 @@ class FrameRateUnavailable(VideoOpenFailure):
 
 
 class VideoStream(ABC):
-    """ Interface which all video backends must implement. """
+    """Interface which all video backends must implement."""
 
     #
     # Default Implementations
@@ -192,7 +190,7 @@ class VideoStream(ABC):
 
     @abstractmethod
     def reset(self) -> None:
-        """ Close and re-open the VideoStream (equivalent to seeking back to beginning). """
+        """Close and re-open the VideoStream (equivalent to seeking back to beginning)."""
         raise NotImplementedError
 
     @abstractmethod

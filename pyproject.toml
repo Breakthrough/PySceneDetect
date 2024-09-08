@@ -1,6 +1,53 @@
+#
+#         PySceneDetect: Python-Based Video Scene Detector
+#   ---------------------------------------------------------------
+#     [  Site: http://www.bcastell.com/projects/PySceneDetect/   ]
+#     [  Github: https://github.com/Breakthrough/PySceneDetect/  ]
+#     [  Documentation: http://www.scenedetect.com/docs/         ]
+#
+# Copyright (C) 2014-2024 Brandon Castellano <http://www.bcastell.com>.
+#
 
-# TODO: Switch to poetry to try and fix dependents graph. Example:
-# https://github.com/Textualize/rich/blob/master/pyproject.toml
 [build-system]
 requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
+
+[tool.ruff]
+exclude = [
+    "docs"
+]
+line-length = 100
+indent-width = 4
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+docstring-code-format = true
+
+[tool.ruff.lint]
+select = [
+    # flake8-bugbear
+    "B",
+    # pycodestyle
+    "E",
+    # Pyflakes
+    "F",
+    # isort
+    "I",
+    # TODO - Add additional rule sets (https://docs.astral.sh/ruff/rules/):
+    # pyupgrade
+    #"UP",
+    # flake8-simplify
+    #"SIM",
+]
+ignore = [
+    # TODO: Determine if we should use __all__, a reudndant alias, or keep this suppressed.
+    "F401",
+    # TODO: Line too long
+    "E501",
+    # TODO: Do not assign a `lambda` expression, use a `def`
+    "E731",
+]
+fixable = ["ALL"]
+unfixable = []
