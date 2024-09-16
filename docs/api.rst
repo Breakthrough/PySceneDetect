@@ -79,38 +79,9 @@ Now that we know where each scene is, we can also :ref:`split the input video <s
     scene_list = detect("my_video.mp4", ContentDetector())
     split_video_ffmpeg("my_video.mp4", scene_list)
 
-For more customizable scene cut/shot detection pipelines, start with :ref:`the SceneManager examples`.  Recipes for common use cases can be :ref:`found on Github <tests/test_api.py <https://github.com/Breakthrough/PySceneDetect/blob/v0.6.4-release/tests/test_api.py>`_.
+ example of using the PySceneDetect API to with a stats file (to save per-frame metrics to disk and/or speed up multiple passes of the same video), take a look at the :ref:`example in the SceneManager
 
-
-.. _scenedetect-detailed_example:
-
-=======================================================================
-Example
-=======================================================================
-
-In this example, we create a function ``find_scenes()`` which will load a video, detect the scenes, and return a list of tuples containing the (start, end) timecodes of each detected scene.  Note that you can modify the `threshold` argument to modify the sensitivity of the :class:`ContentDetector <scenedetect.detectors.content_detector.ContentDetector>`, or use other detection algorithms (e.g. :class:`ThresholdDetector <scenedetect.detectors.threshold_detector.ThresholdDetector>`, :class:`AdaptiveDetector <scenedetect.detectors.adaptive_detector.AdaptiveDetector>`).
-
-.. code:: python
-
-    from scenedetect import SceneManager, open_video, ContentDetector
-
-    def find_scenes(video_path, threshold=27.0):
-        video = open_video(video_path)
-        scene_manager = SceneManager()
-        scene_manager.add_detector(
-            ContentDetector(threshold=threshold))
-        # Detect all scenes in video from current position to end.
-        scene_manager.detect_scenes(video)
-        # `get_scene_list` returns a list of start/end timecode pairs
-        # for each scene that was found.
-        return scene_manager.get_scene_list()
-
-Using a :class:`SceneManager <scenedetect.scene_manager.SceneManager>` directly allows tweaking the Parameters passed to :meth:`detect_scenes <scenedetect.scene_manager.SceneManager.detect_scenes>` including setting a limit to the number of frames to process, which is useful for live streams/camera devices.  You can also combine detection algorithms or create new ones from scratch.
-
-For a more advanced example of using the PySceneDetect API to with a stats file (to save per-frame metrics to disk and/or speed up multiple passes of the same video), take a look at the :ref:`example in the SceneManager reference<scenedetect-scene_manager>`.
-
-In addition to module-level examples, demonstrations of some common use cases can be found in the `tests/test_api.py <https://github.com/Breakthrough/PySceneDetect/blob/v0.6.4-release/tests/test_api.py>`_ file.
-
+Recipes for common use cases can be :ref:`found on Github <https://github.com/Breakthrough/PySceneDetect/blob/v0.6.4-release/tests/test_api.py>`_ including limiting detection time and storing per-frame metrics. For advanced workflows, start with the :ref:`examples in the SceneManager reference <scenedetect-scene_manager>`.
 
 =======================================================================
 Functions
