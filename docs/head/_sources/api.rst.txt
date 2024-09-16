@@ -3,10 +3,6 @@
 ``scenedetect`` 🎬 Package
 ***********************************************************************
 
-=======================================================================
-Overview
-=======================================================================
-
 The `scenedetect` API is easy to integrate with most application workflows, while also being highly extensible. See the `Quickstart`_ and `Example`_ sections below for some common use cases and integrations. The `scenedetect` package contains several modules:
 
     * :ref:`scenedetect.scene_manager 🎞️ <scenedetect-scene_manager>`: The :class:`SceneManager <scenedetect.scene_manager.SceneManager>` acts as a way to coordinate detecting scenes (via `SceneDetector` instances) on video frames (via :ref:`VideoStream <scenedetect-video_stream>` instances). This module also contains functionality to export information about scenes in various formats: :func:`save_images <scenedetect.scene_manager.save_images>` to save images for each scene, :func:`write_scene_list <scenedetect.scene_manager.write_scene_list>` to save scene/cut info as CSV, and :func:`write_scene_list_html <scenedetect.scene_manager.write_scene_list_html>` to export scenes in viewable HTML format.
@@ -53,7 +49,7 @@ Most types/functions are also available directly from the `scenedetect` package 
 .. _scenedetect-quickstart:
 
 =======================================================================
-Quickstart
+Examples
 =======================================================================
 
 To get started, the :func:`scenedetect.detect` function takes a path to a video and a :ref:`scene detector object<scenedetect-detectors>`, and returns a list of start/end timecodes.  For detecting fast cuts (shot changes), we use the :class:`ContentDetector <scenedetect.detectors.content_detector.ContentDetector>`:
@@ -83,9 +79,7 @@ Now that we know where each scene is, we can also :ref:`split the input video <s
     scene_list = detect("my_video.mp4", ContentDetector())
     split_video_ffmpeg("my_video.mp4", scene_list)
 
-This is just a small snippet of what PySceneDetect offers. The library is very modular, and can integrate with most application workflows easily.
-
-In the next example, we show how the library components can be used to create a more customizable scene cut/shot detection pipeline.  Additional demonstrations/recipes can be found in the `tests/test_api.py <https://github.com/Breakthrough/PySceneDetect/blob/v0.6.4-release/tests/test_api.py>`_ file.
+For more customizable scene cut/shot detection pipelines, start with :ref:`the SceneManager examples`.  Recipes for common use cases can be :ref:`found on Github <tests/test_api.py <https://github.com/Breakthrough/PySceneDetect/blob/v0.6.4-release/tests/test_api.py>`_.
 
 
 .. _scenedetect-detailed_example:

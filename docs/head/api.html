@@ -35,9 +35,7 @@
             
   <section id="scenedetect-package">
 <h1><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Package<a class="headerlink" href="#scenedetect-package" title="Permalink to this heading">¶</a></h1>
-<section id="overview">
-<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this heading">¶</a></h2>
-<p>The <cite>scenedetect</cite> API is easy to integrate with most application workflows, while also being highly extensible. See the <a class="reference internal" href="#quickstart">Quickstart</a> and <a class="reference internal" href="#example">Example</a> sections below for some common use cases and integrations. The <cite>scenedetect</cite> package contains several modules:</p>
+<p>The <cite>scenedetect</cite> API is easy to integrate with most application workflows, while also being highly extensible. See the <a href="#id4"><span class="problematic" id="id5">`Quickstart`_</span></a> and <a class="reference internal" href="#example">Example</a> sections below for some common use cases and integrations. The <cite>scenedetect</cite> package contains several modules:</p>
 <blockquote>
 <div><ul>
 <li><p><a class="reference internal" href="api/scene_manager.html#scenedetect-scene-manager"><span class="std std-ref">scenedetect.scene_manager 🎞️</span></a>: The <a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.SceneManager" title="scenedetect.scene_manager.SceneManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">SceneManager</span></code></a> acts as a way to coordinate detecting scenes (via <cite>SceneDetector</cite> instances) on video frames (via <a class="reference internal" href="api/video_stream.html#scenedetect-video-stream"><span class="std std-ref">VideoStream</span></a> instances). This module also contains functionality to export information about scenes in various formats: <a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.save_images" title="scenedetect.scene_manager.save_images"><code class="xref py py-func docutils literal notranslate"><span class="pre">save_images</span></code></a> to save images for each scene, <a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.write_scene_list" title="scenedetect.scene_manager.write_scene_list"><code class="xref py py-func docutils literal notranslate"><span class="pre">write_scene_list</span></code></a> to save scene/cut info as CSV, and <a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.write_scene_list_html" title="scenedetect.scene_manager.write_scene_list_html"><code class="xref py py-func docutils literal notranslate"><span class="pre">write_scene_list_html</span></code></a> to export scenes in viewable HTML format.</p></li>
@@ -77,9 +75,8 @@ with frame-accurate precision.</p></li>
 </pre></div>
 </div>
 </div>
-</section>
-<section id="quickstart">
-<span id="scenedetect-quickstart"></span><h2>Quickstart<a class="headerlink" href="#quickstart" title="Permalink to this heading">¶</a></h2>
+<section id="examples">
+<span id="scenedetect-quickstart"></span><h2>Examples<a class="headerlink" href="#examples" title="Permalink to this heading">¶</a></h2>
 <p>To get started, the <a class="reference internal" href="#scenedetect.detect" title="scenedetect.detect"><code class="xref py py-func docutils literal notranslate"><span class="pre">scenedetect.detect()</span></code></a> function takes a path to a video and a <a class="reference internal" href="api/detectors.html#scenedetect-detectors"><span class="std std-ref">scene detector object</span></a>, and returns a list of start/end timecodes.  For detecting fast cuts (shot changes), we use the <a class="reference internal" href="api/detectors.html#scenedetect.detectors.content_detector.ContentDetector" title="scenedetect.detectors.content_detector.ContentDetector"><code class="xref py py-class docutils literal notranslate"><span class="pre">ContentDetector</span></code></a>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">scenedetect</span> <span class="kn">import</span> <span class="n">detect</span><span class="p">,</span> <span class="n">ContentDetector</span>
 <span class="n">scene_list</span> <span class="o">=</span> <span class="n">detect</span><span class="p">(</span><span class="s2">&quot;my_video.mp4&quot;</span><span class="p">,</span> <span class="n">ContentDetector</span><span class="p">())</span>
@@ -100,8 +97,7 @@ with frame-accurate precision.</p></li>
 <span class="n">split_video_ffmpeg</span><span class="p">(</span><span class="s2">&quot;my_video.mp4&quot;</span><span class="p">,</span> <span class="n">scene_list</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>This is just a small snippet of what PySceneDetect offers. The library is very modular, and can integrate with most application workflows easily.</p>
-<p>In the next example, we show how the library components can be used to create a more customizable scene cut/shot detection pipeline.  Additional demonstrations/recipes can be found in the <a class="reference external" href="https://github.com/Breakthrough/PySceneDetect/blob/v0.6.4-release/tests/test_api.py">tests/test_api.py</a> file.</p>
+<p>For more customizable scene cut/shot detection pipelines, start with <span class="xref std std-ref">the SceneManager examples</span>.  Recipes for common use cases can be <a href="#id1"><span class="problematic" id="id2">:ref:`found on Github &lt;tests/test_api.py &lt;https://github.com/Breakthrough/PySceneDetect/blob/v0.6.4-release/tests/test_api.py&gt;`_</span></a>.</p>
 </section>
 <section id="example">
 <span id="scenedetect-detailed-example"></span><h2>Example<a class="headerlink" href="#example" title="Permalink to this heading">¶</a></h2>
@@ -541,8 +537,7 @@ overriding backend-specific options.</p></li>
 <p class="caption" role="heading"><span class="caption-text">API Documentation:</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Package</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#quickstart">Quickstart</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#examples">Examples</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#example">Example</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-scenedetect">Functions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-reference">Module Reference</a></li>
