@@ -11,11 +11,7 @@
 #
 """PySceneDetect API Tests
 
-These tests function as demonstrations of the PySceneDetect API. These tests provide examples
-of common use cases, which can be integrated into applications, or used from an interactive
-Python environment. When processing longer videos, it is useful to set `show_progress=True`
-when calling `detect()` or `detect_scenes()`.
-"""
+These tests demonstrate common workflow patterns used when integrating the PySceneDetect API."""
 
 
 def test_api_detect(test_video_file: str):
