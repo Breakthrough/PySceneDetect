@@ -35,7 +35,7 @@
             
   <section id="scenedetect-package">
 <h1><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Package<a class="headerlink" href="#scenedetect-package" title="Permalink to this heading">¶</a></h1>
-<p>The <cite>scenedetect</cite> API is easy to integrate with most application workflows, while also being highly extensible. See the <a href="#id3"><span class="problematic" id="id4">`Quickstart`_</span></a> and <a href="#id5"><span class="problematic" id="id6">`Example`_</span></a> sections below for some common use cases and integrations. The <cite>scenedetect</cite> package contains several modules:</p>
+<p>The <cite>scenedetect</cite> API is easy to integrate with most application workflows, while also being highly extensible. See the <a href="#id1"><span class="problematic" id="id2">`Quickstart`_</span></a> and <a href="#id3"><span class="problematic" id="id4">`Example`_</span></a> sections below for some common use cases and integrations. The <cite>scenedetect</cite> package contains several modules:</p>
 <blockquote>
 <div><ul>
 <li><p><a class="reference internal" href="api/scene_manager.html#scenedetect-scene-manager"><span class="std std-ref">scenedetect.scene_manager 🎞️</span></a>: The <a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.SceneManager" title="scenedetect.scene_manager.SceneManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">SceneManager</span></code></a> acts as a way to coordinate detecting scenes (via <cite>SceneDetector</cite> instances) on video frames (via <a class="reference internal" href="api/video_stream.html#scenedetect-video-stream"><span class="std std-ref">VideoStream</span></a> instances). This module also contains functionality to export information about scenes in various formats: <a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.save_images" title="scenedetect.scene_manager.save_images"><code class="xref py py-func docutils literal notranslate"><span class="pre">save_images</span></code></a> to save images for each scene, <a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.write_scene_list" title="scenedetect.scene_manager.write_scene_list"><code class="xref py py-func docutils literal notranslate"><span class="pre">write_scene_list</span></code></a> to save scene/cut info as CSV, and <a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.write_scene_list_html" title="scenedetect.scene_manager.write_scene_list_html"><code class="xref py py-func docutils literal notranslate"><span class="pre">write_scene_list_html</span></code></a> to export scenes in viewable HTML format.</p></li>
@@ -92,14 +92,12 @@ with frame-accurate precision.</p></li>
 </pre></div>
 </div>
 <p>Now that we know where each scene is, we can also <a class="reference internal" href="api/video_splitter.html#scenedetect-video-splitter"><span class="std std-ref">split the input video</span></a> automatically using <cite>ffmpeg</cite> (<cite>mkvmerge</cite> is also supported):</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>   from scenedetect import detect, ContentDetector, split_video_ffmpeg
-   scene_list = detect(&quot;my_video.mp4&quot;, ContentDetector())
-   split_video_ffmpeg(&quot;my_video.mp4&quot;, scene_list)
-
-example of using the PySceneDetect API to with a stats file (to save per-frame metrics to disk and/or speed up multiple passes of the same video), take a look at the :ref:`example in the SceneManager
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">scenedetect</span> <span class="kn">import</span> <span class="n">detect</span><span class="p">,</span> <span class="n">ContentDetector</span><span class="p">,</span> <span class="n">split_video_ffmpeg</span>
+<span class="n">scene_list</span> <span class="o">=</span> <span class="n">detect</span><span class="p">(</span><span class="s2">&quot;my_video.mp4&quot;</span><span class="p">,</span> <span class="n">ContentDetector</span><span class="p">())</span>
+<span class="n">split_video_ffmpeg</span><span class="p">(</span><span class="s2">&quot;my_video.mp4&quot;</span><span class="p">,</span> <span class="n">scene_list</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Recipes for common use cases can be <a href="#id1"><span class="problematic" id="id2">:ref:`found on Github &lt;https://github.com/Breakthrough/PySceneDetect/blob/v0.6.4-release/tests/test_api.py&gt;`_</span></a> including limiting detection time and storing per-frame metrics. For advanced workflows, start with the <a class="reference internal" href="api/scene_manager.html#scenedetect-scene-manager"><span class="std std-ref">examples in the SceneManager reference</span></a>.</p>
+<p>Recipes for common use cases can be <a class="reference external" href="https://github.com/Breakthrough/PySceneDetect/blob/v0.6.4-release/tests/test_api.py">found on Github</a> including limiting detection time and storing per-frame metrics. For advanced workflows, start with the :ref:` SceneManager usage examples &lt;scenedetect-scene_manager&gt;`.</p>
 </section>
 <section id="module-scenedetect">
 <span id="functions"></span><h2>Functions<a class="headerlink" href="#module-scenedetect" title="Permalink to this heading">¶</a></h2>

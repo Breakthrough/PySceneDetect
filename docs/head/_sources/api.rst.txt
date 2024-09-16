@@ -79,9 +79,8 @@ Now that we know where each scene is, we can also :ref:`split the input video <s
     scene_list = detect("my_video.mp4", ContentDetector())
     split_video_ffmpeg("my_video.mp4", scene_list)
 
- example of using the PySceneDetect API to with a stats file (to save per-frame metrics to disk and/or speed up multiple passes of the same video), take a look at the :ref:`example in the SceneManager
+Recipes for common use cases can be `found on Github <https://github.com/Breakthrough/PySceneDetect/blob/v0.6.4-release/tests/test_api.py>`_ including limiting detection time and storing per-frame metrics. For advanced workflows, start with the :ref:` SceneManager usage examples <scenedetect-scene_manager>`.
 
-Recipes for common use cases can be :ref:`found on Github <https://github.com/Breakthrough/PySceneDetect/blob/v0.6.4-release/tests/test_api.py>`_ including limiting detection time and storing per-frame metrics. For advanced workflows, start with the :ref:`examples in the SceneManager reference <scenedetect-scene_manager>`.
 
 =======================================================================
 Functions
