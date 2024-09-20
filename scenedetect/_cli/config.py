@@ -30,7 +30,7 @@ from scenedetect.scene_detector import FlashFilter
 from scenedetect.scene_manager import Interpolation
 from scenedetect.video_splitter import DEFAULT_FFMPEG_ARGS
 
-VALID_PYAV_THREAD_MODES = ["NONE", "SLICE", "FRAME", "AUTO"]
+PYAV_THREADING_MODES = ["NONE", "SLICE", "FRAME", "AUTO"]
 
 
 class OptionParseFailure(Exception):
@@ -354,7 +354,7 @@ certain string options are stored in `CHOICE_MAP`."""
 
 CHOICE_MAP: Dict[str, Dict[str, List[str]]] = {
     "backend-pyav": {
-        "threading_mode": [mode.lower() for mode in VALID_PYAV_THREAD_MODES],
+        "threading_mode": [mode.lower() for mode in PYAV_THREADING_MODES],
     },
     "detect-content": {
         "filter-mode": [mode.name.lower() for mode in FlashFilter.Mode],
@@ -621,3 +621,6 @@ class ConfigRegistry:
         ):
             return ""
         return " [default: %s]" % (str(CONFIG_MAP[command][option]))
+
+
+USER_CONFIG = ConfigRegistry(throw_exception=False)

@@ -22,10 +22,10 @@ from scenedetect.platform import FakeTqdmLoggingRedirect, logging_redirect_tqdm
 
 def main():
     """PySceneDetect command-line interface (CLI) entry point."""
-    cli_ctx = CliContext()
+    context = CliContext()
     try:
         # Process command line arguments and subcommands to initialize the context.
-        scenedetect.main(obj=cli_ctx)  # Parse CLI arguments with registered callbacks.
+        scenedetect.main(obj=context)  # Parse CLI arguments with registered callbacks.
     except SystemExit as exit:
         help_command = any(arg in sys.argv for arg in ["-h", "--help"])
         if help_command or exit.code != 0:
@@ -38,12 +38,12 @@ def main():
     # no progress bars get created, we instead create a fake context manager. This is done here
     # to avoid needing a separate context manager at each point a progress bar is created.
     log_redirect = (
-        FakeTqdmLoggingRedirect() if cli_ctx.quiet_mode else logging_redirect_tqdm(loggers=[logger])
+        FakeTqdmLoggingRedirect() if context.quiet_mode else logging_redirect_tqdm(loggers=[logger])
     )
 
     with log_redirect:
         try:
-            run_scenedetect(cli_ctx)
+            run_scenedetect(context)
         except KeyboardInterrupt:
             logger.info("Stopped.")
             if __debug__:
