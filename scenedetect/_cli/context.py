@@ -12,7 +12,6 @@
 """Context of which command-line options and config settings the user provided."""
 
 import logging
-import os
 import typing as ty
 
 import click
@@ -42,34 +41,7 @@ from scenedetect.video_stream import FrameRateUnavailable, VideoOpenFailure, Vid
 logger = logging.getLogger("pyscenedetect")
 
 USER_CONFIG = ConfigRegistry(throw_exception=False)
-
-SceneList = ty.List[ty.Tuple[FrameTimecode, FrameTimecode]]
-
-CutList = ty.List[FrameTimecode]
-
-
-def parse_timecode(
-    value: ty.Optional[str], frame_rate: float, correct_pts: bool = False
-) -> FrameTimecode:
-    """Parses a user input string into a FrameTimecode assuming the given framerate.
-
-    If value is None, None will be returned instead of processing the value.
-
-    Raises:
-        click.BadParameter
-    """
-    if value is None:
-        return None
-    try:
-        if correct_pts and value.isdigit():
-            value = int(value)
-            if value >= 1:
-                value -= 1
-        return FrameTimecode(timecode=value, fps=frame_rate)
-    except ValueError as ex:
-        raise click.BadParameter(
-            "timecode must be in seconds (100.0), frames (100), or HH:MM:SS"
-        ) from ex
+"""The user config, which can be overriden by command-line. If not found, will be default config."""
 
 
 def check_split_video_requirements(use_mkvmerge: bool) -> None:
@@ -96,29 +68,6 @@ def check_split_video_requirements(use_mkvmerge: bool) -> None:
             error_strs += ["You can specify copy (-c) to use ffmpeg stream copying."]
         error_str = "\n".join(error_strs)
         raise click.BadParameter(error_str, param_hint="split-video")
-
-
-class AppState:
-    def __init__(self):
-        self.video_stream: VideoStream = None
-        self.scene_manager: SceneManager = None
-        self.stats_manager: StatsManager = None
-        self.output: str = None
-        self.quiet_mode: bool = None
-        self.stats_file_path: str = None
-        self.drop_short_scenes: bool = None
-        self.merge_last_scene: bool = None
-        self.min_scene_len: FrameTimecode = None
-        self.frame_skip: int = None
-        self.default_detector: ty.Tuple[ty.Type[SceneDetector], ty.Dict[str, ty.Any]] = None
-        self.start_time: FrameTimecode = None  # time -s/--start
-        self.end_time: FrameTimecode = None  # time -e/--end
-        self.duration: FrameTimecode = None  # time -d/--duration
-        self.load_scenes_input: str = None  # load-scenes -i/--input
-        self.load_scenes_column_name: str = None  # load-scenes -c/--start-col-name
-        self.save_images: bool = False  # True if the save-images command was specified
-        # Result of save-images function output stored for use by export-html
-        self.save_images_result: ty.Any = (None, None)
 
 
 class CliContext:
@@ -159,14 +108,48 @@ class CliContext:
         # the results of the detection pipeline by the controller.
         self.commands: ty.List[ty.Tuple[ty.Callable, ty.Dict[str, ty.Any]]] = []
 
-    def add_command(self, command: ty.Callable, command_args: dict):
-        """Add `command` to the processing pipeline. Will be invoked after processing the input
-        the `context`, the resulting `scenes` and `cuts`, and `command_args`."""
+    def add_command(self, command: ty.Callable, command_args: ty.Dict[str, ty.Any]):
+        """Add `command` to the processing pipeline. Will be called after processing the input."""
+        if "output_dir" in command_args and command_args["output_dir"] is None:
+            command_args["output_dir"] = self.output_dir
+        logger.debug("Adding command: %s(%s)", command.__name__, command_args)
         self.commands.append((command, command_args))
 
-    #
-    # Command Handlers
-    #
+    def add_detector(self, detector: ty.Type[SceneDetector], detector_args: ty.Dict[str, ty.Any]):
+        """Instantiate and add `detector` to the processing pipeline."""
+        if self.load_scenes_input:
+            raise click.ClickException("The load-scenes command cannot be used with detectors.")
+        logger.debug("Adding detector: %s(%s)", detector.__name__, detector_args)
+        self.scene_manager.add_detector(detector(**detector_args))
+
+    def ensure_detector(self):
+        """Ensures at least one detector has been instantiated, otherwise adds a default one."""
+        if self.scene_manager.get_num_detectors() == 0:
+            logger.debug("No detector specified, adding default detector.")
+            (detector_type, detector_args) = self.default_detector
+            self.add_detector(detector_type, detector_args)
+
+    def parse_timecode(self, value: ty.Optional[str], correct_pts: bool = False) -> FrameTimecode:
+        """Parses a user input string into a FrameTimecode assuming the given framerate. If `value`
+        is None it will be passed through without processing.
+
+        Raises:
+            click.BadParameter, click.ClickException
+        """
+        if value is None:
+            return None
+        try:
+            if self.video_stream is None:
+                raise click.ClickException("No input video (-i/--input) was specified.")
+            if correct_pts and value.isdigit():
+                value = int(value)
+                if value >= 1:
+                    value -= 1
+            return FrameTimecode(timecode=value, fps=self.video_stream.frame_rate)
+        except ValueError as ex:
+            raise click.BadParameter(
+                "timecode must be in seconds (100.0), frames (100), or HH:MM:SS"
+            ) from ex
 
     def handle_options(
         self,
@@ -261,11 +244,10 @@ class CliContext:
         if self.output_dir:
             logger.info("Output directory set:\n  %s", self.output_dir)
 
-        self.min_scene_len = parse_timecode(
+        self.min_scene_len = self.parse_timecode(
             min_scene_len
             if min_scene_len is not None
             else self.config.get_value("global", "min-scene-len"),
-            self.video_stream.frame_rate,
         )
         self.drop_short_scenes = drop_short_scenes or self.config.get_value(
             "global", "drop-short-scenes"
@@ -313,6 +295,10 @@ class CliContext:
         ]
         self.scene_manager = scene_manager
 
+    #
+    # Detector Parameters
+    #
+
     def get_detect_content_params(
         self,
         threshold: ty.Optional[float] = None,
@@ -322,9 +308,7 @@ class CliContext:
         kernel_size: ty.Optional[int] = None,
         filter_mode: ty.Optional[str] = None,
     ) -> ty.Dict[str, ty.Any]:
-        """Handle detect-content command options and return args to construct one with."""
-        self.ensure_input_open()
-
+        """Get a dict containing user options to construct a ContentDetector with."""
         if self.drop_short_scenes:
             min_scene_len = 0
         else:
@@ -333,7 +317,7 @@ class CliContext:
                     min_scene_len = self.min_scene_len.frame_num
                 else:
                     min_scene_len = self.config.get_value("detect-content", "min-scene-len")
-            min_scene_len = parse_timecode(min_scene_len, self.video_stream.frame_rate).frame_num
+            min_scene_len = self.parse_timecode(min_scene_len).frame_num
 
         if weights is not None:
             try:
@@ -365,7 +349,6 @@ class CliContext:
         min_delta_hsv: ty.Optional[float] = None,
     ) -> ty.Dict[str, ty.Any]:
         """Handle detect-adaptive command options and return args to construct one with."""
-        self.ensure_input_open()
 
         # TODO(v0.7): Remove these branches when removing -d/--min-delta-hsv.
         if min_delta_hsv is not None:
@@ -391,7 +374,7 @@ class CliContext:
                     min_scene_len = self.min_scene_len.frame_num
                 else:
                     min_scene_len = self.config.get_value("detect-adaptive", "min-scene-len")
-            min_scene_len = parse_timecode(min_scene_len, self.video_stream.frame_rate).frame_num
+            min_scene_len = self.parse_timecode(min_scene_len).frame_num
 
         if weights is not None:
             try:
@@ -419,7 +402,6 @@ class CliContext:
         min_scene_len: ty.Optional[str] = None,
     ) -> ty.Dict[str, ty.Any]:
         """Handle detect-threshold command options and return args to construct one with."""
-        self.ensure_input_open()
 
         if self.drop_short_scenes:
             min_scene_len = 0
@@ -429,7 +411,7 @@ class CliContext:
                     min_scene_len = self.min_scene_len.frame_num
                 else:
                     min_scene_len = self.config.get_value("detect-threshold", "min-scene-len")
-            min_scene_len = parse_timecode(min_scene_len, self.video_stream.frame_rate).frame_num
+            min_scene_len = self.parse_timecode(min_scene_len).frame_num
         # TODO(v1.0): add_last_scene cannot be disabled right now.
         return {
             "add_final_scene": add_last_scene
@@ -439,23 +421,6 @@ class CliContext:
             "threshold": self.config.get_value("detect-threshold", "threshold", threshold),
         }
 
-    def handle_load_scenes(self, input: ty.AnyStr, start_col_name: ty.Optional[str]):
-        """Handle `load-scenes` command options."""
-        self.ensure_input_open()
-        if self.scene_manager.get_num_detectors() > 0:
-            raise click.ClickException("The load-scenes command cannot be used with detectors.")
-        if self.load_scenes_input:
-            raise click.ClickException("The load-scenes command must only be specified once.")
-        input = os.path.abspath(input)
-        if not os.path.exists(input):
-            raise click.BadParameter(
-                f"Could not load scenes, file does not exist: {input}", param_hint="-i/--input"
-            )
-        self.load_scenes_input = input
-        self.load_scenes_column_name = self.config.get_value(
-            "load-scenes", "start-col-name", start_col_name
-        )
-
     def get_detect_hist_params(
         self,
         threshold: ty.Optional[float] = None,
@@ -463,7 +428,7 @@ class CliContext:
         min_scene_len: ty.Optional[str] = None,
     ) -> ty.Dict[str, ty.Any]:
         """Handle detect-hist command options and return args to construct one with."""
-        self.ensure_input_open()
+
         if self.drop_short_scenes:
             min_scene_len = 0
         else:
@@ -472,7 +437,7 @@ class CliContext:
                     min_scene_len = self.min_scene_len.frame_num
                 else:
                     min_scene_len = self.config.get_value("detect-hist", "min-scene-len")
-            min_scene_len = parse_timecode(min_scene_len, self.video_stream.frame_rate).frame_num
+            min_scene_len = self.parse_timecode(min_scene_len).frame_num
         return {
             "bins": self.config.get_value("detect-hist", "bins", bins),
             "min_scene_len": min_scene_len,
@@ -487,7 +452,7 @@ class CliContext:
         min_scene_len: ty.Optional[str] = None,
     ) -> ty.Dict[str, ty.Any]:
         """Handle detect-hash command options and return args to construct one with."""
-        self.ensure_input_open()
+
         if self.drop_short_scenes:
             min_scene_len = 0
         else:
@@ -496,33 +461,13 @@ class CliContext:
                     min_scene_len = self.min_scene_len.frame_num
                 else:
                     min_scene_len = self.config.get_value("detect-hash", "min-scene-len")
-            min_scene_len = parse_timecode(min_scene_len, self.video_stream.frame_rate).frame_num
+            min_scene_len = self.parse_timecode(min_scene_len).frame_num
         return {
             "lowpass": self.config.get_value("detect-hash", "lowpass", lowpass),
             "min_scene_len": min_scene_len,
             "size": self.config.get_value("detect-hash", "size", size),
             "threshold": self.config.get_value("detect-hash", "threshold", threshold),
         }
-
-    def handle_time(self, start, duration, end):
-        """Handle `time` command options."""
-        self.ensure_input_open()
-        if duration is not None and end is not None:
-            raise click.BadParameter(
-                "Only one of --duration/-d or --end/-e can be specified, not both.",
-                param_hint="time",
-            )
-        logger.debug(
-            "Setting video time:\n    start: %s, duration: %s, end: %s", start, duration, end
-        )
-        # *NOTE*: The Python API uses 0-based frame indices, but the CLI uses 1-based indices to
-        # match the default start number used by `ffmpeg` when saving frames as images. As such,
-        # we must correct start time if set as frames. See the test_cli_time* tests for for details.
-        self.start_time = parse_timecode(start, self.video_stream.frame_rate, correct_pts=True)
-        self.end_time = parse_timecode(end, self.video_stream.frame_rate)
-        self.duration = parse_timecode(duration, self.video_stream.frame_rate)
-        if self.start_time and self.end_time and (self.start_time + 1) > self.end_time:
-            raise click.BadParameter("-e/--end time must be greater than -s/--start")
 
     #
     # Private Methods
@@ -560,26 +505,6 @@ class CliContext:
                     self.quiet_mode = False
         # Initialize logger with the set CLI args / user configuration.
         init_logger(log_level=curr_verbosity, show_stdout=not self.quiet_mode, log_file=logfile)
-
-    def add_detector(self, detector):
-        """Add Detector: Adds a detection algorithm to the CliContext's SceneManager."""
-        if self.load_scenes_input:
-            raise click.ClickException("The load-scenes command cannot be used with detectors.")
-        self.ensure_input_open()
-        self.scene_manager.add_detector(detector)
-
-    def ensure_input_open(self):
-        """Ensure self.video_stream was initialized (i.e. -i/--input was specified),
-        otherwise raises an exception. Should only be used from commands that require an
-        input video to process the options (e.g. those that require a timecode).
-
-        Raises:
-            click.BadParameter: self.video_stream was not initialized.
-        """
-        # TODO: Do we still need to do this for each command?  Originally this was added for the
-        # help command to function correctly.
-        if self.video_stream is None:
-            raise click.ClickException("No input video (-i/--input) was specified.")
 
     def _open_video_stream(
         self, input_path: ty.AnyStr, framerate: ty.Optional[float], backend: ty.Optional[str]
@@ -642,22 +567,3 @@ class CliContext:
             raise click.BadParameter(
                 "Input error:\n\n\t%s\n" % str(ex), param_hint="-i/--input"
             ) from None
-
-    def _on_duplicate_command(self, command: str) -> None:
-        """Called when a command is duplicated to stop parsing and raise an error.
-
-        Arguments:
-            command: Command that was duplicated for error context.
-
-        Raises:
-            click.BadParameter
-        """
-        error_strs = []
-        error_strs.append("Error: Command %s specified multiple times." % command)
-        error_strs.append("The %s command may appear only one time.")
-
-        logger.error("\n".join(error_strs))
-        raise click.BadParameter(
-            "\n  Command %s may only be specified once." % command,
-            param_hint="%s command" % command,
-        )

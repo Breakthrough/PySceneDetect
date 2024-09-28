@@ -106,6 +106,12 @@ from scenedetect.video_stream import VideoStream
 
 logger = logging.getLogger("pyscenedetect")
 
+SceneList = List[Tuple[FrameTimecode, FrameTimecode]]
+"""Type hint for a list of scenes in the form (start time, end time)."""
+
+CutList = List[FrameTimecode]
+"""Type hint for a list of cuts, where each timecode represents the first frame of a new shot."""
+
 # TODO: This value can and should be tuned for performance improvements as much as possible,
 # until accuracy falls, on a large enough dataset. This has yet to be done, but the current
 # value doesn't seem to have caused any issues at least.
@@ -158,11 +164,11 @@ def compute_downscale_factor(frame_width: int, effective_width: int = DEFAULT_MI
 
 
 def get_scenes_from_cuts(
-    cut_list: Iterable[FrameTimecode],
+    cut_list: CutList,
     start_pos: Union[int, FrameTimecode],
     end_pos: Union[int, FrameTimecode],
     base_timecode: Optional[FrameTimecode] = None,
-) -> List[Tuple[FrameTimecode, FrameTimecode]]:
+) -> SceneList:
     """Returns a list of tuples of start/end FrameTimecodes for each scene based on a
     list of detected scene cuts/breaks.
 
@@ -207,9 +213,9 @@ def get_scenes_from_cuts(
 
 def write_scene_list(
     output_csv_file: TextIO,
-    scene_list: Iterable[Tuple[FrameTimecode, FrameTimecode]],
+    scene_list: SceneList,
     include_cut_list: bool = True,
-    cut_list: Optional[Iterable[FrameTimecode]] = None,
+    cut_list: Optional[CutList] = None,
 ) -> None:
     """Writes the given list of scenes to an output file handle in CSV format.
 
@@ -263,14 +269,14 @@ def write_scene_list(
 
 
 def write_scene_list_html(
-    output_html_filename,
-    scene_list,
-    cut_list=None,
-    css=None,
-    css_class="mytable",
-    image_filenames=None,
-    image_width=None,
-    image_height=None,
+    output_html_filename: str,
+    scene_list: SceneList,
+    cut_list: Optional[CutList] = None,
+    css: str = None,
+    css_class: str = "mytable",
+    image_filenames: Optional[Dict[int, List[str]]] = None,
+    image_width: Optional[int] = None,
+    image_height: Optional[int] = None,
 ):
     """Writes the given list of scenes to an output file handle in html format.
 
@@ -287,6 +293,7 @@ def write_scene_list_html(
         image_width: Optional desired width of images in table in pixels
         image_height: Optional desired height of images in table in pixels
     """
+    logger.info("Exporting scenes to html:\n %s:", output_html_filename)
     if not css:
         css = """
         table.mytable {
@@ -386,11 +393,9 @@ def write_scene_list_html(
 
 
 #
-# TODO(v1.0): Refactor to take a SceneList object; consider moving this and save scene list
-# to a better spot, or just move them to scene_list.py.
-#
+# TODO(v1.0): Consider moving all post-processing functionality into a separate submodule.
 def save_images(
-    scene_list: List[Tuple[FrameTimecode, FrameTimecode]],
+    scene_list: SceneList,
     video: VideoStream,
     num_images: int = 3,
     frame_margin: int = 1,
@@ -474,7 +479,7 @@ def save_images(
 
     # Setup flags and init progress bar if available.
     completed = True
-    logger.info("Generating output images (%d per scene)...", num_images)
+    logger.info(f"Saving {num_images} images per scene to {output_dir}, format {image_extension}")
     progress_bar = None
     if show_progress:
         progress_bar = tqdm(total=len(scene_list) * num_images, unit="images", dynamic_ncols=True)
@@ -537,6 +542,7 @@ def save_images(
             video.seek(image_timecode)
             frame_im = video.read()
             if frame_im is not None:
+                # TODO: Add extension to template.
                 # TODO: Allow NUM to be a valid suffix in addition to NUMBER.
                 file_path = "%s.%s" % (
                     filename_template.safe_substitute(
@@ -740,7 +746,7 @@ class SceneManager:
 
     def get_scene_list(
         self, base_timecode: Optional[FrameTimecode] = None, start_in_scene: bool = False
-    ) -> List[Tuple[FrameTimecode, FrameTimecode]]:
+    ) -> SceneList:
         """Return a list of tuples of start/end FrameTimecodes for each detected scene.
 
         Arguments:
@@ -779,7 +785,7 @@ class SceneManager:
         # Ensure all cuts are unique by using a set to remove all duplicates.
         return [self._base_timecode + cut for cut in sorted(set(self._cutting_list))]
 
-    def _get_event_list(self) -> List[Tuple[FrameTimecode, FrameTimecode]]:
+    def _get_event_list(self) -> SceneList:
         if not self._event_list:
             return []
         assert self._base_timecode is not None
@@ -1065,8 +1071,10 @@ class SceneManager:
     #
 
     def get_cut_list(
-        self, base_timecode: Optional[FrameTimecode] = None, show_warning: bool = True
-    ) -> List[FrameTimecode]:
+        self,
+        base_timecode: Optional[FrameTimecode] = None,
+        show_warning: bool = True,
+    ) -> CutList:
         """[DEPRECATED] Return a list of FrameTimecodes of the detected scene changes/cuts.
 
         Unlike get_scene_list, the cutting list returns a list of FrameTimecodes representing
@@ -1092,9 +1100,7 @@ class SceneManager:
             logger.error("`get_cut_list()` is deprecated and will be removed in a future release.")
         return self._get_cutting_list()
 
-    def get_event_list(
-        self, base_timecode: Optional[FrameTimecode] = None
-    ) -> List[Tuple[FrameTimecode, FrameTimecode]]:
+    def get_event_list(self, base_timecode: Optional[FrameTimecode] = None) -> SceneList:
         """[DEPRECATED] DO NOT USE.
 
         Get a list of start/end timecodes of sparse detection events.

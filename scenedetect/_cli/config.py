@@ -621,6 +621,3 @@ class ConfigRegistry:
         ):
             return ""
         return " [default: %s]" % (str(CONFIG_MAP[command][option]))
-
-
-USER_CONFIG = ConfigRegistry(throw_exception=False)

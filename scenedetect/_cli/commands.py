@@ -9,23 +9,59 @@
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
-"""Logic for the PySceneDetect command."""
+"""Logic for PySceneDetect commands that operate on the result of the processing pipeline.
+
+In addition to the the arguments registered with the command, commands will be called with the
+current command-line context, as well as the processing result (scenes and cuts).
+"""
 
 import logging
 import typing as ty
 from string import Template
 
-import scenedetect.scene_manager as scene_manager
 from scenedetect._cli.context import CliContext
-from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.platform import get_and_create_path
+from scenedetect.scene_manager import (
+    CutList,
+    Interpolation,
+    SceneList,
+    write_scene_list,
+    write_scene_list_html,
+)
+from scenedetect.scene_manager import (
+    save_images as save_images_impl,
+)
 from scenedetect.video_splitter import split_video_ffmpeg, split_video_mkvmerge
 
 logger = logging.getLogger("pyscenedetect")
 
-SceneList = ty.List[ty.Tuple[FrameTimecode, FrameTimecode]]
 
-CutList = ty.List[FrameTimecode]
+def export_html(
+    context: CliContext,
+    scenes: SceneList,
+    cuts: CutList,
+    image_width: int,
+    image_height: int,
+    html_name_format: str,
+):
+    """Handles the `export-html` command."""
+    (image_filenames, output_dir) = (
+        context.save_images_result
+        if context.save_images_result is not None
+        else (None, context.output_dir)
+    )
+    html_filename = Template(html_name_format).safe_substitute(VIDEO_NAME=context.video_stream.name)
+    if not html_filename.lower().endswith(".html"):
+        html_filename += ".html"
+    html_path = get_and_create_path(html_filename, output_dir)
+    write_scene_list_html(
+        output_html_filename=html_path,
+        scene_list=scenes,
+        cut_list=cuts,
+        image_filenames=image_filenames,
+        image_width=image_width,
+        image_height=image_height,
+    )
 
 
 def list_scenes(
@@ -40,7 +76,6 @@ def list_scenes(
     display_scenes: bool,
     display_cuts: bool,
     cut_format: str,
-    **kwargs,
 ):
     """Handles the `list-scenes` command."""
     # Write scene list CSV to if required.
@@ -56,7 +91,7 @@ def list_scenes(
         )
         logger.info("Writing scene list to CSV file:\n  %s", scene_list_path)
         with open(scene_list_path, "w") as scene_list_file:
-            scene_manager.write_scene_list(
+            write_scene_list(
                 output_csv_file=scene_list_file,
                 scene_list=scenes,
                 include_cut_list=not skip_cuts,
@@ -99,6 +134,7 @@ def list_scenes(
 def save_images(
     context: CliContext,
     scenes: SceneList,
+    cuts: CutList,
     num_images: int,
     frame_margin: int,
     image_extension: str,
@@ -109,13 +145,12 @@ def save_images(
     scale: int,
     height: int,
     width: int,
-    interpolation: scene_manager.Interpolation,
-    **kwargs,
+    interpolation: Interpolation,
 ):
     """Handles the `save-images` command."""
-    logger.info(f"Saving images to {output_dir} with format {image_extension}")
-    logger.debug(f"encoder param: {encoder_param}")
-    images = scene_manager.save_images(
+    del cuts  # save-images only uses scenes.
+
+    images = save_images_impl(
         scene_list=scenes,
         video=context.video_stream,
         num_images=num_images,
@@ -130,49 +165,23 @@ def save_images(
         width=width,
         interpolation=interpolation,
     )
+    # Save the result for use by `export-html` if required.
     context.save_images_result = (images, output_dir)
-
-
-def export_html(
-    context: CliContext,
-    scenes: SceneList,
-    cuts: CutList,
-    image_width: int,
-    image_height: int,
-    html_name_format: str,
-    **kwargs,
-):
-    """Handles the `export-html` command."""
-    save_images_result = context.save_images_result
-    # Command can override global output directory setting.
-    output_dir = save_images_result[1] if save_images_result[1] is not None else context.output_dir
-    html_filename = Template(html_name_format).safe_substitute(VIDEO_NAME=context.video_stream.name)
-
-    if not html_filename.lower().endswith(".html"):
-        html_filename += ".html"
-    html_path = get_and_create_path(html_filename, output_dir)
-    logger.info("Exporting to html file:\n %s:", html_path)
-    scene_manager.write_scene_list_html(
-        output_html_filename=html_path,
-        scene_list=scenes,
-        cut_list=cuts,
-        image_filenames=save_images_result[0],
-        image_width=image_width,
-        image_height=image_height,
-    )
 
 
 def split_video(
     context: CliContext,
     scenes: SceneList,
+    cuts: CutList,
     name_format: str,
     use_mkvmerge: bool,
     output_dir: str,
     show_output: bool,
     ffmpeg_args: str,
-    **kwargs,
 ):
     """Handles the `split-video` command."""
+    del cuts  # split-video only uses scenes.
+
     # Add proper extension to filename template if required.
     dot_pos = name_format.rfind(".")
     extension_length = 0 if dot_pos < 0 else len(name_format) - (dot_pos + 1)

@@ -20,14 +20,10 @@ import typing as ty
 from scenedetect._cli.context import CliContext
 from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.platform import get_and_create_path
-from scenedetect.scene_manager import get_scenes_from_cuts
+from scenedetect.scene_manager import CutList, SceneList, get_scenes_from_cuts
 from scenedetect.video_stream import SeekError
 
 logger = logging.getLogger("pyscenedetect")
-
-SceneList = ty.List[ty.Tuple[FrameTimecode, FrameTimecode]]
-
-CutList = ty.List[FrameTimecode]
 
 
 def run_scenedetect(context: CliContext):
@@ -42,11 +38,6 @@ def run_scenedetect(context: CliContext):
     if context.scene_manager is None:
         logger.debug("No input specified.")
         return
-
-    if context.commands:
-        logger.debug("Commands to run after processing:")
-        for func, args in context.commands:
-            logger.debug("%s(%s)", func.__name__, args)
 
     if context.load_scenes_input:
         # Skip detection if load-scenes was used.
@@ -74,9 +65,6 @@ def run_scenedetect(context: CliContext):
 
     # Handle post-processing commands the user wants to run (see scenedetect._cli.commands).
     for handler, kwargs in context.commands:
-        # TODO: This override should be handled inside the config manager get_value function.
-        if "output_dir" in kwargs and kwargs["output_dir"] is None:
-            kwargs["output_dir"] = context.output_dir
         handler(context=context, scenes=scenes, cuts=cuts, **kwargs)
 
 
@@ -96,13 +84,9 @@ def _postprocess_scene_list(context: CliContext, scene_list: SceneList) -> Scene
 
 
 def _detect(context: CliContext) -> ty.Optional[ty.Tuple[SceneList, CutList]]:
-    # Use default detector if one was not specified.
-    if context.scene_manager.get_num_detectors() == 0:
-        detector_type, detector_args = context.default_detector
-        logger.debug("Using default detector: %s(%s)" % (detector_type.__name__, detector_args))
-        context.scene_manager.add_detector(detector_type(**detector_args))
-
     perf_start_time = time.time()
+
+    context.ensure_detector()
     if context.start_time is not None:
         logger.debug("Seeking to start time...")
         try:
