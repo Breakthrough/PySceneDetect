@@ -44,18 +44,6 @@ for each frame. The <a class="reference internal" href="#scenedetect.stats_manag
 human-readable CSV file, allowing for precise determination of the ideal threshold (or other
 detection parameters) for the given input.</p>
 <dl class="py exception">
-<dt class="sig sig-object py" id="scenedetect.stats_manager.FrameMetricNotRegistered">
-<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scenedetect.stats_manager.</span></span><span class="sig-name descname"><span class="pre">FrameMetricNotRegistered</span></span><a class="headerlink" href="#scenedetect.stats_manager.FrameMetricNotRegistered" title="Permalink to this definition">¶</a></dt>
-<dd><p>[DEPRECATED - DO NOT USE] No longer used.</p>
-</dd></dl>
-
-<dl class="py exception">
-<dt class="sig sig-object py" id="scenedetect.stats_manager.FrameMetricRegistered">
-<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scenedetect.stats_manager.</span></span><span class="sig-name descname"><span class="pre">FrameMetricRegistered</span></span><a class="headerlink" href="#scenedetect.stats_manager.FrameMetricRegistered" title="Permalink to this definition">¶</a></dt>
-<dd><p>[DEPRECATED - DO NOT USE] No longer used.</p>
-</dd></dl>
-
-<dl class="py exception">
 <dt class="sig sig-object py" id="scenedetect.stats_manager.StatsFileCorrupt">
 <em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scenedetect.stats_manager.</span></span><span class="sig-name descname"><span class="pre">StatsFileCorrupt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Could</span> <span class="pre">not</span> <span class="pre">load</span> <span class="pre">frame</span> <span class="pre">metric</span> <span class="pre">data</span> <span class="pre">data</span> <span class="pre">from</span> <span class="pre">passed</span> <span class="pre">CSV</span> <span class="pre">file.'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.stats_manager.StatsFileCorrupt" title="Permalink to this definition">¶</a></dt>
 <dd><p>Raised when frame metrics/stats could not be loaded from a provided CSV file.</p>
@@ -118,30 +106,6 @@ False otherwise.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>bool</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="scenedetect.stats_manager.StatsManager.load_from_csv">
-<span class="sig-name descname"><span class="pre">load_from_csv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">csv_file</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.stats_manager.StatsManager.load_from_csv" title="Permalink to this definition">¶</a></dt>
-<dd><p>[DEPRECATED] DO NOT USE</p>
-<p>Load all metrics stored in a CSV file into the StatsManager instance. Will be removed in a
-future release after becoming a no-op.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>csv_file</strong> (<em>str</em><em> | </em><em>bytes</em><em> | </em><em>TextIO</em>) – A file handle opened in read mode (e.g. open(’…’, ‘r’)) or a path as str.</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Number of frames/rows read from the CSV file, or None if the
-input file was blank or could not be found.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>int or None</p>
-</dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="#scenedetect.stats_manager.StatsFileCorrupt" title="scenedetect.stats_manager.StatsFileCorrupt"><strong>StatsFileCorrupt</strong></a> – Stats file is corrupt and can’t be loaded, or wrong file
-    was specified.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -316,8 +280,6 @@ respective integer/floating-point metric values to set.</p></li>
 <li class="toctree-l1"><a class="reference internal" href="scene_manager.html">SceneManager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="video_splitter.html">Video Splitting</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">StatsManager</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#scenedetect.stats_manager.FrameMetricNotRegistered"><code class="docutils literal notranslate"><span class="pre">FrameMetricNotRegistered</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#scenedetect.stats_manager.FrameMetricRegistered"><code class="docutils literal notranslate"><span class="pre">FrameMetricRegistered</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.stats_manager.StatsFileCorrupt"><code class="docutils literal notranslate"><span class="pre">StatsFileCorrupt</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.stats_manager.StatsManager"><code class="docutils literal notranslate"><span class="pre">StatsManager</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.stats_manager.COLUMN_NAME_FRAME_NUMBER"><code class="docutils literal notranslate"><span class="pre">COLUMN_NAME_FRAME_NUMBER</span></code></a></li>
@@ -328,7 +290,6 @@ respective integer/floating-point metric values to set.</p></li>
 <li class="toctree-l1"><a class="reference internal" href="scene_detector.html">SceneDetector</a></li>
 <li class="toctree-l1"><a class="reference internal" href="video_stream.html">VideoStream</a></li>
 <li class="toctree-l1"><a class="reference internal" href="platform.html">Platform &amp; Logging</a></li>
-<li class="toctree-l1"><a class="reference internal" href="migration_guide.html">Migration Guide</a></li>
 </ul>
 
 <div class="relations">

@@ -186,7 +186,7 @@ cached frame metrics that were computed and saved in the previous call to detect
 <span class="sig-name descname"><span class="pre">detect_scenes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">video</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_skip</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_progress</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_source</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.scene_manager.SceneManager.detect_scenes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Perform scene detection on the given video using the added SceneDetectors, returning the
 number of frames processed. Results can be obtained by calling <a class="reference internal" href="#scenedetect.scene_manager.SceneManager.get_scene_list" title="scenedetect.scene_manager.SceneManager.get_scene_list"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_scene_list()</span></code></a> or
-<a class="reference internal" href="#scenedetect.scene_manager.SceneManager.get_cut_list" title="scenedetect.scene_manager.SceneManager.get_cut_list"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_cut_list()</span></code></a>.</p>
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">get_cut_list()</span></code>.</p>
 <p>Video decoding is performed in a background thread to allow scene detection and frame
 decoding to happen in parallel. Detection will continue until no more frames are left,
 the specified duration or end time has been reached, or <a class="reference internal" href="#scenedetect.scene_manager.SceneManager.stop" title="scenedetect.scene_manager.SceneManager.stop"><code class="xref py py-meth docutils literal notranslate"><span class="pre">stop()</span></code></a> was called.</p>
@@ -219,56 +219,6 @@ complete processing the video frame source.</p></li>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>ValueError</strong> – <cite>frame_skip</cite> <strong>must</strong> be 0 (the default) if the SceneManager
     was constructed with a StatsManager object.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="scenedetect.scene_manager.SceneManager.get_cut_list">
-<span class="sig-name descname"><span class="pre">get_cut_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_timecode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_warning</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.scene_manager.SceneManager.get_cut_list" title="Permalink to this definition">¶</a></dt>
-<dd><p>[DEPRECATED] Return a list of FrameTimecodes of the detected scene changes/cuts.</p>
-<p>Unlike get_scene_list, the cutting list returns a list of FrameTimecodes representing
-the point in the input video where a new scene was detected, and thus the frame
-where the input should be cut/split. The cutting list, in turn, is used to generate
-the scene list, noting that each scene is contiguous starting from the first frame
-and ending at the last frame detected.</p>
-<p>If only sparse detectors are used (e.g. MotionDetector), this will always be empty.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>base_timecode</strong> (<a class="reference internal" href="frame_timecode.html#scenedetect.frame_timecode.FrameTimecode" title="scenedetect.frame_timecode.FrameTimecode"><em>FrameTimecode</em></a><em> | </em><em>None</em>) – [DEPRECATED] DO NOT USE. For backwards compatibility only.</p></li>
-<li><p><strong>show_warning</strong> (<em>bool</em>) – If set to False, suppresses the error from being warned. In v0.7,
-this will have no effect and the error will become a Python warning.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>List of FrameTimecode objects denoting the points in time where a scene change
-was detected in the input video, which can also be passed to external tools
-for automated splitting of the input into individual scenes.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><em>List</em>[<a class="reference internal" href="frame_timecode.html#scenedetect.frame_timecode.FrameTimecode" title="scenedetect.frame_timecode.FrameTimecode"><em>FrameTimecode</em></a>]</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="scenedetect.scene_manager.SceneManager.get_event_list">
-<span class="sig-name descname"><span class="pre">get_event_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_timecode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.scene_manager.SceneManager.get_event_list" title="Permalink to this definition">¶</a></dt>
-<dd><p>[DEPRECATED] DO NOT USE.</p>
-<p>Get a list of start/end timecodes of sparse detection events.</p>
-<p>Unlike get_scene_list, the event list returns a list of FrameTimecodes representing
-the point in the input video where a new scene was detected only by sparse detectors,
-otherwise it is the same.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>base_timecode</strong> (<a class="reference internal" href="frame_timecode.html#scenedetect.frame_timecode.FrameTimecode" title="scenedetect.frame_timecode.FrameTimecode"><em>FrameTimecode</em></a><em> | </em><em>None</em>) – [DEPRECATED] DO NOT USE. For backwards compatibility only.</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>List of pairs of FrameTimecode objects denoting the detected scenes.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><em>List</em>[<em>Tuple</em>[<a class="reference internal" href="frame_timecode.html#scenedetect.frame_timecode.FrameTimecode" title="scenedetect.frame_timecode.FrameTimecode"><em>FrameTimecode</em></a>, <a class="reference internal" href="frame_timecode.html#scenedetect.frame_timecode.FrameTimecode" title="scenedetect.frame_timecode.FrameTimecode"><em>FrameTimecode</em></a>]]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -378,7 +328,7 @@ pixels (e.g. if frame_width is 200, the range of effective widths will be betwee
 <dd><p>Returns a list of tuples of start/end FrameTimecodes for each scene based on a
 list of detected scene cuts/breaks.</p>
 <p>This function is called when using the <a class="reference internal" href="#scenedetect.scene_manager.SceneManager.get_scene_list" title="scenedetect.scene_manager.SceneManager.get_scene_list"><code class="xref py py-meth docutils literal notranslate"><span class="pre">SceneManager.get_scene_list()</span></code></a> method.
-The scene list is generated from a cutting list (<a class="reference internal" href="#scenedetect.scene_manager.SceneManager.get_cut_list" title="scenedetect.scene_manager.SceneManager.get_cut_list"><code class="xref py py-meth docutils literal notranslate"><span class="pre">SceneManager.get_cut_list()</span></code></a>),
+The scene list is generated from a cutting list (<code class="xref py py-meth docutils literal notranslate"><span class="pre">SceneManager.get_cut_list()</span></code>),
 noting that each scene is contiguous, starting from the first to last frame of the input.
 If <cite>cut_list</cite> is empty, the resulting scene will span from <cite>start_pos</cite> to <cite>end_pos</cite>.</p>
 <dl class="field-list simple">
@@ -620,7 +570,6 @@ the n saved images from that scene)</p></li>
 <li class="toctree-l1"><a class="reference internal" href="scene_detector.html">SceneDetector</a></li>
 <li class="toctree-l1"><a class="reference internal" href="video_stream.html">VideoStream</a></li>
 <li class="toctree-l1"><a class="reference internal" href="platform.html">Platform &amp; Logging</a></li>
-<li class="toctree-l1"><a class="reference internal" href="migration_guide.html">Migration Guide</a></li>
 </ul>
 
 <div class="relations">

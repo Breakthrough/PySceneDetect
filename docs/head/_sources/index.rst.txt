@@ -54,7 +54,6 @@ Table of Contents
     api/scene_detector
     api/video_stream
     api/platform
-    api/migration_guide
 
 =======================================================================
 Indices and Tables

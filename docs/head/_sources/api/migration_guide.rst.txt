@@ -5,7 +5,7 @@
 Migration Guide
 ---------------------------------------------------------------
 
-This page details how to transition a program written using PySceneDetect 0.5 to the new 0.6 API. It is recommended to review the new :ref:`Example <scenedetect-example>` section first, as it covers the majority of use cases. Also see `tests/test_api.py <https://github.com/Breakthrough/PySceneDetect/blob/v0.6.4-release/tests/test_api.py>`_ for a set of demonstrations covering many high level use cases.
+This page details how to transition a program written using PySceneDetect 0.5 to the new 0.6 API. It is recommended to review the new :ref:`Example <scenedetect-quickstart>` section first, as it covers the majority of use cases. Also see `tests/test_api.py <https://github.com/Breakthrough/PySceneDetect/blob/v0.6.4-release/tests/test_api.py>`_ for a set of demonstrations covering many high level use cases.
 
 PySceneDetect v0.6 is a major step towards a more stable and simplified API.  The biggest change to existing workflows is how video input is handled, and that Python 3.6 or above is now required.
 
