@@ -174,7 +174,7 @@ def split_video_mkvmerge(
             is supported by this function.
         video_name (str): Name of the video to be substituted in output_file_template for
             $VIDEO_NAME. If not specified, will be obtained from the filename.
-        show_output: If False, adds the --quiet flag when invoking `mkvmerge`..
+        show_output: If False, adds the --quiet flag when invoking `mkvmerge`.
         suppress_output: [DEPRECATED] DO NOT USE. For backwards compatibility only.
     Returns:
         Return code of invoking mkvmerge (0 on success). If scene_list is empty, will

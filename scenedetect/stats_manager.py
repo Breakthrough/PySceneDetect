@@ -49,13 +49,19 @@ COLUMN_NAME_TIMECODE = "Timecode"
 
 
 class FrameMetricRegistered(Exception):
-    """[DEPRECATED - DO NOT USE] No longer used."""
+    """[DEPRECATED - DO NOT USE] No longer used.
+
+    :meta private:
+    """
 
     pass
 
 
 class FrameMetricNotRegistered(Exception):
-    """[DEPRECATED - DO NOT USE] No longer used."""
+    """[DEPRECATED - DO NOT USE] No longer used.
+
+    :meta private:
+    """
 
     pass
 
@@ -236,6 +242,8 @@ class StatsManager:
         Raises:
             StatsFileCorrupt: Stats file is corrupt and can't be loaded, or wrong file
                 was specified.
+
+        :meta private:
         """
         # TODO: Make this an error, then make load_from_csv() a no-op, and finally, remove it.
         logger.warning("load_from_csv() is deprecated and will be removed in a future release.")

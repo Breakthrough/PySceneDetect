@@ -1086,6 +1086,8 @@ class SceneManager:
             List of FrameTimecode objects denoting the points in time where a scene change
             was detected in the input video, which can also be passed to external tools
             for automated splitting of the input into individual scenes.
+
+        :meta private:
         """
         # TODO(v0.7): Use the warnings module to turn this into a warning.
         if show_warning:
@@ -1108,6 +1110,8 @@ class SceneManager:
 
         Returns:
             List of pairs of FrameTimecode objects denoting the detected scenes.
+
+        :meta private:
         """
         # TODO(v0.7): Use the warnings module to turn this into a warning.
         logger.error("`get_event_list()` is deprecated and will be removed in a future release.")
