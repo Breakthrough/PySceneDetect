@@ -301,6 +301,10 @@ CONFIG_MAP: ConfigDict = {
         "image-width": 0,
         "no-images": False,
     },
+    "save-qp": {
+        "filename": "$VIDEO_NAME.qp",
+        "output": None,
+    },
     "list-scenes": {
         "cut-format": "timecode",
         "display-cuts": True,
