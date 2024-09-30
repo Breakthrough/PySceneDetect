@@ -1064,14 +1064,17 @@ def list_scenes_command(
     scene_list_name_format = ctx.config.get_value("list-scenes", "filename", filename)
     list_scenes_args = {
         "cut_format": TimecodeFormat[ctx.config.get_value("list-scenes", "cut-format").upper()],
+        "col_separator": ctx.config.get_value("list-scenes", "col-separator"),
         "display_scenes": ctx.config.get_value("list-scenes", "display-scenes"),
         "display_cuts": ctx.config.get_value("list-scenes", "display-cuts"),
+        "row_separator": ctx.config.get_value("list-scenes", "row-separator"),
         "scene_list_output": not no_output_file,
         "scene_list_name_format": scene_list_name_format,
         "skip_cuts": skip_cuts or ctx.config.get_value("list-scenes", "skip-cuts"),
         "output_dir": scene_list_dir,
         "quiet": quiet or ctx.config.get_value("list-scenes", "quiet") or ctx.quiet_mode,
     }
+    # TODO(#423): Need to validate that col_separator is a 1-character string after decoding.
     ctx.add_command(cli_commands.list_scenes, list_scenes_args)
 
 

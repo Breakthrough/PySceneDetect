@@ -4,6 +4,12 @@ Releases
 
 ## PySceneDetect 0.6
 
+### 0.6.5 (TBD)
+
+ - [api] Add `col_separator` and `row_separator` args to `write_scene_list` function in `scenedetect.scene_manager`
+ - [cli] Add ability to configure CSV separators for rows/columns in config file [#423](https://github.com/Breakthrough/PySceneDetect/issues/423)
+
+
 ### 0.6.4 (June 10, 2024)
 
 #### Release Notes
