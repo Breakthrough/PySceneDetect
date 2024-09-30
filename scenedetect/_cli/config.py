@@ -303,11 +303,13 @@ CONFIG_MAP: ConfigDict = {
         "show": False,
     },
     "list-scenes": {
+        "col-separator": ",",
         "cut-format": TimecodeFormat.TIMECODE,
         "display-cuts": True,
         "display-scenes": True,
         "filename": "$VIDEO_NAME-Scenes.csv",
         "output": None,
+        "row-separator": "\n",
         "no-output-file": False,
         "quiet": False,
         "skip-cuts": False,

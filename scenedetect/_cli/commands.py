@@ -105,6 +105,8 @@ def list_scenes(
     display_scenes: bool,
     display_cuts: bool,
     cut_format: str,
+    col_separator: str,
+    row_separator: str,
 ):
     """Handles the `list-scenes` command."""
     # Write scene list CSV to if required.
@@ -125,6 +127,8 @@ def list_scenes(
                 scene_list=scenes,
                 include_cut_list=not skip_cuts,
                 cut_list=cuts,
+                col_separator=col_separator.encode("utf-8").decode("unicode_escape"),
+                row_separator=row_separator.encode("utf-8").decode("unicode_escape"),
             )
     # Suppress output if requested.
     if quiet:

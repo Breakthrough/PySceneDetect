@@ -596,4 +596,6 @@ Development
  - [improvement] `save_to_csv` now works with paths from `pathlib`
  - [bugfix] Fix `SyntaxWarning` due to incorrect escaping [#400](https://github.com/Breakthrough/PySceneDetect/issues/400)
  - [bugfix] Fix `ContentDetector` crash when using callbacks [#416](https://github.com/Breakthrough/PySceneDetect/issues/416) [#420](https://github.com/Breakthrough/PySceneDetect/issues/420)
-
+ - [api] The `save_to_csv` function now works correctly with paths from the `pathlib` module
+ - [api] Add `col_separator` and `row_separator` args to `write_scene_list` function in `scenedetect.scene_manager`
+ - [feature] Add ability to configure CSV separators for rows/columns in config file [#423](https://github.com/Breakthrough/PySceneDetect/issues/423)
