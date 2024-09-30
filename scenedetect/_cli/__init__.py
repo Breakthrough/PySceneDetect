@@ -1060,7 +1060,7 @@ def list_scenes_command(
     assert isinstance(ctx, CliContext)
 
     no_output_file = no_output_file or ctx.config.get_value("list-scenes", "no-output-file")
-    scene_list_dir = ctx.config.get_value("list-scenes", "output", output, ignore_default=True)
+    scene_list_dir = ctx.config.get_value("list-scenes", "output", output)
     scene_list_name_format = ctx.config.get_value("list-scenes", "filename", filename)
     list_scenes_args = {
         "cut_format": TimecodeFormat[ctx.config.get_value("list-scenes", "cut-format").upper()],
@@ -1243,7 +1243,7 @@ def split_video_command(
     split_video_args = {
         "name_format": ctx.config.get_value("split-video", "filename", filename),
         "use_mkvmerge": mkvmerge,
-        "output_dir": ctx.config.get_value("split-video", "output", output, ignore_default=True),
+        "output_dir": ctx.config.get_value("split-video", "output", output),
         "show_output": not quiet,
         "ffmpeg_args": args,
     }
@@ -1420,7 +1420,7 @@ def save_images_command(
         ]
         logger.debug("\n".join(error_strs))
         raise click.BadParameter("\n".join(error_strs), param_hint="save-images")
-    output = ctx.config.get_value("save-images", "output", output, ignore_default=True)
+    output = ctx.config.get_value("save-images", "output", output)
 
     save_images_args = {
         "encoder_param": compression if png else quality,

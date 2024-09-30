@@ -187,7 +187,7 @@ class CliContext:
             init_failure = not self.config.initialized
             init_log = self.config.get_init_log()
             quiet = not init_failure and quiet
-            self._initialize_logging(quiet=quiet, verbosity=verbosity, logfile=logfile)
+            self._initialize_logging(quiet, verbosity, logfile)
 
             # Configuration file was specified via CLI argument -c/--config.
             if config and not init_failure:
@@ -229,20 +229,16 @@ class CliContext:
                 param_hint="frame skip + stats file",
             )
 
-        # Handle the case where -i/--input was not specified (e.g. for the `help` command).
+        # Handle case where -i/--input was not specified (e.g. for the `help` command).
         if input_path is None:
             return
 
-        # Have to load the input video to obtain a time base before parsing timecodes.
-        self._open_video_stream(
-            input_path=input_path,
-            framerate=framerate,
-            backend=self.config.get_value("global", "backend", backend, ignore_default=True),
-        )
+        # Load the input video to obtain a time base for parsing timecodes.
+        self._open_video_stream(input_path, framerate, backend)
 
-        self.output_dir = output if output else self.config.get_value("global", "output")
+        self.output_dir = self.config.get_value("global", "output", output)
         if self.output_dir:
-            logger.info("Output directory set:\n  %s", self.output_dir)
+            logger.debug("Output directory set:\n  %s", self.output_dir)
 
         self.min_scene_len = self.parse_timecode(
             min_scene_len
@@ -507,7 +503,10 @@ class CliContext:
         init_logger(log_level=curr_verbosity, show_stdout=not self.quiet_mode, log_file=logfile)
 
     def _open_video_stream(
-        self, input_path: ty.AnyStr, framerate: ty.Optional[float], backend: ty.Optional[str]
+        self,
+        input_path: ty.AnyStr,
+        framerate: ty.Optional[float],
+        backend: ty.Optional[str],
     ):
         if "%" in input_path and backend != "opencv":
             raise click.BadParameter(
@@ -517,14 +516,13 @@ class CliContext:
         if framerate is not None and framerate < MAX_FPS_DELTA:
             raise click.BadParameter("Invalid framerate specified!", param_hint="-f/--framerate")
         try:
-            if backend is None:
-                backend = self.config.get_value("global", "backend")
-            else:
-                if backend not in AVAILABLE_BACKENDS:
-                    raise click.BadParameter(
-                        "Specified backend %s is not available on this system!" % backend,
-                        param_hint="-b/--backend",
-                    )
+            backend = self.config.get_value("global", "backend", backend)
+            if backend not in AVAILABLE_BACKENDS:
+                raise click.BadParameter(
+                    "Specified backend %s is not available on this system!" % backend,
+                    param_hint="-b/--backend",
+                )
+
             # Open the video with the specified backend, loading any required config settings.
             if backend == "pyav":
                 self.video_stream = open_video(

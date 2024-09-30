@@ -52,7 +52,7 @@ def main():
             if __debug__:
                 raise
             else:
-                logger.critical("Unhandled exception:", exc_info=ex)
+                logger.critical("ERROR: Unhandled exception:", exc_info=ex)
                 raise SystemExit(1) from None
 
 

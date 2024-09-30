@@ -306,7 +306,7 @@ CONFIG_MAP: ConfigDict = {
         "display-cuts": True,
         "display-scenes": True,
         "filename": "$VIDEO_NAME-Scenes.csv",
-        "output": "",
+        "output": None,
         "no-output-file": False,
         "quiet": False,
         "skip-cuts": False,
@@ -320,7 +320,7 @@ CONFIG_MAP: ConfigDict = {
         "frame-skip": 0,
         "merge-last-scene": False,
         "min-scene-len": TimecodeValue("0.6s"),
-        "output": "",
+        "output": None,
         "verbosity": "info",
     },
     "save-images": {
@@ -330,7 +330,7 @@ CONFIG_MAP: ConfigDict = {
         "frame-margin": 1,
         "height": 0,
         "num-images": 3,
-        "output": "",
+        "output": None,
         "quality": RangeValue(_PLACEHOLDER, min_val=0, max_val=100),
         "scale": 1.0,
         "scale-method": "linear",
@@ -342,7 +342,7 @@ CONFIG_MAP: ConfigDict = {
         "filename": "$VIDEO_NAME-Scene-$SCENE_NUMBER",
         "high-quality": False,
         "mkvmerge": False,
-        "output": "",
+        "output": None,
         "preset": "veryfast",
         "quiet": False,
         "rate-factor": RangeValue(22, min_val=0, max_val=100),
@@ -580,7 +580,6 @@ class ConfigRegistry:
         command: str,
         option: str,
         override: Optional[ConfigValue] = None,
-        ignore_default: bool = False,
     ) -> ConfigValue:
         """Get the current setting or default value of the specified command option."""
         assert command in CONFIG_MAP and option in CONFIG_MAP[command]
@@ -590,8 +589,6 @@ class ConfigRegistry:
             value = self._config[command][option]
         else:
             value = CONFIG_MAP[command][option]
-            if ignore_default:
-                return None
         if issubclass(type(value), ValidatedValue):
             return value.value
         return value
