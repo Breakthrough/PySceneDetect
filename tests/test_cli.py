@@ -431,6 +431,20 @@ def test_cli_export_html(tmp_path: Path):
     # TODO: Check for existence of HTML & image files.
 
 
+def test_cli_save_qp(tmp_path: Path):
+    """Test `save-qp` command."""
+    base_command = "-i {VIDEO} time {TIME} {DETECTOR} {COMMAND}"
+    assert invoke_scenedetect(base_command, COMMAND="save-qp", output_dir=tmp_path) == 0
+    assert (
+        invoke_scenedetect(
+            base_command, COMMAND="save-qp --filename custom.txt", output_dir=tmp_path
+        )
+        == 0
+    )
+    assert os.path.exists(tmp_path.joinpath(f"{DEFAULT_VIDEO_NAME}.qp"))
+    assert os.path.exists(tmp_path.joinpath("custom.txt"))
+
+
 @pytest.mark.parametrize("backend_type", ALL_BACKENDS)
 def test_cli_backend(backend_type: str):
     """Test setting the `-b`/`--backend` argument."""

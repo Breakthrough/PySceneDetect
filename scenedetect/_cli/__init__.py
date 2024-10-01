@@ -346,7 +346,7 @@ def scenedetect(
 )
 @click.pass_context
 def help_command(ctx: click.Context, command_name: str):
-    """Print help for command (`help [command]`)."""
+    """Print full help reference."""
     assert isinstance(ctx.parent.command, click.MultiCommand)
     parent_command = ctx.parent.command
     all_commands = set(parent_command.list_commands(ctx))
@@ -1011,7 +1011,7 @@ def export_html_command(
     "-o",
     metavar="DIR",
     type=click.Path(exists=False, dir_okay=True, writable=True, resolve_path=False),
-    help="Output directory to save videos to. Overrides global option -o/--output if set.%s"
+    help="Output directory to save videos to. Overrides global option -o/--output.%s"
     % (USER_CONFIG.get_help_string("list-scenes", "output", show_default=False)),
 )
 @click.option(
@@ -1081,7 +1081,7 @@ def list_scenes_command(
     "-o",
     metavar="DIR",
     type=click.Path(exists=False, dir_okay=True, writable=True, resolve_path=False),
-    help="Output directory to save videos to. Overrides global option -o/--output if set.%s"
+    help="Output directory to save videos to. Overrides global option -o/--output.%s"
     % (USER_CONFIG.get_help_string("split-video", "output", show_default=False)),
 )
 @click.option(
@@ -1256,7 +1256,7 @@ def split_video_command(
     "-o",
     metavar="DIR",
     type=click.Path(exists=False, dir_okay=True, writable=True, resolve_path=False),
-    help="Output directory for images. Overrides global option -o/--output if set.%s"
+    help="Output directory for images. Overrides global option -o/--output.%s"
     % (USER_CONFIG.get_help_string("save-images", "output", show_default=False)),
 )
 @click.option(
@@ -1442,30 +1442,62 @@ def save_images_command(
     ctx.save_images = True
 
 
+@click.command("save-qp", cls=_Command)
+@click.option(
+    "--filename",
+    "-f",
+    metavar="NAME",
+    default=None,
+    type=click.STRING,
+    help="Filename format to use.%s" % (USER_CONFIG.get_help_string("save-qp", "filename")),
+)
+@click.option(
+    "--output",
+    "-o",
+    metavar="DIR",
+    type=click.Path(exists=False, dir_okay=True, writable=True, resolve_path=False),
+    help="Output directory to save QP file to. Overrides global option -o/--output.%s"
+    % (USER_CONFIG.get_help_string("save-qp", "output", show_default=False)),
+)
+@click.pass_context
+def save_qp_command(
+    ctx: click.Context,
+    filename: ty.Optional[ty.AnyStr],
+    output: ty.Optional[ty.AnyStr],
+):
+    ctx = ctx.obj
+    assert isinstance(ctx, CliContext)
+
+    save_qp_args = {
+        "filename_format": ctx.config.get_value("save-qp", "filename", filename),
+        "output_dir": ctx.config.get_value("save-qp", "output", output),
+    }
+    ctx.add_command(cli_commands.save_qp, save_qp_args)
+
+
 # ----------------------------------------------------------------------
-# Commands Omitted From Help List
+# CLI Sub-Command Registration
 # ----------------------------------------------------------------------
 
-# Info Commands
+# Informational
 scenedetect.add_command(about_command)
 scenedetect.add_command(help_command)
 scenedetect.add_command(version_command)
 
-# ----------------------------------------------------------------------
-# Commands Added To Help List
-# ----------------------------------------------------------------------
-
-# Input / Output
-scenedetect.add_command(export_html_command)
-scenedetect.add_command(list_scenes_command)
+# Input
 scenedetect.add_command(load_scenes_command)
-scenedetect.add_command(save_images_command)
-scenedetect.add_command(split_video_command)
 scenedetect.add_command(time_command)
 
-# Detection Algorithms
+# Detectors
 scenedetect.add_command(detect_adaptive_command)
 scenedetect.add_command(detect_content_command)
 scenedetect.add_command(detect_hash_command)
 scenedetect.add_command(detect_hist_command)
 scenedetect.add_command(detect_threshold_command)
+
+# Output
+scenedetect.add_command(export_html_command)
+scenedetect.add_command(save_qp_command)
+scenedetect.add_command(list_scenes_command)
+scenedetect.add_command(save_images_command)
+scenedetect.add_command(split_video_command)
