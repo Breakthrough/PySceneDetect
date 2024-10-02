@@ -41,8 +41,8 @@ def validate_backwards_compatibility(test_video_file: str, stats_file_path: str)
     base_timecode = video_manager.get_base_timecode()
     scene_list = []
     try:
-        start_time = base_timecode + 20  # 00:00:00.667
-        end_time = base_timecode + 10.0  # 00:00:10.000
+        start_time = base_timecode + 4.0
+        end_time = base_timecode + 8.0
 
         if os.path.exists(stats_file_path):
             with open(stats_file_path) as stats_file:
@@ -66,19 +66,6 @@ def validate_backwards_compatibility(test_video_file: str, stats_file_path: str)
 
         # Correct end frame # for presentation duration.
         assert video_manager.get_current_timecode().get_frames() == end_time.get_frames() + 1
-
-        print("List of scenes obtained:")
-        for i, scene in enumerate(scene_list):
-            print(
-                "    Scene %2d: Start %s / Frame %d, End %s / Frame %d"
-                % (
-                    i + 1,
-                    scene[0].get_timecode(),
-                    scene[0].get_frames(),
-                    scene[1].get_timecode(),
-                    scene[1].get_frames(),
-                )
-            )
 
         if stats_manager.is_save_required():
             with open(stats_file_path, "w") as stats_file:

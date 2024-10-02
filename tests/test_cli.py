@@ -59,6 +59,10 @@ DEFAULT_TIME = "-s 2s -d 4s"  # Seek forward a bit but limit the amount we proce
 DEFAULT_DETECTOR = "detect-content"
 DEFAULT_CONFIG_FILE = "scenedetect.cfg"  # Ensure we default to a "blank" config file.
 DEFAULT_NUM_SCENES = 2  # Number of scenes we expect to detect given above params.
+DEFAULT_FFMPEG_ARGS = (
+    "-vf crop=128:128:0:0 -map 0:v:0 -c:v libx264 -preset ultrafast -qp 0 -tune zerolatency"
+)
+"""Only encodes a small crop of the frame and tuned for performance to speed up tests."""
 
 
 def invoke_scenedetect(
@@ -313,13 +317,13 @@ def test_cli_list_scenes(tmp_path: Path):
 @pytest.mark.skipif(condition=not is_ffmpeg_available(), reason="ffmpeg is not available")
 def test_cli_split_video_ffmpeg(tmp_path: Path):
     """Test `split-video` command using ffmpeg."""
+
     # Assumption: The default filename format is VIDEO_NAME-Scene-SCENE_NUMBER.
-    assert (
-        invoke_scenedetect(
-            "-i {VIDEO} -s {STATS} time {TIME} {DETECTOR} split-video", output_dir=tmp_path
-        )
-        == 0
+    command = f"{SCENEDETECT_CMD} -i {DEFAULT_VIDEO_PATH} -o {tmp_path} time {DEFAULT_TIME} {DEFAULT_DETECTOR} split-video -a".split(
+        " "
     )
+    command.append(DEFAULT_FFMPEG_ARGS)
+    assert subprocess.call(command) == 0
     entries = sorted(tmp_path.glob(f"{DEFAULT_VIDEO_NAME}-Scene-*"))
     assert len(entries) == DEFAULT_NUM_SCENES, entries
     [entry.unlink() for entry in entries]
@@ -334,20 +338,15 @@ def test_cli_split_video_ffmpeg(tmp_path: Path):
     assert len(entries) == DEFAULT_NUM_SCENES
     [entry.unlink() for entry in entries]
 
-    assert (
-        invoke_scenedetect(
-            "-i {VIDEO} -s {STATS} time {TIME} {DETECTOR} split-video -f abc$VIDEO_NAME-123$SCENE_NUMBER",
-            output_dir=tmp_path,
-        )
-        == 0
-    )
+    command += ["-f", "abc$VIDEO_NAME-123$SCENE_NUMBER"]
+    assert subprocess.call(command) == 0
     entries = sorted(tmp_path.glob(f"abc{DEFAULT_VIDEO_NAME}-123*"))
     assert len(entries) == DEFAULT_NUM_SCENES, entries
     [entry.unlink() for entry in entries]
 
     # -a/--args and -c/--copy are mutually exclusive, so this command should fail (return nonzero)
     assert invoke_scenedetect(
-        '-i {VIDEO} -s {STATS} time {TIME} {DETECTOR} split-video -c -a "-c:v libx264"',
+        '-i {VIDEO} {DETECTOR} split-video -c -a "-c:v libx264"',
         output_dir=tmp_path,
     )
 

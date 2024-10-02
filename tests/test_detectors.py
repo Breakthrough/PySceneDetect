@@ -212,7 +212,7 @@ def test_detectors_with_stats(test_video_file):
         scene_manager = SceneManager(stats_manager=stats)
         scene_manager.add_detector(detector())
         scene_manager.auto_downscale = True
-        end_time = FrameTimecode("00:00:08", video.frame_rate)
+        end_time = FrameTimecode("00:00:05", video.frame_rate)
         scene_manager.detect_scenes(video=video, end_time=end_time)
         initial_scene_len = len(scene_manager.get_scene_list())
         assert initial_scene_len > 0, "Test case must have at least one scene."

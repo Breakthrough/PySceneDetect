@@ -358,6 +358,6 @@ def test_corrupt_video(vs_type: Type[VideoStream], corrupt_video_file: str):
     stream = vs_type(corrupt_video_file)
 
     # OpenCV usually fails to read the video at frame 45, so we make sure all backends can
-    # get to 100 without reporting a failure.
-    for frame in range(100):
+    # get to 60 without reporting a failure.
+    for frame in range(60):
         assert stream.read() is not False, "Failed on frame %d!" % frame

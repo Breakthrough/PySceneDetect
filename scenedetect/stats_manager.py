@@ -25,6 +25,7 @@ import csv
 import os.path
 import typing as ty
 from logging import getLogger
+from pathlib import Path
 
 # TODO: Replace below imports with `ty.` prefix.
 from typing import Any, Dict, Iterable, List, Optional, Set, TextIO, Union
@@ -167,7 +168,7 @@ class StatsManager:
 
     def save_to_csv(
         self,
-        csv_file: Union[str, bytes, TextIO],
+        csv_file: Union[str, bytes, Path, TextIO],
         base_timecode: Optional[FrameTimecode] = None,
         force_save=True,
     ) -> None:
@@ -191,7 +192,7 @@ class StatsManager:
 
         # If we get a path instead of an open file handle, recursively call ourselves
         # again but with file handle instead of path.
-        if isinstance(csv_file, (str, bytes)):
+        if isinstance(csv_file, (str, bytes, Path)):
             with open(csv_file, "w") as file:
                 self.save_to_csv(csv_file=file, force_save=force_save)
                 return
@@ -250,7 +251,7 @@ class StatsManager:
 
         # If we get a path instead of an open file handle, check that it exists, and if so,
         # recursively call ourselves again but with file set instead of path.
-        if isinstance(csv_file, (str, bytes)):
+        if isinstance(csv_file, (str, bytes, Path)):
             if os.path.exists(csv_file):
                 with open(csv_file) as file:
                     return self.load_from_csv(csv_file=file)

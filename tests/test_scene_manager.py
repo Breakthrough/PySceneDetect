@@ -36,7 +36,7 @@ def test_scene_list(test_video_file):
 
     video_fps = video.frame_rate
     start_time = FrameTimecode("00:00:05", video_fps)
-    end_time = FrameTimecode("00:00:15", video_fps)
+    end_time = FrameTimecode("00:00:10", video_fps)
 
     assert end_time.get_frames() > start_time.get_frames()
 

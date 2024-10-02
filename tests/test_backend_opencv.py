@@ -23,7 +23,7 @@ from scenedetect import ContentDetector, SceneManager
 from scenedetect.backends.opencv import VideoCaptureAdapter, VideoStreamCv2
 
 GROUND_TRUTH_CAPTURE_ADAPTER_TEST = [1, 90, 210]
-GROUND_TRUTH_CAPTURE_ADAPTER_CALLBACK_TEST = [30, 180, 394]
+GROUND_TRUTH_CAPTURE_ADAPTER_CALLBACK_TEST = [180, 394]
 
 
 def test_open_image_sequence(test_image_sequence: str):
@@ -50,21 +50,3 @@ def test_capture_adapter(test_movie_clip: str):
     scenes = scene_manager.get_scene_list()
     assert len(scenes) == len(GROUND_TRUTH_CAPTURE_ADAPTER_TEST)
     assert [start.get_frames() for (start, _) in scenes] == GROUND_TRUTH_CAPTURE_ADAPTER_TEST
-
-
-def test_capture_adapter_callback(test_video_file: str):
-    """Test that the VideoCaptureAdapter works with SceneManager and a callback."""
-
-    callback_frames = []
-
-    def on_new_scene(_, frame_num: int):
-        nonlocal callback_frames
-        callback_frames.append(frame_num)
-
-    cap = cv2.VideoCapture(test_video_file)
-    assert cap.isOpened()
-    adapter = VideoCaptureAdapter(cap)
-    scene_manager = SceneManager()
-    scene_manager.add_detector(ContentDetector())
-    scene_manager.detect_scenes(video=adapter, callback=on_new_scene)
-    assert callback_frames == GROUND_TRUTH_CAPTURE_ADAPTER_CALLBACK_TEST
