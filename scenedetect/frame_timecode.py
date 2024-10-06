@@ -283,11 +283,18 @@ class FrameTimecode:
             if timecode < 0:
                 raise ValueError("Timecode frame number must be positive.")
             return timecode
-        # Timecode in string format 'HH:MM:SS[.nnn]'
+        # Timecode in string format 'HH:MM:SS[.nnn]' or 'MM:SS[.nnn]'
         elif input.find(":") >= 0:
             values = input.split(":")
-            hrs, mins = int(values[0]), int(values[1])
-            secs = float(values[2]) if "." in values[2] else int(values[2])
+            # Case of 'HH:MM:SS[.nnn]'
+            if len(values) == 3:
+                hrs, mins = int(values[0]), int(values[1])
+                secs = float(values[2]) if "." in values[2] else int(values[2])
+            # Case of 'MM:SS[.nnn]'
+            elif len(values) == 2:
+                hrs = 0
+                mins = int(values[0])
+                secs = float(values[1]) if "." in values[1] else int(values[1])
             if not (hrs >= 0 and mins >= 0 and secs >= 0 and mins < 60 and secs < 60):
                 raise ValueError("Invalid timecode range (values outside allowed range).")
             secs += (hrs * 60 * 60) + (mins * 60)
