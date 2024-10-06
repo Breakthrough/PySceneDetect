@@ -68,8 +68,6 @@
     <ul class="current">
     <li class="toctree-l2"><a class="reference internal" href="#pyscenedetect-06">PySceneDetect 0.6</a>
         <ul>
-    <li class="toctree-l3"><a class="reference internal" href="#065-tbd">0.6.5 (TBD)</a>
-    </li>
     <li class="toctree-l3"><a class="reference internal" href="#064-june-10-2024">0.6.4 (June 10, 2024)</a>
         <ul>
     <li class="toctree-l4"><a class="reference internal" href="#release-notes">Release Notes</a>
@@ -271,11 +269,6 @@
               
                 <h1 id="releases">Releases</h1>
 <h2 id="pyscenedetect-06">PySceneDetect 0.6</h2>
-<h3 id="065-tbd">0.6.5 (TBD)</h3>
-<ul>
-<li>[bugfix] Fix new detectors not working with <code>default-detector</code> config option</li>
-<li>[bugfix] Fix SyntaxWarning due to incorrect escaping <a href="https://github.com/Breakthrough/PySceneDetect/pull/295">#400</a> <a href="https://github.com/Breakthrough/PySceneDetect/issues/35">#400</a></li>
-</ul>
 <h3 id="064-june-10-2024">0.6.4 (June 10, 2024)</h3>
 <h4 id="release-notes">Release Notes</h4>
 <p>Includes new histogram and perceptual hash based detectors (thanks @wjs018 and @ash2703), adds flash filter to content detector, and includes various bugfixes. Below shows the scores of the new detectors normalized against <code>detect-content</code> for comparison on a difficult segment with 3 cuts:</p>
@@ -825,6 +818,14 @@
 <ul>
 <li>first public release</li>
 <li>[feature] threshold-based fade in/out detection</li>
+</ul>
+<hr />
+<h1 id="development">Development</h1>
+<h2 id="pyscenedetect-065-tbd">PySceneDetect 0.6.5 (TBD)</h2>
+<ul>
+<li>[bugfix] Fix new detectors not working with <code>default-detector</code> config option</li>
+<li>[bugfix] Fix <code>SyntaxWarning</code> due to incorrect escaping <a href="https://github.com/Breakthrough/PySceneDetect/issues/400">#400</a></li>
+<li>[bugfix] Fix <code>ContentDetector</code> crash when using callbacks <a href="https://github.com/Breakthrough/PySceneDetect/issues/416">#416</a></li>
 </ul>
               
             </div>
