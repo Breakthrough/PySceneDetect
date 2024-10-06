@@ -20,13 +20,23 @@ performs scene detection and other required actions (`run_scenedetect`).
 
 import inspect
 import logging
+import os
+import os.path
 import typing as ty
 
 import click
 
 import scenedetect
-from scenedetect._cli.config import CHOICE_MAP, CONFIG_FILE_PATH, CONFIG_MAP
-from scenedetect._cli.context import USER_CONFIG, CliContext
+import scenedetect._cli.commands as cli_commands
+from scenedetect._cli.config import (
+    CHOICE_MAP,
+    CONFIG_FILE_PATH,
+    CONFIG_MAP,
+    DEFAULT_JPG_QUALITY,
+    DEFAULT_WEBP_QUALITY,
+    TimecodeFormat,
+)
+from scenedetect._cli.context import USER_CONFIG, CliContext, check_split_video_requirements
 from scenedetect.backends import AVAILABLE_BACKENDS
 from scenedetect.detectors import (
     AdaptiveDetector,
@@ -35,7 +45,8 @@ from scenedetect.detectors import (
     HistogramDetector,
     ThresholdDetector,
 )
-from scenedetect.platform import get_system_version_info
+from scenedetect.platform import get_cv2_imwrite_params, get_system_version_info
+from scenedetect.scene_manager import Interpolation
 
 _PROGRAM_VERSION = scenedetect.__version__
 """Used to avoid name conflict with named `scenedetect` command below."""
@@ -305,8 +316,10 @@ def scenedetect(
 
     Global options (e.g. -i/--input, -c/--config) must be specified before any commands and their options. The order of commands is not strict, but each command must only be specified once.
     """
-    assert isinstance(ctx.obj, CliContext)
-    ctx.obj.handle_options(
+    ctx = ctx.obj
+    assert isinstance(ctx, CliContext)
+
+    ctx.handle_options(
         input_path=input,
         output=output,
         framerate=framerate,
@@ -334,7 +347,6 @@ def scenedetect(
 @click.pass_context
 def help_command(ctx: click.Context, command_name: str):
     """Print help for command (`help [command]`)."""
-    assert isinstance(ctx.obj, CliContext)
     assert isinstance(ctx.parent.command, click.MultiCommand)
     parent_command = ctx.parent.command
     all_commands = set(parent_command.list_commands(ctx))
@@ -358,7 +370,6 @@ def help_command(ctx: click.Context, command_name: str):
 @click.pass_context
 def about_command(ctx: click.Context):
     """Print license/copyright info."""
-    assert isinstance(ctx.obj, CliContext)
     click.echo("")
     click.echo(click.style(_LINE_SEPARATOR, fg="cyan"))
     click.echo(click.style(" About PySceneDetect %s" % _PROGRAM_VERSION, fg="yellow"))
@@ -371,7 +382,6 @@ def about_command(ctx: click.Context):
 @click.pass_context
 def version_command(ctx: click.Context):
     """Print PySceneDetect version."""
-    assert isinstance(ctx.obj, CliContext)
     click.echo("")
     click.echo(get_system_version_info())
     ctx.exit()
@@ -421,12 +431,23 @@ def time_command(
 
         {scenedetect_with_video} time --start 0 --end 1000
     """
-    assert isinstance(ctx.obj, CliContext)
-    ctx.obj.handle_time(
-        start=start,
-        duration=duration,
-        end=end,
-    )
+    ctx = ctx.obj
+    assert isinstance(ctx, CliContext)
+
+    if duration is not None and end is not None:
+        raise click.BadParameter(
+            "Only one of --duration/-d or --end/-e can be specified, not both.",
+            param_hint="time",
+        )
+    logger.debug("Setting video time:\n    start: %s, duration: %s, end: %s", start, duration, end)
+    # *NOTE*: The Python API uses 0-based frame indices, but the CLI uses 1-based indices to
+    # match the default start number used by `ffmpeg` when saving frames as images. As such,
+    # we must correct start time if set as frames. See the test_cli_time* tests for for details.
+    ctx.start_time = ctx.parse_timecode(start, correct_pts=True)
+    ctx.end_time = ctx.parse_timecode(end)
+    ctx.duration = ctx.parse_timecode(duration)
+    if ctx.start_time and ctx.end_time and (ctx.start_time + 1) > ctx.end_time:
+        raise click.BadParameter("-e/--end time must be greater than -s/--start")
 
 
 @click.command("detect-content", cls=_Command)
@@ -525,8 +546,9 @@ def detect_content_command(
 
         {scenedetect_with_video} detect-content --threshold 27.5
     """
-    assert isinstance(ctx.obj, CliContext)
-    detector_args = ctx.obj.get_detect_content_params(
+    ctx = ctx.obj
+    assert isinstance(ctx, CliContext)
+    detector_args = ctx.get_detect_content_params(
         threshold=threshold,
         luma_only=luma_only,
         min_scene_len=min_scene_len,
@@ -534,8 +556,7 @@ def detect_content_command(
         kernel_size=kernel_size,
         filter_mode=filter_mode,
     )
-    logger.debug("Adding detector: ContentDetector(%s)", detector_args)
-    ctx.obj.add_detector(ContentDetector(**detector_args))
+    ctx.add_detector(ContentDetector, detector_args)
 
 
 @click.command("detect-adaptive", cls=_Command)
@@ -636,8 +657,9 @@ def detect_adaptive_command(
 
         {scenedetect_with_video} detect-adaptive --threshold 3.2
     """
-    assert isinstance(ctx.obj, CliContext)
-    detector_args = ctx.obj.get_detect_adaptive_params(
+    ctx = ctx.obj
+    assert isinstance(ctx, CliContext)
+    detector_args = ctx.get_detect_adaptive_params(
         threshold=threshold,
         min_content_val=min_content_val,
         min_delta_hsv=min_delta_hsv,
@@ -647,8 +669,7 @@ def detect_adaptive_command(
         weights=weights,
         kernel_size=kernel_size,
     )
-    logger.debug("Adding detector: AdaptiveDetector(%s)", detector_args)
-    ctx.obj.add_detector(AdaptiveDetector(**detector_args))
+    ctx.add_detector(AdaptiveDetector, detector_args)
 
 
 @click.command("detect-threshold", cls=_Command)
@@ -715,15 +736,15 @@ def detect_threshold_command(
 
         {scenedetect_with_video} detect-threshold --threshold 15
     """
-    assert isinstance(ctx.obj, CliContext)
-    detector_args = ctx.obj.get_detect_threshold_params(
+    ctx = ctx.obj
+    assert isinstance(ctx, CliContext)
+    detector_args = ctx.get_detect_threshold_params(
         threshold=threshold,
         fade_bias=fade_bias,
         add_last_scene=add_last_scene,
         min_scene_len=min_scene_len,
     )
-    logger.debug("Adding detector: ThresholdDetector(%s)", detector_args)
-    ctx.obj.add_detector(ThresholdDetector(**detector_args))
+    ctx.add_detector(ThresholdDetector, detector_args)
 
 
 @click.command("detect-hist", cls=_Command)
@@ -785,14 +806,12 @@ def detect_hist_command(
 
         {scenedetect_with_video} detect-hist --threshold 0.1 --bins 240
     """
-    assert isinstance(ctx.obj, CliContext)
-
-    assert isinstance(ctx.obj, CliContext)
-    detector_args = ctx.obj.get_detect_hist_params(
+    ctx = ctx.obj
+    assert isinstance(ctx, CliContext)
+    detector_args = ctx.get_detect_hist_params(
         threshold=threshold, bins=bins, min_scene_len=min_scene_len
     )
-    logger.debug("Adding detector: HistogramDetector(%s)", detector_args)
-    ctx.obj.add_detector(HistogramDetector(**detector_args))
+    ctx.add_detector(HistogramDetector, detector_args)
 
 
 @click.command("detect-hash", cls=_Command)
@@ -870,14 +889,12 @@ def detect_hash_command(
 
         {scenedetect_with_video} detect-hash --size 32 --lowpass 3
     """
-    assert isinstance(ctx.obj, CliContext)
-
-    assert isinstance(ctx.obj, CliContext)
-    detector_args = ctx.obj.get_detect_hash_params(
+    ctx = ctx.obj
+    assert isinstance(ctx, CliContext)
+    detector_args = ctx.get_detect_hash_params(
         threshold=threshold, size=size, lowpass=lowpass, min_scene_len=min_scene_len
     )
-    logger.debug("Adding detector: HashDetector(%s)", detector_args)
-    ctx.obj.add_detector(HashDetector(**detector_args))
+    ctx.add_detector(HashDetector, detector_args)
 
 
 @click.command("load-scenes", cls=_Command)
@@ -911,9 +928,23 @@ def load_scenes_command(
 
         {scenedetect_with_video} load-scenes -i scenes.csv --start-col-name "Start Timecode"
     """
-    assert isinstance(ctx.obj, CliContext)
-    logger.debug("Loading scenes from %s (start_col_name = %s)", input, start_col_name)
-    ctx.obj.handle_load_scenes(input=input, start_col_name=start_col_name)
+    ctx = ctx.obj
+    assert isinstance(ctx, CliContext)
+
+    logger.debug("Will load scenes from %s (start_col_name = %s)", input, start_col_name)
+    if ctx.scene_manager.get_num_detectors() > 0:
+        raise click.ClickException("The load-scenes command cannot be used with detectors.")
+    if ctx.load_scenes_input:
+        raise click.ClickException("The load-scenes command must only be specified once.")
+    input = os.path.abspath(input)
+    if not os.path.exists(input):
+        raise click.BadParameter(
+            f"Could not load scenes, file does not exist: {input}", param_hint="-i/--input"
+        )
+    ctx.load_scenes_input = input
+    ctx.load_scenes_column_name = ctx.config.get_value(
+        "load-scenes", "start-col-name", start_col_name
+    )
 
 
 @click.command("export-html", cls=_Command)
@@ -958,13 +989,20 @@ def export_html_command(
     image_height: ty.Optional[int],
 ):
     """Export scene list to HTML file. Requires save-images unless --no-images is specified."""
-    assert isinstance(ctx.obj, CliContext)
-    ctx.obj.handle_export_html(
-        filename=filename,
-        no_images=no_images,
-        image_width=image_width,
-        image_height=image_height,
-    )
+    ctx = ctx.obj
+    assert isinstance(ctx, CliContext)
+
+    no_images = no_images or ctx.config.get_value("export-html", "no-images")
+    if not ctx.save_images and not no_images:
+        raise click.BadArgumentUsage(
+            "export-html requires that save-images precedes it or --no-images is specified."
+        )
+    export_html_args = {
+        "html_name_format": ctx.config.get_value("export-html", "filename", filename),
+        "image_width": ctx.config.get_value("export-html", "image-width", image_width),
+        "image_height": ctx.config.get_value("export-html", "image-height", image_height),
+    }
+    ctx.add_command(cli_commands.export_html, export_html_args)
 
 
 @click.command("list-scenes", cls=_Command)
@@ -1018,14 +1056,23 @@ def list_scenes_command(
     skip_cuts: bool,
 ):
     """Create scene list CSV file (will be named $VIDEO_NAME-Scenes.csv by default)."""
-    assert isinstance(ctx.obj, CliContext)
-    ctx.obj.handle_list_scenes(
-        output=output,
-        filename=filename,
-        no_output_file=no_output_file,
-        quiet=quiet,
-        skip_cuts=skip_cuts,
-    )
+    ctx = ctx.obj
+    assert isinstance(ctx, CliContext)
+
+    no_output_file = no_output_file or ctx.config.get_value("list-scenes", "no-output-file")
+    scene_list_dir = ctx.config.get_value("list-scenes", "output", output)
+    scene_list_name_format = ctx.config.get_value("list-scenes", "filename", filename)
+    list_scenes_args = {
+        "cut_format": TimecodeFormat[ctx.config.get_value("list-scenes", "cut-format").upper()],
+        "display_scenes": ctx.config.get_value("list-scenes", "display-scenes"),
+        "display_cuts": ctx.config.get_value("list-scenes", "display-cuts"),
+        "scene_list_output": not no_output_file,
+        "scene_list_name_format": scene_list_name_format,
+        "skip_cuts": skip_cuts or ctx.config.get_value("list-scenes", "skip-cuts"),
+        "output_dir": scene_list_dir,
+        "quiet": quiet or ctx.config.get_value("list-scenes", "quiet") or ctx.quiet_mode,
+    }
+    ctx.add_command(cli_commands.list_scenes, list_scenes_args)
 
 
 @click.command("split-video", cls=_Command)
@@ -1134,18 +1181,73 @@ def split_video_command(
 
         {scenedetect_with_video} split-video --filename \\$VIDEO_NAME-Clip-\\$SCENE_NUMBER
     """
-    assert isinstance(ctx.obj, CliContext)
-    ctx.obj.handle_split_video(
-        output=output,
-        filename=filename,
-        quiet=quiet,
-        copy=copy,
-        high_quality=high_quality,
-        rate_factor=rate_factor,
-        preset=preset,
-        args=args,
-        mkvmerge=mkvmerge,
-    )
+    ctx = ctx.obj
+    assert isinstance(ctx, CliContext)
+
+    check_split_video_requirements(use_mkvmerge=mkvmerge)
+    if "%" in ctx.video_stream.path or "://" in ctx.video_stream.path:
+        error = "The split-video command is incompatible with image sequences/URLs."
+        raise click.BadParameter(error, param_hint="split-video")
+
+    # We only load the config values for these flags/options if none of the other
+    # encoder flags/options were set via the CLI to avoid any conflicting options
+    # (e.g. if the config file sets `high-quality = yes` but `--copy` is specified).
+    if not (mkvmerge or copy or high_quality or args or rate_factor or preset):
+        mkvmerge = ctx.config.get_value("split-video", "mkvmerge")
+        copy = ctx.config.get_value("split-video", "copy")
+        high_quality = ctx.config.get_value("split-video", "high-quality")
+        rate_factor = ctx.config.get_value("split-video", "rate-factor")
+        preset = ctx.config.get_value("split-video", "preset")
+        args = ctx.config.get_value("split-video", "args")
+
+    # Disallow certain combinations of options.
+    if mkvmerge or copy:
+        command = "mkvmerge (-m)" if mkvmerge else "copy (-c)"
+        if high_quality:
+            raise click.BadParameter(
+                "high-quality (-hq) cannot be used with %s" % (command),
+                param_hint="split-video",
+            )
+        if args:
+            raise click.BadParameter(
+                "args (-a) cannot be used with %s" % (command), param_hint="split-video"
+            )
+        if rate_factor:
+            raise click.BadParameter(
+                "rate-factor (crf) cannot be used with %s" % (command), param_hint="split-video"
+            )
+        if preset:
+            raise click.BadParameter(
+                "preset (-p) cannot be used with %s" % (command), param_hint="split-video"
+            )
+
+    # mkvmerge-Specific Options
+    if mkvmerge and copy:
+        logger.warning("copy mode (-c) ignored due to mkvmerge mode (-m).")
+
+    # ffmpeg-Specific Options
+    if copy:
+        args = "-map 0:v:0 -map 0:a? -map 0:s? -c:v copy -c:a copy"
+    elif not args:
+        if rate_factor is None:
+            rate_factor = 22 if not high_quality else 17
+        if preset is None:
+            preset = "veryfast" if not high_quality else "slow"
+        args = (
+            "-map 0:v:0 -map 0:a? -map 0:s? "
+            f"-c:v libx264 -preset {preset} -crf {rate_factor} -c:a aac"
+        )
+    if filename:
+        logger.info("Output file name format: %s", filename)
+
+    split_video_args = {
+        "name_format": ctx.config.get_value("split-video", "filename", filename),
+        "use_mkvmerge": mkvmerge,
+        "output_dir": ctx.config.get_value("split-video", "output", output),
+        "show_output": not quiet,
+        "ffmpeg_args": args,
+    }
+    ctx.add_command(cli_commands.split_video, split_video_args)
 
 
 @click.command("save-images", cls=_Command)
@@ -1279,21 +1381,65 @@ def save_images_command(
 
         {scenedetect_with_video} save-images --filename \\$SCENE_NUMBER-img\\$IMAGE_NUMBER
     """
-    assert isinstance(ctx.obj, CliContext)
-    ctx.obj.handle_save_images(
-        num_images=num_images,
-        output=output,
-        filename=filename,
-        jpeg=jpeg,
-        webp=webp,
-        quality=quality,
-        png=png,
-        compression=compression,
-        frame_margin=frame_margin,
-        scale=scale,
-        height=height,
-        width=width,
+    ctx = ctx.obj
+    assert isinstance(ctx, CliContext)
+
+    if "://" in ctx.video_stream.path:
+        error_str = "\nThe save-images command is incompatible with URLs."
+        logger.error(error_str)
+        raise click.BadParameter(error_str, param_hint="save-images")
+    num_flags = sum([1 if flag else 0 for flag in [jpeg, webp, png]])
+    if num_flags > 1:
+        logger.error(".")
+        raise click.BadParameter("Only one image type can be specified.", param_hint="save-images")
+    elif num_flags == 0:
+        image_format = ctx.config.get_value("save-images", "format").lower()
+        jpeg = image_format == "jpeg"
+        webp = image_format == "webp"
+        png = image_format == "png"
+
+    if not any((scale, height, width)):
+        scale = ctx.config.get_value("save-images", "scale")
+        height = ctx.config.get_value("save-images", "height")
+        width = ctx.config.get_value("save-images", "width")
+    scale_method = Interpolation[ctx.config.get_value("save-images", "scale-method").upper()]
+    quality = (
+        (DEFAULT_WEBP_QUALITY if webp else DEFAULT_JPG_QUALITY)
+        if ctx.config.is_default("save-images", "quality")
+        else ctx.config.get_value("save-images", "quality")
     )
+    compression = ctx.config.get_value("save-images", "compression", compression)
+    image_extension = "jpg" if jpeg else "png" if png else "webp"
+    valid_params = get_cv2_imwrite_params()
+    if image_extension not in valid_params or valid_params[image_extension] is None:
+        error_strs = [
+            "Image encoder type `%s` not supported." % image_extension.upper(),
+            "The specified encoder type could not be found in the current OpenCV module.",
+            "To enable this output format, please update the installed version of OpenCV.",
+            "If you build OpenCV, ensure the the proper dependencies are enabled. ",
+        ]
+        logger.debug("\n".join(error_strs))
+        raise click.BadParameter("\n".join(error_strs), param_hint="save-images")
+    output = ctx.config.get_value("save-images", "output", output)
+
+    save_images_args = {
+        "encoder_param": compression if png else quality,
+        "frame_margin": ctx.config.get_value("save-images", "frame-margin", frame_margin),
+        "height": height,
+        "image_extension": image_extension,
+        "image_name_template": ctx.config.get_value("save-images", "filename", filename),
+        "interpolation": scale_method,
+        "num_images": ctx.config.get_value("save-images", "num-images", num_images),
+        "output_dir": output,
+        "scale": scale,
+        "show_progress": ctx.quiet_mode,
+        "width": width,
+    }
+    ctx.add_command(cli_commands.save_images, save_images_args)
+
+    # Record that we added a save-images command to the pipeline so we can allow export-html
+    # to run afterwards (it is dependent on the output).
+    ctx.save_images = True
 
 
 # ----------------------------------------------------------------------
