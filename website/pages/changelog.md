@@ -589,4 +589,5 @@ Development
 ## PySceneDetect 0.6.5 (TBD)
 
  - [bugfix] Fix new detectors not working with `default-detector` config option
- - [bugfix] Fix SyntaxWarning due to incorrect escaping [#400](https://github.com/Breakthrough/PySceneDetect/issues/400)
+ - [bugfix] Fix `SyntaxWarning` due to incorrect escaping [#400](https://github.com/Breakthrough/PySceneDetect/issues/400)
+ - [bugfix] Fix `ContentDetector` crash when using callbacks [#416](https://github.com/Breakthrough/PySceneDetect/issues/416)

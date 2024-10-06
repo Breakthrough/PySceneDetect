@@ -172,7 +172,12 @@ class FlashFilter:
         self._last_above = None  # Last frame above threshold.
         self._merge_enabled = False  # Used to disable merging until at least one cut was found.
         self._merge_triggered = False  # True when the merge filter is active.
-        self._merge_start = None  # Frame number where we started the merge filte.
+        self._merge_start = None  # Frame number where we started the merge filter.
+
+    @property
+    def max_behind(self) -> int:
+        """Maximum number of frames a filtered cut can be behind the current frame."""
+        return 0 if self._mode == FlashFilter.Mode.SUPPRESS else self._filter_length
 
     def filter(self, frame_num: int, above_threshold: bool) -> ty.List[int]:
         if not self._filter_length > 0:
