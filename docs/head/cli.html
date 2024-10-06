@@ -683,9 +683,9 @@
 <section id="time">
 <span id="command-time"></span><h2><code class="docutils literal notranslate"><span class="pre">time</span></code><a class="headerlink" href="#time" title="Permalink to this heading">¶</a></h2>
 <p>Set start/end/duration of input video.</p>
-<p>Values can be specified as frames (NNNN), seconds (NNNN.NNs), or timecode (HH:MM:SS.nnn). For example, to process only the first minute of a video:</p>
+<p>Values can be specified as frames (NNNN), seconds (NNNN.NNs), or timecode (HH:MM:SS.nnn or MM:SS.nnn). For example, to process only the first minute of a video:</p>
 <blockquote>
-<div><p><code class="docutils literal notranslate"><span class="pre">scenedetect</span> <span class="pre">-i</span> <span class="pre">video.mp4</span> <span class="pre">time</span> <span class="pre">--end</span> <span class="pre">00:01:00</span></code></p>
+<div><p><code class="docutils literal notranslate"><span class="pre">scenedetect</span> <span class="pre">-i</span> <span class="pre">video.mp4</span> <span class="pre">time</span> <span class="pre">--end</span> <span class="pre">1:00</span></code></p>
 <p><code class="docutils literal notranslate"><span class="pre">scenedetect</span> <span class="pre">-i</span> <span class="pre">video.mp4</span> <span class="pre">time</span> <span class="pre">--duration</span> <span class="pre">60s</span></code></p>
 </div></blockquote>
 <p>Note that –end and –duration are mutually exclusive (i.e. only one of the two can be set). Lastly, the following is an example using absolute frame numbers to process frames 0 through 1000:</p>

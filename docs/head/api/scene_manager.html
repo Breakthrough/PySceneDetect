@@ -334,7 +334,7 @@ If <cite>cut_list</cite> is empty, the resulting scene will span from <cite>star
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>cut_list</strong> (<em>Iterable</em><em>[</em><a class="reference internal" href="frame_timecode.html#scenedetect.frame_timecode.FrameTimecode" title="scenedetect.frame_timecode.FrameTimecode"><em>FrameTimecode</em></a><em>]</em>) – List of FrameTimecode objects where scene cuts/breaks occur.</p></li>
+<li><p><strong>cut_list</strong> (<em>List</em><em>[</em><a class="reference internal" href="frame_timecode.html#scenedetect.frame_timecode.FrameTimecode" title="scenedetect.frame_timecode.FrameTimecode"><em>FrameTimecode</em></a><em>]</em>) – List of FrameTimecode objects where scene cuts/breaks occur.</p></li>
 <li><p><strong>base_timecode</strong> (<a class="reference internal" href="frame_timecode.html#scenedetect.frame_timecode.FrameTimecode" title="scenedetect.frame_timecode.FrameTimecode"><em>FrameTimecode</em></a><em> | </em><em>None</em>) – The base_timecode of which all FrameTimecodes in the cut_list are based on.</p></li>
 <li><p><strong>num_frames</strong> – The number of frames, or FrameTimecode representing duration, of the video that
 was processed (used to generate last scene’s end time).</p></li>
@@ -424,10 +424,10 @@ the paths to the newly saved/created images.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>output_csv_file</strong> (<em>TextIO</em>) – Handle to open file in write mode.</p></li>
-<li><p><strong>scene_list</strong> (<em>Iterable</em><em>[</em><em>Tuple</em><em>[</em><a class="reference internal" href="frame_timecode.html#scenedetect.frame_timecode.FrameTimecode" title="scenedetect.frame_timecode.FrameTimecode"><em>FrameTimecode</em></a><em>, </em><a class="reference internal" href="frame_timecode.html#scenedetect.frame_timecode.FrameTimecode" title="scenedetect.frame_timecode.FrameTimecode"><em>FrameTimecode</em></a><em>]</em><em>]</em>) – List of pairs of FrameTimecodes denoting each scene’s start/end FrameTimecode.</p></li>
+<li><p><strong>scene_list</strong> (<em>List</em><em>[</em><em>Tuple</em><em>[</em><a class="reference internal" href="frame_timecode.html#scenedetect.frame_timecode.FrameTimecode" title="scenedetect.frame_timecode.FrameTimecode"><em>FrameTimecode</em></a><em>, </em><a class="reference internal" href="frame_timecode.html#scenedetect.frame_timecode.FrameTimecode" title="scenedetect.frame_timecode.FrameTimecode"><em>FrameTimecode</em></a><em>]</em><em>]</em>) – List of pairs of FrameTimecodes denoting each scene’s start/end FrameTimecode.</p></li>
 <li><p><strong>include_cut_list</strong> (<em>bool</em>) – Bool indicating if the first row should include the timecodes where
 each scene starts. Should be set to False if RFC 4180 compliant CSV output is required.</p></li>
-<li><p><strong>cut_list</strong> (<em>Iterable</em><em>[</em><a class="reference internal" href="frame_timecode.html#scenedetect.frame_timecode.FrameTimecode" title="scenedetect.frame_timecode.FrameTimecode"><em>FrameTimecode</em></a><em>] </em><em>| </em><em>None</em>) – Optional list of FrameTimecode objects denoting the cut list (i.e. the frames
+<li><p><strong>cut_list</strong> (<em>List</em><em>[</em><a class="reference internal" href="frame_timecode.html#scenedetect.frame_timecode.FrameTimecode" title="scenedetect.frame_timecode.FrameTimecode"><em>FrameTimecode</em></a><em>] </em><em>| </em><em>None</em>) – Optional list of FrameTimecode objects denoting the cut list (i.e. the frames
 in the video that need to be split to generate individual scenes). If not specified,
 the cut list is generated using the start times of each scene following the first one.</p></li>
 </ul>
@@ -445,20 +445,27 @@ the cut list is generated using the start times of each scene following the firs
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>output_html_filename</strong> – filename of output html file</p></li>
-<li><p><strong>scene_list</strong> – List of pairs of FrameTimecodes denoting each scene’s start/end FrameTimecode.</p></li>
-<li><p><strong>cut_list</strong> – Optional list of FrameTimecode objects denoting the cut list (i.e. the frames
+<li><p><strong>output_html_filename</strong> (<em>str</em>) – filename of output html file</p></li>
+<li><p><strong>scene_list</strong> (<em>List</em><em>[</em><em>Tuple</em><em>[</em><a class="reference internal" href="frame_timecode.html#scenedetect.frame_timecode.FrameTimecode" title="scenedetect.frame_timecode.FrameTimecode"><em>FrameTimecode</em></a><em>, </em><a class="reference internal" href="frame_timecode.html#scenedetect.frame_timecode.FrameTimecode" title="scenedetect.frame_timecode.FrameTimecode"><em>FrameTimecode</em></a><em>]</em><em>]</em>) – List of pairs of FrameTimecodes denoting each scene’s start/end FrameTimecode.</p></li>
+<li><p><strong>cut_list</strong> (<em>List</em><em>[</em><a class="reference internal" href="frame_timecode.html#scenedetect.frame_timecode.FrameTimecode" title="scenedetect.frame_timecode.FrameTimecode"><em>FrameTimecode</em></a><em>] </em><em>| </em><em>None</em>) – Optional list of FrameTimecode objects denoting the cut list (i.e. the frames
 in the video that need to be split to generate individual scenes). If not passed,
 the start times of each scene (besides the 0th scene) is used instead.</p></li>
-<li><p><strong>css</strong> – String containing all the css information for the resulting html page.</p></li>
-<li><p><strong>css_class</strong> – String containing the named css class</p></li>
-<li><p><strong>image_filenames</strong> – dict where key i contains a list with n elements (filenames of
+<li><p><strong>css</strong> (<em>str</em>) – String containing all the css information for the resulting html page.</p></li>
+<li><p><strong>css_class</strong> (<em>str</em>) – String containing the named css class</p></li>
+<li><p><strong>image_filenames</strong> (<em>Dict</em><em>[</em><em>int</em><em>, </em><em>List</em><em>[</em><em>str</em><em>]</em><em>] </em><em>| </em><em>None</em>) – dict where key i contains a list with n elements (filenames of
 the n saved images from that scene)</p></li>
-<li><p><strong>image_width</strong> – Optional desired width of images in table in pixels</p></li>
-<li><p><strong>image_height</strong> – Optional desired height of images in table in pixels</p></li>
+<li><p><strong>image_width</strong> (<em>int</em><em> | </em><em>None</em>) – Optional desired width of images in table in pixels</p></li>
+<li><p><strong>image_height</strong> (<em>int</em><em> | </em><em>None</em>) – Optional desired height of images in table in pixels</p></li>
 </ul>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="scenedetect.scene_manager.CutList">
+<span class="sig-prename descclassname"><span class="pre">scenedetect.scene_manager.</span></span><span class="sig-name descname"><span class="pre">CutList</span></span><a class="headerlink" href="#scenedetect.scene_manager.CutList" title="Permalink to this definition">¶</a></dt>
+<dd><p>Type hint for a list of cuts, where each timecode represents the first frame of a new shot.</p>
+<p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<a class="reference internal" href="frame_timecode.html#scenedetect.frame_timecode.FrameTimecode" title="scenedetect.frame_timecode.FrameTimecode"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrameTimecode</span></code></a>]</p>
 </dd></dl>
 
 <dl class="py data">
@@ -483,6 +490,13 @@ the n saved images from that scene)</p></li>
 <dt class="sig sig-object py" id="scenedetect.scene_manager.PROGRESS_BAR_DESCRIPTION">
 <span class="sig-prename descclassname"><span class="pre">scenedetect.scene_manager.</span></span><span class="sig-name descname"><span class="pre">PROGRESS_BAR_DESCRIPTION</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'</span>&#160; <span class="pre">Detected:</span> <span class="pre">%d</span> <span class="pre">|</span> <span class="pre">Progress'</span></em><a class="headerlink" href="#scenedetect.scene_manager.PROGRESS_BAR_DESCRIPTION" title="Permalink to this definition">¶</a></dt>
 <dd><p>Template to use for progress bar.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="scenedetect.scene_manager.SceneList">
+<span class="sig-prename descclassname"><span class="pre">scenedetect.scene_manager.</span></span><span class="sig-name descname"><span class="pre">SceneList</span></span><a class="headerlink" href="#scenedetect.scene_manager.SceneList" title="Permalink to this definition">¶</a></dt>
+<dd><p>Type hint for a list of scenes in the form (start time, end time).</p>
+<p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Tuple</span></code>[<a class="reference internal" href="frame_timecode.html#scenedetect.frame_timecode.FrameTimecode" title="scenedetect.frame_timecode.FrameTimecode"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrameTimecode</span></code></a>, <a class="reference internal" href="frame_timecode.html#scenedetect.frame_timecode.FrameTimecode" title="scenedetect.frame_timecode.FrameTimecode"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrameTimecode</span></code></a>]]</p>
 </dd></dl>
 
 </section>
@@ -558,10 +572,12 @@ the n saved images from that scene)</p></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.scene_manager.save_images"><code class="docutils literal notranslate"><span class="pre">save_images()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.scene_manager.write_scene_list"><code class="docutils literal notranslate"><span class="pre">write_scene_list()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.scene_manager.write_scene_list_html"><code class="docutils literal notranslate"><span class="pre">write_scene_list_html()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scenedetect.scene_manager.CutList"><code class="docutils literal notranslate"><span class="pre">CutList</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.scene_manager.DEFAULT_MIN_WIDTH"><code class="docutils literal notranslate"><span class="pre">DEFAULT_MIN_WIDTH</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.scene_manager.MAX_FRAME_QUEUE_LENGTH"><code class="docutils literal notranslate"><span class="pre">MAX_FRAME_QUEUE_LENGTH</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.scene_manager.MAX_FRAME_SIZE_ERRORS"><code class="docutils literal notranslate"><span class="pre">MAX_FRAME_SIZE_ERRORS</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.scene_manager.PROGRESS_BAR_DESCRIPTION"><code class="docutils literal notranslate"><span class="pre">PROGRESS_BAR_DESCRIPTION</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scenedetect.scene_manager.SceneList"><code class="docutils literal notranslate"><span class="pre">SceneList</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="video_splitter.html">Video Splitting</a></li>
