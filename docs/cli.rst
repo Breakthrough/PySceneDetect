@@ -692,9 +692,9 @@ Options
 
 Set start/end/duration of input video.
 
-Values can be specified as frames (NNNN), seconds (NNNN.NNs), or timecode (HH:MM:SS.nnn). For example, to process only the first minute of a video:
+Values can be specified as frames (NNNN), seconds (NNNN.NNs), or timecode (HH:MM:SS.nnn or MM:SS.nnn). For example, to process only the first minute of a video:
 
-    ``scenedetect -i video.mp4 time --end 00:01:00``
+    ``scenedetect -i video.mp4 time --end 1:00``
 
     ``scenedetect -i video.mp4 time --duration 60s``
 
