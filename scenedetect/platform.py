@@ -11,7 +11,7 @@
 #
 """``scenedetect.platform`` Module
 
-This moduke contains all platform/library specific compatibility fixes, as well as some utility
+This module contains all platform/library specific compatibility fixes, as well as some utility
 functions to handle logging and invoking external commands.
 """
 
