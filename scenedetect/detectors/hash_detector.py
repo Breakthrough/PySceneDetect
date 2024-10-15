@@ -57,7 +57,8 @@ class HashDetector(SceneDetector):
         size: Size of square of low frequency data to use for the DCT
         lowpass:  How much high frequency information to filter from the DCT. A value of 2 means
             keep lower 1/2 of the frequency data, 4 means only keep 1/4, etc...
-        min_scene_len: Minimum length of any given scene, in frames (int) or FrameTimecode
+        min_scene_len: Once a cut is detected, this many frames must pass before a new one can
+                be added to the scene list. Can be an int or FrameTimecode type.
     """
 
     def __init__(

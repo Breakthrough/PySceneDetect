@@ -50,7 +50,8 @@ class AdaptiveDetector(ContentDetector):
         Arguments:
             adaptive_threshold: Threshold (float) that score ratio must exceed to trigger a
                 new scene (see frame metric adaptive_ratio in stats file).
-            min_scene_len: Minimum length of any scene.
+            min_scene_len: Once a cut is detected, this many frames must pass before a new one can
+                be added to the scene list. Can be an int or FrameTimecode type.
             window_width: Size of window (number of frames) before and after each frame to
                 average together in order to detect deviations from the mean. Must be at least 1.
             min_content_val: Minimum threshold (float) that the content_val must exceed in order to

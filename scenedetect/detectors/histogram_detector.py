@@ -38,7 +38,8 @@ class HistogramDetector(SceneDetector):
                 YUV, and normalized based on the number of bins. Higher dicfferences imply greater
                 change in content, so larger threshold values are less sensitive to cuts.
             bins: Number of bins to use for the histogram.
-            min_scene_len:  Minimum length of any scene.
+            min_scene_len:   Once a cut is detected, this many frames must pass before a new one can
+                be added to the scene list. Can be an int or FrameTimecode type.
         """
         super().__init__()
         # Internally, threshold represents the correlation between two histograms and has values
