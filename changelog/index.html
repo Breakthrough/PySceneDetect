@@ -74,8 +74,6 @@
     </li>
     <li class="toctree-l4"><a class="reference internal" href="#changelog">Changelog</a>
     </li>
-    <li class="toctree-l4"><a class="reference internal" href="#0641-tbd">0.6.4.1 (TBD)</a>
-    </li>
         </ul>
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#063-march-9-2024">0.6.3 (March 9, 2024)</a>
@@ -291,11 +289,6 @@
 <li>[bugfix] Fix scene lengths being smaller than <code>min-scene-len</code> when using <code>detect-adaptive</code> / <code>AdaptiveDetector</code> with large values of <code>--frame-window</code></li>
 <li>[bugfix] Fix crash when decoded frames have incorrect resolution and log error instead <a href="https://github.com/Breakthrough/PySceneDetect/issues/319">#319</a></li>
 <li>[bugfix] Update default ffmpeg stream mapping from <code>-map 0</code> to <code>-map 0:v:0 -map 0:a? -map 0:s?</code> <a href="https://github.com/Breakthrough/PySceneDetect/issues/392">#392</a></li>
-</ul>
-<h4 id="0641-tbd">0.6.4.1 (TBD)</h4>
-<ul>
-<li>[bugfix] Fix <code>default-detector</code> config option not working with new detectors</li>
-<li>[bugfix] Fix SyntaxWarning due to incorrect string escaping in command-line (#400)</li>
 </ul>
 <h3 id="063-march-9-2024">0.6.3 (March 9, 2024)</h3>
 <h4 id="release-notes_1">Release Notes</h4>
@@ -825,7 +818,9 @@
 <ul>
 <li>[bugfix] Fix new detectors not working with <code>default-detector</code> config option</li>
 <li>[bugfix] Fix <code>SyntaxWarning</code> due to incorrect escaping <a href="https://github.com/Breakthrough/PySceneDetect/issues/400">#400</a></li>
-<li>[bugfix] Fix <code>ContentDetector</code> crash when using callbacks <a href="https://github.com/Breakthrough/PySceneDetect/issues/416">#416</a></li>
+<li>[bugfix] Fix <code>ContentDetector</code> crash when using callbacks <a href="https://github.com/Breakthrough/PySceneDetect/issues/416">#416</a> <a href="https://github.com/Breakthrough/PySceneDetect/issues/420">#420</a></li>
+<li>[general] Timecodes of the form <code>MM:SS[.nnn]</code> are now processed correctly <a href="https://github.com/Breakthrough/PySceneDetect/issues/443">#443</a></li>
+<li>[api] The <code>save_to_csv</code> function now works correctly with paths from the <code>pathlib</code> module</li>
 </ul>
               
             </div>
