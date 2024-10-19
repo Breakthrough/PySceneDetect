@@ -1,8 +1,9 @@
 # PySceneDetect Requirements for Windows Build
-av==10.0
+av==13.1.0
 click>=8.0
+opencv-python-headless==4.10.0.84
+
 numpy
-opencv-python-headless==4.10.0.82
 platformdirs
 pyinstaller
 pytest
