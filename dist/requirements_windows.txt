@@ -3,6 +3,8 @@ av==13.1.0
 click>=8.0
 opencv-python-headless==4.10.0.84
 
+imageio-ffmpeg
+moviepy
 numpy
 platformdirs
 pyinstaller
