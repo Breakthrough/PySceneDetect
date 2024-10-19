@@ -17,6 +17,7 @@ current command-line context, as well as the processing result (scenes and cuts)
 
 import logging
 import typing as ty
+import webbrowser
 from string import Template
 
 from scenedetect._cli.context import CliContext
@@ -43,6 +44,7 @@ def export_html(
     image_width: int,
     image_height: int,
     html_name_format: str,
+    show: bool,
 ):
     """Handles the `export-html` command."""
     (image_filenames, output_dir) = (
@@ -62,6 +64,8 @@ def export_html(
         image_width=image_width,
         image_height=image_height,
     )
+    if show:
+        webbrowser.open(html_path)
 
 
 def list_scenes(

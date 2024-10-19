@@ -980,6 +980,14 @@ def load_scenes_command(
     help="Height in pixels of the images in the resulting HTML table.%s"
     % (USER_CONFIG.get_help_string("export-html", "image-height", show_default=False)),
 )
+@click.option(
+    "--show",
+    "-s",
+    is_flag=True,
+    flag_value=True,
+    help="Automatically open resulting HTML when processing is complete.%s"
+    % (USER_CONFIG.get_help_string("export-html", "show")),
+)
 @click.pass_context
 def export_html_command(
     ctx: click.Context,
@@ -987,6 +995,7 @@ def export_html_command(
     no_images: bool,
     image_width: ty.Optional[int],
     image_height: ty.Optional[int],
+    show: bool,
 ):
     """Export scene list to HTML file. Requires save-images unless --no-images is specified."""
     ctx = ctx.obj
@@ -1001,6 +1010,7 @@ def export_html_command(
         "html_name_format": ctx.config.get_value("export-html", "filename", filename),
         "image_width": ctx.config.get_value("export-html", "image-width", image_width),
         "image_height": ctx.config.get_value("export-html", "image-height", image_height),
+        "show": ctx.config.get_value("export-html", "show", show),
     }
     ctx.add_command(cli_commands.export_html, export_html_args)
 
