@@ -113,7 +113,7 @@ class ContentDetector(SceneDetector):
         Arguments:
             threshold: Threshold the average change in pixel intensity must exceed to trigger a cut.
             min_scene_len: Once a cut is detected, this many frames must pass before a new one can
-                be added to the scene list.
+                be added to the scene list. Can be an int or FrameTimecode type.
             weights: Weight to place on each component when calculating frame score
                 (`content_val` in a statsfile, the value `threshold` is compared against).
             luma_only: If True, only considers changes in the luminance channel of the video.

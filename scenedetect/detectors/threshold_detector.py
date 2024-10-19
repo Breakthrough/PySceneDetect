@@ -82,8 +82,8 @@ class ThresholdDetector(SceneDetector):
         Arguments:
             threshold:  8-bit intensity value that each pixel value (R, G, and B)
                 must be <= to in order to trigger a fade in/out.
-            min_scene_len:  FrameTimecode object or integer greater than 0 of the
-                minimum length, in frames, of a scene (or subsequent scene cut).
+            min_scene_len:   Once a cut is detected, this many frames must pass before a new one can
+                be added to the scene list. Can be an int or FrameTimecode type.
             fade_bias:  Float between -1.0 and +1.0 representing the percentage of
                 timecode skew for the start of a scene (-1.0 causing a cut at the
                 fade-to-black, 0.0 in the middle, and +1.0 causing the cut to be
