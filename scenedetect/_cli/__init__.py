@@ -959,9 +959,10 @@ def load_scenes_command(
 )
 @click.option(
     "--no-images",
+    "-n",
     is_flag=True,
     flag_value=True,
-    help="Export the scene list including or excluding the saved images.%s"
+    help="Do not include images with the result.%s"
     % (USER_CONFIG.get_help_string("export-html", "no-images")),
 )
 @click.option(
@@ -985,6 +986,7 @@ def load_scenes_command(
     "-s",
     is_flag=True,
     flag_value=True,
+    default=None,
     help="Automatically open resulting HTML when processing is complete.%s"
     % (USER_CONFIG.get_help_string("export-html", "show")),
 )
@@ -997,19 +999,21 @@ def export_html_command(
     image_height: ty.Optional[int],
     show: bool,
 ):
-    """Export scene list to HTML file. Requires save-images unless --no-images is specified."""
+    """Export scene list to HTML file.
+
+    To customize image generation, specify the `save-images` command before `export-html`. This command always uses the result of the preceeding `save-images` command, or runs it with the default config values unless `--no-images` is set.
+    """
     ctx = ctx.obj
     assert isinstance(ctx, CliContext)
-
-    no_images = no_images or ctx.config.get_value("export-html", "no-images")
-    if not ctx.save_images and not no_images:
-        raise click.BadArgumentUsage(
-            "export-html requires that save-images precedes it or --no-images is specified."
-        )
+    include_images = not ctx.config.get_value("export-html", "no-images", no_images)
+    # Make sure a save-images command is in the pipeline for us to use the results from.
+    if include_images and not ctx.save_images:
+        save_images_command.callback()
     export_html_args = {
         "html_name_format": ctx.config.get_value("export-html", "filename", filename),
         "image_width": ctx.config.get_value("export-html", "image-width", image_width),
         "image_height": ctx.config.get_value("export-html", "image-height", image_height),
+        "include_images": include_images,
         "show": ctx.config.get_value("export-html", "show", show),
     }
     ctx.add_command(cli_commands.export_html, export_html_args)
@@ -1366,18 +1370,18 @@ def split_video_command(
 @click.pass_context
 def save_images_command(
     ctx: click.Context,
-    output: ty.Optional[ty.AnyStr],
-    filename: ty.Optional[ty.AnyStr],
-    num_images: ty.Optional[int],
-    jpeg: bool,
-    webp: bool,
-    quality: ty.Optional[int],
-    png: bool,
-    compression: ty.Optional[int],
-    frame_margin: ty.Optional[int],
-    scale: ty.Optional[float],
-    height: ty.Optional[int],
-    width: ty.Optional[int],
+    output: ty.Optional[ty.AnyStr] = None,
+    filename: ty.Optional[ty.AnyStr] = None,
+    num_images: ty.Optional[int] = None,
+    jpeg: bool = False,
+    webp: bool = False,
+    quality: ty.Optional[int] = None,
+    png: bool = False,
+    compression: ty.Optional[int] = None,
+    frame_margin: ty.Optional[int] = None,
+    scale: ty.Optional[float] = None,
+    height: ty.Optional[int] = None,
+    width: ty.Optional[int] = None,
 ):
     """Create images for each detected scene.
 
