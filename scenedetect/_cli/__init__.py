@@ -1125,7 +1125,6 @@ def list_scenes_command(
         "quiet": ctx.config.get_value("list-scenes", "quiet", quiet) or ctx.quiet_mode,
         "row_separator": ctx.config.get_value("list-scenes", "row-separator"),
     }
-    # TODO(#423): Need to validate that col_separator is a 1-character string after decoding.
     ctx.add_command(cli_commands.list_scenes, list_scenes_args)
 
 

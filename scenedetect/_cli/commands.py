@@ -127,8 +127,8 @@ def list_scenes(
                 scene_list=scenes,
                 include_cut_list=not skip_cuts,
                 cut_list=cuts,
-                col_separator=col_separator.encode("utf-8").decode("unicode_escape"),
-                row_separator=row_separator.encode("utf-8").decode("unicode_escape"),
+                col_separator=col_separator,
+                row_separator=row_separator,
             )
     # Suppress output if requested.
     if quiet:

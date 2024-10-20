@@ -60,6 +60,12 @@ class ValidatedValue(ABC):
         """
         raise NotImplementedError()
 
+    def __repr__(self) -> str:
+        return str(self.value)
+
+    def __str__(self) -> str:
+        return str(self.value)
+
 
 class TimecodeValue(ValidatedValue):
     """Validator for timecode values in seconds (100.0), frames (100), or HH:MM:SS.
@@ -74,12 +80,6 @@ class TimecodeValue(ValidatedValue):
     @property
     def value(self) -> Union[int, float, str]:
         return self._value
-
-    def __repr__(self) -> str:
-        return str(self.value)
-
-    def __str__(self) -> str:
-        return str(self.value)
 
     @staticmethod
     def from_config(config_value: str, default: "TimecodeValue") -> "TimecodeValue":
@@ -121,12 +121,6 @@ class RangeValue(ValidatedValue):
         """Maximum value of the range."""
         return self._max_val
 
-    def __repr__(self) -> str:
-        return str(self.value)
-
-    def __str__(self) -> str:
-        return str(self.value)
-
     @staticmethod
     def from_config(config_value: str, default: "RangeValue") -> "RangeValue":
         try:
@@ -163,9 +157,6 @@ class ScoreWeightsValue(ValidatedValue):
     def value(self) -> Tuple[float, float, float, float]:
         return self._value
 
-    def __repr__(self) -> str:
-        return str(self.value)
-
     def __str__(self) -> str:
         return "%.3f, %.3f, %.3f, %.3f" % self.value
 
@@ -199,9 +190,6 @@ class KernelSizeValue(ValidatedValue):
     def value(self) -> int:
         return self._value
 
-    def __repr__(self) -> str:
-        return str(self.value)
-
     def __str__(self) -> str:
         if self.value is None:
             return "auto"
@@ -215,6 +203,42 @@ class KernelSizeValue(ValidatedValue):
             raise OptionParseFailure(
                 "Value must be an odd integer greater than 1, or set to -1 for auto kernel size."
             ) from ex
+
+
+class EscapedString(ValidatedValue):
+    """Strings that can contain escape sequences, e.g. the literal \n."""
+
+    def __init__(self, value: str, length_limit: int = 0):
+        self._value = value.encode("utf-8").decode("unicode_escape")
+        if length_limit and len(self._value) > length_limit:
+            raise OptionParseFailure(f"Value must be no longer than {length_limit} characters.")
+
+    @property
+    def value(self) -> str:
+        """Get the value after validation."""
+        return self._value
+
+    @staticmethod
+    def from_config(
+        config_value: str, default: "EscapedString", length_limit: int = 0
+    ) -> "EscapedString":
+        try:
+            return EscapedString(config_value, length_limit)
+        except (UnicodeDecodeError, UnicodeEncodeError) as ex:
+            raise OptionParseFailure(
+                "Value must be valid UTF-8 string with escape characters."
+            ) from ex
+
+
+class EscapedChar(EscapedString):
+    """Strings that can contain escape sequences but can be a maximum of 1 character in length."""
+
+    def __init__(self, value: str):
+        super().__init__(value, length_limit=1)
+
+    @staticmethod
+    def from_config(config_value: str, default: "EscapedString") -> "EscapedChar":
+        return EscapedString.from_config(config_value, default, length_limit=1)
 
 
 class TimecodeFormat(Enum):
@@ -303,13 +327,13 @@ CONFIG_MAP: ConfigDict = {
         "show": False,
     },
     "list-scenes": {
-        "col-separator": ",",
         "cut-format": TimecodeFormat.TIMECODE,
+        "col-separator": EscapedChar(","),
         "display-cuts": True,
         "display-scenes": True,
         "filename": "$VIDEO_NAME-Scenes.csv",
         "output": None,
-        "row-separator": "\n",
+        "row-separator": EscapedString("\n"),
         "no-output-file": False,
         "quiet": False,
         "skip-cuts": False,
