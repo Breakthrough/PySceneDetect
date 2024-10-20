@@ -70,21 +70,19 @@ def save_qp(
     cuts: CutList,
     output_dir: str,
     filename_format: str,
-    disable_shift: bool,
+    shift_start: bool,
 ):
     """Handler for the `save-qp` command."""
     del scenes  # We only use cuts for this handler.
-
     qp_path = get_and_create_path(
         Template(filename_format).safe_substitute(VIDEO_NAME=context.video_stream.name),
         output_dir,
     )
-    # We assume that if a start time was set, the user will encode the video starting from that
-    # point, so we shift all frame numbers such that the QP file always starts from frame 0.
+    start_frame = context.start_time.frame_num if context.start_time else 0
+    offset = start_frame if shift_start else 0
     with open(qp_path, "wt") as qp_file:
-        qp_file.write("0 I -1\n")
+        qp_file.write(f"{0 if shift_start else start_frame} I -1\n")
         # Place another I frame at each detected cut.
-        offset = 0 if context.start_time is None else context.start_time.frame_num
         qp_file.writelines(f"{cut.frame_num - offset} I -1\n" for cut in cuts)
     logger.info(f"QP file written to: {qp_path}")
 

@@ -1467,6 +1467,15 @@ def save_images_command(
     help="Output directory to save QP file to. Overrides global option -o/--output.%s"
     % (USER_CONFIG.get_help_string("save-qp", "output", show_default=False)),
 )
+@click.option(
+    "--disable-shift",
+    "-d",
+    is_flag=True,
+    flag_value=True,
+    default=None,
+    help="Disable shifting frame numbers by start time.%s"
+    % (USER_CONFIG.get_help_string("save-qp", "disable-shift")),
+)
 @click.pass_context
 def save_qp_command(
     ctx: click.Context,
@@ -1483,7 +1492,7 @@ def save_qp_command(
     save_qp_args = {
         "filename_format": ctx.config.get_value("save-qp", "filename", filename),
         "output_dir": ctx.config.get_value("save-qp", "output", output),
-        "disable_shift": ctx.config.get_value("save-qp", "disable_shift", disable_shift),
+        "shift_start": not ctx.config.get_value("save-qp", "disable-shift", disable_shift),
     }
     ctx.add_command(cli_commands.save_qp, save_qp_args)
 

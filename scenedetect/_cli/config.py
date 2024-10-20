@@ -301,10 +301,6 @@ CONFIG_MAP: ConfigDict = {
         "image-width": 0,
         "no-images": False,
     },
-    "save-qp": {
-        "filename": "$VIDEO_NAME.qp",
-        "output": None,
-    },
     "list-scenes": {
         "cut-format": "timecode",
         "display-cuts": True,
@@ -339,6 +335,11 @@ CONFIG_MAP: ConfigDict = {
         "scale": 1.0,
         "scale-method": "linear",
         "width": 0,
+    },
+    "save-qp": {
+        "disable-shift": False,
+        "filename": "$VIDEO_NAME.qp",
+        "output": None,
     },
     "split-video": {
         "args": DEFAULT_FFMPEG_ARGS,

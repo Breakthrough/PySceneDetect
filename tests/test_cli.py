@@ -450,7 +450,7 @@ def test_cli_save_qp(tmp_path: Path):
         assert output_path.read_text() == EXPECTED_QP_CONTENTS[1:]
 
 
-def test_cli_save_qp_start_shift(tmp_path: Path):
+def test_cli_save_qp_start_offset(tmp_path: Path):
     """Test `save-qp` command but using a shifted start time."""
     # The QP file should always start from frame 0, so we expect a similar result to the above, but
     # with the frame numbers shifted by the start frame. Note that on the command-line, the first
@@ -464,6 +464,24 @@ def test_cli_save_qp_start_shift(tmp_path: Path):
     assert (
         invoke_scenedetect(
             "-i {VIDEO} time -s 51 -e 95 {DETECTOR} save-qp",
+            output_dir=tmp_path,
+        )
+        == 0
+    )
+    output_path = tmp_path.joinpath(f"{DEFAULT_VIDEO_NAME}.qp")
+    assert os.path.exists(output_path)
+    assert output_path.read_text() == EXPECTED_QP_CONTENTS[1:]
+
+
+def test_cli_save_qp_no_shift(tmp_path: Path):
+    """Test `save-qp` command with start time shifting disabled."""
+    EXPECTED_QP_CONTENTS = """
+50 I -1
+90 I -1
+"""
+    assert (
+        invoke_scenedetect(
+            "-i {VIDEO} time -s 51 -e 95 {DETECTOR} save-qp --disable-shift",
             output_dir=tmp_path,
         )
         == 0
