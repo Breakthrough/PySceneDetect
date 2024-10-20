@@ -90,9 +90,9 @@ class CliContext:
         self.video_stream: VideoStream = None
         self.load_scenes_input: str = None  # load-scenes -i/--input
         self.load_scenes_column_name: str = None  # load-scenes -c/--start-col-name
-        self.start_time: FrameTimecode = None  # time -s/--start
-        self.end_time: FrameTimecode = None  # time -e/--end
-        self.duration: FrameTimecode = None  # time -d/--duration
+        self.start_time: ty.Optional[FrameTimecode] = None  # time -s/--start
+        self.end_time: ty.Optional[FrameTimecode] = None  # time -e/--end
+        self.duration: ty.Optional[FrameTimecode] = None  # time -d/--duration
         self.frame_skip: int = None
 
         # Options:
