@@ -209,6 +209,7 @@ def _print_command_help(ctx: click.Context, command: click.Command):
     "--drop-short-scenes",
     is_flag=True,
     flag_value=True,
+    default=None,
     help="Drop scenes shorter than -m/--min-scene-len, instead of combining with neighbors.%s"
     % (USER_CONFIG.get_help_string("global", "drop-short-scenes")),
 )
@@ -216,6 +217,7 @@ def _print_command_help(ctx: click.Context, command: click.Command):
     "--merge-last-scene",
     is_flag=True,
     flag_value=True,
+    default=None,
     help="Merge last scene with previous if shorter than -m/--min-scene-len.%s"
     % (USER_CONFIG.get_help_string("global", "merge-last-scene")),
 )
