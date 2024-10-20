@@ -160,8 +160,8 @@ class CliContext:
         downscale: ty.Optional[int],
         frame_skip: int,
         min_scene_len: str,
-        drop_short_scenes: bool,
-        merge_last_scene: bool,
+        drop_short_scenes: ty.Optional[bool],
+        merge_last_scene: ty.Optional[bool],
         backend: ty.Optional[str],
         quiet: bool,
         logfile: ty.Optional[ty.AnyStr],
@@ -245,11 +245,11 @@ class CliContext:
             if min_scene_len is not None
             else self.config.get_value("global", "min-scene-len"),
         )
-        self.drop_short_scenes = drop_short_scenes or self.config.get_value(
-            "global", "drop-short-scenes"
+        self.drop_short_scenes = self.config.get_value(
+            "global", "drop-short-scenes", drop_short_scenes
         )
-        self.merge_last_scene = merge_last_scene or self.config.get_value(
-            "global", "merge-last-scene"
+        self.merge_last_scene = self.config.get_value(
+            "global", "merge-last-scene", merge_last_scene
         )
         self.frame_skip = self.config.get_value("global", "frame-skip", frame_skip)
 

@@ -281,8 +281,8 @@ def scenedetect(
     config: ty.Optional[ty.AnyStr],
     framerate: ty.Optional[float],
     min_scene_len: ty.Optional[str],
-    drop_short_scenes: bool,
-    merge_last_scene: bool,
+    drop_short_scenes: ty.Optional[bool],
+    merge_last_scene: ty.Optional[bool],
     backend: ty.Optional[str],
     downscale: ty.Optional[int],
     frame_skip: ty.Optional[int],
@@ -1028,6 +1028,7 @@ def export_html_command(
     "-n",
     is_flag=True,
     flag_value=True,
+    default=None,
     help="Only print scene list.%s"
     % (USER_CONFIG.get_help_string("list-scenes", "no-output-file")),
 )
@@ -1036,6 +1037,7 @@ def export_html_command(
     "-q",
     is_flag=True,
     flag_value=True,
+    default=None,
     help="Suppress printing scene list.%s" % (USER_CONFIG.get_help_string("list-scenes", "quiet")),
 )
 @click.option(
@@ -1043,6 +1045,7 @@ def export_html_command(
     "-s",
     is_flag=True,
     flag_value=True,
+    default=None,
     help="Skip cutting list as first row in the CSV file. Set for RFC 4180 compliant output.%s"
     % (USER_CONFIG.get_help_string("list-scenes", "skip-cuts")),
 )
@@ -1051,26 +1054,26 @@ def list_scenes_command(
     ctx: click.Context,
     output: ty.Optional[ty.AnyStr],
     filename: ty.Optional[ty.AnyStr],
-    no_output_file: bool,
-    quiet: bool,
-    skip_cuts: bool,
+    no_output_file: ty.Optional[bool],
+    quiet: ty.Optional[bool],
+    skip_cuts: ty.Optional[bool],
 ):
     """Create scene list CSV file (will be named $VIDEO_NAME-Scenes.csv by default)."""
     ctx = ctx.obj
     assert isinstance(ctx, CliContext)
 
-    no_output_file = no_output_file or ctx.config.get_value("list-scenes", "no-output-file")
-    scene_list_dir = ctx.config.get_value("list-scenes", "output", output)
-    scene_list_name_format = ctx.config.get_value("list-scenes", "filename", filename)
+    create_file = not ctx.config.get_value("list-scenes", "no-output-file", no_output_file)
+    output_dir = ctx.config.get_value("list-scenes", "output", output)
+    name_format = ctx.config.get_value("list-scenes", "filename", filename)
     list_scenes_args = {
         "cut_format": TimecodeFormat[ctx.config.get_value("list-scenes", "cut-format").upper()],
         "display_scenes": ctx.config.get_value("list-scenes", "display-scenes"),
         "display_cuts": ctx.config.get_value("list-scenes", "display-cuts"),
-        "scene_list_output": not no_output_file,
-        "scene_list_name_format": scene_list_name_format,
-        "skip_cuts": skip_cuts or ctx.config.get_value("list-scenes", "skip-cuts"),
-        "output_dir": scene_list_dir,
-        "quiet": quiet or ctx.config.get_value("list-scenes", "quiet") or ctx.quiet_mode,
+        "scene_list_output": create_file,
+        "scene_list_name_format": name_format,
+        "skip_cuts": ctx.config.get_value("list-scenes", "skip-cuts", skip_cuts),
+        "output_dir": output_dir,
+        "quiet": ctx.config.get_value("list-scenes", "quiet", quiet) or ctx.quiet_mode,
     }
     ctx.add_command(cli_commands.list_scenes, list_scenes_args)
 
@@ -1098,6 +1101,7 @@ def list_scenes_command(
     "-q",
     is_flag=True,
     flag_value=True,
+    default=False,
     help="Hide output from external video splitting tool.%s"
     % (USER_CONFIG.get_help_string("split-video", "quiet")),
 )
@@ -1189,9 +1193,8 @@ def split_video_command(
         error = "The split-video command is incompatible with image sequences/URLs."
         raise click.BadParameter(error, param_hint="split-video")
 
-    # We only load the config values for these flags/options if none of the other
-    # encoder flags/options were set via the CLI to avoid any conflicting options
-    # (e.g. if the config file sets `high-quality = yes` but `--copy` is specified).
+    # Overwrite flags if no encoder flags/options were set via the CLI to avoid conflicting options
+    # (e.g. `--copy` should override any `high-quality = yes` setting in the config file).
     if not (mkvmerge or copy or high_quality or args or rate_factor or preset):
         mkvmerge = ctx.config.get_value("split-video", "mkvmerge")
         copy = ctx.config.get_value("split-video", "copy")
@@ -1244,7 +1247,7 @@ def split_video_command(
         "name_format": ctx.config.get_value("split-video", "filename", filename),
         "use_mkvmerge": mkvmerge,
         "output_dir": ctx.config.get_value("split-video", "output", output),
-        "show_output": not quiet,
+        "show_output": not ctx.config.get_value("split-video", "quiet", quiet),
         "ffmpeg_args": args,
     }
     ctx.add_command(cli_commands.split_video, split_video_args)
