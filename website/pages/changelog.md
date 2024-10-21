@@ -588,3 +588,6 @@ Development
  - [bugfix] Fix `ContentDetector` crash when using callbacks [#416](https://github.com/Breakthrough/PySceneDetect/issues/416) [#420](https://github.com/Breakthrough/PySceneDetect/issues/420)
  - [general] Timecodes of the form `MM:SS[.nnn]` are now processed correctly [#443](https://github.com/Breakthrough/PySceneDetect/issues/443)
  - [api] The `save_to_csv` function now works correctly with paths from the `pathlib` module
+ - [feature] Add new `--show` flag to `export-html` command to launch browser after processing (#442)
+ - [improvement] The `export-html` command now implicitly invokes `save-images` with default parameters
+     - The output of the `export-html` command will always use the result of the `save-images` command that *precedes* it

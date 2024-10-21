@@ -300,6 +300,7 @@ CONFIG_MAP: ConfigDict = {
         "image-height": 0,
         "image-width": 0,
         "no-images": False,
+        "show": False,
     },
     "list-scenes": {
         "cut-format": "timecode",
