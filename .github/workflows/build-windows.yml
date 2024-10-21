@@ -45,8 +45,8 @@ jobs:
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip build wheel virtualenv setuptools
-          pip install -r dist/requirements_windows.txt --no-binary imageio-ffmpeg
           pip install -r docs/requirements.txt
+          pip install --upgrade -r dist/requirements_windows.txt --no-binary imageio-ffmpeg
 
       - name: Download Resources
         run: |
@@ -69,7 +69,7 @@ jobs:
 
       - name: Build PySceneDetect
         run: |
-          python dist/pre_release.py --ignore-installer
+          python dist/pre_release.py
           pyinstaller dist/scenedetect.spec
 
       - name: Build Documentation

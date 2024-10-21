@@ -1,4 +1,20 @@
-# -*- coding: utf-8 -*-
+#
+#            PySceneDetect: Python-Based Video Scene Detector
+#   -------------------------------------------------------------------
+#     [  Site:    https://scenedetect.com                           ]
+#     [  Docs:    https://scenedetect.com/docs/                     ]
+#     [  Github:  https://github.com/Breakthrough/PySceneDetect/    ]
+#
+# Copyright (C) 2014-2024 Brandon Castellano <http://www.bcastell.com>.
+# PySceneDetect is licensed under the BSD 3-Clause License; see the
+# included LICENSE file, or visit one of the above pages for details.
+#
+
+# Pre-release script to run before invoking `pyinstaller`:
+#
+#     python dist/pre_release.py
+#     pyinstaller dist/scenedetect.spec
+#
 import os
 import sys
 sys.path.append(os.path.abspath("."))
@@ -8,7 +24,7 @@ import scenedetect
 
 VERSION = scenedetect.__version__
 
-run_version_check = ("--ignore-installer" not in sys.argv)
+run_version_check = ("--release" in sys.argv)
 
 if run_version_check:
   installer_aip = ''
