@@ -430,6 +430,67 @@ def test_cli_export_html(tmp_path: Path):
     # TODO: Check for existence of HTML & image files.
 
 
+def test_cli_save_qp(tmp_path: Path):
+    """Test `save-qp` command with and without a custom filename format."""
+    EXPECTED_QP_CONTENTS = """
+0 I -1
+90 I -1
+"""
+    for filename in (None, "custom.txt"):
+        filename_format = f"--filename {filename}" if filename else ""
+        assert (
+            invoke_scenedetect(
+                f"-i {{VIDEO}} time -e 95 {{DETECTOR}} save-qp {filename_format}",
+                output_dir=tmp_path,
+            )
+            == 0
+        )
+        output_path = tmp_path.joinpath(filename if filename else f"{DEFAULT_VIDEO_NAME}.qp")
+        assert os.path.exists(output_path)
+        assert output_path.read_text() == EXPECTED_QP_CONTENTS[1:]
+
+
+def test_cli_save_qp_start_offset(tmp_path: Path):
+    """Test `save-qp` command but using a shifted start time."""
+    # The QP file should always start from frame 0, so we expect a similar result to the above, but
+    # with the frame numbers shifted by the start frame. Note that on the command-line, the first
+    # frame is frame 1, but the first frame in a QP file is indexed by 0.
+    #
+    # Since we are starting at frame 51, we must shift all cuts by 50 frames.
+    EXPECTED_QP_CONTENTS = """
+0 I -1
+40 I -1
+"""
+    assert (
+        invoke_scenedetect(
+            "-i {VIDEO} time -s 51 -e 95 {DETECTOR} save-qp",
+            output_dir=tmp_path,
+        )
+        == 0
+    )
+    output_path = tmp_path.joinpath(f"{DEFAULT_VIDEO_NAME}.qp")
+    assert os.path.exists(output_path)
+    assert output_path.read_text() == EXPECTED_QP_CONTENTS[1:]
+
+
+def test_cli_save_qp_no_shift(tmp_path: Path):
+    """Test `save-qp` command with start time shifting disabled."""
+    EXPECTED_QP_CONTENTS = """
+50 I -1
+90 I -1
+"""
+    assert (
+        invoke_scenedetect(
+            "-i {VIDEO} time -s 51 -e 95 {DETECTOR} save-qp --disable-shift",
+            output_dir=tmp_path,
+        )
+        == 0
+    )
+    output_path = tmp_path.joinpath(f"{DEFAULT_VIDEO_NAME}.qp")
+    assert os.path.exists(output_path)
+    assert output_path.read_text() == EXPECTED_QP_CONTENTS[1:]
+
+
 @pytest.mark.parametrize("backend_type", ALL_BACKENDS)
 def test_cli_backend(backend_type: str):
     """Test setting the `-b`/`--backend` argument."""
