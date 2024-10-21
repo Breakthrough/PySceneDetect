@@ -46,7 +46,7 @@ install:
   - echo * *                          BUILDING WINDOWS EXE                           * *
   - echo * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
   # Build Windows .EXE and create portable .ZIP
-  - python dist/pre_release.py
+  - python dist/pre_release.py --release
   - pyinstaller dist/scenedetect.spec
   - sphinx-build -b singlehtml docs dist/scenedetect/docs
   - mkdir dist\scenedetect\thirdparty
