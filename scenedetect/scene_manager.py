@@ -216,7 +216,9 @@ def write_scene_list(
     scene_list: SceneList,
     include_cut_list: bool = True,
     cut_list: Optional[CutList] = None,
-) -> None:
+    col_separator: str = ",",
+    row_separator: str = "\n",
+):
     """Writes the given list of scenes to an output file handle in CSV format.
 
     Arguments:
@@ -227,8 +229,13 @@ def write_scene_list(
         cut_list: Optional list of FrameTimecode objects denoting the cut list (i.e. the frames
             in the video that need to be split to generate individual scenes). If not specified,
             the cut list is generated using the start times of each scene following the first one.
+        col_separator: Delimiter to use between values. Must be single character.
+        row_separator: Line terminator to use between rows.
+
+    Raises:
+        TypeError: "delimiter" must be a 1-character string
     """
-    csv_writer = csv.writer(output_csv_file, lineterminator="\n")
+    csv_writer = csv.writer(output_csv_file, delimiter=col_separator, lineterminator=row_separator)
     # If required, output the cutting list as the first row (i.e. before the header row).
     if include_cut_list:
         csv_writer.writerow(

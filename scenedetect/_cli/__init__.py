@@ -1069,6 +1069,7 @@ def list_scenes_command(
     name_format = ctx.config.get_value("list-scenes", "filename", filename)
     list_scenes_args = {
         "cut_format": TimecodeFormat[ctx.config.get_value("list-scenes", "cut-format").upper()],
+        "col_separator": ctx.config.get_value("list-scenes", "col-separator"),
         "display_scenes": ctx.config.get_value("list-scenes", "display-scenes"),
         "display_cuts": ctx.config.get_value("list-scenes", "display-cuts"),
         "scene_list_output": create_file,
@@ -1076,6 +1077,7 @@ def list_scenes_command(
         "skip_cuts": ctx.config.get_value("list-scenes", "skip-cuts", skip_cuts),
         "output_dir": output_dir,
         "quiet": ctx.config.get_value("list-scenes", "quiet", quiet) or ctx.quiet_mode,
+        "row_separator": ctx.config.get_value("list-scenes", "row-separator"),
     }
     ctx.add_command(cli_commands.list_scenes, list_scenes_args)
 

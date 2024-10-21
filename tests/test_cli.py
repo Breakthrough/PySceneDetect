@@ -294,15 +294,38 @@ def test_cli_list_scenes(tmp_path: Path):
         )
         == 0
     )
-    # Add statsfile
+    output_path = tmp_path.joinpath(f"{DEFAULT_VIDEO_NAME}-Scenes.csv")
+    assert os.path.exists(output_path)
+    EXPECTED_CSV_OUTPUT = """Timecode List:,00:00:03.754
+Scene Number,Start Frame,Start Timecode,Start Time (seconds),End Frame,End Timecode,End Time (seconds),Length (frames),Length (timecode),Length (seconds)
+1,49,00:00:02.002,2.002,90,00:00:03.754,3.754,42,00:00:01.752,1.752
+2,91,00:00:03.754,3.754,144,00:00:06.006,6.006,54,00:00:02.252,2.252
+"""
+    assert output_path.read_text() == EXPECTED_CSV_OUTPUT
+
+
+def test_cli_list_scenes_skip_cuts(tmp_path: Path):
+    """Test `list-scenes` command with the -s/--skip-cuts option for RFC 4180 compliance."""
+    # Regular invocation
     assert (
         invoke_scenedetect(
-            "-i {VIDEO} -s {STATS} time {TIME} {DETECTOR} list-scenes",
+            "-i {VIDEO} time {TIME} {DETECTOR} list-scenes -s",
             output_dir=tmp_path,
         )
         == 0
     )
-    # Suppress output file
+    output_path = tmp_path.joinpath(f"{DEFAULT_VIDEO_NAME}-Scenes.csv")
+    assert os.path.exists(output_path)
+    EXPECTED_CSV_OUTPUT = """Scene Number,Start Frame,Start Timecode,Start Time (seconds),End Frame,End Timecode,End Time (seconds),Length (frames),Length (timecode),Length (seconds)
+1,49,00:00:02.002,2.002,90,00:00:03.754,3.754,42,00:00:01.752,1.752
+2,91,00:00:03.754,3.754,144,00:00:06.006,6.006,54,00:00:02.252,2.252
+"""
+    assert output_path.read_text() == EXPECTED_CSV_OUTPUT
+
+
+def test_cli_list_scenes_no_output(tmp_path: Path):
+    """Test `list-scenes` command with the -n flag."""
+    output_path = tmp_path.joinpath(f"{DEFAULT_VIDEO_NAME}-Scenes.csv")
     assert (
         invoke_scenedetect(
             "-i {VIDEO} time {TIME} {DETECTOR} list-scenes -n",
@@ -310,8 +333,51 @@ def test_cli_list_scenes(tmp_path: Path):
         )
         == 0
     )
-    # TODO: Check for output files from regular invocation.
-    # TODO: Delete scene list and ensure is not recreated using -n.
+    assert not os.path.exists(output_path)
+
+
+def test_cli_list_scenes_custom_delimiter(tmp_path: Path):
+    """Test `list-scenes` command with custom delimiters set in a config file."""
+    config_path = tmp_path.joinpath("config.cfg")
+    config_path.write_text("""
+[list-scenes]
+col-separator = |
+row-separator = \\t
+""")
+    assert (
+        invoke_scenedetect(
+            f"-i {{VIDEO}} -c {config_path} time {{TIME}} {{DETECTOR}} list-scenes",
+            output_dir=tmp_path,
+        )
+        == 0
+    )
+    output_path = tmp_path.joinpath(f"{DEFAULT_VIDEO_NAME}-Scenes.csv")
+    assert os.path.exists(output_path)
+    EXPECTED_CSV_OUTPUT = """Timecode List:,00:00:03.754
+Scene Number,Start Frame,Start Timecode,Start Time (seconds),End Frame,End Timecode,End Time (seconds),Length (frames),Length (timecode),Length (seconds)
+1,49,00:00:02.002,2.002,90,00:00:03.754,3.754,42,00:00:01.752,1.752
+2,91,00:00:03.754,3.754,144,00:00:06.006,6.006,54,00:00:02.252,2.252
+"""
+    EXPECTED_CSV_OUTPUT = EXPECTED_CSV_OUTPUT.replace(",", "|").replace("\n", "\t")
+    assert output_path.read_text() == EXPECTED_CSV_OUTPUT
+
+
+def test_cli_list_scenes_rejects_multichar_col_separator(tmp_path: Path):
+    """Test `list-scenes` command with custom delimiters set in a config file."""
+    config_path = tmp_path.joinpath("config.cfg")
+    config_path.write_text("""
+[list-scenes]
+col-separator = ||
+""")
+    assert (
+        invoke_scenedetect(
+            f"-i {{VIDEO}} -c {config_path} time {{TIME}} {{DETECTOR}} list-scenes",
+            output_dir=tmp_path,
+        )
+        != 0
+    )
+    output_path = tmp_path.joinpath(f"{DEFAULT_VIDEO_NAME}-Scenes.csv")
+    assert not os.path.exists(output_path)
 
 
 @pytest.mark.skipif(condition=not is_ffmpeg_available(), reason="ffmpeg is not available")

@@ -215,7 +215,7 @@ class CliContext:
                 raise click.Abort()
 
         if self.config.config_dict:
-            logger.debug("Current configuration:\n%s", str(self.config.config_dict))
+            logger.debug("Current configuration:\n%s", str(self.config.config_dict).encode("utf-8"))
 
         logger.debug("Parsing program options.")
         if stats is not None and frame_skip:
