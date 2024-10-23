@@ -603,3 +603,6 @@ Development
  - [improvement] `save_to_csv` now works with paths from `pathlib`
  - [api] The `save_to_csv` function now works correctly with paths from the `pathlib` module
  - [api] Add `col_separator` and `row_separator` args to `write_scene_list` function in `scenedetect.scene_manager`
+ - [feature] Add ability to crop input video before processing [#302](https://github.com/Breakthrough/PySceneDetect/issues/302) [#449](https://github.com/Breakthrough/PySceneDetect/issues/449)
+     - [cli] Add `--crop` option to `scenedetect` command and config file to crop video frames before scene detection
+     - [api] Add `crop` property to `SceneManager` to crop video frames before scene detection

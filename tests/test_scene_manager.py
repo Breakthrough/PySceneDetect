@@ -21,6 +21,8 @@ import os.path
 from pathlib import Path
 from typing import List
 
+import pytest
+
 from scenedetect.backends.opencv import VideoStreamCv2
 from scenedetect.detectors import AdaptiveDetector, ContentDetector
 from scenedetect.frame_timecode import FrameTimecode
@@ -291,3 +293,36 @@ def test_detect_scenes_callback_adaptive(test_video_file):
     scene_list = sm.get_scene_list()
     assert [start for start, end in scene_list] == TEST_VIDEO_START_FRAMES_ACTUAL
     assert fake_callback.scene_list == TEST_VIDEO_START_FRAMES_ACTUAL[1:]
+
+
+def test_detect_scenes_crop(test_video_file):
+    video = VideoStreamCv2(test_video_file)
+    sm = SceneManager()
+    sm.crop = (10, 10, 1900, 1000)
+    sm.add_detector(ContentDetector())
+
+    video_fps = video.frame_rate
+    start_time = FrameTimecode("00:00:05", video_fps)
+    end_time = FrameTimecode("00:00:15", video_fps)
+    video.seek(start_time)
+    sm.auto_downscale = True
+
+    _ = sm.detect_scenes(video=video, end_time=end_time)
+    scene_list = sm.get_scene_list()
+    assert [start for start, _ in scene_list] == TEST_VIDEO_START_FRAMES_ACTUAL
+
+
+def test_crop_invalid():
+    sm = SceneManager()
+    sm.crop = None
+    sm.crop = (0, 0, 0, 0)
+    sm.crop = (1, 1, 0, 0)
+    sm.crop = (0, 0, 1, 1)
+    with pytest.raises(TypeError):
+        sm.crop = 1
+    with pytest.raises(TypeError):
+        sm.crop = (1, 1)
+    with pytest.raises(TypeError):
+        sm.crop = (1, 1, 1)
+    with pytest.raises(ValueError):
+        sm.crop = (1, 1, 1, -1)

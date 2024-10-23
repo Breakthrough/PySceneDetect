@@ -330,7 +330,10 @@ def get_system_version_info() -> str:
     for module_name in third_party_packages:
         try:
             module = importlib.import_module(module_name)
-            out_lines.append(output_template.format(module_name, module.__version__))
+            if hasattr(module, "__version__"):
+                out_lines.append(output_template.format(module_name, module.__version__))
+            else:
+                out_lines.append(output_template.format(module_name, not_found_str))
         except ModuleNotFoundError:
             out_lines.append(output_template.format(module_name, not_found_str))
 

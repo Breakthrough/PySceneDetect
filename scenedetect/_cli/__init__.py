@@ -257,6 +257,14 @@ Global options (e.g. -i/--input, -c/--config) must be specified before any comma
     % (", ".join(AVAILABLE_BACKENDS.keys()), USER_CONFIG.get_help_string("global", "backend")),
 )
 @click.option(
+    "--crop",
+    metavar="X0 Y0 X1 Y1",
+    type=(int, int, int, int),
+    default=None,
+    help="Crop input video. Specified as two points representing top left and bottom right corner of crop region. 0 0 is top-left of the video frame. Bounds are inclusive (e.g. for a 100x100 video, the region covering the whole frame is 0 0 99 99).%s"
+    % (USER_CONFIG.get_help_string("global", "crop", show_default=False)),
+)
+@click.option(
     "--downscale",
     "-d",
     metavar="N",
@@ -312,6 +320,7 @@ def scenedetect(
     drop_short_scenes: ty.Optional[bool],
     merge_last_scene: ty.Optional[bool],
     backend: ty.Optional[str],
+    crop: ty.Optional[ty.Tuple[int, int, int, int]],
     downscale: ty.Optional[int],
     frame_skip: ty.Optional[int],
     verbosity: ty.Optional[str],
@@ -326,12 +335,13 @@ def scenedetect(
         output=output,
         framerate=framerate,
         stats_file=stats,
-        downscale=downscale,
         frame_skip=frame_skip,
         min_scene_len=min_scene_len,
         drop_short_scenes=drop_short_scenes,
         merge_last_scene=merge_last_scene,
         backend=backend,
+        crop=crop,
+        downscale=downscale,
         quiet=quiet,
         logfile=logfile,
         config=config,

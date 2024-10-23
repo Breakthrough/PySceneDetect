@@ -340,6 +340,12 @@ CONFIG_MAP: ConfigDict = {
     },
     "global": {
         "backend": "opencv",
+        #
+        #
+        # FIXME: This should be a tuple of 4 valid ints similar to ScoreWeightsValue.
+        #
+        #
+        "crop": None,
         "default-detector": "detect-adaptive",
         "downscale": 0,
         "downscale-method": Interpolation.LINEAR,
