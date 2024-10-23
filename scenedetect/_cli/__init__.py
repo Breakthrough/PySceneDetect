@@ -34,7 +34,6 @@ from scenedetect._cli.config import (
     CONFIG_MAP,
     DEFAULT_JPG_QUALITY,
     DEFAULT_WEBP_QUALITY,
-    TimecodeFormat,
 )
 from scenedetect._cli.context import USER_CONFIG, CliContext, check_split_video_requirements
 from scenedetect.backends import AVAILABLE_BACKENDS
@@ -46,7 +45,6 @@ from scenedetect.detectors import (
     ThresholdDetector,
 )
 from scenedetect.platform import get_cv2_imwrite_params, get_system_version_info
-from scenedetect.scene_manager import Interpolation
 
 _PROGRAM_VERSION = scenedetect.__version__
 """Used to avoid name conflict with named `scenedetect` command below."""
@@ -1068,7 +1066,7 @@ def list_scenes_command(
     output_dir = ctx.config.get_value("list-scenes", "output", output)
     name_format = ctx.config.get_value("list-scenes", "filename", filename)
     list_scenes_args = {
-        "cut_format": TimecodeFormat[ctx.config.get_value("list-scenes", "cut-format").upper()],
+        "cut_format": ctx.config.get_value("list-scenes", "cut-format"),
         "display_scenes": ctx.config.get_value("list-scenes", "display-scenes"),
         "display_cuts": ctx.config.get_value("list-scenes", "display-cuts"),
         "scene_list_output": create_file,
@@ -1407,7 +1405,7 @@ def save_images_command(
         scale = ctx.config.get_value("save-images", "scale")
         height = ctx.config.get_value("save-images", "height")
         width = ctx.config.get_value("save-images", "width")
-    scale_method = Interpolation[ctx.config.get_value("save-images", "scale-method").upper()]
+    scale_method = ctx.config.get_value("save-images", "scale-method")
     quality = (
         (DEFAULT_WEBP_QUALITY if webp else DEFAULT_JPG_QUALITY)
         if ctx.config.is_default("save-images", "quality")

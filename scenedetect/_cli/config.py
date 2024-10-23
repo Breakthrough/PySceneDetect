@@ -268,7 +268,7 @@ CONFIG_MAP: ConfigDict = {
         "weights": ScoreWeightsValue(ContentDetector.DEFAULT_COMPONENT_WEIGHTS),
     },
     "detect-content": {
-        "filter-mode": "merge",
+        "filter-mode": FlashFilter.Mode.MERGE,
         "kernel-size": KernelSizeValue(-1),
         "luma-only": False,
         "min-scene-len": TimecodeValue(0),
@@ -302,7 +302,7 @@ CONFIG_MAP: ConfigDict = {
         "no-images": False,
     },
     "list-scenes": {
-        "cut-format": "timecode",
+        "cut-format": TimecodeFormat.TIMECODE,
         "display-cuts": True,
         "display-scenes": True,
         "filename": "$VIDEO_NAME-Scenes.csv",
@@ -315,7 +315,7 @@ CONFIG_MAP: ConfigDict = {
         "backend": "opencv",
         "default-detector": "detect-adaptive",
         "downscale": 0,
-        "downscale-method": "linear",
+        "downscale-method": Interpolation.LINEAR,
         "drop-short-scenes": False,
         "frame-skip": 0,
         "merge-last-scene": False,
@@ -333,7 +333,7 @@ CONFIG_MAP: ConfigDict = {
         "output": None,
         "quality": RangeValue(_PLACEHOLDER, min_val=0, max_val=100),
         "scale": 1.0,
-        "scale-method": "linear",
+        "scale-method": Interpolation.LINEAR,
         "width": 0,
     },
     "split-video": {
@@ -442,6 +442,27 @@ def _parse_config(config: ConfigParser) -> Tuple[ConfigDict, List[str]]:
                         value_type = "number"
                         out_map[command][option] = config.getfloat(command, option)
                         continue
+                    elif isinstance(CONFIG_MAP[command][option], Enum):
+                        config_value = (
+                            config.get(command, option).replace("\n", " ").strip().upper()
+                        )
+                        try:
+                            parsed = CONFIG_MAP[command][option].__class__[config_value]
+                            out_map[command][option] = parsed
+                        except TypeError:
+                            errors.append(
+                                "Invalid [%s] value for %s: %s. Must be one of: %s."
+                                % (
+                                    command,
+                                    option,
+                                    config.get(command, option),
+                                    ", ".join(
+                                        str(choice) for choice in CHOICE_MAP[command][option]
+                                    ),
+                                )
+                            )
+                        continue
+
                 except ValueError as _:
                     errors.append(
                         "Invalid [%s] value for %s: %s is not a valid %s."

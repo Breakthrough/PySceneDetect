@@ -286,9 +286,8 @@ class CliContext:
             except ValueError as ex:
                 logger.debug(str(ex))
                 raise click.BadParameter(str(ex), param_hint="downscale factor") from None
-        scene_manager.interpolation = Interpolation[
-            self.config.get_value("global", "downscale-method").upper()
-        ]
+        scene_manager.interpolation = self.config.get_value("global", "downscale-method")
+
         self.scene_manager = scene_manager
 
     #
@@ -328,9 +327,7 @@ class CliContext:
             "luma_only": luma_only or self.config.get_value("detect-content", "luma-only"),
             "min_scene_len": min_scene_len,
             "threshold": self.config.get_value("detect-content", "threshold", threshold),
-            "filter_mode": FlashFilter.Mode[
-                self.config.get_value("detect-content", "filter-mode", filter_mode).upper()
-            ],
+            "filter_mode": self.config.get_value("detect-content", "filter-mode", filter_mode),
         }
 
     def get_detect_adaptive_params(
