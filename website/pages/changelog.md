@@ -584,6 +584,7 @@ Development
 ## PySceneDetect 0.6.5 (TBD)
 
  - [bugfix] Fix new detectors not working with `default-detector` config option
+ - [bugfix] Fix crash when using `save-images` with OpenCV backend [#455](https://github.com/Breakthrough/PySceneDetect/issues/455)
  - [bugfix] Fix `SyntaxWarning` due to incorrect escaping [#400](https://github.com/Breakthrough/PySceneDetect/issues/400)
  - [bugfix] Fix `ContentDetector` crash when using callbacks [#416](https://github.com/Breakthrough/PySceneDetect/issues/416) [#420](https://github.com/Breakthrough/PySceneDetect/issues/420)
  - [general] Timecodes of the form `MM:SS[.nnn]` are now processed correctly [#443](https://github.com/Breakthrough/PySceneDetect/issues/443)
