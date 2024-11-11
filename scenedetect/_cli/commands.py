@@ -17,6 +17,7 @@ current command-line context, as well as the processing result (scenes and cuts)
 
 import logging
 import typing as ty
+import webbrowser
 from string import Template
 
 from scenedetect._cli.context import CliContext
@@ -43,6 +44,8 @@ def export_html(
     image_width: int,
     image_height: int,
     html_name_format: str,
+    include_images: bool,
+    show: bool,
 ):
     """Handles the `export-html` command."""
     (image_filenames, output_dir) = (
@@ -50,6 +53,7 @@ def export_html(
         if context.save_images_result is not None
         else (None, context.output_dir)
     )
+
     html_filename = Template(html_name_format).safe_substitute(VIDEO_NAME=context.video_stream.name)
     if not html_filename.lower().endswith(".html"):
         html_filename += ".html"
@@ -58,10 +62,12 @@ def export_html(
         output_html_filename=html_path,
         scene_list=scenes,
         cut_list=cuts,
-        image_filenames=image_filenames,
+        image_filenames=image_filenames if include_images else None,
         image_width=image_width,
         image_height=image_height,
     )
+    if show:
+        webbrowser.open(html_path)
 
 
 def save_qp(
