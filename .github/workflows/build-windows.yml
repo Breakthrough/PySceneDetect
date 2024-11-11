@@ -27,10 +27,11 @@ jobs:
     runs-on: windows-latest
     strategy:
       matrix:
-        python-version: ["3.9"]
+        python-version: ["3.13"]
 
     env:
       ffmpeg-version: "7.0"
+      IMAGEIO_FFMPEG_EXE: ""
 
     steps:
       - uses: actions/checkout@v4
@@ -44,8 +45,8 @@ jobs:
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip build wheel virtualenv setuptools
-          pip install -r dist/requirements_windows.txt
           pip install -r docs/requirements.txt
+          pip install --upgrade -r dist/requirements_windows.txt --no-binary imageio-ffmpeg
 
       - name: Download Resources
         run: |
@@ -60,13 +61,15 @@ jobs:
           file: 'ffmpeg-${{ env.ffmpeg-version }}-full_build.7z'
 
       - name: Unit Test
+        shell: bash
         run: |
           7z e ffmpeg-${{ env.ffmpeg-version }}-full_build.7z ffmpeg.exe -r
+          echo "IMAGEIO_FFMPEG_EXE=`realpath ffmpeg.exe`" >> "$GITHUB_ENV"
           python -m pytest -vv
 
       - name: Build PySceneDetect
         run: |
-          python dist/pre_release.py --ignore-installer
+          python dist/pre_release.py
           pyinstaller dist/scenedetect.spec
 
       - name: Build Documentation
@@ -117,5 +120,7 @@ jobs:
           ./build/scenedetect -i tests/resources/goldeneye.mp4 -b opencv detect-content time --end 10s
           echo Test PyAV
           ./build/scenedetect -i tests/resources/goldeneye.mp4 -b pyav detect-content time --end 10s
+          echo Test moviepy
+          ./build/scenedetect -i tests/resources/goldeneye.mp4 -b moviepy detect-content time --end 10s
           echo Test split-video + ffmpeg
           ./build/scenedetect -i tests/resources/goldeneye.mp4 detect-content time --end 10s split-video

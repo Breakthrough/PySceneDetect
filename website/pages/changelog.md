@@ -589,3 +589,7 @@ Development
  - [bugfix] Fix `ContentDetector` crash when using callbacks [#416](https://github.com/Breakthrough/PySceneDetect/issues/416) [#420](https://github.com/Breakthrough/PySceneDetect/issues/420)
  - [general] Timecodes of the form `MM:SS[.nnn]` are now processed correctly [#443](https://github.com/Breakthrough/PySceneDetect/issues/443)
  - [api] The `save_to_csv` function now works correctly with paths from the `pathlib` module
+ - [general] Updates to Windows distributions:
+    - The MoviePy backend is now included with Windows distributions
+    - Bundled Python interpreter is now Python 3.13
+    - Updated PyAV 10 -> 13.1.0 and OpenCV 4.10.0.82 -> 4.10.0.84
