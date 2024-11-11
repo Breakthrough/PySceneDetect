@@ -336,6 +336,11 @@ CONFIG_MAP: ConfigDict = {
         "scale-method": Interpolation.LINEAR,
         "width": 0,
     },
+    "save-qp": {
+        "disable-shift": False,
+        "filename": "$VIDEO_NAME.qp",
+        "output": None,
+    },
     "split-video": {
         "args": DEFAULT_FFMPEG_ARGS,
         "copy": False,
