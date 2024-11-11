@@ -34,7 +34,6 @@ from scenedetect._cli.config import (
     CONFIG_MAP,
     DEFAULT_JPG_QUALITY,
     DEFAULT_WEBP_QUALITY,
-    TimecodeFormat,
 )
 from scenedetect._cli.context import USER_CONFIG, CliContext, check_split_video_requirements
 from scenedetect.backends import AVAILABLE_BACKENDS
@@ -46,7 +45,6 @@ from scenedetect.detectors import (
     ThresholdDetector,
 )
 from scenedetect.platform import get_cv2_imwrite_params, get_system_version_info
-from scenedetect.scene_manager import Interpolation
 
 _PROGRAM_VERSION = scenedetect.__version__
 """Used to avoid name conflict with named `scenedetect` command below."""
@@ -209,6 +207,7 @@ def _print_command_help(ctx: click.Context, command: click.Command):
     "--drop-short-scenes",
     is_flag=True,
     flag_value=True,
+    default=None,
     help="Drop scenes shorter than -m/--min-scene-len, instead of combining with neighbors.%s"
     % (USER_CONFIG.get_help_string("global", "drop-short-scenes")),
 )
@@ -216,6 +215,7 @@ def _print_command_help(ctx: click.Context, command: click.Command):
     "--merge-last-scene",
     is_flag=True,
     flag_value=True,
+    default=None,
     help="Merge last scene with previous if shorter than -m/--min-scene-len.%s"
     % (USER_CONFIG.get_help_string("global", "merge-last-scene")),
 )
@@ -281,8 +281,8 @@ def scenedetect(
     config: ty.Optional[ty.AnyStr],
     framerate: ty.Optional[float],
     min_scene_len: ty.Optional[str],
-    drop_short_scenes: bool,
-    merge_last_scene: bool,
+    drop_short_scenes: ty.Optional[bool],
+    merge_last_scene: ty.Optional[bool],
     backend: ty.Optional[str],
     downscale: ty.Optional[int],
     frame_skip: ty.Optional[int],
@@ -346,7 +346,7 @@ def scenedetect(
 )
 @click.pass_context
 def help_command(ctx: click.Context, command_name: str):
-    """Print help for command (`help [command]`)."""
+    """Print full help reference."""
     assert isinstance(ctx.parent.command, click.MultiCommand)
     parent_command = ctx.parent.command
     all_commands = set(parent_command.list_commands(ctx))
@@ -1003,6 +1003,9 @@ def export_html_command(
 
     To customize image generation, specify the `save-images` command before `export-html`. This command always uses the result of the preceeding `save-images` command, or runs it with the default config values unless `--no-images` is set.
     """
+    # TODO: Rename this command to save-html to align with other export commands. This will require
+    # that we allow `export-html` as an alias on the CLI and via the config file for a few versions
+    # as to not break existing workflows.
     ctx = ctx.obj
     assert isinstance(ctx, CliContext)
     include_images = not ctx.config.get_value("export-html", "no-images", no_images)
@@ -1025,7 +1028,7 @@ def export_html_command(
     "-o",
     metavar="DIR",
     type=click.Path(exists=False, dir_okay=True, writable=True, resolve_path=False),
-    help="Output directory to save videos to. Overrides global option -o/--output if set.%s"
+    help="Output directory to save videos to. Overrides global option -o/--output.%s"
     % (USER_CONFIG.get_help_string("list-scenes", "output", show_default=False)),
 )
 @click.option(
@@ -1042,6 +1045,7 @@ def export_html_command(
     "-n",
     is_flag=True,
     flag_value=True,
+    default=None,
     help="Only print scene list.%s"
     % (USER_CONFIG.get_help_string("list-scenes", "no-output-file")),
 )
@@ -1050,6 +1054,7 @@ def export_html_command(
     "-q",
     is_flag=True,
     flag_value=True,
+    default=None,
     help="Suppress printing scene list.%s" % (USER_CONFIG.get_help_string("list-scenes", "quiet")),
 )
 @click.option(
@@ -1057,6 +1062,7 @@ def export_html_command(
     "-s",
     is_flag=True,
     flag_value=True,
+    default=None,
     help="Skip cutting list as first row in the CSV file. Set for RFC 4180 compliant output.%s"
     % (USER_CONFIG.get_help_string("list-scenes", "skip-cuts")),
 )
@@ -1065,26 +1071,26 @@ def list_scenes_command(
     ctx: click.Context,
     output: ty.Optional[ty.AnyStr],
     filename: ty.Optional[ty.AnyStr],
-    no_output_file: bool,
-    quiet: bool,
-    skip_cuts: bool,
+    no_output_file: ty.Optional[bool],
+    quiet: ty.Optional[bool],
+    skip_cuts: ty.Optional[bool],
 ):
     """Create scene list CSV file (will be named $VIDEO_NAME-Scenes.csv by default)."""
     ctx = ctx.obj
     assert isinstance(ctx, CliContext)
 
-    no_output_file = no_output_file or ctx.config.get_value("list-scenes", "no-output-file")
-    scene_list_dir = ctx.config.get_value("list-scenes", "output", output)
-    scene_list_name_format = ctx.config.get_value("list-scenes", "filename", filename)
+    create_file = not ctx.config.get_value("list-scenes", "no-output-file", no_output_file)
+    output_dir = ctx.config.get_value("list-scenes", "output", output)
+    name_format = ctx.config.get_value("list-scenes", "filename", filename)
     list_scenes_args = {
-        "cut_format": TimecodeFormat[ctx.config.get_value("list-scenes", "cut-format").upper()],
+        "cut_format": ctx.config.get_value("list-scenes", "cut-format"),
         "display_scenes": ctx.config.get_value("list-scenes", "display-scenes"),
         "display_cuts": ctx.config.get_value("list-scenes", "display-cuts"),
-        "scene_list_output": not no_output_file,
-        "scene_list_name_format": scene_list_name_format,
-        "skip_cuts": skip_cuts or ctx.config.get_value("list-scenes", "skip-cuts"),
-        "output_dir": scene_list_dir,
-        "quiet": quiet or ctx.config.get_value("list-scenes", "quiet") or ctx.quiet_mode,
+        "scene_list_output": create_file,
+        "scene_list_name_format": name_format,
+        "skip_cuts": ctx.config.get_value("list-scenes", "skip-cuts", skip_cuts),
+        "output_dir": output_dir,
+        "quiet": ctx.config.get_value("list-scenes", "quiet", quiet) or ctx.quiet_mode,
     }
     ctx.add_command(cli_commands.list_scenes, list_scenes_args)
 
@@ -1095,7 +1101,7 @@ def list_scenes_command(
     "-o",
     metavar="DIR",
     type=click.Path(exists=False, dir_okay=True, writable=True, resolve_path=False),
-    help="Output directory to save videos to. Overrides global option -o/--output if set.%s"
+    help="Output directory to save videos to. Overrides global option -o/--output.%s"
     % (USER_CONFIG.get_help_string("split-video", "output", show_default=False)),
 )
 @click.option(
@@ -1112,6 +1118,7 @@ def list_scenes_command(
     "-q",
     is_flag=True,
     flag_value=True,
+    default=False,
     help="Hide output from external video splitting tool.%s"
     % (USER_CONFIG.get_help_string("split-video", "quiet")),
 )
@@ -1203,9 +1210,8 @@ def split_video_command(
         error = "The split-video command is incompatible with image sequences/URLs."
         raise click.BadParameter(error, param_hint="split-video")
 
-    # We only load the config values for these flags/options if none of the other
-    # encoder flags/options were set via the CLI to avoid any conflicting options
-    # (e.g. if the config file sets `high-quality = yes` but `--copy` is specified).
+    # Overwrite flags if no encoder flags/options were set via the CLI to avoid conflicting options
+    # (e.g. `--copy` should override any `high-quality = yes` setting in the config file).
     if not (mkvmerge or copy or high_quality or args or rate_factor or preset):
         mkvmerge = ctx.config.get_value("split-video", "mkvmerge")
         copy = ctx.config.get_value("split-video", "copy")
@@ -1258,7 +1264,7 @@ def split_video_command(
         "name_format": ctx.config.get_value("split-video", "filename", filename),
         "use_mkvmerge": mkvmerge,
         "output_dir": ctx.config.get_value("split-video", "output", output),
-        "show_output": not quiet,
+        "show_output": not ctx.config.get_value("split-video", "quiet", quiet),
         "ffmpeg_args": args,
     }
     ctx.add_command(cli_commands.split_video, split_video_args)
@@ -1270,7 +1276,7 @@ def split_video_command(
     "-o",
     metavar="DIR",
     type=click.Path(exists=False, dir_okay=True, writable=True, resolve_path=False),
-    help="Output directory for images. Overrides global option -o/--output if set.%s"
+    help="Output directory for images. Overrides global option -o/--output.%s"
     % (USER_CONFIG.get_help_string("save-images", "output", show_default=False)),
 )
 @click.option(
@@ -1416,7 +1422,7 @@ def save_images_command(
         scale = ctx.config.get_value("save-images", "scale")
         height = ctx.config.get_value("save-images", "height")
         width = ctx.config.get_value("save-images", "width")
-    scale_method = Interpolation[ctx.config.get_value("save-images", "scale-method").upper()]
+    scale_method = ctx.config.get_value("save-images", "scale-method")
     quality = (
         (DEFAULT_WEBP_QUALITY if webp else DEFAULT_JPG_QUALITY)
         if ctx.config.is_default("save-images", "quality")
@@ -1456,30 +1462,76 @@ def save_images_command(
     ctx.save_images = True
 
 
+@click.command("save-qp", cls=_Command)
+@click.option(
+    "--filename",
+    "-f",
+    metavar="NAME",
+    default=None,
+    type=click.STRING,
+    help="Filename format to use.%s" % (USER_CONFIG.get_help_string("save-qp", "filename")),
+)
+@click.option(
+    "--output",
+    "-o",
+    metavar="DIR",
+    type=click.Path(exists=False, dir_okay=True, writable=True, resolve_path=False),
+    help="Output directory to save QP file to. Overrides global option -o/--output.%s"
+    % (USER_CONFIG.get_help_string("save-qp", "output", show_default=False)),
+)
+@click.option(
+    "--disable-shift",
+    "-d",
+    is_flag=True,
+    flag_value=True,
+    default=None,
+    help="Disable shifting frame numbers by start time.%s"
+    % (USER_CONFIG.get_help_string("save-qp", "disable-shift")),
+)
+@click.pass_context
+def save_qp_command(
+    ctx: click.Context,
+    filename: ty.Optional[ty.AnyStr],
+    output: ty.Optional[ty.AnyStr],
+    disable_shift: ty.Optional[bool],
+):
+    """Save cuts as keyframes (I-frames) for video encoding.
+
+    The resulting QP file can be used with the `--qpfile` argument in x264/x265."""
+    ctx = ctx.obj
+    assert isinstance(ctx, CliContext)
+
+    save_qp_args = {
+        "filename_format": ctx.config.get_value("save-qp", "filename", filename),
+        "output_dir": ctx.config.get_value("save-qp", "output", output),
+        "shift_start": not ctx.config.get_value("save-qp", "disable-shift", disable_shift),
+    }
+    ctx.add_command(cli_commands.save_qp, save_qp_args)
+
+
 # ----------------------------------------------------------------------
-# Commands Omitted From Help List
+# CLI Sub-Command Registration
 # ----------------------------------------------------------------------
 
-# Info Commands
+# Informational
 scenedetect.add_command(about_command)
 scenedetect.add_command(help_command)
 scenedetect.add_command(version_command)
 
-# ----------------------------------------------------------------------
-# Commands Added To Help List
-# ----------------------------------------------------------------------
-
-# Input / Output
-scenedetect.add_command(export_html_command)
-scenedetect.add_command(list_scenes_command)
+# Input
 scenedetect.add_command(load_scenes_command)
-scenedetect.add_command(save_images_command)
-scenedetect.add_command(split_video_command)
 scenedetect.add_command(time_command)
 
-# Detection Algorithms
+# Detectors
 scenedetect.add_command(detect_adaptive_command)
 scenedetect.add_command(detect_content_command)
 scenedetect.add_command(detect_hash_command)
 scenedetect.add_command(detect_hist_command)
 scenedetect.add_command(detect_threshold_command)
+
+# Output
+scenedetect.add_command(export_html_command)
+scenedetect.add_command(save_qp_command)
+scenedetect.add_command(list_scenes_command)
+scenedetect.add_command(save_images_command)
+scenedetect.add_command(split_video_command)

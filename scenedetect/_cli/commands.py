@@ -70,6 +70,29 @@ def export_html(
         webbrowser.open(html_path)
 
 
+def save_qp(
+    context: CliContext,
+    scenes: SceneList,
+    cuts: CutList,
+    output_dir: str,
+    filename_format: str,
+    shift_start: bool,
+):
+    """Handler for the `save-qp` command."""
+    del scenes  # We only use cuts for this handler.
+    qp_path = get_and_create_path(
+        Template(filename_format).safe_substitute(VIDEO_NAME=context.video_stream.name),
+        output_dir,
+    )
+    start_frame = context.start_time.frame_num if context.start_time else 0
+    offset = start_frame if shift_start else 0
+    with open(qp_path, "wt") as qp_file:
+        qp_file.write(f"{0 if shift_start else start_frame} I -1\n")
+        # Place another I frame at each detected cut.
+        qp_file.writelines(f"{cut.frame_num - offset} I -1\n" for cut in cuts)
+    logger.info(f"QP file written to: {qp_path}")
+
+
 def list_scenes(
     context: CliContext,
     scenes: SceneList,

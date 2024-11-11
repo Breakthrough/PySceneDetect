@@ -90,9 +90,9 @@ class CliContext:
         self.video_stream: VideoStream = None
         self.load_scenes_input: str = None  # load-scenes -i/--input
         self.load_scenes_column_name: str = None  # load-scenes -c/--start-col-name
-        self.start_time: FrameTimecode = None  # time -s/--start
-        self.end_time: FrameTimecode = None  # time -e/--end
-        self.duration: FrameTimecode = None  # time -d/--duration
+        self.start_time: ty.Optional[FrameTimecode] = None  # time -s/--start
+        self.end_time: ty.Optional[FrameTimecode] = None  # time -e/--end
+        self.duration: ty.Optional[FrameTimecode] = None  # time -d/--duration
         self.frame_skip: int = None
 
         # Options:
@@ -160,8 +160,8 @@ class CliContext:
         downscale: ty.Optional[int],
         frame_skip: int,
         min_scene_len: str,
-        drop_short_scenes: bool,
-        merge_last_scene: bool,
+        drop_short_scenes: ty.Optional[bool],
+        merge_last_scene: ty.Optional[bool],
         backend: ty.Optional[str],
         quiet: bool,
         logfile: ty.Optional[ty.AnyStr],
@@ -245,11 +245,11 @@ class CliContext:
             if min_scene_len is not None
             else self.config.get_value("global", "min-scene-len"),
         )
-        self.drop_short_scenes = drop_short_scenes or self.config.get_value(
-            "global", "drop-short-scenes"
+        self.drop_short_scenes = self.config.get_value(
+            "global", "drop-short-scenes", drop_short_scenes
         )
-        self.merge_last_scene = merge_last_scene or self.config.get_value(
-            "global", "merge-last-scene"
+        self.merge_last_scene = self.config.get_value(
+            "global", "merge-last-scene", merge_last_scene
         )
         self.frame_skip = self.config.get_value("global", "frame-skip", frame_skip)
 
@@ -286,9 +286,8 @@ class CliContext:
             except ValueError as ex:
                 logger.debug(str(ex))
                 raise click.BadParameter(str(ex), param_hint="downscale factor") from None
-        scene_manager.interpolation = Interpolation[
-            self.config.get_value("global", "downscale-method").upper()
-        ]
+        scene_manager.interpolation = self.config.get_value("global", "downscale-method")
+
         self.scene_manager = scene_manager
 
     #
@@ -328,9 +327,7 @@ class CliContext:
             "luma_only": luma_only or self.config.get_value("detect-content", "luma-only"),
             "min_scene_len": min_scene_len,
             "threshold": self.config.get_value("detect-content", "threshold", threshold),
-            "filter_mode": FlashFilter.Mode[
-                self.config.get_value("detect-content", "filter-mode", filter_mode).upper()
-            ],
+            "filter_mode": self.config.get_value("detect-content", "filter-mode", filter_mode),
         }
 
     def get_detect_adaptive_params(

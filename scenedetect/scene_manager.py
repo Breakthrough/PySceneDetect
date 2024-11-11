@@ -541,7 +541,7 @@ def save_images(
         for j, image_timecode in enumerate(scene_timecodes):
             video.seek(image_timecode)
             frame_im = video.read()
-            if frame_im is not None:
+            if frame_im is not None and frame_im is not False:
                 # TODO: Add extension to template.
                 # TODO: Allow NUM to be a valid suffix in addition to NUMBER.
                 file_path = "%s.%s" % (
