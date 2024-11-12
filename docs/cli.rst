@@ -143,7 +143,7 @@ Detectors
 ``detect-adaptive``
 ========================================================================
 
-Perform adaptive detection algorithm on input video.
+Find fast cuts using diffs in HSL colorspace (rolling average).
 
 Two-pass algorithm that first calculates frame scores with :ref:`detect-content <command-detect-content>`, and then applies a rolling average when processing the result. This can help mitigate false detections in situations such as camera movement.
 
@@ -214,19 +214,19 @@ Options
 ``detect-content``
 ========================================================================
 
-Perform content detection algorithm on input video.
+Find fast cuts using differences in HSL (filtered).
 
 For each frame, a score from 0 to 255.0 is calculated which represents the difference in content between the current and previous frame (higher = more different). A cut is generated when a frame score exceeds :option:`-t/--threshold <-t>`. Frame scores are saved under the "content_val" column in a statsfile.
 
 Scores are calculated from several components which are also recorded in the statsfile:
 
- - *delta_hue*: Difference between pixel hue values of adjacent frames.
+  - *delta_hue*: Difference between pixel hue values of adjacent frames.
 
- - *delta_sat*: Difference between pixel saturation values of adjacent frames.
+  - *delta_sat*: Difference between pixel saturation values of adjacent frames.
 
- - *delta_lum*: Difference between pixel luma (brightness) values of adjacent frames.
+  - *delta_lum*: Difference between pixel luma (brightness) values of adjacent frames.
 
- - *delta_edges*: Difference between calculated edges of adjacent frames. Typically larger than other components, so threshold may need to be increased to compensate.
+  - *delta_edges*: Difference between calculated edges of adjacent frames. Typically larger than other components, so threshold may need to be increased to compensate.
 
 Once calculated, these components are multiplied by the specified :option:`-w/--weights <-w>` to calculate the final frame score ("content_val").  Weights are set as a set of 4 numbers in the form (*delta_hue*, *delta_sat*, *delta_lum*, *delta_edges*). For example, "--weights 1.0 0.5 1.0 0.2 --threshold 32" is a good starting point for trying edge detection. The final sum is normalized by the weight of all components, so they need not equal 100%. Edge detection is disabled by default to improve performance.
 
@@ -246,7 +246,7 @@ Options
 
 .. option:: -t VAL, --threshold VAL
 
-  Threshold (float) that frame score must exceed to trigger a cut. Refers to "content_val" in stats file.
+  The max difference (0.0 to 255.0) that adjacent frames score must exceed to trigger a cut. Lower values are more sensitive to shot changes. Refers to "content_val" in stats file.
 
   Default: ``27.0``
 
@@ -258,7 +258,7 @@ Options
 
 .. option:: -l, --luma-only
 
-  Only use luma (brightness) channel. Useful for greyscale videos. Equivalent to setting "-w 0 0 1 0".
+  Only use luma (brightness) channel. Useful for greyscale videos. Equivalent to setting -w="0 0 1 0".
 
 .. option:: -k N, --kernel-size N
 
@@ -268,7 +268,13 @@ Options
 
 .. option:: -m TIMECODE, --min-scene-len TIMECODE
 
-  Minimum length of any scene. Overrides global option :option:`-m/--min-scene-len <scenedetect -m>`. TIMECODE can be specified in frames (:option:`-m=100 <-m>`), in seconds with `s` suffix (:option:`-m=3.5s <-m>`), or timecode (:option:`-m=00:01:52.778 <-m>`).
+  Minimum length of any scene. Overrides global option :option:`-m/--min-scene-len <scenedetect -m>`.
+
+.. option:: -f MODE, --filter-mode MODE
+
+  Mode used to enforce :option:`-m/--min-scene-len <-m>` option. Can be one of: merge, suppress.
+
+  Default: ``Mode.MERGE``
 
 
 .. _command-detect-hash:
@@ -283,11 +289,12 @@ Find fast cuts using perceptual hashing.
 
 The perceptual hash is taken of adjacent frames, and used to calculate the hamming distance between them. The distance is then normalized by the squared size of the hash, and compared to the threshold.
 
-Saved as the `hash_dist` metric in a statsfile.
+Saved as the ``hash_dist`` metric in a statsfile.
 
 
 Examples
 ------------------------------------------------------------------------
+
 
     ``scenedetect -i video.mp4 detect-hash``
 
@@ -296,6 +303,7 @@ Examples
 
 Options
 ------------------------------------------------------------------------
+
 
 .. option:: -t VAL, --threshold VAL
 
@@ -317,7 +325,7 @@ Options
 
 .. option:: -m TIMECODE, --min-scene-len TIMECODE
 
-  Minimum length of any scene. Overrides global option :option:`-m/--min-scene-len <scenedetect -m>`. TIMECODE can be specified in frames (:option:`-m=100 <-m>`), in seconds with `s` suffix (:option:`-m=3.5s <-m>`), or timecode (:option:`-m=00:01:52.778 <-m>`).
+  Minimum length of any scene. Overrides global min-scene-len (-m) setting. TIMECODE can be specified as exact number of frames, a time in seconds followed by s, or a timecode in the format HH:MM:SS or HH:MM:SS.nnn.
 
 
 .. _command-detect-hist:
@@ -332,11 +340,12 @@ Find fast cuts by differencing YUV histograms.
 
 Uses Y channel after converting each frame to YUV to create a histogram of each frame. Histograms between frames are compared to determine a score for how similar they are.
 
-Saved as the `hist_diff` metric in a statsfile.
+Saved as the ``hist_diff`` metric in a statsfile.
 
 
 Examples
 ------------------------------------------------------------------------
+
 
     ``scenedetect -i video.mp4 detect-hist``
 
@@ -346,6 +355,7 @@ Examples
 Options
 ------------------------------------------------------------------------
 
+
 .. option:: -t VAL, --threshold VAL
 
   Max difference (0.0 to 1.0) between histograms of adjacent frames. Lower values are more sensitive to changes.
@@ -354,13 +364,13 @@ Options
 
 .. option:: -b NUM, --bins NUM
 
-  The number of bins to use for the histogram calculation
+  The number of bins to use for the histogram calculation.
 
-  Default: ``16``
+  Default: ``256``
 
 .. option:: -m TIMECODE, --min-scene-len TIMECODE
 
-  Minimum length of any scene. Overrides global option :option:`-m/--min-scene-len <scenedetect -m>`. TIMECODE can be specified in frames (:option:`-m=100 <-m>`), in seconds with `s` suffix (:option:`-m=3.5s <-m>`), or timecode (:option:`-m=00:01:52.778 <-m>`).
+  Minimum length of any scene. Overrides global min-scene-len (-m) setting. TIMECODE can be specified as exact number of frames, a time in seconds followed by s, or a timecode in the format HH:MM:SS or HH:MM:SS.nnn.
 
 
 .. _command-detect-threshold:
@@ -371,7 +381,7 @@ Options
 ``detect-threshold``
 ========================================================================
 
-Perform threshold detection algorithm on input video.
+Find fade in/out using averaging.
 
 Detects fade-in and fade-out events using average pixel values. Resulting cuts are placed between adjacent fade-out and fade-in events.
 
@@ -425,7 +435,9 @@ Commands
 ``export-html``
 ========================================================================
 
-Export scene list to HTML file. Requires save-images unless --no-images is specified.
+Export scene list to HTML file.
+
+To customize image generation, specify the :ref:`save-images <command-save-images>` command before :ref:`export-html <command-export-html>`. This command always uses the result of the preceeding :ref:`save-images <command-save-images>` command, or runs it with the default config values unless ``--no-images`` is set.
 
 
 Options
@@ -438,9 +450,9 @@ Options
 
   Default: ``$VIDEO_NAME-Scenes.html``
 
-.. option:: --no-images
+.. option:: -n, --no-images
 
-  Export the scene list including or excluding the saved images.
+  Do not include images with the result.
 
 .. option:: -w pixels, --image-width pixels
 
@@ -449,6 +461,10 @@ Options
 .. option:: -h pixels, --image-height pixels
 
   Height in pixels of the images in the resulting HTML table.
+
+.. option:: -s, --show
+
+  Automatically open resulting HTML when processing is complete.
 
 
 .. _command-list-scenes:
@@ -462,13 +478,26 @@ Options
 Create scene list CSV file (will be named $VIDEO_NAME-Scenes.csv by default).
 
 
+Examples
+------------------------------------------------------------------------
+
+
+Default:
+
+    ``scenedetect -i video.mp4 list-scenes``
+
+Without cut list (RFC 4180 compliant CSV):
+
+    ``scenedetect -i video.mp4 list-scenes --skip-cuts``
+
+
 Options
 ------------------------------------------------------------------------
 
 
 .. option:: -o DIR, --output DIR
 
-  Output directory to save videos to. Overrides global option :option:`-o/--output <scenedetect -o>` if set.
+  Output directory to save videos to. Overrides global option :option:`-o/--output <scenedetect -o>`.
 
 .. option:: -f NAME, --filename NAME
 
@@ -532,16 +561,14 @@ Options
 ``save-images``
 ========================================================================
 
-Create images for each detected scene.
-
-Images can be resized
+Extract images from each detected scene.
 
 
 Examples
 ------------------------------------------------------------------------
 
 
-    ``scenedetect -i video.mp4 save-images``
+    ``scenedetect -i video.mp4 save-images --num-images 5``
 
     ``scenedetect -i video.mp4 save-images --width 1024``
 
@@ -554,7 +581,7 @@ Options
 
 .. option:: -o DIR, --output DIR
 
-  Output directory for images. Overrides global option :option:`-o/--output <scenedetect -o>` if set.
+  Output directory for images. Overrides global option :option:`-o/--output <scenedetect -o>`.
 
 .. option:: -f NAME, --filename NAME
 
@@ -611,6 +638,38 @@ Options
   Width (pixels) of images.
 
 
+.. _command-save-qp:
+
+.. program:: scenedetect save-qp
+
+
+``save-qp``
+========================================================================
+
+Save cuts as keyframes (I-frames) for video encoding.
+
+The resulting QP file can be used with the ``--qpfile`` argument in x264/x265.
+
+
+Options
+------------------------------------------------------------------------
+
+
+.. option:: -f NAME, --filename NAME
+
+  Filename format to use.
+
+  Default: ``$VIDEO_NAME.qp``
+
+.. option:: -o DIR, --output DIR
+
+  Output directory to save QP file to. Overrides global option :option:`-o/--output <scenedetect -o>`.
+
+.. option:: -d, --disable-shift
+
+  Disable shifting frame numbers by start time.
+
+
 .. _command-split-video:
 
 .. program:: scenedetect split-video
@@ -626,9 +685,15 @@ Examples
 ------------------------------------------------------------------------
 
 
+Default:
+
     ``scenedetect -i video.mp4 split-video``
 
+Codec-copy mode (not frame accurate):
+
     ``scenedetect -i video.mp4 split-video --copy``
+
+Customized filenames:
 
     ``scenedetect -i video.mp4 split-video --filename \$VIDEO_NAME-Clip-\$SCENE_NUMBER``
 
@@ -639,7 +704,7 @@ Options
 
 .. option:: -o DIR, --output DIR
 
-  Output directory to save videos to. Overrides global option :option:`-o/--output <scenedetect -o>` if set.
+  Output directory to save videos to. Overrides global option :option:`-o/--output <scenedetect -o>`.
 
 .. option:: -f NAME, --filename NAME
 
@@ -653,7 +718,7 @@ Options
 
 .. option:: -c, --copy
 
-  Copy instead of re-encode. Faster but less precise. Equivalent to: :option:`--args="-map 0:v:0 -map 0:a? -map 0:s? -c:v copy -c:a copy" <--args>`
+  Copy instead of re-encode. Faster but less precise.
 
 .. option:: -hq, --high-quality
 
@@ -692,11 +757,11 @@ Options
 
 Set start/end/duration of input video.
 
-Values can be specified as frames (NNNN), seconds (NNNN.NNs), or timecode (HH:MM:SS.nnn or MM:SS.nnn). For example, to process only the first minute of a video:
+Values can be specified as seconds (SSSS.nn), frames (NNNN), or timecode (HH:MM:SS.nnn). For example, to process only the first minute of a video:
 
-    ``scenedetect -i video.mp4 time --end 1:00``
+    ``scenedetect -i video.mp4 time --end 00:01:00``
 
-    ``scenedetect -i video.mp4 time --duration 60s``
+    ``scenedetect -i video.mp4 time --duration 60.0``
 
 Note that --end and --duration are mutually exclusive (i.e. only one of the two can be set). Lastly, the following is an example using absolute frame numbers to process frames 0 through 1000:
 
@@ -709,7 +774,7 @@ Options
 
 .. option:: -s TIMECODE, --start TIMECODE
 
-  Time in video to start detection. TIMECODE can be specified as number of frames (:option:`--start=100 <--start>` for frame 100), time in seconds (:option:`--start=100.0 <--start>` for 100 seconds), or timecode (:option:`--start=00:01:40 <--start>` for 1m40s).
+  Time in video to start detection. TIMECODE can be specified as seconds (:option:`--start=100.0 <--start>`), frames (:option:`--start=100 <--start>`), or timecode (:option:`--start=00:01:40.000 <--start>`).
 
 .. option:: -d TIMECODE, --duration TIMECODE
 
