@@ -71,7 +71,8 @@ in situations such as camera movement.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>adaptive_threshold</strong> (<em>float</em>) – Threshold (float) that score ratio must exceed to trigger a
 new scene (see frame metric adaptive_ratio in stats file).</p></li>
-<li><p><strong>min_scene_len</strong> (<em>int</em>) – Minimum length of any scene.</p></li>
+<li><p><strong>min_scene_len</strong> (<em>int</em>) – Once a cut is detected, this many frames must pass before a new one can
+be added to the scene list. Can be an int or FrameTimecode type.</p></li>
 <li><p><strong>window_width</strong> (<em>int</em>) – Size of window (number of frames) before and after each frame to
 average together in order to detect deviations from the mean. Must be at least 1.</p></li>
 <li><p><strong>min_content_val</strong> (<em>float</em>) – Minimum threshold (float) that the content_val must exceed in order to
@@ -181,7 +182,7 @@ determine when a fast cut has occurred.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>threshold</strong> (<em>float</em>) – Threshold the average change in pixel intensity must exceed to trigger a cut.</p></li>
 <li><p><strong>min_scene_len</strong> (<em>int</em>) – Once a cut is detected, this many frames must pass before a new one can
-be added to the scene list.</p></li>
+be added to the scene list. Can be an int or FrameTimecode type.</p></li>
 <li><p><strong>weights</strong> (<a class="reference internal" href="#scenedetect.detectors.content_detector.ContentDetector.Components" title="scenedetect.detectors.content_detector.ContentDetector.Components"><em>ContentDetector.Components</em></a>) – Weight to place on each component when calculating frame score
 (<cite>content_val</cite> in a statsfile, the value <cite>threshold</cite> is compared against).</p></li>
 <li><p><strong>luma_only</strong> (<em>bool</em>) – If True, only considers changes in the luminance channel of the video.
@@ -349,7 +350,8 @@ before comparing to <cite>threshold</cite> for normalization.</p></li>
 <li><p><strong>size</strong> (<em>int</em>) – Size of square of low frequency data to use for the DCT</p></li>
 <li><p><strong>lowpass</strong> (<em>int</em>) – How much high frequency information to filter from the DCT. A value of 2 means
 keep lower 1/2 of the frequency data, 4 means only keep 1/4, etc…</p></li>
-<li><p><strong>min_scene_len</strong> (<em>int</em>) – Minimum length of any given scene, in frames (int) or FrameTimecode</p></li>
+<li><p><strong>min_scene_len</strong> (<em>int</em>) – Once a cut is detected, this many frames must pass before a new one can
+be added to the scene list. Can be an int or FrameTimecode type.</p></li>
 </ul>
 </dd>
 </dl>
@@ -438,7 +440,8 @@ differ. Histograms are calculated on the Y channel after converting the frame to
 YUV, and normalized based on the number of bins. Higher dicfferences imply greater
 change in content, so larger threshold values are less sensitive to cuts.</p></li>
 <li><p><strong>bins</strong> (<em>int</em>) – Number of bins to use for the histogram.</p></li>
-<li><p><strong>min_scene_len</strong> (<em>int</em>) – Minimum length of any scene.</p></li>
+<li><p><strong>min_scene_len</strong> (<em>int</em>) – Once a cut is detected, this many frames must pass before a new one can
+be added to the scene list. Can be an int or FrameTimecode type.</p></li>
 </ul>
 </dd>
 </dl>
@@ -575,8 +578,8 @@ is chosen (especially taking into account the minimum grey/black level).</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>threshold</strong> (<em>float</em>) – 8-bit intensity value that each pixel value (R, G, and B)
 must be &lt;= to in order to trigger a fade in/out.</p></li>
-<li><p><strong>min_scene_len</strong> (<em>int</em>) – FrameTimecode object or integer greater than 0 of the
-minimum length, in frames, of a scene (or subsequent scene cut).</p></li>
+<li><p><strong>min_scene_len</strong> (<em>int</em>) – Once a cut is detected, this many frames must pass before a new one can
+be added to the scene list. Can be an int or FrameTimecode type.</p></li>
 <li><p><strong>fade_bias</strong> (<em>float</em>) – Float between -1.0 and +1.0 representing the percentage of
 timecode skew for the start of a scene (-1.0 causing a cut at the
 fade-to-black, 0.0 in the middle, and +1.0 causing the cut to be

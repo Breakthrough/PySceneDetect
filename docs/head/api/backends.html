@@ -88,7 +88,7 @@ examples for details.</p>
 </section>
 <dl class="py data">
 <dt class="sig sig-object py" id="scenedetect.backends.AVAILABLE_BACKENDS">
-<span class="sig-prename descclassname"><span class="pre">scenedetect.backends.</span></span><span class="sig-name descname"><span class="pre">AVAILABLE_BACKENDS</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Type</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'opencv':</span> <span class="pre">&lt;class</span> <span class="pre">'scenedetect.backends.opencv.VideoStreamCv2'&gt;,</span> <span class="pre">'pyav':</span> <span class="pre">&lt;class</span> <span class="pre">'scenedetect.backends.pyav.VideoStreamAv'&gt;}</span></em><a class="headerlink" href="#scenedetect.backends.AVAILABLE_BACKENDS" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">scenedetect.backends.</span></span><span class="sig-name descname"><span class="pre">AVAILABLE_BACKENDS</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Type</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'moviepy':</span> <span class="pre">&lt;class</span> <span class="pre">'scenedetect.backends.moviepy.VideoStreamMoviePy'&gt;,</span> <span class="pre">'opencv':</span> <span class="pre">&lt;class</span> <span class="pre">'scenedetect.backends.opencv.VideoStreamCv2'&gt;,</span> <span class="pre">'pyav':</span> <span class="pre">&lt;class</span> <span class="pre">'scenedetect.backends.pyav.VideoStreamAv'&gt;}</span></em><a class="headerlink" href="#scenedetect.backends.AVAILABLE_BACKENDS" title="Permalink to this definition">¶</a></dt>
 <dd><p>All available backends that <a class="reference internal" href="../api.html#scenedetect.open_video" title="scenedetect.open_video"><code class="xref py py-func docutils literal notranslate"><span class="pre">scenedetect.open_video()</span></code></a> can consider for the <cite>backend</cite>
 parameter. These backends must support construction with the following signature:</p>
 <blockquote>
@@ -579,6 +579,159 @@ milliseconds. The first frame has a PTS of 0.</p>
 
 </dd></dl>
 
+<span class="target" id="module-scenedetect.backends.moviepy"></span><p><a class="reference internal" href="#scenedetect.backends.moviepy.VideoStreamMoviePy" title="scenedetect.backends.moviepy.VideoStreamMoviePy"><code class="xref py py-class docutils literal notranslate"><span class="pre">VideoStreamMoviePy</span></code></a> provides an adapter for MoviePy’s <cite>FFMPEG_VideoReader</cite>.</p>
+<p>MoviePy launches ffmpeg as a subprocess, and can be used with various types of inputs. Generally,
+the input should support seeking, but does not necessarily have to be a video. For example,
+image sequences or AviSynth scripts are supported as inputs.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="scenedetect.backends.moviepy.VideoStreamMoviePy">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scenedetect.backends.moviepy.</span></span><span class="sig-name descname"><span class="pre">VideoStreamMoviePy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">framerate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">print_infos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.backends.moviepy.VideoStreamMoviePy" title="Permalink to this definition">¶</a></dt>
+<dd><p>MoviePy <cite>FFMPEG_VideoReader</cite> backend.</p>
+<p>Open a video or device.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<em>AnyStr</em>) – Path to video,.</p></li>
+<li><p><strong>framerate</strong> (<em>float</em><em> | </em><em>None</em>) – If set, overrides the detected framerate.</p></li>
+<li><p><strong>print_infos</strong> (<em>bool</em>) – If True, prints information about the opened video to stdout.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>OSError</strong> – file could not be found, access was denied, or the video is corrupt</p></li>
+<li><p><a class="reference internal" href="video_stream.html#scenedetect.video_stream.VideoOpenFailure" title="scenedetect.video_stream.VideoOpenFailure"><strong>VideoOpenFailure</strong></a> – video could not be opened (may be corrupted)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="scenedetect.backends.moviepy.VideoStreamMoviePy.read">
+<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">decode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">advance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.backends.moviepy.VideoStreamMoviePy.read" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read and decode the next frame as a np.ndarray. Returns False when video ends.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>decode</strong> (<em>bool</em>) – Decode and return the frame.</p></li>
+<li><p><strong>advance</strong> (<em>bool</em>) – Seek to the next frame. If False, will return the current (last) frame.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>If decode = True, the decoded frame (np.ndarray), or False (bool) if end of video.
+If decode = False, a bool indicating if advancing to the the next frame succeeded.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>ndarray</em> | bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scenedetect.backends.moviepy.VideoStreamMoviePy.reset">
+<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.backends.moviepy.VideoStreamMoviePy.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Close and re-open the VideoStream (should be equivalent to calling <cite>seek(0)</cite>).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scenedetect.backends.moviepy.VideoStreamMoviePy.seek">
+<span class="sig-name descname"><span class="pre">seek</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.backends.moviepy.VideoStreamMoviePy.seek" title="Permalink to this definition">¶</a></dt>
+<dd><p>Seek to the given timecode. If given as a frame number, represents the current seek
+pointer (e.g. if seeking to 0, the next frame decoded will be the first frame of the video).</p>
+<p>For 1-based indices (first frame is frame #1), the target frame number needs to be converted
+to 0-based by subtracting one. For example, if we want to seek to the first frame, we call
+seek(0) followed by read(). If we want to seek to the 5th frame, we call seek(4) followed
+by read(), at which point frame_number will be 5.</p>
+<p>Not supported if the VideoStream is a device/camera. Untested with web streams.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>target</strong> (<a class="reference internal" href="frame_timecode.html#scenedetect.frame_timecode.FrameTimecode" title="scenedetect.frame_timecode.FrameTimecode"><em>FrameTimecode</em></a><em> | </em><em>float</em><em> | </em><em>int</em>) – Target position in video stream to seek to.
+If float, interpreted as time in seconds.
+If int, interpreted as frame number.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference internal" href="video_stream.html#scenedetect.video_stream.SeekError" title="scenedetect.video_stream.SeekError"><strong>SeekError</strong></a> – An error occurs while seeking, or seeking is not supported.</p></li>
+<li><p><strong>ValueError</strong> – <cite>target</cite> is not a valid value (i.e. it is negative).</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scenedetect.backends.moviepy.VideoStreamMoviePy.BACKEND_NAME">
+<span class="sig-name descname"><span class="pre">BACKEND_NAME</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'moviepy'</span></em><a class="headerlink" href="#scenedetect.backends.moviepy.VideoStreamMoviePy.BACKEND_NAME" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unique name used to identify this backend.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="scenedetect.backends.moviepy.VideoStreamMoviePy.aspect_ratio">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">aspect_ratio</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#scenedetect.backends.moviepy.VideoStreamMoviePy.aspect_ratio" title="Permalink to this definition">¶</a></dt>
+<dd><p>Display/pixel aspect ratio as a float (1.0 represents square pixels).</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="scenedetect.backends.moviepy.VideoStreamMoviePy.duration">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">duration</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="frame_timecode.html#scenedetect.frame_timecode.FrameTimecode" title="scenedetect.frame_timecode.FrameTimecode"><span class="pre">FrameTimecode</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#scenedetect.backends.moviepy.VideoStreamMoviePy.duration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Duration of the stream as a FrameTimecode, or None if non terminating.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="scenedetect.backends.moviepy.VideoStreamMoviePy.frame_number">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">frame_number</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#scenedetect.backends.moviepy.VideoStreamMoviePy.frame_number" title="Permalink to this definition">¶</a></dt>
+<dd><p>Current position within stream in frames as an int.</p>
+<p>1 indicates the first frame was just decoded by the last call to <cite>read</cite> with advance=True,
+whereas 0 indicates that no frames have been <cite>read</cite>.</p>
+<p>This method will always return 0 if no frames have been <cite>read</cite>.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="scenedetect.backends.moviepy.VideoStreamMoviePy.frame_rate">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">frame_rate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#scenedetect.backends.moviepy.VideoStreamMoviePy.frame_rate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Framerate in frames/sec.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="scenedetect.backends.moviepy.VideoStreamMoviePy.frame_size">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">frame_size</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#scenedetect.backends.moviepy.VideoStreamMoviePy.frame_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Size of each video frame in pixels as a tuple of (width, height).</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="scenedetect.backends.moviepy.VideoStreamMoviePy.is_seekable">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_seekable</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#scenedetect.backends.moviepy.VideoStreamMoviePy.is_seekable" title="Permalink to this definition">¶</a></dt>
+<dd><p>True if seek() is allowed, False otherwise.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="scenedetect.backends.moviepy.VideoStreamMoviePy.name">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scenedetect.backends.moviepy.VideoStreamMoviePy.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Name of the video, without extension, or device.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="scenedetect.backends.moviepy.VideoStreamMoviePy.path">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bytes</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scenedetect.backends.moviepy.VideoStreamMoviePy.path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Video path.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="scenedetect.backends.moviepy.VideoStreamMoviePy.position">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">position</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="frame_timecode.html#scenedetect.frame_timecode.FrameTimecode" title="scenedetect.frame_timecode.FrameTimecode"><span class="pre">FrameTimecode</span></a></em><a class="headerlink" href="#scenedetect.backends.moviepy.VideoStreamMoviePy.position" title="Permalink to this definition">¶</a></dt>
+<dd><p>Current position within stream as FrameTimecode.</p>
+<p>This can be interpreted as presentation time stamp of the last frame which was
+decoded by calling <cite>read</cite> with advance=True.</p>
+<p>This method will always return 0 (e.g. be equal to <cite>base_timecode</cite>) if no frames
+have been <cite>read</cite>.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="scenedetect.backends.moviepy.VideoStreamMoviePy.position_ms">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">position_ms</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#scenedetect.backends.moviepy.VideoStreamMoviePy.position_ms" title="Permalink to this definition">¶</a></dt>
+<dd><p>Current position within stream as a float of the presentation time in milliseconds.
+The first frame has a time of 0.0 ms.</p>
+<p>This method will always return 0.0 if no frames have been <cite>read</cite>.</p>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 
 
@@ -648,6 +801,7 @@ milliseconds. The first frame has a PTS of 0.</p>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.backends.opencv.VideoCaptureAdapter"><code class="docutils literal notranslate"><span class="pre">VideoCaptureAdapter</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.backends.opencv.VideoStreamCv2"><code class="docutils literal notranslate"><span class="pre">VideoStreamCv2</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.backends.pyav.VideoStreamAv"><code class="docutils literal notranslate"><span class="pre">VideoStreamAv</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scenedetect.backends.moviepy.VideoStreamMoviePy"><code class="docutils literal notranslate"><span class="pre">VideoStreamMoviePy</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="scene_manager.html">SceneManager</a></li>

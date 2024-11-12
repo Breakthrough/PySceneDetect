@@ -56,7 +56,7 @@
 <div><ul class="simple">
 <li><p>OpenCV: <code class="xref py py-class docutils literal notranslate"><span class="pre">VideoStreamCv2</span></code></p></li>
 <li><p>PyAV: <a class="reference internal" href="api/backends.html#scenedetect.backends.pyav.VideoStreamAv" title="scenedetect.backends.pyav.VideoStreamAv"><code class="xref py py-class docutils literal notranslate"><span class="pre">VideoStreamAv</span></code></a></p></li>
-<li><p>MoviePy: <code class="xref py py-class docutils literal notranslate"><span class="pre">VideoStreamMoviePy</span></code></p></li>
+<li><p>MoviePy: <a class="reference internal" href="api/backends.html#scenedetect.backends.moviepy.VideoStreamMoviePy" title="scenedetect.backends.moviepy.VideoStreamMoviePy"><code class="xref py py-class docutils literal notranslate"><span class="pre">VideoStreamMoviePy</span></code></a></p></li>
 </ul>
 </div></blockquote>
 </li>
@@ -282,6 +282,23 @@ overriding backend-specific options.</p></li>
 <li class="toctree-l3"><a class="reference internal" href="api/backends.html#scenedetect.backends.pyav.VideoStreamAv.position_ms"><code class="docutils literal notranslate"><span class="pre">VideoStreamAv.position_ms</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="api/backends.html#scenedetect.backends.moviepy.VideoStreamMoviePy"><code class="docutils literal notranslate"><span class="pre">VideoStreamMoviePy</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/backends.html#scenedetect.backends.moviepy.VideoStreamMoviePy.read"><code class="docutils literal notranslate"><span class="pre">VideoStreamMoviePy.read()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/backends.html#scenedetect.backends.moviepy.VideoStreamMoviePy.reset"><code class="docutils literal notranslate"><span class="pre">VideoStreamMoviePy.reset()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/backends.html#scenedetect.backends.moviepy.VideoStreamMoviePy.seek"><code class="docutils literal notranslate"><span class="pre">VideoStreamMoviePy.seek()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/backends.html#scenedetect.backends.moviepy.VideoStreamMoviePy.BACKEND_NAME"><code class="docutils literal notranslate"><span class="pre">VideoStreamMoviePy.BACKEND_NAME</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/backends.html#scenedetect.backends.moviepy.VideoStreamMoviePy.aspect_ratio"><code class="docutils literal notranslate"><span class="pre">VideoStreamMoviePy.aspect_ratio</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/backends.html#scenedetect.backends.moviepy.VideoStreamMoviePy.duration"><code class="docutils literal notranslate"><span class="pre">VideoStreamMoviePy.duration</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/backends.html#scenedetect.backends.moviepy.VideoStreamMoviePy.frame_number"><code class="docutils literal notranslate"><span class="pre">VideoStreamMoviePy.frame_number</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/backends.html#scenedetect.backends.moviepy.VideoStreamMoviePy.frame_rate"><code class="docutils literal notranslate"><span class="pre">VideoStreamMoviePy.frame_rate</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/backends.html#scenedetect.backends.moviepy.VideoStreamMoviePy.frame_size"><code class="docutils literal notranslate"><span class="pre">VideoStreamMoviePy.frame_size</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/backends.html#scenedetect.backends.moviepy.VideoStreamMoviePy.is_seekable"><code class="docutils literal notranslate"><span class="pre">VideoStreamMoviePy.is_seekable</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/backends.html#scenedetect.backends.moviepy.VideoStreamMoviePy.name"><code class="docutils literal notranslate"><span class="pre">VideoStreamMoviePy.name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/backends.html#scenedetect.backends.moviepy.VideoStreamMoviePy.path"><code class="docutils literal notranslate"><span class="pre">VideoStreamMoviePy.path</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/backends.html#scenedetect.backends.moviepy.VideoStreamMoviePy.position"><code class="docutils literal notranslate"><span class="pre">VideoStreamMoviePy.position</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/backends.html#scenedetect.backends.moviepy.VideoStreamMoviePy.position_ms"><code class="docutils literal notranslate"><span class="pre">VideoStreamMoviePy.position_ms</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="api/scene_manager.html">SceneManager</a><ul>
@@ -427,8 +444,6 @@ overriding backend-specific options.</p></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="api/platform.html#scenedetect.platform.Template"><code class="docutils literal notranslate"><span class="pre">Template</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/platform.html#scenedetect.platform.logging_redirect_tqdm"><code class="docutils literal notranslate"><span class="pre">logging_redirect_tqdm</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/platform.html#scenedetect.platform.tqdm"><code class="docutils literal notranslate"><span class="pre">tqdm</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/platform.html#scenedetect.platform.get_and_create_path"><code class="docutils literal notranslate"><span class="pre">get_and_create_path()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/platform.html#scenedetect.platform.get_cv2_imwrite_params"><code class="docutils literal notranslate"><span class="pre">get_cv2_imwrite_params()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/platform.html#scenedetect.platform.get_ffmpeg_path"><code class="docutils literal notranslate"><span class="pre">get_ffmpeg_path()</span></code></a></li>

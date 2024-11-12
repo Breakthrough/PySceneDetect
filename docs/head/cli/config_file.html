@@ -336,6 +336,9 @@
 <span class="c1"># Filename format of created HTML file. Can use $VIDEO_NAME in the name.</span>
 <span class="c1">#filename = $VIDEO_NAME-Scenes.html</span>
 
+<span class="c1"># Automatically open resulting HTML when processing is complete.</span>
+<span class="c1">#show = no</span>
+
 <span class="c1"># Override &lt;img&gt; element width/height.</span>
 <span class="c1">#image-height = 0</span>
 <span class="c1">#image-width = 0</span>
@@ -377,6 +380,18 @@
 <span class="k">[load-scenes]</span>
 <span class="c1"># Name of column used to mark scene cut points.</span>
 <span class="c1">#start-col-name = Start Frame</span>
+
+
+<span class="k">[save-qp]</span>
+
+<span class="c1"># Filename format of QP file. Can use $VIDEO_NAME macro.</span>
+<span class="c1">#filename = $VIDEO_NAME.qp</span>
+
+<span class="c1"># Folder to output QP file to. Overrides [global] output option.</span>
+<span class="c1">#output = /usr/tmp/images</span>
+
+<span class="c1"># Disable shifting frame numbers by start time (yes/no).</span>
+<span class="c1">#disable-shift = no</span>
 
 
 <span class="c1">#</span>
