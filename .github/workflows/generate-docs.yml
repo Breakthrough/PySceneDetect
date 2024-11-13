@@ -51,6 +51,15 @@ jobs:
           git config --global user.name github-actions
           git config --global user.email github-actions@github.com
 
+      - name: Check CLI Documentation
+        shell: bash
+        run: |
+          if [[ `git status --porcelain=1 | wc -l` -ne 0 ]]; then
+            echo "CLI documentation is of date: docs/cli.rst does not match output after running docs/generate_cli_docs.py!"
+            echo "Re-run `python docs/generate_cli_docs.py` to update and commit the result."
+            exit 1
+          fi
+
       - name: Generate Docs
         run: |
           sphinx-build -b html docs build

@@ -1,0 +1,51 @@
+# Checks that the CLI docs are up-to-date. If this fails on your PR, there may be some changes
+# to the command-line docs that were not updated. Run `python docs/generate_cli_docs.py` from
+# the root PySceneDetect source folder and commit the changes to resolve the issue.
+name: Check Documentation
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  pull_request:
+    paths:
+      - docs/**
+      - scenedetect/**
+  push:
+    paths:
+      - docs/**
+      - scenedetect/**
+    branches:
+      - main
+      - 'releases/**'
+    tags:
+      - v*-release
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip build wheel virtualenv
+          pip install -r docs/requirements.txt
+          pip install -r dist/requirements_windows.txt
+
+
+      - name: Check CLI Documentation
+        shell: bash
+        run: |
+          if [[ `git status --porcelain=1 | wc -l` -ne 0 ]]; then
+            echo "CLI documentation is of date: docs/cli.rst does not match output after running docs/generate_cli_docs.py!"
+            echo "Re-run `python docs/generate_cli_docs.py` to update and commit the result."
+            exit 1
+          fi
