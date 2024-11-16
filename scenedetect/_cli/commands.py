@@ -29,9 +29,7 @@ from scenedetect.scene_manager import (
     write_scene_list,
     write_scene_list_html,
 )
-from scenedetect.scene_manager import (
-    save_images_mt as save_images_impl,
-)
+from scenedetect.scene_manager import save_images as save_images_impl
 from scenedetect.video_splitter import split_video_ffmpeg, split_video_mkvmerge
 
 logger = logging.getLogger("pyscenedetect")

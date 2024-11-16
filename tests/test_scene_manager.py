@@ -116,7 +116,7 @@ def test_save_images(test_video_file):
         total_images = 0
         for scene_number in image_filenames:
             for path in image_filenames[scene_number]:
-                assert os.path.exists(path)
+                assert os.path.exists(path), f"expected {path} to exist"
                 total_images += 1
 
         assert total_images == len(glob.glob(image_name_glob))
@@ -151,7 +151,7 @@ def test_save_images_zero_width_scene(test_video_file):
         total_images = 0
         for scene_number in image_filenames:
             for path in image_filenames[scene_number]:
-                assert os.path.exists(path)
+                assert os.path.exists(path), f"expected {path} to exist"
                 total_images += 1
         assert total_images == len(glob.glob(image_name_glob))
     finally:
