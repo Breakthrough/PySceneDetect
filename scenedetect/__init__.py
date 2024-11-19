@@ -42,6 +42,7 @@ from scenedetect.detectors import (
     ThresholdDetector,
     HistogramDetector,
     HashDetector,
+    KoalaDetector,
 )
 from scenedetect.backends import (
     AVAILABLE_BACKENDS,

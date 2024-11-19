@@ -7,4 +7,5 @@ numpy
 opencv-python-headless
 platformdirs
 pytest>=7.0
+scikit-image
 tqdm
