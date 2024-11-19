@@ -66,6 +66,7 @@ dev = [
     "platformdirs",
     "pytest>=7.0",
     "pytest-rerunfailures",
+    "scikit-image",
     "tqdm",
 ]
 docs = ["Sphinx==7.0.1", "sphinx-copybutton==0.5.2"]

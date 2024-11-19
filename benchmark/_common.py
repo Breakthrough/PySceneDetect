@@ -29,6 +29,7 @@ from scenedetect import (
     ContentDetector,
     HashDetector,
     HistogramDetector,
+    KoalaDetector,
     ThresholdDetector,
 )
 
@@ -39,6 +40,8 @@ DETECTORS: dict[str, type] = {
     "detect-content": ContentDetector,
     "detect-hash": HashDetector,
     "detect-hist": HistogramDetector,
+    # TODO: KoalaDetector should be benchmarked without auto-downscaling (see its process_frame).
+    "detect-koala": KoalaDetector,
     "detect-threshold": ThresholdDetector,
 }
 

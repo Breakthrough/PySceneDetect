@@ -16,6 +16,7 @@ results by using known ground truths of scene cut locations in the
 test case material.
 """
 
+import importlib.util
 import os
 from dataclasses import dataclass
 
@@ -29,16 +30,21 @@ from scenedetect.detectors import (
     ContentDetector,
     HashDetector,
     HistogramDetector,
+    KoalaDetector,
     ThresholdDetector,
 )
 
 # Untyped so each entry retains its concrete `type[...]` for parameterized construction
 # (calls below pass detector-specific kwargs like `min_scene_len`).
+# KoalaDetector requires the optional `scikit-image` package; it is only tested when installed.
+_HAVE_SKIMAGE = importlib.util.find_spec("skimage") is not None
+
 FAST_CUT_DETECTORS = (
     AdaptiveDetector,
     ContentDetector,
     HashDetector,
     HistogramDetector,
+    *((KoalaDetector,) if _HAVE_SKIMAGE else ()),
 )
 
 ALL_DETECTORS = (*FAST_CUT_DETECTORS, ThresholdDetector)
@@ -133,7 +139,9 @@ def get_fast_cut_test_cases():
             ),
             id=f"{detector_type.__name__}/m=30",
         )
+        # TODO: Make this work, right now min_scene_len isn't used by the detector.
         for detector_type in FAST_CUT_DETECTORS
+        if detector_type != KoalaDetector
     ]
     return test_cases
 
@@ -246,6 +254,9 @@ def test_detectors_with_stats(test_video_file):
 )
 def test_min_scene_len_accepts_time_values(detector_type, min_scene_len):
     """Detectors accept min_scene_len as int (frames), float (seconds), or str (timecode)."""
+    # TODO: Make this work, right now min_scene_len isn't used by the detector.
+    if detector_type is KoalaDetector:
+        pytest.skip("KoalaDetector does not apply min_scene_len yet.")
     test_case = TestCase(
         path=get_absolute_path("resources/goldeneye.mp4"),
         detector=detector_type(min_scene_len=min_scene_len),
