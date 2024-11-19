@@ -19,6 +19,8 @@ The `scenedetect` API is easy to integrate with most application workflows, whil
 
         * :class:`HashDetector <scenedetect.detectors.hash_detector.HashDetector>`: finds fast cuts using perceptual image hashing
 
+        * :class:`KoalaDetector <scenedetect.detectors.koala_detector.KoalaDetector>`: finds fast cuts using histogram and edge-map similarity metric from Koala-36M (experimental)
+
     * :ref:`scenedetect.output ✂️ <scenedetect-output>`: Output formats:
 
         * :func:`split_video_ffmpeg <scenedetect.output.split_video_ffmpeg>` and :func:`split_video_mkvmerge <scenedetect.output.split_video_mkvmerge>` split a video based on the detected scenes

@@ -20,8 +20,8 @@ This module contains the following scene detection algorithms:
    Detects slow transitions using average pixel intensity in RGB (fade in/fade out)
 
  * :mod:`AdaptiveDetector <scenedetect.detectors.adaptive_detector>`:
-   Performs rolling average on differences in HSV colorspace. In some cases, this can improve
-   handling of fast motion.
+   Performs rolling average on differences in HSV colorspace. In some cases, this can
+   improve handling of fast motion.
 
  * :mod:`HistogramDetector <scenedetect.detectors.histogram_detector>`:
    Uses histogram differences for Y channel in YUV space to find fast cuts.
@@ -29,10 +29,14 @@ This module contains the following scene detection algorithms:
  * :mod:`HashDetector <scenedetect.detectors.hash_detector>`:
    Uses perceptual hashing to calculate similarity between adjacent frames.
 
+ * :mod:`KoalaDetector <scenedetect.detectors.koala_detector>`:
+   Uses histogram differences and edge-map similarity as per the Koala-36M algorithm for
+   finding fast cuts. Experimental.
+
 Detection algorithms are created by implementing the
 :class:`SceneDetector <scenedetect.detector.SceneDetector>` interface. Detectors are
-typically attached to a :class:`SceneManager <scenedetect.scene_manager.SceneManager>` when
-processing videos, however they can also be used to process frames directly.
+typically attached to a :class:`SceneManager <scenedetect.scene_manager.SceneManager>`
+when processing videos, however they can also be used to process frames directly.
 """
 
 from scenedetect.detectors.content_detector import ContentDetector as ContentDetector  # noqa: I001
@@ -40,6 +44,7 @@ from scenedetect.detectors.threshold_detector import ThresholdDetector as Thresh
 from scenedetect.detectors.adaptive_detector import AdaptiveDetector as AdaptiveDetector
 from scenedetect.detectors.hash_detector import HashDetector as HashDetector
 from scenedetect.detectors.histogram_detector import HistogramDetector as HistogramDetector
+from scenedetect.detectors.koala_detector import KoalaDetector as KoalaDetector
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 #                                                                             #

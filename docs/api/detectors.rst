@@ -43,6 +43,15 @@ HistogramDetector
 .. autoclass:: scenedetect.detectors.histogram_detector.HistogramDetector
    :members:
 
+KoalaDetector
+=============
+
+.. automodule:: scenedetect.detectors.koala_detector
+   :no-members:
+
+.. autoclass:: scenedetect.detectors.koala_detector.KoalaDetector
+   :members:
+
 ThresholdDetector
 =================
 

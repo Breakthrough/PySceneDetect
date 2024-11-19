@@ -31,6 +31,7 @@ from scenedetect.detectors import (
     ContentDetector,
     HashDetector,
     HistogramDetector,
+    KoalaDetector,
     ThresholdDetector,
 )
 from scenedetect.output import is_ffmpeg_available, is_mkvmerge_available
@@ -294,6 +295,8 @@ class CliContext:
             self.default_detector = (HashDetector, self.get_detect_hash_params())
         elif default_detector == "detect-hist":
             self.default_detector = (HistogramDetector, self.get_detect_hist_params())
+        elif default_detector == "detect-koala":
+            self.default_detector = (KoalaDetector, self.get_detect_koala_params())
         elif default_detector == "detect-threshold":
             self.default_detector = (ThresholdDetector, self.get_detect_threshold_params())
         else:
@@ -448,6 +451,21 @@ class CliContext:
             "min_scene_len": min_scene_len_frames,
             "size": self.config.get_value("detect-hash", "size", size),
             "threshold": self.config.get_value("detect-hash", "threshold", threshold),
+        }
+
+    def get_detect_koala_params(
+        self,
+        threshold: float | None = None,
+        adaptive: bool | None = None,
+        min_scene_len: str | None = None,
+    ) -> dict[str, ty.Any]:
+        """Handle detect-koala command options and return args to construct one with."""
+
+        min_scene_len_frames = self._resolve_min_scene_len("detect-koala", min_scene_len)
+        return {
+            "adaptive": self.config.get_value("detect-koala", "adaptive", adaptive),
+            "min_scene_len": min_scene_len_frames,
+            "threshold": self.config.get_value("detect-koala", "threshold", threshold),
         }
 
     #

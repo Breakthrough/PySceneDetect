@@ -372,6 +372,51 @@ Options
   Minimum length of any scene. Overrides global min-scene-len (-m) setting. TIMECODE can be specified as exact number of frames, a time in seconds followed by s, or a timecode in the format HH:MM:SS or HH:MM:SS.nnn.
 
 
+.. _command-detect-koala:
+
+.. program:: scenedetect detect-koala
+
+
+``detect-koala``
+========================================================================
+
+Find fast cuts using the Koala-36M transition model (experimental).
+
+Adjacent frames are scored by a linear model over the correlation of their per-channel histograms and the structural similarity of their edge maps (https://github.com/KwaiVGI/Koala-36M). Frames scoring below the threshold are flagged, and each run of flagged frames yields one cut at its first frame. Scores are typically between -4 (very different) and +3 (near identical).
+
+Saved as the ``koala_hist``, ``koala_ssim``, and ``koala_score`` metrics in a statsfile.
+
+This detector is experimental, and its defaults and output may change in future releases.
+
+
+Examples
+------------------------------------------------------------------------
+
+
+    ``scenedetect -i video.mp4 detect-koala``
+
+    ``scenedetect -i video.mp4 detect-koala --threshold -0.5 --adaptive``
+
+
+Options
+------------------------------------------------------------------------
+
+
+.. option:: -t VAL, --threshold VAL
+
+  Frames scoring below this value are flagged as part of a transition. Lower values are less sensitive to changes.
+
+  Default: ``0.0``
+
+.. option:: --adaptive, --no-adaptive
+
+  Also flag frames whose smoothed score drops far below the mean of the preceding frames, as in the reference implementation. Off by default as it reduced accuracy on benchmarks.
+
+.. option:: -m TIMECODE, --min-scene-len TIMECODE
+
+  Minimum length of any scene. Overrides global min-scene-len (-m) setting. TIMECODE can be specified as exact number of frames, a time in seconds followed by s, or a timecode in the format HH:MM:SS or HH:MM:SS.nnn.
+
+
 .. _command-detect-threshold:
 
 .. program:: scenedetect detect-threshold

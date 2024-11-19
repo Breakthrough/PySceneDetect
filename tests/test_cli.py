@@ -34,11 +34,15 @@ from pathlib import Path
 import cv2
 import numpy as np
 import pytest
+from click.testing import CliRunner
 
 import scenedetect
+from scenedetect._cli import scenedetect as _scenedetect_cli
+from scenedetect._cli.context import CliContext
+from scenedetect._cli.controller import run_scenedetect
 from scenedetect.output import is_ffmpeg_available, is_mkvmerge_available
 from scenedetect.platform import StrPath
-from tests.helpers import invoke_cli
+from tests.helpers import close_video_stream, invoke_cli
 
 SCENEDETECT_CMD = sys.executable + " -m scenedetect"
 
@@ -48,6 +52,7 @@ ALL_DETECTORS = [
     "detect-adaptive",
     "detect-hist",
     "detect-hash",
+    "detect-koala",
 ]
 ALL_BACKENDS = ["opencv", "pyav"]
 
@@ -1487,3 +1492,38 @@ def test_cli_save_fcp_fcp7(tmp_path: Path):
     assert second_file is not None
     assert second_file.attrib["id"] == "file1"
     assert second_file.find("pathurl") is None
+
+
+@pytest.mark.parametrize(
+    "config_adaptive,cli_flag,expected",
+    [
+        (None, None, False),
+        (None, "--adaptive", True),
+        (None, "--no-adaptive", False),
+        ("yes", None, True),
+        ("yes", "--no-adaptive", False),
+        ("no", "--adaptive", True),
+    ],
+)
+def test_cli_detect_koala_adaptive(
+    tmp_path: Path, config_adaptive: str | None, cli_flag: str | None, expected: bool
+):
+    """`--adaptive` / `--no-adaptive` override the `[detect-koala] adaptive` config setting."""
+    config_path = Path(DEFAULT_CONFIG_FILE)
+    if config_adaptive is not None:
+        config_path = tmp_path / "koala.cfg"
+        config_path.write_text(f"[detect-koala]\nadaptive = {config_adaptive}\n")
+    args = ["-i", DEFAULT_VIDEO_PATH, "-c", str(config_path), "time", "-s", "2s", "-d", "1s"]
+    args += ["detect-koala"] + ([cli_flag] if cli_flag else [])
+    context = CliContext()
+    try:
+        result = CliRunner().invoke(_scenedetect_cli, args, obj=context)
+        assert result.exit_code == 0, result.output
+        assert context.scene_manager is not None
+        [detector] = context.scene_manager._detector_list
+        assert isinstance(detector, scenedetect.KoalaDetector)
+        assert detector._adaptive is expected
+        run_scenedetect(context)
+    finally:
+        if context.video_stream is not None:
+            close_video_stream(context.video_stream)

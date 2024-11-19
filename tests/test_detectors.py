@@ -29,6 +29,7 @@ from scenedetect.detectors import (
     ContentDetector,
     HashDetector,
     HistogramDetector,
+    KoalaDetector,
     ThresholdDetector,
 )
 
@@ -39,6 +40,7 @@ FAST_CUT_DETECTORS = (
     ContentDetector,
     HashDetector,
     HistogramDetector,
+    KoalaDetector,
 )
 
 ALL_DETECTORS = (*FAST_CUT_DETECTORS, ThresholdDetector)
@@ -292,3 +294,135 @@ def test_adaptive_detector_min_scene_len_uses_target_frame():
 
     cut_frames = [cut.frame_num for cut in cuts]
     assert cut_frames == [100, 140]
+
+
+@pytest.mark.parametrize("start_time", [1217, 1224])
+def test_koala_detector_keeps_cut_near_start(start_time: int):
+    """KoalaDetector emits cuts that fall within its look-ahead buffer of the first frame.
+
+    The cut at frame 1226 is 9 (or 2) frames after `start_time`; `min_scene_len` is 0 so the
+    minimum-length rule cannot suppress it.
+    """
+    scene_list = detect(
+        video_path=get_absolute_path("resources/goldeneye.mp4"),
+        detector=KoalaDetector(min_scene_len=0),
+        start_time=start_time,
+        end_time=1373,
+    )
+    start_frames = [timecode.frame_num for timecode, _ in scene_list]
+    assert start_frames == [start_time, 1226, 1260, 1281, 1334, 1365]
+    assert scene_list[-1][1].frame_num == 1373
+
+
+def test_koala_detector_callback_fires_per_cut():
+    """KoalaDetector returns cuts from `process_frame`, so the SceneManager callback sees each."""
+    video = VideoStreamCv2(get_absolute_path("resources/goldeneye.mp4"))
+    video.seek(1199)
+    scene_manager = SceneManager()
+    scene_manager.add_detector(KoalaDetector())
+    callback_frames: list[int] = []
+    scene_manager.detect_scenes(
+        video=video,
+        end_time=FrameTimecode(1450, video.frame_rate),
+        callback=lambda _image, timecode: callback_frames.append(timecode.frame_num),
+    )
+    assert callback_frames == [1226, 1260, 1281, 1334, 1365]
+    scene_starts = [start.frame_num for start, _ in scene_manager.get_scene_list()]
+    assert scene_starts == [1199, *callback_frames]
+
+
+def _koala_cuts_from_scores(scores: list[float], **kwargs) -> list[int]:
+    """Drive KoalaDetector's cut logic with precomputed frame scores, bypassing image processing.
+
+    Returns the indices into `scores` at which cuts were emitted (`min_scene_len` is 0).
+    """
+    detector = KoalaDetector(min_scene_len=0, **kwargs)
+    detector._last_cut = FrameTimecode(0, 24.0)
+    cuts: list[FrameTimecode] = []
+    for index, score in enumerate(scores):
+        cuts += detector._score_frame(FrameTimecode(index + 1, 24.0), score)
+    cuts += detector.post_process(FrameTimecode(len(scores) + 1, 24.0))
+    return [cut.frame_num - 1 for cut in cuts]
+
+
+def _reference_koala_cuts(scores: list[float], threshold: float = 0.0) -> list[int]:
+    """Reference for KoalaDetector's placement rule with the adaptive rule off: one cut at the
+    first frame of each run of consecutive scores below `threshold`."""
+    cuts: list[int] = []
+    in_run = False
+    for index, score in enumerate(scores):
+        flagged = score < threshold
+        if flagged and not in_run:
+            cuts.append(index)
+        in_run = flagged
+    return cuts
+
+
+def test_koala_detector_cut_placement_matches_reference():
+    """Random score sequences yield the same cuts as the reference placement rule."""
+    rng = np.random.default_rng(1)
+    for scores in rng.uniform(-1.0, 2.5, size=(200, 40)).tolist():
+        assert _koala_cuts_from_scores(scores) == _reference_koala_cuts(scores)
+    # A multi-frame transition yields one cut at its first frame, for both modes.
+    scores = [2.0] * 5 + [-1.0, -1.0, -1.0] + [2.0] * 3
+    assert _koala_cuts_from_scores(scores) == [5]
+    assert _koala_cuts_from_scores(scores, adaptive=True) == [5]
+
+
+def test_koala_detector_adaptive_rule_flags_smoothed_drop():
+    """A dip that never crosses `threshold` is only found by the adaptive rule."""
+    # Smoothed score at index 11 is 0.3, far below the trimmed mean (2.0) of the window.
+    scores = [2.0] * 10 + [0.3, 0.3, 0.3] + [2.0] * 4
+    assert _koala_cuts_from_scores(scores) == []
+    assert _koala_cuts_from_scores(scores, adaptive=True) == [11]
+
+
+def test_koala_detector_adaptive_smear_does_not_move_cut():
+    """The moving average smears a large drop onto the preceding frame, which the adaptive rule
+    flags; the cut must stay on the frame whose raw score crossed the threshold."""
+    scores = [2.0] * 10 + [-3.0] + [2.0] * 5
+    assert _koala_cuts_from_scores(scores) == [10]
+    assert _koala_cuts_from_scores(scores, adaptive=True) == [10]
+
+
+@pytest.mark.parametrize("adaptive", [False, True])
+def test_koala_detector_cut_on_final_frame(adaptive: bool):
+    """A transition on the very last frame is still emitted (from `post_process` when the
+    smoothing look-ahead holds it back)."""
+    detector = KoalaDetector(min_scene_len=0, adaptive=adaptive)
+    black = np.zeros((64, 64, 3), dtype=np.uint8)
+    white = np.full((64, 64, 3), 255, dtype=np.uint8)
+    cuts: list[FrameTimecode] = []
+    for frame_num, frame in enumerate([black] * 10 + [white]):
+        cuts += detector.process_frame(FrameTimecode(frame_num, 24.0), frame)
+    cuts += detector.post_process(FrameTimecode(11, 24.0))
+    assert [cut.frame_num for cut in cuts] == [10]
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {"filter_size": 2},
+        {"filter_size": 0},
+        {"window_size": 4},
+        {"window_size": 8, "filter_size": 9},
+    ],
+)
+def test_koala_detector_rejects_invalid_window(kwargs: dict):
+    with pytest.raises(ValueError):
+        KoalaDetector(**kwargs)
+    # The smallest valid window is also the largest valid filter for it.
+    KoalaDetector(window_size=5, filter_size=5)
+
+
+@pytest.mark.parametrize(
+    "frame",
+    [
+        np.zeros((64, 64, 3), dtype=np.float32),
+        np.zeros((64, 64), dtype=np.uint8),
+        np.zeros((64, 64, 1), dtype=np.uint8),
+    ],
+)
+def test_koala_detector_rejects_invalid_frames(frame: np.ndarray):
+    with pytest.raises(ValueError):
+        KoalaDetector().process_frame(FrameTimecode(0, 24.0), frame)

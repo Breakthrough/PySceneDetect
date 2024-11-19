@@ -791,6 +791,7 @@ Development
  - [general] `-f`, `--frame-rate`, and `--framerate` are now aliases of the same CLI option, and all forms appear in help and documentation. If multiple forms are given, the last value is used [#548](https://github.com/Breakthrough/PySceneDetect/issues/548)
  - [api] `write_scene_list()` now also accepts a path (`str` or `pathlib.Path`) as the first argument in addition to an open file handle; paths are opened and closed automatically [#523](https://github.com/Breakthrough/PySceneDetect/issues/523)
  - [api] Scene-list output functions for EDL, FCPXML, FCP7 XML, and OTIO now accept an open text file handle, a string path, or a `pathlib.Path`; paths are opened and closed automatically [#567](https://github.com/Breakthrough/PySceneDetect/issues/567)
+ - [feature] Added experimental `KoalaDetector` / `detect-koala`, which finds fast cuts using the [Koala-36M](https://github.com/KwaiVGI/Koala-36M) transition model (per-channel histogram correlation combined with edge-map structural similarity). Supports `--threshold`, `--min-scene-len`, and `--adaptive` (the paper's adaptive rule, off by default). [#441](https://github.com/Breakthrough/PySceneDetect/issues/441) [#459](https://github.com/Breakthrough/PySceneDetect/pull/459)
 
 ## PySceneDetect 0.8 (TBD)
 

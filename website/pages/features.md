@@ -48,6 +48,7 @@ PySceneDetect implements a variety of different detection algorithms which can b
  - **content-aware scene detection** (`detect-content`): uses differences in HSL colorspace combined with filtering to detect shot changes (fast cut)
  - **content-aware scene detection** (`detect-hash`): uses perceptual hashing to determine differences between frames to find shot changes (fast cut)
  - **content-aware scene detection** (`detect-hist`): uses differences in histograms of Y channel of frames after conversion to YUV (fast cut)
+ - **content-aware scene detection** (`detect-koala`, experimental): uses the Koala-36M transition model, combining per-channel histogram correlation with edge-map structural similarity (fast cut)
  - **threshold scene detection** (`detect-threshold`): uses average frame intensity (brightness) to detect slow transitions (fade in/out)
 
  By default, detection methods are tuned to provide high performance during processing, while maintaining reasonable accuracy. Each detection method is configurable, and different parameters can be changed for specific use cases. See [the documentation](docs.md) for details, and [the benchmarks page](benchmarks.md) for how each detector scores on public shot-boundary-detection datasets.

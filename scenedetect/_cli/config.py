@@ -387,6 +387,11 @@ CONFIG_MAP: ConfigDict = {
         "threshold": RangeValue(0.20, min_val=0.0, max_val=1.0),
         "bins": RangeValue(128, min_val=1, max_val=256),
     },
+    "detect-koala": {
+        "adaptive": False,
+        "min-scene-len": TimecodeValue(0),
+        "threshold": RangeValue(0.0, min_val=-10.0, max_val=10.0),
+    },
     "detect-threshold": {
         "add-last-scene": True,
         "fade-bias": RangeValue(0, min_val=-100.0, max_val=100.0),
@@ -501,6 +506,7 @@ CHOICE_MAP: dict[str, dict[str, list[str]]] = {
             "detect-threshold",
             "detect-hash",
             "detect-hist",
+            "detect-koala",
         ],
         "downscale-method": [value.name.lower() for value in Interpolation],
         "verbosity": ["debug", "info", "warning", "error", "none"],

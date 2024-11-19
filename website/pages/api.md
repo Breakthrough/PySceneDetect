@@ -33,6 +33,12 @@ The scene change detection algorithm uses histograms of the Y channel in the YCb
 
 The perceptual hash detector (`detect-hash`) calculates a hash for a frame and compares that hash to the previous frame's hash. If the hashes differ by more than the defined threshold, then a scene change is recorded. The hashing algorithm used for this detector is an implementation of `phash` from the [imagehash](https://github.com/JohannesBuchner/imagehash) library. In practice, this detector works similarly to `detect-content` in that it picks up large differences between adjacent frames. One important note is that the hashing algorithm converts the frames to grayscale, so this detector is insensitive to changes in colors if the brightness remains constant. In general, this algorithm is very computationally efficient compared to `detect-content` or `detect-adaptive`, especially if downscaling is not used. See [here](https://www.hackerfactor.com/blog/index.php?/archives/432-Looks-Like-It.html) for an overview of how a perceptual hashing algorithm can be used for detecting similarity (or otherwise) of images and a visual depiction of the algorithm.
 
+## Koala Detector (Experimental)
+
+The Koala detector (`detect-koala`) implements the transition scoring method from the [Koala-36M paper](https://github.com/KwaiVGI/Koala-36M). The transition score is calculated as the difference between adjacent (per-channel) and structural similarity (edges) differences between frames. These values are combined by a (fixed) linear model into a single score (`koala_score` in the statsfile). Frames scoring below the threshold (`--threshold/-t`) are treated as part of a transition, and a cut is placed at the first frame of each transition. The paper includes an adaptive rule , which also flags frames whose smoothed score drops far below the preceding frames, can be enabled with `--adaptive`. This feature is disabled by default as it seems to reduce benchmark accuracy.
+
+This detector is experimental and its defaults may change in future releases.
+
 
 # Creating New Detection Algorithms
 

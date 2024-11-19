@@ -157,10 +157,11 @@ def format_option(command: click.Command, opt: click.Option, flags: list[str]) -
     if isinstance(opt, click.Argument):
         yield f"\n.. option:: {opt.name}\n"
         return
+    # Boolean flags declared as `--flag/--no-flag` keep the negated form in `secondary_opts`.
     yield "\n.. option:: {}\n".format(
         ", ".join(
             arg if opt.metavar is None else f"{arg} {opt.metavar}"
-            for arg in sorted(opt.opts, reverse=True)
+            for arg in sorted(opt.opts, reverse=True) + sorted(opt.secondary_opts, reverse=True)
         )
     )
 
@@ -194,7 +195,11 @@ def generate_command_help(
 
     replacements = [
         opt
-        for opts in [param.opts for param in command.params if hasattr(param, "opts")]
+        for opts in [
+            param.opts + getattr(param, "secondary_opts", [])
+            for param in command.params
+            if hasattr(param, "opts")
+        ]
         for opt in opts
     ]
 
