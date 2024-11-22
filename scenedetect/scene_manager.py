@@ -86,6 +86,7 @@ import queue
 import sys
 import threading
 from enum import Enum
+from pathlib import Path
 from typing import Callable, Dict, Iterable, List, Optional, TextIO, Tuple, Union
 
 import cv2
@@ -587,8 +588,13 @@ def save_images(
                     frame_im = cv2.resize(
                         frame_im, (0, 0), fx=scale, fy=scale, interpolation=interpolation.value
                     )
-
-                cv2.imwrite(get_and_create_path(file_path, output_dir), frame_im, imwrite_param)
+                path = Path(get_and_create_path(file_path, output_dir))
+                (is_ok, encoded) = cv2.imencode(f".{image_extension}", frame_im, imwrite_param)
+                if is_ok:
+                    encoded.tofile(path)
+                else:
+                    logger.error(f"Failed to encode image for {file_path}")
+            #
             else:
                 completed = False
                 break
