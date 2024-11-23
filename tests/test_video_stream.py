@@ -20,7 +20,6 @@ import os.path
 from dataclasses import dataclass
 from typing import List, Type
 
-import moviepy
 import numpy
 import pytest
 
@@ -42,7 +41,11 @@ PIXEL_ASPECT_RATIO_TOLERANCE = 0.001
 # The warning occurs when reading the last frame, which VideoStreamMoviePy handles gracefully.
 MOVIEPY_WARNING_FILTER = "ignore:.*Using the last valid frame instead.:UserWarning"
 
-MOVIEPY_MAJOR_VERSION = int(moviepy.__version__.split(".")[0])
+
+def get_moviepy_major_version() -> int:
+    import moviepy
+
+    return int(moviepy.__version__.split(".")[0])
 
 
 def calculate_frame_delta(frame_a, frame_b, roi=None) -> float:
@@ -357,8 +360,8 @@ def test_corrupt_video(vs_type: Type[VideoStream], corrupt_video_file: str):
     """Test that backend handles video with corrupt frame gracefully with defaults."""
     if vs_type == VideoManager:
         pytest.skip(reason="VideoManager does not support handling corrupt videos.")
-    if vs_type == VideoStreamMoviePy and MOVIEPY_MAJOR_VERSION >= 2:
-        # Due to changes in MoviePy 2.0, loading this file causes an exception to be thrown.
+    if vs_type == VideoStreamMoviePy and get_moviepy_major_version() >= 2:
+        # Due to changes in MoviePy 2.0 (#461), loading this file causes an exception to be thrown.
         # See https://github.com/Zulko/moviepy/pull/2253 for a PR that attempts to more gracefully
         # handle this case, however even once that is fixed, we will be unable to run this test
         # on certain versions of MoviePy.

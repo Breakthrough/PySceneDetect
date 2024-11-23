@@ -180,7 +180,7 @@ class VideoStreamMoviePy(VideoStream):
         try:
             self._last_frame = self._reader.get_frame(target.get_seconds())
             if hasattr(self._reader, "last_read") and target >= self.duration:
-                raise SeekError("MoviePy > 2.0 does not have proper EOF semantics.")
+                raise SeekError("MoviePy > 2.0 does not have proper EOF semantics (#461).")
             self._frame_number = min(
                 target.frame_num,
                 FrameTimecode(self._reader.infos["duration"], self.frame_rate).frame_num - 1,
@@ -228,6 +228,7 @@ class VideoStreamMoviePy(VideoStream):
         if not hasattr(self._reader, "lastread") or self._eof:
             return False
         has_last_read = hasattr(self._reader, "last_read")
+        # In MoviePy 2.0 there is a separate property we need to read named differently (#461).
         self._last_frame = self._reader.last_read if has_last_read else self._reader.lastread
         # Read the *next* frame for the following call to read, and to check for EOF.
         frame = self._reader.read_frame()

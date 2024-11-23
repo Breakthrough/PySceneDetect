@@ -41,10 +41,11 @@ def run_scenedetect(context: CliContext):
         logger.debug("No input specified.")
         return
 
-    # Suppress warnings when reading past EOF in MoviePy.
-    is_debug = context.config.get_value("global", "verbosity") != "debug"
-    if isinstance(context.video_stream, VideoStreamMoviePy) and not is_debug:
-        warnings.filterwarnings("ignore", module="moviepy")
+    # Suppress warnings when reading past EOF in MoviePy (#461).
+    if VideoStreamMoviePy and isinstance(context.video_stream, VideoStreamMoviePy):
+        is_debug = context.config.get_value("global", "verbosity") != "debug"
+        if not is_debug:
+            warnings.filterwarnings("ignore", module="moviepy")
 
     if context.load_scenes_input:
         # Skip detection if load-scenes was used.

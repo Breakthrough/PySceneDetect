@@ -62,6 +62,12 @@ jobs:
           pip install av opencv-python-headless --only-binary :all:
           pip install -r requirements_headless.txt
 
+      - name: Install MoviePy
+        # TODO: We can only run MoviePy tests on systems that have ffmpeg.
+        if: ${{ runner.arch == 'X64' }}
+        run: |
+          pip install moviepy
+
       - name: Checkout test resources
         run: |
           git fetch --depth=1 https://github.com/Breakthrough/PySceneDetect.git refs/heads/resources:refs/remotes/origin/resources
