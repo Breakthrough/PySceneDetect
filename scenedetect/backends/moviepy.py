@@ -189,7 +189,10 @@ class VideoStreamMoviePy(VideoStream):
                 raise SeekError("Target frame is beyond end of video!") from ex
             raise
         self._last_frame = self._reader.lastread
-        self._frame_number = target.frame_num
+        self._frame_number = min(
+            target.frame_num,
+            FrameTimecode(self._reader.infos["duration"], self.frame_rate).frame_num - 1,
+        )
 
     def reset(self):
         """Close and re-open the VideoStream (should be equivalent to calling `seek(0)`)."""
@@ -215,10 +218,10 @@ class VideoStreamMoviePy(VideoStream):
             return self._last_frame_rgb
         if not hasattr(self._reader, "lastread"):
             return False
+        # TODO: In Moviepy2.0 this is broken - lastread is updated in-place in some cases.
         self._last_frame = self._reader.lastread
-        self._reader.read_frame()
-        if self._last_frame is self._reader.lastread:
-            # Didn't decode a new frame, must have hit EOF.
+        frame = self._reader.read_frame()
+        if frame is self._last_frame:
             if self._eof:
                 return False
             self._eof = True
@@ -226,5 +229,5 @@ class VideoStreamMoviePy(VideoStream):
         if decode:
             if self._last_frame is not None:
                 self._last_frame_rgb = cv2.cvtColor(self._last_frame, cv2.COLOR_BGR2RGB)
-            return self._last_frame_rgb
-        return True
+            return self._last_frame_rgb if not self._eof else False
+        return not self._eof
