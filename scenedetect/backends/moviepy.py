@@ -174,13 +174,19 @@ class VideoStreamMoviePy(VideoStream):
             SeekError: An error occurs while seeking, or seeking is not supported.
             ValueError: `target` is not a valid value (i.e. it is negative).
         """
+        success = False
         if not isinstance(target, FrameTimecode):
             target = FrameTimecode(target, self.frame_rate)
         try:
-            self._reader.get_frame(target.get_seconds())
+            self._last_frame = self._reader.get_frame(target.get_seconds())
+            if hasattr(self._reader, "last_read") and target >= self.duration:
+                raise SeekError("MoviePy > 2.0 does not have proper EOF semantics (#461).")
+            self._frame_number = min(
+                target.frame_num,
+                FrameTimecode(self._reader.infos["duration"], self.frame_rate).frame_num - 1,
+            )
+            success = True
         except OSError as ex:
-            # Leave the object in a valid state.
-            self.reset()
             # TODO(#380): Other backends do not currently throw an exception if attempting to seek
             # past EOF. We need to ensure consistency for seeking past end of video with respect to
             # errors and behaviour, and should probably gracefully stop at the last frame instead
@@ -188,15 +194,18 @@ class VideoStreamMoviePy(VideoStream):
             if target >= self.duration:
                 raise SeekError("Target frame is beyond end of video!") from ex
             raise
-        self._last_frame = self._reader.lastread
-        self._frame_number = target.frame_num
+        finally:
+            # Leave the object in a valid state on any errors.
+            if not success:
+                self.reset()
 
-    def reset(self):
+    def reset(self, print_infos=False):
         """Close and re-open the VideoStream (should be equivalent to calling `seek(0)`)."""
-        self._reader.initialize()
-        self._last_frame = self._reader.read_frame()
+        self._last_frame = False
+        self._last_frame_rgb = None
         self._frame_number = 0
         self._eof = False
+        self._reader = FFMPEG_VideoReader(self._path, print_infos=print_infos)
 
     def read(self, decode: bool = True, advance: bool = True) -> Union[np.ndarray, bool]:
         """Read and decode the next frame as a np.ndarray. Returns False when video ends.
@@ -210,21 +219,27 @@ class VideoStreamMoviePy(VideoStream):
             If decode = False, a bool indicating if advancing to the the next frame succeeded.
         """
         if not advance:
+            last_frame_valid = self._last_frame is not None and self._last_frame is not False
+            if not last_frame_valid:
+                return False
             if self._last_frame_rgb is None:
                 self._last_frame_rgb = cv2.cvtColor(self._last_frame, cv2.COLOR_BGR2RGB)
             return self._last_frame_rgb
-        if not hasattr(self._reader, "lastread"):
+        if not hasattr(self._reader, "lastread") or self._eof:
             return False
-        self._last_frame = self._reader.lastread
-        self._reader.read_frame()
-        if self._last_frame is self._reader.lastread:
-            # Didn't decode a new frame, must have hit EOF.
+        has_last_read = hasattr(self._reader, "last_read")
+        # In MoviePy 2.0 there is a separate property we need to read named differently (#461).
+        self._last_frame = self._reader.last_read if has_last_read else self._reader.lastread
+        # Read the *next* frame for the following call to read, and to check for EOF.
+        frame = self._reader.read_frame()
+        if frame is self._last_frame:
             if self._eof:
                 return False
             self._eof = True
         self._frame_number += 1
         if decode:
-            if self._last_frame is not None:
+            last_frame_valid = self._last_frame is not None and self._last_frame is not False
+            if last_frame_valid:
                 self._last_frame_rgb = cv2.cvtColor(self._last_frame, cv2.COLOR_BGR2RGB)
-            return self._last_frame_rgb
-        return True
+                return self._last_frame_rgb
+        return not self._eof

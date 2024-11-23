@@ -42,6 +42,12 @@ PIXEL_ASPECT_RATIO_TOLERANCE = 0.001
 MOVIEPY_WARNING_FILTER = "ignore:.*Using the last valid frame instead.:UserWarning"
 
 
+def get_moviepy_major_version() -> int:
+    import moviepy
+
+    return int(moviepy.__version__.split(".")[0])
+
+
 def calculate_frame_delta(frame_a, frame_b, roi=None) -> float:
     if roi:
         raise RuntimeError("TODO")
@@ -354,10 +360,16 @@ def test_corrupt_video(vs_type: Type[VideoStream], corrupt_video_file: str):
     """Test that backend handles video with corrupt frame gracefully with defaults."""
     if vs_type == VideoManager:
         pytest.skip(reason="VideoManager does not support handling corrupt videos.")
+    if vs_type == VideoStreamMoviePy and get_moviepy_major_version() >= 2:
+        # Due to changes in MoviePy 2.0 (#461), loading this file causes an exception to be thrown.
+        # See https://github.com/Zulko/moviepy/pull/2253 for a PR that attempts to more gracefully
+        # handle this case, however even once that is fixed, we will be unable to run this test
+        # on certain versions of MoviePy.
+        pytest.skip(reason="https://github.com/Zulko/moviepy/pull/2253")
 
     stream = vs_type(corrupt_video_file)
 
-    # OpenCV usually fails to read the video at frame 45, so we make sure all backends can
-    # get to 60 without reporting a failure.
+    # OpenCV usually fails to read the video at frame 45, but the remaining frames all seem to
+    # decode just fine. Make sure all backends can get to 60 without reporting a failure.
     for frame in range(60):
         assert stream.read() is not False, "Failed on frame %d!" % frame

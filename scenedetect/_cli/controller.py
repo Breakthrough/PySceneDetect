@@ -16,8 +16,10 @@ import logging
 import os
 import time
 import typing as ty
+import warnings
 
 from scenedetect._cli.context import CliContext
+from scenedetect.backends import VideoStreamCv2, VideoStreamMoviePy
 from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.platform import get_and_create_path
 from scenedetect.scene_manager import CutList, SceneList, get_scenes_from_cuts
@@ -39,6 +41,12 @@ def run_scenedetect(context: CliContext):
         logger.debug("No input specified.")
         return
 
+    # Suppress warnings when reading past EOF in MoviePy (#461).
+    if VideoStreamMoviePy and isinstance(context.video_stream, VideoStreamMoviePy):
+        is_debug = context.config.get_value("global", "verbosity") != "debug"
+        if not is_debug:
+            warnings.filterwarnings("ignore", module="moviepy")
+
     if context.load_scenes_input:
         # Skip detection if load-scenes was used.
         logger.info("Skipping detection, loading scenes from: %s", context.load_scenes_input)
@@ -49,7 +57,10 @@ def run_scenedetect(context: CliContext):
         logger.info("Loaded %d scenes.", len(scenes))
     else:
         # Perform scene detection on input.
-        scenes, cuts = _detect(context)
+        result = _detect(context)
+        if result is None:
+            return
+        scenes, cuts = result
         scenes = _postprocess_scene_list(context, scenes)
         # Handle -s/--stats option.
         _save_stats(context)
@@ -110,7 +121,7 @@ def _detect(context: CliContext) -> ty.Optional[ty.Tuple[SceneList, CutList]]:
 
     # Handle case where video failure is most likely due to multiple audio tracks (#179).
     # TODO(#380): Ensure this does not erroneusly fire.
-    if num_frames <= 0 and context.video_stream.BACKEND_NAME == "opencv":
+    if num_frames <= 0 and isinstance(context.video_stream, VideoStreamCv2):
         logger.critical(
             "Failed to read any frames from video file. This could be caused by the video"
             " having multiple audio tracks. If so, try installing the PyAV backend:\n"
