@@ -48,7 +48,7 @@ class ValidatedValue(ABC):
     @abstractmethod
     def value(self) -> Any:
         """Get the value after validation."""
-        raise NotImplementedError()
+        ...
 
     @staticmethod
     @abstractmethod
@@ -58,7 +58,7 @@ class ValidatedValue(ABC):
         Raises:
             OptionParseFailure: Value from config file did not meet validation constraints.
         """
-        raise NotImplementedError()
+        ...
 
     def __repr__(self) -> str:
         return str(self.value)

@@ -49,6 +49,8 @@ class SeekError(Exception):
 
     The stream is guaranteed to be left in a valid state, but the position may be reset."""
 
+    ...
+
 
 class VideoOpenFailure(Exception):
     """Raised by a backend if opening a video fails."""
@@ -98,7 +100,7 @@ class VideoStream(ABC):
     def BACKEND_NAME() -> str:
         """Unique name used to identify this backend. Should be a static property in derived
         classes (`BACKEND_NAME = 'backend_identifier'`)."""
-        raise NotImplementedError
+        ...
 
     #
     # Abstract Properties
@@ -108,43 +110,43 @@ class VideoStream(ABC):
     @abstractmethod
     def path(self) -> Union[bytes, str]:
         """Video or device path."""
-        raise NotImplementedError
+        ...
 
     @property
     @abstractmethod
     def name(self) -> Union[bytes, str]:
         """Name of the video, without extension, or device."""
-        raise NotImplementedError
+        ...
 
     @property
     @abstractmethod
     def is_seekable(self) -> bool:
         """True if seek() is allowed, False otherwise."""
-        raise NotImplementedError
+        ...
 
     @property
     @abstractmethod
     def frame_rate(self) -> float:
         """Frame rate in frames/sec."""
-        raise NotImplementedError
+        ...
 
     @property
     @abstractmethod
     def duration(self) -> Optional[FrameTimecode]:
         """Duration of the stream as a FrameTimecode, or None if non terminating."""
-        raise NotImplementedError
+        ...
 
     @property
     @abstractmethod
     def frame_size(self) -> Tuple[int, int]:
         """Size of each video frame in pixels as a tuple of (width, height)."""
-        raise NotImplementedError
+        ...
 
     @property
     @abstractmethod
     def aspect_ratio(self) -> float:
         """Pixel aspect ratio as a float (1.0 represents square pixels)."""
-        raise NotImplementedError
+        ...
 
     @property
     @abstractmethod
@@ -153,14 +155,14 @@ class VideoStream(ABC):
 
         This can be interpreted as presentation time stamp, thus frame 1 corresponds
         to the presentation time 0.  Returns 0 even if `frame_number` is 1."""
-        raise NotImplementedError
+        ...
 
     @property
     @abstractmethod
     def position_ms(self) -> float:
         """Current position within stream as a float of the presentation time in
         milliseconds. The first frame has a PTS of 0."""
-        raise NotImplementedError
+        ...
 
     @property
     @abstractmethod
@@ -168,7 +170,7 @@ class VideoStream(ABC):
         """Current position within stream as the frame number.
 
         Will return 0 until the first frame is `read`."""
-        raise NotImplementedError
+        ...
 
     #
     # Abstract Methods
@@ -186,12 +188,12 @@ class VideoStream(ABC):
             If decode = True, the decoded frame (np.ndarray), or False (bool) if end of video.
             If decode = False, a bool indicating if advancing to the the next frame succeeded.
         """
-        raise NotImplementedError
+        ...
 
     @abstractmethod
     def reset(self) -> None:
         """Close and re-open the VideoStream (equivalent to seeking back to beginning)."""
-        raise NotImplementedError
+        ...
 
     @abstractmethod
     def seek(self, target: Union[FrameTimecode, float, int]) -> None:
@@ -213,4 +215,4 @@ class VideoStream(ABC):
             SeekError: An error occurs while seeking, or seeking is not supported.
             ValueError: `target` is not a valid value (i.e. it is negative).
         """
-        raise NotImplementedError
+        ...
