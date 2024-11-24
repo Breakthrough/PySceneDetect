@@ -821,7 +821,12 @@
 <li>[feature] Add ability to configure CSV separators for rows/columns in config file <a href="https://github.com/Breakthrough/PySceneDetect/issues/423">#423</a></li>
 <li>[feature] Add new <code>--show</code> flag to <code>export-html</code> command to launch browser after processing <a href="https://github.com/Breakthrough/PySceneDetect/issues/442">#442</a></li>
 <li>[general] Timecodes of the form <code>MM:SS[.nnn]</code> are now processed correctly <a href="https://github.com/Breakthrough/PySceneDetect/issues/443">#443</a></li>
-<li>[bugfix] Fix <code>save-images</code>/<code>save_images()</code> not working correctly with UTF-8 paths <a href="https://github.com/Breakthrough/PySceneDetect/issues/455">#450</a></li>
+<li>[bugfix] Fix <code>save-images</code>/<code>save_images()</code> not working correctly with UTF-8 paths <a href="https://github.com/Breakthrough/PySceneDetect/issues/450">#450</a></li>
+<li>[improvement] Add new <code>threading</code> option to <code>save-images</code>/<code>save_images()</code> <a href="https://github.com/Breakthrough/PySceneDetect/issues/456">#456</a><ul>
+<li>Enabled by default, offloads image encoding and disk IO to separate threads</li>
+<li>Improves performance by up to 50% in some cases</li>
+</ul>
+</li>
 <li>[bugfix] Fix crash when using <code>save-images</code>/<code>save_images()</code> with OpenCV backend <a href="https://github.com/Breakthrough/PySceneDetect/issues/455">#455</a></li>
 <li>[bugfix] Fix new detectors not working with <code>default-detector</code> config option</li>
 <li>[improvement] The <code>export-html</code> command now implicitly invokes <code>save-images</code> with default parameters<ul>
