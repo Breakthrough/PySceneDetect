@@ -85,9 +85,10 @@ import math
 import queue
 import sys
 import threading
+import typing as ty
 from enum import Enum
 from pathlib import Path
-from typing import Callable, Dict, Iterable, List, Optional, TextIO, Tuple, Union
+from string import Template
 
 import cv2
 import numpy as np
@@ -100,17 +101,17 @@ from scenedetect._thirdparty.simpletable import (
     SimpleTableRow,
 )
 from scenedetect.frame_timecode import FrameTimecode
-from scenedetect.platform import Template, get_and_create_path, get_cv2_imwrite_params, tqdm
+from scenedetect.platform import get_and_create_path, get_cv2_imwrite_params, tqdm
 from scenedetect.scene_detector import SceneDetector, SparseSceneDetector
 from scenedetect.stats_manager import StatsManager
 from scenedetect.video_stream import VideoStream
 
 logger = logging.getLogger("pyscenedetect")
 
-SceneList = List[Tuple[FrameTimecode, FrameTimecode]]
+SceneList = ty.List[ty.Tuple[FrameTimecode, FrameTimecode]]
 """Type hint for a list of scenes in the form (start time, end time)."""
 
-CutList = List[FrameTimecode]
+CutList = ty.List[FrameTimecode]
 """Type hint for a list of cuts, where each timecode represents the first frame of a new shot."""
 
 # TODO: This value can and should be tuned for performance improvements as much as possible,
@@ -166,9 +167,9 @@ def compute_downscale_factor(frame_width: int, effective_width: int = DEFAULT_MI
 
 def get_scenes_from_cuts(
     cut_list: CutList,
-    start_pos: Union[int, FrameTimecode],
-    end_pos: Union[int, FrameTimecode],
-    base_timecode: Optional[FrameTimecode] = None,
+    start_pos: ty.Union[int, FrameTimecode],
+    end_pos: ty.Union[int, FrameTimecode],
+    base_timecode: ty.Optional[FrameTimecode] = None,
 ) -> SceneList:
     """Returns a list of tuples of start/end FrameTimecodes for each scene based on a
     list of detected scene cuts/breaks.
@@ -212,11 +213,14 @@ def get_scenes_from_cuts(
     return scene_list
 
 
+# TODO(#463): Move post-processing functionality into separate submodule.
+
+
 def write_scene_list(
-    output_csv_file: TextIO,
+    output_csv_file: ty.TextIO,
     scene_list: SceneList,
     include_cut_list: bool = True,
-    cut_list: Optional[CutList] = None,
+    cut_list: ty.Optional[CutList] = None,
     col_separator: str = ",",
     row_separator: str = "\n",
 ):
@@ -279,12 +283,12 @@ def write_scene_list(
 def write_scene_list_html(
     output_html_filename: str,
     scene_list: SceneList,
-    cut_list: Optional[CutList] = None,
+    cut_list: ty.Optional[CutList] = None,
     css: str = None,
     css_class: str = "mytable",
-    image_filenames: Optional[Dict[int, List[str]]] = None,
-    image_width: Optional[int] = None,
-    image_height: Optional[int] = None,
+    image_filenames: ty.Optional[ty.Dict[int, ty.List[str]]] = None,
+    image_width: ty.Optional[int] = None,
+    image_height: ty.Optional[int] = None,
 ):
     """Writes the given list of scenes to an output file handle in html format.
 
@@ -400,8 +404,314 @@ def write_scene_list_html(
     page.save(output_html_filename)
 
 
-#
-# TODO(v1.0): Consider moving all post-processing functionality into a separate submodule.
+def _scale_image(
+    image: cv2.Mat,
+    aspect_ratio: float,
+    height: ty.Optional[int],
+    width: ty.Optional[int],
+    scale: ty.Optional[float],
+    interpolation: Interpolation,
+) -> cv2.Mat:
+    # TODO: Combine this resize with the ones below.
+    if aspect_ratio is not None:
+        image = cv2.resize(
+            image, (0, 0), fx=aspect_ratio, fy=1.0, interpolation=interpolation.value
+        )
+    image_height = image.shape[0]
+    image_width = image.shape[1]
+
+    # Figure out what kind of resizing needs to be done
+    if height or width:
+        if height and not width:
+            factor = height / float(image_height)
+            width = int(factor * image_width)
+        if width and not height:
+            factor = width / float(image_width)
+            height = int(factor * image_height)
+        assert height > 0 and width > 0
+        image = cv2.resize(image, (width, height), interpolation=interpolation.value)
+    elif scale:
+        image = cv2.resize(image, (0, 0), fx=scale, fy=scale, interpolation=interpolation.value)
+    return image
+
+
+class _ImageExtractor:
+    def __init__(
+        self,
+        num_images: int = 3,
+        frame_margin: int = 1,
+        image_extension: str = "jpg",
+        imwrite_param: ty.Dict[str, ty.Union[int, None]] = None,
+        image_name_template: str = "$VIDEO_NAME-Scene-$SCENE_NUMBER-$IMAGE_NUMBER",
+        scale: ty.Optional[float] = None,
+        height: ty.Optional[int] = None,
+        width: ty.Optional[int] = None,
+        interpolation: Interpolation = Interpolation.CUBIC,
+    ):
+        """Multi-threaded implementation of save-images functionality. Uses background threads to
+        handle image encoding and saving images to disk to improve parallelism.
+
+        This object is thread-safe.
+
+        Arguments:
+            num_images: Number of images to generate for each scene.  Minimum is 1.
+            frame_margin: Number of frames to pad each scene around the beginning
+                and end (e.g. moves the first/last image into the scene by N frames).
+                Can set to 0, but will result in some video files failing to extract
+                the very last frame.
+            image_extension: Type of image to save (must be one of 'jpg', 'png', or 'webp').
+            encoder_param: Quality/compression efficiency, based on type of image:
+                'jpg' / 'webp':  Quality 0-100, higher is better quality.  100 is lossless for webp.
+                'png': Compression from 1-9, where 9 achieves best filesize but is slower to encode.
+            image_name_template: Template to use for output filanames. Can use template variables
+                $VIDEO_NAME, $SCENE_NUMBER, $IMAGE_NUMBER, $TIMECODE, $FRAME_NUMBER, $TIMESTAMP_MS.
+                *NOTE*: Should not include the image extension (set `image_extension` instead).
+            scale: Optional factor by which to rescale saved images. A scaling factor of 1 would
+                not result in rescaling. A value < 1 results in a smaller saved image, while a
+                value > 1 results in an image larger than the original. This value is ignored if
+                either the height or width values are specified.
+            height: Optional value for the height of the saved images. Specifying both the height
+                and width will resize images to an exact size, regardless of aspect ratio.
+                Specifying only height will rescale the image to that number of pixels in height
+                while preserving the aspect ratio.
+            width: Optional value for the width of the saved images. Specifying both the width
+                and height will resize images to an exact size, regardless of aspect ratio.
+                Specifying only width will rescale the image to that number of pixels wide
+                while preserving the aspect ratio.
+            interpolation: Type of interpolation to use when resizing images.
+        """
+        self._num_images = num_images
+        self._frame_margin = frame_margin
+        self._image_extension = image_extension
+        self._image_name_template = image_name_template
+        self._scale = scale
+        self._height = height
+        self._width = width
+        self._interpolation = interpolation
+        self._imwrite_param = imwrite_param if imwrite_param else {}
+
+    def run(
+        self,
+        video: VideoStream,
+        scene_list: SceneList,
+        output_dir: ty.Optional[str] = None,
+        show_progress=False,
+    ) -> ty.Dict[int, ty.List[str]]:
+        """Run image extraction on `video` using the current parameters. Thread-safe.
+
+        Arguments:
+            video: The video to process.
+            scene_list: The scenes detected in the video.
+            output_dir: Directory to write files to.
+            show_progress: If `true` and tqdm is available, shows a progress bar.
+        """
+        # Setup flags and init progress bar if available.
+        completed = True
+        logger.info(
+            f"Saving {self._num_images} images per scene [format={self._image_extension}] {output_dir if output_dir else ''} "
+        )
+        progress_bar = None
+        if show_progress:
+            progress_bar = tqdm(
+                total=len(scene_list) * self._num_images, unit="images", dynamic_ncols=True
+            )
+
+        timecode_list = self.generate_timecode_list(scene_list)
+        image_filenames = {i: [] for i in range(len(timecode_list))}
+
+        filename_template = Template(self._image_name_template)
+        logger.debug("Writing images with template %s", filename_template.template)
+        scene_num_format = "%0"
+        scene_num_format += str(max(3, math.floor(math.log(len(scene_list), 10)) + 1)) + "d"
+        image_num_format = "%0"
+        image_num_format += str(math.floor(math.log(self._num_images, 10)) + 2) + "d"
+
+        def format_filename(scene_number: int, image_number: int, image_timecode: FrameTimecode):
+            return "%s.%s" % (
+                filename_template.safe_substitute(
+                    VIDEO_NAME=video.name,
+                    SCENE_NUMBER=scene_num_format % (scene_number + 1),
+                    IMAGE_NUMBER=image_num_format % (image_number + 1),
+                    FRAME_NUMBER=image_timecode.get_frames(),
+                    TIMESTAMP_MS=int(image_timecode.get_seconds() * 1000),
+                    TIMECODE=image_timecode.get_timecode().replace(":", ";"),
+                ),
+                self._image_extension,
+            )
+
+        MAX_QUEUED_ENCODE_FRAMES = 4
+        MAX_QUEUED_SAVE_IMAGES = 4
+        encode_queue = queue.Queue(MAX_QUEUED_ENCODE_FRAMES)
+        save_queue = queue.Queue(MAX_QUEUED_SAVE_IMAGES)
+        error_queue = queue.Queue(2)  # Queue size must be the same as the # of worker threads!
+
+        def check_error_queue():
+            try:
+                return error_queue.get(block=False)
+            except queue.Empty:
+                pass
+            return None
+
+        def launch_thread(callable, *args, **kwargs):
+            def capture_errors(callable, *args, **kwargs):
+                try:
+                    return callable(*args, **kwargs)
+                # Errors we capture in `error_queue` will be re-raised by this thread.
+                except:  # noqa: E722
+                    error_queue.put(sys.exc_info())
+                return None
+
+            thread = threading.Thread(
+                target=capture_errors,
+                args=(
+                    callable,
+                    *args,
+                ),
+                kwargs=kwargs,
+                daemon=True,
+            )
+            thread.start()
+            return thread
+
+        def checked_put(work_queue: queue.Queue, item: ty.Any):
+            error = None
+            while True:
+                try:
+                    work_queue.put(item, timeout=0.1)
+                    return
+                except queue.Full:
+                    error = check_error_queue()
+                    if error is not None:
+                        break
+                    continue
+            raise error[1].with_traceback(error[2])
+
+        encode_thread = launch_thread(
+            self.image_encode_thread,
+            video,
+            encode_queue,
+            save_queue,
+        )
+        save_thread = launch_thread(self.image_save_thread, save_queue, progress_bar)
+
+        for i, scene_timecodes in enumerate(timecode_list):
+            for j, timecode in enumerate(scene_timecodes):
+                video.seek(timecode)
+                frame_im = video.read()
+                if frame_im is not None and frame_im is not False:
+                    file_path = format_filename(i, j, timecode)
+                    image_filenames[i].append(file_path)
+                    checked_put(
+                        encode_queue, (frame_im, get_and_create_path(file_path, output_dir))
+                    )
+                else:
+                    completed = False
+                    break
+
+        checked_put(encode_queue, (None, None))
+        encode_thread.join()
+        checked_put(save_queue, (None, None))
+        save_thread.join()
+
+        error = check_error_queue()
+        if error is not None:
+            raise error[1].with_traceback(error[2])
+
+        if progress_bar is not None:
+            progress_bar.close()
+        if not completed:
+            logger.error("Could not generate all output images.")
+
+        return image_filenames
+
+    def image_encode_thread(
+        self,
+        video: VideoStream,
+        encode_queue: queue.Queue,
+        save_queue: queue.Queue,
+    ):
+        aspect_ratio = video.aspect_ratio
+        if abs(aspect_ratio - 1.0) < 0.01:
+            aspect_ratio = None
+        # TODO: Validate that encoder_param is within the proper range.
+        # Should be between 0 and 100 (inclusive) for jpg/webp, and 1-9 for png.
+        while True:
+            frame_im, dest_path = encode_queue.get()
+            if frame_im is None:
+                return
+            frame_im = self.resize_image(
+                frame_im,
+                aspect_ratio,
+            )
+            (is_ok, encoded) = cv2.imencode(
+                f".{self._image_extension}", frame_im, self._imwrite_param
+            )
+            if not is_ok:
+                continue
+            save_queue.put((encoded, dest_path))
+
+    def image_save_thread(self, save_queue: queue.Queue, progress_bar: tqdm):
+        while True:
+            encoded, dest_path = save_queue.get()
+            if encoded is None:
+                return
+            if encoded is not False:
+                encoded.tofile(Path(dest_path))
+            if progress_bar is not None:
+                progress_bar.update(1)
+
+    def generate_timecode_list(self, scene_list: SceneList) -> ty.List[ty.Iterable[FrameTimecode]]:
+        """Generates a list of timecodes for each scene in `scene_list` based on the current config
+        parameters."""
+        framerate = scene_list[0][0].framerate
+        # TODO(v1.0): Split up into multiple sub-expressions so auto-formatter works correctly.
+        return [
+            (
+                FrameTimecode(int(f), fps=framerate)
+                for f in (
+                    # middle frames
+                    a[len(a) // 2]
+                    if (0 < j < self._num_images - 1) or self._num_images == 1
+                    # first frame
+                    else min(a[0] + self._frame_margin, a[-1])
+                    if j == 0
+                    # last frame
+                    else max(a[-1] - self._frame_margin, a[0])
+                    # for each evenly-split array of frames in the scene list
+                    for j, a in enumerate(np.array_split(r, self._num_images))
+                )
+            )
+            for r in (
+                # pad ranges to number of images
+                r
+                if 1 + r[-1] - r[0] >= self._num_images
+                else list(r) + [r[-1]] * (self._num_images - len(r))
+                # create range of frames in scene
+                for r in (
+                    range(
+                        start.get_frames(),
+                        start.get_frames()
+                        + max(
+                            1,  # guard against zero length scenes
+                            end.get_frames() - start.get_frames(),
+                        ),
+                    )
+                    # for each scene in scene list
+                    for start, end in scene_list
+                )
+            )
+        ]
+
+    def resize_image(
+        self,
+        image: cv2.Mat,
+        aspect_ratio: float,
+    ) -> cv2.Mat:
+        return _scale_image(
+            image, aspect_ratio, self._height, self._width, self._scale, self._interpolation
+        )
+
+
 def save_images(
     scene_list: SceneList,
     video: VideoStream,
@@ -410,14 +720,15 @@ def save_images(
     image_extension: str = "jpg",
     encoder_param: int = 95,
     image_name_template: str = "$VIDEO_NAME-Scene-$SCENE_NUMBER-$IMAGE_NUMBER",
-    output_dir: Optional[str] = None,
-    show_progress: Optional[bool] = False,
-    scale: Optional[float] = None,
-    height: Optional[int] = None,
-    width: Optional[int] = None,
+    output_dir: ty.Optional[str] = None,
+    show_progress: ty.Optional[bool] = False,
+    scale: ty.Optional[float] = None,
+    height: ty.Optional[int] = None,
+    width: ty.Optional[int] = None,
     interpolation: Interpolation = Interpolation.CUBIC,
+    threading: bool = True,
     video_manager=None,
-) -> Dict[int, List[str]]:
+) -> ty.Dict[int, ty.List[str]]:
     """Save a set number of images from each scene, given a list of scenes
     and the associated video/frame source.
 
@@ -454,6 +765,7 @@ def save_images(
             Specifying only width will rescale the image to that number of pixels wide
             while preserving the aspect ratio.
         interpolation: Type of interpolation to use when resizing images.
+        threading: Offload image encoding and disk IO to background threads to improve performance.
         video_manager: [DEPRECATED] DO NOT USE. For backwards compatibility only.
 
     Returns:
@@ -482,12 +794,27 @@ def save_images(
         if encoder_param is not None
         else []
     )
-
     video.reset()
+
+    if threading:
+        extractor = _ImageExtractor(
+            num_images,
+            frame_margin,
+            image_extension,
+            imwrite_param,
+            image_name_template,
+            scale,
+            height,
+            width,
+            interpolation,
+        )
+        return extractor.run(video, scene_list, output_dir, show_progress)
 
     # Setup flags and init progress bar if available.
     completed = True
-    logger.info(f"Saving {num_images} images per scene to {output_dir}, format {image_extension}")
+    logger.info(
+        f"Saving {num_images} images per scene [format={image_extension}] {output_dir if output_dir else ''} "
+    )
     progress_bar = None
     if show_progress:
         progress_bar = tqdm(total=len(scene_list) * num_images, unit="images", dynamic_ncols=True)
@@ -623,7 +950,7 @@ class SceneManager:
 
     def __init__(
         self,
-        stats_manager: Optional[StatsManager] = None,
+        stats_manager: ty.Optional[StatsManager] = None,
     ):
         """
         Arguments:
@@ -632,7 +959,7 @@ class SceneManager:
         """
         self._cutting_list = []
         self._event_list = []
-        self._detector_list: List[SceneDetector] = []
+        self._detector_list: ty.List[SceneDetector] = []
         self._sparse_detector_list = []
         # TODO(v1.0): This class should own a StatsManager instead of taking an optional one.
         # Expose a new `stats_manager` @property from the SceneManager, and either change the
@@ -641,16 +968,16 @@ class SceneManager:
         # TODO(v1.0): This class should own a VideoStream as well, instead of passing one
         # to the detect_scenes method. If concatenation is required, it can be implemented as
         # a generic VideoStream wrapper.
-        self._stats_manager: Optional[StatsManager] = stats_manager
+        self._stats_manager: ty.Optional[StatsManager] = stats_manager
 
         # Position of video that was first passed to detect_scenes.
         self._start_pos: FrameTimecode = None
         # Position of video on the last frame processed by detect_scenes.
         self._last_pos: FrameTimecode = None
         # Size of the decoded frames.
-        self._frame_size: Tuple[int, int] = None
+        self._frame_size: ty.Tuple[int, int] = None
         self._frame_size_errors: int = 0
-        self._base_timecode: Optional[FrameTimecode] = None
+        self._base_timecode: ty.Optional[FrameTimecode] = None
         self._downscale: int = 1
         self._auto_downscale: bool = True
         # Interpolation method to use when downscaling. Defaults to linear interpolation
@@ -675,7 +1002,7 @@ class SceneManager:
         self._interpolation = value
 
     @property
-    def stats_manager(self) -> Optional[StatsManager]:
+    def stats_manager(self) -> ty.Optional[StatsManager]:
         """Getter for the StatsManager associated with this SceneManager, if any."""
         return self._stats_manager
 
@@ -758,7 +1085,7 @@ class SceneManager:
         self._sparse_detector_list.clear()
 
     def get_scene_list(
-        self, base_timecode: Optional[FrameTimecode] = None, start_in_scene: bool = False
+        self, base_timecode: ty.Optional[FrameTimecode] = None, start_in_scene: bool = False
     ) -> SceneList:
         """Return a list of tuples of start/end FrameTimecodes for each detected scene.
 
@@ -790,7 +1117,7 @@ class SceneManager:
             scene_list = []
         return sorted(self._get_event_list() + scene_list)
 
-    def _get_cutting_list(self) -> List[int]:
+    def _get_cutting_list(self) -> ty.List[int]:
         """Return a sorted list of unique frame numbers of any detected scene cuts."""
         if not self._cutting_list:
             return []
@@ -811,7 +1138,7 @@ class SceneManager:
         self,
         frame_num: int,
         frame_im: np.ndarray,
-        callback: Optional[Callable[[np.ndarray, int], None]] = None,
+        callback: ty.Optional[ty.Callable[[np.ndarray, int], None]] = None,
     ) -> bool:
         """Add any cuts detected with the current frame to the cutting list. Returns True if any new
         cuts were detected, False otherwise."""
@@ -852,12 +1179,12 @@ class SceneManager:
     def detect_scenes(
         self,
         video: VideoStream = None,
-        duration: Optional[FrameTimecode] = None,
-        end_time: Optional[FrameTimecode] = None,
+        duration: ty.Optional[FrameTimecode] = None,
+        end_time: ty.Optional[FrameTimecode] = None,
         frame_skip: int = 0,
         show_progress: bool = False,
-        callback: Optional[Callable[[np.ndarray, int], None]] = None,
-        frame_source: Optional[VideoStream] = None,
+        callback: ty.Optional[ty.Callable[[np.ndarray, int], None]] = None,
+        frame_source: ty.Optional[VideoStream] = None,
     ) -> int:
         """Perform scene detection on the given video using the added SceneDetectors, returning the
         number of frames processed. Results can be obtained by calling :meth:`get_scene_list` or
@@ -1085,7 +1412,7 @@ class SceneManager:
 
     def get_cut_list(
         self,
-        base_timecode: Optional[FrameTimecode] = None,
+        base_timecode: ty.Optional[FrameTimecode] = None,
         show_warning: bool = True,
     ) -> CutList:
         """[DEPRECATED] Return a list of FrameTimecodes of the detected scene changes/cuts.
@@ -1115,7 +1442,7 @@ class SceneManager:
             logger.error("`get_cut_list()` is deprecated and will be removed in a future release.")
         return self._get_cutting_list()
 
-    def get_event_list(self, base_timecode: Optional[FrameTimecode] = None) -> SceneList:
+    def get_event_list(self, base_timecode: ty.Optional[FrameTimecode] = None) -> SceneList:
         """[DEPRECATED] DO NOT USE.
 
         Get a list of start/end timecodes of sparse detection events.

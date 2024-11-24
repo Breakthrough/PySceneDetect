@@ -15,8 +15,8 @@ can be used to open a video for a
 :class:`SceneManager <scenedetect.scene_manager.SceneManager>`.
 """
 
+import typing as ty
 from logging import getLogger
-from typing import List, Optional, Tuple, Union
 
 # OpenCV is a required package, but we don't have it as an explicit dependency since we
 # need to support both opencv-python and opencv-python-headless. Include some additional
@@ -30,6 +30,7 @@ except ModuleNotFoundError as ex:
     ) from ex
 
 # Commonly used classes/functions exported under the `scenedetect` namespace for brevity.
+# Note that order of importants is important!
 from scenedetect.platform import init_logger  # noqa: I001
 from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.video_stream import VideoStream, VideoOpenFailure
@@ -50,7 +51,7 @@ from scenedetect.backends import (
     VideoCaptureAdapter,
 )
 from scenedetect.stats_manager import StatsManager, StatsFileCorrupt
-from scenedetect.scene_manager import SceneManager, save_images
+from scenedetect.scene_manager import SceneManager, save_images, SceneList, CutList, Interpolation
 from scenedetect.video_manager import VideoManager  # [DEPRECATED] DO NOT USE.
 
 # Used for module identification and when printing version & about info
@@ -63,7 +64,7 @@ logger = getLogger("pyscenedetect")
 
 def open_video(
     path: str,
-    framerate: Optional[float] = None,
+    framerate: ty.Optional[float] = None,
     backend: str = "opencv",
     **kwargs,
 ) -> VideoStream:
@@ -117,12 +118,12 @@ def open_video(
 def detect(
     video_path: str,
     detector: SceneDetector,
-    stats_file_path: Optional[str] = None,
+    stats_file_path: ty.Optional[str] = None,
     show_progress: bool = False,
-    start_time: Optional[Union[str, float, int]] = None,
-    end_time: Optional[Union[str, float, int]] = None,
+    start_time: ty.Optional[ty.Union[str, float, int]] = None,
+    end_time: ty.Optional[ty.Union[str, float, int]] = None,
     start_in_scene: bool = False,
-) -> List[Tuple[FrameTimecode, FrameTimecode]]:
+) -> SceneList:
     """Perform scene detection on a given video `path` using the specified `detector`.
 
     Arguments:
@@ -143,7 +144,7 @@ def detect(
             will always be included until the first fade-out event is detected.
 
     Returns:
-        List of scenes (pairs of :class:`FrameTimecode` objects).
+        List of scenes as pairs of (start, end) :class:`FrameTimecode` objects.
 
     Raises:
         :class:`VideoOpenFailure`: `video_path` could not be opened.

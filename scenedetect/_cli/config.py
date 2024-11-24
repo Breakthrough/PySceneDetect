@@ -361,6 +361,7 @@ CONFIG_MAP: ConfigDict = {
         "quality": RangeValue(_PLACEHOLDER, min_val=0, max_val=100),
         "scale": 1.0,
         "scale-method": Interpolation.LINEAR,
+        "threading": True,
         "width": 0,
     },
     "save-qp": {

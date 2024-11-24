@@ -1493,7 +1493,8 @@ def save_images_command(
         "num_images": ctx.config.get_value("save-images", "num-images", num_images),
         "output_dir": output,
         "scale": scale,
-        "show_progress": ctx.quiet_mode,
+        "show_progress": not ctx.quiet_mode,
+        "threading": ctx.config.get_value("save-images", "threading"),
         "width": width,
     }
     ctx.add_command(cli_commands.save_images, save_images_args)
