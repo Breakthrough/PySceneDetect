@@ -22,43 +22,37 @@ from logging import getLogger
 # need to support both opencv-python and opencv-python-headless. Include some additional
 # context with the exception if this is the case.
 try:
-    import cv2
+    import cv2 as _
 except ModuleNotFoundError as ex:
     raise ModuleNotFoundError(
         "OpenCV could not be found, try installing opencv-python:\n\npip install opencv-python",
         name="cv2",
     ) from ex
-import numpy as np
-
-from scenedetect.backends import (
-    AVAILABLE_BACKENDS,
-    VideoCaptureAdapter,
-    VideoStreamAv,
-    VideoStreamCv2,
-    VideoStreamMoviePy,
-)
-from scenedetect.detectors import (
-    AdaptiveDetector,
-    ContentDetector,
-    HashDetector,
-    HistogramDetector,
-    ThresholdDetector,
-)
-from scenedetect.frame_timecode import FrameTimecode
 
 # Commonly used classes/functions exported under the `scenedetect` namespace for brevity.
-from scenedetect.platform import (  # noqa: I001
-    get_and_create_path,
-    get_cv2_imwrite_params,
-    init_logger,
-    tqdm,
-)
-from scenedetect.scene_detector import SceneDetector
-from scenedetect.scene_manager import Interpolation, SceneList, SceneManager, save_images
-from scenedetect.stats_manager import StatsFileCorrupt, StatsManager
-from scenedetect.video_manager import VideoManager  # [DEPRECATED] DO NOT USE.
+# Note that order of importants is important!
+from scenedetect.platform import init_logger  # noqa: I001
+from scenedetect.frame_timecode import FrameTimecode
+from scenedetect.video_stream import VideoStream, VideoOpenFailure
 from scenedetect.video_splitter import split_video_ffmpeg, split_video_mkvmerge
-from scenedetect.video_stream import VideoOpenFailure, VideoStream
+from scenedetect.scene_detector import SceneDetector
+from scenedetect.detectors import (
+    ContentDetector,
+    AdaptiveDetector,
+    ThresholdDetector,
+    HistogramDetector,
+    HashDetector,
+)
+from scenedetect.backends import (
+    AVAILABLE_BACKENDS,
+    VideoStreamCv2,
+    VideoStreamAv,
+    VideoStreamMoviePy,
+    VideoCaptureAdapter,
+)
+from scenedetect.stats_manager import StatsManager, StatsFileCorrupt
+from scenedetect.scene_manager import SceneManager, save_images, SceneList, CutList, Interpolation
+from scenedetect.video_manager import VideoManager  # [DEPRECATED] DO NOT USE.
 
 # Used for module identification and when printing version & about info
 # (e.g. calling `scenedetect version` or `scenedetect about`).

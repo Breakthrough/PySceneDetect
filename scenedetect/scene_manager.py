@@ -213,7 +213,7 @@ def get_scenes_from_cuts(
     return scene_list
 
 
-# TODO(v1.0): Move post-processing functionality into separate submodule.
+# TODO(#463): Move post-processing functionality into separate submodule.
 
 
 def write_scene_list(

@@ -588,11 +588,14 @@ Development
  - [feature] Add ability to configure CSV separators for rows/columns in config file [#423](https://github.com/Breakthrough/PySceneDetect/issues/423)
  - [feature] Add new `--show` flag to `export-html` command to launch browser after processing [#442](https://github.com/Breakthrough/PySceneDetect/issues/442)
  - [general] Timecodes of the form `MM:SS[.nnn]` are now processed correctly [#443](https://github.com/Breakthrough/PySceneDetect/issues/443)
- - [bugfix] Fix `save-images`/`save_images()` not working correctly with UTF-8 paths [#450](https://github.com/Breakthrough/PySceneDetect/issues/455)
+ - [bugfix] Fix `save-images`/`save_images()` not working correctly with UTF-8 paths [#450](https://github.com/Breakthrough/PySceneDetect/issues/450)
+ - [improvement] Add new `threading` option to `save-images`/`save_images()` [#456](https://github.com/Breakthrough/PySceneDetect/issues/456)
+    - Enabled by default, offloads image encoding and disk IO to separate threads
+    - Improves performance by up to 50% in some cases
  - [bugfix] Fix crash when using `save-images`/`save_images()` with OpenCV backend [#455](https://github.com/Breakthrough/PySceneDetect/issues/455)
  - [bugfix] Fix new detectors not working with `default-detector` config option
  - [improvement] The `export-html` command now implicitly invokes `save-images` with default parameters
-     - The output of the `export-html` command will always use the result of the `save-images` command that *precedes* it
+    - The output of the `export-html` command will always use the result of the `save-images` command that *precedes* it
  - [general] Updates to Windows distributions:
     - The MoviePy backend is now included with Windows distributions
     - Bundled Python interpreter is now Python 3.13

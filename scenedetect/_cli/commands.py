@@ -177,6 +177,7 @@ def save_images(
     height: int,
     width: int,
     interpolation: Interpolation,
+    threading: bool,
 ):
     """Handles the `save-images` command."""
     del cuts  # save-images only uses scenes.
@@ -195,6 +196,7 @@ def save_images(
         height=height,
         width=width,
         interpolation=interpolation,
+        threading=threading,
     )
     # Save the result for use by `export-html` if required.
     context.save_images_result = (images, output_dir)
