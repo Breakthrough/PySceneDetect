@@ -17,6 +17,7 @@ import typing as ty
 from pathlib import Path
 
 import cv2
+import numpy as np
 import pytest
 
 from scenedetect.video_splitter import is_ffmpeg_available, is_mkvmerge_available
@@ -455,17 +456,35 @@ def test_cli_save_images(tmp_path: Path):
         )
         == 0
     )
+    images = [image for image in tmp_path.glob("*.jpg")]
+    # Should detect two scenes and generate 3 images per scene with above params.
+    assert len(images) == 6
     # Open one of the created images and make sure it has the correct resolution.
-    # TODO: Also need to test that the right number of images was generated, and compare with
-    # expected frames from the actual video.
-    images = glob.glob(os.path.join(tmp_path, "*.jpg"))
-    assert images
     image = cv2.imread(images[0])
     assert image.shape == (544, 1280, 3)
 
 
+def test_cli_save_images_path_handling(tmp_path: Path):
+    """Test `save-images` ability to handle UTF-8 paths."""
+    assert (
+        invoke_scenedetect(
+            "-i {VIDEO} -s {STATS} time {TIME} {DETECTOR} save-images -f %s"
+            % ("電腦檔案-$SCENE_NUMBER-$IMAGE_NUMBER"),
+            output_dir=tmp_path,
+        )
+        == 0
+    )
+    images = [image for image in tmp_path.glob("電腦檔案-*.jpg")]
+    # Should detect two scenes and generate 3 images per scene with above params.
+    assert len(images) == 6
+    # Check the created images can be read and have the correct size.
+    # We can't use `cv2.imread` here since it doesn't seem to work correctly with UTF-8 paths.
+    image = cv2.imdecode(np.fromfile(images[0], dtype=np.uint8), cv2.IMREAD_UNCHANGED)
+    assert image.shape == (544, 1280, 3)
+
+
 # TODO(#134): This works fine with OpenCV currently, but needs to be supported for PyAV and MoviePy.
-def test_cli_save_images_rotation(rotated_video_file, tmp_path):
+def test_cli_save_images_rotation(rotated_video_file, tmp_path: Path):
     """Test that `save-images` command rotates images correctly with the default backend."""
     assert (
         invoke_scenedetect(
@@ -475,8 +494,9 @@ def test_cli_save_images_rotation(rotated_video_file, tmp_path):
         )
         == 0
     )
-    images = glob.glob(os.path.join(tmp_path, "*.jpg"))
-    assert images
+    images = [image for image in tmp_path.glob("*.jpg")]
+    # Should detect two scenes and generate 3 images per scene with above params.
+    assert len(images) == 6
     image = cv2.imread(images[0])
     # Note same resolution as in test_cli_save_images but rotated 90 degrees.
     assert image.shape == (1280, 544, 3)

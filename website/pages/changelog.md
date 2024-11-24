@@ -583,10 +583,14 @@ Development
 
 ## PySceneDetect 0.6.5 (TBD)
 
- - [bugfix] Fix new detectors not working with `default-detector` config option
- - [bugfix] Fix crash when using `save-images`/`save_images()` with OpenCV backend [#455](https://github.com/Breakthrough/PySceneDetect/issues/455)
+ - [bugfix] Fix `SyntaxWarning` due to incorrect escaping [#400](https://github.com/Breakthrough/PySceneDetect/issues/400)
+ - [bugfix] Fix `ContentDetector` crash when using callbacks [#416](https://github.com/Breakthrough/PySceneDetect/issues/416) [#420](https://github.com/Breakthrough/PySceneDetect/issues/420)
+ - [feature] Add ability to configure CSV separators for rows/columns in config file [#423](https://github.com/Breakthrough/PySceneDetect/issues/423)
+ - [feature] Add new `--show` flag to `export-html` command to launch browser after processing [#442](https://github.com/Breakthrough/PySceneDetect/issues/442)
  - [general] Timecodes of the form `MM:SS[.nnn]` are now processed correctly [#443](https://github.com/Breakthrough/PySceneDetect/issues/443)
- - [feature] Add new `--show` flag to `export-html` command to launch browser after processing (#442)
+ - [bugfix] Fix `save-images`/`save_images()` not working correctly with UTF-8 paths [#450](https://github.com/Breakthrough/PySceneDetect/issues/455)
+ - [bugfix] Fix crash when using `save-images`/`save_images()` with OpenCV backend [#455](https://github.com/Breakthrough/PySceneDetect/issues/455)
+ - [bugfix] Fix new detectors not working with `default-detector` config option
  - [improvement] The `export-html` command now implicitly invokes `save-images` with default parameters
      - The output of the `export-html` command will always use the result of the `save-images` command that *precedes* it
  - [general] Updates to Windows distributions:
@@ -594,8 +598,5 @@ Development
     - Bundled Python interpreter is now Python 3.13
     - Updated PyAV 10 -> 13.1.0 and OpenCV 4.10.0.82 -> 4.10.0.84
  - [improvement] `save_to_csv` now works with paths from `pathlib`
- - [bugfix] Fix `SyntaxWarning` due to incorrect escaping [#400](https://github.com/Breakthrough/PySceneDetect/issues/400)
- - [bugfix] Fix `ContentDetector` crash when using callbacks [#416](https://github.com/Breakthrough/PySceneDetect/issues/416) [#420](https://github.com/Breakthrough/PySceneDetect/issues/420)
  - [api] The `save_to_csv` function now works correctly with paths from the `pathlib` module
  - [api] Add `col_separator` and `row_separator` args to `write_scene_list` function in `scenedetect.scene_manager`
- - [feature] Add ability to configure CSV separators for rows/columns in config file [#423](https://github.com/Breakthrough/PySceneDetect/issues/423)
