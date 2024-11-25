@@ -82,12 +82,6 @@
 </dd></dl>
 
 <dl class="std option">
-<dt class="sig sig-object std" id="cmdoption-scenedetect-crop">
-<span class="sig-name descname"><span class="pre">--crop</span></span><span class="sig-prename descclassname"> <span class="pre">X0</span> <span class="pre">Y0</span> <span class="pre">X1</span> <span class="pre">Y1</span></span><a class="headerlink" href="#cmdoption-scenedetect-crop" title="Permalink to this definition">¶</a></dt>
-<dd><p>Crop input video. Specified as two points representing top left and bottom right corner of crop region. 0 0 is top-left of the video frame. Bounds are inclusive (e.g. for a 100x100 video, the region covering the whole frame is 0 0 99 99).</p>
-</dd></dl>
-
-<dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-scenedetect-s">
 <span id="cmdoption-scenedetect-stats"></span><span class="sig-name descname"><span class="pre">-s</span></span><span class="sig-prename descclassname"> <span class="pre">CSV</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--stats</span></span><span class="sig-prename descclassname"> <span class="pre">CSV</span></span><a class="headerlink" href="#cmdoption-scenedetect-s" title="Permalink to this definition">¶</a></dt>
 <dd><p>Stats file (.csv) to write frame metrics. Existing files will be overwritten. Used for tuning detection parameters and data analysis.</p>
@@ -123,6 +117,12 @@
 <span id="cmdoption-scenedetect-backend"></span><span class="sig-name descname"><span class="pre">-b</span></span><span class="sig-prename descclassname"> <span class="pre">BACKEND</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--backend</span></span><span class="sig-prename descclassname"> <span class="pre">BACKEND</span></span><a class="headerlink" href="#cmdoption-scenedetect-b" title="Permalink to this definition">¶</a></dt>
 <dd><p>Backend to use for video input. Backend options can be set using a config file (<a class="reference internal" href="#cmdoption-scenedetect-c"><code class="xref std std-option docutils literal notranslate"><span class="pre">-c/--config</span></code></a>). [available: opencv, pyav, moviepy]</p>
 <p>Default: <code class="docutils literal notranslate"><span class="pre">opencv</span></code></p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-crop">
+<span class="sig-name descname"><span class="pre">--crop</span></span><span class="sig-prename descclassname"> <span class="pre">X0</span> <span class="pre">Y0</span> <span class="pre">X1</span> <span class="pre">Y1</span></span><a class="headerlink" href="#cmdoption-scenedetect-crop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Crop input video. Specified as two points representing top left and bottom right corner of crop region. 0 0 is top-left of the video frame. Bounds are inclusive (e.g. for a 100x100 video, the region covering the whole frame is 0 0 99 99).</p>
 </dd></dl>
 
 <dl class="std option">
