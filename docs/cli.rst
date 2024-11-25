@@ -57,10 +57,6 @@ Options
 
   Path to config file. See :ref:`config file reference <scenedetect_cli-config_file>` for details.
 
-.. option:: --crop X0 Y0 X1 Y1
-
-  Crop input video. Specified as two points representing top left and bottom right corner of crop region. 0 0 is top-left of the video frame. Bounds are inclusive (e.g. for a 100x100 video, the region covering the whole frame is 0 0 99 99).
-
 .. option:: -s CSV, --stats CSV
 
   Stats file (.csv) to write frame metrics. Existing files will be overwritten. Used for tuning detection parameters and data analysis.
@@ -88,6 +84,10 @@ Options
   Backend to use for video input. Backend options can be set using a config file (:option:`-c/--config <-c>`). [available: opencv, pyav, moviepy]
 
   Default: ``opencv``
+
+.. option:: --crop X0 Y0 X1 Y1
+
+  Crop input video. Specified as two points representing top left and bottom right corner of crop region. 0 0 is top-left of the video frame. Bounds are inclusive (e.g. for a 100x100 video, the region covering the whole frame is 0 0 99 99).
 
 .. option:: -d N, --downscale N
 
