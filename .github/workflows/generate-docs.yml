@@ -16,7 +16,7 @@ jobs:
     env:
       # TODO: Figure out a better way to handle figuring out what version /latest should be,
       # e.g. add a latest version file in main.
-      scenedetect_docs_latest: '0.6.4'
+      scenedetect_docs_latest: '0.6.5'
       scenedetect_docs_dest: ''
 
     steps:
