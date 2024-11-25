@@ -1039,7 +1039,7 @@ class SceneManager:
         (x0, y0, x1, y1) = value
         # Internally we store the value in the form used to de-reference the image, which must be
         # one-past the end.
-        self._crop = (x0, y0, x1 + 1, y1 + 1)
+        self._crop = (min(x0, x1), min(y0, y1), max(x0, x1) + 1, max(y0, y1) + 1)
 
     @property
     def downscale(self) -> int:
@@ -1269,7 +1269,7 @@ class SceneManager:
 
         effective_frame_size = video.frame_size
         if self._crop:
-            logger.debug(f"Crop set: {self.crop}")
+            logger.debug(f"Crop set: top left = {self.crop[0:2]}, bottom right = {self.crop[2:4]}")
             x0, y0, x1, y1 = self._crop
             min_x, min_y = (min(x0, x1), min(y0, y1))
             max_x, max_y = (max(x0, x1), max(y0, y1))

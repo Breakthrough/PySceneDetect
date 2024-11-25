@@ -135,6 +135,47 @@ class RangeValue(ValidatedValue):
             ) from ex
 
 
+class CropValue(ValidatedValue):
+    """Validator for crop region defined as X0 Y0 X1 Y1."""
+
+    _IGNORE_CHARS = [",", "/", "(", ")"]
+    """Characters to ignore."""
+
+    def __init__(self, value: Optional[Union[str, Tuple[int, int, int, int]]] = None):
+        if isinstance(value, CropValue) or value is None:
+            self._crop = value
+        else:
+            crop = ()
+            if isinstance(value, str):
+                translation_table = str.maketrans(
+                    {char: " " for char in ScoreWeightsValue._IGNORE_CHARS}
+                )
+                values = value.translate(translation_table).split()
+                crop = tuple(int(val) for val in values)
+            elif isinstance(value, tuple):
+                crop = value
+            if not len(crop) == 4:
+                raise ValueError("Crop region must be four numbers of the form X0 Y0 X1 Y1!")
+            if any(coordinate < 0 for coordinate in crop):
+                raise ValueError("Crop coordinates must be >= 0")
+            (x0, y0, x1, y1) = crop
+            self._crop = (min(x0, x1), min(y0, y1), max(x0, x1), max(y0, y1))
+
+    @property
+    def value(self) -> Tuple[int, int, int, int]:
+        return self._crop
+
+    def __str__(self) -> str:
+        return "[%d, %d], [%d, %d]" % self.value
+
+    @staticmethod
+    def from_config(config_value: str, default: "CropValue") -> "CropValue":
+        try:
+            return CropValue(config_value)
+        except ValueError as ex:
+            raise OptionParseFailure(f"{ex}") from ex
+
+
 class ScoreWeightsValue(ValidatedValue):
     """Validator for score weight values (currently a tuple of four numbers)."""
 
@@ -154,7 +195,7 @@ class ScoreWeightsValue(ValidatedValue):
             self._value = ContentDetector.Components(*(float(val) for val in values))
 
     @property
-    def value(self) -> Tuple[float, float, float, float]:
+    def value(self) -> ContentDetector.Components:
         return self._value
 
     def __str__(self) -> str:
@@ -340,12 +381,7 @@ CONFIG_MAP: ConfigDict = {
     },
     "global": {
         "backend": "opencv",
-        #
-        #
-        # FIXME: This should be a tuple of 4 valid ints similar to ScoreWeightsValue.
-        #
-        #
-        "crop": None,
+        "crop": CropValue(),
         "default-detector": "detect-adaptive",
         "downscale": 0,
         "downscale-method": Interpolation.LINEAR,
@@ -490,7 +526,7 @@ def _parse_config(config: ConfigParser) -> Tuple[ConfigDict, List[str]]:
                             out_map[command][option] = parsed
                         except TypeError:
                             errors.append(
-                                "Invalid [%s] value for %s: %s. Must be one of: %s."
+                                "Invalid value for [%s] option %s': %s. Must be one of: %s."
                                 % (
                                     command,
                                     option,
@@ -504,7 +540,7 @@ def _parse_config(config: ConfigParser) -> Tuple[ConfigDict, List[str]]:
 
                 except ValueError as _:
                     errors.append(
-                        "Invalid [%s] value for %s: %s is not a valid %s."
+                        "Invalid value for [%s] option '%s': %s is not a valid %s."
                         % (command, option, config.get(command, option), value_type)
                     )
                     continue
@@ -520,7 +556,7 @@ def _parse_config(config: ConfigParser) -> Tuple[ConfigDict, List[str]]:
                         )
                     except OptionParseFailure as ex:
                         errors.append(
-                            "Invalid [%s] value for %s:\n  %s\n%s"
+                            "Invalid value for [%s] option '%s':  %s\nError: %s"
                             % (command, option, config_value, ex.error)
                         )
                     continue
@@ -532,7 +568,7 @@ def _parse_config(config: ConfigParser) -> Tuple[ConfigDict, List[str]]:
                     if command in CHOICE_MAP and option in CHOICE_MAP[command]:
                         if config_value.lower() not in CHOICE_MAP[command][option]:
                             errors.append(
-                                "Invalid [%s] value for %s: %s. Must be one of: %s."
+                                "Invalid value for [%s] option '%s': %s. Must be one of: %s."
                                 % (
                                     command,
                                     option,
@@ -618,8 +654,12 @@ class ConfigRegistry:
                 config_file_contents = config_file.read()
             config.read_string(config_file_contents, source=path)
         except ParsingError as ex:
+            if __debug__:
+                raise
             raise ConfigLoadFailure(self._init_log, reason=ex) from None
         except OSError as ex:
+            if __debug__:
+                raise
             raise ConfigLoadFailure(self._init_log, reason=ex) from None
         # At this point the config file syntax is correct, but we need to still validate
         # the parsed options (i.e. that the options have valid values).
@@ -644,8 +684,8 @@ class ConfigRegistry:
         """Get the current setting or default value of the specified command option."""
         assert command in CONFIG_MAP and option in CONFIG_MAP[command]
         if override is not None:
-            return override
-        if command in self._config and option in self._config[command]:
+            value = override
+        elif command in self._config and option in self._config[command]:
             value = self._config[command][option]
         else:
             value = CONFIG_MAP[command][option]

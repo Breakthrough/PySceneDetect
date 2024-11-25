@@ -22,6 +22,7 @@ from scenedetect._cli.config import (
     CHOICE_MAP,
     ConfigLoadFailure,
     ConfigRegistry,
+    CropValue,
 )
 from scenedetect.detectors import (
     AdaptiveDetector,
@@ -213,7 +214,7 @@ class CliContext:
                 logger.log(log_level, log_str)
             if init_failure:
                 logger.critical("Error processing configuration file.")
-                raise click.Abort()
+                raise SystemExit(1)
 
         if self.config.config_dict:
             logger.debug("Current configuration:\n%s", str(self.config.config_dict).encode("utf-8"))
@@ -286,9 +287,22 @@ class CliContext:
                 scene_manager.downscale = downscale
             except ValueError as ex:
                 logger.debug(str(ex))
-                raise click.BadParameter(str(ex), param_hint="downscale factor") from None
+                raise click.BadParameter(str(ex), param_hint="downscale factor") from ex
         scene_manager.interpolation = self.config.get_value("global", "downscale-method")
-        scene_manager.crop = self.config.get_value("global", "crop", crop)
+
+        # If crop was set, make sure it's valid (e.g. it should cover at least a single pixel).
+        try:
+            crop = self.config.get_value("global", "crop", CropValue(crop))
+            if crop is not None:
+                (min_x, min_y) = crop[0:2]
+                frame_size = self.video_stream.frame_size
+                if min_x >= frame_size[0] or min_y >= frame_size[1]:
+                    region = CropValue(crop)
+                    raise ValueError(f"{region} is outside of video boundary of {frame_size}")
+                scene_manager.crop = crop
+        except ValueError as ex:
+            logger.debug(str(ex))
+            raise click.BadParameter(str(ex), param_hint="--crop") from ex
 
         self.scene_manager = scene_manager
 
@@ -320,6 +334,8 @@ class CliContext:
             try:
                 weights = ContentDetector.Components(*weights)
             except ValueError as ex:
+                if __debug__:
+                    raise
                 logger.debug(str(ex))
                 raise click.BadParameter(str(ex), param_hint="weights") from None
 
@@ -375,6 +391,8 @@ class CliContext:
             try:
                 weights = ContentDetector.Components(*weights)
             except ValueError as ex:
+                if __debug__:
+                    raise
                 logger.debug(str(ex))
                 raise click.BadParameter(str(ex), param_hint="weights") from None
         return {
@@ -554,18 +572,24 @@ class CliContext:
   Duration:     {self.video_stream.duration} ({self.video_stream.duration.frame_num} frames)""")
 
         except FrameRateUnavailable as ex:
+            if __debug__:
+                raise
             raise click.BadParameter(
                 "Failed to obtain framerate for input video. Manually specify framerate with the"
                 " -f/--framerate option, or try re-encoding the file.",
                 param_hint="-i/--input",
             ) from ex
         except VideoOpenFailure as ex:
+            if __debug__:
+                raise
             raise click.BadParameter(
                 "Failed to open input video%s: %s"
                 % (" using %s backend" % backend if backend else "", str(ex)),
                 param_hint="-i/--input",
             ) from ex
         except OSError as ex:
+            if __debug__:
+                raise
             raise click.BadParameter(
                 "Input error:\n\n\t%s\n" % str(ex), param_hint="-i/--input"
             ) from None
