@@ -116,6 +116,24 @@ def test_cli_default_detector():
     assert invoke_scenedetect("-i {VIDEO} time {TIME}", config_file=None) == 0
 
 
+def test_cli_crop():
+    """Test --crop functionality."""
+    assert invoke_scenedetect("-i {VIDEO} --crop 0 0 256 256 time {TIME}", config_file=None) == 0
+
+
+def test_cli_crop_rejects_invalid():
+    """Test --crop rejects invalid options."""
+    # Outside of video bounds
+    assert (
+        invoke_scenedetect("-i {VIDEO} --crop 4000 0 8000 100 time {TIME}", config_file=None) != 1
+    )
+    assert (
+        invoke_scenedetect("-i {VIDEO} --crop 0 4000 100 8000 time {TIME}", config_file=None) != 1
+    )
+    # Negative numbers
+    assert invoke_scenedetect("-i {VIDEO} --crop 0 0 -256 -256 time {TIME}", config_file=None) != 1
+
+
 @pytest.mark.parametrize("info_command", ["help", "about", "version"])
 def test_cli_info_command(info_command):
     """Test `scenedetect` info commands (e.g. help, about)."""

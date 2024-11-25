@@ -133,7 +133,6 @@ class ContentDetector(SceneDetector):
             self._weights = ContentDetector.LUMA_ONLY_WEIGHTS
         self._kernel: Optional[numpy.ndarray] = None
         if kernel_size is not None:
-            print(kernel_size)
             if kernel_size < 3 or kernel_size % 2 == 0:
                 raise ValueError("kernel_size must be odd integer >= 3")
             self._kernel = numpy.ones((kernel_size, kernel_size), numpy.uint8)

@@ -114,6 +114,11 @@ SceneList = ty.List[ty.Tuple[FrameTimecode, FrameTimecode]]
 CutList = ty.List[FrameTimecode]
 """Type hint for a list of cuts, where each timecode represents the first frame of a new shot."""
 
+CropRegion = ty.Tuple[int, int, int, int]
+"""Type hint for rectangle of the form X0 Y0 X1 Y1 for cropping frames. Coordinates are relative
+to source frame without downscaling.
+"""
+
 # TODO: This value can and should be tuned for performance improvements as much as possible,
 # until accuracy falls, on a large enough dataset. This has yet to be done, but the current
 # value doesn't seem to have caused any issues at least.
@@ -145,7 +150,7 @@ class Interpolation(Enum):
     """Lanczos interpolation over 8x8 neighborhood."""
 
 
-def compute_downscale_factor(frame_width: int, effective_width: int = DEFAULT_MIN_WIDTH) -> int:
+def compute_downscale_factor(frame_width: int, effective_width: int = DEFAULT_MIN_WIDTH) -> float:
     """Get the optimal default downscale factor based on a video's resolution (currently only
     the width in pixels is considered).
 
@@ -159,10 +164,10 @@ def compute_downscale_factor(frame_width: int, effective_width: int = DEFAULT_MI
     Returns:
         int: The default downscale factor to use to achieve at least the target effective_width.
     """
-    assert not (frame_width < 1 or effective_width < 1)
+    assert frame_width > 0 and effective_width > 0
     if frame_width < effective_width:
         return 1
-    return frame_width // effective_width
+    return frame_width / float(effective_width)
 
 
 def get_scenes_from_cuts(
@@ -991,6 +996,7 @@ class SceneManager:
 
         self._frame_buffer = []
         self._frame_buffer_size = 0
+        self._crop = None
 
     @property
     def interpolation(self) -> Interpolation:
@@ -1005,6 +1011,35 @@ class SceneManager:
     def stats_manager(self) -> ty.Optional[StatsManager]:
         """Getter for the StatsManager associated with this SceneManager, if any."""
         return self._stats_manager
+
+    @property
+    def crop(self) -> ty.Optional[CropRegion]:
+        """Portion of the frame to crop. Tuple of 4 ints in the form (X0, Y0, X1, Y1) where X0, Y0
+        describes one point and X1, Y1 is another which describe a rectangle inside of the frame.
+        Coordinates start from 0 and are inclusive. For example, with a 100x100 pixel video,
+        (0, 0, 99, 99) covers the entire frame."""
+        if self._crop is None:
+            return None
+        (x0, y0, x1, y1) = self._crop
+        return (x0, y0, x1 - 1, y1 - 1)
+
+    @crop.setter
+    def crop(self, value: CropRegion):
+        """Raises:
+        ValueError: All coordinates must be >= 0.
+        """
+        if value is None:
+            self._crop = None
+            return
+        if not (len(value) == 4 and all(isinstance(v, int) for v in value)):
+            raise TypeError("crop region must be tuple of 4 ints")
+        # Verify that the provided crop results in a non-empty portion of the frame.
+        if any(coordinate < 0 for coordinate in value):
+            raise ValueError("crop coordinates must be >= 0")
+        (x0, y0, x1, y1) = value
+        # Internally we store the value in the form used to de-reference the image, which must be
+        # one-past the end.
+        self._crop = (min(x0, x1), min(y0, y1), max(x0, x1) + 1, max(y0, y1) + 1)
 
     @property
     def downscale(self) -> int:
@@ -1232,6 +1267,33 @@ class SceneManager:
         if end_time is not None and isinstance(end_time, (int, float)) and end_time < 0:
             raise ValueError("end_time must be greater than or equal to 0!")
 
+        effective_frame_size = video.frame_size
+        if self._crop:
+            logger.debug(f"Crop set: top left = {self.crop[0:2]}, bottom right = {self.crop[2:4]}")
+            x0, y0, x1, y1 = self._crop
+            min_x, min_y = (min(x0, x1), min(y0, y1))
+            max_x, max_y = (max(x0, x1), max(y0, y1))
+            frame_width, frame_height = video.frame_size
+            if min_x >= frame_width or min_y >= frame_height:
+                raise ValueError("crop starts outside video boundary")
+            if max_x >= frame_width or max_y >= frame_height:
+                logger.warning("Warning: crop ends outside of video boundary.")
+            effective_frame_size = (
+                1 + min(max_x, frame_width) - min_x,
+                1 + min(max_y, frame_height) - min_y,
+            )
+        # Calculate downscale factor and log effective resolution.
+        if self.auto_downscale:
+            downscale_factor = compute_downscale_factor(max(effective_frame_size))
+        else:
+            downscale_factor = self.downscale
+        logger.debug(
+            "Processing resolution: %d x %d, downscale: %1.1f",
+            int(effective_frame_size[0] / downscale_factor),
+            int(effective_frame_size[1] / downscale_factor),
+            downscale_factor,
+        )
+
         self._base_timecode = video.base_timecode
 
         # TODO: Figure out a better solution for communicating framerate to StatsManager.
@@ -1250,19 +1312,6 @@ class SceneManager:
                 total_frames = end_time - start_frame_num
             else:
                 total_frames = video.duration.get_frames() - start_frame_num
-
-        # Calculate the desired downscale factor and log the effective resolution.
-        if self.auto_downscale:
-            downscale_factor = compute_downscale_factor(frame_width=video.frame_size[0])
-        else:
-            downscale_factor = self.downscale
-        if downscale_factor > 1:
-            logger.info(
-                "Downscale factor set to %d, effective resolution: %d x %d",
-                downscale_factor,
-                video.frame_size[0] // downscale_factor,
-                video.frame_size[1] // downscale_factor,
-            )
 
         progress_bar = None
         if show_progress:
@@ -1320,7 +1369,7 @@ class SceneManager:
         self,
         video: VideoStream,
         frame_skip: int,
-        downscale_factor: int,
+        downscale_factor: float,
         end_time: FrameTimecode,
         out_queue: queue.Queue,
     ):
@@ -1361,12 +1410,16 @@ class SceneManager:
                         # Skip processing frames that have an incorrect size.
                         continue
 
-                    if downscale_factor > 1:
+                    if self._crop:
+                        (x0, y0, x1, y1) = self._crop
+                        frame_im = frame_im[y0:y1, x0:x1]
+
+                    if downscale_factor > 1.0:
                         frame_im = cv2.resize(
                             frame_im,
                             (
-                                round(frame_im.shape[1] / downscale_factor),
-                                round(frame_im.shape[0] / downscale_factor),
+                                max(1, round(frame_im.shape[1] / downscale_factor)),
+                                max(1, round(frame_im.shape[0] / downscale_factor)),
                             ),
                             interpolation=self._interpolation.value,
                         )
