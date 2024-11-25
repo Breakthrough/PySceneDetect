@@ -128,7 +128,7 @@ will always be included until the first fade-out event is detected.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>List of scenes (pairs of <code class="xref py py-class docutils literal notranslate"><span class="pre">FrameTimecode</span></code> objects).</p>
+<dd class="field-even"><p>List of scenes as pairs of (start, end) <code class="xref py py-class docutils literal notranslate"><span class="pre">FrameTimecode</span></code> objects.</p>
 </dd>
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -321,6 +321,7 @@ overriding backend-specific options.</p></li>
 <li class="toctree-l3"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.SceneManager.get_scene_list"><code class="docutils literal notranslate"><span class="pre">SceneManager.get_scene_list()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.SceneManager.stop"><code class="docutils literal notranslate"><span class="pre">SceneManager.stop()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.SceneManager.auto_downscale"><code class="docutils literal notranslate"><span class="pre">SceneManager.auto_downscale</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.SceneManager.crop"><code class="docutils literal notranslate"><span class="pre">SceneManager.crop</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.SceneManager.downscale"><code class="docutils literal notranslate"><span class="pre">SceneManager.downscale</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.SceneManager.interpolation"><code class="docutils literal notranslate"><span class="pre">SceneManager.interpolation</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.SceneManager.stats_manager"><code class="docutils literal notranslate"><span class="pre">SceneManager.stats_manager</span></code></a></li>
@@ -331,6 +332,7 @@ overriding backend-specific options.</p></li>
 <li class="toctree-l2"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.save_images"><code class="docutils literal notranslate"><span class="pre">save_images()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.write_scene_list"><code class="docutils literal notranslate"><span class="pre">write_scene_list()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.write_scene_list_html"><code class="docutils literal notranslate"><span class="pre">write_scene_list_html()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.CropRegion"><code class="docutils literal notranslate"><span class="pre">CropRegion</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.CutList"><code class="docutils literal notranslate"><span class="pre">CutList</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.DEFAULT_MIN_WIDTH"><code class="docutils literal notranslate"><span class="pre">DEFAULT_MIN_WIDTH</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.MAX_FRAME_QUEUE_LENGTH"><code class="docutils literal notranslate"><span class="pre">MAX_FRAME_QUEUE_LENGTH</span></code></a></li>

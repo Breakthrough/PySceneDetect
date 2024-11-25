@@ -118,22 +118,24 @@
 <span class="c1">#</span>
 
 <span class="k">[global]</span>
-<span class="c1"># Output directory for written files. If unset, defaults to working directory.</span>
-<span class="c1">#output = /usr/tmp/scenedetect/</span>
 
 <span class="c1"># Default detector to use.</span>
 <span class="c1"># Must be one of: detect-adaptive, detect-content, detect-threshold, detect-hist</span>
 <span class="c1">#default-detector = detect-adaptive</span>
 
-<span class="c1"># Video backend interface, must be one of: opencv, pyav.</span>
+<span class="c1"># Output directory for written files. Defaults to working directory.</span>
+<span class="c1">#output = /usr/tmp/scenedetect/</span>
+
+<span class="c1"># Verbosity of console output (debug, info, warning, error, or none).</span>
+<span class="c1"># Set to none for the same behavior as specifying -q/--quiet.</span>
+<span class="c1">#verbosity = debug</span>
+
+<span class="c1"># Crop input video to area. Specified as two points in the form X0 Y0 X1 Y1 or</span>
+<span class="c1"># as (X0 Y0), (X1 Y1). Coordinate (0, 0) is the top-left corner.</span>
+<span class="c1">#crop = 100 100 200 250</span>
+
+<span class="c1"># Video backend interface, must be one of: opencv, pyav, moviepy.</span>
 <span class="c1">#backend = opencv</span>
-
-<span class="c1"># Downscale frame using a ratio of N. Set to 1 for no downscaling. If unset,</span>
-<span class="c1"># applied automatically based on input video resolution. Must be an integer value.</span>
-<span class="c1">#downscale = 1</span>
-
-<span class="c1"># Method to use for downscaling (nearest, linear, cubic, area, lanczos4).</span>
-<span class="c1">#downscale-method = linear</span>
 
 <span class="c1"># Minimum length of a given scene.</span>
 <span class="c1">#min-scene-len = 0.6s</span>
@@ -145,9 +147,12 @@
 <span class="c1"># Drop scenes shorter than min-scene-len instead of merging (yes/no).</span>
 <span class="c1">#drop-short-scenes = no</span>
 
-<span class="c1"># Verbosity of console output (debug, info, warning, error, or none).</span>
-<span class="c1"># Set to none for the same behavior as specifying -q/--quiet.</span>
-<span class="c1">#verbosity = debug</span>
+<span class="c1"># Downscale frame before processing. Set to 1 for no downscaling.</span>
+<span class="c1"># By default, downscale will be calculated automatically.</span>
+<span class="c1">#downscale = 1</span>
+
+<span class="c1"># Method to use for downscaling (nearest, linear, cubic, area, lanczos4).</span>
+<span class="c1">#downscale-method = linear</span>
 
 <span class="c1"># Amount of frames to skip between performing scene detection. Not recommended.</span>
 <span class="c1">#frame-skip = 0</span>
@@ -315,21 +320,24 @@
 <span class="c1"># Image quality (jpeg/webp). Default is 95 for jpeg, 100 for webp</span>
 <span class="c1">#quality = 95</span>
 
-<span class="c1"># Compression amount for png images (0 to 9). Does not affect quality.</span>
+<span class="c1"># Compression amount for png images (0 to 9). Only affects size, not quality.</span>
 <span class="c1">#compression = 3</span>
 
-<span class="c1"># Number of frames to skip at beginning/end of scene.</span>
+<span class="c1"># Number of frames to ignore around each scene cut when selecting frames.</span>
 <span class="c1">#frame-margin = 1</span>
 
-<span class="c1"># Factor to resize images by (0.5 = half, 1.0 = same, 2.0 = double).</span>
+<span class="c1"># Resize by scale factor (0.5 = half, 1.0 = same, 2.0 = double).</span>
 <span class="c1">#scale = 1.0</span>
 
-<span class="c1"># Override image height and/or width. Mutually exclusive with scale.</span>
+<span class="c1"># Resize to specified height, width, or both. Mutually exclusive with scale.</span>
 <span class="c1">#height = 0</span>
 <span class="c1">#width = 0</span>
 
-<span class="c1"># Method to use for image scaling (nearest, linear, cubic, area, lanczos4).</span>
+<span class="c1"># Method to use for scaling (nearest, linear, cubic, area, lanczos4).</span>
 <span class="c1">#scale-method = linear</span>
+
+<span class="c1"># Use separate threads for encoding and disk IO. Can improve performance.</span>
+<span class="c1">#threading = yes</span>
 
 
 <span class="k">[export-html]</span>
@@ -364,6 +372,14 @@
 
 <span class="c1"># Display list of cut points generated from scene boundaries (yes/no).</span>
 <span class="c1">#display-cuts = yes</span>
+
+<span class="c1"># Separator to use between columns in output file. Must be single (escaped)</span>
+<span class="c1"># ASCII character.</span>
+<span class="c1">#col-separator = ,</span>
+
+<span class="c1"># Separator to use between rows in output file. Must be (escaped) ASCII</span>
+<span class="c1"># characters.</span>
+<span class="c1">#row-separator = \n</span>
 
 <span class="c1"># Format to use for list of cut points (frames, seconds, timecode).</span>
 <span class="c1">#cut-format = timecode</span>
