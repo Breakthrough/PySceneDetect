@@ -4,7 +4,7 @@ Releases
 
 ## PySceneDetect 0.6
 
-### PySceneDetect 0.6.5 (TBD)
+### PySceneDetect 0.6.5 (November 24, 2024)
 
 #### Release Notes
 
@@ -34,8 +34,10 @@ This release brings crop support, performance improvements to save-images, lots 
  - [general] Timecodes of the form `MM:SS[.nnn]` are now processed correctly [#443](https://github.com/Breakthrough/PySceneDetect/issues/443)
  - [general] Updates to Windows distributions:
     - The MoviePy backend is now included with Windows distributions
-    - Bundled Python interpreter is now Python 3.13
-    - Updated PyAV 10 -> 13.1.0 and OpenCV 4.10.0.82 -> 4.10.0.84
+    - Python 3.9 -> Python 3.13
+    - PyAV 10 -> 13.1.0
+    - OpenCV 4.10.0.82 -> 4.10.0.84
+    - Ffmpeg 6.0 -> 7.1
 
 
 ### 0.6.4 (June 10, 2024)

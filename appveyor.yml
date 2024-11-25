@@ -14,7 +14,7 @@ skip_non_tags: true
 
 environment:
   matrix:
-    - PYTHON: "C:\\Python39-x64"
+    - PYTHON: "C:\\Python313-x64"
   # Encrypted AdvancedInstaller License
   ai_license_secret:
     secure: MOkULlGPSi0C1Hg2PU1h2SZg/eyQnPQhRJ1XFlavfMKMOoX9hY4pSjpdgW3psSau
@@ -34,13 +34,14 @@ install:
   - echo * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
   - 'SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%'
   - python --version
-  - python -m pip install --upgrade pip
+  - python -m pip install --upgrade pip build wheel virtualenv setuptools
   - python -m pip install -r docs/requirements.txt
-  - python -m pip install --upgrade -r dist/requirements_windows.txt
+  - python -m pip install --upgrade -r dist/requirements_windows.txt --no-binary imageio-ffmpeg
   # Checkout build resources and third party software used for testing.
   - git checkout refs/remotes/origin/resources -- dist/
-  - appveyor DownloadFile https://github.com/GyanD/codexffmpeg/releases/download/6.0/ffmpeg-6.0-full_build.7z
-  - 7z e ffmpeg-6.0-full_build.7z -odist/ffmpeg ffmpeg.exe LICENSE -r
+  - appveyor DownloadFile https://github.com/GyanD/codexffmpeg/releases/download/7.1/ffmpeg-7.1-full_build.7z
+  - 7z e ffmpeg-7.1-full_build.7z -odist/ffmpeg ffmpeg.exe LICENSE -r
+  - 'SET IMAGEIO_FFMPEG_EXE=%APPVEYOR_BUILD_FOLDER%\\dist\\ffmpeg\\ffmpeg.exe'
 
   - echo * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
   - echo * *                          BUILDING WINDOWS EXE                           * *
@@ -54,7 +55,7 @@ install:
   - move dist\windows\README* dist\scenedetect\
   - move dist\windows\LICENSE* dist\scenedetect\thirdparty\
   - move scenedetect\_thirdparty\LICENSE* dist\scenedetect\thirdparty\
-  - move dist\ffmpeg\ffmpeg.exe dist\scenedetect\
+  - copy dist\ffmpeg\ffmpeg.exe dist\scenedetect\
   - move dist\ffmpeg\LICENSE dist\scenedetect\thirdparty\LICENSE-FFMPEG
   - cd dist/scenedetect
   - 7z a ../scenedetect-win64.zip *
@@ -69,7 +70,7 @@ install:
   - appveyor-tools\secure-file -decrypt license65.dat.enc -secret %ai_license_secret% -salt %ai_license_salt%
   - appveyor DownloadFile https://www.advancedinstaller.com/downloads/advinst.msi
   - msiexec /i advinst.msi /qn
-  - 'SET PATH=%PATH%;C:\\Program Files (x86)\\Caphyon\\Advanced Installer 21.8.1\\bin\\x86'
+  - 'SET PATH=%PATH%;C:\\Program Files (x86)\\Caphyon\\Advanced Installer 22.2\\bin\\x86'
   # License path must be absolute
   - AdvancedInstaller.com /RegisterOffline "%cd%\license65.dat"
   # Create MSI installer
