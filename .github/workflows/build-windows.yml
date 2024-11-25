@@ -30,7 +30,7 @@ jobs:
         python-version: ["3.13"]
 
     env:
-      ffmpeg-version: "7.0"
+      ffmpeg-version: "7.1"
       IMAGEIO_FFMPEG_EXE: ""
 
     steps:
