@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Platform &amp; Logging &#8212; PySceneDetect 0.6.4 documentation</title>
+    <title>Platform &amp; Logging &#8212; PySceneDetect 0.6.5 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
     <link rel="stylesheet" type="text/css" href="../_static/pyscenedetect.css" />
@@ -36,7 +36,7 @@
   <section id="module-scenedetect.platform">
 <span id="platform-logging"></span><span id="scenedetect-platform"></span><h1>Platform &amp; Logging<a class="headerlink" href="#module-scenedetect.platform" title="Permalink to this heading">¶</a></h1>
 <p><code class="docutils literal notranslate"><span class="pre">scenedetect.platform</span></code> Module</p>
-<p>This moduke contains all platform/library specific compatibility fixes, as well as some utility
+<p>This module contains all platform/library specific compatibility fixes, as well as some utility
 functions to handle logging and invoking external commands.</p>
 <dl class="py exception">
 <dt class="sig sig-object py" id="scenedetect.platform.CommandTooLong">
@@ -80,18 +80,6 @@ functions to handle logging and invoking external commands.</p>
 <dt class="sig sig-object py" id="scenedetect.platform.Template">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scenedetect.platform.</span></span><span class="sig-name descname"><span class="pre">Template</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">template</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.platform.Template" title="Permalink to this definition">¶</a></dt>
 <dd><p>Template matcher used to replace instances of $TEMPLATES in filenames.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="scenedetect.platform.logging_redirect_tqdm">
-<span class="sig-prename descclassname"><span class="pre">scenedetect.platform.</span></span><span class="sig-name descname"><span class="pre">logging_redirect_tqdm</span></span><a class="headerlink" href="#scenedetect.platform.logging_redirect_tqdm" title="Permalink to this definition">¶</a></dt>
-<dd><p>alias of <a class="reference internal" href="#scenedetect.platform.FakeTqdmLoggingRedirect" title="scenedetect.platform.FakeTqdmLoggingRedirect"><code class="xref py py-class docutils literal notranslate"><span class="pre">FakeTqdmLoggingRedirect</span></code></a></p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="scenedetect.platform.tqdm">
-<span class="sig-prename descclassname"><span class="pre">scenedetect.platform.</span></span><span class="sig-name descname"><span class="pre">tqdm</span></span><a class="headerlink" href="#scenedetect.platform.tqdm" title="Permalink to this definition">¶</a></dt>
-<dd><p>alias of <a class="reference internal" href="#scenedetect.platform.FakeTqdmObject" title="scenedetect.platform.FakeTqdmObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">FakeTqdmObject</span></code></a></p>
 </dd></dl>
 
 <dl class="py function">
@@ -276,7 +264,7 @@ raises a different exception when the command length is too long.</p>
 
 
 
-<p class="blurb">Version: [0.6.4]</p>
+<p class="blurb">Version: [0.6.5]</p>
 
 
 
@@ -317,8 +305,6 @@ raises a different exception when the command length is too long.</p>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.platform.FakeTqdmLoggingRedirect"><code class="docutils literal notranslate"><span class="pre">FakeTqdmLoggingRedirect</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.platform.FakeTqdmObject"><code class="docutils literal notranslate"><span class="pre">FakeTqdmObject</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.platform.Template"><code class="docutils literal notranslate"><span class="pre">Template</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#scenedetect.platform.logging_redirect_tqdm"><code class="docutils literal notranslate"><span class="pre">logging_redirect_tqdm</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#scenedetect.platform.tqdm"><code class="docutils literal notranslate"><span class="pre">tqdm</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.platform.get_and_create_path"><code class="docutils literal notranslate"><span class="pre">get_and_create_path()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.platform.get_cv2_imwrite_params"><code class="docutils literal notranslate"><span class="pre">get_cv2_imwrite_params()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.platform.get_ffmpeg_path"><code class="docutils literal notranslate"><span class="pre">get_ffmpeg_path()</span></code></a></li>
@@ -330,7 +316,6 @@ raises a different exception when the command length is too long.</p>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.platform.invoke_command"><code class="docutils literal notranslate"><span class="pre">invoke_command()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="migration_guide.html">Migration Guide</a></li>
 </ul>
 
 <div class="relations">
