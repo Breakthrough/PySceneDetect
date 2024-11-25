@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Backends &#8212; PySceneDetect 0.6.5-dev1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/pyscenedetect.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="scenedetect 🎬 Package" href="../api.html" />
+    <link rel="prev" title="Configuration File" href="config_file.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="backends">
+<span id="cli-backends"></span><h1>Backends<a class="headerlink" href="#backends" title="Permalink to this heading">¶</a></h1>
+<p>PySceneDetect supports multiple backends for video input. Some can be configured by using <a class="reference internal" href="config_file.html#scenedetect-cli-config-file"><span class="std std-ref">a config file</span></a>. Installed backends can be verified by running <code class="docutils literal notranslate"><span class="pre">scenedetect</span> <span class="pre">version</span> <span class="pre">--all</span></code>.</p>
+<p>Note that the <cite>scenedetect</cite> command output is generated as a post-processing step, after scene detection completes. Most commands require the ability for the input to be replayed, and preferably it should also support seeking. Network streams and other input types are supported with certain backends, however integration with live streams requires use of the Python API.</p>
+<section id="opencv">
+<h2>OpenCV<a class="headerlink" href="#opencv" title="Permalink to this heading">¶</a></h2>
+<p><em>[Default]</em>
+The <a class="reference external" href="https://opencv.org/">OpenCV</a> backend (usually <a class="reference external" href="https://pypi.org/project/opencv-python/">opencv-python</a>) uses OpenCV’s <code class="docutils literal notranslate"><span class="pre">VideoCapture</span></code> for video input. Can be used by specifying <code class="docutils literal notranslate"><span class="pre">-b</span> <span class="pre">opencv</span></code> via command line, or setting <code class="docutils literal notranslate"><span class="pre">backend</span> <span class="pre">=</span> <span class="pre">opencv</span></code> under the <code class="docutils literal notranslate"><span class="pre">[global]</span></code> section of your <a class="reference internal" href="config_file.html#scenedetect-cli-config-file"><span class="std std-ref">config file</span></a>.</p>
+<p>It is mostly reliable and fast, although can occasionally run into issues processing videos with multiple audio tracks or small amounts of frame corruption. You can use a custom version of the <code class="docutils literal notranslate"><span class="pre">cv2</span></code> package, or install either the <cite>opencv-python</cite> or <cite>opencv-python-headless</cite> packages from <cite>pip</cite>.</p>
+<p>The OpenCV backend also supports image sequences as inputs (e.g. <code class="docutils literal notranslate"><span class="pre">frame%02d.jpg</span></code> if you want to load frame001.jpg, frame002.jpg, frame003.jpg…). Make sure to specify the framerate manually (<code class="docutils literal notranslate"><span class="pre">-f</span></code>/<code class="docutils literal notranslate"><span class="pre">--framerate</span></code>) to ensure accurate timing calculations.</p>
+</section>
+<section id="pyav">
+<h2>PyAV<a class="headerlink" href="#pyav" title="Permalink to this heading">¶</a></h2>
+<p>The <a class="reference external" href="https://github.com/PyAV-Org/PyAV">PyAV</a> backend (<a class="reference external" href="https://pypi.org/project/av/">av package</a>) is a more robust backend that handles multiple audio tracks and frame decode errors gracefully.</p>
+<p>This backend can be used by specifying <code class="docutils literal notranslate"><span class="pre">-b</span> <span class="pre">pyav</span></code> via command line, or setting <code class="docutils literal notranslate"><span class="pre">backend</span> <span class="pre">=</span> <span class="pre">pyav</span></code> under the <code class="docutils literal notranslate"><span class="pre">[global]</span></code> section of your <a class="reference internal" href="config_file.html#scenedetect-cli-config-file"><span class="std std-ref">config file</span></a>.</p>
+</section>
+<section id="moviepy">
+<h2>MoviePy<a class="headerlink" href="#moviepy" title="Permalink to this heading">¶</a></h2>
+<p>MoviePy launches ffmpeg as a subprocess, and can be used with various types of inputs. If the input supports seeking it should work fine with most operations, for example, image sequences or AviSynth scripts.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The MoviePy backend is still under development and is not included with current Windows distribution. To enable MoviePy support, you must install PySceneDetect using <cite>python</cite> and <cite>pip</cite>.</p>
+</div>
+<p>This backend can be used by specifying <code class="docutils literal notranslate"><span class="pre">-b</span> <span class="pre">moviepy</span></code> via command line, or setting <code class="docutils literal notranslate"><span class="pre">backend</span> <span class="pre">=</span> <span class="pre">moviepy</span></code> under the <code class="docutils literal notranslate"><span class="pre">[global]</span></code> section of your <a class="reference internal" href="config_file.html#scenedetect-cli-config-file"><span class="std std-ref">config file</span></a>.</p>
+</section>
+</section>
+
+
+          </div>
+              <div class="related bottom">
+                &nbsp;
+  <nav id="rellinks">
+    <ul>
+        <li>
+          &larr;
+          <a href="config_file.html" title="Previous document">Configuration File</a>
+        </li>
+        <li>
+          <a href="../api.html" title="Next document"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Package</a>
+          &rarr;
+        </li>
+    </ul>
+  </nav>
+              </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="../index.html">
+    <img class="logo" src="../_static/pyscenedetect_logo.png" alt="Logo" />
+    
+  </a>
+</p>
+
+
+
+<p class="blurb">Version: [0.6.5-dev1]</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=Breakthrough&repo=PySceneDetect&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Command-Line Interface:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../cli.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Command</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cli.html#examples">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cli.html#options">Options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cli.html#detectors">Detectors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cli.html#commands">Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="config_file.html">Configuration File</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Backends</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#opencv">OpenCV</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pyav">PyAV</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#moviepy">MoviePy</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Documentation:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/detectors.html">Detection Algorithms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/backends.html">Backends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/scene_manager.html">SceneManager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/video_splitter.html">Video Splitting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/stats_manager.html">StatsManager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/frame_timecode.html">FrameTimecode</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/scene_detector.html">SceneDetector</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/video_stream.html">VideoStream</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/platform.html">Platform &amp; Logging</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="config_file.html" title="previous chapter">Configuration File</a></li>
+      <li>Next: <a href="../api.html" title="next chapter"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Package</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2014-2024, Brandon Castellano.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.0.1</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../_sources/cli/backends.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
