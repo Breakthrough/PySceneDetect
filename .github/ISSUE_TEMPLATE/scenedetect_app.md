@@ -20,7 +20,7 @@ Copy the output of running the application here. Where possible, generate a debu
 
 **Environment:**
 
-The operating system and how you installed PySceneDetect may be relevant to the issue. Please run `scenedetect version --all` and copy the output here, or provide other details on how PySceneDetect was installed.
+The operating system and how you installed PySceneDetect may be relevant to the issue. Please run `scenedetect version` and copy the output here, or provide other details on how PySceneDetect was installed.
 
 **Media/Files:**
 
