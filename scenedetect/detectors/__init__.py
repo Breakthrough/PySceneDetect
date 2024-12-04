@@ -40,6 +40,7 @@ from scenedetect.detectors.threshold_detector import ThresholdDetector
 from scenedetect.detectors.adaptive_detector import AdaptiveDetector
 from scenedetect.detectors.hash_detector import HashDetector
 from scenedetect.detectors.histogram_detector import HistogramDetector
+from scenedetect.detectors.koala_detector import KoalaDetector
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 #                                                                             #
