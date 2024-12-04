@@ -20,7 +20,7 @@ split_video_ffmpeg('my_video.mp4', scene_list)
 
 **Environment:**
 
-Run `scenedetect version --all` and include the output. This will describe the environment/OS/platform and versions of dependencies you have installed.
+Run `scenedetect version` and include the output. This will describe the environment/OS/platform and versions of dependencies you have installed.
 
 **Media/Files:**
 
