@@ -29,6 +29,7 @@ from scenedetect.detectors import (
     ContentDetector,
     HashDetector,
     HistogramDetector,
+    KoalaDetector,
     ThresholdDetector,
 )
 
@@ -37,6 +38,7 @@ FAST_CUT_DETECTORS: ty.Tuple[ty.Type[SceneDetector]] = (
     ContentDetector,
     HashDetector,
     HistogramDetector,
+    KoalaDetector,
 )
 
 ALL_DETECTORS: ty.Tuple[ty.Type[SceneDetector]] = (*FAST_CUT_DETECTORS, ThresholdDetector)
@@ -123,7 +125,9 @@ def get_fast_cut_test_cases():
             ),
             id="%s/m=30" % detector_type.__name__,
         )
+        # TODO: Make this work, right now min_scene_len isn't used by the detector.
         for detector_type in FAST_CUT_DETECTORS
+        if detector_type != KoalaDetector
     ]
     return test_cases
 
