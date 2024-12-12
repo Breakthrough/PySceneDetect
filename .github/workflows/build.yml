@@ -107,7 +107,7 @@ jobs:
           python -m pip uninstall -y scenedetect
 
       - name: Upload Package
-        if: ${{ matrix.python-version == '3.12' && matrix.os == 'ubuntu-latest' }}
+        if: ${{ matrix.python-version == '3.13' && matrix.os == 'ubuntu-latest' }}
         uses: actions/upload-artifact@v4
         with:
           name: scenedetect-dist

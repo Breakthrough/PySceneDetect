@@ -1,7 +1,7 @@
 #
 # PySceneDetect Requirements
 #
-av>=9.2
+av >=9.2, <14.0
 click>=8.0
 numpy
 opencv-python
