@@ -1,7 +1,8 @@
 #
 # PySceneDetect Requirements for Headless Machines
 #
-av>=9.2
+# TODO(#466): Make av work with av >= 14.
+av >=9.2, <14.0
 click>=8.0
 numpy
 opencv-python-headless
