@@ -74,6 +74,8 @@
     </li>
     <li class="toctree-l4"><a class="reference internal" href="#changelog">Changelog</a>
     </li>
+    <li class="toctree-l4"><a class="reference internal" href="#python-distribution-changes">Python Distribution Changes</a>
+    </li>
         </ul>
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#064-june-10-2024">0.6.4 (June 10, 2024)</a>
@@ -112,7 +114,7 @@
     </li>
     <li class="toctree-l4"><a class="reference internal" href="#changelog_3">Changelog</a>
     </li>
-    <li class="toctree-l4"><a class="reference internal" href="#python-distribution-changes">Python Distribution Changes</a>
+    <li class="toctree-l4"><a class="reference internal" href="#python-distribution-changes_1">Python Distribution Changes</a>
     </li>
     <li class="toctree-l4"><a class="reference internal" href="#known-issues">Known Issues</a>
     </li>
@@ -314,6 +316,10 @@
 <li>Ffmpeg 6.0 -&gt; 7.1</li>
 </ul>
 </li>
+</ul>
+<h4 id="python-distribution-changes">Python Distribution Changes</h4>
+<ul>
+<li><em>v0.6.5.1</em> - Fix compatibility issues with PyAV 14+ <a href="https://github.com/Breakthrough/PySceneDetect/issues/466">#466</a></li>
 </ul>
 <h3 id="064-june-10-2024">0.6.4 (June 10, 2024)</h3>
 <h4 id="release-notes_1">Release Notes</h4>
@@ -586,7 +592,7 @@
 <li><code>get_aspect_ratio</code> has been removed from <code>scenedetect.platform</code> (use the <code>aspect_ratio</code> property of a <code>VideoStream</code> instead)</li>
 <li>Backwards compatibility with v0.5 to avoid breaking most applications on release while still allowing performance improvements</li>
 </ul>
-<h4 id="python-distribution-changes">Python Distribution Changes</h4>
+<h4 id="python-distribution-changes_1">Python Distribution Changes</h4>
 <ul>
 <li><em>v0.6.0.3</em> - Fix missing package description</li>
 <li><em>v0.6.0.2</em> - Improve error messaging when OpenCV is not installed</li>
