@@ -17,9 +17,9 @@ environment:
     - PYTHON: "C:\\Python313-x64"
   # Encrypted AdvancedInstaller License
   ai_license_secret:
-    secure: MOkULlGPSi0C1Hg2PU1h2SZg/eyQnPQhRJ1XFlavfMKMOoX9hY4pSjpdgW3psSau
+    secure: of3o1pInqCJYwKLFsiadbsRYazCmCuZq7r2roaYvYXmBvm6e6JHsRU47waylTmhm
   ai_license_salt:
-    secure: /LlGOUGZk8HQgrW6txtssTt8I6Z6pU7K3XOcqTqr2iKX4vLO3ZTdILgL/6M6u7gWVdRoUYfbxm4JVYjs4hfcmQ==
+    secure: +NKWwlkEptlThgfeL35pLo7EsnkJc+4WODm8tTg1aO5fc0duQ4r100fHQYj6nzhyUdy3Dhs/mOLkxD8rNbBiEQ==
 
 # SignPath Config for Code Signing
 deploy:
@@ -27,6 +27,8 @@ deploy:
   url: https://app.signpath.io/API/v1/f2efa44c-5b5c-45f2-b44f-8f9dde708313/Integrations/AppVeyor?ProjectSlug=PySceneDetect&SigningPolicySlug=release-signing
   authorization:
      secure: FBgWCaxCCKOqc2spYf5NGWSNUGLbT5WeuC5U0k4Of1Ids9n51YWxhGlMyzLbdNBFe64RUcOSzk/N3emlQzbsJg==
+  on:
+    APPVEYOR_REPO_TAG: true # keep casing this way for Linux builds where variables are case-sensitive
 
 install:
   - echo * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -70,7 +72,7 @@ install:
   - appveyor-tools\secure-file -decrypt license65.dat.enc -secret %ai_license_secret% -salt %ai_license_salt%
   - appveyor DownloadFile https://www.advancedinstaller.com/downloads/advinst.msi
   - msiexec /i advinst.msi /qn
-  - 'SET PATH=%PATH%;C:\\Program Files (x86)\\Caphyon\\Advanced Installer 22.2\\bin\\x86'
+  - 'SET PATH=%PATH%;C:\\Program Files (x86)\\Caphyon\\Advanced Installer 22.3\\bin\\x86'
   # License path must be absolute
   - AdvancedInstaller.com /RegisterOffline "%cd%\license65.dat"
   # Create MSI installer
