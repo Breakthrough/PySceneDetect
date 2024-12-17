@@ -35,10 +35,10 @@ if run_version_check:
 
 with open("dist/.version_info", "wb") as f:
     v = VERSION.split(".")
-    assert 2 <= len(v) <= 3, f"Unrecognized version format: {VERSION}"
-    if len(v) < 3:
+    assert 2 <= len(v) <= 4, f"Unrecognized version format: {VERSION}"
+    while len(v) < 4:
        v.append("0")
-    (maj, min, pat, bld) = v[0], v[1], v[2], 0
+    (maj, min, pat, bld) = v[0], v[1], v[2], v[3]
     # If either major or minor have suffixes, assume it's a dev/beta build and set
     # the final component to 999.
     if not min.isdigit():
