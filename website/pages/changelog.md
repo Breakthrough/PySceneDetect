@@ -39,6 +39,10 @@ This release brings crop support, performance improvements to save-images, lots 
     - OpenCV 4.10.0.82 -> 4.10.0.84
     - Ffmpeg 6.0 -> 7.1
 
+#### Python Distribution Changes
+
+ * *v0.6.5.1* - Fix compatibility issues with PyAV 14+ [#466](https://github.com/Breakthrough/PySceneDetect/issues/466)
+
 
 ### 0.6.4 (June 10, 2024)
 

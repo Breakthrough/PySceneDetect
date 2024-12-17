@@ -23,12 +23,7 @@ from scenedetect.video_stream import FrameRateUnavailable, VideoOpenFailure, Vid
 
 logger = getLogger("pyscenedetect")
 
-VALID_THREAD_MODES = [
-    av.codec.context.ThreadType.NONE,
-    av.codec.context.ThreadType.SLICE,
-    av.codec.context.ThreadType.FRAME,
-    av.codec.context.ThreadType.AUTO,
-]
+VALID_THREAD_MODES = ["NONE", "SLICE", "FRAME", "AUTO"]
 
 
 class VideoStreamAv(VideoStream):
@@ -88,9 +83,12 @@ class VideoStreamAv(VideoStream):
         self._reopened = True
 
         if threading_mode:
-            threading_mode = threading_mode.upper()
-            if threading_mode not in VALID_THREAD_MODES:
-                raise ValueError("Invalid threading mode! Must be one of: %s" % VALID_THREAD_MODES)
+            try:
+                threading_mode = av.codec.context.ThreadType[threading_mode.upper()]
+            except KeyError as _:
+                raise ValueError(
+                    "Invalid threading mode! Must be one of: %s" % VALID_THREAD_MODES
+                ) from None
 
         if not suppress_output:
             logger.debug("Restoring default ffmpeg log callbacks.")
