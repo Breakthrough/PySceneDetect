@@ -410,13 +410,13 @@ def write_scene_list_html(
 
 
 def _scale_image(
-    image: cv2.Mat,
+    image: np.ndarray,
     aspect_ratio: float,
     height: ty.Optional[int],
     width: ty.Optional[int],
     scale: ty.Optional[float],
     interpolation: Interpolation,
-) -> cv2.Mat:
+) -> np.ndarray:
     # TODO: Combine this resize with the ones below.
     if aspect_ratio is not None:
         image = cv2.resize(
@@ -709,9 +709,9 @@ class _ImageExtractor:
 
     def resize_image(
         self,
-        image: cv2.Mat,
+        image: np.ndarray,
         aspect_ratio: float,
-    ) -> cv2.Mat:
+    ) -> np.ndarray:
         return _scale_image(
             image, aspect_ratio, self._height, self._width, self._scale, self._interpolation
         )
