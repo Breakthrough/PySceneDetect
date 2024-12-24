@@ -42,6 +42,7 @@ This release brings crop support, performance improvements to save-images, lots 
 #### Python Distribution Changes
 
  * *v0.6.5.1* - Fix compatibility issues with PyAV 14+ [#466](https://github.com/Breakthrough/PySceneDetect/issues/466)
+ * *v0.6.5.2* - Fix for `AttributeError: module 'cv2' has no attribute 'Mat'` [#468](https://github.com/Breakthrough/PySceneDetect/issues/466)
 
 
 ### 0.6.4 (June 10, 2024)
