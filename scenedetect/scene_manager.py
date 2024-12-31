@@ -191,7 +191,7 @@ def get_scenes_from_cuts(
             was processed (used to generate last scene's end time).
         start_frame: The start frame or FrameTimecode of the cut list. Used to generate the first
             scene's start time.
-            base_timecode: [DEPRECATED] DO NOT USE. For backwards compatibility only.
+        base_timecode: [DEPRECATED] DO NOT USE. For backwards compatibility only.
     Returns:
         List of tuples in the form (start_time, end_time), where both start_time and
         end_time are FrameTimecode objects representing the exact time/frame where each
