@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Index &#8212; PySceneDetect 0.6.5 documentation</title>
+    <title>Index &#8212; PySceneDetect 0.6.5.2 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
     <link rel="stylesheet" type="text/css" href="_static/pyscenedetect.css" />
@@ -947,6 +947,10 @@
 </li>
       <li><a href="api/video_splitter.html#scenedetect.video_splitter.FFMPEG_PATH">FFMPEG_PATH (in module scenedetect.video_splitter)</a>
 </li>
+      <li><a href="api/scene_detector.html#scenedetect.scene_detector.FlashFilter">FlashFilter (class in scenedetect.scene_detector)</a>
+</li>
+      <li><a href="api/scene_detector.html#scenedetect.scene_detector.FlashFilter.Mode">FlashFilter.Mode (class in scenedetect.scene_detector)</a>
+</li>
       <li><a href="api/detectors.html#scenedetect.detectors.threshold_detector.ThresholdDetector.Method.FLOOR">FLOOR (scenedetect.detectors.threshold_detector.ThresholdDetector.Method attribute)</a>
 </li>
       <li><a href="api/backends.html#scenedetect.backends.moviepy.VideoStreamMoviePy.frame_number">frame_number (scenedetect.backends.moviepy.VideoStreamMoviePy property)</a>
@@ -1079,20 +1083,10 @@
 </li>
       <li><a href="api/video_splitter.html#scenedetect.video_splitter.is_ffmpeg_available">is_ffmpeg_available() (in module scenedetect.video_splitter)</a>
 </li>
-      <li><a href="api/video_splitter.html#scenedetect.video_splitter.is_mkvmerge_available">is_mkvmerge_available() (in module scenedetect.video_splitter)</a>
-</li>
-      <li><a href="api/detectors.html#scenedetect.detectors.content_detector.ContentDetector.is_processing_required">is_processing_required() (scenedetect.detectors.content_detector.ContentDetector method)</a>
-
-      <ul>
-        <li><a href="api/detectors.html#scenedetect.detectors.hash_detector.HashDetector.is_processing_required">(scenedetect.detectors.hash_detector.HashDetector method)</a>
-</li>
-        <li><a href="api/detectors.html#scenedetect.detectors.histogram_detector.HistogramDetector.is_processing_required">(scenedetect.detectors.histogram_detector.HistogramDetector method)</a>
-</li>
-        <li><a href="api/scene_detector.html#scenedetect.scene_detector.SceneDetector.is_processing_required">(scenedetect.scene_detector.SceneDetector method)</a>
-</li>
-      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/video_splitter.html#scenedetect.video_splitter.is_mkvmerge_available">is_mkvmerge_available() (in module scenedetect.video_splitter)</a>
+</li>
       <li><a href="api/stats_manager.html#scenedetect.stats_manager.StatsManager.is_save_required">is_save_required() (scenedetect.stats_manager.StatsManager method)</a>
 </li>
       <li><a href="api/backends.html#scenedetect.backends.moviepy.VideoStreamMoviePy.is_seekable">is_seekable (scenedetect.backends.moviepy.VideoStreamMoviePy property)</a>
@@ -1132,6 +1126,8 @@
       <li><a href="api/scene_manager.html#scenedetect.scene_manager.MAX_FRAME_QUEUE_LENGTH">MAX_FRAME_QUEUE_LENGTH (in module scenedetect.scene_manager)</a>
 </li>
       <li><a href="api/scene_manager.html#scenedetect.scene_manager.MAX_FRAME_SIZE_ERRORS">MAX_FRAME_SIZE_ERRORS (in module scenedetect.scene_manager)</a>
+</li>
+      <li><a href="api/scene_detector.html#scenedetect.scene_detector.FlashFilter.Mode.MERGE">MERGE (scenedetect.scene_detector.FlashFilter.Mode attribute)</a>
 </li>
       <li><a href="api/detectors.html#scenedetect.detectors.content_detector.ContentDetector.METRIC_KEYS">METRIC_KEYS (scenedetect.detectors.content_detector.ContentDetector attribute)</a>
 </li>
@@ -1263,8 +1259,6 @@
 </li>
         <li><a href="api/scene_detector.html#scenedetect.scene_detector.SceneDetector.post_process">(scenedetect.scene_detector.SceneDetector method)</a>
 </li>
-        <li><a href="api/scene_detector.html#scenedetect.scene_detector.SparseSceneDetector.post_process">(scenedetect.scene_detector.SparseSceneDetector method)</a>
-</li>
       </ul></li>
       <li><a href="api/frame_timecode.html#scenedetect.frame_timecode.FrameTimecode.previous_frame">previous_frame() (scenedetect.frame_timecode.FrameTimecode method)</a>
 </li>
@@ -1280,8 +1274,6 @@
         <li><a href="api/detectors.html#scenedetect.detectors.threshold_detector.ThresholdDetector.process_frame">(scenedetect.detectors.threshold_detector.ThresholdDetector method)</a>
 </li>
         <li><a href="api/scene_detector.html#scenedetect.scene_detector.SceneDetector.process_frame">(scenedetect.scene_detector.SceneDetector method)</a>
-</li>
-        <li><a href="api/scene_detector.html#scenedetect.scene_detector.SparseSceneDetector.process_frame">(scenedetect.scene_detector.SparseSceneDetector method)</a>
 </li>
       </ul></li>
       <li><a href="api/scene_manager.html#scenedetect.scene_manager.PROGRESS_BAR_DESCRIPTION">PROGRESS_BAR_DESCRIPTION (in module scenedetect.scene_manager)</a>
@@ -1859,8 +1851,6 @@
 </li>
       <li><a href="api/stats_manager.html#scenedetect.stats_manager.StatsManager.set_metrics">set_metrics() (scenedetect.stats_manager.StatsManager method)</a>
 </li>
-      <li><a href="api/scene_detector.html#scenedetect.scene_detector.SparseSceneDetector">SparseSceneDetector (class in scenedetect.scene_detector)</a>
-</li>
       <li><a href="api/video_splitter.html#scenedetect.video_splitter.split_video_ffmpeg">split_video_ffmpeg() (in module scenedetect.video_splitter)</a>
 </li>
       <li><a href="api/video_splitter.html#scenedetect.video_splitter.split_video_mkvmerge">split_video_mkvmerge() (in module scenedetect.video_splitter)</a>
@@ -1884,6 +1874,8 @@
       <li><a href="api/stats_manager.html#scenedetect.stats_manager.StatsManager">StatsManager (class in scenedetect.stats_manager)</a>
 </li>
       <li><a href="api/scene_manager.html#scenedetect.scene_manager.SceneManager.stop">stop() (scenedetect.scene_manager.SceneManager method)</a>
+</li>
+      <li><a href="api/scene_detector.html#scenedetect.scene_detector.FlashFilter.Mode.SUPPRESS">SUPPRESS (scenedetect.scene_detector.FlashFilter.Mode attribute)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -1974,7 +1966,7 @@
 
 
 
-<p class="blurb">Version: [0.6.5]</p>
+<p class="blurb">Version: [0.6.5.2]</p>
 
 
 

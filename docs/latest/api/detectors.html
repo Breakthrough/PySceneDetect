@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Detection Algorithms &#8212; PySceneDetect 0.6.5 documentation</title>
+    <title>Detection Algorithms &#8212; PySceneDetect 0.6.5.2 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
     <link rel="stylesheet" type="text/css" href="../_static/pyscenedetect.css" />
@@ -190,7 +190,7 @@ Equivalent to specifying <cite>weights</cite> as <code class="xref py py-data do
 Overrides <cite>weights</cite> if both are set.</p></li>
 <li><p><strong>kernel_size</strong> (<em>int</em><em> | </em><em>None</em>) – Size of kernel for expanding detected edges. Must be odd integer
 greater than or equal to 3. If None, automatically set using video resolution.</p></li>
-<li><p><strong>filter_mode</strong> (<em>Mode</em>) – Mode to use when filtering cuts to meet <cite>min_scene_len</cite>.</p></li>
+<li><p><strong>filter_mode</strong> (<a class="reference internal" href="scene_detector.html#scenedetect.scene_detector.FlashFilter.Mode" title="scenedetect.scene_detector.FlashFilter.Mode"><em>Mode</em></a>) – Mode to use when filtering cuts to meet <cite>min_scene_len</cite>.</p></li>
 </ul>
 </dd>
 </dl>
@@ -245,24 +245,6 @@ threshold may need to be adjusted accordingly.</p>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>List of strings of frame metric key names that will be used by
 the detector when a StatsManager is passed to process_frame.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="scenedetect.detectors.content_detector.ContentDetector.is_processing_required">
-<span class="sig-name descname"><span class="pre">is_processing_required</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame_num</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.detectors.content_detector.ContentDetector.is_processing_required" title="Permalink to this definition">¶</a></dt>
-<dd><p>[DEPRECATED] DO NOT USE</p>
-<p>Test if all calculations for a given frame are already done.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><p>False if the SceneDetector has assigned _metric_keys, and the
-stats_manager property is set to a valid StatsManager object containing
-the required frame metrics/calculations for the given frame - thus, not
-needing the frame to perform scene detection.</p>
-<p>True otherwise (i.e. the frame_img passed to process_frame is required
-to be passed to process_frame for the given frame_num).</p>
-</p>
 </dd>
 </dl>
 </dd></dl>
@@ -380,24 +362,6 @@ the detector when a StatsManager is passed to process_frame.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="scenedetect.detectors.hash_detector.HashDetector.is_processing_required">
-<span class="sig-name descname"><span class="pre">is_processing_required</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame_num</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.detectors.hash_detector.HashDetector.is_processing_required" title="Permalink to this definition">¶</a></dt>
-<dd><p>[DEPRECATED] DO NOT USE</p>
-<p>Test if all calculations for a given frame are already done.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><p>False if the SceneDetector has assigned _metric_keys, and the
-stats_manager property is set to a valid StatsManager object containing
-the required frame metrics/calculations for the given frame - thus, not
-needing the frame to perform scene detection.</p>
-<p>True otherwise (i.e. the frame_img passed to process_frame is required
-to be passed to process_frame for the given frame_num).</p>
-</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="scenedetect.detectors.hash_detector.HashDetector.process_frame">
 <span class="sig-name descname"><span class="pre">process_frame</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame_num</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_img</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.detectors.hash_detector.HashDetector.process_frame" title="Permalink to this definition">¶</a></dt>
 <dd><p>Similar to ContentDetector, but using a perceptual hashing algorithm
@@ -509,30 +473,6 @@ the detector when a StatsManager is passed to process_frame.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><em>List</em>[str]</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="scenedetect.detectors.histogram_detector.HistogramDetector.is_processing_required">
-<span class="sig-name descname"><span class="pre">is_processing_required</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame_num</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.detectors.histogram_detector.HistogramDetector.is_processing_required" title="Permalink to this definition">¶</a></dt>
-<dd><p>[DEPRECATED] DO NOT USE</p>
-<p>Test if all calculations for a given frame are already done.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><p>False if the SceneDetector has assigned _metric_keys, and the
-stats_manager property is set to a valid StatsManager object containing
-the required frame metrics/calculations for the given frame - thus, not
-needing the frame to perform scene detection.</p>
-<p>True otherwise (i.e. the frame_img passed to process_frame is required
-to be passed to process_frame for the given frame_num).</p>
-</p>
-</dd>
-<dt class="field-even">Parameters<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>frame_num</strong> (<em>int</em>) – </p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>bool</p>
 </dd>
 </dl>
 </dd></dl>
@@ -696,7 +636,7 @@ or more frames in the list, and not necessarily the same as frame_num.</p>
 
 
 
-<p class="blurb">Version: [0.6.5]</p>
+<p class="blurb">Version: [0.6.5.2]</p>
 
 
 
