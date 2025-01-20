@@ -287,7 +287,7 @@ class HTMLPage:
 
         # Set encoding
         page.append(
-            '<meta http-equiv="Content-Type" content="text/html;' 'charset=%s">' % self.encoding
+            '<meta http-equiv="Content-Type" content="text/html;charset=%s">' % self.encoding
         )
 
         for table in self.tables:
