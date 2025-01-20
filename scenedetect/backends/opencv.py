@@ -350,6 +350,7 @@ class VideoStreamCv2(VideoStream):
         self._cap = cap
         self._frame_rate = framerate
         self._has_grabbed = False
+        cap.set(cv2.CAP_PROP_ORIENTATION_AUTO, 1.0)  # https://github.com/opencv/opencv/issues/26795
 
 
 # TODO(#168): Support non-monotonic timing for `position`. VFR timecode support is a
