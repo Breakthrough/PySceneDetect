@@ -445,25 +445,44 @@ def test_cli_split_video_mkvmerge(tmp_path: Path):
         )
         == 0
     )
+    for scene in range(DEFAULT_NUM_SCENES):
+        path = tmp_path / (Path(DEFAULT_VIDEO_PATH).stem + f"-Scene-{1 + scene:03d}.mkv")
+        path.unlink(missing_ok=False)
+    # If only one scene (just using a few frames), should keep same output template.
+    assert (
+        invoke_scenedetect(
+            "-i {VIDEO} -s {STATS} time -e 3 {DETECTOR} split-video -m", output_dir=tmp_path
+        )
+        == 0
+    )
+    path = tmp_path / (Path(DEFAULT_VIDEO_PATH).stem + "-Scene-001.mkv")
+    path.unlink(missing_ok=False)
+    # -m takes precedence over -c
     assert (
         invoke_scenedetect(
             "-i {VIDEO} -s {STATS} time {TIME} {DETECTOR} split-video -m -c", output_dir=tmp_path
         )
         == 0
     )
+    # Custom filename format
+    for scene in range(DEFAULT_NUM_SCENES):
+        path = tmp_path / (Path(DEFAULT_VIDEO_PATH).stem + f"-Scene-{1 + scene:03d}.mkv")
+        path.unlink(missing_ok=False)
     assert (
         invoke_scenedetect(
-            '-i {VIDEO} -s {STATS} time {TIME} {DETECTOR} split-video -m -f "test$VIDEO_NAME"',
+            "-i {VIDEO} -s {STATS} time {TIME} {DETECTOR} split-video -m -f test$VIDEO_NAME",
             output_dir=tmp_path,
         )
         == 0
     )
+    for scene in range(DEFAULT_NUM_SCENES):
+        path = tmp_path / ("test" + Path(DEFAULT_VIDEO_PATH).stem + f"-{1 + scene:03d}.mkv")
+        path.unlink(missing_ok=False)
     # -a/--args and -m/--mkvmerge are mutually exclusive
     assert invoke_scenedetect(
         '-i {VIDEO} -s {STATS} time {TIME} {DETECTOR} split-video -m -a "-c:v libx264"',
         output_dir=tmp_path,
     )
-    # TODO: Check for existence of split video files.
 
 
 def test_cli_save_images(tmp_path: Path):

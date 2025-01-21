@@ -215,6 +215,9 @@ def split_video(
     """Handles the `split-video` command."""
     del cuts  # split-video only uses scenes.
 
+    if use_mkvmerge:
+        name_format = name_format.removesuffix("-$SCENE_NUMBER")
+
     # Add proper extension to filename template if required.
     dot_pos = name_format.rfind(".")
     extension_length = 0 if dot_pos < 0 else len(name_format) - (dot_pos + 1)

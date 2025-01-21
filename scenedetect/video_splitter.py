@@ -156,8 +156,8 @@ def default_formatter(template: str) -> PathFormatter:
 def split_video_mkvmerge(
     input_video_path: str,
     scene_list: ty.Iterable[TimecodePair],
-    output_dir: ty.Optional[Path] = None,
-    output_file_template: str = "$VIDEO_NAME.mkv",
+    output_dir: ty.Optional[ty.Union[str, Path]] = None,
+    output_file_template: ty.Optional[ty.Union[str, Path]] = "$VIDEO_NAME.mkv",
     video_name: ty.Optional[str] = None,
     show_output: bool = False,
     suppress_output=None,
@@ -202,8 +202,13 @@ def split_video_mkvmerge(
     output_path = template.safe_substitute(VIDEO_NAME=video_name)
     if output_dir:
         output_path = Path(output_dir) / output_path
-    Path(output_path).parent.mkdir(parents=True, exist_ok=True)
+    output_path = Path(output_path)
     logger.info(f"Splitting video with mkvmerge, path template: {output_path}")
+    # If there is only one scene, mkvmerge omits the suffix for the output. To make the filenames
+    # consistent with the output when there are multiple scenes present, we append "-001".
+    if len(scene_list) == 1:
+        output_path = output_path.with_stem(output_path.stem + "-001")
+    output_path.parent.mkdir(parents=True, exist_ok=True)
 
     call_list = ["mkvmerge"]
     if not show_output:
