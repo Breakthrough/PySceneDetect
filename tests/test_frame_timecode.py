@@ -122,6 +122,13 @@ def test_timecode_string():
     assert FrameTimecode(timecode="00:00:02.0000", fps=1).frame_num == 2
     assert FrameTimecode(timecode="00:00:02.0001", fps=1).frame_num == 2
 
+    # MM:SS[.nnn] is also allowed
+    assert FrameTimecode(timecode="00:01", fps=1).frame_num == 1
+    assert FrameTimecode(timecode="00:01.9999", fps=1).frame_num == 2
+    assert FrameTimecode(timecode="00:02.0000", fps=1).frame_num == 2
+    assert FrameTimecode(timecode="00:02.0001", fps=1).frame_num == 2
+
+    # Conversion edge cases
     assert FrameTimecode(timecode="00:00:01", fps=10).frame_num == 10
     assert FrameTimecode(timecode="00:00:00.5", fps=10).frame_num == 5
     assert FrameTimecode(timecode="00:00:00.100", fps=10).frame_num == 1
@@ -134,6 +141,10 @@ def test_timecode_string():
     assert FrameTimecode(timecode="00:59:59.999", fps=1).frame_num == 3600
     assert FrameTimecode(timecode="01:00:00.000", fps=1).frame_num == 3600
     assert FrameTimecode(timecode="01:00:00.001", fps=1).frame_num == 3600
+
+    # Check too many ":" characters (https://github.com/Breakthrough/PySceneDetect/issues/476)
+    with pytest.raises(ValueError):
+        FrameTimecode(timecode="01:01:00:00.001", fps=1)
 
 
 def test_get_frames():

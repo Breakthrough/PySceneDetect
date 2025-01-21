@@ -286,6 +286,8 @@ class FrameTimecode:
         # Timecode in string format 'HH:MM:SS[.nnn]' or 'MM:SS[.nnn]'
         elif input.find(":") >= 0:
             values = input.split(":")
+            if len(values) not in (2, 3):
+                raise ValueError("Invalid timecode (too many separators).")
             # Case of 'HH:MM:SS[.nnn]'
             if len(values) == 3:
                 hrs, mins = int(values[0]), int(values[1])
