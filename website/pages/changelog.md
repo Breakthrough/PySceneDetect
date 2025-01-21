@@ -622,4 +622,6 @@ Both the Windows installer and portable distributions now include signed executa
 Development
 ==========================================================
 
-## PySceneDetect 0.6.6 (TBD)
+## PySceneDetect 0.6.6 (In Development)
+
+ - [bugfix] Fix crash when using `-m`/`--mkvmerge` flag with `split-video` command [#473](https://github.com/Breakthrough/PySceneDetect/issues/473)

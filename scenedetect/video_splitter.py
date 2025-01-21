@@ -193,14 +193,8 @@ def split_video_mkvmerge(
     if not scene_list:
         return 0
 
-    logger.info("Splitting video with mkvmerge, output path template:\n  %s", output_file_template)
-    if output_dir:
-        logger.info("Output folder:\n  %s", output_file_template)
-
     if video_name is None:
         video_name = Path(input_video_path).stem
-
-    ret_val = 0
 
     # mkvmerge doesn't support adding scene metadata to filenames. It always adds the scene
     # number prefixed with a dash to the filenames.
@@ -208,27 +202,29 @@ def split_video_mkvmerge(
     output_path = template.safe_substitute(VIDEO_NAME=video_name)
     if output_dir:
         output_path = Path(output_dir) / output_path
-    output_path.parent.mkdir(parents=True, exist_ok=True)
+    Path(output_path).parent.mkdir(parents=True, exist_ok=True)
+    logger.info(f"Splitting video with mkvmerge, path template: {output_path}")
 
+    call_list = ["mkvmerge"]
+    if not show_output:
+        call_list.append("--quiet")
+    call_list += [
+        "-o",
+        str(output_path),
+        "--split",
+        "parts:%s"
+        % ",".join(
+            [
+                "%s-%s" % (start_time.get_timecode(), end_time.get_timecode())
+                for start_time, end_time in scene_list
+            ]
+        ),
+        input_video_path,
+    ]
+    total_frames = scene_list[-1][1].get_frames() - scene_list[0][0].get_frames()
+    processing_start_time = time.time()
+    ret_val = 0
     try:
-        call_list = ["mkvmerge"]
-        if not show_output:
-            call_list.append("--quiet")
-        call_list += [
-            "-o",
-            str(output_path),
-            "--split",
-            "parts:%s"
-            % ",".join(
-                [
-                    "%s-%s" % (start_time.get_timecode(), end_time.get_timecode())
-                    for start_time, end_time in scene_list
-                ]
-            ),
-            input_video_path,
-        ]
-        total_frames = scene_list[-1][1].get_frames() - scene_list[0][0].get_frames()
-        processing_start_time = time.time()
         # TODO: Capture stdout/stderr and show that if the command fails.
         ret_val = invoke_command(call_list)
         if show_output:
