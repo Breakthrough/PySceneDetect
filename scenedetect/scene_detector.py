@@ -31,6 +31,7 @@ import numpy
 
 from scenedetect.stats_manager import StatsManager
 
+
 # TODO(v0.7): Add a new base class called just "Detector" to eventually replace SceneDetector.
 #
 # class Detector:
