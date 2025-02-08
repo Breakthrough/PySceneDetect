@@ -25,32 +25,6 @@ from scenedetect.scene_detector import SceneDetector
 
 logger = getLogger("pyscenedetect")
 
-##
-## ThresholdDetector Helper Functions
-##
-
-
-def _compute_frame_average(frame: numpy.ndarray) -> float:
-    """Computes the average pixel value/intensity for all pixels in a frame.
-
-    The value is computed by adding up the 8-bit R, G, and B values for
-    each pixel, and dividing by the number of pixels multiplied by 3.
-
-    Arguments:
-        frame: Frame representing the RGB pixels to average.
-
-    Returns:
-        Average pixel intensity across all 3 channels of `frame`
-    """
-    num_pixel_values = float(frame.shape[0] * frame.shape[1] * frame.shape[2])
-    avg_pixel_value = numpy.sum(frame[:, :, :]) / num_pixel_values
-    return avg_pixel_value
-
-
-##
-## ThresholdDetector Class Implementation
-##
-
 
 class ThresholdDetector(SceneDetector):
     """Detects fast cuts/slow fades in from and out to a given threshold level.
@@ -150,7 +124,7 @@ class ThresholdDetector(SceneDetector):
         ):
             frame_avg = self.stats_manager.get_metrics(frame_num, self._metric_keys)[0]
         else:
-            frame_avg = _compute_frame_average(frame_img)
+            frame_avg = numpy.mean(frame_img)
             if self.stats_manager is not None:
                 self.stats_manager.set_metrics(frame_num, {self._metric_keys[0]: frame_avg})
 
