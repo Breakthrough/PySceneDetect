@@ -9,6 +9,10 @@ tests/resources/*
 *.mkv
 *.m4v
 *.csv
+benchmarks/BCC/*.mp4
+*.txt
+benchmarks/RAI/*.mp4
+*.txt
 
 
 # From https://raw.githubusercontent.com/github/gitignore/main/Python.gitignore
