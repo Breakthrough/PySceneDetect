@@ -1,47 +1,44 @@
 # Benchmarking PySceneDetect
 This repository benchmarks the performance of PySceneDetect in terms of both latency and accuracy.
-We evaluate it using two standard datasets for video shot detection: [RAI](https://zenodo.org/records/14865179) and [BBC](https://zenodo.org/records/14865504).
+We evaluate it using the standard dataset for video shot detection: [BBC](https://zenodo.org/records/14865504).
 
 ## Dataset Download
-### RAI Dataset
-```
-wget -O RAI/dataset.zip https://zenodo.org/api/records/14865179/files-archive
-unzip RAI/dataset.zip -d RAI
-rm -rf RAI/dataset.zip
-```
-
 ### BBC
 ```
-wget -O BBC/dataset.zip https://zenodo.org/api/records/14865504/files-archive
-unzip BBC/dataset.zip -d BBC
-rm -rf BBC/dataset.zip
+# annotation
+wget -O BBC/fixed.zip https://zenodo.org/records/14873790/files/fixed.zip
+unzip BBC/fixed.zip -d BBC
+rm -rf BBC/fixed.zip
+
+# videos
+wget -O BBC/videos.zip https://zenodo.org/records/14873790/files/videos.zip
+unzip BBC/videos.zip -d BBC
+rm -rf BBC/videos.zip
 ```
 
 ### Evaluation
 To evaluate PySceneDetect on a dataset, run the following command:
 ```
-python evaluate.py -d <dataset_name>
+python benchmark.py -d <dataset_name> --detector <detector_name>
 ```
-For example, to evaluate it on the RAI dataset:
+For example, to evaluate ContentDetector on the BBC dataset:
 ```
-python evaluate.py -d RAI
+python evaluate.py -d BBC --detector detect-content
 ```
 
 ### Result
-- Results will be updated soon.
-- Planned metrics: Recall, Precision, F1-score, and processing time.
+The performance is computed as recall, precision, f1, and elapsed time. 
+The following results indicate that ContentDetector achieves the highest performance on the BBC dataset.
+
+|      Detector     | Recall | Precision |   F1  | Elapsed time (second) |
+|:-----------------:|:------:|:---------:|:-----:|:---------------------:|
+|  AdaptiveDetector |  7.80  |   96.18   | 14.44 |         25.75         |
+|  ContentDetector  |  84.52 |   88.77   | 86.59 |         25.50         |
+|    HashDetector   |  8.57  |   80.27   | 15.48 |         23.78         |
+| HistogramDetector |  8.22  |   70.82   | 14.72 |         18.60         |
+| ThresholdDetector |  0.00  |    0.00   |  0.00 |         18.95         |
 
 ## Citation
-### RAI
-```
-@InProceedings{rai_dataset,
-  author    = {Lorenzo Baraldi and Costantino Grana and Rita Cucchiara},
-  title     = {Shot and scene detection via hierarchical clustering for re-using broadcast video},
-  booktitle = {Proceedings of International Conference on Computer Analysis of Images and Patterns},
-  year      = {2015},
-}
-```
-
 ### BBC
 ```
 @InProceedings{bbc_dataset,
