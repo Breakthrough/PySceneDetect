@@ -27,16 +27,16 @@ python evaluate.py -d BBC --detector detect-content
 ```
 
 ### Result
-The performance is computed as recall, precision, f1, and elapsed time. 
+The performance is computed as recall, precision, f1, and elapsed time.
 The following results indicate that ContentDetector achieves the highest performance on the BBC dataset.
 
 |      Detector     | Recall | Precision |   F1  | Elapsed time (second) |
 |:-----------------:|:------:|:---------:|:-----:|:---------------------:|
-|  AdaptiveDetector |  7.80  |   96.18   | 14.44 |         25.75         |
-|  ContentDetector  |  84.52 |   88.77   | 86.59 |         25.50         |
-|    HashDetector   |  8.57  |   80.27   | 15.48 |         23.78         |
-| HistogramDetector |  8.22  |   70.82   | 14.72 |         18.60         |
-| ThresholdDetector |  0.00  |    0.00   |  0.00 |         18.95         |
+|  AdaptiveDetector |  87.52 |   97.21   | 92.11 |         27.84         |
+|  ContentDetector  |  85.23 |   89.53   | 87.33 |         26.46         |
+|    HashDetector   |  92.96 |   76.27   | 83.79 |         16.26         |
+| HistogramDetector |  90.55 |   72.76   | 80.68 |         16.13         |
+| ThresholdDetector |  0.00  |   0.00    |  0.00 |         18.95         |
 
 ## Citation
 ### BBC
