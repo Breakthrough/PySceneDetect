@@ -98,6 +98,10 @@ def split_video_into_scenes(video_path, threshold=27.0):
 
 See [the documentation](https://www.scenedetect.com/docs/latest/api.html) for more examples.
 
+**Benchmark**:
+
+We evaluate the performance of different detectors in terms of accuracy and processing speed. See the [benchmark report](benchmarks/README.md) for details.
+
 ## Reference
 
  - [Documentation](https://www.scenedetect.com/docs/) (covers application and Python API)
