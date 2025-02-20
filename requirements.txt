@@ -8,3 +8,4 @@ opencv-python
 platformdirs
 pytest>=7.0
 tqdm
+scikit-image

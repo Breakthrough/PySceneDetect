@@ -10,8 +10,10 @@ from scenedetect import (
     ContentDetector,
     HashDetector,
     HistogramDetector,
+    KoalaDetector,
+    SceneManager,
     ThresholdDetector,
-    detect,
+    open_video,
 )
 
 
@@ -22,6 +24,7 @@ def make_detector(detector_name: str):
         "detect-hash": HashDetector(),
         "detect-hist": HistogramDetector(),
         "detect-threshold": ThresholdDetector(),
+        "detect-koala": KoalaDetector(),
     }
     return detector_map[detector_name]
 
@@ -31,7 +34,19 @@ def _detect_scenes(detector_type: str, dataset):
     for video_file, scene_file in tqdm(dataset):
         start = time.time()
         detector = make_detector(detector_type)
-        pred_scene_list = detect(video_file, detector)
+
+        video = open_video(video_file)
+        scene_manager = SceneManager()
+        scene_manager.add_detector(detector)
+        # TODO: We should also do this for detect-hash.
+        if detector_type == "detect-koala":
+            scene_manager.auto_downscale = False
+        scene_manager.detect_scenes(
+            video=video,
+            show_progress=True,
+        )
+        pred_scene_list = scene_manager.get_scene_list()
+
         elapsed = time.time() - start
         scenes = {
             scene_file: {
@@ -74,6 +89,7 @@ if __name__ == "__main__":
             "detect-hash",
             "detect-hist",
             "detect-threshold",
+            "detect-koala",
         ],
         default="detect-content",
         help="Detector name. Implemented detectors are listed: https://www.scenedetect.com/docs/latest/cli.html",

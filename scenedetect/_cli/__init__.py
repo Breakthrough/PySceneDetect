@@ -42,6 +42,7 @@ from scenedetect.detectors import (
     ContentDetector,
     HashDetector,
     HistogramDetector,
+    KoalaDetector,
     ThresholdDetector,
 )
 from scenedetect.platform import get_cv2_imwrite_params, get_system_version_info
@@ -1590,3 +1591,16 @@ scenedetect.add_command(save_qp_command)
 scenedetect.add_command(list_scenes_command)
 scenedetect.add_command(save_images_command)
 scenedetect.add_command(split_video_command)
+
+
+@click.command("detect-koala", cls=Command, help="""WIP""")
+@click.pass_context
+def detect_koala_command(
+    ctx: click.Context,
+):
+    ctx = ctx.obj
+    assert isinstance(ctx, CliContext)
+    ctx.add_detector(KoalaDetector, {"min_scene_len": None})
+
+
+scenedetect.add_command(detect_koala_command)

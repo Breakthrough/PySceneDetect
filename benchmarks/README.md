@@ -37,6 +37,7 @@ The following results indicate that ContentDetector achieves the highest perform
 |    HashDetector   |  92.96 |   76.27   | 83.79 |         16.26         |
 | HistogramDetector |  90.55 |   72.76   | 80.68 |         16.13         |
 | ThresholdDetector |  0.00  |   0.00    |  0.00 |         18.95         |
+|   KoalaDetector   |  86.83 |   78.38   | 82.39 |         97.75         |
 
 ## Citation
 ### BBC

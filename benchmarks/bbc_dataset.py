@@ -12,15 +12,19 @@ class BBCDataset:
 
     def __init__(self, dataset_dir: str):
         self._video_files = [
-            file for file in sorted(glob.glob(os.path.join(dataset_dir, "videos", "*.mp4")))
+            file
+            for file in sorted(
+                glob.glob(os.path.join("benchmarks", dataset_dir, "videos", "*.mp4"))
+            )
         ]
         self._scene_files = [
-            file for file in sorted(glob.glob(os.path.join(dataset_dir, "fixed", "*.txt")))
+            file
+            for file in sorted(glob.glob(os.path.join("benchmarks", dataset_dir, "fixed", "*.txt")))
         ]
         assert len(self._video_files) == len(self._scene_files)
         for video_file, scene_file in zip(self._video_files, self._scene_files):
             video_id = os.path.basename(video_file).replace("bbc_", "").split(".")[0]
-            scene_id = os.path.basename(scene_file).split("_")[0]
+            scene_id = os.path.basename(scene_file).split("-")[0]
             assert video_id == scene_id
 
     def __getitem__(self, index):
