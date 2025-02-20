@@ -1,6 +1,7 @@
 import glob
 import os
 
+
 class AutoShotDataset:
     """
     The AutoShot Dataset (test splits) proposed by Zhu et al. in AutoShot: A Short Video Dataset and State-of-the-Art Shot Boundary Detection
