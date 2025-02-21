@@ -2,6 +2,8 @@ import argparse
 import time
 
 from bbc_dataset import BBCDataset
+from autoshot_dataset import AutoShotDataset
+
 from evaluator import Evaluator
 from tqdm import tqdm
 
@@ -15,7 +17,7 @@ from scenedetect import (
 )
 
 
-def make_detector(detector_name: str):
+def _make_detector(detector_name: str):
     detector_map = {
         "detect-adaptive": AdaptiveDetector(),
         "detect-content": ContentDetector(),
@@ -26,11 +28,19 @@ def make_detector(detector_name: str):
     return detector_map[detector_name]
 
 
+def _make_dataset(dataset_name: str):
+    dataset_map = {
+        "BBC": BBCDataset("BBC"),
+        "AutoShot": AutoShotDataset("AutoShot"),
+    }
+    return dataset_map[dataset_name]
+
+
 def _detect_scenes(detector_type: str, dataset):
     pred_scenes = {}
     for video_file, scene_file in tqdm(dataset):
         start = time.time()
-        detector = make_detector(detector_type)
+        detector = _make_detector(detector_type)
         pred_scene_list = detect(video_file, detector)
         elapsed = time.time() - start
         scenes = {
@@ -53,7 +63,7 @@ def _detect_scenes(detector_type: str, dataset):
 
 
 def main(args):
-    pred_scenes = _detect_scenes(detector_type=args.detector, dataset=BBCDataset("BBC"))
+    pred_scenes = _detect_scenes(detector_type=args.detector, dataset=_make_dataset(args.dataset))
     result = Evaluator().evaluate_performance(pred_scenes)
     print("Overall Results:")
     print(
@@ -65,6 +75,16 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Benchmarking PySceneDetect performance.")
+    parser.add_argument(
+        "--dataset",
+        type=str,
+        choices=[
+            "BBC",
+            "AutoShot",
+        ],
+        default="BBC",
+        help="Dataset name. Supported datasets are BBC and AutoShot.",
+    )
     parser.add_argument(
         "--detector",
         type=str,

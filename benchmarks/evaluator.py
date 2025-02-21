@@ -24,9 +24,8 @@ class Evaluator:
             total_pred += len(pred_list)
             total_gt += len(gt_scene_list)
 
-        assert total_pred, pred_scenes
         recall = total_correct / total_gt
-        precision = total_correct / total_pred
+        precision = total_correct / total_pred if total_pred != 0 else 0
         f1 = 2 * recall * precision / (recall + precision) if (recall + precision) != 0 else 0
         avg_elapsed = mean([x["elapsed"] for x in pred_scenes.values()])
         result = {
