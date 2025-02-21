@@ -24,13 +24,13 @@ rm AutoShot.tar.gz
 ```
 
 ## Evaluation
-To evaluate PySceneDetect on a dataset, run the following command:
+To evaluate PySceneDetect on a dataset, run the following command from the root of the repo:
 ```
-python benchmark.py -d <dataset_name> --detector <detector_name>
+python -m benchmark -d <dataset_name> --detector <detector_name>
 ```
 For example, to evaluate ContentDetector on the BBC dataset:
 ```
-python evaluate.py -d BBC --detector detect-content
+python -m benchmark -d BBC --detector detect-content
 ```
 
 ### Result
@@ -40,10 +40,10 @@ The performance is computed as recall, precision, f1, and elapsed time.
 
 |      Detector     | Recall | Precision |   F1  | Elapsed time (second) |
 |:-----------------:|:------:|:---------:|:-----:|:---------------------:|
-|  AdaptiveDetector |  87.52 |   97.21   | 92.11 |         27.84         |
-|  ContentDetector  |  85.23 |   89.53   | 87.33 |         26.46         |
-|    HashDetector   |  92.96 |   76.27   | 83.79 |         16.26         |
-| HistogramDetector |  90.55 |   72.76   | 80.68 |         16.13         |
+|  AdaptiveDetector |  87.12 |   96.55   | 91.59 |         27.84         |
+|  ContentDetector  |  84.70 |   88.77   | 86.69 |         28.20         |
+|    HashDetector   |  92.30 |   75.56   | 83.10 |         16.00         |
+| HistogramDetector |  89.84 |   72.03   | 79.96 |         15.13         |
 | ThresholdDetector |  0.00  |   0.00    |  0.00 |         18.95         |
 
 #### AutoShot
