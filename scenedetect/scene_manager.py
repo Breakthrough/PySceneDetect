@@ -1283,7 +1283,9 @@ class SceneManager:
                 1 + min(max_y, frame_height) - min_y,
             )
         # Calculate downscale factor and log effective resolution.
-        if self.auto_downscale:
+        if self.auto_downscale and all(
+            detector.downscale_performance_hint for detector in self._detector_list
+        ):
             downscale_factor = compute_downscale_factor(max(effective_frame_size))
         else:
             downscale_factor = self.downscale

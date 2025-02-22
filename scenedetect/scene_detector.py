@@ -131,6 +131,11 @@ class SceneDetector:
         """
         return 0
 
+    @property
+    def downscale_performance_hint(self) -> bool:
+        """Indicates if the detector's performance is improved by downscaling."""
+        return True
+
 
 # TODO(v0.7): Remove this early, no point in keeping it around.
 class SparseSceneDetector(SceneDetector):

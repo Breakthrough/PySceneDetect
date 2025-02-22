@@ -179,3 +179,7 @@ class HashDetector(SceneDetector):
         hash_img = dct_low_freq > med
 
         return hash_img
+
+    @property
+    def downscale_performance_hint(self) -> bool:
+        return False
