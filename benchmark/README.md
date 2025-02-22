@@ -26,12 +26,17 @@ rm AutoShot.tar.gz
 ## Evaluation
 To evaluate PySceneDetect on a dataset, run the following command from the root of the repo:
 ```
-python -m benchmark -d <dataset_name> --detector <detector_name>
+python -m benchmark --dataset <dataset_name> --detector <detector_name>
 ```
 For example, to evaluate ContentDetector on the BBC dataset:
 ```
-python -m benchmark -d BBC --detector detect-content
+python -m benchmark --dataset BBC --detector detect-content
 ```
+To run all detectors on all datasets:
+```
+python -m benchmark --all
+```
+The `--all` flag can also be combined with `--dataset` or `--detector`.
 
 ### Result
 The performance is computed as recall, precision, f1, and elapsed time.
