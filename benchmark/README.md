@@ -1,6 +1,6 @@
 # Benchmarking PySceneDetect
 This repository benchmarks the performance of PySceneDetect in terms of both latency and accuracy.
-We evaluate it using the standard dataset for video shot detection: [BBC](https://zenodo.org/records/14865504).
+We evaluate it using the standard dataset for video shot detection: [BBC](https://zenodo.org/records/14865504) and [AutoShot](https://drive.google.com/file/d/17diRkLlNUUjHDooXdqFUTXYje2-x4Yt6/view?usp=sharing).
 
 ## Dataset Download
 ### BBC
