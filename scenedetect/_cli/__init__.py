@@ -23,6 +23,7 @@ import logging
 import os
 import os.path
 import typing as ty
+from copy import deepcopy
 
 import click
 
@@ -350,6 +351,13 @@ def scenedetect(
     )
 
 
+def add_hidden_alias(command: click.Command, alias: str):
+    """Adds a copy of `command` that can be invoked under the name `alias`."""
+    hidden_command = deepcopy(command)
+    hidden_command.hidden = True
+    scenedetect.add_command(hidden_command, alias)
+
+
 @click.command("help", cls=Command)
 @click.argument(
     "command_name",
@@ -359,6 +367,7 @@ def scenedetect(
 @click.pass_context
 def help_command(ctx: click.Context, command_name: str):
     """Print full help reference."""
+    # TODO: Other commands still seem to run if this is specified.
     assert isinstance(ctx.parent.command, click.MultiCommand)
     parent_command = ctx.parent.command
     all_commands = set(parent_command.list_commands(ctx))
@@ -973,13 +982,13 @@ def load_scenes_command(
     )
 
 
-EXPORT_HTML_HELP = """Export scene list to HTML file.
+SAVE_HTML_HELP = """Save scene list to HTML file.
 
-To customize image generation, specify the `save-images` command before `export-html`. This command always uses the result of the preceeding `save-images` command, or runs it with the default config values unless `--no-images` is set.
+To customize image generation, specify the `save-images` command before `save-html`. This command always uses the result of the preceeding `save-images` command, or runs it with the default config values unless `--no-images` is set.
 """
 
 
-@click.command("export-html", cls=Command, help=EXPORT_HTML_HELP)
+@click.command("save-html", cls=Command, help=SAVE_HTML_HELP)
 @click.option(
     "--filename",
     "-f",
@@ -987,7 +996,7 @@ To customize image generation, specify the `save-images` command before `export-
     default="$VIDEO_NAME-Scenes.html",
     type=click.STRING,
     help="Filename format to use for the scene list HTML file. You can use the $VIDEO_NAME macro in the file name. Note that you may have to wrap the format name using single quotes.%s"
-    % (USER_CONFIG.get_help_string("export-html", "filename")),
+    % (USER_CONFIG.get_help_string("save-html", "filename")),
 )
 @click.option(
     "--no-images",
@@ -995,7 +1004,7 @@ To customize image generation, specify the `save-images` command before `export-
     is_flag=True,
     flag_value=True,
     help="Do not include images with the result.%s"
-    % (USER_CONFIG.get_help_string("export-html", "no-images")),
+    % (USER_CONFIG.get_help_string("save-html", "no-images")),
 )
 @click.option(
     "--image-width",
@@ -1003,7 +1012,7 @@ To customize image generation, specify the `save-images` command before `export-
     metavar="pixels",
     type=click.INT,
     help="Width in pixels of the images in the resulting HTML table.%s"
-    % (USER_CONFIG.get_help_string("export-html", "image-width", show_default=False)),
+    % (USER_CONFIG.get_help_string("save-html", "image-width", show_default=False)),
 )
 @click.option(
     "--image-height",
@@ -1011,7 +1020,7 @@ To customize image generation, specify the `save-images` command before `export-
     metavar="pixels",
     type=click.INT,
     help="Height in pixels of the images in the resulting HTML table.%s"
-    % (USER_CONFIG.get_help_string("export-html", "image-height", show_default=False)),
+    % (USER_CONFIG.get_help_string("save-html", "image-height", show_default=False)),
 )
 @click.option(
     "--show",
@@ -1020,10 +1029,10 @@ To customize image generation, specify the `save-images` command before `export-
     flag_value=True,
     default=None,
     help="Automatically open resulting HTML when processing is complete.%s"
-    % (USER_CONFIG.get_help_string("export-html", "show")),
+    % (USER_CONFIG.get_help_string("save-html", "show")),
 )
 @click.pass_context
-def export_html_command(
+def save_html_command(
     ctx: click.Context,
     filename: ty.Optional[ty.AnyStr],
     no_images: bool,
@@ -1031,23 +1040,22 @@ def export_html_command(
     image_height: ty.Optional[int],
     show: bool,
 ):
-    # TODO: Rename this command to save-html to align with other export commands. This will require
-    # that we allow `export-html` as an alias on the CLI and via the config file for a few versions
-    # as to not break existing workflows.
+    if ctx.command.name == "save-html":
+        logger.warning("WARNING: export-html is deprecated, use save-html instead.")
     ctx = ctx.obj
     assert isinstance(ctx, CliContext)
-    include_images = not ctx.config.get_value("export-html", "no-images", no_images)
+    include_images = not ctx.config.get_value("save-html", "no-images", no_images)
     # Make sure a save-images command is in the pipeline for us to use the results from.
     if include_images and not ctx.save_images:
         save_images_command.callback()
-    export_html_args = {
-        "html_name_format": ctx.config.get_value("export-html", "filename", filename),
-        "image_width": ctx.config.get_value("export-html", "image-width", image_width),
-        "image_height": ctx.config.get_value("export-html", "image-height", image_height),
+    save_html_args = {
+        "html_name_format": ctx.config.get_value("save-html", "filename", filename),
+        "image_width": ctx.config.get_value("save-html", "image-width", image_width),
+        "image_height": ctx.config.get_value("save-html", "image-height", image_height),
         "include_images": include_images,
-        "show": ctx.config.get_value("export-html", "show", show),
+        "show": ctx.config.get_value("save-html", "show", show),
     }
-    ctx.add_command(cli_commands.export_html, export_html_args)
+    ctx.add_command(cli_commands.save_html, save_html_args)
 
 
 LIST_SCENES_HELP = """Create scene list CSV file (will be named $VIDEO_NAME-Scenes.csv by default).
@@ -1509,7 +1517,7 @@ def save_images_command(
     }
     ctx.add_command(cli_commands.save_images, save_images_args)
 
-    # Record that we added a save-images command to the pipeline so we can allow export-html
+    # Record that we added a save-images command to the pipeline so we can allow save-html
     # to run afterwards (it is dependent on the output).
     ctx.save_images = True
 
@@ -1585,8 +1593,11 @@ scenedetect.add_command(detect_hist_command)
 scenedetect.add_command(detect_threshold_command)
 
 # Output
-scenedetect.add_command(export_html_command)
+scenedetect.add_command(save_html_command)
 scenedetect.add_command(save_qp_command)
 scenedetect.add_command(list_scenes_command)
 scenedetect.add_command(save_images_command)
 scenedetect.add_command(split_video_command)
+
+# Deprecated Commands (Hidden From Help Output)
+add_hidden_alias(save_html_command, "export-html")  # Deprecated in v0.6.6, replaced with save-html

@@ -85,7 +85,7 @@ class CliContext:
         self.scene_manager: SceneManager = None
         self.stats_manager: StatsManager = None
         self.save_images: bool = False  # True if the save-images command was specified
-        self.save_images_result: ty.Any = (None, None)  # Result of save-images used by export-html
+        self.save_images_result: ty.Any = (None, None)  # Result of save-images used by save-html
 
         # Input:
         self.video_stream: VideoStream = None

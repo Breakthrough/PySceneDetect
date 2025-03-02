@@ -17,10 +17,11 @@ possible and re-used by the CLI so that there is one source of truth.
 import logging
 import os
 import os.path
+import typing as ty
 from abc import ABC, abstractmethod
-from configparser import ConfigParser, ParsingError
+from configparser import ConfigParser
+from configparser import Error as ConfigParserError
 from enum import Enum
-from typing import Any, AnyStr, Dict, List, Optional, Tuple, Union
 
 from platformdirs import user_config_dir
 
@@ -31,6 +32,8 @@ from scenedetect.scene_manager import Interpolation
 from scenedetect.video_splitter import DEFAULT_FFMPEG_ARGS
 
 PYAV_THREADING_MODES = ["NONE", "SLICE", "FRAME", "AUTO"]
+
+LogMessage = ty.Tuple[int, str]
 
 
 class OptionParseFailure(Exception):
@@ -46,7 +49,7 @@ class ValidatedValue(ABC):
 
     @property
     @abstractmethod
-    def value(self) -> Any:
+    def value(self) -> ty.Any:
         """Get the value after validation."""
         ...
 
@@ -72,13 +75,13 @@ class TimecodeValue(ValidatedValue):
 
     Stores value in original representation."""
 
-    def __init__(self, value: Union[int, float, str]):
+    def __init__(self, value: ty.Union[int, float, str]):
         # Ensure value is a valid timecode.
         FrameTimecode(timecode=value, fps=100.0)
         self._value = value
 
     @property
-    def value(self) -> Union[int, float, str]:
+    def value(self) -> ty.Union[int, float, str]:
         return self._value
 
     @staticmethod
@@ -96,9 +99,9 @@ class RangeValue(ValidatedValue):
 
     def __init__(
         self,
-        value: Union[int, float],
-        min_val: Union[int, float],
-        max_val: Union[int, float],
+        value: ty.Union[int, float],
+        min_val: ty.Union[int, float],
+        max_val: ty.Union[int, float],
     ):
         if value < min_val or value > max_val:
             # min and max are inclusive.
@@ -108,16 +111,16 @@ class RangeValue(ValidatedValue):
         self._max_val = max_val
 
     @property
-    def value(self) -> Union[int, float]:
+    def value(self) -> ty.Union[int, float]:
         return self._value
 
     @property
-    def min_val(self) -> Union[int, float]:
+    def min_val(self) -> ty.Union[int, float]:
         """Minimum value of the range."""
         return self._min_val
 
     @property
-    def max_val(self) -> Union[int, float]:
+    def max_val(self) -> ty.Union[int, float]:
         """Maximum value of the range."""
         return self._max_val
 
@@ -141,7 +144,7 @@ class CropValue(ValidatedValue):
     _IGNORE_CHARS = [",", "/", "(", ")"]
     """Characters to ignore."""
 
-    def __init__(self, value: Optional[Union[str, Tuple[int, int, int, int]]] = None):
+    def __init__(self, value: ty.Optional[ty.Union[str, ty.Tuple[int, int, int, int]]] = None):
         if isinstance(value, CropValue) or value is None:
             self._crop = value
         else:
@@ -162,7 +165,7 @@ class CropValue(ValidatedValue):
             self._crop = (min(x0, x1), min(y0, y1), max(x0, x1), max(y0, y1))
 
     @property
-    def value(self) -> Tuple[int, int, int, int]:
+    def value(self) -> ty.Tuple[int, int, int, int]:
         return self._crop
 
     def __str__(self) -> str:
@@ -182,7 +185,7 @@ class ScoreWeightsValue(ValidatedValue):
     _IGNORE_CHARS = [",", "/", "(", ")"]
     """Characters to ignore."""
 
-    def __init__(self, value: Union[str, ContentDetector.Components]):
+    def __init__(self, value: ty.Union[str, ContentDetector.Components]):
         if isinstance(value, ContentDetector.Components):
             self._value = value
         else:
@@ -302,14 +305,14 @@ class TimecodeFormat(Enum):
         raise RuntimeError("Unhandled format specifier.")
 
 
-ConfigValue = Union[bool, int, float, str]
-ConfigDict = Dict[str, Dict[str, ConfigValue]]
+ConfigValue = ty.Union[bool, int, float, str]
+ConfigDict = ty.Dict[str, ty.Dict[str, ConfigValue]]
 
-_CONFIG_FILE_NAME: AnyStr = "scenedetect.cfg"
-_CONFIG_FILE_DIR: AnyStr = user_config_dir("PySceneDetect", False)
+_CONFIG_FILE_NAME: ty.AnyStr = "scenedetect.cfg"
+_CONFIG_FILE_DIR: ty.AnyStr = user_config_dir("PySceneDetect", False)
 _PLACEHOLDER = 0  # Placeholder for image quality default, as the value depends on output format
 
-CONFIG_FILE_PATH: AnyStr = os.path.join(_CONFIG_FILE_DIR, _CONFIG_FILE_NAME)
+CONFIG_FILE_PATH: ty.AnyStr = os.path.join(_CONFIG_FILE_DIR, _CONFIG_FILE_NAME)
 DEFAULT_JPG_QUALITY = 95
 DEFAULT_WEBP_QUALITY = 100
 
@@ -360,13 +363,6 @@ CONFIG_MAP: ConfigDict = {
     "load-scenes": {
         "start-col-name": "Start Frame",
     },
-    "export-html": {
-        "filename": "$VIDEO_NAME-Scenes.html",
-        "image-height": 0,
-        "image-width": 0,
-        "no-images": False,
-        "show": False,
-    },
     "list-scenes": {
         "cut-format": TimecodeFormat.TIMECODE,
         "col-separator": EscapedChar(","),
@@ -391,6 +387,13 @@ CONFIG_MAP: ConfigDict = {
         "min-scene-len": TimecodeValue("0.6s"),
         "output": None,
         "verbosity": "info",
+    },
+    "save-html": {
+        "filename": "$VIDEO_NAME-Scenes.html",
+        "image-height": 0,
+        "image-width": 0,
+        "no-images": False,
+        "show": False,
     },
     "save-images": {
         "compression": RangeValue(3, min_val=0, max_val=9),
@@ -427,7 +430,7 @@ CONFIG_MAP: ConfigDict = {
 The types of these values are used when decoding the configuration file. Valid choices for
 certain string options are stored in `CHOICE_MAP`."""
 
-CHOICE_MAP: Dict[str, Dict[str, List[str]]] = {
+CHOICE_MAP: ty.Dict[str, ty.Dict[str, ty.List[str]]] = {
     "backend-pyav": {
         "threading_mode": [mode.lower() for mode in PYAV_THREADING_MODES],
     },
@@ -471,131 +474,184 @@ CHOICE_MAP: Dict[str, Dict[str, List[str]]] = {
 of a set to preserve order when generating error contexts. Values are case-insensitive, and must be
 in lowercase in this map."""
 
-# TODO: This isn't ideal for enums since this could be derived from the type directly, but it works.
+DEPRECATED_COMMANDS: ty.Dict[str, str] = {"export-html": "save-html"}
+"""Deprecated config file sections that have a 1:1 mapping to a new replacement."""
 
 
-def _validate_structure(config: ConfigParser) -> List[str]:
-    """Validates the layout of the section/option mapping.
-
-    Returns:
-        List of any parsing errors in human-readable form.
-    """
-    errors: List[str] = []
-    for section in config.sections():
-        if section not in CONFIG_MAP.keys():
-            errors.append("Unsupported config section: [%s]" % (section))
+def _validate_structure(parser: ConfigParser) -> ty.Tuple[bool, ty.List[LogMessage]]:
+    """Validates the layout of the section/option mapping. Returns a bool indicating if validation
+    was successful, and a list of log messages for the init log."""
+    logs: ty.List[LogMessage] = []
+    success = True
+    all_sections = set(parser.sections())
+    for section in all_sections:
+        section_name = section
+        if section in DEPRECATED_COMMANDS:
+            section = DEPRECATED_COMMANDS[section]
+            logs.append(
+                (
+                    logging.WARNING,
+                    f"WARNING: [{section_name}] is deprecated and will be removed!"
+                    f"Use [{section}] instead.",
+                )
+            )
+            # The parser already handled duplicate sections, but it doesn't know about deprecated
+            # aliases. If there's a conflict, make sure we error out instead of warning.
+            if section in all_sections:
+                success = False
+                logs.append(
+                    (
+                        logging.ERROR,
+                        f"[{section_name}] conflicts with [{section}], only specify one.",
+                    )
+                )
+                continue
+        elif section not in CONFIG_MAP.keys():
+            success = False
+            logs.append((logging.ERROR, f"Unsupported config section: [{section_name}]"))
             continue
-        for option_name, _ in config.items(section):
+        for option_name, _ in parser.items(section_name):
             if option_name not in CONFIG_MAP[section].keys():
-                errors.append("Unsupported config option in [%s]: %s" % (section, option_name))
-    return errors
+                success = False
+                logs.append(
+                    (
+                        logging.ERROR,
+                        f"Unsupported config option in [{section_name}]: [{option_name}]",
+                    )
+                )
+    return (success, logs)
 
 
-def _parse_config(config: ConfigParser) -> Tuple[ConfigDict, List[str]]:
-    """Process the given configuration into a key-value mapping.
-
-    Returns:
-        Configuration mapping and list of any processing errors in human readable form.
-    """
-    out_map: ConfigDict = {}
-    errors: List[str] = []
+def _parse_config(parser: ConfigParser) -> ty.Tuple[ty.Optional[ConfigDict], ty.List[LogMessage]]:
+    """Process the given configuration into a key-value mapping. Returns a tuple of the config
+    dict itself (or None on failure), and a list of log messages during parsing."""
+    (success, logs) = _validate_structure(parser)
+    if not success:
+        return (None, logs)
+    config: ConfigDict = {}
+    success = True
+    # Re-map deprecated config sections to their replacements. Structure validation above should
+    # ensure no conflicts between the two.
+    for deprecated_command in DEPRECATED_COMMANDS:
+        if deprecated_command in parser:
+            replacement = DEPRECATED_COMMANDS[deprecated_command]
+            parser[replacement] = parser[deprecated_command]
+            del parser[deprecated_command]
     for command in CONFIG_MAP:
-        out_map[command] = {}
+        config[command] = {}
         for option in CONFIG_MAP[command]:
-            if command in config and option in config[command]:
+            if command in parser and option in parser[command]:
                 try:
                     value_type = None
                     if isinstance(CONFIG_MAP[command][option], bool):
                         value_type = "yes/no value"
-                        out_map[command][option] = config.getboolean(command, option)
+                        config[command][option] = parser.getboolean(command, option)
                         continue
                     elif isinstance(CONFIG_MAP[command][option], int):
                         value_type = "integer"
-                        out_map[command][option] = config.getint(command, option)
+                        config[command][option] = parser.getint(command, option)
                         continue
                     elif isinstance(CONFIG_MAP[command][option], float):
                         value_type = "number"
-                        out_map[command][option] = config.getfloat(command, option)
+                        config[command][option] = parser.getfloat(command, option)
                         continue
                     elif isinstance(CONFIG_MAP[command][option], Enum):
                         config_value = (
-                            config.get(command, option).replace("\n", " ").strip().upper()
+                            parser.get(command, option).replace("\n", " ").strip().upper()
                         )
                         try:
                             parsed = CONFIG_MAP[command][option].__class__[config_value]
-                            out_map[command][option] = parsed
+                            config[command][option] = parsed
                         except TypeError:
-                            errors.append(
-                                "Invalid value for [%s] option %s': %s. Must be one of: %s."
-                                % (
-                                    command,
-                                    option,
-                                    config.get(command, option),
-                                    ", ".join(
-                                        str(choice) for choice in CHOICE_MAP[command][option]
+                            success = False
+                            logs.append(
+                                (
+                                    logging.ERROR,
+                                    "Invalid value for [%s] option %s': %s. Must be one of: %s."
+                                    % (
+                                        command,
+                                        option,
+                                        parser.get(command, option),
+                                        ", ".join(
+                                            str(choice) for choice in CHOICE_MAP[command][option]
+                                        ),
                                     ),
                                 )
                             )
                         continue
 
                 except ValueError as _:
-                    errors.append(
-                        "Invalid value for [%s] option '%s': %s is not a valid %s."
-                        % (command, option, config.get(command, option), value_type)
+                    success = False
+                    logs.append(
+                        (
+                            logging.ERROR,
+                            "Invalid value for [%s] option '%s': %s is not a valid %s."
+                            % (command, option, parser.get(command, option), value_type),
+                        )
                     )
                     continue
 
                 # Handle custom validation types.
-                config_value = config.get(command, option)
+                config_value = parser.get(command, option)
                 default = CONFIG_MAP[command][option]
                 option_type = type(default)
                 if issubclass(option_type, ValidatedValue):
                     try:
-                        out_map[command][option] = option_type.from_config(
+                        config[command][option] = option_type.from_config(
                             config_value=config_value, default=default
                         )
                     except OptionParseFailure as ex:
-                        errors.append(
-                            "Invalid value for [%s] option '%s':  %s\nError: %s"
-                            % (command, option, config_value, ex.error)
+                        success = False
+                        logs.append(
+                            (
+                                logging.ERROR,
+                                "Invalid value for [%s] option '%s':  %s\nError: %s"
+                                % (command, option, config_value, ex.error),
+                            )
                         )
                     continue
 
                 # If we didn't process the value as a given type, handle it as a string. We also
                 # replace newlines with spaces, and strip any remaining leading/trailing whitespace.
                 if value_type is None:
-                    config_value = config.get(command, option).replace("\n", " ").strip()
+                    config_value = parser.get(command, option).replace("\n", " ").strip()
                     if command in CHOICE_MAP and option in CHOICE_MAP[command]:
                         if config_value.lower() not in CHOICE_MAP[command][option]:
-                            errors.append(
-                                "Invalid value for [%s] option '%s': %s. Must be one of: %s."
-                                % (
-                                    command,
-                                    option,
-                                    config.get(command, option),
-                                    ", ".join(choice for choice in CHOICE_MAP[command][option]),
+                            success = False
+                            logs.append(
+                                (
+                                    logging.ERROR,
+                                    "Invalid value for [%s] option '%s': %s. Must be one of: %s."
+                                    % (
+                                        command,
+                                        option,
+                                        parser.get(command, option),
+                                        ", ".join(choice for choice in CHOICE_MAP[command][option]),
+                                    ),
                                 )
                             )
                             continue
-                    out_map[command][option] = config_value
+                    config[command][option] = config_value
                     continue
 
-    return (out_map, errors)
+    if not success:
+        return (None, logs)
+    return (config, logs)
 
 
 class ConfigLoadFailure(Exception):
     """Raised when a user-specified configuration file fails to be loaded or validated."""
 
-    def __init__(self, init_log: Tuple[int, str], reason: Optional[Exception] = None):
+    def __init__(self, init_log: ty.Tuple[int, str], reason: ty.Optional[Exception] = None):
         super().__init__()
         self.init_log = init_log
         self.reason = reason
 
 
 class ConfigRegistry:
-    def __init__(self, path: Optional[str] = None, throw_exception: bool = True):
+    def __init__(self, path: ty.Optional[str] = None, throw_exception: bool = True):
         self._config: ConfigDict = {}  # Options set in the loaded config file.
-        self._init_log: List[Tuple[int, str]] = []
+        self._init_log: ty.List[ty.Tuple[int, str]] = []
         self._initialized = False
 
         try:
@@ -653,23 +709,18 @@ class ConfigRegistry:
             with open(path) as config_file:
                 config_file_contents = config_file.read()
             config.read_string(config_file_contents, source=path)
-        except ParsingError as ex:
-            if __debug__:
-                raise
-            raise ConfigLoadFailure(self._init_log, reason=ex) from None
-        except OSError as ex:
+        except (ConfigParserError, OSError) as ex:
             if __debug__:
                 raise
             raise ConfigLoadFailure(self._init_log, reason=ex) from None
         # At this point the config file syntax is correct, but we need to still validate
         # the parsed options (i.e. that the options have valid values).
-        errors = _validate_structure(config)
-        if not errors:
-            self._config, errors = _parse_config(config)
-        if errors:
-            for log_str in errors:
-                self._init_log.append((logging.ERROR, log_str))
+        (config, logs) = _parse_config(config)
+        for verbosity, message in logs:
+            self._init_log.append((verbosity, message))
+        if config is None:
             raise ConfigLoadFailure(self._init_log)
+        self._config = config
 
     def is_default(self, command: str, option: str) -> bool:
         """True if specified config option is unset (i.e. the default), False otherwise."""
@@ -679,7 +730,7 @@ class ConfigRegistry:
         self,
         command: str,
         option: str,
-        override: Optional[ConfigValue] = None,
+        override: ty.Optional[ConfigValue] = None,
     ) -> ConfigValue:
         """Get the current setting or default value of the specified command option."""
         assert command in CONFIG_MAP and option in CONFIG_MAP[command]
@@ -694,7 +745,7 @@ class ConfigRegistry:
         return value
 
     def get_help_string(
-        self, command: str, option: str, show_default: Optional[bool] = None
+        self, command: str, option: str, show_default: ty.Optional[bool] = None
     ) -> str:
         """Get a string to specify for the help text indicating the current command option value,
         if set, or the default.

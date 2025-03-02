@@ -539,17 +539,15 @@ def test_cli_save_images_rotation(rotated_video_file, tmp_path: Path):
     assert image.shape == (1280, 544, 3)
 
 
-def test_cli_export_html(tmp_path: Path):
-    """Test `export-html` command."""
+def test_cli_save_html(tmp_path: Path):
+    """Test `save-html` command."""
     base_command = "-i {VIDEO} -s {STATS} time {TIME} {DETECTOR} {COMMAND}"
+    assert invoke_scenedetect(base_command, COMMAND="save-html", output_dir=tmp_path) == 0
     assert (
-        invoke_scenedetect(base_command, COMMAND="save-images export-html", output_dir=tmp_path)
-        == 0
+        invoke_scenedetect(base_command, COMMAND="save-html --no-images", output_dir=tmp_path) == 0
     )
-    assert (
-        invoke_scenedetect(base_command, COMMAND="export-html --no-images", output_dir=tmp_path)
-        == 0
-    )
+    # Ensure we can still call the now deprecated export-html command.
+    assert invoke_scenedetect(base_command, COMMAND="save-html", output_dir=tmp_path) == 0
     # TODO: Check for existence of HTML & image files.
 
 

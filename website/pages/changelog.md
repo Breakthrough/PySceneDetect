@@ -624,6 +624,7 @@ Development
 
 ## PySceneDetect 0.6.6 (In Development)
 
+ - [general] The `export-html` command is now deprecated, use `save-html` instead
  - [bugfix] Fix crash when using `split-video` with `-m`/`--mkvmerge` option [#473](https://github.com/Breakthrough/PySceneDetect/issues/473)
  - [bugfix] Fix incorrect default filename template for `split-video` command with `-m`/`--mkvmerge` option
  - [bugfix] Fix inconsistent filenames when using `split_video_mkvmerge()` function in `scenedetect.video_splitter` module

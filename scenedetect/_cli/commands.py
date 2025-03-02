@@ -35,7 +35,7 @@ from scenedetect.video_splitter import split_video_ffmpeg, split_video_mkvmerge
 logger = logging.getLogger("pyscenedetect")
 
 
-def export_html(
+def save_html(
     context: CliContext,
     scenes: SceneList,
     cuts: CutList,
@@ -45,7 +45,7 @@ def export_html(
     include_images: bool,
     show: bool,
 ):
-    """Handles the `export-html` command."""
+    """Handles the `save-html` command."""
     (image_filenames, output_dir) = (
         context.save_images_result
         if context.save_images_result is not None
@@ -198,7 +198,7 @@ def save_images(
         interpolation=interpolation,
         threading=threading,
     )
-    # Save the result for use by `export-html` if required.
+    # Save the result for use by `save-html` if required.
     context.save_images_result = (images, output_dir)
 
 

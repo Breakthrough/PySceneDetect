@@ -432,17 +432,17 @@ Commands
 ************************************************************************
 
 
-.. _command-export-html:
+.. _command-save-html:
 
-.. program:: scenedetect export-html
+.. program:: scenedetect save-html
 
 
-``export-html``
+``save-html``
 ========================================================================
 
-Export scene list to HTML file.
+Save scene list to HTML file.
 
-To customize image generation, specify the :ref:`save-images <command-save-images>` command before :ref:`export-html <command-export-html>`. This command always uses the result of the preceeding :ref:`save-images <command-save-images>` command, or runs it with the default config values unless ``--no-images`` is set.
+To customize image generation, specify the :ref:`save-images <command-save-images>` command before :ref:`save-html <command-save-html>`. This command always uses the result of the preceeding :ref:`save-images <command-save-images>` command, or runs it with the default config values unless ``--no-images`` is set.
 
 
 Options
