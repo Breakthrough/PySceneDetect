@@ -95,9 +95,7 @@ def test_save_images(test_video_file, tmp_path: Path):
 
     image_name_glob = "scenedetect.tempfile.*.jpg"
     image_name_template = (
-        "scenedetect.tempfile."
-        "$SCENE_NUMBER.$IMAGE_NUMBER.$FRAME_NUMBER."
-        "$TIMESTAMP_MS.$TIMECODE"
+        "scenedetect.tempfile.$SCENE_NUMBER.$IMAGE_NUMBER.$FRAME_NUMBER.$TIMESTAMP_MS.$TIMECODE"
     )
 
     video_fps = video.frame_rate
@@ -134,9 +132,7 @@ def test_save_images_singlethreaded(test_video_file, tmp_path: Path):
 
     image_name_glob = "scenedetect.tempfile.*.jpg"
     image_name_template = (
-        "scenedetect.tempfile."
-        "$SCENE_NUMBER.$IMAGE_NUMBER.$FRAME_NUMBER."
-        "$TIMESTAMP_MS.$TIMECODE"
+        "scenedetect.tempfile.$SCENE_NUMBER.$IMAGE_NUMBER.$FRAME_NUMBER.$TIMESTAMP_MS.$TIMECODE"
     )
 
     video_fps = video.frame_rate
