@@ -67,7 +67,7 @@ Options
 
 .. option:: -m TIMECODE, --min-scene-len TIMECODE
 
-  Minimum length of any scene. TIMECODE can be specified as number of frames (:option:`-m=10 <-m>`), time in seconds (:option:`-m=2.5 <-m>`), or timecode (:option:`-m=00:02:53.633 <-m>`).
+  Minimum length of any scene. TIMECODE can be specified as number of frames (:option:`-m 10 <-m>`), time in seconds (:option:`-m 2.5 <-m>`), or timecode (:option:`-m 00:02:53.633 <-m>`).
 
   Default: ``0.6s``
 
@@ -91,11 +91,11 @@ Options
 
 .. option:: -d N, --downscale N
 
-  Integer factor to downscale video by before processing. If unset, value is selected based on resolution. Set :option:`-d=1 <-d>` to disable downscaling.
+  Integer factor to downscale video by before processing. If unset, value is selected based on resolution. Set :option:`-d 1 <-d>` to disable downscaling.
 
 .. option:: -fs N, --frame-skip N
 
-  Skip N frames during processing. Reduces processing speed at expense of accuracy. :option:`-fs=1 <-fs>` skips every other frame processing 50% of the video, :option:`-fs=2 <-fs>` processes 33% of the video frames, :option:`-fs=3 <-fs>` processes 25%, etc...
+  Skip N frames during processing. Reduces processing speed at expense of accuracy. :option:`-fs 1 <-fs>` skips every other frame processing 50% of the video, :option:`-fs 2 <-fs>` processes 33% of the video frames, :option:`-fs 3 <-fs>` processes 25%, etc...
 
   Default: ``0``
 
@@ -208,7 +208,7 @@ Options
 
 .. option:: -m TIMECODE, --min-scene-len TIMECODE
 
-  Minimum length of any scene. Overrides global option :option:`-m/--min-scene-len <scenedetect -m>`. TIMECODE can be specified in frames (:option:`-m=100 <-m>`), in seconds with `s` suffix (:option:`-m=3.5s <-m>`), or timecode (:option:`-m=00:01:52.778 <-m>`).
+  Minimum length of any scene. Overrides global option :option:`-m/--min-scene-len <scenedetect -m>`. TIMECODE can be specified in frames (:option:`-m 100 <-m>`), in seconds with `s` suffix (:option:`-m 3.5s <-m>`), or timecode (:option:`-m 00:01:52.778 <-m>`).
 
 
 .. _command-detect-content:
@@ -263,7 +263,7 @@ Options
 
 .. option:: -l, --luma-only
 
-  Only use luma (brightness) channel. Useful for greyscale videos. Equivalent to setting -w="0 0 1 0".
+  Only use luma (brightness) channel. Useful for greyscale videos. Equivalent to setting -w 0 0 1 0.
 
 .. option:: -k N, --kernel-size N
 
@@ -424,7 +424,7 @@ Options
 
 .. option:: -m TIMECODE, --min-scene-len TIMECODE
 
-  Minimum length of any scene. Overrides global option :option:`-m/--min-scene-len <scenedetect -m>`. TIMECODE can be specified in frames (:option:`-m=100 <-m>`), in seconds with `s` suffix (:option:`-m=3.5s <-m>`), or timecode (:option:`-m=00:01:52.778 <-m>`).
+  Minimum length of any scene. Overrides global option :option:`-m/--min-scene-len <scenedetect -m>`. TIMECODE can be specified in frames (:option:`-m 100 <-m>`), in seconds with `s` suffix (:option:`-m 3.5s <-m>`), or timecode (:option:`-m 00:01:52.778 <-m>`).
 
 
 ************************************************************************
@@ -506,7 +506,7 @@ Options
 
 .. option:: -f NAME, --filename NAME
 
-  Filename format to use for the scene list CSV file. You can use the $VIDEO_NAME macro in the file name. Note that you may have to wrap the name using single quotes or use escape characters (e.g. :option:`-f=\$VIDEO_NAME-Scenes.csv <-f>`).
+  Filename format to use for the scene list CSV file. You can use the $VIDEO_NAME macro in the file name. Note that you may have to wrap the name using single quotes or use escape characters (e.g. :option:`-f \$VIDEO_NAME-Scenes.csv <-f>`).
 
   Default: ``$VIDEO_NAME-Scenes.csv``
 
@@ -590,13 +590,13 @@ Options
 
 .. option:: -f NAME, --filename NAME
 
-  Filename format *without* extension to use when saving images. You can use the $VIDEO_NAME, $SCENE_NUMBER, $IMAGE_NUMBER, and $FRAME_NUMBER macros in the file name. You may have to use escape characters (e.g. :option:`-f=\$SCENE_NUMBER-Image-\$IMAGE_NUMBER <-f>`) or single quotes.
+  Filename format *without* extension to use when saving images. You can use the $VIDEO_NAME, $SCENE_NUMBER, $IMAGE_NUMBER, and $FRAME_NUMBER macros in the file name. You may have to use escape characters (e.g. :option:`-f \$SCENE_NUMBER-Image-\$IMAGE_NUMBER <-f>`) or single quotes.
 
   Default: ``$VIDEO_NAME-Scene-$SCENE_NUMBER-$IMAGE_NUMBER``
 
 .. option:: -n N, --num-images N
 
-  Number of images to generate per scene. Will always include start/end frame, unless :option:`-n=1 <-n>`, in which case the image will be the frame at the mid-point of the scene.
+  Number of images to generate per scene. Will always include start/end frame, unless :option:`-n 1 <-n>`, in which case the image will be the frame at the mid-point of the scene.
 
   Default: ``3``
 
@@ -713,7 +713,7 @@ Options
 
 .. option:: -f NAME, --filename NAME
 
-  File name format to use when saving videos, with or without extension. You can use $VIDEO_NAME and $SCENE_NUMBER macros in the filename. You may have to wrap the format in single quotes or use escape characters to avoid variable expansion (e.g. :option:`-f=\$VIDEO_NAME-Scene-\$SCENE_NUMBER <-f>`).
+  File name format to use when saving videos, with or without extension. You can use $VIDEO_NAME and $SCENE_NUMBER macros in the filename. You may have to wrap the format in single quotes or use escape characters to avoid variable expansion (e.g. :option:`-f \$VIDEO_NAME-Scene-\$SCENE_NUMBER <-f>`).
 
   Default: ``$VIDEO_NAME-Scene-$SCENE_NUMBER``
 

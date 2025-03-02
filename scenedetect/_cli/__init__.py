@@ -229,7 +229,7 @@ Global options (e.g. -i/--input, -c/--config) must be specified before any comma
     metavar="TIMECODE",
     type=click.STRING,
     default=None,
-    help="Minimum length of any scene. TIMECODE can be specified as number of frames (-m=10), time in seconds (-m=2.5), or timecode (-m=00:02:53.633).%s"
+    help="Minimum length of any scene. TIMECODE can be specified as number of frames (-m 10), time in seconds (-m 2.5), or timecode (-m 00:02:53.633).%s"
     % USER_CONFIG.get_help_string("global", "min-scene-len"),
 )
 @click.option(
@@ -271,7 +271,7 @@ Global options (e.g. -i/--input, -c/--config) must be specified before any comma
     metavar="N",
     type=click.INT,
     default=None,
-    help="Integer factor to downscale video by before processing. If unset, value is selected based on resolution. Set -d=1 to disable downscaling.%s"
+    help="Integer factor to downscale video by before processing. If unset, value is selected based on resolution. Set -d 1 to disable downscaling.%s"
     % (USER_CONFIG.get_help_string("global", "downscale", show_default=False)),
 )
 @click.option(
@@ -280,7 +280,7 @@ Global options (e.g. -i/--input, -c/--config) must be specified before any comma
     metavar="N",
     type=click.INT,
     default=None,
-    help="Skip N frames during processing. Reduces processing speed at expense of accuracy. -fs=1 skips every other frame processing 50%% of the video, -fs=2 processes 33%% of the video frames, -fs=3 processes 25%%, etc... %s"
+    help="Skip N frames during processing. Reduces processing speed at expense of accuracy. -fs 1 skips every other frame processing 50%% of the video, -fs 2 processes 33%% of the video frames, -fs 3 processes 25%%, etc... %s"
     % USER_CONFIG.get_help_string("global", "frame-skip"),
 )
 @click.option(
@@ -524,7 +524,7 @@ Examples:
     "-l",
     is_flag=True,
     flag_value=True,
-    help='Only use luma (brightness) channel. Useful for greyscale videos. Equivalent to setting -w="0 0 1 0".%s'
+    help="Only use luma (brightness) channel. Useful for greyscale videos. Equivalent to setting -w 0 0 1 0.%s"
     % (USER_CONFIG.get_help_string("detect-content", "luma-only")),
 )
 @click.option(
@@ -665,7 +665,7 @@ Examples:
     metavar="TIMECODE",
     type=click.STRING,
     default=None,
-    help="Minimum length of any scene. Overrides global option -m/--min-scene-len. TIMECODE can be specified in frames (-m=100), in seconds with `s` suffix (-m=3.5s), or timecode (-m=00:01:52.778).%s"
+    help="Minimum length of any scene. Overrides global option -m/--min-scene-len. TIMECODE can be specified in frames (-m 100), in seconds with `s` suffix (-m 3.5s), or timecode (-m 00:01:52.778).%s"
     % (
         ""
         if USER_CONFIG.is_default("detect-adaptive", "min-scene-len")
@@ -750,7 +750,7 @@ Examples:
     metavar="TIMECODE",
     type=click.STRING,
     default=None,
-    help="Minimum length of any scene. Overrides global option -m/--min-scene-len. TIMECODE can be specified in frames (-m=100), in seconds with `s` suffix (-m=3.5s), or timecode (-m=00:01:52.778).%s"
+    help="Minimum length of any scene. Overrides global option -m/--min-scene-len. TIMECODE can be specified in frames (-m 100), in seconds with `s` suffix (-m 3.5s), or timecode (-m 00:01:52.778).%s"
     % (
         ""
         if USER_CONFIG.is_default("detect-threshold", "min-scene-len")
@@ -1087,7 +1087,7 @@ Without cut list (RFC 4180 compliant CSV):
     metavar="NAME",
     default="$VIDEO_NAME-Scenes.csv",
     type=click.STRING,
-    help="Filename format to use for the scene list CSV file. You can use the $VIDEO_NAME macro in the file name. Note that you may have to wrap the name using single quotes or use escape characters (e.g. -f=\\$VIDEO_NAME-Scenes.csv).%s"
+    help="Filename format to use for the scene list CSV file. You can use the $VIDEO_NAME macro in the file name. Note that you may have to wrap the name using single quotes or use escape characters (e.g. -f \\$VIDEO_NAME-Scenes.csv).%s"
     % (USER_CONFIG.get_help_string("list-scenes", "filename")),
 )
 @click.option(
@@ -1179,7 +1179,7 @@ Customized filenames:
     metavar="NAME",
     default=None,
     type=click.STRING,
-    help="File name format to use when saving videos, with or without extension. You can use $VIDEO_NAME and $SCENE_NUMBER macros in the filename. You may have to wrap the format in single quotes or use escape characters to avoid variable expansion (e.g. -f=\\$VIDEO_NAME-Scene-\\$SCENE_NUMBER).%s"
+    help="File name format to use when saving videos, with or without extension. You can use $VIDEO_NAME and $SCENE_NUMBER macros in the filename. You may have to wrap the format in single quotes or use escape characters to avoid variable expansion (e.g. -f \\$VIDEO_NAME-Scene-\\$SCENE_NUMBER).%s"
     % (USER_CONFIG.get_help_string("split-video", "filename")),
 )
 @click.option(
@@ -1356,7 +1356,7 @@ Examples:
     metavar="NAME",
     default=None,
     type=click.STRING,
-    help="Filename format *without* extension to use when saving images. You can use the $VIDEO_NAME, $SCENE_NUMBER, $IMAGE_NUMBER, and $FRAME_NUMBER macros in the file name. You may have to use escape characters (e.g. -f=\\$SCENE_NUMBER-Image-\\$IMAGE_NUMBER) or single quotes.%s"
+    help="Filename format *without* extension to use when saving images. You can use the $VIDEO_NAME, $SCENE_NUMBER, $IMAGE_NUMBER, and $FRAME_NUMBER macros in the file name. You may have to use escape characters (e.g. -f \\$SCENE_NUMBER-Image-\\$IMAGE_NUMBER) or single quotes.%s"
     % (USER_CONFIG.get_help_string("save-images", "filename")),
 )
 @click.option(
@@ -1365,7 +1365,7 @@ Examples:
     metavar="N",
     default=None,
     type=click.INT,
-    help="Number of images to generate per scene. Will always include start/end frame, unless -n=1, in which case the image will be the frame at the mid-point of the scene.%s"
+    help="Number of images to generate per scene. Will always include start/end frame, unless -n 1, in which case the image will be the frame at the mid-point of the scene.%s"
     % (USER_CONFIG.get_help_string("save-images", "num-images")),
 )
 @click.option(
