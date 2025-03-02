@@ -48,7 +48,7 @@ of a backend. This is useful when working with devices or streams, for example.<
 <h2>Video Files<a class="headerlink" href="#video-files" title="Permalink to this heading">¶</a></h2>
 <p>Assuming we have a file <cite>video.mp4</cite> in our working directory, we can load it and perform scene
 detection on it using <code class="xref py py-func docutils literal notranslate"><span class="pre">open_video()</span></code>:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">scenedetect</span> <span class="kn">import</span> <span class="n">open_video</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">scenedetect</span><span class="w"> </span><span class="kn">import</span> <span class="n">open_video</span>
 <span class="n">video</span> <span class="o">=</span> <span class="n">open_video</span><span class="p">(</span><span class="s1">&#39;video.mp4&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -58,7 +58,7 @@ will be forwarded to the backend constructor. If the specified backend is unavai
 loading the video fails, <code class="docutils literal notranslate"><span class="pre">opencv</span></code> will be tried as a fallback.</p>
 <p>Lastly, to use a specific backend directly:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Manually importing and constructing a backend:</span>
-<span class="kn">from</span> <span class="nn">scenedetect.backends.opencv</span> <span class="kn">import</span> <span class="n">VideoStreamCv2</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scenedetect.backends.opencv</span><span class="w"> </span><span class="kn">import</span> <span class="n">VideoStreamCv2</span>
 <span class="n">video</span> <span class="o">=</span> <span class="n">VideoStreamCv2</span><span class="p">(</span><span class="s1">&#39;video.mp4&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -70,8 +70,8 @@ loading the video fails, <code class="docutils literal notranslate"><span class=
 <p>You can use an existing <cite>cv2.VideoCapture</cite> object with the PySceneDetect API using a
 <a class="reference internal" href="#scenedetect.backends.opencv.VideoCaptureAdapter" title="scenedetect.backends.opencv.VideoCaptureAdapter"><code class="xref py py-class docutils literal notranslate"><span class="pre">VideoCaptureAdapter</span></code></a>. For example,
 to use a <a class="reference internal" href="scene_manager.html#scenedetect.scene_manager.SceneManager" title="scenedetect.scene_manager.SceneManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">SceneManager</span></code></a> with a webcam device:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">scenedetect</span> <span class="kn">import</span> <span class="n">SceneManager</span><span class="p">,</span> <span class="n">ContentDetector</span>
-<span class="kn">from</span> <span class="nn">scenedetect.backends</span> <span class="kn">import</span> <span class="n">VideoCaptureAdapter</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">scenedetect</span><span class="w"> </span><span class="kn">import</span> <span class="n">SceneManager</span><span class="p">,</span> <span class="n">ContentDetector</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scenedetect.backends</span><span class="w"> </span><span class="kn">import</span> <span class="n">VideoCaptureAdapter</span>
 <span class="c1"># Open device ID 2.</span>
 <span class="n">cap</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">VideoCapture</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
 <span class="n">video</span> <span class="o">=</span> <span class="n">VideoCaptureAdapter</span><span class="p">(</span><span class="n">cap</span><span class="p">)</span>

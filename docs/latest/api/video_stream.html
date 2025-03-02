@@ -38,7 +38,7 @@
 <p><code class="docutils literal notranslate"><span class="pre">scenedetect.video_stream</span></code> Module</p>
 <p>This module contains the <a class="reference internal" href="#scenedetect.video_stream.VideoStream" title="scenedetect.video_stream.VideoStream"><code class="xref py py-class docutils literal notranslate"><span class="pre">VideoStream</span></code></a> class, which provides a library agnostic
 interface for video input. To open a video by path, use <a class="reference internal" href="../api.html#scenedetect.open_video" title="scenedetect.open_video"><code class="xref py py-func docutils literal notranslate"><span class="pre">scenedetect.open_video()</span></code></a>:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">scenedetect</span> <span class="kn">import</span> <span class="n">open_video</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">scenedetect</span><span class="w"> </span><span class="kn">import</span> <span class="n">open_video</span>
 <span class="n">video</span> <span class="o">=</span> <span class="n">open_video</span><span class="p">(</span><span class="s1">&#39;video.mp4&#39;</span><span class="p">)</span>
 <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
     <span class="n">frame</span> <span class="o">=</span> <span class="n">video</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
