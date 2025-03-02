@@ -624,6 +624,11 @@ Development
 
 ## PySceneDetect 0.6.6 (In Development)
 
+### Work In Progress
+- [feature] New `save-xml` command supports saving scenes in Final Cut Pro format [#156](https://github.com/Breakthrough/PySceneDetect/issues/156)
+
+### Complete
+
  - [general] The `export-html` command is now deprecated, use `save-html` instead
  - [bugfix] Fix incorrect help entries for short-form arguments which suggested invalid syntax [#493](https://github.com/Breakthrough/PySceneDetect/issues/493)
  - [bugfix] Fix crash when using `split-video` with `-m`/`--mkvmerge` option [#473](https://github.com/Breakthrough/PySceneDetect/issues/473)

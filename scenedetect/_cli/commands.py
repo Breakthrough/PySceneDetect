@@ -18,8 +18,13 @@ current command-line context, as well as the processing result (scenes and cuts)
 import logging
 import typing as ty
 import webbrowser
+from datetime import datetime
+from pathlib import Path
 from string import Template
+from xml.dom import minidom
+from xml.etree import ElementTree
 
+from scenedetect._cli.config import XmlFormat
 from scenedetect._cli.context import CliContext
 from scenedetect.platform import get_and_create_path
 from scenedetect.scene_manager import (
@@ -248,3 +253,175 @@ def split_video(
         )
     if scenes:
         logger.info("Video splitting completed, scenes written to disk.")
+
+
+def _save_xml_fcpx(
+    context: CliContext,
+    scenes: SceneList,
+    filename: str,
+    output: str,
+):
+    """Saves scenes in Final Cut Pro X XML format."""
+    ASSET_ID = "asset1"
+    FORMAT_ID = "format1"
+    # TODO: Need to handle other video formats!
+    VIDEO_FORMAT_TODO_HANDLE_OTHERS = "FFVideoFormat1080p24"
+
+    root = ElementTree.Element("fcpxml", version="1.9")
+    resources = ElementTree.SubElement(root, "resources")
+    ElementTree.SubElement(resources, "format", id="format1", name=VIDEO_FORMAT_TODO_HANDLE_OTHERS)
+
+    video_name = context.video_stream.name
+
+    # TODO: We should calculate duration from the scene list.
+    duration = context.video_stream.duration
+    duration = str(duration.get_seconds()) + "s"  # TODO: Is float okay here?
+    # TODO: This should be an absolute path, but the path types between VideoStream impls aren't
+    # consistent. Need to make a breaking change to the API so that they return pathlib.Path types.
+    path = context.video_stream.path
+    ElementTree.SubElement(
+        resources,
+        "asset",
+        id=ASSET_ID,
+        name=video_name,
+        src=path,
+        duration=duration,
+        hasVideo="1",
+        hasAudio="1",  # TODO: Handle case of no audio.
+        format=FORMAT_ID,
+    )
+
+    library = ElementTree.SubElement(root, "library")
+    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    event = ElementTree.SubElement(library, "event", name=f"Shot Detection {now}")
+    project = ElementTree.SubElement(
+        event, "project", name=video_name
+    )  # TODO: Allow customizing project name.
+    sequence = ElementTree.SubElement(project, "sequence", format=FORMAT_ID, duration=duration)
+    spine = ElementTree.SubElement(sequence, "spine")
+
+    for i, (start, end) in enumerate(scenes):
+        start_seconds = start.get_seconds()
+        duration_seconds = (end - start).get_seconds()
+        clip = ElementTree.SubElement(
+            spine,
+            "clip",
+            name=f"Shot {i + 1}",
+            duration=f"{duration_seconds:.3f}s",
+            start=f"{start_seconds:.3f}s",
+            offset=f"{start_seconds:.3f}s",
+        )
+        ElementTree.SubElement(
+            clip,
+            "asset-clip",
+            ref=ASSET_ID,
+            duration=f"{duration_seconds:.3f}s",
+            start=f"{start_seconds:.3f}s",
+            offset="0s",
+            name=f"Shot {i + 1}",
+        )
+
+    pretty_xml = minidom.parseString(ElementTree.tostring(root, encoding="unicode")).toprettyxml(
+        indent="  "
+    )
+    xml_path = get_and_create_path(
+        Template(filename).safe_substitute(VIDEO_NAME=context.video_stream.name),
+        output,
+    )
+    logger.info(f"Writing scenes in FCPX format to {xml_path}")
+    with open(xml_path, "w") as f:
+        f.write(pretty_xml)
+
+
+def _save_xml_fcp(
+    context: CliContext,
+    scenes: SceneList,
+    filename: str,
+    output: str,
+):
+    """Saves scenes in Final Cut Pro 7 XML format."""
+    root = ElementTree.Element("xmeml", version="5")
+    project = ElementTree.SubElement(root, "project")
+    ElementTree.SubElement(project, "name").text = context.video_stream.name
+    sequence = ElementTree.SubElement(project, "sequence")
+    ElementTree.SubElement(sequence, "name").text = context.video_stream.name
+
+    # TODO: We should calculate duration from the scene list.
+    duration = context.video_stream.duration
+    duration = str(duration.get_seconds())  # TODO: Is float okay here?
+    ElementTree.SubElement(sequence, "duration").text = duration
+
+    rate = ElementTree.SubElement(sequence, "rate")
+    ElementTree.SubElement(rate, "timebase").text = str(context.video_stream.frame_rate)
+    ElementTree.SubElement(rate, "ntsc").text = "FALSE"
+
+    timecode = ElementTree.SubElement(sequence, "timecode")
+    tc_rate = ElementTree.SubElement(timecode, "rate")
+    ElementTree.SubElement(tc_rate, "timebase").text = str(context.video_stream.frame_rate)
+    ElementTree.SubElement(tc_rate, "ntsc").text = "FALSE"
+    ElementTree.SubElement(timecode, "frame").text = "0"
+    ElementTree.SubElement(timecode, "displayformat").text = "NDF"
+
+    media = ElementTree.SubElement(sequence, "media")
+    video = ElementTree.SubElement(media, "video")
+    format = ElementTree.SubElement(video, "format")
+    ElementTree.SubElement(format, "samplecharacteristics")
+    track = ElementTree.SubElement(video, "track")
+
+    # Add clips for each shot boundary
+    for i, (start, end) in enumerate(scenes):
+        clip = ElementTree.SubElement(track, "clipitem")
+        ElementTree.SubElement(clip, "name").text = f"Shot {i + 1}"
+        ElementTree.SubElement(clip, "enabled").text = "TRUE"
+        ElementTree.SubElement(clip, "rate").append(
+            ElementTree.fromstring(f"<timebase>{context.video_stream.frame_rate}</timebase>")
+        )
+        # TODO: Are these supposed to be frame numbers or another format?
+        ElementTree.SubElement(clip, "start").text = str(start.get_frames())
+        ElementTree.SubElement(clip, "end").text = str(end.get_frames())
+        ElementTree.SubElement(clip, "in").text = str(start.get_frames())
+        ElementTree.SubElement(clip, "out").text = str(end.get_frames())
+
+        file_ref = ElementTree.SubElement(clip, "file", id=f"file{i + 1}")
+        ElementTree.SubElement(file_ref, "name").text = context.video_stream.name
+        # TODO: Turn this into absolute path, see TODO in the FCPX function for details.
+        path = context.video_stream.path
+        ElementTree.SubElement(file_ref, "pathurl").text = f"file://{path}"
+
+        media_ref = ElementTree.SubElement(file_ref, "media")
+        video_ref = ElementTree.SubElement(media_ref, "video")
+        ElementTree.SubElement(video_ref, "samplecharacteristics")
+        link = ElementTree.SubElement(clip, "link")
+        ElementTree.SubElement(link, "linkclipref").text = f"file{i + 1}"
+        ElementTree.SubElement(link, "mediatype").text = "video"
+
+    pretty_xml = minidom.parseString(ElementTree.tostring(root, encoding="unicode")).toprettyxml(
+        indent="  "
+    )
+    xml_path = get_and_create_path(
+        Template(filename).safe_substitute(VIDEO_NAME=context.video_stream.name),
+        output,
+    )
+    logger.info(f"Writing scenes in FCP format to {xml_path}")
+    with open(xml_path, "w") as f:
+        f.write(pretty_xml)
+
+
+def save_xml(
+    context: CliContext,
+    scenes: SceneList,
+    cuts: CutList,
+    filename: str,
+    format: XmlFormat,
+    output: str,
+):
+    """Handles the `save-xml` command."""
+    # We only use scene information.
+    del cuts
+
+    if format == XmlFormat.FCPX:
+        _save_xml_fcpx(context, scenes, filename, output)
+    elif format == XmlFormat.FCP:
+        _save_xml_fcp(context, scenes, filename, output)
+    else:
+        logger.error(f"Unknown format: {format}")

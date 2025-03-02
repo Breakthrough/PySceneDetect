@@ -305,6 +305,15 @@ class TimecodeFormat(Enum):
         raise RuntimeError("Unhandled format specifier.")
 
 
+class XmlFormat(Enum):
+    """Format to use with the `save-xml` command."""
+
+    FCPX = 0
+    """Final Cut Pro X XML Format"""
+    FCP = 1
+    """Final Cut Pro 7 XML Format"""
+
+
 ConfigValue = ty.Union[bool, int, float, str]
 ConfigDict = ty.Dict[str, ty.Dict[str, ConfigValue]]
 
@@ -414,6 +423,11 @@ CONFIG_MAP: ConfigDict = {
         "filename": "$VIDEO_NAME.qp",
         "output": None,
     },
+    "save-xml": {
+        "format": XmlFormat.FCPX,
+        "filename": "$VIDEO_NAME.xml",
+        "output": None,
+    },
     "split-video": {
         "args": DEFAULT_FFMPEG_ARGS,
         "copy": False,
@@ -430,6 +444,8 @@ CONFIG_MAP: ConfigDict = {
 The types of these values are used when decoding the configuration file. Valid choices for
 certain string options are stored in `CHOICE_MAP`."""
 
+# TODO: Use the fact that all enums derive from the Enum class to avoid duplicating their values
+# here in the choice map.
 CHOICE_MAP: ty.Dict[str, ty.Dict[str, ty.List[str]]] = {
     "backend-pyav": {
         "threading_mode": [mode.lower() for mode in PYAV_THREADING_MODES],
@@ -455,6 +471,9 @@ CHOICE_MAP: ty.Dict[str, ty.Dict[str, ty.List[str]]] = {
     "save-images": {
         "format": ["jpeg", "png", "webp"],
         "scale-method": [value.name.lower() for value in Interpolation],
+    },
+    "save-xml": {
+        "format": [value.name.lower() for value in XmlFormat],
     },
     "split-video": {
         "preset": [

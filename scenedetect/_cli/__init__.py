@@ -35,6 +35,7 @@ from scenedetect._cli.config import (
     CONFIG_MAP,
     DEFAULT_JPG_QUALITY,
     DEFAULT_WEBP_QUALITY,
+    XmlFormat,
 )
 from scenedetect._cli.context import USER_CONFIG, CliContext, check_split_video_requirements
 from scenedetect.backends import AVAILABLE_BACKENDS
@@ -1569,6 +1570,57 @@ def save_qp_command(
     ctx.add_command(cli_commands.save_qp, save_qp_args)
 
 
+SAVE_XML_HELP = """Save cuts in XML format."""
+
+
+@click.command("save-xml", cls=Command, help=SAVE_XML_HELP)
+@click.option(
+    "--filename",
+    "-f",
+    metavar="NAME",
+    default=None,
+    type=click.STRING,
+    help="Filename format to use.%s" % (USER_CONFIG.get_help_string("save-xml", "filename")),
+)
+@click.option(
+    "--format",
+    metavar="TYPE",
+    type=click.Choice(CHOICE_MAP["save-xml"]["format"], False),
+    default=None,
+    help="Format to export. TYPE must be one of: %s.%s"
+    % (
+        ", ".join(CHOICE_MAP["save-xml"]["format"]),
+        USER_CONFIG.get_help_string("save-xml", "format"),
+    ),
+)
+@click.option(
+    "--output",
+    "-o",
+    metavar="DIR",
+    type=click.Path(exists=False, dir_okay=True, writable=True, resolve_path=False),
+    help="Output directory to save XML file to. Overrides global option -o/--output.%s"
+    % (USER_CONFIG.get_help_string("save-xml", "output", show_default=False)),
+)
+@click.pass_context
+def save_xml_command(
+    ctx: click.Context,
+    filename: ty.Optional[ty.AnyStr],
+    format: ty.Optional[ty.AnyStr],
+    output: ty.Optional[ty.AnyStr],
+):
+    ctx = ctx.obj
+    assert isinstance(ctx, CliContext)
+
+    # TODO: Change config parser so get_value returns enums directly.
+    format = XmlFormat[ctx.config.get_value("save-xml", "format", format).upper()]
+    save_xml_args = {
+        "filename": ctx.config.get_value("save-xml", "filename", filename),
+        "format": format,
+        "output": ctx.config.get_value("save-xml", "output", output),
+    }
+    ctx.add_command(cli_commands.save_xml, save_xml_args)
+
+
 # ----------------------------------------------------------------------
 # CLI Sub-Command Registration
 # ----------------------------------------------------------------------
@@ -1590,10 +1642,11 @@ scenedetect.add_command(detect_hist_command)
 scenedetect.add_command(detect_threshold_command)
 
 # Output
-scenedetect.add_command(save_html_command)
-scenedetect.add_command(save_qp_command)
 scenedetect.add_command(list_scenes_command)
+scenedetect.add_command(save_html_command)
 scenedetect.add_command(save_images_command)
+scenedetect.add_command(save_qp_command)
+scenedetect.add_command(save_xml_command)
 scenedetect.add_command(split_video_command)
 
 # Deprecated Commands (Hidden From Help Output)
