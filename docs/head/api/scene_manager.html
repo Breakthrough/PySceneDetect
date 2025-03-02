@@ -45,7 +45,7 @@ process the resulting scene list.</p>
 <section id="usage">
 <h2>Usage<a class="headerlink" href="#usage" title="Permalink to this heading">¶</a></h2>
 <p>The following example shows basic usage of a <a class="reference internal" href="#scenedetect.scene_manager.SceneManager" title="scenedetect.scene_manager.SceneManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">SceneManager</span></code></a>:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">scenedetect</span> <span class="kn">import</span> <span class="n">open_video</span><span class="p">,</span> <span class="n">SceneManager</span><span class="p">,</span> <span class="n">ContentDetector</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">scenedetect</span><span class="w"> </span><span class="kn">import</span> <span class="n">open_video</span><span class="p">,</span> <span class="n">SceneManager</span><span class="p">,</span> <span class="n">ContentDetector</span>
 <span class="n">video</span> <span class="o">=</span> <span class="n">open_video</span><span class="p">(</span><span class="n">video_path</span><span class="p">)</span>
 <span class="n">scene_manager</span> <span class="o">=</span> <span class="n">SceneManager</span><span class="p">()</span>
 <span class="n">scene_manager</span><span class="o">.</span><span class="n">add_detector</span><span class="p">(</span><span class="n">ContentDetector</span><span class="p">())</span>
@@ -57,10 +57,10 @@ process the resulting scene list.</p>
 </pre></div>
 </div>
 <p>An optional callback can also be invoked on each detected scene, for example:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">scenedetect</span> <span class="kn">import</span> <span class="n">open_video</span><span class="p">,</span> <span class="n">SceneManager</span><span class="p">,</span> <span class="n">ContentDetector</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">scenedetect</span><span class="w"> </span><span class="kn">import</span> <span class="n">open_video</span><span class="p">,</span> <span class="n">SceneManager</span><span class="p">,</span> <span class="n">ContentDetector</span>
 
 <span class="c1"># Callback to invoke on the first frame of every new scene detection.</span>
-<span class="k">def</span> <span class="nf">on_new_scene</span><span class="p">(</span><span class="n">frame_img</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">frame_num</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">on_new_scene</span><span class="p">(</span><span class="n">frame_img</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">frame_num</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;New scene found at frame </span><span class="si">%d</span><span class="s2">.&quot;</span> <span class="o">%</span> <span class="n">frame_num</span><span class="p">)</span>
 
 <span class="n">video</span> <span class="o">=</span> <span class="n">open_video</span><span class="p">(</span><span class="n">test_video_file</span><span class="p">)</span>
@@ -77,7 +77,7 @@ process the resulting scene list.</p>
 <h2>Storing Per-Frame Statistics<a class="headerlink" href="#storing-per-frame-statistics" title="Permalink to this heading">¶</a></h2>
 <p><cite>SceneManager</cite> can use an optional
 <a class="reference internal" href="stats_manager.html#scenedetect.stats_manager.StatsManager" title="scenedetect.stats_manager.StatsManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">StatsManager</span></code></a> to save frame statistics to disk:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">scenedetect</span> <span class="kn">import</span> <span class="n">open_video</span><span class="p">,</span> <span class="n">ContentDetector</span><span class="p">,</span> <span class="n">SceneManager</span><span class="p">,</span> <span class="n">StatsManager</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">scenedetect</span><span class="w"> </span><span class="kn">import</span> <span class="n">open_video</span><span class="p">,</span> <span class="n">ContentDetector</span><span class="p">,</span> <span class="n">SceneManager</span><span class="p">,</span> <span class="n">StatsManager</span>
 <span class="n">video</span> <span class="o">=</span> <span class="n">open_video</span><span class="p">(</span><span class="n">test_video_file</span><span class="p">)</span>
 <span class="n">scene_manager</span> <span class="o">=</span> <span class="n">SceneManager</span><span class="p">(</span><span class="n">stats_manager</span><span class="o">=</span><span class="n">StatsManager</span><span class="p">())</span>
 <span class="n">scene_manager</span><span class="o">.</span><span class="n">add_detector</span><span class="p">(</span><span class="n">ContentDetector</span><span class="p">())</span>

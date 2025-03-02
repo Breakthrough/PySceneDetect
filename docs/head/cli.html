@@ -430,40 +430,40 @@
 </section>
 <section id="commands">
 <h1>Commands<a class="headerlink" href="#commands" title="Permalink to this heading">¶</a></h1>
-<section id="export-html">
-<span id="command-export-html"></span><h2><code class="docutils literal notranslate"><span class="pre">export-html</span></code><a class="headerlink" href="#export-html" title="Permalink to this heading">¶</a></h2>
-<p>Export scene list to HTML file.</p>
-<p>To customize image generation, specify the <a class="reference internal" href="#command-save-images"><span class="std std-ref">save-images</span></a> command before <a class="reference internal" href="#command-export-html"><span class="std std-ref">export-html</span></a>. This command always uses the result of the preceeding <a class="reference internal" href="#command-save-images"><span class="std std-ref">save-images</span></a> command, or runs it with the default config values unless <code class="docutils literal notranslate"><span class="pre">--no-images</span></code> is set.</p>
+<section id="save-html">
+<span id="command-save-html"></span><h2><code class="docutils literal notranslate"><span class="pre">save-html</span></code><a class="headerlink" href="#save-html" title="Permalink to this heading">¶</a></h2>
+<p>Save scene list to HTML file.</p>
+<p>To customize image generation, specify the <a class="reference internal" href="#command-save-images"><span class="std std-ref">save-images</span></a> command before <a class="reference internal" href="#command-save-html"><span class="std std-ref">save-html</span></a>. This command always uses the result of the preceeding <a class="reference internal" href="#command-save-images"><span class="std std-ref">save-images</span></a> command, or runs it with the default config values unless <code class="docutils literal notranslate"><span class="pre">--no-images</span></code> is set.</p>
 <section id="id11">
 <h3>Options<a class="headerlink" href="#id11" title="Permalink to this heading">¶</a></h3>
 <dl class="std option">
-<dt class="sig sig-object std" id="cmdoption-scenedetect-export-html-f">
-<span id="cmdoption-scenedetect-export-html-filename"></span><span class="sig-name descname"><span class="pre">-f</span></span><span class="sig-prename descclassname"> <span class="pre">NAME</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--filename</span></span><span class="sig-prename descclassname"> <span class="pre">NAME</span></span><a class="headerlink" href="#cmdoption-scenedetect-export-html-f" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object std" id="cmdoption-scenedetect-save-html-f">
+<span id="cmdoption-scenedetect-save-html-filename"></span><span class="sig-name descname"><span class="pre">-f</span></span><span class="sig-prename descclassname"> <span class="pre">NAME</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--filename</span></span><span class="sig-prename descclassname"> <span class="pre">NAME</span></span><a class="headerlink" href="#cmdoption-scenedetect-save-html-f" title="Permalink to this definition">¶</a></dt>
 <dd><p>Filename format to use for the scene list HTML file. You can use the $VIDEO_NAME macro in the file name. Note that you may have to wrap the format name using single quotes.</p>
 <p>Default: <code class="docutils literal notranslate"><span class="pre">$VIDEO_NAME-Scenes.html</span></code></p>
 </dd></dl>
 
 <dl class="std option">
-<dt class="sig sig-object std" id="cmdoption-scenedetect-export-html-n">
-<span id="cmdoption-scenedetect-export-html-no-images"></span><span class="sig-name descname"><span class="pre">-n</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--no-images</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-scenedetect-export-html-n" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object std" id="cmdoption-scenedetect-save-html-n">
+<span id="cmdoption-scenedetect-save-html-no-images"></span><span class="sig-name descname"><span class="pre">-n</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--no-images</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-scenedetect-save-html-n" title="Permalink to this definition">¶</a></dt>
 <dd><p>Do not include images with the result.</p>
 </dd></dl>
 
 <dl class="std option">
-<dt class="sig sig-object std" id="cmdoption-scenedetect-export-html-w">
-<span id="cmdoption-scenedetect-export-html-image-width"></span><span class="sig-name descname"><span class="pre">-w</span></span><span class="sig-prename descclassname"> <span class="pre">pixels</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--image-width</span></span><span class="sig-prename descclassname"> <span class="pre">pixels</span></span><a class="headerlink" href="#cmdoption-scenedetect-export-html-w" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object std" id="cmdoption-scenedetect-save-html-w">
+<span id="cmdoption-scenedetect-save-html-image-width"></span><span class="sig-name descname"><span class="pre">-w</span></span><span class="sig-prename descclassname"> <span class="pre">pixels</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--image-width</span></span><span class="sig-prename descclassname"> <span class="pre">pixels</span></span><a class="headerlink" href="#cmdoption-scenedetect-save-html-w" title="Permalink to this definition">¶</a></dt>
 <dd><p>Width in pixels of the images in the resulting HTML table.</p>
 </dd></dl>
 
 <dl class="std option">
-<dt class="sig sig-object std" id="cmdoption-scenedetect-export-html-h">
-<span id="cmdoption-scenedetect-export-html-image-height"></span><span class="sig-name descname"><span class="pre">-h</span></span><span class="sig-prename descclassname"> <span class="pre">pixels</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--image-height</span></span><span class="sig-prename descclassname"> <span class="pre">pixels</span></span><a class="headerlink" href="#cmdoption-scenedetect-export-html-h" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object std" id="cmdoption-scenedetect-save-html-h">
+<span id="cmdoption-scenedetect-save-html-image-height"></span><span class="sig-name descname"><span class="pre">-h</span></span><span class="sig-prename descclassname"> <span class="pre">pixels</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--image-height</span></span><span class="sig-prename descclassname"> <span class="pre">pixels</span></span><a class="headerlink" href="#cmdoption-scenedetect-save-html-h" title="Permalink to this definition">¶</a></dt>
 <dd><p>Height in pixels of the images in the resulting HTML table.</p>
 </dd></dl>
 
 <dl class="std option">
-<dt class="sig sig-object std" id="cmdoption-scenedetect-export-html-s">
-<span id="cmdoption-scenedetect-export-html-show"></span><span class="sig-name descname"><span class="pre">-s</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--show</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-scenedetect-export-html-s" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object std" id="cmdoption-scenedetect-save-html-s">
+<span id="cmdoption-scenedetect-save-html-show"></span><span class="sig-name descname"><span class="pre">-s</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--show</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-scenedetect-save-html-s" title="Permalink to this definition">¶</a></dt>
 <dd><p>Automatically open resulting HTML when processing is complete.</p>
 </dd></dl>
 
@@ -843,7 +843,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="#commands">Commands</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#export-html"><code class="docutils literal notranslate"><span class="pre">export-html</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#save-html"><code class="docutils literal notranslate"><span class="pre">save-html</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#list-scenes"><code class="docutils literal notranslate"><span class="pre">list-scenes</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#load-scenes"><code class="docutils literal notranslate"><span class="pre">load-scenes</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#save-images"><code class="docutils literal notranslate"><span class="pre">save-images</span></code></a></li>

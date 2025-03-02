@@ -203,8 +203,8 @@ passed timecodes, where each scene is written in sequence from 001.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>input_video_path</strong> (<em>str</em>) – Path to the video to be split.</p></li>
 <li><p><strong>scene_list</strong> (<em>Iterable</em><em>[</em><em>Tuple</em><em>[</em><a class="reference internal" href="frame_timecode.html#scenedetect.frame_timecode.FrameTimecode" title="scenedetect.frame_timecode.FrameTimecode"><em>FrameTimecode</em></a><em>, </em><a class="reference internal" href="frame_timecode.html#scenedetect.frame_timecode.FrameTimecode" title="scenedetect.frame_timecode.FrameTimecode"><em>FrameTimecode</em></a><em>]</em><em>]</em>) – List of scenes as pairs of FrameTimecodes denoting the start/end times.</p></li>
-<li><p><strong>output_dir</strong> (<em>Path</em><em> | </em><em>None</em>) – Directory to output videos. If not set, output will be in working directory.</p></li>
-<li><p><strong>output_file_template</strong> (<em>str</em>) – Template to use for generating output files. Note that mkvmerge always
+<li><p><strong>output_dir</strong> (<em>str</em><em> | </em><em>Path</em><em> | </em><em>None</em>) – Directory to output videos. If not set, output will be in working directory.</p></li>
+<li><p><strong>output_file_template</strong> (<em>str</em><em> | </em><em>Path</em><em> | </em><em>None</em>) – Template to use for generating output files. Note that mkvmerge always
 adds the suffix “-$SCENE_NUMBER” to the output paths. Only the $VIDEO_NAME variable
 is supported by this function.</p></li>
 <li><p><strong>video_name</strong> (<em>str</em>) – Name of the video to be substituted in output_file_template for
@@ -231,7 +231,7 @@ still return 0, but no commands will be invoked.</p>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="scenedetect.video_splitter.FFMPEG_PATH">
-<span class="sig-prename descclassname"><span class="pre">scenedetect.video_splitter.</span></span><span class="sig-name descname"><span class="pre">FFMPEG_PATH</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'/opt/hostedtoolcache/Python/3.12.8/x64/lib/python3.12/site-packages/imageio_ffmpeg/binaries/ffmpeg-linux64-v4.2.2'</span></em><a class="headerlink" href="#scenedetect.video_splitter.FFMPEG_PATH" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">scenedetect.video_splitter.</span></span><span class="sig-name descname"><span class="pre">FFMPEG_PATH</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'/opt/hostedtoolcache/Python/3.12.9/x64/lib/python3.12/site-packages/imageio_ffmpeg/binaries/ffmpeg-linux64-v4.2.2'</span></em><a class="headerlink" href="#scenedetect.video_splitter.FFMPEG_PATH" title="Permalink to this definition">¶</a></dt>
 <dd><p>Relative path to the ffmpeg binary on this system, if any (will be None if not available).</p>
 </dd></dl>
 
