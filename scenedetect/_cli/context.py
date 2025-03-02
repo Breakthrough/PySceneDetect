@@ -101,7 +101,7 @@ class CliContext:
         self.merge_last_scene: bool = None
         self.min_scene_len: FrameTimecode = None
         self.default_detector: ty.Tuple[ty.Type[SceneDetector], ty.Dict[str, ty.Any]] = None
-        self.output_dir: str = None
+        self.output: str = None
         self.stats_file_path: str = None
 
         # Output Commands (e.g. split-video, save-images):
@@ -111,8 +111,8 @@ class CliContext:
 
     def add_command(self, command: ty.Callable, command_args: ty.Dict[str, ty.Any]):
         """Add `command` to the processing pipeline. Will be called after processing the input."""
-        if "output_dir" in command_args and command_args["output_dir"] is None:
-            command_args["output_dir"] = self.output_dir
+        if "output" in command_args and command_args["output"] is None:
+            command_args["output"] = self.output
         logger.debug("Adding command: %s(%s)", command.__name__, command_args)
         self.commands.append((command, command_args))
 
@@ -238,9 +238,9 @@ class CliContext:
         # Load the input video to obtain a time base for parsing timecodes.
         self._open_video_stream(input_path, framerate, backend)
 
-        self.output_dir = self.config.get_value("global", "output", output)
-        if self.output_dir:
-            logger.debug("Output directory set:\n  %s", self.output_dir)
+        self.output = self.config.get_value("global", "output", output)
+        if self.output:
+            logger.debug("Output directory set:\n  %s", self.output)
 
         self.min_scene_len = self.parse_timecode(
             min_scene_len

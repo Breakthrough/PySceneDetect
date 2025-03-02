@@ -154,7 +154,7 @@ def _save_stats(context: CliContext) -> None:
     if not context.stats_file_path:
         return
     if context.stats_manager.is_save_required():
-        path = get_and_create_path(context.stats_file_path, context.output_dir)
+        path = get_and_create_path(context.stats_file_path, context.output)
         logger.info("Saving frame metrics to stats file: %s", path)
         with open(path, mode="w") as file:
             context.stats_manager.save_to_csv(csv_file=file)

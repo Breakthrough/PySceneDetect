@@ -1049,7 +1049,7 @@ def save_html_command(
     if include_images and not ctx.save_images:
         save_images_command.callback()
     save_html_args = {
-        "html_name_format": ctx.config.get_value("save-html", "filename", filename),
+        "filename": ctx.config.get_value("save-html", "filename", filename),
         "image_width": ctx.config.get_value("save-html", "image-width", image_width),
         "image_height": ctx.config.get_value("save-html", "image-height", image_height),
         "include_images": include_images,
@@ -1128,18 +1128,15 @@ def list_scenes_command(
     ctx = ctx.obj
     assert isinstance(ctx, CliContext)
 
-    create_file = not ctx.config.get_value("list-scenes", "no-output-file", no_output_file)
-    output_dir = ctx.config.get_value("list-scenes", "output", output)
-    name_format = ctx.config.get_value("list-scenes", "filename", filename)
     list_scenes_args = {
         "col_separator": ctx.config.get_value("list-scenes", "col-separator"),
         "cut_format": ctx.config.get_value("list-scenes", "cut-format"),
         "display_scenes": ctx.config.get_value("list-scenes", "display-scenes"),
         "display_cuts": ctx.config.get_value("list-scenes", "display-cuts"),
-        "scene_list_output": create_file,
-        "scene_list_name_format": name_format,
+        "no_output_file": ctx.config.get_value("list-scenes", "no-output-file", no_output_file),
+        "filename": ctx.config.get_value("list-scenes", "filename", filename),
         "skip_cuts": ctx.config.get_value("list-scenes", "skip-cuts", skip_cuts),
-        "output_dir": output_dir,
+        "output": ctx.config.get_value("list-scenes", "output", output),
         "quiet": ctx.config.get_value("list-scenes", "quiet", quiet) or ctx.quiet_mode,
         "row_separator": ctx.config.get_value("list-scenes", "row-separator"),
     }
@@ -1322,7 +1319,7 @@ def split_video_command(
     split_video_args = {
         "name_format": ctx.config.get_value("split-video", "filename", filename),
         "use_mkvmerge": mkvmerge,
-        "output_dir": ctx.config.get_value("split-video", "output", output),
+        "output": ctx.config.get_value("split-video", "output", output),
         "show_output": not ctx.config.get_value("split-video", "quiet", quiet),
         "ffmpeg_args": args,
     }
@@ -1506,10 +1503,10 @@ def save_images_command(
         "frame_margin": ctx.config.get_value("save-images", "frame-margin", frame_margin),
         "height": height,
         "image_extension": image_extension,
-        "image_name_template": ctx.config.get_value("save-images", "filename", filename),
+        "filename": ctx.config.get_value("save-images", "filename", filename),
         "interpolation": scale_method,
         "num_images": ctx.config.get_value("save-images", "num-images", num_images),
-        "output_dir": output,
+        "output": output,
         "scale": scale,
         "show_progress": not ctx.quiet_mode,
         "threading": ctx.config.get_value("save-images", "threading"),
@@ -1565,9 +1562,9 @@ def save_qp_command(
     assert isinstance(ctx, CliContext)
 
     save_qp_args = {
-        "filename_format": ctx.config.get_value("save-qp", "filename", filename),
-        "output_dir": ctx.config.get_value("save-qp", "output", output),
-        "shift_start": not ctx.config.get_value("save-qp", "disable-shift", disable_shift),
+        "filename": ctx.config.get_value("save-qp", "filename", filename),
+        "output": ctx.config.get_value("save-qp", "output", output),
+        "disable_shift": ctx.config.get_value("save-qp", "disable-shift", disable_shift),
     }
     ctx.add_command(cli_commands.save_qp, save_qp_args)
 

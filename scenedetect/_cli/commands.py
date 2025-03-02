@@ -46,16 +46,16 @@ def save_html(
     show: bool,
 ):
     """Handles the `save-html` command."""
-    (image_filenames, output_dir) = (
+    (image_filenames, output) = (
         context.save_images_result
         if context.save_images_result is not None
-        else (None, context.output_dir)
+        else (None, context.output)
     )
 
     html_filename = Template(html_name_format).safe_substitute(VIDEO_NAME=context.video_stream.name)
     if not html_filename.lower().endswith(".html"):
         html_filename += ".html"
-    html_path = get_and_create_path(html_filename, output_dir)
+    html_path = get_and_create_path(html_filename, output)
     write_scene_list_html(
         output_html_filename=html_path,
         scene_list=scenes,
@@ -72,17 +72,18 @@ def save_qp(
     context: CliContext,
     scenes: SceneList,
     cuts: CutList,
-    output_dir: str,
-    filename_format: str,
-    shift_start: bool,
+    output: str,
+    filename: str,
+    disable_shift: bool,
 ):
     """Handler for the `save-qp` command."""
     del scenes  # We only use cuts for this handler.
     qp_path = get_and_create_path(
-        Template(filename_format).safe_substitute(VIDEO_NAME=context.video_stream.name),
-        output_dir,
+        Template(filename).safe_substitute(VIDEO_NAME=context.video_stream.name),
+        output,
     )
     start_frame = context.start_time.frame_num if context.start_time else 0
+    shift_start = not disable_shift
     offset = start_frame if shift_start else 0
     with open(qp_path, "wt") as qp_file:
         qp_file.write(f"{0 if shift_start else start_frame} I -1\n")
@@ -95,9 +96,9 @@ def list_scenes(
     context: CliContext,
     scenes: SceneList,
     cuts: CutList,
-    scene_list_output: bool,
-    scene_list_name_format: str,
-    output_dir: str,
+    no_output_file: bool,
+    filename: str,
+    output: str,
     skip_cuts: bool,
     quiet: bool,
     display_scenes: bool,
@@ -108,15 +109,15 @@ def list_scenes(
 ):
     """Handles the `list-scenes` command."""
     # Write scene list CSV to if required.
-    if scene_list_output:
-        scene_list_filename = Template(scene_list_name_format).safe_substitute(
+    if not no_output_file:
+        scene_list_filename = Template(filename).safe_substitute(
             VIDEO_NAME=context.video_stream.name
         )
         if not scene_list_filename.lower().endswith(".csv"):
             scene_list_filename += ".csv"
         scene_list_path = get_and_create_path(
             scene_list_filename,
-            output_dir,
+            output,
         )
         logger.info("Writing scene list to CSV file:\n  %s", scene_list_path)
         with open(scene_list_path, "w") as scene_list_file:
@@ -170,8 +171,8 @@ def save_images(
     frame_margin: int,
     image_extension: str,
     encoder_param: int,
-    image_name_template: str,
-    output_dir: ty.Optional[str],
+    filename: str,
+    output: ty.Optional[str],
     show_progress: bool,
     scale: int,
     height: int,
@@ -189,8 +190,8 @@ def save_images(
         frame_margin=frame_margin,
         image_extension=image_extension,
         encoder_param=encoder_param,
-        image_name_template=image_name_template,
-        output_dir=output_dir,
+        image_name_template=filename,
+        output_dir=output,
         show_progress=show_progress,
         scale=scale,
         height=height,
@@ -199,7 +200,7 @@ def save_images(
         threading=threading,
     )
     # Save the result for use by `save-html` if required.
-    context.save_images_result = (images, output_dir)
+    context.save_images_result = (images, output)
 
 
 def split_video(
@@ -208,7 +209,7 @@ def split_video(
     cuts: CutList,
     name_format: str,
     use_mkvmerge: bool,
-    output_dir: str,
+    output: str,
     show_output: bool,
     ffmpeg_args: str,
 ):
@@ -231,7 +232,7 @@ def split_video(
         split_video_mkvmerge(
             input_video_path=context.video_stream.path,
             scene_list=scenes,
-            output_dir=output_dir,
+            output_dir=output,
             output_file_template=name_format,
             show_output=show_output,
         )
@@ -239,7 +240,7 @@ def split_video(
         split_video_ffmpeg(
             input_video_path=context.video_stream.path,
             scene_list=scenes,
-            output_dir=output_dir,
+            output_dir=output,
             output_file_template=name_format,
             arg_override=ffmpeg_args,
             show_progress=not context.quiet_mode,
