@@ -35,7 +35,6 @@ from scenedetect._cli.config import (
     CONFIG_MAP,
     DEFAULT_JPG_QUALITY,
     DEFAULT_WEBP_QUALITY,
-    XmlFormat,
 )
 from scenedetect._cli.context import USER_CONFIG, CliContext, check_split_video_requirements
 from scenedetect.backends import AVAILABLE_BACKENDS
@@ -1668,11 +1667,9 @@ def save_xml_command(
     ctx = ctx.obj
     assert isinstance(ctx, CliContext)
 
-    # TODO: Change config parser so get_value returns enums directly.
-    format = XmlFormat[ctx.config.get_value("save-xml", "format", format).upper()]
     save_xml_args = {
         "filename": ctx.config.get_value("save-xml", "filename", filename),
-        "format": format,
+        "format": ctx.config.get_value("save-xml", "format", format),
         "output": ctx.config.get_value("save-xml", "output", output),
     }
     ctx.add_command(cli_commands.save_xml, save_xml_args)

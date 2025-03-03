@@ -450,8 +450,6 @@ CONFIG_MAP: ConfigDict = {
 The types of these values are used when decoding the configuration file. Valid choices for
 certain string options are stored in `CHOICE_MAP`."""
 
-# TODO: Use the fact that all enums derive from the Enum class to avoid duplicating their values
-# here in the choice map.
 CHOICE_MAP: ty.Dict[str, ty.Dict[str, ty.List[str]]] = {
     "backend-pyav": {
         "threading_mode": [mode.lower() for mode in PYAV_THREADING_MODES],
@@ -765,8 +763,10 @@ class ConfigRegistry:
             value = self._config[command][option]
         else:
             value = CONFIG_MAP[command][option]
-        if issubclass(type(value), ValidatedValue):
+        if isinstance(value, ValidatedValue):
             return value.value
+        if isinstance(CONFIG_MAP[command][option], Enum) and isinstance(override, str):
+            return CONFIG_MAP[command][option].__class__[value.upper().strip()]
         return value
 
     def get_help_string(
