@@ -336,15 +336,13 @@ def _save_xml_fcpx(
     # TODO: We should calculate duration from the scene list.
     duration = context.video_stream.duration
     duration = str(duration.get_seconds()) + "s"  # TODO: Is float okay here?
-    # TODO: This should be an absolute path, but the path types between VideoStream impls aren't
-    # consistent. Need to make a breaking change to the API so that they return pathlib.Path types.
-    path = context.video_stream.path
+    path = Path(context.video_stream.path).absolute()
     ElementTree.SubElement(
         resources,
         "asset",
         id=ASSET_ID,
         name=video_name,
-        src=path,
+        src=str(path),
         duration=duration,
         hasVideo="1",
         hasAudio="1",  # TODO: Handle case of no audio.
@@ -444,8 +442,8 @@ def _save_xml_fcp(
 
         file_ref = ElementTree.SubElement(clip, "file", id=f"file{i + 1}")
         ElementTree.SubElement(file_ref, "name").text = context.video_stream.name
-        # TODO: Turn this into absolute path, see TODO in the FCPX function for details.
-        path = context.video_stream.path
+        path = Path(context.video_stream.path).absolute()
+        # TODO: Can we just use path.as_uri() here?
         ElementTree.SubElement(file_ref, "pathurl").text = f"file://{path}"
 
         media_ref = ElementTree.SubElement(file_ref, "media")
