@@ -1045,15 +1045,16 @@ def save_html_command(
         logger.warning("WARNING: export-html is deprecated, use save-html instead.")
     ctx = ctx.obj
     assert isinstance(ctx, CliContext)
+    # Make sure a save-images command is in the pipeline for us to use the results from if we need
+    # to include images.
     include_images = not ctx.config.get_value("save-html", "no-images", no_images)
-    # Make sure a save-images command is in the pipeline for us to use the results from.
     if include_images and not ctx.save_images:
         save_images_command.callback()
     save_html_args = {
         "filename": ctx.config.get_value("save-html", "filename", filename),
         "image_width": ctx.config.get_value("save-html", "image-width", image_width),
         "image_height": ctx.config.get_value("save-html", "image-height", image_height),
-        "include_images": include_images,
+        "no_images": ctx.config.get_value("save-html", "no-images", no_images),
         "show": ctx.config.get_value("save-html", "show", show),
     }
     ctx.add_command(cli_commands.save_html, save_html_args)

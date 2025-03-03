@@ -47,8 +47,8 @@ def save_html(
     cuts: CutList,
     image_width: int,
     image_height: int,
-    html_name_format: str,
-    include_images: bool,
+    filename: str,
+    no_images: bool,
     show: bool,
 ):
     """Handles the `save-html` command."""
@@ -58,7 +58,7 @@ def save_html(
         else (None, context.output)
     )
 
-    html_filename = Template(html_name_format).safe_substitute(VIDEO_NAME=context.video_stream.name)
+    html_filename = Template(filename).safe_substitute(VIDEO_NAME=context.video_stream.name)
     if not html_filename.lower().endswith(".html"):
         html_filename += ".html"
     html_path = get_and_create_path(html_filename, output)
@@ -66,7 +66,7 @@ def save_html(
         output_html_filename=html_path,
         scene_list=scenes,
         cut_list=cuts,
-        image_filenames=image_filenames if include_images else None,
+        image_filenames=None if no_images else image_filenames,
         image_width=image_width,
         image_height=image_height,
     )
