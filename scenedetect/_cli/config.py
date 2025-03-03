@@ -397,6 +397,12 @@ CONFIG_MAP: ConfigDict = {
         "output": None,
         "verbosity": "info",
     },
+    "save-edl": {
+        "filename": "$VIDEO_NAME.edl",
+        "output": None,
+        "reel": "AX",
+        "title": "$VIDEO_NAME",
+    },
     "save-html": {
         "filename": "$VIDEO_NAME-Scenes.html",
         "image-height": 0,

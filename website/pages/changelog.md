@@ -625,7 +625,9 @@ Development
 ## PySceneDetect 0.6.6 (In Development)
 
 ### Work In Progress
+
 - [feature] New `save-xml` command supports saving scenes in Final Cut Pro format [#156](https://github.com/Breakthrough/PySceneDetect/issues/156)
+- [feature] New `save-edl` command supports saving scenes in EDL format CMX 3600 [#495](https://github.com/Breakthrough/PySceneDetect/issues/495)
 
 ### Complete
 

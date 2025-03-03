@@ -1520,6 +1520,62 @@ def save_images_command(
     ctx.save_images = True
 
 
+SAVE_EDL_HELP = """Save cuts in EDL format (CMX 3600)."""
+
+
+@click.command("save-edl", cls=Command, help=SAVE_EDL_HELP)
+@click.option(
+    "--filename",
+    "-f",
+    metavar="NAME",
+    default=None,
+    type=click.STRING,
+    help="Filename format to use.%s" % (USER_CONFIG.get_help_string("save-edl", "filename")),
+)
+@click.option(
+    "--title",
+    "-t",
+    metavar="NAME",
+    default=None,
+    type=click.STRING,
+    help="Title format to use.%s" % (USER_CONFIG.get_help_string("save-edl", "title")),
+)
+@click.option(
+    "--reel",
+    "-r",
+    metavar="REEL",
+    default=None,
+    type=click.STRING,
+    help="Reel name to use.%s" % (USER_CONFIG.get_help_string("save-edl", "reel")),
+)
+@click.option(
+    "--output",
+    "-o",
+    metavar="DIR",
+    type=click.Path(exists=False, dir_okay=True, writable=True, resolve_path=False),
+    help="Output directory to save EDL file to. Overrides global option -o/--output.%s"
+    % (USER_CONFIG.get_help_string("save-edl", "output", show_default=False)),
+)
+@click.pass_context
+def save_edl_command(
+    ctx: click.Context,
+    filename: ty.Optional[ty.AnyStr],
+    title: ty.Optional[ty.AnyStr],
+    reel: ty.Optional[ty.AnyStr],
+    output: ty.Optional[ty.AnyStr],
+):
+    ctx = ctx.obj
+    assert isinstance(ctx, CliContext)
+
+    save_edl_args = {
+        "filename": ctx.config.get_value("save-edl", "filename", filename),
+        "title": ctx.config.get_value("save-edl", "title", title),
+        "reel": ctx.config.get_value("save-edl", "reel", reel),
+        "output": ctx.config.get_value("save-edl", "output", output),
+    }
+    ctx.add_command(cli_commands.save_edl, save_edl_args)
+
+
 SAVE_QP_HELP = """Save cuts as keyframes (I-frames) for video encoding.
 
 The resulting QP file can be used with the `--qpfile` argument in x264/x265.
@@ -1643,6 +1699,7 @@ scenedetect.add_command(detect_threshold_command)
 
 # Output
 scenedetect.add_command(list_scenes_command)
+scenedetect.add_command(save_edl_command)
 scenedetect.add_command(save_html_command)
 scenedetect.add_command(save_images_command)
 scenedetect.add_command(save_qp_command)

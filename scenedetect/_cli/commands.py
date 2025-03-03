@@ -26,6 +26,7 @@ from xml.etree import ElementTree
 
 from scenedetect._cli.config import XmlFormat
 from scenedetect._cli.context import CliContext
+from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.platform import get_and_create_path
 from scenedetect.scene_manager import (
     CutList,
@@ -253,6 +254,65 @@ def split_video(
         )
     if scenes:
         logger.info("Video splitting completed, scenes written to disk.")
+
+
+def save_edl(
+    context: CliContext,
+    scenes: SceneList,
+    cuts: CutList,
+    filename: str,
+    output: str,
+    title: str,
+    reel: str,
+):
+    """Handles the `save-edl` command. Outputs in CMX 3600 format."""
+    # We only use scene information.
+    del cuts
+
+    # Converts FrameTimecode to HH:MM:SS:FF
+    # TODO: This should be part of the FrameTimecode object itself.
+    def get_edl_timecode(timecode: FrameTimecode):
+        total_seconds = timecode.get_seconds()
+        hours = int(total_seconds // 3600)
+        minutes = int((total_seconds % 3600) // 60)
+        seconds = int(total_seconds % 60)
+        frames_part = int((total_seconds * timecode.get_framerate()) % timecode.get_framerate())
+        return f"{hours:02d}:{minutes:02d}:{seconds:02d}:{frames_part:02d}"
+
+    edl_content = []
+
+    title = Template(title).safe_substitute(VIDEO_NAME=context.video_stream.name)
+    edl_content.append(f"TITLE: {title}")
+    edl_content.append("FCM: NON-DROP FRAME")
+    edl_content.append("")
+
+    # Add each shot as an edit entry
+    for i, (start, end) in enumerate(scenes):
+        # TODO: Handle start time shift.
+        in_tc = get_edl_timecode(start)
+        out_tc = get_edl_timecode(end)
+
+        # TODO: How should the source/rec timestamps be aligned? One example I found showed:
+        #
+        # 001  AX V     C        00:00:00:00 00:00:10:00 00:00:00:00 00:00:10:00
+        # 002  AX V     C        00:00:10:01 00:00:20:00 00:00:10:00 00:00:20:00
+        # 003  AX V     C        00:00:20:01 00:00:30:00 00:00:20:00 00:00:30:00
+        # 004  AX V     C        00:00:30:01 00:00:40:00 00:00:30:00 00:00:40:00
+        #                                  ^
+        #                                  |- Shifted by 1 frame here
+
+        # Format the edit entry according to CMX 3600 format
+        event_line = f"{(i + 1):03d}  {reel} V     C        {in_tc} {out_tc} {in_tc} {out_tc}"
+        edl_content.append(event_line)
+
+    edl_path = get_and_create_path(
+        Template(filename).safe_substitute(VIDEO_NAME=context.video_stream.name),
+        output,
+    )
+    logger.info(f"Writing scenes in EDL format to {edl_path}")
+    with open(edl_path, "w") as f:
+        f.write("\n".join(edl_content))
+        f.write("\n")
 
 
 def _save_xml_fcpx(
