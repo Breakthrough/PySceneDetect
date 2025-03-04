@@ -627,10 +627,10 @@ Development
 ### Work In Progress
 
 - [feature] New `save-xml` command supports saving scenes in Final Cut Pro format [#156](https://github.com/Breakthrough/PySceneDetect/issues/156)
-- [feature] New `save-edl` command supports saving scenes in EDL format CMX 3600 [#495](https://github.com/Breakthrough/PySceneDetect/issues/495)
 
 ### Complete
 
+ - [feature] New `save-edl` command supports saving scenes in EDL format CMX 3600 [#495](https://github.com/Breakthrough/PySceneDetect/issues/495)
  - [general] The `export-html` command is now deprecated, use `save-html` instead
  - [bugfix] Fix incorrect help entries for short-form arguments which suggested invalid syntax [#493](https://github.com/Breakthrough/PySceneDetect/issues/493)
  - [bugfix] Fix crash when using `split-video` with `-m`/`--mkvmerge` option [#473](https://github.com/Breakthrough/PySceneDetect/issues/473)

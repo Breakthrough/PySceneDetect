@@ -24,6 +24,7 @@ from string import Template
 from xml.dom import minidom
 from xml.etree import ElementTree
 
+import scenedetect
 from scenedetect._cli.config import XmlFormat
 from scenedetect._cli.context import CliContext
 from scenedetect.frame_timecode import FrameTimecode
@@ -288,19 +289,8 @@ def save_edl(
 
     # Add each shot as an edit entry
     for i, (start, end) in enumerate(scenes):
-        # TODO: Handle start time shift.
         in_tc = get_edl_timecode(start)
-        out_tc = get_edl_timecode(end)
-
-        # TODO: How should the source/rec timestamps be aligned? One example I found showed:
-        #
-        # 001  AX V     C        00:00:00:00 00:00:10:00 00:00:00:00 00:00:10:00
-        # 002  AX V     C        00:00:10:01 00:00:20:00 00:00:10:00 00:00:20:00
-        # 003  AX V     C        00:00:20:01 00:00:30:00 00:00:20:00 00:00:30:00
-        # 004  AX V     C        00:00:30:01 00:00:40:00 00:00:30:00 00:00:40:00
-        #                                  ^
-        #                                  |- Shifted by 1 frame here
-
+        out_tc = get_edl_timecode(end - 1)  # Correct for presentation time
         # Format the edit entry according to CMX 3600 format
         event_line = f"{(i + 1):03d}  {reel} V     C        {in_tc} {out_tc} {in_tc} {out_tc}"
         edl_content.append(event_line)
@@ -311,6 +301,7 @@ def save_edl(
     )
     logger.info(f"Writing scenes in EDL format to {edl_path}")
     with open(edl_path, "w") as f:
+        f.write(f"* CREATED WITH PYSCENEDETECT {scenedetect.__version__}\n")
         f.write("\n".join(edl_content))
         f.write("\n")
 
@@ -398,16 +389,15 @@ def _save_xml_fcp(
     output: str,
 ):
     """Saves scenes in Final Cut Pro 7 XML format."""
+    assert scenes
     root = ElementTree.Element("xmeml", version="5")
     project = ElementTree.SubElement(root, "project")
     ElementTree.SubElement(project, "name").text = context.video_stream.name
     sequence = ElementTree.SubElement(project, "sequence")
     ElementTree.SubElement(sequence, "name").text = context.video_stream.name
 
-    # TODO: We should calculate duration from the scene list.
-    duration = context.video_stream.duration
-    duration = str(duration.get_seconds())  # TODO: Is float okay here?
-    ElementTree.SubElement(sequence, "duration").text = duration
+    duration = scenes[-1][1] - scenes[0][0]
+    ElementTree.SubElement(sequence, "duration").text = f"{duration.get_frames()}"
 
     rate = ElementTree.SubElement(sequence, "rate")
     ElementTree.SubElement(rate, "timebase").text = str(context.video_stream.frame_rate)
@@ -444,6 +434,8 @@ def _save_xml_fcp(
         ElementTree.SubElement(file_ref, "name").text = context.video_stream.name
         path = Path(context.video_stream.path).absolute()
         # TODO: Can we just use path.as_uri() here?
+        # On Windows this should be: file://localhost/C:/Users/... according to the samples provided
+        # from https://github.com/Breakthrough/PySceneDetect/issues/156#issuecomment-1076213412.
         ElementTree.SubElement(file_ref, "pathurl").text = f"file://{path}"
 
         media_ref = ElementTree.SubElement(file_ref, "media")
@@ -476,6 +468,9 @@ def save_xml(
     """Handles the `save-xml` command."""
     # We only use scene information.
     del cuts
+
+    if not scenes:
+        return
 
     if format == XmlFormat.FCPX:
         _save_xml_fcpx(context, scenes, filename, output)

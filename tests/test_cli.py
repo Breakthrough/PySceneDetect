@@ -10,7 +10,6 @@
 # included LICENSE file, or visit one of the above pages for details.
 #
 
-import glob
 import os
 import subprocess
 import typing as ty
@@ -20,6 +19,7 @@ import cv2
 import numpy as np
 import pytest
 
+import scenedetect
 from scenedetect.video_splitter import is_ffmpeg_available, is_mkvmerge_available
 
 # These tests validate that the CLI itself functions correctly, mainly based on the return
@@ -739,3 +739,45 @@ Scene Number,Start Frame
     assert ground_truth.split(SPLIT_POINT)[1] == loaded_first_pass.split(SPLIT_POINT)[1]
     with open("testout.csv") as first, open("testout2.csv") as second:
         assert first.readlines() == second.readlines()
+
+
+def test_cli_save_edl(tmp_path: Path):
+    """Test `save-edl` command."""
+    assert (
+        invoke_scenedetect(
+            "-i {VIDEO} time {TIME} {DETECTOR} save-edl",
+            output_dir=tmp_path,
+        )
+        == 0
+    )
+    output_path = tmp_path.joinpath(f"{DEFAULT_VIDEO_NAME}.edl")
+    assert os.path.exists(output_path)
+    EXPECTED_EDL_OUTPUT = f"""* CREATED WITH PYSCENEDETECT {scenedetect.__version__}
+TITLE: {DEFAULT_VIDEO_NAME}
+FCM: NON-DROP FRAME
+
+001  AX V     C        00:00:02:00 00:00:03:17 00:00:02:00 00:00:03:17
+002  AX V     C        00:00:03:18 00:00:05:23 00:00:03:18 00:00:05:23
+"""
+    assert output_path.read_text() == EXPECTED_EDL_OUTPUT
+
+
+def test_cli_save_edl_with_params(tmp_path: Path):
+    """Test `save-edl` command but override the other options."""
+    assert (
+        invoke_scenedetect(
+            "-i {VIDEO} time {TIME} {DETECTOR} save-edl -t title -r BX -f file_no_ext",
+            output_dir=tmp_path,
+        )
+        == 0
+    )
+    output_path = tmp_path.joinpath("file_no_ext")
+    assert os.path.exists(output_path)
+    EXPECTED_EDL_OUTPUT = f"""* CREATED WITH PYSCENEDETECT {scenedetect.__version__}
+TITLE: title
+FCM: NON-DROP FRAME
+
+001  BX V     C        00:00:02:00 00:00:03:17 00:00:02:00 00:00:03:17
+002  BX V     C        00:00:03:18 00:00:05:23 00:00:03:18 00:00:05:23
+"""
+    assert output_path.read_text() == EXPECTED_EDL_OUTPUT
