@@ -409,8 +409,20 @@
 <span class="c1"># Reel/tape name to use.</span>
 <span class="c1">#reel = AX</span>
 
-<span class="c1"># Title to use for the EDL file. Can use $VIDEO_NAME macro.</span>
-<span class="c1">#title = $VIDEO_NAME</span>
+<span class="c1"># Title to use for the EDL information. Can use $VIDEO_NAME macro.</span>
+<span class="c1">#title = $VIDEO_NAME (PySceneDetect)</span>
+
+
+<span class="k">[save-otio]</span>
+
+<span class="c1"># Filename format of OTIO file. Can use $VIDEO_NAME macro.</span>
+<span class="c1">#filename = $VIDEO_NAME.otio</span>
+
+<span class="c1"># Folder to output OTIO file to. Overrides [global] output option.</span>
+<span class="c1">#output = /usr/tmp/images</span>
+
+<span class="c1"># Name to use for the OTIO timeline. Can use $VIDEO_NAME macro.</span>
+<span class="c1">#title = $VIDEO_NAME (PySceneDetect)</span>
 
 
 <span class="k">[save-qp]</span>
