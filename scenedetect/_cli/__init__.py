@@ -1327,7 +1327,7 @@ def split_video_command(
     ctx.add_command(cli_commands.split_video, split_video_args)
 
 
-SAVE_IMAGES_HELP = """Extract images from each detected scene.
+SAVE_IMAGES_HELP = """Save images from each detected scene.
 
 Examples:
 
@@ -1675,6 +1675,54 @@ def save_xml_command(
     ctx.add_command(cli_commands.save_xml, save_xml_args)
 
 
+SAVE_OTIO_HELP = """Save cuts as an OTIO timeline.
+
+Uses the Timeline.1 schema. OTIO (OpenTimelineIO) timelines can be imported by many video editors."""
+
+
+@click.command("save-otio", cls=Command, help=SAVE_OTIO_HELP)
+@click.option(
+    "--filename",
+    "-f",
+    metavar="NAME",
+    default=None,
+    type=click.STRING,
+    help="Filename format to use.%s" % (USER_CONFIG.get_help_string("save-otio", "filename")),
+)
+@click.option(
+    "--name",
+    "-n",
+    metavar="NAME",
+    default=None,
+    type=click.STRING,
+    help="Name of timeline to use.%s" % (USER_CONFIG.get_help_string("save-otio", "name")),
+)
+@click.option(
+    "--output",
+    "-o",
+    metavar="DIR",
+    type=click.Path(exists=False, dir_okay=True, writable=True, resolve_path=False),
+    help="Output directory to save OTIO file to. Overrides global option -o/--output.%s"
+    % (USER_CONFIG.get_help_string("save-otio", "output", show_default=False)),
+)
+@click.pass_context
+def save_otio_command(
+    ctx: click.Context,
+    filename: ty.Optional[ty.AnyStr],
+    name: ty.Optional[ty.AnyStr],
+    output: ty.Optional[ty.AnyStr],
+):
+    ctx = ctx.obj
+    assert isinstance(ctx, CliContext)
+
+    save_otio_args = {
+        "filename": ctx.config.get_value("save-otio", "filename", filename),
+        "name": ctx.config.get_value("save-otio", "name", name),
+        "output": ctx.config.get_value("save-otio", "output", output),
+    }
+    ctx.add_command(cli_commands.save_otio, save_otio_args)
+
+
 # ----------------------------------------------------------------------
 # CLI Sub-Command Registration
 # ----------------------------------------------------------------------
@@ -1702,6 +1750,7 @@ scenedetect.add_command(save_html_command)
 scenedetect.add_command(save_images_command)
 scenedetect.add_command(save_qp_command)
 scenedetect.add_command(save_xml_command)
+scenedetect.add_command(save_otio_command)
 scenedetect.add_command(split_video_command)
 
 # Deprecated Commands (Hidden From Help Output)

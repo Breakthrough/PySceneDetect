@@ -644,7 +644,7 @@ Options
 ``save-images``
 ========================================================================
 
-Extract images from each detected scene.
+Save images from each detected scene.
 
 
 Examples
@@ -719,6 +719,40 @@ Options
 .. option:: -W W, --width W
 
   Width (pixels) of images.
+
+
+.. _command-save-otio:
+
+.. program:: scenedetect save-otio
+
+
+``save-otio``
+========================================================================
+
+Save cuts as an OTIO timeline.
+
+Uses the Timeline.1 schema. OTIO (OpenTimelineIO) timelines can be imported by many video editors.
+
+
+Options
+------------------------------------------------------------------------
+
+
+.. option:: -f NAME, --filename NAME
+
+  Filename format to use.
+
+  Default: ``$VIDEO_NAME.otio``
+
+.. option:: -n NAME, --name NAME
+
+  Name of timeline to use.
+
+  Default: ``"$VIDEO_NAME (PySceneDetect)"``
+
+.. option:: -o DIR, --output DIR
+
+  Output directory to save OTIO file to. Overrides global option :option:`-o/--output <scenedetect -o>`.
 
 
 .. _command-save-qp:

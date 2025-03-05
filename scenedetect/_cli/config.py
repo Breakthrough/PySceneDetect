@@ -424,6 +424,11 @@ CONFIG_MAP: ConfigDict = {
         "threading": True,
         "width": 0,
     },
+    "save-otio": {
+        "filename": "$VIDEO_NAME.otio",
+        "name": "$VIDEO_NAME (PySceneDetect)",
+        "output": None,
+    },
     "save-qp": {
         "disable-shift": False,
         "filename": "$VIDEO_NAME.qp",

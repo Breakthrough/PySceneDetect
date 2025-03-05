@@ -15,7 +15,9 @@ In addition to the the arguments registered with the command, commands will be c
 current command-line context, as well as the processing result (scenes and cuts).
 """
 
+import json
 import logging
+import os.path
 import typing as ty
 import webbrowser
 from datetime import datetime
@@ -401,12 +403,12 @@ def _save_xml_fcp(
 
     rate = ElementTree.SubElement(sequence, "rate")
     ElementTree.SubElement(rate, "timebase").text = str(context.video_stream.frame_rate)
-    ElementTree.SubElement(rate, "ntsc").text = "FALSE"
+    ElementTree.SubElement(rate, "ntsc").text = "False"
 
     timecode = ElementTree.SubElement(sequence, "timecode")
     tc_rate = ElementTree.SubElement(timecode, "rate")
     ElementTree.SubElement(tc_rate, "timebase").text = str(context.video_stream.frame_rate)
-    ElementTree.SubElement(tc_rate, "ntsc").text = "FALSE"
+    ElementTree.SubElement(tc_rate, "ntsc").text = "False"
     ElementTree.SubElement(timecode, "frame").text = "0"
     ElementTree.SubElement(timecode, "displayformat").text = "NDF"
 
@@ -478,3 +480,100 @@ def save_xml(
         _save_xml_fcp(context, scenes, filename, output)
     else:
         logger.error(f"Unknown format: {format}")
+
+
+def save_otio(
+    context: CliContext,
+    scenes: SceneList,
+    cuts: CutList,
+    filename: str,
+    output: str,
+    name: str,
+):
+    """Saves scenes in OTIO format."""
+
+    del cuts  # We only use scene information
+
+    video_name = context.video_stream.name
+    video_path = os.path.abspath(context.video_stream.path)
+    video_base_name = os.path.basename(context.video_stream.path)
+    frame_rate = context.video_stream.frame_rate
+
+    # List of track mapping to resource type.
+    # TODO(#497): Allow exporting without an audio track.
+    track_list = {"Video 1": "Video", "Audio 1": "Audio"}
+
+    otio = {
+        "OTIO_SCHEMA": "Timeline.1",
+        "name": Template(name).safe_substitute(VIDEO_NAME=video_name),
+        "global_start_time": {
+            "OTIO_SCHEMA": "RationalTime.1",
+            "rate": frame_rate,
+            "value": 0.0,
+        },
+        "tracks": {
+            "OTIO_SCHEMA": "Stack.1",
+            "enabled": True,
+            "children": [
+                {
+                    "OTIO_SCHEMA": "Track.1",
+                    "name": track_name,
+                    "enabled": True,
+                    "children": [
+                        {
+                            "OTIO_SCHEMA": "Clip.2",
+                            "name": video_base_name,
+                            "source_range": {
+                                "OTIO_SCHEMA": "TimeRange.1",
+                                "duration": {
+                                    "OTIO_SCHEMA": "RationalTime.1",
+                                    "rate": frame_rate,
+                                    "value": float((end - start).get_frames()),
+                                },
+                                "start_time": {
+                                    "OTIO_SCHEMA": "RationalTime.1",
+                                    "rate": frame_rate,
+                                    "value": float(start.get_frames()),
+                                },
+                            },
+                            "enabled": True,
+                            "media_references": {
+                                "DEFAULT_MEDIA": {
+                                    "OTIO_SCHEMA": "ExternalReference.1",
+                                    "name": video_base_name,
+                                    "available_range": {
+                                        "OTIO_SCHEMA": "TimeRange.1",
+                                        "duration": {
+                                            "OTIO_SCHEMA": "RationalTime.1",
+                                            "rate": frame_rate,
+                                            "value": 1980.0,
+                                        },
+                                        "start_time": {
+                                            "OTIO_SCHEMA": "RationalTime.1",
+                                            "rate": frame_rate,
+                                            "value": 0.0,
+                                        },
+                                    },
+                                    "available_image_bounds": None,
+                                    "target_url": video_path,
+                                }
+                            },
+                            "active_media_reference_key": "DEFAULT_MEDIA",
+                        }
+                        for (start, end) in scenes
+                    ],
+                    "kind": track_type,
+                }
+                for (track_name, track_type) in track_list.items()
+            ],
+        },
+    }
+
+    otio_path = get_and_create_path(
+        Template(filename).safe_substitute(VIDEO_NAME=context.video_stream.name),
+        output,
+    )
+    logger.info(f"Writing scenes in OTIO format to {otio_path}")
+    with open(otio_path, "w") as f:
+        json.dump(otio, f, indent=4)
+        f.write("\n")
