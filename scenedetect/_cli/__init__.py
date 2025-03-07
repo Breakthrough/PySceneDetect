@@ -41,6 +41,7 @@ from scenedetect.backends import AVAILABLE_BACKENDS
 from scenedetect.detectors import (
     AdaptiveDetector,
     ContentDetector,
+    ContentDetector2,
     HashDetector,
     HistogramDetector,
     ThresholdDetector,
@@ -561,6 +562,12 @@ Examples:
         USER_CONFIG.get_help_string("detect-content", "filter-mode"),
     ),
 )
+@click.option(
+    "-b",
+    "--beta",
+    is_flag=True,
+    flag_value=True,
+)
 @click.pass_context
 def detect_content_command(
     ctx: click.Context,
@@ -570,6 +577,7 @@ def detect_content_command(
     kernel_size: ty.Optional[int],
     min_scene_len: ty.Optional[str],
     filter_mode: ty.Optional[str],
+    beta,
 ):
     ctx = ctx.obj
     assert isinstance(ctx, CliContext)
@@ -581,7 +589,7 @@ def detect_content_command(
         kernel_size=kernel_size,
         filter_mode=filter_mode,
     )
-    ctx.add_detector(ContentDetector, detector_args)
+    ctx.add_detector(ContentDetector if not beta else ContentDetector2, detector_args)
 
 
 DETECT_ADAPTIVE_HELP = """Find fast cuts using diffs in HSL colorspace (rolling average).

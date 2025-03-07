@@ -100,6 +100,7 @@ from scenedetect._thirdparty.simpletable import (
     SimpleTableImage,
     SimpleTableRow,
 )
+from scenedetect.detector import Detector
 from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.platform import get_and_create_path, get_cv2_imwrite_params, tqdm
 from scenedetect.scene_detector import SceneDetector, SparseSceneDetector
@@ -965,6 +966,7 @@ class SceneManager:
         self._cutting_list = []
         self._event_list = []
         self._detector_list: ty.List[SceneDetector] = []
+        self._detectors: ty.List[Detector] = []
         self._sparse_detector_list = []
         # TODO(v1.0): This class should own a StatsManager instead of taking an optional one.
         # Expose a new `stats_manager` @property from the SceneManager, and either change the
@@ -1070,7 +1072,7 @@ class SceneManager:
     def auto_downscale(self, value: bool):
         self._auto_downscale = value
 
-    def add_detector(self, detector: SceneDetector) -> None:
+    def add_detector(self, detector: ty.Union[SceneDetector, Detector]) -> None:
         """Add/register a SceneDetector (e.g. ContentDetector, ThresholdDetector) to
         run when detect_scenes is called. The SceneManager owns the detector object,
         so a temporary may be passed.
@@ -1078,7 +1080,11 @@ class SceneManager:
         Arguments:
             detector (SceneDetector): Scene detector to add to the SceneManager.
         """
-        if self._stats_manager is None and detector.stats_manager_required():
+        if (
+            self._stats_manager is None
+            and isinstance(detector, SceneDetector)
+            and detector.stats_manager_required()
+        ):
             # Make sure the lists are empty so that the detectors don't get
             # out of sync (require an explicit statsmanager instead)
             assert not self._detector_list and not self._sparse_detector_list
@@ -1088,16 +1094,21 @@ class SceneManager:
         if self._stats_manager is not None:
             self._stats_manager.register_metrics(detector.get_metrics())
 
-        if not issubclass(type(detector), SparseSceneDetector):
+        if isinstance(detector, Detector):
+            if self._stats_manager is not None:
+                detector._set_stats_manager(self._stats_manager)
+            self._detectors.append(detector)
+        elif isinstance(detector, SceneDetector):
             self._detector_list.append(detector)
         else:
+            assert isinstance(detector, SparseSceneDetector)
             self._sparse_detector_list.append(detector)
 
         self._frame_buffer_size = max(detector.event_buffer_length, self._frame_buffer_size)
 
     def get_num_detectors(self) -> int:
         """Get number of registered scene detectors added via add_detector."""
-        return len(self._detector_list)
+        return len(self._detector_list) + len(self._detectors)
 
     def clear(self) -> None:
         """Clear all cuts/scenes and resets the SceneManager's position.
@@ -1116,6 +1127,7 @@ class SceneManager:
 
     def clear_detectors(self) -> None:
         """Remove all scene detectors added to the SceneManager via add_detector()."""
+        self._detectors.clear()
         self._detector_list.clear()
         self._sparse_detector_list.clear()
 
@@ -1172,6 +1184,7 @@ class SceneManager:
     def _process_frame(
         self,
         frame_num: int,
+        timecode: FrameTimecode,
         frame_im: np.ndarray,
         callback: ty.Optional[ty.Callable[[np.ndarray, int], None]] = None,
     ) -> bool:
@@ -1200,12 +1213,22 @@ class SceneManager:
                 for event_start, _ in events:
                     buffer_index = event_start - (frame_num + 1)
                     callback(self._frame_buffer[buffer_index], event_start)
+        for detector in self._detectors:
+            events = detector.process(frame=frame_im, timecode=timecode)
+            for event in events:
+                self._cutting_list.append(event.time.frame_num)
+            new_cuts = True if events else False
+            if callback:
+                for event in events:
+                    buffer_index = event.time.frame_num - (frame_num + 1)
+                    callback(self._frame_buffer[buffer_index], event.time.frame_num)
         return new_cuts
 
     def _post_process(self, frame_num: int) -> None:
         """Add remaining cuts to the cutting list, after processing the last frame."""
         for detector in self._detector_list:
             self._cutting_list += detector.post_process(frame_num)
+        # TODO: Handle self._detectors.
 
     def stop(self) -> None:
         """Stop the current :meth:`detect_scenes` call, if any. Thread-safe."""
@@ -1339,7 +1362,7 @@ class SceneManager:
                 break
             if next_frame is not None:
                 frame_im = next_frame
-            new_cuts = self._process_frame(position.frame_num, frame_im, callback)
+            new_cuts = self._process_frame(position.frame_num, position, frame_im, callback)
             if progress_bar is not None:
                 if new_cuts:
                     progress_bar.set_description(
@@ -1379,53 +1402,45 @@ class SceneManager:
                 # We don't do any kind of locking here since the worst-case of this being wrong
                 # is that we do some extra work, and this function should never mutate any data
                 # (all of which should be modified under the GIL).
-                # TODO(v1.0): This optimization should be removed as it is an uncommon use case and
-                # greatly increases the complexity of detection algorithms using it.
-                if self._is_processing_required(video.position.frame_num):
-                    frame_im = video.read()
-                    if frame_im is False:
-                        break
-                    # Verify the decoded frame size against the video container's reported
-                    # resolution, and also verify that consecutive frames have the correct size.
-                    decoded_size = (frame_im.shape[1], frame_im.shape[0])
-                    if self._frame_size is None:
-                        self._frame_size = decoded_size
-                        if video.frame_size != decoded_size:
-                            logger.warn(
-                                f"WARNING: Decoded frame size ({decoded_size}) does not match "
-                                f" video resolution {video.frame_size}, possible corrupt input."
-                            )
-                    elif self._frame_size != decoded_size:
-                        self._frame_size_errors += 1
-                        if self._frame_size_errors <= MAX_FRAME_SIZE_ERRORS:
-                            logger.error(
-                                f"ERROR: Frame at {str(video.position)} has incorrect size and "
-                                f"cannot be processed: decoded size = {decoded_size}, "
-                                f"expected = {self._frame_size}. Video may be corrupt."
-                            )
-                        if self._frame_size_errors == MAX_FRAME_SIZE_ERRORS:
-                            logger.warn(
-                                "WARNING: Too many errors emitted, skipping future messages."
-                            )
-                        # Skip processing frames that have an incorrect size.
-                        continue
-
-                    if self._crop:
-                        (x0, y0, x1, y1) = self._crop
-                        frame_im = frame_im[y0:y1, x0:x1]
-
-                    if downscale_factor > 1.0:
-                        frame_im = cv2.resize(
-                            frame_im,
-                            (
-                                max(1, round(frame_im.shape[1] / downscale_factor)),
-                                max(1, round(frame_im.shape[0] / downscale_factor)),
-                            ),
-                            interpolation=self._interpolation.value,
+                frame_im = video.read()
+                if frame_im is False:
+                    break
+                # Verify the decoded frame size against the video container's reported
+                # resolution, and also verify that consecutive frames have the correct size.
+                decoded_size = (frame_im.shape[1], frame_im.shape[0])
+                if self._frame_size is None:
+                    self._frame_size = decoded_size
+                    if video.frame_size != decoded_size:
+                        logger.warn(
+                            f"WARNING: Decoded frame size ({decoded_size}) does not match "
+                            f" video resolution {video.frame_size}, possible corrupt input."
                         )
-                else:
-                    if video.read(decode=False) is False:
-                        break
+                elif self._frame_size != decoded_size:
+                    self._frame_size_errors += 1
+                    if self._frame_size_errors <= MAX_FRAME_SIZE_ERRORS:
+                        logger.error(
+                            f"ERROR: Frame at {str(video.position)} has incorrect size and "
+                            f"cannot be processed: decoded size = {decoded_size}, "
+                            f"expected = {self._frame_size}. Video may be corrupt."
+                        )
+                    if self._frame_size_errors == MAX_FRAME_SIZE_ERRORS:
+                        logger.warn("WARNING: Too many errors emitted, skipping future messages.")
+                    # Skip processing frames that have an incorrect size.
+                    continue
+
+                if self._crop:
+                    (x0, y0, x1, y1) = self._crop
+                    frame_im = frame_im[y0:y1, x0:x1]
+
+                if downscale_factor > 1.0:
+                    frame_im = cv2.resize(
+                        frame_im,
+                        (
+                            max(1, round(frame_im.shape[1] / downscale_factor)),
+                            max(1, round(frame_im.shape[0] / downscale_factor)),
+                        ),
+                        interpolation=self._interpolation.value,
+                    )
 
                 # Set the start position now that we decoded at least the first frame.
                 if self._start_pos is None:
@@ -1515,9 +1530,3 @@ class SceneManager:
         # TODO(v0.7): Use the warnings module to turn this into a warning.
         logger.error("`get_event_list()` is deprecated and will be removed in a future release.")
         return self._get_event_list()
-
-    def _is_processing_required(self, frame_num: int) -> bool:
-        """True if frame metrics not in StatsManager, False otherwise."""
-        if self.stats_manager is None:
-            return True
-        return all([detector.is_processing_required(frame_num) for detector in self._detector_list])
