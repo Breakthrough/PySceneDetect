@@ -1626,10 +1626,10 @@ def save_qp_command(
     ctx.add_command(cli_commands.save_qp, save_qp_args)
 
 
-SAVE_XML_HELP = """Save cuts in XML format."""
+SAVE_XML_HELP = """[IN DEVELOPMENT] Save cuts in XML format."""
 
 
-@click.command("save-xml", cls=Command, help=SAVE_XML_HELP)
+@click.command("save-xml", cls=Command, help=SAVE_XML_HELP, hidden=True)
 @click.option(
     "--filename",
     "-f",
@@ -1705,20 +1705,40 @@ Uses the Timeline.1 schema. OTIO (OpenTimelineIO) timelines can be imported by m
     help="Output directory to save OTIO file to. Overrides global option -o/--output.%s"
     % (USER_CONFIG.get_help_string("save-otio", "output", show_default=False)),
 )
+@click.option(
+    "--audio",
+    is_flag=True,
+    flag_value=True,
+    help="Include audio track (default).",
+)
+@click.option(
+    "--no-audio",
+    is_flag=True,
+    flag_value=True,
+    help="Exclude audio track.",
+)
 @click.pass_context
 def save_otio_command(
     ctx: click.Context,
     filename: ty.Optional[ty.AnyStr],
     name: ty.Optional[ty.AnyStr],
     output: ty.Optional[ty.AnyStr],
+    audio: bool,
+    no_audio: bool,
 ):
     ctx = ctx.obj
     assert isinstance(ctx, CliContext)
+
+    if audio and no_audio:
+        raise click.BadArgumentUsage("Only one of --audio or --no-audio can be specified.")
 
     save_otio_args = {
         "filename": ctx.config.get_value("save-otio", "filename", filename),
         "name": ctx.config.get_value("save-otio", "name", name),
         "output": ctx.config.get_value("save-otio", "output", output),
+        "audio": ctx.config.get_value(
+            "save-otio", "audio", True if audio else False if no_audio else None
+        ),
     }
     ctx.add_command(cli_commands.save_otio, save_otio_args)
 

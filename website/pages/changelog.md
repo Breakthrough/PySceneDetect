@@ -4,6 +4,23 @@ Releases
 
 ## PySceneDetect 0.6
 
+### PySceneDetect 0.6.6 (March 9, 2025)
+
+#### Release Notes
+
+PySceneDetect v0.6.6 introduces new output formats, which improve compatibility with popular video editors (e.g. DaVinci Resolve). Also included are several important bugfixes.
+
+#### Changelog
+
+ - [feature] New `save-otio` command supports saving scenes in OTIO format [#497](https://github.com/Breakthrough/PySceneDetect/issues/497)
+ - [feature] New `save-edl` command supports saving scenes in EDL format CMX 3600 [#495](https://github.com/Breakthrough/PySceneDetect/issues/495)
+ - [general] The `export-html` command is now deprecated, use `save-html` instead
+ - [bugfix] Fix incorrect help entries for short-form arguments which suggested invalid syntax [#493](https://github.com/Breakthrough/PySceneDetect/issues/493)
+ - [bugfix] Fix crash when using `split-video` with `-m`/`--mkvmerge` option [#473](https://github.com/Breakthrough/PySceneDetect/issues/473)
+ - [bugfix] Fix incorrect default filename template for `split-video` command with `-m`/`--mkvmerge` option
+ - [bugfix] Fix inconsistent filenames when using `split_video_mkvmerge()` function in `scenedetect.video_splitter` module
+
+
 ### PySceneDetect 0.6.5 (November 24, 2024)
 
 #### Release Notes
@@ -622,17 +639,8 @@ Both the Windows installer and portable distributions now include signed executa
 Development
 ==========================================================
 
-## PySceneDetect 0.6.6 (In Development)
+## PySceneDetect 0.7 (In Development)
 
 ### Work In Progress
 
 - [feature] New `save-xml` command supports saving scenes in Final Cut Pro format [#156](https://github.com/Breakthrough/PySceneDetect/issues/156)
-
-### Complete
-
- - [feature] New `save-edl` command supports saving scenes in EDL format CMX 3600 [#495](https://github.com/Breakthrough/PySceneDetect/issues/495)
- - [general] The `export-html` command is now deprecated, use `save-html` instead
- - [bugfix] Fix incorrect help entries for short-form arguments which suggested invalid syntax [#493](https://github.com/Breakthrough/PySceneDetect/issues/493)
- - [bugfix] Fix crash when using `split-video` with `-m`/`--mkvmerge` option [#473](https://github.com/Breakthrough/PySceneDetect/issues/473)
- - [bugfix] Fix incorrect default filename template for `split-video` command with `-m`/`--mkvmerge` option
- - [bugfix] Fix inconsistent filenames when using `split_video_mkvmerge()` function in `scenedetect.video_splitter` module

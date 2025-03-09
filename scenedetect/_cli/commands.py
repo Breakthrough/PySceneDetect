@@ -489,6 +489,7 @@ def save_otio(
     filename: str,
     output: str,
     name: str,
+    audio: bool,
 ):
     """Saves scenes in OTIO format."""
 
@@ -501,7 +502,9 @@ def save_otio(
 
     # List of track mapping to resource type.
     # TODO(#497): Allow exporting without an audio track.
-    track_list = {"Video 1": "Video", "Audio 1": "Audio"}
+    track_list = {"Video 1": "Video"}
+    if audio:
+        track_list["Audio 1"] = "Audio"
 
     otio = {
         "OTIO_SCHEMA": "Timeline.1",

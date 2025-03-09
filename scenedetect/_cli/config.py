@@ -425,6 +425,7 @@ CONFIG_MAP: ConfigDict = {
         "width": 0,
     },
     "save-otio": {
+        "audio": True,
         "filename": "$VIDEO_NAME.otio",
         "name": "$VIDEO_NAME (PySceneDetect)",
         "output": None,

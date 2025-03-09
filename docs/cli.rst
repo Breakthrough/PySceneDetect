@@ -754,6 +754,14 @@ Options
 
   Output directory to save OTIO file to. Overrides global option :option:`-o/--output <scenedetect -o>`.
 
+.. option:: --audio
+
+  Include audio track (default).
+
+.. option:: --no-audio
+
+  Exclude audio track.
+
 
 .. _command-save-qp:
 
@@ -795,7 +803,7 @@ Options
 ``save-xml``
 ========================================================================
 
-Save cuts in XML format.
+[IN DEVELOPMENT] Save cuts in XML format.
 
 
 Options
