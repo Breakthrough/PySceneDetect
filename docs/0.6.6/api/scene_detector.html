@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>SceneDetector &#8212; PySceneDetect 0.6.5.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/pyscenedetect.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="VideoStream" href="video_stream.html" />
+    <link rel="prev" title="FrameTimecode" href="frame_timecode.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-scenedetect.scene_detector">
+<span id="scenedetector"></span><span id="scenedetect-scene-detector"></span><h1>SceneDetector<a class="headerlink" href="#module-scenedetect.scene_detector" title="Permalink to this heading">¶</a></h1>
+<p><code class="docutils literal notranslate"><span class="pre">scenedetect.scene_detector</span></code> Module</p>
+<p>This module contains the <a class="reference internal" href="#scenedetect.scene_detector.SceneDetector" title="scenedetect.scene_detector.SceneDetector"><code class="xref py py-class docutils literal notranslate"><span class="pre">SceneDetector</span></code></a> interface, from which all scene detectors in
+<a class="reference internal" href="detectors.html#module-scenedetect.detectors" title="scenedetect.detectors"><code class="xref py py-mod docutils literal notranslate"><span class="pre">scenedetect.detectors</span></code></a> module are derived from.</p>
+<p>The SceneDetector class represents the interface which detection algorithms are expected to provide
+in order to be compatible with PySceneDetect.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This API is still unstable, and changes and design improvements are planned for the v1.0
+release. Instead of just timecodes, detection algorithms will also provide a specific type of
+event (in, out, cut, etc…).</p>
+</div>
+<dl class="py class">
+<dt class="sig sig-object py" id="scenedetect.scene_detector.FlashFilter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scenedetect.scene_detector.</span></span><span class="sig-name descname"><span class="pre">FlashFilter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.scene_detector.FlashFilter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filters fast-cuts to enforce minimum scene length.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mode</strong> (<a class="reference internal" href="#scenedetect.scene_detector.FlashFilter.Mode" title="scenedetect.scene_detector.FlashFilter.Mode"><em>Mode</em></a>) – The mode to use when enforcing <cite>length</cite>.</p></li>
+<li><p><strong>length</strong> (<em>int</em>) – Number of frames to use when filtering cuts.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="scenedetect.scene_detector.FlashFilter.Mode">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Mode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names=&lt;not</span> <span class="pre">given&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qualname=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary=None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.scene_detector.FlashFilter.Mode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Which mode the filter should use for enforcing minimum scene length.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scenedetect.scene_detector.FlashFilter.Mode.MERGE">
+<span class="sig-name descname"><span class="pre">MERGE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#scenedetect.scene_detector.FlashFilter.Mode.MERGE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Merge consecutive cuts shorter than filter length.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scenedetect.scene_detector.FlashFilter.Mode.SUPPRESS">
+<span class="sig-name descname"><span class="pre">SUPPRESS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#scenedetect.scene_detector.FlashFilter.Mode.SUPPRESS" title="Permalink to this definition">¶</a></dt>
+<dd><p>Suppress consecutive cuts until the filter length has passed.</p>
+</dd></dl>
+
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="scenedetect.scene_detector.SceneDetector">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scenedetect.scene_detector.</span></span><span class="sig-name descname"><span class="pre">SceneDetector</span></span><a class="headerlink" href="#scenedetect.scene_detector.SceneDetector" title="Permalink to this definition">¶</a></dt>
+<dd><p>Base class to inherit from when implementing a scene detection algorithm.</p>
+<p>This API is not yet stable and subject to change.</p>
+<p>This represents a “dense” scene detector, which returns a list of frames where
+the next scene/shot begins in a video.</p>
+<p>Also see the implemented scene detectors in the scenedetect.detectors module
+to get an idea of how a particular detector can be created.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="scenedetect.scene_detector.SceneDetector.get_metrics">
+<span class="sig-name descname"><span class="pre">get_metrics</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.scene_detector.SceneDetector.get_metrics" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get Metrics:  Get a list of all metric names/keys used by the detector.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List of strings of frame metric key names that will be used by
+the detector when a StatsManager is passed to process_frame.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>List</em>[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scenedetect.scene_detector.SceneDetector.post_process">
+<span class="sig-name descname"><span class="pre">post_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame_num</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.scene_detector.SceneDetector.post_process" title="Permalink to this definition">¶</a></dt>
+<dd><p>Post Process: Performs any processing after the last frame has been read.</p>
+<p>Prototype method, no actual detection.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List of frame numbers of cuts to be added to the cutting list.</p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>frame_num</strong> (<em>int</em>) – </p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>List</em>[int]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scenedetect.scene_detector.SceneDetector.process_frame">
+<span class="sig-name descname"><span class="pre">process_frame</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame_num</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_img</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.scene_detector.SceneDetector.process_frame" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process the next frame. <cite>frame_num</cite> is assumed to be sequential.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>frame_num</strong> (<em>int</em>) – Frame number of frame that is being passed. Can start from any value
+but must remain sequential.</p></li>
+<li><p><strong>frame_img</strong> (<em>numpy.ndarray</em><em> or </em><em>None</em>) – Video frame corresponding to <cite>frame_img</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of frames where scene cuts have been detected. There may be 0
+or more frames in the list, and not necessarily the same as frame_num.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List[int]</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of frame numbers of cuts to be added to the cutting list.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scenedetect.scene_detector.SceneDetector.stats_manager_required">
+<span class="sig-name descname"><span class="pre">stats_manager_required</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.scene_detector.SceneDetector.stats_manager_required" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stats Manager Required: Prototype indicating if detector requires stats.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True if a StatsManager is required for the detector, False otherwise.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="scenedetect.scene_detector.SceneDetector.event_buffer_length">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">event_buffer_length</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#scenedetect.scene_detector.SceneDetector.event_buffer_length" title="Permalink to this definition">¶</a></dt>
+<dd><p>The amount of frames a given event can be buffered for, in time. Represents maximum
+amount any event can be behind <cite>frame_number</cite> in the result of <a class="reference internal" href="#scenedetect.scene_detector.SceneDetector.process_frame" title="scenedetect.scene_detector.SceneDetector.process_frame"><code class="xref py py-meth docutils literal notranslate"><span class="pre">process_frame()</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scenedetect.scene_detector.SceneDetector.stats_manager">
+<span class="sig-name descname"><span class="pre">stats_manager</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="stats_manager.html#scenedetect.stats_manager.StatsManager" title="scenedetect.stats_manager.StatsManager"><span class="pre">StatsManager</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#scenedetect.scene_detector.SceneDetector.stats_manager" title="Permalink to this definition">¶</a></dt>
+<dd><p>Optional <a class="reference internal" href="stats_manager.html#scenedetect.stats_manager.StatsManager" title="scenedetect.stats_manager.StatsManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">StatsManager</span></code></a> to
+use for caching frame metrics to and from.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+          </div>
+              <div class="related bottom">
+                &nbsp;
+  <nav id="rellinks">
+    <ul>
+        <li>
+          &larr;
+          <a href="frame_timecode.html" title="Previous document">FrameTimecode</a>
+        </li>
+        <li>
+          <a href="video_stream.html" title="Next document">VideoStream</a>
+          &rarr;
+        </li>
+    </ul>
+  </nav>
+              </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="../index.html">
+    <img class="logo" src="../_static/pyscenedetect_logo.png" alt="Logo" />
+    
+  </a>
+</p>
+
+
+
+<p class="blurb">Version: [0.6.5.2]</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=Breakthrough&repo=PySceneDetect&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Command-Line Interface:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../cli.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Command</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cli.html#examples">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cli.html#options">Options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cli.html#detectors">Detectors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cli.html#commands">Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cli/config_file.html">Configuration File</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cli/backends.html">Backends</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Documentation:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../api.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="detectors.html">Detection Algorithms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="backends.html">Backends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scene_manager.html">SceneManager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="video_splitter.html">Video Splitting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stats_manager.html">StatsManager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="frame_timecode.html">FrameTimecode</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">SceneDetector</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#scenedetect.scene_detector.FlashFilter"><code class="docutils literal notranslate"><span class="pre">FlashFilter</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scenedetect.scene_detector.SceneDetector"><code class="docutils literal notranslate"><span class="pre">SceneDetector</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="video_stream.html">VideoStream</a></li>
+<li class="toctree-l1"><a class="reference internal" href="platform.html">Platform &amp; Logging</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="../api.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Package</a><ul>
+      <li>Previous: <a href="frame_timecode.html" title="previous chapter">FrameTimecode</a></li>
+      <li>Next: <a href="video_stream.html" title="next chapter">VideoStream</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2014-2024, Brandon Castellano.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.0.1</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../_sources/api/scene_detector.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
