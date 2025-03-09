@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<DOCUMENT Type="Advanced Installer" CreateVersion="13.5" version="22.2" Modules="professional" RootPath="." Language="en" Id="{3919FEC9-E2C3-453E-81FD-9E8BABBE2CA4}">
+<DOCUMENT Type="Advanced Installer" CreateVersion="13.5" version="22.5" Modules="professional" RootPath="." Language="en" Id="{3919FEC9-E2C3-453E-81FD-9E8BABBE2CA4}">
   <COMPONENT cid="caphyon.advinst.msicomp.MsiPropsComponent">
     <ROW Property="AI_BITMAP_DISPLAY_MODE" Value="0"/>
     <ROW Property="AI_EXTERNALUIUNINSTALLERNAME" MultiBuildValue="DefaultBuild:aiui"/>
@@ -23,10 +23,10 @@
     <ROW Property="DialogBitmap" Value="dialog.jpg" MultiBuildValue="DefaultBuild:installer_logo.jpg" Type="1" MsiKey="DialogBitmap"/>
     <ROW Property="MSIFASTINSTALL" MultiBuildValue="DefaultBuild:3"/>
     <ROW Property="Manufacturer" Value="Brandon Castellano"/>
-    <ROW Property="ProductCode" Value="1033:{7AC4D35C-8A9E-4EA5-81CC-3499A0A082D3} " Type="16"/>
+    <ROW Property="ProductCode" Value="1033:{5F017601-DFDD-4381-A35F-79634ED91632} " Type="16"/>
     <ROW Property="ProductLanguage" Value="1033"/>
     <ROW Property="ProductName" Value="PySceneDetect"/>
-    <ROW Property="ProductVersion" Value="0.6.5" Options="32"/>
+    <ROW Property="ProductVersion" Value="0.6.6" Options="32"/>
     <ROW Property="SecureCustomProperties" Value="OLDPRODUCTS;AI_NEWERPRODUCTFOUND;AI_SETUPEXEPATH;SETUPEXEDIR"/>
     <ROW Property="UpgradeCode" Value="{D0AF0419-DBD5-455C-A4AC-4518A35DD23E}"/>
     <ROW Property="WindowsType9X" MultiBuildValue="DefaultBuild:Windows 9x/ME" ValueLocId="-"/>
@@ -121,7 +121,7 @@
     <ROW Directory="wheel0.45.1.distinfo_Dir" Directory_Parent="_internal_Dir" DefaultDir="WHEEL-~1.DIS|wheel-0.45.1.dist-info"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.SideBySideGuidComponent">
-    <ROW Component="AI_CustomARPName" Value="{9F874C99-76F0-4E06-B0FB-6ADFC7969C73}"/>
+    <ROW Component="AI_CustomARPName" Value="{F7C45B12-D093-4D1A-96D3-9D79D73D8DD1}"/>
     <ROW Component="AI_DisableModify" Value="{5AB8A335-BCAB-4C0A-8A69-E2AE7542AB47}"/>
     <ROW Component="AI_ExePath" Value="{F7DEDE0C-FDB1-411C-B347-A482CE69721F}"/>
     <ROW Component="APPDIR" Value="{6B122BDD-2BF8-41D4-92E0-884DD60467B4}"/>
@@ -253,7 +253,7 @@
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiCompsComponent">
     <ROW Component="ACT" ComponentId="{BBE2F383-39AF-469F-84C8-5FFBD928CDA1}" Directory_="Australia_Dir" Attributes="0" KeyPath="ACT" Type="0"/>
-    <ROW Component="AI_CustomARPName" ComponentId="{9F874C99-76F0-4E06-B0FB-6ADFC7969C73}" Directory_="APPDIR" Attributes="260" KeyPath="DisplayName" Options="1"/>
+    <ROW Component="AI_CustomARPName" ComponentId="{F7C45B12-D093-4D1A-96D3-9D79D73D8DD1}" Directory_="APPDIR" Attributes="260" KeyPath="DisplayName" Options="1"/>
     <ROW Component="AI_DisableModify" ComponentId="{5AB8A335-BCAB-4C0A-8A69-E2AE7542AB47}" Directory_="APPDIR" Attributes="260" KeyPath="NoModify" Options="1"/>
     <ROW Component="AI_ExePath" ComponentId="{F7DEDE0C-FDB1-411C-B347-A482CE69721F}" Directory_="APPDIR" Attributes="260" KeyPath="AI_ExePath"/>
     <ROW Component="APPDIR" ComponentId="{6B122BDD-2BF8-41D4-92E0-884DD60467B4}" Directory_="APPDIR" Attributes="0"/>
@@ -619,7 +619,6 @@
     <ROW File="shell1.1.4.tm" Component_="shell1.1.4.tm" FileName="SHELL-~1.TM|shell-1.1.4.tm" Attributes="0" SourcePath="..\scenedetect\_internal\tcl8\8.4\platform\shell-1.1.4.tm" SelfReg="false"/>
     <ROW File="platform1.0.19.tm" Component_="platform1.0.19.tm" FileName="PLATFO~1.TM|platform-1.0.19.tm" Attributes="0" SourcePath="..\scenedetect\_internal\tcl8\8.4\platform-1.0.19.tm" SelfReg="false"/>
     <ROW File="msgcat1.6.1.tm" Component_="msgcat1.6.1.tm" FileName="MSGCAT~1.TM|msgcat-1.6.1.tm" Attributes="0" SourcePath="..\scenedetect\_internal\tcl8\8.5\msgcat-1.6.1.tm" SelfReg="false"/>
-    <ROW File="tcltest2.5.7.tm" Component_="msgcat1.6.1.tm" FileName="TCLTES~1.TM|tcltest-2.5.7.tm" Attributes="0" SourcePath="..\scenedetect\_internal\tcl8\8.5\tcltest-2.5.7.tm" SelfReg="false"/>
     <ROW File="http2.9.8.tm" Component_="http2.9.8.tm" FileName="HTTP-2~1.TM|http-2.9.8.tm" Attributes="0" SourcePath="..\scenedetect\_internal\tcl8\8.6\http-2.9.8.tm" SelfReg="false"/>
     <ROW File="tcl86t.dll" Component_="tcl86t.dll" FileName="tcl86t.dll" Attributes="0" SourcePath="..\scenedetect\_internal\tcl86t.dll" SelfReg="false"/>
     <ROW File="tk86t.dll" Component_="tk86t.dll" FileName="tk86t.dll" Attributes="0" SourcePath="..\scenedetect\_internal\tk86t.dll" SelfReg="false"/>
@@ -1602,7 +1601,7 @@
     <ROW Action="AI_CleanPrePrereq" Condition="AI_BOOTSTRAPPER AND (NOT AI_PrereqsFulfilled)" Sequence="699"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.BuildComponent">
-    <ROW BuildKey="DefaultBuild" BuildName="DefaultBuild" BuildOrder="1" BuildType="0" PackageFolder="." PackageFileName="PySceneDetect-0.6.5-win64" Languages="en" InstallationType="4" ExtUI="true" UseLargeSchema="true" MsiPackageType="x64"/>
+    <ROW BuildKey="DefaultBuild" BuildName="DefaultBuild" BuildOrder="1" BuildType="0" PackageFolder="." PackageFileName="PySceneDetect-0.6.6-win64" Languages="en" InstallationType="4" ExtUI="true" UseLargeSchema="true" MsiPackageType="x64"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.DictionaryComponent">
     <ROW Path="&lt;AI_DICTS&gt;ui.ail"/>
