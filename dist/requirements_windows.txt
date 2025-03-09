@@ -1,10 +1,10 @@
 # PySceneDetect Requirements for Windows Build
-av==13.1.0
-click==8.1.7
-opencv-python-headless==4.10.0.84
-imageio-ffmpeg==0.5.1
-moviepy==2.1.1
-numpy==2.1.3
+av==14.2.0
+click==8.1.8
+opencv-python-headless==4.11.0.86
+imageio-ffmpeg==0.6.0
+moviepy==2.1.2
+numpy==2.2.3
 platformdirs==4.3.6
 tqdm==4.67.1
 

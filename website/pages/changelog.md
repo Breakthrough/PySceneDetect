@@ -17,8 +17,16 @@ PySceneDetect v0.6.6 introduces new output formats, which improve compatibility 
  - [bugfix] Fix incorrect help entries for short-form arguments which suggested invalid syntax [#493](https://github.com/Breakthrough/PySceneDetect/issues/493)
  - [bugfix] Fix crash when using `split-video` with `-m`/`--mkvmerge` option [#473](https://github.com/Breakthrough/PySceneDetect/issues/473)
  - [bugfix] Fix incorrect default filename template for `split-video` command with `-m`/`--mkvmerge` option
- - [bugfix] Fix inconsistent filenames when using `split_video_mkvmerge()` function in `scenedetect.video_splitter` module
+ - [bugfix] Fix inconsistent filenames when using `split_video_mkvmerge()`
+ - [bugfix] Ensure auto-rotation is always enabled for `VideoStreamCv2` as workaround for (opencv#26795)[https://github.com/opencv/opencv/issues/26795]
  - [general] The `export-html` command is now deprecated, use `save-html` instead
+ - [general] Updates to Windows distributions:
+    - av 13.1.0 -> 14.2.0
+    - click 8.1.7 -> 8.1.8
+    - imageio-ffmpeg 0.5.1 -> 0.6.0
+    - moviepy 2.1.1 -> 2.1.2
+    - numpy 2.1.3 -> 2.2.3
+    - opencv-python 4.10.0.84 -> 4.11.0.86
 
 
 ### PySceneDetect 0.6.5 (November 24, 2024)
