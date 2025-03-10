@@ -252,6 +252,7 @@ def create_help() -> ty.Tuple[str, ty.List[str]]:
     ctx = click.Context(scenedetect, info_name=scenedetect.name)
 
     commands: ty.List[str] = ctx.command.list_commands(ctx)
+    commands = list(filter(lambda command: not ctx.command.hidden, commands))
     # ctx.to_info_dict lacks metavar so we have to use the context directly.
     actions = [
         generate_title("``scenedetect`` 🎬 Command", level=0),
