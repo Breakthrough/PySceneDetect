@@ -800,38 +800,6 @@ Options
 .. program:: scenedetect save-xml
 
 
-``save-xml``
-========================================================================
-
-[IN DEVELOPMENT] Save cuts in XML format.
-
-
-Options
-------------------------------------------------------------------------
-
-
-.. option:: -f NAME, --filename NAME
-
-  Filename format to use.
-
-  Default: ``$VIDEO_NAME.xml``
-
-.. option:: --format TYPE
-
-  Format to export. TYPE must be one of: fcpx, fcp.
-
-  Default: ``XmlFormat.FCPX``
-
-.. option:: -o DIR, --output DIR
-
-  Output directory to save XML file to. Overrides global option :option:`-o/--output <scenedetect -o>`.
-
-
-.. _command-split-video:
-
-.. program:: scenedetect split-video
-
-
 ``split-video``
 ========================================================================
 
