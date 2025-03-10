@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Index &#8212; PySceneDetect 0.6.5.2 documentation</title>
+    <title>Index &#8212; PySceneDetect 0.6.6 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
     <link rel="stylesheet" type="text/css" href="_static/pyscenedetect.css" />
@@ -71,7 +71,14 @@
     --args
 
       <ul>
-        <li><a href="cli.html#cmdoption-scenedetect-split-video-a">scenedetect-split-video command line option</a>
+        <li><a href="cli.html#cmdoption-scenedetect-save-xml-a">scenedetect-save-xml command line option</a>
+</li>
+      </ul></li>
+      <li>
+    --audio
+
+      <ul>
+        <li><a href="cli.html#cmdoption-scenedetect-save-otio-audio">scenedetect-save-otio command line option</a>
 </li>
       </ul></li>
       <li>
@@ -106,7 +113,7 @@
     --copy
 
       <ul>
-        <li><a href="cli.html#cmdoption-scenedetect-split-video-c">scenedetect-split-video command line option</a>
+        <li><a href="cli.html#cmdoption-scenedetect-save-xml-c">scenedetect-save-xml command line option</a>
 </li>
       </ul></li>
       <li>
@@ -162,15 +169,19 @@
     --filename
 
       <ul>
-        <li><a href="cli.html#cmdoption-scenedetect-export-html-f">scenedetect-export-html command line option</a>
-</li>
         <li><a href="cli.html#cmdoption-scenedetect-list-scenes-f">scenedetect-list-scenes command line option</a>
+</li>
+        <li><a href="cli.html#cmdoption-scenedetect-save-edl-f">scenedetect-save-edl command line option</a>
+</li>
+        <li><a href="cli.html#cmdoption-scenedetect-save-html-0">scenedetect-save-html command line option</a>, <a href="cli.html#cmdoption-scenedetect-save-html-f">[1]</a>
 </li>
         <li><a href="cli.html#cmdoption-scenedetect-save-images-f">scenedetect-save-images command line option</a>
 </li>
+        <li><a href="cli.html#cmdoption-scenedetect-save-otio-f">scenedetect-save-otio command line option</a>
+</li>
         <li><a href="cli.html#cmdoption-scenedetect-save-qp-f">scenedetect-save-qp command line option</a>
 </li>
-        <li><a href="cli.html#cmdoption-scenedetect-split-video-f">scenedetect-split-video command line option</a>
+        <li><a href="cli.html#cmdoption-scenedetect-save-xml-f">scenedetect-save-xml command line option</a>
 </li>
       </ul></li>
       <li>
@@ -219,21 +230,21 @@
     --high-quality
 
       <ul>
-        <li><a href="cli.html#cmdoption-scenedetect-split-video-hq">scenedetect-split-video command line option</a>
+        <li><a href="cli.html#cmdoption-scenedetect-save-xml-hq">scenedetect-save-xml command line option</a>
 </li>
       </ul></li>
       <li>
     --image-height
 
       <ul>
-        <li><a href="cli.html#cmdoption-scenedetect-export-html-h">scenedetect-export-html command line option</a>
+        <li><a href="cli.html#cmdoption-scenedetect-save-html-6">scenedetect-save-html command line option</a>, <a href="cli.html#cmdoption-scenedetect-save-html-h">[1]</a>
 </li>
       </ul></li>
       <li>
     --image-width
 
       <ul>
-        <li><a href="cli.html#cmdoption-scenedetect-export-html-w">scenedetect-export-html command line option</a>
+        <li><a href="cli.html#cmdoption-scenedetect-save-html-4">scenedetect-save-html command line option</a>, <a href="cli.html#cmdoption-scenedetect-save-html-w">[1]</a>
 </li>
       </ul></li>
       <li>
@@ -326,14 +337,28 @@
     --mkvmerge
 
       <ul>
-        <li><a href="cli.html#cmdoption-scenedetect-split-video-m">scenedetect-split-video command line option</a>
+        <li><a href="cli.html#cmdoption-scenedetect-save-xml-m">scenedetect-save-xml command line option</a>
+</li>
+      </ul></li>
+      <li>
+    --name
+
+      <ul>
+        <li><a href="cli.html#cmdoption-scenedetect-save-otio-n">scenedetect-save-otio command line option</a>
+</li>
+      </ul></li>
+      <li>
+    --no-audio
+
+      <ul>
+        <li><a href="cli.html#cmdoption-scenedetect-save-otio-no-audio">scenedetect-save-otio command line option</a>
 </li>
       </ul></li>
       <li>
     --no-images
 
       <ul>
-        <li><a href="cli.html#cmdoption-scenedetect-export-html-n">scenedetect-export-html command line option</a>
+        <li><a href="cli.html#cmdoption-scenedetect-save-html-2">scenedetect-save-html command line option</a>, <a href="cli.html#cmdoption-scenedetect-save-html-n">[1]</a>
 </li>
       </ul></li>
       <li>
@@ -358,11 +383,15 @@
 </li>
         <li><a href="cli.html#cmdoption-scenedetect-list-scenes-o">scenedetect-list-scenes command line option</a>
 </li>
+        <li><a href="cli.html#cmdoption-scenedetect-save-edl-o">scenedetect-save-edl command line option</a>
+</li>
         <li><a href="cli.html#cmdoption-scenedetect-save-images-o">scenedetect-save-images command line option</a>
+</li>
+        <li><a href="cli.html#cmdoption-scenedetect-save-otio-o">scenedetect-save-otio command line option</a>
 </li>
         <li><a href="cli.html#cmdoption-scenedetect-save-qp-o">scenedetect-save-qp command line option</a>
 </li>
-        <li><a href="cli.html#cmdoption-scenedetect-split-video-o">scenedetect-split-video command line option</a>
+        <li><a href="cli.html#cmdoption-scenedetect-save-xml-o">scenedetect-save-xml command line option</a>
 </li>
       </ul></li>
       <li>
@@ -376,7 +405,7 @@
     --preset
 
       <ul>
-        <li><a href="cli.html#cmdoption-scenedetect-split-video-p">scenedetect-split-video command line option</a>
+        <li><a href="cli.html#cmdoption-scenedetect-save-xml-p">scenedetect-save-xml command line option</a>
 </li>
       </ul></li>
       <li>
@@ -394,14 +423,21 @@
 </li>
         <li><a href="cli.html#cmdoption-scenedetect-list-scenes-q">scenedetect-list-scenes command line option</a>
 </li>
-        <li><a href="cli.html#cmdoption-scenedetect-split-video-q">scenedetect-split-video command line option</a>
+        <li><a href="cli.html#cmdoption-scenedetect-save-xml-q">scenedetect-save-xml command line option</a>
 </li>
       </ul></li>
       <li>
     --rate-factor
 
       <ul>
-        <li><a href="cli.html#cmdoption-scenedetect-split-video-crf">scenedetect-split-video command line option</a>
+        <li><a href="cli.html#cmdoption-scenedetect-save-xml-crf">scenedetect-save-xml command line option</a>
+</li>
+      </ul></li>
+      <li>
+    --reel
+
+      <ul>
+        <li><a href="cli.html#cmdoption-scenedetect-save-edl-r">scenedetect-save-edl command line option</a>
 </li>
       </ul></li>
       <li>
@@ -415,7 +451,7 @@
     --show
 
       <ul>
-        <li><a href="cli.html#cmdoption-scenedetect-export-html-s">scenedetect-export-html command line option</a>
+        <li><a href="cli.html#cmdoption-scenedetect-save-html-8">scenedetect-save-html command line option</a>, <a href="cli.html#cmdoption-scenedetect-save-html-s">[1]</a>
 </li>
       </ul></li>
       <li>
@@ -471,6 +507,13 @@
 </li>
       </ul></li>
       <li>
+    --title
+
+      <ul>
+        <li><a href="cli.html#cmdoption-scenedetect-save-edl-t">scenedetect-save-edl command line option</a>
+</li>
+      </ul></li>
+      <li>
     --verbosity
 
       <ul>
@@ -504,7 +547,7 @@
     -a
 
       <ul>
-        <li><a href="cli.html#cmdoption-scenedetect-split-video-a">scenedetect-split-video command line option</a>
+        <li><a href="cli.html#cmdoption-scenedetect-save-xml-a">scenedetect-save-xml command line option</a>
 </li>
       </ul></li>
       <li>
@@ -528,14 +571,14 @@
 </li>
         <li><a href="cli.html#cmdoption-scenedetect-save-images-c">scenedetect-save-images command line option</a>
 </li>
-        <li><a href="cli.html#cmdoption-scenedetect-split-video-c">scenedetect-split-video command line option</a>
+        <li><a href="cli.html#cmdoption-scenedetect-save-xml-c">scenedetect-save-xml command line option</a>
 </li>
       </ul></li>
       <li>
     -crf
 
       <ul>
-        <li><a href="cli.html#cmdoption-scenedetect-split-video-crf">scenedetect-split-video command line option</a>
+        <li><a href="cli.html#cmdoption-scenedetect-save-xml-crf">scenedetect-save-xml command line option</a>
 </li>
       </ul></li>
       <li>
@@ -570,15 +613,19 @@
 </li>
         <li><a href="cli.html#cmdoption-scenedetect-detect-threshold-f">scenedetect-detect-threshold command line option</a>
 </li>
-        <li><a href="cli.html#cmdoption-scenedetect-export-html-f">scenedetect-export-html command line option</a>
-</li>
         <li><a href="cli.html#cmdoption-scenedetect-list-scenes-f">scenedetect-list-scenes command line option</a>
+</li>
+        <li><a href="cli.html#cmdoption-scenedetect-save-edl-f">scenedetect-save-edl command line option</a>
+</li>
+        <li><a href="cli.html#cmdoption-scenedetect-save-html-0">scenedetect-save-html command line option</a>, <a href="cli.html#cmdoption-scenedetect-save-html-f">[1]</a>
 </li>
         <li><a href="cli.html#cmdoption-scenedetect-save-images-f">scenedetect-save-images command line option</a>
 </li>
+        <li><a href="cli.html#cmdoption-scenedetect-save-otio-f">scenedetect-save-otio command line option</a>
+</li>
         <li><a href="cli.html#cmdoption-scenedetect-save-qp-f">scenedetect-save-qp command line option</a>
 </li>
-        <li><a href="cli.html#cmdoption-scenedetect-split-video-f">scenedetect-split-video command line option</a>
+        <li><a href="cli.html#cmdoption-scenedetect-save-xml-f">scenedetect-save-xml command line option</a>
 </li>
       </ul></li>
       <li>
@@ -599,14 +646,14 @@
     -h
 
       <ul>
-        <li><a href="cli.html#cmdoption-scenedetect-export-html-h">scenedetect-export-html command line option</a>
+        <li><a href="cli.html#cmdoption-scenedetect-save-html-6">scenedetect-save-html command line option</a>, <a href="cli.html#cmdoption-scenedetect-save-html-h">[1]</a>
 </li>
       </ul></li>
       <li>
     -hq
 
       <ul>
-        <li><a href="cli.html#cmdoption-scenedetect-split-video-hq">scenedetect-split-video command line option</a>
+        <li><a href="cli.html#cmdoption-scenedetect-save-xml-hq">scenedetect-save-xml command line option</a>
 </li>
       </ul></li>
       <li>
@@ -667,18 +714,20 @@
 </li>
         <li><a href="cli.html#cmdoption-scenedetect-save-images-m">scenedetect-save-images command line option</a>
 </li>
-        <li><a href="cli.html#cmdoption-scenedetect-split-video-m">scenedetect-split-video command line option</a>
+        <li><a href="cli.html#cmdoption-scenedetect-save-xml-m">scenedetect-save-xml command line option</a>
 </li>
       </ul></li>
       <li>
     -n
 
       <ul>
-        <li><a href="cli.html#cmdoption-scenedetect-export-html-n">scenedetect-export-html command line option</a>
-</li>
         <li><a href="cli.html#cmdoption-scenedetect-list-scenes-n">scenedetect-list-scenes command line option</a>
 </li>
+        <li><a href="cli.html#cmdoption-scenedetect-save-html-2">scenedetect-save-html command line option</a>, <a href="cli.html#cmdoption-scenedetect-save-html-n">[1]</a>
+</li>
         <li><a href="cli.html#cmdoption-scenedetect-save-images-n">scenedetect-save-images command line option</a>
+</li>
+        <li><a href="cli.html#cmdoption-scenedetect-save-otio-n">scenedetect-save-otio command line option</a>
 </li>
       </ul></li>
       <li>
@@ -689,11 +738,15 @@
 </li>
         <li><a href="cli.html#cmdoption-scenedetect-list-scenes-o">scenedetect-list-scenes command line option</a>
 </li>
+        <li><a href="cli.html#cmdoption-scenedetect-save-edl-o">scenedetect-save-edl command line option</a>
+</li>
         <li><a href="cli.html#cmdoption-scenedetect-save-images-o">scenedetect-save-images command line option</a>
+</li>
+        <li><a href="cli.html#cmdoption-scenedetect-save-otio-o">scenedetect-save-otio command line option</a>
 </li>
         <li><a href="cli.html#cmdoption-scenedetect-save-qp-o">scenedetect-save-qp command line option</a>
 </li>
-        <li><a href="cli.html#cmdoption-scenedetect-split-video-o">scenedetect-split-video command line option</a>
+        <li><a href="cli.html#cmdoption-scenedetect-save-xml-o">scenedetect-save-xml command line option</a>
 </li>
       </ul></li>
       <li>
@@ -702,7 +755,7 @@
       <ul>
         <li><a href="cli.html#cmdoption-scenedetect-save-images-p">scenedetect-save-images command line option</a>
 </li>
-        <li><a href="cli.html#cmdoption-scenedetect-split-video-p">scenedetect-split-video command line option</a>
+        <li><a href="cli.html#cmdoption-scenedetect-save-xml-p">scenedetect-save-xml command line option</a>
 </li>
       </ul></li>
       <li>
@@ -715,7 +768,14 @@
 </li>
         <li><a href="cli.html#cmdoption-scenedetect-save-images-q">scenedetect-save-images command line option</a>
 </li>
-        <li><a href="cli.html#cmdoption-scenedetect-split-video-q">scenedetect-split-video command line option</a>
+        <li><a href="cli.html#cmdoption-scenedetect-save-xml-q">scenedetect-save-xml command line option</a>
+</li>
+      </ul></li>
+      <li>
+    -r
+
+      <ul>
+        <li><a href="cli.html#cmdoption-scenedetect-save-edl-r">scenedetect-save-edl command line option</a>
 </li>
       </ul></li>
       <li>
@@ -726,9 +786,9 @@
 </li>
         <li><a href="cli.html#cmdoption-scenedetect-detect-hash-s">scenedetect-detect-hash command line option</a>
 </li>
-        <li><a href="cli.html#cmdoption-scenedetect-export-html-s">scenedetect-export-html command line option</a>
-</li>
         <li><a href="cli.html#cmdoption-scenedetect-list-scenes-s">scenedetect-list-scenes command line option</a>
+</li>
+        <li><a href="cli.html#cmdoption-scenedetect-save-html-8">scenedetect-save-html command line option</a>, <a href="cli.html#cmdoption-scenedetect-save-html-s">[1]</a>
 </li>
         <li><a href="cli.html#cmdoption-scenedetect-save-images-s">scenedetect-save-images command line option</a>
 </li>
@@ -748,6 +808,8 @@
         <li><a href="cli.html#cmdoption-scenedetect-detect-hist-t">scenedetect-detect-hist command line option</a>
 </li>
         <li><a href="cli.html#cmdoption-scenedetect-detect-threshold-t">scenedetect-detect-threshold command line option</a>
+</li>
+        <li><a href="cli.html#cmdoption-scenedetect-save-edl-t">scenedetect-save-edl command line option</a>
 </li>
       </ul></li>
       <li>
@@ -772,7 +834,7 @@
 </li>
         <li><a href="cli.html#cmdoption-scenedetect-detect-content-w">scenedetect-detect-content command line option</a>
 </li>
-        <li><a href="cli.html#cmdoption-scenedetect-export-html-w">scenedetect-export-html command line option</a>
+        <li><a href="cli.html#cmdoption-scenedetect-save-html-4">scenedetect-save-html command line option</a>, <a href="cli.html#cmdoption-scenedetect-save-html-w">[1]</a>
 </li>
         <li><a href="cli.html#cmdoption-scenedetect-save-images-w">scenedetect-save-images command line option</a>
 </li>
@@ -1514,31 +1576,6 @@
 </li>
       </ul></li>
       <li>
-    scenedetect-export-html command line option
-
-      <ul>
-        <li><a href="cli.html#cmdoption-scenedetect-export-html-f">--filename</a>
-</li>
-        <li><a href="cli.html#cmdoption-scenedetect-export-html-h">--image-height</a>
-</li>
-        <li><a href="cli.html#cmdoption-scenedetect-export-html-w">--image-width</a>
-</li>
-        <li><a href="cli.html#cmdoption-scenedetect-export-html-n">--no-images</a>
-</li>
-        <li><a href="cli.html#cmdoption-scenedetect-export-html-s">--show</a>
-</li>
-        <li><a href="cli.html#cmdoption-scenedetect-export-html-f">-f</a>
-</li>
-        <li><a href="cli.html#cmdoption-scenedetect-export-html-h">-h</a>
-</li>
-        <li><a href="cli.html#cmdoption-scenedetect-export-html-n">-n</a>
-</li>
-        <li><a href="cli.html#cmdoption-scenedetect-export-html-s">-s</a>
-</li>
-        <li><a href="cli.html#cmdoption-scenedetect-export-html-w">-w</a>
-</li>
-      </ul></li>
-      <li>
     scenedetect-list-scenes command line option
 
       <ul>
@@ -1574,6 +1611,52 @@
         <li><a href="cli.html#cmdoption-scenedetect-load-scenes-c">-c</a>
 </li>
         <li><a href="cli.html#cmdoption-scenedetect-load-scenes-i">-i</a>
+</li>
+      </ul></li>
+      <li>
+    scenedetect-save-edl command line option
+
+      <ul>
+        <li><a href="cli.html#cmdoption-scenedetect-save-edl-f">--filename</a>
+</li>
+        <li><a href="cli.html#cmdoption-scenedetect-save-edl-o">--output</a>
+</li>
+        <li><a href="cli.html#cmdoption-scenedetect-save-edl-r">--reel</a>
+</li>
+        <li><a href="cli.html#cmdoption-scenedetect-save-edl-t">--title</a>
+</li>
+        <li><a href="cli.html#cmdoption-scenedetect-save-edl-f">-f</a>
+</li>
+        <li><a href="cli.html#cmdoption-scenedetect-save-edl-o">-o</a>
+</li>
+        <li><a href="cli.html#cmdoption-scenedetect-save-edl-r">-r</a>
+</li>
+        <li><a href="cli.html#cmdoption-scenedetect-save-edl-t">-t</a>
+</li>
+      </ul></li>
+      <li>
+    scenedetect-save-html command line option
+
+      <ul>
+        <li><a href="cli.html#cmdoption-scenedetect-save-html-0">--filename</a>, <a href="cli.html#cmdoption-scenedetect-save-html-f">[1]</a>
+</li>
+        <li><a href="cli.html#cmdoption-scenedetect-save-html-6">--image-height</a>, <a href="cli.html#cmdoption-scenedetect-save-html-h">[1]</a>
+</li>
+        <li><a href="cli.html#cmdoption-scenedetect-save-html-4">--image-width</a>, <a href="cli.html#cmdoption-scenedetect-save-html-w">[1]</a>
+</li>
+        <li><a href="cli.html#cmdoption-scenedetect-save-html-2">--no-images</a>, <a href="cli.html#cmdoption-scenedetect-save-html-n">[1]</a>
+</li>
+        <li><a href="cli.html#cmdoption-scenedetect-save-html-8">--show</a>, <a href="cli.html#cmdoption-scenedetect-save-html-s">[1]</a>
+</li>
+        <li><a href="cli.html#cmdoption-scenedetect-save-html-0">-f</a>, <a href="cli.html#cmdoption-scenedetect-save-html-f">[1]</a>
+</li>
+        <li><a href="cli.html#cmdoption-scenedetect-save-html-6">-h</a>, <a href="cli.html#cmdoption-scenedetect-save-html-h">[1]</a>
+</li>
+        <li><a href="cli.html#cmdoption-scenedetect-save-html-2">-n</a>, <a href="cli.html#cmdoption-scenedetect-save-html-n">[1]</a>
+</li>
+        <li><a href="cli.html#cmdoption-scenedetect-save-html-8">-s</a>, <a href="cli.html#cmdoption-scenedetect-save-html-s">[1]</a>
+</li>
+        <li><a href="cli.html#cmdoption-scenedetect-save-html-4">-w</a>, <a href="cli.html#cmdoption-scenedetect-save-html-w">[1]</a>
 </li>
       </ul></li>
   </ul></td>
@@ -1632,6 +1715,27 @@
 </li>
       </ul></li>
       <li>
+    scenedetect-save-otio command line option
+
+      <ul>
+        <li><a href="cli.html#cmdoption-scenedetect-save-otio-audio">--audio</a>
+</li>
+        <li><a href="cli.html#cmdoption-scenedetect-save-otio-f">--filename</a>
+</li>
+        <li><a href="cli.html#cmdoption-scenedetect-save-otio-n">--name</a>
+</li>
+        <li><a href="cli.html#cmdoption-scenedetect-save-otio-no-audio">--no-audio</a>
+</li>
+        <li><a href="cli.html#cmdoption-scenedetect-save-otio-o">--output</a>
+</li>
+        <li><a href="cli.html#cmdoption-scenedetect-save-otio-f">-f</a>
+</li>
+        <li><a href="cli.html#cmdoption-scenedetect-save-otio-n">-n</a>
+</li>
+        <li><a href="cli.html#cmdoption-scenedetect-save-otio-o">-o</a>
+</li>
+      </ul></li>
+      <li>
     scenedetect-save-qp command line option
 
       <ul>
@@ -1649,44 +1753,44 @@
 </li>
       </ul></li>
       <li>
-    scenedetect-split-video command line option
+    scenedetect-save-xml command line option
 
       <ul>
-        <li><a href="cli.html#cmdoption-scenedetect-split-video-a">--args</a>
+        <li><a href="cli.html#cmdoption-scenedetect-save-xml-a">--args</a>
 </li>
-        <li><a href="cli.html#cmdoption-scenedetect-split-video-c">--copy</a>
+        <li><a href="cli.html#cmdoption-scenedetect-save-xml-c">--copy</a>
 </li>
-        <li><a href="cli.html#cmdoption-scenedetect-split-video-f">--filename</a>
+        <li><a href="cli.html#cmdoption-scenedetect-save-xml-f">--filename</a>
 </li>
-        <li><a href="cli.html#cmdoption-scenedetect-split-video-hq">--high-quality</a>
+        <li><a href="cli.html#cmdoption-scenedetect-save-xml-hq">--high-quality</a>
 </li>
-        <li><a href="cli.html#cmdoption-scenedetect-split-video-m">--mkvmerge</a>
+        <li><a href="cli.html#cmdoption-scenedetect-save-xml-m">--mkvmerge</a>
 </li>
-        <li><a href="cli.html#cmdoption-scenedetect-split-video-o">--output</a>
+        <li><a href="cli.html#cmdoption-scenedetect-save-xml-o">--output</a>
 </li>
-        <li><a href="cli.html#cmdoption-scenedetect-split-video-p">--preset</a>
+        <li><a href="cli.html#cmdoption-scenedetect-save-xml-p">--preset</a>
 </li>
-        <li><a href="cli.html#cmdoption-scenedetect-split-video-q">--quiet</a>
+        <li><a href="cli.html#cmdoption-scenedetect-save-xml-q">--quiet</a>
 </li>
-        <li><a href="cli.html#cmdoption-scenedetect-split-video-crf">--rate-factor</a>
+        <li><a href="cli.html#cmdoption-scenedetect-save-xml-crf">--rate-factor</a>
 </li>
-        <li><a href="cli.html#cmdoption-scenedetect-split-video-a">-a</a>
+        <li><a href="cli.html#cmdoption-scenedetect-save-xml-a">-a</a>
 </li>
-        <li><a href="cli.html#cmdoption-scenedetect-split-video-c">-c</a>
+        <li><a href="cli.html#cmdoption-scenedetect-save-xml-c">-c</a>
 </li>
-        <li><a href="cli.html#cmdoption-scenedetect-split-video-crf">-crf</a>
+        <li><a href="cli.html#cmdoption-scenedetect-save-xml-crf">-crf</a>
 </li>
-        <li><a href="cli.html#cmdoption-scenedetect-split-video-f">-f</a>
+        <li><a href="cli.html#cmdoption-scenedetect-save-xml-f">-f</a>
 </li>
-        <li><a href="cli.html#cmdoption-scenedetect-split-video-hq">-hq</a>
+        <li><a href="cli.html#cmdoption-scenedetect-save-xml-hq">-hq</a>
 </li>
-        <li><a href="cli.html#cmdoption-scenedetect-split-video-m">-m</a>
+        <li><a href="cli.html#cmdoption-scenedetect-save-xml-m">-m</a>
 </li>
-        <li><a href="cli.html#cmdoption-scenedetect-split-video-o">-o</a>
+        <li><a href="cli.html#cmdoption-scenedetect-save-xml-o">-o</a>
 </li>
-        <li><a href="cli.html#cmdoption-scenedetect-split-video-p">-p</a>
+        <li><a href="cli.html#cmdoption-scenedetect-save-xml-p">-p</a>
 </li>
-        <li><a href="cli.html#cmdoption-scenedetect-split-video-q">-q</a>
+        <li><a href="cli.html#cmdoption-scenedetect-save-xml-q">-q</a>
 </li>
       </ul></li>
       <li>
@@ -1966,7 +2070,7 @@
 
 
 
-<p class="blurb">Version: [0.6.5.2]</p>
+<p class="blurb">Version: [0.6.6]</p>
 
 
 

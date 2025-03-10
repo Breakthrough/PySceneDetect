@@ -67,7 +67,7 @@ Options
 
 .. option:: -m TIMECODE, --min-scene-len TIMECODE
 
-  Minimum length of any scene. TIMECODE can be specified as number of frames (:option:`-m 10 <-m>`), time in seconds (:option:`-m 2.5 <-m>`), or timecode (:option:`-m 00:02:53.633 <-m>`).
+  Minimum length of any scene. TIMECODE can be specified as number of frames (-m 10), time in seconds (-m 2.5), or timecode (-m 00:02:53.633).
 
   Default: ``0.6s``
 
@@ -81,7 +81,7 @@ Options
 
 .. option:: -b BACKEND, --backend BACKEND
 
-  Backend to use for video input. Backend options can be set using a config file (:option:`-c/--config <-c>`). [available: opencv, pyav, moviepy]
+  Backend to use for video input. Backend options can be set using a config file (:option:`-c/--config <-c>`). [available: opencv, pyav]
 
   Default: ``opencv``
 
@@ -91,11 +91,11 @@ Options
 
 .. option:: -d N, --downscale N
 
-  Integer factor to downscale video by before processing. If unset, value is selected based on resolution. Set :option:`-d 1 <-d>` to disable downscaling.
+  Integer factor to downscale video by before processing. If unset, value is selected based on resolution. Set -d 1 to disable downscaling.
 
 .. option:: -fs N, --frame-skip N
 
-  Skip N frames during processing. Reduces processing speed at expense of accuracy. :option:`-fs 1 <-fs>` skips every other frame processing 50% of the video, :option:`-fs 2 <-fs>` processes 33% of the video frames, :option:`-fs 3 <-fs>` processes 25%, etc...
+  Skip N frames during processing. Reduces processing speed at expense of accuracy. -fs 1 skips every other frame processing 50% of the video, -fs 2 processes 33% of the video frames, -fs 3 processes 25%, etc...
 
   Default: ``0``
 
@@ -208,7 +208,7 @@ Options
 
 .. option:: -m TIMECODE, --min-scene-len TIMECODE
 
-  Minimum length of any scene. Overrides global option :option:`-m/--min-scene-len <scenedetect -m>`. TIMECODE can be specified in frames (:option:`-m 100 <-m>`), in seconds with `s` suffix (:option:`-m 3.5s <-m>`), or timecode (:option:`-m 00:01:52.778 <-m>`).
+  Minimum length of any scene. Overrides global option :option:`-m/--min-scene-len <scenedetect -m>`. TIMECODE can be specified in frames (-m 100), in seconds with `s` suffix (-m 3.5s), or timecode (-m 00:01:52.778).
 
 
 .. _command-detect-content:
@@ -424,7 +424,7 @@ Options
 
 .. option:: -m TIMECODE, --min-scene-len TIMECODE
 
-  Minimum length of any scene. Overrides global option :option:`-m/--min-scene-len <scenedetect -m>`. TIMECODE can be specified in frames (:option:`-m 100 <-m>`), in seconds with `s` suffix (:option:`-m 3.5s <-m>`), or timecode (:option:`-m 00:01:52.778 <-m>`).
+  Minimum length of any scene. Overrides global option :option:`-m/--min-scene-len <scenedetect -m>`. TIMECODE can be specified in frames (-m 100), in seconds with `s` suffix (-m 3.5s), or timecode (-m 00:01:52.778).
 
 
 ************************************************************************
@@ -432,17 +432,17 @@ Commands
 ************************************************************************
 
 
-.. _command-export-html:
+.. _command-save-html:
 
-.. program:: scenedetect export-html
+.. program:: scenedetect save-html
 
 
-``export-html``
+``save-html``
 ========================================================================
 
-Export scene list to HTML file.
+Save scene list to HTML file.
 
-To customize image generation, specify the :ref:`save-images <command-save-images>` command before :ref:`export-html <command-export-html>`. This command always uses the result of the preceeding :ref:`save-images <command-save-images>` command, or runs it with the default config values unless ``--no-images`` is set.
+To customize image generation, specify the :ref:`save-images <command-save-images>` command before :ref:`save-html <command-save-html>`. This command always uses the result of the preceeding :ref:`save-images <command-save-images>` command, or runs it with the default config values unless ``--no-images`` is set.
 
 
 Options
@@ -506,7 +506,7 @@ Options
 
 .. option:: -f NAME, --filename NAME
 
-  Filename format to use for the scene list CSV file. You can use the $VIDEO_NAME macro in the file name. Note that you may have to wrap the name using single quotes or use escape characters (e.g. :option:`-f \$VIDEO_NAME-Scenes.csv <-f>`).
+  Filename format to use for the scene list CSV file. You can use the $VIDEO_NAME macro in the file name. Note that you may have to wrap the name using single quotes or use escape characters (e.g. -f \$VIDEO_NAME-Scenes.csv).
 
   Default: ``$VIDEO_NAME-Scenes.csv``
 
@@ -558,6 +558,84 @@ Options
   Default: ``"Start Frame"``
 
 
+.. _command-save-edl:
+
+.. program:: scenedetect save-edl
+
+
+``save-edl``
+========================================================================
+
+Save cuts in EDL format (CMX 3600).
+
+
+Options
+------------------------------------------------------------------------
+
+
+.. option:: -f NAME, --filename NAME
+
+  Filename format to use.
+
+  Default: ``$VIDEO_NAME.edl``
+
+.. option:: -t NAME, --title NAME
+
+  Title format to use.
+
+  Default: ``$VIDEO_NAME``
+
+.. option:: -r REEL, --reel REEL
+
+  Reel name to use.
+
+  Default: ``AX``
+
+.. option:: -o DIR, --output DIR
+
+  Output directory to save EDL file to. Overrides global option :option:`-o/--output <scenedetect -o>`.
+
+
+.. _command-save-html:
+
+.. program:: scenedetect save-html
+
+
+``save-html``
+========================================================================
+
+Save scene list to HTML file.
+
+To customize image generation, specify the :ref:`save-images <command-save-images>` command before :ref:`save-html <command-save-html>`. This command always uses the result of the preceeding :ref:`save-images <command-save-images>` command, or runs it with the default config values unless ``--no-images`` is set.
+
+
+Options
+------------------------------------------------------------------------
+
+
+.. option:: -f NAME, --filename NAME
+
+  Filename format to use for the scene list HTML file. You can use the $VIDEO_NAME macro in the file name. Note that you may have to wrap the format name using single quotes.
+
+  Default: ``$VIDEO_NAME-Scenes.html``
+
+.. option:: -n, --no-images
+
+  Do not include images with the result.
+
+.. option:: -w pixels, --image-width pixels
+
+  Width in pixels of the images in the resulting HTML table.
+
+.. option:: -h pixels, --image-height pixels
+
+  Height in pixels of the images in the resulting HTML table.
+
+.. option:: -s, --show
+
+  Automatically open resulting HTML when processing is complete.
+
+
 .. _command-save-images:
 
 .. program:: scenedetect save-images
@@ -566,7 +644,7 @@ Options
 ``save-images``
 ========================================================================
 
-Extract images from each detected scene.
+Save images from each detected scene.
 
 
 Examples
@@ -590,13 +668,13 @@ Options
 
 .. option:: -f NAME, --filename NAME
 
-  Filename format *without* extension to use when saving images. You can use the $VIDEO_NAME, $SCENE_NUMBER, $IMAGE_NUMBER, and $FRAME_NUMBER macros in the file name. You may have to use escape characters (e.g. :option:`-f \$SCENE_NUMBER-Image-\$IMAGE_NUMBER <-f>`) or single quotes.
+  Filename format *without* extension to use when saving images. You can use the $VIDEO_NAME, $SCENE_NUMBER, $IMAGE_NUMBER, and $FRAME_NUMBER macros in the file name. You may have to use escape characters (e.g. -f \$SCENE_NUMBER-Image-\$IMAGE_NUMBER) or single quotes.
 
   Default: ``$VIDEO_NAME-Scene-$SCENE_NUMBER-$IMAGE_NUMBER``
 
 .. option:: -n N, --num-images N
 
-  Number of images to generate per scene. Will always include start/end frame, unless :option:`-n 1 <-n>`, in which case the image will be the frame at the mid-point of the scene.
+  Number of images to generate per scene. Will always include start/end frame, unless -n 1, in which case the image will be the frame at the mid-point of the scene.
 
   Default: ``3``
 
@@ -643,6 +721,48 @@ Options
   Width (pixels) of images.
 
 
+.. _command-save-otio:
+
+.. program:: scenedetect save-otio
+
+
+``save-otio``
+========================================================================
+
+Save cuts as an OTIO timeline.
+
+Uses the Timeline.1 schema. OTIO (OpenTimelineIO) timelines can be imported by many video editors.
+
+
+Options
+------------------------------------------------------------------------
+
+
+.. option:: -f NAME, --filename NAME
+
+  Filename format to use.
+
+  Default: ``$VIDEO_NAME.otio``
+
+.. option:: -n NAME, --name NAME
+
+  Name of timeline to use.
+
+  Default: ``"$VIDEO_NAME (PySceneDetect)"``
+
+.. option:: -o DIR, --output DIR
+
+  Output directory to save OTIO file to. Overrides global option :option:`-o/--output <scenedetect -o>`.
+
+.. option:: --audio
+
+  Include audio track (default).
+
+.. option:: --no-audio
+
+  Exclude audio track.
+
+
 .. _command-save-qp:
 
 .. program:: scenedetect save-qp
@@ -675,9 +795,9 @@ Options
   Disable shifting frame numbers by start time.
 
 
-.. _command-split-video:
+.. _command-save-xml:
 
-.. program:: scenedetect split-video
+.. program:: scenedetect save-xml
 
 
 ``split-video``
@@ -713,7 +833,7 @@ Options
 
 .. option:: -f NAME, --filename NAME
 
-  File name format to use when saving videos, with or without extension. You can use $VIDEO_NAME and $SCENE_NUMBER macros in the filename. You may have to wrap the format in single quotes or use escape characters to avoid variable expansion (e.g. :option:`-f \$VIDEO_NAME-Scene-\$SCENE_NUMBER <-f>`).
+  File name format to use when saving videos, with or without extension. You can use $VIDEO_NAME and $SCENE_NUMBER macros in the filename. You may have to wrap the format in single quotes or use escape characters to avoid variable expansion (e.g. -f \$VIDEO_NAME-Scene-\$SCENE_NUMBER).
 
   Default: ``$VIDEO_NAME-Scene-$SCENE_NUMBER``
 
