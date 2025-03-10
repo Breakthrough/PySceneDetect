@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Configuration File &#8212; PySceneDetect 0.6.5.2 documentation</title>
+    <title>Configuration File &#8212; PySceneDetect 0.6.6 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
     <link rel="stylesheet" type="text/css" href="../_static/pyscenedetect.css" />
@@ -424,6 +424,9 @@
 <span class="c1"># Name to use for the OTIO timeline. Can use $VIDEO_NAME macro.</span>
 <span class="c1">#title = $VIDEO_NAME (PySceneDetect)</span>
 
+<span class="c1"># Include audio track (yes/no).</span>
+<span class="c1">#audio = yes</span>
+
 
 <span class="k">[save-qp]</span>
 
@@ -435,20 +438,6 @@
 
 <span class="c1"># Disable shifting frame numbers by start time (yes/no).</span>
 <span class="c1">#disable-shift = no</span>
-
-
-<span class="k">[save-xml]</span>
-
-<span class="c1"># Filename format of XML file. Can use $VIDEO_NAME macro.</span>
-<span class="c1">#filename = $VIDEO_NAME.xml</span>
-
-<span class="c1"># Format of the XML file. Must be one of:</span>
-<span class="c1">#  - fcpx:  Final Cut Pro X (default)</span>
-<span class="c1">#  - fcp:   Final Cut Pro 7</span>
-<span class="c1">#format = fcpx</span>
-
-<span class="c1"># Folder to output XML file to. Overrides [global] output option.</span>
-<span class="c1">#output = /usr/tmp/images</span>
 
 
 <span class="c1">#</span>
@@ -508,7 +497,7 @@
 
 
 
-<p class="blurb">Version: [0.6.5.2]</p>
+<p class="blurb">Version: [0.6.6]</p>
 
 
 
