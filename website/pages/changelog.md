@@ -27,6 +27,7 @@ PySceneDetect v0.6.6 introduces new output formats, which improve compatibility 
     - moviepy 2.1.1 -> 2.1.2
     - numpy 2.1.3 -> 2.2.3
     - opencv-python 4.10.0.84 -> 4.11.0.86
+ - [general] Windows download URLs for standalone ZIP distribution no longer have `portable` suffix
 
 
 ### PySceneDetect 0.6.5 (November 24, 2024)
