@@ -40,13 +40,11 @@ import typing as ty
 from dataclasses import dataclass
 from pathlib import Path
 
+from scenedetect.common import TimecodePair
 from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.platform import CommandTooLong, Template, get_ffmpeg_path, invoke_command, tqdm
 
 logger = logging.getLogger("pyscenedetect")
-
-TimecodePair = ty.Tuple[FrameTimecode, FrameTimecode]
-"""Named type for pairs of timecodes, which typically represents the start/end of a scene."""
 
 COMMAND_TOO_LONG_STRING = """
 Cannot split video due to too many scenes (resulting command

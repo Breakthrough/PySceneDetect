@@ -100,6 +100,7 @@ from scenedetect._thirdparty.simpletable import (
     SimpleTableImage,
     SimpleTableRow,
 )
+from scenedetect.common import CropRegion, CutList, SceneList
 from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.platform import get_and_create_path, get_cv2_imwrite_params, tqdm
 from scenedetect.scene_detector import SceneDetector, SparseSceneDetector
@@ -107,17 +108,6 @@ from scenedetect.stats_manager import StatsManager
 from scenedetect.video_stream import VideoStream
 
 logger = logging.getLogger("pyscenedetect")
-
-SceneList = ty.List[ty.Tuple[FrameTimecode, FrameTimecode]]
-"""Type hint for a list of scenes in the form (start time, end time)."""
-
-CutList = ty.List[FrameTimecode]
-"""Type hint for a list of cuts, where each timecode represents the first frame of a new shot."""
-
-CropRegion = ty.Tuple[int, int, int, int]
-"""Type hint for rectangle of the form X0 Y0 X1 Y1 for cropping frames. Coordinates are relative
-to source frame without downscaling.
-"""
 
 # TODO: This value can and should be tuned for performance improvements as much as possible,
 # until accuracy falls, on a large enough dataset. This has yet to be done, but the current

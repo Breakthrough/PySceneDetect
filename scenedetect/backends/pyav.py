@@ -17,9 +17,9 @@ from logging import getLogger
 import av
 import numpy as np
 
+from scenedetect.common import Timecode
 from scenedetect.frame_timecode import MAX_FPS_DELTA, FrameTimecode
 from scenedetect.platform import get_file_name
-from scenedetect.timecode import Timecode
 from scenedetect.video_stream import FrameRateUnavailable, VideoFrame, VideoOpenFailure, VideoStream
 
 logger = getLogger("pyscenedetect")

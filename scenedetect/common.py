@@ -9,17 +9,38 @@
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
-"""``scenedetect.timecode`` Module
+"""``scenedetect.common`` Module
 
-This module contains types and functions for handling video timecodes, including parsing user input
-and timecode format conversion.
-"""
+This module contains common types and functions used throughout PySceneDetect."""
 
+import typing as ty
 from dataclasses import dataclass
 from fractions import Fraction
 
+# TODO(v0.7): We should move frame_timecode into this file.
+from scenedetect.frame_timecode import FrameTimecode
 
-# TODO(@Breakthrough): Add conversion from Timecode -> FrameTimecode for backwards compatibility.
+##
+## Type Aliases
+##
+
+SceneList = ty.List[ty.Tuple[FrameTimecode, FrameTimecode]]
+"""Type hint for a list of scenes in the form (start time, end time)."""
+
+CutList = ty.List[FrameTimecode]
+"""Type hint for a list of cuts, where each timecode represents the first frame of a new shot."""
+
+CropRegion = ty.Tuple[int, int, int, int]
+"""Type hint for rectangle of the form X0 Y0 X1 Y1 for cropping frames. Coordinates are relative
+to source frame without downscaling.
+"""
+
+TimecodePair = ty.Tuple[FrameTimecode, FrameTimecode]
+"""Named type for pairs of timecodes, which typically represents the start/end of a scene."""
+
+
+# TODO(@Breakthrough): Figure out interop with FrameTimecode. We can probably just store this inside
+# of FrameTimecode.
 # TODO(@Breakthrough): How should we deal with frame numbers? We might need to detect if a video is
 # VFR or not, and if so, either omit them or always start them from 0 regardless of the start seek.
 # With PyAV we can probably assume the video is VFR if the guessed rate of the stream differs
@@ -33,8 +54,6 @@ from fractions import Fraction
 #     This is probably sufficient, since we could just use 1ms as a timebase.
 #   - MoviePy: Assumes fixed framerate and doesn't include timing information. Fixing this is
 #     probably not feasible, so we should make sure the docs warn users about this.
-#
-#
 @dataclass
 class Timecode:
     """Timing information associated with a given frame."""
