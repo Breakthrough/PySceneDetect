@@ -16,8 +16,8 @@ the input should support seeking, but does not necessarily have to be a video. F
 image sequences or AviSynth scripts are supported as inputs.
 """
 
+import typing as ty
 from logging import getLogger
-from typing import AnyStr, Optional, Tuple, Union
 
 import cv2
 import numpy as np
@@ -34,7 +34,9 @@ logger = getLogger("pyscenedetect")
 class VideoStreamMoviePy(VideoStream):
     """MoviePy `FFMPEG_VideoReader` backend."""
 
-    def __init__(self, path: AnyStr, framerate: Optional[float] = None, print_infos: bool = False):
+    def __init__(
+        self, path: ty.AnyStr, framerate: ty.Optional[float] = None, print_infos: bool = False
+    ):
         """Open a video or device.
 
         Arguments:
@@ -64,8 +66,8 @@ class VideoStreamMoviePy(VideoStream):
         # This will always be one behind self._reader.lastread when we finally call read()
         # as MoviePy caches the first frame when opening the video. Thus self._last_frame
         # will always be the current frame, and self._reader.lastread will be the next.
-        self._last_frame: Union[bool, np.ndarray] = False
-        self._last_frame_rgb: Optional[np.ndarray] = None
+        self._last_frame: ty.Union[bool, np.ndarray] = False
+        self._last_frame_rgb: ty.Optional[np.ndarray] = None
         # Older versions don't track the video position when calling read_frame so we need
         # to keep track of the current frame number.
         self._frame_number = 0
@@ -86,7 +88,7 @@ class VideoStreamMoviePy(VideoStream):
         return self._reader.fps
 
     @property
-    def path(self) -> Union[bytes, str]:
+    def path(self) -> ty.Union[bytes, str]:
         """Video path."""
         return self._path
 
@@ -101,12 +103,12 @@ class VideoStreamMoviePy(VideoStream):
         return True
 
     @property
-    def frame_size(self) -> Tuple[int, int]:
+    def frame_size(self) -> ty.Tuple[int, int]:
         """Size of each video frame in pixels as a tuple of (width, height)."""
         return tuple(self._reader.infos["video_size"])
 
     @property
-    def duration(self) -> Optional[FrameTimecode]:
+    def duration(self) -> ty.Optional[FrameTimecode]:
         """Duration of the stream as a FrameTimecode, or None if non terminating."""
         assert isinstance(self._reader.infos["duration"], float)
         return self.base_timecode + self._reader.infos["duration"]
@@ -155,7 +157,7 @@ class VideoStreamMoviePy(VideoStream):
         This method will always return 0 if no frames have been `read`."""
         return self._frame_number
 
-    def seek(self, target: Union[FrameTimecode, float, int]):
+    def seek(self, target: ty.Union[FrameTimecode, float, int]):
         """Seek to the given timecode. If given as a frame number, represents the current seek
         pointer (e.g. if seeking to 0, the next frame decoded will be the first frame of the video).
 
@@ -207,7 +209,7 @@ class VideoStreamMoviePy(VideoStream):
         self._eof = False
         self._reader = FFMPEG_VideoReader(self._path, print_infos=print_infos)
 
-    def read(self, decode: bool = True, advance: bool = True) -> Union[np.ndarray, bool]:
+    def read(self, decode: bool = True, advance: bool = True) -> ty.Union[np.ndarray, bool]:
         """Read and decode the next frame as a np.ndarray. Returns False when video ends.
 
         Arguments:

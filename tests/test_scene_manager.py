@@ -15,11 +15,8 @@ This file includes unit tests for the scenedetect.scene_manager.SceneManager cla
 which applies SceneDetector algorithms on VideoStream backends.
 """
 
-import glob
-import os
-import os.path
+import typing as ty
 from pathlib import Path
-from typing import List
 
 import pytest
 
@@ -199,7 +196,7 @@ class FakeCallback:
     """Fake callback used for testing. Tracks the frame numbers the callback was invoked with."""
 
     def __init__(self):
-        self.scene_list: List[int] = []
+        self.scene_list: ty.List[int] = []
 
     def get_callback_lambda(self):
         """For testing using a lambda.."""

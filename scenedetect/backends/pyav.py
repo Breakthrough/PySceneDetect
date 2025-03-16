@@ -11,8 +11,8 @@
 #
 """:class:`VideoStreamAv` provides an adapter for the PyAV av.InputContainer object."""
 
+import typing as ty
 from logging import getLogger
-from typing import AnyStr, BinaryIO, Optional, Tuple, Union
 
 import av
 import numpy as np
@@ -35,10 +35,10 @@ class VideoStreamAv(VideoStream):
     # calculates the end time.
     def __init__(
         self,
-        path_or_io: Union[AnyStr, BinaryIO],
-        framerate: Optional[float] = None,
-        name: Optional[str] = None,
-        threading_mode: Optional[str] = None,
+        path_or_io: ty.Union[ty.AnyStr, ty.BinaryIO],
+        framerate: ty.Optional[float] = None,
+        name: ty.Optional[str] = None,
+        threading_mode: ty.Optional[str] = None,
         suppress_output: bool = False,
     ):
         """Open a video by path.
@@ -147,12 +147,12 @@ class VideoStreamAv(VideoStream):
     """Unique name used to identify this backend."""
 
     @property
-    def path(self) -> Union[bytes, str]:
+    def path(self) -> ty.Union[bytes, str]:
         """Video path."""
         return self._path
 
     @property
-    def name(self) -> Union[bytes, str]:
+    def name(self) -> ty.Union[bytes, str]:
         """Name of the video, without extension."""
         return self._name
 
@@ -162,7 +162,7 @@ class VideoStreamAv(VideoStream):
         return self._io.seekable()
 
     @property
-    def frame_size(self) -> Tuple[int, int]:
+    def frame_size(self) -> ty.Tuple[int, int]:
         """Size of each video frame in pixels as a tuple of (width, height)."""
         return (self._codec_context.width, self._codec_context.height)
 
@@ -219,7 +219,7 @@ class VideoStreamAv(VideoStream):
         frame_aspect_ratio = self.frame_size[0] / self.frame_size[1]
         return display_aspect_ratio / frame_aspect_ratio
 
-    def seek(self, target: Union[FrameTimecode, float, int]) -> None:
+    def seek(self, target: ty.Union[FrameTimecode, float, int]) -> None:
         """Seek to the given timecode. If given as a frame number, represents the current seek
         pointer (e.g. if seeking to 0, the next frame decoded will be the first frame of the video).
 
@@ -263,7 +263,7 @@ class VideoStreamAv(VideoStream):
         except Exception as ex:
             raise VideoOpenFailure() from ex
 
-    def read(self, decode: bool = True, advance: bool = True) -> Union[np.ndarray, bool]:
+    def read(self, decode: bool = True, advance: bool = True) -> ty.Union[np.ndarray, bool]:
         """Read and decode the next frame as a np.ndarray. Returns False when video ends.
 
         Arguments:

@@ -67,7 +67,7 @@ disallows negative values, and will clamp negative results to 0.
 """
 
 import math
-from typing import Union
+import typing as ty
 
 MAX_FPS_DELTA: float = 1.0 / 100000
 """Maximum amount two framerates can differ by for equality testing."""
@@ -89,8 +89,8 @@ class FrameTimecode:
 
     def __init__(
         self,
-        timecode: Union[int, float, str, "FrameTimecode"] = None,
-        fps: Union[int, float, str, "FrameTimecode"] = None,
+        timecode: ty.Union[int, float, str, "FrameTimecode"] = None,
+        fps: ty.Union[int, float, str, "FrameTimecode"] = None,
     ):
         """
         Arguments:
@@ -237,7 +237,7 @@ class FrameTimecode:
         """
         return round(seconds * self.framerate)
 
-    def _parse_timecode_number(self, timecode: Union[int, float]) -> int:
+    def _parse_timecode_number(self, timecode: ty.Union[int, float]) -> int:
         """Parse a timecode number, storing it as the exact number of frames.
         Can be passed as frame number (int), seconds (float)
 
@@ -311,7 +311,7 @@ class FrameTimecode:
             raise ValueError("Timecode seconds value must be positive.")
         return self._seconds_to_frames(as_float)
 
-    def __iadd__(self, other: Union[int, float, str, "FrameTimecode"]) -> "FrameTimecode":
+    def __iadd__(self, other: ty.Union[int, float, str, "FrameTimecode"]) -> "FrameTimecode":
         if isinstance(other, int):
             self.frame_num += other
         elif isinstance(other, FrameTimecode):
@@ -330,12 +330,12 @@ class FrameTimecode:
             self.frame_num = 0
         return self
 
-    def __add__(self, other: Union[int, float, str, "FrameTimecode"]) -> "FrameTimecode":
+    def __add__(self, other: ty.Union[int, float, str, "FrameTimecode"]) -> "FrameTimecode":
         to_return = FrameTimecode(timecode=self)
         to_return += other
         return to_return
 
-    def __isub__(self, other: Union[int, float, str, "FrameTimecode"]) -> "FrameTimecode":
+    def __isub__(self, other: ty.Union[int, float, str, "FrameTimecode"]) -> "FrameTimecode":
         if isinstance(other, int):
             self.frame_num -= other
         elif isinstance(other, FrameTimecode):
@@ -356,12 +356,12 @@ class FrameTimecode:
             self.frame_num = 0
         return self
 
-    def __sub__(self, other: Union[int, float, str, "FrameTimecode"]) -> "FrameTimecode":
+    def __sub__(self, other: ty.Union[int, float, str, "FrameTimecode"]) -> "FrameTimecode":
         to_return = FrameTimecode(timecode=self)
         to_return -= other
         return to_return
 
-    def __eq__(self, other: Union[int, float, str, "FrameTimecode"]) -> "FrameTimecode":
+    def __eq__(self, other: ty.Union[int, float, str, "FrameTimecode"]) -> "FrameTimecode":
         if isinstance(other, int):
             return self.frame_num == other
         elif isinstance(other, float):
@@ -382,10 +382,10 @@ class FrameTimecode:
                 "Unsupported type for performing == with FrameTimecode: %s" % type(other)
             )
 
-    def __ne__(self, other: Union[int, float, str, "FrameTimecode"]) -> bool:
+    def __ne__(self, other: ty.Union[int, float, str, "FrameTimecode"]) -> bool:
         return not self == other
 
-    def __lt__(self, other: Union[int, float, str, "FrameTimecode"]) -> bool:
+    def __lt__(self, other: ty.Union[int, float, str, "FrameTimecode"]) -> bool:
         if isinstance(other, int):
             return self.frame_num < other
         elif isinstance(other, float):
@@ -404,7 +404,7 @@ class FrameTimecode:
                 "Unsupported type for performing < with FrameTimecode: %s" % type(other)
             )
 
-    def __le__(self, other: Union[int, float, str, "FrameTimecode"]) -> bool:
+    def __le__(self, other: ty.Union[int, float, str, "FrameTimecode"]) -> bool:
         if isinstance(other, int):
             return self.frame_num <= other
         elif isinstance(other, float):
@@ -423,7 +423,7 @@ class FrameTimecode:
                 "Unsupported type for performing <= with FrameTimecode: %s" % type(other)
             )
 
-    def __gt__(self, other: Union[int, float, str, "FrameTimecode"]) -> bool:
+    def __gt__(self, other: ty.Union[int, float, str, "FrameTimecode"]) -> bool:
         if isinstance(other, int):
             return self.frame_num > other
         elif isinstance(other, float):
@@ -442,7 +442,7 @@ class FrameTimecode:
                 "Unsupported type for performing > with FrameTimecode: %s" % type(other)
             )
 
-    def __ge__(self, other: Union[int, float, str, "FrameTimecode"]) -> bool:
+    def __ge__(self, other: ty.Union[int, float, str, "FrameTimecode"]) -> bool:
         if isinstance(other, int):
             return self.frame_num >= other
         elif isinstance(other, float):

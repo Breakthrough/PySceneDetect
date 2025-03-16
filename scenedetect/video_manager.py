@@ -20,8 +20,8 @@ in a future release.
 
 import math
 import os
+import typing as ty
 from logging import getLogger
-from typing import Iterable, List, Optional, Tuple, Union
 
 import cv2
 import numpy as np
@@ -43,7 +43,7 @@ class VideoParameterMismatch(Exception):
     def __init__(
         self, file_list=None, message="OpenCV VideoCapture object parameters do not match."
     ):
-        # type: (Iterable[Tuple[int, float, float, str, str]], str) -> None
+        # type: (ty.Iterable[ty.Tuple[int, float, float, str, str]], str) -> None
         # Pass message string to base Exception class.
         super(VideoParameterMismatch, self).__init__(message)
         # list of (param_mismatch_type: int, parameter value, expected value,
@@ -67,7 +67,7 @@ class InvalidDownscaleFactor(ValueError):
 ##
 
 
-def get_video_name(video_file: str) -> Tuple[str, str]:
+def get_video_name(video_file: str) -> ty.Tuple[str, str]:
     """Get the video file/device name.
 
     Returns:
@@ -78,7 +78,7 @@ def get_video_name(video_file: str) -> Tuple[str, str]:
     return (os.path.split(video_file)[1], video_file)
 
 
-def get_num_frames(cap_list: Iterable[cv2.VideoCapture]) -> int:
+def get_num_frames(cap_list: ty.Iterable[cv2.VideoCapture]) -> int:
     """Get Number of Frames: Returns total number of frames in the cap_list.
 
     Calls get(CAP_PROP_FRAME_COUNT) and returns the sum for all VideoCaptures.
@@ -87,10 +87,10 @@ def get_num_frames(cap_list: Iterable[cv2.VideoCapture]) -> int:
 
 
 def open_captures(
-    video_files: Iterable[str],
-    framerate: Optional[float] = None,
+    video_files: ty.Iterable[str],
+    framerate: ty.Optional[float] = None,
     validate_parameters: bool = True,
-) -> Tuple[List[cv2.VideoCapture], float, Tuple[int, int]]:
+) -> ty.Tuple[ty.List[cv2.VideoCapture], float, ty.Tuple[int, int]]:
     """Open Captures - helper function to open all capture objects, set the framerate,
     and ensure that all open captures have been opened and the framerates match on a list
     of video file paths, or a list containing a single device ID.
@@ -188,10 +188,10 @@ def open_captures(
 
 
 def validate_capture_framerate(
-    video_names: Iterable[Tuple[str, str]],
-    cap_framerates: List[float],
-    framerate: Optional[float] = None,
-) -> Tuple[float, bool]:
+    video_names: ty.Iterable[ty.Tuple[str, str]],
+    cap_framerates: ty.List[float],
+    framerate: ty.Optional[float] = None,
+) -> ty.Tuple[float, bool]:
     """Ensure the passed capture framerates are valid and equal.
 
     Raises:
@@ -222,10 +222,10 @@ def validate_capture_framerate(
 
 
 def validate_capture_parameters(
-    video_names: List[Tuple[str, str]],
-    cap_frame_sizes: List[Tuple[int, int]],
+    video_names: ty.List[ty.Tuple[str, str]],
+    cap_frame_sizes: ty.List[ty.Tuple[int, int]],
     check_framerate: bool = False,
-    cap_framerates: Optional[List[float]] = None,
+    cap_framerates: ty.Optional[ty.List[float]] = None,
 ) -> None:
     """Validate Capture Parameters: Ensures that all passed capture frame sizes and (optionally)
     framerates are equal.  Raises VideoParameterMismatch if there is a mismatch.
@@ -285,8 +285,8 @@ class VideoManager(VideoStream):
 
     def __init__(
         self,
-        video_files: List[str],
-        framerate: Optional[float] = None,
+        video_files: ty.List[str],
+        framerate: ty.Optional[float] = None,
         logger=None,
     ):
         """[DEPRECATED] DO NOT USE.
@@ -358,11 +358,11 @@ class VideoManager(VideoStream):
         """
         return len(self._cap_list)
 
-    def get_video_paths(self) -> List[str]:
+    def get_video_paths(self) -> ty.List[str]:
         """Get list of strings containing paths to the open video(s).
 
         Returns:
-            List[str]: List of paths to the video files opened by the VideoManager.
+           ty.List[str]: List of paths to the video files opened by the VideoManager.
         """
         return list(self._video_file_paths)
 
@@ -421,7 +421,7 @@ class VideoManager(VideoStream):
         """
         return self._curr_time
 
-    def get_framesize(self) -> Tuple[int, int]:
+    def get_framesize(self) -> ty.Tuple[int, int]:
         """Get frame size of the video(s) open in the VideoManager's capture objects.
 
         Returns:
@@ -429,7 +429,7 @@ class VideoManager(VideoStream):
         """
         return self._cap_framesize
 
-    def get_framesize_effective(self) -> Tuple[int, int]:
+    def get_framesize_effective(self) -> ty.Tuple[int, int]:
         """Get Frame Size - returns the frame size of the video(s) open in the
         VideoManager's capture objects.
 
@@ -440,9 +440,9 @@ class VideoManager(VideoStream):
 
     def set_duration(
         self,
-        duration: Optional[FrameTimecode] = None,
-        start_time: Optional[FrameTimecode] = None,
-        end_time: Optional[FrameTimecode] = None,
+        duration: ty.Optional[FrameTimecode] = None,
+        start_time: ty.Optional[FrameTimecode] = None,
+        end_time: ty.Optional[FrameTimecode] = None,
     ) -> None:
         """Set Duration - sets the duration/length of the video(s) to decode, as well as
         the start/end times.  Must be called before :meth:`start()` is called, otherwise
@@ -508,7 +508,7 @@ class VideoManager(VideoStream):
         is calculated as the start timecode + total duration.
 
         Returns:
-            Tuple[FrameTimecode, FrameTimecode, FrameTimecode]: The current video(s)
+           ty.Tuple[FrameTimecode, FrameTimecode, FrameTimecode]: The current video(s)
                 total duration, start timecode, and end timecode.
         """
         end_time = self._end_time
@@ -616,7 +616,7 @@ class VideoManager(VideoStream):
         )
         self._curr_cap, self._curr_cap_idx = None, None
 
-    def get(self, capture_prop: int, index: Optional[int] = None) -> Union[float, int]:
+    def get(self, capture_prop: int, index: ty.Optional[int] = None) -> ty.Union[float, int]:
         """Get (cv2.VideoCapture method) - obtains capture properties from the current
         VideoCapture object in use.  Index represents the same index as the original
         video_files list passed to the constructor.  Getting/setting the position (POS)
@@ -668,7 +668,7 @@ class VideoManager(VideoStream):
             self._correct_frame_length()
         return grabbed
 
-    def retrieve(self) -> Tuple[bool, Optional[np.ndarray]]:
+    def retrieve(self) -> ty.Tuple[bool, ty.Optional[np.ndarray]]:
         """Retrieve (cv2.VideoCapture method) - retrieves and returns a frame.
 
         Frame returned corresponds to last call to :meth:`grab()`.
@@ -691,7 +691,7 @@ class VideoManager(VideoStream):
             self._last_frame = None
         return (retrieved, self._last_frame)
 
-    def read(self, decode: bool = True, advance: bool = True) -> Union[np.ndarray, bool]:
+    def read(self, decode: bool = True, advance: bool = True) -> ty.Union[np.ndarray, bool]:
         """Return next frame (or current if advance = False), or False if end of video.
 
         Arguments:
@@ -743,7 +743,7 @@ class VideoManager(VideoStream):
         return self._aspect_ratio
 
     @property
-    def duration(self) -> Optional[FrameTimecode]:
+    def duration(self) -> ty.Optional[FrameTimecode]:
         """Duration of the stream as a FrameTimecode, or None if non terminating."""
         return self.get_duration()[0]
 
@@ -785,7 +785,7 @@ class VideoManager(VideoStream):
         return self._cap_framerate
 
     @property
-    def frame_size(self) -> Tuple[int, int]:
+    def frame_size(self) -> ty.Tuple[int, int]:
         """Size of each video frame in pixels as a tuple of (width, height)."""
         return (
             math.trunc(self._cap_list[0].get(cv2.CAP_PROP_FRAME_WIDTH)),
@@ -798,14 +798,14 @@ class VideoManager(VideoStream):
         return True
 
     @property
-    def path(self) -> Union[bytes, str]:
+    def path(self) -> ty.Union[bytes, str]:
         """Video or device path."""
         if self._is_device:
             return "Device %d" % self._path
         return self._path
 
     @property
-    def name(self) -> Union[bytes, str]:
+    def name(self) -> ty.Union[bytes, str]:
         """Name of the video, without extension, or device."""
         if self._is_device:
             return self.path

@@ -83,7 +83,7 @@ examples for details.
 # TODO: Future VideoStream implementations under consideration:
 #  - Nvidia VPF: https://developer.nvidia.com/blog/vpf-hardware-accelerated-video-processing-framework-in-python/
 
-from typing import Dict, Type
+import typing as ty
 
 # OpenCV must be available at minimum.
 from scenedetect.backends.opencv import VideoCaptureAdapter, VideoStreamCv2
@@ -100,7 +100,7 @@ except ImportError:
 
 # TODO: Lazy-loading backends would improve startup performance. However, this requires removing
 # some of the re-exported types above from the public API.
-AVAILABLE_BACKENDS: Dict[str, Type] = {
+AVAILABLE_BACKENDS: ty.Dict[str, ty.Type] = {
     backend.BACKEND_NAME: backend
     for backend in filter(
         None,
@@ -114,5 +114,5 @@ AVAILABLE_BACKENDS: Dict[str, Type] = {
 """All available backends that :func:`scenedetect.open_video` can consider for the `backend`
 parameter. These backends must support construction with the following signature:
 
-    BackendType(path: str, framerate: Optional[float])
+    BackendType(path: str, framerate: ty.Optional[float])
 """

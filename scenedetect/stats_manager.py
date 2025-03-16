@@ -27,9 +27,6 @@ import typing as ty
 from logging import getLogger
 from pathlib import Path
 
-# TODO: Replace below imports with `ty.` prefix.
-from typing import Any, Dict, Iterable, List, Optional, Set, TextIO, Union
-
 from scenedetect.frame_timecode import FrameTimecode
 
 logger = getLogger("pyscenedetect")
@@ -106,10 +103,10 @@ class StatsManager:
         """
         # Frame metrics is a dict of frame (int): metric_dict (Dict[str, float])
         # of each frame metric key and the value it represents (usually float).
-        self._frame_metrics: Dict[FrameTimecode, Dict[str, float]] = dict()
-        self._metric_keys: Set[str] = set()
+        self._frame_metrics: ty.Dict[FrameTimecode, ty.Dict[str, float]] = dict()
+        self._metric_keys: ty.Set[str] = set()
         self._metrics_updated: bool = False  # Flag indicating if metrics require saving.
-        self._base_timecode: Optional[FrameTimecode] = (
+        self._base_timecode: ty.Optional[FrameTimecode] = (
             base_timecode  # Used for timing calculations.
         )
 
@@ -117,14 +114,14 @@ class StatsManager:
     def metric_keys(self) -> ty.Iterable[str]:
         return self._metric_keys
 
-    def register_metrics(self, metric_keys: Iterable[str]) -> None:
+    def register_metrics(self, metric_keys: ty.Iterable[str]) -> None:
         """Register a list of metric keys that will be used by the detector."""
         self._metric_keys = self._metric_keys.union(set(metric_keys))
 
     # TODO(v1.0): Change frame_number to a FrameTimecode now that it is just a hash and will
     # be required for VFR support. This API is also really difficult to use, this type should just
     # function like a dictionary.
-    def get_metrics(self, frame_number: int, metric_keys: Iterable[str]) -> List[Any]:
+    def get_metrics(self, frame_number: int, metric_keys: ty.Iterable[str]) -> ty.List[ty.Any]:
         """Return the requested statistics/metrics for a given frame.
 
         Arguments:
@@ -138,7 +135,7 @@ class StatsManager:
         """
         return [self._get_metric(frame_number, metric_key) for metric_key in metric_keys]
 
-    def set_metrics(self, frame_number: int, metric_kv_dict: Dict[str, Any]) -> None:
+    def set_metrics(self, frame_number: int, metric_kv_dict: ty.Dict[str, ty.Any]) -> None:
         """Set Metrics: Sets the provided statistics/metrics for a given frame.
 
         Arguments:
@@ -149,7 +146,7 @@ class StatsManager:
         for metric_key in metric_kv_dict:
             self._set_metric(frame_number, metric_key, metric_kv_dict[metric_key])
 
-    def metrics_exist(self, frame_number: int, metric_keys: Iterable[str]) -> bool:
+    def metrics_exist(self, frame_number: int, metric_keys: ty.Iterable[str]) -> bool:
         """Metrics Exist: Checks if the given metrics/stats exist for the given frame.
 
         Returns:
@@ -168,8 +165,8 @@ class StatsManager:
 
     def save_to_csv(
         self,
-        csv_file: Union[str, bytes, Path, TextIO],
-        base_timecode: Optional[FrameTimecode] = None,
+        csv_file: ty.Union[str, bytes, Path, ty.TextIO],
+        base_timecode: ty.Optional[FrameTimecode] = None,
         force_save=True,
     ) -> None:
         """Save To CSV: Saves all frame metrics stored in the StatsManager to a CSV file.
@@ -210,7 +207,7 @@ class StatsManager:
             )
 
     @staticmethod
-    def valid_header(row: List[str]) -> bool:
+    def valid_header(row: ty.List[str]) -> bool:
         """Check that the given CSV row is a valid header for a statsfile.
 
         Arguments:
@@ -227,7 +224,7 @@ class StatsManager:
 
     # TODO(v1.0): Create a replacement for a calculation cache that functions like load_from_csv
     # did, but is better integrated with detectors for cached calculations instead of statistics.
-    def load_from_csv(self, csv_file: Union[str, bytes, TextIO]) -> Optional[int]:
+    def load_from_csv(self, csv_file: ty.Union[str, bytes, ty.TextIO]) -> ty.Optional[int]:
         """[DEPRECATED] DO NOT USE
 
         Load all metrics stored in a CSV file into the StatsManager instance. Will be removed in a
@@ -306,12 +303,12 @@ class StatsManager:
 
     # TODO: Get rid of these functions and simplify the implementation of this class.
 
-    def _get_metric(self, frame_number: int, metric_key: str) -> Optional[Any]:
+    def _get_metric(self, frame_number: int, metric_key: str) -> ty.Optional[ty.Any]:
         if self._metric_exists(frame_number, metric_key):
             return self._frame_metrics[frame_number][metric_key]
         return None
 
-    def _set_metric(self, frame_number: int, metric_key: str, metric_value: Any) -> None:
+    def _set_metric(self, frame_number: int, metric_key: str, metric_value: ty.Any) -> None:
         self._metrics_updated = True
         if frame_number not in self._frame_metrics:
             self._frame_metrics[frame_number] = dict()

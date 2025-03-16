@@ -31,8 +31,8 @@ New :class:`VideoStream <scenedetect.video_stream.VideoStream>` implementations 
 tested by adding it to the test suite in `tests/test_video_stream.py`.
 """
 
+import typing as ty
 from abc import ABC, abstractmethod
-from typing import Optional, Tuple, Union
 
 import numpy as np
 
@@ -108,13 +108,13 @@ class VideoStream(ABC):
 
     @property
     @abstractmethod
-    def path(self) -> Union[bytes, str]:
+    def path(self) -> ty.Union[bytes, str]:
         """Video or device path."""
         ...
 
     @property
     @abstractmethod
-    def name(self) -> Union[bytes, str]:
+    def name(self) -> ty.Union[bytes, str]:
         """Name of the video, without extension, or device."""
         ...
 
@@ -132,13 +132,13 @@ class VideoStream(ABC):
 
     @property
     @abstractmethod
-    def duration(self) -> Optional[FrameTimecode]:
+    def duration(self) -> ty.Optional[FrameTimecode]:
         """Duration of the stream as a FrameTimecode, or None if non terminating."""
         ...
 
     @property
     @abstractmethod
-    def frame_size(self) -> Tuple[int, int]:
+    def frame_size(self) -> ty.Tuple[int, int]:
         """Size of each video frame in pixels as a tuple of (width, height)."""
         ...
 
@@ -177,7 +177,7 @@ class VideoStream(ABC):
     #
 
     @abstractmethod
-    def read(self, decode: bool = True, advance: bool = True) -> Union[np.ndarray, bool]:
+    def read(self, decode: bool = True, advance: bool = True) -> ty.Union[np.ndarray, bool]:
         """Read and decode the next frame as a np.ndarray. Returns False when video ends.
 
         Arguments:
@@ -196,7 +196,7 @@ class VideoStream(ABC):
         ...
 
     @abstractmethod
-    def seek(self, target: Union[FrameTimecode, float, int]) -> None:
+    def seek(self, target: ty.Union[FrameTimecode, float, int]) -> None:
         """Seek to the given timecode. If given as a frame number, represents the current seek
         pointer (e.g. if seeking to 0, the next frame decoded will be the first frame of the video).
 

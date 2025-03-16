@@ -15,7 +15,7 @@ frames. If the difference exceeds a given threshold, a cut is detected.
 This detector is available from the command-line as the `detect-hist` command.
 """
 
-from typing import List
+import typing as ty
 
 import cv2
 import numpy
@@ -51,7 +51,7 @@ class HistogramDetector(SceneDetector):
         self._last_scene_cut = None
         self._metric_key = f"hist_diff [bins={self._bins}]"
 
-    def process_frame(self, frame_num: int, frame_img: numpy.ndarray) -> List[int]:
+    def process_frame(self, frame_num: int, frame_img: numpy.ndarray) -> ty.List[int]:
         """Computes the histogram of the luma channel of the frame image and compares it with the
         histogram of the luma channel of the previous frame. If the difference between the histograms
         exceeds the threshold, a scene cut is detected.
@@ -163,5 +163,5 @@ class HistogramDetector(SceneDetector):
     def is_processing_required(self, frame_num: int) -> bool:
         return True
 
-    def get_metrics(self) -> List[str]:
+    def get_metrics(self) -> ty.List[str]:
         return [self._metric_key]

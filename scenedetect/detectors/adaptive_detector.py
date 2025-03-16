@@ -16,8 +16,8 @@ changes. This can help mitigate false detections in situations such as fast came
 This detector is available from the command-line as the `detect-adaptive` command.
 """
 
+import typing as ty
 from logging import getLogger
-from typing import List, Optional
 
 import numpy as np
 
@@ -42,9 +42,9 @@ class AdaptiveDetector(ContentDetector):
         min_content_val: float = 15.0,
         weights: ContentDetector.Components = ContentDetector.DEFAULT_COMPONENT_WEIGHTS,
         luma_only: bool = False,
-        kernel_size: Optional[int] = None,
+        kernel_size: ty.Optional[int] = None,
         video_manager=None,
-        min_delta_hsv: Optional[float] = None,
+        min_delta_hsv: ty.Optional[float] = None,
     ):
         """
         Arguments:
@@ -98,7 +98,7 @@ class AdaptiveDetector(ContentDetector):
         self._first_frame_num = None
 
         # NOTE: This must be different than `self._last_scene_cut` which is used by the base class.
-        self._last_cut: Optional[int] = None
+        self._last_cut: ty.Optional[int] = None
 
         self._buffer = []
 
@@ -107,7 +107,7 @@ class AdaptiveDetector(ContentDetector):
         """Number of frames any detected cuts will be behind the current frame due to buffering."""
         return self.window_width
 
-    def get_metrics(self) -> List[str]:
+    def get_metrics(self) -> ty.List[str]:
         """Combines base ContentDetector metric keys with the AdaptiveDetector one."""
         return super().get_metrics() + [self._adaptive_ratio_key]
 
@@ -115,7 +115,7 @@ class AdaptiveDetector(ContentDetector):
         """Not required for AdaptiveDetector."""
         return False
 
-    def process_frame(self, frame_num: int, frame_img: Optional[np.ndarray]) -> List[int]:
+    def process_frame(self, frame_num: int, frame_img: ty.Optional[np.ndarray]) -> ty.List[int]:
         """Process the next frame. `frame_num` is assumed to be sequential.
 
         Args:
@@ -124,7 +124,7 @@ class AdaptiveDetector(ContentDetector):
             frame_img (numpy.ndarray or None): Video frame corresponding to `frame_img`.
 
         Returns:
-            List[int]: List of frames where scene cuts have been detected. There may be 0
+           ty.List[int]: List of frames where scene cuts have been detected. There may be 0
             or more frames in the list, and not necessarily the same as frame_num.
         """
 
@@ -168,7 +168,7 @@ class AdaptiveDetector(ContentDetector):
             return [target_frame]
         return []
 
-    def get_content_val(self, frame_num: int) -> Optional[float]:
+    def get_content_val(self, frame_num: int) -> ty.Optional[float]:
         """Returns the average content change for a frame."""
         # TODO(v0.7): Add DeprecationWarning that `get_content_val` will be removed in v0.7.
         logger.error(

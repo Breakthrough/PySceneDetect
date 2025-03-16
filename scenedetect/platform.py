@@ -24,7 +24,7 @@ import re
 import string
 import subprocess
 import sys
-from typing import AnyStr, Dict, List, Optional, Union
+import typing as ty
 
 import cv2
 
@@ -76,7 +76,7 @@ except ModuleNotFoundError:
 
 
 # TODO: Move this into scene_manager.
-def get_cv2_imwrite_params() -> Dict[str, Union[int, None]]:
+def get_cv2_imwrite_params() -> ty.Dict[str, ty.Union[int, None]]:
     """Get OpenCV imwrite Params: Returns a dict of supported image formats and
     their associated quality/compression parameter index, or None if that format
     is not supported.
@@ -88,7 +88,7 @@ def get_cv2_imwrite_params() -> Dict[str, Union[int, None]]:
         current system library (e.g. {'jpg': None}).
     """
 
-    def _get_cv2_param(param_name: str) -> Union[int, None]:
+    def _get_cv2_param(param_name: str) -> ty.Union[int, None]:
         if param_name.startswith("CV_"):
             param_name = param_name[3:]
         try:
@@ -108,7 +108,7 @@ def get_cv2_imwrite_params() -> Dict[str, Union[int, None]]:
 ##
 
 
-def get_file_name(file_path: AnyStr, include_extension=True) -> AnyStr:
+def get_file_name(file_path: ty.AnyStr, include_extension=True) -> ty.AnyStr:
     """Return the file name that `file_path` refers to, optionally removing the extension.
 
     If `include_extension` is False, the result will always be a str.
@@ -123,7 +123,9 @@ def get_file_name(file_path: AnyStr, include_extension=True) -> AnyStr:
     return file_name
 
 
-def get_and_create_path(file_path: AnyStr, output_directory: Optional[AnyStr] = None) -> AnyStr:
+def get_and_create_path(
+    file_path: ty.AnyStr, output_directory: ty.Optional[ty.AnyStr] = None
+) -> ty.AnyStr:
     """Get & Create Path: Gets and returns the full/absolute path to file_path
     in the specified output_directory if set, creating any required directories
     along the way.
@@ -157,7 +159,7 @@ def get_and_create_path(file_path: AnyStr, output_directory: Optional[AnyStr] = 
 
 
 def init_logger(
-    log_level: int = logging.INFO, show_stdout: bool = False, log_file: Optional[str] = None
+    log_level: int = logging.INFO, show_stdout: bool = False, log_file: ty.Optional[str] = None
 ):
     """Initializes logging for PySceneDetect. The logger instance used is named 'pyscenedetect'.
     By default the logger has no handlers to suppress output. All existing log handlers are replaced
@@ -202,7 +204,7 @@ class CommandTooLong(Exception):
     """Raised if the length of a command line argument exceeds the limit allowed on Windows."""
 
 
-def invoke_command(args: List[str]) -> int:
+def invoke_command(args: ty.List[str]) -> int:
     """Same as calling Python's subprocess.call() method, but explicitly
     raises a different exception when the command length is too long.
 
@@ -231,7 +233,7 @@ def invoke_command(args: List[str]) -> int:
         raise
 
 
-def get_ffmpeg_path() -> Optional[str]:
+def get_ffmpeg_path() -> ty.Optional[str]:
     """Get path to ffmpeg if available on the current system. First looks at PATH, then checks if
     one is available from the `imageio_ffmpeg` package. Returns None if ffmpeg couldn't be found.
     """
@@ -261,7 +263,7 @@ def get_ffmpeg_path() -> Optional[str]:
     return None
 
 
-def get_ffmpeg_version() -> Optional[str]:
+def get_ffmpeg_version() -> ty.Optional[str]:
     """Get ffmpeg version identifier, or None if ffmpeg is not found. Uses `get_ffmpeg_path()`."""
     ffmpeg_path = get_ffmpeg_path()
     if ffmpeg_path is None:
@@ -275,7 +277,7 @@ def get_ffmpeg_version() -> Optional[str]:
     return output.splitlines()[0]
 
 
-def get_mkvmerge_version() -> Optional[str]:
+def get_mkvmerge_version() -> ty.Optional[str]:
     """Get mkvmerge version identifier, or None if mkvmerge is not found in PATH."""
     tool_name = "mkvmerge"
     try:

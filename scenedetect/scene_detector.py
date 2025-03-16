@@ -106,7 +106,7 @@ class SceneDetector:
             frame_img (numpy.ndarray or None): Video frame corresponding to `frame_img`.
 
         Returns:
-            List[int]: List of frames where scene cuts have been detected. There may be 0
+           ty.List[int]: List of frames where scene cuts have been detected. There may be 0
             or more frames in the list, and not necessarily the same as frame_num.
 
         Returns:

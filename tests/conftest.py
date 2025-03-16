@@ -28,7 +28,7 @@ Note that currently these tests create some temporary files which are not yet cl
 
 import logging
 import os
-from typing import AnyStr
+import typing as ty
 
 import pytest
 
@@ -37,7 +37,7 @@ import pytest
 #
 
 
-def check_exists(path: AnyStr) -> AnyStr:
+def check_exists(path: ty.AnyStr) -> ty.AnyStr:
     """Returns the absolute path to a (relative) path of a file that
     should exist within the tests/ directory.
 
