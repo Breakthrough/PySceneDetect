@@ -19,7 +19,8 @@ import numpy as np
 
 from scenedetect.frame_timecode import MAX_FPS_DELTA, FrameTimecode
 from scenedetect.platform import get_file_name
-from scenedetect.video_stream import FrameRateUnavailable, VideoOpenFailure, VideoStream
+from scenedetect.timecode import Timecode
+from scenedetect.video_stream import FrameRateUnavailable, VideoFrame, VideoOpenFailure, VideoStream
 
 logger = getLogger("pyscenedetect")
 
@@ -262,6 +263,19 @@ class VideoStreamAv(VideoStream):
             self._container = av.open(self._path if self._path else self._io)
         except Exception as ex:
             raise VideoOpenFailure() from ex
+
+    def __next__(self) -> VideoFrame:
+        # TODO: On the VFR test video, we seem to only decode 1979 frames instead of 1980. See what
+        # the issue could be.
+        try:
+            frame = next(self._container.decode(video=0))
+        except av.error.EOFError as ex:
+            if not self._handle_eof():
+                raise StopIteration() from ex
+            return next(self)  # *NOTE*: self._handle_eof must ensure we won't recurse again.
+        image = frame.to_ndarray(format="bgr24")
+        timecode = Timecode(pts=frame.pts, time_base=frame.time_base)
+        return VideoFrame(image=image, timecode=timecode)
 
     def read(self, decode: bool = True, advance: bool = True) -> ty.Union[np.ndarray, bool]:
         """Read and decode the next frame as a np.ndarray. Returns False when video ends.

@@ -110,6 +110,12 @@ def test_movie_clip() -> str:
 
 
 @pytest.fixture
+def test_vfr_video() -> str:
+    """Movie clip containing fast cut, but encoded as variable framerate."""
+    return check_exists("tests/resources/goldeneye-vfr.mp4")
+
+
+@pytest.fixture
 def corrupt_video_file() -> str:
     """Video containing a corrupted frame causing a decode failure."""
     return check_exists("tests/resources/corrupt_frame.mp4")

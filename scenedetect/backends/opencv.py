@@ -20,6 +20,7 @@ which do not support seeking.
 import math
 import os.path
 import typing as ty
+from fractions import Fraction
 from logging import getLogger
 
 import cv2
@@ -27,7 +28,14 @@ import numpy as np
 
 from scenedetect.frame_timecode import MAX_FPS_DELTA, FrameTimecode
 from scenedetect.platform import get_file_name
-from scenedetect.video_stream import FrameRateUnavailable, SeekError, VideoOpenFailure, VideoStream
+from scenedetect.timecode import Timecode
+from scenedetect.video_stream import (
+    FrameRateUnavailable,
+    SeekError,
+    VideoFrame,
+    VideoOpenFailure,
+    VideoStream,
+)
 
 logger = getLogger("pyscenedetect")
 
@@ -263,6 +271,30 @@ class VideoStreamCv2(VideoStream):
         """Close and re-open the VideoStream (should be equivalent to calling `seek(0)`)."""
         self._cap.release()
         self._open_capture(self._frame_rate)
+
+    def __next__(self):
+        # NOTE: POS_FRAMES starts from 0 before any frames are read.
+        read, image = self._cap.read()
+        if not read:
+            raise StopIteration()
+        # We can only query CAP_PROP_PTS if this uses the ffmpeg backend,  however it doesn't seem
+        # to work correctly. Quite frequently consecutive frames return the same PTS. We might need
+        # to just abandon using PTS with OpenCV and rely on milliseconds. This will still result
+        # in occasional off-by-one errors for VFR videos, but better than the status quo.
+        #
+        # We should also add a config option so users can specify if OpenCV should use fixed or
+        # variable timing (i.e. if we should use CAP_PROP_POS_MSEC or CAP_PROP_POS_FRAMES for
+        # timestamp calculation).
+        USE_PTS = False
+        if USE_PTS:
+            pts = self._cap.get(cv2.CAP_PROP_PTS)
+            time_base = Fraction.from_float(self._cap.get(cv2.CAP_PROP_FPS))
+            time_base = Fraction(numerator=time_base.denominator, denominator=time_base.numerator)
+        else:
+            pts = self._cap.get(cv2.CAP_PROP_POS_MSEC)
+            time_base = Fraction(1, 1000)
+        timecode = Timecode(pts=round(pts), time_base=time_base)
+        return VideoFrame(image=image, timecode=timecode)
 
     def read(self, decode: bool = True, advance: bool = True) -> ty.Union[np.ndarray, bool]:
         """Read and decode the next frame as a np.ndarray. Returns False when video ends,

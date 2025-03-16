@@ -56,7 +56,7 @@ from scenedetect.video_manager import VideoManager  # [DEPRECATED] DO NOT USE.
 
 # Used for module identification and when printing version & about info
 # (e.g. calling `scenedetect version` or `scenedetect about`).
-__version__ = "0.6.6"
+__version__ = "0.7-dev0"
 
 init_logger()
 logger = getLogger("pyscenedetect")
