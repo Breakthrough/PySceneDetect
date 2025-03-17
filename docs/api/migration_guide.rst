@@ -127,7 +127,7 @@ The `calculate_frame_score` method of :class:`ContentDetector <scenedetect.detec
 `MINIMUM_FRAMES_PER_SECOND_*` Constants
 ===============================================================
 
-In :mod:`scenedetect.frame_timecode` the constants `MINIMUM_FRAMES_PER_SECOND_FLOAT` and `MINIMUM_FRAMES_PER_SECOND_DELTA_FLOAT` have been replaced with :data:`MAX_FPS_DELTA <scenedetect.frame_timecode.MAX_FPS_DELTA>`.
+In `scenedetect.frame_timecode` the constants `MINIMUM_FRAMES_PER_SECOND_FLOAT` and `MINIMUM_FRAMES_PER_SECOND_DELTA_FLOAT` have been replaced with :data:`MAX_FPS_DELTA <scenedetect.frame_timecode.MAX_FPS_DELTA>`.
 
 
 `get_aspect_ratio` Function

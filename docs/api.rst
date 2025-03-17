@@ -29,10 +29,7 @@ The `scenedetect` API is easy to integrate with most application workflows, whil
 
     * :ref:`scenedetect.video_splitter ✂️ <scenedetect-video_splitter>`: Contains :func:`split_video_ffmpeg <scenedetect.video_splitter.split_video_ffmpeg>` and :func:`split_video_mkvmerge <scenedetect.video_splitter.split_video_mkvmerge>` to split a video based on the detected scenes.
 
-    * :ref:`scenedetect.frame_timecode ⏱️ <scenedetect-frame_timecode>`: Contains
-      :class:`FrameTimecode <scenedetect.frame_timecode.FrameTimecode>`
-      class for storing, converting, and performing arithmetic on timecodes
-      with frame-accurate precision.
+    * :ref:`scenedetect.common ⏱️ <scenedetect-common>`: Contains common types such as :class:`FrameTimecode <scenedetect.common.FrameTimecode>` used for timecode handing.
 
     * :ref:`scenedetect.scene_detector 🌐 <scenedetect-scene_detector>`: Contains :class:`SceneDetector <scenedetect.scene_detector.SceneDetector>` interface which detection algorithms must implement.
 
@@ -68,7 +65,7 @@ PySceneDetect makes it very easy to find scene transitions in a video with the :
     for (scene_start, scene_end) in scenes:
         print(f'{scene_start}-{scene_end}')
 
-``scenes`` now contains a list of :class:`FrameTimecode <scenedetect.frame_timecode.FrameTimecode>` pairs representing the start/end of each scene. Note that you can set ``show_progress=True`` when calling :func:`detect <scenedetect.detect>` to display a progress bar with estimated time remaining.
+``scenes`` now contains a list of :class:`FrameTimecode <scenedetect.common.FrameTimecode>` pairs representing the start/end of each scene. Note that you can set ``show_progress=True`` when calling :func:`detect <scenedetect.detect>` to display a progress bar with estimated time remaining.
 
 Here, we use :mod:`ContentDetector <scenedetect.detectors.content_detector>` to detect fast cuts. There are :ref:`many detector types <scenedetect-detectors>` which can be used to find fast cuts and fades in/out.  PySceneDetect can also export scene data in various formats, and can  :ref:`split the input video <scenedetect-video_splitter>` automatically if `ffmpeg` is available:
 
@@ -103,7 +100,7 @@ Module Reference
     api/scene_manager
     api/video_splitter
     api/stats_manager
-    api/frame_timecode
+    api/common
     api/scene_detector
     api/video_stream
     api/platform

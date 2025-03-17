@@ -650,6 +650,11 @@ Development
 
 ## PySceneDetect 0.7 (In Development)
 
-### Work In Progress
+### CLI Changes
 
-- [feature] New `save-xml` command supports saving scenes in Final Cut Pro format [#156](https://github.com/Breakthrough/PySceneDetect/issues/156)
+- [feature] WORK IN PROGRESS: New `save-xml` command supports saving scenes in Final Cut Pro format [#156](https://github.com/Breakthrough/PySceneDetect/issues/156)
+
+
+### API Changes
+
+- [deprecation] The `scenedetect.frame_timecode` module is deprecated, import `FrameTimecode` from `scenedetect` (or `scenedetect.common`) instead
