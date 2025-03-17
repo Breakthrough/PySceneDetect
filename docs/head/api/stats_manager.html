@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>StatsManager &#8212; PySceneDetect 0.6.6 documentation</title>
+    <title>StatsManager &#8212; PySceneDetect 0.7-dev0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
     <link rel="stylesheet" type="text/css" href="../_static/pyscenedetect.css" />
@@ -14,7 +14,7 @@
     <script src="../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="FrameTimecode" href="frame_timecode.html" />
+    <link rel="next" title="Common" href="common.html" />
     <link rel="prev" title="Video Splitting" href="video_splitter.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
@@ -69,7 +69,7 @@ which owns the given StatsManager instance.</p>
 <p>Initialize a new StatsManager.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>base_timecode</strong> (<a class="reference internal" href="frame_timecode.html#scenedetect.frame_timecode.FrameTimecode" title="scenedetect.frame_timecode.FrameTimecode"><em>FrameTimecode</em></a>) – Timecode associated with this object. Must not be None (default value
+<dd class="field-odd"><p><strong>base_timecode</strong> (<a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a>) – Timecode associated with this object. Must not be None (default value
 will be removed in a future release).</p>
 </dd>
 </dl>
@@ -152,7 +152,7 @@ False otherwise.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>csv_file</strong> (<em>str</em><em> | </em><em>bytes</em><em> | </em><em>Path</em><em> | </em><em>TextIO</em>) – A file handle opened in write mode (e.g. open(’…’, ‘w’)) or a path as str.</p></li>
-<li><p><strong>base_timecode</strong> (<a class="reference internal" href="frame_timecode.html#scenedetect.frame_timecode.FrameTimecode" title="scenedetect.frame_timecode.FrameTimecode"><em>FrameTimecode</em></a><em> | </em><em>None</em>) – [DEPRECATED] DO NOT USE. For backwards compatibility.</p></li>
+<li><p><strong>base_timecode</strong> (<a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em> | </em><em>None</em>) – [DEPRECATED] DO NOT USE. For backwards compatibility.</p></li>
 <li><p><strong>force_save</strong> – If True, writes metrics out even if an update is not required.</p></li>
 </ul>
 </dd>
@@ -227,7 +227,7 @@ respective integer/floating-point metric values to set.</p></li>
           <a href="video_splitter.html" title="Previous document">Video Splitting</a>
         </li>
         <li>
-          <a href="frame_timecode.html" title="Next document">FrameTimecode</a>
+          <a href="common.html" title="Next document">Common</a>
           &rarr;
         </li>
     </ul>
@@ -247,7 +247,7 @@ respective integer/floating-point metric values to set.</p></li>
 
 
 
-<p class="blurb">Version: [0.6.6]</p>
+<p class="blurb">Version: [0.7-dev0]</p>
 
 
 
@@ -278,6 +278,7 @@ respective integer/floating-point metric values to set.</p></li>
 <li class="toctree-l1"><a class="reference internal" href="detectors.html">Detection Algorithms</a></li>
 <li class="toctree-l1"><a class="reference internal" href="backends.html">Backends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="scene_manager.html">SceneManager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="common.html">Common</a></li>
 <li class="toctree-l1"><a class="reference internal" href="video_splitter.html">Video Splitting</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">StatsManager</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.stats_manager.StatsFileCorrupt"><code class="docutils literal notranslate"><span class="pre">StatsFileCorrupt</span></code></a></li>
@@ -286,7 +287,6 @@ respective integer/floating-point metric values to set.</p></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.stats_manager.COLUMN_NAME_TIMECODE"><code class="docutils literal notranslate"><span class="pre">COLUMN_NAME_TIMECODE</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="frame_timecode.html">FrameTimecode</a></li>
 <li class="toctree-l1"><a class="reference internal" href="scene_detector.html">SceneDetector</a></li>
 <li class="toctree-l1"><a class="reference internal" href="video_stream.html">VideoStream</a></li>
 <li class="toctree-l1"><a class="reference internal" href="platform.html">Platform &amp; Logging</a></li>
@@ -298,7 +298,7 @@ respective integer/floating-point metric values to set.</p></li>
   <li><a href="../index.html">Documentation overview</a><ul>
   <li><a href="../api.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Package</a><ul>
       <li>Previous: <a href="video_splitter.html" title="previous chapter">Video Splitting</a></li>
-      <li>Next: <a href="frame_timecode.html" title="next chapter">FrameTimecode</a></li>
+      <li>Next: <a href="common.html" title="next chapter">Common</a></li>
   </ul></li>
   </ul></li>
 </ul>
