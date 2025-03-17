@@ -32,13 +32,6 @@ import numpy
 from scenedetect.stats_manager import StatsManager
 
 
-# TODO(v0.7): Add a new base class called just "Detector" to eventually replace SceneDetector.
-#
-# class Detector:
-#     def process(buffer: ty.List[ty.Tuple[numpy.ndarray, FrameTimecode]]):
-#         # Return EventType.CUT, FADE_IN, FADE_OUT, etc...
-#         pass
-#
 class SceneDetector:
     """Base class to inherit from when implementing a scene detection algorithm.
 

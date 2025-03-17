@@ -32,7 +32,6 @@ from scenedetect.platform import get_file_name
 from scenedetect.video_stream import (
     FrameRateUnavailable,
     SeekError,
-    VideoFrame,
     VideoOpenFailure,
     VideoStream,
 )
@@ -46,6 +45,8 @@ NON_VIDEO_FILE_INPUT_IDENTIFIERS = (
     "://",  # URL/network stream
     " ! ",  # gstreamer pipe
 )
+
+_USE_PTS_IN_DEVELOPMENT = False
 
 
 def _get_aspect_ratio(cap: cv2.VideoCapture, epsilon: float = 0.0001) -> float:
@@ -196,6 +197,16 @@ class VideoStreamCv2(VideoStream):
         return _get_aspect_ratio(self._cap)
 
     @property
+    def timecode(self) -> Timecode:
+        """Current position within stream as a Timecode. This is not frame accurate."""
+        # *NOTE*: Although OpenCV has `CAP_PROP_PTS`, it doesn't seem to be reliable. For now, we
+        # use `CAP_PROP_POS_MSEC` instead, with a time base of 1/1000. Unfortunately this means that
+        # rounding errors will affect frame accuracy with this backend.
+        pts = self._cap.get(cv2.CAP_PROP_POS_MSEC)
+        time_base = Fraction(1, 1000)
+        return Timecode(pts=round(pts), time_base=time_base)
+
+    @property
     def position(self) -> FrameTimecode:
         """Current position within stream as FrameTimecode.
 
@@ -204,6 +215,8 @@ class VideoStreamCv2(VideoStream):
 
         This method will always return 0 (e.g. be equal to `base_timecode`) if no frames
         have been `read`."""
+        if _USE_PTS_IN_DEVELOPMENT:
+            return FrameTimecode(timecode=self.timecode, fps=self.frame_rate)
         if self.frame_number < 1:
             return self.base_timecode
         return self.base_timecode + (self.frame_number - 1)
@@ -271,30 +284,6 @@ class VideoStreamCv2(VideoStream):
         """Close and re-open the VideoStream (should be equivalent to calling `seek(0)`)."""
         self._cap.release()
         self._open_capture(self._frame_rate)
-
-    def __next__(self):
-        # NOTE: POS_FRAMES starts from 0 before any frames are read.
-        read, image = self._cap.read()
-        if not read:
-            raise StopIteration()
-        # We can only query CAP_PROP_PTS if this uses the ffmpeg backend,  however it doesn't seem
-        # to work correctly. Quite frequently consecutive frames return the same PTS. We might need
-        # to just abandon using PTS with OpenCV and rely on milliseconds. This will still result
-        # in occasional off-by-one errors for VFR videos, but better than the status quo.
-        #
-        # We should also add a config option so users can specify if OpenCV should use fixed or
-        # variable timing (i.e. if we should use CAP_PROP_POS_MSEC or CAP_PROP_POS_FRAMES for
-        # timestamp calculation).
-        USE_PTS = False
-        if USE_PTS:
-            pts = self._cap.get(cv2.CAP_PROP_PTS)
-            time_base = Fraction.from_float(self._cap.get(cv2.CAP_PROP_FPS))
-            time_base = Fraction(numerator=time_base.denominator, denominator=time_base.numerator)
-        else:
-            pts = self._cap.get(cv2.CAP_PROP_POS_MSEC)
-            time_base = Fraction(1, 1000)
-        timecode = Timecode(pts=round(pts), time_base=time_base)
-        return VideoFrame(image=image, timecode=timecode)
 
     def read(self, decode: bool = True, advance: bool = True) -> ty.Union[np.ndarray, bool]:
         """Read and decode the next frame as a np.ndarray. Returns False when video ends,
@@ -490,6 +479,8 @@ class VideoCaptureAdapter(VideoStream):
     @property
     def duration(self) -> ty.Optional[FrameTimecode]:
         """Duration of the stream as a FrameTimecode, or None if non terminating."""
+        # TODO(v0.7): This will be incorrect for VFR. See if there is another property we can use
+        # to estimate the video length correctly.
         frame_count = math.trunc(self._cap.get(cv2.CAP_PROP_FRAME_COUNT))
         if frame_count > 0:
             return self.base_timecode + frame_count
@@ -508,6 +499,7 @@ class VideoCaptureAdapter(VideoStream):
 
         This method will always return 0 (e.g. be equal to `base_timecode`) if no frames
         have been `read`."""
+
         if self.frame_number < 1:
             return self.base_timecode
         return self.base_timecode + (self.frame_number - 1)

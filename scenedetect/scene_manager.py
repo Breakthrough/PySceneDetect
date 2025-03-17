@@ -658,7 +658,7 @@ class _ImageExtractor:
     def generate_timecode_list(self, scene_list: SceneList) -> ty.List[ty.Iterable[FrameTimecode]]:
         """Generates a list of timecodes for each scene in `scene_list` based on the current config
         parameters."""
-        framerate = scene_list[0][0].framerate
+        framerate = scene_list[0][0]._framerate
         # TODO(v1.0): Split up into multiple sub-expressions so auto-formatter works correctly.
         return [
             (
@@ -821,7 +821,7 @@ def save_images(
     image_num_format = "%0"
     image_num_format += str(math.floor(math.log(num_images, 10)) + 2) + "d"
 
-    framerate = scene_list[0][0].framerate
+    framerate = scene_list[0][0]._framerate
 
     # TODO(v1.0): Split up into multiple sub-expressions so auto-formatter works correctly.
     timecode_list = [
@@ -1352,7 +1352,7 @@ class SceneManager:
             raise self._exception_info[1].with_traceback(self._exception_info[2])
 
         self._last_pos = video.position
-        self._post_process(video.position.frame_num)
+        self._post_process(video.position._frame_num)
         return video.frame_number - start_frame_num
 
     def _decode_thread(
@@ -1371,7 +1371,7 @@ class SceneManager:
                 # (all of which should be modified under the GIL).
                 # TODO(v1.0): This optimization should be removed as it is an uncommon use case and
                 # greatly increases the complexity of detection algorithms using it.
-                if self._is_processing_required(video.position.frame_num):
+                if self._is_processing_required(video.position._frame_num):
                     frame_im = video.read()
                     if frame_im is False:
                         break

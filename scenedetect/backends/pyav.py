@@ -20,11 +20,13 @@ import numpy as np
 from scenedetect.common import Timecode
 from scenedetect.frame_timecode import MAX_FPS_DELTA, FrameTimecode
 from scenedetect.platform import get_file_name
-from scenedetect.video_stream import FrameRateUnavailable, VideoFrame, VideoOpenFailure, VideoStream
+from scenedetect.video_stream import FrameRateUnavailable, VideoOpenFailure, VideoStream
 
 logger = getLogger("pyscenedetect")
 
 VALID_THREAD_MODES = ["NONE", "SLICE", "FRAME", "AUTO"]
+
+_USE_PTS_IN_DEVELOPMENT = False
 
 
 class VideoStreamAv(VideoStream):
@@ -80,7 +82,7 @@ class VideoStreamAv(VideoStream):
 
         self._name = "" if name is None else name
         self._path = ""
-        self._frame = None
+        self._frame: ty.Optional[av.VideoFrame] = None
         self._reopened = True
 
         if threading_mode:
@@ -183,6 +185,9 @@ class VideoStreamAv(VideoStream):
 
         This can be interpreted as presentation time stamp, thus frame 1 corresponds
         to the presentation time 0.  Returns 0 even if `frame_number` is 1."""
+        if _USE_PTS_IN_DEVELOPMENT:
+            timecode = Timecode(pts=self._frame.pts, time_base=self._frame.time_base)
+            return FrameTimecode(timecode=timecode, fps=self.frame_rate)
         if self._frame is None:
             return self.base_timecode
         return FrameTimecode(round(self._frame.time * self.frame_rate), self.frame_rate)
@@ -263,19 +268,6 @@ class VideoStreamAv(VideoStream):
             self._container = av.open(self._path if self._path else self._io)
         except Exception as ex:
             raise VideoOpenFailure() from ex
-
-    def __next__(self) -> VideoFrame:
-        # TODO: On the VFR test video, we seem to only decode 1979 frames instead of 1980. See what
-        # the issue could be.
-        try:
-            frame = next(self._container.decode(video=0))
-        except av.error.EOFError as ex:
-            if not self._handle_eof():
-                raise StopIteration() from ex
-            return next(self)  # *NOTE*: self._handle_eof must ensure we won't recurse again.
-        image = frame.to_ndarray(format="bgr24")
-        timecode = Timecode(pts=frame.pts, time_base=frame.time_base)
-        return VideoFrame(image=image, timecode=timecode)
 
     def read(self, decode: bool = True, advance: bool = True) -> ty.Union[np.ndarray, bool]:
         """Read and decode the next frame as a np.ndarray. Returns False when video ends.

@@ -657,4 +657,12 @@ Development
 
 ### API Changes
 
-- [deprecation] The `scenedetect.frame_timecode` module is deprecated, import `FrameTimecode` from `scenedetect` (or `scenedetect.common`) instead
+#### Breaking
+
+- `FrameTimecode` fields `frame_num` and `framerate` are now read-only properties, construct a new `FrameTimecode` to change them
+- Remove `FrameTimecode.previous_frame()` method
+
+#### Deprecation
+
+- `scenedetect.frame_timecode` module is now deprecated, use `scenedetect.common` (or `scenedetect`) instead
+

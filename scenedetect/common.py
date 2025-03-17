@@ -98,12 +98,7 @@ _SECONDS_PER_HOUR = 60.0 * _SECONDS_PER_MINUTE
 _MINUTES_PER_HOUR = 60.0
 
 
-# TODO(@Breakthrough): Figure out interop with FrameTimecode. We can probably just store this inside
-# of FrameTimecode.
-# TODO(@Breakthrough): How should we deal with frame numbers? We might need to detect if a video is
-# VFR or not, and if so, either omit them or always start them from 0 regardless of the start seek.
-# With PyAV we can probably assume the video is VFR if the guessed rate of the stream differs
-# from the average rate.
+# TODO(@Breakthrough): How should we deal with frame numbers when we have a `Timecode`?
 #
 # Each backend has slight nuances we have to take into account:
 #   - PyAV: Does not include a position in frames, we can probably estimate it. Need to also compare
@@ -113,6 +108,14 @@ _MINUTES_PER_HOUR = 60.0
 #     This is probably sufficient, since we could just use 1ms as a timebase.
 #   - MoviePy: Assumes fixed framerate and doesn't include timing information. Fixing this is
 #     probably not feasible, so we should make sure the docs warn users about this.
+#
+# In the meantime, having backends provide accurate timing information is controlled by a hard-coded
+# constant `_USE_PTS_IN_DEVELOPMENT` in each backend implementation that supports it. It still does
+# not work correctly however, as we have to modify detectors themselves to work with FrameTimecode
+# objects instead of integer frame numbers like they do now.
+#
+# We might be able to avoid changing the detector interface if we just have them work directly with
+# PTS and convert them back to FrameTimecodes with the same time base.
 @dataclass
 class Timecode:
     """Timing information associated with a given frame."""
@@ -139,13 +142,13 @@ class FrameTimecode:
 
     def __init__(
         self,
-        timecode: ty.Union[int, float, str, "FrameTimecode"] = None,
+        timecode: ty.Union[int, float, str, Timecode, "FrameTimecode"] = None,
         fps: ty.Union[int, float, str, "FrameTimecode"] = None,
     ):
         """
         Arguments:
-            timecode: A frame number (int), number of seconds (float), or timecode (str in
-                the form `'HH:MM:SS'` or `'HH:MM:SS.nnn'`).
+            timecode: A frame number (`int`), number of seconds (`float`), timecode string in
+                the form `'HH:MM:SS'` or `'HH:MM:SS.nnn'`, or a `Timecode`.
             fps: The framerate or FrameTimecode to use as a time base for all arithmetic.
         Raises:
             TypeError: Thrown if either `timecode` or `fps` are unsupported types.
@@ -155,38 +158,52 @@ class FrameTimecode:
         # in a frame-specific manner.  Note that once the framerate is set,
         # the value should never be modified (only read if required).
         # TODO(v1.0): Make these actual @properties.
-        self.framerate = None
-        self.frame_num = None
+        self._framerate = fps
+        self._frame_num = None
+        self._timecode: ty.Optional[Timecode] = None
 
-        # Copy constructor.  Only the timecode argument is used in this case.
+        # Copy constructor.
         if isinstance(timecode, FrameTimecode):
-            self.framerate = timecode.framerate
-            self.frame_num = timecode.frame_num
-            if fps is not None:
-                raise TypeError("Framerate cannot be overwritten when copying a FrameTimecode.")
-        else:
-            # Ensure other arguments are consistent with API.
-            if fps is None:
-                raise TypeError("Framerate (fps) is a required argument.")
-            if isinstance(fps, FrameTimecode):
-                fps = fps.framerate
+            self._framerate = timecode._framerate if fps is None else fps
+            self._frame_num = timecode._frame_num
+            return
 
-            # Process the given framerate, if it was not already set.
-            if not isinstance(fps, (int, float)):
-                raise TypeError("Framerate must be of type int/float.")
-            if (isinstance(fps, int) and not fps > 0) or (
-                isinstance(fps, float) and not fps >= MAX_FPS_DELTA
-            ):
-                raise ValueError("Framerate must be positive and greater than zero.")
-            self.framerate = float(fps)
+        # Timecode.
+        if isinstance(timecode, Timecode):
+            self._timecode = timecode
+            return
 
+        # Ensure args are consistent with API.
+        if fps is None:
+            raise TypeError("Framerate (fps) is a required argument.")
+        if isinstance(fps, FrameTimecode):
+            fps = fps._framerate
+
+        # Process the given framerate, if it was not already set.
+        if not isinstance(fps, (int, float)):
+            raise TypeError("Framerate must be of type int/float.")
+        if (isinstance(fps, int) and not fps > 0) or (
+            isinstance(fps, float) and not fps >= MAX_FPS_DELTA
+        ):
+            raise ValueError("Framerate must be positive and greater than zero.")
+        self._framerate = float(fps)
         # Process the timecode value, storing it as an exact number of frames.
         if isinstance(timecode, str):
-            self.frame_num = self._parse_timecode_string(timecode)
+            # TODO(v0.7): This will be incorrect for VFR videos. Need to represent this format
+            # differently so we can support start/end times and min_scene_len correctly.
+            self._frame_num = self._parse_timecode_string(timecode)
         else:
-            self.frame_num = self._parse_timecode_number(timecode)
+            self._frame_num = self._parse_timecode_number(timecode)
 
-    # TODO(v1.0): Add a `frame` property to replace the existing one and deprecate this getter.
+    @property
+    def frame_num(self) -> ty.Optional[int]:
+        return self._frame_num
+
+    @property
+    def framerate(self) -> ty.Optional[int]:
+        return self._framerate
+
+    # TODO(v0.7): Mark this as deprecated (use frame_num instead).
     def get_frames(self) -> int:
         """Get the current time/position in number of frames.  This is the
         equivalent of accessing the self.frame_num property (which, along
@@ -201,7 +218,7 @@ class FrameTimecode:
         """
         return self.frame_num
 
-    # TODO(v1.0): Add a `framerate` property to replace the existing one and deprecate this getter.
+    # TODO(v0.7): Mark this as deprecated (use framerate instead).
     def get_framerate(self) -> float:
         """Get Framerate: Returns the framerate used by the FrameTimecode object.
 
@@ -210,6 +227,7 @@ class FrameTimecode:
         """
         return self.framerate
 
+    # TODO(v0.7): Figure out how to deal with VFR here.
     def equal_framerate(self, fps) -> bool:
         """Equal Framerate: Determines if the passed framerate is equal to that of this object.
 
@@ -220,9 +238,10 @@ class FrameTimecode:
             bool: True if passed fps matches the FrameTimecode object's framerate, False otherwise.
 
         """
+        # TODO(v0.7): Support this comparison in the case FPS is not set but a timecode is.
         return math.fabs(self.framerate - fps) < MAX_FPS_DELTA
 
-    # TODO(v1.0): Add a `seconds` property to replace this and deprecate the existing one.
+    # TODO(v0.7): Add a `seconds` property to replace this and deprecate the existing one.
     def get_seconds(self) -> float:
         """Get the frame's position in number of seconds.
 
@@ -232,9 +251,11 @@ class FrameTimecode:
         Returns:
             float: The current time/position in seconds.
         """
-        return float(self.frame_num) / self.framerate
+        if self._timecode:
+            return self._timecode.seconds
+        # Assume constant framerate if we don't have timing information.
+        return float(self._frame_num) / self._framerate
 
-    # TODO(v1.0): Add a `timecode` property to replace this and deprecate the existing one.
     def get_timecode(self, precision: int = 3, use_rounding: bool = True) -> str:
         """Get a formatted timecode string of the form HH:MM:SS[.nnn].
 
@@ -270,22 +291,12 @@ class FrameTimecode:
         # Return hours, minutes, and seconds as a formatted timecode string.
         return "%02d:%02d:%s" % (hrs, mins, secs_str)
 
-    # TODO(v1.0): Add a `previous` property to replace the existing one and deprecate this getter.
-    def previous_frame(self) -> "FrameTimecode":
-        """Return a new FrameTimecode for the previous frame (or 0 if on frame 0)."""
-        new_timecode = FrameTimecode(self)
-        new_timecode.frame_num = max(0, new_timecode.frame_num - 1)
-        return new_timecode
-
     def _seconds_to_frames(self, seconds: float) -> int:
-        """Convert the passed value seconds to the nearest number of frames using
-        the current FrameTimecode object's FPS (self.framerate).
+        """Convert `seconds` to the nearest number of frames using the current framerate.
 
-        Returns:
-            Integer number of frames the passed number of seconds represents using
-            the current FrameTimecode's framerate property.
+        *NOTE*: This will not be correct for variable framerate videos.
         """
-        return round(seconds * self.framerate)
+        return round(seconds * self._framerate)
 
     def _parse_timecode_number(self, timecode: ty.Union[int, float]) -> int:
         """Parse a timecode number, storing it as the exact number of frames.
@@ -305,11 +316,6 @@ class FrameTimecode:
             if timecode < 0.0:
                 raise ValueError("Timecode value must be positive and greater than zero.")
             return self._seconds_to_frames(timecode)
-        # FrameTimecode
-        elif isinstance(timecode, FrameTimecode):
-            return timecode.frame_num
-        elif timecode is None:
-            raise TypeError("Timecode/frame number must be specified!")
         else:
             raise TypeError("Timecode format/type unrecognized.")
 
@@ -325,7 +331,7 @@ class FrameTimecode:
         Raises:
             ValueError: Value could not be parsed correctly.
         """
-        assert self.framerate is not None
+        assert self._framerate is not None
         input = input.strip()
         # Exact number of frames N
         if input.isdigit():
@@ -363,21 +369,21 @@ class FrameTimecode:
 
     def __iadd__(self, other: ty.Union[int, float, str, "FrameTimecode"]) -> "FrameTimecode":
         if isinstance(other, int):
-            self.frame_num += other
+            self._frame_num += other
         elif isinstance(other, FrameTimecode):
-            if self.equal_framerate(other.framerate):
-                self.frame_num += other.frame_num
+            if self.equal_framerate(other._framerate):
+                self._frame_num += other._frame_num
             else:
                 raise ValueError("FrameTimecode instances require equal framerate for addition.")
         # Check if value to add is in number of seconds.
         elif isinstance(other, float):
-            self.frame_num += self._seconds_to_frames(other)
+            self._frame_num += self._seconds_to_frames(other)
         elif isinstance(other, str):
-            self.frame_num += self._parse_timecode_string(other)
+            self._frame_num += self._parse_timecode_string(other)
         else:
             raise TypeError("Unsupported type for performing addition with FrameTimecode.")
-        if self.frame_num < 0:  # Required to allow adding negative seconds/frames.
-            self.frame_num = 0
+        if self._frame_num < 0:  # Required to allow adding negative seconds/frames.
+            self._frame_num = 0
         return self
 
     def __add__(self, other: ty.Union[int, float, str, "FrameTimecode"]) -> "FrameTimecode":
@@ -387,23 +393,23 @@ class FrameTimecode:
 
     def __isub__(self, other: ty.Union[int, float, str, "FrameTimecode"]) -> "FrameTimecode":
         if isinstance(other, int):
-            self.frame_num -= other
+            self._frame_num -= other
         elif isinstance(other, FrameTimecode):
-            if self.equal_framerate(other.framerate):
-                self.frame_num -= other.frame_num
+            if self.equal_framerate(other._framerate):
+                self._frame_num -= other._frame_num
             else:
                 raise ValueError("FrameTimecode instances require equal framerate for subtraction.")
         # Check if value to add is in number of seconds.
         elif isinstance(other, float):
-            self.frame_num -= self._seconds_to_frames(other)
+            self._frame_num -= self._seconds_to_frames(other)
         elif isinstance(other, str):
-            self.frame_num -= self._parse_timecode_string(other)
+            self._frame_num -= self._parse_timecode_string(other)
         else:
             raise TypeError(
                 "Unsupported type for performing subtraction with FrameTimecode: %s" % type(other)
             )
-        if self.frame_num < 0:
-            self.frame_num = 0
+        if self._frame_num < 0:
+            self._frame_num = 0
         return self
 
     def __sub__(self, other: ty.Union[int, float, str, "FrameTimecode"]) -> "FrameTimecode":
@@ -413,14 +419,14 @@ class FrameTimecode:
 
     def __eq__(self, other: ty.Union[int, float, str, "FrameTimecode"]) -> "FrameTimecode":
         if isinstance(other, int):
-            return self.frame_num == other
+            return self._frame_num == other
         elif isinstance(other, float):
             return self.get_seconds() == other
         elif isinstance(other, str):
-            return self.frame_num == self._parse_timecode_string(other)
+            return self._frame_num == self._parse_timecode_string(other)
         elif isinstance(other, FrameTimecode):
-            if self.equal_framerate(other.framerate):
-                return self.frame_num == other.frame_num
+            if self.equal_framerate(other._framerate):
+                return self._frame_num == other._frame_num
             else:
                 raise TypeError(
                     "FrameTimecode objects must have the same framerate to be compared."
@@ -437,14 +443,14 @@ class FrameTimecode:
 
     def __lt__(self, other: ty.Union[int, float, str, "FrameTimecode"]) -> bool:
         if isinstance(other, int):
-            return self.frame_num < other
+            return self._frame_num < other
         elif isinstance(other, float):
             return self.get_seconds() < other
         elif isinstance(other, str):
-            return self.frame_num < self._parse_timecode_string(other)
+            return self._frame_num < self._parse_timecode_string(other)
         elif isinstance(other, FrameTimecode):
-            if self.equal_framerate(other.framerate):
-                return self.frame_num < other.frame_num
+            if self.equal_framerate(other._framerate):
+                return self._frame_num < other._frame_num
             else:
                 raise TypeError(
                     "FrameTimecode objects must have the same framerate to be compared."
@@ -456,14 +462,14 @@ class FrameTimecode:
 
     def __le__(self, other: ty.Union[int, float, str, "FrameTimecode"]) -> bool:
         if isinstance(other, int):
-            return self.frame_num <= other
+            return self._frame_num <= other
         elif isinstance(other, float):
             return self.get_seconds() <= other
         elif isinstance(other, str):
-            return self.frame_num <= self._parse_timecode_string(other)
+            return self._frame_num <= self._parse_timecode_string(other)
         elif isinstance(other, FrameTimecode):
-            if self.equal_framerate(other.framerate):
-                return self.frame_num <= other.frame_num
+            if self.equal_framerate(other._framerate):
+                return self._frame_num <= other._frame_num
             else:
                 raise TypeError(
                     "FrameTimecode objects must have the same framerate to be compared."
@@ -475,14 +481,14 @@ class FrameTimecode:
 
     def __gt__(self, other: ty.Union[int, float, str, "FrameTimecode"]) -> bool:
         if isinstance(other, int):
-            return self.frame_num > other
+            return self._frame_num > other
         elif isinstance(other, float):
             return self.get_seconds() > other
         elif isinstance(other, str):
-            return self.frame_num > self._parse_timecode_string(other)
+            return self._frame_num > self._parse_timecode_string(other)
         elif isinstance(other, FrameTimecode):
-            if self.equal_framerate(other.framerate):
-                return self.frame_num > other.frame_num
+            if self.equal_framerate(other._framerate):
+                return self._frame_num > other._frame_num
             else:
                 raise TypeError(
                     "FrameTimecode objects must have the same framerate to be compared."
@@ -494,14 +500,14 @@ class FrameTimecode:
 
     def __ge__(self, other: ty.Union[int, float, str, "FrameTimecode"]) -> bool:
         if isinstance(other, int):
-            return self.frame_num >= other
+            return self._frame_num >= other
         elif isinstance(other, float):
             return self.get_seconds() >= other
         elif isinstance(other, str):
-            return self.frame_num >= self._parse_timecode_string(other)
+            return self._frame_num >= self._parse_timecode_string(other)
         elif isinstance(other, FrameTimecode):
-            if self.equal_framerate(other.framerate):
-                return self.frame_num >= other.frame_num
+            if self.equal_framerate(other._framerate):
+                return self._frame_num >= other._frame_num
             else:
                 raise TypeError(
                     "FrameTimecode objects must have the same framerate to be compared."
@@ -515,7 +521,7 @@ class FrameTimecode:
     # need to use relevant property instead.
 
     def __int__(self) -> int:
-        return self.frame_num
+        return self._frame_num
 
     def __float__(self) -> float:
         return self.get_seconds()
@@ -524,7 +530,7 @@ class FrameTimecode:
         return self.get_timecode()
 
     def __repr__(self) -> str:
-        return "%s [frame=%d, fps=%.3f]" % (self.get_timecode(), self.frame_num, self.framerate)
+        return "%s [frame=%d, fps=%.3f]" % (self.get_timecode(), self._frame_num, self._framerate)
 
     def __hash__(self) -> int:
-        return self.frame_num
+        return self._frame_num

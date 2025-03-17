@@ -77,14 +77,6 @@ class FrameRateUnavailable(VideoOpenFailure):
 ##
 
 
-@dataclass
-class VideoFrame:
-    """Data returned when reading/decoding a frame from a video."""
-
-    image: np.ndarray
-    timecode: Timecode
-
-
 class VideoStream(ABC):
     """Interface which all video backends must implement."""
 
@@ -181,31 +173,7 @@ class VideoStream(ABC):
     #
     # Abstract Methods
     #
-    def __iter__(self) -> ty.Iterable[VideoFrame]:
-        return self
 
-    def __next__(self) -> VideoFrame:
-        """Read and decode the next frame from the current seek position.
-
-        Raises:
-            StopIteration: The next frame could not be decoded (i.e. the stream ended).
-        """
-        # TODO(v0.7): Make this an abstract method when it is implemented for all backends.
-        raise NotImplementedError()
-
-    def skip(self) -> ty.Optional[Timecode]:
-        """Advance the stream to the next frame without decoding the frame data. *May* be faster in
-        cases where the image data for a given frame isn't required.
-
-        Returns:
-            The `Timecode` of the frame that was skipped, or None if it could not be decoded (i.e.
-            the stream ended).
-        """
-        # TODO(v0.7): Make this an abstract method when it is implemented for all backends.
-        raise NotImplementedError()
-
-    # TODO(v0.7): Mark this as deprecated in lieu of `__next__` and `skip`. See if there is a way
-    # we can change this to no longer be an abstract method, but to instead use the above methods.
     @abstractmethod
     def read(self, decode: bool = True, advance: bool = True) -> ty.Union[np.ndarray, bool]:
         """Read and decode the next frame as a np.ndarray. Returns False when video ends.
