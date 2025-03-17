@@ -83,20 +83,6 @@ stream is not seekable (additional information will be provided when possible).<
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="scenedetect.video_stream.VideoFrame">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scenedetect.video_stream.</span></span><span class="sig-name descname"><span class="pre">VideoFrame</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timecode</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.video_stream.VideoFrame" title="Permalink to this definition">¶</a></dt>
-<dd><p>Data returned when reading/decoding a frame from a video.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>image</strong> (<em>ndarray</em>) – </p></li>
-<li><p><strong>timecode</strong> (<a class="reference internal" href="common.html#scenedetect.common.Timecode" title="scenedetect.common.Timecode"><em>Timecode</em></a>) – </p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py class">
 <dt class="sig sig-object py" id="scenedetect.video_stream.VideoStream">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scenedetect.video_stream.</span></span><span class="sig-name descname"><span class="pre">VideoStream</span></span><a class="headerlink" href="#scenedetect.video_stream.VideoStream" title="Permalink to this definition">¶</a></dt>
 <dd><p>Interface which all video backends must implement.</p>
@@ -168,22 +154,6 @@ If int, interpreted as frame number.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>None</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="scenedetect.video_stream.VideoStream.skip">
-<span class="sig-name descname"><span class="pre">skip</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.video_stream.VideoStream.skip" title="Permalink to this definition">¶</a></dt>
-<dd><p>Advance the stream to the next frame without decoding the frame data. <em>May</em> be faster in
-cases where the image data for a given frame isn’t required.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The <cite>Timecode</cite> of the frame that was skipped, or None if it could not be decoded (i.e.
-the stream ended).</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="common.html#scenedetect.common.Timecode" title="scenedetect.common.Timecode"><em>Timecode</em></a> | None</p>
 </dd>
 </dl>
 </dd></dl>
@@ -332,7 +302,6 @@ milliseconds. The first frame has a PTS of 0.</p>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.video_stream.FrameRateUnavailable"><code class="docutils literal notranslate"><span class="pre">FrameRateUnavailable</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.video_stream.SeekError"><code class="docutils literal notranslate"><span class="pre">SeekError</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.video_stream.VideoOpenFailure"><code class="docutils literal notranslate"><span class="pre">VideoOpenFailure</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#scenedetect.video_stream.VideoFrame"><code class="docutils literal notranslate"><span class="pre">VideoFrame</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.video_stream.VideoStream"><code class="docutils literal notranslate"><span class="pre">VideoStream</span></code></a></li>
 </ul>
 </li>

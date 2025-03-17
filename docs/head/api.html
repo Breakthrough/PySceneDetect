@@ -71,7 +71,7 @@
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>The PySceneDetect API is still under development. It is recommended that you pin the <cite>scenedetect</cite> version in your requirements to below the next major release:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">scenedetect</span><span class="o">&lt;</span><span class="mf">0.7</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">scenedetect</span><span class="o">&lt;</span><span class="mf">0.8</span>
 </pre></div>
 </div>
 </div>
@@ -257,6 +257,7 @@ overriding backend-specific options.</p></li>
 <li class="toctree-l3"><a class="reference internal" href="api/backends.html#scenedetect.backends.opencv.VideoStreamCv2.path"><code class="docutils literal notranslate"><span class="pre">VideoStreamCv2.path</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/backends.html#scenedetect.backends.opencv.VideoStreamCv2.position"><code class="docutils literal notranslate"><span class="pre">VideoStreamCv2.position</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/backends.html#scenedetect.backends.opencv.VideoStreamCv2.position_ms"><code class="docutils literal notranslate"><span class="pre">VideoStreamCv2.position_ms</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/backends.html#scenedetect.backends.opencv.VideoStreamCv2.timecode"><code class="docutils literal notranslate"><span class="pre">VideoStreamCv2.timecode</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="api/backends.html#scenedetect.backends.pyav.VideoStreamAv"><code class="docutils literal notranslate"><span class="pre">VideoStreamAv</span></code></a><ul>
@@ -378,7 +379,6 @@ overriding backend-specific options.</p></li>
 <li class="toctree-l3"><a class="reference internal" href="api/common.html#scenedetect.common.FrameTimecode.get_frames"><code class="docutils literal notranslate"><span class="pre">FrameTimecode.get_frames()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/common.html#scenedetect.common.FrameTimecode.get_seconds"><code class="docutils literal notranslate"><span class="pre">FrameTimecode.get_seconds()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/common.html#scenedetect.common.FrameTimecode.get_timecode"><code class="docutils literal notranslate"><span class="pre">FrameTimecode.get_timecode()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="api/common.html#scenedetect.common.FrameTimecode.previous_frame"><code class="docutils literal notranslate"><span class="pre">FrameTimecode.previous_frame()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="api/common.html#scenedetect.common.Timecode"><code class="docutils literal notranslate"><span class="pre">Timecode</span></code></a><ul>
@@ -413,13 +413,11 @@ overriding backend-specific options.</p></li>
 <li class="toctree-l2"><a class="reference internal" href="api/video_stream.html#scenedetect.video_stream.FrameRateUnavailable"><code class="docutils literal notranslate"><span class="pre">FrameRateUnavailable</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/video_stream.html#scenedetect.video_stream.SeekError"><code class="docutils literal notranslate"><span class="pre">SeekError</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/video_stream.html#scenedetect.video_stream.VideoOpenFailure"><code class="docutils literal notranslate"><span class="pre">VideoOpenFailure</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/video_stream.html#scenedetect.video_stream.VideoFrame"><code class="docutils literal notranslate"><span class="pre">VideoFrame</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/video_stream.html#scenedetect.video_stream.VideoStream"><code class="docutils literal notranslate"><span class="pre">VideoStream</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="api/video_stream.html#scenedetect.video_stream.VideoStream.BACKEND_NAME"><code class="docutils literal notranslate"><span class="pre">VideoStream.BACKEND_NAME()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/video_stream.html#scenedetect.video_stream.VideoStream.read"><code class="docutils literal notranslate"><span class="pre">VideoStream.read()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/video_stream.html#scenedetect.video_stream.VideoStream.reset"><code class="docutils literal notranslate"><span class="pre">VideoStream.reset()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/video_stream.html#scenedetect.video_stream.VideoStream.seek"><code class="docutils literal notranslate"><span class="pre">VideoStream.seek()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="api/video_stream.html#scenedetect.video_stream.VideoStream.skip"><code class="docutils literal notranslate"><span class="pre">VideoStream.skip()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/video_stream.html#scenedetect.video_stream.VideoStream.aspect_ratio"><code class="docutils literal notranslate"><span class="pre">VideoStream.aspect_ratio</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/video_stream.html#scenedetect.video_stream.VideoStream.base_timecode"><code class="docutils literal notranslate"><span class="pre">VideoStream.base_timecode</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/video_stream.html#scenedetect.video_stream.VideoStream.duration"><code class="docutils literal notranslate"><span class="pre">VideoStream.duration</span></code></a></li>

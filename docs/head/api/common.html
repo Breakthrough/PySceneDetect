@@ -95,8 +95,8 @@ forth between frame number and seconds/timecode.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>timecode</strong> (<em>int</em><em> | </em><em>float</em><em> | </em><em>str</em><em> | </em><a class="reference internal" href="#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a>) – A frame number (int), number of seconds (float), or timecode (str in
-the form <cite>‘HH:MM:SS’</cite> or <cite>‘HH:MM:SS.nnn’</cite>).</p></li>
+<li><p><strong>timecode</strong> (<em>int</em><em> | </em><em>float</em><em> | </em><em>str</em><em> | </em><a class="reference internal" href="#scenedetect.common.Timecode" title="scenedetect.common.Timecode"><em>Timecode</em></a><em> | </em><a class="reference internal" href="#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a>) – A frame number (<cite>int</cite>), number of seconds (<cite>float</cite>), timecode string in
+the form <cite>‘HH:MM:SS’</cite> or <cite>‘HH:MM:SS.nnn’</cite>, or a <cite>Timecode</cite>.</p></li>
 <li><p><strong>fps</strong> (<em>int</em><em> | </em><em>float</em><em> | </em><em>str</em><em> | </em><a class="reference internal" href="#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a>) – The framerate or FrameTimecode to use as a time base for all arithmetic.</p></li>
 </ul>
 </dd>
@@ -191,17 +191,6 @@ will be truncated to the specified precision.</p></li>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>str</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="scenedetect.common.FrameTimecode.previous_frame">
-<span class="sig-name descname"><span class="pre">previous_frame</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.common.FrameTimecode.previous_frame" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return a new FrameTimecode for the previous frame (or 0 if on frame 0).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a></p>
 </dd>
 </dl>
 </dd></dl>
