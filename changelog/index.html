@@ -909,6 +909,8 @@
 <h3 id="api-changes">API Changes</h3>
 <h4 id="breaking">Breaking</h4>
 <ul>
+<li>Remove deprecated <code>scenedetect.video_manager</code> module (<a href="https://www.scenedetect.com/docs/head/api.html#scenedetect.open_video">use <code>scenedetect.open_video()</code> function</a> instead)</li>
+<li>Deprecated <code>video_manager</code> parameter has been removed from many functions and constructors, use <code>video</code> parameter instead when required</li>
 <li>Refactoring to make code less verbose:<ul>
 <li><code>scenedetect.scene_detector</code> is now <code>scenedetect.detector</code></li>
 <li><code>scenedetect.frame_timecode</code> is now <code>scenedetect.common</code></li>
@@ -918,12 +920,13 @@
 <li>Remove <code>FrameTimecode.previous_frame()</code> method</li>
 <li>Remove <code>SceneDetector.is_processing_required()</code> method, already had no effect in v0.6 as part of deprecation</li>
 <li><code>SceneDetector</code> instances can now assume they always have frame data to process when <code>process_frame</code> is called</li>
-<li>Remove <code>scenedetect.video_manager</code> module (<a href="https://www.scenedetect.com/docs/head/api.html#scenedetect.open_video">use <code>scenedetect.open_video()</code> function</a> instead)</li>
-<li>Deprecated <code>video_manager</code> parameter has been removed from many functions and constructors, use <code>video</code> parameter instead when required</li>
+<li>Remove deprecated <code>SparseSceneDetector</code> interface</li>
+<li>Remove deprecated <code>SceneManager.get_event_list()</code> method</li>
 </ul>
 <h4 id="deprecation">Deprecation</h4>
 <ul>
-<li><code>scenedetect.scene_detector</code> module is now deprecated, use <code>scenedetect.detector</code> (or <code>scenedetect</code>) instead</li>
+<li><code>scenedetect.scene_detector</code> module is now deprecated, import from <code>scenedetect</code> or <code>scenedetect.detector</code> instead</li>
+<li><code>scenedetect.frame_timecode</code> module is now deprecated, import from <code>scenedetect</code> or <code>scenedetect.common</code> instead</li>
 </ul>
               
             </div>
