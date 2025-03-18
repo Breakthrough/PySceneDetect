@@ -1,9 +1,9 @@
 
-.. _scenedetect-scene_detector:
+.. _scenedetect-detector:
 
 -------------------------------------------------
 SceneDetector
 -------------------------------------------------
 
-.. automodule:: scenedetect.scene_detector
+.. automodule:: scenedetect.detector
    :members:

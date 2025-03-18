@@ -53,7 +53,7 @@ Uses perceptual hashing to calculate similarity between adjacent frames.</p></li
 </ul>
 </div></blockquote>
 <p>Detection algorithms are created by implementing the
-<a class="reference internal" href="scene_detector.html#scenedetect.scene_detector.SceneDetector" title="scenedetect.scene_detector.SceneDetector"><code class="xref py py-class docutils literal notranslate"><span class="pre">SceneDetector</span></code></a> interface. Detectors are
+<a class="reference internal" href="detector.html#scenedetect.detector.SceneDetector" title="scenedetect.detector.SceneDetector"><code class="xref py py-class docutils literal notranslate"><span class="pre">SceneDetector</span></code></a> interface. Detectors are
 typically attached to a <a class="reference internal" href="scene_manager.html#scenedetect.scene_manager.SceneManager" title="scenedetect.scene_manager.SceneManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">SceneManager</span></code></a> when
 processing videos, however they can also be used to process frames directly.</p>
 <span class="target" id="module-scenedetect.detectors.adaptive_detector"></span><p><a class="reference internal" href="#scenedetect.detectors.adaptive_detector.AdaptiveDetector" title="scenedetect.detectors.adaptive_detector.AdaptiveDetector"><code class="xref py py-class docutils literal notranslate"><span class="pre">AdaptiveDetector</span></code></a> compares the difference in content between adjacent frames similar
@@ -62,7 +62,7 @@ changes. This can help mitigate false detections in situations such as fast came
 <p>This detector is available from the command-line as the <cite>detect-adaptive</cite> command.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="scenedetect.detectors.adaptive_detector.AdaptiveDetector">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scenedetect.detectors.adaptive_detector.</span></span><span class="sig-name descname"><span class="pre">AdaptiveDetector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adaptive_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_scene_len</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">15</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_content_val</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">15.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Components(delta_hue=1.0,</span> <span class="pre">delta_sat=1.0,</span> <span class="pre">delta_lum=1.0,</span> <span class="pre">delta_edges=0.0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">luma_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">video_manager</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_delta_hsv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.detectors.adaptive_detector.AdaptiveDetector" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scenedetect.detectors.adaptive_detector.</span></span><span class="sig-name descname"><span class="pre">AdaptiveDetector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adaptive_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_scene_len</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">15</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_content_val</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">15.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Components(delta_hue=1.0,</span> <span class="pre">delta_sat=1.0,</span> <span class="pre">delta_lum=1.0,</span> <span class="pre">delta_edges=0.0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">luma_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_delta_hsv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.detectors.adaptive_detector.AdaptiveDetector" title="Permalink to this definition">¶</a></dt>
 <dd><p>Two-pass detector that calculates frame scores with ContentDetector, and then applies
 a rolling average when processing the result that can help mitigate false detections
 in situations such as camera movement.</p>
@@ -86,7 +86,6 @@ Equivalent to specifying <cite>weights</cite> as <code class="xref py py-data do
 Overrides <cite>weights</cite> if both are set.</p></li>
 <li><p><strong>kernel_size</strong> (<em>int</em><em> | </em><em>None</em>) – Size of kernel to use for post edge detection filtering. If None,
 automatically set based on video resolution.</p></li>
-<li><p><strong>video_manager</strong> – [DEPRECATED] DO NOT USE. For backwards compatibility only.</p></li>
 <li><p><strong>min_delta_hsv</strong> (<em>float</em><em> | </em><em>None</em>) – [DEPRECATED] DO NOT USE. Use <cite>min_content_val</cite> instead.</p></li>
 </ul>
 </dd>
@@ -193,7 +192,7 @@ Equivalent to specifying <cite>weights</cite> as <code class="xref py py-data do
 Overrides <cite>weights</cite> if both are set.</p></li>
 <li><p><strong>kernel_size</strong> (<em>int</em><em> | </em><em>None</em>) – Size of kernel for expanding detected edges. Must be odd integer
 greater than or equal to 3. If None, automatically set using video resolution.</p></li>
-<li><p><strong>filter_mode</strong> (<a class="reference internal" href="scene_detector.html#scenedetect.scene_detector.FlashFilter.Mode" title="scenedetect.scene_detector.FlashFilter.Mode"><em>Mode</em></a>) – Mode to use when filtering cuts to meet <cite>min_scene_len</cite>.</p></li>
+<li><p><strong>filter_mode</strong> (<a class="reference internal" href="detector.html#scenedetect.detector.FlashFilter.Mode" title="scenedetect.detector.FlashFilter.Mode"><em>Mode</em></a>) – Mode to use when filtering cuts to meet <cite>min_scene_len</cite>.</p></li>
 </ul>
 </dd>
 </dl>
@@ -376,21 +375,9 @@ frame to frame.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>frame_num</strong> (<em>int</em>) – Frame number of frame that is being passed.</p></li>
-<li><p><strong>frame_img</strong> (<em>Optional</em><em>[</em><em>int</em><em>]</em>) – Decoded frame image (numpy.ndarray) to perform scene
-detection on. Can be None <em>only</em> if the self.is_processing_required() method
-(inhereted from the base SceneDetector class) returns True.</p></li>
+<li><p><strong>frame_num</strong> (<em>int</em>) – </p></li>
+<li><p><strong>frame_img</strong> (<em>ndarray</em>) – </p></li>
 </ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><dl class="simple">
-<dt>List of frames where scene cuts have been detected. There may be 0</dt><dd><p>or more frames in the list, and not necessarily the same as frame_num.</p>
-</dd>
-</dl>
-</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>ty.List[int]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -686,7 +673,7 @@ or more frames in the list, and not necessarily the same as frame_num.</p>
 <li class="toctree-l1"><a class="reference internal" href="common.html">Common</a></li>
 <li class="toctree-l1"><a class="reference internal" href="video_splitter.html">Video Splitting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="stats_manager.html">StatsManager</a></li>
-<li class="toctree-l1"><a class="reference internal" href="scene_detector.html">SceneDetector</a></li>
+<li class="toctree-l1"><a class="reference internal" href="detector.html">SceneDetector</a></li>
 <li class="toctree-l1"><a class="reference internal" href="video_stream.html">VideoStream</a></li>
 <li class="toctree-l1"><a class="reference internal" href="platform.html">Platform &amp; Logging</a></li>
 </ul>

@@ -62,7 +62,7 @@
 </li>
 <li><p><a class="reference internal" href="api/video_splitter.html#scenedetect-video-splitter"><span class="std std-ref">scenedetect.video_splitter ✂️</span></a>: Contains <a class="reference internal" href="api/video_splitter.html#scenedetect.video_splitter.split_video_ffmpeg" title="scenedetect.video_splitter.split_video_ffmpeg"><code class="xref py py-func docutils literal notranslate"><span class="pre">split_video_ffmpeg</span></code></a> and <a class="reference internal" href="api/video_splitter.html#scenedetect.video_splitter.split_video_mkvmerge" title="scenedetect.video_splitter.split_video_mkvmerge"><code class="xref py py-func docutils literal notranslate"><span class="pre">split_video_mkvmerge</span></code></a> to split a video based on the detected scenes.</p></li>
 <li><p><a class="reference internal" href="api/common.html#scenedetect-common"><span class="std std-ref">scenedetect.common ⏱️</span></a>: Contains common types such as <a class="reference internal" href="api/common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrameTimecode</span></code></a> used for timecode handing.</p></li>
-<li><p><a class="reference internal" href="api/scene_detector.html#scenedetect-scene-detector"><span class="std std-ref">scenedetect.scene_detector 🌐</span></a>: Contains <a class="reference internal" href="api/scene_detector.html#scenedetect.scene_detector.SceneDetector" title="scenedetect.scene_detector.SceneDetector"><code class="xref py py-class docutils literal notranslate"><span class="pre">SceneDetector</span></code></a> interface which detection algorithms must implement.</p></li>
+<li><p><a class="reference internal" href="api/detector.html#scenedetect-detector"><span class="std std-ref">scenedetect.detector 🌐</span></a>: Contains <a class="reference internal" href="api/detector.html#scenedetect.detector.SceneDetector" title="scenedetect.detector.SceneDetector"><code class="xref py py-class docutils literal notranslate"><span class="pre">SceneDetector</span></code></a> interface which detection algorithms must implement.</p></li>
 <li><p><a class="reference internal" href="api/stats_manager.html#scenedetect-stats-manager"><span class="std std-ref">scenedetect.stats_manager 🧮</span></a>: Contains <a class="reference internal" href="api/stats_manager.html#scenedetect.stats_manager.StatsManager" title="scenedetect.stats_manager.StatsManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">StatsManager</span></code></a> class for caching frame metrics and loading/saving them to disk in CSV format for analysis.</p></li>
 <li><p><a class="reference internal" href="api/platform.html#scenedetect-platform"><span class="std std-ref">scenedetect.platform 🐱‍💻</span></a>: Logging and utility functions.</p></li>
 </ul>
@@ -108,7 +108,7 @@ can be used to open a video for a
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>video_path</strong> (<em>str</em>) – Path to input video (absolute or relative to working directory).</p></li>
-<li><p><strong>detector</strong> (<a class="reference internal" href="api/scene_detector.html#scenedetect.scene_detector.SceneDetector" title="scenedetect.scene_detector.SceneDetector"><em>SceneDetector</em></a>) – A <cite>SceneDetector</cite> instance (see <a class="reference internal" href="api/detectors.html#module-scenedetect.detectors" title="scenedetect.detectors"><code class="xref py py-mod docutils literal notranslate"><span class="pre">scenedetect.detectors</span></code></a> for a full list
+<li><p><strong>detector</strong> (<a class="reference internal" href="api/detector.html#scenedetect.detector.SceneDetector" title="scenedetect.detector.SceneDetector"><em>SceneDetector</em></a>) – A <cite>SceneDetector</cite> instance (see <a class="reference internal" href="api/detectors.html#module-scenedetect.detectors" title="scenedetect.detectors"><code class="xref py py-mod docutils literal notranslate"><span class="pre">scenedetect.detectors</span></code></a> for a full list
 of detectors).</p></li>
 <li><p><strong>stats_file_path</strong> (<em>str</em><em> | </em><em>None</em>) – Path to save per-frame metrics to for statistical analysis or to
 determine a better threshold value.</p></li>
@@ -393,18 +393,18 @@ overriding backend-specific options.</p></li>
 <li class="toctree-l2"><a class="reference internal" href="api/common.html#scenedetect.common.TimecodePair"><code class="docutils literal notranslate"><span class="pre">TimecodePair</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="api/scene_detector.html">SceneDetector</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="api/scene_detector.html#scenedetect.scene_detector.FlashFilter"><code class="docutils literal notranslate"><span class="pre">FlashFilter</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="api/scene_detector.html#scenedetect.scene_detector.FlashFilter.Mode"><code class="docutils literal notranslate"><span class="pre">FlashFilter.Mode</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/detector.html">SceneDetector</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/detector.html#scenedetect.detector.FlashFilter"><code class="docutils literal notranslate"><span class="pre">FlashFilter</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/detector.html#scenedetect.detector.FlashFilter.Mode"><code class="docutils literal notranslate"><span class="pre">FlashFilter.Mode</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="api/scene_detector.html#scenedetect.scene_detector.SceneDetector"><code class="docutils literal notranslate"><span class="pre">SceneDetector</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="api/scene_detector.html#scenedetect.scene_detector.SceneDetector.get_metrics"><code class="docutils literal notranslate"><span class="pre">SceneDetector.get_metrics()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="api/scene_detector.html#scenedetect.scene_detector.SceneDetector.post_process"><code class="docutils literal notranslate"><span class="pre">SceneDetector.post_process()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="api/scene_detector.html#scenedetect.scene_detector.SceneDetector.process_frame"><code class="docutils literal notranslate"><span class="pre">SceneDetector.process_frame()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="api/scene_detector.html#scenedetect.scene_detector.SceneDetector.stats_manager_required"><code class="docutils literal notranslate"><span class="pre">SceneDetector.stats_manager_required()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="api/scene_detector.html#scenedetect.scene_detector.SceneDetector.event_buffer_length"><code class="docutils literal notranslate"><span class="pre">SceneDetector.event_buffer_length</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="api/scene_detector.html#scenedetect.scene_detector.SceneDetector.stats_manager"><code class="docutils literal notranslate"><span class="pre">SceneDetector.stats_manager</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/detector.html#scenedetect.detector.SceneDetector"><code class="docutils literal notranslate"><span class="pre">SceneDetector</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/detector.html#scenedetect.detector.SceneDetector.get_metrics"><code class="docutils literal notranslate"><span class="pre">SceneDetector.get_metrics()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/detector.html#scenedetect.detector.SceneDetector.post_process"><code class="docutils literal notranslate"><span class="pre">SceneDetector.post_process()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/detector.html#scenedetect.detector.SceneDetector.process_frame"><code class="docutils literal notranslate"><span class="pre">SceneDetector.process_frame()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/detector.html#scenedetect.detector.SceneDetector.stats_manager_required"><code class="docutils literal notranslate"><span class="pre">SceneDetector.stats_manager_required()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/detector.html#scenedetect.detector.SceneDetector.event_buffer_length"><code class="docutils literal notranslate"><span class="pre">SceneDetector.event_buffer_length</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/detector.html#scenedetect.detector.SceneDetector.stats_manager"><code class="docutils literal notranslate"><span class="pre">SceneDetector.stats_manager</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -534,7 +534,7 @@ overriding backend-specific options.</p></li>
 <li class="toctree-l1"><a class="reference internal" href="api/common.html">Common</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/video_splitter.html">Video Splitting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/stats_manager.html">StatsManager</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api/scene_detector.html">SceneDetector</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/detector.html">SceneDetector</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/video_stream.html">VideoStream</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/platform.html">Platform &amp; Logging</a></li>
 </ul>
