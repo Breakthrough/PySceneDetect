@@ -46,9 +46,9 @@ Table of Contents
 
     api
     api/detectors
-    api/backends
     api/scene_manager
     api/common
+    api/backends
     api/video_splitter
     api/stats_manager
     api/detector
