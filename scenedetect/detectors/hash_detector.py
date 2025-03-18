@@ -82,25 +82,10 @@ class HashDetector(SceneDetector):
     def get_metrics(self):
         return [self._metric_key]
 
-    def is_processing_required(self, frame_num):
-        return True
-
-    def process_frame(self, frame_num, frame_img):
+    def process_frame(self, frame_num: int, frame_img: numpy.ndarray):
         """Similar to ContentDetector, but using a perceptual hashing algorithm
         to calculate a hash for each frame and then calculate a hash difference
-        frame to frame.
-
-        Arguments:
-            frame_num (int): Frame number of frame that is being passed.
-
-            frame_img (Optional[int]): Decoded frame image (numpy.ndarray) to perform scene
-                detection on. Can be None *only* if the self.is_processing_required() method
-                (inhereted from the base SceneDetector class) returns True.
-
-        Returns:
-           ty.List[int]: List of frames where scene cuts have been detected. There may be 0
-            or more frames in the list, and not necessarily the same as frame_num.
-        """
+        frame to frame."""
 
         cut_list = []
 

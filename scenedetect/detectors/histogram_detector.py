@@ -160,8 +160,5 @@ class HistogramDetector(SceneDetector):
 
         return hist
 
-    def is_processing_required(self, frame_num: int) -> bool:
-        return True
-
     def get_metrics(self) -> ty.List[str]:
         return [self._metric_key]

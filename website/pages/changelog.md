@@ -659,8 +659,10 @@ Development
 
 #### Breaking
 
-- `FrameTimecode` fields `frame_num` and `framerate` are now read-only properties, construct a new `FrameTimecode` to change them
-- Remove `FrameTimecode.previous_frame()` method
+ - `FrameTimecode` fields `frame_num` and `framerate` are now read-only properties, construct a new `FrameTimecode` to change them
+ - Remove `FrameTimecode.previous_frame()` method
+ - Remove `SceneDetector.is_processing_required()` method, already had no effect in v0.6 as part of deprecation
+ - `SceneDetector` instances can now assume they always have frame data to process when `process_frame` is called
 
 #### Deprecation
 

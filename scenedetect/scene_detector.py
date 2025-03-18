@@ -50,29 +50,6 @@ class SceneDetector:
     """Optional :class:`StatsManager <scenedetect.stats_manager.StatsManager>` to
     use for caching frame metrics to and from."""
 
-    # TODO(v1.0): Remove - this is a rarely used case for what is now a neglegible performance gain.
-    def is_processing_required(self, frame_num: int) -> bool:
-        """[DEPRECATED] DO NOT USE
-
-        Test if all calculations for a given frame are already done.
-
-        Returns:
-            False if the SceneDetector has assigned _metric_keys, and the
-            stats_manager property is set to a valid StatsManager object containing
-            the required frame metrics/calculations for the given frame - thus, not
-            needing the frame to perform scene detection.
-
-            True otherwise (i.e. the frame_img passed to process_frame is required
-            to be passed to process_frame for the given frame_num).
-
-        :meta private:
-        """
-        metric_keys = self.get_metrics()
-        return not metric_keys or not (
-            self.stats_manager is not None
-            and self.stats_manager.metrics_exist(frame_num, metric_keys)
-        )
-
     def stats_manager_required(self) -> bool:
         """Stats Manager Required: Prototype indicating if detector requires stats.
 

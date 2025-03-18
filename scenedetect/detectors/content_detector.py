@@ -142,9 +142,6 @@ class ContentDetector(SceneDetector):
     def get_metrics(self):
         return ContentDetector.METRIC_KEYS
 
-    def is_processing_required(self, frame_num):
-        return True
-
     def _calculate_frame_score(self, frame_num: int, frame_img: numpy.ndarray) -> float:
         """Calculate score representing relative amount of motion in `frame_img` compared to
         the last time the function was called (returns 0.0 on the first call)."""

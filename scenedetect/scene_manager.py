@@ -1369,53 +1369,47 @@ class SceneManager:
                 # We don't do any kind of locking here since the worst-case of this being wrong
                 # is that we do some extra work, and this function should never mutate any data
                 # (all of which should be modified under the GIL).
-                # TODO(v1.0): This optimization should be removed as it is an uncommon use case and
-                # greatly increases the complexity of detection algorithms using it.
-                if self._is_processing_required(video.position._frame_num):
-                    frame_im = video.read()
-                    if frame_im is False:
-                        break
-                    # Verify the decoded frame size against the video container's reported
-                    # resolution, and also verify that consecutive frames have the correct size.
-                    decoded_size = (frame_im.shape[1], frame_im.shape[0])
-                    if self._frame_size is None:
-                        self._frame_size = decoded_size
-                        if video.frame_size != decoded_size:
-                            logger.warn(
-                                f"WARNING: Decoded frame size ({decoded_size}) does not match "
-                                f" video resolution {video.frame_size}, possible corrupt input."
-                            )
-                    elif self._frame_size != decoded_size:
-                        self._frame_size_errors += 1
-                        if self._frame_size_errors <= MAX_FRAME_SIZE_ERRORS:
-                            logger.error(
-                                f"ERROR: Frame at {str(video.position)} has incorrect size and "
-                                f"cannot be processed: decoded size = {decoded_size}, "
-                                f"expected = {self._frame_size}. Video may be corrupt."
-                            )
-                        if self._frame_size_errors == MAX_FRAME_SIZE_ERRORS:
-                            logger.warn(
-                                "WARNING: Too many errors emitted, skipping future messages."
-                            )
-                        # Skip processing frames that have an incorrect size.
-                        continue
-
-                    if self._crop:
-                        (x0, y0, x1, y1) = self._crop
-                        frame_im = frame_im[y0:y1, x0:x1]
-
-                    if downscale_factor > 1.0:
-                        frame_im = cv2.resize(
-                            frame_im,
-                            (
-                                max(1, round(frame_im.shape[1] / downscale_factor)),
-                                max(1, round(frame_im.shape[0] / downscale_factor)),
-                            ),
-                            interpolation=self._interpolation.value,
+                frame_im = video.read()
+                if frame_im is False:
+                    break
+                # Verify the decoded frame size against the video container's reported
+                # resolution, and also verify that consecutive frames have the correct size.
+                decoded_size = (frame_im.shape[1], frame_im.shape[0])
+                if self._frame_size is None:
+                    self._frame_size = decoded_size
+                    if video.frame_size != decoded_size:
+                        logger.warn(
+                            f"WARNING: Decoded frame size ({decoded_size}) does not match "
+                            f" video resolution {video.frame_size}, possible corrupt input."
                         )
-                else:
-                    if video.read(decode=False) is False:
-                        break
+                elif self._frame_size != decoded_size:
+                    self._frame_size_errors += 1
+                    if self._frame_size_errors <= MAX_FRAME_SIZE_ERRORS:
+                        logger.error(
+                            f"ERROR: Frame at {str(video.position)} has incorrect size and "
+                            f"cannot be processed: decoded size = {decoded_size}, "
+                            f"expected = {self._frame_size}. Video may be corrupt."
+                        )
+                    if self._frame_size_errors == MAX_FRAME_SIZE_ERRORS:
+                        logger.warn(
+                            "WARNING: Too many errors emitted, skipping future messages."
+                        )
+                    # Skip processing frames that have an incorrect size.
+                    continue
+
+                if self._crop:
+                    (x0, y0, x1, y1) = self._crop
+                    frame_im = frame_im[y0:y1, x0:x1]
+
+                if downscale_factor > 1.0:
+                    frame_im = cv2.resize(
+                        frame_im,
+                        (
+                            max(1, round(frame_im.shape[1] / downscale_factor)),
+                            max(1, round(frame_im.shape[0] / downscale_factor)),
+                        ),
+                        interpolation=self._interpolation.value,
+                    )
 
                 # Set the start position now that we decoded at least the first frame.
                 if self._start_pos is None:
@@ -1505,9 +1499,3 @@ class SceneManager:
         # TODO(v0.7): Use the warnings module to turn this into a warning.
         logger.error("`get_event_list()` is deprecated and will be removed in a future release.")
         return self._get_event_list()
-
-    def _is_processing_required(self, frame_num: int) -> bool:
-        """True if frame metrics not in StatsManager, False otherwise."""
-        if self.stats_manager is None:
-            return True
-        return all([detector.is_processing_required(frame_num) for detector in self._detector_list])
