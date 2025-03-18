@@ -102,45 +102,6 @@ class SceneDetector:
         return 0
 
 
-# TODO(v0.7): Remove this early, no point in keeping it around.
-class SparseSceneDetector(SceneDetector):
-    """Base class to inherit from when implementing a sparse scene detection algorithm.
-
-    This class will be removed in v1.0 and should not be used.
-
-    Unlike dense detectors, sparse detectors detect "events" and return a *pair* of frames,
-    as opposed to just a single cut.
-
-    An example of a SparseSceneDetector is the MotionDetector.
-
-    :meta private:
-    """
-
-    def process_frame(
-        self, frame_num: int, frame_img: numpy.ndarray
-    ) -> ty.List[ty.Tuple[int, int]]:
-        """Process Frame: Computes/stores metrics and detects any scene changes.
-
-        Prototype method, no actual detection.
-
-        Returns:
-            List of frame pairs representing individual scenes
-            to be added to the output scene list directly.
-        """
-        return []
-
-    def post_process(self, frame_num: int) -> ty.List[ty.Tuple[int, int]]:
-        """Post Process: Performs any processing after the last frame has been read.
-
-        Prototype method, no actual detection.
-
-        Returns:
-            List of frame pairs representing individual scenes
-            to be added to the output scene list directly.
-        """
-        return []
-
-
 class FlashFilter:
     """Filters fast-cuts to enforce minimum scene length."""
 

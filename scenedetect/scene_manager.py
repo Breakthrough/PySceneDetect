@@ -101,7 +101,7 @@ from scenedetect._thirdparty.simpletable import (
     SimpleTableRow,
 )
 from scenedetect.common import CropRegion, CutList, SceneList
-from scenedetect.detector import SceneDetector, SparseSceneDetector
+from scenedetect.detector import SceneDetector
 from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.platform import get_and_create_path, get_cv2_imwrite_params, tqdm
 from scenedetect.stats_manager import StatsManager
@@ -947,9 +947,7 @@ class SceneManager:
                 accessed via the `stats_manager` property of the resulting object to save to disk.
         """
         self._cutting_list = []
-        self._event_list = []
         self._detector_list: ty.List[SceneDetector] = []
-        self._sparse_detector_list = []
         # TODO(v1.0): This class should own a StatsManager instead of taking an optional one.
         # Expose a new `stats_manager` @property from the SceneManager, and either change the
         # `stats_manager` argument to to `store_stats: bool=False`, or lazy-init one.
@@ -1063,19 +1061,14 @@ class SceneManager:
             detector (SceneDetector): Scene detector to add to the SceneManager.
         """
         if self._stats_manager is None and detector.stats_manager_required():
-            # Make sure the lists are empty so that the detectors don't get
-            # out of sync (require an explicit statsmanager instead)
-            assert not self._detector_list and not self._sparse_detector_list
+            assert not self._detector_list
             self._stats_manager = StatsManager()
 
         detector.stats_manager = self._stats_manager
         if self._stats_manager is not None:
             self._stats_manager.register_metrics(detector.get_metrics())
 
-        if not issubclass(type(detector), SparseSceneDetector):
-            self._detector_list.append(detector)
-        else:
-            self._sparse_detector_list.append(detector)
+        self._detector_list.append(detector)
 
         self._frame_buffer_size = max(detector.event_buffer_length, self._frame_buffer_size)
 
@@ -1092,7 +1085,6 @@ class SceneManager:
         cached frame metrics that were computed and saved in the previous call to detect_scenes.
         """
         self._cutting_list.clear()
-        self._event_list.clear()
         self._last_pos = None
         self._start_pos = None
         self._frame_size = None
@@ -1101,7 +1093,6 @@ class SceneManager:
     def clear_detectors(self) -> None:
         """Remove all scene detectors added to the SceneManager via add_detector()."""
         self._detector_list.clear()
-        self._sparse_detector_list.clear()
 
     def get_scene_list(
         self, base_timecode: ty.Optional[FrameTimecode] = None, start_in_scene: bool = False
@@ -1134,7 +1125,7 @@ class SceneManager:
         # unless start_in_scene is True.
         if not cut_list and not start_in_scene:
             scene_list = []
-        return sorted(self._get_event_list() + scene_list)
+        return sorted(scene_list)
 
     def _get_cutting_list(self) -> ty.List[int]:
         """Return a sorted list of unique frame numbers of any detected scene cuts."""
@@ -1143,15 +1134,6 @@ class SceneManager:
         assert self._base_timecode is not None
         # Ensure all cuts are unique by using a set to remove all duplicates.
         return [self._base_timecode + cut for cut in sorted(set(self._cutting_list))]
-
-    def _get_event_list(self) -> SceneList:
-        if not self._event_list:
-            return []
-        assert self._base_timecode is not None
-        return [
-            (self._base_timecode + start, self._base_timecode + end)
-            for start, end in self._event_list
-        ]
 
     def _process_frame(
         self,
@@ -1177,13 +1159,6 @@ class SceneManager:
                 for cut_frame_num in cuts:
                     buffer_index = cut_frame_num - (frame_num + 1)
                     callback(self._frame_buffer[buffer_index], cut_frame_num)
-        for detector in self._sparse_detector_list:
-            events = detector.process_frame(frame_num, frame_im)
-            self._event_list += events
-            if callback:
-                for event_start, _ in events:
-                    buffer_index = event_start - (frame_num + 1)
-                    callback(self._frame_buffer[buffer_index], event_start)
         return new_cuts
 
     def _post_process(self, frame_num: int) -> None:
@@ -1452,8 +1427,6 @@ class SceneManager:
         the scene list, noting that each scene is contiguous starting from the first frame
         and ending at the last frame detected.
 
-        If only sparse detectors are used (e.g. MotionDetector), this will always be empty.
-
         Arguments:
             base_timecode: [DEPRECATED] DO NOT USE. For backwards compatibility only.
             show_warning: If set to False, suppresses the error from being warned. In v0.7,
@@ -1470,24 +1443,3 @@ class SceneManager:
         if show_warning:
             logger.error("`get_cut_list()` is deprecated and will be removed in a future release.")
         return self._get_cutting_list()
-
-    def get_event_list(self, base_timecode: ty.Optional[FrameTimecode] = None) -> SceneList:
-        """[DEPRECATED] DO NOT USE.
-
-        Get a list of start/end timecodes of sparse detection events.
-
-        Unlike get_scene_list, the event list returns a list of FrameTimecodes representing
-        the point in the input video where a new scene was detected only by sparse detectors,
-        otherwise it is the same.
-
-        Arguments:
-            base_timecode: [DEPRECATED] DO NOT USE. For backwards compatibility only.
-
-        Returns:
-            List of pairs of FrameTimecode objects denoting the detected scenes.
-
-        :meta private:
-        """
-        # TODO(v0.7): Use the warnings module to turn this into a warning.
-        logger.error("`get_event_list()` is deprecated and will be removed in a future release.")
-        return self._get_event_list()

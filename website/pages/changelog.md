@@ -658,17 +658,20 @@ Development
 ### API Changes
 
 #### Breaking
- - Refactoring to make code less verbose:
-    - `scenedetect.scene_detector` is now `scenedetect.detector`
-    - `scenedetect.frame_timecode` is now `scenedetect.common`
- - `FrameTimecode` fields `frame_num` and `framerate` are now read-only properties, construct a new `FrameTimecode` to change them
- - Remove `FrameTimecode.previous_frame()` method
- - Remove `SceneDetector.is_processing_required()` method, already had no effect in v0.6 as part of deprecation
- - `SceneDetector` instances can now assume they always have frame data to process when `process_frame` is called
- - Remove `scenedetect.video_manager` module ([use `scenedetect.open_video()` function](https://www.scenedetect.com/docs/head/api.html#scenedetect.open_video) instead)
+
+ * Remove deprecated `scenedetect.video_manager` module ([use `scenedetect.open_video()` function](https://www.scenedetect.com/docs/head/api.html#scenedetect.open_video) instead)
  * Deprecated `video_manager` parameter has been removed from many functions and constructors, use `video` parameter instead when required
+ * Refactoring to make code less verbose:
+      * `scenedetect.scene_detector` is now `scenedetect.detector`
+      * `scenedetect.frame_timecode` is now `scenedetect.common`
+ * `FrameTimecode` fields `frame_num` and `framerate` are now read-only properties, construct a new `FrameTimecode` to change them
+ * Remove `FrameTimecode.previous_frame()` method
+ * Remove `SceneDetector.is_processing_required()` method, already had no effect in v0.6 as part of deprecation
+ * `SceneDetector` instances can now assume they always have frame data to process when `process_frame` is called
+ * Remove deprecated `SparseSceneDetector` interface
+ * Remove deprecated `SceneManager.get_event_list()` method
 
 #### Deprecation
 
-- `scenedetect.scene_detector` module is now deprecated, use `scenedetect.detector` (or `scenedetect`) instead
-
+ * `scenedetect.scene_detector` module is now deprecated, import from `scenedetect` or `scenedetect.detector` instead
+ * `scenedetect.frame_timecode` module is now deprecated, import from `scenedetect` or `scenedetect.common` instead
