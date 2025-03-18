@@ -2,7 +2,7 @@
 .. _scenedetect-scene_manager:
 
 -----------------------------------------------------------------------
-SceneManager
+Scene Manager
 -----------------------------------------------------------------------
 
 .. automodule:: scenedetect.scene_manager

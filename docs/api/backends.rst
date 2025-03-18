@@ -2,7 +2,7 @@
 .. _scenedetect-backends:
 
 ----------------------------------------
-Backends
+Input Backends
 ----------------------------------------
 
 .. automodule:: scenedetect.backends

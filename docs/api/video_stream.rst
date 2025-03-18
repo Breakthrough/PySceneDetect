@@ -2,7 +2,7 @@
 .. _scenedetect-video_stream:
 
 ---------------------------------------------------------------
-VideoStream
+Stream Interface
 ---------------------------------------------------------------
 
 .. automodule:: scenedetect.video_stream

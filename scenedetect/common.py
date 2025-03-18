@@ -18,12 +18,6 @@ frame-accurate timestamps of each cut. This is done by also specifying the video
 timecode, allowing a frame number to be converted to/from a floating-point number of seconds, or
 string in the form `"HH:MM:SS[.nnn]"` where the `[.nnn]` part is optional.
 
-See the following examples, or the :class:`FrameTimecode constructor <FrameTimecode>`.
-
-===============================================================
-Usage Examples
-===============================================================
-
 A :class:`FrameTimecode` can be created by specifying a timecode (`int` for number of frames,
 `float` for number of seconds, or `str` in the form "HH:MM:SS" or "HH:MM:SS.nnn") with a framerate:
 
