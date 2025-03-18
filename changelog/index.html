@@ -911,6 +911,8 @@
 <ul>
 <li><code>FrameTimecode</code> fields <code>frame_num</code> and <code>framerate</code> are now read-only properties, construct a new <code>FrameTimecode</code> to change them</li>
 <li>Remove <code>FrameTimecode.previous_frame()</code> method</li>
+<li>Remove <code>SceneDetector.is_processing_required()</code> method, already had no effect in v0.6 as part of deprecation</li>
+<li><code>SceneDetector</code> instances can now assume they always have frame data to process when <code>process_frame</code> is called</li>
 </ul>
 <h4 id="deprecation">Deprecation</h4>
 <ul>
