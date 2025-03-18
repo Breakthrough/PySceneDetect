@@ -51,7 +51,7 @@ Table of Contents
     api/common
     api/video_splitter
     api/stats_manager
-    api/scene_detector
+    api/detector
     api/video_stream
     api/platform
 

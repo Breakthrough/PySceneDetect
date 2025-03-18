@@ -31,7 +31,7 @@ The `scenedetect` API is easy to integrate with most application workflows, whil
 
     * :ref:`scenedetect.common ⏱️ <scenedetect-common>`: Contains common types such as :class:`FrameTimecode <scenedetect.common.FrameTimecode>` used for timecode handing.
 
-    * :ref:`scenedetect.scene_detector 🌐 <scenedetect-scene_detector>`: Contains :class:`SceneDetector <scenedetect.scene_detector.SceneDetector>` interface which detection algorithms must implement.
+    * :ref:`scenedetect.detector 🌐 <scenedetect-detector>`: Contains :class:`SceneDetector <scenedetect.detector.SceneDetector>` interface which detection algorithms must implement.
 
     * :ref:`scenedetect.stats_manager 🧮 <scenedetect-stats_manager>`: Contains :class:`StatsManager <scenedetect.stats_manager.StatsManager>` class for caching frame metrics and loading/saving them to disk in CSV format for analysis.
 
@@ -101,7 +101,7 @@ Module Reference
     api/video_splitter
     api/stats_manager
     api/common
-    api/scene_detector
+    api/detector
     api/video_stream
     api/platform
 

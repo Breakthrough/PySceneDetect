@@ -659,6 +659,11 @@ Development
 
 #### Breaking
 
+ - Refactoring to make code less verbose:
+    - `scenedetect.scene_detector` is now `scenedetect.detector`
+    - `scenedetect.frame_timecode` is now `scenedetect.common`
+
+
  - `FrameTimecode` fields `frame_num` and `framerate` are now read-only properties, construct a new `FrameTimecode` to change them
  - Remove `FrameTimecode.previous_frame()` method
  - Remove `SceneDetector.is_processing_required()` method, already had no effect in v0.6 as part of deprecation
@@ -666,5 +671,5 @@ Development
 
 #### Deprecation
 
-- `scenedetect.frame_timecode` module is now deprecated, use `scenedetect.common` (or `scenedetect`) instead
+- `scenedetect.scene_detector` module is now deprecated, use `scenedetect.detector` (or `scenedetect`) instead
 

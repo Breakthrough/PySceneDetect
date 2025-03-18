@@ -12,7 +12,7 @@
 """``scenedetect.stats_manager`` Module
 
 This module contains the :class:`StatsManager` class, which provides a key-value store for each
-:class:`SceneDetector <scenedetect.scene_detector.SceneDetector>` to write the metrics calculated
+:class:`SceneDetector <scenedetect.detector.SceneDetector>` to write the metrics calculated
 for each frame. The :class:`StatsManager` must be registered to a
 :class:`SceneManager <scenedetect.scene_manager.SceneManager>` upon construction.
 

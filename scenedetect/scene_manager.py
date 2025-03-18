@@ -1391,9 +1391,7 @@ class SceneManager:
                             f"expected = {self._frame_size}. Video may be corrupt."
                         )
                     if self._frame_size_errors == MAX_FRAME_SIZE_ERRORS:
-                        logger.warn(
-                            "WARNING: Too many errors emitted, skipping future messages."
-                        )
+                        logger.warn("WARNING: Too many errors emitted, skipping future messages.")
                     # Skip processing frames that have an incorrect size.
                     continue
 

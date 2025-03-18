@@ -36,12 +36,12 @@ The perceptual hash detector (`detect-hash`) calculates a hash for a frame and c
 
 # Creating New Detection Algorithms
 
-All scene detection algorithms must inherit from [the base `SceneDetector` class](https://scenedetect.com/projects/Manual/en/latest/api/scene_detector.html). Note that the current SceneDetector API is under development and expected to change somewhat before v1.0 is released, so make sure to pin your `scenedetect` dependency to the correct API version (e.g. `scenedetect < 0.6`, `scenedetect < 0.7`, etc...).
+All scene detection algorithms must inherit from [the base `SceneDetector` class](https://scenedetect.com/projects/Manual/en/latest/api/detector.html). Note that the current SceneDetector API is under development and expected to change somewhat before v1.0 is released, so make sure to pin your `scenedetect` dependency to the correct API version (e.g. `scenedetect < 0.6`, `scenedetect < 0.7`, etc...).
 
 Creating a new scene detection method can be as simple as implementing the `process_frame` function, and optionally `post_process`:
 
 ```python
-from scenedetect.scene_detector import SceneDetector
+from scenedetect.detector import SceneDetector
 
 class CustomDetector(SceneDetector):
     """CustomDetector class to implement a scene detection algorithm."""
@@ -62,7 +62,7 @@ class CustomDetector(SceneDetector):
 
 `process_frame` is called on every frame in the input video, which will be called after the final frame of the video is passed to `process_frame`. This may be useful for multi-pass algorithms, or detectors which are waiting on some condition but still wish to output an event on the final frame.
 
-For example, a detector may output at most 1 cuts for every call to `process_frame`, it may output the entire scene list in `post_process`, or a combination of both.  Note that the latter will not work in cases where a live video stream or camera input device is being used. See the [API documentation for the `SceneDetector` class](https://scenedetect.com/projects/Manual/en/latest/api/scene_detector.html#scenedetect.scene_detector.SceneDetector) for details. Alternatively, you can call `help(SceneDetector)` from a Python REPL. For examples of actual detection algorithm implementations, see the source files in the `scenedetect/detectors/` directory (e.g. `threshold_detector.py`, `content_detector.py`).
+For example, a detector may output at most 1 cuts for every call to `process_frame`, it may output the entire scene list in `post_process`, or a combination of both.  Note that the latter will not work in cases where a live video stream or camera input device is being used. See the [API documentation for the `SceneDetector` class](https://scenedetect.com/projects/Manual/en/latest/api/detector.html#scenedetect.scene_detector.SceneDetector) for details. Alternatively, you can call `help(SceneDetector)` from a Python REPL. For examples of actual detection algorithm implementations, see the source files in the `scenedetect/detectors/` directory (e.g. `threshold_detector.py`, `content_detector.py`).
 
 Processing is done by calling the `process_frame(...)` function for all frames in the video, followed by `post_process(...)` (optional) after the final frame.  Scene cuts are detected and added to the passed list object in both cases.
 

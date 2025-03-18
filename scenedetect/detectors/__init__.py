@@ -30,7 +30,7 @@ This module contains the following scene detection algorithms:
    Uses perceptual hashing to calculate similarity between adjacent frames.
 
 Detection algorithms are created by implementing the
-:class:`SceneDetector <scenedetect.scene_detector.SceneDetector>` interface. Detectors are
+:class:`SceneDetector <scenedetect.detector.SceneDetector>` interface. Detectors are
 typically attached to a :class:`SceneManager <scenedetect.scene_manager.SceneManager>` when
 processing videos, however they can also be used to process frames directly.
 """

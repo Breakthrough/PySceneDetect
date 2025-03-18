@@ -9,7 +9,7 @@
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
-"""``scenedetect.scene_detector`` Module
+"""``scenedetect.detector`` Module
 
 This module contains the :class:`SceneDetector` interface, from which all scene detectors in
 :mod:`scenedetect.detectors` module are derived from.
