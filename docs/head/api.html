@@ -219,7 +219,87 @@ overriding backend-specific options.</p></li>
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="api/backends.html">Backends</a><ul>
+<li class="toctree-l1"><a class="reference internal" href="api/scene_manager.html">Scene Manager</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/scene_manager.html#usage">Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/scene_manager.html#storing-per-frame-statistics">Storing Per-Frame Statistics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.Interpolation"><code class="docutils literal notranslate"><span class="pre">Interpolation</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.Interpolation.AREA"><code class="docutils literal notranslate"><span class="pre">Interpolation.AREA</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.Interpolation.CUBIC"><code class="docutils literal notranslate"><span class="pre">Interpolation.CUBIC</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.Interpolation.LANCZOS4"><code class="docutils literal notranslate"><span class="pre">Interpolation.LANCZOS4</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.Interpolation.LINEAR"><code class="docutils literal notranslate"><span class="pre">Interpolation.LINEAR</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.Interpolation.NEAREST"><code class="docutils literal notranslate"><span class="pre">Interpolation.NEAREST</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.SceneManager"><code class="docutils literal notranslate"><span class="pre">SceneManager</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.SceneManager.add_detector"><code class="docutils literal notranslate"><span class="pre">SceneManager.add_detector()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.SceneManager.clear"><code class="docutils literal notranslate"><span class="pre">SceneManager.clear()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.SceneManager.clear_detectors"><code class="docutils literal notranslate"><span class="pre">SceneManager.clear_detectors()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.SceneManager.detect_scenes"><code class="docutils literal notranslate"><span class="pre">SceneManager.detect_scenes()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.SceneManager.get_num_detectors"><code class="docutils literal notranslate"><span class="pre">SceneManager.get_num_detectors()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.SceneManager.get_scene_list"><code class="docutils literal notranslate"><span class="pre">SceneManager.get_scene_list()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.SceneManager.stop"><code class="docutils literal notranslate"><span class="pre">SceneManager.stop()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.SceneManager.auto_downscale"><code class="docutils literal notranslate"><span class="pre">SceneManager.auto_downscale</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.SceneManager.crop"><code class="docutils literal notranslate"><span class="pre">SceneManager.crop</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.SceneManager.downscale"><code class="docutils literal notranslate"><span class="pre">SceneManager.downscale</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.SceneManager.interpolation"><code class="docutils literal notranslate"><span class="pre">SceneManager.interpolation</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.SceneManager.stats_manager"><code class="docutils literal notranslate"><span class="pre">SceneManager.stats_manager</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.compute_downscale_factor"><code class="docutils literal notranslate"><span class="pre">compute_downscale_factor()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.get_scenes_from_cuts"><code class="docutils literal notranslate"><span class="pre">get_scenes_from_cuts()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.save_images"><code class="docutils literal notranslate"><span class="pre">save_images()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.write_scene_list"><code class="docutils literal notranslate"><span class="pre">write_scene_list()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.write_scene_list_html"><code class="docutils literal notranslate"><span class="pre">write_scene_list_html()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.DEFAULT_MIN_WIDTH"><code class="docutils literal notranslate"><span class="pre">DEFAULT_MIN_WIDTH</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.MAX_FRAME_QUEUE_LENGTH"><code class="docutils literal notranslate"><span class="pre">MAX_FRAME_QUEUE_LENGTH</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.MAX_FRAME_SIZE_ERRORS"><code class="docutils literal notranslate"><span class="pre">MAX_FRAME_SIZE_ERRORS</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.PROGRESS_BAR_DESCRIPTION"><code class="docutils literal notranslate"><span class="pre">PROGRESS_BAR_DESCRIPTION</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/common.html">Common Types</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/common.html#scenedetect.common.FrameTimecode"><code class="docutils literal notranslate"><span class="pre">FrameTimecode</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/common.html#scenedetect.common.FrameTimecode.equal_framerate"><code class="docutils literal notranslate"><span class="pre">FrameTimecode.equal_framerate()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/common.html#scenedetect.common.FrameTimecode.get_framerate"><code class="docutils literal notranslate"><span class="pre">FrameTimecode.get_framerate()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/common.html#scenedetect.common.FrameTimecode.get_frames"><code class="docutils literal notranslate"><span class="pre">FrameTimecode.get_frames()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/common.html#scenedetect.common.FrameTimecode.get_seconds"><code class="docutils literal notranslate"><span class="pre">FrameTimecode.get_seconds()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/common.html#scenedetect.common.FrameTimecode.get_timecode"><code class="docutils literal notranslate"><span class="pre">FrameTimecode.get_timecode()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api/common.html#scenedetect.common.Timecode"><code class="docutils literal notranslate"><span class="pre">Timecode</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/common.html#scenedetect.common.Timecode.pts"><code class="docutils literal notranslate"><span class="pre">Timecode.pts</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/common.html#scenedetect.common.Timecode.time_base"><code class="docutils literal notranslate"><span class="pre">Timecode.time_base</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api/common.html#scenedetect.common.CropRegion"><code class="docutils literal notranslate"><span class="pre">CropRegion</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/common.html#scenedetect.common.CutList"><code class="docutils literal notranslate"><span class="pre">CutList</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/common.html#scenedetect.common.MAX_FPS_DELTA"><code class="docutils literal notranslate"><span class="pre">MAX_FPS_DELTA</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/common.html#scenedetect.common.SceneList"><code class="docutils literal notranslate"><span class="pre">SceneList</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/common.html#scenedetect.common.TimecodePair"><code class="docutils literal notranslate"><span class="pre">TimecodePair</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/video_splitter.html">Video Splitting</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/video_splitter.html#scenedetect.video_splitter.SceneMetadata"><code class="docutils literal notranslate"><span class="pre">SceneMetadata</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/video_splitter.html#scenedetect.video_splitter.SceneMetadata.end"><code class="docutils literal notranslate"><span class="pre">SceneMetadata.end</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/video_splitter.html#scenedetect.video_splitter.SceneMetadata.index"><code class="docutils literal notranslate"><span class="pre">SceneMetadata.index</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/video_splitter.html#scenedetect.video_splitter.SceneMetadata.start"><code class="docutils literal notranslate"><span class="pre">SceneMetadata.start</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api/video_splitter.html#scenedetect.video_splitter.VideoMetadata"><code class="docutils literal notranslate"><span class="pre">VideoMetadata</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/video_splitter.html#scenedetect.video_splitter.VideoMetadata.name"><code class="docutils literal notranslate"><span class="pre">VideoMetadata.name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/video_splitter.html#scenedetect.video_splitter.VideoMetadata.path"><code class="docutils literal notranslate"><span class="pre">VideoMetadata.path</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/video_splitter.html#scenedetect.video_splitter.VideoMetadata.total_scenes"><code class="docutils literal notranslate"><span class="pre">VideoMetadata.total_scenes</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api/video_splitter.html#scenedetect.video_splitter.default_formatter"><code class="docutils literal notranslate"><span class="pre">default_formatter()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/video_splitter.html#scenedetect.video_splitter.is_ffmpeg_available"><code class="docutils literal notranslate"><span class="pre">is_ffmpeg_available()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/video_splitter.html#scenedetect.video_splitter.is_mkvmerge_available"><code class="docutils literal notranslate"><span class="pre">is_mkvmerge_available()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/video_splitter.html#scenedetect.video_splitter.split_video_ffmpeg"><code class="docutils literal notranslate"><span class="pre">split_video_ffmpeg()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/video_splitter.html#scenedetect.video_splitter.split_video_mkvmerge"><code class="docutils literal notranslate"><span class="pre">split_video_mkvmerge()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/video_splitter.html#scenedetect.video_splitter.DEFAULT_FFMPEG_ARGS"><code class="docutils literal notranslate"><span class="pre">DEFAULT_FFMPEG_ARGS</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/video_splitter.html#scenedetect.video_splitter.FFMPEG_PATH"><code class="docutils literal notranslate"><span class="pre">FFMPEG_PATH</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/backends.html">Input Backends</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="api/backends.html#video-files">Video Files</a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/backends.html#devices-cameras-pipes">Devices / Cameras / Pipes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/backends.html#scenedetect.backends.AVAILABLE_BACKENDS"><code class="docutils literal notranslate"><span class="pre">AVAILABLE_BACKENDS</span></code></a></li>
@@ -296,66 +376,7 @@ overriding backend-specific options.</p></li>
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="api/scene_manager.html">SceneManager</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="api/scene_manager.html#usage">Usage</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/scene_manager.html#storing-per-frame-statistics">Storing Per-Frame Statistics</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.Interpolation"><code class="docutils literal notranslate"><span class="pre">Interpolation</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.Interpolation.AREA"><code class="docutils literal notranslate"><span class="pre">Interpolation.AREA</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.Interpolation.CUBIC"><code class="docutils literal notranslate"><span class="pre">Interpolation.CUBIC</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.Interpolation.LANCZOS4"><code class="docutils literal notranslate"><span class="pre">Interpolation.LANCZOS4</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.Interpolation.LINEAR"><code class="docutils literal notranslate"><span class="pre">Interpolation.LINEAR</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.Interpolation.NEAREST"><code class="docutils literal notranslate"><span class="pre">Interpolation.NEAREST</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.SceneManager"><code class="docutils literal notranslate"><span class="pre">SceneManager</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.SceneManager.add_detector"><code class="docutils literal notranslate"><span class="pre">SceneManager.add_detector()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.SceneManager.clear"><code class="docutils literal notranslate"><span class="pre">SceneManager.clear()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.SceneManager.clear_detectors"><code class="docutils literal notranslate"><span class="pre">SceneManager.clear_detectors()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.SceneManager.detect_scenes"><code class="docutils literal notranslate"><span class="pre">SceneManager.detect_scenes()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.SceneManager.get_num_detectors"><code class="docutils literal notranslate"><span class="pre">SceneManager.get_num_detectors()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.SceneManager.get_scene_list"><code class="docutils literal notranslate"><span class="pre">SceneManager.get_scene_list()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.SceneManager.stop"><code class="docutils literal notranslate"><span class="pre">SceneManager.stop()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.SceneManager.auto_downscale"><code class="docutils literal notranslate"><span class="pre">SceneManager.auto_downscale</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.SceneManager.crop"><code class="docutils literal notranslate"><span class="pre">SceneManager.crop</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.SceneManager.downscale"><code class="docutils literal notranslate"><span class="pre">SceneManager.downscale</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.SceneManager.interpolation"><code class="docutils literal notranslate"><span class="pre">SceneManager.interpolation</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.SceneManager.stats_manager"><code class="docutils literal notranslate"><span class="pre">SceneManager.stats_manager</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.compute_downscale_factor"><code class="docutils literal notranslate"><span class="pre">compute_downscale_factor()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.get_scenes_from_cuts"><code class="docutils literal notranslate"><span class="pre">get_scenes_from_cuts()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.save_images"><code class="docutils literal notranslate"><span class="pre">save_images()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.write_scene_list"><code class="docutils literal notranslate"><span class="pre">write_scene_list()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.write_scene_list_html"><code class="docutils literal notranslate"><span class="pre">write_scene_list_html()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.DEFAULT_MIN_WIDTH"><code class="docutils literal notranslate"><span class="pre">DEFAULT_MIN_WIDTH</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.MAX_FRAME_QUEUE_LENGTH"><code class="docutils literal notranslate"><span class="pre">MAX_FRAME_QUEUE_LENGTH</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.MAX_FRAME_SIZE_ERRORS"><code class="docutils literal notranslate"><span class="pre">MAX_FRAME_SIZE_ERRORS</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.PROGRESS_BAR_DESCRIPTION"><code class="docutils literal notranslate"><span class="pre">PROGRESS_BAR_DESCRIPTION</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="api/video_splitter.html">Video Splitting</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="api/video_splitter.html#scenedetect.video_splitter.SceneMetadata"><code class="docutils literal notranslate"><span class="pre">SceneMetadata</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="api/video_splitter.html#scenedetect.video_splitter.SceneMetadata.end"><code class="docutils literal notranslate"><span class="pre">SceneMetadata.end</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="api/video_splitter.html#scenedetect.video_splitter.SceneMetadata.index"><code class="docutils literal notranslate"><span class="pre">SceneMetadata.index</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="api/video_splitter.html#scenedetect.video_splitter.SceneMetadata.start"><code class="docutils literal notranslate"><span class="pre">SceneMetadata.start</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="api/video_splitter.html#scenedetect.video_splitter.VideoMetadata"><code class="docutils literal notranslate"><span class="pre">VideoMetadata</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="api/video_splitter.html#scenedetect.video_splitter.VideoMetadata.name"><code class="docutils literal notranslate"><span class="pre">VideoMetadata.name</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="api/video_splitter.html#scenedetect.video_splitter.VideoMetadata.path"><code class="docutils literal notranslate"><span class="pre">VideoMetadata.path</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="api/video_splitter.html#scenedetect.video_splitter.VideoMetadata.total_scenes"><code class="docutils literal notranslate"><span class="pre">VideoMetadata.total_scenes</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="api/video_splitter.html#scenedetect.video_splitter.default_formatter"><code class="docutils literal notranslate"><span class="pre">default_formatter()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/video_splitter.html#scenedetect.video_splitter.is_ffmpeg_available"><code class="docutils literal notranslate"><span class="pre">is_ffmpeg_available()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/video_splitter.html#scenedetect.video_splitter.is_mkvmerge_available"><code class="docutils literal notranslate"><span class="pre">is_mkvmerge_available()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/video_splitter.html#scenedetect.video_splitter.split_video_ffmpeg"><code class="docutils literal notranslate"><span class="pre">split_video_ffmpeg()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/video_splitter.html#scenedetect.video_splitter.split_video_mkvmerge"><code class="docutils literal notranslate"><span class="pre">split_video_mkvmerge()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/video_splitter.html#scenedetect.video_splitter.DEFAULT_FFMPEG_ARGS"><code class="docutils literal notranslate"><span class="pre">DEFAULT_FFMPEG_ARGS</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/video_splitter.html#scenedetect.video_splitter.FFMPEG_PATH"><code class="docutils literal notranslate"><span class="pre">FFMPEG_PATH</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="api/stats_manager.html">StatsManager</a><ul>
+<li class="toctree-l1"><a class="reference internal" href="api/stats_manager.html">Stats Manager</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="api/stats_manager.html#scenedetect.stats_manager.StatsFileCorrupt"><code class="docutils literal notranslate"><span class="pre">StatsFileCorrupt</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/stats_manager.html#scenedetect.stats_manager.StatsManager"><code class="docutils literal notranslate"><span class="pre">StatsManager</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="api/stats_manager.html#scenedetect.stats_manager.StatsManager.get_metrics"><code class="docutils literal notranslate"><span class="pre">StatsManager.get_metrics()</span></code></a></li>
@@ -371,29 +392,7 @@ overriding backend-specific options.</p></li>
 <li class="toctree-l2"><a class="reference internal" href="api/stats_manager.html#scenedetect.stats_manager.COLUMN_NAME_TIMECODE"><code class="docutils literal notranslate"><span class="pre">COLUMN_NAME_TIMECODE</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="api/common.html">Common</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="api/common.html#usage-examples">Usage Examples</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/common.html#scenedetect.common.FrameTimecode"><code class="docutils literal notranslate"><span class="pre">FrameTimecode</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="api/common.html#scenedetect.common.FrameTimecode.equal_framerate"><code class="docutils literal notranslate"><span class="pre">FrameTimecode.equal_framerate()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="api/common.html#scenedetect.common.FrameTimecode.get_framerate"><code class="docutils literal notranslate"><span class="pre">FrameTimecode.get_framerate()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="api/common.html#scenedetect.common.FrameTimecode.get_frames"><code class="docutils literal notranslate"><span class="pre">FrameTimecode.get_frames()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="api/common.html#scenedetect.common.FrameTimecode.get_seconds"><code class="docutils literal notranslate"><span class="pre">FrameTimecode.get_seconds()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="api/common.html#scenedetect.common.FrameTimecode.get_timecode"><code class="docutils literal notranslate"><span class="pre">FrameTimecode.get_timecode()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="api/common.html#scenedetect.common.Timecode"><code class="docutils literal notranslate"><span class="pre">Timecode</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="api/common.html#scenedetect.common.Timecode.pts"><code class="docutils literal notranslate"><span class="pre">Timecode.pts</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="api/common.html#scenedetect.common.Timecode.time_base"><code class="docutils literal notranslate"><span class="pre">Timecode.time_base</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="api/common.html#scenedetect.common.CropRegion"><code class="docutils literal notranslate"><span class="pre">CropRegion</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/common.html#scenedetect.common.CutList"><code class="docutils literal notranslate"><span class="pre">CutList</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/common.html#scenedetect.common.MAX_FPS_DELTA"><code class="docutils literal notranslate"><span class="pre">MAX_FPS_DELTA</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/common.html#scenedetect.common.SceneList"><code class="docutils literal notranslate"><span class="pre">SceneList</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/common.html#scenedetect.common.TimecodePair"><code class="docutils literal notranslate"><span class="pre">TimecodePair</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="api/detector.html">Detector</a><ul>
+<li class="toctree-l1"><a class="reference internal" href="api/detector.html">Detector Interface</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="api/detector.html#scenedetect.detector.FlashFilter"><code class="docutils literal notranslate"><span class="pre">FlashFilter</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="api/detector.html#scenedetect.detector.FlashFilter.Mode"><code class="docutils literal notranslate"><span class="pre">FlashFilter.Mode</span></code></a></li>
 </ul>
@@ -409,7 +408,7 @@ overriding backend-specific options.</p></li>
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="api/video_stream.html">VideoStream</a><ul>
+<li class="toctree-l1"><a class="reference internal" href="api/video_stream.html">Stream Interface</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="api/video_stream.html#scenedetect.video_stream.FrameRateUnavailable"><code class="docutils literal notranslate"><span class="pre">FrameRateUnavailable</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/video_stream.html#scenedetect.video_stream.SeekError"><code class="docutils literal notranslate"><span class="pre">SeekError</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/video_stream.html#scenedetect.video_stream.VideoOpenFailure"><code class="docutils literal notranslate"><span class="pre">VideoOpenFailure</span></code></a></li>
@@ -529,13 +528,13 @@ overriding backend-specific options.</p></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="api/detectors.html">Detection Algorithms</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api/scene_manager.html">SceneManager</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api/common.html">Common</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api/backends.html">Backends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/scene_manager.html">Scene Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/common.html">Common Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/backends.html">Input Backends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/video_splitter.html">Video Splitting</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api/stats_manager.html">StatsManager</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api/detector.html">Detector</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api/video_stream.html">VideoStream</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/stats_manager.html">Stats Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/detector.html">Detector Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/video_stream.html">Stream Interface</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/platform.html">Platform &amp; Logging</a></li>
 </ul>
 

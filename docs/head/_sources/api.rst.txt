@@ -96,11 +96,11 @@ Module Reference
     :name: fullapitoc
 
     api/detectors
-    api/backends
     api/scene_manager
-    api/video_splitter
-    api/stats_manager
     api/common
+    api/video_splitter
+    api/backends
+    api/stats_manager
     api/detector
     api/video_stream
     api/platform

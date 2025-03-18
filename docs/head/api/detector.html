@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Detector &#8212; PySceneDetect 0.7-dev0 documentation</title>
+    <title>Detector Interface &#8212; PySceneDetect 0.7-dev0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
     <link rel="stylesheet" type="text/css" href="../_static/pyscenedetect.css" />
@@ -14,8 +14,8 @@
     <script src="../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="VideoStream" href="video_stream.html" />
-    <link rel="prev" title="Common" href="common.html" />
+    <link rel="next" title="Stream Interface" href="video_stream.html" />
+    <link rel="prev" title="Stats Manager" href="stats_manager.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
@@ -34,7 +34,7 @@
           <div class="body" role="main">
             
   <section id="module-scenedetect.detector">
-<span id="detector"></span><span id="scenedetect-detector"></span><h1>Detector<a class="headerlink" href="#module-scenedetect.detector" title="Permalink to this heading">¶</a></h1>
+<span id="detector-interface"></span><span id="scenedetect-detector"></span><h1>Detector Interface<a class="headerlink" href="#module-scenedetect.detector" title="Permalink to this heading">¶</a></h1>
 <p><code class="docutils literal notranslate"><span class="pre">scenedetect.detector</span></code> Module</p>
 <p>This module contains the <a class="reference internal" href="#scenedetect.detector.SceneDetector" title="scenedetect.detector.SceneDetector"><code class="xref py py-class docutils literal notranslate"><span class="pre">SceneDetector</span></code></a> interface, from which all scene detectors in
 <a class="reference internal" href="detectors.html#module-scenedetect.detectors" title="scenedetect.detectors"><code class="xref py py-mod docutils literal notranslate"><span class="pre">scenedetect.detectors</span></code></a> module are derived from.</p>
@@ -188,10 +188,10 @@ use for caching frame metrics to and from.</p>
     <ul>
         <li>
           &larr;
-          <a href="common.html" title="Previous document">Common</a>
+          <a href="stats_manager.html" title="Previous document">Stats Manager</a>
         </li>
         <li>
-          <a href="video_stream.html" title="Next document">VideoStream</a>
+          <a href="video_stream.html" title="Next document">Stream Interface</a>
           &rarr;
         </li>
     </ul>
@@ -240,17 +240,17 @@ use for caching frame metrics to and from.</p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../api.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="detectors.html">Detection Algorithms</a></li>
-<li class="toctree-l1"><a class="reference internal" href="scene_manager.html">SceneManager</a></li>
-<li class="toctree-l1"><a class="reference internal" href="common.html">Common</a></li>
-<li class="toctree-l1"><a class="reference internal" href="backends.html">Backends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scene_manager.html">Scene Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="common.html">Common Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="backends.html">Input Backends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="video_splitter.html">Video Splitting</a></li>
-<li class="toctree-l1"><a class="reference internal" href="stats_manager.html">StatsManager</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Detector</a><ul>
+<li class="toctree-l1"><a class="reference internal" href="stats_manager.html">Stats Manager</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Detector Interface</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.detector.FlashFilter"><code class="docutils literal notranslate"><span class="pre">FlashFilter</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.detector.SceneDetector"><code class="docutils literal notranslate"><span class="pre">SceneDetector</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="video_stream.html">VideoStream</a></li>
+<li class="toctree-l1"><a class="reference internal" href="video_stream.html">Stream Interface</a></li>
 <li class="toctree-l1"><a class="reference internal" href="platform.html">Platform &amp; Logging</a></li>
 </ul>
 
@@ -259,8 +259,8 @@ use for caching frame metrics to and from.</p>
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
   <li><a href="../api.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Package</a><ul>
-      <li>Previous: <a href="common.html" title="previous chapter">Common</a></li>
-      <li>Next: <a href="video_stream.html" title="next chapter">VideoStream</a></li>
+      <li>Previous: <a href="stats_manager.html" title="previous chapter">Stats Manager</a></li>
+      <li>Next: <a href="video_stream.html" title="next chapter">Stream Interface</a></li>
   </ul></li>
   </ul></li>
 </ul>

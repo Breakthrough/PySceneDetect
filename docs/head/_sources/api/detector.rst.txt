@@ -2,7 +2,7 @@
 .. _scenedetect-detector:
 
 -------------------------------------------------
-Detector
+Detector Interface
 -------------------------------------------------
 
 .. automodule:: scenedetect.detector
