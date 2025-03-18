@@ -35,7 +35,7 @@ from scenedetect.platform import init_logger  # noqa: I001
 from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.video_stream import VideoStream, VideoOpenFailure
 from scenedetect.video_splitter import split_video_ffmpeg, split_video_mkvmerge
-from scenedetect.scene_detector import SceneDetector
+from scenedetect.detector import SceneDetector
 from scenedetect.detectors import (
     ContentDetector,
     AdaptiveDetector,
@@ -52,7 +52,6 @@ from scenedetect.backends import (
 )
 from scenedetect.stats_manager import StatsManager, StatsFileCorrupt
 from scenedetect.scene_manager import SceneManager, save_images, SceneList, CutList, Interpolation
-from scenedetect.video_manager import VideoManager  # [DEPRECATED] DO NOT USE.
 
 # Used for module identification and when printing version & about info
 # (e.g. calling `scenedetect version` or `scenedetect about`).

@@ -101,9 +101,9 @@ from scenedetect._thirdparty.simpletable import (
     SimpleTableRow,
 )
 from scenedetect.common import CropRegion, CutList, SceneList
+from scenedetect.detector import SceneDetector, SparseSceneDetector
 from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.platform import get_and_create_path, get_cv2_imwrite_params, tqdm
-from scenedetect.scene_detector import SceneDetector, SparseSceneDetector
 from scenedetect.stats_manager import StatsManager
 from scenedetect.video_stream import VideoStream
 
@@ -722,7 +722,6 @@ def save_images(
     width: ty.Optional[int] = None,
     interpolation: Interpolation = Interpolation.CUBIC,
     threading: bool = True,
-    video_manager=None,
 ) -> ty.Dict[int, ty.List[str]]:
     """Save a set number of images from each scene, given a list of scenes
     and the associated video/frame source.
@@ -761,7 +760,6 @@ def save_images(
             while preserving the aspect ratio.
         interpolation: Type of interpolation to use when resizing images.
         threading: Offload image encoding and disk IO to background threads to improve performance.
-        video_manager: [DEPRECATED] DO NOT USE. For backwards compatibility only.
 
     Returns:
         Dictionary of the format { scene_num : [image_paths] }, where scene_num is the
@@ -772,10 +770,6 @@ def save_images(
         ValueError: Raised if any arguments are invalid or out of range (e.g.
         if num_images is negative).
     """
-    # TODO(v0.7): Add DeprecationWarning that `video_manager` will be removed in v0.8.
-    if video_manager is not None:
-        logger.error("`video_manager` argument is deprecated, use `video` instead.")
-        video = video_manager
 
     if not scene_list:
         return {}

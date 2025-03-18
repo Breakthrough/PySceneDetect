@@ -25,7 +25,6 @@ import pytest
 
 from scenedetect.backends import VideoStreamAv, VideoStreamMoviePy
 from scenedetect.backends.opencv import VideoStreamCv2
-from scenedetect.video_manager import VideoManager
 from scenedetect.video_stream import SeekError, VideoStream
 
 # Accuracy a framerate is checked to for testing purposes.
@@ -132,7 +131,6 @@ pytestmark = [
                     VideoStreamCv2,
                     VideoStreamAv,
                     VideoStreamMoviePy,
-                    VideoManager,
                 ],
             )
         ),
@@ -314,8 +312,6 @@ class TestVideoStream:
 
     def test_seek_past_eof(self, vs_type: ty.Type[VideoStream], test_video: VideoParameters):
         """Validate calling `seek()` to offset past end of video."""
-        if vs_type == VideoManager:
-            pytest.skip(reason="VideoManager does not have compliant end-of-video seek behaviour.")
         stream = vs_type(test_video.path)
         # Seek to a large seek offset past the end of the video. Some backends only support 32-bit
         # frame numbers so that's our max offset. Certain backends disallow seek offsets past EOF,
@@ -358,8 +354,6 @@ def test_invalid_path(vs_type: ty.Type[VideoStream]):
 
 def test_corrupt_video(vs_type: ty.Type[VideoStream], corrupt_video_file: str):
     """Test that backend handles video with corrupt frame gracefully with defaults."""
-    if vs_type == VideoManager:
-        pytest.skip(reason="VideoManager does not support handling corrupt videos.")
     if vs_type == VideoStreamMoviePy and get_moviepy_major_version() >= 2:
         # Due to changes in MoviePy 2.0 (#461), loading this file causes an exception to be thrown.
         # See https://github.com/Zulko/moviepy/pull/2253 for a PR that attempts to more gracefully

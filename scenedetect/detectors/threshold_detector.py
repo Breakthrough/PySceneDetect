@@ -21,7 +21,7 @@ from logging import getLogger
 
 import numpy
 
-from scenedetect.scene_detector import SceneDetector
+from scenedetect.detector import SceneDetector
 
 logger = getLogger("pyscenedetect")
 

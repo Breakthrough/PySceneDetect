@@ -22,7 +22,7 @@ from dataclasses import dataclass
 import cv2
 import numpy
 
-from scenedetect.scene_detector import FlashFilter, SceneDetector
+from scenedetect.detector import FlashFilter, SceneDetector
 
 
 def _mean_pixel_distance(left: numpy.ndarray, right: numpy.ndarray) -> float:

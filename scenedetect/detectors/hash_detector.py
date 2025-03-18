@@ -38,7 +38,7 @@ import cv2
 import numpy
 
 # PySceneDetect Library Imports
-from scenedetect.scene_detector import SceneDetector
+from scenedetect.detector import SceneDetector
 
 
 class HashDetector(SceneDetector):

@@ -86,8 +86,7 @@ def pytest_assertrepr_compare(op, left, right):
 @pytest.fixture(autouse=True)
 def no_logs_gte_error(caplog):
     """Ensure no log messages with error severity or higher were reported during test execution."""
-    # TODO: Remove exclusion for VideoManager module when removed from codebase.
-    EXCLUDED_MODULES = {"video_manager"}
+    EXCLUDED_MODULES = set()
     yield
     errors = [
         record

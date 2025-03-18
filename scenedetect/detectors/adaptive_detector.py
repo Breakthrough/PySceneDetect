@@ -43,7 +43,6 @@ class AdaptiveDetector(ContentDetector):
         weights: ContentDetector.Components = ContentDetector.DEFAULT_COMPONENT_WEIGHTS,
         luma_only: bool = False,
         kernel_size: ty.Optional[int] = None,
-        video_manager=None,
         min_delta_hsv: ty.Optional[float] = None,
     ):
         """
@@ -65,13 +64,8 @@ class AdaptiveDetector(ContentDetector):
                 Overrides `weights` if both are set.
             kernel_size: Size of kernel to use for post edge detection filtering. If None,
                 automatically set based on video resolution.
-            video_manager: [DEPRECATED] DO NOT USE. For backwards compatibility only.
             min_delta_hsv: [DEPRECATED] DO NOT USE. Use `min_content_val` instead.
         """
-        # TODO(v0.7): Replace with DeprecationWarning that `video_manager` and `min_delta_hsv` will
-        # be removed in v0.8.
-        if video_manager is not None:
-            logger.error("video_manager is deprecated, use video instead.")
         if min_delta_hsv is not None:
             logger.error("min_delta_hsv is deprecated, use min_content_val instead.")
             min_content_val = min_delta_hsv
