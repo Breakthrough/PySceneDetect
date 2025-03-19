@@ -29,7 +29,7 @@ from xml.etree import ElementTree
 import scenedetect
 from scenedetect._cli.config import XmlFormat
 from scenedetect._cli.context import CliContext
-from scenedetect.frame_timecode import FrameTimecode
+from scenedetect.common import FrameTimecode
 from scenedetect.platform import get_and_create_path
 from scenedetect.scene_manager import (
     CutList,

@@ -37,8 +37,7 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from scenedetect.common import Timecode
-from scenedetect.frame_timecode import FrameTimecode
+from scenedetect.common import FrameTimecode, Timecode
 
 
 class SeekError(Exception):

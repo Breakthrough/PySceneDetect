@@ -100,9 +100,14 @@ from scenedetect._thirdparty.simpletable import (
     SimpleTableImage,
     SimpleTableRow,
 )
-from scenedetect.common import CropRegion, CutList, SceneList
+from scenedetect.common import (
+    CropRegion,
+    CutList,
+    FrameTimecode,
+    SceneList,
+    _USE_PTS_IN_DEVELOPMENT,
+)
 from scenedetect.detector import SceneDetector
-from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.platform import get_and_create_path, get_cv2_imwrite_params, tqdm
 from scenedetect.stats_manager import StatsManager
 from scenedetect.video_stream import VideoStream
@@ -946,7 +951,7 @@ class SceneManager:
             stats_manager: :class:`StatsManager` to bind to this `SceneManager`. Can be
                 accessed via the `stats_manager` property of the resulting object to save to disk.
         """
-        self._cutting_list = []
+        self._cutting_list: ty.List[FrameTimecode] = []
         self._detector_list: ty.List[SceneDetector] = []
         # TODO(v1.0): This class should own a StatsManager instead of taking an optional one.
         # Expose a new `stats_manager` @property from the SceneManager, and either change the
@@ -1127,17 +1132,16 @@ class SceneManager:
             scene_list = []
         return sorted(scene_list)
 
-    def _get_cutting_list(self) -> ty.List[int]:
+    def _get_cutting_list(self) -> ty.List[FrameTimecode]:
         """Return a sorted list of unique frame numbers of any detected scene cuts."""
         if not self._cutting_list:
             return []
-        assert self._base_timecode is not None
         # Ensure all cuts are unique by using a set to remove all duplicates.
-        return [self._base_timecode + cut for cut in sorted(set(self._cutting_list))]
+        return [cut for cut in sorted(set(self._cutting_list))]
 
     def _process_frame(
         self,
-        frame_num: int,
+        position: FrameTimecode,
         frame_im: np.ndarray,
         callback: ty.Optional[ty.Callable[[np.ndarray, int], None]] = None,
     ) -> bool:
@@ -1152,19 +1156,22 @@ class SceneManager:
         # so index based on cut frame should be [event_frame - (frame_num + 1)]
         self._frame_buffer = self._frame_buffer[-(self._frame_buffer_size + 1) :]
         for detector in self._detector_list:
-            cuts = detector.process_frame(frame_num, frame_im)
+            cuts = detector.process_frame(position, frame_im)
             self._cutting_list += cuts
             new_cuts = True if cuts else False
+            # TODO: Support callbacks with PTS.
             if callback:
-                for cut_frame_num in cuts:
-                    buffer_index = cut_frame_num - (frame_num + 1)
-                    callback(self._frame_buffer[buffer_index], cut_frame_num)
+                if _USE_PTS_IN_DEVELOPMENT:
+                    raise NotImplementedError()
+                for cut in cuts:
+                    buffer_index = cut.frame_num - (position.frame_num + 1)
+                    callback(self._frame_buffer[buffer_index], cut.frame_num)
         return new_cuts
 
-    def _post_process(self, frame_num: int) -> None:
+    def _post_process(self, timecode: FrameTimecode) -> None:
         """Add remaining cuts to the cutting list, after processing the last frame."""
         for detector in self._detector_list:
-            self._cutting_list += detector.post_process(frame_num)
+            self._cutting_list += detector.post_process(timecode)
 
     def stop(self) -> None:
         """Stop the current :meth:`detect_scenes` call, if any. Thread-safe."""
@@ -1298,7 +1305,7 @@ class SceneManager:
                 break
             if next_frame is not None:
                 frame_im = next_frame
-            new_cuts = self._process_frame(position.frame_num, frame_im, callback)
+            new_cuts = self._process_frame(position, frame_im, callback)
             if progress_bar is not None:
                 if new_cuts:
                     progress_bar.set_description(
@@ -1321,7 +1328,8 @@ class SceneManager:
             raise self._exception_info[1].with_traceback(self._exception_info[2])
 
         self._last_pos = video.position
-        self._post_process(video.position._frame_num)
+        self._post_process(video.position)
+
         return video.frame_number - start_frame_num
 
     def _decode_thread(

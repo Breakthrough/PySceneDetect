@@ -24,6 +24,7 @@ from scenedetect._cli.config import (
     ConfigRegistry,
     CropValue,
 )
+from scenedetect.common import MAX_FPS_DELTA, FrameTimecode
 from scenedetect.detector import FlashFilter, SceneDetector
 from scenedetect.detectors import (
     AdaptiveDetector,
@@ -32,7 +33,6 @@ from scenedetect.detectors import (
     HistogramDetector,
     ThresholdDetector,
 )
-from scenedetect.frame_timecode import MAX_FPS_DELTA, FrameTimecode
 from scenedetect.platform import init_logger
 from scenedetect.scene_manager import Interpolation, SceneManager
 from scenedetect.stats_manager import StatsManager

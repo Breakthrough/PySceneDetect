@@ -20,7 +20,7 @@ import warnings
 
 from scenedetect._cli.context import CliContext
 from scenedetect.backends import VideoStreamCv2, VideoStreamMoviePy
-from scenedetect.frame_timecode import FrameTimecode
+from scenedetect.common import FrameTimecode
 from scenedetect.platform import get_and_create_path
 from scenedetect.scene_manager import CutList, SceneList, get_scenes_from_cuts
 from scenedetect.video_stream import SeekError

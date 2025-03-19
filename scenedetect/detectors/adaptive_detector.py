@@ -21,6 +21,7 @@ from logging import getLogger
 
 import numpy as np
 
+from scenedetect.common import FrameTimecode
 from scenedetect.detectors import ContentDetector
 
 logger = getLogger("pyscenedetect")
@@ -109,7 +110,9 @@ class AdaptiveDetector(ContentDetector):
         """Not required for AdaptiveDetector."""
         return False
 
-    def process_frame(self, frame_num: int, frame_img: ty.Optional[np.ndarray]) -> ty.List[int]:
+    def process_frame(
+        self, timecode: FrameTimecode, frame_img: ty.Optional[np.ndarray]
+    ) -> ty.List[int]:
         """Process the next frame. `frame_num` is assumed to be sequential.
 
         Args:
@@ -124,14 +127,14 @@ class AdaptiveDetector(ContentDetector):
 
         # TODO(#283): Merge this with ContentDetector and turn it on by default.
 
-        super().process_frame(frame_num=frame_num, frame_img=frame_img)
+        super().process_frame(timecode=timecode, frame_img=frame_img)
 
         # Initialize last scene cut point at the beginning of the frames of interest.
         if self._last_cut is None:
-            self._last_cut = frame_num
+            self._last_cut = timecode
 
         required_frames = 1 + (2 * self.window_width)
-        self._buffer.append((frame_num, self._frame_score))
+        self._buffer.append((timecode, self._frame_score))
         if not len(self._buffer) >= required_frames:
             return []
         self._buffer = self._buffer[-required_frames:]
@@ -156,7 +159,7 @@ class AdaptiveDetector(ContentDetector):
         threshold_met: bool = (
             adaptive_ratio >= self.adaptive_threshold and target_score >= self.min_content_val
         )
-        min_length_met: bool = (frame_num - self._last_cut) >= self.min_scene_len
+        min_length_met: bool = (timecode - self._last_cut) >= self.min_scene_len
         if threshold_met and min_length_met:
             self._last_cut = target_frame
             return [target_frame]

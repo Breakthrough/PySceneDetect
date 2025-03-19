@@ -27,7 +27,7 @@ import typing as ty
 from logging import getLogger
 from pathlib import Path
 
-from scenedetect.frame_timecode import FrameTimecode
+from scenedetect.common import FrameTimecode
 
 logger = getLogger("pyscenedetect")
 

@@ -29,6 +29,7 @@ from enum import Enum
 
 import numpy
 
+from scenedetect.common import FrameTimecode, _USE_PTS_IN_DEVELOPMENT
 from scenedetect.stats_manager import StatsManager
 
 
@@ -46,6 +47,7 @@ class SceneDetector:
 
     # TODO(v0.7): Make this a proper abstract base class.
 
+    # TODO(v0.7): This should be a property.
     stats_manager: ty.Optional[StatsManager] = None
     """Optional :class:`StatsManager <scenedetect.stats_manager.StatsManager>` to
     use for caching frame metrics to and from."""
@@ -67,7 +69,9 @@ class SceneDetector:
         """
         return []
 
-    def process_frame(self, frame_num: int, frame_img: numpy.ndarray) -> ty.List[int]:
+    def process_frame(
+        self, timecode: FrameTimecode, frame_img: numpy.ndarray
+    ) -> ty.List[FrameTimecode]:
         """Process the next frame. `frame_num` is assumed to be sequential.
 
         Args:
@@ -84,7 +88,7 @@ class SceneDetector:
         """
         return []
 
-    def post_process(self, frame_num: int) -> ty.List[int]:
+    def post_process(self, timecode: int) -> ty.List[FrameTimecode]:
         """Post Process: Performs any processing after the last frame has been read.
 
         Prototype method, no actual detection.
@@ -130,15 +134,17 @@ class FlashFilter:
     def max_behind(self) -> int:
         return 0 if self._mode == FlashFilter.Mode.SUPPRESS else self._filter_length
 
-    def filter(self, frame_num: int, above_threshold: bool) -> ty.List[int]:
+    def filter(self, timecode: FrameTimecode, above_threshold: bool) -> ty.List[FrameTimecode]:
         if not self._filter_length > 0:
-            return [frame_num] if above_threshold else []
+            return [timecode] if above_threshold else []
+        if _USE_PTS_IN_DEVELOPMENT:
+            raise NotImplementedError("TODO: Change filter to use units of time instead of frames.")
         if self._last_above is None:
-            self._last_above = frame_num
+            self._last_above = timecode
         if self._mode == FlashFilter.Mode.MERGE:
-            return self._filter_merge(frame_num=frame_num, above_threshold=above_threshold)
+            return self._filter_merge(frame_num=timecode, above_threshold=above_threshold)
         elif self._mode == FlashFilter.Mode.SUPPRESS:
-            return self._filter_suppress(frame_num=frame_num, above_threshold=above_threshold)
+            return self._filter_suppress(frame_num=timecode, above_threshold=above_threshold)
         raise RuntimeError("Unhandled FlashFilter mode.")
 
     def _filter_suppress(self, frame_num: int, above_threshold: bool) -> ty.List[int]:

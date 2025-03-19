@@ -21,8 +21,8 @@ from pathlib import Path
 import pytest
 
 from scenedetect.backends.opencv import VideoStreamCv2
+from scenedetect.common import FrameTimecode
 from scenedetect.detectors import AdaptiveDetector, ContentDetector
-from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.scene_manager import SceneManager, save_images
 
 TEST_VIDEO_START_FRAMES_ACTUAL = [150, 180, 394]

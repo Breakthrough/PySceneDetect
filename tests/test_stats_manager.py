@@ -34,8 +34,8 @@ from pathlib import Path
 import pytest
 
 from scenedetect.backends.opencv import VideoStreamCv2
+from scenedetect.common import FrameTimecode
 from scenedetect.detectors import ContentDetector
-from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.scene_manager import SceneManager
 from scenedetect.stats_manager import (
     COLUMN_NAME_FRAME_NUMBER,

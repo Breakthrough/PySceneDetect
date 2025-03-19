@@ -17,16 +17,13 @@ from logging import getLogger
 import av
 import numpy as np
 
-from scenedetect.common import Timecode
-from scenedetect.frame_timecode import MAX_FPS_DELTA, FrameTimecode
+from scenedetect.common import MAX_FPS_DELTA, FrameTimecode, Timecode, _USE_PTS_IN_DEVELOPMENT
 from scenedetect.platform import get_file_name
 from scenedetect.video_stream import FrameRateUnavailable, VideoOpenFailure, VideoStream
 
 logger = getLogger("pyscenedetect")
 
 VALID_THREAD_MODES = ["NONE", "SLICE", "FRAME", "AUTO"]
-
-_USE_PTS_IN_DEVELOPMENT = False
 
 
 class VideoStreamAv(VideoStream):
@@ -205,7 +202,12 @@ class VideoStreamAv(VideoStream):
         """Current position within stream as the frame number.
 
         Will return 0 until the first frame is `read`."""
+
         if self._frame:
+            if _USE_PTS_IN_DEVELOPMENT:
+                return FrameTimecode(
+                    round(self._frame.time * self.frame_rate), self.frame_rate
+                ).frame_num
             return self.position.frame_num + 1
         return 0
 

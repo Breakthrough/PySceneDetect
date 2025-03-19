@@ -40,8 +40,7 @@ import typing as ty
 from dataclasses import dataclass
 from pathlib import Path
 
-from scenedetect.common import TimecodePair
-from scenedetect.frame_timecode import FrameTimecode
+from scenedetect.common import FrameTimecode, TimecodePair
 from scenedetect.platform import CommandTooLong, Template, get_ffmpeg_path, invoke_command, tqdm
 
 logger = logging.getLogger("pyscenedetect")

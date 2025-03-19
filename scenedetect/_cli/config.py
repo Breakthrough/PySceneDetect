@@ -25,9 +25,9 @@ from enum import Enum
 
 from platformdirs import user_config_dir
 
+from scenedetect.common import FrameTimecode
 from scenedetect.detector import FlashFilter
 from scenedetect.detectors import ContentDetector
-from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.scene_manager import Interpolation
 from scenedetect.video_splitter import DEFAULT_FFMPEG_ARGS
 

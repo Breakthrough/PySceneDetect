@@ -24,7 +24,7 @@ or string HH:MM:SS[.nnn]. timecode format.
 import pytest
 
 # Standard Library Imports
-from scenedetect.frame_timecode import MAX_FPS_DELTA, FrameTimecode
+from scenedetect.common import MAX_FPS_DELTA, FrameTimecode
 
 
 def test_framerate():

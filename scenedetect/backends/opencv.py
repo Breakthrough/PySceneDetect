@@ -26,8 +26,7 @@ from logging import getLogger
 import cv2
 import numpy as np
 
-from scenedetect.common import Timecode
-from scenedetect.frame_timecode import MAX_FPS_DELTA, FrameTimecode
+from scenedetect.common import MAX_FPS_DELTA, FrameTimecode, Timecode, _USE_PTS_IN_DEVELOPMENT
 from scenedetect.platform import get_file_name
 from scenedetect.video_stream import (
     FrameRateUnavailable,
@@ -45,8 +44,6 @@ NON_VIDEO_FILE_INPUT_IDENTIFIERS = (
     "://",  # URL/network stream
     " ! ",  # gstreamer pipe
 )
-
-_USE_PTS_IN_DEVELOPMENT = False
 
 
 def _get_aspect_ratio(cap: cv2.VideoCapture, epsilon: float = 0.0001) -> float:

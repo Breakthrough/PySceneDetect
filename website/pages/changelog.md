@@ -659,6 +659,7 @@ Development
 
 #### Breaking
 
+ * The `SceneDetector` interface now uses timecodes instead of frame numbers
  * Remove deprecated `scenedetect.video_manager` module ([use `scenedetect.open_video()` function](https://www.scenedetect.com/docs/head/api.html#scenedetect.open_video) instead)
  * Deprecated `video_manager` parameter has been removed from many functions and constructors, use `video` parameter instead when required
  * Refactoring to make code less verbose:
