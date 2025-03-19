@@ -29,7 +29,7 @@ from enum import Enum
 
 import numpy
 
-from scenedetect.common import FrameTimecode, _USE_PTS_IN_DEVELOPMENT
+from scenedetect.common import _USE_PTS_IN_DEVELOPMENT, FrameTimecode
 from scenedetect.stats_manager import StatsManager
 
 

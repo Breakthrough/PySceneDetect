@@ -26,7 +26,7 @@ from logging import getLogger
 import cv2
 import numpy as np
 
-from scenedetect.common import MAX_FPS_DELTA, FrameTimecode, Timecode, _USE_PTS_IN_DEVELOPMENT
+from scenedetect.common import _USE_PTS_IN_DEVELOPMENT, MAX_FPS_DELTA, FrameTimecode, Timecode
 from scenedetect.platform import get_file_name
 from scenedetect.video_stream import (
     FrameRateUnavailable,

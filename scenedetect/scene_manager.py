@@ -101,11 +101,11 @@ from scenedetect._thirdparty.simpletable import (
     SimpleTableRow,
 )
 from scenedetect.common import (
+    _USE_PTS_IN_DEVELOPMENT,
     CropRegion,
     CutList,
     FrameTimecode,
     SceneList,
-    _USE_PTS_IN_DEVELOPMENT,
 )
 from scenedetect.detector import SceneDetector
 from scenedetect.platform import get_and_create_path, get_cv2_imwrite_params, tqdm
