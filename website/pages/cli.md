@@ -29,7 +29,7 @@ As a concrete example to become familiar with PySceneDetect, let's use the follo
 
 [https://www.youtube.com/watch?v=OMgIPnCnlbQ](https://www.youtube.com/watch?v=OMgIPnCnlbQ)
 
-You can [download the clip from here](https://github.com/Breakthrough/PySceneDetect/raw/resources/tests/resources/goldeneye/goldeneye.mp4) (right-click and save the video in your working directory as `goldeneye.mp4`).
+You can [download the clip from here](https://github.com/Breakthrough/PySceneDetect/raw/refs/heads/resources/tests/resources/goldeneye.mp4) (right-click and save the video in your working directory as `goldeneye.mp4`).
 
 Let's split this scene into clips on each fast cut. This means we need to use content-aware detecton mode (`detect-content`) or adaptive mode (`detect-adaptive`).  If the video instead contains fade-in/fade-out transitions you want to find, you can use `detect-threshold` instead. If no detector is specified, `detect-adaptive` will be used by default.
 
