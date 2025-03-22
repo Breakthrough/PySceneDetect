@@ -169,7 +169,6 @@ def get_scenes_from_cuts(
     cut_list: CutList,
     start_pos: ty.Union[int, FrameTimecode],
     end_pos: ty.Union[int, FrameTimecode],
-    base_timecode: ty.Optional[FrameTimecode] = None,
 ) -> SceneList:
     """Returns a list of tuples of start/end FrameTimecodes for each scene based on a
     list of detected scene cuts/breaks.
@@ -181,20 +180,15 @@ def get_scenes_from_cuts(
 
     Arguments:
         cut_list: List of FrameTimecode objects where scene cuts/breaks occur.
-        base_timecode: The base_timecode of which all FrameTimecodes in the cut_list are based on.
         num_frames: The number of frames, or FrameTimecode representing duration, of the video that
             was processed (used to generate last scene's end time).
         start_frame: The start frame or FrameTimecode of the cut list. Used to generate the first
             scene's start time.
-        base_timecode: [DEPRECATED] DO NOT USE. For backwards compatibility only.
     Returns:
         List of tuples in the form (start_time, end_time), where both start_time and
         end_time are FrameTimecode objects representing the exact time/frame where each
         scene occupies based on the input cut_list.
     """
-    # TODO(v0.7): Use the warnings module to turn this into a warning.
-    if base_timecode is not None:
-        logger.error("`base_timecode` argument is deprecated has no effect.")
 
     # Scene list, where scenes are tuples of (Start FrameTimecode, End FrameTimecode).
     scene_list = []
@@ -1099,13 +1093,10 @@ class SceneManager:
         """Remove all scene detectors added to the SceneManager via add_detector()."""
         self._detector_list.clear()
 
-    def get_scene_list(
-        self, base_timecode: ty.Optional[FrameTimecode] = None, start_in_scene: bool = False
-    ) -> SceneList:
+    def get_scene_list(self, start_in_scene: bool = False) -> SceneList:
         """Return a list of tuples of start/end FrameTimecodes for each detected scene.
 
         Arguments:
-            base_timecode: [DEPRECATED] DO NOT USE. For backwards compatibility.
             start_in_scene: Assume the video begins in a scene. This means that when detecting
                 fast cuts with `ContentDetector`, if no cuts are found, the resulting scene list
                 will contain a single scene spanning the entire video (instead of no scenes).
@@ -1117,9 +1108,6 @@ class SceneManager:
             end_time are FrameTimecode objects representing the exact time/frame where each
             detected scene in the video begins and ends.
         """
-        # TODO(v0.7): Replace with DeprecationWarning that `base_timecode` will be removed in v0.8.
-        if base_timecode is not None:
-            logger.error("`base_timecode` argument is deprecated and has no effect.")
         if self._base_timecode is None:
             return []
         cut_list = self._get_cutting_list()
@@ -1424,7 +1412,6 @@ class SceneManager:
 
     def get_cut_list(
         self,
-        base_timecode: ty.Optional[FrameTimecode] = None,
         show_warning: bool = True,
     ) -> CutList:
         """[DEPRECATED] Return a list of FrameTimecodes of the detected scene changes/cuts.
@@ -1436,7 +1423,6 @@ class SceneManager:
         and ending at the last frame detected.
 
         Arguments:
-            base_timecode: [DEPRECATED] DO NOT USE. For backwards compatibility only.
             show_warning: If set to False, suppresses the error from being warned. In v0.7,
                 this will have no effect and the error will become a Python warning.
 

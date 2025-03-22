@@ -659,22 +659,21 @@ Development
 
 #### Breaking
 
- * Many types and interfaces now use timecodes instead of frame numbers, which is a breaking change for:
+ * Replace `frame_num` parameter (`int`) with `timecode` (`FrameTimecode`) in `SceneDetector` interface:
       * The detector interface: `SceneDetector.process_frame()` and `SceneDetector.post_process()`
       * Statistics: `StatsManager.get_metrics()`, `StatsManager.set_metrics()`, and `StatsManager.metrics_exist()`
- * The `SceneDetector` interface now uses timecodes instead of frame numbers
- * Remove deprecated `scenedetect.video_manager` module ([use `scenedetect.open_video()` function](https://www.scenedetect.com/docs/head/api.html#scenedetect.open_video) instead)
- * Deprecated `video_manager` parameter has been removed from many functions and constructors, use `video` parameter instead when required
- * Refactoring to make code less verbose:
+ * Reorganized submodules:
       * `scenedetect.scene_detector` is now `scenedetect.detector`
       * `scenedetect.frame_timecode` is now `scenedetect.common`
+ * Remove deprecated module `scenedetect.video_manager`, use [the `scenedetect.open_video()` function](https://www.scenedetect.com/docs/head/api.html#scenedetect.open_video) instead
+ * Remove deprecated parameter `base_timecode` from various functions, there is no need to provide it
+ * Remove deprecated parameter `video_manager` from various functions, use `video` parameter instead
  * `FrameTimecode` fields `frame_num` and `framerate` are now read-only properties, construct a new `FrameTimecode` to change them
  * Remove `FrameTimecode.previous_frame()` method
  * Remove `SceneDetector.is_processing_required()` method, already had no effect in v0.6 as part of deprecation
  * `SceneDetector` instances can now assume they always have frame data to process when `process_frame` is called
  * Remove deprecated `SparseSceneDetector` interface
  * Remove deprecated `SceneManager.get_event_list()` method
- * Remove deprecated `base_timecode` argument in `SceneManager.save_to_csv()`
  * Remove deprecated `AdaptiveDetector.get_content_val()` method (the same information can be obtained using a `StatsManager`)
 
 #### Deprecation
