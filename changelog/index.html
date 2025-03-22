@@ -909,6 +909,11 @@
 <h3 id="api-changes">API Changes</h3>
 <h4 id="breaking">Breaking</h4>
 <ul>
+<li>Many types and interfaces now use timecodes instead of frame numbers, which is a breaking change for:<ul>
+<li>The detector interface: <code>SceneDetector.process_frame()</code> and <code>SceneDetector.post_process()</code></li>
+<li>Statistics: <code>StatsManager.get_metrics()</code>, <code>StatsManager.set_metrics()</code>, and <code>StatsManager.metrics_exist()</code></li>
+</ul>
+</li>
 <li>The <code>SceneDetector</code> interface now uses timecodes instead of frame numbers</li>
 <li>Remove deprecated <code>scenedetect.video_manager</code> module (<a href="https://www.scenedetect.com/docs/head/api.html#scenedetect.open_video">use <code>scenedetect.open_video()</code> function</a> instead)</li>
 <li>Deprecated <code>video_manager</code> parameter has been removed from many functions and constructors, use <code>video</code> parameter instead when required</li>
@@ -923,6 +928,8 @@
 <li><code>SceneDetector</code> instances can now assume they always have frame data to process when <code>process_frame</code> is called</li>
 <li>Remove deprecated <code>SparseSceneDetector</code> interface</li>
 <li>Remove deprecated <code>SceneManager.get_event_list()</code> method</li>
+<li>Remove deprecated <code>base_timecode</code> argument in <code>SceneManager.save_to_csv()</code></li>
+<li>Remove deprecated <code>AdaptiveDetector.get_content_val()</code> method (the same information can be obtained using a <code>StatsManager</code>)</li>
 </ul>
 <h4 id="deprecation">Deprecation</h4>
 <ul>

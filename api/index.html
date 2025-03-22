@@ -141,23 +141,24 @@
 <h1 id="creating-new-detection-algorithms">Creating New Detection Algorithms</h1>
 <p>All scene detection algorithms must inherit from <a href="https://scenedetect.com/projects/Manual/en/latest/api/detector.html">the base <code>SceneDetector</code> class</a>. Note that the current SceneDetector API is under development and expected to change somewhat before v1.0 is released, so make sure to pin your <code>scenedetect</code> dependency to the correct API version (e.g. <code>scenedetect &lt; 0.6</code>, <code>scenedetect &lt; 0.7</code>, etc...).</p>
 <p>Creating a new scene detection method can be as simple as implementing the <code>process_frame</code> function, and optionally <code>post_process</code>:</p>
-<pre><code class="language-python">from scenedetect.detector import SceneDetector
+<pre><code class="language-python">import typing as ty
+import numpy as np
+from scenedetect import FrameTimecode, SceneDetector
 
 class CustomDetector(SceneDetector):
     &quot;&quot;&quot;CustomDetector class to implement a scene detection algorithm.&quot;&quot;&quot;
-    def __init__(self):
-        pass
 
-    def process_frame(self, frame_num, frame_img, frame_metrics, scene_list):
-        &quot;&quot;&quot;Computes/stores metrics and detects any scene changes.
-
-        Returns:
-            A list containing 1 or more the frame numbers of any detected scenes.
-        &quot;&quot;&quot;
+    def process_frame(
+        self,
+        timecode: FrameTimecode,
+        frame_im: np.ndarray,
+    ) -&gt; ty.List[FrameTimecode]:
+        # Return a list of timecodes where we found cuts (either on this frame or previously).
         return []
 
-    def post_process(self, scene_list):
-        pass
+    def post_process(self, timecode: FrameTimecode) -&gt; ty.List[FrameTimecode]:
+        # Called after the last frame has been read to handle pending events.
+        return []
 </code></pre>
 <p><code>process_frame</code> is called on every frame in the input video, which will be called after the final frame of the video is passed to <code>process_frame</code>. This may be useful for multi-pass algorithms, or detectors which are waiting on some condition but still wish to output an event on the final frame.</p>
 <p>For example, a detector may output at most 1 cuts for every call to <code>process_frame</code>, it may output the entire scene list in <code>post_process</code>, or a combination of both.  Note that the latter will not work in cases where a live video stream or camera input device is being used. See the <a href="https://scenedetect.com/projects/Manual/en/latest/api/detector.html#scenedetect.scene_detector.SceneDetector">API documentation for the <code>SceneDetector</code> class</a> for details. Alternatively, you can call <code>help(SceneDetector)</code> from a Python REPL. For examples of actual detection algorithm implementations, see the source files in the <code>scenedetect/detectors/</code> directory (e.g. <code>threshold_detector.py</code>, <code>content_detector.py</code>).</p>
