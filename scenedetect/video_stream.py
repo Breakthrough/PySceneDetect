@@ -174,12 +174,13 @@ class VideoStream(ABC):
     #
 
     @abstractmethod
-    def read(self, decode: bool = True, advance: bool = True) -> ty.Union[np.ndarray, bool]:
+    def read(self, decode: bool = True) -> ty.Union[np.ndarray, bool]:
         """Read and decode the next frame as a np.ndarray. Returns False when video ends.
 
         Arguments:
-            decode: Decode and return the frame.
-            advance: Seek to the next frame. If False, will return the current (last) frame.
+            decode: Return the frame image itself. If False, a boolean indicating if the stream
+                was advanced to the next frame or not. This can improve performance by reducing
+                memory copying and colorspace conversions when a given frame's data is not required.
 
         Returns:
             If decode = True, the decoded frame (np.ndarray), or False (bool) if end of video.

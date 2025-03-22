@@ -131,11 +131,9 @@ class VideoStreamMoviePy(VideoStream):
     def position(self) -> FrameTimecode:
         """Current position within stream as FrameTimecode.
 
-        This can be interpreted as presentation time stamp of the last frame which was
-        decoded by calling `read` with advance=True.
-
-        This method will always return 0 (e.g. be equal to `base_timecode`) if no frames
-        have been `read`."""
+        This can be interpreted as presentation time stamp of the last frame which was decoded by
+        calling `read`. This will always return 0 (e.g. be equal to `base_timecode`) if no frames
+        have been `read` yet."""
         frame_number = max(self._frame_number - 1, 0)
         return FrameTimecode(frame_number, self.frame_rate)
 
@@ -151,10 +149,8 @@ class VideoStreamMoviePy(VideoStream):
     def frame_number(self) -> int:
         """Current position within stream in frames as an int.
 
-        1 indicates the first frame was just decoded by the last call to `read` with advance=True,
-        whereas 0 indicates that no frames have been `read`.
-
-        This method will always return 0 if no frames have been `read`."""
+        0 indicates that no frames have been `read`, 1 indicates the first frame was just read.
+        """
         return self._frame_number
 
     def seek(self, target: ty.Union[FrameTimecode, float, int]):
@@ -209,24 +205,7 @@ class VideoStreamMoviePy(VideoStream):
         self._eof = False
         self._reader = FFMPEG_VideoReader(self._path, print_infos=print_infos)
 
-    def read(self, decode: bool = True, advance: bool = True) -> ty.Union[np.ndarray, bool]:
-        """Read and decode the next frame as a np.ndarray. Returns False when video ends.
-
-        Arguments:
-            decode: Decode and return the frame.
-            advance: Seek to the next frame. If False, will return the current (last) frame.
-
-        Returns:
-            If decode = True, the decoded frame (np.ndarray), or False (bool) if end of video.
-            If decode = False, a bool indicating if advancing to the the next frame succeeded.
-        """
-        if not advance:
-            last_frame_valid = self._last_frame is not None and self._last_frame is not False
-            if not last_frame_valid:
-                return False
-            if self._last_frame_rgb is None:
-                self._last_frame_rgb = cv2.cvtColor(self._last_frame, cv2.COLOR_BGR2RGB)
-            return self._last_frame_rgb
+    def read(self, decode: bool = True) -> ty.Union[np.ndarray, bool]:
         if not hasattr(self._reader, "lastread") or self._eof:
             return False
         has_last_read = hasattr(self._reader, "last_read")

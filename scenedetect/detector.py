@@ -37,12 +37,6 @@ class SceneDetector:
     """Base class to inherit from when implementing a scene detection algorithm.
 
     This API is not yet stable and subject to change.
-
-    This represents a "dense" scene detector, which returns a list of frames where
-    the next scene/shot begins in a video.
-
-    Also see the implemented scene detectors in the scenedetect.detectors module
-    to get an idea of how a particular detector can be created.
     """
 
     # TODO(v0.7): Make this a proper abstract base class.
@@ -61,7 +55,7 @@ class SceneDetector:
         return False
 
     def get_metrics(self) -> ty.List[str]:
-        """Get Metrics:  Get a list of all metric names/keys used by the detector.
+        """Returns a list of all metric names/keys used by this detector.
 
         Returns:
             List of strings of frame metric key names that will be used by
@@ -75,26 +69,22 @@ class SceneDetector:
         """Process the next frame. `frame_num` is assumed to be sequential.
 
         Args:
-            frame_num (int): Frame number of frame that is being passed. Can start from any value
-                but must remain sequential.
-            frame_img (numpy.ndarray or None): Video frame corresponding to `frame_img`.
+            timecode: Timecode corresponding to the frame being processed.
+            frame_img: Video frame as a 24-bit BGR image.
 
         Returns:
-           ty.List[int]: List of frames where scene cuts have been detected. There may be 0
-            or more frames in the list, and not necessarily the same as frame_num.
-
-        Returns:
-            List of frame numbers of cuts to be added to the cutting list.
+           List of timecodes where scene cuts have been detected, if any.
         """
         return []
 
     def post_process(self, timecode: int) -> ty.List[FrameTimecode]:
-        """Post Process: Performs any processing after the last frame has been read.
+        """Called after there are no more frames to process.
 
-        Prototype method, no actual detection.
+        Args:
+            timecode: The last position in the video which was read.
 
         Returns:
-            List of frame numbers of cuts to be added to the cutting list.
+           List of timecodes where scene cuts have been detected, if any.
         """
         return []
 

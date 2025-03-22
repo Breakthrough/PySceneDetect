@@ -257,9 +257,9 @@ class VideoStreamAv(VideoStream):
         self._frame = None
         self._container.seek(target_pts, stream=self._video_stream)
         if not beginning:
-            self.read(decode=False, advance=True)
+            self.read(decode=False)
         while self.position < target:
-            if self.read(decode=False, advance=True) is False:
+            if self.read(decode=False) is False:
                 break
 
     def reset(self):
@@ -271,33 +271,18 @@ class VideoStreamAv(VideoStream):
         except Exception as ex:
             raise VideoOpenFailure() from ex
 
-    def read(self, decode: bool = True, advance: bool = True) -> ty.Union[np.ndarray, bool]:
-        """Read and decode the next frame as a np.ndarray. Returns False when video ends.
-
-        Arguments:
-            decode: Decode and return the frame.
-            advance: Seek to the next frame. If False, will return the current (last) frame.
-
-        Returns:
-            If decode = True, the decoded frame (np.ndarray), or False (bool) if end of video.
-            If decode = False, a bool indicating if advancing to the the next frame succeeded.
-        """
-        has_advanced = False
-        if advance:
-            try:
-                last_frame = self._frame
-                self._frame = next(self._container.decode(video=0))
-            except av.error.EOFError:
-                self._frame = last_frame
-                if self._handle_eof():
-                    return self.read(decode, advance=True)
-                return False
-            except StopIteration:
-                return False
-            has_advanced = True
-        if decode:
-            return self._frame.to_ndarray(format="bgr24")
-        return has_advanced
+    def read(self, decode: bool = True) -> ty.Union[np.ndarray, bool]:
+        try:
+            last_frame = self._frame
+            self._frame = next(self._container.decode(video=0))
+        except av.error.EOFError:
+            self._frame = last_frame
+            if self._handle_eof():
+                return self.read(decode)
+            return False
+        except StopIteration:
+            return False
+        return self._frame.to_ndarray(format="bgr24") if decode else True
 
     #
     # Private Methods/Properties

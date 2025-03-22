@@ -650,6 +650,12 @@ Development
 
 ## PySceneDetect 0.7 (In Development)
 
+### Release Notes
+
+PySceneDetect is a major breaking release which overhauls how timestamps are handled throughout the API. This allows PySceneDetect to properly process variable framerate (VFR) videos. A significant amount of technical debt has been addressed, including removal of deprecated or overly complicated APIs, with the goal of simplifying usage and integration.
+
+Applications written for the 0.6 API may need to be modified to work with the new 0.7 API. These changes should be minimal in most cases, and backwards compatibility has been added where possible to reduce the scope of breaking changes.
+
 ### CLI Changes
 
 - [feature] WORK IN PROGRESS: New `save-xml` command supports saving scenes in Final Cut Pro format [#156](https://github.com/Breakthrough/PySceneDetect/issues/156)
@@ -675,6 +681,7 @@ Development
  * Remove deprecated `SparseSceneDetector` interface
  * Remove deprecated `SceneManager.get_event_list()` method
  * Remove deprecated `AdaptiveDetector.get_content_val()` method (the same information can be obtained using a `StatsManager`)
+ * Remove `advance` parameter from `VideoStream.read()` (was always set to `True`, callers should handle caching frames now if required)
 
 #### Deprecation
 

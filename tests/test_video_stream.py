@@ -164,21 +164,10 @@ class TestVideoStream:
         assert frame.shape == (test_video.height, test_video.width, 3)
         assert stream.frame_number == 1
 
-    def test_read_no_advance(self, vs_type: ty.Type[VideoStream], test_video: VideoParameters):
-        """Validate invoking `read` with `advance` set to False."""
-        stream = vs_type(test_video.path)
-        frame = stream.read().copy()
-        assert stream.frame_number == 1
-        frame_copy = stream.read(advance=False)
-        assert stream.frame_number == 1
-        assert calculate_frame_delta(frame, frame_copy) == pytest.approx(0.0)
-
     def test_read_no_decode(self, vs_type: ty.Type[VideoStream], test_video: VideoParameters):
         """Validate invoking `read` with `decode` set to False."""
         stream = vs_type(test_video.path)
         assert stream.read(decode=False) is True
-        assert stream.frame_number == 1
-        stream.read(decode=False, advance=False)
         assert stream.frame_number == 1
 
     def test_time_invariants(self, vs_type: ty.Type[VideoStream], test_video: VideoParameters):
@@ -322,8 +311,7 @@ class TestVideoStream:
             return
         # For those backends that do allow seek offsets past EOF, they should act as though we
         # seeked to the end of the video (i.e. shouldn't be able to decode any more frames).
-        assert stream.read(advance=True) is False
-        assert stream.read(advance=False) is not False
+        assert stream.read() is False
         # TODO: On some videos, the PyAV backend seems to drop a frame. See where this occurs.
         if vs_type == VideoStreamAv:
             assert stream.frame_number in (test_video.total_frames, test_video.total_frames - 1)

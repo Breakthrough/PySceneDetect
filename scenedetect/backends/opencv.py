@@ -141,13 +141,11 @@ class VideoStreamCv2(VideoStream):
 
     @property
     def frame_rate(self) -> float:
-        """Framerate in frames/sec."""
         assert self._frame_rate
         return self._frame_rate
 
     @property
     def path(self) -> ty.Union[bytes, str]:
-        """Video or device path."""
         if self._is_device:
             assert isinstance(self._path_or_device, (int))
             return "Device %d" % self._path_or_device
@@ -156,7 +154,6 @@ class VideoStreamCv2(VideoStream):
 
     @property
     def name(self) -> str:
-        """Name of the video, without extension, or device."""
         if self._is_device:
             return self.path
         file_name: str = get_file_name(self.path, include_extension=False)
@@ -205,13 +202,6 @@ class VideoStreamCv2(VideoStream):
 
     @property
     def position(self) -> FrameTimecode:
-        """Current position within stream as FrameTimecode.
-
-        This can be interpreted as presentation time stamp of the last frame which was
-        decoded by calling `read` with advance=True.
-
-        This method will always return 0 (e.g. be equal to `base_timecode`) if no frames
-        have been `read`."""
         if _USE_PTS_IN_DEVELOPMENT:
             return FrameTimecode(timecode=self.timecode, fps=self.frame_rate)
         if self.frame_number < 1:
@@ -220,41 +210,13 @@ class VideoStreamCv2(VideoStream):
 
     @property
     def position_ms(self) -> float:
-        """Current position within stream as a float of the presentation time in milliseconds.
-        The first frame has a time of 0.0 ms.
-
-        This method will always return 0.0 if no frames have been `read`."""
         return self._cap.get(cv2.CAP_PROP_POS_MSEC)
 
     @property
     def frame_number(self) -> int:
-        """Current position within stream in frames as an int.
-
-        1 indicates the first frame was just decoded by the last call to `read` with advance=True,
-        whereas 0 indicates that no frames have been `read`.
-
-        This method will always return 0 if no frames have been `read`."""
         return math.trunc(self._cap.get(cv2.CAP_PROP_POS_FRAMES))
 
     def seek(self, target: ty.Union[FrameTimecode, float, int]):
-        """Seek to the given timecode. If given as a frame number, represents the current seek
-        pointer (e.g. if seeking to 0, the next frame decoded will be the first frame of the video).
-
-        For 1-based indices (first frame is frame #1), the target frame number needs to be converted
-        to 0-based by subtracting one. For example, if we want to seek to the first frame, we call
-        seek(0) followed by read(). If we want to seek to the 5th frame, we call seek(4) followed
-        by read(), at which point frame_number will be 5.
-
-        Not supported if the VideoStream is a device/camera. Untested with web streams.
-
-        Arguments:
-            target: Target position in video stream to seek to.
-                If float, interpreted as time in seconds.
-                If int, interpreted as frame number.
-        Raises:
-            SeekError: An error occurs while seeking, or seeking is not supported.
-            ValueError: `target` is not a valid value (i.e. it is negative).
-        """
         if self._is_device:
             raise SeekError("Cannot seek if input is a device!")
         if target < 0:
@@ -282,40 +244,27 @@ class VideoStreamCv2(VideoStream):
         self._cap.release()
         self._open_capture(self._frame_rate)
 
-    def read(self, decode: bool = True, advance: bool = True) -> ty.Union[np.ndarray, bool]:
-        """Read and decode the next frame as a np.ndarray. Returns False when video ends,
-        or the maximum number of decode attempts has passed.
-
-        Arguments:
-            decode: Decode and return the frame.
-            advance: Seek to the next frame. If False, will return the current (last) frame.
-
-        Returns:
-            If decode = True, the decoded frame (np.ndarray), or False (bool) if end of video.
-            If decode = False, a bool indicating if advancing to the the next frame succeeded.
-        """
+    def read(self, decode: bool = True) -> ty.Union[np.ndarray, bool]:
         if not self._cap.isOpened():
             return False
-        # Grab the next frame if possible.
-        if advance:
-            has_grabbed = self._cap.grab()
-            # If we failed to grab the frame, retry a few times if required.
-            if not has_grabbed:
-                if self.duration > 0 and self.position < (self.duration - 1):
-                    for _ in range(self._max_decode_attempts):
-                        has_grabbed = self._cap.grab()
-                        if has_grabbed:
-                            break
-                # Report previous failure in debug mode.
-                if has_grabbed:
-                    self._decode_failures += 1
-                    logger.debug("Frame failed to decode.")
-                    if not self._warning_displayed and self._decode_failures > 1:
-                        logger.warning("Failed to decode some frames, results may be inaccurate.")
-            # We didn't manage to grab a frame even after retrying, so just return.
-            if not has_grabbed:
-                return False
-            self._has_grabbed = True
+        has_grabbed = self._cap.grab()
+        # If we failed to grab the frame, retry a few times if required.
+        if not has_grabbed:
+            if self.duration > 0 and self.position < (self.duration - 1):
+                for _ in range(self._max_decode_attempts):
+                    has_grabbed = self._cap.grab()
+                    if has_grabbed:
+                        break
+            # Report previous failure in debug mode.
+            if has_grabbed:
+                self._decode_failures += 1
+                logger.debug("Frame failed to decode.")
+                if not self._warning_displayed and self._decode_failures > 1:
+                    logger.warning("Failed to decode some frames, results may be inaccurate.")
+        # We didn't manage to grab a frame even after retrying, so just return.
+        if not has_grabbed:
+            return False
+        self._has_grabbed = True
         # Need to make sure we actually grabbed a frame before calling retrieve.
         if decode and self._has_grabbed:
             _, frame = self._cap.retrieve()
@@ -490,35 +439,18 @@ class VideoCaptureAdapter(VideoStream):
 
     @property
     def position(self) -> FrameTimecode:
-        """Current position within stream as FrameTimecode. Use the :meth:`position_ms`
-        if an accurate duration of elapsed time is required, as `position` is currently
-        based off of the number of frames, and may not be accurate for devicesor live streams.
-
-        This method will always return 0 (e.g. be equal to `base_timecode`) if no frames
-        have been `read`."""
-
         if self.frame_number < 1:
             return self.base_timecode
         return self.base_timecode + (self.frame_number - 1)
 
     @property
     def position_ms(self) -> float:
-        """Current position within stream as a float of the presentation time in milliseconds.
-        The first frame has a time of 0.0 ms.
-
-        This method will always return 0.0 if no frames have been `read`."""
         if self._num_frames == 0:
             return 0.0
         return self._cap.get(cv2.CAP_PROP_POS_MSEC) - self._time_base
 
     @property
     def frame_number(self) -> int:
-        """Current position within stream in frames as an int.
-
-        1 indicates the first frame was just decoded by the last call to `read` with advance=True,
-        whereas 0 indicates that no frames have been `read`.
-
-        This method will always return 0 if no frames have been `read`."""
         return self._num_frames
 
     def seek(self, target: ty.Union[FrameTimecode, float, int]):
@@ -529,41 +461,28 @@ class VideoCaptureAdapter(VideoStream):
         """Not supported."""
         raise NotImplementedError("Reset is not supported.")
 
-    def read(self, decode: bool = True, advance: bool = True) -> ty.Union[np.ndarray, bool]:
-        """Read and decode the next frame as a np.ndarray. Returns False when video ends,
-        or the maximum number of decode attempts has passed.
-
-        Arguments:
-            decode: Decode and return the frame.
-            advance: Seek to the next frame. If False, will return the current (last) frame.
-
-        Returns:
-            If decode = True, the decoded frame (np.ndarray), or False (bool) if end of video.
-            If decode = False, a bool indicating if advancing to the the next frame succeeded.
-        """
+    def read(self, decode: bool = True) -> ty.Union[np.ndarray, bool]:
         if not self._cap.isOpened():
             return False
-        # Grab the next frame if possible.
-        if advance:
-            has_grabbed = self._cap.grab()
-            # If we failed to grab the frame, retry a few times if required.
-            if not has_grabbed:
-                for _ in range(self._max_read_attempts):
-                    has_grabbed = self._cap.grab()
-                    if has_grabbed:
-                        break
-                # Report previous failure in debug mode.
+        has_grabbed = self._cap.grab()
+        # If we failed to grab the frame, retry a few times if required.
+        if not has_grabbed:
+            for _ in range(self._max_read_attempts):
+                has_grabbed = self._cap.grab()
                 if has_grabbed:
-                    self._decode_failures += 1
-                    logger.debug("Frame failed to decode.")
-                    if not self._warning_displayed and self._decode_failures > 1:
-                        logger.warning("Failed to decode some frames, results may be inaccurate.")
-            # We didn't manage to grab a frame even after retrying, so just return.
-            if not has_grabbed:
-                return False
-            if self._num_frames == 0:
-                self._time_base = self._cap.get(cv2.CAP_PROP_POS_MSEC)
-            self._num_frames += 1
+                    break
+            # Report previous failure in debug mode.
+            if has_grabbed:
+                self._decode_failures += 1
+                logger.debug("Frame failed to decode.")
+                if not self._warning_displayed and self._decode_failures > 1:
+                    logger.warning("Failed to decode some frames, results may be inaccurate.")
+        # We didn't manage to grab a frame even after retrying, so just return.
+        if not has_grabbed:
+            return False
+        if self._num_frames == 0:
+            self._time_base = self._cap.get(cv2.CAP_PROP_POS_MSEC)
+        self._num_frames += 1
         # Need to make sure we actually grabbed a frame before calling retrieve.
         if decode and self._num_frames > 0:
             _, frame = self._cap.retrieve()
