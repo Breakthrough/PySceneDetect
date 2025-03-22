@@ -81,7 +81,7 @@ class AdaptiveDetector(ContentDetector):
             kernel_size=kernel_size,
         )
 
-        # TODO: Turn these options into properties.
+        # TODO: Turn these public options into properties.
         self.min_scene_len = min_scene_len
         self.adaptive_threshold = adaptive_threshold
         self.min_content_val = min_content_val
@@ -90,41 +90,21 @@ class AdaptiveDetector(ContentDetector):
         self._adaptive_ratio_key = AdaptiveDetector.ADAPTIVE_RATIO_KEY_TEMPLATE.format(
             window_width=window_width, luma_only="" if not luma_only else "_lum"
         )
-        self._first_frame_num = None
-
-        # NOTE: This must be different than `self._last_scene_cut` which is used by the base class.
-        self._last_cut: ty.Optional[int] = None
-
-        self._buffer = []
+        self._buffer: ty.List[ty.Tuple[FrameTimecode, float]] = []
+        # NOTE: The name of last cut is different from `self._last_scene_cut` from our base class,
+        # and serves a different purpose!
+        self._last_cut: ty.Optional[FrameTimecode] = None
 
     @property
     def event_buffer_length(self) -> int:
-        """Number of frames any detected cuts will be behind the current frame due to buffering."""
         return self.window_width
 
     def get_metrics(self) -> ty.List[str]:
-        """Combines base ContentDetector metric keys with the AdaptiveDetector one."""
         return super().get_metrics() + [self._adaptive_ratio_key]
 
-    def stats_manager_required(self) -> bool:
-        """Not required for AdaptiveDetector."""
-        return False
-
     def process_frame(
-        self, timecode: FrameTimecode, frame_img: ty.Optional[np.ndarray]
-    ) -> ty.List[int]:
-        """Process the next frame. `frame_num` is assumed to be sequential.
-
-        Args:
-            frame_num (int): Frame number of frame that is being passed. Can start from any value
-                but must remain sequential.
-            frame_img (numpy.ndarray or None): Video frame corresponding to `frame_img`.
-
-        Returns:
-           ty.List[int]: List of frames where scene cuts have been detected. There may be 0
-            or more frames in the list, and not necessarily the same as frame_num.
-        """
-
+        self, timecode: FrameTimecode, frame_img: np.ndarray
+    ) -> ty.List[FrameTimecode]:
         # TODO(#283): Merge this with ContentDetector and turn it on by default.
 
         super().process_frame(timecode=timecode, frame_img=frame_img)
@@ -138,7 +118,7 @@ class AdaptiveDetector(ContentDetector):
         if not len(self._buffer) >= required_frames:
             return []
         self._buffer = self._buffer[-required_frames:]
-        (target_frame, target_score) = self._buffer[self.window_width]
+        (target_timecode, target_score) = self._buffer[self.window_width]
         average_window_score = sum(
             score for i, (_frame, score) in enumerate(self._buffer) if i != self.window_width
         ) / (2.0 * self.window_width)
@@ -152,7 +132,9 @@ class AdaptiveDetector(ContentDetector):
             # if we would have divided by zero, set adaptive_ratio to the max (255.0)
             adaptive_ratio = 255.0
         if self.stats_manager is not None:
-            self.stats_manager.set_metrics(target_frame, {self._adaptive_ratio_key: adaptive_ratio})
+            self.stats_manager.set_metrics(
+                target_timecode, {self._adaptive_ratio_key: adaptive_ratio}
+            )
 
         # Check to see if adaptive_ratio exceeds the adaptive_threshold as well as there
         # being a large enough content_val to trigger a cut
@@ -161,21 +143,6 @@ class AdaptiveDetector(ContentDetector):
         )
         min_length_met: bool = (timecode - self._last_cut) >= self.min_scene_len
         if threshold_met and min_length_met:
-            self._last_cut = target_frame
-            return [target_frame]
-        return []
-
-    def get_content_val(self, frame_num: int) -> ty.Optional[float]:
-        """Returns the average content change for a frame."""
-        # TODO(v0.7): Add DeprecationWarning that `get_content_val` will be removed in v0.7.
-        logger.error(
-            "get_content_val is deprecated and will be removed. Lookup the value"
-            " using a StatsManager with ContentDetector.FRAME_SCORE_KEY."
-        )
-        if self.stats_manager is not None:
-            return self.stats_manager.get_metrics(frame_num, [ContentDetector.FRAME_SCORE_KEY])[0]
-        return 0.0
-
-    def post_process(self, _unused_frame_num: int):
-        """Not required for AdaptiveDetector."""
+            self._last_cut = target_timecode
+            return [target_timecode]
         return []

@@ -41,23 +41,24 @@ All scene detection algorithms must inherit from [the base `SceneDetector` class
 Creating a new scene detection method can be as simple as implementing the `process_frame` function, and optionally `post_process`:
 
 ```python
-from scenedetect.detector import SceneDetector
+import typing as ty
+import numpy as np
+from scenedetect import FrameTimecode, SceneDetector
 
 class CustomDetector(SceneDetector):
     """CustomDetector class to implement a scene detection algorithm."""
-    def __init__(self):
-        pass
 
-    def process_frame(self, frame_num, frame_img, frame_metrics, scene_list):
-        """Computes/stores metrics and detects any scene changes.
-
-        Returns:
-            A list containing 1 or more the frame numbers of any detected scenes.
-        """
+    def process_frame(
+        self,
+        timecode: FrameTimecode,
+        frame_im: np.ndarray,
+    ) -> ty.List[FrameTimecode]:
+        # Return a list of timecodes where we found cuts (either on this frame or previously).
         return []
 
-    def post_process(self, scene_list):
-        pass
+    def post_process(self, timecode: FrameTimecode) -> ty.List[FrameTimecode]:
+        # Called after the last frame has been read to handle pending events.
+        return []
 ```
 
 `process_frame` is called on every frame in the input video, which will be called after the final frame of the video is passed to `process_frame`. This may be useful for multi-pass algorithms, or detectors which are waiting on some condition but still wish to output an event on the final frame.

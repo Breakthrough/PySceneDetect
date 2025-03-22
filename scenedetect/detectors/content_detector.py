@@ -179,7 +179,7 @@ class ContentDetector(SceneDetector):
         if self.stats_manager is not None:
             metrics = {self.FRAME_SCORE_KEY: frame_score}
             metrics.update(score_components._asdict())
-            self.stats_manager.set_metrics(timecode.frame_num, metrics)
+            self.stats_manager.set_metrics(timecode, metrics)
 
         # Store all data required to calculate the next frame's score.
         self._last_frame = ContentDetector._FrameData(hue, sat, lum, edges)

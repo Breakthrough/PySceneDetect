@@ -20,7 +20,7 @@ import typing as ty
 import cv2
 import numpy
 
-# PySceneDetect Library Imports
+from scenedetect.common import FrameTimecode
 from scenedetect.detector import SceneDetector
 
 
@@ -48,10 +48,10 @@ class HistogramDetector(SceneDetector):
         self._bins = bins
         self._min_scene_len = min_scene_len
         self._last_hist = None
-        self._last_scene_cut = None
+        self._last_cut = None
         self._metric_key = f"hist_diff [bins={self._bins}]"
 
-    def process_frame(self, frame_num: int, frame_img: numpy.ndarray) -> ty.List[int]:
+    def process_frame(self, timecode: FrameTimecode, frame_img: numpy.ndarray) -> ty.List[int]:
         """Computes the histogram of the luma channel of the frame image and compares it with the
         histogram of the luma channel of the previous frame. If the difference between the histograms
         exceeds the threshold, a scene cut is detected.
@@ -77,8 +77,8 @@ class HistogramDetector(SceneDetector):
             raise ValueError("Image must have three color channels for HistogramDetector")
 
         # Initialize last scene cut point at the beginning of the frames of interest.
-        if not self._last_scene_cut:
-            self._last_scene_cut = frame_num
+        if not self._last_cut:
+            self._last_cut = timecode
 
         hist = self.calculate_histogram(frame_img, bins=self._bins)
 
@@ -98,14 +98,14 @@ class HistogramDetector(SceneDetector):
             # Example: If `_threshold` is set to 0.8, it implies that only changes resulting in a correlation
             # less than 0.8 between histograms will be considered significant enough to denote a scene change.
             if hist_diff <= self._threshold and (
-                (frame_num - self._last_scene_cut) >= self._min_scene_len
+                (timecode - self._last_cut) >= self._min_scene_len
             ):
-                cut_list.append(frame_num)
-                self._last_scene_cut = frame_num
+                cut_list.append(timecode)
+                self._last_cut = timecode
 
             # Save stats to a StatsManager if it is being used
             if self.stats_manager is not None:
-                self.stats_manager.set_metrics(frame_num, {self._metric_key: hist_diff})
+                self.stats_manager.set_metrics(timecode, {self._metric_key: hist_diff})
 
         self._last_hist = hist
 

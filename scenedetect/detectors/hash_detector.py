@@ -1,43 +1,27 @@
 #
-#         PySceneDetect: Python-Based Video Scene Detector
-#   ---------------------------------------------------------------
-#     [  Site: http://www.bcastell.com/projects/PySceneDetect/   ]
-#     [  Github: https://github.com/Breakthrough/PySceneDetect/  ]
-#     [  Documentation: http://pyscenedetect.readthedocs.org/    ]
+#            PySceneDetect: Python-Based Video Scene Detector
+#   -------------------------------------------------------------------
+#     [  Site:    https://scenedetect.com                           ]
+#     [  Docs:    https://scenedetect.com/docs/                     ]
+#     [  Github:  https://github.com/Breakthrough/PySceneDetect/    ]
 #
 # Copyright (C) 2014-2022 Brandon Castellano <http://www.bcastell.com>.
+# PySceneDetect is licensed under the BSD 3-Clause License; see the
+# included LICENSE file, or visit one of the above pages for details.
 #
-# PySceneDetect is licensed under the BSD 3-Clause License; see the included
-# LICENSE file, or visit one of the following pages for details:
-#  - https://github.com/Breakthrough/PySceneDetect/
-#  - http://www.bcastell.com/projects/PySceneDetect/
-#
-# This software uses Numpy, OpenCV, click, tqdm, simpletable, and pytest.
-# See the included LICENSE files or one of the above URLs for more information.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-# AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
-# ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-# WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#
-"""``scenedetect.detectors.hash_detector`` Module
+""":py:class:`HashDetector` calculates a hash for each frame of a video using a perceptual
+hashing algorithm. The differences (distance) in hash value between frames is calculated.
+If this difference exceeds a set threshold, a scene cut is triggered.
 
-This module implements the :py:class:`HashDetector`, which calculates a hash
-value for each from of a video using a perceptual hashing algorithm. Then, the
-differences in hash value between frames is calculated. If this difference
-exceeds a set threshold, a scene cut is triggered.
-
-This detector is available from the command-line interface by using the
-`detect-hash` command.
+This detector is available from the command-line interface by using the `detect-hash` command.
 """
 
-# Third-Party Library Imports
+import typing as ty
+
 import cv2
 import numpy
 
-# PySceneDetect Library Imports
+from scenedetect.common import FrameTimecode
 from scenedetect.detector import SceneDetector
 
 
@@ -74,15 +58,17 @@ class HashDetector(SceneDetector):
         self._size = size
         self._size_sq = float(size * size)
         self._factor = lowpass
-        self._last_frame = None
-        self._last_scene_cut = None
+        self._last_frame: numpy.ndarray = None
+        self._last_scene_cut: FrameTimecode = None
         self._last_hash = numpy.array([])
         self._metric_key = f"hash_dist [size={self._size} lowpass={self._factor}]"
 
     def get_metrics(self):
         return [self._metric_key]
 
-    def process_frame(self, frame_num: int, frame_img: numpy.ndarray):
+    def process_frame(
+        self, timecode: FrameTimecode, frame_img: numpy.ndarray
+    ) -> ty.List[FrameTimecode]:
         """Similar to ContentDetector, but using a perceptual hashing algorithm
         to calculate a hash for each frame and then calculate a hash difference
         frame to frame."""
@@ -91,7 +77,7 @@ class HashDetector(SceneDetector):
 
         # Initialize last scene cut point at the beginning of the frames of interest.
         if self._last_scene_cut is None:
-            self._last_scene_cut = frame_num
+            self._last_scene_cut = timecode
 
         # We can only start detecting once we have a frame to compare with.
         if self._last_frame is not None:
@@ -115,17 +101,17 @@ class HashDetector(SceneDetector):
             hash_dist_norm = hash_dist / self._size_sq
 
             if self.stats_manager is not None:
-                self.stats_manager.set_metrics(frame_num, {self._metric_key: hash_dist_norm})
+                self.stats_manager.set_metrics(timecode, {self._metric_key: hash_dist_norm})
 
             self._last_hash = curr_hash
 
             # We consider any frame over the threshold a new scene, but only if
             # the minimum scene length has been reached (otherwise it is ignored).
             if hash_dist_norm >= self._threshold and (
-                (frame_num - self._last_scene_cut) >= self._min_scene_len
+                (timecode - self._last_scene_cut) >= self._min_scene_len
             ):
-                cut_list.append(frame_num)
-                self._last_scene_cut = frame_num
+                cut_list.append(timecode)
+                self._last_scene_cut = timecode
 
         self._last_frame = frame_img.copy()
 

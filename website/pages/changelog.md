@@ -659,6 +659,9 @@ Development
 
 #### Breaking
 
+ * Many types and interfaces now use timecodes instead of frame numbers, which is a breaking change for:
+      * The detector interface: `SceneDetector.process_frame()` and `SceneDetector.post_process()`
+      * Statistics: `StatsManager.get_metrics()`, `StatsManager.set_metrics()`, and `StatsManager.metrics_exist()`
  * The `SceneDetector` interface now uses timecodes instead of frame numbers
  * Remove deprecated `scenedetect.video_manager` module ([use `scenedetect.open_video()` function](https://www.scenedetect.com/docs/head/api.html#scenedetect.open_video) instead)
  * Deprecated `video_manager` parameter has been removed from many functions and constructors, use `video` parameter instead when required
@@ -671,6 +674,8 @@ Development
  * `SceneDetector` instances can now assume they always have frame data to process when `process_frame` is called
  * Remove deprecated `SparseSceneDetector` interface
  * Remove deprecated `SceneManager.get_event_list()` method
+ * Remove deprecated `base_timecode` argument in `SceneManager.save_to_csv()`
+ * Remove deprecated `AdaptiveDetector.get_content_val()` method (the same information can be obtained using a `StatsManager`)
 
 #### Deprecation
 

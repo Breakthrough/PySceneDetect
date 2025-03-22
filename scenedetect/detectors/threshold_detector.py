@@ -93,7 +93,9 @@ class ThresholdDetector(SceneDetector):
     def get_metrics(self) -> ty.List[str]:
         return self._metric_keys
 
-    def process_frame(self, timecode: FrameTimecode, frame_img: numpy.ndarray) -> ty.List[int]:
+    def process_frame(
+        self, timecode: FrameTimecode, frame_img: numpy.ndarray
+    ) -> ty.List[FrameTimecode]:
         """Process the next frame. `frame_num` is assumed to be sequential.
 
         Args:
@@ -105,7 +107,8 @@ class ThresholdDetector(SceneDetector):
             ty.List[int]: List of frames where scene cuts have been detected. There may be 0
             or more frames in the list, and not necessarily the same as frame_num.
         """
-        # TODO(v0.7): We might need to consider PTS here instead.
+        # TODO(v0.7): We need to consider PTS here instead. The methods below using frame numbers
+        # won't work for variable framerates.
         frame_num = timecode.frame_num
 
         # Initialize last scene cut point at the beginning of the frames of interest.
@@ -130,7 +133,7 @@ class ThresholdDetector(SceneDetector):
         else:
             frame_avg = numpy.mean(frame_img)
             if self.stats_manager is not None:
-                self.stats_manager.set_metrics(frame_num, {self._metric_keys[0]: frame_avg})
+                self.stats_manager.set_metrics(timecode, {self._metric_keys[0]: frame_avg})
 
         if self.processed_frame:
             if self.last_fade["type"] == "in" and (
@@ -166,7 +169,7 @@ class ThresholdDetector(SceneDetector):
         self.processed_frame = True
         return [FrameTimecode(cut, fps=timecode) for cut in cuts]
 
-    def post_process(self, timecode: FrameTimecode):
+    def post_process(self, timecode: FrameTimecode) -> ty.List[FrameTimecode]:
         """Writes a final scene cut if the last detected fade was a fade-out.
 
         Only writes the scene cut if add_final_scene is true, and the last fade
