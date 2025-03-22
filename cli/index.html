@@ -176,7 +176,7 @@
 <h2 id="example">Example</h2>
 <p>As a concrete example to become familiar with PySceneDetect, let's use the following short clip from the James Bond movie, GoldenEye (Copyright &copy; 1995 MGM):</p>
 <p><a href="https://www.youtube.com/watch?v=OMgIPnCnlbQ">https://www.youtube.com/watch?v=OMgIPnCnlbQ</a></p>
-<p>You can <a href="https://github.com/Breakthrough/PySceneDetect/raw/resources/tests/resources/goldeneye/goldeneye.mp4">download the clip from here</a> (right-click and save the video in your working directory as <code>goldeneye.mp4</code>).</p>
+<p>You can <a href="https://github.com/Breakthrough/PySceneDetect/raw/refs/heads/resources/tests/resources/goldeneye.mp4">download the clip from here</a> (right-click and save the video in your working directory as <code>goldeneye.mp4</code>).</p>
 <p>Let's split this scene into clips on each fast cut. This means we need to use content-aware detecton mode (<code>detect-content</code>) or adaptive mode (<code>detect-adaptive</code>).  If the video instead contains fade-in/fade-out transitions you want to find, you can use <code>detect-threshold</code> instead. If no detector is specified, <code>detect-adaptive</code> will be used by default.</p>
 <p>Let's first save a scene list in CSV format and generate some images of each scene to check the output:</p>
 <pre><code class="language-rst">scenedetect --input goldeneye.mp4 detect-adaptive list-scenes save-images
