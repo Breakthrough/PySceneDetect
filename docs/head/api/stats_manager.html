@@ -75,19 +75,18 @@ will be removed in a future release).</p>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="scenedetect.stats_manager.StatsManager.get_metrics">
-<span class="sig-name descname"><span class="pre">get_metrics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame_number</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_keys</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.stats_manager.StatsManager.get_metrics" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return the requested statistics/metrics for a given frame.</p>
+<span class="sig-name descname"><span class="pre">get_metrics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timecode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_keys</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.stats_manager.StatsManager.get_metrics" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the requested statistics/metrics for a given timecode.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>frame_number</strong> (<em>int</em>) – Frame number to retrieve metrics for.</p></li>
-<li><p><strong>metric_keys</strong> (<em>List</em><em>[</em><em>str</em><em>]</em>) – A list of metric keys to look up.</p></li>
-</ul>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A list containing the requested frame metrics for the given frame number, ordered as
+they are in <cite>metric_keys</cite>.</p>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A list containing the requested frame metrics for the given frame number
-in the same order as the input list of metric keys. If a metric could
-not be found, None is returned for that particular metric.</p>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>timecode</strong> (<a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a>) – </p></li>
+<li><p><strong>metric_keys</strong> (<em>Iterable</em><em>[</em><em>str</em><em>]</em>) – </p></li>
+</ul>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><em>List</em>[<em>Any</em>]</p>
@@ -112,7 +111,7 @@ False otherwise.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="scenedetect.stats_manager.StatsManager.metrics_exist">
-<span class="sig-name descname"><span class="pre">metrics_exist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame_number</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_keys</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.stats_manager.StatsManager.metrics_exist" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">metrics_exist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timecode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_keys</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.stats_manager.StatsManager.metrics_exist" title="Permalink to this definition">¶</a></dt>
 <dd><p>Metrics Exist: Checks if the given metrics/stats exist for the given frame.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -123,7 +122,7 @@ False otherwise.</p>
 </dd>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>frame_number</strong> (<em>int</em>) – </p></li>
+<li><p><strong>timecode</strong> (<a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a>) – </p></li>
 <li><p><strong>metric_keys</strong> (<em>Iterable</em><em>[</em><em>str</em><em>]</em>) – </p></li>
 </ul>
 </dd>
@@ -146,13 +145,12 @@ False otherwise.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="scenedetect.stats_manager.StatsManager.save_to_csv">
-<span class="sig-name descname"><span class="pre">save_to_csv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">csv_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_timecode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_save</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.stats_manager.StatsManager.save_to_csv" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">save_to_csv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">csv_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_save</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.stats_manager.StatsManager.save_to_csv" title="Permalink to this definition">¶</a></dt>
 <dd><p>Save To CSV: Saves all frame metrics stored in the StatsManager to a CSV file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>csv_file</strong> (<em>str</em><em> | </em><em>bytes</em><em> | </em><em>Path</em><em> | </em><em>TextIO</em>) – A file handle opened in write mode (e.g. open(’…’, ‘w’)) or a path as str.</p></li>
-<li><p><strong>base_timecode</strong> (<a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em> | </em><em>None</em>) – [DEPRECATED] DO NOT USE. For backwards compatibility.</p></li>
 <li><p><strong>force_save</strong> – If True, writes metrics out even if an update is not required.</p></li>
 </ul>
 </dd>
@@ -167,14 +165,13 @@ False otherwise.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="scenedetect.stats_manager.StatsManager.set_metrics">
-<span class="sig-name descname"><span class="pre">set_metrics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame_number</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_kv_dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.stats_manager.StatsManager.set_metrics" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">set_metrics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timecode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_kv_dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.stats_manager.StatsManager.set_metrics" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set Metrics: Sets the provided statistics/metrics for a given frame.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>frame_number</strong> (<em>int</em>) – Frame number to retrieve metrics for.</p></li>
-<li><p><strong>metric_kv_dict</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>]</em>) – A dict mapping metric keys to the
-respective integer/floating-point metric values to set.</p></li>
+<li><p><strong>timecode</strong> (<a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a>) – Timecode to set metrics for.</p></li>
+<li><p><strong>metric_kv_dict</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>]</em>) – Key value mapping of metrics to their values for <cite>timecode</cite>.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>

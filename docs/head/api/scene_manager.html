@@ -236,18 +236,15 @@ complete processing the video frame source.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="scenedetect.scene_manager.SceneManager.get_scene_list">
-<span class="sig-name descname"><span class="pre">get_scene_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_timecode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_in_scene</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.scene_manager.SceneManager.get_scene_list" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">get_scene_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start_in_scene</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.scene_manager.SceneManager.get_scene_list" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a list of tuples of start/end FrameTimecodes for each detected scene.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>base_timecode</strong> (<a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em> | </em><em>None</em>) – [DEPRECATED] DO NOT USE. For backwards compatibility.</p></li>
-<li><p><strong>start_in_scene</strong> (<em>bool</em>) – Assume the video begins in a scene. This means that when detecting
+<dd class="field-odd"><p><strong>start_in_scene</strong> (<em>bool</em>) – Assume the video begins in a scene. This means that when detecting
 fast cuts with <cite>ContentDetector</cite>, if no cuts are found, the resulting scene list
 will contain a single scene spanning the entire video (instead of no scenes).
 When detecting fades with <cite>ThresholdDetector</cite>, the beginning portion of the video
-will always be included until the first fade-out event is detected.</p></li>
-</ul>
+will always be included until the first fade-out event is detected.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>List of tuples in the form (start_time, end_time), where both start_time and
@@ -333,7 +330,7 @@ pixels (e.g. if frame_width is 200, the range of effective widths will be betwee
 
 <dl class="py function">
 <dt class="sig sig-object py" id="scenedetect.scene_manager.get_scenes_from_cuts">
-<span class="sig-prename descclassname"><span class="pre">scenedetect.scene_manager.</span></span><span class="sig-name descname"><span class="pre">get_scenes_from_cuts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cut_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_pos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_pos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_timecode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.scene_manager.get_scenes_from_cuts" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">scenedetect.scene_manager.</span></span><span class="sig-name descname"><span class="pre">get_scenes_from_cuts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cut_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_pos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_pos</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.scene_manager.get_scenes_from_cuts" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a list of tuples of start/end FrameTimecodes for each scene based on a
 list of detected scene cuts/breaks.</p>
 <p>This function is called when using the <a class="reference internal" href="#scenedetect.scene_manager.SceneManager.get_scene_list" title="scenedetect.scene_manager.SceneManager.get_scene_list"><code class="xref py py-meth docutils literal notranslate"><span class="pre">SceneManager.get_scene_list()</span></code></a> method.
@@ -344,12 +341,10 @@ If <cite>cut_list</cite> is empty, the resulting scene will span from <cite>star
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>cut_list</strong> (<em>List</em><em>[</em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em>]</em>) – List of FrameTimecode objects where scene cuts/breaks occur.</p></li>
-<li><p><strong>base_timecode</strong> (<a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em> | </em><em>None</em>) – The base_timecode of which all FrameTimecodes in the cut_list are based on.</p></li>
 <li><p><strong>num_frames</strong> – The number of frames, or FrameTimecode representing duration, of the video that
 was processed (used to generate last scene’s end time).</p></li>
 <li><p><strong>start_frame</strong> – The start frame or FrameTimecode of the cut list. Used to generate the first
 scene’s start time.</p></li>
-<li><p><strong>base_timecode</strong> – [DEPRECATED] DO NOT USE. For backwards compatibility only.</p></li>
 <li><p><strong>start_pos</strong> (<em>int</em><em> | </em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a>) – </p></li>
 <li><p><strong>end_pos</strong> (<em>int</em><em> | </em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a>) – </p></li>
 </ul>

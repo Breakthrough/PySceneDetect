@@ -83,14 +83,10 @@ event (in, out, cut, etc…).</p>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scenedetect.detector.</span></span><span class="sig-name descname"><span class="pre">SceneDetector</span></span><a class="headerlink" href="#scenedetect.detector.SceneDetector" title="Permalink to this definition">¶</a></dt>
 <dd><p>Base class to inherit from when implementing a scene detection algorithm.</p>
 <p>This API is not yet stable and subject to change.</p>
-<p>This represents a “dense” scene detector, which returns a list of frames where
-the next scene/shot begins in a video.</p>
-<p>Also see the implemented scene detectors in the scenedetect.detectors module
-to get an idea of how a particular detector can be created.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="scenedetect.detector.SceneDetector.get_metrics">
 <span class="sig-name descname"><span class="pre">get_metrics</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.detector.SceneDetector.get_metrics" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get Metrics:  Get a list of all metric names/keys used by the detector.</p>
+<dd><p>Returns a list of all metric names/keys used by this detector.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>List of strings of frame metric key names that will be used by
@@ -104,46 +100,37 @@ the detector when a StatsManager is passed to process_frame.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="scenedetect.detector.SceneDetector.post_process">
-<span class="sig-name descname"><span class="pre">post_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame_num</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.detector.SceneDetector.post_process" title="Permalink to this definition">¶</a></dt>
-<dd><p>Post Process: Performs any processing after the last frame has been read.</p>
-<p>Prototype method, no actual detection.</p>
+<span class="sig-name descname"><span class="pre">post_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timecode</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.detector.SceneDetector.post_process" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called after there are no more frames to process.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>List of frame numbers of cuts to be added to the cutting list.</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>timecode</strong> (<em>int</em>) – The last position in the video which was read.</p>
 </dd>
-<dt class="field-even">Parameters<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>frame_num</strong> (<em>int</em>) – </p>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of timecodes where scene cuts have been detected, if any.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><em>List</em>[int]</p>
+<dd class="field-odd"><p><em>List</em>[<a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a>]</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="scenedetect.detector.SceneDetector.process_frame">
-<span class="sig-name descname"><span class="pre">process_frame</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame_num</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_img</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.detector.SceneDetector.process_frame" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">process_frame</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timecode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_img</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.detector.SceneDetector.process_frame" title="Permalink to this definition">¶</a></dt>
 <dd><p>Process the next frame. <cite>frame_num</cite> is assumed to be sequential.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>frame_num</strong> (<em>int</em>) – Frame number of frame that is being passed. Can start from any value
-but must remain sequential.</p></li>
-<li><p><strong>frame_img</strong> (<em>numpy.ndarray</em><em> or </em><em>None</em>) – Video frame corresponding to <cite>frame_img</cite>.</p></li>
+<li><p><strong>timecode</strong> (<a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a>) – Timecode corresponding to the frame being processed.</p></li>
+<li><p><strong>frame_img</strong> (<em>ndarray</em>) – Video frame as a 24-bit BGR image.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><dl class="simple">
-<dt>List of frames where scene cuts have been detected. There may be 0</dt><dd><p>or more frames in the list, and not necessarily the same as frame_num.</p>
-</dd>
-</dl>
-</p>
+<dd class="field-even"><p>List of timecodes where scene cuts have been detected, if any.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>ty.List[int]</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>List of frame numbers of cuts to be added to the cutting list.</p>
+<dd class="field-odd"><p><em>List</em>[<a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a>]</p>
 </dd>
 </dl>
 </dd></dl>

@@ -127,15 +127,13 @@ decoding will stop and emit an error.</p></li>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="scenedetect.backends.opencv.VideoCaptureAdapter.read">
-<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">decode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">advance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.backends.opencv.VideoCaptureAdapter.read" title="Permalink to this definition">¶</a></dt>
-<dd><p>Read and decode the next frame as a np.ndarray. Returns False when video ends,
-or the maximum number of decode attempts has passed.</p>
+<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">decode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.backends.opencv.VideoCaptureAdapter.read" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read and decode the next frame as a np.ndarray. Returns False when video ends.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>decode</strong> (<em>bool</em>) – Decode and return the frame.</p></li>
-<li><p><strong>advance</strong> (<em>bool</em>) – Seek to the next frame. If False, will return the current (last) frame.</p></li>
-</ul>
+<dd class="field-odd"><p><strong>decode</strong> (<em>bool</em>) – Return the frame image itself. If False, a boolean indicating if the stream
+was advanced to the next frame or not. This can improve performance by reducing
+memory copying and colorspace conversions when a given frame’s data is not required.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>If decode = True, the decoded frame (np.ndarray), or False (bool) if end of video.
@@ -194,10 +192,8 @@ will leave this object in an inconsistent state.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="scenedetect.backends.opencv.VideoCaptureAdapter.frame_number">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">frame_number</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#scenedetect.backends.opencv.VideoCaptureAdapter.frame_number" title="Permalink to this definition">¶</a></dt>
-<dd><p>Current position within stream in frames as an int.</p>
-<p>1 indicates the first frame was just decoded by the last call to <cite>read</cite> with advance=True,
-whereas 0 indicates that no frames have been <cite>read</cite>.</p>
-<p>This method will always return 0 if no frames have been <cite>read</cite>.</p>
+<dd><p>Current position within stream as the frame number.</p>
+<p>Will return 0 until the first frame is <cite>read</cite>.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -233,19 +229,16 @@ whereas 0 indicates that no frames have been <cite>read</cite>.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="scenedetect.backends.opencv.VideoCaptureAdapter.position">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">position</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><span class="pre">FrameTimecode</span></a></em><a class="headerlink" href="#scenedetect.backends.opencv.VideoCaptureAdapter.position" title="Permalink to this definition">¶</a></dt>
-<dd><p>Current position within stream as FrameTimecode. Use the <a class="reference internal" href="#scenedetect.backends.opencv.VideoCaptureAdapter.position_ms" title="scenedetect.backends.opencv.VideoCaptureAdapter.position_ms"><code class="xref py py-meth docutils literal notranslate"><span class="pre">position_ms()</span></code></a>
-if an accurate duration of elapsed time is required, as <cite>position</cite> is currently
-based off of the number of frames, and may not be accurate for devicesor live streams.</p>
-<p>This method will always return 0 (e.g. be equal to <cite>base_timecode</cite>) if no frames
-have been <cite>read</cite>.</p>
+<dd><p>Current position within stream as FrameTimecode.</p>
+<p>This can be interpreted as presentation time stamp, thus frame 1 corresponds
+to the presentation time 0.  Returns 0 even if <cite>frame_number</cite> is 1.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="scenedetect.backends.opencv.VideoCaptureAdapter.position_ms">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">position_ms</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#scenedetect.backends.opencv.VideoCaptureAdapter.position_ms" title="Permalink to this definition">¶</a></dt>
-<dd><p>Current position within stream as a float of the presentation time in milliseconds.
-The first frame has a time of 0.0 ms.</p>
-<p>This method will always return 0.0 if no frames have been <cite>read</cite>.</p>
+<dd><p>Current position within stream as a float of the presentation time in
+milliseconds. The first frame has a PTS of 0.</p>
 </dd></dl>
 
 </dd></dl>
@@ -280,15 +273,13 @@ network streams/URLs.  Use <cite>VideoCaptureAdapter</cite> for devices/pipes.</
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="scenedetect.backends.opencv.VideoStreamCv2.read">
-<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">decode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">advance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.backends.opencv.VideoStreamCv2.read" title="Permalink to this definition">¶</a></dt>
-<dd><p>Read and decode the next frame as a np.ndarray. Returns False when video ends,
-or the maximum number of decode attempts has passed.</p>
+<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">decode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.backends.opencv.VideoStreamCv2.read" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read and decode the next frame as a np.ndarray. Returns False when video ends.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>decode</strong> (<em>bool</em>) – Decode and return the frame.</p></li>
-<li><p><strong>advance</strong> (<em>bool</em>) – Seek to the next frame. If False, will return the current (last) frame.</p></li>
-</ul>
+<dd class="field-odd"><p><strong>decode</strong> (<em>bool</em>) – Return the frame image itself. If False, a boolean indicating if the stream
+was advanced to the next frame or not. This can improve performance by reducing
+memory copying and colorspace conversions when a given frame’s data is not required.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>If decode = True, the decoded frame (np.ndarray), or False (bool) if end of video.
@@ -315,7 +306,7 @@ pointer (e.g. if seeking to 0, the next frame decoded will be the first frame of
 to 0-based by subtracting one. For example, if we want to seek to the first frame, we call
 seek(0) followed by read(). If we want to seek to the 5th frame, we call seek(4) followed
 by read(), at which point frame_number will be 5.</p>
-<p>Not supported if the VideoStream is a device/camera. Untested with web streams.</p>
+<p>May not be supported on all backend types or inputs (e.g. cameras).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>target</strong> (<a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em> | </em><em>float</em><em> | </em><em>int</em>) – Target position in video stream to seek to.
@@ -361,16 +352,14 @@ unsupported and will leave this object in an inconsistent state.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="scenedetect.backends.opencv.VideoStreamCv2.frame_number">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">frame_number</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#scenedetect.backends.opencv.VideoStreamCv2.frame_number" title="Permalink to this definition">¶</a></dt>
-<dd><p>Current position within stream in frames as an int.</p>
-<p>1 indicates the first frame was just decoded by the last call to <cite>read</cite> with advance=True,
-whereas 0 indicates that no frames have been <cite>read</cite>.</p>
-<p>This method will always return 0 if no frames have been <cite>read</cite>.</p>
+<dd><p>Current position within stream as the frame number.</p>
+<p>Will return 0 until the first frame is <cite>read</cite>.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="scenedetect.backends.opencv.VideoStreamCv2.frame_rate">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">frame_rate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#scenedetect.backends.opencv.VideoStreamCv2.frame_rate" title="Permalink to this definition">¶</a></dt>
-<dd><p>Framerate in frames/sec.</p>
+<dd><p>Frame rate in frames/sec.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -402,18 +391,15 @@ whereas 0 indicates that no frames have been <cite>read</cite>.</p>
 <dt class="sig sig-object py" id="scenedetect.backends.opencv.VideoStreamCv2.position">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">position</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><span class="pre">FrameTimecode</span></a></em><a class="headerlink" href="#scenedetect.backends.opencv.VideoStreamCv2.position" title="Permalink to this definition">¶</a></dt>
 <dd><p>Current position within stream as FrameTimecode.</p>
-<p>This can be interpreted as presentation time stamp of the last frame which was
-decoded by calling <cite>read</cite> with advance=True.</p>
-<p>This method will always return 0 (e.g. be equal to <cite>base_timecode</cite>) if no frames
-have been <cite>read</cite>.</p>
+<p>This can be interpreted as presentation time stamp, thus frame 1 corresponds
+to the presentation time 0.  Returns 0 even if <cite>frame_number</cite> is 1.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="scenedetect.backends.opencv.VideoStreamCv2.position_ms">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">position_ms</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#scenedetect.backends.opencv.VideoStreamCv2.position_ms" title="Permalink to this definition">¶</a></dt>
-<dd><p>Current position within stream as a float of the presentation time in milliseconds.
-The first frame has a time of 0.0 ms.</p>
-<p>This method will always return 0.0 if no frames have been <cite>read</cite>.</p>
+<dd><p>Current position within stream as a float of the presentation time in
+milliseconds. The first frame has a PTS of 0.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -463,14 +449,13 @@ for details: <a class="reference external" href="https://pyav.org/docs/stable/ov
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="scenedetect.backends.pyav.VideoStreamAv.read">
-<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">decode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">advance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.backends.pyav.VideoStreamAv.read" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">decode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.backends.pyav.VideoStreamAv.read" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read and decode the next frame as a np.ndarray. Returns False when video ends.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>decode</strong> (<em>bool</em>) – Decode and return the frame.</p></li>
-<li><p><strong>advance</strong> (<em>bool</em>) – Seek to the next frame. If False, will return the current (last) frame.</p></li>
-</ul>
+<dd class="field-odd"><p><strong>decode</strong> (<em>bool</em>) – Return the frame image itself. If False, a boolean indicating if the stream
+was advanced to the next frame or not. This can improve performance by reducing
+memory copying and colorspace conversions when a given frame’s data is not required.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>If decode = True, the decoded frame (np.ndarray), or False (bool) if end of video.
@@ -611,14 +596,13 @@ image sequences or AviSynth scripts are supported as inputs.</p>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="scenedetect.backends.moviepy.VideoStreamMoviePy.read">
-<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">decode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">advance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.backends.moviepy.VideoStreamMoviePy.read" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">decode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.backends.moviepy.VideoStreamMoviePy.read" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read and decode the next frame as a np.ndarray. Returns False when video ends.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>decode</strong> (<em>bool</em>) – Decode and return the frame.</p></li>
-<li><p><strong>advance</strong> (<em>bool</em>) – Seek to the next frame. If False, will return the current (last) frame.</p></li>
-</ul>
+<dd class="field-odd"><p><strong>decode</strong> (<em>bool</em>) – Return the frame image itself. If False, a boolean indicating if the stream
+was advanced to the next frame or not. This can improve performance by reducing
+memory copying and colorspace conversions when a given frame’s data is not required.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>If decode = True, the decoded frame (np.ndarray), or False (bool) if end of video.
@@ -683,9 +667,7 @@ If int, interpreted as frame number.</p>
 <dt class="sig sig-object py" id="scenedetect.backends.moviepy.VideoStreamMoviePy.frame_number">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">frame_number</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#scenedetect.backends.moviepy.VideoStreamMoviePy.frame_number" title="Permalink to this definition">¶</a></dt>
 <dd><p>Current position within stream in frames as an int.</p>
-<p>1 indicates the first frame was just decoded by the last call to <cite>read</cite> with advance=True,
-whereas 0 indicates that no frames have been <cite>read</cite>.</p>
-<p>This method will always return 0 if no frames have been <cite>read</cite>.</p>
+<p>0 indicates that no frames have been <cite>read</cite>, 1 indicates the first frame was just read.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -722,10 +704,9 @@ whereas 0 indicates that no frames have been <cite>read</cite>.</p>
 <dt class="sig sig-object py" id="scenedetect.backends.moviepy.VideoStreamMoviePy.position">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">position</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><span class="pre">FrameTimecode</span></a></em><a class="headerlink" href="#scenedetect.backends.moviepy.VideoStreamMoviePy.position" title="Permalink to this definition">¶</a></dt>
 <dd><p>Current position within stream as FrameTimecode.</p>
-<p>This can be interpreted as presentation time stamp of the last frame which was
-decoded by calling <cite>read</cite> with advance=True.</p>
-<p>This method will always return 0 (e.g. be equal to <cite>base_timecode</cite>) if no frames
-have been <cite>read</cite>.</p>
+<p>This can be interpreted as presentation time stamp of the last frame which was decoded by
+calling <cite>read</cite>. This will always return 0 (e.g. be equal to <cite>base_timecode</cite>) if no frames
+have been <cite>read</cite> yet.</p>
 </dd></dl>
 
 <dl class="py property">

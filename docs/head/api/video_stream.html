@@ -100,14 +100,13 @@ classes (<cite>BACKEND_NAME = ‘backend_identifier’</cite>).</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="scenedetect.video_stream.VideoStream.read">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">decode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">advance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.video_stream.VideoStream.read" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">decode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.video_stream.VideoStream.read" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read and decode the next frame as a np.ndarray. Returns False when video ends.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>decode</strong> (<em>bool</em>) – Decode and return the frame.</p></li>
-<li><p><strong>advance</strong> (<em>bool</em>) – Seek to the next frame. If False, will return the current (last) frame.</p></li>
-</ul>
+<dd class="field-odd"><p><strong>decode</strong> (<em>bool</em>) – Return the frame image itself. If False, a boolean indicating if the stream
+was advanced to the next frame or not. This can improve performance by reducing
+memory copying and colorspace conversions when a given frame’s data is not required.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>If decode = True, the decoded frame (np.ndarray), or False (bool) if end of video.
