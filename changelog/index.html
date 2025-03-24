@@ -912,7 +912,7 @@
 <h3 id="api-changes">API Changes</h3>
 <h4 id="breaking">Breaking</h4>
 <ul>
-<li>Replace <code>frame_num</code> parameter (<code>int</code>) with <code>timecode</code> (<code>FrameTimecode</code>) in <code>SceneDetector</code> interface:<ul>
+<li>Replace <code>frame_num</code> parameter (<code>int</code>) with <code>timecode</code> (<code>FrameTimecode</code>) in <code>SceneDetector</code> interface (#168)[https://github.com/Breakthrough/PySceneDetect/issues/168]:<ul>
 <li>The detector interface: <code>SceneDetector.process_frame()</code> and <code>SceneDetector.post_process()</code></li>
 <li>Statistics: <code>StatsManager.get_metrics()</code>, <code>StatsManager.set_metrics()</code>, and <code>StatsManager.metrics_exist()</code></li>
 </ul>
@@ -920,8 +920,8 @@
 <li>Move existing functionality to new submodules:<ul>
 <li><code>scenedetect.scene_detector</code> moved to <code>scenedetect.detector</code></li>
 <li><code>scenedetect.frame_timecode</code> moved to <code>scenedetect.common</code></li>
-<li>Output functionality from <code>scenedetect.scene_manager</code> moved to <code>scenedetect.output</code></li>
-<li><code>scenedetect.video_splitter</code> moved to <code>scenedetect.output.video</code></li>
+<li>Output functionality from <code>scenedetect.scene_manager</code> moved to <code>scenedetect.output</code> <a href="https://github.com/Breakthrough/PySceneDetect/issues/463">#463</a></li>
+<li><code>scenedetect.video_splitter</code> moved to <code>scenedetect.output.video</code> <a href="https://github.com/Breakthrough/PySceneDetect/issues/463">#463</a></li>
 </ul>
 </li>
 <li>Remove deprecated module <code>scenedetect.video_manager</code>, use <a href="https://www.scenedetect.com/docs/head/api.html#scenedetect.open_video">the <code>scenedetect.open_video()</code> function</a> instead</li>
