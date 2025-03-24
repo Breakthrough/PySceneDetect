@@ -432,46 +432,6 @@ Commands
 ************************************************************************
 
 
-.. _command-save-html:
-
-.. program:: scenedetect save-html
-
-
-``save-html``
-========================================================================
-
-Save scene list to HTML file.
-
-To customize image generation, specify the :ref:`save-images <command-save-images>` command before :ref:`save-html <command-save-html>`. This command always uses the result of the preceeding :ref:`save-images <command-save-images>` command, or runs it with the default config values unless ``--no-images`` is set.
-
-
-Options
-------------------------------------------------------------------------
-
-
-.. option:: -f NAME, --filename NAME
-
-  Filename format to use for the scene list HTML file. You can use the $VIDEO_NAME macro in the file name. Note that you may have to wrap the format name using single quotes.
-
-  Default: ``$VIDEO_NAME-Scenes.html``
-
-.. option:: -n, --no-images
-
-  Do not include images with the result.
-
-.. option:: -w pixels, --image-width pixels
-
-  Width in pixels of the images in the resulting HTML table.
-
-.. option:: -h pixels, --image-height pixels
-
-  Height in pixels of the images in the resulting HTML table.
-
-.. option:: -s, --show
-
-  Automatically open resulting HTML when processing is complete.
-
-
 .. _command-list-scenes:
 
 .. program:: scenedetect list-scenes
@@ -793,38 +753,6 @@ Options
 .. option:: -d, --disable-shift
 
   Disable shifting frame numbers by start time.
-
-
-.. _command-save-xml:
-
-.. program:: scenedetect save-xml
-
-
-``save-xml``
-========================================================================
-
-[IN DEVELOPMENT] Save cuts in XML format.
-
-
-Options
-------------------------------------------------------------------------
-
-
-.. option:: -f NAME, --filename NAME
-
-  Filename format to use.
-
-  Default: ``$VIDEO_NAME.xml``
-
-.. option:: --format TYPE
-
-  Format to export. TYPE must be one of: fcpx, fcp.
-
-  Default: ``XmlFormat.FCPX``
-
-.. option:: -o DIR, --output DIR
-
-  Output directory to save XML file to. Overrides global option :option:`-o/--output <scenedetect -o>`.
 
 
 .. _command-split-video:
