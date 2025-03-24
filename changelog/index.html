@@ -911,6 +911,9 @@
 </ul>
 <h3 id="api-changes">API Changes</h3>
 <h4 id="breaking">Breaking</h4>
+<blockquote>
+<p>Note: Imports that break when upgrading to 0.7 can usually be resolved by importing from <code>scenedetect</code> directly, rather than a submodule. The package structure has changed significantly in 0.7.</p>
+</blockquote>
 <ul>
 <li>Replace <code>frame_num</code> parameter (<code>int</code>) with <code>timecode</code> (<code>FrameTimecode</code>) in <code>SceneDetector</code> interface (#168)[https://github.com/Breakthrough/PySceneDetect/issues/168]:<ul>
 <li>The detector interface: <code>SceneDetector.process_frame()</code> and <code>SceneDetector.post_process()</code></li>
