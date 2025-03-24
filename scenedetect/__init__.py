@@ -32,9 +32,27 @@ except ModuleNotFoundError as ex:
 # Commonly used classes/functions exported under the `scenedetect` namespace for brevity.
 # Note that order of importants is important!
 from scenedetect.platform import init_logger  # noqa: I001
-from scenedetect.common import FrameTimecode, SceneList, CutList, CropRegion, TimecodePair
+from scenedetect.common import (
+    FrameTimecode,
+    SceneList,
+    CutList,
+    CropRegion,
+    TimecodePair,
+    Interpolation,
+)
 from scenedetect.video_stream import VideoStream, VideoOpenFailure
-from scenedetect.video_splitter import split_video_ffmpeg, split_video_mkvmerge
+from scenedetect.output import (
+    save_images,
+    split_video_ffmpeg,
+    split_video_mkvmerge,
+    is_ffmpeg_available,
+    is_mkvmerge_available,
+    write_scene_list,
+    write_scene_list_html,
+    PathFormatter,
+    VideoMetadata,
+    SceneMetadata,
+)
 from scenedetect.detector import SceneDetector
 from scenedetect.detectors import (
     ContentDetector,
@@ -51,7 +69,7 @@ from scenedetect.backends import (
     VideoCaptureAdapter,
 )
 from scenedetect.stats_manager import StatsManager, StatsFileCorrupt
-from scenedetect.scene_manager import SceneManager, save_images, Interpolation
+from scenedetect.scene_manager import SceneManager
 
 # Used for module identification and when printing version & about info
 # (e.g. calling `scenedetect version` or `scenedetect about`).

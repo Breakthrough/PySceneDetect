@@ -7,7 +7,7 @@ The `scenedetect` API is easy to integrate with most application workflows, whil
 
     * :ref:`scenedetect 🎬 <scenedetect-functions>`: Includes the :func:`scenedetect.detect <scenedetect.detect>` function which takes a path and a  :ref:`detector <scenedetect-detectors>` to find scene transitions (:ref:`example <scenedetect-quickstart>`), and :func:`scenedetect.open_video <scenedetect.open_video>` for video input
 
-    * :ref:`scenedetect.scene_manager 🎞️ <scenedetect-scene_manager>`: The :class:`SceneManager <scenedetect.scene_manager.SceneManager>` acts as a way to coordinate detecting scenes (via `SceneDetector` instances) on video frames (via :ref:`VideoStream <scenedetect-video_stream>` instances). This module also contains functionality to export information about scenes in various formats: :func:`save_images <scenedetect.scene_manager.save_images>` to save images for each scene, :func:`write_scene_list <scenedetect.scene_manager.write_scene_list>` to save scene/cut info as CSV, and :func:`write_scene_list_html <scenedetect.scene_manager.write_scene_list_html>` to export scenes in viewable HTML format.
+    * :ref:`scenedetect.scene_manager 🎞️ <scenedetect-scene_manager>`: The :class:`SceneManager <scenedetect.scene_manager.SceneManager>` acts as a way to coordinate detecting scenes (via `SceneDetector` instances) on video frames (via :ref:`VideoStream <scenedetect-video_stream>` instances).
 
     * :ref:`scenedetect.detectors 🕵️ <scenedetect-detectors>`: Detection algorithms:
 
@@ -27,7 +27,13 @@ The `scenedetect` API is easy to integrate with most application workflows, whil
         * PyAV: :class:`VideoStreamAv <scenedetect.backends.pyav.VideoStreamAv>`
         * MoviePy: :class:`VideoStreamMoviePy <scenedetect.backends.moviepy.VideoStreamMoviePy>`
 
-    * :ref:`scenedetect.video_splitter ✂️ <scenedetect-video_splitter>`: Contains :func:`split_video_ffmpeg <scenedetect.video_splitter.split_video_ffmpeg>` and :func:`split_video_mkvmerge <scenedetect.video_splitter.split_video_mkvmerge>` to split a video based on the detected scenes.
+     * :ref:`scenedetect.output ✂️ <scenedetect-output>`: Output formats:
+
+        * :func:`split_video_ffmpeg <scenedetect.output.split_video_ffmpeg>` and :func:`split_video_mkvmerge <scenedetect.output.split_video_mkvmerge>` split a video based on the detected scenes
+
+        * :func:`save_images <scenedetect.scene_manager.save_images>` can save an arbitrary number of images from each scene
+
+        * :func:`write_scene_list <scenedetect.scene_manager.write_scene_list>` can be used to save scene/cut info as CSV, :func:`write_scene_list_html <scenedetect.scene_manager.write_scene_list_html>` for HTML
 
     * :ref:`scenedetect.common ⏱️ <scenedetect-common>`: Contains common types such as :class:`FrameTimecode <scenedetect.common.FrameTimecode>` used for timecode handing.
 
@@ -67,7 +73,7 @@ PySceneDetect makes it very easy to find scene transitions in a video with the :
 
 ``scenes`` now contains a list of :class:`FrameTimecode <scenedetect.common.FrameTimecode>` pairs representing the start/end of each scene. Note that you can set ``show_progress=True`` when calling :func:`detect <scenedetect.detect>` to display a progress bar with estimated time remaining.
 
-Here, we use :mod:`ContentDetector <scenedetect.detectors.content_detector>` to detect fast cuts. There are :ref:`many detector types <scenedetect-detectors>` which can be used to find fast cuts and fades in/out.  PySceneDetect can also export scene data in various formats, and can  :ref:`split the input video <scenedetect-video_splitter>` automatically if `ffmpeg` is available:
+Here, we use :mod:`ContentDetector <scenedetect.detectors.content_detector>` to detect fast cuts. There are :ref:`many detector types <scenedetect-detectors>` which can be used to find fast cuts and fades in/out.  PySceneDetect can also export scene data in various formats, and can  :ref:`split the input video <scenedetect-output>` automatically if `ffmpeg` is available:
 
 .. code:: python
 
@@ -98,7 +104,7 @@ Module Reference
     api/detectors
     api/scene_manager
     api/common
-    api/video_splitter
+    api/output
     api/backends
     api/stats_manager
     api/detector

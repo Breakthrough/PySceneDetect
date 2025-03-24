@@ -33,10 +33,10 @@ from scenedetect.detectors import (
     HistogramDetector,
     ThresholdDetector,
 )
+from scenedetect.output import is_ffmpeg_available, is_mkvmerge_available
 from scenedetect.platform import init_logger
 from scenedetect.scene_manager import Interpolation, SceneManager
 from scenedetect.stats_manager import StatsManager
-from scenedetect.video_splitter import is_ffmpeg_available, is_mkvmerge_available
 from scenedetect.video_stream import FrameRateUnavailable, VideoOpenFailure, VideoStream
 
 logger = logging.getLogger("pyscenedetect")

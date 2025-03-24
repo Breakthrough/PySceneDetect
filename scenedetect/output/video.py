@@ -15,9 +15,7 @@
 # Certain distributions of PySceneDetect may include the above software;
 # see the included LICENSE-FFMPEG and LICENSE-MKVMERGE files.
 #
-"""``scenedetect.video_splitter`` Module
-
-The `scenedetect.video_splitter` module contains functions to split existing videos into clips
+"""The ``scenedetect.output.video`` module contains functions to split existing videos into clips
 using ffmpeg or mkvmerge.
 
 These programs can be obtained from following URLs (note that mkvmerge is a part mkvtoolnix):
@@ -159,8 +157,7 @@ def split_video_mkvmerge(
     show_output: bool = False,
     suppress_output=None,
 ) -> int:
-    """Calls the mkvmerge command on the input video, splitting it at the
-    passed timecodes, where each scene is written in sequence from 001.
+    """Split `input_video_path` using `mkvmerge` based on the scenes in `scene_list`.
 
     Arguments:
         input_video_path: Path to the video to be split.
@@ -169,7 +166,7 @@ def split_video_mkvmerge(
         output_file_template: Template to use for generating output files. Note that mkvmerge always
             adds the suffix "-$SCENE_NUMBER" to the output paths. Only the $VIDEO_NAME variable
             is supported by this function.
-        video_name (str): Name of the video to be substituted in output_file_template for
+        video_name: Name of the video to be substituted in output_file_template for
             $VIDEO_NAME. If not specified, will be obtained from the filename.
         show_output: If False, adds the --quiet flag when invoking `mkvmerge`.
         suppress_output: [DEPRECATED] DO NOT USE. For backwards compatibility only.
@@ -259,22 +256,20 @@ def split_video_ffmpeg(
     hide_progress=None,
     formatter: ty.Optional[PathFormatter] = None,
 ) -> int:
-    """Calls the ffmpeg command on the input video, generating a new video for
-    each scene based on the start/end timecodes.
+    """Split `input_video_path` using `ffmpeg` based on the scenes in `scene_list`.
 
     Arguments:
         input_video_path: Path to the video to be split.
-        scene_list (List[ty.Tuple[FrameTimecode, FrameTimecode]]): List of scenes
-            (pairs of FrameTimecodes) denoting the start/end frames of each scene.
+        scene_list: List of scenes (pairs of FrameTimecodes) denoting the start/end of each scene.
         output_dir: Directory to output videos. If not set, output will be in working directory.
-        output_file_template (str): Template to use for generating output filenames.
+        output_file_template: Template to use for generating output filenames.
             The following variables will be replaced in the template for each scene:
             $VIDEO_NAME, $SCENE_NUMBER, $START_TIME, $END_TIME, $START_FRAME, $END_FRAME
-        video_name (str): Name of the video to be substituted in output_file_template. If not
+        video_name: Name of the video to be substituted in output_file_template. If not
             passed will be calculated from input_video_path automatically.
-        arg_override (str): Allows overriding the arguments passed to ffmpeg for encoding.
-        show_progress (bool): If True, will show progress bar provided by tqdm (if installed).
-        show_output (bool): If True, will show output from ffmpeg for first split.
+        arg_override: Allows overriding the arguments passed to ffmpeg for encoding.
+        show_progress: If True, will show progress bar provided by tqdm (if installed).
+        show_output: If True, will show output from ffmpeg for first split.
         suppress_output: [DEPRECATED] DO NOT USE. For backwards compatibility only.
         hide_progress: [DEPRECATED] DO NOT USE. For backwards compatibility only.
         formatter: Custom formatter callback. Overrides `output_file_template`.

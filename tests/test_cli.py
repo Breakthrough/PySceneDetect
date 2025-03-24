@@ -14,14 +14,13 @@ import os
 import subprocess
 import typing as ty
 from pathlib import Path
-from string import Template
 
 import cv2
 import numpy as np
 import pytest
 
 import scenedetect
-from scenedetect.video_splitter import is_ffmpeg_available, is_mkvmerge_available
+from scenedetect.output import is_ffmpeg_available, is_mkvmerge_available
 
 # These tests validate that the CLI itself functions correctly, mainly based on the return
 # return code from the process. We do not yet check for correctness of the output, just a

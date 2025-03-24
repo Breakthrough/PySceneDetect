@@ -64,7 +64,10 @@ disallows negative values, and will clamp negative results to 0.
 import math
 import typing as ty
 from dataclasses import dataclass
+from enum import Enum
 from fractions import Fraction
+
+import cv2
 
 _USE_PTS_IN_DEVELOPMENT = False
 
@@ -92,6 +95,21 @@ MAX_FPS_DELTA: float = 1.0 / 100000
 _SECONDS_PER_MINUTE = 60.0
 _SECONDS_PER_HOUR = 60.0 * _SECONDS_PER_MINUTE
 _MINUTES_PER_HOUR = 60.0
+
+
+class Interpolation(Enum):
+    """Interpolation method used for image resizing. Based on constants defined in OpenCV."""
+
+    NEAREST = cv2.INTER_NEAREST
+    """Nearest neighbor interpolation."""
+    LINEAR = cv2.INTER_LINEAR
+    """Bilinear interpolation."""
+    CUBIC = cv2.INTER_CUBIC
+    """Bicubic interpolation."""
+    AREA = cv2.INTER_AREA
+    """Pixel area relation resampling. Provides moire'-free downscaling."""
+    LANCZOS4 = cv2.INTER_LANCZOS4
+    """Lanczos interpolation over 8x8 neighborhood."""
 
 
 # TODO(@Breakthrough): How should we deal with frame numbers when we have a `Timecode`?

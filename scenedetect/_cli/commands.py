@@ -30,16 +30,19 @@ import scenedetect
 from scenedetect._cli.config import XmlFormat
 from scenedetect._cli.context import CliContext
 from scenedetect.common import FrameTimecode
+from scenedetect.output import save_images as save_images_impl
+from scenedetect.output import (
+    split_video_ffmpeg,
+    split_video_mkvmerge,
+    write_scene_list,
+    write_scene_list_html,
+)
 from scenedetect.platform import get_and_create_path
 from scenedetect.scene_manager import (
     CutList,
     Interpolation,
     SceneList,
-    write_scene_list,
-    write_scene_list_html,
 )
-from scenedetect.scene_manager import save_images as save_images_impl
-from scenedetect.video_splitter import split_video_ffmpeg, split_video_mkvmerge
 
 logger = logging.getLogger("pyscenedetect")
 

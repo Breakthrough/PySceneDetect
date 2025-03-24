@@ -652,9 +652,9 @@ Development
 
 ### Release Notes
 
-PySceneDetect is a major breaking release which overhauls how timestamps are handled throughout the API. This allows PySceneDetect to properly process variable framerate (VFR) videos. A significant amount of technical debt has been addressed, including removal of deprecated or overly complicated APIs, with the goal of simplifying usage and integration.
+PySceneDetect is a major breaking release which overhauls how timestamps are handled throughout the API. This allows PySceneDetect to properly process variable framerate (VFR) videos. A significant amount of technical debt has been addressed, including removal of deprecated or overly complicated APIs.
 
-Applications written for the 0.6 API may need to be modified to work with the new 0.7 API. These changes should be minimal in most cases, and backwards compatibility has been added where possible to reduce the scope of breaking changes.
+Although there have been minimal changes to most API examples, there are several breaking changes. Applications written for the 0.6 API *may* require modification to work with the new API.
 
 ### CLI Changes
 
@@ -668,9 +668,11 @@ Applications written for the 0.6 API may need to be modified to work with the ne
  * Replace `frame_num` parameter (`int`) with `timecode` (`FrameTimecode`) in `SceneDetector` interface:
       * The detector interface: `SceneDetector.process_frame()` and `SceneDetector.post_process()`
       * Statistics: `StatsManager.get_metrics()`, `StatsManager.set_metrics()`, and `StatsManager.metrics_exist()`
- * Reorganized submodules:
-      * `scenedetect.scene_detector` is now `scenedetect.detector`
-      * `scenedetect.frame_timecode` is now `scenedetect.common`
+ * Move existing functionality to new submodules:
+      * `scenedetect.scene_detector` moved to `scenedetect.detector`
+      * `scenedetect.frame_timecode` moved to `scenedetect.common`
+      * Output functionality from `scenedetect.scene_manager` moved to `scenedetect.output`
+      * `scenedetect.video_splitter` moved to `scenedetect.output.video`
  * Remove deprecated module `scenedetect.video_manager`, use [the `scenedetect.open_video()` function](https://www.scenedetect.com/docs/head/api.html#scenedetect.open_video) instead
  * Remove deprecated parameter `base_timecode` from various functions, there is no need to provide it
  * Remove deprecated parameter `video_manager` from various functions, use `video` parameter instead
@@ -682,8 +684,3 @@ Applications written for the 0.6 API may need to be modified to work with the ne
  * Remove deprecated `SceneManager.get_event_list()` method
  * Remove deprecated `AdaptiveDetector.get_content_val()` method (the same information can be obtained using a `StatsManager`)
  * Remove `advance` parameter from `VideoStream.read()` (was always set to `True`, callers should handle caching frames now if required)
-
-#### Deprecation
-
- * `scenedetect.scene_detector` module is now deprecated, import from `scenedetect` or `scenedetect.detector` instead
- * `scenedetect.frame_timecode` module is now deprecated, import from `scenedetect` or `scenedetect.common` instead
