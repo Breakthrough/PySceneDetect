@@ -32,10 +32,10 @@ detection on it using :func:`open_video`:
 .. code:: python
 
     from scenedetect import open_video
-    video = open_video('video.mp4')
+    video = open_video("video.mp4")
 
 An optional backend from :data:`AVAILABLE_BACKENDS` can be passed to :func:`open_video`
-(e.g. `backend='opencv'`). Additional keyword arguments passed to :func:`open_video`
+(e.g. `backend="opencv"`). Additional keyword arguments passed to :func:`open_video`
 will be forwarded to the backend constructor. If the specified backend is unavailable, or
 loading the video fails, ``opencv`` will be tried as a fallback.
 
@@ -45,7 +45,7 @@ Lastly, to use a specific backend directly:
 
     # Manually importing and constructing a backend:
     from scenedetect.backends.opencv import VideoStreamCv2
-    video = VideoStreamCv2('video.mp4')
+    video = VideoStreamCv2("video.mp4")
 
 In both examples above, the resulting ``video`` can be used with
 :meth:`SceneManager.detect_scenes() <scenedetect.scene_manager.SceneManager.detect_scenes>`.

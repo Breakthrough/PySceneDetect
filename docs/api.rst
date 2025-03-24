@@ -63,7 +63,7 @@ PySceneDetect makes it very easy to find scene transitions in a video with the :
     path = "video.mp4"
     scenes = detect(path, ContentDetector())
     for (scene_start, scene_end) in scenes:
-        print(f'{scene_start}-{scene_end}')
+        print(f"{scene_start}-{scene_end}")
 
 ``scenes`` now contains a list of :class:`FrameTimecode <scenedetect.common.FrameTimecode>` pairs representing the start/end of each scene. Note that you can set ``show_progress=True`` when calling :func:`detect <scenedetect.detect>` to display a progress bar with estimated time remaining.
 

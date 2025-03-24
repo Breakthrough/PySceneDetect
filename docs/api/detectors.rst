@@ -2,7 +2,7 @@
 .. _scenedetect-detectors:
 
 ----------------------------------------
-Detection Algorithms
+Detectors
 ----------------------------------------
 
 .. automodule:: scenedetect.detectors
