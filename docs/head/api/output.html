@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Ouptut &#8212; PySceneDetect 0.7-dev0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/pyscenedetect.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Video Backends" href="backends.html" />
+    <link rel="prev" title="Common" href="common.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-scenedetect.output">
+<span id="ouptut"></span><span id="scenedetect-output"></span><h1>Ouptut<a class="headerlink" href="#module-scenedetect.output" title="Permalink to this heading">¶</a></h1>
+<p>The <code class="docutils literal notranslate"><span class="pre">scenedetect.output</span></code> module contains functions which can be used to generate output
+based on the output of scene detection. This includes saving images for each scene, exporting to
+CSV/HTML, or splitting the input video into individual shots.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="scenedetect.output.write_scene_list">
+<span class="sig-prename descclassname"><span class="pre">scenedetect.output.</span></span><span class="sig-name descname"><span class="pre">write_scene_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_csv_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scene_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_cut_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cut_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">col_separator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">','</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">row_separator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'\n'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.output.write_scene_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes the given list of scenes to an output file handle in CSV format.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>output_csv_file</strong> (<em>TextIO</em>) – Handle to open file in write mode.</p></li>
+<li><p><strong>scene_list</strong> (<em>List</em><em>[</em><em>Tuple</em><em>[</em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em>, </em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em>]</em><em>]</em>) – List of pairs of FrameTimecodes denoting each scene’s start/end FrameTimecode.</p></li>
+<li><p><strong>include_cut_list</strong> (<em>bool</em>) – Bool indicating if the first row should include the timecodes where
+each scene starts. Should be set to False if RFC 4180 compliant CSV output is required.</p></li>
+<li><p><strong>cut_list</strong> (<em>List</em><em>[</em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em>] </em><em>| </em><em>None</em>) – Optional list of FrameTimecode objects denoting the cut list (i.e. the frames
+in the video that need to be split to generate individual scenes). If not specified,
+the cut list is generated using the start times of each scene following the first one.</p></li>
+<li><p><strong>col_separator</strong> (<em>str</em>) – Delimiter to use between values. Must be single character.</p></li>
+<li><p><strong>row_separator</strong> (<em>str</em>) – Line terminator to use between rows.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>TypeError</strong> – “delimiter” must be a 1-character string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scenedetect.output.write_scene_list_html">
+<span class="sig-prename descclassname"><span class="pre">scenedetect.output.</span></span><span class="sig-name descname"><span class="pre">write_scene_list_html</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_html_filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scene_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cut_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">css</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">css_class</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mytable'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">image_filenames</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">image_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">image_height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.output.write_scene_list_html" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes the given list of scenes to an output file handle in html format.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>output_html_filename</strong> (<em>str</em>) – filename of output html file</p></li>
+<li><p><strong>scene_list</strong> (<em>List</em><em>[</em><em>Tuple</em><em>[</em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em>, </em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em>]</em><em>]</em>) – List of pairs of FrameTimecodes denoting each scene’s start/end FrameTimecode.</p></li>
+<li><p><strong>cut_list</strong> (<em>List</em><em>[</em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em>] </em><em>| </em><em>None</em>) – Optional list of FrameTimecode objects denoting the cut list (i.e. the frames
+in the video that need to be split to generate individual scenes). If not passed,
+the start times of each scene (besides the 0th scene) is used instead.</p></li>
+<li><p><strong>css</strong> (<em>str</em>) – String containing all the css information for the resulting html page.</p></li>
+<li><p><strong>css_class</strong> (<em>str</em>) – String containing the named css class</p></li>
+<li><p><strong>image_filenames</strong> (<em>Dict</em><em>[</em><em>int</em><em>, </em><em>List</em><em>[</em><em>str</em><em>]</em><em>] </em><em>| </em><em>None</em>) – dict where key i contains a list with n elements (filenames of
+the n saved images from that scene)</p></li>
+<li><p><strong>image_width</strong> (<em>int</em><em> | </em><em>None</em>) – Optional desired width of images in table in pixels</p></li>
+<li><p><strong>image_height</strong> (<em>int</em><em> | </em><em>None</em>) – Optional desired height of images in table in pixels</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scenedetect.output.image.save_images">
+<span class="sig-prename descclassname"><span class="pre">scenedetect.output.image.</span></span><span class="sig-name descname"><span class="pre">save_images</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scene_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">video</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_images</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_margin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">image_extension</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'jpg'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoder_param</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">95</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">image_name_template</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'$VIDEO_NAME-Scene-$SCENE_NUMBER-$IMAGE_NUMBER'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_progress</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Interpolation.CUBIC</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threading</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.output.image.save_images" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save a set number of images from each scene, given a list of scenes
+and the associated video/frame source.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>scene_list</strong> (<em>List</em><em>[</em><em>Tuple</em><em>[</em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em>, </em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em>]</em><em>]</em>) – A list of scenes (pairs of FrameTimecode objects) returned
+from calling a SceneManager’s detect_scenes() method.</p></li>
+<li><p><strong>video</strong> (<a class="reference internal" href="video_stream.html#scenedetect.video_stream.VideoStream" title="scenedetect.video_stream.VideoStream"><em>VideoStream</em></a>) – A VideoStream object corresponding to the scene list.
+Note that the video will be closed/re-opened and seeked through.</p></li>
+<li><p><strong>num_images</strong> (<em>int</em>) – Number of images to generate for each scene.  Minimum is 1.</p></li>
+<li><p><strong>frame_margin</strong> (<em>int</em>) – Number of frames to pad each scene around the beginning
+and end (e.g. moves the first/last image into the scene by N frames).
+Can set to 0, but will result in some video files failing to extract
+the very last frame.</p></li>
+<li><p><strong>image_extension</strong> (<em>str</em>) – Type of image to save (must be one of ‘jpg’, ‘png’, or ‘webp’).</p></li>
+<li><p><strong>encoder_param</strong> (<em>int</em>) – Quality/compression efficiency, based on type of image:
+‘jpg’ / ‘webp’:  Quality 0-100, higher is better quality.  100 is lossless for webp.
+‘png’: Compression from 1-9, where 9 achieves best filesize but is slower to encode.</p></li>
+<li><p><strong>image_name_template</strong> (<em>str</em>) – Template to use for naming image files. Can use the template variables
+$VIDEO_NAME, $SCENE_NUMBER, $IMAGE_NUMBER, $TIMECODE, $FRAME_NUMBER, $TIMESTAMP_MS.
+Should not include an extension.</p></li>
+<li><p><strong>output_dir</strong> (<em>str</em><em> | </em><em>None</em>) – Directory to output the images into.  If not set, the output
+is created in the working directory.</p></li>
+<li><p><strong>show_progress</strong> (<em>bool</em><em> | </em><em>None</em>) – If True, shows a progress bar if tqdm is installed.</p></li>
+<li><p><strong>scale</strong> (<em>float</em><em> | </em><em>None</em>) – Optional factor by which to rescale saved images. A scaling factor of 1 would
+not result in rescaling. A value &lt; 1 results in a smaller saved image, while a
+value &gt; 1 results in an image larger than the original. This value is ignored if
+either the height or width values are specified.</p></li>
+<li><p><strong>height</strong> (<em>int</em><em> | </em><em>None</em>) – Optional value for the height of the saved images. Specifying both the height
+and width will resize images to an exact size, regardless of aspect ratio.
+Specifying only height will rescale the image to that number of pixels in height
+while preserving the aspect ratio.</p></li>
+<li><p><strong>width</strong> (<em>int</em><em> | </em><em>None</em>) – Optional value for the width of the saved images. Specifying both the width
+and height will resize images to an exact size, regardless of aspect ratio.
+Specifying only width will rescale the image to that number of pixels wide
+while preserving the aspect ratio.</p></li>
+<li><p><strong>interpolation</strong> (<a class="reference internal" href="common.html#scenedetect.common.Interpolation" title="scenedetect.common.Interpolation"><em>Interpolation</em></a>) – Type of interpolation to use when resizing images.</p></li>
+<li><p><strong>threading</strong> (<em>bool</em>) – Offload image encoding and disk IO to background threads to improve performance.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>[image_paths] }, where scene_num is the
+number of the scene in scene_list (starting from 1), and image_paths is a list of
+the paths to the newly saved/created images.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dictionary of the format { scene_num</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>ValueError</strong> – Raised if any arguments are invalid or out of range (e.g.</p></li>
+<li><p><strong>if num_images is negative</strong><strong>)</strong><strong>.</strong> – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-scenedetect.output.video">
+<span id="video"></span><h1>Video<a class="headerlink" href="#module-scenedetect.output.video" title="Permalink to this heading">¶</a></h1>
+<p>The <code class="docutils literal notranslate"><span class="pre">scenedetect.output.video</span></code> module contains functions to split existing videos into clips
+using ffmpeg or mkvmerge.</p>
+<p>These programs can be obtained from following URLs (note that mkvmerge is a part mkvtoolnix):</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>FFmpeg:   [ <a class="reference external" href="https://ffmpeg.org/download.html">https://ffmpeg.org/download.html</a> ]</p></li>
+<li><p>mkvmerge: [ <a class="reference external" href="https://mkvtoolnix.download/downloads.html">https://mkvtoolnix.download/downloads.html</a> ]</p></li>
+</ul>
+</div></blockquote>
+<p>If you are a Linux user, you can likely obtain the above programs from your package manager.</p>
+<p>Once installed, ensure the program can be accessed system-wide by calling the <cite>mkvmerge</cite> or <cite>ffmpeg</cite>
+command from a terminal/command prompt. PySceneDetect will automatically use whichever program is
+available on the computer, depending on the specified command-line options.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="scenedetect.output.video.SceneMetadata">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scenedetect.output.video.</span></span><span class="sig-name descname"><span class="pre">SceneMetadata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.output.video.SceneMetadata" title="Permalink to this definition">¶</a></dt>
+<dd><p>Information about the scene being extracted.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>index</strong> (<em>int</em>) – </p></li>
+<li><p><strong>start</strong> (<a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a>) – </p></li>
+<li><p><strong>end</strong> (<a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a>) – </p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scenedetect.output.video.SceneMetadata.end">
+<span class="sig-name descname"><span class="pre">end</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><span class="pre">FrameTimecode</span></a></em><a class="headerlink" href="#scenedetect.output.video.SceneMetadata.end" title="Permalink to this definition">¶</a></dt>
+<dd><p>Last frame.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scenedetect.output.video.SceneMetadata.index">
+<span class="sig-name descname"><span class="pre">index</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#scenedetect.output.video.SceneMetadata.index" title="Permalink to this definition">¶</a></dt>
+<dd><p>0-based index of this scene.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scenedetect.output.video.SceneMetadata.start">
+<span class="sig-name descname"><span class="pre">start</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><span class="pre">FrameTimecode</span></a></em><a class="headerlink" href="#scenedetect.output.video.SceneMetadata.start" title="Permalink to this definition">¶</a></dt>
+<dd><p>First frame.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="scenedetect.output.video.VideoMetadata">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scenedetect.output.video.</span></span><span class="sig-name descname"><span class="pre">VideoMetadata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">total_scenes</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.output.video.VideoMetadata" title="Permalink to this definition">¶</a></dt>
+<dd><p>Information about the video being split.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – </p></li>
+<li><p><strong>path</strong> (<em>Path</em>) – </p></li>
+<li><p><strong>total_scenes</strong> (<em>int</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scenedetect.output.video.VideoMetadata.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scenedetect.output.video.VideoMetadata.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Expected name of the video. May differ from <cite>path</cite>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scenedetect.output.video.VideoMetadata.path">
+<span class="sig-name descname"><span class="pre">path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span></em><a class="headerlink" href="#scenedetect.output.video.VideoMetadata.path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Path to the input file.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scenedetect.output.video.VideoMetadata.total_scenes">
+<span class="sig-name descname"><span class="pre">total_scenes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#scenedetect.output.video.VideoMetadata.total_scenes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Total number of scenes that will be written.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scenedetect.output.video.default_formatter">
+<span class="sig-prename descclassname"><span class="pre">scenedetect.output.video.</span></span><span class="sig-name descname"><span class="pre">default_formatter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">template</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.output.video.default_formatter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Formats filenames using a template string which allows the following variables:</p>
+<p><cite>$VIDEO_NAME</cite>, <cite>$SCENE_NUMBER</cite>, <cite>$START_TIME</cite>, <cite>$END_TIME</cite>, <cite>$START_FRAME</cite>, <cite>$END_FRAME</cite></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>template</strong> (<em>str</em>) – </p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>Callable</em>[[<a class="reference internal" href="#scenedetect.output.video.VideoMetadata" title="scenedetect.output.video.VideoMetadata"><em>VideoMetadata</em></a>, <a class="reference internal" href="#scenedetect.output.video.SceneMetadata" title="scenedetect.output.video.SceneMetadata"><em>SceneMetadata</em></a>], AnyStr]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scenedetect.output.video.is_ffmpeg_available">
+<span class="sig-prename descclassname"><span class="pre">scenedetect.output.video.</span></span><span class="sig-name descname"><span class="pre">is_ffmpeg_available</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.output.video.is_ffmpeg_available" title="Permalink to this definition">¶</a></dt>
+<dd><p>Is ffmpeg Available: Gracefully checks if ffmpeg command is available.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True if <cite>ffmpeg</cite> can be invoked, False otherwise.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scenedetect.output.video.is_mkvmerge_available">
+<span class="sig-prename descclassname"><span class="pre">scenedetect.output.video.</span></span><span class="sig-name descname"><span class="pre">is_mkvmerge_available</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.output.video.is_mkvmerge_available" title="Permalink to this definition">¶</a></dt>
+<dd><p>Is mkvmerge Available: Gracefully checks if mkvmerge command is available.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True if <cite>mkvmerge</cite> can be invoked, False otherwise.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scenedetect.output.video.split_video_ffmpeg">
+<span class="sig-prename descclassname"><span class="pre">scenedetect.output.video.</span></span><span class="sig-name descname"><span class="pre">split_video_ffmpeg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_video_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scene_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_file_template</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'$VIDEO_NAME-Scene-$SCENE_NUMBER.mp4'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">video_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg_override</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'-map</span> <span class="pre">0:v:0</span> <span class="pre">-map</span> <span class="pre">0:a?</span> <span class="pre">-map</span> <span class="pre">0:s?</span> <span class="pre">-c:v</span> <span class="pre">libx264</span> <span class="pre">-preset</span> <span class="pre">veryfast</span> <span class="pre">-crf</span> <span class="pre">22</span> <span class="pre">-c:a</span> <span class="pre">aac'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_progress</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">suppress_output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hide_progress</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">formatter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.output.video.split_video_ffmpeg" title="Permalink to this definition">¶</a></dt>
+<dd><p>Split <cite>input_video_path</cite> using <cite>ffmpeg</cite> based on the scenes in <cite>scene_list</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_video_path</strong> (<em>str</em>) – Path to the video to be split.</p></li>
+<li><p><strong>scene_list</strong> (<em>Iterable</em><em>[</em><em>Tuple</em><em>[</em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em>, </em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em>]</em><em>]</em>) – List of scenes (pairs of FrameTimecodes) denoting the start/end of each scene.</p></li>
+<li><p><strong>output_dir</strong> (<em>Path</em><em> | </em><em>None</em>) – Directory to output videos. If not set, output will be in working directory.</p></li>
+<li><p><strong>output_file_template</strong> (<em>str</em>) – Template to use for generating output filenames.
+The following variables will be replaced in the template for each scene:
+$VIDEO_NAME, $SCENE_NUMBER, $START_TIME, $END_TIME, $START_FRAME, $END_FRAME</p></li>
+<li><p><strong>video_name</strong> (<em>str</em><em> | </em><em>None</em>) – Name of the video to be substituted in output_file_template. If not
+passed will be calculated from input_video_path automatically.</p></li>
+<li><p><strong>arg_override</strong> (<em>str</em>) – Allows overriding the arguments passed to ffmpeg for encoding.</p></li>
+<li><p><strong>show_progress</strong> (<em>bool</em>) – If True, will show progress bar provided by tqdm (if installed).</p></li>
+<li><p><strong>show_output</strong> (<em>bool</em>) – If True, will show output from ffmpeg for first split.</p></li>
+<li><p><strong>suppress_output</strong> – [DEPRECATED] DO NOT USE. For backwards compatibility only.</p></li>
+<li><p><strong>hide_progress</strong> – [DEPRECATED] DO NOT USE. For backwards compatibility only.</p></li>
+<li><p><strong>formatter</strong> (<em>Callable</em><em>[</em><em>[</em><a class="reference internal" href="#scenedetect.output.video.VideoMetadata" title="scenedetect.output.video.VideoMetadata"><em>VideoMetadata</em></a><em>, </em><a class="reference internal" href="#scenedetect.output.video.SceneMetadata" title="scenedetect.output.video.SceneMetadata"><em>SceneMetadata</em></a><em>]</em><em>, </em><em>AnyStr</em><em>] </em><em>| </em><em>None</em>) – Custom formatter callback. Overrides <cite>output_file_template</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Return code of invoking ffmpeg (0 on success). If scene_list is empty, will
+still return 0, but no commands will be invoked.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scenedetect.output.video.split_video_mkvmerge">
+<span class="sig-prename descclassname"><span class="pre">scenedetect.output.video.</span></span><span class="sig-name descname"><span class="pre">split_video_mkvmerge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_video_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scene_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_file_template</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'$VIDEO_NAME.mkv'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">video_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">suppress_output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.output.video.split_video_mkvmerge" title="Permalink to this definition">¶</a></dt>
+<dd><p>Split <cite>input_video_path</cite> using <cite>mkvmerge</cite> based on the scenes in <cite>scene_list</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_video_path</strong> (<em>str</em>) – Path to the video to be split.</p></li>
+<li><p><strong>scene_list</strong> (<em>Iterable</em><em>[</em><em>Tuple</em><em>[</em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em>, </em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em>]</em><em>]</em>) – List of scenes as pairs of FrameTimecodes denoting the start/end times.</p></li>
+<li><p><strong>output_dir</strong> (<em>str</em><em> | </em><em>Path</em><em> | </em><em>None</em>) – Directory to output videos. If not set, output will be in working directory.</p></li>
+<li><p><strong>output_file_template</strong> (<em>str</em><em> | </em><em>Path</em><em> | </em><em>None</em>) – Template to use for generating output files. Note that mkvmerge always
+adds the suffix “-$SCENE_NUMBER” to the output paths. Only the $VIDEO_NAME variable
+is supported by this function.</p></li>
+<li><p><strong>video_name</strong> (<em>str</em><em> | </em><em>None</em>) – Name of the video to be substituted in output_file_template for
+$VIDEO_NAME. If not specified, will be obtained from the filename.</p></li>
+<li><p><strong>show_output</strong> (<em>bool</em>) – If False, adds the –quiet flag when invoking <cite>mkvmerge</cite>.</p></li>
+<li><p><strong>suppress_output</strong> – [DEPRECATED] DO NOT USE. For backwards compatibility only.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Return code of invoking mkvmerge (0 on success). If scene_list is empty, will
+still return 0, but no commands will be invoked.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="scenedetect.output.video.DEFAULT_FFMPEG_ARGS">
+<span class="sig-prename descclassname"><span class="pre">scenedetect.output.video.</span></span><span class="sig-name descname"><span class="pre">DEFAULT_FFMPEG_ARGS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'-map</span> <span class="pre">0:v:0</span> <span class="pre">-map</span> <span class="pre">0:a?</span> <span class="pre">-map</span> <span class="pre">0:s?</span> <span class="pre">-c:v</span> <span class="pre">libx264</span> <span class="pre">-preset</span> <span class="pre">veryfast</span> <span class="pre">-crf</span> <span class="pre">22</span> <span class="pre">-c:a</span> <span class="pre">aac'</span></em><a class="headerlink" href="#scenedetect.output.video.DEFAULT_FFMPEG_ARGS" title="Permalink to this definition">¶</a></dt>
+<dd><p>Default arguments passed to ffmpeg when invoking the <cite>split_video_ffmpeg</cite> function.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="scenedetect.output.video.FFMPEG_PATH">
+<span class="sig-prename descclassname"><span class="pre">scenedetect.output.video.</span></span><span class="sig-name descname"><span class="pre">FFMPEG_PATH</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'/opt/hostedtoolcache/Python/3.12.9/x64/lib/python3.12/site-packages/imageio_ffmpeg/binaries/ffmpeg-linux-x86_64-v7.0.2'</span></em><a class="headerlink" href="#scenedetect.output.video.FFMPEG_PATH" title="Permalink to this definition">¶</a></dt>
+<dd><p>Relative path to the ffmpeg binary on this system, if any (will be None if not available).</p>
+</dd></dl>
+
+</section>
+
+
+          </div>
+              <div class="related bottom">
+                &nbsp;
+  <nav id="rellinks">
+    <ul>
+        <li>
+          &larr;
+          <a href="common.html" title="Previous document">Common</a>
+        </li>
+        <li>
+          <a href="backends.html" title="Next document">Video Backends</a>
+          &rarr;
+        </li>
+    </ul>
+  </nav>
+              </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="../index.html">
+    <img class="logo" src="../_static/pyscenedetect_logo.png" alt="Logo" />
+    
+  </a>
+</p>
+
+
+
+<p class="blurb">Version: [0.7-dev0]</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=Breakthrough&repo=PySceneDetect&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Command-Line Interface:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../cli.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Command</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cli.html#examples">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cli.html#options">Options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cli.html#detectors">Detectors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cli.html#commands">Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cli/config_file.html">Configuration File</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cli/backends.html">Backends</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Documentation:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../api.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="detectors.html">Detectors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scene_manager.html">Scene Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="common.html">Common</a></li>
+<li class="toctree-l1"><a class="reference internal" href="backends.html">Video Backends</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Ouptut</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#scenedetect.output.write_scene_list"><code class="docutils literal notranslate"><span class="pre">write_scene_list()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scenedetect.output.write_scene_list_html"><code class="docutils literal notranslate"><span class="pre">write_scene_list_html()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scenedetect.output.image.save_images"><code class="docutils literal notranslate"><span class="pre">save_images()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#module-scenedetect.output.video">Video</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#scenedetect.output.video.SceneMetadata"><code class="docutils literal notranslate"><span class="pre">SceneMetadata</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scenedetect.output.video.VideoMetadata"><code class="docutils literal notranslate"><span class="pre">VideoMetadata</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scenedetect.output.video.default_formatter"><code class="docutils literal notranslate"><span class="pre">default_formatter()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scenedetect.output.video.is_ffmpeg_available"><code class="docutils literal notranslate"><span class="pre">is_ffmpeg_available()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scenedetect.output.video.is_mkvmerge_available"><code class="docutils literal notranslate"><span class="pre">is_mkvmerge_available()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scenedetect.output.video.split_video_ffmpeg"><code class="docutils literal notranslate"><span class="pre">split_video_ffmpeg()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scenedetect.output.video.split_video_mkvmerge"><code class="docutils literal notranslate"><span class="pre">split_video_mkvmerge()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scenedetect.output.video.DEFAULT_FFMPEG_ARGS"><code class="docutils literal notranslate"><span class="pre">DEFAULT_FFMPEG_ARGS</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scenedetect.output.video.FFMPEG_PATH"><code class="docutils literal notranslate"><span class="pre">FFMPEG_PATH</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="stats_manager.html">Stats Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="detector.html">Detector Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="video_stream.html">Stream Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="platform.html">Platform &amp; Logging</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="../api.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Package</a><ul>
+      <li>Previous: <a href="common.html" title="previous chapter">Common</a></li>
+      <li>Next: <a href="backends.html" title="next chapter">Video Backends</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2014-2024, Brandon Castellano.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.0.1</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../_sources/api/output.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

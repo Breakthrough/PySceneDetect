@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Common Types &#8212; PySceneDetect 0.7-dev0 documentation</title>
+    <title>Common &#8212; PySceneDetect 0.7-dev0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
     <link rel="stylesheet" type="text/css" href="../_static/pyscenedetect.css" />
@@ -14,7 +14,7 @@
     <script src="../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Video Splitting" href="video_splitter.html" />
+    <link rel="next" title="Ouptut" href="output.html" />
     <link rel="prev" title="Scene Manager" href="scene_manager.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
@@ -34,7 +34,7 @@
           <div class="body" role="main">
             
   <section id="module-scenedetect.common">
-<span id="common-types"></span><span id="scenedetect-common"></span><h1>Common Types<a class="headerlink" href="#module-scenedetect.common" title="Permalink to this heading">¶</a></h1>
+<span id="common"></span><span id="scenedetect-common"></span><h1>Common<a class="headerlink" href="#module-scenedetect.common" title="Permalink to this heading">¶</a></h1>
 <p><code class="docutils literal notranslate"><span class="pre">scenedetect.common</span></code> Module</p>
 <p>This module contains common types and functions used throughout PySceneDetect.</p>
 <p>This includes <a class="reference internal" href="#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrameTimecode</span></code></a> which is used as a way for PySceneDetect to store
@@ -194,6 +194,42 @@ will be truncated to the specified precision.</p></li>
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="scenedetect.common.Interpolation">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scenedetect.common.</span></span><span class="sig-name descname"><span class="pre">Interpolation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names=&lt;not</span> <span class="pre">given&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qualname=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary=None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.common.Interpolation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Interpolation method used for image resizing. Based on constants defined in OpenCV.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scenedetect.common.Interpolation.AREA">
+<span class="sig-name descname"><span class="pre">AREA</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></em><a class="headerlink" href="#scenedetect.common.Interpolation.AREA" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pixel area relation resampling. Provides moire’-free downscaling.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scenedetect.common.Interpolation.CUBIC">
+<span class="sig-name descname"><span class="pre">CUBIC</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#scenedetect.common.Interpolation.CUBIC" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bicubic interpolation.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scenedetect.common.Interpolation.LANCZOS4">
+<span class="sig-name descname"><span class="pre">LANCZOS4</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4</span></em><a class="headerlink" href="#scenedetect.common.Interpolation.LANCZOS4" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lanczos interpolation over 8x8 neighborhood.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scenedetect.common.Interpolation.LINEAR">
+<span class="sig-name descname"><span class="pre">LINEAR</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#scenedetect.common.Interpolation.LINEAR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bilinear interpolation.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scenedetect.common.Interpolation.NEAREST">
+<span class="sig-name descname"><span class="pre">NEAREST</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#scenedetect.common.Interpolation.NEAREST" title="Permalink to this definition">¶</a></dt>
+<dd><p>Nearest neighbor interpolation.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="scenedetect.common.Timecode">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scenedetect.common.</span></span><span class="sig-name descname"><span class="pre">Timecode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_base</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.common.Timecode" title="Permalink to this definition">¶</a></dt>
 <dd><p>Timing information associated with a given frame.</p>
@@ -267,7 +303,7 @@ to source frame without downscaling.</p>
           <a href="scene_manager.html" title="Previous document">Scene Manager</a>
         </li>
         <li>
-          <a href="video_splitter.html" title="Next document">Video Splitting</a>
+          <a href="output.html" title="Next document">Ouptut</a>
           &rarr;
         </li>
     </ul>
@@ -315,10 +351,11 @@ to source frame without downscaling.</p>
 <p class="caption" role="heading"><span class="caption-text">API Documentation:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../api.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="detectors.html">Detection Algorithms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="detectors.html">Detectors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="scene_manager.html">Scene Manager</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Common Types</a><ul>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Common</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.common.FrameTimecode"><code class="docutils literal notranslate"><span class="pre">FrameTimecode</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scenedetect.common.Interpolation"><code class="docutils literal notranslate"><span class="pre">Interpolation</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.common.Timecode"><code class="docutils literal notranslate"><span class="pre">Timecode</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.common.CropRegion"><code class="docutils literal notranslate"><span class="pre">CropRegion</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.common.CutList"><code class="docutils literal notranslate"><span class="pre">CutList</span></code></a></li>
@@ -327,8 +364,9 @@ to source frame without downscaling.</p>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.common.TimecodePair"><code class="docutils literal notranslate"><span class="pre">TimecodePair</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="backends.html">Input Backends</a></li>
-<li class="toctree-l1"><a class="reference internal" href="video_splitter.html">Video Splitting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="backends.html">Video Backends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="output.html">Ouptut</a></li>
+<li class="toctree-l1"><a class="reference internal" href="output.html#module-scenedetect.output.video">Video</a></li>
 <li class="toctree-l1"><a class="reference internal" href="stats_manager.html">Stats Manager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="detector.html">Detector Interface</a></li>
 <li class="toctree-l1"><a class="reference internal" href="video_stream.html">Stream Interface</a></li>
@@ -341,7 +379,7 @@ to source frame without downscaling.</p>
   <li><a href="../index.html">Documentation overview</a><ul>
   <li><a href="../api.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Package</a><ul>
       <li>Previous: <a href="scene_manager.html" title="previous chapter">Scene Manager</a></li>
-      <li>Next: <a href="video_splitter.html" title="next chapter">Video Splitting</a></li>
+      <li>Next: <a href="output.html" title="next chapter">Ouptut</a></li>
   </ul></li>
   </ul></li>
 </ul>

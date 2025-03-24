@@ -14,8 +14,8 @@
     <script src="../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Common Types" href="common.html" />
-    <link rel="prev" title="Detection Algorithms" href="detectors.html" />
+    <link rel="next" title="Common" href="common.html" />
+    <link rel="prev" title="Detectors" href="detectors.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
@@ -40,8 +40,6 @@
 <a class="reference internal" href="detectors.html#module-scenedetect.detectors" title="scenedetect.detectors"><code class="xref py py-mod docutils literal notranslate"><span class="pre">SceneDetector</span></code></a> over the frames of a video
 (<a class="reference internal" href="video_stream.html#module-scenedetect.video_stream" title="scenedetect.video_stream"><code class="xref py py-mod docutils literal notranslate"><span class="pre">VideoStream</span></code></a>). Video decoding is done in a separate thread to
 improve performance.</p>
-<p>This module also contains other helper functions (e.g. <a class="reference internal" href="#scenedetect.scene_manager.save_images" title="scenedetect.scene_manager.save_images"><code class="xref py py-func docutils literal notranslate"><span class="pre">save_images()</span></code></a>) which can be used to
-process the resulting scene list.</p>
 <section id="usage">
 <h2>Usage<a class="headerlink" href="#usage" title="Permalink to this heading">¶</a></h2>
 <p>The following example shows basic usage of a <a class="reference internal" href="#scenedetect.scene_manager.SceneManager" title="scenedetect.scene_manager.SceneManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">SceneManager</span></code></a>:</p>
@@ -91,42 +89,6 @@ process the resulting scene list.</p>
 <p>The statsfile can be used to find a better threshold for certain inputs, or perform statistical
 analysis of the video.</p>
 </section>
-<dl class="py class">
-<dt class="sig sig-object py" id="scenedetect.scene_manager.Interpolation">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scenedetect.scene_manager.</span></span><span class="sig-name descname"><span class="pre">Interpolation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names=&lt;not</span> <span class="pre">given&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qualname=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary=None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.scene_manager.Interpolation" title="Permalink to this definition">¶</a></dt>
-<dd><p>Interpolation method used for image resizing. Based on constants defined in OpenCV.</p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="scenedetect.scene_manager.Interpolation.AREA">
-<span class="sig-name descname"><span class="pre">AREA</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></em><a class="headerlink" href="#scenedetect.scene_manager.Interpolation.AREA" title="Permalink to this definition">¶</a></dt>
-<dd><p>Pixel area relation resampling. Provides moire’-free downscaling.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="scenedetect.scene_manager.Interpolation.CUBIC">
-<span class="sig-name descname"><span class="pre">CUBIC</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#scenedetect.scene_manager.Interpolation.CUBIC" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bicubic interpolation.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="scenedetect.scene_manager.Interpolation.LANCZOS4">
-<span class="sig-name descname"><span class="pre">LANCZOS4</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4</span></em><a class="headerlink" href="#scenedetect.scene_manager.Interpolation.LANCZOS4" title="Permalink to this definition">¶</a></dt>
-<dd><p>Lanczos interpolation over 8x8 neighborhood.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="scenedetect.scene_manager.Interpolation.LINEAR">
-<span class="sig-name descname"><span class="pre">LINEAR</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#scenedetect.scene_manager.Interpolation.LINEAR" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bilinear interpolation.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="scenedetect.scene_manager.Interpolation.NEAREST">
-<span class="sig-name descname"><span class="pre">NEAREST</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#scenedetect.scene_manager.Interpolation.NEAREST" title="Permalink to this definition">¶</a></dt>
-<dd><p>Nearest neighbor interpolation.</p>
-</dd></dl>
-
-</dd></dl>
-
 <dl class="py class">
 <dt class="sig sig-object py" id="scenedetect.scene_manager.SceneManager">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scenedetect.scene_manager.</span></span><span class="sig-name descname"><span class="pre">SceneManager</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stats_manager</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.scene_manager.SceneManager" title="Permalink to this definition">¶</a></dt>
@@ -293,7 +255,7 @@ indicates no scaling. Will be ignored if auto_downscale=True.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="scenedetect.scene_manager.SceneManager.interpolation">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">interpolation</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#scenedetect.scene_manager.Interpolation" title="scenedetect.scene_manager.Interpolation"><span class="pre">Interpolation</span></a></em><a class="headerlink" href="#scenedetect.scene_manager.SceneManager.interpolation" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">interpolation</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="common.html#scenedetect.common.Interpolation" title="scenedetect.common.Interpolation"><span class="pre">Interpolation</span></a></em><a class="headerlink" href="#scenedetect.scene_manager.SceneManager.interpolation" title="Permalink to this definition">¶</a></dt>
 <dd><p>Interpolation method to use when downscaling frames. Must be one of cv2.INTER_*.</p>
 </dd></dl>
 
@@ -360,113 +322,6 @@ scene occupies based on the input cut_list.</p>
 </dl>
 </dd></dl>
 
-<dl class="py function">
-<dt class="sig sig-object py" id="scenedetect.scene_manager.save_images">
-<span class="sig-prename descclassname"><span class="pre">scenedetect.scene_manager.</span></span><span class="sig-name descname"><span class="pre">save_images</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scene_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">video</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_images</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_margin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">image_extension</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'jpg'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoder_param</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">95</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">image_name_template</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'$VIDEO_NAME-Scene-$SCENE_NUMBER-$IMAGE_NUMBER'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_progress</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Interpolation.CUBIC</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threading</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.scene_manager.save_images" title="Permalink to this definition">¶</a></dt>
-<dd><p>Save a set number of images from each scene, given a list of scenes
-and the associated video/frame source.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>scene_list</strong> (<em>List</em><em>[</em><em>Tuple</em><em>[</em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em>, </em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em>]</em><em>]</em>) – A list of scenes (pairs of FrameTimecode objects) returned
-from calling a SceneManager’s detect_scenes() method.</p></li>
-<li><p><strong>video</strong> (<a class="reference internal" href="video_stream.html#scenedetect.video_stream.VideoStream" title="scenedetect.video_stream.VideoStream"><em>VideoStream</em></a>) – A VideoStream object corresponding to the scene list.
-Note that the video will be closed/re-opened and seeked through.</p></li>
-<li><p><strong>num_images</strong> (<em>int</em>) – Number of images to generate for each scene.  Minimum is 1.</p></li>
-<li><p><strong>frame_margin</strong> (<em>int</em>) – Number of frames to pad each scene around the beginning
-and end (e.g. moves the first/last image into the scene by N frames).
-Can set to 0, but will result in some video files failing to extract
-the very last frame.</p></li>
-<li><p><strong>image_extension</strong> (<em>str</em>) – Type of image to save (must be one of ‘jpg’, ‘png’, or ‘webp’).</p></li>
-<li><p><strong>encoder_param</strong> (<em>int</em>) – Quality/compression efficiency, based on type of image:
-‘jpg’ / ‘webp’:  Quality 0-100, higher is better quality.  100 is lossless for webp.
-‘png’: Compression from 1-9, where 9 achieves best filesize but is slower to encode.</p></li>
-<li><p><strong>image_name_template</strong> (<em>str</em>) – Template to use for naming image files. Can use the template variables
-$VIDEO_NAME, $SCENE_NUMBER, $IMAGE_NUMBER, $TIMECODE, $FRAME_NUMBER, $TIMESTAMP_MS.
-Should not include an extension.</p></li>
-<li><p><strong>output_dir</strong> (<em>str</em><em> | </em><em>None</em>) – Directory to output the images into.  If not set, the output
-is created in the working directory.</p></li>
-<li><p><strong>show_progress</strong> (<em>bool</em><em> | </em><em>None</em>) – If True, shows a progress bar if tqdm is installed.</p></li>
-<li><p><strong>scale</strong> (<em>float</em><em> | </em><em>None</em>) – Optional factor by which to rescale saved images. A scaling factor of 1 would
-not result in rescaling. A value &lt; 1 results in a smaller saved image, while a
-value &gt; 1 results in an image larger than the original. This value is ignored if
-either the height or width values are specified.</p></li>
-<li><p><strong>height</strong> (<em>int</em><em> | </em><em>None</em>) – Optional value for the height of the saved images. Specifying both the height
-and width will resize images to an exact size, regardless of aspect ratio.
-Specifying only height will rescale the image to that number of pixels in height
-while preserving the aspect ratio.</p></li>
-<li><p><strong>width</strong> (<em>int</em><em> | </em><em>None</em>) – Optional value for the width of the saved images. Specifying both the width
-and height will resize images to an exact size, regardless of aspect ratio.
-Specifying only width will rescale the image to that number of pixels wide
-while preserving the aspect ratio.</p></li>
-<li><p><strong>interpolation</strong> (<a class="reference internal" href="#scenedetect.scene_manager.Interpolation" title="scenedetect.scene_manager.Interpolation"><em>Interpolation</em></a>) – Type of interpolation to use when resizing images.</p></li>
-<li><p><strong>threading</strong> (<em>bool</em>) – Offload image encoding and disk IO to background threads to improve performance.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>[image_paths] }, where scene_num is the
-number of the scene in scene_list (starting from 1), and image_paths is a list of
-the paths to the newly saved/created images.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Dictionary of the format { scene_num</p>
-</dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><ul class="simple">
-<li><p><strong>ValueError</strong> – Raised if any arguments are invalid or out of range (e.g.</p></li>
-<li><p><strong>if num_images is negative</strong><strong>)</strong><strong>.</strong> – </p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="scenedetect.scene_manager.write_scene_list">
-<span class="sig-prename descclassname"><span class="pre">scenedetect.scene_manager.</span></span><span class="sig-name descname"><span class="pre">write_scene_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_csv_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scene_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_cut_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cut_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">col_separator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">','</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">row_separator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'\n'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.scene_manager.write_scene_list" title="Permalink to this definition">¶</a></dt>
-<dd><p>Writes the given list of scenes to an output file handle in CSV format.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>output_csv_file</strong> (<em>TextIO</em>) – Handle to open file in write mode.</p></li>
-<li><p><strong>scene_list</strong> (<em>List</em><em>[</em><em>Tuple</em><em>[</em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em>, </em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em>]</em><em>]</em>) – List of pairs of FrameTimecodes denoting each scene’s start/end FrameTimecode.</p></li>
-<li><p><strong>include_cut_list</strong> (<em>bool</em>) – Bool indicating if the first row should include the timecodes where
-each scene starts. Should be set to False if RFC 4180 compliant CSV output is required.</p></li>
-<li><p><strong>cut_list</strong> (<em>List</em><em>[</em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em>] </em><em>| </em><em>None</em>) – Optional list of FrameTimecode objects denoting the cut list (i.e. the frames
-in the video that need to be split to generate individual scenes). If not specified,
-the cut list is generated using the start times of each scene following the first one.</p></li>
-<li><p><strong>col_separator</strong> (<em>str</em>) – Delimiter to use between values. Must be single character.</p></li>
-<li><p><strong>row_separator</strong> (<em>str</em>) – Line terminator to use between rows.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>TypeError</strong> – “delimiter” must be a 1-character string</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="scenedetect.scene_manager.write_scene_list_html">
-<span class="sig-prename descclassname"><span class="pre">scenedetect.scene_manager.</span></span><span class="sig-name descname"><span class="pre">write_scene_list_html</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_html_filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scene_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cut_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">css</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">css_class</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mytable'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">image_filenames</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">image_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">image_height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.scene_manager.write_scene_list_html" title="Permalink to this definition">¶</a></dt>
-<dd><p>Writes the given list of scenes to an output file handle in html format.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>output_html_filename</strong> (<em>str</em>) – filename of output html file</p></li>
-<li><p><strong>scene_list</strong> (<em>List</em><em>[</em><em>Tuple</em><em>[</em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em>, </em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em>]</em><em>]</em>) – List of pairs of FrameTimecodes denoting each scene’s start/end FrameTimecode.</p></li>
-<li><p><strong>cut_list</strong> (<em>List</em><em>[</em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em>] </em><em>| </em><em>None</em>) – Optional list of FrameTimecode objects denoting the cut list (i.e. the frames
-in the video that need to be split to generate individual scenes). If not passed,
-the start times of each scene (besides the 0th scene) is used instead.</p></li>
-<li><p><strong>css</strong> (<em>str</em>) – String containing all the css information for the resulting html page.</p></li>
-<li><p><strong>css_class</strong> (<em>str</em>) – String containing the named css class</p></li>
-<li><p><strong>image_filenames</strong> (<em>Dict</em><em>[</em><em>int</em><em>, </em><em>List</em><em>[</em><em>str</em><em>]</em><em>] </em><em>| </em><em>None</em>) – dict where key i contains a list with n elements (filenames of
-the n saved images from that scene)</p></li>
-<li><p><strong>image_width</strong> (<em>int</em><em> | </em><em>None</em>) – Optional desired width of images in table in pixels</p></li>
-<li><p><strong>image_height</strong> (<em>int</em><em> | </em><em>None</em>) – Optional desired height of images in table in pixels</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
 <dl class="py data">
 <dt class="sig sig-object py" id="scenedetect.scene_manager.DEFAULT_MIN_WIDTH">
 <span class="sig-prename descclassname"><span class="pre">scenedetect.scene_manager.</span></span><span class="sig-name descname"><span class="pre">DEFAULT_MIN_WIDTH</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">256</span></em><a class="headerlink" href="#scenedetect.scene_manager.DEFAULT_MIN_WIDTH" title="Permalink to this definition">¶</a></dt>
@@ -501,10 +356,10 @@ the n saved images from that scene)</p></li>
     <ul>
         <li>
           &larr;
-          <a href="detectors.html" title="Previous document">Detection Algorithms</a>
+          <a href="detectors.html" title="Previous document">Detectors</a>
         </li>
         <li>
-          <a href="common.html" title="Next document">Common Types</a>
+          <a href="common.html" title="Next document">Common</a>
           &rarr;
         </li>
     </ul>
@@ -552,26 +407,23 @@ the n saved images from that scene)</p></li>
 <p class="caption" role="heading"><span class="caption-text">API Documentation:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../api.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="detectors.html">Detection Algorithms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="detectors.html">Detectors</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Scene Manager</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#usage">Usage</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#storing-per-frame-statistics">Storing Per-Frame Statistics</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#scenedetect.scene_manager.Interpolation"><code class="docutils literal notranslate"><span class="pre">Interpolation</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.scene_manager.SceneManager"><code class="docutils literal notranslate"><span class="pre">SceneManager</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.scene_manager.compute_downscale_factor"><code class="docutils literal notranslate"><span class="pre">compute_downscale_factor()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.scene_manager.get_scenes_from_cuts"><code class="docutils literal notranslate"><span class="pre">get_scenes_from_cuts()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#scenedetect.scene_manager.save_images"><code class="docutils literal notranslate"><span class="pre">save_images()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#scenedetect.scene_manager.write_scene_list"><code class="docutils literal notranslate"><span class="pre">write_scene_list()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#scenedetect.scene_manager.write_scene_list_html"><code class="docutils literal notranslate"><span class="pre">write_scene_list_html()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.scene_manager.DEFAULT_MIN_WIDTH"><code class="docutils literal notranslate"><span class="pre">DEFAULT_MIN_WIDTH</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.scene_manager.MAX_FRAME_QUEUE_LENGTH"><code class="docutils literal notranslate"><span class="pre">MAX_FRAME_QUEUE_LENGTH</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.scene_manager.MAX_FRAME_SIZE_ERRORS"><code class="docutils literal notranslate"><span class="pre">MAX_FRAME_SIZE_ERRORS</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.scene_manager.PROGRESS_BAR_DESCRIPTION"><code class="docutils literal notranslate"><span class="pre">PROGRESS_BAR_DESCRIPTION</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="common.html">Common Types</a></li>
-<li class="toctree-l1"><a class="reference internal" href="backends.html">Input Backends</a></li>
-<li class="toctree-l1"><a class="reference internal" href="video_splitter.html">Video Splitting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="common.html">Common</a></li>
+<li class="toctree-l1"><a class="reference internal" href="backends.html">Video Backends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="output.html">Ouptut</a></li>
+<li class="toctree-l1"><a class="reference internal" href="output.html#module-scenedetect.output.video">Video</a></li>
 <li class="toctree-l1"><a class="reference internal" href="stats_manager.html">Stats Manager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="detector.html">Detector Interface</a></li>
 <li class="toctree-l1"><a class="reference internal" href="video_stream.html">Stream Interface</a></li>
@@ -583,8 +435,8 @@ the n saved images from that scene)</p></li>
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
   <li><a href="../api.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Package</a><ul>
-      <li>Previous: <a href="detectors.html" title="previous chapter">Detection Algorithms</a></li>
-      <li>Next: <a href="common.html" title="next chapter">Common Types</a></li>
+      <li>Previous: <a href="detectors.html" title="previous chapter">Detectors</a></li>
+      <li>Next: <a href="common.html" title="next chapter">Common</a></li>
   </ul></li>
   </ul></li>
 </ul>

@@ -49,7 +49,7 @@ Table of Contents
     api/scene_manager
     api/common
     api/backends
-    api/video_splitter
+    api/output
     api/stats_manager
     api/detector
     api/video_stream
