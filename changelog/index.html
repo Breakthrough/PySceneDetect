@@ -903,8 +903,8 @@
 <h1 id="development">Development</h1>
 <h2 id="pyscenedetect-07-in-development">PySceneDetect 0.7 (In Development)</h2>
 <h3 id="release-notes_11">Release Notes</h3>
-<p>PySceneDetect is a major breaking release which overhauls how timestamps are handled throughout the API. This allows PySceneDetect to properly process variable framerate (VFR) videos. A significant amount of technical debt has been addressed, including removal of deprecated or overly complicated APIs, with the goal of simplifying usage and integration.</p>
-<p>Applications written for the 0.6 API may need to be modified to work with the new 0.7 API. These changes should be minimal in most cases, and backwards compatibility has been added where possible to reduce the scope of breaking changes.</p>
+<p>PySceneDetect is a major breaking release which overhauls how timestamps are handled throughout the API. This allows PySceneDetect to properly process variable framerate (VFR) videos. A significant amount of technical debt has been addressed, including removal of deprecated or overly complicated APIs.</p>
+<p>Although there have been minimal changes to most API examples, there are several breaking changes. Applications written for the 0.6 API <em>may</em> require modification to work with the new API.</p>
 <h3 id="cli-changes">CLI Changes</h3>
 <ul>
 <li>[feature] WORK IN PROGRESS: New <code>save-xml</code> command supports saving scenes in Final Cut Pro format <a href="https://github.com/Breakthrough/PySceneDetect/issues/156">#156</a></li>
@@ -917,9 +917,11 @@
 <li>Statistics: <code>StatsManager.get_metrics()</code>, <code>StatsManager.set_metrics()</code>, and <code>StatsManager.metrics_exist()</code></li>
 </ul>
 </li>
-<li>Reorganized submodules:<ul>
-<li><code>scenedetect.scene_detector</code> is now <code>scenedetect.detector</code></li>
-<li><code>scenedetect.frame_timecode</code> is now <code>scenedetect.common</code></li>
+<li>Move existing functionality to new submodules:<ul>
+<li><code>scenedetect.scene_detector</code> moved to <code>scenedetect.detector</code></li>
+<li><code>scenedetect.frame_timecode</code> moved to <code>scenedetect.common</code></li>
+<li>Output functionality from <code>scenedetect.scene_manager</code> moved to <code>scenedetect.output</code></li>
+<li><code>scenedetect.video_splitter</code> moved to <code>scenedetect.output.video</code></li>
 </ul>
 </li>
 <li>Remove deprecated module <code>scenedetect.video_manager</code>, use <a href="https://www.scenedetect.com/docs/head/api.html#scenedetect.open_video">the <code>scenedetect.open_video()</code> function</a> instead</li>
@@ -933,11 +935,6 @@
 <li>Remove deprecated <code>SceneManager.get_event_list()</code> method</li>
 <li>Remove deprecated <code>AdaptiveDetector.get_content_val()</code> method (the same information can be obtained using a <code>StatsManager</code>)</li>
 <li>Remove <code>advance</code> parameter from <code>VideoStream.read()</code> (was always set to <code>True</code>, callers should handle caching frames now if required)</li>
-</ul>
-<h4 id="deprecation">Deprecation</h4>
-<ul>
-<li><code>scenedetect.scene_detector</code> module is now deprecated, import from <code>scenedetect</code> or <code>scenedetect.detector</code> instead</li>
-<li><code>scenedetect.frame_timecode</code> module is now deprecated, import from <code>scenedetect</code> or <code>scenedetect.common</code> instead</li>
 </ul>
               
             </div>
