@@ -665,6 +665,8 @@ Although there have been minimal changes to most API examples, there are several
 
 #### Breaking
 
+> Note: Imports that break when upgrading to 0.7 can usually be resolved by importing from `scenedetect` directly, rather than a submodule. The package structure has changed significantly in 0.7.
+
  * Replace `frame_num` parameter (`int`) with `timecode` (`FrameTimecode`) in `SceneDetector` interface (#168)[https://github.com/Breakthrough/PySceneDetect/issues/168]:
       * The detector interface: `SceneDetector.process_frame()` and `SceneDetector.post_process()`
       * Statistics: `StatsManager.get_metrics()`, `StatsManager.set_metrics()`, and `StatsManager.metrics_exist()`
