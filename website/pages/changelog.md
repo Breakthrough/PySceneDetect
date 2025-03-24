@@ -665,14 +665,14 @@ Although there have been minimal changes to most API examples, there are several
 
 #### Breaking
 
- * Replace `frame_num` parameter (`int`) with `timecode` (`FrameTimecode`) in `SceneDetector` interface:
+ * Replace `frame_num` parameter (`int`) with `timecode` (`FrameTimecode`) in `SceneDetector` interface (#168)[https://github.com/Breakthrough/PySceneDetect/issues/168]:
       * The detector interface: `SceneDetector.process_frame()` and `SceneDetector.post_process()`
       * Statistics: `StatsManager.get_metrics()`, `StatsManager.set_metrics()`, and `StatsManager.metrics_exist()`
  * Move existing functionality to new submodules:
       * `scenedetect.scene_detector` moved to `scenedetect.detector`
       * `scenedetect.frame_timecode` moved to `scenedetect.common`
-      * Output functionality from `scenedetect.scene_manager` moved to `scenedetect.output`
-      * `scenedetect.video_splitter` moved to `scenedetect.output.video`
+      * Output functionality from `scenedetect.scene_manager` moved to `scenedetect.output` [#463](https://github.com/Breakthrough/PySceneDetect/issues/463)
+      * `scenedetect.video_splitter` moved to `scenedetect.output.video` [#463](https://github.com/Breakthrough/PySceneDetect/issues/463)
  * Remove deprecated module `scenedetect.video_manager`, use [the `scenedetect.open_video()` function](https://www.scenedetect.com/docs/head/api.html#scenedetect.open_video) instead
  * Remove deprecated parameter `base_timecode` from various functions, there is no need to provide it
  * Remove deprecated parameter `video_manager` from various functions, use `video` parameter instead
