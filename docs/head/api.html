@@ -35,12 +35,11 @@
             
   <section id="scenedetect-package">
 <h1><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Package<a class="headerlink" href="#scenedetect-package" title="Permalink to this heading">¶</a></h1>
-<p>The <cite>scenedetect</cite> API is easy to integrate with most application workflows, while also being highly extensible. See the <a class="reference internal" href="#getting-started">Getting Started</a> section below for some common use cases and integrations. The <cite>scenedetect</cite> package contains several modules:</p>
+<p>The <cite>scenedetect</cite> API is easy to integrate with most application workflows, while also being highly extensible. See the <a class="reference internal" href="#getting-started">Getting Started</a> section below for some common use cases and integrations. The <cite>scenedetect</cite> package is organized into several sub-modules:</p>
 <blockquote>
 <div><ul>
-<li><p><a class="reference internal" href="#scenedetect-functions"><span class="std std-ref">scenedetect 🎬</span></a>: Includes the <a class="reference internal" href="#scenedetect.detect" title="scenedetect.detect"><code class="xref py py-func docutils literal notranslate"><span class="pre">scenedetect.detect</span></code></a> function which takes a path and a  <a class="reference internal" href="api/detectors.html#scenedetect-detectors"><span class="std std-ref">detector</span></a> to find scene transitions (<a class="reference internal" href="#scenedetect-quickstart"><span class="std std-ref">example</span></a>), and <a class="reference internal" href="#scenedetect.open_video" title="scenedetect.open_video"><code class="xref py py-func docutils literal notranslate"><span class="pre">scenedetect.open_video</span></code></a> for video input</p></li>
-<li><p><a class="reference internal" href="api/scene_manager.html#scenedetect-scene-manager"><span class="std std-ref">scenedetect.scene_manager 🎞️</span></a>: The <a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.SceneManager" title="scenedetect.scene_manager.SceneManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">SceneManager</span></code></a> acts as a way to coordinate detecting scenes (via <cite>SceneDetector</cite> instances) on video frames (via <a class="reference internal" href="api/video_stream.html#scenedetect-video-stream"><span class="std std-ref">VideoStream</span></a> instances).</p></li>
-<li><p><a class="reference internal" href="api/detectors.html#scenedetect-detectors"><span class="std std-ref">scenedetect.detectors 🕵️</span></a>: Detection algorithms:</p>
+<li><p><a class="reference internal" href="#scenedetect-functions"><span class="std std-ref">scenedetect 🎬</span></a>: high-level functions like <a class="reference internal" href="#scenedetect.detect" title="scenedetect.detect"><code class="xref py py-func docutils literal notranslate"><span class="pre">scenedetect.detect()</span></code></a> to quickly analyze a video with any <a class="reference internal" href="api/detectors.html#scenedetect-detectors"><span class="std std-ref">detection algorithm</span></a> (<a class="reference internal" href="#scenedetect-quickstart"><span class="std std-ref">example</span></a>) and get a list of timecode pairs as a result</p></li>
+<li><p><a class="reference internal" href="api/detectors.html#scenedetect-detectors"><span class="std std-ref">scenedetect.detectors 🕵️</span></a>: detection algorithms:</p>
 <blockquote>
 <div><ul class="simple">
 <li><p><a class="reference internal" href="api/detectors.html#module-scenedetect.detectors.content_detector" title="scenedetect.detectors.content_detector"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ContentDetector</span></code></a>: detects fast cuts using weighted average of HSV changes</p></li>
@@ -51,7 +50,16 @@
 </ul>
 </div></blockquote>
 </li>
-<li><p><a class="reference internal" href="api/video_stream.html#scenedetect-video-stream"><span class="std std-ref">scenedetect.video_stream 🎥</span></a>: Video input is handled through the <a class="reference internal" href="api/video_stream.html#scenedetect.video_stream.VideoStream" title="scenedetect.video_stream.VideoStream"><code class="xref py py-class docutils literal notranslate"><span class="pre">VideoStream</span></code></a> interface. Implementations for common video libraries are provided in <a class="reference internal" href="api/backends.html#module-scenedetect.backends" title="scenedetect.backends"><code class="xref py py-mod docutils literal notranslate"><span class="pre">scenedetect.backends</span></code></a>:</p>
+<li><p><a class="reference internal" href="api/output.html#scenedetect-output"><span class="std std-ref">scenedetect.output ✂️</span></a>: Output formats:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><a class="reference internal" href="api/output.html#scenedetect.output.split_video_ffmpeg" title="scenedetect.output.split_video_ffmpeg"><code class="xref py py-func docutils literal notranslate"><span class="pre">split_video_ffmpeg</span></code></a> and <a class="reference internal" href="api/output.html#scenedetect.output.split_video_mkvmerge" title="scenedetect.output.split_video_mkvmerge"><code class="xref py py-func docutils literal notranslate"><span class="pre">split_video_mkvmerge</span></code></a> split a video based on the detected scenes</p></li>
+<li><p><code class="xref py py-func docutils literal notranslate"><span class="pre">save_images</span></code> can save an arbitrary number of images from each scene</p></li>
+<li><p><code class="xref py py-func docutils literal notranslate"><span class="pre">write_scene_list</span></code> can be used to save scene/cut info as CSV, <code class="xref py py-func docutils literal notranslate"><span class="pre">write_scene_list_html</span></code> for HTML</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p><a class="reference internal" href="api/backends.html#scenedetect-backends"><span class="std std-ref">scenedetect.backends 🎥</span></a>: PySceneDetect supports multiple libraries as an input backend:</p>
 <blockquote>
 <div><ul class="simple">
 <li><p>OpenCV: <code class="xref py py-class docutils literal notranslate"><span class="pre">VideoStreamCv2</span></code></p></li>
@@ -60,25 +68,12 @@
 </ul>
 </div></blockquote>
 </li>
-</ul>
-<blockquote>
-<div><ul>
-<li><p><a class="reference internal" href="api/output.html#scenedetect-output"><span class="std std-ref">scenedetect.output ✂️</span></a>: Output formats:</p>
-<blockquote>
-<div><ul class="simple">
-<li><p><code class="xref py py-func docutils literal notranslate"><span class="pre">split_video_ffmpeg</span></code> and <code class="xref py py-func docutils literal notranslate"><span class="pre">split_video_mkvmerge</span></code> split a video based on the detected scenes</p></li>
-<li><p><code class="xref py py-func docutils literal notranslate"><span class="pre">save_images</span></code> can save an arbitrary number of images from each scene</p></li>
-<li><p><code class="xref py py-func docutils literal notranslate"><span class="pre">write_scene_list</span></code> can be used to save scene/cut info as CSV, <code class="xref py py-func docutils literal notranslate"><span class="pre">write_scene_list_html</span></code> for HTML</p></li>
-</ul>
-</div></blockquote>
-</li>
-</ul>
-</div></blockquote>
-<ul class="simple">
-<li><p><a class="reference internal" href="api/common.html#scenedetect-common"><span class="std std-ref">scenedetect.common ⏱️</span></a>: Contains common types such as <a class="reference internal" href="api/common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrameTimecode</span></code></a> used for timecode handing.</p></li>
-<li><p><a class="reference internal" href="api/detector.html#scenedetect-detector"><span class="std std-ref">scenedetect.detector 🌐</span></a>: Contains <a class="reference internal" href="api/detector.html#scenedetect.detector.SceneDetector" title="scenedetect.detector.SceneDetector"><code class="xref py py-class docutils literal notranslate"><span class="pre">SceneDetector</span></code></a> interface which detection algorithms must implement.</p></li>
-<li><p><a class="reference internal" href="api/stats_manager.html#scenedetect-stats-manager"><span class="std std-ref">scenedetect.stats_manager 🧮</span></a>: Contains <a class="reference internal" href="api/stats_manager.html#scenedetect.stats_manager.StatsManager" title="scenedetect.stats_manager.StatsManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">StatsManager</span></code></a> class for caching frame metrics and loading/saving them to disk in CSV format for analysis.</p></li>
-<li><p><a class="reference internal" href="api/platform.html#scenedetect-platform"><span class="std std-ref">scenedetect.platform 🐱‍💻</span></a>: Logging and utility functions.</p></li>
+<li><p><a class="reference internal" href="api/common.html#scenedetect-common"><span class="std std-ref">scenedetect.common ⏱️</span></a>: common functionality such as <a class="reference internal" href="api/common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrameTimecode</span></code></a> for timecode handling</p></li>
+<li><p><a class="reference internal" href="api/scene_manager.html#scenedetect-scene-manager"><span class="std std-ref">scenedetect.scene_manager 🎞️</span></a>: the <a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.SceneManager" title="scenedetect.scene_manager.SceneManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">SceneManager</span></code></a> coordinates performing scene detection on a video with one or more detectors</p></li>
+<li><p><a class="reference internal" href="api/detector.html#scenedetect-detector"><span class="std std-ref">scenedetect.detector 🌐</span></a>: the interface (<a class="reference internal" href="api/detector.html#scenedetect.detector.SceneDetector" title="scenedetect.detector.SceneDetector"><code class="xref py py-class docutils literal notranslate"><span class="pre">SceneDetector</span></code></a>) that detectors must implement to be compatible with PySceneDetect</p></li>
+<li><p><a class="reference internal" href="api/video_stream.html#scenedetect-video-stream"><span class="std std-ref">scenedetect.video_stream</span></a>: the interface (<a class="reference internal" href="api/video_stream.html#scenedetect.video_stream.VideoStream" title="scenedetect.video_stream.VideoStream"><code class="xref py py-class docutils literal notranslate"><span class="pre">VideoStream</span></code></a>) that detectors must implement to be compatible with PySceneDetect</p></li>
+<li><p><a class="reference internal" href="api/stats_manager.html#scenedetect-stats-manager"><span class="std std-ref">scenedetect.stats_manager 🧮</span></a>: the <a class="reference internal" href="api/stats_manager.html#scenedetect.stats_manager.StatsManager" title="scenedetect.stats_manager.StatsManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">StatsManager</span></code></a> allows you to store detection metrics for each frame and save them to CSV for further analysis</p></li>
+<li><p><a class="reference internal" href="api/platform.html#scenedetect-platform"><span class="std std-ref">scenedetect.platform 🐱‍💻</span></a>: logging and utility functions</p></li>
 </ul>
 </div></blockquote>
 <p>Most types/functions are also available directly from the <cite>scenedetect</cite> package to make imports simpler.</p>
@@ -286,28 +281,16 @@ overriding backend-specific options.</p></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="api/output.html">Ouptut</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="api/output.html#scenedetect.output.write_scene_list"><code class="docutils literal notranslate"><span class="pre">write_scene_list()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/output.html#scenedetect.output.write_scene_list_html"><code class="docutils literal notranslate"><span class="pre">write_scene_list_html()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/output.html#scenedetect.output.save_images"><code class="docutils literal notranslate"><span class="pre">save_images()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/output.html#scenedetect.output.video.SceneMetadata"><code class="docutils literal notranslate"><span class="pre">SceneMetadata</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="api/output.html#scenedetect.output.video.SceneMetadata.end"><code class="docutils literal notranslate"><span class="pre">SceneMetadata.end</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="api/output.html#scenedetect.output.video.SceneMetadata.index"><code class="docutils literal notranslate"><span class="pre">SceneMetadata.index</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="api/output.html#scenedetect.output.video.SceneMetadata.start"><code class="docutils literal notranslate"><span class="pre">SceneMetadata.start</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="api/output.html#scenedetect.output.video.VideoMetadata"><code class="docutils literal notranslate"><span class="pre">VideoMetadata</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="api/output.html#scenedetect.output.video.VideoMetadata.name"><code class="docutils literal notranslate"><span class="pre">VideoMetadata.name</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="api/output.html#scenedetect.output.video.VideoMetadata.path"><code class="docutils literal notranslate"><span class="pre">VideoMetadata.path</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="api/output.html#scenedetect.output.video.VideoMetadata.total_scenes"><code class="docutils literal notranslate"><span class="pre">VideoMetadata.total_scenes</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="api/output.html#scenedetect.output.video.default_formatter"><code class="docutils literal notranslate"><span class="pre">default_formatter()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/output.html#scenedetect.output.video.is_ffmpeg_available"><code class="docutils literal notranslate"><span class="pre">is_ffmpeg_available()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/output.html#scenedetect.output.video.is_mkvmerge_available"><code class="docutils literal notranslate"><span class="pre">is_mkvmerge_available()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/output.html#scenedetect.output.video.split_video_ffmpeg"><code class="docutils literal notranslate"><span class="pre">split_video_ffmpeg()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/output.html#scenedetect.output.video.split_video_mkvmerge"><code class="docutils literal notranslate"><span class="pre">split_video_mkvmerge()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/output.html#scenedetect.output.video.DEFAULT_FFMPEG_ARGS"><code class="docutils literal notranslate"><span class="pre">DEFAULT_FFMPEG_ARGS</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/output.html#scenedetect.output.video.FFMPEG_PATH"><code class="docutils literal notranslate"><span class="pre">FFMPEG_PATH</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/output.html#scenedetect.output.is_ffmpeg_available"><code class="docutils literal notranslate"><span class="pre">is_ffmpeg_available()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/output.html#scenedetect.output.split_video_ffmpeg"><code class="docutils literal notranslate"><span class="pre">split_video_ffmpeg()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/output.html#scenedetect.output.is_mkvmerge_available"><code class="docutils literal notranslate"><span class="pre">is_mkvmerge_available()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/output.html#scenedetect.output.split_video_mkvmerge"><code class="docutils literal notranslate"><span class="pre">split_video_mkvmerge()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/output.html#scenedetect.output.write_scene_list_html"><code class="docutils literal notranslate"><span class="pre">write_scene_list_html()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/output.html#scenedetect.output.write_scene_list"><code class="docutils literal notranslate"><span class="pre">write_scene_list()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/output.html#scenedetect.output.SceneMetadata"><code class="docutils literal notranslate"><span class="pre">SceneMetadata</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/output.html#scenedetect.output.VideoMetadata"><code class="docutils literal notranslate"><span class="pre">VideoMetadata</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/output.html#scenedetect.output.default_formatter"><code class="docutils literal notranslate"><span class="pre">default_formatter()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="api/backends.html">Video Backends</a><ul>
@@ -539,13 +522,13 @@ overriding backend-specific options.</p></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="api/detectors.html">Detectors</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api/scene_manager.html">Scene Manager</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api/common.html">Common</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api/backends.html">Video Backends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/output.html">Ouptut</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api/stats_manager.html">Stats Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/backends.html">Video Backends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/common.html">Common</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/scene_manager.html">Scene Manager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/detector.html">Detector Interface</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/video_stream.html">Stream Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/stats_manager.html">Stats Manager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/platform.html">Platform &amp; Logging</a></li>
 </ul>
 
