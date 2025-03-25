@@ -28,7 +28,7 @@ from platformdirs import user_config_dir
 from scenedetect.common import FrameTimecode
 from scenedetect.detector import FlashFilter
 from scenedetect.detectors import ContentDetector
-from scenedetect.output.video import DEFAULT_FFMPEG_ARGS
+from scenedetect.output.video import _DEFAULT_FFMPEG_ARGS
 from scenedetect.scene_manager import Interpolation
 
 PYAV_THREADING_MODES = ["NONE", "SLICE", "FRAME", "AUTO"]
@@ -441,7 +441,7 @@ CONFIG_MAP: ConfigDict = {
         "output": None,
     },
     "split-video": {
-        "args": DEFAULT_FFMPEG_ARGS,
+        "args": _DEFAULT_FFMPEG_ARGS,
         "copy": False,
         "filename": "$VIDEO_NAME-Scene-$SCENE_NUMBER",
         "high-quality": False,

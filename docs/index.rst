@@ -46,13 +46,13 @@ Table of Contents
 
     api
     api/detectors
-    api/scene_manager
-    api/common
-    api/backends
     api/output
-    api/stats_manager
+    api/backends
+    api/common
+    api/scene_manager
     api/detector
     api/video_stream
+    api/stats_manager
     api/platform
 
 =======================================================================

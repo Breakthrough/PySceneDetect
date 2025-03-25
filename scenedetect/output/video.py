@@ -43,7 +43,7 @@ from scenedetect.platform import CommandTooLong, Template, get_ffmpeg_path, invo
 
 logger = logging.getLogger("pyscenedetect")
 
-COMMAND_TOO_LONG_STRING = """
+_COMMAND_TOO_LONG_STRING = """
 Cannot split video due to too many scenes (resulting command
 is too large to process). To work around this issue, you can
 split the video manually by exporting a list of cuts with the
@@ -52,10 +52,10 @@ See https://github.com/Breakthrough/PySceneDetect/issues/164
 for details.  Sorry about that!
 """
 
-FFMPEG_PATH: ty.Optional[str] = get_ffmpeg_path()
+_FFMPEG_PATH: ty.Optional[str] = get_ffmpeg_path()
 """Relative path to the ffmpeg binary on this system, if any (will be None if not available)."""
 
-DEFAULT_FFMPEG_ARGS = (
+_DEFAULT_FFMPEG_ARGS = (
     "-map 0:v:0 -map 0:a? -map 0:s? -c:v libx264 -preset veryfast -crf 22 -c:a aac"
 )
 """Default arguments passed to ffmpeg when invoking the `split_video_ffmpeg` function."""
@@ -87,7 +87,7 @@ def is_ffmpeg_available() -> bool:
     Returns:
         True if `ffmpeg` can be invoked, False otherwise.
     """
-    return FFMPEG_PATH is not None
+    return _FFMPEG_PATH is not None
 
 
 ##
@@ -232,7 +232,7 @@ def split_video_mkvmerge(
                 float(total_frames) / (time.time() - processing_start_time),
             )
     except CommandTooLong:
-        logger.error(COMMAND_TOO_LONG_STRING)
+        logger.error(_COMMAND_TOO_LONG_STRING)
     except OSError:
         logger.error(
             "mkvmerge could not be found on the system."
@@ -249,7 +249,7 @@ def split_video_ffmpeg(
     output_dir: ty.Optional[Path] = None,
     output_file_template: str = "$VIDEO_NAME-Scene-$SCENE_NUMBER.mp4",
     video_name: ty.Optional[str] = None,
-    arg_override: str = DEFAULT_FFMPEG_ARGS,
+    arg_override: str = _DEFAULT_FFMPEG_ARGS,
     show_progress: bool = False,
     show_output: bool = False,
     suppress_output=None,
@@ -329,7 +329,7 @@ def split_video_ffmpeg(
             output_path.parent.mkdir(parents=True, exist_ok=True)
 
             # Gracefully handle case where FFMPEG_PATH might be unset.
-            call_list = [FFMPEG_PATH if FFMPEG_PATH is not None else "ffmpeg"]
+            call_list = [_FFMPEG_PATH if _FFMPEG_PATH is not None else "ffmpeg"]
             if not show_output:
                 call_list += ["-v", "quiet"]
             elif i > 0:
@@ -371,7 +371,7 @@ def split_video_ffmpeg(
             )
 
     except CommandTooLong:
-        logger.error(COMMAND_TOO_LONG_STRING)
+        logger.error(_COMMAND_TOO_LONG_STRING)
     except OSError:
         logger.error(
             "ffmpeg could not be found on the system."
