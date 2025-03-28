@@ -27,13 +27,18 @@
 
 ## Features
 
- - exports list of scenes to .CSV file and terminal (both timecodes and frame numbers) with `list-scenes` command
  - exports timecodes in standard format (HH:MM:SS.nnn), comma-separated for easy copy-and-paste into external tools and analysis with spreadsheet software
  - statistics/analysis mode to export frame-by-frame video metrics via the `-s [FILE]`/`--stats [FILE]` argument (e.g. `--stats metrics.csv`)
  - output-suppression (quiet) mode for better automation with external scripts/programs (`-q`/`--quiet`)
  - save an image of the first and last frame of each detected scene via the `save-images` command
  - split the input video automatically if `ffmpeg` or `mkvmerge` is available via the `split-video` command
 
+### Output Formats
+
+ - **EDL**: `save-edl` command (save as edit decision list in CMX 3600 format, compatible with most editors)
+ - **HTML**: `save-html` command (save HTML table that can be viewed with browser)
+ - **OTIO**: `save-otio` command (save as [OpenTimelineIO](https://github.com/AcademySoftwareFoundation/OpenTimelineIO) file)
+ - **QP**: `save-qp` command (can be used with x264 `--qpfile`)
 
 ### Detection Methods
 
