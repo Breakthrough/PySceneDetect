@@ -145,12 +145,18 @@
 <hr />
 <h2 id="features">Features</h2>
 <ul>
-<li>exports list of scenes to .CSV file and terminal (both timecodes and frame numbers) with <code>list-scenes</code> command</li>
 <li>exports timecodes in standard format (HH:MM:SS.nnn), comma-separated for easy copy-and-paste into external tools and analysis with spreadsheet software</li>
 <li>statistics/analysis mode to export frame-by-frame video metrics via the <code>-s [FILE]</code>/<code>--stats [FILE]</code> argument (e.g. <code>--stats metrics.csv</code>)</li>
 <li>output-suppression (quiet) mode for better automation with external scripts/programs (<code>-q</code>/<code>--quiet</code>)</li>
 <li>save an image of the first and last frame of each detected scene via the <code>save-images</code> command</li>
 <li>split the input video automatically if <code>ffmpeg</code> or <code>mkvmerge</code> is available via the <code>split-video</code> command</li>
+</ul>
+<h3 id="output-formats">Output Formats</h3>
+<ul>
+<li><strong>EDL</strong>: <code>save-edl</code> command (save as edit decision list in CMX 3600 format, compatible with most editors)</li>
+<li><strong>HTML</strong>: <code>save-html</code> command (save HTML table that can be viewed with browser)</li>
+<li><strong>OTIO</strong>: <code>save-otio</code> command (save as <a href="https://github.com/AcademySoftwareFoundation/OpenTimelineIO">OpenTimelineIO</a> file)</li>
+<li><strong>QP</strong>: <code>save-qp</code> command (can be used with x264 <code>--qpfile</code>)</li>
 </ul>
 <h3 id="detection-methods">Detection Methods</h3>
 <p>PySceneDetect implements a variety of different detection algorithms which can be used independently or combined depending on the source material being analyzed.</p>
