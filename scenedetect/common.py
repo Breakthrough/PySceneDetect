@@ -209,6 +209,9 @@ class FrameTimecode:
         else:
             self._frame_num = self._parse_timecode_number(timecode)
 
+    # TODO(v0.7): Add a PTS property as well and slowly transition over to that, since we don't
+    # always know the position as a "frame number".  However, for the reverse case, we CAN state
+    # the presentation time if we know the frame number (for a fixed framerate video).
     @property
     def frame_num(self) -> ty.Optional[int]:
         return self._frame_num
