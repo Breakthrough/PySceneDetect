@@ -118,7 +118,8 @@ class StatsManager:
         """Register a list of metric keys that will be used by the detector."""
         self._metric_keys = self._metric_keys.union(set(metric_keys))
 
-    # TODO(v1.0): This interface is difficult to use, we should support the dictionary protocol.
+    # TODO(#507): This interface is difficult to use, we should support the dictionary protocol.
+    # Ideally this should work with Panadas. This could be done with the v0.7 API change.
     def get_metrics(
         self, timecode: FrameTimecode, metric_keys: ty.Iterable[str]
     ) -> ty.List[ty.Any]:
