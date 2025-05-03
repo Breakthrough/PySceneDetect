@@ -67,7 +67,7 @@ Options
 
 .. option:: -m TIMECODE, --min-scene-len TIMECODE
 
-  Minimum length of any scene. TIMECODE can be specified as number of frames (-m 10), time in seconds (-m 2.5), or timecode (-m 00:02:53.633).
+  Minimum length of any scene. TIMECODE can be specified as number of frames (-m 10), time in seconds (-m 2.5s), or timecode (-m 00:02:53.633).
 
   Default: ``0.6s``
 
