@@ -906,9 +906,10 @@
 <p>PySceneDetect is a major breaking release which overhauls how timestamps are handled throughout the API. This allows PySceneDetect to properly process variable framerate (VFR) videos. A significant amount of technical debt has been addressed, including removal of deprecated or overly complicated APIs.</p>
 <p>Although there have been minimal changes to most API examples, there are several breaking changes. Applications written for the 0.6 API <em>may</em> require modification to work with the new API.</p>
 <h3 id="cli-changes">CLI Changes</h3>
+<h3 id="cli-changes_1">CLI Changes</h3>
 <ul>
-<li>[refactor] Remove deprecated <code>-d</code>/<code>--min-delta-hsv</code> option from <code>detect-adaptive</code> command.</li>
-<li>[feature] WORK IN PROGRESS: New <code>save-xml</code> command supports saving scenes in Final Cut Pro format <a href="https://github.com/Breakthrough/PySceneDetect/issues/156">#156</a></li>
+<li>[feature] [WIP] New <code>save-xml</code> command supports saving scenes in Final Cut Pro format <a href="https://github.com/Breakthrough/PySceneDetect/issues/156">#156</a></li>
+<li>[refactor] Remove deprecated <code>-d</code>/<code>--min-delta-hsv</code> option from <code>detect-adaptive</code> command</li>
 </ul>
 <h3 id="api-changes">API Changes</h3>
 <h4 id="breaking">Breaking</h4>
@@ -938,7 +939,14 @@
 <li>Remove deprecated <code>SparseSceneDetector</code> interface</li>
 <li>Remove deprecated <code>SceneManager.get_event_list()</code> method</li>
 <li>Remove deprecated <code>AdaptiveDetector.get_content_val()</code> method (the same information can be obtained using a <code>StatsManager</code>)</li>
+<li>Remove deprecated <code>AdaptiveDetector</code> constructor argument <code>min_delta_hsv</code> (use <code>min_content_val</code> instead)</li>
 <li>Remove <code>advance</code> parameter from <code>VideoStream.read()</code> (was always set to <code>True</code>, callers should handle caching frames now if required)</li>
+</ul>
+<p>#### General</p>
+<ul>
+<li>Deprecated functionality preserved from v0.6 now uses the <code>warnings</code> module</li>
+<li>Add properties to access <code>frame_num</code>, <code>framerate</code>, and <code>seconds</code> from <code>FrameTimecode</code> instead of getter methods</li>
+<li>Add new <code>Timecode</code> type to represent frame timings in terms of the video's source timebase</li>
 </ul>
               
             </div>
