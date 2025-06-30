@@ -658,6 +658,7 @@ Although there have been minimal changes to most API examples, there are several
 
 ### CLI Changes
 
+- [refactor] Remove deprecated `-d`/`--min-delta-hsv` option from `detect-adaptive` command.
 - [feature] WORK IN PROGRESS: New `save-xml` command supports saving scenes in Final Cut Pro format [#156](https://github.com/Breakthrough/PySceneDetect/issues/156)
 
 

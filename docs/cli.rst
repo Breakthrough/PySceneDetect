@@ -178,11 +178,7 @@ Options
 
   Default: ``15.0``
 
-.. option:: -d VAL, --min-delta-hsv VAL
 
-  [DEPRECATED] Use :option:`-c/--min-content-val <-c>` instead.
-
-  Default: ``15.0``
 
 .. option:: -f VAL, --frame-window VAL
 
