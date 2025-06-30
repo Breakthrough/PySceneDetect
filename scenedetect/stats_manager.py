@@ -190,7 +190,7 @@ class StatsManager:
         logger.info("Writing %d frames to CSV...", len(frame_keys))
         for frame_key in frame_keys:
             csv_writer.writerow(
-                [frame_key.get_frames() + 1, frame_key.get_timecode()]
+                [frame_key.frame_num + 1, frame_key.get_timecode()]
                 + [str(metric) for metric in self.get_metrics(frame_key, metric_keys)]
             )
 

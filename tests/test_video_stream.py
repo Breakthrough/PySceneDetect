@@ -148,7 +148,7 @@ class TestVideoStream:
         stream = vs_type(test_video.path)
         assert stream.frame_size == (test_video.width, test_video.height)
         assert stream.frame_rate == pytest.approx(test_video.frame_rate, FRAMERATE_TOLERANCE)
-        assert stream.duration.get_frames() == test_video.total_frames
+        assert stream.duration.frame_num == test_video.total_frames
         file_name = os.path.basename(test_video.path)
         last_dot_pos = file_name.rfind(".")
         assert stream.name == file_name[:last_dot_pos]

@@ -98,15 +98,15 @@ def write_scene_list(
         csv_writer.writerow(
             [
                 "%d" % (i + 1),
-                "%d" % (start.get_frames() + 1),
+                "%d" % (start.frame_num + 1),
                 start.get_timecode(),
-                "%.3f" % start.get_seconds(),
-                "%d" % end.get_frames(),
+                "%.3f" % start.seconds,
+                "%d" % end.frame_num,
                 end.get_timecode(),
-                "%.3f" % end.get_seconds(),
-                "%d" % duration.get_frames(),
+                "%.3f" % end.seconds,
+                "%d" % duration.frame_num,
                 duration.get_timecode(),
-                "%.3f" % duration.get_seconds(),
+                "%.3f" % duration.seconds,
             ]
         )
 
@@ -204,15 +204,15 @@ def write_scene_list_html(
         row = SimpleTableRow(
             [
                 "%d" % (i + 1),
-                "%d" % (start.get_frames() + 1),
+                "%d" % (start.frame_num + 1),
                 start.get_timecode(),
-                "%.3f" % start.get_seconds(),
-                "%d" % end.get_frames(),
+                "%.3f" % start.seconds,
+                "%d" % end.frame_num,
                 end.get_timecode(),
-                "%.3f" % end.get_seconds(),
-                "%d" % duration.get_frames(),
+                "%.3f" % end.seconds,
+                "%d" % duration.frame_num,
                 duration.get_timecode(),
-                "%.3f" % duration.get_seconds(),
+                "%.3f" % duration.seconds,
             ]
         )
 

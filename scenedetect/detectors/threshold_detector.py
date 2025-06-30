@@ -16,6 +16,7 @@ This detector is available from the command-line as the `detect-threshold` comma
 """
 
 import typing as ty
+import warnings
 from enum import Enum
 from logging import getLogger
 
@@ -68,9 +69,12 @@ class ThresholdDetector(SceneDetector):
             method: How to treat `threshold` when detecting fade events.
             block_size: [DEPRECATED] DO NOT USE. For backwards compatibility.
         """
-        # TODO(v0.7): Replace with DeprecationWarning that `block_size` will be removed in v0.8.
         if block_size is not None:
-            logger.error("block_size is deprecated.")
+            warnings.warn(
+                "The `block_size` argument is deprecated and will be removed in v0.8.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
 
         super().__init__()
         self.threshold = int(threshold)

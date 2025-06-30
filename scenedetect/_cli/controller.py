@@ -68,7 +68,7 @@ def run_scenedetect(context: CliContext):
             logger.info(
                 "Detected %d scenes, average shot length %.1f seconds.",
                 len(scenes),
-                sum([(end_time - start_time).get_seconds() for start_time, end_time in scenes])
+                sum([(end_time - start_time).seconds for start_time, end_time in scenes])
                 / float(len(scenes)),
             )
         else:
@@ -106,7 +106,7 @@ def _detect(context: CliContext) -> ty.Optional[ty.Tuple[SceneList, CutList]]:
             logger.critical(
                 "Failed to seek to %s / frame %d: %s",
                 context.start_time.get_timecode(),
-                context.start_time.get_frames(),
+                context.start_time.frame_num,
                 str(ex),
             )
             return None

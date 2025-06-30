@@ -158,9 +158,9 @@ def list_scenes(
                     " |  %5d  | %11d | %s | %11d | %s |"
                     % (
                         i + 1,
-                        start_time.get_frames() + 1,
+                        start_time.frame_num + 1,
                         start_time.get_timecode(),
-                        end_time.get_frames(),
+                        end_time.frame_num,
                         end_time.get_timecode(),
                     )
                     for i, (start_time, end_time) in enumerate(scenes)
@@ -278,11 +278,11 @@ def save_edl(
     # Converts FrameTimecode to HH:MM:SS:FF
     # TODO: This should be part of the FrameTimecode object itself.
     def get_edl_timecode(timecode: FrameTimecode):
-        total_seconds = timecode.get_seconds()
+        total_seconds = timecode.seconds
         hours = int(total_seconds // 3600)
         minutes = int((total_seconds % 3600) // 60)
         seconds = int(total_seconds % 60)
-        frames_part = int((total_seconds * timecode.get_framerate()) % timecode.get_framerate())
+        frames_part = int((total_seconds * timecode.framerate) % timecode.framerate)
         return f"{hours:02d}:{minutes:02d}:{seconds:02d}:{frames_part:02d}"
 
     edl_content = []
@@ -331,7 +331,7 @@ def _save_xml_fcpx(
 
     # TODO: We should calculate duration from the scene list.
     duration = context.video_stream.duration
-    duration = str(duration.get_seconds()) + "s"  # TODO: Is float okay here?
+    duration = str(duration.seconds) + "s"  # TODO: Is float okay here?
     path = Path(context.video_stream.path).absolute()
     ElementTree.SubElement(
         resources,
@@ -355,8 +355,8 @@ def _save_xml_fcpx(
     spine = ElementTree.SubElement(sequence, "spine")
 
     for i, (start, end) in enumerate(scenes):
-        start_seconds = start.get_seconds()
-        duration_seconds = (end - start).get_seconds()
+        start_seconds = start.seconds
+        duration_seconds = (end - start).seconds
         clip = ElementTree.SubElement(
             spine,
             "clip",
@@ -402,7 +402,7 @@ def _save_xml_fcp(
     ElementTree.SubElement(sequence, "name").text = context.video_stream.name
 
     duration = scenes[-1][1] - scenes[0][0]
-    ElementTree.SubElement(sequence, "duration").text = f"{duration.get_frames()}"
+    ElementTree.SubElement(sequence, "duration").text = f"{duration.frame_num}"
 
     rate = ElementTree.SubElement(sequence, "rate")
     ElementTree.SubElement(rate, "timebase").text = str(context.video_stream.frame_rate)
@@ -430,10 +430,10 @@ def _save_xml_fcp(
             ElementTree.fromstring(f"<timebase>{context.video_stream.frame_rate}</timebase>")
         )
         # TODO: Are these supposed to be frame numbers or another format?
-        ElementTree.SubElement(clip, "start").text = str(start.get_frames())
-        ElementTree.SubElement(clip, "end").text = str(end.get_frames())
-        ElementTree.SubElement(clip, "in").text = str(start.get_frames())
-        ElementTree.SubElement(clip, "out").text = str(end.get_frames())
+        ElementTree.SubElement(clip, "start").text = str(start.frame_num)
+        ElementTree.SubElement(clip, "end").text = str(end.frame_num)
+        ElementTree.SubElement(clip, "in").text = str(start.frame_num)
+        ElementTree.SubElement(clip, "out").text = str(end.frame_num)
 
         file_ref = ElementTree.SubElement(clip, "file", id=f"file{i + 1}")
         ElementTree.SubElement(file_ref, "name").text = context.video_stream.name
@@ -534,12 +534,12 @@ def save_otio(
                                 "duration": {
                                     "OTIO_SCHEMA": "RationalTime.1",
                                     "rate": frame_rate,
-                                    "value": float((end - start).get_frames()),
+                                    "value": float((end - start).frame_num),
                                 },
                                 "start_time": {
                                     "OTIO_SCHEMA": "RationalTime.1",
                                     "rate": frame_rate,
-                                    "value": float(start.get_frames()),
+                                    "value": float(start.frame_num),
                                 },
                             },
                             "enabled": True,

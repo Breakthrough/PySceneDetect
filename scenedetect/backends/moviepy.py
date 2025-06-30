@@ -143,7 +143,7 @@ class VideoStreamMoviePy(VideoStream):
         The first frame has a time of 0.0 ms.
 
         This method will always return 0.0 if no frames have been `read`."""
-        return self.position.get_seconds() * 1000.0
+        return self.position.seconds * 1000.0
 
     @property
     def frame_number(self) -> int:
@@ -176,7 +176,7 @@ class VideoStreamMoviePy(VideoStream):
         if not isinstance(target, FrameTimecode):
             target = FrameTimecode(target, self.frame_rate)
         try:
-            self._last_frame = self._reader.get_frame(target.get_seconds())
+            self._last_frame = self._reader.get_frame(target.seconds)
             if hasattr(self._reader, "last_read") and target >= self.duration:
                 raise SeekError("MoviePy > 2.0 does not have proper EOF semantics (#461).")
             self._frame_number = min(

@@ -187,7 +187,7 @@ def get_fade_in_out_test_cases():
 @pytest.mark.parametrize("test_case", get_fast_cut_test_cases())
 def test_detect_fast_cuts(test_case: TestCase):
     scene_list = test_case.detect()
-    start_frames = [timecode.get_frames() for timecode, _ in scene_list]
+    start_frames = [timecode.frame_num for timecode, _ in scene_list]
 
     assert start_frames == test_case.scene_boundaries
     assert scene_list[0][0] == test_case.start_time
@@ -197,7 +197,7 @@ def test_detect_fast_cuts(test_case: TestCase):
 @pytest.mark.parametrize("test_case", get_fade_in_out_test_cases())
 def test_detect_fades(test_case: TestCase):
     scene_list = test_case.detect()
-    start_frames = [timecode.get_frames() for timecode, _ in scene_list]
+    start_frames = [timecode.frame_num for timecode, _ in scene_list]
     assert start_frames == test_case.scene_boundaries
     assert scene_list[0][0] == test_case.start_time
     assert scene_list[-1][1] == test_case.end_time

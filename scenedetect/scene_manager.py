@@ -81,6 +81,7 @@ import queue
 import sys
 import threading
 import typing as ty
+import warnings
 
 import cv2
 import numpy as np
@@ -452,6 +453,7 @@ class SceneManager:
                 complete processing the video frame source.
             callback: If set, called after each scene/event detected.
             frame_source: [DEPRECATED] DO NOT USE. For compatibility with previous version.
+                :meta private:
         Returns:
             int: Number of frames read and processed from the frame source.
         Raises:
@@ -460,6 +462,11 @@ class SceneManager:
         """
         # TODO(v0.7): Add DeprecationWarning that `frame_source` will be removed in v0.8.
         if frame_source is not None:
+            warnings.warn(
+                "The `frame_source` argument is deprecated, use `video` instead.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
             video = frame_source
         # TODO(v0.8): Remove default value for `video` after `frame_source` is removed.
         if video is None:
@@ -518,7 +525,7 @@ class SceneManager:
             if end_time is not None and end_time < video.duration:
                 total_frames = end_time - start_frame_num
             else:
-                total_frames = video.duration.get_frames() - start_frame_num
+                total_frames = video.duration.frame_num - start_frame_num
 
         progress_bar = None
         if show_progress:
@@ -684,9 +691,11 @@ class SceneManager:
             was detected in the input video, which can also be passed to external tools
             for automated splitting of the input into individual scenes.
 
-        :meta private:
         """
-        # TODO(v0.7): Use the warnings module to turn this into a warning.
         if show_warning:
-            logger.error("`get_cut_list()` is deprecated and will be removed in a future release.")
+            warnings.warn(
+                "get_cut_list() is deprecated and will be removed in a future release.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
         return self._get_cutting_list()

@@ -658,8 +658,10 @@ Although there have been minimal changes to most API examples, there are several
 
 ### CLI Changes
 
-- [refactor] Remove deprecated `-d`/`--min-delta-hsv` option from `detect-adaptive` command.
-- [feature] WORK IN PROGRESS: New `save-xml` command supports saving scenes in Final Cut Pro format [#156](https://github.com/Breakthrough/PySceneDetect/issues/156)
+### CLI Changes
+
+- [feature] [WIP] New `save-xml` command supports saving scenes in Final Cut Pro format [#156](https://github.com/Breakthrough/PySceneDetect/issues/156)
+- [refactor] Remove deprecated `-d`/`--min-delta-hsv` option from `detect-adaptive` command
 
 
 ### API Changes
@@ -686,4 +688,11 @@ Although there have been minimal changes to most API examples, there are several
  * Remove deprecated `SparseSceneDetector` interface
  * Remove deprecated `SceneManager.get_event_list()` method
  * Remove deprecated `AdaptiveDetector.get_content_val()` method (the same information can be obtained using a `StatsManager`)
+ * Remove deprecated `AdaptiveDetector` constructor argument `min_delta_hsv` (use `min_content_val` instead)
  * Remove `advance` parameter from `VideoStream.read()` (was always set to `True`, callers should handle caching frames now if required)
+
+ #### General
+
+ * Deprecated functionality preserved from v0.6 now uses the `warnings` module
+ * Add properties to access `frame_num`, `framerate`, and `seconds` from `FrameTimecode` instead of getter methods
+ * Add new `Timecode` type to represent frame timings in terms of the video's source timebase

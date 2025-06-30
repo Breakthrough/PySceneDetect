@@ -297,11 +297,11 @@ class TimecodeFormat(Enum):
 
     def format(self, timecode: FrameTimecode) -> str:
         if self == TimecodeFormat.FRAMES:
-            return str(timecode.get_frames())
+            return str(timecode.frame_num)
         if self == TimecodeFormat.TIMECODE:
             return timecode.get_timecode()
         if self == TimecodeFormat.SECONDS:
-            return "%.3f" % timecode.get_seconds()
+            return "%.3f" % timecode.seconds
         raise RuntimeError("Unhandled format specifier.")
 
 

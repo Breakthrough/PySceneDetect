@@ -63,6 +63,7 @@ disallows negative values, and will clamp negative results to 0.
 
 import math
 import typing as ty
+import warnings
 from dataclasses import dataclass
 from enum import Enum
 from fractions import Fraction
@@ -220,28 +221,32 @@ class FrameTimecode:
     def framerate(self) -> ty.Optional[int]:
         return self._framerate
 
-    # TODO(v0.7): Mark this as deprecated (use frame_num instead).
     def get_frames(self) -> int:
-        """Get the current time/position in number of frames.  This is the
-        equivalent of accessing the self.frame_num property (which, along
-        with the specified framerate, forms the base for all of the other
-        time measurement calculations, e.g. the :meth:`get_seconds` method).
+        """[DEPRECATED] Get the current time/position in number of frames.
 
-        If using to compare a :class:`FrameTimecode` with a frame number,
-        you can do so directly against the object (e.g. ``FrameTimecode(10, 10.0) <= 10``).
+        Use the `frame_num` property instead.
 
-        Returns:
-            int: The current time in frames (the current frame number).
+        :meta private:
         """
+        warnings.warn(
+            "get_frames() is deprecated, use the `frame_num` property instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         return self.frame_num
 
-    # TODO(v0.7): Mark this as deprecated (use framerate instead).
     def get_framerate(self) -> float:
-        """Get Framerate: Returns the framerate used by the FrameTimecode object.
+        """[DEPRECATED] Get Framerate: Returns the framerate used by the FrameTimecode object.
 
-        Returns:
-            float: Framerate of the current FrameTimecode object, in frames per second.
+        Use the `framerate` property instead.
+
+        :meta private:
         """
+        warnings.warn(
+            "get_framerate() is deprecated, use the `framerate` property instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         return self.framerate
 
     # TODO(v0.7): Figure out how to deal with VFR here.
@@ -258,20 +263,33 @@ class FrameTimecode:
         # TODO(v0.7): Support this comparison in the case FPS is not set but a timecode is.
         return math.fabs(self.framerate - fps) < MAX_FPS_DELTA
 
-    # TODO(v0.7): Add a `seconds` property to replace this and deprecate the existing one.
+    @property
+    def seconds(self) -> float:
+        """The frame's position in number of seconds."""
+        if self._timecode:
+            return self._timecode.seconds
+        # Assume constant framerate if we don't have timing information.
+        return float(self._frame_num) / self._framerate
+
     def get_seconds(self) -> float:
-        """Get the frame's position in number of seconds.
+        """[DEPRECATED] Get the frame's position in number of seconds.
+
+        Use the `seconds` property instead.
 
         If using to compare a :class:`FrameTimecode` with a frame number,
         you can do so directly against the object (e.g. ``FrameTimecode(10, 10.0) <= 1.0``).
 
         Returns:
             float: The current time/position in seconds.
+
+        :meta private:
         """
-        if self._timecode:
-            return self._timecode.seconds
-        # Assume constant framerate if we don't have timing information.
-        return float(self._frame_num) / self._framerate
+        warnings.warn(
+            "get_seconds() is deprecated, use the `seconds` property instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self.seconds
 
     def get_timecode(self, precision: int = 3, use_rounding: bool = True) -> str:
         """Get a formatted timecode string of the form HH:MM:SS[.nnn].
@@ -285,7 +303,7 @@ class FrameTimecode:
             str: The current time in the form ``"HH:MM:SS[.nnn]"``.
         """
         # Compute hours and minutes based off of seconds, and update seconds.
-        secs = self.get_seconds()
+        secs = self.seconds
         hrs = int(secs / _SECONDS_PER_HOUR)
         secs -= hrs * _SECONDS_PER_HOUR
         mins = int(secs / _SECONDS_PER_MINUTE)
@@ -438,7 +456,7 @@ class FrameTimecode:
         if isinstance(other, int):
             return self._frame_num == other
         elif isinstance(other, float):
-            return self.get_seconds() == other
+            return self.seconds == other
         elif isinstance(other, str):
             return self._frame_num == self._parse_timecode_string(other)
         elif isinstance(other, FrameTimecode):
@@ -462,7 +480,7 @@ class FrameTimecode:
         if isinstance(other, int):
             return self._frame_num < other
         elif isinstance(other, float):
-            return self.get_seconds() < other
+            return self.seconds < other
         elif isinstance(other, str):
             return self._frame_num < self._parse_timecode_string(other)
         elif isinstance(other, FrameTimecode):
@@ -481,7 +499,7 @@ class FrameTimecode:
         if isinstance(other, int):
             return self._frame_num <= other
         elif isinstance(other, float):
-            return self.get_seconds() <= other
+            return self.seconds <= other
         elif isinstance(other, str):
             return self._frame_num <= self._parse_timecode_string(other)
         elif isinstance(other, FrameTimecode):
@@ -500,7 +518,7 @@ class FrameTimecode:
         if isinstance(other, int):
             return self._frame_num > other
         elif isinstance(other, float):
-            return self.get_seconds() > other
+            return self.seconds > other
         elif isinstance(other, str):
             return self._frame_num > self._parse_timecode_string(other)
         elif isinstance(other, FrameTimecode):
@@ -519,7 +537,7 @@ class FrameTimecode:
         if isinstance(other, int):
             return self._frame_num >= other
         elif isinstance(other, float):
-            return self.get_seconds() >= other
+            return self.seconds >= other
         elif isinstance(other, str):
             return self._frame_num >= self._parse_timecode_string(other)
         elif isinstance(other, FrameTimecode):
@@ -541,7 +559,7 @@ class FrameTimecode:
         return self._frame_num
 
     def __float__(self) -> float:
-        return self.get_seconds()
+        return self.seconds
 
     def __str__(self) -> str:
         return self.get_timecode()

@@ -252,7 +252,7 @@ class VideoStreamAv(VideoStream):
         if target >= 1:
             target = target - 1
         target_pts = self._video_stream.start_time + int(
-            (self.base_timecode + target).get_seconds() / self._video_stream.time_base
+            (self.base_timecode + target).seconds / self._video_stream.time_base
         )
         self._frame = None
         self._container.seek(target_pts, stream=self._video_stream)
