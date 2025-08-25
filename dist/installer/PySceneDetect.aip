@@ -366,7 +366,6 @@
     <ROW Component="context.cp313win_amd64.pyd" ComponentId="{3F46B25C-6AF9-4049-A39B-9211FFF611B2}" Directory_="filter_Dir" Attributes="256" KeyPath="context.cp313win_amd64.pyd_1" Type="0"/>
     <ROW Component="core.cp313win_amd64.pyd" ComponentId="{239884C9-D5A8-4EAC-BB80-98940D72772E}" Directory_="container_Dir" Attributes="256" KeyPath="core.cp313win_amd64.pyd" Type="0"/>
     <ROW Component="cs.msg" ComponentId="{CA47D90F-CA31-4D5E-8EB4-2BE8724900E9}" Directory_="msgs_1_Dir" Attributes="0" KeyPath="cs.msg_1" Type="0"/>
-    <ROW Component="entry_points.txt" ComponentId="{E6C2334A-40CF-4B41-B7E9-ECC421D6A28A}" Directory_="wheel0.45.1.distinfo_Dir" Attributes="0" KeyPath="entry_points.txt_1" Type="0"/>
     <ROW Component="ffmpeg.exe" ComponentId="{B7CA4B2A-DE88-42CD-AD38-AC30FD29D506}" Directory_="APPDIR" Attributes="256" KeyPath="ffmpeg.exe"/>
     <ROW Component="http.tcl" ComponentId="{E68A9C81-9D27-40F2-88A7-4B2CF7388062}" Directory_="http1.0_Dir" Attributes="0" KeyPath="http.tcl" Type="0"/>
     <ROW Component="http2.9.8.tm" ComponentId="{80BA6FC3-9CCC-4A73-8673-F6C6BC2106B5}" Directory_="__2_Dir" Attributes="0" KeyPath="http2.9.8.tm" Type="0"/>
@@ -639,13 +638,6 @@
     <ROW File="unicodedata.pyd" Component_="base_library.zip" FileName="UNICOD~1.PYD|unicodedata.pyd" Attributes="0" SourcePath="..\scenedetect\_internal\unicodedata.pyd" SelfReg="false"/>
     <ROW File="VCRUNTIME140.dll" Component_="VCRUNTIME140.dll" FileName="VCRUNT~1.DLL|VCRUNTIME140.dll" Attributes="0" SourcePath="..\scenedetect\_internal\VCRUNTIME140.dll" SelfReg="false"/>
     <ROW File="VCRUNTIME140_1.dll" Component_="VCRUNTIME140_1.dll" FileName="VCRUNT~2.DLL|VCRUNTIME140_1.dll" Attributes="0" SourcePath="..\scenedetect\_internal\VCRUNTIME140_1.dll" SelfReg="false"/>
-    <ROW File="entry_points.txt_1" Component_="entry_points.txt" FileName="ENTRY_~1.TXT|entry_points.txt" Attributes="0" SourcePath="..\scenedetect\_internal\wheel-0.45.1.dist-info\entry_points.txt" SelfReg="false"/>
-    <ROW File="INSTALLER_2" Component_="entry_points.txt" FileName="INSTAL~1|INSTALLER" Attributes="0" SourcePath="..\scenedetect\_internal\wheel-0.45.1.dist-info\INSTALLER" SelfReg="false"/>
-    <ROW File="LICENSE.txt_1" Component_="entry_points.txt" FileName="LICENSE.txt" Attributes="0" SourcePath="..\scenedetect\_internal\wheel-0.45.1.dist-info\LICENSE.txt" SelfReg="false"/>
-    <ROW File="METADATA_2" Component_="entry_points.txt" FileName="METADATA" Attributes="0" SourcePath="..\scenedetect\_internal\wheel-0.45.1.dist-info\METADATA" SelfReg="false"/>
-    <ROW File="RECORD_2" Component_="entry_points.txt" FileName="RECORD" Attributes="0" SourcePath="..\scenedetect\_internal\wheel-0.45.1.dist-info\RECORD" SelfReg="false"/>
-    <ROW File="REQUESTED_2" Component_="entry_points.txt" FileName="REQUES~1|REQUESTED" Attributes="0" SourcePath="..\scenedetect\_internal\wheel-0.45.1.dist-info\REQUESTED" SelfReg="false"/>
-    <ROW File="WHEEL_2" Component_="entry_points.txt" FileName="WHEEL" Attributes="0" SourcePath="..\scenedetect\_internal\wheel-0.45.1.dist-info\WHEEL" SelfReg="false"/>
     <ROW File="zlib1.dll" Component_="zlib1.dll" FileName="zlib1.dll" Attributes="0" SourcePath="..\scenedetect\_internal\zlib1.dll" SelfReg="false"/>
     <ROW File="_asyncio.pyd" Component_="base_library.zip" FileName="_asyncio.pyd" Attributes="0" SourcePath="..\scenedetect\_internal\_asyncio.pyd" SelfReg="false"/>
     <ROW File="_bz2.pyd" Component_="base_library.zip" FileName="_bz2.pyd" Attributes="0" SourcePath="..\scenedetect\_internal\_bz2.pyd" SelfReg="false"/>
@@ -1897,7 +1889,6 @@
     <ROW Feature_="PySceneDetect" Component_="ucrtbase.dll"/>
     <ROW Feature_="PySceneDetect" Component_="VCRUNTIME140.dll"/>
     <ROW Feature_="PySceneDetect" Component_="VCRUNTIME140_1.dll"/>
-    <ROW Feature_="PySceneDetect" Component_="entry_points.txt"/>
     <ROW Feature_="PySceneDetect" Component_="zlib1.dll"/>
     <ROW Feature_="PySceneDetect" Component_="auto.tcl"/>
     <ROW Feature_="PySceneDetect" Component_="ascii.enc"/>
