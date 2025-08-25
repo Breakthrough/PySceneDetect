@@ -756,8 +756,8 @@ def test_cli_save_edl(tmp_path: Path):
 TITLE: {DEFAULT_VIDEO_NAME}
 FCM: NON-DROP FRAME
 
-001  AX V     C        00:00:02:00 00:00:03:17 00:00:02:00 00:00:03:17
-002  AX V     C        00:00:03:18 00:00:05:23 00:00:03:18 00:00:05:23
+001  AX V     C        00:00:02:00 00:00:03:18 00:00:02:00 00:00:03:18
+002  AX V     C        00:00:03:18 00:00:06:00 00:00:03:18 00:00:06:00
 """
     assert output_path.read_text() == EXPECTED_EDL_OUTPUT
 
@@ -777,8 +777,8 @@ def test_cli_save_edl_with_params(tmp_path: Path):
 TITLE: title
 FCM: NON-DROP FRAME
 
-001  BX V     C        00:00:02:00 00:00:03:17 00:00:02:00 00:00:03:17
-002  BX V     C        00:00:03:18 00:00:05:23 00:00:03:18 00:00:05:23
+001  BX V     C        00:00:02:00 00:00:03:18 00:00:02:00 00:00:03:18
+002  BX V     C        00:00:03:18 00:00:06:00 00:00:03:18 00:00:06:00
 """
     assert output_path.read_text() == EXPECTED_EDL_OUTPUT
 
