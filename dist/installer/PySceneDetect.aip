@@ -23,10 +23,10 @@
     <ROW Property="DialogBitmap" Value="dialog.jpg" MultiBuildValue="DefaultBuild:installer_logo.jpg" Type="1" MsiKey="DialogBitmap"/>
     <ROW Property="MSIFASTINSTALL" MultiBuildValue="DefaultBuild:3"/>
     <ROW Property="Manufacturer" Value="Brandon Castellano"/>
-    <ROW Property="ProductCode" Value="1033:{5F017601-DFDD-4381-A35F-79634ED91632} " Type="16"/>
+    <ROW Property="ProductCode" Value="1033:{AA389A8A-489B-403A-9EF6-B8AF31DE1D0D} " Type="16"/>
     <ROW Property="ProductLanguage" Value="1033"/>
     <ROW Property="ProductName" Value="PySceneDetect"/>
-    <ROW Property="ProductVersion" Value="0.6.6" Options="32"/>
+    <ROW Property="ProductVersion" Value="0.6.7" Options="32"/>
     <ROW Property="SecureCustomProperties" Value="OLDPRODUCTS;AI_NEWERPRODUCTFOUND;AI_SETUPEXEPATH;SETUPEXEDIR"/>
     <ROW Property="UpgradeCode" Value="{D0AF0419-DBD5-455C-A4AC-4518A35DD23E}"/>
     <ROW Property="WindowsType9X" MultiBuildValue="DefaultBuild:Windows 9x/ME" ValueLocId="-"/>
@@ -125,7 +125,7 @@
     <ROW Directory="wheel0.45.1.distinfo_Dir" Directory_Parent="_internal_Dir" DefaultDir="WHEEL-~1.DIS|wheel-0.45.1.dist-info"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.SideBySideGuidComponent">
-    <ROW Component="AI_CustomARPName" Value="{F7C45B12-D093-4D1A-96D3-9D79D73D8DD1}"/>
+    <ROW Component="AI_CustomARPName" Value="{1EE8167C-7E52-48AD-9053-BD9A132F2918}"/>
     <ROW Component="AI_DisableModify" Value="{5AB8A335-BCAB-4C0A-8A69-E2AE7542AB47}"/>
     <ROW Component="AI_ExePath" Value="{F7DEDE0C-FDB1-411C-B347-A482CE69721F}"/>
     <ROW Component="APPDIR" Value="{6B122BDD-2BF8-41D4-92E0-884DD60467B4}"/>
@@ -1642,7 +1642,7 @@
     <ROW Action="AI_CleanPrePrereq" Condition="AI_BOOTSTRAPPER AND (NOT AI_PrereqsFulfilled)" Sequence="699"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.BuildComponent">
-    <ROW BuildKey="DefaultBuild" BuildName="DefaultBuild" BuildOrder="1" BuildType="0" PackageFolder="." PackageFileName="PySceneDetect-0.6.6-win64" Languages="en" InstallationType="4" ExtUI="true" UseLargeSchema="true" MsiPackageType="x64"/>
+    <ROW BuildKey="DefaultBuild" BuildName="DefaultBuild" BuildOrder="1" BuildType="0" PackageFolder="." PackageFileName="PySceneDetect-0.6.7-win64" Languages="en" InstallationType="4" ExtUI="true" UseLargeSchema="true" MsiPackageType="x64"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.DictionaryComponent">
     <ROW Path="&lt;AI_DICTS&gt;ui.ail"/>

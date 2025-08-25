@@ -43,7 +43,7 @@ install:
   # Checkout build resources and third party software used for testing.
   - git checkout refs/remotes/origin/resources -- dist/
   - appveyor DownloadFile https://github.com/GyanD/codexffmpeg/releases/download/%ffmpeg_version%/ffmpeg-%ffmpeg_version%-full_build.7z
-  - 7z e ffmpeg-7.1-full_build.7z -odist/ffmpeg ffmpeg.exe LICENSE -r
+  - 7z e ffmpeg-%ffmpeg_version%-full_build.7z -odist/ffmpeg ffmpeg.exe LICENSE -r
   - 'SET IMAGEIO_FFMPEG_EXE=%APPVEYOR_BUILD_FOLDER%\\dist\\ffmpeg\\ffmpeg.exe'
 
   - echo * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

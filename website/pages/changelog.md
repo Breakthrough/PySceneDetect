@@ -4,6 +4,19 @@ Releases
 
 ## PySceneDetect 0.6
 
+### PySceneDetect 0.6.7 (August 24, 2025)
+
+#### Release Notes
+
+Minor update to fix issues with importing EDL files into DaVinci Resolve and other editors.
+
+#### Changelog
+
+ - [bugfix] Fix `save-edl` end timestamp being too short by 1 frame [#516](https://github.com/Breakthrough/PySceneDetect/issues/516)
+ - [general] Updates to Windows distributions:
+    - ffmpeg 7.1 -> 8.0
+
+
 ### PySceneDetect 0.6.6 (March 9, 2025)
 
 #### Release Notes
