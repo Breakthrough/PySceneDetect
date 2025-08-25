@@ -122,55 +122,6 @@ the form <cite>‘HH:MM:SS’</cite> or <cite>‘HH:MM:SS.nnn’</cite>, or a <c
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="scenedetect.common.FrameTimecode.get_framerate">
-<span class="sig-name descname"><span class="pre">get_framerate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.common.FrameTimecode.get_framerate" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get Framerate: Returns the framerate used by the FrameTimecode object.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Framerate of the current FrameTimecode object, in frames per second.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>float</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="scenedetect.common.FrameTimecode.get_frames">
-<span class="sig-name descname"><span class="pre">get_frames</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.common.FrameTimecode.get_frames" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get the current time/position in number of frames.  This is the
-equivalent of accessing the self.frame_num property (which, along
-with the specified framerate, forms the base for all of the other
-time measurement calculations, e.g. the <a class="reference internal" href="#scenedetect.common.FrameTimecode.get_seconds" title="scenedetect.common.FrameTimecode.get_seconds"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_seconds()</span></code></a> method).</p>
-<p>If using to compare a <a class="reference internal" href="#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrameTimecode</span></code></a> with a frame number,
-you can do so directly against the object (e.g. <code class="docutils literal notranslate"><span class="pre">FrameTimecode(10,</span> <span class="pre">10.0)</span> <span class="pre">&lt;=</span> <span class="pre">10</span></code>).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The current time in frames (the current frame number).</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>int</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="scenedetect.common.FrameTimecode.get_seconds">
-<span class="sig-name descname"><span class="pre">get_seconds</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.common.FrameTimecode.get_seconds" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get the frame’s position in number of seconds.</p>
-<p>If using to compare a <a class="reference internal" href="#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrameTimecode</span></code></a> with a frame number,
-you can do so directly against the object (e.g. <code class="docutils literal notranslate"><span class="pre">FrameTimecode(10,</span> <span class="pre">10.0)</span> <span class="pre">&lt;=</span> <span class="pre">1.0</span></code>).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The current time/position in seconds.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>float</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="scenedetect.common.FrameTimecode.get_timecode">
 <span class="sig-name descname"><span class="pre">get_timecode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">precision</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_rounding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.common.FrameTimecode.get_timecode" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get a formatted timecode string of the form HH:MM:SS[.nnn].</p>
@@ -189,6 +140,12 @@ will be truncated to the specified precision.</p></li>
 <dd class="field-odd"><p>str</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="scenedetect.common.FrameTimecode.seconds">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">seconds</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#scenedetect.common.FrameTimecode.seconds" title="Permalink to this definition">¶</a></dt>
+<dd><p>The frame’s position in number of seconds.</p>
 </dd></dl>
 
 </dd></dl>
