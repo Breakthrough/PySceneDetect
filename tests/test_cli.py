@@ -104,7 +104,7 @@ def invoke_scenedetect(
     if config_file:
         command += " -c %s" % config_file
     command += " " + args.format(**value_dict)
-    return subprocess.call(command.strip().split(" "), shell=True)
+    return subprocess.call(command.strip().split(" "))
 
 
 def test_cli_no_args():
