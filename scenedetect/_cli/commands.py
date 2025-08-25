@@ -292,7 +292,7 @@ def save_edl(
     # Add each shot as an edit entry
     for i, (start, end) in enumerate(scenes):
         in_tc = get_edl_timecode(start)
-        out_tc = get_edl_timecode(end - 1)  # Correct for presentation time
+        out_tc = get_edl_timecode(end)  # Correct for presentation time
         # Format the edit entry according to CMX 3600 format
         event_line = f"{(i + 1):03d}  {reel} V     C        {in_tc} {out_tc} {in_tc} {out_tc}"
         edl_content.append(event_line)
