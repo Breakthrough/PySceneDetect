@@ -960,6 +960,8 @@
 <li>Remove deprecated <code>AdaptiveDetector.get_content_val()</code> method (the same information can be obtained using a <code>StatsManager</code>)</li>
 <li>Remove deprecated <code>AdaptiveDetector</code> constructor argument <code>min_delta_hsv</code> (use <code>min_content_val</code> instead)</li>
 <li>Remove <code>advance</code> parameter from <code>VideoStream.read()</code> (was always set to <code>True</code>, callers should handle caching frames now if required)</li>
+<li>Remove <code>SceneDetector.stats_manager_required</code> property as it is no longer required</li>
+<li>Remove <code>SceneDetector</code> is now a Python abstract class (<code>abc.ABC</code>) but all method names remain the same</li>
 </ul>
 <p>#### General</p>
 <ul>
