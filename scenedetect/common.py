@@ -402,21 +402,44 @@ class FrameTimecode:
             raise ValueError("Timecode seconds value must be positive.")
         return self._seconds_to_frames(as_float)
 
-    def __iadd__(self, other: ty.Union[int, float, str, "FrameTimecode"]) -> "FrameTimecode":
+    def _get_other_as_frames(self, other: ty.Union[int, float, str, "FrameTimecode"]) -> int:
+        """Get the frame number from `other` for arithmetic operations."""
         if isinstance(other, int):
-            self._frame_num += other
-        elif isinstance(other, FrameTimecode):
+            return other
+        if isinstance(other, float):
+            return self._seconds_to_frames(other)
+        if isinstance(other, str):
+            return self._parse_timecode_string(other)
+        if isinstance(other, FrameTimecode):
             if self.equal_framerate(other._framerate):
-                self._frame_num += other._frame_num
-            else:
-                raise ValueError("FrameTimecode instances require equal framerate for addition.")
-        # Check if value to add is in number of seconds.
-        elif isinstance(other, float):
-            self._frame_num += self._seconds_to_frames(other)
-        elif isinstance(other, str):
-            self._frame_num += self._parse_timecode_string(other)
-        else:
-            raise TypeError("Unsupported type for performing addition with FrameTimecode.")
+                return other._frame_num
+            raise ValueError("FrameTimecode instances require equal framerate for arithmetic.")
+        raise TypeError("Unsupported type for performing arithmetic with FrameTimecode.")
+
+    def __eq__(self, other: ty.Union[int, float, str, "FrameTimecode"]) -> bool:
+        if other is None:
+            return False
+        # Allow comparison with other types by converting them to frames.
+        # If the framerate is not equal, a TypeError will be raised.
+        return self.frame_num == self._get_other_as_frames(other)
+
+    def __ne__(self, other: ty.Union[int, float, str, "FrameTimecode"]) -> bool:
+        return not self == other
+
+    def __lt__(self, other: ty.Union[int, float, str, "FrameTimecode"]) -> bool:
+        return self.frame_num < self._get_other_as_frames(other)
+
+    def __le__(self, other: ty.Union[int, float, str, "FrameTimecode"]) -> bool:
+        return self.frame_num <= self._get_other_as_frames(other)
+
+    def __gt__(self, other: ty.Union[int, float, str, "FrameTimecode"]) -> bool:
+        return self.frame_num > self._get_other_as_frames(other)
+
+    def __ge__(self, other: ty.Union[int, float, str, "FrameTimecode"]) -> bool:
+        return self.frame_num >= self._get_other_as_frames(other)
+
+    def __iadd__(self, other: ty.Union[int, float, str, "FrameTimecode"]) -> "FrameTimecode":
+        self._frame_num += self._get_other_as_frames(other)
         if self._frame_num < 0:  # Required to allow adding negative seconds/frames.
             self._frame_num = 0
         return self
@@ -427,22 +450,7 @@ class FrameTimecode:
         return to_return
 
     def __isub__(self, other: ty.Union[int, float, str, "FrameTimecode"]) -> "FrameTimecode":
-        if isinstance(other, int):
-            self._frame_num -= other
-        elif isinstance(other, FrameTimecode):
-            if self.equal_framerate(other._framerate):
-                self._frame_num -= other._frame_num
-            else:
-                raise ValueError("FrameTimecode instances require equal framerate for subtraction.")
-        # Check if value to add is in number of seconds.
-        elif isinstance(other, float):
-            self._frame_num -= self._seconds_to_frames(other)
-        elif isinstance(other, str):
-            self._frame_num -= self._parse_timecode_string(other)
-        else:
-            raise TypeError(
-                "Unsupported type for performing subtraction with FrameTimecode: %s" % type(other)
-            )
+        self._frame_num -= self._get_other_as_frames(other)
         if self._frame_num < 0:
             self._frame_num = 0
         return self
@@ -451,106 +459,6 @@ class FrameTimecode:
         to_return = FrameTimecode(timecode=self)
         to_return -= other
         return to_return
-
-    def __eq__(self, other: ty.Union[int, float, str, "FrameTimecode"]) -> "FrameTimecode":
-        if isinstance(other, int):
-            return self._frame_num == other
-        elif isinstance(other, float):
-            return self.seconds == other
-        elif isinstance(other, str):
-            return self._frame_num == self._parse_timecode_string(other)
-        elif isinstance(other, FrameTimecode):
-            if self.equal_framerate(other._framerate):
-                return self._frame_num == other._frame_num
-            else:
-                raise TypeError(
-                    "FrameTimecode objects must have the same framerate to be compared."
-                )
-        elif other is None:
-            return False
-        else:
-            raise TypeError(
-                "Unsupported type for performing == with FrameTimecode: %s" % type(other)
-            )
-
-    def __ne__(self, other: ty.Union[int, float, str, "FrameTimecode"]) -> bool:
-        return not self == other
-
-    def __lt__(self, other: ty.Union[int, float, str, "FrameTimecode"]) -> bool:
-        if isinstance(other, int):
-            return self._frame_num < other
-        elif isinstance(other, float):
-            return self.seconds < other
-        elif isinstance(other, str):
-            return self._frame_num < self._parse_timecode_string(other)
-        elif isinstance(other, FrameTimecode):
-            if self.equal_framerate(other._framerate):
-                return self._frame_num < other._frame_num
-            else:
-                raise TypeError(
-                    "FrameTimecode objects must have the same framerate to be compared."
-                )
-        else:
-            raise TypeError(
-                "Unsupported type for performing < with FrameTimecode: %s" % type(other)
-            )
-
-    def __le__(self, other: ty.Union[int, float, str, "FrameTimecode"]) -> bool:
-        if isinstance(other, int):
-            return self._frame_num <= other
-        elif isinstance(other, float):
-            return self.seconds <= other
-        elif isinstance(other, str):
-            return self._frame_num <= self._parse_timecode_string(other)
-        elif isinstance(other, FrameTimecode):
-            if self.equal_framerate(other._framerate):
-                return self._frame_num <= other._frame_num
-            else:
-                raise TypeError(
-                    "FrameTimecode objects must have the same framerate to be compared."
-                )
-        else:
-            raise TypeError(
-                "Unsupported type for performing <= with FrameTimecode: %s" % type(other)
-            )
-
-    def __gt__(self, other: ty.Union[int, float, str, "FrameTimecode"]) -> bool:
-        if isinstance(other, int):
-            return self._frame_num > other
-        elif isinstance(other, float):
-            return self.seconds > other
-        elif isinstance(other, str):
-            return self._frame_num > self._parse_timecode_string(other)
-        elif isinstance(other, FrameTimecode):
-            if self.equal_framerate(other._framerate):
-                return self._frame_num > other._frame_num
-            else:
-                raise TypeError(
-                    "FrameTimecode objects must have the same framerate to be compared."
-                )
-        else:
-            raise TypeError(
-                "Unsupported type for performing > with FrameTimecode: %s" % type(other)
-            )
-
-    def __ge__(self, other: ty.Union[int, float, str, "FrameTimecode"]) -> bool:
-        if isinstance(other, int):
-            return self._frame_num >= other
-        elif isinstance(other, float):
-            return self.seconds >= other
-        elif isinstance(other, str):
-            return self._frame_num >= self._parse_timecode_string(other)
-        elif isinstance(other, FrameTimecode):
-            if self.equal_framerate(other._framerate):
-                return self._frame_num >= other._frame_num
-            else:
-                raise TypeError(
-                    "FrameTimecode objects must have the same framerate to be compared."
-                )
-        else:
-            raise TypeError(
-                "Unsupported type for performing >= with FrameTimecode: %s" % type(other)
-            )
 
     # TODO(v1.0): __int__ and __float__ should be removed. Mark as deprecated, and indicate
     # need to use relevant property instead.

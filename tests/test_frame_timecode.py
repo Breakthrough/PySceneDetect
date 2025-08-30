@@ -200,9 +200,9 @@ def test_equality():
     assert x != FrameTimecode(timecode=10.0, fps=10.0)
     assert x != FrameTimecode(timecode=10.0, fps=10.0)
     # Comparing FrameTimecodes with different framerates raises a TypeError.
-    with pytest.raises(TypeError):
+    with pytest.raises(ValueError):
         assert x == FrameTimecode(timecode=1.0, fps=100.0)
-    with pytest.raises(TypeError):
+    with pytest.raises(ValueError):
         assert x == FrameTimecode(timecode=1.0, fps=10.1)
 
     assert x == FrameTimecode(x)
@@ -249,7 +249,7 @@ def test_addition():
 
     assert x + 10 == "00:00:02.000"
 
-    with pytest.raises(TypeError):
+    with pytest.raises(ValueError):
         assert FrameTimecode("00:00:02.000", fps=20.0) == x + 10
 
 
@@ -268,7 +268,7 @@ def test_subtraction():
 
     assert x - 1 == FrameTimecode(timecode=0.9, fps=10.0)
 
-    with pytest.raises(TypeError):
+    with pytest.raises(ValueError):
         assert FrameTimecode("00:00:02.000", fps=20.0) == x - 10
 
 
