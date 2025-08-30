@@ -25,6 +25,7 @@ in order to be compatible with PySceneDetect.
 """
 
 import typing as ty
+from abc import ABC, abstractmethod
 from enum import Enum
 
 import numpy
@@ -33,36 +34,18 @@ from scenedetect.common import _USE_PTS_IN_DEVELOPMENT, FrameTimecode
 from scenedetect.stats_manager import StatsManager
 
 
-class SceneDetector:
+class SceneDetector(ABC):
     """Base class to inherit from when implementing a scene detection algorithm.
 
     This API is not yet stable and subject to change.
     """
 
-    # TODO(v0.7): Make this a proper abstract base class.
+    def __init__(self):
+        self._stats_manager: ty.Optional[StatsManager] = None
 
-    # TODO(v0.7): This should be a property.
-    stats_manager: ty.Optional[StatsManager] = None
-    """Optional :class:`StatsManager <scenedetect.stats_manager.StatsManager>` to
-    use for caching frame metrics to and from."""
+    # Required Methods
 
-    def stats_manager_required(self) -> bool:
-        """Stats Manager Required: Prototype indicating if detector requires stats.
-
-        Returns:
-            True if a StatsManager is required for the detector, False otherwise.
-        """
-        return False
-
-    def get_metrics(self) -> ty.List[str]:
-        """Returns a list of all metric names/keys used by this detector.
-
-        Returns:
-            List of strings of frame metric key names that will be used by
-            the detector when a StatsManager is passed to process_frame.
-        """
-        return []
-
+    @abstractmethod
     def process_frame(
         self, timecode: FrameTimecode, frame_img: numpy.ndarray
     ) -> ty.List[FrameTimecode]:
@@ -75,7 +58,8 @@ class SceneDetector:
         Returns:
            List of timecodes where scene cuts have been detected, if any.
         """
-        return []
+
+    # Optional Methods
 
     def post_process(self, timecode: int) -> ty.List[FrameTimecode]:
         """Called after there are no more frames to process.
@@ -94,6 +78,30 @@ class SceneDetector:
         amount any event can be behind `frame_number` in the result of :meth:`process_frame`.
         """
         return 0
+
+    # Frame Stats/Metrics
+
+    @property
+    def stats_manager(self) -> ty.Optional[StatsManager]:
+        """Optional :class:`StatsManager <scenedetect.stats_manager.StatsManager>` to use for
+        storing frame metrics. When this detector is added to a parent
+        :class:`SceneManager <scenedetect.scene_manager.SceneManager>`, then this is set to the
+        same :class:`StatsManager <scenedetect.stats_manager.StatsManager>` of the parent - but
+        only if it has one itself."""
+        return self._stats_manager
+
+    @stats_manager.setter
+    def stats_manager(self, value: ty.Optional[StatsManager]):
+        self._stats_manager = value
+
+    def get_metrics(self) -> ty.List[str]:
+        """Returns a list of all metric names/keys used by this detector.
+
+        Returns:
+            List of strings of frame metric key names that will be used by
+            the detector when a StatsManager is passed to process_frame.
+        """
+        return []
 
 
 class FlashFilter:

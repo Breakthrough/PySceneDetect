@@ -703,6 +703,8 @@ Although there have been minimal changes to most API examples, there are several
  * Remove deprecated `AdaptiveDetector.get_content_val()` method (the same information can be obtained using a `StatsManager`)
  * Remove deprecated `AdaptiveDetector` constructor argument `min_delta_hsv` (use `min_content_val` instead)
  * Remove `advance` parameter from `VideoStream.read()` (was always set to `True`, callers should handle caching frames now if required)
+ * Remove `SceneDetector.stats_manager_required` property as it is no longer required
+ * Remove `SceneDetector` is now a Python abstract class (`abc.ABC`) but all method names remain the same
 
  #### General
 

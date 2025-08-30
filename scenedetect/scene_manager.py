@@ -313,9 +313,6 @@ class SceneManager:
         Arguments:
             detector (SceneDetector): Scene detector to add to the SceneManager.
         """
-        if self._stats_manager is None and detector.stats_manager_required():
-            assert not self._detector_list
-            self._stats_manager = StatsManager()
 
         detector.stats_manager = self._stats_manager
         if self._stats_manager is not None:
