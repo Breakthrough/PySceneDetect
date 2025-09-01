@@ -131,7 +131,7 @@ class Interpolation(Enum):
 #
 # We might be able to avoid changing the detector interface if we just have them work directly with
 # PTS and convert them back to FrameTimecodes with the same time base.
-@dataclass
+@dataclass(frozen=True)
 class Timecode:
     """Timing information associated with a given frame."""
 
@@ -181,6 +181,7 @@ class FrameTimecode:
         if isinstance(timecode, FrameTimecode):
             self._framerate = timecode._framerate if fps is None else fps
             self._frame_num = timecode._frame_num
+            self._timecode = timecode._timecode
             return
 
         # Timecode.
@@ -411,35 +412,60 @@ class FrameTimecode:
         if isinstance(other, str):
             return self._parse_timecode_string(other)
         if isinstance(other, FrameTimecode):
-            if self.equal_framerate(other._framerate):
+            # If comparing two FrameTimecodes, they must have the same framerate for frame-based operations.
+            if self._framerate and other._framerate and not self.equal_framerate(other._framerate):
+                raise ValueError(
+                    "FrameTimecode instances require equal framerate for frame-based arithmetic."
+                )
+            if other._frame_num is not None:
                 return other._frame_num
-            raise ValueError("FrameTimecode instances require equal framerate for arithmetic.")
+            # If other has no frame_num, it must have a timecode. Convert to frames.
+            return self._seconds_to_frames(other.seconds)
         raise TypeError("Unsupported type for performing arithmetic with FrameTimecode.")
 
     def __eq__(self, other: ty.Union[int, float, str, "FrameTimecode"]) -> bool:
         if other is None:
             return False
-        # Allow comparison with other types by converting them to frames.
-        # If the framerate is not equal, a TypeError will be raised.
+        if self._timecode:
+            return self.seconds == self._get_other_as_seconds(other)
         return self.frame_num == self._get_other_as_frames(other)
 
     def __ne__(self, other: ty.Union[int, float, str, "FrameTimecode"]) -> bool:
-        return not self == other
+        if other is None:
+            return True
+        if self._timecode:
+            return self.seconds != self._get_other_as_seconds(other)
+        return self.frame_num != self._get_other_as_frames(other)
 
     def __lt__(self, other: ty.Union[int, float, str, "FrameTimecode"]) -> bool:
+        if self._timecode:
+            return self.seconds < self._get_other_as_seconds(other)
         return self.frame_num < self._get_other_as_frames(other)
 
     def __le__(self, other: ty.Union[int, float, str, "FrameTimecode"]) -> bool:
+        if self._timecode:
+            return self.seconds <= self._get_other_as_seconds(other)
         return self.frame_num <= self._get_other_as_frames(other)
 
     def __gt__(self, other: ty.Union[int, float, str, "FrameTimecode"]) -> bool:
+        if self._timecode:
+            return self.seconds > self._get_other_as_seconds(other)
         return self.frame_num > self._get_other_as_frames(other)
 
     def __ge__(self, other: ty.Union[int, float, str, "FrameTimecode"]) -> bool:
+        if self._timecode:
+            return self.seconds >= self._get_other_as_seconds(other)
         return self.frame_num >= self._get_other_as_frames(other)
 
     def __iadd__(self, other: ty.Union[int, float, str, "FrameTimecode"]) -> "FrameTimecode":
-        self._frame_num += self._get_other_as_frames(other)
+        if self._timecode:
+            new_seconds = self.seconds + self._get_other_as_seconds(other)
+            # TODO: This is incorrect for VFR, need a better way to handle this.
+            # For now, we convert back to a frame number.
+            self._frame_num = self._seconds_to_frames(new_seconds)
+            self._timecode = None
+        else:
+            self._frame_num += self._get_other_as_frames(other)
         if self._frame_num < 0:  # Required to allow adding negative seconds/frames.
             self._frame_num = 0
         return self
@@ -450,7 +476,14 @@ class FrameTimecode:
         return to_return
 
     def __isub__(self, other: ty.Union[int, float, str, "FrameTimecode"]) -> "FrameTimecode":
-        self._frame_num -= self._get_other_as_frames(other)
+        if self._timecode:
+            new_seconds = self.seconds - self._get_other_as_seconds(other)
+            # TODO: This is incorrect for VFR, need a better way to handle this.
+            # For now, we convert back to a frame number.
+            self._frame_num = self._seconds_to_frames(new_seconds)
+            self._timecode = None
+        else:
+            self._frame_num -= self._get_other_as_frames(other)
         if self._frame_num < 0:
             self._frame_num = 0
         return self
@@ -473,7 +506,25 @@ class FrameTimecode:
         return self.get_timecode()
 
     def __repr__(self) -> str:
+        if self._timecode:
+            return f"{self.get_timecode()} [pts={self._timecode.pts}, time_base={self._timecode.time_base}]"
         return "%s [frame=%d, fps=%.3f]" % (self.get_timecode(), self._frame_num, self._framerate)
 
     def __hash__(self) -> int:
+        if self._timecode:
+            return hash(self._timecode)
         return self._frame_num
+
+    def _get_other_as_seconds(self, other: ty.Union[int, float, str, "FrameTimecode"]) -> float:
+        """Get the time in seconds from `other` for arithmetic operations."""
+        if isinstance(other, int):
+            return float(other) / self._framerate
+        if isinstance(other, float):
+            return other
+        if isinstance(other, str):
+            # This is not ideal, but we need a framerate to parse strings.
+            # We create a temporary FrameTimecode to do this.
+            return FrameTimecode(timecode=other, fps=self._framerate).seconds
+        if isinstance(other, FrameTimecode):
+            return other.seconds
+        raise TypeError("Unsupported type for performing arithmetic with FrameTimecode.")
