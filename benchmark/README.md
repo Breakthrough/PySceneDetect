@@ -1,6 +1,6 @@
 # Benchmarking PySceneDetect
 This repository benchmarks the performance of PySceneDetect in terms of both latency and accuracy.
-We evaluate it using the standard dataset for video shot detection: [BBC](https://zenodo.org/records/14865504) and [AutoShot](https://drive.google.com/file/d/17diRkLlNUUjHDooXdqFUTXYje2-x4Yt6/view?usp=sharing).
+We evaluate it using the standard dataset for video shot detection: [BBC](https://zenodo.org/records/14865504), [AutoShot](https://drive.google.com/file/d/17diRkLlNUUjHDooXdqFUTXYje2-x4Yt6/view?usp=sharing), and [ClipShots](https://drive.google.com/drive/folders/1AAhTbNroSFsygHBXa88emCU7f50MxI8t).
 
 ## Dataset Download
 ### BBC
@@ -19,8 +19,16 @@ rm -rf BBC/videos.zip
 ### AutoShot
 Download `AutoShot_test.tar.gz` from [Google drive](https://drive.google.com/file/d/17diRkLlNUUjHDooXdqFUTXYje2-x4Yt6/view?usp=sharing).
 ```
-tar -zxvf AutoShot.tar.gz
+tar -zxvf AutoShot.tar.gz -C AutoShot
 rm AutoShot.tar.gz
+```
+
+### ClipShots
+Download `ClipShots-a`, `ClipShots-b`, `ClipShots-c` from [Google drive](https://drive.google.com/drive/folders/1AAhTbNroSFsygHBXa88emCU7f50MxI8t).
+```
+cat ClipShots-{a,b,c} > ClipShots.tar.gz
+tar -zxvf ClipShots.tar.gz -C ClipShots
+rm ClipShots.tar.gz
 ```
 
 ## Evaluation
@@ -61,6 +69,9 @@ The performance is computed as recall, precision, f1, and elapsed time.
 | HistogramDetector |  63.36 |   53.34   | 57.92 |          1.23         |
 | ThresholdDetector |  0.75  |   38.64   |  1.47 |          1.24         |
 
+#### ClipShots
+TBD
+
 ## Citation
 ### BBC
 ```
@@ -79,5 +90,15 @@ The performance is computed as recall, precision, f1, and elapsed time.
   title     = {AutoShot: A Short Video Dataset and State-of-the-Art Shot Boundary Detection},
   booktitle = {Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR) Workshops},
   year      = {2023},
+}
+```
+
+### ClipShots
+```
+@InProceedings{clipshots_dataset,
+  author    = {Shitao Tang and Litong Feng and Zhanghui Kuang and Yimin Chen and Wei Zhang},
+  title     = {Fast Video Shot Transition Localization with Deep Structured Models},
+  booktitle = {Proceedings of the Asian Conference on Computer Vision (ACCV)},
+  year      = {2018},
 }
 ```
