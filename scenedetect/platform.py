@@ -27,6 +27,7 @@ import sys
 import typing as ty
 
 import cv2
+import numpy
 
 ##
 ## tqdm Library
