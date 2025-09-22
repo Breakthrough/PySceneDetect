@@ -39,3 +39,6 @@ markdown_extensions: [fenced_code]
 
 extra_css:
   - style.css
+
+extra_javascript:
+  - redirect.js
