@@ -2,7 +2,8 @@
 # PySceneDetect Requirements for Headless Machines
 #
 av>=9.2
-click>=8.0
+# click 8.3.0 is excluded as per https://scenedetect.com/issues/521
+click~=8.0, !=8.3.0
 numpy
 opencv-python-headless
 platformdirs
