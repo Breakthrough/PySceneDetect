@@ -104,11 +104,40 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
+<h1 id="404-title">Page Not Found</h1>
+<p id="404-body">This page does not exist.</p>
 
-  <h1 id="404-page-not-found">404</h1>
+<script>
+(function() {
+    var path = window.location.pathname;
+    var pageTitle = document.getElementById('404-title');
+    var pageBody = document.getElementById('404-body');
 
-  <p><strong>Page not found</strong></p>
+    const TARGETS = [ '/issue', '/issues', '/issue/', '/issues/' ];
+    for (const target of TARGETS) {
+        if (path === target) {
+            pageTitle.innerText = 'Redirecting...';
+            pageBody.innerText = 'Redirecting to GitHub issues...';
+            window.location.href = 'https://github.com/Breakthrough/PySceneDetect/issues/';
+            return;
+        }
+    }
 
+    const PREFIXES = ['/issue/', '/issues/'];
+    for (const prefix of PREFIXES) {
+        if (path.startsWith(prefix)) {
+            var issueNumber = path.substring(prefix.length);
+            if (issueNumber) {
+                pageTitle.innerText = 'Redirecting...';
+                pageBody.innerText = 'Redirecting to issue #' + issueNumber + ' on GitHub...';
+                var newUrl = 'https://github.com/Breakthrough/PySceneDetect/issues/' + issueNumber;
+                window.location.href = newUrl;
+                return;
+            }
+        }
+    }
+})();
+</script>
 
             </div>
           </div><footer>
@@ -141,7 +170,6 @@
     <script>var base_url = "/";</script>
     <script src="/js/theme_extra.js"></script>
     <script src="/js/theme.js"></script>
-      <script src="/redirect.js"></script>
       <script src="/search/main.js"></script>
     <script>
         jQuery(function () {
