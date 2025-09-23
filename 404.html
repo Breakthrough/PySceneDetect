@@ -113,12 +113,14 @@
     var pageTitle = document.getElementById('404-title');
     var pageBody = document.getElementById('404-body');
 
+    // The canonical form is "issues" but we allow "issue" as well.
     const TARGETS = [ '/issue', '/issues', '/issue/', '/issues/' ];
     for (const target of TARGETS) {
         if (path === target) {
             pageTitle.innerText = 'Redirecting...';
-            pageBody.innerText = 'Redirecting to GitHub issues...';
-            window.location.href = 'https://github.com/Breakthrough/PySceneDetect/issues/';
+            const url = 'https://github.com/Breakthrough/PySceneDetect/issues/';
+            pageBody.innerHTML = 'Redirecting to <a href="' + url + '">GitHub issues...</a>';
+            window.location.href = url;
             return;
         }
     }
@@ -129,8 +131,8 @@
             var issueNumber = path.substring(prefix.length);
             if (issueNumber) {
                 pageTitle.innerText = 'Redirecting...';
-                pageBody.innerText = 'Redirecting to issue #' + issueNumber + ' on GitHub...';
                 var newUrl = 'https://github.com/Breakthrough/PySceneDetect/issues/' + issueNumber;
+                pageBody.innerHTML = 'Redirecting to <a href="' + newUrl + '">issue #' + issueNumber + ' on GitHub...</a>';
                 window.location.href = newUrl;
                 return;
             }
