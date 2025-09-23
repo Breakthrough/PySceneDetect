@@ -41,10 +41,10 @@ FAST_CUT_DETECTORS: ty.Tuple[ty.Type[SceneDetector]] = (
 
 ALL_DETECTORS: ty.Tuple[ty.Type[SceneDetector]] = (*FAST_CUT_DETECTORS, ThresholdDetector)
 
-# TODO(#53): Add a test that verifies algorithms output relatively consistent frame scores
-# regardless of resolution. This will ensure that threshold values will hold true for different
-# input sources. Most detectors already provide this guarantee, so this is more to prevent any
-# regressions in the future.
+# TODO(https://scenedetect.com/issues/53): Add a test that verifies algorithms output relatively
+# consistent frame scores regardless of resolution. This will ensure that threshold values will hold
+# true for different input sources. Most detectors already provide this guarantee, so this is more
+# to prevent any regressions in the future.
 
 
 # TODO: Reduce code duplication here and in `conftest.py`

@@ -520,7 +520,8 @@ def test_cli_save_images_path_handling(tmp_path: Path):
     assert image.shape == (544, 1280, 3)
 
 
-# TODO(#134): This works fine with OpenCV currently, but needs to be supported for PyAV and MoviePy.
+# TODO(https://scenedetect.com/issues/134): This works fine with OpenCV currently, but needs to be
+# supported for PyAV and MoviePy.
 def test_cli_save_images_rotation(rotated_video_file, tmp_path: Path):
     """Test that `save-images` command rotates images correctly with the default backend."""
     assert (

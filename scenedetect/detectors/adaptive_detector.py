@@ -100,8 +100,6 @@ class AdaptiveDetector(ContentDetector):
     def process_frame(
         self, timecode: FrameTimecode, frame_img: np.ndarray
     ) -> ty.List[FrameTimecode]:
-        # TODO(#283): Merge this with ContentDetector and turn it on by default.
-
         super().process_frame(timecode=timecode, frame_img=frame_img)
 
         # Initialize last scene cut point at the beginning of the frames of interest.

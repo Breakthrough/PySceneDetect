@@ -504,7 +504,7 @@ def save_otio(
     frame_rate = context.video_stream.frame_rate
 
     # List of track mapping to resource type.
-    # TODO(#497): Allow exporting without an audio track.
+    # TODO(https://scenedetect.com/issues/497): Allow OTIO export without an audio track.
     track_list = {"Video 1": "Video"}
     if audio:
         track_list["Audio 1"] = "Audio"

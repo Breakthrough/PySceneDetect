@@ -387,9 +387,9 @@ class SceneManager:
         """Add any cuts detected with the current frame to the cutting list. Returns True if any new
         cuts were detected, False otherwise."""
         new_cuts = False
-        # TODO(#283): This breaks with AdaptiveDetector as cuts differ from the frame number
-        # being processed. Allow detectors to specify the max frame lookahead they require
-        # (i.e. any event will never be more than N frames behind the current one).
+        # TODO(https://scenedetect.com/issues/283): This breaks with AdaptiveDetector as cuts differ
+        # from the frame number being processed. Allow detectors to specify the max frame lookahead
+        # they require (i.e. any event will never be more than N frames behind the current one).
         self._frame_buffer.append(frame_im)
         # frame_buffer[-1] is current frame, -2 is one behind, etc
         # so index based on cut frame should be [event_frame - (frame_num + 1)]

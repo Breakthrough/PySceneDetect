@@ -120,7 +120,7 @@ def _detect(context: CliContext) -> ty.Optional[ty.Tuple[SceneList, CutList]]:
     )
 
     # Handle case where video failure is most likely due to multiple audio tracks (#179).
-    # TODO(#380): Ensure this does not erroneusly fire.
+    # TODO(https://scenedetect.com/issues/380): Ensure this does not erroneusly fire.
     if num_frames <= 0 and isinstance(context.video_stream, VideoStreamCv2):
         logger.critical(
             "Failed to read any frames from video file. This could be caused by the video"

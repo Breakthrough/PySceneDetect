@@ -324,9 +324,9 @@ class VideoStreamCv2(VideoStream):
         cap.set(cv2.CAP_PROP_ORIENTATION_AUTO, 1.0)  # https://github.com/opencv/opencv/issues/26795
 
 
-# TODO(#168): Support non-monotonic timing for `position`. VFR timecode support is a
-# prerequisite for this. Timecodes are currently calculated by multiplying the framerate
-# by number of frames. Actual elapsed time can be obtained via `position_ms` for now.
+# TODO(https://scenedetect.com/issues/168): Support non-monotonic timing for `position`. VFR timecode
+# support is a prerequisite for this. Timecodes are currently calculated by multiplying the
+# framerate by number of frames. Actual elapsed time can be obtained via `position_ms` for now.
 class VideoCaptureAdapter(VideoStream):
     """Adapter for existing VideoCapture objects. Unlike VideoStreamCv2, this class supports
     VideoCaptures which may not support seeking.
