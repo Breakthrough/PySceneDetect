@@ -92,15 +92,29 @@ jobs:
         with:
           python-version: "3.x"
 
-      - name: Install dependencies
+      - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
           pip install build twine
 
-      - name: Build package
-        run: python -m build
+      - name: Build Package
+        run: |
+          python -m build
+          mkdir pkg
+          mv dist/*.tar.gz pkg/
+          mv dist/*.whl pkg/
 
-      - name: Publish package
+      - name: Upload Package
+        uses: actions/upload-artifact@v4
+        with:
+          name: scenedetect-dist
+          path: |
+            pkg/*.tar.gz
+            pkg/*.whl
+
+      - name: Publish Package
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           repository-url: ${{ github.event.inputs.environment == 'test' && 'https://test.pypi.org/legacy/' || 'https://upload.pypi.org/legacy/' }}
+          packages-dir: pkg/
+          print-hash: true
