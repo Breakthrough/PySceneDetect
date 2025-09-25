@@ -26,8 +26,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        # TODO: Bump ubuntu 20 to 22 when past EOL date.
-        os: [macos-13, macos-14, ubuntu-20.04, ubuntu-latest, windows-latest]
+        os: [macos-13, macos-14, ubuntu-22.04, ubuntu-latest, windows-latest]
         python-version: ["3.7", "3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]
         exclude:
           # macos-14 builders use M1 (ARM64) which does not have a Python 3.7 package available.

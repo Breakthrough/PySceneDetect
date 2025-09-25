@@ -4,6 +4,10 @@ Releases
 
 ## PySceneDetect 0.6
 
+### PySceneDetect 0.6.7.1 (September 24, 2025)
+
+Re-release of the Python package that fixes dependency version pinning.
+
 ### PySceneDetect 0.6.7 (August 24, 2025)
 
 #### Release Notes
