@@ -4,23 +4,23 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Tag to publish'
+        description: 'Tag To Publish'
         required: true
       environment:
-        description: 'PyPI environment'
+        description: 'PyPI Environment'
         required: true
         type: choice
         options:
           - test
-          - prod
+          - release
         default: 'test'
 
 jobs:
-  verify-builds:
-    name: Verify build workflows passed
+  verify:
+    name: Verify Build
     runs-on: ubuntu-latest
     steps:
-      - name: Verify build workflows
+      - name: Check workflows
         uses: actions/github-script@v6
         with:
           script: |
@@ -68,21 +68,20 @@ jobs:
               throw new Error("One or more required build workflows did not succeed.");
             }
 
-  build-and-publish:
-    name: Build and publish Python distributions to ${{ github.event.inputs.environment }} PyPI
+  publish:
+    name: Building and Publishing to ${{ github.event.inputs.environment }} PyPI
     runs-on: ubuntu-latest
-    needs: verify-builds
-
+    needs: verify
 
     environment:
-      name: ${{ github.event.inputs.environment == 'test' && 'testpypi' || 'pypi' }}
+      name: ${{ github.event.inputs.environment == 'test' && 'test' || 'release' }}
       url: ${{ github.event.inputs.environment == 'test' && 'https://test.pypi.org/p/scenedetect' || 'https://pypi.org/p/scenedetect' }}
 
     permissions:
       id-token: write  # IMPORTANT: mandatory for trusted publishing
 
     steps:
-      - name: Checkout code
+      - name: Checkout ${{ github.event.inputs.tag }}
         uses: actions/checkout@v3
         with:
           ref: ${{ github.event.inputs.tag }}
