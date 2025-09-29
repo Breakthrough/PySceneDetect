@@ -95,6 +95,9 @@ from scenedetect.common import (
     SceneList,
 )
 from scenedetect.detector import SceneDetector
+
+# TODO(v0.8): Remove the import * below, for backwards compatibility with v0.6 only.
+from scenedetect.output import *  # noqa: F403
 from scenedetect.platform import tqdm
 from scenedetect.stats_manager import StatsManager
 from scenedetect.video_stream import VideoStream

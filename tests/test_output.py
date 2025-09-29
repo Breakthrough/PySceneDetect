@@ -191,3 +191,12 @@ def test_save_images_zero_width_scene(test_video_file, tmp_path: Path):
             total_images += 1
 
     assert total_images == len([path for path in tmp_path.glob(image_name_glob)])
+
+
+# TODO(v0.8): Remove this test during the removal of `scenedetect.video_splitter`.
+def test_deprecated_output_modules_emits_warning_on_import():
+    VIDEO_SPLITTER_WARNING = (
+        "The `video_splitter` submodule is deprecated, import from the base package instead."
+    )
+    with pytest.warns(DeprecationWarning, match=VIDEO_SPLITTER_WARNING):
+        from scenedetect.video_splitter import split_video_ffmpeg as _

@@ -300,3 +300,12 @@ def test_precision():
     assert FrameTimecode(990, fps).get_timecode(precision=1, use_rounding=False) == "00:00:00.9"
     assert FrameTimecode(990, fps).get_timecode(precision=0, use_rounding=True) == "00:00:01"
     assert FrameTimecode(990, fps).get_timecode(precision=0, use_rounding=False) == "00:00:00"
+
+
+# TODO(v0.8): Remove this test during the removal of `scenedetect.scene_detector`.
+def test_deprecated_timecode_module_emits_warning_on_import():
+    FRAME_TIMECODE_WARNING = (
+        "The `frame_timecode` submodule is deprecated, import from the base package instead."
+    )
+    with pytest.warns(DeprecationWarning, match=FRAME_TIMECODE_WARNING):
+        from scenedetect.frame_timecode import FrameTimecode as _

@@ -685,30 +685,28 @@ Although there have been minimal changes to most API examples, there are several
 
 #### Breaking
 
-> Note: Imports that break when upgrading to 0.7 can usually be resolved by importing from `scenedetect` directly, rather than a submodule. The package structure has changed significantly in 0.7.
-
  * Replace `frame_num` parameter (`int`) with `timecode` (`FrameTimecode`) in `SceneDetector` interface (#168)[https://github.com/Breakthrough/PySceneDetect/issues/168]:
       * The detector interface: `SceneDetector.process_frame()` and `SceneDetector.post_process()`
       * Statistics: `StatsManager.get_metrics()`, `StatsManager.set_metrics()`, and `StatsManager.metrics_exist()`
  * Move existing functionality to new submodules:
-      * `scenedetect.scene_detector` moved to `scenedetect.detector`
-      * `scenedetect.frame_timecode` moved to `scenedetect.common`
-      * Output functionality from `scenedetect.scene_manager` moved to `scenedetect.output` [#463](https://github.com/Breakthrough/PySceneDetect/issues/463)
+      * Detector interface in `scenedetect.scene_detector` moved to `scenedetect.detector`
+      * Timecode types in `scenedetect.frame_timecode` moved to `scenedetect.common`
+      * Image/HTML/CSV export in `scenedetect.scene_manager` moved to `scenedetect.output` [#463](https://github.com/Breakthrough/PySceneDetect/issues/463)
       * `scenedetect.video_splitter` moved to `scenedetect.output.video` [#463](https://github.com/Breakthrough/PySceneDetect/issues/463)
  * Remove deprecated module `scenedetect.video_manager`, use [the `scenedetect.open_video()` function](https://www.scenedetect.com/docs/head/api.html#scenedetect.open_video) instead
  * Remove deprecated parameter `base_timecode` from various functions, there is no need to provide it
  * Remove deprecated parameter `video_manager` from various functions, use `video` parameter instead
  * `FrameTimecode` fields `frame_num` and `framerate` are now read-only properties, construct a new `FrameTimecode` to change them
  * Remove `FrameTimecode.previous_frame()` method
- * Remove `SceneDetector.is_processing_required()` method, already had no effect in v0.6 as part of deprecation
+ * Remove `SceneDetector.is_processing_required()` method
  * `SceneDetector` instances can now assume they always have frame data to process when `process_frame` is called
  * Remove deprecated `SparseSceneDetector` interface
  * Remove deprecated `SceneManager.get_event_list()` method
- * Remove deprecated `AdaptiveDetector.get_content_val()` method (the same information can be obtained using a `StatsManager`)
- * Remove deprecated `AdaptiveDetector` constructor argument `min_delta_hsv` (use `min_content_val` instead)
- * Remove `advance` parameter from `VideoStream.read()` (was always set to `True`, callers should handle caching frames now if required)
- * Remove `SceneDetector.stats_manager_required` property as it is no longer required
- * Remove `SceneDetector` is now a Python abstract class (`abc.ABC`) but all method names remain the same
+ * Remove deprecated `AdaptiveDetector.get_content_val()` method (use `StatsManager` instead)
+ * Remove deprecated `AdaptiveDetector` constructor arg `min_delta_hsv` (use `min_content_val` instead)
+ * Remove `advance` parameter from `VideoStream.read()`
+ * Remove `SceneDetector.stats_manager_required` property, no longer required
+ * `SceneDetector` is now a [Python abstract class](https://docs.python.org/3/library/abc.html)
 
  #### General
 

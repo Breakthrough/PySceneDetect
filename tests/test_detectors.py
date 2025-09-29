@@ -224,3 +224,12 @@ def test_detectors_with_stats(test_video_file):
         scene_manager.detect_scenes(video=video, end_time=end_time)
         scene_list = scene_manager.get_scene_list()
         assert len(scene_list) == initial_scene_len
+
+
+# TODO(v0.8): Remove this test during the removal of `scenedetect.scene_detector`.
+def test_deprecated_detector_module_emits_warning_on_import():
+    SCENE_DETECTOR_WARNING = (
+        "The `scene_detector` submodule is deprecated, import from the base package instead."
+    )
+    with pytest.warns(DeprecationWarning, match=SCENE_DETECTOR_WARNING):
+        from scenedetect.scene_detector import SceneDetector as _
