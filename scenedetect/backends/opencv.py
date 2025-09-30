@@ -226,6 +226,10 @@ class VideoStreamCv2(VideoStream):
         if target < 0:
             raise ValueError("Target seek position cannot be negative!")
 
+        if _USE_PTS_IN_DEVELOPMENT:
+            # TODO(https://scenedetect.com/issue/168): Shouldn't use frames for VFR video here.
+            raise NotImplementedError()
+
         # Have to seek one behind and call grab() after to that the VideoCapture
         # returns a valid timestamp when using CAP_PROP_POS_MSEC.
         target_frame_cv2 = (self.base_timecode + target).frame_num
@@ -429,8 +433,8 @@ class VideoCaptureAdapter(VideoStream):
     @property
     def duration(self) -> ty.Optional[FrameTimecode]:
         """Duration of the stream as a FrameTimecode, or None if non terminating."""
-        # TODO(v0.7): This will be incorrect for VFR. See if there is another property we can use
-        # to estimate the video length correctly.
+        # TODO(https://scenedetect.com/issue/168): This will be incorrect for VFR. See if there is
+        # another property we can use to estimate the video length correctly.
         frame_count = math.trunc(self._cap.get(cv2.CAP_PROP_FRAME_COUNT))
         if frame_count > 0:
             return self.base_timecode + frame_count

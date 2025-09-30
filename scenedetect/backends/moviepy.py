@@ -24,7 +24,7 @@ import numpy as np
 from moviepy.video.io.ffmpeg_reader import FFMPEG_VideoReader
 
 from scenedetect.backends.opencv import VideoStreamCv2
-from scenedetect.common import FrameTimecode
+from scenedetect.common import _USE_PTS_IN_DEVELOPMENT, FrameTimecode
 from scenedetect.platform import get_file_name
 from scenedetect.video_stream import SeekError, VideoOpenFailure, VideoStream
 
@@ -173,6 +173,10 @@ class VideoStreamMoviePy(VideoStream):
             ValueError: `target` is not a valid value (i.e. it is negative).
         """
         success = False
+        if _USE_PTS_IN_DEVELOPMENT:
+            # TODO(https://scenedetect.com/issue/168): Need to handle PTS here.
+            raise NotImplementedError()
+
         if not isinstance(target, FrameTimecode):
             target = FrameTimecode(target, self.frame_rate)
         try:

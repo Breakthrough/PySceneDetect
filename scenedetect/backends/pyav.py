@@ -249,6 +249,11 @@ class VideoStreamAv(VideoStream):
         if target < 0:
             raise ValueError("Target cannot be negative!")
         beginning = target == 0
+
+        if _USE_PTS_IN_DEVELOPMENT:
+            # TODO(https://scenedetect.com/issue/168): Need to handle PTS here.
+            raise NotImplementedError()
+
         target = self.base_timecode + target
         if target >= 1:
             target = target - 1

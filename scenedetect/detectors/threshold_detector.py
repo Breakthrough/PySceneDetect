@@ -111,7 +111,7 @@ class ThresholdDetector(SceneDetector):
             ty.List[int]: List of frames where scene cuts have been detected. There may be 0
             or more frames in the list, and not necessarily the same as frame_num.
         """
-        # TODO(v0.7): We need to consider PTS here instead. The methods below using frame numbers
+        # TODO(https://scenedetect.com/issue/168): We need to consider PTS here instead. The methods below using frame numbers
         # won't work for variable framerates.
         frame_num = timecode.frame_num
 
