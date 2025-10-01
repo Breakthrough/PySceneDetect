@@ -188,8 +188,14 @@ def test_get_timecode():
     assert FrameTimecode(timecode="00:00:02.0000", fps=1).get_timecode() == "00:00:02.000"
     assert FrameTimecode(timecode="00:00:00.5", fps=10).get_timecode() == "00:00:00.500"
     # If a value is provided in seconds, we store that value internally now.
-    assert FrameTimecode(timecode="00:00:01.501", fps=10).get_timecode() == "00:00:01.501"
-    assert FrameTimecode(timecode="00:01:00.000", fps=1).get_timecode() == "00:01:00.000"
+    assert (
+        FrameTimecode(timecode="00:00:01.501", fps=10).get_timecode(nearest_frame=False)
+        == "00:00:01.501"
+    )
+    assert (
+        FrameTimecode(timecode="00:00:01.501", fps=10).get_timecode(nearest_frame=True)
+        == "00:00:01.500"
+    )
 
 
 def test_equality():

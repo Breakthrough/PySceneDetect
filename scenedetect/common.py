@@ -207,17 +207,27 @@ class FrameTimecode:
         ):
             raise ValueError("Framerate must be positive and greater than zero.")
         self._framerate = float(fps)
-        # Process the timecode value, storing it as an exact number of frames.
+        # Process the timecode value, storing it as an exact number of frames only if required.
+        if isinstance(timecode, str) and timecode.isdigit():
+            timecode = int(timecode)
         if isinstance(timecode, str):
             self._seconds = self._timecode_to_seconds(timecode)
-            self._frame_num = self._seconds_to_frames(self._seconds)
+        elif isinstance(timecode, float):
+            if timecode < 0.0:
+                raise ValueError("Timecode frame number must be positive and greater than zero.")
+            self._seconds = timecode
+        elif isinstance(timecode, int):
+            if timecode < 0:
+                raise ValueError("Timecode frame number must be positive and greater than zero.")
+            self._frame_num = timecode
         else:
-            self._frame_num = self._parse_timecode_number(timecode)
-            self._seconds = timecode if isinstance(timecode, float) else None
+            raise TypeError("Timecode format/type unrecognized.")
 
     @property
     def frame_num(self) -> ty.Optional[int]:
         if self._timecode:
+            # We need to audit anything currently using this property to guarantee temporal
+            # consistency when handling VFR videos (i.e. no assumptions on fixed frame rate).
             warnings.warn(
                 message="TODO(https://scenedetect.com/issue/168): Update caller to handle VFR.",
                 stacklevel=2,
@@ -227,6 +237,8 @@ class FrameTimecode:
             # time base itself.
             (num, den) = (self._timecode.time_base * self._timecode.pts).as_integer_ratio()
             return num / den
+        if self._seconds is not None:
+            return self._seconds_to_frames(self._seconds)
         return self._frame_num
 
     @property
@@ -306,19 +318,26 @@ class FrameTimecode:
         )
         return self.seconds
 
-    def get_timecode(self, precision: int = 3, use_rounding: bool = True) -> str:
+    def get_timecode(
+        self, precision: int = 3, use_rounding: bool = True, nearest_frame: bool = True
+    ) -> str:
         """Get a formatted timecode string of the form HH:MM:SS[.nnn].
 
         Args:
             precision: The number of decimal places to include in the output ``[.nnn]``.
             use_rounding: Rounds the output to the desired precision. If False, the value
                 will be truncated to the specified precision.
+            nearest_frame: Ensures that the timecode is moved to the nearest frame boundary if this
+                object has a defined framerate, otherwise has no effect.
 
         Returns:
             str: The current time in the form ``"HH:MM:SS[.nnn]"``.
         """
         # Compute hours and minutes based off of seconds, and update seconds.
-        secs = self.seconds
+        if nearest_frame and self.framerate:
+            secs = self.frame_num / self.framerate
+        else:
+            secs = self.seconds
         hrs = int(secs / _SECONDS_PER_HOUR)
         secs -= hrs * _SECONDS_PER_HOUR
         mins = int(secs / _SECONDS_PER_MINUTE)
@@ -440,7 +459,7 @@ class FrameTimecode:
         if other is None:
             return False
         if _compare_as_fixed(self, other):
-            return self._frame_num == other._frame_num
+            return self.frame_num == other.frame_num
         if self._timecode or self._seconds is not None:
             return self.seconds == self._get_other_as_seconds(other)
         return self.frame_num == self._get_other_as_frames(other)
@@ -449,35 +468,35 @@ class FrameTimecode:
         if other is None:
             return True
         if _compare_as_fixed(self, other):
-            return self._frame_num != other._frame_num
+            return self.frame_num != other.frame_num
         if self._timecode or self._seconds is not None:
             return self.seconds != self._get_other_as_seconds(other)
         return self.frame_num != self._get_other_as_frames(other)
 
     def __lt__(self, other: ty.Union[int, float, str, "FrameTimecode"]) -> bool:
         if _compare_as_fixed(self, other):
-            return self._frame_num < other._frame_num
+            return self.frame_num < other.frame_num
         if self._timecode or self._seconds is not None:
             return self.seconds < self._get_other_as_seconds(other)
         return self.frame_num < self._get_other_as_frames(other)
 
     def __le__(self, other: ty.Union[int, float, str, "FrameTimecode"]) -> bool:
         if _compare_as_fixed(self, other):
-            return self._frame_num <= other._frame_num
+            return self.frame_num <= other.frame_num
         if self._timecode or self._seconds is not None:
             return self.seconds <= self._get_other_as_seconds(other)
         return self.frame_num <= self._get_other_as_frames(other)
 
     def __gt__(self, other: ty.Union[int, float, str, "FrameTimecode"]) -> bool:
         if _compare_as_fixed(self, other):
-            return self._frame_num > other._frame_num
+            return self.frame_num > other.frame_num
         if self._timecode or self._seconds is not None:
             return self.seconds > self._get_other_as_seconds(other)
         return self.frame_num > self._get_other_as_frames(other)
 
     def __ge__(self, other: ty.Union[int, float, str, "FrameTimecode"]) -> bool:
         if _compare_as_fixed(self, other):
-            return self._frame_num >= other._frame_num
+            return self.frame_num >= other.frame_num
         if self._timecode or self._seconds is not None:
             return self.seconds >= self._get_other_as_seconds(other)
         return self.frame_num >= self._get_other_as_frames(other)
@@ -513,9 +532,11 @@ class FrameTimecode:
             self._seconds = max(0, self._seconds + other._seconds)
             return self
 
-        self._frame_num = max(0, self._frame_num + self._get_other_as_frames(other))
         if self._seconds is not None:
             self._seconds = max(0.0, self._seconds + self._get_other_as_seconds(other))
+            return self
+
+        self._frame_num = max(0, self._frame_num + self._get_other_as_frames(other))
         return self
 
     def __add__(self, other: ty.Union[int, float, str, "FrameTimecode"]) -> "FrameTimecode":
@@ -554,9 +575,11 @@ class FrameTimecode:
             self._seconds = max(0, self._seconds - other._seconds)
             return self
 
-        self._frame_num = max(0, self._frame_num - self._get_other_as_frames(other))
         if self._seconds is not None:
             self._seconds = max(0.0, self._seconds - self._get_other_as_seconds(other))
+            return self
+
+        self._frame_num = max(0, self._frame_num - self._get_other_as_frames(other))
         return self
 
     def __sub__(self, other: ty.Union[int, float, str, "FrameTimecode"]) -> "FrameTimecode":
@@ -579,7 +602,9 @@ class FrameTimecode:
     def __repr__(self) -> str:
         if self._timecode:
             return f"{self.get_timecode()} [pts={self._timecode.pts}, time_base={self._timecode.time_base}]"
-        return "%s [frame=%d, fps=%.3f]" % (self.get_timecode(), self._frame_num, self._framerate)
+        if self._seconds is not None:
+            return f"{self.get_timecode()} [seconds={self._seconds}, fps={self._framerate}]"
+        return f"{self.get_timecode()} [frame_num={self._frame_num}, fps={self._framerate}]"
 
     def __hash__(self) -> int:
         if self._timecode:

@@ -175,10 +175,15 @@ def _load_scenes(context: CliContext) -> ty.Tuple[SceneList, CutList]:
         if context.load_scenes_column_name not in csv_headers:
             raise ValueError("specified column header for scene start is not present")
         col_idx = csv_headers.index(context.load_scenes_column_name)
-        cut_list = sorted(
-            FrameTimecode(row[col_idx], fps=context.video_stream.frame_rate) - 1
-            for row in file_reader
-        )
+
+        def calculate_timecode(value: str) -> FrameTimecode:
+            # Assume other columns are in seconds except frame numbers.
+            if value.isdigit():
+                # Frame numbers start from index 1 in the CLI output so we correct for that.
+                return FrameTimecode(int(value) - 1, fps=context.video_stream.frame_rate)
+            return FrameTimecode(value, fps=context.video_stream.frame_rate)
+
+        cut_list = sorted(calculate_timecode(row[col_idx]) for row in file_reader)
         # `SceneDetector` works on cuts, so we have to skip the first scene and place the first
         # cut point where the next scenes starts.
         if cut_list:
