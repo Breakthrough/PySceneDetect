@@ -187,7 +187,8 @@ def test_get_timecode():
 
     assert FrameTimecode(timecode="00:00:02.0000", fps=1).get_timecode() == "00:00:02.000"
     assert FrameTimecode(timecode="00:00:00.5", fps=10).get_timecode() == "00:00:00.500"
-    assert FrameTimecode(timecode="00:00:01.501", fps=10).get_timecode() == "00:00:01.500"
+    # If a value is provided in seconds, we store that value internally now.
+    assert FrameTimecode(timecode="00:00:01.501", fps=10).get_timecode() == "00:00:01.501"
     assert FrameTimecode(timecode="00:01:00.000", fps=1).get_timecode() == "00:01:00.000"
 
 
@@ -199,12 +200,6 @@ def test_equality():
     assert x == FrameTimecode(timecode=1.0, fps=10.0)
     assert x != FrameTimecode(timecode=10.0, fps=10.0)
     assert x != FrameTimecode(timecode=10.0, fps=10.0)
-    # Comparing FrameTimecodes with different framerates raises a TypeError.
-    with pytest.raises(ValueError):
-        assert x == FrameTimecode(timecode=1.0, fps=100.0)
-    with pytest.raises(ValueError):
-        assert x == FrameTimecode(timecode=1.0, fps=10.1)
-
     assert x == FrameTimecode(x)
     assert x == FrameTimecode(1.0, x)
     assert x == FrameTimecode(10, x)
@@ -232,11 +227,6 @@ def test_equality():
 
     assert FrameTimecode(timecode="00:00:00.5", fps=10) == "00:00:00.500"
     assert FrameTimecode(timecode="00:00:01.500", fps=10) == "00:00:01.500"
-    assert FrameTimecode(timecode="00:00:01.500", fps=10) == "00:00:01.501"
-    assert FrameTimecode(timecode="00:00:01.500", fps=10) == "00:00:01.502"
-    assert FrameTimecode(timecode="00:00:01.500", fps=10) == "00:00:01.508"
-    assert FrameTimecode(timecode="00:00:01.500", fps=10) == "00:00:01.509"
-    assert FrameTimecode(timecode="00:00:01.519", fps=10) == "00:00:01.510"
 
 
 def test_addition():
@@ -244,13 +234,10 @@ def test_addition():
     x = FrameTimecode(timecode=1.0, fps=10.0)
     assert x + 1 == FrameTimecode(timecode=1.1, fps=10.0)
     assert x + 1 == FrameTimecode(1.1, x)
+    assert x + 10 == "00:00:02.000", str(x + 10)
     assert x + 10 == 20
     assert x + 10 == 2.0
-
     assert x + 10 == "00:00:02.000"
-
-    with pytest.raises(ValueError):
-        assert FrameTimecode("00:00:02.000", fps=20.0) == x + 10
 
 
 def test_subtraction():
@@ -259,17 +246,13 @@ def test_subtraction():
     assert (x - 1) == FrameTimecode(timecode=0.9, fps=10.0)
     assert x - 2 == FrameTimecode(0.8, x)
     assert x - 10 == FrameTimecode(0.0, x)
-    # TODO(v1.0): Allow negative values
+    # TODO(v1.0): Allow negative values. For now we clamp.
     assert x - 11 == FrameTimecode(0.0, x)
     assert x - 100 == FrameTimecode(0.0, x)
-
     assert x - 1.0 == FrameTimecode(0.0, x)
     assert x - 100.0 == FrameTimecode(0.0, x)
-
     assert x - 1 == FrameTimecode(timecode=0.9, fps=10.0)
-
-    with pytest.raises(ValueError):
-        assert FrameTimecode("00:00:02.000", fps=20.0) == x - 10
+    assert FrameTimecode("00:00:00.000", fps=20.0) == x - 10
 
 
 @pytest.mark.parametrize("frame_num,fps", [(1, 1), (61, 14), (29, 25), (126, 24000 / 1001.0)])

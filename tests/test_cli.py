@@ -691,7 +691,7 @@ Scene Number,Start Frame
 
 
 def test_cli_load_scenes_round_trip():
-    """Verify we can use `load-scenes` with the `time` command and get the desired output."""
+    """Verify we can use `load-scenes` and get the same scenes as output with `list-scenes`."""
     scenes_csv = """
 Scene Number,Start Frame
 1,49
