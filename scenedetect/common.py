@@ -92,8 +92,8 @@ to source frame without downscaling.
 TimecodePair = ty.Tuple["FrameTimecode", "FrameTimecode"]
 """Named type for pairs of timecodes, which typically represents the start/end of a scene."""
 
-MAX_FPS_DELTA: float = 1.0 / 100000
-"""Maximum amount two framerates can differ by for equality testing."""
+MAX_FPS_DELTA: float = 1.0 / 1000000000.0
+"""Maximum amount two framerates can differ by for equality testing. Currently 1 frame/nanosec."""
 
 _SECONDS_PER_MINUTE = 60.0
 _SECONDS_PER_HOUR = 60.0 * _SECONDS_PER_MINUTE
@@ -160,13 +160,14 @@ class FrameTimecode:
     def __init__(
         self,
         timecode: ty.Union[int, float, str, Timecode, "FrameTimecode"] = None,
-        fps: ty.Union[int, float, str, "FrameTimecode"] = None,
+        fps: ty.Union[float, "FrameTimecode", Fraction] = None,
     ):
         """
         Arguments:
             timecode: A frame number (`int`), number of seconds (`float`), timecode string in
                 the form `'HH:MM:SS'` or `'HH:MM:SS.nnn'`, or a `Timecode`.
-            fps: The framerate or FrameTimecode to use as a time base for all arithmetic.
+            fps: The framerate to use for distance between frames and to calculate frame numbers.
+                For a VFR video, this may just be the average framerate.
         Raises:
             TypeError: Thrown if either `timecode` or `fps` are unsupported types.
             ValueError: Thrown when specifying a negative timecode or framerate.
@@ -175,7 +176,7 @@ class FrameTimecode:
         # in a frame-specific manner.  Note that once the framerate is set,
         # the value should never be modified (only read if required).
         # TODO(v1.0): Make these actual @properties.
-        self._framerate = fps
+        self._framerate: Fraction = None
         self._frame_num = None
         self._timecode: ty.Optional[Timecode] = None
         self._seconds: ty.Optional[float] = None
@@ -188,25 +189,31 @@ class FrameTimecode:
             self._seconds = timecode._seconds
             return
 
-        # Timecode.
-        if isinstance(timecode, Timecode):
-            self._timecode = timecode
-            return
+        if not isinstance(fps, (float, Fraction, FrameTimecode)):
+            raise TypeError("fps must be of type float, Fraction, or FrameTimecode.")
 
         # Ensure args are consistent with API.
         if fps is None:
-            raise TypeError("Framerate (fps) is a required argument.")
+            raise TypeError("fps is a required argument.")
         if isinstance(fps, FrameTimecode):
-            fps = fps._framerate
+            self._framerate = fps._framerate
+        elif isinstance(fps, float):
+            if fps <= MAX_FPS_DELTA:
+                raise ValueError("Framerate must be positive and greater than zero.")
+            self._framerate = Fraction.from_float(fps)
+        elif isinstance(fps, Fraction):
+            if float(fps) <= MAX_FPS_DELTA:
+                raise ValueError("Framerate must be positive and greater than zero.")
+            self._framerate = fps
+        else:
+            raise TypeError(
+                f"Wrong type for fps: {type(fps)} - expected float, Fraction, or FrameTimecode"
+            )
 
-        # Process the given framerate, if it was not already set.
-        if not isinstance(fps, (int, float)):
-            raise TypeError("Framerate must be of type int/float.")
-        if (isinstance(fps, int) and not fps > 0) or (
-            isinstance(fps, float) and not fps >= MAX_FPS_DELTA
-        ):
-            raise ValueError("Framerate must be positive and greater than zero.")
-        self._framerate = float(fps)
+        # Timecode with a time base.
+        if isinstance(timecode, Timecode):
+            self._timecode = timecode
+            return
         # Process the timecode value, storing it as an exact number of frames only if required.
         if isinstance(timecode, str) and timecode.isdigit():
             timecode = int(timecode)
@@ -243,7 +250,7 @@ class FrameTimecode:
 
     @property
     def framerate(self) -> ty.Optional[float]:
-        return self._framerate
+        return float(self._framerate)
 
     def get_frames(self) -> int:
         """[DEPRECATED] Get the current time/position in number of frames.
