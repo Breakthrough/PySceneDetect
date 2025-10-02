@@ -206,6 +206,8 @@ class VideoStreamCv2(VideoStream):
 
     @property
     def position(self) -> FrameTimecode:
+        # TODO(https://scenedetect.com/issue/168): See if there is a better way to do this, or
+        # add a config option before landing this.
         if _USE_PTS_IN_DEVELOPMENT:
             return FrameTimecode(timecode=self.timecode, fps=self.frame_rate)
         if self.frame_number < 1:
@@ -226,10 +228,7 @@ class VideoStreamCv2(VideoStream):
         if target < 0:
             raise ValueError("Target seek position cannot be negative!")
 
-        if _USE_PTS_IN_DEVELOPMENT:
-            # TODO(https://scenedetect.com/issue/168): Shouldn't use frames for VFR video here.
-            raise NotImplementedError()
-
+        # TODO(https://scenedetect.com/issue/168): Shouldn't use frames for VFR video here.
         # Have to seek one behind and call grab() after to that the VideoCapture
         # returns a valid timestamp when using CAP_PROP_POS_MSEC.
         target_frame_cv2 = (self.base_timecode + target).frame_num

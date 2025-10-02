@@ -137,7 +137,8 @@ class ContentDetector(SceneDetector):
                 raise ValueError("kernel_size must be odd integer >= 3")
             self._kernel = numpy.ones((kernel_size, kernel_size), numpy.uint8)
         self._frame_score: ty.Optional[float] = None
-        # TODO(https://scenedetect.com/issue/168): Handle timecodes in filter.
+        # TODO(https://scenedetect.com/issue/168): Figure out a better long term plan for handling
+        # `min_scene_len` which should be specified in seconds, not frames.
         self._flash_filter = FlashFilter(mode=filter_mode, length=min_scene_len)
 
     def get_metrics(self):

@@ -713,4 +713,5 @@ Although there have been minimal changes to most API examples, there are several
  * Deprecated functionality preserved from v0.6 now uses the `warnings` module
  * Add properties to access `frame_num`, `framerate`, and `seconds` from `FrameTimecode` instead of getter methods
  * Add new `Timecode` type to represent frame timings in terms of the video's source timebase
- * Expand `FrameTimecode` representations to preserve accuracy (previously all timecodes were rounded to frame boundaries)
+ * Add new `time_base` and `pts` properties to `FrameTimecode` to provide more accurate timing information
+

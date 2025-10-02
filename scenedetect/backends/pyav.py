@@ -12,6 +12,7 @@
 """:class:`VideoStreamAv` provides an adapter for the PyAV av.InputContainer object."""
 
 import typing as ty
+from fractions import Fraction
 from logging import getLogger
 
 import av
@@ -22,7 +23,6 @@ from scenedetect.platform import get_file_name
 from scenedetect.video_stream import FrameRateUnavailable, VideoOpenFailure, VideoStream
 
 logger = getLogger("pyscenedetect")
-
 VALID_THREAD_MODES = ["NONE", "SLICE", "FRAME", "AUTO"]
 
 
@@ -36,7 +36,7 @@ class VideoStreamAv(VideoStream):
     def __init__(
         self,
         path_or_io: ty.Union[ty.AnyStr, ty.BinaryIO],
-        framerate: ty.Optional[float] = None,
+        framerate: ty.Optional[ty.Union[float, Fraction]] = None,
         name: ty.Optional[str] = None,
         threading_mode: ty.Optional[str] = None,
         suppress_output: bool = False,
@@ -123,15 +123,14 @@ class VideoStreamAv(VideoStream):
             )
             if frame_rate is None or frame_rate == 0:
                 raise FrameRateUnavailable()
-            # TODO: Refactor FrameTimecode to support raw timing rather than framerate based calculations.
-            # See https://pyav.org/docs/develop/api/stream.html for details.
-            frame_rate = frame_rate.numerator / float(frame_rate.denominator)
             if frame_rate < MAX_FPS_DELTA:
                 raise FrameRateUnavailable()
-            self._frame_rate: float = frame_rate
+            self._frame_rate: Fraction = frame_rate
         else:
             assert framerate >= MAX_FPS_DELTA
-            self._frame_rate: float = framerate
+            self._frame_rate: Fraction = (
+                framerate if isinstance(framerate, Fraction) else Fraction.from_float(framerate)
+            )
 
         # Calculate duration after we have set the framerate.
         self._duration_frames = self._get_duration()
@@ -213,6 +212,16 @@ class VideoStreamAv(VideoStream):
         return 0
 
     @property
+    def rate(self) -> Fraction:
+        return self._video_stream.guessed_rate
+
+    @property
+    def time_base(self) -> Fraction:
+        if self._frame:
+            return self._frame.time_base
+        return None
+
+    @property
     def aspect_ratio(self) -> float:
         """Pixel aspect ratio as a float (1.0 represents square pixels)."""
         if (
@@ -250,10 +259,7 @@ class VideoStreamAv(VideoStream):
             raise ValueError("Target cannot be negative!")
         beginning = target == 0
 
-        if _USE_PTS_IN_DEVELOPMENT:
-            # TODO(https://scenedetect.com/issue/168): Need to handle PTS here.
-            raise NotImplementedError()
-
+        # TODO(https://scenedetect.com/issues/168): This breaks with PTS mode enabled.
         target = self.base_timecode + target
         if target >= 1:
             target = target - 1

@@ -30,7 +30,7 @@ from enum import Enum
 
 import numpy
 
-from scenedetect.common import _USE_PTS_IN_DEVELOPMENT, FrameTimecode
+from scenedetect.common import FrameTimecode
 from scenedetect.stats_manager import StatsManager
 
 
@@ -49,7 +49,7 @@ class SceneDetector(ABC):
     def process_frame(
         self, timecode: FrameTimecode, frame_img: numpy.ndarray
     ) -> ty.List[FrameTimecode]:
-        """Process the next frame. `frame_num` is assumed to be sequential.
+        """Process the next frame. `timecode` is assumed to be sequential.
 
         Args:
             timecode: Timecode corresponding to the frame being processed.
@@ -74,9 +74,8 @@ class SceneDetector(ABC):
 
     @property
     def event_buffer_length(self) -> int:
-        """The amount of frames a given event can be buffered for, in time. Represents maximum
-        amount any event can be behind `frame_number` in the result of :meth:`process_frame`.
-        """
+        """The amount of frames a given event can be buffered for, in time. This must be set to the
+        amount of frames a detector might emit an event in the past."""
         return 0
 
     # Frame Stats/Metrics
@@ -135,30 +134,32 @@ class FlashFilter:
     def filter(self, timecode: FrameTimecode, above_threshold: bool) -> ty.List[FrameTimecode]:
         if not self._filter_length > 0:
             return [timecode] if above_threshold else []
-        if _USE_PTS_IN_DEVELOPMENT:
-            raise NotImplementedError("TODO: Change filter to use units of time instead of frames.")
         if self._last_above is None:
             self._last_above = timecode
         if self._mode == FlashFilter.Mode.MERGE:
-            return self._filter_merge(frame_num=timecode, above_threshold=above_threshold)
+            return self._filter_merge(timecode=timecode, above_threshold=above_threshold)
         elif self._mode == FlashFilter.Mode.SUPPRESS:
-            return self._filter_suppress(frame_num=timecode, above_threshold=above_threshold)
+            return self._filter_suppress(timecode=timecode, above_threshold=above_threshold)
         raise RuntimeError("Unhandled FlashFilter mode.")
 
-    def _filter_suppress(self, frame_num: int, above_threshold: bool) -> ty.List[int]:
-        min_length_met: bool = (frame_num - self._last_above) >= self._filter_length
+    def _filter_suppress(self, timecode: FrameTimecode, above_threshold: bool) -> ty.List[int]:
+        framerate = timecode.framerate
+        assert framerate >= 0
+        min_length_met: bool = (timecode - self._last_above) >= (self._filter_length / framerate)
         if not (above_threshold and min_length_met):
             return []
         # Both length and threshold requirements were satisfied. Emit the cut, and wait until both
         # requirements are met again.
-        self._last_above = frame_num
-        return [frame_num]
+        self._last_above = timecode
+        return [timecode]
 
-    def _filter_merge(self, frame_num: int, above_threshold: bool) -> ty.List[int]:
-        min_length_met: bool = (frame_num - self._last_above) >= self._filter_length
+    def _filter_merge(self, timecode: FrameTimecode, above_threshold: bool) -> ty.List[int]:
+        framerate = timecode.framerate
+        assert framerate >= 0
+        min_length_met: bool = (timecode - self._last_above) >= (self._filter_length / framerate)
         # Ensure last frame is always advanced to the most recent one that was above the threshold.
         if above_threshold:
-            self._last_above = frame_num
+            self._last_above = timecode
         if self._merge_triggered:
             # This frame was under the threshold, see if enough frames passed to disable the filter.
             num_merged_frames = self._last_above - self._merge_start
@@ -174,9 +175,9 @@ class FlashFilter:
         if min_length_met:
             # Only allow the merge filter once the first cut is emitted.
             self._merge_enabled = True
-            return [frame_num]
+            return [timecode]
         # Start merging cuts until the length requirement is met.
         if self._merge_enabled:
             self._merge_triggered = True
-            self._merge_start = frame_num
+            self._merge_start = timecode
         return []

@@ -21,11 +21,12 @@ or string HH:MM:SS[.nnn]. timecode format.
 """
 
 # Third-Party Library Imports
+from fractions import Fraction
+
 import pytest
 
 # Standard Library Imports
 from scenedetect.common import MAX_FPS_DELTA, FrameTimecode
-from fractions import Fraction
 
 
 def test_framerate():

@@ -87,7 +87,6 @@ import cv2
 import numpy as np
 
 from scenedetect.common import (
-    _USE_PTS_IN_DEVELOPMENT,
     CropRegion,
     CutList,
     FrameTimecode,
@@ -232,7 +231,7 @@ class SceneManager:
         self._exception_info = None
         self._stop = threading.Event()
 
-        self._frame_buffer = []
+        self._frame_buffer: ty.List[ty.Tuple[FrameTimecode, np.ndarray]] = []
         self._frame_buffer_size = 0
         self._crop = None
 
@@ -385,7 +384,7 @@ class SceneManager:
         self,
         position: FrameTimecode,
         frame_im: np.ndarray,
-        callback: ty.Optional[ty.Callable[[np.ndarray, int], None]] = None,
+        callback: ty.Optional[ty.Callable[[np.ndarray, FrameTimecode], None]] = None,
     ) -> bool:
         """Add any cuts detected with the current frame to the cutting list. Returns True if any new
         cuts were detected, False otherwise."""
@@ -393,7 +392,7 @@ class SceneManager:
         # TODO(https://scenedetect.com/issues/283): This breaks with AdaptiveDetector as cuts differ
         # from the frame number being processed. Allow detectors to specify the max frame lookahead
         # they require (i.e. any event will never be more than N frames behind the current one).
-        self._frame_buffer.append(frame_im)
+        self._frame_buffer.append((position, frame_im))
         # frame_buffer[-1] is current frame, -2 is one behind, etc
         # so index based on cut frame should be [event_frame - (frame_num + 1)]
         self._frame_buffer = self._frame_buffer[-(self._frame_buffer_size + 1) :]
@@ -401,13 +400,11 @@ class SceneManager:
             cuts = detector.process_frame(position, frame_im)
             self._cutting_list += cuts
             new_cuts = True if cuts else False
-            # TODO: Support callbacks with PTS.
             if callback:
-                if _USE_PTS_IN_DEVELOPMENT:
-                    raise NotImplementedError()
                 for cut in cuts:
-                    buffer_index = cut.frame_num - (position.frame_num + 1)
-                    callback(self._frame_buffer[buffer_index], cut.frame_num)
+                    for position, frame in self._frame_buffer:
+                        if cut == position:
+                            callback(frame, position)
         return new_cuts
 
     def _post_process(self, timecode: FrameTimecode) -> None:
