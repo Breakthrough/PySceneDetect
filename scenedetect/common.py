@@ -147,6 +147,20 @@ class Timecode:
         return float(self.time_base * self.pts)
 
 
+@dataclass(frozen=True)
+class _FrameNumber:
+    """Represents a time as a frame number."""
+
+    value: int
+
+
+@dataclass(frozen=True)
+class _Seconds:
+    """Represents a time in seconds."""
+
+    value: float
+
+
 class FrameTimecode:
     """Object for frame-based timecodes, using the video framerate to compute back and
     forth between frame number and seconds/timecode.
@@ -172,24 +186,15 @@ class FrameTimecode:
             TypeError: Thrown if either `timecode` or `fps` are unsupported types.
             ValueError: Thrown when specifying a negative timecode or framerate.
         """
-        # NOTE: FrameTimecode will have either a `Timecode` representation, a `seconds`
-        # representation, or only a frame number. We cache the calculated values for later use
-        # for the parameters that are missing.
+        self._time: ty.Union[_FrameNumber, _Seconds, Timecode]
+        """Internal time representation."""
         self._rate: Fraction = None
         """Rate at which time passes between frames, measured in frames/sec."""
-        self._frame_num = None
-        """Frame number which may be estimated."""
-        self._timecode: ty.Optional[Timecode] = None
-        """Presentation timestamp from the backend."""
-        self._seconds: ty.Optional[float] = None
-        """An explicit point in time."""
 
         # Copy constructor.
         if isinstance(timecode, FrameTimecode):
             self._rate = timecode._rate if fps is None else fps
-            self._frame_num = timecode._frame_num
-            self._timecode = timecode._timecode
-            self._seconds = timecode._seconds
+            self._time = timecode._time
             return
 
         if not isinstance(fps, (float, Fraction, FrameTimecode)):
@@ -215,7 +220,7 @@ class FrameTimecode:
 
         # Timecode with a time base.
         if isinstance(timecode, Timecode):
-            self._timecode = timecode
+            self._time = timecode
             return
 
         # Process the timecode value, storing it as an exact number of frames only if required.
@@ -223,15 +228,15 @@ class FrameTimecode:
             timecode = int(timecode)
 
         if isinstance(timecode, str):
-            self._seconds = self._timecode_to_seconds(timecode)
+            self._time = _Seconds(self._timecode_to_seconds(timecode))
         elif isinstance(timecode, float):
             if timecode < 0.0:
                 raise ValueError("Timecode frame number must be positive and greater than zero.")
-            self._seconds = timecode
+            self._time = _Seconds(timecode)
         elif isinstance(timecode, int):
             if timecode < 0:
                 raise ValueError("Timecode frame number must be positive and greater than zero.")
-            self._frame_num = timecode
+            self._time = _FrameNumber(timecode)
         else:
             raise TypeError("Timecode format/type unrecognized.")
 
@@ -239,7 +244,7 @@ class FrameTimecode:
     def frame_num(self) -> ty.Optional[int]:
         """The frame number. This value will be an estimate if the video is VFR. Prefer using the
         `pts` property."""
-        if self._timecode:
+        if isinstance(self._time, Timecode):
             # We need to audit anything currently using this property to guarantee temporal
             # consistency when handling VFR videos (i.e. no assumptions on fixed frame rate).
             warnings.warn(
@@ -249,11 +254,11 @@ class FrameTimecode:
             )
             # We can calculate the approx. # of frames by taking the presentation time and the
             # time base itself.
-            (num, den) = (self._timecode.time_base * self._timecode.pts).as_integer_ratio()
+            (num, den) = (self._time.time_base * self._time.pts).as_integer_ratio()
             return num / den
-        if self._seconds is not None:
-            return self._seconds_to_frames(self._seconds)
-        return self._frame_num
+        if isinstance(self._time, _Seconds):
+            return self._seconds_to_frames(self._time.value)
+        return self._time.value
 
     @property
     def framerate(self) -> float:
@@ -264,15 +269,15 @@ class FrameTimecode:
     @property
     def time_base(self) -> Fraction:
         """The time base in which presentation time is calculated."""
-        if self._timecode:
-            return self._timecode.time_base
+        if isinstance(self._time, Timecode):
+            return self._time.time_base
         return 1 / self._rate
 
     @property
     def pts(self) -> int:
         """The presentation timestamp of the frame in units of `time_base`."""
-        if self._timecode:
-            return self._timecode.pts
+        if isinstance(self._time, Timecode):
+            return self._time.pts
         return self.frame_num
 
     def get_frames(self) -> int:
@@ -321,11 +326,11 @@ class FrameTimecode:
     @property
     def seconds(self) -> float:
         """The frame's position in number of seconds."""
-        if self._timecode:
-            return self._timecode.seconds
-        if self._seconds:
-            return self._seconds
-        return float(self._frame_num / self._rate)
+        if isinstance(self._time, Timecode):
+            return self._time.seconds
+        if isinstance(self._time, _Seconds):
+            return self._time.value
+        return float(self._time.value / self._rate)
 
     def get_seconds(self) -> float:
         """[DEPRECATED] Get the frame's position in number of seconds.
@@ -478,8 +483,8 @@ class FrameTimecode:
                 raise ValueError(
                     "FrameTimecode instances require equal framerate for frame-based arithmetic."
                 )
-            if other._frame_num is not None:
-                return other._frame_num
+            if isinstance(other._time, _FrameNumber):
+                return other._time.value
             # If other has no frame_num, it must have a timecode. Convert to frames.
             return self._seconds_to_frames(other.seconds)
         raise TypeError("Cannot obtain frame number for this timecode.")
@@ -489,7 +494,7 @@ class FrameTimecode:
             return False
         if _compare_as_fixed(self, other):
             return self.frame_num == other.frame_num
-        if self._timecode or self._seconds is not None:
+        if isinstance(self._time, (Timecode, _Seconds)):
             return self.seconds == self._get_other_as_seconds(other)
         return self.frame_num == self._get_other_as_frames(other)
 
@@ -498,74 +503,76 @@ class FrameTimecode:
             return True
         if _compare_as_fixed(self, other):
             return self.frame_num != other.frame_num
-        if self._timecode or self._seconds is not None:
+        if isinstance(self._time, (Timecode, _Seconds)):
             return self.seconds != self._get_other_as_seconds(other)
         return self.frame_num != self._get_other_as_frames(other)
 
     def __lt__(self, other: ty.Union[int, float, str, "FrameTimecode"]) -> bool:
         if _compare_as_fixed(self, other):
             return self.frame_num < other.frame_num
-        if self._timecode or self._seconds is not None:
+        if isinstance(self._time, (Timecode, _Seconds)):
             return self.seconds < self._get_other_as_seconds(other)
         return self.frame_num < self._get_other_as_frames(other)
 
     def __le__(self, other: ty.Union[int, float, str, "FrameTimecode"]) -> bool:
         if _compare_as_fixed(self, other):
             return self.frame_num <= other.frame_num
-        if self._timecode or self._seconds is not None:
+        if isinstance(self._time, (Timecode, _Seconds)):
             return self.seconds <= self._get_other_as_seconds(other)
         return self.frame_num <= self._get_other_as_frames(other)
 
     def __gt__(self, other: ty.Union[int, float, str, "FrameTimecode"]) -> bool:
         if _compare_as_fixed(self, other):
             return self.frame_num > other.frame_num
-        if self._timecode or self._seconds is not None:
+        if isinstance(self._time, (Timecode, _Seconds)):
             return self.seconds > self._get_other_as_seconds(other)
         return self.frame_num > self._get_other_as_frames(other)
 
     def __ge__(self, other: ty.Union[int, float, str, "FrameTimecode"]) -> bool:
         if _compare_as_fixed(self, other):
             return self.frame_num >= other.frame_num
-        if self._timecode or self._seconds is not None:
+        if isinstance(self._time, (Timecode, _Seconds)):
             return self.seconds >= self._get_other_as_seconds(other)
         return self.frame_num >= self._get_other_as_frames(other)
 
     def __iadd__(self, other: ty.Union[int, float, str, "FrameTimecode"]) -> "FrameTimecode":
-        other_has_timecode = isinstance(other, FrameTimecode) and other._timecode
+        other_is_timecode = isinstance(other, FrameTimecode) and isinstance(other._time, Timecode)
 
-        if self._timecode and other_has_timecode:
-            if self._timecode.time_base != other._timecode.time_base:
+        if isinstance(self._time, Timecode) and other_is_timecode:
+            if self._time.time_base != other._time.time_base:
                 raise ValueError("timecodes have different time bases")
-            self._timecode = Timecode(
-                pts=max(0, self._timecode.pts + other._timecode.pts),
-                time_base=self._timecode.time_base,
+            self._time = Timecode(
+                pts=max(0, self._time.pts + other._time.pts),
+                time_base=self._time.time_base,
             )
             return self
 
         # If either input is a timecode, the output shall also be one. The input which isn't a
         # timecode is converted into seconds, after which the equivalent timecode is computed.
-        if self._timecode or other_has_timecode:
-            timecode: Timecode = self._timecode if self._timecode else other._timecode
-            seconds: float = self._get_other_as_seconds(other) if self._timecode else self.seconds
-            self._timecode = Timecode(
+        if isinstance(self._time, Timecode) or other_is_timecode:
+            timecode: Timecode = self._time if isinstance(self._time, Timecode) else other._time
+            seconds: float = (
+                self._get_other_as_seconds(other)
+                if isinstance(self._time, Timecode)
+                else self.seconds
+            )
+            self._time = Timecode(
                 pts=max(0, timecode.pts + round(seconds / timecode.time_base)),
                 time_base=timecode.time_base,
             )
-            self._seconds = None
             self._rate = None
-            self._frame_num = None
             return self
 
-        other_has_seconds = isinstance(other, FrameTimecode) and other._seconds
-        if self._seconds is not None and other_has_seconds:
-            self._seconds = max(0, self._seconds + other._seconds)
+        other_is_seconds = isinstance(other, FrameTimecode) and isinstance(other._time, _Seconds)
+        if isinstance(self._time, _Seconds) and other_is_seconds:
+            self._time = _Seconds(max(0, self._time.value + other._time.value))
             return self
 
-        if self._seconds is not None:
-            self._seconds = max(0.0, self._seconds + self._get_other_as_seconds(other))
+        if isinstance(self._time, _Seconds):
+            self._time = _Seconds(max(0.0, self._time.value + self._get_other_as_seconds(other)))
             return self
 
-        self._frame_num = max(0, self._frame_num + self._get_other_as_frames(other))
+        self._time = _FrameNumber(max(0, self._time.value + self._get_other_as_frames(other)))
         return self
 
     def __add__(self, other: ty.Union[int, float, str, "FrameTimecode"]) -> "FrameTimecode":
@@ -574,41 +581,43 @@ class FrameTimecode:
         return to_return
 
     def __isub__(self, other: ty.Union[int, float, str, "FrameTimecode"]) -> "FrameTimecode":
-        other_has_timecode = isinstance(other, FrameTimecode) and other._timecode
+        other_is_timecode = isinstance(other, FrameTimecode) and isinstance(other._time, Timecode)
 
-        if self._timecode and other_has_timecode:
-            if self._timecode.time_base != other._timecode.time_base:
+        if isinstance(self._time, Timecode) and other_is_timecode:
+            if self._time.time_base != other._time.time_base:
                 raise ValueError("timecodes have different time bases")
-            self._timecode = Timecode(
-                pts=max(0, self._timecode.pts - other._timecode.pts),
-                time_base=self._timecode.time_base,
+            self._time = Timecode(
+                pts=max(0, self._time.pts - other._time.pts),
+                time_base=self._time.time_base,
             )
             return self
 
         # If either input is a timecode, the output shall also be one. The input which isn't a
         # timecode is converted into seconds, after which the equivalent timecode is computed.
-        if self._timecode or other_has_timecode:
-            timecode: Timecode = self._timecode if self._timecode else other._timecode
-            seconds: float = self._get_other_as_seconds(other) if self._timecode else self.seconds
-            self._timecode = Timecode(
+        if isinstance(self._time, Timecode) or other_is_timecode:
+            timecode: Timecode = self._time if isinstance(self._time, Timecode) else other._time
+            seconds: float = (
+                self._get_other_as_seconds(other)
+                if isinstance(self._time, Timecode)
+                else self.seconds
+            )
+            self._time = Timecode(
                 pts=max(0, timecode.pts - round(seconds / timecode.time_base)),
                 time_base=timecode.time_base,
             )
-            self._seconds = None
             self._rate = None
-            self._frame_num = None
             return self
 
-        other_has_seconds = isinstance(other, FrameTimecode) and other._seconds
-        if self._seconds is not None and other_has_seconds:
-            self._seconds = max(0, self._seconds - other._seconds)
+        other_is_seconds = isinstance(other, FrameTimecode) and isinstance(other._time, _Seconds)
+        if isinstance(self._time, _Seconds) and other_is_seconds:
+            self._time = _Seconds(max(0, self._time.value - other._time.value))
             return self
 
-        if self._seconds is not None:
-            self._seconds = max(0.0, self._seconds - self._get_other_as_seconds(other))
+        if isinstance(self._time, _Seconds):
+            self._time = _Seconds(max(0.0, self._time.value - self._get_other_as_seconds(other)))
             return self
 
-        self._frame_num = max(0, self._frame_num - self._get_other_as_frames(other))
+        self._time = _FrameNumber(max(0, self._time.value - self._get_other_as_frames(other)))
         return self
 
     def __sub__(self, other: ty.Union[int, float, str, "FrameTimecode"]) -> "FrameTimecode":
@@ -620,7 +629,9 @@ class FrameTimecode:
     # need to use relevant property instead.
 
     def __int__(self) -> int:
-        return self._frame_num
+        if isinstance(self._time, _FrameNumber):
+            return self._time.value
+        return self.frame_num
 
     def __float__(self) -> float:
         return self.seconds
@@ -629,21 +640,21 @@ class FrameTimecode:
         return self.get_timecode()
 
     def __repr__(self) -> str:
-        if self._timecode:
-            return f"{self.get_timecode()} [pts={self._timecode.pts}, time_base={self._timecode.time_base}]"
-        if self._seconds is not None:
-            return f"{self.get_timecode()} [seconds={self._seconds}, fps={self._rate}]"
-        return f"{self.get_timecode()} [frame_num={self._frame_num}, fps={self._rate}]"
+        if isinstance(self._time, Timecode):
+            return f"{self.get_timecode()} [pts={self._time.pts}, time_base={self._time.time_base}]"
+        if isinstance(self._time, _Seconds):
+            return f"{self.get_timecode()} [seconds={self._time.value}, fps={self._rate}]"
+        return f"{self.get_timecode()} [frame_num={self._time.value}, fps={self._rate}]"
 
     def __hash__(self) -> int:
-        if self._timecode:
-            return hash(self._timecode)
-        return self._frame_num
+        if isinstance(self._time, Timecode):
+            return hash(self._time)
+        return self.frame_num
 
     def _get_other_as_seconds(self, other: ty.Union[int, float, str, "FrameTimecode"]) -> float:
         """Get the time in seconds from `other` for arithmetic operations."""
         if isinstance(other, int):
-            if self._timecode:
+            if isinstance(self._time, Timecode):
                 # TODO(https://scenedetect.com/issue/168): We need to convert every place that uses
                 # frame numbers with timestamps to convert to a non-frame based way of temporal
                 # logic and instead use seconds-based.
