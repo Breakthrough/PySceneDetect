@@ -352,6 +352,11 @@ class FrameTimecode:
         )
         return self.seconds
 
+    # TODO(https://scenedetect.com/issue/168): We should remove `nearest_frame` if possible, it
+    # assumes constant framerate and causes more problems than it solves. Setting it to False makes
+    # test_cli_load_scenes_with_time_frames in test_cli.py fail due to differences in end time.
+    # We may also just need to clamp end time to the one specified by the user, this may not be
+    # happening in the code.
     def get_timecode(
         self, precision: int = 3, use_rounding: bool = True, nearest_frame: bool = True
     ) -> str:

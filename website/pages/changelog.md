@@ -671,19 +671,14 @@ Development
 
 PySceneDetect is a major breaking release which overhauls how timestamps are handled throughout the API. This allows PySceneDetect to properly process variable framerate (VFR) videos. A significant amount of technical debt has been addressed, including removal of deprecated or overly complicated APIs.
 
-Although there have been minimal changes to most API examples, there are several breaking changes. Applications written for the 0.6 API *may* require modification to work with the new API.
-
-### CLI Changes
+Although there have been minimal changes to most API examples, there are several breaking changes. Applications written for the 0.6 API *may* require modification to work with the new API.  Minimum supported Python version is now **Python 3.8**.
 
 ### CLI Changes
 
 - [feature] [WIP] New `save-xml` command supports saving scenes in Final Cut Pro format [#156](https://github.com/Breakthrough/PySceneDetect/issues/156)
 - [refactor] Remove deprecated `-d`/`--min-delta-hsv` option from `detect-adaptive` command
 
-
 ### API Changes
-
-#### Breaking
 
  * Replace `frame_num` parameter (`int`) with `timecode` (`FrameTimecode`) in `SceneDetector` interface (#168)[https://github.com/Breakthrough/PySceneDetect/issues/168]:
       * The detector interface: `SceneDetector.process_frame()` and `SceneDetector.post_process()`
@@ -707,9 +702,6 @@ Although there have been minimal changes to most API examples, there are several
  * Remove `advance` parameter from `VideoStream.read()`
  * Remove `SceneDetector.stats_manager_required` property, no longer required
  * `SceneDetector` is now a [Python abstract class](https://docs.python.org/3/library/abc.html)
-
- #### General
-
  * Deprecated functionality preserved from v0.6 now uses the `warnings` module
  * Add properties to access `frame_num`, `framerate`, and `seconds` from `FrameTimecode` instead of getter methods
  * Add new `Timecode` type to represent frame timings in terms of the video's source timebase

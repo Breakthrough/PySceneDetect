@@ -116,7 +116,7 @@ class VideoStreamMoviePy(VideoStream):
     @property
     def aspect_ratio(self) -> float:
         """Display/pixel aspect ratio as a float (1.0 represents square pixels)."""
-        # TODO: Use cached_property once Python 3.7 support is deprecated.
+        # TODO: Use cached_property.
         if self._aspect_ratio is None:
             # MoviePy doesn't support extracting the aspect ratio yet, so for now we just fall
             # back to using OpenCV to determine it.

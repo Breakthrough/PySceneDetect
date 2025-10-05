@@ -630,7 +630,7 @@ def test_cli_backend_unsupported():
     )
 
 
-def test_cli_load_scenes():
+def test_cli_load_scenes_options():
     """Ensure we can load scenes both with and without the cut row."""
     assert invoke_scenedetect("-i {VIDEO} time {TIME} {DETECTOR} list-scenes") == 0
     assert invoke_scenedetect("-i {VIDEO} time {TIME} load-scenes -i {VIDEO_NAME}-Scenes.csv") == 0
@@ -648,7 +648,7 @@ def test_cli_load_scenes():
     assert invoke_scenedetect("-i {VIDEO} time {TIME} load-scenes -i {VIDEO_NAME}-Scenes.csv") == 0
 
 
-def test_cli_load_scenes_with_time_frames():
+def test_cli_load_scenes_output():
     """Verify we can use `load-scenes` with the `time` command and get the desired output."""
     scenes_csv = """
 Scene Number,Start Frame
