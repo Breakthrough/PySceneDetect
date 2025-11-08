@@ -137,8 +137,8 @@ def default_formatter(template: str) -> PathFormatter:
         SCENE_NUMBER=format_scene_number(video, scene),
         START_TIME=str(scene.start.get_timecode().replace(":", ";")),
         END_TIME=str(scene.end.get_timecode().replace(":", ";")),
-        START_FRAME=str(scene.start.get_frames()),
-        END_FRAME=str(scene.end.get_frames()),
+        START_FRAME=str(scene.start.frame_num),
+        END_FRAME=str(scene.end.frame_num),
     )
     return formatter
 
@@ -220,7 +220,7 @@ def split_video_mkvmerge(
         ),
         input_video_path,
     ]
-    total_frames = scene_list[-1][1].get_frames() - scene_list[0][0].get_frames()
+    total_frames = scene_list[-1][1].frame_num - scene_list[0][0].frame_num
     processing_start_time = time.time()
     ret_val = 0
     try:
@@ -316,7 +316,7 @@ def split_video_ffmpeg(
 
     try:
         progress_bar = None
-        total_frames = scene_list[-1][1].get_frames() - scene_list[0][0].get_frames()
+        total_frames = scene_list[-1][1].frame_num - scene_list[0][0].frame_num
         if show_progress:
             progress_bar = tqdm(total=total_frames, unit="frame", miniters=1, dynamic_ncols=True)
         processing_start_time = time.time()
@@ -341,11 +341,11 @@ def split_video_ffmpeg(
                 "-nostdin",
                 "-y",
                 "-ss",
-                str(start_time.get_seconds()),
+                str(start_time.seconds),
                 "-i",
                 input_video_path,
                 "-t",
-                str(duration.get_seconds()),
+                str(duration.seconds),
             ]
             call_list += arg_override
             call_list += ["-sn"]
@@ -360,7 +360,7 @@ def split_video_ffmpeg(
                 logger.error("Error splitting video (ffmpeg returned %d).", ret_val)
                 break
             if progress_bar:
-                progress_bar.update(duration.get_frames())
+                progress_bar.update(duration.frame_num)
 
         if progress_bar:
             progress_bar.close()

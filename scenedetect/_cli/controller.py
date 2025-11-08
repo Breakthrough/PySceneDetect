@@ -68,7 +68,7 @@ def run_scenedetect(context: CliContext):
             logger.info(
                 "Detected %d scenes, average shot length %.1f seconds.",
                 len(scenes),
-                sum([(end_time - start_time).get_seconds() for start_time, end_time in scenes])
+                sum([(end_time - start_time).seconds for start_time, end_time in scenes])
                 / float(len(scenes)),
             )
         else:
@@ -106,7 +106,7 @@ def _detect(context: CliContext) -> ty.Optional[ty.Tuple[SceneList, CutList]]:
             logger.critical(
                 "Failed to seek to %s / frame %d: %s",
                 context.start_time.get_timecode(),
-                context.start_time.get_frames(),
+                context.start_time.frame_num,
                 str(ex),
             )
             return None
@@ -120,7 +120,7 @@ def _detect(context: CliContext) -> ty.Optional[ty.Tuple[SceneList, CutList]]:
     )
 
     # Handle case where video failure is most likely due to multiple audio tracks (#179).
-    # TODO(#380): Ensure this does not erroneusly fire.
+    # TODO(https://scenedetect.com/issues/380): Ensure this does not erroneusly fire.
     if num_frames <= 0 and isinstance(context.video_stream, VideoStreamCv2):
         logger.critical(
             "Failed to read any frames from video file. This could be caused by the video"
@@ -175,10 +175,15 @@ def _load_scenes(context: CliContext) -> ty.Tuple[SceneList, CutList]:
         if context.load_scenes_column_name not in csv_headers:
             raise ValueError("specified column header for scene start is not present")
         col_idx = csv_headers.index(context.load_scenes_column_name)
-        cut_list = sorted(
-            FrameTimecode(row[col_idx], fps=context.video_stream.frame_rate) - 1
-            for row in file_reader
-        )
+
+        def calculate_timecode(value: str) -> FrameTimecode:
+            # Assume other columns are in seconds except frame numbers.
+            if value.isdigit():
+                # Frame numbers start from index 1 in the CLI output so we correct for that.
+                return FrameTimecode(int(value) - 1, fps=context.video_stream.frame_rate)
+            return FrameTimecode(value, fps=context.video_stream.frame_rate)
+
+        cut_list = sorted(calculate_timecode(row[col_idx]) for row in file_reader)
         # `SceneDetector` works on cuts, so we have to skip the first scene and place the first
         # cut point where the next scenes starts.
         if cut_list:

@@ -1,0 +1,119 @@
+name: Publish PyPI Package
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag To Publish'
+        required: true
+      environment:
+        description: 'PyPI Environment'
+        required: true
+        type: choice
+        options:
+          - test
+          - release
+        default: 'test'
+
+jobs:
+  verify:
+    name: Verify Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check workflows
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const tag = "${{ github.event.inputs.tag }}";
+            const requiredWorkflows = ['Windows Distribution', 'Python Distribution'];
+            let workflowConclusions = {};
+
+            console.log(`Checking for successful workflow runs for tag: ${tag}`);
+
+            const { data: response } = await github.rest.actions.listWorkflowRunsForRepo({
+              owner,
+              repo,
+              event: 'push',
+            });
+
+            const runsForTag = response.workflow_runs.filter(run => run.head_branch === tag);
+
+            for (const run of runsForTag) {
+              if (requiredWorkflows.includes(run.name)) {
+                if (!workflowConclusions[run.name] || new Date(run.created_at) > new Date(workflowConclusions[run.name].created_at)) {
+                  workflowConclusions[run.name] = {
+                    conclusion: run.conclusion,
+                    created_at: run.created_at,
+                    html_url: run.html_url,
+                  };
+                }
+              }
+            }
+
+            let allSuccess = true;
+            for (const workflowName of requiredWorkflows) {
+              if (!workflowConclusions[workflowName]) {
+                core.setFailed(`Workflow "${workflowName}" was not found for tag ${tag}.`);
+                allSuccess = false;
+              } else if (workflowConclusions[workflowName].conclusion !== 'success') {
+                core.setFailed(`Workflow "${workflowName}" did not succeed for tag ${tag}. Conclusion was "${workflowConclusions[workflowName].conclusion}". See: ${workflowConclusions[workflowName].html_url}`);
+                allSuccess = false;
+              } else {
+                console.log(`✅ Workflow "${workflowName}" succeeded for tag ${tag}.`);
+              }
+            }
+
+            if (!allSuccess) {
+              throw new Error("One or more required build workflows did not succeed.");
+            }
+
+  publish:
+    name: Building and Publishing to ${{ github.event.inputs.environment }} PyPI
+    runs-on: ubuntu-latest
+    needs: verify
+
+    environment:
+      name: ${{ github.event.inputs.environment == 'test' && 'test' || 'release' }}
+      url: ${{ github.event.inputs.environment == 'test' && 'https://test.pypi.org/p/scenedetect' || 'https://pypi.org/p/scenedetect' }}
+
+    permissions:
+      id-token: write  # IMPORTANT: mandatory for trusted publishing
+
+    steps:
+      - name: Checkout ${{ github.event.inputs.tag }}
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.inputs.tag }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.x"
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install build twine
+
+      - name: Build Package
+        run: |
+          python -m build
+          mkdir pkg
+          mv dist/*.tar.gz pkg/
+          mv dist/*.whl pkg/
+
+      - name: Upload Package
+        uses: actions/upload-artifact@v4
+        with:
+          name: scenedetect-dist
+          path: |
+            pkg/*.tar.gz
+            pkg/*.whl
+
+      - name: Publish Package
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: ${{ github.event.inputs.environment == 'test' && 'https://test.pypi.org/legacy/' || 'https://upload.pypi.org/legacy/' }}
+          packages-dir: pkg/
+          print-hash: true

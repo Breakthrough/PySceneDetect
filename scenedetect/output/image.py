@@ -162,8 +162,8 @@ class _ImageExtractor:
                     VIDEO_NAME=video.name,
                     SCENE_NUMBER=scene_num_format % (scene_number + 1),
                     IMAGE_NUMBER=image_num_format % (image_number + 1),
-                    FRAME_NUMBER=image_timecode.get_frames(),
-                    TIMESTAMP_MS=int(image_timecode.get_seconds() * 1000),
+                    FRAME_NUMBER=image_timecode.frame_num,
+                    TIMESTAMP_MS=int(image_timecode.seconds * 1000),
                     TIMECODE=image_timecode.get_timecode().replace(":", ";"),
                 ),
                 self._image_extension,
@@ -293,7 +293,8 @@ class _ImageExtractor:
     def generate_timecode_list(self, scene_list: SceneList) -> ty.List[ty.Iterable[FrameTimecode]]:
         """Generates a list of timecodes for each scene in `scene_list` based on the current config
         parameters."""
-        framerate = scene_list[0][0]._framerate
+        # TODO(v0.7): This needs to be fixed as part of PTS overhaul.
+        framerate = scene_list[0][0].framerate
         # TODO(v1.0): Split up into multiple sub-expressions so auto-formatter works correctly.
         return [
             (
@@ -319,11 +320,11 @@ class _ImageExtractor:
                 # create range of frames in scene
                 for r in (
                     range(
-                        start.get_frames(),
-                        start.get_frames()
+                        start.frame_num,
+                        start.frame_num
                         + max(
                             1,  # guard against zero length scenes
-                            end.get_frames() - start.get_frames(),
+                            end.frame_num - start.frame_num,
                         ),
                     )
                     # for each scene in scene list
@@ -450,13 +451,13 @@ def save_images(
     image_num_format = "%0"
     image_num_format += str(math.floor(math.log(num_images, 10)) + 2) + "d"
 
-    framerate = scene_list[0][0]._framerate
+    framerate = scene_list[0][0]._rate
 
     # TODO(v1.0): Split up into multiple sub-expressions so auto-formatter works correctly.
     timecode_list = [
         [
             FrameTimecode(int(f), fps=framerate)
-            for f in [
+            for f in (
                 # middle frames
                 a[len(a) // 2]
                 if (0 < j < num_images - 1) or num_images == 1
@@ -467,7 +468,7 @@ def save_images(
                 else max(a[-1] - frame_margin, a[0])
                 # for each evenly-split array of frames in the scene list
                 for j, a in enumerate(np.array_split(r, num_images))
-            ]
+            )
         ]
         for i, r in enumerate(
             [
@@ -476,11 +477,11 @@ def save_images(
                 # create range of frames in scene
                 for r in (
                     range(
-                        start.get_frames(),
-                        start.get_frames()
+                        start.frame_num,
+                        start.frame_num
                         + max(
                             1,  # guard against zero length scenes
-                            end.get_frames() - start.get_frames(),
+                            end.frame_num - start.frame_num,
                         ),
                     )
                     # for each scene in scene list
@@ -508,8 +509,8 @@ def save_images(
                         VIDEO_NAME=video.name,
                         SCENE_NUMBER=scene_num_format % (i + 1),
                         IMAGE_NUMBER=image_num_format % (j + 1),
-                        FRAME_NUMBER=image_timecode.get_frames(),
-                        TIMESTAMP_MS=int(image_timecode.get_seconds() * 1000),
+                        FRAME_NUMBER=image_timecode.frame_num,
+                        TIMESTAMP_MS=int(image_timecode.seconds * 1000),
                         TIMECODE=image_timecode.get_timecode().replace(":", ";"),
                     ),
                     image_extension,

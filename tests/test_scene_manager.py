@@ -37,14 +37,14 @@ def test_scene_list(test_video_file):
     start_time = FrameTimecode("00:00:05", video_fps)
     end_time = FrameTimecode("00:00:10", video_fps)
 
-    assert end_time.get_frames() > start_time.get_frames()
+    assert end_time.frame_num > start_time.frame_num
 
     video.seek(start_time)
     sm.auto_downscale = True
 
     num_frames = sm.detect_scenes(video=video, end_time=end_time)
 
-    assert num_frames == (end_time.get_frames() - start_time.get_frames())
+    assert num_frames == (end_time.frame_num - start_time.frame_num)
 
     scene_list = sm.get_scene_list()
     assert scene_list
@@ -56,7 +56,7 @@ def test_scene_list(test_video_file):
     assert scene_list[-1][1] == end_time
 
     for i, _ in enumerate(scene_list):
-        assert scene_list[i][0].get_frames() < scene_list[i][1].get_frames()
+        assert scene_list[i][0].frame_num < scene_list[i][1].frame_num
         if i > 0:
             # Ensure frame list is sorted (i.e. end time frame of
             # one scene is equal to the start time of the next).

@@ -49,4 +49,4 @@ def test_capture_adapter(test_movie_clip: str):
     assert scene_manager.detect_scenes(video=adapter, duration=adapter.base_timecode + 10.0)
     scenes = scene_manager.get_scene_list()
     assert len(scenes) == len(GROUND_TRUTH_CAPTURE_ADAPTER_TEST)
-    assert [start.get_frames() for (start, _) in scenes] == GROUND_TRUTH_CAPTURE_ADAPTER_TEST
+    assert [start.frame_num for (start, _) in scenes] == GROUND_TRUTH_CAPTURE_ADAPTER_TEST

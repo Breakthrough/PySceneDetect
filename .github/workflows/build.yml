@@ -26,21 +26,11 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [macos-13, macos-14, ubuntu-22.04, ubuntu-latest, windows-latest]
-        python-version: ["3.7", "3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]
-        exclude:
-          # macos-14 builders use M1 (ARM64) which does not have a Python 3.7 package available.
-          - os: macos-14
-            python-version: "3.7"
-          # ubuntu 24+ does not have Python 3.7
-          - os: ubuntu-latest
-            python-version: "3.7"
-
+        os: [macos-14, macos-latest, ubuntu-22.04, ubuntu-latest, windows-latest]
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]
     env:
       # Version is extracted below and used to find correct package install path.
       scenedetect_version: ""
-      # Setuptools must be pinned for the Python 3.7 builders.
-      setuptools_version: "${{ matrix.python-version == '3.7' && '==62.3.4' || '' }}"
 
     steps:
       - uses: actions/checkout@v4
@@ -61,7 +51,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          python -m pip install --upgrade pip build wheel virtualenv setuptools${{ env.setuptools_version }}
+          python -m pip install --upgrade pip build wheel virtualenv setuptools
           pip install -r requirements_headless.txt --only-binary av,opencv-python-headless
 
       - name: Install MoviePy

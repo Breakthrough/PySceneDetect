@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Page Not Found{% endblock %}
+
+{% block content %}
+<h1 id="404-title">Page Not Found</h1>
+<p id="404-body">This page does not exist.</p>
+
+<script>
+(function() {
+    var path = window.location.pathname;
+    var pageTitle = document.getElementById('404-title');
+    var pageBody = document.getElementById('404-body');
+
+    // The canonical form is "issues" but we allow "issue" as well.
+    const TARGETS = [ '/issue', '/issues', '/issue/', '/issues/' ];
+    for (const target of TARGETS) {
+        if (path === target) {
+            pageTitle.innerText = 'Redirecting...';
+            const url = 'https://github.com/Breakthrough/PySceneDetect/issues/';
+            pageBody.innerHTML = 'Redirecting to <a href="' + url + '">GitHub issues...</a>';
+            window.location.href = url;
+            return;
+        }
+    }
+
+    const PREFIXES = ['/issue/', '/issues/'];
+    for (const prefix of PREFIXES) {
+        if (path.startsWith(prefix)) {
+            var issueNumber = path.substring(prefix.length);
+            if (issueNumber) {
+                pageTitle.innerText = 'Redirecting...';
+                var newUrl = 'https://github.com/Breakthrough/PySceneDetect/issues/' + issueNumber;
+                pageBody.innerHTML = 'Redirecting to <a href="' + newUrl + '">issue #' + issueNumber + ' on GitHub...</a>';
+                window.location.href = newUrl;
+                return;
+            }
+        }
+    }
+})();
+</script>
+{% endblock %}

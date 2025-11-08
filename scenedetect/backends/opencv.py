@@ -20,6 +20,7 @@ which do not support seeking.
 import math
 import os.path
 import typing as ty
+import warnings
 from fractions import Fraction
 from logging import getLogger
 
@@ -89,9 +90,12 @@ class VideoStreamCv2(VideoStream):
             ValueError: specified framerate is invalid
         """
         super().__init__()
-        # TODO(v0.7): Replace with DeprecationWarning that `path_or_device` will be removed in v0.8.
         if path_or_device is not None:
-            logger.error("path_or_device is deprecated, use path or VideoCaptureAdapter instead.")
+            warnings.warn(
+                "The `path_or_device` argument is deprecated, use `path` or `VideoCaptureAdapter` instead.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
             path = path_or_device
         if path is None:
             raise ValueError("Path must be specified!")
@@ -202,6 +206,8 @@ class VideoStreamCv2(VideoStream):
 
     @property
     def position(self) -> FrameTimecode:
+        # TODO(https://scenedetect.com/issue/168): See if there is a better way to do this, or
+        # add a config option before landing this.
         if _USE_PTS_IN_DEVELOPMENT:
             return FrameTimecode(timecode=self.timecode, fps=self.frame_rate)
         if self.frame_number < 1:
@@ -222,9 +228,10 @@ class VideoStreamCv2(VideoStream):
         if target < 0:
             raise ValueError("Target seek position cannot be negative!")
 
+        # TODO(https://scenedetect.com/issue/168): Shouldn't use frames for VFR video here.
         # Have to seek one behind and call grab() after to that the VideoCapture
         # returns a valid timestamp when using CAP_PROP_POS_MSEC.
-        target_frame_cv2 = (self.base_timecode + target).get_frames()
+        target_frame_cv2 = (self.base_timecode + target).frame_num
         if target_frame_cv2 > 0:
             target_frame_cv2 -= 1
         self._cap.set(cv2.CAP_PROP_POS_FRAMES, target_frame_cv2)
@@ -320,9 +327,9 @@ class VideoStreamCv2(VideoStream):
         cap.set(cv2.CAP_PROP_ORIENTATION_AUTO, 1.0)  # https://github.com/opencv/opencv/issues/26795
 
 
-# TODO(#168): Support non-monotonic timing for `position`. VFR timecode support is a
-# prerequisite for this. Timecodes are currently calculated by multiplying the framerate
-# by number of frames. Actual elapsed time can be obtained via `position_ms` for now.
+# TODO(https://scenedetect.com/issues/168): Support non-monotonic timing for `position`. VFR timecode
+# support is a prerequisite for this. Timecodes are currently calculated by multiplying the
+# framerate by number of frames. Actual elapsed time can be obtained via `position_ms` for now.
 class VideoCaptureAdapter(VideoStream):
     """Adapter for existing VideoCapture objects. Unlike VideoStreamCv2, this class supports
     VideoCaptures which may not support seeking.
@@ -425,8 +432,8 @@ class VideoCaptureAdapter(VideoStream):
     @property
     def duration(self) -> ty.Optional[FrameTimecode]:
         """Duration of the stream as a FrameTimecode, or None if non terminating."""
-        # TODO(v0.7): This will be incorrect for VFR. See if there is another property we can use
-        # to estimate the video length correctly.
+        # TODO(https://scenedetect.com/issue/168): This will be incorrect for VFR. See if there is
+        # another property we can use to estimate the video length correctly.
         frame_count = math.trunc(self._cap.get(cv2.CAP_PROP_FRAME_COUNT))
         if frame_count > 0:
             return self.base_timecode + frame_count

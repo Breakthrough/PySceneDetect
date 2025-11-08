@@ -616,16 +616,6 @@ Examples:
     % (USER_CONFIG.get_help_string("detect-adaptive", "min-content-val")),
 )
 @click.option(
-    "--min-delta-hsv",
-    "-d",
-    metavar="VAL",
-    type=click.FLOAT,
-    default=None,
-    help="[DEPRECATED] Use -c/--min-content-val instead.%s"
-    % (USER_CONFIG.get_help_string("detect-adaptive", "min-delta-hsv")),
-    hidden=True,
-)
-@click.option(
     "--frame-window",
     "-f",
     metavar="VAL",
@@ -677,7 +667,6 @@ def detect_adaptive_command(
     ctx: click.Context,
     threshold: ty.Optional[float],
     min_content_val: ty.Optional[float],
-    min_delta_hsv: ty.Optional[float],
     frame_window: ty.Optional[int],
     weights: ty.Optional[ty.Tuple[float, float, float, float]],
     luma_only: bool,
@@ -689,7 +678,6 @@ def detect_adaptive_command(
     detector_args = ctx.get_detect_adaptive_params(
         threshold=threshold,
         min_content_val=min_content_val,
-        min_delta_hsv=min_delta_hsv,
         frame_window=frame_window,
         luma_only=luma_only,
         min_scene_len=min_scene_len,

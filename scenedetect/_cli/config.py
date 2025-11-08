@@ -297,11 +297,11 @@ class TimecodeFormat(Enum):
 
     def format(self, timecode: FrameTimecode) -> str:
         if self == TimecodeFormat.FRAMES:
-            return str(timecode.get_frames())
+            return str(timecode.frame_num)
         if self == TimecodeFormat.TIMECODE:
             return timecode.get_timecode()
         if self == TimecodeFormat.SECONDS:
-            return "%.3f" % timecode.get_seconds()
+            return "%.3f" % timecode.seconds
         raise RuntimeError("Unhandled format specifier.")
 
 
@@ -325,7 +325,6 @@ CONFIG_FILE_PATH: ty.AnyStr = os.path.join(_CONFIG_FILE_DIR, _CONFIG_FILE_NAME)
 DEFAULT_JPG_QUALITY = 95
 DEFAULT_WEBP_QUALITY = 100
 
-# TODO(v0.7): Remove [detect-adaptive] min-delta-hsv
 CONFIG_MAP: ConfigDict = {
     "backend-opencv": {
         "max-decode-attempts": 5,
@@ -339,7 +338,6 @@ CONFIG_MAP: ConfigDict = {
         "kernel-size": KernelSizeValue(-1),
         "luma-only": False,
         "min-content-val": RangeValue(15.0, min_val=0.0, max_val=255.0),
-        "min-delta-hsv": RangeValue(15.0, min_val=0.0, max_val=255.0),
         "min-scene-len": TimecodeValue(0),
         "threshold": RangeValue(3.0, min_val=0.0, max_val=255.0),
         "weights": ScoreWeightsValue(ContentDetector.DEFAULT_COMPONENT_WEIGHTS),

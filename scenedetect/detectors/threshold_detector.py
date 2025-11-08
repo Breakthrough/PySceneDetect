@@ -16,6 +16,7 @@ This detector is available from the command-line as the `detect-threshold` comma
 """
 
 import typing as ty
+import warnings
 from enum import Enum
 from logging import getLogger
 
@@ -68,9 +69,12 @@ class ThresholdDetector(SceneDetector):
             method: How to treat `threshold` when detecting fade events.
             block_size: [DEPRECATED] DO NOT USE. For backwards compatibility.
         """
-        # TODO(v0.7): Replace with DeprecationWarning that `block_size` will be removed in v0.8.
         if block_size is not None:
-            logger.error("block_size is deprecated.")
+            warnings.warn(
+                "The `block_size` argument is deprecated and will be removed in v0.8.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
 
         super().__init__()
         self.threshold = int(threshold)
@@ -107,7 +111,7 @@ class ThresholdDetector(SceneDetector):
             ty.List[int]: List of frames where scene cuts have been detected. There may be 0
             or more frames in the list, and not necessarily the same as frame_num.
         """
-        # TODO(v0.7): We need to consider PTS here instead. The methods below using frame numbers
+        # TODO(https://scenedetect.com/issue/168): We need to consider PTS here instead. The methods below using frame numbers
         # won't work for variable framerates.
         frame_num = timecode.frame_num
 

@@ -81,12 +81,12 @@ import queue
 import sys
 import threading
 import typing as ty
+import warnings
 
 import cv2
 import numpy as np
 
 from scenedetect.common import (
-    _USE_PTS_IN_DEVELOPMENT,
     CropRegion,
     CutList,
     FrameTimecode,
@@ -94,6 +94,9 @@ from scenedetect.common import (
     SceneList,
 )
 from scenedetect.detector import SceneDetector
+
+# TODO(v0.8): Remove the import * below, for backwards compatibility with v0.6 only.
+from scenedetect.output import *  # noqa: F403
 from scenedetect.platform import tqdm
 from scenedetect.stats_manager import StatsManager
 from scenedetect.video_stream import VideoStream
@@ -228,7 +231,7 @@ class SceneManager:
         self._exception_info = None
         self._stop = threading.Event()
 
-        self._frame_buffer = []
+        self._frame_buffer: ty.List[ty.Tuple[FrameTimecode, np.ndarray]] = []
         self._frame_buffer_size = 0
         self._crop = None
 
@@ -312,9 +315,6 @@ class SceneManager:
         Arguments:
             detector (SceneDetector): Scene detector to add to the SceneManager.
         """
-        if self._stats_manager is None and detector.stats_manager_required():
-            assert not self._detector_list
-            self._stats_manager = StatsManager()
 
         detector.stats_manager = self._stats_manager
         if self._stats_manager is not None:
@@ -384,15 +384,15 @@ class SceneManager:
         self,
         position: FrameTimecode,
         frame_im: np.ndarray,
-        callback: ty.Optional[ty.Callable[[np.ndarray, int], None]] = None,
+        callback: ty.Optional[ty.Callable[[np.ndarray, FrameTimecode], None]] = None,
     ) -> bool:
         """Add any cuts detected with the current frame to the cutting list. Returns True if any new
         cuts were detected, False otherwise."""
         new_cuts = False
-        # TODO(#283): This breaks with AdaptiveDetector as cuts differ from the frame number
-        # being processed. Allow detectors to specify the max frame lookahead they require
-        # (i.e. any event will never be more than N frames behind the current one).
-        self._frame_buffer.append(frame_im)
+        # TODO(https://scenedetect.com/issues/283): This breaks with AdaptiveDetector as cuts differ
+        # from the frame number being processed. Allow detectors to specify the max frame lookahead
+        # they require (i.e. any event will never be more than N frames behind the current one).
+        self._frame_buffer.append((position, frame_im))
         # frame_buffer[-1] is current frame, -2 is one behind, etc
         # so index based on cut frame should be [event_frame - (frame_num + 1)]
         self._frame_buffer = self._frame_buffer[-(self._frame_buffer_size + 1) :]
@@ -400,13 +400,11 @@ class SceneManager:
             cuts = detector.process_frame(position, frame_im)
             self._cutting_list += cuts
             new_cuts = True if cuts else False
-            # TODO: Support callbacks with PTS.
             if callback:
-                if _USE_PTS_IN_DEVELOPMENT:
-                    raise NotImplementedError()
                 for cut in cuts:
-                    buffer_index = cut.frame_num - (position.frame_num + 1)
-                    callback(self._frame_buffer[buffer_index], cut.frame_num)
+                    for position, frame in self._frame_buffer:
+                        if cut == position:
+                            callback(frame, position)
         return new_cuts
 
     def _post_process(self, timecode: FrameTimecode) -> None:
@@ -452,6 +450,7 @@ class SceneManager:
                 complete processing the video frame source.
             callback: If set, called after each scene/event detected.
             frame_source: [DEPRECATED] DO NOT USE. For compatibility with previous version.
+                :meta private:
         Returns:
             int: Number of frames read and processed from the frame source.
         Raises:
@@ -460,6 +459,11 @@ class SceneManager:
         """
         # TODO(v0.7): Add DeprecationWarning that `frame_source` will be removed in v0.8.
         if frame_source is not None:
+            warnings.warn(
+                "The `frame_source` argument is deprecated, use `video` instead.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
             video = frame_source
         # TODO(v0.8): Remove default value for `video` after `frame_source` is removed.
         if video is None:
@@ -518,7 +522,7 @@ class SceneManager:
             if end_time is not None and end_time < video.duration:
                 total_frames = end_time - start_frame_num
             else:
-                total_frames = video.duration.get_frames() - start_frame_num
+                total_frames = video.duration.frame_num - start_frame_num
 
         progress_bar = None
         if show_progress:
@@ -684,9 +688,11 @@ class SceneManager:
             was detected in the input video, which can also be passed to external tools
             for automated splitting of the input into individual scenes.
 
-        :meta private:
         """
-        # TODO(v0.7): Use the warnings module to turn this into a warning.
         if show_warning:
-            logger.error("`get_cut_list()` is deprecated and will be removed in a future release.")
+            warnings.warn(
+                "get_cut_list() is deprecated and will be removed in a future release.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
         return self._get_cutting_list()

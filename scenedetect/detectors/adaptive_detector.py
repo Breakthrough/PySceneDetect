@@ -44,7 +44,6 @@ class AdaptiveDetector(ContentDetector):
         weights: ContentDetector.Components = ContentDetector.DEFAULT_COMPONENT_WEIGHTS,
         luma_only: bool = False,
         kernel_size: ty.Optional[int] = None,
-        min_delta_hsv: ty.Optional[float] = None,
     ):
         """
         Arguments:
@@ -65,11 +64,7 @@ class AdaptiveDetector(ContentDetector):
                 Overrides `weights` if both are set.
             kernel_size: Size of kernel to use for post edge detection filtering. If None,
                 automatically set based on video resolution.
-            min_delta_hsv: [DEPRECATED] DO NOT USE. Use `min_content_val` instead.
         """
-        if min_delta_hsv is not None:
-            logger.error("min_delta_hsv is deprecated, use min_content_val instead.")
-            min_content_val = min_delta_hsv
         if window_width < 1:
             raise ValueError("window_width must be at least 1.")
 
@@ -105,8 +100,6 @@ class AdaptiveDetector(ContentDetector):
     def process_frame(
         self, timecode: FrameTimecode, frame_img: np.ndarray
     ) -> ty.List[FrameTimecode]:
-        # TODO(#283): Merge this with ContentDetector and turn it on by default.
-
         super().process_frame(timecode=timecode, frame_img=frame_img)
 
         # Initialize last scene cut point at the beginning of the frames of interest.

@@ -520,7 +520,8 @@ def test_cli_save_images_path_handling(tmp_path: Path):
     assert image.shape == (544, 1280, 3)
 
 
-# TODO(#134): This works fine with OpenCV currently, but needs to be supported for PyAV and MoviePy.
+# TODO(https://scenedetect.com/issues/134): This works fine with OpenCV currently, but needs to be
+# supported for PyAV and MoviePy.
 def test_cli_save_images_rotation(rotated_video_file, tmp_path: Path):
     """Test that `save-images` command rotates images correctly with the default backend."""
     assert (
@@ -629,7 +630,7 @@ def test_cli_backend_unsupported():
     )
 
 
-def test_cli_load_scenes():
+def test_cli_load_scenes_options():
     """Ensure we can load scenes both with and without the cut row."""
     assert invoke_scenedetect("-i {VIDEO} time {TIME} {DETECTOR} list-scenes") == 0
     assert invoke_scenedetect("-i {VIDEO} time {TIME} load-scenes -i {VIDEO_NAME}-Scenes.csv") == 0
@@ -647,7 +648,7 @@ def test_cli_load_scenes():
     assert invoke_scenedetect("-i {VIDEO} time {TIME} load-scenes -i {VIDEO_NAME}-Scenes.csv") == 0
 
 
-def test_cli_load_scenes_with_time_frames():
+def test_cli_load_scenes_output():
     """Verify we can use `load-scenes` with the `time` command and get the desired output."""
     scenes_csv = """
 Scene Number,Start Frame
@@ -690,7 +691,7 @@ Scene Number,Start Frame
 
 
 def test_cli_load_scenes_round_trip():
-    """Verify we can use `load-scenes` with the `time` command and get the desired output."""
+    """Verify we can use `load-scenes` and get the same scenes as output with `list-scenes`."""
     scenes_csv = """
 Scene Number,Start Frame
 1,49
@@ -756,8 +757,8 @@ def test_cli_save_edl(tmp_path: Path):
 TITLE: {DEFAULT_VIDEO_NAME}
 FCM: NON-DROP FRAME
 
-001  AX V     C        00:00:02:00 00:00:03:17 00:00:02:00 00:00:03:17
-002  AX V     C        00:00:03:18 00:00:05:23 00:00:03:18 00:00:05:23
+001  AX V     C        00:00:02:00 00:00:03:18 00:00:02:00 00:00:03:18
+002  AX V     C        00:00:03:18 00:00:06:00 00:00:03:18 00:00:06:00
 """
     assert output_path.read_text() == EXPECTED_EDL_OUTPUT
 
@@ -777,8 +778,8 @@ def test_cli_save_edl_with_params(tmp_path: Path):
 TITLE: title
 FCM: NON-DROP FRAME
 
-001  BX V     C        00:00:02:00 00:00:03:17 00:00:02:00 00:00:03:17
-002  BX V     C        00:00:03:18 00:00:05:23 00:00:03:18 00:00:05:23
+001  BX V     C        00:00:02:00 00:00:03:18 00:00:02:00 00:00:03:18
+002  BX V     C        00:00:03:18 00:00:06:00 00:00:03:18 00:00:06:00
 """
     assert output_path.read_text() == EXPECTED_EDL_OUTPUT
 

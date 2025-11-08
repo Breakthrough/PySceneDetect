@@ -79,16 +79,16 @@ def test_api_timecode_types():
     base_timecode = FrameTimecode(timecode=0, fps=10.0)
     # Frames (int)
     timecode = base_timecode + 1
-    assert timecode.get_frames() == 1
+    assert timecode.frame_num == 1
     # Seconds (float)
     timecode = base_timecode + 1.0
-    assert timecode.get_frames() == 10
+    assert timecode.frame_num == 10
     # Timecode (str, 'HH:MM:SS' or 'HH:MM:SSS.nnn')
     timecode = base_timecode + "00:00:01.500"
-    assert timecode.get_frames() == 15
+    assert timecode.frame_num == 15
     # Seconds (str, 'SSSs' or 'SSSS.SSSs')
     timecode = base_timecode + "1.5s"
-    assert timecode.get_frames() == 15
+    assert timecode.frame_num == 15
 
 
 def test_api_stats_manager(test_video_file: str):

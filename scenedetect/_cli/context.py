@@ -357,25 +357,8 @@ class CliContext:
         min_scene_len: ty.Optional[str] = None,
         weights: ty.Optional[ty.Tuple[float, float, float, float]] = None,
         kernel_size: ty.Optional[int] = None,
-        min_delta_hsv: ty.Optional[float] = None,
     ) -> ty.Dict[str, ty.Any]:
         """Handle detect-adaptive command options and return args to construct one with."""
-
-        # TODO(v0.7): Remove these branches when removing -d/--min-delta-hsv.
-        if min_delta_hsv is not None:
-            logger.error("-d/--min-delta-hsv is deprecated, use -c/--min-content-val instead.")
-            if min_content_val is None:
-                min_content_val = min_delta_hsv
-        # Handle case where deprecated min-delta-hsv is set, and use it to set min-content-val.
-        if not self.config.is_default("detect-adaptive", "min-delta-hsv"):
-            logger.error(
-                "[detect-adaptive] config file option `min-delta-hsv` is deprecated"
-                ", use `min-delta-hsv` instead."
-            )
-            if self.config.is_default("detect-adaptive", "min-content-val"):
-                self.config.config_dict["detect-adaptive"]["min-content-val"] = (
-                    self.config.config_dict["detect-adaptive"]["min-deleta-hsv"]
-                )
 
         if self.drop_short_scenes:
             min_scene_len = 0

@@ -41,10 +41,10 @@ FAST_CUT_DETECTORS: ty.Tuple[ty.Type[SceneDetector]] = (
 
 ALL_DETECTORS: ty.Tuple[ty.Type[SceneDetector]] = (*FAST_CUT_DETECTORS, ThresholdDetector)
 
-# TODO(#53): Add a test that verifies algorithms output relatively consistent frame scores
-# regardless of resolution. This will ensure that threshold values will hold true for different
-# input sources. Most detectors already provide this guarantee, so this is more to prevent any
-# regressions in the future.
+# TODO(https://scenedetect.com/issues/53): Add a test that verifies algorithms output relatively
+# consistent frame scores regardless of resolution. This will ensure that threshold values will hold
+# true for different input sources. Most detectors already provide this guarantee, so this is more
+# to prevent any regressions in the future.
 
 
 # TODO: Reduce code duplication here and in `conftest.py`
@@ -187,7 +187,7 @@ def get_fade_in_out_test_cases():
 @pytest.mark.parametrize("test_case", get_fast_cut_test_cases())
 def test_detect_fast_cuts(test_case: TestCase):
     scene_list = test_case.detect()
-    start_frames = [timecode.get_frames() for timecode, _ in scene_list]
+    start_frames = [timecode.frame_num for timecode, _ in scene_list]
 
     assert start_frames == test_case.scene_boundaries
     assert scene_list[0][0] == test_case.start_time
@@ -197,7 +197,7 @@ def test_detect_fast_cuts(test_case: TestCase):
 @pytest.mark.parametrize("test_case", get_fade_in_out_test_cases())
 def test_detect_fades(test_case: TestCase):
     scene_list = test_case.detect()
-    start_frames = [timecode.get_frames() for timecode, _ in scene_list]
+    start_frames = [timecode.frame_num for timecode, _ in scene_list]
     assert start_frames == test_case.scene_boundaries
     assert scene_list[0][0] == test_case.start_time
     assert scene_list[-1][1] == test_case.end_time
@@ -224,3 +224,12 @@ def test_detectors_with_stats(test_video_file):
         scene_manager.detect_scenes(video=video, end_time=end_time)
         scene_list = scene_manager.get_scene_list()
         assert len(scene_list) == initial_scene_len
+
+
+# TODO(v0.8): Remove this test during the removal of `scenedetect.scene_detector`.
+def test_deprecated_detector_module_emits_warning_on_import():
+    SCENE_DETECTOR_WARNING = (
+        "The `scene_detector` submodule is deprecated, import from the base package instead."
+    )
+    with pytest.warns(DeprecationWarning, match=SCENE_DETECTOR_WARNING):
+        from scenedetect.scene_detector import SceneDetector as _

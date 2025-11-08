@@ -24,7 +24,7 @@ import numpy as np
 from moviepy.video.io.ffmpeg_reader import FFMPEG_VideoReader
 
 from scenedetect.backends.opencv import VideoStreamCv2
-from scenedetect.common import FrameTimecode
+from scenedetect.common import _USE_PTS_IN_DEVELOPMENT, FrameTimecode
 from scenedetect.platform import get_file_name
 from scenedetect.video_stream import SeekError, VideoOpenFailure, VideoStream
 
@@ -116,7 +116,7 @@ class VideoStreamMoviePy(VideoStream):
     @property
     def aspect_ratio(self) -> float:
         """Display/pixel aspect ratio as a float (1.0 represents square pixels)."""
-        # TODO: Use cached_property once Python 3.7 support is deprecated.
+        # TODO: Use cached_property.
         if self._aspect_ratio is None:
             # MoviePy doesn't support extracting the aspect ratio yet, so for now we just fall
             # back to using OpenCV to determine it.
@@ -143,7 +143,7 @@ class VideoStreamMoviePy(VideoStream):
         The first frame has a time of 0.0 ms.
 
         This method will always return 0.0 if no frames have been `read`."""
-        return self.position.get_seconds() * 1000.0
+        return self.position.seconds * 1000.0
 
     @property
     def frame_number(self) -> int:
@@ -173,10 +173,14 @@ class VideoStreamMoviePy(VideoStream):
             ValueError: `target` is not a valid value (i.e. it is negative).
         """
         success = False
+        if _USE_PTS_IN_DEVELOPMENT:
+            # TODO(https://scenedetect.com/issue/168): Need to handle PTS here.
+            raise NotImplementedError()
+
         if not isinstance(target, FrameTimecode):
             target = FrameTimecode(target, self.frame_rate)
         try:
-            self._last_frame = self._reader.get_frame(target.get_seconds())
+            self._last_frame = self._reader.get_frame(target.seconds)
             if hasattr(self._reader, "last_read") and target >= self.duration:
                 raise SeekError("MoviePy > 2.0 does not have proper EOF semantics (#461).")
             self._frame_number = min(
@@ -185,10 +189,11 @@ class VideoStreamMoviePy(VideoStream):
             )
             success = True
         except OSError as ex:
-            # TODO(#380): Other backends do not currently throw an exception if attempting to seek
-            # past EOF. We need to ensure consistency for seeking past end of video with respect to
-            # errors and behaviour, and should probably gracefully stop at the last frame instead
-            # of throwing an exception.
+            # TODO(https://scenedetect.com/issues/380): Other backends do not currently throw an
+            # exception if attempting to seek past EOF.
+            #
+            # We need to ensure consistency for seeking past end of video with respect to errors and
+            # behaviour, and should probably gracefully stop at the last frame instead of throwing.
             if target >= self.duration:
                 raise SeekError("Target frame is beyond end of video!") from ex
             raise
