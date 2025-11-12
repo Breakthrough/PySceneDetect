@@ -133,8 +133,8 @@ but must remain sequential.</p></li>
 <dl class="py property">
 <dt class="sig sig-object py" id="scenedetect.detectors.adaptive_detector.AdaptiveDetector.event_buffer_length">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">event_buffer_length</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#scenedetect.detectors.adaptive_detector.AdaptiveDetector.event_buffer_length" title="Permalink to this definition">¶</a></dt>
-<dd><p>The amount of frames a given event can be buffered for, in time. Represents maximum
-amount any event can be behind <cite>frame_number</cite> in the result of <a class="reference internal" href="#scenedetect.detectors.adaptive_detector.AdaptiveDetector.process_frame" title="scenedetect.detectors.adaptive_detector.AdaptiveDetector.process_frame"><code class="xref py py-meth docutils literal notranslate"><span class="pre">process_frame()</span></code></a>.</p>
+<dd><p>The amount of frames a given event can be buffered for, in time. This must be set to the
+amount of frames a detector might emit an event in the past.</p>
 </dd></dl>
 
 </dd></dl>
@@ -274,8 +274,8 @@ to allow adding new components without breaking existing usage.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="scenedetect.detectors.content_detector.ContentDetector.event_buffer_length">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">event_buffer_length</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#scenedetect.detectors.content_detector.ContentDetector.event_buffer_length" title="Permalink to this definition">¶</a></dt>
-<dd><p>The amount of frames a given event can be buffered for, in time. Represents maximum
-amount any event can be behind <cite>frame_number</cite> in the result of <a class="reference internal" href="#scenedetect.detectors.content_detector.ContentDetector.process_frame" title="scenedetect.detectors.content_detector.ContentDetector.process_frame"><code class="xref py py-meth docutils literal notranslate"><span class="pre">process_frame()</span></code></a>.</p>
+<dd><p>The amount of frames a given event can be buffered for, in time. This must be set to the
+amount of frames a detector might emit an event in the past.</p>
 </dd></dl>
 
 </dd></dl>

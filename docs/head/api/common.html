@@ -93,7 +93,8 @@ forth between frame number and seconds/timecode.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>timecode</strong> (<em>int</em><em> | </em><em>float</em><em> | </em><em>str</em><em> | </em><a class="reference internal" href="#scenedetect.common.Timecode" title="scenedetect.common.Timecode"><em>Timecode</em></a><em> | </em><a class="reference internal" href="#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a>) – A frame number (<cite>int</cite>), number of seconds (<cite>float</cite>), timecode string in
 the form <cite>‘HH:MM:SS’</cite> or <cite>‘HH:MM:SS.nnn’</cite>, or a <cite>Timecode</cite>.</p></li>
-<li><p><strong>fps</strong> (<em>int</em><em> | </em><em>float</em><em> | </em><em>str</em><em> | </em><a class="reference internal" href="#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a>) – The framerate or FrameTimecode to use as a time base for all arithmetic.</p></li>
+<li><p><strong>fps</strong> (<em>float</em><em> | </em><a class="reference internal" href="#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em> | </em><em>Fraction</em>) – The framerate to use for distance between frames and to calculate frame numbers.
+For a VFR video, this may just be the average framerate.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
@@ -123,7 +124,7 @@ the form <cite>‘HH:MM:SS’</cite> or <cite>‘HH:MM:SS.nnn’</cite>, or a <c
 
 <dl class="py method">
 <dt class="sig sig-object py" id="scenedetect.common.FrameTimecode.get_timecode">
-<span class="sig-name descname"><span class="pre">get_timecode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">precision</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_rounding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.common.FrameTimecode.get_timecode" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">get_timecode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">precision</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_rounding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nearest_frame</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.common.FrameTimecode.get_timecode" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get a formatted timecode string of the form HH:MM:SS[.nnn].</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -131,6 +132,8 @@ the form <cite>‘HH:MM:SS’</cite> or <cite>‘HH:MM:SS.nnn’</cite>, or a <c
 <li><p><strong>precision</strong> (<em>int</em>) – The number of decimal places to include in the output <code class="docutils literal notranslate"><span class="pre">[.nnn]</span></code>.</p></li>
 <li><p><strong>use_rounding</strong> (<em>bool</em>) – Rounds the output to the desired precision. If False, the value
 will be truncated to the specified precision.</p></li>
+<li><p><strong>nearest_frame</strong> (<em>bool</em>) – Ensures that the timecode is moved to the nearest frame boundary if this
+object has a defined framerate, otherwise has no effect.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -143,9 +146,35 @@ will be truncated to the specified precision.</p></li>
 </dd></dl>
 
 <dl class="py property">
+<dt class="sig sig-object py" id="scenedetect.common.FrameTimecode.frame_num">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">frame_num</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#scenedetect.common.FrameTimecode.frame_num" title="Permalink to this definition">¶</a></dt>
+<dd><p>The frame number. This value will be an estimate if the video is VFR. Prefer using the
+<cite>pts</cite> property.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="scenedetect.common.FrameTimecode.framerate">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">framerate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#scenedetect.common.FrameTimecode.framerate" title="Permalink to this definition">¶</a></dt>
+<dd><p>The framerate to use for distance between frames and to calculate frame numbers.
+For a VFR video, this may just be the average framerate.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="scenedetect.common.FrameTimecode.pts">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">pts</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#scenedetect.common.FrameTimecode.pts" title="Permalink to this definition">¶</a></dt>
+<dd><p>The presentation timestamp of the frame in units of <cite>time_base</cite>.</p>
+</dd></dl>
+
+<dl class="py property">
 <dt class="sig sig-object py" id="scenedetect.common.FrameTimecode.seconds">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">seconds</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#scenedetect.common.FrameTimecode.seconds" title="Permalink to this definition">¶</a></dt>
 <dd><p>The frame’s position in number of seconds.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="scenedetect.common.FrameTimecode.time_base">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">time_base</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Fraction</span></em><a class="headerlink" href="#scenedetect.common.FrameTimecode.time_base" title="Permalink to this definition">¶</a></dt>
+<dd><p>The time base in which presentation time is calculated.</p>
 </dd></dl>
 
 </dd></dl>
@@ -229,8 +258,8 @@ to source frame without downscaling.</p>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="scenedetect.common.MAX_FPS_DELTA">
-<span class="sig-prename descclassname"><span class="pre">scenedetect.common.</span></span><span class="sig-name descname"><span class="pre">MAX_FPS_DELTA</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1e-05</span></em><a class="headerlink" href="#scenedetect.common.MAX_FPS_DELTA" title="Permalink to this definition">¶</a></dt>
-<dd><p>Maximum amount two framerates can differ by for equality testing.</p>
+<span class="sig-prename descclassname"><span class="pre">scenedetect.common.</span></span><span class="sig-name descname"><span class="pre">MAX_FPS_DELTA</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1e-09</span></em><a class="headerlink" href="#scenedetect.common.MAX_FPS_DELTA" title="Permalink to this definition">¶</a></dt>
+<dd><p>Maximum amount two framerates can differ by for equality testing. Currently 1 frame/nanosec.</p>
 </dd></dl>
 
 <dl class="py data">

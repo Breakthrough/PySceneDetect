@@ -117,8 +117,8 @@ the detector when a StatsManager is passed to process_frame.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="scenedetect.detector.SceneDetector.process_frame">
-<span class="sig-name descname"><span class="pre">process_frame</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timecode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_img</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.detector.SceneDetector.process_frame" title="Permalink to this definition">¶</a></dt>
-<dd><p>Process the next frame. <cite>frame_num</cite> is assumed to be sequential.</p>
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">process_frame</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timecode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_img</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.detector.SceneDetector.process_frame" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process the next frame. <cite>timecode</cite> is assumed to be sequential.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -135,32 +135,21 @@ the detector when a StatsManager is passed to process_frame.</p>
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="scenedetect.detector.SceneDetector.stats_manager_required">
-<span class="sig-name descname"><span class="pre">stats_manager_required</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.detector.SceneDetector.stats_manager_required" title="Permalink to this definition">¶</a></dt>
-<dd><p>Stats Manager Required: Prototype indicating if detector requires stats.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>True if a StatsManager is required for the detector, False otherwise.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>bool</p>
-</dd>
-</dl>
-</dd></dl>
-
 <dl class="py property">
 <dt class="sig sig-object py" id="scenedetect.detector.SceneDetector.event_buffer_length">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">event_buffer_length</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#scenedetect.detector.SceneDetector.event_buffer_length" title="Permalink to this definition">¶</a></dt>
-<dd><p>The amount of frames a given event can be buffered for, in time. Represents maximum
-amount any event can be behind <cite>frame_number</cite> in the result of <a class="reference internal" href="#scenedetect.detector.SceneDetector.process_frame" title="scenedetect.detector.SceneDetector.process_frame"><code class="xref py py-meth docutils literal notranslate"><span class="pre">process_frame()</span></code></a>.</p>
+<dd><p>The amount of frames a given event can be buffered for, in time. This must be set to the
+amount of frames a detector might emit an event in the past.</p>
 </dd></dl>
 
-<dl class="py attribute">
+<dl class="py property">
 <dt class="sig sig-object py" id="scenedetect.detector.SceneDetector.stats_manager">
-<span class="sig-name descname"><span class="pre">stats_manager</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="stats_manager.html#scenedetect.stats_manager.StatsManager" title="scenedetect.stats_manager.StatsManager"><span class="pre">StatsManager</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#scenedetect.detector.SceneDetector.stats_manager" title="Permalink to this definition">¶</a></dt>
-<dd><p>Optional <a class="reference internal" href="stats_manager.html#scenedetect.stats_manager.StatsManager" title="scenedetect.stats_manager.StatsManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">StatsManager</span></code></a> to
-use for caching frame metrics to and from.</p>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">stats_manager</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="stats_manager.html#scenedetect.stats_manager.StatsManager" title="scenedetect.stats_manager.StatsManager"><span class="pre">StatsManager</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#scenedetect.detector.SceneDetector.stats_manager" title="Permalink to this definition">¶</a></dt>
+<dd><p>Optional <a class="reference internal" href="stats_manager.html#scenedetect.stats_manager.StatsManager" title="scenedetect.stats_manager.StatsManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">StatsManager</span></code></a> to use for
+storing frame metrics. When this detector is added to a parent
+<a class="reference internal" href="scene_manager.html#scenedetect.scene_manager.SceneManager" title="scenedetect.scene_manager.SceneManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">SceneManager</span></code></a>, then this is set to the
+same <a class="reference internal" href="stats_manager.html#scenedetect.stats_manager.StatsManager" title="scenedetect.stats_manager.StatsManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">StatsManager</span></code></a> of the parent - but
+only if it has one itself.</p>
 </dd></dl>
 
 </dd></dl>

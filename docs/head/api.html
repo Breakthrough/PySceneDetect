@@ -42,9 +42,9 @@
 <li><p><a class="reference internal" href="api/detectors.html#scenedetect-detectors"><span class="std std-ref">scenedetect.detectors 🕵️</span></a>: detection algorithms:</p>
 <blockquote>
 <div><ul class="simple">
+<li><p><a class="reference internal" href="api/detectors.html#module-scenedetect.detectors.adaptive_detector" title="scenedetect.detectors.adaptive_detector"><code class="xref py py-mod docutils literal notranslate"><span class="pre">AdaptiveDetector</span></code></a> finds fast cuts using rolling average of HSL changes</p></li>
 <li><p><a class="reference internal" href="api/detectors.html#module-scenedetect.detectors.content_detector" title="scenedetect.detectors.content_detector"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ContentDetector</span></code></a>: detects fast cuts using weighted average of HSV changes</p></li>
 <li><p><a class="reference internal" href="api/detectors.html#module-scenedetect.detectors.threshold_detector" title="scenedetect.detectors.threshold_detector"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ThresholdDetector</span></code></a>: finds fades in/out using average pixel intensity changes in RGB</p></li>
-<li><p><a class="reference internal" href="api/detectors.html#module-scenedetect.detectors.adaptive_detector" title="scenedetect.detectors.adaptive_detector"><code class="xref py py-mod docutils literal notranslate"><span class="pre">AdaptiveDetector</span></code></a> finds fast cuts using rolling average of HSL changes</p></li>
 <li><p><a class="reference internal" href="api/detectors.html#module-scenedetect.detectors.histogram_detector" title="scenedetect.detectors.histogram_detector"><code class="xref py py-mod docutils literal notranslate"><span class="pre">HistogramDetector</span></code></a> finds fast cuts using HSV histogram changes</p></li>
 <li><p><a class="reference internal" href="api/detectors.html#module-scenedetect.detectors.hash_detector" title="scenedetect.detectors.hash_detector"><code class="xref py py-mod docutils literal notranslate"><span class="pre">HashDetector</span></code></a>: finds fast cuts using perceptual image hashing</p></li>
 </ul>
@@ -256,7 +256,11 @@ overriding backend-specific options.</p></li>
 <li class="toctree-l2"><a class="reference internal" href="api/common.html#scenedetect.common.FrameTimecode"><code class="docutils literal notranslate"><span class="pre">FrameTimecode</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="api/common.html#scenedetect.common.FrameTimecode.equal_framerate"><code class="docutils literal notranslate"><span class="pre">FrameTimecode.equal_framerate()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/common.html#scenedetect.common.FrameTimecode.get_timecode"><code class="docutils literal notranslate"><span class="pre">FrameTimecode.get_timecode()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/common.html#scenedetect.common.FrameTimecode.frame_num"><code class="docutils literal notranslate"><span class="pre">FrameTimecode.frame_num</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/common.html#scenedetect.common.FrameTimecode.framerate"><code class="docutils literal notranslate"><span class="pre">FrameTimecode.framerate</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/common.html#scenedetect.common.FrameTimecode.pts"><code class="docutils literal notranslate"><span class="pre">FrameTimecode.pts</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/common.html#scenedetect.common.FrameTimecode.seconds"><code class="docutils literal notranslate"><span class="pre">FrameTimecode.seconds</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/common.html#scenedetect.common.FrameTimecode.time_base"><code class="docutils literal notranslate"><span class="pre">FrameTimecode.time_base</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="api/common.html#scenedetect.common.Interpolation"><code class="docutils literal notranslate"><span class="pre">Interpolation</span></code></a><ul>
@@ -394,7 +398,6 @@ overriding backend-specific options.</p></li>
 <li class="toctree-l3"><a class="reference internal" href="api/detector.html#scenedetect.detector.SceneDetector.get_metrics"><code class="docutils literal notranslate"><span class="pre">SceneDetector.get_metrics()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/detector.html#scenedetect.detector.SceneDetector.post_process"><code class="docutils literal notranslate"><span class="pre">SceneDetector.post_process()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/detector.html#scenedetect.detector.SceneDetector.process_frame"><code class="docutils literal notranslate"><span class="pre">SceneDetector.process_frame()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="api/detector.html#scenedetect.detector.SceneDetector.stats_manager_required"><code class="docutils literal notranslate"><span class="pre">SceneDetector.stats_manager_required()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/detector.html#scenedetect.detector.SceneDetector.event_buffer_length"><code class="docutils literal notranslate"><span class="pre">SceneDetector.event_buffer_length</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/detector.html#scenedetect.detector.SceneDetector.stats_manager"><code class="docutils literal notranslate"><span class="pre">SceneDetector.stats_manager</span></code></a></li>
 </ul>

@@ -426,7 +426,7 @@ application. See the PyAV documentation for details:
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>path_or_io</strong> (<em>AnyStr</em><em> | </em><em>BinaryIO</em>) – Path to the video, or a file-like object.</p></li>
-<li><p><strong>framerate</strong> (<em>float</em><em> | </em><em>None</em>) – If set, overrides the detected framerate.</p></li>
+<li><p><strong>framerate</strong> (<em>float</em><em> | </em><em>Fraction</em><em> | </em><em>None</em>) – If set, overrides the detected framerate.</p></li>
 <li><p><strong>name</strong> (<em>str</em><em> | </em><em>None</em>) – Overrides the <cite>name</cite> property derived from the video path. Should be set if
 <cite>path_or_io</cite> is a file-like object.</p></li>
 <li><p><strong>threading_mode</strong> (<em>str</em><em> | </em><em>None</em>) – The PyAV video stream <cite>thread_type</cite>. See av.codec.context.ThreadType
