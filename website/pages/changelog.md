@@ -671,7 +671,7 @@ Development
 
 PySceneDetect is a major breaking release which overhauls how timestamps are handled throughout the API. This allows PySceneDetect to properly process variable framerate (VFR) videos. A significant amount of technical debt has been addressed, including removal of deprecated or overly complicated APIs.
 
-Although there have been minimal changes to most API examples, there are several breaking changes. Applications written for the 0.6 API *may* require modification to work with the new API.  Minimum supported Python version is now **Python 3.8**.
+Although there have been minimal changes to most API examples, there are several breaking changes. Applications written for the 0.6 API *may* require modification to work with the new API.  Minimum supported Python version is now **Python 3.10**.
 
 ### CLI Changes
 
