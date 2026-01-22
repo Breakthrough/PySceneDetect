@@ -209,7 +209,14 @@ class VideoStreamCv2(VideoStream):
         # TODO(https://scenedetect.com/issue/168): See if there is a better way to do this, or
         # add a config option before landing this.
         if _USE_PTS_IN_DEVELOPMENT:
-            return FrameTimecode(timecode=self.timecode, fps=self.frame_rate)
+            timecode = self.timecode
+            # If PTS is 0 but we've read frames, derive from frame number.
+            # This handles image sequences and cases where CAP_PROP_POS_MSEC is unreliable.
+            if timecode.pts == 0 and self.frame_number > 0:
+                time_sec = (self.frame_number - 1) / self.frame_rate
+                pts = round(time_sec * 1000)
+                timecode = Timecode(pts=pts, time_base=Fraction(1, 1000))
+            return FrameTimecode(timecode=timecode, fps=self.frame_rate)
         if self.frame_number < 1:
             return self.base_timecode
         return self.base_timecode + (self.frame_number - 1)
