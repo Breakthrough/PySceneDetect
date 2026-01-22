@@ -173,7 +173,8 @@ class ContentDetector(SceneDetector):
         )
 
         frame_score: float = sum(
-            component * weight for (component, weight) in zip(score_components, self._weights)
+            component * weight
+            for (component, weight) in zip(score_components, self._weights, strict=True)
         ) / sum(abs(weight) for weight in self._weights)
 
         # Record components and frame score if needed for analysis.
