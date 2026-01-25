@@ -77,6 +77,7 @@ class _ImageExtractor:
         height: ty.Optional[int] = None,
         width: ty.Optional[int] = None,
         interpolation: Interpolation = Interpolation.CUBIC,
+        temporal_margin: ty.Optional[FrameTimecode] = None,
     ):
         """Multi-threaded implementation of save-images functionality. Uses background threads to
         handle image encoding and saving images to disk to improve parallelism.
@@ -85,10 +86,10 @@ class _ImageExtractor:
 
         Arguments:
             num_images: Number of images to generate for each scene.  Minimum is 1.
-            frame_margin: Number of frames to pad each scene around the beginning
+            frame_margin: [DEPRECATED] Number of frames to pad each scene around the beginning
                 and end (e.g. moves the first/last image into the scene by N frames).
                 Can set to 0, but will result in some video files failing to extract
-                the very last frame.
+                the very last frame. Use `temporal_margin` instead.
             image_extension: Type of image to save (must be one of 'jpg', 'png', or 'webp').
             encoder_param: Quality/compression efficiency, based on type of image:
                 'jpg' / 'webp':  Quality 0-100, higher is better quality.  100 is lossless for webp.
@@ -109,9 +110,14 @@ class _ImageExtractor:
                 Specifying only width will rescale the image to that number of pixels wide
                 while preserving the aspect ratio.
             interpolation: Type of interpolation to use when resizing images.
+            temporal_margin: Amount of time to ignore at the beginning/end of a scene when
+                selecting frames. Can be specified as frames (int), seconds (float), or timecode
+                string when creating the FrameTimecode. Uses presentation time (PTS) for selection.
+                When set, takes precedence over `frame_margin`.
         """
         self._num_images = num_images
         self._frame_margin = frame_margin
+        self._temporal_margin = temporal_margin
         self._image_extension = image_extension
         self._image_name_template = image_name_template
         self._scale = scale
@@ -290,48 +296,55 @@ class _ImageExtractor:
             if progress_bar is not None:
                 progress_bar.update(1)
 
+    def _generate_scene_timecodes(
+        self, start: FrameTimecode, end: FrameTimecode
+    ) -> ty.Iterable[FrameTimecode]:
+        """Generate timecodes for images to extract from a single scene.
+
+        Uses temporal_margin to determine the effective time range, then distributes
+        images evenly across that range using time-based arithmetic.
+        """
+        # Use temporal_margin if set, otherwise fall back to frame_margin converted to time
+        if self._temporal_margin is not None:
+            margin = self._temporal_margin
+        elif self._frame_margin > 0:
+            margin = FrameTimecode(self._frame_margin, fps=start.framerate)
+        else:
+            margin = FrameTimecode(0, fps=start.framerate)
+
+        # Calculate effective time range with margin, clamped to scene bounds
+        first_time = min(start + margin, end)
+        last_time = max(end - margin, start)
+
+        # Handle edge case where margins overlap (scene shorter than 2x margin)
+        if first_time > last_time:
+            # Use middle of scene for all images
+            middle = start + (end - start) / 2
+            first_time = last_time = middle
+
+        if self._num_images == 1:
+            # Single image: use middle of effective range
+            yield first_time + (last_time - first_time) / 2
+        elif self._num_images == 2:
+            yield first_time
+            yield last_time
+        else:
+            # Multiple images: first at margin, last at margin, rest evenly distributed
+            duration = last_time - first_time
+            for i in range(self._num_images):
+                if i == 0:
+                    yield first_time
+                elif i == self._num_images - 1:
+                    yield last_time
+                else:
+                    # Evenly distribute middle images
+                    fraction = i / (self._num_images - 1)
+                    yield first_time + duration * fraction
+
     def generate_timecode_list(self, scene_list: SceneList) -> ty.List[ty.Iterable[FrameTimecode]]:
         """Generates a list of timecodes for each scene in `scene_list` based on the current config
         parameters."""
-        # TODO(v0.7): This needs to be fixed as part of PTS overhaul.
-        framerate = scene_list[0][0].framerate
-        # TODO(v1.0): Split up into multiple sub-expressions so auto-formatter works correctly.
-        return [
-            (
-                FrameTimecode(int(f), fps=framerate)
-                for f in (
-                    # middle frames
-                    a[len(a) // 2]
-                    if (0 < j < self._num_images - 1) or self._num_images == 1
-                    # first frame
-                    else min(a[0] + self._frame_margin, a[-1])
-                    if j == 0
-                    # last frame
-                    else max(a[-1] - self._frame_margin, a[0])
-                    # for each evenly-split array of frames in the scene list
-                    for j, a in enumerate(np.array_split(r, self._num_images))
-                )
-            )
-            for r in (
-                # pad ranges to number of images
-                r
-                if 1 + r[-1] - r[0] >= self._num_images
-                else list(r) + [r[-1]] * (self._num_images - len(r))
-                # create range of frames in scene
-                for r in (
-                    range(
-                        start.frame_num,
-                        start.frame_num
-                        + max(
-                            1,  # guard against zero length scenes
-                            end.frame_num - start.frame_num,
-                        ),
-                    )
-                    # for each scene in scene list
-                    for start, end in scene_list
-                )
-            )
-        ]
+        return [self._generate_scene_timecodes(start, end) for start, end in scene_list]
 
     def resize_image(
         self,
@@ -358,6 +371,7 @@ def save_images(
     width: ty.Optional[int] = None,
     interpolation: Interpolation = Interpolation.CUBIC,
     threading: bool = True,
+    temporal_margin: ty.Optional[FrameTimecode] = None,
 ) -> ty.Dict[int, ty.List[str]]:
     """Save a set number of images from each scene, given a list of scenes
     and the associated video/frame source.
@@ -371,7 +385,7 @@ def save_images(
         frame_margin: Number of frames to pad each scene around the beginning
             and end (e.g. moves the first/last image into the scene by N frames).
             Can set to 0, but will result in some video files failing to extract
-            the very last frame.
+            the very last frame. Discarded if `temporal_margin` is set.
         image_extension: Type of image to save (must be one of 'jpg', 'png', or 'webp').
         encoder_param: Quality/compression efficiency, based on type of image:
             'jpg' / 'webp':  Quality 0-100, higher is better quality.  100 is lossless for webp.
@@ -396,6 +410,9 @@ def save_images(
             while preserving the aspect ratio.
         interpolation: Type of interpolation to use when resizing images.
         threading: Offload image encoding and disk IO to background threads to improve performance.
+        temporal_margin: Amount of time to pad each scene around the beginning and end. Takes
+            precedence over `frame_margin` when set. Can be created from seconds (float), frames
+            (int), or timecode string.
 
     Returns:
         Dictionary of the format { scene_num : [image_paths] }, where scene_num is the
@@ -432,6 +449,7 @@ def save_images(
             height,
             width,
             interpolation,
+            temporal_margin,
         )
         return extractor.run(video, scene_list, output_dir, show_progress)
 
@@ -451,45 +469,13 @@ def save_images(
     image_num_format = "%0"
     image_num_format += str(math.floor(math.log(num_images, 10)) + 2) + "d"
 
-    framerate = scene_list[0][0]._rate
-
-    # TODO(v1.0): Split up into multiple sub-expressions so auto-formatter works correctly.
-    timecode_list = [
-        [
-            FrameTimecode(int(f), fps=framerate)
-            for f in (
-                # middle frames
-                a[len(a) // 2]
-                if (0 < j < num_images - 1) or num_images == 1
-                # first frame
-                else min(a[0] + frame_margin, a[-1])
-                if j == 0
-                # last frame
-                else max(a[-1] - frame_margin, a[0])
-                # for each evenly-split array of frames in the scene list
-                for j, a in enumerate(np.array_split(r, num_images))
-            )
-        ]
-        for i, r in enumerate(
-            [
-                # pad ranges to number of images
-                r if 1 + r[-1] - r[0] >= num_images else list(r) + [r[-1]] * (num_images - len(r))
-                # create range of frames in scene
-                for r in (
-                    range(
-                        start.frame_num,
-                        start.frame_num
-                        + max(
-                            1,  # guard against zero length scenes
-                            end.frame_num - start.frame_num,
-                        ),
-                    )
-                    # for each scene in scene list
-                    for start, end in scene_list
-                )
-            ]
-        )
-    ]
+    # Use _ImageExtractor to generate timecodes (shares logic with threaded path)
+    extractor = _ImageExtractor(
+        num_images=num_images,
+        frame_margin=frame_margin,
+        temporal_margin=temporal_margin,
+    )
+    timecode_list = [list(tc) for tc in extractor.generate_timecode_list(scene_list)]
 
     image_filenames = {i: [] for i in range(len(timecode_list))}
     aspect_ratio = video.aspect_ratio

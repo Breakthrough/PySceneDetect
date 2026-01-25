@@ -200,3 +200,204 @@ def test_deprecated_output_modules_emits_warning_on_import():
     )
     with pytest.warns(DeprecationWarning, match=VIDEO_SPLITTER_WARNING):
         from scenedetect.video_splitter import split_video_ffmpeg as _
+
+
+class TestImageExtractorTemporalMargin:
+    """Tests for _ImageExtractor temporal margin functionality using PTS-based selection."""
+
+    def test_temporal_margin_uses_seconds_not_frames(self):
+        """Test that temporal_margin operates on presentation time, not frame count.
+
+        With a 0.1s margin on a scene from 0s to 3s at 30fps:
+        - First image should be at ~0.1s (frame 3)
+        - Last image should be at ~2.9s (frame 87)
+        """
+        from scenedetect.output.image import _ImageExtractor
+
+        # 30 fps, 0.1s temporal margin
+        extractor = _ImageExtractor(
+            num_images=3, temporal_margin=FrameTimecode(timecode=0.1, fps=30.0)
+        )
+
+        # Scene from frame 0 to 90 (0s to 3s at 30fps)
+        scene_list = [
+            (FrameTimecode(0, fps=30.0), FrameTimecode(90, fps=30.0)),
+        ]
+        timecode_list = extractor.generate_timecode_list(scene_list)
+        timecodes = list(timecode_list[0])
+
+        # First image: start.seconds + margin = 0 + 0.1 = 0.1s → frame 3
+        assert timecodes[0].seconds == pytest.approx(0.1, abs=0.05)
+        # Middle image: should be around middle of scene
+        assert timecodes[1].seconds == pytest.approx(1.5, abs=0.1)
+        # Last image: end.seconds - margin = 3.0 - 0.1 = 2.9s → frame 87
+        assert timecodes[2].seconds == pytest.approx(2.9, abs=0.05)
+
+    def test_temporal_margin_different_framerates(self):
+        """Test temporal margin works consistently across different framerates.
+
+        The same temporal margin (0.1s) should result in different frame offsets
+        but the same time offset regardless of framerate.
+        """
+        from scenedetect.output.image import _ImageExtractor
+
+        for fps in [24.0, 25.0, 30.0, 60.0]:
+            extractor = _ImageExtractor(
+                num_images=3, temporal_margin=FrameTimecode(timecode=0.1, fps=fps)
+            )
+            # 3 second scene
+            scene_list = [
+                (FrameTimecode(0, fps=fps), FrameTimecode(int(3 * fps), fps=fps)),
+            ]
+            timecode_list = extractor.generate_timecode_list(scene_list)
+            timecodes = list(timecode_list[0])
+
+            # First and last images should be offset by ~0.1s regardless of fps
+            assert timecodes[0].seconds == pytest.approx(0.1, abs=0.05), f"Failed at {fps}fps"
+            assert timecodes[2].seconds == pytest.approx(2.9, abs=0.05), f"Failed at {fps}fps"
+
+    def test_temporal_margin_clamped_to_scene_bounds(self):
+        """Test that temporal margin is clamped when scene is shorter than 2x margin."""
+        from scenedetect.output.image import _ImageExtractor
+
+        # 0.5s margin on a 0.5s scene - should clamp to scene bounds
+        extractor = _ImageExtractor(
+            num_images=3, temporal_margin=FrameTimecode(timecode=0.5, fps=30.0)
+        )
+
+        # Scene from frame 0 to 15 (0s to 0.5s at 30fps)
+        scene_list = [
+            (FrameTimecode(0, fps=30.0), FrameTimecode(15, fps=30.0)),
+        ]
+        timecode_list = extractor.generate_timecode_list(scene_list)
+        timecodes = list(timecode_list[0])
+
+        # All frames should be within scene bounds
+        for tc in timecodes:
+            assert 0.0 <= tc.seconds <= 0.5
+
+    def test_temporal_margin_zero(self):
+        """Test that zero temporal margin selects frames at scene boundaries."""
+        from scenedetect.output.image import _ImageExtractor
+
+        extractor = _ImageExtractor(
+            num_images=3, temporal_margin=FrameTimecode(timecode=0.0, fps=30.0)
+        )
+
+        scene_list = [
+            (FrameTimecode(30, fps=30.0), FrameTimecode(90, fps=30.0)),
+        ]
+        timecode_list = extractor.generate_timecode_list(scene_list)
+        timecodes = list(timecode_list[0])
+
+        # First image at scene start (1s)
+        assert timecodes[0].seconds == pytest.approx(1.0, abs=0.05)
+        # Last image near scene end (3s)
+        assert timecodes[2].seconds == pytest.approx(2.97, abs=0.1)
+
+    def test_temporal_margin_with_pts_timecodes(self):
+        """Test temporal margin works correctly with PTS-based FrameTimecodes.
+
+        PTS (Presentation Time Stamp) based timecodes use a time_base rather than
+        a fixed framerate. This test verifies that temporal margin calculations
+        work correctly when scenes are defined using PTS.
+        """
+        from fractions import Fraction
+
+        from scenedetect.common import Timecode
+        from scenedetect.output.image import _ImageExtractor
+
+        # Use a time_base of 1/1000 (milliseconds) - common for many video formats
+        time_base = Fraction(1, 1000)
+
+        # Create PTS-based FrameTimecodes for a 3 second scene (0ms to 3000ms)
+        start = FrameTimecode(timecode=Timecode(pts=0, time_base=time_base), fps=30.0)
+        end = FrameTimecode(timecode=Timecode(pts=3000, time_base=time_base), fps=30.0)
+
+        # 100ms (0.1s) temporal margin, also as PTS-based
+        margin = FrameTimecode(timecode=Timecode(pts=100, time_base=time_base), fps=30.0)
+
+        extractor = _ImageExtractor(num_images=3, temporal_margin=margin)
+
+        scene_list = [(start, end)]
+        timecode_list = extractor.generate_timecode_list(scene_list)
+        timecodes = list(timecode_list[0])
+
+        # First image: 0s + 0.1s margin = 0.1s
+        assert timecodes[0].seconds == pytest.approx(0.1, abs=0.05)
+        # Middle image: ~1.5s
+        assert timecodes[1].seconds == pytest.approx(1.5, abs=0.1)
+        # Last image: 3s - 0.1s margin = 2.9s
+        assert timecodes[2].seconds == pytest.approx(2.9, abs=0.05)
+
+    def test_temporal_margin_pts_preserves_time_base(self):
+        """Test that output timecodes preserve the time_base from input PTS timecodes."""
+        from fractions import Fraction
+
+        from scenedetect.common import Timecode
+        from scenedetect.output.image import _ImageExtractor
+
+        time_base = Fraction(1, 90000)  # Common time_base for MPEG-TS
+
+        # 2 second scene at pts 0 to 180000 (at 1/90000 time_base)
+        start = FrameTimecode(timecode=Timecode(pts=0, time_base=time_base), fps=30.0)
+        end = FrameTimecode(timecode=Timecode(pts=180000, time_base=time_base), fps=30.0)
+
+        # 0.1s margin = 9000 pts at 1/90000 time_base
+        margin = FrameTimecode(timecode=Timecode(pts=9000, time_base=time_base), fps=30.0)
+
+        extractor = _ImageExtractor(num_images=2, temporal_margin=margin)
+
+        scene_list = [(start, end)]
+        timecode_list = extractor.generate_timecode_list(scene_list)
+        timecodes = list(timecode_list[0])
+
+        # Verify time values are correct
+        assert timecodes[0].seconds == pytest.approx(0.1, abs=0.01)
+        assert timecodes[1].seconds == pytest.approx(1.9, abs=0.01)
+
+    def test_frame_margin_backwards_compatibility(self):
+        """Test that frame_margin still works when temporal_margin is not set.
+
+        This ensures backwards compatibility with existing code using frame_margin.
+        """
+        from scenedetect.output.image import _ImageExtractor
+
+        # 3 frame margin at 30fps = 0.1s
+        extractor = _ImageExtractor(num_images=3, frame_margin=3)
+
+        # Scene from frame 0 to 90 (0s to 3s at 30fps)
+        scene_list = [
+            (FrameTimecode(0, fps=30.0), FrameTimecode(90, fps=30.0)),
+        ]
+        timecode_list = extractor.generate_timecode_list(scene_list)
+        timecodes = list(timecode_list[0])
+
+        # First image: 3 frames = 0.1s at 30fps
+        assert timecodes[0].seconds == pytest.approx(0.1, abs=0.05)
+        # Middle image: ~1.5s
+        assert timecodes[1].seconds == pytest.approx(1.5, abs=0.1)
+        # Last image: 3s - 3 frames = 2.9s
+        assert timecodes[2].seconds == pytest.approx(2.9, abs=0.05)
+
+    def test_temporal_margin_overrides_frame_margin(self):
+        """Test that temporal_margin takes precedence over frame_margin when both are set."""
+        from scenedetect.output.image import _ImageExtractor
+
+        # Set frame_margin to 30 frames (1s at 30fps), but temporal_margin to 0.1s
+        # temporal_margin should win
+        extractor = _ImageExtractor(
+            num_images=3,
+            frame_margin=30,  # Would be 1s at 30fps
+            temporal_margin=FrameTimecode(timecode=0.1, fps=30.0),  # 0.1s
+        )
+
+        scene_list = [
+            (FrameTimecode(0, fps=30.0), FrameTimecode(90, fps=30.0)),
+        ]
+        timecode_list = extractor.generate_timecode_list(scene_list)
+        timecodes = list(timecode_list[0])
+
+        # Should use temporal_margin (0.1s), not frame_margin (1s)
+        assert timecodes[0].seconds == pytest.approx(0.1, abs=0.05)
+        assert timecodes[2].seconds == pytest.approx(2.9, abs=0.05)
