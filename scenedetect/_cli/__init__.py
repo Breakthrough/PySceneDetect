@@ -38,6 +38,7 @@ from scenedetect._cli.config import (
 )
 from scenedetect._cli.context import USER_CONFIG, CliContext, check_split_video_requirements
 from scenedetect.backends import AVAILABLE_BACKENDS
+from scenedetect.common import FrameTimecode
 from scenedetect.detectors import (
     AdaptiveDetector,
     ContentDetector,
@@ -1400,8 +1401,17 @@ Examples:
     metavar="N",
     default=None,
     type=click.INT,
-    help="Number of frames to ignore at beginning/end of scenes when saving images. Controls temporal padding on scene boundaries.%s"
-    % (USER_CONFIG.get_help_string("save-images", "num-images")),
+    help="[DEPRECATED] Use --temporal-margin instead. Number of frames to ignore at beginning/end of scenes when saving images.%s"
+    % (USER_CONFIG.get_help_string("save-images", "frame-margin")),
+)
+@click.option(
+    "-M",
+    "--temporal-margin",
+    metavar="TIME",
+    default=None,
+    type=click.STRING,
+    help="Amount of time to ignore at the beginning/end of each scene. Discards frame-margin if set. Can be specified as seconds (0.1), frames (3), or timecode (00:00:00.100).%s"
+    % (USER_CONFIG.get_help_string("save-images", "temporal-margin")),
 )
 @click.option(
     "--scale",
@@ -1442,6 +1452,7 @@ def save_images_command(
     png: bool = False,
     compression: ty.Optional[int] = None,
     frame_margin: ty.Optional[int] = None,
+    temporal_margin: ty.Optional[str] = None,
     scale: ty.Optional[float] = None,
     height: ty.Optional[int] = None,
     width: ty.Optional[int] = None,
@@ -1487,6 +1498,14 @@ def save_images_command(
         raise click.BadParameter("\n".join(error_strs), param_hint="save-images")
     output = ctx.config.get_value("save-images", "output", output)
 
+    # Get temporal_margin value (from CLI arg or config), converting to FrameTimecode
+    temporal_margin_value = ctx.config.get_value("save-images", "temporal-margin", temporal_margin)
+    temporal_margin_tc = None
+    if temporal_margin_value is not None:
+        temporal_margin_tc = FrameTimecode(
+            timecode=temporal_margin_value, fps=ctx.video_stream.frame_rate
+        )
+
     save_images_args = {
         "encoder_param": compression if png else quality,
         "frame_margin": ctx.config.get_value("save-images", "frame-margin", frame_margin),
@@ -1498,6 +1517,7 @@ def save_images_command(
         "output": output,
         "scale": scale,
         "show_progress": not ctx.quiet_mode,
+        "temporal_margin": temporal_margin_tc,
         "threading": ctx.config.get_value("save-images", "threading"),
         "width": width,
     }

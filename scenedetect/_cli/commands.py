@@ -191,6 +191,7 @@ def save_images(
     width: int,
     interpolation: Interpolation,
     threading: bool,
+    temporal_margin: ty.Optional["FrameTimecode"] = None,
 ):
     """Handles the `save-images` command."""
     del cuts  # save-images only uses scenes.
@@ -210,6 +211,7 @@ def save_images(
         width=width,
         interpolation=interpolation,
         threading=threading,
+        temporal_margin=temporal_margin,
     )
     # Save the result for use by `save-html` if required.
     context.save_images_result = (images, output)
