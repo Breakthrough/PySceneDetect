@@ -38,6 +38,7 @@ from scenedetect._cli.config import (
 )
 from scenedetect._cli.context import USER_CONFIG, CliContext, check_split_video_requirements
 from scenedetect.backends import AVAILABLE_BACKENDS
+from scenedetect.common import FrameTimecode
 from scenedetect.detectors import (
     AdaptiveDetector,
     ContentDetector,
@@ -1400,8 +1401,17 @@ Examples:
     metavar="N",
     default=None,
     type=click.INT,
-    help="Number of frames to ignore at beginning/end of scenes when saving images. Controls temporal padding on scene boundaries.%s"
-    % (USER_CONFIG.get_help_string("save-images", "num-images")),
+    help="[DEPRECATED] Use --margin instead. Number of frames to ignore at beginning/end of scenes when saving images.%s"
+    % (USER_CONFIG.get_help_string("save-images", "frame-margin")),
+)
+@click.option(
+    "-M",
+    "--margin",
+    metavar="TIME",
+    default=None,
+    type=click.STRING,
+    help="Amount of time to ignore at the beginning/end of each scene. Discards frame-margin if set. Can be specified as seconds (0.1), frames (3), or timecode (00:00:00.100).%s"
+    % (USER_CONFIG.get_help_string("save-images", "margin")),
 )
 @click.option(
     "--scale",
@@ -1442,6 +1452,7 @@ def save_images_command(
     png: bool = False,
     compression: ty.Optional[int] = None,
     frame_margin: ty.Optional[int] = None,
+    margin: ty.Optional[str] = None,
     scale: ty.Optional[float] = None,
     height: ty.Optional[int] = None,
     width: ty.Optional[int] = None,
@@ -1487,6 +1498,12 @@ def save_images_command(
         raise click.BadParameter("\n".join(error_strs), param_hint="save-images")
     output = ctx.config.get_value("save-images", "output", output)
 
+    # Get margin value (from CLI arg or config), converting to FrameTimecode
+    margin_value = ctx.config.get_value("save-images", "margin", margin)
+    margin_tc = None
+    if margin_value is not None:
+        margin_tc = FrameTimecode(timecode=margin_value, fps=ctx.video_stream.frame_rate)
+
     save_images_args = {
         "encoder_param": compression if png else quality,
         "frame_margin": ctx.config.get_value("save-images", "frame-margin", frame_margin),
@@ -1498,6 +1515,7 @@ def save_images_command(
         "output": output,
         "scale": scale,
         "show_progress": not ctx.quiet_mode,
+        "margin": margin_tc,
         "threading": ctx.config.get_value("save-images", "threading"),
         "width": width,
     }

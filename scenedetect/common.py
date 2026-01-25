@@ -656,6 +656,44 @@ class FrameTimecode:
         to_return -= other
         return to_return
 
+    def __mul__(self, factor: ty.Union[int, float]) -> "FrameTimecode":
+        """Multiply timecode by a scalar factor. Returns a new FrameTimecode."""
+        if not isinstance(factor, (int, float)):
+            return NotImplemented
+        to_return = FrameTimecode(timecode=self)
+        if isinstance(to_return._time, Timecode):
+            to_return._time = Timecode(
+                pts=max(0, round(to_return._time.pts * factor)),
+                time_base=to_return._time.time_base,
+            )
+        elif isinstance(to_return._time, _Seconds):
+            to_return._time = _Seconds(max(0.0, to_return._time.value * factor))
+        else:
+            to_return._time = _FrameNumber(max(0, round(to_return._time.value * factor)))
+        return to_return
+
+    def __rmul__(self, factor: ty.Union[int, float]) -> "FrameTimecode":
+        """Multiply timecode by a scalar factor (reversed). Returns a new FrameTimecode."""
+        return self.__mul__(factor)
+
+    def __truediv__(self, divisor: ty.Union[int, float]) -> "FrameTimecode":
+        """Divide timecode by a scalar divisor. Returns a new FrameTimecode."""
+        if not isinstance(divisor, (int, float)):
+            return NotImplemented
+        if divisor == 0:
+            raise ZeroDivisionError("Cannot divide FrameTimecode by zero")
+        to_return = FrameTimecode(timecode=self)
+        if isinstance(to_return._time, Timecode):
+            to_return._time = Timecode(
+                pts=max(0, round(to_return._time.pts / divisor)),
+                time_base=to_return._time.time_base,
+            )
+        elif isinstance(to_return._time, _Seconds):
+            to_return._time = _Seconds(max(0.0, to_return._time.value / divisor))
+        else:
+            to_return._time = _FrameNumber(max(0, round(to_return._time.value / divisor)))
+        return to_return
+
     # TODO(v1.0): __int__ and __float__ should be removed. Mark as deprecated, and indicate
     # need to use relevant property instead.
 
