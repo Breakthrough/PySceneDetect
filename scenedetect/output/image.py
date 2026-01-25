@@ -77,7 +77,7 @@ class _ImageExtractor:
         height: ty.Optional[int] = None,
         width: ty.Optional[int] = None,
         interpolation: Interpolation = Interpolation.CUBIC,
-        temporal_margin: ty.Optional[FrameTimecode] = None,
+        margin: ty.Optional[FrameTimecode] = None,
     ):
         """Multi-threaded implementation of save-images functionality. Uses background threads to
         handle image encoding and saving images to disk to improve parallelism.
@@ -89,7 +89,7 @@ class _ImageExtractor:
             frame_margin: [DEPRECATED] Number of frames to pad each scene around the beginning
                 and end (e.g. moves the first/last image into the scene by N frames).
                 Can set to 0, but will result in some video files failing to extract
-                the very last frame. Use `temporal_margin` instead.
+                the very last frame. Use `margin` instead.
             image_extension: Type of image to save (must be one of 'jpg', 'png', or 'webp').
             encoder_param: Quality/compression efficiency, based on type of image:
                 'jpg' / 'webp':  Quality 0-100, higher is better quality.  100 is lossless for webp.
@@ -110,14 +110,14 @@ class _ImageExtractor:
                 Specifying only width will rescale the image to that number of pixels wide
                 while preserving the aspect ratio.
             interpolation: Type of interpolation to use when resizing images.
-            temporal_margin: Amount of time to ignore at the beginning/end of a scene when
+            margin: Amount of time to ignore at the beginning/end of a scene when
                 selecting frames. Can be specified as frames (int), seconds (float), or timecode
                 string when creating the FrameTimecode. Uses presentation time (PTS) for selection.
                 When set, takes precedence over `frame_margin`.
         """
         self._num_images = num_images
         self._frame_margin = frame_margin
-        self._temporal_margin = temporal_margin
+        self._margin = margin
         self._image_extension = image_extension
         self._image_name_template = image_name_template
         self._scale = scale
@@ -301,12 +301,12 @@ class _ImageExtractor:
     ) -> ty.Iterable[FrameTimecode]:
         """Generate timecodes for images to extract from a single scene.
 
-        Uses temporal_margin to determine the effective time range, then distributes
+        Uses margin to determine the effective time range, then distributes
         images evenly across that range using time-based arithmetic.
         """
-        # Use temporal_margin if set, otherwise fall back to frame_margin converted to time
-        if self._temporal_margin is not None:
-            margin = self._temporal_margin
+        # Use margin if set, otherwise fall back to frame_margin converted to time
+        if self._margin is not None:
+            margin = self._margin
         elif self._frame_margin > 0:
             margin = FrameTimecode(self._frame_margin, fps=start.framerate)
         else:
@@ -371,7 +371,7 @@ def save_images(
     width: ty.Optional[int] = None,
     interpolation: Interpolation = Interpolation.CUBIC,
     threading: bool = True,
-    temporal_margin: ty.Optional[FrameTimecode] = None,
+    margin: ty.Optional[FrameTimecode] = None,
 ) -> ty.Dict[int, ty.List[str]]:
     """Save a set number of images from each scene, given a list of scenes
     and the associated video/frame source.
@@ -385,7 +385,7 @@ def save_images(
         frame_margin: Number of frames to pad each scene around the beginning
             and end (e.g. moves the first/last image into the scene by N frames).
             Can set to 0, but will result in some video files failing to extract
-            the very last frame. Discarded if `temporal_margin` is set.
+            the very last frame. Discarded if `margin` is set.
         image_extension: Type of image to save (must be one of 'jpg', 'png', or 'webp').
         encoder_param: Quality/compression efficiency, based on type of image:
             'jpg' / 'webp':  Quality 0-100, higher is better quality.  100 is lossless for webp.
@@ -410,7 +410,7 @@ def save_images(
             while preserving the aspect ratio.
         interpolation: Type of interpolation to use when resizing images.
         threading: Offload image encoding and disk IO to background threads to improve performance.
-        temporal_margin: Amount of time to pad each scene around the beginning and end. Takes
+        margin: Amount of time to pad each scene around the beginning and end. Takes
             precedence over `frame_margin` when set. Can be created from seconds (float), frames
             (int), or timecode string.
 
@@ -449,7 +449,7 @@ def save_images(
             height,
             width,
             interpolation,
-            temporal_margin,
+            margin,
         )
         return extractor.run(video, scene_list, output_dir, show_progress)
 
@@ -473,7 +473,7 @@ def save_images(
     extractor = _ImageExtractor(
         num_images=num_images,
         frame_margin=frame_margin,
-        temporal_margin=temporal_margin,
+        margin=margin,
     )
     timecode_list = [list(tc) for tc in extractor.generate_timecode_list(scene_list)]
 
