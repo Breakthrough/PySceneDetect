@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Generate pyscenedetect.ico from pyscenedetect.svg.
+"""Generate pyscenedetect.ico and logo PNGs from SVG sources.
 
 Requires Inkscape (for SVG rasterization) and Pillow (for ICO generation).
 """
@@ -10,8 +10,16 @@ import subprocess
 import sys
 import tempfile
 from pathlib import Path
+from typing import NamedTuple
 
 from PIL import Image, ImageFilter
+
+
+class LogoOutput(NamedTuple):
+    path: Path
+    width: int
+    height: int
+    source: Path
 
 # Colors matching the SVG design
 BG = (224, 232, 240, 255)  # #e0e8f0
@@ -31,8 +39,21 @@ SHARPEN_AMOUNT = {
 SHARPEN_RADIUS = 0.5
 
 DIST_DIR = Path(__file__).resolve().parent
+REPO_DIR = DIST_DIR.parent
 LOGO_DIR = DIST_DIR / "logo"
 ICO_PATH = DIST_DIR / "pyscenedetect.ico"
+
+LOGO_SVG = LOGO_DIR / "pyscenedetect-logo.svg"
+LOGO_BG_SVG = LOGO_DIR / "pyscenedetect-logo-bg.svg"
+
+# Heights match the natural SVG aspect ratio (1024x480).
+# _small outputs use the -bg variant (background included).
+LOGO_OUTPUTS: list[LogoOutput] = [
+    LogoOutput(REPO_DIR / "docs" / "_static" / "pyscenedetect_logo.png", 900, 422, LOGO_SVG),
+    LogoOutput(REPO_DIR / "docs" / "_static" / "pyscenedetect_logo_small.png", 300, 141, LOGO_BG_SVG),
+    LogoOutput(REPO_DIR / "website" / "pages" / "img" / "pyscenedetect_logo.png", 640, 300, LOGO_BG_SVG),
+    LogoOutput(REPO_DIR / "website" / "pages" / "img" / "pyscenedetect_logo_small.png", 462, 217, LOGO_SVG),
+]
 
 SVG_FOR_SIZE: dict[int, Path] = {
     24: LOGO_DIR / "pyscenedetect-24.svg",
@@ -88,13 +109,22 @@ def find_inkscape() -> str:
     sys.exit(1)
 
 
-def render_svg(inkscape: str, svg: Path, output: Path, size: int):
-    """Render an SVG to a PNG at the given size using Inkscape."""
+def render_svg(inkscape: str, svg: Path, output: Path, width: int, height: int):
+    """Render an SVG to a PNG at the given dimensions using Inkscape."""
     subprocess.run(
-        [inkscape, str(svg), "--export-type=png", f"--export-filename={output}", "-w", str(size), "-h", str(size)],
+        [inkscape, str(svg), "--export-type=png", f"--export-filename={output}", "-w", str(width), "-h", str(height)],
         check=True,
         capture_output=True,
     )
+
+
+def render_logos(inkscape: str):
+    """Render the logo SVG to all required PNG outputs."""
+    print("Rendering logo PNGs...")
+    for entry in LOGO_OUTPUTS:
+        print(f"  {entry.path.relative_to(REPO_DIR)} ({entry.width}x{entry.height}) [source: {entry.source.name}]...")
+        render_svg(inkscape, entry.source, entry.path, entry.width, entry.height)
+    print(f"  Done ({len(LOGO_OUTPUTS)} files).")
 
 
 def render_all_sizes(inkscape: str, work_dir: Path) -> list[Image.Image]:
@@ -109,7 +139,7 @@ def render_all_sizes(inkscape: str, work_dir: Path) -> list[Image.Image]:
         else:
             svg_path = SVG_FOR_SIZE[size]
             print(f"  Rendering {size}x{size} using {svg_path.name}...")
-            render_svg(inkscape, svg_path, png_path, size)
+            render_svg(inkscape, svg_path, png_path, size, size)
             img = Image.open(png_path).copy()
             if size in SHARPEN_AMOUNT:
                 img = img.filter(ImageFilter.UnsharpMask(radius=SHARPEN_RADIUS, percent=SHARPEN_AMOUNT[size], threshold=0))
@@ -135,6 +165,7 @@ def main():
         images[-1].save(ICO_PATH, format="ICO", append_images=images[:-1])
 
     print(f"Output ICO: {ICO_PATH}")
+    render_logos(inkscape)
 
 
 if __name__ == "__main__":
