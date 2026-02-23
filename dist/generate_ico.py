@@ -35,12 +35,12 @@ LOGO_DIR = DIST_DIR / "logo"
 ICO_PATH = DIST_DIR / "pyscenedetect.ico"
 
 SVG_FOR_SIZE: dict[int, Path] = {
-    24: LOGO_DIR / "pyscenedetect-24-48.svg",
+    24: LOGO_DIR / "pyscenedetect-24.svg",
     32: LOGO_DIR / "pyscenedetect-32.svg",
-    48: LOGO_DIR / "pyscenedetect-24-48.svg",
-    64: LOGO_DIR / "pyscenedetect-64+.svg",
-    128: LOGO_DIR / "pyscenedetect-64+.svg",
-    256: LOGO_DIR / "pyscenedetect-64+.svg",
+    48: LOGO_DIR / "pyscenedetect.svg",
+    64: LOGO_DIR / "pyscenedetect.svg",
+    128: LOGO_DIR / "pyscenedetect.svg",
+    256: LOGO_DIR / "pyscenedetect.svg",
 }
 
 
