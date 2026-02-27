@@ -48,6 +48,11 @@ LOGO_BG_SVG = LOGO_DIR / "pyscenedetect-logo-bg.svg"
 
 # Heights match the natural SVG aspect ratio (1024x480).
 # _small outputs use the -bg variant (background included).
+FAVICON_OUTPUTS: list[Path] = [
+    REPO_DIR / "docs" / "_static" / "favicon.ico",
+    REPO_DIR / "website" / "pages" / "img" / "favicon.ico",
+]
+
 LOGO_OUTPUTS: list[LogoOutput] = [
     LogoOutput(REPO_DIR / "docs" / "_static" / "pyscenedetect_logo.png", 900, 422, LOGO_SVG),
     LogoOutput(REPO_DIR / "docs" / "_static" / "pyscenedetect_logo_small.png", 300, 141, LOGO_BG_SVG),
@@ -165,6 +170,10 @@ def main():
         images[-1].save(ICO_PATH, format="ICO", append_images=images[:-1])
 
     print(f"Output ICO: {ICO_PATH}")
+    print("Copying favicons...")
+    for dest in FAVICON_OUTPUTS:
+        shutil.copy2(ICO_PATH, dest)
+        print(f"  {dest.relative_to(REPO_DIR)}")
     render_logos(inkscape)
 
 
