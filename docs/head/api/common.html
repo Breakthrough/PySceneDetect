@@ -154,9 +154,10 @@ object has a defined framerate, otherwise has no effect.</p></li>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="scenedetect.common.FrameTimecode.framerate">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">framerate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#scenedetect.common.FrameTimecode.framerate" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">framerate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#scenedetect.common.FrameTimecode.framerate" title="Permalink to this definition">¶</a></dt>
 <dd><p>The framerate to use for distance between frames and to calculate frame numbers.
-For a VFR video, this may just be the average framerate.</p>
+For a VFR video, this may just be the average framerate. Returns None if framerate
+is unknown (e.g. when working with pure Timecode representations).</p>
 </dd></dl>
 
 <dl class="py property">
