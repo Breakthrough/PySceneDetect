@@ -6,10 +6,6 @@
 {% else %}
   <a href="{{ nav.homepage.url|url }}">
 {% endif %}
-{% if page.is_index %}
- 🎥 {{ config.site_name }}
-{% else %}
-<img src="{{ config.theme.logo|url }}" class="logo" alt="{% trans %}Logo{% endtrans %}"/>
-{% endif %}
+<img src="{{ config.theme.logo|url }}" class="logo" id="side-nav-logo" alt="{% trans %}Logo{% endtrans %}"/>
 </a>
 {% endblock %}
