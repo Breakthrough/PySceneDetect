@@ -1,11 +1,10 @@
 
+
 <img alt="PySceneDetect" src="img/pyscenedetect_logo_small.png" />
 
 <div class="important">
 <h3 class="wy-text-neutral"><span class="fa fa-info-circle wy-text-info"></span>&nbsp; Latest Release: <b>v0.6.7</b> (August 24, 2025)</h3>
 <a href="download/" class="btn btn-success" style="margin-bottom:8px;" role="button"><span class="fa fa-download"></span>&nbsp; <b>Download</b></a> &nbsp;&nbsp;&nbsp;&nbsp; <a href="changelog/" class="btn btn-info" style="margin-bottom:8px;" role="button"><span class="fa fa-reorder"></span>&nbsp; <b>Changelog</b></a> &nbsp;&nbsp;&nbsp;&nbsp; <a href="docs/latest/" class="btn btn-warning" style="margin-bottom:8px;" role="button"><span class="fa fa-gear"></span>&nbsp; <b>Documentation</b></a> &nbsp;&nbsp;&nbsp;&nbsp; <a href="cli/" class="btn btn-danger" style="margin-bottom:8px;" role="button"><span class="fa fa-book"></span>&nbsp; <b>Getting Started</b></a>
-<br/>
-See the changelog for the latest release notes and known issues.
 </div>
 
 **PySceneDetect** is a tool for **detecting shot changes in videos** ([example](cli.md)), and can **automatically split the video into separate clips**.  PySceneDetect is free and open-source software, and has several [detection methods](features.md#detection-methods) to find fast-cuts and threshold-based fades.

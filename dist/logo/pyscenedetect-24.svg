@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+
+PySceneDetect Logo - Optimized For 24x24 Icon
+
+Copyright (C) 2026 Brandon Castellano <http://www.bcastell.com>.
+PySceneDetect is licensed under the BSD 3-Clause License; see the
+included LICENSE file, or visit one of the above pages for details.
+
+-->
+<svg
+   width="240"
+   height="240"
+   viewBox="127.91564 143.58975 34.518657 34.518657"
+   version="1.1"
+   id="svg2"
+   sodipodi:docname="pyscenedetect-24.svg"
+   inkscape:version="1.4.3 (0d15f75, 2025-12-25)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs2" />
+  <sodipodi:namedview
+     id="namedview2"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="2.8284271"
+     inkscape:cx="-156.09382"
+     inkscape:cy="157.50804"
+     inkscape:window-width="3440"
+     inkscape:window-height="1369"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg2"
+     showgrid="true"
+     showguides="true"
+     inkscape:document-units="px"
+     inkscape:lockguides="false">
+    <inkscape:grid
+       id="grid1"
+       units="px"
+       originx="0"
+       originy="0"
+       spacingx="0.14382774"
+       spacingy="0.14382774"
+       empcolor="#0099e5"
+       empopacity="0.30196078"
+       color="#0099e5"
+       opacity="0.14901961"
+       empspacing="5"
+       enabled="true"
+       visible="true" />
+  </sodipodi:namedview>
+  <!-- Background with rounded corners -->
+  <rect
+     x="127.91564"
+     y="143.58975"
+     width="34.518654"
+     height="34.518654"
+     rx="2.34375"
+     ry="2.3437498"
+     fill="#e0e8f0"
+     id="rect1"
+     style="display:inline;fill:#e0e8f0;fill-opacity:1;stroke-width:0.9375" />
+  <!-- Border -->
+  <!-- Logo -->
+  <path
+     fill="#2a3545"
+     d="m 154.52377,145.02803 -23.73158,6.47225 v 5.03397 1.43827 1.43828 l 3e-5,15.82105 h 28.76555 v -17.25933 h -24.45074 l 24.45071,-5.75311 v -1.43827 l -2.87655,-5.75311 z M 136.5453,159.4108 h 2.87656 l -2.87656,2.87656 h -2.87655 z m 5.75311,0 h 2.89046 l -2.89046,2.87656 h -2.88351 z m 5.75311,0 h 2.8835 l -2.8835,2.87656 h -2.89046 z m 5.75311,0 h 2.87656 l -2.87656,2.87656 h -2.89739 z m -19.41674,5.75311 h 21.57416 l 0,7.19139 h -21.57416 z m 4.57293,-10.78708 -2.79537,0.67855 -3.47394,-2.11683 2.79538,-0.67855 z m 5.75311,-1.43829 -2.79537,0.67856 -3.47394,-2.11682 2.79538,-0.67856 z m 5.75311,-1.43828 -2.79537,0.67856 -3.47394,-2.11682 2.79538,-0.67856 z m 5.75311,-1.43826 -2.79537,0.67855 -3.47394,-2.11683 2.79538,-0.67855 z"
+     id="path2"
+     sodipodi:nodetypes="cccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+     style="fill:#2a3545;fill-opacity:1;stroke-width:0.924504" />
+</svg>
