@@ -1,0 +1,14 @@
+name: Publish Docker Image
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Placeholder Step
+        run: echo "This workflow is meant to be run from the fng-infra-docker-ci branch."
