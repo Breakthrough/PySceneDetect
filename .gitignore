@@ -87,3 +87,4 @@ dmypy.json
 .pyre/
 .pytype/
 cython_debug/
+test_clips/
