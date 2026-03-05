@@ -22,10 +22,12 @@ jobs:
     steps:
       - name: Check workflows
         uses: actions/github-script@v6
+        env:
+          TAG: ${{ github.event.inputs.tag }}
         with:
           script: |
             const { owner, repo } = context.repo;
-            const tag = "${{ github.event.inputs.tag }}";
+            const tag = process.env.TAG;
             const requiredWorkflows = ['Windows Distribution', 'Python Distribution'];
             let workflowConclusions = {};
 
