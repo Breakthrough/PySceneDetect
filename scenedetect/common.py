@@ -70,10 +70,6 @@ from fractions import Fraction
 
 import cv2
 
-# TODO(https://scenedetect.com/issue/168): Ensure both CFR and VFR videos work as intended with this
-# flag enabled. When this feature is stable, we can then work on a roll-out plan.
-_USE_PTS_IN_DEVELOPMENT = False
-
 ##
 ## Type Aliases
 ##
@@ -99,6 +95,34 @@ _SECONDS_PER_MINUTE = 60.0
 _SECONDS_PER_HOUR = 60.0 * _SECONDS_PER_MINUTE
 _MINUTES_PER_HOUR = 60.0
 
+# Common framerates mapped from their float representation to exact rational values.
+_COMMON_FRAMERATES: ty.Dict[Fraction, Fraction] = {
+    Fraction(24000, 1001): Fraction(24000, 1001),  # 23.976...
+    Fraction(30000, 1001): Fraction(30000, 1001),  # 29.97...
+    Fraction(60000, 1001): Fraction(60000, 1001),  # 59.94...
+    Fraction(120000, 1001): Fraction(120000, 1001),  # 119.88...
+}
+
+
+def framerate_to_fraction(fps: float) -> Fraction:
+    """Convert a float framerate to an exact rational Fraction.
+
+    Recognizes common NTSC framerates (23.976, 29.97, 59.94, 119.88) and maps them to their
+    exact rational representation (e.g. 24000/1001). For other values, uses limit_denominator
+    to find a clean rational approximation, or returns the exact integer fraction for whole
+    number framerates.
+    """
+    if fps <= MAX_FPS_DELTA:
+        raise ValueError("Framerate must be positive and greater than zero.")
+    # Integer framerates are exact.
+    if fps == int(fps):
+        return Fraction(int(fps), 1)
+    # Check against known common framerates using limit_denominator to find the closest match.
+    candidate = Fraction(fps).limit_denominator(10000)
+    if candidate in _COMMON_FRAMERATES:
+        return _COMMON_FRAMERATES[candidate]
+    return candidate
+
 
 class Interpolation(Enum):
     """Interpolation method used for image resizing. Based on constants defined in OpenCV."""
@@ -115,24 +139,6 @@ class Interpolation(Enum):
     """Lanczos interpolation over 8x8 neighborhood."""
 
 
-# TODO(@Breakthrough): How should we deal with frame numbers when we have a `Timecode`?
-#
-# Each backend has slight nuances we have to take into account:
-#   - PyAV: Does not include a position in frames, we can probably estimate it. Need to also compare
-#     with how OpenCV handles this. It also seems to fail to decode the last frame. This library
-#     provides the most accurate timing information however.
-#   - OpenCV: Lacks any kind of timebase, only provides position in milliseconds and as frames.
-#     This is probably sufficient, since we could just use 1ms as a timebase.
-#   - MoviePy: Assumes fixed framerate and doesn't include timing information. Fixing this is
-#     probably not feasible, so we should make sure the docs warn users about this.
-#
-# In the meantime, having backends provide accurate timing information is controlled by a hard-coded
-# constant `_USE_PTS_IN_DEVELOPMENT` in each backend implementation that supports it. It still does
-# not work correctly however, as we have to modify detectors themselves to work with FrameTimecode
-# objects instead of integer frame numbers like they do now.
-#
-# We might be able to avoid changing the detector interface if we just have them work directly with
-# PTS and convert them back to FrameTimecodes with the same time base.
 @dataclass(frozen=True)
 class Timecode:
     """Timing information associated with a given frame."""
@@ -242,16 +248,9 @@ class FrameTimecode:
 
     @property
     def frame_num(self) -> ty.Optional[int]:
-        """The frame number. This value will be an estimate if the video is VFR. Prefer using the
-        `pts` property."""
+        """The frame number. For VFR video or Timecode-backed objects, this is an approximation
+        based on the average framerate. Prefer using `pts` and `time_base` for precise timing."""
         if isinstance(self._time, Timecode):
-            # We need to audit anything currently using this property to guarantee temporal
-            # consistency when handling VFR videos (i.e. no assumptions on fixed frame rate).
-            warnings.warn(
-                message="TODO(https://scenedetect.com/issue/168): Update caller to handle VFR.",
-                stacklevel=2,
-                category=UserWarning,
-            )
             # Calculate approximate frame number from seconds and framerate.
             if self._rate is not None:
                 return round(self._time.seconds * float(self._rate))
@@ -312,7 +311,6 @@ class FrameTimecode:
         )
         return self.framerate
 
-    # TODO(https://scenedetect.com/issue/168): Figure out how to deal with VFR here.
     def equal_framerate(self, fps) -> bool:
         """Equal Framerate: Determines if the passed framerate is equal to that of this object.
 
@@ -323,8 +321,8 @@ class FrameTimecode:
             bool: True if passed fps matches the FrameTimecode object's framerate, False otherwise.
 
         """
-        # TODO(https://scenedetect.com/issue/168): Support this comparison in the case FPS is not
-        # set but a timecode is.
+        if self.framerate is None:
+            return False
         return math.fabs(self.framerate - fps) < MAX_FPS_DELTA
 
     @property
@@ -566,12 +564,17 @@ class FrameTimecode:
         other_is_timecode = isinstance(other, FrameTimecode) and isinstance(other._time, Timecode)
 
         if isinstance(self._time, Timecode) and other_is_timecode:
-            if self._time.time_base != other._time.time_base:
-                raise ValueError("timecodes have different time bases")
-            self._time = Timecode(
-                pts=max(0, self._time.pts + other._time.pts),
-                time_base=self._time.time_base,
-            )
+            if self._time.time_base == other._time.time_base:
+                self._time = Timecode(
+                    pts=max(0, self._time.pts + other._time.pts),
+                    time_base=self._time.time_base,
+                )
+                return self
+            # Different time bases: use the finer (smaller) one for better precision.
+            time_base = min(self._time.time_base, other._time.time_base)
+            self_pts = round(Fraction(self._time.pts) * self._time.time_base / time_base)
+            other_pts = round(Fraction(other._time.pts) * other._time.time_base / time_base)
+            self._time = Timecode(pts=max(0, self_pts + other_pts), time_base=time_base)
             return self
 
         # If either input is a timecode, the output shall also be one. The input which isn't a
@@ -613,12 +616,17 @@ class FrameTimecode:
         other_is_timecode = isinstance(other, FrameTimecode) and isinstance(other._time, Timecode)
 
         if isinstance(self._time, Timecode) and other_is_timecode:
-            if self._time.time_base != other._time.time_base:
-                raise ValueError("timecodes have different time bases")
-            self._time = Timecode(
-                pts=max(0, self._time.pts - other._time.pts),
-                time_base=self._time.time_base,
-            )
+            if self._time.time_base == other._time.time_base:
+                self._time = Timecode(
+                    pts=max(0, self._time.pts - other._time.pts),
+                    time_base=self._time.time_base,
+                )
+                return self
+            # Different time bases: use the finer (smaller) one for better precision.
+            time_base = min(self._time.time_base, other._time.time_base)
+            self_pts = round(Fraction(self._time.pts) * self._time.time_base / time_base)
+            other_pts = round(Fraction(other._time.pts) * other._time.time_base / time_base)
+            self._time = Timecode(pts=max(0, self_pts - other_pts), time_base=time_base)
             return self
 
         # If either input is a timecode, the output shall also be one. The input which isn't a

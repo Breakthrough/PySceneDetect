@@ -26,7 +26,7 @@ from fractions import Fraction
 import pytest
 
 # Standard Library Imports
-from scenedetect.common import MAX_FPS_DELTA, FrameTimecode
+from scenedetect.common import MAX_FPS_DELTA, FrameTimecode, Timecode, framerate_to_fraction
 
 
 def test_framerate():
@@ -297,6 +297,48 @@ def test_precision():
     assert FrameTimecode(990, fps).get_timecode(precision=1, use_rounding=False) == "00:00:00.9"
     assert FrameTimecode(990, fps).get_timecode(precision=0, use_rounding=True) == "00:00:01"
     assert FrameTimecode(990, fps).get_timecode(precision=0, use_rounding=False) == "00:00:00"
+
+
+def test_rational_framerate_precision():
+    """Rational framerates should round-trip frame/second conversions without drift."""
+    fps = Fraction(24000, 1001)
+    # Verify that frame_num round-trips through seconds without drift over many frames.
+    for frame in [0, 1, 100, 1000, 10000, 100000]:
+        tc = FrameTimecode(frame, fps)
+        assert tc.frame_num == frame, f"Frame {frame} drifted to {tc.frame_num}"
+
+
+def test_ntsc_framerate_detection():
+    """Common NTSC framerates should be detected from float values."""
+    assert framerate_to_fraction(23.976023976023978) == Fraction(24000, 1001)
+    assert framerate_to_fraction(29.97002997002997) == Fraction(30000, 1001)
+    assert framerate_to_fraction(59.94005994005994) == Fraction(60000, 1001)
+    assert framerate_to_fraction(24.0) == Fraction(24, 1)
+    assert framerate_to_fraction(30.0) == Fraction(30, 1)
+    assert framerate_to_fraction(60.0) == Fraction(60, 1)
+    assert framerate_to_fraction(25.0) == Fraction(25, 1)
+
+
+def test_timecode_arithmetic_mixed_time_base():
+    """Arithmetic with FrameTimecodes using different time_bases should work."""
+    fps = Fraction(24000, 1001)
+    # Timecode with time_base 1/24000 (from PyAV)
+    tc_pyav = FrameTimecode(timecode=Timecode(pts=1001, time_base=Fraction(1, 24000)), fps=fps)
+    # Timecode with time_base 1/1000000 (from OpenCV microseconds)
+    tc_cv2 = FrameTimecode(timecode=Timecode(pts=41708, time_base=Fraction(1, 1000000)), fps=fps)
+    # Both represent approximately 1 frame duration. Addition/subtraction shouldn't raise.
+    result = tc_pyav + tc_cv2
+    assert result.seconds > 0
+    result = tc_pyav - tc_cv2
+    assert result.seconds >= 0  # Clamped to 0 if negative
+
+
+def test_timecode_frame_num_for_vfr():
+    """frame_num should return approximate values for Timecode-backed objects without warning."""
+    fps = Fraction(24000, 1001)
+    tc = FrameTimecode(timecode=Timecode(pts=1001, time_base=Fraction(1, 24000)), fps=fps)
+    # Should not raise or warn - just return the approximate frame number.
+    assert tc.frame_num == 1
 
 
 # TODO(v0.8): Remove this test during the removal of `scenedetect.scene_detector`.

@@ -124,8 +124,8 @@ class VideoStream(ABC):
 
     @property
     @abstractmethod
-    def frame_rate(self) -> float:
-        """Frame rate in frames/sec."""
+    def frame_rate(self) -> Fraction:
+        """Frame rate in frames/sec as a rational Fraction (e.g. Fraction(24000, 1001))."""
         ...
 
     @property

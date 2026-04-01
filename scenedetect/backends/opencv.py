@@ -27,7 +27,7 @@ from logging import getLogger
 import cv2
 import numpy as np
 
-from scenedetect.common import _USE_PTS_IN_DEVELOPMENT, MAX_FPS_DELTA, FrameTimecode, Timecode
+from scenedetect.common import MAX_FPS_DELTA, FrameTimecode, Timecode, framerate_to_fraction
 from scenedetect.platform import get_file_name
 from scenedetect.video_stream import (
     FrameRateUnavailable,
@@ -111,7 +111,7 @@ class VideoStreamCv2(VideoStream):
         self._cap: ty.Optional[cv2.VideoCapture] = (
             None  # Reference to underlying cv2.VideoCapture object.
         )
-        self._frame_rate: ty.Optional[float] = None
+        self._frame_rate: ty.Optional[Fraction] = None
 
         # VideoCapture state
         self._has_grabbed = False
@@ -144,7 +144,7 @@ class VideoStreamCv2(VideoStream):
     """Unique name used to identify this backend."""
 
     @property
-    def frame_rate(self) -> float:
+    def frame_rate(self) -> Fraction:
         assert self._frame_rate
         return self._frame_rate
 
@@ -196,30 +196,25 @@ class VideoStreamCv2(VideoStream):
 
     @property
     def timecode(self) -> Timecode:
-        """Current position within stream as a Timecode. This is not frame accurate."""
+        """Current position within stream as a Timecode."""
         # *NOTE*: Although OpenCV has `CAP_PROP_PTS`, it doesn't seem to be reliable. For now, we
-        # use `CAP_PROP_POS_MSEC` instead, with a time base of 1/1000. Unfortunately this means that
-        # rounding errors will affect frame accuracy with this backend.
-        pts = self._cap.get(cv2.CAP_PROP_POS_MSEC)
-        time_base = Fraction(1, 1000)
-        return Timecode(pts=round(pts), time_base=time_base)
+        # use `CAP_PROP_POS_MSEC` instead, converting to microseconds for sufficient precision to
+        # avoid frame-boundary rounding errors at common framerates like 24000/1001.
+        ms = self._cap.get(cv2.CAP_PROP_POS_MSEC)
+        time_base = Fraction(1, 1000000)
+        return Timecode(pts=round(ms * 1000), time_base=time_base)
 
     @property
     def position(self) -> FrameTimecode:
-        # TODO(https://scenedetect.com/issue/168): See if there is a better way to do this, or
-        # add a config option before landing this.
-        if _USE_PTS_IN_DEVELOPMENT:
-            timecode = self.timecode
-            # If PTS is 0 but we've read frames, derive from frame number.
-            # This handles image sequences and cases where CAP_PROP_POS_MSEC is unreliable.
-            if timecode.pts == 0 and self.frame_number > 0:
-                time_sec = (self.frame_number - 1) / self.frame_rate
-                pts = round(time_sec * 1000)
-                timecode = Timecode(pts=pts, time_base=Fraction(1, 1000))
-            return FrameTimecode(timecode=timecode, fps=self.frame_rate)
-        if self.frame_number < 1:
-            return self.base_timecode
-        return self.base_timecode + (self.frame_number - 1)
+        timecode = self.timecode
+        # If PTS is 0 but we've read frames, derive from frame number.
+        # This handles image sequences and cases where CAP_PROP_POS_MSEC is unreliable.
+        if timecode.pts == 0 and self.frame_number > 0:
+            fps = self.frame_rate
+            time_base = Fraction(1, fps.numerator)
+            pts = (self.frame_number - 1) * fps.denominator
+            timecode = Timecode(pts=pts, time_base=time_base)
+        return FrameTimecode(timecode=timecode, fps=self.frame_rate)
 
     @property
     def position_ms(self) -> float:
@@ -235,8 +230,9 @@ class VideoStreamCv2(VideoStream):
         if target < 0:
             raise ValueError("Target seek position cannot be negative!")
 
-        # TODO(https://scenedetect.com/issue/168): Shouldn't use frames for VFR video here.
-        # Have to seek one behind and call grab() after to that the VideoCapture
+        # Seeking is done via frame number since OpenCV doesn't support PTS-based seeking.
+        # After seeking, position returns actual PTS from CAP_PROP_POS_MSEC.
+        # Have to seek one behind and call grab() after so that the VideoCapture
         # returns a valid timestamp when using CAP_PROP_POS_MSEC.
         target_frame_cv2 = (self.base_timecode + target).frame_num
         if target_frame_cv2 > 0:
@@ -329,14 +325,11 @@ class VideoStreamCv2(VideoStream):
                 raise FrameRateUnavailable()
 
         self._cap = cap
-        self._frame_rate = framerate
+        self._frame_rate = framerate_to_fraction(framerate)
         self._has_grabbed = False
         cap.set(cv2.CAP_PROP_ORIENTATION_AUTO, 1.0)  # https://github.com/opencv/opencv/issues/26795
 
 
-# TODO(https://scenedetect.com/issues/168): Support non-monotonic timing for `position`. VFR timecode
-# support is a prerequisite for this. Timecodes are currently calculated by multiplying the
-# framerate by number of frames. Actual elapsed time can be obtained via `position_ms` for now.
 class VideoCaptureAdapter(VideoStream):
     """Adapter for existing VideoCapture objects. Unlike VideoStreamCv2, this class supports
     VideoCaptures which may not support seeking.
@@ -378,7 +371,7 @@ class VideoCaptureAdapter(VideoStream):
                 raise FrameRateUnavailable()
 
         self._cap = cap
-        self._frame_rate: float = framerate
+        self._frame_rate: Fraction = framerate_to_fraction(framerate)
         self._num_frames = 0
         self._max_read_attempts = max_read_attempts
         self._decode_failures = 0
@@ -408,7 +401,7 @@ class VideoCaptureAdapter(VideoStream):
     """Unique name used to identify this backend."""
 
     @property
-    def frame_rate(self) -> float:
+    def frame_rate(self) -> Fraction:
         """Framerate in frames/sec."""
         assert self._frame_rate
         return self._frame_rate
@@ -439,8 +432,6 @@ class VideoCaptureAdapter(VideoStream):
     @property
     def duration(self) -> ty.Optional[FrameTimecode]:
         """Duration of the stream as a FrameTimecode, or None if non terminating."""
-        # TODO(https://scenedetect.com/issue/168): This will be incorrect for VFR. See if there is
-        # another property we can use to estimate the video length correctly.
         frame_count = math.trunc(self._cap.get(cv2.CAP_PROP_FRAME_COUNT))
         if frame_count > 0:
             return self.base_timecode + frame_count
@@ -455,7 +446,12 @@ class VideoCaptureAdapter(VideoStream):
     def position(self) -> FrameTimecode:
         if self.frame_number < 1:
             return self.base_timecode
-        return self.base_timecode + (self.frame_number - 1)
+        # Synthesize a Timecode from frame count and rational framerate.
+        fps = self.frame_rate
+        time_base = Fraction(1, fps.numerator)
+        pts = (self.frame_number - 1) * fps.denominator
+        timecode = Timecode(pts=pts, time_base=time_base)
+        return FrameTimecode(timecode=timecode, fps=fps)
 
     @property
     def position_ms(self) -> float:

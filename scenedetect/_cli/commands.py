@@ -405,12 +405,13 @@ def _save_xml_fcp(
     ElementTree.SubElement(sequence, "duration").text = f"{duration.frame_num}"
 
     rate = ElementTree.SubElement(sequence, "rate")
-    ElementTree.SubElement(rate, "timebase").text = str(context.video_stream.frame_rate)
+    fps = float(context.video_stream.frame_rate)
+    ElementTree.SubElement(rate, "timebase").text = str(round(fps))
     ElementTree.SubElement(rate, "ntsc").text = "False"
 
     timecode = ElementTree.SubElement(sequence, "timecode")
     tc_rate = ElementTree.SubElement(timecode, "rate")
-    ElementTree.SubElement(tc_rate, "timebase").text = str(context.video_stream.frame_rate)
+    ElementTree.SubElement(tc_rate, "timebase").text = str(round(fps))
     ElementTree.SubElement(tc_rate, "ntsc").text = "False"
     ElementTree.SubElement(timecode, "frame").text = "0"
     ElementTree.SubElement(timecode, "displayformat").text = "NDF"
@@ -427,7 +428,7 @@ def _save_xml_fcp(
         ElementTree.SubElement(clip, "name").text = f"Shot {i + 1}"
         ElementTree.SubElement(clip, "enabled").text = "TRUE"
         ElementTree.SubElement(clip, "rate").append(
-            ElementTree.fromstring(f"<timebase>{context.video_stream.frame_rate}</timebase>")
+            ElementTree.fromstring(f"<timebase>{round(fps)}</timebase>")
         )
         # TODO: Are these supposed to be frame numbers or another format?
         ElementTree.SubElement(clip, "start").text = str(start.frame_num)
@@ -501,7 +502,7 @@ def save_otio(
     video_name = context.video_stream.name
     video_path = os.path.abspath(context.video_stream.path)
     video_base_name = os.path.basename(context.video_stream.path)
-    frame_rate = context.video_stream.frame_rate
+    frame_rate = float(context.video_stream.frame_rate)
 
     # List of track mapping to resource type.
     # TODO(https://scenedetect.com/issues/497): Allow OTIO export without an audio track.

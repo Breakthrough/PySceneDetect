@@ -724,4 +724,3 @@ Although there have been minimal changes to most API examples, there are several
  * Remove deprecated `AdaptiveDetector` constructor arg `min_delta_hsv` (use `min_content_val` instead)
  * Remove `advance` parameter from `VideoStream.read()`
 
-
