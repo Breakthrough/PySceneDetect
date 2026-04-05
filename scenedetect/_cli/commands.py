@@ -401,18 +401,19 @@ def _save_xml_fcp(
     sequence = ElementTree.SubElement(project, "sequence")
     ElementTree.SubElement(sequence, "name").text = context.video_stream.name
 
+    fps = float(context.video_stream.frame_rate)
+    ntsc = "True" if context.video_stream.frame_rate.denominator != 1 else "False"
     duration = scenes[-1][1] - scenes[0][0]
-    ElementTree.SubElement(sequence, "duration").text = f"{duration.frame_num}"
+    ElementTree.SubElement(sequence, "duration").text = str(round(duration.seconds * fps))
 
     rate = ElementTree.SubElement(sequence, "rate")
-    fps = float(context.video_stream.frame_rate)
     ElementTree.SubElement(rate, "timebase").text = str(round(fps))
-    ElementTree.SubElement(rate, "ntsc").text = "False"
+    ElementTree.SubElement(rate, "ntsc").text = ntsc
 
     timecode = ElementTree.SubElement(sequence, "timecode")
     tc_rate = ElementTree.SubElement(timecode, "rate")
     ElementTree.SubElement(tc_rate, "timebase").text = str(round(fps))
-    ElementTree.SubElement(tc_rate, "ntsc").text = "False"
+    ElementTree.SubElement(tc_rate, "ntsc").text = ntsc
     ElementTree.SubElement(timecode, "frame").text = "0"
     ElementTree.SubElement(timecode, "displayformat").text = "NDF"
 
@@ -430,11 +431,11 @@ def _save_xml_fcp(
         ElementTree.SubElement(clip, "rate").append(
             ElementTree.fromstring(f"<timebase>{round(fps)}</timebase>")
         )
-        # TODO: Are these supposed to be frame numbers or another format?
-        ElementTree.SubElement(clip, "start").text = str(start.frame_num)
-        ElementTree.SubElement(clip, "end").text = str(end.frame_num)
-        ElementTree.SubElement(clip, "in").text = str(start.frame_num)
-        ElementTree.SubElement(clip, "out").text = str(end.frame_num)
+        # Frame numbers relative to the declared <timebase> fps, computed from PTS seconds.
+        ElementTree.SubElement(clip, "start").text = str(round(start.seconds * fps))
+        ElementTree.SubElement(clip, "end").text = str(round(end.seconds * fps))
+        ElementTree.SubElement(clip, "in").text = str(round(start.seconds * fps))
+        ElementTree.SubElement(clip, "out").text = str(round(end.seconds * fps))
 
         file_ref = ElementTree.SubElement(clip, "file", id=f"file{i + 1}")
         ElementTree.SubElement(file_ref, "name").text = context.video_stream.name
@@ -535,12 +536,12 @@ def save_otio(
                                 "duration": {
                                     "OTIO_SCHEMA": "RationalTime.1",
                                     "rate": frame_rate,
-                                    "value": float((end - start).frame_num),
+                                    "value": (end - start).seconds * frame_rate,
                                 },
                                 "start_time": {
                                     "OTIO_SCHEMA": "RationalTime.1",
                                     "rate": frame_rate,
-                                    "value": float(start.frame_num),
+                                    "value": start.seconds * frame_rate,
                                 },
                             },
                             "enabled": True,

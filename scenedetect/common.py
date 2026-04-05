@@ -375,7 +375,10 @@ class FrameTimecode:
             str: The current time in the form ``"HH:MM:SS[.nnn]"``.
         """
         # Compute hours and minutes based off of seconds, and update seconds.
-        if nearest_frame and self.framerate:
+        # For PTS-backed timecodes, the PTS already represents an exact frame boundary, so we use
+        # `seconds` directly. For non-PTS timecodes, `nearest_frame` snaps to the nearest frame
+        # boundary using frame_num, which avoids floating point drift in CFR video display.
+        if nearest_frame and self.framerate and not isinstance(self._time, Timecode):
             secs = self.frame_num / self.framerate
         else:
             secs = self.seconds
