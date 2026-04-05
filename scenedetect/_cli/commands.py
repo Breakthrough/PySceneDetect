@@ -536,12 +536,12 @@ def save_otio(
                                 "duration": {
                                     "OTIO_SCHEMA": "RationalTime.1",
                                     "rate": frame_rate,
-                                    "value": (end - start).seconds * frame_rate,
+                                    "value": round((end - start).seconds * frame_rate, 6),
                                 },
                                 "start_time": {
                                     "OTIO_SCHEMA": "RationalTime.1",
                                     "rate": frame_rate,
-                                    "value": start.seconds * frame_rate,
+                                    "value": round(start.seconds * frame_rate, 6),
                                 },
                             },
                             "enabled": True,
