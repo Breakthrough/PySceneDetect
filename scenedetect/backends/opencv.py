@@ -230,24 +230,22 @@ class VideoStreamCv2(VideoStream):
         if target < 0:
             raise ValueError("Target seek position cannot be negative!")
 
-        # Seeking is done via frame number since OpenCV doesn't support PTS-based seeking.
-        # After seeking, position returns actual PTS from CAP_PROP_POS_MSEC.
-        # Have to seek one behind and call grab() after so that the VideoCapture
-        # returns a valid timestamp when using CAP_PROP_POS_MSEC.
-        target_frame_cv2 = (self.base_timecode + target).frame_num
-        if target_frame_cv2 > 0:
-            target_frame_cv2 -= 1
-        self._cap.set(cv2.CAP_PROP_POS_FRAMES, target_frame_cv2)
+        target_secs = (self.base_timecode + target).seconds
         self._has_grabbed = False
-        # Preemptively grab the frame behind the target position if possible.
-        if target > 0:
+        if target_secs > 0:
+            # Use CAP_PROP_POS_MSEC for time-accurate seeking (correct for both CFR and VFR).
+            # Seek one frame before the target so the next read() returns the frame at target.
+            one_frame_ms = 1000.0 / float(self._frame_rate)
+            seek_ms = max(0.0, target_secs * 1000.0 - one_frame_ms)
+            self._cap.set(cv2.CAP_PROP_POS_MSEC, seek_ms)
             self._has_grabbed = self._cap.grab()
-            # If we seeked past the end of the video, need to seek one frame backwards
-            # from the current position and grab that frame instead.
+            # If we seeked past the end, back up one frame.
             if not self._has_grabbed:
                 seek_pos = round(self._cap.get(cv2.CAP_PROP_POS_FRAMES) - 1.0)
                 self._cap.set(cv2.CAP_PROP_POS_FRAMES, max(0, seek_pos))
                 self._has_grabbed = self._cap.grab()
+        else:
+            self._cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
 
     def reset(self):
         """Close and re-open the VideoStream (should be equivalent to calling `seek(0)`)."""

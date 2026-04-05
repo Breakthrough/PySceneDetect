@@ -168,7 +168,11 @@ class FlashFilter:
             self._last_above = timecode
         if self._merge_triggered:
             # This frame was under the threshold, see if enough frames passed to disable the filter.
-            if min_length_met and not above_threshold and (self._last_above - self._merge_start) >= self._filter_secs:
+            if (
+                min_length_met
+                and not above_threshold
+                and (self._last_above - self._merge_start) >= self._filter_secs
+            ):
                 self._merge_triggered = False
                 return [self._last_above]
             # Keep merging until enough frames pass below the threshold.

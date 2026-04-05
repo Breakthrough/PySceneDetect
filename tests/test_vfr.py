@@ -31,6 +31,15 @@ EXPECTED_SCENES_VFR: ty.List[ty.Tuple[str, str]] = [
     ("00:00:03.921", "00:00:09.676"),
 ]
 
+# Expected scene cuts for `goldeneye-vfr-drop3.mp4` — a synthetic VFR clip created from the first
+# 10s of goldeneye.mp4 by dropping every 3rd frame (frames 2,5,8,...). PTS durations alternate
+# between 1001 and 2002 (time_base=1/24000), nominal fps=24000/1001, avg fps≈16. The last scene
+# ends at the clip boundary and may vary slightly between backends.
+EXPECTED_SCENES_VFR_DROP3: ty.List[ty.Tuple[str, str]] = [
+    ("00:00:00.000", "00:00:03.754"),
+    ("00:00:03.754", "00:00:08.759"),
+]
+
 
 class TestVFR:
     """Test VFR video handling."""
@@ -141,6 +150,46 @@ class TestVFR:
             reader = csv.reader(f)
             rows = list(reader)
             assert len(rows) >= 3  # 2 header rows + data
+
+    @pytest.mark.parametrize("backend", ["pyav", "opencv"])
+    def test_vfr_drop3_scene_detection(self, test_vfr_drop3_video: str, backend: str):
+        """Synthetic VFR video (drop every 3rd frame, alternating 1x/2x durations) should produce
+        timecodes matching known ground truth with both backends."""
+        video = open_video(test_vfr_drop3_video, backend=backend)
+        sm = SceneManager()
+        sm.add_detector(ContentDetector())
+        sm.detect_scenes(video=video, show_progress=False)
+        scene_list = sm.get_scene_list()
+
+        assert len(scene_list) >= len(EXPECTED_SCENES_VFR_DROP3), (
+            f"[{backend}] Expected at least {len(EXPECTED_SCENES_VFR_DROP3)} scenes, got {len(scene_list)}"
+        )
+        for i, ((start, end), (exp_start_tc, exp_end_tc)) in enumerate(
+            zip(scene_list, EXPECTED_SCENES_VFR_DROP3, strict=False)
+        ):
+            assert start.get_timecode() == exp_start_tc, (
+                f"[{backend}] Scene {i + 1} start: expected {exp_start_tc!r}, got {start.get_timecode()!r}"
+            )
+            assert end.get_timecode() == exp_end_tc, (
+                f"[{backend}] Scene {i + 1} end: expected {exp_end_tc!r}, got {end.get_timecode()!r}"
+            )
+
+    @pytest.mark.parametrize("backend", ["pyav", "opencv"])
+    def test_vfr_drop3_position_monotonic(self, test_vfr_drop3_video: str, backend: str):
+        """PTS-based position should be monotonically non-decreasing on synthetic VFR video."""
+        video = open_video(test_vfr_drop3_video, backend=backend)
+        last_seconds = -1.0
+        frame_count = 0
+        while True:
+            if video.read() is False:
+                break
+            current = video.position.seconds
+            assert current >= last_seconds, (
+                f"[{backend}] Position decreased at frame {frame_count}: {current} < {last_seconds}"
+            )
+            last_seconds = current
+            frame_count += 1
+        assert frame_count == 160  # 2/3 of original 240 frames in 10s at 24000/1001
 
     def test_cfr_position_is_timecode(self, test_movie_clip: str):
         """CFR video positions should also be Timecode-backed with PTS support."""
