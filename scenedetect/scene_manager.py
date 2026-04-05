@@ -404,7 +404,7 @@ class SceneManager:
                 for cut in cuts:
                     for position, frame in self._frame_buffer:
                         if cut == position:
-                            callback(frame, position)
+                            callback(frame, int(position))
         return new_cuts
 
     def _post_process(self, timecode: FrameTimecode) -> None:

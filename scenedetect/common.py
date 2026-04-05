@@ -252,18 +252,22 @@ class FrameTimecode:
                 stacklevel=2,
                 category=UserWarning,
             )
-            # We can calculate the approx. # of frames by taking the presentation time and the
-            # time base itself.
-            (num, den) = (self._time.time_base * self._time.pts).as_integer_ratio()
-            return num / den
+            # Calculate approximate frame number from seconds and framerate.
+            if self._rate is not None:
+                return round(self._time.seconds * float(self._rate))
+            # No framerate available - return estimate based on time.
+            return round(self._time.seconds)
         if isinstance(self._time, _Seconds):
             return self._seconds_to_frames(self._time.value)
         return self._time.value
 
     @property
-    def framerate(self) -> float:
+    def framerate(self) -> ty.Optional[float]:
         """The framerate to use for distance between frames and to calculate frame numbers.
-        For a VFR video, this may just be the average framerate."""
+        For a VFR video, this may just be the average framerate. Returns None if framerate
+        is unknown (e.g. when working with pure Timecode representations)."""
+        if self._rate is None:
+            return None
         return float(self._rate)
 
     @property
@@ -499,6 +503,9 @@ class FrameTimecode:
             return False
         if _compare_as_fixed(self, other):
             return self.frame_num == other.frame_num
+        # For integer comparison, use frame numbers to avoid floating point precision issues.
+        if isinstance(other, int):
+            return self.frame_num == other
         if isinstance(self._time, (Timecode, _Seconds)):
             return self.seconds == self._get_other_as_seconds(other)
         return self.frame_num == self._get_other_as_frames(other)
@@ -508,6 +515,9 @@ class FrameTimecode:
             return True
         if _compare_as_fixed(self, other):
             return self.frame_num != other.frame_num
+        # For integer comparison, use frame numbers to avoid floating point precision issues.
+        if isinstance(other, int):
+            return self.frame_num != other
         if isinstance(self._time, (Timecode, _Seconds)):
             return self.seconds != self._get_other_as_seconds(other)
         return self.frame_num != self._get_other_as_frames(other)
@@ -515,6 +525,9 @@ class FrameTimecode:
     def __lt__(self, other: ty.Union[int, float, str, "FrameTimecode"]) -> bool:
         if _compare_as_fixed(self, other):
             return self.frame_num < other.frame_num
+        # For integer comparison, use frame numbers to avoid floating point precision issues.
+        if isinstance(other, int):
+            return self.frame_num < other
         if isinstance(self._time, (Timecode, _Seconds)):
             return self.seconds < self._get_other_as_seconds(other)
         return self.frame_num < self._get_other_as_frames(other)
@@ -522,6 +535,9 @@ class FrameTimecode:
     def __le__(self, other: ty.Union[int, float, str, "FrameTimecode"]) -> bool:
         if _compare_as_fixed(self, other):
             return self.frame_num <= other.frame_num
+        # For integer comparison, use frame numbers to avoid floating point precision issues.
+        if isinstance(other, int):
+            return self.frame_num <= other
         if isinstance(self._time, (Timecode, _Seconds)):
             return self.seconds <= self._get_other_as_seconds(other)
         return self.frame_num <= self._get_other_as_frames(other)
@@ -529,6 +545,9 @@ class FrameTimecode:
     def __gt__(self, other: ty.Union[int, float, str, "FrameTimecode"]) -> bool:
         if _compare_as_fixed(self, other):
             return self.frame_num > other.frame_num
+        # For integer comparison, use frame numbers to avoid floating point precision issues.
+        if isinstance(other, int):
+            return self.frame_num > other
         if isinstance(self._time, (Timecode, _Seconds)):
             return self.seconds > self._get_other_as_seconds(other)
         return self.frame_num > self._get_other_as_frames(other)
@@ -536,6 +555,9 @@ class FrameTimecode:
     def __ge__(self, other: ty.Union[int, float, str, "FrameTimecode"]) -> bool:
         if _compare_as_fixed(self, other):
             return self.frame_num >= other.frame_num
+        # For integer comparison, use frame numbers to avoid floating point precision issues.
+        if isinstance(other, int):
+            return self.frame_num >= other
         if isinstance(self._time, (Timecode, _Seconds)):
             return self.seconds >= self._get_other_as_seconds(other)
         return self.frame_num >= self._get_other_as_frames(other)
@@ -565,7 +587,9 @@ class FrameTimecode:
                 pts=max(0, timecode.pts + round(seconds / timecode.time_base)),
                 time_base=timecode.time_base,
             )
-            self._rate = None
+            # Preserve rate if available from self or other.
+            if self._rate is None and isinstance(other, FrameTimecode):
+                self._rate = other._rate
             return self
 
         other_is_seconds = isinstance(other, FrameTimecode) and isinstance(other._time, _Seconds)
@@ -610,7 +634,9 @@ class FrameTimecode:
                 pts=max(0, timecode.pts - round(seconds / timecode.time_base)),
                 time_base=timecode.time_base,
             )
-            self._rate = None
+            # Preserve rate if available from self or other.
+            if self._rate is None and isinstance(other, FrameTimecode):
+                self._rate = other._rate
             return self
 
         other_is_seconds = isinstance(other, FrameTimecode) and isinstance(other._time, _Seconds)
@@ -652,21 +678,20 @@ class FrameTimecode:
         return f"{self.get_timecode()} [frame_num={self._time.value}, fps={self._rate}]"
 
     def __hash__(self) -> int:
-        if isinstance(self._time, Timecode):
-            return hash(self._time)
+        # Use frame_num for consistent hashing regardless of internal representation.
+        # This ensures that FrameTimecodes representing the same frame have the same hash,
+        # enabling proper dictionary lookups in StatsManager.
         return self.frame_num
 
     def _get_other_as_seconds(self, other: ty.Union[int, float, str, "FrameTimecode"]) -> float:
         """Get the time in seconds from `other` for arithmetic operations."""
         if isinstance(other, int):
-            if isinstance(self._time, Timecode):
-                # TODO(https://scenedetect.com/issue/168): We need to convert every place that uses
-                # frame numbers with timestamps to convert to a non-frame based way of temporal
-                # logic and instead use seconds-based.
-                if _USE_PTS_IN_DEVELOPMENT and other == 1:
-                    return self.seconds
-                raise NotImplementedError()
-            return float(other) / self._rate
+            # Convert frame number to seconds using framerate.
+            if self._rate is None:
+                raise NotImplementedError(
+                    "Cannot convert frame number to seconds without framerate"
+                )
+            return float(other) / float(self._rate)
         if isinstance(other, float):
             return other
         if isinstance(other, str):

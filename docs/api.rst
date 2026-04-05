@@ -9,11 +9,11 @@ The `scenedetect` API is easy to integrate with most application workflows, whil
 
     * :ref:`scenedetect.detectors 🕵️ <scenedetect-detectors>`: detection algorithms:
 
+        * :mod:`AdaptiveDetector <scenedetect.detectors.adaptive_detector>` finds fast cuts using rolling average of HSL changes
+
         * :mod:`ContentDetector <scenedetect.detectors.content_detector>`: detects fast cuts using weighted average of HSV changes
 
         * :mod:`ThresholdDetector <scenedetect.detectors.threshold_detector>`: finds fades in/out using average pixel intensity changes in RGB
-
-        * :mod:`AdaptiveDetector <scenedetect.detectors.adaptive_detector>` finds fast cuts using rolling average of HSL changes
 
         * :mod:`HistogramDetector <scenedetect.detectors.histogram_detector>` finds fast cuts using HSV histogram changes
 

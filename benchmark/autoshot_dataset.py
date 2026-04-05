@@ -17,7 +17,7 @@ class AutoShotDataset:
         self._scene_files = [
             file for file in sorted(glob.glob(os.path.join(dataset_dir, "annotations", "*.txt")))
         ]
-        for video_file, scene_file in zip(self._video_files, self._scene_files):
+        for video_file, scene_file in zip(self._video_files, self._scene_files, strict=True):
             video_id = os.path.basename(video_file).split(".")[0]
             scene_id = os.path.basename(scene_file).split(".")[0]
             assert video_id == scene_id
