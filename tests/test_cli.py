@@ -38,6 +38,7 @@ import pytest
 
 import scenedetect
 from scenedetect.output import is_ffmpeg_available, is_mkvmerge_available
+from tests.helpers import invoke_cli
 
 SCENEDETECT_CMD = sys.executable + " -m scenedetect"
 
@@ -303,14 +304,22 @@ def test_cli_detector_with_stats(tmp_path, detector_command: str):
 
 def test_cli_list_scenes(tmp_path: Path):
     """Test `list-scenes` command."""
-    # Regular invocation
-    assert (
-        invoke_scenedetect(
-            "-i {VIDEO} time {TIME} {DETECTOR} list-scenes",
-            output_dir=tmp_path,
-        )
-        == 0
+    exit_code, _ = invoke_cli(
+        [
+            "-i",
+            DEFAULT_VIDEO_PATH,
+            "-o",
+            str(tmp_path),
+            "time",
+            "-s",
+            "2s",
+            "-d",
+            "4s",
+            "detect-content",
+            "list-scenes",
+        ]
     )
+    assert exit_code == 0
     output_path = tmp_path.joinpath(f"{DEFAULT_VIDEO_NAME}-Scenes.csv")
     assert os.path.exists(output_path)
     EXPECTED_CSV_OUTPUT = """Timecode List:,00:00:03.754
@@ -742,13 +751,22 @@ Scene Number,Start Frame
 
 def test_cli_save_edl(tmp_path: Path):
     """Test `save-edl` command."""
-    assert (
-        invoke_scenedetect(
-            "-i {VIDEO} time {TIME} {DETECTOR} save-edl",
-            output_dir=tmp_path,
-        )
-        == 0
+    exit_code, _ = invoke_cli(
+        [
+            "-i",
+            DEFAULT_VIDEO_PATH,
+            "-o",
+            str(tmp_path),
+            "time",
+            "-s",
+            "2s",
+            "-d",
+            "4s",
+            "detect-content",
+            "save-edl",
+        ]
     )
+    assert exit_code == 0
     output_path = tmp_path.joinpath(f"{DEFAULT_VIDEO_NAME}.edl")
     assert os.path.exists(output_path)
     EXPECTED_EDL_OUTPUT = f"""* CREATED WITH PYSCENEDETECT {scenedetect.__version__}
@@ -763,13 +781,28 @@ FCM: NON-DROP FRAME
 
 def test_cli_save_edl_with_params(tmp_path: Path):
     """Test `save-edl` command but override the other options."""
-    assert (
-        invoke_scenedetect(
-            "-i {VIDEO} time {TIME} {DETECTOR} save-edl -t title -r BX -f file_no_ext",
-            output_dir=tmp_path,
-        )
-        == 0
+    exit_code, _ = invoke_cli(
+        [
+            "-i",
+            DEFAULT_VIDEO_PATH,
+            "-o",
+            str(tmp_path),
+            "time",
+            "-s",
+            "2s",
+            "-d",
+            "4s",
+            "detect-content",
+            "save-edl",
+            "-t",
+            "title",
+            "-r",
+            "BX",
+            "-f",
+            "file_no_ext",
+        ]
     )
+    assert exit_code == 0
     output_path = tmp_path.joinpath("file_no_ext")
     assert os.path.exists(output_path)
     EXPECTED_EDL_OUTPUT = f"""* CREATED WITH PYSCENEDETECT {scenedetect.__version__}
@@ -784,13 +817,22 @@ FCM: NON-DROP FRAME
 
 def test_cli_save_otio(tmp_path: Path):
     """Test `save-otio` command."""
-    assert (
-        invoke_scenedetect(
-            "-i {VIDEO} time {TIME} {DETECTOR} save-otio",
-            output_dir=tmp_path,
-        )
-        == 0
+    exit_code, _ = invoke_cli(
+        [
+            "-i",
+            DEFAULT_VIDEO_PATH,
+            "-o",
+            str(tmp_path),
+            "time",
+            "-s",
+            "2s",
+            "-d",
+            "4s",
+            "detect-content",
+            "save-otio",
+        ]
     )
+    assert exit_code == 0
     output_path = tmp_path.joinpath(f"{DEFAULT_VIDEO_NAME}.otio")
     assert os.path.exists(output_path)
     EXPECTED_OTIO_OUTPUT = """{
@@ -992,13 +1034,23 @@ def test_cli_save_otio(tmp_path: Path):
 
 def test_cli_save_otio_no_audio(tmp_path: Path):
     """Test `save-otio` command without audio."""
-    assert (
-        invoke_scenedetect(
-            "-i {VIDEO} time {TIME} {DETECTOR} save-otio --no-audio",
-            output_dir=tmp_path,
-        )
-        == 0
+    exit_code, _ = invoke_cli(
+        [
+            "-i",
+            DEFAULT_VIDEO_PATH,
+            "-o",
+            str(tmp_path),
+            "time",
+            "-s",
+            "2s",
+            "-d",
+            "4s",
+            "detect-content",
+            "save-otio",
+            "--no-audio",
+        ]
     )
+    assert exit_code == 0
     output_path = tmp_path.joinpath(f"{DEFAULT_VIDEO_NAME}.otio")
     assert os.path.exists(output_path)
     EXPECTED_OTIO_OUTPUT = """{

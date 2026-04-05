@@ -487,6 +487,9 @@ def save_xml(
         logger.error(f"Unknown format: {format}")
 
 
+# TODO: We have to export framerate as a float for OTIO's current format. When OTIO supports
+# fractional timecodes, we should export the framerate as a rational number instead.
+# https://github.com/AcademySoftwareFoundation/OpenTimelineIO/issues/190
 def save_otio(
     context: CliContext,
     scenes: SceneList,
