@@ -15,11 +15,14 @@ import csv
 import os
 import typing as ty
 
+import cv2
+import numpy as np
 import pytest
 
 from scenedetect import SceneManager, open_video
-from scenedetect.common import FrameTimecode, Timecode
+from scenedetect.common import Timecode
 from scenedetect.detectors import ContentDetector
+from scenedetect.output import save_images
 from scenedetect.stats_manager import StatsManager
 
 # Expected scene cuts for `goldeneye-vfr.mp4` detected with ContentDetector() and end_time=10.0s.
@@ -203,3 +206,44 @@ class TestVFR:
         for expected_frame in range(1, 11):
             assert video.read() is not False
             assert video.position.frame_num == expected_frame - 1
+
+    def test_vfr_save_images_opencv_matches_pyav(self, test_vfr_video: str, tmp_path):
+        """OpenCV save-images thumbnails should match PyAV thumbnails for all scenes.
+
+        If the OpenCV seek off-by-one bug is present, scene thumbnails will show content from the
+        wrong scene; MSE against PyAV (ground truth) will be very high for those scenes.
+        """
+        # Run save-images for both backends with 1 image per scene for simplicity.
+        scene_lists = {}
+        for backend in ("pyav", "opencv"):
+            out_dir = tmp_path / backend
+            out_dir.mkdir()
+            video = open_video(test_vfr_video, backend=backend)
+            sm = SceneManager()
+            sm.add_detector(ContentDetector())
+            sm.detect_scenes(video=video)
+            scene_lists[backend] = sm.get_scene_list()
+            assert len(scene_lists[backend]) > 0
+            save_images(scene_lists[backend], video, num_images=1, output_dir=str(out_dir))
+
+        pyav_imgs = sorted((tmp_path / "pyav").glob("*.jpg"))
+        opencv_imgs = sorted((tmp_path / "opencv").glob("*.jpg"))
+        assert len(pyav_imgs) > 0
+        assert len(pyav_imgs) == len(opencv_imgs), (
+            f"Image count mismatch: pyav={len(pyav_imgs)}, opencv={len(opencv_imgs)}"
+        )
+
+        # Compare every corresponding thumbnail. Wrong-scene content produces very high MSE.
+        MAX_MSE = 5000
+        for pyav_path, opencv_path in zip(pyav_imgs, opencv_imgs, strict=False):
+            img_pyav = cv2.imread(str(pyav_path))
+            img_opencv = cv2.imread(str(opencv_path))
+            assert img_pyav is not None, f"Failed to load {pyav_path}"
+            assert img_opencv is not None, f"Failed to load {opencv_path}"
+            if img_pyav.shape != img_opencv.shape:
+                # Resize opencv image to match pyav dimensions before comparing.
+                img_opencv = cv2.resize(img_opencv, (img_pyav.shape[1], img_pyav.shape[0]))
+            mse = float(np.mean((img_pyav.astype(np.float32) - img_opencv.astype(np.float32)) ** 2))
+            assert mse < MAX_MSE, (
+                f"Thumbnail mismatch for {pyav_path.name} vs {opencv_path.name}: MSE={mse:.0f}"
+            )

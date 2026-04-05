@@ -233,12 +233,22 @@ class VideoStreamCv2(VideoStream):
         target_secs = (self.base_timecode + target).seconds
         self._has_grabbed = False
         if target_secs > 0:
-            # Use CAP_PROP_POS_MSEC for time-accurate seeking (correct for both CFR and VFR).
-            # Seek one frame before the target so the next read() returns the frame at target.
+            # Seek one frame before target so the next read() returns the frame at target.
             one_frame_ms = 1000.0 / float(self._frame_rate)
             seek_ms = max(0.0, target_secs * 1000.0 - one_frame_ms)
             self._cap.set(cv2.CAP_PROP_POS_MSEC, seek_ms)
             self._has_grabbed = self._cap.grab()
+            if self._has_grabbed:
+                # VFR correction: set(CAP_PROP_POS_MSEC) converts time using avg_fps internally,
+                # which can land ~1s too early for VFR video. Read forward until we reach the
+                # intended position. The threshold (2x one_frame_ms) never triggers for CFR.
+                actual_ms = self._cap.get(cv2.CAP_PROP_POS_MSEC)
+                corrections = 0
+                while actual_ms < seek_ms - 2.0 * one_frame_ms and corrections < 100:
+                    if not self._cap.grab():
+                        break
+                    actual_ms = self._cap.get(cv2.CAP_PROP_POS_MSEC)
+                    corrections += 1
             # If we seeked past the end, back up one frame.
             if not self._has_grabbed:
                 seek_pos = round(self._cap.get(cv2.CAP_PROP_POS_FRAMES) - 1.0)
