@@ -12,6 +12,23 @@
 
 import os
 import subprocess
+
+# These tests validate that the CLI itself functions correctly, mainly based on the return
+# return code from the process. We do not yet check for correctness of the output, just a
+# successful invocation of the command (i.e. no exceptions/errors).
+# TODO: Add some basic correctness tests to validate the output (just look for the
+# last expected log message or extract # of scenes). Might need to refactor the test cases
+# since we need to calculate the output file names for commands that write to disk.
+# TODO: Define error/exit codes explicitly. Right now these tests only verify that the
+# exit code is zero or nonzero.
+# TODO: These tests are very expensive since they spin up new Python interpreters.
+# Move most of these test cases (e.g. argument validation) to ones that interface directly
+# with the scenedetect._cli module. Click also supports unit testing directly, so we should
+# probably use that instead of spinning up new subprocesses for each run of the controller.
+# That will also allow splitting up the validation of argument parsing logic from the controller
+# logic by creating a CLI context with the desired parameters.
+# TODO: Missing tests for --min-scene-len and --drop-short-scenes.
+import sys
 import typing as ty
 from pathlib import Path
 
@@ -22,27 +39,8 @@ import pytest
 import scenedetect
 from scenedetect.output import is_ffmpeg_available, is_mkvmerge_available
 
-# These tests validate that the CLI itself functions correctly, mainly based on the return
-# return code from the process. We do not yet check for correctness of the output, just a
-# successful invocation of the command (i.e. no exceptions/errors).
+SCENEDETECT_CMD = sys.executable + " -m scenedetect"
 
-# TODO: Add some basic correctness tests to validate the output (just look for the
-# last expected log message or extract # of scenes). Might need to refactor the test cases
-# since we need to calculate the output file names for commands that write to disk.
-
-# TODO: Define error/exit codes explicitly. Right now these tests only verify that the
-# exit code is zero or nonzero.
-
-# TODO: These tests are very expensive since they spin up new Python interpreters.
-# Move most of these test cases (e.g. argument validation) to ones that interface directly
-# with the scenedetect._cli module. Click also supports unit testing directly, so we should
-# probably use that instead of spinning up new subprocesses for each run of the controller.
-# That will also allow splitting up the validation of argument parsing logic from the controller
-# logic by creating a CLI context with the desired parameters.
-
-# TODO: Missing tests for --min-scene-len and --drop-short-scenes.
-
-SCENEDETECT_CMD = "python -m scenedetect"
 ALL_DETECTORS = [
     "detect-content",
     "detect-threshold",

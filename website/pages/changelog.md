@@ -675,7 +675,9 @@ Although there have been minimal changes to most API examples, there are several
 
 ### CLI Changes
 
-- [feature] [WIP] New `save-xml` command supports saving scenes in Final Cut Pro format [#156](https://github.com/Breakthrough/PySceneDetect/issues/156)
+- [feature] VFR videos are handled correctly by the OpenCV and PyAV backends, and should work correctly with default parameters
+- [feature] New `save-xml` command supports saving scenes in Final Cut Pro formats [#156](https://github.com/Breakthrough/PySceneDetect/issues/156)
+- [bugfix] Fix floating-point precision error in `save-otio` output where frame values near integer boundaries (e.g. `90.00000000000001`) were serialized with spurious precision
 - [refactor] Remove deprecated `-d`/`--min-delta-hsv` option from `detect-adaptive` command
 
 ### API Changes
@@ -723,4 +725,5 @@ Although there have been minimal changes to most API examples, there are several
  * Remove deprecated `AdaptiveDetector.get_content_val()` method (use `StatsManager` instead)
  * Remove deprecated `AdaptiveDetector` constructor arg `min_delta_hsv` (use `min_content_val` instead)
  * Remove `advance` parameter from `VideoStream.read()`
-
+ * Remove `SceneDetector.stats_manager_required` property, no longer required
+ * `SceneDetector` is now a [Python abstract class](https://docs.python.org/3/library/abc.html)

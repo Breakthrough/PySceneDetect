@@ -339,12 +339,3 @@ def test_timecode_frame_num_for_vfr():
     tc = FrameTimecode(timecode=Timecode(pts=1001, time_base=Fraction(1, 24000)), fps=fps)
     # Should not raise or warn - just return the approximate frame number.
     assert tc.frame_num == 1
-
-
-# TODO(v0.8): Remove this test during the removal of `scenedetect.scene_detector`.
-def test_deprecated_timecode_module_emits_warning_on_import():
-    FRAME_TIMECODE_WARNING = (
-        "The `frame_timecode` submodule is deprecated, import from the base package instead."
-    )
-    with pytest.warns(DeprecationWarning, match=FRAME_TIMECODE_WARNING):
-        from scenedetect.frame_timecode import FrameTimecode as _
