@@ -14,7 +14,7 @@
     <script src="_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Detectors" href="api/detectors.html" />
+    <link rel="next" title="Migration Guide: v0.6 to v0.7" href="api/migration_guide.html" />
     <link rel="prev" title="Backends" href="cli/backends.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
@@ -186,6 +186,31 @@ overriding backend-specific options.</p></li>
 <div class="toctree-wrapper compound" id="fullapitoc">
 <p class="caption" role="heading"><span class="caption-text">PySceneDetect Module Documentation</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="api/migration_guide.html">Migration Guide: v0.6 to v0.7</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/migration_guide.html#quick-check">Quick Check</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/migration_guide.html#import-changes">Import Changes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/migration_guide.html#custom-detector-changes">Custom Detector Changes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/migration_guide.html#process-frame-signature"><code class="docutils literal notranslate"><span class="pre">process_frame</span></code> Signature</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/migration_guide.html#scenedetector-is-now-abstract"><code class="docutils literal notranslate"><span class="pre">SceneDetector</span></code> is Now Abstract</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/migration_guide.html#removed-methods-and-properties">Removed Methods and Properties</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api/migration_guide.html#frametimecode-changes"><code class="docutils literal notranslate"><span class="pre">FrameTimecode</span></code> Changes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/migration_guide.html#read-only-properties">Read-Only Properties</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/migration_guide.html#new-properties">New Properties</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/migration_guide.html#removed-methods">Removed Methods</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api/migration_guide.html#framerate-and-timestamp-changes">Framerate and Timestamp Changes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/migration_guide.html#rational-framerates">Rational Framerates</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/migration_guide.html#pts-backed-timestamps">PTS-Backed Timestamps</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api/migration_guide.html#statsmanager-changes"><code class="docutils literal notranslate"><span class="pre">StatsManager</span></code> Changes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/migration_guide.html#removed-apis">Removed APIs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/migration_guide.html#cli-changes">CLI Changes</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="api/detectors.html">Detectors</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="api/detectors.html#scenedetect.detectors.adaptive_detector.AdaptiveDetector"><code class="docutils literal notranslate"><span class="pre">AdaptiveDetector</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="api/detectors.html#scenedetect.detectors.adaptive_detector.AdaptiveDetector.get_metrics"><code class="docutils literal notranslate"><span class="pre">AdaptiveDetector.get_metrics()</span></code></a></li>
@@ -469,7 +494,7 @@ overriding backend-specific options.</p></li>
           <a href="cli/backends.html" title="Previous document">Backends</a>
         </li>
         <li>
-          <a href="api/detectors.html" title="Next document">Detectors</a>
+          <a href="api/migration_guide.html" title="Next document">Migration Guide: v0.6 to v0.7</a>
           &rarr;
         </li>
     </ul>
@@ -539,7 +564,7 @@ overriding backend-specific options.</p></li>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
       <li>Previous: <a href="cli/backends.html" title="previous chapter">Backends</a></li>
-      <li>Next: <a href="api/detectors.html" title="next chapter">Detectors</a></li>
+      <li>Next: <a href="api/migration_guide.html" title="next chapter">Migration Guide: v0.6 to v0.7</a></li>
   </ul></li>
 </ul>
 </div>
