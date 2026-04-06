@@ -932,37 +932,51 @@
 <li>[refactor] Remove deprecated <code>-d</code>/<code>--min-delta-hsv</code> option from <code>detect-adaptive</code> command</li>
 </ul>
 <h3 id="api-changes">API Changes</h3>
+<p><strong>VFR &amp; Timestamp Overhaul:</strong></p>
 <ul>
-<li>Replace <code>frame_num</code> parameter (<code>int</code>) with <code>timecode</code> (<code>FrameTimecode</code>) in <code>SceneDetector</code> interface (#168)[https://github.com/Breakthrough/PySceneDetect/issues/168]:<ul>
+<li>Add new <code>Timecode</code> type to represent frame timings in terms of the video's source timebase</li>
+<li>Add <code>time_base</code> and <code>pts</code> properties to <code>FrameTimecode</code> for more accurate timing information</li>
+<li>All backends (PyAV, OpenCV, MoviePy) now return PTS-backed timestamps from <code>VideoStream.position</code></li>
+<li><code>VideoStream.frame_rate</code> now returns <code>Fraction</code> instead of <code>float</code></li>
+<li>Framerates are now stored as rational <code>Fraction</code> values (e.g. <code>Fraction(24000, 1001)</code> instead of <code>23.976</code>) to avoid float precision loss</li>
+<li>Common NTSC rates (23.976, 29.97, 59.94) are automatically detected from float values</li>
+<li><code>FrameTimecode.frame_num</code> is now approximate for VFR video (based on PTS-derived time)</li>
+</ul>
+<p><strong>Detector Interface:</strong></p>
+<ul>
+<li>Replace <code>frame_num</code> parameter (<code>int</code>) with <code>timecode</code> (<code>FrameTimecode</code>) in <code>SceneDetector</code> interface <a href="https://github.com/Breakthrough/PySceneDetect/issues/168">#168</a>:<ul>
 <li>The detector interface: <code>SceneDetector.process_frame()</code> and <code>SceneDetector.post_process()</code></li>
 <li>Statistics: <code>StatsManager.get_metrics()</code>, <code>StatsManager.set_metrics()</code>, and <code>StatsManager.metrics_exist()</code></li>
 </ul>
 </li>
-<li>Move existing functionality to new submodules:<ul>
-<li>Detector interface in <code>scenedetect.scene_detector</code> moved to <code>scenedetect.detector</code></li>
-<li>Timecode types in <code>scenedetect.frame_timecode</code> moved to <code>scenedetect.common</code></li>
+<li><code>SceneDetector</code> is now a <a href="https://docs.python.org/3/library/abc.html">Python abstract class</a></li>
+<li><code>SceneDetector</code> instances can now assume they always have frame data to process when <code>process_frame</code> is called</li>
+<li>Remove <code>SceneDetector.is_processing_required()</code> method</li>
+<li>Remove <code>SceneDetector.stats_manager_required</code> property, no longer required</li>
+<li>Remove deprecated <code>SparseSceneDetector</code> interface</li>
+</ul>
+<p><strong>Module Reorganization:</strong></p>
+<ul>
+<li><code>scenedetect.scene_detector</code> moved to <code>scenedetect.detector</code></li>
+<li><code>scenedetect.frame_timecode</code> moved to <code>scenedetect.common</code></li>
 <li>Image/HTML/CSV export in <code>scenedetect.scene_manager</code> moved to <code>scenedetect.output</code> <a href="https://github.com/Breakthrough/PySceneDetect/issues/463">#463</a></li>
 <li><code>scenedetect.video_splitter</code> moved to <code>scenedetect.output.video</code> <a href="https://github.com/Breakthrough/PySceneDetect/issues/463">#463</a></li>
 </ul>
-</li>
-<li>Remove deprecated module <code>scenedetect.video_manager</code>, use <a href="https://www.scenedetect.com/docs/head/api.html#scenedetect.open_video">the <code>scenedetect.open_video()</code> function</a> instead</li>
-<li>Remove deprecated parameter <code>base_timecode</code> from various functions, there is no need to provide it</li>
-<li>Remove deprecated parameter <code>video_manager</code> from various functions, use <code>video</code> parameter instead</li>
-<li><code>FrameTimecode</code> fields <code>frame_num</code> and <code>framerate</code> are now read-only properties, construct a new <code>FrameTimecode</code> to change them</li>
+<p><strong>FrameTimecode:</strong></p>
+<ul>
+<li><code>frame_num</code> and <code>framerate</code> are now read-only properties, construct a new <code>FrameTimecode</code> to change them</li>
+<li>Add properties to access <code>frame_num</code>, <code>framerate</code>, and <code>seconds</code> instead of getter methods</li>
 <li>Remove <code>FrameTimecode.previous_frame()</code> method</li>
-<li>Remove <code>SceneDetector.is_processing_required()</code> method</li>
-<li><code>SceneDetector</code> instances can now assume they always have frame data to process when <code>process_frame</code> is called</li>
-<li>Remove deprecated <code>SparseSceneDetector</code> interface</li>
+<li>Deprecated functionality preserved from v0.6 now uses the <code>warnings</code> module</li>
+</ul>
+<p><strong>Removals:</strong></p>
+<ul>
+<li>Remove deprecated module <code>scenedetect.video_manager</code>, use <a href="https://www.scenedetect.com/docs/head/api.html#scenedetect.open_video">the <code>scenedetect.open_video()</code> function</a> instead</li>
+<li>Remove deprecated parameters <code>base_timecode</code> and <code>video_manager</code> from various functions</li>
 <li>Remove deprecated <code>SceneManager.get_event_list()</code> method</li>
 <li>Remove deprecated <code>AdaptiveDetector.get_content_val()</code> method (use <code>StatsManager</code> instead)</li>
 <li>Remove deprecated <code>AdaptiveDetector</code> constructor arg <code>min_delta_hsv</code> (use <code>min_content_val</code> instead)</li>
 <li>Remove <code>advance</code> parameter from <code>VideoStream.read()</code></li>
-<li>Remove <code>SceneDetector.stats_manager_required</code> property, no longer required</li>
-<li><code>SceneDetector</code> is now a <a href="https://docs.python.org/3/library/abc.html">Python abstract class</a></li>
-<li>Deprecated functionality preserved from v0.6 now uses the <code>warnings</code> module</li>
-<li>Add properties to access <code>frame_num</code>, <code>framerate</code>, and <code>seconds</code> from <code>FrameTimecode</code> instead of getter methods</li>
-<li>Add new <code>Timecode</code> type to represent frame timings in terms of the video's source timebase</li>
-<li>Add new <code>time_base</code> and <code>pts</code> properties to <code>FrameTimecode</code> to provide more accurate timing information</li>
 </ul>
               
             </div>
