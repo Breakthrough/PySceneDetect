@@ -1,6 +1,14 @@
-# Containerfile for PySceneDetect
-# Copyright (C) 2026 FNGarvin. All rights reserved.
-# License: BSD-3-Clause
+#
+#            PySceneDetect: Python-Based Video Scene Detector
+#   -------------------------------------------------------------------
+#     [  Site:    https://scenedetect.com                           ]
+#     [  Docs:    https://scenedetect.com/docs/                     ]
+#     [  Github:  https://github.com/Breakthrough/PySceneDetect/    ]
+#
+# Copyright (C) 2014-2026 Brandon Castellano <http://www.bcastell.com>.
+# PySceneDetect is licensed under the BSD 3-Clause License; see the
+# included LICENSE file, or visit one of the above pages for details.
+#
 
 FROM python:3.11.11-slim
 
@@ -30,4 +38,3 @@ USER scenedetect
 # The default behavior is to run the CLI
 ENTRYPOINT ["scenedetect"]
 
-# EOF Dockerfile

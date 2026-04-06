@@ -1,7 +1,5 @@
+# Build and publish PySceneDetect Docker image to GitHub Container Registry (GHCR).
 name: Publish Docker Image
-
-# Copyright (C) 2026 FNGarvin. All rights reserved.
-# License: BSD-3-Clause
 
 on:
   workflow_dispatch:
@@ -65,4 +63,3 @@ jobs:
           subject-digest: ${{ steps.push.outputs.digest }}
           push-to-registry: true
 
-# EOF docker-publish.yml
