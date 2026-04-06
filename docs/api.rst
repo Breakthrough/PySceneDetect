@@ -105,6 +105,7 @@ Module Reference
     :caption: PySceneDetect Module Documentation
     :name: fullapitoc
 
+    api/migration_guide
     api/detectors
     api/scene_manager
     api/common
