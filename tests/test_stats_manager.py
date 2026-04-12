@@ -27,8 +27,6 @@ These files will be deleted, if possible, after the tests are completed running.
 """
 
 import csv
-import os
-import random
 from pathlib import Path
 
 import pytest

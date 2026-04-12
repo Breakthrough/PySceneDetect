@@ -290,48 +290,37 @@ class _ImageExtractor:
             if progress_bar is not None:
                 progress_bar.update(1)
 
-    def generate_timecode_list(self, scene_list: SceneList) -> ty.List[ty.Iterable[FrameTimecode]]:
+    def generate_timecode_list(self, scene_list: SceneList) -> ty.List[ty.List[FrameTimecode]]:
         """Generates a list of timecodes for each scene in `scene_list` based on the current config
-        parameters."""
-        # TODO(v0.7): This needs to be fixed as part of PTS overhaul.
+        parameters.
+
+        Uses PTS-accurate seconds-based timing so results are correct for both CFR and VFR video.
+        """
         framerate = scene_list[0][0].framerate
-        # TODO(v1.0): Split up into multiple sub-expressions so auto-formatter works correctly.
-        return [
-            (
-                FrameTimecode(int(f), fps=framerate)
-                for f in (
-                    # middle frames
-                    a[len(a) // 2]
-                    if (0 < j < self._num_images - 1) or self._num_images == 1
-                    # first frame
-                    else min(a[0] + self._frame_margin, a[-1])
-                    if j == 0
-                    # last frame
-                    else max(a[-1] - self._frame_margin, a[0])
-                    # for each evenly-split array of frames in the scene list
-                    for j, a in enumerate(np.array_split(r, self._num_images))
-                )
-            )
-            for r in (
-                # pad ranges to number of images
-                r
-                if 1 + r[-1] - r[0] >= self._num_images
-                else list(r) + [r[-1]] * (self._num_images - len(r))
-                # create range of frames in scene
-                for r in (
-                    range(
-                        start.frame_num,
-                        start.frame_num
-                        + max(
-                            1,  # guard against zero length scenes
-                            end.frame_num - start.frame_num,
-                        ),
-                    )
-                    # for each scene in scene list
-                    for start, end in scene_list
-                )
-            )
-        ]
+        # Convert frame_margin to seconds using the nominal framerate.
+        margin_secs = self._frame_margin / framerate
+        result = []
+        for start, end in scene_list:
+            duration_secs = (end - start).seconds
+            if duration_secs <= 0:
+                result.append([start] * self._num_images)
+                continue
+            segment_secs = duration_secs / self._num_images
+            timecodes = []
+            for j in range(self._num_images):
+                seg_start = start.seconds + j * segment_secs
+                seg_end = start.seconds + (j + 1) * segment_secs
+                if self._num_images == 1:
+                    t = start.seconds + duration_secs / 2.0
+                elif j == 0:
+                    t = min(seg_start + margin_secs, seg_end)
+                elif j == self._num_images - 1:
+                    t = max(seg_end - margin_secs, seg_start)
+                else:
+                    t = (seg_start + seg_end) / 2.0
+                timecodes.append(FrameTimecode(t, fps=framerate))
+            result.append(timecodes)
+        return result
 
     def resize_image(
         self,

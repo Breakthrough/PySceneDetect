@@ -21,12 +21,16 @@ It is mostly reliable and fast, although can occasionally run into issues proces
 
 The OpenCV backend also supports image sequences as inputs (e.g. ``frame%02d.jpg`` if you want to load frame001.jpg, frame002.jpg, frame003.jpg...). Make sure to specify the framerate manually (``-f``/``--framerate``) to ensure accurate timing calculations.
 
+Variable framerate (VFR) video is supported. Scene detection uses PTS-derived timestamps from ``CAP_PROP_POS_MSEC`` for accurate timecodes. Seeking compensates for OpenCV's average-fps-based internal seek approximation, so output timecodes remain accurate across the full video.
+
 
 =======================================================================
 PyAV
 =======================================================================
 
 The `PyAV <https://github.com/PyAV-Org/PyAV>`_ backend (`av package <https://pypi.org/project/av/>`_) is a more robust backend that handles multiple audio tracks and frame decode errors gracefully.
+
+Variable framerate (VFR) video is fully supported. PyAV uses native PTS timestamps directly from the container, giving the most accurate timecodes for VFR content.
 
 This backend can be used by specifying ``-b pyav`` via command line, or setting ``backend = pyav`` under the ``[global]`` section of your :ref:`config file <scenedetect_cli-config_file>`.
 
@@ -40,5 +44,7 @@ MoviePy launches ffmpeg as a subprocess, and can be used with various types of i
 .. warning::
 
     The MoviePy backend is still under development and is not included with current Windows distribution. To enable MoviePy support, you must install PySceneDetect using `python` and `pip`.
+
+    Variable framerate (VFR) video is **not supported**. MoviePy assumes a fixed framerate, so timecodes for VFR content will be inaccurate. Use the PyAV or OpenCV backend instead.
 
 This backend can be used by specifying ``-b moviepy`` via command line, or setting ``backend = moviepy`` under the ``[global]`` section of your :ref:`config file <scenedetect_cli-config_file>`.

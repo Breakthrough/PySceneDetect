@@ -122,6 +122,7 @@ class FlashFilter:
         """
         self._mode = mode
         self._filter_length = length  # Number of frames to use for activating the filter.
+        self._filter_secs: ty.Optional[float] = None  # Threshold in seconds, computed on first use.
         self._last_above = None  # Last frame above threshold.
         self._merge_enabled = False  # Used to disable merging until at least one cut was found.
         self._merge_triggered = False  # True when the merge filter is active.
@@ -143,9 +144,12 @@ class FlashFilter:
         raise RuntimeError("Unhandled FlashFilter mode.")
 
     def _filter_suppress(self, timecode: FrameTimecode, above_threshold: bool) -> ty.List[int]:
-        framerate = timecode.framerate
-        assert framerate >= 0
-        min_length_met: bool = (timecode - self._last_above) >= (self._filter_length / framerate)
+        assert timecode.framerate >= 0
+        # Compute the threshold in seconds once from the first frame's framerate. This avoids
+        # using an incorrect average fps (e.g. OpenCV on VFR video) on subsequent frames.
+        if self._filter_secs is None:
+            self._filter_secs = self._filter_length / timecode.framerate
+        min_length_met: bool = (timecode - self._last_above) >= self._filter_secs
         if not (above_threshold and min_length_met):
             return []
         # Both length and threshold requirements were satisfied. Emit the cut, and wait until both
@@ -154,16 +158,21 @@ class FlashFilter:
         return [timecode]
 
     def _filter_merge(self, timecode: FrameTimecode, above_threshold: bool) -> ty.List[int]:
-        framerate = timecode.framerate
-        assert framerate >= 0
-        min_length_met: bool = (timecode - self._last_above) >= (self._filter_length / framerate)
+        assert timecode.framerate >= 0
+        # Compute the threshold in seconds once from the first frame's framerate.
+        if self._filter_secs is None:
+            self._filter_secs = self._filter_length / timecode.framerate
+        min_length_met: bool = (timecode - self._last_above) >= self._filter_secs
         # Ensure last frame is always advanced to the most recent one that was above the threshold.
         if above_threshold:
             self._last_above = timecode
         if self._merge_triggered:
             # This frame was under the threshold, see if enough frames passed to disable the filter.
-            num_merged_frames = self._last_above - self._merge_start
-            if min_length_met and not above_threshold and num_merged_frames >= self._filter_length:
+            if (
+                min_length_met
+                and not above_threshold
+                and (self._last_above - self._merge_start) >= self._filter_secs
+            ):
                 self._merge_triggered = False
                 return [self._last_above]
             # Keep merging until enough frames pass below the threshold.

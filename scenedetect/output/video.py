@@ -125,7 +125,8 @@ PathFormatter = ty.Callable[[VideoMetadata, SceneMetadata], ty.AnyStr]
 def default_formatter(template: str) -> PathFormatter:
     """Formats filenames using a template string which allows the following variables:
 
-    `$VIDEO_NAME`, `$SCENE_NUMBER`, `$START_TIME`, `$END_TIME`, `$START_FRAME`, `$END_FRAME`
+    `$VIDEO_NAME`, `$SCENE_NUMBER`, `$START_TIME`, `$END_TIME`, `$START_FRAME`, `$END_FRAME`,
+    `$START_PTS`, `$END_PTS` (presentation timestamp in milliseconds, accurate for VFR video)
     """
     MIN_DIGITS = 3
     format_scene_number: PathFormatter = lambda video, scene: (
@@ -139,6 +140,8 @@ def default_formatter(template: str) -> PathFormatter:
         END_TIME=str(scene.end.get_timecode().replace(":", ";")),
         START_FRAME=str(scene.start.frame_num),
         END_FRAME=str(scene.end.frame_num),
+        START_PTS=str(round(scene.start.seconds * 1000)),
+        END_PTS=str(round(scene.end.seconds * 1000)),
     )
     return formatter
 

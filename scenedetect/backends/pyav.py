@@ -18,7 +18,7 @@ from logging import getLogger
 import av
 import numpy as np
 
-from scenedetect.common import _USE_PTS_IN_DEVELOPMENT, MAX_FPS_DELTA, FrameTimecode, Timecode
+from scenedetect.common import MAX_FPS_DELTA, FrameTimecode, Timecode
 from scenedetect.platform import get_file_name
 from scenedetect.video_stream import FrameRateUnavailable, VideoOpenFailure, VideoStream
 
@@ -81,6 +81,8 @@ class VideoStreamAv(VideoStream):
         self._name = "" if name is None else name
         self._path = ""
         self._frame: ty.Optional[av.VideoFrame] = None
+        self._decoder: ty.Optional[ty.Generator] = None
+        self._decode_count: int = 0
         self._reopened = True
 
         if threading_mode:
@@ -172,8 +174,8 @@ class VideoStreamAv(VideoStream):
         return self.base_timecode + self._duration_frames
 
     @property
-    def frame_rate(self) -> float:
-        """Frame rate in frames/sec."""
+    def frame_rate(self) -> Fraction:
+        """Frame rate in frames/sec as a rational Fraction."""
         return self._frame_rate
 
     @property
@@ -184,10 +186,8 @@ class VideoStreamAv(VideoStream):
         to the presentation time 0.  Returns 0 even if `frame_number` is 1."""
         if self._frame is None:
             return self.base_timecode
-        if _USE_PTS_IN_DEVELOPMENT:
-            timecode = Timecode(pts=self._frame.pts, time_base=self._frame.time_base)
-            return FrameTimecode(timecode=timecode, fps=self.frame_rate)
-        return FrameTimecode(round(self._frame.time * self.frame_rate), self.frame_rate)
+        timecode = Timecode(pts=self._frame.pts, time_base=self._frame.time_base)
+        return FrameTimecode(timecode=timecode, fps=self.frame_rate)
 
     @property
     def position_ms(self) -> float:
@@ -199,16 +199,13 @@ class VideoStreamAv(VideoStream):
 
     @property
     def frame_number(self) -> int:
-        """Current position within stream as the frame number.
+        """Current position within stream as the frame number (CFR-equivalent).
 
-        Will return 0 until the first frame is `read`."""
-
-        if self._frame:
-            if _USE_PTS_IN_DEVELOPMENT:
-                # frame_number is 1-indexed, so add 1 to the 0-based frame position.
-                return round(self._frame.time * self.frame_rate) + 1
-            return self.position.frame_num + 1
-        return 0
+        Will return 0 until the first frame is `read`. For VFR video this is an approximation
+        derived from PTS × framerate; use `position` for accurate PTS-based timing."""
+        if self._frame is None:
+            return 0
+        return round(self._frame.time * float(self.frame_rate)) + 1
 
     @property
     def rate(self) -> Fraction:
@@ -258,7 +255,6 @@ class VideoStreamAv(VideoStream):
             raise ValueError("Target cannot be negative!")
         beginning = target == 0
 
-        # TODO(https://scenedetect.com/issues/168): This breaks with PTS mode enabled.
         target = self.base_timecode + target
         if target >= 1:
             target = target - 1
@@ -266,6 +262,8 @@ class VideoStreamAv(VideoStream):
             (self.base_timecode + target).seconds / self._video_stream.time_base
         )
         self._frame = None
+        self._decoder = None
+        self._decode_count = 0
         self._container.seek(target_pts, stream=self._video_stream)
         if not beginning:
             self.read(decode=False)
@@ -277,15 +275,23 @@ class VideoStreamAv(VideoStream):
         """Close and re-open the VideoStream (should be equivalent to calling `seek(0)`)."""
         self._container.close()
         self._frame = None
+        self._decoder = None
+        self._decode_count = 0
         try:
             self._container = av.open(self._path if self._path else self._io)
         except Exception as ex:
             raise VideoOpenFailure() from ex
 
     def read(self, decode: bool = True) -> ty.Union[np.ndarray, bool]:
+        # Reuse a persistent decoder generator so the codec's internal frame buffer (used for
+        # B-frame reordering) is never flushed prematurely. Creating a new generator each call
+        # caused the last buffered frame to be lost at EOF.
+        if self._decoder is None:
+            self._decoder = self._container.decode(video=0)
         try:
             last_frame = self._frame
-            self._frame = next(self._container.decode(video=0))
+            self._frame = next(self._decoder)
+            self._decode_count += 1
         except av.error.EOFError:
             self._frame = last_frame
             if self._handle_eof():
@@ -350,7 +356,7 @@ class VideoStreamAv(VideoStream):
         # Don't re-open the video if we can't seek or aren't in AUTO/FRAME thread_type mode.
         if not self.is_seekable or self._video_stream.thread_type not in ("AUTO", "FRAME"):
             return False
-        last_frame = self.frame_number
+        last_pos_secs = self.position.seconds
         orig_pos = self._io.tell()
         try:
             self._io.seek(0)
@@ -360,5 +366,6 @@ class VideoStreamAv(VideoStream):
             raise
         self._container.close()
         self._container = container
-        self.seek(last_frame)
+        self._decoder = None
+        self.seek(last_pos_secs)
         return True
