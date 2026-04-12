@@ -266,7 +266,8 @@ the cut list is generated using the start times of each scene following the firs
 <dt class="sig sig-object py" id="scenedetect.output.default_formatter">
 <span class="sig-prename descclassname"><span class="pre">scenedetect.output.</span></span><span class="sig-name descname"><span class="pre">default_formatter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">template</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.output.default_formatter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Formats filenames using a template string which allows the following variables:</p>
-<p><cite>$VIDEO_NAME</cite>, <cite>$SCENE_NUMBER</cite>, <cite>$START_TIME</cite>, <cite>$END_TIME</cite>, <cite>$START_FRAME</cite>, <cite>$END_FRAME</cite></p>
+<p><cite>$VIDEO_NAME</cite>, <cite>$SCENE_NUMBER</cite>, <cite>$START_TIME</cite>, <cite>$END_TIME</cite>, <cite>$START_FRAME</cite>, <cite>$END_FRAME</cite>,
+<cite>$START_PTS</cite>, <cite>$END_PTS</cite> (presentation timestamp in milliseconds, accurate for VFR video)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>template</strong> (<em>str</em>) – </p>

@@ -148,8 +148,8 @@ object has a defined framerate, otherwise has no effect.</p></li>
 <dl class="py property">
 <dt class="sig sig-object py" id="scenedetect.common.FrameTimecode.frame_num">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">frame_num</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#scenedetect.common.FrameTimecode.frame_num" title="Permalink to this definition">¶</a></dt>
-<dd><p>The frame number. This value will be an estimate if the video is VFR. Prefer using the
-<cite>pts</cite> property.</p>
+<dd><p>The frame number. For VFR video or Timecode-backed objects, this is an approximation
+based on the average framerate. Prefer using <cite>pts</cite> and <cite>time_base</cite> for precise timing.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -240,6 +240,24 @@ is unknown (e.g. when working with pure Timecode representations).</p>
 <dd><p>The base unit in which <cite>pts</cite> is measured.</p>
 </dd></dl>
 
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scenedetect.common.framerate_to_fraction">
+<span class="sig-prename descclassname"><span class="pre">scenedetect.common.</span></span><span class="sig-name descname"><span class="pre">framerate_to_fraction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fps</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.common.framerate_to_fraction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a float framerate to an exact rational Fraction.</p>
+<p>Recognizes common NTSC framerates (23.976, 29.97, 59.94, 119.88) and maps them to their
+exact rational representation (e.g. 24000/1001). For other values, uses limit_denominator
+to find a clean rational approximation, or returns the exact integer fraction for whole
+number framerates.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>fps</strong> (<em>float</em>) – </p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>Fraction</em></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py data">
@@ -345,6 +363,7 @@ to source frame without downscaling.</p>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.common.FrameTimecode"><code class="docutils literal notranslate"><span class="pre">FrameTimecode</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.common.Interpolation"><code class="docutils literal notranslate"><span class="pre">Interpolation</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.common.Timecode"><code class="docutils literal notranslate"><span class="pre">Timecode</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scenedetect.common.framerate_to_fraction"><code class="docutils literal notranslate"><span class="pre">framerate_to_fraction()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.common.CropRegion"><code class="docutils literal notranslate"><span class="pre">CropRegion</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.common.CutList"><code class="docutils literal notranslate"><span class="pre">CutList</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.common.MAX_FPS_DELTA"><code class="docutils literal notranslate"><span class="pre">MAX_FPS_DELTA</span></code></a></li>
