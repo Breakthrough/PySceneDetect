@@ -928,7 +928,9 @@
 <p>Although there have been minimal changes to most API examples, there are several breaking changes. Applications written for the 0.6 API <em>may</em> require modification to work with the new API.  Minimum supported Python version is now <strong>Python 3.10</strong>.</p>
 <h3 id="cli-changes">CLI Changes</h3>
 <ul>
-<li>[feature] [WIP] New <code>save-xml</code> command supports saving scenes in Final Cut Pro format <a href="https://github.com/Breakthrough/PySceneDetect/issues/156">#156</a></li>
+<li>[feature] VFR videos are handled correctly by the OpenCV and PyAV backends, and should work correctly with default parameters</li>
+<li>[feature] New <code>save-xml</code> command supports saving scenes in Final Cut Pro formats <a href="https://github.com/Breakthrough/PySceneDetect/issues/156">#156</a></li>
+<li>[bugfix] Fix floating-point precision error in <code>save-otio</code> output where frame values near integer boundaries (e.g. <code>90.00000000000001</code>) were serialized with spurious precision</li>
 <li>[refactor] Remove deprecated <code>-d</code>/<code>--min-delta-hsv</code> option from <code>detect-adaptive</code> command</li>
 </ul>
 <h3 id="api-changes">API Changes</h3>
@@ -977,6 +979,8 @@
 <li>Remove deprecated <code>AdaptiveDetector.get_content_val()</code> method (use <code>StatsManager</code> instead)</li>
 <li>Remove deprecated <code>AdaptiveDetector</code> constructor arg <code>min_delta_hsv</code> (use <code>min_content_val</code> instead)</li>
 <li>Remove <code>advance</code> parameter from <code>VideoStream.read()</code></li>
+<li>Remove <code>SceneDetector.stats_manager_required</code> property, no longer required</li>
+<li><code>SceneDetector</code> is now a <a href="https://docs.python.org/3/library/abc.html">Python abstract class</a></li>
 </ul>
               
             </div>
