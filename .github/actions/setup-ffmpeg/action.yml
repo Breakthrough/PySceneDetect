@@ -1,41 +1,68 @@
 name: 'Setup FFmpeg'
+description: 'Ensure ffmpeg is available on the runner, using OS package managers as a fallback.'
 inputs:
   github-token:
-    required: true
+    description: 'Unused; kept for backward compatibility with existing callers.'
+    required: false
+    default: ''
 
 runs:
   using: 'composite'
   steps:
-    - name: Setup FFmpeg (latest)
-      id: latest
-      continue-on-error: true
-      uses: FedericoCarboni/setup-ffmpeg@v3
-      with:
-        github-token: ${{ inputs.github-token }}
+    - name: Check for preinstalled ffmpeg
+      id: check
+      shell: bash
+      run: |
+        if command -v ffmpeg >/dev/null 2>&1; then
+          echo "ffmpeg already available at: $(command -v ffmpeg)"
+          ffmpeg -version | head -n 1
+          echo "installed=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "ffmpeg not found on PATH; will install via package manager."
+          echo "installed=false" >> "$GITHUB_OUTPUT"
+        fi
 
-    - name: Setup FFmpeg (7.0.0)
-      if: ${{ steps.latest.outcome == 'failure' }}
-      id: v7-0-0
-      continue-on-error: true
-      uses: FedericoCarboni/setup-ffmpeg@v3
-      with:
-        github-token: ${{ inputs.github-token }}
-        ffmpeg-version: "7.0.0"
+    - name: Install ffmpeg (Linux)
+      if: ${{ steps.check.outputs.installed == 'false' && runner.os == 'Linux' }}
+      shell: bash
+      run: |
+        for attempt in 1 2 3; do
+          echo "apt-get attempt $attempt"
+          if sudo apt-get update && sudo apt-get install -y ffmpeg; then
+            exit 0
+          fi
+          sleep 10
+        done
+        echo "Failed to install ffmpeg via apt-get after 3 attempts" >&2
+        exit 1
 
-    - name: Setup FFmpeg (6.1.1)
-      if: ${{ steps.v7-0-0.outcome == 'failure' }}
-      id: v6-1-1
-      continue-on-error: true
-      uses: FedericoCarboni/setup-ffmpeg@v3
-      with:
-        github-token: ${{ inputs.github-token }}
-        ffmpeg-version: "6.1.1"
+    - name: Install ffmpeg (macOS)
+      if: ${{ steps.check.outputs.installed == 'false' && runner.os == 'macOS' }}
+      shell: bash
+      run: |
+        for attempt in 1 2 3; do
+          echo "brew attempt $attempt"
+          if brew install ffmpeg; then
+            exit 0
+          fi
+          sleep 10
+        done
+        echo "Failed to install ffmpeg via brew after 3 attempts" >&2
+        exit 1
 
-  # The oldest version we allow falling back to must not have `continue-on-error: true`
-    - name: Setup FFmpeg (6.1.0)
-      if: ${{ steps.v6-1-1.outcome == 'failure' }}
-      id: v6-1-0
-      uses: FedericoCarboni/setup-ffmpeg@v3
-      with:
-        github-token: ${{ inputs.github-token }}
-        ffmpeg-version: "6.1.0"
+    - name: Install ffmpeg (Windows)
+      if: ${{ steps.check.outputs.installed == 'false' && runner.os == 'Windows' }}
+      shell: pwsh
+      run: |
+        for ($attempt = 1; $attempt -le 3; $attempt++) {
+          Write-Host "choco attempt $attempt"
+          choco install ffmpeg -y --no-progress
+          if ($LASTEXITCODE -eq 0) { exit 0 }
+          Start-Sleep -Seconds 10
+        }
+        Write-Error "Failed to install ffmpeg via choco after 3 attempts"
+        exit 1
+
+    - name: Verify ffmpeg
+      shell: bash
+      run: ffmpeg -version | head -n 1
