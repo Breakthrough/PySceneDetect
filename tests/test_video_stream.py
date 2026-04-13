@@ -121,20 +121,17 @@ def get_test_video_params() -> ty.List[VideoParameters]:
     ]
 
 
+_VS_TYPES: list = [vs for vs in (VideoStreamCv2, VideoStreamAv) if vs is not None]
+if VideoStreamMoviePy is not None:
+    _VS_TYPES.append(
+        pytest.param(
+            VideoStreamMoviePy,
+            marks=pytest.mark.flaky(reruns=3, reruns_delay=2, only_rerun=["OSError"]),
+        )
+    )
+
 pytestmark = [
-    pytest.mark.parametrize(
-        "vs_type",
-        list(
-            filter(
-                lambda x: x is not None,
-                [
-                    VideoStreamCv2,
-                    VideoStreamAv,
-                    VideoStreamMoviePy,
-                ],
-            )
-        ),
-    ),
+    pytest.mark.parametrize("vs_type", _VS_TYPES),
     pytest.mark.filterwarnings(MOVIEPY_WARNING_FILTER),
 ]
 
