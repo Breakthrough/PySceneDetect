@@ -1397,11 +1397,11 @@ Examples:
 @click.option(
     "-m",
     "--frame-margin",
-    metavar="N",
+    metavar="DURATION",
     default=None,
-    type=click.INT,
-    help="Number of frames to ignore at beginning/end of scenes when saving images. Controls temporal padding on scene boundaries.%s"
-    % (USER_CONFIG.get_help_string("save-images", "num-images")),
+    type=click.STRING,
+    help="Padding around the beginning/end of each scene used when selecting which frames to extract. DURATION can be specified in frames (-m 1), in seconds with `s` suffix (-m 0.1s), or timecode (-m 00:00:00.100).%s"
+    % (USER_CONFIG.get_help_string("save-images", "frame-margin")),
 )
 @click.option(
     "--scale",
@@ -1441,7 +1441,7 @@ def save_images_command(
     quality: ty.Optional[int] = None,
     png: bool = False,
     compression: ty.Optional[int] = None,
-    frame_margin: ty.Optional[int] = None,
+    frame_margin: ty.Optional[str] = None,
     scale: ty.Optional[float] = None,
     height: ty.Optional[int] = None,
     width: ty.Optional[int] = None,

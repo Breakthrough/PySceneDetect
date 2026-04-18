@@ -48,7 +48,7 @@ class ThresholdDetector(SceneDetector):
     def __init__(
         self,
         threshold: float = 12,
-        min_scene_len: int = 15,
+        min_scene_len: ty.Union[int, float, str] = 15,
         fade_bias: float = 0.0,
         add_final_scene: bool = False,
         method: Method = Method.FLOOR,
@@ -58,8 +58,9 @@ class ThresholdDetector(SceneDetector):
         Arguments:
             threshold:  8-bit intensity value that each pixel value (R, G, and B)
                 must be <= to in order to trigger a fade in/out.
-            min_scene_len:   Once a cut is detected, this many frames must pass before a new one can
-                be added to the scene list. Can be an int or FrameTimecode type.
+            min_scene_len:   Once a cut is detected, this much time must pass before a new one can
+                be added to the scene list. Accepts an int (frames), float (seconds), or
+                str (e.g. ``"0.6s"``, ``"00:00:00.600"``).
             fade_bias:  Float between -1.0 and +1.0 representing the percentage of
                 timecode skew for the start of a scene (-1.0 causing a cut at the
                 fade-to-black, 0.0 in the middle, and +1.0 causing the cut to be

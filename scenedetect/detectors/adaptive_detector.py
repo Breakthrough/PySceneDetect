@@ -38,7 +38,7 @@ class AdaptiveDetector(ContentDetector):
     def __init__(
         self,
         adaptive_threshold: float = 3.0,
-        min_scene_len: int = 15,
+        min_scene_len: ty.Union[int, float, str] = 15,
         window_width: int = 2,
         min_content_val: float = 15.0,
         weights: ContentDetector.Components = ContentDetector.DEFAULT_COMPONENT_WEIGHTS,
@@ -49,8 +49,9 @@ class AdaptiveDetector(ContentDetector):
         Arguments:
             adaptive_threshold: Threshold (float) that score ratio must exceed to trigger a
                 new scene (see frame metric adaptive_ratio in stats file).
-            min_scene_len: Once a cut is detected, this many frames must pass before a new one can
-                be added to the scene list. Can be an int or FrameTimecode type.
+            min_scene_len: Once a cut is detected, this much time must pass before a new one can
+                be added to the scene list. Accepts an int (frames), float (seconds), or
+                str (e.g. ``"0.6s"``, ``"00:00:00.600"``).
             window_width: Size of window (number of frames) before and after each frame to
                 average together in order to detect deviations from the mean. Must be at least 1.
             min_content_val: Minimum threshold (float) that the content_val must exceed in order to
