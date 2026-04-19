@@ -24,6 +24,7 @@ in order to be compatible with PySceneDetect.
     event (in, out, cut, etc...).
 """
 
+import math
 import typing as ty
 from abc import ABC, abstractmethod
 from enum import Enum
@@ -114,15 +115,26 @@ class FlashFilter:
         SUPPRESS = 1
         """Suppress consecutive cuts until the filter length has passed."""
 
-    def __init__(self, mode: Mode, length: int):
+    def __init__(self, mode: Mode, length: ty.Union[int, float, str]):
         """
         Arguments:
             mode: The mode to use when enforcing `length`.
-            length: Number of frames to use when filtering cuts.
+            length: Minimum scene length. Accepts an `int` (number of frames), `float` (seconds),
+                or `str` (timecode, e.g. ``"0.6s"`` or ``"00:00:00.600"``).
         """
         self._mode = mode
-        self._filter_length = length  # Number of frames to use for activating the filter.
-        self._filter_secs: ty.Optional[float] = None  # Threshold in seconds, computed on first use.
+        # Frame count (int) and seconds (float) representations of `length`. Exactly one is
+        # populated up front; the other is computed on the first frame once the framerate is
+        # known. Temporal inputs (float/non-digit str) populate `_filter_secs`; integer inputs
+        # (int/digit str) populate `_filter_length`.
+        self._filter_length: int = 0
+        self._filter_secs: ty.Optional[float] = None
+        if isinstance(length, float):
+            self._filter_secs = length
+        elif isinstance(length, str) and not length.strip().isdigit():
+            self._filter_secs = FrameTimecode(timecode=length, fps=100.0).seconds
+        else:
+            self._filter_length = int(length)
         self._last_above = None  # Last frame above threshold.
         self._merge_enabled = False  # Used to disable merging until at least one cut was found.
         self._merge_triggered = False  # True when the merge filter is active.
@@ -130,10 +142,21 @@ class FlashFilter:
 
     @property
     def max_behind(self) -> int:
-        return 0 if self._mode == FlashFilter.Mode.SUPPRESS else self._filter_length
+        if self._mode == FlashFilter.Mode.SUPPRESS:
+            return 0
+        if self._filter_secs is not None:
+            # Estimate using 240fps so the event buffer is large enough for any reasonable input.
+            return math.ceil(self._filter_secs * 240.0)
+        return self._filter_length
+
+    @property
+    def _is_disabled(self) -> bool:
+        if self._filter_secs is not None:
+            return self._filter_secs <= 0.0
+        return self._filter_length <= 0
 
     def filter(self, timecode: FrameTimecode, above_threshold: bool) -> ty.List[FrameTimecode]:
-        if not self._filter_length > 0:
+        if self._is_disabled:
             return [timecode] if above_threshold else []
         if self._last_above is None:
             self._last_above = timecode

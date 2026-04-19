@@ -412,7 +412,7 @@ CONFIG_MAP: ConfigDict = {
         "compression": RangeValue(3, min_val=0, max_val=9),
         "filename": "$VIDEO_NAME-Scene-$SCENE_NUMBER-$IMAGE_NUMBER",
         "format": "jpeg",
-        "frame-margin": 1,
+        "frame-margin": TimecodeValue(1),
         "height": 0,
         "num-images": 3,
         "output": None,
