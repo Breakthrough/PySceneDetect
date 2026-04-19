@@ -930,6 +930,7 @@
 <ul>
 <li>[feature] VFR videos are handled correctly by the OpenCV and PyAV backends, and should work correctly with default parameters</li>
 <li>[feature] New <code>save-xml</code> command supports saving scenes in Final Cut Pro formats <a href="https://github.com/Breakthrough/PySceneDetect/issues/156">#156</a></li>
+<li>[feature] <code>--min-scene-len</code>/<code>-m</code> and <code>save-images --frame-margin</code>/<code>-m</code> now accept seconds (e.g. <code>0.6s</code>) and timecodes (e.g. <code>00:00:00.600</code>) in addition to a frame count <a href="https://github.com/Breakthrough/PySceneDetect/issues/531">#531</a></li>
 <li>[bugfix] Fix floating-point precision error in <code>save-otio</code> output where frame values near integer boundaries (e.g. <code>90.00000000000001</code>) were serialized with spurious precision</li>
 <li>[refactor] Remove deprecated <code>-d</code>/<code>--min-delta-hsv</code> option from <code>detect-adaptive</code> command</li>
 </ul>
@@ -956,6 +957,7 @@
 <li>Remove <code>SceneDetector.is_processing_required()</code> method</li>
 <li>Remove <code>SceneDetector.stats_manager_required</code> property, no longer required</li>
 <li>Remove deprecated <code>SparseSceneDetector</code> interface</li>
+<li>Detector <code>min_scene_len</code> and <code>save_images()</code> <code>frame_margin</code> arguments now accept seconds (<code>float</code>) and timecode strings (e.g. <code>"0.6s"</code>, <code>"00:00:00.600"</code>) in addition to a frame count (<code>int</code>); these are evaluated using the source video's timing for correct behavior on VFR videos <a href="https://github.com/Breakthrough/PySceneDetect/issues/531">#531</a></li>
 </ul>
 <p><strong>Module Reorganization:</strong></p>
 <ul>
