@@ -104,7 +104,7 @@ class ContentDetector(SceneDetector):
     def __init__(
         self,
         threshold: float = 27.0,
-        min_scene_len: int = 15,
+        min_scene_len: ty.Union[int, float, str] = 15,
         weights: "ContentDetector.Components" = DEFAULT_COMPONENT_WEIGHTS,
         luma_only: bool = False,
         kernel_size: ty.Optional[int] = None,
@@ -113,8 +113,9 @@ class ContentDetector(SceneDetector):
         """
         Arguments:
             threshold: Threshold the average change in pixel intensity must exceed to trigger a cut.
-            min_scene_len: Once a cut is detected, this many frames must pass before a new one can
-                be added to the scene list. Can be an int or FrameTimecode type.
+            min_scene_len: Once a cut is detected, this much time must pass before a new one can
+                be added to the scene list. Accepts an int (frames), float (seconds), or
+                str (e.g. ``"0.6s"``, ``"00:00:00.600"``).
             weights: Weight to place on each component when calculating frame score
                 (`content_val` in a statsfile, the value `threshold` is compared against).
             luma_only: If True, only considers changes in the luminance channel of the video.

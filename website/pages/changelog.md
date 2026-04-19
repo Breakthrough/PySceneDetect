@@ -675,7 +675,10 @@ Although there have been minimal changes to most API examples, there are several
 
 ### CLI Changes
 
-- [feature] [WIP] New `save-xml` command supports saving scenes in Final Cut Pro format [#156](https://github.com/Breakthrough/PySceneDetect/issues/156)
+- [feature] VFR videos are handled correctly by the OpenCV and PyAV backends, and should work correctly with default parameters
+- [feature] New `save-xml` command supports saving scenes in Final Cut Pro formats [#156](https://github.com/Breakthrough/PySceneDetect/issues/156)
+- [feature] `--min-scene-len`/`-m` and `save-images --frame-margin`/`-m` now accept seconds (e.g. `0.6s`) and timecodes (e.g. `00:00:00.600`) in addition to a frame count [#531](https://github.com/Breakthrough/PySceneDetect/issues/531)
+- [bugfix] Fix floating-point precision error in `save-otio` output where frame values near integer boundaries (e.g. `90.00000000000001`) were serialized with spurious precision
 - [refactor] Remove deprecated `-d`/`--min-delta-hsv` option from `detect-adaptive` command
 
 ### API Changes
@@ -700,6 +703,7 @@ Although there have been minimal changes to most API examples, there are several
  * Remove `SceneDetector.is_processing_required()` method
  * Remove `SceneDetector.stats_manager_required` property, no longer required
  * Remove deprecated `SparseSceneDetector` interface
+ * Detector `min_scene_len` and `save_images()` `frame_margin` arguments now accept seconds (`float`) and timecode strings (e.g. `"0.6s"`, `"00:00:00.600"`) in addition to a frame count (`int`); these are evaluated using the source video's timing for correct behavior on VFR videos [#531](https://github.com/Breakthrough/PySceneDetect/issues/531)
 
 **Module Reorganization:**
 
@@ -723,5 +727,5 @@ Although there have been minimal changes to most API examples, there are several
  * Remove deprecated `AdaptiveDetector.get_content_val()` method (use `StatsManager` instead)
  * Remove deprecated `AdaptiveDetector` constructor arg `min_delta_hsv` (use `min_content_val` instead)
  * Remove `advance` parameter from `VideoStream.read()`
-
-
+ * Remove `SceneDetector.stats_manager_required` property, no longer required
+ * `SceneDetector` is now a [Python abstract class](https://docs.python.org/3/library/abc.html)

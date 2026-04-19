@@ -12,6 +12,23 @@
 
 import os
 import subprocess
+
+# These tests validate that the CLI itself functions correctly, mainly based on the return
+# return code from the process. We do not yet check for correctness of the output, just a
+# successful invocation of the command (i.e. no exceptions/errors).
+# TODO: Add some basic correctness tests to validate the output (just look for the
+# last expected log message or extract # of scenes). Might need to refactor the test cases
+# since we need to calculate the output file names for commands that write to disk.
+# TODO: Define error/exit codes explicitly. Right now these tests only verify that the
+# exit code is zero or nonzero.
+# TODO: These tests are very expensive since they spin up new Python interpreters.
+# Move most of these test cases (e.g. argument validation) to ones that interface directly
+# with the scenedetect._cli module. Click also supports unit testing directly, so we should
+# probably use that instead of spinning up new subprocesses for each run of the controller.
+# That will also allow splitting up the validation of argument parsing logic from the controller
+# logic by creating a CLI context with the desired parameters.
+# TODO: Missing tests for --min-scene-len and --drop-short-scenes.
+import sys
 import typing as ty
 from pathlib import Path
 
@@ -21,28 +38,10 @@ import pytest
 
 import scenedetect
 from scenedetect.output import is_ffmpeg_available, is_mkvmerge_available
+from tests.helpers import invoke_cli
 
-# These tests validate that the CLI itself functions correctly, mainly based on the return
-# return code from the process. We do not yet check for correctness of the output, just a
-# successful invocation of the command (i.e. no exceptions/errors).
+SCENEDETECT_CMD = sys.executable + " -m scenedetect"
 
-# TODO: Add some basic correctness tests to validate the output (just look for the
-# last expected log message or extract # of scenes). Might need to refactor the test cases
-# since we need to calculate the output file names for commands that write to disk.
-
-# TODO: Define error/exit codes explicitly. Right now these tests only verify that the
-# exit code is zero or nonzero.
-
-# TODO: These tests are very expensive since they spin up new Python interpreters.
-# Move most of these test cases (e.g. argument validation) to ones that interface directly
-# with the scenedetect._cli module. Click also supports unit testing directly, so we should
-# probably use that instead of spinning up new subprocesses for each run of the controller.
-# That will also allow splitting up the validation of argument parsing logic from the controller
-# logic by creating a CLI context with the desired parameters.
-
-# TODO: Missing tests for --min-scene-len and --drop-short-scenes.
-
-SCENEDETECT_CMD = "python -m scenedetect"
 ALL_DETECTORS = [
     "detect-content",
     "detect-threshold",
@@ -305,14 +304,22 @@ def test_cli_detector_with_stats(tmp_path, detector_command: str):
 
 def test_cli_list_scenes(tmp_path: Path):
     """Test `list-scenes` command."""
-    # Regular invocation
-    assert (
-        invoke_scenedetect(
-            "-i {VIDEO} time {TIME} {DETECTOR} list-scenes",
-            output_dir=tmp_path,
-        )
-        == 0
+    exit_code, _ = invoke_cli(
+        [
+            "-i",
+            DEFAULT_VIDEO_PATH,
+            "-o",
+            str(tmp_path),
+            "time",
+            "-s",
+            "2s",
+            "-d",
+            "4s",
+            "detect-content",
+            "list-scenes",
+        ]
     )
+    assert exit_code == 0
     output_path = tmp_path.joinpath(f"{DEFAULT_VIDEO_NAME}-Scenes.csv")
     assert os.path.exists(output_path)
     EXPECTED_CSV_OUTPUT = """Timecode List:,00:00:03.754
@@ -744,13 +751,22 @@ Scene Number,Start Frame
 
 def test_cli_save_edl(tmp_path: Path):
     """Test `save-edl` command."""
-    assert (
-        invoke_scenedetect(
-            "-i {VIDEO} time {TIME} {DETECTOR} save-edl",
-            output_dir=tmp_path,
-        )
-        == 0
+    exit_code, _ = invoke_cli(
+        [
+            "-i",
+            DEFAULT_VIDEO_PATH,
+            "-o",
+            str(tmp_path),
+            "time",
+            "-s",
+            "2s",
+            "-d",
+            "4s",
+            "detect-content",
+            "save-edl",
+        ]
     )
+    assert exit_code == 0
     output_path = tmp_path.joinpath(f"{DEFAULT_VIDEO_NAME}.edl")
     assert os.path.exists(output_path)
     EXPECTED_EDL_OUTPUT = f"""* CREATED WITH PYSCENEDETECT {scenedetect.__version__}
@@ -765,13 +781,28 @@ FCM: NON-DROP FRAME
 
 def test_cli_save_edl_with_params(tmp_path: Path):
     """Test `save-edl` command but override the other options."""
-    assert (
-        invoke_scenedetect(
-            "-i {VIDEO} time {TIME} {DETECTOR} save-edl -t title -r BX -f file_no_ext",
-            output_dir=tmp_path,
-        )
-        == 0
+    exit_code, _ = invoke_cli(
+        [
+            "-i",
+            DEFAULT_VIDEO_PATH,
+            "-o",
+            str(tmp_path),
+            "time",
+            "-s",
+            "2s",
+            "-d",
+            "4s",
+            "detect-content",
+            "save-edl",
+            "-t",
+            "title",
+            "-r",
+            "BX",
+            "-f",
+            "file_no_ext",
+        ]
     )
+    assert exit_code == 0
     output_path = tmp_path.joinpath("file_no_ext")
     assert os.path.exists(output_path)
     EXPECTED_EDL_OUTPUT = f"""* CREATED WITH PYSCENEDETECT {scenedetect.__version__}
@@ -786,13 +817,22 @@ FCM: NON-DROP FRAME
 
 def test_cli_save_otio(tmp_path: Path):
     """Test `save-otio` command."""
-    assert (
-        invoke_scenedetect(
-            "-i {VIDEO} time {TIME} {DETECTOR} save-otio",
-            output_dir=tmp_path,
-        )
-        == 0
+    exit_code, _ = invoke_cli(
+        [
+            "-i",
+            DEFAULT_VIDEO_PATH,
+            "-o",
+            str(tmp_path),
+            "time",
+            "-s",
+            "2s",
+            "-d",
+            "4s",
+            "detect-content",
+            "save-otio",
+        ]
     )
+    assert exit_code == 0
     output_path = tmp_path.joinpath(f"{DEFAULT_VIDEO_NAME}.otio")
     assert os.path.exists(output_path)
     EXPECTED_OTIO_OUTPUT = """{
@@ -994,13 +1034,23 @@ def test_cli_save_otio(tmp_path: Path):
 
 def test_cli_save_otio_no_audio(tmp_path: Path):
     """Test `save-otio` command without audio."""
-    assert (
-        invoke_scenedetect(
-            "-i {VIDEO} time {TIME} {DETECTOR} save-otio --no-audio",
-            output_dir=tmp_path,
-        )
-        == 0
+    exit_code, _ = invoke_cli(
+        [
+            "-i",
+            DEFAULT_VIDEO_PATH,
+            "-o",
+            str(tmp_path),
+            "time",
+            "-s",
+            "2s",
+            "-d",
+            "4s",
+            "detect-content",
+            "save-otio",
+            "--no-audio",
+        ]
     )
+    assert exit_code == 0
     output_path = tmp_path.joinpath(f"{DEFAULT_VIDEO_NAME}.otio")
     assert os.path.exists(output_path)
     EXPECTED_OTIO_OUTPUT = """{

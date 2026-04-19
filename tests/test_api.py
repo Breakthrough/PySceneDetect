@@ -142,3 +142,28 @@ def test_api_device_callback(test_video_file: str):
     scene_manager = SceneManager()
     scene_manager.add_detector(ContentDetector())
     scene_manager.detect_scenes(video=video, duration=total_frames, callback=on_new_scene)
+
+
+# TODO(v0.8): Remove this test when these deprecated modules are removed from the codebase.
+def test_deprecated_modules_emits_warning_on_import():
+    import importlib
+
+    import pytest
+
+    SCENE_DETECTOR_WARNING = (
+        "The `scene_detector` submodule is deprecated, import from the base package instead."
+    )
+    with pytest.warns(DeprecationWarning, match=SCENE_DETECTOR_WARNING):
+        importlib.import_module("scenedetect.scene_detector")
+
+    FRAME_TIMECODE_WARNING = (
+        "The `frame_timecode` submodule is deprecated, import from the base package instead."
+    )
+    with pytest.warns(DeprecationWarning, match=FRAME_TIMECODE_WARNING):
+        importlib.import_module("scenedetect.frame_timecode")
+
+    VIDEO_SPLITTER_WARNING = (
+        "The `video_splitter` submodule is deprecated, import from the base package instead."
+    )
+    with pytest.warns(DeprecationWarning, match=VIDEO_SPLITTER_WARNING):
+        importlib.import_module("scenedetect.video_splitter")

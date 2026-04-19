@@ -17,6 +17,7 @@ image sequences or AviSynth scripts are supported as inputs.
 """
 
 import typing as ty
+from fractions import Fraction
 from logging import getLogger
 
 import cv2
@@ -24,7 +25,7 @@ import numpy as np
 from moviepy.video.io.ffmpeg_reader import FFMPEG_VideoReader
 
 from scenedetect.backends.opencv import VideoStreamCv2
-from scenedetect.common import _USE_PTS_IN_DEVELOPMENT, FrameTimecode
+from scenedetect.common import FrameTimecode, Timecode, framerate_to_fraction
 from scenedetect.platform import get_file_name
 from scenedetect.video_stream import SeekError, VideoOpenFailure, VideoStream
 
@@ -83,9 +84,9 @@ class VideoStreamMoviePy(VideoStream):
     """Unique name used to identify this backend."""
 
     @property
-    def frame_rate(self) -> float:
-        """Framerate in frames/sec."""
-        return self._reader.fps
+    def frame_rate(self) -> Fraction:
+        """Framerate in frames/sec as a rational Fraction."""
+        return framerate_to_fraction(self._reader.fps)
 
     @property
     def path(self) -> ty.Union[bytes, str]:
@@ -135,7 +136,14 @@ class VideoStreamMoviePy(VideoStream):
         calling `read`. This will always return 0 (e.g. be equal to `base_timecode`) if no frames
         have been `read` yet."""
         frame_number = max(self._frame_number - 1, 0)
-        return FrameTimecode(frame_number, self.frame_rate)
+        # Synthesize a Timecode from the frame count and rational framerate.
+        # MoviePy assumes CFR, so this is equivalent to frame-based timing.
+        # Use the framerate denominator as the time_base denominator for exact timing.
+        fps = self.frame_rate
+        time_base = Fraction(1, fps.numerator)
+        pts = frame_number * fps.denominator
+        timecode = Timecode(pts=pts, time_base=time_base)
+        return FrameTimecode(timecode=timecode, fps=fps)
 
     @property
     def position_ms(self) -> float:
@@ -173,10 +181,6 @@ class VideoStreamMoviePy(VideoStream):
             ValueError: `target` is not a valid value (i.e. it is negative).
         """
         success = False
-        if _USE_PTS_IN_DEVELOPMENT:
-            # TODO(https://scenedetect.com/issue/168): Need to handle PTS here.
-            raise NotImplementedError()
-
         if not isinstance(target, FrameTimecode):
             target = FrameTimecode(target, self.frame_rate)
         try:

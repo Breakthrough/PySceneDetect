@@ -226,10 +226,23 @@ def test_detectors_with_stats(test_video_file):
         assert len(scene_list) == initial_scene_len
 
 
-# TODO(v0.8): Remove this test during the removal of `scenedetect.scene_detector`.
-def test_deprecated_detector_module_emits_warning_on_import():
-    SCENE_DETECTOR_WARNING = (
-        "The `scene_detector` submodule is deprecated, import from the base package instead."
+@pytest.mark.parametrize("detector_type", FAST_CUT_DETECTORS)
+@pytest.mark.parametrize(
+    "min_scene_len",
+    # 30 frames at goldeneye.mp4's 24000/1001 (~23.976) fps is ~1.2513s. All four forms should
+    # produce identical cut lists, demonstrating that detectors accept temporal as well as
+    # frame-count values.
+    [30, 1.25, "1.25s", "00:00:01.250"],
+)
+def test_min_scene_len_accepts_time_values(detector_type, min_scene_len):
+    """Detectors accept min_scene_len as int (frames), float (seconds), or str (timecode)."""
+    test_case = TestCase(
+        path=get_absolute_path("resources/goldeneye.mp4"),
+        detector=detector_type(min_scene_len=min_scene_len),
+        start_time=1199,
+        end_time=1450,
+        scene_boundaries=[1199, 1260, 1334, 1365],
     )
-    with pytest.warns(DeprecationWarning, match=SCENE_DETECTOR_WARNING):
-        from scenedetect.scene_detector import SceneDetector as _
+    scene_list = test_case.detect()
+    start_frames = [timecode.frame_num for timecode, _ in scene_list]
+    assert start_frames == test_case.scene_boundaries

@@ -115,6 +115,17 @@ def test_vfr_video() -> str:
 
 
 @pytest.fixture
+def test_vfr_drop3_video() -> str:
+    """Synthetic VFR video created from goldeneye.mp4 by dropping every 3rd frame.
+
+    Frame pattern: keeps frames where (n+1) % 3 != 0 (i.e. drops frames 2,5,8,...).
+    Resulting PTS durations alternate: 1001, 2002, 1001, 2002, ... (time_base=1/24000).
+    Nominal fps: 24000/1001. Average fps: ~16 fps. Duration: ~10s, 160 frames.
+    """
+    return check_exists("tests/resources/goldeneye-vfr-drop3.mp4")
+
+
+@pytest.fixture
 def corrupt_video_file() -> str:
     """Video containing a corrupted frame causing a decode failure."""
     return check_exists("tests/resources/corrupt_frame.mp4")

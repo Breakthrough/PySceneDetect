@@ -30,7 +30,12 @@ class HistogramDetector(SceneDetector):
 
     METRIC_KEYS = ["hist_diff"]
 
-    def __init__(self, threshold: float = 0.05, bins: int = 256, min_scene_len: int = 15):
+    def __init__(
+        self,
+        threshold: float = 0.05,
+        bins: int = 256,
+        min_scene_len: ty.Union[int, float, str] = 15,
+    ):
         """
         Arguments:
             threshold: maximum relative difference between 0.0 and 1.0 that the histograms can
@@ -38,8 +43,9 @@ class HistogramDetector(SceneDetector):
                 YUV, and normalized based on the number of bins. Higher dicfferences imply greater
                 change in content, so larger threshold values are less sensitive to cuts.
             bins: Number of bins to use for the histogram.
-            min_scene_len:   Once a cut is detected, this many frames must pass before a new one can
-                be added to the scene list. Can be an int or FrameTimecode type.
+            min_scene_len:   Once a cut is detected, this much time must pass before a new one can
+                be added to the scene list. Accepts an int (frames), float (seconds), or
+                str (e.g. ``"0.6s"``, ``"00:00:00.600"``).
         """
         super().__init__()
         # Internally, threshold represents the correlation between two histograms and has values

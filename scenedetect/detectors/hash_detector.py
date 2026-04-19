@@ -41,8 +41,9 @@ class HashDetector(SceneDetector):
         size: Size of square of low frequency data to use for the DCT
         lowpass:  How much high frequency information to filter from the DCT. A value of 2 means
             keep lower 1/2 of the frequency data, 4 means only keep 1/4, etc...
-        min_scene_len: Once a cut is detected, this many frames must pass before a new one can
-                be added to the scene list. Can be an int or FrameTimecode type.
+        min_scene_len: Once a cut is detected, this much time must pass before a new one can
+                be added to the scene list. Accepts an int (frames), float (seconds), or
+                str (e.g. ``"0.6s"``, ``"00:00:00.600"``).
     """
 
     def __init__(
@@ -50,7 +51,7 @@ class HashDetector(SceneDetector):
         threshold: float = 0.395,
         size: int = 16,
         lowpass: int = 2,
-        min_scene_len: int = 15,
+        min_scene_len: ty.Union[int, float, str] = 15,
     ):
         super(HashDetector, self).__init__()
         self._threshold = threshold

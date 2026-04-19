@@ -161,6 +161,38 @@ def test_save_images_singlethreaded(test_video_file, tmp_path: Path):
     assert total_images == len([path for path in tmp_path.glob(image_name_glob)])
 
 
+@pytest.mark.parametrize("frame_margin", [1, 0.1, "0.1s", "00:00:00.100"])
+def test_save_images_frame_margin_accepts_time_values(
+    test_video_file, tmp_path: Path, frame_margin
+):
+    """save_images() should accept frame counts (int), seconds (float), and timecode strings."""
+    video = VideoStreamCv2(test_video_file)
+    video_fps = video.frame_rate
+    scene_list = [
+        (FrameTimecode(start, video_fps), FrameTimecode(end, video_fps))
+        for start, end in [(0, 100), (200, 300)]
+    ]
+    image_filenames = save_images(
+        scene_list=scene_list,
+        output_dir=tmp_path,
+        video=video,
+        num_images=3,
+        image_extension="jpg",
+        image_name_template="scenedetect.tempfile.$SCENE_NUMBER.$IMAGE_NUMBER",
+        frame_margin=frame_margin,
+    )
+    for paths in image_filenames.values():
+        for path in paths:
+            assert tmp_path.joinpath(path).exists()
+
+
+def test_save_images_rejects_negative_margin(test_video_file, tmp_path: Path):
+    video = VideoStreamCv2(test_video_file)
+    scene_list = [(FrameTimecode(0, video.frame_rate), FrameTimecode(10, video.frame_rate))]
+    with pytest.raises(ValueError):
+        save_images(scene_list=scene_list, output_dir=tmp_path, video=video, frame_margin=-1)
+
+
 # TODO: Test other functionality against zero width scenes.
 def test_save_images_zero_width_scene(test_video_file, tmp_path: Path):
     """Test scenedetect.scene_manager.save_images guards against zero width scenes."""
@@ -191,12 +223,3 @@ def test_save_images_zero_width_scene(test_video_file, tmp_path: Path):
             total_images += 1
 
     assert total_images == len([path for path in tmp_path.glob(image_name_glob)])
-
-
-# TODO(v0.8): Remove this test during the removal of `scenedetect.video_splitter`.
-def test_deprecated_output_modules_emits_warning_on_import():
-    VIDEO_SPLITTER_WARNING = (
-        "The `video_splitter` submodule is deprecated, import from the base package instead."
-    )
-    with pytest.warns(DeprecationWarning, match=VIDEO_SPLITTER_WARNING):
-        from scenedetect.video_splitter import split_video_ffmpeg as _
