@@ -135,7 +135,7 @@ class TransnetV2Detector(SceneDetector):
         model_path: ty.Union[str, Path] = "tests/resources/transnetv2.onnx",
         onnx_providers: ty.Union[ty.List[str], None] = None,
         threshold: float = 0.5,
-        min_scene_len: int = 15,
+        min_scene_len: ty.Union[int, float, str] = 15,
         filter_mode: FlashFilter.Mode = FlashFilter.Mode.MERGE,
     ):
         super().__init__()
