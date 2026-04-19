@@ -16,6 +16,7 @@ the input should support seeking, but does not necessarily have to be a video. F
 image sequences or AviSynth scripts are supported as inputs.
 """
 
+import time
 import typing as ty
 from fractions import Fraction
 from logging import getLogger
@@ -30,6 +31,33 @@ from scenedetect.platform import get_file_name
 from scenedetect.video_stream import SeekError, VideoOpenFailure, VideoStream
 
 logger = getLogger("pyscenedetect")
+
+# MoviePy spawns ffmpeg as a subprocess and reads frame bytes over stdout. Under
+# load the parent can read before the child has flushed its first write, which
+# surfaces as OSError (see #496). A short retry clears nearly all such flakes.
+_FFMPEG_RETRY_COUNT = 2
+_FFMPEG_RETRY_BACKOFF_SECS = 0.5
+
+
+def _retry_on_oserror(op_name: str, fn: ty.Callable):
+    """Run ``fn``, retrying up to ``_FFMPEG_RETRY_COUNT`` times on ``OSError``."""
+    last_exc: ty.Optional[OSError] = None
+    for attempt in range(_FFMPEG_RETRY_COUNT + 1):
+        try:
+            return fn()
+        except OSError as ex:
+            last_exc = ex
+            if attempt < _FFMPEG_RETRY_COUNT:
+                logger.warning(
+                    "ffmpeg %s failed (attempt %d/%d), retrying: %s",
+                    op_name,
+                    attempt + 1,
+                    _FFMPEG_RETRY_COUNT + 1,
+                    ex,
+                )
+                time.sleep(_FFMPEG_RETRY_BACKOFF_SECS)
+    assert last_exc is not None
+    raise last_exc
 
 
 class VideoStreamMoviePy(VideoStream):
@@ -63,7 +91,9 @@ class VideoStreamMoviePy(VideoStream):
         # cases return IOErrors (e.g. could not read duration/video resolution). These
         # should be mapped to specific errors, e.g. write a function to map MoviePy
         # exceptions to a new set of equivalents.
-        self._reader = FFMPEG_VideoReader(path, print_infos=print_infos)
+        self._reader = _retry_on_oserror(
+            "open", lambda: FFMPEG_VideoReader(path, print_infos=print_infos)
+        )
         # This will always be one behind self._reader.lastread when we finally call read()
         # as MoviePy caches the first frame when opening the video. Thus self._last_frame
         # will always be the current frame, and self._reader.lastread will be the next.
@@ -184,7 +214,9 @@ class VideoStreamMoviePy(VideoStream):
         if not isinstance(target, FrameTimecode):
             target = FrameTimecode(target, self.frame_rate)
         try:
-            self._last_frame = self._reader.get_frame(target.seconds)
+            self._last_frame = _retry_on_oserror(
+                "seek", lambda: self._reader.get_frame(target.seconds)
+            )
             if hasattr(self._reader, "last_read") and target >= self.duration:
                 raise SeekError("MoviePy > 2.0 does not have proper EOF semantics (#461).")
             self._frame_number = min(
@@ -212,7 +244,9 @@ class VideoStreamMoviePy(VideoStream):
         self._last_frame_rgb = None
         self._frame_number = 0
         self._eof = False
-        self._reader = FFMPEG_VideoReader(self._path, print_infos=print_infos)
+        self._reader = _retry_on_oserror(
+            "reset", lambda: FFMPEG_VideoReader(self._path, print_infos=print_infos)
+        )
 
     def read(self, decode: bool = True) -> ty.Union[np.ndarray, bool]:
         if not hasattr(self._reader, "lastread") or self._eof:
