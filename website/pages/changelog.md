@@ -676,7 +676,7 @@ Although there have been minimal changes to most API examples, there are several
 ### CLI Changes
 
 - [feature] VFR videos are handled correctly by the OpenCV and PyAV backends, and should work correctly with default parameters
-- [feature] New `save-xml` command supports saving scenes in Final Cut Pro formats [#156](https://github.com/Breakthrough/PySceneDetect/issues/156)
+- [feature] New `save-xml` command allows exporting in Final Cut Pro format (FCP7/FCPX) [#156](https://github.com/Breakthrough/PySceneDetect/issues/156)
 - [feature] `--min-scene-len`/`-m` and `save-images --frame-margin`/`-m` now accept seconds (e.g. `0.6s`) and timecodes (e.g. `00:00:00.600`) in addition to a frame count [#531](https://github.com/Breakthrough/PySceneDetect/issues/531)
 - [bugfix] Fix floating-point precision error in `save-otio` output where frame values near integer boundaries (e.g. `90.00000000000001`) were serialized with spurious precision
 - [bugfix] Add mitigation for transient `OSError` in the MoviePy backend as it is susceptible to subprocess pipe races on slow or heavily loaded systems [#496](https://github.com/Breakthrough/PySceneDetect/issues/496)

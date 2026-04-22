@@ -20,7 +20,7 @@ import logging
 import os.path
 import typing as ty
 import webbrowser
-from datetime import datetime
+from fractions import Fraction
 from pathlib import Path
 from string import Template
 from xml.dom import minidom
@@ -311,68 +311,89 @@ def save_edl(
         f.write("\n")
 
 
+def _rational_seconds(value: Fraction) -> str:
+    """Format a `Fraction` as an FCPXML rational time string.
+
+    FCPXML expresses time as `<num>/<denom>s` (or `<int>s` for whole seconds).
+    See https://developer.apple.com/documentation/professional-video-applications/fcpxml-reference
+    """
+    if value.denominator == 1:
+        return f"{value.numerator}s"
+    return f"{value.numerator}/{value.denominator}s"
+
+
+def _frame_timecode_seconds(tc: FrameTimecode) -> Fraction:
+    """Exact seconds for `tc` as a `Fraction`, derived from PTS × time base."""
+    return Fraction(tc.pts) * tc.time_base
+
+
 def _save_xml_fcpx(
     context: CliContext,
     scenes: SceneList,
     filename: str,
     output: str,
 ):
-    """Saves scenes in Final Cut Pro X XML format."""
-    ASSET_ID = "asset1"
-    FORMAT_ID = "format1"
-    # TODO: Need to handle other video formats!
-    VIDEO_FORMAT_TODO_HANDLE_OTHERS = "FFVideoFormat1080p24"
+    """Saves scenes in Final Cut Pro X XML format (FCPXML 1.9).
+
+    The output follows Apple's FCPXML schema with rational-second time values and
+    a custom `<format>` derived from the source video's frame rate and resolution.
+    See https://developer.apple.com/documentation/professional-video-applications/fcpxml-reference
+    """
+    ASSET_ID = "r2"
+    FORMAT_ID = "r1"
+
+    frame_rate = context.video_stream.frame_rate
+    frame_duration = _rational_seconds(Fraction(frame_rate.denominator, frame_rate.numerator))
+    width, height = context.video_stream.frame_size
+    video_name = context.video_stream.name
+    src_uri = Path(context.video_stream.path).absolute().as_uri()
+    total_duration = _rational_seconds(_frame_timecode_seconds(scenes[-1][1] - scenes[0][0]))
 
     root = ElementTree.Element("fcpxml", version="1.9")
     resources = ElementTree.SubElement(root, "resources")
-    ElementTree.SubElement(resources, "format", id="format1", name=VIDEO_FORMAT_TODO_HANDLE_OTHERS)
-
-    video_name = context.video_stream.name
-
-    # TODO: We should calculate duration from the scene list.
-    duration = context.video_stream.duration
-    duration = str(duration.seconds) + "s"  # TODO: Is float okay here?
-    path = Path(context.video_stream.path).absolute()
+    # `name` is cosmetic: Apple publishes no authoritative FFVideoFormat* list, and editors key
+    # off frameDuration/width/height. We emit a generated name for display only.
+    format_name = f"FFVideoFormat{height}p{round(float(frame_rate) * 100):04d}"
     ElementTree.SubElement(
+        resources,
+        "format",
+        id=FORMAT_ID,
+        name=format_name,
+        frameDuration=frame_duration,
+        width=str(width),
+        height=str(height),
+    )
+    asset = ElementTree.SubElement(
         resources,
         "asset",
         id=ASSET_ID,
         name=video_name,
-        src=str(path),
-        duration=duration,
+        start="0s",
+        duration=total_duration,
         hasVideo="1",
-        hasAudio="1",  # TODO: Handle case of no audio.
         format=FORMAT_ID,
     )
+    ElementTree.SubElement(asset, "media-rep", kind="original-media", src=src_uri)
 
     library = ElementTree.SubElement(root, "library")
-    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    event = ElementTree.SubElement(library, "event", name=f"Shot Detection {now}")
-    project = ElementTree.SubElement(
-        event, "project", name=video_name
-    )  # TODO: Allow customizing project name.
-    sequence = ElementTree.SubElement(project, "sequence", format=FORMAT_ID, duration=duration)
+    event = ElementTree.SubElement(library, "event", name=video_name)
+    project = ElementTree.SubElement(event, "project", name=video_name)
+    sequence = ElementTree.SubElement(
+        project, "sequence", format=FORMAT_ID, duration=total_duration, tcStart="0s", tcFormat="NDF"
+    )
     spine = ElementTree.SubElement(sequence, "spine")
 
     for i, (start, end) in enumerate(scenes):
-        start_seconds = start.seconds
-        duration_seconds = (end - start).seconds
-        clip = ElementTree.SubElement(
-            spine,
-            "clip",
-            name=f"Shot {i + 1}",
-            duration=f"{duration_seconds:.3f}s",
-            start=f"{start_seconds:.3f}s",
-            offset=f"{start_seconds:.3f}s",
-        )
+        scene_start = _rational_seconds(_frame_timecode_seconds(start))
+        scene_duration = _rational_seconds(_frame_timecode_seconds(end - start))
         ElementTree.SubElement(
-            clip,
+            spine,
             "asset-clip",
-            ref=ASSET_ID,
-            duration=f"{duration_seconds:.3f}s",
-            start=f"{start_seconds:.3f}s",
-            offset="0s",
             name=f"Shot {i + 1}",
+            ref=ASSET_ID,
+            offset=scene_start,
+            start=scene_start,
+            duration=scene_duration,
         )
 
     pretty_xml = minidom.parseString(ElementTree.tostring(root, encoding="unicode")).toprettyxml(
@@ -393,7 +414,11 @@ def _save_xml_fcp(
     filename: str,
     output: str,
 ):
-    """Saves scenes in Final Cut Pro 7 XML format."""
+    """Saves scenes in Final Cut Pro 7 XML (xmeml) format.
+
+    See https://developer.apple.com/library/archive/documentation/AppleApplications/Reference/FinalCutPro_XML/
+    for the element reference. `pathurl` must be a valid `file://` URI per the xmeml spec.
+    """
     assert scenes
     root = ElementTree.Element("xmeml", version="5")
     project = ElementTree.SubElement(root, "project")
@@ -417,39 +442,59 @@ def _save_xml_fcp(
     ElementTree.SubElement(timecode, "frame").text = "0"
     ElementTree.SubElement(timecode, "displayformat").text = "NDF"
 
+    width, height = context.video_stream.frame_size
     media = ElementTree.SubElement(sequence, "media")
     video = ElementTree.SubElement(media, "video")
     format = ElementTree.SubElement(video, "format")
-    ElementTree.SubElement(format, "samplecharacteristics")
+    sample_chars = ElementTree.SubElement(format, "samplecharacteristics")
+    ElementTree.SubElement(sample_chars, "width").text = str(width)
+    ElementTree.SubElement(sample_chars, "height").text = str(height)
     track = ElementTree.SubElement(video, "track")
 
-    # Add clips for each shot boundary
+    path_uri = Path(context.video_stream.path).absolute().as_uri()
+    # Source media total duration in frames at the declared timebase. Required on `<file>` so NLEs
+    # (DaVinci Resolve, Premiere) can seek into the source — without it the clip plays frozen.
+    source_duration_frames = (
+        str(round(context.video_stream.duration.seconds * fps))
+        if context.video_stream.duration is not None
+        else str(round(scenes[-1][1].seconds * fps))
+    )
+    FILE_ID = "file1"
+
     for i, (start, end) in enumerate(scenes):
         clip = ElementTree.SubElement(track, "clipitem")
         ElementTree.SubElement(clip, "name").text = f"Shot {i + 1}"
         ElementTree.SubElement(clip, "enabled").text = "TRUE"
-        ElementTree.SubElement(clip, "rate").append(
-            ElementTree.fromstring(f"<timebase>{round(fps)}</timebase>")
-        )
+        ElementTree.SubElement(clip, "duration").text = source_duration_frames
+        clip_rate = ElementTree.SubElement(clip, "rate")
+        ElementTree.SubElement(clip_rate, "timebase").text = str(round(fps))
+        ElementTree.SubElement(clip_rate, "ntsc").text = ntsc
         # Frame numbers relative to the declared <timebase> fps, computed from PTS seconds.
         ElementTree.SubElement(clip, "start").text = str(round(start.seconds * fps))
         ElementTree.SubElement(clip, "end").text = str(round(end.seconds * fps))
         ElementTree.SubElement(clip, "in").text = str(round(start.seconds * fps))
         ElementTree.SubElement(clip, "out").text = str(round(end.seconds * fps))
 
-        file_ref = ElementTree.SubElement(clip, "file", id=f"file{i + 1}")
-        ElementTree.SubElement(file_ref, "name").text = context.video_stream.name
-        path = Path(context.video_stream.path).absolute()
-        # TODO: Can we just use path.as_uri() here?
-        # On Windows this should be: file://localhost/C:/Users/... according to the samples provided
-        # from https://github.com/Breakthrough/PySceneDetect/issues/156#issuecomment-1076213412.
-        ElementTree.SubElement(file_ref, "pathurl").text = f"file://{path}"
+        # xmeml allows a single full `<file>` declaration reused via `<file id="...">` on
+        # subsequent clipitems. Emit full details on the first, then self-close on the rest.
+        if i == 0:
+            file_ref = ElementTree.SubElement(clip, "file", id=FILE_ID)
+            ElementTree.SubElement(file_ref, "name").text = context.video_stream.name
+            ElementTree.SubElement(file_ref, "pathurl").text = path_uri
+            ElementTree.SubElement(file_ref, "duration").text = source_duration_frames
+            file_rate = ElementTree.SubElement(file_ref, "rate")
+            ElementTree.SubElement(file_rate, "timebase").text = str(round(fps))
+            ElementTree.SubElement(file_rate, "ntsc").text = ntsc
+            media_ref = ElementTree.SubElement(file_ref, "media")
+            video_ref = ElementTree.SubElement(media_ref, "video")
+            clip_chars = ElementTree.SubElement(video_ref, "samplecharacteristics")
+            ElementTree.SubElement(clip_chars, "width").text = str(width)
+            ElementTree.SubElement(clip_chars, "height").text = str(height)
+        else:
+            ElementTree.SubElement(clip, "file", id=FILE_ID)
 
-        media_ref = ElementTree.SubElement(file_ref, "media")
-        video_ref = ElementTree.SubElement(media_ref, "video")
-        ElementTree.SubElement(video_ref, "samplecharacteristics")
         link = ElementTree.SubElement(clip, "link")
-        ElementTree.SubElement(link, "linkclipref").text = f"file{i + 1}"
+        ElementTree.SubElement(link, "linkclipref").text = FILE_ID
         ElementTree.SubElement(link, "mediatype").text = "video"
 
     pretty_xml = minidom.parseString(ElementTree.tostring(root, encoding="unicode")).toprettyxml(

@@ -1160,3 +1160,112 @@ def test_cli_save_otio_no_audio(tmp_path: Path):
     assert output_path.read_text() == EXPECTED_OTIO_OUTPUT.replace(
         "{ABSOLUTE_PATH}", os.path.abspath(DEFAULT_VIDEO_PATH).replace("\\", "\\\\")
     )
+
+
+def test_cli_save_xml_fcpx(tmp_path: Path):
+    """Test `save-xml --format fcpx` produces a valid FCPXML 1.9 file."""
+    from xml.etree import ElementTree
+
+    exit_code, _ = invoke_cli(
+        [
+            "-i",
+            DEFAULT_VIDEO_PATH,
+            "-o",
+            str(tmp_path),
+            "time",
+            "-s",
+            "2s",
+            "-d",
+            "4s",
+            "detect-content",
+            "save-xml",
+        ]
+    )
+    assert exit_code == 0
+    output_path = tmp_path.joinpath(f"{DEFAULT_VIDEO_NAME}.xml")
+    assert os.path.exists(output_path)
+
+    root = ElementTree.parse(output_path).getroot()
+    assert root.tag == "fcpxml"
+    assert root.attrib["version"] == "1.9"
+
+    # Format carries the rational frameDuration derived from the video's 24000/1001 fps.
+    fmt = root.find("resources/format")
+    assert fmt is not None
+    assert fmt.attrib["frameDuration"] == "1001/24000s"
+    assert fmt.attrib["width"] == "1280"
+    assert fmt.attrib["height"] == "544"
+
+    # Asset references the source video via a file:// URI.
+    media_rep = root.find("resources/asset/media-rep")
+    assert media_rep is not None
+    assert media_rep.attrib["src"].startswith("file://")
+    assert media_rep.attrib["src"].endswith("goldeneye.mp4")
+
+    # Spine contains one `<asset-clip>` per scene (not wrapped in `<clip>`).
+    asset_clips = root.findall("library/event/project/sequence/spine/asset-clip")
+    assert len(asset_clips) == 2
+    # All clip time attributes are rational strings ending in "s".
+    for clip in asset_clips:
+        for attr in ("offset", "start", "duration"):
+            assert clip.attrib[attr].endswith("s")
+
+
+def test_cli_save_xml_fcp(tmp_path: Path):
+    """Test `save-xml --format fcp` produces a valid FCP7 xmeml file."""
+    from xml.etree import ElementTree
+
+    exit_code, _ = invoke_cli(
+        [
+            "-i",
+            DEFAULT_VIDEO_PATH,
+            "-o",
+            str(tmp_path),
+            "time",
+            "-s",
+            "2s",
+            "-d",
+            "4s",
+            "detect-content",
+            "save-xml",
+            "--format",
+            "fcp",
+        ]
+    )
+    assert exit_code == 0
+    output_path = tmp_path.joinpath(f"{DEFAULT_VIDEO_NAME}.xml")
+    assert os.path.exists(output_path)
+
+    root = ElementTree.parse(output_path).getroot()
+    assert root.tag == "xmeml"
+    assert root.attrib["version"] == "5"
+
+    # NTSC flag is True for the 23.976 test video.
+    ntsc = root.find("project/sequence/rate/ntsc")
+    assert ntsc is not None and ntsc.text == "True"
+
+    # samplecharacteristics carry width/height so Premiere/DaVinci can ingest.
+    width = root.find("project/sequence/media/video/format/samplecharacteristics/width")
+    height = root.find("project/sequence/media/video/format/samplecharacteristics/height")
+    assert width is not None and width.text == "1280"
+    assert height is not None and height.text == "544"
+
+    # Two clipitems produced; first carries the full <file> block, rest reference it by id.
+    clipitems = root.findall("project/sequence/media/video/track/clipitem")
+    assert len(clipitems) == 2
+
+    first_file = clipitems[0].find("file")
+    assert first_file is not None
+    assert first_file.attrib["id"] == "file1"
+    pathurl = first_file.find("pathurl")
+    assert pathurl is not None and pathurl.text is not None
+    assert pathurl.text.startswith("file://")
+    assert pathurl.text.endswith("goldeneye.mp4")
+    # Source duration is required for NLEs to seek into the media.
+    assert first_file.find("duration") is not None
+
+    # Subsequent clipitems reference the same file id without redeclaring.
+    second_file = clipitems[1].find("file")
+    assert second_file is not None
+    assert second_file.attrib["id"] == "file1"
+    assert second_file.find("pathurl") is None

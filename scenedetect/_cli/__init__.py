@@ -1614,10 +1614,10 @@ def save_qp_command(
     ctx.add_command(cli_commands.save_qp, save_qp_args)
 
 
-SAVE_XML_HELP = """[IN DEVELOPMENT] Save cuts in XML format."""
+SAVE_XML_HELP = """Save cuts in Final Cut Pro XML format (FCP7 xmeml or FCPX)."""
 
 
-@click.command("save-xml", cls=Command, help=SAVE_XML_HELP, hidden=True)
+@click.command("save-xml", cls=Command, help=SAVE_XML_HELP)
 @click.option(
     "--filename",
     "-f",

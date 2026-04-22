@@ -381,6 +381,32 @@ def test_vfr_edl_export(test_vfr_video: str, tmp_path):
     assert "001  AX V" in content
 
 
+@pytest.mark.parametrize("xml_format", ["fcpx", "fcp"])
+def test_vfr_xml_export(test_vfr_video: str, xml_format: str, tmp_path):
+    """`save-xml` should succeed on VFR video and produce well-formed output in either dialect."""
+    from xml.etree import ElementTree
+
+    exit_code, _ = invoke_cli(
+        [
+            "-i",
+            test_vfr_video,
+            "-o",
+            str(tmp_path),
+            "detect-content",
+            "time",
+            "--end",
+            "10s",
+            "save-xml",
+            "--format",
+            xml_format,
+        ]
+    )
+    assert exit_code == 0
+    xml_path = next(tmp_path.glob("*.xml"))
+    root = ElementTree.parse(xml_path).getroot()
+    assert root.tag == ("fcpxml" if xml_format == "fcpx" else "xmeml")
+
+
 def test_vfr_csv_backend_conformance(test_vfr_video: str):
     """PyAV and OpenCV should produce identical scene timecodes for VFR video.
 
