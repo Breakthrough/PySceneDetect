@@ -1614,27 +1614,27 @@ def save_qp_command(
     ctx.add_command(cli_commands.save_qp, save_qp_args)
 
 
-SAVE_XML_HELP = """Save cuts in Final Cut Pro XML format (FCP7 xmeml or FCPX)."""
+SAVE_FCP_HELP = """Save cuts in Final Cut Pro XML format (FCP7 xmeml or FCPX)."""
 
 
-@click.command("save-xml", cls=Command, help=SAVE_XML_HELP)
+@click.command("save-fcp", cls=Command, help=SAVE_FCP_HELP)
 @click.option(
     "--filename",
     "-f",
     metavar="NAME",
     default=None,
     type=click.STRING,
-    help="Filename format to use.%s" % (USER_CONFIG.get_help_string("save-xml", "filename")),
+    help="Filename format to use.%s" % (USER_CONFIG.get_help_string("save-fcp", "filename")),
 )
 @click.option(
     "--format",
     metavar="TYPE",
-    type=click.Choice(CHOICE_MAP["save-xml"]["format"], False),
+    type=click.Choice(CHOICE_MAP["save-fcp"]["format"], False),
     default=None,
     help="Format to export. TYPE must be one of: %s.%s"
     % (
-        ", ".join(CHOICE_MAP["save-xml"]["format"]),
-        USER_CONFIG.get_help_string("save-xml", "format"),
+        ", ".join(CHOICE_MAP["save-fcp"]["format"]),
+        USER_CONFIG.get_help_string("save-fcp", "format"),
     ),
 )
 @click.option(
@@ -1643,10 +1643,10 @@ SAVE_XML_HELP = """Save cuts in Final Cut Pro XML format (FCP7 xmeml or FCPX).""
     metavar="DIR",
     type=click.Path(exists=False, dir_okay=True, writable=True, resolve_path=False),
     help="Output directory to save XML file to. Overrides global option -o/--output.%s"
-    % (USER_CONFIG.get_help_string("save-xml", "output", show_default=False)),
+    % (USER_CONFIG.get_help_string("save-fcp", "output", show_default=False)),
 )
 @click.pass_context
-def save_xml_command(
+def save_fcp_command(
     ctx: click.Context,
     filename: ty.Optional[ty.AnyStr],
     format: ty.Optional[ty.AnyStr],
@@ -1655,12 +1655,12 @@ def save_xml_command(
     ctx = ctx.obj
     assert isinstance(ctx, CliContext)
 
-    save_xml_args = {
-        "filename": ctx.config.get_value("save-xml", "filename", filename),
-        "format": ctx.config.get_value("save-xml", "format", format),
-        "output": ctx.config.get_value("save-xml", "output", output),
+    save_fcp_args = {
+        "filename": ctx.config.get_value("save-fcp", "filename", filename),
+        "format": ctx.config.get_value("save-fcp", "format", format),
+        "output": ctx.config.get_value("save-fcp", "output", output),
     }
-    ctx.add_command(cli_commands.save_xml, save_xml_args)
+    ctx.add_command(cli_commands.save_fcp, save_fcp_args)
 
 
 SAVE_OTIO_HELP = """Save cuts as an OTIO timeline.
@@ -1757,7 +1757,7 @@ scenedetect.add_command(save_edl_command)
 scenedetect.add_command(save_html_command)
 scenedetect.add_command(save_images_command)
 scenedetect.add_command(save_qp_command)
-scenedetect.add_command(save_xml_command)
+scenedetect.add_command(save_fcp_command)
 scenedetect.add_command(save_otio_command)
 scenedetect.add_command(split_video_command)
 

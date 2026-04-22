@@ -203,4 +203,4 @@ CLI Changes
 
 - The ``-d``/``--min-delta-hsv`` option on ``detect-adaptive`` has been removed. Use ``-c``/``--min-content-val`` instead.
 - VFR videos now work correctly with both the OpenCV and PyAV backends.
-- New ``save-xml`` command for exporting scenes in Final Cut Pro XML format.
+- New ``save-fcp`` command for exporting scenes in Final Cut Pro XML format.

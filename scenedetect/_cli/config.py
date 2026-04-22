@@ -305,12 +305,12 @@ class TimecodeFormat(Enum):
         raise RuntimeError("Unhandled format specifier.")
 
 
-class XmlFormat(Enum):
-    """Format to use with the `save-xml` command."""
+class FcpFormat(Enum):
+    """Format to use with the `save-fcp` command."""
 
     FCPX = 0
     """Final Cut Pro X XML Format"""
-    FCP = 1
+    FCP7 = 1
     """Final Cut Pro 7 XML Format"""
 
 
@@ -433,8 +433,8 @@ CONFIG_MAP: ConfigDict = {
         "filename": "$VIDEO_NAME.qp",
         "output": None,
     },
-    "save-xml": {
-        "format": XmlFormat.FCPX,
+    "save-fcp": {
+        "format": FcpFormat.FCPX,
         "filename": "$VIDEO_NAME.xml",
         "output": None,
     },
@@ -480,8 +480,8 @@ CHOICE_MAP: ty.Dict[str, ty.Dict[str, ty.List[str]]] = {
         "format": ["jpeg", "png", "webp"],
         "scale-method": [value.name.lower() for value in Interpolation],
     },
-    "save-xml": {
-        "format": [value.name.lower() for value in XmlFormat],
+    "save-fcp": {
+        "format": [value.name.lower() for value in FcpFormat],
     },
     "split-video": {
         "preset": [

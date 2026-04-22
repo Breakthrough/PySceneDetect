@@ -1162,8 +1162,8 @@ def test_cli_save_otio_no_audio(tmp_path: Path):
     )
 
 
-def test_cli_save_xml_fcpx(tmp_path: Path):
-    """Test `save-xml --format fcpx` produces a valid FCPXML 1.9 file."""
+def test_cli_save_fcp_fcpx(tmp_path: Path):
+    """Test `save-fcp --format fcpx` produces a valid FCPXML 1.9 file."""
     from xml.etree import ElementTree
 
     exit_code, _ = invoke_cli(
@@ -1178,7 +1178,7 @@ def test_cli_save_xml_fcpx(tmp_path: Path):
             "-d",
             "4s",
             "detect-content",
-            "save-xml",
+            "save-fcp",
         ]
     )
     assert exit_code == 0
@@ -1211,8 +1211,8 @@ def test_cli_save_xml_fcpx(tmp_path: Path):
             assert clip.attrib[attr].endswith("s")
 
 
-def test_cli_save_xml_fcp(tmp_path: Path):
-    """Test `save-xml --format fcp` produces a valid FCP7 xmeml file."""
+def test_cli_save_fcp_fcp7(tmp_path: Path):
+    """Test `save-fcp --format fcp7` produces a valid FCP7 xmeml file."""
     from xml.etree import ElementTree
 
     exit_code, _ = invoke_cli(
@@ -1227,9 +1227,9 @@ def test_cli_save_xml_fcp(tmp_path: Path):
             "-d",
             "4s",
             "detect-content",
-            "save-xml",
+            "save-fcp",
             "--format",
-            "fcp",
+            "fcp7",
         ]
     )
     assert exit_code == 0
