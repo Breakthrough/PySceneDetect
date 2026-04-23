@@ -232,6 +232,89 @@ the cut list is generated using the start times of each scene following the firs
 </dl>
 </dd></dl>
 
+<dl class="py function">
+<dt class="sig sig-object py" id="scenedetect.output.write_scene_list_edl">
+<span class="sig-prename descclassname"><span class="pre">scenedetect.output.</span></span><span class="sig-name descname"><span class="pre">write_scene_list_edl</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scene_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'PySceneDetect'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'AX'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.output.write_scene_list_edl" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes the given list of scenes to <cite>output_path</cite> in CMX 3600 EDL format.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>output_path</strong> (<em>str</em><em> | </em><em>Path</em>) – Path to write the EDL file to. Parent directories must exist.</p></li>
+<li><p><strong>scene_list</strong> (<em>List</em><em>[</em><em>Tuple</em><em>[</em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em>, </em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em>]</em><em>]</em>) – List of scenes as pairs of FrameTimecodes denoting each scene’s start/end.</p></li>
+<li><p><strong>title</strong> (<em>str</em>) – Title header written as <code class="docutils literal notranslate"><span class="pre">TITLE:</span></code> in the EDL.</p></li>
+<li><p><strong>reel</strong> (<em>str</em>) – Reel name used for each event. Typically 2-8 uppercase characters.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scenedetect.output.write_scene_list_fcpx">
+<span class="sig-prename descclassname"><span class="pre">scenedetect.output.</span></span><span class="sig-name descname"><span class="pre">write_scene_list_fcpx</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scene_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">video_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">video_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.output.write_scene_list_fcpx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes the given list of scenes to <cite>output_path</cite> in Final Cut Pro X XML format (FCPXML 1.9).</p>
+<p>The output follows Apple’s FCPXML schema with rational-second time values and a custom
+<code class="docutils literal notranslate"><span class="pre">&lt;format&gt;</span></code> derived from the source video’s frame rate and resolution. See
+<a class="reference external" href="https://developer.apple.com/documentation/professional-video-applications/fcpxml-reference">https://developer.apple.com/documentation/professional-video-applications/fcpxml-reference</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>output_path</strong> (<em>str</em><em> | </em><em>Path</em>) – Path to write the FCPXML file to. Parent directories must exist.</p></li>
+<li><p><strong>scene_list</strong> (<em>List</em><em>[</em><em>Tuple</em><em>[</em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em>, </em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em>]</em><em>]</em>) – List of scenes as pairs of FrameTimecodes. Must not be empty.</p></li>
+<li><p><strong>video_path</strong> (<em>str</em><em> | </em><em>Path</em>) – Path to the source video file; written into the output as a <code class="docutils literal notranslate"><span class="pre">file://</span></code> URI.</p></li>
+<li><p><strong>frame_rate</strong> (<em>Fraction</em>) – Source frame rate as a rational <cite>Fraction</cite> (e.g. <code class="docutils literal notranslate"><span class="pre">Fraction(24000,</span> <span class="pre">1001)</span></code>).</p></li>
+<li><p><strong>frame_size</strong> (<em>Tuple</em><em>[</em><em>int</em><em>, </em><em>int</em><em>]</em>) – Source resolution as a <code class="docutils literal notranslate"><span class="pre">(width,</span> <span class="pre">height)</span></code> tuple in pixels.</p></li>
+<li><p><strong>video_name</strong> (<em>str</em><em> | </em><em>None</em>) – Display name used for the asset, project, and event. Defaults to the stem
+of <cite>video_path</cite>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scenedetect.output.write_scene_list_fcp7">
+<span class="sig-prename descclassname"><span class="pre">scenedetect.output.</span></span><span class="sig-name descname"><span class="pre">write_scene_list_fcp7</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scene_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">video_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">video_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_duration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.output.write_scene_list_fcp7" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes the given list of scenes to <cite>output_path</cite> in Final Cut Pro 7 XML (xmeml) format.</p>
+<p>See the xmeml element reference at
+<a class="reference external" href="https://developer.apple.com/library/archive/documentation/AppleApplications/Reference/FinalCutPro_XML/">https://developer.apple.com/library/archive/documentation/AppleApplications/Reference/FinalCutPro_XML/</a>.
+<code class="docutils literal notranslate"><span class="pre">pathurl</span></code> is written as a valid <code class="docutils literal notranslate"><span class="pre">file://</span></code> URI per the xmeml spec.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>output_path</strong> (<em>str</em><em> | </em><em>Path</em>) – Path to write the xmeml file to. Parent directories must exist.</p></li>
+<li><p><strong>scene_list</strong> (<em>List</em><em>[</em><em>Tuple</em><em>[</em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em>, </em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em>]</em><em>]</em>) – List of scenes as pairs of FrameTimecodes. Must not be empty.</p></li>
+<li><p><strong>video_path</strong> (<em>str</em><em> | </em><em>Path</em>) – Path to the source video file; written into the output as a <code class="docutils literal notranslate"><span class="pre">file://</span></code> URI.</p></li>
+<li><p><strong>frame_rate</strong> (<em>Fraction</em>) – Source frame rate as a rational <cite>Fraction</cite>.</p></li>
+<li><p><strong>frame_size</strong> (<em>Tuple</em><em>[</em><em>int</em><em>, </em><em>int</em><em>]</em>) – Source resolution as a <code class="docutils literal notranslate"><span class="pre">(width,</span> <span class="pre">height)</span></code> tuple in pixels.</p></li>
+<li><p><strong>video_name</strong> (<em>str</em><em> | </em><em>None</em>) – Display name used for project and sequence. Defaults to the stem of
+<cite>video_path</cite>.</p></li>
+<li><p><strong>source_duration</strong> (<a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em> | </em><em>None</em>) – Total duration of the source media. Required on <code class="docutils literal notranslate"><span class="pre">&lt;file&gt;</span></code> so NLEs
+(DaVinci Resolve, Premiere) can seek into the source — without it the clip plays
+frozen. If None, falls back to the last scene’s end time.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scenedetect.output.write_scene_list_otio">
+<span class="sig-prename descclassname"><span class="pre">scenedetect.output.</span></span><span class="sig-name descname"><span class="pre">write_scene_list_otio</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scene_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">video_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">audio</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.output.write_scene_list_otio" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes the given list of scenes to <cite>output_path</cite> as an OTIO Timeline.1 JSON document.</p>
+<p>OTIO (OpenTimelineIO) timelines can be imported by many video editors.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>output_path</strong> (<em>str</em><em> | </em><em>Path</em>) – Path to write the OTIO file to. Parent directories must exist.</p></li>
+<li><p><strong>scene_list</strong> (<em>List</em><em>[</em><em>Tuple</em><em>[</em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em>, </em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em>]</em><em>]</em>) – List of scenes as pairs of FrameTimecodes.</p></li>
+<li><p><strong>video_path</strong> (<em>str</em><em> | </em><em>Path</em>) – Path to the source video file; written into the output as an absolute path.</p></li>
+<li><p><strong>frame_rate</strong> (<em>Fraction</em>) – Source frame rate as a rational <cite>Fraction</cite>. Exported as a float, as the
+current OTIO format does not support rational timings.</p></li>
+<li><p><strong>name</strong> (<em>str</em><em> | </em><em>None</em>) – Timeline name. Defaults to the stem of <cite>video_path</cite>.</p></li>
+<li><p><strong>audio</strong> (<em>bool</em>) – If True (default), include an audio track alongside the video track.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py class">
 <dt class="sig sig-object py" id="scenedetect.output.SceneMetadata">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scenedetect.output.</span></span><span class="sig-name descname"><span class="pre">SceneMetadata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.output.SceneMetadata" title="Permalink to this definition">¶</a></dt>
@@ -348,6 +431,10 @@ the cut list is generated using the start times of each scene following the firs
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.output.split_video_mkvmerge"><code class="docutils literal notranslate"><span class="pre">split_video_mkvmerge()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.output.write_scene_list_html"><code class="docutils literal notranslate"><span class="pre">write_scene_list_html()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.output.write_scene_list"><code class="docutils literal notranslate"><span class="pre">write_scene_list()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scenedetect.output.write_scene_list_edl"><code class="docutils literal notranslate"><span class="pre">write_scene_list_edl()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scenedetect.output.write_scene_list_fcpx"><code class="docutils literal notranslate"><span class="pre">write_scene_list_fcpx()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scenedetect.output.write_scene_list_fcp7"><code class="docutils literal notranslate"><span class="pre">write_scene_list_fcp7()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scenedetect.output.write_scene_list_otio"><code class="docutils literal notranslate"><span class="pre">write_scene_list_otio()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.output.SceneMetadata"><code class="docutils literal notranslate"><span class="pre">SceneMetadata</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.output.VideoMetadata"><code class="docutils literal notranslate"><span class="pre">VideoMetadata</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.output.default_formatter"><code class="docutils literal notranslate"><span class="pre">default_formatter()</span></code></a></li>
