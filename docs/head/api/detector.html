@@ -54,7 +54,8 @@ event (in, out, cut, etc…).</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>mode</strong> (<a class="reference internal" href="#scenedetect.detector.FlashFilter.Mode" title="scenedetect.detector.FlashFilter.Mode"><em>Mode</em></a>) – The mode to use when enforcing <cite>length</cite>.</p></li>
-<li><p><strong>length</strong> (<em>int</em>) – Number of frames to use when filtering cuts.</p></li>
+<li><p><strong>length</strong> (<em>int</em><em> | </em><em>float</em><em> | </em><em>str</em>) – Minimum scene length. Accepts an <cite>int</cite> (number of frames), <cite>float</cite> (seconds),
+or <cite>str</cite> (timecode, e.g. <code class="docutils literal notranslate"><span class="pre">&quot;0.6s&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;00:00:00.600&quot;</span></code>).</p></li>
 </ul>
 </dd>
 </dl>
