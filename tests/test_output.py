@@ -11,7 +11,10 @@
 #
 """Tests for scenedetect.output module."""
 
+import json
+from fractions import Fraction
 from pathlib import Path
+from xml.etree import ElementTree
 
 import pytest
 
@@ -28,6 +31,10 @@ from scenedetect.output import (
     VideoMetadata,
     is_ffmpeg_available,
     split_video_ffmpeg,
+    write_scene_list_edl,
+    write_scene_list_fcp7,
+    write_scene_list_fcpx,
+    write_scene_list_otio,
 )
 
 FFMPEG_ARGS = (
@@ -223,3 +230,210 @@ def test_save_images_zero_width_scene(test_video_file, tmp_path: Path):
             total_images += 1
 
     assert total_images == len([path for path in tmp_path.glob(image_name_glob)])
+
+
+#
+# Scene-list export API (EDL / FCPXML / FCP7 xmeml / OTIO)
+#
+# These tests construct small synthetic scene lists so they do not require video
+# decoding and stay fast. They assert the structural invariants each format must
+# hold (e.g. rational time strings for FCPXML, `file://` URIs for xmeml, OTIO
+# Clip.2 count matching scene count).
+
+_FPS_NTSC = Fraction(24000, 1001)
+_FPS_CFR = Fraction(30, 1)
+
+
+def _fake_scenes(fps: Fraction, frames):
+    return [(FrameTimecode(start, fps=fps), FrameTimecode(end, fps=fps)) for start, end in frames]
+
+
+def test_write_scene_list_edl(tmp_path: Path):
+    """EDL output has title header, FCM line, and one event per scene in CMX 3600 format."""
+    scenes = _fake_scenes(_FPS_CFR, [(0, 30), (30, 60)])
+    output_path = tmp_path / "scenes.edl"
+    write_scene_list_edl(output_path, scenes, title="my-clip", reel="AX")
+
+    content = output_path.read_text()
+    assert "TITLE: my-clip" in content
+    assert "FCM: NON-DROP FRAME" in content
+    assert "001  AX V     C        00:00:00:00 00:00:01:00 00:00:00:00 00:00:01:00" in content
+    assert "002  AX V     C        00:00:01:00 00:00:02:00 00:00:01:00 00:00:02:00" in content
+
+
+def test_write_scene_list_edl_accepts_str_path(tmp_path: Path):
+    """`output_path` must accept both Path and str."""
+    scenes = _fake_scenes(_FPS_CFR, [(0, 30)])
+    output_path = tmp_path / "scenes.edl"
+    write_scene_list_edl(str(output_path), scenes)
+    assert output_path.exists()
+
+
+def test_write_scene_list_fcpx(tmp_path: Path):
+    """FCPXML output declares version 1.9, rational time strings, and an asset-clip per scene."""
+    scenes = _fake_scenes(_FPS_NTSC, [(48, 96), (96, 144)])
+    output_path = tmp_path / "scenes.xml"
+    # `video_path` need not exist; only `.absolute().as_uri()` is called on it.
+    write_scene_list_fcpx(
+        output_path=output_path,
+        scene_list=scenes,
+        video_path=tmp_path / "fake_video.mp4",
+        frame_rate=_FPS_NTSC,
+        frame_size=(1280, 544),
+    )
+
+    root = ElementTree.parse(output_path).getroot()
+    assert root.tag == "fcpxml"
+    assert root.attrib["version"] == "1.9"
+
+    fmt = root.find("resources/format")
+    assert fmt is not None
+    # 24000/1001 fps → frameDuration is the reciprocal: 1001/24000s.
+    assert fmt.attrib["frameDuration"] == "1001/24000s"
+    assert fmt.attrib["width"] == "1280"
+    assert fmt.attrib["height"] == "544"
+
+    media_rep = root.find("resources/asset/media-rep")
+    assert media_rep is not None
+    assert media_rep.attrib["src"].startswith("file://")
+
+    clips = root.findall("library/event/project/sequence/spine/asset-clip")
+    assert len(clips) == 2
+    for clip in clips:
+        for attr in ("offset", "start", "duration"):
+            assert clip.attrib[attr].endswith("s")
+
+
+def test_write_scene_list_fcpx_video_name_defaults_to_path_stem(tmp_path: Path):
+    """Omitting `video_name` falls back to the stem of `video_path`."""
+    scenes = _fake_scenes(_FPS_NTSC, [(0, 24)])
+    output_path = tmp_path / "scenes.xml"
+    write_scene_list_fcpx(
+        output_path=output_path,
+        scene_list=scenes,
+        video_path=tmp_path / "my_clip.mp4",
+        frame_rate=_FPS_NTSC,
+        frame_size=(640, 360),
+    )
+    root = ElementTree.parse(output_path).getroot()
+    asset = root.find("resources/asset")
+    assert asset is not None and asset.attrib["name"] == "my_clip"
+
+
+def test_write_scene_list_fcp7(tmp_path: Path):
+    """FCP7 xmeml declares version 5, a clipitem per scene, and a shared <file id> reference."""
+    scenes = _fake_scenes(_FPS_NTSC, [(0, 48), (48, 96)])
+    output_path = tmp_path / "scenes.xml"
+    write_scene_list_fcp7(
+        output_path=output_path,
+        scene_list=scenes,
+        video_path=tmp_path / "source.mp4",
+        frame_rate=_FPS_NTSC,
+        frame_size=(1920, 1080),
+        source_duration=FrameTimecode(240, fps=_FPS_NTSC),
+    )
+
+    root = ElementTree.parse(output_path).getroot()
+    assert root.tag == "xmeml"
+    assert root.attrib["version"] == "5"
+
+    ntsc = root.find("project/sequence/rate/ntsc")
+    assert ntsc is not None and ntsc.text == "True"
+
+    clipitems = root.findall("project/sequence/media/video/track/clipitem")
+    assert len(clipitems) == 2
+    # First clipitem carries the full <file> declaration; later ones reference it by id.
+    first_file = clipitems[0].find("file")
+    assert first_file is not None and first_file.attrib["id"] == "file1"
+    pathurl = first_file.find("pathurl")
+    assert pathurl is not None and pathurl.text is not None
+    assert pathurl.text.startswith("file://")
+    assert first_file.find("duration") is not None
+    second_file = clipitems[1].find("file")
+    assert second_file is not None and second_file.attrib["id"] == "file1"
+    assert second_file.find("pathurl") is None
+
+
+def test_write_scene_list_fcp7_cfr_sets_ntsc_false(tmp_path: Path):
+    """Integer frame rates (denominator == 1) must set ntsc="False"."""
+    scenes = _fake_scenes(_FPS_CFR, [(0, 30)])
+    output_path = tmp_path / "scenes.xml"
+    write_scene_list_fcp7(
+        output_path=output_path,
+        scene_list=scenes,
+        video_path=tmp_path / "source.mp4",
+        frame_rate=_FPS_CFR,
+        frame_size=(640, 360),
+    )
+    root = ElementTree.parse(output_path).getroot()
+    ntsc = root.find("project/sequence/rate/ntsc")
+    assert ntsc is not None and ntsc.text == "False"
+
+
+def test_write_scene_list_otio(tmp_path: Path):
+    """OTIO output is valid JSON with a Timeline.1 schema and one Clip.2 per scene per track."""
+    scenes = _fake_scenes(_FPS_NTSC, [(24, 72), (72, 120)])
+    output_path = tmp_path / "scenes.otio"
+    write_scene_list_otio(
+        output_path=output_path,
+        scene_list=scenes,
+        video_path=tmp_path / "clip.mp4",
+        frame_rate=_FPS_NTSC,
+        name="my-timeline",
+    )
+
+    doc = json.loads(output_path.read_text())
+    assert doc["OTIO_SCHEMA"] == "Timeline.1"
+    assert doc["name"] == "my-timeline"
+    assert doc["global_start_time"]["rate"] == pytest.approx(float(_FPS_NTSC))
+
+    tracks = doc["tracks"]["children"]
+    # Default `audio=True` yields both a video and an audio track.
+    assert [t["kind"] for t in tracks] == ["Video", "Audio"]
+    for track in tracks:
+        assert len(track["children"]) == len(scenes)
+        for clip in track["children"]:
+            assert clip["OTIO_SCHEMA"] == "Clip.2"
+            ref = clip["media_references"]["DEFAULT_MEDIA"]
+            assert ref["OTIO_SCHEMA"] == "ExternalReference.1"
+            assert Path(ref["target_url"]).is_absolute()
+
+
+def test_write_scene_list_otio_no_audio(tmp_path: Path):
+    """`audio=False` omits the audio track."""
+    scenes = _fake_scenes(_FPS_NTSC, [(0, 24)])
+    output_path = tmp_path / "scenes.otio"
+    write_scene_list_otio(
+        output_path=output_path,
+        scene_list=scenes,
+        video_path=tmp_path / "clip.mp4",
+        frame_rate=_FPS_NTSC,
+        audio=False,
+    )
+    doc = json.loads(output_path.read_text())
+    tracks = doc["tracks"]["children"]
+    assert [t["kind"] for t in tracks] == ["Video"]
+
+
+def test_write_scene_list_otio_rational_time_precision(tmp_path: Path):
+    """Serialized frame-count values must be free of sub-10µs float drift (cf. 914ca31)."""
+    # Frames on integer-frame boundaries under NTSC 24000/1001: seconds * 23.976...
+    # should land on integers but floats can produce values like 214.00001 without
+    # the explicit round(..., 6) in the writer.
+    scenes = _fake_scenes(
+        _FPS_NTSC,
+        [(start, start + 24) for start in (0, 24, 48, 96, 120)],
+    )
+    output_path = tmp_path / "scenes.otio"
+    write_scene_list_otio(
+        output_path=output_path,
+        scene_list=scenes,
+        video_path=tmp_path / "clip.mp4",
+        frame_rate=_FPS_NTSC,
+    )
+    doc = json.loads(output_path.read_text())
+    for track in doc["tracks"]["children"]:
+        for clip in track["children"]:
+            for key in ("start_time", "duration"):
+                value = clip["source_range"][key]["value"]
+                assert value == round(value, 6), f"value {value!r} carries sub-10µs float drift"
