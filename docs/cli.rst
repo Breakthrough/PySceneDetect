@@ -178,8 +178,6 @@ Options
 
   Default: ``15.0``
 
-
-
 .. option:: -f VAL, --frame-window VAL
 
   Size of window to detect deviations from mean. Represents how many frames before/after the current one to use for mean.
@@ -552,6 +550,38 @@ Options
   Output directory to save EDL file to. Overrides global option :option:`-o/--output <scenedetect -o>`.
 
 
+.. _command-save-fcp:
+
+.. program:: scenedetect save-fcp
+
+
+``save-fcp``
+========================================================================
+
+Save cuts in Final Cut Pro XML format (FCP7 xmeml or FCPX).
+
+
+Options
+------------------------------------------------------------------------
+
+
+.. option:: -f NAME, --filename NAME
+
+  Filename format to use.
+
+  Default: ``$VIDEO_NAME.xml``
+
+.. option:: --format TYPE
+
+  Format to export. TYPE must be one of: fcpx, fcp7.
+
+  Default: ``FcpFormat.FCPX``
+
+.. option:: -o DIR, --output DIR
+
+  Output directory to save XML file to. Overrides global option :option:`-o/--output <scenedetect -o>`.
+
+
 .. _command-save-html:
 
 .. program:: scenedetect save-html
@@ -658,11 +688,11 @@ Options
 
   Default: ``3``
 
-.. option:: -m N, --frame-margin N
+.. option:: -m DURATION, --frame-margin DURATION
 
-  Number of frames to ignore at beginning/end of scenes when saving images. Controls temporal padding on scene boundaries.
+  Padding around the beginning/end of each scene used when selecting which frames to extract. DURATION can be specified in frames (-m 1), in seconds with `s` suffix (-m 0.1s), or timecode (-m 00:00:00.100).
 
-  Default: ``3``
+  Default: ``1``
 
 .. option:: -s S, --scale S
 
