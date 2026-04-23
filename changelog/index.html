@@ -929,7 +929,7 @@
 <h3 id="cli-changes">CLI Changes</h3>
 <ul>
 <li>[feature] VFR videos are handled correctly by the OpenCV and PyAV backends, and should work correctly with default parameters</li>
-<li>[feature] New <code>save-xml</code> command supports saving scenes in Final Cut Pro formats <a href="https://github.com/Breakthrough/PySceneDetect/issues/156">#156</a></li>
+<li>[feature] New <code>save-fcp</code> command allows exporting in Final Cut Pro format (FCP7/FCPX) <a href="https://github.com/Breakthrough/PySceneDetect/issues/156">#156</a></li>
 <li>[feature] <code>--min-scene-len</code>/<code>-m</code> and <code>save-images --frame-margin</code>/<code>-m</code> now accept seconds (e.g. <code>0.6s</code>) and timecodes (e.g. <code>00:00:00.600</code>) in addition to a frame count <a href="https://github.com/Breakthrough/PySceneDetect/issues/531">#531</a></li>
 <li>[bugfix] Fix floating-point precision error in <code>save-otio</code> output where frame values near integer boundaries (e.g. <code>90.00000000000001</code>) were serialized with spurious precision</li>
 <li>[bugfix] Add mitigation for transient <code>OSError</code> in the MoviePy backend as it is susceptible to subprocess pipe races on slow or heavily loaded systems <a href="https://github.com/Breakthrough/PySceneDetect/issues/496">#496</a></li>
@@ -938,6 +938,7 @@
 <h3 id="api-changes">API Changes</h3>
 <p><strong>VFR &amp; Timestamp Overhaul:</strong></p>
 <ul>
+<li>Add <code>write_scene_list_edl</code>, <code>write_scene_list_fcpx</code>, <code>write_scene_list_fcp7</code>, and <code>write_scene_list_otio</code> to the <code>scenedetect.output</code> module so <code>save-edl</code>, <code>save-fcp</code>, and <code>save-otio</code> can be invoked directly from Python (previously CLI-only)</li>
 <li>Add new <code>Timecode</code> type to represent frame timings in terms of the video's source timebase</li>
 <li>Add <code>time_base</code> and <code>pts</code> properties to <code>FrameTimecode</code> for more accurate timing information</li>
 <li>All backends (PyAV, OpenCV, MoviePy) now return PTS-backed timestamps from <code>VideoStream.position</code></li>
