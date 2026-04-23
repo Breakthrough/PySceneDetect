@@ -129,20 +129,23 @@ def default_formatter(template: str) -> PathFormatter:
     `$START_PTS`, `$END_PTS` (presentation timestamp in milliseconds, accurate for VFR video)
     """
     MIN_DIGITS = 3
-    format_scene_number: PathFormatter = lambda video, scene: (
-        ("%0" + str(max(MIN_DIGITS, math.floor(math.log(video.total_scenes, 10)) + 1)) + "d")
-        % (scene.index + 1)
-    )
-    formatter: PathFormatter = lambda video, scene: Template(template).safe_substitute(
-        VIDEO_NAME=video.name,
-        SCENE_NUMBER=format_scene_number(video, scene),
-        START_TIME=str(scene.start.get_timecode().replace(":", ";")),
-        END_TIME=str(scene.end.get_timecode().replace(":", ";")),
-        START_FRAME=str(scene.start.frame_num),
-        END_FRAME=str(scene.end.frame_num),
-        START_PTS=str(round(scene.start.seconds * 1000)),
-        END_PTS=str(round(scene.end.seconds * 1000)),
-    )
+
+    def format_scene_number(video: VideoMetadata, scene: SceneMetadata) -> str:
+        width = max(MIN_DIGITS, math.floor(math.log(video.total_scenes, 10)) + 1)
+        return ("%0" + str(width) + "d") % (scene.index + 1)
+
+    def formatter(video: VideoMetadata, scene: SceneMetadata) -> str:
+        return Template(template).safe_substitute(
+            VIDEO_NAME=video.name,
+            SCENE_NUMBER=format_scene_number(video, scene),
+            START_TIME=str(scene.start.get_timecode().replace(":", ";")),
+            END_TIME=str(scene.end.get_timecode().replace(":", ";")),
+            START_FRAME=str(scene.start.frame_num),
+            END_FRAME=str(scene.end.frame_num),
+            START_PTS=str(round(scene.start.seconds * 1000)),
+            END_PTS=str(round(scene.end.seconds * 1000)),
+        )
+
     return formatter
 
 

@@ -13,9 +13,6 @@ requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [tool.ruff]
-exclude = [
-    "docs"
-]
 line-length = 100
 indent-width = 4
 
@@ -31,6 +28,7 @@ select = [
     "B",
     # pycodestyle
     "E",
+    "W",
     # Pyflakes
     "F",
     # isort
@@ -46,8 +44,6 @@ ignore = [
     "F401",
     # TODO: Line too long
     "E501",
-    # TODO: Do not assign a `lambda` expression, use a `def`
-    "E731",
 ]
 fixable = ["ALL"]
 unfixable = []
