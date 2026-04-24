@@ -47,3 +47,18 @@ ignore = [
 ]
 fixable = ["ALL"]
 unfixable = []
+
+[tool.pyright]
+include = ["scenedetect", "tests"]
+typeCheckingMode = "basic"
+# cv2, av, and moviepy ship without type stubs; these reports generate
+# unactionable noise without catching real issues in this codebase.
+reportMissingTypeStubs = "none"
+reportUnknownMemberType = "none"
+reportUnknownArgumentType = "none"
+reportUnknownVariableType = "none"
+reportUnknownParameterType = "none"
+reportMissingParameterType = "none"
+reportMissingTypeArgument = "none"
+reportUntypedFunctionDecorator = "none"
+reportPrivateUsage = "none"
