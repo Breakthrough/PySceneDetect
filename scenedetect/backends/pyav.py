@@ -203,7 +203,7 @@ class VideoStreamAv(VideoStream):
         """Current position within stream as the frame number (CFR-equivalent).
 
         Will return 0 until the first frame is `read`. For VFR video this is an approximation
-        derived from PTS × framerate; use `position` for accurate PTS-based timing."""
+        derived from PTS * framerate; use `position` for accurate PTS-based timing."""
         if self._frame is None:
             return 0
         return round(self._frame.time * float(self.frame_rate)) + 1

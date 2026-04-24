@@ -608,7 +608,7 @@ class SceneManager:
                     self._frame_size_errors += 1
                     if self._frame_size_errors <= MAX_FRAME_SIZE_ERRORS:
                         logger.error(
-                            f"ERROR: Frame at {str(video.position)} has incorrect size and "
+                            f"ERROR: Frame at {video.position!s} has incorrect size and "
                             f"cannot be processed: decoded size = {decoded_size}, "
                             f"expected = {self._frame_size}. Video may be corrupt."
                         )

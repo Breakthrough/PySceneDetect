@@ -96,7 +96,7 @@ class AdaptiveDetector(ContentDetector):
         return self.window_width
 
     def get_metrics(self) -> list[str]:
-        return super().get_metrics() + [self._adaptive_ratio_key]
+        return [*super().get_metrics(), self._adaptive_ratio_key]
 
     def process_frame(self, timecode: FrameTimecode, frame_img: np.ndarray) -> list[FrameTimecode]:
         super().process_frame(timecode=timecode, frame_img=frame_img)

@@ -167,9 +167,17 @@ def test_cli_time_end():
     ]
     for test_case in TEST_CASES:
         output = subprocess.check_output(
-            SCENEDETECT_CMD.split(" ")
-            + ["-i", DEFAULT_VIDEO_PATH, "-m", "0", "detect-content", "list-scenes", "-n"]
-            + test_case.split(),
+            [
+                *SCENEDETECT_CMD.split(" "),
+                "-i",
+                DEFAULT_VIDEO_PATH,
+                "-m",
+                "0",
+                "detect-content",
+                "list-scenes",
+                "-n",
+                *test_case.split(),
+            ],
             text=True,
         )
         assert EXPECTED in output, test_case
@@ -195,9 +203,17 @@ def test_cli_time_start():
     ]
     for test_case in TEST_CASES:
         output = subprocess.check_output(
-            SCENEDETECT_CMD.split(" ")
-            + ["-i", DEFAULT_VIDEO_PATH, "-m", "0", "detect-content", "list-scenes", "-n"]
-            + test_case.split(),
+            [
+                *SCENEDETECT_CMD.split(" "),
+                "-i",
+                DEFAULT_VIDEO_PATH,
+                "-m",
+                "0",
+                "detect-content",
+                "list-scenes",
+                "-n",
+                *test_case.split(),
+            ],
             text=True,
         )
         assert EXPECTED in output, test_case
@@ -240,9 +256,17 @@ def test_cli_time_scene_boundary():
     ]
     for test_case in TEST_CASES:
         output = subprocess.check_output(
-            SCENEDETECT_CMD.split(" ")
-            + ["-i", DEFAULT_VIDEO_PATH, "-m", "0", "detect-content", "list-scenes", "-n"]
-            + test_case.split(),
+            [
+                *SCENEDETECT_CMD.split(" "),
+                "-i",
+                DEFAULT_VIDEO_PATH,
+                "-m",
+                "0",
+                "detect-content",
+                "list-scenes",
+                "-n",
+                *test_case.split(),
+            ],
             text=True,
         )
         assert EXPECTED in output, test_case
@@ -252,8 +276,17 @@ def test_cli_time_end_of_video():
     """Validate frame number/timecode alignment at the end of the video. The end timecode includes
     presentation time and therefore should represent the full length of the video."""
     output = subprocess.check_output(
-        SCENEDETECT_CMD.split(" ")
-        + ["-i", DEFAULT_VIDEO_PATH, "detect-content", "list-scenes", "-n", "time", "-s", "1872"],
+        [
+            *SCENEDETECT_CMD.split(" "),
+            "-i",
+            DEFAULT_VIDEO_PATH,
+            "detect-content",
+            "list-scenes",
+            "-n",
+            "time",
+            "-s",
+            "1872",
+        ],
         text=True,
     )
     assert (
@@ -667,8 +700,8 @@ Scene Number,Start Frame
     with open("test_scene_list.csv", "w") as f:
         f.write(scenes_csv)
     output = subprocess.check_output(
-        SCENEDETECT_CMD.split(" ")
-        + [
+        [
+            *SCENEDETECT_CMD.split(" "),
             "-i",
             DEFAULT_VIDEO_PATH,
             "load-scenes",
@@ -709,8 +742,8 @@ Scene Number,Start Frame
     with open("test_scene_list.csv", "w") as f:
         f.write(scenes_csv)
     ground_truth = subprocess.check_output(
-        SCENEDETECT_CMD.split(" ")
-        + [
+        [
+            *SCENEDETECT_CMD.split(" "),
             "-i",
             DEFAULT_VIDEO_PATH,
             "detect-content",
@@ -726,8 +759,8 @@ Scene Number,Start Frame
         text=True,
     )
     loaded_first_pass = subprocess.check_output(
-        SCENEDETECT_CMD.split(" ")
-        + [
+        [
+            *SCENEDETECT_CMD.split(" "),
             "-i",
             DEFAULT_VIDEO_PATH,
             "load-scenes",

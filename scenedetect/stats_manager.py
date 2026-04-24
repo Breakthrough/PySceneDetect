@@ -181,7 +181,7 @@ class StatsManager:
 
         csv_writer = csv.writer(csv_file, lineterminator="\n")
         metric_keys = sorted(list(self._metric_keys))
-        csv_writer.writerow([COLUMN_NAME_FRAME_NUMBER, COLUMN_NAME_TIMECODE] + metric_keys)
+        csv_writer.writerow([COLUMN_NAME_FRAME_NUMBER, COLUMN_NAME_TIMECODE, *metric_keys])
         frame_keys = sorted(self._frame_metrics.keys())
         logger.info("Writing %d frames to CSV...", len(frame_keys))
         for frame_key in frame_keys:

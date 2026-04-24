@@ -28,7 +28,7 @@ class HistogramDetector(SceneDetector):
     """Compares the difference in the Y channel of YUV histograms for adjacent frames. When the
     difference exceeds a given threshold, a cut is detected."""
 
-    METRIC_KEYS = ["hist_diff"]
+    METRIC_KEYS: ty.ClassVar[list[str]] = ["hist_diff"]
 
     def __init__(
         self,

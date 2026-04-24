@@ -85,7 +85,7 @@ class ContentDetector(SceneDetector):
     FRAME_SCORE_KEY = "content_val"
     """Key in statsfile representing the final frame score after weighed by specified components."""
 
-    METRIC_KEYS = [FRAME_SCORE_KEY, *Components._fields]
+    METRIC_KEYS: ty.ClassVar[list[str]] = [FRAME_SCORE_KEY, *Components._fields]
     """All statsfile keys this detector produces."""
 
     @dataclass

@@ -141,7 +141,7 @@ class RangeValue(ValidatedValue):
 class CropValue(ValidatedValue):
     """Validator for crop region defined as X0 Y0 X1 Y1."""
 
-    _IGNORE_CHARS = [",", "/", "(", ")"]
+    _IGNORE_CHARS = (",", "/", "(", ")")
     """Characters to ignore."""
 
     def __init__(self, value: str | tuple[int, int, int, int] | None = None):
@@ -183,7 +183,7 @@ class CropValue(ValidatedValue):
 class ScoreWeightsValue(ValidatedValue):
     """Validator for score weight values (currently a tuple of four numbers)."""
 
-    _IGNORE_CHARS = [",", "/", "(", ")"]
+    _IGNORE_CHARS = (",", "/", "(", ")")
     """Characters to ignore."""
 
     def __init__(self, value: str | ContentDetector.Components):
@@ -795,4 +795,4 @@ class ConfigRegistry:
             show_default is None and is_flag and CONFIG_MAP[command][option] is False
         ):
             return ""
-        return f" [default: {str(CONFIG_MAP[command][option])}]"
+        return f" [default: {CONFIG_MAP[command][option]!s}]"

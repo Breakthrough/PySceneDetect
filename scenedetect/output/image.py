@@ -106,7 +106,7 @@ class _ImageExtractor:
         num_images: int = 3,
         frame_margin: int | float | str = 1,
         image_extension: str = "jpg",
-        imwrite_param: dict[str, int | None] = None,
+        imwrite_param: dict[str, int | None] | None = None,
         image_name_template: str = "$VIDEO_NAME-Scene-$SCENE_NUMBER-$IMAGE_NUMBER",
         scale: float | None = None,
         height: int | None = None,

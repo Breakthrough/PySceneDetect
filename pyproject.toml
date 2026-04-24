@@ -37,6 +37,8 @@ select = [
     "UP",
     # flake8-simplify
     "SIM",
+    # ruff-native checks
+    "RUF",
 ]
 ignore = [
     # TODO: Determine if we should use __all__, a reudndant alias, or keep this suppressed.

@@ -315,7 +315,7 @@ class CliContext:
     def get_detect_content_params(
         self,
         threshold: float | None = None,
-        luma_only: bool = None,
+        luma_only: bool | None = None,
         min_scene_len: str | None = None,
         weights: tuple[float, float, float, float] | None = None,
         kernel_size: int | None = None,
@@ -355,7 +355,7 @@ class CliContext:
         threshold: float | None = None,
         min_content_val: float | None = None,
         frame_window: int | None = None,
-        luma_only: bool = None,
+        luma_only: bool | None = None,
         min_scene_len: str | None = None,
         weights: tuple[float, float, float, float] | None = None,
         kernel_size: int | None = None,
@@ -396,7 +396,7 @@ class CliContext:
         self,
         threshold: float | None = None,
         fade_bias: float | None = None,
-        add_last_scene: bool = None,
+        add_last_scene: bool | None = None,
         min_scene_len: str | None = None,
     ) -> dict[str, ty.Any]:
         """Handle detect-threshold command options and return args to construct one with."""
@@ -577,5 +577,5 @@ class CliContext:
             if __debug__:
                 raise
             raise click.BadParameter(
-                f"Input error:\n\n\t{str(ex)}\n", param_hint="-i/--input"
+                f"Input error:\n\n\t{ex!s}\n", param_hint="-i/--input"
             ) from None

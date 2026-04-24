@@ -65,10 +65,10 @@ class VideoStreamCv2(VideoStream):
 
     def __init__(
         self,
-        path: ty.AnyStr = None,
+        path: ty.AnyStr | None = None,
         framerate: float | None = None,
         max_decode_attempts: int = 5,
-        path_or_device: bytes | str | int = None,
+        path_or_device: bytes | str | int | None = None,
     ):
         """Open a video file, image sequence, or network stream.
 

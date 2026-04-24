@@ -81,7 +81,7 @@ def write_scene_list(
     # If required, output the cutting list as the first row (i.e. before the header row).
     if include_cut_list:
         csv_writer.writerow(
-            ["Timecode List:"] + cut_list
+            ["Timecode List:", *cut_list]
             if cut_list
             else [start.get_timecode() for start, _ in scene_list[1:]]
         )
@@ -121,7 +121,7 @@ def write_scene_list_html(
     output_html_filename: str,
     scene_list: SceneList,
     cut_list: CutList | None = None,
-    css: str = None,
+    css: str | None = None,
     css_class: str = "mytable",
     image_filenames: dict[int, list[str]] | None = None,
     image_width: int | None = None,
@@ -293,7 +293,7 @@ def _rational_seconds(value: Fraction) -> str:
 
 
 def _frame_timecode_seconds(tc: FrameTimecode) -> Fraction:
-    """Exact seconds for `tc` as a `Fraction`, derived from PTS × time base."""
+    """Exact seconds for `tc` as a `Fraction`, derived from PTS * time base."""
     return Fraction(tc.pts) * tc.time_base
 
 
