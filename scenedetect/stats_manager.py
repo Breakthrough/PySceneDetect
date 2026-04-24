@@ -202,9 +202,7 @@ class StatsManager:
         """
         if not row or not len(row) >= 2:
             return False
-        if row[0] != COLUMN_NAME_FRAME_NUMBER or row[1] != COLUMN_NAME_TIMECODE:
-            return False
-        return True
+        return not (row[0] != COLUMN_NAME_FRAME_NUMBER or row[1] != COLUMN_NAME_TIMECODE)
 
     # TODO(v1.0): Create a replacement for a calculation cache that functions like load_from_csv
     # did, but is better integrated with detectors for cached calculations instead of statistics.

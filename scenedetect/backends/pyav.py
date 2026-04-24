@@ -100,7 +100,8 @@ class VideoStreamAv(VideoStream):
         try:
             if isinstance(path_or_io, (str, bytes)):
                 self._path = path_or_io
-                self._io = open(path_or_io, "rb")
+                # File handle is intentionally long-lived and tied to the VideoStream.
+                self._io = open(path_or_io, "rb")  # noqa: SIM115
                 if not self._name:
                     self._name = get_file_name(self.path, include_extension=False)
             else:

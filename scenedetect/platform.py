@@ -277,6 +277,16 @@ def get_ffmpeg_version() -> str | None:
     return output.splitlines()[0]
 
 
+def get_mkvmerge_path() -> str | None:
+    """Get path to mkvmerge if available on the current system by checking PATH. Returns None if
+    mkvmerge couldn't be found."""
+    try:
+        subprocess.call(["mkvmerge", "--quiet"])
+        return "mkvmerge"
+    except OSError:
+        return None
+
+
 def get_mkvmerge_version() -> str | None:
     """Get mkvmerge version identifier, or None if mkvmerge is not found in PATH."""
     tool_name = "mkvmerge"

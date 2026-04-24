@@ -32,14 +32,20 @@ available on the computer, depending on the specified command-line options.
 
 import logging
 import math
-import subprocess
 import time
 import typing as ty
 from dataclasses import dataclass
 from pathlib import Path
 
 from scenedetect.common import FrameTimecode, TimecodePair
-from scenedetect.platform import CommandTooLong, Template, get_ffmpeg_path, invoke_command, tqdm
+from scenedetect.platform import (
+    CommandTooLong,
+    Template,
+    get_ffmpeg_path,
+    get_mkvmerge_path,
+    invoke_command,
+    tqdm,
+)
 
 logger = logging.getLogger("pyscenedetect")
 
@@ -52,6 +58,8 @@ See https://github.com/Breakthrough/PySceneDetect/issues/164
 for details.  Sorry about that!
 """
 
+# TODO: Resolve this on first use (e.g., functools.cache on the getter) rather than at import
+# time, so that importing this module doesn't spawn an ffmpeg subprocess.
 _FFMPEG_PATH: str | None = get_ffmpeg_path()
 """Relative path to the ffmpeg binary on this system, if any (will be None if not available)."""
 
@@ -71,14 +79,7 @@ def is_mkvmerge_available() -> bool:
     Returns:
         True if `mkvmerge` can be invoked, False otherwise.
     """
-    ret_val = None
-    try:
-        ret_val = subprocess.call(["mkvmerge", "--quiet"])
-    except OSError:
-        return False
-    if ret_val is not None and ret_val != 2:
-        return False
-    return True
+    return get_mkvmerge_path() is not None
 
 
 def is_ffmpeg_available() -> bool:

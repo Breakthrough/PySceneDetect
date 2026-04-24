@@ -82,10 +82,15 @@ def run_scenedetect(context: CliContext):
 def _postprocess_scene_list(context: CliContext, scene_list: SceneList) -> SceneList:
     # Handle --merge-last-scene. If set, when the last scene is shorter than --min-scene-len,
     # it will be merged with the previous one.
-    if context.merge_last_scene and context.min_scene_len is not None and context.min_scene_len > 0:
-        if len(scene_list) > 1 and (scene_list[-1][1] - scene_list[-1][0]) < context.min_scene_len:
-            new_last_scene = (scene_list[-2][0], scene_list[-1][1])
-            scene_list = scene_list[:-2] + [new_last_scene]
+    if (
+        context.merge_last_scene
+        and context.min_scene_len is not None
+        and context.min_scene_len > 0
+        and len(scene_list) > 1
+        and (scene_list[-1][1] - scene_list[-1][0]) < context.min_scene_len
+    ):
+        new_last_scene = (scene_list[-2][0], scene_list[-1][1])
+        scene_list = scene_list[:-2] + [new_last_scene]
 
     # Handle --drop-short-scenes.
     if context.drop_short_scenes and context.min_scene_len > 0:

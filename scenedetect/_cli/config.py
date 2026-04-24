@@ -534,12 +534,12 @@ def _validate_structure(parser: ConfigParser) -> tuple[bool, list[LogMessage]]:
                     )
                 )
                 continue
-        elif section not in CONFIG_MAP.keys():
+        elif section not in CONFIG_MAP:
             success = False
             logs.append((logging.ERROR, f"Unsupported config section: [{section_name}]"))
             continue
         for option_name, _ in parser.items(section_name):
-            if option_name not in CONFIG_MAP[section].keys():
+            if option_name not in CONFIG_MAP[section]:
                 success = False
                 logs.append(
                     (
@@ -640,21 +640,24 @@ def _parse_config(parser: ConfigParser) -> tuple[ConfigDict | None, list[LogMess
                 # replace newlines with spaces, and strip any remaining leading/trailing whitespace.
                 if value_type is None:
                     config_value = parser.get(command, option).replace("\n", " ").strip()
-                    if command in CHOICE_MAP and option in CHOICE_MAP[command]:
-                        if config_value.lower() not in CHOICE_MAP[command][option]:
-                            success = False
-                            logs.append(
-                                (
-                                    logging.ERROR,
-                                    "Invalid value for [{}] option '{}': {}. Must be one of: {}.".format(
-                                        command,
-                                        option,
-                                        parser.get(command, option),
-                                        ", ".join(choice for choice in CHOICE_MAP[command][option]),
-                                    ),
-                                )
+                    if (
+                        command in CHOICE_MAP
+                        and option in CHOICE_MAP[command]
+                        and config_value.lower() not in CHOICE_MAP[command][option]
+                    ):
+                        success = False
+                        logs.append(
+                            (
+                                logging.ERROR,
+                                "Invalid value for [{}] option '{}': {}. Must be one of: {}.".format(
+                                    command,
+                                    option,
+                                    parser.get(command, option),
+                                    ", ".join(choice for choice in CHOICE_MAP[command][option]),
+                                ),
                             )
-                            continue
+                        )
+                        continue
                     config[command][option] = config_value
                     continue
 
