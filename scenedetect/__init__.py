@@ -15,14 +15,13 @@ can be used to open a video for a
 :class:`SceneManager <scenedetect.scene_manager.SceneManager>`.
 """
 
-import typing as ty
 from logging import getLogger
 
 # OpenCV is a required package, but we don't have it as an explicit dependency since we
 # need to support both opencv-python and opencv-python-headless. Include some additional
 # context with the exception if this is the case.
 try:
-    import cv2 as _
+    import cv2 as _  # availability check; raise a friendlier error if missing
 except ModuleNotFoundError as ex:
     raise ModuleNotFoundError(
         "OpenCV could not be found, try installing opencv-python:\n\npip install opencv-python",

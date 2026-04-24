@@ -92,7 +92,8 @@ class VideoStreamCv2(VideoStream):
         super().__init__()
         if path_or_device is not None:
             warnings.warn(
-                "The `path_or_device` argument is deprecated, use `path` or `VideoCaptureAdapter` instead.",
+                "The `path_or_device` argument is deprecated, use `path` or `VideoCaptureAdapter`"
+                " instead.",
                 DeprecationWarning,
                 stacklevel=2,
             )

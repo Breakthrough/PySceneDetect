@@ -173,7 +173,8 @@ class _ImageExtractor:
         # Setup flags and init progress bar if available.
         completed = True
         logger.info(
-            f"Saving {self._num_images} images per scene [format={self._image_extension}] {output_dir if output_dir else ''} "
+            f"Saving {self._num_images} images per scene [format={self._image_extension}]"
+            f" {output_dir if output_dir else ''} "
         )
         progress_bar = None
         if show_progress:
@@ -440,7 +441,8 @@ def save_images(
     # Setup flags and init progress bar if available.
     completed = True
     logger.info(
-        f"Saving {num_images} images per scene [format={image_extension}] {output_dir if output_dir else ''} "
+        f"Saving {num_images} images per scene [format={image_extension}]"
+        f" {output_dir if output_dir else ''} "
     )
     progress_bar = None
     if show_progress:

@@ -70,8 +70,8 @@ class VideoStreamAv(VideoStream):
         """
         self._container = None
 
-        # TODO(https://scenedetect.com/issues/258): See what `self._container.discard_corrupt = True`
-        # does with corrupt videos.
+        # TODO(https://scenedetect.com/issues/258): See what
+        # `self._container.discard_corrupt = True` does with corrupt videos.
         super().__init__()
 
         # Ensure specified framerate is valid if set.

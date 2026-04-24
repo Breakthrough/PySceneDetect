@@ -16,8 +16,6 @@ If this difference exceeds a set threshold, a scene cut is triggered.
 This detector is available from the command-line interface by using the `detect-hash` command.
 """
 
-import typing as ty
-
 import cv2
 import numpy
 

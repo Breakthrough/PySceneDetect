@@ -29,7 +29,6 @@ import subprocess
 # logic by creating a CLI context with the desired parameters.
 # TODO: Missing tests for --min-scene-len and --drop-short-scenes.
 import sys
-import typing as ty
 from pathlib import Path
 
 import cv2

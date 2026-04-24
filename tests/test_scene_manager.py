@@ -15,8 +15,6 @@ This file includes unit tests for the scenedetect.scene_manager.SceneManager cla
 which applies SceneDetector algorithms on VideoStream backends.
 """
 
-import typing as ty
-
 import pytest
 
 from scenedetect.backends.opencv import VideoStreamCv2

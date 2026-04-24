@@ -31,14 +31,12 @@ New :class:`VideoStream <scenedetect.video_stream.VideoStream>` implementations 
 tested by adding it to the test suite in `tests/test_video_stream.py`.
 """
 
-import typing as ty
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
 from fractions import Fraction
 
 import numpy as np
 
-from scenedetect.common import FrameTimecode, Timecode
+from scenedetect.common import FrameTimecode
 
 
 class SeekError(Exception):

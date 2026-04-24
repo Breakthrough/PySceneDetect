@@ -83,8 +83,6 @@ examples for details.
 # TODO: Future VideoStream implementations under consideration:
 #  - Nvidia VPF: https://developer.nvidia.com/blog/vpf-hardware-accelerated-video-processing-framework-in-python/
 
-import typing as ty
-
 # OpenCV must be available at minimum.
 from scenedetect.backends.opencv import VideoCaptureAdapter, VideoStreamCv2
 

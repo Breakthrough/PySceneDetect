@@ -15,7 +15,6 @@ import csv
 import logging
 import os
 import time
-import typing as ty
 import warnings
 
 from scenedetect._cli.context import CliContext

@@ -488,7 +488,8 @@ class FrameTimecode:
         if isinstance(other, str):
             return self._seconds_to_frames(self._timecode_to_seconds(other))
         if isinstance(other, FrameTimecode):
-            # If comparing two FrameTimecodes, they must have the same framerate for frame-based operations.
+            # If comparing two FrameTimecodes, they must have the same framerate for frame-based
+            # operations.
             if self._rate and other._rate and not self.equal_framerate(other._rate):
                 raise ValueError(
                     "FrameTimecode instances require equal framerate for frame-based arithmetic."

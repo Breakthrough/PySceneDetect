@@ -15,7 +15,6 @@ triggered when the average pixel intensity exceeds or falls below this threshold
 This detector is available from the command-line as the `detect-threshold` command.
 """
 
-import typing as ty
 import warnings
 from enum import Enum
 from logging import getLogger

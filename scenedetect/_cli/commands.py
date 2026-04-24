@@ -16,7 +16,6 @@ current command-line context, as well as the processing result (scenes and cuts)
 """
 
 import logging
-import typing as ty
 import webbrowser
 from string import Template
 

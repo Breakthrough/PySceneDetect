@@ -11,8 +11,6 @@
 #
 """Shared test helpers."""
 
-import typing as ty
-
 from click.testing import CliRunner
 
 from scenedetect._cli import scenedetect as _scenedetect_cli

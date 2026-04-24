@@ -14,16 +14,13 @@
 This detector is available from the command-line as the `detect-transnetv2` command.
 """
 
-import typing as ty
-import warnings
-from enum import Enum
 from logging import getLogger
 from pathlib import Path
 
 import cv2
 import numpy as np
 
-from scenedetect.common import FrameTimecode, Timecode
+from scenedetect.common import FrameTimecode
 from scenedetect.detector import FlashFilter, SceneDetector
 
 logger = getLogger("pyscenedetect")

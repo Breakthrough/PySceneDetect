@@ -17,7 +17,6 @@ all supported backends, and verify that they are functionally equivalent where p
 """
 
 import os.path
-import typing as ty
 from dataclasses import dataclass
 
 import numpy

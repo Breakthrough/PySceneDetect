@@ -14,7 +14,6 @@
 import csv
 import json
 import os
-import typing as ty
 
 import cv2
 import numpy as np

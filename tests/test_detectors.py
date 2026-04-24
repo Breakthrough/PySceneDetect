@@ -17,7 +17,6 @@ test case material.
 """
 
 import os
-import typing as ty
 from dataclasses import dataclass
 
 import pytest

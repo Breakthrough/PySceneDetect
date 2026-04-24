@@ -16,7 +16,6 @@ changes. This can help mitigate false detections in situations such as fast came
 This detector is available from the command-line as the `detect-adaptive` command.
 """
 
-import typing as ty
 from logging import getLogger
 
 import numpy as np

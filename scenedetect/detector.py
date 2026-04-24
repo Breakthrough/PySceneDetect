@@ -25,7 +25,6 @@ in order to be compatible with PySceneDetect.
 """
 
 import math
-import typing as ty
 from abc import ABC, abstractmethod
 from enum import Enum
 

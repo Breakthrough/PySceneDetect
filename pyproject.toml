@@ -41,10 +41,9 @@ select = [
     "RUF",
 ]
 ignore = [
-    # TODO: Determine if we should use __all__, a reudndant alias, or keep this suppressed.
+    # TODO: Audit re-exports in __init__.py files. Add `__all__` (note: must be kept in sync as
+    # new public symbols are added) or use redundant-alias form (`from x import Y as Y`).
     "F401",
-    # TODO: Line too long
-    "E501",
 ]
 fixable = ["ALL"]
 unfixable = []
@@ -52,6 +51,13 @@ unfixable = []
 [tool.ruff.lint.per-file-ignores]
 # Vendored third-party code: don't rewrite/modernize upstream source.
 "scenedetect/_thirdparty/*" = ["UP"]
+# CLI help text and validation messages are intentionally long.
+"scenedetect/_cli/*" = ["E501"]
+# Test data tables and golden output strings are clearer unwrapped.
+"tests/*" = ["E501"]
+# Doc generators and benchmark scripts mirror the CLI strings.
+"docs/*" = ["E501"]
+"benchmark/*" = ["E501"]
 
 [tool.pyright]
 include = ["scenedetect", "tests"]

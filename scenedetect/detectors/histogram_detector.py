@@ -59,8 +59,8 @@ class HistogramDetector(SceneDetector):
 
     def process_frame(self, timecode: FrameTimecode, frame_img: numpy.ndarray) -> list[int]:
         """Computes the histogram of the luma channel of the frame image and compares it with the
-        histogram of the luma channel of the previous frame. If the difference between the histograms
-        exceeds the threshold, a scene cut is detected.
+        histogram of the luma channel of the previous frame. If the difference between the
+        histograms exceeds the threshold, a scene cut is detected.
         Histogram difference is computed using the correlation metric.
 
         Arguments:
@@ -98,11 +98,12 @@ class HistogramDetector(SceneDetector):
 
             # Check if a new scene should be triggered
             # Set a correlation threshold to determine scene changes.
-            # The threshold value should be between -1 (perfect negative correlation, not applicable here)
-            # and +1 (perfect positive correlation, identical histograms).
+            # The threshold value should be between -1 (perfect negative correlation, not
+            # applicable here) and +1 (perfect positive correlation, identical histograms).
             # Values close to 1 indicate very similar frames, while lower values suggest changes.
-            # Example: If `_threshold` is set to 0.8, it implies that only changes resulting in a correlation
-            # less than 0.8 between histograms will be considered significant enough to denote a scene change.
+            # Example: If `_threshold` is set to 0.8, it implies that only changes resulting in a
+            # correlation less than 0.8 between histograms will be considered significant enough to
+            # denote a scene change.
             if hist_diff <= self._threshold and (
                 (timecode - self._last_cut) >= self._min_scene_len
             ):

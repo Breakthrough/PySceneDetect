@@ -25,7 +25,7 @@ from scenedetect._cli.config import (
     CropValue,
 )
 from scenedetect.common import MAX_FPS_DELTA, FrameTimecode
-from scenedetect.detector import FlashFilter, SceneDetector
+from scenedetect.detector import SceneDetector
 from scenedetect.detectors import (
     AdaptiveDetector,
     ContentDetector,
@@ -35,7 +35,7 @@ from scenedetect.detectors import (
 )
 from scenedetect.output import is_ffmpeg_available, is_mkvmerge_available
 from scenedetect.platform import init_logger
-from scenedetect.scene_manager import Interpolation, SceneManager
+from scenedetect.scene_manager import SceneManager
 from scenedetect.stats_manager import StatsManager
 from scenedetect.video_stream import FrameRateUnavailable, VideoOpenFailure, VideoStream
 
