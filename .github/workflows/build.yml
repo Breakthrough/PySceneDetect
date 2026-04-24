@@ -9,11 +9,15 @@ on:
       - dist/**
       - scenedetect/**
       - tests/**
+      - .github/workflows/build.yml
+      - .github/actions/setup-ffmpeg/**
   push:
     paths:
       - dist/**
       - scenedetect/**
       - tests/**
+      - .github/workflows/build.yml
+      - .github/actions/setup-ffmpeg/**
     branches:
       - main
       - 'releases/**'

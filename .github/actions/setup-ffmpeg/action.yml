@@ -9,6 +9,13 @@ inputs:
 runs:
   using: 'composite'
   steps:
+    - name: Set ffmpeg install config
+      shell: bash
+      run: |
+        VERSION=8.1
+        echo "FFMPEG_VERSION=${VERSION}" >> "$GITHUB_ENV"
+        echo "FFMPEG_ASSET=ffmpeg-${VERSION}-essentials_build.zip" >> "$GITHUB_ENV"
+
     - name: Check for preinstalled ffmpeg
       id: check
       shell: bash
@@ -26,42 +33,79 @@ runs:
       if: ${{ steps.check.outputs.installed == 'false' && runner.os == 'Linux' }}
       shell: bash
       run: |
-        for attempt in 1 2 3; do
+        attempts=4
+        for attempt in $(seq 1 $attempts); do
           echo "apt-get attempt $attempt"
           if sudo apt-get update && sudo apt-get install -y ffmpeg; then
             exit 0
           fi
-          sleep 10
+          if [ "$attempt" -lt "$attempts" ]; then
+            delay=$(( 15 * (1 << (attempt - 1)) + RANDOM % 6 ))
+            echo "install failed; sleeping ${delay}s before retry"
+            sleep "$delay"
+          fi
         done
-        echo "Failed to install ffmpeg via apt-get after 3 attempts" >&2
+        echo "Failed to install ffmpeg via apt-get after $attempts attempts" >&2
         exit 1
 
     - name: Install ffmpeg (macOS)
       if: ${{ steps.check.outputs.installed == 'false' && runner.os == 'macOS' }}
       shell: bash
       run: |
-        for attempt in 1 2 3; do
+        attempts=4
+        for attempt in $(seq 1 $attempts); do
           echo "brew attempt $attempt"
           if brew install ffmpeg; then
             exit 0
           fi
-          sleep 10
+          if [ "$attempt" -lt "$attempts" ]; then
+            delay=$(( 15 * (1 << (attempt - 1)) + RANDOM % 6 ))
+            echo "install failed; sleeping ${delay}s before retry"
+            sleep "$delay"
+          fi
         done
-        echo "Failed to install ffmpeg via brew after 3 attempts" >&2
+        echo "Failed to install ffmpeg via brew after $attempts attempts" >&2
         exit 1
 
+    - name: Cache ffmpeg (Windows)
+      if: ${{ steps.check.outputs.installed == 'false' && runner.os == 'Windows' }}
+      id: cache-ffmpeg-windows
+      uses: actions/cache@v4
+      with:
+        path: C:\ffmpeg-bin
+        key: ffmpeg-windows-${{ env.FFMPEG_VERSION }}-v1
+
     - name: Install ffmpeg (Windows)
+      if: ${{ steps.check.outputs.installed == 'false' && runner.os == 'Windows' && steps.cache-ffmpeg-windows.outputs.cache-hit != 'true' }}
+      shell: pwsh
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        $attempts = 4
+        $downloaded = $false
+        for ($attempt = 1; $attempt -le $attempts; $attempt++) {
+          Write-Host "download attempt $attempt (GyanD/codexffmpeg $env:FFMPEG_VERSION)"
+          gh release download $env:FFMPEG_VERSION --repo GyanD/codexffmpeg --pattern $env:FFMPEG_ASSET --clobber
+          if ($LASTEXITCODE -eq 0) { $downloaded = $true; break }
+          if ($attempt -lt $attempts) {
+            $delay = [int]([math]::Pow(2, $attempt - 1) * 15) + (Get-Random -Minimum 0 -Maximum 6)
+            Write-Host "download failed; sleeping ${delay}s before retry"
+            Start-Sleep -Seconds $delay
+          }
+        }
+        if (-not $downloaded) {
+          Write-Error "Failed to download ffmpeg after $attempts attempts"
+          exit 1
+        }
+        Expand-Archive -Path $env:FFMPEG_ASSET -DestinationPath ffmpeg-extract -Force
+        New-Item -ItemType Directory -Force -Path C:\ffmpeg-bin | Out-Null
+        Copy-Item -Path (Join-Path "ffmpeg-extract" "ffmpeg-$env:FFMPEG_VERSION-essentials_build\bin\*.exe") -Destination C:\ffmpeg-bin\
+        Remove-Item -Recurse -Force ffmpeg-extract, $env:FFMPEG_ASSET
+
+    - name: Add ffmpeg to PATH (Windows)
       if: ${{ steps.check.outputs.installed == 'false' && runner.os == 'Windows' }}
       shell: pwsh
-      run: |
-        for ($attempt = 1; $attempt -le 3; $attempt++) {
-          Write-Host "choco attempt $attempt"
-          choco install ffmpeg -y --no-progress
-          if ($LASTEXITCODE -eq 0) { exit 0 }
-          Start-Sleep -Seconds 10
-        }
-        Write-Error "Failed to install ffmpeg via choco after 3 attempts"
-        exit 1
+      run: Add-Content -Path $env:GITHUB_PATH -Value 'C:\ffmpeg-bin'
 
     - name: Verify ffmpeg
       shell: bash
