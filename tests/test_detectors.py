@@ -32,14 +32,14 @@ from scenedetect.detectors import (
     ThresholdDetector,
 )
 
-FAST_CUT_DETECTORS: ty.Tuple[ty.Type[SceneDetector]] = (
+FAST_CUT_DETECTORS: tuple[type[SceneDetector]] = (
     AdaptiveDetector,
     ContentDetector,
     HashDetector,
     HistogramDetector,
 )
 
-ALL_DETECTORS: ty.Tuple[ty.Type[SceneDetector]] = (*FAST_CUT_DETECTORS, ThresholdDetector)
+ALL_DETECTORS: tuple[type[SceneDetector]] = (*FAST_CUT_DETECTORS, ThresholdDetector)
 
 # TODO(https://scenedetect.com/issues/53): Add a test that verifies algorithms output relatively
 # consistent frame scores regardless of resolution. This will ensure that threshold values will hold
@@ -57,14 +57,13 @@ def get_absolute_path(relative_path: str) -> str:
     abs_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), relative_path)
     if not os.path.exists(abs_path):
         raise FileNotFoundError(
-            """
-Test video file (%s) must be present to run test case. This file can be obtained by running the following commands from the root of the repository:
+            f"""
+Test video file ({relative_path}) must be present to run test case. This file can be obtained by running the following commands from the root of the repository:
 
 git fetch --depth=1 https://github.com/Breakthrough/PySceneDetect.git refs/heads/resources:refs/remotes/origin/resources
 git checkout refs/remotes/origin/resources -- tests/resources/
 git reset
 """
-            % relative_path
         )
     return abs_path
 
@@ -81,7 +80,7 @@ class TestCase:
     """Start time as frames."""
     end_time: int
     """End time as frames."""
-    scene_boundaries: ty.List[int]
+    scene_boundaries: list[int]
     """Scene boundaries."""
 
     def detect(self):
@@ -107,7 +106,7 @@ def get_fast_cut_test_cases():
                 end_time=1450,
                 scene_boundaries=[1199, 1226, 1260, 1281, 1334, 1365],
             ),
-            id="%s/default" % detector_type.__name__,
+            id=f"{detector_type.__name__}/default",
         )
         for detector_type in FAST_CUT_DETECTORS
     ]
@@ -121,7 +120,7 @@ def get_fast_cut_test_cases():
                 end_time=1450,
                 scene_boundaries=[1199, 1260, 1334, 1365],
             ),
-            id="%s/m=30" % detector_type.__name__,
+            id=f"{detector_type.__name__}/m=30",
         )
         for detector_type in FAST_CUT_DETECTORS
     ]

@@ -100,7 +100,7 @@ except ImportError:
 
 # TODO: Lazy-loading backends would improve startup performance. However, this requires removing
 # some of the re-exported types above from the public API.
-AVAILABLE_BACKENDS: ty.Dict[str, ty.Type] = {
+AVAILABLE_BACKENDS: dict[str, type] = {
     backend.BACKEND_NAME: backend
     for backend in filter(
         None,

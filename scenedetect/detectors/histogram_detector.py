@@ -34,7 +34,7 @@ class HistogramDetector(SceneDetector):
         self,
         threshold: float = 0.05,
         bins: int = 256,
-        min_scene_len: ty.Union[int, float, str] = 15,
+        min_scene_len: int | float | str = 15,
     ):
         """
         Arguments:
@@ -57,7 +57,7 @@ class HistogramDetector(SceneDetector):
         self._last_cut = None
         self._metric_key = f"hist_diff [bins={self._bins}]"
 
-    def process_frame(self, timecode: FrameTimecode, frame_img: numpy.ndarray) -> ty.List[int]:
+    def process_frame(self, timecode: FrameTimecode, frame_img: numpy.ndarray) -> list[int]:
         """Computes the histogram of the luma channel of the frame image and compares it with the
         histogram of the luma channel of the previous frame. If the difference between the histograms
         exceeds the threshold, a scene cut is detected.
@@ -166,5 +166,5 @@ class HistogramDetector(SceneDetector):
 
         return hist
 
-    def get_metrics(self) -> ty.List[str]:
+    def get_metrics(self) -> list[str]:
         return [self._metric_key]

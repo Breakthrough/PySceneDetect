@@ -31,7 +31,7 @@ from tests.helpers import invoke_cli
 # Entries are (start_timecode, end_timecode). All backends should agree on cut timecodes since
 # CAP_PROP_POS_MSEC gives accurate PTS-derived timestamps. The last scene ends at the clip
 # boundary (end_time) which may vary slightly between backends based on frame counting.
-EXPECTED_SCENES_VFR: ty.List[ty.Tuple[str, str]] = [
+EXPECTED_SCENES_VFR: list[tuple[str, str]] = [
     ("00:00:00.000", "00:00:03.921"),
     ("00:00:03.921", "00:00:09.676"),
 ]
@@ -40,7 +40,7 @@ EXPECTED_SCENES_VFR: ty.List[ty.Tuple[str, str]] = [
 # 10s of goldeneye.mp4 by dropping every 3rd frame (frames 2,5,8,...). PTS durations alternate
 # between 1001 and 2002 (time_base=1/24000), nominal fps=24000/1001, avg fps≈16. The last scene
 # ends at the clip boundary and may vary slightly between backends.
-EXPECTED_SCENES_VFR_DROP3: ty.List[ty.Tuple[str, str]] = [
+EXPECTED_SCENES_VFR_DROP3: list[tuple[str, str]] = [
     ("00:00:00.000", "00:00:03.754"),
     ("00:00:03.754", "00:00:08.759"),
 ]
@@ -161,7 +161,7 @@ def test_vfr_csv_output(test_vfr_video: str, tmp_path):
         write_scene_list(f, scene_list)
 
     # Verify CSV contains valid data.
-    with open(csv_path, "r") as f:
+    with open(csv_path) as f:
         reader = csv.reader(f)
         rows = list(reader)
         assert len(rows) >= 3  # 2 header rows + data
@@ -413,7 +413,7 @@ def test_vfr_csv_backend_conformance(test_vfr_video: str):
     Only the known interior scenes are compared; the last scene's end time may vary slightly
     between backends since it reflects the clip boundary rather than a detected cut.
     """
-    timecodes: ty.Dict[str, ty.List[ty.Tuple[str, str]]] = {}
+    timecodes: dict[str, list[tuple[str, str]]] = {}
     for backend in ("pyav", "opencv"):
         video = open_video(test_vfr_video, backend=backend)
         sm = SceneManager()

@@ -33,7 +33,7 @@ from scenedetect.scene_manager import Interpolation
 
 PYAV_THREADING_MODES = ["NONE", "SLICE", "FRAME", "AUTO"]
 
-LogMessage = ty.Tuple[int, str]
+LogMessage = tuple[int, str]
 
 
 class OptionParseFailure(Exception):
@@ -75,13 +75,13 @@ class TimecodeValue(ValidatedValue):
 
     Stores value in original representation."""
 
-    def __init__(self, value: ty.Union[int, float, str]):
+    def __init__(self, value: int | float | str):
         # Ensure value is a valid timecode.
         FrameTimecode(timecode=value, fps=100.0)
         self._value = value
 
     @property
-    def value(self) -> ty.Union[int, float, str]:
+    def value(self) -> int | float | str:
         return self._value
 
     @staticmethod
@@ -99,9 +99,9 @@ class RangeValue(ValidatedValue):
 
     def __init__(
         self,
-        value: ty.Union[int, float],
-        min_val: ty.Union[int, float],
-        max_val: ty.Union[int, float],
+        value: int | float,
+        min_val: int | float,
+        max_val: int | float,
     ):
         if value < min_val or value > max_val:
             # min and max are inclusive.
@@ -111,16 +111,16 @@ class RangeValue(ValidatedValue):
         self._max_val = max_val
 
     @property
-    def value(self) -> ty.Union[int, float]:
+    def value(self) -> int | float:
         return self._value
 
     @property
-    def min_val(self) -> ty.Union[int, float]:
+    def min_val(self) -> int | float:
         """Minimum value of the range."""
         return self._min_val
 
     @property
-    def max_val(self) -> ty.Union[int, float]:
+    def max_val(self) -> int | float:
         """Maximum value of the range."""
         return self._max_val
 
@@ -134,7 +134,7 @@ class RangeValue(ValidatedValue):
             )
         except ValueError as ex:
             raise OptionParseFailure(
-                "Value must be between %s and %s." % (default.min_val, default.max_val)
+                f"Value must be between {default.min_val} and {default.max_val}."
             ) from ex
 
 
@@ -144,7 +144,7 @@ class CropValue(ValidatedValue):
     _IGNORE_CHARS = [",", "/", "(", ")"]
     """Characters to ignore."""
 
-    def __init__(self, value: ty.Optional[ty.Union[str, ty.Tuple[int, int, int, int]]] = None):
+    def __init__(self, value: str | tuple[int, int, int, int] | None = None):
         if isinstance(value, CropValue) or value is None:
             self._crop = value
         else:
@@ -165,11 +165,12 @@ class CropValue(ValidatedValue):
             self._crop = (min(x0, x1), min(y0, y1), max(x0, x1), max(y0, y1))
 
     @property
-    def value(self) -> ty.Tuple[int, int, int, int]:
+    def value(self) -> tuple[int, int, int, int]:
         return self._crop
 
     def __str__(self) -> str:
-        return "[%d, %d], [%d, %d]" % self.value
+        x0, y0, x1, y1 = self.value
+        return f"[{x0}, {y0}], [{x1}, {y1}]"
 
     @staticmethod
     def from_config(config_value: str, default: "CropValue") -> "CropValue":
@@ -185,7 +186,7 @@ class ScoreWeightsValue(ValidatedValue):
     _IGNORE_CHARS = [",", "/", "(", ")"]
     """Characters to ignore."""
 
-    def __init__(self, value: ty.Union[str, ContentDetector.Components]):
+    def __init__(self, value: str | ContentDetector.Components):
         if isinstance(value, ContentDetector.Components):
             self._value = value
         else:
@@ -202,7 +203,7 @@ class ScoreWeightsValue(ValidatedValue):
         return self._value
 
     def __str__(self) -> str:
-        return "%.3f, %.3f, %.3f, %.3f" % self.value
+        return "{:.3f}, {:.3f}, {:.3f}, {:.3f}".format(*self.value)
 
     @staticmethod
     def from_config(config_value: str, default: "ScoreWeightsValue") -> "ScoreWeightsValue":
@@ -301,7 +302,7 @@ class TimecodeFormat(Enum):
         if self == TimecodeFormat.TIMECODE:
             return timecode.get_timecode()
         if self == TimecodeFormat.SECONDS:
-            return "%.3f" % timecode.seconds
+            return f"{timecode.seconds:.3f}"
         raise RuntimeError("Unhandled format specifier.")
 
 
@@ -314,8 +315,8 @@ class FcpFormat(Enum):
     """Final Cut Pro 7 XML Format"""
 
 
-ConfigValue = ty.Union[bool, int, float, str]
-ConfigDict = ty.Dict[str, ty.Dict[str, ConfigValue]]
+ConfigValue = bool | int | float | str
+ConfigDict = dict[str, dict[str, ConfigValue]]
 
 _CONFIG_FILE_NAME: ty.AnyStr = "scenedetect.cfg"
 _CONFIG_FILE_DIR: ty.AnyStr = user_config_dir("PySceneDetect", False)
@@ -454,7 +455,7 @@ CONFIG_MAP: ConfigDict = {
 The types of these values are used when decoding the configuration file. Valid choices for
 certain string options are stored in `CHOICE_MAP`."""
 
-CHOICE_MAP: ty.Dict[str, ty.Dict[str, ty.List[str]]] = {
+CHOICE_MAP: dict[str, dict[str, list[str]]] = {
     "backend-pyav": {
         "threading_mode": [mode.lower() for mode in PYAV_THREADING_MODES],
     },
@@ -501,14 +502,14 @@ CHOICE_MAP: ty.Dict[str, ty.Dict[str, ty.List[str]]] = {
 of a set to preserve order when generating error contexts. Values are case-insensitive, and must be
 in lowercase in this map."""
 
-DEPRECATED_COMMANDS: ty.Dict[str, str] = {"export-html": "save-html"}
+DEPRECATED_COMMANDS: dict[str, str] = {"export-html": "save-html"}
 """Deprecated config file sections that have a 1:1 mapping to a new replacement."""
 
 
-def _validate_structure(parser: ConfigParser) -> ty.Tuple[bool, ty.List[LogMessage]]:
+def _validate_structure(parser: ConfigParser) -> tuple[bool, list[LogMessage]]:
     """Validates the layout of the section/option mapping. Returns a bool indicating if validation
     was successful, and a list of log messages for the init log."""
-    logs: ty.List[LogMessage] = []
+    logs: list[LogMessage] = []
     success = True
     all_sections = set(parser.sections())
     for section in all_sections:
@@ -549,7 +550,7 @@ def _validate_structure(parser: ConfigParser) -> ty.Tuple[bool, ty.List[LogMessa
     return (success, logs)
 
 
-def _parse_config(parser: ConfigParser) -> ty.Tuple[ty.Optional[ConfigDict], ty.List[LogMessage]]:
+def _parse_config(parser: ConfigParser) -> tuple[ConfigDict | None, list[LogMessage]]:
     """Process the given configuration into a key-value mapping. Returns a tuple of the config
     dict itself (or None on failure), and a list of log messages during parsing."""
     (success, logs) = _validate_structure(parser)
@@ -594,8 +595,7 @@ def _parse_config(parser: ConfigParser) -> ty.Tuple[ty.Optional[ConfigDict], ty.
                             logs.append(
                                 (
                                     logging.ERROR,
-                                    "Invalid value for [%s] option %s': %s. Must be one of: %s."
-                                    % (
+                                    "Invalid value for [{}] option {}': {}. Must be one of: {}.".format(
                                         command,
                                         option,
                                         parser.get(command, option),
@@ -612,8 +612,7 @@ def _parse_config(parser: ConfigParser) -> ty.Tuple[ty.Optional[ConfigDict], ty.
                     logs.append(
                         (
                             logging.ERROR,
-                            "Invalid value for [%s] option '%s': %s is not a valid %s."
-                            % (command, option, parser.get(command, option), value_type),
+                            f"Invalid value for [{command}] option '{option}': {parser.get(command, option)} is not a valid {value_type}.",
                         )
                     )
                     continue
@@ -632,8 +631,7 @@ def _parse_config(parser: ConfigParser) -> ty.Tuple[ty.Optional[ConfigDict], ty.
                         logs.append(
                             (
                                 logging.ERROR,
-                                "Invalid value for [%s] option '%s':  %s\nError: %s"
-                                % (command, option, config_value, ex.error),
+                                f"Invalid value for [{command}] option '{option}':  {config_value}\nError: {ex.error}",
                             )
                         )
                     continue
@@ -648,8 +646,7 @@ def _parse_config(parser: ConfigParser) -> ty.Tuple[ty.Optional[ConfigDict], ty.
                             logs.append(
                                 (
                                     logging.ERROR,
-                                    "Invalid value for [%s] option '%s': %s. Must be one of: %s."
-                                    % (
+                                    "Invalid value for [{}] option '{}': {}. Must be one of: {}.".format(
                                         command,
                                         option,
                                         parser.get(command, option),
@@ -669,16 +666,16 @@ def _parse_config(parser: ConfigParser) -> ty.Tuple[ty.Optional[ConfigDict], ty.
 class ConfigLoadFailure(Exception):
     """Raised when a user-specified configuration file fails to be loaded or validated."""
 
-    def __init__(self, init_log: ty.Tuple[int, str], reason: ty.Optional[Exception] = None):
+    def __init__(self, init_log: tuple[int, str], reason: Exception | None = None):
         super().__init__()
         self.init_log = init_log
         self.reason = reason
 
 
 class ConfigRegistry:
-    def __init__(self, path: ty.Optional[str] = None, throw_exception: bool = True):
+    def __init__(self, path: str | None = None, throw_exception: bool = True):
         self._config: ConfigDict = {}  # Options set in the loaded config file.
-        self._init_log: ty.List[ty.Tuple[int, str]] = []
+        self._init_log: list[tuple[int, str]] = []
         self._initialized = False
 
         try:
@@ -693,7 +690,7 @@ class ConfigRegistry:
             self._init_log = ex.init_log
             if ex.reason is not None:
                 self._init_log += [
-                    (logging.ERROR, "Error: %s" % str(ex.reason).replace("\t", "  ")),
+                    (logging.ERROR, "Error: {}".format(str(ex.reason).replace("\t", "  "))),
                 ]
             self._initialized = False
 
@@ -719,9 +716,9 @@ class ConfigRegistry:
     def _load_from_disk(self, path=None):
         # Validate `path`, or if not provided, use CONFIG_FILE_PATH if it exists.
         if path:
-            self._init_log.append((logging.INFO, "Loading config from file:\n  %s" % path))
+            self._init_log.append((logging.INFO, f"Loading config from file:\n  {path}"))
             if not os.path.exists(path):
-                self._init_log.append((logging.ERROR, "File not found: %s" % (path)))
+                self._init_log.append((logging.ERROR, f"File not found: {path}"))
                 raise ConfigLoadFailure(self._init_log)
         else:
             # Gracefully handle the case where there isn't a user config file.
@@ -729,7 +726,7 @@ class ConfigRegistry:
                 self._init_log.append((logging.DEBUG, "User config file not found."))
                 return
             path = CONFIG_FILE_PATH
-            self._init_log.append((logging.INFO, "Loading user config file:\n  %s" % path))
+            self._init_log.append((logging.INFO, f"Loading user config file:\n  {path}"))
         # Try to load and parse the config file at `path`.
         config = ConfigParser()
         try:
@@ -757,7 +754,7 @@ class ConfigRegistry:
         self,
         command: str,
         option: str,
-        override: ty.Optional[ConfigValue] = None,
+        override: ConfigValue | None = None,
     ) -> ConfigValue:
         """Get the current setting or default value of the specified command option."""
         assert command in CONFIG_MAP and option in CONFIG_MAP[command]
@@ -773,9 +770,7 @@ class ConfigRegistry:
             return CONFIG_MAP[command][option].__class__[value.upper().strip()]
         return value
 
-    def get_help_string(
-        self, command: str, option: str, show_default: ty.Optional[bool] = None
-    ) -> str:
+    def get_help_string(self, command: str, option: str, show_default: bool | None = None) -> str:
         """Get a string to specify for the help text indicating the current command option value,
         if set, or the default.
 
@@ -792,9 +787,9 @@ class ConfigRegistry:
                 value_str = "on" if self._config[command][option] else "off"
             else:
                 value_str = str(self._config[command][option])
-            return " [setting: %s]" % (value_str)
+            return f" [setting: {value_str}]"
         if show_default is False or (
             show_default is None and is_flag and CONFIG_MAP[command][option] is False
         ):
             return ""
-        return " [default: %s]" % (str(CONFIG_MAP[command][option]))
+        return f" [default: {str(CONFIG_MAP[command][option])}]"

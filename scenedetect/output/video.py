@@ -52,7 +52,7 @@ See https://github.com/Breakthrough/PySceneDetect/issues/164
 for details.  Sorry about that!
 """
 
-_FFMPEG_PATH: ty.Optional[str] = get_ffmpeg_path()
+_FFMPEG_PATH: str | None = get_ffmpeg_path()
 """Relative path to the ffmpeg binary on this system, if any (will be None if not available)."""
 
 _DEFAULT_FFMPEG_ARGS = (
@@ -157,9 +157,9 @@ def default_formatter(template: str) -> PathFormatter:
 def split_video_mkvmerge(
     input_video_path: str,
     scene_list: ty.Iterable[TimecodePair],
-    output_dir: ty.Optional[ty.Union[str, Path]] = None,
-    output_file_template: ty.Optional[ty.Union[str, Path]] = "$VIDEO_NAME.mkv",
-    video_name: ty.Optional[str] = None,
+    output_dir: str | Path | None = None,
+    output_file_template: str | Path | None = "$VIDEO_NAME.mkv",
+    video_name: str | None = None,
     show_output: bool = False,
     suppress_output=None,
 ) -> int:
@@ -217,12 +217,13 @@ def split_video_mkvmerge(
         "-o",
         str(output_path),
         "--split",
-        "parts:%s"
-        % ",".join(
-            [
-                "%s-%s" % (start_time.get_timecode(), end_time.get_timecode())
-                for start_time, end_time in scene_list
-            ]
+        "parts:{}".format(
+            ",".join(
+                [
+                    f"{start_time.get_timecode()}-{end_time.get_timecode()}"
+                    for start_time, end_time in scene_list
+                ]
+            )
         ),
         input_video_path,
     ]
@@ -252,15 +253,15 @@ def split_video_mkvmerge(
 def split_video_ffmpeg(
     input_video_path: str,
     scene_list: ty.Iterable[TimecodePair],
-    output_dir: ty.Optional[Path] = None,
+    output_dir: Path | None = None,
     output_file_template: str = "$VIDEO_NAME-Scene-$SCENE_NUMBER.mp4",
-    video_name: ty.Optional[str] = None,
+    video_name: str | None = None,
     arg_override: str = _DEFAULT_FFMPEG_ARGS,
     show_progress: bool = False,
     show_output: bool = False,
     suppress_output=None,
     hide_progress=None,
-    formatter: ty.Optional[PathFormatter] = None,
+    formatter: PathFormatter | None = None,
 ) -> int:
     """Split `input_video_path` using `ffmpeg` based on the scenes in `scene_list`.
 

@@ -41,7 +41,7 @@ _FFMPEG_RETRY_BACKOFF_SECS = 0.5
 
 def _retry_on_oserror(op_name: str, fn: ty.Callable):
     """Run ``fn``, retrying up to ``_FFMPEG_RETRY_COUNT`` times on ``OSError``."""
-    last_exc: ty.Optional[OSError] = None
+    last_exc: OSError | None = None
     for attempt in range(_FFMPEG_RETRY_COUNT + 1):
         try:
             return fn()
@@ -63,9 +63,7 @@ def _retry_on_oserror(op_name: str, fn: ty.Callable):
 class VideoStreamMoviePy(VideoStream):
     """MoviePy `FFMPEG_VideoReader` backend."""
 
-    def __init__(
-        self, path: ty.AnyStr, framerate: ty.Optional[float] = None, print_infos: bool = False
-    ):
+    def __init__(self, path: ty.AnyStr, framerate: float | None = None, print_infos: bool = False):
         """Open a video or device.
 
         Arguments:
@@ -97,8 +95,8 @@ class VideoStreamMoviePy(VideoStream):
         # This will always be one behind self._reader.lastread when we finally call read()
         # as MoviePy caches the first frame when opening the video. Thus self._last_frame
         # will always be the current frame, and self._reader.lastread will be the next.
-        self._last_frame: ty.Union[bool, np.ndarray] = False
-        self._last_frame_rgb: ty.Optional[np.ndarray] = None
+        self._last_frame: bool | np.ndarray = False
+        self._last_frame_rgb: np.ndarray | None = None
         # Older versions don't track the video position when calling read_frame so we need
         # to keep track of the current frame number.
         self._frame_number = 0
@@ -119,7 +117,7 @@ class VideoStreamMoviePy(VideoStream):
         return framerate_to_fraction(self._reader.fps)
 
     @property
-    def path(self) -> ty.Union[bytes, str]:
+    def path(self) -> bytes | str:
         """Video path."""
         return self._path
 
@@ -134,12 +132,12 @@ class VideoStreamMoviePy(VideoStream):
         return True
 
     @property
-    def frame_size(self) -> ty.Tuple[int, int]:
+    def frame_size(self) -> tuple[int, int]:
         """Size of each video frame in pixels as a tuple of (width, height)."""
         return tuple(self._reader.infos["video_size"])
 
     @property
-    def duration(self) -> ty.Optional[FrameTimecode]:
+    def duration(self) -> FrameTimecode | None:
         """Duration of the stream as a FrameTimecode, or None if non terminating."""
         assert isinstance(self._reader.infos["duration"], float)
         return self.base_timecode + self._reader.infos["duration"]
@@ -191,7 +189,7 @@ class VideoStreamMoviePy(VideoStream):
         """
         return self._frame_number
 
-    def seek(self, target: ty.Union[FrameTimecode, float, int]):
+    def seek(self, target: FrameTimecode | float | int):
         """Seek to the given timecode. If given as a frame number, represents the current seek
         pointer (e.g. if seeking to 0, the next frame decoded will be the first frame of the video).
 
@@ -248,7 +246,7 @@ class VideoStreamMoviePy(VideoStream):
             "reset", lambda: FFMPEG_VideoReader(self._path, print_infos=print_infos)
         )
 
-    def read(self, decode: bool = True) -> ty.Union[np.ndarray, bool]:
+    def read(self, decode: bool = True) -> np.ndarray | bool:
         if not hasattr(self._reader, "lastread") or self._eof:
             return False
         has_last_read = hasattr(self._reader, "last_read")

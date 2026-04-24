@@ -91,32 +91,32 @@ class CliContext:
         self.video_stream: VideoStream = None
         self.load_scenes_input: str = None  # load-scenes -i/--input
         self.load_scenes_column_name: str = None  # load-scenes -c/--start-col-name
-        self.start_time: ty.Optional[FrameTimecode] = None  # time -s/--start
-        self.end_time: ty.Optional[FrameTimecode] = None  # time -e/--end
-        self.duration: ty.Optional[FrameTimecode] = None  # time -d/--duration
+        self.start_time: FrameTimecode | None = None  # time -s/--start
+        self.end_time: FrameTimecode | None = None  # time -e/--end
+        self.duration: FrameTimecode | None = None  # time -d/--duration
         self.frame_skip: int = None
 
         # Options:
         self.drop_short_scenes: bool = None
         self.merge_last_scene: bool = None
         self.min_scene_len: FrameTimecode = None
-        self.default_detector: ty.Tuple[ty.Type[SceneDetector], ty.Dict[str, ty.Any]] = None
+        self.default_detector: tuple[type[SceneDetector], dict[str, ty.Any]] = None
         self.output: str = None
         self.stats_file_path: str = None
 
         # Output Commands (e.g. split-video, save-images):
         # Commands to run after the detection pipeline. Stored as (callback, args) and invoked with
         # the results of the detection pipeline by the controller.
-        self.commands: ty.List[ty.Tuple[ty.Callable, ty.Dict[str, ty.Any]]] = []
+        self.commands: list[tuple[ty.Callable, dict[str, ty.Any]]] = []
 
-    def add_command(self, command: ty.Callable, command_args: ty.Dict[str, ty.Any]):
+    def add_command(self, command: ty.Callable, command_args: dict[str, ty.Any]):
         """Add `command` to the processing pipeline. Will be called after processing the input."""
         if "output" in command_args and command_args["output"] is None:
             command_args["output"] = self.output
         logger.debug("Adding command: %s(%s)", command.__name__, command_args)
         self.commands.append((command, command_args))
 
-    def add_detector(self, detector: ty.Type[SceneDetector], detector_args: ty.Dict[str, ty.Any]):
+    def add_detector(self, detector: type[SceneDetector], detector_args: dict[str, ty.Any]):
         """Instantiate and add `detector` to the processing pipeline."""
         if self.load_scenes_input:
             raise click.ClickException("The load-scenes command cannot be used with detectors.")
@@ -130,7 +130,7 @@ class CliContext:
             (detector_type, detector_args) = self.default_detector
             self.add_detector(detector_type, detector_args)
 
-    def parse_timecode(self, value: ty.Optional[str], correct_pts: bool = False) -> FrameTimecode:
+    def parse_timecode(self, value: str | None, correct_pts: bool = False) -> FrameTimecode:
         """Parses a user input string into a FrameTimecode assuming the given framerate. If `value`
         is None it will be passed through without processing.
 
@@ -155,21 +155,21 @@ class CliContext:
     def handle_options(
         self,
         input_path: ty.AnyStr,
-        output: ty.Optional[ty.AnyStr],
+        output: ty.AnyStr | None,
         framerate: float,
-        stats_file: ty.Optional[ty.AnyStr],
+        stats_file: ty.AnyStr | None,
         frame_skip: int,
         min_scene_len: str,
-        drop_short_scenes: ty.Optional[bool],
-        merge_last_scene: ty.Optional[bool],
-        backend: ty.Optional[str],
-        crop: ty.Optional[ty.Tuple[int, int, int, int]],
-        downscale: ty.Optional[int],
+        drop_short_scenes: bool | None,
+        merge_last_scene: bool | None,
+        backend: str | None,
+        crop: tuple[int, int, int, int] | None,
+        downscale: int | None,
         quiet: bool,
-        logfile: ty.Optional[ty.AnyStr],
-        config: ty.Optional[ty.AnyStr],
-        stats: ty.Optional[ty.AnyStr],
-        verbosity: ty.Optional[str],
+        logfile: ty.AnyStr | None,
+        config: ty.AnyStr | None,
+        stats: ty.AnyStr | None,
+        verbosity: str | None,
     ):
         """Parse all global options/arguments passed to the main scenedetect command,
         before other sub-commands (e.g. this function processes the [options] when calling
@@ -206,7 +206,9 @@ class CliContext:
             init_failure = True
             init_log += ex.init_log
             if ex.reason is not None:
-                init_log += [(logging.ERROR, "Error: %s" % str(ex.reason).replace("\t", "  "))]
+                init_log += [
+                    (logging.ERROR, "Error: {}".format(str(ex.reason).replace("\t", "  ")))
+                ]
         finally:
             # Make sure we print the version number even on any kind of init failure.
             logger.info("PySceneDetect %s", scenedetect.__version__)
@@ -312,13 +314,13 @@ class CliContext:
 
     def get_detect_content_params(
         self,
-        threshold: ty.Optional[float] = None,
+        threshold: float | None = None,
         luma_only: bool = None,
-        min_scene_len: ty.Optional[str] = None,
-        weights: ty.Optional[ty.Tuple[float, float, float, float]] = None,
-        kernel_size: ty.Optional[int] = None,
-        filter_mode: ty.Optional[str] = None,
-    ) -> ty.Dict[str, ty.Any]:
+        min_scene_len: str | None = None,
+        weights: tuple[float, float, float, float] | None = None,
+        kernel_size: int | None = None,
+        filter_mode: str | None = None,
+    ) -> dict[str, ty.Any]:
         """Get a dict containing user options to construct a ContentDetector with."""
         if self.drop_short_scenes:
             min_scene_len = 0
@@ -350,14 +352,14 @@ class CliContext:
 
     def get_detect_adaptive_params(
         self,
-        threshold: ty.Optional[float] = None,
-        min_content_val: ty.Optional[float] = None,
-        frame_window: ty.Optional[int] = None,
+        threshold: float | None = None,
+        min_content_val: float | None = None,
+        frame_window: int | None = None,
         luma_only: bool = None,
-        min_scene_len: ty.Optional[str] = None,
-        weights: ty.Optional[ty.Tuple[float, float, float, float]] = None,
-        kernel_size: ty.Optional[int] = None,
-    ) -> ty.Dict[str, ty.Any]:
+        min_scene_len: str | None = None,
+        weights: tuple[float, float, float, float] | None = None,
+        kernel_size: int | None = None,
+    ) -> dict[str, ty.Any]:
         """Handle detect-adaptive command options and return args to construct one with."""
 
         if self.drop_short_scenes:
@@ -392,11 +394,11 @@ class CliContext:
 
     def get_detect_threshold_params(
         self,
-        threshold: ty.Optional[float] = None,
-        fade_bias: ty.Optional[float] = None,
+        threshold: float | None = None,
+        fade_bias: float | None = None,
         add_last_scene: bool = None,
-        min_scene_len: ty.Optional[str] = None,
-    ) -> ty.Dict[str, ty.Any]:
+        min_scene_len: str | None = None,
+    ) -> dict[str, ty.Any]:
         """Handle detect-threshold command options and return args to construct one with."""
 
         if self.drop_short_scenes:
@@ -419,10 +421,10 @@ class CliContext:
 
     def get_detect_hist_params(
         self,
-        threshold: ty.Optional[float] = None,
-        bins: ty.Optional[int] = None,
-        min_scene_len: ty.Optional[str] = None,
-    ) -> ty.Dict[str, ty.Any]:
+        threshold: float | None = None,
+        bins: int | None = None,
+        min_scene_len: str | None = None,
+    ) -> dict[str, ty.Any]:
         """Handle detect-hist command options and return args to construct one with."""
 
         if self.drop_short_scenes:
@@ -442,11 +444,11 @@ class CliContext:
 
     def get_detect_hash_params(
         self,
-        threshold: ty.Optional[float] = None,
-        size: ty.Optional[int] = None,
-        lowpass: ty.Optional[int] = None,
-        min_scene_len: ty.Optional[str] = None,
-    ) -> ty.Dict[str, ty.Any]:
+        threshold: float | None = None,
+        size: int | None = None,
+        lowpass: int | None = None,
+        min_scene_len: str | None = None,
+    ) -> dict[str, ty.Any]:
         """Handle detect-hash command options and return args to construct one with."""
 
         if self.drop_short_scenes:
@@ -471,9 +473,9 @@ class CliContext:
 
     def _initialize_logging(
         self,
-        quiet: ty.Optional[bool] = None,
-        verbosity: ty.Optional[str] = None,
-        logfile: ty.Optional[ty.AnyStr] = None,
+        quiet: bool | None = None,
+        verbosity: str | None = None,
+        logfile: ty.AnyStr | None = None,
     ):
         """Setup logging based on CLI args and user configuration settings."""
         if quiet is not None:
@@ -505,8 +507,8 @@ class CliContext:
     def _open_video_stream(
         self,
         input_path: ty.AnyStr,
-        framerate: ty.Optional[float],
-        backend: ty.Optional[str],
+        framerate: float | None,
+        backend: str | None,
     ):
         if "%" in input_path and backend != "opencv":
             raise click.BadParameter(
@@ -519,7 +521,7 @@ class CliContext:
             backend = self.config.get_value("global", "backend", backend)
             if backend not in AVAILABLE_BACKENDS:
                 raise click.BadParameter(
-                    "Specified backend %s is not available on this system!" % backend,
+                    f"Specified backend {backend} is not available on this system!",
                     param_hint="-b/--backend",
                 )
 
@@ -566,13 +568,14 @@ class CliContext:
             if __debug__:
                 raise
             raise click.BadParameter(
-                "Failed to open input video%s: %s"
-                % (" using %s backend" % backend if backend else "", str(ex)),
+                "Failed to open input video{}: {}".format(
+                    f" using {backend} backend" if backend else "", str(ex)
+                ),
                 param_hint="-i/--input",
             ) from ex
         except OSError as ex:
             if __debug__:
                 raise
             raise click.BadParameter(
-                "Input error:\n\n\t%s\n" % str(ex), param_hint="-i/--input"
+                f"Input error:\n\n\t{str(ex)}\n", param_hint="-i/--input"
             ) from None

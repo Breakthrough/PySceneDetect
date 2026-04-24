@@ -98,16 +98,16 @@ class ContentDetector(SceneDetector):
         """Frame saturation map [2D 8-bit]."""
         lum: numpy.ndarray
         """Frame luma/brightness map [2D 8-bit]."""
-        edges: ty.Optional[numpy.ndarray]
+        edges: numpy.ndarray | None
         """Frame edge map [2D 8-bit, edges are 255, non edges 0]. Affected by `kernel_size`."""
 
     def __init__(
         self,
         threshold: float = 27.0,
-        min_scene_len: ty.Union[int, float, str] = 15,
+        min_scene_len: int | float | str = 15,
         weights: "ContentDetector.Components" = DEFAULT_COMPONENT_WEIGHTS,
         luma_only: bool = False,
-        kernel_size: ty.Optional[int] = None,
+        kernel_size: int | None = None,
         filter_mode: FlashFilter.Mode = FlashFilter.Mode.MERGE,
     ):
         """
@@ -127,17 +127,17 @@ class ContentDetector(SceneDetector):
         """
         super().__init__()
         self._threshold: float = threshold
-        self._last_above_threshold: ty.Optional[int] = None
-        self._last_frame: ty.Optional[ContentDetector._FrameData] = None
+        self._last_above_threshold: int | None = None
+        self._last_frame: ContentDetector._FrameData | None = None
         self._weights: ContentDetector.Components = weights
         if luma_only:
             self._weights = ContentDetector.LUMA_ONLY_WEIGHTS
-        self._kernel: ty.Optional[numpy.ndarray] = None
+        self._kernel: numpy.ndarray | None = None
         if kernel_size is not None:
             if kernel_size < 3 or kernel_size % 2 == 0:
                 raise ValueError("kernel_size must be odd integer >= 3")
             self._kernel = numpy.ones((kernel_size, kernel_size), numpy.uint8)
-        self._frame_score: ty.Optional[float] = None
+        self._frame_score: float | None = None
         # TODO(https://scenedetect.com/issue/168): Figure out a better long term plan for handling
         # `min_scene_len` which should be specified in seconds, not frames.
         self._flash_filter = FlashFilter(mode=filter_mode, length=min_scene_len)
@@ -190,7 +190,7 @@ class ContentDetector(SceneDetector):
 
     def process_frame(
         self, timecode: FrameTimecode, frame_img: numpy.ndarray
-    ) -> ty.List[FrameTimecode]:
+    ) -> list[FrameTimecode]:
         """Process the next frame. `frame_num` is assumed to be sequential.
 
         Args:

@@ -89,7 +89,7 @@ class FakeCallback:
     """Fake callback used for testing. Tracks the frame numbers the callback was invoked with."""
 
     def __init__(self):
-        self.scene_list: ty.List[int] = []
+        self.scene_list: list[int] = []
 
     def get_callback_lambda(self):
         """For testing using a lambda.."""

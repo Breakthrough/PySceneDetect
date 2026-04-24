@@ -76,7 +76,7 @@ except ModuleNotFoundError:
 
 
 # TODO: Move this into scene_manager.
-def get_cv2_imwrite_params() -> ty.Dict[str, ty.Union[int, None]]:
+def get_cv2_imwrite_params() -> dict[str, int | None]:
     """Get OpenCV imwrite Params: Returns a dict of supported image formats and
     their associated quality/compression parameter index, or None if that format
     is not supported.
@@ -88,7 +88,7 @@ def get_cv2_imwrite_params() -> ty.Dict[str, ty.Union[int, None]]:
         current system library (e.g. {'jpg': None}).
     """
 
-    def _get_cv2_param(param_name: str) -> ty.Union[int, None]:
+    def _get_cv2_param(param_name: str) -> int | None:
         if param_name.startswith("CV_"):
             param_name = param_name[3:]
         try:
@@ -124,7 +124,7 @@ def get_file_name(file_path: ty.AnyStr, include_extension=True) -> ty.AnyStr:
 
 
 def get_and_create_path(
-    file_path: ty.AnyStr, output_directory: ty.Optional[ty.AnyStr] = None
+    file_path: ty.AnyStr, output_directory: ty.AnyStr | None = None
 ) -> ty.AnyStr:
     """Get & Create Path: Gets and returns the full/absolute path to file_path
     in the specified output_directory if set, creating any required directories
@@ -159,7 +159,7 @@ def get_and_create_path(
 
 
 def init_logger(
-    log_level: int = logging.INFO, show_stdout: bool = False, log_file: ty.Optional[str] = None
+    log_level: int = logging.INFO, show_stdout: bool = False, log_file: str | None = None
 ):
     """Initializes logging for PySceneDetect. The logger instance used is named 'pyscenedetect'.
     By default the logger has no handlers to suppress output. All existing log handlers are replaced
@@ -204,7 +204,7 @@ class CommandTooLong(Exception):
     """Raised if the length of a command line argument exceeds the limit allowed on Windows."""
 
 
-def invoke_command(args: ty.List[str]) -> int:
+def invoke_command(args: list[str]) -> int:
     """Same as calling Python's subprocess.call() method, but explicitly
     raises a different exception when the command length is too long.
 
@@ -233,7 +233,7 @@ def invoke_command(args: ty.List[str]) -> int:
         raise
 
 
-def get_ffmpeg_path() -> ty.Optional[str]:
+def get_ffmpeg_path() -> str | None:
     """Get path to ffmpeg if available on the current system. First looks at PATH, then checks if
     one is available from the `imageio_ffmpeg` package. Returns None if ffmpeg couldn't be found.
     """
@@ -263,7 +263,7 @@ def get_ffmpeg_path() -> ty.Optional[str]:
     return None
 
 
-def get_ffmpeg_version() -> ty.Optional[str]:
+def get_ffmpeg_version() -> str | None:
     """Get ffmpeg version identifier, or None if ffmpeg is not found. Uses `get_ffmpeg_path()`."""
     ffmpeg_path = get_ffmpeg_path()
     if ffmpeg_path is None:
@@ -277,7 +277,7 @@ def get_ffmpeg_version() -> ty.Optional[str]:
     return output.splitlines()[0]
 
 
-def get_mkvmerge_version() -> ty.Optional[str]:
+def get_mkvmerge_version() -> str | None:
     """Get mkvmerge version identifier, or None if mkvmerge is not found in PATH."""
     tool_name = "mkvmerge"
     try:
@@ -309,8 +309,8 @@ def get_system_version_info() -> str:
     out_lines += [
         output_template.format(name, version)
         for name, version in (
-            ("OS", "%s" % platform.platform()),
-            ("Python", "%s %s" % (platform.python_implementation(), platform.python_version())),
+            ("OS", f"{platform.platform()}"),
+            ("Python", f"{platform.python_implementation()} {platform.python_version()}"),
             ("Architecture", " + ".join(platform.architecture())),
         )
     ]

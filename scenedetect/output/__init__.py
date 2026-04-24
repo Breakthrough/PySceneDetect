@@ -57,7 +57,7 @@ def write_scene_list(
     output_csv_file: ty.TextIO,
     scene_list: SceneList,
     include_cut_list: bool = True,
-    cut_list: ty.Optional[CutList] = None,
+    cut_list: CutList | None = None,
     col_separator: str = ",",
     row_separator: str = "\n",
 ):
@@ -103,16 +103,16 @@ def write_scene_list(
         duration = end - start
         csv_writer.writerow(
             [
-                "%d" % (i + 1),
-                "%d" % (start.frame_num + 1),
+                f"{i + 1:d}",
+                f"{start.frame_num + 1:d}",
                 start.get_timecode(),
-                "%.3f" % start.seconds,
-                "%d" % end.frame_num,
+                f"{start.seconds:.3f}",
+                f"{end.frame_num:d}",
                 end.get_timecode(),
-                "%.3f" % end.seconds,
-                "%d" % duration.frame_num,
+                f"{end.seconds:.3f}",
+                f"{duration.frame_num:d}",
                 duration.get_timecode(),
-                "%.3f" % duration.seconds,
+                f"{duration.seconds:.3f}",
             ]
         )
 
@@ -120,12 +120,12 @@ def write_scene_list(
 def write_scene_list_html(
     output_html_filename: str,
     scene_list: SceneList,
-    cut_list: ty.Optional[CutList] = None,
+    cut_list: CutList | None = None,
     css: str = None,
     css_class: str = "mytable",
-    image_filenames: ty.Optional[ty.Dict[int, ty.List[str]]] = None,
-    image_width: ty.Optional[int] = None,
-    image_height: ty.Optional[int] = None,
+    image_filenames: dict[int, list[str]] | None = None,
+    image_width: int | None = None,
+    image_height: int | None = None,
 ):
     """Writes the given list of scenes to an output file handle in html format.
 
@@ -209,16 +209,16 @@ def write_scene_list_html(
 
         row = SimpleTableRow(
             [
-                "%d" % (i + 1),
-                "%d" % (start.frame_num + 1),
+                f"{i + 1:d}",
+                f"{start.frame_num + 1:d}",
                 start.get_timecode(),
-                "%.3f" % start.seconds,
-                "%d" % end.frame_num,
+                f"{start.seconds:.3f}",
+                f"{end.frame_num:d}",
                 end.get_timecode(),
-                "%.3f" % end.seconds,
-                "%d" % duration.frame_num,
+                f"{end.seconds:.3f}",
+                f"{duration.frame_num:d}",
                 duration.get_timecode(),
-                "%.3f" % duration.seconds,
+                f"{duration.seconds:.3f}",
             ]
         )
 
@@ -252,7 +252,7 @@ def _edl_timecode(timecode: FrameTimecode) -> str:
 
 
 def write_scene_list_edl(
-    output_path: ty.Union[str, Path],
+    output_path: str | Path,
     scene_list: SceneList,
     title: str = "PySceneDetect",
     reel: str = "AX",
@@ -298,12 +298,12 @@ def _frame_timecode_seconds(tc: FrameTimecode) -> Fraction:
 
 
 def write_scene_list_fcpx(
-    output_path: ty.Union[str, Path],
+    output_path: str | Path,
     scene_list: SceneList,
-    video_path: ty.Union[str, Path],
+    video_path: str | Path,
     frame_rate: Fraction,
-    frame_size: ty.Tuple[int, int],
-    video_name: ty.Optional[str] = None,
+    frame_size: tuple[int, int],
+    video_name: str | None = None,
 ):
     """Writes the given list of scenes to `output_path` in Final Cut Pro X XML format (FCPXML 1.9).
 
@@ -397,13 +397,13 @@ def write_scene_list_fcpx(
 
 
 def write_scene_list_fcp7(
-    output_path: ty.Union[str, Path],
+    output_path: str | Path,
     scene_list: SceneList,
-    video_path: ty.Union[str, Path],
+    video_path: str | Path,
     frame_rate: Fraction,
-    frame_size: ty.Tuple[int, int],
-    video_name: ty.Optional[str] = None,
-    source_duration: ty.Optional[FrameTimecode] = None,
+    frame_size: tuple[int, int],
+    video_name: str | None = None,
+    source_duration: FrameTimecode | None = None,
 ):
     """Writes the given list of scenes to `output_path` in Final Cut Pro 7 XML (xmeml) format.
 
@@ -517,11 +517,11 @@ def write_scene_list_fcp7(
 # fractional timecodes, we should export the framerate as a rational number instead.
 # https://github.com/AcademySoftwareFoundation/OpenTimelineIO/issues/190
 def write_scene_list_otio(
-    output_path: ty.Union[str, Path],
+    output_path: str | Path,
     scene_list: SceneList,
-    video_path: ty.Union[str, Path],
+    video_path: str | Path,
     frame_rate: Fraction,
-    name: ty.Optional[str] = None,
+    name: str | None = None,
     audio: bool = True,
 ):
     """Writes the given list of scenes to `output_path` as an OTIO Timeline.1 JSON document.

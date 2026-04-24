@@ -20,7 +20,7 @@ from scenedetect._cli.context import CliContext
 from scenedetect._cli.controller import run_scenedetect
 
 
-def invoke_cli(args: ty.List[str], catch_exceptions: bool = False) -> ty.Tuple[int, str]:
+def invoke_cli(args: list[str], catch_exceptions: bool = False) -> tuple[int, str]:
     """Invoke the scenedetect CLI in-process using Click's CliRunner.
 
     Replicates the two-step execution of ``__main__.py``:

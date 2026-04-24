@@ -94,7 +94,7 @@ def _postprocess_scene_list(context: CliContext, scene_list: SceneList) -> Scene
     return scene_list
 
 
-def _detect(context: CliContext) -> ty.Optional[ty.Tuple[SceneList, CutList]]:
+def _detect(context: CliContext) -> tuple[SceneList, CutList] | None:
     perf_start_time = time.time()
 
     context.ensure_detector()
@@ -162,7 +162,7 @@ def _save_stats(context: CliContext) -> None:
         logger.debug("No frame metrics updated, skipping update of the stats file.")
 
 
-def _load_scenes(context: CliContext) -> ty.Tuple[SceneList, CutList]:
+def _load_scenes(context: CliContext) -> tuple[SceneList, CutList]:
     assert context.load_scenes_input
     assert os.path.exists(context.load_scenes_input)
 

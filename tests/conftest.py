@@ -45,14 +45,13 @@ def check_exists(path: ty.AnyStr) -> ty.AnyStr:
     """
     if not os.path.exists(path):
         raise FileNotFoundError(
-            """
-Test video file (%s) must be present to run test case. This file can be obtained by running the following commands from the root of the repository:
+            f"""
+Test video file ({path}) must be present to run test case. This file can be obtained by running the following commands from the root of the repository:
 
 git fetch --depth=1 https://github.com/Breakthrough/PySceneDetect.git refs/heads/resources:refs/remotes/origin/resources
 git checkout refs/remotes/origin/resources -- tests/resources/
 git reset
 """
-            % path
         )
     return path
 

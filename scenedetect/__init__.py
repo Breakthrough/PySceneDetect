@@ -81,7 +81,7 @@ logger = getLogger("pyscenedetect")
 
 def open_video(
     path: str,
-    framerate: ty.Optional[float] = None,
+    framerate: float | None = None,
     backend: str = "opencv",
     **kwargs,
 ) -> VideoStream:
@@ -135,10 +135,10 @@ def open_video(
 def detect(
     video_path: str,
     detector: SceneDetector,
-    stats_file_path: ty.Optional[str] = None,
+    stats_file_path: str | None = None,
     show_progress: bool = False,
-    start_time: ty.Optional[ty.Union[str, float, int]] = None,
-    end_time: ty.Optional[ty.Union[str, float, int]] = None,
+    start_time: str | float | int | None = None,
+    end_time: str | float | int | None = None,
     start_in_scene: bool = False,
 ) -> SceneList:
     """Perform scene detection on a given video `path` using the specified `detector`.

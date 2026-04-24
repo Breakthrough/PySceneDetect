@@ -103,12 +103,10 @@ class StatsManager:
         """
         # Frame metrics is a dict of frame (int): metric_dict (Dict[str, float])
         # of each frame metric key and the value it represents (usually float).
-        self._frame_metrics: ty.Dict[FrameTimecode, ty.Dict[str, float]] = dict()
-        self._metric_keys: ty.Set[str] = set()
+        self._frame_metrics: dict[FrameTimecode, dict[str, float]] = dict()
+        self._metric_keys: set[str] = set()
         self._metrics_updated: bool = False  # Flag indicating if metrics require saving.
-        self._base_timecode: ty.Optional[FrameTimecode] = (
-            base_timecode  # Used for timing calculations.
-        )
+        self._base_timecode: FrameTimecode | None = base_timecode  # Used for timing calculations.
 
     @property
     def metric_keys(self) -> ty.Iterable[str]:
@@ -120,9 +118,7 @@ class StatsManager:
 
     # TODO(https://scenedetect.com/issues/507): We should support the dictionary protocol instead
     # of using this bespoke interface. It would be useful for Pandas compatibility as well.
-    def get_metrics(
-        self, timecode: FrameTimecode, metric_keys: ty.Iterable[str]
-    ) -> ty.List[ty.Any]:
+    def get_metrics(self, timecode: FrameTimecode, metric_keys: ty.Iterable[str]) -> list[ty.Any]:
         """Return the requested statistics/metrics for a given timecode.
 
         Returns:
@@ -131,7 +127,7 @@ class StatsManager:
         """
         return [self._get_metric(timecode, metric_key) for metric_key in metric_keys]
 
-    def set_metrics(self, timecode: FrameTimecode, metric_kv_dict: ty.Dict[str, ty.Any]) -> None:
+    def set_metrics(self, timecode: FrameTimecode, metric_kv_dict: dict[str, ty.Any]) -> None:
         """Set Metrics: Sets the provided statistics/metrics for a given frame.
 
         Arguments:
@@ -160,7 +156,7 @@ class StatsManager:
 
     def save_to_csv(
         self,
-        csv_file: ty.Union[str, bytes, Path, ty.TextIO],
+        csv_file: str | bytes | Path | ty.TextIO,
         force_save=True,
     ) -> None:
         """Save To CSV: Saves all frame metrics stored in the StatsManager to a CSV file.
@@ -195,7 +191,7 @@ class StatsManager:
             )
 
     @staticmethod
-    def valid_header(row: ty.List[str]) -> bool:
+    def valid_header(row: list[str]) -> bool:
         """Check that the given CSV row is a valid header for a statsfile.
 
         Arguments:
@@ -212,7 +208,7 @@ class StatsManager:
 
     # TODO(v1.0): Create a replacement for a calculation cache that functions like load_from_csv
     # did, but is better integrated with detectors for cached calculations instead of statistics.
-    def load_from_csv(self, csv_file: ty.Union[str, bytes, ty.TextIO]) -> ty.Optional[int]:
+    def load_from_csv(self, csv_file: str | bytes | ty.TextIO) -> int | None:
         """[DEPRECATED] DO NOT USE
 
         Load all metrics stored in a CSV file into the StatsManager instance. Will be removed in a
@@ -281,7 +277,7 @@ class StatsManager:
                         self._set_metric(frame_number, loaded_metrics[i], float(metric))
                     except ValueError:
                         raise StatsFileCorrupt(
-                            "Corrupted value in stats file: %s" % metric
+                            f"Corrupted value in stats file: {metric}"
                         ) from ValueError
             num_frames += 1
         self._metric_keys = self._metric_keys.union(set(loaded_metrics))
@@ -291,7 +287,7 @@ class StatsManager:
 
     # TODO: Get rid of these functions and simplify the implementation of this class.
 
-    def _get_metric(self, timecode: FrameTimecode, metric_key: str) -> ty.Optional[ty.Any]:
+    def _get_metric(self, timecode: FrameTimecode, metric_key: str) -> ty.Any | None:
         if self._metric_exists(timecode, metric_key):
             return self._frame_metrics[timecode][metric_key]
         return None

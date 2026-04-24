@@ -67,8 +67,8 @@ DEFAULT_FFMPEG_ARGS = (
 
 def invoke_scenedetect(
     args: str = "",
-    output_dir: ty.Optional[str] = None,
-    config_file: ty.Optional[str] = DEFAULT_CONFIG_FILE,
+    output_dir: str | None = None,
+    config_file: str | None = DEFAULT_CONFIG_FILE,
     **kwargs,
 ):
     """Invokes the scenedetect CLI with the specified arguments and returns the exit code.
@@ -98,9 +98,9 @@ def invoke_scenedetect(
     value_dict.update(**kwargs)
     command = SCENEDETECT_CMD
     if output_dir:
-        command += " -o %s" % output_dir
+        command += f" -o {output_dir}"
     if config_file:
-        command += " -c %s" % config_file
+        command += f" -c {config_file}"
     command += " " + args.format(**value_dict)
     return subprocess.call(command.strip().split(" "))
 
@@ -512,8 +512,9 @@ def test_cli_save_images_path_handling(tmp_path: Path):
     """Test `save-images` ability to handle UTF-8 paths."""
     assert (
         invoke_scenedetect(
-            "-i {VIDEO} -s {STATS} time {TIME} {DETECTOR} save-images -f %s"
-            % ("電腦檔案-$SCENE_NUMBER-$IMAGE_NUMBER"),
+            "-i {{VIDEO}} -s {{STATS}} time {{TIME}} {{DETECTOR}} save-images -f {}".format(
+                "電腦檔案-$SCENE_NUMBER-$IMAGE_NUMBER"
+            ),
             output_dir=tmp_path,
         )
         == 0

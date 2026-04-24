@@ -52,9 +52,9 @@ class Detector:
 class Predictor:
     def __init__(
         self,
-        model_path: ty.Union[str, Path],
+        model_path: str | Path,
         flash_filter: FlashFilter,
-        onnx_providers: ty.Union[ty.List[str], None],
+        onnx_providers: list[str] | None,
         threshold,
     ):
         import onnxruntime as ort
@@ -132,10 +132,10 @@ class Predictor:
 class TransnetV2Detector(SceneDetector):
     def __init__(
         self,
-        model_path: ty.Union[str, Path] = "tests/resources/transnetv2.onnx",
-        onnx_providers: ty.Union[ty.List[str], None] = None,
+        model_path: str | Path = "tests/resources/transnetv2.onnx",
+        onnx_providers: list[str] | None = None,
         threshold: float = 0.5,
-        min_scene_len: ty.Union[int, float, str] = 15,
+        min_scene_len: int | float | str = 15,
         filter_mode: FlashFilter.Mode = FlashFilter.Mode.MERGE,
     ):
         super().__init__()
@@ -163,9 +163,7 @@ class TransnetV2Detector(SceneDetector):
         t = float(pts * self.time_base)
         return FrameTimecode(t, fps=self._fps)
 
-    def process_frame(
-        self, timecode: FrameTimecode, frame_img: np.ndarray
-    ) -> ty.List[FrameTimecode]:
+    def process_frame(self, timecode: FrameTimecode, frame_img: np.ndarray) -> list[FrameTimecode]:
         """Process the next frame."""
 
         self.time_base = timecode.time_base
@@ -189,7 +187,7 @@ class TransnetV2Detector(SceneDetector):
         else:
             return []
 
-    def post_process(self, timecode: FrameTimecode) -> ty.List[FrameTimecode]:
+    def post_process(self, timecode: FrameTimecode) -> list[FrameTimecode]:
         """Writes a final scene cut if the last detected fade was a fade-out."""
 
         cuts = []

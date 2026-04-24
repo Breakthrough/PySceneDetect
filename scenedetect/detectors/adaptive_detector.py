@@ -38,12 +38,12 @@ class AdaptiveDetector(ContentDetector):
     def __init__(
         self,
         adaptive_threshold: float = 3.0,
-        min_scene_len: ty.Union[int, float, str] = 15,
+        min_scene_len: int | float | str = 15,
         window_width: int = 2,
         min_content_val: float = 15.0,
         weights: ContentDetector.Components = ContentDetector.DEFAULT_COMPONENT_WEIGHTS,
         luma_only: bool = False,
-        kernel_size: ty.Optional[int] = None,
+        kernel_size: int | None = None,
     ):
         """
         Arguments:
@@ -86,21 +86,19 @@ class AdaptiveDetector(ContentDetector):
         self._adaptive_ratio_key = AdaptiveDetector.ADAPTIVE_RATIO_KEY_TEMPLATE.format(
             window_width=window_width, luma_only="" if not luma_only else "_lum"
         )
-        self._buffer: ty.List[ty.Tuple[FrameTimecode, float]] = []
+        self._buffer: list[tuple[FrameTimecode, float]] = []
         # NOTE: The name of last cut is different from `self._last_scene_cut` from our base class,
         # and serves a different purpose!
-        self._last_cut: ty.Optional[FrameTimecode] = None
+        self._last_cut: FrameTimecode | None = None
 
     @property
     def event_buffer_length(self) -> int:
         return self.window_width
 
-    def get_metrics(self) -> ty.List[str]:
+    def get_metrics(self) -> list[str]:
         return super().get_metrics() + [self._adaptive_ratio_key]
 
-    def process_frame(
-        self, timecode: FrameTimecode, frame_img: np.ndarray
-    ) -> ty.List[FrameTimecode]:
+    def process_frame(self, timecode: FrameTimecode, frame_img: np.ndarray) -> list[FrameTimecode]:
         super().process_frame(timecode=timecode, frame_img=frame_img)
 
         # Initialize last scene cut point at the beginning of the frames of interest.

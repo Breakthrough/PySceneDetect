@@ -20,7 +20,7 @@ def test_api_detect(test_video_file: str):
 
     scene_list = detect(test_video_file, ContentDetector())
     for i, scene in enumerate(scene_list):
-        print("Scene %d: %s - %s" % (i + 1, scene[0].get_timecode(), scene[1].get_timecode()))
+        print(f"Scene {i + 1}: {scene[0].get_timecode()} - {scene[1].get_timecode()}")
 
 
 def test_api_detect_start_end_time(test_video_file: str):
@@ -31,7 +31,7 @@ def test_api_detect_start_end_time(test_video_file: str):
     # See test_api_timecode_types() for examples of each format.
     scene_list = detect(test_video_file, ContentDetector(), start_time=10.5, end_time=15.9)
     for i, scene in enumerate(scene_list):
-        print("Scene %d: %s - %s" % (i + 1, scene[0].get_timecode(), scene[1].get_timecode()))
+        print(f"Scene {i + 1}: {scene[0].get_timecode()} - {scene[1].get_timecode()}")
 
 
 def test_api_detect_stats(test_video_file: str):
@@ -51,7 +51,7 @@ def test_api_scene_manager(test_video_file: str):
     scene_manager.detect_scenes(video=video)
     scene_list = scene_manager.get_scene_list()
     for i, scene in enumerate(scene_list):
-        print("Scene %d: %s - %s" % (i + 1, scene[0].get_timecode(), scene[1].get_timecode()))
+        print(f"Scene {i + 1}: {scene[0].get_timecode()} - {scene[1].get_timecode()}")
 
 
 def test_api_scene_manager_start_end_time(test_video_file: str):
@@ -69,7 +69,7 @@ def test_api_scene_manager_start_end_time(test_video_file: str):
     scene_manager.detect_scenes(video=video, end_time=end_time)
     scene_list = scene_manager.get_scene_list()
     for i, scene in enumerate(scene_list):
-        print("Scene %d: %s - %s" % (i + 1, scene[0].get_timecode(), scene[1].get_timecode()))
+        print(f"Scene {i + 1}: {scene[0].get_timecode()} - {scene[1].get_timecode()}")
 
 
 def test_api_timecode_types():
@@ -100,7 +100,7 @@ def test_api_stats_manager(test_video_file: str):
     scene_manager.add_detector(ContentDetector())
     scene_manager.detect_scenes(video=video)
     # Save per-frame statistics to disk.
-    filename = "%s.stats.csv" % test_video_file
+    filename = f"{test_video_file}.stats.csv"
     scene_manager.stats_manager.save_to_csv(csv_file=filename)
 
 
@@ -112,7 +112,7 @@ def test_api_scene_manager_callback(test_video_file: str):
 
     # Callback to invoke on the first frame of every new scene detection.
     def on_new_scene(frame_img: numpy.ndarray, frame_num: int):
-        print("New scene found at frame %d." % frame_num)
+        print(f"New scene found at frame {frame_num}.")
 
     video = open_video(test_video_file)
     scene_manager = SceneManager()
@@ -131,7 +131,7 @@ def test_api_device_callback(test_video_file: str):
 
     # Callback to invoke on the first frame of every new scene detection.
     def on_new_scene(frame_img: numpy.ndarray, frame_num: int):
-        print("New scene found at frame %d." % frame_num)
+        print(f"New scene found at frame {frame_num}.")
 
     # We open a file just for test purposes, but we can also use a device or pipe here.
     cap = cv2.VideoCapture(test_video_file)

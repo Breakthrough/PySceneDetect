@@ -173,8 +173,7 @@ class SimpleTableRow:
 
     def __iter__(self):
         """Iterate through row cells"""
-        for cell in self.cells:
-            yield cell
+        yield from self.cells
 
     def add_cell(self, cell):
         """Add a SimpleTableCell object to the list of cells."""
@@ -249,8 +248,7 @@ class SimpleTable:
 
     def __iter__(self):
         """Iterate through table rows"""
-        for row in self.rows:
-            yield row
+        yield from self.rows
 
     def add_row(self, row):
         """Add a SimpleTableRow object to the list of rows."""
@@ -298,8 +296,7 @@ class HTMLPage:
 
     def __iter__(self):
         """Iterate through tables"""
-        for table in self.tables:
-            yield table
+        yield from self.tables
 
     def save(self, filename):
         """Save HTML page to a file using the proper encoding"""

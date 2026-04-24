@@ -42,14 +42,14 @@ class SceneDetector(ABC):
     """
 
     def __init__(self):
-        self._stats_manager: ty.Optional[StatsManager] = None
+        self._stats_manager: StatsManager | None = None
 
     # Required Methods
 
     @abstractmethod
     def process_frame(
         self, timecode: FrameTimecode, frame_img: numpy.ndarray
-    ) -> ty.List[FrameTimecode]:
+    ) -> list[FrameTimecode]:
         """Process the next frame. `timecode` is assumed to be sequential.
 
         Args:
@@ -62,7 +62,7 @@ class SceneDetector(ABC):
 
     # Optional Methods
 
-    def post_process(self, timecode: int) -> ty.List[FrameTimecode]:
+    def post_process(self, timecode: int) -> list[FrameTimecode]:
         """Called after there are no more frames to process.
 
         Args:
@@ -82,7 +82,7 @@ class SceneDetector(ABC):
     # Frame Stats/Metrics
 
     @property
-    def stats_manager(self) -> ty.Optional[StatsManager]:
+    def stats_manager(self) -> StatsManager | None:
         """Optional :class:`StatsManager <scenedetect.stats_manager.StatsManager>` to use for
         storing frame metrics. When this detector is added to a parent
         :class:`SceneManager <scenedetect.scene_manager.SceneManager>`, then this is set to the
@@ -91,10 +91,10 @@ class SceneDetector(ABC):
         return self._stats_manager
 
     @stats_manager.setter
-    def stats_manager(self, value: ty.Optional[StatsManager]):
+    def stats_manager(self, value: StatsManager | None):
         self._stats_manager = value
 
-    def get_metrics(self) -> ty.List[str]:
+    def get_metrics(self) -> list[str]:
         """Returns a list of all metric names/keys used by this detector.
 
         Returns:
@@ -115,7 +115,7 @@ class FlashFilter:
         SUPPRESS = 1
         """Suppress consecutive cuts until the filter length has passed."""
 
-    def __init__(self, mode: Mode, length: ty.Union[int, float, str]):
+    def __init__(self, mode: Mode, length: int | float | str):
         """
         Arguments:
             mode: The mode to use when enforcing `length`.
@@ -128,7 +128,7 @@ class FlashFilter:
         # known. Temporal inputs (float/non-digit str) populate `_filter_secs`; integer inputs
         # (int/digit str) populate `_filter_length`.
         self._filter_length: int = 0
-        self._filter_secs: ty.Optional[float] = None
+        self._filter_secs: float | None = None
         if isinstance(length, float):
             self._filter_secs = length
         elif isinstance(length, str) and not length.strip().isdigit():
@@ -155,7 +155,7 @@ class FlashFilter:
             return self._filter_secs <= 0.0
         return self._filter_length <= 0
 
-    def filter(self, timecode: FrameTimecode, above_threshold: bool) -> ty.List[FrameTimecode]:
+    def filter(self, timecode: FrameTimecode, above_threshold: bool) -> list[FrameTimecode]:
         if self._is_disabled:
             return [timecode] if above_threshold else []
         if self._last_above is None:
@@ -166,7 +166,7 @@ class FlashFilter:
             return self._filter_suppress(timecode=timecode, above_threshold=above_threshold)
         raise RuntimeError("Unhandled FlashFilter mode.")
 
-    def _filter_suppress(self, timecode: FrameTimecode, above_threshold: bool) -> ty.List[int]:
+    def _filter_suppress(self, timecode: FrameTimecode, above_threshold: bool) -> list[int]:
         assert timecode.framerate >= 0
         # Compute the threshold in seconds once from the first frame's framerate. This avoids
         # using an incorrect average fps (e.g. OpenCV on VFR video) on subsequent frames.
@@ -180,7 +180,7 @@ class FlashFilter:
         self._last_above = timecode
         return [timecode]
 
-    def _filter_merge(self, timecode: FrameTimecode, above_threshold: bool) -> ty.List[int]:
+    def _filter_merge(self, timecode: FrameTimecode, above_threshold: bool) -> list[int]:
         assert timecode.framerate >= 0
         # Compute the threshold in seconds once from the first frame's framerate.
         if self._filter_secs is None:

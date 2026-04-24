@@ -51,9 +51,9 @@ class HashDetector(SceneDetector):
         threshold: float = 0.395,
         size: int = 16,
         lowpass: int = 2,
-        min_scene_len: ty.Union[int, float, str] = 15,
+        min_scene_len: int | float | str = 15,
     ):
-        super(HashDetector, self).__init__()
+        super().__init__()
         self._threshold = threshold
         self._min_scene_len = min_scene_len
         self._size = size
@@ -69,7 +69,7 @@ class HashDetector(SceneDetector):
 
     def process_frame(
         self, timecode: FrameTimecode, frame_img: numpy.ndarray
-    ) -> ty.List[FrameTimecode]:
+    ) -> list[FrameTimecode]:
         """Similar to ContentDetector, but using a perceptual hashing algorithm
         to calculate a hash for each frame and then calculate a hash difference
         frame to frame."""

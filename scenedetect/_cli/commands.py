@@ -93,7 +93,7 @@ def save_qp(
     start_frame = context.start_time.frame_num if context.start_time else 0
     shift_start = not disable_shift
     offset = start_frame if shift_start else 0
-    with open(qp_path, "wt") as qp_file:
+    with open(qp_path, "w") as qp_file:
         qp_file.write(f"{0 if shift_start else start_frame} I -1\n")
         # Place another I frame at each detected cut.
         qp_file.writelines(f"{cut.frame_num - offset} I -1\n" for cut in cuts)
@@ -151,14 +151,7 @@ def list_scenes(
 -----------------------------------------------------------------------""",
             "\n".join(
                 [
-                    " |  %5d  | %11d | %s | %11d | %s |"
-                    % (
-                        i + 1,
-                        start_time.frame_num + 1,
-                        start_time.get_timecode(),
-                        end_time.frame_num,
-                        end_time.get_timecode(),
-                    )
+                    f" |  {i + 1:5d}  | {start_time.frame_num + 1:11d} | {start_time.get_timecode()} | {end_time.frame_num:11d} | {end_time.get_timecode()} |"
                     for i, (start_time, end_time) in enumerate(scenes)
                 ]
             ),
@@ -180,7 +173,7 @@ def save_images(
     image_extension: str,
     encoder_param: int,
     filename: str,
-    output: ty.Optional[str],
+    output: str | None,
     show_progress: bool,
     scale: int,
     height: int,

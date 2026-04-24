@@ -35,10 +35,10 @@ class VideoStreamAv(VideoStream):
     # calculates the end time.
     def __init__(
         self,
-        path_or_io: ty.Union[ty.AnyStr, ty.BinaryIO],
-        framerate: ty.Optional[ty.Union[float, Fraction]] = None,
-        name: ty.Optional[str] = None,
-        threading_mode: ty.Optional[str] = None,
+        path_or_io: ty.AnyStr | ty.BinaryIO,
+        framerate: float | Fraction | None = None,
+        name: str | None = None,
+        threading_mode: str | None = None,
         suppress_output: bool = False,
     ):
         """Open a video by path.
@@ -76,12 +76,12 @@ class VideoStreamAv(VideoStream):
 
         # Ensure specified framerate is valid if set.
         if framerate is not None and framerate < MAX_FPS_DELTA:
-            raise ValueError("Specified framerate (%f) is invalid!" % framerate)
+            raise ValueError(f"Specified framerate ({framerate:f}) is invalid!")
 
         self._name = "" if name is None else name
         self._path = ""
-        self._frame: ty.Optional[av.VideoFrame] = None
-        self._decoder: ty.Optional[ty.Generator] = None
+        self._frame: av.VideoFrame | None = None
+        self._decoder: ty.Generator | None = None
         self._decode_count: int = 0
         self._reopened = True
 
@@ -90,7 +90,7 @@ class VideoStreamAv(VideoStream):
                 threading_mode = av.codec.context.ThreadType[threading_mode.upper()]
             except KeyError as _:
                 raise ValueError(
-                    "Invalid threading mode! Must be one of: %s" % VALID_THREAD_MODES
+                    f"Invalid threading mode! Must be one of: {VALID_THREAD_MODES}"
                 ) from None
 
         if not suppress_output:
@@ -149,12 +149,12 @@ class VideoStreamAv(VideoStream):
     """Unique name used to identify this backend."""
 
     @property
-    def path(self) -> ty.Union[bytes, str]:
+    def path(self) -> bytes | str:
         """Video path."""
         return self._path
 
     @property
-    def name(self) -> ty.Union[bytes, str]:
+    def name(self) -> bytes | str:
         """Name of the video, without extension."""
         return self._name
 
@@ -164,7 +164,7 @@ class VideoStreamAv(VideoStream):
         return self._io.seekable()
 
     @property
-    def frame_size(self) -> ty.Tuple[int, int]:
+    def frame_size(self) -> tuple[int, int]:
         """Size of each video frame in pixels as a tuple of (width, height)."""
         return (self._codec_context.width, self._codec_context.height)
 
@@ -233,7 +233,7 @@ class VideoStreamAv(VideoStream):
         frame_aspect_ratio = self.frame_size[0] / self.frame_size[1]
         return display_aspect_ratio / frame_aspect_ratio
 
-    def seek(self, target: ty.Union[FrameTimecode, float, int]) -> None:
+    def seek(self, target: FrameTimecode | float | int) -> None:
         """Seek to the given timecode. If given as a frame number, represents the current seek
         pointer (e.g. if seeking to 0, the next frame decoded will be the first frame of the video).
 
@@ -282,7 +282,7 @@ class VideoStreamAv(VideoStream):
         except Exception as ex:
             raise VideoOpenFailure() from ex
 
-    def read(self, decode: bool = True) -> ty.Union[np.ndarray, bool]:
+    def read(self, decode: bool = True) -> np.ndarray | bool:
         # Reuse a persistent decoder generator so the codec's internal frame buffer (used for
         # B-frame reordering) is never flushed prematurely. Creating a new generator each call
         # caused the last buffered frame to be lost at EOF.

@@ -149,7 +149,7 @@ texinfo_documents = [
 html_theme = "alabaster"
 html_theme_options = {
     "sidebar_width": "235px",
-    "description": "Version: [%s]" % (release),
+    "description": f"Version: [{release}]",
     "show_relbar_bottom": True,
     "show_relbar_top": False,
     "github_user": "Breakthrough",

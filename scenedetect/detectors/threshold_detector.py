@@ -48,7 +48,7 @@ class ThresholdDetector(SceneDetector):
     def __init__(
         self,
         threshold: float = 12,
-        min_scene_len: ty.Union[int, float, str] = 15,
+        min_scene_len: int | float | str = 15,
         fade_bias: float = 0.0,
         add_final_scene: bool = False,
         method: Method = Method.FLOOR,
@@ -95,12 +95,12 @@ class ThresholdDetector(SceneDetector):
         self._metric_keys = [ThresholdDetector.THRESHOLD_VALUE_KEY]
         self._time_base = None
 
-    def get_metrics(self) -> ty.List[str]:
+    def get_metrics(self) -> list[str]:
         return self._metric_keys
 
     def process_frame(
         self, timecode: FrameTimecode, frame_img: numpy.ndarray
-    ) -> ty.List[FrameTimecode]:
+    ) -> list[FrameTimecode]:
         """Process the next frame.
 
         Args:
@@ -114,7 +114,7 @@ class ThresholdDetector(SceneDetector):
         if self.last_scene_cut is None:
             self.last_scene_cut = timecode
 
-        cuts: ty.List[FrameTimecode] = []
+        cuts: list[FrameTimecode] = []
 
         # The metric used here to detect scene breaks is the percent of pixels
         # less than or equal to the threshold; however, since this differs on
@@ -162,7 +162,7 @@ class ThresholdDetector(SceneDetector):
         self.processed_frame = True
         return cuts
 
-    def post_process(self, timecode: FrameTimecode) -> ty.List[FrameTimecode]:
+    def post_process(self, timecode: FrameTimecode) -> list[FrameTimecode]:
         """Writes a final scene cut if the last detected fade was a fade-out.
 
         Only writes the scene cut if add_final_scene is true, and the last fade
@@ -174,7 +174,7 @@ class ThresholdDetector(SceneDetector):
         # If the last fade detected was a fade out, we add a corresponding new
         # scene break to indicate the end of the scene.  This is only done for
         # fade-outs, as a scene cut is already added when a fade-in is found.
-        cuts: ty.List[FrameTimecode] = []
+        cuts: list[FrameTimecode] = []
         if (
             self.last_fade["type"] == "out"
             and self.add_final_scene

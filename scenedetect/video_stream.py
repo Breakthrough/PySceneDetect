@@ -106,13 +106,13 @@ class VideoStream(ABC):
 
     @property
     @abstractmethod
-    def path(self) -> ty.Union[bytes, str]:
+    def path(self) -> bytes | str:
         """Video or device path."""
         ...
 
     @property
     @abstractmethod
-    def name(self) -> ty.Union[bytes, str]:
+    def name(self) -> bytes | str:
         """Name of the video, without extension, or device."""
         ...
 
@@ -130,13 +130,13 @@ class VideoStream(ABC):
 
     @property
     @abstractmethod
-    def duration(self) -> ty.Optional[FrameTimecode]:
+    def duration(self) -> FrameTimecode | None:
         """Duration of the stream as a FrameTimecode, or None if non terminating."""
         ...
 
     @property
     @abstractmethod
-    def frame_size(self) -> ty.Tuple[int, int]:
+    def frame_size(self) -> tuple[int, int]:
         """Size of each video frame in pixels as a tuple of (width, height)."""
         ...
 
@@ -175,7 +175,7 @@ class VideoStream(ABC):
     #
 
     @abstractmethod
-    def read(self, decode: bool = True) -> ty.Union[np.ndarray, bool]:
+    def read(self, decode: bool = True) -> np.ndarray | bool:
         """Read and decode the next frame as a np.ndarray. Returns False when video ends.
 
         Arguments:
@@ -195,7 +195,7 @@ class VideoStream(ABC):
         ...
 
     @abstractmethod
-    def seek(self, target: ty.Union[FrameTimecode, float, int]) -> None:
+    def seek(self, target: FrameTimecode | float | int) -> None:
         """Seek to the given timecode. If given as a frame number, represents the current seek
         pointer (e.g. if seeking to 0, the next frame decoded will be the first frame of the video).
 

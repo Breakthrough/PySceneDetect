@@ -33,9 +33,9 @@ select = [
     "F",
     # isort
     "I",
-    # TODO - Add additional rule sets (https://docs.astral.sh/ruff/rules/):
     # pyupgrade
-    #"UP",
+    "UP",
+    # TODO - Add additional rule sets (https://docs.astral.sh/ruff/rules/):
     # flake8-simplify
     #"SIM",
 ]
@@ -47,6 +47,10 @@ ignore = [
 ]
 fixable = ["ALL"]
 unfixable = []
+
+[tool.ruff.lint.per-file-ignores]
+# Vendored third-party code: don't rewrite/modernize upstream source.
+"scenedetect/_thirdparty/*" = ["UP"]
 
 [tool.pyright]
 include = ["scenedetect", "tests"]

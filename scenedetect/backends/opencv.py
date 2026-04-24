@@ -66,9 +66,9 @@ class VideoStreamCv2(VideoStream):
     def __init__(
         self,
         path: ty.AnyStr = None,
-        framerate: ty.Optional[float] = None,
+        framerate: float | None = None,
         max_decode_attempts: int = 5,
-        path_or_device: ty.Union[bytes, str, int] = None,
+        path_or_device: bytes | str | int = None,
     ):
         """Open a video file, image sequence, or network stream.
 
@@ -100,7 +100,7 @@ class VideoStreamCv2(VideoStream):
         if path is None:
             raise ValueError("Path must be specified!")
         if framerate is not None and framerate < MAX_FPS_DELTA:
-            raise ValueError("Specified framerate (%f) is invalid!" % framerate)
+            raise ValueError(f"Specified framerate ({framerate:f}) is invalid!")
         if max_decode_attempts < 0:
             raise ValueError("Maximum decode attempts must be >= 0!")
 
@@ -108,10 +108,10 @@ class VideoStreamCv2(VideoStream):
         self._is_device = isinstance(self._path_or_device, int)
 
         # Initialized in _open_capture:
-        self._cap: ty.Optional[cv2.VideoCapture] = (
+        self._cap: cv2.VideoCapture | None = (
             None  # Reference to underlying cv2.VideoCapture object.
         )
-        self._frame_rate: ty.Optional[Fraction] = None
+        self._frame_rate: Fraction | None = None
 
         # VideoCapture state
         self._has_grabbed = False
@@ -149,10 +149,10 @@ class VideoStreamCv2(VideoStream):
         return self._frame_rate
 
     @property
-    def path(self) -> ty.Union[bytes, str]:
+    def path(self) -> bytes | str:
         if self._is_device:
             assert isinstance(self._path_or_device, (int))
-            return "Device %d" % self._path_or_device
+            return f"Device {self._path_or_device}"
         assert isinstance(self._path_or_device, (bytes, str))
         return self._path_or_device
 
@@ -175,7 +175,7 @@ class VideoStreamCv2(VideoStream):
         return not self._is_device
 
     @property
-    def frame_size(self) -> ty.Tuple[int, int]:
+    def frame_size(self) -> tuple[int, int]:
         """Size of each video frame in pixels as a tuple of (width, height)."""
         return (
             math.trunc(self._cap.get(cv2.CAP_PROP_FRAME_WIDTH)),
@@ -183,7 +183,7 @@ class VideoStreamCv2(VideoStream):
         )
 
     @property
-    def duration(self) -> ty.Optional[FrameTimecode]:
+    def duration(self) -> FrameTimecode | None:
         """Duration of the stream as a FrameTimecode, or None if non terminating."""
         if self._is_device:
             return None
@@ -224,7 +224,7 @@ class VideoStreamCv2(VideoStream):
     def frame_number(self) -> int:
         return math.trunc(self._cap.get(cv2.CAP_PROP_POS_FRAMES))
 
-    def seek(self, target: ty.Union[FrameTimecode, float, int]):
+    def seek(self, target: FrameTimecode | float | int):
         if self._is_device:
             raise SeekError("Cannot seek if input is a device!")
         if target < 0:
@@ -262,7 +262,7 @@ class VideoStreamCv2(VideoStream):
         self._cap.release()
         self._open_capture(self._frame_rate)
 
-    def read(self, decode: bool = True) -> ty.Union[np.ndarray, bool]:
+    def read(self, decode: bool = True) -> np.ndarray | bool:
         if not self._cap.isOpened():
             return False
         has_grabbed = self._cap.grab()
@@ -293,7 +293,7 @@ class VideoStreamCv2(VideoStream):
     # Private Methods
     #
 
-    def _open_capture(self, framerate: ty.Optional[float] = None):
+    def _open_capture(self, framerate: float | None = None):
         """Opens capture referenced by this object and resets internal state."""
         if self._is_device and self._path_or_device < 0:
             raise ValueError("Invalid/negative device ID specified.")
@@ -346,7 +346,7 @@ class VideoCaptureAdapter(VideoStream):
     def __init__(
         self,
         cap: cv2.VideoCapture,
-        framerate: ty.Optional[float] = None,
+        framerate: float | None = None,
         max_read_attempts: int = 5,
     ):
         """Create from an existing OpenCV VideoCapture object. Used for webcams, live streams,
@@ -368,7 +368,7 @@ class VideoCaptureAdapter(VideoStream):
         super().__init__()
 
         if framerate is not None and framerate < MAX_FPS_DELTA:
-            raise ValueError("Specified framerate (%f) is invalid!" % framerate)
+            raise ValueError(f"Specified framerate ({framerate:f}) is invalid!")
         if max_read_attempts < 0:
             raise ValueError("Maximum decode attempts must be >= 0!")
         if not cap.isOpened():
@@ -430,7 +430,7 @@ class VideoCaptureAdapter(VideoStream):
         return False
 
     @property
-    def frame_size(self) -> ty.Tuple[int, int]:
+    def frame_size(self) -> tuple[int, int]:
         """Reported size of each video frame in pixels as a tuple of (width, height)."""
         return (
             math.trunc(self._cap.get(cv2.CAP_PROP_FRAME_WIDTH)),
@@ -438,7 +438,7 @@ class VideoCaptureAdapter(VideoStream):
         )
 
     @property
-    def duration(self) -> ty.Optional[FrameTimecode]:
+    def duration(self) -> FrameTimecode | None:
         """Duration of the stream as a FrameTimecode, or None if non terminating."""
         frame_count = math.trunc(self._cap.get(cv2.CAP_PROP_FRAME_COUNT))
         if frame_count > 0:
@@ -471,7 +471,7 @@ class VideoCaptureAdapter(VideoStream):
     def frame_number(self) -> int:
         return self._num_frames
 
-    def seek(self, target: ty.Union[FrameTimecode, float, int]):
+    def seek(self, target: FrameTimecode | float | int):
         """The underlying VideoCapture is assumed to not support seeking."""
         raise NotImplementedError("Seeking is not supported.")
 
@@ -479,7 +479,7 @@ class VideoCaptureAdapter(VideoStream):
         """Not supported."""
         raise NotImplementedError("Reset is not supported.")
 
-    def read(self, decode: bool = True) -> ty.Union[np.ndarray, bool]:
+    def read(self, decode: bool = True) -> np.ndarray | bool:
         if not self._cap.isOpened():
             return False
         has_grabbed = self._cap.grab()

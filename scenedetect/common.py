@@ -74,18 +74,18 @@ import cv2
 ## Type Aliases
 ##
 
-SceneList = ty.List[ty.Tuple["FrameTimecode", "FrameTimecode"]]
+SceneList = list[tuple["FrameTimecode", "FrameTimecode"]]
 """Type hint for a list of scenes in the form (start time, end time)."""
 
-CutList = ty.List["FrameTimecode"]
+CutList = list["FrameTimecode"]
 """Type hint for a list of cuts, where each timecode represents the first frame of a new shot."""
 
-CropRegion = ty.Tuple[int, int, int, int]
+CropRegion = tuple[int, int, int, int]
 """Type hint for rectangle of the form X0 Y0 X1 Y1 for cropping frames. Coordinates are relative
 to source frame without downscaling.
 """
 
-TimecodePair = ty.Tuple["FrameTimecode", "FrameTimecode"]
+TimecodePair = tuple["FrameTimecode", "FrameTimecode"]
 """Named type for pairs of timecodes, which typically represents the start/end of a scene."""
 
 MAX_FPS_DELTA: float = 1.0 / 1000000000.0
@@ -96,7 +96,7 @@ _SECONDS_PER_HOUR = 60.0 * _SECONDS_PER_MINUTE
 _MINUTES_PER_HOUR = 60.0
 
 # Common framerates mapped from their float representation to exact rational values.
-_COMMON_FRAMERATES: ty.Dict[Fraction, Fraction] = {
+_COMMON_FRAMERATES: dict[Fraction, Fraction] = {
     Fraction(24000, 1001): Fraction(24000, 1001),  # 23.976...
     Fraction(30000, 1001): Fraction(30000, 1001),  # 29.97...
     Fraction(60000, 1001): Fraction(60000, 1001),  # 59.94...
@@ -192,7 +192,7 @@ class FrameTimecode:
             TypeError: Thrown if either `timecode` or `fps` are unsupported types.
             ValueError: Thrown when specifying a negative timecode or framerate.
         """
-        self._time: ty.Union[_FrameNumber, _Seconds, Timecode]
+        self._time: _FrameNumber | _Seconds | Timecode
         """Internal time representation."""
         self._rate: Fraction = None
         """Rate at which time passes between frames, measured in frames/sec."""
@@ -247,7 +247,7 @@ class FrameTimecode:
             raise TypeError("Timecode format/type unrecognized.")
 
     @property
-    def frame_num(self) -> ty.Optional[int]:
+    def frame_num(self) -> int | None:
         """The frame number. For VFR video or Timecode-backed objects, this is an approximation
         based on the average framerate. Prefer using `pts` and `time_base` for precise timing."""
         if isinstance(self._time, Timecode):
@@ -261,7 +261,7 @@ class FrameTimecode:
         return self._time.value
 
     @property
-    def framerate(self) -> ty.Optional[float]:
+    def framerate(self) -> float | None:
         """The framerate to use for distance between frames and to calculate frame numbers.
         For a VFR video, this may just be the average framerate. Returns None if framerate
         is unknown (e.g. when working with pure Timecode representations)."""
@@ -397,12 +397,12 @@ class FrameTimecode:
                 mins = 0
                 hrs += 1
         # We have to extend the precision by 1 here, since `format` will round up.
-        msec = format(secs, ".%df" % (precision + 1)) if precision else ""
+        msec = format(secs, f".{precision + 1}f") if precision else ""
         # Need to include decimal place in `msec_str`.
         msec_str = msec[-(2 + precision) : -1]
         secs_str = f"{int(secs):02d}{msec_str}"
         # Return hours, minutes, and seconds as a formatted timecode string.
-        return "%02d:%02d:%s" % (hrs, mins, secs_str)
+        return f"{hrs:02d}:{mins:02d}:{secs_str}"
 
     def _seconds_to_frames(self, seconds: float) -> int:
         """Convert `seconds` to the nearest number of frames using the current framerate.
@@ -411,7 +411,7 @@ class FrameTimecode:
         """
         return round(seconds * self._rate)
 
-    def _parse_timecode_number(self, timecode: ty.Union[int, float]) -> int:
+    def _parse_timecode_number(self, timecode: int | float) -> int:
         """Parse a timecode number, storing it as the exact number of frames.
         Can be passed as frame number (int), seconds (float)
 

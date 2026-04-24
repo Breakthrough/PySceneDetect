@@ -37,8 +37,8 @@ logger = logging.getLogger("pyscenedetect")
 def _generate_timecode_list(
     scene_list: SceneList,
     num_images: int,
-    frame_margin: ty.Union[int, float, str],
-) -> ty.List[ty.List[FrameTimecode]]:
+    frame_margin: int | float | str,
+) -> list[list[FrameTimecode]]:
     """Generate per-scene image timecodes using PTS-accurate seconds-based timing.
 
     `frame_margin` accepts an int (frames), float (seconds), or str (e.g. ``"0.1s"``).
@@ -72,9 +72,9 @@ def _generate_timecode_list(
 def _scale_image(
     image: np.ndarray,
     aspect_ratio: float,
-    height: ty.Optional[int],
-    width: ty.Optional[int],
-    scale: ty.Optional[float],
+    height: int | None,
+    width: int | None,
+    scale: float | None,
     interpolation: Interpolation,
 ) -> np.ndarray:
     # TODO: Combine this resize with the ones below.
@@ -104,13 +104,13 @@ class _ImageExtractor:
     def __init__(
         self,
         num_images: int = 3,
-        frame_margin: ty.Union[int, float, str] = 1,
+        frame_margin: int | float | str = 1,
         image_extension: str = "jpg",
-        imwrite_param: ty.Dict[str, ty.Union[int, None]] = None,
+        imwrite_param: dict[str, int | None] = None,
         image_name_template: str = "$VIDEO_NAME-Scene-$SCENE_NUMBER-$IMAGE_NUMBER",
-        scale: ty.Optional[float] = None,
-        height: ty.Optional[int] = None,
-        width: ty.Optional[int] = None,
+        scale: float | None = None,
+        height: int | None = None,
+        width: int | None = None,
         interpolation: Interpolation = Interpolation.CUBIC,
     ):
         """Multi-threaded implementation of save-images functionality. Uses background threads to
@@ -159,9 +159,9 @@ class _ImageExtractor:
         self,
         video: VideoStream,
         scene_list: SceneList,
-        output_dir: ty.Optional[str] = None,
+        output_dir: str | None = None,
         show_progress=False,
-    ) -> ty.Dict[int, ty.List[str]]:
+    ) -> dict[int, list[str]]:
         """Run image extraction on `video` using the current parameters. Thread-safe.
 
         Arguments:
@@ -192,7 +192,7 @@ class _ImageExtractor:
         image_num_format += str(math.floor(math.log(self._num_images, 10)) + 2) + "d"
 
         def format_filename(scene_number: int, image_number: int, image_timecode: FrameTimecode):
-            return "%s.%s" % (
+            return "{}.{}".format(
                 filename_template.safe_substitute(
                     VIDEO_NAME=video.name,
                     SCENE_NUMBER=scene_num_format % (scene_number + 1),
@@ -325,7 +325,7 @@ class _ImageExtractor:
             if progress_bar is not None:
                 progress_bar.update(1)
 
-    def generate_timecode_list(self, scene_list: SceneList) -> ty.List[ty.List[FrameTimecode]]:
+    def generate_timecode_list(self, scene_list: SceneList) -> list[list[FrameTimecode]]:
         """Generates a list of timecodes for each scene in `scene_list` based on the current config
         parameters.
 
@@ -347,18 +347,18 @@ def save_images(
     scene_list: SceneList,
     video: VideoStream,
     num_images: int = 3,
-    frame_margin: ty.Union[int, float, str] = 1,
+    frame_margin: int | float | str = 1,
     image_extension: str = "jpg",
     encoder_param: int = 95,
     image_name_template: str = "$VIDEO_NAME-Scene-$SCENE_NUMBER-$IMAGE_NUMBER",
-    output_dir: ty.Optional[str] = None,
-    show_progress: ty.Optional[bool] = False,
-    scale: ty.Optional[float] = None,
-    height: ty.Optional[int] = None,
-    width: ty.Optional[int] = None,
+    output_dir: str | None = None,
+    show_progress: bool | None = False,
+    scale: float | None = None,
+    height: int | None = None,
+    width: int | None = None,
     interpolation: Interpolation = Interpolation.CUBIC,
     threading: bool = True,
-) -> ty.Dict[int, ty.List[str]]:
+) -> dict[int, list[str]]:
     """Save a set number of images from each scene, given a list of scenes
     and the associated video/frame source.
 
@@ -468,7 +468,7 @@ def save_images(
             if frame_im is not None and frame_im is not False:
                 # TODO: Add extension to template.
                 # TODO: Allow NUM to be a valid suffix in addition to NUMBER.
-                file_path = "%s.%s" % (
+                file_path = "{}.{}".format(
                     filename_template.safe_substitute(
                         VIDEO_NAME=video.name,
                         SCENE_NUMBER=scene_num_format % (i + 1),

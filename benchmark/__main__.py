@@ -115,7 +115,7 @@ def create_parser():
     return parser
 
 
-def run_all_benchmarks(detector: ty.Optional[str], dataset: ty.Optional[str], detailed: bool):
+def run_all_benchmarks(detector: str | None, dataset: str | None, detailed: bool):
     detectors = {detector: _DETECTORS[detector]} if detector else _DETECTORS
     datasets = {dataset: _DATASETS[dataset]} if dataset else _DATASETS
     print(
