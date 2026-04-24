@@ -1028,7 +1028,7 @@ def save_html_command(
     image_height: ty.Optional[int],
     show: bool,
 ):
-    if ctx.command.name == "save-html":
+    if ctx.info_name == "export-html":
         logger.warning("WARNING: export-html is deprecated, use save-html instead.")
     ctx = ctx.obj
     assert isinstance(ctx, CliContext)
