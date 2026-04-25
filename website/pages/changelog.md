@@ -678,6 +678,7 @@ Although there have been minimal changes to most API examples, there are several
 - [feature] VFR videos are handled correctly by the OpenCV and PyAV backends, and should work correctly with default parameters
 - [feature] New `save-fcp` command allows exporting in Final Cut Pro format (FCP7/FCPX) [#156](https://github.com/Breakthrough/PySceneDetect/issues/156)
 - [feature] `--min-scene-len`/`-m` and `save-images --frame-margin`/`-m` now accept seconds (e.g. `0.6s`) and timecodes (e.g. `00:00:00.600`) in addition to a frame count [#531](https://github.com/Breakthrough/PySceneDetect/issues/531)
+- [feature] `save-edl` accepts a new `--start-timecode`/`-s` flag (SMPTE `HH:MM:SS:FF` or 8-digit `HHMMSSFF`) to stamp every event with a custom start timecode so generated EDLs align with the source media's on-screen timecode [#515](https://github.com/Breakthrough/PySceneDetect/issues/515)
 - [bugfix] Fix floating-point precision error in `save-otio` output where frame values near integer boundaries (e.g. `90.00000000000001`) were serialized with spurious precision
 - [bugfix] Add mitigation for transient `OSError` in the MoviePy backend as it is susceptible to subprocess pipe races on slow or heavily loaded systems [#496](https://github.com/Breakthrough/PySceneDetect/issues/496)
 - [refactor] Remove deprecated `-d`/`--min-delta-hsv` option from `detect-adaptive` command
@@ -687,6 +688,7 @@ Although there have been minimal changes to most API examples, there are several
 **VFR & Timestamp Overhaul:**
 
  * Add `write_scene_list_edl`, `write_scene_list_fcpx`, `write_scene_list_fcp7`, and `write_scene_list_otio` to the `scenedetect.output` module so `save-edl`, `save-fcp`, and `save-otio` can be invoked directly from Python (previously CLI-only)
+ * `write_scene_list_edl` accepts an optional `start_timecode` parameter (SMPTE `HH:MM:SS:FF` or 8-digit `HHMMSSFF`) that is added to every event's source and record columns [#515](https://github.com/Breakthrough/PySceneDetect/issues/515)
  * Add new `Timecode` type to represent frame timings in terms of the video's source timebase
  * Add `time_base` and `pts` properties to `FrameTimecode` for more accurate timing information
  * All backends (PyAV, OpenCV, MoviePy) now return PTS-backed timestamps from `VideoStream.position`

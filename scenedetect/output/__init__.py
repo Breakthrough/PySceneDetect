@@ -18,6 +18,7 @@ CSV/HTML, or splitting the input video into individual shots.
 import csv
 import json
 import logging
+import math
 import typing as ty
 from fractions import Fraction
 from pathlib import Path
@@ -253,11 +254,36 @@ def _edl_timecode(timecode: FrameTimecode) -> str:
     return f"{hours:02d}:{minutes:02d}:{seconds:02d}:{frames_part:02d}"
 
 
+def _parse_edl_start_timecode(value: str, framerate: Fraction | float) -> int:
+    """Parse a SMPTE ``HH:MM:SS:FF`` (or 8-digit ``HHMMSSFF``) start timecode into a frame count."""
+    stripped = value.strip()
+    if ":" in stripped:
+        parts = stripped.split(":")
+    elif stripped.isdigit() and len(stripped) == 8:
+        parts = [stripped[0:2], stripped[2:4], stripped[4:6], stripped[6:8]]
+    else:
+        raise ValueError(
+            f"Invalid start timecode {value!r}: expected HH:MM:SS:FF or 8 digits (HHMMSSFF)."
+        )
+    if len(parts) != 4 or not all(p.isdigit() for p in parts):
+        raise ValueError(
+            f"Invalid start timecode {value!r}: expected HH:MM:SS:FF or 8 digits (HHMMSSFF)."
+        )
+    hours, minutes, seconds, frames = (int(p) for p in parts)
+    max_frames = math.ceil(float(framerate))
+    if minutes >= 60 or seconds >= 60 or frames >= max_frames:
+        raise ValueError(
+            f"Invalid start timecode {value!r}: MM<60, SS<60, FF<{max_frames} required."
+        )
+    return round((hours * 3600 + minutes * 60 + seconds) * float(framerate)) + frames
+
+
 def write_scene_list_edl(
     output_path: str | Path,
     scene_list: SceneList,
     title: str = "PySceneDetect",
     reel: str = "AX",
+    start_timecode: str | None = None,
 ):
     """Writes the given list of scenes to `output_path` in CMX 3600 EDL format.
 
@@ -266,12 +292,20 @@ def write_scene_list_edl(
         scene_list: List of scenes as pairs of FrameTimecodes denoting each scene's start/end.
         title: Title header written as ``TITLE:`` in the EDL.
         reel: Reel name used for each event. Typically 2-8 uppercase characters.
+        start_timecode: Optional SMPTE timecode (``HH:MM:SS:FF`` or 8-digit ``HHMMSSFF``) added to
+            every event so the EDL aligns with the source media's on-screen timecode. Applied to
+            both source and record columns.
     """
     output_path = Path(output_path)
+    offset_frames = 0
+    if start_timecode is not None and start_timecode.strip() and scene_list:
+        framerate = scene_list[0][0].framerate
+        assert framerate is not None
+        offset_frames = _parse_edl_start_timecode(start_timecode, framerate)
     lines = [f"TITLE: {title}", "FCM: NON-DROP FRAME", ""]
     for i, (start, end) in enumerate(scene_list):
-        in_tc = _edl_timecode(start)
-        out_tc = _edl_timecode(end)
+        in_tc = _edl_timecode(start + offset_frames)
+        out_tc = _edl_timecode(end + offset_frames)
         lines.append(f"{(i + 1):03d}  {reel} V     C        {in_tc} {out_tc} {in_tc} {out_tc}")
     logger.info("Writing scenes in EDL format to %s", output_path)
     with open(output_path, "w") as f:

@@ -269,6 +269,84 @@ def test_write_scene_list_edl_accepts_str_path(tmp_path: Path):
     assert output_path.exists()
 
 
+def test_write_scene_list_edl_with_start_timecode_smpte(tmp_path: Path):
+    """`start_timecode` shifts every event by the supplied SMPTE offset (source + record)."""
+    scenes = _fake_scenes(_FPS_CFR, [(0, 30), (30, 60)])
+    output_path = tmp_path / "scenes.edl"
+    write_scene_list_edl(output_path, scenes, start_timecode="01:00:00:00")
+
+    content = output_path.read_text()
+    assert "001  AX V     C        01:00:00:00 01:00:01:00 01:00:00:00 01:00:01:00" in content
+    assert "002  AX V     C        01:00:01:00 01:00:02:00 01:00:01:00 01:00:02:00" in content
+
+
+def test_write_scene_list_edl_with_start_timecode_digits(tmp_path: Path):
+    """8-digit form (numpad-friendly) yields the same output as the colon-separated form."""
+    scenes = _fake_scenes(_FPS_CFR, [(0, 30), (30, 60)])
+    smpte_path = tmp_path / "smpte.edl"
+    digits_path = tmp_path / "digits.edl"
+    write_scene_list_edl(smpte_path, scenes, start_timecode="01:00:00:00")
+    write_scene_list_edl(digits_path, scenes, start_timecode="01000000")
+
+    assert smpte_path.read_text() == digits_path.read_text()
+
+
+def test_write_scene_list_edl_with_start_timecode_subsecond(tmp_path: Path):
+    """A sub-second frame offset (FF component) is added to every event."""
+    scenes = _fake_scenes(_FPS_CFR, [(0, 30)])
+    output_path = tmp_path / "scenes.edl"
+    write_scene_list_edl(output_path, scenes, start_timecode="00:00:00:15")
+
+    content = output_path.read_text()
+    assert "001  AX V     C        00:00:00:15 00:00:01:15 00:00:00:15 00:00:01:15" in content
+
+
+def test_write_scene_list_edl_default_no_offset(tmp_path: Path):
+    """Omitting `start_timecode` (or passing ``None``/empty) preserves the existing baseline."""
+    scenes = _fake_scenes(_FPS_CFR, [(0, 30), (30, 60)])
+    baseline = tmp_path / "baseline.edl"
+    explicit_none = tmp_path / "none.edl"
+    explicit_empty = tmp_path / "empty.edl"
+    write_scene_list_edl(baseline, scenes)
+    write_scene_list_edl(explicit_none, scenes, start_timecode=None)
+    write_scene_list_edl(explicit_empty, scenes, start_timecode="   ")
+
+    assert baseline.read_text() == explicit_none.read_text() == explicit_empty.read_text()
+
+
+@pytest.mark.parametrize(
+    "bad_value",
+    [
+        "bogus",
+        "00:00:00",  # 3 segments, not 4
+        "00:00:00:00:00",  # 5 segments
+        "1234567",  # 7 digits
+        "123456789",  # 9 digits
+        "ab:cd:ef:gh",  # non-numeric
+    ],
+)
+def test_write_scene_list_edl_with_start_timecode_invalid_format(tmp_path: Path, bad_value: str):
+    """Malformed start timecodes raise ValueError before writing."""
+    scenes = _fake_scenes(_FPS_CFR, [(0, 30)])
+    with pytest.raises(ValueError):
+        write_scene_list_edl(tmp_path / "scenes.edl", scenes, start_timecode=bad_value)
+
+
+@pytest.mark.parametrize(
+    "bad_value",
+    [
+        "00:60:00:00",  # MM=60
+        "00:00:60:00",  # SS=60
+        "00:00:00:99",  # FF beyond ceil(30 fps)
+    ],
+)
+def test_write_scene_list_edl_with_start_timecode_out_of_range(tmp_path: Path, bad_value: str):
+    """Out-of-range SMPTE components raise ValueError."""
+    scenes = _fake_scenes(_FPS_CFR, [(0, 30)])
+    with pytest.raises(ValueError):
+        write_scene_list_edl(tmp_path / "scenes.edl", scenes, start_timecode=bad_value)
+
+
 def test_write_scene_list_fcpx(tmp_path: Path):
     """FCPXML output declares version 1.9, rational time strings, and an asset-clip per scene."""
     scenes = _fake_scenes(_FPS_NTSC, [(48, 96), (96, 144)])

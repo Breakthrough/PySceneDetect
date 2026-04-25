@@ -424,6 +424,7 @@ CONFIG_MAP: ConfigDict = {
         "filename": "$VIDEO_NAME.edl",
         "output": None,
         "reel": "AX",
+        "start-timecode": None,
         "title": "$VIDEO_NAME",
     },
     "save-html": {

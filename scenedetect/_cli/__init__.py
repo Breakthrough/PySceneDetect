@@ -1597,6 +1597,18 @@ SAVE_EDL_HELP = """Save cuts in EDL format (CMX 3600)."""
         USER_CONFIG.get_help_string("save-edl", "output", show_default=False)
     ),
 )
+@click.option(
+    "--start-timecode",
+    "-s",
+    metavar="TIMECODE",
+    default=None,
+    type=click.STRING,
+    help=(
+        "Start timecode added to every event so the EDL aligns with the source media's "
+        "on-screen timecode. Accepts SMPTE HH:MM:SS:FF or 8 digits (HHMMSSFF, e.g. 01000000)."
+        "{}"
+    ).format(USER_CONFIG.get_help_string("save-edl", "start-timecode", show_default=False)),
+)
 @click.pass_context
 def save_edl_command(
     ctx: click.Context,
@@ -1604,6 +1616,7 @@ def save_edl_command(
     title: str | None,
     reel: str | None,
     output: str | None,
+    start_timecode: str | None,
 ):
     ctx = ctx.obj
     assert isinstance(ctx, CliContext)
@@ -1613,6 +1626,7 @@ def save_edl_command(
         "title": ctx.config.get_value("save-edl", "title", title),
         "reel": ctx.config.get_value("save-edl", "reel", reel),
         "output": ctx.config.get_value("save-edl", "output", output),
+        "start_timecode": ctx.config.get_value("save-edl", "start-timecode", start_timecode),
     }
     ctx.add_command(cli_commands.save_edl, save_edl_args)
 

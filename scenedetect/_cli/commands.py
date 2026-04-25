@@ -263,6 +263,7 @@ def save_edl(
     output: str,
     title: str,
     reel: str,
+    start_timecode: str | None,
 ):
     """Handles the `save-edl` command. Outputs in CMX 3600 format."""
     del cuts  # We only use scene information.
@@ -277,6 +278,7 @@ def save_edl(
         scene_list=scenes,
         title=Template(title).safe_substitute(VIDEO_NAME=video_name),
         reel=reel,
+        start_timecode=start_timecode,
     )
 
 
