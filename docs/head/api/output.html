@@ -43,7 +43,7 @@ and the associated video/frame source.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>scene_list</strong> (<em>List</em><em>[</em><em>Tuple</em><em>[</em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em>, </em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em>]</em><em>]</em>) – A list of scenes (pairs of FrameTimecode objects) returned
+<li><p><strong>scene_list</strong> (<em>list</em><em>[</em><em>tuple</em><em>[</em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>scenedetect.common.FrameTimecode</em></a><em>, </em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>scenedetect.common.FrameTimecode</em></a><em>]</em><em>]</em>) – A list of scenes (pairs of FrameTimecode objects) returned
 from calling a SceneManager’s detect_scenes() method.</p></li>
 <li><p><strong>video</strong> (<a class="reference internal" href="video_stream.html#scenedetect.video_stream.VideoStream" title="scenedetect.video_stream.VideoStream"><em>VideoStream</em></a>) – A VideoStream object corresponding to the scene list.
 Note that the video will be closed/re-opened and seeked through.</p></li>
@@ -117,8 +117,8 @@ the paths to the newly saved/created images.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>input_video_path</strong> (<em>str</em>) – Path to the video to be split.</p></li>
-<li><p><strong>scene_list</strong> (<em>Iterable</em><em>[</em><em>Tuple</em><em>[</em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em>, </em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em>]</em><em>]</em>) – List of scenes (pairs of FrameTimecodes) denoting the start/end of each scene.</p></li>
-<li><p><strong>output_dir</strong> (<em>Path</em><em> | </em><em>None</em>) – Directory to output videos. If not set, output will be in working directory.</p></li>
+<li><p><strong>scene_list</strong> (<em>Sequence</em><em>[</em><em>tuple</em><em>[</em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>scenedetect.common.FrameTimecode</em></a><em>, </em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>scenedetect.common.FrameTimecode</em></a><em>]</em><em>]</em>) – List of scenes (pairs of FrameTimecodes) denoting the start/end of each scene.</p></li>
+<li><p><strong>output_dir</strong> (<em>str</em><em> | </em><em>Path</em><em> | </em><em>None</em>) – Directory to output videos. If not set, output will be in working directory.</p></li>
 <li><p><strong>output_file_template</strong> (<em>str</em>) – Template to use for generating output filenames.
 The following variables will be replaced in the template for each scene:
 $VIDEO_NAME, $SCENE_NUMBER, $START_TIME, $END_TIME, $START_FRAME, $END_FRAME</p></li>
@@ -129,7 +129,7 @@ passed will be calculated from input_video_path automatically.</p></li>
 <li><p><strong>show_output</strong> (<em>bool</em>) – If True, will show output from ffmpeg for first split.</p></li>
 <li><p><strong>suppress_output</strong> – [DEPRECATED] DO NOT USE. For backwards compatibility only.</p></li>
 <li><p><strong>hide_progress</strong> – [DEPRECATED] DO NOT USE. For backwards compatibility only.</p></li>
-<li><p><strong>formatter</strong> (<em>Callable</em><em>[</em><em>[</em><a class="reference internal" href="#scenedetect.output.VideoMetadata" title="scenedetect.output.video.VideoMetadata"><em>VideoMetadata</em></a><em>, </em><a class="reference internal" href="#scenedetect.output.SceneMetadata" title="scenedetect.output.video.SceneMetadata"><em>SceneMetadata</em></a><em>]</em><em>, </em><em>AnyStr</em><em>] </em><em>| </em><em>None</em>) – Custom formatter callback. Overrides <cite>output_file_template</cite>.</p></li>
+<li><p><strong>formatter</strong> (<em>Callable</em><em>[</em><em>[</em><a class="reference internal" href="#scenedetect.output.VideoMetadata" title="scenedetect.output.video.VideoMetadata"><em>VideoMetadata</em></a><em>, </em><a class="reference internal" href="#scenedetect.output.SceneMetadata" title="scenedetect.output.video.SceneMetadata"><em>SceneMetadata</em></a><em>]</em><em>, </em><em>str</em><em>] </em><em>| </em><em>None</em>) – Custom formatter callback. Overrides <cite>output_file_template</cite>.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -164,9 +164,9 @@ still return 0, but no commands will be invoked.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>input_video_path</strong> (<em>str</em>) – Path to the video to be split.</p></li>
-<li><p><strong>scene_list</strong> (<em>Iterable</em><em>[</em><em>Tuple</em><em>[</em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em>, </em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em>]</em><em>]</em>) – List of scenes as pairs of FrameTimecodes denoting the start/end times.</p></li>
+<li><p><strong>scene_list</strong> (<em>Sequence</em><em>[</em><em>tuple</em><em>[</em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>scenedetect.common.FrameTimecode</em></a><em>, </em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>scenedetect.common.FrameTimecode</em></a><em>]</em><em>]</em>) – List of scenes as pairs of FrameTimecodes denoting the start/end times.</p></li>
 <li><p><strong>output_dir</strong> (<em>str</em><em> | </em><em>Path</em><em> | </em><em>None</em>) – Directory to output videos. If not set, output will be in working directory.</p></li>
-<li><p><strong>output_file_template</strong> (<em>str</em><em> | </em><em>Path</em><em> | </em><em>None</em>) – Template to use for generating output files. Note that mkvmerge always
+<li><p><strong>output_file_template</strong> (<em>str</em>) – Template to use for generating output files. Note that mkvmerge always
 adds the suffix “-$SCENE_NUMBER” to the output paths. Only the $VIDEO_NAME variable
 is supported by this function.</p></li>
 <li><p><strong>video_name</strong> (<em>str</em><em> | </em><em>None</em>) – Name of the video to be substituted in output_file_template for
@@ -193,13 +193,13 @@ still return 0, but no commands will be invoked.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>output_html_filename</strong> (<em>str</em>) – filename of output html file</p></li>
-<li><p><strong>scene_list</strong> (<em>List</em><em>[</em><em>Tuple</em><em>[</em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em>, </em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em>]</em><em>]</em>) – List of pairs of FrameTimecodes denoting each scene’s start/end FrameTimecode.</p></li>
-<li><p><strong>cut_list</strong> (<em>List</em><em>[</em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em>] </em><em>| </em><em>None</em>) – Optional list of FrameTimecode objects denoting the cut list (i.e. the frames
+<li><p><strong>scene_list</strong> (<em>list</em><em>[</em><em>tuple</em><em>[</em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>scenedetect.common.FrameTimecode</em></a><em>, </em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>scenedetect.common.FrameTimecode</em></a><em>]</em><em>]</em>) – List of pairs of FrameTimecodes denoting each scene’s start/end FrameTimecode.</p></li>
+<li><p><strong>cut_list</strong> (<em>list</em><em>[</em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>scenedetect.common.FrameTimecode</em></a><em>] </em><em>| </em><em>None</em>) – Optional list of FrameTimecode objects denoting the cut list (i.e. the frames
 in the video that need to be split to generate individual scenes). If not passed,
 the start times of each scene (besides the 0th scene) is used instead.</p></li>
-<li><p><strong>css</strong> (<em>str</em>) – String containing all the css information for the resulting html page.</p></li>
+<li><p><strong>css</strong> (<em>str</em><em> | </em><em>None</em>) – String containing all the css information for the resulting html page.</p></li>
 <li><p><strong>css_class</strong> (<em>str</em>) – String containing the named css class</p></li>
-<li><p><strong>image_filenames</strong> (<em>Dict</em><em>[</em><em>int</em><em>, </em><em>List</em><em>[</em><em>str</em><em>]</em><em>] </em><em>| </em><em>None</em>) – dict where key i contains a list with n elements (filenames of
+<li><p><strong>image_filenames</strong> (<em>dict</em><em>[</em><em>int</em><em>, </em><em>list</em><em>[</em><em>str</em><em>]</em><em>] </em><em>| </em><em>None</em>) – dict where key i contains a list with n elements (filenames of
 the n saved images from that scene)</p></li>
 <li><p><strong>image_width</strong> (<em>int</em><em> | </em><em>None</em>) – Optional desired width of images in table in pixels</p></li>
 <li><p><strong>image_height</strong> (<em>int</em><em> | </em><em>None</em>) – Optional desired height of images in table in pixels</p></li>
@@ -216,10 +216,10 @@ the n saved images from that scene)</p></li>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>output_csv_file</strong> (<em>TextIO</em>) – Handle to open file in write mode.</p></li>
-<li><p><strong>scene_list</strong> (<em>List</em><em>[</em><em>Tuple</em><em>[</em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em>, </em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em>]</em><em>]</em>) – List of pairs of FrameTimecodes denoting each scene’s start/end FrameTimecode.</p></li>
+<li><p><strong>scene_list</strong> (<em>list</em><em>[</em><em>tuple</em><em>[</em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>scenedetect.common.FrameTimecode</em></a><em>, </em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>scenedetect.common.FrameTimecode</em></a><em>]</em><em>]</em>) – List of pairs of FrameTimecodes denoting each scene’s start/end FrameTimecode.</p></li>
 <li><p><strong>include_cut_list</strong> (<em>bool</em>) – Bool indicating if the first row should include the timecodes where
 each scene starts. Should be set to False if RFC 4180 compliant CSV output is required.</p></li>
-<li><p><strong>cut_list</strong> (<em>List</em><em>[</em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em>] </em><em>| </em><em>None</em>) – Optional list of FrameTimecode objects denoting the cut list (i.e. the frames
+<li><p><strong>cut_list</strong> (<em>list</em><em>[</em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>scenedetect.common.FrameTimecode</em></a><em>] </em><em>| </em><em>None</em>) – Optional list of FrameTimecode objects denoting the cut list (i.e. the frames
 in the video that need to be split to generate individual scenes). If not specified,
 the cut list is generated using the start times of each scene following the first one.</p></li>
 <li><p><strong>col_separator</strong> (<em>str</em>) – Delimiter to use between values. Must be single character.</p></li>
@@ -240,7 +240,7 @@ the cut list is generated using the start times of each scene following the firs
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>output_path</strong> (<em>str</em><em> | </em><em>Path</em>) – Path to write the EDL file to. Parent directories must exist.</p></li>
-<li><p><strong>scene_list</strong> (<em>List</em><em>[</em><em>Tuple</em><em>[</em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em>, </em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em>]</em><em>]</em>) – List of scenes as pairs of FrameTimecodes denoting each scene’s start/end.</p></li>
+<li><p><strong>scene_list</strong> (<em>list</em><em>[</em><em>tuple</em><em>[</em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>scenedetect.common.FrameTimecode</em></a><em>, </em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>scenedetect.common.FrameTimecode</em></a><em>]</em><em>]</em>) – List of scenes as pairs of FrameTimecodes denoting each scene’s start/end.</p></li>
 <li><p><strong>title</strong> (<em>str</em>) – Title header written as <code class="docutils literal notranslate"><span class="pre">TITLE:</span></code> in the EDL.</p></li>
 <li><p><strong>reel</strong> (<em>str</em>) – Reel name used for each event. Typically 2-8 uppercase characters.</p></li>
 </ul>
@@ -259,10 +259,10 @@ the cut list is generated using the start times of each scene following the firs
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>output_path</strong> (<em>str</em><em> | </em><em>Path</em>) – Path to write the FCPXML file to. Parent directories must exist.</p></li>
-<li><p><strong>scene_list</strong> (<em>List</em><em>[</em><em>Tuple</em><em>[</em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em>, </em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em>]</em><em>]</em>) – List of scenes as pairs of FrameTimecodes. Must not be empty.</p></li>
+<li><p><strong>scene_list</strong> (<em>list</em><em>[</em><em>tuple</em><em>[</em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>scenedetect.common.FrameTimecode</em></a><em>, </em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>scenedetect.common.FrameTimecode</em></a><em>]</em><em>]</em>) – List of scenes as pairs of FrameTimecodes. Must not be empty.</p></li>
 <li><p><strong>video_path</strong> (<em>str</em><em> | </em><em>Path</em>) – Path to the source video file; written into the output as a <code class="docutils literal notranslate"><span class="pre">file://</span></code> URI.</p></li>
 <li><p><strong>frame_rate</strong> (<em>Fraction</em>) – Source frame rate as a rational <cite>Fraction</cite> (e.g. <code class="docutils literal notranslate"><span class="pre">Fraction(24000,</span> <span class="pre">1001)</span></code>).</p></li>
-<li><p><strong>frame_size</strong> (<em>Tuple</em><em>[</em><em>int</em><em>, </em><em>int</em><em>]</em>) – Source resolution as a <code class="docutils literal notranslate"><span class="pre">(width,</span> <span class="pre">height)</span></code> tuple in pixels.</p></li>
+<li><p><strong>frame_size</strong> (<em>tuple</em><em>[</em><em>int</em><em>, </em><em>int</em><em>]</em>) – Source resolution as a <code class="docutils literal notranslate"><span class="pre">(width,</span> <span class="pre">height)</span></code> tuple in pixels.</p></li>
 <li><p><strong>video_name</strong> (<em>str</em><em> | </em><em>None</em>) – Display name used for the asset, project, and event. Defaults to the stem
 of <cite>video_path</cite>.</p></li>
 </ul>
@@ -281,10 +281,10 @@ of <cite>video_path</cite>.</p></li>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>output_path</strong> (<em>str</em><em> | </em><em>Path</em>) – Path to write the xmeml file to. Parent directories must exist.</p></li>
-<li><p><strong>scene_list</strong> (<em>List</em><em>[</em><em>Tuple</em><em>[</em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em>, </em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em>]</em><em>]</em>) – List of scenes as pairs of FrameTimecodes. Must not be empty.</p></li>
+<li><p><strong>scene_list</strong> (<em>list</em><em>[</em><em>tuple</em><em>[</em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>scenedetect.common.FrameTimecode</em></a><em>, </em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>scenedetect.common.FrameTimecode</em></a><em>]</em><em>]</em>) – List of scenes as pairs of FrameTimecodes. Must not be empty.</p></li>
 <li><p><strong>video_path</strong> (<em>str</em><em> | </em><em>Path</em>) – Path to the source video file; written into the output as a <code class="docutils literal notranslate"><span class="pre">file://</span></code> URI.</p></li>
 <li><p><strong>frame_rate</strong> (<em>Fraction</em>) – Source frame rate as a rational <cite>Fraction</cite>.</p></li>
-<li><p><strong>frame_size</strong> (<em>Tuple</em><em>[</em><em>int</em><em>, </em><em>int</em><em>]</em>) – Source resolution as a <code class="docutils literal notranslate"><span class="pre">(width,</span> <span class="pre">height)</span></code> tuple in pixels.</p></li>
+<li><p><strong>frame_size</strong> (<em>tuple</em><em>[</em><em>int</em><em>, </em><em>int</em><em>]</em>) – Source resolution as a <code class="docutils literal notranslate"><span class="pre">(width,</span> <span class="pre">height)</span></code> tuple in pixels.</p></li>
 <li><p><strong>video_name</strong> (<em>str</em><em> | </em><em>None</em>) – Display name used for project and sequence. Defaults to the stem of
 <cite>video_path</cite>.</p></li>
 <li><p><strong>source_duration</strong> (<a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em> | </em><em>None</em>) – Total duration of the source media. Required on <code class="docutils literal notranslate"><span class="pre">&lt;file&gt;</span></code> so NLEs
@@ -304,7 +304,7 @@ frozen. If None, falls back to the last scene’s end time.</p></li>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>output_path</strong> (<em>str</em><em> | </em><em>Path</em>) – Path to write the OTIO file to. Parent directories must exist.</p></li>
-<li><p><strong>scene_list</strong> (<em>List</em><em>[</em><em>Tuple</em><em>[</em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em>, </em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em>]</em><em>]</em>) – List of scenes as pairs of FrameTimecodes.</p></li>
+<li><p><strong>scene_list</strong> (<em>list</em><em>[</em><em>tuple</em><em>[</em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>scenedetect.common.FrameTimecode</em></a><em>, </em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>scenedetect.common.FrameTimecode</em></a><em>]</em><em>]</em>) – List of scenes as pairs of FrameTimecodes.</p></li>
 <li><p><strong>video_path</strong> (<em>str</em><em> | </em><em>Path</em>) – Path to the source video file; written into the output as an absolute path.</p></li>
 <li><p><strong>frame_rate</strong> (<em>Fraction</em>) – Source frame rate as a rational <cite>Fraction</cite>. Exported as a float, as the
 current OTIO format does not support rational timings.</p></li>
@@ -356,7 +356,7 @@ current OTIO format does not support rational timings.</p></li>
 <dd class="field-odd"><p><strong>template</strong> (<em>str</em>) – </p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><em>Callable</em>[[<a class="reference internal" href="#scenedetect.output.VideoMetadata" title="scenedetect.output.video.VideoMetadata"><em>VideoMetadata</em></a>, <a class="reference internal" href="#scenedetect.output.SceneMetadata" title="scenedetect.output.video.SceneMetadata"><em>SceneMetadata</em></a>], AnyStr]</p>
+<dd class="field-even"><p><em>Callable</em>[[<a class="reference internal" href="#scenedetect.output.VideoMetadata" title="scenedetect.output.video.VideoMetadata"><em>VideoMetadata</em></a>, <a class="reference internal" href="#scenedetect.output.SceneMetadata" title="scenedetect.output.video.SceneMetadata"><em>SceneMetadata</em></a>], str]</p>
 </dd>
 </dl>
 </dd></dl>

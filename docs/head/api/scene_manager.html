@@ -155,7 +155,7 @@ the specified duration or end time has been reached, or <a class="reference inte
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>video</strong> (<a class="reference internal" href="video_stream.html#scenedetect.video_stream.VideoStream" title="scenedetect.video_stream.VideoStream"><em>VideoStream</em></a>) – VideoStream obtained from either <cite>scenedetect.open_video</cite>, or by creating
+<li><p><strong>video</strong> (<a class="reference internal" href="video_stream.html#scenedetect.video_stream.VideoStream" title="scenedetect.video_stream.VideoStream"><em>VideoStream</em></a><em> | </em><em>None</em>) – VideoStream obtained from either <cite>scenedetect.open_video</cite>, or by creating
 one directly (e.g. <cite>scenedetect.backends.opencv.VideoStreamCv2</cite>).</p></li>
 <li><p><strong>duration</strong> (<a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em> | </em><em>None</em>) – Amount of time to detect from current video position. Cannot be
 specified if <cite>end_time</cite> is set.</p></li>
@@ -168,7 +168,7 @@ speeding up the detection time at the expense of accuracy).
 <li><p><strong>show_progress</strong> (<em>bool</em>) – If True, and the <code class="docutils literal notranslate"><span class="pre">tqdm</span></code> module is available, displays
 a progress bar with the progress, framerate, and expected time to
 complete processing the video frame source.</p></li>
-<li><p><strong>callback</strong> (<em>Callable</em><em>[</em><em>[</em><em>ndarray</em><em>, </em><em>int</em><em>]</em><em>, </em><em>None</em><em>] </em><em>| </em><em>None</em>) – If set, called after each scene/event detected.</p></li>
+<li><p><strong>callback</strong> (<em>Callable</em><em>[</em><em>[</em><em>ndarray</em><em>, </em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em>]</em><em>, </em><em>None</em><em>] </em><em>| </em><em>None</em>) – If set, called after each scene/event detected.</p></li>
 <li><p><strong>frame_source</strong> (<a class="reference internal" href="video_stream.html#scenedetect.video_stream.VideoStream" title="scenedetect.video_stream.VideoStream"><em>VideoStream</em></a><em> | </em><em>None</em>) – [DEPRECATED] DO NOT USE. For compatibility with previous version.
 :meta private:</p></li>
 </ul>
@@ -206,7 +206,7 @@ was detected in the input video, which can also be passed to external tools
 for automated splitting of the input into individual scenes.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><em>List</em>[<a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a>]</p>
+<dd class="field-odd"><p>list[<a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode">scenedetect.common.FrameTimecode</a>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -240,7 +240,7 @@ end_time are FrameTimecode objects representing the exact time/frame where each
 detected scene in the video begins and ends.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><em>List</em>[<em>Tuple</em>[<a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a>, <a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a>]]</p>
+<dd class="field-odd"><p>list[tuple[<a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode">scenedetect.common.FrameTimecode</a>, <a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode">scenedetect.common.FrameTimecode</a>]]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -265,7 +265,7 @@ detected scene in the video begins and ends.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="scenedetect.scene_manager.SceneManager.crop">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">crop</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#scenedetect.scene_manager.SceneManager.crop" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">crop</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#scenedetect.scene_manager.SceneManager.crop" title="Permalink to this definition">¶</a></dt>
 <dd><p>Portion of the frame to crop. Tuple of 4 ints in the form (X0, Y0, X1, Y1) where X0, Y0
 describes one point and X1, Y1 is another which describe a rectangle inside of the frame.
 Coordinates start from 0 and are inclusive. For example, with a 100x100 pixel video,
@@ -328,7 +328,7 @@ If <cite>cut_list</cite> is empty, the resulting scene will span from <cite>star
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>cut_list</strong> (<em>List</em><em>[</em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em>]</em>) – List of FrameTimecode objects where scene cuts/breaks occur.</p></li>
+<li><p><strong>cut_list</strong> (<em>list</em><em>[</em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>scenedetect.common.FrameTimecode</em></a><em>]</em>) – List of FrameTimecode objects where scene cuts/breaks occur.</p></li>
 <li><p><strong>num_frames</strong> – The number of frames, or FrameTimecode representing duration, of the video that
 was processed (used to generate last scene’s end time).</p></li>
 <li><p><strong>start_frame</strong> – The start frame or FrameTimecode of the cut list. Used to generate the first
@@ -343,7 +343,7 @@ end_time are FrameTimecode objects representing the exact time/frame where each
 scene occupies based on the input cut_list.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><em>List</em>[<em>Tuple</em>[<a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a>, <a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a>]]</p>
+<dd class="field-odd"><p>list[tuple[<a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode">scenedetect.common.FrameTimecode</a>, <a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode">scenedetect.common.FrameTimecode</a>]]</p>
 </dd>
 </dl>
 </dd></dl>

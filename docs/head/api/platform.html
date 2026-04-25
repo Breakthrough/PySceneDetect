@@ -91,19 +91,19 @@ along the way.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>file_path</strong> (<em>AnyStr</em>) – File name to get path for.  If file_path is an absolute
+<li><p><strong>file_path</strong> (<em>str</em><em> | </em><em>PathLike</em><em>[</em><em>str</em><em>]</em>) – File name to get path for.  If file_path is an absolute
 path (e.g. starts at a drive/root), no modification of the path
 is performed, only ensuring that all output directories are created.</p></li>
 <li><p><strong>output_dir</strong> – An optional output directory to override the
 directory of file_path if it is relative to the working directory.</p></li>
-<li><p><strong>output_directory</strong> (<em>AnyStr</em><em> | </em><em>None</em>) – </p></li>
+<li><p><strong>output_directory</strong> (<em>str</em><em> | </em><em>PathLike</em><em>[</em><em>str</em><em>] </em><em>| </em><em>None</em>) – </p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Full path to output file suitable for writing.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>AnyStr</p>
+<dd class="field-odd"><p>str</p>
 </dd>
 </dl>
 </dd></dl>
@@ -122,7 +122,7 @@ respective OpenCV quality or compression parameter as {‘jpg’: cv2.IMWRITE_JP
 current system library (e.g. {‘jpg’: None}).</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><em>Dict</em>[str, int | None]</p>
+<dd class="field-even"><p>dict[str, int | None]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -154,14 +154,28 @@ one is available from the <cite>imageio_ffmpeg</cite> package. Returns None if f
 <dt class="sig sig-object py" id="scenedetect.platform.get_file_name">
 <span class="sig-prename descclassname"><span class="pre">scenedetect.platform.</span></span><span class="sig-name descname"><span class="pre">get_file_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_extension</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.platform.get_file_name" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the file name that <cite>file_path</cite> refers to, optionally removing the extension.</p>
-<p>If <cite>include_extension</cite> is False, the result will always be a str.</p>
 <p>E.g. /tmp/foo.bar -&gt; foo</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>file_path</strong> (<em>AnyStr</em>) – </p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file_path</strong> (<em>str</em><em> | </em><em>PathLike</em><em>[</em><em>str</em><em>]</em>) – </p></li>
+<li><p><strong>include_extension</strong> (<em>bool</em>) – </p></li>
+</ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>AnyStr</p>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scenedetect.platform.get_mkvmerge_path">
+<span class="sig-prename descclassname"><span class="pre">scenedetect.platform.</span></span><span class="sig-name descname"><span class="pre">get_mkvmerge_path</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.platform.get_mkvmerge_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get path to mkvmerge if available on the current system by checking PATH. Returns None if
+mkvmerge couldn’t be found.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str | None</p>
 </dd>
 </dl>
 </dd></dl>
@@ -216,7 +230,7 @@ raises a different exception when the command length is too long.</p>
 <p>See <a class="reference external" href="https://github.com/Breakthrough/PySceneDetect/issues/164">https://github.com/Breakthrough/PySceneDetect/issues/164</a> for details.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>args</strong> (<em>List</em><em>[</em><em>str</em><em>]</em>) – List of strings to pass to subprocess.call().</p>
+<dd class="field-odd"><p><strong>args</strong> (<em>list</em><em>[</em><em>str</em><em>]</em>) – List of strings to pass to subprocess.call().</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Return code of command.</p>
@@ -228,6 +242,13 @@ raises a different exception when the command length is too long.</p>
 <dd class="field-even"><p>int</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="scenedetect.platform.StrPath">
+<span class="sig-prename descclassname"><span class="pre">scenedetect.platform.</span></span><span class="sig-name descname"><span class="pre">StrPath</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">str</span> <span class="pre">|</span> <span class="pre">os.PathLike[str]</span></em><a class="headerlink" href="#scenedetect.platform.StrPath" title="Permalink to this definition">¶</a></dt>
+<dd><p>Type hint for filesystem paths. Accepts a <cite>str</cite> or any object implementing <code class="xref py py-class docutils literal notranslate"><span class="pre">os.PathLike</span></code>
+(e.g. <code class="xref py py-class docutils literal notranslate"><span class="pre">pathlib.Path</span></code>).</p>
 </dd></dl>
 
 </section>
@@ -305,10 +326,12 @@ raises a different exception when the command length is too long.</p>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.platform.get_ffmpeg_path"><code class="docutils literal notranslate"><span class="pre">get_ffmpeg_path()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.platform.get_ffmpeg_version"><code class="docutils literal notranslate"><span class="pre">get_ffmpeg_version()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.platform.get_file_name"><code class="docutils literal notranslate"><span class="pre">get_file_name()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scenedetect.platform.get_mkvmerge_path"><code class="docutils literal notranslate"><span class="pre">get_mkvmerge_path()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.platform.get_mkvmerge_version"><code class="docutils literal notranslate"><span class="pre">get_mkvmerge_version()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.platform.get_system_version_info"><code class="docutils literal notranslate"><span class="pre">get_system_version_info()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.platform.init_logger"><code class="docutils literal notranslate"><span class="pre">init_logger()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.platform.invoke_command"><code class="docutils literal notranslate"><span class="pre">invoke_command()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scenedetect.platform.StrPath"><code class="docutils literal notranslate"><span class="pre">StrPath</span></code></a></li>
 </ul>
 </li>
 </ul>

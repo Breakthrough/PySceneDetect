@@ -87,18 +87,6 @@ stream is not seekable (additional information will be provided when possible).<
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scenedetect.video_stream.</span></span><span class="sig-name descname"><span class="pre">VideoStream</span></span><a class="headerlink" href="#scenedetect.video_stream.VideoStream" title="Permalink to this definition">¶</a></dt>
 <dd><p>Interface which all video backends must implement.</p>
 <dl class="py method">
-<dt class="sig sig-object py" id="scenedetect.video_stream.VideoStream.BACKEND_NAME">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">BACKEND_NAME</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.video_stream.VideoStream.BACKEND_NAME" title="Permalink to this definition">¶</a></dt>
-<dd><p>Unique name used to identify this backend. Should be a static property in derived
-classes (<cite>BACKEND_NAME = ‘backend_identifier’</cite>).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>str</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="scenedetect.video_stream.VideoStream.read">
 <em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">decode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.video_stream.VideoStream.read" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read and decode the next frame as a np.ndarray. Returns False when video ends.</p>
@@ -141,7 +129,7 @@ by read(), at which point frame_number will be 5.</p>
 <p>May not be supported on all backend types or inputs (e.g. cameras).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>target</strong> (<a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em> | </em><em>float</em><em> | </em><em>int</em>) – Target position in video stream to seek to.
+<dd class="field-odd"><p><strong>target</strong> (<em>int</em><em> | </em><em>float</em><em> | </em><em>str</em><em> | </em><a class="reference internal" href="common.html#scenedetect.common.Timecode" title="scenedetect.common.Timecode"><em>Timecode</em></a><em> | </em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a>) – Target position in video stream to seek to.
 If float, interpreted as time in seconds.
 If int, interpreted as frame number.</p>
 </dd>
@@ -155,6 +143,12 @@ If int, interpreted as frame number.</p>
 <dd class="field-odd"><p>None</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scenedetect.video_stream.VideoStream.BACKEND_NAME">
+<span class="sig-name descname"><span class="pre">BACKEND_NAME</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#scenedetect.video_stream.VideoStream.BACKEND_NAME" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unique name used to identify this backend. Each subclass must set this to a unique str.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -190,7 +184,7 @@ If int, interpreted as frame number.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="scenedetect.video_stream.VideoStream.frame_size">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">frame_size</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#scenedetect.video_stream.VideoStream.frame_size" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">frame_size</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#scenedetect.video_stream.VideoStream.frame_size" title="Permalink to this definition">¶</a></dt>
 <dd><p>Size of each video frame in pixels as a tuple of (width, height).</p>
 </dd></dl>
 
@@ -202,13 +196,13 @@ If int, interpreted as frame number.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="scenedetect.video_stream.VideoStream.name">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bytes</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scenedetect.video_stream.VideoStream.name" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scenedetect.video_stream.VideoStream.name" title="Permalink to this definition">¶</a></dt>
 <dd><p>Name of the video, without extension, or device.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="scenedetect.video_stream.VideoStream.path">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bytes</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scenedetect.video_stream.VideoStream.path" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scenedetect.video_stream.VideoStream.path" title="Permalink to this definition">¶</a></dt>
 <dd><p>Video or device path.</p>
 </dd></dl>
 

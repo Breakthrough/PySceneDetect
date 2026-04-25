@@ -100,7 +100,7 @@ automatically set based on video resolution.</p></li>
 the detector when a StatsManager is passed to process_frame.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><em>List</em>[str]</p>
+<dd class="field-even"><p>list[str]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -269,7 +269,7 @@ to allow adding new components without breaking existing usage.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="scenedetect.detectors.content_detector.ContentDetector.METRIC_KEYS">
-<span class="sig-name descname"><span class="pre">METRIC_KEYS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['content_val',</span> <span class="pre">'delta_hue',</span> <span class="pre">'delta_sat',</span> <span class="pre">'delta_lum',</span> <span class="pre">'delta_edges']</span></em><a class="headerlink" href="#scenedetect.detectors.content_detector.ContentDetector.METRIC_KEYS" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">METRIC_KEYS</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['content_val',</span> <span class="pre">'delta_hue',</span> <span class="pre">'delta_sat',</span> <span class="pre">'delta_lum',</span> <span class="pre">'delta_edges']</span></em><a class="headerlink" href="#scenedetect.detectors.content_detector.ContentDetector.METRIC_KEYS" title="Permalink to this definition">¶</a></dt>
 <dd><p>All statsfile keys this detector produces.</p>
 </dd></dl>
 
@@ -350,7 +350,7 @@ frame to frame.</p>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><em>List</em>[<a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a>]</p>
+<dd class="field-even"><p>list[<a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode">scenedetect.common.FrameTimecode</a>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -442,7 +442,7 @@ luma value in the image. If normalized, these values represent the relative freq
 the detector when a StatsManager is passed to process_frame.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><em>List</em>[str]</p>
+<dd class="field-even"><p>list[str]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -451,8 +451,8 @@ the detector when a StatsManager is passed to process_frame.</p>
 <dt class="sig sig-object py" id="scenedetect.detectors.histogram_detector.HistogramDetector.process_frame">
 <span class="sig-name descname"><span class="pre">process_frame</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timecode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_img</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.detectors.histogram_detector.HistogramDetector.process_frame" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes the histogram of the luma channel of the frame image and compares it with the
-histogram of the luma channel of the previous frame. If the difference between the histograms
-exceeds the threshold, a scene cut is detected.
+histogram of the luma channel of the previous frame. If the difference between the
+histograms exceeds the threshold, a scene cut is detected.
 Histogram difference is computed using the correlation metric.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -468,7 +468,7 @@ detection on.</p></li>
 or more frames in the list, and not necessarily the same as frame_num.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><em>List</em>[int]</p>
+<dd class="field-odd"><p>list[int]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -531,7 +531,7 @@ generate an additional scene at this timecode.</p></li>
 the detector when a StatsManager is passed to process_frame.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><em>List</em>[str]</p>
+<dd class="field-even"><p>list[str]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -549,7 +549,7 @@ exact frame where the fade-out crossed the detection threshold.</p>
 <dd class="field-odd"><p><strong>timecode</strong> (<a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a>) – </p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><em>List</em>[<a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a>]</p>
+<dd class="field-even"><p>list[<a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode">scenedetect.common.FrameTimecode</a>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -569,7 +569,7 @@ exact frame where the fade-out crossed the detection threshold.</p>
 <dd class="field-even"><p>List of FrameTimecodes where scene cuts have been detected.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><em>List</em>[<a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a>]</p>
+<dd class="field-odd"><p>list[<a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode">scenedetect.common.FrameTimecode</a>]</p>
 </dd>
 </dl>
 </dd></dl>

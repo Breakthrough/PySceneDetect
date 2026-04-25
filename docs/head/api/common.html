@@ -147,7 +147,7 @@ object has a defined framerate, otherwise has no effect.</p></li>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="scenedetect.common.FrameTimecode.frame_num">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">frame_num</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#scenedetect.common.FrameTimecode.frame_num" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">frame_num</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#scenedetect.common.FrameTimecode.frame_num" title="Permalink to this definition">¶</a></dt>
 <dd><p>The frame number. For VFR video or Timecode-backed objects, this is an approximation
 based on the average framerate. Prefer using <cite>pts</cite> and <cite>time_base</cite> for precise timing.</p>
 </dd></dl>
@@ -265,14 +265,14 @@ number framerates.</p>
 <span class="sig-prename descclassname"><span class="pre">scenedetect.common.</span></span><span class="sig-name descname"><span class="pre">CropRegion</span></span><a class="headerlink" href="#scenedetect.common.CropRegion" title="Permalink to this definition">¶</a></dt>
 <dd><p>Type hint for rectangle of the form X0 Y0 X1 Y1 for cropping frames. Coordinates are relative
 to source frame without downscaling.</p>
-<p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]</p>
+<p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]</p>
 </dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="scenedetect.common.CutList">
 <span class="sig-prename descclassname"><span class="pre">scenedetect.common.</span></span><span class="sig-name descname"><span class="pre">CutList</span></span><a class="headerlink" href="#scenedetect.common.CutList" title="Permalink to this definition">¶</a></dt>
 <dd><p>Type hint for a list of cuts, where each timecode represents the first frame of a new shot.</p>
-<p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<a class="reference internal" href="#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrameTimecode</span></code></a>]</p>
+<p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[FrameTimecode]</p>
 </dd></dl>
 
 <dl class="py data">
@@ -285,14 +285,22 @@ to source frame without downscaling.</p>
 <dt class="sig sig-object py" id="scenedetect.common.SceneList">
 <span class="sig-prename descclassname"><span class="pre">scenedetect.common.</span></span><span class="sig-name descname"><span class="pre">SceneList</span></span><a class="headerlink" href="#scenedetect.common.SceneList" title="Permalink to this definition">¶</a></dt>
 <dd><p>Type hint for a list of scenes in the form (start time, end time).</p>
-<p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Tuple</span></code>[<a class="reference internal" href="#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrameTimecode</span></code></a>, <a class="reference internal" href="#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrameTimecode</span></code></a>]]</p>
+<p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[FrameTimecode, FrameTimecode]]</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="scenedetect.common.TimecodeLike">
+<span class="sig-prename descclassname"><span class="pre">scenedetect.common.</span></span><span class="sig-name descname"><span class="pre">TimecodeLike</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">int</span> <span class="pre">|</span> <span class="pre">float</span> <span class="pre">|</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">scenedetect.common.Timecode</span> <span class="pre">|</span> <span class="pre">scenedetect.common.FrameTimecode</span></em><a class="headerlink" href="#scenedetect.common.TimecodeLike" title="Permalink to this definition">¶</a></dt>
+<dd><p>Type hint for values that can be converted to a <a class="reference internal" href="#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrameTimecode</span></code></a>. Accepts a frame number
+(<cite>int</cite>), number of seconds (<cite>float</cite>), timecode string (<cite>str</cite> of the form <code class="docutils literal notranslate"><span class="pre">HH:MM:SS[.nnn]</span></code>), a
+<a class="reference internal" href="#scenedetect.common.Timecode" title="scenedetect.common.Timecode"><code class="xref py py-class docutils literal notranslate"><span class="pre">Timecode</span></code></a>, or an existing <a class="reference internal" href="#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrameTimecode</span></code></a>.</p>
 </dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="scenedetect.common.TimecodePair">
 <span class="sig-prename descclassname"><span class="pre">scenedetect.common.</span></span><span class="sig-name descname"><span class="pre">TimecodePair</span></span><a class="headerlink" href="#scenedetect.common.TimecodePair" title="Permalink to this definition">¶</a></dt>
 <dd><p>Named type for pairs of timecodes, which typically represents the start/end of a scene.</p>
-<p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">Tuple</span></code>[<a class="reference internal" href="#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrameTimecode</span></code></a>, <a class="reference internal" href="#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrameTimecode</span></code></a>]</p>
+<p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[FrameTimecode, FrameTimecode]</p>
 </dd></dl>
 
 </section>
@@ -368,6 +376,7 @@ to source frame without downscaling.</p>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.common.CutList"><code class="docutils literal notranslate"><span class="pre">CutList</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.common.MAX_FPS_DELTA"><code class="docutils literal notranslate"><span class="pre">MAX_FPS_DELTA</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.common.SceneList"><code class="docutils literal notranslate"><span class="pre">SceneList</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scenedetect.common.TimecodeLike"><code class="docutils literal notranslate"><span class="pre">TimecodeLike</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.common.TimecodePair"><code class="docutils literal notranslate"><span class="pre">TimecodePair</span></code></a></li>
 </ul>
 </li>
