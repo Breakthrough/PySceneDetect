@@ -9,6 +9,8 @@ on:
       - dist/**
       - scenedetect/**
       - tests/**
+      - pyproject.toml
+      - requirements_headless.txt
       - .github/workflows/build.yml
       - .github/actions/setup-ffmpeg/**
   push:
@@ -16,6 +18,8 @@ on:
       - dist/**
       - scenedetect/**
       - tests/**
+      - pyproject.toml
+      - requirements_headless.txt
       - .github/workflows/build.yml
       - .github/actions/setup-ffmpeg/**
     branches:

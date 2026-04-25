@@ -10,11 +10,17 @@ on:
       - dist/**
       - scenedetect/**
       - tests/**
+      - pyproject.toml
+      - requirements_headless.txt
+      - .github/workflows/build-windows.yml
   push:
     paths:
       - dist/**
       - scenedetect/**
       - tests/**
+      - pyproject.toml
+      - requirements_headless.txt
+      - .github/workflows/build-windows.yml
     branches:
       - main
       - 'releases/**'

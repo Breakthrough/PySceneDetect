@@ -6,10 +6,16 @@ on:
     paths:
       - scenedetect/**
       - tests/**
+      - pyproject.toml
+      - .style.yapf
+      - .github/workflows/check-code-format.yml
   push:
     paths:
       - scenedetect/**
       - tests/**
+      - pyproject.toml
+      - .style.yapf
+      - .github/workflows/check-code-format.yml
 
 jobs:
   check_format:
