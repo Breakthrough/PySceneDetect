@@ -950,10 +950,12 @@
 <p><strong>Detector Interface:</strong></p>
 <ul>
 <li>Replace <code>frame_num</code> parameter (<code>int</code>) with <code>timecode</code> (<code>FrameTimecode</code>) in <code>SceneDetector</code> interface <a href="https://github.com/Breakthrough/PySceneDetect/issues/168">#168</a>:<ul>
-<li>The detector interface: <code>SceneDetector.process_frame()</code> and <code>SceneDetector.post_process()</code></li>
-<li>Statistics: <code>StatsManager.get_metrics()</code>, <code>StatsManager.set_metrics()</code>, and <code>StatsManager.metrics_exist()</code></li>
+<li>The detector interface: <code>SceneDetector.process_frame()</code> and <code>SceneDetector.post_process()</code> (the <code>post_process</code> signature on the abstract base is now consistently typed as <code>FrameTimecode</code> to match its concrete-detector overrides; the prior <code>int</code> annotation did not reflect the actual runtime value)</li>
+<li>Statistics: <code>StatsManager.get_metrics()</code>, <code>StatsManager.set_metrics()</code>, and <code>StatsManager.metrics_exist()</code> formally accept either <code>FrameTimecode</code> or <code>int</code> (the <code>int</code> form is retained for compatibility with the deprecated <code>load_from_csv()</code> path, which keys metrics by integer frame number)</li>
 </ul>
 </li>
+<li><code>StatsManager.load_from_csv()</code> and <code>save_images()</code> <code>output_dir</code> now accept <code>os.PathLike</code> (e.g. <code>pathlib.Path</code>) in addition to <code>str</code></li>
+<li><code>SceneManager.detect_scenes()</code> <code>duration</code> and <code>end_time</code> formally accept <code>int</code> (frames), <code>float</code> (seconds), <code>str</code> (timecode), or <code>FrameTimecode</code> — matching the documented and runtime-supported behavior</li>
 <li><code>SceneDetector</code> is now a <a href="https://docs.python.org/3/library/abc.html">Python abstract class</a></li>
 <li><code>SceneDetector</code> instances can now assume they always have frame data to process when <code>process_frame</code> is called</li>
 <li>Remove <code>SceneDetector.is_processing_required()</code> method</li>
