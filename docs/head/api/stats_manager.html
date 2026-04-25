@@ -69,7 +69,7 @@ which owns the given StatsManager instance.</p>
 <p>Initialize a new StatsManager.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>base_timecode</strong> (<a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em> | </em><em>None</em>) – Timecode associated with this object. Must not be None (default value
+<dd class="field-odd"><p><strong>base_timecode</strong> (<em>int</em><em> | </em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em> | </em><em>None</em>) – Timecode associated with this object. Must not be None (default value
 will be removed in a future release).</p>
 </dd>
 </dl>
@@ -84,7 +84,7 @@ they are in <cite>metric_keys</cite>.</p>
 </dd>
 <dt class="field-even">Parameters<span class="colon">:</span></dt>
 <dd class="field-even"><ul class="simple">
-<li><p><strong>timecode</strong> (<a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a>) – </p></li>
+<li><p><strong>timecode</strong> (<em>int</em><em> | </em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a>) – </p></li>
 <li><p><strong>metric_keys</strong> (<em>Iterable</em><em>[</em><em>str</em><em>]</em>) – </p></li>
 </ul>
 </dd>
@@ -122,7 +122,7 @@ False otherwise.</p>
 </dd>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>timecode</strong> (<a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a>) – </p></li>
+<li><p><strong>timecode</strong> (<em>int</em><em> | </em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a>) – </p></li>
 <li><p><strong>metric_keys</strong> (<em>Iterable</em><em>[</em><em>str</em><em>]</em>) – </p></li>
 </ul>
 </dd>
@@ -170,7 +170,7 @@ False otherwise.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>timecode</strong> (<a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a>) – Timecode to set metrics for.</p></li>
+<li><p><strong>timecode</strong> (<em>int</em><em> | </em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a>) – Timecode to set metrics for.</p></li>
 <li><p><strong>metric_kv_dict</strong> (<em>dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>]</em>) – Key value mapping of metrics to their values for <cite>timecode</cite>.</p></li>
 </ul>
 </dd>

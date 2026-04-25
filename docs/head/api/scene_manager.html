@@ -157,9 +157,9 @@ the specified duration or end time has been reached, or <a class="reference inte
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>video</strong> (<a class="reference internal" href="video_stream.html#scenedetect.video_stream.VideoStream" title="scenedetect.video_stream.VideoStream"><em>VideoStream</em></a><em> | </em><em>None</em>) – VideoStream obtained from either <cite>scenedetect.open_video</cite>, or by creating
 one directly (e.g. <cite>scenedetect.backends.opencv.VideoStreamCv2</cite>).</p></li>
-<li><p><strong>duration</strong> (<a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em> | </em><em>None</em>) – Amount of time to detect from current video position. Cannot be
+<li><p><strong>duration</strong> (<em>int</em><em> | </em><em>float</em><em> | </em><em>str</em><em> | </em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em> | </em><em>None</em>) – Amount of time to detect from current video position. Cannot be
 specified if <cite>end_time</cite> is set.</p></li>
-<li><p><strong>end_time</strong> (<a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em> | </em><em>None</em>) – Time to stop processing at. Cannot be specified if <cite>duration</cite> is set.</p></li>
+<li><p><strong>end_time</strong> (<em>int</em><em> | </em><em>float</em><em> | </em><em>str</em><em> | </em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em> | </em><em>None</em>) – Time to stop processing at. Cannot be specified if <cite>duration</cite> is set.</p></li>
 <li><p><strong>frame_skip</strong> (<em>int</em>) – Not recommended except for extremely high framerate videos.
 Number of frames to skip (i.e. process every 1 in N+1 frames,
 where N is frame_skip, processing only 1/N+1 percent of the video,

@@ -59,7 +59,7 @@ may then fail to extract the very last frame.</p></li>
 <li><p><strong>image_name_template</strong> (<em>str</em>) – Template to use for naming image files. Can use the template variables
 $VIDEO_NAME, $SCENE_NUMBER, $IMAGE_NUMBER, $TIMECODE, $FRAME_NUMBER, $TIMESTAMP_MS.
 Should not include an extension.</p></li>
-<li><p><strong>output_dir</strong> (<em>str</em><em> | </em><em>None</em>) – Directory to output the images into.  If not set, the output
+<li><p><strong>output_dir</strong> (<em>str</em><em> | </em><em>PathLike</em><em>[</em><em>str</em><em>] </em><em>| </em><em>None</em>) – Directory to output the images into.  If not set, the output
 is created in the working directory.</p></li>
 <li><p><strong>show_progress</strong> (<em>bool</em><em> | </em><em>None</em>) – If True, shows a progress bar if tqdm is installed.</p></li>
 <li><p><strong>scale</strong> (<em>float</em><em> | </em><em>None</em>) – Optional factor by which to rescale saved images. A scaling factor of 1 would

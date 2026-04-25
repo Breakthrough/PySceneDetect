@@ -77,7 +77,7 @@ amounts of frames/seconds. In the example below, <code class="docutils literal n
 </div>
 <dl class="py class">
 <dt class="sig sig-object py" id="scenedetect.common.FrameTimecode">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scenedetect.common.</span></span><span class="sig-name descname"><span class="pre">FrameTimecode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timecode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.common.FrameTimecode" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scenedetect.common.</span></span><span class="sig-name descname"><span class="pre">FrameTimecode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timecode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.common.FrameTimecode" title="Permalink to this definition">¶</a></dt>
 <dd><p>Object for frame-based timecodes, using the video framerate to compute back and
 forth between frame number and seconds/timecode.</p>
 <dl class="simple">
@@ -93,7 +93,7 @@ forth between frame number and seconds/timecode.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>timecode</strong> (<em>int</em><em> | </em><em>float</em><em> | </em><em>str</em><em> | </em><a class="reference internal" href="#scenedetect.common.Timecode" title="scenedetect.common.Timecode"><em>Timecode</em></a><em> | </em><a class="reference internal" href="#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a>) – A frame number (<cite>int</cite>), number of seconds (<cite>float</cite>), timecode string in
 the form <cite>‘HH:MM:SS’</cite> or <cite>‘HH:MM:SS.nnn’</cite>, or a <cite>Timecode</cite>.</p></li>
-<li><p><strong>fps</strong> (<em>float</em><em> | </em><a class="reference internal" href="#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em> | </em><em>Fraction</em>) – The framerate to use for distance between frames and to calculate frame numbers.
+<li><p><strong>fps</strong> (<em>float</em><em> | </em><a class="reference internal" href="#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em> | </em><em>Fraction</em><em> | </em><em>None</em>) – The framerate to use for distance between frames and to calculate frame numbers.
 For a VFR video, this may just be the average framerate.</p></li>
 </ul>
 </dd>
