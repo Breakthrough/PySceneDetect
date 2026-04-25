@@ -26,7 +26,7 @@ import numpy as np
 from moviepy.video.io.ffmpeg_reader import FFMPEG_VideoReader
 
 from scenedetect.backends.opencv import VideoStreamCv2
-from scenedetect.common import FrameTimecode, Timecode, framerate_to_fraction
+from scenedetect.common import FrameTimecode, Timecode, TimecodeLike, framerate_to_fraction
 from scenedetect.platform import get_file_name
 from scenedetect.video_stream import SeekError, VideoOpenFailure, VideoStream
 
@@ -189,7 +189,7 @@ class VideoStreamMoviePy(VideoStream):
         """
         return self._frame_number
 
-    def seek(self, target: FrameTimecode | float | int):
+    def seek(self, target: TimecodeLike):
         """Seek to the given timecode. If given as a frame number, represents the current seek
         pointer (e.g. if seeking to 0, the next frame decoded will be the first frame of the video).
 

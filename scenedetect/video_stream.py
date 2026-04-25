@@ -36,7 +36,7 @@ from fractions import Fraction
 
 import numpy as np
 
-from scenedetect.common import FrameTimecode
+from scenedetect.common import FrameTimecode, TimecodeLike
 
 
 class SeekError(Exception):
@@ -193,7 +193,7 @@ class VideoStream(ABC):
         ...
 
     @abstractmethod
-    def seek(self, target: FrameTimecode | float | int) -> None:
+    def seek(self, target: TimecodeLike) -> None:
         """Seek to the given timecode. If given as a frame number, represents the current seek
         pointer (e.g. if seeking to 0, the next frame decoded will be the first frame of the video).
 

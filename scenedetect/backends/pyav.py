@@ -18,7 +18,7 @@ from logging import getLogger
 import av
 import numpy as np
 
-from scenedetect.common import MAX_FPS_DELTA, FrameTimecode, Timecode
+from scenedetect.common import MAX_FPS_DELTA, FrameTimecode, Timecode, TimecodeLike
 from scenedetect.platform import get_file_name
 from scenedetect.video_stream import FrameRateUnavailable, VideoOpenFailure, VideoStream
 
@@ -234,7 +234,7 @@ class VideoStreamAv(VideoStream):
         frame_aspect_ratio = self.frame_size[0] / self.frame_size[1]
         return display_aspect_ratio / frame_aspect_ratio
 
-    def seek(self, target: FrameTimecode | float | int) -> None:
+    def seek(self, target: TimecodeLike) -> None:
         """Seek to the given timecode. If given as a frame number, represents the current seek
         pointer (e.g. if seeking to 0, the next frame decoded will be the first frame of the video).
 
@@ -252,6 +252,8 @@ class VideoStreamAv(VideoStream):
         Raises:
             ValueError: `target` is not a valid value (i.e. it is negative).
         """
+        if not isinstance(target, FrameTimecode):
+            target = FrameTimecode(target, self.frame_rate)
         if target < 0:
             raise ValueError("Target cannot be negative!")
         beginning = target == 0

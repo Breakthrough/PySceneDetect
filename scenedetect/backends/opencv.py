@@ -27,7 +27,13 @@ from logging import getLogger
 import cv2
 import numpy as np
 
-from scenedetect.common import MAX_FPS_DELTA, FrameTimecode, Timecode, framerate_to_fraction
+from scenedetect.common import (
+    MAX_FPS_DELTA,
+    FrameTimecode,
+    Timecode,
+    TimecodeLike,
+    framerate_to_fraction,
+)
 from scenedetect.platform import get_file_name
 from scenedetect.video_stream import (
     FrameRateUnavailable,
@@ -231,9 +237,11 @@ class VideoStreamCv2(VideoStream):
         assert self._cap is not None
         return math.trunc(self._cap.get(cv2.CAP_PROP_POS_FRAMES))
 
-    def seek(self, target: FrameTimecode | float | int):
+    def seek(self, target: TimecodeLike):
         if self._is_device:
             raise SeekError("Cannot seek if input is a device!")
+        if not isinstance(target, FrameTimecode):
+            target = FrameTimecode(target, self.frame_rate)
         if target < 0:
             raise ValueError("Target seek position cannot be negative!")
         assert self._cap is not None
@@ -484,7 +492,7 @@ class VideoCaptureAdapter(VideoStream):
     def frame_number(self) -> int:
         return self._num_frames
 
-    def seek(self, target: FrameTimecode | float | int):
+    def seek(self, target: TimecodeLike):
         """The underlying VideoCapture is assumed to not support seeking."""
         raise NotImplementedError("Seeking is not supported.")
 

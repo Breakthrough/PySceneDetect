@@ -37,6 +37,7 @@ from scenedetect.common import (
     CutList,
     CropRegion,
     TimecodePair,
+    TimecodeLike,
     Interpolation,
 )
 from scenedetect.video_stream import VideoStream, VideoOpenFailure
@@ -136,8 +137,8 @@ def detect(
     detector: SceneDetector,
     stats_file_path: str | None = None,
     show_progress: bool = False,
-    start_time: str | float | int | None = None,
-    end_time: str | float | int | None = None,
+    start_time: TimecodeLike | None = None,
+    end_time: TimecodeLike | None = None,
     start_in_scene: bool = False,
 ) -> SceneList:
     """Perform scene detection on a given video `path` using the specified `detector`.
@@ -170,10 +171,8 @@ def detect(
     """
     video = open_video(video_path)
     if start_time is not None:
-        start_time = video.base_timecode + start_time
-        video.seek(start_time)
-    if end_time is not None:
-        end_time = video.base_timecode + end_time
+        video.seek(FrameTimecode(start_time, video.frame_rate))
+    end_timecode = FrameTimecode(end_time, video.frame_rate) if end_time is not None else None
     # To reduce memory consumption when not required, we only add a StatsManager if we
     # need to save frame metrics to disk.
     scene_manager = SceneManager(StatsManager() if stats_file_path else None)
@@ -181,7 +180,7 @@ def detect(
     scene_manager.detect_scenes(
         video=video,
         show_progress=show_progress,
-        end_time=end_time,
+        end_time=end_timecode,
     )
     if scene_manager.stats_manager is not None:
         scene_manager.stats_manager.save_to_csv(csv_file=stats_file_path)

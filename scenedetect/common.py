@@ -715,3 +715,10 @@ class FrameTimecode:
 
 def _compare_as_fixed(a: FrameTimecode, b: ty.Any) -> bool:
     return a._rate is not None and isinstance(b, FrameTimecode) and b._rate is not None
+
+
+TimecodeLike = int | float | str | Timecode | FrameTimecode
+"""Type hint for values that can be converted to a :class:`FrameTimecode`. Accepts a frame number
+(`int`), number of seconds (`float`), timecode string (`str` of the form ``HH:MM:SS[.nnn]``), a
+:class:`Timecode`, or an existing :class:`FrameTimecode`.
+"""
