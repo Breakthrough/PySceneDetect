@@ -12,6 +12,12 @@
 requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
+[tool.pytest.ini_options]
+markers = [
+    "release: opt-in release-validation tests; excluded by default (run with `pytest -m release`)",
+]
+addopts = "-m 'not release'"
+
 [tool.ruff]
 line-length = 100
 indent-width = 4

@@ -1,0 +1,144 @@
+name: Release Test Suite
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*-release'
+
+jobs:
+  static:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install build twine pip-audit
+      - name: Version consistency check
+        run: |
+          VERSION=$(python -c "import scenedetect; print(scenedetect.__version__)")
+          echo "scenedetect.__version__ = $VERSION"
+          if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            TAG_VERSION=${GITHUB_REF#refs/tags/v}
+            TAG_VERSION=${TAG_VERSION%-release}
+            if [[ "$VERSION" != "$TAG_VERSION" ]]; then
+              echo "Version mismatch: scenedetect=$VERSION, tag=$TAG_VERSION"
+              exit 1
+            fi
+            if ! grep -q "^## PySceneDetect $TAG_VERSION" website/pages/changelog.md; then
+              echo "Changelog is missing a '## PySceneDetect $TAG_VERSION' heading"
+              exit 1
+            fi
+          fi
+      - name: Build and Check
+        run: |
+          python -m build
+          twine check dist/*
+      - name: pip-audit
+        run: pip-audit
+
+  release-tests:
+    needs: static
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: ['3.10', '3.13']
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkout resources branch
+        run: |
+          git fetch --depth=1 origin refs/heads/resources:refs/remotes/origin/resources
+          git checkout refs/remotes/origin/resources -- tests/resources/
+          git reset
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install ffmpeg
+        uses: ./.github/actions/setup-ffmpeg
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install .[opencv,pyav,moviepy]
+          pip install opentimelineio pillow psutil pytest
+      - name: Run release tests
+        run: pytest -m release -vv --ignore=tests/release/test_long_video_stress.py --ignore=tests/release/test_install_matrix.py
+
+  long-stress:
+    needs: static
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkout resources branch
+        run: |
+          git fetch --depth=1 origin refs/heads/resources:refs/remotes/origin/resources
+          git checkout refs/remotes/origin/resources -- tests/resources/
+          git reset
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: Install ffmpeg
+        uses: ./.github/actions/setup-ffmpeg
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install .[opencv,pyav]
+          pip install psutil pytest
+      - name: Run long stress test
+        run: pytest -m release -k long_video -vv
+
+  install-matrix:
+    needs: static
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkout resources branch
+        run: |
+          git fetch --depth=1 origin refs/heads/resources:refs/remotes/origin/resources
+          git checkout refs/remotes/origin/resources -- tests/resources/
+          git reset
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: Build wheel
+        run: |
+          pip install build
+          python -m build --wheel
+      - name: Test Bare Install
+        shell: bash
+        run: |
+          WHEEL=$(ls dist/*.whl)
+          PY=${{ matrix.os == 'windows-latest' && 'venv_bare/Scripts/python' || 'venv_bare/bin/python' }}
+          PYTEST=${{ matrix.os == 'windows-latest' && 'venv_bare/Scripts/pytest' || 'venv_bare/bin/pytest' }}
+          python -m venv venv_bare
+          $PY -m pip install pytest "$WHEEL"
+          $PYTEST -m release -k test_install_bare
+      - name: Test OpenCV Install
+        shell: bash
+        run: |
+          WHEEL=$(ls dist/*.whl)
+          PY=${{ matrix.os == 'windows-latest' && 'venv_opencv/Scripts/python' || 'venv_opencv/bin/python' }}
+          PYTEST=${{ matrix.os == 'windows-latest' && 'venv_opencv/Scripts/pytest' || 'venv_opencv/bin/pytest' }}
+          python -m venv venv_opencv
+          $PY -m pip install pytest "${WHEEL}[opencv]"
+          $PYTEST -m release -k test_opencv_only
+      - name: Test PyAV Install
+        shell: bash
+        run: |
+          WHEEL=$(ls dist/*.whl)
+          PY=${{ matrix.os == 'windows-latest' && 'venv_pyav/Scripts/python' || 'venv_pyav/bin/python' }}
+          PYTEST=${{ matrix.os == 'windows-latest' && 'venv_pyav/Scripts/pytest' || 'venv_pyav/bin/pytest' }}
+          python -m venv venv_pyav
+          $PY -m pip install pytest "${WHEEL}[pyav]"
+          $PYTEST -m release -k test_pyav_only
