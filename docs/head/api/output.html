@@ -234,7 +234,7 @@ the cut list is generated using the start times of each scene following the firs
 
 <dl class="py function">
 <dt class="sig sig-object py" id="scenedetect.output.write_scene_list_edl">
-<span class="sig-prename descclassname"><span class="pre">scenedetect.output.</span></span><span class="sig-name descname"><span class="pre">write_scene_list_edl</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scene_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'PySceneDetect'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'AX'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.output.write_scene_list_edl" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">scenedetect.output.</span></span><span class="sig-name descname"><span class="pre">write_scene_list_edl</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scene_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'PySceneDetect'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'AX'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_timecode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.output.write_scene_list_edl" title="Permalink to this definition">¶</a></dt>
 <dd><p>Writes the given list of scenes to <cite>output_path</cite> in CMX 3600 EDL format.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -243,6 +243,9 @@ the cut list is generated using the start times of each scene following the firs
 <li><p><strong>scene_list</strong> (<em>list</em><em>[</em><em>tuple</em><em>[</em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>scenedetect.common.FrameTimecode</em></a><em>, </em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>scenedetect.common.FrameTimecode</em></a><em>]</em><em>]</em>) – List of scenes as pairs of FrameTimecodes denoting each scene’s start/end.</p></li>
 <li><p><strong>title</strong> (<em>str</em>) – Title header written as <code class="docutils literal notranslate"><span class="pre">TITLE:</span></code> in the EDL.</p></li>
 <li><p><strong>reel</strong> (<em>str</em>) – Reel name used for each event. Typically 2-8 uppercase characters.</p></li>
+<li><p><strong>start_timecode</strong> (<em>str</em><em> | </em><em>None</em>) – Optional SMPTE timecode (<code class="docutils literal notranslate"><span class="pre">HH:MM:SS:FF</span></code> or 8-digit <code class="docutils literal notranslate"><span class="pre">HHMMSSFF</span></code>) added to
+every event so the EDL aligns with the source media’s on-screen timecode. Applied to
+both source and record columns.</p></li>
 </ul>
 </dd>
 </dl>
@@ -483,7 +486,7 @@ current OTIO format does not support rational timings.</p></li>
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &#169;2014-2024, Brandon Castellano.
+      &#169;2014, Brandon Castellano.
       
       |
       Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.0.1</a>
