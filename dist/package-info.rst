@@ -43,6 +43,6 @@ You can also use the Python API (`docs <https://www.scenedetect.com/docs/latest/
 
 Licensed under BSD 3-Clause (see the ``LICENSE`` file for details).
 
-Copyright (C) 2014-2024 Brandon Castellano.
+Copyright (C) 2014 Brandon Castellano.
 All rights reserved.
 

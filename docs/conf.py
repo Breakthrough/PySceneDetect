@@ -21,7 +21,7 @@ from scenedetect import __version__ as scenedetect_version
 # -- Project information -----------------------------------------------------
 
 project = "PySceneDetect"
-copyright = "2014-2024, Brandon Castellano"
+copyright = "2014, Brandon Castellano"
 author = "Brandon Castellano"
 
 # The short X.Y version
