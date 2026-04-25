@@ -74,7 +74,7 @@ class VideoStreamAv(VideoStream):
             VideoOpenFailure: video could not be opened (may be corrupted)
             ValueError: specified framerate is invalid
         """
-        self._container: av.container.InputContainer | None = None
+        self._container: av.container.InputContainer | None = None  # type: ignore[name-defined]
 
         # TODO(https://scenedetect.com/issues/258): See what
         # `self._container.discard_corrupt = True` does with corrupt videos.
@@ -93,7 +93,7 @@ class VideoStreamAv(VideoStream):
 
         if threading_mode:
             try:
-                threading_mode = av.codec.context.ThreadType[threading_mode.upper()]
+                threading_mode = av.codec.context.ThreadType[threading_mode.upper()]  # type: ignore[attr-defined]
             except KeyError as _:
                 raise ValueError(
                     f"Invalid threading mode! Must be one of: {VALID_THREAD_MODES}"
@@ -101,7 +101,7 @@ class VideoStreamAv(VideoStream):
 
         if not suppress_output:
             logger.debug("Restoring default ffmpeg log callbacks.")
-            av.logging.restore_default_callback()
+            av.logging.restore_default_callback()  # type: ignore[attr-defined]
 
         try:
             if isinstance(path_or_io, (str, os.PathLike)):
@@ -305,7 +305,7 @@ class VideoStreamAv(VideoStream):
             assert self._decoder is not None
             self._frame = next(self._decoder)
             self._decode_count += 1
-        except av.error.EOFError:
+        except av.error.EOFError:  # type: ignore[attr-defined]
             self._frame = last_frame
             if self._handle_eof():
                 return self.read(decode)

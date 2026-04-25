@@ -44,6 +44,7 @@ def _generate_timecode_list(
     `frame_margin` accepts an int (frames), float (seconds), or str (e.g. ``"0.1s"``).
     """
     framerate = scene_list[0][0].framerate
+    assert framerate is not None
     margin_secs = FrameTimecode(timecode=frame_margin, fps=framerate).seconds
     result = []
     for start, end in scene_list:
@@ -71,7 +72,7 @@ def _generate_timecode_list(
 
 def _scale_image(
     image: np.ndarray,
-    aspect_ratio: float,
+    aspect_ratio: float | None,
     height: int | None,
     width: int | None,
     scale: float | None,
@@ -90,9 +91,11 @@ def _scale_image(
         if height and not width:
             factor = height / float(image_height)
             width = int(factor * image_width)
-        if width and not height:
+        elif width and not height:
             factor = width / float(image_width)
             height = int(factor * image_height)
+        assert height is not None
+        assert width is not None
         assert height > 0 and width > 0
         image = cv2.resize(image, (width, height), interpolation=interpolation.value)
     elif scale:
@@ -106,7 +109,7 @@ class _ImageExtractor:
         num_images: int = 3,
         frame_margin: int | float | str = 1,
         image_extension: str = "jpg",
-        imwrite_param: dict[str, int | None] | None = None,
+        imwrite_param: list[int] | None = None,
         image_name_template: str = "$VIDEO_NAME-Scene-$SCENE_NUMBER-$IMAGE_NUMBER",
         scale: float | None = None,
         height: int | None = None,
@@ -153,7 +156,7 @@ class _ImageExtractor:
         self._height = height
         self._width = width
         self._interpolation = interpolation
-        self._imwrite_param = imwrite_param if imwrite_param else {}
+        self._imwrite_param: list[int] = imwrite_param if imwrite_param is not None else []
 
     def run(
         self,
@@ -337,7 +340,7 @@ class _ImageExtractor:
     def resize_image(
         self,
         image: np.ndarray,
-        aspect_ratio: float,
+        aspect_ratio: float | None,
     ) -> np.ndarray:
         return _scale_image(
             image, aspect_ratio, self._height, self._width, self._scale, self._interpolation
@@ -436,7 +439,7 @@ def save_images(
             width,
             interpolation,
         )
-        return extractor.run(video, scene_list, output_dir, show_progress)
+        return extractor.run(video, scene_list, output_dir, bool(show_progress))
 
     # Setup flags and init progress bar if available.
     completed = True
@@ -467,7 +470,7 @@ def save_images(
         for j, image_timecode in enumerate(scene_timecodes):
             video.seek(image_timecode)
             frame_im = video.read()
-            if frame_im is not None and frame_im is not False:
+            if isinstance(frame_im, np.ndarray):
                 # TODO: Add extension to template.
                 # TODO: Allow NUM to be a valid suffix in addition to NUMBER.
                 file_path = "{}.{}".format(
@@ -495,9 +498,11 @@ def save_images(
                     if height and not width:
                         factor = height / float(frame_height)
                         width = int(factor * frame_width)
-                    if width and not height:
+                    elif width and not height:
                         factor = width / float(frame_width)
                         height = int(factor * frame_height)
+                    assert height is not None
+                    assert width is not None
                     assert height > 0 and width > 0
                     frame_im = cv2.resize(
                         frame_im, (width, height), interpolation=interpolation.value

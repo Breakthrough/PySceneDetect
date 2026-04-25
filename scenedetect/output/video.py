@@ -34,6 +34,7 @@ import logging
 import math
 import time
 import typing as ty
+from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -157,9 +158,9 @@ def default_formatter(template: str) -> PathFormatter:
 
 def split_video_mkvmerge(
     input_video_path: str,
-    scene_list: ty.Iterable[TimecodePair],
+    scene_list: Sequence[TimecodePair],
     output_dir: str | Path | None = None,
-    output_file_template: str | Path | None = "$VIDEO_NAME.mkv",
+    output_file_template: str = "$VIDEO_NAME.mkv",
     video_name: str | None = None,
     show_output: bool = False,
     suppress_output=None,
@@ -253,8 +254,8 @@ def split_video_mkvmerge(
 
 def split_video_ffmpeg(
     input_video_path: str,
-    scene_list: ty.Iterable[TimecodePair],
-    output_dir: Path | None = None,
+    scene_list: Sequence[TimecodePair],
+    output_dir: str | Path | None = None,
     output_file_template: str = "$VIDEO_NAME-Scene-$SCENE_NUMBER.mp4",
     video_name: str | None = None,
     arg_override: str = _DEFAULT_FFMPEG_ARGS,
@@ -312,14 +313,14 @@ def split_video_ffmpeg(
     arg_override = arg_override.replace('\\"', '"')
 
     ret_val = 0
-    arg_override = arg_override.split(" ")
+    ffmpeg_args = arg_override.split(" ")
     scene_num_format = "%0"
     scene_num_format += str(max(3, math.floor(math.log(len(scene_list), 10)) + 1)) + "d"
 
     if formatter is None:
         formatter = default_formatter(output_file_template)
     video_metadata = VideoMetadata(
-        name=video_name, path=input_video_path, total_scenes=len(scene_list)
+        name=video_name, path=Path(input_video_path), total_scenes=len(scene_list)
     )
 
     try:
@@ -331,7 +332,7 @@ def split_video_ffmpeg(
         for i, (start_time, end_time) in enumerate(scene_list):
             duration = end_time - start_time
             scene_metadata = SceneMetadata(index=i, start=start_time, end=end_time)
-            output_path = Path(formatter(scene=scene_metadata, video=video_metadata))
+            output_path = Path(formatter(video_metadata, scene_metadata))
             if output_dir:
                 output_path = Path(output_dir) / output_path
             output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -355,7 +356,7 @@ def split_video_ffmpeg(
                 "-t",
                 str(duration.seconds),
             ]
-            call_list += arg_override
+            call_list += ffmpeg_args
             call_list += ["-sn"]
             call_list += [str(output_path)]
             ret_val = invoke_command(call_list)

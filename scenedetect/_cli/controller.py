@@ -209,11 +209,13 @@ def _load_scenes(context: CliContext) -> tuple[SceneList, CutList]:
             start_time = context.start_time
             cut_list = [cut for cut in cut_list if cut > context.start_time]
 
-        end_time = context.video_stream.duration
+        video_duration = context.video_stream.duration
+        assert video_duration is not None
+        end_time = video_duration
         if context.end_time is not None:
-            end_time = min(context.end_time, context.video_stream.duration)
+            end_time = min(context.end_time, video_duration)
         elif context.duration is not None:
-            end_time = min(start_time + context.duration, context.video_stream.duration)
+            end_time = min(start_time + context.duration, video_duration)
 
         cut_list = [cut for cut in cut_list if cut < end_time]
         scene_list = get_scenes_from_cuts(cut_list=cut_list, start_pos=start_time, end_pos=end_time)

@@ -31,6 +31,7 @@ New :class:`VideoStream <scenedetect.video_stream.VideoStream>` implementations 
 tested by adding it to the test suite in `tests/test_video_stream.py`.
 """
 
+import typing as ty
 from abc import ABC, abstractmethod
 from fractions import Fraction
 
@@ -88,15 +89,11 @@ class VideoStream(ABC):
         return FrameTimecode(timecode=0, fps=self.frame_rate)
 
     #
-    # Abstract Static Methods
+    # Backend Identification
     #
 
-    @staticmethod
-    @abstractmethod
-    def BACKEND_NAME() -> str:
-        """Unique name used to identify this backend. Should be a static property in derived
-        classes (`BACKEND_NAME = 'backend_identifier'`)."""
-        ...
+    BACKEND_NAME: ty.ClassVar[str]
+    """Unique name used to identify this backend. Each subclass must set this to a unique str."""
 
     #
     # Abstract Properties

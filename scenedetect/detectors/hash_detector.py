@@ -57,8 +57,8 @@ class HashDetector(SceneDetector):
         self._size = size
         self._size_sq = float(size * size)
         self._factor = lowpass
-        self._last_frame: numpy.ndarray = None
-        self._last_scene_cut: FrameTimecode = None
+        self._last_frame: numpy.ndarray | None = None
+        self._last_scene_cut: FrameTimecode | None = None
         self._last_hash = numpy.array([])
         self._metric_key = f"hash_dist [size={self._size} lowpass={self._factor}]"
 
@@ -136,7 +136,7 @@ class HashDetector(SceneDetector):
             max_value = 1
 
         # Calculate discrete cosine tranformation of the image
-        resized_img = numpy.float32(resized_img) / max_value
+        resized_img = numpy.asarray(numpy.float32(resized_img) / max_value)
         dct_complete = cv2.dct(resized_img)
 
         # Only keep the low frequency information

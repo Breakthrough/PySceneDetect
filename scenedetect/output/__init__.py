@@ -244,10 +244,12 @@ def write_scene_list_html(
 def _edl_timecode(timecode: FrameTimecode) -> str:
     """Format `timecode` as ``HH:MM:SS:FF`` for a CMX 3600 EDL entry."""
     total_seconds = timecode.seconds
+    framerate = timecode.framerate
+    assert framerate is not None
     hours = int(total_seconds // 3600)
     minutes = int((total_seconds % 3600) // 60)
     seconds = int(total_seconds % 60)
-    frames_part = int((total_seconds * timecode.framerate) % timecode.framerate)
+    frames_part = int((total_seconds * framerate) % framerate)
     return f"{hours:02d}:{minutes:02d}:{seconds:02d}:{frames_part:02d}"
 
 

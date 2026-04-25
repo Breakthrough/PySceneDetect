@@ -213,11 +213,11 @@ class SceneManager:
         self._stats_manager: StatsManager | None = stats_manager
 
         # Position of video that was first passed to detect_scenes.
-        self._start_pos: FrameTimecode = None
+        self._start_pos: FrameTimecode | None = None
         # Position of video on the last frame processed by detect_scenes.
-        self._last_pos: FrameTimecode = None
+        self._last_pos: FrameTimecode | None = None
         # Size of the decoded frames.
-        self._frame_size: tuple[int, int] = None
+        self._frame_size: tuple[int, int] | None = None
         self._frame_size_errors: int = 0
         self._base_timecode: FrameTimecode | None = None
         self._downscale: int = 1
@@ -361,7 +361,7 @@ class SceneManager:
             end_time are FrameTimecode objects representing the exact time/frame where each
             detected scene in the video begins and ends.
         """
-        if self._base_timecode is None:
+        if self._base_timecode is None or self._start_pos is None or self._last_pos is None:
             return []
         cut_list = self._get_cutting_list()
         scene_list = get_scenes_from_cuts(
@@ -404,7 +404,7 @@ class SceneManager:
                 for cut in cuts:
                     for position, frame in self._frame_buffer:
                         if cut == position:
-                            callback(frame, int(position))
+                            callback(frame, position)
         return new_cuts
 
     def _post_process(self, timecode: FrameTimecode) -> None:
@@ -418,12 +418,12 @@ class SceneManager:
 
     def detect_scenes(
         self,
-        video: VideoStream = None,
+        video: VideoStream | None = None,
         duration: FrameTimecode | None = None,
         end_time: FrameTimecode | None = None,
         frame_skip: int = 0,
         show_progress: bool = False,
-        callback: ty.Callable[[np.ndarray, int], None] | None = None,
+        callback: ty.Callable[[np.ndarray, FrameTimecode], None] | None = None,
         frame_source: VideoStream | None = None,
     ) -> int:
         """Perform scene detection on the given video using the added SceneDetectors, returning the
@@ -480,7 +480,9 @@ class SceneManager:
 
         effective_frame_size = video.frame_size
         if self._crop:
-            logger.debug(f"Crop set: top left = {self.crop[0:2]}, bottom right = {self.crop[2:4]}")
+            logger.debug(
+                f"Crop set: top left = {self._crop[0:2]}, bottom right = {self._crop[2:4]}"
+            )
             x0, y0, x1, y1 = self._crop
             min_x, min_y = (min(x0, x1), min(y0, y1))
             max_x, max_y = (max(x0, x1), max(y0, y1))
@@ -550,6 +552,7 @@ class SceneManager:
                 break
             if next_frame is not None:
                 frame_im = next_frame
+            assert frame_im is not None
             new_cuts = self._process_frame(position, frame_im, callback)
             if progress_bar is not None:
                 if new_cuts:
@@ -570,7 +573,9 @@ class SceneManager:
         decode_thread.join()
 
         if self._exception_info is not None:
-            raise self._exception_info[1].with_traceback(self._exception_info[2])
+            exc = self._exception_info[1]
+            assert exc is not None
+            raise exc.with_traceback(self._exception_info[2])
 
         self._last_pos = video.position
         self._post_process(video.position)
@@ -594,6 +599,7 @@ class SceneManager:
                 frame_im = video.read()
                 if frame_im is False:
                     break
+                assert isinstance(frame_im, np.ndarray)
                 # Verify the decoded frame size against the video container's reported
                 # resolution, and also verify that consecutive frames have the correct size.
                 decoded_size = (frame_im.shape[1], frame_im.shape[0])

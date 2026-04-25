@@ -15,6 +15,7 @@ triggered when the average pixel intensity exceeds or falls below this threshold
 This detector is available from the command-line as the `detect-threshold` command.
 """
 
+import typing as ty
 import warnings
 from enum import Enum
 from logging import getLogger
@@ -82,12 +83,12 @@ class ThresholdDetector(SceneDetector):
         self.fade_bias = fade_bias
         self.min_scene_len = min_scene_len
         self.processed_frame = False
-        self.last_scene_cut = None
+        self.last_scene_cut: FrameTimecode | None = None
         # Whether to add an additional scene or not when ending on a fade out
         # (as cuts are only added on fade ins; see post_process() for details).
         self.add_final_scene = add_final_scene
         # Where the last fade (threshold crossing) was detected.
-        self.last_fade = {
+        self.last_fade: dict[str, ty.Any] = {
             "frame": None,  # FrameTimecode where the last detected fade is
             "type": None,  # type of fade, can be either 'in' or 'out'
         }
@@ -174,14 +175,12 @@ class ThresholdDetector(SceneDetector):
         # scene break to indicate the end of the scene.  This is only done for
         # fade-outs, as a scene cut is already added when a fade-in is found.
         cuts: list[FrameTimecode] = []
+        elapsed = timecode if self.last_scene_cut is None else timecode - self.last_scene_cut
         if (
             self.last_fade["type"] == "out"
             and self.add_final_scene
             and self.last_fade["frame"] is not None
-            and (
-                (self.last_scene_cut is None and timecode >= self.min_scene_len)
-                or (timecode - self.last_scene_cut) >= self.min_scene_len
-            )
+            and elapsed >= self.min_scene_len
         ):
             cuts.append(self.last_fade["frame"])
         return cuts

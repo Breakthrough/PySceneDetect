@@ -22,12 +22,14 @@ detection parameters) for the given input.
 """
 
 import csv
+import os
 import os.path
 import typing as ty
 from logging import getLogger
 from pathlib import Path
 
 from scenedetect.common import FrameTimecode
+from scenedetect.platform import StrPath
 
 logger = getLogger("pyscenedetect")
 
@@ -94,7 +96,7 @@ class StatsManager:
     Only metrics consisting of `float` or `int` should be used currently.
     """
 
-    def __init__(self, base_timecode: FrameTimecode = None):
+    def __init__(self, base_timecode: FrameTimecode | None = None):
         """Initialize a new StatsManager.
 
         Arguments:
@@ -156,7 +158,7 @@ class StatsManager:
 
     def save_to_csv(
         self,
-        csv_file: str | bytes | Path | ty.TextIO,
+        csv_file: StrPath | ty.TextIO,
         force_save=True,
     ) -> None:
         """Save To CSV: Saves all frame metrics stored in the StatsManager to a CSV file.
@@ -174,10 +176,11 @@ class StatsManager:
 
         # If we get a path instead of an open file handle, recursively call ourselves
         # again but with file handle instead of path.
-        if isinstance(csv_file, (str, bytes, Path)):
+        if isinstance(csv_file, (str, bytes, Path, os.PathLike)):
             with open(csv_file, "w") as file:
                 self.save_to_csv(csv_file=file, force_save=force_save)
                 return
+        # csv_file is now narrowed to ty.TextIO (the path branch returned above).
 
         csv_writer = csv.writer(csv_file, lineterminator="\n")
         metric_keys = sorted(list(self._metric_keys))

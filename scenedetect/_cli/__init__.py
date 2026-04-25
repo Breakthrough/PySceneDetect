@@ -66,6 +66,7 @@ def _click_range(section: str, key: str) -> "click.IntRange | click.FloatRange":
     assert isinstance(val, RangeValue), f"Expected RangeValue at {section}/{key}, got {type(val)}"
     return val.click_range
 
+
 # About & copyright message string shown for the 'about' CLI command (scenedetect about).
 ABOUT_STRING = """
 Site: http://scenedetect.com/

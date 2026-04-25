@@ -105,7 +105,7 @@ def open_video(
         :class:`VideoOpenFailure`: Constructing the VideoStream fails. If multiple backends have
             been attempted, the error from the first backend will be returned.
     """
-    last_error: Exception = None
+    last_error: Exception | None = None
     # If `backend` is available, try to open the video at `path` using it.
     if backend in AVAILABLE_BACKENDS:
         backend_type = AVAILABLE_BACKENDS[backend]
@@ -183,6 +183,6 @@ def detect(
         show_progress=show_progress,
         end_time=end_timecode,
     )
-    if scene_manager.stats_manager is not None:
+    if scene_manager.stats_manager is not None and stats_file_path is not None:
         scene_manager.stats_manager.save_to_csv(csv_file=stats_file_path)
     return scene_manager.get_scene_list(start_in_scene=start_in_scene)

@@ -267,10 +267,8 @@ class VideoStreamMoviePy(VideoStream):
                 return False
             self._eof = True
         self._frame_number += 1
-        if decode:
-            last_frame_valid = self._last_frame is not None and self._last_frame is not False
-            if last_frame_valid:
-                self._last_frame_rgb = cv2.cvtColor(self._last_frame, cv2.COLOR_BGR2RGB)
-                assert self._last_frame_rgb is not None
-                return self._last_frame_rgb
+        if decode and isinstance(self._last_frame, np.ndarray):
+            self._last_frame_rgb = cv2.cvtColor(self._last_frame, cv2.COLOR_BGR2RGB)
+            assert self._last_frame_rgb is not None
+            return self._last_frame_rgb
         return not self._eof
