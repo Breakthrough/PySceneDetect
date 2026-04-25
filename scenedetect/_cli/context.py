@@ -81,28 +81,28 @@ class CliContext:
     def __init__(self):
         # State:
         self.config: ConfigRegistry = USER_CONFIG
-        self.quiet_mode: bool = None
-        self.scene_manager: SceneManager = None
-        self.stats_manager: StatsManager = None
+        self.quiet_mode: bool | None = None
+        self.scene_manager: SceneManager | None = None
+        self.stats_manager: StatsManager | None = None
         self.save_images: bool = False  # True if the save-images command was specified
         self.save_images_result: ty.Any = (None, None)  # Result of save-images used by save-html
 
         # Input:
-        self.video_stream: VideoStream = None
-        self.load_scenes_input: str = None  # load-scenes -i/--input
-        self.load_scenes_column_name: str = None  # load-scenes -c/--start-col-name
+        self.video_stream: VideoStream | None = None
+        self.load_scenes_input: str | None = None  # load-scenes -i/--input
+        self.load_scenes_column_name: str | None = None  # load-scenes -c/--start-col-name
         self.start_time: FrameTimecode | None = None  # time -s/--start
         self.end_time: FrameTimecode | None = None  # time -e/--end
         self.duration: FrameTimecode | None = None  # time -d/--duration
-        self.frame_skip: int = None
+        self.frame_skip: int | None = None
 
         # Options:
-        self.drop_short_scenes: bool = None
-        self.merge_last_scene: bool = None
-        self.min_scene_len: FrameTimecode = None
-        self.default_detector: tuple[type[SceneDetector], dict[str, ty.Any]] = None
-        self.output: str = None
-        self.stats_file_path: str = None
+        self.drop_short_scenes: bool | None = None
+        self.merge_last_scene: bool | None = None
+        self.min_scene_len: FrameTimecode | None = None
+        self.default_detector: tuple[type[SceneDetector], dict[str, ty.Any]] | None = None
+        self.output: str | None = None
+        self.stats_file_path: str | None = None
 
         # Output Commands (e.g. split-video, save-images):
         # Commands to run after the detection pipeline. Stored as (callback, args) and invoked with
@@ -120,17 +120,20 @@ class CliContext:
         """Instantiate and add `detector` to the processing pipeline."""
         if self.load_scenes_input:
             raise click.ClickException("The load-scenes command cannot be used with detectors.")
+        assert self.scene_manager is not None
         logger.debug("Adding detector: %s(%s)", detector.__name__, detector_args)
         self.scene_manager.add_detector(detector(**detector_args))
 
     def ensure_detector(self):
         """Ensures at least one detector has been instantiated, otherwise adds a default one."""
+        assert self.scene_manager is not None
+        assert self.default_detector is not None
         if self.scene_manager.get_num_detectors() == 0:
             logger.debug("No detector specified, adding default detector.")
             (detector_type, detector_args) = self.default_detector
             self.add_detector(detector_type, detector_args)
 
-    def parse_timecode(self, value: str | None, correct_pts: bool = False) -> FrameTimecode:
+    def parse_timecode(self, value: str | None, correct_pts: bool = False) -> FrameTimecode | None:
         """Parses a user input string into a FrameTimecode assuming the given framerate. If `value`
         is None it will be passed through without processing.
 
@@ -142,11 +145,13 @@ class CliContext:
         try:
             if self.video_stream is None:
                 raise click.ClickException("No input video (-i/--input) was specified.")
+            timecode: int | str
             if correct_pts and value.isdigit():
-                value = int(value)
-                if value >= 1:
-                    value -= 1
-            return FrameTimecode(timecode=value, fps=self.video_stream.frame_rate)
+                int_value = int(value)
+                timecode = int_value - 1 if int_value >= 1 else int_value
+            else:
+                timecode = value
+            return FrameTimecode(timecode=timecode, fps=self.video_stream.frame_rate)
         except ValueError as ex:
             raise click.BadParameter(
                 "timecode must be in seconds (100.0), frames (100), or HH:MM:SS"
@@ -297,6 +302,7 @@ class CliContext:
             crop = self.config.get_value("global", "crop", CropValue(crop))
             if crop is not None:
                 (min_x, min_y) = crop[0:2]
+                assert self.video_stream is not None
                 frame_size = self.video_stream.frame_size
                 if min_x >= frame_size[0] or min_y >= frame_size[1]:
                     region = CropValue(crop)
@@ -327,10 +333,13 @@ class CliContext:
         else:
             if min_scene_len is None:
                 if self.config.is_default("detect-content", "min-scene-len"):
+                    assert self.min_scene_len is not None
                     min_scene_len = self.min_scene_len.frame_num
                 else:
                     min_scene_len = self.config.get_value("detect-content", "min-scene-len")
-            min_scene_len = self.parse_timecode(min_scene_len).frame_num
+            parsed = self.parse_timecode(min_scene_len)
+            assert parsed is not None
+            min_scene_len = parsed.frame_num
 
         if weights is not None:
             try:
@@ -367,10 +376,13 @@ class CliContext:
         else:
             if min_scene_len is None:
                 if self.config.is_default("detect-adaptive", "min-scene-len"):
+                    assert self.min_scene_len is not None
                     min_scene_len = self.min_scene_len.frame_num
                 else:
                     min_scene_len = self.config.get_value("detect-adaptive", "min-scene-len")
-            min_scene_len = self.parse_timecode(min_scene_len).frame_num
+            parsed = self.parse_timecode(min_scene_len)
+            assert parsed is not None
+            min_scene_len = parsed.frame_num
 
         if weights is not None:
             try:
@@ -406,10 +418,13 @@ class CliContext:
         else:
             if min_scene_len is None:
                 if self.config.is_default("detect-threshold", "min-scene-len"):
+                    assert self.min_scene_len is not None
                     min_scene_len = self.min_scene_len.frame_num
                 else:
                     min_scene_len = self.config.get_value("detect-threshold", "min-scene-len")
-            min_scene_len = self.parse_timecode(min_scene_len).frame_num
+            parsed = self.parse_timecode(min_scene_len)
+            assert parsed is not None
+            min_scene_len = parsed.frame_num
         # TODO(v1.0): add_last_scene cannot be disabled right now.
         return {
             "add_final_scene": add_last_scene
@@ -432,10 +447,13 @@ class CliContext:
         else:
             if min_scene_len is None:
                 if self.config.is_default("detect-hist", "min-scene-len"):
+                    assert self.min_scene_len is not None
                     min_scene_len = self.min_scene_len.frame_num
                 else:
                     min_scene_len = self.config.get_value("detect-hist", "min-scene-len")
-            min_scene_len = self.parse_timecode(min_scene_len).frame_num
+            parsed = self.parse_timecode(min_scene_len)
+            assert parsed is not None
+            min_scene_len = parsed.frame_num
         return {
             "bins": self.config.get_value("detect-hist", "bins", bins),
             "min_scene_len": min_scene_len,
@@ -456,10 +474,13 @@ class CliContext:
         else:
             if min_scene_len is None:
                 if self.config.is_default("detect-hash", "min-scene-len"):
+                    assert self.min_scene_len is not None
                     min_scene_len = self.min_scene_len.frame_num
                 else:
                     min_scene_len = self.config.get_value("detect-hash", "min-scene-len")
-            min_scene_len = self.parse_timecode(min_scene_len).frame_num
+            parsed = self.parse_timecode(min_scene_len)
+            assert parsed is not None
+            min_scene_len = parsed.frame_num
         return {
             "lowpass": self.config.get_value("detect-hash", "lowpass", lowpass),
             "min_scene_len": min_scene_len,

@@ -979,6 +979,7 @@ def load_scenes_command(ctx: click.Context, input: str | None, start_col_name: s
     assert isinstance(ctx, CliContext)
 
     logger.debug("Will load scenes from %s (start_col_name = %s)", input, start_col_name)
+    assert ctx.scene_manager is not None
     if ctx.scene_manager.get_num_detectors() > 0:
         raise click.ClickException("The load-scenes command cannot be used with detectors.")
     if ctx.load_scenes_input:
@@ -1293,6 +1294,7 @@ def split_video_command(
     assert isinstance(ctx, CliContext)
 
     check_split_video_requirements(use_mkvmerge=mkvmerge)
+    assert ctx.video_stream is not None
     if "%" in ctx.video_stream.path or "://" in ctx.video_stream.path:
         error = "The split-video command is incompatible with image sequences/URLs."
         raise click.BadParameter(error, param_hint="split-video")
@@ -1500,6 +1502,7 @@ def save_images_command(
 ):
     ctx = ctx.obj
     assert isinstance(ctx, CliContext)
+    assert ctx.video_stream is not None
 
     if "://" in ctx.video_stream.path:
         error_str = "\nThe save-images command is incompatible with URLs."

@@ -53,6 +53,7 @@ def save_html(
     show: bool,
 ):
     """Handles the `save-html` command."""
+    assert context.video_stream is not None
     (image_filenames, output) = (
         context.save_images_result
         if context.save_images_result is not None
@@ -85,6 +86,7 @@ def save_qp(
 ):
     """Handler for the `save-qp` command."""
     del scenes  # We only use cuts for this handler.
+    assert context.video_stream is not None
     qp_path = get_and_create_path(
         Template(filename).safe_substitute(VIDEO_NAME=context.video_stream.name),
         output,
@@ -115,6 +117,7 @@ def list_scenes(
     row_separator: str,
 ):
     """Handles the `list-scenes` command."""
+    assert context.video_stream is not None
     # Write scene list CSV to if required.
     if not no_output_file:
         scene_list_filename = Template(filename).safe_substitute(
@@ -182,6 +185,7 @@ def save_images(
 ):
     """Handles the `save-images` command."""
     del cuts  # save-images only uses scenes.
+    assert context.video_stream is not None
 
     images = save_images_impl(
         scene_list=scenes,
@@ -215,6 +219,7 @@ def split_video(
 ):
     """Handles the `split-video` command."""
     del cuts  # split-video only uses scenes.
+    assert context.video_stream is not None
 
     if use_mkvmerge:
         name_format = name_format.removesuffix("-$SCENE_NUMBER")
@@ -261,6 +266,7 @@ def save_edl(
 ):
     """Handles the `save-edl` command. Outputs in CMX 3600 format."""
     del cuts  # We only use scene information.
+    assert context.video_stream is not None
     video_name = context.video_stream.name
     edl_path = get_and_create_path(
         Template(filename).safe_substitute(VIDEO_NAME=video_name),
@@ -286,6 +292,7 @@ def save_fcp(
     del cuts  # We only use scene information.
     if not scenes:
         return
+    assert context.video_stream is not None
 
     video_stream = context.video_stream
     video_name = str(video_stream.name)
@@ -328,6 +335,7 @@ def save_otio(
 ):
     """Handles the `save-otio` command."""
     del cuts  # We only use scene information
+    assert context.video_stream is not None
     video_stream = context.video_stream
     video_name = str(video_stream.name)
     otio_path = get_and_create_path(

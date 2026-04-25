@@ -92,7 +92,11 @@ def _postprocess_scene_list(context: CliContext, scene_list: SceneList) -> Scene
         scene_list = [*scene_list[:-2], new_last_scene]
 
     # Handle --drop-short-scenes.
-    if context.drop_short_scenes and context.min_scene_len > 0:
+    if (
+        context.drop_short_scenes
+        and context.min_scene_len is not None
+        and context.min_scene_len > 0
+    ):
         scene_list = [s for s in scene_list if (s[1] - s[0]) >= context.min_scene_len]
 
     return scene_list
@@ -100,6 +104,9 @@ def _postprocess_scene_list(context: CliContext, scene_list: SceneList) -> Scene
 
 def _detect(context: CliContext) -> tuple[SceneList, CutList] | None:
     perf_start_time = time.time()
+    assert context.scene_manager is not None
+    assert context.video_stream is not None
+    assert context.frame_skip is not None
 
     context.ensure_detector()
     if context.start_time is not None:
@@ -157,6 +164,7 @@ def _save_stats(context: CliContext) -> None:
     """Handles saving the statsfile if -s/--stats was specified."""
     if not context.stats_file_path:
         return
+    assert context.stats_manager is not None
     if context.stats_manager.is_save_required():
         path = get_and_create_path(context.stats_file_path, context.output)
         logger.info("Saving frame metrics to stats file: %s", path)
@@ -168,8 +176,11 @@ def _save_stats(context: CliContext) -> None:
 
 def _load_scenes(context: CliContext) -> tuple[SceneList, CutList]:
     assert context.load_scenes_input
+    assert context.load_scenes_column_name is not None
+    assert context.video_stream is not None
     assert os.path.exists(context.load_scenes_input)
 
+    video_stream = context.video_stream
     with open(context.load_scenes_input) as input_file:
         file_reader = csv.reader(input_file)
         csv_headers = next(file_reader)
@@ -184,8 +195,8 @@ def _load_scenes(context: CliContext) -> tuple[SceneList, CutList]:
             # Assume other columns are in seconds except frame numbers.
             if value.isdigit():
                 # Frame numbers start from index 1 in the CLI output so we correct for that.
-                return FrameTimecode(int(value) - 1, fps=context.video_stream.frame_rate)
-            return FrameTimecode(value, fps=context.video_stream.frame_rate)
+                return FrameTimecode(int(value) - 1, fps=video_stream.frame_rate)
+            return FrameTimecode(value, fps=video_stream.frame_rate)
 
         cut_list = sorted(calculate_timecode(row[col_idx]) for row in file_reader)
         # `SceneDetector` works on cuts, so we have to skip the first scene and place the first
