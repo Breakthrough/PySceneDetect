@@ -16,6 +16,7 @@ the input should support seeking, but does not necessarily have to be a video. F
 image sequences or AviSynth scripts are supported as inputs.
 """
 
+import os
 import time
 import typing as ty
 from fractions import Fraction
@@ -26,8 +27,13 @@ import numpy as np
 from moviepy.video.io.ffmpeg_reader import FFMPEG_VideoReader
 
 from scenedetect.backends.opencv import VideoStreamCv2
-from scenedetect.common import FrameTimecode, Timecode, TimecodeLike, framerate_to_fraction
-from scenedetect.platform import get_file_name
+from scenedetect.common import (
+    FrameTimecode,
+    Timecode,
+    TimecodeLike,
+    framerate_to_fraction,
+)
+from scenedetect.platform import StrPath, get_file_name
 from scenedetect.video_stream import SeekError, VideoOpenFailure, VideoStream
 
 logger = getLogger("pyscenedetect")
@@ -63,7 +69,7 @@ def _retry_on_oserror(op_name: str, fn: ty.Callable):
 class VideoStreamMoviePy(VideoStream):
     """MoviePy `FFMPEG_VideoReader` backend."""
 
-    def __init__(self, path: ty.AnyStr, framerate: float | None = None, print_infos: bool = False):
+    def __init__(self, path: StrPath, framerate: float | None = None, print_infos: bool = False):
         """Open a video or device.
 
         Arguments:
@@ -84,13 +90,13 @@ class VideoStreamMoviePy(VideoStream):
                 "VideoStreamMoviePy does not support the `framerate` argument yet."
             )
 
-        self._path = path
+        self._path: str = os.fspath(path)
         # TODO: Need to map errors based on the strings, since several failure
         # cases return IOErrors (e.g. could not read duration/video resolution). These
         # should be mapped to specific errors, e.g. write a function to map MoviePy
         # exceptions to a new set of equivalents.
         self._reader = _retry_on_oserror(
-            "open", lambda: FFMPEG_VideoReader(path, print_infos=print_infos)
+            "open", lambda: FFMPEG_VideoReader(self._path, print_infos=print_infos)
         )
         # This will always be one behind self._reader.lastread when we finally call read()
         # as MoviePy caches the first frame when opening the video. Thus self._last_frame
@@ -117,7 +123,7 @@ class VideoStreamMoviePy(VideoStream):
         return framerate_to_fraction(self._reader.fps)
 
     @property
-    def path(self) -> bytes | str:
+    def path(self) -> str:
         """Video path."""
         return self._path
 

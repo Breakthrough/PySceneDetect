@@ -120,7 +120,7 @@ class SceneMetadata:
     """Last frame."""
 
 
-PathFormatter = ty.Callable[[VideoMetadata, SceneMetadata], ty.AnyStr]
+PathFormatter = ty.Callable[[VideoMetadata, SceneMetadata], str]
 
 
 def default_formatter(template: str) -> PathFormatter:

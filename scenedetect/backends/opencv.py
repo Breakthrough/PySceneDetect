@@ -18,6 +18,7 @@ which do not support seeking.
 """
 
 import math
+import os
 import os.path
 import typing as ty
 import warnings
@@ -34,7 +35,7 @@ from scenedetect.common import (
     TimecodeLike,
     framerate_to_fraction,
 )
-from scenedetect.platform import get_file_name
+from scenedetect.platform import StrPath, get_file_name
 from scenedetect.video_stream import (
     FrameRateUnavailable,
     SeekError,
@@ -71,10 +72,10 @@ class VideoStreamCv2(VideoStream):
 
     def __init__(
         self,
-        path: ty.AnyStr | None = None,
+        path: StrPath | None = None,
         framerate: float | None = None,
         max_decode_attempts: int = 5,
-        path_or_device: bytes | str | int | None = None,
+        path_or_device: StrPath | int | None = None,
     ):
         """Open a video file, image sequence, or network stream.
 
@@ -103,15 +104,19 @@ class VideoStreamCv2(VideoStream):
                 DeprecationWarning,
                 stacklevel=2,
             )
-            path = path_or_device
-        if path is None:
+            resolved: str | int = (
+                path_or_device if isinstance(path_or_device, int) else os.fspath(path_or_device)
+            )
+        elif path is None:
             raise ValueError("Path must be specified!")
+        else:
+            resolved = os.fspath(path)
         if framerate is not None and framerate < MAX_FPS_DELTA:
             raise ValueError(f"Specified framerate ({framerate:f}) is invalid!")
         if max_decode_attempts < 0:
             raise ValueError("Maximum decode attempts must be >= 0!")
 
-        self._path_or_device = path
+        self._path_or_device: str | int = resolved
         self._is_device = isinstance(self._path_or_device, int)
 
         # Initialized in _open_capture:
@@ -156,11 +161,11 @@ class VideoStreamCv2(VideoStream):
         return self._frame_rate
 
     @property
-    def path(self) -> bytes | str:
+    def path(self) -> str:
         if self._is_device:
-            assert isinstance(self._path_or_device, (int))
+            assert isinstance(self._path_or_device, int)
             return f"Device {self._path_or_device}"
-        assert isinstance(self._path_or_device, (bytes, str))
+        assert isinstance(self._path_or_device, str)
         return self._path_or_device
 
     @property
@@ -316,15 +321,21 @@ class VideoStreamCv2(VideoStream):
 
     def _open_capture(self, framerate: float | None = None):
         """Opens capture referenced by this object and resets internal state."""
-        if self._is_device and self._path_or_device < 0:
-            raise ValueError("Invalid/negative device ID specified.")
-        input_is_video_file = not self._is_device and not any(
-            identifier in self._path_or_device for identifier in NON_VIDEO_FILE_INPUT_IDENTIFIERS
-        )
-        # We don't have a way of querying why opening a video fails (errors are logged at least),
-        # so provide a better error message if we try to open a file that doesn't exist.
-        if input_is_video_file and not os.path.exists(self._path_or_device):
-            raise OSError("Video file not found.")
+        if self._is_device:
+            assert isinstance(self._path_or_device, int)
+            if self._path_or_device < 0:
+                raise ValueError("Invalid/negative device ID specified.")
+            input_is_video_file = False
+        else:
+            assert isinstance(self._path_or_device, str)
+            input_is_video_file = not any(
+                identifier in self._path_or_device
+                for identifier in NON_VIDEO_FILE_INPUT_IDENTIFIERS
+            )
+            # We don't have a way of querying why opening a video fails (errors are logged at
+            # least), so provide a better error message if we try to open a missing file.
+            if input_is_video_file and not os.path.exists(self._path_or_device):
+                raise OSError("Video file not found.")
 
         cap = cv2.VideoCapture(self._path_or_device)
         if not cap.isOpened():

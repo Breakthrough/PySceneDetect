@@ -40,6 +40,7 @@ from scenedetect.common import (
     TimecodeLike,
     Interpolation,
 )
+from scenedetect.platform import StrPath
 from scenedetect.video_stream import VideoStream, VideoOpenFailure
 from scenedetect.output import (
     save_images,
@@ -80,7 +81,7 @@ logger = getLogger("pyscenedetect")
 
 
 def open_video(
-    path: str,
+    path: StrPath,
     framerate: float | None = None,
     backend: str = "opencv",
     **kwargs,
@@ -133,9 +134,9 @@ def open_video(
 
 
 def detect(
-    video_path: str,
+    video_path: StrPath,
     detector: SceneDetector,
-    stats_file_path: str | None = None,
+    stats_file_path: StrPath | None = None,
     show_progress: bool = False,
     start_time: TimecodeLike | None = None,
     end_time: TimecodeLike | None = None,

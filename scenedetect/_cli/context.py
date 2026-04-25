@@ -159,21 +159,21 @@ class CliContext:
 
     def handle_options(
         self,
-        input_path: ty.AnyStr,
-        output: ty.AnyStr | None,
-        framerate: float,
-        stats_file: ty.AnyStr | None,
-        frame_skip: int,
-        min_scene_len: str,
+        input_path: str | None,
+        output: str | None,
+        framerate: float | None,
+        stats_file: str | None,
+        frame_skip: int | None,
+        min_scene_len: str | None,
         drop_short_scenes: bool | None,
         merge_last_scene: bool | None,
         backend: str | None,
         crop: tuple[int, int, int, int] | None,
         downscale: int | None,
         quiet: bool,
-        logfile: ty.AnyStr | None,
-        config: ty.AnyStr | None,
-        stats: ty.AnyStr | None,
+        logfile: str | None,
+        config: str | None,
+        stats: str | None,
         verbosity: str | None,
     ):
         """Parse all global options/arguments passed to the main scenedetect command,
@@ -496,7 +496,7 @@ class CliContext:
         self,
         quiet: bool | None = None,
         verbosity: str | None = None,
-        logfile: ty.AnyStr | None = None,
+        logfile: str | None = None,
     ):
         """Setup logging based on CLI args and user configuration settings."""
         if quiet is not None:
@@ -527,7 +527,7 @@ class CliContext:
 
     def _open_video_stream(
         self,
-        input_path: ty.AnyStr,
+        input_path: str,
         framerate: float | None,
         backend: str | None,
     ):

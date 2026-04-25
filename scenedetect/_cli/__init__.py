@@ -319,10 +319,10 @@ Global options (e.g. -i/--input, -c/--config) must be specified before any comma
 @click.pass_context
 def scenedetect(
     ctx: click.Context,
-    input: ty.AnyStr | None,
-    output: ty.AnyStr | None,
-    stats: ty.AnyStr | None,
-    config: ty.AnyStr | None,
+    input: str | None,
+    output: str | None,
+    stats: str | None,
+    config: str | None,
     framerate: float | None,
     min_scene_len: str | None,
     drop_short_scenes: bool | None,
@@ -332,7 +332,7 @@ def scenedetect(
     downscale: int | None,
     frame_skip: int | None,
     verbosity: str | None,
-    logfile: ty.AnyStr | None,
+    logfile: str | None,
     quiet: bool,
 ):
     ctx = ctx.obj
@@ -1052,7 +1052,7 @@ To customize image generation, specify the `save-images` command before `save-ht
 @click.pass_context
 def save_html_command(
     ctx: click.Context,
-    filename: ty.AnyStr | None,
+    filename: str | None,
     no_images: bool,
     image_width: int | None,
     image_height: int | None,
@@ -1144,8 +1144,8 @@ Without cut list (RFC 4180 compliant CSV):
 @click.pass_context
 def list_scenes_command(
     ctx: click.Context,
-    output: ty.AnyStr | None,
-    filename: ty.AnyStr | None,
+    output: str | None,
+    filename: str | None,
     no_output_file: bool | None,
     quiet: bool | None,
     skip_cuts: bool | None,
@@ -1280,8 +1280,8 @@ Customized filenames:
 @click.pass_context
 def split_video_command(
     ctx: click.Context,
-    output: ty.AnyStr | None,
-    filename: ty.AnyStr | None,
+    output: str | None,
+    filename: str | None,
     quiet: bool,
     copy: bool,
     high_quality: bool,
@@ -1487,8 +1487,8 @@ Examples:
 @click.pass_context
 def save_images_command(
     ctx: click.Context,
-    output: ty.AnyStr | None = None,
-    filename: ty.AnyStr | None = None,
+    output: str | None = None,
+    filename: str | None = None,
     num_images: int | None = None,
     jpeg: bool = False,
     webp: bool = False,
@@ -1603,10 +1603,10 @@ SAVE_EDL_HELP = """Save cuts in EDL format (CMX 3600)."""
 @click.pass_context
 def save_edl_command(
     ctx: click.Context,
-    filename: ty.AnyStr | None,
-    title: ty.AnyStr | None,
-    reel: ty.AnyStr | None,
-    output: ty.AnyStr | None,
+    filename: str | None,
+    title: str | None,
+    reel: str | None,
+    output: str | None,
 ):
     ctx = ctx.obj
     assert isinstance(ctx, CliContext)
@@ -1657,8 +1657,8 @@ The resulting QP file can be used with the `--qpfile` argument in x264/x265.
 @click.pass_context
 def save_qp_command(
     ctx: click.Context,
-    filename: ty.AnyStr | None,
-    output: ty.AnyStr | None,
+    filename: str | None,
+    output: str | None,
     disable_shift: bool | None,
 ):
     ctx = ctx.obj
@@ -1706,9 +1706,9 @@ SAVE_FCP_HELP = """Save cuts in Final Cut Pro XML format (FCP7 xmeml or FCPX).""
 @click.pass_context
 def save_fcp_command(
     ctx: click.Context,
-    filename: ty.AnyStr | None,
-    format: ty.AnyStr | None,
-    output: ty.AnyStr | None,
+    filename: str | None,
+    format: str | None,
+    output: str | None,
 ):
     ctx = ctx.obj
     assert isinstance(ctx, CliContext)
@@ -1767,9 +1767,9 @@ Uses the Timeline.1 schema. OTIO (OpenTimelineIO) timelines can be imported by m
 @click.pass_context
 def save_otio_command(
     ctx: click.Context,
-    filename: ty.AnyStr | None,
-    name: ty.AnyStr | None,
-    output: ty.AnyStr | None,
+    filename: str | None,
+    name: str | None,
+    output: str | None,
     audio: bool,
     no_audio: bool,
 ):

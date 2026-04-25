@@ -104,13 +104,13 @@ class VideoStream(ABC):
 
     @property
     @abstractmethod
-    def path(self) -> bytes | str:
+    def path(self) -> str:
         """Video or device path."""
         ...
 
     @property
     @abstractmethod
-    def name(self) -> bytes | str:
+    def name(self) -> str:
         """Name of the video, without extension, or device."""
         ...
 

@@ -28,6 +28,10 @@ import typing as ty
 
 import cv2
 
+StrPath = str | os.PathLike[str]
+"""Type hint for filesystem paths. Accepts a `str` or any object implementing :class:`os.PathLike`
+(e.g. :class:`pathlib.Path`)."""
+
 ##
 ## tqdm Library
 ##
@@ -108,24 +112,19 @@ def get_cv2_imwrite_params() -> dict[str, int | None]:
 ##
 
 
-def get_file_name(file_path: ty.AnyStr, include_extension=True) -> ty.AnyStr:
+def get_file_name(file_path: StrPath, include_extension: bool = True) -> str:
     """Return the file name that `file_path` refers to, optionally removing the extension.
 
-    If `include_extension` is False, the result will always be a str.
-
     E.g. /tmp/foo.bar -> foo"""
-    file_name = os.path.basename(file_path)
+    file_name = os.path.basename(os.fspath(file_path))
     if not include_extension:
-        file_name = str(file_name)
         last_dot_pos = file_name.rfind(".")
         if last_dot_pos >= 0:
             file_name = file_name[:last_dot_pos]
     return file_name
 
 
-def get_and_create_path(
-    file_path: ty.AnyStr, output_directory: ty.AnyStr | None = None
-) -> ty.AnyStr:
+def get_and_create_path(file_path: StrPath, output_directory: StrPath | None = None) -> str:
     """Get & Create Path: Gets and returns the full/absolute path to file_path
     in the specified output_directory if set, creating any required directories
     along the way.
@@ -143,10 +142,11 @@ def get_and_create_path(
         Full path to output file suitable for writing.
 
     """
+    file_path = os.fspath(file_path)
     # If an output directory is defined and the file path is a relative path, open
     # the file handle in the output directory instead of the working directory.
     if output_directory is not None and not os.path.isabs(file_path):
-        file_path = os.path.join(output_directory, file_path)
+        file_path = os.path.join(os.fspath(output_directory), file_path)
     # Now that file_path is an absolute path, let's make sure all the directories
     # exist for us to start writing files there.
     os.makedirs(os.path.split(os.path.abspath(file_path))[0], exist_ok=True)

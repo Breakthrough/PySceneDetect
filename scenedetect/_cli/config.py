@@ -318,11 +318,11 @@ class FcpFormat(Enum):
 ConfigValue = bool | int | float | str
 ConfigDict = dict[str, dict[str, ConfigValue]]
 
-_CONFIG_FILE_NAME: ty.AnyStr = "scenedetect.cfg"
-_CONFIG_FILE_DIR: ty.AnyStr = user_config_dir("PySceneDetect", False)
+_CONFIG_FILE_NAME: str = "scenedetect.cfg"
+_CONFIG_FILE_DIR: str = user_config_dir("PySceneDetect", False)
 _PLACEHOLDER = 0  # Placeholder for image quality default, as the value depends on output format
 
-CONFIG_FILE_PATH: ty.AnyStr = os.path.join(_CONFIG_FILE_DIR, _CONFIG_FILE_NAME)
+CONFIG_FILE_PATH: str = os.path.join(_CONFIG_FILE_DIR, _CONFIG_FILE_NAME)
 DEFAULT_JPG_QUALITY = 95
 DEFAULT_WEBP_QUALITY = 100
 

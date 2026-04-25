@@ -11,6 +11,7 @@
 #
 """:class:`VideoStreamAv` provides an adapter for the PyAV av.InputContainer object."""
 
+import os
 import typing as ty
 from fractions import Fraction
 from logging import getLogger
@@ -18,8 +19,13 @@ from logging import getLogger
 import av
 import numpy as np
 
-from scenedetect.common import MAX_FPS_DELTA, FrameTimecode, Timecode, TimecodeLike
-from scenedetect.platform import get_file_name
+from scenedetect.common import (
+    MAX_FPS_DELTA,
+    FrameTimecode,
+    Timecode,
+    TimecodeLike,
+)
+from scenedetect.platform import StrPath, get_file_name
 from scenedetect.video_stream import FrameRateUnavailable, VideoOpenFailure, VideoStream
 
 logger = getLogger("pyscenedetect")
@@ -35,7 +41,7 @@ class VideoStreamAv(VideoStream):
     # calculates the end time.
     def __init__(
         self,
-        path_or_io: ty.AnyStr | ty.BinaryIO,
+        path_or_io: StrPath | ty.BinaryIO,
         framerate: float | Fraction | None = None,
         name: str | None = None,
         threading_mode: str | None = None,
@@ -98,12 +104,12 @@ class VideoStreamAv(VideoStream):
             av.logging.restore_default_callback()
 
         try:
-            if isinstance(path_or_io, (str, bytes)):
-                self._path = path_or_io
+            if isinstance(path_or_io, (str, os.PathLike)):
+                self._path: str = os.fspath(path_or_io)
                 # File handle is intentionally long-lived and tied to the VideoStream.
-                self._io = open(path_or_io, "rb")  # noqa: SIM115
+                self._io = open(self._path, "rb")  # noqa: SIM115
                 if not self._name:
-                    self._name = get_file_name(self.path, include_extension=False)
+                    self._name = get_file_name(self._path, include_extension=False)
             else:
                 self._io = path_or_io
 
@@ -150,12 +156,12 @@ class VideoStreamAv(VideoStream):
     """Unique name used to identify this backend."""
 
     @property
-    def path(self) -> bytes | str:
+    def path(self) -> str:
         """Video path."""
         return self._path
 
     @property
-    def name(self) -> bytes | str:
+    def name(self) -> str:
         """Name of the video, without extension."""
         return self._name
 
