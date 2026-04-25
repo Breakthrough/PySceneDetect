@@ -27,7 +27,7 @@ from copy import deepcopy
 
 import click
 
-import scenedetect
+import scenedetect as scenedetect_pkg
 import scenedetect._cli.commands as cli_commands
 from scenedetect._cli.config import (
     CHOICE_MAP,
@@ -35,6 +35,7 @@ from scenedetect._cli.config import (
     CONFIG_MAP,
     DEFAULT_JPG_QUALITY,
     DEFAULT_WEBP_QUALITY,
+    RangeValue,
 )
 from scenedetect._cli.context import USER_CONFIG, CliContext, check_split_video_requirements
 from scenedetect.backends import AVAILABLE_BACKENDS
@@ -47,12 +48,23 @@ from scenedetect.detectors import (
 )
 from scenedetect.platform import get_cv2_imwrite_params, get_system_version_info
 
-PROGRAM_VERSION = scenedetect.__version__
+PROGRAM_VERSION = scenedetect_pkg.__version__
 """Used to avoid name conflict with named `scenedetect` command below."""
 
 logger = logging.getLogger("pyscenedetect")
 
 LINE_SEPARATOR = "-" * 72
+
+
+def _click_range(section: str, key: str) -> "click.IntRange | click.FloatRange":
+    """Return a `click` parameter type matching the `RangeValue` at `CONFIG_MAP[section][key]`.
+
+    Used in `@click.option(... type=...)` decorators so each option's bounds and value type are
+    sourced from the canonical `CONFIG_MAP` entry.
+    """
+    val = CONFIG_MAP[section][key]
+    assert isinstance(val, RangeValue), f"Expected RangeValue at {section}/{key}, got {type(val)}"
+    return val.click_range
 
 # About & copyright message string shown for the 'about' CLI command (scenedetect about).
 ABOUT_STRING = """
@@ -375,7 +387,8 @@ def add_hidden_alias(command: click.Command, alias: str):
 def help_command(ctx: click.Context, command_name: str):
     """Print full help reference."""
     # TODO: Other commands still seem to run if this is specified.
-    assert isinstance(ctx.parent.command, click.MultiCommand)
+    assert ctx.parent is not None
+    assert isinstance(ctx.parent.command, click.Group)
     parent_command = ctx.parent.command
     all_commands = set(parent_command.list_commands(ctx))
     if command_name is not None:
@@ -386,11 +399,15 @@ def help_command(ctx: click.Context, command_name: str):
             ]
             raise click.BadParameter("\n".join(error_strs), param_hint="command")
         click.echo("")
-        print_command_help(ctx, parent_command.get_command(ctx, command_name))
+        target = parent_command.get_command(ctx, command_name)
+        assert target is not None
+        print_command_help(ctx, target)
     else:
         click.echo(ctx.parent.get_help())
         for command in sorted(all_commands):
-            print_command_help(ctx, parent_command.get_command(ctx, command))
+            target = parent_command.get_command(ctx, command)
+            assert target is not None
+            print_command_help(ctx, target)
     ctx.exit()
 
 
@@ -509,10 +526,7 @@ Examples:
     "--threshold",
     "-t",
     metavar="VAL",
-    type=click.FloatRange(
-        CONFIG_MAP["detect-content"]["threshold"].min_val,
-        CONFIG_MAP["detect-content"]["threshold"].max_val,
-    ),
+    type=_click_range("detect-content", "threshold"),
     default=None,
     help='The max difference (0.0 to 255.0) that adjacent frames score must exceed to trigger a cut. Lower values are more sensitive to shot changes. Refers to "content_val" in stats file.{}'.format(
         USER_CONFIG.get_help_string("detect-content", "threshold")
@@ -720,10 +734,7 @@ Examples:
     "--threshold",
     "-t",
     metavar="VAL",
-    type=click.FloatRange(
-        CONFIG_MAP["detect-threshold"]["threshold"].min_val,
-        CONFIG_MAP["detect-threshold"]["threshold"].max_val,
-    ),
+    type=_click_range("detect-threshold", "threshold"),
     default=None,
     help='Threshold (integer) that frame score must exceed to start a new scene. Refers to "delta_rgb" in stats file.{}'.format(
         USER_CONFIG.get_help_string("detect-threshold", "threshold")
@@ -733,10 +744,7 @@ Examples:
     "--fade-bias",
     "-f",
     metavar="PERCENT",
-    type=click.FloatRange(
-        CONFIG_MAP["detect-threshold"]["fade-bias"].min_val,
-        CONFIG_MAP["detect-threshold"]["fade-bias"].max_val,
-    ),
+    type=_click_range("detect-threshold", "fade-bias"),
     default=None,
     help="Percent (%) from -100 to 100 of timecode skew of cut placement. -100 indicates the start frame, +100 indicates the end frame, and 0 is the middle of both.{}".format(
         USER_CONFIG.get_help_string("detect-threshold", "fade-bias")
@@ -802,10 +810,7 @@ Examples:
     "--threshold",
     "-t",
     metavar="VAL",
-    type=click.FloatRange(
-        CONFIG_MAP["detect-hist"]["threshold"].min_val,
-        CONFIG_MAP["detect-hist"]["threshold"].max_val,
-    ),
+    type=_click_range("detect-hist", "threshold"),
     default=None,
     help="Max difference (0.0 to 1.0) between histograms of adjacent frames. Lower "
     "values are more sensitive to changes.{}".format(
@@ -816,9 +821,7 @@ Examples:
     "--bins",
     "-b",
     metavar="NUM",
-    type=click.IntRange(
-        CONFIG_MAP["detect-hist"]["bins"].min_val, CONFIG_MAP["detect-hist"]["bins"].max_val
-    ),
+    type=_click_range("detect-hist", "bins"),
     default=None,
     help="The number of bins to use for the histogram calculation.{}".format(
         USER_CONFIG.get_help_string("detect-hist", "bins")
@@ -873,10 +876,7 @@ Examples:
     "--threshold",
     "-t",
     metavar="VAL",
-    type=click.FloatRange(
-        CONFIG_MAP["detect-hash"]["threshold"].min_val,
-        CONFIG_MAP["detect-hash"]["threshold"].max_val,
-    ),
+    type=_click_range("detect-hash", "threshold"),
     default=None,
     help=(
         "Max distance between hash values (0.0 to 1.0) of adjacent frames. Lower values are "
@@ -889,9 +889,7 @@ Examples:
     "--size",
     "-s",
     metavar="SIZE",
-    type=click.IntRange(
-        CONFIG_MAP["detect-hash"]["size"].min_val, CONFIG_MAP["detect-hash"]["size"].max_val
-    ),
+    type=_click_range("detect-hash", "size"),
     default=None,
     help="Size of square of low frequency data to include from the discrete cosine transform.{}".format(
         USER_CONFIG.get_help_string("detect-hash", "size")
@@ -901,9 +899,7 @@ Examples:
     "--lowpass",
     "-l",
     metavar="FRAC",
-    type=click.IntRange(
-        CONFIG_MAP["detect-hash"]["lowpass"].min_val, CONFIG_MAP["detect-hash"]["lowpass"].max_val
-    ),
+    type=_click_range("detect-hash", "lowpass"),
     default=None,
     help=(
         "How much high frequency information to filter from the DCT. 2 means keep lower 1/2 of "
@@ -984,6 +980,8 @@ def load_scenes_command(ctx: click.Context, input: str | None, start_col_name: s
         raise click.ClickException("The load-scenes command cannot be used with detectors.")
     if ctx.load_scenes_input:
         raise click.ClickException("The load-scenes command must only be specified once.")
+    if input is None:
+        raise click.BadParameter("Input file is required.", param_hint="-i/--input")
     input = os.path.abspath(input)
     if not os.path.exists(input):
         raise click.BadParameter(
@@ -1066,6 +1064,7 @@ def save_html_command(
     # to include images.
     include_images = not ctx.config.get_value("save-html", "no-images", no_images)
     if include_images and not ctx.save_images:
+        assert save_images_command.callback is not None
         save_images_command.callback()
     save_html_args = {
         "filename": ctx.config.get_value("save-html", "filename", filename),
@@ -1239,10 +1238,7 @@ Customized filenames:
     "-crf",
     metavar="RATE",
     default=None,
-    type=click.IntRange(
-        CONFIG_MAP["split-video"]["rate-factor"].min_val,
-        CONFIG_MAP["split-video"]["rate-factor"].max_val,
-    ),
+    type=_click_range("split-video", "rate-factor"),
     help="Video encoding quality (x264 constant rate factor), from 0-100, where lower is higher quality (larger output). 0 indicates lossless.{}".format(
         USER_CONFIG.get_help_string("split-video", "rate-factor")
     ),

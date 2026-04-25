@@ -23,6 +23,7 @@ from configparser import ConfigParser
 from configparser import Error as ConfigParserError
 from enum import Enum
 
+import click
 from platformdirs import user_config_dir
 
 from scenedetect.common import FrameTimecode
@@ -123,6 +124,13 @@ class RangeValue(ValidatedValue):
     def max_val(self) -> int | float:
         """Maximum value of the range."""
         return self._max_val
+
+    @property
+    def click_range(self) -> "click.IntRange | click.FloatRange":
+        """A `click` parameter type matching this range's bounds and value type."""
+        if isinstance(self._value, int):
+            return click.IntRange(int(self._min_val), int(self._max_val))
+        return click.FloatRange(float(self._min_val), float(self._max_val))
 
     @staticmethod
     def from_config(config_value: str, default: "RangeValue") -> "RangeValue":
@@ -757,9 +765,14 @@ class ConfigRegistry:
         self,
         command: str,
         option: str,
-        override: ConfigValue | None = None,
-    ) -> ConfigValue:
-        """Get the current setting or default value of the specified command option."""
+        override: ty.Any = None,
+    ) -> ty.Any:
+        """Get the current setting or default value of the specified command option.
+
+        Returns ``ty.Any`` because each (command, option) pair has a known concrete type at
+        the call site, but the union across all options is too wide to be useful as a return
+        annotation. Callers should know the expected type for the option they are reading.
+        """
         assert command in CONFIG_MAP and option in CONFIG_MAP[command]
         if override is not None:
             value = override

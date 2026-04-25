@@ -133,6 +133,22 @@ class CliContext:
             (detector_type, detector_args) = self.default_detector
             self.add_detector(detector_type, detector_args)
 
+    def _resolve_min_scene_len(self, command: str, override: str | None) -> int:
+        """Resolve the minimum scene length (in frames) for a `detect-*` command, honoring
+        the `--drop-short-scenes` flag, command-specific config, and global default."""
+        if self.drop_short_scenes:
+            return 0
+        if override is not None:
+            parsed = self.parse_timecode(override)
+            assert parsed is not None
+            return parsed.frame_num
+        if self.config.is_default(command, "min-scene-len"):
+            assert self.min_scene_len is not None
+            return self.min_scene_len.frame_num
+        parsed = self.parse_timecode(self.config.get_value(command, "min-scene-len"))
+        assert parsed is not None
+        return parsed.frame_num
+
     def parse_timecode(self, value: str | None, correct_pts: bool = False) -> FrameTimecode | None:
         """Parses a user input string into a FrameTimecode assuming the given framerate. If `value`
         is None it will be passed through without processing.
@@ -328,18 +344,7 @@ class CliContext:
         filter_mode: str | None = None,
     ) -> dict[str, ty.Any]:
         """Get a dict containing user options to construct a ContentDetector with."""
-        if self.drop_short_scenes:
-            min_scene_len = 0
-        else:
-            if min_scene_len is None:
-                if self.config.is_default("detect-content", "min-scene-len"):
-                    assert self.min_scene_len is not None
-                    min_scene_len = self.min_scene_len.frame_num
-                else:
-                    min_scene_len = self.config.get_value("detect-content", "min-scene-len")
-            parsed = self.parse_timecode(min_scene_len)
-            assert parsed is not None
-            min_scene_len = parsed.frame_num
+        min_scene_len_frames = self._resolve_min_scene_len("detect-content", min_scene_len)
 
         if weights is not None:
             try:
@@ -354,7 +359,7 @@ class CliContext:
             "weights": self.config.get_value("detect-content", "weights", weights),
             "kernel_size": self.config.get_value("detect-content", "kernel-size", kernel_size),
             "luma_only": luma_only or self.config.get_value("detect-content", "luma-only"),
-            "min_scene_len": min_scene_len,
+            "min_scene_len": min_scene_len_frames,
             "threshold": self.config.get_value("detect-content", "threshold", threshold),
             "filter_mode": self.config.get_value("detect-content", "filter-mode", filter_mode),
         }
@@ -371,18 +376,7 @@ class CliContext:
     ) -> dict[str, ty.Any]:
         """Handle detect-adaptive command options and return args to construct one with."""
 
-        if self.drop_short_scenes:
-            min_scene_len = 0
-        else:
-            if min_scene_len is None:
-                if self.config.is_default("detect-adaptive", "min-scene-len"):
-                    assert self.min_scene_len is not None
-                    min_scene_len = self.min_scene_len.frame_num
-                else:
-                    min_scene_len = self.config.get_value("detect-adaptive", "min-scene-len")
-            parsed = self.parse_timecode(min_scene_len)
-            assert parsed is not None
-            min_scene_len = parsed.frame_num
+        min_scene_len_frames = self._resolve_min_scene_len("detect-adaptive", min_scene_len)
 
         if weights is not None:
             try:
@@ -400,7 +394,7 @@ class CliContext:
             "min_content_val": self.config.get_value(
                 "detect-adaptive", "min-content-val", min_content_val
             ),
-            "min_scene_len": min_scene_len,
+            "min_scene_len": min_scene_len_frames,
             "window_width": self.config.get_value("detect-adaptive", "frame-window", frame_window),
         }
 
@@ -413,24 +407,13 @@ class CliContext:
     ) -> dict[str, ty.Any]:
         """Handle detect-threshold command options and return args to construct one with."""
 
-        if self.drop_short_scenes:
-            min_scene_len = 0
-        else:
-            if min_scene_len is None:
-                if self.config.is_default("detect-threshold", "min-scene-len"):
-                    assert self.min_scene_len is not None
-                    min_scene_len = self.min_scene_len.frame_num
-                else:
-                    min_scene_len = self.config.get_value("detect-threshold", "min-scene-len")
-            parsed = self.parse_timecode(min_scene_len)
-            assert parsed is not None
-            min_scene_len = parsed.frame_num
+        min_scene_len_frames = self._resolve_min_scene_len("detect-threshold", min_scene_len)
         # TODO(v1.0): add_last_scene cannot be disabled right now.
         return {
             "add_final_scene": add_last_scene
             or self.config.get_value("detect-threshold", "add-last-scene"),
             "fade_bias": self.config.get_value("detect-threshold", "fade-bias", fade_bias),
-            "min_scene_len": min_scene_len,
+            "min_scene_len": min_scene_len_frames,
             "threshold": self.config.get_value("detect-threshold", "threshold", threshold),
         }
 
@@ -442,21 +425,10 @@ class CliContext:
     ) -> dict[str, ty.Any]:
         """Handle detect-hist command options and return args to construct one with."""
 
-        if self.drop_short_scenes:
-            min_scene_len = 0
-        else:
-            if min_scene_len is None:
-                if self.config.is_default("detect-hist", "min-scene-len"):
-                    assert self.min_scene_len is not None
-                    min_scene_len = self.min_scene_len.frame_num
-                else:
-                    min_scene_len = self.config.get_value("detect-hist", "min-scene-len")
-            parsed = self.parse_timecode(min_scene_len)
-            assert parsed is not None
-            min_scene_len = parsed.frame_num
+        min_scene_len_frames = self._resolve_min_scene_len("detect-hist", min_scene_len)
         return {
             "bins": self.config.get_value("detect-hist", "bins", bins),
-            "min_scene_len": min_scene_len,
+            "min_scene_len": min_scene_len_frames,
             "threshold": self.config.get_value("detect-hist", "threshold", threshold),
         }
 
@@ -469,21 +441,10 @@ class CliContext:
     ) -> dict[str, ty.Any]:
         """Handle detect-hash command options and return args to construct one with."""
 
-        if self.drop_short_scenes:
-            min_scene_len = 0
-        else:
-            if min_scene_len is None:
-                if self.config.is_default("detect-hash", "min-scene-len"):
-                    assert self.min_scene_len is not None
-                    min_scene_len = self.min_scene_len.frame_num
-                else:
-                    min_scene_len = self.config.get_value("detect-hash", "min-scene-len")
-            parsed = self.parse_timecode(min_scene_len)
-            assert parsed is not None
-            min_scene_len = parsed.frame_num
+        min_scene_len_frames = self._resolve_min_scene_len("detect-hash", min_scene_len)
         return {
             "lowpass": self.config.get_value("detect-hash", "lowpass", lowpass),
-            "min_scene_len": min_scene_len,
+            "min_scene_len": min_scene_len_frames,
             "size": self.config.get_value("detect-hash", "size", size),
             "threshold": self.config.get_value("detect-hash", "threshold", threshold),
         }

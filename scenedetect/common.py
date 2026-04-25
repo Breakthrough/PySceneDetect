@@ -503,7 +503,7 @@ class FrameTimecode:
     def __eq__(self, other: ty.Union[int, float, str, "FrameTimecode"]) -> bool:
         if other is None:
             return False
-        if _compare_as_fixed(self, other):
+        if _compare_as_fixed(other, self):
             return self.frame_num == other.frame_num
         # For integer comparison, use frame numbers to avoid floating point precision issues.
         if isinstance(other, int):
@@ -515,7 +515,7 @@ class FrameTimecode:
     def __ne__(self, other: ty.Union[int, float, str, "FrameTimecode"]) -> bool:
         if other is None:
             return True
-        if _compare_as_fixed(self, other):
+        if _compare_as_fixed(other, self):
             return self.frame_num != other.frame_num
         # For integer comparison, use frame numbers to avoid floating point precision issues.
         if isinstance(other, int):
@@ -525,7 +525,7 @@ class FrameTimecode:
         return self.frame_num != self._get_other_as_frames(other)
 
     def __lt__(self, other: ty.Union[int, float, str, "FrameTimecode"]) -> bool:
-        if _compare_as_fixed(self, other):
+        if _compare_as_fixed(other, self):
             return self.frame_num < other.frame_num
         # For integer comparison, use frame numbers to avoid floating point precision issues.
         if isinstance(other, int):
@@ -535,7 +535,7 @@ class FrameTimecode:
         return self.frame_num < self._get_other_as_frames(other)
 
     def __le__(self, other: ty.Union[int, float, str, "FrameTimecode"]) -> bool:
-        if _compare_as_fixed(self, other):
+        if _compare_as_fixed(other, self):
             return self.frame_num <= other.frame_num
         # For integer comparison, use frame numbers to avoid floating point precision issues.
         if isinstance(other, int):
@@ -545,7 +545,7 @@ class FrameTimecode:
         return self.frame_num <= self._get_other_as_frames(other)
 
     def __gt__(self, other: ty.Union[int, float, str, "FrameTimecode"]) -> bool:
-        if _compare_as_fixed(self, other):
+        if _compare_as_fixed(other, self):
             return self.frame_num > other.frame_num
         # For integer comparison, use frame numbers to avoid floating point precision issues.
         if isinstance(other, int):
@@ -555,7 +555,7 @@ class FrameTimecode:
         return self.frame_num > self._get_other_as_frames(other)
 
     def __ge__(self, other: ty.Union[int, float, str, "FrameTimecode"]) -> bool:
-        if _compare_as_fixed(self, other):
+        if _compare_as_fixed(other, self):
             return self.frame_num >= other.frame_num
         # For integer comparison, use frame numbers to avoid floating point precision issues.
         if isinstance(other, int):
@@ -713,8 +713,10 @@ class FrameTimecode:
         raise TypeError("Unsupported type for performing arithmetic with FrameTimecode.")
 
 
-def _compare_as_fixed(a: FrameTimecode, b: ty.Any) -> bool:
-    return a._rate is not None and isinstance(b, FrameTimecode) and b._rate is not None
+def _compare_as_fixed(other: ty.Any, base: FrameTimecode) -> ty.TypeGuard[FrameTimecode]:
+    """Type guard: True (and narrows `other` to `FrameTimecode`) iff both timecodes have a known
+    framerate, in which case frame-based comparison is exact and preferred over float seconds."""
+    return base._rate is not None and isinstance(other, FrameTimecode) and other._rate is not None
 
 
 TimecodeLike = int | float | str | Timecode | FrameTimecode
