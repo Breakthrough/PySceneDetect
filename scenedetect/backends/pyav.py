@@ -74,8 +74,6 @@ class VideoStreamAv(VideoStream):
             VideoOpenFailure: video could not be opened (may be corrupted)
             ValueError: specified framerate is invalid
         """
-        self._container: av.container.InputContainer | None = None  # type: ignore[name-defined]
-
         # TODO(https://scenedetect.com/issues/258): See what
         # `self._container.discard_corrupt = True` does with corrupt videos.
         super().__init__()
@@ -113,7 +111,7 @@ class VideoStreamAv(VideoStream):
             else:
                 self._io = path_or_io
 
-            self._container = av.open(self._io)
+            self._container: av.container.InputContainer = av.open(self._io)  # type: ignore[attr-defined]
             if threading_mode is not None:
                 self._video_stream.thread_type = threading_mode
                 self._reopened = False
@@ -145,8 +143,10 @@ class VideoStreamAv(VideoStream):
         self._duration_frames = self._get_duration()
 
     def __del__(self):
-        if self._container is not None:
-            self._container.close()
+        # `_container` is unset if `__init__` raised before `av.open()` succeeded.
+        container = getattr(self, "_container", None)
+        if container is not None:
+            container.close()
 
     #
     # VideoStream Methods/Properties
@@ -273,7 +273,6 @@ class VideoStreamAv(VideoStream):
         self._frame = None
         self._decoder = None
         self._decode_count = 0
-        assert self._container is not None
         self._container.seek(target_pts, stream=self._video_stream)
         if not beginning:
             self.read(decode=False)
@@ -283,7 +282,6 @@ class VideoStreamAv(VideoStream):
 
     def reset(self):
         """Close and re-open the VideoStream (should be equivalent to calling `seek(0)`)."""
-        assert self._container is not None
         self._container.close()
         self._frame = None
         self._decoder = None
@@ -298,7 +296,6 @@ class VideoStreamAv(VideoStream):
         # B-frame reordering) is never flushed prematurely. Creating a new generator each call
         # caused the last buffered frame to be lost at EOF.
         if self._decoder is None:
-            assert self._container is not None
             self._decoder = self._container.decode(video=0)
         try:
             last_frame = self._frame
@@ -322,7 +319,6 @@ class VideoStreamAv(VideoStream):
     @property
     def _video_stream(self):
         """PyAV `av.video.stream.VideoStream` being used."""
-        assert self._container is not None
         return self._container.streams.video[0]
 
     @property
@@ -379,7 +375,6 @@ class VideoStreamAv(VideoStream):
         except:
             self._io.seek(orig_pos)
             raise
-        assert self._container is not None
         self._container.close()
         self._container = container
         self._decoder = None

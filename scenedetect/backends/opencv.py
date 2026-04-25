@@ -119,18 +119,13 @@ class VideoStreamCv2(VideoStream):
         self._path_or_device: str | int = resolved
         self._is_device = isinstance(self._path_or_device, int)
 
-        # Initialized in _open_capture:
-        self._cap: cv2.VideoCapture | None = (
-            None  # Reference to underlying cv2.VideoCapture object.
-        )
-        self._frame_rate: Fraction | None = None
-
         # VideoCapture state
         self._has_grabbed = False
         self._max_decode_attempts = max_decode_attempts
         self._decode_failures = 0
         self._warning_displayed = False
 
+        # `_open_capture` populates `_cap` and `_frame_rate`.
         self._open_capture(framerate)
 
     #
@@ -145,7 +140,6 @@ class VideoStreamCv2(VideoStream):
         backing this object. Seeking or using the read/grab methods through this property are
         unsupported and will leave this object in an inconsistent state.
         """
-        assert self._cap
         return self._cap
 
     #
@@ -157,7 +151,6 @@ class VideoStreamCv2(VideoStream):
 
     @property
     def frame_rate(self) -> Fraction:
-        assert self._frame_rate
         return self._frame_rate
 
     @property
@@ -189,7 +182,6 @@ class VideoStreamCv2(VideoStream):
     @property
     def frame_size(self) -> tuple[int, int]:
         """Size of each video frame in pixels as a tuple of (width, height)."""
-        assert self._cap is not None
         return (
             math.trunc(self._cap.get(cv2.CAP_PROP_FRAME_WIDTH)),
             math.trunc(self._cap.get(cv2.CAP_PROP_FRAME_HEIGHT)),
@@ -200,13 +192,11 @@ class VideoStreamCv2(VideoStream):
         """Duration of the stream as a FrameTimecode, or None if non terminating."""
         if self._is_device:
             return None
-        assert self._cap is not None
         return self.base_timecode + math.trunc(self._cap.get(cv2.CAP_PROP_FRAME_COUNT))
 
     @property
     def aspect_ratio(self) -> float:
         """Display/pixel aspect ratio as a float (1.0 represents square pixels)."""
-        assert self._cap is not None
         return _get_aspect_ratio(self._cap)
 
     @property
@@ -215,7 +205,6 @@ class VideoStreamCv2(VideoStream):
         # *NOTE*: Although OpenCV has `CAP_PROP_PTS`, it doesn't seem to be reliable. For now, we
         # use `CAP_PROP_POS_MSEC` instead, converting to microseconds for sufficient precision to
         # avoid frame-boundary rounding errors at common framerates like 24000/1001.
-        assert self._cap is not None
         ms = self._cap.get(cv2.CAP_PROP_POS_MSEC)
         time_base = Fraction(1, 1000000)
         return Timecode(pts=round(ms * 1000), time_base=time_base)
@@ -234,12 +223,10 @@ class VideoStreamCv2(VideoStream):
 
     @property
     def position_ms(self) -> float:
-        assert self._cap is not None
         return self._cap.get(cv2.CAP_PROP_POS_MSEC)
 
     @property
     def frame_number(self) -> int:
-        assert self._cap is not None
         return math.trunc(self._cap.get(cv2.CAP_PROP_POS_FRAMES))
 
     def seek(self, target: TimecodeLike):
@@ -249,9 +236,6 @@ class VideoStreamCv2(VideoStream):
             target = FrameTimecode(target, self.frame_rate)
         if target < 0:
             raise ValueError("Target seek position cannot be negative!")
-        assert self._cap is not None
-
-        assert self._frame_rate is not None
         target_secs = (self.base_timecode + target).seconds
         self._has_grabbed = False
         if target_secs > 0:
@@ -281,13 +265,10 @@ class VideoStreamCv2(VideoStream):
 
     def reset(self):
         """Close and re-open the VideoStream (should be equivalent to calling `seek(0)`)."""
-        assert self._cap is not None
-        assert self._frame_rate is not None
         self._cap.release()
         self._open_capture(float(self._frame_rate))
 
     def read(self, decode: bool = True) -> np.ndarray | bool:
-        assert self._cap is not None
         if not self._cap.isOpened():
             return False
         has_grabbed = self._cap.grab()
@@ -364,8 +345,8 @@ class VideoStreamCv2(VideoStream):
             if framerate < MAX_FPS_DELTA:
                 raise FrameRateUnavailable()
 
-        self._cap = cap
-        self._frame_rate = framerate_to_fraction(framerate)
+        self._cap: cv2.VideoCapture = cap
+        self._frame_rate: Fraction = framerate_to_fraction(framerate)
         self._has_grabbed = False
         cap.set(cv2.CAP_PROP_ORIENTATION_AUTO, 1.0)  # https://github.com/opencv/opencv/issues/26795
 
@@ -430,7 +411,6 @@ class VideoCaptureAdapter(VideoStream):
         backing this object. Using the read/grab methods through this property are unsupported and
         will leave this object in an inconsistent state.
         """
-        assert self._cap
         return self._cap
 
     #
@@ -443,7 +423,6 @@ class VideoCaptureAdapter(VideoStream):
     @property
     def frame_rate(self) -> Fraction:
         """Framerate in frames/sec."""
-        assert self._frame_rate
         return self._frame_rate
 
     @property

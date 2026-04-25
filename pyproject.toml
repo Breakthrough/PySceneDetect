@@ -61,15 +61,35 @@ unfixable = []
 
 [tool.pyright]
 include = ["scenedetect", "tests"]
+# Run pyright from inside an activated venv (or pass `--pythonpath` /
+# configure your editor's interpreter) so cv2 / av / numpy / moviepy
+# resolve. Without this, pyright uses its bundled Python and the report
+# fills with cascading "import could not be resolved" noise.
+# Per-developer venv paths are deliberately NOT pinned here.
+#
+# Modes: "off" | "basic" | "standard" | "strict".
+# We're at "basic" for 0.7. Bumping requires the cleanup in TODO(0.8) below.
 typeCheckingMode = "basic"
-# cv2, av, and moviepy ship without type stubs; these reports generate
-# unactionable noise without catching real issues in this codebase.
+
+# Third-party noise: cv2, av, moviepy ship without (or with partial) type
+# stubs; these reports are unactionable in this codebase.
 reportMissingTypeStubs = "none"
 reportUnknownMemberType = "none"
 reportUnknownArgumentType = "none"
 reportUnknownVariableType = "none"
 reportUnknownParameterType = "none"
+
+# Click + pytest decorators are conventionally untyped.
+reportUntypedFunctionDecorator = "none"
+
+# TODO(0.8): Audit the rules below. They were added globally with a
+# third-party justification, but they affect the whole codebase. After the
+# remaining first-party type-debt is cleared (FrameTimecode/TimecodeLike in
+# common.py, _cli/config.py CropValue overloads, Click CLI typing in
+# _cli/__init__.py), re-enable each in isolation and decide keep/drop:
+#   reportMissingParameterType  — first-party coverage looks complete
+#   reportMissingTypeArgument   — modern Python defaults absorb most
+#   reportPrivateUsage          — no cross-module _private access seen
 reportMissingParameterType = "none"
 reportMissingTypeArgument = "none"
-reportUntypedFunctionDecorator = "none"
 reportPrivateUsage = "none"
