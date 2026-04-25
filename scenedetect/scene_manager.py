@@ -419,8 +419,8 @@ class SceneManager:
     def detect_scenes(
         self,
         video: VideoStream | None = None,
-        duration: FrameTimecode | None = None,
-        end_time: FrameTimecode | None = None,
+        duration: "int | float | str | FrameTimecode | None" = None,
+        end_time: "int | float | str | FrameTimecode | None" = None,
         frame_skip: int = 0,
         show_progress: bool = False,
         callback: ty.Callable[[np.ndarray, FrameTimecode], None] | None = None,

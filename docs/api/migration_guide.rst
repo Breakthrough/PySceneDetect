@@ -160,7 +160,37 @@ All backends now return presentation timestamp (PTS) backed values from ``VideoS
 ``StatsManager`` Changes
 =======================================================================
 
-The ``StatsManager`` methods ``get_metrics()``, ``set_metrics()``, and ``metrics_exist()`` now take a ``FrameTimecode`` instead of ``int`` for the frame identifier, matching the detector interface change.
+The ``StatsManager`` methods ``get_metrics()``, ``set_metrics()``, and ``metrics_exist()`` now formally accept either a ``FrameTimecode`` or a plain ``int`` frame number for the timecode argument. Passing a ``FrameTimecode`` is preferred and matches the detector interface; the ``int`` form is retained for compatibility with the deprecated ``load_from_csv()`` path, which keys metrics by integer frame number.
+
+``StatsManager.load_from_csv()`` also accepts ``os.PathLike`` (e.g. ``pathlib.Path``) in addition to ``str`` / ``bytes`` / file handles.
+
+
+=======================================================================
+``SceneDetector`` Annotation Fixes
+=======================================================================
+
+``SceneDetector.post_process()`` now declares its parameter as ``timecode: FrameTimecode`` (previously typed as ``int``). The method already received a ``FrameTimecode`` at runtime and concrete detectors (e.g. ``ThresholdDetector``, ``ContentDetector``) already used the ``FrameTimecode`` type — only the abstract-base-class annotation was inconsistent. No call-site changes are needed; this just brings the signature into agreement with the documented and actual behavior.
+
+
+=======================================================================
+``SceneManager.detect_scenes()`` Time Arguments
+=======================================================================
+
+The ``duration`` and ``end_time`` arguments now formally accept ``int`` (frames), ``float`` (seconds), ``str`` (timecode string, e.g. ``"00:00:05.000"``), or ``FrameTimecode``. The internal code already validated these forms; the annotation was previously narrower than the documented behavior.
+
+.. code:: python
+
+    # All of these were always supported at runtime; now they type-check too:
+    scene_manager.detect_scenes(video=video, end_time=15.0)         # seconds
+    scene_manager.detect_scenes(video=video, end_time=1500)         # frames
+    scene_manager.detect_scenes(video=video, end_time="00:01:00")   # timecode
+
+
+=======================================================================
+``save_images()`` Path Handling
+=======================================================================
+
+The ``output_dir`` argument of :func:`scenedetect.output.save_images` now accepts ``os.PathLike`` (e.g. ``pathlib.Path``) in addition to ``str``. No changes are required for existing string-based callers.
 
 
 =======================================================================

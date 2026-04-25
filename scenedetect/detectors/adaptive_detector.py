@@ -100,6 +100,10 @@ class AdaptiveDetector(ContentDetector):
     def process_frame(self, timecode: FrameTimecode, frame_img: np.ndarray) -> list[FrameTimecode]:
         super().process_frame(timecode=timecode, frame_img=frame_img)
 
+        # If the parent could not calculate a frame score, there's nothing to buffer.
+        if self._frame_score is None:
+            return []
+
         # Initialize last scene cut point at the beginning of the frames of interest.
         if self._last_cut is None:
             self._last_cut = timecode

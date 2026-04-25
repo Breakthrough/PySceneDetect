@@ -169,7 +169,9 @@ class ContentDetector(SceneDetector):
             delta_sat=_mean_pixel_distance(sat, self._last_frame.sat),
             delta_lum=_mean_pixel_distance(lum, self._last_frame.lum),
             delta_edges=(
-                0.0 if edges is None else _mean_pixel_distance(edges, self._last_frame.edges)
+                0.0
+                if edges is None or self._last_frame.edges is None
+                else _mean_pixel_distance(edges, self._last_frame.edges)
             ),
         )
 

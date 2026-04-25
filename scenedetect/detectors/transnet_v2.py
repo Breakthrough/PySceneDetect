@@ -107,6 +107,8 @@ class Predictor:
                 ),
             )
         else:
+            # `self.time` is set in lockstep with `self.pixels` above, so it is non-None here.
+            assert self.time is not None
             c1 = self.pixels
             c2 = pixels
 

@@ -101,6 +101,7 @@ def test_api_stats_manager(test_video_file: str):
     scene_manager.detect_scenes(video=video)
     # Save per-frame statistics to disk.
     filename = f"{test_video_file}.stats.csv"
+    assert scene_manager.stats_manager is not None
     scene_manager.stats_manager.save_to_csv(csv_file=filename)
 
 
@@ -108,11 +109,11 @@ def test_api_scene_manager_callback(test_video_file: str):
     """Demonstrate how to use a callback with the SceneManager detect_scenes method."""
     import numpy
 
-    from scenedetect import ContentDetector, SceneManager, open_video
+    from scenedetect import ContentDetector, FrameTimecode, SceneManager, open_video
 
     # Callback to invoke on the first frame of every new scene detection.
-    def on_new_scene(frame_img: numpy.ndarray, frame_num: int):
-        print(f"New scene found at frame {frame_num}.")
+    def on_new_scene(frame_img: numpy.ndarray, position: FrameTimecode):
+        print(f"New scene found at frame {position.frame_num}.")
 
     video = open_video(test_video_file)
     scene_manager = SceneManager()
@@ -127,11 +128,11 @@ def test_api_device_callback(test_video_file: str):
     import cv2
     import numpy
 
-    from scenedetect import ContentDetector, SceneManager, VideoCaptureAdapter
+    from scenedetect import ContentDetector, FrameTimecode, SceneManager, VideoCaptureAdapter
 
     # Callback to invoke on the first frame of every new scene detection.
-    def on_new_scene(frame_img: numpy.ndarray, frame_num: int):
-        print(f"New scene found at frame {frame_num}.")
+    def on_new_scene(frame_img: numpy.ndarray, position: FrameTimecode):
+        print(f"New scene found at frame {position.frame_num}.")
 
     # We open a file just for test purposes, but we can also use a device or pipe here.
     cap = cv2.VideoCapture(test_video_file)

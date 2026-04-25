@@ -206,6 +206,7 @@ class CliContext:
 
         # The `scenedetect` command was just started, let's initialize logging and try to load any
         # config files that were specified.
+        init_log: list = []
         try:
             init_failure = not self.config.initialized
             init_log = self.config.get_init_log()
@@ -305,9 +306,9 @@ class CliContext:
             scene_manager.auto_downscale = True
         else:
             scene_manager.auto_downscale = False
-            downscale = self.config.get_value("global", "downscale", downscale)
+            downscale_value: int = self.config.get_value("global", "downscale", downscale)
             try:
-                scene_manager.downscale = downscale
+                scene_manager.downscale = downscale_value
             except ValueError as ex:
                 logger.debug(str(ex))
                 raise click.BadParameter(str(ex), param_hint="downscale factor") from ex
@@ -532,11 +533,13 @@ class CliContext:
                     framerate=framerate,
                     backend=backend,
                 )
+            duration = self.video_stream.duration
+            duration_str = f"{duration} ({duration.frame_num} frames)" if duration else "unknown"
             logger.debug(f"""Video information:
   Backend:      {type(self.video_stream).__name__}
   Resolution:   {self.video_stream.frame_size}
   Framerate:    {self.video_stream.frame_rate}
-  Duration:     {self.video_stream.duration} ({self.video_stream.duration.frame_num} frames)""")
+  Duration:     {duration_str}""")
 
         except FrameRateUnavailable as ex:
             if __debug__:

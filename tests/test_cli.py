@@ -37,6 +37,7 @@ import pytest
 
 import scenedetect
 from scenedetect.output import is_ffmpeg_available, is_mkvmerge_available
+from scenedetect.platform import StrPath
 from tests.helpers import invoke_cli
 
 SCENEDETECT_CMD = sys.executable + " -m scenedetect"
@@ -66,7 +67,7 @@ DEFAULT_FFMPEG_ARGS = (
 
 def invoke_scenedetect(
     args: str = "",
-    output_dir: str | None = None,
+    output_dir: StrPath | None = None,
     config_file: str | None = DEFAULT_CONFIG_FILE,
     **kwargs,
 ):
@@ -536,7 +537,7 @@ def test_cli_save_images(tmp_path: Path):
     # Should detect two scenes and generate 3 images per scene with above params.
     assert len(images) == 6
     # Open one of the created images and make sure it has the correct resolution.
-    image = cv2.imread(images[0])
+    image = cv2.imread(str(images[0]))
     assert image.shape == (544, 1280, 3)
 
 
@@ -575,7 +576,7 @@ def test_cli_save_images_rotation(rotated_video_file, tmp_path: Path):
     images = [image for image in tmp_path.glob("*.jpg")]
     # Should detect two scenes and generate 3 images per scene with above params.
     assert len(images) == 6
-    image = cv2.imread(images[0])
+    image = cv2.imread(str(images[0]))
     # Note same resolution as in test_cli_save_images but rotated 90 degrees.
     assert image.shape == (1280, 544, 3)
 

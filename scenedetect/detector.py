@@ -61,7 +61,7 @@ class SceneDetector(ABC):
 
     # Optional Methods
 
-    def post_process(self, timecode: int) -> list[FrameTimecode]:
+    def post_process(self, timecode: FrameTimecode) -> list[FrameTimecode]:
         """Called after there are no more frames to process.
 
         Args:

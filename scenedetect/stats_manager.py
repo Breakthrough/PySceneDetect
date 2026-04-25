@@ -96,19 +96,22 @@ class StatsManager:
     Only metrics consisting of `float` or `int` should be used currently.
     """
 
-    def __init__(self, base_timecode: FrameTimecode | None = None):
+    def __init__(self, base_timecode: int | FrameTimecode | None = None):
         """Initialize a new StatsManager.
 
         Arguments:
             base_timecode: Timecode associated with this object. Must not be None (default value
                 will be removed in a future release).
         """
-        # Frame metrics is a dict of frame (int): metric_dict (Dict[str, float])
-        # of each frame metric key and the value it represents (usually float).
-        self._frame_metrics: dict[FrameTimecode, dict[str, float]] = dict()
+        # Frame metrics keyed by either an `int` frame number or a `FrameTimecode`. Both forms
+        # hash/compare to the same dict slot (`FrameTimecode.__hash__` returns `frame_num`), so
+        # public methods accept both interchangeably for the same frame.
+        self._frame_metrics: dict[int | FrameTimecode, dict[str, float]] = dict()
         self._metric_keys: set[str] = set()
         self._metrics_updated: bool = False  # Flag indicating if metrics require saving.
-        self._base_timecode: FrameTimecode | None = base_timecode  # Used for timing calculations.
+        self._base_timecode: int | FrameTimecode | None = (
+            base_timecode  # Used for timing calculations.
+        )
 
     @property
     def metric_keys(self) -> ty.Iterable[str]:
@@ -120,7 +123,9 @@ class StatsManager:
 
     # TODO(https://scenedetect.com/issues/507): We should support the dictionary protocol instead
     # of using this bespoke interface. It would be useful for Pandas compatibility as well.
-    def get_metrics(self, timecode: FrameTimecode, metric_keys: ty.Iterable[str]) -> list[ty.Any]:
+    def get_metrics(
+        self, timecode: int | FrameTimecode, metric_keys: ty.Iterable[str]
+    ) -> list[ty.Any]:
         """Return the requested statistics/metrics for a given timecode.
 
         Returns:
@@ -129,7 +134,7 @@ class StatsManager:
         """
         return [self._get_metric(timecode, metric_key) for metric_key in metric_keys]
 
-    def set_metrics(self, timecode: FrameTimecode, metric_kv_dict: dict[str, ty.Any]) -> None:
+    def set_metrics(self, timecode: int | FrameTimecode, metric_kv_dict: dict[str, ty.Any]) -> None:
         """Set Metrics: Sets the provided statistics/metrics for a given frame.
 
         Arguments:
@@ -139,7 +144,7 @@ class StatsManager:
         for metric_key in metric_kv_dict:
             self._set_metric(timecode, metric_key, metric_kv_dict[metric_key])
 
-    def metrics_exist(self, timecode: FrameTimecode, metric_keys: ty.Iterable[str]) -> bool:
+    def metrics_exist(self, timecode: int | FrameTimecode, metric_keys: ty.Iterable[str]) -> bool:
         """Metrics Exist: Checks if the given metrics/stats exist for the given frame.
 
         Returns:
@@ -188,6 +193,10 @@ class StatsManager:
         frame_keys = sorted(self._frame_metrics.keys())
         logger.info("Writing %d frames to CSV...", len(frame_keys))
         for frame_key in frame_keys:
+            # `frame_key` may be a bare `int` if the deprecated `load_from_csv` populated the dict.
+            # Skip such rows since we cannot recover a timecode without a base framerate.
+            if not isinstance(frame_key, FrameTimecode):
+                continue
             csv_writer.writerow(
                 [frame_key.frame_num + 1, frame_key.get_timecode()]
                 + [str(metric) for metric in self.get_metrics(frame_key, metric_keys)]
@@ -209,7 +218,7 @@ class StatsManager:
 
     # TODO(v1.0): Create a replacement for a calculation cache that functions like load_from_csv
     # did, but is better integrated with detectors for cached calculations instead of statistics.
-    def load_from_csv(self, csv_file: str | bytes | ty.TextIO) -> int | None:
+    def load_from_csv(self, csv_file: StrPath | bytes | ty.TextIO) -> int | None:
         """[DEPRECATED] DO NOT USE
 
         Load all metrics stored in a CSV file into the StatsManager instance. Will be removed in a
@@ -233,7 +242,7 @@ class StatsManager:
 
         # If we get a path instead of an open file handle, check that it exists, and if so,
         # recursively call ourselves again but with file set instead of path.
-        if isinstance(csv_file, (str, bytes, Path)):
+        if isinstance(csv_file, (str, bytes, os.PathLike)):
             if os.path.exists(csv_file):
                 with open(csv_file) as file:
                     return self.load_from_csv(csv_file=file)
@@ -288,16 +297,18 @@ class StatsManager:
 
     # TODO: Get rid of these functions and simplify the implementation of this class.
 
-    def _get_metric(self, timecode: FrameTimecode, metric_key: str) -> ty.Any | None:
+    def _get_metric(self, timecode: int | FrameTimecode, metric_key: str) -> ty.Any | None:
         if self._metric_exists(timecode, metric_key):
             return self._frame_metrics[timecode][metric_key]
         return None
 
-    def _set_metric(self, timecode: FrameTimecode, metric_key: str, metric_value: ty.Any) -> None:
+    def _set_metric(
+        self, timecode: int | FrameTimecode, metric_key: str, metric_value: ty.Any
+    ) -> None:
         self._metrics_updated = True
         if timecode not in self._frame_metrics:
             self._frame_metrics[timecode] = dict()
         self._frame_metrics[timecode][metric_key] = metric_value
 
-    def _metric_exists(self, timecode: FrameTimecode, metric_key: str) -> bool:
+    def _metric_exists(self, timecode: int | FrameTimecode, metric_key: str) -> bool:
         return timecode in self._frame_metrics and metric_key in self._frame_metrics[timecode]

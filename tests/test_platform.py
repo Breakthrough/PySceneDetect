@@ -37,4 +37,4 @@ def test_long_command():
     """
     if platform.system() == "Windows":
         with pytest.raises(CommandTooLong):
-            invoke_command("x" * 2**15)
+            invoke_command(["x" * 2**15])

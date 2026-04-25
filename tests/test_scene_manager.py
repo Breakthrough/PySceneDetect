@@ -198,15 +198,15 @@ def test_detect_scenes_crop(test_video_file):
 
 def test_crop_invalid():
     sm = SceneManager()
-    sm.crop = None
+    sm.crop = None  # type: ignore[assignment]
     sm.crop = (0, 0, 0, 0)
     sm.crop = (1, 1, 0, 0)
     sm.crop = (0, 0, 1, 1)
     with pytest.raises(TypeError):
-        sm.crop = 1
+        sm.crop = 1  # type: ignore[assignment]
     with pytest.raises(TypeError):
-        sm.crop = (1, 1)
+        sm.crop = (1, 1)  # type: ignore[assignment]
     with pytest.raises(TypeError):
-        sm.crop = (1, 1, 1)
+        sm.crop = (1, 1, 1)  # type: ignore[assignment]
     with pytest.raises(ValueError):
         sm.crop = (1, 1, 1, -1)

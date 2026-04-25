@@ -28,7 +28,7 @@ from scenedetect.common import (
     Interpolation,
     SceneList,
 )
-from scenedetect.platform import get_and_create_path, get_cv2_imwrite_params, tqdm
+from scenedetect.platform import StrPath, get_and_create_path, get_cv2_imwrite_params, tqdm
 from scenedetect.video_stream import VideoStream
 
 logger = logging.getLogger("pyscenedetect")
@@ -162,7 +162,7 @@ class _ImageExtractor:
         self,
         video: VideoStream,
         scene_list: SceneList,
-        output_dir: str | None = None,
+        output_dir: StrPath | None = None,
         show_progress=False,
     ) -> dict[int, list[str]]:
         """Run image extraction on `video` using the current parameters. Thread-safe.
@@ -355,7 +355,7 @@ def save_images(
     image_extension: str = "jpg",
     encoder_param: int = 95,
     image_name_template: str = "$VIDEO_NAME-Scene-$SCENE_NUMBER-$IMAGE_NUMBER",
-    output_dir: str | None = None,
+    output_dir: StrPath | None = None,
     show_progress: bool | None = False,
     scale: float | None = None,
     height: int | None = None,

@@ -33,11 +33,14 @@ def test_framerate():
     """Test FrameTimecode constructor argument "fps"."""
     # Not passing fps results in TypeError.
     with pytest.raises(TypeError):
-        FrameTimecode()
+        FrameTimecode()  # type: ignore[call-arg]
     with pytest.raises(TypeError):
         FrameTimecode(timecode=0, fps=None)
     with pytest.raises(TypeError):
-        FrameTimecode(timecode=None, fps=FrameTimecode(timecode=0, fps=None))
+        FrameTimecode(
+            timecode=None,  # type: ignore[arg-type]
+            fps=FrameTimecode(timecode=0, fps=None),
+        )
     # Test zero FPS/negative.
     with pytest.raises(ValueError):
         FrameTimecode(timecode=0, fps=0.0)

@@ -31,14 +31,16 @@ from scenedetect.detectors import (
     ThresholdDetector,
 )
 
-FAST_CUT_DETECTORS: tuple[type[SceneDetector]] = (
+# Untyped so each entry retains its concrete `type[…]` for parameterized construction
+# (calls below pass detector-specific kwargs like `min_scene_len`).
+FAST_CUT_DETECTORS = (
     AdaptiveDetector,
     ContentDetector,
     HashDetector,
     HistogramDetector,
 )
 
-ALL_DETECTORS: tuple[type[SceneDetector]] = (*FAST_CUT_DETECTORS, ThresholdDetector)
+ALL_DETECTORS = (*FAST_CUT_DETECTORS, ThresholdDetector)
 
 # TODO(https://scenedetect.com/issues/53): Add a test that verifies algorithms output relatively
 # consistent frame scores regardless of resolution. This will ensure that threshold values will hold

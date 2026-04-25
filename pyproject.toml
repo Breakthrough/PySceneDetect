@@ -61,6 +61,9 @@ unfixable = []
 
 [tool.pyright]
 include = ["scenedetect", "tests"]
+# Vendored third-party code: don't lint upstream source (mirrors the ruff
+# per-file-ignores convention).
+exclude = ["scenedetect/_thirdparty"]
 # Run pyright from inside an activated venv (or pass `--pythonpath` /
 # configure your editor's interpreter) so cv2 / av / numpy / moviepy
 # resolve. Without this, pyright uses its bundled Python and the report
