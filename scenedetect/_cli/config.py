@@ -152,11 +152,14 @@ class CropValue(ValidatedValue):
     _IGNORE_CHARS = (",", "/", "(", ")")
     """Characters to ignore."""
 
-    def __init__(self, value: str | tuple[int, int, int, int] | None = None):
-        if isinstance(value, CropValue) or value is None:
-            self._crop = value
+    def __init__(self, value: "str | tuple[int, int, int, int] | CropValue | None" = None):
+        self._crop: tuple[int, int, int, int] | None = None
+        if isinstance(value, CropValue):
+            self._crop = value._crop
+        elif value is None:
+            return
         else:
-            crop = ()
+            crop: tuple[int, ...] = ()
             if isinstance(value, str):
                 translation_table = str.maketrans(
                     {char: " " for char in ScoreWeightsValue._IGNORE_CHARS}
@@ -173,11 +176,13 @@ class CropValue(ValidatedValue):
             self._crop = (min(x0, x1), min(y0, y1), max(x0, x1), max(y0, y1))
 
     @property
-    def value(self) -> tuple[int, int, int, int]:
+    def value(self) -> tuple[int, int, int, int] | None:
         return self._crop
 
     def __str__(self) -> str:
-        x0, y0, x1, y1 = self.value
+        if self._crop is None:
+            return "(none)"
+        x0, y0, x1, y1 = self._crop
         return f"[{x0}, {y0}], [{x1}, {y1}]"
 
     @staticmethod
@@ -228,25 +233,27 @@ class KernelSizeValue(ValidatedValue):
     """Validator for kernel sizes (odd integer > 1, or -1 for auto size)."""
 
     def __init__(self, value: int):
+        self._value: int | None
         if value == -1:
-            # Downscale factor of -1 maps to None internally for auto downscale.
-            value = None
+            # Kernel size of -1 maps to None internally for auto-sized kernel.
+            self._value = None
         elif value < 0:
             # Disallow other negative values.
             raise ValueError()
         elif value % 2 == 0:
             # Disallow even values.
             raise ValueError()
-        self._value = value
+        else:
+            self._value = value
 
     @property
-    def value(self) -> int:
+    def value(self) -> int | None:
         return self._value
 
     def __str__(self) -> str:
-        if self.value is None:
+        if self._value is None:
             return "auto"
-        return str(self.value)
+        return str(self._value)
 
     @staticmethod
     def from_config(config_value: str, default: "KernelSizeValue") -> "KernelSizeValue":
@@ -291,7 +298,12 @@ class EscapedChar(EscapedString):
 
     @staticmethod
     def from_config(config_value: str, default: "EscapedString") -> "EscapedChar":
-        return EscapedString.from_config(config_value, default, length_limit=1)
+        try:
+            return EscapedChar(config_value)
+        except (UnicodeDecodeError, UnicodeEncodeError) as ex:
+            raise OptionParseFailure(
+                "Value must be valid UTF-8 string with escape characters."
+            ) from ex
 
 
 class TimecodeFormat(Enum):
@@ -323,7 +335,11 @@ class FcpFormat(Enum):
     """Final Cut Pro 7 XML Format"""
 
 
-ConfigValue = bool | int | float | str
+# `ConfigValue` covers every concrete type that can appear as a default in
+# `CONFIG_MAP` or as a parsed value in `ConfigRegistry._config`. Custom
+# validators (`ValidatedValue` subclasses) and `Enum` defaults are included
+# because they appear directly in `CONFIG_MAP`.
+ConfigValue = bool | int | float | str | None | ValidatedValue | Enum
 ConfigDict = dict[str, dict[str, ConfigValue]]
 
 _CONFIG_FILE_NAME: str = "scenedetect.cfg"
@@ -577,26 +593,28 @@ def _parse_config(parser: ConfigParser) -> tuple[ConfigDict | None, list[LogMess
         config[command] = {}
         for option in CONFIG_MAP[command]:
             if command in parser and option in parser[command]:
+                # Bind to a local so pyright can narrow inside the isinstance branches.
+                default_value = CONFIG_MAP[command][option]
                 try:
                     value_type = None
-                    if isinstance(CONFIG_MAP[command][option], bool):
+                    if isinstance(default_value, bool):
                         value_type = "yes/no value"
                         config[command][option] = parser.getboolean(command, option)
                         continue
-                    elif isinstance(CONFIG_MAP[command][option], int):
+                    elif isinstance(default_value, int):
                         value_type = "integer"
                         config[command][option] = parser.getint(command, option)
                         continue
-                    elif isinstance(CONFIG_MAP[command][option], float):
+                    elif isinstance(default_value, float):
                         value_type = "number"
                         config[command][option] = parser.getfloat(command, option)
                         continue
-                    elif isinstance(CONFIG_MAP[command][option], Enum):
+                    elif isinstance(default_value, Enum):
                         config_value = (
                             parser.get(command, option).replace("\n", " ").strip().upper()
                         )
                         try:
-                            parsed = CONFIG_MAP[command][option].__class__[config_value]
+                            parsed = default_value.__class__[config_value]
                             config[command][option] = parsed
                         except TypeError:
                             success = False
@@ -627,12 +645,11 @@ def _parse_config(parser: ConfigParser) -> tuple[ConfigDict | None, list[LogMess
 
                 # Handle custom validation types.
                 config_value = parser.get(command, option)
-                default = CONFIG_MAP[command][option]
-                option_type = type(default)
-                if issubclass(option_type, ValidatedValue):
+                if isinstance(default_value, ValidatedValue):
+                    option_type = type(default_value)
                     try:
                         config[command][option] = option_type.from_config(
-                            config_value=config_value, default=default
+                            config_value=config_value, default=default_value
                         )
                     except OptionParseFailure as ex:
                         success = False
@@ -677,7 +694,7 @@ def _parse_config(parser: ConfigParser) -> tuple[ConfigDict | None, list[LogMess
 class ConfigLoadFailure(Exception):
     """Raised when a user-specified configuration file fails to be loaded or validated."""
 
-    def __init__(self, init_log: tuple[int, str], reason: Exception | None = None):
+    def __init__(self, init_log: list[LogMessage], reason: Exception | None = None):
         super().__init__()
         self.init_log = init_log
         self.reason = reason
@@ -774,16 +791,17 @@ class ConfigRegistry:
         annotation. Callers should know the expected type for the option they are reading.
         """
         assert command in CONFIG_MAP and option in CONFIG_MAP[command]
+        default_value = CONFIG_MAP[command][option]
         if override is not None:
             value = override
         elif command in self._config and option in self._config[command]:
             value = self._config[command][option]
         else:
-            value = CONFIG_MAP[command][option]
+            value = default_value
         if isinstance(value, ValidatedValue):
             return value.value
-        if isinstance(CONFIG_MAP[command][option], Enum) and isinstance(override, str):
-            return CONFIG_MAP[command][option].__class__[value.upper().strip()]
+        if isinstance(default_value, Enum) and isinstance(override, str):
+            return default_value.__class__[override.upper().strip()]
         return value
 
     def get_help_string(self, command: str, option: str, show_default: bool | None = None) -> str:
