@@ -178,6 +178,7 @@ class VideoStreamCv2(VideoStream):
     @property
     def frame_size(self) -> tuple[int, int]:
         """Size of each video frame in pixels as a tuple of (width, height)."""
+        assert self._cap is not None
         return (
             math.trunc(self._cap.get(cv2.CAP_PROP_FRAME_WIDTH)),
             math.trunc(self._cap.get(cv2.CAP_PROP_FRAME_HEIGHT)),
@@ -188,11 +189,13 @@ class VideoStreamCv2(VideoStream):
         """Duration of the stream as a FrameTimecode, or None if non terminating."""
         if self._is_device:
             return None
+        assert self._cap is not None
         return self.base_timecode + math.trunc(self._cap.get(cv2.CAP_PROP_FRAME_COUNT))
 
     @property
     def aspect_ratio(self) -> float:
         """Display/pixel aspect ratio as a float (1.0 represents square pixels)."""
+        assert self._cap is not None
         return _get_aspect_ratio(self._cap)
 
     @property
@@ -201,6 +204,7 @@ class VideoStreamCv2(VideoStream):
         # *NOTE*: Although OpenCV has `CAP_PROP_PTS`, it doesn't seem to be reliable. For now, we
         # use `CAP_PROP_POS_MSEC` instead, converting to microseconds for sufficient precision to
         # avoid frame-boundary rounding errors at common framerates like 24000/1001.
+        assert self._cap is not None
         ms = self._cap.get(cv2.CAP_PROP_POS_MSEC)
         time_base = Fraction(1, 1000000)
         return Timecode(pts=round(ms * 1000), time_base=time_base)
@@ -219,10 +223,12 @@ class VideoStreamCv2(VideoStream):
 
     @property
     def position_ms(self) -> float:
+        assert self._cap is not None
         return self._cap.get(cv2.CAP_PROP_POS_MSEC)
 
     @property
     def frame_number(self) -> int:
+        assert self._cap is not None
         return math.trunc(self._cap.get(cv2.CAP_PROP_POS_FRAMES))
 
     def seek(self, target: FrameTimecode | float | int):
@@ -230,7 +236,9 @@ class VideoStreamCv2(VideoStream):
             raise SeekError("Cannot seek if input is a device!")
         if target < 0:
             raise ValueError("Target seek position cannot be negative!")
+        assert self._cap is not None
 
+        assert self._frame_rate is not None
         target_secs = (self.base_timecode + target).seconds
         self._has_grabbed = False
         if target_secs > 0:
@@ -260,16 +268,20 @@ class VideoStreamCv2(VideoStream):
 
     def reset(self):
         """Close and re-open the VideoStream (should be equivalent to calling `seek(0)`)."""
+        assert self._cap is not None
+        assert self._frame_rate is not None
         self._cap.release()
-        self._open_capture(self._frame_rate)
+        self._open_capture(float(self._frame_rate))
 
     def read(self, decode: bool = True) -> np.ndarray | bool:
+        assert self._cap is not None
         if not self._cap.isOpened():
             return False
         has_grabbed = self._cap.grab()
         # If we failed to grab the frame, retry a few times if required.
         if not has_grabbed:
-            if self.duration > 0 and self.position < (self.duration - 1):
+            duration = self.duration
+            if duration is not None and duration > 0 and self.position < (duration - 1):
                 for _ in range(self._max_decode_attempts):
                     has_grabbed = self._cap.grab()
                     if has_grabbed:

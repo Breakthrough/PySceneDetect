@@ -102,7 +102,7 @@ class VideoStreamMoviePy(VideoStream):
         self._frame_number = 0
         # We need to manually keep track of EOF as duration may not be accurate.
         self._eof = False
-        self._aspect_ratio: float = None
+        self._aspect_ratio: float | None = None
 
     #
     # VideoStream Methods/Properties
@@ -211,11 +211,13 @@ class VideoStreamMoviePy(VideoStream):
         success = False
         if not isinstance(target, FrameTimecode):
             target = FrameTimecode(target, self.frame_rate)
+        duration = self.duration
+        assert duration is not None
         try:
             self._last_frame = _retry_on_oserror(
                 "seek", lambda: self._reader.get_frame(target.seconds)
             )
-            if hasattr(self._reader, "last_read") and target >= self.duration:
+            if hasattr(self._reader, "last_read") and target >= duration:
                 raise SeekError("MoviePy > 2.0 does not have proper EOF semantics (#461).")
             self._frame_number = min(
                 target.frame_num,
@@ -228,7 +230,7 @@ class VideoStreamMoviePy(VideoStream):
             #
             # We need to ensure consistency for seeking past end of video with respect to errors and
             # behaviour, and should probably gracefully stop at the last frame instead of throwing.
-            if target >= self.duration:
+            if target >= duration:
                 raise SeekError("Target frame is beyond end of video!") from ex
             raise
         finally:
@@ -263,5 +265,6 @@ class VideoStreamMoviePy(VideoStream):
             last_frame_valid = self._last_frame is not None and self._last_frame is not False
             if last_frame_valid:
                 self._last_frame_rgb = cv2.cvtColor(self._last_frame, cv2.COLOR_BGR2RGB)
+                assert self._last_frame_rgb is not None
                 return self._last_frame_rgb
         return not self._eof

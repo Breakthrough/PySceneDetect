@@ -247,7 +247,7 @@ class FrameTimecode:
             raise TypeError("Timecode format/type unrecognized.")
 
     @property
-    def frame_num(self) -> int | None:
+    def frame_num(self) -> int:
         """The frame number. For VFR video or Timecode-backed objects, this is an approximation
         based on the average framerate. Prefer using `pts` and `time_base` for precise timing."""
         if isinstance(self._time, Timecode):

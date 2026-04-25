@@ -68,7 +68,7 @@ class VideoStreamAv(VideoStream):
             VideoOpenFailure: video could not be opened (may be corrupted)
             ValueError: specified framerate is invalid
         """
-        self._container = None
+        self._container: av.container.InputContainer | None = None
 
         # TODO(https://scenedetect.com/issues/258): See what
         # `self._container.discard_corrupt = True` does with corrupt videos.
@@ -213,7 +213,7 @@ class VideoStreamAv(VideoStream):
         return self._video_stream.guessed_rate
 
     @property
-    def time_base(self) -> Fraction:
+    def time_base(self) -> Fraction | None:
         if self._frame:
             return self._frame.time_base
         return None
@@ -265,6 +265,7 @@ class VideoStreamAv(VideoStream):
         self._frame = None
         self._decoder = None
         self._decode_count = 0
+        assert self._container is not None
         self._container.seek(target_pts, stream=self._video_stream)
         if not beginning:
             self.read(decode=False)
@@ -274,6 +275,7 @@ class VideoStreamAv(VideoStream):
 
     def reset(self):
         """Close and re-open the VideoStream (should be equivalent to calling `seek(0)`)."""
+        assert self._container is not None
         self._container.close()
         self._frame = None
         self._decoder = None
@@ -288,9 +290,11 @@ class VideoStreamAv(VideoStream):
         # B-frame reordering) is never flushed prematurely. Creating a new generator each call
         # caused the last buffered frame to be lost at EOF.
         if self._decoder is None:
+            assert self._container is not None
             self._decoder = self._container.decode(video=0)
         try:
             last_frame = self._frame
+            assert self._decoder is not None
             self._frame = next(self._decoder)
             self._decode_count += 1
         except av.error.EOFError:
@@ -300,6 +304,7 @@ class VideoStreamAv(VideoStream):
             return False
         except StopIteration:
             return False
+        assert self._frame is not None
         return self._frame.to_ndarray(format="bgr24") if decode else True
 
     #
@@ -309,6 +314,7 @@ class VideoStreamAv(VideoStream):
     @property
     def _video_stream(self):
         """PyAV `av.video.stream.VideoStream` being used."""
+        assert self._container is not None
         return self._container.streams.video[0]
 
     @property
@@ -365,6 +371,7 @@ class VideoStreamAv(VideoStream):
         except:
             self._io.seek(orig_pos)
             raise
+        assert self._container is not None
         self._container.close()
         self._container = container
         self._decoder = None
