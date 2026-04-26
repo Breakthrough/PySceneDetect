@@ -145,11 +145,17 @@ class ThresholdDetector(SceneDetector):
                 # Only add the scene if min_scene_len frames have passed.
                 if (timecode - self.last_scene_cut) >= self.min_scene_len:
                     # Just faded into a new scene, compute timecode for the scene
-                    # split based on the fade bias.
+                    # split based on the fade bias. Use frame-number arithmetic so the
+                    # result is identical across backends — float seconds + framerate
+                    # multiplication can land on a .5 rounding boundary and tip the
+                    # frame number by 1 between PyAV (sub-microsecond PTS) and OpenCV
+                    # (millisecond-truncated CAP_PROP_POS_MSEC).
                     f_out = self.last_fade["frame"]
-                    duration = (timecode - f_out).seconds
-                    split_seconds = f_out.seconds + (duration * (1.0 + self.fade_bias)) / 2.0
-                    cuts.append(FrameTimecode(split_seconds, fps=timecode))
+                    duration_frames = timecode.frame_num - f_out.frame_num
+                    split_frame_num = f_out.frame_num + round(
+                        duration_frames * (1.0 + self.fade_bias) / 2.0
+                    )
+                    cuts.append(FrameTimecode(split_frame_num, fps=timecode))
                     self.last_scene_cut = timecode
                 self.last_fade["type"] = "in"
                 self.last_fade["frame"] = timecode

@@ -681,6 +681,7 @@ Although there have been minimal changes to most API examples, there are several
 - [feature] `save-edl` accepts a new `--start-timecode`/`-s` flag (SMPTE `HH:MM:SS:FF` or 8-digit `HHMMSSFF`) to stamp every event with a custom start timecode so generated EDLs align with the source media's on-screen timecode [#515](https://github.com/Breakthrough/PySceneDetect/issues/515)
 - [bugfix] Fix floating-point precision error in `save-otio` output where frame values near integer boundaries (e.g. `90.00000000000001`) were serialized with spurious precision
 - [bugfix] Add mitigation for transient `OSError` in the MoviePy backend as it is susceptible to subprocess pipe races on slow or heavily loaded systems [#496](https://github.com/Breakthrough/PySceneDetect/issues/496)
+- [bugfix] `detect-threshold` cut frame numbers are now backend-deterministic; previously the cut could differ by 1 frame between PyAV and OpenCV when the fade midpoint landed on a `.5` rounding boundary (PyAV uses sub-microsecond PTS, OpenCV uses millisecond-truncated `CAP_PROP_POS_MSEC`)
 - [refactor] Remove deprecated `-d`/`--min-delta-hsv` option from `detect-adaptive` command
 
 ### API Changes
