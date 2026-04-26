@@ -51,7 +51,7 @@ dependencies = [
 [project.optional-dependencies]
 pyav = ["av>=9.2"]
 moviepy = ["moviepy"]
-dev = ["av>=9.2", "pytest>=7.0"]
+dev = ["av>=9.2", "moviepy", "pytest>=7.0"]
 docs = ["Sphinx==7.0.1"]
 website = ["mkdocs==1.5.2", "jinja2>=3.1.6"]
 
@@ -139,6 +139,8 @@ exclude = [
     ".venv",
     # Vendored third-party code
     "scenedetect/_thirdparty",
+    # Release tests pull in extra deps (opentimelineio, psutil) that aren't in [dev]
+    "tests/release",
 ]
 
 # Modes: "off" | "basic" | "standard" | "strict". The 0.7 codebase is clean
@@ -146,3 +148,7 @@ exclude = [
 # cv2 / av / numpy / moviepy noise rules (reportUnknown*, reportMissingTypeStubs)
 # will likely need to be re-added with "none" or scoped per-file.
 typeCheckingMode = "basic"
+
+# Analyze against the minimum supported Python so 3.11+-only APIs get flagged
+# regardless of which interpreter runs pyright.
+pythonVersion = "3.10"

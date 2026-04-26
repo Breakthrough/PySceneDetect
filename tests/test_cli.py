@@ -538,6 +538,7 @@ def test_cli_save_images(tmp_path: Path):
     assert len(images) == 6
     # Open one of the created images and make sure it has the correct resolution.
     image = cv2.imread(str(images[0]))
+    assert image is not None
     assert image.shape == (544, 1280, 3)
 
 
@@ -558,6 +559,7 @@ def test_cli_save_images_path_handling(tmp_path: Path):
     # Check the created images can be read and have the correct size.
     # We can't use `cv2.imread` here since it doesn't seem to work correctly with UTF-8 paths.
     image = cv2.imdecode(np.fromfile(images[0], dtype=np.uint8), cv2.IMREAD_UNCHANGED)
+    assert image is not None
     assert image.shape == (544, 1280, 3)
 
 
@@ -577,6 +579,7 @@ def test_cli_save_images_rotation(rotated_video_file, tmp_path: Path):
     # Should detect two scenes and generate 3 images per scene with above params.
     assert len(images) == 6
     image = cv2.imread(str(images[0]))
+    assert image is not None
     # Note same resolution as in test_cli_save_images but rotated 90 degrees.
     assert image.shape == (1280, 544, 3)
 

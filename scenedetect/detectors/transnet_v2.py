@@ -54,7 +54,7 @@ class Predictor:
         onnx_providers: list[str] | None,
         threshold,
     ):
-        import onnxruntime as ort
+        import onnxruntime as ort  # pyright: ignore[reportMissingImports]
 
         ort.set_default_logger_severity(3)
 

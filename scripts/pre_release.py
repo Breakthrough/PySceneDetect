@@ -21,7 +21,7 @@ from pathlib import Path
 REPO_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_DIR))
 
-import scenedetect
+import scenedetect  # noqa: E402
 
 PACKAGING_DIR = REPO_DIR / "packaging"
 WINDOWS_DIR = PACKAGING_DIR / "windows"
@@ -30,30 +30,31 @@ VERSION_INFO = WINDOWS_DIR / ".version_info"
 
 VERSION = scenedetect.__version__
 
-run_version_check = ("--release" in sys.argv)
+run_version_check = "--release" in sys.argv
 
 if run_version_check:
-  installer_aip = INSTALLER_AIP.read_text()
-  aip_version = f"<ROW Property=\"ProductVersion\" Value=\"{VERSION}\" Options=\"32\"/>"
-  assert aip_version in installer_aip, f"Installer project version does not match {VERSION}."
+    installer_aip = INSTALLER_AIP.read_text()
+    aip_version = f'<ROW Property="ProductVersion" Value="{VERSION}" Options="32"/>'
+    assert aip_version in installer_aip, f"Installer project version does not match {VERSION}."
 
 with VERSION_INFO.open("wb") as f:
     v = VERSION.split(".")
     assert 2 <= len(v) <= 4, f"Unrecognized version format: {VERSION}"
     while len(v) < 4:
-       v.append("0")
+        v.append("0")
     (maj, min, pat, bld) = v[0], v[1], v[2], v[3]
     # If either major or minor have suffixes, assume it's a dev/beta build and set
     # the final component to 999.
     if not min.isdigit():
-       assert "-" in min
-       min = min[:min.find("-")]
-       bld = 999
+        assert "-" in min
+        min = min[: min.find("-")]
+        bld = 999
     if not pat.isdigit():
-       assert "-" in pat
-       pat = pat[:pat.find("-")]
-       bld = 999
-    f.write(f"""# UTF-8
+        assert "-" in pat
+        pat = pat[: pat.find("-")]
+        bld = 999
+    f.write(
+        f"""# UTF-8
 #
 # For more details about fixed file info 'ffi' see:
 # http://msdn.microsoft.com/en-us/library/ms646997.aspx
@@ -96,4 +97,5 @@ StringFileInfo(
 VarFileInfo([VarStruct(u'Translation', [1033, 1200])])
   ]
 )
-""".encode())
+""".encode()
+    )

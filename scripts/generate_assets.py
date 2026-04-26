@@ -21,6 +21,7 @@ class LogoOutput(NamedTuple):
     height: int
     source: Path
 
+
 # Colors matching the SVG design
 BG = (224, 232, 240, 255)  # #e0e8f0
 FG = (42, 53, 69, 255)  # #2a3545
@@ -55,9 +56,15 @@ FAVICON_OUTPUTS: list[Path] = [
 
 LOGO_OUTPUTS: list[LogoOutput] = [
     LogoOutput(REPO_DIR / "docs" / "_static" / "pyscenedetect_logo.png", 900, 422, LOGO_SVG),
-    LogoOutput(REPO_DIR / "docs" / "_static" / "pyscenedetect_logo_small.png", 300, 141, LOGO_BG_SVG),
-    LogoOutput(REPO_DIR / "website" / "pages" / "img" / "pyscenedetect_logo.png", 640, 300, LOGO_BG_SVG),
-    LogoOutput(REPO_DIR / "website" / "pages" / "img" / "pyscenedetect_logo_small.png", 462, 217, LOGO_SVG),
+    LogoOutput(
+        REPO_DIR / "docs" / "_static" / "pyscenedetect_logo_small.png", 300, 141, LOGO_BG_SVG
+    ),
+    LogoOutput(
+        REPO_DIR / "website" / "pages" / "img" / "pyscenedetect_logo.png", 640, 300, LOGO_BG_SVG
+    ),
+    LogoOutput(
+        REPO_DIR / "website" / "pages" / "img" / "pyscenedetect_logo_small.png", 462, 217, LOGO_SVG
+    ),
 ]
 
 SVG_FOR_SIZE: dict[int, Path] = {
@@ -82,7 +89,7 @@ def make_icon_16() -> Image.Image:
         px[i, 0] = BG
         px[i, 15] = BG
 
-    # Arm stripe gaps (rows 2–4): clear pixels not part of a complete stripe.
+    # Arm stripe gaps (rows 2-4): clear pixels not part of a complete stripe.
     # A stripe x+y=s spans all 3 arm rows only when 5 <= s <= 16.
     for y in range(2, 5):
         for x in range(1, 15):
@@ -93,7 +100,7 @@ def make_icon_16() -> Image.Image:
             if not ((x + y) % 4 < 2 and 5 <= (x + y) <= 16):
                 px[x, y] = BG
 
-    # Slate interior (rows 8–12, cols 3–12)
+    # Slate interior (rows 8-12, cols 3-12)
     for y in range(8, 13):
         for x in range(3, 13):
             px[x, y] = BG
@@ -117,7 +124,16 @@ def find_inkscape() -> str:
 def render_svg(inkscape: str, svg: Path, output: Path, width: int, height: int):
     """Render an SVG to a PNG at the given dimensions using Inkscape."""
     subprocess.run(
-        [inkscape, str(svg), "--export-type=png", f"--export-filename={output}", "-w", str(width), "-h", str(height)],
+        [
+            inkscape,
+            str(svg),
+            "--export-type=png",
+            f"--export-filename={output}",
+            "-w",
+            str(width),
+            "-h",
+            str(height),
+        ],
         check=True,
         capture_output=True,
     )
@@ -127,7 +143,8 @@ def render_logos(inkscape: str):
     """Render the logo SVG to all required PNG outputs."""
     print("Rendering logo PNGs...")
     for entry in LOGO_OUTPUTS:
-        print(f"  {entry.path.relative_to(REPO_DIR)} ({entry.width}x{entry.height}) [source: {entry.source.name}]...")
+        rel_path = entry.path.relative_to(REPO_DIR)
+        print(f"  {rel_path} ({entry.width}x{entry.height}) [source: {entry.source.name}]...")
         render_svg(inkscape, entry.source, entry.path, entry.width, entry.height)
     print(f"  Done ({len(LOGO_OUTPUTS)} files).")
 
@@ -147,7 +164,11 @@ def render_all_sizes(inkscape: str, work_dir: Path) -> list[Image.Image]:
             render_svg(inkscape, svg_path, png_path, size, size)
             img = Image.open(png_path).copy()
             if size in SHARPEN_AMOUNT:
-                img = img.filter(ImageFilter.UnsharpMask(radius=SHARPEN_RADIUS, percent=SHARPEN_AMOUNT[size], threshold=0))
+                img = img.filter(
+                    ImageFilter.UnsharpMask(
+                        radius=SHARPEN_RADIUS, percent=SHARPEN_AMOUNT[size], threshold=0
+                    )
+                )
                 print(f"    Sharpened {size}x{size} (USM {SHARPEN_AMOUNT[size]}%)")
                 img.save(png_path)
         images.append(img)
