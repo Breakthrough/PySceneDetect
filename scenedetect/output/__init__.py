@@ -456,7 +456,7 @@ def write_scene_list_fcp7(
         video_name: Display name used for project and sequence. Defaults to the stem of
             `video_path`.
         source_duration: Total duration of the source media. Required on ``<file>`` so NLEs
-            (DaVinci Resolve, Premiere) can seek into the source — without it the clip plays
+            (DaVinci Resolve, Premiere) can seek into the source - without it the clip plays
             frozen. If None, falls back to the last scene's end time.
     """
     assert scene_list

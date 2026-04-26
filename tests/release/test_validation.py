@@ -9,10 +9,9 @@
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
-"""Category 4: Output File Validation
+"""Output File Validation
 
-Verifies that output files (videos, images, CSV, EDL, OTIO) are correctly
-generated and valid.
+Verifies that output files (videos, images, CSV, EDL, OTIO) are correctly generated and valid.
 """
 
 import csv

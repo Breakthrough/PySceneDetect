@@ -704,7 +704,7 @@ Although there have been minimal changes to most API examples, there are several
       * The detector interface: `SceneDetector.process_frame()` and `SceneDetector.post_process()` (the `post_process` signature on the abstract base is now consistently typed as `FrameTimecode` to match its concrete-detector overrides; the prior `int` annotation did not reflect the actual runtime value)
       * Statistics: `StatsManager.get_metrics()`, `StatsManager.set_metrics()`, and `StatsManager.metrics_exist()` formally accept either `FrameTimecode` or `int` (the `int` form is retained for compatibility with the deprecated `load_from_csv()` path, which keys metrics by integer frame number)
  * `StatsManager.load_from_csv()` and `save_images()` `output_dir` now accept `os.PathLike` (e.g. `pathlib.Path`) in addition to `str`
- * `SceneManager.detect_scenes()` `duration` and `end_time` formally accept `int` (frames), `float` (seconds), `str` (timecode), or `FrameTimecode` — matching the documented and runtime-supported behavior
+ * `SceneManager.detect_scenes()` `duration` and `end_time` formally accept `int` (frames), `float` (seconds), `str` (timecode), or `FrameTimecode` - matching the documented and runtime-supported behavior
  * `SceneDetector` is now a [Python abstract class](https://docs.python.org/3/library/abc.html)
  * `SceneDetector` instances can now assume they always have frame data to process when `process_frame` is called
  * Remove `SceneDetector.is_processing_required()` method

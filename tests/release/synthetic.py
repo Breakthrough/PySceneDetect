@@ -11,8 +11,7 @@
 #
 """Synthetic Video Generation
 
-This module provides functions to generate pathological or specific video files
-using ffmpeg for testing purposes.
+Functions to generate synthetic video files using ffmpeg for testing purposes.
 """
 
 import subprocess

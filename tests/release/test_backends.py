@@ -9,10 +9,9 @@
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
-"""Category 2: Cross-Backend Consistency
+"""Backend Consistency
 
-Verifies that all available backends produce consistent cut lists for both CFR
-and VFR videos.
+Verifies that all available backends produce consistent cut lists for both CFR and VFR videos.
 """
 
 import importlib.util
@@ -50,7 +49,7 @@ def test_cross_backend_consistency(rel_path, is_vfr):
 
     backends = _installed_backends()
     if is_vfr and "moviepy" in backends:
-        # MoviePy does not honor per-frame PTS on VFR video — tracked separately
+        # MoviePy does not honor per-frame PTS on VFR video - tracked separately
         # from the OpenCV/PyAV VFR path that this test gates.
         backends = [b for b in backends if b != "moviepy"]
     if len(backends) < 2:

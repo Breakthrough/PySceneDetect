@@ -47,7 +47,7 @@ PROJECT_LEVEL_FILES = {
 }
 
 # Foreign-licensed files we never modify. The _thirdparty package's own
-# __init__.py is excluded from this list — it carries the project header.
+# __init__.py is excluded from this list - it carries the project header.
 SKIP_PATHS = {
     "scenedetect/_thirdparty/simpletable.py",  # vendored from third party
 }

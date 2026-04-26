@@ -21,7 +21,9 @@ jobs:
           pip install build twine pip-audit
       - name: Version consistency check
         run: |
-          VERSION=$(python -c "import scenedetect; print(scenedetect.__version__)")
+          # Parse __version__ directly so we don't have to install scenedetect
+          # (importing it triggers a cv2-availability guard).
+          VERSION=$(python -c "import ast,pathlib; print(next(n.value.value for n in ast.parse(pathlib.Path('scenedetect/__init__.py').read_text()).body if isinstance(n, ast.Assign) and any(getattr(t,'id',None)=='__version__' for t in n.targets)))")
           echo "scenedetect.__version__ = $VERSION"
           if [[ "${{ github.ref }}" == refs/tags/* ]]; then
             TAG_VERSION=${GITHUB_REF#refs/tags/v}
@@ -37,10 +39,16 @@ jobs:
           fi
       - name: Build and Check
         run: |
-          python -m build
-          twine check dist/*
+          # Build to a clean output dir - `dist/` already holds tracked installer
+          # scripts and config (e.g. dist/generate_assets.py, dist/installer/),
+          # so `twine check dist/*` would try to validate non-distribution files.
+          python -m build --outdir build-dist
+          twine check build-dist/*
       - name: pip-audit
-        run: pip-audit
+        # CVE-2026-3219 in pip 26.0.1 has no fix version available upstream
+        # and pip ships pre-installed on the runner (not controlled by this
+        # project). Re-evaluate when pip publishes a fix.
+        run: pip-audit --ignore-vuln CVE-2026-3219
 
   release-tests:
     needs: static
@@ -68,7 +76,7 @@ jobs:
           pip install .[opencv,pyav,moviepy]
           pip install opentimelineio pillow psutil pytest
       - name: Run release tests
-        run: pytest -m release -vv --ignore=tests/release/test_long_video_stress.py --ignore=tests/release/test_install_matrix.py
+        run: pytest -m release -vv --ignore=tests/release/test_long_video_stress.py
 
   long-stress:
     needs: static
@@ -93,52 +101,3 @@ jobs:
           pip install psutil pytest
       - name: Run long stress test
         run: pytest -m release -k long_video -vv
-
-  install-matrix:
-    needs: static
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest]
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@v4
-      - name: Checkout resources branch
-        run: |
-          git fetch --depth=1 origin refs/heads/resources:refs/remotes/origin/resources
-          git checkout refs/remotes/origin/resources -- tests/resources/
-          git reset
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
-      - name: Build wheel
-        run: |
-          pip install build
-          python -m build --wheel
-      - name: Test Bare Install
-        shell: bash
-        run: |
-          WHEEL=$(ls dist/*.whl)
-          PY=${{ matrix.os == 'windows-latest' && 'venv_bare/Scripts/python' || 'venv_bare/bin/python' }}
-          PYTEST=${{ matrix.os == 'windows-latest' && 'venv_bare/Scripts/pytest' || 'venv_bare/bin/pytest' }}
-          python -m venv venv_bare
-          $PY -m pip install pytest "$WHEEL"
-          $PYTEST -m release -k test_install_bare
-      - name: Test OpenCV Install
-        shell: bash
-        run: |
-          WHEEL=$(ls dist/*.whl)
-          PY=${{ matrix.os == 'windows-latest' && 'venv_opencv/Scripts/python' || 'venv_opencv/bin/python' }}
-          PYTEST=${{ matrix.os == 'windows-latest' && 'venv_opencv/Scripts/pytest' || 'venv_opencv/bin/pytest' }}
-          python -m venv venv_opencv
-          $PY -m pip install pytest "${WHEEL}[opencv]"
-          $PYTEST -m release -k test_opencv_only
-      - name: Test PyAV Install
-        shell: bash
-        run: |
-          WHEEL=$(ls dist/*.whl)
-          PY=${{ matrix.os == 'windows-latest' && 'venv_pyav/Scripts/python' || 'venv_pyav/bin/python' }}
-          PYTEST=${{ matrix.os == 'windows-latest' && 'venv_pyav/Scripts/pytest' || 'venv_pyav/bin/pytest' }}
-          python -m venv venv_pyav
-          $PY -m pip install pytest "${WHEEL}[pyav]"
-          $PYTEST -m release -k test_pyav_only

@@ -1,7 +1,7 @@
 # PySceneDetect Release Checklist
 
 Use one copy per release (e.g. tick the boxes in a tracking issue or draft PR).
-Version referenced below as `X.Y[.Z]` — replace with the real version throughout.
+Version referenced below as `X.Y[.Z]` - replace with the real version throughout.
 
 ## 0. Branch setup
 
@@ -11,7 +11,7 @@ Version referenced below as `X.Y[.Z]` — replace with the real version througho
 ## 1. Code & version
 
 - [ ] Bump `__version__` in `scenedetect/__init__.py`.
-- [ ] Bump `ProductVersion` in `dist/installer/PySceneDetect.aip` (must match `__version__` — `dist/pre_release.py --release` asserts this).
+- [ ] Bump `ProductVersion` in `dist/installer/PySceneDetect.aip` (must match `__version__` - `dist/pre_release.py --release` asserts this).
 - [ ] No `-dev` / pre-release suffix on the version string for a final release.
 
 > **Note:** `setup.cfg` reads the package version dynamically via `version = attr: scenedetect.__version__`, and `pyproject.toml` does not declare a `version` field. The single source of truth is `scenedetect/__init__.py`; the `.aip` is the only other place to keep in sync.
@@ -33,7 +33,7 @@ Version referenced below as `X.Y[.Z]` — replace with the real version througho
 
 - [ ] Unit tests green locally and in CI: `pytest -vv` (should collect `-m 'not release'` by default).
 - [ ] `ruff check scenedetect/ tests/` and `ruff format --check scenedetect/ tests/` pass.
-- [ ] Release test suite green: tag a disposable `vX.Y.Z-release-rc` or use `workflow_dispatch` on `.github/workflows/release-test.yml` — all 4 jobs (`static`, `release-tests`, `install-matrix`, `long-stress`) green across the 3-OS × 2-Python matrix. See `RELEASE-TEST-PLAN.md` for what the suite covers.
+- [ ] Release test suite green: tag a disposable `vX.Y.Z-release-rc` or use `workflow_dispatch` on `.github/workflows/release-test.yml` - all 4 jobs (`static`, `release-tests`, `install-matrix`, `long-stress`) green across the 3-OS × 2-Python matrix. See `RELEASE-TEST-PLAN.md` for what the suite covers.
 - [ ] `resources` branch has the artifacts the release tests need (goldens under `tests/resources/goldens/`, `tests/resources/stress_15min.mp4`). Re-push if any golden was regenerated.
 - [ ] Manual smoke: fresh venv, `pip install .` then `pip install .[opencv]` then `pip install .[pyav]`; run `scenedetect -i <video> detect-content list-scenes save-images` and eyeball the output.
 - [ ] `pip-audit` clean (or exceptions documented in the changelog).
@@ -41,14 +41,14 @@ Version referenced below as `X.Y[.Z]` — replace with the real version througho
 ## 5. Windows installer
 
 - [ ] `python dist/pre_release.py --release` passes (enforces `.aip` ↔ `__version__` parity, writes `dist/.version_info`).
-- [ ] `pyinstaller dist/scenedetect.spec` produces a working `scenedetect.exe` — run it against a sample video.
+- [ ] `pyinstaller dist/scenedetect.spec` produces a working `scenedetect.exe` - run it against a sample video.
 - [ ] Build the MSI via Advanced Installer (`dist/installer/PySceneDetect.aip`); install into a clean Windows VM and run the CLI.
 
 ## 6. Cut the release
 
 - [ ] Final commit on `releases/X.Y`: "Release vX.Y[.Z]".
-- [ ] Tag `vX.Y[.Z]-release` on that commit and push — this fires `release-test.yml`. Wait for all jobs green.
-- [ ] Merge `releases/X.Y` into `main` (fast-forward or merge commit — keep history clean).
+- [ ] Tag `vX.Y[.Z]-release` on that commit and push - this fires `release-test.yml`. Wait for all jobs green.
+- [ ] Merge `releases/X.Y` into `main` (fast-forward or merge commit - keep history clean).
 - [ ] Tag the final release `vX.Y[.Z]` on the merged commit and push.
 
 ## 7. Publish
@@ -72,4 +72,4 @@ Version referenced below as `X.Y[.Z]` — replace with the real version througho
 
 - **Branching model**: work spans multiple commits on `releases/X.Y`; the final one gets the `vX.Y[.Z]-release` tag which gates the release-test workflow. A passing release-test is a hard prerequisite for publishing.
 - **Version consistency** is enforced in two places (`__init__.py`, `PySceneDetect.aip`). The `static` job of `release-test.yml` checks `__init__.py` against the tag and verifies the changelog has a matching `## PySceneDetect X.Y` heading; the installer parity is checked by `dist/pre_release.py --release`.
-- **Changelog convention**: the in-development section lives at the *bottom* of `website/pages/changelog.md` under the "Development" heading — don't move it to the top.
+- **Changelog convention**: the in-development section lives at the *bottom* of `website/pages/changelog.md` under the "Development" heading - don't move it to the top.

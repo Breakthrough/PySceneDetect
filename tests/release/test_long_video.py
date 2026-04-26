@@ -9,10 +9,9 @@
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
-"""Category 6: Long-Video Stress Test
+"""Long-Video Stress Test
 
-Verifies that PySceneDetect does not leak memory or file descriptors during
-processing of long videos.
+Verifies no memory leaks or file descriptors during processing of long videos.
 """
 
 import os

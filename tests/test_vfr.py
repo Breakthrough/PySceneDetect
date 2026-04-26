@@ -35,7 +35,7 @@ EXPECTED_SCENES_VFR: list[tuple[str, str]] = [
     ("00:00:03.921", "00:00:09.676"),
 ]
 
-# Expected scene cuts for `goldeneye-vfr-drop3.mp4` — a synthetic VFR clip created from the first
+# Expected scene cuts for `goldeneye-vfr-drop3.mp4` - a synthetic VFR clip created from the first
 # 10s of goldeneye.mp4 by dropping every 3rd frame (frames 2,5,8,...). PTS durations alternate
 # between 1001 and 2002 (time_base=1/24000), nominal fps=24000/1001, avg fps≈16. The last scene
 # ends at the clip boundary and may vary slightly between backends.

@@ -23,8 +23,8 @@ def invoke_cli(args: list[str], catch_exceptions: bool = False) -> tuple[int, st
 
     Replicates the two-step execution of ``__main__.py``:
 
-    1. ``scenedetect.main(obj=context)`` — parse args and register callbacks on ``CliContext``
-    2. ``run_scenedetect(context)`` — execute detection and output commands
+    1. ``scenedetect.main(obj=context)`` - parse args and register callbacks on ``CliContext``
+    2. ``run_scenedetect(context)`` - execute detection and output commands
 
     Returns ``(exit_code, output_text)``.
     """

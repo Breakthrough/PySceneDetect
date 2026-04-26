@@ -9,14 +9,9 @@
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
-"""Category 7: CLI Permutation Smoke Tests.
+"""CLI Permutation Smoke Tests
 
-Exercises CLI command chains via subprocess. We use subprocess (not Click's
-CliRunner) because the CLI's argument-parsing pass and its controller run are
-separate calls in ``scenedetect.__main__`` — ``CliRunner`` only drives the
-first pass and does not execute the controller. The TODO at
-``tests/test_cli.py:19`` tracks a future refactor that would make CliRunner
-viable.
+Exercises CLI command chains via subprocess.
 """
 
 import os

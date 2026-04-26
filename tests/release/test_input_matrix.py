@@ -9,7 +9,7 @@
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
-"""Category 5: Synthetic Codec / Container / Geometry Matrix
+"""Codec / Container / Geometry
 
 Verifies that PySceneDetect can handle various codecs, containers, and video properties.
 """
