@@ -9,13 +9,13 @@ PySceneDetect requires at least Python 3.10 or higher.
 ## Install via pip &nbsp; <span class="wy-text-neutral"><span class="fa fa-windows"></span> &nbsp; <span class="fa fa-linux"></span> &nbsp; <span class="fa fa-apple"></span></span></h3>
 
 <div class="important">
-<h4 class="wy-text-neutral"><span class="fa fa-angle-double-down wy-text-info"></span> Including OpenCV (recommended):</h4>
-<h3 class="wy-text-neutral"><tt>pip install --upgrade scenedetect[opencv]</tt></h3>
-<h4 class="wy-text-neutral"><span class="fa fa-angle-down wy-text-info"></span> Including Headless OpenCV (servers):</h4>
-<h3 class="wy-text-neutral"><tt>pip install --upgrade scenedetect[opencv-headless]</tt></h3>
+<h4 class="wy-text-neutral"><span class="fa fa-angle-double-down wy-text-info"></span> Standard install (recommended):</h4>
+<h3 class="wy-text-neutral"><tt>pip install --upgrade scenedetect</tt></h3>
+<h4 class="wy-text-neutral"><span class="fa fa-angle-down wy-text-info"></span> Headless install (servers, no GUI libs):</h4>
+<h3 class="wy-text-neutral"><tt>pip install --upgrade scenedetect-headless</tt></h3>
 </div>
 
-PySceneDetect is available via `pip` as [the `scenedetect` package](https://pypi.org/project/scenedetect/).
+PySceneDetect is available via `pip` as either [`scenedetect`](https://pypi.org/project/scenedetect/) (depends on `opencv-python`) or [`scenedetect-headless`](https://pypi.org/project/scenedetect-headless/) (depends on `opencv-python-headless`). Both ship the same `scenedetect` Python module — install whichever OpenCV variant suits your environment.
 
 ## Windows Build (64-bit Only) &nbsp; <span class="wy-text-neutral"><span class="fa fa-windows"></span></span>
 

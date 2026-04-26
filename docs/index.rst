@@ -8,7 +8,7 @@ PySceneDetect Documentation
 
 Welcome to the PySceneDetect docs. The docs are split into two separate parts: one for the command-line interface (the `scenedetect` command) and another for the Python API (the `scenedetect` module).
 
-You can install the latest release of PySceneDetect by running `pip install scenedetect[opencv]` or downloading the Windows build from `scenedetect.com/download <http://www.scenedetect.com/download/>`_. PySceneDetect requires `ffmpeg` or `mkvmerge` for video splitting support.
+You can install the latest release of PySceneDetect by running `pip install scenedetect` (or `pip install scenedetect-headless` on servers without GUI libraries), or by downloading the Windows build from `scenedetect.com/download <http://www.scenedetect.com/download/>`_. PySceneDetect requires `ffmpeg` or `mkvmerge` for video splitting support.
 
 .. note::
 

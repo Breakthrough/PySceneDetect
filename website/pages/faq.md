@@ -4,20 +4,19 @@
 
 #### How can I fix `ImportError: No module named cv2`?
 
-You need to install OpenCV for PySceneDetect to properly work.  If you're using `pip`, you can install it as follows:
+As of PySceneDetect 0.7, the OpenCV dependency is bundled with the install. The standard `scenedetect` package depends on `opencv-python`:
 
 ```md
-pip install scenedetect[opencv]
+pip install scenedetect
 ```
 
-Note that you may need to use a different/older version depending on your Python version.  You can also use the headless package if you're running a server:
-
+For server environments without GUI libraries, install the headless variant instead, which depends on `opencv-python-headless`:
 
 ```md
-pip install scenedetect[opencv-headless]
+pip install scenedetect-headless
 ```
 
-Unlike calling `pip install opencv-python`, the above commands will download and install the correct OpenCV version based on the Python version you are running.
+Both packages ship the same `scenedetect` Python module — you only need one.
 
 #### How can I enable video splitting support?
 

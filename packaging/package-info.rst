@@ -23,7 +23,7 @@ Documentation: https://www.scenedetect.com/docs
 
 Github Repo: https://github.com/Breakthrough/PySceneDetect/
 
-Install: ``pip install --upgrade scenedetect[opencv]``
+Install: ``pip install --upgrade scenedetect`` (or ``scenedetect-headless`` for servers)
 
 ----------------------------------------------------------
 
