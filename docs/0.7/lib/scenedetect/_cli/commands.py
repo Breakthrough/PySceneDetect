@@ -1,0 +1,354 @@
+#
+#            PySceneDetect: Python-Based Video Scene Detector
+#   -------------------------------------------------------------------
+#     [  Site:    https://scenedetect.com                           ]
+#     [  Docs:    https://scenedetect.com/docs/                     ]
+#     [  Github:  https://github.com/Breakthrough/PySceneDetect/    ]
+#
+# Copyright (C) 2024 Brandon Castellano <http://www.bcastell.com>.
+# PySceneDetect is licensed under the BSD 3-Clause License; see the
+# included LICENSE file, or visit one of the above pages for details.
+#
+"""Logic for PySceneDetect commands that operate on the result of the processing pipeline.
+
+In addition to the the arguments registered with the command, commands will be called with the
+current command-line context, as well as the processing result (scenes and cuts).
+"""
+
+import logging
+import webbrowser
+from string import Template
+
+from scenedetect._cli.config import FcpFormat
+from scenedetect._cli.context import CliContext
+from scenedetect.output import save_images as save_images_impl
+from scenedetect.output import (
+    split_video_ffmpeg,
+    split_video_mkvmerge,
+    write_scene_list,
+    write_scene_list_edl,
+    write_scene_list_fcp7,
+    write_scene_list_fcpx,
+    write_scene_list_html,
+    write_scene_list_otio,
+)
+from scenedetect.platform import get_and_create_path
+from scenedetect.scene_manager import (
+    CutList,
+    Interpolation,
+    SceneList,
+)
+
+logger = logging.getLogger("pyscenedetect")
+
+
+def save_html(
+    context: CliContext,
+    scenes: SceneList,
+    cuts: CutList,
+    image_width: int,
+    image_height: int,
+    filename: str,
+    no_images: bool,
+    show: bool,
+):
+    """Handles the `save-html` command."""
+    assert context.video_stream is not None
+    (image_filenames, output) = (
+        context.save_images_result
+        if context.save_images_result is not None
+        else (None, context.output)
+    )
+
+    html_filename = Template(filename).safe_substitute(VIDEO_NAME=context.video_stream.name)
+    if not html_filename.lower().endswith(".html"):
+        html_filename += ".html"
+    html_path = get_and_create_path(html_filename, output)
+    write_scene_list_html(
+        output_html_filename=html_path,
+        scene_list=scenes,
+        cut_list=cuts,
+        image_filenames=None if no_images else image_filenames,
+        image_width=image_width,
+        image_height=image_height,
+    )
+    if show:
+        webbrowser.open(html_path)
+
+
+def save_qp(
+    context: CliContext,
+    scenes: SceneList,
+    cuts: CutList,
+    output: str,
+    filename: str,
+    disable_shift: bool,
+):
+    """Handler for the `save-qp` command."""
+    del scenes  # We only use cuts for this handler.
+    assert context.video_stream is not None
+    qp_path = get_and_create_path(
+        Template(filename).safe_substitute(VIDEO_NAME=context.video_stream.name),
+        output,
+    )
+    start_frame = context.start_time.frame_num if context.start_time else 0
+    shift_start = not disable_shift
+    offset = start_frame if shift_start else 0
+    with open(qp_path, "w") as qp_file:
+        qp_file.write(f"{0 if shift_start else start_frame} I -1\n")
+        # Place another I frame at each detected cut.
+        qp_file.writelines(f"{cut.frame_num - offset} I -1\n" for cut in cuts)
+    logger.info(f"QP file written to: {qp_path}")
+
+
+def list_scenes(
+    context: CliContext,
+    scenes: SceneList,
+    cuts: CutList,
+    no_output_file: bool,
+    filename: str,
+    output: str,
+    skip_cuts: bool,
+    quiet: bool,
+    display_scenes: bool,
+    display_cuts: bool,
+    cut_format: str,
+    col_separator: str,
+    row_separator: str,
+):
+    """Handles the `list-scenes` command."""
+    assert context.video_stream is not None
+    # Write scene list CSV to if required.
+    if not no_output_file:
+        scene_list_filename = Template(filename).safe_substitute(
+            VIDEO_NAME=context.video_stream.name
+        )
+        if not scene_list_filename.lower().endswith(".csv"):
+            scene_list_filename += ".csv"
+        scene_list_path = get_and_create_path(
+            scene_list_filename,
+            output,
+        )
+        logger.info("Writing scene list to CSV file:\n  %s", scene_list_path)
+        with open(scene_list_path, "w") as scene_list_file:
+            write_scene_list(
+                output_csv_file=scene_list_file,
+                scene_list=scenes,
+                include_cut_list=not skip_cuts,
+                cut_list=cuts,
+                col_separator=col_separator,
+                row_separator=row_separator,
+            )
+    # Suppress output if requested.
+    if quiet:
+        return
+    # Print scene list.
+    if display_scenes:
+        logger.info(
+            """Scene List:
+-----------------------------------------------------------------------
+ | Scene # | Start Frame |  Start Time  |  End Frame  |   End Time   |
+-----------------------------------------------------------------------
+%s
+-----------------------------------------------------------------------""",
+            "\n".join(
+                [
+                    f" |  {i + 1:5d}  | {start_time.frame_num + 1:11d} | {start_time.get_timecode()} | {end_time.frame_num:11d} | {end_time.get_timecode()} |"
+                    for i, (start_time, end_time) in enumerate(scenes)
+                ]
+            ),
+        )
+    # Print cut list.
+    if cuts and display_cuts:
+        logger.info(
+            "Comma-separated timecode list:\n  %s",
+            ",".join([cut_format.format(cut) for cut in cuts]),
+        )
+
+
+def save_images(
+    context: CliContext,
+    scenes: SceneList,
+    cuts: CutList,
+    num_images: int,
+    frame_margin: int,
+    image_extension: str,
+    encoder_param: int,
+    filename: str,
+    output: str | None,
+    show_progress: bool,
+    scale: int,
+    height: int,
+    width: int,
+    interpolation: Interpolation,
+    threading: bool,
+):
+    """Handles the `save-images` command."""
+    del cuts  # save-images only uses scenes.
+    assert context.video_stream is not None
+
+    images = save_images_impl(
+        scene_list=scenes,
+        video=context.video_stream,
+        num_images=num_images,
+        frame_margin=frame_margin,
+        image_extension=image_extension,
+        encoder_param=encoder_param,
+        image_name_template=filename,
+        output_dir=output,
+        show_progress=show_progress,
+        scale=scale,
+        height=height,
+        width=width,
+        interpolation=interpolation,
+        threading=threading,
+    )
+    # Save the result for use by `save-html` if required.
+    context.save_images_result = (images, output)
+
+
+def split_video(
+    context: CliContext,
+    scenes: SceneList,
+    cuts: CutList,
+    name_format: str,
+    use_mkvmerge: bool,
+    output: str,
+    show_output: bool,
+    ffmpeg_args: str,
+):
+    """Handles the `split-video` command."""
+    del cuts  # split-video only uses scenes.
+    assert context.video_stream is not None
+
+    if use_mkvmerge:
+        name_format = name_format.removesuffix("-$SCENE_NUMBER")
+
+    # Add proper extension to filename template if required.
+    dot_pos = name_format.rfind(".")
+    extension_length = 0 if dot_pos < 0 else len(name_format) - (dot_pos + 1)
+    # If using mkvmerge, force extension to .mkv.
+    if use_mkvmerge and not name_format.endswith(".mkv"):
+        name_format += ".mkv"
+    # Otherwise, if using ffmpeg, only add an extension if one doesn't exist.
+    elif not 2 <= extension_length <= 4:
+        name_format += ".mp4"
+    if use_mkvmerge:
+        split_video_mkvmerge(
+            input_video_path=context.video_stream.path,
+            scene_list=scenes,
+            output_dir=output,
+            output_file_template=name_format,
+            show_output=show_output,
+        )
+    else:
+        split_video_ffmpeg(
+            input_video_path=context.video_stream.path,
+            scene_list=scenes,
+            output_dir=output,
+            output_file_template=name_format,
+            arg_override=ffmpeg_args,
+            show_progress=not context.quiet_mode,
+            show_output=show_output,
+        )
+    if scenes:
+        logger.info("Video splitting completed, scenes written to disk.")
+
+
+def save_edl(
+    context: CliContext,
+    scenes: SceneList,
+    cuts: CutList,
+    filename: str,
+    output: str,
+    title: str,
+    reel: str,
+    start_timecode: str | None,
+):
+    """Handles the `save-edl` command. Outputs in CMX 3600 format."""
+    del cuts  # We only use scene information.
+    assert context.video_stream is not None
+    video_name = context.video_stream.name
+    edl_path = get_and_create_path(
+        Template(filename).safe_substitute(VIDEO_NAME=video_name),
+        output,
+    )
+    write_scene_list_edl(
+        output_path=edl_path,
+        scene_list=scenes,
+        title=Template(title).safe_substitute(VIDEO_NAME=video_name),
+        reel=reel,
+        start_timecode=start_timecode,
+    )
+
+
+def save_fcp(
+    context: CliContext,
+    scenes: SceneList,
+    cuts: CutList,
+    filename: str,
+    format: FcpFormat,
+    output: str,
+):
+    """Handles the `save-fcp` command."""
+    del cuts  # We only use scene information.
+    if not scenes:
+        return
+    assert context.video_stream is not None
+
+    video_stream = context.video_stream
+    video_name = str(video_stream.name)
+    video_path = str(video_stream.path)
+    xml_path = get_and_create_path(
+        Template(filename).safe_substitute(VIDEO_NAME=video_name),
+        output,
+    )
+    if format == FcpFormat.FCPX:
+        write_scene_list_fcpx(
+            output_path=xml_path,
+            scene_list=scenes,
+            video_path=video_path,
+            frame_rate=video_stream.frame_rate,
+            frame_size=video_stream.frame_size,
+            video_name=video_name,
+        )
+    elif format == FcpFormat.FCP7:
+        write_scene_list_fcp7(
+            output_path=xml_path,
+            scene_list=scenes,
+            video_path=video_path,
+            frame_rate=video_stream.frame_rate,
+            frame_size=video_stream.frame_size,
+            video_name=video_name,
+            source_duration=video_stream.duration,
+        )
+    else:
+        logger.error(f"Unknown format: {format}")
+
+
+def save_otio(
+    context: CliContext,
+    scenes: SceneList,
+    cuts: CutList,
+    filename: str,
+    output: str,
+    name: str,
+    audio: bool,
+):
+    """Handles the `save-otio` command."""
+    del cuts  # We only use scene information
+    assert context.video_stream is not None
+    video_stream = context.video_stream
+    video_name = str(video_stream.name)
+    otio_path = get_and_create_path(
+        Template(filename).safe_substitute(VIDEO_NAME=video_name),
+        output,
+    )
+    write_scene_list_otio(
+        output_path=otio_path,
+        scene_list=scenes,
+        video_path=str(video_stream.path),
+        frame_rate=video_stream.frame_rate,
+        name=Template(name).safe_substitute(VIDEO_NAME=video_name),
+        audio=audio,
+    )

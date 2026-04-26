@@ -1,0 +1,34 @@
+.sig {
+    padding-bottom: 8px;
+}
+.field-list {
+    padding-bottom: 8px;
+}
+.class {
+    padding-bottom: 12px;
+    padding-top: 4px;
+}
+.function {
+    padding-bottom: 12px;
+    padding-top: 12px;
+}
+.data {
+    padding-bottom: 12px;
+    padding-top: 12px;
+}
+.method {
+    padding-bottom: 12px;
+    padding-top: 12px;
+}
+.attribute {
+    padding-bottom: 12px;
+    padding-top: 12px;
+}
+.exception {
+    padding-bottom: 12px;
+    padding-top: 12px;
+}
+.property {
+    padding-bottom: 12px;
+    padding-top: 12px;
+}
