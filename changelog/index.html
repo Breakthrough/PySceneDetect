@@ -958,7 +958,7 @@
 </ul>
 </li>
 <li><code>StatsManager.load_from_csv()</code> and <code>save_images()</code> <code>output_dir</code> now accept <code>os.PathLike</code> (e.g. <code>pathlib.Path</code>) in addition to <code>str</code></li>
-<li><code>SceneManager.detect_scenes()</code> <code>duration</code> and <code>end_time</code> formally accept <code>int</code> (frames), <code>float</code> (seconds), <code>str</code> (timecode), or <code>FrameTimecode</code> — matching the documented and runtime-supported behavior</li>
+<li><code>SceneManager.detect_scenes()</code> <code>duration</code> and <code>end_time</code> formally accept <code>int</code> (frames), <code>float</code> (seconds), <code>str</code> (timecode), or <code>FrameTimecode</code> - matching the documented and runtime-supported behavior</li>
 <li><code>SceneDetector</code> is now a <a href="https://docs.python.org/3/library/abc.html">Python abstract class</a></li>
 <li><code>SceneDetector</code> instances can now assume they always have frame data to process when <code>process_frame</code> is called</li>
 <li>Remove <code>SceneDetector.is_processing_required()</code> method</li>
