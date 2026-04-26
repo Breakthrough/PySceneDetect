@@ -12,7 +12,7 @@ Video Scene Cut Detection and Analysis Tool
    :target: https://github.com/Breakthrough/PySceneDetect
 
 .. image:: https://img.shields.io/pypi/l/scenedetect.svg
-   :target: http://pyscenedetect.readthedocs.org/en/latest/copyright/
+   :target: https://www.scenedetect.com/copyright/
 
 .. image:: https://img.shields.io/github/stars/Breakthrough/PySceneDetect.svg?style=social&label=View%20on%20Github
    :target: https://github.com/Breakthrough/PySceneDetect

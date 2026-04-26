@@ -38,7 +38,7 @@ install:
   - 'SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%'
   - python --version
   - python -m pip install --upgrade pip build wheel virtualenv setuptools
-  - python -m pip install -r docs/requirements.txt
+  - python -m pip install .[docs]
   - python -m pip install --upgrade -r packaging/windows/requirements.txt --no-binary imageio-ffmpeg
   # Checkout build resources and third party software used for testing.
   - git checkout refs/remotes/origin/resources -- packaging/

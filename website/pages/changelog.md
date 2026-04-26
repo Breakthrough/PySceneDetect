@@ -671,7 +671,7 @@ Development
 
 PySceneDetect is a major breaking release which overhauls how timestamps are handled throughout the API. This allows PySceneDetect to properly process variable framerate (VFR) videos. A significant amount of technical debt has been addressed, including removal of deprecated or overly complicated APIs.
 
-Although there have been minimal changes to most API examples, there are several breaking changes. Applications written for the 0.6 API *may* require modification to work with the new API.  Minimum supported Python version is now **Python 3.10**.
+Care was taken to minimize changes for most common API uses, however more advanced use cases may run into breaking changes. Please review [the Migration Guide](https://www.scenedetect.com/docs/0.7/api/migration_guide.html) when updating from v0.6. Minimum supported Python version is now **Python 3.10**.
 
 ### CLI Changes
 
@@ -725,6 +725,12 @@ Although there have been minimal changes to most API examples, there are several
  * Add properties to access `frame_num`, `framerate`, and `seconds` instead of getter methods
  * Remove `FrameTimecode.previous_frame()` method
  * Deprecated functionality preserved from v0.6 now uses the `warnings` module
+
+**General:**
+
+ * Type hints: audit and overhaul: first-party code is now clean with Pyright basic mode, migrated deprecated type hints to comply with PEP 585
+ * Code quality: expand static analysis rules, audit and cleanup existing suppressions
+ * Packaging: modernized to comply with PEP 621, make `opencv-python` a requirement, add separate `scenedetect-headless` variant instead
 
 **Removals:**
 

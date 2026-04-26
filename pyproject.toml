@@ -12,11 +12,75 @@
 requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
+[project]
+name = "scenedetect"
+dynamic = ["version"]
+description = "Video scene cut/shot detection program and Python library."
+readme = { file = "packaging/package-info.rst", content-type = "text/x-rst" }
+license = { text = "BSD-3-Clause" }
+requires-python = ">=3.10"
+authors = [{ name = "Brandon Castellano", email = "brandon248@gmail.com" }]
+keywords = ["video", "computer-vision", "analysis"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "Environment :: Console :: Curses",
+    "Intended Audience :: Developers",
+    "Intended Audience :: End Users/Desktop",
+    "Intended Audience :: System Administrators",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Multimedia :: Video",
+    "Topic :: Multimedia :: Video :: Conversion",
+    "Topic :: Multimedia :: Video :: Non-Linear Editor",
+    "Topic :: Utilities",
+]
+dependencies = [
+    # click 8.3.0 is excluded as per https://scenedetect.com/issues/521
+    "click~=8.0,<8.3.0",
+    "numpy",
+    "opencv-python",
+    "platformdirs",
+    "tqdm",
+]
+
+[project.optional-dependencies]
+pyav = ["av>=9.2"]
+moviepy = ["moviepy"]
+dev = ["av>=9.2", "pytest>=7.0"]
+docs = ["Sphinx==7.0.1"]
+website = ["mkdocs==1.5.2", "jinja2>=3.1.6"]
+
+[project.urls]
+Homepage = "https://www.scenedetect.com"
+Repository = "https://github.com/Breakthrough/PySceneDetect/"
+Documentation = "https://www.scenedetect.com/docs/"
+"Bug Tracker" = "https://github.com/Breakthrough/PySceneDetect/issues/"
+
+[project.scripts]
+scenedetect = "scenedetect.__main__:main"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+include = ["scenedetect*"]
+
+[tool.setuptools.dynamic]
+version = { attr = "scenedetect.__version__" }
+
 [tool.pytest.ini_options]
 markers = [
     "release: opt-in release-validation tests; excluded by default (run with `pytest -m release`)",
 ]
 addopts = "-m 'not release'"
+filterwarnings = [
+    "ignore:TODO.*Update caller to handle VFR:UserWarning",
+]
 
 [tool.ruff]
 line-length = 100
