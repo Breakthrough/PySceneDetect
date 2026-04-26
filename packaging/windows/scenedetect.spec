@@ -3,13 +3,14 @@
 block_cipher = None
 
 
-a = Analysis(['../scenedetect/__main__.py'],
+a = Analysis(['../../scenedetect/__main__.py'],
              pathex=['.'],
              binaries=None,
              datas=[
-                ('windows/*', '.'),
-                ('../LICENSE', '.'),
-                ('../scenedetect.cfg', '.')
+                ('LICENSE-PYTHON', '.'),
+                ('README.txt', '.'),
+                ('../../LICENSE', '.'),
+                ('../../scenedetect.cfg', '.')
             ],
              hiddenimports=[],
              hookspath=[],

@@ -7,7 +7,8 @@ on:
     - cron: '0 0 * * *'
   pull_request:
     paths:
-      - dist/**
+      - packaging/**
+      - scripts/**
       - scenedetect/**
       - tests/**
       - pyproject.toml
@@ -15,7 +16,8 @@ on:
       - .github/workflows/build-windows.yml
   push:
     paths:
-      - dist/**
+      - packaging/**
+      - scripts/**
       - scenedetect/**
       - tests/**
       - pyproject.toml
@@ -52,7 +54,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip build wheel virtualenv setuptools
           pip install -r docs/requirements.txt
-          pip install --upgrade -r dist/requirements_windows.txt --no-binary imageio-ffmpeg
+          pip install --upgrade -r packaging/windows/requirements.txt --no-binary imageio-ffmpeg
 
       - name: Download Resources
         run: |
@@ -75,8 +77,8 @@ jobs:
 
       - name: Build PySceneDetect
         run: |
-          python dist/pre_release.py
-          pyinstaller dist/scenedetect.spec
+          python scripts/pre_release.py
+          pyinstaller packaging/windows/scenedetect.spec
 
       - name: Build Documentation
         run: |
@@ -87,9 +89,8 @@ jobs:
         run: |
           Move-Item -Path LICENSE -Destination dist/scenedetect/
           New-Item -Path dist/scenedetect/ -Name thirdparty -ItemType Directory
-          Move-Item -Path dist/windows/README* -Destination dist/scenedetect/
-          Move-Item -Path dist/windows/LICENSE* -Destination dist/scenedetect/thirdparty/
-          Move-Item -Path scenedetect/_thirdparty/LICENSE* -Destination dist/scenedetect/thirdparty/
+          Copy-Item -Path packaging/windows/LICENSE-PYTHON -Destination dist/scenedetect/thirdparty/
+          Copy-Item -Path scenedetect/_thirdparty/LICENSE* -Destination dist/scenedetect/thirdparty/
           7z e -odist/ffmpeg ffmpeg-${{ env.ffmpeg-version }}-full_build.7z LICENSE -r
           Move-Item -Path ffmpeg.exe -Destination dist/scenedetect/ffmpeg.exe
           Move-Item -Path dist/ffmpeg/LICENSE -Destination dist/scenedetect/thirdparty/LICENSE-FFMPEG

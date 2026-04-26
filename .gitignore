@@ -9,6 +9,7 @@ tests/resources/*
 *.mkv
 *.m4v
 *.csv
+packaging/windows/.version_info
 benchmarks/BCC/*.mp4
 *.txt
 benchmarks/RAI/*.mp4

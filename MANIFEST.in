@@ -1,5 +1,6 @@
 recursive-exclude .github *
-recursive-exclude dist *
+recursive-exclude packaging *
+recursive-exclude scripts *
 recursive-exclude docs *
 recursive-exclude website *
 exclude *
@@ -8,5 +9,5 @@ include LICENSE
 include pyproject.toml
 include setup.cfg
 include scenedetect.cfg
-include dist/package-info.rst
+include packaging/package-info.rst
 recursive-include docs *

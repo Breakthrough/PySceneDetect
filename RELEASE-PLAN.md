@@ -11,7 +11,7 @@ Version referenced below as `X.Y[.Z]` - replace with the real version throughout
 ## 1. Code & version
 
 - [ ] Bump `__version__` in `scenedetect/__init__.py`.
-- [ ] Bump `ProductVersion` in `dist/installer/PySceneDetect.aip` (must match `__version__` - `dist/pre_release.py --release` asserts this).
+- [ ] Bump `ProductVersion` in `packaging/windows/installer/PySceneDetect.aip` (must match `__version__` - `scripts/pre_release.py --release` asserts this).
 - [ ] No `-dev` / pre-release suffix on the version string for a final release.
 
 > **Note:** `setup.cfg` reads the package version dynamically via `version = attr: scenedetect.__version__`, and `pyproject.toml` does not declare a `version` field. The single source of truth is `scenedetect/__init__.py`; the `.aip` is the only other place to keep in sync.
@@ -40,9 +40,9 @@ Version referenced below as `X.Y[.Z]` - replace with the real version throughout
 
 ## 5. Windows installer
 
-- [ ] `python dist/pre_release.py --release` passes (enforces `.aip` ↔ `__version__` parity, writes `dist/.version_info`).
-- [ ] `pyinstaller dist/scenedetect.spec` produces a working `scenedetect.exe` - run it against a sample video.
-- [ ] Build the MSI via Advanced Installer (`dist/installer/PySceneDetect.aip`); install into a clean Windows VM and run the CLI.
+- [ ] `python scripts/pre_release.py --release` passes (enforces `.aip` ↔ `__version__` parity, writes `packaging/windows/.version_info`).
+- [ ] `pyinstaller packaging/windows/scenedetect.spec` produces a working `scenedetect.exe` - run it against a sample video.
+- [ ] Build the MSI via Advanced Installer (`packaging/windows/installer/PySceneDetect.aip`); install into a clean Windows VM and run the CLI.
 
 ## 6. Cut the release
 
@@ -71,5 +71,5 @@ Version referenced below as `X.Y[.Z]` - replace with the real version throughout
 ## Notes
 
 - **Branching model**: work spans multiple commits on `releases/X.Y`; the final one gets the `vX.Y[.Z]-release` tag which gates the release-test workflow. A passing release-test is a hard prerequisite for publishing.
-- **Version consistency** is enforced in two places (`__init__.py`, `PySceneDetect.aip`). The `static` job of `release-test.yml` checks `__init__.py` against the tag and verifies the changelog has a matching `## PySceneDetect X.Y` heading; the installer parity is checked by `dist/pre_release.py --release`.
+- **Version consistency** is enforced in two places (`__init__.py`, `PySceneDetect.aip`). The `static` job of `release-test.yml` checks `__init__.py` against the tag and verifies the changelog has a matching `## PySceneDetect X.Y` heading; the installer parity is checked by `scripts/pre_release.py --release`.
 - **Changelog convention**: the in-development section lives at the *bottom* of `website/pages/changelog.md` under the "Development" heading - don't move it to the top.

@@ -38,10 +38,10 @@ SHARPEN_AMOUNT = {
 
 SHARPEN_RADIUS = 0.5
 
-DIST_DIR = Path(__file__).resolve().parent
-REPO_DIR = DIST_DIR.parent
-LOGO_DIR = DIST_DIR / "logo"
-ICO_PATH = DIST_DIR / "pyscenedetect.ico"
+REPO_DIR = Path(__file__).resolve().parent.parent
+PACKAGING_DIR = REPO_DIR / "packaging"
+LOGO_DIR = PACKAGING_DIR / "logo"
+ICO_PATH = PACKAGING_DIR / "windows" / "pyscenedetect.ico"
 
 LOGO_SVG = LOGO_DIR / "pyscenedetect-logo.svg"
 LOGO_BG_SVG = LOGO_DIR / "pyscenedetect-logo-bg.svg"

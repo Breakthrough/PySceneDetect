@@ -39,11 +39,8 @@ jobs:
           fi
       - name: Build and Check
         run: |
-          # Build to a clean output dir - `dist/` already holds tracked installer
-          # scripts and config (e.g. dist/generate_assets.py, dist/installer/),
-          # so `twine check dist/*` would try to validate non-distribution files.
-          python -m build --outdir build-dist
-          twine check build-dist/*
+          python -m build
+          twine check dist/*
       - name: pip-audit
         # CVE-2026-3219 in pip 26.0.1 has no fix version available upstream
         # and pip ships pre-installed on the runner (not controlled by this

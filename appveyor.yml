@@ -39,9 +39,9 @@ install:
   - python --version
   - python -m pip install --upgrade pip build wheel virtualenv setuptools
   - python -m pip install -r docs/requirements.txt
-  - python -m pip install --upgrade -r dist/requirements_windows.txt --no-binary imageio-ffmpeg
+  - python -m pip install --upgrade -r packaging/windows/requirements.txt --no-binary imageio-ffmpeg
   # Checkout build resources and third party software used for testing.
-  - git checkout refs/remotes/origin/resources -- dist/
+  - git checkout refs/remotes/origin/resources -- packaging/
   - appveyor DownloadFile https://github.com/GyanD/codexffmpeg/releases/download/%ffmpeg_version%/ffmpeg-%ffmpeg_version%-full_build.7z
   - 7z e ffmpeg-%ffmpeg_version%-full_build.7z -odist/ffmpeg ffmpeg.exe LICENSE -r
   - 'SET IMAGEIO_FFMPEG_EXE=%APPVEYOR_BUILD_FOLDER%\\dist\\ffmpeg\\ffmpeg.exe'
@@ -50,14 +50,13 @@ install:
   - echo * *                          BUILDING WINDOWS EXE                           * *
   - echo * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
   # Build Windows .EXE and create portable .ZIP
-  - python dist/pre_release.py --release
-  - pyinstaller dist/scenedetect.spec
+  - python scripts/pre_release.py --release
+  - pyinstaller packaging/windows/scenedetect.spec
   - sphinx-build -b singlehtml docs dist/scenedetect/docs
   - mkdir dist\scenedetect\thirdparty
   - move LICENSE dist\scenedetect\
-  - move dist\windows\README* dist\scenedetect\
-  - move dist\windows\LICENSE* dist\scenedetect\thirdparty\
-  - move scenedetect\_thirdparty\LICENSE* dist\scenedetect\thirdparty\
+  - copy packaging\windows\LICENSE-PYTHON dist\scenedetect\thirdparty\
+  - copy scenedetect\_thirdparty\LICENSE* dist\scenedetect\thirdparty\
   - copy dist\ffmpeg\ffmpeg.exe dist\scenedetect\
   - move dist\ffmpeg\LICENSE dist\scenedetect\thirdparty\LICENSE-FFMPEG
   - cd dist/scenedetect
@@ -68,7 +67,7 @@ install:
   - echo * *                         BUILDING MSI INSTALLER                          * *
   - echo * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
   # Download, install, and register AdvancedInstaller
-  - cd dist/installer
+  - cd packaging/windows/installer
   - ps: iex ((New-Object Net.WebClient).DownloadString('https://raw.githubusercontent.com/appveyor/secure-file/master/install.ps1'))
   - appveyor-tools\secure-file -decrypt license65.dat.enc -secret %ai_license_secret% -salt %ai_license_salt%
   - appveyor DownloadFile https://www.advancedinstaller.com/downloads/advinst.msi
@@ -84,8 +83,8 @@ install:
   - echo * *                        PACKAGING BUILD ARTIFACTS                        * *
   - echo * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
   # Zip all resources together for code signing
+  - move packaging\windows\installer\PySceneDetect-*.msi dist\
   - cd dist
-  - move installer\PySceneDetect-*.msi .
   - cp scenedetect\scenedetect.exe .
   - 7z a scenedetect-signed.zip scenedetect.exe PySceneDetect-*.msi
   - cd ..

@@ -6,7 +6,8 @@ on:
     - cron: '0 0 * * *'
   pull_request:
     paths:
-      - dist/**
+      - packaging/**
+      - scripts/**
       - scenedetect/**
       - tests/**
       - pyproject.toml
@@ -15,7 +16,8 @@ on:
       - .github/actions/setup-ffmpeg/**
   push:
     paths:
-      - dist/**
+      - packaging/**
+      - scripts/**
       - scenedetect/**
       - tests/**
       - pyproject.toml

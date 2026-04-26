@@ -12,28 +12,32 @@
 
 # Pre-release script to run before invoking `pyinstaller`:
 #
-#     python dist/pre_release.py
-#     pyinstaller dist/scenedetect.spec
+#     python scripts/pre_release.py
+#     pyinstaller packaging/windows/scenedetect.spec
 #
-import os
 import sys
-sys.path.append(os.path.abspath("."))
+from pathlib import Path
+
+REPO_DIR = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(REPO_DIR))
 
 import scenedetect
 
+PACKAGING_DIR = REPO_DIR / "packaging"
+WINDOWS_DIR = PACKAGING_DIR / "windows"
+INSTALLER_AIP = WINDOWS_DIR / "installer" / "PySceneDetect.aip"
+VERSION_INFO = WINDOWS_DIR / ".version_info"
 
 VERSION = scenedetect.__version__
 
 run_version_check = ("--release" in sys.argv)
 
 if run_version_check:
-  installer_aip = ''
-  with open("dist/installer/PySceneDetect.aip", "r") as f:
-    installer_aip = f.read()
+  installer_aip = INSTALLER_AIP.read_text()
   aip_version = f"<ROW Property=\"ProductVersion\" Value=\"{VERSION}\" Options=\"32\"/>"
   assert aip_version in installer_aip, f"Installer project version does not match {VERSION}."
 
-with open("dist/.version_info", "wb") as f:
+with VERSION_INFO.open("wb") as f:
     v = VERSION.split(".")
     assert 2 <= len(v) <= 4, f"Unrecognized version format: {VERSION}"
     while len(v) < 4:
