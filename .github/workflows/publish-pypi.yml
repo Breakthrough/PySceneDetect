@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check workflows
-        uses: actions/github-script@v6
+        uses: actions/github-script@v8
         with:
           script: |
             const { owner, repo } = context.repo;
@@ -82,12 +82,12 @@ jobs:
 
     steps:
       - name: Checkout ${{ github.event.inputs.tag }}
-        uses: actions/checkout@v3
+        uses: actions/checkout@v5
         with:
           ref: ${{ github.event.inputs.tag }}
 
       - name: Set up Python
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v6
         with:
           python-version: "3.x"
 
@@ -104,7 +104,7 @@ jobs:
           mv dist/*.whl pkg/
 
       - name: Upload Package
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: scenedetect-dist
           path: |

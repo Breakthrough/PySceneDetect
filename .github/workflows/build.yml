@@ -41,7 +41,7 @@ jobs:
       scenedetect_version: ""
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Setup FFmpeg
         uses: ./.github/actions/setup-ffmpeg
@@ -49,7 +49,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
           cache: 'pip'
@@ -105,7 +105,7 @@ jobs:
 
       - name: Upload Package
         if: ${{ matrix.python-version == '3.13' && matrix.os == 'ubuntu-latest' }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: scenedetect-dist
           path: |
