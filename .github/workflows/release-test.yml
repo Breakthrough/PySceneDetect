@@ -41,6 +41,9 @@ jobs:
       - name: Build and Check
         run: |
           python -m build
+          python packaging/build_headless.py
+          python -m build
+          git checkout pyproject.toml
           twine check dist/*
       - name: pip-audit
         # CVE-2026-3219 in pip 26.0.1 has no fix version available upstream

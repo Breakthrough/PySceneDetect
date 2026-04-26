@@ -35,7 +35,7 @@ Version referenced below as `X.Y[.Z]` - replace with the real version throughout
 - [ ] `ruff check scenedetect/ tests/` and `ruff format --check scenedetect/ tests/` pass.
 - [ ] Release test suite green: tag a disposable `vX.Y.Z-release-rc` or use `workflow_dispatch` on `.github/workflows/release-test.yml` - all 4 jobs (`static`, `release-tests`, `install-matrix`, `long-stress`) green across the 3-OS × 2-Python matrix. See `RELEASE-TEST-PLAN.md` for what the suite covers.
 - [ ] `resources` branch has the artifacts the release tests need (goldens under `tests/resources/goldens/`, `tests/resources/stress_15min.mp4`). Re-push if any golden was regenerated.
-- [ ] Manual smoke: fresh venv, `pip install .` then `pip install .[opencv]` then `pip install .[pyav]`; run `scenedetect -i <video> detect-content list-scenes save-images` and eyeball the output.
+- [ ] Manual smoke: fresh venv, `pip install .` (pulls opencv-python automatically) then `pip install .[pyav]`; run `scenedetect -i <video> detect-content list-scenes save-images` and eyeball the output. Repeat after `python packaging/build_headless.py && pip install .` to verify the headless variant.
 - [ ] `pip-audit` clean (or exceptions documented in the changelog).
 
 ## 5. Windows installer
@@ -53,8 +53,8 @@ Version referenced below as `X.Y[.Z]` - replace with the real version throughout
 
 ## 7. Publish
 
-- [ ] `publish-pypi.yml` ran on the tag and uploaded successfully. Verify at https://pypi.org/project/scenedetect/.
-- [ ] Smoke-test PyPI: in a fresh venv, `pip install scenedetect==X.Y.Z` (bare), then with `[opencv]` and `[pyav]`. CLI launches.
+- [ ] `publish-pypi.yml` ran on the tag and uploaded successfully. Verify both projects: https://pypi.org/project/scenedetect/ and https://pypi.org/project/scenedetect-headless/.
+- [ ] Smoke-test PyPI: in a fresh venv, `pip install scenedetect==X.Y.Z`; CLI launches and `pip show scenedetect` lists `opencv-python`. Repeat in a second venv with `pip install scenedetect-headless==X.Y.Z`; verify it lists `opencv-python-headless`.
 - [ ] Create GitHub Release from the `vX.Y[.Z]` tag, body = changelog section, attach Windows installer MSI + portable `.zip`.
 - [ ] Deploy website: `generate-website.yml` picks up the changelog / download page updates.
 - [ ] Deploy docs: `generate-docs.yml` publishes the new version.
