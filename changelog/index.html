@@ -925,7 +925,7 @@
 <h2 id="pyscenedetect-07-in-development">PySceneDetect 0.7 (In Development)</h2>
 <h3 id="release-notes_12">Release Notes</h3>
 <p>PySceneDetect is a major breaking release which overhauls how timestamps are handled throughout the API. This allows PySceneDetect to properly process variable framerate (VFR) videos. A significant amount of technical debt has been addressed, including removal of deprecated or overly complicated APIs.</p>
-<p>Although there have been minimal changes to most API examples, there are several breaking changes. Applications written for the 0.6 API <em>may</em> require modification to work with the new API.  Minimum supported Python version is now <strong>Python 3.10</strong>.</p>
+<p>Care was taken to minimize changes for most common API uses, however more advanced use cases may run into breaking changes. Please review <a href="https://www.scenedetect.com/docs/0.7/api/migration_guide.html">the Migration Guide</a> when updating from v0.6. Minimum supported Python version is now <strong>Python 3.10</strong>.</p>
 <h3 id="cli-changes">CLI Changes</h3>
 <ul>
 <li>[feature] VFR videos are handled correctly by the OpenCV and PyAV backends, and should work correctly with default parameters</li>
@@ -979,6 +979,12 @@
 <li>Add properties to access <code>frame_num</code>, <code>framerate</code>, and <code>seconds</code> instead of getter methods</li>
 <li>Remove <code>FrameTimecode.previous_frame()</code> method</li>
 <li>Deprecated functionality preserved from v0.6 now uses the <code>warnings</code> module</li>
+</ul>
+<p><strong>General:</strong></p>
+<ul>
+<li>Type hints: audit and overhaul: first-party code is now clean with Pyright basic mode, migrated deprecated type hints to comply with PEP 585</li>
+<li>Code quality: expand static analysis rules, audit and cleanup existing suppressions</li>
+<li>Packaging: modernized to comply with PEP 621</li>
 </ul>
 <p><strong>Removals:</strong></p>
 <ul>
