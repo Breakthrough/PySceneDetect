@@ -40,8 +40,6 @@ install:
   - python -m pip install --upgrade pip build wheel virtualenv setuptools
   - python -m pip install .[docs]
   - python -m pip install --upgrade -r packaging/windows/requirements.txt --no-binary imageio-ffmpeg
-  # Checkout build resources and third party software used for testing.
-  - git checkout refs/remotes/origin/resources -- packaging/
   - appveyor DownloadFile https://github.com/GyanD/codexffmpeg/releases/download/%ffmpeg_version%/ffmpeg-%ffmpeg_version%-full_build.7z
   - 7z e ffmpeg-%ffmpeg_version%-full_build.7z -odist/ffmpeg ffmpeg.exe LICENSE -r
   - 'SET IMAGEIO_FFMPEG_EXE=%APPVEYOR_BUILD_FOLDER%\\dist\\ffmpeg\\ffmpeg.exe'
@@ -69,9 +67,14 @@ install:
   - 'SET PATH=%PATH%;C:\\Program Files (x86)\\Caphyon\\Advanced Installer 22.9.1\\bin\\x86'
   # License path must be absolute
   - AdvancedInstaller.com /RegisterOffline "%cd%\license65.dat"
+  - cd ../../..
+  # Re-sync APPDIR from CI's dist/scenedetect (handles drift between local and
+  # CI pyinstaller output - new transitive deps, Python patch updates, etc.).
+  # Does not touch version/GUID fields - those are committed to the .aip on the
+  # release tag and must stay stable across rebuilds for upgrade-chain integrity.
+  - python scripts/bump_installer.py --sync-only
   # Create MSI installer
-  - AdvancedInstaller.com /build PySceneDetect.aip
-  - cd ../..
+  - AdvancedInstaller.com /build packaging/windows/installer/PySceneDetect.aip
 
   - echo * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
   - echo * *                        PACKAGING BUILD ARTIFACTS                        * *

@@ -13,15 +13,19 @@
 
 Usage:
     python scripts/bump_installer.py             # version bump only
-    python scripts/bump_installer.py --sync-files  # also re-sync APPDIR
+    python scripts/bump_installer.py --sync-files  # bump + re-sync APPDIR
+    python scripts/bump_installer.py --sync-only   # re-sync APPDIR only (CI)
     python scripts/bump_installer.py --version 0.7.0  # explicit version override
 
 The version-bump path rewrites ProductVersion / ProductCode / PackageFileName.
-The --sync-files path additionally walks dist/scenedetect/ (pyinstaller output)
-and rewrites the project's directory + component + file tables to match,
-which is needed when bundled dependencies change.
+--sync-files additionally walks dist/scenedetect/ (pyinstaller output) and
+rewrites the project's directory + component + file tables to match, which
+is needed when bundled dependencies change. --sync-only does the resync
+without touching version/identity fields - intended for CI, where the .aip
+is already at the release version and we just want the file list to match
+CI's pyinstaller output (rather than the developer's local one).
 
-Both paths shell out to AdvancedInstaller.com so the .aip's invariants
+All paths shell out to AdvancedInstaller.com so the .aip's invariants
 (line endings, attribute ordering, GUID casing) stay intact. The CLI lives
 under "C:\\Program Files (x86)\\Caphyon\\Advanced Installer ..\\bin\\x86\\".
 Override discovery with the ADVINST environment variable.
@@ -80,12 +84,30 @@ def run(advinst: Path, *edit_args: str, check: bool = True) -> int:
     return subprocess.run(cmd, check=check).returncode
 
 
+def resync_appdir(advinst: Path) -> None:
+    if not DIST_TREE.exists():
+        sys.exit(
+            f"{DIST_TREE} not found. Run `pyinstaller packaging/windows/scenedetect.spec` first."
+        )
+    # /ResetSync errors out if APPDIR isn't already a synced folder
+    # (true on the first run); /NewSync will fail if it IS synced. So
+    # try the reset but tolerate failure, then sync.
+    run(advinst, "/ResetSync", "APPDIR", check=False)
+    run(advinst, "/NewSync", "APPDIR", str(DIST_TREE))
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=(__doc__ or "").splitlines()[0])
-    parser.add_argument(
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument(
         "--sync-files",
         action="store_true",
-        help="Re-sync APPDIR from dist/scenedetect/ (run pyinstaller first).",
+        help="Bump version/GUIDs AND re-sync APPDIR from dist/scenedetect/.",
+    )
+    mode.add_argument(
+        "--sync-only",
+        action="store_true",
+        help="Re-sync APPDIR only; leave version/GUID fields untouched (CI use).",
     )
     parser.add_argument(
         "--version",
@@ -94,11 +116,16 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    raw_version = args.version_override or scenedetect.__version__
-    version = msi_version(raw_version)
-
     advinst = find_advinst()
     print(f"Using {advinst}")
+
+    if args.sync_only:
+        print(f"Re-syncing APPDIR in {INSTALLER_AIP.name}")
+        resync_appdir(advinst)
+        return
+
+    raw_version = args.version_override or scenedetect.__version__
+    version = msi_version(raw_version)
     if version != raw_version:
         print(f"Normalized {raw_version!r} -> {version!r} for AdvancedInstaller")
     print(f"Bumping {INSTALLER_AIP.name} to {version}")
@@ -114,16 +141,7 @@ def main() -> None:
     )
 
     if args.sync_files:
-        if not DIST_TREE.exists():
-            sys.exit(
-                f"{DIST_TREE} not found. Run "
-                "`pyinstaller packaging/windows/scenedetect.spec` first."
-            )
-        # /ResetSync errors out if APPDIR isn't already a synced folder
-        # (true on the first run); /NewSync will fail if it IS synced. So
-        # try the reset but tolerate failure, then sync.
-        run(advinst, "/ResetSync", "APPDIR", check=False)
-        run(advinst, "/NewSync", "APPDIR", str(DIST_TREE))
+        resync_appdir(advinst)
 
 
 if __name__ == "__main__":
