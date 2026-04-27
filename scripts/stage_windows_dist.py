@@ -1,0 +1,184 @@
+#
+#            PySceneDetect: Python-Based Video Scene Detector
+#   -------------------------------------------------------------------
+#     [  Site:    https://scenedetect.com                           ]
+#     [  Docs:    https://scenedetect.com/docs/                     ]
+#     [  Github:  https://github.com/Breakthrough/PySceneDetect/    ]
+#
+# Copyright (C) 2026 Brandon Castellano <http://www.bcastell.com>.
+# PySceneDetect is licensed under the BSD 3-Clause License; see the
+# included LICENSE file, or visit one of the above pages for details.
+#
+"""Stage non-pyinstaller assets into dist/scenedetect/.
+
+Pyinstaller produces only scenedetect.exe + _internal/. This script adds
+the rest of what both the AdvancedInstaller MSI and the portable ZIP need:
+ffmpeg.exe + its LICENSE, the project LICENSE / README.txt, third-party
+licenses, and sphinx-built docs. Mirrors the inline staging steps that
+appveyor.yml used to do, so CI and local builds stay in sync.
+
+Sequence in a release:
+
+    python scripts/pre_release.py
+    pyinstaller packaging/windows/scenedetect.spec
+    python scripts/stage_windows_dist.py --ffmpeg-dir <dir> --portable-zip
+    python scripts/bump_installer.py --sync-files
+    AdvancedInstaller.com /build packaging/windows/installer/PySceneDetect.aip
+    python scripts/generate_manifest.py
+
+--ffmpeg-dir points at a directory containing ffmpeg.exe and its LICENSE
+(e.g. the extracted GyanD codexffmpeg release). If omitted, the script
+falls back to extracting ffmpeg.exe from packaging/windows/thirdparty.7z;
+LICENSE-FFMPEG is then a stub since the bundled archive doesn't carry it.
+"""
+
+import argparse
+import re
+import shutil
+import subprocess
+import sys
+import zipfile
+from pathlib import Path
+
+REPO_DIR = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(REPO_DIR))
+
+import scenedetect  # noqa: E402
+
+DIST_DIR = REPO_DIR / "dist"
+DIST_TREE = DIST_DIR / "scenedetect"
+PACKAGING_WIN = REPO_DIR / "packaging" / "windows"
+DOCS_DIR = REPO_DIR / "docs"
+THIRDPARTY_LICENSES = REPO_DIR / "scenedetect" / "_thirdparty"
+
+
+def msi_version(raw: str) -> str:
+    parts = [re.split(r"[^\d]", p, maxsplit=1)[0] for p in raw.split(".")]
+    while len(parts) < 3:
+        parts.append("0")
+    return ".".join(parts[:4])
+
+
+def find_7zip() -> Path:
+    for candidate in (
+        Path(r"C:\Program Files\7-Zip\7z.exe"),
+        Path(r"C:\Program Files (x86)\7-Zip\7z.exe"),
+    ):
+        if candidate.exists():
+            return candidate
+    sys.exit("7-Zip not found. Install from https://www.7-zip.org/.")
+
+
+def copy_file(src: Path, dst: Path) -> None:
+    if not src.exists():
+        print(f"WARNING: {src} missing - skipping {dst.name}")
+        return
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(src, dst)
+    print(f"  {src.relative_to(REPO_DIR)} -> {dst.relative_to(REPO_DIR)}")
+
+
+def stage_ffmpeg(ffmpeg_dir: Path | None) -> None:
+    thirdparty = DIST_TREE / "thirdparty"
+    thirdparty.mkdir(parents=True, exist_ok=True)
+    if ffmpeg_dir is not None:
+        print(f"Copying ffmpeg from {ffmpeg_dir}")
+        copy_file(ffmpeg_dir / "ffmpeg.exe", DIST_TREE / "ffmpeg.exe")
+        copy_file(ffmpeg_dir / "LICENSE", thirdparty / "LICENSE-FFMPEG")
+        return
+    archive = PACKAGING_WIN / "thirdparty.7z"
+    if not archive.exists():
+        sys.exit(f"No --ffmpeg-dir given and {archive} missing.")
+    sevenz = find_7zip()
+    staging = DIST_TREE / "_thirdparty_extract"
+    if staging.exists():
+        shutil.rmtree(staging)
+    staging.mkdir(parents=True)
+    print(f"Extracting {archive.name} (bundled fallback)...")
+    subprocess.run(
+        [str(sevenz), "x", str(archive), f"-o{staging}", "windows/ffmpeg.exe", "-y"],
+        check=True,
+        capture_output=True,
+    )
+    src = staging / "windows" / "ffmpeg.exe"
+    if src.exists():
+        shutil.move(str(src), str(DIST_TREE / "ffmpeg.exe"))
+        print("  ffmpeg.exe -> dist/scenedetect/ffmpeg.exe")
+    shutil.rmtree(staging)
+    # The bundled archive predates LICENSE-FFMPEG; emit a stub pointing at upstream.
+    stub = thirdparty / "LICENSE-FFMPEG"
+    stub.write_text(
+        "FFmpeg is licensed under the LGPL/GPL. See https://ffmpeg.org/legal.html "
+        "for the canonical license text matching the bundled binary.\n",
+        encoding="utf-8",
+    )
+    print(f"  (stub) -> {stub.relative_to(REPO_DIR)}")
+
+
+def build_docs() -> None:
+    if not (DOCS_DIR / "Makefile").exists():
+        print("WARNING: docs/Makefile missing - skipping docs build")
+        return
+    print("Building Sphinx docs (singlehtml)...")
+    target = DIST_TREE / "docs"
+    if target.exists():
+        shutil.rmtree(target)
+    subprocess.run(
+        [sys.executable, "-m", "sphinx", "-b", "singlehtml", str(DOCS_DIR), str(target)],
+        check=True,
+    )
+    print("  docs -> dist/scenedetect/docs/")
+
+
+def stage_thirdparty_licenses() -> None:
+    target = DIST_TREE / "thirdparty"
+    target.mkdir(parents=True, exist_ok=True)
+    print("Staging third-party licenses...")
+    for src in sorted(THIRDPARTY_LICENSES.glob("LICENSE-*")):
+        copy_file(src, target / src.name)
+    copy_file(PACKAGING_WIN / "LICENSE-PYTHON", target / "LICENSE-PYTHON")
+
+
+def make_portable_zip(version: str) -> None:
+    zip_path = DIST_DIR / f"PySceneDetect-{version}-portable.zip"
+    if zip_path.exists():
+        zip_path.unlink()
+    print(f"Creating {zip_path.relative_to(REPO_DIR)}...")
+    with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zf:
+        for path in sorted(p for p in DIST_TREE.rglob("*") if p.is_file()):
+            zf.write(path, path.relative_to(DIST_TREE))
+    print(f"  {zip_path.stat().st_size / (1024 * 1024):.1f} MB")
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description=(__doc__ or "").splitlines()[0])
+    parser.add_argument(
+        "--ffmpeg-dir",
+        type=Path,
+        help="Directory containing ffmpeg.exe and its LICENSE. "
+        "If omitted, ffmpeg is extracted from packaging/windows/thirdparty.7z.",
+    )
+    parser.add_argument(
+        "--portable-zip",
+        action="store_true",
+        help="Also produce dist/PySceneDetect-<version>-portable.zip.",
+    )
+    args = parser.parse_args()
+
+    if not DIST_TREE.exists():
+        sys.exit(f"{DIST_TREE} not found. Run pyinstaller first.")
+
+    print(f"Staging into {DIST_TREE.relative_to(REPO_DIR)}")
+    stage_ffmpeg(args.ffmpeg_dir)
+    print("Copying root files...")
+    copy_file(REPO_DIR / "LICENSE", DIST_TREE / "LICENSE")
+    copy_file(PACKAGING_WIN / "README.txt", DIST_TREE / "README.txt")
+    stage_thirdparty_licenses()
+    build_docs()
+
+    if args.portable_zip:
+        make_portable_zip(msi_version(scenedetect.__version__))
+
+
+if __name__ == "__main__":
+    main()

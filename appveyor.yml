@@ -49,19 +49,13 @@ install:
   - echo * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
   - echo * *                          BUILDING WINDOWS EXE                           * *
   - echo * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-  # Build Windows .EXE and create portable .ZIP
+  # Build Windows .EXE and create portable .ZIP. The staging script copies
+  # ffmpeg.exe + LICENSE from --ffmpeg-dir, third-party licenses, the project
+  # LICENSE/README, and sphinx docs into dist/scenedetect/, then emits the
+  # portable .zip - keeps CI and local builds in sync (see scripts/stage_windows_dist.py).
   - python scripts/pre_release.py --release
   - pyinstaller packaging/windows/scenedetect.spec
-  - sphinx-build -b singlehtml docs dist/scenedetect/docs
-  - mkdir dist\scenedetect\thirdparty
-  - move LICENSE dist\scenedetect\
-  - copy packaging\windows\LICENSE-PYTHON dist\scenedetect\thirdparty\
-  - copy scenedetect\_thirdparty\LICENSE* dist\scenedetect\thirdparty\
-  - copy dist\ffmpeg\ffmpeg.exe dist\scenedetect\
-  - move dist\ffmpeg\LICENSE dist\scenedetect\thirdparty\LICENSE-FFMPEG
-  - cd dist/scenedetect
-  - 7z a ../scenedetect-win64.zip *
-  - cd ../..
+  - python scripts/stage_windows_dist.py --ffmpeg-dir dist/ffmpeg --portable-zip
 
   - echo * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
   - echo * *                         BUILDING MSI INSTALLER                          * *
@@ -109,8 +103,8 @@ test_script:
   - scenedetect.exe -i ../../tests/resources/testvideo.mp4 -b pyav detect-content time -e 2s
 
 artifacts:
-  # Portable ZIP
-  - path: dist/scenedetect-win64.zip
+  # Portable ZIP (named PySceneDetect-X.Y.Z-portable.zip by stage_windows_dist.py)
+  - path: dist/PySceneDetect-*-portable.zip
     name: PySceneDetect-win64_portable
   # MSI Installer + .EXE Bundle for Signing
   - path: dist/scenedetect-signed.zip

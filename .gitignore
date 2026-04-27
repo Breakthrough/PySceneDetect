@@ -10,6 +10,7 @@ tests/resources/*
 *.m4v
 *.csv
 packaging/windows/.version_info
+packaging/windows/installer/PySceneDetect.back*.aip
 benchmarks/BCC/*.mp4
 *.txt
 benchmarks/RAI/*.mp4

@@ -5,16 +5,16 @@ Version referenced below as `X.Y[.Z]` - replace with the real version throughout
 
 ## 0. Branch setup
 
-- [ ] Create / fast-forward release branch: `releases/X.Y` off `main`.
-- [ ] All release-prep commits land on `releases/X.Y` (never directly on `main` during the freeze - commits are usually halted to `main` until the release branch is cut, after which the release branch is merged back into `main` and development resumes).
+- [X] Create / fast-forward release branch: `releases/X.Y` off `main`.
+- [X] All release-prep commits land on `releases/X.Y` (never directly on `main` during the freeze - commits are usually halted to `main` until the release branch is cut, after which the release branch is merged back into `main` and development resumes).
 
 ## 1. Code & version
 
 - [ ] Bump `__version__` in `scenedetect/__init__.py`.
-- [ ] Bump `ProductVersion` in `packaging/windows/installer/PySceneDetect.aip` (must match `__version__` - `scripts/pre_release.py --release` asserts this).
+- [ ] Bump the installer project: `python scripts/bump_installer.py` (rewrites `ProductVersion`, regenerates `ProductCode`, updates the MSI filename via the AdvancedInstaller CLI). Add `--sync-files` after `pyinstaller` if any bundled dependency versions changed since the last release - this re-syncs APPDIR from `dist/scenedetect/` and replaces the manual "delete install dir + re-add files" GUI step. `scripts/pre_release.py --release` asserts the resulting `ProductVersion` matches `__version__`.
 - [ ] No `-dev` / pre-release suffix on the version string for a final release.
 
-> **Note:** `setup.cfg` reads the package version dynamically via `version = attr: scenedetect.__version__`, and `pyproject.toml` does not declare a `version` field. The single source of truth is `scenedetect/__init__.py`; the `.aip` is the only other place to keep in sync.
+> **Note:** `pyproject.toml` does not declare a `version` field - the single source of truth is `scenedetect/__init__.py`; the Windows installer `.aip` is the only other place to keep in sync.
 
 ## 2. Docs
 
@@ -42,7 +42,18 @@ Version referenced below as `X.Y[.Z]` - replace with the real version throughout
 
 - [ ] `python scripts/pre_release.py --release` passes (enforces `.aip` ↔ `__version__` parity, writes `packaging/windows/.version_info`).
 - [ ] `pyinstaller packaging/windows/scenedetect.spec` produces a working `scenedetect.exe` - run it against a sample video.
+- [ ] `python scripts/stage_windows_dist.py --ffmpeg-dir <dir> --portable-zip` populates `dist/scenedetect/` with ffmpeg, third-party licenses, sphinx docs, and emits the portable `.zip`. Pass `--ffmpeg-dir` pointing at a recent extracted [GyanD codexffmpeg](https://github.com/GyanD/codexffmpeg/releases) build; omit it only for offline builds (uses the bundled `packaging/windows/thirdparty.7z` with a stub `LICENSE-FFMPEG`).
 - [ ] Build the MSI via Advanced Installer (`packaging/windows/installer/PySceneDetect.aip`); install into a clean Windows VM and run the CLI.
+- [ ] After both `pyinstaller` and the MSI build are done (and the portable `.zip` is staged at `dist/PySceneDetect-X.Y.Z-portable.zip`), run `python scripts/generate_manifest.py` to produce `dist/PySceneDetect-X.Y.Z.manifest.json` (per-file SHA256 audit of every artifact) and `dist/SHA256SUMS` (flat `sha256sum -c` compatible). Both are attached to the GitHub release in step 7.
+
+> **GUI required for structural changes.** `scripts/bump_installer.py` covers routine version bumps and `--sync-files` covers dependency-driven file-list changes, but anything that touches the *project structure* of the .aip still needs the AdvancedInstaller GUI. Examples:
+>
+> - Moving the .aip or its source tree (the build's `SourcePath` references are stored relative to the .aip and aren't rewritten by `/NewSync` - cf. the `dist/installer/` → `packaging/windows/installer/` move that broke the relative paths until they were edited in the GUI).
+> - Adding/removing build configurations, features, or prerequisites.
+> - Editing dialog layouts, branding bitmaps, install sequences, custom actions, file associations, or shortcuts.
+> - Changing `UpgradeCode`, install directory layout (`APPDIR` location), or per-component attributes.
+>
+> When in doubt, open the .aip in AdvancedInstaller, make the change, save, and commit the resulting diff. Re-run `bump_installer.py` afterwards if the version-identity fields need refreshing.
 
 ## 6. Cut the release
 
@@ -55,7 +66,7 @@ Version referenced below as `X.Y[.Z]` - replace with the real version throughout
 
 - [ ] `publish-pypi.yml` ran on the tag and uploaded successfully. Verify both projects: https://pypi.org/project/scenedetect/ and https://pypi.org/project/scenedetect-headless/.
 - [ ] Smoke-test PyPI: in a fresh venv, `pip install scenedetect==X.Y.Z`; CLI launches and `pip show scenedetect` lists `opencv-python`. Repeat in a second venv with `pip install scenedetect-headless==X.Y.Z`; verify it lists `opencv-python-headless`.
-- [ ] Create GitHub Release from the `vX.Y[.Z]` tag, body = changelog section, attach Windows installer MSI + portable `.zip`.
+- [ ] Create GitHub Release from the `vX.Y[.Z]` tag, body = changelog section, attach Windows installer MSI + portable `.zip` + `PySceneDetect-X.Y.Z.manifest.json` + `SHA256SUMS` (both produced by `scripts/generate_manifest.py`).
 - [ ] Deploy website: `generate-website.yml` picks up the changelog / download page updates.
 - [ ] Deploy docs: `generate-docs.yml` publishes the new version.
 
