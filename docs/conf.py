@@ -37,6 +37,7 @@ release = scenedetect_version
 extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.autodoc",
+    "sphinx_copybutton",
 ]
 
 autoclass_content = "both"

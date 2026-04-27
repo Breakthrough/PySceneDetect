@@ -669,16 +669,16 @@ Development
 
 ### Release Notes
 
-PySceneDetect is a major breaking release which overhauls how timestamps are handled throughout the API. This allows PySceneDetect to properly process variable framerate (VFR) videos. A significant amount of technical debt has been addressed, including removal of deprecated or overly complicated APIs.
+PySceneDetect 0.7 is a **major breaking release** which overhauls how timestamps are handled. This allows PySceneDetect to properly process variable framerate (VFR) videos. A significant amount of technical debt has been addressed, including removal of deprecated or overly complicated APIs.
 
 Care was taken to minimize changes for most common API uses, however more advanced use cases may run into breaking changes. Please review [the Migration Guide](https://www.scenedetect.com/docs/0.7/api/migration_guide.html) when updating from v0.6. Minimum supported Python version is now **Python 3.10**.
 
 ### CLI Changes
 
 - [feature] VFR videos are handled correctly by the OpenCV and PyAV backends, and should work correctly with default parameters
+- [feature] All CLI options which used to accept frame numbers only now accept seconds (e.g. `0.6s`) and timecodes (e.g. `00:00:00.600`) [#531](https://github.com/Breakthrough/PySceneDetect/issues/531)
 - [feature] New `save-fcp` command allows exporting in Final Cut Pro format (FCP7/FCPX) [#156](https://github.com/Breakthrough/PySceneDetect/issues/156)
-- [feature] `--min-scene-len`/`-m` and `save-images --frame-margin`/`-m` now accept seconds (e.g. `0.6s`) and timecodes (e.g. `00:00:00.600`) in addition to a frame count [#531](https://github.com/Breakthrough/PySceneDetect/issues/531)
-- [feature] `save-edl` accepts a new `--start-timecode`/`-s` flag (SMPTE `HH:MM:SS:FF` or 8-digit `HHMMSSFF`) to stamp every event with a custom start timecode so generated EDLs align with the source media's on-screen timecode [#515](https://github.com/Breakthrough/PySceneDetect/issues/515)
+- [feature] Add `save-edl` option  `--start-timecode`/`-s` to providde a custom start timecode for generated EDLs, supports SMPTE `HH:MM:SS:FF` or 8-digit `HHMMSSFF` input [#515](https://github.com/Breakthrough/PySceneDetect/issues/515)
 - [bugfix] Fix floating-point precision error in `save-otio` output where frame values near integer boundaries (e.g. `90.00000000000001`) were serialized with spurious precision
 - [bugfix] Add mitigation for transient `OSError` in the MoviePy backend as it is susceptible to subprocess pipe races on slow or heavily loaded systems [#496](https://github.com/Breakthrough/PySceneDetect/issues/496)
 - [bugfix] `detect-threshold` cut frame numbers are now backend-deterministic; previously the cut could differ by 1 frame between PyAV and OpenCV when the fade midpoint landed on a `.5` rounding boundary (PyAV uses sub-microsecond PTS, OpenCV uses millisecond-truncated `CAP_PROP_POS_MSEC`)

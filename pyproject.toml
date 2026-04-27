@@ -52,7 +52,7 @@ dependencies = [
 pyav = ["av>=9.2"]
 moviepy = ["moviepy"]
 dev = ["av>=9.2", "moviepy", "pytest>=7.0"]
-docs = ["Sphinx==7.0.1"]
+docs = ["Sphinx==7.0.1", "sphinx-copybutton==0.5.2"]
 website = ["mkdocs==1.5.2", "jinja2>=3.1.6"]
 
 [project.urls]
