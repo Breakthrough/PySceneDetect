@@ -316,10 +316,32 @@ def test_ntsc_framerate_detection():
     assert framerate_to_fraction(23.976023976023978) == Fraction(24000, 1001)
     assert framerate_to_fraction(29.97002997002997) == Fraction(30000, 1001)
     assert framerate_to_fraction(59.94005994005994) == Fraction(60000, 1001)
+    assert framerate_to_fraction(119.88011988011988) == Fraction(120000, 1001)
     assert framerate_to_fraction(24.0) == Fraction(24, 1)
     assert framerate_to_fraction(30.0) == Fraction(30, 1)
     assert framerate_to_fraction(60.0) == Fraction(60, 1)
     assert framerate_to_fraction(25.0) == Fraction(25, 1)
+
+
+def test_ntsc_framerate_detection_arbitrary_base():
+    """NTSC detection should work for any base rate, not a hardcoded list (e.g. 48000/1001
+    for HFR cinema)."""
+    assert framerate_to_fraction(47.952047952047955) == Fraction(48000, 1001)
+    assert framerate_to_fraction(239.76023976023975) == Fraction(240000, 1001)
+
+
+def test_ntsc_framerate_detection_low_precision():
+    """Low-precision float reports (e.g. truncated to 3 decimals) should still snap to the
+    NTSC rational."""
+    assert framerate_to_fraction(23.976) == Fraction(24000, 1001)
+    assert framerate_to_fraction(29.97) == Fraction(30000, 1001)
+
+
+def test_framerate_to_fraction_non_ntsc_fallback():
+    """Non-NTSC, non-integer framerates should fall back to limit_denominator and not be
+    misclassified as NTSC."""
+    # 24.5 is not near any N*1000/1001 within tolerance, so the limit_denominator path runs.
+    assert framerate_to_fraction(24.5) == Fraction(49, 2)
 
 
 def test_timecode_arithmetic_mixed_time_base():
