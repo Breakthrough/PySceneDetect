@@ -18,8 +18,12 @@
 import sys
 from pathlib import Path
 
-REPO_DIR = Path(__file__).resolve().parent.parent
+SCRIPTS_DIR = Path(__file__).resolve().parent
+REPO_DIR = SCRIPTS_DIR.parent
 sys.path.insert(0, str(REPO_DIR))
+sys.path.insert(0, str(SCRIPTS_DIR))
+
+from bump_installer import msi_version  # noqa: E402
 
 import scenedetect  # noqa: E402
 
@@ -34,8 +38,15 @@ run_version_check = "--release" in sys.argv
 
 if run_version_check:
     installer_aip = INSTALLER_AIP.read_text()
-    aip_version = f'<ROW Property="ProductVersion" Value="{VERSION}" Options="32"/>'
-    assert aip_version in installer_aip, f"Installer project version does not match {VERSION}."
+    # The .aip stores the numeric MSI form (e.g. "0.7.0"), not the Python __version__
+    # (which may be "0.7-dev0", "0.7", "0.7.1", ...). Normalize through the same
+    # function bump_installer.py uses to write the .aip so the comparison is apples-to-apples.
+    expected = msi_version(VERSION)
+    aip_row = f'<ROW Property="ProductVersion" Value="{expected}" Options="32"/>'
+    assert aip_row in installer_aip, (
+        f"Installer ProductVersion does not match normalized {VERSION!r} ({expected!r}). "
+        f"Run `python scripts/bump_installer.py` to refresh the .aip."
+    )
 
 with VERSION_INFO.open("wb") as f:
     v = VERSION.split(".")

@@ -43,6 +43,7 @@ Version referenced below as `X.Y[.Z]` - replace with the real version throughout
 - [ ] `python scripts/pre_release.py --release` passes (enforces `.aip` ↔ `__version__` parity, writes `packaging/windows/.version_info`).
 - [ ] `pyinstaller packaging/windows/scenedetect.spec` produces a working `scenedetect.exe` - run it against a sample video.
 - [ ] `python scripts/stage_windows_dist.py --ffmpeg-dir <dir> --portable-zip` populates `dist/scenedetect/` with ffmpeg, third-party licenses, sphinx docs, and emits the portable `.zip`. Pass `--ffmpeg-dir` pointing at a recent extracted [GyanD codexffmpeg](https://github.com/GyanD/codexffmpeg/releases) build; omit it only for offline builds (uses the bundled `packaging/windows/thirdparty.7z` with a stub `LICENSE-FFMPEG`).
+- [ ] `python scripts/bump_installer.py --sync-files` and commit the .aip diff (refreshes the APPDIR baseline so CI's per-build `--sync-only` diff stays small).
 - [ ] Build the MSI via Advanced Installer (`packaging/windows/installer/PySceneDetect.aip`); install into a clean Windows VM and run the CLI.
 - [ ] After both `pyinstaller` and the MSI build are done (and the portable `.zip` is staged at `dist/PySceneDetect-X.Y.Z-portable.zip`), run `python scripts/generate_manifest.py` to produce `dist/PySceneDetect-X.Y.Z.manifest.json` (per-file SHA256 audit of every artifact) and `dist/SHA256SUMS` (flat `sha256sum -c` compatible). Both are attached to the GitHub release in step 7.
 

@@ -69,13 +69,22 @@ def find_7zip() -> Path:
     sys.exit("7-Zip not found. Install from https://www.7-zip.org/.")
 
 
+def _rel(p: Path) -> str:
+    # Display paths relative to the repo when possible, else fall back to the
+    # absolute path (e.g. --ffmpeg-dir pointing outside the repo on CI).
+    try:
+        return str(p.relative_to(REPO_DIR))
+    except ValueError:
+        return str(p)
+
+
 def copy_file(src: Path, dst: Path) -> None:
     if not src.exists():
         print(f"WARNING: {src} missing - skipping {dst.name}")
         return
     dst.parent.mkdir(parents=True, exist_ok=True)
     shutil.copy2(src, dst)
-    print(f"  {src.relative_to(REPO_DIR)} -> {dst.relative_to(REPO_DIR)}")
+    print(f"  {_rel(src)} -> {_rel(dst)}")
 
 
 def stage_ffmpeg(ffmpeg_dir: Path | None) -> None:
@@ -141,13 +150,20 @@ def stage_thirdparty_licenses() -> None:
 
 def make_portable_zip(version: str) -> None:
     zip_path = DIST_DIR / f"PySceneDetect-{version}-portable.zip"
+    manifest_path = DIST_DIR / f"PySceneDetect-{version}-portable.manifest.txt"
     if zip_path.exists():
         zip_path.unlink()
     print(f"Creating {zip_path.relative_to(REPO_DIR)}...")
+    files = sorted(p for p in DIST_TREE.rglob("*") if p.is_file())
     with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zf:
-        for path in sorted(p for p in DIST_TREE.rglob("*") if p.is_file()):
+        for path in files:
             zf.write(path, path.relative_to(DIST_TREE))
     print(f"  {zip_path.stat().st_size / (1024 * 1024):.1f} MB")
+    manifest_path.write_text(
+        "\n".join(str(p.relative_to(DIST_TREE)) for p in files) + "\n",
+        encoding="utf-8",
+    )
+    print(f"  manifest -> {manifest_path.relative_to(REPO_DIR)}")
 
 
 def main() -> None:

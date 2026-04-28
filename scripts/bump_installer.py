@@ -12,23 +12,18 @@
 """Bump the AdvancedInstaller .aip project for a release.
 
 Usage:
-    python scripts/bump_installer.py             # version bump only
-    python scripts/bump_installer.py --sync-files  # bump + re-sync APPDIR
-    python scripts/bump_installer.py --sync-only   # re-sync APPDIR only (CI)
-    python scripts/bump_installer.py --version 0.7.0  # explicit version override
+    python scripts/bump_installer.py                    # version bump only
+    python scripts/bump_installer.py --sync-files       # bump + re-sync APPDIR
+    python scripts/bump_installer.py --sync-only        # re-sync APPDIR only (CI)
+    python scripts/bump_installer.py --sync-only --dev  # CI dev build (renames MSI)
+    python scripts/bump_installer.py --version 0.7.0    # explicit version override
 
-The version-bump path rewrites ProductVersion / ProductCode / PackageFileName.
---sync-files additionally walks dist/scenedetect/ (pyinstaller output) and
-rewrites the project's directory + component + file tables to match, which
-is needed when bundled dependencies change. --sync-only does the resync
-without touching version/identity fields - intended for CI, where the .aip
-is already at the release version and we just want the file list to match
-CI's pyinstaller output (rather than the developer's local one).
+The committed .aip is a baseline; CI's --sync-only adapts it per build and is
+never written back to git. Refresh locally with --sync-files before each release.
 
-All paths shell out to AdvancedInstaller.com so the .aip's invariants
-(line endings, attribute ordering, GUID casing) stay intact. The CLI lives
-under "C:\\Program Files (x86)\\Caphyon\\Advanced Installer ..\\bin\\x86\\".
-Override discovery with the ADVINST environment variable.
+All paths shell out to AdvancedInstaller.com to preserve .aip invariants
+(line endings, attribute ordering, GUID casing). Override CLI discovery with
+the ADVINST environment variable.
 """
 
 import argparse
@@ -110,11 +105,22 @@ def main() -> None:
         help="Re-sync APPDIR only; leave version/GUID fields untouched (CI use).",
     )
     parser.add_argument(
+        "--dev",
+        action="store_true",
+        help=(
+            "Rename the MSI to PySceneDetect-{ver}-dev-win64.msi so dev-build artifacts "
+            "are distinguishable from release artifacts. Only valid with --sync-only."
+        ),
+    )
+    parser.add_argument(
         "--version",
         dest="version_override",
         help="MSI version override (default: derived from scenedetect.__version__).",
     )
     args = parser.parse_args()
+
+    if args.dev and not args.sync_only:
+        sys.exit("--dev is only valid in combination with --sync-only.")
 
     advinst = find_advinst()
     print(f"Using {advinst}")
@@ -122,6 +128,11 @@ def main() -> None:
     if args.sync_only:
         print(f"Re-syncing APPDIR in {INSTALLER_AIP.name}")
         resync_appdir(advinst)
+        if args.dev:
+            version = msi_version(args.version_override or scenedetect.__version__)
+            dev_name = f"PySceneDetect-{version}-dev-win64.msi"
+            print(f"Renaming MSI package to {dev_name} (dev build)")
+            run(advinst, "/SetPackageName", dev_name, "-buildname", "DefaultBuild")
         return
 
     raw_version = args.version_override or scenedetect.__version__

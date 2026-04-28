@@ -64,7 +64,11 @@ install:
   - appveyor-tools\secure-file -decrypt license65.dat.enc -secret %ai_license_secret% -salt %ai_license_salt%
   - appveyor DownloadFile https://www.advancedinstaller.com/downloads/advinst.msi
   - msiexec /i advinst.msi /qn
-  - 'SET PATH=%PATH%;C:\\Program Files (x86)\\Caphyon\\Advanced Installer 22.9.1\\bin\\x86'
+  # Resolve the installed Advanced Installer bin path dynamically - the upstream
+  # MSI is unversioned so the directory name (Advanced Installer X.Y.Z) drifts.
+  - ps: $aiBin = (Get-ChildItem 'C:\Program Files (x86)\Caphyon\Advanced Installer*\bin\x86' | Sort-Object FullName -Descending | Select-Object -First 1).FullName; Add-Content $env:APPVEYOR_BUILD_FOLDER\ai_path.txt $aiBin
+  - set /p AI_BIN=<%APPVEYOR_BUILD_FOLDER%\ai_path.txt
+  - 'SET PATH=%PATH%;%AI_BIN%'
   # License path must be absolute
   - AdvancedInstaller.com /RegisterOffline "%cd%\license65.dat"
   - cd ../../..
@@ -72,7 +76,14 @@ install:
   # CI pyinstaller output - new transitive deps, Python patch updates, etc.).
   # Does not touch version/GUID fields - those are committed to the .aip on the
   # release tag and must stay stable across rebuilds for upgrade-chain integrity.
-  - python scripts/bump_installer.py --sync-only
+  # On non-tag builds, also pass --dev so the MSI is named PySceneDetect-{ver}-dev-win64.msi
+  # (keeps dev artifacts distinguishable from signed releases).
+  - if "%APPVEYOR_REPO_TAG%"=="true" (python scripts/bump_installer.py --sync-only) else (python scripts/bump_installer.py --sync-only --dev)
+  # Snapshot the post-sync .aip and the actual payload tree as build artifacts.
+  # The committed .aip is a baseline; CI adapts it to its own pyinstaller output
+  # and we never write back to git, so these snapshots are the authoritative
+  # record of what each MSI was built from (for audit / release forensics).
+  - copy packaging\windows\installer\PySceneDetect.aip dist\PySceneDetect.aip
   # Create MSI installer
   - AdvancedInstaller.com /build packaging/windows/installer/PySceneDetect.aip
 
@@ -112,3 +123,8 @@ artifacts:
   # MSI Installer + .EXE Bundle for Signing
   - path: dist/scenedetect-signed.zip
     name: PySceneDetect-win64_installer
+  # Build provenance: post-sync .aip and the portable payload manifest.
+  - path: dist/PySceneDetect.aip
+    name: PySceneDetect-build-manifest-aip
+  - path: dist/PySceneDetect-*-portable.manifest.txt
+    name: PySceneDetect-build-manifest-payload
