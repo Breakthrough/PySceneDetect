@@ -9,10 +9,7 @@
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
-"""Golden Cut-List Generator
-
-This script generates golden cut-lists in JSON format for the release test suite.
-"""
+"""Generates golden cut-lists in JSON format for the release test suite."""
 
 import argparse
 import json

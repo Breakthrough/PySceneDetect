@@ -1,8 +1,15 @@
-#!/usr/bin/env python
-"""Generate pyscenedetect.ico and logo PNGs from SVG sources.
-
-Requires Inkscape (for SVG rasterization) and Pillow (for ICO generation).
-"""
+#
+#            PySceneDetect: Python-Based Video Scene Detector
+#   -------------------------------------------------------------------
+#     [  Site:    https://scenedetect.com                           ]
+#     [  Docs:    https://scenedetect.com/docs/                     ]
+#     [  Github:  https://github.com/Breakthrough/PySceneDetect/    ]
+#
+# Copyright (C) 2026 Brandon Castellano <http://www.bcastell.com>.
+# PySceneDetect is licensed under the BSD 3-Clause License; see the
+# included LICENSE file, or visit one of the above pages for details.
+#
+"""Generate pyscenedetect.ico and logo PNGs from SVG sources. Requires Inkscape and Pillow."""
 
 import contextlib
 import shutil

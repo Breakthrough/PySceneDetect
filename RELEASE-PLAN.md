@@ -11,7 +11,7 @@ Version referenced below as `X.Y[.Z]` - replace with the real version throughout
 ## 1. Code & version
 
 - [ ] Bump `__version__` in `scenedetect/__init__.py`.
-- [ ] Bump the installer project: `python scripts/bump_installer.py` (rewrites `ProductVersion`, regenerates `ProductCode`, updates the MSI filename via the AdvancedInstaller CLI). Add `--sync-files` after `pyinstaller` if any bundled dependency versions changed since the last release - this re-syncs APPDIR from `dist/scenedetect/` and replaces the manual "delete install dir + re-add files" GUI step. `scripts/pre_release.py --release` asserts the resulting `ProductVersion` matches `__version__`.
+- [ ] Bump the installer project: `python scripts/update_installer.py` (rewrites `ProductVersion`, regenerates `ProductCode`, updates the MSI filename via the AdvancedInstaller CLI). Add `--sync-files` after `pyinstaller` if any bundled dependency versions changed since the last release - this re-syncs APPDIR from `dist/scenedetect/` and replaces the manual "delete install dir + re-add files" GUI step. `scripts/pre_release.py --release` asserts the resulting `ProductVersion` matches `__version__`.
 - [ ] No `-dev` / pre-release suffix on the version string for a final release.
 
 > **Note:** `pyproject.toml` does not declare a `version` field - the single source of truth is `scenedetect/__init__.py`; the Windows installer `.aip` is the only other place to keep in sync.
@@ -42,19 +42,19 @@ Version referenced below as `X.Y[.Z]` - replace with the real version throughout
 
 - [ ] `python scripts/pre_release.py --release` passes (enforces `.aip` <-> `__version__` parity, writes `packaging/windows/.version_info`).
 - [ ] `pyinstaller packaging/windows/scenedetect.spec` produces a working `scenedetect.exe` - run it against a sample video.
-- [ ] `python scripts/stage_windows_dist.py --ffmpeg-dir <dir> --portable-zip` populates `dist/scenedetect/` with ffmpeg, third-party licenses, sphinx docs, and emits the portable `.zip`. Pass `--ffmpeg-dir` pointing at a recent extracted [GyanD codexffmpeg](https://github.com/GyanD/codexffmpeg/releases) build; omit it only for offline builds (uses the bundled `packaging/windows/thirdparty.7z` with a stub `LICENSE-FFMPEG`).
-- [ ] `python scripts/bump_installer.py --sync-files` and commit the .aip diff (refreshes the APPDIR baseline so CI's per-build `--sync-only` diff stays small).
+- [ ] `python scripts/stage_windows_dist.py --ffmpeg-dir <dir>` populates `dist/scenedetect/` with ffmpeg, third-party licenses, sphinx docs, and emits the portable `.zip`. Pass `--ffmpeg-dir` pointing at a recent extracted [GyanD codexffmpeg](https://github.com/GyanD/codexffmpeg/releases) build; omit it only for offline builds (uses the bundled `packaging/windows/thirdparty.7z` with a stub `LICENSE-FFMPEG`).
+- [ ] `python scripts/update_installer.py --sync-files` and commit the .aip diff (refreshes the APPDIR baseline so CI's per-build `--sync-only` diff stays small).
 - [ ] Build the MSI via Advanced Installer (`packaging/windows/installer/PySceneDetect.aip`); install into a clean Windows VM and run the CLI.
 - [ ] After both `pyinstaller` and the MSI build are done (and the portable `.zip` is staged at `dist/PySceneDetect-X.Y.Z-portable.zip`), run `python scripts/generate_manifest.py` to produce `dist/PySceneDetect-X.Y.Z.manifest.json` (per-file SHA256 audit of every artifact) and `dist/SHA256SUMS` (flat `sha256sum -c` compatible). Both are attached to the GitHub release in step 7.
 
-> **GUI required for structural changes.** `scripts/bump_installer.py` covers routine version bumps and `--sync-files` covers dependency-driven file-list changes, but anything that touches the *project structure* of the .aip still needs the AdvancedInstaller GUI. Examples:
+> **GUI required for structural changes.** `scripts/update_installer.py` covers routine version bumps and `--sync-files` covers dependency-driven file-list changes, but anything that touches the *project structure* of the .aip still needs the AdvancedInstaller GUI. Examples:
 >
 > - Moving the .aip or its source tree (the build's `SourcePath` references are stored relative to the .aip and aren't rewritten by `/NewSync` - cf. the `dist/installer/` -> `packaging/windows/installer/` move that broke the relative paths until they were edited in the GUI).
 > - Adding/removing build configurations, features, or prerequisites.
 > - Editing dialog layouts, branding bitmaps, install sequences, custom actions, file associations, or shortcuts.
 > - Changing `UpgradeCode`, install directory layout (`APPDIR` location), or per-component attributes.
 >
-> When in doubt, open the .aip in AdvancedInstaller, make the change, save, and commit the resulting diff. Re-run `bump_installer.py` afterwards if the version-identity fields need refreshing.
+> When in doubt, open the .aip in AdvancedInstaller, make the change, save, and commit the resulting diff. Re-run `update_installer.py` afterwards if the version-identity fields need refreshing.
 
 ## 6. Cut the release
 

@@ -38,7 +38,7 @@ import scenedetect  # noqa: E402
 
 
 def msi_version(raw: str) -> str:
-    # Mirror scripts/bump_installer.py - the artifact filename uses the
+    # Mirror scripts/update_installer.py - the artifact filename uses the
     # normalized X.Y.Z form, not the Python __version__ string.
     parts = [re.split(r"[^\d]", p, maxsplit=1)[0] for p in raw.split(".")]
     while len(parts) < 3:

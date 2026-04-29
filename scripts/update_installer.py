@@ -9,21 +9,14 @@
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
-"""Bump the AdvancedInstaller .aip project for a release.
+"""Update the AdvancedInstaller .aip project for a release.
 
 Usage:
-    python scripts/bump_installer.py                    # version bump only
-    python scripts/bump_installer.py --sync-files       # bump + re-sync APPDIR
-    python scripts/bump_installer.py --sync-only        # re-sync APPDIR only (CI)
-    python scripts/bump_installer.py --sync-only --dev  # CI dev build (renames MSI)
-    python scripts/bump_installer.py --version 0.7.0    # explicit version override
-
-The committed .aip is a baseline; CI's --sync-only adapts it per build and is
-never written back to git. Refresh locally with --sync-files before each release.
-
-All paths shell out to AdvancedInstaller.com to preserve .aip invariants
-(line endings, attribute ordering, GUID casing). Override CLI discovery with
-the ADVINST environment variable.
+    python scripts/update_installer.py                    # version bump only
+    python scripts/update_installer.py --sync-files       # bump + re-sync APPDIR
+    python scripts/update_installer.py --sync-only        # re-sync APPDIR only (CI)
+    python scripts/update_installer.py --sync-only --dev  # CI dev build (renames MSI)
+    python scripts/update_installer.py --version 0.7.0    # explicit version override
 """
 
 import argparse

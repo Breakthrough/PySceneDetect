@@ -2,6 +2,11 @@
 
 build: false
 
+cache:
+  - 'ffmpeg-%ffmpeg_version%-full_build.7z -> appveyor.yml'
+  - 'packaging\windows\installer\advinst.msi -> appveyor.yml'
+  - '%LOCALAPPDATA%\uv\cache -> pyproject.toml'
+
 # Branches applies to tags as well. We only build on tagged releases of the form vX.Y.Z-release
 branches:
   only:
@@ -37,10 +42,10 @@ install:
   - echo * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
   - 'SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%'
   - python --version
-  - python -m pip install --upgrade pip build wheel virtualenv setuptools
-  - python -m pip install .[docs]
-  - python -m pip install --upgrade -r packaging/windows/requirements.txt --no-binary imageio-ffmpeg
-  - appveyor DownloadFile https://github.com/GyanD/codexffmpeg/releases/download/%ffmpeg_version%/ffmpeg-%ffmpeg_version%-full_build.7z
+  - python -m pip install uv
+  - uv pip install --system .[docs]
+  - uv pip install --system -r packaging/windows/requirements.txt --no-binary imageio-ffmpeg
+  - if not exist ffmpeg-%ffmpeg_version%-full_build.7z appveyor DownloadFile https://github.com/GyanD/codexffmpeg/releases/download/%ffmpeg_version%/ffmpeg-%ffmpeg_version%-full_build.7z
   - 7z e ffmpeg-%ffmpeg_version%-full_build.7z -odist/ffmpeg ffmpeg.exe LICENSE -r
   # moviepy.config reads FFMPEG_BINARY (which routes through imageio_ffmpeg) at import time.
   # `--no-binary imageio-ffmpeg` strips the bundled ffmpeg, so point it at the GyanD copy
@@ -57,7 +62,7 @@ install:
   # portable .zip - keeps CI and local builds in sync (see scripts/stage_windows_dist.py).
   - python scripts/pre_release.py --release
   - pyinstaller packaging/windows/scenedetect.spec
-  - python scripts/stage_windows_dist.py --ffmpeg-dir dist/ffmpeg --portable-zip
+  - python scripts/stage_windows_dist.py --ffmpeg-dir dist/ffmpeg
 
   - echo * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
   - echo * *                         BUILDING MSI INSTALLER                          * *
@@ -66,7 +71,7 @@ install:
   - cd packaging/windows/installer
   - ps: iex ((New-Object Net.WebClient).DownloadString('https://raw.githubusercontent.com/appveyor/secure-file/master/install.ps1'))
   - appveyor-tools\secure-file -decrypt license65.dat.enc -secret %ai_license_secret% -salt %ai_license_salt%
-  - appveyor DownloadFile https://www.advancedinstaller.com/downloads/advinst.msi
+  - if not exist advinst.msi appveyor DownloadFile https://www.advancedinstaller.com/downloads/advinst.msi
   - msiexec /i advinst.msi /qn
   # Resolve the installed Advanced Installer bin path dynamically - the upstream
   # MSI is unversioned so the directory name (Advanced Installer X.Y.Z) drifts.
@@ -82,7 +87,7 @@ install:
   # release tag and must stay stable across rebuilds for upgrade-chain integrity.
   # On non-tag builds, also pass --dev so the MSI is named PySceneDetect-{ver}-dev-win64.msi
   # (keeps dev artifacts distinguishable from signed releases).
-  - if "%APPVEYOR_REPO_TAG%"=="true" (python scripts/bump_installer.py --sync-only) else (python scripts/bump_installer.py --sync-only --dev)
+  - if "%APPVEYOR_REPO_TAG%"=="true" (python scripts/update_installer.py --sync-only) else (python scripts/update_installer.py --sync-only --dev)
   # Snapshot the post-sync .aip and the actual payload tree as build artifacts.
   # The committed .aip is a baseline; CI adapts it to its own pyinstaller output
   # and we never write back to git, so these snapshots are the authoritative

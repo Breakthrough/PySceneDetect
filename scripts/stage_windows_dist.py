@@ -9,28 +9,25 @@
 # PySceneDetect is licensed under the BSD 3-Clause License; see the
 # included LICENSE file, or visit one of the above pages for details.
 #
-"""Stage non-pyinstaller assets into dist/scenedetect/.
+"""Stages Windows distribution assets into dist/scenedetect/.
 
-Pyinstaller produces only scenedetect.exe + _internal/. This script adds
-the rest of what both the AdvancedInstaller MSI and the portable ZIP need:
-ffmpeg.exe + its LICENSE, the project LICENSE / README.txt, third-party
-licenses, and sphinx-built docs. Mirrors the inline staging steps that
-appveyor.yml used to do, so CI and local builds stay in sync.
+Sequence in a release to generate the installer:
 
-Sequence in a release:
-
+```bash
     python scripts/pre_release.py
     pyinstaller packaging/windows/scenedetect.spec
-    python scripts/stage_windows_dist.py --ffmpeg-dir <dir> --portable-zip
-    python scripts/bump_installer.py --sync-files
+    python scripts/stage_windows_dist.py --ffmpeg-dir <dir>
+    python scripts/update_installer.py --sync-files
     AdvancedInstaller.com /build packaging/windows/installer/PySceneDetect.aip
     python scripts/generate_manifest.py
+```
 
---ffmpeg-dir points at a directory containing ffmpeg.exe and its LICENSE
-(e.g. the extracted GyanD codexffmpeg release). If omitted, the script
-falls back to extracting ffmpeg.exe from packaging/windows/thirdparty.7z;
-LICENSE-FFMPEG is then a stub since the bundled archive doesn't carry it.
+This script assumes it is run on a Windows machine.
 """
+
+# TODO: This should be called from the Github Actions workflow as well, right now it's only
+# done from the appveyor one. When that's done it should be merged with update_installer.py
+# into a combined "prepare_windows_dist.py".
 
 import argparse
 import re
@@ -38,6 +35,10 @@ import shutil
 import subprocess
 import sys
 import zipfile
+
+if sys.platform != "win32":
+    print("Error: stage_windows_dist.py must be run on Windows.", file=sys.stderr)
+    sys.exit(1)
 from pathlib import Path
 
 REPO_DIR = Path(__file__).resolve().parent.parent
@@ -174,11 +175,6 @@ def main() -> None:
         help="Directory containing ffmpeg.exe and its LICENSE. "
         "If omitted, ffmpeg is extracted from packaging/windows/thirdparty.7z.",
     )
-    parser.add_argument(
-        "--portable-zip",
-        action="store_true",
-        help="Also produce dist/PySceneDetect-<version>-portable.zip.",
-    )
     args = parser.parse_args()
 
     if not DIST_TREE.exists():
@@ -191,9 +187,7 @@ def main() -> None:
     copy_file(PACKAGING_WIN / "README.txt", DIST_TREE / "README.txt")
     stage_thirdparty_licenses()
     build_docs()
-
-    if args.portable_zip:
-        make_portable_zip(msi_version(scenedetect.__version__))
+    make_portable_zip(msi_version(scenedetect.__version__))
 
 
 if __name__ == "__main__":
