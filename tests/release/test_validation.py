@@ -109,10 +109,10 @@ def test_output_otio_rational_time_precision(test_video_file, tmp_path):
     video_track = timeline.tracks[0]
     assert len(list(video_track)) == len(scene_list)
 
-    # `value` is a frame count derived from seconds * fps, serialized at 10µs
+    # `value` is a frame count derived from seconds * fps, serialized at 10us
     # precision (round(..., 6)) per 914ca31. Guards the `90.00000000000001` class
     # of float-cast drift by asserting the rounded value never carries spurious
-    # sub-10µs noise.
+    # sub-10us noise.
     for clip in video_track:
         for rt in (clip.source_range.start_time, clip.source_range.duration):
             assert abs(rt.value - round(rt.value, 6)) == 0, (

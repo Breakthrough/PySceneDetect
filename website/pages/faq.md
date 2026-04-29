@@ -16,7 +16,7 @@ For server environments without GUI libraries, install the headless variant inst
 pip install scenedetect-headless
 ```
 
-Both packages ship the same `scenedetect` Python module — you only need one.
+Both packages ship the same `scenedetect` Python module -- you only need one.
 
 #### How can I enable video splitting support?
 

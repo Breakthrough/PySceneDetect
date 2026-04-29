@@ -15,7 +15,7 @@ PySceneDetect requires at least Python 3.10 or higher.
 <h3 class="wy-text-neutral"><tt>pip install --upgrade scenedetect-headless</tt></h3>
 </div>
 
-PySceneDetect is available via `pip` as either [`scenedetect`](https://pypi.org/project/scenedetect/) (depends on `opencv-python`) or [`scenedetect-headless`](https://pypi.org/project/scenedetect-headless/) (depends on `opencv-python-headless`). Both ship the same `scenedetect` Python module — install whichever OpenCV variant suits your environment.
+PySceneDetect is available via `pip` as either [`scenedetect`](https://pypi.org/project/scenedetect/) (depends on `opencv-python`) or [`scenedetect-headless`](https://pypi.org/project/scenedetect-headless/) (depends on `opencv-python-headless`). Both ship the same `scenedetect` Python module -- install whichever OpenCV variant suits your environment.
 
 ## Windows Build (64-bit Only) &nbsp; <span class="wy-text-neutral"><span class="fa fa-windows"></span></span>
 

@@ -36,8 +36,7 @@ jobs:
         python-version: ["3.13"]
 
     env:
-      ffmpeg-version: "7.1"
-      IMAGEIO_FFMPEG_EXE: ""
+      ffmpeg-version: "8.1"
 
     steps:
       - uses: actions/checkout@v5
@@ -70,7 +69,11 @@ jobs:
         shell: bash
         run: |
           7z e ffmpeg-${{ env.ffmpeg-version }}-full_build.7z ffmpeg.exe -r
-          echo "IMAGEIO_FFMPEG_EXE=`realpath ffmpeg.exe`" >> "$GITHUB_ENV"
+          export PATH="$(pwd):$PATH"
+          # moviepy.config resolves ffmpeg via imageio_ffmpeg at import time; `--no-binary`
+          # strips the bundled binary, so point at the GyanD ffmpeg we just extracted
+          # for both pytest and the subsequent pyinstaller step.
+          echo "IMAGEIO_FFMPEG_EXE=$(realpath ffmpeg.exe)" >> "$GITHUB_ENV"
           python -m pytest -vv
 
       - name: Build PySceneDetect

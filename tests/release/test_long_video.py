@@ -70,7 +70,7 @@ def test_long_video_stress(long_video):
         stop_event.set()
         monitor_thread.join()
 
-    # Assert peak RSS ≤ 3x baseline
+    # Assert peak RSS <= 3x baseline
     # Some increase is expected due to internal buffering, but not 3x for 480p.
     assert peak_rss[0] <= 3 * baseline_rss, (
         f"Memory leak suspected: Peak RSS {peak_rss[0]} > 3x Baseline RSS {baseline_rss}"

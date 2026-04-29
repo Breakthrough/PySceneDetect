@@ -79,7 +79,7 @@ def test_cross_backend_consistency(rel_path, is_vfr):
         )
         if is_vfr:
             for a, e in zip(actual, expected, strict=True):
-                # Tolerance: ~one frame at 30 fps. Plan calls for ±1 local-frame-duration;
+                # Tolerance: ~one frame at 30 fps. Plan calls for +/-1 local-frame-duration;
                 # 50 ms is a conservative superset that still catches real drift.
                 assert abs(a - e) < 0.05, (
                     f"VFR timestamp drift between {backend} and {reference}: {a} vs {e}"

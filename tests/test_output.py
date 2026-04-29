@@ -366,7 +366,7 @@ def test_write_scene_list_fcpx(tmp_path: Path):
 
     fmt = root.find("resources/format")
     assert fmt is not None
-    # 24000/1001 fps → frameDuration is the reciprocal: 1001/24000s.
+    # 24000/1001 fps -> frameDuration is the reciprocal: 1001/24000s.
     assert fmt.attrib["frameDuration"] == "1001/24000s"
     assert fmt.attrib["width"] == "1280"
     assert fmt.attrib["height"] == "544"
@@ -494,7 +494,7 @@ def test_write_scene_list_otio_no_audio(tmp_path: Path):
 
 
 def test_write_scene_list_otio_rational_time_precision(tmp_path: Path):
-    """Serialized frame-count values must be free of sub-10µs float drift (cf. 914ca31)."""
+    """Serialized frame-count values must be free of sub-10us float drift (cf. 914ca31)."""
     # Frames on integer-frame boundaries under NTSC 24000/1001: seconds * 23.976...
     # should land on integers but floats can produce values like 214.00001 without
     # the explicit round(..., 6) in the writer.
@@ -514,4 +514,4 @@ def test_write_scene_list_otio_rational_time_precision(tmp_path: Path):
         for clip in track["children"]:
             for key in ("start_time", "duration"):
                 value = clip["source_range"][key]["value"]
-                assert value == round(value, 6), f"value {value!r} carries sub-10µs float drift"
+                assert value == round(value, 6), f"value {value!r} carries sub-10us float drift"

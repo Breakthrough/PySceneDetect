@@ -60,7 +60,7 @@ jobs:
                 core.setFailed(`Workflow "${workflowName}" did not succeed for tag ${tag}. Conclusion was "${workflowConclusions[workflowName].conclusion}". See: ${workflowConclusions[workflowName].html_url}`);
                 allSuccess = false;
               } else {
-                console.log(`✅ Workflow "${workflowName}" succeeded for tag ${tag}.`);
+                console.log(`[OK] Workflow "${workflowName}" succeeded for tag ${tag}.`);
               }
             }
 

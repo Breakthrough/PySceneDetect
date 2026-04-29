@@ -20,7 +20,7 @@ environment:
     secure: QRCPoNYF1nqgXDn7pHgBzg==
   ai_license_salt:
     secure: +Gy+SRk8JUsaM+5pMEKITiJxdLilrxHpkKlrZzR3C9DPwdgYLGxt5sJn6uXuAJg7e6JsKHcT7tRks/HcSKkHPw==
-  ffmpeg_version: "8.0"
+  ffmpeg_version: "8.1"
 
 # SignPath Config for Code Signing
 deploy:
@@ -42,6 +42,10 @@ install:
   - python -m pip install --upgrade -r packaging/windows/requirements.txt --no-binary imageio-ffmpeg
   - appveyor DownloadFile https://github.com/GyanD/codexffmpeg/releases/download/%ffmpeg_version%/ffmpeg-%ffmpeg_version%-full_build.7z
   - 7z e ffmpeg-%ffmpeg_version%-full_build.7z -odist/ffmpeg ffmpeg.exe LICENSE -r
+  # moviepy.config reads FFMPEG_BINARY (which routes through imageio_ffmpeg) at import time.
+  # `--no-binary imageio-ffmpeg` strips the bundled ffmpeg, so point it at the GyanD copy
+  # we just extracted; otherwise pre_release.py and pyinstaller analysis crash on
+  # `import scenedetect`. The runtime hook (pyi_rth_scenedetect.py) does the same at exe runtime.
   - 'SET IMAGEIO_FFMPEG_EXE=%APPVEYOR_BUILD_FOLDER%\\dist\\ffmpeg\\ffmpeg.exe'
 
   - echo * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

@@ -33,14 +33,14 @@ Version referenced below as `X.Y[.Z]` - replace with the real version throughout
 
 - [ ] Unit tests green locally and in CI: `pytest -vv` (should collect `-m 'not release'` by default).
 - [ ] `ruff check scenedetect/ tests/` and `ruff format --check scenedetect/ tests/` pass.
-- [ ] Release test suite green: tag a disposable `vX.Y.Z-release-rc` or use `workflow_dispatch` on `.github/workflows/release-test.yml` - all 4 jobs (`static`, `release-tests`, `install-matrix`, `long-stress`) green across the 3-OS × 2-Python matrix. See `RELEASE-TEST-PLAN.md` for what the suite covers.
+- [ ] Release test suite green: tag a disposable `vX.Y.Z-release-rc` or use `workflow_dispatch` on `.github/workflows/release-test.yml` - all 4 jobs (`static`, `release-tests`, `install-matrix`, `long-stress`) green across the 3-OS x 2-Python matrix. See `RELEASE-TEST-PLAN.md` for what the suite covers.
 - [ ] `resources` branch has the artifacts the release tests need (goldens under `tests/resources/goldens/`, `tests/resources/stress_15min.mp4`). Re-push if any golden was regenerated.
 - [ ] Manual smoke: fresh venv, `pip install .` (pulls opencv-python automatically) then `pip install .[pyav]`; run `scenedetect -i <video> detect-content list-scenes save-images` and eyeball the output. Repeat after `python packaging/build_headless.py && pip install .` to verify the headless variant.
 - [ ] `pip-audit` clean (or exceptions documented in the changelog).
 
 ## 5. Windows installer
 
-- [ ] `python scripts/pre_release.py --release` passes (enforces `.aip` ↔ `__version__` parity, writes `packaging/windows/.version_info`).
+- [ ] `python scripts/pre_release.py --release` passes (enforces `.aip` <-> `__version__` parity, writes `packaging/windows/.version_info`).
 - [ ] `pyinstaller packaging/windows/scenedetect.spec` produces a working `scenedetect.exe` - run it against a sample video.
 - [ ] `python scripts/stage_windows_dist.py --ffmpeg-dir <dir> --portable-zip` populates `dist/scenedetect/` with ffmpeg, third-party licenses, sphinx docs, and emits the portable `.zip`. Pass `--ffmpeg-dir` pointing at a recent extracted [GyanD codexffmpeg](https://github.com/GyanD/codexffmpeg/releases) build; omit it only for offline builds (uses the bundled `packaging/windows/thirdparty.7z` with a stub `LICENSE-FFMPEG`).
 - [ ] `python scripts/bump_installer.py --sync-files` and commit the .aip diff (refreshes the APPDIR baseline so CI's per-build `--sync-only` diff stays small).
@@ -49,7 +49,7 @@ Version referenced below as `X.Y[.Z]` - replace with the real version throughout
 
 > **GUI required for structural changes.** `scripts/bump_installer.py` covers routine version bumps and `--sync-files` covers dependency-driven file-list changes, but anything that touches the *project structure* of the .aip still needs the AdvancedInstaller GUI. Examples:
 >
-> - Moving the .aip or its source tree (the build's `SourcePath` references are stored relative to the .aip and aren't rewritten by `/NewSync` - cf. the `dist/installer/` → `packaging/windows/installer/` move that broke the relative paths until they were edited in the GUI).
+> - Moving the .aip or its source tree (the build's `SourcePath` references are stored relative to the .aip and aren't rewritten by `/NewSync` - cf. the `dist/installer/` -> `packaging/windows/installer/` move that broke the relative paths until they were edited in the GUI).
 > - Adding/removing build configurations, features, or prerequisites.
 > - Editing dialog layouts, branding bitmaps, install sequences, custom actions, file associations, or shortcuts.
 > - Changing `UpgradeCode`, install directory layout (`APPDIR` location), or per-component attributes.

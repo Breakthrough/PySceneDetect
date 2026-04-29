@@ -31,7 +31,7 @@ from scenedetect.detectors import (
     ThresholdDetector,
 )
 
-# Untyped so each entry retains its concrete `type[…]` for parameterized construction
+# Untyped so each entry retains its concrete `type[...]` for parameterized construction
 # (calls below pass detector-specific kwargs like `min_scene_len`).
 FAST_CUT_DETECTORS = (
     AdaptiveDetector,

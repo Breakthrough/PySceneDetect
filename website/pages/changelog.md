@@ -742,3 +742,17 @@ Care was taken to minimize changes for most common API uses, however more advanc
  * Remove `advance` parameter from `VideoStream.read()`
  * Remove `SceneDetector.stats_manager_required` property, no longer required
  * `SceneDetector` is now a [Python abstract class](https://docs.python.org/3/library/abc.html)
+
+### Windows Distribution
+
+ - [general] Updates to Windows distributions:
+    - av 14.2.0 -> 17.0.1
+    - click 8.1.8 -> 8.2.1
+    - imageio-ffmpeg 0.6.0
+    - moviepy 2.1.2 -> 2.2.1
+    - numpy 2.2.3 -> 2.4.4
+    - opencv-python-headless 4.11.0.86 -> 4.13.0.92
+    - platformdirs 4.3.6 -> 4.9.6
+    - tqdm 4.67.1 -> 4.67.3
+    - ffmpeg 8.0 -> 8.1
+ - [general] Reduce size of Windows distribution by requiring `imageio_ffmpeg` to use non-bundled instance

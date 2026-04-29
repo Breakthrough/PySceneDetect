@@ -20,7 +20,7 @@ import subprocess
 def generate_vfr_swing(output_path: str):
     """Generates a VFR video with three segments separated by visible luma steps.
 
-    Segments: black @ 1 fps (5s) → gray @ 60 fps (5s) → white @ 1 fps (5s).
+    Segments: black @ 1 fps (5s) -> gray @ 60 fps (5s) -> white @ 1 fps (5s).
     Solid colors make the cuts unambiguous for ContentDetector; mixed rates
     exercise the VFR code path. Boundary timestamps: 5.0s and 10.0s.
     """
