@@ -17,7 +17,9 @@ python scripts/pre_release.py
 pyinstaller packaging/windows/scenedetect.spec
 ```
 """
+
 import sys
+import tempfile
 from pathlib import Path
 
 SCRIPTS_DIR = Path(__file__).resolve().parent
@@ -25,6 +27,7 @@ REPO_DIR = SCRIPTS_DIR.parent
 sys.path.insert(0, str(REPO_DIR))
 sys.path.insert(0, str(SCRIPTS_DIR))
 
+from generate_assets import find_inkscape, render_installer_jpegs  # noqa: E402
 from update_installer import msi_version  # noqa: E402
 
 import scenedetect  # noqa: E402
@@ -42,13 +45,19 @@ if run_version_check:
     installer_aip = INSTALLER_AIP.read_text()
     # The .aip stores the numeric MSI form (e.g. "0.7.0"), not the Python __version__
     # (which may be "0.7-dev0", "0.7", "0.7.1", ...). Normalize through the same
-    # function update_installer.py uses to write the .aip so the comparison is apples-to-apples.
+    # function update_installer.py uses to write the .aip so the comparison is correct.
     expected = msi_version(VERSION)
     aip_row = f'<ROW Property="ProductVersion" Value="{expected}" Options="32"/>'
     assert aip_row in installer_aip, (
         f"Installer ProductVersion does not match normalized {VERSION!r} ({expected!r}). "
         f"Run `python scripts/update_installer.py` to refresh the .aip."
     )
+
+    # Refresh installer JPGs from the master SVG.
+    print("Regenerating installer JPGs...")
+    inkscape = find_inkscape()
+    with tempfile.TemporaryDirectory() as work:
+        render_installer_jpegs(inkscape, Path(work))
 
 with VERSION_INFO.open("wb") as f:
     v = VERSION.split(".")

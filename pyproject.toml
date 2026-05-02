@@ -130,7 +130,7 @@ unfixable = []
 "benchmark/*" = ["E501"]
 
 [tool.pyright]
-include = ["scenedetect", "tests"]
+include = ["scenedetect", "tests", "scripts", "packaging"]
 exclude = [
     # Pyright built-in defaults
     "**/node_modules",
@@ -141,6 +141,8 @@ exclude = [
     "scenedetect/_thirdparty",
     # Release tests pull in extra deps (opentimelineio, psutil) that aren't in [dev]
     "tests/release",
+    # User-local scripts (gitignored)
+    "scripts/local",
 ]
 
 # Modes: "off" | "basic" | "standard" | "strict". The 0.7 codebase is clean

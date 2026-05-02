@@ -1,5 +1,6 @@
 docs/_build/
 website/build/
+scripts/local/
 tests/resources/*
 *.mp4
 *.jpg

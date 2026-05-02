@@ -23,7 +23,7 @@
     <ROW Property="DialogBitmap" Value="dialog.jpg" MultiBuildValue="DefaultBuild:installer_logo.jpg" Type="1" MsiKey="DialogBitmap"/>
     <ROW Property="MSIFASTINSTALL" MultiBuildValue="DefaultBuild:3"/>
     <ROW Property="Manufacturer" Value="Brandon Castellano"/>
-    <ROW Property="ProductCode" Value="1033:{4F7193C8-1F83-4E6C-BF13-492CB4577809} " Type="16"/>
+    <ROW Property="ProductCode" Value="1033:{F7AA154A-21CB-45BA-AF86-174E86A21960} " Type="16"/>
     <ROW Property="ProductLanguage" Value="1033"/>
     <ROW Property="ProductName" Value="PySceneDetect"/>
     <ROW Property="ProductVersion" Value="0.7.0" Options="32"/>

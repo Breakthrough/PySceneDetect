@@ -6,6 +6,7 @@ cache:
   - 'ffmpeg-%ffmpeg_version%-full_build.7z -> appveyor.yml'
   - 'packaging\windows\installer\advinst.msi -> appveyor.yml'
   - '%LOCALAPPDATA%\uv\cache -> pyproject.toml'
+  - 'C:\Program Files\Inkscape -> appveyor.yml'
 
 # Branches applies to tags as well. We only build on tagged releases of the form vX.Y.Z-release
 branches:
@@ -52,6 +53,12 @@ install:
   # we just extracted; otherwise pre_release.py and pyinstaller analysis crash on
   # `import scenedetect`. The runtime hook (pyi_rth_scenedetect.py) does the same at exe runtime.
   - 'SET IMAGEIO_FFMPEG_EXE=%APPVEYOR_BUILD_FOLDER%\\dist\\ffmpeg\\ffmpeg.exe'
+  # Inkscape is required by scripts/pre_release.py --release (regenerates installer JPGs
+  # from the master SVG). Not preinstalled on the AppVeyor VS2019 image; cached
+  # in `C:\Program Files\Inkscape` (see cache: section) so we only re-install when
+  # the cache is busted (appveyor.yml changes).
+  - if not exist "C:\Program Files\Inkscape\bin\inkscape.exe" choco install inkscape -y --no-progress
+  - 'SET PATH=%PATH%;C:\Program Files\Inkscape\bin'
 
   - echo * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
   - echo * *                          BUILDING WINDOWS EXE                           * *

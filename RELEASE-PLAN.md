@@ -5,16 +5,13 @@ Version referenced below as `X.Y[.Z]` - replace with the real version throughout
 
 ## 0. Branch setup
 
-- [X] Create / fast-forward release branch: `releases/X.Y` off `main`.
-- [X] All release-prep commits land on `releases/X.Y` (never directly on `main` during the freeze - commits are usually halted to `main` until the release branch is cut, after which the release branch is merged back into `main` and development resumes).
+- [ ] Create / fast-forward release branch: `releases/X.Y` off `main`.
+- [ ] All release-prep commits land on `releases/X.Y` (never directly on `main` during the freeze - commits are usually halted to `main` until the release branch is cut, after which the release branch is merged back into `main` and development resumes).
 
 ## 1. Code & version
 
 - [ ] Bump `__version__` in `scenedetect/__init__.py`.
-- [ ] Bump the installer project: `python scripts/update_installer.py` (rewrites `ProductVersion`, regenerates `ProductCode`, updates the MSI filename via the AdvancedInstaller CLI). Add `--sync-files` after `pyinstaller` if any bundled dependency versions changed since the last release - this re-syncs APPDIR from `dist/scenedetect/` and replaces the manual "delete install dir + re-add files" GUI step. `scripts/pre_release.py --release` asserts the resulting `ProductVersion` matches `__version__`.
-- [ ] No `-dev` / pre-release suffix on the version string for a final release.
-
-> **Note:** `pyproject.toml` does not declare a `version` field - the single source of truth is `scenedetect/__init__.py`; the Windows installer `.aip` is the only other place to keep in sync.
+- [ ] Regular release: No `-dev` suffix or other, pre-release: has `-dev0`, `-dev1`, ...
 
 ## 2. Docs
 
