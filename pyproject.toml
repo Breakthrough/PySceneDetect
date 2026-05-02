@@ -40,8 +40,8 @@ classifiers = [
     "Topic :: Utilities",
 ]
 dependencies = [
-    # click 8.3.0 is excluded as per https://scenedetect.com/issues/521
-    "click~=8.0,<8.3.0",
+    # click 8.3.0 specifically is excluded per https://scenedetect.com/issues/521; 8.3.1+ are fine.
+    "click~=8.0,!=8.3.0",
     "numpy",
     "opencv-python",
     "platformdirs",

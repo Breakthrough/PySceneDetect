@@ -12,6 +12,8 @@ tests/resources/*
 *.csv
 packaging/windows/.version_info
 packaging/windows/installer/PySceneDetect.back*.aip
+packaging/windows/installer/PySceneDetect-*.msi
+packaging/windows/installer/PySceneDetect-cache/
 benchmarks/BCC/*.mp4
 *.txt
 benchmarks/RAI/*.mp4
