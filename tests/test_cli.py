@@ -669,6 +669,41 @@ def test_cli_save_html(tmp_path: Path):
     # TODO: Check for existence of HTML & image files.
 
 
+def test_cli_moviepy_accepts_frame_rate_override():
+    """The MoviePy backend supports the -f/--frame-rate override in v0.7. The CLI must run
+    end-to-end without raising NotImplementedError, and the override must be reflected in the
+    resulting frame rate."""
+    from fractions import Fraction
+
+    from scenedetect.backends.moviepy import VideoStreamMoviePy
+
+    # Direct backend invocation: confirm the frame_rate property reports the override.
+    vs = VideoStreamMoviePy("tests/resources/testvideo.mp4", frame_rate=15.0)
+    assert vs.frame_rate == Fraction(15, 1), (
+        f"MoviePy frame_rate override not honored: got {vs.frame_rate}"
+    )
+
+    # CLI invocation must run cleanly with `-b moviepy -f 30`.
+    exit_code, output = invoke_cli(
+        [
+            "-i",
+            DEFAULT_VIDEO_PATH,
+            "-b",
+            "moviepy",
+            "--frame-rate",
+            "30",
+            "time",
+            "--end",
+            "1s",
+            "detect-content",
+        ],
+    )
+    assert exit_code == 0, f"CLI failed:\n{output}"
+    assert "NotImplementedError" not in output, (
+        f"Backend NotImplementedError leaked to user output:\n{output}"
+    )
+
+
 def test_cli_legacy_v06_config_file(tmp_path: Path):
     """A v0.6-era scenedetect.cfg using the deprecated `[export-html]` section must still load
     in v0.7. The parser maps `[export-html]` -> `[save-html]` (via DEPRECATED_COMMANDS in

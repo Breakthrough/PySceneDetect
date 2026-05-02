@@ -348,16 +348,8 @@ def test_invalid_path(vs_type: ty.Callable[..., VideoStream]):
 
 def test_framerate_legacy_alias(vs_type: ty.Callable[..., VideoStream]):
     """`framerate=` is the soft-deprecated alias for `frame_rate=` (issue #548). All backends
-    must accept it; for backends that support the override, both forms must produce the same
-    `frame_rate`. ``MoviePy`` does not yet support overriding and must raise the same error
-    on either form."""
+    must accept both forms and produce the same `frame_rate`."""
     path = get_absolute_path("resources/goldeneye.mp4")
-    if vs_type is VideoStreamMoviePy:
-        with pytest.raises(NotImplementedError):
-            vs_type(path, framerate=30.0)
-        with pytest.raises(NotImplementedError):
-            vs_type(path, frame_rate=30.0)
-        return
     legacy = vs_type(path, framerate=30.0)
     canonical = vs_type(path, frame_rate=30.0)
     assert legacy.frame_rate == canonical.frame_rate

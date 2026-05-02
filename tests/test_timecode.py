@@ -216,7 +216,11 @@ def test_get_frames():
 
     assert FrameTimecode(timecode=1.0, fps=1.0).frame_num == int(1.0 / 1.0)
     assert FrameTimecode(timecode=1000.0, fps=60.0).frame_num == int(1000.0 * 60.0)
-    assert FrameTimecode(timecode=1000000000.0, fps=29.97).frame_num == int(1000000000.0 * 29.97)
+    # 29.97 snaps to exact NTSC Fraction(30000, 1001), so expected is computed from that
+    # rational rather than the lossy float multiplication.
+    assert FrameTimecode(timecode=1000000000.0, fps=29.97).frame_num == round(
+        1000000000.0 * 30000 / 1001
+    )
 
     assert FrameTimecode(timecode="00:00:02.0000", fps=1.0).frame_num == 2
     assert FrameTimecode(timecode="00:00:00.5", fps=10.0).frame_num == 5
@@ -244,7 +248,9 @@ def test_get_timecode():
     """Test FrameTimecode get_timecode() method."""
     assert FrameTimecode(timecode=1.0, fps=1.0).get_timecode() == "00:00:01.000"
     assert FrameTimecode(timecode=60.117, fps=60.0).get_timecode() == "00:01:00.117"
-    assert FrameTimecode(timecode=3600.234, fps=29.97).get_timecode() == "01:00:00.234"
+    # 29.97 snaps to exact NTSC Fraction(30000, 1001); 3600.234s lands on the nearest
+    # NTSC frame at ~01:00:00.230 rather than the lossy-float result of "01:00:00.234".
+    assert FrameTimecode(timecode=3600.234, fps=29.97).get_timecode() == "01:00:00.230"
 
     assert FrameTimecode(timecode="00:00:02.0000", fps=1.0).get_timecode() == "00:00:02.000"
     assert FrameTimecode(timecode="00:00:00.5", fps=10.0).get_timecode() == "00:00:00.500"
@@ -375,6 +381,23 @@ def test_ntsc_framerate_detection():
     assert framerate_to_fraction(30.0) == Fraction(30, 1)
     assert framerate_to_fraction(60.0) == Fraction(60, 1)
     assert framerate_to_fraction(25.0) == Fraction(25, 1)
+
+
+def test_frame_timecode_converts_ntsc_float_fps():
+    """End-to-end: passing a float NTSC rate into the FrameTimecode constructor must yield
+    the exact Fraction representation, not the lossy float. This is the user-facing entry
+    point most users hit (e.g. when a backend hands them `cap.get(CAP_PROP_FPS)`)."""
+    expected = {
+        23.976: Fraction(24000, 1001),
+        29.97: Fraction(30000, 1001),
+        59.94: Fraction(60000, 1001),
+    }
+    for fps_float, fps_exact in expected.items():
+        tc = FrameTimecode(0, fps_float)
+        assert tc.frame_rate == fps_exact, (
+            f"FrameTimecode(0, {fps_float}) produced {tc.frame_rate}, expected {fps_exact}"
+        )
+        assert isinstance(tc.frame_rate, Fraction)
 
 
 def test_ntsc_framerate_detection_arbitrary_base():

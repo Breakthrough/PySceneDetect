@@ -683,6 +683,7 @@ Care was taken to minimize changes for most common API uses, however more advanc
 - [feature] Add `save-edl` option  `--start-timecode`/`-s` to providde a custom start timecode for generated EDLs, supports SMPTE `HH:MM:SS:FF` or 8-digit `HHMMSSFF` input [#515](https://github.com/Breakthrough/PySceneDetect/issues/515)
 - [bugfix] Fix floating-point precision error in `save-otio` output where frame values near integer boundaries (e.g. `90.00000000000001`) were serialized with spurious precision
 - [bugfix] Add mitigation for transient `OSError` in the MoviePy backend as it is susceptible to subprocess pipe races on slow or heavily loaded systems [#496](https://github.com/Breakthrough/PySceneDetect/issues/496)
+- [feature] The MoviePy backend now supports overriding the source frame rate via `-f`/`--frame-rate` (and the `VideoStreamMoviePy(frame_rate=...)` API), bringing it in line with the OpenCV and PyAV backends
 - [bugfix] `detect-threshold` cut frame numbers are now backend-deterministic; previously the cut could differ by 1 frame between PyAV and OpenCV when the fade midpoint landed on a `.5` rounding boundary (PyAV uses sub-microsecond PTS, OpenCV uses millisecond-truncated `CAP_PROP_POS_MSEC`)
 - [refactor] Remove deprecated `-d`/`--min-delta-hsv` option from `detect-adaptive` command
 - [breaking] Rename `-f/--framerate` to `-f/--frame-rate` as part of VFR overhaul (legacy `--framerate` form is preserved as a hidden alias but will be removed in v0.8)

@@ -26,6 +26,9 @@ MATRIX = [
     ("libvpx-vp9", "webm", []),
     ("libx264", "mp4", ["-vf", "transpose=1"]),  # Rotation
     ("libx264", "mp4", ["-pix_fmt", "yuv400p"]),  # Grayscale
+    ("libx264", "mp4", ["-vf", "scale=3840:2160"]),  # 4K UHD
+    ("libx264", "mp4", ["-vf", "fps=120"]),  # 120 fps high frame rate
+    ("libx265", "mp4", ["-pix_fmt", "yuv420p10le"]),  # 10-bit HEVC (HDR-adjacent)
 ]
 
 

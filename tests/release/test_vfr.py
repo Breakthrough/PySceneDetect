@@ -69,3 +69,28 @@ def test_vfr_bframes_accuracy(vfr_bframes_video, backend):
 
     assert video.duration is not None
     assert video.duration.seconds > 0
+
+
+@pytest.mark.release
+def test_vfr_swing_cross_backend_parity(vfr_swing_video):
+    """OpenCV and PyAV must agree on cuts in a synthetic VFR clip with known ground truth.
+
+    MoviePy is excluded because it does not honor per-frame PTS on VFR sources (already
+    skipped in test_cross_backend_consistency for the same reason).
+    """
+    results: dict[str, list[float]] = {}
+    for backend in ("opencv", "pyav"):
+        video = open_video(vfr_swing_video, backend=backend)
+        sm = SceneManager()
+        sm.add_detector(ContentDetector())
+        sm.detect_scenes(video)
+        results[backend] = [s[0].seconds for s in sm.get_scene_list()]
+
+    assert len(results["opencv"]) == len(results["pyav"]), (
+        f"Scene count mismatch: opencv={len(results['opencv'])}, pyav={len(results['pyav'])}"
+    )
+    # Tolerance: 50ms (well below one frame at the 1fps and 60fps regions of the swing clip).
+    for cv_t, av_t in zip(results["opencv"], results["pyav"], strict=True):
+        assert abs(cv_t - av_t) < 0.05, (
+            f"VFR-swing scene start drifted between backends: opencv={cv_t}, pyav={av_t}"
+        )

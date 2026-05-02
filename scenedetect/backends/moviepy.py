@@ -90,6 +90,7 @@ class VideoStreamMoviePy(VideoStream):
         Raises:
             OSError: file could not be found, access was denied, or the video is corrupt
             VideoOpenFailure: video could not be opened (may be corrupted)
+            ValueError: specified frame rate is invalid
         """
         super().__init__()
 
@@ -98,11 +99,14 @@ class VideoStreamMoviePy(VideoStream):
         if frame_rate is None:
             frame_rate = framerate
         # TODO: Investigate how MoviePy handles ffmpeg not being on PATH.
-        # TODO: Add frame rate override.
-        if frame_rate is not None:
-            raise NotImplementedError(
-                "VideoStreamMoviePy does not support the `frame_rate` argument yet."
-            )
+        if frame_rate is not None and frame_rate <= 0:
+            raise ValueError(f"Specified frame rate ({float(frame_rate):f}) is invalid!")
+        # The override - if set - takes precedence over the rate reported by the reader.
+        # MoviePy assumes CFR, so changing the rate is equivalent to reinterpreting frame
+        # timestamps at a different cadence; the source's wall-clock duration is unaffected.
+        self._frame_rate_override: Fraction | None = (
+            framerate_to_fraction(frame_rate) if frame_rate is not None else None
+        )
 
         self._path: str = os.fspath(path)
         # TODO: Need to map errors based on the strings, since several failure
@@ -133,7 +137,10 @@ class VideoStreamMoviePy(VideoStream):
 
     @property
     def frame_rate(self) -> Fraction:
-        """Framerate in frames/sec as a rational Fraction."""
+        """Framerate in frames/sec as a rational Fraction. Returns the override passed at
+        construction if one was provided; otherwise the rate reported by MoviePy's reader."""
+        if self._frame_rate_override is not None:
+            return self._frame_rate_override
         return framerate_to_fraction(self._reader.fps)
 
     @property

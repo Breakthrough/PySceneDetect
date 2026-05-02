@@ -15,6 +15,7 @@ Verifies that output files (videos, images, CSV, EDL, OTIO) are correctly genera
 """
 
 import csv
+import shutil
 import subprocess
 
 import pytest
@@ -118,6 +119,31 @@ def test_output_otio_rational_time_precision(test_video_file, tmp_path):
             assert abs(rt.value - round(rt.value, 6)) == 0, (
                 f"RationalTime.value lost precision: {rt.value!r}"
             )
+
+
+@pytest.mark.release
+def test_input_path_unicode(test_video_file, tmp_path):
+    """All backends must open videos at non-ASCII filesystem paths. This is a silent failure
+    mode on platforms with mbcs default codecs; the failure mode is "video just won't open"
+    rather than a clear error. Worth a release-level smoke test."""
+    nonascii_dir = tmp_path / "vidéos日本語"
+    nonascii_dir.mkdir()
+    nonascii_video = nonascii_dir / "café_テスト.mp4"
+    shutil.copy(test_video_file, nonascii_video)
+
+    for backend in ("opencv", "pyav"):
+        try:
+            video = open_video(str(nonascii_video), backend=backend)
+        except Exception as exc:
+            pytest.fail(f"Failed to open non-ASCII path {nonascii_video} via {backend}: {exc}")
+        sm = SceneManager()
+        sm.add_detector(ContentDetector())
+        sm.detect_scenes(video)
+        # Detection should succeed end-to-end; we don't care about the exact scene count, just
+        # that the backend made it through the read loop without bailing out silently.
+        assert video.frame_number > 0, (
+            f"Backend {backend} read 0 frames from {nonascii_video} - silent path-decode failure?"
+        )
 
 
 @pytest.mark.release
