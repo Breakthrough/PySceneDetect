@@ -21,9 +21,11 @@ import numpy as np
 
 from scenedetect.common import (
     MAX_FPS_DELTA,
+    FrameRate,
     FrameTimecode,
     Timecode,
     TimecodeLike,
+    framerate_to_fraction,
 )
 from scenedetect.platform import StrPath, get_file_name
 from scenedetect.video_stream import FrameRateUnavailable, VideoOpenFailure, VideoStream
@@ -42,10 +44,11 @@ class VideoStreamAv(VideoStream):
     def __init__(
         self,
         path_or_io: StrPath | ty.BinaryIO,
-        framerate: float | Fraction | None = None,
+        frame_rate: FrameRate | None = None,
         name: str | None = None,
         threading_mode: str | None = None,
         suppress_output: bool = False,
+        framerate: FrameRate | None = None,
     ):
         """Open a video by path.
 
@@ -57,7 +60,8 @@ class VideoStreamAv(VideoStream):
 
         Arguments:
             path_or_io: Path to the video, or a file-like object.
-            framerate: If set, overrides the detected framerate.
+            frame_rate: If set, overrides the detected frame rate. Takes precedence over
+                `framerate`.
             name: Overrides the `name` property derived from the video path. Should be set if
                 `path_or_io` is a file-like object.
             threading_mode: The PyAV video stream `thread_type`. See av.codec.context.ThreadType
@@ -68,19 +72,25 @@ class VideoStreamAv(VideoStream):
                 `av.logging.restore_default_callback()` before any other library calls. If True
                 the application may deadlock if threading_mode is set. See the PyAV documentation
                 for details: https://pyav.org/docs/stable/overview/caveats.html#sub-interpeters
+            framerate: [DEPRECATED] Use `frame_rate` instead. Retained as a deprecated
+                alias for backwards compatibility; ignored when `frame_rate` is provided.
 
         Raises:
             OSError: file could not be found or access was denied
             VideoOpenFailure: video could not be opened (may be corrupted)
-            ValueError: specified framerate is invalid
+            ValueError: specified frame rate is invalid
         """
         # TODO(https://scenedetect.com/issues/258): See what
         # `self._container.discard_corrupt = True` does with corrupt videos.
         super().__init__()
 
-        # Ensure specified framerate is valid if set.
-        if framerate is not None and framerate < MAX_FPS_DELTA:
-            raise ValueError(f"Specified framerate ({framerate:f}) is invalid!")
+        # TODO(https://scenedetect.com/issue/548): emit DeprecationWarning when `framerate=` is
+        # used, once internal callers and downstream users have had a release to migrate.
+        if frame_rate is None:
+            frame_rate = framerate
+        # Ensure specified frame rate is valid if set.
+        if frame_rate is not None and frame_rate < MAX_FPS_DELTA:
+            raise ValueError(f"Specified frame rate ({float(frame_rate):f}) is invalid!")
 
         self._name = "" if name is None else name
         self._path = ""
@@ -121,23 +131,21 @@ class VideoStreamAv(VideoStream):
         except Exception as ex:
             raise VideoOpenFailure(str(ex)) from ex
 
-        if framerate is None:
-            # Calculate framerate from video container. `guessed_rate` below appears in PyAV 9.
-            frame_rate = (
+        if frame_rate is None:
+            # Calculate frame rate from video container. `guessed_rate` below appears in PyAV 9.
+            detected_rate = (
                 self._video_stream.guessed_rate
                 if hasattr(self._video_stream, "guessed_rate")
                 else self._codec_context.framerate
             )
-            if frame_rate is None or frame_rate == 0:
+            if detected_rate is None or detected_rate == 0:
                 raise FrameRateUnavailable()
-            if frame_rate < MAX_FPS_DELTA:
+            if detected_rate < MAX_FPS_DELTA:
                 raise FrameRateUnavailable()
-            self._frame_rate: Fraction = frame_rate
+            self._frame_rate: Fraction = framerate_to_fraction(detected_rate)
         else:
-            assert framerate >= MAX_FPS_DELTA
-            self._frame_rate: Fraction = (
-                framerate if isinstance(framerate, Fraction) else Fraction.from_float(framerate)
-            )
+            assert frame_rate >= MAX_FPS_DELTA
+            self._frame_rate: Fraction = framerate_to_fraction(frame_rate)
 
         # Calculate duration after we have set the framerate.
         self._duration_frames = self._get_duration()

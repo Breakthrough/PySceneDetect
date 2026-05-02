@@ -20,7 +20,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 
-from scenedetect.common import FrameTimecode
+from scenedetect.common import FrameTimecode, TimecodeLike
 from scenedetect.detector import FlashFilter, SceneDetector
 
 logger = getLogger("pyscenedetect")
@@ -134,7 +134,7 @@ class TransnetV2Detector(SceneDetector):
         model_path: str | Path = "tests/resources/transnetv2.onnx",
         onnx_providers: list[str] | None = None,
         threshold: float = 0.5,
-        min_scene_len: int | float | str = 15,
+        min_scene_len: TimecodeLike = 15,
         filter_mode: FlashFilter.Mode = FlashFilter.Mode.MERGE,
     ):
         super().__init__()

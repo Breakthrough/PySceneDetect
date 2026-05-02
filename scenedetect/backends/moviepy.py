@@ -28,6 +28,7 @@ from moviepy.video.io.ffmpeg_reader import FFMPEG_VideoReader
 
 from scenedetect.backends.opencv import VideoStreamCv2
 from scenedetect.common import (
+    FrameRate,
     FrameTimecode,
     Timecode,
     TimecodeLike,
@@ -69,13 +70,22 @@ def _retry_on_oserror(op_name: str, fn: ty.Callable):
 class VideoStreamMoviePy(VideoStream):
     """MoviePy `FFMPEG_VideoReader` backend."""
 
-    def __init__(self, path: StrPath, framerate: float | None = None, print_infos: bool = False):
+    def __init__(
+        self,
+        path: StrPath,
+        frame_rate: FrameRate | None = None,
+        print_infos: bool = False,
+        framerate: float | None = None,
+    ):
         """Open a video or device.
 
         Arguments:
             path: Path to video,.
-            framerate: If set, overrides the detected framerate.
+            frame_rate: If set, overrides the detected frame rate. Takes precedence over
+                `framerate`.
             print_infos: If True, prints information about the opened video to stdout.
+            framerate: [DEPRECATED] Use `frame_rate` instead. Retained as a deprecated
+                alias for backwards compatibility; ignored when `frame_rate` is provided.
 
         Raises:
             OSError: file could not be found, access was denied, or the video is corrupt
@@ -83,11 +93,15 @@ class VideoStreamMoviePy(VideoStream):
         """
         super().__init__()
 
+        # TODO(https://scenedetect.com/issue/548): emit DeprecationWarning when `framerate=` is
+        # used, once internal callers and downstream users have had a release to migrate.
+        if frame_rate is None:
+            frame_rate = framerate
         # TODO: Investigate how MoviePy handles ffmpeg not being on PATH.
-        # TODO: Add framerate override.
-        if framerate is not None:
+        # TODO: Add frame rate override.
+        if frame_rate is not None:
             raise NotImplementedError(
-                "VideoStreamMoviePy does not support the `framerate` argument yet."
+                "VideoStreamMoviePy does not support the `frame_rate` argument yet."
             )
 
         self._path: str = os.fspath(path)

@@ -177,7 +177,7 @@ class CliContext:
         self,
         input_path: str | None,
         output: str | None,
-        framerate: float | None,
+        frame_rate: float | None,
         stats_file: str | None,
         frame_skip: int | None,
         min_scene_len: str | None,
@@ -260,7 +260,7 @@ class CliContext:
             return
 
         # Load the input video to obtain a time base for parsing timecodes.
-        self._open_video_stream(input_path, framerate, backend)
+        self._open_video_stream(input_path, frame_rate, backend)
 
         self.output = self.config.get_value("global", "output", output)
         if self.output:
@@ -490,7 +490,7 @@ class CliContext:
     def _open_video_stream(
         self,
         input_path: str,
-        framerate: float | None,
+        frame_rate: float | None,
         backend: str | None,
     ):
         if "%" in input_path and backend != "opencv":
@@ -498,8 +498,8 @@ class CliContext:
                 "The OpenCV backend (`--backend opencv`) must be used to process image sequences.",
                 param_hint="-i/--input",
             )
-        if framerate is not None and framerate < MAX_FPS_DELTA:
-            raise click.BadParameter("Invalid framerate specified!", param_hint="-f/--framerate")
+        if frame_rate is not None and frame_rate < MAX_FPS_DELTA:
+            raise click.BadParameter("Invalid frame rate specified!", param_hint="-f/--frame-rate")
         try:
             backend = self.config.get_value("global", "backend", backend)
             if backend not in AVAILABLE_BACKENDS:
@@ -512,7 +512,7 @@ class CliContext:
             if backend == "pyav":
                 self.video_stream = open_video(
                     path=input_path,
-                    framerate=framerate,
+                    frame_rate=frame_rate,
                     backend=backend,
                     threading_mode=self.config.get_value("backend-pyav", "threading-mode"),
                     suppress_output=self.config.get_value("backend-pyav", "suppress-output"),
@@ -520,7 +520,7 @@ class CliContext:
             elif backend == "opencv":
                 self.video_stream = open_video(
                     path=input_path,
-                    framerate=framerate,
+                    frame_rate=frame_rate,
                     backend=backend,
                     max_decode_attempts=self.config.get_value(
                         "backend-opencv", "max-decode-attempts"
@@ -530,7 +530,7 @@ class CliContext:
             else:
                 self.video_stream = open_video(
                     path=input_path,
-                    framerate=framerate,
+                    frame_rate=frame_rate,
                     backend=backend,
                 )
             duration = self.video_stream.duration
@@ -538,15 +538,15 @@ class CliContext:
             logger.debug(f"""Video information:
   Backend:      {type(self.video_stream).__name__}
   Resolution:   {self.video_stream.frame_size}
-  Framerate:    {self.video_stream.frame_rate}
+  Frame rate:   {self.video_stream.frame_rate}
   Duration:     {duration_str}""")
 
         except FrameRateUnavailable as ex:
             if __debug__:
                 raise
             raise click.BadParameter(
-                "Failed to obtain framerate for input video. Manually specify framerate with the"
-                " -f/--framerate option, or try re-encoding the file.",
+                "Failed to obtain frame rate for input video. Manually specify frame rate with the"
+                " -f/--frame-rate option, or try re-encoding the file.",
                 param_hint="-i/--input",
             ) from ex
         except VideoOpenFailure as ex:

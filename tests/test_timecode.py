@@ -67,6 +67,37 @@ def test_framerate():
         assert FrameTimecode(timecode=0, fps=MAX_FPS_DELTA).frame_num == 0
 
 
+def test_frame_rate_property():
+    """`frame_rate` returns an exact Fraction; `framerate` returns the float equivalent."""
+    # Integer rate.
+    tc = FrameTimecode(timecode=0, fps=30.0)
+    assert tc.frame_rate == Fraction(30, 1)
+    assert isinstance(tc.frame_rate, Fraction)
+    assert tc.framerate == 30.0
+    assert isinstance(tc.framerate, float)
+    # Constructed directly from a Fraction (the exact form for NTSC rates).
+    tc = FrameTimecode(timecode=0, fps=Fraction(30000, 1001))
+    assert tc.frame_rate == Fraction(30000, 1001)
+    assert tc.framerate == pytest.approx(float(Fraction(30000, 1001)))
+    tc = FrameTimecode(timecode=0, fps=Fraction(24000, 1001))
+    assert tc.frame_rate == Fraction(24000, 1001)
+    # time_base equals 1 / frame_rate for CFR sources.
+    assert tc.frame_rate is not None
+    assert tc.time_base == 1 / tc.frame_rate
+
+
+def test_frame_rate_for_vfr():
+    """For Timecode-backed instances, frame_rate is the approximation passed via fps."""
+    fps = Fraction(24000, 1001)
+    tc = FrameTimecode(timecode=Timecode(pts=1001, time_base=Fraction(1, 24000)), fps=fps)
+    # frame_rate exposes the rate carried by the FrameTimecode (an approximation for VFR).
+    assert tc.frame_rate == fps
+    # time_base is authoritative for VFR and need not equal 1 / frame_rate.
+    assert tc.time_base == Fraction(1, 24000)
+    assert tc.frame_rate is not None
+    assert tc.time_base != 1 / tc.frame_rate
+
+
 def test_timecode_numeric():
     """Test FrameTimecode constructor argument "timecode" with numeric arguments."""
     with pytest.raises(ValueError):
@@ -364,3 +395,60 @@ def test_timecode_frame_num_for_vfr():
     tc = FrameTimecode(timecode=Timecode(pts=1001, time_base=Fraction(1, 24000)), fps=fps)
     # Should not raise or warn - just return the approximate frame number.
     assert tc.frame_num == 1
+
+
+def test_arithmetic_with_bare_timecode():
+    """`FrameTimecode` arithmetic should accept a bare :class:`Timecode` operand by treating
+    it as an absolute time in seconds."""
+    fps = 30.0
+    base = FrameTimecode(timecode=10, fps=fps)  # 10 frames @ 30fps == ~0.333s
+    # 1/30s expressed in a 1/1000 time base is pts=33 (rounded).
+    one_frame_at_30 = Timecode(pts=33, time_base=Fraction(1, 1000))
+
+    plus = base + one_frame_at_30
+    assert plus.frame_num == 11
+
+    minus = base - one_frame_at_30
+    assert minus.frame_num == 9
+
+    # Reverse direction: a Timecode-backed FrameTimecode plus a bare Timecode.
+    pts_base = FrameTimecode(timecode=Timecode(pts=1, time_base=Fraction(1, 1000)), fps=fps)
+    pts_plus = pts_base + Timecode(pts=2, time_base=Fraction(1, 1000))
+    assert pts_plus.seconds == pytest.approx(0.003)
+
+
+def test_comparisons_with_bare_timecode():
+    """`FrameTimecode` comparison operators should accept a bare :class:`Timecode` operand."""
+    fps = 30.0
+    half_second_frame = FrameTimecode(timecode=15, fps=fps)
+    half_second_tc = Timecode(pts=500, time_base=Fraction(1, 1000))
+    one_second_tc = Timecode(pts=1000, time_base=Fraction(1, 1000))
+
+    assert half_second_frame == half_second_tc
+    assert half_second_frame != one_second_tc
+    assert half_second_frame < one_second_tc
+    assert half_second_frame <= half_second_tc
+    assert one_second_tc != half_second_frame  # reflected via __ne__
+    assert FrameTimecode(timecode=30, fps=fps) > half_second_tc
+    assert FrameTimecode(timecode=15, fps=fps) >= half_second_tc
+
+
+def test_min_scene_len_accepts_timecode_like():
+    """Detector ``min_scene_len`` and FlashFilter ``length`` should accept any TimecodeLike,
+    including :class:`FrameTimecode` / :class:`Timecode`."""
+    from scenedetect.detector import FlashFilter
+    from scenedetect.detectors import ContentDetector
+
+    # FlashFilter: int, float, str, FrameTimecode, Timecode all valid.
+    FlashFilter(mode=FlashFilter.Mode.MERGE, length=15)
+    FlashFilter(mode=FlashFilter.Mode.MERGE, length=0.5)
+    FlashFilter(mode=FlashFilter.Mode.MERGE, length="00:00:00.500")
+    FlashFilter(mode=FlashFilter.Mode.MERGE, length=FrameTimecode(timecode=15, fps=30.0))
+    FlashFilter(
+        mode=FlashFilter.Mode.MERGE,
+        length=Timecode(pts=500, time_base=Fraction(1, 1000)),
+    )
+
+    # ContentDetector: same.
+    ContentDetector(min_scene_len=FrameTimecode(timecode=15, fps=30.0))
+    ContentDetector(min_scene_len=Timecode(pts=500, time_base=Fraction(1, 1000)))

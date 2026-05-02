@@ -22,7 +22,7 @@ from dataclasses import dataclass
 import cv2
 import numpy
 
-from scenedetect.common import FrameTimecode
+from scenedetect.common import FrameTimecode, TimecodeLike
 from scenedetect.detector import FlashFilter, SceneDetector
 
 
@@ -104,7 +104,7 @@ class ContentDetector(SceneDetector):
     def __init__(
         self,
         threshold: float = 27.0,
-        min_scene_len: int | float | str = 15,
+        min_scene_len: TimecodeLike = 15,
         weights: "ContentDetector.Components" = DEFAULT_COMPONENT_WEIGHTS,
         luma_only: bool = False,
         kernel_size: int | None = None,
