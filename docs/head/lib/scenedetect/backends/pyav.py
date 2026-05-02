@@ -191,7 +191,7 @@ class VideoStreamAv(VideoStream):
 
         This can be interpreted as presentation time stamp, thus frame 1 corresponds
         to the presentation time 0.  Returns 0 even if `frame_number` is 1."""
-        if self._frame is None:
+        if self._frame is None or self._frame.pts is None or self._frame.time_base is None:
             return self.base_timecode
         timecode = Timecode(pts=self._frame.pts, time_base=self._frame.time_base)
         return FrameTimecode(timecode=timecode, fps=self.frame_rate)

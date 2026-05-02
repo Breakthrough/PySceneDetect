@@ -143,7 +143,7 @@ class HashDetector(SceneDetector):
         dct_low_freq = dct_complete[:hash_size, :hash_size]
 
         # Calculate the median of the low frequency informations
-        med = numpy.median(dct_low_freq)
+        med = numpy.median(numpy.asarray(dct_low_freq, dtype=numpy.float32))
 
         # Transform the low frequency information into a binary image based on > or < median
         hash_img = dct_low_freq > med

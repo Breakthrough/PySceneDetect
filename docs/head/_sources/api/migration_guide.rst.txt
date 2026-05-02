@@ -80,7 +80,7 @@ The ``frame_num`` parameter (``int``) has been replaced with ``timecode`` (:clas
         def process_frame(self, timecode: FrameTimecode, frame_img) -> List[FrameTimecode]:
             ...
 
-The same change applies to ``post_process()``. If you need the frame number, use ``timecode.frame_num``.
+The same change applies to ``post_process()``. Using units of time instead of frame numbers is critical for temporal accuracy. If you need the frame number, use ``timecode.frame_num`` to the timecode to an integer.
 
 ``SceneDetector`` is Now Abstract
 -----------------------------------------------------------------------
@@ -104,20 +104,19 @@ The following have been removed from the ``SceneDetector`` interface:
 Read-Only Properties
 -----------------------------------------------------------------------
 
-``frame_num`` and ``framerate`` are now read-only properties. To change them, construct a new ``FrameTimecode``:
+:attr:`~scenedetect.common.FrameTimecode.frame_num` and :attr:`~scenedetect.common.FrameTimecode.framerate` are now read-only properties. To change them, construct a new ``FrameTimecode``:
 
 .. code:: python
 
-    # v0.6 - direct assignment
-    tc.frame_num = 100  # No longer works
-
-    # v0.7 - construct new instance
-    tc = FrameTimecode(100, tc.framerate)
+    tc = FrameTimecode(0, 24.0)
+    # Can no longer reassign frame_num, must create a new FrameTimecode instead:
+    #tc.frame_num = 100
+    tc = FrameTimecode(100, tc)
 
 New Properties
 -----------------------------------------------------------------------
 
-Access ``frame_num``, ``framerate``, and ``seconds`` as properties instead of getter methods:
+Access :attr:`~scenedetect.common.FrameTimecode.frame_num`, :attr:`~scenedetect.common.FrameTimecode.framerate`, and :attr:`~scenedetect.common.FrameTimecode.seconds` as properties instead of getter methods:
 
 .. code:: python
 
@@ -139,7 +138,7 @@ Framerate and Timestamp Changes
 Rational Framerates
 -----------------------------------------------------------------------
 
-``VideoStream.frame_rate`` now returns a ``Fraction`` instead of ``float``. Common NTSC rates (23.976, 29.97, 59.94) are automatically detected from float values:
+:attr:`~scenedetect.video_stream.VideoStream.frame_rate` now returns a ``Fraction`` instead of ``float``. Common NTSC rates (23.976, 29.97, 59.94) are automatically detected from float values:
 
 .. code:: python
 
@@ -151,16 +150,16 @@ Rational Framerates
 PTS-Backed Timestamps
 -----------------------------------------------------------------------
 
-All backends now return presentation timestamp (PTS) backed values from ``VideoStream.position``. This enables correct handling of VFR videos.
+All backends now return presentation timestamp (PTS) backed values from :attr:`~scenedetect.video_stream.VideoStream.position`. This enables correct handling of VFR videos.
 
-``FrameTimecode`` has new ``time_base`` and ``pts`` properties for accessing the underlying timing information. For VFR videos, ``frame_num`` is now an approximation based on PTS-derived time rather than a sequential count.
+``FrameTimecode`` has new :attr:`~scenedetect.common.FrameTimecode.time_base` and :attr:`~scenedetect.common.FrameTimecode.pts` properties for accessing the underlying timing information. For VFR videos, :attr:`~scenedetect.common.FrameTimecode.frame_num` is now an approximation based on PTS-derived time rather than a sequential count.
 
 
 =======================================================================
 ``StatsManager`` Changes
 =======================================================================
 
-The ``StatsManager`` methods ``get_metrics()``, ``set_metrics()``, and ``metrics_exist()`` now formally accept either a ``FrameTimecode`` or a plain ``int`` frame number for the timecode argument. Passing a ``FrameTimecode`` is preferred and matches the detector interface; the ``int`` form is retained for compatibility with the deprecated ``load_from_csv()`` path, which keys metrics by integer frame number.
+The ``StatsManager`` methods :meth:`~scenedetect.stats_manager.StatsManager.get_metrics`, :meth:`~scenedetect.stats_manager.StatsManager.set_metrics`, and :meth:`~scenedetect.stats_manager.StatsManager.metrics_exist` now formally accept either a ``FrameTimecode`` or a plain ``int`` frame number for the timecode argument. Passing a ``FrameTimecode`` is preferred and matches the detector interface; the ``int`` form is retained for compatibility with the deprecated ``load_from_csv()`` path, which keys metrics by integer frame number.
 
 ``StatsManager.load_from_csv()`` also accepts ``os.PathLike`` (e.g. ``pathlib.Path``) in addition to ``str`` / ``bytes`` / file handles.
 
@@ -169,21 +168,21 @@ The ``StatsManager`` methods ``get_metrics()``, ``set_metrics()``, and ``metrics
 ``SceneDetector`` Annotation Fixes
 =======================================================================
 
-``SceneDetector.post_process()`` now declares its parameter as ``timecode: FrameTimecode`` (previously typed as ``int``). The method already received a ``FrameTimecode`` at runtime and concrete detectors (e.g. ``ThresholdDetector``, ``ContentDetector``) already used the ``FrameTimecode`` type - only the abstract-base-class annotation was inconsistent. No call-site changes are needed; this just brings the signature into agreement with the documented and actual behavior.
+:meth:`~scenedetect.detector.SceneDetector.post_process` now declares its parameter as ``timecode: FrameTimecode`` (previously typed as ``int``). The method already received a ``FrameTimecode`` at runtime and concrete detectors (e.g. ``ThresholdDetector``, ``ContentDetector``) already used the ``FrameTimecode`` type - only the abstract-base-class annotation was inconsistent. No call-site changes are needed; this just brings the signature into agreement with the documented and actual behavior.
 
 
 =======================================================================
 ``SceneManager.detect_scenes()`` Time Arguments
 =======================================================================
 
-The ``duration`` and ``end_time`` arguments now formally accept ``int`` (frames), ``float`` (seconds), ``str`` (timecode string, e.g. ``"00:00:05.000"``), or ``FrameTimecode``. The internal code already validated these forms; the annotation was previously narrower than the documented behavior.
+The ``duration`` and ``end_time`` arguments of :meth:`~scenedetect.scene_manager.SceneManager.detect_scenes` now formally accept ``int`` (frames), ``float`` (seconds), ``str`` (timecode string, e.g. ``"00:00:05.000"``), or ``FrameTimecode``. The internal code already validated these forms; the annotation was previously narrower than the documented behavior.
 
 .. code:: python
 
     # All of these were always supported at runtime; now they type-check too:
-    scene_manager.detect_scenes(video=video, end_time=15.0)         # seconds
-    scene_manager.detect_scenes(video=video, end_time=1500)         # frames
-    scene_manager.detect_scenes(video=video, end_time="00:01:00")   # timecode
+    scene_manager.detect_scenes(video, end_time=15.0)         # seconds
+    scene_manager.detect_scenes(video, end_time=1500)         # frames
+    scene_manager.detect_scenes(video, end_time="00:01:00")   # timecode
 
 
 =======================================================================
@@ -212,7 +211,7 @@ The following deprecated APIs have been fully removed in v0.7:
    * - ``video_manager`` parameter (various functions)
      - Use ``video`` parameter instead
    * - ``SceneManager.get_event_list()``
-     - Use ``SceneManager.get_cut_list()`` or ``SceneManager.get_scene_list()``
+     - Use :meth:`~scenedetect.scene_manager.SceneManager.get_cut_list` or :meth:`~scenedetect.scene_manager.SceneManager.get_scene_list`
    * - ``AdaptiveDetector.get_content_val()``
      - Use ``StatsManager`` to query metrics
    * - ``AdaptiveDetector(min_delta_hsv=...)``

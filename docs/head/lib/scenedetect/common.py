@@ -91,37 +91,34 @@ TimecodePair = tuple["FrameTimecode", "FrameTimecode"]
 MAX_FPS_DELTA: float = 1.0 / 1000000000.0
 """Maximum amount two framerates can differ by for equality testing. Currently 1 frame/nanosec."""
 
+# `datetime.timedelta` does not expose seconds per minute/hour as constants, so we define our own.
 _SECONDS_PER_MINUTE = 60.0
 _SECONDS_PER_HOUR = 60.0 * _SECONDS_PER_MINUTE
 _MINUTES_PER_HOUR = 60.0
 
-# Common framerates mapped from their float representation to exact rational values.
-_COMMON_FRAMERATES: dict[Fraction, Fraction] = {
-    Fraction(24000, 1001): Fraction(24000, 1001),  # 23.976...
-    Fraction(30000, 1001): Fraction(30000, 1001),  # 29.97...
-    Fraction(60000, 1001): Fraction(60000, 1001),  # 59.94...
-    Fraction(120000, 1001): Fraction(120000, 1001),  # 119.88...
-}
+# Tolerance for snapping a float value's framerate to an NTSC-derived rational (N * 1000/1001).
+# e.g. 23.976 should be detected as 24000/1001, 29.97 should be detected as 30000/1001, etc.
+_NTSC_DETECTION_TOLERANCE: float = 1e-3
 
 
 def framerate_to_fraction(fps: float) -> Fraction:
     """Convert a float framerate to an exact rational Fraction.
 
-    Recognizes common NTSC framerates (23.976, 29.97, 59.94, 119.88) and maps them to their
-    exact rational representation (e.g. 24000/1001). For other values, uses limit_denominator
-    to find a clean rational approximation, or returns the exact integer fraction for whole
-    number framerates.
+    Detects NTSC-derived framerates of the form ``N * 1000/1001`` (e.g. 23.976 -> 24000/1001,
+    29.97 -> 30000/1001, 47.952 -> 48000/1001) for any positive integer ``N`` and returns
+    their exact rational representation. Whole-number framerates are returned as
+    ``Fraction(N, 1)``. Other values fall back to ``limit_denominator(10000)`` for a clean
+    rational approximation.
     """
     if fps <= MAX_FPS_DELTA:
         raise ValueError("Framerate must be positive and greater than zero.")
-    # Integer framerates are exact.
     if fps == int(fps):
         return Fraction(int(fps), 1)
-    # Check against known common framerates using limit_denominator to find the closest match.
-    candidate = Fraction(fps).limit_denominator(10000)
-    if candidate in _COMMON_FRAMERATES:
-        return _COMMON_FRAMERATES[candidate]
-    return candidate
+    # Invert fps = N * 1000/1001 to recover N, then verify within tolerance.
+    base = round(fps * 1001 / 1000)
+    if base > 0 and abs(base * 1000 / 1001 - fps) < _NTSC_DETECTION_TOLERANCE:
+        return Fraction(base * 1000, 1001)
+    return Fraction(fps).limit_denominator(10000)
 
 
 class Interpolation(Enum):
