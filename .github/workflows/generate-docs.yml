@@ -14,13 +14,15 @@ jobs:
   update_docs:
     runs-on: ubuntu-latest
     env:
-      # TODO: Figure out a better way to handle figuring out what version /latest should be,
-      # e.g. add a latest version file in main.
-      scenedetect_docs_latest: '0.6.7'
       scenedetect_docs_dest: ''
 
     steps:
       - uses: actions/checkout@v5
+
+      - name: Get Latest Version
+        run: |
+          git fetch origin main --depth=1
+          echo "scenedetect_docs_latest=$(git show origin/main:docs/LATEST_VERSION | tr -d '[:space:]')" >> "$GITHUB_ENV"
 
       - name: Set up Python 3.12
         uses: actions/setup-python@v6
