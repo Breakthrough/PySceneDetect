@@ -148,24 +148,26 @@ will always be included until the first fade-out event is detected.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>list[tuple[<a class="reference internal" href="api/common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode">scenedetect.common.FrameTimecode</a>, <a class="reference internal" href="api/common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode">scenedetect.common.FrameTimecode</a>]]</p>
+<dd class="field-even"><p>list[tuple[‘FrameTimecode’, ‘FrameTimecode’]]</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="scenedetect.open_video">
-<span class="sig-prename descclassname"><span class="pre">scenedetect.</span></span><span class="sig-name descname"><span class="pre">open_video</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">framerate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'opencv'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.open_video" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">scenedetect.</span></span><span class="sig-name descname"><span class="pre">open_video</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'opencv'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">framerate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.open_video" title="Permalink to this definition">¶</a></dt>
 <dd><p>Open a video at the given path. If <cite>backend</cite> is specified but not available on the current
 system, OpenCV (<cite>VideoStreamCv2</cite>) will be used as a fallback.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>path</strong> (<em>str</em><em> | </em><em>PathLike</em><em>[</em><em>str</em><em>]</em>) – Path to video file to open.</p></li>
-<li><p><strong>framerate</strong> (<em>float</em><em> | </em><em>None</em>) – Overrides detected framerate if set.</p></li>
+<li><p><strong>frame_rate</strong> (<em>float</em><em> | </em><em>Fraction</em><em> | </em><em>None</em>) – Overrides detected frame rate if set. Takes precedence over <cite>framerate</cite>.</p></li>
 <li><p><strong>backend</strong> (<em>str</em>) – Name of specific backend to use, if possible. See
 <a class="reference internal" href="api/backends.html#scenedetect.backends.AVAILABLE_BACKENDS" title="scenedetect.backends.AVAILABLE_BACKENDS"><code class="xref py py-data docutils literal notranslate"><span class="pre">scenedetect.backends.AVAILABLE_BACKENDS</span></code></a> for backends available on the current
 system. If the backend fails to open the video, OpenCV will be used as a fallback.</p></li>
+<li><p><strong>framerate</strong> (<em>float</em><em> | </em><em>None</em>) – [DEPRECATED] Use <cite>frame_rate</cite> instead. Retained as a deprecated alias for
+backwards compatibility; ignored when <cite>frame_rate</cite> is provided.</p></li>
 <li><p><strong>kwargs</strong> – Optional named arguments to pass to the specified <cite>backend</cite> constructor for
 overriding backend-specific options.</p></li>
 </ul>
@@ -285,9 +287,11 @@ overriding backend-specific options.</p></li>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="api/common.html">Common</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="api/common.html#scenedetect.common.FrameTimecode"><code class="docutils literal notranslate"><span class="pre">FrameTimecode</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/common.html#scenedetect.common.FrameTimecode.equal_frame_rate"><code class="docutils literal notranslate"><span class="pre">FrameTimecode.equal_frame_rate()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/common.html#scenedetect.common.FrameTimecode.equal_framerate"><code class="docutils literal notranslate"><span class="pre">FrameTimecode.equal_framerate()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/common.html#scenedetect.common.FrameTimecode.get_timecode"><code class="docutils literal notranslate"><span class="pre">FrameTimecode.get_timecode()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/common.html#scenedetect.common.FrameTimecode.frame_num"><code class="docutils literal notranslate"><span class="pre">FrameTimecode.frame_num</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/common.html#scenedetect.common.FrameTimecode.frame_rate"><code class="docutils literal notranslate"><span class="pre">FrameTimecode.frame_rate</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/common.html#scenedetect.common.FrameTimecode.framerate"><code class="docutils literal notranslate"><span class="pre">FrameTimecode.framerate</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/common.html#scenedetect.common.FrameTimecode.pts"><code class="docutils literal notranslate"><span class="pre">FrameTimecode.pts</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/common.html#scenedetect.common.FrameTimecode.seconds"><code class="docutils literal notranslate"><span class="pre">FrameTimecode.seconds</span></code></a></li>
@@ -310,6 +314,7 @@ overriding backend-specific options.</p></li>
 <li class="toctree-l2"><a class="reference internal" href="api/common.html#scenedetect.common.framerate_to_fraction"><code class="docutils literal notranslate"><span class="pre">framerate_to_fraction()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/common.html#scenedetect.common.CropRegion"><code class="docutils literal notranslate"><span class="pre">CropRegion</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/common.html#scenedetect.common.CutList"><code class="docutils literal notranslate"><span class="pre">CutList</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/common.html#scenedetect.common.FrameRate"><code class="docutils literal notranslate"><span class="pre">FrameRate</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/common.html#scenedetect.common.MAX_FPS_DELTA"><code class="docutils literal notranslate"><span class="pre">MAX_FPS_DELTA</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/common.html#scenedetect.common.SceneList"><code class="docutils literal notranslate"><span class="pre">SceneList</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/common.html#scenedetect.common.TimecodeLike"><code class="docutils literal notranslate"><span class="pre">TimecodeLike</span></code></a></li>

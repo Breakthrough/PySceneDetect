@@ -230,12 +230,22 @@ Global options (e.g. -i/--input, -c/--config) must be specified before any comma
     help="Stats file (.csv) to write frame metrics. Existing files will be overwritten. Used for tuning detection parameters and data analysis.",
 )
 @click.option(
-    "--framerate",
+    "--frame-rate",
     "-f",
+    "frame_rate",
     metavar="FPS",
     type=click.FLOAT,
     default=None,
-    help="Override framerate with value as frames/sec.",
+    help="Override frame rate with value as frames/sec.",
+)
+@click.option(
+    "--framerate",
+    "framerate_legacy",
+    metavar="FPS",
+    type=click.FLOAT,
+    default=None,
+    hidden=True,
+    help="[DEPRECATED] Use -f/--frame-rate instead.",
 )
 @click.option(
     "--min-scene-len",
@@ -336,7 +346,8 @@ def scenedetect(
     output: str | None,
     stats: str | None,
     config: str | None,
-    framerate: float | None,
+    frame_rate: float | None,
+    framerate_legacy: float | None,
     min_scene_len: str | None,
     drop_short_scenes: bool | None,
     merge_last_scene: bool | None,
@@ -351,10 +362,17 @@ def scenedetect(
     ctx = ctx.obj
     assert isinstance(ctx, CliContext)
 
+    # TODO(https://scenedetect.com/issue/548): emit DeprecationWarning when `--framerate`
+    # is used, once downstream users have had a release to migrate to `--frame-rate`.
+    if frame_rate is None:
+        frame_rate = framerate_legacy
+    elif framerate_legacy is not None:
+        logger.warning("Both --frame-rate and --framerate were specified; using --frame-rate.")
+
     ctx.handle_options(
         input_path=input,
         output=output,
-        framerate=framerate,
+        frame_rate=frame_rate,
         stats_file=stats,
         frame_skip=frame_skip,
         min_scene_len=min_scene_len,

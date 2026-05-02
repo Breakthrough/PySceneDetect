@@ -30,7 +30,7 @@ from enum import Enum
 
 import numpy
 
-from scenedetect.common import FrameTimecode
+from scenedetect.common import FrameTimecode, Timecode, TimecodeLike
 from scenedetect.stats_manager import StatsManager
 
 
@@ -114,24 +114,27 @@ class FlashFilter:
         SUPPRESS = 1
         """Suppress consecutive cuts until the filter length has passed."""
 
-    def __init__(self, mode: Mode, length: int | float | str):
+    def __init__(self, mode: Mode, length: TimecodeLike):
         """
         Arguments:
             mode: The mode to use when enforcing `length`.
-            length: Minimum scene length. Accepts an `int` (number of frames), `float` (seconds),
-                or `str` (timecode, e.g. ``"0.6s"`` or ``"00:00:00.600"``).
+            length: Minimum scene length. Accepts any :data:`TimecodeLike` value (e.g.
+                ``int`` frames, ``float`` seconds, ``str`` such as ``"0.6s"`` /
+                ``"00:00:00.600"``, or a :class:`FrameTimecode` / :class:`Timecode`).
         """
         self._mode = mode
         # Frame count (int) and seconds (float) representations of `length`. Exactly one is
         # populated up front; the other is computed on the first frame once the framerate is
-        # known. Temporal inputs (float/non-digit str) populate `_filter_secs`; integer inputs
-        # (int/digit str) populate `_filter_length`.
+        # known. Temporal inputs (float/non-digit str / Timecode / FrameTimecode) populate
+        # `_filter_secs`; integer inputs (int/digit str) populate `_filter_length`.
         self._filter_length: int = 0
         self._filter_secs: float | None = None
         if isinstance(length, float):
             self._filter_secs = length
         elif isinstance(length, str) and not length.strip().isdigit():
             self._filter_secs = FrameTimecode(timecode=length, fps=100.0).seconds
+        elif isinstance(length, (Timecode, FrameTimecode)):
+            self._filter_secs = length.seconds
         else:
             self._filter_length = int(length)
         self._last_above: FrameTimecode | None = None  # Last frame above threshold.
@@ -168,13 +171,13 @@ class FlashFilter:
     def _filter_suppress(
         self, timecode: FrameTimecode, above_threshold: bool
     ) -> list[FrameTimecode]:
-        framerate = timecode.framerate
-        assert framerate is not None and framerate >= 0
+        frame_rate = timecode.frame_rate
+        assert frame_rate is not None and frame_rate >= 0
         assert self._last_above is not None
         # Compute the threshold in seconds once from the first frame's framerate. This avoids
         # using an incorrect average fps (e.g. OpenCV on VFR video) on subsequent frames.
         if self._filter_secs is None:
-            self._filter_secs = self._filter_length / framerate
+            self._filter_secs = self._filter_length / float(frame_rate)
         min_length_met: bool = (timecode - self._last_above) >= self._filter_secs
         if not (above_threshold and min_length_met):
             return []
@@ -184,12 +187,12 @@ class FlashFilter:
         return [timecode]
 
     def _filter_merge(self, timecode: FrameTimecode, above_threshold: bool) -> list[FrameTimecode]:
-        framerate = timecode.framerate
-        assert framerate is not None and framerate >= 0
+        frame_rate = timecode.frame_rate
+        assert frame_rate is not None and frame_rate >= 0
         assert self._last_above is not None
         # Compute the threshold in seconds once from the first frame's framerate.
         if self._filter_secs is None:
-            self._filter_secs = self._filter_length / framerate
+            self._filter_secs = self._filter_length / float(frame_rate)
         min_length_met: bool = (timecode - self._last_above) >= self._filter_secs
         # Ensure last frame is always advanced to the most recent one that was above the threshold.
         if above_threshold:

@@ -112,5 +112,5 @@ AVAILABLE_BACKENDS: dict[str, type] = {
 """All available backends that :func:`scenedetect.open_video` can consider for the `backend`
 parameter. These backends must support construction with the following signature:
 
-    BackendType(path: str, framerate: ty.Optional[float])
+    BackendType(path: str, frame_rate: ty.Optional[float | Fraction])
 """

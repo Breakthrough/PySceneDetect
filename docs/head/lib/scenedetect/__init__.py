@@ -33,6 +33,7 @@ except ModuleNotFoundError as ex:
 from scenedetect.platform import init_logger  # noqa: I001
 from scenedetect.common import (
     FrameTimecode,
+    FrameRate,
     SceneList,
     CutList,
     CropRegion,
@@ -82,8 +83,9 @@ logger = getLogger("pyscenedetect")
 
 def open_video(
     path: StrPath,
-    framerate: float | None = None,
+    frame_rate: FrameRate | None = None,
     backend: str = "opencv",
+    framerate: float | None = None,
     **kwargs,
 ) -> VideoStream:
     """Open a video at the given path. If `backend` is specified but not available on the current
@@ -91,10 +93,12 @@ def open_video(
 
     Arguments:
         path: Path to video file to open.
-        framerate: Overrides detected framerate if set.
+        frame_rate: Overrides detected frame rate if set. Takes precedence over `framerate`.
         backend: Name of specific backend to use, if possible. See
             :data:`scenedetect.backends.AVAILABLE_BACKENDS` for backends available on the current
             system. If the backend fails to open the video, OpenCV will be used as a fallback.
+        framerate: [DEPRECATED] Use `frame_rate` instead. Retained as a deprecated alias for
+            backwards compatibility; ignored when `frame_rate` is provided.
         kwargs: Optional named arguments to pass to the specified `backend` constructor for
             overriding backend-specific options.
 
@@ -105,13 +109,17 @@ def open_video(
         :class:`VideoOpenFailure`: Constructing the VideoStream fails. If multiple backends have
             been attempted, the error from the first backend will be returned.
     """
+    # TODO(https://scenedetect.com/issue/548): emit DeprecationWarning when `framerate=` is
+    # used, once internal callers and downstream users have had a release to migrate.
+    if frame_rate is None:
+        frame_rate = framerate
     last_error: Exception | None = None
     # If `backend` is available, try to open the video at `path` using it.
     if backend in AVAILABLE_BACKENDS:
         backend_type = AVAILABLE_BACKENDS[backend]
         try:
             logger.debug("Opening video with %s...", backend_type.BACKEND_NAME)
-            return backend_type(path, framerate, **kwargs)
+            return backend_type(path, frame_rate, **kwargs)
         except VideoOpenFailure as ex:
             logger.warning("Failed to open video with %s: %s", backend_type.BACKEND_NAME, str(ex))
             if backend == VideoStreamCv2.BACKEND_NAME:
@@ -123,7 +131,7 @@ def open_video(
     backend_type = VideoStreamCv2
     logger.warning("Trying another backend: %s", backend_type.BACKEND_NAME)
     try:
-        return backend_type(path, framerate)
+        return backend_type(path, frame_rate)
     except VideoOpenFailure as ex:
         logger.debug("Failed to open video: %s", str(ex))
         if last_error is None:

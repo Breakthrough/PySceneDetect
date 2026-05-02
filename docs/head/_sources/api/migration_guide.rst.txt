@@ -104,7 +104,7 @@ The following have been removed from the ``SceneDetector`` interface:
 Read-Only Properties
 -----------------------------------------------------------------------
 
-:attr:`~scenedetect.common.FrameTimecode.frame_num` and :attr:`~scenedetect.common.FrameTimecode.framerate` are now read-only properties. To change them, construct a new ``FrameTimecode``:
+:attr:`~scenedetect.common.FrameTimecode.frame_num` and :attr:`~scenedetect.common.FrameTimecode.frame_rate` are now read-only properties. To change them, construct a new ``FrameTimecode``:
 
 .. code:: python
 
@@ -116,19 +116,35 @@ Read-Only Properties
 New Properties
 -----------------------------------------------------------------------
 
-Access :attr:`~scenedetect.common.FrameTimecode.frame_num`, :attr:`~scenedetect.common.FrameTimecode.framerate`, and :attr:`~scenedetect.common.FrameTimecode.seconds` as properties instead of getter methods:
+Access :attr:`~scenedetect.common.FrameTimecode.frame_num`, :attr:`~scenedetect.common.FrameTimecode.frame_rate`, and :attr:`~scenedetect.common.FrameTimecode.seconds` as properties instead of getter methods. The new :attr:`~scenedetect.common.FrameTimecode.frame_rate` property returns an exact :class:`fractions.Fraction` and matches :attr:`~scenedetect.video_stream.VideoStream.frame_rate`:
 
 .. code:: python
 
-    tc = FrameTimecode(100, 24.0)
-    tc.frame_num   # 100
-    tc.framerate    # Fraction(24, 1)
-    tc.seconds      # ~4.167
+    from fractions import Fraction
+    tc = FrameTimecode(100, 29.97)
+    tc.frame_num    # 100
+    tc.frame_rate   # Fraction(30000, 1001) (exact)
+    tc.time_base    # Fraction(1001, 30000)
+    tc.seconds      # ~3.337
+
+``time_base`` equals ``1 / frame_rate`` for CFR sources. For VFR (``Timecode``-backed) instances, ``time_base`` is authoritative and ``frame_rate`` is an approximation.
+
+``Fraction`` participates in numeric arithmetic and comparisons just like ``float``, and converts implicitly when mixed with floats (the result is a ``float``). When a ``float`` is explicitly required (e.g. format specifiers, ``json.dumps``, ``isinstance(x, float)`` checks) wrap the value with ``float(...)``:
+
+.. code:: python
+
+    rate = tc.frame_rate            # Fraction(30000, 1001)
+    rate * 2                        # Fraction(60000, 1001)
+    rate > 24                       # True
+    rate * 0.5                      # 14.985... (float, mixed arithmetic)
+    f"{float(rate):.3f}"            # '29.970' (explicit cast for format spec)
+
+The legacy ``framerate`` property (one word, returns ``float``) is retained as a deprecated alias and will emit a ``DeprecationWarning`` in a future release. Migrate to ``frame_rate``; cast with ``float(...)`` at the call site if you specifically need a ``float``.
 
 Removed Methods
 -----------------------------------------------------------------------
 
-- ``previous_frame()`` - removed, use ``FrameTimecode(tc.frame_num - 1, tc.framerate)`` instead
+- ``previous_frame()`` - removed, use ``FrameTimecode(tc.frame_num - 1, tc)`` instead (passing a ``FrameTimecode`` as the ``fps`` argument reuses its rate)
 
 
 =======================================================================

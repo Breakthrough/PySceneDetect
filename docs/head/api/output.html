@@ -46,12 +46,12 @@ and the associated video/frame source.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>scene_list</strong> (<em>list</em><em>[</em><em>tuple</em><em>[</em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>scenedetect.common.FrameTimecode</em></a><em>, </em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>scenedetect.common.FrameTimecode</em></a><em>]</em><em>]</em>) – A list of scenes (pairs of FrameTimecode objects) returned
+<li><p><strong>scene_list</strong> (<em>list</em><em>[</em><em>tuple</em><em>[</em><em>'FrameTimecode'</em><em>, </em><em>'FrameTimecode'</em><em>]</em><em>]</em>) – A list of scenes (pairs of FrameTimecode objects) returned
 from calling a SceneManager’s detect_scenes() method.</p></li>
 <li><p><strong>video</strong> (<a class="reference internal" href="video_stream.html#scenedetect.video_stream.VideoStream" title="scenedetect.video_stream.VideoStream"><em>VideoStream</em></a>) – A VideoStream object corresponding to the scene list.
 Note that the video will be closed/re-opened and seeked through.</p></li>
 <li><p><strong>num_images</strong> (<em>int</em>) – Number of images to generate for each scene.  Minimum is 1.</p></li>
-<li><p><strong>frame_margin</strong> (<em>int</em><em> | </em><em>float</em><em> | </em><em>str</em>) – Padding around the beginning and end of each scene used when
+<li><p><strong>frame_margin</strong> (<em>int</em><em> | </em><em>float</em><em> | </em><em>str</em><em> | </em><a class="reference internal" href="common.html#scenedetect.common.Timecode" title="scenedetect.common.Timecode"><em>Timecode</em></a><em> | </em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a>) – Padding around the beginning and end of each scene used when
 selecting which frames to extract. Accepts an int (frames), float (seconds),
 or str (e.g. <code class="docutils literal notranslate"><span class="pre">&quot;0.1s&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;00:00:00.100&quot;</span></code>). Can be 0, but some video files
 may then fail to extract the very last frame.</p></li>

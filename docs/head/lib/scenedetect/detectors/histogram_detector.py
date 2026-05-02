@@ -20,7 +20,7 @@ import typing as ty
 import cv2
 import numpy
 
-from scenedetect.common import FrameTimecode
+from scenedetect.common import FrameTimecode, TimecodeLike
 from scenedetect.detector import SceneDetector
 
 
@@ -34,7 +34,7 @@ class HistogramDetector(SceneDetector):
         self,
         threshold: float = 0.05,
         bins: int = 256,
-        min_scene_len: int | float | str = 15,
+        min_scene_len: TimecodeLike = 15,
     ):
         """
         Arguments:
