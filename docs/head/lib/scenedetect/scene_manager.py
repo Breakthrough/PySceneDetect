@@ -226,8 +226,6 @@ class SceneManager:
         # Interpolation method to use when downscaling. Defaults to linear interpolation
         # as a good balance between quality and performance.
         self._interpolation: Interpolation = Interpolation.LINEAR
-        # Boolean indicating if we have only seen EventType.CUT events so far.
-        self._only_cuts: bool = True
         # Set by decode thread when an exception occurs.
         self._exception_info = None
         self._stop = threading.Event()
@@ -458,7 +456,7 @@ class SceneManager:
             ValueError: `frame_skip` **must** be 0 (the default) if the SceneManager
                 was constructed with a StatsManager object.
         """
-        # TODO(v0.7): Add DeprecationWarning that `frame_source` will be removed in v0.8.
+        # TODO(v0.8): Remove `frame_source` entirely; the `DeprecationWarning` below has shipped.
         if frame_source is not None:
             warnings.warn(
                 "The `frame_source` argument is deprecated, use `video` instead.",

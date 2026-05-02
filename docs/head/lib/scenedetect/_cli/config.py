@@ -739,23 +739,23 @@ class ConfigRegistry:
         self._init_log = []
         return init_log
 
-    def _log(self, log_level, log_str):
+    def _log(self, log_level: int, log_str: str) -> None:
         self._init_log.append((log_level, log_str))
 
     def _load_from_disk(self, path=None):
         # Validate `path`, or if not provided, use CONFIG_FILE_PATH if it exists.
         if path:
-            self._init_log.append((logging.INFO, f"Loading config from file:\n  {path}"))
+            self._log(logging.INFO, f"Loading config from file:\n  {path}")
             if not os.path.exists(path):
-                self._init_log.append((logging.ERROR, f"File not found: {path}"))
+                self._log(logging.ERROR, f"File not found: {path}")
                 raise ConfigLoadFailure(self._init_log)
         else:
             # Gracefully handle the case where there isn't a user config file.
             if not os.path.exists(CONFIG_FILE_PATH):
-                self._init_log.append((logging.DEBUG, "User config file not found."))
+                self._log(logging.DEBUG, "User config file not found.")
                 return
             path = CONFIG_FILE_PATH
-            self._init_log.append((logging.INFO, f"Loading user config file:\n  {path}"))
+            self._log(logging.INFO, f"Loading user config file:\n  {path}")
         # Try to load and parse the config file at `path`.
         config = ConfigParser()
         try:
@@ -770,7 +770,7 @@ class ConfigRegistry:
         # the parsed options (i.e. that the options have valid values).
         (config, logs) = _parse_config(config)
         for verbosity, message in logs:
-            self._init_log.append((verbosity, message))
+            self._log(verbosity, message)
         if config is None:
             raise ConfigLoadFailure(self._init_log)
         self._config = config

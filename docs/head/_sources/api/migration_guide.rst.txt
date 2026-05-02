@@ -56,6 +56,10 @@ Several submodules have been reorganized. If you import directly from `scenedete
 
     Most commonly used types and functions are also available directly from the top-level ``scenedetect`` package (e.g. ``from scenedetect import FrameTimecode``), which has not changed.
 
+.. note::
+
+    The ``frame_timecode``, ``scene_detector``, and ``video_splitter`` submodules emit a ``DeprecationWarning`` when imported directly. The ``save_images``, ``write_scene_list``, and ``write_scene_list_html`` re-exports from ``scenedetect.scene_manager`` continue to work silently in v0.7 but **will be removed in v0.8**. Import these symbols from ``scenedetect`` directly to avoid breakage.
+
 
 =======================================================================
 Custom Detector Changes
@@ -141,6 +145,11 @@ Access :attr:`~scenedetect.common.FrameTimecode.frame_num`, :attr:`~scenedetect.
 
 The legacy ``framerate`` property (one word, returns ``float``) is retained as a deprecated alias and will emit a ``DeprecationWarning`` in a future release. Migrate to ``frame_rate``; cast with ``float(...)`` at the call site if you specifically need a ``float``.
 
+Renamed Method: ``equal_framerate()``
+-----------------------------------------------------------------------
+
+:meth:`~scenedetect.common.FrameTimecode.equal_framerate` has been renamed to :meth:`~scenedetect.common.FrameTimecode.equal_frame_rate` for consistency with the :attr:`~scenedetect.common.FrameTimecode.frame_rate` property. The legacy ``equal_framerate()`` method is retained as a deprecated alias and will emit a ``DeprecationWarning`` in a future release. The new form additionally accepts a ``Fraction`` or another ``FrameTimecode`` (in addition to ``float``).
+
 Removed Methods
 -----------------------------------------------------------------------
 
@@ -162,6 +171,19 @@ Rational Framerates
     video = open_video("video.mp4")
     assert isinstance(video.frame_rate, Fraction)
     # e.g. Fraction(24000, 1001) instead of 23.976023976...
+
+``frame_rate`` Keyword Argument
+-----------------------------------------------------------------------
+
+The ``framerate`` keyword argument has been renamed to ``frame_rate`` on :func:`~scenedetect.open_video` and on every backend constructor (:class:`~scenedetect.backends.opencv.VideoStreamCv2`, :class:`~scenedetect.backends.opencv.VideoCaptureAdapter`, :class:`~scenedetect.backends.pyav.VideoStreamAv`, :class:`~scenedetect.backends.moviepy.VideoStreamMoviePy`). The new form accepts ``float | Fraction | None``. The legacy ``framerate`` keyword is retained as a deprecated alias and will emit a ``DeprecationWarning`` in a future release; if both are supplied, ``frame_rate`` takes precedence.
+
+.. code:: python
+
+    # v0.6 - will still work but will be removed in a future version
+    video = open_video("video.mp4", framerate=30.0)
+
+    # v0.7
+    video = open_video("video.mp4", frame_rate=30.0)
 
 PTS-Backed Timestamps
 -----------------------------------------------------------------------
@@ -246,6 +268,23 @@ The following deprecated APIs have been fully removed in v0.7:
 CLI Changes
 =======================================================================
 
+Removed / Renamed
+-----------------------------------------------------------------------
+
 - The ``-d``/``--min-delta-hsv`` option on ``detect-adaptive`` has been removed. Use ``-c``/``--min-content-val`` instead.
+- The global ``--framerate`` flag has been renamed to ``-f``/``--frame-rate`` for consistency with the API. The legacy ``--framerate`` form is retained as a hidden alias and will be removed in v0.8; if both are supplied, ``--frame-rate`` takes precedence and a warning is logged.
+- The ``export-html`` command has been renamed to :ref:`save-html <command-save-html>`. The legacy ``export-html`` command is retained as a deprecated alias and emits a deprecation warning when used.
+
+New Commands and Options
+-----------------------------------------------------------------------
+
+- New :ref:`save-fcp <command-save-fcp>` command exports scenes in Final Cut Pro XML format (FCP7/FCPX).
+- New :ref:`save-qp <command-save-qp>` command writes a QP file with scene boundary frame numbers, suitable for forcing keyframes at scene cuts in x264/x265.
+- New :ref:`save-html <command-save-html>` command (replaces ``export-html``).
+- New ``-s``/``--start-timecode`` option on :ref:`save-edl <command-save-edl>` provides a custom start timecode for generated EDLs (SMPTE ``HH:MM:SS:FF`` or 8-digit ``HHMMSSFF``).
+
+Other Changes
+-----------------------------------------------------------------------
+
 - VFR videos now work correctly with both the OpenCV and PyAV backends.
-- New ``save-fcp`` command for exporting scenes in Final Cut Pro XML format.
+- All CLI options that previously accepted only frame numbers now also accept seconds (e.g. ``0.6s``) and timecodes (e.g. ``00:00:00.600``).

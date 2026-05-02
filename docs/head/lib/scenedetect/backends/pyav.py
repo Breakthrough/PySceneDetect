@@ -96,7 +96,6 @@ class VideoStreamAv(VideoStream):
         self._path = ""
         self._frame: av.VideoFrame | None = None
         self._decoder: ty.Generator | None = None
-        self._decode_count: int = 0
         self._reopened = True
 
         if threading_mode:
@@ -280,7 +279,6 @@ class VideoStreamAv(VideoStream):
         )
         self._frame = None
         self._decoder = None
-        self._decode_count = 0
         self._container.seek(target_pts, stream=self._video_stream)
         if not beginning:
             self.read(decode=False)
@@ -293,7 +291,6 @@ class VideoStreamAv(VideoStream):
         self._container.close()
         self._frame = None
         self._decoder = None
-        self._decode_count = 0
         try:
             self._container = av.open(self._path if self._path else self._io)
         except Exception as ex:
@@ -309,7 +306,6 @@ class VideoStreamAv(VideoStream):
             last_frame = self._frame
             assert self._decoder is not None
             self._frame = next(self._decoder)
-            self._decode_count += 1
         except av.error.EOFError:  # type: ignore[attr-defined]
             self._frame = last_frame
             if self._handle_eof():

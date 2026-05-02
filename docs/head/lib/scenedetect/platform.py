@@ -40,7 +40,7 @@ StrPath = str | os.PathLike[str]
 class FakeTqdmObject:
     """Provides a no-op tqdm-like object."""
 
-    def __init__(self, **kawrgs):
+    def __init__(self, **kwargs):
         """No-op."""
 
     def update(self, n=1):
@@ -56,7 +56,7 @@ class FakeTqdmObject:
 class FakeTqdmLoggingRedirect:
     """Provides a no-op tqdm context manager for redirecting log messages."""
 
-    def __init__(self, **kawrgs):
+    def __init__(self, **kwargs):
         """No-op."""
 
     def __enter__(self):

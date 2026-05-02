@@ -93,6 +93,10 @@
 <p class="admonition-title">Note</p>
 <p>Most commonly used types and functions are also available directly from the top-level <code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> package (e.g. <code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">scenedetect</span> <span class="pre">import</span> <span class="pre">FrameTimecode</span></code>), which has not changed.</p>
 </div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">frame_timecode</span></code>, <code class="docutils literal notranslate"><span class="pre">scene_detector</span></code>, and <code class="docutils literal notranslate"><span class="pre">video_splitter</span></code> submodules emit a <code class="docutils literal notranslate"><span class="pre">DeprecationWarning</span></code> when imported directly. The <code class="docutils literal notranslate"><span class="pre">save_images</span></code>, <code class="docutils literal notranslate"><span class="pre">write_scene_list</span></code>, and <code class="docutils literal notranslate"><span class="pre">write_scene_list_html</span></code> re-exports from <code class="docutils literal notranslate"><span class="pre">scenedetect.scene_manager</span></code> continue to work silently in v0.7 but <strong>will be removed in v0.8</strong>. Import these symbols from <code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> directly to avoid breakage.</p>
+</div>
 </section>
 <section id="custom-detector-changes">
 <h2>Custom Detector Changes<a class="headerlink" href="#custom-detector-changes" title="Permalink to this heading">¶</a></h2>
@@ -161,6 +165,10 @@
 </div>
 <p>The legacy <code class="docutils literal notranslate"><span class="pre">framerate</span></code> property (one word, returns <code class="docutils literal notranslate"><span class="pre">float</span></code>) is retained as a deprecated alias and will emit a <code class="docutils literal notranslate"><span class="pre">DeprecationWarning</span></code> in a future release. Migrate to <code class="docutils literal notranslate"><span class="pre">frame_rate</span></code>; cast with <code class="docutils literal notranslate"><span class="pre">float(...)</span></code> at the call site if you specifically need a <code class="docutils literal notranslate"><span class="pre">float</span></code>.</p>
 </section>
+<section id="renamed-method-equal-framerate">
+<h3>Renamed Method: <code class="docutils literal notranslate"><span class="pre">equal_framerate()</span></code><a class="headerlink" href="#renamed-method-equal-framerate" title="Permalink to this heading">¶</a></h3>
+<p><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode.equal_framerate" title="scenedetect.common.FrameTimecode.equal_framerate"><code class="xref py py-meth docutils literal notranslate"><span class="pre">equal_framerate()</span></code></a> has been renamed to <a class="reference internal" href="common.html#scenedetect.common.FrameTimecode.equal_frame_rate" title="scenedetect.common.FrameTimecode.equal_frame_rate"><code class="xref py py-meth docutils literal notranslate"><span class="pre">equal_frame_rate()</span></code></a> for consistency with the <a class="reference internal" href="common.html#scenedetect.common.FrameTimecode.frame_rate" title="scenedetect.common.FrameTimecode.frame_rate"><code class="xref py py-attr docutils literal notranslate"><span class="pre">frame_rate</span></code></a> property. The legacy <code class="docutils literal notranslate"><span class="pre">equal_framerate()</span></code> method is retained as a deprecated alias and will emit a <code class="docutils literal notranslate"><span class="pre">DeprecationWarning</span></code> in a future release. The new form additionally accepts a <code class="docutils literal notranslate"><span class="pre">Fraction</span></code> or another <code class="docutils literal notranslate"><span class="pre">FrameTimecode</span></code> (in addition to <code class="docutils literal notranslate"><span class="pre">float</span></code>).</p>
+</section>
 <section id="removed-methods">
 <h3>Removed Methods<a class="headerlink" href="#removed-methods" title="Permalink to this heading">¶</a></h3>
 <ul class="simple">
@@ -177,6 +185,17 @@
 <span class="n">video</span> <span class="o">=</span> <span class="n">open_video</span><span class="p">(</span><span class="s2">&quot;video.mp4&quot;</span><span class="p">)</span>
 <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">video</span><span class="o">.</span><span class="n">frame_rate</span><span class="p">,</span> <span class="n">Fraction</span><span class="p">)</span>
 <span class="c1"># e.g. Fraction(24000, 1001) instead of 23.976023976...</span>
+</pre></div>
+</div>
+</section>
+<section id="frame-rate-keyword-argument">
+<h3><code class="docutils literal notranslate"><span class="pre">frame_rate</span></code> Keyword Argument<a class="headerlink" href="#frame-rate-keyword-argument" title="Permalink to this heading">¶</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">framerate</span></code> keyword argument has been renamed to <code class="docutils literal notranslate"><span class="pre">frame_rate</span></code> on <a class="reference internal" href="../api.html#scenedetect.open_video" title="scenedetect.open_video"><code class="xref py py-func docutils literal notranslate"><span class="pre">open_video()</span></code></a> and on every backend constructor (<a class="reference internal" href="backends.html#scenedetect.backends.opencv.VideoStreamCv2" title="scenedetect.backends.opencv.VideoStreamCv2"><code class="xref py py-class docutils literal notranslate"><span class="pre">VideoStreamCv2</span></code></a>, <a class="reference internal" href="backends.html#scenedetect.backends.opencv.VideoCaptureAdapter" title="scenedetect.backends.opencv.VideoCaptureAdapter"><code class="xref py py-class docutils literal notranslate"><span class="pre">VideoCaptureAdapter</span></code></a>, <a class="reference internal" href="backends.html#scenedetect.backends.pyav.VideoStreamAv" title="scenedetect.backends.pyav.VideoStreamAv"><code class="xref py py-class docutils literal notranslate"><span class="pre">VideoStreamAv</span></code></a>, <a class="reference internal" href="backends.html#scenedetect.backends.moviepy.VideoStreamMoviePy" title="scenedetect.backends.moviepy.VideoStreamMoviePy"><code class="xref py py-class docutils literal notranslate"><span class="pre">VideoStreamMoviePy</span></code></a>). The new form accepts <code class="docutils literal notranslate"><span class="pre">float</span> <span class="pre">|</span> <span class="pre">Fraction</span> <span class="pre">|</span> <span class="pre">None</span></code>. The legacy <code class="docutils literal notranslate"><span class="pre">framerate</span></code> keyword is retained as a deprecated alias and will emit a <code class="docutils literal notranslate"><span class="pre">DeprecationWarning</span></code> in a future release; if both are supplied, <code class="docutils literal notranslate"><span class="pre">frame_rate</span></code> takes precedence.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># v0.6 - will still work but will be removed in a future version</span>
+<span class="n">video</span> <span class="o">=</span> <span class="n">open_video</span><span class="p">(</span><span class="s2">&quot;video.mp4&quot;</span><span class="p">,</span> <span class="n">framerate</span><span class="o">=</span><span class="mf">30.0</span><span class="p">)</span>
+
+<span class="c1"># v0.7</span>
+<span class="n">video</span> <span class="o">=</span> <span class="n">open_video</span><span class="p">(</span><span class="s2">&quot;video.mp4&quot;</span><span class="p">,</span> <span class="n">frame_rate</span><span class="o">=</span><span class="mf">30.0</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
@@ -256,11 +275,30 @@
 </section>
 <section id="cli-changes">
 <h2>CLI Changes<a class="headerlink" href="#cli-changes" title="Permalink to this heading">¶</a></h2>
+<section id="removed-renamed">
+<h3>Removed / Renamed<a class="headerlink" href="#removed-renamed" title="Permalink to this heading">¶</a></h3>
 <ul class="simple">
 <li><p>The <code class="docutils literal notranslate"><span class="pre">-d</span></code>/<code class="docutils literal notranslate"><span class="pre">--min-delta-hsv</span></code> option on <code class="docutils literal notranslate"><span class="pre">detect-adaptive</span></code> has been removed. Use <code class="docutils literal notranslate"><span class="pre">-c</span></code>/<code class="docutils literal notranslate"><span class="pre">--min-content-val</span></code> instead.</p></li>
-<li><p>VFR videos now work correctly with both the OpenCV and PyAV backends.</p></li>
-<li><p>New <code class="docutils literal notranslate"><span class="pre">save-fcp</span></code> command for exporting scenes in Final Cut Pro XML format.</p></li>
+<li><p>The global <code class="docutils literal notranslate"><span class="pre">--framerate</span></code> flag has been renamed to <code class="docutils literal notranslate"><span class="pre">-f</span></code>/<code class="docutils literal notranslate"><span class="pre">--frame-rate</span></code> for consistency with the API. The legacy <code class="docutils literal notranslate"><span class="pre">--framerate</span></code> form is retained as a hidden alias and will be removed in v0.8; if both are supplied, <code class="docutils literal notranslate"><span class="pre">--frame-rate</span></code> takes precedence and a warning is logged.</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">export-html</span></code> command has been renamed to <a class="reference internal" href="../cli.html#command-save-html"><span class="std std-ref">save-html</span></a>. The legacy <code class="docutils literal notranslate"><span class="pre">export-html</span></code> command is retained as a deprecated alias and emits a deprecation warning when used.</p></li>
 </ul>
+</section>
+<section id="new-commands-and-options">
+<h3>New Commands and Options<a class="headerlink" href="#new-commands-and-options" title="Permalink to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>New <a class="reference internal" href="../cli.html#command-save-fcp"><span class="std std-ref">save-fcp</span></a> command exports scenes in Final Cut Pro XML format (FCP7/FCPX).</p></li>
+<li><p>New <a class="reference internal" href="../cli.html#command-save-qp"><span class="std std-ref">save-qp</span></a> command writes a QP file with scene boundary frame numbers, suitable for forcing keyframes at scene cuts in x264/x265.</p></li>
+<li><p>New <a class="reference internal" href="../cli.html#command-save-html"><span class="std std-ref">save-html</span></a> command (replaces <code class="docutils literal notranslate"><span class="pre">export-html</span></code>).</p></li>
+<li><p>New <code class="docutils literal notranslate"><span class="pre">-s</span></code>/<code class="docutils literal notranslate"><span class="pre">--start-timecode</span></code> option on <a class="reference internal" href="../cli.html#command-save-edl"><span class="std std-ref">save-edl</span></a> provides a custom start timecode for generated EDLs (SMPTE <code class="docutils literal notranslate"><span class="pre">HH:MM:SS:FF</span></code> or 8-digit <code class="docutils literal notranslate"><span class="pre">HHMMSSFF</span></code>).</p></li>
+</ul>
+</section>
+<section id="other-changes">
+<h3>Other Changes<a class="headerlink" href="#other-changes" title="Permalink to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>VFR videos now work correctly with both the OpenCV and PyAV backends.</p></li>
+<li><p>All CLI options that previously accepted only frame numbers now also accept seconds (e.g. <code class="docutils literal notranslate"><span class="pre">0.6s</span></code>) and timecodes (e.g. <code class="docutils literal notranslate"><span class="pre">00:00:00.600</span></code>).</p></li>
+</ul>
+</section>
 </section>
 </section>
 

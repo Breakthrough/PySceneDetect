@@ -93,7 +93,6 @@ class ThresholdDetector(SceneDetector):
             "type": None,  # type of fade, can be either 'in' or 'out'
         }
         self._metric_keys = [ThresholdDetector.THRESHOLD_VALUE_KEY]
-        self._time_base = None
 
     def get_metrics(self) -> list[str]:
         return self._metric_keys
