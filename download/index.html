@@ -142,13 +142,13 @@
 <p>PySceneDetect requires at least Python 3.10 or higher.</p>
 <h2 id="install-via-pip">Install via pip &nbsp; <span class="wy-text-neutral"><span class="fa fa-windows"></span> &nbsp; <span class="fa fa-linux"></span> &nbsp; <span class="fa fa-apple"></span></span></h3></h2>
 <div class="important">
-<h4 class="wy-text-neutral"><span class="fa fa-angle-double-down wy-text-info"></span> Including OpenCV (recommended):</h4>
-<h3 class="wy-text-neutral"><tt>pip install --upgrade scenedetect[opencv]</tt></h3>
-<h4 class="wy-text-neutral"><span class="fa fa-angle-down wy-text-info"></span> Including Headless OpenCV (servers):</h4>
-<h3 class="wy-text-neutral"><tt>pip install --upgrade scenedetect[opencv-headless]</tt></h3>
+<h4 class="wy-text-neutral"><span class="fa fa-angle-double-down wy-text-info"></span> Standard install (recommended):</h4>
+<h3 class="wy-text-neutral"><tt>pip install --upgrade scenedetect</tt></h3>
+<h4 class="wy-text-neutral"><span class="fa fa-angle-down wy-text-info"></span> Headless install (servers, no GUI libs):</h4>
+<h3 class="wy-text-neutral"><tt>pip install --upgrade scenedetect-headless</tt></h3>
 </div>
 
-<p>PySceneDetect is available via <code>pip</code> as <a href="https://pypi.org/project/scenedetect/">the <code>scenedetect</code> package</a>.</p>
+<p>PySceneDetect is available via <code>pip</code> as either <a href="https://pypi.org/project/scenedetect/"><code>scenedetect</code></a> (depends on <code>opencv-python</code>) or <a href="https://pypi.org/project/scenedetect-headless/"><code>scenedetect-headless</code></a> (depends on <code>opencv-python-headless</code>). Both ship the same <code>scenedetect</code> Python module -- install whichever OpenCV variant suits your environment.</p>
 <h2 id="windows-build-64-bit-only">Windows Build (64-bit Only) &nbsp; <span class="wy-text-neutral"><span class="fa fa-windows"></span></span></h2>
 <div class="important">
 <h3 class="wy-text-neutral"><span class="fa fa-forward wy-text-info"></span> Latest Release: <b class="wy-text-neutral">v0.6.7</b></h3>

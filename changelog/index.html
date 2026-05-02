@@ -924,14 +924,14 @@
 <h1 id="development">Development</h1>
 <h2 id="pyscenedetect-07-in-development">PySceneDetect 0.7 (In Development)</h2>
 <h3 id="release-notes_12">Release Notes</h3>
-<p>PySceneDetect is a major breaking release which overhauls how timestamps are handled throughout the API. This allows PySceneDetect to properly process variable framerate (VFR) videos. A significant amount of technical debt has been addressed, including removal of deprecated or overly complicated APIs.</p>
+<p>PySceneDetect 0.7 is a <strong>major breaking release</strong> which overhauls how timestamps are handled. This allows PySceneDetect to properly process variable framerate (VFR) videos. A significant amount of technical debt has been addressed, including removal of deprecated or overly complicated APIs.</p>
 <p>Care was taken to minimize changes for most common API uses, however more advanced use cases may run into breaking changes. Please review <a href="https://www.scenedetect.com/docs/0.7/api/migration_guide.html">the Migration Guide</a> when updating from v0.6. Minimum supported Python version is now <strong>Python 3.10</strong>.</p>
 <h3 id="cli-changes">CLI Changes</h3>
 <ul>
 <li>[feature] VFR videos are handled correctly by the OpenCV and PyAV backends, and should work correctly with default parameters</li>
+<li>[feature] All CLI options which used to accept frame numbers only now accept seconds (e.g. <code>0.6s</code>) and timecodes (e.g. <code>00:00:00.600</code>) <a href="https://github.com/Breakthrough/PySceneDetect/issues/531">#531</a></li>
 <li>[feature] New <code>save-fcp</code> command allows exporting in Final Cut Pro format (FCP7/FCPX) <a href="https://github.com/Breakthrough/PySceneDetect/issues/156">#156</a></li>
-<li>[feature] <code>--min-scene-len</code>/<code>-m</code> and <code>save-images --frame-margin</code>/<code>-m</code> now accept seconds (e.g. <code>0.6s</code>) and timecodes (e.g. <code>00:00:00.600</code>) in addition to a frame count <a href="https://github.com/Breakthrough/PySceneDetect/issues/531">#531</a></li>
-<li>[feature] <code>save-edl</code> accepts a new <code>--start-timecode</code>/<code>-s</code> flag (SMPTE <code>HH:MM:SS:FF</code> or 8-digit <code>HHMMSSFF</code>) to stamp every event with a custom start timecode so generated EDLs align with the source media's on-screen timecode <a href="https://github.com/Breakthrough/PySceneDetect/issues/515">#515</a></li>
+<li>[feature] Add <code>save-edl</code> option  <code>--start-timecode</code>/<code>-s</code> to providde a custom start timecode for generated EDLs, supports SMPTE <code>HH:MM:SS:FF</code> or 8-digit <code>HHMMSSFF</code> input <a href="https://github.com/Breakthrough/PySceneDetect/issues/515">#515</a></li>
 <li>[bugfix] Fix floating-point precision error in <code>save-otio</code> output where frame values near integer boundaries (e.g. <code>90.00000000000001</code>) were serialized with spurious precision</li>
 <li>[bugfix] Add mitigation for transient <code>OSError</code> in the MoviePy backend as it is susceptible to subprocess pipe races on slow or heavily loaded systems <a href="https://github.com/Breakthrough/PySceneDetect/issues/496">#496</a></li>
 <li>[bugfix] <code>detect-threshold</code> cut frame numbers are now backend-deterministic; previously the cut could differ by 1 frame between PyAV and OpenCV when the fade midpoint landed on a <code>.5</code> rounding boundary (PyAV uses sub-microsecond PTS, OpenCV uses millisecond-truncated <code>CAP_PROP_POS_MSEC</code>)</li>
@@ -996,6 +996,22 @@
 <li>Remove <code>advance</code> parameter from <code>VideoStream.read()</code></li>
 <li>Remove <code>SceneDetector.stats_manager_required</code> property, no longer required</li>
 <li><code>SceneDetector</code> is now a <a href="https://docs.python.org/3/library/abc.html">Python abstract class</a></li>
+</ul>
+<h3 id="windows-distribution">Windows Distribution</h3>
+<ul>
+<li>[general] Updates to Windows distributions:<ul>
+<li>av 14.2.0 -&gt; 17.0.1</li>
+<li>click 8.1.8 -&gt; 8.2.1</li>
+<li>imageio-ffmpeg 0.6.0</li>
+<li>moviepy 2.1.2 -&gt; 2.2.1</li>
+<li>numpy 2.2.3 -&gt; 2.4.4</li>
+<li>opencv-python-headless 4.11.0.86 -&gt; 4.13.0.92</li>
+<li>platformdirs 4.3.6 -&gt; 4.9.6</li>
+<li>tqdm 4.67.1 -&gt; 4.67.3</li>
+<li>ffmpeg 8.0 -&gt; 8.1</li>
+</ul>
+</li>
+<li>[general] Reduce size of Windows distribution by requiring <code>imageio_ffmpeg</code> to use non-bundled instance</li>
 </ul>
               
             </div>
