@@ -2,6 +2,116 @@
 Releases
 ==========================================================
 
+
+## PySceneDetect 0.7
+
+### 0.7 (May 3, 2026)
+
+#### Release Notes
+
+PySceneDetect 0.7 is a **major breaking release** which overhauls how timestamps are handled. This allows PySceneDetect to properly process variable framerate (VFR) videos. A significant amount of technical debt has been addressed, including removal of deprecated or overly complicated APIs.
+
+Care was taken to minimize changes for most common API uses, however more advanced use cases may run into breaking changes. Please review [the Migration Guide](https://www.scenedetect.com/docs/0.7/api/migration_guide.html) when updating from v0.6. Minimum supported Python version is now **Python 3.10**.
+
+#### CLI Changes
+
+- [feature] VFR videos are handled correctly by the OpenCV and PyAV backends, and should work correctly with default parameters
+- [feature] All CLI options which used to accept frame numbers only now accept seconds (e.g. `0.6s`) and timecodes (e.g. `00:00:00.600`) [#531](https://github.com/Breakthrough/PySceneDetect/issues/531)
+- [feature] New `save-fcp` command allows exporting in Final Cut Pro format (FCP7/FCPX) [#156](https://github.com/Breakthrough/PySceneDetect/issues/156)
+- [feature] New `save-qp` command writes a QP file with scene boundary frame numbers, suitable for forcing keyframes at scene cuts in x264/x265 [#448](https://github.com/Breakthrough/PySceneDetect/issues/448)
+- [feature] New `save-html` command replaces the deprecated `export-html`; the prior command remains as an alias and emits a deprecation warning [#518](https://github.com/Breakthrough/PySceneDetect/issues/518)
+- [feature] Add `save-edl` option  `--start-timecode`/`-s` to providde a custom start timecode for generated EDLs, supports SMPTE `HH:MM:SS:FF` or 8-digit `HHMMSSFF` input [#515](https://github.com/Breakthrough/PySceneDetect/issues/515)
+- [bugfix] Fix floating-point precision error in `save-otio` output where frame values near integer boundaries (e.g. `90.00000000000001`) were serialized with spurious precision
+- [bugfix] Add mitigation for transient `OSError` in the MoviePy backend as it is susceptible to subprocess pipe races on slow or heavily loaded systems [#496](https://github.com/Breakthrough/PySceneDetect/issues/496)
+- [feature] The MoviePy backend now supports overriding the source frame rate via `-f`/`--frame-rate` (and the `VideoStreamMoviePy(frame_rate=...)` API), bringing it in line with the OpenCV and PyAV backends
+- [bugfix] `detect-threshold` cut frame numbers are now backend-deterministic; previously the cut could differ by 1 frame between PyAV and OpenCV when the fade midpoint landed on a `.5` rounding boundary (PyAV uses sub-microsecond PTS, OpenCV uses millisecond-truncated `CAP_PROP_POS_MSEC`)
+- [breaking] Remove deprecated `-d`/`--min-delta-hsv` option from `detect-adaptive` command (use `-c`/`--min-content-val` instead)
+- [breaking] Rename `-f/--framerate` to `-f/--frame-rate` as part of VFR overhaul (legacy `--framerate` form is preserved as a hidden alias but will be removed in v0.8)
+- [general] Support `SCENEDETECT_DEBUG` environment variable to control how exceptions and debugging are handled. Unhandled exceptions and `Ctrl+C` now produce a logger-formatted error message and exit cleanly with code 1 instead of dumping a raw Python traceback. Set `SCENEDETECT_DEBUG=1` to ensure all exceptions are re-raised instead of being logged. In both cases, the program will exit with a non-zero exit code.
+
+#### API Changes
+
+**VFR & Timestamp Overhaul:**
+
+ * Add `write_scene_list_edl`, `write_scene_list_fcpx`, `write_scene_list_fcp7`, and `write_scene_list_otio` to the `scenedetect.output` module so `save-edl`, `save-fcp`, and `save-otio` can be invoked directly from Python (previously CLI-only)
+ * `write_scene_list_edl` accepts an optional `start_timecode` parameter (SMPTE `HH:MM:SS:FF` or 8-digit `HHMMSSFF`) that is added to every event's source and record columns [#515](https://github.com/Breakthrough/PySceneDetect/issues/515)
+ * Add new `Timecode` type to represent frame timings in terms of the video's source timebase
+ * Add `time_base` and `pts` properties to `FrameTimecode` for more accurate timing information
+ * All backends (PyAV, OpenCV, MoviePy) now return PTS-backed timestamps from `VideoStream.position`
+ * `VideoStream.frame_rate` now returns `Fraction` instead of `float`
+ * Framerates are now stored as rational `Fraction` values (e.g. `Fraction(24000, 1001)` instead of `23.976`) to avoid float precision loss
+ * Common NTSC rates (23.976, 29.97, 59.94) are automatically detected from float values
+ * `FrameTimecode.frame_num` is now approximate for VFR video (based on PTS-derived time)
+ * Add `frame_rate` property (returns exact `Fraction`) as the canonical replacement for `framerate` (returns `float`) in `FrameTimecode` and `VideoStream`
+    * For CFR sources, both properties represent the same rate, i.e. `time_base` equals `1 / frame_rate` for CFR sources [#548](https://github.com/Breakthrough/PySceneDetect/issues/548)
+ * Add `frame_rate` keyword argument to `open_video()` and the `VideoStreamCv2`, `VideoCaptureAdapter`, `VideoStreamAv`, and `VideoStreamMoviePy` constructors as the canonical replacement for `framerate` [#548](https://github.com/Breakthrough/PySceneDetect/issues/548); accepts `float | Fraction | None`. The legacy `framerate` keyword is retained as a deprecated alias and is ignored when `frame_rate` is provided
+ * Add `equal_frame_rate(other)` method as the canonical replacement for `equal_framerate(fps)`
+
+**General:**
+
+ * Type hints: audit and overhaul: first-party code is now clean with Pyright basic mode, migrated deprecated type hints to comply with PEP 585
+ * Code quality: expand static analysis rules, audit and cleanup existing suppressions
+ * Packaging: modernized to comply with PEP 621, make `opencv-python` a requirement, add separate `scenedetect-headless` variant instead
+
+**Detector Interface:**
+
+ * Replace `frame_num` parameter (`int`) with `timecode` (`FrameTimecode`) in `SceneDetector` interface [#168](https://github.com/Breakthrough/PySceneDetect/issues/168):
+      * The detector interface: `SceneDetector.process_frame()` and `SceneDetector.post_process()` (the `post_process` signature on the abstract base is now consistently typed as `FrameTimecode` to match its concrete-detector overrides; the prior `int` annotation did not reflect the actual runtime value)
+      * Statistics: `StatsManager.get_metrics()`, `StatsManager.set_metrics()`, and `StatsManager.metrics_exist()` formally accept either `FrameTimecode` or `int` (the `int` form is retained for compatibility with the deprecated `load_from_csv()` path, which keys metrics by integer frame number)
+ * `StatsManager.load_from_csv()` and `save_images()` `output_dir` now accept `os.PathLike` (e.g. `pathlib.Path`) in addition to `str`
+ * `SceneManager.detect_scenes()` `duration` and `end_time` formally accept `int` (frames), `float` (seconds), `str` (timecode), or `FrameTimecode` - matching the documented and runtime-supported behavior
+ * `SceneDetector` is now a [Python abstract class](https://docs.python.org/3/library/abc.html)
+ * `SceneDetector` instances can now assume they always have frame data to process when `process_frame` is called
+ * Remove `SceneDetector.is_processing_required()` method
+ * Remove `SceneDetector.stats_manager_required` property, no longer required
+ * Remove deprecated `SparseSceneDetector` interface
+ * Detector `min_scene_len` and `save_images()` `frame_margin` arguments now accept seconds (`float`) and timecode strings (e.g. `"0.6s"`, `"00:00:00.600"`) in addition to a frame count (`int`); these are evaluated using the source video's timing for correct behavior on VFR videos [#531](https://github.com/Breakthrough/PySceneDetect/issues/531)
+
+**Module Reorganization:**
+
+ * `scenedetect.scene_detector` moved to `scenedetect.detector`
+ * `scenedetect.frame_timecode` moved to `scenedetect.common`
+ * Image/HTML/CSV export in `scenedetect.scene_manager` moved to `scenedetect.output` [#463](https://github.com/Breakthrough/PySceneDetect/issues/463)
+ * `scenedetect.video_splitter` moved to `scenedetect.output.video` [#463](https://github.com/Breakthrough/PySceneDetect/issues/463)
+
+**FrameTimecode:**
+
+ * Add properties to access `frame_num`, `frame_rate`, and `seconds` instead of getter methods
+ * `frame_num` and `frame_rate` are now read-only properties (construct a new `FrameTimecode` to change them)
+ * Remove `FrameTimecode.previous_frame()` method
+ * Deprecated functionality preserved from v0.6 now uses the `warnings` module to emit runtime deprecation warnings, these features will be removed in v0.8
+ * Soft-deprecate `framerate` property and `equal_framerate()` method via docstring; the legacy forms will continue to work until v0.8 when they will be upgraded to `DeprecationWarning` before removal in v0.9
+
+**Removals:**
+
+ * Remove deprecated module `scenedetect.video_manager`, use [the `scenedetect.open_video()` function](https://www.scenedetect.com/docs/head/api.html#scenedetect.open_video) instead
+ * Remove deprecated parameters `base_timecode` and `video_manager` from various functions
+ * Remove deprecated `SceneManager.get_event_list()` method
+ * Remove deprecated `AdaptiveDetector.get_content_val()` method (use `StatsManager` instead)
+ * Remove deprecated `AdaptiveDetector` constructor arg `min_delta_hsv` (use `min_content_val` instead)
+ * Remove `advance` parameter from `VideoStream.read()`
+ * Remove `SceneDetector.stats_manager_required` property, no longer required
+ * `SceneDetector` is now a [Python abstract class](https://docs.python.org/3/library/abc.html)
+
+#### Windows Distribution
+
+ - [general] Updates to Windows distributions:
+    - av 14.2.0 -> 17.0.1
+    - click 8.1.8 -> 8.2.1
+    - imageio-ffmpeg 0.6.0
+    - moviepy 2.1.2 -> 2.2.1
+    - numpy 2.2.3 -> 2.4.4
+    - opencv-python-headless 4.11.0.86 -> 4.13.0.92
+    - platformdirs 4.3.6 -> 4.9.6
+    - tqdm 4.67.1 -> 4.67.3
+    - ffmpeg 8.0 -> 8.1
+ - [general] Reduced size of Windows distribution without affecting functionality
+ - [bugfix] Pressing `Ctrl+C` during scene detection in the bundled distribution now exits cleanly instead of surfacing the PyInstaller bootloader traceback
+
+
+----------------------------------------------------------------
+
+
 ## PySceneDetect 0.6
 
 ### PySceneDetect 0.6.7.1 (September 24, 2025)
@@ -662,109 +772,7 @@ Both the Windows installer and portable distributions now include signed executa
 ----------------------------------------------------------------
 
 
-Development
+<!--Development
 ==========================================================
 
-## PySceneDetect 0.7 (In Development)
-
-### Release Notes
-
-PySceneDetect 0.7 is a **major breaking release** which overhauls how timestamps are handled. This allows PySceneDetect to properly process variable framerate (VFR) videos. A significant amount of technical debt has been addressed, including removal of deprecated or overly complicated APIs.
-
-Care was taken to minimize changes for most common API uses, however more advanced use cases may run into breaking changes. Please review [the Migration Guide](https://www.scenedetect.com/docs/0.7/api/migration_guide.html) when updating from v0.6. Minimum supported Python version is now **Python 3.10**.
-
-### CLI Changes
-
-- [feature] VFR videos are handled correctly by the OpenCV and PyAV backends, and should work correctly with default parameters
-- [feature] All CLI options which used to accept frame numbers only now accept seconds (e.g. `0.6s`) and timecodes (e.g. `00:00:00.600`) [#531](https://github.com/Breakthrough/PySceneDetect/issues/531)
-- [feature] New `save-fcp` command allows exporting in Final Cut Pro format (FCP7/FCPX) [#156](https://github.com/Breakthrough/PySceneDetect/issues/156)
-- [feature] New `save-qp` command writes a QP file with scene boundary frame numbers, suitable for forcing keyframes at scene cuts in x264/x265 [#448](https://github.com/Breakthrough/PySceneDetect/issues/448)
-- [feature] New `save-html` command replaces the deprecated `export-html`; the prior command remains as an alias and emits a deprecation warning [#518](https://github.com/Breakthrough/PySceneDetect/issues/518)
-- [feature] Add `save-edl` option  `--start-timecode`/`-s` to providde a custom start timecode for generated EDLs, supports SMPTE `HH:MM:SS:FF` or 8-digit `HHMMSSFF` input [#515](https://github.com/Breakthrough/PySceneDetect/issues/515)
-- [bugfix] Fix floating-point precision error in `save-otio` output where frame values near integer boundaries (e.g. `90.00000000000001`) were serialized with spurious precision
-- [bugfix] Add mitigation for transient `OSError` in the MoviePy backend as it is susceptible to subprocess pipe races on slow or heavily loaded systems [#496](https://github.com/Breakthrough/PySceneDetect/issues/496)
-- [feature] The MoviePy backend now supports overriding the source frame rate via `-f`/`--frame-rate` (and the `VideoStreamMoviePy(frame_rate=...)` API), bringing it in line with the OpenCV and PyAV backends
-- [bugfix] `detect-threshold` cut frame numbers are now backend-deterministic; previously the cut could differ by 1 frame between PyAV and OpenCV when the fade midpoint landed on a `.5` rounding boundary (PyAV uses sub-microsecond PTS, OpenCV uses millisecond-truncated `CAP_PROP_POS_MSEC`)
-- [breaking] Remove deprecated `-d`/`--min-delta-hsv` option from `detect-adaptive` command (use `-c`/`--min-content-val` instead)
-- [breaking] Rename `-f/--framerate` to `-f/--frame-rate` as part of VFR overhaul (legacy `--framerate` form is preserved as a hidden alias but will be removed in v0.8)
-- [general] Support `SCENEDETECT_DEBUG` environment variable to control how exceptions and debugging are handled. Unhandled exceptions and `Ctrl+C` now produce a logger-formatted error message and exit cleanly with code 1 instead of dumping a raw Python traceback. Set `SCENEDETECT_DEBUG=1` to ensure all exceptions are re-raised instead of being logged. In both cases, the program will exit with a non-zero exit code.
-
-### API Changes
-
-**VFR & Timestamp Overhaul:**
-
- * Add `write_scene_list_edl`, `write_scene_list_fcpx`, `write_scene_list_fcp7`, and `write_scene_list_otio` to the `scenedetect.output` module so `save-edl`, `save-fcp`, and `save-otio` can be invoked directly from Python (previously CLI-only)
- * `write_scene_list_edl` accepts an optional `start_timecode` parameter (SMPTE `HH:MM:SS:FF` or 8-digit `HHMMSSFF`) that is added to every event's source and record columns [#515](https://github.com/Breakthrough/PySceneDetect/issues/515)
- * Add new `Timecode` type to represent frame timings in terms of the video's source timebase
- * Add `time_base` and `pts` properties to `FrameTimecode` for more accurate timing information
- * All backends (PyAV, OpenCV, MoviePy) now return PTS-backed timestamps from `VideoStream.position`
- * `VideoStream.frame_rate` now returns `Fraction` instead of `float`
- * Framerates are now stored as rational `Fraction` values (e.g. `Fraction(24000, 1001)` instead of `23.976`) to avoid float precision loss
- * Common NTSC rates (23.976, 29.97, 59.94) are automatically detected from float values
- * `FrameTimecode.frame_num` is now approximate for VFR video (based on PTS-derived time)
- * Add `frame_rate` property (returns exact `Fraction`) as the canonical replacement for `framerate` (returns `float`) in `FrameTimecode` and `VideoStream`
-    * For CFR sources, both properties represent the same rate, i.e. `time_base` equals `1 / frame_rate` for CFR sources [#548](https://github.com/Breakthrough/PySceneDetect/issues/548)
- * Add `frame_rate` keyword argument to `open_video()` and the `VideoStreamCv2`, `VideoCaptureAdapter`, `VideoStreamAv`, and `VideoStreamMoviePy` constructors as the canonical replacement for `framerate` [#548](https://github.com/Breakthrough/PySceneDetect/issues/548); accepts `float | Fraction | None`. The legacy `framerate` keyword is retained as a deprecated alias and is ignored when `frame_rate` is provided
- * Add `equal_frame_rate(other)` method as the canonical replacement for `equal_framerate(fps)`
-
-**General:**
-
- * Type hints: audit and overhaul: first-party code is now clean with Pyright basic mode, migrated deprecated type hints to comply with PEP 585
- * Code quality: expand static analysis rules, audit and cleanup existing suppressions
- * Packaging: modernized to comply with PEP 621, make `opencv-python` a requirement, add separate `scenedetect-headless` variant instead
-
-**Detector Interface:**
-
- * Replace `frame_num` parameter (`int`) with `timecode` (`FrameTimecode`) in `SceneDetector` interface [#168](https://github.com/Breakthrough/PySceneDetect/issues/168):
-      * The detector interface: `SceneDetector.process_frame()` and `SceneDetector.post_process()` (the `post_process` signature on the abstract base is now consistently typed as `FrameTimecode` to match its concrete-detector overrides; the prior `int` annotation did not reflect the actual runtime value)
-      * Statistics: `StatsManager.get_metrics()`, `StatsManager.set_metrics()`, and `StatsManager.metrics_exist()` formally accept either `FrameTimecode` or `int` (the `int` form is retained for compatibility with the deprecated `load_from_csv()` path, which keys metrics by integer frame number)
- * `StatsManager.load_from_csv()` and `save_images()` `output_dir` now accept `os.PathLike` (e.g. `pathlib.Path`) in addition to `str`
- * `SceneManager.detect_scenes()` `duration` and `end_time` formally accept `int` (frames), `float` (seconds), `str` (timecode), or `FrameTimecode` - matching the documented and runtime-supported behavior
- * `SceneDetector` is now a [Python abstract class](https://docs.python.org/3/library/abc.html)
- * `SceneDetector` instances can now assume they always have frame data to process when `process_frame` is called
- * Remove `SceneDetector.is_processing_required()` method
- * Remove `SceneDetector.stats_manager_required` property, no longer required
- * Remove deprecated `SparseSceneDetector` interface
- * Detector `min_scene_len` and `save_images()` `frame_margin` arguments now accept seconds (`float`) and timecode strings (e.g. `"0.6s"`, `"00:00:00.600"`) in addition to a frame count (`int`); these are evaluated using the source video's timing for correct behavior on VFR videos [#531](https://github.com/Breakthrough/PySceneDetect/issues/531)
-
-**Module Reorganization:**
-
- * `scenedetect.scene_detector` moved to `scenedetect.detector`
- * `scenedetect.frame_timecode` moved to `scenedetect.common`
- * Image/HTML/CSV export in `scenedetect.scene_manager` moved to `scenedetect.output` [#463](https://github.com/Breakthrough/PySceneDetect/issues/463)
- * `scenedetect.video_splitter` moved to `scenedetect.output.video` [#463](https://github.com/Breakthrough/PySceneDetect/issues/463)
-
-**FrameTimecode:**
-
- * Add properties to access `frame_num`, `frame_rate`, and `seconds` instead of getter methods
- * `frame_num` and `frame_rate` are now read-only properties (construct a new `FrameTimecode` to change them)
- * Remove `FrameTimecode.previous_frame()` method
- * Deprecated functionality preserved from v0.6 now uses the `warnings` module to emit runtime deprecation warnings, these features will be removed in v0.8
- * Soft-deprecate `framerate` property and `equal_framerate()` method via docstring; the legacy forms will continue to work until v0.8 when they will be upgraded to `DeprecationWarning` before removal in v0.9
-
-**Removals:**
-
- * Remove deprecated module `scenedetect.video_manager`, use [the `scenedetect.open_video()` function](https://www.scenedetect.com/docs/head/api.html#scenedetect.open_video) instead
- * Remove deprecated parameters `base_timecode` and `video_manager` from various functions
- * Remove deprecated `SceneManager.get_event_list()` method
- * Remove deprecated `AdaptiveDetector.get_content_val()` method (use `StatsManager` instead)
- * Remove deprecated `AdaptiveDetector` constructor arg `min_delta_hsv` (use `min_content_val` instead)
- * Remove `advance` parameter from `VideoStream.read()`
- * Remove `SceneDetector.stats_manager_required` property, no longer required
- * `SceneDetector` is now a [Python abstract class](https://docs.python.org/3/library/abc.html)
-
-### Windows Distribution
-
- - [general] Updates to Windows distributions:
-    - av 14.2.0 -> 17.0.1
-    - click 8.1.8 -> 8.2.1
-    - imageio-ffmpeg 0.6.0
-    - moviepy 2.1.2 -> 2.2.1
-    - numpy 2.2.3 -> 2.4.4
-    - opencv-python-headless 4.11.0.86 -> 4.13.0.92
-    - platformdirs 4.3.6 -> 4.9.6
-    - tqdm 4.67.1 -> 4.67.3
-    - ffmpeg 8.0 -> 8.1
- - [general] Reduced size of Windows distribution without affecting functionality
- - [bugfix] Fix `scenedetect version` reporting `av`, `opencv-python-headless`, `platformdirs`, `click`, `numpy`, and `tqdm` as "Not Installed" in the bundled distribution (PyInstaller does not ship `.dist-info` directories by default, so `importlib.metadata` lookups failed at runtime)
- - [bugfix] Pressing `Ctrl+C` during scene detection in the bundled distribution now exits cleanly instead of surfacing the PyInstaller bootloader traceback
+## PySceneDetect 0.8 (TDB)-->
