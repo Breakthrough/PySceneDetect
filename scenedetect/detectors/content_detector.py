@@ -127,7 +127,6 @@ class ContentDetector(SceneDetector):
         """
         super().__init__()
         self._threshold: float = threshold
-        self._last_above_threshold: int | None = None
         self._last_frame: ContentDetector._FrameData | None = None
         self._weights: ContentDetector.Components = weights
         if luma_only:

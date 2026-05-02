@@ -476,27 +476,6 @@ class FrameTimecode:
         assert self._rate is not None
         return round(seconds * self._rate)
 
-    def _parse_timecode_number(self, timecode: int | float) -> int:
-        """Parse a timecode number, storing it as the exact number of frames.
-        Can be passed as frame number (int), seconds (float)
-
-        Raises:
-            TypeError, ValueError
-        """
-        # Process the timecode value, storing it as an exact number of frames.
-        # Exact number of frames N
-        if isinstance(timecode, int):
-            if timecode < 0:
-                raise ValueError("Timecode frame number must be positive and greater than zero.")
-            return timecode
-        # Number of seconds S
-        elif isinstance(timecode, float):
-            if timecode < 0.0:
-                raise ValueError("Timecode value must be positive and greater than zero.")
-            return self._seconds_to_frames(timecode)
-        else:
-            raise TypeError("Timecode format/type unrecognized.")
-
     def _timecode_to_seconds(self, input: str) -> float:
         """Parses a string based on the three possible forms (in timecode format, as an integer
         number of frames, or floating-point seconds, ending with 's'). Exact frame numbers (int)
