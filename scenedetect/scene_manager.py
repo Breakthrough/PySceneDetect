@@ -456,7 +456,7 @@ class SceneManager:
             ValueError: `frame_skip` **must** be 0 (the default) if the SceneManager
                 was constructed with a StatsManager object.
         """
-        # TODO(v0.7): Add DeprecationWarning that `frame_source` will be removed in v0.8.
+        # TODO(v0.8): Remove `frame_source` entirely; the `DeprecationWarning` below has shipped.
         if frame_source is not None:
             warnings.warn(
                 "The `frame_source` argument is deprecated, use `video` instead.",

@@ -346,6 +346,26 @@ def test_invalid_path(vs_type: ty.Callable[..., VideoStream]):
         _ = vs_type("this_path_should_not_exist.mp4")
 
 
+def test_framerate_legacy_alias(vs_type: ty.Callable[..., VideoStream]):
+    """`framerate=` is the soft-deprecated alias for `frame_rate=` (issue #548). All backends
+    must accept it; for backends that support the override, both forms must produce the same
+    `frame_rate`. ``MoviePy`` does not yet support overriding and must raise the same error
+    on either form."""
+    path = get_absolute_path("resources/goldeneye.mp4")
+    if vs_type is VideoStreamMoviePy:
+        with pytest.raises(NotImplementedError):
+            vs_type(path, framerate=30.0)
+        with pytest.raises(NotImplementedError):
+            vs_type(path, frame_rate=30.0)
+        return
+    legacy = vs_type(path, framerate=30.0)
+    canonical = vs_type(path, frame_rate=30.0)
+    assert legacy.frame_rate == canonical.frame_rate
+    # When both are provided, `frame_rate` wins (legacy is ignored).
+    both = vs_type(path, frame_rate=30.0, framerate=24.0)
+    assert both.frame_rate == canonical.frame_rate
+
+
 def test_corrupt_video(vs_type: ty.Callable[..., VideoStream], corrupt_video_file: str):
     """Test that backend handles video with corrupt frame gracefully with defaults."""
     if vs_type == VideoStreamMoviePy and get_moviepy_major_version() >= 2:

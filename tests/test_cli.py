@@ -335,6 +335,38 @@ def test_cli_detector_with_stats(tmp_path, detector_command: str):
     # and ensuring that we got some frames.
 
 
+def test_cli_framerate_legacy_alias():
+    """`--framerate` is the soft-deprecated hidden alias for `-f/--frame-rate` (issue #548).
+    Both forms must be accepted; passing both should not error."""
+    # Canonical form.
+    exit_code, _ = invoke_cli(
+        ["-i", DEFAULT_VIDEO_PATH, "--frame-rate", "30.0", "time", "-s", "2s", "-d", "4s"]
+    )
+    assert exit_code == 0
+    # Legacy form.
+    exit_code, _ = invoke_cli(
+        ["-i", DEFAULT_VIDEO_PATH, "--framerate", "30.0", "time", "-s", "2s", "-d", "4s"]
+    )
+    assert exit_code == 0
+    # Both forms together: `--frame-rate` wins, a warning is logged but no error.
+    exit_code, _ = invoke_cli(
+        [
+            "-i",
+            DEFAULT_VIDEO_PATH,
+            "--frame-rate",
+            "30.0",
+            "--framerate",
+            "24.0",
+            "time",
+            "-s",
+            "2s",
+            "-d",
+            "4s",
+        ]
+    )
+    assert exit_code == 0
+
+
 def test_cli_list_scenes(tmp_path: Path):
     """Test `list-scenes` command."""
     exit_code, _ = invoke_cli(

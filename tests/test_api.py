@@ -72,6 +72,19 @@ def test_api_scene_manager_start_end_time(test_video_file: str):
         print(f"Scene {i + 1}: {scene[0].get_timecode()} - {scene[1].get_timecode()}")
 
 
+def test_api_open_video_framerate_legacy_alias(test_video_file: str):
+    """`open_video(framerate=...)` is the soft-deprecated alias for `frame_rate=` (issue #548).
+    Both forms must produce equivalent streams; when both are provided, `frame_rate` wins."""
+    from scenedetect import open_video
+
+    legacy = open_video(test_video_file, framerate=30.0)
+    canonical = open_video(test_video_file, frame_rate=30.0)
+    assert legacy.frame_rate == canonical.frame_rate
+    # `frame_rate` takes precedence over `framerate` when both are provided.
+    both = open_video(test_video_file, frame_rate=30.0, framerate=24.0)
+    assert both.frame_rate == canonical.frame_rate
+
+
 def test_api_timecode_types():
     """Demonstrate all different types of timecodes that can be used."""
     from scenedetect import FrameTimecode

@@ -98,6 +98,20 @@ def test_frame_rate_for_vfr():
     assert tc.time_base != 1 / tc.frame_rate
 
 
+def test_equal_frame_rate_legacy_alias():
+    """`equal_framerate()` is the soft-deprecated alias for `equal_frame_rate()` (issue #548).
+    Both forms should produce identical results for every accepted operand type."""
+    tc = FrameTimecode(timecode=0, fps=30.0)
+    # float, Fraction, FrameTimecode operands.
+    other_tc = FrameTimecode(timecode=0, fps=30.0)
+    for other in (30.0, Fraction(30, 1), other_tc):
+        assert tc.equal_frame_rate(other) == tc.equal_framerate(other)
+        assert tc.equal_frame_rate(other) is True
+    # Mismatched rate.
+    assert tc.equal_frame_rate(24.0) is False
+    assert tc.equal_framerate(24.0) is False
+
+
 def test_timecode_numeric():
     """Test FrameTimecode constructor argument "timecode" with numeric arguments."""
     with pytest.raises(ValueError):
