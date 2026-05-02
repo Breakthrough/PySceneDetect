@@ -19,7 +19,7 @@ import os
 
 import pytest
 
-from scenedetect import ContentDetector, SceneManager, open_video
+from scenedetect import ContentDetector, SceneManager, ThresholdDetector, open_video
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -88,3 +88,41 @@ def test_cross_backend_consistency(rel_path, is_vfr):
             assert actual == expected, (
                 f"CFR frame-number mismatch between {backend} and {reference}"
             )
+
+
+@pytest.mark.release
+def test_cross_backend_threshold_determinism():
+    """detect-threshold cut frames must be backend-deterministic across PyAV/OpenCV/MoviePy.
+
+    Regression coverage for the changelog item: previously the cut could differ by 1 frame
+    between PyAV and OpenCV when the fade midpoint landed on a `.5` rounding boundary
+    (PyAV uses sub-microsecond PTS; OpenCV uses millisecond-truncated CAP_PROP_POS_MSEC).
+    """
+    video_path = os.path.join(REPO_ROOT, "tests/resources/fades.mp4")
+    if not os.path.exists(video_path):
+        pytest.skip("tests/resources/fades.mp4 not present.")
+
+    backends = _installed_backends()
+    if len(backends) < 2:
+        pytest.skip(f"Need at least two backends, have: {backends}")
+
+    results = {}
+    for backend in backends:
+        try:
+            video = open_video(video_path, backend=backend)
+        except Exception as exc:
+            pytest.skip(f"{backend} failed to open fades.mp4: {exc}")
+        sm = SceneManager()
+        sm.add_detector(ThresholdDetector())
+        sm.detect_scenes(video)
+        # `frame_num` of the first frame of each cut, excluding the implicit 0th cut.
+        results[backend] = [s[0].frame_num for s in sm.get_scene_list()[1:]]
+
+    reference = backends[0]
+    expected = results[reference]
+    for backend in backends[1:]:
+        actual = results[backend]
+        assert actual == expected, (
+            f"detect-threshold cut frames differ between {backend}={actual} and "
+            f"{reference}={expected} - the .5-boundary rounding fix has regressed."
+        )

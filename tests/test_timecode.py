@@ -98,6 +98,15 @@ def test_frame_rate_for_vfr():
     assert tc.time_base != 1 / tc.frame_rate
 
 
+def test_frame_num_and_frame_rate_are_read_only():
+    """Per migration guide, `frame_num`, `frame_rate`, and the legacy `framerate` alias are
+    read-only properties; callers must construct a new FrameTimecode to change them."""
+    tc = FrameTimecode(timecode=0, fps=30.0)
+    for attr in ("frame_num", "frame_rate", "framerate"):
+        with pytest.raises(AttributeError):
+            setattr(tc, attr, 99)
+
+
 def test_equal_frame_rate_legacy_alias():
     """`equal_framerate()` is the soft-deprecated alias for `equal_frame_rate()` (issue #548).
     Both forms should produce identical results for every accepted operand type."""

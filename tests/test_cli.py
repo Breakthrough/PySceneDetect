@@ -367,6 +367,47 @@ def test_cli_framerate_legacy_alias():
     assert exit_code == 0
 
 
+def test_cli_min_scene_len_accepts_all_timecode_forms(tmp_path: Path):
+    """`--min-scene-len` (and equivalent options) must accept frames, seconds, and timecodes
+    in v0.7 per the changelog. The four forms below all resolve to ~20 frames at 23.976 fps
+    and must produce byte-identical scene lists."""
+    # 20 frames @ 23.976 fps = 0.8341... s, which rounds to the same nearest frame regardless
+    # of which form is parsed.
+    forms = ["20", "0.834", "0.834s", "00:00:00.834"]
+    outputs = []
+    for form in forms:
+        out = tmp_path / f"scenes_{form.replace(':', '_')}.csv"
+        exit_code, _ = invoke_cli(
+            [
+                "-i",
+                DEFAULT_VIDEO_PATH,
+                "-o",
+                str(tmp_path),
+                "time",
+                "-s",
+                "2s",
+                "-d",
+                "4s",
+                "detect-content",
+                "--min-scene-len",
+                form,
+                "list-scenes",
+                "-f",
+                out.name,
+                "-q",  # suppress stdout printing
+            ],
+        )
+        assert exit_code == 0, f"--min-scene-len {form!r} rejected"
+        assert out.exists(), f"--min-scene-len {form!r} did not produce {out}"
+        outputs.append((form, out.read_text()))
+    # All forms must produce the same scene list.
+    base_form, base_csv = outputs[0]
+    for form, csv in outputs[1:]:
+        assert csv == base_csv, (
+            f"Scene list differs between --min-scene-len {base_form!r} and {form!r}"
+        )
+
+
 def test_cli_list_scenes(tmp_path: Path):
     """Test `list-scenes` command."""
     exit_code, _ = invoke_cli(
@@ -624,8 +665,27 @@ def test_cli_save_html(tmp_path: Path):
         invoke_scenedetect(base_command, COMMAND="save-html --no-images", output_dir=tmp_path) == 0
     )
     # Ensure we can still call the now deprecated export-html command.
-    assert invoke_scenedetect(base_command, COMMAND="save-html", output_dir=tmp_path) == 0
+    assert invoke_scenedetect(base_command, COMMAND="export-html", output_dir=tmp_path) == 0
     # TODO: Check for existence of HTML & image files.
+
+
+def test_cli_legacy_v06_config_file(tmp_path: Path):
+    """A v0.6-era scenedetect.cfg using the deprecated `[export-html]` section must still load
+    in v0.7. The parser maps `[export-html]` -> `[save-html]` (via DEPRECATED_COMMANDS in
+    scenedetect/_cli/config.py) and emits a deprecation warning on load. This is the most
+    likely silent break for users upgrading config files; the option set under both sections
+    is identical."""
+    legacy_cfg = tmp_path / "scenedetect.cfg"
+    legacy_cfg.write_text(
+        # Mix of unchanged sections and the renamed `[export-html]` section.
+        "[global]\nmin-scene-len = 0.6s\n\n"
+        "[detect-content]\nthreshold = 27\n\n"
+        "[export-html]\nfilename = $VIDEO_NAME-Scenes.html\nno-images = yes\n"
+    )
+    exit_code, output = invoke_cli(
+        ["-c", str(legacy_cfg), "-i", DEFAULT_VIDEO_PATH, "time", "-s", "2s", "-d", "1s"],
+    )
+    assert exit_code == 0, f"v0.6-style config rejected:\n{output}"
 
 
 def test_cli_save_qp(tmp_path: Path):
