@@ -535,10 +535,11 @@ class CliContext:
                 )
             duration = self.video_stream.duration
             duration_str = f"{duration} ({duration.frame_num} frames)" if duration else "unknown"
+            rate = self.video_stream.frame_rate
             logger.debug(f"""Video information:
   Backend:      {type(self.video_stream).__name__}
   Resolution:   {self.video_stream.frame_size}
-  Frame rate:   {self.video_stream.frame_rate}
+  Frame rate:   {float(rate):.3f} ({rate.numerator}/{rate.denominator})
   Duration:     {duration_str}""")
 
         except FrameRateUnavailable as ex:
