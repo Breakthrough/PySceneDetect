@@ -52,7 +52,8 @@ Optional: version referenced below as `X.Y[.Z]` - replace with the real version 
 ## 6. Publish & Release Checks
 
 - [ ] Publish Github release
-- [ ] Upload to PyPI: `publish-pypi.yml` should run on the tag and upload. Verify both projects: https://pypi.org/project/scenedetect/ and https://pypi.org/project/scenedetect-headless/.
+- [ ] Upload to PyPI: `publish-pypi.yml` must be manually triggered on a release tag. Specify `testpypi` first, and make sure everything goes okay on the test instance. When verified and smoke tested, specify `pypi` as the environment, and publish the production package.
+- [ ] Verify both projects: https://pypi.org/project/scenedetect/ and https://pypi.org/project/scenedetect-headless/.
 - [ ] Merge `releases/X.Y` back into `main`.
 - [ ] Deploy website: `generate-website.yml` picks up the changelog / download page updates.
 - [ ] Deploy docs: `generate-docs.yml` publishes the new version.
