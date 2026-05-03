@@ -15,6 +15,7 @@
     <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/clipboard.min.js"></script>
     <script src="../_static/copybutton.js"></script>
+    <link rel="icon" href="../_static/favicon.ico"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Stats Manager" href="stats_manager.html" />
@@ -607,6 +608,7 @@ alias for backwards compatibility; ignored when <cite>frame_rate</cite> is provi
 <dd class="field-even"><ul class="simple">
 <li><p><strong>OSError</strong> – file could not be found, access was denied, or the video is corrupt</p></li>
 <li><p><a class="reference internal" href="video_stream.html#scenedetect.video_stream.VideoOpenFailure" title="scenedetect.video_stream.VideoOpenFailure"><strong>VideoOpenFailure</strong></a> – video could not be opened (may be corrupted)</p></li>
+<li><p><strong>ValueError</strong> – specified frame rate is invalid</p></li>
 </ul>
 </dd>
 </dl>
@@ -689,7 +691,8 @@ If int, interpreted as frame number.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="scenedetect.backends.moviepy.VideoStreamMoviePy.frame_rate">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">frame_rate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Fraction</span></em><a class="headerlink" href="#scenedetect.backends.moviepy.VideoStreamMoviePy.frame_rate" title="Permalink to this definition">¶</a></dt>
-<dd><p>Framerate in frames/sec as a rational Fraction.</p>
+<dd><p>Framerate in frames/sec as a rational Fraction. Returns the override passed at
+construction if one was provided; otherwise the rate reported by MoviePy’s reader.</p>
 </dd></dl>
 
 <dl class="py property">
