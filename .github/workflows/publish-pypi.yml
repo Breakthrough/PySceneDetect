@@ -74,7 +74,7 @@ jobs:
     needs: verify
 
     environment:
-      name: ${{ github.event.inputs.environment == 'test' && 'test' || 'release' }}
+      name: ${{ github.event.inputs.environment == 'test' && 'testpypi' || 'pypi' }}
       url: ${{ github.event.inputs.environment == 'test' && 'https://test.pypi.org/p/scenedetect' || 'https://pypi.org/p/scenedetect' }}
 
     permissions:

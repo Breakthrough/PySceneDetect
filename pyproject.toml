@@ -9,7 +9,7 @@
 #
 
 [build-system]
-requires = ["setuptools"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -17,7 +17,8 @@ name = "scenedetect"
 dynamic = ["version"]
 description = "Video scene cut/shot detection program and Python library."
 readme = { file = "packaging/package-info.rst", content-type = "text/x-rst" }
-license = { text = "BSD-3-Clause" }
+license = "BSD-3-Clause"
+license-files = ["LICENSE"]
 requires-python = ">=3.10"
 authors = [{ name = "Brandon Castellano", email = "brandon248@gmail.com" }]
 keywords = ["video", "computer-vision", "analysis"]
