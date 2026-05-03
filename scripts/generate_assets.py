@@ -200,7 +200,7 @@ def _render_slate(inkscape: str, work_dir: Path, side: int, *, inverted: bool) -
     With inverted=False, the slate renders with its native FG body / BG stripes
     (right for placing on the white banner). With inverted=True, the SVG color
     codes are swapped before rendering so the body becomes BG and the stripes
-    FG — needed for the dialog's dark FG strip, where a non-inverted slate
+    FG - needed for the dialog's dark FG strip, where a non-inverted slate
     would blend into the background.
     """
     if inverted:
@@ -256,18 +256,18 @@ def render_installer_jpegs(inkscape: str, work_dir: Path) -> None:
     """Render the per-scale baseline JPEGs that ship inside the MSI.
 
     Outputs `Generated Images/installer_{banner,logo}{,.scale-125,.scale-150,.scale-200}.jpg`
-    from the master SVG. These are gitignored — pre_release.py --release rebuilds
+    from the master SVG. These are gitignored - pre_release.py --release rebuilds
     them before each MSI build, so they always match the current logo without
     being re-committed every time.
     """
     GENERATED_IMAGES_DIR.mkdir(parents=True, exist_ok=True)
-    # Render the slate at the exact target size each iteration — sharper than
+    # Render the slate at the exact target size each iteration - sharper than
     # rendering once big and downsampling, and avoids Pillow's resize stub mismatch.
     for scale, suffix in SCALES:
         bw, bh = round(BANNER_BASE[0] * scale), round(BANNER_BASE[1] * scale)
         dw, dh = round(DIALOG_BASE[0] * scale), round(DIALOG_BASE[1] * scale)
 
-        # Banner icon sized off height (the limiting dim — banner is wide & short).
+        # Banner icon sized off height (the limiting dim - banner is wide & short).
         # Strip is wider than the icon, so the icon centers within it.
         banner_icon_side = round(bh * BANNER_ICON_FRAC)
         slate_fg = _render_slate(inkscape, work_dir, banner_icon_side, inverted=False)
@@ -285,7 +285,7 @@ def render_installer_jpegs(inkscape: str, work_dir: Path) -> None:
 
 
 def render_installer_static(inkscape: str, work_dir: Path) -> None:
-    """Render the stable, committed installer assets — only re-run when the logo changes.
+    """Render the stable, committed installer assets - only re-run when the logo changes.
 
     Outputs:
       - psd_square_small.ico (copy of pyscenedetect.ico)

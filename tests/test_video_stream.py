@@ -42,9 +42,9 @@ MOVIEPY_WARNING_FILTER = "ignore:.*Using the last valid frame instead.:UserWarni
 
 
 def get_moviepy_major_version() -> int:
-    import moviepy
+    import importlib.metadata
 
-    return int(moviepy.__version__.split(".")[0])
+    return int(importlib.metadata.version("moviepy").split(".")[0])
 
 
 def calculate_frame_delta(frame_a, frame_b, roi=None) -> float:
