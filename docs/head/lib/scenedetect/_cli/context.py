@@ -34,7 +34,7 @@ from scenedetect.detectors import (
     ThresholdDetector,
 )
 from scenedetect.output import is_ffmpeg_available, is_mkvmerge_available
-from scenedetect.platform import init_logger
+from scenedetect.platform import DEBUG_MODE, init_logger
 from scenedetect.scene_manager import SceneManager
 from scenedetect.stats_manager import StatsManager
 from scenedetect.video_stream import FrameRateUnavailable, VideoOpenFailure, VideoStream
@@ -351,7 +351,7 @@ class CliContext:
             try:
                 weights = ContentDetector.Components(*weights)
             except ValueError as ex:
-                if __debug__:
+                if DEBUG_MODE:
                     raise
                 logger.debug(str(ex))
                 raise click.BadParameter(str(ex), param_hint="weights") from None
@@ -383,7 +383,7 @@ class CliContext:
             try:
                 weights = ContentDetector.Components(*weights)
             except ValueError as ex:
-                if __debug__:
+                if DEBUG_MODE:
                     raise
                 logger.debug(str(ex))
                 raise click.BadParameter(str(ex), param_hint="weights") from None
@@ -543,7 +543,7 @@ class CliContext:
   Duration:     {duration_str}""")
 
         except FrameRateUnavailable as ex:
-            if __debug__:
+            if DEBUG_MODE:
                 raise
             raise click.BadParameter(
                 "Failed to obtain frame rate for input video. Manually specify frame rate with the"
@@ -551,7 +551,7 @@ class CliContext:
                 param_hint="-i/--input",
             ) from ex
         except VideoOpenFailure as ex:
-            if __debug__:
+            if DEBUG_MODE:
                 raise
             raise click.BadParameter(
                 "Failed to open input video{}: {}".format(
@@ -560,7 +560,7 @@ class CliContext:
                 param_hint="-i/--input",
             ) from ex
         except OSError as ex:
-            if __debug__:
+            if DEBUG_MODE:
                 raise
             raise click.BadParameter(
                 f"Input error:\n\n\t{ex!s}\n", param_hint="-i/--input"
