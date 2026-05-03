@@ -938,7 +938,7 @@
 <li>[bugfix] Add mitigation for transient <code>OSError</code> in the MoviePy backend as it is susceptible to subprocess pipe races on slow or heavily loaded systems <a href="https://github.com/Breakthrough/PySceneDetect/issues/496">#496</a></li>
 <li>[feature] The MoviePy backend now supports overriding the source frame rate via <code>-f</code>/<code>--frame-rate</code> (and the <code>VideoStreamMoviePy(frame_rate=...)</code> API), bringing it in line with the OpenCV and PyAV backends</li>
 <li>[bugfix] <code>detect-threshold</code> cut frame numbers are now backend-deterministic; previously the cut could differ by 1 frame between PyAV and OpenCV when the fade midpoint landed on a <code>.5</code> rounding boundary (PyAV uses sub-microsecond PTS, OpenCV uses millisecond-truncated <code>CAP_PROP_POS_MSEC</code>)</li>
-<li>[refactor] Remove deprecated <code>-d</code>/<code>--min-delta-hsv</code> option from <code>detect-adaptive</code> command</li>
+<li>[breaking] Remove deprecated <code>-d</code>/<code>--min-delta-hsv</code> option from <code>detect-adaptive</code> command (use <code>-c</code>/<code>--min-content-val</code> instead)</li>
 <li>[breaking] Rename <code>-f/--framerate</code> to <code>-f/--frame-rate</code> as part of VFR overhaul (legacy <code>--framerate</code> form is preserved as a hidden alias but will be removed in v0.8)</li>
 </ul>
 <h3 id="api-changes">API Changes</h3>
