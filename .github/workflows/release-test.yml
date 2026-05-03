@@ -33,7 +33,11 @@ jobs:
               echo "Version mismatch: scenedetect=$VERSION, tag=$TAG_VERSION"
               exit 1
             fi
-            if ! grep -q "^## PySceneDetect $TAG_VERSION" website/pages/changelog.md; then
+            # Pre-release tags (e.g. 0.7-dev0) ship before the changelog is finalized,
+            # so only enforce the heading on stable releases.
+            if [[ "$TAG_VERSION" == *-dev* ]]; then
+              echo "Pre-release ($TAG_VERSION); skipping changelog heading check."
+            elif ! grep -q "^## PySceneDetect $TAG_VERSION" website/pages/changelog.md; then
               echo "Changelog is missing a '## PySceneDetect $TAG_VERSION' heading"
               exit 1
             fi
