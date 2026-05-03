@@ -3,10 +3,14 @@
 build: false
 
 cache:
-  - 'ffmpeg-%ffmpeg_version%-full_build.7z -> appveyor.yml'
-  - 'packaging\windows\installer\advinst.msi -> appveyor.yml'
+  # FFmpeg self-invalidates via %ffmpeg_version% in the filename; AdvInst MSI and
+  # Inkscape rarely need refresh and have `if not exist` install guards, so we
+  # don't tie them to appveyor.yml (any edit there would force a cold-cache
+  # reinstall of all three and blow past the 10-minute build limit).
+  - 'ffmpeg-%ffmpeg_version%-full_build.7z'
+  - 'packaging\windows\installer\advinst.msi'
   - '%LOCALAPPDATA%\uv\cache -> pyproject.toml'
-  - 'C:\Program Files\Inkscape -> appveyor.yml'
+  - 'C:\Program Files\Inkscape'
 
 # Branches applies to tags as well. We only build on tagged releases of the form vX.Y.Z-release
 branches:
