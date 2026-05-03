@@ -11,9 +11,9 @@ on:
         required: true
         type: choice
         options:
-          - test
-          - release
-        default: 'test'
+          - testpypi
+          - pypi
+        default: 'testpypi'
 
 jobs:
   verify:
@@ -74,8 +74,8 @@ jobs:
     needs: verify
 
     environment:
-      name: ${{ github.event.inputs.environment == 'test' && 'testpypi' || 'pypi' }}
-      url: ${{ github.event.inputs.environment == 'test' && 'https://test.pypi.org/p/scenedetect' || 'https://pypi.org/p/scenedetect' }}
+      name: ${{ github.event.inputs.environment }}
+      url: ${{ github.event.inputs.environment == 'testpypi' && 'https://test.pypi.org/p/scenedetect' || 'https://pypi.org/p/scenedetect' }}
 
     permissions:
       id-token: write  # IMPORTANT: mandatory for trusted publishing
@@ -117,6 +117,8 @@ jobs:
       - name: Publish Package
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          repository-url: ${{ github.event.inputs.environment == 'test' && 'https://test.pypi.org/legacy/' || 'https://upload.pypi.org/legacy/' }}
+          repository-url: ${{ github.event.inputs.environment == 'testpypi' && 'https://test.pypi.org/legacy/' || 'https://upload.pypi.org/legacy/' }}
           packages-dir: pkg/
           print-hash: true
+          # Tolerate retries: skip existing packages if for example only one variant was uploaded.
+          skip-existing: true
