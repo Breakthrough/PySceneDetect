@@ -259,7 +259,7 @@ def create_help() -> tuple[str, list[str]]:
     )
     # ctx.to_info_dict lacks metavar so we have to use the context directly.
     actions = [
-        generate_title("``scenedetect`` 🎬 Command", level=0),
+        generate_title("``scenedetect`` \N{CLAPPER BOARD} Command", level=0),
         generate_command_help(ctx, ctx.command),
         generate_subcommands(ctx, commands),
     ]
