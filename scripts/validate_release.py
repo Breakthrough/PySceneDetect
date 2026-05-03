@@ -313,10 +313,13 @@ def check_frozen_exe(portable_zip: Path) -> None:
             fail(f"`scenedetect.exe version` exited {result.returncode}\n{result.stderr}")
         packages = _parse_packages_section(result.stdout)
         scenedetect_reported = packages.get("scenedetect", "")
-        if scenedetect_reported != VERSION:
+        # Normalize both sides through msi_version() so a raw __version__ of "0.7"
+        # matches the artifact-name VERSION of "0.7.0" (mirrors the same
+        # normalization scripts/update_installer.py applies to filenames).
+        if msi_version(scenedetect_reported) != VERSION:
             fail(
                 f"`scenedetect.exe version` reports scenedetect=={scenedetect_reported!r}, "
-                f"expected {VERSION!r}"
+                f"expected {VERSION!r} (raw __version__ normalized)"
             )
         print(f"  scenedetect=={scenedetect_reported}")
 

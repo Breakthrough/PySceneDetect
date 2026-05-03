@@ -11,20 +11,18 @@
 #
 """Finalize signed Windows release artifacts.
 
-Takes the signed bundle returned by SignPath and the portable .zip built by
-AppVeyor, swaps the unsigned `scenedetect.exe` inside the portable .zip for
-the signed copy, repacks the .zip with LZMA via 7-Zip, copies the signed MSI
-alongside, and emits SHA256 manifests over the final release artifacts.
+Takes the signed bundle returned by SignPath, extracts the file tree from the
+signed MSI via `msiexec /a`, repacks it as the portable .zip with 7-Zip, and
+emits SHA256 manifests over the final release artifacts.
 
 Run after the SignPath signing job completes and `scenedetect-signed.zip`
 has been downloaded.
 
-Expected inputs (in --staging-dir, default `dist/signed/`):
+Expected input (in --staging-dir, default `dist/signed/`):
     scenedetect-signed.zip                    - SignPath bundle (signed .exe + .msi)
-    PySceneDetect-X.Y.Z-win64.zip             - portable .zip from AppVeyor
 
 Outputs (written to the same directory):
-    PySceneDetect-X.Y.Z-win64.zip             - repacked with the signed .exe
+    PySceneDetect-X.Y.Z-win64.zip             - portable .zip rebuilt from the signed MSI
     PySceneDetect-X.Y.Z-win64.msi             - signed MSI extracted from the bundle
     PySceneDetect-X.Y.Z-win64.manifest.json   - structured per-file SHA256 manifest
     SHA256SUMS                                - flat sha256sum -c compatible output
@@ -75,52 +73,78 @@ def extract_signed_bundle(signed_zip: Path, dest: Path) -> tuple[Path, Path]:
     return exe, msi
 
 
-def repack_portable(portable_zip: Path, signed_exe: Path, sevenz: Path) -> None:
-    with tempfile.TemporaryDirectory() as tmp:
-        tree = Path(tmp)
-        print(f"Extracting {portable_zip.name}...")
-        with zipfile.ZipFile(portable_zip) as zf:
-            zf.extractall(tree)
-        target = tree / "scenedetect.exe"
-        if not target.exists():
-            sys.exit(f"scenedetect.exe not found inside {portable_zip}")
-        print("  swapping in signed scenedetect.exe")
-        shutil.copy2(signed_exe, target)
-        # Preserve the unsigned AppVeyor zip alongside the signed output for
-        # diffing / recovery. Overwrite any prior .unsigned from a re-run.
-        backup = portable_zip.with_suffix(".unsigned.zip")
-        if backup.exists():
-            backup.unlink()
-        portable_zip.rename(backup)
-        print(f"  preserved original as {backup.name}")
-        print(f"Repacking {portable_zip.name} (zip / Deflate / mx=9 / mt=on)...")
-        # -mm=Deflate (not LZMA): Windows Explorer's built-in "Extract All" only
-        # supports Deflate-compressed zips; LZMA needs 7-Zip/WinRAR. Portable .zip
-        # ships to end users on clean Windows, so compat trumps ratio here.
-        # -mfb=258 -mpass=15: max-out Deflate tuning (slow, but once per release).
-        # -mmt=on: 7z parallelizes Deflate across files (not within a file), so
-        # the docs/ + thirdparty/ tree gets a real speedup; the two big binaries
-        # (scenedetect.exe, ffmpeg.exe) still each compress on a single thread.
-        # Pass top-level entries (not '*') so we don't depend on shell globbing.
-        entries = sorted(p.name for p in tree.iterdir())
-        subprocess.run(
-            [
-                str(sevenz),
-                "a",
-                "-tzip",
-                "-mm=Deflate",
-                "-mx=9",
-                "-mfb=258",
-                "-mpass=15",
-                "-mmt=on",
-                str(portable_zip),
-                *entries,
-            ],
-            cwd=tree,
-            check=True,
-            capture_output=True,
+def extract_msi_tree(msi_path: Path, dest: Path) -> Path:
+    """Run `msiexec /a` to extract the .msi's installed file tree without
+    actually installing. Returns the directory containing scenedetect.exe
+    (the app root), which sits under TARGETDIR at the .aip's APPDIR depth."""
+    if sys.platform != "win32":
+        sys.exit("msiexec /a is Windows-only")
+    print(f"Extracting {msi_path.name} via msiexec /a...")
+    # /a = administrative install: file extraction only, no registry, no admin rights.
+    # /qn = silent. TARGETDIR must be absolute.
+    result = subprocess.run(
+        ["msiexec", "/a", str(msi_path), "/qn", f"TARGETDIR={dest}"],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        sys.exit(
+            f"msiexec /a failed (exit {result.returncode}): "
+            f"{result.stderr.strip() or result.stdout.strip()}"
         )
-        print(f"  {portable_zip.stat().st_size / (1024 * 1024):.1f} MB")
+    exe = next((p for p in dest.rglob("scenedetect.exe")), None)
+    if exe is None:
+        sys.exit(f"scenedetect.exe not found anywhere under {dest} after msiexec /a")
+    tree = exe.parent
+    # `msiexec /a` writes an "administrative" copy of the .msi (and sometimes a
+    # `Cabs/` folder) into TARGETDIR alongside the extracted app files. When
+    # APPDIR == TARGETDIR (no nested install folder), these land inside the app
+    # tree and would pollute the portable .zip. Strip them.
+    for stray in tree.glob("*.msi"):
+        print(f"  stripping admin-install artifact: {stray.name}")
+        stray.unlink()
+    cabs_dir = tree / "Cabs"
+    if cabs_dir.is_dir():
+        print("  stripping admin-install artifact: Cabs/")
+        shutil.rmtree(cabs_dir)
+    print(f"  app tree: {tree.relative_to(dest)}/ ({sum(1 for _ in tree.rglob('*')):,} entries)")
+    return tree
+
+
+def build_portable_zip(tree: Path, zip_path: Path, sevenz: Path) -> None:
+    """Pack `tree`'s top-level contents into a Deflate .zip using the same
+    flags AppVeyor's stage_windows_dist.py uses for the portable distribution."""
+    if zip_path.exists():
+        zip_path.unlink()
+    print(f"Building {zip_path.name} (zip / Deflate / mx=9 / mt=on)...")
+    # -mm=Deflate (not LZMA): Windows Explorer's built-in "Extract All" only
+    # supports Deflate-compressed zips; LZMA needs 7-Zip/WinRAR. Portable .zip
+    # ships to end users on clean Windows, so compat trumps ratio here.
+    # -mfb=258 -mpass=15: max-out Deflate tuning (slow, but once per release).
+    # -mmt=on: 7z parallelizes Deflate across files (not within a file), so
+    # the docs/ + thirdparty/ tree gets a real speedup; the two big binaries
+    # (scenedetect.exe, ffmpeg.exe) still each compress on a single thread.
+    # Pass top-level entries (not '*') so we don't depend on shell globbing.
+    entries = sorted(p.name for p in tree.iterdir())
+    subprocess.run(
+        [
+            str(sevenz),
+            "a",
+            "-tzip",
+            "-mm=Deflate",
+            "-mx=9",
+            "-mfb=258",
+            "-mpass=15",
+            "-mmt=on",
+            str(zip_path),
+            *entries,
+        ],
+        cwd=tree,
+        check=True,
+        capture_output=True,
+    )
+    print(f"  {zip_path.stat().st_size / (1024 * 1024):.1f} MB")
 
 
 def write_manifests(staging: Path, portable_zip: Path, msi: Path) -> None:
@@ -164,7 +188,7 @@ def main() -> None:
         "--staging-dir",
         type=Path,
         default=REPO_DIR / "dist" / "signed",
-        help="Directory holding scenedetect-signed.zip and PySceneDetect-*-win64.zip.",
+        help="Directory holding scenedetect-signed.zip.",
     )
     args = parser.parse_args()
 
@@ -173,23 +197,26 @@ def main() -> None:
         sys.exit(f"{staging} not found")
 
     signed_bundle = staging / "scenedetect-signed.zip"
-    portable_zip = staging / f"PySceneDetect-{VERSION}-win64.zip"
     if not signed_bundle.is_file():
         sys.exit(f"{signed_bundle} not found")
-    if not portable_zip.is_file():
-        sys.exit(f"{portable_zip} not found")
 
     sevenz = find_7zip()
     print(f"Using 7-Zip: {sevenz}")
     print(f"Staging dir: {staging}")
     print(f"Version:     {VERSION}")
 
+    portable_zip = staging / f"PySceneDetect-{VERSION}-win64.zip"
     with tempfile.TemporaryDirectory() as tmp:
-        signed_exe, signed_msi = extract_signed_bundle(signed_bundle, Path(tmp))
-        repack_portable(portable_zip, signed_exe, sevenz)
+        tmp_path = Path(tmp)
+        # Bundle holds the SignPath outputs; signed .exe is verified for the
+        # wrong-bundle check but otherwise unused (the .msi already ships its
+        # own signed copy of scenedetect.exe).
+        _signed_exe, signed_msi = extract_signed_bundle(signed_bundle, tmp_path / "bundle")
         msi_dest = staging / signed_msi.name
         shutil.copy2(signed_msi, msi_dest)
         print(f"Copied signed MSI -> {msi_dest.name}")
+        msi_tree = extract_msi_tree(msi_dest, tmp_path / "msi-extract")
+        build_portable_zip(msi_tree, portable_zip, sevenz)
         write_manifests(staging, portable_zip, msi_dest)
 
     print()
