@@ -30,6 +30,7 @@ from scenedetect.common import FrameTimecode
 from scenedetect.detector import FlashFilter
 from scenedetect.detectors import ContentDetector
 from scenedetect.output.video import _DEFAULT_FFMPEG_ARGS
+from scenedetect.platform import DEBUG_MODE
 from scenedetect.scene_manager import Interpolation
 
 PYAV_THREADING_MODES = ["NONE", "SLICE", "FRAME", "AUTO"]
@@ -763,7 +764,7 @@ class ConfigRegistry:
                 config_file_contents = config_file.read()
             config.read_string(config_file_contents, source=path)
         except (ConfigParserError, OSError) as ex:
-            if __debug__:
+            if DEBUG_MODE:
                 raise
             raise ConfigLoadFailure(self._init_log, reason=ex) from None
         # At this point the config file syntax is correct, but we need to still validate

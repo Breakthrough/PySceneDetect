@@ -32,6 +32,12 @@ import typing as ty
 
 import pytest
 
+# Surface unhandled exceptions and KeyboardInterrupt as raw tracebacks during tests so pytest
+# (and any debugger) sees the original failure instead of the logger-formatted output the CLI
+# uses for end users. Read by `scenedetect.platform.DEBUG_MODE`. `setdefault` lets a developer
+# override (e.g. `SCENEDETECT_DEBUG=` to mimic end-user behavior in a specific test run).
+os.environ.setdefault("SCENEDETECT_DEBUG", "1")
+
 #
 # Helper Functions
 #

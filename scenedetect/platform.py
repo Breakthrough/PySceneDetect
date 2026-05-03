@@ -32,6 +32,20 @@ StrPath = str | os.PathLike[str]
 """Type hint for filesystem paths. Accepts a `str` or any object implementing :class:`os.PathLike`
 (e.g. :class:`pathlib.Path`)."""
 
+DEBUG_MODE: bool = os.environ.get("SCENEDETECT_DEBUG", "").strip().lower() not in (
+    "",
+    "0",
+    "false",
+    "no",
+    "off",
+)
+"""True when the `SCENEDETECT_DEBUG` environment variable is set to a truthy value
+(`1`, `true`, `yes`, `on`, etc.); False when unset or set to `0`/`false`/`no`/`off`/empty.
+Use this to gate behavior intended only for development - e.g. re-raising unhandled
+exceptions for debuggers/pytest instead of logging gracefully and exiting. Default-off so
+end users on any install path (pip, pipx, the Windows .exe) get clean error output; pytest
+opts in via `tests/conftest.py`."""
+
 ##
 ## tqdm Library
 ##
@@ -302,70 +316,89 @@ def get_mkvmerge_version() -> str | None:
     return output.splitlines()[0]
 
 
+def _query_package_version(dist_name: str, fallback_module: str | None) -> str | None:
+    """Return version of an installed package, querying PyPI metadata first then
+    falling back to the module's `__version__` attribute when metadata is missing.
+
+    PyInstaller bundles ship modules but not the `.dist-info` directories that
+    `importlib.metadata` reads, so the fallback is required for frozen builds.
+    Returns None when the package isn't installed.
+    """
+    try:
+        return importlib.metadata.version(dist_name)
+    except importlib.metadata.PackageNotFoundError:
+        pass
+    if fallback_module is None:
+        return None
+    try:
+        module = importlib.import_module(fallback_module)
+    except ModuleNotFoundError:
+        return None
+    return getattr(module, "__version__", None)
+
+
 def get_system_version_info() -> str:
     """Get the system's operating system, Python, packages, and external tool versions.
     Useful for debugging or filing bug reports.
 
     Used for the `scenedetect version -a` command.
     """
-    output_template = "{:<16} {}"
     line_separator = "-" * 60
     not_found_str = "Not Installed"
     out_lines = []
 
-    # System (Python, OS)
-    output_template = "{:<16} {}"
-    out_lines += ["System Info", line_separator]
-    out_lines += [
-        output_template.format(name, version)
-        for name, version in (
-            ("OS", f"{platform.platform()}"),
-            ("Python", f"{platform.python_implementation()} {platform.python_version()}"),
-            ("Architecture", " + ".join(platform.architecture())),
-        )
-    ]
+    system_info = (
+        ("OS", f"{platform.platform()}"),
+        ("Python", f"{platform.python_implementation()} {platform.python_version()}"),
+        ("Architecture", " + ".join(platform.architecture())),
+    )
 
-    # Third-Party Packages: queried via PyPI distribution names. `cv2` is exposed by either
-    # `opencv-python` or `opencv-python-headless` - both are listed so whichever is installed
-    # gets reported. `scenedetect` is read from the package attribute since it must report a
-    # version even when run uninstalled (e.g. from a source checkout). The import is deferred
-    # to avoid a circular import at module load time.
+    # Third-Party Packages: queried via PyPI distribution names with a module-attribute
+    # fallback. PyInstaller bundles ship the modules but not the `.dist-info` metadata
+    # directories, so `importlib.metadata.version()` alone reports "Not Installed" for
+    # every package in a frozen build; reading `module.__version__` recovers the version
+    # there. `scenedetect` is read from the package attribute since it must report a
+    # version even when run uninstalled (e.g. from a source checkout). The import is
+    # deferred to avoid a circular import at module load time.
     from scenedetect import __version__ as scenedetect_version
 
+    # (dist_name, fallback_module_name). Module fallback is only used when metadata is
+    # missing, so the metadata path still distinguishes `opencv-python` vs
+    # `opencv-python-headless` in source installs. In the frozen Windows build only
+    # `opencv-python-headless` is shipped, so `cv2` is attributed to that row alone.
+    third_party_packages = (
+        ("av", "av"),
+        ("click", "click"),
+        ("opencv-python", None),
+        ("opencv-python-headless", "cv2"),
+        ("imageio", "imageio"),
+        ("imageio-ffmpeg", "imageio_ffmpeg"),
+        ("moviepy", "moviepy"),
+        ("numpy", "numpy"),
+        ("platformdirs", "platformdirs"),
+        ("tqdm", "tqdm"),
+    )
+    package_versions = [("scenedetect", scenedetect_version)] + [
+        (dist_name, _query_package_version(dist_name, fallback_module) or not_found_str)
+        for dist_name, fallback_module in third_party_packages
+    ]
+
+    tool_versions = (
+        ("ffmpeg", get_ffmpeg_version() or not_found_str),
+        ("mkvmerge", get_mkvmerge_version() or not_found_str),
+    )
+
+    # Size the label column to the longest label across every section so all three tables
+    # align consistently - `opencv-python-headless` exceeds the previous fixed width of 16.
+    label_width = max(len(name) for name, _ in (*system_info, *package_versions, *tool_versions))
+    output_template = f"{{:<{label_width}}} {{}}"
+
+    out_lines += ["System Info", line_separator]
+    out_lines += [output_template.format(name, value) for name, value in system_info]
     out_lines += ["", "Packages", line_separator]
-    out_lines.append(output_template.format("scenedetect", scenedetect_version))
-    third_party_distributions = (
-        "av",
-        "click",
-        "opencv-python",
-        "opencv-python-headless",
-        "imageio",
-        "imageio-ffmpeg",
-        "moviepy",
-        "numpy",
-        "platformdirs",
-        "tqdm",
-    )
-    for dist_name in third_party_distributions:
-        try:
-            out_lines.append(
-                output_template.format(dist_name, importlib.metadata.version(dist_name))
-            )
-        except importlib.metadata.PackageNotFoundError:
-            out_lines.append(output_template.format(dist_name, not_found_str))
-
-    # External Tools
+    out_lines += [output_template.format(name, value) for name, value in package_versions]
     out_lines += ["", "Tools", line_separator]
-
-    tool_version_info = (
-        ("ffmpeg", get_ffmpeg_version()),
-        ("mkvmerge", get_mkvmerge_version()),
-    )
-
-    for tool_name, tool_version in tool_version_info:
-        out_lines.append(
-            output_template.format(tool_name, tool_version if tool_version else not_found_str)
-        )
+    out_lines += [output_template.format(name, value) for name, value in tool_versions]
 
     return "\n".join(out_lines)
 

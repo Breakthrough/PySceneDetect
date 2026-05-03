@@ -687,6 +687,7 @@ Care was taken to minimize changes for most common API uses, however more advanc
 - [bugfix] `detect-threshold` cut frame numbers are now backend-deterministic; previously the cut could differ by 1 frame between PyAV and OpenCV when the fade midpoint landed on a `.5` rounding boundary (PyAV uses sub-microsecond PTS, OpenCV uses millisecond-truncated `CAP_PROP_POS_MSEC`)
 - [breaking] Remove deprecated `-d`/`--min-delta-hsv` option from `detect-adaptive` command (use `-c`/`--min-content-val` instead)
 - [breaking] Rename `-f/--framerate` to `-f/--frame-rate` as part of VFR overhaul (legacy `--framerate` form is preserved as a hidden alias but will be removed in v0.8)
+- [general] Support `SCENEDETECT_DEBUG` environment variable to control how exceptions and debugging are handled. Unhandled exceptions and `Ctrl+C` now produce a logger-formatted error message and exit cleanly with code 1 instead of dumping a raw Python traceback. Set `SCENEDETECT_DEBUG=1` to ensure all exceptions are re-raised instead of being logged. In both cases, the program will exit with a non-zero exit code.
 
 ### API Changes
 
@@ -765,3 +766,5 @@ Care was taken to minimize changes for most common API uses, however more advanc
     - tqdm 4.67.1 -> 4.67.3
     - ffmpeg 8.0 -> 8.1
  - [general] Reduced size of Windows distribution without affecting functionality
+ - [bugfix] Fix `scenedetect version` reporting `av`, `opencv-python-headless`, `platformdirs`, `click`, `numpy`, and `tqdm` as "Not Installed" in the bundled distribution (PyInstaller does not ship `.dist-info` directories by default, so `importlib.metadata` lookups failed at runtime)
+ - [bugfix] Pressing `Ctrl+C` during scene detection in the bundled distribution now exits cleanly instead of surfacing the PyInstaller bootloader traceback

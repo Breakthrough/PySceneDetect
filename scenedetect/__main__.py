@@ -17,7 +17,7 @@ from logging import getLogger
 from scenedetect._cli import scenedetect
 from scenedetect._cli.context import CliContext
 from scenedetect._cli.controller import run_scenedetect
-from scenedetect.platform import FakeTqdmLoggingRedirect, logging_redirect_tqdm
+from scenedetect.platform import DEBUG_MODE, FakeTqdmLoggingRedirect, logging_redirect_tqdm
 
 
 def main():
@@ -46,14 +46,14 @@ def main():
             run_scenedetect(context)
         except KeyboardInterrupt:
             logger.info("Stopped.")
-            if __debug__:
+            if DEBUG_MODE:
                 raise
+            raise SystemExit(1) from None
         except BaseException as ex:
-            if __debug__:
+            if DEBUG_MODE:
                 raise
-            else:
-                logger.critical("ERROR: Unhandled exception:", exc_info=ex)
-                raise SystemExit(1) from None
+            logger.critical("ERROR: Unhandled exception:", exc_info=ex)
+            raise SystemExit(1) from ex
 
 
 if __name__ == "__main__":
