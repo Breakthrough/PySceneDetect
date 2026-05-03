@@ -23,7 +23,7 @@ import logging
 import os
 import os.path
 import typing as ty
-from copy import deepcopy
+from copy import copy
 
 import click
 
@@ -391,7 +391,9 @@ def scenedetect(
 
 def add_hidden_alias(command: click.Command, alias: str):
     """Adds a copy of `command` that can be invoked under the name `alias`."""
-    hidden_command = deepcopy(command)
+    # Shallow copy: deepcopy fails on Python 3.10 + click >=8.3 because click's internal
+    # `Sentinel` enum values are not deepcopy-safe.
+    hidden_command = copy(command)
     hidden_command.hidden = True
     scenedetect.add_command(hidden_command, alias)
 
