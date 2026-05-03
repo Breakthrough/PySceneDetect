@@ -133,8 +133,8 @@ test_script:
   - scenedetect.exe -i ../../tests/resources/testvideo.mp4 -b pyav detect-content time -e 2s
 
 artifacts:
-  # Portable ZIP (named PySceneDetect-X.Y.Z.zip by stage_windows_dist.py)
-  - path: dist/PySceneDetect-*.zip
+  # Portable ZIP (named PySceneDetect-X.Y.Z-win64.zip by stage_windows_dist.py)
+  - path: dist/PySceneDetect-*-win64.zip
     name: PySceneDetect-win64
   # MSI Installer + .EXE Bundle for Signing
   - path: dist/scenedetect-signed.zip

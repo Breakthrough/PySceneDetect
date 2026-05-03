@@ -153,8 +153,8 @@ def stage_thirdparty_licenses() -> None:
 
 
 def make_portable_zip(version: str) -> None:
-    zip_path = DIST_DIR / f"PySceneDetect-{version}.zip"
-    manifest_path = DIST_DIR / f"PySceneDetect-{version}.manifest.txt"
+    zip_path = DIST_DIR / f"PySceneDetect-{version}-win64.zip"
+    manifest_path = DIST_DIR / f"PySceneDetect-{version}-win64.manifest.txt"
     if zip_path.exists():
         zip_path.unlink()
     print(f"Creating {zip_path.relative_to(REPO_DIR)}...")

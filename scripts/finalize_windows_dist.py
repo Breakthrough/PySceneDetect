@@ -20,14 +20,14 @@ Run after the SignPath signing job completes and `scenedetect-signed.zip`
 has been downloaded.
 
 Expected inputs (in --staging-dir, default `dist/signed/`):
-    scenedetect-signed.zip              - SignPath bundle (signed .exe + .msi)
-    PySceneDetect-X.Y.Z.zip             - portable .zip from AppVeyor
+    scenedetect-signed.zip                    - SignPath bundle (signed .exe + .msi)
+    PySceneDetect-X.Y.Z-win64.zip             - portable .zip from AppVeyor
 
 Outputs (written to the same directory):
-    PySceneDetect-X.Y.Z.zip    - repacked with the signed .exe
-    PySceneDetect-X.Y.Z-win64.msi       - signed MSI extracted from the bundle
-    PySceneDetect-X.Y.Z.manifest.json   - structured per-file SHA256 manifest
-    SHA256SUMS                          - flat sha256sum -c compatible output
+    PySceneDetect-X.Y.Z-win64.zip             - repacked with the signed .exe
+    PySceneDetect-X.Y.Z-win64.msi             - signed MSI extracted from the bundle
+    PySceneDetect-X.Y.Z-win64.manifest.json   - structured per-file SHA256 manifest
+    SHA256SUMS                                - flat sha256sum -c compatible output
 """
 
 import argparse
@@ -229,7 +229,7 @@ def write_manifests(staging: Path, portable_zip: Path, msi: Path) -> None:
         },
     }
 
-    manifest_path = staging / f"PySceneDetect-{VERSION}.manifest.json"
+    manifest_path = staging / f"PySceneDetect-{VERSION}-win64.manifest.json"
     sums_path = staging / "SHA256SUMS"
     manifest_path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
     sums_path.write_text(
@@ -246,7 +246,7 @@ def main() -> None:
         "--staging-dir",
         type=Path,
         default=REPO_DIR / "dist" / "signed",
-        help="Directory holding scenedetect-signed.zip and PySceneDetect-*.zip.",
+        help="Directory holding scenedetect-signed.zip and PySceneDetect-*-win64.zip.",
     )
     args = parser.parse_args()
 
@@ -255,7 +255,7 @@ def main() -> None:
         sys.exit(f"{staging} not found")
 
     signed_bundle = staging / "scenedetect-signed.zip"
-    portable_zip = staging / f"PySceneDetect-{VERSION}.zip"
+    portable_zip = staging / f"PySceneDetect-{VERSION}-win64.zip"
     if not signed_bundle.is_file():
         sys.exit(f"{signed_bundle} not found")
     if not portable_zip.is_file():
