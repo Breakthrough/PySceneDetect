@@ -46,8 +46,8 @@ Optional: version referenced below as `X.Y[.Z]` - replace with the real version 
 - [ ] Approve code signing request on SignPath, download `scenedetect-signed.zip`
 - [ ] Finalize Windows artifacts locally (CI can't do this - signing happens after the AppVeyor build, so the signed-exe swap and hashing must run locally):
   - Create `dist/signed/` and copy in both `scenedetect-signed.zip` (from SignPath) and `PySceneDetect-X.Y.Z-win64.zip` (from the AppVeyor `PySceneDetect-win64` artifact).
-  - Run `python scripts/finalize_windows_dist.py`. This swaps the signed `scenedetect.exe` into the portable `.zip`, repacks it with 7-Zip, copies out the signed `.msi`, and writes `PySceneDetect-X.Y.Z-win64.manifest.json` + `SHA256SUMS`.
-- [ ] Draft release on Github using the tagged commit: include full changelog & release notes, signed portable .ZIP, signed .MSI installer, Python .whl/.tar.gz packages, and checksum manifests (`PySceneDetect-X.Y.Z.manifest.json` + `SHA256SUMS`)
+  - Run `python scripts/finalize_windows_dist.py`. This swaps the signed `scenedetect.exe` into the portable `.zip`, repacks it with 7-Zip, copies out the signed `.msi`, writes `PySceneDetect-X.Y.Z-win64.manifest.json` + `SHA256SUMS`, and then runs `scripts/validate_release.py` to verify filenames, hashes, Authenticode signatures, MSI/zip parity, and frozen `.exe` smoke tests.
+- [ ] Draft release on Github using the tagged commit: include full changelog & release notes, signed portable .ZIP, signed .MSI installer, Python .whl/.tar.gz packages, and checksum manifests (`PySceneDetect-X.Y.Z-win64.manifest.json` + `SHA256SUMS`)
 - [ ] Verify all artifacts uploaded to Github release are valid and named correctly
 - [ ] Smoke-test all release artifacts
 

@@ -31,9 +31,7 @@ Outputs (written to the same directory):
 """
 
 import argparse
-import hashlib
 import json
-import re
 import shutil
 import subprocess
 import sys
@@ -44,100 +42,20 @@ from pathlib import Path
 
 REPO_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_DIR))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+import validate_release  # noqa: E402
+from _release_common import (  # noqa: E402
+    find_7zip,
+    hash_zip_contents,
+    msi_version,
+    sha256_file,
+    verify_authenticode,
+)
 
 import scenedetect  # noqa: E402
 
-CHUNK = 1 << 20  # 1 MiB
-
-
-def msi_version(raw: str) -> str:
-    # Mirror scripts/update_installer.py / generate_manifest.py - artifact
-    # filenames use the normalized X.Y.Z form, not the Python __version__.
-    parts = [re.split(r"[^\d]", p, maxsplit=1)[0] for p in raw.split(".")]
-    while len(parts) < 3:
-        parts.append("0")
-    return ".".join(parts[:4])
-
-
 VERSION = msi_version(scenedetect.__version__)
-
-
-def find_7zip() -> Path:
-    for candidate in (
-        Path(r"C:\Program Files\7-Zip\7z.exe"),
-        Path(r"C:\Program Files (x86)\7-Zip\7z.exe"),
-    ):
-        if candidate.exists():
-            return candidate
-    on_path = shutil.which("7z") or shutil.which("7z.exe")
-    if on_path:
-        return Path(on_path)
-    sys.exit("7-Zip not found. Install from https://www.7-zip.org/.")
-
-
-def sha256_file(path: Path) -> str:
-    h = hashlib.sha256()
-    with path.open("rb") as f:
-        for block in iter(lambda: f.read(CHUNK), b""):
-            h.update(block)
-    return h.hexdigest()
-
-
-def hash_zip_contents(zip_path: Path) -> list[dict]:
-    entries = []
-    with zipfile.ZipFile(zip_path) as zf:
-        for info in sorted(zf.infolist(), key=lambda i: i.filename):
-            if info.is_dir():
-                continue
-            h = hashlib.sha256()
-            with zf.open(info) as f:
-                for block in iter(lambda: f.read(CHUNK), b""):
-                    h.update(block)
-            entries.append(
-                {
-                    "path": info.filename,
-                    "size": info.file_size,
-                    "sha256": h.hexdigest(),
-                }
-            )
-    return entries
-
-
-def verify_authenticode(path: Path) -> None:
-    """Bail unless `path` carries a Valid Authenticode signature.
-
-    Catches the wrong-artifact case: e.g. someone drops the AppVeyor
-    pre-signing bundle into dist/signed/ instead of the SignPath output.
-    PowerShell's Get-AuthenticodeSignature works on both .exe and .msi.
-    """
-    if sys.platform != "win32":
-        print(f"  (skipping Authenticode check for {path.name} on non-Windows)")
-        return
-    ps_cmd = (
-        f"$sig = Get-AuthenticodeSignature -FilePath '{path}'; "
-        "Write-Output $sig.Status; "
-        "if ($sig.SignerCertificate) { Write-Output $sig.SignerCertificate.Subject }"
-    )
-    result = subprocess.run(
-        ["powershell", "-NoProfile", "-Command", ps_cmd],
-        capture_output=True,
-        text=True,
-        check=False,
-    )
-    lines = [line.strip() for line in result.stdout.splitlines() if line.strip()]
-    if result.returncode != 0 or not lines:
-        sys.exit(
-            f"Authenticode check for {path.name} failed to run.\n  stderr: {result.stderr.strip()}"
-        )
-    status = lines[0]
-    subject = lines[1] if len(lines) > 1 else "<no certificate>"
-    print(f"  Authenticode: {status} ({subject})")
-    if status != "Valid":
-        sys.exit(
-            f"Authenticode check FAILED for {path.name}: status={status!r}. "
-            "Verify scenedetect-signed.zip is the SignPath output, not an "
-            "unsigned AppVeyor artifact."
-        )
 
 
 def extract_signed_bundle(signed_zip: Path, dest: Path) -> tuple[Path, Path]:
@@ -273,6 +191,10 @@ def main() -> None:
         shutil.copy2(signed_msi, msi_dest)
         print(f"Copied signed MSI -> {msi_dest.name}")
         write_manifests(staging, portable_zip, msi_dest)
+
+    print()
+    print("Validating finalized artifacts...")
+    validate_release.run_all_checks(staging)
 
 
 if __name__ == "__main__":
