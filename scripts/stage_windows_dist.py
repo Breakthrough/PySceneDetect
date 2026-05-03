@@ -19,8 +19,11 @@ Sequence in a release to generate the installer:
     python scripts/stage_windows_dist.py --ffmpeg-dir <dir>
     python scripts/update_installer.py --sync-files
     AdvancedInstaller.com /build packaging/windows/installer/PySceneDetect.aip
-    python scripts/generate_manifest.py
 ```
+
+After SignPath returns the signed bundle, run `scripts/finalize_windows_dist.py`
+locally to swap in the signed exe, repack the portable .zip, and emit the
+SHA256 manifests.
 
 This script assumes it is run on a Windows machine.
 """
