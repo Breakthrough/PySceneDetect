@@ -20,7 +20,7 @@ import typing as ty
 import cv2
 import numpy
 
-from scenedetect.common import FrameTimecode
+from scenedetect.common import FrameTimecode, TimecodeLike
 from scenedetect.detector import SceneDetector
 
 
@@ -34,18 +34,17 @@ class HistogramDetector(SceneDetector):
         self,
         threshold: float = 0.05,
         bins: int = 256,
-        min_scene_len: int | float | str = 15,
+        min_scene_len: TimecodeLike = 15,
     ):
         """
         Arguments:
             threshold: maximum relative difference between 0.0 and 1.0 that the histograms can
                 differ. Histograms are calculated on the Y channel after converting the frame to
-                YUV, and normalized based on the number of bins. Higher dicfferences imply greater
+                YUV, and normalized based on the number of bins. Higher differences imply greater
                 change in content, so larger threshold values are less sensitive to cuts.
             bins: Number of bins to use for the histogram.
-            min_scene_len:   Once a cut is detected, this much time must pass before a new one can
-                be added to the scene list. Accepts an int (frames), float (seconds), or
-                str (e.g. ``"0.6s"``, ``"00:00:00.600"``).
+            min_scene_len: Once a cut is detected, this much time must pass before a new one can
+                be added to the scene list. Accepts any :data:`TimecodeLike` value.
         """
         super().__init__()
         # Internally, threshold represents the correlation between two histograms and has values
@@ -57,20 +56,22 @@ class HistogramDetector(SceneDetector):
         self._last_cut = None
         self._metric_key = f"hist_diff [bins={self._bins}]"
 
-    def process_frame(self, timecode: FrameTimecode, frame_img: numpy.ndarray) -> list[int]:
+    def process_frame(
+        self, timecode: FrameTimecode, frame_img: numpy.ndarray
+    ) -> list[FrameTimecode]:
         """Computes the histogram of the luma channel of the frame image and compares it with the
         histogram of the luma channel of the previous frame. If the difference between the
         histograms exceeds the threshold, a scene cut is detected.
         Histogram difference is computed using the correlation metric.
 
         Arguments:
-            frame_num: Frame number of frame that is being passed.
+            timecode: Timecode of the frame that is being passed.
             frame_img: Decoded frame image (numpy.ndarray) to perform scene
                 detection on.
 
         Returns:
-            List of frames where scene cuts have been detected. There may be 0
-            or more frames in the list, and not necessarily the same as frame_num.
+            List of timecodes where scene cuts have been detected. There may be 0
+            or more timecodes in the list, and not necessarily the same as `timecode`.
         """
         cut_list = []
 

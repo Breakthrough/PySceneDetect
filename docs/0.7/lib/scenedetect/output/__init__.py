@@ -245,16 +245,16 @@ def write_scene_list_html(
 def _edl_timecode(timecode: FrameTimecode) -> str:
     """Format `timecode` as ``HH:MM:SS:FF`` for a CMX 3600 EDL entry."""
     total_seconds = timecode.seconds
-    framerate = timecode.framerate
-    assert framerate is not None
+    frame_rate = timecode.frame_rate
+    assert frame_rate is not None
     hours = int(total_seconds // 3600)
     minutes = int((total_seconds % 3600) // 60)
     seconds = int(total_seconds % 60)
-    frames_part = int((total_seconds * framerate) % framerate)
+    frames_part = int((total_seconds * frame_rate) % frame_rate)
     return f"{hours:02d}:{minutes:02d}:{seconds:02d}:{frames_part:02d}"
 
 
-def _parse_edl_start_timecode(value: str, framerate: Fraction | float) -> int:
+def _parse_edl_start_timecode(value: str, frame_rate: Fraction | float) -> int:
     """Parse a SMPTE ``HH:MM:SS:FF`` (or 8-digit ``HHMMSSFF``) start timecode into a frame count."""
     stripped = value.strip()
     if ":" in stripped:
@@ -270,12 +270,12 @@ def _parse_edl_start_timecode(value: str, framerate: Fraction | float) -> int:
             f"Invalid start timecode {value!r}: expected HH:MM:SS:FF or 8 digits (HHMMSSFF)."
         )
     hours, minutes, seconds, frames = (int(p) for p in parts)
-    max_frames = math.ceil(float(framerate))
+    max_frames = math.ceil(float(frame_rate))
     if minutes >= 60 or seconds >= 60 or frames >= max_frames:
         raise ValueError(
             f"Invalid start timecode {value!r}: MM<60, SS<60, FF<{max_frames} required."
         )
-    return round((hours * 3600 + minutes * 60 + seconds) * float(framerate)) + frames
+    return round((hours * 3600 + minutes * 60 + seconds) * float(frame_rate)) + frames
 
 
 def write_scene_list_edl(
@@ -299,9 +299,9 @@ def write_scene_list_edl(
     output_path = Path(output_path)
     offset_frames = 0
     if start_timecode is not None and start_timecode.strip() and scene_list:
-        framerate = scene_list[0][0].framerate
-        assert framerate is not None
-        offset_frames = _parse_edl_start_timecode(start_timecode, framerate)
+        frame_rate = scene_list[0][0].frame_rate
+        assert frame_rate is not None
+        offset_frames = _parse_edl_start_timecode(start_timecode, frame_rate)
     lines = [f"TITLE: {title}", "FCM: NON-DROP FRAME", ""]
     for i, (start, end) in enumerate(scene_list):
         in_tc = _edl_timecode(start + offset_frames)

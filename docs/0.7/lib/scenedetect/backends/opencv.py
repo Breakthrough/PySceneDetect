@@ -30,6 +30,7 @@ import numpy as np
 
 from scenedetect.common import (
     MAX_FPS_DELTA,
+    FrameRate,
     FrameTimecode,
     Timecode,
     TimecodeLike,
@@ -73,16 +74,18 @@ class VideoStreamCv2(VideoStream):
     def __init__(
         self,
         path: StrPath | None = None,
-        framerate: float | None = None,
+        frame_rate: FrameRate | None = None,
         max_decode_attempts: int = 5,
         path_or_device: StrPath | int | None = None,
+        framerate: float | None = None,
     ):
         """Open a video file, image sequence, or network stream.
 
         Arguments:
             path: Path to the video. Can be a file, image sequence (`'folder/DSC_%04d.jpg'`),
                 or network stream.
-            framerate: If set, overrides the detected framerate.
+            frame_rate: If set, overrides the detected frame rate. Takes precedence over
+                `framerate`.
             max_decode_attempts: Number of attempts to continue decoding the video
                 after a frame fails to decode. This allows processing videos that
                 have a few corrupted frames or metadata (in which case accuracy
@@ -90,13 +93,19 @@ class VideoStreamCv2(VideoStream):
                 decoding will stop and emit an error.
             path_or_device: [DEPRECATED] Specify `path` for files, image sequences, or
                 network streams/URLs.  Use `VideoCaptureAdapter` for devices/pipes.
+            framerate: [DEPRECATED] Use `frame_rate` instead. Retained as a deprecated
+                alias for backwards compatibility; ignored when `frame_rate` is provided.
 
         Raises:
             OSError: file could not be found or access was denied
             VideoOpenFailure: video could not be opened (may be corrupted)
-            ValueError: specified framerate is invalid
+            ValueError: specified frame rate is invalid
         """
         super().__init__()
+        # TODO(https://scenedetect.com/issue/548): emit DeprecationWarning when `framerate=` is
+        # used, once internal callers and downstream users have had a release to migrate.
+        if frame_rate is None:
+            frame_rate = framerate
         if path_or_device is not None:
             warnings.warn(
                 "The `path_or_device` argument is deprecated, use `path` or `VideoCaptureAdapter`"
@@ -111,8 +120,8 @@ class VideoStreamCv2(VideoStream):
             raise ValueError("Path must be specified!")
         else:
             resolved = os.fspath(path)
-        if framerate is not None and framerate < MAX_FPS_DELTA:
-            raise ValueError(f"Specified framerate ({framerate:f}) is invalid!")
+        if frame_rate is not None and frame_rate < MAX_FPS_DELTA:
+            raise ValueError(f"Specified frame rate ({float(frame_rate):f}) is invalid!")
         if max_decode_attempts < 0:
             raise ValueError("Maximum decode attempts must be >= 0!")
 
@@ -126,7 +135,7 @@ class VideoStreamCv2(VideoStream):
         self._warning_displayed = False
 
         # `_open_capture` populates `_cap` and `_frame_rate`.
-        self._open_capture(framerate)
+        self._open_capture(frame_rate)
 
     #
     # Backend-Specific Methods/Properties
@@ -300,7 +309,7 @@ class VideoStreamCv2(VideoStream):
     # Private Methods
     #
 
-    def _open_capture(self, framerate: float | None = None):
+    def _open_capture(self, frame_rate: FrameRate | None = None):
         """Opens capture referenced by this object and resets internal state."""
         if self._is_device:
             assert isinstance(self._path_or_device, int)
@@ -339,14 +348,16 @@ class VideoStreamCv2(VideoStream):
 
         # Ensure the framerate is correct to avoid potential divide by zero errors. This can be
         # addressed in the PyAV backend if required since it supports integer timebases.
-        assert framerate is None or framerate > MAX_FPS_DELTA, "Framerate must be validated if set!"
-        if framerate is None:
-            framerate = cap.get(cv2.CAP_PROP_FPS)
-            if framerate < MAX_FPS_DELTA:
+        assert frame_rate is None or frame_rate > MAX_FPS_DELTA, (
+            "Frame rate must be validated if set!"
+        )
+        if frame_rate is None:
+            frame_rate = cap.get(cv2.CAP_PROP_FPS)
+            if frame_rate < MAX_FPS_DELTA:
                 raise FrameRateUnavailable()
 
         self._cap: cv2.VideoCapture = cap
-        self._frame_rate: Fraction = framerate_to_fraction(framerate)
+        self._frame_rate: Fraction = framerate_to_fraction(frame_rate)
         self._has_grabbed = False
         cap.set(cv2.CAP_PROP_ORIENTATION_AUTO, 1.0)  # https://github.com/opencv/opencv/issues/26795
 
@@ -359,8 +370,9 @@ class VideoCaptureAdapter(VideoStream):
     def __init__(
         self,
         cap: cv2.VideoCapture,
-        framerate: float | None = None,
+        frame_rate: FrameRate | None = None,
         max_read_attempts: int = 5,
+        framerate: float | None = None,
     ):
         """Create from an existing OpenCV VideoCapture object. Used for webcams, live streams,
         pipes, or other inputs which may not support seeking.
@@ -368,31 +380,38 @@ class VideoCaptureAdapter(VideoStream):
         Arguments:
             cap: The `cv2.VideoCapture` object to wrap. Must already be opened and ready to
                 have `cap.read()` called on it.
-            framerate: If set, overrides the detected framerate.
+            frame_rate: If set, overrides the detected frame rate. Takes precedence over
+                `framerate`.
             max_read_attempts: Number of attempts to continue decoding the video
                 after a frame fails to decode. This allows processing videos that
                 have a few corrupted frames or metadata (in which case accuracy
                 of detection algorithms may be lower). Once this limit is passed,
                 decoding will stop and emit an error.
+            framerate: [DEPRECATED] Use `frame_rate` instead. Retained as a deprecated
+                alias for backwards compatibility; ignored when `frame_rate` is provided.
 
         Raises:
-            ValueError: capture is not open, framerate or max_read_attempts is invalid
+            ValueError: capture is not open, frame rate or max_read_attempts is invalid
         """
         super().__init__()
 
-        if framerate is not None and framerate < MAX_FPS_DELTA:
-            raise ValueError(f"Specified framerate ({framerate:f}) is invalid!")
+        # TODO(https://scenedetect.com/issue/548): emit DeprecationWarning when `framerate=` is
+        # used, once internal callers and downstream users have had a release to migrate.
+        if frame_rate is None:
+            frame_rate = framerate
+        if frame_rate is not None and frame_rate < MAX_FPS_DELTA:
+            raise ValueError(f"Specified frame rate ({float(frame_rate):f}) is invalid!")
         if max_read_attempts < 0:
             raise ValueError("Maximum decode attempts must be >= 0!")
         if not cap.isOpened():
             raise ValueError("Specified VideoCapture must already be opened!")
-        if framerate is None:
-            framerate = cap.get(cv2.CAP_PROP_FPS)
-            if framerate < MAX_FPS_DELTA:
+        if frame_rate is None:
+            frame_rate = cap.get(cv2.CAP_PROP_FPS)
+            if frame_rate < MAX_FPS_DELTA:
                 raise FrameRateUnavailable()
 
         self._cap = cap
-        self._frame_rate: Fraction = framerate_to_fraction(framerate)
+        self._frame_rate: Fraction = framerate_to_fraction(frame_rate)
         self._num_frames = 0
         self._max_read_attempts = max_read_attempts
         self._decode_failures = 0

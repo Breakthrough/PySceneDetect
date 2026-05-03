@@ -28,6 +28,7 @@ from moviepy.video.io.ffmpeg_reader import FFMPEG_VideoReader
 
 from scenedetect.backends.opencv import VideoStreamCv2
 from scenedetect.common import (
+    FrameRate,
     FrameTimecode,
     Timecode,
     TimecodeLike,
@@ -69,26 +70,43 @@ def _retry_on_oserror(op_name: str, fn: ty.Callable):
 class VideoStreamMoviePy(VideoStream):
     """MoviePy `FFMPEG_VideoReader` backend."""
 
-    def __init__(self, path: StrPath, framerate: float | None = None, print_infos: bool = False):
+    def __init__(
+        self,
+        path: StrPath,
+        frame_rate: FrameRate | None = None,
+        print_infos: bool = False,
+        framerate: float | None = None,
+    ):
         """Open a video or device.
 
         Arguments:
             path: Path to video,.
-            framerate: If set, overrides the detected framerate.
+            frame_rate: If set, overrides the detected frame rate. Takes precedence over
+                `framerate`.
             print_infos: If True, prints information about the opened video to stdout.
+            framerate: [DEPRECATED] Use `frame_rate` instead. Retained as a deprecated
+                alias for backwards compatibility; ignored when `frame_rate` is provided.
 
         Raises:
             OSError: file could not be found, access was denied, or the video is corrupt
             VideoOpenFailure: video could not be opened (may be corrupted)
+            ValueError: specified frame rate is invalid
         """
         super().__init__()
 
+        # TODO(https://scenedetect.com/issue/548): emit DeprecationWarning when `framerate=` is
+        # used, once internal callers and downstream users have had a release to migrate.
+        if frame_rate is None:
+            frame_rate = framerate
         # TODO: Investigate how MoviePy handles ffmpeg not being on PATH.
-        # TODO: Add framerate override.
-        if framerate is not None:
-            raise NotImplementedError(
-                "VideoStreamMoviePy does not support the `framerate` argument yet."
-            )
+        if frame_rate is not None and frame_rate <= 0:
+            raise ValueError(f"Specified frame rate ({float(frame_rate):f}) is invalid!")
+        # The override - if set - takes precedence over the rate reported by the reader.
+        # MoviePy assumes CFR, so changing the rate is equivalent to reinterpreting frame
+        # timestamps at a different cadence; the source's wall-clock duration is unaffected.
+        self._frame_rate_override: Fraction | None = (
+            framerate_to_fraction(frame_rate) if frame_rate is not None else None
+        )
 
         self._path: str = os.fspath(path)
         # TODO: Need to map errors based on the strings, since several failure
@@ -119,7 +137,10 @@ class VideoStreamMoviePy(VideoStream):
 
     @property
     def frame_rate(self) -> Fraction:
-        """Framerate in frames/sec as a rational Fraction."""
+        """Framerate in frames/sec as a rational Fraction. Returns the override passed at
+        construction if one was provided; otherwise the rate reported by MoviePy's reader."""
+        if self._frame_rate_override is not None:
+            return self._frame_rate_override
         return framerate_to_fraction(self._reader.fps)
 
     @property

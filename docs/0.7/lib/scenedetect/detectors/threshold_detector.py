@@ -22,7 +22,7 @@ from logging import getLogger
 
 import numpy
 
-from scenedetect.common import FrameTimecode
+from scenedetect.common import FrameTimecode, TimecodeLike
 from scenedetect.detector import SceneDetector
 
 logger = getLogger("pyscenedetect")
@@ -48,7 +48,7 @@ class ThresholdDetector(SceneDetector):
     def __init__(
         self,
         threshold: float = 12,
-        min_scene_len: int | float | str = 15,
+        min_scene_len: TimecodeLike = 15,
         fade_bias: float = 0.0,
         add_final_scene: bool = False,
         method: Method = Method.FLOOR,
@@ -93,7 +93,6 @@ class ThresholdDetector(SceneDetector):
             "type": None,  # type of fade, can be either 'in' or 'out'
         }
         self._metric_keys = [ThresholdDetector.THRESHOLD_VALUE_KEY]
-        self._time_base = None
 
     def get_metrics(self) -> list[str]:
         return self._metric_keys

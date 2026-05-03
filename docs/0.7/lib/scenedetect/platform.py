@@ -15,7 +15,7 @@ This module contains all platform/library specific compatibility fixes, as well 
 functions to handle logging and invoking external commands.
 """
 
-import importlib
+import importlib.metadata
 import logging
 import os
 import os.path
@@ -40,7 +40,7 @@ StrPath = str | os.PathLike[str]
 class FakeTqdmObject:
     """Provides a no-op tqdm-like object."""
 
-    def __init__(self, **kawrgs):
+    def __init__(self, **kwargs):
         """No-op."""
 
     def update(self, n=1):
@@ -56,7 +56,7 @@ class FakeTqdmObject:
 class FakeTqdmLoggingRedirect:
     """Provides a no-op tqdm context manager for redirecting log messages."""
 
-    def __init__(self, **kawrgs):
+    def __init__(self, **kwargs):
         """No-op."""
 
     def __enter__(self):
@@ -325,29 +325,34 @@ def get_system_version_info() -> str:
         )
     ]
 
-    # Third-Party Packages
+    # Third-Party Packages: queried via PyPI distribution names. `cv2` is exposed by either
+    # `opencv-python` or `opencv-python-headless` - both are listed so whichever is installed
+    # gets reported. `scenedetect` is read from the package attribute since it must report a
+    # version even when run uninstalled (e.g. from a source checkout). The import is deferred
+    # to avoid a circular import at module load time.
+    from scenedetect import __version__ as scenedetect_version
+
     out_lines += ["", "Packages", line_separator]
-    third_party_packages = (
+    out_lines.append(output_template.format("scenedetect", scenedetect_version))
+    third_party_distributions = (
         "av",
         "click",
-        "cv2",
+        "opencv-python",
+        "opencv-python-headless",
         "imageio",
-        "imageio_ffmpeg",
+        "imageio-ffmpeg",
         "moviepy",
         "numpy",
         "platformdirs",
-        "scenedetect",
         "tqdm",
     )
-    for module_name in third_party_packages:
+    for dist_name in third_party_distributions:
         try:
-            module = importlib.import_module(module_name)
-            if hasattr(module, "__version__"):
-                out_lines.append(output_template.format(module_name, module.__version__))
-            else:
-                out_lines.append(output_template.format(module_name, not_found_str))
-        except ModuleNotFoundError:
-            out_lines.append(output_template.format(module_name, not_found_str))
+            out_lines.append(
+                output_template.format(dist_name, importlib.metadata.version(dist_name))
+            )
+        except importlib.metadata.PackageNotFoundError:
+            out_lines.append(output_template.format(dist_name, not_found_str))
 
     # External Tools
     out_lines += ["", "Tools", line_separator]

@@ -27,6 +27,7 @@ from scenedetect.common import (
     FrameTimecode,
     Interpolation,
     SceneList,
+    TimecodeLike,
 )
 from scenedetect.platform import StrPath, get_and_create_path, get_cv2_imwrite_params, tqdm
 from scenedetect.video_stream import VideoStream
@@ -37,15 +38,16 @@ logger = logging.getLogger("pyscenedetect")
 def _generate_timecode_list(
     scene_list: SceneList,
     num_images: int,
-    frame_margin: int | float | str,
+    frame_margin: TimecodeLike,
 ) -> list[list[FrameTimecode]]:
     """Generate per-scene image timecodes using PTS-accurate seconds-based timing.
 
-    `frame_margin` accepts an int (frames), float (seconds), or str (e.g. ``"0.1s"``).
+    `frame_margin` accepts any :data:`TimecodeLike` value (e.g. ``int`` frames, ``float``
+    seconds, or ``str`` such as ``"0.1s"``).
     """
-    framerate = scene_list[0][0].framerate
-    assert framerate is not None
-    margin_secs = FrameTimecode(timecode=frame_margin, fps=framerate).seconds
+    frame_rate = scene_list[0][0].frame_rate
+    assert frame_rate is not None
+    margin_secs = FrameTimecode(timecode=frame_margin, fps=frame_rate).seconds
     result = []
     for start, end in scene_list:
         duration_secs = (end - start).seconds
@@ -65,7 +67,7 @@ def _generate_timecode_list(
                 t = max(seg_end - margin_secs, seg_start)
             else:
                 t = (seg_start + seg_end) / 2.0
-            timecodes.append(FrameTimecode(t, fps=framerate))
+            timecodes.append(FrameTimecode(t, fps=frame_rate))
         result.append(timecodes)
     return result
 
@@ -107,7 +109,7 @@ class _ImageExtractor:
     def __init__(
         self,
         num_images: int = 3,
-        frame_margin: int | float | str = 1,
+        frame_margin: TimecodeLike = 1,
         image_extension: str = "jpg",
         imwrite_param: list[int] | None = None,
         image_name_template: str = "$VIDEO_NAME-Scene-$SCENE_NUMBER-$IMAGE_NUMBER",
@@ -351,7 +353,7 @@ def save_images(
     scene_list: SceneList,
     video: VideoStream,
     num_images: int = 3,
-    frame_margin: int | float | str = 1,
+    frame_margin: TimecodeLike = 1,
     image_extension: str = "jpg",
     encoder_param: int = 95,
     image_name_template: str = "$VIDEO_NAME-Scene-$SCENE_NUMBER-$IMAGE_NUMBER",

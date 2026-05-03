@@ -20,7 +20,7 @@ from logging import getLogger
 
 import numpy as np
 
-from scenedetect.common import FrameTimecode
+from scenedetect.common import FrameTimecode, TimecodeLike
 from scenedetect.detectors import ContentDetector
 
 logger = getLogger("pyscenedetect")
@@ -37,7 +37,7 @@ class AdaptiveDetector(ContentDetector):
     def __init__(
         self,
         adaptive_threshold: float = 3.0,
-        min_scene_len: int | float | str = 15,
+        min_scene_len: TimecodeLike = 15,
         window_width: int = 2,
         min_content_val: float = 15.0,
         weights: ContentDetector.Components = ContentDetector.DEFAULT_COMPONENT_WEIGHTS,

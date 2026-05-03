@@ -19,7 +19,7 @@ This detector is available from the command-line interface by using the `detect-
 import cv2
 import numpy
 
-from scenedetect.common import FrameTimecode
+from scenedetect.common import FrameTimecode, TimecodeLike
 from scenedetect.detector import SceneDetector
 
 
@@ -49,7 +49,7 @@ class HashDetector(SceneDetector):
         threshold: float = 0.395,
         size: int = 16,
         lowpass: int = 2,
-        min_scene_len: int | float | str = 15,
+        min_scene_len: TimecodeLike = 15,
     ):
         super().__init__()
         self._threshold = threshold
