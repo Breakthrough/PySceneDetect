@@ -249,6 +249,17 @@ raises a different exception when the command length is too long.</p>
 </dd></dl>
 
 <dl class="py data">
+<dt class="sig sig-object py" id="scenedetect.platform.DEBUG_MODE">
+<span class="sig-prename descclassname"><span class="pre">scenedetect.platform.</span></span><span class="sig-name descname"><span class="pre">DEBUG_MODE</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#scenedetect.platform.DEBUG_MODE" title="Permalink to this definition">¶</a></dt>
+<dd><p>True when the <cite>SCENEDETECT_DEBUG</cite> environment variable is set to a truthy value
+(<cite>1</cite>, <cite>true</cite>, <cite>yes</cite>, <cite>on</cite>, etc.); False when unset or set to <cite>0</cite>/<cite>false</cite>/<cite>no</cite>/<cite>off</cite>/empty.
+Use this to gate behavior intended only for development - e.g. re-raising unhandled
+exceptions for debuggers/pytest instead of logging gracefully and exiting. Default-off so
+end users on any install path (pip, pipx, the Windows .exe) get clean error output; pytest
+opts in via <cite>tests/conftest.py</cite>.</p>
+</dd></dl>
+
+<dl class="py data">
 <dt class="sig sig-object py" id="scenedetect.platform.StrPath">
 <span class="sig-prename descclassname"><span class="pre">scenedetect.platform.</span></span><span class="sig-name descname"><span class="pre">StrPath</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">str</span> <span class="pre">|</span> <span class="pre">os.PathLike[str]</span></em><a class="headerlink" href="#scenedetect.platform.StrPath" title="Permalink to this definition">¶</a></dt>
 <dd><p>Type hint for filesystem paths. Accepts a <cite>str</cite> or any object implementing <code class="xref py py-class docutils literal notranslate"><span class="pre">os.PathLike</span></code>
@@ -335,6 +346,7 @@ raises a different exception when the command length is too long.</p>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.platform.get_system_version_info"><code class="docutils literal notranslate"><span class="pre">get_system_version_info()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.platform.init_logger"><code class="docutils literal notranslate"><span class="pre">init_logger()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.platform.invoke_command"><code class="docutils literal notranslate"><span class="pre">invoke_command()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scenedetect.platform.DEBUG_MODE"><code class="docutils literal notranslate"><span class="pre">DEBUG_MODE</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.platform.StrPath"><code class="docutils literal notranslate"><span class="pre">StrPath</span></code></a></li>
 </ul>
 </li>
