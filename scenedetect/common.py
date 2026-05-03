@@ -451,9 +451,8 @@ class FrameTimecode:
 
     @staticmethod
     def _ensure_fractional(fps: "FrameRate | FrameTimecode") -> Fraction:
-        """Validate and convert an `fps` argument into a positive `Fraction`. Float inputs are
-        routed through :func:`framerate_to_fraction` so NTSC-derived rates (e.g. 23.976 -> 24000/1001)
-        snap to their exact rational form instead of the lossy :func:`Fraction.from_float` value."""
+        """Validate and convert an `fps` argument into a positive `Fraction`. NTSC-like frame rates
+        are handled via :func:`framerate_to_fraction`."""
         if isinstance(fps, FrameTimecode):
             if fps._rate is None:
                 raise TypeError("FrameTimecode passed as fps must have a known rate.")

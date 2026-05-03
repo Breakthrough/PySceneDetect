@@ -96,14 +96,11 @@ Functions
 .. automodule:: scenedetect
     :members:
 
-=======================================================================
-Module Reference
-=======================================================================
-
 .. toctree::
     :maxdepth: 3
     :caption: PySceneDetect Module Documentation
     :name: fullapitoc
+    :hidden:
 
     api/migration_guide
     api/detectors
