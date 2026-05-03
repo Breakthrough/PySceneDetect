@@ -103,7 +103,7 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@v6
         with:
-          name: PySceneDetect-win64_portable
+          name: PySceneDetect-win64
           path: dist/scenedetect
           include-hidden-files: true
 
@@ -117,7 +117,7 @@ jobs:
 
       - uses: actions/download-artifact@v7
         with:
-          name: PySceneDetect-win64_portable
+          name: PySceneDetect-win64
           path: build
 
       - name: Test

@@ -21,10 +21,10 @@ has been downloaded.
 
 Expected inputs (in --staging-dir, default `dist/signed/`):
     scenedetect-signed.zip              - SignPath bundle (signed .exe + .msi)
-    PySceneDetect-X.Y.Z-portable.zip    - portable .zip from AppVeyor
+    PySceneDetect-X.Y.Z.zip             - portable .zip from AppVeyor
 
 Outputs (written to the same directory):
-    PySceneDetect-X.Y.Z-portable.zip    - repacked with the signed .exe
+    PySceneDetect-X.Y.Z.zip    - repacked with the signed .exe
     PySceneDetect-X.Y.Z-win64.msi       - signed MSI extracted from the bundle
     PySceneDetect-X.Y.Z.manifest.json   - structured per-file SHA256 manifest
     SHA256SUMS                          - flat sha256sum -c compatible output
@@ -127,8 +127,7 @@ def verify_authenticode(path: Path) -> None:
     lines = [line.strip() for line in result.stdout.splitlines() if line.strip()]
     if result.returncode != 0 or not lines:
         sys.exit(
-            f"Authenticode check for {path.name} failed to run.\n"
-            f"  stderr: {result.stderr.strip()}"
+            f"Authenticode check for {path.name} failed to run.\n  stderr: {result.stderr.strip()}"
         )
     status = lines[0]
     subject = lines[1] if len(lines) > 1 else "<no certificate>"
@@ -247,7 +246,7 @@ def main() -> None:
         "--staging-dir",
         type=Path,
         default=REPO_DIR / "dist" / "signed",
-        help="Directory holding scenedetect-signed.zip and PySceneDetect-*-portable.zip.",
+        help="Directory holding scenedetect-signed.zip and PySceneDetect-*.zip.",
     )
     args = parser.parse_args()
 
@@ -256,7 +255,7 @@ def main() -> None:
         sys.exit(f"{staging} not found")
 
     signed_bundle = staging / "scenedetect-signed.zip"
-    portable_zip = staging / f"PySceneDetect-{VERSION}-portable.zip"
+    portable_zip = staging / f"PySceneDetect-{VERSION}.zip"
     if not signed_bundle.is_file():
         sys.exit(f"{signed_bundle} not found")
     if not portable_zip.is_file():
