@@ -25,8 +25,7 @@ Video Cut Detection and Analysis Tool
 
 **Quick Install**:
 
-    pip install scenedetect --upgrade           # standard (depends on opencv-python)
-    pip install scenedetect-headless --upgrade  # headless servers (depends on opencv-python-headless)
+    pip install scenedetect --upgrade
 
 Requires ffmpeg/mkvmerge for video splitting support. Windows builds (MSI installer/portable ZIP) can be found on [the download page](https://scenedetect.com/download/).
 
