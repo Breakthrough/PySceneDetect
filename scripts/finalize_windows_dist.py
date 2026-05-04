@@ -44,16 +44,16 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import validate_release  # noqa: E402
 from _release_common import (  # noqa: E402
+    display_version,
     find_7zip,
     hash_zip_contents,
-    msi_version,
     sha256_file,
     verify_authenticode,
 )
 
 import scenedetect  # noqa: E402
 
-VERSION = msi_version(scenedetect.__version__)
+VERSION = display_version(scenedetect.__version__)
 
 
 def extract_signed_bundle(signed_zip: Path, dest: Path) -> tuple[Path, Path]:

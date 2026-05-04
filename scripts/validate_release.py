@@ -48,16 +48,16 @@ sys.path.insert(0, str(REPO_DIR))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from _release_common import (  # noqa: E402
+    display_version,
     find_7zip,
     hash_zip_contents,
-    msi_version,
     sha256_file,
     verify_authenticode,
 )
 
 import scenedetect  # noqa: E402
 
-VERSION = msi_version(scenedetect.__version__)
+VERSION = display_version(scenedetect.__version__)
 
 # Mirrors `third_party_packages` in `scenedetect/platform.py:get_system_version_info()`.
 # Keep these two lists in sync: any package added there should be classified here as
@@ -313,10 +313,9 @@ def check_frozen_exe(portable_zip: Path) -> None:
             fail(f"`scenedetect.exe version` exited {result.returncode}\n{result.stderr}")
         packages = _parse_packages_section(result.stdout)
         scenedetect_reported = packages.get("scenedetect", "")
-        # Normalize both sides through msi_version() so a raw __version__ of "0.7"
-        # matches the artifact-name VERSION of "0.7.0" (mirrors the same
-        # normalization scripts/update_installer.py applies to filenames).
-        if msi_version(scenedetect_reported) != VERSION:
+        # Normalize both sides through display_version() so a raw __version__
+        # like "0.7-dev0" matches the artifact-name VERSION of "0.7".
+        if display_version(scenedetect_reported) != VERSION:
             fail(
                 f"`scenedetect.exe version` reports scenedetect=={scenedetect_reported!r}, "
                 f"expected {VERSION!r} (raw __version__ normalized)"

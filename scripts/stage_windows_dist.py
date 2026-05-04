@@ -33,7 +33,6 @@ This script assumes it is run on a Windows machine.
 # into a combined "prepare_windows_dist.py".
 
 import argparse
-import re
 import shutil
 import subprocess
 import sys
@@ -46,6 +45,9 @@ from pathlib import Path
 
 REPO_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_DIR))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from _release_common import display_version, find_7zip  # noqa: E402
 
 import scenedetect  # noqa: E402
 
@@ -54,23 +56,6 @@ DIST_TREE = DIST_DIR / "scenedetect"
 PACKAGING_WIN = REPO_DIR / "packaging" / "windows"
 DOCS_DIR = REPO_DIR / "docs"
 THIRDPARTY_LICENSES = REPO_DIR / "scenedetect" / "_thirdparty"
-
-
-def msi_version(raw: str) -> str:
-    parts = [re.split(r"[^\d]", p, maxsplit=1)[0] for p in raw.split(".")]
-    while len(parts) < 3:
-        parts.append("0")
-    return ".".join(parts[:4])
-
-
-def find_7zip() -> Path:
-    for candidate in (
-        Path(r"C:\Program Files\7-Zip\7z.exe"),
-        Path(r"C:\Program Files (x86)\7-Zip\7z.exe"),
-    ):
-        if candidate.exists():
-            return candidate
-    sys.exit("7-Zip not found. Install from https://www.7-zip.org/.")
 
 
 def _rel(p: Path) -> str:
@@ -190,7 +175,7 @@ def main() -> None:
     copy_file(PACKAGING_WIN / "README.txt", DIST_TREE / "README.txt")
     stage_thirdparty_licenses()
     build_docs()
-    make_portable_zip(msi_version(scenedetect.__version__))
+    make_portable_zip(display_version(scenedetect.__version__))
 
 
 if __name__ == "__main__":

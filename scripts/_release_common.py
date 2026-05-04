@@ -23,12 +23,24 @@ CHUNK = 1 << 20  # 1 MiB
 
 
 def msi_version(raw: str) -> str:
-    # Mirror scripts/update_installer.py - artifact filenames use the
-    # normalized X.Y.Z form, not the raw Python __version__.
+    # AdvancedInstaller's MSI ProductVersion field requires numeric X.Y.Z[.B];
+    # strip Python-style suffixes ("0.7-dev0" -> "0.7") and pad to three parts.
+    # Use this ONLY for the /SetVersion value passed to AdvancedInstaller, not
+    # for artifact filenames - those should use display_version() to match the
+    # Python package version (e.g. PyPI "0.7", not "0.7.0").
     parts = [re.split(r"[^\d]", p, maxsplit=1)[0] for p in raw.split(".")]
     while len(parts) < 3:
         parts.append("0")
     return ".".join(parts[:4])
+
+
+def display_version(raw: str) -> str:
+    # Filename-facing version: matches scenedetect.__version__ component count,
+    # with Python-style suffixes stripped ("0.7-dev0" -> "0.7", "0.7" -> "0.7",
+    # "0.7.1" -> "0.7.1"). Use for .msi/.zip/manifest filenames so artifacts
+    # line up with the PyPI package and git tag.
+    parts = [re.split(r"[^\d]", p, maxsplit=1)[0] for p in raw.split(".")]
+    return ".".join(p for p in parts[:4] if p)
 
 
 def find_7zip() -> Path:

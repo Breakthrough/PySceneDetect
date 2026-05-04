@@ -21,30 +21,20 @@ Usage:
 
 import argparse
 import os
-import re
 import subprocess
 import sys
 from pathlib import Path
 
 REPO_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_DIR))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from _release_common import display_version, msi_version  # noqa: E402
 
 import scenedetect  # noqa: E402
 
 INSTALLER_AIP = REPO_DIR / "packaging" / "windows" / "installer" / "PySceneDetect.aip"
 DIST_TREE = REPO_DIR / "dist" / "scenedetect"
-
-
-def msi_version(raw: str) -> str:
-    # AdvancedInstaller's ProductVersion only accepts numeric X[.Y[.Z[.B]]].
-    # Strip Python-style suffixes ("0.7-dev0" -> "0.7"; "1.0.0-rc1" -> "1.0.0")
-    # and pad to three components so the resulting MSI filename is consistent.
-    parts = [re.split(r"[^\d]", p, maxsplit=1)[0] for p in raw.split(".")]
-    if not all(p.isdigit() for p in parts if p):
-        sys.exit(f"Cannot derive numeric MSI version from {raw!r}")
-    while len(parts) < 3:
-        parts.append("0")
-    return ".".join(parts[:4])
 
 
 def find_advinst() -> Path:
@@ -122,24 +112,28 @@ def main() -> None:
         print(f"Re-syncing APPDIR in {INSTALLER_AIP.name}")
         resync_appdir(advinst)
         if args.dev:
-            version = msi_version(args.version_override or scenedetect.__version__)
-            dev_name = f"PySceneDetect-{version}-dev-win64.msi"
+            raw_version = args.version_override or scenedetect.__version__
+            file_version = display_version(raw_version)
+            dev_name = f"PySceneDetect-{file_version}-dev-win64.msi"
             print(f"Renaming MSI package to {dev_name} (dev build)")
             run(advinst, "/SetPackageName", dev_name, "-buildname", "DefaultBuild")
         return
 
     raw_version = args.version_override or scenedetect.__version__
-    version = msi_version(raw_version)
-    if version != raw_version:
-        print(f"Normalized {raw_version!r} -> {version!r} for AdvancedInstaller")
-    print(f"Bumping {INSTALLER_AIP.name} to {version}")
+    product_version = msi_version(raw_version)
+    file_version = display_version(raw_version)
+    if not all(p.isdigit() for p in product_version.split(".") if p):
+        sys.exit(f"Cannot derive numeric MSI version from {raw_version!r}")
+    if product_version != raw_version:
+        print(f"Normalized {raw_version!r} -> {product_version!r} for AdvancedInstaller")
+    print(f"Bumping {INSTALLER_AIP.name} to {product_version} (filename: {file_version})")
 
-    run(advinst, "/SetVersion", version)
+    run(advinst, "/SetVersion", product_version)
     run(advinst, "/SetProductCode", "-langid", "1033")
     run(
         advinst,
         "/SetPackageName",
-        f"PySceneDetect-{version}-win64.msi",
+        f"PySceneDetect-{file_version}-win64.msi",
         "-buildname",
         "DefaultBuild",
     )
