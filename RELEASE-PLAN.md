@@ -56,9 +56,10 @@ Optional: version referenced below as `X.Y[.Z]` - replace with the real version 
 - [ ] Publish Github release
 - [ ] Upload to PyPI: `publish-pypi.yml` must be manually triggered on a release tag. Specify `testpypi` first, and make sure everything goes okay on the test instance. When verified and smoke tested, specify `pypi` as the environment, and publish the production package.
 - [ ] Verify both projects: https://pypi.org/project/scenedetect/ and https://pypi.org/project/scenedetect-headless/.
-- [ ] Merge `releases/X.Y` back into `main`.
-- [ ] Deploy website: `generate-website.yml` picks up the changelog / download page updates.
-- [ ] Deploy docs: `generate-docs.yml` publishes the new version.
+- [ ] Deploy website: `generate-website.yml`
+- [ ] Deploy docs: `generate-docs.yml`
+- [ ] Merge release branch back into `main`, verify `docs/LATEST_VERSION` is correct
+- [ ] [Manually dispatch `generate-docs.yml`](https://github.com/Breakthrough/PySceneDetect/actions/workflows/generate-docs.yml) against `releases/X.Y` to update www.scenedetect.com/docs/latest
 - [ ] Smoke-test PyPI release: in a fresh venv, `pip install scenedetect==X.Y.Z`; CLI launches and `scenedetect --version` looks correct.
 - [ ] Verify download links on website are correct, PyPI project page is up to date and correct.
 - [ ] Clear / archive release-scoped tracking files (`tracking.md`, any release-specific TODOs).
