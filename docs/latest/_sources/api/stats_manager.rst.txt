@@ -2,7 +2,7 @@
 .. _scenedetect-stats_manager:
 
 -----------------------------------------------------------------------
-StatsManager
+Stats Manager
 -----------------------------------------------------------------------
 
 .. automodule:: scenedetect.stats_manager

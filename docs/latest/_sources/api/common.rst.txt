@@ -1,10 +1,9 @@
 
-
-.. _scenedetect-video_splitter:
+.. _scenedetect-common:
 
 ---------------------------------------------------------------
-Video Splitting
+Common
 ---------------------------------------------------------------
 
-.. automodule:: scenedetect.video_splitter
+.. automodule:: scenedetect.common
    :members:

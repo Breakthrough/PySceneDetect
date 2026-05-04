@@ -4,13 +4,17 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Index &#8212; PySceneDetect 0.6.7.1 documentation</title>
+    <title>Index &#8212; PySceneDetect 0.7 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
     <link rel="stylesheet" type="text/css" href="_static/pyscenedetect.css" />
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
     <script src="_static/doctools.js"></script>
     <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/clipboard.min.js"></script>
+    <script src="_static/copybutton.js"></script>
+    <link rel="icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="#" />
     <link rel="search" title="Search" href="search.html" />
    
@@ -173,15 +177,15 @@
 </li>
         <li><a href="cli.html#cmdoption-scenedetect-save-edl-f">scenedetect-save-edl command line option</a>
 </li>
-        <li><a href="cli.html#cmdoption-scenedetect-save-html-0">scenedetect-save-html command line option</a>, <a href="cli.html#cmdoption-scenedetect-save-html-f">[1]</a>
+        <li><a href="cli.html#cmdoption-scenedetect-save-fcp-f">scenedetect-save-fcp command line option</a>
+</li>
+        <li><a href="cli.html#cmdoption-scenedetect-save-html-f">scenedetect-save-html command line option</a>
 </li>
         <li><a href="cli.html#cmdoption-scenedetect-save-images-f">scenedetect-save-images command line option</a>
 </li>
         <li><a href="cli.html#cmdoption-scenedetect-save-otio-f">scenedetect-save-otio command line option</a>
 </li>
         <li><a href="cli.html#cmdoption-scenedetect-save-qp-f">scenedetect-save-qp command line option</a>
-</li>
-        <li><a href="cli.html#cmdoption-scenedetect-save-xml-f">scenedetect-save-xml command line option</a>
 </li>
         <li><a href="cli.html#cmdoption-scenedetect-split-video-f">scenedetect-split-video command line option</a>
 </li>
@@ -197,7 +201,7 @@
     --format
 
       <ul>
-        <li><a href="cli.html#cmdoption-scenedetect-save-xml-format">scenedetect-save-xml command line option</a>
+        <li><a href="cli.html#cmdoption-scenedetect-save-fcp-format">scenedetect-save-fcp command line option</a>
 </li>
       </ul></li>
       <li>
@@ -246,14 +250,14 @@
     --image-height
 
       <ul>
-        <li><a href="cli.html#cmdoption-scenedetect-save-html-6">scenedetect-save-html command line option</a>, <a href="cli.html#cmdoption-scenedetect-save-html-h">[1]</a>
+        <li><a href="cli.html#cmdoption-scenedetect-save-html-h">scenedetect-save-html command line option</a>
 </li>
       </ul></li>
       <li>
     --image-width
 
       <ul>
-        <li><a href="cli.html#cmdoption-scenedetect-save-html-4">scenedetect-save-html command line option</a>, <a href="cli.html#cmdoption-scenedetect-save-html-w">[1]</a>
+        <li><a href="cli.html#cmdoption-scenedetect-save-html-w">scenedetect-save-html command line option</a>
 </li>
       </ul></li>
       <li>
@@ -319,13 +323,6 @@
 </li>
       </ul></li>
       <li>
-    --min-delta-hsv
-
-      <ul>
-        <li><a href="cli.html#cmdoption-scenedetect-detect-adaptive-d">scenedetect-detect-adaptive command line option</a>
-</li>
-      </ul></li>
-      <li>
     --min-scene-len
 
       <ul>
@@ -367,7 +364,7 @@
     --no-images
 
       <ul>
-        <li><a href="cli.html#cmdoption-scenedetect-save-html-2">scenedetect-save-html command line option</a>, <a href="cli.html#cmdoption-scenedetect-save-html-n">[1]</a>
+        <li><a href="cli.html#cmdoption-scenedetect-save-html-n">scenedetect-save-html command line option</a>
 </li>
       </ul></li>
       <li>
@@ -394,13 +391,13 @@
 </li>
         <li><a href="cli.html#cmdoption-scenedetect-save-edl-o">scenedetect-save-edl command line option</a>
 </li>
+        <li><a href="cli.html#cmdoption-scenedetect-save-fcp-o">scenedetect-save-fcp command line option</a>
+</li>
         <li><a href="cli.html#cmdoption-scenedetect-save-images-o">scenedetect-save-images command line option</a>
 </li>
         <li><a href="cli.html#cmdoption-scenedetect-save-otio-o">scenedetect-save-otio command line option</a>
 </li>
         <li><a href="cli.html#cmdoption-scenedetect-save-qp-o">scenedetect-save-qp command line option</a>
-</li>
-        <li><a href="cli.html#cmdoption-scenedetect-save-xml-o">scenedetect-save-xml command line option</a>
 </li>
         <li><a href="cli.html#cmdoption-scenedetect-split-video-o">scenedetect-split-video command line option</a>
 </li>
@@ -462,7 +459,7 @@
     --show
 
       <ul>
-        <li><a href="cli.html#cmdoption-scenedetect-save-html-8">scenedetect-save-html command line option</a>, <a href="cli.html#cmdoption-scenedetect-save-html-s">[1]</a>
+        <li><a href="cli.html#cmdoption-scenedetect-save-html-s">scenedetect-save-html command line option</a>
 </li>
       </ul></li>
       <li>
@@ -598,8 +595,6 @@
       <ul>
         <li><a href="cli.html#cmdoption-scenedetect-d">scenedetect command line option</a>
 </li>
-        <li><a href="cli.html#cmdoption-scenedetect-detect-adaptive-d">scenedetect-detect-adaptive command line option</a>
-</li>
         <li><a href="cli.html#cmdoption-scenedetect-save-qp-d">scenedetect-save-qp command line option</a>
 </li>
         <li><a href="cli.html#cmdoption-scenedetect-time-d">scenedetect-time command line option</a>
@@ -628,15 +623,15 @@
 </li>
         <li><a href="cli.html#cmdoption-scenedetect-save-edl-f">scenedetect-save-edl command line option</a>
 </li>
-        <li><a href="cli.html#cmdoption-scenedetect-save-html-0">scenedetect-save-html command line option</a>, <a href="cli.html#cmdoption-scenedetect-save-html-f">[1]</a>
+        <li><a href="cli.html#cmdoption-scenedetect-save-fcp-f">scenedetect-save-fcp command line option</a>
+</li>
+        <li><a href="cli.html#cmdoption-scenedetect-save-html-f">scenedetect-save-html command line option</a>
 </li>
         <li><a href="cli.html#cmdoption-scenedetect-save-images-f">scenedetect-save-images command line option</a>
 </li>
         <li><a href="cli.html#cmdoption-scenedetect-save-otio-f">scenedetect-save-otio command line option</a>
 </li>
         <li><a href="cli.html#cmdoption-scenedetect-save-qp-f">scenedetect-save-qp command line option</a>
-</li>
-        <li><a href="cli.html#cmdoption-scenedetect-save-xml-f">scenedetect-save-xml command line option</a>
 </li>
         <li><a href="cli.html#cmdoption-scenedetect-split-video-f">scenedetect-split-video command line option</a>
 </li>
@@ -659,7 +654,7 @@
     -h
 
       <ul>
-        <li><a href="cli.html#cmdoption-scenedetect-save-html-6">scenedetect-save-html command line option</a>, <a href="cli.html#cmdoption-scenedetect-save-html-h">[1]</a>
+        <li><a href="cli.html#cmdoption-scenedetect-save-html-h">scenedetect-save-html command line option</a>
 </li>
       </ul></li>
       <li>
@@ -736,7 +731,7 @@
       <ul>
         <li><a href="cli.html#cmdoption-scenedetect-list-scenes-n">scenedetect-list-scenes command line option</a>
 </li>
-        <li><a href="cli.html#cmdoption-scenedetect-save-html-2">scenedetect-save-html command line option</a>, <a href="cli.html#cmdoption-scenedetect-save-html-n">[1]</a>
+        <li><a href="cli.html#cmdoption-scenedetect-save-html-n">scenedetect-save-html command line option</a>
 </li>
         <li><a href="cli.html#cmdoption-scenedetect-save-images-n">scenedetect-save-images command line option</a>
 </li>
@@ -753,13 +748,13 @@
 </li>
         <li><a href="cli.html#cmdoption-scenedetect-save-edl-o">scenedetect-save-edl command line option</a>
 </li>
+        <li><a href="cli.html#cmdoption-scenedetect-save-fcp-o">scenedetect-save-fcp command line option</a>
+</li>
         <li><a href="cli.html#cmdoption-scenedetect-save-images-o">scenedetect-save-images command line option</a>
 </li>
         <li><a href="cli.html#cmdoption-scenedetect-save-otio-o">scenedetect-save-otio command line option</a>
 </li>
         <li><a href="cli.html#cmdoption-scenedetect-save-qp-o">scenedetect-save-qp command line option</a>
-</li>
-        <li><a href="cli.html#cmdoption-scenedetect-save-xml-o">scenedetect-save-xml command line option</a>
 </li>
         <li><a href="cli.html#cmdoption-scenedetect-split-video-o">scenedetect-split-video command line option</a>
 </li>
@@ -803,7 +798,7 @@
 </li>
         <li><a href="cli.html#cmdoption-scenedetect-list-scenes-s">scenedetect-list-scenes command line option</a>
 </li>
-        <li><a href="cli.html#cmdoption-scenedetect-save-html-8">scenedetect-save-html command line option</a>, <a href="cli.html#cmdoption-scenedetect-save-html-s">[1]</a>
+        <li><a href="cli.html#cmdoption-scenedetect-save-html-s">scenedetect-save-html command line option</a>
 </li>
         <li><a href="cli.html#cmdoption-scenedetect-save-images-s">scenedetect-save-images command line option</a>
 </li>
@@ -849,7 +844,7 @@
 </li>
         <li><a href="cli.html#cmdoption-scenedetect-detect-content-w">scenedetect-detect-content command line option</a>
 </li>
-        <li><a href="cli.html#cmdoption-scenedetect-save-html-4">scenedetect-save-html command line option</a>, <a href="cli.html#cmdoption-scenedetect-save-html-w">[1]</a>
+        <li><a href="cli.html#cmdoption-scenedetect-save-html-w">scenedetect-save-html command line option</a>
 </li>
         <li><a href="cli.html#cmdoption-scenedetect-save-images-w">scenedetect-save-images command line option</a>
 </li>
@@ -864,7 +859,7 @@
 </li>
       <li><a href="api/scene_manager.html#scenedetect.scene_manager.SceneManager.add_detector">add_detector() (scenedetect.scene_manager.SceneManager method)</a>
 </li>
-      <li><a href="api/scene_manager.html#scenedetect.scene_manager.Interpolation.AREA">AREA (scenedetect.scene_manager.Interpolation attribute)</a>
+      <li><a href="api/common.html#scenedetect.common.Interpolation.AREA">AREA (scenedetect.common.Interpolation attribute)</a>
 </li>
       <li><a href="api/backends.html#scenedetect.backends.moviepy.VideoStreamMoviePy.aspect_ratio">aspect_ratio (scenedetect.backends.moviepy.VideoStreamMoviePy property)</a>
 
@@ -899,11 +894,11 @@
 </li>
         <li><a href="api/backends.html#scenedetect.backends.pyav.VideoStreamAv.BACKEND_NAME">(scenedetect.backends.pyav.VideoStreamAv attribute)</a>
 </li>
+        <li><a href="api/video_stream.html#scenedetect.video_stream.VideoStream.BACKEND_NAME">(scenedetect.video_stream.VideoStream attribute)</a>
+</li>
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/video_stream.html#scenedetect.video_stream.VideoStream.BACKEND_NAME">BACKEND_NAME() (scenedetect.video_stream.VideoStream static method)</a>
-</li>
       <li><a href="api/video_stream.html#scenedetect.video_stream.VideoStream.base_timecode">base_timecode (scenedetect.video_stream.VideoStream property)</a>
 </li>
   </ul></td>
@@ -944,11 +939,11 @@
 </li>
       <li><a href="api/scene_manager.html#scenedetect.scene_manager.SceneManager.crop">crop (scenedetect.scene_manager.SceneManager property)</a>
 </li>
-      <li><a href="api/scene_manager.html#scenedetect.scene_manager.CropRegion">CropRegion (in module scenedetect.scene_manager)</a>
+      <li><a href="api/common.html#scenedetect.common.CropRegion">CropRegion (in module scenedetect.common)</a>
 </li>
-      <li><a href="api/scene_manager.html#scenedetect.scene_manager.Interpolation.CUBIC">CUBIC (scenedetect.scene_manager.Interpolation attribute)</a>
+      <li><a href="api/common.html#scenedetect.common.Interpolation.CUBIC">CUBIC (scenedetect.common.Interpolation attribute)</a>
 </li>
-      <li><a href="api/scene_manager.html#scenedetect.scene_manager.CutList">CutList (in module scenedetect.scene_manager)</a>
+      <li><a href="api/common.html#scenedetect.common.CutList">CutList (in module scenedetect.common)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -956,11 +951,11 @@
 <h2 id="D">D</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/platform.html#scenedetect.platform.DEBUG_MODE">DEBUG_MODE (in module scenedetect.platform)</a>
+</li>
       <li><a href="api/detectors.html#scenedetect.detectors.content_detector.ContentDetector.DEFAULT_COMPONENT_WEIGHTS">DEFAULT_COMPONENT_WEIGHTS (scenedetect.detectors.content_detector.ContentDetector attribute)</a>
 </li>
-      <li><a href="api/video_splitter.html#scenedetect.video_splitter.DEFAULT_FFMPEG_ARGS">DEFAULT_FFMPEG_ARGS (in module scenedetect.video_splitter)</a>
-</li>
-      <li><a href="api/video_splitter.html#scenedetect.video_splitter.default_formatter">default_formatter() (in module scenedetect.video_splitter)</a>
+      <li><a href="api/output.html#scenedetect.output.default_formatter">default_formatter() (in module scenedetect.output)</a>
 </li>
       <li><a href="api/scene_manager.html#scenedetect.scene_manager.DEFAULT_MIN_WIDTH">DEFAULT_MIN_WIDTH (in module scenedetect.scene_manager)</a>
 </li>
@@ -998,18 +993,18 @@
 <h2 id="E">E</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/video_splitter.html#scenedetect.video_splitter.SceneMetadata.end">end (scenedetect.video_splitter.SceneMetadata attribute)</a>
+      <li><a href="api/common.html#scenedetect.common.FrameTimecode.equal_frame_rate">equal_frame_rate() (scenedetect.common.FrameTimecode method)</a>
 </li>
-      <li><a href="api/frame_timecode.html#scenedetect.frame_timecode.FrameTimecode.equal_framerate">equal_framerate() (scenedetect.frame_timecode.FrameTimecode method)</a>
+      <li><a href="api/common.html#scenedetect.common.FrameTimecode.equal_framerate">equal_framerate() (scenedetect.common.FrameTimecode method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/detectors.html#scenedetect.detectors.adaptive_detector.AdaptiveDetector.event_buffer_length">event_buffer_length (scenedetect.detectors.adaptive_detector.AdaptiveDetector property)</a>
+      <li><a href="api/detector.html#scenedetect.detector.SceneDetector.event_buffer_length">event_buffer_length (scenedetect.detector.SceneDetector property)</a>
 
       <ul>
-        <li><a href="api/detectors.html#scenedetect.detectors.content_detector.ContentDetector.event_buffer_length">(scenedetect.detectors.content_detector.ContentDetector property)</a>
+        <li><a href="api/detectors.html#scenedetect.detectors.adaptive_detector.AdaptiveDetector.event_buffer_length">(scenedetect.detectors.adaptive_detector.AdaptiveDetector property)</a>
 </li>
-        <li><a href="api/scene_detector.html#scenedetect.scene_detector.SceneDetector.event_buffer_length">(scenedetect.scene_detector.SceneDetector property)</a>
+        <li><a href="api/detectors.html#scenedetect.detectors.content_detector.ContentDetector.event_buffer_length">(scenedetect.detectors.content_detector.ContentDetector property)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -1022,13 +1017,13 @@
 </li>
       <li><a href="api/platform.html#scenedetect.platform.FakeTqdmObject">FakeTqdmObject (class in scenedetect.platform)</a>
 </li>
-      <li><a href="api/video_splitter.html#scenedetect.video_splitter.FFMPEG_PATH">FFMPEG_PATH (in module scenedetect.video_splitter)</a>
+      <li><a href="api/detector.html#scenedetect.detector.FlashFilter">FlashFilter (class in scenedetect.detector)</a>
 </li>
-      <li><a href="api/scene_detector.html#scenedetect.scene_detector.FlashFilter">FlashFilter (class in scenedetect.scene_detector)</a>
-</li>
-      <li><a href="api/scene_detector.html#scenedetect.scene_detector.FlashFilter.Mode">FlashFilter.Mode (class in scenedetect.scene_detector)</a>
+      <li><a href="api/detector.html#scenedetect.detector.FlashFilter.Mode">FlashFilter.Mode (class in scenedetect.detector)</a>
 </li>
       <li><a href="api/detectors.html#scenedetect.detectors.threshold_detector.ThresholdDetector.Method.FLOOR">FLOOR (scenedetect.detectors.threshold_detector.ThresholdDetector.Method attribute)</a>
+</li>
+      <li><a href="api/common.html#scenedetect.common.FrameTimecode.frame_num">frame_num (scenedetect.common.FrameTimecode property)</a>
 </li>
       <li><a href="api/backends.html#scenedetect.backends.moviepy.VideoStreamMoviePy.frame_number">frame_number (scenedetect.backends.moviepy.VideoStreamMoviePy property)</a>
 
@@ -1051,6 +1046,8 @@
 </li>
         <li><a href="api/backends.html#scenedetect.backends.pyav.VideoStreamAv.frame_rate">(scenedetect.backends.pyav.VideoStreamAv property)</a>
 </li>
+        <li><a href="api/common.html#scenedetect.common.FrameTimecode.frame_rate">(scenedetect.common.FrameTimecode property)</a>
+</li>
         <li><a href="api/video_stream.html#scenedetect.video_stream.VideoStream.frame_rate">(scenedetect.video_stream.VideoStream property)</a>
 </li>
       </ul></li>
@@ -1070,9 +1067,15 @@
         <li><a href="api/video_stream.html#scenedetect.video_stream.VideoStream.frame_size">(scenedetect.video_stream.VideoStream property)</a>
 </li>
       </ul></li>
+      <li><a href="api/common.html#scenedetect.common.FrameRate">FrameRate (in module scenedetect.common)</a>
+</li>
+      <li><a href="api/common.html#scenedetect.common.FrameTimecode.framerate">framerate (scenedetect.common.FrameTimecode property)</a>
+</li>
+      <li><a href="api/common.html#scenedetect.common.framerate_to_fraction">framerate_to_fraction() (in module scenedetect.common)</a>
+</li>
       <li><a href="api/video_stream.html#scenedetect.video_stream.FrameRateUnavailable">FrameRateUnavailable</a>
 </li>
-      <li><a href="api/frame_timecode.html#scenedetect.frame_timecode.FrameTimecode">FrameTimecode (class in scenedetect.frame_timecode)</a>
+      <li><a href="api/common.html#scenedetect.common.FrameTimecode">FrameTimecode (class in scenedetect.common)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -1082,7 +1085,7 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/platform.html#scenedetect.platform.get_and_create_path">get_and_create_path() (in module scenedetect.platform)</a>
 </li>
-      <li><a href="api/detectors.html#scenedetect.detectors.adaptive_detector.AdaptiveDetector.get_content_val">get_content_val() (scenedetect.detectors.adaptive_detector.AdaptiveDetector method)</a>
+      <li><a href="api/scene_manager.html#scenedetect.scene_manager.SceneManager.get_cut_list">get_cut_list() (scenedetect.scene_manager.SceneManager method)</a>
 </li>
       <li><a href="api/platform.html#scenedetect.platform.get_cv2_imwrite_params">get_cv2_imwrite_params() (in module scenedetect.platform)</a>
 </li>
@@ -1092,13 +1095,11 @@
 </li>
       <li><a href="api/platform.html#scenedetect.platform.get_file_name">get_file_name() (in module scenedetect.platform)</a>
 </li>
-      <li><a href="api/frame_timecode.html#scenedetect.frame_timecode.FrameTimecode.get_framerate">get_framerate() (scenedetect.frame_timecode.FrameTimecode method)</a>
-</li>
-      <li><a href="api/frame_timecode.html#scenedetect.frame_timecode.FrameTimecode.get_frames">get_frames() (scenedetect.frame_timecode.FrameTimecode method)</a>
-</li>
-      <li><a href="api/detectors.html#scenedetect.detectors.adaptive_detector.AdaptiveDetector.get_metrics">get_metrics() (scenedetect.detectors.adaptive_detector.AdaptiveDetector method)</a>
+      <li><a href="api/detector.html#scenedetect.detector.SceneDetector.get_metrics">get_metrics() (scenedetect.detector.SceneDetector method)</a>
 
       <ul>
+        <li><a href="api/detectors.html#scenedetect.detectors.adaptive_detector.AdaptiveDetector.get_metrics">(scenedetect.detectors.adaptive_detector.AdaptiveDetector method)</a>
+</li>
         <li><a href="api/detectors.html#scenedetect.detectors.content_detector.ContentDetector.get_metrics">(scenedetect.detectors.content_detector.ContentDetector method)</a>
 </li>
         <li><a href="api/detectors.html#scenedetect.detectors.hash_detector.HashDetector.get_metrics">(scenedetect.detectors.hash_detector.HashDetector method)</a>
@@ -1107,13 +1108,13 @@
 </li>
         <li><a href="api/detectors.html#scenedetect.detectors.threshold_detector.ThresholdDetector.get_metrics">(scenedetect.detectors.threshold_detector.ThresholdDetector method)</a>
 </li>
-        <li><a href="api/scene_detector.html#scenedetect.scene_detector.SceneDetector.get_metrics">(scenedetect.scene_detector.SceneDetector method)</a>
-</li>
         <li><a href="api/stats_manager.html#scenedetect.stats_manager.StatsManager.get_metrics">(scenedetect.stats_manager.StatsManager method)</a>
 </li>
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/platform.html#scenedetect.platform.get_mkvmerge_path">get_mkvmerge_path() (in module scenedetect.platform)</a>
+</li>
       <li><a href="api/platform.html#scenedetect.platform.get_mkvmerge_version">get_mkvmerge_version() (in module scenedetect.platform)</a>
 </li>
       <li><a href="api/scene_manager.html#scenedetect.scene_manager.SceneManager.get_num_detectors">get_num_detectors() (scenedetect.scene_manager.SceneManager method)</a>
@@ -1122,11 +1123,9 @@
 </li>
       <li><a href="api/scene_manager.html#scenedetect.scene_manager.get_scenes_from_cuts">get_scenes_from_cuts() (in module scenedetect.scene_manager)</a>
 </li>
-      <li><a href="api/frame_timecode.html#scenedetect.frame_timecode.FrameTimecode.get_seconds">get_seconds() (scenedetect.frame_timecode.FrameTimecode method)</a>
-</li>
       <li><a href="api/platform.html#scenedetect.platform.get_system_version_info">get_system_version_info() (in module scenedetect.platform)</a>
 </li>
-      <li><a href="api/frame_timecode.html#scenedetect.frame_timecode.FrameTimecode.get_timecode">get_timecode() (scenedetect.frame_timecode.FrameTimecode method)</a>
+      <li><a href="api/common.html#scenedetect.common.FrameTimecode.get_timecode">get_timecode() (scenedetect.common.FrameTimecode method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -1148,22 +1147,20 @@
 <h2 id="I">I</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/video_splitter.html#scenedetect.video_splitter.SceneMetadata.index">index (scenedetect.video_splitter.SceneMetadata attribute)</a>
-</li>
       <li><a href="api/platform.html#scenedetect.platform.init_logger">init_logger() (in module scenedetect.platform)</a>
 </li>
-      <li><a href="api/scene_manager.html#scenedetect.scene_manager.Interpolation">Interpolation (class in scenedetect.scene_manager)</a>
+      <li><a href="api/common.html#scenedetect.common.Interpolation">Interpolation (class in scenedetect.common)</a>
 </li>
       <li><a href="api/scene_manager.html#scenedetect.scene_manager.SceneManager.interpolation">interpolation (scenedetect.scene_manager.SceneManager property)</a>
 </li>
       <li><a href="api/platform.html#scenedetect.platform.invoke_command">invoke_command() (in module scenedetect.platform)</a>
 </li>
-      <li><a href="api/video_splitter.html#scenedetect.video_splitter.is_ffmpeg_available">is_ffmpeg_available() (in module scenedetect.video_splitter)</a>
+      <li><a href="api/output.html#scenedetect.output.is_ffmpeg_available">is_ffmpeg_available() (in module scenedetect.output)</a>
+</li>
+      <li><a href="api/output.html#scenedetect.output.is_mkvmerge_available">is_mkvmerge_available() (in module scenedetect.output)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/video_splitter.html#scenedetect.video_splitter.is_mkvmerge_available">is_mkvmerge_available() (in module scenedetect.video_splitter)</a>
-</li>
       <li><a href="api/stats_manager.html#scenedetect.stats_manager.StatsManager.is_save_required">is_save_required() (scenedetect.stats_manager.StatsManager method)</a>
 </li>
       <li><a href="api/backends.html#scenedetect.backends.moviepy.VideoStreamMoviePy.is_seekable">is_seekable (scenedetect.backends.moviepy.VideoStreamMoviePy property)</a>
@@ -1184,11 +1181,11 @@
 <h2 id="L">L</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/scene_manager.html#scenedetect.scene_manager.Interpolation.LANCZOS4">LANCZOS4 (scenedetect.scene_manager.Interpolation attribute)</a>
+      <li><a href="api/common.html#scenedetect.common.Interpolation.LANCZOS4">LANCZOS4 (scenedetect.common.Interpolation attribute)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/scene_manager.html#scenedetect.scene_manager.Interpolation.LINEAR">LINEAR (scenedetect.scene_manager.Interpolation attribute)</a>
+      <li><a href="api/common.html#scenedetect.common.Interpolation.LINEAR">LINEAR (scenedetect.common.Interpolation attribute)</a>
 </li>
       <li><a href="api/detectors.html#scenedetect.detectors.content_detector.ContentDetector.LUMA_ONLY_WEIGHTS">LUMA_ONLY_WEIGHTS (scenedetect.detectors.content_detector.ContentDetector attribute)</a>
 </li>
@@ -1198,13 +1195,13 @@
 <h2 id="M">M</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/frame_timecode.html#scenedetect.frame_timecode.MAX_FPS_DELTA">MAX_FPS_DELTA (in module scenedetect.frame_timecode)</a>
+      <li><a href="api/common.html#scenedetect.common.MAX_FPS_DELTA">MAX_FPS_DELTA (in module scenedetect.common)</a>
 </li>
       <li><a href="api/scene_manager.html#scenedetect.scene_manager.MAX_FRAME_QUEUE_LENGTH">MAX_FRAME_QUEUE_LENGTH (in module scenedetect.scene_manager)</a>
 </li>
       <li><a href="api/scene_manager.html#scenedetect.scene_manager.MAX_FRAME_SIZE_ERRORS">MAX_FRAME_SIZE_ERRORS (in module scenedetect.scene_manager)</a>
 </li>
-      <li><a href="api/scene_detector.html#scenedetect.scene_detector.FlashFilter.Mode.MERGE">MERGE (scenedetect.scene_detector.FlashFilter.Mode attribute)</a>
+      <li><a href="api/detector.html#scenedetect.detector.FlashFilter.Mode.MERGE">MERGE (scenedetect.detector.FlashFilter.Mode attribute)</a>
 </li>
       <li><a href="api/detectors.html#scenedetect.detectors.content_detector.ContentDetector.METRIC_KEYS">METRIC_KEYS (scenedetect.detectors.content_detector.ContentDetector attribute)</a>
 </li>
@@ -1224,6 +1221,10 @@
 </li>
         <li><a href="api/backends.html#module-scenedetect.backends.pyav">scenedetect.backends.pyav</a>
 </li>
+        <li><a href="api/common.html#module-scenedetect.common">scenedetect.common</a>
+</li>
+        <li><a href="api/detector.html#module-scenedetect.detector">scenedetect.detector</a>
+</li>
         <li><a href="api/detectors.html#module-scenedetect.detectors">scenedetect.detectors</a>
 </li>
         <li><a href="api/detectors.html#module-scenedetect.detectors.adaptive_detector">scenedetect.detectors.adaptive_detector</a>
@@ -1236,17 +1237,11 @@
 </li>
         <li><a href="api/detectors.html#module-scenedetect.detectors.threshold_detector">scenedetect.detectors.threshold_detector</a>
 </li>
-        <li><a href="api/frame_timecode.html#module-scenedetect.frame_timecode">scenedetect.frame_timecode</a>
-</li>
         <li><a href="api/platform.html#module-scenedetect.platform">scenedetect.platform</a>
-</li>
-        <li><a href="api/scene_detector.html#module-scenedetect.scene_detector">scenedetect.scene_detector</a>
 </li>
         <li><a href="api/scene_manager.html#module-scenedetect.scene_manager">scenedetect.scene_manager</a>
 </li>
         <li><a href="api/stats_manager.html#module-scenedetect.stats_manager">scenedetect.stats_manager</a>
-</li>
-        <li><a href="api/video_splitter.html#module-scenedetect.video_splitter">scenedetect.video_splitter</a>
 </li>
         <li><a href="api/video_stream.html#module-scenedetect.video_stream">scenedetect.video_stream</a>
 </li>
@@ -1266,14 +1261,12 @@
 </li>
         <li><a href="api/backends.html#scenedetect.backends.pyav.VideoStreamAv.name">(scenedetect.backends.pyav.VideoStreamAv property)</a>
 </li>
-        <li><a href="api/video_splitter.html#scenedetect.video_splitter.VideoMetadata.name">(scenedetect.video_splitter.VideoMetadata attribute)</a>
-</li>
         <li><a href="api/video_stream.html#scenedetect.video_stream.VideoStream.name">(scenedetect.video_stream.VideoStream property)</a>
 </li>
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/scene_manager.html#scenedetect.scene_manager.Interpolation.NEAREST">NEAREST (scenedetect.scene_manager.Interpolation attribute)</a>
+      <li><a href="api/common.html#scenedetect.common.Interpolation.NEAREST">NEAREST (scenedetect.common.Interpolation attribute)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -1297,8 +1290,6 @@
         <li><a href="api/backends.html#scenedetect.backends.opencv.VideoStreamCv2.path">(scenedetect.backends.opencv.VideoStreamCv2 property)</a>
 </li>
         <li><a href="api/backends.html#scenedetect.backends.pyav.VideoStreamAv.path">(scenedetect.backends.pyav.VideoStreamAv property)</a>
-</li>
-        <li><a href="api/video_splitter.html#scenedetect.video_splitter.VideoMetadata.path">(scenedetect.video_splitter.VideoMetadata attribute)</a>
 </li>
         <li><a href="api/video_stream.html#scenedetect.video_stream.VideoStream.path">(scenedetect.video_stream.VideoStream property)</a>
 </li>
@@ -1329,19 +1320,17 @@
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/detectors.html#scenedetect.detectors.adaptive_detector.AdaptiveDetector.post_process">post_process() (scenedetect.detectors.adaptive_detector.AdaptiveDetector method)</a>
+      <li><a href="api/detector.html#scenedetect.detector.SceneDetector.post_process">post_process() (scenedetect.detector.SceneDetector method)</a>
 
       <ul>
         <li><a href="api/detectors.html#scenedetect.detectors.threshold_detector.ThresholdDetector.post_process">(scenedetect.detectors.threshold_detector.ThresholdDetector method)</a>
 </li>
-        <li><a href="api/scene_detector.html#scenedetect.scene_detector.SceneDetector.post_process">(scenedetect.scene_detector.SceneDetector method)</a>
-</li>
       </ul></li>
-      <li><a href="api/frame_timecode.html#scenedetect.frame_timecode.FrameTimecode.previous_frame">previous_frame() (scenedetect.frame_timecode.FrameTimecode method)</a>
-</li>
-      <li><a href="api/detectors.html#scenedetect.detectors.adaptive_detector.AdaptiveDetector.process_frame">process_frame() (scenedetect.detectors.adaptive_detector.AdaptiveDetector method)</a>
+      <li><a href="api/detector.html#scenedetect.detector.SceneDetector.process_frame">process_frame() (scenedetect.detector.SceneDetector method)</a>
 
       <ul>
+        <li><a href="api/detectors.html#scenedetect.detectors.adaptive_detector.AdaptiveDetector.process_frame">(scenedetect.detectors.adaptive_detector.AdaptiveDetector method)</a>
+</li>
         <li><a href="api/detectors.html#scenedetect.detectors.content_detector.ContentDetector.process_frame">(scenedetect.detectors.content_detector.ContentDetector method)</a>
 </li>
         <li><a href="api/detectors.html#scenedetect.detectors.hash_detector.HashDetector.process_frame">(scenedetect.detectors.hash_detector.HashDetector method)</a>
@@ -1350,11 +1339,15 @@
 </li>
         <li><a href="api/detectors.html#scenedetect.detectors.threshold_detector.ThresholdDetector.process_frame">(scenedetect.detectors.threshold_detector.ThresholdDetector method)</a>
 </li>
-        <li><a href="api/scene_detector.html#scenedetect.scene_detector.SceneDetector.process_frame">(scenedetect.scene_detector.SceneDetector method)</a>
-</li>
       </ul></li>
       <li><a href="api/scene_manager.html#scenedetect.scene_manager.PROGRESS_BAR_DESCRIPTION">PROGRESS_BAR_DESCRIPTION (in module scenedetect.scene_manager)</a>
 </li>
+      <li><a href="api/common.html#scenedetect.common.FrameTimecode.pts">pts (scenedetect.common.FrameTimecode property)</a>
+
+      <ul>
+        <li><a href="api/common.html#scenedetect.common.Timecode.pts">(scenedetect.common.Timecode attribute)</a>
+</li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -1395,7 +1388,7 @@
 <h2 id="S">S</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/scene_manager.html#scenedetect.scene_manager.save_images">save_images() (in module scenedetect.scene_manager)</a>
+      <li><a href="api/output.html#scenedetect.output.save_images">save_images() (in module scenedetect.output)</a>
 </li>
       <li><a href="api/stats_manager.html#scenedetect.stats_manager.StatsManager.save_to_csv">save_to_csv() (scenedetect.stats_manager.StatsManager method)</a>
 </li>
@@ -1477,8 +1470,6 @@
 </li>
         <li><a href="cli.html#cmdoption-scenedetect-detect-adaptive-c">--min-content-val</a>
 </li>
-        <li><a href="cli.html#cmdoption-scenedetect-detect-adaptive-d">--min-delta-hsv</a>
-</li>
         <li><a href="cli.html#cmdoption-scenedetect-detect-adaptive-m">--min-scene-len</a>
 </li>
         <li><a href="cli.html#cmdoption-scenedetect-detect-adaptive-t">--threshold</a>
@@ -1486,8 +1477,6 @@
         <li><a href="cli.html#cmdoption-scenedetect-detect-adaptive-w">--weights</a>
 </li>
         <li><a href="cli.html#cmdoption-scenedetect-detect-adaptive-c">-c</a>
-</li>
-        <li><a href="cli.html#cmdoption-scenedetect-detect-adaptive-d">-d</a>
 </li>
         <li><a href="cli.html#cmdoption-scenedetect-detect-adaptive-f">-f</a>
 </li>
@@ -1650,30 +1639,47 @@
 </li>
       </ul></li>
       <li>
+    scenedetect-save-fcp command line option
+
+      <ul>
+        <li><a href="cli.html#cmdoption-scenedetect-save-fcp-f">--filename</a>
+</li>
+        <li><a href="cli.html#cmdoption-scenedetect-save-fcp-format">--format</a>
+</li>
+        <li><a href="cli.html#cmdoption-scenedetect-save-fcp-o">--output</a>
+</li>
+        <li><a href="cli.html#cmdoption-scenedetect-save-fcp-f">-f</a>
+</li>
+        <li><a href="cli.html#cmdoption-scenedetect-save-fcp-o">-o</a>
+</li>
+      </ul></li>
+      <li>
     scenedetect-save-html command line option
 
       <ul>
-        <li><a href="cli.html#cmdoption-scenedetect-save-html-0">--filename</a>, <a href="cli.html#cmdoption-scenedetect-save-html-f">[1]</a>
+        <li><a href="cli.html#cmdoption-scenedetect-save-html-f">--filename</a>
 </li>
-        <li><a href="cli.html#cmdoption-scenedetect-save-html-6">--image-height</a>, <a href="cli.html#cmdoption-scenedetect-save-html-h">[1]</a>
+        <li><a href="cli.html#cmdoption-scenedetect-save-html-h">--image-height</a>
 </li>
-        <li><a href="cli.html#cmdoption-scenedetect-save-html-4">--image-width</a>, <a href="cli.html#cmdoption-scenedetect-save-html-w">[1]</a>
+        <li><a href="cli.html#cmdoption-scenedetect-save-html-w">--image-width</a>
 </li>
-        <li><a href="cli.html#cmdoption-scenedetect-save-html-2">--no-images</a>, <a href="cli.html#cmdoption-scenedetect-save-html-n">[1]</a>
+        <li><a href="cli.html#cmdoption-scenedetect-save-html-n">--no-images</a>
 </li>
-        <li><a href="cli.html#cmdoption-scenedetect-save-html-8">--show</a>, <a href="cli.html#cmdoption-scenedetect-save-html-s">[1]</a>
+        <li><a href="cli.html#cmdoption-scenedetect-save-html-s">--show</a>
 </li>
-        <li><a href="cli.html#cmdoption-scenedetect-save-html-0">-f</a>, <a href="cli.html#cmdoption-scenedetect-save-html-f">[1]</a>
+        <li><a href="cli.html#cmdoption-scenedetect-save-html-f">-f</a>
 </li>
-        <li><a href="cli.html#cmdoption-scenedetect-save-html-6">-h</a>, <a href="cli.html#cmdoption-scenedetect-save-html-h">[1]</a>
+        <li><a href="cli.html#cmdoption-scenedetect-save-html-h">-h</a>
 </li>
-        <li><a href="cli.html#cmdoption-scenedetect-save-html-2">-n</a>, <a href="cli.html#cmdoption-scenedetect-save-html-n">[1]</a>
+        <li><a href="cli.html#cmdoption-scenedetect-save-html-n">-n</a>
 </li>
-        <li><a href="cli.html#cmdoption-scenedetect-save-html-8">-s</a>, <a href="cli.html#cmdoption-scenedetect-save-html-s">[1]</a>
+        <li><a href="cli.html#cmdoption-scenedetect-save-html-s">-s</a>
 </li>
-        <li><a href="cli.html#cmdoption-scenedetect-save-html-4">-w</a>, <a href="cli.html#cmdoption-scenedetect-save-html-w">[1]</a>
+        <li><a href="cli.html#cmdoption-scenedetect-save-html-w">-w</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     scenedetect-save-images command line option
 
@@ -1727,8 +1733,6 @@
         <li><a href="cli.html#cmdoption-scenedetect-save-images-W">-W</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     scenedetect-save-otio command line option
 
@@ -1765,21 +1769,6 @@
         <li><a href="cli.html#cmdoption-scenedetect-save-qp-f">-f</a>
 </li>
         <li><a href="cli.html#cmdoption-scenedetect-save-qp-o">-o</a>
-</li>
-      </ul></li>
-      <li>
-    scenedetect-save-xml command line option
-
-      <ul>
-        <li><a href="cli.html#cmdoption-scenedetect-save-xml-f">--filename</a>
-</li>
-        <li><a href="cli.html#cmdoption-scenedetect-save-xml-format">--format</a>
-</li>
-        <li><a href="cli.html#cmdoption-scenedetect-save-xml-o">--output</a>
-</li>
-        <li><a href="cli.html#cmdoption-scenedetect-save-xml-f">-f</a>
-</li>
-        <li><a href="cli.html#cmdoption-scenedetect-save-xml-o">-o</a>
 </li>
       </ul></li>
       <li>
@@ -1869,6 +1858,20 @@
 </li>
       </ul></li>
       <li>
+    scenedetect.common
+
+      <ul>
+        <li><a href="api/common.html#module-scenedetect.common">module</a>
+</li>
+      </ul></li>
+      <li>
+    scenedetect.detector
+
+      <ul>
+        <li><a href="api/detector.html#module-scenedetect.detector">module</a>
+</li>
+      </ul></li>
+      <li>
     scenedetect.detectors
 
       <ul>
@@ -1911,24 +1914,10 @@
 </li>
       </ul></li>
       <li>
-    scenedetect.frame_timecode
-
-      <ul>
-        <li><a href="api/frame_timecode.html#module-scenedetect.frame_timecode">module</a>
-</li>
-      </ul></li>
-      <li>
     scenedetect.platform
 
       <ul>
         <li><a href="api/platform.html#module-scenedetect.platform">module</a>
-</li>
-      </ul></li>
-      <li>
-    scenedetect.scene_detector
-
-      <ul>
-        <li><a href="api/scene_detector.html#module-scenedetect.scene_detector">module</a>
 </li>
       </ul></li>
       <li>
@@ -1946,26 +1935,21 @@
 </li>
       </ul></li>
       <li>
-    scenedetect.video_splitter
-
-      <ul>
-        <li><a href="api/video_splitter.html#module-scenedetect.video_splitter">module</a>
-</li>
-      </ul></li>
-      <li>
     scenedetect.video_stream
 
       <ul>
         <li><a href="api/video_stream.html#module-scenedetect.video_stream">module</a>
 </li>
       </ul></li>
-      <li><a href="api/scene_detector.html#scenedetect.scene_detector.SceneDetector">SceneDetector (class in scenedetect.scene_detector)</a>
+      <li><a href="api/detector.html#scenedetect.detector.SceneDetector">SceneDetector (class in scenedetect.detector)</a>
 </li>
-      <li><a href="api/scene_manager.html#scenedetect.scene_manager.SceneList">SceneList (in module scenedetect.scene_manager)</a>
+      <li><a href="api/common.html#scenedetect.common.SceneList">SceneList (in module scenedetect.common)</a>
 </li>
       <li><a href="api/scene_manager.html#scenedetect.scene_manager.SceneManager">SceneManager (class in scenedetect.scene_manager)</a>
 </li>
-      <li><a href="api/video_splitter.html#scenedetect.video_splitter.SceneMetadata">SceneMetadata (class in scenedetect.video_splitter)</a>
+      <li><a href="api/output.html#scenedetect.output.SceneMetadata">SceneMetadata (class in scenedetect.output)</a>
+</li>
+      <li><a href="api/common.html#scenedetect.common.FrameTimecode.seconds">seconds (scenedetect.common.FrameTimecode property)</a>
 </li>
       <li><a href="api/backends.html#scenedetect.backends.moviepy.VideoStreamMoviePy.seek">seek() (scenedetect.backends.moviepy.VideoStreamMoviePy method)</a>
 
@@ -1985,22 +1969,14 @@
 </li>
       <li><a href="api/stats_manager.html#scenedetect.stats_manager.StatsManager.set_metrics">set_metrics() (scenedetect.stats_manager.StatsManager method)</a>
 </li>
-      <li><a href="api/video_splitter.html#scenedetect.video_splitter.split_video_ffmpeg">split_video_ffmpeg() (in module scenedetect.video_splitter)</a>
+      <li><a href="api/output.html#scenedetect.output.split_video_ffmpeg">split_video_ffmpeg() (in module scenedetect.output)</a>
 </li>
-      <li><a href="api/video_splitter.html#scenedetect.video_splitter.split_video_mkvmerge">split_video_mkvmerge() (in module scenedetect.video_splitter)</a>
+      <li><a href="api/output.html#scenedetect.output.split_video_mkvmerge">split_video_mkvmerge() (in module scenedetect.output)</a>
 </li>
-      <li><a href="api/video_splitter.html#scenedetect.video_splitter.SceneMetadata.start">start (scenedetect.video_splitter.SceneMetadata attribute)</a>
-</li>
-      <li><a href="api/scene_detector.html#scenedetect.scene_detector.SceneDetector.stats_manager">stats_manager (scenedetect.scene_detector.SceneDetector attribute)</a>
+      <li><a href="api/detector.html#scenedetect.detector.SceneDetector.stats_manager">stats_manager (scenedetect.detector.SceneDetector property)</a>
 
       <ul>
         <li><a href="api/scene_manager.html#scenedetect.scene_manager.SceneManager.stats_manager">(scenedetect.scene_manager.SceneManager property)</a>
-</li>
-      </ul></li>
-      <li><a href="api/detectors.html#scenedetect.detectors.adaptive_detector.AdaptiveDetector.stats_manager_required">stats_manager_required() (scenedetect.detectors.adaptive_detector.AdaptiveDetector method)</a>
-
-      <ul>
-        <li><a href="api/scene_detector.html#scenedetect.scene_detector.SceneDetector.stats_manager_required">(scenedetect.scene_detector.SceneDetector method)</a>
 </li>
       </ul></li>
       <li><a href="api/stats_manager.html#scenedetect.stats_manager.StatsFileCorrupt">StatsFileCorrupt</a>
@@ -2009,7 +1985,9 @@
 </li>
       <li><a href="api/scene_manager.html#scenedetect.scene_manager.SceneManager.stop">stop() (scenedetect.scene_manager.SceneManager method)</a>
 </li>
-      <li><a href="api/scene_detector.html#scenedetect.scene_detector.FlashFilter.Mode.SUPPRESS">SUPPRESS (scenedetect.scene_detector.FlashFilter.Mode attribute)</a>
+      <li><a href="api/platform.html#scenedetect.platform.StrPath">StrPath (in module scenedetect.platform)</a>
+</li>
+      <li><a href="api/detector.html#scenedetect.detector.FlashFilter.Mode.SUPPRESS">SUPPRESS (scenedetect.detector.FlashFilter.Mode attribute)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -2021,13 +1999,23 @@
 </li>
       <li><a href="api/detectors.html#scenedetect.detectors.threshold_detector.ThresholdDetector">ThresholdDetector (class in scenedetect.detectors.threshold_detector)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/detectors.html#scenedetect.detectors.threshold_detector.ThresholdDetector.Method">ThresholdDetector.Method (class in scenedetect.detectors.threshold_detector)</a>
 </li>
-      <li><a href="api/video_splitter.html#scenedetect.video_splitter.TimecodePair">TimecodePair (in module scenedetect.video_splitter)</a>
+      <li><a href="api/common.html#scenedetect.common.FrameTimecode.time_base">time_base (scenedetect.common.FrameTimecode property)</a>
+
+      <ul>
+        <li><a href="api/common.html#scenedetect.common.Timecode.time_base">(scenedetect.common.Timecode attribute)</a>
 </li>
-      <li><a href="api/video_splitter.html#scenedetect.video_splitter.VideoMetadata.total_scenes">total_scenes (scenedetect.video_splitter.VideoMetadata attribute)</a>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/common.html#scenedetect.common.Timecode">Timecode (class in scenedetect.common)</a>
+</li>
+      <li><a href="api/backends.html#scenedetect.backends.opencv.VideoStreamCv2.timecode">timecode (scenedetect.backends.opencv.VideoStreamCv2 property)</a>
+</li>
+      <li><a href="api/common.html#scenedetect.common.TimecodeLike">TimecodeLike (in module scenedetect.common)</a>
+</li>
+      <li><a href="api/common.html#scenedetect.common.TimecodePair">TimecodePair (in module scenedetect.common)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -2047,7 +2035,7 @@
 </li>
       <li><a href="api/backends.html#scenedetect.backends.opencv.VideoCaptureAdapter">VideoCaptureAdapter (class in scenedetect.backends.opencv)</a>
 </li>
-      <li><a href="api/video_splitter.html#scenedetect.video_splitter.VideoMetadata">VideoMetadata (class in scenedetect.video_splitter)</a>
+      <li><a href="api/output.html#scenedetect.output.VideoMetadata">VideoMetadata (class in scenedetect.output)</a>
 </li>
       <li><a href="api/video_stream.html#scenedetect.video_stream.VideoOpenFailure">VideoOpenFailure</a>
 </li>
@@ -2067,11 +2055,19 @@
 <h2 id="W">W</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/scene_manager.html#scenedetect.scene_manager.write_scene_list">write_scene_list() (in module scenedetect.scene_manager)</a>
+      <li><a href="api/output.html#scenedetect.output.write_scene_list">write_scene_list() (in module scenedetect.output)</a>
+</li>
+      <li><a href="api/output.html#scenedetect.output.write_scene_list_edl">write_scene_list_edl() (in module scenedetect.output)</a>
+</li>
+      <li><a href="api/output.html#scenedetect.output.write_scene_list_fcp7">write_scene_list_fcp7() (in module scenedetect.output)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/scene_manager.html#scenedetect.scene_manager.write_scene_list_html">write_scene_list_html() (in module scenedetect.scene_manager)</a>
+      <li><a href="api/output.html#scenedetect.output.write_scene_list_fcpx">write_scene_list_fcpx() (in module scenedetect.output)</a>
+</li>
+      <li><a href="api/output.html#scenedetect.output.write_scene_list_html">write_scene_list_html() (in module scenedetect.output)</a>
+</li>
+      <li><a href="api/output.html#scenedetect.output.write_scene_list_otio">write_scene_list_otio() (in module scenedetect.output)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -2100,7 +2096,7 @@
 
 
 
-<p class="blurb">Version: [0.6.7.1]</p>
+<p class="blurb">Version: [0.7]</p>
 
 
 
@@ -2128,14 +2124,14 @@
 <p class="caption" role="heading"><span class="caption-text">API Documentation:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="api.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api/detectors.html">Detection Algorithms</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api/backends.html">Backends</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api/scene_manager.html">SceneManager</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api/video_splitter.html">Video Splitting</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api/stats_manager.html">StatsManager</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api/frame_timecode.html">FrameTimecode</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api/scene_detector.html">SceneDetector</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api/video_stream.html">VideoStream</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/detectors.html">Detectors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/output.html">Ouptut</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/backends.html">Video Backends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/common.html">Common</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/scene_manager.html">Scene Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/detector.html">Detector Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/video_stream.html">Stream Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/stats_manager.html">Stats Manager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/platform.html">Platform &amp; Logging</a></li>
 </ul>
 
@@ -2169,7 +2165,7 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &#169;2014-2024, Brandon Castellano.
+      &#169;2014, Brandon Castellano.
       
       |
       Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.0.1</a>

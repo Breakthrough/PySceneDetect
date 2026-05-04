@@ -2,7 +2,7 @@
 .. _scenedetect-backends:
 
 ----------------------------------------
-Backends
+Video Backends
 ----------------------------------------
 
 .. automodule:: scenedetect.backends

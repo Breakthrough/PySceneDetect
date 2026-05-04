@@ -1,136 +1,290 @@
 
-.. _scenedetect-migration_guide:
+.. _scenedetect-migration-guide:
 
----------------------------------------------------------------
-Migration Guide
----------------------------------------------------------------
+***********************************************************************
+Migration Guide: v0.6 to v0.7
+***********************************************************************
 
-This page details how to transition a program written using PySceneDetect 0.5 to the new 0.6 API. It is recommended to review the new :ref:`Example <scenedetect-quickstart>` section first, as it covers the majority of use cases. Also see `tests/test_api.py <https://github.com/Breakthrough/PySceneDetect/blob/v0.6.4-release/tests/test_api.py>`_ for a set of demonstrations covering many high level use cases.
+PySceneDetect v0.7 is a major release that overhauls timestamp handling to support variable framerate (VFR) videos. While the high-level :func:`scenedetect.detect` workflow is largely unchanged, several internal APIs have been restructured. This guide covers the changes needed to update applications from v0.6 to v0.7.
 
-PySceneDetect v0.6 is a major step towards a more stable and simplified API.  The biggest change to existing workflows is how video input is handled, and that Python 3.6 or above is now required.
-
-This page covers commonly used APIs which require updates to work with v0.6.  Note that this page is not an exhaustive set of changes.  For a complete list of breaking API changes, see `the changelog <https://www.scenedetect.com/changelog/>`_.
-
-In some places, a backwards compatibility layer has been added to avoid breaking most applications upon release. This should not be relied upon, and will be removed in the future. You can call ``scenedetect.platform.init_logger(show_stdout=True)`` or attach a custom log handler to the ``'pyscenedetect'`` logger to help find these cases.
+The minimum supported Python version is now **Python 3.10**.
 
 
-===============================================================
-`VideoManager` Class
-===============================================================
+=======================================================================
+Quick Check
+=======================================================================
 
-`VideoManager` has been deprecated and replaced with :mod:`scenedetect.backends`.  For most applications, the :func:`open_video <scenedetect.open_video>` function should be used instead:
+If your code only uses :func:`scenedetect.detect` with a built-in detector, it should work without changes:
 
 .. code:: python
 
-    from scenedetect import open_video
-    video = open_video(video.mp4')
+    # This still works in v0.7
+    from scenedetect import detect, ContentDetector
+    scenes = detect("video.mp4", ContentDetector())
 
-The resulting object can then be passed to a :class:`SceneManager <scenedetect.scene_manager.SceneManager>` when calling :meth:`detect_scenes <scenedetect.scene_manager.SceneManager.detect_scenes>`, or any other function/method that used to take a `VideoManager`, e.g.:
+
+=======================================================================
+Import Changes
+=======================================================================
+
+Several submodules have been reorganized. If you import directly from `scenedetect` you do not need to make any changes. Update imports as follows:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 50 50
+
+   * - v0.6
+     - v0.7
+   * - ``from scenedetect.frame_timecode import FrameTimecode``
+     - ``from scenedetect.common import FrameTimecode``
+   * - ``from scenedetect.scene_detector import SceneDetector``
+     - ``from scenedetect.detector import SceneDetector``
+   * - ``from scenedetect.video_splitter import split_video_ffmpeg``
+     - ``from scenedetect.output import split_video_ffmpeg``
+   * - ``from scenedetect.video_splitter import split_video_mkvmerge``
+     - ``from scenedetect.output import split_video_mkvmerge``
+   * - ``from scenedetect.scene_manager import save_images``
+     - ``from scenedetect.output import save_images``
+   * - ``from scenedetect.scene_manager import write_scene_list``
+     - ``from scenedetect.output import write_scene_list``
+   * - ``from scenedetect.scene_manager import write_scene_list_html``
+     - ``from scenedetect.output import write_scene_list_html``
+   * - ``from scenedetect.video_manager import VideoManager``
+     - Removed. Use :func:`scenedetect.open_video` instead.
+
+.. note::
+
+    Most commonly used types and functions are also available directly from the top-level ``scenedetect`` package (e.g. ``from scenedetect import FrameTimecode``), which has not changed.
+
+.. note::
+
+    The ``frame_timecode``, ``scene_detector``, and ``video_splitter`` submodules emit a ``DeprecationWarning`` when imported directly. The ``save_images``, ``write_scene_list``, and ``write_scene_list_html`` re-exports from ``scenedetect.scene_manager`` continue to work silently in v0.7 but **will be removed in v0.8**. Import these symbols from ``scenedetect`` directly to avoid breakage.
+
+
+=======================================================================
+Custom Detector Changes
+=======================================================================
+
+If you have written a custom :class:`SceneDetector <scenedetect.detector.SceneDetector>` subclass, there are several interface changes.
+
+``process_frame`` Signature
+-----------------------------------------------------------------------
+
+The ``frame_num`` parameter (``int``) has been replaced with ``timecode`` (:class:`FrameTimecode <scenedetect.common.FrameTimecode>`):
 
 .. code:: python
 
-    from scenedetect import open_video, SceneManager, ContentDetector
-    video = open_video('video.mp4')
-    scene_manager = SceneManager()
-    scene_manager.add_detector(ContentDetector(threshold=threshold))
-    scene_manager.detect_scenes(video)
-    print(scene_manager.get_scene_list())
+    # v0.6
+    class MyDetector(SceneDetector):
+        def process_frame(self, frame_num: int, frame_img) -> List[int]:
+            ...
 
-See :mod:`scenedetect.backends` for examples of how to create specific backends.  Where previously a list of paths was accepted, now only a single string should be provided.
+    # v0.7
+    class MyDetector(SceneDetector):
+        def process_frame(self, timecode: FrameTimecode, frame_img) -> List[FrameTimecode]:
+            ...
+
+The same change applies to ``post_process()``. Using units of time instead of frame numbers is critical for temporal accuracy. If you need the frame number, use ``timecode.frame_num`` to the timecode to an integer.
+
+``SceneDetector`` is Now Abstract
+-----------------------------------------------------------------------
+
+``SceneDetector`` is now a Python `abstract class <https://docs.python.org/3/library/abc.html>`_. Subclasses **must** implement ``process_frame()``.
+
+Removed Methods and Properties
+-----------------------------------------------------------------------
+
+The following have been removed from the ``SceneDetector`` interface:
+
+- ``is_processing_required()`` - detectors can now assume they always have frame data
+- ``stats_manager_required`` property - no longer needed
+- ``SparseSceneDetector`` interface - removed entirely
 
 
-Seeking and Start/End Times
-===============================================================
+=======================================================================
+``FrameTimecode`` Changes
+=======================================================================
 
-Instead of setting the start time via the `VideoManager`, now :meth:`seek <scenedetect.video_stream.VideoStream.seek>` to the starting time on the :class:`VideoStream <scenedetect.video_stream.VideoStream>` object.
+Read-Only Properties
+-----------------------------------------------------------------------
 
-Instead of setting the duration or end time via the `VideoManager`, now set the `duration` or `end_time` parameters when calling :meth:`detect_scenes <scenedetect.scene_manager.SceneManager.detect_scenes>`.
+:attr:`~scenedetect.common.FrameTimecode.frame_num` and :attr:`~scenedetect.common.FrameTimecode.frame_rate` are now read-only properties. To change them, construct a new ``FrameTimecode``:
 
 .. code:: python
 
-    from scenedetect import open_video, SceneManager, ContentDetector
-    video = open_video('video.mp4')
-    # Can be seconds (float), frame # (int), or FrameTimecode
-    start_time, end_time = 2.5, 5.0
-    scene_manager = SceneManager()
-    scene_manager.add_detector(ContentDetector(threshold=threshold))
-    video.seek(start_time)
-    # Note there is also a `duration` parameter that can also be set.
-    # If neither `duration` nor `end_time` is provided, the video will
-    # be processed from its current position until the end.
-    scene_manager.detect_scenes(video, end_time=end_time)
-    print(scene_manager.get_scene_list())
+    tc = FrameTimecode(0, 24.0)
+    # Can no longer reassign frame_num, must create a new FrameTimecode instead:
+    #tc.frame_num = 100
+    tc = FrameTimecode(100, tc)
+
+New Properties
+-----------------------------------------------------------------------
+
+Access :attr:`~scenedetect.common.FrameTimecode.frame_num`, :attr:`~scenedetect.common.FrameTimecode.frame_rate`, and :attr:`~scenedetect.common.FrameTimecode.seconds` as properties instead of getter methods. The new :attr:`~scenedetect.common.FrameTimecode.frame_rate` property returns an exact :class:`fractions.Fraction` and matches :attr:`~scenedetect.video_stream.VideoStream.frame_rate`:
+
+.. code:: python
+
+    from fractions import Fraction
+    tc = FrameTimecode(100, 29.97)
+    tc.frame_num    # 100
+    tc.frame_rate   # Fraction(30000, 1001) (exact)
+    tc.time_base    # Fraction(1001, 30000)
+    tc.seconds      # ~3.337
+
+``time_base`` equals ``1 / frame_rate`` for CFR sources. For VFR (``Timecode``-backed) instances, ``time_base`` is authoritative and ``frame_rate`` is an approximation.
+
+``Fraction`` participates in numeric arithmetic and comparisons just like ``float``, and converts implicitly when mixed with floats (the result is a ``float``). When a ``float`` is explicitly required (e.g. format specifiers, ``json.dumps``, ``isinstance(x, float)`` checks) wrap the value with ``float(...)``:
+
+.. code:: python
+
+    rate = tc.frame_rate            # Fraction(30000, 1001)
+    rate * 2                        # Fraction(60000, 1001)
+    rate > 24                       # True
+    rate * 0.5                      # 14.985... (float, mixed arithmetic)
+    f"{float(rate):.3f}"            # '29.970' (explicit cast for format spec)
+
+The legacy ``framerate`` property (one word, returns ``float``) is retained as a deprecated alias and will emit a ``DeprecationWarning`` in a future release. Migrate to ``frame_rate``; cast with ``float(...)`` at the call site if you specifically need a ``float``.
+
+Renamed Method: ``equal_framerate()``
+-----------------------------------------------------------------------
+
+:meth:`~scenedetect.common.FrameTimecode.equal_framerate` has been renamed to :meth:`~scenedetect.common.FrameTimecode.equal_frame_rate` for consistency with the :attr:`~scenedetect.common.FrameTimecode.frame_rate` property. The legacy ``equal_framerate()`` method is retained as a deprecated alias and will emit a ``DeprecationWarning`` in a future release. The new form additionally accepts a ``Fraction`` or another ``FrameTimecode`` (in addition to ``float``).
+
+Removed Methods
+-----------------------------------------------------------------------
+
+- ``previous_frame()`` - removed, use ``FrameTimecode(tc.frame_num - 1, tc)`` instead (passing a ``FrameTimecode`` as the ``fps`` argument reuses its rate)
 
 
-===============================================================
-`SceneManager` Class
-===============================================================
+=======================================================================
+Framerate and Timestamp Changes
+=======================================================================
 
-The first argument of the :meth:`detect_scenes <scenedetect.scene_manager.SceneManager.detect_scenes>` method has been renamed to `video` and should now be a :class:`VideoStream <scenedetect.video_stream.VideoStream>` object (see above).
+Rational Framerates
+-----------------------------------------------------------------------
 
+:attr:`~scenedetect.video_stream.VideoStream.frame_rate` now returns a ``Fraction`` instead of ``float``. Common NTSC rates (23.976, 29.97, 59.94) are automatically detected from float values:
 
-===============================================================
-`save_images` Function
-===============================================================
+.. code:: python
 
-The second argument of :func:`save_images <scenedetect.scene_manager.save_images>` in :mod:`scenedetect.scene_manager` has been renamed from `video_manager` to `video`.
+    from fractions import Fraction
+    video = open_video("video.mp4")
+    assert isinstance(video.frame_rate, Fraction)
+    # e.g. Fraction(24000, 1001) instead of 23.976023976...
 
-The `downscale_factor` parameter has been removed from :func:`save_images <scenedetect.scene_manager.save_images>` (use the `scale` parameter instead). To achieve the same result as the previous version, set `scale` to `1.0 / downscale_factor`.
+``frame_rate`` Keyword Argument
+-----------------------------------------------------------------------
 
+The ``framerate`` keyword argument has been renamed to ``frame_rate`` on :func:`~scenedetect.open_video` and on every backend constructor (:class:`~scenedetect.backends.opencv.VideoStreamCv2`, :class:`~scenedetect.backends.opencv.VideoCaptureAdapter`, :class:`~scenedetect.backends.pyav.VideoStreamAv`, :class:`~scenedetect.backends.moviepy.VideoStreamMoviePy`). The new form accepts ``float | Fraction | None``. The legacy ``framerate`` keyword is retained as a deprecated alias and will emit a ``DeprecationWarning`` in a future release; if both are supplied, ``frame_rate`` takes precedence.
 
-===============================================================
-`split_video_*` Functions
-===============================================================
+.. code:: python
 
-The the :mod:`scenedetect.video_splitter` functions :func:`split_video_ffmpeg <scenedetect.video_splitter.split_video_ffmpeg>` and :func:`split_video_mkvmerge <scenedetect.video_splitter.split_video_mkvmerge>` now only accept a single path as the input (first) argument.
+    # v0.6 - will still work but will be removed in a future version
+    video = open_video("video.mp4", framerate=30.0)
 
-The `suppress_output` and `hide_progress` arguments to the :func:`split_video_ffmpeg <scenedetect.video_splitter.split_video_ffmpeg>` and :func:`split_video_mkvmerge <scenedetect.video_splitter.split_video_mkvmerge>` have been removed, and two new options have been added:
+    # v0.7
+    video = open_video("video.mp4", frame_rate=30.0)
 
- * `suppress_output` is now `show_output`, default is `False`
- * `hide_progress` is now `show_progress`, default is `False`
+PTS-Backed Timestamps
+-----------------------------------------------------------------------
 
-This makes the API consistent with that of :class:`SceneManager <scenedetect.scene_manager.SceneManager>`.
+All backends now return presentation timestamp (PTS) backed values from :attr:`~scenedetect.video_stream.VideoStream.position`. This enables correct handling of VFR videos.
 
-
-===============================================================
-`StatsManager` Class
-===============================================================
-
-The :func:`save_to_csv <scenedetect.stats_manager.StatsManager.save_to_csv>` and :func:`load_from_csv <scenedetect.stats_manager.StatsManager.save_to_csv>` methods now accept either a `path` or an open `file` handle.
-
-The `base_timecode` argument has been removed from :func:`save_to_csv <scenedetect.stats_manager.StatsManager.save_to_csv>`. It is no longer required.
+``FrameTimecode`` has new :attr:`~scenedetect.common.FrameTimecode.time_base` and :attr:`~scenedetect.common.FrameTimecode.pts` properties for accessing the underlying timing information. For VFR videos, :attr:`~scenedetect.common.FrameTimecode.frame_num` is now an approximation based on PTS-derived time rather than a sequential count.
 
 
-===============================================================
-`AdaptiveDetector` Class
-===============================================================
+=======================================================================
+``StatsManager`` Changes
+=======================================================================
 
-The `video_manager` parameter has been removed and is no longer required when constructing an :class:`AdaptiveDetector <scenedetect.detectors.adaptive_detector.AdaptiveDetector>` object.
+The ``StatsManager`` methods :meth:`~scenedetect.stats_manager.StatsManager.get_metrics`, :meth:`~scenedetect.stats_manager.StatsManager.set_metrics`, and :meth:`~scenedetect.stats_manager.StatsManager.metrics_exist` now formally accept either a ``FrameTimecode`` or a plain ``int`` frame number for the timecode argument. Passing a ``FrameTimecode`` is preferred and matches the detector interface; the ``int`` form is retained for compatibility with the deprecated ``load_from_csv()`` path, which keys metrics by integer frame number.
 
-
-===============================================================
-Other
-===============================================================
-
-`ThresholdDetector` Class
-===============================================================
-
-The `block_size` argument has been removed from the :class:`ThresholdDetector <scenedetect.detectors.threshold_detector.ThresholdDetector>` constructor. It is no longer required.
+``StatsManager.load_from_csv()`` also accepts ``os.PathLike`` (e.g. ``pathlib.Path``) in addition to ``str`` / ``bytes`` / file handles.
 
 
-`ContentDetector` Class
-===============================================================
+=======================================================================
+``SceneDetector`` Annotation Fixes
+=======================================================================
 
-The `calculate_frame_score` method of :class:`ContentDetector <scenedetect.detectors.content_detector.ContentDetector>` has been renamed to :meth:`_calculate_frame_score <scenedetect.detectors.content_detector.ContentDetector._calculate_frame_score>`. Use new global function :func:`calculate_frame_score <scenedetect.detectors.content_detector.calculate_frame_score>` to achieve the same result.
-
-
-`MINIMUM_FRAMES_PER_SECOND_*` Constants
-===============================================================
-
-In :mod:`scenedetect.frame_timecode` the constants `MINIMUM_FRAMES_PER_SECOND_FLOAT` and `MINIMUM_FRAMES_PER_SECOND_DELTA_FLOAT` have been replaced with :data:`MAX_FPS_DELTA <scenedetect.frame_timecode.MAX_FPS_DELTA>`.
+:meth:`~scenedetect.detector.SceneDetector.post_process` now declares its parameter as ``timecode: FrameTimecode`` (previously typed as ``int``). The method already received a ``FrameTimecode`` at runtime and concrete detectors (e.g. ``ThresholdDetector``, ``ContentDetector``) already used the ``FrameTimecode`` type - only the abstract-base-class annotation was inconsistent. No call-site changes are needed; this just brings the signature into agreement with the documented and actual behavior.
 
 
-`get_aspect_ratio` Function
-===============================================================
+=======================================================================
+``SceneManager.detect_scenes()`` Time Arguments
+=======================================================================
 
- The `get_aspect_ratio` function has been removed from `scenedetect.platform`. Use the :attr:`aspect_ratio <scenedetect.video_stream.VideoStream.aspect_ratio>` property from the :class:`VideoStream <scenedetect.video_stream.VideoStream>`  object instead.
+The ``duration`` and ``end_time`` arguments of :meth:`~scenedetect.scene_manager.SceneManager.detect_scenes` now formally accept ``int`` (frames), ``float`` (seconds), ``str`` (timecode string, e.g. ``"00:00:05.000"``), or ``FrameTimecode``. The internal code already validated these forms; the annotation was previously narrower than the documented behavior.
+
+.. code:: python
+
+    # All of these were always supported at runtime; now they type-check too:
+    scene_manager.detect_scenes(video, end_time=15.0)         # seconds
+    scene_manager.detect_scenes(video, end_time=1500)         # frames
+    scene_manager.detect_scenes(video, end_time="00:01:00")   # timecode
+
+
+=======================================================================
+``save_images()`` Path Handling
+=======================================================================
+
+The ``output_dir`` argument of :func:`scenedetect.output.save_images` now accepts ``os.PathLike`` (e.g. ``pathlib.Path``) in addition to ``str``. No changes are required for existing string-based callers.
+
+
+=======================================================================
+Removed APIs
+=======================================================================
+
+The following deprecated APIs have been fully removed in v0.7:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 50 50
+
+   * - Removed
+     - Replacement
+   * - ``scenedetect.video_manager`` module
+     - :func:`scenedetect.open_video`
+   * - ``base_timecode`` parameter (various functions)
+     - No longer needed, remove the argument
+   * - ``video_manager`` parameter (various functions)
+     - Use ``video`` parameter instead
+   * - ``SceneManager.get_event_list()``
+     - Use :meth:`~scenedetect.scene_manager.SceneManager.get_cut_list` or :meth:`~scenedetect.scene_manager.SceneManager.get_scene_list`
+   * - ``AdaptiveDetector.get_content_val()``
+     - Use ``StatsManager`` to query metrics
+   * - ``AdaptiveDetector(min_delta_hsv=...)``
+     - Use ``min_content_val`` parameter instead
+   * - ``VideoStream.read(advance=...)``
+     - Call ``read()`` without the ``advance`` parameter
+   * - ``SparseSceneDetector``
+     - No direct replacement, use ``SceneDetector``
+
+.. note::
+
+    Deprecated v0.6 compatibility shims that still exist now emit warnings using the ``warnings`` module. Address any ``DeprecationWarning`` messages to prepare for future releases.
+
+
+=======================================================================
+CLI Changes
+=======================================================================
+
+Removed / Renamed
+-----------------------------------------------------------------------
+
+- The ``-d``/``--min-delta-hsv`` option on ``detect-adaptive`` has been removed. Use ``-c``/``--min-content-val`` instead.
+- The global ``--framerate`` flag has been renamed to ``-f``/``--frame-rate`` for consistency with the API. The legacy ``--framerate`` form is retained as a hidden alias and will be removed in v0.8; if both are supplied, ``--frame-rate`` takes precedence and a warning is logged.
+- The ``export-html`` command has been renamed to :ref:`save-html <command-save-html>`. The legacy ``export-html`` command is retained as a deprecated alias and emits a deprecation warning when used.
+
+New Commands and Options
+-----------------------------------------------------------------------
+
+- New :ref:`save-fcp <command-save-fcp>` command exports scenes in Final Cut Pro XML format (FCP7/FCPX).
+- New :ref:`save-qp <command-save-qp>` command writes a QP file with scene boundary frame numbers, suitable for forcing keyframes at scene cuts in x264/x265.
+- New :ref:`save-html <command-save-html>` command (replaces ``export-html``).
+- New ``-s``/``--start-timecode`` option on :ref:`save-edl <command-save-edl>` provides a custom start timecode for generated EDLs (SMPTE ``HH:MM:SS:FF`` or 8-digit ``HHMMSSFF``).
+
+Other Changes
+-----------------------------------------------------------------------
+
+- VFR videos now work correctly with both the OpenCV and PyAV backends.
+- All CLI options that previously accepted only frame numbers now also accept seconds (e.g. ``0.6s``) and timecodes (e.g. ``00:00:00.600``).
