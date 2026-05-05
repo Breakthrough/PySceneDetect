@@ -18,7 +18,7 @@
     <link rel="icon" href="../_static/favicon.ico"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Stats Manager" href="stats_manager.html" />
+    <link rel="next" title="Common" href="common.html" />
     <link rel="prev" title="Ouptut" href="output.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
@@ -92,7 +92,7 @@ examples for details.</p>
 </section>
 <dl class="py data">
 <dt class="sig sig-object py" id="scenedetect.backends.AVAILABLE_BACKENDS">
-<span class="sig-prename descclassname"><span class="pre">scenedetect.backends.</span></span><span class="sig-name descname"><span class="pre">AVAILABLE_BACKENDS</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">type</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'moviepy':</span> <span class="pre">&lt;class</span> <span class="pre">'scenedetect.backends.moviepy.VideoStreamMoviePy'&gt;,</span> <span class="pre">'opencv':</span> <span class="pre">&lt;class</span> <span class="pre">'scenedetect.backends.opencv.VideoStreamCv2'&gt;,</span> <span class="pre">'pyav':</span> <span class="pre">&lt;class</span> <span class="pre">'scenedetect.backends.pyav.VideoStreamAv'&gt;}</span></em><a class="headerlink" href="#scenedetect.backends.AVAILABLE_BACKENDS" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">AVAILABLE_BACKENDS</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">type</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'moviepy':</span> <span class="pre">&lt;class</span> <span class="pre">'scenedetect.backends.moviepy.VideoStreamMoviePy'&gt;,</span> <span class="pre">'opencv':</span> <span class="pre">&lt;class</span> <span class="pre">'scenedetect.backends.opencv.VideoStreamCv2'&gt;,</span> <span class="pre">'pyav':</span> <span class="pre">&lt;class</span> <span class="pre">'scenedetect.backends.pyav.VideoStreamAv'&gt;}</span></em><a class="headerlink" href="#scenedetect.backends.AVAILABLE_BACKENDS" title="Permalink to this definition">¶</a></dt>
 <dd><p>All available backends that <a class="reference internal" href="../api.html#scenedetect.open_video" title="scenedetect.open_video"><code class="xref py py-func docutils literal notranslate"><span class="pre">scenedetect.open_video()</span></code></a> can consider for the <cite>backend</cite>
 parameter. These backends must support construction with the following signature:</p>
 <blockquote>
@@ -107,7 +107,7 @@ constructed from an existing <cite>cv2.VideoCapture</cite>. This allows performi
 which do not support seeking.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="scenedetect.backends.opencv.VideoCaptureAdapter">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scenedetect.backends.opencv.</span></span><span class="sig-name descname"><span class="pre">VideoCaptureAdapter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cap</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_read_attempts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">framerate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.backends.opencv.VideoCaptureAdapter" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">VideoCaptureAdapter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cap</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_read_attempts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">framerate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.backends.opencv.VideoCaptureAdapter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Adapter for existing VideoCapture objects. Unlike VideoStreamCv2, this class supports
 VideoCaptures which may not support seeking.</p>
 <p>Create from an existing OpenCV VideoCapture object. Used for webcams, live streams,
@@ -147,7 +147,7 @@ memory copying and colorspace conversions when a given frame’s data is not req
 If decode = False, a bool indicating if advancing to the the next frame succeeded.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><em>ndarray</em> | bool</p>
+<dd class="field-odd"><p><em>ndarray</em> | <em>bool</em></p>
 </dd>
 </dl>
 </dd></dl>
@@ -252,7 +252,7 @@ milliseconds. The first frame has a PTS of 0.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="scenedetect.backends.opencv.VideoStreamCv2">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scenedetect.backends.opencv.</span></span><span class="sig-name descname"><span class="pre">VideoStreamCv2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_decode_attempts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path_or_device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">framerate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.backends.opencv.VideoStreamCv2" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">VideoStreamCv2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_decode_attempts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path_or_device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">framerate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.backends.opencv.VideoStreamCv2" title="Permalink to this definition">¶</a></dt>
 <dd><p>OpenCV <cite>cv2.VideoCapture</cite> backend.</p>
 <p>Open a video file, image sequence, or network stream.</p>
 <dl class="field-list simple">
@@ -296,7 +296,7 @@ memory copying and colorspace conversions when a given frame’s data is not req
 If decode = False, a bool indicating if advancing to the the next frame succeeded.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><em>ndarray</em> | bool</p>
+<dd class="field-odd"><p><em>ndarray</em> | <em>bool</em></p>
 </dd>
 </dl>
 </dd></dl>
@@ -423,7 +423,7 @@ milliseconds. The first frame has a PTS of 0.</p>
 <span class="target" id="module-scenedetect.backends.pyav"></span><p><a class="reference internal" href="#scenedetect.backends.pyav.VideoStreamAv" title="scenedetect.backends.pyav.VideoStreamAv"><code class="xref py py-class docutils literal notranslate"><span class="pre">VideoStreamAv</span></code></a> provides an adapter for the PyAV av.InputContainer object.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="scenedetect.backends.pyav.VideoStreamAv">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scenedetect.backends.pyav.</span></span><span class="sig-name descname"><span class="pre">VideoStreamAv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path_or_io</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threading_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">suppress_output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">framerate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.backends.pyav.VideoStreamAv" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">VideoStreamAv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path_or_io</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threading_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">suppress_output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">framerate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.backends.pyav.VideoStreamAv" title="Permalink to this definition">¶</a></dt>
 <dd><p>PyAV <cite>av.InputContainer</cite> backend.</p>
 <p>Open a video by path.</p>
 <div class="admonition warning">
@@ -475,7 +475,7 @@ memory copying and colorspace conversions when a given frame’s data is not req
 If decode = False, a bool indicating if advancing to the the next frame succeeded.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><em>ndarray</em> | bool</p>
+<dd class="field-odd"><p><em>ndarray</em> | <em>bool</em></p>
 </dd>
 </dl>
 </dd></dl>
@@ -506,7 +506,7 @@ If int, interpreted as frame number.</p>
 <dd class="field-even"><p><strong>ValueError</strong> – <cite>target</cite> is not a valid value (i.e. it is negative).</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>None</p>
+<dd class="field-odd"><p><em>None</em></p>
 </dd>
 </dl>
 </dd></dl>
@@ -590,7 +590,7 @@ the input should support seeking, but does not necessarily have to be a video. F
 image sequences or AviSynth scripts are supported as inputs.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="scenedetect.backends.moviepy.VideoStreamMoviePy">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scenedetect.backends.moviepy.</span></span><span class="sig-name descname"><span class="pre">VideoStreamMoviePy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">print_infos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">framerate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.backends.moviepy.VideoStreamMoviePy" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">VideoStreamMoviePy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">print_infos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">framerate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.backends.moviepy.VideoStreamMoviePy" title="Permalink to this definition">¶</a></dt>
 <dd><p>MoviePy <cite>FFMPEG_VideoReader</cite> backend.</p>
 <p>Open a video or device.</p>
 <dl class="field-list simple">
@@ -627,7 +627,7 @@ memory copying and colorspace conversions when a given frame’s data is not req
 If decode = False, a bool indicating if advancing to the the next frame succeeded.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><em>ndarray</em> | bool</p>
+<dd class="field-odd"><p><em>ndarray</em> | <em>bool</em></p>
 </dd>
 </dl>
 </dd></dl>
@@ -751,7 +751,7 @@ The first frame has a time of 0.0 ms.</p>
           <a href="output.html" title="Previous document">Ouptut</a>
         </li>
         <li>
-          <a href="stats_manager.html" title="Next document">Stats Manager</a>
+          <a href="common.html" title="Next document">Common</a>
           &rarr;
         </li>
     </ul>
@@ -817,16 +817,15 @@ The first frame has a time of 0.0 ms.</p>
 <li class="toctree-l1"><a class="reference internal" href="video_stream.html">Stream Interface</a></li>
 <li class="toctree-l1"><a class="reference internal" href="stats_manager.html">Stats Manager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="platform.html">Platform &amp; Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="migration_guide.html">Migration Guide (v0.7)</a></li>
 </ul>
 
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
-  <li><a href="../api.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Package</a><ul>
       <li>Previous: <a href="output.html" title="previous chapter">Ouptut</a></li>
-      <li>Next: <a href="stats_manager.html" title="next chapter">Stats Manager</a></li>
-  </ul></li>
+      <li>Next: <a href="common.html" title="next chapter">Common</a></li>
   </ul></li>
 </ul>
 </div>

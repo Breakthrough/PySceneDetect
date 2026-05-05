@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Migration Guide: v0.6 to v0.7 &#8212; PySceneDetect 0.7 documentation</title>
+    <title>Migration Guide (v0.7) &#8212; PySceneDetect 0.7 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
@@ -18,8 +18,7 @@
     <link rel="icon" href="../_static/favicon.ico"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Detectors" href="detectors.html" />
-    <link rel="prev" title="scenedetect 🎬 Package" href="../api.html" />
+    <link rel="prev" title="Platform &amp; Logging" href="platform.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
@@ -37,8 +36,8 @@
 
           <div class="body" role="main">
             
-  <section id="migration-guide-v0-6-to-v0-7">
-<span id="scenedetect-migration-guide"></span><h1>Migration Guide: v0.6 to v0.7<a class="headerlink" href="#migration-guide-v0-6-to-v0-7" title="Permalink to this heading">¶</a></h1>
+  <section id="migration-guide-v0-7">
+<span id="scenedetect-migration-guide"></span><h1>Migration Guide (v0.7)<a class="headerlink" href="#migration-guide-v0-7" title="Permalink to this heading">¶</a></h1>
 <p>PySceneDetect v0.7 is a major release that overhauls timestamp handling to support variable framerate (VFR) videos. While the high-level <a class="reference internal" href="../api.html#scenedetect.detect" title="scenedetect.detect"><code class="xref py py-func docutils literal notranslate"><span class="pre">scenedetect.detect()</span></code></a> workflow is largely unchanged, several internal APIs have been restructured. This guide covers the changes needed to update applications from v0.6 to v0.7.</p>
 <p>The minimum supported Python version is now <strong>Python 3.10</strong>.</p>
 <section id="quick-check">
@@ -311,11 +310,7 @@
     <ul>
         <li>
           &larr;
-          <a href="../api.html" title="Previous document"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Package</a>
-        </li>
-        <li>
-          <a href="detectors.html" title="Next document">Detectors</a>
-          &rarr;
+          <a href="platform.html" title="Previous document">Platform &amp; Logging</a>
         </li>
     </ul>
   </nav>
@@ -361,12 +356,7 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Documentation:</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="../api.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Package</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="../api.html#getting-started">Getting Started</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="../api.html#module-scenedetect">Functions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../api.html#logging">Logging</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="detectors.html">Detectors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="output.html">Ouptut</a></li>
 <li class="toctree-l1"><a class="reference internal" href="backends.html">Video Backends</a></li>
@@ -376,16 +366,27 @@
 <li class="toctree-l1"><a class="reference internal" href="video_stream.html">Stream Interface</a></li>
 <li class="toctree-l1"><a class="reference internal" href="stats_manager.html">Stats Manager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="platform.html">Platform &amp; Logging</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Migration Guide (v0.7)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#quick-check">Quick Check</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#import-changes">Import Changes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#custom-detector-changes">Custom Detector Changes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#frametimecode-changes"><code class="docutils literal notranslate"><span class="pre">FrameTimecode</span></code> Changes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#framerate-and-timestamp-changes">Framerate and Timestamp Changes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#statsmanager-changes"><code class="docutils literal notranslate"><span class="pre">StatsManager</span></code> Changes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scenedetector-annotation-fixes"><code class="docutils literal notranslate"><span class="pre">SceneDetector</span></code> Annotation Fixes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scenemanager-detect-scenes-time-arguments"><code class="docutils literal notranslate"><span class="pre">SceneManager.detect_scenes()</span></code> Time Arguments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#save-images-path-handling"><code class="docutils literal notranslate"><span class="pre">save_images()</span></code> Path Handling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#removed-apis">Removed APIs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#cli-changes">CLI Changes</a></li>
+</ul>
+</li>
 </ul>
 
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
-  <li><a href="../api.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Package</a><ul>
-      <li>Previous: <a href="../api.html" title="previous chapter"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Package</a></li>
-      <li>Next: <a href="detectors.html" title="next chapter">Detectors</a></li>
-  </ul></li>
+      <li>Previous: <a href="platform.html" title="previous chapter">Platform &amp; Logging</a></li>
   </ul></li>
 </ul>
 </div>

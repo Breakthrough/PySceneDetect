@@ -19,7 +19,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Stream Interface" href="video_stream.html" />
-    <link rel="prev" title="Stats Manager" href="stats_manager.html" />
+    <link rel="prev" title="Scene Manager" href="scene_manager.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
@@ -52,7 +52,7 @@ event (in, out, cut, etc…).</p>
 </div>
 <dl class="py class">
 <dt class="sig sig-object py" id="scenedetect.detector.FlashFilter">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scenedetect.detector.</span></span><span class="sig-name descname"><span class="pre">FlashFilter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.detector.FlashFilter" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">FlashFilter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.detector.FlashFilter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Filters fast-cuts to enforce minimum scene length.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -86,7 +86,7 @@ event (in, out, cut, etc…).</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="scenedetect.detector.SceneDetector">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scenedetect.detector.</span></span><span class="sig-name descname"><span class="pre">SceneDetector</span></span><a class="headerlink" href="#scenedetect.detector.SceneDetector" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SceneDetector</span></span><a class="headerlink" href="#scenedetect.detector.SceneDetector" title="Permalink to this definition">¶</a></dt>
 <dd><p>Base class to inherit from when implementing a scene detection algorithm.</p>
 <p>This API is not yet stable and subject to change.</p>
 <dl class="py method">
@@ -99,7 +99,7 @@ event (in, out, cut, etc…).</p>
 the detector when a StatsManager is passed to process_frame.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>list[str]</p>
+<dd class="field-even"><p><em>list</em>[<em>str</em>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -116,7 +116,7 @@ the detector when a StatsManager is passed to process_frame.</p>
 <dd class="field-even"><p>List of timecodes where scene cuts have been detected, if any.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>list[<a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode">scenedetect.common.FrameTimecode</a>]</p>
+<dd class="field-odd"><p><em>list</em>[<a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -136,7 +136,7 @@ the detector when a StatsManager is passed to process_frame.</p>
 <dd class="field-even"><p>List of timecodes where scene cuts have been detected, if any.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>list[<a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode">scenedetect.common.FrameTimecode</a>]</p>
+<dd class="field-odd"><p><em>list</em>[<a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -170,7 +170,7 @@ only if it has one itself.</p>
     <ul>
         <li>
           &larr;
-          <a href="stats_manager.html" title="Previous document">Stats Manager</a>
+          <a href="scene_manager.html" title="Previous document">Scene Manager</a>
         </li>
         <li>
           <a href="video_stream.html" title="Next document">Stream Interface</a>
@@ -234,16 +234,15 @@ only if it has one itself.</p>
 <li class="toctree-l1"><a class="reference internal" href="video_stream.html">Stream Interface</a></li>
 <li class="toctree-l1"><a class="reference internal" href="stats_manager.html">Stats Manager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="platform.html">Platform &amp; Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="migration_guide.html">Migration Guide (v0.7)</a></li>
 </ul>
 
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
-  <li><a href="../api.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Package</a><ul>
-      <li>Previous: <a href="stats_manager.html" title="previous chapter">Stats Manager</a></li>
+      <li>Previous: <a href="scene_manager.html" title="previous chapter">Scene Manager</a></li>
       <li>Next: <a href="video_stream.html" title="next chapter">Stream Interface</a></li>
-  </ul></li>
   </ul></li>
 </ul>
 </div>

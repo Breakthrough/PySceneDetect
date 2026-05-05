@@ -54,6 +54,7 @@ Table of Contents
     api/video_stream
     api/stats_manager
     api/platform
+    api/migration_guide
 
 =======================================================================
 Indices and Tables
