@@ -29,7 +29,7 @@ The `scenedetect` API is easy to integrate with most application workflows, whil
 
     * :ref:`scenedetect.backends 🎥 <scenedetect-backends>`: PySceneDetect supports multiple libraries as an input backend:
 
-        * OpenCV: :class:`VideoStreamCv2 <scenedetect.backends.opencv.ideoStreamCv2>`
+        * OpenCV: :class:`VideoStreamCv2 <scenedetect.backends.opencv.VideoStreamCv2>`
 
         * PyAV: :class:`VideoStreamAv <scenedetect.backends.pyav.VideoStreamAv>`
 

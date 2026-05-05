@@ -2,9 +2,9 @@
 
 .. _scenedetect-output:
 
--------------------------------------------------
-Ouptut
--------------------------------------------------
+------
+Output
+------
 
 .. autofunction:: scenedetect.output.save_images
 
