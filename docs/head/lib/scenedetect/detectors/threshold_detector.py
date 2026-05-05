@@ -102,7 +102,7 @@ class ThresholdDetector(SceneDetector):
     ) -> list[FrameTimecode]:
         """Process the next frame.
 
-        Args:
+        Arguments:
             timecode: FrameTimecode of the current frame position.
             frame_img (numpy.ndarray or None): Video frame corresponding to `timecode`.
 
