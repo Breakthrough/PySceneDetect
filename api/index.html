@@ -22,17 +22,16 @@
       <script src="../js/html5shiv.min.js"></script>
     <![endif]-->
       <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
-      <script>hljs.highlightAll();</script> 
-      <script>
-        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-        })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+      <script>hljs.highlightAll();</script>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-72551323-1', 'auto');
+  ga('send', 'pageview');
+</script>
 
-        ga('create', "UA-72551323-1", "auto");
-        ga('send', 'pageview');
-      </script>
-    
 </head>
 
 <body class="wy-body-for-nav" role="document">
@@ -127,7 +126,7 @@
 <p>The content-aware scene detector (<code>detect-content</code>) detects <a href="https://en.wikipedia.org/wiki/Jump_cut">jump cuts</a> in the input video.  This is typically what people think of as "cuts" between scenes in a movie - given two adjacent frames, do they belong to the same scene?  The content-aware scene detector finds areas where the <em>difference</em> between two subsequent frames exceeds the threshold value that is set (a good value to start with is <code>--threshold 27</code>).</p>
 <p>Internally, this detector functions by converting the colorspace of each decoded frame from <a href="https://en.wikipedia.org/wiki/RGB_color_space">RGB</a> into <a href="https://en.wikipedia.org/wiki/HSL_and_HSV">HSV</a>.  It then takes the average difference across all channels (or optionally just the <em>value</em> channel) from frame to frame.  When this exceeds a set threshold, a scene change is triggered.</p>
 <p><code>detect-content</code> also has edge detection, which can be enabled by providing a set of 4 numbers in the form (<em>delta_hue</em>, <em>delta_sat</em>, <em>delta_lum</em>, <em>delta_edges</em>). Changes in edges are typically larger than the other components, so threshold may need to be increased accordingly.  For example, <code>-w 1.0 0.5 1.0 0.2 -t 32</code> is a good starting point to use with edge detection.  The default weights are <code>--weights 1.0 1.0 1.0 0.0</code> which does not include edges, but this may change in the future.</p>
-<p>See <a href="http://scenedetect.com/projects/Manual/en/latest/cli/detectors.html#detect-content">the documentation for detect-content</a> for details.</p>
+<p>See <a href="https://www.scenedetect.com/docs/latest/cli/detectors.html#detect-content">the documentation for detect-content</a> for details.</p>
 <h2 id="adaptive-content-detector">Adaptive Content Detector</h2>
 <p>The adaptive content detector (<code>detect-adaptive</code>) compares the difference in content between adjacent frames similar to <code>detect-content</code> but instead using a rolling average of adjacent frame changes. This helps mitigate false detections where there is fast camera motion.</p>
 <h2 id="threshold-detector">Threshold Detector</h2>
@@ -137,7 +136,7 @@
 <h2 id="perceptual-hash-detector">Perceptual Hash Detector</h2>
 <p>The perceptual hash detector (<code>detect-hash</code>) calculates a hash for a frame and compares that hash to the previous frame's hash. If the hashes differ by more than the defined threshold, then a scene change is recorded. The hashing algorithm used for this detector is an implementation of <code>phash</code> from the <a href="https://github.com/JohannesBuchner/imagehash">imagehash</a> library. In practice, this detector works similarly to <code>detect-content</code> in that it picks up large differences between adjacent frames. One important note is that the hashing algorithm converts the frames to grayscale, so this detector is insensitive to changes in colors if the brightness remains constant. In general, this algorithm is very computationally efficient compared to <code>detect-content</code> or <code>detect-adaptive</code>, especially if downscaling is not used. See <a href="https://www.hackerfactor.com/blog/index.php?/archives/432-Looks-Like-It.html">here</a> for an overview of how a perceptual hashing algorithm can be used for detecting similarity (or otherwise) of images and a visual depiction of the algorithm.</p>
 <h1 id="creating-new-detection-algorithms">Creating New Detection Algorithms</h1>
-<p>All scene detection algorithms must inherit from <a href="https://scenedetect.com/projects/Manual/en/latest/api/detector.html">the base <code>SceneDetector</code> class</a>. Note that the current SceneDetector API is under development and expected to change somewhat before v1.0 is released, so make sure to pin your <code>scenedetect</code> dependency to the correct API version (e.g. <code>scenedetect &lt; 0.6</code>, <code>scenedetect &lt; 0.7</code>, etc...).</p>
+<p>All scene detection algorithms must inherit from <a href="https://www.scenedetect.com/docs/latest/api/detector.html">the base <code>SceneDetector</code> class</a>. Note that the current SceneDetector API is under development and expected to change somewhat before v1.0 is released, so make sure to pin your <code>scenedetect</code> dependency to the correct API version (e.g. <code>scenedetect &lt; 0.6</code>, <code>scenedetect &lt; 0.7</code>, etc...).</p>
 <p>Creating a new scene detection method can be as simple as implementing the <code>process_frame</code> function, and optionally <code>post_process</code>:</p>
 <pre><code class="language-python">import typing as ty
 import numpy as np
@@ -159,7 +158,7 @@ class CustomDetector(SceneDetector):
         return []
 </code></pre>
 <p><code>process_frame</code> is called on every frame in the input video, which will be called after the final frame of the video is passed to <code>process_frame</code>. This may be useful for multi-pass algorithms, or detectors which are waiting on some condition but still wish to output an event on the final frame.</p>
-<p>For example, a detector may output at most 1 cuts for every call to <code>process_frame</code>, it may output the entire scene list in <code>post_process</code>, or a combination of both.  Note that the latter will not work in cases where a live video stream or camera input device is being used. See the <a href="https://scenedetect.com/projects/Manual/en/latest/api/detector.html#scenedetect.scene_detector.SceneDetector">API documentation for the <code>SceneDetector</code> class</a> for details. Alternatively, you can call <code>help(SceneDetector)</code> from a Python REPL. For examples of actual detection algorithm implementations, see the source files in the <code>scenedetect/detectors/</code> directory (e.g. <code>threshold_detector.py</code>, <code>content_detector.py</code>).</p>
+<p>For example, a detector may output at most 1 cuts for every call to <code>process_frame</code>, it may output the entire scene list in <code>post_process</code>, or a combination of both.  Note that the latter will not work in cases where a live video stream or camera input device is being used. See the <a href="https://www.scenedetect.com/docs/latest/api/detector.html#scenedetect.scene_detector.SceneDetector">API documentation for the <code>SceneDetector</code> class</a> for details. Alternatively, you can call <code>help(SceneDetector)</code> from a Python REPL. For examples of actual detection algorithm implementations, see the source files in the <code>scenedetect/detectors/</code> directory (e.g. <code>threshold_detector.py</code>, <code>content_detector.py</code>).</p>
 <p>Processing is done by calling the <code>process_frame(...)</code> function for all frames in the video, followed by <code>post_process(...)</code> (optional) after the final frame.  Scene cuts are detected and added to the passed list object in both cases.</p>
 <p><code>process_frame(...)</code> is called for each frame in sequence, passing the following arguments:</p>
 <ul>

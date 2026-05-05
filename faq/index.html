@@ -22,17 +22,16 @@
       <script src="../js/html5shiv.min.js"></script>
     <![endif]-->
       <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
-      <script>hljs.highlightAll();</script> 
-      <script>
-        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-        })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+      <script>hljs.highlightAll();</script>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-72551323-1', 'auto');
+  ga('send', 'pageview');
+</script>
 
-        ga('create', "UA-72551323-1", "auto");
-        ga('send', 'pageview');
-      </script>
-    
 </head>
 
 <body class="wy-body-for-nav" role="document">
@@ -130,14 +129,14 @@
                 <h2 id="frequently-asked-questions"><span class="fa fa-question-circle"></span>&nbsp; Frequently Asked Questions</h2>
 <h4 id="how-can-i-fix-importerror-no-module-named-cv2">How can I fix <code>ImportError: No module named cv2</code>?</h4>
 <p>As of PySceneDetect 0.7, the OpenCV dependency is bundled with the install. The standard <code>scenedetect</code> package depends on <code>opencv-python</code>:</p>
-<pre><code class="language-md">pip install scenedetect
+<pre><code class="language-bash">pip install scenedetect
 </code></pre>
 <p>For server environments without GUI libraries, install the headless variant instead, which depends on <code>opencv-python-headless</code>:</p>
-<pre><code class="language-md">pip install scenedetect-headless
+<pre><code class="language-bash">pip install scenedetect-headless
 </code></pre>
 <p>Both packages ship the same <code>scenedetect</code> Python module -- you only need one.</p>
 <h4 id="how-can-i-enable-video-splitting-support">How can I enable video splitting support?</h4>
-<p>Video splitting is performed by <code>ffmpeg</code> (<a href="https://ffmpeg.org/download.html">https://ffmpeg.org/download.html</a>) or <code>mkvmerge</code> (https://mkvtoolnix.download/downloads.html) depending on which command line arguments are used. Ensure the tool is available and somewhere in your system's PATH folder.</p>
+<p>Video splitting is performed by <code>ffmpeg</code> (<a href="https://ffmpeg.org/download.html">https://ffmpeg.org/download.html</a>) or <code>mkvmerge</code> (<a href="https://mkvtoolnix.download/downloads.html">https://mkvtoolnix.download/downloads.html</a>) depending on which command line arguments are used. Ensure the tool is available and somewhere in your system's PATH folder.</p>
 <h4 id="how-can-i-fix-the-error-cannot-split-video-due-to-too-many-scenes">How can I fix the error <code>Cannot split video due to too many scenes</code>?</h4>
 <p>This error occurs on Windows platforms specifically when the number of detected scenes is too large.  This is because PySceneDetect internally invokes other commands, such as those used for the <code>split-video</code> command.</p>
 <p>You can get around this issue by simply invoking those tools manually, using a smaller sub-set of scenes (or splitting the scene list into multiple parts).  You can obtain a comma-separated list of timecodes by using the <code>list-scenes</code> command.</p>
@@ -145,10 +144,10 @@
 <h4 id="how-can-i-fix-the-error-failed-to-read-any-frames-from-video-file">How can I fix the error <code>Failed to read any frames from video file</code>?</h4>
 <p>Unfortunately, the underlying library used to perform video I/O was unable to open the file. Try using a different backend by installing PyAV (<code>pip install av</code>) and see if the problem persists.</p>
 <p>This can also happen due to videos having multiple audio tracks (as per <a href="https://github.com/Breakthrough/PySceneDetect/issues/179">#179</a>).  If the PyAV backend does not succeed in processing the video, as a workaround you can remove the audio track using either <code>ffmpeg</code> or <code>mkvmerge</code>:</p>
-<pre><code class="language-md">ffmpeg -i input.mp4 -c copy -an output.mp4
+<pre><code class="language-bash">ffmpeg -i input.mp4 -c copy -an output.mp4
 </code></pre>
 <p>Or:</p>
-<pre><code class="language-md">mkvmerge -o output.mkv input.mp4
+<pre><code class="language-bash">mkvmerge -o output.mkv input.mp4
 </code></pre>
               
             </div>
