@@ -194,7 +194,7 @@ class ContentDetector(SceneDetector):
     ) -> list[FrameTimecode]:
         """Process the next frame. `frame_num` is assumed to be sequential.
 
-        Args:
+        Arguments:
             frame_num (int): Frame number of frame that is being passed. Can start from any value
                 but must remain sequential.
             frame_img (numpy.ndarray or None): Video frame corresponding to `frame_img`.

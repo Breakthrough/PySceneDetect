@@ -1,9 +1,9 @@
 
 .. _scenedetect-backends:
 
-----------------------------------------
+--------------
 Video Backends
-----------------------------------------
+--------------
 
 .. automodule:: scenedetect.backends
    :members:

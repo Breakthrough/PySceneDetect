@@ -1,14 +1,14 @@
 
 .. _scenedetect-detectors:
 
-----------------------------------------
+---------
 Detectors
-----------------------------------------
+---------
 
 .. automodule:: scenedetect.detectors
 
 AdaptiveDetector
-========================================
+================
 
 .. automodule:: scenedetect.detectors.adaptive_detector
    :no-members:
@@ -17,7 +17,7 @@ AdaptiveDetector
    :members:
 
 ContentDetector
-========================================
+===============
 
 .. automodule:: scenedetect.detectors.content_detector
    :no-members:
@@ -26,7 +26,7 @@ ContentDetector
    :members:
 
 HashDetector
-========================================
+============
 
 .. automodule:: scenedetect.detectors.hash_detector
    :no-members:
@@ -35,7 +35,7 @@ HashDetector
    :members:
 
 HistogramDetector
-========================================
+=================
 
 .. automodule:: scenedetect.detectors.histogram_detector
    :no-members:
@@ -44,7 +44,7 @@ HistogramDetector
    :members:
 
 ThresholdDetector
-========================================
+=================
 
 .. automodule:: scenedetect.detectors.threshold_detector
    :no-members:
