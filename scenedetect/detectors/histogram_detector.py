@@ -132,29 +132,23 @@ class HistogramDetector(SceneDetector):
         across all bins.
 
         Args:
-        -----
-        frame_img : np.ndarray
-            The input image in BGR color space, assumed to have shape (height, width, 3)
-            where the last dimension represents the BGR channels.
-        bins : int, optional (default=256)
-            The number of bins to use for the histogram.
-        normalize : bool, optional (default=True)
-            A boolean flag that determines whether the histogram should be normalized
-            such that the sum of all histogram bins equals 1.
+            frame_img: The input image in BGR color space, assumed to have shape
+                (height, width, 3) where the last dimension represents the BGR channels.
+            bins: The number of bins to use for the histogram.
+            normalize: A boolean flag that determines whether the histogram should be
+                normalized such that the sum of all histogram bins equals 1.
 
         Returns:
-        --------
-        np.ndarray
-            A 1D numpy array of length equal to `bins`, representing the histogram of the luma
-            channel. Each element in the array represents the count (or frequency) of a particular
-            luma value in the image. If normalized, these values represent the relative frequency.
+            A 1D numpy array of length equal to `bins`, representing the histogram of the
+            luma channel. Each element in the array represents the count (or frequency) of
+            a particular luma value in the image. If normalized, these values represent the
+            relative frequency.
 
-        Examples:
-        ---------
-        >>> img = cv2.imread("path_to_image.jpg")
-        >>> hist = calculate_histogram(img, bins=256, normalize=True)
-        >>> print(hist.shape)
-        (256,)
+        Example:
+            >>> img = cv2.imread("path_to_image.jpg")
+            >>> hist = calculate_histogram(img, bins=256, normalize=True)
+            >>> print(hist.shape)
+            (256,)
         """
         # Extract Luma channel from the frame image
         y, _, _ = cv2.split(cv2.cvtColor(frame_img, cv2.COLOR_BGR2YUV))

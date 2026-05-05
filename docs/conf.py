@@ -45,6 +45,9 @@ autodoc_member_order = "groupwise"
 autodoc_typehints = "description"
 autodoc_typehints_format = "short"
 
+add_module_names = False
+python_use_unqualified_type_names = True
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
 

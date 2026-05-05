@@ -96,23 +96,6 @@ Functions
 .. automodule:: scenedetect
     :members:
 
-.. toctree::
-    :maxdepth: 3
-    :caption: PySceneDetect Module Documentation
-    :name: fullapitoc
-    :hidden:
-
-    api/migration_guide
-    api/detectors
-    api/scene_manager
-    api/common
-    api/output
-    api/backends
-    api/stats_manager
-    api/detector
-    api/video_stream
-    api/platform
-
 
 =======================================================================
 Logging
