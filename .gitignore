@@ -1,4 +1,5 @@
 docs/_build/
+docs/STYLE.md
 website/build/
 scripts/local/
 tests/resources/*

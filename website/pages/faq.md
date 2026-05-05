@@ -6,13 +6,13 @@
 
 As of PySceneDetect 0.7, the OpenCV dependency is bundled with the install. The standard `scenedetect` package depends on `opencv-python`:
 
-```md
+```bash
 pip install scenedetect
 ```
 
 For server environments without GUI libraries, install the headless variant instead, which depends on `opencv-python-headless`:
 
-```md
+```bash
 pip install scenedetect-headless
 ```
 
@@ -20,7 +20,7 @@ Both packages ship the same `scenedetect` Python module -- you only need one.
 
 #### How can I enable video splitting support?
 
-Video splitting is performed by `ffmpeg` ([https://ffmpeg.org/download.html](https://ffmpeg.org/download.html)) or `mkvmerge` (https://mkvtoolnix.download/downloads.html) depending on which command line arguments are used. Ensure the tool is available and somewhere in your system's PATH folder.
+Video splitting is performed by `ffmpeg` ([https://ffmpeg.org/download.html](https://ffmpeg.org/download.html)) or `mkvmerge` ([https://mkvtoolnix.download/downloads.html](https://mkvtoolnix.download/downloads.html)) depending on which command line arguments are used. Ensure the tool is available and somewhere in your system's PATH folder.
 
 #### How can I fix the error `Cannot split video due to too many scenes`?
 
@@ -36,12 +36,12 @@ Unfortunately, the underlying library used to perform video I/O was unable to op
 
 This can also happen due to videos having multiple audio tracks (as per [#179](https://github.com/Breakthrough/PySceneDetect/issues/179)).  If the PyAV backend does not succeed in processing the video, as a workaround you can remove the audio track using either `ffmpeg` or `mkvmerge`:
 
-```md
+```bash
 ffmpeg -i input.mp4 -c copy -an output.mp4
 ```
 
 Or:
 
-```md
+```bash
 mkvmerge -o output.mkv input.mp4
 ```

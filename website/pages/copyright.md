@@ -1,7 +1,7 @@
 
 ## PySceneDetect License Agreement
 
-```md
+```text
 
                 PySceneDetect License (BSD 3-Clause)
           < http://www.bcastell.com/projects/PySceneDetect >

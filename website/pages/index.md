@@ -13,7 +13,7 @@
 
 Split video on each fast cut using [command line (more examples)](cli.md):
 
-```rst
+```bash
 scenedetect -i video.mp4 split-video
 ```
 

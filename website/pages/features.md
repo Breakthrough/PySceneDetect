@@ -62,7 +62,7 @@ Future version roadmaps are now [tracked as milestones (link)](https://github.co
 
 ### Planned Features
 
-The following features are under consideration for future releases. Any contributions towards completing these features are most welcome (pull requests may be accpeted via Github).
+The following features are under consideration for future releases. Any contributions towards completing these features are most welcome (pull requests may be accepted via Github).
 
  - graphical interface (GUI)
  - automatic threshold detection for the current scene detection methods (or just output message indicating "Predicted Threshold: X")

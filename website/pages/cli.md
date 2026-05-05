@@ -7,19 +7,19 @@ See [the documentation](../docs/latest/) for a complete reference to the `scened
 
 Split input video on each fast cut using `ffmpeg`:
 
-```rst
+```bash
 scenedetect -i video.mp4 split-video
 ```
 
 Save some frames from each cut:
 
-```rst
+```bash
 scenedetect -i video.mp4 save-images
 ```
 
 Skip the first 10 seconds of the input video:
 
-```rst
+```bash
 scenedetect -i video.mp4 time -s 10s
 ```
 
@@ -31,11 +31,11 @@ As a concrete example to become familiar with PySceneDetect, let's use the follo
 
 You can [download the clip from here](https://github.com/Breakthrough/PySceneDetect/raw/refs/heads/resources/tests/resources/goldeneye.mp4) (right-click and save the video in your working directory as `goldeneye.mp4`).
 
-Let's split this scene into clips on each fast cut. This means we need to use content-aware detecton mode (`detect-content`) or adaptive mode (`detect-adaptive`).  If the video instead contains fade-in/fade-out transitions you want to find, you can use `detect-threshold` instead. If no detector is specified, `detect-adaptive` will be used by default.
+Let's split this scene into clips on each fast cut. This means we need to use content-aware detection mode (`detect-content`) or adaptive mode (`detect-adaptive`).  If the video instead contains fade-in/fade-out transitions you want to find, you can use `detect-threshold` instead. If no detector is specified, `detect-adaptive` will be used by default.
 
 Let's first save a scene list in CSV format and generate some images of each scene to check the output:
 
-```rst
+```bash
 scenedetect --input goldeneye.mp4 detect-adaptive list-scenes save-images
 ```
 
@@ -64,7 +64,7 @@ Running the above command, in the working directory, you should see a file `gold
 
 The `split-video` command can be used to automatically split the input video using `ffmpeg` or `mkvmerge`. For example:
 
-```rst
+```bash
 scenedetect -i goldeneye.mp4 split-video
 ```
 
@@ -77,7 +77,7 @@ You can also specify `-h` / `--high-quality` to produces near lossless results, 
 
 PySceneDetect can look for fades in/out using `detect-threshold` (comparing each frame to a set black level) or find fast cuts using `detect-content` (compares each frame looking for changes in content). There also is `detect-adaptive`, which uses the same scoring as `detect-content`, but compares the ratio of each frame score to its neighbors.
 
-Each mode has slightly different parameters, and is described in detail below. Most detector parameters can also be [set with a config file](http://scenedetect.com/projects/Manual/en/latest/cli/config_file.html).
+Each mode has slightly different parameters, and is described in detail below. Most detector parameters can also be [set with a config file](../docs/latest/cli/config_file.html).
 
 In general, use `detect-threshold` mode if you want to detect scene boundaries using fades/cuts in/out to black.  If the video uses a lot of fast cuts between content, and has no well-defined scene boundaries, you should use the `detect-adaptive` or  `detect-content` modes.  Once you know what detection mode to use, you can try the parameters recommended below, or generate a statistics file (using the `-s` / `--stats` flag) in order to determine the correct parameters - specifically, the proper threshold value.
 
@@ -93,11 +93,11 @@ The optimal threshold can be determined by generating a stats file (`-s`), openi
 
 Threshold-based mode is what most traditional scene detection programs use, which looks at the average intensity of the *current* frame, triggering a scene break when the intensity falls below the threshold (or crosses back upwards).  The default threshold when using the `detect-threshold` is `12` (e.g. `detect-threshold` is the same as `detect-threshold --threshold 12` when the `-t` / `--threshold` option is not supplied), which is a good value to try when detecting fade outs to black on most videos.
 
-```rst
+```bash
 scenedetect -i my_video.mp4 -s my_video.stats.mp4 detect-threshold
 ```
 
-```rst
+```bash
 scenedetect -i my_video.mp4 -s my_video.stats.mp4 detect-threshold -t 20
 ```
 
@@ -113,11 +113,11 @@ The `detect-adaptive` mode compares each frame's score as calculated by `detect-
 
 ## Detection Parameters
 
-Detectors take a variety of parameters, which can be [configured via command-line](http://scenedetect.com/projects/Manual/en/latest/cli/detectors.html) or by [using a config file](http://scenedetect.com/projects/Manual/en/latest/cli/config_file.html). If the default parameters do not produce correct results, you can generate a stats file using the `-s` / `--stats` option.
+Detectors take a variety of parameters, which can be [configured via command-line](../docs/latest/cli/detectors.html) or by [using a config file](../docs/latest/cli/config_file.html). If the default parameters do not produce correct results, you can generate a stats file using the `-s` / `--stats` option.
 
 For example, with `detect-content`, if the default threshold of `27` does not produce correct results, we can determine the proper threshold by first generating a stats file:
 
-```rst
+```bash
 scenedetect --input goldeneye.mp4 --stats goldeneye.stats.csv detect-adaptive
 ```
 
@@ -159,19 +159,19 @@ Specifying the `time` command allows control over what portion of the video PySc
 
 For example, let's say we have a video shot at 30 FPS, and want to analyze only the segment from the 5 to the 6.5 minute mark in the video (we want to analyze the 90 seconds [2700 frames] between 00:05:00 and 00:06:30).  The following commands are all thus equivalent in this regard (assuming we are using the content detector):
 
-```rst
+```bash
 scenedetect -i my_video.mp4 time --start 00:05:00 --end 00:06:30
 ```
 
-```rst
+```bash
 scenedetect -i my_video.mp4 time --start 300s --end 390s
 ```
 
-```rst
+```bash
 scenedetect -i my_video.mp4 time --start 300s --duration 90s
 ```
 
-```rst
+```bash
 scenedetect -i my_video.mp4 time --start 300s --duration 2700
 ```
 
@@ -198,7 +198,7 @@ Specifying a config file path using -c/--config overrides the user config file. 
 
 The syntax of a configuration file is:
 
-```
+```ini
 [command]
 option_a = value
 #comment
@@ -207,7 +207,7 @@ option_b = 1
 
 ### Example
 
-```
+```ini
 [global]
 default-detector = detect-content
 min-scene-len = 0.8s
