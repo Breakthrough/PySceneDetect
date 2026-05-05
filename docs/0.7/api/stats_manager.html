@@ -18,8 +18,8 @@
     <link rel="icon" href="../_static/favicon.ico"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Detector Interface" href="detector.html" />
-    <link rel="prev" title="Video Backends" href="backends.html" />
+    <link rel="next" title="Platform &amp; Logging" href="platform.html" />
+    <link rel="prev" title="Stream Interface" href="video_stream.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
@@ -49,7 +49,7 @@ human-readable CSV file, allowing for precise determination of the ideal thresho
 detection parameters) for the given input.</p>
 <dl class="py exception">
 <dt class="sig sig-object py" id="scenedetect.stats_manager.StatsFileCorrupt">
-<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scenedetect.stats_manager.</span></span><span class="sig-name descname"><span class="pre">StatsFileCorrupt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Could</span> <span class="pre">not</span> <span class="pre">load</span> <span class="pre">frame</span> <span class="pre">metric</span> <span class="pre">data</span> <span class="pre">data</span> <span class="pre">from</span> <span class="pre">passed</span> <span class="pre">CSV</span> <span class="pre">file.'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.stats_manager.StatsFileCorrupt" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">StatsFileCorrupt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Could</span> <span class="pre">not</span> <span class="pre">load</span> <span class="pre">frame</span> <span class="pre">metric</span> <span class="pre">data</span> <span class="pre">data</span> <span class="pre">from</span> <span class="pre">passed</span> <span class="pre">CSV</span> <span class="pre">file.'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.stats_manager.StatsFileCorrupt" title="Permalink to this definition">¶</a></dt>
 <dd><p>Raised when frame metrics/stats could not be loaded from a provided CSV file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -60,7 +60,7 @@ detection parameters) for the given input.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="scenedetect.stats_manager.StatsManager">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scenedetect.stats_manager.</span></span><span class="sig-name descname"><span class="pre">StatsManager</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_timecode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.stats_manager.StatsManager" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">StatsManager</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_timecode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.stats_manager.StatsManager" title="Permalink to this definition">¶</a></dt>
 <dd><p>Provides a key-value store for frame metrics/calculations which can be used
 for two-pass detection algorithms, as well as saving stats to a CSV file.</p>
 <p>Analyzing a statistics CSV file is also very useful for finding the optimal
@@ -93,7 +93,7 @@ they are in <cite>metric_keys</cite>.</p>
 </ul>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>list[<em>Any</em>]</p>
+<dd class="field-odd"><p><em>list</em>[<em>Any</em>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -108,7 +108,7 @@ they are in <cite>metric_keys</cite>.</p>
 False otherwise.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>bool</p>
+<dd class="field-even"><p><em>bool</em></p>
 </dd>
 </dl>
 </dd></dl>
@@ -122,7 +122,7 @@ False otherwise.</p>
 <dd class="field-odd"><p>True if the given metric keys exist for the frame, False otherwise.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>bool</p>
+<dd class="field-even"><p><em>bool</em></p>
 </dd>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -142,7 +142,7 @@ False otherwise.</p>
 <dd class="field-odd"><p><strong>metric_keys</strong> (<em>Iterable</em><em>[</em><em>str</em><em>]</em>) – </p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>None</p>
+<dd class="field-even"><p><em>None</em></p>
 </dd>
 </dl>
 </dd></dl>
@@ -162,7 +162,7 @@ False otherwise.</p>
 <dd class="field-even"><p><strong>OSError</strong> – If <cite>path</cite> cannot be opened or a write failure occurs.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>None</p>
+<dd class="field-odd"><p><em>None</em></p>
 </dd>
 </dl>
 </dd></dl>
@@ -179,7 +179,7 @@ False otherwise.</p>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>None</p>
+<dd class="field-even"><p><em>None</em></p>
 </dd>
 </dl>
 </dd></dl>
@@ -196,7 +196,7 @@ False otherwise.</p>
 <dd class="field-even"><p>True if <cite>row</cite> is a valid statsfile header, False otherwise.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>bool</p>
+<dd class="field-odd"><p><em>bool</em></p>
 </dd>
 </dl>
 </dd></dl>
@@ -205,13 +205,13 @@ False otherwise.</p>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="scenedetect.stats_manager.COLUMN_NAME_FRAME_NUMBER">
-<span class="sig-prename descclassname"><span class="pre">scenedetect.stats_manager.</span></span><span class="sig-name descname"><span class="pre">COLUMN_NAME_FRAME_NUMBER</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Frame</span> <span class="pre">Number'</span></em><a class="headerlink" href="#scenedetect.stats_manager.COLUMN_NAME_FRAME_NUMBER" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">COLUMN_NAME_FRAME_NUMBER</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Frame</span> <span class="pre">Number'</span></em><a class="headerlink" href="#scenedetect.stats_manager.COLUMN_NAME_FRAME_NUMBER" title="Permalink to this definition">¶</a></dt>
 <dd><p>Name of column containing frame numbers in the statsfile CSV.</p>
 </dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="scenedetect.stats_manager.COLUMN_NAME_TIMECODE">
-<span class="sig-prename descclassname"><span class="pre">scenedetect.stats_manager.</span></span><span class="sig-name descname"><span class="pre">COLUMN_NAME_TIMECODE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Timecode'</span></em><a class="headerlink" href="#scenedetect.stats_manager.COLUMN_NAME_TIMECODE" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">COLUMN_NAME_TIMECODE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Timecode'</span></em><a class="headerlink" href="#scenedetect.stats_manager.COLUMN_NAME_TIMECODE" title="Permalink to this definition">¶</a></dt>
 <dd><p>Name of column containing timecodes in the statsfile CSV.</p>
 </dd></dl>
 
@@ -225,10 +225,10 @@ False otherwise.</p>
     <ul>
         <li>
           &larr;
-          <a href="backends.html" title="Previous document">Video Backends</a>
+          <a href="video_stream.html" title="Previous document">Stream Interface</a>
         </li>
         <li>
-          <a href="detector.html" title="Next document">Detector Interface</a>
+          <a href="platform.html" title="Next document">Platform &amp; Logging</a>
           &rarr;
         </li>
     </ul>
@@ -291,16 +291,15 @@ False otherwise.</p>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="platform.html">Platform &amp; Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="migration_guide.html">Migration Guide (v0.7)</a></li>
 </ul>
 
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
-  <li><a href="../api.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Package</a><ul>
-      <li>Previous: <a href="backends.html" title="previous chapter">Video Backends</a></li>
-      <li>Next: <a href="detector.html" title="next chapter">Detector Interface</a></li>
-  </ul></li>
+      <li>Previous: <a href="video_stream.html" title="previous chapter">Stream Interface</a></li>
+      <li>Next: <a href="platform.html" title="next chapter">Platform &amp; Logging</a></li>
   </ul></li>
 </ul>
 </div>

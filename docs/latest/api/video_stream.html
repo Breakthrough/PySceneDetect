@@ -18,7 +18,7 @@
     <link rel="icon" href="../_static/favicon.ico"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Platform &amp; Logging" href="platform.html" />
+    <link rel="next" title="Stats Manager" href="stats_manager.html" />
     <link rel="prev" title="Detector Interface" href="detector.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
@@ -57,7 +57,7 @@ OpenCV will be used as the video backend. See <a class="reference internal" href
 tested by adding it to the test suite in <cite>tests/test_video_stream.py</cite>.</p>
 <dl class="py exception">
 <dt class="sig sig-object py" id="scenedetect.video_stream.FrameRateUnavailable">
-<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scenedetect.video_stream.</span></span><span class="sig-name descname"><span class="pre">FrameRateUnavailable</span></span><a class="headerlink" href="#scenedetect.video_stream.FrameRateUnavailable" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">FrameRateUnavailable</span></span><a class="headerlink" href="#scenedetect.video_stream.FrameRateUnavailable" title="Permalink to this definition">¶</a></dt>
 <dd><p>Exception instance to provide consistent error messaging across backends when the video frame
 rate is unavailable or cannot be calculated. Subclass of VideoOpenFailure.</p>
 <dl class="field-list simple">
@@ -69,7 +69,7 @@ rate is unavailable or cannot be calculated. Subclass of VideoOpenFailure.</p>
 
 <dl class="py exception">
 <dt class="sig sig-object py" id="scenedetect.video_stream.SeekError">
-<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scenedetect.video_stream.</span></span><span class="sig-name descname"><span class="pre">SeekError</span></span><a class="headerlink" href="#scenedetect.video_stream.SeekError" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SeekError</span></span><a class="headerlink" href="#scenedetect.video_stream.SeekError" title="Permalink to this definition">¶</a></dt>
 <dd><p>Either an unrecoverable error happened while attempting to seek, or the underlying
 stream is not seekable (additional information will be provided when possible).</p>
 <p>The stream is guaranteed to be left in a valid state, but the position may be reset.</p>
@@ -77,7 +77,7 @@ stream is not seekable (additional information will be provided when possible).<
 
 <dl class="py exception">
 <dt class="sig sig-object py" id="scenedetect.video_stream.VideoOpenFailure">
-<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scenedetect.video_stream.</span></span><span class="sig-name descname"><span class="pre">VideoOpenFailure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Unknown</span> <span class="pre">backend</span> <span class="pre">error.'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.video_stream.VideoOpenFailure" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">VideoOpenFailure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Unknown</span> <span class="pre">backend</span> <span class="pre">error.'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.video_stream.VideoOpenFailure" title="Permalink to this definition">¶</a></dt>
 <dd><p>Raised by a backend if opening a video fails.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -88,7 +88,7 @@ stream is not seekable (additional information will be provided when possible).<
 
 <dl class="py class">
 <dt class="sig sig-object py" id="scenedetect.video_stream.VideoStream">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scenedetect.video_stream.</span></span><span class="sig-name descname"><span class="pre">VideoStream</span></span><a class="headerlink" href="#scenedetect.video_stream.VideoStream" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">VideoStream</span></span><a class="headerlink" href="#scenedetect.video_stream.VideoStream" title="Permalink to this definition">¶</a></dt>
 <dd><p>Interface which all video backends must implement.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="scenedetect.video_stream.VideoStream.read">
@@ -105,7 +105,7 @@ memory copying and colorspace conversions when a given frame’s data is not req
 If decode = False, a bool indicating if advancing to the the next frame succeeded.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><em>ndarray</em> | bool</p>
+<dd class="field-odd"><p><em>ndarray</em> | <em>bool</em></p>
 </dd>
 </dl>
 </dd></dl>
@@ -116,7 +116,7 @@ If decode = False, a bool indicating if advancing to the the next frame succeede
 <dd><p>Close and re-open the VideoStream (equivalent to seeking back to beginning).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>None</p>
+<dd class="field-odd"><p><em>None</em></p>
 </dd>
 </dl>
 </dd></dl>
@@ -144,7 +144,7 @@ If int, interpreted as frame number.</p>
 </ul>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>None</p>
+<dd class="field-odd"><p><em>None</em></p>
 </dd>
 </dl>
 </dd></dl>
@@ -240,7 +240,7 @@ milliseconds. The first frame has a PTS of 0.</p>
           <a href="detector.html" title="Previous document">Detector Interface</a>
         </li>
         <li>
-          <a href="platform.html" title="Next document">Platform &amp; Logging</a>
+          <a href="stats_manager.html" title="Next document">Stats Manager</a>
           &rarr;
         </li>
     </ul>
@@ -303,16 +303,15 @@ milliseconds. The first frame has a PTS of 0.</p>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="stats_manager.html">Stats Manager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="platform.html">Platform &amp; Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="migration_guide.html">Migration Guide (v0.7)</a></li>
 </ul>
 
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
-  <li><a href="../api.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Package</a><ul>
       <li>Previous: <a href="detector.html" title="previous chapter">Detector Interface</a></li>
-      <li>Next: <a href="platform.html" title="next chapter">Platform &amp; Logging</a></li>
-  </ul></li>
+      <li>Next: <a href="stats_manager.html" title="next chapter">Stats Manager</a></li>
   </ul></li>
 </ul>
 </div>

@@ -18,8 +18,8 @@
     <link rel="icon" href="../_static/favicon.ico"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Ouptut" href="output.html" />
-    <link rel="prev" title="Scene Manager" href="scene_manager.html" />
+    <link rel="next" title="Scene Manager" href="scene_manager.html" />
+    <link rel="prev" title="Video Backends" href="backends.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
@@ -81,7 +81,7 @@ amounts of frames/seconds. In the example below, <code class="docutils literal n
 </div>
 <dl class="py class">
 <dt class="sig sig-object py" id="scenedetect.common.FrameTimecode">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scenedetect.common.</span></span><span class="sig-name descname"><span class="pre">FrameTimecode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timecode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.common.FrameTimecode" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">FrameTimecode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timecode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.common.FrameTimecode" title="Permalink to this definition">¶</a></dt>
 <dd><p>Object for frame-based timecodes, using the video framerate to compute back and
 forth between frame number and seconds/timecode.</p>
 <dl class="simple">
@@ -132,7 +132,7 @@ module (see <a class="reference internal" href="#scenedetect.common.MAX_FPS_DELT
 tolerance, False otherwise.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>bool</p>
+<dd class="field-odd"><p><em>bool</em></p>
 </dd>
 </dl>
 </dd></dl>
@@ -143,7 +143,7 @@ tolerance, False otherwise.</p>
 <dd><p>[DEPRECATED] Use <a class="reference internal" href="#scenedetect.common.FrameTimecode.equal_frame_rate" title="scenedetect.common.FrameTimecode.equal_frame_rate"><code class="xref py py-meth docutils literal notranslate"><span class="pre">equal_frame_rate()</span></code></a> instead.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>bool</p>
+<dd class="field-odd"><p><em>bool</em></p>
 </dd>
 </dl>
 </dd></dl>
@@ -166,7 +166,7 @@ object has a defined framerate, otherwise has no effect.</p></li>
 <dd class="field-even"><p>The current time in the form <code class="docutils literal notranslate"><span class="pre">&quot;HH:MM:SS[.nnn]&quot;</span></code>.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>str</p>
+<dd class="field-odd"><p><em>str</em></p>
 </dd>
 </dl>
 </dd></dl>
@@ -219,7 +219,7 @@ property returns an exact <code class="xref py py-class docutils literal notrans
 
 <dl class="py class">
 <dt class="sig sig-object py" id="scenedetect.common.Interpolation">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scenedetect.common.</span></span><span class="sig-name descname"><span class="pre">Interpolation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names=&lt;not</span> <span class="pre">given&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qualname=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary=None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.common.Interpolation" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Interpolation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names=&lt;not</span> <span class="pre">given&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qualname=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary=None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.common.Interpolation" title="Permalink to this definition">¶</a></dt>
 <dd><p>Interpolation method used for image resizing. Based on constants defined in OpenCV.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="scenedetect.common.Interpolation.AREA">
@@ -255,7 +255,7 @@ property returns an exact <code class="xref py py-class docutils literal notrans
 
 <dl class="py class">
 <dt class="sig sig-object py" id="scenedetect.common.Timecode">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scenedetect.common.</span></span><span class="sig-name descname"><span class="pre">Timecode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_base</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.common.Timecode" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Timecode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_base</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.common.Timecode" title="Permalink to this definition">¶</a></dt>
 <dd><p>Timing information associated with a given frame.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -281,7 +281,7 @@ property returns an exact <code class="xref py py-class docutils literal notrans
 
 <dl class="py function">
 <dt class="sig sig-object py" id="scenedetect.common.framerate_to_fraction">
-<span class="sig-prename descclassname"><span class="pre">scenedetect.common.</span></span><span class="sig-name descname"><span class="pre">framerate_to_fraction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fps</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.common.framerate_to_fraction" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">framerate_to_fraction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fps</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.common.framerate_to_fraction" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convert a framerate value to an exact rational Fraction.</p>
 <p>Detects NTSC-derived framerates of the form <code class="docutils literal notranslate"><span class="pre">N</span> <span class="pre">*</span> <span class="pre">1000/1001</span></code> (e.g. 23.976 -&gt; 24000/1001,
 29.97 -&gt; 30000/1001, 47.952 -&gt; 48000/1001) for any positive integer <code class="docutils literal notranslate"><span class="pre">N</span></code> and returns
@@ -300,7 +300,7 @@ rational approximation. <code class="docutils literal notranslate"><span class="
 
 <dl class="py data">
 <dt class="sig sig-object py" id="scenedetect.common.CropRegion">
-<span class="sig-prename descclassname"><span class="pre">scenedetect.common.</span></span><span class="sig-name descname"><span class="pre">CropRegion</span></span><a class="headerlink" href="#scenedetect.common.CropRegion" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">CropRegion</span></span><a class="headerlink" href="#scenedetect.common.CropRegion" title="Permalink to this definition">¶</a></dt>
 <dd><p>Type hint for rectangle of the form X0 Y0 X1 Y1 for cropping frames. Coordinates are relative
 to source frame without downscaling.</p>
 <p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]</p>
@@ -308,14 +308,14 @@ to source frame without downscaling.</p>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="scenedetect.common.CutList">
-<span class="sig-prename descclassname"><span class="pre">scenedetect.common.</span></span><span class="sig-name descname"><span class="pre">CutList</span></span><a class="headerlink" href="#scenedetect.common.CutList" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">CutList</span></span><a class="headerlink" href="#scenedetect.common.CutList" title="Permalink to this definition">¶</a></dt>
 <dd><p>Type hint for a list of cuts, where each timecode represents the first frame of a new shot.</p>
 <p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[FrameTimecode]</p>
 </dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="scenedetect.common.FrameRate">
-<span class="sig-prename descclassname"><span class="pre">scenedetect.common.</span></span><span class="sig-name descname"><span class="pre">FrameRate</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">float</span> <span class="pre">|</span> <span class="pre">fractions.Fraction</span></em><a class="headerlink" href="#scenedetect.common.FrameRate" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">FrameRate</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">float</span> <span class="pre">|</span> <span class="pre">fractions.Fraction</span></em><a class="headerlink" href="#scenedetect.common.FrameRate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Type hint for a video frame rate. <code class="docutils literal notranslate"><span class="pre">Fraction</span></code> is the canonical exact form and should be
 preferred (e.g. <code class="docutils literal notranslate"><span class="pre">Fraction(30000,</span> <span class="pre">1001)</span></code>), while <code class="docutils literal notranslate"><span class="pre">float</span></code> is accepted for convenience. Floats
 will be converted to rationals at runtime via <a class="reference internal" href="#scenedetect.common.framerate_to_fraction" title="scenedetect.common.framerate_to_fraction"><code class="xref py py-func docutils literal notranslate"><span class="pre">framerate_to_fraction()</span></code></a>.</p>
@@ -323,20 +323,20 @@ will be converted to rationals at runtime via <a class="reference internal" href
 
 <dl class="py data">
 <dt class="sig sig-object py" id="scenedetect.common.MAX_FPS_DELTA">
-<span class="sig-prename descclassname"><span class="pre">scenedetect.common.</span></span><span class="sig-name descname"><span class="pre">MAX_FPS_DELTA</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1e-09</span></em><a class="headerlink" href="#scenedetect.common.MAX_FPS_DELTA" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">MAX_FPS_DELTA</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1e-09</span></em><a class="headerlink" href="#scenedetect.common.MAX_FPS_DELTA" title="Permalink to this definition">¶</a></dt>
 <dd><p>Maximum amount two framerates can differ by for equality testing. Currently 1 frame/nanosec.</p>
 </dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="scenedetect.common.SceneList">
-<span class="sig-prename descclassname"><span class="pre">scenedetect.common.</span></span><span class="sig-name descname"><span class="pre">SceneList</span></span><a class="headerlink" href="#scenedetect.common.SceneList" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">SceneList</span></span><a class="headerlink" href="#scenedetect.common.SceneList" title="Permalink to this definition">¶</a></dt>
 <dd><p>Type hint for a list of scenes in the form (start time, end time).</p>
 <p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[FrameTimecode, FrameTimecode]]</p>
 </dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="scenedetect.common.TimecodeLike">
-<span class="sig-prename descclassname"><span class="pre">scenedetect.common.</span></span><span class="sig-name descname"><span class="pre">TimecodeLike</span></span><a class="headerlink" href="#scenedetect.common.TimecodeLike" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">TimecodeLike</span></span><a class="headerlink" href="#scenedetect.common.TimecodeLike" title="Permalink to this definition">¶</a></dt>
 <dd><p>Type hint for values that can be converted to a <a class="reference internal" href="#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrameTimecode</span></code></a>. Accepts a frame number
 (<cite>int</cite>), number of seconds (<cite>float</cite>), timecode string (<cite>str</cite> of the form <code class="docutils literal notranslate"><span class="pre">HH:MM:SS[.nnn]</span></code>), a
 <a class="reference internal" href="#scenedetect.common.Timecode" title="scenedetect.common.Timecode"><code class="xref py py-class docutils literal notranslate"><span class="pre">Timecode</span></code></a>, or an existing <a class="reference internal" href="#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrameTimecode</span></code></a>.</p>
@@ -345,7 +345,7 @@ will be converted to rationals at runtime via <a class="reference internal" href
 
 <dl class="py data">
 <dt class="sig sig-object py" id="scenedetect.common.TimecodePair">
-<span class="sig-prename descclassname"><span class="pre">scenedetect.common.</span></span><span class="sig-name descname"><span class="pre">TimecodePair</span></span><a class="headerlink" href="#scenedetect.common.TimecodePair" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">TimecodePair</span></span><a class="headerlink" href="#scenedetect.common.TimecodePair" title="Permalink to this definition">¶</a></dt>
 <dd><p>Type hint for timecode pairs, typically representing the start/end of a scene.</p>
 <p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[FrameTimecode, FrameTimecode]</p>
 </dd></dl>
@@ -360,10 +360,10 @@ will be converted to rationals at runtime via <a class="reference internal" href
     <ul>
         <li>
           &larr;
-          <a href="scene_manager.html" title="Previous document">Scene Manager</a>
+          <a href="backends.html" title="Previous document">Video Backends</a>
         </li>
         <li>
-          <a href="output.html" title="Next document">Ouptut</a>
+          <a href="scene_manager.html" title="Next document">Scene Manager</a>
           &rarr;
         </li>
     </ul>
@@ -433,16 +433,15 @@ will be converted to rationals at runtime via <a class="reference internal" href
 <li class="toctree-l1"><a class="reference internal" href="video_stream.html">Stream Interface</a></li>
 <li class="toctree-l1"><a class="reference internal" href="stats_manager.html">Stats Manager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="platform.html">Platform &amp; Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="migration_guide.html">Migration Guide (v0.7)</a></li>
 </ul>
 
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
-  <li><a href="../api.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Package</a><ul>
-      <li>Previous: <a href="scene_manager.html" title="previous chapter">Scene Manager</a></li>
-      <li>Next: <a href="output.html" title="next chapter">Ouptut</a></li>
-  </ul></li>
+      <li>Previous: <a href="backends.html" title="previous chapter">Video Backends</a></li>
+      <li>Next: <a href="scene_manager.html" title="next chapter">Scene Manager</a></li>
   </ul></li>
 </ul>
 </div>

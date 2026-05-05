@@ -18,7 +18,8 @@
     <link rel="icon" href="../_static/favicon.ico"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="prev" title="Stream Interface" href="video_stream.html" />
+    <link rel="next" title="Migration Guide (v0.7)" href="migration_guide.html" />
+    <link rel="prev" title="Stats Manager" href="stats_manager.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
@@ -43,20 +44,20 @@
 functions to handle logging and invoking external commands.</p>
 <dl class="py exception">
 <dt class="sig sig-object py" id="scenedetect.platform.CommandTooLong">
-<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scenedetect.platform.</span></span><span class="sig-name descname"><span class="pre">CommandTooLong</span></span><a class="headerlink" href="#scenedetect.platform.CommandTooLong" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CommandTooLong</span></span><a class="headerlink" href="#scenedetect.platform.CommandTooLong" title="Permalink to this definition">¶</a></dt>
 <dd><p>Raised if the length of a command line argument exceeds the limit allowed on Windows.</p>
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="scenedetect.platform.FakeTqdmLoggingRedirect">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scenedetect.platform.</span></span><span class="sig-name descname"><span class="pre">FakeTqdmLoggingRedirect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.platform.FakeTqdmLoggingRedirect" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">FakeTqdmLoggingRedirect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.platform.FakeTqdmLoggingRedirect" title="Permalink to this definition">¶</a></dt>
 <dd><p>Provides a no-op tqdm context manager for redirecting log messages.</p>
 <p>No-op.</p>
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="scenedetect.platform.FakeTqdmObject">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scenedetect.platform.</span></span><span class="sig-name descname"><span class="pre">FakeTqdmObject</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.platform.FakeTqdmObject" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">FakeTqdmObject</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.platform.FakeTqdmObject" title="Permalink to this definition">¶</a></dt>
 <dd><p>Provides a no-op tqdm-like object.</p>
 <p>No-op.</p>
 <dl class="py method">
@@ -81,13 +82,13 @@ functions to handle logging and invoking external commands.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="scenedetect.platform.Template">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scenedetect.platform.</span></span><span class="sig-name descname"><span class="pre">Template</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">template</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.platform.Template" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Template</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">template</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.platform.Template" title="Permalink to this definition">¶</a></dt>
 <dd><p>Template matcher used to replace instances of $TEMPLATES in filenames.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="scenedetect.platform.get_and_create_path">
-<span class="sig-prename descclassname"><span class="pre">scenedetect.platform.</span></span><span class="sig-name descname"><span class="pre">get_and_create_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_directory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.platform.get_and_create_path" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">get_and_create_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_directory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.platform.get_and_create_path" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get &amp; Create Path: Gets and returns the full/absolute path to file_path
 in the specified output_directory if set, creating any required directories
 along the way.</p>
@@ -107,14 +108,14 @@ directory of file_path if it is relative to the working directory.</p></li>
 <dd class="field-even"><p>Full path to output file suitable for writing.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>str</p>
+<dd class="field-odd"><p><em>str</em></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="scenedetect.platform.get_cv2_imwrite_params">
-<span class="sig-prename descclassname"><span class="pre">scenedetect.platform.</span></span><span class="sig-name descname"><span class="pre">get_cv2_imwrite_params</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.platform.get_cv2_imwrite_params" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">get_cv2_imwrite_params</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.platform.get_cv2_imwrite_params" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get OpenCV imwrite Params: Returns a dict of supported image formats and
 their associated quality/compression parameter index, or None if that format
 is not supported.</p>
@@ -126,37 +127,37 @@ respective OpenCV quality or compression parameter as {‘jpg’: cv2.IMWRITE_JP
 current system library (e.g. {‘jpg’: None}).</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>dict[str, int | None]</p>
+<dd class="field-even"><p><em>dict</em>[<em>str</em>, <em>int</em> | <em>None</em>]</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="scenedetect.platform.get_ffmpeg_path">
-<span class="sig-prename descclassname"><span class="pre">scenedetect.platform.</span></span><span class="sig-name descname"><span class="pre">get_ffmpeg_path</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.platform.get_ffmpeg_path" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">get_ffmpeg_path</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.platform.get_ffmpeg_path" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get path to ffmpeg if available on the current system. First looks at PATH, then checks if
 one is available from the <cite>imageio_ffmpeg</cite> package. Returns None if ffmpeg couldn’t be found.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>str | None</p>
+<dd class="field-odd"><p><em>str</em> | <em>None</em></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="scenedetect.platform.get_ffmpeg_version">
-<span class="sig-prename descclassname"><span class="pre">scenedetect.platform.</span></span><span class="sig-name descname"><span class="pre">get_ffmpeg_version</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.platform.get_ffmpeg_version" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">get_ffmpeg_version</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.platform.get_ffmpeg_version" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get ffmpeg version identifier, or None if ffmpeg is not found. Uses <cite>get_ffmpeg_path()</cite>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>str | None</p>
+<dd class="field-odd"><p><em>str</em> | <em>None</em></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="scenedetect.platform.get_file_name">
-<span class="sig-prename descclassname"><span class="pre">scenedetect.platform.</span></span><span class="sig-name descname"><span class="pre">get_file_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_extension</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.platform.get_file_name" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">get_file_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_extension</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.platform.get_file_name" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the file name that <cite>file_path</cite> refers to, optionally removing the extension.</p>
 <p>E.g. /tmp/foo.bar -&gt; foo</p>
 <dl class="field-list simple">
@@ -167,50 +168,50 @@ one is available from the <cite>imageio_ffmpeg</cite> package. Returns None if f
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>str</p>
+<dd class="field-even"><p><em>str</em></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="scenedetect.platform.get_mkvmerge_path">
-<span class="sig-prename descclassname"><span class="pre">scenedetect.platform.</span></span><span class="sig-name descname"><span class="pre">get_mkvmerge_path</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.platform.get_mkvmerge_path" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">get_mkvmerge_path</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.platform.get_mkvmerge_path" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get path to mkvmerge if available on the current system by checking PATH. Returns None if
 mkvmerge couldn’t be found.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>str | None</p>
+<dd class="field-odd"><p><em>str</em> | <em>None</em></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="scenedetect.platform.get_mkvmerge_version">
-<span class="sig-prename descclassname"><span class="pre">scenedetect.platform.</span></span><span class="sig-name descname"><span class="pre">get_mkvmerge_version</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.platform.get_mkvmerge_version" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">get_mkvmerge_version</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.platform.get_mkvmerge_version" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get mkvmerge version identifier, or None if mkvmerge is not found in PATH.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>str | None</p>
+<dd class="field-odd"><p><em>str</em> | <em>None</em></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="scenedetect.platform.get_system_version_info">
-<span class="sig-prename descclassname"><span class="pre">scenedetect.platform.</span></span><span class="sig-name descname"><span class="pre">get_system_version_info</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.platform.get_system_version_info" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">get_system_version_info</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.platform.get_system_version_info" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the system’s operating system, Python, packages, and external tool versions.
 Useful for debugging or filing bug reports.</p>
 <p>Used for the <cite>scenedetect version -a</cite> command.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>str</p>
+<dd class="field-odd"><p><em>str</em></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="scenedetect.platform.init_logger">
-<span class="sig-prename descclassname"><span class="pre">scenedetect.platform.</span></span><span class="sig-name descname"><span class="pre">init_logger</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">log_level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_stdout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.platform.init_logger" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">init_logger</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">log_level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_stdout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.platform.init_logger" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initializes logging for PySceneDetect. The logger instance used is named ‘pyscenedetect’.
 By default the logger has no handlers to suppress output. All existing log handlers are replaced
 every time this function is invoked.</p>
@@ -228,7 +229,7 @@ logging.WARNING, logging.ERROR, logging.CRITICAL].</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="scenedetect.platform.invoke_command">
-<span class="sig-prename descclassname"><span class="pre">scenedetect.platform.</span></span><span class="sig-name descname"><span class="pre">invoke_command</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.platform.invoke_command" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">invoke_command</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.platform.invoke_command" title="Permalink to this definition">¶</a></dt>
 <dd><p>Same as calling Python’s subprocess.call() method, but explicitly
 raises a different exception when the command length is too long.</p>
 <p>See <a class="reference external" href="https://github.com/Breakthrough/PySceneDetect/issues/164">https://github.com/Breakthrough/PySceneDetect/issues/164</a> for details.</p>
@@ -243,14 +244,14 @@ raises a different exception when the command length is too long.</p>
 <dd class="field-odd"><p><a class="reference internal" href="#scenedetect.platform.CommandTooLong" title="scenedetect.platform.CommandTooLong"><strong>CommandTooLong</strong></a> – <cite>args</cite> exceeds built in command line length limit on Windows.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>int</p>
+<dd class="field-even"><p><em>int</em></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="scenedetect.platform.DEBUG_MODE">
-<span class="sig-prename descclassname"><span class="pre">scenedetect.platform.</span></span><span class="sig-name descname"><span class="pre">DEBUG_MODE</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#scenedetect.platform.DEBUG_MODE" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">DEBUG_MODE</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#scenedetect.platform.DEBUG_MODE" title="Permalink to this definition">¶</a></dt>
 <dd><p>True when the <cite>SCENEDETECT_DEBUG</cite> environment variable is set to a truthy value
 (<cite>1</cite>, <cite>true</cite>, <cite>yes</cite>, <cite>on</cite>, etc.); False when unset or set to <cite>0</cite>/<cite>false</cite>/<cite>no</cite>/<cite>off</cite>/empty.
 Use this to gate behavior intended only for development - e.g. re-raising unhandled
@@ -261,7 +262,7 @@ opts in via <cite>tests/conftest.py</cite>.</p>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="scenedetect.platform.StrPath">
-<span class="sig-prename descclassname"><span class="pre">scenedetect.platform.</span></span><span class="sig-name descname"><span class="pre">StrPath</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">str</span> <span class="pre">|</span> <span class="pre">os.PathLike[str]</span></em><a class="headerlink" href="#scenedetect.platform.StrPath" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">StrPath</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">str</span> <span class="pre">|</span> <span class="pre">os.PathLike[str]</span></em><a class="headerlink" href="#scenedetect.platform.StrPath" title="Permalink to this definition">¶</a></dt>
 <dd><p>Type hint for filesystem paths. Accepts a <cite>str</cite> or any object implementing <code class="xref py py-class docutils literal notranslate"><span class="pre">os.PathLike</span></code>
 (e.g. <code class="xref py py-class docutils literal notranslate"><span class="pre">pathlib.Path</span></code>).</p>
 </dd></dl>
@@ -276,7 +277,11 @@ opts in via <cite>tests/conftest.py</cite>.</p>
     <ul>
         <li>
           &larr;
-          <a href="video_stream.html" title="Previous document">Stream Interface</a>
+          <a href="stats_manager.html" title="Previous document">Stats Manager</a>
+        </li>
+        <li>
+          <a href="migration_guide.html" title="Next document">Migration Guide (v0.7)</a>
+          &rarr;
         </li>
     </ul>
   </nav>
@@ -350,15 +355,15 @@ opts in via <cite>tests/conftest.py</cite>.</p>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.platform.StrPath"><code class="docutils literal notranslate"><span class="pre">StrPath</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="migration_guide.html">Migration Guide (v0.7)</a></li>
 </ul>
 
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
-  <li><a href="../api.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Package</a><ul>
-      <li>Previous: <a href="video_stream.html" title="previous chapter">Stream Interface</a></li>
-  </ul></li>
+      <li>Previous: <a href="stats_manager.html" title="previous chapter">Stats Manager</a></li>
+      <li>Next: <a href="migration_guide.html" title="next chapter">Migration Guide (v0.7)</a></li>
   </ul></li>
 </ul>
 </div>

@@ -2,7 +2,7 @@
 .. _scenedetect-migration-guide:
 
 ***********************************************************************
-Migration Guide: v0.6 to v0.7
+Migration Guide (v0.7)
 ***********************************************************************
 
 PySceneDetect v0.7 is a major release that overhauls timestamp handling to support variable framerate (VFR) videos. While the high-level :func:`scenedetect.detect` workflow is largely unchanged, several internal APIs have been restructured. This guide covers the changes needed to update applications from v0.6 to v0.7.
