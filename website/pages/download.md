@@ -6,7 +6,7 @@ PySceneDetect is completely free software, and can be downloaded from the links 
 PySceneDetect requires at least Python 3.10 or higher.
 
 
-## Install via pip &nbsp; <span class="wy-text-neutral"><span class="fa fa-windows"></span> &nbsp; <span class="fa fa-linux"></span> &nbsp; <span class="fa fa-apple"></span></span></h3>
+## Install via pip &nbsp; <span class="wy-text-neutral"><span class="fa fa-windows"></span> &nbsp; <span class="fa fa-linux"></span> &nbsp; <span class="fa fa-apple"></span></span>
 
 <div class="important">
 <h4 class="wy-text-neutral"><span class="fa fa-angle-double-down wy-text-info"></span> Standard install (recommended):</h4>

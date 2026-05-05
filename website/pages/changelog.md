@@ -20,7 +20,7 @@ Care was taken to minimize changes for most common API uses, however more advanc
 - [feature] New `save-fcp` command allows exporting in Final Cut Pro format (FCP7/FCPX) [#156](https://github.com/Breakthrough/PySceneDetect/issues/156)
 - [feature] New `save-qp` command writes a QP file with scene boundary frame numbers, suitable for forcing keyframes at scene cuts in x264/x265 [#448](https://github.com/Breakthrough/PySceneDetect/issues/448)
 - [feature] New `save-html` command replaces the deprecated `export-html`; the prior command remains as an alias and emits a deprecation warning [#518](https://github.com/Breakthrough/PySceneDetect/issues/518)
-- [feature] Add `save-edl` option  `--start-timecode`/`-s` to providde a custom start timecode for generated EDLs, supports SMPTE `HH:MM:SS:FF` or 8-digit `HHMMSSFF` input [#515](https://github.com/Breakthrough/PySceneDetect/issues/515)
+- [feature] Add `save-edl` option  `--start-timecode`/`-s` to provide a custom start timecode for generated EDLs, supports SMPTE `HH:MM:SS:FF` or 8-digit `HHMMSSFF` input [#515](https://github.com/Breakthrough/PySceneDetect/issues/515)
 - [bugfix] Fix floating-point precision error in `save-otio` output where frame values near integer boundaries (e.g. `90.00000000000001`) were serialized with spurious precision
 - [bugfix] Add mitigation for transient `OSError` in the MoviePy backend as it is susceptible to subprocess pipe races on slow or heavily loaded systems [#496](https://github.com/Breakthrough/PySceneDetect/issues/496)
 - [feature] The MoviePy backend now supports overriding the source frame rate via `-f`/`--frame-rate` (and the `VideoStreamMoviePy(frame_rate=...)` API), bringing it in line with the OpenCV and PyAV backends
