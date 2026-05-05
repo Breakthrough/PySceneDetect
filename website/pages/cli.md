@@ -77,7 +77,7 @@ You can also specify `-h` / `--high-quality` to produces near lossless results, 
 
 PySceneDetect can look for fades in/out using `detect-threshold` (comparing each frame to a set black level) or find fast cuts using `detect-content` (compares each frame looking for changes in content). There also is `detect-adaptive`, which uses the same scoring as `detect-content`, but compares the ratio of each frame score to its neighbors.
 
-Each mode has slightly different parameters, and is described in detail below. Most detector parameters can also be [set with a config file](../docs/latest/cli/config_file.html).
+Each mode has slightly different parameters, and is described in detail below. Most detector parameters can also be [set with a config file](https://www.scenedetect.com/docs/latest/cli/config_file.html).
 
 In general, use `detect-threshold` mode if you want to detect scene boundaries using fades/cuts in/out to black.  If the video uses a lot of fast cuts between content, and has no well-defined scene boundaries, you should use the `detect-adaptive` or  `detect-content` modes.  Once you know what detection mode to use, you can try the parameters recommended below, or generate a statistics file (using the `-s` / `--stats` flag) in order to determine the correct parameters - specifically, the proper threshold value.
 
@@ -86,7 +86,7 @@ In general, use `detect-threshold` mode if you want to detect scene boundaries u
 
 Unlike threshold mode, content-aware mode looks at the *difference* between each pair of adjacent frames, triggering a scene break when this difference exceeds the threshold value.
 
-The optimal threshold can be determined by generating a stats file (`-s`), opening it with a spreadsheet editor (e.g. Excel), and examining the `content_val` column ([example](../img/goldeneye-stats.png)).  This value should be very small between similar frames, and grow large when a big change in content is noticed (look at the values near frame numbers/times where you know a scene change occurs).  The threshold value should be set so that most scenes fall below the threshold value, and scenes where changes occur should *exceed* the threshold value (thus triggering a scene change).
+The optimal threshold can be determined by generating a stats file (`-s`), opening it with a spreadsheet editor (e.g. Excel), and examining the `content_val` column ([example](img/goldeneye-stats.png)).  This value should be very small between similar frames, and grow large when a big change in content is noticed (look at the values near frame numbers/times where you know a scene change occurs).  The threshold value should be set so that most scenes fall below the threshold value, and scenes where changes occur should *exceed* the threshold value (thus triggering a scene change).
 
 
 ### Threshold Detection
@@ -113,7 +113,7 @@ The `detect-adaptive` mode compares each frame's score as calculated by `detect-
 
 ## Detection Parameters
 
-Detectors take a variety of parameters, which can be [configured via command-line](../docs/latest/cli/detectors.html) or by [using a config file](../docs/latest/cli/config_file.html). If the default parameters do not produce correct results, you can generate a stats file using the `-s` / `--stats` option.
+Detectors take a variety of parameters, which can be [configured via command-line](https://www.scenedetect.com/docs/latest/cli/detectors.html) or by [using a config file](https://www.scenedetect.com/docs/latest/cli/config_file.html). If the default parameters do not produce correct results, you can generate a stats file using the `-s` / `--stats` option.
 
 For example, with `detect-content`, if the default threshold of `27` does not produce correct results, we can determine the proper threshold by first generating a stats file:
 
@@ -123,7 +123,7 @@ scenedetect --input goldeneye.mp4 --stats goldeneye.stats.csv detect-adaptive
 
 We can then plot the values of the `content_val` column:
 
-<img src="../img/goldeneye-stats.png" alt="goldeneye.mp4 statistics graph" />
+<img src="img/goldeneye-stats.png" alt="goldeneye.mp4 statistics graph" />
 
 The peaks in values correspond to the scene breaks in the input video. In some cases the threshold may need to be raised or lowered accordingly.
 

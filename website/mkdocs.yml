@@ -14,8 +14,8 @@ theme:
     logo: img/pyscenedetect_logo_small.png
     favicon: img/favicon.ico
     custom_dir: overrides
-# TODO: deprecated option for this theme
-google_analytics: ['UA-72551323-1', 'auto']
+# Google Analytics is injected manually via overrides/main.html (the top-level
+# `google_analytics` option was deprecated and removed from MkDocs).
 
 nav:
 - 'PySceneDetect':

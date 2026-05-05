@@ -51,7 +51,7 @@ class SceneDetector(ABC):
     ) -> list[FrameTimecode]:
         """Process the next frame. `timecode` is assumed to be sequential.
 
-        Args:
+        Arguments:
             timecode: Timecode corresponding to the frame being processed.
             frame_img: Video frame as a 24-bit BGR image.
 
@@ -64,7 +64,7 @@ class SceneDetector(ABC):
     def post_process(self, timecode: FrameTimecode) -> list[FrameTimecode]:
         """Called after there are no more frames to process.
 
-        Args:
+        Arguments:
             timecode: The last position in the video which was read.
 
         Returns:

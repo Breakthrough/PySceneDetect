@@ -1,6 +1,3 @@
-# Checks that the CLI docs are up-to-date. If this fails on your PR, there may be some changes
-# to the command-line docs that were not updated. Run `python docs/generate_cli_docs.py` from
-# the root PySceneDetect source folder and commit the changes to resolve the issue.
 name: Check Documentation
 
 on:
@@ -10,10 +7,12 @@ on:
     paths:
       - docs/**
       - scenedetect/**
+      - website/**
   push:
     paths:
       - docs/**
       - scenedetect/**
+      - website/**
     branches:
       - main
       - 'releases/**'
@@ -37,7 +36,7 @@ jobs:
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip build wheel virtualenv
-          pip install .[docs]
+          pip install .[docs,website]
           pip install -r packaging/windows/requirements.txt
 
 
@@ -49,3 +48,13 @@ jobs:
             echo "Re-run `python docs/generate_cli_docs.py` to update and commit the result."
             exit 1
           fi
+
+      - name: Build Sphinx Reference (warnings as errors)
+        shell: bash
+        run: |
+          sphinx-build -W --keep-going -b html docs docs/_build/html
+
+      - name: Build MkDocs Website (--strict)
+        shell: bash
+        run: |
+          mkdocs build --strict -f website/mkdocs.yml

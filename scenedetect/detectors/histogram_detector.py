@@ -131,7 +131,7 @@ class HistogramDetector(SceneDetector):
         the specified number of bins, and optionally normalizes this histogram to have a sum of one
         across all bins.
 
-        Args:
+        Arguments:
             frame_img: The input image in BGR color space, assumed to have shape
                 (height, width, 3) where the last dimension represents the BGR channels.
             bins: The number of bins to use for the histogram.

@@ -9,15 +9,15 @@ The `scenedetect` API is easy to integrate with most application workflows, whil
 
     * :ref:`scenedetect.detectors 🕵️ <scenedetect-detectors>`: detection algorithms:
 
-        * :mod:`AdaptiveDetector <scenedetect.detectors.adaptive_detector>` finds fast cuts using rolling average of HSL changes
+        * :class:`AdaptiveDetector <scenedetect.detectors.adaptive_detector.AdaptiveDetector>`: finds fast cuts using rolling average of HSL changes
 
-        * :mod:`ContentDetector <scenedetect.detectors.content_detector>`: detects fast cuts using weighted average of HSV changes
+        * :class:`ContentDetector <scenedetect.detectors.content_detector.ContentDetector>`: detects fast cuts using weighted average of HSV changes
 
-        * :mod:`ThresholdDetector <scenedetect.detectors.threshold_detector>`: finds fades in/out using average pixel intensity changes in RGB
+        * :class:`ThresholdDetector <scenedetect.detectors.threshold_detector.ThresholdDetector>`: finds fades in/out using average pixel intensity changes in RGB
 
-        * :mod:`HistogramDetector <scenedetect.detectors.histogram_detector>` finds fast cuts using HSV histogram changes
+        * :class:`HistogramDetector <scenedetect.detectors.histogram_detector.HistogramDetector>`: finds fast cuts using HSV histogram changes
 
-        * :mod:`HashDetector <scenedetect.detectors.hash_detector>`: finds fast cuts using perceptual image hashing
+        * :class:`HashDetector <scenedetect.detectors.hash_detector.HashDetector>`: finds fast cuts using perceptual image hashing
 
     * :ref:`scenedetect.output ✂️ <scenedetect-output>`: Output formats:
 
@@ -41,7 +41,7 @@ The `scenedetect` API is easy to integrate with most application workflows, whil
 
     * :ref:`scenedetect.detector 🌐 <scenedetect-detector>`: the interface (:class:`SceneDetector <scenedetect.detector.SceneDetector>`) that detectors must implement to be compatible with PySceneDetect
 
-    * :ref:`scenedetect.video_stream  <scenedetect-video_stream>`: the interface (:class:`VideoStream <scenedetect.video_stream.VideoStream>`) that detectors must implement to be compatible with PySceneDetect
+    * :ref:`scenedetect.video_stream 📹 <scenedetect-video_stream>`: the interface (:class:`VideoStream <scenedetect.video_stream.VideoStream>`) that video backends must implement to be compatible with PySceneDetect
 
     * :ref:`scenedetect.stats_manager 🧮 <scenedetect-stats_manager>`: the :class:`StatsManager <scenedetect.stats_manager.StatsManager>` allows you to store detection metrics for each frame and save them to CSV for further analysis
 

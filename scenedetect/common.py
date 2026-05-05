@@ -409,7 +409,7 @@ class FrameTimecode:
     ) -> str:
         """Get a formatted timecode string of the form HH:MM:SS[.nnn].
 
-        Args:
+        Arguments:
             precision: The number of decimal places to include in the output ``[.nnn]``.
             use_rounding: Rounds the output to the desired precision. If False, the value
                 will be truncated to the specified precision.
