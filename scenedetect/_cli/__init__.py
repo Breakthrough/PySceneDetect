@@ -1294,6 +1294,15 @@ Customized filenames:
         USER_CONFIG.get_help_string("split-video", "mkvmerge")
     ),
 )
+@click.option(
+    "--expand-to-video",
+    is_flag=True,
+    flag_value=True,
+    default=False,
+    help="Extend the first/last output clips to cover the full input video, even if `time -s/-e` limited the analysis window. Useful for keeping content outside the analyzed region attached to the adjacent split.{}".format(
+        USER_CONFIG.get_help_string("split-video", "expand-to-video")
+    ),
+)
 @click.pass_context
 def split_video_command(
     ctx: click.Context,
@@ -1306,6 +1315,7 @@ def split_video_command(
     preset: str | None,
     args: str | None,
     mkvmerge: bool,
+    expand_to_video: bool,
 ):
     ctx = ctx.obj
     assert isinstance(ctx, CliContext)
@@ -1372,6 +1382,7 @@ def split_video_command(
         "output": ctx.config.get_value("split-video", "output", output),
         "show_output": not ctx.config.get_value("split-video", "quiet", quiet),
         "ffmpeg_args": args,
+        "expand_to_video": ctx.config.get_value("split-video", "expand-to-video", expand_to_video),
     }
     ctx.add_command(cli_commands.split_video, split_video_args)
 

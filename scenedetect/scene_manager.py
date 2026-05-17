@@ -140,6 +140,34 @@ def compute_downscale_factor(frame_width: int, effective_width: int = DEFAULT_MI
     return frame_width / float(effective_width)
 
 
+def expand_scenes_to_bounds(
+    scenes: SceneList,
+    start: int | FrameTimecode,
+    end: int | FrameTimecode,
+) -> SceneList:
+    """Return a new scene list whose first scene starts at `start` and last scene ends at `end`.
+
+    Useful when scenes were detected within a sub-region of a video (e.g. via the `time`
+    command's `-s`/`-e`) but the caller wants the resulting clip boundaries to cover content
+    outside that analysis window.
+
+    Arguments:
+        scenes: List of (start, end) FrameTimecode pairs.
+        start: Desired start of the first scene.
+        end: Desired end of the last scene.
+
+    Returns:
+        A new scene list with the outer endpoints replaced. The input is not modified.
+        An empty input is returned unchanged.
+    """
+    if not scenes:
+        return list(scenes)
+    expanded = list(scenes)
+    expanded[0] = (start, expanded[0][1])
+    expanded[-1] = (expanded[-1][0], end)
+    return expanded
+
+
 def get_scenes_from_cuts(
     cut_list: CutList,
     start_pos: int | FrameTimecode,
