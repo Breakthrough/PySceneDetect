@@ -744,7 +744,7 @@ Both the Windows installer and portable distributions now include signed executa
 ----------------------------------------------------------------
 
 
-<!--Development
+Development
 ==========================================================
 
-## PySceneDetect 0.8 (TDB)-->
+## PySceneDetect 0.7.1 (TDB)
