@@ -115,7 +115,7 @@ We evaluate the performance of different detectors in terms of accuracy and proc
 Please submit any bugs/issues or feature requests to [the Issue Tracker](https://github.com/Breakthrough/PySceneDetect/issues). Before submission, ensure you search through existing issues (both open and closed) to avoid creating duplicate entries.
 Pull requests are welcome and encouraged.  PySceneDetect is released under the BSD 3-Clause license, and submitted code should be compliant.
 
-For help or other issues, you can join [the official PySceneDetect Discord Server](https://discord.gg/H83HbJngk7), submit an issue/bug report [here on Github](https://github.com/Breakthrough/PySceneDetect/issues), or contact me via [my website](http://www.bcastell.com/about/).
+For help or other issues, you can join [the official PySceneDetect Discord Server](https://discord.gg/H83HbJngk7), submit an issue/bug report [here on Github](https://github.com/Breakthrough/PySceneDetect/issues), or contact me via [my website](https://bcastell.com/about/).
 
 ## Code Signing
 
