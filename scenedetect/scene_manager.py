@@ -142,8 +142,8 @@ def compute_downscale_factor(frame_width: int, effective_width: int = DEFAULT_MI
 
 def expand_scenes_to_bounds(
     scenes: SceneList,
-    start: int | FrameTimecode,
-    end: int | FrameTimecode,
+    start: FrameTimecode,
+    end: FrameTimecode,
 ) -> SceneList:
     """Return a new scene list whose first scene starts at `start` and last scene ends at `end`.
 
