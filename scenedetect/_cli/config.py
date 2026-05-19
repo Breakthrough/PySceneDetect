@@ -468,7 +468,7 @@ CONFIG_MAP: ConfigDict = {
     "split-video": {
         "args": _DEFAULT_FFMPEG_ARGS,
         "copy": False,
-        "expand-to-video": False,
+        "expand": False,
         "filename": "$VIDEO_NAME-Scene-$SCENE_NUMBER",
         "high-quality": False,
         "mkvmerge": False,

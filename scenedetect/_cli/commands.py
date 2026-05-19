@@ -217,16 +217,16 @@ def split_video(
     output: str,
     show_output: bool,
     ffmpeg_args: str,
-    expand_to_video: bool,
+    expand: bool,
 ):
     """Handles the `split-video` command."""
     del cuts  # split-video only uses scenes.
     assert context.video_stream is not None
 
-    if expand_to_video and scenes:
+    if expand and scenes:
         video_duration = context.video_stream.duration
         if video_duration is None:
-            logger.warning("Cannot expand-to-video: video duration is unavailable for this stream.")
+            logger.warning("Cannot --expand: video duration is unavailable for this stream.")
         else:
             scenes = expand_scenes_to_bounds(
                 scenes,
