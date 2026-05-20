@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Scene Manager &#8212; PySceneDetect 0.7 documentation</title>
+    <title>Scene Manager &#8212; PySceneDetect 0.7.1-dev0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
@@ -321,6 +321,31 @@ pixels (e.g. if frame_width is 200, the range of effective widths will be betwee
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="scenedetect.scene_manager.expand_scenes_to_bounds">
+<span class="sig-name descname"><span class="pre">expand_scenes_to_bounds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scenes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.scene_manager.expand_scenes_to_bounds" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a new scene list whose first scene starts at <cite>start</cite> and last scene ends at <cite>end</cite>.</p>
+<p>Useful when scenes were detected within a sub-region of a video (e.g. via the <cite>time</cite>
+command’s <cite>-s</cite>/<cite>-e</cite>) but the caller wants the resulting clip boundaries to cover content
+outside that analysis window.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>scenes</strong> (<em>list</em><em>[</em><em>tuple</em><em>[</em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em>, </em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em>]</em><em>]</em>) – List of (start, end) FrameTimecode pairs.</p></li>
+<li><p><strong>start</strong> (<a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a>) – Desired start of the first scene.</p></li>
+<li><p><strong>end</strong> (<a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a>) – Desired end of the last scene.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A new scene list with the outer endpoints replaced. The input is not modified.
+An empty input is returned unchanged.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>list</em>[<em>tuple</em>[<a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a>, <a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a>]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="scenedetect.scene_manager.get_scenes_from_cuts">
 <span class="sig-name descname"><span class="pre">get_scenes_from_cuts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cut_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_pos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_pos</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.scene_manager.get_scenes_from_cuts" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a list of tuples of start/end FrameTimecodes for each scene based on a
@@ -409,7 +434,7 @@ scene occupies based on the input cut_list.</p>
 
 
 
-<p class="blurb">Version: [0.7]</p>
+<p class="blurb">Version: [0.7.1-dev0]</p>
 
 
 
@@ -446,6 +471,7 @@ scene occupies based on the input cut_list.</p>
 <li class="toctree-l2"><a class="reference internal" href="#storing-per-frame-statistics">Storing Per-Frame Statistics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.scene_manager.SceneManager"><code class="docutils literal notranslate"><span class="pre">SceneManager</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.scene_manager.compute_downscale_factor"><code class="docutils literal notranslate"><span class="pre">compute_downscale_factor()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scenedetect.scene_manager.expand_scenes_to_bounds"><code class="docutils literal notranslate"><span class="pre">expand_scenes_to_bounds()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.scene_manager.get_scenes_from_cuts"><code class="docutils literal notranslate"><span class="pre">get_scenes_from_cuts()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.scene_manager.DEFAULT_MIN_WIDTH"><code class="docutils literal notranslate"><span class="pre">DEFAULT_MIN_WIDTH</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.scene_manager.MAX_FRAME_QUEUE_LENGTH"><code class="docutils literal notranslate"><span class="pre">MAX_FRAME_QUEUE_LENGTH</span></code></a></li>

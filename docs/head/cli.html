@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>scenedetect 🎬 Command &#8212; PySceneDetect 0.7 documentation</title>
+    <title>scenedetect 🎬 Command &#8212; PySceneDetect 0.7.1-dev0 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
@@ -840,6 +840,12 @@
 <dd><p>Split video using mkvmerge. Faster than re-encoding, but less precise. If set, options other than <a class="reference internal" href="#cmdoption-scenedetect-split-video-f"><code class="xref std std-option docutils literal notranslate"><span class="pre">-f/--filename</span></code></a>, <a class="reference internal" href="#cmdoption-scenedetect-split-video-q"><code class="xref std std-option docutils literal notranslate"><span class="pre">-q/--quiet</span></code></a> and <a class="reference internal" href="#cmdoption-scenedetect-split-video-o"><code class="xref std std-option docutils literal notranslate"><span class="pre">-o/--output</span></code></a> will be ignored. Note that mkvmerge automatically appends the $SCENE_NUMBER suffix.</p>
 </dd></dl>
 
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-split-video-expand">
+<span class="sig-name descname"><span class="pre">--expand</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-scenedetect-split-video-expand" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extend the first/last output clips to cover the full input video, even if the <a class="reference internal" href="#command-time"><span class="std std-ref">time</span></a> command’s <code class="docutils literal notranslate"><span class="pre">--start</span></code>/<code class="docutils literal notranslate"><span class="pre">--end</span></code> limited the analysis window. Useful for keeping content outside the analyzed region attached to the adjacent split.</p>
+</dd></dl>
+
 </section>
 </section>
 <section id="time">
@@ -909,7 +915,7 @@
 
 
 
-<p class="blurb">Version: [0.7]</p>
+<p class="blurb">Version: [0.7.1-dev0]</p>
 
 
 

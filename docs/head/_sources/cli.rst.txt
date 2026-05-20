@@ -857,6 +857,10 @@ Options
 
   Split video using mkvmerge. Faster than re-encoding, but less precise. If set, options other than :option:`-f/--filename <-f>`, :option:`-q/--quiet <-q>` and :option:`-o/--output <-o>` will be ignored. Note that mkvmerge automatically appends the $SCENE_NUMBER suffix.
 
+.. option:: --expand
+
+  Extend the first/last output clips to cover the full input video, even if the :ref:`time <command-time>` command's ``--start``/``--end`` limited the analysis window. Useful for keeping content outside the analyzed region attached to the adjacent split.
+
 
 .. _command-time:
 
