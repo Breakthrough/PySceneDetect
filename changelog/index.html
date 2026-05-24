@@ -1003,6 +1003,15 @@
 <hr />
 <h1 id="development">Development</h1>
 <h2 id="pyscenedetect-071-tdb">PySceneDetect 0.7.1 (TDB)</h2>
+<h4 id="cli-changes_1">CLI Changes</h4>
+<ul>
+<li>[feature] <code>split-video</code> has a new <code>--expand</code> flag: when scenes are detected within a time window (<code>-s</code>/<code>-e</code>), the first output clip is extended back to the start of the video and the last clip is extended forward to the end, so no footage outside the analysis window is dropped <a href="https://github.com/Breakthrough/PySceneDetect/issues/115">#115</a></li>
+</ul>
+<h4 id="api-changes_1">API Changes</h4>
+<ul>
+<li>[feature] <code>scenedetect.detect()</code> now accepts a <code>backend</code> keyword argument (<code>"opencv"</code>, <code>"pyav"</code>, or <code>"moviepy"</code>) similar to <code>open_video</code>. Defaults to <code>"opencv"</code>, matching prior behavior.</li>
+<li>[feature] Add <code>expand_scenes_to_bounds()</code> helper in <code>scenedetect.scene_manager</code> to extend a scene list so the first scene starts at a given lower bound and the last scene ends at a given upper bound</li>
+</ul>
               
             </div>
           </div><footer>
