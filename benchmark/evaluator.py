@@ -1,10 +1,21 @@
+#
+#            PySceneDetect: Python-Based Video Scene Detector
+#   -------------------------------------------------------------------
+#     [  Site:    https://scenedetect.com                           ]
+#     [  Docs:    https://scenedetect.com/docs/                     ]
+#     [  Github:  https://github.com/Breakthrough/PySceneDetect/    ]
+#
+# Copyright (C) 2026 Brandon Castellano <http://www.bcastell.com>.
+# PySceneDetect is licensed under the BSD 3-Clause License; see the
+# included LICENSE file, or visit one of the above pages for details.
+#
 """Scoring for shot-boundary-detection benchmarks.
 
 Implements the TRECVID-SBD evaluation convention. Each predicted boundary is one integer frame
-number. Hard cuts are matched against ground-truth frames with a configurable frame-tolerance window
-via greedy 1-to-1 nearest-neighbor assignment. Fades and other gradual transitions are matched by
-point-in-interval membership, where the prediction inside an interval matches. Additional
-predictions in the same interval are considered false positives.
+number. Hard cuts are matched against ground-truth frames, with a configurable frame-tolerance.
+Matches are scored via greedy 1-to-1 nearest-neighbor assignment. Fades and other gradual
+transitions are matched by point-in-interval membership, where the prediction inside an interval
+is considered a match. Other predictions in the same interval are considered false positives.
 
 References:
 - Smeaton, Over & Doherty (2010), "Video shot boundary detection: Seven years of TRECVid activity",
@@ -20,21 +31,27 @@ from __future__ import annotations
 import math
 from collections.abc import Iterable
 from dataclasses import dataclass, field
+from pathlib import Path
 from statistics import mean
+from typing import TypeAlias
+
+# 1-based frame number, matching the convention used by the BBC/AutoShot text annotations and by
+# PySceneDetect's :class:`FrameTimecode`. Used for cut positions and for tolerance windows.
+#
+# Ironically, all the work we did in v0.7 to support VFR is meaningless for most existing benchmarks
+# since they are all CFR. In the future we should consider extending the API to support temporal
+# units of time or PTS, and also see if other datasets might take this into account.
+Frames: TypeAlias = int
 
 
 @dataclass(frozen=True)
 class EventInterval:
-    """Interval that captures the start/end of a gradual transition (dissolve/fade) in ground truth.
+    """Inclusive ``[start, end]`` frame range for a gradual transition (dissolve/fade)."""
 
-    ``start`` and ``end`` are inclusive 1-based frame indices, matching the convention used by the
-    BBC/AutoShot text annotations and by PySceneDetect's :class:`FrameTimecode`.
-    """
+    start: Frames
+    end: Frames
 
-    start: int
-    end: int
-
-    def contains(self, frame: int) -> bool:
+    def contains(self, frame: Frames) -> bool:
         return self.start <= frame <= self.end
 
 
@@ -42,9 +59,21 @@ class EventInterval:
 class GroundTruth:
     """Ground truth for one video, consisting of hard cut frames and fade intervals."""
 
-    hard_cuts: list[int]
+    hard_cuts: list[Frames]
     fades: list[EventInterval] = field(default_factory=list)
     category: str | None = None
+
+
+@dataclass
+class Prediction:
+    """One detector run on one video, ready for scoring against typed ground truth."""
+
+    predicted_cuts: list[Frames]
+    """Flat list of predicted hard cut frame numbers, 1-based."""
+    ground_truth: GroundTruth
+    """Ground truth for the video being scored."""
+    elapsed: float
+    """How long it took to run the prediction, in seconds. Used for performance not accuracy."""
 
 
 @dataclass
@@ -97,118 +126,109 @@ class EventMetrics:
 
 @dataclass
 class VideoMetrics:
-    """Per-video result. One entry per (video, detector) pair."""
+    """Per-video result at one tolerance. The video's path lives in the enclosing
+    :class:`BenchmarkResult.per_video` dict key, not on this object."""
 
-    video_file: str
     elapsed: float
     category: str | None
-    hard_cuts: dict[int, EventMetrics]
+    hard_cuts: EventMetrics
     fades: EventMetrics
-    # Per-tolerance (sum of |prediction - ground_truth|, match count) over
-    # hard-cut matches. Stored as raw sums so aggregation across videos is
-    # `sum / total_matched`, not a mean-of-means.
-    hard_offset: dict[int, tuple[float, int]]
+    # (sum of |prediction - ground_truth|, match count) over hard-cut matches.
+    # Stored as raw sums so aggregation across videos is `sum / total_matched`,
+    # not a mean-of-means.
+    hard_offset: tuple[float, int]
 
-    def mean_abs_offset(self, tolerance: int) -> float:
-        s, n = self.hard_offset[tolerance]
+    @property
+    def mean_abs_offset(self) -> float:
+        s, n = self.hard_offset
         return s / n if n else math.nan
 
     def to_dict(self) -> dict:
         return {
-            "video_file": self.video_file,
             "elapsed": self.elapsed,
             "category": self.category,
-            "hard_cuts": {str(t): m.to_dict() for t, m in self.hard_cuts.items()},
+            "hard_cuts": self.hard_cuts.to_dict(),
             "fades": self.fades.to_dict(),
-            "mean_abs_offset_hard_cuts": {str(t): self.mean_abs_offset(t) for t in self.hard_cuts},
+            "mean_abs_offset_hard_cuts": self.mean_abs_offset,
         }
 
 
 @dataclass
 class BenchmarkResult:
-    """Aggregate result of running one detector configuration on a dataset.
+    """Aggregate result of running one detector configuration on a dataset at one tolerance.
 
-    Holds per-video metrics and exposes aggregate properties computed by summing counts across
-    videos (same convention used by TRECVID).
+    ``per_video`` is keyed by source video path so per-video lookups are explicit; aggregate
+    properties sum counts across all videos (same convention used by TRECVID).
     """
 
-    per_video: list[VideoMetrics]
-    tolerances: tuple[int, ...]
+    per_video: dict[Path, VideoMetrics]
+    tolerance: Frames
 
     @property
-    def hard_cuts(self) -> dict[int, EventMetrics]:
-        out = {t: EventMetrics() for t in self.tolerances}
-        for v in self.per_video:
-            for t in self.tolerances:
-                out[t] = out[t] + v.hard_cuts[t]
-        return out
+    def hard_cuts(self) -> EventMetrics:
+        total = EventMetrics()
+        for v in self.per_video.values():
+            total = total + v.hard_cuts
+        return total
 
     @property
     def fades(self) -> EventMetrics:
         total = EventMetrics()
-        for v in self.per_video:
+        for v in self.per_video.values():
             total = total + v.fades
         return total
 
     @property
-    def mean_abs_offset_hard_cuts(self) -> dict[int, float]:
-        out: dict[int, float] = {}
-        for tolerance in self.tolerances:
-            num = sum(v.hard_offset[tolerance][0] for v in self.per_video)
-            den = sum(v.hard_offset[tolerance][1] for v in self.per_video)
-            out[tolerance] = num / den if den else math.nan
-        return out
+    def mean_abs_offset_hard_cuts(self) -> float:
+        num = sum(v.hard_offset[0] for v in self.per_video.values())
+        den = sum(v.hard_offset[1] for v in self.per_video.values())
+        return num / den if den else math.nan
 
     @property
     def elapsed_total(self) -> float:
-        return sum(v.elapsed for v in self.per_video)
+        return sum(v.elapsed for v in self.per_video.values())
 
     @property
     def elapsed_mean(self) -> float:
-        return mean(v.elapsed for v in self.per_video) if self.per_video else 0.0
+        return mean(v.elapsed for v in self.per_video.values()) if self.per_video else 0.0
 
     def by_category(self) -> dict[str, BenchmarkResult]:
-        buckets: dict[str, list[VideoMetrics]] = {}
-        for v in self.per_video:
-            buckets.setdefault(v.category or "unknown", []).append(v)
+        buckets: dict[str, dict[Path, VideoMetrics]] = {}
+        for path, v in self.per_video.items():
+            buckets.setdefault(v.category or "unknown", {})[path] = v
         return {
-            g: BenchmarkResult(per_video=vids, tolerances=self.tolerances)
+            g: BenchmarkResult(per_video=vids, tolerance=self.tolerance)
             for g, vids in buckets.items()
         }
 
     def to_dict(self) -> dict:
         return {
-            "tolerances": list(self.tolerances),
+            "tolerance": self.tolerance,
             "aggregate": {
-                "hard_cuts": {str(t): m.to_dict() for t, m in self.hard_cuts.items()},
-                "mean_abs_offset_hard_cuts": {
-                    str(t): v for t, v in self.mean_abs_offset_hard_cuts.items()
-                },
+                "hard_cuts": self.hard_cuts.to_dict(),
+                "mean_abs_offset_hard_cuts": self.mean_abs_offset_hard_cuts,
                 "fades": self.fades.to_dict(),
                 "elapsed_total": self.elapsed_total,
                 "elapsed_mean": self.elapsed_mean,
                 "video_count": len(self.per_video),
             },
-            "per_video": [v.to_dict() for v in self.per_video],
+            "per_video": {str(path): v.to_dict() for path, v in self.per_video.items()},
         }
 
 
 def _score_hard_cuts(
-    predicted_cuts: Iterable[int],
-    ground_truth_cuts: Iterable[int],
-    tolerance: int,
-) -> tuple[EventMetrics, list[int]]:
+    predicted_cuts: Iterable[Frames],
+    ground_truth_cuts: Iterable[Frames],
+    tolerance: Frames,
+) -> tuple[EventMetrics, list[Frames]]:
     """Greedy 1-to-1 nearest-neighbor matching within ``tolerance`` frames.
 
-    Builds the set of all (prediction, ground-truth) candidate pairs whose
-    absolute frame distance is within tolerance, sorts by distance, and
-    walks the sorted list claiming the first unused pair each time. Ties
-    on distance are broken by stable iteration order, which is
-    deterministic but otherwise unspecified - fine since we report
-    aggregate metrics, not per-event assignments.
+    Builds the set of all (prediction, ground-truth) candidate pairs whose absolute frame distance
+    is within tolerance, sorts by distance, and walks the sorted list claiming the first unused
+    pair each time. Ties on distance are broken by stable iteration order, which is deterministic
+    but otherwise unspecified - fine since we report aggregate metrics, not per-event assignments.
 
-    Returns the event metrics and the per-match absolute offsets (for later
-    averaging).
+    Returns the event metrics and the per-match absolute offsets (for later averaging).
     """
     predicted_cuts = list(predicted_cuts)
     ground_truth_cuts = list(ground_truth_cuts)
@@ -239,19 +259,19 @@ def _score_hard_cuts(
 
 
 def _score_fade_transitions(
-    predicted_cuts: Iterable[int],
+    predicted_cuts: Iterable[Frames],
     intervals: Iterable[EventInterval],
 ) -> tuple[EventMetrics, set[int]]:
     """Point-in-interval matching for gradual fade transitions.
 
-    Each prediction that falls inside any ground-truth interval is
-    consumed by that interval (first-match wins). The first prediction to
-    land in an interval is the match; any further predictions in the same
-    interval are false positives. Predictions outside every interval are
+    Each prediction that falls inside any ground-truth interval is consumed by that interval
+    (first-match wins). The first prediction to land in an interval is the match; any further
+    predictions in the same interval are false positives. Predictions outside every interval are
     not touched here - they go back to the hard-cut scorer.
 
-    Returns the fade transition metrics and the indices of predictions that were
-    consumed (so the caller can skip them when running hard matching).
+    Returns the fade transition metrics and the set of *positional indices* (into
+    ``predicted_cuts``, not frame values) that were consumed by a fade interval, so the caller
+    can skip them when running hard matching.
     """
     predicted_cuts = list(predicted_cuts)
     intervals = list(intervals)
@@ -277,106 +297,42 @@ def _score_fade_transitions(
 
 
 def score_video(
-    predicted_cuts: Iterable[int],
+    predicted_cuts: Iterable[Frames],
     ground_truth: GroundTruth,
-    tolerances: Iterable[int],
-    video_file: str,
+    tolerance: Frames,
     elapsed: float,
 ) -> VideoMetrics:
-    """Score one video against typed ground truth.
+    """Score one video against typed ground truth at one tolerance.
 
-    Fade transition matching runs first; predictions that land inside any fade
-    interval are consumed there and excluded from hard-cut matching. The
-    remaining predictions are matched against ground-truth hard cuts once
-    per tolerance value in ``tolerances``.
+    Fade transition matching runs first; predictions that land inside any fade interval are
+    consumed there and excluded from hard-cut matching. The remaining predictions are matched
+    against ground-truth hard cuts at ``tolerance`` frames.
     """
     predicted_cuts = list(predicted_cuts)
-    tolerances = tuple(tolerances)
 
     fade_metrics, consumed = _score_fade_transitions(predicted_cuts, ground_truth.fades)
     remaining_cuts = [p for k, p in enumerate(predicted_cuts) if k not in consumed]
-
-    hard_cuts: dict[int, EventMetrics] = {}
-    hard_cut_offsets: dict[int, tuple[float, int]] = {}
-    for t in tolerances:
-        m, offsets = _score_hard_cuts(remaining_cuts, ground_truth.hard_cuts, t)
-        hard_cuts[t] = m
-        hard_cut_offsets[t] = (float(sum(offsets)), len(offsets))
+    hard_metrics, offsets = _score_hard_cuts(remaining_cuts, ground_truth.hard_cuts, tolerance)
 
     return VideoMetrics(
-        video_file=video_file,
         elapsed=elapsed,
         category=ground_truth.category,
-        hard_cuts=hard_cuts,
+        hard_cuts=hard_metrics,
         fades=fade_metrics,
-        hard_offset=hard_cut_offsets,
+        hard_offset=(float(sum(offsets)), len(offsets)),
     )
 
 
-def _load_scenes_text(scene_filename: str) -> list[int]:
-    """Read a BBC/AutoShot annotation file and return 1-based frame indices.
-
-    Expects tab-separated rows where the second column is the 0-based frame index of the cut.
-    """
-    with open(scene_filename) as f:
-        return [int(x.strip().split("\t")[1]) + 1 for x in f.readlines()]
-
-
-def _build_video_metrics(pred_scenes: dict, tolerances: tuple[int, ...]) -> list[VideoMetrics]:
-    """Score every (scene_file, payload) entry in ``pred_scenes``."""
-    if not pred_scenes:
-        raise ValueError("pred_scenes must not be empty")
-    videos: list[VideoMetrics] = []
-    for scene_file, payload in pred_scenes.items():
-        gt = payload.get("ground_truth")
-        if gt is None:
-            gt = GroundTruth(hard_cuts=_load_scenes_text(scene_file))
-        videos.append(
-            score_video(
-                predicted_cuts=payload["pred_scenes"],
-                ground_truth=gt,
-                tolerances=tolerances,
-                video_file=payload["video_file"],
-                elapsed=payload["elapsed"],
-            )
+def evaluate(predictions: dict[Path, Prediction], tolerance: Frames) -> BenchmarkResult:
+    """Score predictions at a single tolerance and return aggregate + per-video results."""
+    assert predictions, "predictions must not be empty"
+    videos = {
+        path: score_video(
+            predicted_cuts=p.predicted_cuts,
+            ground_truth=p.ground_truth,
+            tolerance=tolerance,
+            elapsed=p.elapsed,
         )
-    return videos
-
-
-class Evaluator:
-    """Wrapper exposing ``evaluate_performance(dict) -> dict`` for the printed result table."""
-
-    def evaluate_performance(self, pred_scenes: dict) -> dict:
-        """Score a set of predictions.
-
-        ``pred_scenes`` is a dict mapping ``scene_file`` to a dict containing:
-
-        - ``video_file``: source video filename
-        - ``elapsed``: per-video wall-clock seconds
-        - ``pred_scenes``: list of predicted cut frames (1-based)
-        - ``ground_truth`` (optional): a :class:`GroundTruth`. If absent the scene file is
-          parsed as a BBC/AutoShot-style tab-separated text file with hard cuts only.
-
-        Returns the flat dict ``{recall, precision, f1, elapsed}`` at tolerance 0 over
-        hard-cut events. Use :func:`evaluate` for per-video, per-tolerance, fade-aware results.
-        """
-        result = BenchmarkResult(
-            per_video=_build_video_metrics(pred_scenes, (0,)),
-            tolerances=(0,),
-        )
-        hard_zero = result.hard_cuts[0]
-        return {
-            "recall": hard_zero.recall * 100,
-            "precision": hard_zero.precision * 100,
-            "f1": hard_zero.f1 * 100,
-            "elapsed": result.elapsed_mean,
-        }
-
-
-def evaluate(pred_scenes: dict, tolerances: Iterable[int] = (0, 1)) -> BenchmarkResult:
-    """Score predictions and return per-video and per-tolerance results."""
-    tolerances = tuple(tolerances)
-    return BenchmarkResult(
-        per_video=_build_video_metrics(pred_scenes, tolerances),
-        tolerances=tolerances,
-    )
+        for path, p in predictions.items()
+    }
+    return BenchmarkResult(per_video=videos, tolerance=tolerance)

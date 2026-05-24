@@ -15,11 +15,11 @@ packaging/windows/.version_info
 packaging/windows/installer/PySceneDetect.back*.aip
 packaging/windows/installer/PySceneDetect-*.msi
 packaging/windows/installer/PySceneDetect-cache/
-benchmarks/BCC/*.mp4
-*.txt
-benchmarks/RAI/*.mp4
 *.txt
 
+benchmark/BBC/
+benchmark/AutoShot/
+benchmark/results/
 
 # From https://raw.githubusercontent.com/github/gitignore/main/Python.gitignore
 

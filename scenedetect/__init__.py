@@ -149,6 +149,7 @@ def detect(
     start_time: TimecodeLike | None = None,
     end_time: TimecodeLike | None = None,
     start_in_scene: bool = False,
+    backend: str = "opencv",
 ) -> SceneList:
     """Perform scene detection on a given video `path` using the specified `detector`.
 
@@ -168,6 +169,10 @@ def detect(
             will contain a single scene spanning the entire video (instead of no scenes).
             When detecting fades with `ThresholdDetector`, the beginning portion of the video
             will always be included until the first fade-out event is detected.
+        backend: Name of the backend to use for video decoding. See
+            :data:`scenedetect.backends.AVAILABLE_BACKENDS` for backends available on the
+            current system. Defaults to OpenCV; falls back to OpenCV if the requested backend
+            is unavailable or fails to open the video.
 
     Returns:
         List of scenes as pairs of (start, end) :class:`FrameTimecode` objects.
@@ -178,7 +183,7 @@ def detect(
         ValueError: `start_time` or `end_time` are incorrectly formatted.
         TypeError: `start_time` or `end_time` are invalid types.
     """
-    video = open_video(video_path)
+    video = open_video(video_path, backend=backend)
     if start_time is not None:
         video.seek(FrameTimecode(start_time, video.frame_rate))
     end_timecode = FrameTimecode(end_time, video.frame_rate) if end_time is not None else None

@@ -1,11 +1,35 @@
 # Benchmarking PySceneDetect
-This repository benchmarks the performance of PySceneDetect in terms of both latency and accuracy.
-We evaluate it using the standard dataset for video shot detection: [BBC](https://zenodo.org/records/14865504) and [AutoShot](https://drive.google.com/file/d/17diRkLlNUUjHDooXdqFUTXYje2-x4Yt6/view?usp=sharing).
+
+Benchmarks PySceneDetect's detection accuracy and latency against public shot-boundary-detection
+corpora. Scoring follows the [TRECVID-SBD][trecvid] convention (greedy 1-to-1 nearest-neighbor
+matching with a configurable frame tolerance for hard cuts; point-in-interval matching for fade
+transitions; mean absolute frame offset on matched events) so numbers are comparable to published
+SBD results.
+
+[trecvid]: https://www-nlpir.nist.gov/projects/tv2007/pastdata/shot_boundary.07.html
+
+Supported datasets:
+
+- [BBC Planet Earth](https://zenodo.org/records/14865504):
+  11 long-form broadcast clips; hard cuts only
+- [AutoShot](https://drive.google.com/file/d/17diRkLlNUUjHDooXdqFUTXYje2-x4Yt6/view?usp=sharing):
+  Short-form web clips; hard cuts only
+
+## Usage
+
+```bash
+# Single detector x single dataset:
+python -m benchmark --detector detect-content --dataset BBC
+```
+
+Pass `--help` for `--dataset-root`, `--backend`, `--tolerance`, and `--out` options.
 
 ## Dataset Download
+
 ### BBC
-```
-# annotation
+
+```bash
+# annotations
 wget -O BBC/fixed.zip https://zenodo.org/records/14873790/files/fixed.zip
 unzip BBC/fixed.zip -d BBC
 rm -rf BBC/fixed.zip
@@ -17,29 +41,23 @@ rm -rf BBC/videos.zip
 ```
 
 ### AutoShot
-Download `AutoShot_test.tar.gz` from [Google drive](https://drive.google.com/file/d/17diRkLlNUUjHDooXdqFUTXYje2-x4Yt6/view?usp=sharing).
-```
-tar -zxvf AutoShot.tar.gz
-rm AutoShot.tar.gz
+
+Download `AutoShot_test.tar.gz` from
+[Google Drive](https://drive.google.com/file/d/17diRkLlNUUjHDooXdqFUTXYje2-x4Yt6/view?usp=sharing).
+
+```bash
+tar -zxvf AutoShot_test.tar.gz
+rm AutoShot_test.tar.gz
 ```
 
-## Evaluation
-To evaluate PySceneDetect on a dataset, run the following command from the root of the repo:
-```
-python -m benchmark --dataset <dataset_name> --detector <detector_name>
-```
-For example, to evaluate ContentDetector on the BBC dataset:
-```
-python -m benchmark --dataset BBC --detector detect-content
-```
-To run all detectors on all datasets:
-```
-python -m benchmark --all
-```
-The `--all` flag can also be combined with `--dataset` or `--detector`.
+Set `--dataset-root /path/to/datasets` to override. The default dataset location assumes they are
+all placed in the benchmark folder (e.g. `benchmark/BBC`, `benchmark/AutoShot`).
 
-### Result
-The performance is computed as recall, precision, f1, and elapsed time.
+## Results (defaults)
+
+*NOTE*: These results were generated before the new scoring methodology was implemented and will be
+updated as soon as possible. The precision and recall scores are still relevant, just the evaluation
+strategy is being expanded to allow for more dataset coverage and also tuning of parameters.
 
 #### BBC
 
@@ -49,7 +67,7 @@ The performance is computed as recall, precision, f1, and elapsed time.
 |  ContentDetector  |  84.70 |   88.77   | 86.69 |         28.20         |
 |    HashDetector   |  92.30 |   75.56   | 83.10 |         16.00         |
 | HistogramDetector |  89.84 |   72.03   | 79.96 |         15.13         |
-| ThresholdDetector |  0.00  |   0.00    |  0.00 |         18.95         |
+| ThresholdDetector |   0.00 |    0.00   |  0.00 |         18.95         |
 
 #### AutoShot
 
@@ -59,10 +77,12 @@ The performance is computed as recall, precision, f1, and elapsed time.
 |  ContentDetector  |  63.67 |   76.40   | 69.46 |          1.21         |
 |    HashDetector   |  56.66 |   76.35   | 65.05 |          1.16         |
 | HistogramDetector |  63.36 |   53.34   | 57.92 |          1.23         |
-| ThresholdDetector |  0.75  |   38.64   |  1.47 |          1.24         |
+| ThresholdDetector |   0.75 |   38.64   |  1.47 |          1.24         |
 
-## Citation
+## Citations
+
 ### BBC
+
 ```
 @InProceedings{bbc_dataset,
   author    = {Lorenzo Baraldi and Costantino Grana and Rita Cucchiara},
@@ -73,6 +93,7 @@ The performance is computed as recall, precision, f1, and elapsed time.
 ```
 
 ### AutoShot
+
 ```
 @InProceedings{autoshot_dataset,
   author    = {Wentao Zhu and Yufang Huang and Xiufeng Xie and Wenxian Liu and Jincan Deng and Debing Zhang and Zhangyang Wang and Ji Liu},

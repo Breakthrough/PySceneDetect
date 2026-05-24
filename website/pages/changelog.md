@@ -748,3 +748,7 @@ Development
 ==========================================================
 
 ## PySceneDetect 0.7.1 (TDB)
+
+#### API Changes
+
+ - [feature] `scenedetect.detect()` now accepts a `backend` keyword argument (`"opencv"`, `"pyav"`, or `"moviepy"`) similar to `open_video`. Defaults to `"opencv"`, matching prior behavior.
