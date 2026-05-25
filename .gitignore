@@ -19,6 +19,7 @@ packaging/windows/installer/PySceneDetect-cache/
 
 benchmark/BBC/
 benchmark/AutoShot/
+benchmark/ClipShots/
 benchmark/results/
 
 # From https://raw.githubusercontent.com/github/gitignore/main/Python.gitignore

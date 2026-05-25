@@ -14,6 +14,8 @@ Supported datasets:
   11 long-form broadcast clips; hard cuts only
 - [AutoShot](https://drive.google.com/file/d/17diRkLlNUUjHDooXdqFUTXYje2-x4Yt6/view?usp=sharing):
   Short-form web clips; hard cuts only
+- [ClipShots](https://github.com/Tangshitao/ClipShots):
+  Short-form web clips; hard cuts and typed gradual transitions (fades/dissolves)
 
 ## Usage
 
@@ -50,14 +52,30 @@ tar -zxvf AutoShot_test.tar.gz
 rm AutoShot_test.tar.gz
 ```
 
+### ClipShots
+
+ClipShots is gated behind a dataset request form; direct `wget`-style download links are not
+published. See [the download instructions](https://github.com/Tangshitao/ClipShots#downloads) to
+obtain the annotations and videos. The expected on-disk layout is:
+
+```
+ClipShots/
+  annotations/{train,test,only_gradual}.json
+  video_lists/{train,test,only_gradual}.txt
+  videos/*.mp4
+```
+
+The loader defaults to the test split (500 videos). The full corpus is ~46 GB.
+
 Set `--dataset-root /path/to/datasets` to override. The default dataset location assumes they are
-all placed in the benchmark folder (e.g. `benchmark/BBC`, `benchmark/AutoShot`).
+all placed in the benchmark folder (e.g. `benchmark/BBC`, `benchmark/AutoShot`, `benchmark/ClipShots`).
 
 ## Results (defaults)
 
 *NOTE*: These results were generated before the new scoring methodology was implemented and will be
 updated as soon as possible. The precision and recall scores are still relevant, just the evaluation
 strategy is being expanded to allow for more dataset coverage and also tuning of parameters.
+ClipShots numbers are intentionally absent here and will be added in the same refresh pass.
 
 #### BBC
 
@@ -100,5 +118,16 @@ strategy is being expanded to allow for more dataset coverage and also tuning of
   title     = {AutoShot: A Short Video Dataset and State-of-the-Art Shot Boundary Detection},
   booktitle = {Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR) Workshops},
   year      = {2023},
+}
+```
+
+### ClipShots
+
+```
+@InProceedings{clipshots_dataset,
+  author    = {Shitao Tang and Litong Feng and Zhanghui Kuang and Yimin Chen and Wei Zhang},
+  title     = {Fast Video Shot Transition Localization with Deep Structured Models},
+  booktitle = {Asian Conference on Computer Vision (ACCV)},
+  year      = {2018},
 }
 ```

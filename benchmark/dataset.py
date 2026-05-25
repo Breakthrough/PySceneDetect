@@ -24,12 +24,16 @@ Add a new dataset by:
 from __future__ import annotations
 
 import glob
+import json
+import logging
 import os
 from collections.abc import Iterator
 from dataclasses import dataclass
 from pathlib import Path
 
-from benchmark.evaluator import Frames, GroundTruth
+from benchmark.evaluator import EventInterval, Frames, GroundTruth
+
+logger = logging.getLogger("pyscenedetect")
 
 
 @dataclass(frozen=True)
@@ -133,12 +137,96 @@ class AutoShotDataset(Dataset):
         ]
 
 
+class ClipShotsDataset(Dataset):
+    """The ClipShots dataset (test split by default).
+
+    Tang et al., "Fast Video Shot Transition Localization with Deep Structured Models",
+    ACCV 2018. https://github.com/Tangshitao/ClipShots
+
+    The only in-tree dataset with typed gradual-transition (fade/dissolve) ground truth in
+    addition to hard cuts. Layout under ``ClipShots/``::
+
+        annotations/{train,test,only_gradual}.json
+        video_lists/{train,test,only_gradual}.txt   (optional split filter)
+        videos/*.mp4
+
+    Each annotation entry is ``{"transitions": [[start, end], ...], "frame_num": float}``.
+    Hard cuts are single-frame spans (``end == start + 1``); wider spans are gradual
+    transitions. Unlike the BBC/AutoShot annotations, ClipShots frame indices already match
+    PySceneDetect's boundary-frame convention (the prediction's ``frame_num`` lines up with
+    ``transition[1]`` directly), so no offset is applied here.
+
+    Loading rules:
+
+    - Videos listed in ``video_lists/<split>.txt`` but absent from the annotations JSON are
+      silently ignored (the filter runs against the JSON, not the other way).
+    - Annotations whose ``.mp4`` is not on disk are skipped (so partial corpora work).
+    - Malformed transitions (fewer than 2 entries, negative span, zero-width span) are
+      skipped with a warning rather than crashing the load.
+
+    Only the ``ClipShotsDataset(dir, split=...)`` constructor honors a non-default split;
+    the registry entry in :data:`DATASETS` always loads the ``test`` split.
+    """
+
+    event_types = frozenset({"hard_cut", "fade"})
+
+    def __init__(self, dataset_dir: str, split: str = "test"):
+        ann_path = os.path.join(dataset_dir, "annotations", f"{split}.json")
+        videos_dir = os.path.join(dataset_dir, "videos")
+        with open(ann_path) as f:
+            annotations: dict = json.load(f)
+        split_list_path = os.path.join(dataset_dir, "video_lists", f"{split}.txt")
+        if os.path.exists(split_list_path):
+            with open(split_list_path) as allow_f:
+                allowed = {line.strip() for line in allow_f if line.strip()}
+            annotations = {k: v for k, v in annotations.items() if k in allowed}
+        total = len(annotations)
+        skipped_missing = 0
+        self._samples: list[Sample] = []
+        for video_name in sorted(annotations):
+            video_path = os.path.join(videos_dir, video_name)
+            if not os.path.exists(video_path):
+                skipped_missing += 1
+                continue
+            hard_cuts: list[Frames] = []
+            fades: list[EventInterval] = []
+            # `... or []` (not `.get(k, [])`) so an explicit JSON `null` is treated as empty.
+            for transition in annotations[video_name].get("transitions") or []:
+                if len(transition) < 2:
+                    logger.warning("ClipShots %s: malformed transition %r", video_name, transition)
+                    continue
+                start, end = int(transition[0]), int(transition[1])
+                span = end - start
+                if span == 1:
+                    hard_cuts.append(end)
+                elif span > 1:
+                    fades.append(EventInterval(start=start, end=end))
+                else:
+                    logger.warning(
+                        "ClipShots %s: skipping degenerate transition %r", video_name, transition
+                    )
+            self._samples.append(
+                Sample(
+                    video_file=Path(video_path),
+                    ground_truth=GroundTruth(hard_cuts=hard_cuts, fades=fades),
+                )
+            )
+        logger.info(
+            "ClipShots %s: loaded %d/%d samples (%d videos missing on disk)",
+            split,
+            len(self._samples),
+            total,
+            skipped_missing,
+        )
+
+
 # Mapping of --dataset names to constructors. Typed as a plain callable so
 # subclass-specific positional signatures (each takes ``dataset_dir: str``)
 # aren't widened away by the base ``Dataset`` class's empty ``__init__``.
 DATASETS: dict[str, type] = {
     "BBC": BBCDataset,
     "AutoShot": AutoShotDataset,
+    "ClipShots": ClipShotsDataset,
 }
 
 
