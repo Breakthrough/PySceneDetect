@@ -201,7 +201,15 @@ class BenchmarkResult:
             for g, vids in buckets.items()
         }
 
-    def to_dict(self) -> dict:
+    def to_dict(self, root: Path | None = None) -> dict:
+        def _fmt_path(p: Path) -> str:
+            if root is not None:
+                try:
+                    return p.relative_to(root).as_posix()
+                except ValueError:
+                    pass
+            return p.as_posix()
+
         return {
             "tolerance": self.tolerance,
             "aggregate": {
@@ -212,7 +220,7 @@ class BenchmarkResult:
                 "elapsed_mean": self.elapsed_mean,
                 "video_count": len(self.per_video),
             },
-            "per_video": {str(path): v.to_dict() for path, v in self.per_video.items()},
+            "per_video": {_fmt_path(path): v.to_dict() for path, v in self.per_video.items()},
         }
 
 
