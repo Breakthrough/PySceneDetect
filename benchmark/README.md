@@ -26,6 +26,31 @@ python -m benchmark --detector detect-content --dataset BBC
 
 Pass `--help` for `--dataset-root`, `--backend`, `--tolerance`, and `--out` options.
 
+### Parameter sweeps
+
+`python -m benchmark.sweep` runs a grid over detector parameters and reports the
+top cells by F1 plus the Pareto front across tolerances. One decode is shared by up to
+`--workers` parallel detectors via an internal fan-out wrapper, so the cost scales with
+`ceil(cells / workers)` decodes per video rather than `cells` decodes.
+
+```bash
+python -m benchmark.sweep \
+  --detector detect-content --dataset BBC \
+  --params "threshold=15:35:1;min_scene_len=0.0:1.0:0.1" \
+  --tolerance 0,1 --workers 16 \
+  --out sweep-content-bbc.json
+```
+
+Spec language for `--params`: clauses joined by `;`. Each clause is either
+`key=v1,v2,v3` (enumerated values) or `key=start:stop:step` (numeric range, inclusive
+when `stop` lands on a step). Omitted keys use the detector's default.
+
+Time-valued kwargs (`min_scene_len`, etc.) accept `TimecodeLike` - integers are
+frames, floats are seconds, and strings like `"0.1s"` / `"00:00:00.500"` also work.
+Prefer floats so the same sweep is comparable across datasets with different
+framerates. Use `--quick N` to limit to the first N samples for iteration; published
+numbers should always come from the full corpus.
+
 ## Dataset Download
 
 ### BBC
