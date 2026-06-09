@@ -11,3 +11,4 @@ tqdm==4.67.3
 # Build-only and test-only requirements.
 pyinstaller
 pytest
+pytest-rerunfailures
