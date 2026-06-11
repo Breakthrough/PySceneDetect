@@ -41,7 +41,7 @@ Research into detection methods and performance are ongoing. All contributions i
 
 ### GUI
 
-A graphical user interface will be crucial for making PySceneDetect approchable by a wider audience.  There have been several suggested designs, but nothing concrete has been developed yet.  Any proposed solution for the GUI should work across Windows, Linux, and OSX.
+A graphical user interface will be crucial for making PySceneDetect approachable by a wider audience.  There have been several suggested designs, but nothing concrete has been developed yet.  Any proposed solution for the GUI should work across Windows, Linux, and OSX.
 
 ### Localization
 
