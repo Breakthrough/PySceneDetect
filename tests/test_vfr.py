@@ -20,7 +20,7 @@ import numpy as np
 import pytest
 
 from scenedetect import SceneManager, open_video
-from scenedetect.common import Timecode
+from scenedetect.common import FrameTimecode, Timecode
 from scenedetect.detectors import ContentDetector
 from scenedetect.output import save_images, write_scene_list
 from scenedetect.stats_manager import StatsManager
@@ -229,18 +229,29 @@ def test_vfr_save_images_opencv_matches_pyav(test_vfr_video: str, tmp_path):
     If the OpenCV seek off-by-one bug is present, scene thumbnails will show content from the
     wrong scene; MSE against PyAV (ground truth) will be very high for those scenes.
     """
-    # Run save-images for both backends with 1 image per scene for simplicity.
-    scene_lists = {}
+    # Detect scenes once and save images with both backends from the same scene list. Detection
+    # must not run per-backend: the cut at 00:01:39.474 scores content_val=27.08 against the
+    # default threshold of 27.0, so decoder/colorspace differences between backends (or FFmpeg
+    # builds - e.g. av 17.1.0 on macOS arm64) can flip it, changing the scene count.
+    video = open_video(test_vfr_video, backend="pyav")
+    sm = SceneManager()
+    sm.add_detector(ContentDetector())
+    sm.detect_scenes(video=video)
+    scene_list = sm.get_scene_list()
+    assert len(scene_list) > 0
+
+    # Run save-images for both backends with 1 image per scene for simplicity. The backends
+    # report different nominal frame rates for VFR video, so rebase the scene list onto each
+    # video's rate; the underlying PTS values are preserved (FrameTimecode copy constructor).
     for backend in ("pyav", "opencv"):
         out_dir = tmp_path / backend
         out_dir.mkdir()
         video = open_video(test_vfr_video, backend=backend)
-        sm = SceneManager()
-        sm.add_detector(ContentDetector())
-        sm.detect_scenes(video=video)
-        scene_lists[backend] = sm.get_scene_list()
-        assert len(scene_lists[backend]) > 0
-        save_images(scene_lists[backend], video, num_images=1, output_dir=str(out_dir))
+        rebased = [
+            (FrameTimecode(start, fps=video.frame_rate), FrameTimecode(end, fps=video.frame_rate))
+            for start, end in scene_list
+        ]
+        save_images(rebased, video, num_images=1, output_dir=str(out_dir))
 
     pyav_imgs = sorted((tmp_path / "pyav").glob("*.jpg"))
     opencv_imgs = sorted((tmp_path / "opencv").glob("*.jpg"))
