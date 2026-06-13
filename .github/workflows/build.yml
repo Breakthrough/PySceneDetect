@@ -33,9 +33,12 @@ jobs:
   build:
     runs-on: ${{ matrix.os }}
     strategy:
+      # DEBUG BRANCH: fail-fast disabled and matrix trimmed to one Python version to
+      # determine which platforms reproduce the av 17.1.0 VFR EOF regression.
+      fail-fast: false
       matrix:
         os: [macos-14, macos-latest, ubuntu-22.04, ubuntu-latest, windows-latest]
-        python-version: ["3.10", "3.11", "3.12", "3.13"]
+        python-version: ["3.12"]
     env:
       # Version is extracted below and used to find correct package install path.
       scenedetect_version: ""
@@ -63,6 +66,18 @@ jobs:
         run: |
           git fetch --depth=1 https://github.com/Breakthrough/PySceneDetect.git refs/heads/resources:refs/remotes/origin/resources
           git checkout refs/remotes/origin/resources -- tests/resources/
+
+      # DEBUG BRANCH: A/B the VFR EOF behavior under both av releases before running
+      # the test suite, so we get decode diagnostics even on platforms where it fails.
+      - name: VFR Diagnostic (av A/B)
+        shell: bash
+        run: |
+          echo "=== av as installed by deps (expect 17.1.0) ==="
+          python scripts/diag_vfr.py
+          pip install av==17.0.1 --only-binary av
+          echo "=== av 17.0.1 ==="
+          python scripts/diag_vfr.py
+          pip install --upgrade av --only-binary av
 
       - name: Unit Tests
         run: |
