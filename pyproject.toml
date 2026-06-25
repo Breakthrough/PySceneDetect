@@ -52,6 +52,8 @@ dependencies = [
 [project.optional-dependencies]
 pyav = ["av>=9.2"]
 moviepy = ["moviepy"]
+# Optional semantic scene labelling via TwelveLabs Pegasus (see scenedetect.output.label_scenes).
+twelvelabs = ["twelvelabs>=1.2.8"]
 dev = ["av>=9.2", "moviepy", "pytest>=7.0", "pytest-rerunfailures"]
 docs = ["Sphinx==7.0.1", "sphinx-copybutton==0.5.2"]
 website = ["mkdocs==1.5.2", "jinja2>=3.1.6"]

@@ -40,6 +40,12 @@ from scenedetect.common import (
 
 # Commonly used classes/functions exported under the `scenedetect.output` namespace for brevity.
 from scenedetect.output.image import save_images
+from scenedetect.output.labels import (
+    DEFAULT_MODEL,
+    DEFAULT_PROMPT,
+    SceneLabel,
+    label_scenes,
+)
 from scenedetect.output.video import (
     PathFormatter,
     SceneMetadata,

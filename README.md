@@ -100,6 +100,21 @@ def split_video_into_scenes(video_path, threshold=27.0):
 
 See [the documentation](https://www.scenedetect.com/docs/latest/api.html) for more examples.
 
+**Optional: Semantic Scene Labels**:
+
+PySceneDetect finds *where* the cuts are; if you also want a short description of *what* is in each scene, the optional `label_scenes` helper runs the detected scenes through the [TwelveLabs](https://twelvelabs.io) Pegasus video-understanding model. Install with `pip install scenedetect[twelvelabs]` and set `TWELVELABS_API_KEY`:
+
+```python
+from scenedetect import detect, ContentDetector
+from scenedetect.output import label_scenes
+
+scenes = detect("my_video.mp4", ContentDetector())
+for label in label_scenes(scenes, video_url="https://example.com/my_video.mp4"):
+    print(label.index, label.label)
+```
+
+This is entirely opt-in and never runs during normal detection. A free API key with a generous free tier is available at [twelvelabs.io](https://twelvelabs.io).
+
 **Benchmark**:
 
 We evaluate the performance of different detectors in terms of accuracy and processing speed. See the [benchmark report](benchmark/README.md) for details.

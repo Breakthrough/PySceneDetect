@@ -51,9 +51,11 @@ from scenedetect.output import (
     is_mkvmerge_available,
     write_scene_list,
     write_scene_list_html,
+    label_scenes,
     PathFormatter,
     VideoMetadata,
     SceneMetadata,
+    SceneLabel,
 )
 from scenedetect.detector import SceneDetector
 from scenedetect.detectors import (
