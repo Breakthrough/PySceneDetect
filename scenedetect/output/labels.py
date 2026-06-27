@@ -96,6 +96,11 @@ def label_scenes(
     than aborting the whole pass. Either case simply omits that scene from the result; use
     :attr:`SceneLabel.index` to map a label back to its scene.
 
+    If TwelveLabs returns a rate-limit error (HTTP 429), labelling stops early with a logged warning
+    and the labels gathered so far are returned rather than raising — further per-scene calls would
+    only hit the same limit. Long videos on the free tier can exhaust the quota mid-pass; rerun once
+    it resets (the warning includes the API's ``Retry-After`` when provided) to label the remainder.
+
     Arguments:
         scene_list: Scenes to label, as returned by
             :meth:`SceneManager.get_scene_list()
@@ -140,6 +145,7 @@ def label_scenes(
 
     # Imported lazily so the module stays importable without the optional dependency.
     from twelvelabs.errors.bad_request_error import BadRequestError
+    from twelvelabs.errors.too_many_requests_error import TooManyRequestsError
 
     if video_url is not None:
         from twelvelabs.types.video_context import VideoContext_Url
@@ -172,6 +178,21 @@ def label_scenes(
                 start_time=start_seconds,
                 end_time=end_seconds,
             )
+        except TooManyRequestsError as ex:
+            # Once rate-limited (HTTP 429), every further per-scene call will 429 too, so stop and
+            # return what we have rather than aborting the whole run. Common on the free tier for
+            # long videos. Surface Retry-After if the API provided one.
+            retry_after = (ex.headers or {}).get("Retry-After") or (ex.headers or {}).get(
+                "retry-after"
+            )
+            logger.warning(
+                "TwelveLabs rate limit hit (free-tier quota?) at scene %d%s — stopping scene "
+                "labelling early; returning the %d label(s) generated so far.",
+                index,
+                f" (retry after {retry_after})" if retry_after else "",
+                len(labels),
+            )
+            break
         except BadRequestError as ex:
             # A single rejected scene must not abort the batch (e.g. the 4s window check we already
             # guard above, but the API may reject other windows too). Auth/quota/server errors are

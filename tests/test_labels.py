@@ -36,18 +36,21 @@ class _FakeAnalyzeResponse:
 class _FakeClient:
     """Records each analyze() call so wiring can be asserted without hitting the network."""
 
-    def __init__(self, error_on_call=None):
+    def __init__(self, error_on_call=None, error=None):
         self.calls = []
-        # If set, analyze() raises this exception on the matching (0-based) call index.
+        # If set, analyze() raises on the matching (0-based) call index. `error` is a zero-arg
+        # factory for the exception to raise; defaults to a BadRequestError.
         self._error_on_call = error_on_call
+        self._error = error
 
     def analyze(self, **kwargs):
-        if self._error_on_call is not None and len(self.calls) == self._error_on_call:
-            self.calls.append(kwargs)
+        self.calls.append(kwargs)
+        if self._error_on_call is not None and len(self.calls) - 1 == self._error_on_call:
+            if self._error is not None:
+                raise self._error()
             from twelvelabs.errors.bad_request_error import BadRequestError
 
             raise BadRequestError(body={"code": "parameter_invalid", "message": "boom"})
-        self.calls.append(kwargs)
         return _FakeAnalyzeResponse(f"  scene at {kwargs['start_time']}s  ")
 
 
@@ -111,6 +114,25 @@ def test_label_scenes_skips_per_scene_api_error():
 
     assert len(client.calls) == 2  # both attempted
     assert [label.index for label in labels] == [1]  # only the second succeeded
+
+
+def test_label_scenes_stops_gracefully_on_rate_limit():
+    # A 429 on the second scene must stop the pass (no further calls) and return the labels
+    # already gathered, without raising — long free-tier videos can hit the quota mid-pass.
+    from twelvelabs.errors.too_many_requests_error import TooManyRequestsError
+
+    def _rate_limited():
+        return TooManyRequestsError(
+            body={"code": "too_many_requests"}, headers={"Retry-After": "86400"}
+        )
+
+    client = _FakeClient(error_on_call=1, error=_rate_limited)
+    labels = label_scenes(SCENE_LIST, video_url="https://example.com/v.mp4", client=client)
+
+    # The first scene succeeded; the second 429'd and stopped the run before any third call.
+    assert len(client.calls) == 2
+    assert [label.index for label in labels] == [0]
+    assert labels[0].label == "scene at 0.0s"
 
 
 @pytest.mark.skipif(
