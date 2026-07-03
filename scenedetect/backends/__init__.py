@@ -92,16 +92,16 @@ examples for details.
 #  - Nvidia VPF: https://developer.nvidia.com/blog/vpf-hardware-accelerated-video-processing-framework-in-python/
 
 # OpenCV must be available at minimum.
-from scenedetect.backends.concat import SourceSpan, VideoStreamConcat
-from scenedetect.backends.opencv import VideoCaptureAdapter, VideoStreamCv2
+from scenedetect.backends.concat import SourceSpan as SourceSpan, VideoStreamConcat as VideoStreamConcat
+from scenedetect.backends.opencv import VideoCaptureAdapter as VideoCaptureAdapter, VideoStreamCv2 as VideoStreamCv2
 
 try:
-    from scenedetect.backends.pyav import VideoStreamAv
+    from scenedetect.backends.pyav import VideoStreamAv as VideoStreamAv
 except ImportError:
     VideoStreamAv = None
 
 try:
-    from scenedetect.backends.moviepy import VideoStreamMoviePy
+    from scenedetect.backends.moviepy import VideoStreamMoviePy as VideoStreamMoviePy
 except ImportError:
     VideoStreamMoviePy = None
 
