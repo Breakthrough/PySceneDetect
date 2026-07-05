@@ -19,6 +19,7 @@ test case material.
 import os
 from dataclasses import dataclass
 
+import numpy
 import pytest
 
 from scenedetect import FrameTimecode, SceneDetector, SceneManager, StatsManager, detect
@@ -246,3 +247,33 @@ def test_min_scene_len_accepts_time_values(detector_type, min_scene_len):
     scene_list = test_case.detect()
     start_frames = [timecode.frame_num for timecode, _ in scene_list]
     assert start_frames == test_case.scene_boundaries
+
+
+def test_adaptive_detector_uses_target_frame_for_min_scene_len():
+    """AdaptiveDetector applies min_scene_len to the buffered target frame."""
+
+    class ScoreAdaptiveDetector(AdaptiveDetector):
+        def __init__(self, scores: dict[int, float]):
+            super().__init__(
+                adaptive_threshold=3.0,
+                min_scene_len=24,
+                min_content_val=10.0,
+                window_width=20,
+            )
+            self._scores = scores
+
+        def _calculate_frame_score(
+            self, timecode: FrameTimecode, frame_img: numpy.ndarray
+        ) -> float:
+            return self._scores.get(timecode.frame_num, 0.0)
+
+    detector = ScoreAdaptiveDetector({100: 100.0, 104: 100.0})
+    frame = numpy.zeros((1, 1, 3), dtype=numpy.uint8)
+
+    cuts = [
+        cut.frame_num
+        for frame_num in range(130)
+        for cut in detector.process_frame(FrameTimecode(frame_num, fps=30.0), frame)
+    ]
+
+    assert cuts == [100]
