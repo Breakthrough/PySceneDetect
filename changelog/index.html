@@ -1011,6 +1011,11 @@
 <ul>
 <li>[feature] <code>scenedetect.detect()</code> now accepts a <code>backend</code> keyword argument (<code>"opencv"</code>, <code>"pyav"</code>, or <code>"moviepy"</code>) similar to <code>open_video</code>. Defaults to <code>"opencv"</code>, matching prior behavior.</li>
 <li>[feature] Add <code>expand_scenes_to_bounds()</code> helper in <code>scenedetect.scene_manager</code> to extend a scene list so the first scene starts at a given lower bound and the last scene ends at a given upper bound</li>
+<li>[feature] <code>VideoStream</code> now provides a public read-only <code>decode_failures</code> property reporting the number of frames that failed to decode and were skipped (defaults to 0; populated by the OpenCV and PyAV backends)</li>
+<li>[feature] Add <code>VideoStreamConcat</code> (<code>scenedetect.backends.concat</code>) which concatenates multiple videos into a single continuous stream with a monotonic PTS timeline; <code>open_video()</code> and <code>detect()</code> now accept a list of paths. <code>VideoStreamConcat.map_span()</code> maps spans of the global timeline back to per-source local times</li>
+<li>[bugfix] The PyAV backend (<code>VideoStreamAv</code>) now skips corrupt frames during <code>read()</code> and continues decoding instead of failing, giving up only after 8 consecutive decode failures (matching the OpenCV backend's tolerance behavior)</li>
+<li>[bugfix] The PyAV backend now normalizes presentation times by the stream start time, so files with a delayed start (e.g. from edit lists) report the first frame at <code>position</code> 0, consistent with other backends and with <code>seek()</code></li>
+<li>[bugfix] Comparisons between two <code>FrameTimecode</code> objects that both carry exact presentation times (e.g. positions from VFR videos) and share the same frame rate are now performed exactly using <code>pts</code> and <code>time_base</code> instead of rounded frame numbers. Previously, distinct frames in VFR sections could compare equal or fail strict ordering when their times rounded to the same approximate frame number. Comparisons involving frame- or seconds-based timecodes, plain values (<code>int</code>/<code>float</code>/<code>str</code>), or differing frame rates are unchanged</li>
 </ul>
               
             </div>
