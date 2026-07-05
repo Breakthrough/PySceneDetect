@@ -369,7 +369,30 @@ def test_corrupt_video(vs_type: ty.Callable[..., VideoStream], corrupt_video_fil
 
     stream = vs_type(corrupt_video_file)
 
-    # OpenCV usually fails to read the video at frame 45, but the remaining frames all seem to
-    # decode just fine. Make sure all backends can get to 60 without reporting a failure.
-    for frame in range(60):
-        assert stream.read() is not False, f"Failed on frame {frame}!"
+    # The fixture has 596 frames, one of which is corrupt. Depending on the FFmpeg build, the bad
+    # frame is either skipped (incrementing `decode_failures`) or concealed and decoded anyway.
+    # Either way the backend must decode the rest of the stream without raising.
+    frames_read = 0
+    while stream.read(decode=False) is not False:
+        frames_read += 1
+    assert frames_read >= 590, f"Only decoded {frames_read} frames!"
+    assert isinstance(stream.decode_failures, int)
+    assert stream.decode_failures >= 0
+
+
+def test_decode_failures_clean_video(vs_type: ty.Callable[..., VideoStream]):
+    """`decode_failures` must exist on every backend and stay 0 on a clean video."""
+    stream = vs_type(get_absolute_path("resources/testvideo.mp4"))
+    assert stream.decode_failures == 0
+    for _ in range(10):
+        assert stream.read() is not False
+    assert stream.decode_failures == 0
+
+
+def test_delayed_start_normalized(vs_type: ty.Callable[..., VideoStream], delayed_start_video: str):
+    """Files with a nonzero stream start time must report the first frame at t=0 on every
+    backend (the fixture has a start time of 1.075s)."""
+    stream = vs_type(delayed_start_video)
+    assert stream.read(decode=False) is not False
+    assert stream.position.seconds < 0.1
+    assert stream.frame_number == 1

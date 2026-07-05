@@ -51,3 +51,21 @@ def test_capture_adapter(test_movie_clip: str):
     scenes = scene_manager.get_scene_list()
     assert len(scenes) == len(GROUND_TRUTH_CAPTURE_ADAPTER_TEST)
     assert [start.frame_num for (start, _) in scenes] == GROUND_TRUTH_CAPTURE_ADAPTER_TEST
+
+
+def test_decode_failures_exposed(corrupt_video_file: str):
+    """The private decode failure counters must be surfaced by the public property on both
+    VideoStreamCv2 and VideoCaptureAdapter."""
+    stream = VideoStreamCv2(corrupt_video_file)
+    while stream.read(decode=False) is not False:
+        pass
+    assert stream.decode_failures == stream._decode_failures
+    assert stream.decode_failures >= 0
+
+    cap = cv2.VideoCapture(corrupt_video_file)
+    assert cap.isOpened()
+    adapter = VideoCaptureAdapter(cap)
+    while adapter.read(decode=False) is not False:
+        pass
+    assert adapter.decode_failures == adapter._decode_failures
+    assert adapter.decode_failures >= 0

@@ -479,6 +479,63 @@ def test_comparisons_with_bare_timecode():
     assert FrameTimecode(timecode=15, fps=fps) >= half_second_tc
 
 
+def test_exact_comparison_same_rate():
+    """Timecode-backed instances with the same rate compare by exact PTS, not rounded frame
+    numbers. pts=999 and pts=1001 @ time_base 1/1000 both round to frame 30 @ 30fps, but
+    represent different presentation times."""
+    fps = Fraction(30, 1)
+    a = FrameTimecode(timecode=Timecode(pts=999, time_base=Fraction(1, 1000)), fps=fps)
+    b = FrameTimecode(timecode=Timecode(pts=1001, time_base=Fraction(1, 1000)), fps=fps)
+    assert a.frame_num == b.frame_num == 30  # Rounding collides...
+    assert a != b  # ...but exact times differ.
+    assert not (a == b)  # noqa: SIM201 - deliberately exercises __eq__, not just __ne__.
+    assert a < b and a <= b
+    assert b > a and b >= a
+    assert not (a > b) and not (a >= b)
+    # Hash may still collide (frame_num-based); that is legal since a != b.
+    assert hash(a) == hash(b)
+    # Sets/sorting now distinguish and correctly order the two times.
+    assert len({a, b}) == 2
+    assert sorted([b, a]) == [a, b]
+
+
+def test_exact_equality_across_time_base_representations():
+    """Equal exact times expressed in different time bases are equal, and hashes agree."""
+    fps = Fraction(30, 1)
+    a = FrameTimecode(timecode=Timecode(pts=500, time_base=Fraction(1, 1000)), fps=fps)
+    b = FrameTimecode(timecode=Timecode(pts=1000, time_base=Fraction(1, 2000)), fps=fps)
+    assert a == b and not (a != b)  # noqa: SIM202 - deliberately exercises both operators.
+    assert a <= b and a >= b
+    assert not (a < b) and not (a > b)
+    assert hash(a) == hash(b)
+    assert len({a, b}) == 1
+
+
+def test_exact_comparison_requires_same_rate():
+    """Timecode-backed instances with DIFFERENT rates keep legacy frame-number comparison."""
+    a = FrameTimecode(timecode=Timecode(pts=999, time_base=Fraction(1, 1000)), fps=30.0)
+    b = FrameTimecode(timecode=Timecode(pts=1001, time_base=Fraction(1, 1000)), fps=30.0)
+    c = FrameTimecode(b, fps=Fraction(30000, 1001))  # Same time as b, different rate.
+    # Cross-rate falls back to frame_num comparison:
+    assert (a == c) == (a.frame_num == c.frame_num)
+    # Same-rate pair still compares exactly:
+    assert a != b
+
+
+def test_cross_rate_frame_number_equality_unchanged():
+    """Legacy behavior pinned: rated, non-Timecode-backed instances with different rates still
+    compare by frame number."""
+    assert FrameTimecode(timecode=100, fps=25.0) == FrameTimecode(timecode=100, fps=30.0)
+
+
+def test_mixed_representation_comparison_unchanged():
+    """Timecode-backed vs frame-backed comparison still uses frame numbers."""
+    fps = Fraction(24000, 1001)
+    vfr = FrameTimecode(timecode=Timecode(pts=1001, time_base=Fraction(1, 24000)), fps=fps)
+    assert vfr.frame_num == 1
+    assert vfr == FrameTimecode(timecode=1, fps=fps)
+
+
 def test_min_scene_len_accepts_timecode_like():
     """Detector ``min_scene_len`` and FlashFilter ``length`` should accept any TimecodeLike,
     including :class:`FrameTimecode` / :class:`Timecode`."""

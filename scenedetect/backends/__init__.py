@@ -50,6 +50,14 @@ Lastly, to use a specific backend directly:
 In both examples above, the resulting ``video`` can be used with
 :meth:`SceneManager.detect_scenes() <scenedetect.scene_manager.SceneManager.detect_scenes>`.
 
+Multiple videos can be opened as one continuous stream by passing a list of paths to
+:func:`open_video`, which returns a
+:class:`VideoStreamConcat <scenedetect.backends.concat.VideoStreamConcat>`:
+
+.. code:: python
+
+    video = open_video(["part1.mp4", "part2.mp4"])
+
 ===============================================================
 Devices / Cameras / Pipes
 ===============================================================
@@ -84,6 +92,7 @@ examples for details.
 #  - Nvidia VPF: https://developer.nvidia.com/blog/vpf-hardware-accelerated-video-processing-framework-in-python/
 
 # OpenCV must be available at minimum.
+from scenedetect.backends.concat import SourceSpan, VideoStreamConcat
 from scenedetect.backends.opencv import VideoCaptureAdapter, VideoStreamCv2
 
 try:

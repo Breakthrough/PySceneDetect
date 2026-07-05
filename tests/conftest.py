@@ -152,3 +152,10 @@ def test_image_sequence() -> str:
 def test_fades_clip() -> str:
     """Clip containing fades in/out."""
     return check_exists("tests/resources/fades.mp4")
+
+
+@pytest.fixture
+def delayed_start_video() -> str:
+    """Video with a nonzero stream start time (1.075s edit-list offset). Created from
+    fades.mp4 via: ffmpeg -itsoffset 1.075 -i fades.mp4 -t 2 -c:v copy -an delayed_start.mp4"""
+    return check_exists("tests/resources/delayed_start.mp4")

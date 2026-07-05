@@ -33,6 +33,10 @@ from scenedetect.video_stream import FrameRateUnavailable, VideoOpenFailure, Vid
 logger = getLogger("pyscenedetect")
 VALID_THREAD_MODES = ["NONE", "SLICE", "FRAME", "AUTO"]
 
+MAX_CONSECUTIVE_DECODE_FAILURES = 8
+"""Number of consecutive frame decode failures after which `VideoStreamAv.read()` gives up.
+Isolated corrupt frames are skipped; this bound ensures a truncated file still terminates."""
+
 
 class VideoStreamAv(VideoStream):
     """PyAV `av.InputContainer` backend."""
@@ -80,8 +84,9 @@ class VideoStreamAv(VideoStream):
             VideoOpenFailure: video could not be opened (may be corrupted)
             ValueError: specified frame rate is invalid
         """
-        # TODO(https://scenedetect.com/issues/258): See what
-        # `self._container.discard_corrupt = True` does with corrupt videos.
+        # NOTE(https://scenedetect.com/issues/258): `read()` skips over corrupt packets and
+        # continues decoding. `self._container.discard_corrupt = True` may be a future
+        # refinement for frames FFmpeg flags as corrupt but still decodes.
         super().__init__()
 
         # TODO(https://scenedetect.com/issue/548): emit DeprecationWarning when `framerate=` is
@@ -97,6 +102,8 @@ class VideoStreamAv(VideoStream):
         self._frame: av.VideoFrame | None = None
         self._decoder: ty.Generator | None = None
         self._reopened = True
+        self._decode_failures = 0
+        self._warning_displayed = False
 
         if threading_mode:
             try:
@@ -200,16 +207,16 @@ class VideoStreamAv(VideoStream):
         to the presentation time 0.  Returns 0 even if `frame_number` is 1."""
         if self._frame is None or self._frame.pts is None or self._frame.time_base is None:
             return self.base_timecode
-        timecode = Timecode(pts=self._frame.pts, time_base=self._frame.time_base)
+        timecode = Timecode(pts=self._normalized_pts(), time_base=self._frame.time_base)
         return FrameTimecode(timecode=timecode, fps=self.frame_rate)
 
     @property
     def position_ms(self) -> float:
         """Current position within stream as a float of the presentation time in
         milliseconds. The first frame has a PTS of 0."""
-        if self._frame is None:
+        if self._frame is None or self._frame.pts is None or self._frame.time_base is None:
             return 0.0
-        return self._frame.time * 1000.0
+        return float(self._normalized_pts() * self._frame.time_base) * 1000.0
 
     @property
     def frame_number(self) -> int:
@@ -217,9 +224,10 @@ class VideoStreamAv(VideoStream):
 
         Will return 0 until the first frame is `read`. For VFR video this is an approximation
         derived from PTS * framerate; use `position` for accurate PTS-based timing."""
-        if self._frame is None:
+        if self._frame is None or self._frame.pts is None or self._frame.time_base is None:
             return 0
-        return round(self._frame.time * float(self.frame_rate)) + 1
+        seconds = float(self._normalized_pts() * self._frame.time_base)
+        return round(seconds * float(self.frame_rate)) + 1
 
     @property
     def rate(self) -> Fraction:
@@ -297,24 +305,47 @@ class VideoStreamAv(VideoStream):
             raise VideoOpenFailure() from ex
 
     def read(self, decode: bool = True) -> np.ndarray | bool:
-        # Reuse a persistent decoder generator so the codec's internal frame buffer (used for
-        # B-frame reordering) is never flushed prematurely. Creating a new generator each call
-        # caused the last buffered frame to be lost at EOF.
-        if self._decoder is None:
-            self._decoder = self._container.decode(video=0)
-        try:
-            last_frame = self._frame
-            assert self._decoder is not None
-            self._frame = next(self._decoder)
-        except av.error.EOFError:  # type: ignore[attr-defined]
-            self._frame = last_frame
-            if self._handle_eof():
-                return self.read(decode)
-            return False
-        except StopIteration:
-            return False
-        assert self._frame is not None
-        return self._frame.to_ndarray(format="bgr24") if decode else True
+        consecutive_failures = 0
+        while True:
+            # Reuse a persistent decoder generator so the codec's internal frame buffer (used for
+            # B-frame reordering) is never flushed prematurely. Creating a new generator each call
+            # caused the last buffered frame to be lost at EOF.
+            if self._decoder is None:
+                self._decoder = self._container.decode(video=0)
+            try:
+                last_frame = self._frame
+                assert self._decoder is not None
+                self._frame = next(self._decoder)
+            # NOTE: EOFError subclasses FFmpegError, so this clause must come first.
+            except av.error.EOFError:  # type: ignore[attr-defined]
+                self._frame = last_frame
+                if self._handle_eof():
+                    return self.read(decode)
+                return False
+            except StopIteration:
+                return False
+            except av.error.FFmpegError as ex:  # type: ignore[attr-defined]
+                # `next()` raised before assignment, so `self._frame` is still the last good
+                # frame and position/frame_number are unaffected by the skipped packet.
+                self._decode_failures += 1
+                consecutive_failures += 1
+                # The decoder generator is closed once an exception propagates through it;
+                # recreating it (next loop iteration) resumes demuxing after the bad packet.
+                self._decoder = None
+                if consecutive_failures >= MAX_CONSECUTIVE_DECODE_FAILURES:
+                    logger.error(
+                        "Failed to decode %d consecutive frames, stopping: %s",
+                        consecutive_failures,
+                        ex,
+                    )
+                    return False
+                logger.debug("Frame failed to decode: %s", ex)
+                if not self._warning_displayed and self._decode_failures > 1:
+                    self._warning_displayed = True
+                    logger.warning("Failed to decode some frames, results may be inaccurate.")
+                continue
+            assert self._frame is not None
+            return self._frame.to_ndarray(format="bgr24") if decode else True
 
     #
     # Private Methods/Properties
@@ -329,6 +360,16 @@ class VideoStreamAv(VideoStream):
     def _codec_context(self):
         """PyAV `av.codec.context.CodecContext` being used."""
         return self._video_stream.codec_context
+
+    def _normalized_pts(self) -> int:
+        """PTS of the current frame relative to the start of the stream. Some files have a
+        nonzero stream start_time (e.g. from edit lists); other backends report the first
+        frame's presentation time as 0, so we must do the same."""
+        assert self._frame is not None and self._frame.pts is not None
+        start_time = self._video_stream.start_time or 0
+        if start_time and self._video_stream.time_base != self._frame.time_base:
+            start_time = int(start_time * self._video_stream.time_base / self._frame.time_base)
+        return self._frame.pts - start_time
 
     def _get_duration(self) -> int:
         """Get video duration as number of frames based on the video and set framerate."""
