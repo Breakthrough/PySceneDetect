@@ -215,7 +215,7 @@ Feedback on the new detection methods and their default values is most welcome. 
 
 ### 0.6.3 (March 9, 2024)
 
-In addition to some perfromance improvements with the `load-scenes` command, this release of PySceneDetect includes a significant amount of bugfixes. Thanks to everyone who contributed to the release, including those who filed bug reports and helped with debugging!
+In addition to some performance improvements with the `load-scenes` command, this release of PySceneDetect includes a significant amount of bugfixes. Thanks to everyone who contributed to the release, including those who filed bug reports and helped with debugging!
 
 **Program Changes:**
 
