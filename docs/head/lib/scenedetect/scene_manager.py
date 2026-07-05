@@ -237,8 +237,8 @@ class SceneManager:
         # `stats_manager` argument to to `store_stats: bool=False`, or lazy-init one.
 
         # TODO(v1.0): This class should own a VideoStream as well, instead of passing one
-        # to the detect_scenes method. If concatenation is required, it can be implemented as
-        # a generic VideoStream wrapper.
+        # to the detect_scenes method. Concatenation is handled by VideoStreamConcat
+        # (scenedetect.backends.concat).
         self._stats_manager: StatsManager | None = stats_manager
 
         # Position of video that was first passed to detect_scenes.

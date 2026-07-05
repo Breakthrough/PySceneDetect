@@ -204,6 +204,10 @@ class FrameTimecode:
         * :attr:`time_base` equals ``1 / frame_rate`` for CFR sources. For VFR
           (:class:`Timecode`-backed) instances, ``time_base`` is authoritative and
           ``frame_rate`` is an approximation.
+
+    Comparisons between two :class:`Timecode`-backed instances with the same rate are performed
+    exactly using ``pts * time_base`` as rational numbers. All other comparisons between two
+    rated instances use frame numbers, which for VFR sources are approximations.
     """
 
     def __init__(
@@ -544,6 +548,9 @@ class FrameTimecode:
     def __eq__(self, other: "TimecodeLike") -> bool:
         if other is None:
             return False
+        exact = _compare_as_exact(other, self)
+        if exact is not None:
+            return exact[0] == exact[1]
         if _compare_as_fixed(other, self):
             return self.frame_num == other.frame_num
         # For integer comparison, use frame numbers to avoid floating point precision issues.
@@ -556,6 +563,9 @@ class FrameTimecode:
     def __ne__(self, other: "TimecodeLike") -> bool:
         if other is None:
             return True
+        exact = _compare_as_exact(other, self)
+        if exact is not None:
+            return exact[0] != exact[1]
         if _compare_as_fixed(other, self):
             return self.frame_num != other.frame_num
         # For integer comparison, use frame numbers to avoid floating point precision issues.
@@ -566,6 +576,9 @@ class FrameTimecode:
         return self.frame_num != self._get_other_as_frames(other)
 
     def __lt__(self, other: "TimecodeLike") -> bool:
+        exact = _compare_as_exact(other, self)
+        if exact is not None:
+            return exact[0] < exact[1]
         if _compare_as_fixed(other, self):
             return self.frame_num < other.frame_num
         # For integer comparison, use frame numbers to avoid floating point precision issues.
@@ -576,6 +589,9 @@ class FrameTimecode:
         return self.frame_num < self._get_other_as_frames(other)
 
     def __le__(self, other: "TimecodeLike") -> bool:
+        exact = _compare_as_exact(other, self)
+        if exact is not None:
+            return exact[0] <= exact[1]
         if _compare_as_fixed(other, self):
             return self.frame_num <= other.frame_num
         # For integer comparison, use frame numbers to avoid floating point precision issues.
@@ -586,6 +602,9 @@ class FrameTimecode:
         return self.frame_num <= self._get_other_as_frames(other)
 
     def __gt__(self, other: "TimecodeLike") -> bool:
+        exact = _compare_as_exact(other, self)
+        if exact is not None:
+            return exact[0] > exact[1]
         if _compare_as_fixed(other, self):
             return self.frame_num > other.frame_num
         # For integer comparison, use frame numbers to avoid floating point precision issues.
@@ -596,6 +615,9 @@ class FrameTimecode:
         return self.frame_num > self._get_other_as_frames(other)
 
     def __ge__(self, other: "TimecodeLike") -> bool:
+        exact = _compare_as_exact(other, self)
+        if exact is not None:
+            return exact[0] >= exact[1]
         if _compare_as_fixed(other, self):
             return self.frame_num >= other.frame_num
         # For integer comparison, use frame numbers to avoid floating point precision issues.
@@ -751,7 +773,11 @@ class FrameTimecode:
     def __hash__(self) -> int:
         # Use frame_num for consistent hashing regardless of internal representation.
         # This ensures that FrameTimecodes representing the same frame have the same hash,
-        # enabling proper dictionary lookups in StatsManager.
+        # enabling proper dictionary lookups in StatsManager (including int-key interop).
+        # Exact (PTS-based) equality requires equal rates (`_compare_as_exact`), and equal exact
+        # times with equal rates always derive the same frame_num, so a == b still implies
+        # hash(a) == hash(b). Distinct exact times which round to the same frame number compare
+        # unequal and coexist as a hash collision.
         return self.frame_num
 
     def _get_other_as_seconds(self, other: "TimecodeLike") -> float:
@@ -776,5 +802,36 @@ class FrameTimecode:
 
 def _compare_as_fixed(other: ty.Any, base: FrameTimecode) -> ty.TypeGuard[FrameTimecode]:
     """Type guard: True (and narrows `other` to `FrameTimecode`) iff both timecodes have a known
-    framerate, in which case frame-based comparison is exact and preferred over float seconds."""
+    framerate, in which case frame-based comparison is exact and preferred over float seconds.
+
+    This is the fallback when `_compare_as_exact` does not apply (i.e. at least one operand
+    lacks an exact presentation time, or the rates differ)."""
     return base._rate is not None and isinstance(other, FrameTimecode) and other._rate is not None
+
+
+def _compare_as_exact(other: ty.Any, base: FrameTimecode) -> "tuple[Fraction, Fraction] | None":
+    """If both operands carry exact presentation times (are :class:`Timecode`-backed) and share
+    the same nominal rate, return both times as exact rational seconds (``pts * time_base``) for
+    comparison, otherwise return ``None``.
+
+    For Timecode-backed instances (e.g. VFR video positions), `frame_num` is an approximation
+    derived from the average framerate, so distinct presentation times can round to the same
+    frame number; the rational times are exact. The same-rate requirement keeps cross-rate
+    comparisons on the frame-number path, which both preserves existing cross-rate semantics and
+    guarantees ``__eq__``/``__hash__`` consistency: ``__hash__`` is derived from ``frame_num``
+    (rate-dependent), and for equal rates, equal exact times always produce equal frame numbers.
+
+    Returns the extracted pair instead of acting as a type guard since a TypeGuard can only
+    narrow `other`, not `other._time` or `base._time`.
+    """
+    if (
+        isinstance(base._time, Timecode)
+        and isinstance(other, FrameTimecode)
+        and isinstance(other._time, Timecode)
+        and base._rate == other._rate
+    ):
+        return (
+            base._time.pts * base._time.time_base,
+            other._time.pts * other._time.time_base,
+        )
+    return None

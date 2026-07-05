@@ -69,6 +69,7 @@
 <li><p>OpenCV: <a class="reference internal" href="api/backends.html#scenedetect.backends.opencv.VideoStreamCv2" title="scenedetect.backends.opencv.VideoStreamCv2"><code class="xref py py-class docutils literal notranslate"><span class="pre">VideoStreamCv2</span></code></a></p></li>
 <li><p>PyAV: <a class="reference internal" href="api/backends.html#scenedetect.backends.pyav.VideoStreamAv" title="scenedetect.backends.pyav.VideoStreamAv"><code class="xref py py-class docutils literal notranslate"><span class="pre">VideoStreamAv</span></code></a></p></li>
 <li><p>MoviePy: <a class="reference internal" href="api/backends.html#scenedetect.backends.moviepy.VideoStreamMoviePy" title="scenedetect.backends.moviepy.VideoStreamMoviePy"><code class="xref py py-class docutils literal notranslate"><span class="pre">VideoStreamMoviePy</span></code></a></p></li>
+<li><p>Multiple videos can be treated as a single continuous stream using <a class="reference internal" href="api/backends.html#scenedetect.backends.concat.VideoStreamConcat" title="scenedetect.backends.concat.VideoStreamConcat"><code class="xref py py-class docutils literal notranslate"><span class="pre">VideoStreamConcat</span></code></a> (e.g. <code class="docutils literal notranslate"><span class="pre">open_video([&quot;part1.mp4&quot;,</span> <span class="pre">&quot;part2.mp4&quot;])</span></code>)</p></li>
 </ul>
 </div></blockquote>
 </li>
@@ -115,12 +116,14 @@ can be used to open a video for a
 <a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.SceneManager" title="scenedetect.scene_manager.SceneManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">SceneManager</span></code></a>.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="scenedetect.detect">
-<span class="sig-name descname"><span class="pre">detect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">video_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">detector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stats_file_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_progress</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_in_scene</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.detect" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">detect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">video_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">detector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stats_file_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_progress</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_in_scene</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'opencv'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.detect" title="Permalink to this definition">¶</a></dt>
 <dd><p>Perform scene detection on a given video <cite>path</cite> using the specified <cite>detector</cite>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>video_path</strong> (<em>str</em><em> | </em><em>PathLike</em><em>[</em><em>str</em><em>]</em>) – Path to input video (absolute or relative to working directory).</p></li>
+<li><p><strong>video_path</strong> (<em>StrPath</em><em> | </em><em>list</em><em>[</em><em>StrPath</em><em>] </em><em>| </em><em>tuple</em><em>[</em><em>StrPath</em><em>, </em><em>...</em><em>]</em>) – Path to input video (absolute or relative to working directory). May also
+be a list of paths, in which case the videos are concatenated and treated as a
+single continuous stream.</p></li>
 <li><p><strong>detector</strong> (<a class="reference internal" href="api/detector.html#scenedetect.detector.SceneDetector" title="scenedetect.detector.SceneDetector"><em>SceneDetector</em></a>) – A <cite>SceneDetector</cite> instance (see <a class="reference internal" href="api/detectors.html#module-scenedetect.detectors" title="scenedetect.detectors"><code class="xref py py-mod docutils literal notranslate"><span class="pre">scenedetect.detectors</span></code></a> for a full list
 of detectors).</p></li>
 <li><p><strong>stats_file_path</strong> (<em>str</em><em> | </em><em>PathLike</em><em>[</em><em>str</em><em>] </em><em>| </em><em>None</em>) – Path to save per-frame metrics to for statistical analysis or to
@@ -135,6 +138,10 @@ fast cuts with <cite>ContentDetector</cite>, if no cuts are found, the resulting
 will contain a single scene spanning the entire video (instead of no scenes).
 When detecting fades with <cite>ThresholdDetector</cite>, the beginning portion of the video
 will always be included until the first fade-out event is detected.</p></li>
+<li><p><strong>backend</strong> (<em>str</em>) – Name of the backend to use for video decoding. See
+<a class="reference internal" href="api/backends.html#scenedetect.backends.AVAILABLE_BACKENDS" title="scenedetect.backends.AVAILABLE_BACKENDS"><code class="xref py py-data docutils literal notranslate"><span class="pre">scenedetect.backends.AVAILABLE_BACKENDS</span></code></a> for backends available on the
+current system. Defaults to OpenCV; falls back to OpenCV if the requested backend
+is unavailable or fails to open the video.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -162,7 +169,9 @@ system, OpenCV (<cite>VideoStreamCv2</cite>) will be used as a fallback.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>path</strong> (<em>str</em><em> | </em><em>PathLike</em><em>[</em><em>str</em><em>]</em>) – Path to video file to open.</p></li>
+<li><p><strong>path</strong> (<em>str</em><em> | </em><em>PathLike</em><em>[</em><em>str</em><em>] </em><em>| </em><em>list</em><em>[</em><em>str</em><em> | </em><em>os.PathLike</em><em>[</em><em>str</em><em>]</em><em>] </em><em>| </em><em>tuple</em><em>[</em><em>str</em><em> | </em><em>os.PathLike</em><em>[</em><em>str</em><em>]</em><em>, </em><em>...</em><em>]</em>) – Path to video file to open. May also be a list of paths, in which case the videos
+are concatenated and treated as a single continuous stream
+(see <a class="reference internal" href="api/backends.html#scenedetect.backends.concat.VideoStreamConcat" title="scenedetect.backends.concat.VideoStreamConcat"><code class="xref py py-class docutils literal notranslate"><span class="pre">VideoStreamConcat</span></code></a>).</p></li>
 <li><p><strong>frame_rate</strong> (<em>float</em><em> | </em><em>Fraction</em><em> | </em><em>None</em>) – Overrides detected frame rate if set. Takes precedence over <cite>framerate</cite>.</p></li>
 <li><p><strong>backend</strong> (<em>str</em>) – Name of specific backend to use, if possible. See
 <a class="reference internal" href="api/backends.html#scenedetect.backends.AVAILABLE_BACKENDS" title="scenedetect.backends.AVAILABLE_BACKENDS"><code class="xref py py-data docutils literal notranslate"><span class="pre">scenedetect.backends.AVAILABLE_BACKENDS</span></code></a> for backends available on the current

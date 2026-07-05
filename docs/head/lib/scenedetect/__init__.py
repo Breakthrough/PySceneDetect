@@ -69,6 +69,8 @@ from scenedetect.backends import (
     VideoStreamAv,
     VideoStreamMoviePy,
     VideoCaptureAdapter,
+    VideoStreamConcat,
+    SourceSpan,
 )
 from scenedetect.stats_manager import StatsManager, StatsFileCorrupt
 from scenedetect.scene_manager import SceneManager
@@ -82,7 +84,7 @@ logger = getLogger("pyscenedetect")
 
 
 def open_video(
-    path: StrPath,
+    path: "StrPath | list[StrPath] | tuple[StrPath, ...]",
     frame_rate: FrameRate | None = None,
     backend: str = "opencv",
     framerate: float | None = None,
@@ -92,7 +94,9 @@ def open_video(
     system, OpenCV (`VideoStreamCv2`) will be used as a fallback.
 
     Arguments:
-        path: Path to video file to open.
+        path: Path to video file to open. May also be a list of paths, in which case the videos
+            are concatenated and treated as a single continuous stream
+            (see :class:`VideoStreamConcat <scenedetect.backends.concat.VideoStreamConcat>`).
         frame_rate: Overrides detected frame rate if set. Takes precedence over `framerate`.
         backend: Name of specific backend to use, if possible. See
             :data:`scenedetect.backends.AVAILABLE_BACKENDS` for backends available on the current
@@ -113,6 +117,10 @@ def open_video(
     # used, once internal callers and downstream users have had a release to migrate.
     if frame_rate is None:
         frame_rate = framerate
+    # A list of paths is opened as a single concatenated stream. VideoStreamConcat handles
+    # backend selection/fallback internally, so this must come before the lookup below.
+    if isinstance(path, (list, tuple)):
+        return VideoStreamConcat(path, frame_rate, backend=backend, **kwargs)
     last_error: Exception | None = None
     # If `backend` is available, try to open the video at `path` using it.
     if backend in AVAILABLE_BACKENDS:
@@ -142,18 +150,21 @@ def open_video(
 
 
 def detect(
-    video_path: StrPath,
+    video_path: "StrPath | list[StrPath] | tuple[StrPath, ...]",
     detector: SceneDetector,
     stats_file_path: StrPath | None = None,
     show_progress: bool = False,
     start_time: TimecodeLike | None = None,
     end_time: TimecodeLike | None = None,
     start_in_scene: bool = False,
+    backend: str = "opencv",
 ) -> SceneList:
     """Perform scene detection on a given video `path` using the specified `detector`.
 
     Arguments:
-        video_path: Path to input video (absolute or relative to working directory).
+        video_path: Path to input video (absolute or relative to working directory). May also
+            be a list of paths, in which case the videos are concatenated and treated as a
+            single continuous stream.
         detector: A `SceneDetector` instance (see :mod:`scenedetect.detectors` for a full list
             of detectors).
         stats_file_path: Path to save per-frame metrics to for statistical analysis or to
@@ -168,6 +179,10 @@ def detect(
             will contain a single scene spanning the entire video (instead of no scenes).
             When detecting fades with `ThresholdDetector`, the beginning portion of the video
             will always be included until the first fade-out event is detected.
+        backend: Name of the backend to use for video decoding. See
+            :data:`scenedetect.backends.AVAILABLE_BACKENDS` for backends available on the
+            current system. Defaults to OpenCV; falls back to OpenCV if the requested backend
+            is unavailable or fails to open the video.
 
     Returns:
         List of scenes as pairs of (start, end) :class:`FrameTimecode` objects.
@@ -178,7 +193,7 @@ def detect(
         ValueError: `start_time` or `end_time` are incorrectly formatted.
         TypeError: `start_time` or `end_time` are invalid types.
     """
-    video = open_video(video_path)
+    video = open_video(video_path, backend=backend)
     if start_time is not None:
         video.seek(FrameTimecode(start_time, video.frame_rate))
     end_timecode = FrameTimecode(end_time, video.frame_rate) if end_time is not None else None

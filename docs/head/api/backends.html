@@ -68,6 +68,12 @@ loading the video fails, <code class="docutils literal notranslate"><span class=
 </div>
 <p>In both examples above, the resulting <code class="docutils literal notranslate"><span class="pre">video</span></code> can be used with
 <a class="reference internal" href="scene_manager.html#scenedetect.scene_manager.SceneManager.detect_scenes" title="scenedetect.scene_manager.SceneManager.detect_scenes"><code class="xref py py-meth docutils literal notranslate"><span class="pre">SceneManager.detect_scenes()</span></code></a>.</p>
+<p>Multiple videos can be opened as one continuous stream by passing a list of paths to
+<code class="xref py py-func docutils literal notranslate"><span class="pre">open_video()</span></code>, which returns a
+<a class="reference internal" href="#scenedetect.backends.concat.VideoStreamConcat" title="scenedetect.backends.concat.VideoStreamConcat"><code class="xref py py-class docutils literal notranslate"><span class="pre">VideoStreamConcat</span></code></a>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">video</span> <span class="o">=</span> <span class="n">open_video</span><span class="p">([</span><span class="s2">&quot;part1.mp4&quot;</span><span class="p">,</span> <span class="s2">&quot;part2.mp4&quot;</span><span class="p">])</span>
+</pre></div>
+</div>
 </section>
 <section id="devices-cameras-pipes">
 <h2>Devices / Cameras / Pipes<a class="headerlink" href="#devices-cameras-pipes" title="Permalink to this heading">¶</a></h2>
@@ -584,6 +590,13 @@ milliseconds. The first frame has a PTS of 0.</p>
 
 </dd></dl>
 
+<dl class="py data">
+<dt class="sig sig-object py" id="scenedetect.backends.pyav.MAX_CONSECUTIVE_DECODE_FAILURES">
+<span class="sig-name descname"><span class="pre">MAX_CONSECUTIVE_DECODE_FAILURES</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">8</span></em><a class="headerlink" href="#scenedetect.backends.pyav.MAX_CONSECUTIVE_DECODE_FAILURES" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of consecutive frame decode failures after which <cite>VideoStreamAv.read()</cite> gives up.
+Isolated corrupt frames are skipped; this bound ensures a truncated file still terminates.</p>
+</dd></dl>
+
 <span class="target" id="module-scenedetect.backends.moviepy"></span><p><a class="reference internal" href="#scenedetect.backends.moviepy.VideoStreamMoviePy" title="scenedetect.backends.moviepy.VideoStreamMoviePy"><code class="xref py py-class docutils literal notranslate"><span class="pre">VideoStreamMoviePy</span></code></a> provides an adapter for MoviePy’s <cite>FFMPEG_VideoReader</cite>.</p>
 <p>MoviePy launches ffmpeg as a subprocess, and can be used with various types of inputs. Generally,
 the input should support seeking, but does not necessarily have to be a video. For example,
@@ -738,6 +751,223 @@ The first frame has a time of 0.0 ms.</p>
 
 </dd></dl>
 
+<span class="target" id="module-scenedetect.backends.concat"></span><p><code class="docutils literal notranslate"><span class="pre">scenedetect.backends.concat</span></code> Module</p>
+<p><a class="reference internal" href="#scenedetect.backends.concat.VideoStreamConcat" title="scenedetect.backends.concat.VideoStreamConcat"><code class="xref py py-class docutils literal notranslate"><span class="pre">VideoStreamConcat</span></code></a> presents multiple videos as a single, contiguous
+<a class="reference internal" href="video_stream.html#scenedetect.video_stream.VideoStream" title="scenedetect.video_stream.VideoStream"><code class="xref py py-class docutils literal notranslate"><span class="pre">VideoStream</span></code></a> with a monotonic PTS-based
+timeline. Frames are decoded through any available backend, so the concatenation logic is
+backend-agnostic. The easiest way to construct one is by passing a list of paths to
+<a class="reference internal" href="../api.html#scenedetect.open_video" title="scenedetect.open_video"><code class="xref py py-func docutils literal notranslate"><span class="pre">scenedetect.open_video()</span></code></a>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">scenedetect</span><span class="w"> </span><span class="kn">import</span> <span class="n">open_video</span>
+<span class="n">video</span> <span class="o">=</span> <span class="n">open_video</span><span class="p">([</span><span class="s2">&quot;part1.mp4&quot;</span><span class="p">,</span> <span class="s2">&quot;part2.mp4&quot;</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>The resulting stream can be used anywhere a single-video stream can, e.g. with a
+<a class="reference internal" href="scene_manager.html#scenedetect.scene_manager.SceneManager" title="scenedetect.scene_manager.SceneManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">SceneManager</span></code></a>. All videos must have the same
+resolution. Framerates may differ, in which case reported frame numbers may be inaccurate -
+use <cite>position</cite> for accurate PTS-based timing.</p>
+<p><a class="reference internal" href="#scenedetect.backends.concat.VideoStreamConcat.map_span" title="scenedetect.backends.concat.VideoStreamConcat.map_span"><code class="xref py py-meth docutils literal notranslate"><span class="pre">VideoStreamConcat.map_span()</span></code></a> maps a span of the global timeline back to per-source local
+times (e.g. for use as ffmpeg <cite>-ss</cite>/<cite>-t</cite> arguments).</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="scenedetect.backends.concat.SourceSpan">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SourceSpan</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">local_start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">local_end</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.backends.concat.SourceSpan" title="Permalink to this definition">¶</a></dt>
+<dd><p>Portion of a single input video covered by a time span on the global timeline of a
+<a class="reference internal" href="#scenedetect.backends.concat.VideoStreamConcat" title="scenedetect.backends.concat.VideoStreamConcat"><code class="xref py py-class docutils literal notranslate"><span class="pre">VideoStreamConcat</span></code></a>. Local times are relative to the start of that video, directly
+usable as seek targets or ffmpeg <cite>-ss</cite>/<cite>-t</cite> values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>source_index</strong> (<em>int</em>) – </p></li>
+<li><p><strong>path</strong> (<em>Path</em>) – </p></li>
+<li><p><strong>local_start</strong> (<a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a>) – </p></li>
+<li><p><strong>local_end</strong> (<a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a>) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="scenedetect.backends.concat.VideoStreamConcat">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">VideoStreamConcat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">paths</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'opencv'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.backends.concat.VideoStreamConcat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Concatenates multiple videos into a single, contiguous video stream with a
+monotonic PTS-based global timeline.</p>
+<p>The concatenation logic is backend-agnostic: frames are read through any PySceneDetect
+<cite>VideoStream</cite> backend, selected by name (default <cite>opencv</cite>). For the most accurate seam
+timing, use <cite>backend=”pyav”</cite> if available.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="video_stream.html#scenedetect.video_stream.VideoOpenFailure" title="scenedetect.video_stream.VideoOpenFailure"><strong>VideoOpenFailure</strong></a> – Failed to open a video, or video parameters don’t match.</p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>paths</strong> (<em>Sequence</em><em>[</em><em>str</em><em> | </em><em>PathLike</em><em>[</em><em>str</em><em>]</em><em>]</em>) – </p></li>
+<li><p><strong>frame_rate</strong> (<em>float</em><em> | </em><em>Fraction</em><em> | </em><em>None</em>) – </p></li>
+<li><p><strong>backend</strong> (<em>str</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+<p>Open a list of videos as one continuous stream.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>paths</strong> (<em>Sequence</em><em>[</em><em>str</em><em> | </em><em>PathLike</em><em>[</em><em>str</em><em>]</em><em>]</em>) – List of paths of the videos to concatenate, in playback order.</p></li>
+<li><p><strong>frame_rate</strong> (<em>float</em><em> | </em><em>Fraction</em><em> | </em><em>None</em>) – If set, overrides the detected frame rate of every input.</p></li>
+<li><p><strong>backend</strong> (<em>str</em>) – Name of the backend to decode each input with (see
+<a class="reference internal" href="#scenedetect.backends.AVAILABLE_BACKENDS" title="scenedetect.backends.AVAILABLE_BACKENDS"><code class="xref py py-data docutils literal notranslate"><span class="pre">scenedetect.backends.AVAILABLE_BACKENDS</span></code></a>). Falls back to OpenCV if
+unavailable.</p></li>
+<li><p><strong>kwargs</strong> – Optional named arguments to pass to every child backend constructor.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>OSError</strong> – A file could not be found or access was denied.</p></li>
+<li><p><a class="reference internal" href="video_stream.html#scenedetect.video_stream.VideoOpenFailure" title="scenedetect.video_stream.VideoOpenFailure"><strong>VideoOpenFailure</strong></a> – A video could not be opened, or resolutions don’t match.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="scenedetect.backends.concat.VideoStreamConcat.map_span">
+<span class="sig-name descname"><span class="pre">map_span</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.backends.concat.VideoStreamConcat.map_span" title="Permalink to this definition">¶</a></dt>
+<dd><p>Map a time span on the global timeline to the input video(s) covering it.
+A span which straddles one or more file boundaries yields multiple entries.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>start</strong> (<a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a>) – </p></li>
+<li><p><strong>end</strong> (<a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>list</em>[<a class="reference internal" href="#scenedetect.backends.concat.SourceSpan" title="scenedetect.backends.concat.SourceSpan"><em>SourceSpan</em></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scenedetect.backends.concat.VideoStreamConcat.read">
+<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">decode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.backends.concat.VideoStreamConcat.read" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read/decode the next frame. Returns False when all inputs have been processed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>decode</strong> (<em>bool</em>) – </p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>ndarray</em> | <em>bool</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scenedetect.backends.concat.VideoStreamConcat.reset">
+<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.backends.concat.VideoStreamConcat.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Close and re-open the stream (equivalent to seeking back to the beginning).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scenedetect.backends.concat.VideoStreamConcat.seek">
+<span class="sig-name descname"><span class="pre">seek</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.backends.concat.VideoStreamConcat.seek" title="Permalink to this definition">¶</a></dt>
+<dd><p>Seek to <cite>target</cite> on the global timeline. Supports seeking across sources in
+either direction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>target</strong> (<em>int</em><em> | </em><em>float</em><em> | </em><em>str</em><em> | </em><a class="reference internal" href="common.html#scenedetect.common.Timecode" title="scenedetect.common.Timecode"><em>Timecode</em></a><em> | </em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a>) – </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scenedetect.backends.concat.VideoStreamConcat.BACKEND_NAME">
+<span class="sig-name descname"><span class="pre">BACKEND_NAME</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'concat'</span></em><a class="headerlink" href="#scenedetect.backends.concat.VideoStreamConcat.BACKEND_NAME" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unique name used to identify this backend. Each subclass must set this to a unique str.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="scenedetect.backends.concat.VideoStreamConcat.aspect_ratio">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">aspect_ratio</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#scenedetect.backends.concat.VideoStreamConcat.aspect_ratio" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pixel aspect ratio as a float (1.0 represents square pixels).</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="scenedetect.backends.concat.VideoStreamConcat.child_backend">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">child_backend</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scenedetect.backends.concat.VideoStreamConcat.child_backend" title="Permalink to this definition">¶</a></dt>
+<dd><p>Name of the backend used to decode each input video.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="scenedetect.backends.concat.VideoStreamConcat.decode_failures">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">decode_failures</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#scenedetect.backends.concat.VideoStreamConcat.decode_failures" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of frames which failed to decode across all sources.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="scenedetect.backends.concat.VideoStreamConcat.duration">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">duration</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><span class="pre">FrameTimecode</span></a></em><a class="headerlink" href="#scenedetect.backends.concat.VideoStreamConcat.duration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Total duration of all input videos combined. May be inaccurate.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="scenedetect.backends.concat.VideoStreamConcat.frame_number">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">frame_number</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#scenedetect.backends.concat.VideoStreamConcat.frame_number" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of frames read so far across all sources.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="scenedetect.backends.concat.VideoStreamConcat.frame_rate">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">frame_rate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Fraction</span></em><a class="headerlink" href="#scenedetect.backends.concat.VideoStreamConcat.frame_rate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Average framerate of the first input video. Individual sources may vary; use
+<cite>position</cite> for accurate timing.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="scenedetect.backends.concat.VideoStreamConcat.frame_size">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">frame_size</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#scenedetect.backends.concat.VideoStreamConcat.frame_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Video resolution (width x height) in pixels.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="scenedetect.backends.concat.VideoStreamConcat.is_seekable">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_seekable</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#scenedetect.backends.concat.VideoStreamConcat.is_seekable" title="Permalink to this definition">¶</a></dt>
+<dd><p>True if seek() is allowed, False otherwise.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="scenedetect.backends.concat.VideoStreamConcat.name">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scenedetect.backends.concat.VideoStreamConcat.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Name of the first input video, without extension.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="scenedetect.backends.concat.VideoStreamConcat.path">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#scenedetect.backends.concat.VideoStreamConcat.path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Path of the first input video.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="scenedetect.backends.concat.VideoStreamConcat.paths">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">paths</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">pathlib.Path</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#scenedetect.backends.concat.VideoStreamConcat.paths" title="Permalink to this definition">¶</a></dt>
+<dd><p>All paths this object was created with.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="scenedetect.backends.concat.VideoStreamConcat.position">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">position</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><span class="pre">FrameTimecode</span></a></em><a class="headerlink" href="#scenedetect.backends.concat.VideoStreamConcat.position" title="Permalink to this definition">¶</a></dt>
+<dd><p>Presentation time of the last-read frame on the global timeline (the first frame
+of the first video has a presentation time of 0).</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="scenedetect.backends.concat.VideoStreamConcat.position_ms">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">position_ms</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#scenedetect.backends.concat.VideoStreamConcat.position_ms" title="Permalink to this definition">¶</a></dt>
+<dd><p>Presentation time of the last-read frame in milliseconds on the global timeline.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="scenedetect.backends.concat.FRAMERATE_DELTA_TOLERANCE">
+<span class="sig-name descname"><span class="pre">FRAMERATE_DELTA_TOLERANCE</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.1</span></em><a class="headerlink" href="#scenedetect.backends.concat.FRAMERATE_DELTA_TOLERANCE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tolerance in frames/sec above which a framerate mismatch between inputs is warned about.</p>
+</dd></dl>
+
 </section>
 
 
@@ -808,7 +1038,11 @@ The first frame has a time of 0.0 ms.</p>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.backends.opencv.VideoCaptureAdapter"><code class="docutils literal notranslate"><span class="pre">VideoCaptureAdapter</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.backends.opencv.VideoStreamCv2"><code class="docutils literal notranslate"><span class="pre">VideoStreamCv2</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.backends.pyav.VideoStreamAv"><code class="docutils literal notranslate"><span class="pre">VideoStreamAv</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scenedetect.backends.pyav.MAX_CONSECUTIVE_DECODE_FAILURES"><code class="docutils literal notranslate"><span class="pre">MAX_CONSECUTIVE_DECODE_FAILURES</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scenedetect.backends.moviepy.VideoStreamMoviePy"><code class="docutils literal notranslate"><span class="pre">VideoStreamMoviePy</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scenedetect.backends.concat.SourceSpan"><code class="docutils literal notranslate"><span class="pre">SourceSpan</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scenedetect.backends.concat.VideoStreamConcat"><code class="docutils literal notranslate"><span class="pre">VideoStreamConcat</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scenedetect.backends.concat.FRAMERATE_DELTA_TOLERANCE"><code class="docutils literal notranslate"><span class="pre">FRAMERATE_DELTA_TOLERANCE</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="common.html">Common</a></li>

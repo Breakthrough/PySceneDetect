@@ -35,6 +35,8 @@ The `scenedetect` API is easy to integrate with most application workflows, whil
 
         * MoviePy: :class:`VideoStreamMoviePy <scenedetect.backends.moviepy.VideoStreamMoviePy>`
 
+        * Multiple videos can be treated as a single continuous stream using :class:`VideoStreamConcat <scenedetect.backends.concat.VideoStreamConcat>` (e.g. ``open_video(["part1.mp4", "part2.mp4"])``)
+
     * :ref:`scenedetect.common ⏱️ <scenedetect-common>`: common functionality such as :class:`FrameTimecode <scenedetect.common.FrameTimecode>` for timecode handling
 
     * :ref:`scenedetect.scene_manager 🎞️ <scenedetect-scene_manager>`: the :class:`SceneManager <scenedetect.scene_manager.SceneManager>` coordinates performing scene detection on a video with one or more detectors

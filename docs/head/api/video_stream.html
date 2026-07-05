@@ -168,6 +168,13 @@ If int, interpreted as frame number.</p>
 </dd></dl>
 
 <dl class="py property">
+<dt class="sig sig-object py" id="scenedetect.video_stream.VideoStream.decode_failures">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">decode_failures</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#scenedetect.video_stream.VideoStream.decode_failures" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of frames that failed to decode and were skipped (may indicate video
+corruption). Always 0 for backends which do not track decode failures.</p>
+</dd></dl>
+
+<dl class="py property">
 <dt class="sig sig-object py" id="scenedetect.video_stream.VideoStream.duration">
 <em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">duration</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><span class="pre">FrameTimecode</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#scenedetect.video_stream.VideoStream.duration" title="Permalink to this definition">¶</a></dt>
 <dd><p>Duration of the stream as a FrameTimecode, or None if non terminating.</p>

@@ -101,6 +101,9 @@ the same rate.</p></li>
 </ul>
 </dd>
 </dl>
+<p>Comparisons between two <a class="reference internal" href="#scenedetect.common.Timecode" title="scenedetect.common.Timecode"><code class="xref py py-class docutils literal notranslate"><span class="pre">Timecode</span></code></a>-backed instances with the same rate are performed
+exactly using <code class="docutils literal notranslate"><span class="pre">pts</span> <span class="pre">*</span> <span class="pre">time_base</span></code> as rational numbers. All other comparisons between two
+rated instances use frame numbers, which for VFR sources are approximations.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
