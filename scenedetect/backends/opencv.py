@@ -221,9 +221,10 @@ class VideoStreamCv2(VideoStream):
     @property
     def position(self) -> FrameTimecode:
         timecode = self.timecode
-        # If PTS is 0 but we've read frames, derive from frame number.
-        # This handles image sequences and cases where CAP_PROP_POS_MSEC is unreliable.
-        if timecode.pts == 0 and self.frame_number > 0:
+        # If PTS is non-positive but we've read frames, derive from frame number. This handles
+        # image sequences and cases where CAP_PROP_POS_MSEC is unreliable. OpenCV 5 reports
+        # CAP_PROP_POS_MSEC as -1 (rather than 0) for image sequences on Windows, so check <= 0.
+        if timecode.pts <= 0 and self.frame_number > 0:
             fps = self.frame_rate
             time_base = Fraction(1, fps.numerator)
             pts = (self.frame_number - 1) * fps.denominator
