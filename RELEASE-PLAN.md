@@ -54,8 +54,8 @@ Optional: version referenced below as `X.Y[.Z]` - replace with the real version 
 ## 6. Publish & Release Checks
 
 - [ ] Publish Github release
-- [ ] Upload to PyPI: `publish-pypi.yml` must be manually triggered on a release tag. Specify `testpypi` first, and make sure everything goes okay on the test instance. When verified and smoke tested, specify `pypi` as the environment, and publish the production package.
-- [ ] Verify both projects: https://pypi.org/project/scenedetect/ and https://pypi.org/project/scenedetect-headless/.
+- [ ] Upload to PyPI: `publish-pypi.yml` must be manually triggered on a release tag. Specify `testpypi` first, and make sure everything goes okay on the test instance. When verified and smoke tested, specify `pypi` as the environment, and publish the production package. The artifact contains 6 files (sdist + wheel for `scenedetect-core`, `scenedetect`, and `scenedetect-headless`).
+- [ ] Verify all three projects: https://pypi.org/project/scenedetect/, https://pypi.org/project/scenedetect-headless/, and https://pypi.org/project/scenedetect-core/.
 - [ ] Deploy website: `generate-website.yml`
 - [ ] Deploy docs: `generate-docs.yml`
 - [ ] Merge release branch back into `main`, verify `docs/LATEST_VERSION` is correct

@@ -1,0 +1,81 @@
+#
+#         PySceneDetect: Python-Based Video Scene Detector
+#   ---------------------------------------------------------------
+#     [  Site: http://www.bcastell.com/projects/PySceneDetect/   ]
+#     [  Github: https://github.com/Breakthrough/PySceneDetect/  ]
+#     [  Documentation: http://www.scenedetect.com/docs/         ]
+#
+# Copyright (C) 2014 Brandon Castellano <http://www.bcastell.com>.
+#
+# pyproject.toml for the `scenedetect` package: the same code as scenedetect-core,
+# but bundling the opencv-python (GUI-capable) OpenCV variant, the CLI dependencies,
+# and the `scenedetect` console script. packaging/build_all.py temporarily swaps
+# this file into the repo root and builds from there, so the code, readme, and
+# dynamic version are shared with the other variants.
+#
+# Keep [project] metadata (classifiers, requires-python, etc.) in sync with the
+# root pyproject.toml and pyproject-scenedetect-headless.toml. Only the name,
+# description, dependencies, extras, and console script differ between variants.
+
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "scenedetect"
+dynamic = ["version"]
+description = "Video scene cut/shot detection program and Python library (bundles the opencv-python OpenCV variant and the scenedetect CLI)."
+readme = { file = "packaging/package-info.rst", content-type = "text/x-rst" }
+license = "BSD-3-Clause"
+license-files = ["LICENSE"]
+requires-python = ">=3.10"
+authors = [{ name = "Brandon Castellano", email = "brandon248@gmail.com" }]
+keywords = ["video", "computer-vision", "analysis"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "Environment :: Console :: Curses",
+    "Intended Audience :: Developers",
+    "Intended Audience :: End Users/Desktop",
+    "Intended Audience :: System Administrators",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Multimedia :: Video",
+    "Topic :: Multimedia :: Video :: Conversion",
+    "Topic :: Multimedia :: Video :: Non-Linear Editor",
+    "Topic :: Utilities",
+]
+dependencies = [
+    # click 8.3.0 specifically is excluded per https://scenedetect.com/issues/521; 8.3.1+ are fine.
+    "click~=8.0,!=8.3.0",
+    "numpy",
+    "opencv-python",
+    "platformdirs",
+    "tqdm",
+]
+
+[project.optional-dependencies]
+pyav = ["av>=9.2"]
+moviepy = ["moviepy"]
+
+[project.urls]
+Homepage = "https://www.scenedetect.com"
+Documentation = "https://www.scenedetect.com/docs/"
+Source = "https://github.com/Breakthrough/PySceneDetect"
+Issues = "https://github.com/Breakthrough/PySceneDetect/issues"
+
+[project.scripts]
+scenedetect = "scenedetect.__main__:main"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+include = ["scenedetect*"]
+
+[tool.setuptools.dynamic]
+version = { attr = "scenedetect.__version__" }

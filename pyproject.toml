@@ -13,9 +13,9 @@ requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "scenedetect"
+name = "scenedetect-core"
 dynamic = ["version"]
-description = "Video scene cut/shot detection program and Python library."
+description = "The detection pipeline for PySceneDetect (core library, minimal dependencies)."
 readme = { file = "packaging/package-info.rst", content-type = "text/x-rst" }
 license = "BSD-3-Clause"
 license-files = ["LICENSE"]
@@ -40,19 +40,31 @@ classifiers = [
     "Topic :: Multimedia :: Video :: Non-Linear Editor",
     "Topic :: Utilities",
 ]
+# OpenCV is required at runtime but intentionally NOT declared: any of the four
+# opencv-python* variants satisfies the library, and downstream projects must be
+# able to pick their own (https://scenedetect.com/issues/558). The `scenedetect`
+# and `scenedetect-headless` packages (packaging/variants/) ship the same code
+# with a concrete OpenCV variant plus the CLI dependencies.
 dependencies = [
-    # click 8.3.0 specifically is excluded per https://scenedetect.com/issues/521; 8.3.1+ are fine.
-    "click~=8.0,!=8.3.0",
     "numpy",
-    "opencv-python",
-    "platformdirs",
-    "tqdm",
 ]
 
 [project.optional-dependencies]
+opencv = ["opencv-python"]
+opencv-headless = ["opencv-python-headless"]
 pyav = ["av>=9.2"]
 moviepy = ["moviepy"]
-dev = ["av>=9.2", "moviepy", "pytest>=7.0", "pytest-rerunfailures"]
+dev = [
+    "av>=9.2",
+    # click 8.3.0 specifically is excluded per https://scenedetect.com/issues/521; 8.3.1+ are fine.
+    "click~=8.0,!=8.3.0",
+    "moviepy",
+    "opencv-python",
+    "platformdirs",
+    "pytest>=7.0",
+    "pytest-rerunfailures",
+    "tqdm",
+]
 docs = ["Sphinx==7.0.1", "sphinx-copybutton==0.5.2"]
 website = ["mkdocs==1.5.2", "jinja2>=3.1.6"]
 
@@ -62,8 +74,9 @@ Documentation = "https://www.scenedetect.com/docs/"
 Source = "https://github.com/Breakthrough/PySceneDetect"
 Issues = "https://github.com/Breakthrough/PySceneDetect/issues"
 
-[project.scripts]
-scenedetect = "scenedetect.__main__:main"
+# No [project.scripts]: the `scenedetect` console script is declared by the
+# scenedetect/scenedetect-headless variants (packaging/variants/) so a core
+# install stays library-only. Use `python -m scenedetect` from a core-only install.
 
 [tool.setuptools]
 include-package-data = true
@@ -81,6 +94,13 @@ markers = [
 addopts = "-m 'not release'"
 filterwarnings = [
     "ignore:TODO.*Update caller to handle VFR:UserWarning",
+    # Promote unraisable (finalizer) and unhandled-thread exceptions to named test
+    # failures. A CI run on windows-latest once exited 1 with every test passing and
+    # no output - the failure mode pytest 9.1+ reports for unraisable exceptions
+    # collected at shutdown. These filters turn any recurrence into an attributable
+    # traceback instead of a bare exit code.
+    "error::pytest.PytestUnraisableExceptionWarning",
+    "error::pytest.PytestUnhandledThreadExceptionWarning",
 ]
 
 [tool.ruff]

@@ -11,16 +11,17 @@ tests/resources/*
 *.mkv
 *.m4v
 *.csv
-packaging/windows/.version_info
-packaging/windows/installer/PySceneDetect.back*.aip
-packaging/windows/installer/PySceneDetect-*.msi
-packaging/windows/installer/PySceneDetect-cache/
 *.txt
 
 benchmark/BBC/
 benchmark/AutoShot/
 benchmark/ClipShots/
 benchmark/results/
+
+packaging/windows/.version_info
+packaging/windows/installer/PySceneDetect.back*.aip
+packaging/windows/installer/PySceneDetect-*.msi
+packaging/windows/installer/PySceneDetect-cache/
 
 # From https://raw.githubusercontent.com/github/gitignore/main/Python.gitignore
 

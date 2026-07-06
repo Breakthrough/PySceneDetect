@@ -362,10 +362,23 @@ def get_system_version_info() -> str:
     # deferred to avoid a circular import at module load time.
     from scenedetect import __version__ as scenedetect_version
 
-    # (dist_name, fallback_module_name). Module fallback is only used when metadata is
-    # missing, so the metadata path still distinguishes `opencv-python` vs
-    # `opencv-python-headless` in source installs. In the frozen Windows build only
-    # `opencv-python-headless` is shipped, so `cv2` is attributed to that row alone.
+    # (dist_name, fallback_module_name). Module fallback is only used when that dist's
+    # metadata is missing. Known quirk: `cv2` cannot reveal which distribution provided
+    # it, so whenever cv2 is importable but `opencv-python-headless` is not installed
+    # (e.g. only `opencv-python` is), the headless row still shows cv2's version via the
+    # fallback - both opencv rows then report a version even though only one is
+    # installed. Kept intentionally: the fallback is what recovers the version in the
+    # frozen Windows build (which ships cv2 without any `.dist-info`), and the
+    # `opencv-python` row is metadata-only, so it remains accurate on its own.
+    # The same code ships in three distributions: `scenedetect-core` (minimal deps)
+    # and the `scenedetect`/`scenedetect-headless` variants (OpenCV variant + CLI
+    # deps). Metadata-only lookups (no module fallback) so each row reflects which
+    # distribution is actually installed - e.g. frozen builds show "Not Installed"
+    # here rather than misattributing the module version.
+    scenedetect_packages = (
+        ("scenedetect-core", None),
+        ("scenedetect-headless", None),
+    )
     third_party_packages = (
         ("av", "av"),
         ("click", "click"),
@@ -380,7 +393,7 @@ def get_system_version_info() -> str:
     )
     package_versions = [("scenedetect", scenedetect_version)] + [
         (dist_name, _query_package_version(dist_name, fallback_module) or not_found_str)
-        for dist_name, fallback_module in third_party_packages
+        for dist_name, fallback_module in (*scenedetect_packages, *third_party_packages)
     ]
 
     tool_versions = (

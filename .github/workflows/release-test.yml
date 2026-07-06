@@ -44,11 +44,11 @@ jobs:
           fi
       - name: Build and Check
         run: |
-          python -m build
-          python packaging/build_headless.py
-          python -m build
-          git checkout pyproject.toml
-          twine check dist/*
+          # Builds scenedetect-core plus the scenedetect/scenedetect-headless variants.
+          python packaging/build_all.py
+          # Glob by extension: dist/ also holds tracked website assets (dist/logo/),
+          # which `twine check dist/*` would reject as an unknown distribution.
+          twine check dist/*.whl dist/*.tar.gz
       - name: pip-audit
         # CVE-2026-3219 in pip 26.0.1 has no fix version available upstream
         # and pip ships pre-installed on the runner (not controlled by this
@@ -79,7 +79,9 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install .[pyav,moviepy]
+          # The dev extra supplies the CLI deps (click/opencv/tqdm) plus av and moviepy;
+          # a bare `pip install .` is now scenedetect-core with numpy only.
+          pip install .[dev]
           pip install opentimelineio pillow psutil pytest
       - name: Run release tests
         run: pytest -m release -vv --ignore=tests/release/test_long_video_stress.py
@@ -104,7 +106,8 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install .[pyav]
+          # The dev extra supplies the CLI deps (click/opencv/tqdm) plus av.
+          pip install .[dev]
           pip install psutil pytest
       - name: Run long stress test
         run: pytest -m release -k long_video -vv

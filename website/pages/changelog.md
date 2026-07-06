@@ -763,3 +763,8 @@ Development
  - [bugfix] The PyAV backend now normalizes presentation times by the stream start time, so files with a delayed start (e.g. from edit lists) report the first frame at `position` 0, consistent with other backends and with `seek()`
  - [bugfix] Comparisons between two `FrameTimecode` objects that both carry exact presentation times (e.g. positions from VFR videos) and share the same frame rate are now performed exactly using `pts` and `time_base` instead of rounded frame numbers. Previously, distinct frames in VFR sections could compare equal or fail strict ordering when their times rounded to the same approximate frame number. Comparisons involving frame- or seconds-based timecodes, plain values (`int`/`float`/`str`), or differing frame rates are unchanged
  - [bugfix] Fix image sequence inputs when using OpenCV 5.0
+
+#### Packaging
+
+ - [feature] Add `scenedetect-core`, a new library-only package with minimal dependencies (`numpy` only): it does not depend on any specific OpenCV variant, allowing downstream projects to choose their own (e.g. `opencv-contrib-python`), and does not include the CLI dependencies or the `scenedetect` command [#558](https://github.com/Breakthrough/PySceneDetect/issues/558). Convenience extras `scenedetect-core[opencv]` and `scenedetect-core[opencv-headless]` are provided
+ - [general] `scenedetect` and `scenedetect-headless` are unchanged: they continue to ship the full program (library + CLI) with `opencv-python` / `opencv-python-headless` respectively. All three packages provide the same `scenedetect` module (install or depend only one)

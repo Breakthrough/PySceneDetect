@@ -103,6 +103,9 @@ jobs:
           run-id: ${{ steps.resolve.outputs.run-id }}
 
       - name: List artifact contents
+        # Expect 6 files: sdist + wheel for each of scenedetect-core, scenedetect,
+        # and scenedetect-headless. All three projects publish from this one step;
+        # each needs a trusted publisher configured on PyPI/TestPyPI for this workflow.
         run: ls -la pkg/
 
       - name: Publish Package
@@ -111,5 +114,5 @@ jobs:
           repository-url: ${{ github.event.inputs.environment == 'testpypi' && 'https://test.pypi.org/legacy/' || 'https://upload.pypi.org/legacy/' }}
           packages-dir: pkg/
           print-hash: true
-          # Tolerate retries: skip existing packages if for example only one variant was uploaded.
+          # Tolerate retries: skip existing packages if for example only some variants were uploaded.
           skip-existing: true
