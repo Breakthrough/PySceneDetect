@@ -147,7 +147,13 @@
 <h3 class="wy-text-neutral"><tt>pip install --upgrade scenedetect-headless</tt></h3>
 </div>
 
-<p>PySceneDetect is available via <code>pip</code> as either <a href="https://pypi.org/project/scenedetect/"><code>scenedetect</code></a> (depends on <code>opencv-python</code>) or <a href="https://pypi.org/project/scenedetect-headless/"><code>scenedetect-headless</code></a> (depends on <code>opencv-python-headless</code>). Both ship the same <code>scenedetect</code> Python module -- install whichever OpenCV variant suits your environment.</p>
+<p>PySceneDetect is available via <code>pip</code> as three packages:</p>
+<ul>
+<li><a href="https://pypi.org/project/scenedetect/"><code>scenedetect</code></a>: full install with the CLI, depends on <code>opencv-python</code></li>
+<li><a href="https://pypi.org/project/scenedetect-headless/"><code>scenedetect-headless</code></a>: full install with the CLI, depends on <code>opencv-python-headless</code> (servers/containers without GUI libraries)</li>
+<li><a href="https://pypi.org/project/scenedetect-core/"><code>scenedetect-core</code></a>: library only, minimal dependencies. <em>Requires at least one of the <code>opencv-python</code> package variants to be installed</em>.</li>
+</ul>
+<p>All three provide the same <code>scenedetect</code> Python module -- install only one of them.</p>
 <h2 id="windows-build-64-bit-only">Windows Build (64-bit Only) &nbsp; <span class="wy-text-neutral"><span class="fa fa-windows"></span></span></h2>
 <div class="important">
 <h3 class="wy-text-neutral"><span class="fa fa-forward wy-text-info"></span> Latest Release: <b class="wy-text-neutral">v0.7</b></h3>
@@ -161,13 +167,13 @@
 <p>After installation, you can call PySceneDetect from any terminal/command prompt by typing <code>scenedetect</code> (try running <code>scenedetect --help</code>, or <code>scenedetect version</code>). If you encounter any runtime errors while running PySceneDetect, ensure that you have all the required dependencies listed in the System Requirements section above (you should be able to <code>import numpy</code> and <code>import cv2</code>).  If you encounter any issues or want to make a feature request, feel free to <a href="../contributing/">report any bugs or share some feature requests/ideas</a> on the <a href="https://github.com/Breakthrough/PySceneDetect/issues">issue tracker</a> and help make PySceneDetect even better.</p>
 <h2 id="dependencies">Dependencies</h2>
 <h3 id="python-packages">Python Packages</h3>
-<p>PySceneDetect requires <a href="https://www.python.org/">Python 3</a> and the following packages:</p>
+<p>PySceneDetect requires <a href="https://www.python.org/">Python 3</a> and the following packages. The <code>scenedetect</code> and <code>scenedetect-headless</code> packages install all of them automatically; <code>scenedetect-core</code> installs only Numpy, and requires an OpenCV variant to be installed separately:</p>
 <ul>
-<li><a href="http://opencv.org/">OpenCV</a>: <code>pip install opencv-python</code></li>
+<li><a href="http://opencv.org/">OpenCV</a>: <code>pip install opencv-python</code> (any <code>opencv-python*</code> variant works)</li>
 <li><a href="https://numpy.org/">Numpy</a>: <code>pip install numpy</code></li>
-<li><a href="https://click.palletsprojects.com">Click</a>: <code>pip install Click</code></li>
-<li><a href="https://github.com/tqdm/tqdm">tqdm</a>: <code>pip install tqdm</code></li>
-<li><a href="https://github.com/ActiveState/appdirs">appdirs</a>: <code>pip install appdirs</code></li>
+<li><a href="https://click.palletsprojects.com">Click</a>: <code>pip install click</code> (command-line interface only)</li>
+<li><a href="https://github.com/tqdm/tqdm">tqdm</a>: <code>pip install tqdm</code> (optional, enables progress bars)</li>
+<li><a href="https://github.com/tox-dev/platformdirs">platformdirs</a>: <code>pip install platformdirs</code> (command-line interface only)</li>
 </ul>
 <p>Optional packages:</p>
 <ul>
