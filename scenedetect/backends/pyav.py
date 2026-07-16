@@ -157,10 +157,19 @@ class VideoStreamAv(VideoStream):
         self._duration_frames = self._get_duration()
 
     def __del__(self):
-        # `_container` is unset if `__init__` raised before `av.open()` succeeded.
-        container = getattr(self, "_container", None)
-        if container is not None:
-            container.close()
+        # Finalizers must never raise - an exception here becomes an unraisable error. During
+        # interpreter shutdown the underlying handles are reclaimed by the OS anyway.
+        try:
+            # Close the decode generator first to break its cycle with the container.
+            decoder = getattr(self, "_decoder", None)
+            if decoder is not None:
+                decoder.close()
+            # `_container` is unset if `__init__` raised before `av.open()` succeeded.
+            container = getattr(self, "_container", None)
+            if container is not None:
+                container.close()
+        except Exception:
+            pass
 
     #
     # VideoStream Methods/Properties
