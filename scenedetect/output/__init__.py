@@ -42,12 +42,26 @@ from scenedetect.common import (
 from scenedetect.output.image import save_images as save_images
 from scenedetect.output.video import (
     PathFormatter as PathFormatter,
+)
+from scenedetect.output.video import (
     SceneMetadata as SceneMetadata,
+)
+from scenedetect.output.video import (
     VideoMetadata as VideoMetadata,
+)
+from scenedetect.output.video import (
     default_formatter as default_formatter,
+)
+from scenedetect.output.video import (
     is_ffmpeg_available as is_ffmpeg_available,
+)
+from scenedetect.output.video import (
     is_mkvmerge_available as is_mkvmerge_available,
+)
+from scenedetect.output.video import (
     split_video_ffmpeg as split_video_ffmpeg,
+)
+from scenedetect.output.video import (
     split_video_mkvmerge as split_video_mkvmerge,
 )
 
