@@ -24,3 +24,21 @@
 #side-nav-logo {
     margin-bottom: -1em;
 }
+
+/* Benchmark results tables (benchmarks.md). F1 cells are shaded on a single-hue
+   sequential scale: darker = higher score. */
+.bm-table {
+    border-collapse: collapse;
+    margin-bottom: 24px;
+}
+.bm-table th, .bm-table td {
+    border: 1px solid #e1e0d9;
+    padding: 6px 12px;
+    text-align: center;
+}
+.bm-table td:first-child {
+    text-align: left;
+}
+.bm-t1 { background-color: #6da7ec; }  /* F1 >= 80 */
+.bm-t2 { background-color: #9ec5f4; }  /* F1 60-79 */
+.bm-t3 { background-color: #cde2fb; }  /* F1 40-59 */

@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="Brandon Castellano" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Benchmarks - PySceneDetect</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../style.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Benchmarks";
+        var mkdocs_page_input_path = "benchmarks.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-72551323-1', 'auto');
+  ga('send', 'pageview');
+</script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+
+  <a href="..">
+
+<img src="../img/pyscenedetect_logo_small.png" class="logo" id="side-nav-logo" alt="Logo"/>
+</a>
+<div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">PySceneDetect</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../features/">Features</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../download/">Download</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../changelog/">Changelog</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Reference:</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../docs/">Documentation</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../cli/">Command-Line</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../api/">Python API</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="./">Benchmarks</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#accuracy-at-default-settings">Accuracy at default settings</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#bbc-planet-earth">BBC Planet Earth</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#autoshot">AutoShot</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#clipshots-hard-cuts">ClipShots (hard cuts)</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#clipshots-fades">ClipShots (fades)</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#parameter-sweeps">Parameter sweeps</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#reproducing">Reproducing</a>
+    </li>
+    </ul>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Support:</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../faq/">FAQ</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../contributing/">Bugs & Contributing</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../supporting/">Development & Support</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Resources</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../similar/">Similar Projects</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../literature/">Research & Literature</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../copyright/">License & Copyright</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">PySceneDetect</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a> &raquo;</li>
+          <li>Reference: &raquo;</li>
+      <li class="breadcrumb-item active">Benchmarks</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/Breakthrough/PySceneDetect/blob/main/website/pages/benchmarks.md">Edit on PySceneDetect on Github</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="benchmarks">Benchmarks</h1>
+<p>PySceneDetect's detectors are benchmarked for accuracy and speed against public
+shot-boundary-detection corpora. Scoring follows the
+<a href="https://www-nlpir.nist.gov/projects/tv2007/pastdata/shot_boundary.07.html">TRECVID-SBD convention</a>
+(greedy 1-to-1 nearest-neighbor matching with a configurable frame tolerance for hard cuts;
+point-in-interval matching for fades), so numbers are comparable to published results.
+The benchmark harness, datasets, and full raw results live in
+<a href="https://github.com/Breakthrough/PySceneDetect/tree/main/benchmark"><code>benchmark/</code></a> on GitHub.</p>
+<p>Three datasets are used, chosen to cover very different content:</p>
+<ul>
+<li><strong>BBC Planet Earth</strong> - 11 long-form broadcast episodes (hard cuts only)</li>
+<li><strong>AutoShot</strong> - short-form web/user-generated clips (hard cuts only)</li>
+<li><strong>ClipShots</strong> - 500 short web clips with hard cuts <em>and</em> typed gradual transitions</li>
+</ul>
+<h2 id="accuracy-at-default-settings">Accuracy at default settings</h2>
+<p><img src="../img/benchmark-f1-defaults.svg" alt="Grouped bar chart of hard-cut F1 score per detector and dataset at default settings. AdaptiveDetector leads on BBC (92) and AutoShot (74); HistogramDetector trails, dropping to 20 on ClipShots." style="max-width:100%;"></p>
+<p>Hard cuts, strict frame-exact matching (tolerance 0). F1 cells are shaded by score.</p>
+<h3 id="bbc-planet-earth">BBC Planet Earth</h3>
+<table class="bm-table">
+<tr><th>Detector</th><th>Recall</th><th>Precision</th><th>F1</th></tr>
+<tr><td>AdaptiveDetector</td><td>87.12</td><td>96.55</td><td class="bm-t1">91.59</td></tr>
+<tr><td>ContentDetector</td><td>84.70</td><td>88.77</td><td class="bm-t1">86.69</td></tr>
+<tr><td>HashDetector</td><td>92.30</td><td>75.56</td><td class="bm-t1">83.10</td></tr>
+<tr><td>HistogramDetector</td><td>89.84</td><td>72.03</td><td class="bm-t2">79.96</td></tr>
+<tr><td>ThresholdDetector&nbsp;*</td><td>0.06</td><td>0.70</td><td>0.11</td></tr>
+</table>
+
+<h3 id="autoshot">AutoShot</h3>
+<table class="bm-table">
+<tr><th>Detector</th><th>Recall</th><th>Precision</th><th>F1</th></tr>
+<tr><td>AdaptiveDetector</td><td>70.59</td><td>77.46</td><td class="bm-t2">73.86</td></tr>
+<tr><td>ContentDetector</td><td>63.49</td><td>76.19</td><td class="bm-t2">69.26</td></tr>
+<tr><td>HashDetector</td><td>56.48</td><td>76.11</td><td class="bm-t2">64.84</td></tr>
+<tr><td>HistogramDetector</td><td>63.27</td><td>53.23</td><td class="bm-t3">57.82</td></tr>
+<tr><td>ThresholdDetector&nbsp;*</td><td>0.75</td><td>38.64</td><td>1.47</td></tr>
+</table>
+
+<h3 id="clipshots-hard-cuts">ClipShots (hard cuts)</h3>
+<table class="bm-table">
+<tr><th>Detector</th><th>Recall</th><th>Precision</th><th>F1</th></tr>
+<tr><td>AdaptiveDetector</td><td>85.97</td><td>41.25</td><td class="bm-t3">55.75</td></tr>
+<tr><td>ContentDetector</td><td>81.93</td><td>42.36</td><td class="bm-t3">55.84</td></tr>
+<tr><td>HashDetector</td><td>81.34</td><td>30.14</td><td class="bm-t3">43.98</td></tr>
+<tr><td>HistogramDetector</td><td>72.20</td><td>11.47</td><td>19.80</td></tr>
+<tr><td>ThresholdDetector&nbsp;*</td><td>0.08</td><td>0.58</td><td>0.14</td></tr>
+</table>
+
+<h3 id="clipshots-fades">ClipShots (fades)</h3>
+<table class="bm-table">
+<tr><th>Detector</th><th>Recall</th><th>Precision</th><th>F1</th></tr>
+<tr><td>AdaptiveDetector</td><td>13.65</td><td>98.12</td><td>23.96</td></tr>
+<tr><td>ContentDetector</td><td>26.03</td><td>98.04</td><td class="bm-t3">41.14</td></tr>
+<tr><td>HashDetector</td><td>18.77</td><td>94.53</td><td>31.33</td></tr>
+<tr><td>HistogramDetector</td><td>69.67</td><td>81.99</td><td class="bm-t2">75.33</td></tr>
+<tr><td>ThresholdDetector&nbsp;*</td><td>5.69</td><td>99.24</td><td>10.77</td></tr>
+</table>
+
+<p>* ThresholdDetector detects fades to/from black, not shot-to-shot transitions; near-zero
+hard-cut scores are expected, and it is included for completeness only.</p>
+<h2 id="parameter-sweeps">Parameter sweeps</h2>
+<p>Beyond the defaults, a full grid sweep over each detector's key parameters shows how
+accuracy responds to tuning, and how much the optimum differs per dataset:</p>
+<p><img src="../img/benchmark-sweep-curves.svg" alt="Four small-multiple line charts showing hard-cut F1 at 1-frame tolerance versus threshold for detect-content, detect-adaptive, detect-hash, and detect-hist. Each panel has one line per dataset with a dot at that dataset's optimum; BBC and AutoShot peak at lower thresholds than ClipShots in most panels." style="max-width:100%;"></p>
+<p>Dots mark each dataset's optimum within the shown parameter slice. The key takeaway:
+per-dataset optima diverge - long-form broadcast content (BBC) generally prefers lower
+thresholds than short web clips (ClipShots) - so the defaults aim for a robust
+middle ground rather than any single corpus's peak.</p>
+<p>How much accuracy is on the table? The chart below compares three levels for each detector:
+the v0.7 default (tick), the best <em>single</em> parameter set across all datasets (bar - what a
+better default could ship), and each dataset's own optimum (dot - the ceiling when tuning for
+your specific content):</p>
+<p><img src="../img/benchmark-f1-optimal.svg" alt="Grouped bar chart of hard-cut F1 at 1-frame tolerance after parameter tuning. Bars show the best single cross-dataset parameter set per detector and dataset, a black tick marks the v0.7 default, and a dot marks each dataset's own optimum. HistogramDetector shows the largest gap between default and tuned scores, most dramatically on ClipShots (20 vs 48); for ContentDetector and AdaptiveDetector on BBC the default tick sits slightly above the tuned bar." style="max-width:100%;"></p>
+<p>Two things stand out. HistogramDetector's default is far from its optimum everywhere
+(most dramatically on ClipShots: 20 to 48). And for ContentDetector / AdaptiveDetector on
+BBC, the v0.7 default actually <em>beats</em> the cross-dataset tuned setting - tuning toward
+short web clips costs accuracy on long-form broadcast, which is why defaults favor a robust
+middle ground.</p>
+<p>Scored by mean hard-cut F1 at 1-frame tolerance across all three datasets, the best single
+parameter set per detector compares to the v0.7 defaults as follows:</p>
+<table class="bm-table">
+<tr><th>Detector</th><th>Best mean F1</th><th>Best parameters</th><th>v0.7 default</th></tr>
+<tr><td>AdaptiveDetector</td><td class="bm-t2">76.3</td><td>adaptive_threshold=3.5, window_width=3, min_scene_len=0.6s</td><td>adaptive_threshold=3.0, window_width=2</td></tr>
+<tr><td>ContentDetector</td><td class="bm-t2">73.4</td><td>threshold=31, min_scene_len=0.6s</td><td>threshold=27</td></tr>
+<tr><td>HashDetector</td><td class="bm-t2">69.8</td><td>threshold=0.35, size=8</td><td>threshold=0.395, size=16</td></tr>
+<tr><td>HistogramDetector</td><td class="bm-t2">66.3</td><td>threshold=0.20, bins=128</td><td>threshold=0.05, bins=256</td></tr>
+</table>
+
+<p>Full per-dataset breakdowns are in
+<a href="https://github.com/Breakthrough/PySceneDetect/blob/main/benchmark/SWEEP_REPORT.md"><code>benchmark/SWEEP_REPORT.md</code></a>.
+A review of the default values in light of these results is in progress; HistogramDetector's
+default in particular scores well below its swept optimum (54.3 vs 66.3 mean F1).</p>
+<h2 id="reproducing">Reproducing</h2>
+<p>See <a href="https://github.com/Breakthrough/PySceneDetect/blob/main/benchmark/README.md"><code>benchmark/README.md</code></a>
+for dataset download instructions and usage. In short:</p>
+<pre><code class="language-bash"># Score one detector on one dataset:
+python -m benchmark --detector detect-content --dataset BBC
+
+# Grid sweep over detector parameters:
+python -m benchmark.sweep --detector detect-content --dataset BBC \
+    --params &quot;threshold=15:35:1;min_scene_len=0.0:1.0:0.1&quot;
+</code></pre>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../api/" class="btn btn-neutral float-left" title="Python API"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../faq/" class="btn btn-neutral float-right" title="FAQ">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+      <p>Copyright &copy; 2014 Brandon Castellano.  All rights reserved.<br />Licensed under BSD 3-Clause (see the <a href="https://github.com/Breakthrough/PySceneDetect/blob/main/LICENSE" alt="link to latest LICENSE file on Github">LICENSE file</a> for details).</p>
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../api/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../faq/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

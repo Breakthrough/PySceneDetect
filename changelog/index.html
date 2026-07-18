@@ -234,6 +234,8 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../api/">Python API</a>
                   </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../benchmarks/">Benchmarks</a>
+                  </li>
               </ul>
               <p class="caption"><span class="caption-text">Support:</span></p>
               <ul>
@@ -1022,6 +1024,10 @@
 <ul>
 <li>[feature] Add <code>scenedetect-core</code>, a new library-only package with minimal dependencies (<code>numpy</code> only): it does not depend on any specific OpenCV variant, allowing downstream projects to choose their own (e.g. <code>opencv-contrib-python</code>), and does not include the CLI dependencies or the <code>scenedetect</code> command <a href="https://github.com/Breakthrough/PySceneDetect/issues/558">#558</a>. Convenience extras <code>scenedetect-core[opencv]</code> and <code>scenedetect-core[opencv-headless]</code> are provided</li>
 <li>[general] <code>scenedetect</code> and <code>scenedetect-headless</code> are unchanged: they continue to ship the full program (library + CLI) with <code>opencv-python</code> / <code>opencv-python-headless</code> respectively. All three packages provide the same <code>scenedetect</code> module (install or depend only one)</li>
+</ul>
+<h4 id="general">General</h4>
+<ul>
+<li>[general] Benchmark results are now published on the website (<a href="https://www.scenedetect.com/benchmarks/">scenedetect.com/benchmarks</a>), including accuracy at default settings and parameter sweep curves for each detector</li>
 </ul>
               
             </div>
