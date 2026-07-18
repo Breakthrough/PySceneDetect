@@ -88,7 +88,7 @@
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#parameter-sweeps">Parameter sweeps</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#reproducing">Reproducing</a>
+    <li class="toctree-l2"><a class="reference internal" href="#benchmarking">Benchmarking</a>
     </li>
     </ul>
                   </li>
@@ -137,7 +137,7 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="benchmarks">Benchmarks</h1>
-<p>PySceneDetect's detectors are benchmarked for accuracy and speed against public
+<p>PySceneDetect's detectors are benchmarked for accuracy against public
 shot-boundary-detection corpora. Scoring follows the
 <a href="https://www-nlpir.nist.gov/projects/tv2007/pastdata/shot_boundary.07.html">TRECVID-SBD convention</a>
 (greedy 1-to-1 nearest-neighbor matching with a configurable frame tolerance for hard cuts;
@@ -194,27 +194,16 @@ The benchmark harness, datasets, and full raw results live in
 </table>
 
 <p>* ThresholdDetector detects fades to/from black, not shot-to-shot transitions; near-zero
-hard-cut scores are expected, and it is included for completeness only.</p>
+hard-cut scores are expected. Included for completeness.</p>
 <h2 id="parameter-sweeps">Parameter sweeps</h2>
-<p>Beyond the defaults, a full grid sweep over each detector's key parameters shows how
-accuracy responds to tuning, and how much the optimum differs per dataset:</p>
+<p>Beyond the default values, a sweep over each detector's key parameters shows how
+accuracy per dataset changes:</p>
 <p><img src="../img/benchmark-sweep-curves.svg" alt="Four small-multiple line charts showing hard-cut F1 at 1-frame tolerance versus threshold for detect-content, detect-adaptive, detect-hash, and detect-hist. Each panel has one line per dataset with a dot at that dataset's optimum; BBC and AutoShot peak at lower thresholds than ClipShots in most panels." style="max-width:100%;"></p>
-<p>Dots mark each dataset's optimum within the shown parameter slice. The key takeaway:
-per-dataset optima diverge - long-form broadcast content (BBC) generally prefers lower
-thresholds than short web clips (ClipShots) - so the defaults aim for a robust
-middle ground rather than any single corpus's peak.</p>
-<p>How much accuracy is on the table? The chart below compares three levels for each detector:
-the v0.7 default (tick), the best <em>single</em> parameter set across all datasets (bar - what a
-better default could ship), and each dataset's own optimum (dot - the ceiling when tuning for
-your specific content):</p>
+<p>Dots mark each dataset's optimum within the shown parameter slice. Long-form broadcast content (BBC)
+generally prefers lower thresholds than short web clips (ClipShots), so the defaults aim for a
+robust middle ground.</p>
 <p><img src="../img/benchmark-f1-optimal.svg" alt="Grouped bar chart of hard-cut F1 at 1-frame tolerance after parameter tuning. Bars show the best single cross-dataset parameter set per detector and dataset, a black tick marks the v0.7 default, and a dot marks each dataset's own optimum. HistogramDetector shows the largest gap between default and tuned scores, most dramatically on ClipShots (20 vs 48); for ContentDetector and AdaptiveDetector on BBC the default tick sits slightly above the tuned bar." style="max-width:100%;"></p>
-<p>Two things stand out. HistogramDetector's default is far from its optimum everywhere
-(most dramatically on ClipShots: 20 to 48). And for ContentDetector / AdaptiveDetector on
-BBC, the v0.7 default actually <em>beats</em> the cross-dataset tuned setting - tuning toward
-short web clips costs accuracy on long-form broadcast, which is why defaults favor a robust
-middle ground.</p>
-<p>Scored by mean hard-cut F1 at 1-frame tolerance across all three datasets, the best single
-parameter set per detector compares to the v0.7 defaults as follows:</p>
+<p>Scored by mean hard-cut F1 at 1-frame tolerance across all three datasets:</p>
 <table class="bm-table">
 <tr><th>Detector</th><th>Best mean F1</th><th>Best parameters</th><th>v0.7 default</th></tr>
 <tr><td>AdaptiveDetector</td><td class="bm-t2">76.3</td><td>adaptive_threshold=3.5, window_width=3, min_scene_len=0.6s</td><td>adaptive_threshold=3.0, window_width=2</td></tr>
@@ -224,12 +213,10 @@ parameter set per detector compares to the v0.7 defaults as follows:</p>
 </table>
 
 <p>Full per-dataset breakdowns are in
-<a href="https://github.com/Breakthrough/PySceneDetect/blob/main/benchmark/SWEEP_REPORT.md"><code>benchmark/SWEEP_REPORT.md</code></a>.
-A review of the default values in light of these results is in progress; HistogramDetector's
-default in particular scores well below its swept optimum (54.3 vs 66.3 mean F1).</p>
-<h2 id="reproducing">Reproducing</h2>
+<a href="https://github.com/Breakthrough/PySceneDetect/blob/main/benchmark/SWEEP_REPORT.md"><code>benchmark/SWEEP_REPORT.md</code></a>.</p>
+<h2 id="benchmarking">Benchmarking</h2>
 <p>See <a href="https://github.com/Breakthrough/PySceneDetect/blob/main/benchmark/README.md"><code>benchmark/README.md</code></a>
-for dataset download instructions and usage. In short:</p>
+for dataset download instructions and usage.</p>
 <pre><code class="language-bash"># Score one detector on one dataset:
 python -m benchmark --detector detect-content --dataset BBC
 
