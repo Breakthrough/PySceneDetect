@@ -102,7 +102,7 @@ See [the documentation](https://www.scenedetect.com/docs/latest/api.html) for mo
 
 **Benchmark**:
 
-We evaluate the performance of different detectors in terms of accuracy and processing speed. See the [benchmark report](benchmark/README.md) for details.
+We evaluate the performance of different detectors in terms of accuracy and processing speed. See [www.scenedetect.com/benchmarks](https://www.scenedetect.com/benchmarks/) for results, or the [benchmark report](benchmark/README.md) for details on the datasets and methodology.
 
 ## Reference
 

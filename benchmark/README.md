@@ -140,6 +140,33 @@ Elapsed is mean wall-clock seconds per video.
 | HistogramDetector |  69.67 |   81.99   | 75.33 |
 | ThresholdDetector |   5.69 |   99.24   | 10.77 |
 
+## Parameter sweep results
+
+The tables above use each detector's v0.7 defaults. A grid sweep over the key parameters
+scored by hard-cut F1 at 1-frame tolerance, averaged across BBC / AutoShot / ClipShots gives the
+best single parameter set for this corpus mix:
+
+|      Detector     | Best mean F1 | Best params                                                | v0.7 default                           |
+|:-----------------:|:------------:|:-----------------------------------------------------------|:---------------------------------------|
+|  ContentDetector  |     73.4     | threshold=31, min_scene_len=0.6s                           | threshold=27                           |
+|  AdaptiveDetector |     76.3     | adaptive_threshold=3.5, window_width=3, min_scene_len=0.6s | adaptive_threshold=3.0, window_width=2 |
+|    HashDetector   |     69.8     | threshold=0.35, size=8                                     | threshold=0.395, size=16               |
+| HistogramDetector |     66.3     | threshold=0.20, bins=128                                   | threshold=0.05, bins=256               |
+| ThresholdDetector |      --      | detects fades, not hard cuts (validation only)             | threshold=12                           |
+
+Per-dataset optima differ (e.g. HistogramDetector peaks at threshold=0.11 on BBC but keeps climbing
+to 0.35 on ClipShots); the "best params" column is the single cell with the highest cross-dataset
+mean. Full per-dataset breakdowns - including F1 at 0-frame tolerance and precision/recall - are in
+[`SWEEP_REPORT.md`](SWEEP_REPORT.md), regenerated with `python -m benchmark.report_sweep`.
+The full grids (all detectors and datasets) are driven by `scripts/benchmark_sweep.sh`.
+
+Notes:
+
+- Every sweep cell requires a full decode pass (shared across up to `--workers` cells); `size` /
+  `bins` change the per-frame metric itself, so hash / hist cells cannot share metrics either.
+- HistogramDetector's v0.7 default (0.05 / 256) scores only 54.3 mean F1 - well below the swept
+  optimum, making it the most miscalibrated default of the five.
+
 ## Citations
 
 ### BBC

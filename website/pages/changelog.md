@@ -768,3 +768,7 @@ Development
 
  - [feature] Add `scenedetect-core`, a new library-only package with minimal dependencies (`numpy` only): it does not depend on any specific OpenCV variant, allowing downstream projects to choose their own (e.g. `opencv-contrib-python`), and does not include the CLI dependencies or the `scenedetect` command [#558](https://github.com/Breakthrough/PySceneDetect/issues/558). Convenience extras `scenedetect-core[opencv]` and `scenedetect-core[opencv-headless]` are provided
  - [general] `scenedetect` and `scenedetect-headless` are unchanged: they continue to ship the full program (library + CLI) with `opencv-python` / `opencv-python-headless` respectively. All three packages provide the same `scenedetect` module (install or depend only one)
+
+#### General
+
+ - [general] Benchmark results are now published on the website ([scenedetect.com/benchmarks](https://www.scenedetect.com/benchmarks/)), including accuracy at default settings and parameter sweep curves for each detector
