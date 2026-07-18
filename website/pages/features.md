@@ -50,7 +50,7 @@ PySceneDetect implements a variety of different detection algorithms which can b
  - **content-aware scene detection** (`detect-hist`): uses differences in histograms of Y channel of frames after conversion to YUV (fast cut)
  - **threshold scene detection** (`detect-threshold`): uses average frame intensity (brightness) to detect slow transitions (fade in/out)
 
- By default, detection methods are tuned to provide high performance during processing, while maintaining reasonable accuracy. Each detection method is configurable, and different parameters can be changed for specific use cases. See [the documentation](docs.md) for details.
+ By default, detection methods are tuned to provide high performance during processing, while maintaining reasonable accuracy. Each detection method is configurable, and different parameters can be changed for specific use cases. See [the documentation](docs.md) for details, and [the benchmarks page](benchmarks.md) for how each detector scores on public shot-boundary-detection datasets.
 
 ------------------------------------------------------------------------
 

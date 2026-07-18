@@ -27,6 +27,7 @@ nav:
     - 'Documentation': 'docs.md'
     - 'Command-Line': 'cli.md'
     - 'Python API': 'api.md'
+    - 'Benchmarks': 'benchmarks.md'
 - 'Support:':
     - 'FAQ': 'faq.md'
     - 'Bugs & Contributing': 'contributing.md'
