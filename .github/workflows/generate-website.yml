@@ -12,6 +12,8 @@ on:
 jobs:
   update_site:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write  # pushes generated site to the gh-pages branch
 
     steps:
       - uses: actions/checkout@v5
