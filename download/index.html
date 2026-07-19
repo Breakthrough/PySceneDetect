@@ -65,6 +65,8 @@
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#windows-build-64-bit-only">Windows Build (64-bit Only) &nbsp;</a>
     </li>
+    <li class="toctree-l2"><a class="reference internal" href="#docker-image">Docker Image &nbsp;</a>
+    </li>
     <li class="toctree-l2"><a class="reference internal" href="#post-installation">Post Installation</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#dependencies">Dependencies</a>
@@ -165,6 +167,16 @@
 <a href="../cli/" class="btn btn-success" style="margin-bottom:8px;" role="button"><span class="fa fa-book"></span>&nbsp; <b>Getting Started</b></a>
 </div>
 
+<h2 id="docker-image">Docker Image &nbsp; <span class="wy-text-neutral"><span class="fa fa-ship"></span></span></h2>
+<p>Official container images are published at <a href="https://github.com/breakthrough/PySceneDetect/pkgs/container/pyscenedetect">ghcr.io/breakthrough/pyscenedetect</a>. The image includes the full CLI, all optional backends (PyAV, MoviePy), and the external tools used for video splitting (<code>ffmpeg</code>, <code>mkvmerge</code>) -- no other setup is required:</p>
+<pre><code class="language-bash">docker pull ghcr.io/breakthrough/pyscenedetect
+docker run --rm ghcr.io/breakthrough/pyscenedetect version
+</code></pre>
+<p>To process videos, mount the folder containing them into the container (the image runs as a non-root user, so output files are written with regular permissions):</p>
+<pre><code class="language-bash">docker run --rm -v &quot;$(pwd):/files&quot; ghcr.io/breakthrough/pyscenedetect \
+    -i /files/video.mp4 detect-adaptive split-video -o /files
+</code></pre>
+<p>The <code>latest</code> tag (the default when no tag is given) points to the most recent recommended build, and the <code>main</code> tag tracks the development branch. Starting with the next release, version tags (e.g. <code>0.7.1</code>) will also be published. <code>podman</code> can be used in place of <code>docker</code> in the commands above.</p>
 <h2 id="post-installation">Post Installation</h2>
 <p>After installation, you can call PySceneDetect from any terminal/command prompt by typing <code>scenedetect</code> (try running <code>scenedetect --help</code>, or <code>scenedetect version</code>). If you encounter any runtime errors while running PySceneDetect, ensure that you have all the required dependencies listed in the System Requirements section above (you should be able to <code>import numpy</code> and <code>import cv2</code>).  If you encounter any issues or want to make a feature request, feel free to <a href="../contributing/">report any bugs or share some feature requests/ideas</a> on the <a href="https://github.com/Breakthrough/PySceneDetect/issues">issue tracker</a> and help make PySceneDetect even better.</p>
 <h2 id="dependencies">Dependencies</h2>

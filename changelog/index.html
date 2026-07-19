@@ -1024,8 +1024,13 @@
 <ul>
 <li>[feature] Add <code>scenedetect-core</code>, a new library-only package with minimal dependencies (<code>numpy</code> only): it does not depend on any specific OpenCV variant, allowing downstream projects to choose their own (e.g. <code>opencv-contrib-python</code>), and does not include the CLI dependencies or the <code>scenedetect</code> command <a href="https://github.com/Breakthrough/PySceneDetect/issues/558">#558</a>. Convenience extras <code>scenedetect-core[opencv]</code> and <code>scenedetect-core[opencv-headless]</code> are provided</li>
 <li>[general] <code>scenedetect</code> and <code>scenedetect-headless</code> are unchanged: they continue to ship the full program (library + CLI) with <code>opencv-python</code> / <code>opencv-python-headless</code> respectively. All three packages provide the same <code>scenedetect</code> module (install or depend only one)</li>
-<li>[feature] Official Docker images are now published to the GitHub Container Registry: <code>docker run --rm ghcr.io/breakthrough/pyscenedetect</code> runs the full CLI with all backends and external tools (ffmpeg, mkvmerge) included, thanks <a href="https://github.com/FNGarvin">@FNGarvin</a> <a href="https://github.com/Breakthrough/PySceneDetect/pull/537">#537</a></li>
+<li>[feature] Official Docker images are now published to the GitHub Container Registry with the full CLI, all backends, and external tools (ffmpeg, mkvmerge) included, thanks <a href="https://github.com/FNGarvin">@FNGarvin</a> <a href="https://github.com/Breakthrough/PySceneDetect/pull/537">#537</a><ul>
+<li>Example usage (process a video in the current directory):</li>
 </ul>
+</li>
+</ul>
+<pre><code class="language-bash">docker run --rm -v &quot;$(pwd):/files&quot; ghcr.io/breakthrough/pyscenedetect -i /files/video.mp4 detect-adaptive split-video -o /files
+</code></pre>
 <h4 id="general">General</h4>
 <ul>
 <li>[general] Benchmark results are now published on the website (<a href="https://www.scenedetect.com/benchmarks/">scenedetect.com/benchmarks</a>), including accuracy at default settings and parameter sweep curves for each detector</li>
