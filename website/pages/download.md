@@ -33,6 +33,24 @@ All three provide the same `scenedetect` Python module -- install only one of th
 <a href="../cli/" class="btn btn-success" style="margin-bottom:8px;" role="button"><span class="fa fa-book"></span>&nbsp; <b>Getting Started</b></a>
 </div>
 
+## Docker Image &nbsp; <span class="wy-text-neutral"><span class="fa fa-ship"></span></span>
+
+Official container images are published at [ghcr.io/breakthrough/pyscenedetect](https://github.com/breakthrough/PySceneDetect/pkgs/container/pyscenedetect). The image includes the full CLI, all optional backends (PyAV, MoviePy), and the external tools used for video splitting (`ffmpeg`, `mkvmerge`) -- no other setup is required:
+
+```bash
+docker pull ghcr.io/breakthrough/pyscenedetect
+docker run --rm ghcr.io/breakthrough/pyscenedetect version
+```
+
+To process videos, mount the folder containing them into the container (the image runs as a non-root user, so output files are written with regular permissions):
+
+```bash
+docker run --rm -v "$(pwd):/files" ghcr.io/breakthrough/pyscenedetect \
+    -i /files/video.mp4 detect-adaptive split-video -o /files
+```
+
+The `latest` tag (the default when no tag is given) points to the most recent recommended build, and the `main` tag tracks the development branch. Starting with the next release, version tags (e.g. `0.7.1`) will also be published. `podman` can be used in place of `docker` in the commands above.
+
 ## Post Installation
 
 After installation, you can call PySceneDetect from any terminal/command prompt by typing `scenedetect` (try running `scenedetect --help`, or `scenedetect version`). If you encounter any runtime errors while running PySceneDetect, ensure that you have all the required dependencies listed in the System Requirements section above (you should be able to `import numpy` and `import cv2`).  If you encounter any issues or want to make a feature request, feel free to [report any bugs or share some feature requests/ideas](contributing.md) on the [issue tracker](https://github.com/Breakthrough/PySceneDetect/issues) and help make PySceneDetect even better.

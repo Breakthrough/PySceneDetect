@@ -3,6 +3,11 @@ name: Publish Docker Image
 
 on:
   workflow_dispatch:
+    inputs:
+      tag_latest:
+        description: 'Also tag this build as `latest`'
+        type: boolean
+        default: false
   push:
     branches: [ "main" ]
   release:
@@ -47,6 +52,7 @@ jobs:
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
             type=sha
+            type=raw,value=latest,enable=${{ github.event_name == 'workflow_dispatch' && inputs.tag_latest }}
 
       - name: Build and push Docker image
         id: push

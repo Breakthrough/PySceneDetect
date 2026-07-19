@@ -29,7 +29,7 @@
 
     pip install scenedetect --upgrade
 
-Requires ffmpeg/mkvmerge for video splitting support. Windows builds (MSI installer/portable ZIP) can be found on [the download page](https://scenedetect.com/download/).
+Requires ffmpeg/mkvmerge for video splitting support. Windows builds (MSI installer/portable ZIP) can be found on [the download page](https://scenedetect.com/download/). A Docker image with all dependencies included is available as [`ghcr.io/breakthrough/pyscenedetect`](https://github.com/Breakthrough/PySceneDetect/pkgs/container/pyscenedetect).
 
 ----------------------------------------------------------
 
