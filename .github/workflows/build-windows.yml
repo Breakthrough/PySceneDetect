@@ -25,7 +25,7 @@ on:
       - main
       - 'releases/**'
     tags:
-      - v*-release
+      - 'v*'
   workflow_dispatch:
 
 jobs:
