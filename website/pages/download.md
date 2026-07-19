@@ -10,9 +10,9 @@ PySceneDetect requires at least Python 3.10 or higher.
 
 <div class="important">
 <h4 class="wy-text-neutral"><span class="fa fa-angle-double-down wy-text-info"></span> Standard install (recommended):</h4>
-<h3 class="wy-text-neutral"><tt>pip install --upgrade scenedetect</tt></h3>
+<pre class="command"><code class="nohighlight">pip install --upgrade scenedetect</code></pre>
 <h4 class="wy-text-neutral"><span class="fa fa-angle-down wy-text-info"></span> Headless install (servers, no GUI libs):</h4>
-<h3 class="wy-text-neutral"><tt>pip install --upgrade scenedetect-headless</tt></h3>
+<pre class="command"><code class="nohighlight">pip install --upgrade scenedetect-headless</code></pre>
 </div>
 
 PySceneDetect is available via `pip` as three packages:

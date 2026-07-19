@@ -42,3 +42,58 @@
 .bm-t1 { background-color: #6da7ec; }  /* F1 >= 80 */
 .bm-t2 { background-color: #9ec5f4; }  /* F1 60-79 */
 .bm-t3 { background-color: #cde2fb; }  /* F1 40-59 */
+
+/* Copy-to-clipboard button injected into code blocks by js/helper.js. */
+.rst-content pre {
+    position: relative;
+}
+.rst-content pre .copy-btn {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    padding: 2px 8px;
+    border: 1px solid transparent;
+    border-radius: 3px;
+    background: transparent;
+    color: #9a9a9a;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1.5;
+}
+.rst-content pre:hover .copy-btn,
+.rst-content pre .copy-btn:focus {
+    border-color: #c4c4c4;
+    background: rgba(255, 255, 255, 0.8);
+    color: #404040;
+}
+.rst-content pre .copy-btn.copied,
+.rst-content pre .copy-btn.copied:focus {
+    color: #27ae60;
+}
+
+/* Prominent pip install commands inside the download page "important" divs:
+   full-width like regular code blocks, but white with larger bold text. */
+.rst-content .important h4:has(+ pre.command) {
+    margin-bottom: 6px;
+}
+.rst-content .important pre.command {
+    margin: 0 0 28px 0;
+    padding: 6px 42px 6px 12px;  /* right padding leaves room for the copy button */
+    background: #fff;
+    border: 1px solid #e1e4e5;
+}
+.rst-content .important pre.command code {
+    font-size: 120%;
+    font-weight: 700;
+    color: #404040;
+    background: transparent;
+    border: none;
+    padding: 0;
+}
+.rst-content .important pre.command:last-child {
+    margin-bottom: 4px;  /* tighten space at the bottom of the box */
+}
+.rst-content .important pre.command .copy-btn {
+    top: 50%;
+    transform: translateY(-50%);
+}

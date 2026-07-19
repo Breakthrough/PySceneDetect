@@ -49,6 +49,12 @@ Skip the first 10 seconds of the input video:
 
 More examples can be found throughout [the documentation](https://www.scenedetect.com/docs/latest/cli.html).
 
+**Quick Start (Docker)**:
+
+The same commands work without installing anything using [the official Docker image](https://github.com/Breakthrough/PySceneDetect/pkgs/container/pyscenedetect), which includes all dependencies (`ffmpeg`/`mkvmerge` included). Mount the folder containing your videos and use it for input/output paths:
+
+    docker run --rm -v "$(pwd):/files" ghcr.io/breakthrough/pyscenedetect -i /files/video.mp4 split-video -o /files
+
 **Quick Start (Python API)**:
 
 To get started, there is a high level function in the library that performs content-aware scene detection on a video (try it from a Python prompt):
