@@ -136,7 +136,7 @@ class AdaptiveDetector(ContentDetector):
         threshold_met: bool = (
             adaptive_ratio >= self.adaptive_threshold and target_score >= self.min_content_val
         )
-        min_length_met: bool = (timecode - self._last_cut) >= self.min_scene_len
+        min_length_met: bool = (target_timecode - self._last_cut) >= self.min_scene_len
         if threshold_met and min_length_met:
             self._last_cut = target_timecode
             return [target_timecode]
