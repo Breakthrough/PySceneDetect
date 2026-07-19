@@ -139,17 +139,19 @@ class FanOutVideoStream:
         except BaseException as e:
             self._reader_exc = e
         finally:
-            # Sentinel must reach every consumer or its blocking read() deadlocks.
-            # Drop the oldest frame whenever the queue is full; we are the sole writer,
-            # so after a successful get_nowait() the queue has room for the EOF.
+            # Sentinel must reach every consumer or its blocking read() deadlocks. On normal
+            # EOF the put must respect back-pressure (a full queue still holds undelivered
+            # frames); only once an abort is in progress may pending frames be dropped to
+            # force the sentinel through.
             for q in self._queues:
                 while True:
                     try:
-                        q.put_nowait(_EOF)
+                        q.put(_EOF, timeout=0.1)
                         break
                     except queue.Full:
-                        with contextlib.suppress(queue.Empty):
-                            q.get_nowait()
+                        if self._stop.is_set():
+                            with contextlib.suppress(queue.Empty):
+                                q.get_nowait()
 
 
 class _FanOutConsumer(VideoStream):
