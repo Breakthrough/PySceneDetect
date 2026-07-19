@@ -4,13 +4,14 @@ name: Publish Docker Image
 on:
   workflow_dispatch:
   push:
-    branches: [ "main", "fng-infra-docker-ci" ]
+    branches: [ "main" ]
   release:
     types: [published]
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
+  # Image names must be lowercase; github.repository is Breakthrough/PySceneDetect.
+  IMAGE_NAME: breakthrough/pyscenedetect
 
 jobs:
   build-and-push:

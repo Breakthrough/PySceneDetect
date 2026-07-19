@@ -26,11 +26,14 @@ RUN apt-get update && \
     mkvtoolnix && \
     rm -rf /var/lib/apt/lists/*
 
-# Install PySceneDetect with headless OpenCV and other optional media backends
+# Install the scenedetect-headless variant: full program (CLI + opencv-python-headless)
+# with the optional media backends. The repo root pyproject builds scenedetect-core
+# (library only, no CLI), so swap in the headless variant pyproject first.
 # pyav is highly recommended for faster/more robust video decodes
 # moviepy provides an alternative video splitting backend
 RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install ".[opencv-headless,pyav,moviepy]"
+    cp packaging/variants/pyproject-scenedetect-headless.toml pyproject.toml && \
+    pip install ".[pyav,moviepy]"
 
 # Switch to the non-root user
 USER scenedetect
