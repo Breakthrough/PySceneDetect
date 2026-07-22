@@ -1,6 +1,8 @@
 # Build and publish PySceneDetect Docker image to GitHub Container Registry (GHCR).
 name: Publish Docker Image
 
+# Publishing a release build is driven by release.yml, which dispatches this workflow after
+# artifact verification passes.
 on:
   workflow_dispatch:
     inputs:
@@ -10,8 +12,6 @@ on:
         default: false
   push:
     branches: [ "main" ]
-  release:
-    types: [published]
 
 env:
   REGISTRY: ghcr.io

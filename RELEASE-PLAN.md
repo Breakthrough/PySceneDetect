@@ -5,9 +5,9 @@ Optional: version referenced below as `X.Y[.Z]` - replace with the real version 
 
 ## 1. Version Identifiers, Branch Prep
 
-- [ ] Create / fast-forward release branch: `releases/X.Y` off `main` if major/minor release. If patch release, fast-forward current `releases/X.Y` branch.
+- [ ] Create release branch `releases/X.Y[.Z]` off `main` (each release, including patches, gets its own branch - e.g. `releases/0.6.7`, `releases/0.7.1`); fast-forward it to `main` as release work lands.
 - [ ] Bump `__version__` in `scenedetect/__init__.py`
-- [ ] Bump `docs/LATEST_VERSION` if needed (stable major/minor releases only)
+- [ ] Bump `docs/LATEST_VERSION` for any stable release: it must match the `releases/X.Y[.Z]` branch suffix for `generate-docs.yml` to update `docs/latest`
 - [ ] Regular release: No `-dev` suffix or other, pre-release: has suffix `-dev0`, `-dev1`, ...
 
 ## 2. Documentation, Website, Changelog
@@ -30,7 +30,7 @@ Optional: version referenced below as `X.Y[.Z]` - replace with the real version 
 ## 4. Prepare Windows Distribution
 
 - [ ] Update `packaging/windows/requirements.txt` and bump bundled ffmpeg version in `appveyor.yml`
-- [ ] Run Appyeyor build on release branch, ensure resulting portable distribution and MSI installer are correct
+- [ ] Run AppVeyor build on release branch, ensure resulting portable distribution and MSI installer are correct
 
 > **GUI required for structural changes.** `scripts/update_installer.py` covers routine version bumps and `--sync-files` covers dependency-driven file-list changes, but anything that touches the *project structure* of the .aip still needs the AdvancedInstaller GUI. Examples:
 >
@@ -41,8 +41,8 @@ Optional: version referenced below as `X.Y[.Z]` - replace with the real version 
 
 ## 5. Tag & Draft Release
 
-- [ ] Final commit on `releases/X.Y`: "Release vX.Y[.Z]".
-- [ ] Tag `vX.Y[.Z]-release` on that commit and push. Wait for all tests/builds to pass.
+- [ ] Final commit on `releases/X.Y[.Z]`: "Release vX.Y[.Z]".
+- [ ] Tag `vX.Y[.Z]` on that commit and push (the legacy `vX.Y[.Z]-release` form is also accepted by all workflows). Wait for all tests/builds to pass.
 - [ ] Approve code signing request on SignPath, download `scenedetect-signed.zip`
 - [ ] Finalize Windows artifacts locally (CI can't do this - signing happens after the AppVeyor build, so the post-signing steps must run locally):
   - Create `dist/signed/` and drop `scenedetect-signed.zip` (from SignPath) into it. No other inputs needed - the portable .zip is rebuilt from the signed .msi via `msiexec /a`, eliminating the AppVeyor download.
@@ -54,7 +54,7 @@ Optional: version referenced below as `X.Y[.Z]` - replace with the real version 
 ## 6. Publish & Release Checks
 
 - [ ] Publish Github release
-- [ ] Upload to PyPI: `publish-pypi.yml` must be manually triggered on a release tag. Specify `testpypi` first, and make sure everything goes okay on the test instance. When verified and smoke tested, specify `pypi` as the environment, and publish the production package. The artifact contains 6 files (sdist + wheel for `scenedetect-core`, `scenedetect`, and `scenedetect-headless`).
+- [ ] Dispatch `release.yml` (Release Orchestrator) with the release tag. It publishes stage by stage, verifying each stage before the next: MSI install/uninstall + upgrade-from-previous on a clean Windows runner (`test-installer.yml`) -> TestPyPI publish -> pip smoke install from TestPyPI -> production PyPI publish (all 6 artifacts - sdist + wheel for `scenedetect-core`, `scenedetect`, and `scenedetect-headless`) -> pip smoke install from PyPI -> Docker publish (version tags + `latest`) -> docker pull + smoke run from GHCR. Use the `verify-only` input to stop after the TestPyPI stage without publishing anything user-facing. The underlying workflows (`test-installer.yml`, `publish-pypi.yml`, `docker-publish.yml`) can still be dispatched individually as a fallback.
 - [ ] Verify all three projects: https://pypi.org/project/scenedetect/, https://pypi.org/project/scenedetect-headless/, and https://pypi.org/project/scenedetect-core/.
 - [ ] Deploy website: `generate-website.yml`
 - [ ] Deploy docs: `generate-docs.yml`
@@ -69,6 +69,6 @@ Optional: version referenced below as `X.Y[.Z]` - replace with the real version 
 
 ## Notes
 
-- **Branching model**: work spans multiple commits on `releases/X.Y`; the final one gets the `vX.Y[.Z]-release` tag which gates the release-test workflow. A passing release-test is a hard prerequisite for publishing.
+- **Branching model**: work spans multiple commits on `releases/X.Y[.Z]`; the final one gets the `vX.Y[.Z]` tag which gates the release-test workflow. A passing release-test is a hard prerequisite for publishing.
 - **Version consistency** is enforced in two places (`__init__.py`, `PySceneDetect.aip`). The `static` job of `release-test.yml` checks `__init__.py` against the tag and verifies the changelog has a matching `## PySceneDetect X.Y` heading; the installer parity is checked by `scripts/pre_release.py --release`.
 - **Changelog convention**: the in-development section lives at the *bottom* of `website/pages/changelog.md` under the "Development" heading - don't move it to the top.

@@ -1,0 +1,654 @@
+# Post-release verification of the signed Windows MSI installer.
+#
+# Downloads the MSI attached to a published release, then on a clean
+# windows-latest runner: verifies checksum + Authenticode signature, performs a
+# silent install, checks the Apps & Features registration / PATH / smoke-runs
+# the CLI, and uninstalls cleanly. A second job installs the previous release's
+# MSI first and upgrades over it to catch duplicate-entry and leftover-file
+# regressions.
+
+name: Windows Installer Test
+
+# Dispatched by release.yml (the release orchestrator) as part of post-release
+# artifact verification; can also be run manually against any published release.
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag to test (e.g. v0.7-release or v0.7.1)'
+        required: true
+      previous-tag:
+        description: 'Release tag to upgrade from (default: auto-detect previous release)'
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  resolve:
+    name: Resolve Release Tags
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.resolve.outputs.tag }}
+      version: ${{ steps.resolve.outputs.version }}
+      msi-version: ${{ steps.resolve.outputs.msi-version }}
+      prev-tag: ${{ steps.resolve.outputs.prev-tag }}
+      prev-msi-version: ${{ steps.resolve.outputs.prev-msi-version }}
+    steps:
+      - name: Resolve current and previous release
+        id: resolve
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          INPUT_TAG: ${{ inputs.tag }}
+          INPUT_PREV_TAG: ${{ inputs.previous-tag }}
+        run: |
+          set -euo pipefail
+          TAG="$INPUT_TAG"
+          if [[ -z "$TAG" ]]; then
+            echo "::error::No tag to test: the 'tag' input is required."
+            exit 1
+          fi
+          # Both tag styles are in use (v0.7-release and v0.7.1); mirror the
+          # normalization release-test.yml applies to pushed tags.
+          VERSION="${TAG#v}"
+          VERSION="${VERSION%-release}"
+          # Pad to the numeric X.Y.Z the installer stamps into the MSI
+          # ProductVersion / DisplayVersion; mirrors msi_version() in
+          # scripts/_release_common.py ("0.7" -> "0.7.0").
+          IFS=. read -r a b c _ <<<"$VERSION"
+          MSI_VERSION="${a}.${b:-0}.${c:-0}"
+
+          if [[ -n "$INPUT_PREV_TAG" ]]; then
+            PREV_TAG="$INPUT_PREV_TAG"
+          else
+            # Newest-first list of published stable releases; the previous
+            # release is the entry right after the current tag.
+            mapfile -t tags < <(gh release list --exclude-drafts --exclude-pre-releases \
+              --limit 30 --json tagName -q '.[].tagName')
+            PREV_TAG=""
+            found=0
+            for i in "${!tags[@]}"; do
+              if [[ "${tags[$i]}" == "$TAG" ]]; then
+                found=1
+                PREV_TAG="${tags[$((i + 1))]:-}"
+                break
+              fi
+            done
+            if [[ "$found" -eq 0 ]]; then
+              # Manual dispatch before the release is published: the current
+              # tag is not listed yet, so upgrade from the newest listed tag
+              # that differs from it.
+              for t in "${tags[@]}"; do
+                if [[ "$t" != "$TAG" ]]; then
+                  PREV_TAG="$t"
+                  break
+                fi
+              done
+            fi
+          fi
+          if [[ -z "$PREV_TAG" ]]; then
+            echo "::error::Could not determine a previous release to upgrade from; pass the 'previous-tag' input."
+            exit 1
+          fi
+          PREV_VERSION="${PREV_TAG#v}"
+          PREV_VERSION="${PREV_VERSION%-release}"
+          IFS=. read -r a b c _ <<<"$PREV_VERSION"
+          PREV_MSI_VERSION="${a}.${b:-0}.${c:-0}"
+
+          {
+            echo "tag=$TAG"
+            echo "version=$VERSION"
+            echo "msi-version=$MSI_VERSION"
+            echo "prev-tag=$PREV_TAG"
+            echo "prev-msi-version=$PREV_MSI_VERSION"
+          } >> "$GITHUB_OUTPUT"
+          echo "Testing $TAG (display $VERSION, MSI $MSI_VERSION); upgrading from $PREV_TAG (MSI $PREV_MSI_VERSION)"
+
+  fresh-install:
+    name: Fresh Install
+    runs-on: windows-latest
+    needs: resolve
+    env:
+      TAG: ${{ needs.resolve.outputs.tag }}
+      VERSION: ${{ needs.resolve.outputs.version }}
+      MSI_VERSION: ${{ needs.resolve.outputs.msi-version }}
+    steps:
+      # Test videos live on the resources branch; this is the same layout
+      # build-windows.yml smoke-tests the portable distribution against.
+      - uses: actions/checkout@v5
+        with:
+          ref: resources
+
+      - name: Write helper functions
+        # Each `run:` step is a fresh pwsh process, so shared functions go into
+        # a file (in RUNNER_TEMP, which checkout cannot clean away) that later
+        # steps dot-source.
+        run: |
+          $helpers = @'
+          # All hives an uninstall entry could land in. The MSI installs
+          # per-machine (the .aip sets ALLUSERS=2 and the runner is elevated),
+          # so 64-bit HKLM is the expected home; the others are scanned so a
+          # misplaced entry fails the assertions loudly instead of hiding.
+          $UninstallRoots = @(
+              'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall'
+              'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall'
+              'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall'
+          )
+
+          function Get-PySceneDetectEntries {
+              # Every uninstall entry (any hive, visible or hidden) for
+              # PySceneDetect. A healthy install has exactly two: the MSI
+              # ProductCode key (hidden from Apps & Features by
+              # ARPSYSTEMCOMPONENT=1, set in PySceneDetect.aip) and the visible
+              # custom key "PySceneDetect <msi-version>" that carries
+              # DisplayVersion / InstallLocation.
+              foreach ($root in $UninstallRoots) {
+                  if (-not (Test-Path $root)) { continue }
+                  foreach ($key in Get-ChildItem $root) {
+                      $props = Get-ItemProperty $key.PSPath -ErrorAction SilentlyContinue
+                      if ($props.DisplayName -like 'PySceneDetect*') {
+                          [pscustomobject]@{
+                              KeyPath         = $key.PSPath
+                              KeyName         = $key.PSChildName
+                              DisplayName     = $props.DisplayName
+                              DisplayVersion  = $props.DisplayVersion
+                              InstallLocation = $props.InstallLocation
+                              SystemComponent = $props.SystemComponent
+                          }
+                      }
+                  }
+              }
+          }
+
+          function Get-VisiblePySceneDetectEntries {
+              # The set Apps & Features actually shows: SystemComponent != 1.
+              Get-PySceneDetectEntries | Where-Object { $_.SystemComponent -ne 1 }
+          }
+
+          function Get-UninstallKeyByName {
+              # The visible key's name embeds the MSI version ("PySceneDetect
+              # 0.7.0"), so a lookup by name across hives is a precise
+              # per-version existence check.
+              param([Parameter(Mandatory)][string]$KeyName)
+              foreach ($root in $UninstallRoots) {
+                  $path = Join-Path $root $KeyName
+                  if (Test-Path $path) { $path }
+              }
+          }
+
+          function Invoke-Msiexec {
+              # msiexec detaches from the console immediately, so a bare
+              # `msiexec ...` would return before the Windows Installer service
+              # finishes (and without the real exit code); Start-Process
+              # -Wait -PassThru blocks and surfaces it.
+              param(
+                  [Parameter(Mandatory)][string[]]$MsiArgs,
+                  [Parameter(Mandatory)][string]$LogPath
+              )
+              $log = Join-Path (Get-Location) $LogPath
+              for ($attempt = 1; $attempt -le 3; $attempt++) {
+                  $p = Start-Process msiexec.exe -ArgumentList ($MsiArgs + @('/L*v', $log)) -Wait -PassThru
+                  switch ($p.ExitCode) {
+                      0 { Write-Host "msiexec $($MsiArgs -join ' ') succeeded (exit 0)"; return }
+                      3010 { Write-Host 'msiexec exit 3010 (success, reboot required) - treated as success'; return }
+                      1618 {
+                          # ERROR_INSTALL_ALREADY_RUNNING: runner provisioning
+                          # sometimes still holds the machine-wide MSI mutex.
+                          Write-Host "msiexec exit 1618 (another install in progress), attempt $attempt of 3"
+                          if ($attempt -lt 3) { Start-Sleep -Seconds 30 }
+                      }
+                      default { throw "msiexec $($MsiArgs -join ' ') failed with exit code $($p.ExitCode); see $LogPath" }
+                  }
+              }
+              throw 'msiexec still blocked by another installation (exit 1618) after 3 attempts'
+          }
+
+          function Get-PathRegistryValues {
+              # The installer edits PATH in the registry only; neither this
+              # process nor its children see the change, so assertions must
+              # read the raw values. Machine PATH is where a per-machine
+              # install writes (the .aip Environment row uses the '*' system
+              # prefix); HKCU is read too for completeness.
+              $values = @()
+              $machine = Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Environment' -Name Path -ErrorAction SilentlyContinue
+              if ($machine) { $values += $machine.Path }
+              $user = Get-ItemProperty 'HKCU:\Environment' -Name Path -ErrorAction SilentlyContinue
+              if ($user) { $values += $user.Path }
+              $values
+          }
+
+          function Test-DirOnRegistryPath {
+              param([Parameter(Mandatory)][string]$Directory)
+              $needle = $Directory.TrimEnd('\')
+              foreach ($value in Get-PathRegistryValues) {
+                  # -contains is case-insensitive, matching how Windows treats paths.
+                  if (@($value -split ';' | ForEach-Object { $_.TrimEnd('\') }) -contains $needle) {
+                      return $true
+                  }
+              }
+              return $false
+          }
+
+          function Assert-CleanRemoval {
+              param([string]$InstallDir)
+              $entries = @(Get-PySceneDetectEntries)
+              if ($entries.Count -ne 0) {
+                  $entries | Format-List | Out-String | Write-Host
+                  throw "Expected zero uninstall entries after uninstall, found $($entries.Count)"
+              }
+              # Also match stale keys by name in case a leftover key lost its
+              # DisplayName value.
+              foreach ($root in $UninstallRoots) {
+                  if (-not (Test-Path $root)) { continue }
+                  $stale = @(Get-ChildItem $root | Where-Object { $_.PSChildName -like 'PySceneDetect*' })
+                  if ($stale.Count -ne 0) {
+                      throw "Stale uninstall keys remain under ${root}: $($stale.PSChildName -join ', ')"
+                  }
+              }
+              if ($InstallDir) {
+                  if (Test-Path (Join-Path $InstallDir 'scenedetect.exe')) {
+                      throw "scenedetect.exe still present in $InstallDir after uninstall"
+                  }
+                  if (Test-DirOnRegistryPath -Directory $InstallDir) {
+                      throw "$InstallDir still present in a PATH registry value after uninstall"
+                  }
+              }
+              Write-Host 'Verified clean removal.'
+          }
+          '@
+          $dest = Join-Path $env:RUNNER_TEMP 'installer-helpers.ps1'
+          Set-Content -LiteralPath $dest -Value $helpers
+          Write-Host "Wrote $dest"
+
+      - name: Download release assets
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          gh release download $env:TAG --pattern 'PySceneDetect-*-win64.msi' --pattern 'SHA256SUMS' --dir dist
+          if ($LASTEXITCODE -ne 0) { throw "gh release download failed for $env:TAG" }
+          $expected = "PySceneDetect-$env:VERSION-win64.msi"
+          $msis = @(Get-ChildItem dist -Filter '*.msi')
+          if ($msis.Count -ne 1 -or $msis[0].Name -ne $expected) {
+            throw "Expected exactly one MSI named $expected, got: $($msis.Name -join ', ')"
+          }
+          if (-not (Test-Path dist\SHA256SUMS)) { throw 'SHA256SUMS missing from release assets' }
+
+      - name: Verify checksum and Authenticode signature
+        run: |
+          $msi = "dist\PySceneDetect-$env:VERSION-win64.msi"
+          $name = Split-Path $msi -Leaf
+          # SHA256SUMS lines are `<hash>  <name>` (two spaces; the sha256sum -c
+          # format written by scripts/finalize_windows_dist.py).
+          $sums = @{}
+          foreach ($line in Get-Content dist\SHA256SUMS) {
+            $hash, $entry = $line -split '  ', 2
+            $sums[$entry.Trim()] = $hash.Trim()
+          }
+          if (-not $sums.ContainsKey($name)) { throw "SHA256SUMS has no entry for $name" }
+          $actual = (Get-FileHash $msi -Algorithm SHA256).Hash.ToLowerInvariant()
+          if ($actual -ne $sums[$name].ToLowerInvariant()) {
+            throw "SHA256 mismatch for ${name}: expected $($sums[$name]), got $actual"
+          }
+          Write-Host "Checksum OK: $actual"
+          $sig = Get-AuthenticodeSignature $msi
+          if ($sig.Status -ne 'Valid') {
+            throw "Authenticode signature status is '$($sig.Status)' (expected 'Valid')"
+          }
+          Write-Host "Signature OK: $($sig.SignerCertificate.Subject)"
+
+      - name: Install MSI
+        run: |
+          . (Join-Path $env:RUNNER_TEMP 'installer-helpers.ps1')
+          $msi = (Resolve-Path "dist\PySceneDetect-$env:VERSION-win64.msi").Path
+          Invoke-Msiexec -MsiArgs @('/i', $msi, '/qn', '/norestart') -LogPath install.log
+
+      - name: Verify installation
+        run: |
+          . (Join-Path $env:RUNNER_TEMP 'installer-helpers.ps1')
+          # Locate the install via the registry - never hard-code the path: the
+          # .aip uses ALLUSERS=2 with a MixedAllUsersInstallLocation custom
+          # action, so APPDIR is resolved at install time.
+          $visible = @(Get-VisiblePySceneDetectEntries)
+          if ($visible.Count -ne 1) {
+            Get-PySceneDetectEntries | Format-List | Out-String | Write-Host
+            throw "Expected exactly 1 visible uninstall entry, found $($visible.Count)"
+          }
+          $entry = $visible[0]
+          if ($entry.DisplayVersion -ne $env:MSI_VERSION) {
+            throw "DisplayVersion is '$($entry.DisplayVersion)', expected '$env:MSI_VERSION'"
+          }
+          if (-not $entry.InstallLocation) { throw 'InstallLocation is empty' }
+          $exe = Join-Path $entry.InstallLocation 'scenedetect.exe'
+          if (-not (Test-Path $exe)) { throw "scenedetect.exe not found in $($entry.InstallLocation)" }
+          # Persist the discovered install dir for the later steps.
+          Add-Content $env:GITHUB_ENV "INSTALL_DIR=$($entry.InstallLocation)"
+          # Invoke by absolute path: the installer's PATH change is
+          # registry-only and not visible to this already-running process.
+          $out = & $exe version 2>&1 | Out-String
+          Write-Host $out
+          if ($LASTEXITCODE -ne 0) { throw "scenedetect version exited with $LASTEXITCODE" }
+          if (-not $out.Contains($env:VERSION)) { throw "version output does not mention $env:VERSION" }
+          if (-not (Test-DirOnRegistryPath -Directory $entry.InstallLocation)) {
+            throw "$($entry.InstallLocation) was not added to any PATH registry value"
+          }
+          Write-Host 'Install verified.'
+
+      - name: Functional smoke test
+        run: |
+          # Same clip and command build-windows.yml uses to smoke-test the
+          # portable distribution.
+          $exe = Join-Path $env:INSTALL_DIR 'scenedetect.exe'
+          & $exe -i tests/resources/goldeneye.mp4 detect-content time --end 10s
+          if ($LASTEXITCODE -ne 0) { throw "smoke test exited with $LASTEXITCODE" }
+
+      - name: Uninstall MSI
+        run: |
+          . (Join-Path $env:RUNNER_TEMP 'installer-helpers.ps1')
+          # Uninstall via the same local MSI file (not the ProductCode) so a
+          # broken product registration surfaces as a failure here.
+          $msi = (Resolve-Path "dist\PySceneDetect-$env:VERSION-win64.msi").Path
+          Invoke-Msiexec -MsiArgs @('/x', $msi, '/qn', '/norestart') -LogPath uninstall.log
+
+      - name: Verify clean removal
+        run: |
+          . (Join-Path $env:RUNNER_TEMP 'installer-helpers.ps1')
+          Assert-CleanRemoval -InstallDir $env:INSTALL_DIR
+
+      - name: Upload msiexec logs
+        if: failure()
+        uses: actions/upload-artifact@v6
+        with:
+          name: fresh-install-logs
+          path: '*.log'
+          if-no-files-found: ignore
+
+  upgrade:
+    name: Upgrade From Previous Release
+    runs-on: windows-latest
+    needs: resolve
+    env:
+      TAG: ${{ needs.resolve.outputs.tag }}
+      VERSION: ${{ needs.resolve.outputs.version }}
+      MSI_VERSION: ${{ needs.resolve.outputs.msi-version }}
+      PREV_TAG: ${{ needs.resolve.outputs.prev-tag }}
+      PREV_MSI_VERSION: ${{ needs.resolve.outputs.prev-msi-version }}
+    steps:
+      - name: Write helper functions
+        # Identical to the fresh-install helpers; jobs cannot share script
+        # blocks, so the definitions are duplicated per job.
+        run: |
+          $helpers = @'
+          # All hives an uninstall entry could land in. The MSI installs
+          # per-machine (the .aip sets ALLUSERS=2 and the runner is elevated),
+          # so 64-bit HKLM is the expected home; the others are scanned so a
+          # misplaced entry fails the assertions loudly instead of hiding.
+          $UninstallRoots = @(
+              'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall'
+              'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall'
+              'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall'
+          )
+
+          function Get-PySceneDetectEntries {
+              # Every uninstall entry (any hive, visible or hidden) for
+              # PySceneDetect. A healthy install has exactly two: the MSI
+              # ProductCode key (hidden from Apps & Features by
+              # ARPSYSTEMCOMPONENT=1, set in PySceneDetect.aip) and the visible
+              # custom key "PySceneDetect <msi-version>" that carries
+              # DisplayVersion / InstallLocation.
+              foreach ($root in $UninstallRoots) {
+                  if (-not (Test-Path $root)) { continue }
+                  foreach ($key in Get-ChildItem $root) {
+                      $props = Get-ItemProperty $key.PSPath -ErrorAction SilentlyContinue
+                      if ($props.DisplayName -like 'PySceneDetect*') {
+                          [pscustomobject]@{
+                              KeyPath         = $key.PSPath
+                              KeyName         = $key.PSChildName
+                              DisplayName     = $props.DisplayName
+                              DisplayVersion  = $props.DisplayVersion
+                              InstallLocation = $props.InstallLocation
+                              SystemComponent = $props.SystemComponent
+                          }
+                      }
+                  }
+              }
+          }
+
+          function Get-VisiblePySceneDetectEntries {
+              # The set Apps & Features actually shows: SystemComponent != 1.
+              Get-PySceneDetectEntries | Where-Object { $_.SystemComponent -ne 1 }
+          }
+
+          function Get-UninstallKeyByName {
+              # The visible key's name embeds the MSI version ("PySceneDetect
+              # 0.7.0"), so a lookup by name across hives is a precise
+              # per-version existence check.
+              param([Parameter(Mandatory)][string]$KeyName)
+              foreach ($root in $UninstallRoots) {
+                  $path = Join-Path $root $KeyName
+                  if (Test-Path $path) { $path }
+              }
+          }
+
+          function Invoke-Msiexec {
+              # msiexec detaches from the console immediately, so a bare
+              # `msiexec ...` would return before the Windows Installer service
+              # finishes (and without the real exit code); Start-Process
+              # -Wait -PassThru blocks and surfaces it.
+              param(
+                  [Parameter(Mandatory)][string[]]$MsiArgs,
+                  [Parameter(Mandatory)][string]$LogPath
+              )
+              $log = Join-Path (Get-Location) $LogPath
+              for ($attempt = 1; $attempt -le 3; $attempt++) {
+                  $p = Start-Process msiexec.exe -ArgumentList ($MsiArgs + @('/L*v', $log)) -Wait -PassThru
+                  switch ($p.ExitCode) {
+                      0 { Write-Host "msiexec $($MsiArgs -join ' ') succeeded (exit 0)"; return }
+                      3010 { Write-Host 'msiexec exit 3010 (success, reboot required) - treated as success'; return }
+                      1618 {
+                          # ERROR_INSTALL_ALREADY_RUNNING: runner provisioning
+                          # sometimes still holds the machine-wide MSI mutex.
+                          Write-Host "msiexec exit 1618 (another install in progress), attempt $attempt of 3"
+                          if ($attempt -lt 3) { Start-Sleep -Seconds 30 }
+                      }
+                      default { throw "msiexec $($MsiArgs -join ' ') failed with exit code $($p.ExitCode); see $LogPath" }
+                  }
+              }
+              throw 'msiexec still blocked by another installation (exit 1618) after 3 attempts'
+          }
+
+          function Get-PathRegistryValues {
+              # The installer edits PATH in the registry only; neither this
+              # process nor its children see the change, so assertions must
+              # read the raw values. Machine PATH is where a per-machine
+              # install writes (the .aip Environment row uses the '*' system
+              # prefix); HKCU is read too for completeness.
+              $values = @()
+              $machine = Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Environment' -Name Path -ErrorAction SilentlyContinue
+              if ($machine) { $values += $machine.Path }
+              $user = Get-ItemProperty 'HKCU:\Environment' -Name Path -ErrorAction SilentlyContinue
+              if ($user) { $values += $user.Path }
+              $values
+          }
+
+          function Test-DirOnRegistryPath {
+              param([Parameter(Mandatory)][string]$Directory)
+              $needle = $Directory.TrimEnd('\')
+              foreach ($value in Get-PathRegistryValues) {
+                  # -contains is case-insensitive, matching how Windows treats paths.
+                  if (@($value -split ';' | ForEach-Object { $_.TrimEnd('\') }) -contains $needle) {
+                      return $true
+                  }
+              }
+              return $false
+          }
+
+          function Assert-CleanRemoval {
+              param([string]$InstallDir)
+              $entries = @(Get-PySceneDetectEntries)
+              if ($entries.Count -ne 0) {
+                  $entries | Format-List | Out-String | Write-Host
+                  throw "Expected zero uninstall entries after uninstall, found $($entries.Count)"
+              }
+              # Also match stale keys by name in case a leftover key lost its
+              # DisplayName value.
+              foreach ($root in $UninstallRoots) {
+                  if (-not (Test-Path $root)) { continue }
+                  $stale = @(Get-ChildItem $root | Where-Object { $_.PSChildName -like 'PySceneDetect*' })
+                  if ($stale.Count -ne 0) {
+                      throw "Stale uninstall keys remain under ${root}: $($stale.PSChildName -join ', ')"
+                  }
+              }
+              if ($InstallDir) {
+                  if (Test-Path (Join-Path $InstallDir 'scenedetect.exe')) {
+                      throw "scenedetect.exe still present in $InstallDir after uninstall"
+                  }
+                  if (Test-DirOnRegistryPath -Directory $InstallDir) {
+                      throw "$InstallDir still present in a PATH registry value after uninstall"
+                  }
+              }
+              Write-Host 'Verified clean removal.'
+          }
+          '@
+          $dest = Join-Path $env:RUNNER_TEMP 'installer-helpers.ps1'
+          Set-Content -LiteralPath $dest -Value $helpers
+          Write-Host "Wrote $dest"
+
+      - name: Download previous release MSI
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          gh release download $env:PREV_TAG --pattern '*-win64.msi' --dir prev
+          if ($LASTEXITCODE -ne 0) { throw "gh release download failed for $env:PREV_TAG" }
+          $msis = @(Get-ChildItem prev -Filter '*.msi')
+          if ($msis.Count -ne 1) {
+            throw "Expected exactly one MSI from $env:PREV_TAG, got: $($msis.Name -join ', ')"
+          }
+          # Older releases may not ship SHA256SUMS, so the previous MSI is
+          # deliberately not checksummed; only the new MSI under test is.
+          Add-Content $env:GITHUB_ENV "PREV_MSI=$($msis[0].FullName)"
+
+      - name: Install previous release
+        run: |
+          . (Join-Path $env:RUNNER_TEMP 'installer-helpers.ps1')
+          Invoke-Msiexec -MsiArgs @('/i', $env:PREV_MSI, '/qn', '/norestart') -LogPath install-prev.log
+          # Sanity check the baseline before upgrading over it.
+          $visible = @(Get-VisiblePySceneDetectEntries)
+          if ($visible.Count -ne 1) {
+            Get-PySceneDetectEntries | Format-List | Out-String | Write-Host
+            throw "Expected exactly 1 visible uninstall entry after baseline install, found $($visible.Count)"
+          }
+          if ($visible[0].DisplayVersion -ne $env:PREV_MSI_VERSION) {
+            throw "Baseline DisplayVersion is '$($visible[0].DisplayVersion)', expected '$env:PREV_MSI_VERSION'"
+          }
+          $exe = Join-Path $visible[0].InstallLocation 'scenedetect.exe'
+          if (-not (Test-Path $exe)) { throw "scenedetect.exe not found in $($visible[0].InstallLocation)" }
+          & $exe version
+          if ($LASTEXITCODE -ne 0) { throw "baseline scenedetect version exited with $LASTEXITCODE" }
+          Add-Content $env:GITHUB_ENV "OLD_INSTALL_DIR=$($visible[0].InstallLocation)"
+
+      - name: Download new release assets
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          gh release download $env:TAG --pattern 'PySceneDetect-*-win64.msi' --pattern 'SHA256SUMS' --dir dist
+          if ($LASTEXITCODE -ne 0) { throw "gh release download failed for $env:TAG" }
+          $expected = "PySceneDetect-$env:VERSION-win64.msi"
+          $msis = @(Get-ChildItem dist -Filter '*.msi')
+          if ($msis.Count -ne 1 -or $msis[0].Name -ne $expected) {
+            throw "Expected exactly one MSI named $expected, got: $($msis.Name -join ', ')"
+          }
+          if (-not (Test-Path dist\SHA256SUMS)) { throw 'SHA256SUMS missing from release assets' }
+
+      - name: Verify checksum and Authenticode signature
+        run: |
+          $msi = "dist\PySceneDetect-$env:VERSION-win64.msi"
+          $name = Split-Path $msi -Leaf
+          # SHA256SUMS lines are `<hash>  <name>` (two spaces; the sha256sum -c
+          # format written by scripts/finalize_windows_dist.py).
+          $sums = @{}
+          foreach ($line in Get-Content dist\SHA256SUMS) {
+            $hash, $entry = $line -split '  ', 2
+            $sums[$entry.Trim()] = $hash.Trim()
+          }
+          if (-not $sums.ContainsKey($name)) { throw "SHA256SUMS has no entry for $name" }
+          $actual = (Get-FileHash $msi -Algorithm SHA256).Hash.ToLowerInvariant()
+          if ($actual -ne $sums[$name].ToLowerInvariant()) {
+            throw "SHA256 mismatch for ${name}: expected $($sums[$name]), got $actual"
+          }
+          Write-Host "Checksum OK: $actual"
+          $sig = Get-AuthenticodeSignature $msi
+          if ($sig.Status -ne 'Valid') {
+            throw "Authenticode signature status is '$($sig.Status)' (expected 'Valid')"
+          }
+          Write-Host "Signature OK: $($sig.SignerCertificate.Subject)"
+
+      - name: Install new release over previous
+        run: |
+          . (Join-Path $env:RUNNER_TEMP 'installer-helpers.ps1')
+          $msi = (Resolve-Path "dist\PySceneDetect-$env:VERSION-win64.msi").Path
+          Invoke-Msiexec -MsiArgs @('/i', $msi, '/qn', '/norestart') -LogPath install-upgrade.log
+
+      - name: Verify upgrade
+        run: |
+          . (Join-Path $env:RUNNER_TEMP 'installer-helpers.ps1')
+          $visible = @(Get-VisiblePySceneDetectEntries)
+          if ($visible.Count -ne 1) {
+            Get-PySceneDetectEntries | Format-List | Out-String | Write-Host
+            throw "Expected exactly 1 visible uninstall entry after upgrade, found $($visible.Count)"
+          }
+          $entry = $visible[0]
+          if ($entry.DisplayVersion -ne $env:MSI_VERSION) {
+            throw "DisplayVersion is '$($entry.DisplayVersion)', expected '$env:MSI_VERSION'"
+          }
+          # The visible key name embeds the version ("PySceneDetect
+          # <msi-version>"), so the old key vanishing from every hive is a
+          # precise duplicate-Apps-&-Features-entry check.
+          $stale = @(Get-UninstallKeyByName -KeyName "PySceneDetect $env:PREV_MSI_VERSION")
+          if ($stale.Count -ne 0) {
+            throw "Previous version's uninstall key still present: $($stale -join ', ')"
+          }
+          # Belt and braces: no entry anywhere (visible or hidden) may still
+          # report the old version.
+          $old = @(Get-PySceneDetectEntries | Where-Object { $_.DisplayVersion -eq $env:PREV_MSI_VERSION })
+          if ($old.Count -ne 0) {
+            $old | Format-List | Out-String | Write-Host
+            throw "Found $($old.Count) uninstall entries still at $env:PREV_MSI_VERSION"
+          }
+          if (-not $entry.InstallLocation) { throw 'InstallLocation is empty after upgrade' }
+          $exe = Join-Path $entry.InstallLocation 'scenedetect.exe'
+          if (-not (Test-Path $exe)) { throw "scenedetect.exe not found in $($entry.InstallLocation)" }
+          $out = & $exe version 2>&1 | Out-String
+          Write-Host $out
+          if ($LASTEXITCODE -ne 0) { throw "scenedetect version exited with $LASTEXITCODE" }
+          if (-not $out.Contains($env:VERSION)) { throw "version output does not mention $env:VERSION" }
+          # If the upgrade relocated the install, the old copy must be gone.
+          if ($env:OLD_INSTALL_DIR.TrimEnd('\') -ne $entry.InstallLocation.TrimEnd('\')) {
+            if (Test-Path (Join-Path $env:OLD_INSTALL_DIR 'scenedetect.exe')) {
+              throw "Old install at $env:OLD_INSTALL_DIR still present after relocating upgrade"
+            }
+          }
+          Add-Content $env:GITHUB_ENV "INSTALL_DIR=$($entry.InstallLocation)"
+          Write-Host 'Upgrade verified.'
+
+      - name: Uninstall new MSI
+        run: |
+          . (Join-Path $env:RUNNER_TEMP 'installer-helpers.ps1')
+          $msi = (Resolve-Path "dist\PySceneDetect-$env:VERSION-win64.msi").Path
+          Invoke-Msiexec -MsiArgs @('/x', $msi, '/qn', '/norestart') -LogPath uninstall.log
+
+      - name: Verify clean removal
+        run: |
+          . (Join-Path $env:RUNNER_TEMP 'installer-helpers.ps1')
+          Assert-CleanRemoval -InstallDir $env:INSTALL_DIR
+
+      - name: Upload msiexec logs
+        if: failure()
+        uses: actions/upload-artifact@v6
+        with:
+          name: upgrade-logs
+          path: '*.log'
+          if-no-files-found: ignore

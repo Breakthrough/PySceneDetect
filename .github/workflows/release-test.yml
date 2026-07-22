@@ -37,8 +37,10 @@ jobs:
             # so only enforce the heading on stable releases.
             if [[ "$TAG_VERSION" == *-dev* ]]; then
               echo "Pre-release ($TAG_VERSION); skipping changelog heading check."
-            elif ! grep -q "^## PySceneDetect $TAG_VERSION" website/pages/changelog.md; then
-              echo "Changelog is missing a '## PySceneDetect $TAG_VERSION' heading"
+            # Major/minor releases use a '## PySceneDetect X.Y' heading; patch
+            # releases nest under it as '### PySceneDetect X.Y.Z (date)'.
+            elif ! grep -Eq "^#{2,3} (PySceneDetect )?$TAG_VERSION( |$)" website/pages/changelog.md; then
+              echo "Changelog is missing a heading for $TAG_VERSION (e.g. '### PySceneDetect $TAG_VERSION (...)')"
               exit 1
             fi
           fi

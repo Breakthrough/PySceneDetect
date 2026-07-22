@@ -1,0 +1,202 @@
+# Release orchestrator: verifies the artifacts attached to a published GitHub
+# release actually work, then publishes them stage by stage, verifying each
+# stage before starting the next:
+#
+#   MSI install/upgrade test (test-installer.yml)
+#     -> TestPyPI publish  -> pip smoke install from TestPyPI
+#     -> PyPI publish      -> pip smoke install from PyPI
+#     -> Docker publish    -> docker pull + smoke run from GHCR
+#
+# Publishing is intentionally NOT triggered automatically by the release event -
+# this workflow is dispatched manually once the GitHub release is published, and
+# the publish steps only run after every verification step succeeds. Each stage
+# is driven through the existing workflows via `gh workflow run` (rather than
+# workflow_call) so they keep working standalone and the PyPI trusted-publisher
+# configuration (which is bound to publish-pypi.yml as the top-level workflow)
+# is unaffected.
+
+name: Release Orchestrator
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag to verify and publish (e.g. v0.7.1)'
+        required: true
+      verify-only:
+        description: 'Stop after verification (no PyPI/Docker publish)'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  actions: write  # `gh workflow run` on the workflows this one orchestrates
+
+# The run-id lookup after each dispatch assumes this is the only orchestrator
+# running; never allow two concurrent releases.
+concurrency:
+  group: release-orchestrator
+
+jobs:
+  orchestrate:
+    name: ${{ inputs.verify-only && 'Verify' || 'Verify + Publish' }} ${{ inputs.tag }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_REPO: ${{ github.repository }}
+      TAG: ${{ inputs.tag }}
+    steps:
+      - name: Validate release
+        run: |
+          set -euo pipefail
+          state=$(gh release view "$TAG" --json isDraft,isPrerelease \
+            -q 'if .isDraft then "draft" elif .isPrerelease then "prerelease" else "published" end')
+          if [[ "$state" == "draft" ]]; then
+            echo "::error::Release $TAG is still a draft; publish it before running the orchestrator."
+            exit 1
+          fi
+          echo "Release $TAG is $state."
+          # Display version used by the pip smoke test; mirrors the tag
+          # normalization in release-test.yml (both vX.Y[.Z] and the legacy
+          # vX.Y[.Z]-release tag styles are accepted).
+          VERSION="${TAG#v}"
+          VERSION="${VERSION%-release}"
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+
+      - name: Write dispatch helper
+        # `gh workflow run` returns no run id, so the helper polls for the
+        # newest workflow_dispatch run created at/after dispatch time (the
+        # concurrency group above guarantees it is ours), then watches it to
+        # completion, propagating failure.
+        run: |
+          cat > "$RUNNER_TEMP/dispatch.sh" <<'EOF'
+          dispatch_and_watch() {
+            local workflow="$1" ref="$2"
+            shift 2
+            local start_epoch
+            start_epoch=$(date -u +%s)
+            echo "::group::Dispatch $workflow (ref $ref) $*"
+            gh workflow run "$workflow" --ref "$ref" "$@"
+            local run_id=""
+            for _ in $(seq 1 24); do
+              sleep 5
+              run_id=$(gh run list --workflow "$workflow" --event workflow_dispatch --limit 5 \
+                --json databaseId,createdAt \
+                -q "[.[] | select((.createdAt | fromdateiso8601) >= $((start_epoch - 5)))] | first | .databaseId // \"\"")
+              [[ -n "$run_id" ]] && break
+            done
+            if [[ -z "$run_id" ]]; then
+              echo "::error::Dispatched $workflow but its run never appeared."
+              return 1
+            fi
+            echo "Watching run $run_id: https://github.com/$GH_REPO/actions/runs/$run_id"
+            echo "::endgroup::"
+            gh run watch "$run_id" --exit-status --interval 30
+          }
+          EOF
+
+      - name: Write pip smoke-install helper
+        # Same smoke test for TestPyPI and production PyPI: fresh venv, install
+        # the exact release version, and check `scenedetect version` reports it.
+        # Both indexes can lag a fresh upload, so installs are retried briefly.
+        run: |
+          cat > "$RUNNER_TEMP/smoke.sh" <<'EOF'
+          pip_smoke_install() {
+            local venv="$1"
+            shift
+            python3 -m venv "$venv"
+            local ok=0
+            for attempt in 1 2 3 4 5; do
+              if "$venv/bin/pip" install --quiet "$@" "scenedetect==$VERSION"; then
+                ok=1
+                break
+              fi
+              echo "pip install attempt $attempt failed; retrying in 30s..."
+              sleep 30
+            done
+            [[ "$ok" -eq 1 ]]
+            local out
+            out=$("$venv/bin/scenedetect" version)
+            echo "$out"
+            grep -F "$VERSION" <<<"$out"
+          }
+          EOF
+
+      - name: 'Stage 1 - Verify: Windows installer (install + upgrade on clean runner)'
+        run: |
+          set -euo pipefail
+          source "$RUNNER_TEMP/dispatch.sh"
+          dispatch_and_watch test-installer.yml "$GITHUB_REF_NAME" -f "tag=$TAG"
+
+      - name: 'Stage 2 - Publish: TestPyPI'
+        run: |
+          set -euo pipefail
+          source "$RUNNER_TEMP/dispatch.sh"
+          dispatch_and_watch publish-pypi.yml "$GITHUB_REF_NAME" -f "tag=$TAG" -f "environment=testpypi"
+
+      - name: 'Stage 2 - Verify: pip install from TestPyPI'
+        run: |
+          set -euo pipefail
+          source "$RUNNER_TEMP/smoke.sh"
+          # Dependencies are not mirrored on TestPyPI, so resolve them from the
+          # production index.
+          pip_smoke_install smoke-testpypi \
+            --index-url https://test.pypi.org/simple/ \
+            --extra-index-url https://pypi.org/simple/
+
+      - name: 'Stage 3 - Publish: PyPI (production)'
+        if: ${{ !inputs.verify-only }}
+        run: |
+          set -euo pipefail
+          source "$RUNNER_TEMP/dispatch.sh"
+          # publish-pypi.yml additionally gates production publishes on the
+          # build + release-test workflows being green for the tag.
+          dispatch_and_watch publish-pypi.yml "$GITHUB_REF_NAME" -f "tag=$TAG" -f "environment=pypi"
+
+      - name: 'Stage 3 - Verify: pip install from PyPI'
+        if: ${{ !inputs.verify-only }}
+        run: |
+          set -euo pipefail
+          source "$RUNNER_TEMP/smoke.sh"
+          pip_smoke_install smoke-pypi
+
+      - name: 'Stage 4 - Publish: Docker image (version tags + latest)'
+        if: ${{ !inputs.verify-only }}
+        run: |
+          set -euo pipefail
+          source "$RUNNER_TEMP/dispatch.sh"
+          # Dispatched on the release tag itself so docker/metadata-action
+          # derives the semver image tags from it (requires the tag to contain
+          # docker-publish.yml, i.e. v0.7.1 or newer).
+          dispatch_and_watch docker-publish.yml "$TAG" -f "tag_latest=true"
+
+      - name: 'Stage 4 - Verify: docker pull + smoke run from GHCR'
+        if: ${{ !inputs.verify-only }}
+        run: |
+          set -euo pipefail
+          image="ghcr.io/breakthrough/pyscenedetect"
+          docker pull "$image:$VERSION"
+          docker pull "$image:latest"
+          # `latest` must point at the build we just published.
+          v=$(docker image inspect "$image:$VERSION" --format '{{.Id}}')
+          l=$(docker image inspect "$image:latest" --format '{{.Id}}')
+          if [[ "$v" != "$l" ]]; then
+            echo "::error::latest ($l) does not match $VERSION ($v)"
+            exit 1
+          fi
+          out=$(docker run --rm "$image:$VERSION" version)
+          echo "$out"
+          grep -F "$VERSION" <<<"$out"
+
+      - name: Summary
+        run: |
+          if [[ "${{ inputs.verify-only }}" == "true" ]]; then
+            echo "Verification of $TAG passed. Re-run without verify-only to publish."
+          else
+            echo "Release $TAG verified and published:"
+            echo "  https://pypi.org/project/scenedetect/$VERSION/"
+            echo "  https://pypi.org/project/scenedetect-headless/$VERSION/"
+            echo "  https://pypi.org/project/scenedetect-core/$VERSION/"
+            echo "  https://github.com/$GH_REPO/pkgs/container/pyscenedetect"
+          fi
