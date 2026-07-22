@@ -83,10 +83,20 @@ class VideoStream(ABC):
     # Default Implementations
     #
 
+    _decode_failures: int = 0
+    """Cumulative count of frames which failed to decode. Backends which can detect and skip
+    corrupt frames increment this as an instance attribute."""
+
     @property
     def base_timecode(self) -> FrameTimecode:
         """FrameTimecode object to use as a time base."""
         return FrameTimecode(timecode=0, fps=self.frame_rate)
+
+    @property
+    def decode_failures(self) -> int:
+        """Number of frames that failed to decode and were skipped (may indicate video
+        corruption). Always 0 for backends which do not track decode failures."""
+        return self._decode_failures
 
     #
     # Backend Identification

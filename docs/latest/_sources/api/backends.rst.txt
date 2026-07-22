@@ -16,3 +16,6 @@ Video Backends
 
 .. automodule:: scenedetect.backends.moviepy
    :members:
+
+.. automodule:: scenedetect.backends.concat
+   :members:

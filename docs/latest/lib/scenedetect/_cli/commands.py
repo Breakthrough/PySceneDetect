@@ -37,6 +37,7 @@ from scenedetect.scene_manager import (
     CutList,
     Interpolation,
     SceneList,
+    expand_scenes_to_bounds,
 )
 
 logger = logging.getLogger("pyscenedetect")
@@ -216,10 +217,22 @@ def split_video(
     output: str,
     show_output: bool,
     ffmpeg_args: str,
+    expand: bool,
 ):
     """Handles the `split-video` command."""
     del cuts  # split-video only uses scenes.
     assert context.video_stream is not None
+
+    if expand and scenes:
+        video_duration = context.video_stream.duration
+        if video_duration is None:
+            logger.warning("Cannot --expand: video duration is unavailable for this stream.")
+        else:
+            scenes = expand_scenes_to_bounds(
+                scenes,
+                start=context.video_stream.base_timecode,
+                end=video_duration,
+            )
 
     if use_mkvmerge:
         name_format = name_format.removesuffix("-$SCENE_NUMBER")

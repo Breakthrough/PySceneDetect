@@ -140,6 +140,34 @@ def compute_downscale_factor(frame_width: int, effective_width: int = DEFAULT_MI
     return frame_width / float(effective_width)
 
 
+def expand_scenes_to_bounds(
+    scenes: SceneList,
+    start: FrameTimecode,
+    end: FrameTimecode,
+) -> SceneList:
+    """Return a new scene list whose first scene starts at `start` and last scene ends at `end`.
+
+    Useful when scenes were detected within a sub-region of a video (e.g. via the `time`
+    command's `-s`/`-e`) but the caller wants the resulting clip boundaries to cover content
+    outside that analysis window.
+
+    Arguments:
+        scenes: List of (start, end) FrameTimecode pairs.
+        start: Desired start of the first scene.
+        end: Desired end of the last scene.
+
+    Returns:
+        A new scene list with the outer endpoints replaced. The input is not modified.
+        An empty input is returned unchanged.
+    """
+    if not scenes:
+        return list(scenes)
+    expanded = list(scenes)
+    expanded[0] = (start, expanded[0][1])
+    expanded[-1] = (expanded[-1][0], end)
+    return expanded
+
+
 def get_scenes_from_cuts(
     cut_list: CutList,
     start_pos: int | FrameTimecode,
@@ -209,8 +237,8 @@ class SceneManager:
         # `stats_manager` argument to to `store_stats: bool=False`, or lazy-init one.
 
         # TODO(v1.0): This class should own a VideoStream as well, instead of passing one
-        # to the detect_scenes method. If concatenation is required, it can be implemented as
-        # a generic VideoStream wrapper.
+        # to the detect_scenes method. Concatenation is handled by VideoStreamConcat
+        # (scenedetect.backends.concat).
         self._stats_manager: StatsManager | None = stats_manager
 
         # Position of video that was first passed to detect_scenes.
@@ -545,31 +573,37 @@ class SceneManager:
         frame_im = None
 
         logger.info("Detecting scenes...")
-        while not self._stop.is_set():
-            next_frame, position = frame_queue.get()
-            if next_frame is None and position is None:
-                break
-            if next_frame is not None:
-                frame_im = next_frame
-            assert frame_im is not None
-            new_cuts = self._process_frame(position, frame_im, callback)
+        try:
+            while not self._stop.is_set():
+                next_frame, position = frame_queue.get()
+                if next_frame is None and position is None:
+                    break
+                if next_frame is not None:
+                    frame_im = next_frame
+                assert frame_im is not None
+                new_cuts = self._process_frame(position, frame_im, callback)
+                if progress_bar is not None:
+                    if new_cuts:
+                        progress_bar.set_description(
+                            PROGRESS_BAR_DESCRIPTION % len(self._cutting_list), refresh=False
+                        )
+                    progress_bar.update(1 + frame_skip)
+        finally:
             if progress_bar is not None:
-                if new_cuts:
-                    progress_bar.set_description(
-                        PROGRESS_BAR_DESCRIPTION % len(self._cutting_list), refresh=False
-                    )
-                progress_bar.update(1 + frame_skip)
-
-        if progress_bar is not None:
-            progress_bar.set_description(
-                PROGRESS_BAR_DESCRIPTION % len(self._cutting_list), refresh=True
-            )
-            progress_bar.close()
-        # Unblock any puts in the decode thread before joining. This can happen if the main
-        # processing thread stops before the decode thread.
-        while not frame_queue.empty():
-            frame_queue.get_nowait()
-        decode_thread.join()
+                progress_bar.set_description(
+                    PROGRESS_BAR_DESCRIPTION % len(self._cutting_list), refresh=True
+                )
+                progress_bar.close()
+            # The decode thread must never be abandoned, even if a detector or callback
+            # raises above: an orphaned daemon thread keeps the VideoStream alive until
+            # interpreter shutdown, where finalizing it (or killing the thread mid-decode)
+            # can crash process exit. Signal it to stop, then keep unblocking any pending
+            # puts until it exits.
+            self._stop.set()
+            while decode_thread.is_alive():
+                while not frame_queue.empty():
+                    frame_queue.get_nowait()
+                decode_thread.join(timeout=0.1)
 
         if self._exception_info is not None:
             exc = self._exception_info[1]
