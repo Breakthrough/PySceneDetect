@@ -21,8 +21,11 @@ on:
         description: 'Release tag to upgrade from (default: auto-detect previous release)'
         required: false
 
+# NOTE: This workflow never writes to the repository; `contents: write` is required
+# only because draft-release assets are invisible to read-only tokens, and the
+# release orchestrator runs this verification while the release is still a draft.
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   resolve:

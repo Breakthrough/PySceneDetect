@@ -18,7 +18,9 @@ jobs:
           cache: 'pip'
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
+          # setuptools is upgraded because the toolcache copy periodically lags
+          # security fixes (e.g. PYSEC-2026-3447) and would fail the audit below.
+          python -m pip install --upgrade pip setuptools
           pip install build twine pip-audit
       - name: Version consistency check
         run: |
