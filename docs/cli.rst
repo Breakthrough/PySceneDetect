@@ -61,9 +61,13 @@ Options
 
   Stats file (.csv) to write frame metrics. Existing files will be overwritten. Used for tuning detection parameters and data analysis.
 
-.. option:: -f FPS, --framerate FPS
+.. option:: -f FPS, --frame-rate FPS
 
-  Override framerate with value as frames/sec.
+  Override frame rate with value as frames/sec.
+
+.. option:: --framerate FPS
+
+  [DEPRECATED] Use :option:`-f/--frame-rate <-f>` instead.
 
 .. option:: -m TIMECODE, --min-scene-len TIMECODE
 
@@ -549,6 +553,10 @@ Options
 
   Output directory to save EDL file to. Overrides global option :option:`-o/--output <scenedetect -o>`.
 
+.. option:: -s TIMECODE, --start-timecode TIMECODE
+
+  Start timecode added to every event so the EDL aligns with the source media's on-screen timecode. Accepts SMPTE HH:MM:SS:FF or 8 digits (HHMMSSFF, e.g. 01000000).
+
 
 .. _command-save-fcp:
 
@@ -859,7 +867,7 @@ Options
 
 .. option:: --expand
 
-  Extend the first/last output clips to cover the full input video, even if the :ref:`time <command-time>` command's ``--start``/``--end`` limited the analysis window. Useful for keeping content outside the analyzed region attached to the adjacent split.
+  Extend the first/last output clips to cover the full input video, even if `time -s/-e` limited the analysis window. Useful for keeping content outside the analyzed region attached to the adjacent split.
 
 
 .. _command-time:

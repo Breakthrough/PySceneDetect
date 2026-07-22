@@ -23,10 +23,10 @@
     <ROW Property="DialogBitmap" Value="dialog.jpg" MultiBuildValue="DefaultBuild:installer_logo.jpg" Type="1" MsiKey="DialogBitmap"/>
     <ROW Property="MSIFASTINSTALL" MultiBuildValue="DefaultBuild:3"/>
     <ROW Property="Manufacturer" Value="Brandon Castellano"/>
-    <ROW Property="ProductCode" Value="1033:{F7AA154A-21CB-45BA-AF86-174E86A21960} " Type="16"/>
+    <ROW Property="ProductCode" Value="1033:{61D7DE50-E4E4-456F-9361-413F73DA43FC} " Type="16"/>
     <ROW Property="ProductLanguage" Value="1033"/>
     <ROW Property="ProductName" Value="PySceneDetect"/>
-    <ROW Property="ProductVersion" Value="0.7.0" Options="32"/>
+    <ROW Property="ProductVersion" Value="0.7.1" Options="32"/>
     <ROW Property="SecureCustomProperties" Value="OLDPRODUCTS;AI_NEWERPRODUCTFOUND;AI_SETUPEXEPATH;SETUPEXEDIR"/>
     <ROW Property="UpgradeCode" Value="{D0AF0419-DBD5-455C-A4AC-4518A35DD23E}"/>
     <ROW Property="WindowsType9X" MultiBuildValue="DefaultBuild:Windows 9x/ME" ValueLocId="-"/>
@@ -159,7 +159,7 @@
     <ROW Directory="x86simdsort_Dir" Directory_Parent="npysort_Dir" DefaultDir="X86-SI~1|x86-simd-sort"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.SideBySideGuidComponent">
-    <ROW Component="AI_CustomARPName" Value="{C37CA592-883C-4811-AC57-69BF5ABA66D7}"/>
+    <ROW Component="AI_CustomARPName" Value="{875513D0-8249-4DFA-BE9C-4A2A1B22F171}"/>
     <ROW Component="AI_DisableModify" Value="{5AB8A335-BCAB-4C0A-8A69-E2AE7542AB47}"/>
     <ROW Component="AI_ExePath" Value="{F7DEDE0C-FDB1-411C-B347-A482CE69721F}"/>
     <ROW Component="APPDIR" Value="{6B122BDD-2BF8-41D4-92E0-884DD60467B4}"/>
@@ -291,7 +291,7 @@
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiCompsComponent">
     <ROW Component="ACT" ComponentId="{31CB1D42-690C-4AA9-ABEB-7591D8240C30}" Directory_="Australia_Dir" Attributes="0" KeyPath="ACT" Type="0"/>
-    <ROW Component="AI_CustomARPName" ComponentId="{C37CA592-883C-4811-AC57-69BF5ABA66D7}" Directory_="APPDIR" Attributes="260" KeyPath="DisplayName" Options="1"/>
+    <ROW Component="AI_CustomARPName" ComponentId="{875513D0-8249-4DFA-BE9C-4A2A1B22F171}" Directory_="APPDIR" Attributes="260" KeyPath="DisplayName" Options="1"/>
     <ROW Component="AI_DisableModify" ComponentId="{5AB8A335-BCAB-4C0A-8A69-E2AE7542AB47}" Directory_="APPDIR" Attributes="260" KeyPath="NoModify" Options="1"/>
     <ROW Component="AI_ExePath" ComponentId="{F7DEDE0C-FDB1-411C-B347-A482CE69721F}" Directory_="APPDIR" Attributes="260" KeyPath="AI_ExePath"/>
     <ROW Component="APPDIR" ComponentId="{6B122BDD-2BF8-41D4-92E0-884DD60467B4}" Directory_="APPDIR" Attributes="0"/>
@@ -1743,7 +1743,7 @@
     <ROW Action="AI_CleanPrePrereq" Condition="AI_BOOTSTRAPPER AND (NOT AI_PrereqsFulfilled)" Sequence="699"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.BuildComponent">
-    <ROW BuildKey="DefaultBuild" BuildName="DefaultBuild" BuildOrder="1" BuildType="0" PackageFolder="." PackageFileName="PySceneDetect-0.7.0-win64" Languages="en" InstallationType="4" ExtUI="true" UseLargeSchema="true" MsiPackageType="x64"/>
+    <ROW BuildKey="DefaultBuild" BuildName="DefaultBuild" BuildOrder="1" BuildType="0" PackageFolder="." PackageFileName="PySceneDetect-0.7.1-win64" Languages="en" InstallationType="4" ExtUI="true" UseLargeSchema="true" MsiPackageType="x64"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.DictionaryComponent">
     <ROW Path="&lt;AI_DICTS&gt;ui.ail"/>

@@ -26,10 +26,10 @@ All three provide the same `scenedetect` Python module -- install only one of th
 ## Windows Build (64-bit Only) &nbsp; <span class="wy-text-neutral"><span class="fa fa-windows"></span></span>
 
 <div class="important">
-<h3 class="wy-text-neutral"><span class="fa fa-forward wy-text-info"></span> Latest Release: <b class="wy-text-neutral">v0.7</b></h3>
-<h4 class="wy-text-neutral"><span class="fa fa-calendar wy-text-info"></span>&nbsp; Release Date:&nbsp; <b>May 3, 2026</b></h4>
-<a href="https://github.com/Breakthrough/PySceneDetect/releases/download/v0.7-release/PySceneDetect-0.7-win64.msi" class="btn btn-info" style="margin-bottom:8px;" role="button"><span class="fa fa-download"></span>&nbsp; <b>Installer</b>&nbsp;&nbsp;(recommended)</a> &nbsp;&nbsp;&nbsp;&nbsp;
-<a href="https://github.com/Breakthrough/PySceneDetect/releases/download/v0.7-release/PySceneDetect-0.7-win64.zip" class="btn btn-info" style="margin-bottom:8px;" role="button"><span class="fa fa-download"></span>&nbsp; <b>Portable .zip</b></a> &nbsp;&nbsp;&nbsp;&nbsp;
+<h3 class="wy-text-neutral"><span class="fa fa-forward wy-text-info"></span> Latest Release: <b class="wy-text-neutral">v0.7.1</b></h3>
+<h4 class="wy-text-neutral"><span class="fa fa-calendar wy-text-info"></span>&nbsp; Release Date:&nbsp; <b>July 2026</b></h4>
+<a href="https://github.com/Breakthrough/PySceneDetect/releases/download/v0.7.1/PySceneDetect-0.7.1-win64.msi" class="btn btn-info" style="margin-bottom:8px;" role="button"><span class="fa fa-download"></span>&nbsp; <b>Installer</b>&nbsp;&nbsp;(recommended)</a> &nbsp;&nbsp;&nbsp;&nbsp;
+<a href="https://github.com/Breakthrough/PySceneDetect/releases/download/v0.7.1/PySceneDetect-0.7.1-win64.zip" class="btn btn-info" style="margin-bottom:8px;" role="button"><span class="fa fa-download"></span>&nbsp; <b>Portable .zip</b></a> &nbsp;&nbsp;&nbsp;&nbsp;
 <a href="../cli/" class="btn btn-success" style="margin-bottom:8px;" role="button"><span class="fa fa-book"></span>&nbsp; <b>Getting Started</b></a>
 </div>
 
@@ -49,7 +49,7 @@ docker run --rm -v "$(pwd):/files" ghcr.io/breakthrough/pyscenedetect \
     -i /files/video.mp4 detect-adaptive split-video -o /files
 ```
 
-The `latest` tag (the default when no tag is given) points to the most recent recommended build, and the `main` tag tracks the development branch. Starting with the next release, version tags (e.g. `0.7.1`) will also be published. `podman` can be used in place of `docker` in the commands above.
+The `latest` tag (the default when no tag is given) points to the most recent recommended build, the `main` tag tracks the development branch, and version tags (e.g. `0.7.1`) point to specific releases. `podman` can be used in place of `docker` in the commands above.
 
 ## Post Installation
 

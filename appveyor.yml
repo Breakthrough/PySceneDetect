@@ -12,12 +12,13 @@ cache:
   - '%LOCALAPPDATA%\uv\cache -> pyproject.toml'
   - 'C:\Program Files\Inkscape'
 
-# Branches applies to tags as well. We only build on tagged releases of the form vX.Y.Z-release
+# Branches applies to tags as well. We only build on tagged releases of the form
+# vX.Y[.Z] (the legacy -release suffix is also accepted, matching the GitHub workflows).
 branches:
   only:
     - main
     - /releases\/.+/
-    - /v.+-release/
+    - /v.+/
 
 skip_tags: false
 skip_non_tags: true
@@ -30,7 +31,7 @@ environment:
     secure: QRCPoNYF1nqgXDn7pHgBzg==
   ai_license_salt:
     secure: +Gy+SRk8JUsaM+5pMEKITiJxdLilrxHpkKlrZzR3C9DPwdgYLGxt5sJn6uXuAJg7e6JsKHcT7tRks/HcSKkHPw==
-  ffmpeg_version: "8.1"
+  ffmpeg_version: "8.1.2"
 
 # SignPath Config for Code Signing
 deploy:
@@ -50,6 +51,11 @@ install:
   - python -m pip install uv
   - uv pip install --system .[docs]
   - uv pip install --system -r packaging/windows/requirements.txt --no-binary imageio-ffmpeg
+  # TODO(https://github.com/Zulko/moviepy/issues/2553): moviepy caps pillow<12.0, but 11.x has
+  # CVEs only fixed in 12.3.0+. Installed as a separate step since a pin in requirements.txt
+  # would fail strict resolution against moviepy's constraint. Tests pass against 12.3.0;
+  # drop this once moviepy lifts the cap.
+  - uv pip install --system pillow==12.3.0
   - if not exist ffmpeg-%ffmpeg_version%-full_build.7z appveyor DownloadFile https://github.com/GyanD/codexffmpeg/releases/download/%ffmpeg_version%/ffmpeg-%ffmpeg_version%-full_build.7z
   - 7z e ffmpeg-%ffmpeg_version%-full_build.7z -odist/ffmpeg ffmpeg.exe LICENSE -r
   # moviepy.config reads FFMPEG_BINARY (which routes through imageio_ffmpeg) at import time.
