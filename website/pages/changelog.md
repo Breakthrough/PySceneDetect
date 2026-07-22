@@ -3,7 +3,7 @@
 
 ## PySceneDetect 0.7
 
-### PySceneDetect 0.7.1 (July 2026)
+### PySceneDetect 0.7.1 (July 21, 2026)
 
 PySceneDetect 0.7.1 adds a new `scenedetect-core` package and official Docker images to make downstream integration easier, along with support for concatenating multiple videos. It also includes several stability and robustness fixes for the PyAV and OpenCV backends.
 

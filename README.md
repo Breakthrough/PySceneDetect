@@ -13,7 +13,7 @@
 
 ----------------------------------------------------------
 
-### Latest Release: v0.7 (May 3, 2026)
+### Latest Release: v0.7.1 (July 21, 2026)
 
 **Website**:  [scenedetect.com](https://www.scenedetect.com)
 
@@ -114,7 +114,7 @@ We evaluate the performance of different detectors in terms of accuracy and proc
 
  - [Documentation](https://www.scenedetect.com/docs/) (covers application and Python API)
  - [CLI Example](https://www.scenedetect.com/cli/)
- - [Config File](https://www.scenedetect.com/docs/0.6.4/cli/config_file.html)
+ - [Config File](https://www.scenedetect.com/docs/latest/cli/config_file.html)
 
 ## Help & Contributing
 
