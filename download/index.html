@@ -160,10 +160,10 @@
 <p>All three provide the same <code>scenedetect</code> Python module -- install only one of them.</p>
 <h2 id="windows-build-64-bit-only">Windows Build (64-bit Only) &nbsp; <span class="wy-text-neutral"><span class="fa fa-windows"></span></span></h2>
 <div class="important">
-<h3 class="wy-text-neutral"><span class="fa fa-forward wy-text-info"></span> Latest Release: <b class="wy-text-neutral">v0.7</b></h3>
-<h4 class="wy-text-neutral"><span class="fa fa-calendar wy-text-info"></span>&nbsp; Release Date:&nbsp; <b>May 3, 2026</b></h4>
-<a href="https://github.com/Breakthrough/PySceneDetect/releases/download/v0.7-release/PySceneDetect-0.7-win64.msi" class="btn btn-info" style="margin-bottom:8px;" role="button"><span class="fa fa-download"></span>&nbsp; <b>Installer</b>&nbsp;&nbsp;(recommended)</a> &nbsp;&nbsp;&nbsp;&nbsp;
-<a href="https://github.com/Breakthrough/PySceneDetect/releases/download/v0.7-release/PySceneDetect-0.7-win64.zip" class="btn btn-info" style="margin-bottom:8px;" role="button"><span class="fa fa-download"></span>&nbsp; <b>Portable .zip</b></a> &nbsp;&nbsp;&nbsp;&nbsp;
+<h3 class="wy-text-neutral"><span class="fa fa-forward wy-text-info"></span> Latest Release: <b class="wy-text-neutral">v0.7.1</b></h3>
+<h4 class="wy-text-neutral"><span class="fa fa-calendar wy-text-info"></span>&nbsp; Release Date:&nbsp; <b>July 2026</b></h4>
+<a href="https://github.com/Breakthrough/PySceneDetect/releases/download/v0.7.1/PySceneDetect-0.7.1-win64.msi" class="btn btn-info" style="margin-bottom:8px;" role="button"><span class="fa fa-download"></span>&nbsp; <b>Installer</b>&nbsp;&nbsp;(recommended)</a> &nbsp;&nbsp;&nbsp;&nbsp;
+<a href="https://github.com/Breakthrough/PySceneDetect/releases/download/v0.7.1/PySceneDetect-0.7.1-win64.zip" class="btn btn-info" style="margin-bottom:8px;" role="button"><span class="fa fa-download"></span>&nbsp; <b>Portable .zip</b></a> &nbsp;&nbsp;&nbsp;&nbsp;
 <a href="../cli/" class="btn btn-success" style="margin-bottom:8px;" role="button"><span class="fa fa-book"></span>&nbsp; <b>Getting Started</b></a>
 </div>
 
@@ -176,7 +176,7 @@ docker run --rm ghcr.io/breakthrough/pyscenedetect version
 <pre><code class="language-bash">docker run --rm -v &quot;$(pwd):/files&quot; ghcr.io/breakthrough/pyscenedetect \
     -i /files/video.mp4 detect-adaptive split-video -o /files
 </code></pre>
-<p>The <code>latest</code> tag (the default when no tag is given) points to the most recent recommended build, and the <code>main</code> tag tracks the development branch. Starting with the next release, version tags (e.g. <code>0.7.1</code>) will also be published. <code>podman</code> can be used in place of <code>docker</code> in the commands above.</p>
+<p>The <code>latest</code> tag (the default when no tag is given) points to the most recent recommended build, the <code>main</code> tag tracks the development branch, and version tags (e.g. <code>0.7.1</code>) point to specific releases. <code>podman</code> can be used in place of <code>docker</code> in the commands above.</p>
 <h2 id="post-installation">Post Installation</h2>
 <p>After installation, you can call PySceneDetect from any terminal/command prompt by typing <code>scenedetect</code> (try running <code>scenedetect --help</code>, or <code>scenedetect version</code>). If you encounter any runtime errors while running PySceneDetect, ensure that you have all the required dependencies listed in the System Requirements section above (you should be able to <code>import numpy</code> and <code>import cv2</code>).  If you encounter any issues or want to make a feature request, feel free to <a href="../contributing/">report any bugs or share some feature requests/ideas</a> on the <a href="https://github.com/Breakthrough/PySceneDetect/issues">issue tracker</a> and help make PySceneDetect even better.</p>
 <h2 id="dependencies">Dependencies</h2>
