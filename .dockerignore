@@ -1,0 +1,71 @@
+#
+#            PySceneDetect: Python-Based Video Scene Detector
+#   -------------------------------------------------------------------
+#     [  Site:    https://scenedetect.com                           ]
+#     [  Docs:    https://scenedetect.com/docs/                     ]
+#     [  Github:  https://github.com/Breakthrough/PySceneDetect/    ]
+#
+# Copyright (C) 2014-2026 Brandon Castellano <http://www.bcastell.com>.
+# PySceneDetect is licensed under the BSD 3-Clause License; see the
+# included LICENSE file, or visit one of the above pages for details.
+#
+
+# Version control
+.git
+.gitignore
+.github
+
+# Python / Build artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Testing / Tooling
+.pytest_cache/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.log
+.mypy_cache/
+.hypothesis/
+
+# IDE / Project files
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Project specific exclusions (to keep the image lean)
+test_clips/
+tests/
+docs/
+website/
+benchmark/
+scenedetect.cfg
+

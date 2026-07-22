@@ -29,7 +29,7 @@
 
     pip install scenedetect --upgrade
 
-Requires ffmpeg/mkvmerge for video splitting support. Windows builds (MSI installer/portable ZIP) can be found on [the download page](https://scenedetect.com/download/).
+Requires ffmpeg/mkvmerge for video splitting support. Windows builds (MSI installer/portable ZIP) can be found on [the download page](https://scenedetect.com/download/). A Docker image with all dependencies included is available as [`ghcr.io/breakthrough/pyscenedetect`](https://github.com/Breakthrough/PySceneDetect/pkgs/container/pyscenedetect).
 
 ----------------------------------------------------------
 
@@ -48,6 +48,12 @@ Skip the first 10 seconds of the input video:
     scenedetect -i video.mp4 time -s 10s
 
 More examples can be found throughout [the documentation](https://www.scenedetect.com/docs/latest/cli.html).
+
+**Quick Start (Docker)**:
+
+The same commands work without installing anything using [the official Docker image](https://github.com/Breakthrough/PySceneDetect/pkgs/container/pyscenedetect), which includes all dependencies (`ffmpeg`/`mkvmerge` included). Mount the folder containing your videos and use it for input/output paths:
+
+    docker run --rm -v "$(pwd):/files" ghcr.io/breakthrough/pyscenedetect -i /files/video.mp4 split-video -o /files
 
 **Quick Start (Python API)**:
 
@@ -102,7 +108,7 @@ See [the documentation](https://www.scenedetect.com/docs/latest/api.html) for mo
 
 **Benchmark**:
 
-We evaluate the performance of different detectors in terms of accuracy and processing speed. See the [benchmark report](benchmark/README.md) for details.
+We evaluate the performance of different detectors in terms of accuracy and processing speed. See [www.scenedetect.com/benchmarks](https://www.scenedetect.com/benchmarks/) for results, or the [benchmark report](benchmark/README.md) for details on the datasets and methodology.
 
 ## Reference
 

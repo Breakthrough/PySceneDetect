@@ -27,6 +27,7 @@ nav:
     - 'Documentation': 'docs.md'
     - 'Command-Line': 'cli.md'
     - 'Python API': 'api.md'
+    - 'Benchmarks': 'benchmarks.md'
 - 'Support:':
     - 'FAQ': 'faq.md'
     - 'Bugs & Contributing': 'contributing.md'
@@ -40,3 +41,6 @@ markdown_extensions: [fenced_code]
 
 extra_css:
   - style.css
+
+extra_javascript:
+  - js/helper.js

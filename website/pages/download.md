@@ -10,9 +10,9 @@ PySceneDetect requires at least Python 3.10 or higher.
 
 <div class="important">
 <h4 class="wy-text-neutral"><span class="fa fa-angle-double-down wy-text-info"></span> Standard install (recommended):</h4>
-<h3 class="wy-text-neutral"><tt>pip install --upgrade scenedetect</tt></h3>
+<pre class="command"><code class="nohighlight">pip install --upgrade scenedetect</code></pre>
 <h4 class="wy-text-neutral"><span class="fa fa-angle-down wy-text-info"></span> Headless install (servers, no GUI libs):</h4>
-<h3 class="wy-text-neutral"><tt>pip install --upgrade scenedetect-headless</tt></h3>
+<pre class="command"><code class="nohighlight">pip install --upgrade scenedetect-headless</code></pre>
 </div>
 
 PySceneDetect is available via `pip` as three packages:
@@ -32,6 +32,24 @@ All three provide the same `scenedetect` Python module -- install only one of th
 <a href="https://github.com/Breakthrough/PySceneDetect/releases/download/v0.7-release/PySceneDetect-0.7-win64.zip" class="btn btn-info" style="margin-bottom:8px;" role="button"><span class="fa fa-download"></span>&nbsp; <b>Portable .zip</b></a> &nbsp;&nbsp;&nbsp;&nbsp;
 <a href="../cli/" class="btn btn-success" style="margin-bottom:8px;" role="button"><span class="fa fa-book"></span>&nbsp; <b>Getting Started</b></a>
 </div>
+
+## Docker Image &nbsp; <span class="wy-text-neutral"><span class="fa fa-ship"></span></span>
+
+Official container images are published at [ghcr.io/breakthrough/pyscenedetect](https://github.com/breakthrough/PySceneDetect/pkgs/container/pyscenedetect). The image includes the full CLI, all optional backends (PyAV, MoviePy), and the external tools used for video splitting (`ffmpeg`, `mkvmerge`) -- no other setup is required:
+
+```bash
+docker pull ghcr.io/breakthrough/pyscenedetect
+docker run --rm ghcr.io/breakthrough/pyscenedetect version
+```
+
+To process videos, mount the folder containing them into the container (the image runs as a non-root user, so output files are written with regular permissions):
+
+```bash
+docker run --rm -v "$(pwd):/files" ghcr.io/breakthrough/pyscenedetect \
+    -i /files/video.mp4 detect-adaptive split-video -o /files
+```
+
+The `latest` tag (the default when no tag is given) points to the most recent recommended build, and the `main` tag tracks the development branch. Starting with the next release, version tags (e.g. `0.7.1`) will also be published. `podman` can be used in place of `docker` in the commands above.
 
 ## Post Installation
 

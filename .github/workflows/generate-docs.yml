@@ -13,6 +13,8 @@ on:
 jobs:
   update_docs:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write  # pushes generated docs to the gh-pages branch
     env:
       scenedetect_docs_dest: ''
 

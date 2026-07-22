@@ -159,3 +159,26 @@ def delayed_start_video() -> str:
     """Video with a nonzero stream start time (1.075s edit-list offset). Created from
     fades.mp4 via: ffmpeg -itsoffset 1.075 -i fades.mp4 -t 2 -c:v copy -an delayed_start.mp4"""
     return check_exists("tests/resources/delayed_start.mp4")
+
+
+def pytest_unconfigure(config):
+    """Diagnostic for a windows-latest CI flake (silent exit 1 after a green run):
+    report any non-main threads still alive at session end. Leaked threads keep
+    VideoStreams alive into interpreter shutdown, where native teardown can crash
+    the process exit code. tqdm's global monitor singleton is expected and ignored."""
+    import sys
+    import threading
+
+    leftover = [
+        t
+        for t in threading.enumerate()
+        if t is not threading.main_thread() and t.name != "tqdm_monitor"
+    ]
+    for thread in leftover:
+        frame = sys._current_frames().get(thread.ident) if thread.ident else None
+        location = f"{frame.f_code.co_filename}:{frame.f_lineno}" if frame else "unknown"
+        print(
+            f"WARNING: thread still alive at exit: {thread.name} "
+            f"(daemon={thread.daemon}) at {location}",
+            file=sys.stderr,
+        )

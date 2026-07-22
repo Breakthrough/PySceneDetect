@@ -94,13 +94,6 @@ markers = [
 addopts = "-m 'not release'"
 filterwarnings = [
     "ignore:TODO.*Update caller to handle VFR:UserWarning",
-    # Promote unraisable (finalizer) and unhandled-thread exceptions to named test
-    # failures. A CI run on windows-latest once exited 1 with every test passing and
-    # no output - the failure mode pytest 9.1+ reports for unraisable exceptions
-    # collected at shutdown. These filters turn any recurrence into an attributable
-    # traceback instead of a bare exit code.
-    "error::pytest.PytestUnraisableExceptionWarning",
-    "error::pytest.PytestUnhandledThreadExceptionWarning",
 ]
 
 [tool.ruff]
