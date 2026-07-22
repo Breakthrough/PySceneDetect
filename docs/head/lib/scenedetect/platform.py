@@ -24,7 +24,6 @@ import re
 import string
 import subprocess
 import sys
-import typing as ty
 
 import cv2
 
