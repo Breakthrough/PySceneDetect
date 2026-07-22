@@ -1,19 +1,19 @@
-# Release orchestrator: verifies the artifacts attached to a published GitHub
-# release actually work, then publishes them stage by stage, verifying each
-# stage before starting the next:
+# Release orchestrator: verifies the artifacts attached to a DRAFT GitHub
+# release actually work, then publishes stage by stage, verifying each stage
+# before starting the next:
 #
-#   MSI install/upgrade test (test-installer.yml)
+#   MSI install/upgrade test against the draft's assets (test-installer.yml)
 #     -> TestPyPI publish  -> pip smoke install from TestPyPI
+#     -> publish the GitHub release (draft -> public, marked latest)
 #     -> PyPI publish      -> pip smoke install from PyPI
 #     -> Docker publish    -> docker pull + smoke run from GHCR
 #
-# Publishing is intentionally NOT triggered automatically by the release event -
-# this workflow is dispatched manually once the GitHub release is published, and
-# the publish steps only run after every verification step succeeds. Each stage
-# is driven through the existing workflows via `gh workflow run` (rather than
-# workflow_call) so they keep working standalone and the PyPI trusted-publisher
-# configuration (which is bound to publish-pypi.yml as the top-level workflow)
-# is unaffected.
+# This workflow is dispatched manually once the GitHub release has been DRAFTED
+# with its artifacts attached (signed MSI/zip, wheels, SHA256SUMS); nothing goes
+# public until artifact verification passes. Each stage is driven through the
+# existing workflows via `gh workflow run` (rather than workflow_call) so they
+# keep working standalone and the PyPI trusted-publisher configuration (which is
+# bound to publish-pypi.yml as the top-level workflow) is unaffected.
 
 name: Release Orchestrator
 
@@ -29,8 +29,8 @@ on:
         default: false
 
 permissions:
-  contents: read
-  actions: write  # `gh workflow run` on the workflows this one orchestrates
+  contents: write  # read the draft release's assets and publish it (draft -> public)
+  actions: write   # `gh workflow run` on the workflows this one orchestrates
 
 # The run-id lookup after each dispatch assumes this is the only orchestrator
 # running; never allow two concurrent releases.
@@ -53,10 +53,10 @@ jobs:
           state=$(gh release view "$TAG" --json isDraft,isPrerelease \
             -q 'if .isDraft then "draft" elif .isPrerelease then "prerelease" else "published" end')
           if [[ "$state" == "draft" ]]; then
-            echo "::error::Release $TAG is still a draft; publish it before running the orchestrator."
-            exit 1
+            echo "Release $TAG is a draft; it will be published after artifact verification passes."
+          else
+            echo "Release $TAG is already $state; the GitHub release publish step will be a no-op (re-run mode)."
           fi
-          echo "Release $TAG is $state."
           # Display version used by the pip smoke test; mirrors the tag
           # normalization in release-test.yml (both vX.Y[.Z] and the legacy
           # vX.Y[.Z]-release tag styles are accepted).
@@ -145,7 +145,19 @@ jobs:
             --index-url https://test.pypi.org/simple/ \
             --extra-index-url https://pypi.org/simple/
 
-      - name: 'Stage 3 - Publish: PyPI (production)'
+      - name: 'Stage 3 - Publish: GitHub release (draft -> public)'
+        if: ${{ !inputs.verify-only }}
+        run: |
+          set -euo pipefail
+          is_draft=$(gh release view "$TAG" --json isDraft -q .isDraft)
+          if [[ "$is_draft" == "true" ]]; then
+            gh release edit "$TAG" --draft=false --latest
+            echo "Published release $TAG (marked as latest)."
+          else
+            echo "Release $TAG is already published; skipping."
+          fi
+
+      - name: 'Stage 4 - Publish: PyPI (production)'
         if: ${{ !inputs.verify-only }}
         run: |
           set -euo pipefail
@@ -154,14 +166,14 @@ jobs:
           # build + release-test workflows being green for the tag.
           dispatch_and_watch publish-pypi.yml "$GITHUB_REF_NAME" -f "tag=$TAG" -f "environment=pypi"
 
-      - name: 'Stage 3 - Verify: pip install from PyPI'
+      - name: 'Stage 4 - Verify: pip install from PyPI'
         if: ${{ !inputs.verify-only }}
         run: |
           set -euo pipefail
           source "$RUNNER_TEMP/smoke.sh"
           pip_smoke_install smoke-pypi
 
-      - name: 'Stage 4 - Publish: Docker image (version tags + latest)'
+      - name: 'Stage 5 - Publish: Docker image (version tags + latest)'
         if: ${{ !inputs.verify-only }}
         run: |
           set -euo pipefail
@@ -171,7 +183,7 @@ jobs:
           # docker-publish.yml, i.e. v0.7.1 or newer).
           dispatch_and_watch docker-publish.yml "$TAG" -f "tag_latest=true"
 
-      - name: 'Stage 4 - Verify: docker pull + smoke run from GHCR'
+      - name: 'Stage 5 - Verify: docker pull + smoke run from GHCR'
         if: ${{ !inputs.verify-only }}
         run: |
           set -euo pipefail
@@ -192,7 +204,7 @@ jobs:
       - name: Summary
         run: |
           if [[ "${{ inputs.verify-only }}" == "true" ]]; then
-            echo "Verification of $TAG passed. Re-run without verify-only to publish."
+            echo "Verification of $TAG passed (release left as draft). Re-run without verify-only to publish."
           else
             echo "Release $TAG verified and published:"
             echo "  https://pypi.org/project/scenedetect/$VERSION/"

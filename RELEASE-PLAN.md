@@ -53,8 +53,7 @@ Optional: version referenced below as `X.Y[.Z]` - replace with the real version 
 
 ## 6. Publish & Release Checks
 
-- [ ] Publish Github release
-- [ ] Dispatch `release.yml` (Release Orchestrator) with the release tag. It publishes stage by stage, verifying each stage before the next: MSI install/uninstall + upgrade-from-previous on a clean Windows runner (`test-installer.yml`) -> TestPyPI publish -> pip smoke install from TestPyPI -> production PyPI publish (all 6 artifacts - sdist + wheel for `scenedetect-core`, `scenedetect`, and `scenedetect-headless`) -> pip smoke install from PyPI -> Docker publish (version tags + `latest`) -> docker pull + smoke run from GHCR. Use the `verify-only` input to stop after the TestPyPI stage without publishing anything user-facing. The underlying workflows (`test-installer.yml`, `publish-pypi.yml`, `docker-publish.yml`) can still be dispatched individually as a fallback.
+- [ ] Dispatch `release.yml` (Release Orchestrator) with the release tag while the Github release is still a **draft**. It runs the verify-then-publish ladder (MSI install/upgrade test -> TestPyPI -> publish Github release -> PyPI -> Docker), verifying each stage before the next; `verify-only` stops before anything goes public. See the header of `release.yml` for details.
 - [ ] Verify all three projects: https://pypi.org/project/scenedetect/, https://pypi.org/project/scenedetect-headless/, and https://pypi.org/project/scenedetect-core/.
 - [ ] Deploy website: `generate-website.yml`
 - [ ] Deploy docs: `generate-docs.yml`
