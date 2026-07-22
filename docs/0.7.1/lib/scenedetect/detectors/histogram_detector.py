@@ -145,10 +145,12 @@ class HistogramDetector(SceneDetector):
             relative frequency.
 
         Example:
-            >>> img = cv2.imread("path_to_image.jpg")
-            >>> hist = calculate_histogram(img, bins=256, normalize=True)
-            >>> print(hist.shape)
-            (256,)
+
+        .. code:: python
+
+            img = cv2.imread("path_to_image.jpg")
+            hist = HistogramDetector.calculate_histogram(img, bins=256, normalize=True)
+            assert hist.shape == (256,)
         """
         # Extract Luma channel from the frame image
         y, _, _ = cv2.split(cv2.cvtColor(frame_img, cv2.COLOR_BGR2YUV))
