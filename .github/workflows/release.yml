@@ -133,7 +133,10 @@ jobs:
         run: |
           set -euo pipefail
           source "$RUNNER_TEMP/dispatch.sh"
-          dispatch_and_watch publish-pypi.yml "$GITHUB_REF_NAME" -f "tag=$TAG" -f "environment=testpypi"
+          # Dispatched on the release tag: the pypi environment's deployment
+          # branch policy only permits release refs (v* tags / releases/*
+          # branches), and the tag is the immutable ref being released anyway.
+          dispatch_and_watch publish-pypi.yml "$TAG" -f "tag=$TAG" -f "environment=testpypi"
 
       - name: 'Stage 2 - Verify: pip install from TestPyPI'
         run: |
@@ -163,8 +166,9 @@ jobs:
           set -euo pipefail
           source "$RUNNER_TEMP/dispatch.sh"
           # publish-pypi.yml additionally gates production publishes on the
-          # build + release-test workflows being green for the tag.
-          dispatch_and_watch publish-pypi.yml "$GITHUB_REF_NAME" -f "tag=$TAG" -f "environment=pypi"
+          # build + release-test workflows being green for the tag. Dispatched
+          # on the tag ref to satisfy the pypi environment's deployment policy.
+          dispatch_and_watch publish-pypi.yml "$TAG" -f "tag=$TAG" -f "environment=pypi"
 
       - name: 'Stage 4 - Verify: pip install from PyPI'
         if: ${{ !inputs.verify-only }}
