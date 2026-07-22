@@ -33,7 +33,10 @@ RUN apt-get update && \
 # moviepy provides an alternative video splitting backend
 RUN --mount=type=cache,target=/root/.cache/pip \
     cp packaging/variants/pyproject-scenedetect-headless.toml pyproject.toml && \
-    pip install ".[pyav,moviepy]"
+    pip install ".[pyav,moviepy]" && \
+    # TODO(https://github.com/Zulko/moviepy/issues/2553): moviepy caps pillow<12.0, but 11.x has
+    # CVEs only fixed in 12.3.0+. Tests pass against 12.3.0; drop this once moviepy lifts the cap.
+    pip install "pillow==12.3.0"
 
 # Switch to the non-root user
 USER scenedetect

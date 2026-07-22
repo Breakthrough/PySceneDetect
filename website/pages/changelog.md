@@ -3,6 +3,40 @@
 
 ## PySceneDetect 0.7
 
+### PySceneDetect 0.7.1 (July 2026)
+
+PySceneDetect 0.7.1 adds a new `scenedetect-core` package and official Docker images to make downstream integration easier, along with support for concatenating multiple videos. It also includes several stability and robustness fixes for the PyAV and OpenCV backends.
+
+#### CLI Changes
+
+ - [feature] `split-video` has a new `--expand` flag: when scenes are detected within a time window (`-s`/`-e`), the first output clip is extended back to the start of the video and the last clip is extended forward to the end, so no footage outside the analysis window is dropped [#115](https://github.com/Breakthrough/PySceneDetect/issues/115)
+
+#### API Changes
+
+ - [feature] `scenedetect.detect()` now accepts a `backend` keyword argument (`"opencv"`, `"pyav"`, or `"moviepy"`) similar to `open_video`. Defaults to `"opencv"`, matching prior behavior.
+ - [feature] Add `expand_scenes_to_bounds()` helper in `scenedetect.scene_manager` to extend a scene list so the first scene starts at a given lower bound and the last scene ends at a given upper bound
+ - [feature] `VideoStream` now provides a public read-only `decode_failures` property reporting the number of frames that failed to decode and were skipped (defaults to 0; populated by the OpenCV and PyAV backends)
+ - [feature] Add `VideoStreamConcat` (`scenedetect.backends.concat`) which concatenates multiple videos into a single continuous stream with a monotonic PTS timeline; `open_video()` and `detect()` now accept a list of paths. `VideoStreamConcat.map_span()` maps spans of the global timeline back to per-source local times
+ - [bugfix] The PyAV backend (`VideoStreamAv`) now skips corrupt frames during `read()` and continues decoding instead of failing, giving up only after 8 consecutive decode failures (matching the OpenCV backend's tolerance behavior)
+ - [bugfix] The PyAV backend now normalizes presentation times by the stream start time, so files with a delayed start (e.g. from edit lists) report the first frame at `position` 0, consistent with other backends and with `seek()`
+ - [bugfix] Comparisons between two `FrameTimecode` objects that both carry exact presentation times (e.g. positions from VFR videos) and share the same frame rate are now performed exactly using `pts` and `time_base` instead of rounded frame numbers. Previously, distinct frames in VFR sections could compare equal or fail strict ordering when their times rounded to the same approximate frame number. Comparisons involving frame- or seconds-based timecodes, plain values (`int`/`float`/`str`), or differing frame rates are unchanged
+ - [bugfix] Fix image sequence inputs when using OpenCV 5.0
+
+#### Packaging
+
+ - [feature] Add `scenedetect-core`, a new library-only package with minimal dependencies (`numpy` only): it does not depend on any specific OpenCV variant, allowing downstream projects to choose their own (e.g. `opencv-contrib-python`), and does not include the CLI dependencies or the `scenedetect` command [#558](https://github.com/Breakthrough/PySceneDetect/issues/558). Convenience extras `scenedetect-core[opencv]` and `scenedetect-core[opencv-headless]` are provided
+ - [general] `scenedetect` and `scenedetect-headless` are unchanged: they continue to ship the full program (library + CLI) with `opencv-python` / `opencv-python-headless` respectively. All three packages provide the same `scenedetect` module (install or depend only one)
+ - [feature] Official Docker images are now published to the GitHub Container Registry with the full CLI, all backends, and external tools (ffmpeg, mkvmerge) included, thanks [@FNGarvin](https://github.com/FNGarvin) [#537](https://github.com/Breakthrough/PySceneDetect/pull/537)
+     - Example usage (process a video in the current directory):
+```bash
+docker run --rm -v "$(pwd):/files" ghcr.io/breakthrough/pyscenedetect -i /files/video.mp4 detect-adaptive split-video -o /files
+```
+ - [general] The Windows distribution now bundles OpenCV 5.0, PyAV 18, and FFmpeg 8.1.2. The Windows and Docker builds also override Pillow to 12.3.0 for upstream security fixes ([moviepy#2553](https://github.com/Zulko/moviepy/issues/2553))
+
+#### General
+
+ - [general] Benchmark results are now published on the website ([scenedetect.com/benchmarks](https://www.scenedetect.com/benchmarks/)), including accuracy at default settings and parameter sweep curves for each detector
+
 ### 0.7 (May 3, 2026)
 
 PySceneDetect 0.7 is a **major breaking release** which overhauls how timestamps are handled. This allows PySceneDetect to properly process variable framerate (VFR) videos. A significant amount of technical debt has been addressed, including removal of deprecated or overly complicated APIs.
@@ -747,33 +781,4 @@ Both the Windows installer and portable distributions now include signed executa
 Development
 ==========================================================
 
-## PySceneDetect 0.7.1 (TDB)
-
-#### CLI Changes
-
- - [feature] `split-video` has a new `--expand` flag: when scenes are detected within a time window (`-s`/`-e`), the first output clip is extended back to the start of the video and the last clip is extended forward to the end, so no footage outside the analysis window is dropped [#115](https://github.com/Breakthrough/PySceneDetect/issues/115)
-
-#### API Changes
-
- - [feature] `scenedetect.detect()` now accepts a `backend` keyword argument (`"opencv"`, `"pyav"`, or `"moviepy"`) similar to `open_video`. Defaults to `"opencv"`, matching prior behavior.
- - [feature] Add `expand_scenes_to_bounds()` helper in `scenedetect.scene_manager` to extend a scene list so the first scene starts at a given lower bound and the last scene ends at a given upper bound
- - [feature] `VideoStream` now provides a public read-only `decode_failures` property reporting the number of frames that failed to decode and were skipped (defaults to 0; populated by the OpenCV and PyAV backends)
- - [feature] Add `VideoStreamConcat` (`scenedetect.backends.concat`) which concatenates multiple videos into a single continuous stream with a monotonic PTS timeline; `open_video()` and `detect()` now accept a list of paths. `VideoStreamConcat.map_span()` maps spans of the global timeline back to per-source local times
- - [bugfix] The PyAV backend (`VideoStreamAv`) now skips corrupt frames during `read()` and continues decoding instead of failing, giving up only after 8 consecutive decode failures (matching the OpenCV backend's tolerance behavior)
- - [bugfix] The PyAV backend now normalizes presentation times by the stream start time, so files with a delayed start (e.g. from edit lists) report the first frame at `position` 0, consistent with other backends and with `seek()`
- - [bugfix] Comparisons between two `FrameTimecode` objects that both carry exact presentation times (e.g. positions from VFR videos) and share the same frame rate are now performed exactly using `pts` and `time_base` instead of rounded frame numbers. Previously, distinct frames in VFR sections could compare equal or fail strict ordering when their times rounded to the same approximate frame number. Comparisons involving frame- or seconds-based timecodes, plain values (`int`/`float`/`str`), or differing frame rates are unchanged
- - [bugfix] Fix image sequence inputs when using OpenCV 5.0
-
-#### Packaging
-
- - [feature] Add `scenedetect-core`, a new library-only package with minimal dependencies (`numpy` only): it does not depend on any specific OpenCV variant, allowing downstream projects to choose their own (e.g. `opencv-contrib-python`), and does not include the CLI dependencies or the `scenedetect` command [#558](https://github.com/Breakthrough/PySceneDetect/issues/558). Convenience extras `scenedetect-core[opencv]` and `scenedetect-core[opencv-headless]` are provided
- - [general] `scenedetect` and `scenedetect-headless` are unchanged: they continue to ship the full program (library + CLI) with `opencv-python` / `opencv-python-headless` respectively. All three packages provide the same `scenedetect` module (install or depend only one)
- - [feature] Official Docker images are now published to the GitHub Container Registry with the full CLI, all backends, and external tools (ffmpeg, mkvmerge) included, thanks [@FNGarvin](https://github.com/FNGarvin) [#537](https://github.com/Breakthrough/PySceneDetect/pull/537)
-     - Example usage (process a video in the current directory):
-```bash
-docker run --rm -v "$(pwd):/files" ghcr.io/breakthrough/pyscenedetect -i /files/video.mp4 detect-adaptive split-video -o /files
-```
-
-#### General
-
- - [general] Benchmark results are now published on the website ([scenedetect.com/benchmarks](https://www.scenedetect.com/benchmarks/)), including accuracy at default settings and parameter sweep curves for each detector
+## PySceneDetect 0.7.2 (TBD)
