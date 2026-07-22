@@ -20,7 +20,6 @@ which do not support seeking.
 import math
 import os
 import os.path
-import typing as ty
 import warnings
 from fractions import Fraction
 from logging import getLogger

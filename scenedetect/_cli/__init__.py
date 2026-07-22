@@ -22,7 +22,6 @@ import inspect
 import logging
 import os
 import os.path
-import typing as ty
 from copy import copy
 
 import click

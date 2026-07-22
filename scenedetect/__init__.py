@@ -30,49 +30,51 @@ except ModuleNotFoundError as ex:
 
 # Commonly used classes/functions exported under the `scenedetect` namespace for brevity.
 # Note that order of importants is important!
-from scenedetect.platform import init_logger  # noqa: I001
+from scenedetect.platform import init_logger as init_logger  # noqa: I001
 from scenedetect.common import (
-    FrameTimecode,
-    FrameRate,
-    SceneList,
-    CutList,
-    CropRegion,
-    TimecodePair,
-    TimecodeLike,
-    Interpolation,
+    FrameTimecode as FrameTimecode,
+    FrameRate as FrameRate,
+    SceneList as SceneList,
+    CutList as CutList,
+    CropRegion as CropRegion,
+    TimecodePair as TimecodePair,
+    TimecodeLike as TimecodeLike,
+    Interpolation as Interpolation,
 )
-from scenedetect.platform import StrPath
-from scenedetect.video_stream import VideoStream, VideoOpenFailure
+from scenedetect.platform import StrPath as StrPath
+from scenedetect.video_stream import VideoStream as VideoStream
+from scenedetect.video_stream import VideoOpenFailure as VideoOpenFailure
 from scenedetect.output import (
-    save_images,
-    split_video_ffmpeg,
-    split_video_mkvmerge,
-    is_ffmpeg_available,
-    is_mkvmerge_available,
-    write_scene_list,
-    write_scene_list_html,
-    PathFormatter,
-    VideoMetadata,
-    SceneMetadata,
+    save_images as save_images,
+    split_video_ffmpeg as split_video_ffmpeg,
+    split_video_mkvmerge as split_video_mkvmerge,
+    is_ffmpeg_available as is_ffmpeg_available,
+    is_mkvmerge_available as is_mkvmerge_available,
+    write_scene_list as write_scene_list,
+    write_scene_list_html as write_scene_list_html,
+    PathFormatter as PathFormatter,
+    VideoMetadata as VideoMetadata,
+    SceneMetadata as SceneMetadata,
 )
-from scenedetect.detector import SceneDetector
+from scenedetect.detector import SceneDetector as SceneDetector
 from scenedetect.detectors import (
-    ContentDetector,
-    AdaptiveDetector,
-    ThresholdDetector,
-    HistogramDetector,
-    HashDetector,
+    ContentDetector as ContentDetector,
+    AdaptiveDetector as AdaptiveDetector,
+    ThresholdDetector as ThresholdDetector,
+    HistogramDetector as HistogramDetector,
+    HashDetector as HashDetector,
 )
 from scenedetect.backends import (
-    AVAILABLE_BACKENDS,
-    VideoStreamCv2,
-    VideoStreamAv,
-    VideoStreamMoviePy,
-    VideoCaptureAdapter,
-    VideoStreamConcat,
-    SourceSpan,
+    AVAILABLE_BACKENDS as AVAILABLE_BACKENDS,
+    VideoStreamCv2 as VideoStreamCv2,
+    VideoStreamAv as VideoStreamAv,
+    VideoStreamMoviePy as VideoStreamMoviePy,
+    VideoCaptureAdapter as VideoCaptureAdapter,
+    VideoStreamConcat as VideoStreamConcat,
+    SourceSpan as SourceSpan,
 )
-from scenedetect.stats_manager import StatsManager, StatsFileCorrupt
+from scenedetect.stats_manager import StatsManager as StatsManager
+from scenedetect.stats_manager import StatsFileCorrupt as StatsFileCorrupt
 from scenedetect.scene_manager import SceneManager
 
 # Used for module identification and when printing version & about info

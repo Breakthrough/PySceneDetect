@@ -39,16 +39,30 @@ from scenedetect.common import (
 )
 
 # Commonly used classes/functions exported under the `scenedetect.output` namespace for brevity.
-from scenedetect.output.image import save_images
+from scenedetect.output.image import save_images as save_images
 from scenedetect.output.video import (
-    PathFormatter,
-    SceneMetadata,
-    VideoMetadata,
-    default_formatter,
-    is_ffmpeg_available,
-    is_mkvmerge_available,
-    split_video_ffmpeg,
-    split_video_mkvmerge,
+    PathFormatter as PathFormatter,
+)
+from scenedetect.output.video import (
+    SceneMetadata as SceneMetadata,
+)
+from scenedetect.output.video import (
+    VideoMetadata as VideoMetadata,
+)
+from scenedetect.output.video import (
+    default_formatter as default_formatter,
+)
+from scenedetect.output.video import (
+    is_ffmpeg_available as is_ffmpeg_available,
+)
+from scenedetect.output.video import (
+    is_mkvmerge_available as is_mkvmerge_available,
+)
+from scenedetect.output.video import (
+    split_video_ffmpeg as split_video_ffmpeg,
+)
+from scenedetect.output.video import (
+    split_video_mkvmerge as split_video_mkvmerge,
 )
 
 logger = logging.getLogger("pyscenedetect")
