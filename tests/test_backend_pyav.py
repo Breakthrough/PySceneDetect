@@ -22,11 +22,11 @@ import av
 from scenedetect.backends.pyav import MAX_CONSECUTIVE_DECODE_FAILURES, VideoStreamAv
 
 
-def test_video_stream_pyav_bytesio(test_video_file: str):
+def test_video_stream_pyav_bytesio(test_video_file: str, auto_close):
     """Test that VideoStreamAv works with a BytesIO input in addition to a path."""
     # Mode must be binary!
     with open(test_video_file, mode="rb") as video_file:
-        stream = VideoStreamAv(path_or_io=video_file, threading_mode=None)
+        stream = auto_close(VideoStreamAv(path_or_io=video_file, threading_mode=None))
         assert stream.is_seekable
         stream.seek(50)
         for _ in range(10):
@@ -56,9 +56,9 @@ class _FaultInjectingContainer:
         return getattr(self._container, name)
 
 
-def test_read_tolerates_corrupt_frame(test_video_file: str):
+def test_read_tolerates_corrupt_frame(test_video_file: str, auto_close):
     """A decode error partway through the stream must be skipped, not stop decoding."""
-    stream = VideoStreamAv(test_video_file)
+    stream = auto_close(VideoStreamAv(test_video_file))
     injected = False
 
     def fault_injecting_decode(container, *args, **kwargs):
@@ -76,9 +76,9 @@ def test_read_tolerates_corrupt_frame(test_video_file: str):
     assert stream.decode_failures == 1
 
 
-def test_read_gives_up_after_consecutive_failures(test_video_file: str, caplog):
+def test_read_gives_up_after_consecutive_failures(test_video_file: str, caplog, auto_close):
     """After too many consecutive decode failures, read() must return False, not hang."""
-    stream = VideoStreamAv(test_video_file)
+    stream = auto_close(VideoStreamAv(test_video_file))
 
     def always_failing_decode(container, *args, **kwargs):
         raise _make_invalid_data_error()

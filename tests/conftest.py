@@ -161,13 +161,40 @@ def delayed_start_video() -> str:
     return check_exists("tests/resources/delayed_start.mp4")
 
 
+@pytest.fixture
+def auto_close():
+    """Registers VideoStreams (or anything closeable) for deterministic cleanup at test end.
+
+    Usage: ``video = auto_close(open_video(path))``. Returns its argument unchanged.
+    Closing test-owned streams while the interpreter is healthy avoids ResourceWarnings
+    (unclosed PyAV containers / file handles) finalizing during interpreter shutdown,
+    where native teardown can crash the process exit code (windows-latest CI flake).
+    """
+    from tests.helpers import close_video_stream
+
+    streams = []
+
+    def _register(stream):
+        streams.append(stream)
+        return stream
+
+    yield _register
+    for stream in streams:
+        close_video_stream(stream)
+
+
 def pytest_unconfigure(config):
     """Diagnostic for a windows-latest CI flake (silent exit 1 after a green run):
     report any non-main threads still alive at session end. Leaked threads keep
     VideoStreams alive into interpreter shutdown, where native teardown can crash
     the process exit code. tqdm's global monitor singleton is expected and ignored."""
+    import gc
     import sys
     import threading
+
+    # Finalize any lingering test-owned objects (e.g. av containers kept alive by reference
+    # cycles) while the interpreter is still healthy, instead of at interpreter shutdown.
+    gc.collect()
 
     leftover = [
         t
