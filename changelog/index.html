@@ -295,7 +295,7 @@
                 <h1 id="releases">Releases</h1>
 <h2 id="pyscenedetect-07">PySceneDetect 0.7</h2>
 <h3 id="pyscenedetect-071-july-21-2026">PySceneDetect 0.7.1 (July 21, 2026)</h3>
-<p>PySceneDetect 0.7.1 adds a new <code>scenedetect-core</code> package and official Docker images to make downstream integration easier, along with support for concatenating multiple videos. It also includes several stability and robustness fixes for the PyAV and OpenCV backends.</p>
+<p>PySceneDetect 0.7.1 adds support for concatenating multiple videos, along with several stability and robustness fixes for the PyAV and OpenCV backends.</p>
 <h4 id="cli-changes">CLI Changes</h4>
 <ul>
 <li>[feature] <code>split-video</code> has a new <code>--expand</code> flag: when scenes are detected within a time window (<code>-s</code>/<code>-e</code>), the first output clip is extended back to the start of the video and the last clip is extended forward to the end, so no footage outside the analysis window is dropped <a href="https://github.com/Breakthrough/PySceneDetect/issues/115">#115</a></li>
@@ -313,8 +313,7 @@
 </ul>
 <h4 id="packaging">Packaging</h4>
 <ul>
-<li>[feature] Add <code>scenedetect-core</code>, a new library-only package with minimal dependencies (<code>numpy</code> only): it does not depend on any specific OpenCV variant, allowing downstream projects to choose their own (e.g. <code>opencv-contrib-python</code>), and does not include the CLI dependencies or the <code>scenedetect</code> command <a href="https://github.com/Breakthrough/PySceneDetect/issues/558">#558</a>. Convenience extras <code>scenedetect-core[opencv]</code> and <code>scenedetect-core[opencv-headless]</code> are provided</li>
-<li>[general] <code>scenedetect</code> and <code>scenedetect-headless</code> are unchanged: they continue to ship the full program (library + CLI) with <code>opencv-python</code> / <code>opencv-python-headless</code> respectively. All three packages provide the same <code>scenedetect</code> module (install or depend only one)</li>
+<li>[general] <code>scenedetect</code> and <code>scenedetect-headless</code> are unchanged: they continue to ship the full program (library + CLI) with <code>opencv-python</code> / <code>opencv-python-headless</code> respectively. Both packages provide the same <code>scenedetect</code> module (install or depend only one)</li>
 <li>[feature] Official Docker images are now published to the GitHub Container Registry with the full CLI, all backends, and external tools (ffmpeg, mkvmerge) included, thanks <a href="https://github.com/FNGarvin">@FNGarvin</a> <a href="https://github.com/Breakthrough/PySceneDetect/pull/537">#537</a><ul>
 <li>Example usage (process a video in the current directory):</li>
 </ul>
@@ -1052,6 +1051,9 @@
 <hr />
 <h1 id="development">Development</h1>
 <h2 id="pyscenedetect-072-tbd">PySceneDetect 0.7.2 (TBD)</h2>
+<ul>
+<li>[general] The <code>scenedetect-core</code> package introduced in 0.7.1 has been discontinued, and its only release (0.7.1) yanked from PyPI: pip cannot safely support multiple packages that install the same module files, and restructuring the existing packages around a shared core would break in-place upgrades. Existing <code>scenedetect-core</code> installs keep working but will not receive updates; install <code>scenedetect</code> or <code>scenedetect-headless</code> instead. Support for choosing a different OpenCV variant remains tracked in <a href="https://github.com/Breakthrough/PySceneDetect/issues/558">#558</a></li>
+</ul>
               
             </div>
           </div><footer>

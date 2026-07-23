@@ -136,10 +136,12 @@
 <p>For server environments without GUI libraries, install the headless variant instead, which depends on <code>opencv-python-headless</code>:</p>
 <pre><code class="language-bash">pip install scenedetect-headless
 </code></pre>
-<p>For projects that need a different OpenCV variant (e.g. <code>opencv-contrib-python</code>), install <a href="https://pypi.org/project/scenedetect-core/"><code>scenedetect-core</code></a> instead: it provides the library without the CLI and does not declare any OpenCV variant, so you can pair it with whichever one you need:</p>
-<pre><code class="language-bash">pip install scenedetect-core opencv-contrib-python
+<p>Both packages ship the same <code>scenedetect</code> Python module -- install only one of them.</p>
+<p>For projects that need a different OpenCV variant (e.g. <code>opencv-contrib-python</code>), install it <em>pinned to the same version</em> as the <code>opencv-python</code> variant your scenedetect package pulled in, so the two resolve to identical <code>cv2</code> files:</p>
+<pre><code class="language-bash">pip install scenedetect
+pip install &quot;opencv-contrib-python==$(pip show opencv-python | grep ^Version | cut -d' ' -f2)&quot;
 </code></pre>
-<p>All of these packages ship the same <code>scenedetect</code> Python module -- install only one of them.</p>
+<p>Mixing OpenCV variants at <em>different</em> versions corrupts the shared <code>cv2</code> install. First-class support for choosing your own OpenCV variant is tracked in <a href="https://github.com/Breakthrough/PySceneDetect/issues/558">#558</a>.</p>
 <h4 id="how-can-i-enable-video-splitting-support">How can I enable video splitting support?</h4>
 <p>Video splitting is performed by <code>ffmpeg</code> (<a href="https://ffmpeg.org/download.html">https://ffmpeg.org/download.html</a>) or <code>mkvmerge</code> (<a href="https://mkvtoolnix.download/downloads.html">https://mkvtoolnix.download/downloads.html</a>) depending on which command line arguments are used. Ensure the tool is available and somewhere in your system's PATH folder.</p>
 <h4 id="how-can-i-fix-the-error-cannot-split-video-due-to-too-many-scenes">How can I fix the error <code>Cannot split video due to too many scenes</code>?</h4>
