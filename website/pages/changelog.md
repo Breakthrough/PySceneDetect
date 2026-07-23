@@ -5,7 +5,7 @@
 
 ### PySceneDetect 0.7.1 (July 2026)
 
-PySceneDetect 0.7.1 adds a new `scenedetect-core` package and official Docker images to make downstream integration easier, along with support for concatenating multiple videos. It also includes several stability and robustness fixes for the PyAV and OpenCV backends.
+PySceneDetect 0.7.1 adds support for concatenating multiple videos, along with several stability and robustness fixes for the PyAV and OpenCV backends.
 
 #### CLI Changes
 
@@ -24,8 +24,7 @@ PySceneDetect 0.7.1 adds a new `scenedetect-core` package and official Docker im
 
 #### Packaging
 
- - [feature] Add `scenedetect-core`, a new library-only package with minimal dependencies (`numpy` only): it does not depend on any specific OpenCV variant, allowing downstream projects to choose their own (e.g. `opencv-contrib-python`), and does not include the CLI dependencies or the `scenedetect` command [#558](https://github.com/Breakthrough/PySceneDetect/issues/558). Convenience extras `scenedetect-core[opencv]` and `scenedetect-core[opencv-headless]` are provided
- - [general] `scenedetect` and `scenedetect-headless` are unchanged: they continue to ship the full program (library + CLI) with `opencv-python` / `opencv-python-headless` respectively. All three packages provide the same `scenedetect` module (install or depend only one)
+ - [general] `scenedetect` and `scenedetect-headless` are unchanged: they continue to ship the full program (library + CLI) with `opencv-python` / `opencv-python-headless` respectively. Both packages provide the same `scenedetect` module (install or depend only one)
  - [feature] Official Docker images are now published to the GitHub Container Registry with the full CLI, all backends, and external tools (ffmpeg, mkvmerge) included, thanks [@FNGarvin](https://github.com/FNGarvin) [#537](https://github.com/Breakthrough/PySceneDetect/pull/537)
      - Example usage (process a video in the current directory):
 ```bash
@@ -782,3 +781,5 @@ Development
 ==========================================================
 
 ## PySceneDetect 0.7.2 (TBD)
+
+ - [general] The `scenedetect-core` package introduced in 0.7.1 has been discontinued, and its only release (0.7.1) yanked from PyPI: pip cannot safely support multiple packages that install the same module files, and restructuring the existing packages around a shared core would break in-place upgrades. Existing `scenedetect-core` installs keep working but will not receive updates; install `scenedetect` or `scenedetect-headless` instead. Support for choosing a different OpenCV variant remains tracked in [#558](https://github.com/Breakthrough/PySceneDetect/issues/558)

@@ -16,13 +16,16 @@ For server environments without GUI libraries, install the headless variant inst
 pip install scenedetect-headless
 ```
 
-For projects that need a different OpenCV variant (e.g. `opencv-contrib-python`), install [`scenedetect-core`](https://pypi.org/project/scenedetect-core/) instead: it provides the library without the CLI and does not declare any OpenCV variant, so you can pair it with whichever one you need:
+Both packages ship the same `scenedetect` Python module -- install only one of them.
+
+For projects that need a different OpenCV variant (e.g. `opencv-contrib-python`), install it *pinned to the same version* as the `opencv-python` variant your scenedetect package pulled in, so the two resolve to identical `cv2` files:
 
 ```bash
-pip install scenedetect-core opencv-contrib-python
+pip install scenedetect
+pip install "opencv-contrib-python==$(pip show opencv-python | grep ^Version | cut -d' ' -f2)"
 ```
 
-All of these packages ship the same `scenedetect` Python module -- install only one of them.
+Mixing OpenCV variants at *different* versions corrupts the shared `cv2` install. First-class support for choosing your own OpenCV variant is tracked in [#558](https://github.com/Breakthrough/PySceneDetect/issues/558).
 
 #### How can I enable video splitting support?
 
