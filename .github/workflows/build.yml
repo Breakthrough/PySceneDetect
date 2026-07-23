@@ -88,7 +88,7 @@ jobs:
       - name: Build Package
         shell: bash
         run: |
-          # Builds scenedetect-core plus the scenedetect/scenedetect-headless variants.
+          # Builds the scenedetect/scenedetect-headless packages.
           python packaging/build_all.py
           echo "scenedetect_version=`python -c \"import scenedetect; print(scenedetect.__version__.replace('-', '.'))\"`" >> "$GITHUB_ENV"
 
@@ -132,40 +132,16 @@ jobs:
           scenedetect -i tests/resources/testvideo.mp4 -b opencv time --end 2s
           scenedetect -i tests/resources/testvideo.mp4 -b pyav time --end 2s
 
-      - name: Smoke Test Package (Core Only)
-        shell: bash
-        run: |
-          python -m venv .smoke-core
-          VENV_BIN=.smoke-core/bin
-          [ -d .smoke-core/Scripts ] && VENV_BIN=.smoke-core/Scripts
-          source "$VENV_BIN/activate"
-          pip install "dist/scenedetect_core-${{ env.scenedetect_version }}-py3-none-any.whl"
-          # Core declares no OpenCV variant; importing without one must raise the friendly error.
-          python -c "
-          try:
-              import scenedetect
-              raise AssertionError('import should fail without cv2')
-          except ModuleNotFoundError as ex:
-              assert ex.name == 'cv2', ex
-          "
-          # Any variant satisfies the library; core must not drag in CLI deps or the entry point.
-          pip install opencv-python-headless
-          python -c "import scenedetect; print(scenedetect.__version__)"
-          python -c "import importlib.util as u; assert u.find_spec('click') is None, 'click must not be a core dependency'"
-          python -c "import importlib.util as u; assert u.find_spec('tqdm') is None, 'tqdm must not be a core dependency'"
-          if command -v scenedetect >/dev/null 2>&1; then
-            echo "The scenedetect entry point must not be installed by scenedetect-core"
-            exit 1
-          fi
-
       - name: Smoke Test Package (Upgrade From 0.7)
         shell: bash
         run: |
-          # All three packages ship the code (no metapackage layering) precisely so that
-          # in-place upgrades from pre-0.7.1 installs keep working - a code-carrying dist
+          # Both packages ship the code (no metapackage layering) precisely so that
+          # in-place upgrades from older installs keep working - a code-carrying dist
           # flipped to a code-free metapackage would break here, since uninstalling the old
-          # version deletes module files a dependency just wrote. Keep this as a regression
-          # guard for that failure mode (https://scenedetect.com/issues/558).
+          # version deletes module files a dependency just wrote. This is also why the
+          # short-lived scenedetect-core (published in 0.7.1 only) was yanked rather than
+          # layered on. Keep this as a regression guard for that failure mode
+          # (https://scenedetect.com/issues/558).
           python -m venv .smoke-upgrade
           VENV_BIN=.smoke-upgrade/bin
           [ -d .smoke-upgrade/Scripts ] && VENV_BIN=.smoke-upgrade/Scripts

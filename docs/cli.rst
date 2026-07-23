@@ -312,13 +312,13 @@ Options
 
   Max distance between hash values (0.0 to 1.0) of adjacent frames. Lower values are more sensitive to changes.
 
-  Default: ``0.395``
+  Default: ``0.35``
 
 .. option:: -s SIZE, --size SIZE
 
   Size of square of low frequency data to include from the discrete cosine transform.
 
-  Default: ``16``
+  Default: ``8``
 
 .. option:: -l FRAC, --lowpass FRAC
 
@@ -363,13 +363,13 @@ Options
 
   Max difference (0.0 to 1.0) between histograms of adjacent frames. Lower values are more sensitive to changes.
 
-  Default: ``0.05``
+  Default: ``0.2``
 
 .. option:: -b NUM, --bins NUM
 
   The number of bins to use for the histogram calculation.
 
-  Default: ``256``
+  Default: ``128``
 
 .. option:: -m TIMECODE, --min-scene-len TIMECODE
 

@@ -41,10 +41,13 @@ classifiers = [
     "Topic :: Utilities",
 ]
 # OpenCV is required at runtime but intentionally NOT declared: any of the four
-# opencv-python* variants satisfies the library, and downstream projects must be
-# able to pick their own (https://scenedetect.com/issues/558). The `scenedetect`
-# and `scenedetect-headless` packages (packaging/variants/) ship the same code
-# with a concrete OpenCV variant plus the CLI dependencies.
+# opencv-python* variants satisfies the library for development installs. This root
+# config (`scenedetect-core`) is used for local/dev installs only and is NOT
+# published to PyPI (0.7.1 was published briefly and yanked - layering the published
+# packages over a shared core dist is unsafe with pip; see
+# https://scenedetect.com/issues/558). The published `scenedetect` and
+# `scenedetect-headless` packages (packaging/variants/) ship the same code with a
+# concrete OpenCV variant plus the CLI dependencies.
 dependencies = [
     "numpy",
 ]

@@ -379,13 +379,13 @@ CONFIG_MAP: ConfigDict = {
     "detect-hash": {
         "min-scene-len": TimecodeValue(0),
         "lowpass": RangeValue(2, min_val=1, max_val=256),
-        "size": RangeValue(16, min_val=1, max_val=256),
-        "threshold": RangeValue(0.395, min_val=0.0, max_val=1.0),
+        "size": RangeValue(8, min_val=1, max_val=256),
+        "threshold": RangeValue(0.35, min_val=0.0, max_val=1.0),
     },
     "detect-hist": {
         "min-scene-len": TimecodeValue(0),
-        "threshold": RangeValue(0.05, min_val=0.0, max_val=1.0),
-        "bins": RangeValue(256, min_val=1, max_val=256),
+        "threshold": RangeValue(0.20, min_val=0.0, max_val=1.0),
+        "bins": RangeValue(128, min_val=1, max_val=256),
     },
     "detect-threshold": {
         "add-last-scene": True,

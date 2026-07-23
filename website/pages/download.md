@@ -15,13 +15,12 @@ PySceneDetect requires at least Python 3.10 or higher.
 <pre class="command"><code class="nohighlight">pip install --upgrade scenedetect-headless</code></pre>
 </div>
 
-PySceneDetect is available via `pip` as three packages:
+PySceneDetect is available via `pip` as two packages:
 
  - [`scenedetect`](https://pypi.org/project/scenedetect/): full install with the CLI, depends on `opencv-python`
  - [`scenedetect-headless`](https://pypi.org/project/scenedetect-headless/): full install with the CLI, depends on `opencv-python-headless` (servers/containers without GUI libraries)
- - [`scenedetect-core`](https://pypi.org/project/scenedetect-core/): library only, minimal dependencies. *Requires at least one of the `opencv-python` package variants to be installed*.
 
-All three provide the same `scenedetect` Python module -- install only one of them.
+Both provide the same `scenedetect` Python module -- install only one of them.
 
 ## Windows Build (64-bit Only) &nbsp; <span class="wy-text-neutral"><span class="fa fa-windows"></span></span>
 
@@ -60,7 +59,7 @@ After installation, you can call PySceneDetect from any terminal/command prompt 
 
 ### Python Packages
 
-PySceneDetect requires [Python 3](https://www.python.org/) and the following packages. The `scenedetect` and `scenedetect-headless` packages install all of them automatically; `scenedetect-core` installs only Numpy, and requires an OpenCV variant to be installed separately:
+PySceneDetect requires [Python 3](https://www.python.org/) and the following packages, all of which the `scenedetect` and `scenedetect-headless` packages install automatically:
 
  - [OpenCV](http://opencv.org/): `pip install opencv-python` (any `opencv-python*` variant works)
  - [Numpy](https://numpy.org/): `pip install numpy`

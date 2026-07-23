@@ -7,20 +7,23 @@
 #
 # Copyright (C) 2026 Brandon Castellano <http://www.bcastell.com>.
 #
-"""Builds all three PySceneDetect distributions into dist/:
+"""Builds the two published PySceneDetect distributions into dist/:
 
-  - scenedetect-core: minimal dependencies (numpy only, no OpenCV variant declared,
-    no console script) - built from the repo root pyproject.toml
-  - scenedetect / scenedetect-headless: the same code plus an OpenCV variant, the
-    CLI dependencies, and the `scenedetect` console script
+  - scenedetect / scenedetect-headless: the full package (code, an OpenCV variant,
+    the CLI dependencies, and the `scenedetect` console script), produced by
+    temporarily swapping packaging/variants/pyproject-<name>.toml into the repo
+    root (restored afterwards, even on failure)
 
-All three are code-carrying packages built from the repo root, so they share the
-same source, readme, and dynamic version. The scenedetect / scenedetect-headless
-variants are produced by temporarily swapping packaging/variants/pyproject-<name>.toml
-into the repo root (restored afterwards, even on failure).
+Both are standalone code-carrying packages built from the repo root, so they share
+the same source, readme, and dynamic version. The root pyproject.toml
+(`scenedetect-core`) is a development/local-install configuration only and is NOT
+built or published here: scenedetect-core 0.7.1 was briefly published and then
+yanked - layering packages over a shared core dist is unsafe with pip (co-installed
+variants double-own files, and converting an existing code-carrying name to a
+metapackage breaks in-place upgrades; see https://scenedetect.com/issues/558).
 
 Requires `build` (pip install build). Fails if dist/ ends up with any wheel/sdist
-besides the six expected artifacts, so clear stale build artifacts from dist/ first.
+besides the four expected artifacts, so clear stale build artifacts from dist/ first.
 (Other dist/ contents are ignored - e.g. dist/logo/ is tracked website assets.)
 """
 
@@ -63,7 +66,6 @@ def main() -> None:
             "and re-run."
         )
 
-    build()  # scenedetect-core from the unmodified repo root.
     try:
         for name in VARIANTS:
             variant = (ROOT / "packaging" / "variants" / f"pyproject-{name}.toml").read_text(
@@ -76,7 +78,7 @@ def main() -> None:
         PYPROJECT.write_text(original, encoding="utf-8")
 
     expected = set()
-    for name in ("scenedetect-core", *VARIANTS):
+    for name in VARIANTS:
         normalized = name.replace("-", "_")
         expected.add(f"{normalized}-{version}.tar.gz")
         expected.add(f"{normalized}-{version}-py3-none-any.whl")

@@ -103,8 +103,8 @@ jobs:
           run-id: ${{ steps.resolve.outputs.run-id }}
 
       - name: List artifact contents
-        # Expect 6 files: sdist + wheel for each of scenedetect-core, scenedetect,
-        # and scenedetect-headless. All three projects publish from this one step;
+        # Expect 4 files: sdist + wheel for each of scenedetect and
+        # scenedetect-headless. Both projects publish from this one step;
         # each needs a trusted publisher configured on PyPI/TestPyPI for this workflow.
         run: ls -la pkg/
 

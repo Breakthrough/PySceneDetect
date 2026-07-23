@@ -213,6 +213,5 @@ jobs:
             echo "Release $TAG verified and published:"
             echo "  https://pypi.org/project/scenedetect/$VERSION/"
             echo "  https://pypi.org/project/scenedetect-headless/$VERSION/"
-            echo "  https://pypi.org/project/scenedetect-core/$VERSION/"
             echo "  https://github.com/$GH_REPO/pkgs/container/pyscenedetect"
           fi

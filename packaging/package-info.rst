@@ -25,7 +25,7 @@ Github Repo: https://github.com/Breakthrough/PySceneDetect/
 
 Install: ``pip install --upgrade scenedetect`` (or ``scenedetect-headless`` for servers)
 
-Packages: `scenedetect <https://pypi.org/project/scenedetect/>`_ (CLI + ``opencv-python``), `scenedetect-headless <https://pypi.org/project/scenedetect-headless/>`_ (CLI + ``opencv-python-headless``), and `scenedetect-core <https://pypi.org/project/scenedetect-core/>`_ (library only, minimal dependencies, bring your own OpenCV variant). All provide the same ``scenedetect`` module -- install only one.
+Packages: `scenedetect <https://pypi.org/project/scenedetect/>`_ (CLI + ``opencv-python``) and `scenedetect-headless <https://pypi.org/project/scenedetect-headless/>`_ (CLI + ``opencv-python-headless``). Both provide the same ``scenedetect`` module -- install only one.
 
 ----------------------------------------------------------
 

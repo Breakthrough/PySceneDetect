@@ -46,8 +46,8 @@ class HashDetector(SceneDetector):
 
     def __init__(
         self,
-        threshold: float = 0.395,
-        size: int = 16,
+        threshold: float = 0.35,
+        size: int = 8,
         lowpass: int = 2,
         min_scene_len: TimecodeLike = 15,
     ):

@@ -48,7 +48,7 @@ jobs:
           fi
       - name: Build and Check
         run: |
-          # Builds scenedetect-core plus the scenedetect/scenedetect-headless variants.
+          # Builds the scenedetect/scenedetect-headless packages.
           python packaging/build_all.py
           # Glob by extension: dist/ also holds tracked website assets (dist/logo/),
           # which `twine check dist/*` would reject as an unknown distribution.

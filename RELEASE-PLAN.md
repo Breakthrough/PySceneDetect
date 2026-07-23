@@ -54,7 +54,7 @@ Optional: version referenced below as `X.Y[.Z]` - replace with the real version 
 ## 6. Publish & Release Checks
 
 - [ ] Dispatch `release.yml` (Release Orchestrator) with the release tag while the Github release is still a **draft**. It runs the verify-then-publish ladder (MSI install/upgrade test -> TestPyPI -> publish Github release -> PyPI -> Docker), verifying each stage before the next; `verify-only` stops before anything goes public. See the header of `release.yml` for details.
-- [ ] Verify all three projects: https://pypi.org/project/scenedetect/, https://pypi.org/project/scenedetect-headless/, and https://pypi.org/project/scenedetect-core/.
+- [ ] Verify both projects: https://pypi.org/project/scenedetect/ and https://pypi.org/project/scenedetect-headless/.
 - [ ] Deploy website: `generate-website.yml`
 - [ ] Deploy docs: `generate-docs.yml`
 - [ ] Merge release branch back into `main`, verify `docs/LATEST_VERSION` is correct

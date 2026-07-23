@@ -97,7 +97,8 @@ class TestCase:
 def get_fast_cut_test_cases():
     """Fixture for parameterized test cases that detect fast cuts."""
     test_cases = []
-    # goldeneye.mp4 with min_scene_len = 15 (default)
+    # goldeneye.mp4 with min_scene_len = 15 (default). HistogramDetector's recalibrated defaults
+    # (threshold=0.20, bins=128) are less sensitive and do not trigger on the cut at frame 1260.
     test_cases += [
         pytest.param(
             TestCase(
@@ -105,7 +106,11 @@ def get_fast_cut_test_cases():
                 detector=detector_type(min_scene_len=15),
                 start_time=1199,
                 end_time=1450,
-                scene_boundaries=[1199, 1226, 1260, 1281, 1334, 1365],
+                scene_boundaries=(
+                    [1199, 1226, 1281, 1334, 1365]
+                    if detector_type is HistogramDetector
+                    else [1199, 1226, 1260, 1281, 1334, 1365]
+                ),
             ),
             id=f"{detector_type.__name__}/default",
         )
@@ -119,7 +124,11 @@ def get_fast_cut_test_cases():
                 detector=detector_type(min_scene_len=30),
                 start_time=1199,
                 end_time=1450,
-                scene_boundaries=[1199, 1260, 1334, 1365],
+                scene_boundaries=(
+                    [1199, 1281, 1334, 1365]
+                    if detector_type is HistogramDetector
+                    else [1199, 1260, 1334, 1365]
+                ),
             ),
             id=f"{detector_type.__name__}/m=30",
         )
@@ -241,7 +250,13 @@ def test_min_scene_len_accepts_time_values(detector_type, min_scene_len):
         detector=detector_type(min_scene_len=min_scene_len),
         start_time=1199,
         end_time=1450,
-        scene_boundaries=[1199, 1260, 1334, 1365],
+        # HistogramDetector's recalibrated defaults do not trigger on the cut at frame 1260
+        # (see `get_fast_cut_test_cases`).
+        scene_boundaries=(
+            [1199, 1281, 1334, 1365]
+            if detector_type is HistogramDetector
+            else [1199, 1260, 1334, 1365]
+        ),
     )
     scene_list = test_case.detect()
     start_frames = [timecode.frame_num for timecode, _ in scene_list]
