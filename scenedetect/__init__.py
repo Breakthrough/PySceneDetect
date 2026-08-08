@@ -15,6 +15,7 @@ can be used to open a video for a
 :class:`SceneManager <scenedetect.scene_manager.SceneManager>`.
 """
 
+import warnings
 from logging import getLogger
 
 # OpenCV is a required package, but we don't have it as an explicit dependency since we
@@ -115,8 +116,13 @@ def open_video(
         :class:`VideoOpenFailure`: Constructing the VideoStream fails. If multiple backends have
             been attempted, the error from the first backend will be returned.
     """
-    # TODO(https://scenedetect.com/issue/548): emit DeprecationWarning when `framerate=` is
-    # used, once internal callers and downstream users have had a release to migrate.
+    if framerate is not None:
+        warnings.warn(
+            "`framerate` is deprecated and scheduled for removal in v0.9; "
+            "use `frame_rate` instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
     if frame_rate is None:
         frame_rate = framerate
     # A list of paths is opened as a single concatenated stream. VideoStreamConcat handles

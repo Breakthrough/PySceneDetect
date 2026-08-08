@@ -22,6 +22,7 @@ import inspect
 import logging
 import os
 import os.path
+import warnings
 from copy import copy
 
 import click
@@ -361,8 +362,13 @@ def scenedetect(
     ctx = ctx.obj
     assert isinstance(ctx, CliContext)
 
-    # TODO(https://scenedetect.com/issue/548): emit DeprecationWarning when `--framerate`
-    # is used, once downstream users have had a release to migrate to `--frame-rate`.
+    if framerate_legacy is not None:
+        warnings.warn(
+            "`--framerate` is deprecated; use `--frame-rate` instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+
     if frame_rate is None:
         frame_rate = framerate_legacy
     elif framerate_legacy is not None:

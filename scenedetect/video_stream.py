@@ -66,7 +66,7 @@ class FrameRateUnavailable(VideoOpenFailure):
 
     def __init__(self):
         super().__init__(
-            "Unable to obtain video framerate! Specify `framerate` manually, or"
+            "Unable to obtain video framerate! Specify `frame_rate` manually, or"
             " re-encode/re-mux the video and try again."
         )
 

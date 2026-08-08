@@ -336,7 +336,7 @@ def test_cli_detector_with_stats(tmp_path, detector_command: str):
 
 
 def test_cli_framerate_legacy_alias():
-    """`--framerate` is the soft-deprecated hidden alias for `-f/--frame-rate` (issue #548).
+    """`--framerate` is the deprecated hidden alias for `-f/--frame-rate` (issue #548).
     Both forms must be accepted; passing both should not error."""
     # Canonical form.
     exit_code, _ = invoke_cli(
@@ -344,26 +344,28 @@ def test_cli_framerate_legacy_alias():
     )
     assert exit_code == 0
     # Legacy form.
-    exit_code, _ = invoke_cli(
-        ["-i", DEFAULT_VIDEO_PATH, "--framerate", "30.0", "time", "-s", "2s", "-d", "4s"]
-    )
+    with pytest.warns(DeprecationWarning, match="--frame-rate"):
+        exit_code, _ = invoke_cli(
+            ["-i", DEFAULT_VIDEO_PATH, "--framerate", "30.0", "time", "-s", "2s", "-d", "4s"]
+        )
     assert exit_code == 0
     # Both forms together: `--frame-rate` wins, a warning is logged but no error.
-    exit_code, _ = invoke_cli(
-        [
-            "-i",
-            DEFAULT_VIDEO_PATH,
-            "--frame-rate",
-            "30.0",
-            "--framerate",
-            "24.0",
-            "time",
-            "-s",
-            "2s",
-            "-d",
-            "4s",
-        ]
-    )
+    with pytest.warns(DeprecationWarning, match="--frame-rate"):
+        exit_code, _ = invoke_cli(
+            [
+                "-i",
+                DEFAULT_VIDEO_PATH,
+                "--frame-rate",
+                "30.0",
+                "--framerate",
+                "24.0",
+                "time",
+                "-s",
+                "2s",
+                "-d",
+                "4s",
+            ]
+        )
     assert exit_code == 0
 
 

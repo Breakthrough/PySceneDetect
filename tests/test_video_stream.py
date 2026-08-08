@@ -359,14 +359,16 @@ def test_invalid_path(vs_type: ty.Callable[..., VideoStream]):
 
 
 def test_framerate_legacy_alias(vs_type: ty.Callable[..., VideoStream], auto_close):
-    """`framerate=` is the soft-deprecated alias for `frame_rate=` (issue #548). All backends
+    """`framerate=` is the deprecated alias for `frame_rate=` (issue #548). All backends
     must accept both forms and produce the same `frame_rate`."""
     path = get_absolute_path("resources/goldeneye.mp4")
-    legacy = auto_close(vs_type(path, framerate=30.0))
+    with pytest.warns(DeprecationWarning, match="frame_rate"):
+        legacy = auto_close(vs_type(path, framerate=30.0))
     canonical = auto_close(vs_type(path, frame_rate=30.0))
     assert legacy.frame_rate == canonical.frame_rate
     # When both are provided, `frame_rate` wins (legacy is ignored).
-    both = auto_close(vs_type(path, frame_rate=30.0, framerate=24.0))
+    with pytest.warns(DeprecationWarning, match="frame_rate"):
+        both = auto_close(vs_type(path, frame_rate=30.0, framerate=24.0))
     assert both.frame_rate == canonical.frame_rate
 
 

@@ -73,12 +73,16 @@ def test_frame_rate_property():
     tc = FrameTimecode(timecode=0, fps=30.0)
     assert tc.frame_rate == Fraction(30, 1)
     assert isinstance(tc.frame_rate, Fraction)
-    assert tc.framerate == 30.0
-    assert isinstance(tc.framerate, float)
+    with pytest.warns(DeprecationWarning, match="frame_rate"):
+        legacy_frame_rate = tc.framerate
+
+    assert legacy_frame_rate == 30.0
+    assert isinstance(legacy_frame_rate, float)
     # Constructed directly from a Fraction (the exact form for NTSC rates).
     tc = FrameTimecode(timecode=0, fps=Fraction(30000, 1001))
     assert tc.frame_rate == Fraction(30000, 1001)
-    assert tc.framerate == pytest.approx(float(Fraction(30000, 1001)))
+    with pytest.warns(DeprecationWarning, match="frame_rate"):
+        assert tc.framerate == pytest.approx(float(Fraction(30000, 1001)))
     tc = FrameTimecode(timecode=0, fps=Fraction(24000, 1001))
     assert tc.frame_rate == Fraction(24000, 1001)
     # time_base equals 1 / frame_rate for CFR sources.
@@ -108,17 +112,21 @@ def test_frame_num_and_frame_rate_are_read_only():
 
 
 def test_equal_frame_rate_legacy_alias():
-    """`equal_framerate()` is the soft-deprecated alias for `equal_frame_rate()` (issue #548).
+    """`equal_framerate()` is the deprecated alias for `equal_frame_rate()` (issue #548).
     Both forms should produce identical results for every accepted operand type."""
     tc = FrameTimecode(timecode=0, fps=30.0)
     # float, Fraction, FrameTimecode operands.
     other_tc = FrameTimecode(timecode=0, fps=30.0)
     for other in (30.0, Fraction(30, 1), other_tc):
-        assert tc.equal_frame_rate(other) == tc.equal_framerate(other)
-        assert tc.equal_frame_rate(other) is True
+        expected = tc.equal_frame_rate(other)
+        with pytest.warns(DeprecationWarning, match="equal_frame_rate"):
+            actual = tc.equal_framerate(other)
+        assert actual == expected
+        assert actual is True
     # Mismatched rate.
     assert tc.equal_frame_rate(24.0) is False
-    assert tc.equal_framerate(24.0) is False
+    with pytest.warns(DeprecationWarning, match="equal_frame_rate"):
+        assert tc.equal_framerate(24.0) is False
 
 
 def test_timecode_numeric():
@@ -555,3 +563,15 @@ def test_min_scene_len_accepts_timecode_like():
     # ContentDetector: same.
     ContentDetector(min_scene_len=FrameTimecode(timecode=15, fps=30.0))
     ContentDetector(min_scene_len=Timecode(pts=500, time_base=Fraction(1, 1000)))
+
+
+def test_get_framerate():
+    """`get_framerate()` emits one warning and preserves its legacy float return value."""
+    tc = FrameTimecode(timecode=0, fps=30.0)
+
+    with pytest.warns(DeprecationWarning, match="frame_rate") as warning_info:
+        frame_rate = tc.get_framerate()
+
+    assert len(warning_info) == 1
+    assert frame_rate == 30.0
+    assert isinstance(frame_rate, float)
