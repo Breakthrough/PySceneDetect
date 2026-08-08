@@ -132,8 +132,9 @@
 </code></pre>
 <p>Split video on each fast cut using <a href="docs/">Python API (docs)</a>:</p>
 <pre><code class="language-python">from scenedetect import detect, AdaptiveDetector, split_video_ffmpeg
-scene_list = detect('my_video.mp4', AdaptiveDetector())
-split_video_ffmpeg('my_video.mp4', scene_list)
+
+scene_list = detect(&quot;my_video.mp4&quot;, AdaptiveDetector())
+split_video_ffmpeg(&quot;my_video.mp4&quot;, scene_list)
 </code></pre>
 <h3>Examples and Use Cases</h3>
 
