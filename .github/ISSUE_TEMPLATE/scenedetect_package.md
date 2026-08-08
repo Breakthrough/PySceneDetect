@@ -14,8 +14,9 @@ Include code samples that demonstrate the issue:
 
 ```python
 from scenedetect import detect, ContentDetector, split_video_ffmpeg
-scene_list = detect('my_video.mp4', ContentDetector())
-split_video_ffmpeg('my_video.mp4', scene_list)
+
+scene_list = detect("my_video.mp4", ContentDetector())
+split_video_ffmpeg("my_video.mp4", scene_list)
 ```
 
 **Environment:**

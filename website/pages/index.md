@@ -21,8 +21,9 @@ Split video on each fast cut using [Python API (docs)](docs.md):
 
 ```python
 from scenedetect import detect, AdaptiveDetector, split_video_ffmpeg
-scene_list = detect('my_video.mp4', AdaptiveDetector())
-split_video_ffmpeg('my_video.mp4', scene_list)
+
+scene_list = detect("my_video.mp4", AdaptiveDetector())
+split_video_ffmpeg("my_video.mp4", scene_list)
 ```
 
 

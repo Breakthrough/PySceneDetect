@@ -45,6 +45,7 @@ import typing as ty
 import numpy as np
 from scenedetect import FrameTimecode, SceneDetector
 
+
 class CustomDetector(SceneDetector):
     """CustomDetector class to implement a scene detection algorithm."""
 
