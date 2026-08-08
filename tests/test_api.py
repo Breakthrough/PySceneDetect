@@ -13,7 +13,6 @@
 
 These tests demonstrate common workflow patterns used when integrating the PySceneDetect API."""
 
-
 import pytest
 
 
