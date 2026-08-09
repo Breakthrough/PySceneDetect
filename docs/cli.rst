@@ -67,7 +67,7 @@ Options
 
 .. option:: --framerate FPS
 
-  [DEPRECATED] Use :option:`-f/--frame-rate <-f>` instead.
+  Alias of :option:`-f/--frame-rate <-f>`.
 
 .. option:: -m TIMECODE, --min-scene-len TIMECODE
 

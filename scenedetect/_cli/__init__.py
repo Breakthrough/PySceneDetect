@@ -22,7 +22,6 @@ import inspect
 import logging
 import os
 import os.path
-import warnings
 from copy import copy
 
 import click
@@ -238,14 +237,15 @@ Global options (e.g. -i/--input, -c/--config) must be specified before any comma
     default=None,
     help="Override frame rate with value as frames/sec.",
 )
+# Keep --framerate separate so Click can hide it while mapping both spellings to frame_rate.
 @click.option(
     "--framerate",
-    "framerate_legacy",
+    "frame_rate",
     metavar="FPS",
     type=click.FLOAT,
     default=None,
     hidden=True,
-    help="[DEPRECATED] Use -f/--frame-rate instead.",
+    help="Alias of -f/--frame-rate.",
 )
 @click.option(
     "--min-scene-len",
@@ -347,7 +347,6 @@ def scenedetect(
     stats: str | None,
     config: str | None,
     frame_rate: float | None,
-    framerate_legacy: float | None,
     min_scene_len: str | None,
     drop_short_scenes: bool | None,
     merge_last_scene: bool | None,
@@ -361,18 +360,6 @@ def scenedetect(
 ):
     ctx = ctx.obj
     assert isinstance(ctx, CliContext)
-
-    if framerate_legacy is not None:
-        warnings.warn(
-            "`--framerate` is deprecated; use `--frame-rate` instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-
-    if frame_rate is None:
-        frame_rate = framerate_legacy
-    elif framerate_legacy is not None:
-        logger.warning("Both --frame-rate and --framerate were specified; using --frame-rate.")
 
     ctx.handle_options(
         input_path=input,
