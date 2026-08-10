@@ -369,11 +369,12 @@ def get_system_version_info() -> str:
     # installed. Kept intentionally: the fallback is what recovers the version in the
     # frozen Windows build (which ships cv2 without any `.dist-info`), and the
     # `opencv-python` row is metadata-only, so it remains accurate on its own.
-    # The same code ships in three distributions: `scenedetect-core` (minimal deps)
-    # and the `scenedetect`/`scenedetect-headless` variants (OpenCV variant + CLI
-    # deps). Metadata-only lookups (no module fallback) so each row reflects which
-    # distribution is actually installed - e.g. frozen builds show "Not Installed"
-    # here rather than misattributing the module version.
+    # The same code ships in the `scenedetect`/`scenedetect-headless` distributions
+    # (OpenCV variant + CLI deps). `scenedetect-core` was published in 0.7.1 only and
+    # then yanked (see https://scenedetect.com/issues/558); its row is kept so lingering
+    # installs remain visible. Metadata-only lookups (no module fallback) so each row
+    # reflects which distribution is actually installed - e.g. frozen builds show
+    # "Not Installed" here rather than misattributing the module version.
     scenedetect_packages = (
         ("scenedetect-core", None),
         ("scenedetect-headless", None),

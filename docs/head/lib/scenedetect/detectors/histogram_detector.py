@@ -32,8 +32,8 @@ class HistogramDetector(SceneDetector):
 
     def __init__(
         self,
-        threshold: float = 0.05,
-        bins: int = 256,
+        threshold: float = 0.20,
+        bins: int = 128,
         min_scene_len: TimecodeLike = 15,
     ):
         """

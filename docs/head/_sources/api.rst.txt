@@ -58,7 +58,7 @@ Most types/functions are also available directly from the `scenedetect` package 
 
     .. code:: python
 
-        scenedetect<0.8
+        scenedetect~=0.7
 
 
 .. _scenedetect-quickstart:

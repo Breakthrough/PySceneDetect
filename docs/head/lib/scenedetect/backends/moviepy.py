@@ -19,6 +19,7 @@ image sequences or AviSynth scripts are supported as inputs.
 import os
 import time
 import typing as ty
+import warnings
 from fractions import Fraction
 from logging import getLogger
 
@@ -94,8 +95,13 @@ class VideoStreamMoviePy(VideoStream):
         """
         super().__init__()
 
-        # TODO(https://scenedetect.com/issue/548): emit DeprecationWarning when `framerate=` is
-        # used, once internal callers and downstream users have had a release to migrate.
+        if framerate is not None:
+            warnings.warn(
+                "`framerate` is deprecated and scheduled for removal in v0.9; "
+                "use `frame_rate` instead.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
         if frame_rate is None:
             frame_rate = framerate
         # TODO: Investigate how MoviePy handles ffmpeg not being on PATH.

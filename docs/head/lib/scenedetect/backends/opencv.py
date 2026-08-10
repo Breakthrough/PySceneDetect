@@ -101,8 +101,13 @@ class VideoStreamCv2(VideoStream):
             ValueError: specified frame rate is invalid
         """
         super().__init__()
-        # TODO(https://scenedetect.com/issue/548): emit DeprecationWarning when `framerate=` is
-        # used, once internal callers and downstream users have had a release to migrate.
+        if framerate is not None:
+            warnings.warn(
+                "`framerate` is deprecated and scheduled for removal in v0.9; "
+                "use `frame_rate` instead.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
         if frame_rate is None:
             frame_rate = framerate
         if path_or_device is not None:
@@ -395,8 +400,13 @@ class VideoCaptureAdapter(VideoStream):
         """
         super().__init__()
 
-        # TODO(https://scenedetect.com/issue/548): emit DeprecationWarning when `framerate=` is
-        # used, once internal callers and downstream users have had a release to migrate.
+        if framerate is not None:
+            warnings.warn(
+                "`framerate` is deprecated and scheduled for removal in v0.9; "
+                "use `frame_rate` instead.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
         if frame_rate is None:
             frame_rate = framerate
         if frame_rate is not None and frame_rate < MAX_FPS_DELTA:

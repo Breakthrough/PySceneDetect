@@ -19,7 +19,7 @@ The `OpenCV <https://opencv.org/>`_ backend (usually `opencv-python <https://pyp
 
 It is mostly reliable and fast, although can occasionally run into issues processing videos with multiple audio tracks or small amounts of frame corruption. You can use a custom version of the ``cv2`` package, or install either the `opencv-python` or `opencv-python-headless` packages from `pip`.
 
-The OpenCV backend also supports image sequences as inputs (e.g. ``frame%02d.jpg`` if you want to load frame001.jpg, frame002.jpg, frame003.jpg...). Make sure to specify the framerate manually (``-f``/``--framerate``) to ensure accurate timing calculations.
+The OpenCV backend also supports image sequences as inputs (e.g. ``frame%02d.jpg`` if you want to load frame001.jpg, frame002.jpg, frame003.jpg...). Make sure to specify the framerate manually (``-f``/``--frame-rate``) to ensure accurate timing calculations.
 
 Variable framerate (VFR) video is supported. Scene detection uses PTS-derived timestamps from ``CAP_PROP_POS_MSEC`` for accurate timecodes. Seeking compensates for OpenCV's average-fps-based internal seek approximation, so output timecodes remain accurate across the full video.
 
