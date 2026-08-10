@@ -296,8 +296,12 @@ class FrameTimecode:
         property returns an exact :class:`fractions.Fraction` and matches the naming used by
         :attr:`scenedetect.video_stream.VideoStream.frame_rate`.
         """
-        # TODO(https://scenedetect.com/issue/548): emit DeprecationWarning here once internal
-        # callers and downstream users have had a release to migrate to `frame_rate`.
+        warnings.warn(
+            "`framerate` is deprecated and scheduled for removal in v0.9; "
+            "use `frame_rate` instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         if self._rate is None:
             return None
         return float(self._rate)
@@ -335,16 +339,18 @@ class FrameTimecode:
     def get_framerate(self) -> float | None:
         """[DEPRECATED] Get Framerate: Returns the framerate used by the FrameTimecode object.
 
-        Use the `framerate` property instead.
+        Use the `frame_rate` property instead.
 
         :meta private:
         """
         warnings.warn(
-            "get_framerate() is deprecated, use the `framerate` property instead.",
+            "get_framerate() is deprecated, use the `frame_rate` property instead.",
             DeprecationWarning,
             stacklevel=2,
         )
-        return self.framerate
+        if self.frame_rate is None:
+            return None
+        return float(self.frame_rate)
 
     def equal_frame_rate(self, other: "float | Fraction | FrameTimecode") -> bool:
         """Determine whether the passed frame rate equals this object's frame rate.
@@ -368,8 +374,12 @@ class FrameTimecode:
 
     def equal_framerate(self, fps) -> bool:
         """[DEPRECATED] Use :meth:`equal_frame_rate` instead."""
-        # TODO(https://scenedetect.com/issue/548): emit DeprecationWarning here once internal
-        # callers and downstream users have had a release to migrate to `equal_frame_rate`.
+        warnings.warn(
+            "`equal_framerate()` is deprecated and scheduled for removal in v0.9; "
+            "use `equal_frame_rate()` instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         return self.equal_frame_rate(fps)
 
     @property

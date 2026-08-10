@@ -335,36 +335,38 @@ def test_cli_detector_with_stats(tmp_path, detector_command: str):
     # and ensuring that we got some frames.
 
 
-def test_cli_framerate_legacy_alias():
-    """`--framerate` is the soft-deprecated hidden alias for `-f/--frame-rate` (issue #548).
-    Both forms must be accepted; passing both should not error."""
-    # Canonical form.
+@pytest.mark.parametrize(
+    "option",
+    ["--frame-rate", "--framerate"],
+)
+def test_cli_frame_rate_aliases(option: str):
+    """Both long frame-rate spellings are accepted by the CLI."""
     exit_code, _ = invoke_cli(
-        ["-i", DEFAULT_VIDEO_PATH, "--frame-rate", "30.0", "time", "-s", "2s", "-d", "4s"]
+        ["-i", DEFAULT_VIDEO_PATH, option, "30.0", "time", "-s", "2s", "-d", "4s"]
     )
     assert exit_code == 0
-    # Legacy form.
-    exit_code, _ = invoke_cli(
-        ["-i", DEFAULT_VIDEO_PATH, "--framerate", "30.0", "time", "-s", "2s", "-d", "4s"]
-    )
+
+
+@pytest.mark.parametrize(
+    ("options", "succeeds"),
+    [
+        (["--frame-rate", "30.0", "--framerate", "0"], False),
+        (["--framerate", "0", "--frame-rate", "30.0"], True),
+    ],
+)
+def test_cli_frame_rate_aliases_last_value_wins(options: list[str], succeeds: bool):
+    """When a frame-rate option is repeated, only the last value is validated and used."""
+    exit_code, _ = invoke_cli(["-i", DEFAULT_VIDEO_PATH, *options, "time", "-s", "2s", "-d", "4s"])
+    assert (exit_code == 0) is succeeds
+
+
+def test_cli_framerate_alias_is_hidden():
+    """Help shows the primary frame-rate spellings but not the supported hidden alias."""
+    exit_code, output = invoke_cli(["--help"])
+
     assert exit_code == 0
-    # Both forms together: `--frame-rate` wins, a warning is logged but no error.
-    exit_code, _ = invoke_cli(
-        [
-            "-i",
-            DEFAULT_VIDEO_PATH,
-            "--frame-rate",
-            "30.0",
-            "--framerate",
-            "24.0",
-            "time",
-            "-s",
-            "2s",
-            "-d",
-            "4s",
-        ]
-    )
-    assert exit_code == 0
+    assert "-f, --frame-rate FPS" in output
+    assert "--framerate" not in output
 
 
 def test_cli_min_scene_len_accepts_all_timecode_forms(tmp_path: Path):

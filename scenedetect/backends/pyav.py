@@ -13,6 +13,7 @@
 
 import os
 import typing as ty
+import warnings
 from fractions import Fraction
 from logging import getLogger
 
@@ -89,8 +90,13 @@ class VideoStreamAv(VideoStream):
         # refinement for frames FFmpeg flags as corrupt but still decodes.
         super().__init__()
 
-        # TODO(https://scenedetect.com/issue/548): emit DeprecationWarning when `framerate=` is
-        # used, once internal callers and downstream users have had a release to migrate.
+        if framerate is not None:
+            warnings.warn(
+                "`framerate` is deprecated and scheduled for removal in v0.9; "
+                "use `frame_rate` instead.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
         if frame_rate is None:
             frame_rate = framerate
         # Ensure specified frame rate is valid if set.

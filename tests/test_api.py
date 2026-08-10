@@ -13,6 +13,8 @@
 
 These tests demonstrate common workflow patterns used when integrating the PySceneDetect API."""
 
+import pytest
+
 
 def test_api_detect(test_video_file: str):
     """Demonstrate usage of the `detect()` function to process a complete video."""
@@ -73,15 +75,17 @@ def test_api_scene_manager_start_end_time(test_video_file: str):
 
 
 def test_api_open_video_framerate_legacy_alias(test_video_file: str):
-    """`open_video(framerate=...)` is the soft-deprecated alias for `frame_rate=` (issue #548).
+    """`open_video(framerate=...)` is the deprecated alias for `frame_rate=` (issue #548).
     Both forms must produce equivalent streams; when both are provided, `frame_rate` wins."""
     from scenedetect import open_video
 
-    legacy = open_video(test_video_file, framerate=30.0)
+    with pytest.warns(DeprecationWarning, match="frame_rate"):
+        legacy = open_video(test_video_file, framerate=30.0)
     canonical = open_video(test_video_file, frame_rate=30.0)
     assert legacy.frame_rate == canonical.frame_rate
     # `frame_rate` takes precedence over `framerate` when both are provided.
-    both = open_video(test_video_file, frame_rate=30.0, framerate=24.0)
+    with pytest.warns(DeprecationWarning, match="frame_rate"):
+        both = open_video(test_video_file, frame_rate=30.0, framerate=24.0)
     assert both.frame_rate == canonical.frame_rate
 
 
