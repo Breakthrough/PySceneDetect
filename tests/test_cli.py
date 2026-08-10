@@ -337,10 +337,10 @@ def test_cli_detector_with_stats(tmp_path, detector_command: str):
 
 @pytest.mark.parametrize(
     "option",
-    ["--frame-rate", "--framerate"],
+    ["--frame-rate", "--framerate", "-f"],
 )
 def test_cli_frame_rate_aliases(option: str):
-    """Both long frame-rate spellings are accepted by the CLI."""
+    """All frame-rate aliases are accepted by the CLI."""
     exit_code, _ = invoke_cli(
         ["-i", DEFAULT_VIDEO_PATH, option, "30.0", "time", "-s", "2s", "-d", "4s"]
     )
@@ -360,13 +360,12 @@ def test_cli_frame_rate_aliases_last_value_wins(options: list[str], succeeds: bo
     assert (exit_code == 0) is succeeds
 
 
-def test_cli_framerate_alias_is_hidden():
-    """Help shows the primary frame-rate spellings but not the supported hidden alias."""
+def test_cli_framerate_alias_is_visible():
+    """Help shows all frame-rate aliases as one option."""
     exit_code, output = invoke_cli(["--help"])
 
     assert exit_code == 0
-    assert "-f, --frame-rate FPS" in output
-    assert "--framerate" not in output
+    assert "-f, --frame-rate, --framerate FPS" in output
 
 
 def test_cli_min_scene_len_accepts_all_timecode_forms(tmp_path: Path):

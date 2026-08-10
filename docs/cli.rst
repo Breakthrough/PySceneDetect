@@ -61,13 +61,9 @@ Options
 
   Stats file (.csv) to write frame metrics. Existing files will be overwritten. Used for tuning detection parameters and data analysis.
 
-.. option:: -f FPS, --frame-rate FPS
+.. option:: -f FPS, --framerate FPS, --frame-rate FPS
 
   Override frame rate with value as frames/sec.
-
-.. option:: --framerate FPS
-
-  Alias of :option:`-f/--frame-rate <-f>`.
 
 .. option:: -m TIMECODE, --min-scene-len TIMECODE
 
