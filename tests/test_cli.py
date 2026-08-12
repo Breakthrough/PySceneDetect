@@ -786,6 +786,59 @@ def test_cli_save_qp_no_shift(tmp_path: Path):
     assert output_path.read_text() == EXPECTED_QP_CONTENTS[1:]
 
 
+def test_cli_save_keyframes(tmp_path: Path):
+    """Test `save-keyframes` command."""
+    EXPECTED_KEYFRAMES_CONTENTS = """# keyframe format v1
+fps 0
+0
+90
+"""
+    assert (
+        invoke_scenedetect(
+            "-i {VIDEO} time -e 95 {DETECTOR} save-keyframes",
+            output_dir=tmp_path,
+        )
+        == 0
+    )
+    output_path = tmp_path / f"{DEFAULT_VIDEO_NAME}-keyframes.txt"
+    assert output_path.exists()
+    assert output_path.read_text() == EXPECTED_KEYFRAMES_CONTENTS
+
+
+def test_cli_save_keyframes_start_offset(tmp_path: Path):
+    """Test `save-keyframes` command"""
+    EXPECTED_KEYFRAMES_CONTENTS = """# keyframe format v1
+fps 0
+0
+90
+"""
+    assert (
+        invoke_scenedetect(
+            "-i {VIDEO} time -s 51 -e 95 {DETECTOR} save-keyframes",
+            output_dir=tmp_path,
+        )
+        == 0
+    )
+    output_path = tmp_path.joinpath(f"{DEFAULT_VIDEO_NAME}-keyframes.txt")
+    assert os.path.exists(output_path)
+    assert output_path.read_text() == EXPECTED_KEYFRAMES_CONTENTS
+
+
+def test_cli_save_keyframes_custom_filename(tmp_path: Path):
+    """Test `save-keyframes` with a custom filename."""
+    custom_filename = "custom-keyframes.txt"
+    assert (
+        invoke_scenedetect(
+            f"-i {{VIDEO}} time -s 51 -e 95 {{DETECTOR}} "
+            f"save-keyframes --filename {custom_filename}",
+            output_dir=tmp_path,
+        )
+        == 0
+    )
+    output_path = tmp_path / custom_filename
+    assert output_path.exists()
+
+
 @pytest.mark.parametrize("backend_type", ALL_BACKENDS)
 def test_cli_backend(backend_type: str):
     """Test setting the `-b`/`--backend` argument."""
