@@ -12,6 +12,7 @@
 """Tests for scenedetect.output module."""
 
 import json
+from io import StringIO
 from fractions import Fraction
 from pathlib import Path
 from xml.etree import ElementTree
@@ -31,6 +32,7 @@ from scenedetect.output import (
     VideoMetadata,
     is_ffmpeg_available,
     split_video_ffmpeg,
+    write_scene_list,
     write_scene_list_edl,
     write_scene_list_fcp7,
     write_scene_list_fcpx,
@@ -246,6 +248,34 @@ _FPS_CFR = Fraction(30, 1)
 
 def _fake_scenes(fps: Fraction, frames):
     return [(FrameTimecode(start, fps=fps), FrameTimecode(end, fps=fps)) for start, end in frames]
+
+
+def test_write_scene_list_file_handle():
+    """Existing callers that pass an open file handle keep working."""
+    scenes = _fake_scenes(_FPS_CFR, [(0, 30), (30, 60)])
+    buf = StringIO()
+    write_scene_list(buf, scenes, include_cut_list=False)
+    text = buf.getvalue()
+    assert "Scene Number" in text
+    assert "00:00:00.000" in text or "00:00:00:00" in text
+
+
+def test_write_scene_list_accepts_str_path(tmp_path: Path):
+    """A filesystem path string must not raise TypeError from csv.writer."""
+    scenes = _fake_scenes(_FPS_CFR, [(0, 30)])
+    output_path = tmp_path / "scenes.csv"
+    write_scene_list(str(output_path), scenes, include_cut_list=False)
+    assert output_path.exists()
+    assert "Scene Number" in output_path.read_text()
+
+
+def test_write_scene_list_accepts_path(tmp_path: Path):
+    """pathlib.Path is opened with a context manager and closed after write."""
+    scenes = _fake_scenes(_FPS_CFR, [(0, 30)])
+    output_path = tmp_path / "scenes.csv"
+    write_scene_list(output_path, scenes, include_cut_list=False)
+    assert output_path.exists()
+    assert "Scene Number" in output_path.read_text()
 
 
 def test_write_scene_list_edl(tmp_path: Path):
