@@ -12,8 +12,8 @@
 """Tests for scenedetect.output module."""
 
 import json
-from io import StringIO
 from fractions import Fraction
+from io import StringIO
 from pathlib import Path
 from xml.etree import ElementTree
 
