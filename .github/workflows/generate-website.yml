@@ -12,6 +12,7 @@ on:
 jobs:
   update_site:
     runs-on: ubuntu-latest
+    if: github.repository == 'Breakthrough/PySceneDetect'
     permissions:
       contents: write  # pushes generated site to the gh-pages branch
 

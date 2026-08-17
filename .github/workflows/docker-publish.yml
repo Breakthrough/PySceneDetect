@@ -21,6 +21,7 @@ env:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+    if: github.repository == 'Breakthrough/PySceneDetect'
     permissions:
       contents: read
       packages: write

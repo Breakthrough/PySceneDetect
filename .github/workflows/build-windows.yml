@@ -113,6 +113,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
         with:
+          repository: Breakthrough/PySceneDetect
           ref: resources
 
       - uses: actions/download-artifact@v7
