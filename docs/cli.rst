@@ -711,6 +711,32 @@ Options
   Width (pixels) of images.
 
 
+.. _command-save-keyframes:
+
+.. program:: scenedetect save-keyframes
+
+
+``save-keyframes``
+========================================================================
+
+Save detected cuts using keyframe format v1.
+
+
+Options
+------------------------------------------------------------------------
+
+
+.. option:: -f NAME, --filename NAME
+
+  Filename format to use.
+
+  Default: ``$VIDEO_NAME-keyframes.txt``
+
+.. option:: -o DIR, --output DIR
+
+  Output directory to save keyframes to. Overrides global option :option:`-o/--output <scenedetect -o>`.
+
+
 .. _command-save-otio:
 
 .. program:: scenedetect save-otio

@@ -785,3 +785,7 @@ Development
  - [general] The `scenedetect-core` package introduced in 0.7.1 has been discontinued, and its only release (0.7.1) yanked from PyPI: pip cannot safely support multiple packages that install the same module files, and restructuring the existing packages around a shared core would break in-place upgrades. Existing `scenedetect-core` installs keep working but will not receive updates; continue to install `scenedetect` or `scenedetect-headless` as usual.
  - [improvement] `HistogramDetector` (`detect-hist`) default `threshold` changed from 0.05 to 0.20 and default `bins` from 256 to 128, calibrated from the [benchmark sweep](https://www.scenedetect.com/benchmarks/) for significantly better accuracy. Default output for this detector will change [#559](https://github.com/Breakthrough/PySceneDetect/issues/559)
  - [improvement] `HashDetector` (`detect-hash`) default `threshold` changed from 0.395 to 0.35 and default `size` from 16 to 8, calibrated from the [benchmark sweep](https://www.scenedetect.com/benchmarks/) for better accuracy. Default output for this detector will change, including the statsfile metric key (now `hash_dist [size=8 lowpass=2]`) [#559](https://github.com/Breakthrough/PySceneDetect/issues/559)
+
+## PySceneDetect 0.8 (TBD)
+
+- [feature] Added `save-keyframes` command to export detected cuts using `# keyframe format v1` for Aegisub-compatible tools [#534](https://github.com/Breakthrough/PySceneDetect/issues/534)

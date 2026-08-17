@@ -1697,6 +1697,46 @@ def save_qp_command(
     ctx.add_command(cli_commands.save_qp, save_qp_args)
 
 
+SAVE_KEYFRAMES_HELP = """Save detected cuts using keyframe format v1.
+"""
+
+
+@click.command("save-keyframes", cls=Command, help=SAVE_KEYFRAMES_HELP)
+@click.option(
+    "--filename",
+    "-f",
+    metavar="NAME",
+    default=None,
+    type=click.STRING,
+    help="Filename format to use.{}".format(
+        USER_CONFIG.get_help_string("save-keyframes", "filename")
+    ),
+)
+@click.option(
+    "--output",
+    "-o",
+    metavar="DIR",
+    type=click.Path(exists=False, dir_okay=True, writable=True, resolve_path=False),
+    help="Output directory to save keyframes to. Overrides global option -o/--output.{}".format(
+        USER_CONFIG.get_help_string("save-keyframes", "output", show_default=False)
+    ),
+)
+@click.pass_context
+def save_keyframes_command(
+    ctx: click.Context,
+    filename: str | None,
+    output: str | None,
+):
+    ctx = ctx.obj
+    assert isinstance(ctx, CliContext)
+
+    save_keyframes_args = {
+        "filename": ctx.config.get_value("save-keyframes", "filename", filename),
+        "output": ctx.config.get_value("save-keyframes", "output", output),
+    }
+    ctx.add_command(cli_commands.save_keyframes, save_keyframes_args)
+
+
 SAVE_FCP_HELP = """Save cuts in Final Cut Pro XML format (FCP7 xmeml or FCPX)."""
 
 
@@ -1841,6 +1881,7 @@ scenedetect.add_command(save_edl_command)
 scenedetect.add_command(save_html_command)
 scenedetect.add_command(save_images_command)
 scenedetect.add_command(save_qp_command)
+scenedetect.add_command(save_keyframes_command)
 scenedetect.add_command(save_fcp_command)
 scenedetect.add_command(save_otio_command)
 scenedetect.add_command(split_video_command)
