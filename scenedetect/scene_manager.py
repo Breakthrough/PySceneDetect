@@ -590,7 +590,9 @@ class SceneManager:
                         )
                     # Increment progress bar by delta of position.frame_num instead of 1
                     # to handle VFR video where frame count is an approximation.
-                    delta = 1 if prev_position is None else position.frame_num - prev_position.frame_num
+                    delta = (
+                        1 if prev_position is None else position.frame_num - prev_position.frame_num
+                    )
                     progress_bar.update(delta)
                     prev_position = position
         finally:
