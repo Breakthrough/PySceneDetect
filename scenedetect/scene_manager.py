@@ -582,9 +582,6 @@ class SceneManager:
                 if next_frame is not None:
                     frame_im = next_frame
                 assert frame_im is not None
-                if prev_position is None:
-                    prev_position = self._start_pos
-                assert prev_position is not None
                 new_cuts = self._process_frame(position, frame_im, callback)
                 if progress_bar is not None:
                     if new_cuts:
@@ -593,10 +590,8 @@ class SceneManager:
                         )
                     # Increment progress bar by delta of position.frame_num instead of 1
                     # to handle VFR video where frame count is an approximation.
-                    # First frame increments by 1 as base case.
-                    delta_pos = position.frame_num - prev_position.frame_num
-                    is_first_frame = position.frame_num == 0
-                    progress_bar.update((1 if is_first_frame else delta_pos) + frame_skip)
+                    delta = 1 if prev_position is None else position.frame_num - prev_position.frame_num
+                    progress_bar.update(delta)
                     prev_position = position
         finally:
             if progress_bar is not None:
