@@ -230,22 +230,13 @@ Global options (e.g. -i/--input, -c/--config) must be specified before any comma
 )
 @click.option(
     "--frame-rate",
+    "--framerate",
     "-f",
     "frame_rate",
     metavar="FPS",
     type=click.FLOAT,
     default=None,
     help="Override frame rate with value as frames/sec.",
-)
-# Keep --framerate separate so Click can hide it while mapping both spellings to frame_rate.
-@click.option(
-    "--framerate",
-    "frame_rate",
-    metavar="FPS",
-    type=click.FLOAT,
-    default=None,
-    hidden=True,
-    help="Alias of -f/--frame-rate.",
 )
 @click.option(
     "--min-scene-len",
