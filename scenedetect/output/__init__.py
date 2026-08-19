@@ -69,7 +69,7 @@ logger = logging.getLogger("pyscenedetect")
 
 
 def write_scene_list(
-    output_csv_file: ty.TextIO,
+    output_csv_file: ty.TextIO | str | Path,
     scene_list: SceneList,
     include_cut_list: bool = True,
     cut_list: CutList | None = None,
@@ -79,7 +79,8 @@ def write_scene_list(
     """Writes the given list of scenes to an output file handle in CSV format.
 
     Arguments:
-        output_csv_file: Handle to open file in write mode.
+        output_csv_file: Handle to open file in write mode, or a filesystem path. A path is
+            opened with a context manager so the file is closed after writing.
         scene_list: List of pairs of FrameTimecodes denoting each scene's start/end FrameTimecode.
         include_cut_list: Bool indicating if the first row should include the timecodes where
             each scene starts. Should be set to False if RFC 4180 compliant CSV output is required.
@@ -92,6 +93,17 @@ def write_scene_list(
     Raises:
         TypeError: "delimiter" must be a 1-character string
     """
+    if isinstance(output_csv_file, (str, Path)):
+        with open(output_csv_file, "w", newline="") as file_handle:
+            write_scene_list(
+                file_handle,
+                scene_list,
+                include_cut_list=include_cut_list,
+                cut_list=cut_list,
+                col_separator=col_separator,
+                row_separator=row_separator,
+            )
+        return
     csv_writer = csv.writer(output_csv_file, delimiter=col_separator, lineterminator=row_separator)
     # If required, output the cutting list as the first row (i.e. before the header row).
     if include_cut_list:
