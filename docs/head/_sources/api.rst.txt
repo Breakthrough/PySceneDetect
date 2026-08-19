@@ -23,9 +23,9 @@ The `scenedetect` API is easy to integrate with most application workflows, whil
 
         * :func:`split_video_ffmpeg <scenedetect.output.split_video_ffmpeg>` and :func:`split_video_mkvmerge <scenedetect.output.split_video_mkvmerge>` split a video based on the detected scenes
 
-        * :func:`save_images <scenedetect.scene_manager.save_images>` can save an arbitrary number of images from each scene
+        * :func:`save_images <scenedetect.output.save_images>` can save an arbitrary number of images from each scene
 
-        * :func:`write_scene_list <scenedetect.scene_manager.write_scene_list>` can be used to save scene/cut info as CSV, :func:`write_scene_list_html <scenedetect.scene_manager.write_scene_list_html>` for HTML
+        * :func:`write_scene_list <scenedetect.output.write_scene_list>` can be used to save scene/cut info as CSV, :func:`write_scene_list_html <scenedetect.output.write_scene_list_html>` for HTML
 
     * :ref:`scenedetect.backends 🎥 <scenedetect-backends>`: PySceneDetect supports multiple libraries as an input backend:
 

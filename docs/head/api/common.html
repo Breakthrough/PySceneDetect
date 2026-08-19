@@ -49,18 +49,18 @@ string in the form <cite>“HH:MM:SS[.nnn]”</cite> where the <cite>[.nnn]</cit
 <cite>float</cite> for number of seconds, or <cite>str</cite> in the form “HH:MM:SS” or “HH:MM:SS.nnn”) with a framerate:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">frames</span> <span class="o">=</span> <span class="n">FrameTimecode</span><span class="p">(</span><span class="mi">29</span><span class="p">,</span> <span class="mf">29.97</span><span class="p">)</span>
 <span class="n">seconds_float</span> <span class="o">=</span> <span class="n">FrameTimecode</span><span class="p">(</span><span class="mf">10.0</span><span class="p">,</span> <span class="mf">10.0</span><span class="p">)</span>
-<span class="n">timecode_str</span> <span class="o">=</span> <span class="n">FrameTimecode</span><span class="p">(</span><span class="s2">&quot;00:00:10.000&quot;</span><span class="p">,</span> <span class="mf">10.0</span><span class="p">)</span>
+<span class="n">timecode_str</span> <span class="o">=</span> <span class="n">FrameTimecode</span><span class="p">(</span><span class="s2">"00:00:10.000"</span><span class="p">,</span> <span class="mf">10.0</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Arithmetic/comparison operations with <a class="reference internal" href="#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrameTimecode</span></code></a> objects is also possible, and the
 other operand can also be of the above types:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">x</span> <span class="o">=</span> <span class="n">FrameTimecode</span><span class="p">(</span><span class="s2">&quot;00:01:00.000&quot;</span><span class="p">,</span> <span class="mf">10.0</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">x</span> <span class="o">=</span> <span class="n">FrameTimecode</span><span class="p">(</span><span class="s2">"00:01:00.000"</span><span class="p">,</span> <span class="mf">10.0</span><span class="p">)</span>
 <span class="c1"># Can add int (frames), float (seconds), or str (timecode).</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="mi">10</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="mf">10.0</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="s2">&quot;00:10:00&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="s2">"00:10:00"</span><span class="p">)</span>
 <span class="c1"># Same for all comparison operators.</span>
-<span class="nb">print</span><span class="p">((</span><span class="n">x</span> <span class="o">+</span> <span class="mf">10.0</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;00:01:10.000&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">((</span><span class="n">x</span> <span class="o">+</span> <span class="mf">10.0</span><span class="p">)</span> <span class="o">==</span> <span class="s2">"00:01:10.000"</span><span class="p">)</span>
 </pre></div>
 </div>
 <p><a class="reference internal" href="#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrameTimecode</span></code></a> objects can be added and subtracted, however the current implementation

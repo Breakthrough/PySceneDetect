@@ -49,7 +49,8 @@ CSV/HTML, or splitting the input video into individual shots.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>output_csv_file</strong> (<em>TextIO</em>) – Handle to open file in write mode.</p></li>
+<li><p><strong>output_csv_file</strong> (<em>TextIO</em><em> | </em><em>str</em><em> | </em><em>Path</em>) – Handle to open file in write mode, or a filesystem path. A path is
+opened with a context manager so the file is closed after writing.</p></li>
 <li><p><strong>scene_list</strong> (<em>list</em><em>[</em><em>tuple</em><em>[</em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em>, </em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em>]</em><em>]</em>) – List of pairs of FrameTimecodes denoting each scene’s start/end FrameTimecode.</p></li>
 <li><p><strong>include_cut_list</strong> (<em>bool</em>) – Bool indicating if the first row should include the timecodes where
 each scene starts. Should be set to False if RFC 4180 compliant CSV output is required.</p></li>

@@ -53,7 +53,7 @@ of a backend. This is useful when working with devices or streams, for example.<
 <p>Assuming we have a file <cite>video.mp4</cite> in our working directory, we can load it and perform scene
 detection on it using <code class="xref py py-func docutils literal notranslate"><span class="pre">open_video()</span></code>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">scenedetect</span><span class="w"> </span><span class="kn">import</span> <span class="n">open_video</span>
-<span class="n">video</span> <span class="o">=</span> <span class="n">open_video</span><span class="p">(</span><span class="s2">&quot;video.mp4&quot;</span><span class="p">)</span>
+<span class="n">video</span> <span class="o">=</span> <span class="n">open_video</span><span class="p">(</span><span class="s2">"video.mp4"</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>An optional backend from <a class="reference internal" href="#scenedetect.backends.AVAILABLE_BACKENDS" title="scenedetect.backends.AVAILABLE_BACKENDS"><code class="xref py py-data docutils literal notranslate"><span class="pre">AVAILABLE_BACKENDS</span></code></a> can be passed to <code class="xref py py-func docutils literal notranslate"><span class="pre">open_video()</span></code>
@@ -63,7 +63,7 @@ loading the video fails, <code class="docutils literal notranslate"><span class=
 <p>Lastly, to use a specific backend directly:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Manually importing and constructing a backend:</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">scenedetect.backends.opencv</span><span class="w"> </span><span class="kn">import</span> <span class="n">VideoStreamCv2</span>
-<span class="n">video</span> <span class="o">=</span> <span class="n">VideoStreamCv2</span><span class="p">(</span><span class="s2">&quot;video.mp4&quot;</span><span class="p">)</span>
+<span class="n">video</span> <span class="o">=</span> <span class="n">VideoStreamCv2</span><span class="p">(</span><span class="s2">"video.mp4"</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>In both examples above, the resulting <code class="docutils literal notranslate"><span class="pre">video</span></code> can be used with
@@ -71,7 +71,7 @@ loading the video fails, <code class="docutils literal notranslate"><span class=
 <p>Multiple videos can be opened as one continuous stream by passing a list of paths to
 <code class="xref py py-func docutils literal notranslate"><span class="pre">open_video()</span></code>, which returns a
 <a class="reference internal" href="#scenedetect.backends.concat.VideoStreamConcat" title="scenedetect.backends.concat.VideoStreamConcat"><code class="xref py py-class docutils literal notranslate"><span class="pre">VideoStreamConcat</span></code></a>:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">video</span> <span class="o">=</span> <span class="n">open_video</span><span class="p">([</span><span class="s2">&quot;part1.mp4&quot;</span><span class="p">,</span> <span class="s2">&quot;part2.mp4&quot;</span><span class="p">])</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">video</span> <span class="o">=</span> <span class="n">open_video</span><span class="p">([</span><span class="s2">"part1.mp4"</span><span class="p">,</span> <span class="s2">"part2.mp4"</span><span class="p">])</span>
 </pre></div>
 </div>
 </section>
@@ -758,7 +758,7 @@ timeline. Frames are decoded through any available backend, so the concatenation
 backend-agnostic. The easiest way to construct one is by passing a list of paths to
 <a class="reference internal" href="../api.html#scenedetect.open_video" title="scenedetect.open_video"><code class="xref py py-func docutils literal notranslate"><span class="pre">scenedetect.open_video()</span></code></a>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">scenedetect</span><span class="w"> </span><span class="kn">import</span> <span class="n">open_video</span>
-<span class="n">video</span> <span class="o">=</span> <span class="n">open_video</span><span class="p">([</span><span class="s2">&quot;part1.mp4&quot;</span><span class="p">,</span> <span class="s2">&quot;part2.mp4&quot;</span><span class="p">])</span>
+<span class="n">video</span> <span class="o">=</span> <span class="n">open_video</span><span class="p">([</span><span class="s2">"part1.mp4"</span><span class="p">,</span> <span class="s2">"part2.mp4"</span><span class="p">])</span>
 </pre></div>
 </div>
 <p>The resulting stream can be used anywhere a single-video stream can, e.g. with a

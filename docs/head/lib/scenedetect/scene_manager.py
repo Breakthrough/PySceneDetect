@@ -571,6 +571,7 @@ class SceneManager:
         )
         decode_thread.start()
         frame_im = None
+        prev_position = None
 
         logger.info("Detecting scenes...")
         try:
@@ -587,7 +588,13 @@ class SceneManager:
                         progress_bar.set_description(
                             PROGRESS_BAR_DESCRIPTION % len(self._cutting_list), refresh=False
                         )
-                    progress_bar.update(1 + frame_skip)
+                    # Increment progress bar by delta of position.frame_num instead of 1
+                    # to handle VFR video where frame count is an approximation.
+                    delta = (
+                        1 if prev_position is None else position.frame_num - prev_position.frame_num
+                    )
+                    progress_bar.update(delta)
+                    prev_position = position
         finally:
             if progress_bar is not None:
                 progress_bar.set_description(
