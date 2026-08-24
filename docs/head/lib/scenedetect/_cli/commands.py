@@ -102,6 +102,29 @@ def save_qp(
     logger.info(f"QP file written to: {qp_path}")
 
 
+def save_keyframes(
+    context: CliContext, scenes: SceneList, cuts: CutList, output: str, filename: str
+):
+    """Handler for the `save-keyframes` command."""
+    del scenes  # We only use cuts for this handler.
+    assert context.video_stream is not None
+    keyframes_path = get_and_create_path(
+        Template(filename).safe_substitute(VIDEO_NAME=context.video_stream.name),
+        output,
+    )
+    with open(keyframes_path, "w") as keyframes_file:
+        keyframes_file.write("# keyframe format v1\n")
+        # The keyframe format v1 specification includes an FPS field, but Aegisub does not
+        # use it and documents `0` as the conventional value:
+        # https://aegisub.org/docs/latest/video/#keyframe-file-specification
+        keyframes_file.write("fps 0\n")
+        keyframes_file.write("0\n")
+        # TODO(https://scenedetect.com/issues/569): Frame numbers are approximate for VFR
+        # input until exact presentation-frame ordinals are tracked.
+        keyframes_file.writelines(f"{cut.frame_num}\n" for cut in cuts)
+    logger.info(f"Keyframes written to: {keyframes_path}")
+
+
 def list_scenes(
     context: CliContext,
     scenes: SceneList,

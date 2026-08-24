@@ -460,6 +460,10 @@ CONFIG_MAP: ConfigDict = {
         "filename": "$VIDEO_NAME.qp",
         "output": None,
     },
+    "save-keyframes": {
+        "filename": "$VIDEO_NAME-keyframes.txt",
+        "output": None,
+    },
     "save-fcp": {
         "format": FcpFormat.FCPX,
         "filename": "$VIDEO_NAME.xml",
