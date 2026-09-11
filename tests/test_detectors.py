@@ -19,6 +19,7 @@ test case material.
 import os
 from dataclasses import dataclass
 
+import numpy as np
 import pytest
 
 from scenedetect import FrameTimecode, SceneDetector, SceneManager, StatsManager, detect
@@ -261,3 +262,33 @@ def test_min_scene_len_accepts_time_values(detector_type, min_scene_len):
     scene_list = test_case.detect()
     start_frames = [timecode.frame_num for timecode, _ in scene_list]
     assert start_frames == test_case.scene_boundaries
+
+
+def test_adaptive_detector_min_scene_len_uses_target_frame():
+    """AdaptiveDetector applies min_scene_len to the emitted cut, not the current frame.
+
+    AdaptiveDetector scores a target frame `window_width` behind the frame currently
+    being processed. Comparing min_scene_len against the current frame lets a second
+    peak emit a cut only `window_width` frames after the previous one (issue #408).
+    """
+    window_width = 20
+    min_scene_len = 24
+    detector = AdaptiveDetector(
+        adaptive_threshold=2.0,
+        window_width=window_width,
+        min_scene_len=min_scene_len,
+        min_content_val=15.0,
+        luma_only=True,
+    )
+    fps = 30.0
+    n_frames = 180
+    cuts: list[FrameTimecode] = []
+    for frame_num in range(n_frames):
+        # Hard cuts at 100 and 104 (4 frames apart) plus a later valid cut at 140.
+        # The 4-frame pair matches the report: min_scene_len - window_width.
+        value = 255 if 100 <= frame_num <= 103 or 140 <= frame_num <= 143 else 0
+        frame = np.full((16, 16, 3), value, dtype=np.uint8)
+        cuts.extend(detector.process_frame(FrameTimecode(frame_num, fps), frame))
+
+    cut_frames = [cut.frame_num for cut in cuts]
+    assert cut_frames == [100, 140]
