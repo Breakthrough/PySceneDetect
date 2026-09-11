@@ -29,7 +29,7 @@ from scenedetect.common import (
     framerate_to_fraction,
 )
 from scenedetect.platform import StrPath, get_file_name
-from scenedetect.video_stream import FrameRateUnavailable, VideoOpenFailure, VideoStream
+from scenedetect.video_stream import FrameRateUnavailable, SeekError, VideoOpenFailure, VideoStream
 
 logger = getLogger("pyscenedetect")
 VALID_THREAD_MODES = ["NONE", "SLICE", "FRAME", "AUTO"]
@@ -286,12 +286,15 @@ class VideoStreamAv(VideoStream):
                 If float, interpreted as time in seconds.
                 If int, interpreted as frame number.
         Raises:
+            SeekError: An error occurs while seeking, or `target` is beyond the end of the video.
             ValueError: `target` is not a valid value (i.e. it is negative).
         """
         if not isinstance(target, FrameTimecode):
             target = FrameTimecode(target, self.frame_rate)
         if target < 0:
             raise ValueError("Target cannot be negative!")
+        if self.duration > 0 and target >= self.duration:
+            raise SeekError("Target frame is beyond end of video!")
         beginning = target == 0
 
         target = self.base_timecode + target

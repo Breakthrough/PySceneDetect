@@ -318,21 +318,9 @@ class TestVideoStream:
     ):
         """Validate calling `seek()` to offset past end of video."""
         stream = auto_close(vs_type(test_video.path))
-        # Seek to a large seek offset past the end of the video. Some backends only support 32-bit
-        # frame numbers so that's our max offset. Certain backends disallow seek offsets past EOF,
-        # in which case they should raise a SeekError (and the test is considered a pass).
-        try:
+        # All backends raise SeekError when the target is at or past duration (#380).
+        with pytest.raises(SeekError):
             stream.seek(2**32)
-        except SeekError:
-            return
-        # For those backends that do allow seek offsets past EOF, they should act as though we
-        # seeked to the end of the video (i.e. shouldn't be able to decode any more frames).
-        assert stream.read() is False
-        # TODO: On some videos, the PyAV backend seems to drop a frame. See where this occurs.
-        if vs_type == VideoStreamAv:
-            assert stream.frame_number in (test_video.total_frames, test_video.total_frames - 1)
-        else:
-            assert stream.frame_number == test_video.total_frames
 
     def test_seek_invalid(
         self, vs_type: ty.Callable[..., VideoStream], test_video: VideoParameters, auto_close

@@ -250,6 +250,9 @@ class VideoStreamCv2(VideoStream):
             target = FrameTimecode(target, self.frame_rate)
         if target < 0:
             raise ValueError("Target seek position cannot be negative!")
+        duration = self.duration
+        if duration is not None and duration > 0 and target >= duration:
+            raise SeekError("Target frame is beyond end of video!")
         target_secs = (self.base_timecode + target).seconds
         self._has_grabbed = False
         if target_secs > 0:
@@ -271,7 +274,12 @@ class VideoStreamCv2(VideoStream):
                     corrections += 1
             # If we seeked past the end, back up one frame.
             if not self._has_grabbed:
-                seek_pos = round(self._cap.get(cv2.CAP_PROP_POS_FRAMES) - 1.0)
+                pos = self._cap.get(cv2.CAP_PROP_POS_FRAMES)
+                # OpenCV 5 can report NaN here after a seek past EOF, which would crash
+                # round()/trunc and hang the CLI decode thread (#380).
+                if not math.isfinite(pos):
+                    raise SeekError("Target frame is beyond end of video!")
+                seek_pos = round(pos - 1.0)
                 self._cap.set(cv2.CAP_PROP_POS_FRAMES, max(0, seek_pos))
                 self._has_grabbed = self._cap.grab()
         else:

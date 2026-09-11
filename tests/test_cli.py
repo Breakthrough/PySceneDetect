@@ -272,6 +272,16 @@ def test_cli_time_scene_boundary():
         assert EXPECTED in output, test_case
 
 
+@pytest.mark.parametrize("backend", ["opencv", "pyav", "moviepy"])
+def test_cli_time_start_past_end_of_video(backend: str):
+    """Start time past EOF must fail the same way on every backend (issue #380)."""
+    exit_code, output = invoke_cli(["-i", DEFAULT_VIDEO_PATH, "-b", backend, "time", "-s", "10000"])
+    assert exit_code != 0, output
+    assert "beyond the end of the video" in output
+    assert "multiple audio tracks" not in output
+    assert "Detected 1 scenes" not in output
+
+
 def test_cli_time_end_of_video():
     """Validate frame number/timecode alignment at the end of the video. The end timecode includes
     presentation time and therefore should represent the full length of the video."""
