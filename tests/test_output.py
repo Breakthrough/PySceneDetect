@@ -32,6 +32,7 @@ from scenedetect import (
 from scenedetect.output import (
     SceneMetadata,
     VideoMetadata,
+    _open_output_file,
     is_ffmpeg_available,
     split_video_ffmpeg,
     write_scene_list,
@@ -271,6 +272,20 @@ def _make_output_target(
         assert target_kind == "path"
         output_target = output_path
     return output_target, lambda: output_path.read_text(encoding="utf-8")
+
+
+def test_open_output_file_does_not_create_file_on_error(tmp_path: Path):
+    """The decorator does not create a destination when output generation fails."""
+
+    @_open_output_file("TEST")
+    def failing_writer(output_file: ty.Any):
+        output_file.write("partial output")
+        raise RuntimeError("generation failed")
+
+    output_path = tmp_path / "output.txt"
+    with pytest.raises(RuntimeError, match="generation failed"):
+        failing_writer(output_path)
+    assert not output_path.exists()
 
 
 @pytest.mark.parametrize("target_kind", _OUTPUT_TARGET_KINDS)
