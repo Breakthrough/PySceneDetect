@@ -12,6 +12,8 @@
 """Tests for scenedetect.output module."""
 
 import json
+import os
+import typing as ty
 from fractions import Fraction
 from io import StringIO
 from pathlib import Path
@@ -250,32 +252,43 @@ def _fake_scenes(fps: Fraction, frames):
     return [(FrameTimecode(start, fps=fps), FrameTimecode(end, fps=fps)) for start, end in frames]
 
 
-def test_write_scene_list_file_handle():
-    """Existing callers that pass an open file handle keep working."""
+_OUTPUT_TARGET_KINDS = ("file_handle", "str", "path", "bytes")
+
+
+def _make_output_target(
+    tmp_path: Path, target_kind: str, filename: str
+) -> tuple[ty.Any, ty.Callable[[], str]]:
+    """Create one supported output target and a function that reads its text."""
+    output_path = tmp_path / filename
+    if target_kind == "file_handle":
+        output_file = StringIO(newline="")
+        return output_file, output_file.getvalue
+    if target_kind == "str":
+        output_target = str(output_path)
+    elif target_kind == "bytes":
+        output_target = os.fsencode(output_path)
+    else:
+        assert target_kind == "path"
+        output_target = output_path
+    return output_target, lambda: output_path.read_text(encoding="utf-8")
+
+
+@pytest.mark.parametrize("target_kind", _OUTPUT_TARGET_KINDS)
+def test_write_scene_list_output_target(tmp_path: Path, target_kind: str):
+    """CSV output accepts a file handle, string, Path, or bytes path."""
     scenes = _fake_scenes(_FPS_CFR, [(0, 30), (30, 60)])
-    buf = StringIO()
-    write_scene_list(buf, scenes, include_cut_list=False)
-    text = buf.getvalue()
+    output_target, read_output = _make_output_target(tmp_path, target_kind, "scenes.csv")
+    write_scene_list(output_target, scenes, include_cut_list=False)
+    text = read_output()
     assert "Scene Number" in text
     assert "00:00:00.000" in text or "00:00:00:00" in text
 
 
-def test_write_scene_list_accepts_str_path(tmp_path: Path):
-    """A filesystem path string must not raise TypeError from csv.writer."""
-    scenes = _fake_scenes(_FPS_CFR, [(0, 30)])
-    output_path = tmp_path / "scenes.csv"
-    write_scene_list(str(output_path), scenes, include_cut_list=False)
-    assert output_path.exists()
-    assert "Scene Number" in output_path.read_text()
-
-
-def test_write_scene_list_accepts_path(tmp_path: Path):
-    """pathlib.Path is opened with a context manager and closed after write."""
-    scenes = _fake_scenes(_FPS_CFR, [(0, 30)])
-    output_path = tmp_path / "scenes.csv"
-    write_scene_list(output_path, scenes, include_cut_list=False)
-    assert output_path.exists()
-    assert "Scene Number" in output_path.read_text()
+def test_write_scene_list_rejects_invalid_output_target():
+    """The shared output decorator rejects objects that are neither paths nor writable files."""
+    scenes = [(FrameTimecode(0, 24.0), FrameTimecode(24, 24.0))]
+    with pytest.raises(TypeError, match="output_csv_file"):
+        write_scene_list(ty.cast(ty.Any, object()), scenes)
 
 
 def test_write_scene_list_edl(tmp_path: Path):
@@ -291,12 +304,15 @@ def test_write_scene_list_edl(tmp_path: Path):
     assert "002  AX V     C        00:00:01:00 00:00:02:00 00:00:01:00 00:00:02:00" in content
 
 
-def test_write_scene_list_edl_accepts_str_path(tmp_path: Path):
-    """`output_path` must accept both Path and str."""
+@pytest.mark.parametrize("target_kind", _OUTPUT_TARGET_KINDS)
+def test_write_scene_list_edl_output_target(tmp_path: Path, target_kind: str):
+    """EDL output accepts a file handle, string, Path, or bytes path."""
     scenes = _fake_scenes(_FPS_CFR, [(0, 30)])
-    output_path = tmp_path / "scenes.edl"
-    write_scene_list_edl(str(output_path), scenes)
-    assert output_path.exists()
+    output_target, read_output = _make_output_target(tmp_path, target_kind, "scenes.edl")
+    write_scene_list_edl(output_target, scenes, title="Tést")
+    text = read_output()
+    assert "TITLE: Tést" in text
+    assert "\r\n" not in text
 
 
 def test_write_scene_list_edl_with_start_timecode_smpte(tmp_path: Path):
@@ -358,8 +374,11 @@ def test_write_scene_list_edl_default_no_offset(tmp_path: Path):
 def test_write_scene_list_edl_with_start_timecode_invalid_format(tmp_path: Path, bad_value: str):
     """Malformed start timecodes raise ValueError before writing."""
     scenes = _fake_scenes(_FPS_CFR, [(0, 30)])
+    output_path = tmp_path / "scenes.edl"
+    output_path.write_text("existing output", encoding="utf-8")
     with pytest.raises(ValueError):
-        write_scene_list_edl(tmp_path / "scenes.edl", scenes, start_timecode=bad_value)
+        write_scene_list_edl(output_path, scenes, start_timecode=bad_value)
+    assert output_path.read_text(encoding="utf-8") == "existing output"
 
 
 @pytest.mark.parametrize(
@@ -428,6 +447,22 @@ def test_write_scene_list_fcpx_video_name_defaults_to_path_stem(tmp_path: Path):
     assert asset is not None and asset.attrib["name"] == "my_clip"
 
 
+@pytest.mark.parametrize("target_kind", _OUTPUT_TARGET_KINDS)
+def test_write_scene_list_fcpx_output_target(tmp_path: Path, target_kind: str):
+    """FCPXML output accepts a file handle, string, Path, or bytes path."""
+    scenes = _fake_scenes(_FPS_NTSC, [(48, 96), (96, 144)])
+    output_target, read_output = _make_output_target(tmp_path, target_kind, "scenes.xml")
+    # `video_path` need not exist; only `.absolute().as_uri()` is called on it.
+    write_scene_list_fcpx(
+        output_path=output_target,
+        scene_list=scenes,
+        video_path=Path("fake_video.mp4"),
+        frame_rate=_FPS_NTSC,
+        frame_size=(1280, 544),
+    )
+    assert read_output().startswith('<?xml version="1.0"')
+
+
 def test_write_scene_list_fcp7(tmp_path: Path):
     """FCP7 xmeml declares version 5, a clipitem per scene, and a shared <file id> reference."""
     scenes = _fake_scenes(_FPS_NTSC, [(0, 48), (48, 96)])
@@ -476,6 +511,21 @@ def test_write_scene_list_fcp7_cfr_sets_ntsc_false(tmp_path: Path):
     root = ElementTree.parse(output_path).getroot()
     ntsc = root.find("project/sequence/rate/ntsc")
     assert ntsc is not None and ntsc.text == "False"
+
+
+@pytest.mark.parametrize("target_kind", _OUTPUT_TARGET_KINDS)
+def test_write_scene_list_fcp7_output_target(tmp_path: Path, target_kind: str):
+    """FCP7 XML output accepts a file handle, string, Path, or bytes path."""
+    scenes = _fake_scenes(_FPS_CFR, [(0, 30)])
+    output_target, read_output = _make_output_target(tmp_path, target_kind, "scenes.xml")
+    write_scene_list_fcp7(
+        output_target,
+        scene_list=scenes,
+        video_path=Path("source.mp4"),
+        frame_rate=_FPS_CFR,
+        frame_size=(640, 360),
+    )
+    assert read_output().startswith('<?xml version="1.0"')
 
 
 def test_write_scene_list_otio(tmp_path: Path):
@@ -545,3 +595,19 @@ def test_write_scene_list_otio_rational_time_precision(tmp_path: Path):
             for key in ("start_time", "duration"):
                 value = clip["source_range"][key]["value"]
                 assert value == round(value, 6), f"value {value!r} carries sub-10us float drift"
+
+
+@pytest.mark.parametrize("target_kind", _OUTPUT_TARGET_KINDS)
+def test_write_scene_list_otio_output_target(tmp_path: Path, target_kind: str):
+    """OTIO output accepts a file handle, string, Path, or bytes path."""
+    scenes = _fake_scenes(_FPS_NTSC, [(24, 72), (72, 120)])
+    output_target, read_output = _make_output_target(tmp_path, target_kind, "scenes.otio")
+    write_scene_list_otio(
+        output_path=output_target,
+        scene_list=scenes,
+        video_path=tmp_path / "clip.mp4",
+        frame_rate=_FPS_NTSC,
+        name="my-timeline",
+    )
+    doc = json.loads(read_output())
+    assert doc["OTIO_SCHEMA"] == "Timeline.1"
