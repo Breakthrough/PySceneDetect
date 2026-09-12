@@ -246,8 +246,6 @@ class VideoStreamMoviePy(VideoStream):
             target = FrameTimecode(target, self.frame_rate)
         duration = self.duration
         assert duration is not None
-        if duration > 0 and target >= duration:
-            raise SeekError("Target frame is beyond end of video!")
         try:
             self._last_frame = _retry_on_oserror(
                 "seek", lambda: self._reader.get_frame(target.seconds)
@@ -260,6 +258,11 @@ class VideoStreamMoviePy(VideoStream):
             )
             success = True
         except OSError as ex:
+            # TODO(https://scenedetect.com/issues/380): Other backends do not currently throw an
+            # exception if attempting to seek past EOF.
+            #
+            # We need to ensure consistency for seeking past end of video with respect to errors and
+            # behaviour, and should probably gracefully stop at the last frame instead of throwing.
             if target >= duration:
                 raise SeekError("Target frame is beyond end of video!") from ex
             raise

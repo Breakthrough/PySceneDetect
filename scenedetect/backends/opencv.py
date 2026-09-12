@@ -250,9 +250,6 @@ class VideoStreamCv2(VideoStream):
             target = FrameTimecode(target, self.frame_rate)
         if target < 0:
             raise ValueError("Target seek position cannot be negative!")
-        duration = self.duration
-        if duration is not None and duration > 0 and target >= duration:
-            raise SeekError("Target frame is beyond end of video!")
         target_secs = (self.base_timecode + target).seconds
         self._has_grabbed = False
         if target_secs > 0:

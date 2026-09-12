@@ -22,7 +22,6 @@ import pytest
 
 from scenedetect import ContentDetector, SceneManager
 from scenedetect.backends.opencv import VideoCaptureAdapter, VideoStreamCv2
-from scenedetect.video_stream import SeekError
 
 GROUND_TRUTH_CAPTURE_ADAPTER_TEST = [1, 90, 210]
 GROUND_TRUTH_CAPTURE_ADAPTER_CALLBACK_TEST = [180, 394]
@@ -36,9 +35,7 @@ def test_open_image_sequence(test_image_sequence: str):
     assert sequence.duration is not None
     assert sequence.duration.frame_num == 30
     assert sequence.read() is not False
-    with pytest.raises(SeekError):
-        sequence.seek(100)
-    sequence.seek(sequence.duration.frame_num - 1)
+    sequence.seek(100)
     assert sequence.position == 29
 
 

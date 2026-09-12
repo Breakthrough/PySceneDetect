@@ -14,7 +14,6 @@ PySceneDetect 0.7.1 adds support for concatenating multiple videos, along with s
 
 #### API Changes
 
- - [bugfix] `VideoStream.seek()` now raises `SeekError` on every backend when the target is at or past the video duration [#380](https://github.com/Breakthrough/PySceneDetect/issues/380)
  - [feature] `scenedetect.detect()` now accepts a `backend` keyword argument (`"opencv"`, `"pyav"`, or `"moviepy"`) similar to `open_video`. Defaults to `"opencv"`, matching prior behavior.
  - [feature] Add `expand_scenes_to_bounds()` helper in `scenedetect.scene_manager` to extend a scene list so the first scene starts at a given lower bound and the last scene ends at a given upper bound
  - [feature] `VideoStream` now provides a public read-only `decode_failures` property reporting the number of frames that failed to decode and were skipped (defaults to 0; populated by the OpenCV and PyAV backends)
