@@ -1059,6 +1059,7 @@
 <li>[api] Legacy <code>framerate</code> argument aliases in <code>FrameTimecode</code>, <code>open_video()</code>, and the video backends now emit a <code>DeprecationWarning</code>; use <code>frame_rate</code> instead. When both forms are provided, <code>frame_rate</code> takes precedence <a href="https://github.com/Breakthrough/PySceneDetect/issues/548">#548</a></li>
 <li>[general] <code>-f</code>, <code>--frame-rate</code>, and <code>--framerate</code> are now aliases of the same CLI option, and all forms appear in help and documentation. If multiple forms are given, the last value is used <a href="https://github.com/Breakthrough/PySceneDetect/issues/548">#548</a></li>
 <li>[api] <code>write_scene_list()</code> now also accepts a path (<code>str</code> or <code>pathlib.Path</code>) as the first argument in addition to an open file handle; paths are opened and closed automatically <a href="https://github.com/Breakthrough/PySceneDetect/issues/523">#523</a></li>
+<li>[api] Scene-list output functions for EDL, FCPXML, FCP7 XML, and OTIO now accept an open text file handle, a string path, or a <code>pathlib.Path</code>; paths are opened and closed automatically <a href="https://github.com/Breakthrough/PySceneDetect/issues/567">#567</a></li>
 </ul>
 <h2 id="pyscenedetect-08-tbd">PySceneDetect 0.8 (TBD)</h2>
 <ul>
