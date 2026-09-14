@@ -416,6 +416,12 @@ Options
 
   Default: ``True``
 
+.. option:: --min-out-length TIMECODE
+
+  Minimum time spent faded out before a cut is allowed. Ignores shorter fades even when the minimum scene length is met. Also applies to a final fade-out, including the last processed frame. Zero allows fades of any duration. TIMECODE can be specified in frames (4), seconds with an `s` suffix (0.4s), or timecode (00:00:00.400).
+
+  Default: ``0``
+
 .. option:: -m TIMECODE, --min-scene-len TIMECODE
 
   Minimum length of any scene. Overrides global option :option:`-m/--min-scene-len <scenedetect -m>`. TIMECODE can be specified in frames (-m 100), in seconds with `s` suffix (-m 3.5s), or timecode (-m 00:01:52.778).
