@@ -1,5 +1,14 @@
-# Copyright (C) 2026 Mingyang Wu.
-# PySceneDetect is licensed under the BSD 3-Clause License; see LICENSE for details.
+#
+#            PySceneDetect: Python-Based Video Scene Detector
+#   -------------------------------------------------------------------
+#     [  Site:    https://scenedetect.com                           ]
+#     [  Docs:    https://scenedetect.com/docs/                     ]
+#     [  Github:  https://github.com/Breakthrough/PySceneDetect/    ]
+#
+# Copyright (C) 2026 Brandon Castellano <http://www.bcastell.com>.
+# PySceneDetect is licensed under the BSD 3-Clause License; see the
+# included LICENSE file, or visit one of the above pages for details.
+#
 """Duration filtering for threshold-based fades."""
 
 import csv
@@ -79,7 +88,7 @@ def test_default_keeps_short_fades():
 
 
 def _write_video(path, levels):
-    writer = cv2.VideoWriter(str(path), cv2.VideoWriter_fourcc(*"MJPG"), 10, (64, 48))
+    writer = cv2.VideoWriter(str(path), cv2.VideoWriter.fourcc(*"MJPG"), 10, (64, 48))
     assert writer.isOpened()
     try:
         for level in levels:
