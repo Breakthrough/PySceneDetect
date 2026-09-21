@@ -298,6 +298,7 @@
 <p>PySceneDetect 0.7.1 adds support for concatenating multiple videos, along with several stability and robustness fixes for the PyAV and OpenCV backends.</p>
 <h4 id="cli-changes">CLI Changes</h4>
 <ul>
+<li>[bugfix] A start time past the end of the video now fails the same way on every backend, instead of blaming multiple audio tracks (OpenCV), reporting a zero-length scene (PyAV), or hanging on an invalid seek (OpenCV 5) <a href="https://github.com/Breakthrough/PySceneDetect/issues/380">#380</a></li>
 <li>[feature] <code>split-video</code> has a new <code>--expand</code> flag: when scenes are detected within a time window (<code>-s</code>/<code>-e</code>), the first output clip is extended back to the start of the video and the last clip is extended forward to the end, so no footage outside the analysis window is dropped <a href="https://github.com/Breakthrough/PySceneDetect/issues/115">#115</a></li>
 </ul>
 <h4 id="api-changes">API Changes</h4>
