@@ -53,6 +53,7 @@ class ThresholdDetector(SceneDetector):
         add_final_scene: bool = False,
         method: Method = Method.FLOOR,
         block_size=None,
+        min_out_length: TimecodeLike = 0,
     ):
         """
         Arguments:
@@ -69,6 +70,9 @@ class ThresholdDetector(SceneDetector):
                 generate an additional scene at this timecode.
             method: How to treat `threshold` when detecting fade events.
             block_size: [DEPRECATED] DO NOT USE. For backwards compatibility.
+            min_out_length: Minimum time spent faded out before a cut can be added. Accepts the
+                same formats as min_scene_len. Shorter fades are ignored. Defaults to 0,
+                allowing fades of any duration.
         """
         if block_size is not None:
             warnings.warn(
@@ -82,6 +86,7 @@ class ThresholdDetector(SceneDetector):
         self.method = ThresholdDetector.Method(method)
         self.fade_bias = fade_bias
         self.min_scene_len = min_scene_len
+        self.min_out_length = min_out_length
         self.processed_frame = False
         self.last_scene_cut: FrameTimecode | None = None
         # Whether to add an additional scene or not when ending on a fade out
@@ -141,8 +146,10 @@ class ThresholdDetector(SceneDetector):
                 (self.method == ThresholdDetector.Method.FLOOR and frame_avg >= self.threshold)
                 or (self.method == ThresholdDetector.Method.CEILING and frame_avg < self.threshold)
             ):
-                # Only add the scene if min_scene_len frames have passed.
-                if (timecode - self.last_scene_cut) >= self.min_scene_len:
+                # Both the scene and the fade-out must meet their minimum durations.
+                if (timecode - self.last_scene_cut) >= self.min_scene_len and (
+                    timecode - self.last_fade["frame"]
+                ) >= self.min_out_length:
                     # Just faded into a new scene, compute timecode for the scene
                     # split based on the fade bias. Use frame-number arithmetic so the
                     # result is identical across backends - float seconds + framerate
@@ -173,7 +180,8 @@ class ThresholdDetector(SceneDetector):
         Only writes the scene cut if add_final_scene is true, and the last fade
         that was detected was a fade-out.  There is no bias applied to this cut
         (since there is no corresponding fade-in) so it will be located at the
-        exact frame where the fade-out crossed the detection threshold.
+        exact frame where the fade-out crossed the detection threshold. The fade-out
+        must also meet min_out_length, including the last processed frame.
         """
 
         # If the last fade detected was a fade out, we add a corresponding new
@@ -186,6 +194,8 @@ class ThresholdDetector(SceneDetector):
             and self.add_final_scene
             and self.last_fade["frame"] is not None
             and elapsed >= self.min_scene_len
+            # timecode is the last processed frame, so include it in the fade duration.
+            and (timecode + 1 - self.last_fade["frame"]) >= self.min_out_length
         ):
             cuts.append(self.last_fade["frame"])
         return cuts

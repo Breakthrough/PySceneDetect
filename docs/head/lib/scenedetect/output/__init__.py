@@ -16,9 +16,13 @@ CSV/HTML, or splitting the input video into individual shots.
 """
 
 import csv
+import functools
+import inspect
+import io
 import json
 import logging
 import math
+import os
 import typing as ty
 from fractions import Fraction
 from pathlib import Path
@@ -64,12 +68,67 @@ from scenedetect.output.video import (
 from scenedetect.output.video import (
     split_video_mkvmerge as split_video_mkvmerge,
 )
+from scenedetect.platform import BytePath, StrPath
 
 logger = logging.getLogger("pyscenedetect")
 
 
+_F = ty.TypeVar("_F", bound=ty.Callable[..., ty.Any])
+
+
+def _open_output_file(output_format: str) -> ty.Callable[[_F], _F]:
+    """Allows a writer's first argument to be an open text file or a filesystem path.
+
+    File handles remain open after the writer returns. Path-based output is rendered in memory
+    before the destination is opened, then written as UTF-8 with no newline translation.
+    """
+
+    def decorator(func: _F) -> _F:
+        parameters = tuple(inspect.signature(func).parameters.values())
+        assert parameters and parameters[0].kind in (
+            inspect.Parameter.POSITIONAL_ONLY,
+            inspect.Parameter.POSITIONAL_OR_KEYWORD,
+        )
+        parameter_name = parameters[0].name
+
+        @functools.wraps(func)
+        def wrapper(*args: ty.Any, **kwargs: ty.Any) -> ty.Any:
+            output_file = args[0] if args else kwargs[parameter_name]
+
+            if not isinstance(output_file, (str, bytes, os.PathLike)):
+                if not callable(getattr(output_file, "write", None)):
+                    raise TypeError(
+                        f"{parameter_name} must be a filesystem path or writable text file"
+                    )
+                logger.info(
+                    "Writing scenes in %s format to %s",
+                    output_format,
+                    getattr(output_file, "name", "<file-like object>"),
+                )
+                return func(*args, **kwargs)
+
+            with io.StringIO(newline="") as output_buffer:
+                if args:
+                    result = func(output_buffer, *args[1:], **kwargs)
+                else:
+                    kwargs[parameter_name] = output_buffer
+                    result = func(**kwargs)
+                contents = output_buffer.getvalue()
+
+            logger.info("Writing scenes in %s format to %s", output_format, output_file)
+            with open(output_file, "w", encoding="utf-8", newline="") as file_handle:
+                file_handle.write(contents)
+
+            return result
+
+        return ty.cast(_F, wrapper)
+
+    return decorator
+
+
+@_open_output_file("CSV")
 def write_scene_list(
-    output_csv_file: ty.TextIO | str | Path,
+    output_csv_file: StrPath | BytePath | ty.TextIO,
     scene_list: SceneList,
     include_cut_list: bool = True,
     cut_list: CutList | None = None,
@@ -93,18 +152,10 @@ def write_scene_list(
     Raises:
         TypeError: "delimiter" must be a 1-character string
     """
-    if isinstance(output_csv_file, (str, Path)):
-        with open(output_csv_file, "w", newline="") as file_handle:
-            write_scene_list(
-                file_handle,
-                scene_list,
-                include_cut_list=include_cut_list,
-                cut_list=cut_list,
-                col_separator=col_separator,
-                row_separator=row_separator,
-            )
-        return
-    csv_writer = csv.writer(output_csv_file, delimiter=col_separator, lineterminator=row_separator)
+    # `_open_output_file` replaces filesystem paths with writable text streams.
+    assert not isinstance(output_csv_file, (str, bytes, os.PathLike))
+    output_file = output_csv_file
+    csv_writer = csv.writer(output_file, delimiter=col_separator, lineterminator=row_separator)
     # If required, output the cutting list as the first row (i.e. before the header row).
     if include_cut_list:
         csv_writer.writerow(
@@ -304,8 +355,9 @@ def _parse_edl_start_timecode(value: str, frame_rate: Fraction | float) -> int:
     return round((hours * 3600 + minutes * 60 + seconds) * float(frame_rate)) + frames
 
 
+@_open_output_file("EDL")
 def write_scene_list_edl(
-    output_path: str | Path,
+    output_path: StrPath | BytePath | ty.TextIO,
     scene_list: SceneList,
     title: str = "PySceneDetect",
     reel: str = "AX",
@@ -314,7 +366,8 @@ def write_scene_list_edl(
     """Writes the given list of scenes to `output_path` in CMX 3600 EDL format.
 
     Arguments:
-        output_path: Path to write the EDL file to. Parent directories must exist.
+        output_path: Open text file or path to write the EDL file to. Parent directories must
+            exist. When a path is provided, the file is closed after writing.
         scene_list: List of scenes as pairs of FrameTimecodes denoting each scene's start/end.
         title: Title header written as ``TITLE:`` in the EDL.
         reel: Reel name used for each event. Typically 2-8 uppercase characters.
@@ -322,7 +375,9 @@ def write_scene_list_edl(
             every event so the EDL aligns with the source media's on-screen timecode. Applied to
             both source and record columns.
     """
-    output_path = Path(output_path)
+    # `_open_output_file` replaces filesystem paths with writable text streams.
+    assert not isinstance(output_path, (str, bytes, os.PathLike))
+    output_file = output_path
     offset_frames = 0
     if start_timecode is not None and start_timecode.strip() and scene_list:
         frame_rate = scene_list[0][0].frame_rate
@@ -333,14 +388,12 @@ def write_scene_list_edl(
         in_tc = _edl_timecode(start + offset_frames)
         out_tc = _edl_timecode(end + offset_frames)
         lines.append(f"{(i + 1):03d}  {reel} V     C        {in_tc} {out_tc} {in_tc} {out_tc}")
-    logger.info("Writing scenes in EDL format to %s", output_path)
-    with open(output_path, "w") as f:
-        # `scenedetect` is imported lazily to avoid a circular import at module load.
-        import scenedetect
+    # `scenedetect` is imported lazily to avoid a circular import at module load.
+    import scenedetect
 
-        f.write(f"* CREATED WITH PYSCENEDETECT {scenedetect.__version__}\n")
-        f.write("\n".join(lines))
-        f.write("\n")
+    output_file.write(f"* CREATED WITH PYSCENEDETECT {scenedetect.__version__}\n")
+    output_file.write("\n".join(lines))
+    output_file.write("\n")
 
 
 def _rational_seconds(value: Fraction) -> str:
@@ -359,8 +412,9 @@ def _frame_timecode_seconds(tc: FrameTimecode) -> Fraction:
     return Fraction(tc.pts) * tc.time_base
 
 
+@_open_output_file("FCPX")
 def write_scene_list_fcpx(
-    output_path: str | Path,
+    output_path: StrPath | BytePath | ty.TextIO,
     scene_list: SceneList,
     video_path: str | Path,
     frame_rate: Fraction,
@@ -374,7 +428,8 @@ def write_scene_list_fcpx(
     https://developer.apple.com/documentation/professional-video-applications/fcpxml-reference
 
     Arguments:
-        output_path: Path to write the FCPXML file to. Parent directories must exist.
+        output_path: Open text file or path to write the FCPXML file to. Parent directories must
+            exist. When a path is provided, the file is closed after writing.
         scene_list: List of scenes as pairs of FrameTimecodes. Must not be empty.
         video_path: Path to the source video file; written into the output as a ``file://`` URI.
         frame_rate: Source frame rate as a rational `Fraction` (e.g. ``Fraction(24000, 1001)``).
@@ -383,7 +438,9 @@ def write_scene_list_fcpx(
             of `video_path`.
     """
     assert scene_list
-    output_path = Path(output_path)
+    # `_open_output_file` replaces filesystem paths with writable text streams.
+    assert not isinstance(output_path, (str, bytes, os.PathLike))
+    output_file = output_path
     video_path = Path(video_path)
     if video_name is None:
         video_name = video_path.stem
@@ -453,13 +510,12 @@ def write_scene_list_fcpx(
     pretty_xml = minidom.parseString(ElementTree.tostring(root, encoding="unicode")).toprettyxml(
         indent="  "
     )
-    logger.info("Writing scenes in FCPX format to %s", output_path)
-    with open(output_path, "w") as f:
-        f.write(pretty_xml)
+    output_file.write(pretty_xml)
 
 
+@_open_output_file("FCP")
 def write_scene_list_fcp7(
-    output_path: str | Path,
+    output_path: StrPath | BytePath | ty.TextIO,
     scene_list: SceneList,
     video_path: str | Path,
     frame_rate: Fraction,
@@ -474,7 +530,8 @@ def write_scene_list_fcp7(
     ``pathurl`` is written as a valid ``file://`` URI per the xmeml spec.
 
     Arguments:
-        output_path: Path to write the xmeml file to. Parent directories must exist.
+        output_path: Open text file or path to write the xmeml file to. Parent directories must
+            exist. When a path is provided, the file is closed after writing.
         scene_list: List of scenes as pairs of FrameTimecodes. Must not be empty.
         video_path: Path to the source video file; written into the output as a ``file://`` URI.
         frame_rate: Source frame rate as a rational `Fraction`.
@@ -486,7 +543,9 @@ def write_scene_list_fcp7(
             frozen. If None, falls back to the last scene's end time.
     """
     assert scene_list
-    output_path = Path(output_path)
+    # `_open_output_file` replaces filesystem paths with writable text streams.
+    assert not isinstance(output_path, (str, bytes, os.PathLike))
+    output_file = output_path
     video_path = Path(video_path)
     if video_name is None:
         video_name = video_path.stem
@@ -570,16 +629,15 @@ def write_scene_list_fcp7(
     pretty_xml = minidom.parseString(ElementTree.tostring(root, encoding="unicode")).toprettyxml(
         indent="  "
     )
-    logger.info("Writing scenes in FCP format to %s", output_path)
-    with open(output_path, "w") as f:
-        f.write(pretty_xml)
+    output_file.write(pretty_xml)
 
 
 # TODO: We have to export framerate as a float for OTIO's current format. When OTIO supports
 # fractional timecodes, we should export the framerate as a rational number instead.
 # https://github.com/AcademySoftwareFoundation/OpenTimelineIO/issues/190
+@_open_output_file("OTIO")
 def write_scene_list_otio(
-    output_path: str | Path,
+    output_path: StrPath | BytePath | ty.TextIO,
     scene_list: SceneList,
     video_path: str | Path,
     frame_rate: Fraction,
@@ -591,7 +649,8 @@ def write_scene_list_otio(
     OTIO (OpenTimelineIO) timelines can be imported by many video editors.
 
     Arguments:
-        output_path: Path to write the OTIO file to. Parent directories must exist.
+        output_path: Open text file or path to write the OTIO file to. Parent directories must
+            exist. When a path is provided, the file is closed after writing.
         scene_list: List of scenes as pairs of FrameTimecodes.
         video_path: Path to the source video file; written into the output as an absolute path.
         frame_rate: Source frame rate as a rational `Fraction`. Exported as a float, as the
@@ -599,7 +658,9 @@ def write_scene_list_otio(
         name: Timeline name. Defaults to the stem of `video_path`.
         audio: If True (default), include an audio track alongside the video track.
     """
-    output_path = Path(output_path)
+    # `_open_output_file` replaces filesystem paths with writable text streams.
+    assert not isinstance(output_path, (str, bytes, os.PathLike))
+    output_file = output_path
     video_path = Path(video_path)
     if name is None:
         name = video_path.stem
@@ -680,7 +741,5 @@ def write_scene_list_otio(
         },
     }
 
-    logger.info("Writing scenes in OTIO format to %s", output_path)
-    with open(output_path, "w") as f:
-        json.dump(otio, f, indent=4)
-        f.write("\n")
+    json.dump(otio, output_file, indent=4)
+    output_file.write("\n")

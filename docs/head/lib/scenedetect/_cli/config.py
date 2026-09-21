@@ -390,6 +390,7 @@ CONFIG_MAP: ConfigDict = {
     "detect-threshold": {
         "add-last-scene": True,
         "fade-bias": RangeValue(0, min_val=-100.0, max_val=100.0),
+        "min-out-length": TimecodeValue("0.1s"),
         "min-scene-len": TimecodeValue(0),
         "threshold": RangeValue(12.0, min_val=0.0, max_val=255.0),
     },

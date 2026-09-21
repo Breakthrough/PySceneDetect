@@ -31,6 +31,10 @@ StrPath = str | os.PathLike[str]
 """Type hint for filesystem paths. Accepts a `str` or any object implementing :class:`os.PathLike`
 (e.g. :class:`pathlib.Path`)."""
 
+BytePath = bytes | os.PathLike[bytes]
+"""Type hint for byte-based filesystem paths. Accepts `bytes` or any object implementing
+:class:`os.PathLike` that returns `bytes`."""
+
 DEBUG_MODE: bool = os.environ.get("SCENEDETECT_DEBUG", "").strip().lower() not in (
     "",
     "0",

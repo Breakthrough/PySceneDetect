@@ -49,7 +49,7 @@ CSV/HTML, or splitting the input video into individual shots.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>output_csv_file</strong> (<em>TextIO</em><em> | </em><em>str</em><em> | </em><em>Path</em>) – Handle to open file in write mode, or a filesystem path. A path is
+<li><p><strong>output_csv_file</strong> (<em>str</em><em> | </em><em>PathLike</em><em>[</em><em>str</em><em>] </em><em>| </em><em>bytes</em><em> | </em><em>PathLike</em><em>[</em><em>bytes</em><em>] </em><em>| </em><em>TextIO</em>) – Handle to open file in write mode, or a filesystem path. A path is
 opened with a context manager so the file is closed after writing.</p></li>
 <li><p><strong>scene_list</strong> (<em>list</em><em>[</em><em>tuple</em><em>[</em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em>, </em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em>]</em><em>]</em>) – List of pairs of FrameTimecodes denoting each scene’s start/end FrameTimecode.</p></li>
 <li><p><strong>include_cut_list</strong> (<em>bool</em>) – Bool indicating if the first row should include the timecodes where
@@ -74,7 +74,8 @@ the cut list is generated using the start times of each scene following the firs
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>output_path</strong> (<em>str</em><em> | </em><em>Path</em>) – Path to write the EDL file to. Parent directories must exist.</p></li>
+<li><p><strong>output_path</strong> (<em>str</em><em> | </em><em>PathLike</em><em>[</em><em>str</em><em>] </em><em>| </em><em>bytes</em><em> | </em><em>PathLike</em><em>[</em><em>bytes</em><em>] </em><em>| </em><em>TextIO</em>) – Open text file or path to write the EDL file to. Parent directories must
+exist. When a path is provided, the file is closed after writing.</p></li>
 <li><p><strong>scene_list</strong> (<em>list</em><em>[</em><em>tuple</em><em>[</em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em>, </em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em>]</em><em>]</em>) – List of scenes as pairs of FrameTimecodes denoting each scene’s start/end.</p></li>
 <li><p><strong>title</strong> (<em>str</em>) – Title header written as <code class="docutils literal notranslate"><span class="pre">TITLE:</span></code> in the EDL.</p></li>
 <li><p><strong>reel</strong> (<em>str</em>) – Reel name used for each event. Typically 2-8 uppercase characters.</p></li>
@@ -96,7 +97,8 @@ both source and record columns.</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>output_path</strong> (<em>str</em><em> | </em><em>Path</em>) – Path to write the xmeml file to. Parent directories must exist.</p></li>
+<li><p><strong>output_path</strong> (<em>str</em><em> | </em><em>PathLike</em><em>[</em><em>str</em><em>] </em><em>| </em><em>bytes</em><em> | </em><em>PathLike</em><em>[</em><em>bytes</em><em>] </em><em>| </em><em>TextIO</em>) – Open text file or path to write the xmeml file to. Parent directories must
+exist. When a path is provided, the file is closed after writing.</p></li>
 <li><p><strong>scene_list</strong> (<em>list</em><em>[</em><em>tuple</em><em>[</em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em>, </em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em>]</em><em>]</em>) – List of scenes as pairs of FrameTimecodes. Must not be empty.</p></li>
 <li><p><strong>video_path</strong> (<em>str</em><em> | </em><em>Path</em>) – Path to the source video file; written into the output as a <code class="docutils literal notranslate"><span class="pre">file://</span></code> URI.</p></li>
 <li><p><strong>frame_rate</strong> (<em>Fraction</em>) – Source frame rate as a rational <cite>Fraction</cite>.</p></li>
@@ -121,7 +123,8 @@ frozen. If None, falls back to the last scene’s end time.</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>output_path</strong> (<em>str</em><em> | </em><em>Path</em>) – Path to write the FCPXML file to. Parent directories must exist.</p></li>
+<li><p><strong>output_path</strong> (<em>str</em><em> | </em><em>PathLike</em><em>[</em><em>str</em><em>] </em><em>| </em><em>bytes</em><em> | </em><em>PathLike</em><em>[</em><em>bytes</em><em>] </em><em>| </em><em>TextIO</em>) – Open text file or path to write the FCPXML file to. Parent directories must
+exist. When a path is provided, the file is closed after writing.</p></li>
 <li><p><strong>scene_list</strong> (<em>list</em><em>[</em><em>tuple</em><em>[</em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em>, </em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em>]</em><em>]</em>) – List of scenes as pairs of FrameTimecodes. Must not be empty.</p></li>
 <li><p><strong>video_path</strong> (<em>str</em><em> | </em><em>Path</em>) – Path to the source video file; written into the output as a <code class="docutils literal notranslate"><span class="pre">file://</span></code> URI.</p></li>
 <li><p><strong>frame_rate</strong> (<em>Fraction</em>) – Source frame rate as a rational <cite>Fraction</cite> (e.g. <code class="docutils literal notranslate"><span class="pre">Fraction(24000,</span> <span class="pre">1001)</span></code>).</p></li>
@@ -164,7 +167,8 @@ the n saved images from that scene)</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>output_path</strong> (<em>str</em><em> | </em><em>Path</em>) – Path to write the OTIO file to. Parent directories must exist.</p></li>
+<li><p><strong>output_path</strong> (<em>str</em><em> | </em><em>PathLike</em><em>[</em><em>str</em><em>] </em><em>| </em><em>bytes</em><em> | </em><em>PathLike</em><em>[</em><em>bytes</em><em>] </em><em>| </em><em>TextIO</em>) – Open text file or path to write the OTIO file to. Parent directories must
+exist. When a path is provided, the file is closed after writing.</p></li>
 <li><p><strong>scene_list</strong> (<em>list</em><em>[</em><em>tuple</em><em>[</em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em>, </em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em>]</em><em>]</em>) – List of scenes as pairs of FrameTimecodes.</p></li>
 <li><p><strong>video_path</strong> (<em>str</em><em> | </em><em>Path</em>) – Path to the source video file; written into the output as an absolute path.</p></li>
 <li><p><strong>frame_rate</strong> (<em>Fraction</em>) – Source frame rate as a rational <cite>Fraction</cite>. Exported as a float, as the
