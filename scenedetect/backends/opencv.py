@@ -54,6 +54,22 @@ NON_VIDEO_FILE_INPUT_IDENTIFIERS = (
 )
 
 
+def _get_capture_api(path: str) -> int:
+    """API preference to use when opening `path` with `cv2.VideoCapture`. This exists as a
+    workaround for https://scenedetect.com/issue/575, where certain versions of the opencv-python
+    package cause intermittent segfaults on exit. The issue only happens on Windows when opening
+    PNG image sequences.
+
+    By default OpenCV resolves any capture backend by probing for compatibility, and tries FFmpeg
+    first. Usually this fails, and it falls back gracefully to CAP_IMAGES. However, this also seems
+    to cause issues on interpreter exit, as the stack trace implicates something in the ffmpeg DLL.
+    """
+    is_local = not any(identifier in path for identifier in ("://", " ! "))
+    if os.name == "nt" and is_local and path.lower().endswith(".png"):
+        return cv2.CAP_IMAGES
+    return cv2.CAP_ANY
+
+
 def _get_aspect_ratio(cap: cv2.VideoCapture, epsilon: float = 0.0001) -> float:
     """Display/pixel aspect ratio of the VideoCapture as a float (1.0 represents square pixels)."""
     # Versions of OpenCV < 3.4.1 do not support this, so we fall back to 1.0.
@@ -326,8 +342,10 @@ class VideoStreamCv2(VideoStream):
             if self._path_or_device < 0:
                 raise ValueError("Invalid/negative device ID specified.")
             input_is_video_file = False
+            capture_api = cv2.CAP_ANY
         else:
             assert isinstance(self._path_or_device, str)
+            capture_api = _get_capture_api(self._path_or_device)
             input_is_video_file = not any(
                 identifier in self._path_or_device
                 for identifier in NON_VIDEO_FILE_INPUT_IDENTIFIERS
@@ -337,7 +355,7 @@ class VideoStreamCv2(VideoStream):
             if input_is_video_file and not os.path.exists(self._path_or_device):
                 raise OSError("Video file not found.")
 
-        cap = cv2.VideoCapture(self._path_or_device)
+        cap = cv2.VideoCapture(self._path_or_device, capture_api)
         if not cap.isOpened():
             raise VideoOpenFailure(
                 "Ensure file is valid video and system dependencies are up to date.\n"

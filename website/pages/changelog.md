@@ -794,7 +794,5 @@ Development
  - [api] Scene-list output functions for EDL, FCPXML, FCP7 XML, and OTIO now accept an open text file handle, a string path, or a `pathlib.Path`; paths are opened and closed automatically [#567](https://github.com/Breakthrough/PySceneDetect/issues/567)
  - [feature] Add `--min-out-length`/`min_out_length` to `detect-threshold`/`ThresholdDetector`, which ignores fades that stay below the threshold for less than the given duration [#278](https://github.com/Breakthrough/PySceneDetect/issues/278)
  - [improvement] `detect-threshold` now ignores fade-outs shorter than `0.1s` by default. Use `--min-out-length 0` to restore the previous behavior. The API default remains `0` [#278](https://github.com/Breakthrough/PySceneDetect/issues/278)
-
-## PySceneDetect 0.8 (TBD)
-
 - [feature] Added `save-keyframes` command to export detected cuts using `# keyframe format v1` for Aegisub-compatible tools [#534](https://github.com/Breakthrough/PySceneDetect/issues/534). Frame numbers are currently approximate for VFR input [#569](https://github.com/Breakthrough/PySceneDetect/issues/569)
+ - [bugfix] Fix intermittent segfault on exit. Isolated to Windows builds with OpenCV 5.x when opening PNG image sequences with the `VideoStreamCv2` backend. [#575](https://github.com/Breakthrough/PySceneDetect/issues/575)

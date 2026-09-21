@@ -17,6 +17,8 @@ VideoStreamCv2 ('opencv') backend. These tests validate behaviour specific to th
 For VideoStream tests that validate conformance, see test_video_stream.py.
 """
 
+import os
+
 import cv2
 import pytest
 
@@ -37,6 +39,27 @@ def test_open_image_sequence(test_image_sequence: str):
     assert sequence.read() is not False
     sequence.seek(100)
     assert sequence.position == 29
+
+
+@pytest.mark.skipif(os.name != "nt", reason="Workaround only applies on Windows.")
+def test_open_png_sequence_skips_ffmpeg_probe(test_image_sequence: str, monkeypatch):
+    """PNG inputs must be opened with `cv2.CAP_IMAGES` on Windows because certain versions of the
+    opencv-python 5.x package cause intermittent segfaults on exit.
+
+    See https://scenedetect.com/issue/575 for details."""
+    calls = []
+    real_capture = cv2.VideoCapture
+
+    def spy(*args):
+        calls.append(args)
+        return real_capture(*args)
+
+    monkeypatch.setattr(cv2, "VideoCapture", spy)
+    sequence = VideoStreamCv2(test_image_sequence, frame_rate=25.0)
+    sequence.reset()
+    assert calls == [(test_image_sequence, cv2.CAP_IMAGES)] * 2
+    assert sequence.capture.getBackendName() == "CV_IMAGES"
+    assert sequence.read() is not False
 
 
 def test_capture_adapter(test_movie_clip: str):
