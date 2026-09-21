@@ -67,6 +67,20 @@ def test_min_scene_len_still_applies():
     assert _detect_levels(levels, min_scene_len=0, min_out_length=4) == [12, 19]
 
 
+@pytest.mark.parametrize("out_length, expected", [(3, []), (4, [2]), (6, [3])])
+def test_min_out_length_applies_to_leading_fade(out_length, expected):
+    # A video that starts faded out should be measured from the *first* frame we process.
+    levels = [0] * out_length + [128] * 10
+    assert _detect_levels(levels, min_scene_len=0, min_out_length=4) == expected
+    assert _detect_levels(levels, min_scene_len=0) == [round(out_length / 2)]
+
+
+@pytest.mark.parametrize("minimum", [-1, -0.5])
+def test_negative_min_out_length_rejected(minimum):
+    with pytest.raises(ValueError):
+        ThresholdDetector(min_out_length=minimum)
+
+
 @pytest.mark.parametrize("add_final_scene", [False, True])
 @pytest.mark.parametrize("out_length", [3, 4])
 def test_final_fade_counts_last_frame(out_length, add_final_scene):

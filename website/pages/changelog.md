@@ -792,6 +792,8 @@ Development
  - [general] `-f`, `--frame-rate`, and `--framerate` are now aliases of the same CLI option, and all forms appear in help and documentation. If multiple forms are given, the last value is used [#548](https://github.com/Breakthrough/PySceneDetect/issues/548)
  - [api] `write_scene_list()` now also accepts a path (`str` or `pathlib.Path`) as the first argument in addition to an open file handle; paths are opened and closed automatically [#523](https://github.com/Breakthrough/PySceneDetect/issues/523)
  - [api] Scene-list output functions for EDL, FCPXML, FCP7 XML, and OTIO now accept an open text file handle, a string path, or a `pathlib.Path`; paths are opened and closed automatically [#567](https://github.com/Breakthrough/PySceneDetect/issues/567)
+ - [feature] Add `--min-out-length`/`min_out_length` to `detect-threshold`/`ThresholdDetector`, which ignores fades that stay below the threshold for less than the given duration [#278](https://github.com/Breakthrough/PySceneDetect/issues/278)
+ - [improvement] `detect-threshold` now ignores fade-outs shorter than `0.1s` by default. Use `--min-out-length 0` to restore the previous behavior. The API default remains `0` [#278](https://github.com/Breakthrough/PySceneDetect/issues/278)
 
 ## PySceneDetect 0.8 (TBD)
 
