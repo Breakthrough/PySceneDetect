@@ -271,11 +271,11 @@ def _make_output_target(
     else:
         assert target_kind == "path"
         output_target = output_path
-    return output_target, lambda: output_path.read_text(encoding="utf-8")
+    return output_target, lambda: output_path.read_bytes().decode("utf-8")
 
 
 def test_open_output_file_does_not_create_file_on_error(tmp_path: Path):
-    """The decorator does not create a destination when output generation fails."""
+    """Verify that the decorator does not create a destination when output generation fails."""
 
     @_open_output_file("TEST")
     def failing_writer(output_file: ty.Any):
@@ -288,6 +288,27 @@ def test_open_output_file_does_not_create_file_on_error(tmp_path: Path):
     assert not output_path.exists()
 
 
+def test_open_output_file_preserves_existing_file_on_error(tmp_path: Path):
+    """The decorator does not clobber an existing destination when output generation fails."""
+
+    @_open_output_file("TEST")
+    def failing_writer(output_file: ty.Any):
+        output_file.write("partial output")
+        raise RuntimeError("generation failed")
+
+    output_path = tmp_path / "output.txt"
+    output_path.write_text("existing contents", encoding="utf-8")
+    with pytest.raises(RuntimeError, match="generation failed"):
+        failing_writer(output_path)
+    assert output_path.read_text(encoding="utf-8") == "existing contents"
+
+
+def test_open_output_file_missing_target_raises_type_error():
+    """Omitting the output target raises the usual missing-argument TypeError, not KeyError."""
+    with pytest.raises(TypeError, match="output_csv_file"):
+        write_scene_list(scene_list=[])  # type: ignore[call-arg]
+
+
 @pytest.mark.parametrize("target_kind", _OUTPUT_TARGET_KINDS)
 def test_write_scene_list_output_target(tmp_path: Path, target_kind: str):
     """CSV output accepts a file handle, string, Path, or bytes path."""
@@ -296,7 +317,8 @@ def test_write_scene_list_output_target(tmp_path: Path, target_kind: str):
     write_scene_list(output_target, scenes, include_cut_list=False)
     text = read_output()
     assert "Scene Number" in text
-    assert "00:00:00.000" in text or "00:00:00:00" in text
+    assert "00:00:00.000" in text
+    assert "\r\n" not in text
 
 
 def test_write_scene_list_rejects_invalid_output_target():
@@ -475,7 +497,9 @@ def test_write_scene_list_fcpx_output_target(tmp_path: Path, target_kind: str):
         frame_rate=_FPS_NTSC,
         frame_size=(1280, 544),
     )
-    assert read_output().startswith('<?xml version="1.0"')
+    text = read_output()
+    assert text.startswith('<?xml version="1.0"')
+    assert "\r\n" not in text
 
 
 def test_write_scene_list_fcp7(tmp_path: Path):
@@ -540,7 +564,9 @@ def test_write_scene_list_fcp7_output_target(tmp_path: Path, target_kind: str):
         frame_rate=_FPS_CFR,
         frame_size=(640, 360),
     )
-    assert read_output().startswith('<?xml version="1.0"')
+    text = read_output()
+    assert text.startswith('<?xml version="1.0"')
+    assert "\r\n" not in text
 
 
 def test_write_scene_list_otio(tmp_path: Path):
@@ -624,5 +650,7 @@ def test_write_scene_list_otio_output_target(tmp_path: Path, target_kind: str):
         frame_rate=_FPS_NTSC,
         name="my-timeline",
     )
-    doc = json.loads(read_output())
+    text = read_output()
+    assert "\r\n" not in text
+    doc = json.loads(text)
     assert doc["OTIO_SCHEMA"] == "Timeline.1"
