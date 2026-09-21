@@ -152,6 +152,7 @@ def write_scene_list(
     Raises:
         TypeError: "delimiter" must be a 1-character string
     """
+    # `_open_output_file` replaces filesystem paths with writable text streams.
     assert not isinstance(output_csv_file, (str, bytes, os.PathLike))
     output_file = output_csv_file
     csv_writer = csv.writer(output_file, delimiter=col_separator, lineterminator=row_separator)
@@ -374,6 +375,7 @@ def write_scene_list_edl(
             every event so the EDL aligns with the source media's on-screen timecode. Applied to
             both source and record columns.
     """
+    # `_open_output_file` replaces filesystem paths with writable text streams.
     assert not isinstance(output_path, (str, bytes, os.PathLike))
     output_file = output_path
     offset_frames = 0
@@ -436,6 +438,7 @@ def write_scene_list_fcpx(
             of `video_path`.
     """
     assert scene_list
+    # `_open_output_file` replaces filesystem paths with writable text streams.
     assert not isinstance(output_path, (str, bytes, os.PathLike))
     output_file = output_path
     video_path = Path(video_path)
@@ -540,6 +543,7 @@ def write_scene_list_fcp7(
             frozen. If None, falls back to the last scene's end time.
     """
     assert scene_list
+    # `_open_output_file` replaces filesystem paths with writable text streams.
     assert not isinstance(output_path, (str, bytes, os.PathLike))
     output_file = output_path
     video_path = Path(video_path)
@@ -654,6 +658,7 @@ def write_scene_list_otio(
         name: Timeline name. Defaults to the stem of `video_path`.
         audio: If True (default), include an audio track alongside the video track.
     """
+    # `_open_output_file` replaces filesystem paths with writable text streams.
     assert not isinstance(output_path, (str, bytes, os.PathLike))
     output_file = output_path
     video_path = Path(video_path)
