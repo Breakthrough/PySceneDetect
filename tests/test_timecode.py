@@ -21,6 +21,7 @@ or string HH:MM:SS[.nnn]. timecode format.
 """
 
 # Third-Party Library Imports
+import numbers
 from fractions import Fraction
 
 import pytest
@@ -427,6 +428,51 @@ def test_framerate_to_fraction_non_ntsc_fallback():
     misclassified as NTSC."""
     # 24.5 is not near any N*1000/1001 within tolerance, so the limit_denominator path runs.
     assert framerate_to_fraction(24.5) == Fraction(49, 2)
+
+
+class _StubRational:
+    """Minimal `numbers.Rational` that only exposes numerator/denominator, mirroring
+    `av.AVRational` from PyAV 19+ (which has no `__int__`, `__round__`, or `__floor__`)."""
+
+    def __init__(self, numerator: int, denominator: int):
+        self.numerator = numerator
+        self.denominator = denominator
+
+
+numbers.Rational.register(_StubRational)
+
+
+def test_framerate_to_fraction_accepts_rational():
+    """Any `numbers.Rational` (not just `Fraction`) must be converted exactly. PyAV >= 19.0
+    reports frame rates and time bases as the `av.AVRational` type."""
+    for num, den in [(30000, 1001), (24000, 1001), (25, 1)]:
+        result = framerate_to_fraction(_StubRational(num, den))  # type: ignore[arg-type]
+        assert isinstance(result, Fraction)
+        assert result == Fraction(num, den)
+    with pytest.raises(ValueError):
+        framerate_to_fraction(_StubRational(0, 1))  # type: ignore[arg-type]
+
+
+def test_frame_timecode_accepts_rational_fps():
+    tc = FrameTimecode(0, _StubRational(24000, 1001))  # type: ignore[arg-type]
+    assert isinstance(tc.frame_rate, Fraction)
+    assert tc.frame_rate == Fraction(24000, 1001)
+
+
+def test_frame_timecode_rejects_integral_fps():
+    """`int`/`bool` are also `numbers.Rational` - these must raise TypeError so a misplaced
+    frame *count* is never silently used as a frame *rate*."""
+    with pytest.raises(TypeError):
+        FrameTimecode(0, 30)  # type: ignore[arg-type]
+    with pytest.raises(TypeError):
+        FrameTimecode(0, True)  # type: ignore[arg-type]
+
+
+def test_timecode_normalizes_rational_time_base():
+    tc = Timecode(pts=1001, time_base=_StubRational(1, 30000))  # type: ignore[arg-type]
+    assert isinstance(tc.time_base, Fraction)
+    assert tc.time_base == Fraction(1, 30000)
+    assert tc.seconds == pytest.approx(1001 / 30000)
 
 
 def test_timecode_arithmetic_mixed_time_base():

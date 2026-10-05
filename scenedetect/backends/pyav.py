@@ -39,6 +39,12 @@ MAX_CONSECUTIVE_DECODE_FAILURES = 8
 Isolated corrupt frames are skipped; this bound ensures a truncated file still terminates."""
 
 
+def _to_fraction(value) -> Fraction:
+    """PyAV >= 19.0 returns `av.AVRational` for time bases and frame rates. The backend must
+    convert to `Fraction` so downstream arithmetic works correctly."""
+    return Fraction(value.numerator, value.denominator)
+
+
 class VideoStreamAv(VideoStream):
     """PyAV `av.InputContainer` backend."""
 
@@ -150,9 +156,10 @@ class VideoStreamAv(VideoStream):
                 if hasattr(self._video_stream, "guessed_rate")
                 else self._codec_context.framerate
             )
-            if detected_rate is None or detected_rate == 0:
-                raise FrameRateUnavailable()
-            if detected_rate < MAX_FPS_DELTA:
+            # PyAV behavior has changed in version 19:
+            #   PyAV  < 19 - unknown rate is returned as None
+            #   PyAV >= 19 - returns AVRational(0, 1) which is falsy
+            if not detected_rate or detected_rate < MAX_FPS_DELTA:
                 raise FrameRateUnavailable()
             self._frame_rate: Fraction = framerate_to_fraction(detected_rate)
         else:
@@ -220,18 +227,18 @@ class VideoStreamAv(VideoStream):
 
         This can be interpreted as presentation time stamp, thus frame 1 corresponds
         to the presentation time 0.  Returns 0 even if `frame_number` is 1."""
-        if self._frame is None or self._frame.pts is None or self._frame.time_base is None:
+        if self._frame is None or self._frame.pts is None or not self._frame.time_base:
             return self.base_timecode
-        timecode = Timecode(pts=self._normalized_pts(), time_base=self._frame.time_base)
+        timecode = Timecode(pts=self._normalized_pts(), time_base=self._frame_time_base)
         return FrameTimecode(timecode=timecode, fps=self.frame_rate)
 
     @property
     def position_ms(self) -> float:
         """Current position within stream as a float of the presentation time in
         milliseconds. The first frame has a PTS of 0."""
-        if self._frame is None or self._frame.pts is None or self._frame.time_base is None:
+        if self._frame is None or self._frame.pts is None or not self._frame.time_base:
             return 0.0
-        return float(self._normalized_pts() * self._frame.time_base) * 1000.0
+        return float(self._normalized_pts() * self._frame_time_base) * 1000.0
 
     @property
     def frame_number(self) -> int:
@@ -239,33 +246,31 @@ class VideoStreamAv(VideoStream):
 
         Will return 0 until the first frame is `read`. For VFR video this is an approximation
         derived from PTS * framerate; use `position` for accurate PTS-based timing."""
-        if self._frame is None or self._frame.pts is None or self._frame.time_base is None:
+        if self._frame is None or self._frame.pts is None or not self._frame.time_base:
             return 0
-        seconds = float(self._normalized_pts() * self._frame.time_base)
+        seconds = float(self._normalized_pts() * self._frame_time_base)
         return round(seconds * float(self.frame_rate)) + 1
 
     @property
-    def rate(self) -> Fraction:
-        return self._video_stream.guessed_rate
+    def rate(self) -> Fraction | None:
+        """Frame rate reported by the stream (PyAV `guessed_rate`), or None if unavailable."""
+        guessed_rate = self._video_stream.guessed_rate
+        return _to_fraction(guessed_rate) if guessed_rate else None
 
     @property
     def time_base(self) -> Fraction | None:
-        if self._frame:
-            return self._frame.time_base
+        if self._frame is not None and self._frame.time_base:
+            return self._frame_time_base
         return None
 
     @property
     def aspect_ratio(self) -> float:
         """Pixel aspect ratio as a float (1.0 represents square pixels)."""
-        if (
-            not hasattr(self._codec_context, "display_aspect_ratio")
-            or self._codec_context.display_aspect_ratio is None
-        ):
+        # Unset is None on PyAV < 19 and a falsy AVRational(0, 1) on PyAV 19+.
+        dar = getattr(self._codec_context, "display_aspect_ratio", None)
+        if not dar or dar.denominator <= 0:
             return 1.0
-        ar_denom = self._codec_context.display_aspect_ratio.denominator
-        if ar_denom <= 0:
-            return 1.0
-        display_aspect_ratio = self._codec_context.display_aspect_ratio.numerator / ar_denom
+        display_aspect_ratio = dar.numerator / dar.denominator
         assert self.frame_size[0] > 0 and self.frame_size[1] > 0
         frame_aspect_ratio = self.frame_size[0] / self.frame_size[1]
         return display_aspect_ratio / frame_aspect_ratio
@@ -297,8 +302,8 @@ class VideoStreamAv(VideoStream):
         target = self.base_timecode + target
         if target >= 1:
             target = target - 1
-        target_pts = self._video_stream.start_time + int(
-            (self.base_timecode + target).seconds / self._video_stream.time_base
+        target_pts = (self._video_stream.start_time or 0) + int(
+            (self.base_timecode + target).seconds / _to_fraction(self._video_stream.time_base)
         )
         self._frame = None
         self._decoder = None
@@ -376,6 +381,12 @@ class VideoStreamAv(VideoStream):
         """PyAV `av.codec.context.CodecContext` being used."""
         return self._video_stream.codec_context
 
+    @property
+    def _frame_time_base(self) -> Fraction:
+        """Time base of the current frame as a `Fraction` (see `_to_fraction`)."""
+        assert self._frame is not None and self._frame.time_base
+        return _to_fraction(self._frame.time_base)
+
     def _normalized_pts(self) -> int:
         """PTS of the current frame relative to the start of the stream. Some files have a
         nonzero stream start_time (e.g. from edit lists); other backends report the first
@@ -383,7 +394,9 @@ class VideoStreamAv(VideoStream):
         assert self._frame is not None and self._frame.pts is not None
         start_time = self._video_stream.start_time or 0
         if start_time and self._video_stream.time_base != self._frame.time_base:
-            start_time = int(start_time * self._video_stream.time_base / self._frame.time_base)
+            start_time = int(
+                start_time * _to_fraction(self._video_stream.time_base) / self._frame_time_base
+            )
         return self._frame.pts - start_time
 
     def _get_duration(self) -> int:
@@ -405,15 +418,14 @@ class VideoStreamAv(VideoStream):
             if self._video_stream.duration is None:
                 logger.warning("Video duration unavailable.")
                 return 0
-            # Streams use stream `time_base` as the time base.
+            # Streams use stream `time_base` as the time base. Unset is None on PyAV < 19 and
+            # a falsy AVRational(0, 1) on PyAV 19+.
             time_base = self._video_stream.time_base
-            if time_base.denominator == 0:
-                logger.warning(
-                    "Unable to calculate video duration: time_base (%s) has zero denominator!",
-                    str(time_base),
-                )
+            if not time_base:
+                logger.warning("Unable to calculate video duration: stream time_base is unset.")
                 return 0
-            duration_sec = float(self._video_stream.duration / time_base)
+            # `duration` is in units of `time_base`, so seconds = duration * time_base.
+            duration_sec = float(self._video_stream.duration * _to_fraction(time_base))
         return round(duration_sec * self.frame_rate)
 
     def _handle_eof(self):

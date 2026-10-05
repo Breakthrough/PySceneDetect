@@ -17,9 +17,13 @@ VideoStreamAv ('pyav') backend. These tests validate behaviour specific to this 
 For VideoStream tests that validate conformance, see test_video_stream.py.
 """
 
-import av
+from fractions import Fraction
+from types import SimpleNamespace
 
-from scenedetect.backends.pyav import MAX_CONSECUTIVE_DECODE_FAILURES, VideoStreamAv
+import av
+import pytest
+
+from scenedetect.backends.pyav import MAX_CONSECUTIVE_DECODE_FAILURES, VideoStreamAv, _to_fraction
 
 
 def test_video_stream_pyav_bytesio(test_video_file: str, auto_close):
@@ -91,3 +95,110 @@ def test_read_gives_up_after_consecutive_failures(test_video_file: str, caplog, 
     # `no_logs_gte_error` fixture doesn't fail the test.
     assert any("consecutive" in record.message for record in caplog.records)
     caplog.clear()
+
+
+def test_rationals_are_fractions(test_video_file: str, auto_close):
+    """PyAV >= 19.0 returns `av.AVRational` for time bases and frame rates. The backend must
+    convert to `Fraction` so downstream arithmetic (`round`, `int`) works properly."""
+    stream = auto_close(VideoStreamAv(test_video_file))
+    assert stream.read(decode=False) is not False
+    assert isinstance(stream.frame_rate, Fraction)
+    assert stream.frame_rate == Fraction(30000, 1001)
+    assert isinstance(stream.rate, Fraction)
+    assert isinstance(stream.time_base, Fraction)
+    assert isinstance(stream.position.time_base, Fraction)
+    assert stream.position_ms == 0.0
+    assert stream.frame_number == 1
+
+
+class _StubRational:
+    """Stands in for `av.AVRational` (PyAV 19+): only `numerator`/`denominator`, no `__int__`."""
+
+    def __init__(self, numerator: int, denominator: int):
+        self.numerator = numerator
+        self.denominator = denominator
+
+
+def test_to_fraction_from_stub_rational():
+    result = _to_fraction(_StubRational(30000, 1001))
+    assert isinstance(result, Fraction)
+    assert result == Fraction(30000, 1001)
+    assert _to_fraction(Fraction(1, 24000)) == Fraction(1, 24000)
+
+
+class _AttrOverridingProxy:
+    """Forwards attribute access to the wrapped object except for the given overrides."""
+
+    def __init__(self, wrapped, **overrides):
+        self._wrapped = wrapped
+        self._overrides = overrides
+
+    def __getattr__(self, name):
+        if name in self._overrides:
+            return self._overrides[name]
+        return getattr(self._wrapped, name)
+
+
+def test_duration_fallback_from_stream_duration(
+    test_video_file: str, monkeypatch: pytest.MonkeyPatch, auto_close
+):
+    """When neither the stream frame count nor the container duration is available, the duration
+    must be derived from `stream.duration * stream.time_base` (duration is in time_base units)."""
+    stream = auto_close(VideoStreamAv(test_video_file))
+    real_stream = stream._video_stream
+    assert real_stream.frames == 720
+    fake_stream = _AttrOverridingProxy(
+        real_stream,
+        frames=0,
+        container=SimpleNamespace(duration=None),
+    )
+    monkeypatch.setattr(VideoStreamAv, "_video_stream", property(lambda self: fake_stream))
+    assert stream._get_duration() == 720
+
+
+@pytest.mark.parametrize("unset_dar", [None, Fraction(0, 1)], ids=["none", "zero"])
+def test_aspect_ratio_unset_dar(
+    test_video_file: str, unset_dar, monkeypatch: pytest.MonkeyPatch, auto_close
+):
+    """An unset display aspect ratio (None on PyAV < 19, AVRational(0, 1) on PyAV 19+) must be
+    treated as square pixels rather than producing an aspect ratio of 0."""
+    stream = auto_close(VideoStreamAv(test_video_file))
+    width, height = stream.frame_size
+    fake_ctx = SimpleNamespace(display_aspect_ratio=unset_dar, width=width, height=height)
+    monkeypatch.setattr(VideoStreamAv, "_codec_context", property(lambda self: fake_ctx))
+    assert stream.aspect_ratio == 1.0
+
+
+@pytest.mark.parametrize(
+    "guessed_rate, expected",
+    [(_StubRational(30000, 1001), Fraction(30000, 1001)), (None, None)],
+    ids=["stub-rational", "none"],
+)
+def test_rate_normalizes_stream_rational(
+    test_video_file: str, guessed_rate, expected, monkeypatch: pytest.MonkeyPatch, auto_close
+):
+    """`rate` must return a `Fraction` for any rational type the stream reports (PyAV 19+ returns
+    `av.AVRational`), and None when the stream has no guessed rate (PyAV < 19)."""
+    stream = auto_close(VideoStreamAv(test_video_file))
+    fake_stream = _AttrOverridingProxy(stream._video_stream, guessed_rate=guessed_rate)
+    monkeypatch.setattr(VideoStreamAv, "_video_stream", property(lambda self: fake_stream))
+    assert stream.rate == expected
+    assert expected is None or isinstance(stream.rate, Fraction)
+
+
+@pytest.mark.parametrize("time_base", [None, Fraction(0, 1)], ids=["none", "zero"])
+def test_duration_fallback_unset_time_base(
+    test_video_file: str, time_base, monkeypatch: pytest.MonkeyPatch, caplog, auto_close
+):
+    """With no frame count, no container duration, and an unset stream time base (None on
+    PyAV < 19, AVRational(0, 1) on PyAV 19+), the duration must be reported as 0 with a warning."""
+    stream = auto_close(VideoStreamAv(test_video_file))
+    fake_stream = _AttrOverridingProxy(
+        stream._video_stream,
+        frames=0,
+        container=SimpleNamespace(duration=None),
+        time_base=time_base,
+    )
+    monkeypatch.setattr(VideoStreamAv, "_video_stream", property(lambda self: fake_stream))
+    assert stream._get_duration() == 0
+    assert any("time_base" in record.message for record in caplog.records)
