@@ -172,11 +172,13 @@ class ThresholdDetector(SceneDetector):
                 self.last_fade["type"] = "in"
                 self.last_fade["frame"] = timecode
         else:
+            # Initial state: faded out if the first frame is past the threshold for `method`.
             self.last_fade["frame"] = timecode
-            if frame_avg < self.threshold:
-                self.last_fade["type"] = "out"
+            if self.method == ThresholdDetector.Method.FLOOR:
+                faded_out = frame_avg < self.threshold
             else:
-                self.last_fade["type"] = "in"
+                faded_out = frame_avg >= self.threshold
+            self.last_fade["type"] = "out" if faded_out else "in"
         self.processed_frame = True
         return cuts
 
