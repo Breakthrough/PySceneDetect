@@ -124,9 +124,9 @@ class FlashFilter:
         """
         self._mode = mode
         # Frame count (int) and seconds (float) representations of `length`. Exactly one is
-        # populated up front; the other is computed on the first frame once the framerate is
-        # known. Temporal inputs (float/non-digit str / Timecode / FrameTimecode) populate
-        # `_filter_secs`; integer inputs (int/digit str) populate `_filter_length`.
+        # populated. Temporal inputs (float/non-digit str / Timecode / FrameTimecode) populate
+        # `_filter_secs`; integer inputs (int/digit str) populate `_filter_length`, which is
+        # compared as a frame count so no conversion to seconds is needed (#577).
         self._filter_length: int = 0
         self._filter_secs: float | None = None
         if isinstance(length, float):
@@ -178,6 +178,7 @@ class FlashFilter:
         """
         if self._filter_length > 0:
             return (to_tc - from_tc) >= self._filter_length
+        assert self._filter_secs is not None
         return (to_tc - from_tc) >= self._filter_secs
 
     def _filter_suppress(
@@ -186,10 +187,6 @@ class FlashFilter:
         frame_rate = timecode.frame_rate
         assert frame_rate is not None and frame_rate >= 0
         assert self._last_above is not None
-        # Compute the threshold in seconds once from the first frame's framerate. This avoids
-        # using an incorrect average fps (e.g. OpenCV on VFR video) on subsequent frames.
-        if self._filter_secs is None:
-            self._filter_secs = self._filter_length / float(frame_rate)
         min_length_met: bool = self._min_length_met(self._last_above, timecode)
         if not (above_threshold and min_length_met):
             return []
@@ -202,9 +199,6 @@ class FlashFilter:
         frame_rate = timecode.frame_rate
         assert frame_rate is not None and frame_rate >= 0
         assert self._last_above is not None
-        # Compute the threshold in seconds once from the first frame's framerate.
-        if self._filter_secs is None:
-            self._filter_secs = self._filter_length / float(frame_rate)
         min_length_met: bool = self._min_length_met(self._last_above, timecode)
         # Ensure last frame is always advanced to the most recent one that was above the threshold.
         if above_threshold:
