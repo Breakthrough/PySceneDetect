@@ -798,4 +798,5 @@ Development
  - [bugfix] Fix intermittent segfault on exit. Isolated to Windows builds with OpenCV 5.x when opening PNG image sequences with the `VideoStreamCv2` backend. [#575](https://github.com/Breakthrough/PySceneDetect/issues/575)
  - [bugfix] Fix `TypeError` when opening videos with the `pyav` backend on PyAV 19.0 or newer
  - [bugfix] Fix `pyav` backend duration calculation fallback
+ - [bugfix] Fix `pyav` backend not releasing the file handle it opened when the stream is garbage collected, which emitted a `ResourceWarning` under `python -X dev` [#568](https://github.com/Breakthrough/PySceneDetect/issues/568)
  - [bugfix] `ThresholdDetector`/`detect-threshold` with method `CEILING` now classifies the first frame with the `CEILING` rule instead of the `FLOOR` rule, anchoring a leading fade one frame late and resulting in the possibility of a spurious first-frame cut (thanks @MuhammadBilalKhan267)

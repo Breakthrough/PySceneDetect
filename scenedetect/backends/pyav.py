@@ -116,6 +116,9 @@ class VideoStreamAv(VideoStream):
         self._reopened = True
         self._decode_failures = 0
         self._warning_displayed = False
+        # True if `_io` was opened by this object (from a path) and must be closed in `__del__`.
+        # Set before anything below can raise so a partially constructed object is safe to finalize.
+        self._owns_io = False
 
         if threading_mode:
             try:
@@ -132,8 +135,9 @@ class VideoStreamAv(VideoStream):
         try:
             if isinstance(path_or_io, (str, os.PathLike)):
                 self._path: str = os.fspath(path_or_io)
-                # File handle is intentionally long-lived and tied to the VideoStream.
+                # File handle is tied to the lifetime of this object and released in `__del__`.
                 self._io = open(self._path, "rb")  # noqa: SIM115
+                self._owns_io = True
                 if not self._name:
                     self._name = get_file_name(self._path, include_extension=False)
             else:
@@ -181,6 +185,12 @@ class VideoStreamAv(VideoStream):
             container = getattr(self, "_container", None)
             if container is not None:
                 container.close()
+            # Closing the container does not close the file object backing it. Only close `_io`
+            # if we opened it ourselves; file-like objects passed by the caller remain theirs.
+            if getattr(self, "_owns_io", False):
+                io = getattr(self, "_io", None)
+                if io is not None:
+                    io.close()
         except Exception:
             pass
 

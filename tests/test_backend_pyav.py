@@ -17,6 +17,7 @@ VideoStreamAv ('pyav') backend. These tests validate behaviour specific to this 
 For VideoStream tests that validate conformance, see test_video_stream.py.
 """
 
+import gc
 from fractions import Fraction
 from types import SimpleNamespace
 
@@ -26,15 +27,32 @@ import pytest
 from scenedetect.backends.pyav import MAX_CONSECUTIVE_DECODE_FAILURES, VideoStreamAv, _to_fraction
 
 
-def test_video_stream_pyav_bytesio(test_video_file: str, auto_close):
+def test_video_stream_pyav_bytesio(test_video_file: str):
     """Test that VideoStreamAv works with a BytesIO input in addition to a path."""
     # Mode must be binary!
     with open(test_video_file, mode="rb") as video_file:
-        stream = auto_close(VideoStreamAv(path_or_io=video_file, threading_mode=None))
+        stream = VideoStreamAv(path_or_io=video_file, threading_mode=None)
         assert stream.is_seekable
         stream.seek(50)
         for _ in range(10):
             assert stream.read() is not False
+        # A file-like object supplied by the caller belongs to the caller and must survive the
+        # stream being finalized.
+        del stream
+        gc.collect()
+        assert not video_file.closed
+
+
+def test_video_stream_pyav_del_closes_owned_file_handle(test_video_file: str):
+    """When opened from a path, the stream owns the file handle it created and must close it
+    when finalized (#568). Otherwise the handle is only reclaimed by the file object's own
+    finalizer, which emits a ResourceWarning under `python -X dev`."""
+    stream = VideoStreamAv(test_video_file, threading_mode=None)
+    handle = stream._io
+    assert not handle.closed
+    del stream
+    gc.collect()
+    assert handle.closed
 
 
 def _make_invalid_data_error() -> Exception:
