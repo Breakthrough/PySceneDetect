@@ -800,3 +800,4 @@ Development
  - [bugfix] Fix `pyav` backend duration calculation fallback
  - [bugfix] Fix `pyav` backend not releasing the file handle it opened when the stream is garbage collected, which emitted a `ResourceWarning` under `python -X dev` [#568](https://github.com/Breakthrough/PySceneDetect/issues/568)
  - [bugfix] `ThresholdDetector`/`detect-threshold` with method `CEILING` now classifies the first frame with the `CEILING` rule instead of the `FLOOR` rule, anchoring a leading fade one frame late and resulting in the possibility of a spurious first-frame cut (thanks @MuhammadBilalKhan267)
+ - [bugfix] Fix `min_scene_len` given in frames dropping cuts that are exactly `min_scene_len` frames apart at NTSC framerates (e.g. 29.97 fps), by comparing frame counts instead of converting to seconds [#577](https://github.com/Breakthrough/PySceneDetect/issues/577)
