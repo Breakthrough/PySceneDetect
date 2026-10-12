@@ -63,6 +63,10 @@ def _get_capture_api(path: str) -> int:
     By default OpenCV resolves any capture backend by probing for compatibility, and tries FFmpeg
     first. Usually this fails, and it falls back gracefully to CAP_IMAGES. However, this also seems
     to cause issues on interpreter exit, as the stack trace implicates something in the ffmpeg DLL.
+
+    TODO: Remove this workaround once upstream fix ships.
+
+    https://github.com/opencv/opencv/issues/30017
     """
     is_local = not any(identifier in path for identifier in ("://", " ! "))
     if os.name == "nt" and is_local and path.lower().endswith(".png"):
