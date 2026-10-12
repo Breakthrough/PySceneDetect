@@ -76,6 +76,13 @@ logger = logging.getLogger("pyscenedetect")
 _F = ty.TypeVar("_F", bound=ty.Callable[..., ty.Any])
 
 
+@ty.runtime_checkable
+class _SupportsWrite(ty.Protocol):
+    """Any object with a `write` method accepting text (e.g. an open text file)."""
+
+    def write(self, s: str, /) -> object: ...
+
+
 def _open_output_file(output_format: str) -> ty.Callable[[_F], _F]:
     """Allows a writer's first argument to be an open text file or a filesystem path.
 
@@ -93,10 +100,16 @@ def _open_output_file(output_format: str) -> ty.Callable[[_F], _F]:
 
         @functools.wraps(func)
         def wrapper(*args: ty.Any, **kwargs: ty.Any) -> ty.Any:
-            output_file = args[0] if args else kwargs[parameter_name]
+            if args:
+                output_file = args[0]
+            elif parameter_name in kwargs:
+                output_file = kwargs[parameter_name]
+            else:
+                # Let the call itself raise the usual TypeError for the missing argument.
+                return func(*args, **kwargs)
 
             if not isinstance(output_file, (str, bytes, os.PathLike)):
-                if not callable(getattr(output_file, "write", None)):
+                if not isinstance(output_file, _SupportsWrite):
                     raise TypeError(
                         f"{parameter_name} must be a filesystem path or writable text file"
                     )
@@ -153,7 +166,7 @@ def write_scene_list(
         TypeError: "delimiter" must be a 1-character string
     """
     # `_open_output_file` replaces filesystem paths with writable text streams.
-    assert not isinstance(output_csv_file, (str, bytes, os.PathLike))
+    assert isinstance(output_csv_file, _SupportsWrite)
     output_file = output_csv_file
     csv_writer = csv.writer(output_file, delimiter=col_separator, lineterminator=row_separator)
     # If required, output the cutting list as the first row (i.e. before the header row).
@@ -376,7 +389,7 @@ def write_scene_list_edl(
             both source and record columns.
     """
     # `_open_output_file` replaces filesystem paths with writable text streams.
-    assert not isinstance(output_path, (str, bytes, os.PathLike))
+    assert isinstance(output_path, _SupportsWrite)
     output_file = output_path
     offset_frames = 0
     if start_timecode is not None and start_timecode.strip() and scene_list:
@@ -439,7 +452,7 @@ def write_scene_list_fcpx(
     """
     assert scene_list
     # `_open_output_file` replaces filesystem paths with writable text streams.
-    assert not isinstance(output_path, (str, bytes, os.PathLike))
+    assert isinstance(output_path, _SupportsWrite)
     output_file = output_path
     video_path = Path(video_path)
     if video_name is None:
@@ -544,7 +557,7 @@ def write_scene_list_fcp7(
     """
     assert scene_list
     # `_open_output_file` replaces filesystem paths with writable text streams.
-    assert not isinstance(output_path, (str, bytes, os.PathLike))
+    assert isinstance(output_path, _SupportsWrite)
     output_file = output_path
     video_path = Path(video_path)
     if video_name is None:
@@ -659,7 +672,7 @@ def write_scene_list_otio(
         audio: If True (default), include an audio track alongside the video track.
     """
     # `_open_output_file` replaces filesystem paths with writable text streams.
-    assert not isinstance(output_path, (str, bytes, os.PathLike))
+    assert isinstance(output_path, _SupportsWrite)
     output_file = output_path
     video_path = Path(video_path)
     if name is None:

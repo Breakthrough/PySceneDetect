@@ -70,10 +70,16 @@ class ThresholdDetector(SceneDetector):
                 generate an additional scene at this timecode.
             method: How to treat `threshold` when detecting fade events.
             block_size: [DEPRECATED] DO NOT USE. For backwards compatibility.
-            min_out_length: Minimum time spent faded out before a cut can be added. Accepts the
-                same formats as min_scene_len. Shorter fades are ignored. Defaults to 0,
-                allowing fades of any duration.
+            min_out_length: Minimum time in the faded out state before a new cut will be added.
+                Accepts the same formats as min_scene_len. Fades shorter than this duration will
+                be ignored. Defaults to 0, allowing fades of any duration. Durations given in
+                seconds are rounded to the nearest frame.
+
+        Raises:
+            ValueError: `min_out_length` is a negative number.
         """
+        if isinstance(min_out_length, (int, float)) and min_out_length < 0:
+            raise ValueError("min_out_length must be non-negative.")
         if block_size is not None:
             warnings.warn(
                 "The `block_size` argument is deprecated and will be removed in v0.8.",
@@ -166,11 +172,13 @@ class ThresholdDetector(SceneDetector):
                 self.last_fade["type"] = "in"
                 self.last_fade["frame"] = timecode
         else:
+            # Initial state: faded out if the first frame is past the threshold for `method`.
             self.last_fade["frame"] = timecode
-            if frame_avg < self.threshold:
-                self.last_fade["type"] = "out"
+            if self.method == ThresholdDetector.Method.FLOOR:
+                faded_out = frame_avg < self.threshold
             else:
-                self.last_fade["type"] = "in"
+                faded_out = frame_avg >= self.threshold
+            self.last_fade["type"] = "out" if faded_out else "in"
         self.processed_frame = True
         return cuts
 
