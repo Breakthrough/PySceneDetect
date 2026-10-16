@@ -1101,19 +1101,7 @@ def test_cli_save_otio(tmp_path: Path):
                             "DEFAULT_MEDIA": {
                                 "OTIO_SCHEMA": "ExternalReference.1",
                                 "name": "goldeneye.mp4",
-                                "available_range": {
-                                    "OTIO_SCHEMA": "TimeRange.1",
-                                    "duration": {
-                                        "OTIO_SCHEMA": "RationalTime.1",
-                                        "rate": 23.976023976023978,
-                                        "value": 1980.0
-                                    },
-                                    "start_time": {
-                                        "OTIO_SCHEMA": "RationalTime.1",
-                                        "rate": 23.976023976023978,
-                                        "value": 0.0
-                                    }
-                                },
+                                "available_range": null,
                                 "available_image_bounds": null,
                                 "target_url": "{ABSOLUTE_PATH}"
                             }
@@ -1141,19 +1129,7 @@ def test_cli_save_otio(tmp_path: Path):
                             "DEFAULT_MEDIA": {
                                 "OTIO_SCHEMA": "ExternalReference.1",
                                 "name": "goldeneye.mp4",
-                                "available_range": {
-                                    "OTIO_SCHEMA": "TimeRange.1",
-                                    "duration": {
-                                        "OTIO_SCHEMA": "RationalTime.1",
-                                        "rate": 23.976023976023978,
-                                        "value": 1980.0
-                                    },
-                                    "start_time": {
-                                        "OTIO_SCHEMA": "RationalTime.1",
-                                        "rate": 23.976023976023978,
-                                        "value": 0.0
-                                    }
-                                },
+                                "available_range": null,
                                 "available_image_bounds": null,
                                 "target_url": "{ABSOLUTE_PATH}"
                             }
@@ -1189,19 +1165,7 @@ def test_cli_save_otio(tmp_path: Path):
                             "DEFAULT_MEDIA": {
                                 "OTIO_SCHEMA": "ExternalReference.1",
                                 "name": "goldeneye.mp4",
-                                "available_range": {
-                                    "OTIO_SCHEMA": "TimeRange.1",
-                                    "duration": {
-                                        "OTIO_SCHEMA": "RationalTime.1",
-                                        "rate": 23.976023976023978,
-                                        "value": 1980.0
-                                    },
-                                    "start_time": {
-                                        "OTIO_SCHEMA": "RationalTime.1",
-                                        "rate": 23.976023976023978,
-                                        "value": 0.0
-                                    }
-                                },
+                                "available_range": null,
                                 "available_image_bounds": null,
                                 "target_url": "{ABSOLUTE_PATH}"
                             }
@@ -1229,19 +1193,7 @@ def test_cli_save_otio(tmp_path: Path):
                             "DEFAULT_MEDIA": {
                                 "OTIO_SCHEMA": "ExternalReference.1",
                                 "name": "goldeneye.mp4",
-                                "available_range": {
-                                    "OTIO_SCHEMA": "TimeRange.1",
-                                    "duration": {
-                                        "OTIO_SCHEMA": "RationalTime.1",
-                                        "rate": 23.976023976023978,
-                                        "value": 1980.0
-                                    },
-                                    "start_time": {
-                                        "OTIO_SCHEMA": "RationalTime.1",
-                                        "rate": 23.976023976023978,
-                                        "value": 0.0
-                                    }
-                                },
+                                "available_range": null,
                                 "available_image_bounds": null,
                                 "target_url": "{ABSOLUTE_PATH}"
                             }
@@ -1319,19 +1271,7 @@ def test_cli_save_otio_no_audio(tmp_path: Path):
                             "DEFAULT_MEDIA": {
                                 "OTIO_SCHEMA": "ExternalReference.1",
                                 "name": "goldeneye.mp4",
-                                "available_range": {
-                                    "OTIO_SCHEMA": "TimeRange.1",
-                                    "duration": {
-                                        "OTIO_SCHEMA": "RationalTime.1",
-                                        "rate": 23.976023976023978,
-                                        "value": 1980.0
-                                    },
-                                    "start_time": {
-                                        "OTIO_SCHEMA": "RationalTime.1",
-                                        "rate": 23.976023976023978,
-                                        "value": 0.0
-                                    }
-                                },
+                                "available_range": null,
                                 "available_image_bounds": null,
                                 "target_url": "{ABSOLUTE_PATH}"
                             }
@@ -1359,19 +1299,7 @@ def test_cli_save_otio_no_audio(tmp_path: Path):
                             "DEFAULT_MEDIA": {
                                 "OTIO_SCHEMA": "ExternalReference.1",
                                 "name": "goldeneye.mp4",
-                                "available_range": {
-                                    "OTIO_SCHEMA": "TimeRange.1",
-                                    "duration": {
-                                        "OTIO_SCHEMA": "RationalTime.1",
-                                        "rate": 23.976023976023978,
-                                        "value": 1980.0
-                                    },
-                                    "start_time": {
-                                        "OTIO_SCHEMA": "RationalTime.1",
-                                        "rate": 23.976023976023978,
-                                        "value": 0.0
-                                    }
-                                },
+                                "available_range": null,
                                 "available_image_bounds": null,
                                 "target_url": "{ABSOLUTE_PATH}"
                             }

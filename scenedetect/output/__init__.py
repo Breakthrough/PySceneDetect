@@ -726,19 +726,8 @@ def write_scene_list_otio(
                                 "DEFAULT_MEDIA": {
                                     "OTIO_SCHEMA": "ExternalReference.1",
                                     "name": video_base_name,
-                                    "available_range": {
-                                        "OTIO_SCHEMA": "TimeRange.1",
-                                        "duration": {
-                                            "OTIO_SCHEMA": "RationalTime.1",
-                                            "rate": fps,
-                                            "value": 1980.0,
-                                        },
-                                        "start_time": {
-                                            "OTIO_SCHEMA": "RationalTime.1",
-                                            "rate": fps,
-                                            "value": 0.0,
-                                        },
-                                    },
+                                    # Scene ranges do not tell us the full media duration.
+                                    "available_range": None,
                                     "available_image_bounds": None,
                                     "target_url": video_abs_path,
                                 }

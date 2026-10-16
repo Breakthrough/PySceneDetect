@@ -654,3 +654,29 @@ def test_write_scene_list_otio_output_target(tmp_path: Path, target_kind: str):
     assert "\r\n" not in text
     doc = json.loads(text)
     assert doc["OTIO_SCHEMA"] == "Timeline.1"
+
+
+@pytest.mark.parametrize("frame_rate", [_FPS_CFR, _FPS_NTSC])
+@pytest.mark.parametrize("audio", [False, True])
+@pytest.mark.parametrize("ranges", [[], [(0, 24)], [(2400, 4800)], [(24, 72), (3000, 3600)]])
+def test_write_scene_list_otio_unknown_available_range(tmp_path, frame_rate, audio, ranges):
+    """Scene ranges do not reveal the source video's full available duration."""
+    output_path = tmp_path / "scenes.otio"
+    write_scene_list_otio(
+        output_path,
+        scene_list=_fake_scenes(frame_rate, ranges),
+        video_path=tmp_path / "source.mp4",
+        frame_rate=frame_rate,
+        audio=audio,
+    )
+
+    doc = json.loads(output_path.read_text())
+    tracks = doc["tracks"]["children"]
+    assert len(tracks) == (2 if audio else 1)
+    for track in tracks:
+        assert len(track["children"]) == len(ranges)
+        for clip, (start, end) in zip(track["children"], ranges, strict=True):
+            ref = clip["media_references"]["DEFAULT_MEDIA"]
+            assert ref["available_range"] is None
+            assert clip["source_range"]["start_time"]["value"] == pytest.approx(start)
+            assert clip["source_range"]["duration"]["value"] == pytest.approx(end - start)
