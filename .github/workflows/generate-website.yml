@@ -17,10 +17,10 @@ jobs:
       contents: write  # pushes generated site to the gh-pages branch
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Set up Python 3.12
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         with:
           python-version: '3.12'
           cache: 'pip'

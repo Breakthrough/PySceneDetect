@@ -119,7 +119,7 @@ jobs:
     steps:
       # Test videos live on the resources branch; this is the same layout
       # build-windows.yml smoke-tests the portable distribution against.
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         with:
           ref: resources
 
@@ -361,7 +361,7 @@ jobs:
 
       - name: Upload msiexec logs
         if: failure()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: fresh-install-logs
           path: '*.log'
@@ -650,7 +650,7 @@ jobs:
 
       - name: Upload msiexec logs
         if: failure()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: upgrade-logs
           path: '*.log'

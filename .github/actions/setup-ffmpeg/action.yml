@@ -70,7 +70,7 @@ runs:
     - name: Cache ffmpeg (Windows)
       if: ${{ steps.check.outputs.installed == 'false' && runner.os == 'Windows' }}
       id: cache-ffmpeg-windows
-      uses: actions/cache@v4
+      uses: actions/cache@v6
       with:
         path: C:\ffmpeg-bin
         key: ffmpeg-windows-${{ env.FFMPEG_VERSION }}-v1

@@ -42,10 +42,10 @@ jobs:
       ffmpeg-version: "8.1"
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python-version }}
           cache: 'pip'
@@ -62,11 +62,11 @@ jobs:
           git checkout refs/remotes/origin/resources -- tests/resources/
 
       - name: Download FFMPEG ${{ env.ffmpeg-version }}
-        uses: dsaltares/fetch-gh-release-asset@1.1.2
-        with:
-          repo: 'GyanD/codexffmpeg'
-          version: 'tags/${{ env.ffmpeg-version }}'
-          file: 'ffmpeg-${{ env.ffmpeg-version }}-full_build.7z'
+        # Same source/pattern as the Windows branch of .github/actions/setup-ffmpeg, but the
+        # full build (ffmpeg.exe + LICENSE) is needed to assemble the portable distribution.
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release download ${{ env.ffmpeg-version }} --repo GyanD/codexffmpeg --pattern "ffmpeg-${{ env.ffmpeg-version }}-full_build.7z"
 
       - name: Unit Test
         shell: bash
@@ -104,7 +104,7 @@ jobs:
           ./dist/scenedetect/scenedetect -i tests/resources/goldeneye.mp4 detect-content time -e 2s
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: PySceneDetect-win64
           path: dist/scenedetect
@@ -114,12 +114,12 @@ jobs:
     runs-on: windows-latest
     needs: build
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         with:
           repository: Breakthrough/PySceneDetect
           ref: resources
 
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           name: PySceneDetect-win64
           path: build
