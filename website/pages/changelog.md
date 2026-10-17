@@ -3,6 +3,10 @@
 
 ## PySceneDetect 0.7
 
+### Unreleased
+
+ - [bugfix] OTIO exports use the full source duration when provided, including from the CLI, instead of declaring a fixed 1,980-frame duration. The available range remains unspecified when the duration is unknown. Scene source ranges are unchanged. [#580](https://github.com/Breakthrough/PySceneDetect/pull/580)
+
 ### PySceneDetect 0.7.2 (October 11, 2026)
 
 PySceneDetect 0.7.2 ships improved defaults for the histogram and perceptual hash detectors, adds PyAV 19 support, and fixes several timing and output bugs. **Default output of `detect-hist` and `detect-hash` will change in this release due to improved default values**.

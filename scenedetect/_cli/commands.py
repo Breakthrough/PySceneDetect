@@ -387,4 +387,5 @@ def save_otio(
         frame_rate=video_stream.frame_rate,
         name=Template(name).safe_substitute(VIDEO_NAME=video_name),
         audio=audio,
+        source_duration=video_stream.duration,
     )
