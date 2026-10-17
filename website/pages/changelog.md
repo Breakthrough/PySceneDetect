@@ -5,7 +5,7 @@
 
 ### Unreleased
 
- - [bugfix] OTIO exports leave the source media available range unspecified instead of declaring a fixed 1,980-frame duration. Scene source ranges are unchanged.
+ - [bugfix] OTIO exports use the full source duration when provided, including from the CLI, instead of declaring a fixed 1,980-frame duration. The available range remains unspecified when the duration is unknown. Scene source ranges are unchanged. [#580](https://github.com/Breakthrough/PySceneDetect/pull/580)
 
 ### PySceneDetect 0.7.2 (October 11, 2026)
 

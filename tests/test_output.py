@@ -680,3 +680,47 @@ def test_write_scene_list_otio_unknown_available_range(tmp_path, frame_rate, aud
             assert ref["available_range"] is None
             assert clip["source_range"]["start_time"]["value"] == pytest.approx(start)
             assert clip["source_range"]["duration"]["value"] == pytest.approx(end - start)
+
+
+@pytest.mark.parametrize("frame_rate", [_FPS_CFR, _FPS_NTSC])
+@pytest.mark.parametrize("source_frame_rate", [_FPS_CFR, _FPS_NTSC])
+@pytest.mark.parametrize("source_frames", [0, 6000])
+@pytest.mark.parametrize("audio", [False, True])
+def test_write_scene_list_otio_source_duration(
+    tmp_path, frame_rate, source_frame_rate, source_frames, audio
+):
+    """Available media duration uses the full source, not the selected scenes."""
+    source_duration = FrameTimecode(source_frames, fps=source_frame_rate)
+    ranges = [(24, 72), (120, 180)] if source_frames else [(0, 0)]
+    output_path = tmp_path / "scenes.otio"
+    write_scene_list_otio(
+        output_path,
+        scene_list=_fake_scenes(frame_rate, ranges),
+        video_path=tmp_path / "source.mp4",
+        frame_rate=frame_rate,
+        audio=audio,
+        source_duration=source_duration,
+    )
+
+    doc = json.loads(output_path.read_text())
+    fps = float(frame_rate)
+    expected_duration = round(source_duration.seconds * fps, 6)
+    tracks = doc["tracks"]["children"]
+    assert len(tracks) == (2 if audio else 1)
+    for track in tracks:
+        assert len(track["children"]) == len(ranges)
+        for clip, (start, end) in zip(track["children"], ranges, strict=True):
+            available = clip["media_references"]["DEFAULT_MEDIA"]["available_range"]
+            assert available["OTIO_SCHEMA"] == "TimeRange.1"
+            assert available["start_time"] == {
+                "OTIO_SCHEMA": "RationalTime.1",
+                "rate": fps,
+                "value": 0.0,
+            }
+            assert available["duration"] == {
+                "OTIO_SCHEMA": "RationalTime.1",
+                "rate": fps,
+                "value": expected_duration,
+            }
+            assert clip["source_range"]["start_time"]["value"] == pytest.approx(start)
+            assert clip["source_range"]["duration"]["value"] == pytest.approx(end - start)
