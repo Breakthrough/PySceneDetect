@@ -1,0 +1,12 @@
+# Version updates for GitHub Actions. Python dependencies are not covered here.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directories:
+      - "/"                   # .github/workflows/*
+      - "/.github/actions/*"  # composite actions
+    schedule:
+      interval: monthly
+    groups:
+      actions:
+        patterns: ["*"]
