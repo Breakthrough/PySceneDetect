@@ -24,6 +24,7 @@ import re
 import string
 import subprocess
 import sys
+import urllib.parse
 
 import cv2
 
@@ -129,11 +130,34 @@ def get_cv2_imwrite_params() -> dict[str, int | None]:
 ##
 
 
+def is_url(path: StrPath) -> bool:
+    """True if `path` looks like a URL or network stream (e.g. https://..., rtsp://...)."""
+    return "://" in os.fspath(path)
+
+
 def get_file_name(file_path: StrPath, include_extension: bool = True) -> str:
     """Return the file name that `file_path` refers to, optionally removing the extension.
 
-    E.g. /tmp/foo.bar -> foo"""
-    file_name = os.path.basename(os.fspath(file_path))
+    E.g. /tmp/foo.bar -> foo
+
+    URLs use the last non-empty segment of the path component, ignoring any query string or
+    fragment, so https://example.com/videos/clip.mp4?token=1.2 -> clip. If the URL has no path
+    (e.g. rtsp://192.168.0.1:554), the host is used instead, with the port separator replaced
+    so the result is a valid file name on all platforms. Returns an empty string only if no
+    usable name can be derived."""
+    file_path = os.fspath(file_path)
+    if is_url(file_path):
+        parsed = urllib.parse.urlsplit(file_path)
+        segments = [urllib.parse.unquote(seg) for seg in parsed.path.split("/") if seg]
+        if not segments:
+            # No path to take a name from, so fall back to the host (never the credentials). A
+            # host has no extension to remove: stripping after the last "." would turn
+            # example.com into example.
+            host = parsed.hostname or ""
+            return f"{host}_{parsed.port}" if parsed.port else host
+        file_name = segments[-1]
+    else:
+        file_name = os.path.basename(file_path)
     if not include_extension:
         last_dot_pos = file_name.rfind(".")
         if last_dot_pos >= 0:
