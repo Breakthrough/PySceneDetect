@@ -65,6 +65,8 @@
     <ul class="current">
     <li class="toctree-l2"><a class="reference internal" href="#pyscenedetect-07">PySceneDetect 0.7</a>
         <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#unreleased">Unreleased</a>
+    </li>
     <li class="toctree-l3"><a class="reference internal" href="#pyscenedetect-072-october-11-2026">PySceneDetect 0.7.2 (October 11, 2026)</a>
         <ul>
     <li class="toctree-l4"><a class="reference internal" href="#cli-changes">CLI Changes</a>
@@ -304,6 +306,10 @@
               
                 <h1 id="releases">Releases</h1>
 <h2 id="pyscenedetect-07">PySceneDetect 0.7</h2>
+<h3 id="unreleased">Unreleased</h3>
+<ul>
+<li>[bugfix] OTIO exports use the full source duration when provided, including from the CLI, instead of declaring a fixed 1,980-frame duration. The available range remains unspecified when the duration is unknown. Scene source ranges are unchanged. <a href="https://github.com/Breakthrough/PySceneDetect/pull/580">#580</a></li>
+</ul>
 <h3 id="pyscenedetect-072-october-11-2026">PySceneDetect 0.7.2 (October 11, 2026)</h3>
 <p>PySceneDetect 0.7.2 ships improved defaults for the histogram and perceptual hash detectors, adds PyAV 19 support, and fixes several timing and output bugs. <strong>Default output of <code>detect-hist</code> and <code>detect-hash</code> will change in this release due to improved default values</strong>.</p>
 <h4 id="cli-changes">CLI Changes</h4>
