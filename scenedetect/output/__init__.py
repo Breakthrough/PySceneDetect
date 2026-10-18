@@ -656,6 +656,7 @@ def write_scene_list_otio(
     frame_rate: Fraction,
     name: str | None = None,
     audio: bool = True,
+    source_duration: FrameTimecode | None = None,
 ):
     """Writes the given list of scenes to `output_path` as an OTIO Timeline.1 JSON document.
 
@@ -670,6 +671,9 @@ def write_scene_list_otio(
             current OTIO format does not support rational timings.
         name: Timeline name. Defaults to the stem of `video_path`.
         audio: If True (default), include an audio track alongside the video track.
+        source_duration: Total duration of the source media. Written as the media reference's
+            available range so NLEs can seek into the source. If None, the available range is
+            left unspecified rather than inferred from the selected scenes.
     """
     # `_open_output_file` replaces filesystem paths with writable text streams.
     assert isinstance(output_path, _SupportsWrite)
@@ -681,6 +685,21 @@ def write_scene_list_otio(
     video_base_name = video_path.name
     video_abs_path = str(video_path.absolute())
     fps = float(frame_rate)
+    available_range = None
+    if source_duration is not None:
+        available_range = {
+            "OTIO_SCHEMA": "TimeRange.1",
+            "duration": {
+                "OTIO_SCHEMA": "RationalTime.1",
+                "rate": fps,
+                "value": round(source_duration.seconds * fps, 6),
+            },
+            "start_time": {
+                "OTIO_SCHEMA": "RationalTime.1",
+                "rate": fps,
+                "value": 0.0,
+            },
+        }
 
     # List of track mapping to resource type.
     # TODO(https://scenedetect.com/issues/497): Allow OTIO export without an audio track.
@@ -726,19 +745,7 @@ def write_scene_list_otio(
                                 "DEFAULT_MEDIA": {
                                     "OTIO_SCHEMA": "ExternalReference.1",
                                     "name": video_base_name,
-                                    "available_range": {
-                                        "OTIO_SCHEMA": "TimeRange.1",
-                                        "duration": {
-                                            "OTIO_SCHEMA": "RationalTime.1",
-                                            "rate": fps,
-                                            "value": 1980.0,
-                                        },
-                                        "start_time": {
-                                            "OTIO_SCHEMA": "RationalTime.1",
-                                            "rate": fps,
-                                            "value": 0.0,
-                                        },
-                                    },
+                                    "available_range": available_range,
                                     "available_image_bounds": None,
                                     "target_url": video_abs_path,
                                 }
