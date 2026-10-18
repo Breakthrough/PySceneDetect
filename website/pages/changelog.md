@@ -5,6 +5,7 @@
 
 ### Unreleased
 
+ - [bugfix] `$VIDEO_NAME` is now derived from the path component of URL inputs, ignoring the query string and fragment (e.g. `https://host/clip.mp4?token=1.2` -> `clip`). URLs with no path use the host. Previously the query string leaked into output filenames, which fails on Windows. [#197](https://github.com/Breakthrough/PySceneDetect/issues/197)
  - [bugfix] OTIO exports use the full source duration when provided, including from the CLI, instead of declaring a fixed 1,980-frame duration. The available range remains unspecified when the duration is unknown. Scene source ranges are unchanged. [#580](https://github.com/Breakthrough/PySceneDetect/pull/580)
 
 ### PySceneDetect 0.7.2 (October 11, 2026)
