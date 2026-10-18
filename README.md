@@ -132,6 +132,25 @@ Pull requests are welcome and encouraged.  PySceneDetect is released under the B
 
 For help or other issues, you can join [the official PySceneDetect Discord Server](https://discord.gg/H83HbJngk7), submit an issue/bug report [here on Github](https://github.com/Breakthrough/PySceneDetect/issues), or contact me via [my website](https://bcastell.com/about/).
 
+## Development Setup
+
+Create a virtual environment and install the project in editable mode with the development dependencies:
+
+    python -m venv .venv
+    source .venv/bin/activate      # Windows: .venv\Scripts\activate
+    pip install -e ".[dev]"
+
+The tests use videos from the `resources` branch. Fetch them into `tests/resources/` (this folder is ignored by git, so nothing gets staged):
+
+    git fetch --depth=1 https://github.com/Breakthrough/PySceneDetect.git resources
+    git restore --source=FETCH_HEAD tests/resources
+
+Then run `pytest`. The full test suite also needs `ffmpeg` and `mkvmerge`. If `ffmpeg` is not on your `PATH`, the copy bundled with `imageio-ffmpeg` (installed by `[dev]`) is used instead. Install `mkvmerge` separately, otherwise its test is skipped.
+
+A development install does not include the `scenedetect` command, so use `python -m scenedetect` instead:
+
+    python -m scenedetect -i video.mp4 detect-content list-scenes
+
 ## Code Signing
 
 This program uses free code signing provided by [SignPath.io](https://signpath.io?utm_source=foundation&utm_medium=github&utm_campaign=PySceneDetect), and a free code signing certificate by the [SignPath Foundation](https://signpath.org?utm_source=foundation&utm_medium=github&utm_campaign=PySceneDetect)
