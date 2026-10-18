@@ -672,9 +672,17 @@ def test_cli_save_html(tmp_path: Path):
     """Test `save-html` command."""
     base_command = "-i {VIDEO} -s {STATS} time {TIME} {DETECTOR} {COMMAND}"
     assert invoke_scenedetect(base_command, COMMAND="save-html", output_dir=tmp_path) == 0
+    # `save-html --no-images` ignores -o, so pass an absolute filename to keep output in tmp_path.
+    no_images_html = tmp_path / "no-images.html"
     assert (
-        invoke_scenedetect(base_command, COMMAND="save-html --no-images", output_dir=tmp_path) == 0
+        invoke_scenedetect(
+            base_command,
+            COMMAND=f"save-html --no-images --filename {no_images_html}",
+            output_dir=tmp_path,
+        )
+        == 0
     )
+    assert no_images_html.exists()
     # Ensure we can still call the now deprecated export-html command.
     assert invoke_scenedetect(base_command, COMMAND="export-html", output_dir=tmp_path) == 0
     # TODO: Check for existence of HTML & image files.
