@@ -309,6 +309,7 @@
 <h3 id="unreleased">Unreleased</h3>
 <ul>
 <li>[bugfix] OTIO exports use the full source duration when provided, including from the CLI, instead of declaring a fixed 1,980-frame duration. The available range remains unspecified when the duration is unknown. Scene source ranges are unchanged. <a href="https://github.com/Breakthrough/PySceneDetect/pull/580">#580</a></li>
+<li>[bugfix] The OpenCV backend keeps <code>position</code> on the last frame after reaching the end of a VFR video, so the last scene no longer ends early (or before it starts) <a href="https://github.com/Breakthrough/PySceneDetect/issues/561">#561</a></li>
 </ul>
 <h3 id="pyscenedetect-072-october-11-2026">PySceneDetect 0.7.2 (October 11, 2026)</h3>
 <p>PySceneDetect 0.7.2 ships improved defaults for the histogram and perceptual hash detectors, adds PyAV 19 support, and fixes several timing and output bugs. <strong>Default output of <code>detect-hist</code> and <code>detect-hash</code> will change in this release due to improved default values</strong>.</p>
