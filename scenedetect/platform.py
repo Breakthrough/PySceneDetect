@@ -140,11 +140,27 @@ def get_file_name(file_path: StrPath, include_extension: bool = True) -> str:
 
     E.g. /tmp/foo.bar -> foo
 
-    URLs use the last non-empty segment of the path component, ignoring any query string or
-    fragment, so https://example.com/videos/clip.mp4?token=1.2 -> clip. If the URL has no path
-    (e.g. rtsp://192.168.0.1:554), the host is used instead, with the port separator replaced
-    so the result is a valid file name on all platforms. Returns an empty string only if no
-    usable name can be derived."""
+    URL and URI-like inputs:
+        Inputs containing "://" are treated as URLs (see :func:`is_url`) and handled by their
+        URL components rather than as paths, since a path separator inside a query string or
+        fragment is not part of the name. The name is the last non-empty segment of the path
+        component, percent-decoded, e.g. https://example.com/videos/clip.mp4?token=1.2 -> clip.
+
+        When the path component is empty there is no segment to use, so the host becomes the
+        name, e.g. rtsp://192.168.0.1:554 -> 192.168.0.1_554. Userinfo (credentials) is never
+        part of the result, and the port is joined with "_" because ":" is not valid in a file
+        name on Windows. Hosts are returned in full even when `include_extension` is False, as
+        the last "." in a host is a domain separator and not an extension.
+
+    Arguments:
+        file_path: Path, or URL, to get the name of.
+        include_extension: If False, remove the extension (the last "." and everything after
+            it) from the name. Has no effect on names derived from a URL host.
+
+    Returns:
+        The name, or an empty string if none can be derived (e.g. a path that is only
+        separators, or a URL with neither a path nor a host).
+    """
     file_path = os.fspath(file_path)
     if is_url(file_path):
         parsed = urllib.parse.urlsplit(file_path)
@@ -154,7 +170,7 @@ def get_file_name(file_path: StrPath, include_extension: bool = True) -> str:
             # host has no extension to remove: stripping after the last "." would turn
             # example.com into example.
             host = parsed.hostname or ""
-            return f"{host}_{parsed.port}" if parsed.port else host
+            return f"{host}_{parsed.port}" if host and parsed.port else host
         file_name = segments[-1]
     else:
         file_name = os.path.basename(file_path)
