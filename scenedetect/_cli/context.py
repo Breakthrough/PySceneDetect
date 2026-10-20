@@ -540,8 +540,7 @@ class CliContext:
             if not self.video_stream.name:
                 logger.warning(
                     "Could not determine a video name from the input path, so $VIDEO_NAME will be"
-                    " empty in output filenames. Set an explicit filename on the output command"
-                    " (e.g. `list-scenes -f scenes.csv`) to avoid this."
+                    " empty in output filenames."
                 )
             duration = self.video_stream.duration
             duration_str = f"{duration} ({duration.frame_num} frames)" if duration else "unknown"

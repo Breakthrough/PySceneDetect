@@ -58,6 +58,9 @@ def test_long_command():
         ("https://example.com/", "example.com"),
         ("rtsp://192.168.0.1:554", "192.168.0.1_554"),
         ("rtsp://user:pass@192.168.0.1:554", "192.168.0.1_554"),
+        # Neither a path nor a host to derive a name from.
+        ("rtsp://", ""),
+        ("rtsp://:554", ""),
     ],
 )
 def test_get_file_name_without_extension(path: str, expected: str):
