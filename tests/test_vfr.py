@@ -95,6 +95,16 @@ def test_vfr_position_monotonic_opencv(test_vfr_video: str, auto_close):
     assert frame_count > 0
 
 
+def test_vfr_position_after_eof_opencv(test_vfr_drop3_video: str, auto_close):
+    """Position should stay on the last frame once read() hits the end of the video (#561)."""
+    video = auto_close(open_video(test_vfr_drop3_video, backend="opencv"))
+    last_position = None
+    while video.read() is not False:
+        last_position = video.position
+    assert last_position is not None
+    assert video.position == last_position
+
+
 @pytest.mark.parametrize("backend", ["pyav", "opencv"])
 def test_vfr_scene_detection(test_vfr_video: str, backend: str, auto_close):
     """Scene detection on VFR video should produce timestamps matching known ground truth.
