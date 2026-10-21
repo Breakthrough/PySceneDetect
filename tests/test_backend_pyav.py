@@ -55,16 +55,18 @@ def test_video_stream_pyav_del_closes_owned_file_handle(test_video_file: str):
     assert handle.closed
 
 
-def test_close_leaves_caller_file_open(test_video_file: str):
+def test_close_leaves_caller_file_open(test_video_file: str, auto_close):
     """`close()` must not close a file-like object supplied by the caller (#568)."""
     with open(test_video_file, mode="rb") as video_file:
-        stream = VideoStreamAv(path_or_io=video_file, threading_mode=None)
+        stream = auto_close(VideoStreamAv(path_or_io=video_file, threading_mode=None))
         assert stream.read() is not False
         stream.close()
         assert not video_file.closed
 
 
-def test_close_releases_owned_file_handle(test_video_file: str, monkeypatch: pytest.MonkeyPatch):
+def test_close_releases_owned_file_handle(
+    test_video_file: str, monkeypatch: pytest.MonkeyPatch, auto_close
+):
     """`close()` must release the file handle the stream opened from a path (#568), without
     waiting for the stream to be finalized."""
     opened = []
@@ -76,7 +78,7 @@ def test_close_releases_owned_file_handle(test_video_file: str, monkeypatch: pyt
         return handle
 
     monkeypatch.setattr("scenedetect.backends.pyav.open", recording_open, raising=False)
-    stream = VideoStreamAv(test_video_file, threading_mode=None)
+    stream = auto_close(VideoStreamAv(test_video_file, threading_mode=None))
     assert len(opened) == 1
     assert not opened[0].closed
     stream.close()

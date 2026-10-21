@@ -286,7 +286,8 @@ class VideoStreamMoviePy(VideoStream):
 
     def close(self) -> None:
         """Close the video, terminating the ffmpeg process used to decode it. Has no effect if
-        the stream is already closed. See :meth:`VideoStream.close` for details."""
+        the stream is already closed. See
+        :meth:`VideoStream.close() <scenedetect.video_stream.VideoStream.close>` for details."""
         if self._closed:
             return
         self._closed = True

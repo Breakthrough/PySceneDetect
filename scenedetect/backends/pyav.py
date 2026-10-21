@@ -173,9 +173,6 @@ class VideoStreamAv(VideoStream):
 
         # Calculate duration after we have set the framerate.
         self._duration_frames = self._get_duration()
-        # Properties read from the container are recorded so they remain available after `close()`.
-        self._closed_frame_size = self.frame_size
-        self._closed_aspect_ratio = self.aspect_ratio
 
     def __del__(self):
         # Finalizers must never raise - an exception here becomes an unraisable error. During
@@ -186,12 +183,15 @@ class VideoStreamAv(VideoStream):
     def close(self) -> None:
         """Close the video, releasing the decoder, the container, and the file handle opened if
         `path_or_io` is a path. File-like objects passed by the caller are left open. Has no
-        effect if the stream is already closed. See :meth:`VideoStream.close` for details."""
+        effect if the stream is already closed. See
+        :meth:`VideoStream.close() <scenedetect.video_stream.VideoStream.close>` for details."""
         if self._closed:
             return
-        self._closed = True
-        self._frame = None
-        # Attributes below may be unset if `__init__` raised, since `__del__` calls this method.
+        # Record the properties read from the container while it is open. They can't be read if
+        # `__init__` raised (`__del__` also calls this method) or the video can't be decoded.
+        with contextlib.suppress(Exception):
+            self._closed_frame_size = self.frame_size
+            self._closed_aspect_ratio = self.aspect_ratio
         # Close the decode generator first to break its cycle with the container.
         decoder = getattr(self, "_decoder", None)
         if decoder is not None:
@@ -207,6 +207,10 @@ class VideoStreamAv(VideoStream):
             io = getattr(self, "_io", None)
             if io is not None:
                 io.close()
+        # Only mark the stream as closed once everything is released, so a failed `close()` can be
+        # retried. The last decoded frame is dropped, since `position` is undefined once closed.
+        self._closed = True
+        self._frame = None
 
     #
     # VideoStream Methods/Properties

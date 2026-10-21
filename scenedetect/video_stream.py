@@ -17,27 +17,18 @@ interface for video input. To open a video by path, use :func:`scenedetect.open_
 .. code:: python
 
     from scenedetect import open_video
-    video = open_video('video.mp4')
-    while True:
-        frame = video.read()
-        if frame is False:
-            break
-    print("Read %d frames" % video.frame_number)
+    with open_video('video.mp4') as video:
+        while True:
+            frame = video.read()
+            if frame is False:
+                break
+        print("Read %d frames" % video.frame_number)
+
+Leaving the ``with`` block closes the video, releasing resources such as file handles and decoders.
+A stream can also be closed explicitly by calling :meth:`VideoStream.close`.
 
 You can also optionally specify a framerate and a specific backend library to use. Unless specified,
 OpenCV will be used as the video backend. See :mod:`scenedetect.backends` for a detailed example.
-
-A :class:`VideoStream` holds resources such as file handles and decoders until it is closed.
-Call :meth:`VideoStream.close` once done with it, or use it as a context manager to close it
-automatically:
-
-.. code:: python
-
-    from scenedetect import open_video
-    with open_video('video.mp4') as video:
-        while video.read() is not False:
-            pass
-        print("Read %d frames" % video.frame_number)
 
 New :class:`VideoStream <scenedetect.video_stream.VideoStream>` implementations can be
 tested by adding it to the test suite in `tests/test_video_stream.py`.
@@ -120,10 +111,11 @@ class VideoStream(ABC):
     def close(self) -> None:  # noqa: B027 - Not abstract, so existing subclasses remain valid.
         """Close the stream, releasing any resources it holds (e.g. file handles, decoders).
 
-        Calling `close()` more than once has no effect. Once closed, `read()`, `seek()`, and
-        `reset()` raise `ValueError`; the stream is never re-opened. Properties describing the
-        video itself (`path`, `name`, `frame_rate`, `duration`, `frame_size`, and `aspect_ratio`)
-        remain available, but the values of all others (e.g. `position`) are undefined.
+        Calling `close()` more than once has no effect. Backends which hold resources override
+        this method: once they are closed, `read()`, `seek()`, and `reset()` raise `ValueError`,
+        and the stream is never re-opened. Properties describing the video itself (`path`, `name`,
+        `frame_rate`, `duration`, `frame_size`, and `aspect_ratio`) remain available, but all
+        others (e.g. `position`) are undefined, and may return arbitrary values or raise.
 
         A stream can also be used as a context manager, which closes it on exit:
 
@@ -132,7 +124,9 @@ class VideoStream(ABC):
             with open_video("video.mp4") as video:
                 scene_manager.detect_scenes(video=video)
 
-        The default implementation does nothing. Backends which hold resources override it.
+        The default implementation does nothing, so streams which hold no resources of their own
+        (e.g. a :class:`VideoCaptureAdapter <scenedetect.backends.opencv.VideoCaptureAdapter>`,
+        whose capture belongs to the caller) remain usable after closing.
         """
 
     def __enter__(self: _VideoStreamT) -> _VideoStreamT:
@@ -244,12 +238,18 @@ class VideoStream(ABC):
         Returns:
             If decode = True, the decoded frame (np.ndarray), or False (bool) if end of video.
             If decode = False, a bool indicating if advancing to the the next frame succeeded.
+        Raises:
+            ValueError: The stream is closed.
         """
         ...
 
     @abstractmethod
     def reset(self) -> None:
-        """Close and re-open the VideoStream (equivalent to seeking back to beginning)."""
+        """Close and re-open the VideoStream (equivalent to seeking back to beginning).
+
+        Raises:
+            ValueError: The stream is closed.
+        """
         ...
 
     @abstractmethod
@@ -270,6 +270,7 @@ class VideoStream(ABC):
                 If int, interpreted as frame number.
         Raises:
             SeekError: An error occurs while seeking, or seeking is not supported.
-            ValueError: `target` is not a valid value (i.e. it is negative).
+            ValueError: `target` is not a valid value (i.e. it is negative), or the stream is
+                closed.
         """
         ...

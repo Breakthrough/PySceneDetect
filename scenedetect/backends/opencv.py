@@ -171,7 +171,8 @@ class VideoStreamCv2(VideoStream):
 
         Prefer to use this property only to take ownership of the underlying cv2.VideoCapture object
         backing this object. Seeking or using the read/grab methods through this property are
-        unsupported and will leave this object in an inconsistent state.
+        unsupported and will leave this object in an inconsistent state. Closing this object (e.g.
+        by leaving a `with` block) releases the capture.
         """
         return self._cap
 
@@ -228,7 +229,7 @@ class VideoStreamCv2(VideoStream):
         if self._is_device:
             return None
         if self._closed:
-            return self.base_timecode + self._closed_frame_count
+            return self.base_timecode + math.trunc(self._closed_frame_count)
         return self.base_timecode + math.trunc(self._cap.get(cv2.CAP_PROP_FRAME_COUNT))
 
     @property
@@ -320,9 +321,14 @@ class VideoStreamCv2(VideoStream):
 
     def close(self) -> None:
         """Close the video, releasing the underlying `cv2.VideoCapture`. Has no effect if the
-        stream is already closed. See :meth:`VideoStream.close` for details."""
+        stream is already closed. See
+        :meth:`VideoStream.close() <scenedetect.video_stream.VideoStream.close>` for details."""
         if self._closed:
             return
+        # A released capture no longer reports the video's properties, so record them first.
+        self._closed_frame_size = self.frame_size
+        self._closed_frame_count = self._cap.get(cv2.CAP_PROP_FRAME_COUNT)
+        self._closed_aspect_ratio = self.aspect_ratio
         self._closed = True
         self._cap.release()
 
@@ -418,16 +424,14 @@ class VideoStreamCv2(VideoStream):
         self._has_grabbed = False
         self._eof_timecode: Timecode | None = None
         cap.set(cv2.CAP_PROP_ORIENTATION_AUTO, 1.0)  # https://github.com/opencv/opencv/issues/26795
-        # A released capture reports 0 for every property, so record those describing the video
-        # for after `close()`. While open, they are still read from the capture.
-        self._closed_frame_size = self.frame_size
-        self._closed_frame_count = math.trunc(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-        self._closed_aspect_ratio = self.aspect_ratio
 
 
 class VideoCaptureAdapter(VideoStream):
     """Adapter for existing VideoCapture objects. Unlike VideoStreamCv2, this class supports
     VideoCaptures which may not support seeking.
+
+    The VideoCapture remains owned by the caller: closing the adapter (e.g. by leaving a `with`
+    block) does not release it.
     """
 
     def __init__(

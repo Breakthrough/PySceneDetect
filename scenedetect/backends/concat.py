@@ -215,11 +215,10 @@ class VideoStreamConcat(VideoStream):
         )
 
     def _switch_source(self, index: int):
-        """Make the source at `index` the one being decoded, closing the outgoing source. The
-        new source is opened first, so the outgoing one is kept if that fails."""
+        """Make the source at `index` the one being decoded, and close the outgoing source."""
         cap = self._open_source(index)
-        self._cap.close()
-        self._cap = cap
+        outgoing, self._cap = self._cap, cap
+        outgoing.close()
 
     def _child_position_seconds(self) -> Fraction:
         """Position of the current source as exact rational seconds (local timeline)."""
@@ -288,7 +287,7 @@ class VideoStreamConcat(VideoStream):
     def close(self) -> None:
         """Close the stream, closing the input video currently open for decoding (only one is
         kept open at a time). Has no effect if the stream is already closed. See
-        :meth:`VideoStream.close` for details."""
+        :meth:`VideoStream.close() <scenedetect.video_stream.VideoStream.close>` for details."""
         if self._closed:
             return
         self._closed = True

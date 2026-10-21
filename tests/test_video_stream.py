@@ -432,9 +432,9 @@ def _video_properties(stream: VideoStream) -> tuple:
     )
 
 
-def test_close_is_idempotent(vs_type: ty.Callable[..., VideoStream]):
+def test_close_is_idempotent(vs_type: ty.Callable[..., VideoStream], auto_close):
     """Calling `close()` more than once must have no effect."""
-    stream = vs_type(get_absolute_path("resources/testvideo.mp4"))
+    stream = auto_close(vs_type(get_absolute_path("resources/testvideo.mp4")))
     assert stream.read() is not False
     stream.close()
     stream.close()
@@ -442,9 +442,9 @@ def test_close_is_idempotent(vs_type: ty.Callable[..., VideoStream]):
         stream.read()
 
 
-def test_use_after_close(vs_type: ty.Callable[..., VideoStream]):
+def test_use_after_close(vs_type: ty.Callable[..., VideoStream], auto_close):
     """`read()`, `seek()`, and `reset()` must raise `ValueError` once a stream is closed."""
-    stream = vs_type(get_absolute_path("resources/testvideo.mp4"))
+    stream = auto_close(vs_type(get_absolute_path("resources/testvideo.mp4")))
     stream.close()
     with pytest.raises(ValueError):
         stream.read()
@@ -456,9 +456,12 @@ def test_use_after_close(vs_type: ty.Callable[..., VideoStream]):
         stream.reset()
 
 
-def test_properties_after_close(vs_type: ty.Callable[..., VideoStream]):
-    """Properties describing the video must remain available after `close()`."""
-    stream = vs_type(get_absolute_path("resources/testvideo.mp4"))
+@pytest.mark.parametrize("test_video", get_test_video_params())
+def test_properties_after_close(
+    vs_type: ty.Callable[..., VideoStream], test_video: VideoParameters, auto_close
+):
+    """Properties describing the video must remain available, and unchanged, after `close()`."""
+    stream = auto_close(vs_type(test_video.path))
     expected = _video_properties(stream)
     stream.close()
     assert _video_properties(stream) == expected
@@ -474,9 +477,9 @@ def test_context_manager(vs_type: type[VideoStream]):
         video.read()
 
 
-def test_context_manager_closes_on_error(vs_type: ty.Callable[..., VideoStream]):
+def test_context_manager_closes_on_error(vs_type: ty.Callable[..., VideoStream], auto_close):
     """The stream must be closed if the `with` block raises, without suppressing the error."""
-    stream = vs_type(get_absolute_path("resources/testvideo.mp4"))
+    stream = auto_close(vs_type(get_absolute_path("resources/testvideo.mp4")))
     with pytest.raises(RuntimeError, match="raised in with block"), stream:
         raise RuntimeError("raised in with block")
     with pytest.raises(ValueError):

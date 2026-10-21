@@ -50,9 +50,9 @@ Lastly, to use a specific backend directly:
 In both examples above, the resulting ``video`` can be used with
 :meth:`SceneManager.detect_scenes() <scenedetect.scene_manager.SceneManager.detect_scenes>`.
 
-Every backend can be closed with :meth:`close() <scenedetect.video_stream.VideoStream.close>`
-to release the file handles and decoders it holds, or used as a context manager to close it
-automatically:
+Backends which open a video themselves can be closed with
+:meth:`close() <scenedetect.video_stream.VideoStream.close>` to release the file handles and
+decoders they hold, or used as a context manager to close them automatically:
 
 .. code:: python
 

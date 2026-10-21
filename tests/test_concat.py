@@ -30,18 +30,18 @@ BACKENDS = [backend for backend in ("opencv", "pyav") if backend in AVAILABLE_BA
 
 
 class _TrackedStream(VideoStreamCv2):
-    """OpenCV backend which records every stream it opens, and whether it has been closed."""
+    """OpenCV backend which records every stream it opens."""
 
     instances: ty.ClassVar[list["_TrackedStream"]] = []
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.is_closed = False
         _TrackedStream.instances.append(self)
 
-    def close(self) -> None:
-        super().close()
-        self.is_closed = True
+    @property
+    def is_closed(self) -> bool:
+        """True once the underlying capture has been released."""
+        return not self.capture.isOpened()
 
 
 @pytest.fixture
@@ -210,10 +210,14 @@ def test_probed_sources_closed(test_fades_clip, tracked_streams, auto_close):
 
 
 def test_failed_open_closes_sources(test_fades_clip, test_video_file, tracked_streams):
-    """Every probed input must be closed if the inputs can't be concatenated."""
+    """Every input opened so far must be closed if the inputs can't be opened or concatenated."""
+    # The second input has a different resolution.
     with pytest.raises(VideoOpenFailure):
         VideoStreamConcat([test_fades_clip, test_video_file], backend="tracked")
-    assert len(tracked_streams) == 2
+    # The third input doesn't exist.
+    with pytest.raises(OSError):
+        VideoStreamConcat([test_fades_clip, test_fades_clip, "missing.mp4"], backend="tracked")
+    assert len(tracked_streams) == 4
     assert all(stream.is_closed for stream in tracked_streams)
 
 
@@ -241,10 +245,10 @@ def test_switching_sources_closes_outgoing(test_fades_clip, tracked_streams, aut
     assert_only_latest_open(6)
 
 
-def test_close(test_fades_clip, tracked_streams):
+def test_close(test_fades_clip, tracked_streams, auto_close):
     """`close()` closes the current source and is idempotent. Afterwards `read()`, `seek()`,
     and `reset()` raise `ValueError` without opening any source."""
-    video = VideoStreamConcat([test_fades_clip] * 2, backend="tracked")
+    video = auto_close(VideoStreamConcat([test_fades_clip] * 2, backend="tracked"))
     assert video.read(decode=False) is not False
     video.close()
     video.close()
@@ -271,9 +275,9 @@ def test_context_manager(test_fades_clip, backend):
 
 
 @pytest.mark.parametrize("backend", BACKENDS)
-def test_properties_after_close(test_fades_clip, backend):
+def test_properties_after_close(test_fades_clip, backend, auto_close):
     """Properties describing the video must remain available after `close()`."""
-    video = VideoStreamConcat([test_fades_clip] * 2, backend=backend)
+    video = auto_close(VideoStreamConcat([test_fades_clip] * 2, backend=backend))
 
     def properties():
         return (
