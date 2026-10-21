@@ -215,6 +215,8 @@ class VideoStreamCv2(VideoStream):
     @property
     def frame_size(self) -> tuple[int, int]:
         """Size of each video frame in pixels as a tuple of (width, height)."""
+        if self._closed:
+            return self._closed_frame_size
         return (
             math.trunc(self._cap.get(cv2.CAP_PROP_FRAME_WIDTH)),
             math.trunc(self._cap.get(cv2.CAP_PROP_FRAME_HEIGHT)),
@@ -225,11 +227,15 @@ class VideoStreamCv2(VideoStream):
         """Duration of the stream as a FrameTimecode, or None if non terminating."""
         if self._is_device:
             return None
+        if self._closed:
+            return self.base_timecode + self._closed_frame_count
         return self.base_timecode + math.trunc(self._cap.get(cv2.CAP_PROP_FRAME_COUNT))
 
     @property
     def aspect_ratio(self) -> float:
         """Display/pixel aspect ratio as a float (1.0 represents square pixels)."""
+        if self._closed:
+            return self._closed_aspect_ratio
         return _get_aspect_ratio(self._cap)
 
     @property
@@ -266,6 +272,7 @@ class VideoStreamCv2(VideoStream):
         return math.trunc(self._cap.get(cv2.CAP_PROP_POS_FRAMES))
 
     def seek(self, target: TimecodeLike):
+        self._check_open()
         if self._is_device:
             raise SeekError("Cannot seek if input is a device!")
         if not isinstance(target, FrameTimecode):
@@ -307,10 +314,20 @@ class VideoStreamCv2(VideoStream):
 
     def reset(self):
         """Close and re-open the VideoStream (should be equivalent to calling `seek(0)`)."""
+        self._check_open()
         self._cap.release()
         self._open_capture(float(self._frame_rate))
 
+    def close(self) -> None:
+        """Close the video, releasing the underlying `cv2.VideoCapture`. Has no effect if the
+        stream is already closed. See :meth:`VideoStream.close` for details."""
+        if self._closed:
+            return
+        self._closed = True
+        self._cap.release()
+
     def read(self, decode: bool = True) -> np.ndarray | bool:
+        self._check_open()
         if not self._cap.isOpened():
             return False
         # At the end of some VFR streams OpenCV reports an earlier CAP_PROP_POS_MSEC once grab()
@@ -401,6 +418,11 @@ class VideoStreamCv2(VideoStream):
         self._has_grabbed = False
         self._eof_timecode: Timecode | None = None
         cap.set(cv2.CAP_PROP_ORIENTATION_AUTO, 1.0)  # https://github.com/opencv/opencv/issues/26795
+        # A released capture reports 0 for every property, so record those describing the video
+        # for after `close()`. While open, they are still read from the capture.
+        self._closed_frame_size = self.frame_size
+        self._closed_frame_count = math.trunc(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+        self._closed_aspect_ratio = self.aspect_ratio
 
 
 class VideoCaptureAdapter(VideoStream):

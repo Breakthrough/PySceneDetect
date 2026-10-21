@@ -27,6 +27,18 @@ interface for video input. To open a video by path, use :func:`scenedetect.open_
 You can also optionally specify a framerate and a specific backend library to use. Unless specified,
 OpenCV will be used as the video backend. See :mod:`scenedetect.backends` for a detailed example.
 
+A :class:`VideoStream` holds resources such as file handles and decoders until it is closed.
+Call :meth:`VideoStream.close` once done with it, or use it as a context manager to close it
+automatically:
+
+.. code:: python
+
+    from scenedetect import open_video
+    with open_video('video.mp4') as video:
+        while video.read() is not False:
+            pass
+        print("Read %d frames" % video.frame_number)
+
 New :class:`VideoStream <scenedetect.video_stream.VideoStream>` implementations can be
 tested by adding it to the test suite in `tests/test_video_stream.py`.
 """
@@ -34,6 +46,7 @@ tested by adding it to the test suite in `tests/test_video_stream.py`.
 import typing as ty
 from abc import ABC, abstractmethod
 from fractions import Fraction
+from types import TracebackType
 
 import numpy as np
 
@@ -75,6 +88,8 @@ class FrameRateUnavailable(VideoOpenFailure):
 ## VideoStream Interface (Base Class)
 ##
 
+_VideoStreamT = ty.TypeVar("_VideoStreamT", bound="VideoStream")
+
 
 class VideoStream(ABC):
     """Interface which all video backends must implement."""
@@ -87,6 +102,10 @@ class VideoStream(ABC):
     """Cumulative count of frames which failed to decode. Backends which can detect and skip
     corrupt frames increment this as an instance attribute."""
 
+    _closed: bool = False
+    """True once the stream has been closed. Backends which implement `close()` set this as an
+    instance attribute, and call `_check_open()` from methods which require an open stream."""
+
     @property
     def base_timecode(self) -> FrameTimecode:
         """FrameTimecode object to use as a time base."""
@@ -97,6 +116,40 @@ class VideoStream(ABC):
         """Number of frames that failed to decode and were skipped (may indicate video
         corruption). Always 0 for backends which do not track decode failures."""
         return self._decode_failures
+
+    def close(self) -> None:  # noqa: B027 - Not abstract, so existing subclasses remain valid.
+        """Close the stream, releasing any resources it holds (e.g. file handles, decoders).
+
+        Calling `close()` more than once has no effect. Once closed, `read()`, `seek()`, and
+        `reset()` raise `ValueError`; the stream is never re-opened. Properties describing the
+        video itself (`path`, `name`, `frame_rate`, `duration`, `frame_size`, and `aspect_ratio`)
+        remain available, but the values of all others (e.g. `position`) are undefined.
+
+        A stream can also be used as a context manager, which closes it on exit:
+
+        .. code:: python
+
+            with open_video("video.mp4") as video:
+                scene_manager.detect_scenes(video=video)
+
+        The default implementation does nothing. Backends which hold resources override it.
+        """
+
+    def __enter__(self: _VideoStreamT) -> _VideoStreamT:
+        return self
+
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_value: BaseException | None,
+        traceback: TracebackType | None,
+    ) -> None:
+        self.close()
+
+    def _check_open(self) -> None:
+        """Raise `ValueError` if the stream has been closed."""
+        if self._closed:
+            raise ValueError("I/O operation on closed video stream.")
 
     #
     # Backend Identification

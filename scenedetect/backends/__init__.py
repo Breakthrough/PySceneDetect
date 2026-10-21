@@ -50,6 +50,15 @@ Lastly, to use a specific backend directly:
 In both examples above, the resulting ``video`` can be used with
 :meth:`SceneManager.detect_scenes() <scenedetect.scene_manager.SceneManager.detect_scenes>`.
 
+Every backend can be closed with :meth:`close() <scenedetect.video_stream.VideoStream.close>`
+to release the file handles and decoders it holds, or used as a context manager to close it
+automatically:
+
+.. code:: python
+
+    with open_video("video.mp4") as video:
+        scene_manager.detect_scenes(video=video)
+
 Multiple videos can be opened as one continuous stream by passing a list of paths to
 :func:`open_video`, which returns a
 :class:`VideoStreamConcat <scenedetect.backends.concat.VideoStreamConcat>`:

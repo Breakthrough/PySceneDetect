@@ -13,11 +13,14 @@
 
 Validates the multi-video concatenation logic in `scenedetect.backends.concat`."""
 
+import typing as ty
+
 import pytest
 
 from scenedetect import SceneManager, ThresholdDetector, open_video
 from scenedetect.backends import AVAILABLE_BACKENDS
 from scenedetect.backends.concat import VideoStreamConcat
+from scenedetect.backends.opencv import VideoStreamCv2
 from scenedetect.video_stream import VideoOpenFailure
 
 FADES_TOTAL_FRAMES = 250
@@ -26,10 +29,33 @@ FADES_DURATION = 10.0
 BACKENDS = [backend for backend in ("opencv", "pyav") if backend in AVAILABLE_BACKENDS]
 
 
+class _TrackedStream(VideoStreamCv2):
+    """OpenCV backend which records every stream it opens, and whether it has been closed."""
+
+    instances: ty.ClassVar[list["_TrackedStream"]] = []
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.is_closed = False
+        _TrackedStream.instances.append(self)
+
+    def close(self) -> None:
+        super().close()
+        self.is_closed = True
+
+
+@pytest.fixture
+def tracked_streams(monkeypatch: pytest.MonkeyPatch) -> list[_TrackedStream]:
+    """Registers `_TrackedStream` as the `tracked` backend, returning the streams it opens."""
+    monkeypatch.setattr(_TrackedStream, "instances", [])
+    monkeypatch.setitem(AVAILABLE_BACKENDS, "tracked", _TrackedStream)
+    return _TrackedStream.instances
+
+
 @pytest.mark.parametrize("backend", BACKENDS)
-def test_decode_single(test_fades_clip, backend):
+def test_decode_single(test_fades_clip, backend, auto_close):
     """Decode a single video and validate the reported frame count and position."""
-    video = VideoStreamConcat([test_fades_clip], backend=backend)
+    video = auto_close(VideoStreamConcat([test_fades_clip], backend=backend))
     while video.read(decode=False) is not False:
         pass
     assert video.frame_number == FADES_TOTAL_FRAMES
@@ -37,10 +63,10 @@ def test_decode_single(test_fades_clip, backend):
 
 
 @pytest.mark.parametrize("backend", BACKENDS)
-def test_decode_multiple(test_fades_clip, backend):
+def test_decode_multiple(test_fades_clip, backend, auto_close):
     """Decode multiple videos and validate the reported frame count."""
     splice_amount = 3
-    video = VideoStreamConcat([test_fades_clip] * splice_amount, backend=backend)
+    video = auto_close(VideoStreamConcat([test_fades_clip] * splice_amount, backend=backend))
     while video.read(decode=False) is not False:
         pass
     assert video.frame_number == FADES_TOTAL_FRAMES * splice_amount
@@ -48,9 +74,9 @@ def test_decode_multiple(test_fades_clip, backend):
 
 
 @pytest.mark.parametrize("backend", BACKENDS)
-def test_seam_monotonicity(test_fades_clip, backend):
+def test_seam_monotonicity(test_fades_clip, backend, auto_close):
     """Position must be strictly increasing across the file seam."""
-    video = VideoStreamConcat([test_fades_clip] * 2, backend=backend)
+    video = auto_close(VideoStreamConcat([test_fades_clip] * 2, backend=backend))
     last_seconds = -1.0
     max_delta = 0.0
     while video.read(decode=False) is not False:
@@ -65,9 +91,9 @@ def test_seam_monotonicity(test_fades_clip, backend):
 
 
 @pytest.mark.parametrize("backend", BACKENDS)
-def test_seek(test_fades_clip, backend):
+def test_seek(test_fades_clip, backend, auto_close):
     """Seeking should work on the global timeline, in either direction, across sources."""
-    video = VideoStreamConcat([test_fades_clip] * 2, backend=backend)
+    video = auto_close(VideoStreamConcat([test_fades_clip] * 2, backend=backend))
     # Seek into the second source.
     target = FADES_DURATION + 5.0
     video.seek(target)
@@ -79,10 +105,10 @@ def test_seek(test_fades_clip, backend):
     assert abs(video.position.seconds - 5.0) < 0.25
 
 
-def test_seek_backward_then_cross_seam(test_fades_clip):
+def test_seek_backward_then_cross_seam(test_fades_clip, auto_close):
     """Crossing the seam a second time after a backward seek must not shift the timeline
     again (offset correction must be idempotent)."""
-    video = VideoStreamConcat([test_fades_clip] * 2)
+    video = auto_close(VideoStreamConcat([test_fades_clip] * 2))
     # Read across the seam once.
     video.seek(FADES_DURATION - 0.5)
     while video.position.seconds < FADES_DURATION + 0.5:
@@ -98,10 +124,10 @@ def test_seek_backward_then_cross_seam(test_fades_clip):
     assert abs(video.position.seconds - first_pass) < 0.25
 
 
-def test_seam_monotonicity_vfr(test_vfr_drop3_video):
+def test_seam_monotonicity_vfr(test_vfr_drop3_video, auto_close):
     """Position must also be strictly increasing across the seam between variable framerate
     inputs, whose declared duration is less exact than CFR."""
-    video = VideoStreamConcat([test_vfr_drop3_video] * 2)
+    video = auto_close(VideoStreamConcat([test_vfr_drop3_video] * 2))
     last_seconds = -1.0
     while video.read(decode=False) is not False:
         seconds = video.position.seconds
@@ -109,9 +135,9 @@ def test_seam_monotonicity_vfr(test_vfr_drop3_video):
         last_seconds = seconds
 
 
-def test_map_span(test_fades_clip):
+def test_map_span(test_fades_clip, auto_close):
     """A span crossing the seam between two inputs must map to two local spans."""
-    video = VideoStreamConcat([test_fades_clip] * 2)
+    video = auto_close(VideoStreamConcat([test_fades_clip] * 2))
     duration = FADES_DURATION
     start = video.base_timecode + (duration - 3.0)
     end = video.base_timecode + (duration + 3.0)
@@ -133,31 +159,31 @@ def test_mismatched_resolution(test_fades_clip, test_video_file):
         VideoStreamConcat([test_fades_clip, test_video_file])
 
 
-def test_unknown_backend_falls_back(test_fades_clip):
+def test_unknown_backend_falls_back(test_fades_clip, auto_close):
     """An unknown backend name falls back to OpenCV instead of failing."""
-    video = VideoStreamConcat([test_fades_clip], backend="not_a_backend")
+    video = auto_close(VideoStreamConcat([test_fades_clip], backend="not_a_backend"))
     assert video.child_backend == "opencv"
     assert video.read(decode=False) is not False
 
 
-def test_open_video_list(test_fades_clip):
+def test_open_video_list(test_fades_clip, auto_close):
     """`open_video` accepts a list of paths and returns a concatenated stream."""
-    video = open_video([test_fades_clip, test_fades_clip])
+    video = auto_close(open_video([test_fades_clip, test_fades_clip]))
     assert isinstance(video, VideoStreamConcat)
     assert video.duration.seconds == pytest.approx(2 * FADES_DURATION, abs=0.1)
     # A single-element list also returns a concatenated stream.
-    video = open_video([test_fades_clip])
+    video = auto_close(open_video([test_fades_clip]))
     assert isinstance(video, VideoStreamConcat)
 
 
-def test_scene_manager_detect(test_fades_clip):
+def test_scene_manager_detect(test_fades_clip, auto_close):
     """The concatenated stream must work end-to-end with SceneManager: detecting fades over
     two spliced copies must find twice as many scenes as a single copy."""
 
     def detect_scenes(paths):
         scene_manager = SceneManager()
         scene_manager.add_detector(ThresholdDetector())
-        video = open_video(paths)
+        video = auto_close(open_video(paths))
         scene_manager.detect_scenes(video=video)
         return scene_manager.get_scene_list()
 
@@ -168,10 +194,98 @@ def test_scene_manager_detect(test_fades_clip):
 
 
 @pytest.mark.skipif("pyav" not in AVAILABLE_BACKENDS, reason="PyAV backend not available")
-def test_corrupt_concat(corrupt_video_file):
+def test_corrupt_concat(corrupt_video_file, auto_close):
     """The PyAV input path must tolerate corrupt frames and decode the full stream."""
-    video = VideoStreamConcat([corrupt_video_file], backend="pyav")
+    video = auto_close(VideoStreamConcat([corrupt_video_file], backend="pyav"))
     num_frames = 0
     while video.read(decode=False) is not False:
         num_frames += 1
     assert num_frames >= 590
+
+
+def test_probed_sources_closed(test_fades_clip, tracked_streams, auto_close):
+    """Only the first input stays open after probing; the others are closed once probed."""
+    auto_close(VideoStreamConcat([test_fades_clip] * 3, backend="tracked"))
+    assert [stream.is_closed for stream in tracked_streams] == [False, True, True]
+
+
+def test_failed_open_closes_sources(test_fades_clip, test_video_file, tracked_streams):
+    """Every probed input must be closed if the inputs can't be concatenated."""
+    with pytest.raises(VideoOpenFailure):
+        VideoStreamConcat([test_fades_clip, test_video_file], backend="tracked")
+    assert len(tracked_streams) == 2
+    assert all(stream.is_closed for stream in tracked_streams)
+
+
+def test_switching_sources_closes_outgoing(test_fades_clip, tracked_streams, auto_close):
+    """Switching sources via `read()`, `seek()`, or `reset()` must close the outgoing source,
+    so only the source currently being decoded is open."""
+    video = auto_close(VideoStreamConcat([test_fades_clip] * 2, backend="tracked"))
+
+    def assert_only_latest_open(num_opened: int):
+        assert len(tracked_streams) == num_opened
+        assert all(stream.is_closed for stream in tracked_streams[:-1])
+        assert not tracked_streams[-1].is_closed
+
+    # Read across the seam into the second source.
+    video.seek(FADES_DURATION - 0.5)
+    while video.position.seconds < FADES_DURATION + 0.5:
+        assert video.read(decode=False) is not False
+    assert_only_latest_open(3)
+    # Seek back into the first source, then forward into the second.
+    video.seek(5.0)
+    assert_only_latest_open(4)
+    video.seek(FADES_DURATION + 5.0)
+    assert_only_latest_open(5)
+    video.reset()
+    assert_only_latest_open(6)
+
+
+def test_close(test_fades_clip, tracked_streams):
+    """`close()` closes the current source and is idempotent. Afterwards `read()`, `seek()`,
+    and `reset()` raise `ValueError` without opening any source."""
+    video = VideoStreamConcat([test_fades_clip] * 2, backend="tracked")
+    assert video.read(decode=False) is not False
+    video.close()
+    video.close()
+    assert all(stream.is_closed for stream in tracked_streams)
+    num_opened = len(tracked_streams)
+    with pytest.raises(ValueError):
+        video.read()
+    with pytest.raises(ValueError):
+        video.seek(FADES_DURATION + 5.0)
+    with pytest.raises(ValueError):
+        video.reset()
+    assert len(tracked_streams) == num_opened
+
+
+@pytest.mark.parametrize("backend", BACKENDS)
+def test_context_manager(test_fades_clip, backend):
+    """`with open_video([...]) as video:` yields the concatenated stream and closes it."""
+    with open_video([test_fades_clip] * 2, backend=backend) as video:
+        assert isinstance(video, VideoStreamConcat)
+        assert video.child_backend == backend
+        assert video.read(decode=False) is not False
+    with pytest.raises(ValueError):
+        video.read()
+
+
+@pytest.mark.parametrize("backend", BACKENDS)
+def test_properties_after_close(test_fades_clip, backend):
+    """Properties describing the video must remain available after `close()`."""
+    video = VideoStreamConcat([test_fades_clip] * 2, backend=backend)
+
+    def properties():
+        return (
+            video.path,
+            video.name,
+            video.frame_rate,
+            video.duration,
+            video.frame_size,
+            video.aspect_ratio,
+            video.child_backend,
+        )
+
+    expected = properties()
+    video.close()
+    assert properties() == expected

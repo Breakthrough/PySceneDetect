@@ -23,6 +23,7 @@ from dataclasses import dataclass
 import numpy
 import pytest
 
+from scenedetect import open_video
 from scenedetect.backends import VideoStreamAv, VideoStreamMoviePy
 from scenedetect.backends.opencv import VideoStreamCv2
 from scenedetect.video_stream import SeekError, VideoStream
@@ -412,3 +413,71 @@ def test_delayed_start_normalized(
     assert stream.read(decode=False) is not False
     assert stream.position.seconds < 0.1
     assert stream.frame_number == 1
+
+
+#
+# Tests for closing streams.
+#
+
+
+def _video_properties(stream: VideoStream) -> tuple:
+    """Properties describing the video itself, which must remain available after `close()`."""
+    return (
+        stream.path,
+        stream.name,
+        stream.frame_rate,
+        stream.duration,
+        stream.frame_size,
+        stream.aspect_ratio,
+    )
+
+
+def test_close_is_idempotent(vs_type: ty.Callable[..., VideoStream]):
+    """Calling `close()` more than once must have no effect."""
+    stream = vs_type(get_absolute_path("resources/testvideo.mp4"))
+    assert stream.read() is not False
+    stream.close()
+    stream.close()
+    with pytest.raises(ValueError):
+        stream.read()
+
+
+def test_use_after_close(vs_type: ty.Callable[..., VideoStream]):
+    """`read()`, `seek()`, and `reset()` must raise `ValueError` once a stream is closed."""
+    stream = vs_type(get_absolute_path("resources/testvideo.mp4"))
+    stream.close()
+    with pytest.raises(ValueError):
+        stream.read()
+    with pytest.raises(ValueError):
+        stream.read(decode=False)
+    with pytest.raises(ValueError):
+        stream.seek(10)
+    with pytest.raises(ValueError):
+        stream.reset()
+
+
+def test_properties_after_close(vs_type: ty.Callable[..., VideoStream]):
+    """Properties describing the video must remain available after `close()`."""
+    stream = vs_type(get_absolute_path("resources/testvideo.mp4"))
+    expected = _video_properties(stream)
+    stream.close()
+    assert _video_properties(stream) == expected
+
+
+def test_context_manager(vs_type: type[VideoStream]):
+    """`with open_video(path) as video:` must yield the stream and close it on exit."""
+    path = get_absolute_path("resources/testvideo.mp4")
+    with open_video(path, backend=vs_type.BACKEND_NAME) as video:
+        assert isinstance(video, vs_type)
+        assert video.read() is not False
+    with pytest.raises(ValueError):
+        video.read()
+
+
+def test_context_manager_closes_on_error(vs_type: ty.Callable[..., VideoStream]):
+    """The stream must be closed if the `with` block raises, without suppressing the error."""
+    stream = vs_type(get_absolute_path("resources/testvideo.mp4"))
+    with pytest.raises(RuntimeError, match="raised in with block"), stream:
+        raise RuntimeError("raised in with block")
+    with pytest.raises(ValueError):
+        stream.read()

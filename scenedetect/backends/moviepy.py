@@ -239,8 +239,10 @@ class VideoStreamMoviePy(VideoStream):
                 If int, interpreted as frame number.
         Raises:
             SeekError: An error occurs while seeking, or seeking is not supported.
-            ValueError: `target` is not a valid value (i.e. it is negative).
+            ValueError: `target` is not a valid value (i.e. it is negative), or the stream is
+                closed.
         """
+        self._check_open()
         success = False
         if not isinstance(target, FrameTimecode):
             target = FrameTimecode(target, self.frame_rate)
@@ -273,6 +275,7 @@ class VideoStreamMoviePy(VideoStream):
 
     def reset(self, print_infos=False):
         """Close and re-open the VideoStream (should be equivalent to calling `seek(0)`)."""
+        self._check_open()
         self._last_frame = False
         self._last_frame_rgb = None
         self._frame_number = 0
@@ -281,7 +284,16 @@ class VideoStreamMoviePy(VideoStream):
             "reset", lambda: FFMPEG_VideoReader(self._path, print_infos=print_infos)
         )
 
+    def close(self) -> None:
+        """Close the video, terminating the ffmpeg process used to decode it. Has no effect if
+        the stream is already closed. See :meth:`VideoStream.close` for details."""
+        if self._closed:
+            return
+        self._closed = True
+        self._reader.close()
+
     def read(self, decode: bool = True) -> np.ndarray | bool:
+        self._check_open()
         if not hasattr(self._reader, "lastread") or self._eof:
             return False
         has_last_read = hasattr(self._reader, "last_read")
