@@ -537,6 +537,11 @@ class CliContext:
                     frame_rate=frame_rate,
                     backend=backend,
                 )
+            if not self.video_stream.name:
+                logger.warning(
+                    "Could not determine a video name from the input path, so $VIDEO_NAME will be"
+                    " empty in output filenames."
+                )
             duration = self.video_stream.duration
             duration_str = f"{duration} ({duration.frame_num} frames)" if duration else "unknown"
             rate = self.video_stream.frame_rate
