@@ -228,8 +228,8 @@ def write_scene_list_html(
             the start times of each scene (besides the 0th scene) is used instead.
         css: String containing all the css information for the resulting html page.
         css_class: String containing the named css class
-        image_filenames: dict where key i contains a list with n elements (filenames of
-            the n saved images from that scene)
+        image_filenames: dict where key i contains a list of the filenames of the images
+            saved from that scene (the number of images can differ between scenes)
         image_width: Optional desired width of images in table in pixels
         image_height: Optional desired height of images in table in pixels
     """

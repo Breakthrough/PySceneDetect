@@ -237,6 +237,73 @@ def test_save_images_zero_width_scene(test_video_file, tmp_path: Path):
     assert total_images == len([path for path in tmp_path.glob(image_name_glob)])
 
 
+@pytest.mark.parametrize("threading", [True, False])
+@pytest.mark.parametrize(
+    "interval,min_images,max_images,expected",
+    [
+        # Scenes are 100, 10, and 60 frames long: floor(length / 25) + 1 images each.
+        (25, 1, None, [5, 1, 3]),
+        ("25", 1, None, [5, 1, 3]),
+        (25, 2, 4, [4, 2, 3]),
+        # 1 second is 29.97 frames.
+        ("1s", 1, None, [4, 1, 3]),
+        (1.0, 1, None, [4, 1, 3]),
+    ],
+)
+def test_save_images_interval(
+    test_video_file, tmp_path: Path, threading, interval, min_images, max_images, expected
+):
+    """With `interval`, the number of images saved for each scene depends on its length."""
+    video = VideoStreamCv2(test_video_file)
+    video_fps = video.frame_rate
+    scene_list = [
+        (FrameTimecode(start, video_fps), FrameTimecode(end, video_fps))
+        for start, end in [(0, 100), (200, 210), (300, 360)]
+    ]
+    image_filenames = save_images(
+        scene_list=scene_list,
+        output_dir=tmp_path,
+        video=video,
+        interval=interval,
+        min_images=min_images,
+        max_images=max_images,
+        image_name_template="scenedetect.tempfile.$SCENE_NUMBER.$IMAGE_NUMBER",
+        threading=threading,
+    )
+    assert [len(image_filenames[scene]) for scene in sorted(image_filenames)] == expected
+    for paths in image_filenames.values():
+        for path in paths:
+            assert tmp_path.joinpath(path).exists(), f"expected {path} to exist"
+    assert sum(expected) == len(list(tmp_path.glob("scenedetect.tempfile.*.jpg")))
+
+
+@pytest.mark.parametrize(
+    "kwargs,error",
+    [
+        ({"num_images": 3, "interval": 25}, "num_images and interval cannot both be set"),
+        ({"interval": 0}, "interval must be greater than 0"),
+        ({"interval": "0s"}, "interval must be greater than 0"),
+        ({"interval": 25, "min_images": 0}, "min_images must be greater than 0"),
+        (
+            {"interval": 25, "min_images": 3, "max_images": 2},
+            "max_images must be greater than or equal to min_images",
+        ),
+        (
+            {"num_images": 3, "max_images": 2},
+            "min_images and max_images can only be used with interval",
+        ),
+        ({"min_images": 2}, "min_images and max_images can only be used with interval"),
+    ],
+)
+def test_save_images_interval_rejects_invalid_arguments(
+    test_video_file, tmp_path: Path, kwargs, error
+):
+    video = VideoStreamCv2(test_video_file)
+    scene_list = [(FrameTimecode(0, video.frame_rate), FrameTimecode(10, video.frame_rate))]
+    with pytest.raises(ValueError, match=error):
+        save_images(scene_list=scene_list, output_dir=tmp_path, video=video, **kwargs)
+
+
 #
 # Scene-list export API (EDL / FCPXML / FCP7 xmeml / OTIO)
 #

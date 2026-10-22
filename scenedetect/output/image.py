@@ -35,13 +35,44 @@ from scenedetect.video_stream import VideoStream
 logger = logging.getLogger("pyscenedetect")
 
 
+def _get_num_images(
+    scene_list: SceneList,
+    num_images: int | None,
+    interval: TimecodeLike | None,
+    min_images: int,
+    max_images: int | None,
+) -> list[int]:
+    """Get the number of images to generate for each scene in `scene_list`.
+
+    If `interval` is set, each scene gets ``floor(scene length / interval) + 1`` images, clamped
+    to [`min_images`, `max_images`]. Otherwise, each scene gets `num_images`.
+    """
+    if interval is None:
+        assert num_images is not None
+        return [num_images] * len(scene_list)
+    frame_rate = scene_list[0][0].frame_rate
+    assert frame_rate is not None
+    interval_secs = FrameTimecode(timecode=interval, fps=frame_rate).seconds
+    result = []
+    for start, end in scene_list:
+        duration_secs = max((end - start).seconds, 0.0)
+        # The epsilon keeps a scene that is a whole number of intervals long from getting one
+        # image less due to floating point error.
+        scene_images = max(math.floor(duration_secs / interval_secs + 1e-9) + 1, min_images)
+        if max_images is not None:
+            scene_images = min(scene_images, max_images)
+        result.append(scene_images)
+    return result
+
+
 def _generate_timecode_list(
     scene_list: SceneList,
-    num_images: int,
+    num_images_per_scene: list[int],
     frame_margin: TimecodeLike,
 ) -> list[list[FrameTimecode]]:
     """Generate per-scene image timecodes using PTS-accurate seconds-based timing.
 
+    `num_images_per_scene` is the number of images to generate for each scene in `scene_list`.
     `frame_margin` accepts any :data:`TimecodeLike` value (e.g. ``int`` frames, ``float``
     seconds, or ``str`` such as ``"0.1s"``).
     """
@@ -49,7 +80,7 @@ def _generate_timecode_list(
     assert frame_rate is not None
     margin_secs = FrameTimecode(timecode=frame_margin, fps=frame_rate).seconds
     result = []
-    for start, end in scene_list:
+    for (start, end), num_images in zip(scene_list, num_images_per_scene, strict=True):
         duration_secs = (end - start).seconds
         if duration_secs <= 0:
             result.append([start] * num_images)
@@ -70,6 +101,14 @@ def _generate_timecode_list(
             timecodes.append(FrameTimecode(t, fps=frame_rate))
         result.append(timecodes)
     return result
+
+
+def _describe_num_images(
+    num_images: int | None, interval: TimecodeLike | None, total_images: int
+) -> str:
+    if interval is None:
+        return f"{num_images} images per scene"
+    return f"{total_images} images (interval: {interval})"
 
 
 def _scale_image(
@@ -108,7 +147,7 @@ def _scale_image(
 class _ImageExtractor:
     def __init__(
         self,
-        num_images: int = 3,
+        num_images: int | None = 3,
         frame_margin: TimecodeLike = 1,
         image_extension: str = "jpg",
         imwrite_param: list[int] | None = None,
@@ -117,6 +156,9 @@ class _ImageExtractor:
         height: int | None = None,
         width: int | None = None,
         interpolation: Interpolation = Interpolation.CUBIC,
+        interval: TimecodeLike | None = None,
+        min_images: int = 1,
+        max_images: int | None = None,
     ):
         """Multi-threaded implementation of save-images functionality. Uses background threads to
         handle image encoding and saving images to disk to improve parallelism.
@@ -124,7 +166,8 @@ class _ImageExtractor:
         This object is thread-safe.
 
         Arguments:
-            num_images: Number of images to generate for each scene.  Minimum is 1.
+            num_images: Number of images to generate for each scene.  Minimum is 1. Must be None
+                if `interval` is set.
             frame_margin: Padding around the beginning and end of each scene used when
                 selecting which frames to extract. Accepts an int (frames), float (seconds),
                 or str (e.g. ``"0.1s"``, ``"00:00:00.100"``). Can be 0, but some video files
@@ -149,8 +192,15 @@ class _ImageExtractor:
                 Specifying only width will rescale the image to that number of pixels wide
                 while preserving the aspect ratio.
             interpolation: Type of interpolation to use when resizing images.
+            interval: If set, generate one image per `interval` of each scene's length instead of
+                `num_images`, see :func:`save_images`.
+            min_images: Minimum number of images to generate for each scene with `interval`.
+            max_images: Maximum number of images to generate for each scene with `interval`.
         """
         self._num_images = num_images
+        self._interval = interval
+        self._min_images = min_images
+        self._max_images = max_images
         self._frame_margin = frame_margin
         self._image_extension = image_extension
         self._image_name_template = image_name_template
@@ -175,19 +225,20 @@ class _ImageExtractor:
             output_dir: Directory to write files to.
             show_progress: If `true` and tqdm is available, shows a progress bar.
         """
+        timecode_list = self.generate_timecode_list(scene_list)
+        total_images = sum(len(timecodes) for timecodes in timecode_list)
+        max_scene_images = max(len(timecodes) for timecodes in timecode_list)
+
         # Setup flags and init progress bar if available.
         completed = True
         logger.info(
-            f"Saving {self._num_images} images per scene [format={self._image_extension}]"
-            f" {output_dir if output_dir else ''} "
+            f"Saving {_describe_num_images(self._num_images, self._interval, total_images)}"
+            f" [format={self._image_extension}] {output_dir if output_dir else ''} "
         )
         progress_bar = None
         if show_progress:
-            progress_bar = tqdm(
-                total=len(scene_list) * self._num_images, unit="images", dynamic_ncols=True
-            )
+            progress_bar = tqdm(total=total_images, unit="images", dynamic_ncols=True)
 
-        timecode_list = self.generate_timecode_list(scene_list)
         image_filenames = {i: [] for i in range(len(timecode_list))}
 
         filename_template = Template(self._image_name_template)
@@ -195,7 +246,7 @@ class _ImageExtractor:
         scene_num_format = "%0"
         scene_num_format += str(max(3, math.floor(math.log(len(scene_list), 10)) + 1)) + "d"
         image_num_format = "%0"
-        image_num_format += str(math.floor(math.log(self._num_images, 10)) + 2) + "d"
+        image_num_format += str(math.floor(math.log(max_scene_images, 10)) + 2) + "d"
 
         def format_filename(scene_number: int, image_number: int, image_timecode: FrameTimecode):
             return "{}.{}".format(
@@ -337,7 +388,10 @@ class _ImageExtractor:
 
         Uses PTS-accurate seconds-based timing so results are correct for both CFR and VFR video.
         """
-        return _generate_timecode_list(scene_list, self._num_images, self._frame_margin)
+        num_images_per_scene = _get_num_images(
+            scene_list, self._num_images, self._interval, self._min_images, self._max_images
+        )
+        return _generate_timecode_list(scene_list, num_images_per_scene, self._frame_margin)
 
     def resize_image(
         self,
@@ -352,7 +406,7 @@ class _ImageExtractor:
 def save_images(
     scene_list: SceneList,
     video: VideoStream,
-    num_images: int = 3,
+    num_images: int | None = None,
     frame_margin: TimecodeLike = 1,
     image_extension: str = "jpg",
     encoder_param: int = 95,
@@ -364,6 +418,9 @@ def save_images(
     width: int | None = None,
     interpolation: Interpolation = Interpolation.CUBIC,
     threading: bool = True,
+    interval: TimecodeLike | None = None,
+    min_images: int = 1,
+    max_images: int | None = None,
 ) -> dict[int, list[str]]:
     """Save a set number of images from each scene, given a list of scenes
     and the associated video/frame source.
@@ -373,7 +430,8 @@ def save_images(
             from calling a SceneManager's detect_scenes() method.
         video: A VideoStream object corresponding to the scene list.
             Note that the video will be closed/re-opened and seeked through.
-        num_images: Number of images to generate for each scene.  Minimum is 1.
+        num_images: Number of images to generate for each scene.  Minimum is 1. Defaults to 3
+            if `interval` is not set. Cannot be used with `interval`.
         frame_margin: Padding around the beginning and end of each scene used when
             selecting which frames to extract. Accepts an int (frames), float (seconds),
             or str (e.g. ``"0.1s"``, ``"00:00:00.100"``). Can be 0, but some video files
@@ -402,6 +460,14 @@ def save_images(
             while preserving the aspect ratio.
         interpolation: Type of interpolation to use when resizing images.
         threading: Offload image encoding and disk IO to background threads to improve performance.
+        interval: If set, the number of images for each scene depends on its length instead of
+            being `num_images`: each scene gets ``floor(scene length / interval) + 1`` images,
+            spread over the scene the same way. Accepts the same values as `frame_margin`.
+            Cannot be used with `num_images`.
+        min_images: Minimum number of images to generate for each scene with `interval`.
+            Minimum is 1. Can only be set with `interval`.
+        max_images: Maximum number of images to generate for each scene with `interval`, or
+            None for no limit. Can only be set with `interval`.
 
     Returns:
         Dictionary of the format { scene_num : [image_paths] }, where scene_num is the
@@ -415,7 +481,23 @@ def save_images(
 
     if not scene_list:
         return {}
-    if num_images <= 0:
+    if interval is not None:
+        if num_images is not None:
+            raise ValueError("num_images and interval cannot both be set")
+        frame_rate = scene_list[0][0].frame_rate
+        assert frame_rate is not None
+        if FrameTimecode(timecode=interval, fps=frame_rate).seconds <= 0:
+            raise ValueError("interval must be greater than 0")
+        if min_images <= 0:
+            raise ValueError("min_images must be greater than 0")
+        if max_images is not None and max_images < min_images:
+            raise ValueError("max_images must be greater than or equal to min_images")
+    else:
+        if min_images != 1 or max_images is not None:
+            raise ValueError("min_images and max_images can only be used with interval")
+        if num_images is None:
+            num_images = 3
+    if num_images is not None and num_images <= 0:
         raise ValueError("num_images must be greater than 0")
     if isinstance(frame_margin, (int, float)) and frame_margin < 0:
         raise ValueError("frame_margin must be non-negative")
@@ -440,27 +522,36 @@ def save_images(
             height,
             width,
             interpolation,
+            interval,
+            min_images,
+            max_images,
         )
         return extractor.run(video, scene_list, output_dir, bool(show_progress))
+
+    timecode_list = _generate_timecode_list(
+        scene_list,
+        _get_num_images(scene_list, num_images, interval, min_images, max_images),
+        frame_margin,
+    )
+    total_images = sum(len(timecodes) for timecodes in timecode_list)
+    max_scene_images = max(len(timecodes) for timecodes in timecode_list)
 
     # Setup flags and init progress bar if available.
     completed = True
     logger.info(
-        f"Saving {num_images} images per scene [format={image_extension}]"
-        f" {output_dir if output_dir else ''} "
+        f"Saving {_describe_num_images(num_images, interval, total_images)}"
+        f" [format={image_extension}] {output_dir if output_dir else ''} "
     )
     progress_bar = None
     if show_progress:
-        progress_bar = tqdm(total=len(scene_list) * num_images, unit="images", dynamic_ncols=True)
+        progress_bar = tqdm(total=total_images, unit="images", dynamic_ncols=True)
 
     filename_template = Template(image_name_template)
 
     scene_num_format = "%0"
     scene_num_format += str(max(3, math.floor(math.log(len(scene_list), 10)) + 1)) + "d"
     image_num_format = "%0"
-    image_num_format += str(math.floor(math.log(num_images, 10)) + 2) + "d"
-
-    timecode_list = _generate_timecode_list(scene_list, num_images, frame_margin)
+    image_num_format += str(math.floor(math.log(max_scene_images, 10)) + 2) + "d"
 
     image_filenames = {i: [] for i in range(len(timecode_list))}
     aspect_ratio = video.aspect_ratio
