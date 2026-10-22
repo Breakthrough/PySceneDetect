@@ -96,6 +96,57 @@ class TimecodeValue(ValidatedValue):
             ) from ex
 
 
+class ImageIntervalValue(ValidatedValue):
+    """Validator for the save-images interval, specified as DURATION[,MIN[,MAX]].
+
+    DURATION is a timecode, and MIN/MAX are the minimum/maximum number of images per scene. An
+    empty MIN or MAX uses the default (e.g. `2s,,10` only sets MAX)."""
+
+    def __init__(self, value: str | None = None):
+        self._value: tuple[str, int, int | None] | None = None
+        if value is None:
+            return
+        values = [val.strip() for val in value.split(",")]
+        if not 1 <= len(values) <= 3 or not values[0]:
+            raise ValueError("Interval must be specified as DURATION[,MIN[,MAX]].")
+        duration = values[0]
+        try:
+            duration_secs = FrameTimecode(timecode=duration, fps=100.0).seconds
+        except ValueError as ex:
+            raise ValueError(
+                "Interval DURATION must be in frames (24), seconds (1.5s), or HH:MM:SS."
+            ) from ex
+        if duration_secs <= 0:
+            raise ValueError("Interval DURATION must be greater than 0.")
+        try:
+            min_images = int(values[1]) if len(values) > 1 and values[1] else 1
+            max_images = int(values[2]) if len(values) > 2 and values[2] else None
+        except ValueError as ex:
+            raise ValueError("Interval MIN and MAX must be numbers of images.") from ex
+        if min_images < 1:
+            raise ValueError("Interval MIN must be at least 1.")
+        if max_images is not None and max_images < min_images:
+            raise ValueError("Interval MAX must be greater than or equal to MIN.")
+        self._value = (duration, min_images, max_images)
+
+    @property
+    def value(self) -> tuple[str, int, int | None] | None:
+        return self._value
+
+    def __str__(self) -> str:
+        if self._value is None:
+            return "(none)"
+        duration, min_images, max_images = self._value
+        return ", ".join(str(val) for val in (duration, min_images, max_images) if val is not None)
+
+    @staticmethod
+    def from_config(config_value: str, default: "ImageIntervalValue") -> "ImageIntervalValue":
+        try:
+            return ImageIntervalValue(config_value)
+        except ValueError as ex:
+            raise OptionParseFailure(f"{ex}") from ex
+
+
 class RangeValue(ValidatedValue):
     """Validator for int/float ranges. `min_val` and `max_val` are inclusive."""
 
@@ -442,6 +493,7 @@ CONFIG_MAP: ConfigDict = {
         "format": "jpeg",
         "frame-margin": TimecodeValue(1),
         "height": 0,
+        "interval": ImageIntervalValue(),
         "num-images": 3,
         "output": None,
         "quality": RangeValue(_PLACEHOLDER, min_val=0, max_val=100),

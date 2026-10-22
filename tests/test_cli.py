@@ -11,6 +11,7 @@
 #
 
 import os
+import re
 import subprocess
 
 # These tests validate that the CLI itself functions correctly, mainly based on the return
@@ -36,6 +37,7 @@ import numpy as np
 import pytest
 
 import scenedetect
+from scenedetect._cli.config import ConfigLoadFailure, ConfigRegistry, ImageIntervalValue
 from scenedetect.output import is_ffmpeg_available, is_mkvmerge_available
 from scenedetect.platform import StrPath
 from tests.helpers import invoke_cli
@@ -666,6 +668,160 @@ def test_cli_save_images_rotation(rotated_video_file, tmp_path: Path):
     assert image is not None
     # Note same resolution as in test_cli_save_images but rotated 90 degrees.
     assert image.shape == (1280, 544, 3)
+
+
+_TIME_AND_DETECTOR = ["time", *DEFAULT_TIME.split(), DEFAULT_DETECTOR]
+
+
+def _count_images_per_scene(path: Path) -> list[int]:
+    return [
+        len(list(path.glob(f"{DEFAULT_VIDEO_NAME}-Scene-{scene + 1:03d}-*.jpg")))
+        for scene in range(DEFAULT_NUM_SCENES)
+    ]
+
+
+@pytest.mark.parametrize(
+    "interval,expected",
+    [
+        # The two scenes are 1.752s and 2.252s long: floor(length / 1s) + 1 images each.
+        ("1s", [2, 3]),
+        ("00:00:01.000", [2, 3]),
+        # MIN and MAX limit the number of images per scene.
+        ("1s,3", [3, 3]),
+        ("0.5s,1,4", [4, 4]),
+        ("0.5s,,4", [4, 4]),
+    ],
+)
+def test_cli_save_images_interval(tmp_path: Path, interval: str, expected: list[int]):
+    """Test `save-images -i/--interval`."""
+    assert (
+        invoke_scenedetect(
+            f"-i {{VIDEO}} -s {{STATS}} time {{TIME}} {{DETECTOR}} save-images -i {interval}",
+            output_dir=tmp_path,
+        )
+        == 0
+    )
+    assert _count_images_per_scene(tmp_path) == expected
+
+
+@pytest.mark.parametrize(
+    "value,expected",
+    [
+        ("1s", ("1s", 1, None)),
+        ("24", ("24", 1, None)),
+        ("00:00:01.500", ("00:00:01.500", 1, None)),
+        ("2s,3", ("2s", 3, None)),
+        ("2s,1,10", ("2s", 1, 10)),
+        ("2s, 1, 10", ("2s", 1, 10)),
+        # An empty MIN or MAX uses the default.
+        ("2s,,10", ("2s", 1, 10)),
+        ("2s,3,", ("2s", 3, None)),
+    ],
+)
+def test_image_interval_value(value: str, expected: tuple):
+    assert ImageIntervalValue(value).value == expected
+
+
+@pytest.mark.parametrize(
+    "value,error",
+    [
+        ("", "Interval must be specified as DURATION[,MIN[,MAX]]."),
+        (",3", "Interval must be specified as DURATION[,MIN[,MAX]]."),
+        ("1s,1,2,3", "Interval must be specified as DURATION[,MIN[,MAX]]."),
+        ("abc", "Interval DURATION must be in frames"),
+        ("1s 2 3", "Interval DURATION must be in frames"),
+        ("0", "Interval DURATION must be greater than 0."),
+        ("0s", "Interval DURATION must be greater than 0."),
+        ("1s,x", "Interval MIN and MAX must be numbers of images."),
+        ("1s,0", "Interval MIN must be at least 1."),
+        ("1s,3,2", "Interval MAX must be greater than or equal to MIN."),
+    ],
+)
+def test_image_interval_value_rejects_invalid_values(value: str, error: str):
+    with pytest.raises(ValueError, match=re.escape(error)):
+        ImageIntervalValue(value)
+
+
+@pytest.mark.parametrize(
+    "args,error",
+    [
+        (["-n", "3", "-i", "1s"], "Only one of -n/--num-images or -i/--interval can be set."),
+        (["-i", "1s,3,2"], "Interval MAX must be greater than or equal to MIN."),
+    ],
+)
+def test_cli_save_images_interval_rejects_invalid_values(
+    tmp_path: Path, args: list[str], error: str
+):
+    exit_code, output = invoke_cli(
+        ["-i", DEFAULT_VIDEO_PATH, "-o", str(tmp_path), *_TIME_AND_DETECTOR, "save-images", *args]
+    )
+    assert exit_code != 0
+    assert error in output
+    assert not list(tmp_path.glob("*.jpg"))
+
+
+@pytest.mark.parametrize(
+    "config,args,expected",
+    [
+        ("interval = 1s, 3", "", [3, 3]),
+        # Options on the command line take precedence over the config file.
+        ("interval = 1s, 3", "-n 2", [2, 2]),
+        ("num-images = 5", "-i 1s", [2, 3]),
+    ],
+)
+def test_cli_save_images_interval_config_file(
+    tmp_path: Path, config: str, args: str, expected: list[int]
+):
+    """Test the `interval` option of `[save-images]` in a config file."""
+    config_path = tmp_path.joinpath("config.cfg")
+    config_path.write_text(f"[save-images]\n{config}\n")
+    assert (
+        invoke_scenedetect(
+            f"-i {{VIDEO}} -s {{STATS}} time {{TIME}} {{DETECTOR}} save-images {args}",
+            output_dir=tmp_path,
+            config_file=str(config_path),
+        )
+        == 0
+    )
+    assert _count_images_per_scene(tmp_path) == expected
+
+
+@pytest.mark.parametrize(
+    "config,error",
+    [
+        ("interval = 1s, 0", "Interval MIN must be at least 1."),
+        ("interval = abc", "Interval DURATION must be in frames"),
+    ],
+)
+def test_cli_save_images_interval_config_file_rejects_invalid_values(
+    tmp_path: Path, config: str, error: str
+):
+    config_path = tmp_path.joinpath("config.cfg")
+    config_path.write_text(f"[save-images]\n{config}\n")
+    with pytest.raises(ConfigLoadFailure) as ex:
+        ConfigRegistry(str(config_path))
+    assert any(error in message for _, message in ex.value.init_log)
+
+
+def test_cli_save_images_interval_config_file_rejects_num_images(tmp_path: Path):
+    """`num-images` and `interval` are mutually exclusive in the config file."""
+    config_path = tmp_path.joinpath("config.cfg")
+    config_path.write_text("[save-images]\nnum-images = 3\ninterval = 1s\n")
+    exit_code, output = invoke_cli(
+        [
+            "-c",
+            str(config_path),
+            "-i",
+            DEFAULT_VIDEO_PATH,
+            "-o",
+            str(tmp_path),
+            *_TIME_AND_DETECTOR,
+            "save-images",
+        ]
+    )
+    assert exit_code != 0
+    assert "Only one of num-images or interval can be set in the config file." in output
+    assert not list(tmp_path.glob("*.jpg"))
 
 
 def test_cli_save_html(tmp_path: Path):

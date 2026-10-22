@@ -34,6 +34,7 @@ from scenedetect._cli.config import (
     CONFIG_MAP,
     DEFAULT_JPG_QUALITY,
     DEFAULT_WEBP_QUALITY,
+    ImageIntervalValue,
     RangeValue,
 )
 from scenedetect._cli.context import USER_CONFIG, CliContext, check_split_video_requirements
@@ -1400,6 +1401,8 @@ Examples:
 
     {scenedetect_with_video} save-images --num-images 5
 
+    {scenedetect_with_video} save-images --interval 2s,1,10
+
     {scenedetect_with_video} save-images --width 1024
 
     {scenedetect_with_video} save-images --filename \\$SCENE_NUMBER-img\\$IMAGE_NUMBER
@@ -1432,8 +1435,18 @@ Examples:
     metavar="N",
     default=None,
     type=click.INT,
-    help="Number of images to generate per scene. Will always include start/end frame, unless -n 1, in which case the image will be the frame at the mid-point of the scene.{}".format(
+    help="Number of images to generate per scene. Will always include start/end frame, unless -n 1, in which case the image will be the frame at the mid-point of the scene. Cannot be used with -i/--interval.{}".format(
         USER_CONFIG.get_help_string("save-images", "num-images")
+    ),
+)
+@click.option(
+    "--interval",
+    "-i",
+    metavar="DURATION[,MIN[,MAX]]",
+    default=None,
+    type=click.STRING,
+    help="Generate one image per DURATION of each scene instead of a fixed number, so longer scenes get more images. Each scene gets floor(length / DURATION) + 1 images, chosen the same way as with -n/--num-images. MIN and MAX limit the number of images per scene (default: 1, no limit). Leave MIN empty to only set MAX (-i 2s,,10). DURATION can be specified in frames (-i 24), in seconds with `s` suffix (-i 1.5s), or timecode (-i 00:00:01.500). Cannot be used with -n/--num-images.{}".format(
+        USER_CONFIG.get_help_string("save-images", "interval", show_default=False)
     ),
 )
 @click.option(
@@ -1525,6 +1538,7 @@ def save_images_command(
     output: str | None = None,
     filename: str | None = None,
     num_images: int | None = None,
+    interval: str | None = None,
     jpeg: bool = False,
     webp: bool = False,
     quality: int | None = None,
@@ -1577,6 +1591,34 @@ def save_images_command(
         raise click.BadParameter("\n".join(error_strs), param_hint="save-images")
     output = ctx.config.get_value("save-images", "output", output)
 
+    # -n/--num-images and -i/--interval are mutually exclusive. If neither is set, use the
+    # config file, where only one of them may be set.
+    if num_images is not None and interval is not None:
+        raise click.BadParameter(
+            "Only one of -n/--num-images or -i/--interval can be set.", param_hint="save-images"
+        )
+    if interval is not None:
+        try:
+            interval_value = ImageIntervalValue(interval).value
+        except ValueError as ex:
+            raise click.BadParameter(str(ex), param_hint="-i/--interval") from ex
+    elif num_images is not None:
+        interval_value = None
+    else:
+        if not ctx.config.is_default("save-images", "interval") and not ctx.config.is_default(
+            "save-images", "num-images"
+        ):
+            raise click.BadParameter(
+                "Only one of num-images or interval can be set in the config file.",
+                param_hint="save-images",
+            )
+        interval_value = ctx.config.get_value("save-images", "interval")
+        if interval_value is None:
+            num_images = ctx.config.get_value("save-images", "num-images")
+    (interval, min_images, max_images) = (
+        interval_value if interval_value is not None else (None, 1, None)
+    )
+
     save_images_args = {
         "encoder_param": compression if png else quality,
         "frame_margin": ctx.config.get_value("save-images", "frame-margin", frame_margin),
@@ -1584,7 +1626,10 @@ def save_images_command(
         "image_extension": image_extension,
         "filename": ctx.config.get_value("save-images", "filename", filename),
         "interpolation": scale_method,
-        "num_images": ctx.config.get_value("save-images", "num-images", num_images),
+        "interval": interval,
+        "max_images": max_images,
+        "min_images": min_images,
+        "num_images": num_images,
         "output": output,
         "scale": scale,
         "show_progress": not ctx.quiet_mode,
