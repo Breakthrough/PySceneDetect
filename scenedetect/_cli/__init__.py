@@ -22,7 +22,6 @@ import inspect
 import logging
 import os
 import os.path
-import re
 from copy import copy
 
 import click
@@ -149,46 +148,6 @@ class CommandGroup(Command, click.Group):
     """Custom formatting for command groups."""
 
     pass
-
-
-# Matches an argument that starts with a number, e.g. `10`, `-3`, `1.5`, or `2s`. No command or
-# option name starts with a digit (there are no options like `-1`), so a following command (e.g.
-# `list-scenes`) or option (e.g. `-o DIR`) never matches.
-_STARTS_WITH_NUMBER = re.compile(r"[+-]?[0-9]")
-
-
-class IntervalOption(click.Option):
-    """Option that takes 1 to 3 space-separated values: DURATION [MIN [MAX]].
-
-    Click options only support a fixed number of values (`nargs=-1` is not allowed), so the first
-    value is parsed as usual, and the arguments that follow are also taken while they start with a
-    number. Invalid values (e.g. `1.5` or a fourth number) are therefore reported as errors for
-    this option instead of as unknown commands. The values are passed on joined by spaces (e.g.
-    "2s 1 10"), and checked by `ImageIntervalValue`.
-    """
-
-    def add_to_parser(self, parser, ctx) -> None:
-        super().add_to_parser(parser, ctx)
-        # Click has no public API for this, so it relies on parser internals that are the same in
-        # click 8.0 through 8.5: the parser's `_long_opt`/`_short_opt` dicts, `obj`/`process` of
-        # their option objects, and `state.rargs`. If they are missing (click plans to replace its
-        # parser in 9.0), the hook is skipped and the values can still be quoted (-i "2s 1 10").
-        parser_opts = [
-            *getattr(parser, "_long_opt", {}).values(),
-            *getattr(parser, "_short_opt", {}).values(),
-        ]
-        parser_opt = next((opt for opt in parser_opts if getattr(opt, "obj", None) is self), None)
-        if parser_opt is None or not hasattr(parser_opt, "process"):
-            return
-        process = parser_opt.process
-
-        def process_with_extra_values(value, state) -> None:
-            values = [value]
-            while state.rargs and _STARTS_WITH_NUMBER.match(state.rargs[0]):
-                values.append(state.rargs.pop(0))
-            process(" ".join(values), state)
-
-        parser_opt.process = process_with_extra_values
 
 
 def print_command_help(ctx: click.Context, command: click.Command):
@@ -1442,7 +1401,7 @@ Examples:
 
     {scenedetect_with_video} save-images --num-images 5
 
-    {scenedetect_with_video} save-images --interval 2s 1 10
+    {scenedetect_with_video} save-images --interval 2s --max-images 10
 
     {scenedetect_with_video} save-images --width 1024
 
@@ -1483,12 +1442,29 @@ Examples:
 @click.option(
     "--interval",
     "-i",
-    cls=IntervalOption,
-    metavar="DURATION [MIN [MAX]]",
+    metavar="DURATION",
     default=None,
     type=click.STRING,
-    help="Generate one image per DURATION of each scene instead of a fixed number, so longer scenes get more images. Each scene gets floor(length / DURATION) + 1 images, chosen the same way as with -n/--num-images. MIN and MAX limit the number of images per scene (default: 1, no limit), e.g. -i 2s 1 10. MAX requires MIN. DURATION can be specified in frames (-i 24), in seconds with `s` suffix (-i 1.5s), or timecode (-i 00:00:01.500). Cannot be used with -n/--num-images.{}".format(
+    help="Generate one image per DURATION of each scene instead of a fixed number, so longer scenes get more images. Each scene gets floor(length / DURATION) + 1 images, chosen the same way as with -n/--num-images. Use --min-images and --max-images to limit the number of images per scene. DURATION can be specified in frames (-i 24), in seconds with `s` suffix (-i 1.5s), or timecode (-i 00:00:01.500). Cannot be used with -n/--num-images.{}".format(
         USER_CONFIG.get_help_string("save-images", "interval", show_default=False)
+    ),
+)
+@click.option(
+    "--min-images",
+    metavar="N",
+    default=None,
+    type=click.IntRange(min=1),
+    help="Minimum number of images per scene. Can only be used with -i/--interval.{}".format(
+        USER_CONFIG.get_help_string("save-images", "min-images")
+    ),
+)
+@click.option(
+    "--max-images",
+    metavar="N",
+    default=None,
+    type=click.IntRange(min=0),
+    help="Maximum number of images per scene, or 0 for no limit. Can only be used with -i/--interval.{}".format(
+        USER_CONFIG.get_help_string("save-images", "max-images")
     ),
 )
 @click.option(
@@ -1581,6 +1557,8 @@ def save_images_command(
     filename: str | None = None,
     num_images: int | None = None,
     interval: str | None = None,
+    min_images: int | None = None,
+    max_images: int | None = None,
     jpeg: bool = False,
     webp: bool = False,
     quality: int | None = None,
@@ -1641,12 +1619,10 @@ def save_images_command(
         )
     if interval is not None:
         try:
-            interval_value = ImageIntervalValue(interval).value
+            ImageIntervalValue(interval)
         except ValueError as ex:
             raise click.BadParameter(str(ex), param_hint="-i/--interval") from ex
-    elif num_images is not None:
-        interval_value = None
-    else:
+    elif num_images is None:
         if not ctx.config.is_default("save-images", "interval") and not ctx.config.is_default(
             "save-images", "num-images"
         ):
@@ -1654,12 +1630,33 @@ def save_images_command(
                 "Only one of num-images or interval can be set in the config file.",
                 param_hint="save-images",
             )
-        interval_value = ctx.config.get_value("save-images", "interval")
-        if interval_value is None:
+        interval = ctx.config.get_value("save-images", "interval")
+        if interval is None:
             num_images = ctx.config.get_value("save-images", "num-images")
-    (interval, min_images, max_images) = (
-        interval_value if interval_value is not None else (None, 1, None)
-    )
+    # --min-images/--max-images only apply with an interval (from the command line or the config
+    # file). Without one, they are an error on the command line, and ignored in the config file.
+    if interval is None:
+        if min_images is not None or max_images is not None:
+            raise click.BadParameter(
+                "--min-images and --max-images can only be used with -i/--interval.",
+                param_hint="save-images",
+            )
+        min_images, max_images = 1, None
+    else:
+        min_images_value: int = ctx.config.get_value("save-images", "min-images", min_images)
+        max_images_value: int = ctx.config.get_value("save-images", "max-images", max_images)
+        # Click checks the range of values from the command line, but not from the config file.
+        if min_images_value < 1:
+            raise click.BadParameter(
+                "min-images in the config file must be at least 1.", param_hint="save-images"
+            )
+        if max_images_value != 0 and max_images_value < min_images_value:
+            raise click.BadParameter(
+                "max-images must be 0 (no limit) or at least min-images.",
+                param_hint="save-images",
+            )
+        # A max-images of 0 means no limit.
+        min_images, max_images = min_images_value, max_images_value or None
 
     save_images_args = {
         "encoder_param": compression if png else quality,
