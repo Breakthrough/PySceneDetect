@@ -32,11 +32,13 @@ import subprocess
 import sys
 from pathlib import Path
 
+import click
 import cv2
 import numpy as np
 import pytest
 
 import scenedetect
+from scenedetect._cli import IntervalOption
 from scenedetect._cli.config import ConfigLoadFailure, ConfigRegistry, ImageIntervalValue
 from scenedetect.output import is_ffmpeg_available, is_mkvmerge_available
 from scenedetect.platform import StrPath
@@ -687,9 +689,10 @@ def _count_images_per_scene(path: Path) -> list[int]:
         ("1s", [2, 3]),
         ("00:00:01.000", [2, 3]),
         # MIN and MAX limit the number of images per scene.
-        ("1s,3", [3, 3]),
-        ("0.5s,1,4", [4, 4]),
-        ("0.5s,,4", [4, 4]),
+        ("1s 3", [3, 3]),
+        ("0.5s 1 4", [4, 4]),
+        # DURATION in frames (24 frames is about 1s here).
+        ("24 2 2", [2, 2]),
     ],
 )
 def test_cli_save_images_interval(tmp_path: Path, interval: str, expected: list[int]):
@@ -705,36 +708,109 @@ def test_cli_save_images_interval(tmp_path: Path, interval: str, expected: list[
 
 
 @pytest.mark.parametrize(
+    "args,expected",
+    [
+        (["-i", "1s"], [2, 3]),
+        (["-i", "1s", "3"], [3, 3]),
+        (["-i", "0.5s", "1", "4"], [4, 4]),
+        (["-i", "24"], [2, 3]),
+        (["--interval=1s", "3"], [3, 3]),
+        (["-i1s", "3"], [3, 3]),
+        # The values can also be given as one argument.
+        (["-i", "1s 3"], [3, 3]),
+    ],
+)
+def test_cli_save_images_interval_followed_by_command(
+    tmp_path: Path, args: list[str], expected: list[int]
+):
+    """Only the values of -i/--interval are taken, so a following command still runs."""
+    exit_code, _ = invoke_cli(
+        [
+            "-i",
+            DEFAULT_VIDEO_PATH,
+            "-o",
+            str(tmp_path),
+            *_TIME_AND_DETECTOR,
+            "save-images",
+            *args,
+            "list-scenes",
+        ]
+    )
+    assert exit_code == 0
+    assert _count_images_per_scene(tmp_path) == expected
+    assert tmp_path.joinpath(f"{DEFAULT_VIDEO_NAME}-Scenes.csv").exists()
+
+
+def test_cli_save_images_interval_followed_by_option(tmp_path: Path):
+    """Only the values of -i/--interval are taken, so a following option is still parsed."""
+    image_dir = tmp_path / "images"
+    exit_code, _ = invoke_cli(
+        [
+            "-i",
+            DEFAULT_VIDEO_PATH,
+            "-o",
+            str(tmp_path),
+            *_TIME_AND_DETECTOR,
+            "save-images",
+            "-i",
+            "1s",
+            "3",
+            "-o",
+            str(image_dir),
+            "-q",
+            "90",
+        ]
+    )
+    assert exit_code == 0
+    assert _count_images_per_scene(image_dir) == [3, 3]
+    assert not list(tmp_path.glob("*.jpg"))
+
+
+def test_interval_option_without_parser_internals():
+    """IntervalOption skips its hook if click's parser internals are missing (e.g. click 9)."""
+
+    class Parser:
+        def add_option(self, **kwargs):
+            pass
+
+    option = IntervalOption(["--interval", "-i"])
+    option.add_to_parser(Parser(), click.Context(click.Command("save-images")))  # type: ignore[arg-type]
+
+
+@pytest.mark.parametrize(
     "value,expected",
     [
         ("1s", ("1s", 1, None)),
         ("24", ("24", 1, None)),
         ("00:00:01.500", ("00:00:01.500", 1, None)),
-        ("2s,3", ("2s", 3, None)),
-        ("2s,1,10", ("2s", 1, 10)),
-        ("2s, 1, 10", ("2s", 1, 10)),
-        # An empty MIN or MAX uses the default.
-        ("2s,,10", ("2s", 1, 10)),
-        ("2s,3,", ("2s", 3, None)),
+        ("2s 3", ("2s", 3, None)),
+        ("2s 1 10", ("2s", 1, 10)),
+        ("  2s   1\t10 ", ("2s", 1, 10)),
     ],
 )
 def test_image_interval_value(value: str, expected: tuple):
     assert ImageIntervalValue(value).value == expected
+    # The string form (shown in --help when set in a config file) can be parsed again.
+    assert ImageIntervalValue(str(ImageIntervalValue(value))).value == expected
 
 
 @pytest.mark.parametrize(
     "value,error",
     [
-        ("", "Interval must be specified as DURATION[,MIN[,MAX]]."),
-        (",3", "Interval must be specified as DURATION[,MIN[,MAX]]."),
-        ("1s,1,2,3", "Interval must be specified as DURATION[,MIN[,MAX]]."),
+        ("", "Interval must be specified as DURATION [MIN [MAX]]."),
+        ("1s 1 2 3", "Interval must be specified as DURATION [MIN [MAX]]."),
         ("abc", "Interval DURATION must be in frames"),
-        ("1s 2 3", "Interval DURATION must be in frames"),
         ("0", "Interval DURATION must be greater than 0."),
         ("0s", "Interval DURATION must be greater than 0."),
-        ("1s,x", "Interval MIN and MAX must be numbers of images."),
-        ("1s,0", "Interval MIN must be at least 1."),
-        ("1s,3,2", "Interval MAX must be greater than or equal to MIN."),
+        ("1s x", "Interval MIN and MAX must be numbers of images."),
+        ("1s 1.5", "Interval MIN and MAX must be numbers of images."),
+        ("1s 2s", "Interval MIN and MAX must be numbers of images."),
+        ("1s 0", "Interval MIN must be at least 1."),
+        ("1s 3 2", "Interval MAX must be greater than or equal to MIN."),
+        # Commas are not separators, and are not accepted in timecodes.
+        ("1s,3", "Interval values must be separated by spaces, not commas (e.g. 2s 1 10)."),
+        ("2s, 1, 10", "Interval values must be separated by spaces, not commas (e.g. 2s 1 10)."),
+        ("00:00:01,500", "Interval values must be separated by spaces, not commas (e.g. 2s 1 10)."),
     ],
 )
 def test_image_interval_value_rejects_invalid_values(value: str, error: str):
@@ -746,7 +822,28 @@ def test_image_interval_value_rejects_invalid_values(value: str, error: str):
     "args,error",
     [
         (["-n", "3", "-i", "1s"], "Only one of -n/--num-images or -i/--interval can be set."),
-        (["-i", "1s,3,2"], "Interval MAX must be greater than or equal to MIN."),
+        (["-i", "1s", "3", "-n", "3"], "Only one of -n/--num-images or -i/--interval can be set."),
+        (
+            ["-i", "1s", "3", "2"],
+            "Invalid value for -i/--interval: Interval MAX must be greater than or equal to MIN.",
+        ),
+        (["-i", "1s", "-3"], "Invalid value for -i/--interval: Interval MIN must be at least 1."),
+        (
+            ["-i", "1s", "3", "10", "7", "list-scenes"],
+            "Invalid value for -i/--interval: Interval must be specified as DURATION [MIN [MAX]].",
+        ),
+        (
+            ["-i", "1s", "1.5"],
+            "Invalid value for -i/--interval: Interval MIN and MAX must be numbers of images.",
+        ),
+        (
+            ["-i", "1s", "2s"],
+            "Invalid value for -i/--interval: Interval MIN and MAX must be numbers of images.",
+        ),
+        (
+            ["-i", "1s,3"],
+            "Invalid value for -i/--interval: Interval values must be separated by spaces, not commas (e.g. 2s 1 10).",
+        ),
     ],
 )
 def test_cli_save_images_interval_rejects_invalid_values(
@@ -763,9 +860,11 @@ def test_cli_save_images_interval_rejects_invalid_values(
 @pytest.mark.parametrize(
     "config,args,expected",
     [
-        ("interval = 1s, 3", "", [3, 3]),
+        ("interval = 1s 3", "", [3, 3]),
+        # The two scenes are 1.752s and 2.252s long: floor(length / 2s) + 1 images each.
+        ("interval = 2s 1 10", "", [1, 2]),
         # Options on the command line take precedence over the config file.
-        ("interval = 1s, 3", "-n 2", [2, 2]),
+        ("interval = 1s 3", "-n 2", [2, 2]),
         ("num-images = 5", "-i 1s", [2, 3]),
     ],
 )
@@ -789,8 +888,9 @@ def test_cli_save_images_interval_config_file(
 @pytest.mark.parametrize(
     "config,error",
     [
-        ("interval = 1s, 0", "Interval MIN must be at least 1."),
+        ("interval = 1s 0", "Interval MIN must be at least 1."),
         ("interval = abc", "Interval DURATION must be in frames"),
+        ("interval = 1s, 3", "Interval values must be separated by spaces, not commas"),
     ],
 )
 def test_cli_save_images_interval_config_file_rejects_invalid_values(

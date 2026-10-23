@@ -22,6 +22,7 @@ import inspect
 import logging
 import os
 import os.path
+import re
 from copy import copy
 
 import click
@@ -148,6 +149,46 @@ class CommandGroup(Command, click.Group):
     """Custom formatting for command groups."""
 
     pass
+
+
+# Matches an argument that starts with a number, e.g. `10`, `-3`, `1.5`, or `2s`. No command or
+# option name starts with a digit (there are no options like `-1`), so a following command (e.g.
+# `list-scenes`) or option (e.g. `-o DIR`) never matches.
+_STARTS_WITH_NUMBER = re.compile(r"[+-]?[0-9]")
+
+
+class IntervalOption(click.Option):
+    """Option that takes 1 to 3 space-separated values: DURATION [MIN [MAX]].
+
+    Click options only support a fixed number of values (`nargs=-1` is not allowed), so the first
+    value is parsed as usual, and the arguments that follow are also taken while they start with a
+    number. Invalid values (e.g. `1.5` or a fourth number) are therefore reported as errors for
+    this option instead of as unknown commands. The values are passed on joined by spaces (e.g.
+    "2s 1 10"), and checked by `ImageIntervalValue`.
+    """
+
+    def add_to_parser(self, parser, ctx) -> None:
+        super().add_to_parser(parser, ctx)
+        # Click has no public API for this, so it relies on parser internals that are the same in
+        # click 8.0 through 8.5: the parser's `_long_opt`/`_short_opt` dicts, `obj`/`process` of
+        # their option objects, and `state.rargs`. If they are missing (click plans to replace its
+        # parser in 9.0), the hook is skipped and the values can still be quoted (-i "2s 1 10").
+        parser_opts = [
+            *getattr(parser, "_long_opt", {}).values(),
+            *getattr(parser, "_short_opt", {}).values(),
+        ]
+        parser_opt = next((opt for opt in parser_opts if getattr(opt, "obj", None) is self), None)
+        if parser_opt is None or not hasattr(parser_opt, "process"):
+            return
+        process = parser_opt.process
+
+        def process_with_extra_values(value, state) -> None:
+            values = [value]
+            while state.rargs and _STARTS_WITH_NUMBER.match(state.rargs[0]):
+                values.append(state.rargs.pop(0))
+            process(" ".join(values), state)
+
+        parser_opt.process = process_with_extra_values
 
 
 def print_command_help(ctx: click.Context, command: click.Command):
@@ -1401,7 +1442,7 @@ Examples:
 
     {scenedetect_with_video} save-images --num-images 5
 
-    {scenedetect_with_video} save-images --interval 2s,1,10
+    {scenedetect_with_video} save-images --interval 2s 1 10
 
     {scenedetect_with_video} save-images --width 1024
 
@@ -1442,10 +1483,11 @@ Examples:
 @click.option(
     "--interval",
     "-i",
-    metavar="DURATION[,MIN[,MAX]]",
+    cls=IntervalOption,
+    metavar="DURATION [MIN [MAX]]",
     default=None,
     type=click.STRING,
-    help="Generate one image per DURATION of each scene instead of a fixed number, so longer scenes get more images. Each scene gets floor(length / DURATION) + 1 images, chosen the same way as with -n/--num-images. MIN and MAX limit the number of images per scene (default: 1, no limit). Leave MIN empty to only set MAX (-i 2s,,10). DURATION can be specified in frames (-i 24), in seconds with `s` suffix (-i 1.5s), or timecode (-i 00:00:01.500). Cannot be used with -n/--num-images.{}".format(
+    help="Generate one image per DURATION of each scene instead of a fixed number, so longer scenes get more images. Each scene gets floor(length / DURATION) + 1 images, chosen the same way as with -n/--num-images. MIN and MAX limit the number of images per scene (default: 1, no limit), e.g. -i 2s 1 10. MAX requires MIN. DURATION can be specified in frames (-i 24), in seconds with `s` suffix (-i 1.5s), or timecode (-i 00:00:01.500). Cannot be used with -n/--num-images.{}".format(
         USER_CONFIG.get_help_string("save-images", "interval", show_default=False)
     ),
 )

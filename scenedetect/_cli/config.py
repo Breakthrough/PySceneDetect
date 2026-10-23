@@ -97,18 +97,22 @@ class TimecodeValue(ValidatedValue):
 
 
 class ImageIntervalValue(ValidatedValue):
-    """Validator for the save-images interval, specified as DURATION[,MIN[,MAX]].
+    """Validator for the save-images interval, specified as DURATION [MIN [MAX]].
 
-    DURATION is a timecode, and MIN/MAX are the minimum/maximum number of images per scene. An
-    empty MIN or MAX uses the default (e.g. `2s,,10` only sets MAX)."""
+    DURATION is a timecode, and MIN/MAX are the minimum/maximum number of images per scene. The
+    values are separated by spaces, so MAX can only be set together with MIN (e.g. `2s 1 10`)."""
 
     def __init__(self, value: str | None = None):
         self._value: tuple[str, int, int | None] | None = None
         if value is None:
             return
-        values = [val.strip() for val in value.split(",")]
-        if not 1 <= len(values) <= 3 or not values[0]:
-            raise ValueError("Interval must be specified as DURATION[,MIN[,MAX]].")
+        if "," in value:
+            raise ValueError(
+                "Interval values must be separated by spaces, not commas (e.g. 2s 1 10)."
+            )
+        values = value.split()
+        if not 1 <= len(values) <= 3:
+            raise ValueError("Interval must be specified as DURATION [MIN [MAX]].")
         duration = values[0]
         try:
             duration_secs = FrameTimecode(timecode=duration, fps=100.0).seconds
@@ -119,8 +123,8 @@ class ImageIntervalValue(ValidatedValue):
         if duration_secs <= 0:
             raise ValueError("Interval DURATION must be greater than 0.")
         try:
-            min_images = int(values[1]) if len(values) > 1 and values[1] else 1
-            max_images = int(values[2]) if len(values) > 2 and values[2] else None
+            min_images = int(values[1]) if len(values) > 1 else 1
+            max_images = int(values[2]) if len(values) > 2 else None
         except ValueError as ex:
             raise ValueError("Interval MIN and MAX must be numbers of images.") from ex
         if min_images < 1:
@@ -137,7 +141,7 @@ class ImageIntervalValue(ValidatedValue):
         if self._value is None:
             return "(none)"
         duration, min_images, max_images = self._value
-        return ", ".join(str(val) for val in (duration, min_images, max_images) if val is not None)
+        return " ".join(str(val) for val in (duration, min_images, max_images) if val is not None)
 
     @staticmethod
     def from_config(config_value: str, default: "ImageIntervalValue") -> "ImageIntervalValue":
