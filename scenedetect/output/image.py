@@ -34,6 +34,11 @@ from scenedetect.video_stream import VideoStream
 
 logger = logging.getLogger("pyscenedetect")
 
+# Added to the ratio of scene length to interval (a number of intervals, so it has no unit) before
+# rounding down, so floating point error doesn't drop an image from a scene that is a whole number
+# of intervals long (e.g. 0.3 / 0.1 gives 2.9999999999999996).
+_INTERVAL_COUNT_TOLERANCE: float = 1e-9
+
 
 def _get_num_images(
     scene_list: SceneList,
@@ -56,9 +61,8 @@ def _get_num_images(
     result = []
     for start, end in scene_list:
         duration_secs = max((end - start).seconds, 0.0)
-        # The epsilon keeps a scene that is a whole number of intervals long from getting one
-        # image less due to floating point error.
-        scene_images = max(math.floor(duration_secs / interval_secs + 1e-9) + 1, min_images)
+        num_intervals = math.floor(duration_secs / interval_secs + _INTERVAL_COUNT_TOLERANCE)
+        scene_images = max(num_intervals + 1, min_images)
         if max_images is not None:
             scene_images = min(scene_images, max_images)
         result.append(scene_images)
