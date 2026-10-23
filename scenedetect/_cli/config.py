@@ -97,51 +97,25 @@ class TimecodeValue(ValidatedValue):
 
 
 class ImageIntervalValue(ValidatedValue):
-    """Validator for the save-images interval, specified as DURATION [MIN [MAX]].
+    """Validator for the save-images interval: a timecode greater than 0, or None if unset.
 
-    DURATION is a timecode, and MIN/MAX are the minimum/maximum number of images per scene. The
-    values are separated by spaces, so MAX can only be set together with MIN (e.g. `2s 1 10`)."""
+    Stores value in original representation, like `TimecodeValue`."""
 
     def __init__(self, value: str | None = None):
-        self._value: tuple[str, int, int | None] | None = None
-        if value is None:
-            return
-        if "," in value:
-            raise ValueError(
-                "Interval values must be separated by spaces, not commas (e.g. 2s 1 10)."
-            )
-        values = value.split()
-        if not 1 <= len(values) <= 3:
-            raise ValueError("Interval must be specified as DURATION [MIN [MAX]].")
-        duration = values[0]
-        try:
-            duration_secs = FrameTimecode(timecode=duration, fps=100.0).seconds
-        except ValueError as ex:
-            raise ValueError(
-                "Interval DURATION must be in frames (24), seconds (1.5s), or HH:MM:SS."
-            ) from ex
-        if duration_secs <= 0:
-            raise ValueError("Interval DURATION must be greater than 0.")
-        try:
-            min_images = int(values[1]) if len(values) > 1 else 1
-            max_images = int(values[2]) if len(values) > 2 else None
-        except ValueError as ex:
-            raise ValueError("Interval MIN and MAX must be numbers of images.") from ex
-        if min_images < 1:
-            raise ValueError("Interval MIN must be at least 1.")
-        if max_images is not None and max_images < min_images:
-            raise ValueError("Interval MAX must be greater than or equal to MIN.")
-        self._value = (duration, min_images, max_images)
+        if value is not None:
+            try:
+                seconds = FrameTimecode(timecode=value, fps=100.0).seconds
+            except ValueError as ex:
+                raise ValueError(
+                    "Interval must be in frames (24), seconds (1.5s), or HH:MM:SS."
+                ) from ex
+            if seconds <= 0:
+                raise ValueError("Interval must be greater than 0.")
+        self._value = value
 
     @property
-    def value(self) -> tuple[str, int, int | None] | None:
+    def value(self) -> str | None:
         return self._value
-
-    def __str__(self) -> str:
-        if self._value is None:
-            return "(none)"
-        duration, min_images, max_images = self._value
-        return " ".join(str(val) for val in (duration, min_images, max_images) if val is not None)
 
     @staticmethod
     def from_config(config_value: str, default: "ImageIntervalValue") -> "ImageIntervalValue":
@@ -498,6 +472,8 @@ CONFIG_MAP: ConfigDict = {
         "frame-margin": TimecodeValue(1),
         "height": 0,
         "interval": ImageIntervalValue(),
+        "max-images": 0,
+        "min-images": 1,
         "num-images": 3,
         "output": None,
         "quality": RangeValue(_PLACEHOLDER, min_val=0, max_val=100),
