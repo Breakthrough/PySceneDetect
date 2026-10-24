@@ -798,17 +798,13 @@ def test_cli_save_images_interval_config_file(
             ["--max-images", "2"],
             "--min-images and --max-images can only be used with -i/--interval.",
         ),
-        ("interval = 1s\nmin-images = 0", [], "min-images in the config file must be at least 1."),
         (
             "interval = 1s\nmin-images = 3\nmax-images = 2",
             [],
             "max-images must be 0 (no limit) or at least min-images.",
         ),
-        (
-            "interval = 1s\nmax-images = -1",
-            [],
-            "max-images must be 0 (no limit) or at least min-images.",
-        ),
+        ("interval = 0", [], "interval in the config file must be greater than 0."),
+        ("interval = 0s", [], "interval in the config file must be greater than 0."),
     ],
 )
 def test_cli_save_images_interval_config_file_rejects_invalid_values(
@@ -823,9 +819,11 @@ def test_cli_save_images_interval_config_file_rejects_invalid_values(
 @pytest.mark.parametrize(
     "config,error",
     [
-        ("interval = abc", "Interval must be in frames (24), seconds (1.5s), or HH:MM:SS."),
-        ("interval = 0", "Interval must be greater than 0."),
-        ("min-images = x", "x is not a valid integer."),
+        ("interval = abc", "Timecodes must be in seconds (100.0), frames (100), or HH:MM:SS."),
+        ("min-images = 0", "Value must be an integer of at least 1."),
+        ("min-images = 1.5", "Value must be an integer of at least 1."),
+        ("min-images = x", "Value must be an integer of at least 1."),
+        ("max-images = -1", "Value must be an integer of at least 0."),
     ],
 )
 def test_cli_save_images_interval_config_file_load_errors(tmp_path: Path, config: str, error: str):

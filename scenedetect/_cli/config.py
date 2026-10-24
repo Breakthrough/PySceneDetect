@@ -96,45 +96,17 @@ class TimecodeValue(ValidatedValue):
             ) from ex
 
 
-class ImageIntervalValue(ValidatedValue):
-    """Validator for the save-images interval: a timecode greater than 0, or None if unset.
-
-    Stores value in original representation, like `TimecodeValue`."""
-
-    def __init__(self, value: str | None = None):
-        if value is not None:
-            try:
-                seconds = FrameTimecode(timecode=value, fps=100.0).seconds
-            except ValueError as ex:
-                raise ValueError(
-                    "Interval must be in frames (24), seconds (1.5s), or HH:MM:SS."
-                ) from ex
-            if seconds <= 0:
-                raise ValueError("Interval must be greater than 0.")
-        self._value = value
-
-    @property
-    def value(self) -> str | None:
-        return self._value
-
-    @staticmethod
-    def from_config(config_value: str, default: "ImageIntervalValue") -> "ImageIntervalValue":
-        try:
-            return ImageIntervalValue(config_value)
-        except ValueError as ex:
-            raise OptionParseFailure(f"{ex}") from ex
-
-
 class RangeValue(ValidatedValue):
-    """Validator for int/float ranges. `min_val` and `max_val` are inclusive."""
+    """Validator for int/float ranges. `min_val` and `max_val` are inclusive. A `max_val` of None
+    means there is no upper bound."""
 
     def __init__(
         self,
         value: int | float,
         min_val: int | float,
-        max_val: int | float,
+        max_val: int | float | None,
     ):
-        if value < min_val or value > max_val:
+        if value < min_val or (max_val is not None and value > max_val):
             # min and max are inclusive.
             raise ValueError()
         self._value = value
@@ -151,16 +123,20 @@ class RangeValue(ValidatedValue):
         return self._min_val
 
     @property
-    def max_val(self) -> int | float:
-        """Maximum value of the range."""
+    def max_val(self) -> int | float | None:
+        """Maximum value of the range, or None if there is no upper bound."""
         return self._max_val
 
     @property
     def click_range(self) -> "click.IntRange | click.FloatRange":
         """A `click` parameter type matching this range's bounds and value type."""
         if isinstance(self._value, int):
-            return click.IntRange(int(self._min_val), int(self._max_val))
-        return click.FloatRange(float(self._min_val), float(self._max_val))
+            return click.IntRange(
+                int(self._min_val), None if self._max_val is None else int(self._max_val)
+            )
+        return click.FloatRange(
+            float(self._min_val), None if self._max_val is None else float(self._max_val)
+        )
 
     @staticmethod
     def from_config(config_value: str, default: "RangeValue") -> "RangeValue":
@@ -171,6 +147,11 @@ class RangeValue(ValidatedValue):
                 max_val=default.max_val,
             )
         except ValueError as ex:
+            if default.max_val is None:
+                value_type = "an integer" if isinstance(default.value, int) else "a number"
+                raise OptionParseFailure(
+                    f"Value must be {value_type} of at least {default.min_val}."
+                ) from ex
             raise OptionParseFailure(
                 f"Value must be between {default.min_val} and {default.max_val}."
             ) from ex
@@ -471,9 +452,9 @@ CONFIG_MAP: ConfigDict = {
         "format": "jpeg",
         "frame-margin": TimecodeValue(1),
         "height": 0,
-        "interval": ImageIntervalValue(),
-        "max-images": 0,
-        "min-images": 1,
+        "interval": TimecodeValue(0),  # Placeholder, as there is no interval by default
+        "max-images": RangeValue(0, min_val=0, max_val=None),
+        "min-images": RangeValue(1, min_val=1, max_val=None),
         "num-images": 3,
         "output": None,
         "quality": RangeValue(_PLACEHOLDER, min_val=0, max_val=100),
