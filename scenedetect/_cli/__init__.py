@@ -34,11 +34,12 @@ from scenedetect._cli.config import (
     CONFIG_MAP,
     DEFAULT_JPG_QUALITY,
     DEFAULT_WEBP_QUALITY,
-    ImageIntervalValue,
     RangeValue,
+    TimecodeValue,
 )
 from scenedetect._cli.context import USER_CONFIG, CliContext, check_split_video_requirements
 from scenedetect.backends import AVAILABLE_BACKENDS
+from scenedetect.common import FrameTimecode
 from scenedetect.detectors import (
     AdaptiveDetector,
     ContentDetector,
@@ -1453,7 +1454,7 @@ Examples:
     "--min-images",
     metavar="N",
     default=None,
-    type=click.IntRange(min=1),
+    type=_click_range("save-images", "min-images"),
     help="Minimum number of images per scene. Can only be used with -i/--interval.{}".format(
         USER_CONFIG.get_help_string("save-images", "min-images")
     ),
@@ -1462,7 +1463,7 @@ Examples:
     "--max-images",
     metavar="N",
     default=None,
-    type=click.IntRange(min=0),
+    type=_click_range("save-images", "max-images"),
     help="Maximum number of images per scene, or 0 for no limit. Can only be used with -i/--interval.{}".format(
         USER_CONFIG.get_help_string("save-images", "max-images")
     ),
@@ -1619,9 +1620,14 @@ def save_images_command(
         )
     if interval is not None:
         try:
-            ImageIntervalValue(interval)
+            TimecodeValue(interval)
         except ValueError as ex:
-            raise click.BadParameter(str(ex), param_hint="-i/--interval") from ex
+            raise click.BadParameter(
+                "Interval must be in frames (24), seconds (1.5s), or HH:MM:SS.",
+                param_hint="-i/--interval",
+            ) from ex
+        if FrameTimecode(timecode=interval, fps=ctx.video_stream.frame_rate).seconds <= 0:
+            raise click.BadParameter("Interval must be greater than 0.", param_hint="-i/--interval")
     elif num_images is None:
         if not ctx.config.is_default("save-images", "interval") and not ctx.config.is_default(
             "save-images", "num-images"
@@ -1630,9 +1636,16 @@ def save_images_command(
                 "Only one of num-images or interval can be set in the config file.",
                 param_hint="save-images",
             )
-        interval = ctx.config.get_value("save-images", "interval")
-        if interval is None:
+        if ctx.config.is_default("save-images", "interval"):
             num_images = ctx.config.get_value("save-images", "num-images")
+        else:
+            interval_value: str = ctx.config.get_value("save-images", "interval")
+            if FrameTimecode(timecode=interval_value, fps=ctx.video_stream.frame_rate).seconds <= 0:
+                raise click.BadParameter(
+                    "interval in the config file must be greater than 0.",
+                    param_hint="save-images",
+                )
+            interval = interval_value
     # --min-images/--max-images only apply with an interval (from the command line or the config
     # file). Without one, they are an error on the command line, and ignored in the config file.
     if interval is None:
@@ -1645,11 +1658,6 @@ def save_images_command(
     else:
         min_images_value: int = ctx.config.get_value("save-images", "min-images", min_images)
         max_images_value: int = ctx.config.get_value("save-images", "max-images", max_images)
-        # Click checks the range of values from the command line, but not from the config file.
-        if min_images_value < 1:
-            raise click.BadParameter(
-                "min-images in the config file must be at least 1.", param_hint="save-images"
-            )
         if max_images_value != 0 and max_images_value < min_images_value:
             raise click.BadParameter(
                 "max-images must be 0 (no limit) or at least min-images.",
