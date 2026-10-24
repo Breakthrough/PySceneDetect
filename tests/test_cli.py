@@ -36,6 +36,7 @@ import numpy as np
 import pytest
 
 import scenedetect
+from scenedetect._cli.config import ConfigLoadFailure, ConfigRegistry
 from scenedetect.output import is_ffmpeg_available, is_mkvmerge_available
 from scenedetect.platform import StrPath
 from tests.helpers import invoke_cli
@@ -666,6 +667,171 @@ def test_cli_save_images_rotation(rotated_video_file, tmp_path: Path):
     assert image is not None
     # Note same resolution as in test_cli_save_images but rotated 90 degrees.
     assert image.shape == (1280, 544, 3)
+
+
+_TIME_AND_DETECTOR = ["time", *DEFAULT_TIME.split(), DEFAULT_DETECTOR]
+
+
+def _count_images_per_scene(path: Path) -> list[int]:
+    return [
+        len(list(path.glob(f"{DEFAULT_VIDEO_NAME}-Scene-{scene + 1:03d}-*.jpg")))
+        for scene in range(DEFAULT_NUM_SCENES)
+    ]
+
+
+def _invoke_save_images(
+    tmp_path: Path, args: list[str], config: str | None = None
+) -> tuple[int, str]:
+    """Run `save-images` with `args` in-process, using `config` as the [save-images] section of
+    the config file."""
+    config_path = tmp_path / "config.cfg"
+    config_path.write_text(f"[save-images]\n{config or ''}\n")
+    return invoke_cli(
+        [
+            "-c",
+            str(config_path),
+            "-i",
+            DEFAULT_VIDEO_PATH,
+            "-o",
+            str(tmp_path),
+            *_TIME_AND_DETECTOR,
+            "save-images",
+            *args,
+        ]
+    )
+
+
+@pytest.mark.parametrize(
+    "args,expected",
+    [
+        # The two scenes are 1.752s and 2.252s long: floor(length / 1s) + 1 images each.
+        (["-i", "1s"], [2, 3]),
+        (["-i", "1.5s"], [2, 2]),
+        (["--interval", "00:00:01.000"], [2, 3]),
+        # DURATION in frames (24 frames is about 1s here).
+        (["-i", "24"], [2, 3]),
+        # --min-images and --max-images limit the number of images per scene.
+        (["-i", "1s", "--min-images", "3"], [3, 3]),
+        (["-i", "0.5s", "--max-images", "4"], [4, 4]),
+        (["-i", "0.2s", "--min-images", "10", "--max-images", "11"], [10, 11]),
+        (["-i", "0.5s", "--max-images", "0"], [4, 5]),
+    ],
+)
+def test_cli_save_images_interval(tmp_path: Path, args: list[str], expected: list[int]):
+    """Test `save-images -i/--interval` with --min-images/--max-images."""
+    exit_code, _ = _invoke_save_images(tmp_path, args)
+    assert exit_code == 0
+    assert _count_images_per_scene(tmp_path) == expected
+
+
+@pytest.mark.parametrize(
+    "args,error",
+    [
+        (["-n", "3", "-i", "1s"], "Only one of -n/--num-images or -i/--interval can be set."),
+        (
+            ["--min-images", "2"],
+            "--min-images and --max-images can only be used with -i/--interval.",
+        ),
+        (
+            ["-n", "3", "--max-images", "2"],
+            "--min-images and --max-images can only be used with -i/--interval.",
+        ),
+        (
+            ["-i", "1s", "--min-images", "3", "--max-images", "2"],
+            "max-images must be 0 (no limit) or at least min-images.",
+        ),
+        (["-i", "1s", "--min-images", "0"], "0 is not in the range x>=1."),
+        (["-i", "1s", "--max-images", "-1"], "-1 is not in the range x>=0."),
+        (
+            ["-i", "abc"],
+            "Invalid value for -i/--interval: Interval must be in frames (24), seconds (1.5s), or HH:MM:SS.",
+        ),
+        (["-i", "0"], "Invalid value for -i/--interval: Interval must be greater than 0."),
+        (["-i", "0s"], "Invalid value for -i/--interval: Interval must be greater than 0."),
+    ],
+)
+def test_cli_save_images_interval_rejects_invalid_values(
+    tmp_path: Path, args: list[str], error: str
+):
+    exit_code, output = _invoke_save_images(tmp_path, args)
+    assert exit_code != 0
+    assert error in output
+    assert not list(tmp_path.glob("*.jpg"))
+
+
+@pytest.mark.parametrize(
+    "config,args,expected",
+    [
+        ("interval = 1s", [], [2, 3]),
+        ("interval = 1s\nmin-images = 3", [], [3, 3]),
+        ("interval = 0.5s\nmax-images = 4", [], [4, 4]),
+        # Options on the command line take precedence over the config file.
+        ("interval = 2s\nmax-images = 2", ["-i", "0.5s"], [2, 2]),
+        ("interval = 0.5s\nmax-images = 4", ["--max-images", "2"], [2, 2]),
+        ("interval = 0.5s\nmax-images = 4", ["--max-images", "0"], [4, 5]),
+        ("interval = 2s", ["--min-images", "3"], [3, 3]),
+        ("num-images = 5", ["-i", "1s"], [2, 3]),
+        # Without an interval in effect, min-images and max-images in the config file are ignored.
+        ("interval = 1s\nmin-images = 5\nmax-images = 5", ["-n", "2"], [2, 2]),
+        ("num-images = 2\nmin-images = 5", [], [2, 2]),
+    ],
+)
+def test_cli_save_images_interval_config_file(
+    tmp_path: Path, config: str, args: list[str], expected: list[int]
+):
+    """Test the `interval`, `min-images` and `max-images` options of `[save-images]`."""
+    exit_code, _ = _invoke_save_images(tmp_path, args, config=config)
+    assert exit_code == 0
+    assert _count_images_per_scene(tmp_path) == expected
+
+
+@pytest.mark.parametrize(
+    "config,args,error",
+    [
+        (
+            "num-images = 3\ninterval = 1s",
+            [],
+            "Only one of num-images or interval can be set in the config file.",
+        ),
+        (
+            "num-images = 3",
+            ["--max-images", "2"],
+            "--min-images and --max-images can only be used with -i/--interval.",
+        ),
+        (
+            "interval = 1s\nmin-images = 3\nmax-images = 2",
+            [],
+            "max-images must be 0 (no limit) or at least min-images.",
+        ),
+        ("interval = 0", [], "interval in the config file must be greater than 0."),
+        ("interval = 0s", [], "interval in the config file must be greater than 0."),
+    ],
+)
+def test_cli_save_images_interval_config_file_rejects_invalid_values(
+    tmp_path: Path, config: str, args: list[str], error: str
+):
+    exit_code, output = _invoke_save_images(tmp_path, args, config=config)
+    assert exit_code != 0
+    assert error in output
+    assert not list(tmp_path.glob("*.jpg"))
+
+
+@pytest.mark.parametrize(
+    "config,error",
+    [
+        ("interval = abc", "Timecodes must be in seconds (100.0), frames (100), or HH:MM:SS."),
+        ("min-images = 0", "Value must be an integer of at least 1."),
+        ("min-images = 1.5", "Value must be an integer of at least 1."),
+        ("min-images = x", "Value must be an integer of at least 1."),
+        ("max-images = -1", "Value must be an integer of at least 0."),
+    ],
+)
+def test_cli_save_images_interval_config_file_load_errors(tmp_path: Path, config: str, error: str):
+    config_path = tmp_path.joinpath("config.cfg")
+    config_path.write_text(f"[save-images]\n{config}\n")
+    with pytest.raises(ConfigLoadFailure) as ex:
+        ConfigRegistry(str(config_path))
+    assert any(error in message for _, message in ex.value.init_log)
 
 
 def test_cli_save_html(tmp_path: Path):
