@@ -65,8 +65,6 @@
     <ul class="current">
     <li class="toctree-l2"><a class="reference internal" href="#pyscenedetect-07">PySceneDetect 0.7</a>
         <ul>
-    <li class="toctree-l3"><a class="reference internal" href="#unreleased">Unreleased</a>
-    </li>
     <li class="toctree-l3"><a class="reference internal" href="#pyscenedetect-072-october-11-2026">PySceneDetect 0.7.2 (October 11, 2026)</a>
         <ul>
     <li class="toctree-l4"><a class="reference internal" href="#cli-changes">CLI Changes</a>
@@ -306,16 +304,6 @@
               
                 <h1 id="releases">Releases</h1>
 <h2 id="pyscenedetect-07">PySceneDetect 0.7</h2>
-<h3 id="unreleased">Unreleased</h3>
-<ul>
-<li>[feature] Add <code>-i</code>/<code>--interval</code> to <code>save-images</code> to save images based on the length of each scene: one image per <code>DURATION</code>, with <code>--min-images</code>/<code>--max-images</code> to limit the number of images per scene, e.g. <code>save-images -i 2s --max-images 10</code> (<code>interval</code>/<code>min-images</code>/<code>max-images</code> in the config file, and <code>interval</code>/<code>min_images</code>/<code>max_images</code> in <code>save_images()</code>) <a href="https://github.com/Breakthrough/PySceneDetect/issues/280">#280</a></li>
-<li>[bugfix] <code>$VIDEO_NAME</code> is now derived from the path component of URL inputs, ignoring the query string and fragment (e.g. <code>https://host/clip.mp4?token=1.2</code> -&gt; <code>clip</code>). URLs with no path use the host. Previously the query string leaked into output filenames, which fails on Windows. <a href="https://github.com/Breakthrough/PySceneDetect/issues/197">#197</a></li>
-<li>[bugfix] OTIO exports use the full source duration when provided, including from the CLI, instead of declaring a fixed 1,980-frame duration. The available range remains unspecified when the duration is unknown. Scene source ranges are unchanged. <a href="https://github.com/Breakthrough/PySceneDetect/pull/580">#580</a></li>
-<li>[bugfix] The OpenCV backend keeps <code>position</code> on the last frame after reaching the end of a VFR video, so the last scene no longer ends early (or before it starts) <a href="https://github.com/Breakthrough/PySceneDetect/issues/561">#561</a></li>
-<li>[bugfix] <code>save-html --no-images</code> now writes to the global <code>-o</code>/<code>--output</code> directory instead of the working directory <a href="https://github.com/Breakthrough/PySceneDetect/pull/583">#583</a></li>
-<li>[feature] <code>VideoStream</code> has a new <code>close()</code> method to release the file handles and decoders a video holds, and can be used as a context manager (<code>with open_video(path) as video:</code>) to close it automatically. Calling <code>close()</code> more than once has no effect. Once an OpenCV, PyAV, MoviePy or concatenated stream is closed, <code>read()</code>, <code>seek()</code> and <code>reset()</code> raise <code>ValueError</code>, while properties describing the video (<code>path</code>, <code>name</code>, <code>frame_rate</code>, <code>duration</code>, <code>frame_size</code>, <code>aspect_ratio</code>) remain available. The default implementation does nothing, so existing <code>VideoStream</code> subclasses are unaffected, and <code>VideoCaptureAdapter</code> leaves the caller's <code>VideoCapture</code> open <a href="https://github.com/Breakthrough/PySceneDetect/issues/568">#568</a></li>
-<li>[bugfix] <code>VideoStreamConcat</code> no longer keeps its input videos open when they can't be concatenated (e.g. mismatched resolutions), and now closes each input explicitly once it is no longer needed instead of relying on garbage collection <a href="https://github.com/Breakthrough/PySceneDetect/issues/568">#568</a></li>
-</ul>
 <h3 id="pyscenedetect-072-october-11-2026">PySceneDetect 0.7.2 (October 11, 2026)</h3>
 <p>PySceneDetect 0.7.2 ships improved defaults for the histogram and perceptual hash detectors, adds PyAV 19 support, and fixes several timing and output bugs. <strong>Default output of <code>detect-hist</code> and <code>detect-hash</code> will change in this release due to improved default values</strong>.</p>
 <h4 id="cli-changes">CLI Changes</h4>
@@ -1106,6 +1094,15 @@
 <hr />
 <h1 id="development">Development</h1>
 <h2 id="pyscenedetect-073-tbd">PySceneDetect 0.7.3 (TBD)</h2>
+<ul>
+<li>[feature] Add <code>-i</code>/<code>--interval</code> to <code>save-images</code> to save images based on the length of each scene: one image per <code>DURATION</code>, with <code>--min-images</code>/<code>--max-images</code> to limit the number of images per scene, e.g. <code>save-images -i 2s --max-images 10</code> (<code>interval</code>/<code>min-images</code>/<code>max-images</code> in the config file, and <code>interval</code>/<code>min_images</code>/<code>max_images</code> in <code>save_images()</code>) <a href="https://github.com/Breakthrough/PySceneDetect/issues/280">#280</a></li>
+<li>[bugfix] <code>$VIDEO_NAME</code> is now derived from the path component of URL inputs, ignoring the query string and fragment (e.g. <code>https://host/clip.mp4?token=1.2</code> -&gt; <code>clip</code>). URLs with no path use the host. Previously the query string leaked into output filenames, which fails on Windows. <a href="https://github.com/Breakthrough/PySceneDetect/issues/197">#197</a></li>
+<li>[bugfix] OTIO exports use the full source duration when provided, including from the CLI, instead of declaring a fixed 1,980-frame duration. The available range remains unspecified when the duration is unknown. Scene source ranges are unchanged. <a href="https://github.com/Breakthrough/PySceneDetect/pull/580">#580</a></li>
+<li>[bugfix] The OpenCV backend keeps <code>position</code> on the last frame after reaching the end of a VFR video, so the last scene no longer ends early (or before it starts) <a href="https://github.com/Breakthrough/PySceneDetect/issues/561">#561</a></li>
+<li>[bugfix] <code>save-html --no-images</code> now writes to the global <code>-o</code>/<code>--output</code> directory instead of the working directory <a href="https://github.com/Breakthrough/PySceneDetect/pull/583">#583</a></li>
+<li>[feature] <code>VideoStream</code> has a new <code>close()</code> method to release the file handles and decoders a video holds, and can be used as a context manager (<code>with open_video(path) as video:</code>) to close it automatically. Calling <code>close()</code> more than once has no effect. Once an OpenCV, PyAV, MoviePy or concatenated stream is closed, <code>read()</code>, <code>seek()</code> and <code>reset()</code> raise <code>ValueError</code>, while properties describing the video (<code>path</code>, <code>name</code>, <code>frame_rate</code>, <code>duration</code>, <code>frame_size</code>, <code>aspect_ratio</code>) remain available. The default implementation does nothing, so existing <code>VideoStream</code> subclasses are unaffected, and <code>VideoCaptureAdapter</code> leaves the caller's <code>VideoCapture</code> open <a href="https://github.com/Breakthrough/PySceneDetect/issues/568">#568</a></li>
+<li>[bugfix] <code>VideoStreamConcat</code> no longer keeps its input videos open when they can't be concatenated (e.g. mismatched resolutions), and now closes each input explicitly once it is no longer needed instead of relying on garbage collection <a href="https://github.com/Breakthrough/PySceneDetect/issues/568">#568</a></li>
+</ul>
               
             </div>
           </div><footer>
