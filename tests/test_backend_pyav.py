@@ -24,7 +24,16 @@ from types import SimpleNamespace
 import av
 import pytest
 
-from scenedetect.backends.pyav import MAX_CONSECUTIVE_DECODE_FAILURES, VideoStreamAv, _to_fraction
+import scenedetect.backends.pyav as pyav_backend
+from scenedetect import SceneManager
+from scenedetect.backends.pyav import (
+    MAX_CONSECUTIVE_DECODE_FAILURES,
+    VideoStreamAv,
+    _frame_timestamp,
+    _TimeSource,
+    _to_fraction,
+)
+from scenedetect.detectors import ContentDetector
 
 
 def test_video_stream_pyav_bytesio(test_video_file: str):
@@ -250,3 +259,150 @@ def test_duration_fallback_unset_time_base(
     monkeypatch.setattr(VideoStreamAv, "_video_stream", property(lambda self: fake_stream))
     assert stream._get_duration() == 0
     assert any("time_base" in record.message for record in caplog.records)
+
+
+#
+# Streams without presentation timestamps
+#
+# PyAV enables AVFMT_FLAG_GENPTS on every input, which for containers that only carry decode
+# timestamps (AVI) invents out-of-order PTS once B-frames are reordered. Raw elementary streams
+# have no timestamps at all. Both fixtures hold the first 480 frames of `goldeneye.mp4` re-encoded
+# with B-frames, so the cuts in `goldeneye.mp4` over that range are the oracle they must match.
+#
+
+_BFRAMES_NUM_FRAMES = 480
+
+
+def _detect_cuts(path: str, num_frames: int | None = None) -> list:
+    scene_manager = SceneManager()
+    scene_manager.add_detector(ContentDetector())
+    with VideoStreamAv(path) as video:
+        end_time = None if num_frames is None else video.base_timecode + num_frames
+        scene_manager.detect_scenes(video, end_time=end_time)
+    return [scene[0] for scene in scene_manager.get_scene_list()[1:]]
+
+
+def test_no_pts_avi_positions_monotonic(test_no_pts_avi: str, auto_close):
+    """With GENPTS disabled the AVI falls back to DTS; positions must start at 0 and increase by
+    one frame per read instead of following the decoder's reordering."""
+    stream = auto_close(VideoStreamAv(test_no_pts_avi))
+    assert stream.read() is not False
+    assert stream._time_source == _TimeSource.DTS
+    assert stream.position == stream.base_timecode
+    assert stream.position_ms == pytest.approx(0.0)
+    assert stream.frame_number == 1
+    previous = stream.position
+    for i in range(2, 100):
+        assert stream.read() is not False
+        assert stream.position > previous
+        assert stream.frame_number == i
+        previous = stream.position
+
+
+def test_no_pts_avi_matches_mp4(test_no_pts_avi: str, test_movie_clip: str):
+    """Cuts detected on the AVI must land on the same frames as on the mp4 it was encoded from.
+    Before the fix the AVI cuts were one frame late and frame numbers were permuted."""
+    expected = _detect_cuts(test_movie_clip, _BFRAMES_NUM_FRAMES)
+    actual = _detect_cuts(test_no_pts_avi)
+    assert len(expected) > 0
+    assert [cut.frame_num for cut in actual] == [cut.frame_num for cut in expected]
+    for cut, oracle in zip(actual, expected, strict=True):
+        # The AVI time base (1/600) cannot represent 24000/1001 exactly, so allow a few ms.
+        assert cut.seconds == pytest.approx(oracle.seconds, abs=0.005)
+
+
+def test_no_pts_avi_seek(test_no_pts_avi: str, auto_close):
+    """Seeking must give the same positions whether or not a frame was read first, since the DTS
+    offset has to be probed separately when `seek()` is the first call."""
+    read_first = auto_close(VideoStreamAv(test_no_pts_avi))
+    assert read_first.read() is not False
+    read_first.seek(50)
+    seek_first = auto_close(VideoStreamAv(test_no_pts_avi))
+    seek_first.seek(50)
+    for stream in (read_first, seek_first):
+        assert stream.frame_number == 50
+        frame_ms = 1000.0 / float(stream.frame_rate)
+        assert stream.position_ms == pytest.approx(49 * frame_ms, abs=frame_ms / 2)
+        assert stream.read() is not False
+        assert stream.frame_number == 51
+    assert read_first.position == seek_first.position
+
+
+def test_no_pts_avi_reopen(test_no_pts_avi: str, auto_close):
+    """Re-opening the container (`reset()`, and the AUTO threading EOF re-open) must keep GENPTS
+    disabled, otherwise positions go out of order again partway through the video."""
+    stream = auto_close(VideoStreamAv(test_no_pts_avi, threading_mode="AUTO"))
+    for _ in range(10):
+        assert stream.read() is not False
+    stream.reset()
+    assert stream.frame_number == 0
+    assert stream.read() is not False
+    assert stream.position == stream.base_timecode
+    previous, frames = stream.position, 1
+    while stream.read() is not False:
+        frames += 1
+        assert stream.position > previous
+        previous = stream.position
+    # Not compared to `stream.duration`: this AVI declares a 600 Hz stream rate, so ffmpeg (and
+    # OpenCV) report its frame count in ticks. See the TODO in `VideoStreamAv._get_duration`.
+    assert frames == _BFRAMES_NUM_FRAMES
+
+
+def test_raw_stream_without_timestamps_counts_frames(
+    test_raw_h264: str, test_movie_clip: str, auto_close
+):
+    """A raw elementary stream has neither PTS nor DTS. Positions are then derived from the number
+    of decoded frames (like the OpenCV backend) instead of every frame reporting time 0."""
+    stream = auto_close(VideoStreamAv(test_raw_h264))
+    for i in range(1, 11):
+        assert stream.read() is not False
+        assert stream.frame_number == i
+        assert stream.position == stream.base_timecode + (i - 1)
+    assert stream._time_source == _TimeSource.FRAMES
+    expected = _detect_cuts(test_movie_clip, _BFRAMES_NUM_FRAMES)
+    actual = _detect_cuts(test_raw_h264)
+    assert [cut.frame_num for cut in actual] == [cut.frame_num for cut in expected]
+
+
+#
+# Timestamp source and monotonicity
+#
+
+
+@pytest.mark.parametrize(
+    "has_best_effort, frame, expected",
+    [
+        (True, SimpleNamespace(pts=None, dts=7, best_effort_timestamp=9), 9),
+        (True, SimpleNamespace(pts=3, dts=1, best_effort_timestamp=None), None),
+        (False, SimpleNamespace(pts=None, dts=7), 7),
+        (False, SimpleNamespace(pts=3, dts=1), 3),
+        (False, SimpleNamespace(pts=None, dts=None), None),
+    ],
+    ids=["best-effort", "best-effort-unset", "dts-fallback", "pts", "none"],
+)
+def test_frame_timestamp_source(monkeypatch: pytest.MonkeyPatch, has_best_effort, frame, expected):
+    """`best_effort_timestamp` is used when PyAV exposes it (19.1+), otherwise the PTS with a DTS
+    fallback. The module flag decides, not the frame, so an unset estimate (None) is honoured."""
+    monkeypatch.setattr(pyav_backend, "_HAS_BEST_EFFORT_TIMESTAMP", has_best_effort)
+    assert _frame_timestamp(frame) == expected
+
+
+def test_non_monotonic_timestamps_warn_once(
+    test_video_file: str, monkeypatch: pytest.MonkeyPatch, caplog, auto_close
+):
+    """A timestamp going backwards is reported once per stream, and only when it actually goes
+    backwards: repeated timestamps (as in VFR video) stay silent."""
+    stream = auto_close(VideoStreamAv(test_video_file))
+    monkeypatch.setattr(pyav_backend, "_HAS_BEST_EFFORT_TIMESTAMP", False)
+    fake_stream = _AttrOverridingProxy(stream._video_stream, start_time=0)
+    monkeypatch.setattr(VideoStreamAv, "_video_stream", property(lambda self: fake_stream))
+    time_base = Fraction(1, 1000)
+    for pts in (0, 40, 40, 0, 80, 20):
+        stream._frame = SimpleNamespace(pts=pts, dts=None, time_base=time_base)
+        stream._frames_decoded += 1
+        stream._update_timecode()
+    warnings = [record for record in caplog.records if "backwards" in record.message]
+    assert len(warnings) == 1
+    assert "frame 4" in warnings[0].message
+    # Positions keep following the input; the warning does not alter them.
+    assert stream.position_ms == pytest.approx(20.0)

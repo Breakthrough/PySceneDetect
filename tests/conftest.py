@@ -131,6 +131,20 @@ def test_vfr_drop3_video() -> str:
 
 
 @pytest.fixture
+def test_no_pts_avi() -> str:
+    """First 480 frames of goldeneye.mp4 re-encoded with B-frames (libx264, -bf 3 -g 48) and
+    remuxed into an AVI, so its packets only carry decode timestamps (no PTS). See issue #590."""
+    return check_exists("tests/resources/issue-590-bframes.avi")
+
+
+@pytest.fixture
+def test_raw_h264() -> str:
+    """Same bitstream as `test_no_pts_avi` as a raw Annex-B H.264 elementary stream, which carries
+    no timestamps at all. See issue #590."""
+    return check_exists("tests/resources/issue-590-bframes.h264")
+
+
+@pytest.fixture
 def corrupt_video_file() -> str:
     """Video containing a corrupted frame causing a decode failure."""
     return check_exists("tests/resources/corrupt_frame.mp4")
