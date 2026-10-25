@@ -826,3 +826,10 @@ Development
  - [bugfix] `VideoStreamConcat` no longer keeps its input videos open when they can't be concatenated (e.g. mismatched resolutions), and now closes each input explicitly once it is no longer needed instead of relying on garbage collection [#568](https://github.com/Breakthrough/PySceneDetect/issues/568)
  - [bugfix] `split-video` with `-o` now logs the output folder instead of repeating the filename template [#595](https://github.com/Breakthrough/PySceneDetect/pull/595)
  - [bugfix] Allow `-d`/`--downscale` on the CLI and `downscale` in the config file to be set to `0` for automatic downscaling
+ - [bugfix] Fix `pyav` backend timing for videos that lack presentation timestamps (e.g. AVI files, elementary H.264 streams), which could lead to frame positions being out of order or stuck at zero and shifting cuts by one or more frames ([#590](https://github.com/Breakthrough/PySceneDetect/issues/590), [PyAV#933](https://github.com/PyAV-Org/PyAV/discussions/933), [PyAV#2478](https://github.com/PyAV-Org/PyAV/pull/2478))
+     - Videos are now opened with FFmpeg's `genpts` flag disabled.
+     - Each frame will use the exact presentation timestamp, but if it is unavailable we now fall back to the decode timestamp to be consistent with the `opencv` backend.
+     - If neither presentation nor decode timestamps are available for the stream, we add one to the previous frame's time to advance by one unit (which is what the `moviepy` backend does in this case).
+     - A one-time warning is emitted if timestamps are still detected going backwards.
+     - `VideoStreamAv.seek()` now raises `SeekError` on streams that cannot be seeked (e.g. elementary streams without timestamps) instead of a backend-specific exception.
+ - [api] `VideoStream.seek()` now documents that the stream position is undefined after a `SeekError` is raised, and `reset()` must be called before reading further
