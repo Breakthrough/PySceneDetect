@@ -649,6 +649,8 @@ Examples
 
     ``scenedetect -i video.mp4 save-images --num-images 5``
 
+    ``scenedetect -i video.mp4 save-images --interval 2s --max-images 10``
+
     ``scenedetect -i video.mp4 save-images --width 1024``
 
     ``scenedetect -i video.mp4 save-images --filename \$SCENE_NUMBER-img\$IMAGE_NUMBER``
@@ -670,9 +672,25 @@ Options
 
 .. option:: -n N, --num-images N
 
-  Number of images to generate per scene. Will always include start/end frame, unless -n 1, in which case the image will be the frame at the mid-point of the scene.
+  Number of images to generate per scene. Will always include start/end frame, unless -n 1, in which case the image will be the frame at the mid-point of the scene. Cannot be used with :option:`-i/--interval <-i>`.
 
   Default: ``3``
+
+.. option:: -i DURATION, --interval DURATION
+
+  Generate one image per DURATION of each scene instead of a fixed number, so longer scenes get more images. Each scene gets floor(length / DURATION) + 1 images, chosen the same way as with :option:`-n/--num-images <-n>`. Use --min-images and --max-images to limit the number of images per scene. DURATION can be specified in frames (-i 24), in seconds with `s` suffix (-i 1.5s), or timecode (-i 00:00:01.500). Cannot be used with :option:`-n/--num-images <-n>`.
+
+.. option:: --min-images N
+
+  Minimum number of images per scene. Can only be used with :option:`-i/--interval <-i>`.
+
+  Default: ``1``
+
+.. option:: --max-images N
+
+  Maximum number of images per scene, or 0 for no limit. Can only be used with :option:`-i/--interval <-i>`.
+
+  Default: ``0``
 
 .. option:: -j, --jpeg
 

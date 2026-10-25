@@ -85,7 +85,8 @@ class CliContext:
         self.scene_manager: SceneManager | None = None
         self.stats_manager: StatsManager | None = None
         self.save_images: bool = False  # True if the save-images command was specified
-        self.save_images_result: ty.Any = (None, None)  # Result of save-images used by save-html
+        # Result of save-images used by save-html: (image filenames, output directory).
+        self.save_images_result: tuple[dict[int, list[str]], str | None] | None = None
 
         # Input:
         self.video_stream: VideoStream | None = None
@@ -536,6 +537,11 @@ class CliContext:
                     path=input_path,
                     frame_rate=frame_rate,
                     backend=backend,
+                )
+            if not self.video_stream.name:
+                logger.warning(
+                    "Could not determine a video name from the input path, so $VIDEO_NAME will be"
+                    " empty in output filenames."
                 )
             duration = self.video_stream.duration
             duration_str = f"{duration} ({duration.frame_num} frames)" if duration else "unknown"

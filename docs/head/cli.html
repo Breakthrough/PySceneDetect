@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>scenedetect 🎬 Command &#8212; PySceneDetect 0.7.2 documentation</title>
+    <title>scenedetect 🎬 Command &#8212; PySceneDetect 0.7.3-dev0 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
@@ -623,6 +623,7 @@
 <h3>Examples<a class="headerlink" href="#id18" title="Permalink to this heading">¶</a></h3>
 <blockquote>
 <div><p><code class="docutils literal notranslate"><span class="pre">scenedetect</span> <span class="pre">-i</span> <span class="pre">video.mp4</span> <span class="pre">save-images</span> <span class="pre">--num-images</span> <span class="pre">5</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">scenedetect</span> <span class="pre">-i</span> <span class="pre">video.mp4</span> <span class="pre">save-images</span> <span class="pre">--interval</span> <span class="pre">2s</span> <span class="pre">--max-images</span> <span class="pre">10</span></code></p>
 <p><code class="docutils literal notranslate"><span class="pre">scenedetect</span> <span class="pre">-i</span> <span class="pre">video.mp4</span> <span class="pre">save-images</span> <span class="pre">--width</span> <span class="pre">1024</span></code></p>
 <p><code class="docutils literal notranslate"><span class="pre">scenedetect</span> <span class="pre">-i</span> <span class="pre">video.mp4</span> <span class="pre">save-images</span> <span class="pre">--filename</span> <span class="pre">\$SCENE_NUMBER-img\$IMAGE_NUMBER</span></code></p>
 </div></blockquote>
@@ -645,8 +646,28 @@
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-scenedetect-save-images-n">
 <span id="cmdoption-scenedetect-save-images-num-images"></span><span class="sig-name descname"><span class="pre">-n</span></span><span class="sig-prename descclassname"> <span class="pre">N</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--num-images</span></span><span class="sig-prename descclassname"> <span class="pre">N</span></span><a class="headerlink" href="#cmdoption-scenedetect-save-images-n" title="Permalink to this definition">¶</a></dt>
-<dd><p>Number of images to generate per scene. Will always include start/end frame, unless -n 1, in which case the image will be the frame at the mid-point of the scene.</p>
+<dd><p>Number of images to generate per scene. Will always include start/end frame, unless -n 1, in which case the image will be the frame at the mid-point of the scene. Cannot be used with <a class="reference internal" href="#cmdoption-scenedetect-save-images-i"><code class="xref std std-option docutils literal notranslate"><span class="pre">-i/--interval</span></code></a>.</p>
 <p>Default: <code class="docutils literal notranslate"><span class="pre">3</span></code></p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-save-images-i">
+<span id="cmdoption-scenedetect-save-images-interval"></span><span class="sig-name descname"><span class="pre">-i</span></span><span class="sig-prename descclassname"> <span class="pre">DURATION</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--interval</span></span><span class="sig-prename descclassname"> <span class="pre">DURATION</span></span><a class="headerlink" href="#cmdoption-scenedetect-save-images-i" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate one image per DURATION of each scene instead of a fixed number, so longer scenes get more images. Each scene gets floor(length / DURATION) + 1 images, chosen the same way as with <a class="reference internal" href="#cmdoption-scenedetect-save-images-n"><code class="xref std std-option docutils literal notranslate"><span class="pre">-n/--num-images</span></code></a>. Use –min-images and –max-images to limit the number of images per scene. DURATION can be specified in frames (-i 24), in seconds with <cite>s</cite> suffix (-i 1.5s), or timecode (-i 00:00:01.500). Cannot be used with <a class="reference internal" href="#cmdoption-scenedetect-save-images-n"><code class="xref std std-option docutils literal notranslate"><span class="pre">-n/--num-images</span></code></a>.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-save-images-min-images">
+<span class="sig-name descname"><span class="pre">--min-images</span></span><span class="sig-prename descclassname"> <span class="pre">N</span></span><a class="headerlink" href="#cmdoption-scenedetect-save-images-min-images" title="Permalink to this definition">¶</a></dt>
+<dd><p>Minimum number of images per scene. Can only be used with <a class="reference internal" href="#cmdoption-scenedetect-save-images-i"><code class="xref std std-option docutils literal notranslate"><span class="pre">-i/--interval</span></code></a>.</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">1</span></code></p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-save-images-max-images">
+<span class="sig-name descname"><span class="pre">--max-images</span></span><span class="sig-prename descclassname"> <span class="pre">N</span></span><a class="headerlink" href="#cmdoption-scenedetect-save-images-max-images" title="Permalink to this definition">¶</a></dt>
+<dd><p>Maximum number of images per scene, or 0 for no limit. Can only be used with <a class="reference internal" href="#cmdoption-scenedetect-save-images-i"><code class="xref std std-option docutils literal notranslate"><span class="pre">-i/--interval</span></code></a>.</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">0</span></code></p>
 </dd></dl>
 
 <dl class="std option">
@@ -949,7 +970,7 @@
 
 
 
-<p class="blurb">Version: [0.7.2]</p>
+<p class="blurb">Version: [0.7.3-dev0]</p>
 
 
 

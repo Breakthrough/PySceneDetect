@@ -238,6 +238,8 @@ class VideoStreamCv2(VideoStream):
         # *NOTE*: Although OpenCV has `CAP_PROP_PTS`, it doesn't seem to be reliable. For now, we
         # use `CAP_PROP_POS_MSEC` instead, converting to microseconds for sufficient precision to
         # avoid frame-boundary rounding errors at common framerates like 24000/1001.
+        if self._eof_timecode is not None:
+            return self._eof_timecode
         ms = self._cap.get(cv2.CAP_PROP_POS_MSEC)
         time_base = Fraction(1, 1000000)
         return Timecode(pts=round(ms * 1000), time_base=time_base)
@@ -272,6 +274,7 @@ class VideoStreamCv2(VideoStream):
             raise ValueError("Target seek position cannot be negative!")
         target_secs = (self.base_timecode + target).seconds
         self._has_grabbed = False
+        self._eof_timecode = None
         if target_secs > 0:
             # Seek one frame before target so the next read() returns the frame at target.
             one_frame_ms = 1000.0 / float(self._frame_rate)
@@ -310,6 +313,9 @@ class VideoStreamCv2(VideoStream):
     def read(self, decode: bool = True) -> np.ndarray | bool:
         if not self._cap.isOpened():
             return False
+        # At the end of some VFR streams OpenCV reports an earlier CAP_PROP_POS_MSEC once grab()
+        # fails, so keep `position` on the last frame read like the other backends do (#561).
+        last_timecode = self.timecode if self._has_grabbed else None
         has_grabbed = self._cap.grab()
         # If we failed to grab the frame, retry a few times if required.
         if not has_grabbed:
@@ -327,8 +333,10 @@ class VideoStreamCv2(VideoStream):
                     logger.warning("Failed to decode some frames, results may be inaccurate.")
         # We didn't manage to grab a frame even after retrying, so just return.
         if not has_grabbed:
+            self._eof_timecode = last_timecode
             return False
         self._has_grabbed = True
+        self._eof_timecode = None
         # Need to make sure we actually grabbed a frame before calling retrieve.
         if decode and self._has_grabbed:
             _, frame = self._cap.retrieve()
@@ -391,6 +399,7 @@ class VideoStreamCv2(VideoStream):
         self._cap: cv2.VideoCapture = cap
         self._frame_rate: Fraction = framerate_to_fraction(frame_rate)
         self._has_grabbed = False
+        self._eof_timecode: Timecode | None = None
         cap.set(cv2.CAP_PROP_ORIENTATION_AUTO, 1.0)  # https://github.com/opencv/opencv/issues/26795
 
 
