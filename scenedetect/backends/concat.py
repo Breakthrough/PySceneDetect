@@ -12,7 +12,7 @@
 """``scenedetect.backends.concat`` Module
 
 :class:`VideoStreamConcat` presents multiple videos as a single, contiguous
-:class:`VideoStream <scenedetect.video_stream.VideoStream>` with a monotonic PTS-based
+:class:`VideoStream <scenedetect.video_stream.VideoStream>` with a global PTS-based
 timeline. Frames are decoded through any available backend, so the concatenation logic is
 backend-agnostic. The easiest way to construct one is by passing a list of paths to
 :func:`scenedetect.open_video`:
@@ -24,8 +24,8 @@ backend-agnostic. The easiest way to construct one is by passing a list of paths
 
 The resulting stream can be used anywhere a single-video stream can, e.g. with a
 :class:`SceneManager <scenedetect.scene_manager.SceneManager>`. All videos must have the same
-resolution. Framerates may differ, in which case reported frame numbers may be inaccurate -
-use `position` for accurate PTS-based timing.
+resolution. Framerates may differ. Frame ordinals follow the decoded sequence across input
+boundaries; `position` contains each frame's timestamp on the global timeline.
 
 :meth:`VideoStreamConcat.map_span` maps a span of the global timeline back to per-source local
 times (e.g. for use as ffmpeg `-ss`/`-t` arguments).
@@ -40,14 +40,14 @@ from pathlib import Path
 
 import numpy as np
 
-from scenedetect.common import FrameRate, FrameTimecode, Timecode, TimecodeLike
+from scenedetect.common import FrameRate, FrameTimecode, Timecode, TimecodeLike, parse_frame_or_time
 from scenedetect.platform import StrPath
-from scenedetect.video_stream import VideoOpenFailure, VideoStream
+from scenedetect.video_stream import SeekError, VideoOpenFailure, VideoStream, FrameNumbering
 
 logger = logging.getLogger("pyscenedetect")
 
 _GLOBAL_TIME_BASE = Fraction(1, 1000000)
-"""Time base used for the global (concatenated) timeline."""
+"""Time base used for the legacy combined-duration value."""
 
 FRAMERATE_DELTA_TOLERANCE: float = 0.1
 """Tolerance in frames/sec above which a framerate mismatch between inputs is warned about."""
@@ -62,22 +62,21 @@ class _SourceMetadata:
     frame_rate: Fraction
     duration: Fraction
     """Declared duration of the video in seconds (exact rational value). May be inaccurate;
-    the global timeline is corrected once the actual end of the source is reached."""
-    frames: int
-    """Declared number of frames in the video. May be inaccurate."""
+    later source offsets may be extended when decoding reaches this source's end."""
     aspect_ratio: float
 
 
 @dataclass(frozen=True)
 class SourceSpan:
     """Portion of a single input video covered by a time span on the global timeline of a
-    :class:`VideoStreamConcat`. Local times are relative to the start of that video, directly
-    usable as seek targets or ffmpeg `-ss`/`-t` values."""
+    :class:`VideoStreamConcat`. The interval [local_start, local_end) is relative to that video's
+    start. Use local_start as a seek target or ffmpeg `-ss` value; the elapsed time between the
+    endpoints gives the `-t` value."""
 
     source_index: int
     path: Path
-    local_start: FrameTimecode
-    local_end: FrameTimecode
+    local_start: Timecode
+    local_end: Timecode
 
 
 def _exact_seconds(timecode: FrameTimecode) -> Fraction:
@@ -87,7 +86,7 @@ def _exact_seconds(timecode: FrameTimecode) -> Fraction:
 
 class VideoStreamConcat(VideoStream):
     """Concatenates multiple videos into a single, contiguous video stream with a
-    monotonic PTS-based global timeline.
+    PTS-based global timeline.
 
     The concatenation logic is backend-agnostic: frames are read through any PySceneDetect
     `VideoStream` backend, selected by name (default `opencv`). For the most accurate seam
@@ -104,6 +103,7 @@ class VideoStreamConcat(VideoStream):
         paths: ty.Sequence[StrPath],
         frame_rate: FrameRate | None = None,
         backend: str = "opencv",
+        frame_numbering: FrameNumbering = FrameNumbering.RELATIVE,
         **kwargs,
     ):
         """Open a list of videos as one continuous stream.
@@ -114,6 +114,8 @@ class VideoStreamConcat(VideoStream):
             backend: Name of the backend to decode each input with (see
                 :data:`scenedetect.backends.AVAILABLE_BACKENDS`). Falls back to OpenCV if
                 unavailable.
+            frame_numbering: RELATIVE (default) restarts ordinals at 0 after seeking.
+                SOURCE counts frames from the beginning of the concatenated stream.
             kwargs: Optional named arguments to pass to every child backend constructor.
 
         Raises:
@@ -121,7 +123,7 @@ class VideoStreamConcat(VideoStream):
             VideoOpenFailure: A video could not be opened, or resolutions don't match.
         """
         assert paths
-        super().__init__()
+        super().__init__(frame_numbering=frame_numbering)
         # Import here to avoid a circular import (scenedetect.backends imports this module).
         from scenedetect.backends import AVAILABLE_BACKENDS
 
@@ -149,7 +151,6 @@ class VideoStreamConcat(VideoStream):
                     frame_size=cap.frame_size,
                     frame_rate=cap.frame_rate,
                     duration=declared_seconds,
-                    frames=duration.frame_num if duration is not None else 0,
                     aspect_ratio=cap.aspect_ratio,
                 )
             )
@@ -159,15 +160,15 @@ class VideoStreamConcat(VideoStream):
 
         # Global start time of each source in exact rational seconds. Has one extra entry at
         # the end holding the total (declared) duration. Values after the current source are
-        # estimates from declared durations, and are corrected once the actual end of each
-        # source is reached during decode.
+        # estimates from declared durations, and may be extended using an estimated end time
+        # when each source reaches EOF.
         self._offsets: list[Fraction] = [Fraction(0)]
         for source in self._sources:
             self._offsets.append(self._offsets[-1] + source.duration)
 
         self._index: int = 0
-        self._frames_prior: int = 0
         self._decode_failures_prior: int = 0
+        self._pending_frame: np.ndarray | None = None
         assert first_cap is not None
         self._cap: VideoStream = first_cap
 
@@ -193,8 +194,8 @@ class VideoStreamConcat(VideoStream):
                 )
             if abs(float(source.frame_rate) - float(first.frame_rate)) > FRAMERATE_DELTA_TOLERANCE:
                 logger.warning(
-                    "Framerate of %s does not match the first input. Timing is based on "
-                    "presentation timestamps, but reported frame numbers may be inaccurate.",
+                    "Framerate of %s does not match the first input. The reported frame rate "
+                    "is taken from the first input; timestamps use each input backend's timing.",
                     source.path.name,
                 )
 
@@ -205,14 +206,19 @@ class VideoStreamConcat(VideoStream):
 
     def _child_position_seconds(self) -> Fraction:
         """Position of the current source as exact rational seconds (local timeline)."""
-        return _exact_seconds(self._cap.position)
+        position = self._cap.position
+        assert position is not None
+        timecode = position.timecode
+        return timecode.seconds
 
     def _finish_current_source(self):
-        """Correct the declared offset of the next source now that the actual end of the
-        current source is known, guaranteeing strictly monotonic PTS across the seam even
-        when the declared duration is inaccurate."""
+        """Extend later source offsets when the estimated end exceeds the declared duration.
+
+        Estimate the end from the last observed timestamp plus one frame at the child's rate.
+        """
         self._decode_failures_prior += self._cap.decode_failures
-        self._frames_prior += self._cap.frame_number
+        if self._cap.position is None:
+            return
         actual_end = (
             self._offsets[self._index]
             + self._child_position_seconds()
@@ -224,8 +230,22 @@ class VideoStreamConcat(VideoStream):
             for i in range(self._index + 1, len(self._offsets)):
                 self._offsets[i] += delta
 
-    def read(self, decode: bool = True) -> np.ndarray | bool:
-        """Read/decode the next frame. Returns False when all inputs have been processed."""
+    def _current_timecode(self) -> Timecode:
+        """Current position on the global timeline as a Timecode."""
+        seconds = self._offsets[self._index] + self._child_position_seconds()
+        return Timecode(pts=seconds.numerator, time_base=Fraction(1, seconds.denominator))
+
+
+    def _read_next_frame(self, decode: bool = True) -> np.ndarray | bool:
+        """Read/decode the next frame. Returns False when all inputs have been processed.
+
+        Consume a pending seek image before reading from a child. Does not record a global
+        frame position.
+        """
+        if self._pending_frame is not None:
+            frame = self._pending_frame
+            self._pending_frame = None
+            return frame if decode else True
         while True:
             result = self._cap.read(decode=decode)
             if result is not False:
@@ -238,29 +258,114 @@ class VideoStreamConcat(VideoStream):
             logger.debug("Processing complete, opening next video: %s", self._paths[self._index])
             self._cap = self._open_source(self._index)
 
+    def read(self, decode: bool = True) -> np.ndarray | bool:
+        result = self._read_next_frame(decode=decode)
+        if result is False:
+            return False
+        self._record_frame(self._current_timecode())
+        return result
+
     def seek(self, target: TimecodeLike):
         """Seek to `target` on the global timeline. Supports seeking across sources in
-        either direction."""
-        if not isinstance(target, FrameTimecode):
-            target = FrameTimecode(target, self.frame_rate)
-        if target < 0:
+        either direction.
+
+        Integer targets are zero-based source ordinals reached by sequential reading. For
+        example, `seek(4)` followed by `read()` reads the fifth frame, with ordinal 0 in
+        RELATIVE mode or 4 in SOURCE mode.
+
+        SOURCE time seeks count preceding frames sequentially. RELATIVE time seeks use native
+        child seeking and the currently known source offsets, which may depend on declared
+        durations. If the child raises SeekError and another source exists, replay the selected
+        child and continue across source boundaries. Preroll retains the first image encountered
+        at or after the requested time for the next read. Timestamp and seek accuracy depend on
+        the child backend.
+        A successful seek restarts RELATIVE numbering at 0 without resetting frame timestamps.
+
+        Arguments:
+            target: A zero-based source ordinal (int or digit-only string), or a time
+                (float seconds, timecode string, or Timecode).
+
+        Raises:
+            SeekError: Seeking is unsupported or the requested position cannot be reached.
+            OSError: A child backend fails to open, seek, or read an input.
+            TypeError: The target type is unsupported.
+            ValueError: The target is negative, non-finite, or malformed, or has an invalid
+                time base.
+        """
+        if not self.is_seekable:
+            raise SeekError("Seeking is not supported for this video stream.")
+
+        parsed = parse_frame_or_time(target)
+        if parsed < 0:
             raise ValueError("Target seek position cannot be negative!")
-        target_seconds = _exact_seconds(target)
-        # Find the last source which starts at or before the target.
-        index = bisect.bisect_right(self._offsets, target_seconds) - 1
-        index = max(0, min(index, len(self._paths) - 1))
-        if index != self._index:
-            self._decode_failures_prior += self._cap.decode_failures
-            self._frames_prior = sum(source.frames for source in self._sources[:index])
-            self._index = index
-            self._cap = self._open_source(index)
-        local_seconds = target_seconds - self._offsets[index]
-        self._cap.seek(float(local_seconds))
+
+        if isinstance(parsed, Fraction):
+            if self._frame_numbering is FrameNumbering.SOURCE:
+                position = self.position
+                if (
+                    position is not None
+                    and position.timecode.seconds >= parsed
+                ):
+                    self.reset()
+            else:
+                self._pending_frame = None
+                target_seconds = parsed
+                # Find the last source which starts at or before the target.
+                index = bisect.bisect_right(self._offsets, target_seconds) - 1
+                index = max(0, min(index, len(self._paths) - 1))
+                if index != self._index:
+                    self._decode_failures_prior += self._cap.decode_failures
+                    self._index = index
+                    self._cap = self._open_source(index)
+                local_seconds = target_seconds - self._offsets[index]
+                try:
+                    self._cap.seek(
+                        Timecode(
+                            pts=local_seconds.numerator,
+                            time_base=Fraction(1, local_seconds.denominator),
+                        )
+                    )
+                except SeekError:
+                    if self._index + 1 >= len(self._paths):
+                        raise
+                    self._cap.reset()
+                else:
+                    self._position = None
+                    return
+
+            while True:
+                result = self._read_next_frame()
+                if result is False:
+                    raise SeekError("Could not reach the requested time.")
+
+                timecode = self._current_timecode()
+                if timecode.seconds >= parsed:
+                    assert isinstance(result, np.ndarray)
+                    self._pending_frame = result
+                    if self.frame_numbering is FrameNumbering.RELATIVE:
+                        self._position = None
+                    return
+                if self.frame_numbering is FrameNumbering.SOURCE:
+                    self._record_frame(timecode)
+        else:
+            if (
+                self._frame_numbering is FrameNumbering.RELATIVE
+                or parsed <= self.frame_number
+            ):
+                self.reset()
+
+            for _ in range(self.frame_number+1, parsed):
+                if self._read_next_frame(decode=False) is False:
+                    raise SeekError("Could not reach the requested frame.")
+                if self.frame_numbering is FrameNumbering.SOURCE:
+                    self._record_frame(self._current_timecode())
+            return
 
     def reset(self):
         """Close and re-open the stream (equivalent to seeking back to the beginning)."""
         self._index = 0
-        self._frames_prior = 0
+        self._position = None
+        self._pending_frame = None
         self._decode_failures_prior = 0
         self._cap = self._open_source(0)
 
@@ -286,8 +391,6 @@ class VideoStreamConcat(VideoStream):
     def frame_rate(self) -> Fraction:
         """Average framerate of the first input video. Individual sources may vary; use
         `position` for accurate timing."""
-        if self._frame_rate_override is not None:
-            return Fraction(self._frame_rate_override)
         return self._sources[0].frame_rate
 
     @property
@@ -310,28 +413,6 @@ class VideoStreamConcat(VideoStream):
         return self._sources[0].aspect_ratio
 
     @property
-    def position(self) -> FrameTimecode:
-        """Presentation time of the last-read frame on the global timeline (the first frame
-        of the first video has a presentation time of 0)."""
-        global_seconds = self._offsets[self._index] + self._child_position_seconds()
-        return FrameTimecode(
-            timecode=Timecode(
-                pts=round(global_seconds / _GLOBAL_TIME_BASE), time_base=_GLOBAL_TIME_BASE
-            ),
-            fps=self.frame_rate,
-        )
-
-    @property
-    def position_ms(self) -> float:
-        """Presentation time of the last-read frame in milliseconds on the global timeline."""
-        return float((self._offsets[self._index] + self._child_position_seconds()) * 1000)
-
-    @property
-    def frame_number(self) -> int:
-        """Number of frames read so far across all sources."""
-        return self._frames_prior + self._cap.frame_number
-
-    @property
     def decode_failures(self) -> int:
         """Number of frames which failed to decode across all sources."""
         return self._decode_failures_prior + self._cap.decode_failures
@@ -350,11 +431,19 @@ class VideoStreamConcat(VideoStream):
         """Name of the backend used to decode each input video."""
         return self._cap.BACKEND_NAME
 
-    def map_span(self, start: FrameTimecode, end: FrameTimecode) -> list[SourceSpan]:
+    def map_span(self, start: Timecode, end: Timecode) -> list[SourceSpan]:
         """Map a time span on the global timeline to the input video(s) covering it.
-        A span which straddles one or more file boundaries yields multiple entries."""
-        start_seconds = _exact_seconds(start)
-        end_seconds = _exact_seconds(end)
+        A span which straddles one or more file boundaries yields multiple entries.
+
+        Treat [start, end) as a half-open interval and clip it to the currently known source
+        boundaries. Empty intervals return no spans. Raises ValueError if end precedes start.
+        """
+        start_seconds = start.seconds
+        end_seconds = end.seconds
+        if end_seconds < start_seconds:
+            raise ValueError("Span end must not precede its start.")
+        if end_seconds == start_seconds:
+            return []
         spans: list[SourceSpan] = []
         for index, source in enumerate(self._sources):
             source_start, source_end = self._offsets[index], self._offsets[index + 1]
@@ -364,23 +453,19 @@ class VideoStreamConcat(VideoStream):
                 continue
             local_start = max(Fraction(0), start_seconds - source_start)
             local_end = min(source_end - source_start, end_seconds - source_start)
+            if local_end <= local_start:
+                continue
             spans.append(
                 SourceSpan(
                     source_index=index,
                     path=source.path,
-                    local_start=FrameTimecode(
-                        timecode=Timecode(
-                            pts=round(local_start / _GLOBAL_TIME_BASE),
-                            time_base=_GLOBAL_TIME_BASE,
-                        ),
-                        fps=source.frame_rate,
+                    local_start=Timecode(
+                        pts=local_start.numerator,
+                        time_base=Fraction(1, local_start.denominator)
                     ),
-                    local_end=FrameTimecode(
-                        timecode=Timecode(
-                            pts=round(local_end / _GLOBAL_TIME_BASE),
-                            time_base=_GLOBAL_TIME_BASE,
-                        ),
-                        fps=source.frame_rate,
+                    local_end=Timecode(
+                        pts=local_end.numerator,
+                        time_base=Fraction(1, local_end.denominator)
                     ),
                 )
             )

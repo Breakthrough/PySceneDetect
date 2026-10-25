@@ -370,6 +370,91 @@ def test_precision():
     assert FrameTimecode(990, fps).get_timecode(precision=0, use_rounding=False) == "00:00:00"
 
 
+@pytest.mark.parametrize(
+    "pts,time_base,expected",
+    [
+        (0, Fraction(1, 1000), "00:00:00.000"),
+        (125, Fraction(1, 100), "00:00:01.250"),
+        (45296789, Fraction(1, 1000), "12:34:56.789"),
+        (1, Fraction(1001, 24000), "00:00:00.042"),
+        (360000, Fraction(1), "100:00:00.000"),
+    ],
+)
+def test_timecode_get_timecode(pts, time_base, expected):
+    """Format observed timestamps directly, including rational bases and long runtimes."""
+    assert Timecode(pts, time_base).get_timecode() == expected
+
+
+@pytest.mark.parametrize(
+    "seconds,precision,use_rounding,expected",
+    [
+        ("0.11", 2, True, "00:00:00.11"),
+        ("0.99", 1, True, "00:00:01.0"),
+        ("0.99", 1, False, "00:00:00.9"),
+        ("0.99", 0, True, "00:00:01"),
+        ("0.99", 0, False, "00:00:00"),
+        ("1.5", 0, True, "00:00:02"),
+        ("2.5", 0, True, "00:00:02"),
+        ("0.0005", 3, True, "00:00:00.000"),
+        ("0.0015", 3, True, "00:00:00.002"),
+        ("0.0025", 3, True, "00:00:00.002"),
+        ("0.9995", 3, True, "00:00:01.000"),
+        ("59.9995", 3, True, "00:01:00.000"),
+        ("3599.9995", 3, True, "01:00:00.000"),
+        ("1/3", 6, True, "00:00:00.333333"),
+        ("2/3", 6, True, "00:00:00.666667"),
+        ("2/3", 6, False, "00:00:00.666666"),
+        ("1.000000000000000001", 18, True, "00:00:01.000000000000000001"),
+        ("1.000000000000000001", 18, False, "00:00:01.000000000000000001"),
+    ],
+)
+def test_timecode_get_timecode_precision(seconds, precision, use_rounding, expected):
+    """Round exact ties to even and carry through boundaries without float conversion."""
+    value = Fraction(seconds)
+    timecode = Timecode(value.numerator, Fraction(1, value.denominator))
+    assert timecode.get_timecode(precision=precision, use_rounding=use_rounding) == expected
+
+
+@pytest.mark.parametrize(
+    "seconds,expected",
+    [
+        ("1.23499", "00:00:01.234"),
+        ("0.99996", "00:00:00.999"),
+        ("59.99996", "00:00:59.999"),
+        ("3599.99996", "00:59:59.999"),
+    ],
+)
+def test_timecode_get_timecode_truncation_regression(seconds, expected):
+    """Truncation must not round an extra decimal place before discarding it."""
+    value = Fraction(seconds)
+    timecode = Timecode(value.numerator, Fraction(1, value.denominator))
+    assert timecode.get_timecode(use_rounding=False) == expected
+
+
+@pytest.mark.parametrize(
+    "seconds,use_rounding,expected",
+    [
+        ("-1.23499", True, "-00:00:01.235"),
+        ("-1.23499", False, "-00:00:01.234"),
+        ("-59.9995", True, "-00:01:00.000"),
+        ("-0.0001", True, "00:00:00.000"),
+        ("-0.0001", False, "00:00:00.000"),
+    ],
+)
+def test_timecode_get_timecode_negative_timestamps(seconds, use_rounding, expected):
+    """Preserve negative timestamp signs, but do not emit negative zero."""
+    value = Fraction(seconds)
+    timecode = Timecode(value.numerator, Fraction(1, value.denominator))
+    assert timecode.get_timecode(use_rounding=use_rounding) == expected
+
+
+@pytest.mark.parametrize("precision", [-1, -3])
+@pytest.mark.parametrize("use_rounding", [True, False])
+def test_timecode_get_timecode_rejects_negative_precision(precision, use_rounding):
+    with pytest.raises(ValueError, match="precision must be non-negative"):
+        Timecode(0, Fraction(1, 1000)).get_timecode(precision=precision, use_rounding=use_rounding)
+
+
 def test_rational_framerate_precision():
     """Rational framerates should round-trip frame/second conversions without drift."""
     fps = Fraction(24000, 1001)

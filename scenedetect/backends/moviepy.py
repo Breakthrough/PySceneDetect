@@ -16,6 +16,7 @@ the input should support seeking, but does not necessarily have to be a video. F
 image sequences or AviSynth scripts are supported as inputs.
 """
 
+import math
 import os
 import time
 import typing as ty
@@ -34,9 +35,10 @@ from scenedetect.common import (
     Timecode,
     TimecodeLike,
     framerate_to_fraction,
+    parse_frame_or_time
 )
 from scenedetect.platform import StrPath, get_file_name
-from scenedetect.video_stream import SeekError, VideoOpenFailure, VideoStream
+from scenedetect.video_stream import FrameNumbering, SeekError, VideoOpenFailure, VideoStream
 
 logger = getLogger("pyscenedetect")
 
@@ -77,6 +79,8 @@ class VideoStreamMoviePy(VideoStream):
         frame_rate: FrameRate | None = None,
         print_infos: bool = False,
         framerate: float | None = None,
+        *,
+        frame_numbering: FrameNumbering = FrameNumbering.RELATIVE,
     ):
         """Open a video or device.
 
@@ -87,13 +91,15 @@ class VideoStreamMoviePy(VideoStream):
             print_infos: If True, prints information about the opened video to stdout.
             framerate: [DEPRECATED] Use `frame_rate` instead. Retained as a deprecated
                 alias for backwards compatibility; ignored when `frame_rate` is provided.
+            frame_numbering: RELATIVE (default) restarts ordinals at 0 after seeking.
+                SOURCE counts frames from the source beginning.
 
         Raises:
             OSError: file could not be found, access was denied, or the video is corrupt
             VideoOpenFailure: video could not be opened (may be corrupted)
             ValueError: specified frame rate is invalid
         """
-        super().__init__()
+        super().__init__(frame_numbering=frame_numbering)
 
         if framerate is not None:
             warnings.warn(
@@ -122,14 +128,10 @@ class VideoStreamMoviePy(VideoStream):
         self._reader = _retry_on_oserror(
             "open", lambda: FFMPEG_VideoReader(self._path, print_infos=print_infos)
         )
-        # This will always be one behind self._reader.lastread when we finally call read()
-        # as MoviePy caches the first frame when opening the video. Thus self._last_frame
-        # will always be the current frame, and self._reader.lastread will be the next.
-        self._last_frame: bool | np.ndarray = False
-        self._last_frame_rgb: np.ndarray | None = None
-        # Older versions don't track the video position when calling read_frame so we need
-        # to keep track of the current frame number.
-        self._frame_number = 0
+        # TODO: Support native VFR timestamps. FFMPEG_VideoReader exposes no per-frame
+        # PTS, so this backend currently derives timestamps from the frame rate.
+        # Timestamp of the cached image that the next read will return.
+        self._next_timecode = Timecode(pts=0, time_base=1 / self.frame_rate)
         # We need to manually keep track of EOF as duration may not be accurate.
         self._eof = False
         self._aspect_ratio: float | None = None
@@ -189,113 +191,133 @@ class VideoStreamMoviePy(VideoStream):
                 self._aspect_ratio = 1.0
         return self._aspect_ratio
 
-    @property
-    def position(self) -> FrameTimecode:
-        """Current position within stream as FrameTimecode.
-
-        This can be interpreted as presentation time stamp of the last frame which was decoded by
-        calling `read`. This will always return 0 (e.g. be equal to `base_timecode`) if no frames
-        have been `read` yet."""
-        frame_number = max(self._frame_number - 1, 0)
-        # Synthesize a Timecode from the frame count and rational framerate.
-        # MoviePy assumes CFR, so this is equivalent to frame-based timing.
-        # Use the framerate denominator as the time_base denominator for exact timing.
-        fps = self.frame_rate
-        time_base = Fraction(1, fps.numerator)
-        pts = frame_number * fps.denominator
-        timecode = Timecode(pts=pts, time_base=time_base)
-        return FrameTimecode(timecode=timecode, fps=fps)
-
-    @property
-    def position_ms(self) -> float:
-        """Current position within stream as a float of the presentation time in milliseconds.
-        The first frame has a time of 0.0 ms.
-
-        This method will always return 0.0 if no frames have been `read`."""
-        return self.position.seconds * 1000.0
-
-    @property
-    def frame_number(self) -> int:
-        """Current position within stream in frames as an int.
-
-        0 indicates that no frames have been `read`, 1 indicates the first frame was just read.
-        """
-        return self._frame_number
-
     def seek(self, target: TimecodeLike):
-        """Seek to the given timecode. If given as a frame number, represents the current seek
-        pointer (e.g. if seeking to 0, the next frame decoded will be the first frame of the video).
+        """Position the next read at a source frame ordinal or a time on the FPS-derived clock.
 
-        For 1-based indices (first frame is frame #1), the target frame number needs to be converted
-        to 0-based by subtracting one. For example, if we want to seek to the first frame, we call
-        seek(0) followed by read(). If we want to seek to the 5th frame, we call seek(4) followed
-        by read(), at which point frame_number will be 5.
+        Integer targets use sequential reading in both numbering modes. For example, `seek(4)`
+        followed by `read()` reads the fifth frame. Its ordinal is 0 in RELATIVE mode or 4 in
+        SOURCE mode.
+
+        Time targets select the first frame at or after the requested time on the clock derived
+        from `frame_rate`. Native per-frame presentation timestamps are not available. RELATIVE
+        mode uses native MoviePy seeking; SOURCE mode counts the preceding frames sequentially.
+        A successful seek restarts RELATIVE numbering at 0 without resetting frame timestamps.
 
         Not supported if the VideoStream is a device/camera. Untested with web streams.
 
         Arguments:
-            target: Target position in video stream to seek to.
-                If float, interpreted as time in seconds.
-                If int, interpreted as frame number.
+            target: A zero-based source ordinal (int or digit-only string), or a time
+                (float seconds, timecode string, or Timecode).
         Raises:
-            SeekError: An error occurs while seeking, or seeking is not supported.
-            ValueError: `target` is not a valid value (i.e. it is negative).
+            SeekError: The target cannot be reached, or seeking is not supported.
+            OSError: MoviePy fails while seeking.
+            TypeError: The target type is unsupported.
+            ValueError: The target is negative, non-finite, or malformed, or has an invalid
+                time base.
         """
-        success = False
-        if not isinstance(target, FrameTimecode):
-            target = FrameTimecode(target, self.frame_rate)
-        duration = self.duration
-        assert duration is not None
-        try:
-            self._last_frame = _retry_on_oserror(
-                "seek", lambda: self._reader.get_frame(target.seconds)
-            )
-            if hasattr(self._reader, "last_read") and target >= duration:
-                raise SeekError("MoviePy > 2.0 does not have proper EOF semantics (#461).")
-            self._frame_number = min(
-                target.frame_num,
-                FrameTimecode(self._reader.infos["duration"], self.frame_rate).frame_num - 1,
-            )
-            success = True
-        except OSError as ex:
-            # TODO(https://scenedetect.com/issues/380): Other backends do not currently throw an
-            # exception if attempting to seek past EOF.
-            #
-            # We need to ensure consistency for seeking past end of video with respect to errors and
-            # behaviour, and should probably gracefully stop at the last frame instead of throwing.
-            if target >= duration:
-                raise SeekError("Target frame is beyond end of video!") from ex
-            raise
-        finally:
-            # Leave the object in a valid state on any errors.
-            if not success:
+
+        if not self.is_seekable:
+            raise SeekError("Seeking is not supported for this video stream!")
+        
+        parsed = parse_frame_or_time(target)
+        if parsed < 0:
+            raise ValueError(f"Target frame/timecode ({target}) is negative!")
+
+        if isinstance(parsed, Fraction):
+            target_frame = math.ceil(parsed * self.frame_rate)
+            if self.frame_numbering is FrameNumbering.SOURCE:
+                self.seek(target_frame)
+                if self._eof:
+                    raise SeekError("Could not seek to the requested frame")
+                return
+
+            reader_time = target_frame / self._reader.fps
+            success = False
+            duration = self._reader.infos["duration"]
+            try:
+                # MoviePy 1.x does not update pos during direct read_frame() calls.
+                self._reader.pos = self._next_timecode.pts + 1
+                _retry_on_oserror(
+                    "seek", lambda: self._reader.get_frame(reader_time)
+                )
+                if hasattr(self._reader, "last_read") and reader_time >= duration:
+                    raise SeekError("MoviePy > 2.0 does not have proper EOF semantics (#461).")
+                self._next_timecode = Timecode(
+                    pts=target_frame, 
+                    time_base=1 / self.frame_rate
+                )
+                self._position = None
+                self._eof = False
+                success = True
+            except OSError as ex:
+                # TODO(https://scenedetect.com/issues/380): Other backends do not currently throw an
+                # exception if attempting to seek past EOF.
+                #
+                # We need to ensure consistency for seeking past end of video with respect to errors and
+                # behaviour, and should probably gracefully stop at the last frame instead of throwing.
+                if reader_time >= duration:
+                    raise SeekError("Target frame is beyond end of video!") from ex
+                raise
+            finally:
+                # Leave the object in a valid state on any errors.
+                if not success:
+                    self.reset()
+            
+        else:
+            if (self.frame_numbering is FrameNumbering.RELATIVE
+                or parsed <= self.frame_number):
                 self.reset()
+
+            for _ in range(self.frame_number+1, parsed):
+                item = self._read_next_frame()
+                if item is None:
+                    raise SeekError("Could not seek to the requested frame")
+                if self._frame_numbering is FrameNumbering.SOURCE:
+                    _, timecode = item
+                    self._record_frame(timecode)
+            return
 
     def reset(self, print_infos=False):
         """Close and re-open the VideoStream (should be equivalent to calling `seek(0)`)."""
-        self._last_frame = False
-        self._last_frame_rgb = None
-        self._frame_number = 0
+        self._reader.close()
+        self._position = None
         self._eof = False
         self._reader = _retry_on_oserror(
             "reset", lambda: FFMPEG_VideoReader(self._path, print_infos=print_infos)
         )
+        self._next_timecode = Timecode(pts=0, time_base=1 / self.frame_rate)
 
     def read(self, decode: bool = True) -> np.ndarray | bool:
-        if not hasattr(self._reader, "lastread") or self._eof:
+        item = self._read_next_frame()
+        if item is None:
             return False
-        has_last_read = hasattr(self._reader, "last_read")
-        # In MoviePy 2.0 there is a separate property we need to read named differently (#461).
-        self._last_frame = self._reader.last_read if has_last_read else self._reader.lastread
-        # Read the *next* frame for the following call to read, and to check for EOF.
-        frame = self._reader.read_frame()
-        if frame is self._last_frame:
-            if self._eof:
-                return False
+
+        frame, timecode = item
+        result = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB) if decode else True
+        self._record_frame(timecode)
+        return result
+
+    def _read_next_frame(self) -> tuple[np.ndarray, Timecode] | None:
+        """Return the cached image and timestamp without recording a position.
+
+        Prefetch the next image. If it reaches EOF, the current image is still returned;
+        the following call returns None.
+        """
+        if self._eof:
+            return None
+        if hasattr(self._reader, "last_read"):
+            frame = self._reader.last_read
+        elif hasattr(self._reader, "lastread"):
+            frame = self._reader.lastread
+        else:
+            return None
+
+        timecode = self._next_timecode
+        if self._reader.read_frame() is frame:
             self._eof = True
-        self._frame_number += 1
-        if decode and isinstance(self._last_frame, np.ndarray):
-            self._last_frame_rgb = cv2.cvtColor(self._last_frame, cv2.COLOR_BGR2RGB)
-            assert self._last_frame_rgb is not None
-            return self._last_frame_rgb
-        return not self._eof
+        else:
+            self._next_timecode = Timecode(
+                pts=timecode.pts + 1, time_base=timecode.time_base
+            )
+
+        return frame, timecode

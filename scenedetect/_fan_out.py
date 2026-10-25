@@ -126,11 +126,14 @@ class FanOutVideoStream:
                 frame = self._source.read()
                 if frame is False:
                     break
+                position = self._source.position
+                assert position is not None
+                item = (frame, position)
                 # Block per-consumer; slowest consumer paces the source.
                 for q in self._queues:
                     while not self._stop.is_set():
                         try:
-                            q.put(frame, timeout=0.1)
+                            q.put(item, timeout=0.1)
                             break
                         except queue.Full:
                             continue
@@ -161,14 +164,16 @@ class _FanOutConsumer(VideoStream):
     Maintains its own ``frame_number`` / ``position`` -- both advance only when this
     consumer calls ``read()``, independent of the source's position or sibling
     consumers.
+    
+    Each consumer preserves the source's frame positions and numbering mode.
     """
 
     BACKEND_NAME = "fan_out"
 
     def __init__(self, parent: FanOutVideoStream, index: int):
+        super().__init__(frame_numbering=parent._source.frame_numbering)
         self._parent = parent
         self._index = index
-        self._frame_number = 0
         self._eof = False
 
     @property
@@ -203,24 +208,6 @@ class _FanOutConsumer(VideoStream):
     def decode_failures(self) -> int:
         return self._parent._source.decode_failures
 
-    @property
-    def frame_number(self) -> int:
-        return self._frame_number
-
-    @property
-    def position(self) -> FrameTimecode:
-        # Mirrors VideoStream contract: "frame 1 corresponds to presentation time 0;
-        # returns 0 even if frame_number is 1."
-        n = max(0, self._frame_number - 1)
-        return FrameTimecode(timecode=n, fps=self.frame_rate)
-
-    @property
-    def position_ms(self) -> float:
-        if self._frame_number == 0:
-            return 0.0
-        fps = self.frame_rate
-        return float(1000 * (self._frame_number - 1) * fps.denominator) / float(fps.numerator)
-
     def read(self, decode: bool = True) -> np.ndarray | bool:
         if self._eof:
             return False
@@ -230,11 +217,12 @@ class _FanOutConsumer(VideoStream):
             if self._parent._reader_exc is not None:
                 raise self._parent._reader_exc
             return False
-        self._frame_number += 1
+        frame, position = item
+        self._position = position
         # The source already decoded the frame; decode=False just suppresses returning it.
         if not decode:
             return True
-        return item  # type: ignore[return-value]
+        return frame  # type: ignore[return-value]
 
     def reset(self) -> None:
         raise SeekError("FanOutVideoStream consumers are forward-only; reset the source instead.")

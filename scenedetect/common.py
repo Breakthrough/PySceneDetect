@@ -62,6 +62,7 @@ disallows negative values, and will clamp negative results to 0.
 """
 
 import math
+import re
 import typing as ty
 import warnings
 from dataclasses import dataclass
@@ -90,13 +91,12 @@ will be converted to rationals at runtime via :func:`framerate_to_fraction`."""
 SceneList = list[tuple["FrameTimecode", "FrameTimecode"]]
 """Type hint for a list of scenes in the form (start time, end time)."""
 
-# `Timecode` and `FrameTimecode` are defined later in this module; using `typing.Union` with
+# `Timecode` is defined later in this module; using `typing.Union` with
 # string forward refs is the only form that both works at the top of the file (the PEP 604 `|`
 # syntax can't accept string forward refs) and supports `TimecodeLike | None` at use sites.
-TimecodeLike: ty.TypeAlias = ty.Union[int, float, str, "Timecode", "FrameTimecode"]
-"""Type hint for values that can be converted to a :class:`FrameTimecode`. Accepts a frame number
-(`int`), number of seconds (`float`), timecode string (`str` of the form ``HH:MM:SS[.nnn]``), a
-:class:`Timecode`, or an existing :class:`FrameTimecode`."""
+TimecodeLike: ty.TypeAlias = ty.Union[int, float, str, "Timecode"]
+"""Frame-or-time input accepted by :func:`parse_frame_or_time`: a frame number (`int`),
+seconds (`float`), a frame/seconds/clock string (`str`), or a :class:`Timecode`."""
 
 TimecodePair = tuple["FrameTimecode", "FrameTimecode"]
 """Type hint for timecode pairs, typically representing the start/end of a scene."""
@@ -109,9 +109,9 @@ MAX_FPS_DELTA: float = 1.0 / 1000000000.0
 """Maximum amount two framerates can differ by for equality testing. Currently 1 frame/nanosec."""
 
 # `datetime.timedelta` does not expose seconds per minute/hour as constants, so we define our own.
-_SECONDS_PER_MINUTE = 60.0
-_SECONDS_PER_HOUR = 60.0 * _SECONDS_PER_MINUTE
-_MINUTES_PER_HOUR = 60.0
+_SECONDS_PER_MINUTE = 60
+_SECONDS_PER_HOUR = 60 * _SECONDS_PER_MINUTE
+_MINUTES_PER_HOUR = 60
 
 # Tolerance for snapping a float value's framerate to an NTSC-derived rational (N * 1000/1001).
 # e.g. 23.976 should be detected as 24000/1001, 29.97 should be detected as 30000/1001, etc.
@@ -170,8 +170,80 @@ class Timecode:
     """The base unit in which `pts` is measured."""
 
     @property
-    def seconds(self) -> float:
-        return float(self.time_base * self.pts)
+    def seconds(self) -> Fraction:
+        return self.time_base * self.pts
+
+    def get_timecode(self, precision: int = 3, use_rounding: bool = True) -> str:
+        """Format the timestamp as HH:MM:SS[.nnn]."""
+        if precision < 0:
+            raise ValueError("precision must be non-negative")
+
+        seconds = self.seconds
+        scale = 10**precision
+        scaled = abs(seconds) * scale
+        units = round(scaled) if use_rounding else scaled.numerator // scaled.denominator
+
+        whole_seconds, fraction = divmod(units, scale)
+        hours, remainder = divmod(whole_seconds, _SECONDS_PER_HOUR)
+        minutes, seconds_part = divmod(remainder, _SECONDS_PER_MINUTE)
+
+        sign = "-" if seconds < 0 and units else ""
+        suffix = f".{fraction:0{precision}d}" if precision else ""
+        return f"{sign}{hours:02d}:{minutes:02d}:{seconds_part:02d}{suffix}"
+
+
+def parse_frame_or_time(value: TimecodeLike) -> int | Fraction:
+    """Parse a non-negative input, preserving frames (int) or seconds (Fraction).
+
+    Digit-only strings denote frames. Decimal strings, seconds suffixed with ``s``,
+    and ``MM:SS``/``HH:MM:SS`` strings denote seconds. A Timecode uses its exact
+    ``pts * time_base``; floats use their decimal string representation. No FPS
+    conversion or frame rounding is performed.
+
+    Raises:
+        TypeError: Unsupported input type (including bool).
+        ValueError: Negative, non-finite, or malformed input, or invalid time base.
+    """
+    result: int | Fraction
+    if isinstance(value, bool):
+        raise TypeError("Boolean values are not frame-or-time inputs.")
+    if isinstance(value, int):
+        result = value
+    elif isinstance(value, float):
+        if not math.isfinite(value):
+            raise ValueError("Time must be finite.")
+        result = Fraction(str(value))
+    elif isinstance(value, Timecode):
+        if value.time_base <= 0:
+            raise ValueError("Time base must be positive.")
+        result = value.seconds
+    elif isinstance(value, str):
+        text = value.strip()
+        if re.fullmatch(r"[0-9]+", text):
+            return int(text)
+        parts = text.split(":")
+        if len(parts) not in (1, 2, 3):
+            raise ValueError("Invalid timecode format.")
+        hours = minutes = 0
+        seconds_text = parts[-1]
+        if len(parts) == 1:
+            seconds_text = seconds_text.removesuffix("s")
+        else:
+            if not all(re.fullmatch(r"[0-9]+", part) for part in parts[:-1]):
+                raise ValueError("Invalid timecode format.")
+            hours = int(parts[0]) if len(parts) == 3 else 0
+            minutes = int(parts[-2])
+        if not re.fullmatch(r"(?:[0-9]+(?:\.[0-9]*)?|\.[0-9]+)", seconds_text):
+            raise ValueError("Invalid timecode seconds.")
+        seconds = Fraction(seconds_text)
+        if len(parts) > 1 and (minutes >= 60 or seconds >= 60):
+            raise ValueError("Timecode minutes and seconds must be less than 60.")
+        result = hours * 3600 + minutes * 60 + seconds
+    else:
+        raise TypeError(f"Unsupported frame-or-time input: {type(value)}")
+    if result < 0:
+        raise ValueError("Frame-or-time input must be non-negative.")
+    return result
 
 
 @dataclass(frozen=True)
@@ -186,6 +258,34 @@ class _Seconds:
     """Represents a time in seconds."""
 
     value: float
+
+
+@dataclass(frozen=True)
+class FramePosition:
+    """Represents a frame's position, including its timecode and frame number."""
+
+    timecode: Timecode
+    frame_number: int
+
+    def __sub__(self, other: "FramePosition") -> "FrameDuration":
+        if not isinstance(other, FramePosition):
+            raise TypeError(f"Cannot subtract {type(other)} from FramePosition")
+
+        frames = self.frame_number - other.frame_number
+        elapsed = self.timecode.seconds - other.timecode.seconds
+
+        if frames < 0 or elapsed < 0:
+            raise ValueError("Cannot subtract FramePosition objects with negative result")
+
+        return FrameDuration(frames=frames, elapsed=elapsed)
+
+
+@dataclass(frozen=True)
+class FrameDuration:
+    """Represents a duration of time, including its length in frames and seconds."""
+
+    frames: int
+    elapsed: Fraction
 
 
 class FrameTimecode:
@@ -386,7 +486,7 @@ class FrameTimecode:
     def seconds(self) -> float:
         """The frame's position in number of seconds."""
         if isinstance(self._time, Timecode):
-            return self._time.seconds
+            return float(self._time.seconds)
         if isinstance(self._time, _Seconds):
             return self._time.value
         # `_FrameNumber` is only assigned after `_rate` is set.
@@ -541,7 +641,7 @@ class FrameTimecode:
         if isinstance(other, str):
             return self._seconds_to_frames(self._timecode_to_seconds(other))
         if isinstance(other, Timecode):
-            return self._seconds_to_frames(other.seconds)
+            return self._seconds_to_frames(float(other.seconds))
         if isinstance(other, FrameTimecode):
             # If comparing two FrameTimecodes, they must have the same framerate for frame-based
             # operations.
@@ -804,7 +904,7 @@ class FrameTimecode:
         if isinstance(other, str):
             return self._timecode_to_seconds(other)
         if isinstance(other, Timecode):
-            return other.seconds
+            return float(other.seconds)
         if isinstance(other, FrameTimecode):
             return other.seconds
         raise TypeError("Unsupported type for performing arithmetic with FrameTimecode.")
@@ -840,8 +940,5 @@ def _compare_as_exact(other: ty.Any, base: FrameTimecode) -> "tuple[Fraction, Fr
         and isinstance(other._time, Timecode)
         and base._rate == other._rate
     ):
-        return (
-            base._time.pts * base._time.time_base,
-            other._time.pts * other._time.time_base,
-        )
+        return base._time.seconds, other._time.seconds
     return None

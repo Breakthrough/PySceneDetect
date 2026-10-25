@@ -536,10 +536,6 @@ class SceneManager:
 
         self._base_timecode = video.base_timecode
 
-        # TODO: Figure out a better solution for communicating framerate to StatsManager.
-        if self._stats_manager is not None:
-            self._stats_manager._base_timecode = self._base_timecode
-
         start_frame_num: int = video.frame_number
         if end_time is not None:
             end_time = self._base_timecode + end_time
