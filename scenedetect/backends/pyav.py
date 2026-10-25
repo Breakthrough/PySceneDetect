@@ -11,6 +11,7 @@
 #
 """:class:`VideoStreamAv` provides an adapter for the PyAV av.InputContainer object."""
 
+import contextlib
 import os
 import typing as ty
 import warnings
@@ -116,7 +117,7 @@ class VideoStreamAv(VideoStream):
         self._reopened = True
         self._decode_failures = 0
         self._warning_displayed = False
-        # True if `_io` was opened by this object (from a path) and must be closed in `__del__`.
+        # True if `_io` was opened by this object (from a path) and must be closed in `close()`.
         # Set before anything below can raise so a partially constructed object is safe to finalize.
         self._owns_io = False
 
@@ -135,7 +136,7 @@ class VideoStreamAv(VideoStream):
         try:
             if isinstance(path_or_io, (str, os.PathLike)):
                 self._path: str = os.fspath(path_or_io)
-                # File handle is tied to the lifetime of this object and released in `__del__`.
+                # File handle is owned by this object and released in `close()` (or `__del__`).
                 self._io = open(self._path, "rb")  # noqa: SIM115
                 self._owns_io = True
                 if not self._name:
@@ -176,23 +177,40 @@ class VideoStreamAv(VideoStream):
     def __del__(self):
         # Finalizers must never raise - an exception here becomes an unraisable error. During
         # interpreter shutdown the underlying handles are reclaimed by the OS anyway.
-        try:
-            # Close the decode generator first to break its cycle with the container.
-            decoder = getattr(self, "_decoder", None)
-            if decoder is not None:
-                decoder.close()
-            # `_container` is unset if `__init__` raised before `av.open()` succeeded.
-            container = getattr(self, "_container", None)
-            if container is not None:
-                container.close()
-            # Closing the container does not close the file object backing it. Only close `_io`
-            # if we opened it ourselves; file-like objects passed by the caller remain theirs.
-            if getattr(self, "_owns_io", False):
-                io = getattr(self, "_io", None)
-                if io is not None:
-                    io.close()
-        except Exception:
-            pass
+        with contextlib.suppress(Exception):
+            self.close()
+
+    def close(self) -> None:
+        """Close the video, releasing the decoder, the container, and the file handle opened if
+        `path_or_io` is a path. File-like objects passed by the caller are left open. Has no
+        effect if the stream is already closed. See
+        :meth:`VideoStream.close() <scenedetect.video_stream.VideoStream.close>` for details."""
+        if self._closed:
+            return
+        # Record the properties read from the container while it is open. They can't be read if
+        # `__init__` raised (`__del__` also calls this method) or the video can't be decoded.
+        with contextlib.suppress(Exception):
+            self._closed_frame_size = self.frame_size
+            self._closed_aspect_ratio = self.aspect_ratio
+        # Close the decode generator first to break its cycle with the container.
+        decoder = getattr(self, "_decoder", None)
+        if decoder is not None:
+            decoder.close()
+            self._decoder = None
+        # `_container` is unset if `__init__` raised before `av.open()` succeeded.
+        container = getattr(self, "_container", None)
+        if container is not None:
+            container.close()
+        # Closing the container does not close the file object backing it. Only close `_io`
+        # if we opened it ourselves; file-like objects passed by the caller remain theirs.
+        if getattr(self, "_owns_io", False):
+            io = getattr(self, "_io", None)
+            if io is not None:
+                io.close()
+        # Only mark the stream as closed once everything is released, so a failed `close()` can be
+        # retried. The last decoded frame is dropped, since `position` is undefined once closed.
+        self._closed = True
+        self._frame = None
 
     #
     # VideoStream Methods/Properties
@@ -219,6 +237,8 @@ class VideoStreamAv(VideoStream):
     @property
     def frame_size(self) -> tuple[int, int]:
         """Size of each video frame in pixels as a tuple of (width, height)."""
+        if self._closed:
+            return self._closed_frame_size
         return (self._codec_context.width, self._codec_context.height)
 
     @property
@@ -276,6 +296,8 @@ class VideoStreamAv(VideoStream):
     @property
     def aspect_ratio(self) -> float:
         """Pixel aspect ratio as a float (1.0 represents square pixels)."""
+        if self._closed:
+            return self._closed_aspect_ratio
         # Unset is None on PyAV < 19 and a falsy AVRational(0, 1) on PyAV 19+.
         dar = getattr(self._codec_context, "display_aspect_ratio", None)
         if not dar or dar.denominator <= 0:
@@ -301,8 +323,10 @@ class VideoStreamAv(VideoStream):
                 If float, interpreted as time in seconds.
                 If int, interpreted as frame number.
         Raises:
-            ValueError: `target` is not a valid value (i.e. it is negative).
+            ValueError: `target` is not a valid value (i.e. it is negative), or the stream is
+                closed.
         """
+        self._check_open()
         if not isinstance(target, FrameTimecode):
             target = FrameTimecode(target, self.frame_rate)
         if target < 0:
@@ -326,6 +350,7 @@ class VideoStreamAv(VideoStream):
 
     def reset(self):
         """Close and re-open the VideoStream (should be equivalent to calling `seek(0)`)."""
+        self._check_open()
         self._container.close()
         self._frame = None
         self._decoder = None
@@ -335,6 +360,7 @@ class VideoStreamAv(VideoStream):
             raise VideoOpenFailure() from ex
 
     def read(self, decode: bool = True) -> np.ndarray | bool:
+        self._check_open()
         consecutive_failures = 0
         while True:
             # Reuse a persistent decoder generator so the codec's internal frame buffer (used for

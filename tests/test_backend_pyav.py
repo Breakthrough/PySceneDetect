@@ -55,6 +55,36 @@ def test_video_stream_pyav_del_closes_owned_file_handle(test_video_file: str):
     assert handle.closed
 
 
+def test_close_leaves_caller_file_open(test_video_file: str, auto_close):
+    """`close()` must not close a file-like object supplied by the caller (#568)."""
+    with open(test_video_file, mode="rb") as video_file:
+        stream = auto_close(VideoStreamAv(path_or_io=video_file, threading_mode=None))
+        assert stream.read() is not False
+        stream.close()
+        assert not video_file.closed
+
+
+def test_close_releases_owned_file_handle(
+    test_video_file: str, monkeypatch: pytest.MonkeyPatch, auto_close
+):
+    """`close()` must release the file handle the stream opened from a path (#568), without
+    waiting for the stream to be finalized."""
+    opened = []
+
+    # Record the handle as the backend opens it, rather than reaching into the stream.
+    def recording_open(*args, **kwargs):
+        handle = open(*args, **kwargs)  # noqa: SIM115
+        opened.append(handle)
+        return handle
+
+    monkeypatch.setattr("scenedetect.backends.pyav.open", recording_open, raising=False)
+    stream = auto_close(VideoStreamAv(test_video_file, threading_mode=None))
+    assert len(opened) == 1
+    assert not opened[0].closed
+    stream.close()
+    assert opened[0].closed
+
+
 def _make_invalid_data_error() -> Exception:
     # AVERROR_INVALIDDATA ("Invalid data found when processing input").
     return av.error.InvalidDataError(  # type: ignore[attr-defined]
