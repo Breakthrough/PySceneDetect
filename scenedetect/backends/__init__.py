@@ -22,9 +22,8 @@ If you already have a `cv2.VideoCapture` object you want to use for scene detect
 use a :class:`VideoCaptureAdapter <scenedetect.backends.opencv.VideoCaptureAdapter>` instead
 of a backend. This is useful when working with devices or streams, for example.
 
-===============================================================
-Video Files
-===============================================================
+.. rubric:: Video Files
+   :name: video-files
 
 Assuming we have a file `video.mp4` in our working directory, we can load it and perform scene
 detection on it using :func:`open_video`:
@@ -67,9 +66,8 @@ Multiple videos can be opened as one continuous stream by passing a list of path
 
     video = open_video(["part1.mp4", "part2.mp4"])
 
-===============================================================
-Devices / Cameras / Pipes
-===============================================================
+.. rubric:: Devices / Cameras / Pipes
+   :name: devices-cameras-pipes
 
 You can use an existing `cv2.VideoCapture` object with the PySceneDetect API using a
 :class:`VideoCaptureAdapter <scenedetect.backends.opencv.VideoCaptureAdapter>`. For example,
