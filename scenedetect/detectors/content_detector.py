@@ -119,7 +119,8 @@ class ContentDetector(SceneDetector):
             weights: Weight to place on each component when calculating frame score
                 (`content_val` in a statsfile, the value `threshold` is compared against).
             luma_only: If True, only considers changes in the luminance channel of the video.
-                Equivalent to specifying `weights` as :data:`ContentDetector.LUMA_ONLY`.
+                Equivalent to specifying `weights` as
+                :attr:`~scenedetect.detectors.content_detector.ContentDetector.LUMA_ONLY_WEIGHTS`.
                 Overrides `weights` if both are set.
             kernel_size: Size of kernel for expanding detected edges. Must be odd integer
                 greater than or equal to 3. If None, automatically set using video resolution.

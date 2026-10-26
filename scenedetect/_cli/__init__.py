@@ -675,8 +675,9 @@ Examples:
     "-w",
     type=(float, float, float, float),
     default=None,
+    metavar="HUE SAT LUM EDGE",
     help='Weights of 4 components ("delta_hue", "delta_sat", "delta_lum", "delta_edges") used to calculate "content_val".{}'.format(
-        USER_CONFIG.get_help_string("detect-content", "weights")
+        USER_CONFIG.get_help_string("detect-adaptive", "weights")
     ),
 )
 @click.option(
