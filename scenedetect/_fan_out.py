@@ -164,7 +164,7 @@ class _FanOutConsumer(VideoStream):
     Maintains its own ``frame_number`` / ``position`` -- both advance only when this
     consumer calls ``read()``, independent of the source's position or sibling
     consumers.
-    
+
     Each consumer preserves the source's frame positions and numbering mode.
     """
 

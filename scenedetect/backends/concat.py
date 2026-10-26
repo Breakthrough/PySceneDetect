@@ -42,7 +42,7 @@ import numpy as np
 
 from scenedetect.common import FrameRate, FrameTimecode, Timecode, TimecodeLike, parse_frame_or_time
 from scenedetect.platform import StrPath
-from scenedetect.video_stream import SeekError, VideoOpenFailure, VideoStream, FrameNumbering
+from scenedetect.video_stream import FrameNumbering, SeekError, VideoOpenFailure, VideoStream
 
 logger = logging.getLogger("pyscenedetect")
 

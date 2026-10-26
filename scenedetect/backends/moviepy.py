@@ -35,7 +35,7 @@ from scenedetect.common import (
     Timecode,
     TimecodeLike,
     framerate_to_fraction,
-    parse_frame_or_time
+    parse_frame_or_time,
 )
 from scenedetect.platform import StrPath, get_file_name
 from scenedetect.video_stream import FrameNumbering, SeekError, VideoOpenFailure, VideoStream
@@ -218,7 +218,7 @@ class VideoStreamMoviePy(VideoStream):
 
         if not self.is_seekable:
             raise SeekError("Seeking is not supported for this video stream!")
-        
+
         parsed = parse_frame_or_time(target)
         if parsed < 0:
             raise ValueError(f"Target frame/timecode ({target}) is negative!")
@@ -243,7 +243,7 @@ class VideoStreamMoviePy(VideoStream):
                 if hasattr(self._reader, "last_read") and reader_time >= duration:
                     raise SeekError("MoviePy > 2.0 does not have proper EOF semantics (#461).")
                 self._next_timecode = Timecode(
-                    pts=target_frame, 
+                    pts=target_frame,
                     time_base=1 / self.frame_rate
                 )
                 self._position = None
@@ -253,8 +253,9 @@ class VideoStreamMoviePy(VideoStream):
                 # TODO(https://scenedetect.com/issues/380): Other backends do not currently throw an
                 # exception if attempting to seek past EOF.
                 #
-                # We need to ensure consistency for seeking past end of video with respect to errors and
-                # behaviour, and should probably gracefully stop at the last frame instead of throwing.
+                # We need to ensure consistency for seeking past end of video with respect to errors
+                # and behaviour, and should probably gracefully stop at the last frame instead of
+                # throwing.
                 if reader_time >= duration:
                     raise SeekError("Target frame is beyond end of video!") from ex
                 raise
@@ -262,7 +263,7 @@ class VideoStreamMoviePy(VideoStream):
                 # Leave the object in a valid state on any errors.
                 if not success:
                     self.reset()
-            
+
         else:
             if (self.frame_numbering is FrameNumbering.RELATIVE
                 or parsed <= self.frame_number):
