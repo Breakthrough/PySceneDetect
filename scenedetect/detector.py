@@ -115,6 +115,7 @@ class SceneDetector(ABC):
 
         return duration.elapsed >= minimum
 
+
 class FlashFilter:
     """Filters fast-cuts to enforce minimum scene length."""
 

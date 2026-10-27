@@ -290,7 +290,7 @@ class VideoStreamAv(VideoStream):
             if time_base is None or time_base <= 0:
                 raise SeekError("The stream has no usable time base.")
             raw_timestamp = parsed + (stream.start_time or 0) * stream.time_base
-            target_pts = raw_timestamp//stream.time_base
+            target_pts = raw_timestamp // stream.time_base
 
             if self._frame_numbering is FrameNumbering.RELATIVE:
                 if self._decoder is not None:
@@ -299,17 +299,16 @@ class VideoStreamAv(VideoStream):
                 self._pending_frame = None
                 try:
                     self._container.seek(target_pts, stream=stream)
-                except (OSError, OverflowError, av.error.FFmpegError) as ex: # type: ignore[attr-defined]
+                except (OSError, OverflowError, av.error.FFmpegError) as ex:  # type: ignore[attr-defined]
                     raise SeekError("Could not seek to the requested time.") from ex
             else:
-                if (self.position and
-                    self.position.timecode.seconds >= parsed):
+                if self.position and self.position.timecode.seconds >= parsed:
                     self.reset()
 
             while True:
                 try:
                     next_frame = self._decode_next_frame()
-                except av.error.EOFError as ex: # type: ignore[attr-defined]
+                except av.error.EOFError as ex:  # type: ignore[attr-defined]
                     raise SeekError("Could not reach the requested time.") from ex
 
                 if next_frame is None:
@@ -329,12 +328,12 @@ class VideoStreamAv(VideoStream):
                     self._record_decoded_frame(next_frame)
 
         else:
-            if (self._frame_numbering is FrameNumbering.RELATIVE or parsed <= self.frame_number):
+            if self._frame_numbering is FrameNumbering.RELATIVE or parsed <= self.frame_number:
                 self.reset()
             for _ in range(self.frame_number + 1, parsed):
                 try:
                     frame = self._decode_next_frame()
-                except av.error.EOFError as ex: # type: ignore[attr-defined]
+                except av.error.EOFError as ex:  # type: ignore[attr-defined]
                     raise SeekError("Could not reach the requested frame.") from ex
 
                 if frame is None:
@@ -344,7 +343,6 @@ class VideoStreamAv(VideoStream):
                     self._record_decoded_frame(frame)
 
             self._seek_origin = target
-
 
     def reset(self):
         """Reopen at the source beginning and clear the frame position and seek origin.
@@ -382,6 +380,7 @@ class VideoStreamAv(VideoStream):
             result = frame.to_ndarray(format="bgr24") if decode else True
             self._record_decoded_frame(frame)
             return result
+
     #
     # Private Methods/Properties
     #
@@ -465,14 +464,10 @@ class VideoStreamAv(VideoStream):
             self.seek(seek_origin)
             for _ in range(frames_read):
                 if self.read(decode=False) is False:
-                    raise SeekError(
-                        "Could not replay the consumed frames during EOF recovery."
-                    )
+                    raise SeekError("Could not replay the consumed frames during EOF recovery.")
 
         if self.position != expected_position:
-            raise SeekError(
-                "Could not restore the expected position during EOF recovery."
-            )
+            raise SeekError("Could not restore the expected position during EOF recovery.")
         # Internal recovery seeks must not replace the original public seek target.
         self._seek_origin = seek_origin
         return True
@@ -520,9 +515,7 @@ class VideoStreamAv(VideoStream):
 
     def _record_decoded_frame(self, frame: av.VideoFrame) -> None:
         if frame.pts is None or frame.time_base is None:
-            raise ValueError(
-                "Decoded frame has no usable presentation timestamp."
-            )
+            raise ValueError("Decoded frame has no usable presentation timestamp.")
         self._frame = frame
         self._record_frame(
             Timecode(

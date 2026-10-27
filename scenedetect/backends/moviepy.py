@@ -237,15 +237,10 @@ class VideoStreamMoviePy(VideoStream):
             try:
                 # MoviePy 1.x does not update pos during direct read_frame() calls.
                 self._reader.pos = self._next_timecode.pts + 1
-                _retry_on_oserror(
-                    "seek", lambda: self._reader.get_frame(reader_time)
-                )
+                _retry_on_oserror("seek", lambda: self._reader.get_frame(reader_time))
                 if hasattr(self._reader, "last_read") and reader_time >= duration:
                     raise SeekError("MoviePy > 2.0 does not have proper EOF semantics (#461).")
-                self._next_timecode = Timecode(
-                    pts=target_frame,
-                    time_base=1 / self.frame_rate
-                )
+                self._next_timecode = Timecode(pts=target_frame, time_base=1 / self.frame_rate)
                 self._position = None
                 self._eof = False
                 success = True
@@ -265,11 +260,10 @@ class VideoStreamMoviePy(VideoStream):
                     self.reset()
 
         else:
-            if (self.frame_numbering is FrameNumbering.RELATIVE
-                or parsed <= self.frame_number):
+            if self.frame_numbering is FrameNumbering.RELATIVE or parsed <= self.frame_number:
                 self.reset()
 
-            for _ in range(self.frame_number+1, parsed):
+            for _ in range(self.frame_number + 1, parsed):
                 item = self._read_next_frame()
                 if item is None:
                     raise SeekError("Could not seek to the requested frame")
@@ -317,8 +311,6 @@ class VideoStreamMoviePy(VideoStream):
         if self._reader.read_frame() is frame:
             self._eof = True
         else:
-            self._next_timecode = Timecode(
-                pts=timecode.pts + 1, time_base=timecode.time_base
-            )
+            self._next_timecode = Timecode(pts=timecode.pts + 1, time_base=timecode.time_base)
 
         return frame, timecode

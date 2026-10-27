@@ -243,9 +243,7 @@ class VideoStreamCv2(VideoStream):
         Image-sequence timestamps use the source image index and configured frame rate.
         """
         if self._cap.get(cv2.CAP_PROP_BACKEND) == cv2.CAP_IMAGES:
-            source_index = max(
-                0, math.trunc(self._cap.get(cv2.CAP_PROP_POS_FRAMES)) - 1
-            )
+            source_index = max(0, math.trunc(self._cap.get(cv2.CAP_PROP_POS_FRAMES)) - 1)
             return Timecode(
                 pts=source_index,
                 time_base=1 / self.frame_rate,
@@ -283,10 +281,7 @@ class VideoStreamCv2(VideoStream):
             raise ValueError("Target seek position cannot be negative!")
 
         # TODO: Optimize seeking for CAP_IMAGES
-        if (
-            isinstance(parsed, Fraction)
-            and self._cap.get(cv2.CAP_PROP_BACKEND) == cv2.CAP_IMAGES
-        ):
+        if isinstance(parsed, Fraction) and self._cap.get(cv2.CAP_PROP_BACKEND) == cv2.CAP_IMAGES:
             parsed = math.ceil(parsed * self.frame_rate)
         if isinstance(parsed, Fraction):
             # Compare the target at the same precision as the reported video timestamps.
@@ -295,10 +290,7 @@ class VideoStreamCv2(VideoStream):
                 self._pending_grab = False
                 if not self._cap.set(cv2.CAP_PROP_POS_MSEC, float(parsed * 1000)):
                     raise SeekError("Could not seek to the requested time.")
-            elif (
-                self._position is not None
-                and self._position.timecode.seconds >= target_time
-            ):
+            elif self._position is not None and self._position.timecode.seconds >= target_time:
                 self.reset()
 
             while self._grab_next_frame():
@@ -313,17 +305,15 @@ class VideoStreamCv2(VideoStream):
             raise SeekError("Could not seek to the requested time.")
 
         else:
-            if (self.frame_numbering is FrameNumbering.RELATIVE
-                or self.frame_number >= parsed):
+            if self.frame_numbering is FrameNumbering.RELATIVE or self.frame_number >= parsed:
                 self.reset()
-            for _ in range(self.frame_number+1, parsed):
+            for _ in range(self.frame_number + 1, parsed):
                 if not self._grab_next_frame():
                     raise SeekError("Could not seek to the requested frame.")
                 if self.frame_numbering is FrameNumbering.SOURCE:
                     self._record_frame(self.timecode)
 
             return
-
 
     def reset(self):
         """Reopen at the source beginning and clear the recorded position and pending frame."""
@@ -576,12 +566,7 @@ class VideoCaptureAdapter(VideoStream):
             return False
         # TODO: Define a timestamp policy for timed and untimed captures.
         # The FPS-derived clock below does not preserve variable frame intervals.
-        self._record_frame(
-            Timecode(
-                pts=self.frame_number+1,
-                time_base=1 / self.frame_rate
-            )
-        )
+        self._record_frame(Timecode(pts=self.frame_number + 1, time_base=1 / self.frame_rate))
         # Need to make sure we actually grabbed a frame before calling retrieve.
         if decode:
             success, frame = self._cap.retrieve()

@@ -184,8 +184,11 @@ class ThresholdDetector(SceneDetector):
                             key=lambda position: position.frame_number,
                         )
                         earlier = self._fade_positions[index - 1] if index else None
-                        later = (self._fade_positions[index] if index < len(self._fade_positions)
-                                 else frame)
+                        later = (
+                            self._fade_positions[index]
+                            if index < len(self._fade_positions)
+                            else frame
+                        )
 
                         split_frame = later
                         if earlier is not None and (

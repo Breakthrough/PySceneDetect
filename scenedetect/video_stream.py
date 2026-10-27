@@ -142,7 +142,7 @@ class VideoStream(ABC):
         return self._decode_failures
 
     def _record_frame(self, timecode: Timecode) -> FramePosition:
-        self._position = FramePosition(timecode=timecode, frame_number=self.frame_number+1)
+        self._position = FramePosition(timecode=timecode, frame_number=self.frame_number + 1)
         return self._position
 
     #
@@ -197,7 +197,6 @@ class VideoStream(ABC):
     def aspect_ratio(self) -> float:
         """Pixel aspect ratio as a float (1.0 represents square pixels)."""
         ...
-
 
     #
     # Abstract Methods

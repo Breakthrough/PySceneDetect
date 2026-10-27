@@ -235,7 +235,6 @@ class VideoStreamConcat(VideoStream):
         seconds = self._offsets[self._index] + self._child_position_seconds()
         return Timecode(pts=seconds.numerator, time_base=Fraction(1, seconds.denominator))
 
-
     def _read_next_frame(self, decode: bool = True) -> np.ndarray | bool:
         """Read/decode the next frame. Returns False when all inputs have been processed.
 
@@ -302,10 +301,7 @@ class VideoStreamConcat(VideoStream):
         if isinstance(parsed, Fraction):
             if self._frame_numbering is FrameNumbering.SOURCE:
                 position = self.position
-                if (
-                    position is not None
-                    and position.timecode.seconds >= parsed
-                ):
+                if position is not None and position.timecode.seconds >= parsed:
                     self.reset()
             else:
                 self._pending_frame = None
@@ -348,13 +344,10 @@ class VideoStreamConcat(VideoStream):
                 if self.frame_numbering is FrameNumbering.SOURCE:
                     self._record_frame(timecode)
         else:
-            if (
-                self._frame_numbering is FrameNumbering.RELATIVE
-                or parsed <= self.frame_number
-            ):
+            if self._frame_numbering is FrameNumbering.RELATIVE or parsed <= self.frame_number:
                 self.reset()
 
-            for _ in range(self.frame_number+1, parsed):
+            for _ in range(self.frame_number + 1, parsed):
                 if self._read_next_frame(decode=False) is False:
                     raise SeekError("Could not reach the requested frame.")
                 if self.frame_numbering is FrameNumbering.SOURCE:
@@ -460,12 +453,10 @@ class VideoStreamConcat(VideoStream):
                     source_index=index,
                     path=source.path,
                     local_start=Timecode(
-                        pts=local_start.numerator,
-                        time_base=Fraction(1, local_start.denominator)
+                        pts=local_start.numerator, time_base=Fraction(1, local_start.denominator)
                     ),
                     local_end=Timecode(
-                        pts=local_end.numerator,
-                        time_base=Fraction(1, local_end.denominator)
+                        pts=local_end.numerator, time_base=Fraction(1, local_end.denominator)
                     ),
                 )
             )
