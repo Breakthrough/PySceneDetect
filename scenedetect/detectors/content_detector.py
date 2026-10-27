@@ -22,7 +22,7 @@ from dataclasses import dataclass
 import cv2
 import numpy
 
-from scenedetect.common import FrameTimecode, TimecodeLike
+from scenedetect.common import FramePosition, TimecodeLike
 from scenedetect.detector import FlashFilter, SceneDetector
 
 
@@ -144,7 +144,7 @@ class ContentDetector(SceneDetector):
     def get_metrics(self):
         return ContentDetector.METRIC_KEYS
 
-    def _calculate_frame_score(self, timecode: FrameTimecode, frame_img: numpy.ndarray) -> float:
+    def _calculate_frame_score(self, position: FramePosition, frame_img: numpy.ndarray) -> float:
         """Calculate score representing relative amount of motion in `frame_img` compared to
         the last time the function was called (returns 0.0 on the first call)."""
         # TODO: Add option to enable motion estimation before calculating score components.
@@ -183,32 +183,32 @@ class ContentDetector(SceneDetector):
         if self.stats_manager is not None:
             metrics = {self.FRAME_SCORE_KEY: frame_score}
             metrics.update(score_components._asdict())
-            self.stats_manager.set_metrics(timecode, metrics)
+            self.stats_manager.set_metrics(position, metrics)
 
         # Store all data required to calculate the next frame's score.
         self._last_frame = ContentDetector._FrameData(hue, sat, lum, edges)
         return frame_score
 
     def process_frame(
-        self, timecode: FrameTimecode, frame_img: numpy.ndarray
-    ) -> list[FrameTimecode]:
+        self, position: FramePosition, frame_img: numpy.ndarray
+    ) -> list[FramePosition]:
         """Process the next frame. `frame_num` is assumed to be sequential.
 
         Arguments:
-            frame_num (int): Frame number of frame that is being passed. Can start from any value
-                but must remain sequential.
+            position (FramePosition): Position (frame_number, timecode) of frame that is 
+            being passed.
             frame_img (numpy.ndarray or None): Video frame corresponding to `frame_img`.
 
         Returns:
-           ty.List[int]: List of frames where scene cuts have been detected. There may be 0
+           typing.List[FramePosition]: List of frames where scene cuts have been detected. There may be 0
             or more frames in the list, and not necessarily the same as frame_num.
         """
-        self._frame_score = self._calculate_frame_score(timecode, frame_img)
+        self._frame_score = self._calculate_frame_score(position, frame_img)
         if self._frame_score is None:
             return []
 
         above_threshold: bool = self._frame_score >= self._threshold
-        return self._flash_filter.filter(timecode=timecode, above_threshold=above_threshold)
+        return self._flash_filter.filter(position=position, above_threshold=above_threshold)
 
     def _detect_edges(self, lum: numpy.ndarray) -> numpy.ndarray:
         """Detect edges using the luma channel of a frame.

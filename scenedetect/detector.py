@@ -158,40 +158,40 @@ class FlashFilter:
             return duration.frames >= self._filter_length
         return duration.elapsed >= self._filter_length
 
-    def filter(self, timecode: FramePosition, above_threshold: bool) -> list[FramePosition]:
+    def filter(self, position: FramePosition, above_threshold: bool) -> list[FramePosition]:
         """Process one frame's cut-candidate flag and return accepted cut positions.
 
         Call for every processed frame, including frames below the threshold.
         MERGE can return a position saved from an earlier call.
         """
         if self._is_disabled:
-            return [timecode] if above_threshold else []
+            return [position] if above_threshold else []
         if self._last_above is None:
-            self._last_above = timecode
+            self._last_above = position
         if self._mode == FlashFilter.Mode.MERGE:
-            return self._filter_merge(timecode=timecode, above_threshold=above_threshold)
+            return self._filter_merge(position=position, above_threshold=above_threshold)
         elif self._mode == FlashFilter.Mode.SUPPRESS:
-            return self._filter_suppress(timecode=timecode, above_threshold=above_threshold)
+            return self._filter_suppress(position=position, above_threshold=above_threshold)
         raise RuntimeError("Unhandled FlashFilter mode.")
 
     def _filter_suppress(
-        self, timecode: FramePosition, above_threshold: bool
+        self, position: FramePosition, above_threshold: bool
     ) -> list[FramePosition]:
         assert self._last_above is not None
-        min_length_met: bool = self._meets_minimum(timecode - self._last_above)
+        min_length_met: bool = self._meets_minimum(position - self._last_above)
         if not (above_threshold and min_length_met):
             return []
         # Both length and threshold requirements were satisfied. Emit the cut, and wait until both
         # requirements are met again.
-        self._last_above = timecode
-        return [timecode]
+        self._last_above = position
+        return [position]
 
-    def _filter_merge(self, timecode: FramePosition, above_threshold: bool) -> list[FramePosition]:
+    def _filter_merge(self, position: FramePosition, above_threshold: bool) -> list[FramePosition]:
         assert self._last_above is not None
-        min_length_met: bool = self._meets_minimum(timecode - self._last_above)
+        min_length_met: bool = self._meets_minimum(position - self._last_above)
         # Ensure last frame is always advanced to the most recent one that was above the threshold.
         if above_threshold:
-            self._last_above = timecode
+            self._last_above = position
         if self._merge_triggered:
             # Finish merging when both the quiet gap and merged span meet the minimum.
             assert self._merge_start is not None
@@ -211,9 +211,9 @@ class FlashFilter:
         if min_length_met:
             # Only allow the merge filter once the first cut is emitted.
             self._merge_enabled = True
-            return [timecode]
+            return [position]
         # Start merging cuts until the length requirement is met.
         if self._merge_enabled:
             self._merge_triggered = True
-            self._merge_start = timecode
+            self._merge_start = position
         return []
