@@ -195,13 +195,13 @@ class ContentDetector(SceneDetector):
         """Process the next frame. `frame_num` is assumed to be sequential.
 
         Arguments:
-            position (FramePosition): Position (frame_number, timecode) of frame that is 
+            position (FramePosition): Position (frame_number, timecode) of frame that is
             being passed.
             frame_img (numpy.ndarray or None): Video frame corresponding to `frame_img`.
 
         Returns:
-           typing.List[FramePosition]: List of frames where scene cuts have been detected. There may be 0
-            or more frames in the list, and not necessarily the same as frame_num.
+           typing.List[FramePosition]: List of frames where scene cuts have been detected.
+           There may be 0 or more frames in the list, and not necessarily the same as frame_num.
         """
         self._frame_score = self._calculate_frame_score(position, frame_img)
         if self._frame_score is None:
