@@ -20,7 +20,7 @@ from logging import getLogger
 
 import numpy as np
 
-from scenedetect.common import FrameTimecode, TimecodeLike
+from scenedetect.common import FramePosition, TimecodeLike, parse_frame_or_time
 from scenedetect.detectors import ContentDetector
 
 logger = getLogger("pyscenedetect")
@@ -77,7 +77,7 @@ class AdaptiveDetector(ContentDetector):
         )
 
         # TODO: Turn these public options into properties.
-        self.min_scene_len = min_scene_len
+        self.min_scene_len = parse_frame_or_time(min_scene_len)
         self.adaptive_threshold = adaptive_threshold
         self.min_content_val = min_content_val
         self.window_width = window_width
@@ -85,10 +85,10 @@ class AdaptiveDetector(ContentDetector):
         self._adaptive_ratio_key = AdaptiveDetector.ADAPTIVE_RATIO_KEY_TEMPLATE.format(
             window_width=window_width, luma_only="" if not luma_only else "_lum"
         )
-        self._buffer: list[tuple[FrameTimecode, float]] = []
+        self._buffer: list[tuple[FramePosition, float]] = []
         # NOTE: The name of last cut is different from `self._last_scene_cut` from our base class,
         # and serves a different purpose!
-        self._last_cut: FrameTimecode | None = None
+        self._last_cut: FramePosition | None = None
 
     @property
     def event_buffer_length(self) -> int:
@@ -97,8 +97,8 @@ class AdaptiveDetector(ContentDetector):
     def get_metrics(self) -> list[str]:
         return [*super().get_metrics(), self._adaptive_ratio_key]
 
-    def process_frame(self, timecode: FrameTimecode, frame_img: np.ndarray) -> list[FrameTimecode]:
-        super().process_frame(timecode=timecode, frame_img=frame_img)
+    def process_frame(self, position: FramePosition, frame_img: np.ndarray) -> list[FramePosition]:
+        super().process_frame(position=position, frame_img=frame_img)
 
         # If the parent could not calculate a frame score, there's nothing to buffer.
         if self._frame_score is None:
@@ -106,14 +106,14 @@ class AdaptiveDetector(ContentDetector):
 
         # Initialize last scene cut point at the beginning of the frames of interest.
         if self._last_cut is None:
-            self._last_cut = timecode
+            self._last_cut = position
 
         required_frames = 1 + (2 * self.window_width)
-        self._buffer.append((timecode, self._frame_score))
+        self._buffer.append((position, self._frame_score))
         if not len(self._buffer) >= required_frames:
             return []
         self._buffer = self._buffer[-required_frames:]
-        (target_timecode, target_score) = self._buffer[self.window_width]
+        (target_position, target_score) = self._buffer[self.window_width]
         average_window_score = sum(
             score for i, (_frame, score) in enumerate(self._buffer) if i != self.window_width
         ) / (2.0 * self.window_width)
@@ -128,7 +128,7 @@ class AdaptiveDetector(ContentDetector):
             adaptive_ratio = 255.0
         if self.stats_manager is not None:
             self.stats_manager.set_metrics(
-                target_timecode, {self._adaptive_ratio_key: adaptive_ratio}
+                target_position, {self._adaptive_ratio_key: adaptive_ratio}
             )
 
         # Check to see if adaptive_ratio exceeds the adaptive_threshold as well as there
@@ -136,9 +136,12 @@ class AdaptiveDetector(ContentDetector):
         threshold_met: bool = (
             adaptive_ratio >= self.adaptive_threshold and target_score >= self.min_content_val
         )
-        # Cuts are emitted at `target_timecode` (`window_width` behind `timecode`).
-        min_length_met: bool = (target_timecode - self._last_cut) >= self.min_scene_len
+        # Cuts are emitted at `target_position` (`window_width` behind `position`).
+        min_length_met: bool = self.meets_minimum(
+            target_position - self._last_cut,
+            self.min_scene_len,
+        )
         if threshold_met and min_length_met:
-            self._last_cut = target_timecode
-            return [target_timecode]
+            self._last_cut = target_position
+            return [target_position]
         return []

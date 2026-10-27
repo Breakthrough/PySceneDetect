@@ -108,6 +108,12 @@ class SceneDetector(ABC):
         """
         return []
 
+    def meets_minimum(self, duration: FrameDuration, minimum: int | Fraction) -> bool:
+
+        if isinstance(minimum, (int)):
+            return duration.frames >= minimum
+
+        return duration.elapsed >= minimum
 
 class FlashFilter:
     """Filters fast-cuts to enforce minimum scene length."""
