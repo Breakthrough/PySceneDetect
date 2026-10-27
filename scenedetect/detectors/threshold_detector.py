@@ -242,10 +242,3 @@ class ThresholdDetector(SceneDetector):
         ):
             cuts.append(self.last_fade["frame"])
         return cuts
-
-    def meets_minimum(self, duration: FrameDuration, minimum: int | Fraction) -> bool:
-
-        if isinstance(minimum, (int)):
-            return duration.frames >= minimum
-
-        return duration.elapsed >= minimum
