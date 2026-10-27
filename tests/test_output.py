@@ -12,6 +12,7 @@
 """Tests for scenedetect.output module."""
 
 import json
+import logging
 import os
 import typing as ty
 from fractions import Fraction
@@ -49,7 +50,8 @@ FFMPEG_ARGS = (
 
 
 @pytest.mark.skipif(condition=not is_ffmpeg_available(), reason="ffmpeg is not available")
-def test_split_video_ffmpeg_default(tmp_path, test_movie_clip):
+def test_split_video_ffmpeg_default(tmp_path, test_movie_clip, caplog):
+    caplog.set_level(logging.INFO, logger="pyscenedetect")
     video = open_video(test_movie_clip)
     # Extract three hard-coded scenes for testing, each 30 frames.
     scenes = [
@@ -65,6 +67,8 @@ def test_split_video_ffmpeg_default(tmp_path, test_movie_clip):
     video_name = Path(test_movie_clip).stem
     entries = sorted(tmp_path.glob(f"{video_name}-Scene-*"))
     assert len(entries) == len(scenes)
+    # The log should show the output folder, not the filename template.
+    assert f"Output folder:\n  {tmp_path}" in caplog.text
 
 
 @pytest.mark.skipif(condition=not is_ffmpeg_available(), reason="ffmpeg is not available")
