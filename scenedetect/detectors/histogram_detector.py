@@ -20,7 +20,7 @@ import typing as ty
 import cv2
 import numpy
 
-from scenedetect.common import FrameTimecode, TimecodeLike
+from scenedetect.common import FramePosition, TimecodeLike, parse_frame_or_time
 from scenedetect.detector import SceneDetector
 
 
@@ -51,27 +51,27 @@ class HistogramDetector(SceneDetector):
         # between -1.0 and 1.0.
         self._threshold = max(0.0, min(1.0, 1.0 - threshold))
         self._bins = bins
-        self._min_scene_len = min_scene_len
+        self._min_scene_len = parse_frame_or_time(min_scene_len)
         self._last_hist = None
         self._last_cut = None
         self._metric_key = f"hist_diff [bins={self._bins}]"
 
     def process_frame(
-        self, timecode: FrameTimecode, frame_img: numpy.ndarray
-    ) -> list[FrameTimecode]:
+        self, position: FramePosition, frame_img: numpy.ndarray
+    ) -> list[FramePosition]:
         """Computes the histogram of the luma channel of the frame image and compares it with the
         histogram of the luma channel of the previous frame. If the difference between the
         histograms exceeds the threshold, a scene cut is detected.
         Histogram difference is computed using the correlation metric.
 
         Arguments:
-            timecode: Timecode of the frame that is being passed.
+            position: FramePosition of the frame that is being passed.
             frame_img: Decoded frame image (numpy.ndarray) to perform scene
                 detection on.
 
         Returns:
-            List of timecodes where scene cuts have been detected. There may be 0
-            or more timecodes in the list, and not necessarily the same as `timecode`.
+            List of FramePositions where scene cuts have been detected. There may be 0
+            or more FramePositions in the list, and not necessarily the same as `position`.
         """
         cut_list = []
 
@@ -85,7 +85,7 @@ class HistogramDetector(SceneDetector):
 
         # Initialize last scene cut point at the beginning of the frames of interest.
         if not self._last_cut:
-            self._last_cut = timecode
+            self._last_cut = position
 
         hist = self.calculate_histogram(frame_img, bins=self._bins)
 
@@ -106,14 +106,14 @@ class HistogramDetector(SceneDetector):
             # correlation less than 0.8 between histograms will be considered significant enough to
             # denote a scene change.
             if hist_diff <= self._threshold and (
-                (timecode - self._last_cut) >= self._min_scene_len
+                self.meets_minimum(position - self._last_cut, self._min_scene_len)
             ):
-                cut_list.append(timecode)
-                self._last_cut = timecode
+                cut_list.append(position)
+                self._last_cut = position
 
             # Save stats to a StatsManager if it is being used
             if self.stats_manager is not None:
-                self.stats_manager.set_metrics(timecode, {self._metric_key: hist_diff})
+                self.stats_manager.set_metrics(position, {self._metric_key: hist_diff})
 
         self._last_hist = hist
 
