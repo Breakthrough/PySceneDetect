@@ -20,7 +20,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 
-from scenedetect.common import FrameTimecode, TimecodeLike
+from scenedetect.common import FramePosition, TimecodeLike
 from scenedetect.detector import FlashFilter, SceneDetector
 
 logger = getLogger("pyscenedetect")
@@ -33,13 +33,16 @@ class Detector:
         self.threshold = threshold
         self.flash_filter = flash_filter
 
-    def push(self, ys: np.ndarray, ts: np.ndarray):
+    def push(self, ys: np.ndarray, positions: np.ndarray) -> list[FramePosition]:
         predictions = (ys > self.threshold).astype(np.uint8)
 
         cuts = []
-        for y, t in zip(predictions, ts, strict=True):
-            if self.y_prev == 0 and y == 1 and self.i > 0:
-                cuts.append(t)
+        for y, position in zip(predictions, positions, strict=True):
+            if position is None:
+                continue
+
+            is_cut = self.y_prev == 0 and y == 1 and self.i > 0
+            cuts.extend(self.flash_filter.filter(position, is_cut))
             self.y_prev = y
             self.i += 1
 
@@ -67,22 +70,22 @@ class Predictor:
         self.session = ort.InferenceSession(model_path, sess_opt=sess_opt, providers=onnx_providers)
 
         self.pixels = None
-        self.time = None
+        self.positions: np.ndarray | None = None
 
         self.det = Detector(threshold, flash_filter)
 
-    def _inference(self, pixels: np.ndarray, time: np.ndarray):
+    def _inference(self, pixels: np.ndarray, positions: np.ndarray) -> list[FramePosition]:
         pred = np.array(self.session.run(["output"], {"input": pixels}))[0]
 
         cuts = []
         for i in range(pred.shape[0]):
-            cuts.extend(self.det.push(pred[i, 25:75, 0], time[i, 25:75]))
+            cuts.extend(self.det.push(pred[i, 25:75, 0], positions[i, 25:75]))
         return cuts
 
-    def push(self, pixels: np.ndarray, time: np.ndarray):
+    def push(self, pixels: np.ndarray, positions: np.ndarray) -> list[FramePosition]:
         if self.pixels is None:
             self.pixels = pixels
-            self.time = time
+            self.positions = positions
 
             return self._inference(
                 np.stack(
@@ -99,31 +102,35 @@ class Predictor:
                 ),
                 np.stack(
                     (
-                        np.tile(np.expand_dims(time[0], axis=0), (100,)),
+                        np.full(100, None, dtype=object),
                         np.concatenate(
-                            (np.tile(np.expand_dims(time[0], axis=0), (25,)), time[:75]), 0
+                            (
+                                np.full(25, None, dtype=object),
+                                positions[:75]
+                            ),
+                            0
                         ),
                     )
                 ),
             )
         else:
-            # `self.time` is set in lockstep with `self.pixels` above, so it is non-None here.
-            assert self.time is not None
+            # `self.positions` is set in lockstep with `self.pixels` above, so it is non-None here.
+            assert self.positions is not None
             c1 = self.pixels
             c2 = pixels
 
-            t1 = self.time
-            t2 = time
+            p1 = self.positions
+            p2 = positions
 
             self.pixels = pixels
-            self.time = time
+            self.positions = positions
 
             return self._inference(
                 np.stack(
                     (np.concatenate((c1[25:], c2[:25]), 0), np.concatenate((c1[75:], c2[:75]), 0))
                 ),
                 np.stack(
-                    (np.concatenate((t1[25:], t2[:25]), 0), np.concatenate((t1[75:], t2[:75]), 0))
+                    (np.concatenate((p1[25:], p2[:25]), 0), np.concatenate((p1[75:], p2[:75]), 0))
                 ),
             )
 
@@ -140,7 +147,7 @@ class TransnetV2Detector(SceneDetector):
         super().__init__()
 
         self.px = np.zeros((2, 100, 27, 48, 3), dtype=np.uint8)
-        self.time = np.zeros((2, 100), dtype=np.int64)
+        self.positions = np.full((2, 100), None, dtype=object)
 
         self.blank = np.zeros(self.px.shape[2:], dtype=np.uint8)
 
@@ -155,56 +162,39 @@ class TransnetV2Detector(SceneDetector):
         )
         # TODO(https://scenedetect.com/issue/168): Figure out a better long term plan for handling
         # `min_scene_len` which should be specified in seconds, not frames.
-        self._flash_filter = FlashFilter(mode=filter_mode, length=min_scene_len)
 
-    def mk_ft(self, pts: int):
-        # t = Timecode(pts=pts, time_base=self.time_base)
-        t = float(pts * self.time_base)
-        return FrameTimecode(t, fps=self._fps)
-
-    def process_frame(self, timecode: FrameTimecode, frame_img: np.ndarray) -> list[FrameTimecode]:
+    def process_frame(self, position: FramePosition, frame_img: np.ndarray) -> list[FramePosition]:
         """Process the next frame."""
-
-        self.time_base = timecode.time_base
-        self._fps = timecode._rate
 
         pixels = cv2.resize(frame_img, (48, 27), interpolation=cv2.INTER_AREA)
 
         self.px[self.j, self.i] = pixels
-        self.time[self.j, self.i] = timecode.pts
+        self.positions[self.j, self.i] = position
         self.i += 1
 
         if self.i >= 100:
-            cuts = self.predictor.push(self.px[self.j], self.time[self.j])
+            cuts = self.predictor.push(self.px[self.j], self.positions[self.j])
             self.j = 1 - self.j
             self.i = 0
 
-            filtered_cuts = []
-            for cut in cuts:
-                filtered_cuts += self._flash_filter.filter(self.mk_ft(cut), True)
-            return filtered_cuts
+            return cuts
         else:
             return []
 
-    def post_process(self, timecode: FrameTimecode) -> list[FrameTimecode]:
-        """Writes a final scene cut if the last detected fade was a fade-out."""
+    def post_process(self, position: FramePosition) -> list[FramePosition]:
+        """Flush buffered model predictions."""
 
         cuts = []
-
-        last_time = timecode.pts
         blank_frame = self.blank[:]
 
         self.px[self.j, self.i :] = blank_frame
-        self.time[self.j, self.i :] = last_time
-        cuts.extend(self.predictor.push(self.px[self.j], self.time[self.j]))
+        self.positions[self.j, self.i :] = None
+        cuts.extend(self.predictor.push(self.px[self.j], self.positions[self.j]))
 
         self.j = 1 - self.j
 
         self.px[self.j, :] = blank_frame
-        self.time[self.j, :] = last_time
-        cuts.extend(self.predictor.push(self.px[self.j], self.time[self.j]))
+        self.positions[self.j, :] = None
+        cuts.extend(self.predictor.push(self.px[self.j], self.positions[self.j]))
 
-        filtered_cuts = []
-        for cut in cuts:
-            filtered_cuts += self._flash_filter.filter(self.mk_ft(cut), True)
-        return filtered_cuts
+        return cuts
