@@ -293,7 +293,7 @@ Global options (e.g. -i/--input, -c/--config) must be specified before any comma
     metavar="N",
     type=click.INT,
     default=None,
-    help="Integer factor to downscale video by before processing. If unset, value is selected based on resolution. Set -d 1 to disable downscaling.{}".format(
+    help="Integer factor to downscale video by before processing. If unset or 0, value is selected based on resolution. Set -d 1 to disable downscaling.{}".format(
         USER_CONFIG.get_help_string("global", "downscale", show_default=False)
     ),
 )

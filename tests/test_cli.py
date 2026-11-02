@@ -134,6 +134,71 @@ def test_cli_crop_rejects_invalid():
     assert invoke_scenedetect("-i {VIDEO} --crop 0 0 -256 -256 time {TIME}", config_file=None) != 1
 
 
+@pytest.mark.parametrize(
+    ("config", "cli_args", "expected_auto", "expected_downscale"),
+    [
+        ("", [], True, 1),
+        ("", ["-d", "0"], True, 1),
+        ("", ["--downscale", "1"], False, 1),
+        ("", ["-d", "2"], False, 2),
+        ("downscale = 0", [], True, 1),
+        ("downscale = 1", [], False, 1),
+        ("downscale = 3", [], False, 3),
+        # CLI -d 0 overrides a manual downscale factor in the config file back to auto.
+        ("downscale = 3", ["-d", "0"], True, 1),
+        ("downscale = 0", ["-d", "2"], False, 2),
+    ],
+)
+def test_cli_downscale(
+    tmp_path: Path,
+    config: str,
+    cli_args: list[str],
+    expected_auto: bool,
+    expected_downscale: int,
+):
+    """Test `-d`/`--downscale` on the CLI and `downscale` in `[global]`, including `0` for auto."""
+    from click.testing import CliRunner
+
+    from scenedetect._cli import scenedetect as scenedetect_cli
+    from scenedetect._cli.context import CliContext
+    from tests.helpers import close_video_stream
+
+    config_path = tmp_path / "scenedetect.cfg"
+    config_path.write_text(f"[global]\n{config}\n")
+    context = CliContext()
+    try:
+        result = CliRunner().invoke(
+            scenedetect_cli,
+            ["-c", str(config_path), "-i", DEFAULT_VIDEO_PATH, *cli_args, "time", "-e", "1"],
+            obj=context,
+        )
+        assert result.exit_code == 0, result.output
+        assert context.scene_manager is not None
+        assert context.scene_manager.auto_downscale is expected_auto
+        assert context.scene_manager.downscale == expected_downscale
+    finally:
+        if context.video_stream is not None:
+            close_video_stream(context.video_stream)
+
+
+@pytest.mark.parametrize(
+    ("config", "cli_args"),
+    [
+        ("", ["-d", "-1"]),
+        ("downscale = -1", []),
+    ],
+)
+def test_cli_downscale_rejects_negative(tmp_path: Path, config: str, cli_args: list[str]):
+    """Negative downscale values must be rejected on both the CLI and in the config file."""
+    config_path = tmp_path / "scenedetect.cfg"
+    config_path.write_text(f"[global]\n{config}\n")
+    exit_code, output = invoke_cli(
+        ["-c", str(config_path), "-i", DEFAULT_VIDEO_PATH, *cli_args, "time", "-e", "1"]
+    )
+    assert exit_code != 0
+    assert "Downscale factor must be a positive integer >= 1!" in output
+
+
 @pytest.mark.parametrize("info_command", ["help", "about", "version"])
 def test_cli_info_command(info_command):
     """Test `scenedetect` info commands (e.g. help, about)."""

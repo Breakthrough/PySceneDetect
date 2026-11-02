@@ -303,11 +303,11 @@ class CliContext:
         logger.debug("Initializing SceneManager.")
         scene_manager = SceneManager(self.stats_manager)
 
-        if downscale is None and self.config.is_default("global", "downscale"):
+        downscale_value: int = self.config.get_value("global", "downscale", downscale)
+        if downscale_value == 0:
             scene_manager.auto_downscale = True
         else:
             scene_manager.auto_downscale = False
-            downscale_value: int = self.config.get_value("global", "downscale", downscale)
             try:
                 scene_manager.downscale = downscale_value
             except ValueError as ex:
