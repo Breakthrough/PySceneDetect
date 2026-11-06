@@ -30,13 +30,16 @@ import subprocess
 # TODO: Missing tests for --min-scene-len and --drop-short-scenes.
 import sys
 from pathlib import Path
+from types import SimpleNamespace
 
+import click
 import cv2
 import numpy as np
 import pytest
 
 import scenedetect
 from scenedetect._cli.config import ConfigLoadFailure, ConfigRegistry
+from scenedetect._cli.context import CliContext
 from scenedetect.output import is_ffmpeg_available, is_mkvmerge_available
 from scenedetect.platform import StrPath
 from tests.helpers import invoke_cli
@@ -1755,3 +1758,116 @@ def test_cli_save_fcp_fcp7(tmp_path: Path):
     assert second_file is not None
     assert second_file.attrib["id"] == "file1"
     assert second_file.find("pathurl") is None
+
+
+# Matroska can be demuxed from a pipe, unlike an MP4 with its index at the end of the file.
+STDIN_VIDEO_PATH = "tests/resources/issue-236-split-copy.mkv"
+
+
+def run_stdin(*args: str, video: str | None = STDIN_VIDEO_PATH) -> subprocess.CompletedProcess:
+    """Runs the CLI with `video` written to stdin through a real pipe."""
+    return subprocess.run(
+        [*SCENEDETECT_CMD.split(" "), *args],
+        input=Path(video).read_bytes() if video else b"",
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+    )
+
+
+def test_cli_stdin_matches_file_input():
+    """Scenes detected from stdin should match those from the same video opened by path."""
+    command = ["detect-content", "list-scenes", "-n"]
+    piped = run_stdin("--stdin", *command)
+    assert piped.returncode == 0, piped.stdout.decode(errors="replace")
+    from_file = subprocess.run(
+        [*SCENEDETECT_CMD.split(" "), "-i", STDIN_VIDEO_PATH, "-b", "pyav", *command],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+    )
+    assert from_file.returncode == 0
+
+    def scene_rows(output: bytes) -> list[str]:
+        return [line for line in output.decode().splitlines() if line.strip().startswith("|")]
+
+    assert scene_rows(piped.stdout)
+    assert scene_rows(piped.stdout) == scene_rows(from_file.stdout)
+
+
+def test_cli_stdin_output_filename(tmp_path: Path):
+    """$VIDEO_NAME should have a usable value since there is no input path."""
+    result = run_stdin("--stdin", "-o", str(tmp_path), "detect-content", "list-scenes")
+    assert result.returncode == 0, result.stdout.decode(errors="replace")
+    assert (tmp_path / "stdin-Scenes.csv").exists()
+
+
+def test_cli_stdin_save_html_without_images(tmp_path: Path):
+    """save-html needs to seek for images, so they should be left out when reading from stdin."""
+    result = run_stdin("--stdin", "-o", str(tmp_path), "detect-content", "save-html")
+    assert result.returncode == 0, result.stdout.decode(errors="replace")
+    assert (tmp_path / "stdin-Scenes.html").exists()
+    assert not list(tmp_path.glob("*.jpg"))
+
+
+def test_cli_stdin_with_input():
+    """--stdin and -i/--input should be mutually exclusive."""
+    result = run_stdin("--stdin", "-i", DEFAULT_VIDEO_PATH, "detect-content")
+    assert result.returncode != 0
+    assert b"cannot be used with --stdin" in result.stdout
+
+
+def test_cli_stdin_with_other_backend():
+    """--stdin is only implemented by the PyAV backend."""
+    result = run_stdin("--stdin", "-b", "opencv", "detect-content")
+    assert result.returncode != 0
+    assert b"requires the pyav backend" in result.stdout
+
+
+def test_cli_stdin_terminal(monkeypatch: pytest.MonkeyPatch):
+    """Reading from a terminal would block forever, so it should be rejected."""
+    monkeypatch.setattr("sys.stdin", SimpleNamespace(isatty=lambda: True))
+    with pytest.raises(click.BadParameter, match="requires a video to be piped"):
+        CliContext()._open_stdin_stream(frame_rate=None, backend=None)
+
+
+def test_cli_stdin_stats_file(tmp_path: Path):
+    """A stats file should be written for each frame read from stdin."""
+    result = run_stdin("--stdin", "-o", str(tmp_path), "-s", "stats.csv", "detect-content")
+    assert result.returncode == 0, result.stdout.decode(errors="replace")
+    assert len((tmp_path / "stats.csv").read_text().splitlines()) > 1
+
+
+@pytest.mark.parametrize(
+    "command",
+    [
+        "split-video",
+        "save-images",
+        "save-fcp",
+        "save-otio",
+        # The option requires a path that exists, but it's rejected before the file is parsed.
+        f"load-scenes -i {DEFAULT_CONFIG_FILE}",
+        "time -s 1s",
+    ],
+)
+def test_cli_stdin_incompatible_commands(command: str):
+    """Commands that need to seek or refer to a source file should fail before processing."""
+    result = run_stdin("--stdin", *command.split(" "))
+    assert result.returncode != 0
+    output = result.stdout.decode(errors="replace")
+    assert "incompatible with --stdin" in output
+    assert "Processed" not in output
+
+
+def test_cli_stdin_unreadable_container():
+    """An MP4 with its index at the end decodes no frames from a pipe, which shouldn't be silent."""
+    result = run_stdin("--stdin", "detect-content", video="tests/resources/testvideo.mp4")
+    assert result.returncode != 0
+    assert b"Failed to read any frames from stdin" in result.stdout
+
+
+def test_cli_stdin_no_data(monkeypatch: pytest.MonkeyPatch):
+    """An empty pipe should be reported as a failure to open the input."""
+    # Errors opening the input are only reported as usage errors outside of debug mode.
+    monkeypatch.setenv("SCENEDETECT_DEBUG", "")
+    result = run_stdin("--stdin", "detect-content", video=None)
+    assert result.returncode != 0
+    assert b"Invalid value for --stdin: Failed to open input video" in result.stdout

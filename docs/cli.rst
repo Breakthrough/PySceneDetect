@@ -54,6 +54,10 @@ Options
 
   [REQUIRED] Input video file. Image sequences and URLs are supported.
 
+.. option:: --stdin
+
+  Read the input video from standard input instead of :option:`-i/--input <-i>`. Requires the pyav backend and a container that can be read from a pipe (e.g. MKV or MPEG-TS). Commands that need to seek in the video are not supported.
+
 .. option:: -o DIR, --output DIR
 
   Output directory for created files. If unset, working directory will be used. May be overridden by command options.
