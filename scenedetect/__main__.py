@@ -49,6 +49,8 @@ def main():
             if DEBUG_MODE:
                 raise
             raise SystemExit(1) from None
+        except SystemExit:
+            raise
         except BaseException as ex:
             if DEBUG_MODE:
                 raise
