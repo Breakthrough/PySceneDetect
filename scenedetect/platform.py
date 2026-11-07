@@ -384,7 +384,7 @@ def get_system_version_info() -> str:
     """Get the system's operating system, Python, packages, and external tool versions.
     Useful for debugging or filing bug reports.
 
-    Used for the `scenedetect version -a` command.
+    Used for the ``scenedetect version`` command.
     """
     line_separator = "-" * 60
     not_found_str = "Not Installed"

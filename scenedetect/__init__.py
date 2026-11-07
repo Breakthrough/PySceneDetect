@@ -193,7 +193,7 @@ def detect(
             is unavailable or fails to open the video.
 
     Returns:
-        List of scenes as pairs of (start, end) :class:`FrameTimecode` objects.
+        List of scenes as pairs of (start, end) :class:`~scenedetect.common.FrameTimecode` objects.
 
     Raises:
         :class:`VideoOpenFailure`: `video_path` could not be opened.

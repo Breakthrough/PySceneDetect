@@ -353,6 +353,18 @@ class FcpFormat(Enum):
 ConfigValue = bool | int | float | str | None | ValidatedValue | Enum
 ConfigDict = dict[str, dict[str, ConfigValue]]
 
+
+def default_to_str(value: ConfigValue) -> str:
+    """A `CONFIG_MAP` default as it is written in a config file or on the command line:
+    `yes`/`no` for flags and the lower-case name for enums. Used for `--help` and the
+    generated documentation."""
+    if isinstance(value, bool):
+        return "yes" if value else "no"
+    if isinstance(value, Enum):
+        return value.name.lower()
+    return str(value)
+
+
 _CONFIG_FILE_NAME: str = "scenedetect.cfg"
 _CONFIG_FILE_DIR: str = user_config_dir("PySceneDetect", False)
 _PLACEHOLDER = 0  # Placeholder for image quality default, as the value depends on output format
@@ -502,7 +514,7 @@ certain string options are stored in `CHOICE_MAP`."""
 
 CHOICE_MAP: dict[str, dict[str, list[str]]] = {
     "backend-pyav": {
-        "threading_mode": [mode.lower() for mode in PYAV_THREADING_MODES],
+        "threading-mode": [mode.lower() for mode in PYAV_THREADING_MODES],
     },
     "detect-content": {
         "filter-mode": [mode.name.lower() for mode in FlashFilter.Mode],
@@ -838,13 +850,9 @@ class ConfigRegistry:
         assert command in CONFIG_MAP and option in CONFIG_MAP[command]
         is_flag = isinstance(CONFIG_MAP[command][option], bool)
         if command in self._config and option in self._config[command]:
-            if is_flag:
-                value_str = "on" if self._config[command][option] else "off"
-            else:
-                value_str = str(self._config[command][option])
-            return f" [setting: {value_str}]"
+            return f" [setting: {default_to_str(self._config[command][option])}]"
         if show_default is False or (
             show_default is None and is_flag and CONFIG_MAP[command][option] is False
         ):
             return ""
-        return f" [default: {CONFIG_MAP[command][option]!s}]"
+        return f" [default: {default_to_str(CONFIG_MAP[command][option])}]"

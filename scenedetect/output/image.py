@@ -474,13 +474,13 @@ def save_images(
             None for no limit. Can only be set with `interval`.
 
     Returns:
-        Dictionary of the format { scene_num : [image_paths] }, where scene_num is the
+        Dictionary of the format ``{scene_num: [image_paths]}``, where ``scene_num`` is the
         number of the scene in scene_list (starting from 1), and image_paths is a list of
         the paths to the newly saved/created images.
 
     Raises:
         ValueError: Raised if any arguments are invalid or out of range (e.g.
-        if num_images is negative).
+            if `num_images` is negative).
     """
 
     if not scene_list:

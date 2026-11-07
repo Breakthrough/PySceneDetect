@@ -118,9 +118,10 @@ class FlashFilter:
         """
         Arguments:
             mode: The mode to use when enforcing `length`.
-            length: Minimum scene length. Accepts any :data:`TimecodeLike` value (e.g.
-                ``int`` frames, ``float`` seconds, ``str`` such as ``"0.6s"`` /
-                ``"00:00:00.600"``, or a :class:`FrameTimecode` / :class:`Timecode`).
+            length: Minimum scene length. Accepts any :data:`~scenedetect.common.TimecodeLike` value
+                (e.g. ``int`` frames, ``float`` seconds, ``str`` such as ``"0.6s"`` /
+                ``"00:00:00.600"``, or a :class:`~scenedetect.common.FrameTimecode` /
+                :class:`~scenedetect.common.Timecode`).
         """
         self._mode = mode
         # Frame count (int) and seconds (float) representations of `length`. Exactly one is
