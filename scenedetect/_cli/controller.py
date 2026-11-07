@@ -143,6 +143,14 @@ def _detect(context: CliContext) -> tuple[SceneList, CutList] | None:
         )
         return None
 
+    if num_frames <= 0 and context.use_stdin:
+        logger.critical(
+            "Failed to read any frames from stdin. Some containers can't be read from a pipe, such"
+            " as an MP4 with its index at the end of the file. Try remuxing to MKV or MPEG-TS:\n"
+            "      ffmpeg -i input.mp4 -c copy -f matroska -\n"
+        )
+        raise SystemExit(1)
+
     perf_duration = time.time() - perf_start_time
     logger.info(
         "Processed %d frames in %.1f seconds (average %.2f FPS).",
