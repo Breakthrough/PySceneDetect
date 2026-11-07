@@ -399,6 +399,16 @@ def test_write_scene_list_rejects_invalid_output_target():
         write_scene_list(ty.cast(ty.Any, object()), scenes)
 
 
+def test_write_scene_list_cut_list_row_without_cut_list():
+    """The cut list row is labelled whether the cut list is passed in or derived from the scenes."""
+    scenes = _fake_scenes(_FPS_CFR, [(0, 30), (30, 60), (60, 90)])
+    derived, explicit = StringIO(), StringIO()
+    write_scene_list(derived, scenes)
+    write_scene_list(explicit, scenes, cut_list=[scenes[1][0], scenes[2][0]])
+    assert derived.getvalue().splitlines()[0] == "Timecode List:,00:00:01.000,00:00:02.000"
+    assert derived.getvalue() == explicit.getvalue()
+
+
 def test_write_scene_list_edl(tmp_path: Path):
     """EDL output has title header, FCM line, and one event per scene in CMX 3600 format."""
     scenes = _fake_scenes(_FPS_CFR, [(0, 30), (30, 60)])

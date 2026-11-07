@@ -172,9 +172,10 @@ def write_scene_list(
     # If required, output the cutting list as the first row (i.e. before the header row).
     if include_cut_list:
         csv_writer.writerow(
-            ["Timecode List:", *cut_list]
-            if cut_list
-            else [start.get_timecode() for start, _ in scene_list[1:]]
+            [
+                "Timecode List:",
+                *(cut_list if cut_list else [start.get_timecode() for start, _ in scene_list[1:]]),
+            ]
         )
     csv_writer.writerow(
         [
