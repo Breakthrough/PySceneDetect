@@ -53,9 +53,9 @@ install:
   - uv pip install --system -r packaging/windows/requirements.txt --no-binary imageio-ffmpeg
   # TODO(https://github.com/Zulko/moviepy/issues/2553): moviepy caps pillow<12.0, but 11.x has
   # CVEs only fixed in 12.3.0+. Installed as a separate step since a pin in requirements.txt
-  # would fail strict resolution against moviepy's constraint. Tests pass against 12.3.0;
+  # would fail strict resolution against moviepy's constraint. Tests pass against 13.0.0;
   # drop this once moviepy lifts the cap.
-  - uv pip install --system pillow==12.3.0
+  - uv pip install --system pillow==13.0.0
   - if not exist ffmpeg-%ffmpeg_version%-full_build.7z appveyor DownloadFile https://github.com/GyanD/codexffmpeg/releases/download/%ffmpeg_version%/ffmpeg-%ffmpeg_version%-full_build.7z
   - 7z e ffmpeg-%ffmpeg_version%-full_build.7z -odist/ffmpeg ffmpeg.exe LICENSE -r
   # moviepy.config reads FFMPEG_BINARY (which routes through imageio_ffmpeg) at import time.
