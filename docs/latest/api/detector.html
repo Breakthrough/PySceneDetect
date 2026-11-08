@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Detector Interface &#8212; PySceneDetect 0.7.1 documentation</title>
+    <title>Detector Interface &#8212; PySceneDetect 0.7.3 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
@@ -50,40 +50,6 @@ in order to be compatible with PySceneDetect.</p>
 release. Instead of just timecodes, detection algorithms will also provide a specific type of
 event (in, out, cut, etc…).</p>
 </div>
-<dl class="py class">
-<dt class="sig sig-object py" id="scenedetect.detector.FlashFilter">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">FlashFilter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.detector.FlashFilter" title="Permalink to this definition">¶</a></dt>
-<dd><p>Filters fast-cuts to enforce minimum scene length.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>mode</strong> (<a class="reference internal" href="#scenedetect.detector.FlashFilter.Mode" title="scenedetect.detector.FlashFilter.Mode"><em>Mode</em></a>) – The mode to use when enforcing <cite>length</cite>.</p></li>
-<li><p><strong>length</strong> (<em>int</em><em> | </em><em>float</em><em> | </em><em>str</em><em> | </em><a class="reference internal" href="common.html#scenedetect.common.Timecode" title="scenedetect.common.Timecode"><em>Timecode</em></a><em> | </em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a>) – Minimum scene length. Accepts any <code class="xref py py-data docutils literal notranslate"><span class="pre">TimecodeLike</span></code> value (e.g.
-<code class="docutils literal notranslate"><span class="pre">int</span></code> frames, <code class="docutils literal notranslate"><span class="pre">float</span></code> seconds, <code class="docutils literal notranslate"><span class="pre">str</span></code> such as <code class="docutils literal notranslate"><span class="pre">&quot;0.6s&quot;</span></code> /
-<code class="docutils literal notranslate"><span class="pre">&quot;00:00:00.600&quot;</span></code>, or a <code class="xref py py-class docutils literal notranslate"><span class="pre">FrameTimecode</span></code> / <code class="xref py py-class docutils literal notranslate"><span class="pre">Timecode</span></code>).</p></li>
-</ul>
-</dd>
-</dl>
-<dl class="py class">
-<dt class="sig sig-object py" id="scenedetect.detector.FlashFilter.Mode">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Mode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names=&lt;not</span> <span class="pre">given&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qualname=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary=None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.detector.FlashFilter.Mode" title="Permalink to this definition">¶</a></dt>
-<dd><p>Which mode the filter should use for enforcing minimum scene length.</p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="scenedetect.detector.FlashFilter.Mode.MERGE">
-<span class="sig-name descname"><span class="pre">MERGE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#scenedetect.detector.FlashFilter.Mode.MERGE" title="Permalink to this definition">¶</a></dt>
-<dd><p>Merge consecutive cuts shorter than filter length.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="scenedetect.detector.FlashFilter.Mode.SUPPRESS">
-<span class="sig-name descname"><span class="pre">SUPPRESS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#scenedetect.detector.FlashFilter.Mode.SUPPRESS" title="Permalink to this definition">¶</a></dt>
-<dd><p>Suppress consecutive cuts until the filter length has passed.</p>
-</dd></dl>
-
-</dd></dl>
-
-</dd></dl>
-
 <dl class="py class">
 <dt class="sig sig-object py" id="scenedetect.detector.SceneDetector">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SceneDetector</span></span><a class="headerlink" href="#scenedetect.detector.SceneDetector" title="Permalink to this definition">¶</a></dt>
@@ -160,6 +126,41 @@ only if it has one itself.</p>
 
 </dd></dl>
 
+<dl class="py class">
+<dt class="sig sig-object py" id="scenedetect.detector.FlashFilter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">FlashFilter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.detector.FlashFilter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filters fast-cuts to enforce minimum scene length.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mode</strong> (<a class="reference internal" href="#scenedetect.detector.FlashFilter.Mode" title="scenedetect.detector.FlashFilter.Mode"><em>Mode</em></a>) – The mode to use when enforcing <cite>length</cite>.</p></li>
+<li><p><strong>length</strong> (<em>int</em><em> | </em><em>float</em><em> | </em><em>str</em><em> | </em><a class="reference internal" href="common.html#scenedetect.common.Timecode" title="scenedetect.common.Timecode"><em>Timecode</em></a><em> | </em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a>) – Minimum scene length. Accepts any <a class="reference internal" href="common.html#scenedetect.common.TimecodeLike" title="scenedetect.common.TimecodeLike"><code class="xref py py-data docutils literal notranslate"><span class="pre">TimecodeLike</span></code></a> value
+(e.g. <code class="docutils literal notranslate"><span class="pre">int</span></code> frames, <code class="docutils literal notranslate"><span class="pre">float</span></code> seconds, <code class="docutils literal notranslate"><span class="pre">str</span></code> such as <code class="docutils literal notranslate"><span class="pre">&quot;0.6s&quot;</span></code> /
+<code class="docutils literal notranslate"><span class="pre">&quot;00:00:00.600&quot;</span></code>, or a <a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrameTimecode</span></code></a> /
+<a class="reference internal" href="common.html#scenedetect.common.Timecode" title="scenedetect.common.Timecode"><code class="xref py py-class docutils literal notranslate"><span class="pre">Timecode</span></code></a>).</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="scenedetect.detector.FlashFilter.Mode">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Mode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names=&lt;not</span> <span class="pre">given&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qualname=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary=None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.detector.FlashFilter.Mode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Which mode the filter should use for enforcing minimum scene length.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scenedetect.detector.FlashFilter.Mode.MERGE">
+<span class="sig-name descname"><span class="pre">MERGE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#scenedetect.detector.FlashFilter.Mode.MERGE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Merge consecutive cuts shorter than filter length.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scenedetect.detector.FlashFilter.Mode.SUPPRESS">
+<span class="sig-name descname"><span class="pre">SUPPRESS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#scenedetect.detector.FlashFilter.Mode.SUPPRESS" title="Permalink to this definition">¶</a></dt>
+<dd><p>Suppress consecutive cuts until the filter length has passed.</p>
+</dd></dl>
+
+</dd></dl>
+
+</dd></dl>
+
 </section>
 
 
@@ -193,7 +194,7 @@ only if it has one itself.</p>
 
 
 
-<p class="blurb">Version: [0.7.1]</p>
+<p class="blurb">Version: [0.7.3]</p>
 
 
 
@@ -207,45 +208,7 @@ only if it has one itself.</p>
 
 
 
-<h3>Navigation</h3>
-<p class="caption" role="heading"><span class="caption-text">Command-Line Interface:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../cli.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Command</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../cli.html#examples">Examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../cli.html#options">Options</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../cli.html#detectors">Detectors</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../cli.html#commands">Commands</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../cli/config_file.html">Configuration File</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../cli/backends.html">Backends</a></li>
-</ul>
-<p class="caption" role="heading"><span class="caption-text">API Documentation:</span></p>
-<ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../api.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="detectors.html">Detectors</a></li>
-<li class="toctree-l1"><a class="reference internal" href="output.html">Output</a></li>
-<li class="toctree-l1"><a class="reference internal" href="backends.html">Video Backends</a></li>
-<li class="toctree-l1"><a class="reference internal" href="common.html">Common</a></li>
-<li class="toctree-l1"><a class="reference internal" href="scene_manager.html">Scene Manager</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Detector Interface</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#scenedetect.detector.FlashFilter"><code class="docutils literal notranslate"><span class="pre">FlashFilter</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#scenedetect.detector.SceneDetector"><code class="docutils literal notranslate"><span class="pre">SceneDetector</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="video_stream.html">Stream Interface</a></li>
-<li class="toctree-l1"><a class="reference internal" href="stats_manager.html">Stats Manager</a></li>
-<li class="toctree-l1"><a class="reference internal" href="platform.html">Platform &amp; Logging</a></li>
-<li class="toctree-l1"><a class="reference internal" href="migration_guide.html">Migration Guide (v0.7)</a></li>
-</ul>
 
-<div class="relations">
-<h3>Related Topics</h3>
-<ul>
-  <li><a href="../index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="scene_manager.html" title="previous chapter">Scene Manager</a></li>
-      <li>Next: <a href="video_stream.html" title="next chapter">Stream Interface</a></li>
-  </ul></li>
-</ul>
-</div>
 <div id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
@@ -256,12 +219,103 @@ only if it has one itself.</p>
     </div>
 </div>
 <script>document.getElementById('searchbox').style.display = "block"</script>
-
-
-
-
-
-
+<nav class="section-switch" aria-label="Documentation section">
+  <a href="../cli.html">CLI</a><span class="sep" aria-hidden="true">|</span>
+  <a href="../api.html" class="current" aria-current="location">Python API</a>
+  <span class="section-links">
+  <a href="../examples.html">Examples</a>
+  </span>
+</nav>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../api.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> Package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#usage">Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#module-scenedetect">Functions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="detectors.html">Detectors</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="detectors.html#adaptivedetector">AdaptiveDetector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="detectors.html#contentdetector">ContentDetector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="detectors.html#hashdetector">HashDetector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="detectors.html#histogramdetector">HistogramDetector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="detectors.html#thresholddetector">ThresholdDetector</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="output.html">Output</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="output.html#splitting-video">Splitting Video</a></li>
+<li class="toctree-l2"><a class="reference internal" href="output.html#saving-images">Saving Images</a></li>
+<li class="toctree-l2"><a class="reference internal" href="output.html#scene-lists">Scene Lists</a></li>
+<li class="toctree-l2"><a class="reference internal" href="output.html#filename-formatting">Filename Formatting</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="backends.html">Video Backends</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="backends.html#opencv">OpenCV</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="backends.html#scenedetect.backends.opencv.VideoStreamCv2"><code class="docutils literal notranslate"><span class="pre">VideoStreamCv2</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="backends.html#pyav">PyAV</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="backends.html#scenedetect.backends.pyav.VideoStreamAv"><code class="docutils literal notranslate"><span class="pre">VideoStreamAv</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="backends.html#moviepy">MoviePy</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="backends.html#scenedetect.backends.moviepy.VideoStreamMoviePy"><code class="docutils literal notranslate"><span class="pre">VideoStreamMoviePy</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="backends.html#module-scenedetect.backends.concat">Multiple Videos</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="backends.html#scenedetect.backends.concat.VideoStreamConcat"><code class="docutils literal notranslate"><span class="pre">VideoStreamConcat</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="common.html">Common</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="common.html#timecodes">Timecodes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode"><code class="docutils literal notranslate"><span class="pre">FrameTimecode</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="common.html#type-aliases">Type Aliases</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="common.html#scenedetect.common.SceneList"><code class="docutils literal notranslate"><span class="pre">SceneList</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="common.html#scenedetect.common.CutList"><code class="docutils literal notranslate"><span class="pre">CutList</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="scene_manager.html">Scene Manager</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="scene_manager.html#scenedetect.scene_manager.SceneManager"><code class="docutils literal notranslate"><span class="pre">SceneManager</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="scene_manager.html#functions">Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="scene_manager.html#scenedetect.scene_manager.get_scenes_from_cuts"><code class="docutils literal notranslate"><span class="pre">get_scenes_from_cuts()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Detector Interface</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#scenedetect.detector.SceneDetector"><code class="docutils literal notranslate"><span class="pre">SceneDetector</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#scenedetect.detector.SceneDetector.get_metrics"><code class="docutils literal notranslate"><span class="pre">get_metrics()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scenedetect.detector.SceneDetector.post_process"><code class="docutils literal notranslate"><span class="pre">post_process()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scenedetect.detector.SceneDetector.process_frame"><code class="docutils literal notranslate"><span class="pre">process_frame()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scenedetect.detector.SceneDetector.event_buffer_length"><code class="docutils literal notranslate"><span class="pre">event_buffer_length</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scenedetect.detector.SceneDetector.stats_manager"><code class="docutils literal notranslate"><span class="pre">stats_manager</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#scenedetect.detector.FlashFilter"><code class="docutils literal notranslate"><span class="pre">FlashFilter</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#scenedetect.detector.FlashFilter.Mode"><code class="docutils literal notranslate"><span class="pre">Mode</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#scenedetect.detector.FlashFilter.Mode.MERGE"><code class="docutils literal notranslate"><span class="pre">MERGE</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scenedetect.detector.FlashFilter.Mode.SUPPRESS"><code class="docutils literal notranslate"><span class="pre">SUPPRESS</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="video_stream.html">Stream Interface</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="video_stream.html#scenedetect.video_stream.VideoStream"><code class="docutils literal notranslate"><span class="pre">VideoStream</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="stats_manager.html">Stats Manager</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="stats_manager.html#scenedetect.stats_manager.StatsManager"><code class="docutils literal notranslate"><span class="pre">StatsManager</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="platform.html">Platform &amp; Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="migration_guide.html">Migration Guide (v0.7)</a></li>
+</ul>
 
 
         </div>

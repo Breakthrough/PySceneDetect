@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Examples &#8212; PySceneDetect 0.7.3 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="_static/pyscenedetect.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/clipboard.min.js"></script>
+    <script src="_static/copybutton.js"></script>
+    <link rel="icon" href="_static/favicon.ico"/>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Migration Guide (v0.7)" href="api/migration_guide.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="examples">
+<span id="id1"></span><h1>Examples<a class="headerlink" href="#examples" title="Permalink to this heading">¶</a></h1>
+<p>Each task shows the command line first, then the same task in Python. Every command in the
+<a class="reference internal" href="cli.html"><span class="doc">CLI reference</span></a> links to its Python API and config file
+counterparts, and each detector to a table of its options.</p>
+<p>All examples assume a file called <code class="docutils literal notranslate"><span class="pre">video.mp4</span></code> in the working directory. When no <code class="docutils literal notranslate"><span class="pre">detect-*</span></code> command is given, the CLI uses <a class="reference internal" href="cli.html#command-detect-adaptive"><span class="std std-ref">detect-adaptive</span></a> (<a class="reference internal" href="api/detectors.html#scenedetect.detectors.adaptive_detector.AdaptiveDetector" title="scenedetect.detectors.adaptive_detector.AdaptiveDetector"><code class="xref py py-class docutils literal notranslate"><span class="pre">AdaptiveDetector</span></code></a>). Most Python examples
+use <a class="reference internal" href="api.html#scenedetect.detect" title="scenedetect.detect"><code class="xref py py-func docutils literal notranslate"><span class="pre">scenedetect.detect()</span></code></a>, which returns a list of <code class="docutils literal notranslate"><span class="pre">(start,</span> <span class="pre">end)</span></code>
+<a class="reference internal" href="api/common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrameTimecode</span></code></a> pairs (empty if no cuts are found);
+see <a class="reference internal" href="api/scene_manager.html#scenedetect-scene-manager"><span class="std std-ref">SceneManager</span></a> for lower-level control.</p>
+<section id="split-a-video-into-scenes">
+<h2>Split a Video Into Scenes<a class="headerlink" href="#split-a-video-into-scenes" title="Permalink to this heading">¶</a></h2>
+<p>Find the scenes and write one clip per scene. Requires <code class="docutils literal notranslate"><span class="pre">ffmpeg</span></code> (or <code class="docutils literal notranslate"><span class="pre">mkvmerge</span></code> with
+<code class="docutils literal notranslate"><span class="pre">split-video</span> <span class="pre">-m</span></code> / <a class="reference internal" href="api/output.html#scenedetect.output.split_video_mkvmerge" title="scenedetect.output.split_video_mkvmerge"><code class="xref py py-func docutils literal notranslate"><span class="pre">split_video_mkvmerge()</span></code></a>).</p>
+<p>Command line:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>scenedetect<span class="w"> </span>-i<span class="w"> </span>video.mp4<span class="w"> </span>split-video
+</pre></div>
+</div>
+<p>Python:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">scenedetect</span><span class="w"> </span><span class="kn">import</span> <span class="n">detect</span><span class="p">,</span> <span class="n">AdaptiveDetector</span><span class="p">,</span> <span class="n">split_video_ffmpeg</span>
+
+<span class="n">scenes</span> <span class="o">=</span> <span class="n">detect</span><span class="p">(</span><span class="s2">"video.mp4"</span><span class="p">,</span> <span class="n">AdaptiveDetector</span><span class="p">())</span>
+<span class="n">split_video_ffmpeg</span><span class="p">(</span><span class="s2">"video.mp4"</span><span class="p">,</span> <span class="n">scenes</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="save-the-scene-list-as-csv">
+<h2>Save the Scene List as CSV<a class="headerlink" href="#save-the-scene-list-as-csv" title="Permalink to this heading">¶</a></h2>
+<p>Write the scene list to <code class="docutils literal notranslate"><span class="pre">video-Scenes.csv</span></code>.</p>
+<p>Command line:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>scenedetect<span class="w"> </span>-i<span class="w"> </span>video.mp4<span class="w"> </span>list-scenes
+</pre></div>
+</div>
+<p>Python:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">scenedetect</span><span class="w"> </span><span class="kn">import</span> <span class="n">detect</span><span class="p">,</span> <span class="n">AdaptiveDetector</span><span class="p">,</span> <span class="n">write_scene_list</span>
+
+<span class="n">scenes</span> <span class="o">=</span> <span class="n">detect</span><span class="p">(</span><span class="s2">"video.mp4"</span><span class="p">,</span> <span class="n">AdaptiveDetector</span><span class="p">())</span>
+<span class="n">write_scene_list</span><span class="p">(</span><span class="s2">"video-Scenes.csv"</span><span class="p">,</span> <span class="n">scenes</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="save-images-from-each-scene">
+<h2>Save Images From Each Scene<a class="headerlink" href="#save-images-from-each-scene" title="Permalink to this heading">¶</a></h2>
+<p>Save three images from each scene (start, middle, end) into the <code class="docutils literal notranslate"><span class="pre">images</span></code> directory.</p>
+<p>Command line:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>scenedetect<span class="w"> </span>-i<span class="w"> </span>video.mp4<span class="w"> </span>-o<span class="w"> </span>images<span class="w"> </span>save-images<span class="w"> </span>--num-images<span class="w"> </span><span class="m">3</span>
+</pre></div>
+</div>
+<p>Python:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">scenedetect</span><span class="w"> </span><span class="kn">import</span> <span class="n">detect</span><span class="p">,</span> <span class="n">open_video</span><span class="p">,</span> <span class="n">AdaptiveDetector</span><span class="p">,</span> <span class="n">save_images</span>
+
+<span class="n">scenes</span> <span class="o">=</span> <span class="n">detect</span><span class="p">(</span><span class="s2">"video.mp4"</span><span class="p">,</span> <span class="n">AdaptiveDetector</span><span class="p">())</span>
+<span class="n">video</span> <span class="o">=</span> <span class="n">open_video</span><span class="p">(</span><span class="s2">"video.mp4"</span><span class="p">)</span>
+<span class="n">save_images</span><span class="p">(</span><span class="n">scenes</span><span class="p">,</span> <span class="n">video</span><span class="p">,</span> <span class="n">num_images</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">output_dir</span><span class="o">=</span><span class="s2">"images"</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="pick-a-detector-and-tune-it">
+<h2>Pick a Detector and Tune It<a class="headerlink" href="#pick-a-detector-and-tune-it" title="Permalink to this heading">¶</a></h2>
+<p>Every detector is both a <code class="docutils literal notranslate"><span class="pre">detect-*</span></code> command and a class in
+<a class="reference internal" href="api/detectors.html#scenedetect-detectors"><span class="std std-ref">scenedetect.detectors</span></a>. Options map to constructor arguments of
+the same name, with a few exceptions listed on that page. Here, a lower threshold makes
+<a class="reference internal" href="cli.html#command-detect-content"><span class="std std-ref">detect-content</span></a> more sensitive.</p>
+<p>Command line:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>scenedetect<span class="w"> </span>-i<span class="w"> </span>video.mp4<span class="w"> </span>detect-content<span class="w"> </span>--threshold<span class="w"> </span><span class="m">20</span>
+</pre></div>
+</div>
+<p>Python:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">scenedetect</span><span class="w"> </span><span class="kn">import</span> <span class="n">detect</span><span class="p">,</span> <span class="n">ContentDetector</span>
+
+<span class="n">scenes</span> <span class="o">=</span> <span class="n">detect</span><span class="p">(</span><span class="s2">"video.mp4"</span><span class="p">,</span> <span class="n">ContentDetector</span><span class="p">(</span><span class="n">threshold</span><span class="o">=</span><span class="mi">20</span><span class="p">))</span>
+</pre></div>
+</div>
+</section>
+<section id="detect-fades-in-and-out">
+<h2>Detect Fades In and Out<a class="headerlink" href="#detect-fades-in-and-out" title="Permalink to this heading">¶</a></h2>
+<p><a class="reference internal" href="cli.html#command-detect-threshold"><span class="std std-ref">detect-threshold</span></a> finds fades to and from black instead of
+fast cuts. Defaults differ: the command adds a final scene and ignores fades shorter than
+<code class="docutils literal notranslate"><span class="pre">0.1s</span></code>, while <a class="reference internal" href="api/detectors.html#scenedetect.detectors.threshold_detector.ThresholdDetector" title="scenedetect.detectors.threshold_detector.ThresholdDetector"><code class="xref py py-class docutils literal notranslate"><span class="pre">ThresholdDetector</span></code></a> does
+neither (see <a class="reference internal" href="api/detectors.html#scenedetect-detectors"><span class="std std-ref">Detectors</span></a>).</p>
+<p>Command line:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>scenedetect<span class="w"> </span>-i<span class="w"> </span>video.mp4<span class="w"> </span>detect-threshold
+</pre></div>
+</div>
+<p>Python:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">scenedetect</span><span class="w"> </span><span class="kn">import</span> <span class="n">detect</span><span class="p">,</span> <span class="n">ThresholdDetector</span>
+
+<span class="n">scenes</span> <span class="o">=</span> <span class="n">detect</span><span class="p">(</span><span class="s2">"video.mp4"</span><span class="p">,</span> <span class="n">ThresholdDetector</span><span class="p">())</span>
+</pre></div>
+</div>
+</section>
+<section id="set-a-minimum-scene-length">
+<h2>Set a Minimum Scene Length<a class="headerlink" href="#set-a-minimum-scene-length" title="Permalink to this heading">¶</a></h2>
+<p>Cuts closer together than this are ignored. On the command line
+<a class="reference internal" href="cli.html#cmdoption-scenedetect-m"><code class="xref std std-option docutils literal notranslate"><span class="pre">-m/--min-scene-len</span></code></a> applies to every detector and defaults to
+<code class="docutils literal notranslate"><span class="pre">0.6s</span></code>; in Python each detector takes <code class="docutils literal notranslate"><span class="pre">min_scene_len</span></code> and defaults to <code class="docutils literal notranslate"><span class="pre">15</span></code> frames.</p>
+<p>Command line:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>scenedetect<span class="w"> </span>-i<span class="w"> </span>video.mp4<span class="w"> </span>-m<span class="w"> </span>2s<span class="w"> </span>detect-content
+</pre></div>
+</div>
+<p>Python:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">scenedetect</span><span class="w"> </span><span class="kn">import</span> <span class="n">detect</span><span class="p">,</span> <span class="n">ContentDetector</span>
+
+<span class="n">scenes</span> <span class="o">=</span> <span class="n">detect</span><span class="p">(</span><span class="s2">"video.mp4"</span><span class="p">,</span> <span class="n">ContentDetector</span><span class="p">(</span><span class="n">min_scene_len</span><span class="o">=</span><span class="s2">"2s"</span><span class="p">))</span>
+</pre></div>
+</div>
+</section>
+<section id="analyze-only-part-of-the-video">
+<h2>Analyze Only Part of the Video<a class="headerlink" href="#analyze-only-part-of-the-video" title="Permalink to this heading">¶</a></h2>
+<p>Skip the first 10 seconds and stop after one minute. Times can be given as frames (<code class="docutils literal notranslate"><span class="pre">100</span></code>),
+seconds (<code class="docutils literal notranslate"><span class="pre">10s</span></code>) or timecodes (<code class="docutils literal notranslate"><span class="pre">00:01:00</span></code>).</p>
+<p>Command line:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>scenedetect<span class="w"> </span>-i<span class="w"> </span>video.mp4<span class="w"> </span><span class="nb">time</span><span class="w"> </span>--start<span class="w"> </span>10s<span class="w"> </span>--end<span class="w"> </span><span class="m">00</span>:01:00<span class="w"> </span>detect-content
+</pre></div>
+</div>
+<p>Python:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">scenedetect</span><span class="w"> </span><span class="kn">import</span> <span class="n">detect</span><span class="p">,</span> <span class="n">ContentDetector</span>
+
+<span class="n">scenes</span> <span class="o">=</span> <span class="n">detect</span><span class="p">(</span><span class="s2">"video.mp4"</span><span class="p">,</span> <span class="n">ContentDetector</span><span class="p">(),</span> <span class="n">start_time</span><span class="o">=</span><span class="s2">"10s"</span><span class="p">,</span> <span class="n">end_time</span><span class="o">=</span><span class="s2">"00:01:00"</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="save-per-frame-statistics">
+<h2>Save Per-Frame Statistics<a class="headerlink" href="#save-per-frame-statistics" title="Permalink to this heading">¶</a></h2>
+<p>Write the metric each detector computes for every frame to a CSV file, to help choose a
+threshold.</p>
+<p>Command line:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>scenedetect<span class="w"> </span>-i<span class="w"> </span>video.mp4<span class="w"> </span>-s<span class="w"> </span>stats.csv<span class="w"> </span>detect-content
+</pre></div>
+</div>
+<p>Python:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">scenedetect</span><span class="w"> </span><span class="kn">import</span> <span class="n">detect</span><span class="p">,</span> <span class="n">ContentDetector</span>
+
+<span class="n">scenes</span> <span class="o">=</span> <span class="n">detect</span><span class="p">(</span><span class="s2">"video.mp4"</span><span class="p">,</span> <span class="n">ContentDetector</span><span class="p">(),</span> <span class="n">stats_file_path</span><span class="o">=</span><span class="s2">"stats.csv"</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="use-a-different-video-backend">
+<h2>Use a Different Video Backend<a class="headerlink" href="#use-a-different-video-backend" title="Permalink to this heading">¶</a></h2>
+<p>Decode with PyAV instead of OpenCV (see <a class="reference internal" href="api/backends.html#scenedetect-backends"><span class="std std-ref">Video Backends</span></a>).</p>
+<p>Command line:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>scenedetect<span class="w"> </span>-i<span class="w"> </span>video.mp4<span class="w"> </span>-b<span class="w"> </span>pyav<span class="w"> </span>detect-content
+</pre></div>
+</div>
+<p>Python:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">scenedetect</span><span class="w"> </span><span class="kn">import</span> <span class="n">detect</span><span class="p">,</span> <span class="n">ContentDetector</span>
+
+<span class="n">scenes</span> <span class="o">=</span> <span class="n">detect</span><span class="p">(</span><span class="s2">"video.mp4"</span><span class="p">,</span> <span class="n">ContentDetector</span><span class="p">(),</span> <span class="n">backend</span><span class="o">=</span><span class="s2">"pyav"</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="run-several-detectors-at-once">
+<h2>Run Several Detectors at Once<a class="headerlink" href="#run-several-detectors-at-once" title="Permalink to this heading">¶</a></h2>
+<p>Find both fast cuts and fades. In Python this needs a
+<a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.SceneManager" title="scenedetect.scene_manager.SceneManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">SceneManager</span></code></a>, which also gives you per-frame
+callbacks and access to the cut list.</p>
+<p>Command line:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>scenedetect<span class="w"> </span>-i<span class="w"> </span>video.mp4<span class="w"> </span>detect-content<span class="w"> </span>detect-threshold
+</pre></div>
+</div>
+<p>Python:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">scenedetect</span><span class="w"> </span><span class="kn">import</span> <span class="n">open_video</span><span class="p">,</span> <span class="n">SceneManager</span><span class="p">,</span> <span class="n">ContentDetector</span><span class="p">,</span> <span class="n">ThresholdDetector</span>
+
+<span class="n">video</span> <span class="o">=</span> <span class="n">open_video</span><span class="p">(</span><span class="s2">"video.mp4"</span><span class="p">)</span>
+<span class="n">scene_manager</span> <span class="o">=</span> <span class="n">SceneManager</span><span class="p">()</span>
+<span class="n">scene_manager</span><span class="o">.</span><span class="n">add_detector</span><span class="p">(</span><span class="n">ContentDetector</span><span class="p">())</span>
+<span class="n">scene_manager</span><span class="o">.</span><span class="n">add_detector</span><span class="p">(</span><span class="n">ThresholdDetector</span><span class="p">())</span>
+<span class="n">scene_manager</span><span class="o">.</span><span class="n">detect_scenes</span><span class="p">(</span><span class="n">video</span><span class="p">,</span> <span class="n">show_progress</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">scenes</span> <span class="o">=</span> <span class="n">scene_manager</span><span class="o">.</span><span class="n">get_scene_list</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+          </div>
+              <div class="related bottom">
+                &nbsp;
+  <nav id="rellinks">
+    <ul>
+        <li>
+          &larr;
+          <a href="api/migration_guide.html" title="Previous document">Migration Guide (v0.7)</a>
+        </li>
+    </ul>
+  </nav>
+              </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="index.html">
+    <img class="logo" src="_static/pyscenedetect_logo.png" alt="Logo" />
+    
+  </a>
+</p>
+
+
+
+<p class="blurb">Version: [0.7.3]</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=Breakthrough&repo=PySceneDetect&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+<nav class="section-switch" aria-label="Documentation section">
+  <a href="cli.html">CLI</a><span class="sep" aria-hidden="true">|</span>
+  <a href="api.html">Python API</a>
+  <span class="section-links">
+  <a href="#" class="current" aria-current="page">Examples</a>
+  </span>
+</nav>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="#split-a-video-into-scenes">Split a Video Into Scenes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#save-the-scene-list-as-csv">Save the Scene List as CSV</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#save-images-from-each-scene">Save Images From Each Scene</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#pick-a-detector-and-tune-it">Pick a Detector and Tune It</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#detect-fades-in-and-out">Detect Fades In and Out</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#set-a-minimum-scene-length">Set a Minimum Scene Length</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#analyze-only-part-of-the-video">Analyze Only Part of the Video</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#save-per-frame-statistics">Save Per-Frame Statistics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#use-a-different-video-backend">Use a Different Video Backend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#run-several-detectors-at-once">Run Several Detectors at Once</a></li>
+</ul>
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2014, Brandon Castellano.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.0.1</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="_sources/examples.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

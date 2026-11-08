@@ -32,3 +32,163 @@
     padding-bottom: 12px;
     padding-top: 12px;
 }
+
+/* Per-section sidebar: CLI | Python API switch and the expanded section tree. */
+div.sphinxsidebar nav.section-switch {
+    font-size: 1.2em;
+    margin: 0.5em 0 1em 0;
+}
+/* No captions over the trees (the switch names them); on the index page, where every
+   section's tree is listed, space separates one tree from the next. */
+div.sphinxsidebarwrapper > ul + ul {
+    margin-top: 1.2em;
+}
+div.sphinxsidebar nav.section-switch a.current {
+    font-weight: bold;
+    border-bottom: 2px solid #004B6B;
+}
+div.sphinxsidebar nav.section-switch .sep {
+    color: #AAA;
+    margin: 0 0.4em;
+}
+div.sphinxsidebar ul li.toctree-l3 > a,
+div.sphinxsidebar ul li.toctree-l4 > a {
+    font-size: 0.9em;
+}
+/* Long constant names (MAX_CONSECUTIVE_DECODE_FAILURES) must wrap inside the sidebar. */
+div.sphinxsidebar code span.pre {
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+/* Pages that span both halves (Examples): a row of smaller links under the switch. */
+div.sphinxsidebar nav.section-switch span.section-links {
+    display: block;
+    font-size: 0.75em;
+    margin-top: 0.4em;
+}
+div.sphinxsidebar nav.section-switch span.section-links::before {
+    content: "\2192\00a0";
+}
+div.sphinxsidebar nav.section-switch span.section-links a {
+    white-space: nowrap;  /* "Migration Guide (v0.7)" wraps as a whole, not at "(v0.7)" */
+}
+div.sphinxsidebar nav.section-switch span.section-links a.current {
+    font-weight: bold;
+    border-bottom: none;
+}
+
+/* CLI <-> Python API cross-links: compact "See also" boxes with the title inline. */
+div.body div.admonition.seealso {
+    padding: 8px 14px;
+    margin: 12px 0;
+}
+div.body div.admonition.seealso p.admonition-title {
+    display: inline;
+    font-size: 1em;
+    font-weight: bold;
+    line-height: inherit;
+    margin: 0 0.4em 0 0;
+}
+div.body div.admonition.seealso p.admonition-title + p {
+    display: inline;
+}
+div.body div.admonition.seealso ul {
+    margin-top: 0.4em;
+    margin-bottom: 0;
+}
+
+/* Index page: the Command Line and Python API lists side by side (stacked below alabaster's
+   breakpoint). */
+div.surfaces {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 2em;
+    margin: 1em 0;
+}
+div.surfaces div.surface {
+    min-width: 0;
+}
+div.surfaces div.surface p.rubric {
+    font-size: 1.2em;
+    margin: 0 0 0.3em 0;
+}
+div.surfaces div.surface > ul {
+    margin-left: 1.2em;
+}
+div.surfaces div.surface li > ul {
+    margin: 0.1em 0 0.3em 1.4em;
+}
+div.surfaces li li a {
+    white-space: nowrap;
+}
+
+/* Generated tables. Per-detector option tables: automatic layout; the option and parameter
+   names (first two columns) never break, other code may wrap so the Default column takes the
+   slack; the container scrolls sideways when the table cannot fit (narrow screens, see below).
+   Config key tables: fixed layout, and code is allowed to wrap because the [split-video] args
+   default is a long single token. basic.css makes `span.pre` nowrap, so every override has
+   to name it. */
+table.detector-options,
+table.config-keys {
+    width: 100%;
+    font-size: 0.9em;
+}
+div.table-scroll {
+    overflow-x: auto;
+}
+div.body table.detector-options code span.pre,
+table.config-keys code span.pre {
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+div.body table.detector-options td:nth-child(-n+2) code span.pre {
+    white-space: nowrap;
+    overflow-wrap: normal;
+}
+table.config-keys {
+    table-layout: fixed;
+}
+/* Cross-link boxes: keep each link (e.g. [detect-content]) on one line. */
+div.body div.admonition.seealso a {
+    white-space: nowrap;
+}
+/* Long inline code (config file paths) and URLs wrap instead of widening the page. The 980px
+   bound matches the fluid-width query below. */
+@media screen and (max-width: 980px) {
+    div.body code.literal span.pre,
+    div.body a.reference.external {
+        white-space: normal;
+        overflow-wrap: anywhere;
+    }
+}
+
+/* alabaster fixes the page at 940px and only goes fluid below 876px; fill the gap. */
+@media screen and (min-width: 876px) and (max-width: 980px) {
+    div.document,
+    div.footer {
+        width: auto;
+        margin-left: 20px;
+        margin-right: 20px;
+    }
+}
+@media screen and (max-width: 875px) {
+    div.surfaces {
+        grid-template-columns: 1fr;
+    }
+    /* The sidebar is drawn as a dark block at the bottom of the page. */
+    div.sphinxsidebar code,
+    div.sphinxsidebar code span.pre {
+        color: #DDD;
+        background: transparent;
+    }
+    div.sphinxsidebar nav.section-switch a.current {
+        border-bottom-color: #DDD;
+    }
+}
+@media screen and (max-width: 700px) {
+    /* Too narrow for four columns: keep the table readable and let its container scroll. */
+    div.table-scroll table.detector-options {
+        min-width: 560px;
+    }
+}

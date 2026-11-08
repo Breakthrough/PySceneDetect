@@ -62,6 +62,7 @@ disallows negative values, and will clamp negative results to 0.
 """
 
 import math
+import numbers
 import typing as ty
 import warnings
 from dataclasses import dataclass
@@ -123,7 +124,7 @@ _NTSC_DETECTION_TOLERANCE: float = 1e-3
 ##
 
 
-def framerate_to_fraction(fps: "FrameRate") -> Fraction:
+def framerate_to_fraction(fps: "FrameRate | numbers.Rational") -> Fraction:
     """Convert a framerate value to an exact rational Fraction.
 
     Detects NTSC-derived framerates of the form ``N * 1000/1001`` (e.g. 23.976 -> 24000/1001,
@@ -131,7 +132,11 @@ def framerate_to_fraction(fps: "FrameRate") -> Fraction:
     their exact rational representation. Whole-number framerates are returned as
     ``Fraction(N, 1)``. Other values fall back to ``limit_denominator(10000)`` for a clean
     rational approximation. ``Fraction`` inputs are returned directly without conversion.
+    :class:`numbers.Rational` (e.g. ``av.AVRational`` from PyAV) is converted using numerator and
+    denominator.
     """
+    if isinstance(fps, numbers.Rational) and not isinstance(fps, Fraction):
+        fps = Fraction(int(fps.numerator), int(fps.denominator))
     if fps <= MAX_FPS_DELTA:
         raise ValueError("Framerate must be positive and greater than zero.")
     if isinstance(fps, Fraction):
@@ -168,6 +173,15 @@ class Timecode:
     """Presentation timestamp of the frame in units of `time_base`."""
     time_base: Fraction
     """The base unit in which `pts` is measured."""
+
+    def __post_init__(self):
+        # Accept any rational (e.g. `av.AVRational` from PyAV 19+) but always store a `Fraction`
+        # so downstream arithmetic (`round`, `int`, mixed-type operations) behaves consistently.
+        time_base = self.time_base
+        if isinstance(time_base, numbers.Rational) and not isinstance(time_base, Fraction):
+            object.__setattr__(
+                self, "time_base", Fraction(int(time_base.numerator), int(time_base.denominator))
+            )
 
     @property
     def seconds(self) -> float:
@@ -296,8 +310,12 @@ class FrameTimecode:
         property returns an exact :class:`fractions.Fraction` and matches the naming used by
         :attr:`scenedetect.video_stream.VideoStream.frame_rate`.
         """
-        # TODO(https://scenedetect.com/issue/548): emit DeprecationWarning here once internal
-        # callers and downstream users have had a release to migrate to `frame_rate`.
+        warnings.warn(
+            "`framerate` is deprecated and scheduled for removal in v0.9; "
+            "use `frame_rate` instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         if self._rate is None:
             return None
         return float(self._rate)
@@ -335,16 +353,18 @@ class FrameTimecode:
     def get_framerate(self) -> float | None:
         """[DEPRECATED] Get Framerate: Returns the framerate used by the FrameTimecode object.
 
-        Use the `framerate` property instead.
+        Use the `frame_rate` property instead.
 
         :meta private:
         """
         warnings.warn(
-            "get_framerate() is deprecated, use the `framerate` property instead.",
+            "get_framerate() is deprecated, use the `frame_rate` property instead.",
             DeprecationWarning,
             stacklevel=2,
         )
-        return self.framerate
+        if self.frame_rate is None:
+            return None
+        return float(self.frame_rate)
 
     def equal_frame_rate(self, other: "float | Fraction | FrameTimecode") -> bool:
         """Determine whether the passed frame rate equals this object's frame rate.
@@ -368,8 +388,12 @@ class FrameTimecode:
 
     def equal_framerate(self, fps) -> bool:
         """[DEPRECATED] Use :meth:`equal_frame_rate` instead."""
-        # TODO(https://scenedetect.com/issue/548): emit DeprecationWarning here once internal
-        # callers and downstream users have had a release to migrate to `equal_frame_rate`.
+        warnings.warn(
+            "`equal_framerate()` is deprecated and scheduled for removal in v0.9; "
+            "use `equal_frame_rate()` instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         return self.equal_frame_rate(fps)
 
     @property
@@ -454,17 +478,20 @@ class FrameTimecode:
         return f"{hrs:02d}:{mins:02d}:{secs_str}"
 
     @staticmethod
-    def _ensure_fractional(fps: "FrameRate | FrameTimecode") -> Fraction:
+    def _ensure_fractional(fps: "FrameRate | numbers.Rational | FrameTimecode") -> Fraction:
         """Validate and convert an `fps` argument into a positive `Fraction`. NTSC-like frame rates
         are handled via :func:`framerate_to_fraction`."""
         if isinstance(fps, FrameTimecode):
             if fps._rate is None:
                 raise TypeError("FrameTimecode passed as fps must have a known rate.")
             return fps._rate
-        if isinstance(fps, (float, Fraction)):
+        # Accept floats and non-integral rationals (`Fraction`, PyAV 19's `av.AVRational`), but
+        # keep rejecting `int`/`bool` so an accidental frame count is not treated as a frame rate.
+        if isinstance(fps, (float, numbers.Rational)) and not isinstance(fps, numbers.Integral):
             return framerate_to_fraction(fps)
         raise TypeError(
-            f"Wrong type for fps: {type(fps)} - expected float, Fraction, or FrameTimecode"
+            f"Wrong type for fps: {type(fps)} - expected float, Fraction (or another non-integral"
+            " rational), or FrameTimecode"
         )
 
     def _seconds_to_frames(self, seconds: float) -> int:

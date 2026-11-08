@@ -97,15 +97,16 @@ class TimecodeValue(ValidatedValue):
 
 
 class RangeValue(ValidatedValue):
-    """Validator for int/float ranges. `min_val` and `max_val` are inclusive."""
+    """Validator for int/float ranges. `min_val` and `max_val` are inclusive. A `max_val` of None
+    means there is no upper bound."""
 
     def __init__(
         self,
         value: int | float,
         min_val: int | float,
-        max_val: int | float,
+        max_val: int | float | None,
     ):
-        if value < min_val or value > max_val:
+        if value < min_val or (max_val is not None and value > max_val):
             # min and max are inclusive.
             raise ValueError()
         self._value = value
@@ -122,16 +123,20 @@ class RangeValue(ValidatedValue):
         return self._min_val
 
     @property
-    def max_val(self) -> int | float:
-        """Maximum value of the range."""
+    def max_val(self) -> int | float | None:
+        """Maximum value of the range, or None if there is no upper bound."""
         return self._max_val
 
     @property
     def click_range(self) -> "click.IntRange | click.FloatRange":
         """A `click` parameter type matching this range's bounds and value type."""
         if isinstance(self._value, int):
-            return click.IntRange(int(self._min_val), int(self._max_val))
-        return click.FloatRange(float(self._min_val), float(self._max_val))
+            return click.IntRange(
+                int(self._min_val), None if self._max_val is None else int(self._max_val)
+            )
+        return click.FloatRange(
+            float(self._min_val), None if self._max_val is None else float(self._max_val)
+        )
 
     @staticmethod
     def from_config(config_value: str, default: "RangeValue") -> "RangeValue":
@@ -142,6 +147,11 @@ class RangeValue(ValidatedValue):
                 max_val=default.max_val,
             )
         except ValueError as ex:
+            if default.max_val is None:
+                value_type = "an integer" if isinstance(default.value, int) else "a number"
+                raise OptionParseFailure(
+                    f"Value must be {value_type} of at least {default.min_val}."
+                ) from ex
             raise OptionParseFailure(
                 f"Value must be between {default.min_val} and {default.max_val}."
             ) from ex
@@ -217,7 +227,8 @@ class ScoreWeightsValue(ValidatedValue):
         return self._value
 
     def __str__(self) -> str:
-        return "{:.3f}, {:.3f}, {:.3f}, {:.3f}".format(*self.value)
+        # Space-separated, as the `-w/--weights` option takes them.
+        return " ".join(str(float(weight)) for weight in self.value)
 
     @staticmethod
     def from_config(config_value: str, default: "ScoreWeightsValue") -> "ScoreWeightsValue":
@@ -343,6 +354,18 @@ class FcpFormat(Enum):
 ConfigValue = bool | int | float | str | None | ValidatedValue | Enum
 ConfigDict = dict[str, dict[str, ConfigValue]]
 
+
+def default_to_str(value: ConfigValue) -> str:
+    """A `CONFIG_MAP` default as it is written in a config file or on the command line:
+    `yes`/`no` for flags and the lower-case name for enums. Used for `--help` and the
+    generated documentation."""
+    if isinstance(value, bool):
+        return "yes" if value else "no"
+    if isinstance(value, Enum):
+        return value.name.lower()
+    return str(value)
+
+
 _CONFIG_FILE_NAME: str = "scenedetect.cfg"
 _CONFIG_FILE_DIR: str = user_config_dir("PySceneDetect", False)
 _PLACEHOLDER = 0  # Placeholder for image quality default, as the value depends on output format
@@ -379,17 +402,18 @@ CONFIG_MAP: ConfigDict = {
     "detect-hash": {
         "min-scene-len": TimecodeValue(0),
         "lowpass": RangeValue(2, min_val=1, max_val=256),
-        "size": RangeValue(16, min_val=1, max_val=256),
-        "threshold": RangeValue(0.395, min_val=0.0, max_val=1.0),
+        "size": RangeValue(8, min_val=1, max_val=256),
+        "threshold": RangeValue(0.35, min_val=0.0, max_val=1.0),
     },
     "detect-hist": {
         "min-scene-len": TimecodeValue(0),
-        "threshold": RangeValue(0.05, min_val=0.0, max_val=1.0),
-        "bins": RangeValue(256, min_val=1, max_val=256),
+        "threshold": RangeValue(0.20, min_val=0.0, max_val=1.0),
+        "bins": RangeValue(128, min_val=1, max_val=256),
     },
     "detect-threshold": {
         "add-last-scene": True,
         "fade-bias": RangeValue(0, min_val=-100.0, max_val=100.0),
+        "min-out-length": TimecodeValue("0.1s"),
         "min-scene-len": TimecodeValue(0),
         "threshold": RangeValue(12.0, min_val=0.0, max_val=255.0),
     },
@@ -441,6 +465,9 @@ CONFIG_MAP: ConfigDict = {
         "format": "jpeg",
         "frame-margin": TimecodeValue(1),
         "height": 0,
+        "interval": TimecodeValue(0),  # Placeholder, as there is no interval by default
+        "max-images": RangeValue(0, min_val=0, max_val=None),
+        "min-images": RangeValue(1, min_val=1, max_val=None),
         "num-images": 3,
         "output": None,
         "quality": RangeValue(_PLACEHOLDER, min_val=0, max_val=100),
@@ -458,6 +485,10 @@ CONFIG_MAP: ConfigDict = {
     "save-qp": {
         "disable-shift": False,
         "filename": "$VIDEO_NAME.qp",
+        "output": None,
+    },
+    "save-keyframes": {
+        "filename": "$VIDEO_NAME-keyframes.txt",
         "output": None,
     },
     "save-fcp": {
@@ -484,7 +515,7 @@ certain string options are stored in `CHOICE_MAP`."""
 
 CHOICE_MAP: dict[str, dict[str, list[str]]] = {
     "backend-pyav": {
-        "threading_mode": [mode.lower() for mode in PYAV_THREADING_MODES],
+        "threading-mode": [mode.lower() for mode in PYAV_THREADING_MODES],
     },
     "detect-content": {
         "filter-mode": [mode.name.lower() for mode in FlashFilter.Mode],
@@ -820,13 +851,9 @@ class ConfigRegistry:
         assert command in CONFIG_MAP and option in CONFIG_MAP[command]
         is_flag = isinstance(CONFIG_MAP[command][option], bool)
         if command in self._config and option in self._config[command]:
-            if is_flag:
-                value_str = "on" if self._config[command][option] else "off"
-            else:
-                value_str = str(self._config[command][option])
-            return f" [setting: {value_str}]"
+            return f" [setting: {default_to_str(self._config[command][option])}]"
         if show_default is False or (
             show_default is None and is_flag and CONFIG_MAP[command][option] is False
         ):
             return ""
-        return f" [default: {CONFIG_MAP[command][option]!s}]"
+        return f" [default: {default_to_str(CONFIG_MAP[command][option])}]"

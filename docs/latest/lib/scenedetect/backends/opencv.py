@@ -54,6 +54,26 @@ NON_VIDEO_FILE_INPUT_IDENTIFIERS = (
 )
 
 
+def _get_capture_api(path: str) -> int:
+    """API preference to use when opening `path` with `cv2.VideoCapture`. This exists as a
+    workaround for https://scenedetect.com/issue/575, where certain versions of the opencv-python
+    package cause intermittent segfaults on exit. The issue only happens on Windows when opening
+    PNG image sequences.
+
+    By default OpenCV resolves any capture backend by probing for compatibility, and tries FFmpeg
+    first. Usually this fails, and it falls back gracefully to CAP_IMAGES. However, this also seems
+    to cause issues on interpreter exit, as the stack trace implicates something in the ffmpeg DLL.
+
+    TODO: Remove this workaround once upstream fix ships.
+
+    https://github.com/opencv/opencv/issues/30017
+    """
+    is_local = not any(identifier in path for identifier in ("://", " ! "))
+    if os.name == "nt" and is_local and path.lower().endswith(".png"):
+        return cv2.CAP_IMAGES
+    return cv2.CAP_ANY
+
+
 def _get_aspect_ratio(cap: cv2.VideoCapture, epsilon: float = 0.0001) -> float:
     """Display/pixel aspect ratio of the VideoCapture as a float (1.0 represents square pixels)."""
     # Versions of OpenCV < 3.4.1 do not support this, so we fall back to 1.0.
@@ -101,8 +121,13 @@ class VideoStreamCv2(VideoStream):
             ValueError: specified frame rate is invalid
         """
         super().__init__()
-        # TODO(https://scenedetect.com/issue/548): emit DeprecationWarning when `framerate=` is
-        # used, once internal callers and downstream users have had a release to migrate.
+        if framerate is not None:
+            warnings.warn(
+                "`framerate` is deprecated and scheduled for removal in v0.9; "
+                "use `frame_rate` instead.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
         if frame_rate is None:
             frame_rate = framerate
         if path_or_device is not None:
@@ -146,7 +171,8 @@ class VideoStreamCv2(VideoStream):
 
         Prefer to use this property only to take ownership of the underlying cv2.VideoCapture object
         backing this object. Seeking or using the read/grab methods through this property are
-        unsupported and will leave this object in an inconsistent state.
+        unsupported and will leave this object in an inconsistent state. Closing this object (e.g.
+        by leaving a `with` block) releases the capture.
         """
         return self._cap
 
@@ -190,6 +216,8 @@ class VideoStreamCv2(VideoStream):
     @property
     def frame_size(self) -> tuple[int, int]:
         """Size of each video frame in pixels as a tuple of (width, height)."""
+        if self._closed:
+            return self._closed_frame_size
         return (
             math.trunc(self._cap.get(cv2.CAP_PROP_FRAME_WIDTH)),
             math.trunc(self._cap.get(cv2.CAP_PROP_FRAME_HEIGHT)),
@@ -200,11 +228,15 @@ class VideoStreamCv2(VideoStream):
         """Duration of the stream as a FrameTimecode, or None if non terminating."""
         if self._is_device:
             return None
+        if self._closed:
+            return self.base_timecode + math.trunc(self._closed_frame_count)
         return self.base_timecode + math.trunc(self._cap.get(cv2.CAP_PROP_FRAME_COUNT))
 
     @property
     def aspect_ratio(self) -> float:
         """Display/pixel aspect ratio as a float (1.0 represents square pixels)."""
+        if self._closed:
+            return self._closed_aspect_ratio
         return _get_aspect_ratio(self._cap)
 
     @property
@@ -213,6 +245,8 @@ class VideoStreamCv2(VideoStream):
         # *NOTE*: Although OpenCV has `CAP_PROP_PTS`, it doesn't seem to be reliable. For now, we
         # use `CAP_PROP_POS_MSEC` instead, converting to microseconds for sufficient precision to
         # avoid frame-boundary rounding errors at common framerates like 24000/1001.
+        if self._eof_timecode is not None:
+            return self._eof_timecode
         ms = self._cap.get(cv2.CAP_PROP_POS_MSEC)
         time_base = Fraction(1, 1000000)
         return Timecode(pts=round(ms * 1000), time_base=time_base)
@@ -239,6 +273,7 @@ class VideoStreamCv2(VideoStream):
         return math.trunc(self._cap.get(cv2.CAP_PROP_POS_FRAMES))
 
     def seek(self, target: TimecodeLike):
+        self._check_open()
         if self._is_device:
             raise SeekError("Cannot seek if input is a device!")
         if not isinstance(target, FrameTimecode):
@@ -247,6 +282,7 @@ class VideoStreamCv2(VideoStream):
             raise ValueError("Target seek position cannot be negative!")
         target_secs = (self.base_timecode + target).seconds
         self._has_grabbed = False
+        self._eof_timecode = None
         if target_secs > 0:
             # Seek one frame before target so the next read() returns the frame at target.
             one_frame_ms = 1000.0 / float(self._frame_rate)
@@ -266,7 +302,12 @@ class VideoStreamCv2(VideoStream):
                     corrections += 1
             # If we seeked past the end, back up one frame.
             if not self._has_grabbed:
-                seek_pos = round(self._cap.get(cv2.CAP_PROP_POS_FRAMES) - 1.0)
+                pos = self._cap.get(cv2.CAP_PROP_POS_FRAMES)
+                # OpenCV 5 can report NaN here after a seek past EOF, which would crash
+                # round()/trunc and hang the CLI decode thread (#380).
+                if not math.isfinite(pos):
+                    raise SeekError("Target frame is beyond end of video!")
+                seek_pos = round(pos - 1.0)
                 self._cap.set(cv2.CAP_PROP_POS_FRAMES, max(0, seek_pos))
                 self._has_grabbed = self._cap.grab()
         else:
@@ -274,12 +315,30 @@ class VideoStreamCv2(VideoStream):
 
     def reset(self):
         """Close and re-open the VideoStream (should be equivalent to calling `seek(0)`)."""
+        self._check_open()
         self._cap.release()
         self._open_capture(float(self._frame_rate))
 
+    def close(self) -> None:
+        """Close the video, releasing the underlying `cv2.VideoCapture`. Has no effect if the
+        stream is already closed. See
+        :meth:`VideoStream.close() <scenedetect.video_stream.VideoStream.close>` for details."""
+        if self._closed:
+            return
+        # A released capture no longer reports the video's properties, so record them first.
+        self._closed_frame_size = self.frame_size
+        self._closed_frame_count = self._cap.get(cv2.CAP_PROP_FRAME_COUNT)
+        self._closed_aspect_ratio = self.aspect_ratio
+        self._closed = True
+        self._cap.release()
+
     def read(self, decode: bool = True) -> np.ndarray | bool:
+        self._check_open()
         if not self._cap.isOpened():
             return False
+        # At the end of some VFR streams OpenCV reports an earlier CAP_PROP_POS_MSEC once grab()
+        # fails, so keep `position` on the last frame read like the other backends do (#561).
+        last_timecode = self.timecode if self._has_grabbed else None
         has_grabbed = self._cap.grab()
         # If we failed to grab the frame, retry a few times if required.
         if not has_grabbed:
@@ -297,8 +356,10 @@ class VideoStreamCv2(VideoStream):
                     logger.warning("Failed to decode some frames, results may be inaccurate.")
         # We didn't manage to grab a frame even after retrying, so just return.
         if not has_grabbed:
+            self._eof_timecode = last_timecode
             return False
         self._has_grabbed = True
+        self._eof_timecode = None
         # Need to make sure we actually grabbed a frame before calling retrieve.
         if decode and self._has_grabbed:
             _, frame = self._cap.retrieve()
@@ -316,8 +377,10 @@ class VideoStreamCv2(VideoStream):
             if self._path_or_device < 0:
                 raise ValueError("Invalid/negative device ID specified.")
             input_is_video_file = False
+            capture_api = cv2.CAP_ANY
         else:
             assert isinstance(self._path_or_device, str)
+            capture_api = _get_capture_api(self._path_or_device)
             input_is_video_file = not any(
                 identifier in self._path_or_device
                 for identifier in NON_VIDEO_FILE_INPUT_IDENTIFIERS
@@ -327,7 +390,7 @@ class VideoStreamCv2(VideoStream):
             if input_is_video_file and not os.path.exists(self._path_or_device):
                 raise OSError("Video file not found.")
 
-        cap = cv2.VideoCapture(self._path_or_device)
+        cap = cv2.VideoCapture(self._path_or_device, capture_api)
         if not cap.isOpened():
             raise VideoOpenFailure(
                 "Ensure file is valid video and system dependencies are up to date.\n"
@@ -359,12 +422,16 @@ class VideoStreamCv2(VideoStream):
         self._cap: cv2.VideoCapture = cap
         self._frame_rate: Fraction = framerate_to_fraction(frame_rate)
         self._has_grabbed = False
+        self._eof_timecode: Timecode | None = None
         cap.set(cv2.CAP_PROP_ORIENTATION_AUTO, 1.0)  # https://github.com/opencv/opencv/issues/26795
 
 
 class VideoCaptureAdapter(VideoStream):
     """Adapter for existing VideoCapture objects. Unlike VideoStreamCv2, this class supports
     VideoCaptures which may not support seeking.
+
+    The VideoCapture remains owned by the caller: closing the adapter (e.g. by leaving a `with`
+    block) does not release it.
     """
 
     def __init__(
@@ -395,8 +462,13 @@ class VideoCaptureAdapter(VideoStream):
         """
         super().__init__()
 
-        # TODO(https://scenedetect.com/issue/548): emit DeprecationWarning when `framerate=` is
-        # used, once internal callers and downstream users have had a release to migrate.
+        if framerate is not None:
+            warnings.warn(
+                "`framerate` is deprecated and scheduled for removal in v0.9; "
+                "use `frame_rate` instead.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
         if frame_rate is None:
             frame_rate = framerate
         if frame_rate is not None and frame_rate < MAX_FPS_DELTA:

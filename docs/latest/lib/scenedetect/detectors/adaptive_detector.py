@@ -60,7 +60,8 @@ class AdaptiveDetector(ContentDetector):
                 (`content_val` in a statsfile, the value `threshold` is compared against).
                 If omitted, the default ContentDetector weights are used.
             luma_only: If True, only considers changes in the luminance channel of the video.
-                Equivalent to specifying `weights` as :data:`ContentDetector.LUMA_ONLY`.
+                Equivalent to specifying `weights` as
+                :attr:`~scenedetect.detectors.content_detector.ContentDetector.LUMA_ONLY_WEIGHTS`.
                 Overrides `weights` if both are set.
             kernel_size: Size of kernel to use for post edge detection filtering. If None,
                 automatically set based on video resolution.
@@ -136,7 +137,8 @@ class AdaptiveDetector(ContentDetector):
         threshold_met: bool = (
             adaptive_ratio >= self.adaptive_threshold and target_score >= self.min_content_val
         )
-        min_length_met: bool = (timecode - self._last_cut) >= self.min_scene_len
+        # Cuts are emitted at `target_timecode` (`window_width` behind `timecode`).
+        min_length_met: bool = (target_timecode - self._last_cut) >= self.min_scene_len
         if threshold_met and min_length_met:
             self._last_cut = target_timecode
             return [target_timecode]

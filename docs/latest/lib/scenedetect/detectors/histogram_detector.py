@@ -32,8 +32,8 @@ class HistogramDetector(SceneDetector):
 
     def __init__(
         self,
-        threshold: float = 0.05,
-        bins: int = 256,
+        threshold: float = 0.20,
+        bins: int = 128,
         min_scene_len: TimecodeLike = 15,
     ):
         """
@@ -43,8 +43,9 @@ class HistogramDetector(SceneDetector):
                 YUV, and normalized based on the number of bins. Higher differences imply greater
                 change in content, so larger threshold values are less sensitive to cuts.
             bins: Number of bins to use for the histogram.
-            min_scene_len: Once a cut is detected, this much time must pass before a new one can
-                be added to the scene list. Accepts any :data:`TimecodeLike` value.
+            min_scene_len: How much time must pass between cuts before a new one can be added to the
+                scene list (e.g. how small each scene can be). Accepts any
+                :data:`~scenedetect.common.TimecodeLike` value.
         """
         super().__init__()
         # Internally, threshold represents the correlation between two histograms and has values

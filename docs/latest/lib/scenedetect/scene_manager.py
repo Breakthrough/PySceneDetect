@@ -16,9 +16,8 @@ This module implements :class:`SceneManager`, coordinates running a
 (:mod:`VideoStream <scenedetect.video_stream>`). Video decoding is done in a separate thread to
 improve performance.
 
-===============================================================
-Usage
-===============================================================
+.. rubric:: Usage
+   :name: usage
 
 The following example shows basic usage of a :class:`SceneManager`:
 
@@ -53,9 +52,8 @@ To use a `SceneManager` with a webcam/device or existing `cv2.VideoCapture` devi
 :class:`VideoCaptureAdapter <scenedetect.backends.opencv.VideoCaptureAdapter>` instead of
 `open_video`.
 
-=======================================================================
-Storing Per-Frame Statistics
-=======================================================================
+.. rubric:: Storing Per-Frame Statistics
+   :name: storing-per-frame-statistics
 
 `SceneManager` can use an optional
 :class:`StatsManager <scenedetect.stats_manager.StatsManager>` to save frame statistics to disk:
@@ -227,8 +225,8 @@ class SceneManager:
     ):
         """
         Arguments:
-            stats_manager: :class:`StatsManager` to bind to this `SceneManager`. Can be
-                accessed via the `stats_manager` property of the resulting object to save to disk.
+            stats_manager: :class:`~scenedetect.stats_manager.StatsManager` to bind to this
+                `SceneManager`. Can be accessed via the `stats_manager` property to save to disk.
         """
         self._cutting_list: list[FrameTimecode] = []
         self._detector_list: list[SceneDetector] = []
@@ -571,6 +569,7 @@ class SceneManager:
         )
         decode_thread.start()
         frame_im = None
+        prev_position = None
 
         logger.info("Detecting scenes...")
         try:
@@ -587,7 +586,13 @@ class SceneManager:
                         progress_bar.set_description(
                             PROGRESS_BAR_DESCRIPTION % len(self._cutting_list), refresh=False
                         )
-                    progress_bar.update(1 + frame_skip)
+                    # Increment progress bar by delta of position.frame_num instead of 1
+                    # to handle VFR video where frame count is an approximation.
+                    delta = (
+                        1 if prev_position is None else position.frame_num - prev_position.frame_num
+                    )
+                    progress_bar.update(delta)
+                    prev_position = position
         finally:
             if progress_bar is not None:
                 progress_bar.set_description(

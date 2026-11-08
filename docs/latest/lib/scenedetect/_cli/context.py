@@ -85,7 +85,8 @@ class CliContext:
         self.scene_manager: SceneManager | None = None
         self.stats_manager: StatsManager | None = None
         self.save_images: bool = False  # True if the save-images command was specified
-        self.save_images_result: ty.Any = (None, None)  # Result of save-images used by save-html
+        # Result of save-images used by save-html: (image filenames, output directory).
+        self.save_images_result: tuple[dict[int, list[str]], str | None] | None = None
 
         # Input:
         self.video_stream: VideoStream | None = None
@@ -302,11 +303,11 @@ class CliContext:
         logger.debug("Initializing SceneManager.")
         scene_manager = SceneManager(self.stats_manager)
 
-        if downscale is None and self.config.is_default("global", "downscale"):
+        downscale_value: int = self.config.get_value("global", "downscale", downscale)
+        if downscale_value == 0:
             scene_manager.auto_downscale = True
         else:
             scene_manager.auto_downscale = False
-            downscale_value: int = self.config.get_value("global", "downscale", downscale)
             try:
                 scene_manager.downscale = downscale_value
             except ValueError as ex:
@@ -405,6 +406,7 @@ class CliContext:
         fade_bias: float | None = None,
         add_last_scene: bool | None = None,
         min_scene_len: str | None = None,
+        min_out_length: str | None = None,
     ) -> dict[str, ty.Any]:
         """Handle detect-threshold command options and return args to construct one with."""
 
@@ -415,6 +417,9 @@ class CliContext:
             or self.config.get_value("detect-threshold", "add-last-scene"),
             "fade_bias": self.config.get_value("detect-threshold", "fade-bias", fade_bias),
             "min_scene_len": min_scene_len_frames,
+            "min_out_length": self.parse_timecode(
+                self.config.get_value("detect-threshold", "min-out-length", min_out_length)
+            ),
             "threshold": self.config.get_value("detect-threshold", "threshold", threshold),
         }
 
@@ -532,6 +537,11 @@ class CliContext:
                     path=input_path,
                     frame_rate=frame_rate,
                     backend=backend,
+                )
+            if not self.video_stream.name:
+                logger.warning(
+                    "Could not determine a video name from the input path, so $VIDEO_NAME will be"
+                    " empty in output filenames."
                 )
             duration = self.video_stream.duration
             duration_str = f"{duration} ({duration.frame_num} frames)" if duration else "unknown"
