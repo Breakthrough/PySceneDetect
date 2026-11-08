@@ -18,7 +18,7 @@
     <link rel="icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="scenedetect 🎬 Command" href="cli.html" />
+    <link rel="next" title="scenedetect Command" href="cli.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -38,196 +38,92 @@
             
   <section id="pyscenedetect-documentation">
 <h1>PySceneDetect Documentation<a class="headerlink" href="#pyscenedetect-documentation" title="Permalink to this heading">¶</a></h1>
-<p>Welcome to the PySceneDetect docs. The docs are split into two separate parts: one for the command-line interface (the <cite>scenedetect</cite> command) and another for the Python API (the <cite>scenedetect</cite> module).</p>
-<p>You can install the latest release of PySceneDetect by running <cite>pip install scenedetect</cite> (or <cite>pip install scenedetect-headless</cite> on servers without GUI libraries), or by downloading the Windows build from <a class="reference external" href="http://www.scenedetect.com/download/">scenedetect.com/download</a>. PySceneDetect requires <cite>ffmpeg</cite> or <cite>mkvmerge</cite> for video splitting support.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>If you see any errors in the documentation, or want to suggest improvements, feel free to raise an issue on <a class="reference external" href="https://github.com/Breakthrough/PySceneDetect/issues">the PySceneDetect issue tracker</a>.</p>
+<p>PySceneDetect finds scene changes in video (fast cuts and fades) and can split the video, save
+frames, or export the scene list. Use it as the <code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> command, or as the
+<code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> Python package.</p>
+<p>Install with <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">scenedetect</span></code> (<code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">scenedetect-headless</span></code> on servers without
+GUI libraries), or download the Windows build from
+<a class="reference external" href="https://www.scenedetect.com/download/">scenedetect.com/download</a>. Splitting video requires
+<code class="docutils literal notranslate"><span class="pre">ffmpeg</span></code> (or <code class="docutils literal notranslate"><span class="pre">mkvmerge</span></code> with <code class="docutils literal notranslate"><span class="pre">split-video</span> <span class="pre">-m</span></code>); the Windows build includes <code class="docutils literal notranslate"><span class="pre">ffmpeg</span></code>.</p>
+<section id="quick-start">
+<h2>Quick Start<a class="headerlink" href="#quick-start" title="Permalink to this heading">¶</a></h2>
+<p>From the command line, find the scenes in <code class="docutils literal notranslate"><span class="pre">video.mp4</span></code> and write one clip per scene:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>scenedetect<span class="w"> </span>-i<span class="w"> </span>video.mp4<span class="w"> </span>split-video
+</pre></div>
 </div>
-<p>PySceneDetect development happens on Github at <a class="reference external" href="http://github.com/Breakthrough/PySceneDetect">github.com/Breakthrough/PySceneDetect</a>.</p>
-<section id="table-of-contents">
-<h2>Table of Contents<a class="headerlink" href="#table-of-contents" title="Permalink to this heading">¶</a></h2>
-<section id="scenedetect-command-reference">
-<h3><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> Command Reference 🖥️<a class="headerlink" href="#scenedetect-command-reference" title="Permalink to this heading">¶</a></h3>
-<div class="toctree-wrapper compound" id="clitoc">
-<p class="caption" role="heading"><span class="caption-text">Command-Line Interface:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="cli.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Command</a></li>
-<li class="toctree-l1"><a class="reference internal" href="cli.html#examples">Examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="cli.html#options">Options</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="cli.html#help-version-and-about"><code class="docutils literal notranslate"><span class="pre">help</span></code>, <code class="docutils literal notranslate"><span class="pre">version</span></code>, and <code class="docutils literal notranslate"><span class="pre">about</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="cli.html#detectors">Detectors</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="cli.html#detect-adaptive"><code class="docutils literal notranslate"><span class="pre">detect-adaptive</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="cli.html#detect-content"><code class="docutils literal notranslate"><span class="pre">detect-content</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="cli.html#detect-hash"><code class="docutils literal notranslate"><span class="pre">detect-hash</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="cli.html#detect-hist"><code class="docutils literal notranslate"><span class="pre">detect-hist</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="cli.html#detect-threshold"><code class="docutils literal notranslate"><span class="pre">detect-threshold</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="cli.html#commands">Commands</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="cli.html#list-scenes"><code class="docutils literal notranslate"><span class="pre">list-scenes</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="cli.html#load-scenes"><code class="docutils literal notranslate"><span class="pre">load-scenes</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="cli.html#save-edl"><code class="docutils literal notranslate"><span class="pre">save-edl</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="cli.html#save-fcp"><code class="docutils literal notranslate"><span class="pre">save-fcp</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="cli.html#save-html"><code class="docutils literal notranslate"><span class="pre">save-html</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="cli.html#save-images"><code class="docutils literal notranslate"><span class="pre">save-images</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="cli.html#save-keyframes"><code class="docutils literal notranslate"><span class="pre">save-keyframes</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="cli.html#save-otio"><code class="docutils literal notranslate"><span class="pre">save-otio</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="cli.html#save-qp"><code class="docutils literal notranslate"><span class="pre">save-qp</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="cli.html#split-video"><code class="docutils literal notranslate"><span class="pre">split-video</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="cli.html#time"><code class="docutils literal notranslate"><span class="pre">time</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="cli/config_file.html">Configuration File</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="cli/config_file.html#example">Example</a></li>
-<li class="toctree-l2"><a class="reference internal" href="cli/config_file.html#template">Template</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="cli/backends.html">Backends</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="cli/backends.html#opencv">OpenCV</a></li>
-<li class="toctree-l2"><a class="reference internal" href="cli/backends.html#pyav">PyAV</a></li>
-<li class="toctree-l2"><a class="reference internal" href="cli/backends.html#moviepy">MoviePy</a></li>
-</ul>
-</li>
-</ul>
+<p>Add <code class="docutils literal notranslate"><span class="pre">list-scenes</span></code> for a CSV, <code class="docutils literal notranslate"><span class="pre">save-images</span></code> for still frames, or a <code class="docutils literal notranslate"><span class="pre">detect-*</span></code> command to
+pick the detector (default: <code class="docutils literal notranslate"><span class="pre">detect-adaptive</span></code>). See the <a class="reference internal" href="cli.html"><span class="doc">CLI reference</span></a>.</p>
+<p>The same from Python:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">scenedetect</span><span class="w"> </span><span class="kn">import</span> <span class="n">detect</span><span class="p">,</span> <span class="n">AdaptiveDetector</span><span class="p">,</span> <span class="n">split_video_ffmpeg</span>
+
+<span class="n">scenes</span> <span class="o">=</span> <span class="n">detect</span><span class="p">(</span><span class="s2">"video.mp4"</span><span class="p">,</span> <span class="n">AdaptiveDetector</span><span class="p">())</span>
+<span class="n">split_video_ffmpeg</span><span class="p">(</span><span class="s2">"video.mp4"</span><span class="p">,</span> <span class="n">scenes</span><span class="p">)</span>
+</pre></div>
 </div>
+<p><code class="docutils literal notranslate"><span class="pre">scenes</span></code> is a list of <code class="docutils literal notranslate"><span class="pre">(start,</span> <span class="pre">end)</span></code> timecode pairs. More <a class="reference internal" href="examples.html"><span class="doc">Examples</span></a>, each done both
+ways, cover images, CSV output, detector tuning and more; see <a class="reference internal" href="api/scene_manager.html#scenedetect-scene-manager"><span class="std std-ref">SceneManager</span></a> for advanced workflows.</p>
 </section>
-<section id="scenedetect-python-module">
-<h3><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> Python Module 🐍<a class="headerlink" href="#scenedetect-python-module" title="Permalink to this heading">¶</a></h3>
-<div class="toctree-wrapper compound" id="apitoc">
-<p class="caption" role="heading"><span class="caption-text">API Documentation:</span></p>
+<section id="reference">
+<h2>Reference<a class="headerlink" href="#reference" title="Permalink to this heading">¶</a></h2>
+<p>Most features exist on both sides. The <a class="reference internal" href="examples.html"><span class="doc">Examples</span></a> page shows each task done both ways,
+and every page links to its counterpart on the other side: each command to the function or
+class that does the same, and each detector to a table of its options, config file keys and
+constructor parameters.</p>
+<div class="surfaces docutils container">
+<div class="surface docutils container">
+<p class="rubric">CLI</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="cli.html"><span class="doc">scenedetect Command</span></a></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="api.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Package</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="api.html#getting-started">Getting Started</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api.html#module-scenedetect">Functions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api.html#logging">Logging</a></li>
+<li><p><a class="reference internal" href="cli.html#cli-usage"><span class="std std-ref">Usage</span></a></p></li>
+<li><p><a class="reference internal" href="cli.html#cli-options"><span class="std std-ref">Options</span></a></p></li>
+<li><p><a class="reference internal" href="cli.html#cli-detectors"><span class="std std-ref">Detectors</span></a>: <a class="reference internal" href="cli.html#command-detect-adaptive"><span class="std std-ref">detect-adaptive</span></a>, <a class="reference internal" href="cli.html#command-detect-content"><span class="std std-ref">detect-content</span></a>, <a class="reference internal" href="cli.html#command-detect-hash"><span class="std std-ref">detect-hash</span></a>, <a class="reference internal" href="cli.html#command-detect-hist"><span class="std std-ref">detect-hist</span></a>, <a class="reference internal" href="cli.html#command-detect-threshold"><span class="std std-ref">detect-threshold</span></a></p></li>
+<li><p><a class="reference internal" href="cli.html#cli-commands"><span class="std std-ref">Commands</span></a>: <a class="reference internal" href="cli.html#command-list-scenes"><span class="std std-ref">list-scenes</span></a>, <a class="reference internal" href="cli.html#command-load-scenes"><span class="std std-ref">load-scenes</span></a>, <a class="reference internal" href="cli.html#command-save-edl"><span class="std std-ref">save-edl</span></a>, <a class="reference internal" href="cli.html#command-save-fcp"><span class="std std-ref">save-fcp</span></a>, <a class="reference internal" href="cli.html#command-save-html"><span class="std std-ref">save-html</span></a>, <a class="reference internal" href="cli.html#command-save-images"><span class="std std-ref">save-images</span></a>, <a class="reference internal" href="cli.html#command-save-keyframes"><span class="std std-ref">save-keyframes</span></a>, <a class="reference internal" href="cli.html#command-save-otio"><span class="std std-ref">save-otio</span></a>, <a class="reference internal" href="cli.html#command-save-qp"><span class="std std-ref">save-qp</span></a>, <a class="reference internal" href="cli.html#command-split-video"><span class="std std-ref">split-video</span></a>, <a class="reference internal" href="cli.html#command-time"><span class="std std-ref">time</span></a></p></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="api/detectors.html">Detectors</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="api/detectors.html#module-scenedetect.detectors.adaptive_detector">AdaptiveDetector</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/detectors.html#module-scenedetect.detectors.content_detector">ContentDetector</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/detectors.html#module-scenedetect.detectors.hash_detector">HashDetector</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/detectors.html#module-scenedetect.detectors.histogram_detector">HistogramDetector</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/detectors.html#module-scenedetect.detectors.threshold_detector">ThresholdDetector</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="api/output.html">Output</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="api/output.html#scenedetect.output.write_scene_list"><code class="docutils literal notranslate"><span class="pre">write_scene_list()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/output.html#scenedetect.output.write_scene_list_edl"><code class="docutils literal notranslate"><span class="pre">write_scene_list_edl()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/output.html#scenedetect.output.write_scene_list_fcp7"><code class="docutils literal notranslate"><span class="pre">write_scene_list_fcp7()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/output.html#scenedetect.output.write_scene_list_fcpx"><code class="docutils literal notranslate"><span class="pre">write_scene_list_fcpx()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/output.html#scenedetect.output.write_scene_list_html"><code class="docutils literal notranslate"><span class="pre">write_scene_list_html()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/output.html#scenedetect.output.write_scene_list_otio"><code class="docutils literal notranslate"><span class="pre">write_scene_list_otio()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="api/backends.html">Video Backends</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="api/backends.html#video-files">Video Files</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/backends.html#devices-cameras-pipes">Devices / Cameras / Pipes</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/backends.html#scenedetect.backends.AVAILABLE_BACKENDS"><code class="docutils literal notranslate"><span class="pre">AVAILABLE_BACKENDS</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/backends.html#scenedetect.backends.opencv.VideoCaptureAdapter"><code class="docutils literal notranslate"><span class="pre">VideoCaptureAdapter</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/backends.html#scenedetect.backends.opencv.VideoStreamCv2"><code class="docutils literal notranslate"><span class="pre">VideoStreamCv2</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/backends.html#scenedetect.backends.pyav.VideoStreamAv"><code class="docutils literal notranslate"><span class="pre">VideoStreamAv</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/backends.html#scenedetect.backends.pyav.MAX_CONSECUTIVE_DECODE_FAILURES"><code class="docutils literal notranslate"><span class="pre">MAX_CONSECUTIVE_DECODE_FAILURES</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/backends.html#scenedetect.backends.moviepy.VideoStreamMoviePy"><code class="docutils literal notranslate"><span class="pre">VideoStreamMoviePy</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/backends.html#scenedetect.backends.concat.SourceSpan"><code class="docutils literal notranslate"><span class="pre">SourceSpan</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/backends.html#scenedetect.backends.concat.VideoStreamConcat"><code class="docutils literal notranslate"><span class="pre">VideoStreamConcat</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/backends.html#scenedetect.backends.concat.FRAMERATE_DELTA_TOLERANCE"><code class="docutils literal notranslate"><span class="pre">FRAMERATE_DELTA_TOLERANCE</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="api/common.html">Common</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="api/common.html#scenedetect.common.FrameTimecode"><code class="docutils literal notranslate"><span class="pre">FrameTimecode</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/common.html#scenedetect.common.Interpolation"><code class="docutils literal notranslate"><span class="pre">Interpolation</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/common.html#scenedetect.common.Timecode"><code class="docutils literal notranslate"><span class="pre">Timecode</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/common.html#scenedetect.common.framerate_to_fraction"><code class="docutils literal notranslate"><span class="pre">framerate_to_fraction()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/common.html#scenedetect.common.CropRegion"><code class="docutils literal notranslate"><span class="pre">CropRegion</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/common.html#scenedetect.common.CutList"><code class="docutils literal notranslate"><span class="pre">CutList</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/common.html#scenedetect.common.FrameRate"><code class="docutils literal notranslate"><span class="pre">FrameRate</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/common.html#scenedetect.common.MAX_FPS_DELTA"><code class="docutils literal notranslate"><span class="pre">MAX_FPS_DELTA</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/common.html#scenedetect.common.SceneList"><code class="docutils literal notranslate"><span class="pre">SceneList</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/common.html#scenedetect.common.TimecodeLike"><code class="docutils literal notranslate"><span class="pre">TimecodeLike</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/common.html#scenedetect.common.TimecodePair"><code class="docutils literal notranslate"><span class="pre">TimecodePair</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="api/scene_manager.html">Scene Manager</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="api/scene_manager.html#usage">Usage</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/scene_manager.html#storing-per-frame-statistics">Storing Per-Frame Statistics</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.SceneManager"><code class="docutils literal notranslate"><span class="pre">SceneManager</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.compute_downscale_factor"><code class="docutils literal notranslate"><span class="pre">compute_downscale_factor()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.expand_scenes_to_bounds"><code class="docutils literal notranslate"><span class="pre">expand_scenes_to_bounds()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.get_scenes_from_cuts"><code class="docutils literal notranslate"><span class="pre">get_scenes_from_cuts()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.DEFAULT_MIN_WIDTH"><code class="docutils literal notranslate"><span class="pre">DEFAULT_MIN_WIDTH</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.MAX_FRAME_QUEUE_LENGTH"><code class="docutils literal notranslate"><span class="pre">MAX_FRAME_QUEUE_LENGTH</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.MAX_FRAME_SIZE_ERRORS"><code class="docutils literal notranslate"><span class="pre">MAX_FRAME_SIZE_ERRORS</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.PROGRESS_BAR_DESCRIPTION"><code class="docutils literal notranslate"><span class="pre">PROGRESS_BAR_DESCRIPTION</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="api/detector.html">Detector Interface</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="api/detector.html#scenedetect.detector.FlashFilter"><code class="docutils literal notranslate"><span class="pre">FlashFilter</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/detector.html#scenedetect.detector.SceneDetector"><code class="docutils literal notranslate"><span class="pre">SceneDetector</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="api/video_stream.html">Stream Interface</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="api/video_stream.html#scenedetect.video_stream.FrameRateUnavailable"><code class="docutils literal notranslate"><span class="pre">FrameRateUnavailable</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/video_stream.html#scenedetect.video_stream.SeekError"><code class="docutils literal notranslate"><span class="pre">SeekError</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/video_stream.html#scenedetect.video_stream.VideoOpenFailure"><code class="docutils literal notranslate"><span class="pre">VideoOpenFailure</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/video_stream.html#scenedetect.video_stream.VideoStream"><code class="docutils literal notranslate"><span class="pre">VideoStream</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="api/stats_manager.html">Stats Manager</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="api/stats_manager.html#scenedetect.stats_manager.StatsFileCorrupt"><code class="docutils literal notranslate"><span class="pre">StatsFileCorrupt</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/stats_manager.html#scenedetect.stats_manager.StatsManager"><code class="docutils literal notranslate"><span class="pre">StatsManager</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/stats_manager.html#scenedetect.stats_manager.COLUMN_NAME_FRAME_NUMBER"><code class="docutils literal notranslate"><span class="pre">COLUMN_NAME_FRAME_NUMBER</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/stats_manager.html#scenedetect.stats_manager.COLUMN_NAME_TIMECODE"><code class="docutils literal notranslate"><span class="pre">COLUMN_NAME_TIMECODE</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="api/platform.html">Platform &amp; Logging</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="api/platform.html#scenedetect.platform.CommandTooLong"><code class="docutils literal notranslate"><span class="pre">CommandTooLong</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/platform.html#scenedetect.platform.FakeTqdmLoggingRedirect"><code class="docutils literal notranslate"><span class="pre">FakeTqdmLoggingRedirect</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/platform.html#scenedetect.platform.FakeTqdmObject"><code class="docutils literal notranslate"><span class="pre">FakeTqdmObject</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/platform.html#scenedetect.platform.Template"><code class="docutils literal notranslate"><span class="pre">Template</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/platform.html#scenedetect.platform.get_and_create_path"><code class="docutils literal notranslate"><span class="pre">get_and_create_path()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/platform.html#scenedetect.platform.get_cv2_imwrite_params"><code class="docutils literal notranslate"><span class="pre">get_cv2_imwrite_params()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/platform.html#scenedetect.platform.get_ffmpeg_path"><code class="docutils literal notranslate"><span class="pre">get_ffmpeg_path()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/platform.html#scenedetect.platform.get_ffmpeg_version"><code class="docutils literal notranslate"><span class="pre">get_ffmpeg_version()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/platform.html#scenedetect.platform.get_file_name"><code class="docutils literal notranslate"><span class="pre">get_file_name()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/platform.html#scenedetect.platform.get_mkvmerge_path"><code class="docutils literal notranslate"><span class="pre">get_mkvmerge_path()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/platform.html#scenedetect.platform.get_mkvmerge_version"><code class="docutils literal notranslate"><span class="pre">get_mkvmerge_version()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/platform.html#scenedetect.platform.get_system_version_info"><code class="docutils literal notranslate"><span class="pre">get_system_version_info()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/platform.html#scenedetect.platform.init_logger"><code class="docutils literal notranslate"><span class="pre">init_logger()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/platform.html#scenedetect.platform.invoke_command"><code class="docutils literal notranslate"><span class="pre">invoke_command()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/platform.html#scenedetect.platform.is_url"><code class="docutils literal notranslate"><span class="pre">is_url()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/platform.html#scenedetect.platform.BytePath"><code class="docutils literal notranslate"><span class="pre">BytePath</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/platform.html#scenedetect.platform.DEBUG_MODE"><code class="docutils literal notranslate"><span class="pre">DEBUG_MODE</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/platform.html#scenedetect.platform.StrPath"><code class="docutils literal notranslate"><span class="pre">StrPath</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="api/migration_guide.html">Migration Guide (v0.7)</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="api/migration_guide.html#quick-check">Quick Check</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/migration_guide.html#import-changes">Import Changes</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/migration_guide.html#custom-detector-changes">Custom Detector Changes</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/migration_guide.html#frametimecode-changes"><code class="docutils literal notranslate"><span class="pre">FrameTimecode</span></code> Changes</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/migration_guide.html#framerate-and-timestamp-changes">Framerate and Timestamp Changes</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/migration_guide.html#statsmanager-changes"><code class="docutils literal notranslate"><span class="pre">StatsManager</span></code> Changes</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/migration_guide.html#scenedetector-annotation-fixes"><code class="docutils literal notranslate"><span class="pre">SceneDetector</span></code> Annotation Fixes</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/migration_guide.html#scenemanager-detect-scenes-time-arguments"><code class="docutils literal notranslate"><span class="pre">SceneManager.detect_scenes()</span></code> Time Arguments</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/migration_guide.html#save-images-path-handling"><code class="docutils literal notranslate"><span class="pre">save_images()</span></code> Path Handling</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/migration_guide.html#removed-apis">Removed APIs</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/migration_guide.html#cli-changes">CLI Changes</a></li>
-</ul>
-</li>
+<li><p><a class="reference internal" href="cli/config_file.html"><span class="doc">Configuration File</span></a></p></li>
+<li><p><a class="reference internal" href="cli/backends.html"><span class="doc">Video Backends</span></a></p></li>
 </ul>
 </div>
+<div class="surface docutils container">
+<p class="rubric">Python API</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="api.html"><span class="doc">scenedetect Package</span></a></p></li>
+<li><p><a class="reference internal" href="api/detectors.html"><span class="doc">Detectors</span></a>: <a class="reference internal" href="api/detectors.html#scenedetect.detectors.adaptive_detector.AdaptiveDetector" title="scenedetect.detectors.adaptive_detector.AdaptiveDetector"><code class="xref py py-class docutils literal notranslate"><span class="pre">AdaptiveDetector</span></code></a>,
+<a class="reference internal" href="api/detectors.html#scenedetect.detectors.content_detector.ContentDetector" title="scenedetect.detectors.content_detector.ContentDetector"><code class="xref py py-class docutils literal notranslate"><span class="pre">ContentDetector</span></code></a>,
+<a class="reference internal" href="api/detectors.html#scenedetect.detectors.hash_detector.HashDetector" title="scenedetect.detectors.hash_detector.HashDetector"><code class="xref py py-class docutils literal notranslate"><span class="pre">HashDetector</span></code></a>,
+<a class="reference internal" href="api/detectors.html#scenedetect.detectors.histogram_detector.HistogramDetector" title="scenedetect.detectors.histogram_detector.HistogramDetector"><code class="xref py py-class docutils literal notranslate"><span class="pre">HistogramDetector</span></code></a>,
+<a class="reference internal" href="api/detectors.html#scenedetect.detectors.threshold_detector.ThresholdDetector" title="scenedetect.detectors.threshold_detector.ThresholdDetector"><code class="xref py py-class docutils literal notranslate"><span class="pre">ThresholdDetector</span></code></a></p></li>
+<li><p><a class="reference internal" href="api/output.html"><span class="doc">Output</span></a></p></li>
+<li><p><a class="reference internal" href="api/backends.html"><span class="doc">Video Backends</span></a></p></li>
+<li><p><a class="reference internal" href="api/common.html"><span class="doc">Common</span></a></p></li>
+<li><p><a class="reference internal" href="api/scene_manager.html"><span class="doc">Scene Manager</span></a></p></li>
+<li><p><a class="reference internal" href="api/detector.html"><span class="doc">Detector Interface</span></a></p></li>
+<li><p><a class="reference internal" href="api/video_stream.html"><span class="doc">Stream Interface</span></a></p></li>
+<li><p><a class="reference internal" href="api/stats_manager.html"><span class="doc">Stats Manager</span></a></p></li>
+<li><p><a class="reference internal" href="api/platform.html"><span class="doc">Platform &amp; Logging</span></a></p></li>
+<li><p><a class="reference internal" href="api/migration_guide.html"><span class="doc">Migration Guide (v0.7)</span></a></p></li>
+</ul>
+</div>
+</div>
+<div class="toctree-wrapper compound" id="clitoc">
+</div>
+<div class="toctree-wrapper compound" id="apitoc">
+</div>
+<div class="toctree-wrapper compound" id="reftoc">
+</div>
+<p>Found a problem in the docs? Raise an issue on
+<a class="reference external" href="https://github.com/Breakthrough/PySceneDetect/issues">the PySceneDetect issue tracker</a>.
+Development happens on Github at
+<a class="reference external" href="https://github.com/Breakthrough/PySceneDetect">github.com/Breakthrough/PySceneDetect</a>.</p>
 </section>
 <section id="indices-and-tables">
-<h3>Indices and Tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this heading">¶</a></h3>
+<h2>Indices and Tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
 <li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
 <li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
 </ul>
-</section>
 </section>
 </section>
 
@@ -238,7 +134,7 @@
   <nav id="rellinks">
     <ul>
         <li>
-          <a href="cli.html" title="Next document"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Command</a>
+          <a href="cli.html" title="Next document"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> Command</a>
           &rarr;
         </li>
     </ul>
@@ -272,20 +168,46 @@
 
 
 
-<h3>Navigation</h3>
-<p class="caption" role="heading"><span class="caption-text">Command-Line Interface:</span></p>
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+<nav class="section-switch" aria-label="Documentation section">
+  <a href="cli.html">CLI</a><span class="sep" aria-hidden="true">|</span>
+  <a href="api.html">Python API</a>
+  <span class="section-links">
+  <a href="examples.html">Examples</a>
+  </span>
+</nav>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="cli.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Command</a></li>
-<li class="toctree-l1"><a class="reference internal" href="cli.html#examples">Examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="cli.html#options">Options</a></li>
-<li class="toctree-l1"><a class="reference internal" href="cli.html#detectors">Detectors</a></li>
-<li class="toctree-l1"><a class="reference internal" href="cli.html#commands">Commands</a></li>
-<li class="toctree-l1"><a class="reference internal" href="cli/config_file.html">Configuration File</a></li>
-<li class="toctree-l1"><a class="reference internal" href="cli/backends.html">Backends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> Command</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="cli.html#usage">Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cli.html#options">Options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cli.html#detectors">Detectors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cli.html#commands">Commands</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">API Documentation:</span></p>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="cli/config_file.html">Configuration File</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="cli/config_file.html#sample-file">Sample File</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cli/config_file.html#sections">Sections</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="cli/backends.html">Video Backends</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="cli/backends.html#opencv">OpenCV</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cli/backends.html#pyav">PyAV</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cli/backends.html#moviepy">MoviePy</a></li>
+</ul>
+</li>
+</ul>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="api.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> Package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/detectors.html">Detectors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/output.html">Output</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/backends.html">Video Backends</a></li>
@@ -297,31 +219,6 @@
 <li class="toctree-l1"><a class="reference internal" href="api/platform.html">Platform &amp; Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/migration_guide.html">Migration Guide (v0.7)</a></li>
 </ul>
-
-<div class="relations">
-<h3>Related Topics</h3>
-<ul>
-  <li><a href="#">Documentation overview</a><ul>
-      <li>Next: <a href="cli.html" title="next chapter"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Command</a></li>
-  </ul></li>
-</ul>
-</div>
-<div id="searchbox" style="display: none" role="search">
-  <h3 id="searchlabel">Quick search</h3>
-    <div class="searchformwrapper">
-    <form class="search" action="search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
-      <input type="submit" value="Go" />
-    </form>
-    </div>
-</div>
-<script>document.getElementById('searchbox').style.display = "block"</script>
-
-
-
-
-
-
 
 
         </div>

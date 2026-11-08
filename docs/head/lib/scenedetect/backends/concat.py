@@ -136,26 +136,37 @@ class VideoStreamConcat(VideoStream):
 
         # Probe all inputs up front for validation and metadata, then only keep one source
         # open at a time for decoding. The handle probed for the first source is kept as the
-        # initial decode source to avoid re-opening it.
+        # initial decode source to avoid re-opening it, and the others are closed once probed.
         self._sources: list[_SourceMetadata] = []
         first_cap: VideoStream | None = None
-        for index in range(len(self._paths)):
-            cap = self._open_source(index)
-            duration = cap.duration
-            declared_seconds = _exact_seconds(duration) if duration is not None else Fraction(0)
-            self._sources.append(
-                _SourceMetadata(
-                    path=self._paths[index],
-                    frame_size=cap.frame_size,
-                    frame_rate=cap.frame_rate,
-                    duration=declared_seconds,
-                    frames=duration.frame_num if duration is not None else 0,
-                    aspect_ratio=cap.aspect_ratio,
+        cap: VideoStream | None = None
+        try:
+            for index in range(len(self._paths)):
+                cap = self._open_source(index)
+                duration = cap.duration
+                declared_seconds = _exact_seconds(duration) if duration is not None else Fraction(0)
+                self._sources.append(
+                    _SourceMetadata(
+                        path=self._paths[index],
+                        frame_size=cap.frame_size,
+                        frame_rate=cap.frame_rate,
+                        duration=declared_seconds,
+                        frames=duration.frame_num if duration is not None else 0,
+                        aspect_ratio=cap.aspect_ratio,
+                    )
                 )
-            )
-            if index == 0:
-                first_cap = cap
-        self._validate_sources()
+                if index == 0:
+                    first_cap = cap
+                else:
+                    cap.close()
+            self._validate_sources()
+        except BaseException:
+            # Don't leave any probed source open if probing or validation fails. Closing is
+            # idempotent, so it doesn't matter if `cap` was already closed or is `first_cap`.
+            for opened in (cap, first_cap):
+                if opened is not None:
+                    opened.close()
+            raise
 
         # Global start time of each source in exact rational seconds. Has one extra entry at
         # the end holding the total (declared) duration. Values after the current source are
@@ -203,6 +214,12 @@ class VideoStreamConcat(VideoStream):
             str(self._paths[index]), self._frame_rate_override, **self._backend_kwargs
         )
 
+    def _switch_source(self, index: int):
+        """Make the source at `index` the one being decoded, and close the outgoing source."""
+        cap = self._open_source(index)
+        outgoing, self._cap = self._cap, cap
+        outgoing.close()
+
     def _child_position_seconds(self) -> Fraction:
         """Position of the current source as exact rational seconds (local timeline)."""
         return _exact_seconds(self._cap.position)
@@ -226,6 +243,7 @@ class VideoStreamConcat(VideoStream):
 
     def read(self, decode: bool = True) -> np.ndarray | bool:
         """Read/decode the next frame. Returns False when all inputs have been processed."""
+        self._check_open()
         while True:
             result = self._cap.read(decode=decode)
             if result is not False:
@@ -236,11 +254,12 @@ class VideoStreamConcat(VideoStream):
             self._finish_current_source()
             self._index += 1
             logger.debug("Processing complete, opening next video: %s", self._paths[self._index])
-            self._cap = self._open_source(self._index)
+            self._switch_source(self._index)
 
     def seek(self, target: TimecodeLike):
         """Seek to `target` on the global timeline. Supports seeking across sources in
         either direction."""
+        self._check_open()
         if not isinstance(target, FrameTimecode):
             target = FrameTimecode(target, self.frame_rate)
         if target < 0:
@@ -253,16 +272,26 @@ class VideoStreamConcat(VideoStream):
             self._decode_failures_prior += self._cap.decode_failures
             self._frames_prior = sum(source.frames for source in self._sources[:index])
             self._index = index
-            self._cap = self._open_source(index)
+            self._switch_source(index)
         local_seconds = target_seconds - self._offsets[index]
         self._cap.seek(float(local_seconds))
 
     def reset(self):
         """Close and re-open the stream (equivalent to seeking back to the beginning)."""
+        self._check_open()
         self._index = 0
         self._frames_prior = 0
         self._decode_failures_prior = 0
-        self._cap = self._open_source(0)
+        self._switch_source(0)
+
+    def close(self) -> None:
+        """Close the stream, closing the input video currently open for decoding (only one is
+        kept open at a time). Has no effect if the stream is already closed. See
+        :meth:`VideoStream.close() <scenedetect.video_stream.VideoStream.close>` for details."""
+        if self._closed:
+            return
+        self._closed = True
+        self._cap.close()
 
     #
     # VideoStream Properties

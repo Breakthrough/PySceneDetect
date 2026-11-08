@@ -43,53 +43,48 @@
 <p>This module contains the <a class="reference internal" href="#scenedetect.video_stream.VideoStream" title="scenedetect.video_stream.VideoStream"><code class="xref py py-class docutils literal notranslate"><span class="pre">VideoStream</span></code></a> class, which provides a library agnostic
 interface for video input. To open a video by path, use <a class="reference internal" href="../api.html#scenedetect.open_video" title="scenedetect.open_video"><code class="xref py py-func docutils literal notranslate"><span class="pre">scenedetect.open_video()</span></code></a>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">scenedetect</span><span class="w"> </span><span class="kn">import</span> <span class="n">open_video</span>
-<span class="n">video</span> <span class="o">=</span> <span class="n">open_video</span><span class="p">(</span><span class="s1">'video.mp4'</span><span class="p">)</span>
-<span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-    <span class="n">frame</span> <span class="o">=</span> <span class="n">video</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
-    <span class="k">if</span> <span class="n">frame</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
-        <span class="k">break</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">"Read </span><span class="si">%d</span><span class="s2"> frames"</span> <span class="o">%</span> <span class="n">video</span><span class="o">.</span><span class="n">frame_number</span><span class="p">)</span>
+<span class="k">with</span> <span class="n">open_video</span><span class="p">(</span><span class="s1">'video.mp4'</span><span class="p">)</span> <span class="k">as</span> <span class="n">video</span><span class="p">:</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">frame</span> <span class="o">=</span> <span class="n">video</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">frame</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="k">break</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"Read </span><span class="si">%d</span><span class="s2"> frames"</span> <span class="o">%</span> <span class="n">video</span><span class="o">.</span><span class="n">frame_number</span><span class="p">)</span>
 </pre></div>
 </div>
+<p>Leaving the <code class="docutils literal notranslate"><span class="pre">with</span></code> block closes the video, releasing resources such as file handles and decoders.
+A stream can also be closed explicitly by calling <a class="reference internal" href="#scenedetect.video_stream.VideoStream.close" title="scenedetect.video_stream.VideoStream.close"><code class="xref py py-meth docutils literal notranslate"><span class="pre">VideoStream.close()</span></code></a>.</p>
 <p>You can also optionally specify a framerate and a specific backend library to use. Unless specified,
 OpenCV will be used as the video backend. See <a class="reference internal" href="backends.html#module-scenedetect.backends" title="scenedetect.backends"><code class="xref py py-mod docutils literal notranslate"><span class="pre">scenedetect.backends</span></code></a> for a detailed example.</p>
 <p>New <a class="reference internal" href="#scenedetect.video_stream.VideoStream" title="scenedetect.video_stream.VideoStream"><code class="xref py py-class docutils literal notranslate"><span class="pre">VideoStream</span></code></a> implementations can be
 tested by adding it to the test suite in <cite>tests/test_video_stream.py</cite>.</p>
-<dl class="py exception">
-<dt class="sig sig-object py" id="scenedetect.video_stream.FrameRateUnavailable">
-<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">FrameRateUnavailable</span></span><a class="headerlink" href="#scenedetect.video_stream.FrameRateUnavailable" title="Permalink to this definition">¶</a></dt>
-<dd><p>Exception instance to provide consistent error messaging across backends when the video frame
-rate is unavailable or cannot be calculated. Subclass of VideoOpenFailure.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>message</strong> – Additional context the backend can provide for the open failure.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py exception">
-<dt class="sig sig-object py" id="scenedetect.video_stream.SeekError">
-<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SeekError</span></span><a class="headerlink" href="#scenedetect.video_stream.SeekError" title="Permalink to this definition">¶</a></dt>
-<dd><p>Either an unrecoverable error happened while attempting to seek, or the underlying
-stream is not seekable (additional information will be provided when possible).</p>
-<p>The stream is guaranteed to be left in a valid state, but the position may be reset.</p>
-</dd></dl>
-
-<dl class="py exception">
-<dt class="sig sig-object py" id="scenedetect.video_stream.VideoOpenFailure">
-<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">VideoOpenFailure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Unknown</span> <span class="pre">backend</span> <span class="pre">error.'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.video_stream.VideoOpenFailure" title="Permalink to this definition">¶</a></dt>
-<dd><p>Raised by a backend if opening a video fails.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>message</strong> (<em>str</em>) – Additional context the backend can provide for the open failure.</p>
-</dd>
-</dl>
-</dd></dl>
-
 <dl class="py class">
 <dt class="sig sig-object py" id="scenedetect.video_stream.VideoStream">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">VideoStream</span></span><a class="headerlink" href="#scenedetect.video_stream.VideoStream" title="Permalink to this definition">¶</a></dt>
 <dd><p>Interface which all video backends must implement.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="scenedetect.video_stream.VideoStream.close">
+<span class="sig-name descname"><span class="pre">close</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.video_stream.VideoStream.close" title="Permalink to this definition">¶</a></dt>
+<dd><p>Close the stream, releasing any resources it holds (e.g. file handles, decoders).</p>
+<p>Calling <cite>close()</cite> more than once has no effect. Backends which hold resources override
+this method: once they are closed, <cite>read()</cite>, <cite>seek()</cite>, and <cite>reset()</cite> raise <cite>ValueError</cite>,
+and the stream is never re-opened. Properties describing the video itself (<cite>path</cite>, <cite>name</cite>,
+<cite>frame_rate</cite>, <cite>duration</cite>, <cite>frame_size</cite>, and <cite>aspect_ratio</cite>) remain available, but all
+others (e.g. <cite>position</cite>) are undefined, and may return arbitrary values or raise.</p>
+<p>A stream can also be used as a context manager, which closes it on exit:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">open_video</span><span class="p">(</span><span class="s2">"video.mp4"</span><span class="p">)</span> <span class="k">as</span> <span class="n">video</span><span class="p">:</span>
+    <span class="n">scene_manager</span><span class="o">.</span><span class="n">detect_scenes</span><span class="p">(</span><span class="n">video</span><span class="o">=</span><span class="n">video</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The default implementation does nothing, so streams which hold no resources of their own
+(e.g. a <a class="reference internal" href="backends.html#scenedetect.backends.opencv.VideoCaptureAdapter" title="scenedetect.backends.opencv.VideoCaptureAdapter"><code class="xref py py-class docutils literal notranslate"><span class="pre">VideoCaptureAdapter</span></code></a>,
+whose capture belongs to the caller) remain usable after closing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>None</em></p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="scenedetect.video_stream.VideoStream.read">
 <em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">decode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.video_stream.VideoStream.read" title="Permalink to this definition">¶</a></dt>
@@ -104,8 +99,11 @@ memory copying and colorspace conversions when a given frame’s data is not req
 <dd class="field-even"><p>If decode = True, the decoded frame (np.ndarray), or False (bool) if end of video.
 If decode = False, a bool indicating if advancing to the the next frame succeeded.</p>
 </dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><em>ndarray</em> | <em>bool</em></p>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ValueError</strong> – The stream is closed.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>ndarray</em> | <em>bool</em></p>
 </dd>
 </dl>
 </dd></dl>
@@ -115,8 +113,11 @@ If decode = False, a bool indicating if advancing to the the next frame succeede
 <em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.video_stream.VideoStream.reset" title="Permalink to this definition">¶</a></dt>
 <dd><p>Close and re-open the VideoStream (equivalent to seeking back to beginning).</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><em>None</em></p>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ValueError</strong> – The stream is closed.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>None</em></p>
 </dd>
 </dl>
 </dd></dl>
@@ -140,7 +141,8 @@ If int, interpreted as frame number.</p>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><ul class="simple">
 <li><p><a class="reference internal" href="#scenedetect.video_stream.SeekError" title="scenedetect.video_stream.SeekError"><strong>SeekError</strong></a> – An error occurs while seeking, or seeking is not supported.</p></li>
-<li><p><strong>ValueError</strong> – <cite>target</cite> is not a valid value (i.e. it is negative).</p></li>
+<li><p><strong>ValueError</strong> – <cite>target</cite> is not a valid value (i.e. it is negative), or the stream is
+    closed.</p></li>
 </ul>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
@@ -234,6 +236,40 @@ milliseconds. The first frame has a PTS of 0.</p>
 
 </dd></dl>
 
+<section id="exceptions">
+<h2>Exceptions<a class="headerlink" href="#exceptions" title="Permalink to this heading">¶</a></h2>
+<dl class="py exception">
+<dt class="sig sig-object py" id="scenedetect.video_stream.VideoOpenFailure">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">VideoOpenFailure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Unknown</span> <span class="pre">backend</span> <span class="pre">error.'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.video_stream.VideoOpenFailure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raised by a backend if opening a video fails.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>message</strong> (<em>str</em>) – Additional context the backend can provide for the open failure.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="scenedetect.video_stream.FrameRateUnavailable">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">FrameRateUnavailable</span></span><a class="headerlink" href="#scenedetect.video_stream.FrameRateUnavailable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Exception instance to provide consistent error messaging across backends when the video frame
+rate is unavailable or cannot be calculated. Subclass of VideoOpenFailure.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>message</strong> – Additional context the backend can provide for the open failure.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="scenedetect.video_stream.SeekError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SeekError</span></span><a class="headerlink" href="#scenedetect.video_stream.SeekError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Either an unrecoverable error happened while attempting to seek, or the underlying
+stream is not seekable (additional information will be provided when possible).</p>
+<p>The stream is guaranteed to be left in a valid state, but the position may be reset.</p>
+</dd></dl>
+
+</section>
 </section>
 
 
@@ -281,47 +317,7 @@ milliseconds. The first frame has a PTS of 0.</p>
 
 
 
-<h3>Navigation</h3>
-<p class="caption" role="heading"><span class="caption-text">Command-Line Interface:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../cli.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Command</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../cli.html#examples">Examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../cli.html#options">Options</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../cli.html#detectors">Detectors</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../cli.html#commands">Commands</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../cli/config_file.html">Configuration File</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../cli/backends.html">Backends</a></li>
-</ul>
-<p class="caption" role="heading"><span class="caption-text">API Documentation:</span></p>
-<ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../api.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="detectors.html">Detectors</a></li>
-<li class="toctree-l1"><a class="reference internal" href="output.html">Output</a></li>
-<li class="toctree-l1"><a class="reference internal" href="backends.html">Video Backends</a></li>
-<li class="toctree-l1"><a class="reference internal" href="common.html">Common</a></li>
-<li class="toctree-l1"><a class="reference internal" href="scene_manager.html">Scene Manager</a></li>
-<li class="toctree-l1"><a class="reference internal" href="detector.html">Detector Interface</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Stream Interface</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#scenedetect.video_stream.FrameRateUnavailable"><code class="docutils literal notranslate"><span class="pre">FrameRateUnavailable</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#scenedetect.video_stream.SeekError"><code class="docutils literal notranslate"><span class="pre">SeekError</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#scenedetect.video_stream.VideoOpenFailure"><code class="docutils literal notranslate"><span class="pre">VideoOpenFailure</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#scenedetect.video_stream.VideoStream"><code class="docutils literal notranslate"><span class="pre">VideoStream</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="stats_manager.html">Stats Manager</a></li>
-<li class="toctree-l1"><a class="reference internal" href="platform.html">Platform &amp; Logging</a></li>
-<li class="toctree-l1"><a class="reference internal" href="migration_guide.html">Migration Guide (v0.7)</a></li>
-</ul>
 
-<div class="relations">
-<h3>Related Topics</h3>
-<ul>
-  <li><a href="../index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="detector.html" title="previous chapter">Detector Interface</a></li>
-      <li>Next: <a href="stats_manager.html" title="next chapter">Stats Manager</a></li>
-  </ul></li>
-</ul>
-</div>
 <div id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
@@ -332,12 +328,113 @@ milliseconds. The first frame has a PTS of 0.</p>
     </div>
 </div>
 <script>document.getElementById('searchbox').style.display = "block"</script>
-
-
-
-
-
-
+<nav class="section-switch" aria-label="Documentation section">
+  <a href="../cli.html">CLI</a><span class="sep" aria-hidden="true">|</span>
+  <a href="../api.html" class="current" aria-current="location">Python API</a>
+  <span class="section-links">
+  <a href="../examples.html">Examples</a>
+  </span>
+</nav>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../api.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> Package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#usage">Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#module-scenedetect">Functions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="detectors.html">Detectors</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="detectors.html#adaptivedetector">AdaptiveDetector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="detectors.html#contentdetector">ContentDetector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="detectors.html#hashdetector">HashDetector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="detectors.html#histogramdetector">HistogramDetector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="detectors.html#thresholddetector">ThresholdDetector</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="output.html">Output</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="output.html#splitting-video">Splitting Video</a></li>
+<li class="toctree-l2"><a class="reference internal" href="output.html#saving-images">Saving Images</a></li>
+<li class="toctree-l2"><a class="reference internal" href="output.html#scene-lists">Scene Lists</a></li>
+<li class="toctree-l2"><a class="reference internal" href="output.html#filename-formatting">Filename Formatting</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="backends.html">Video Backends</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="backends.html#opencv">OpenCV</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="backends.html#scenedetect.backends.opencv.VideoStreamCv2"><code class="docutils literal notranslate"><span class="pre">VideoStreamCv2</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="backends.html#pyav">PyAV</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="backends.html#scenedetect.backends.pyav.VideoStreamAv"><code class="docutils literal notranslate"><span class="pre">VideoStreamAv</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="backends.html#moviepy">MoviePy</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="backends.html#scenedetect.backends.moviepy.VideoStreamMoviePy"><code class="docutils literal notranslate"><span class="pre">VideoStreamMoviePy</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="backends.html#module-scenedetect.backends.concat">Multiple Videos</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="backends.html#scenedetect.backends.concat.VideoStreamConcat"><code class="docutils literal notranslate"><span class="pre">VideoStreamConcat</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="common.html">Common</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="common.html#timecodes">Timecodes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode"><code class="docutils literal notranslate"><span class="pre">FrameTimecode</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="common.html#type-aliases">Type Aliases</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="common.html#scenedetect.common.SceneList"><code class="docutils literal notranslate"><span class="pre">SceneList</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="common.html#scenedetect.common.CutList"><code class="docutils literal notranslate"><span class="pre">CutList</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="scene_manager.html">Scene Manager</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="scene_manager.html#scenedetect.scene_manager.SceneManager"><code class="docutils literal notranslate"><span class="pre">SceneManager</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="scene_manager.html#functions">Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="scene_manager.html#scenedetect.scene_manager.get_scenes_from_cuts"><code class="docutils literal notranslate"><span class="pre">get_scenes_from_cuts()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="detector.html">Detector Interface</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="detector.html#scenedetect.detector.SceneDetector"><code class="docutils literal notranslate"><span class="pre">SceneDetector</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Stream Interface</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#scenedetect.video_stream.VideoStream"><code class="docutils literal notranslate"><span class="pre">VideoStream</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#scenedetect.video_stream.VideoStream.close"><code class="docutils literal notranslate"><span class="pre">close()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scenedetect.video_stream.VideoStream.read"><code class="docutils literal notranslate"><span class="pre">read()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scenedetect.video_stream.VideoStream.reset"><code class="docutils literal notranslate"><span class="pre">reset()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scenedetect.video_stream.VideoStream.seek"><code class="docutils literal notranslate"><span class="pre">seek()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scenedetect.video_stream.VideoStream.BACKEND_NAME"><code class="docutils literal notranslate"><span class="pre">BACKEND_NAME</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scenedetect.video_stream.VideoStream.aspect_ratio"><code class="docutils literal notranslate"><span class="pre">aspect_ratio</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scenedetect.video_stream.VideoStream.base_timecode"><code class="docutils literal notranslate"><span class="pre">base_timecode</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scenedetect.video_stream.VideoStream.decode_failures"><code class="docutils literal notranslate"><span class="pre">decode_failures</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scenedetect.video_stream.VideoStream.duration"><code class="docutils literal notranslate"><span class="pre">duration</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scenedetect.video_stream.VideoStream.frame_number"><code class="docutils literal notranslate"><span class="pre">frame_number</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scenedetect.video_stream.VideoStream.frame_rate"><code class="docutils literal notranslate"><span class="pre">frame_rate</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scenedetect.video_stream.VideoStream.frame_size"><code class="docutils literal notranslate"><span class="pre">frame_size</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scenedetect.video_stream.VideoStream.is_seekable"><code class="docutils literal notranslate"><span class="pre">is_seekable</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scenedetect.video_stream.VideoStream.name"><code class="docutils literal notranslate"><span class="pre">name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scenedetect.video_stream.VideoStream.path"><code class="docutils literal notranslate"><span class="pre">path</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scenedetect.video_stream.VideoStream.position"><code class="docutils literal notranslate"><span class="pre">position</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scenedetect.video_stream.VideoStream.position_ms"><code class="docutils literal notranslate"><span class="pre">position_ms</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#exceptions">Exceptions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#scenedetect.video_stream.VideoOpenFailure"><code class="docutils literal notranslate"><span class="pre">VideoOpenFailure</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scenedetect.video_stream.FrameRateUnavailable"><code class="docutils literal notranslate"><span class="pre">FrameRateUnavailable</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scenedetect.video_stream.SeekError"><code class="docutils literal notranslate"><span class="pre">SeekError</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="stats_manager.html">Stats Manager</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="stats_manager.html#scenedetect.stats_manager.StatsManager"><code class="docutils literal notranslate"><span class="pre">StatsManager</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="platform.html">Platform &amp; Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="migration_guide.html">Migration Guide (v0.7)</a></li>
+</ul>
 
 
         </div>

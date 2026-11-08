@@ -79,6 +79,8 @@ amounts of frames/seconds. In the example below, <code class="docutils literal n
 </pre></div>
 </div>
 </div>
+<section id="timecodes">
+<h2>Timecodes<a class="headerlink" href="#timecodes" title="Permalink to this heading">¶</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="scenedetect.common.FrameTimecode">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">FrameTimecode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timecode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.common.FrameTimecode" title="Permalink to this definition">¶</a></dt>
@@ -221,42 +223,6 @@ property returns an exact <code class="xref py py-class docutils literal notrans
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="scenedetect.common.Interpolation">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Interpolation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names=&lt;not</span> <span class="pre">given&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qualname=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary=None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.common.Interpolation" title="Permalink to this definition">¶</a></dt>
-<dd><p>Interpolation method used for image resizing. Based on constants defined in OpenCV.</p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="scenedetect.common.Interpolation.AREA">
-<span class="sig-name descname"><span class="pre">AREA</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></em><a class="headerlink" href="#scenedetect.common.Interpolation.AREA" title="Permalink to this definition">¶</a></dt>
-<dd><p>Pixel area relation resampling. Provides moire’-free downscaling.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="scenedetect.common.Interpolation.CUBIC">
-<span class="sig-name descname"><span class="pre">CUBIC</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#scenedetect.common.Interpolation.CUBIC" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bicubic interpolation.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="scenedetect.common.Interpolation.LANCZOS4">
-<span class="sig-name descname"><span class="pre">LANCZOS4</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4</span></em><a class="headerlink" href="#scenedetect.common.Interpolation.LANCZOS4" title="Permalink to this definition">¶</a></dt>
-<dd><p>Lanczos interpolation over 8x8 neighborhood.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="scenedetect.common.Interpolation.LINEAR">
-<span class="sig-name descname"><span class="pre">LINEAR</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#scenedetect.common.Interpolation.LINEAR" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bilinear interpolation.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="scenedetect.common.Interpolation.NEAREST">
-<span class="sig-name descname"><span class="pre">NEAREST</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#scenedetect.common.Interpolation.NEAREST" title="Permalink to this definition">¶</a></dt>
-<dd><p>Nearest neighbor interpolation.</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
 <dt class="sig sig-object py" id="scenedetect.common.Timecode">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Timecode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_base</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.common.Timecode" title="Permalink to this definition">¶</a></dt>
 <dd><p>Timing information associated with a given frame.</p>
@@ -303,12 +269,14 @@ denominator.</p>
 </dl>
 </dd></dl>
 
+</section>
+<section id="type-aliases">
+<h2>Type Aliases<a class="headerlink" href="#type-aliases" title="Permalink to this heading">¶</a></h2>
 <dl class="py data">
-<dt class="sig sig-object py" id="scenedetect.common.CropRegion">
-<span class="sig-name descname"><span class="pre">CropRegion</span></span><a class="headerlink" href="#scenedetect.common.CropRegion" title="Permalink to this definition">¶</a></dt>
-<dd><p>Type hint for rectangle of the form X0 Y0 X1 Y1 for cropping frames. Coordinates are relative
-to source frame without downscaling.</p>
-<p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]</p>
+<dt class="sig sig-object py" id="scenedetect.common.SceneList">
+<span class="sig-name descname"><span class="pre">SceneList</span></span><a class="headerlink" href="#scenedetect.common.SceneList" title="Permalink to this definition">¶</a></dt>
+<dd><p>Type hint for a list of scenes in the form (start time, end time).</p>
+<p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[FrameTimecode, FrameTimecode]]</p>
 </dd></dl>
 
 <dl class="py data">
@@ -319,24 +287,10 @@ to source frame without downscaling.</p>
 </dd></dl>
 
 <dl class="py data">
-<dt class="sig sig-object py" id="scenedetect.common.FrameRate">
-<span class="sig-name descname"><span class="pre">FrameRate</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">float</span> <span class="pre">|</span> <span class="pre">fractions.Fraction</span></em><a class="headerlink" href="#scenedetect.common.FrameRate" title="Permalink to this definition">¶</a></dt>
-<dd><p>Type hint for a video frame rate. <code class="docutils literal notranslate"><span class="pre">Fraction</span></code> is the canonical exact form and should be
-preferred (e.g. <code class="docutils literal notranslate"><span class="pre">Fraction(30000,</span> <span class="pre">1001)</span></code>), while <code class="docutils literal notranslate"><span class="pre">float</span></code> is accepted for convenience. Floats
-will be converted to rationals at runtime via <a class="reference internal" href="#scenedetect.common.framerate_to_fraction" title="scenedetect.common.framerate_to_fraction"><code class="xref py py-func docutils literal notranslate"><span class="pre">framerate_to_fraction()</span></code></a>.</p>
-</dd></dl>
-
-<dl class="py data">
-<dt class="sig sig-object py" id="scenedetect.common.MAX_FPS_DELTA">
-<span class="sig-name descname"><span class="pre">MAX_FPS_DELTA</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1e-09</span></em><a class="headerlink" href="#scenedetect.common.MAX_FPS_DELTA" title="Permalink to this definition">¶</a></dt>
-<dd><p>Maximum amount two framerates can differ by for equality testing. Currently 1 frame/nanosec.</p>
-</dd></dl>
-
-<dl class="py data">
-<dt class="sig sig-object py" id="scenedetect.common.SceneList">
-<span class="sig-name descname"><span class="pre">SceneList</span></span><a class="headerlink" href="#scenedetect.common.SceneList" title="Permalink to this definition">¶</a></dt>
-<dd><p>Type hint for a list of scenes in the form (start time, end time).</p>
-<p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[FrameTimecode, FrameTimecode]]</p>
+<dt class="sig sig-object py" id="scenedetect.common.TimecodePair">
+<span class="sig-name descname"><span class="pre">TimecodePair</span></span><a class="headerlink" href="#scenedetect.common.TimecodePair" title="Permalink to this definition">¶</a></dt>
+<dd><p>Type hint for timecode pairs, typically representing the start/end of a scene.</p>
+<p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[FrameTimecode, FrameTimecode]</p>
 </dd></dl>
 
 <dl class="py data">
@@ -349,12 +303,67 @@ will be converted to rationals at runtime via <a class="reference internal" href
 </dd></dl>
 
 <dl class="py data">
-<dt class="sig sig-object py" id="scenedetect.common.TimecodePair">
-<span class="sig-name descname"><span class="pre">TimecodePair</span></span><a class="headerlink" href="#scenedetect.common.TimecodePair" title="Permalink to this definition">¶</a></dt>
-<dd><p>Type hint for timecode pairs, typically representing the start/end of a scene.</p>
-<p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[FrameTimecode, FrameTimecode]</p>
+<dt class="sig sig-object py" id="scenedetect.common.FrameRate">
+<span class="sig-name descname"><span class="pre">FrameRate</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">float</span> <span class="pre">|</span> <span class="pre">fractions.Fraction</span></em><a class="headerlink" href="#scenedetect.common.FrameRate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Type hint for a video frame rate. <code class="docutils literal notranslate"><span class="pre">Fraction</span></code> is the canonical exact form and should be
+preferred (e.g. <code class="docutils literal notranslate"><span class="pre">Fraction(30000,</span> <span class="pre">1001)</span></code>), while <code class="docutils literal notranslate"><span class="pre">float</span></code> is accepted for convenience. Floats
+will be converted to rationals at runtime via <a class="reference internal" href="#scenedetect.common.framerate_to_fraction" title="scenedetect.common.framerate_to_fraction"><code class="xref py py-func docutils literal notranslate"><span class="pre">framerate_to_fraction()</span></code></a>.</p>
 </dd></dl>
 
+<dl class="py data">
+<dt class="sig sig-object py" id="scenedetect.common.CropRegion">
+<span class="sig-name descname"><span class="pre">CropRegion</span></span><a class="headerlink" href="#scenedetect.common.CropRegion" title="Permalink to this definition">¶</a></dt>
+<dd><p>Type hint for rectangle of the form X0 Y0 X1 Y1 for cropping frames. Coordinates are relative
+to source frame without downscaling.</p>
+<p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]</p>
+</dd></dl>
+
+</section>
+<section id="constants">
+<h2>Constants<a class="headerlink" href="#constants" title="Permalink to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="scenedetect.common.Interpolation">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Interpolation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names=&lt;not</span> <span class="pre">given&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qualname=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary=None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.common.Interpolation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Interpolation method used for image resizing. Based on constants defined in OpenCV.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scenedetect.common.Interpolation.AREA">
+<span class="sig-name descname"><span class="pre">AREA</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></em><a class="headerlink" href="#scenedetect.common.Interpolation.AREA" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pixel area relation resampling. Provides moire’-free downscaling.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scenedetect.common.Interpolation.CUBIC">
+<span class="sig-name descname"><span class="pre">CUBIC</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#scenedetect.common.Interpolation.CUBIC" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bicubic interpolation.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scenedetect.common.Interpolation.LANCZOS4">
+<span class="sig-name descname"><span class="pre">LANCZOS4</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4</span></em><a class="headerlink" href="#scenedetect.common.Interpolation.LANCZOS4" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lanczos interpolation over 8x8 neighborhood.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scenedetect.common.Interpolation.LINEAR">
+<span class="sig-name descname"><span class="pre">LINEAR</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#scenedetect.common.Interpolation.LINEAR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bilinear interpolation.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scenedetect.common.Interpolation.NEAREST">
+<span class="sig-name descname"><span class="pre">NEAREST</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#scenedetect.common.Interpolation.NEAREST" title="Permalink to this definition">¶</a></dt>
+<dd><p>Nearest neighbor interpolation.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="scenedetect.common.MAX_FPS_DELTA">
+<span class="sig-name descname"><span class="pre">MAX_FPS_DELTA</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1e-09</span></em><a class="headerlink" href="#scenedetect.common.MAX_FPS_DELTA" title="Permalink to this definition">¶</a></dt>
+<dd><p>Maximum amount two framerates can differ by for equality testing. Currently 1 frame/nanosec.</p>
+</dd></dl>
+
+</section>
 </section>
 
 
@@ -402,54 +411,7 @@ will be converted to rationals at runtime via <a class="reference internal" href
 
 
 
-<h3>Navigation</h3>
-<p class="caption" role="heading"><span class="caption-text">Command-Line Interface:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../cli.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Command</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../cli.html#examples">Examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../cli.html#options">Options</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../cli.html#detectors">Detectors</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../cli.html#commands">Commands</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../cli/config_file.html">Configuration File</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../cli/backends.html">Backends</a></li>
-</ul>
-<p class="caption" role="heading"><span class="caption-text">API Documentation:</span></p>
-<ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../api.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="detectors.html">Detectors</a></li>
-<li class="toctree-l1"><a class="reference internal" href="output.html">Output</a></li>
-<li class="toctree-l1"><a class="reference internal" href="backends.html">Video Backends</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Common</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#scenedetect.common.FrameTimecode"><code class="docutils literal notranslate"><span class="pre">FrameTimecode</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#scenedetect.common.Interpolation"><code class="docutils literal notranslate"><span class="pre">Interpolation</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#scenedetect.common.Timecode"><code class="docutils literal notranslate"><span class="pre">Timecode</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#scenedetect.common.framerate_to_fraction"><code class="docutils literal notranslate"><span class="pre">framerate_to_fraction()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#scenedetect.common.CropRegion"><code class="docutils literal notranslate"><span class="pre">CropRegion</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#scenedetect.common.CutList"><code class="docutils literal notranslate"><span class="pre">CutList</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#scenedetect.common.FrameRate"><code class="docutils literal notranslate"><span class="pre">FrameRate</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#scenedetect.common.MAX_FPS_DELTA"><code class="docutils literal notranslate"><span class="pre">MAX_FPS_DELTA</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#scenedetect.common.SceneList"><code class="docutils literal notranslate"><span class="pre">SceneList</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#scenedetect.common.TimecodeLike"><code class="docutils literal notranslate"><span class="pre">TimecodeLike</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#scenedetect.common.TimecodePair"><code class="docutils literal notranslate"><span class="pre">TimecodePair</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="scene_manager.html">Scene Manager</a></li>
-<li class="toctree-l1"><a class="reference internal" href="detector.html">Detector Interface</a></li>
-<li class="toctree-l1"><a class="reference internal" href="video_stream.html">Stream Interface</a></li>
-<li class="toctree-l1"><a class="reference internal" href="stats_manager.html">Stats Manager</a></li>
-<li class="toctree-l1"><a class="reference internal" href="platform.html">Platform &amp; Logging</a></li>
-<li class="toctree-l1"><a class="reference internal" href="migration_guide.html">Migration Guide (v0.7)</a></li>
-</ul>
 
-<div class="relations">
-<h3>Related Topics</h3>
-<ul>
-  <li><a href="../index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="backends.html" title="previous chapter">Video Backends</a></li>
-      <li>Next: <a href="scene_manager.html" title="next chapter">Scene Manager</a></li>
-  </ul></li>
-</ul>
-</div>
 <div id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
@@ -460,12 +422,121 @@ will be converted to rationals at runtime via <a class="reference internal" href
     </div>
 </div>
 <script>document.getElementById('searchbox').style.display = "block"</script>
-
-
-
-
-
-
+<nav class="section-switch" aria-label="Documentation section">
+  <a href="../cli.html">CLI</a><span class="sep" aria-hidden="true">|</span>
+  <a href="../api.html" class="current" aria-current="location">Python API</a>
+  <span class="section-links">
+  <a href="../examples.html">Examples</a>
+  </span>
+</nav>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../api.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> Package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#usage">Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#module-scenedetect">Functions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="detectors.html">Detectors</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="detectors.html#adaptivedetector">AdaptiveDetector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="detectors.html#contentdetector">ContentDetector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="detectors.html#hashdetector">HashDetector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="detectors.html#histogramdetector">HistogramDetector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="detectors.html#thresholddetector">ThresholdDetector</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="output.html">Output</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="output.html#splitting-video">Splitting Video</a></li>
+<li class="toctree-l2"><a class="reference internal" href="output.html#saving-images">Saving Images</a></li>
+<li class="toctree-l2"><a class="reference internal" href="output.html#scene-lists">Scene Lists</a></li>
+<li class="toctree-l2"><a class="reference internal" href="output.html#filename-formatting">Filename Formatting</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="backends.html">Video Backends</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="backends.html#opencv">OpenCV</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="backends.html#scenedetect.backends.opencv.VideoStreamCv2"><code class="docutils literal notranslate"><span class="pre">VideoStreamCv2</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="backends.html#pyav">PyAV</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="backends.html#scenedetect.backends.pyav.VideoStreamAv"><code class="docutils literal notranslate"><span class="pre">VideoStreamAv</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="backends.html#moviepy">MoviePy</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="backends.html#scenedetect.backends.moviepy.VideoStreamMoviePy"><code class="docutils literal notranslate"><span class="pre">VideoStreamMoviePy</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="backends.html#module-scenedetect.backends.concat">Multiple Videos</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="backends.html#scenedetect.backends.concat.VideoStreamConcat"><code class="docutils literal notranslate"><span class="pre">VideoStreamConcat</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Common</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#timecodes">Timecodes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#scenedetect.common.FrameTimecode"><code class="docutils literal notranslate"><span class="pre">FrameTimecode</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#scenedetect.common.FrameTimecode.equal_frame_rate"><code class="docutils literal notranslate"><span class="pre">equal_frame_rate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scenedetect.common.FrameTimecode.equal_framerate"><code class="docutils literal notranslate"><span class="pre">equal_framerate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scenedetect.common.FrameTimecode.get_timecode"><code class="docutils literal notranslate"><span class="pre">get_timecode()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scenedetect.common.FrameTimecode.frame_num"><code class="docutils literal notranslate"><span class="pre">frame_num</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scenedetect.common.FrameTimecode.frame_rate"><code class="docutils literal notranslate"><span class="pre">frame_rate</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scenedetect.common.FrameTimecode.framerate"><code class="docutils literal notranslate"><span class="pre">framerate</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scenedetect.common.FrameTimecode.pts"><code class="docutils literal notranslate"><span class="pre">pts</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scenedetect.common.FrameTimecode.seconds"><code class="docutils literal notranslate"><span class="pre">seconds</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scenedetect.common.FrameTimecode.time_base"><code class="docutils literal notranslate"><span class="pre">time_base</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#scenedetect.common.Timecode"><code class="docutils literal notranslate"><span class="pre">Timecode</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#scenedetect.common.Timecode.pts"><code class="docutils literal notranslate"><span class="pre">pts</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scenedetect.common.Timecode.time_base"><code class="docutils literal notranslate"><span class="pre">time_base</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#scenedetect.common.framerate_to_fraction"><code class="docutils literal notranslate"><span class="pre">framerate_to_fraction()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#type-aliases">Type Aliases</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#scenedetect.common.SceneList"><code class="docutils literal notranslate"><span class="pre">SceneList</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scenedetect.common.CutList"><code class="docutils literal notranslate"><span class="pre">CutList</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scenedetect.common.TimecodePair"><code class="docutils literal notranslate"><span class="pre">TimecodePair</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scenedetect.common.TimecodeLike"><code class="docutils literal notranslate"><span class="pre">TimecodeLike</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scenedetect.common.FrameRate"><code class="docutils literal notranslate"><span class="pre">FrameRate</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scenedetect.common.CropRegion"><code class="docutils literal notranslate"><span class="pre">CropRegion</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#constants">Constants</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#scenedetect.common.Interpolation"><code class="docutils literal notranslate"><span class="pre">Interpolation</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#scenedetect.common.Interpolation.AREA"><code class="docutils literal notranslate"><span class="pre">AREA</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scenedetect.common.Interpolation.CUBIC"><code class="docutils literal notranslate"><span class="pre">CUBIC</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scenedetect.common.Interpolation.LANCZOS4"><code class="docutils literal notranslate"><span class="pre">LANCZOS4</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scenedetect.common.Interpolation.LINEAR"><code class="docutils literal notranslate"><span class="pre">LINEAR</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scenedetect.common.Interpolation.NEAREST"><code class="docutils literal notranslate"><span class="pre">NEAREST</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#scenedetect.common.MAX_FPS_DELTA"><code class="docutils literal notranslate"><span class="pre">MAX_FPS_DELTA</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="scene_manager.html">Scene Manager</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="scene_manager.html#scenedetect.scene_manager.SceneManager"><code class="docutils literal notranslate"><span class="pre">SceneManager</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="scene_manager.html#functions">Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="scene_manager.html#scenedetect.scene_manager.get_scenes_from_cuts"><code class="docutils literal notranslate"><span class="pre">get_scenes_from_cuts()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="detector.html">Detector Interface</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="detector.html#scenedetect.detector.SceneDetector"><code class="docutils literal notranslate"><span class="pre">SceneDetector</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="video_stream.html">Stream Interface</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="video_stream.html#scenedetect.video_stream.VideoStream"><code class="docutils literal notranslate"><span class="pre">VideoStream</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="stats_manager.html">Stats Manager</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="stats_manager.html#scenedetect.stats_manager.StatsManager"><code class="docutils literal notranslate"><span class="pre">StatsManager</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="platform.html">Platform &amp; Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="migration_guide.html">Migration Guide (v0.7)</a></li>
+</ul>
 
 
         </div>

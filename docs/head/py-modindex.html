@@ -183,20 +183,34 @@
 
 
 
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+<nav class="section-switch" aria-label="Documentation section">
+  <a href="cli.html">CLI</a><span class="sep" aria-hidden="true">|</span>
+  <a href="api.html">Python API</a>
+  <span class="section-links">
+  <a href="examples.html">Examples</a>
+  </span>
+</nav>
 <h3>Navigation</h3>
-<p class="caption" role="heading"><span class="caption-text">Command-Line Interface:</span></p>
+<p class="caption" role="heading"><span class="caption-text">CLI</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="cli.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Command</a></li>
-<li class="toctree-l1"><a class="reference internal" href="cli.html#examples">Examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="cli.html#options">Options</a></li>
-<li class="toctree-l1"><a class="reference internal" href="cli.html#detectors">Detectors</a></li>
-<li class="toctree-l1"><a class="reference internal" href="cli.html#commands">Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> Command</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cli/config_file.html">Configuration File</a></li>
-<li class="toctree-l1"><a class="reference internal" href="cli/backends.html">Backends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli/backends.html">Video Backends</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">API Documentation:</span></p>
+<p class="caption" role="heading"><span class="caption-text">Python API</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="api.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> 🎬 Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> Package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/detectors.html">Detectors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/output.html">Output</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/backends.html">Video Backends</a></li>
@@ -208,30 +222,10 @@
 <li class="toctree-l1"><a class="reference internal" href="api/platform.html">Platform &amp; Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/migration_guide.html">Migration Guide (v0.7)</a></li>
 </ul>
-
-<div class="relations">
-<h3>Related Topics</h3>
+<p class="caption" role="heading"><span class="caption-text">Guides</span></p>
 <ul>
-  <li><a href="index.html">Documentation overview</a><ul>
-  </ul></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
 </ul>
-</div>
-<div id="searchbox" style="display: none" role="search">
-  <h3 id="searchlabel">Quick search</h3>
-    <div class="searchformwrapper">
-    <form class="search" action="search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
-      <input type="submit" value="Go" />
-    </form>
-    </div>
-</div>
-<script>document.getElementById('searchbox').style.display = "block"</script>
-
-
-
-
-
-
 
 
         </div>

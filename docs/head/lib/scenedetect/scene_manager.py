@@ -16,9 +16,8 @@ This module implements :class:`SceneManager`, coordinates running a
 (:mod:`VideoStream <scenedetect.video_stream>`). Video decoding is done in a separate thread to
 improve performance.
 
-===============================================================
-Usage
-===============================================================
+.. rubric:: Usage
+   :name: usage
 
 The following example shows basic usage of a :class:`SceneManager`:
 
@@ -53,9 +52,8 @@ To use a `SceneManager` with a webcam/device or existing `cv2.VideoCapture` devi
 :class:`VideoCaptureAdapter <scenedetect.backends.opencv.VideoCaptureAdapter>` instead of
 `open_video`.
 
-=======================================================================
-Storing Per-Frame Statistics
-=======================================================================
+.. rubric:: Storing Per-Frame Statistics
+   :name: storing-per-frame-statistics
 
 `SceneManager` can use an optional
 :class:`StatsManager <scenedetect.stats_manager.StatsManager>` to save frame statistics to disk:
@@ -227,8 +225,8 @@ class SceneManager:
     ):
         """
         Arguments:
-            stats_manager: :class:`StatsManager` to bind to this `SceneManager`. Can be
-                accessed via the `stats_manager` property of the resulting object to save to disk.
+            stats_manager: :class:`~scenedetect.stats_manager.StatsManager` to bind to this
+                `SceneManager`. Can be accessed via the `stats_manager` property to save to disk.
         """
         self._cutting_list: list[FrameTimecode] = []
         self._detector_list: list[SceneDetector] = []
