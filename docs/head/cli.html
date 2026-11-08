@@ -613,6 +613,8 @@
 <p>Python API: <a class="reference internal" href="api/output.html#scenedetect.output.write_scene_list_edl" title="scenedetect.output.write_scene_list_edl"><code class="xref py py-func docutils literal notranslate"><span class="pre">write_scene_list_edl()</span></code></a> | Config file: <a class="reference internal" href="cli/config_file.html#config-save-edl"><span class="std std-ref">[save-edl]</span></a></p>
 </div>
 <p>Save cuts in EDL format (CMX 3600).</p>
+<p>Timecodes are non-drop-frame (HH:MM:SS:FF), counting frames at the nominal rate: 24 frames per
+timecode second at 23.976 fps, 30 at 29.97 fps, and so on.</p>
 <section id="id14">
 <h4>Options<a class="headerlink" href="#id14" title="Permalink to this heading">¶</a></h4>
 <dl class="std option">
@@ -645,7 +647,7 @@
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-scenedetect-save-edl-s">
 <span id="cmdoption-scenedetect-save-edl-start-timecode"></span><span class="sig-name descname"><span class="pre">-s</span></span><span class="sig-prename descclassname"> <span class="pre">TIMECODE</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--start-timecode</span></span><span class="sig-prename descclassname"> <span class="pre">TIMECODE</span></span><a class="headerlink" href="#cmdoption-scenedetect-save-edl-s" title="Permalink to this definition">¶</a></dt>
-<dd><p>Start timecode added to every event so the EDL aligns with the source media’s on-screen timecode. Accepts SMPTE HH:MM:SS:FF or 8 digits (HHMMSSFF, e.g. 01000000).</p>
+<dd><p>Start timecode added to every event so the EDL aligns with the source media’s on-screen timecode. Accepts non-drop-frame SMPTE HH:MM:SS:FF or 8 digits (HHMMSSFF, e.g. 01000000).</p>
 </dd></dl>
 
 </section>

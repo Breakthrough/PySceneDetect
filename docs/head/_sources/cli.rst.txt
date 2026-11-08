@@ -596,6 +596,9 @@ Options
 
 Save cuts in EDL format (CMX 3600).
 
+Timecodes are non-drop-frame (HH:MM:SS:FF), counting frames at the nominal rate: 24 frames per
+timecode second at 23.976 fps, 30 at 29.97 fps, and so on.
+
 
 Options
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -625,7 +628,7 @@ Options
 
 .. option:: -s TIMECODE, --start-timecode TIMECODE
 
-  Start timecode added to every event so the EDL aligns with the source media's on-screen timecode. Accepts SMPTE HH:MM:SS:FF or 8 digits (HHMMSSFF, e.g. 01000000).
+  Start timecode added to every event so the EDL aligns with the source media's on-screen timecode. Accepts non-drop-frame SMPTE HH:MM:SS:FF or 8 digits (HHMMSSFF, e.g. 01000000).
 
 
 .. _command-save-fcp:
