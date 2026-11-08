@@ -1105,6 +1105,7 @@
 <li>[bugfix] <code>split-video</code> with <code>-o</code> now logs the output folder instead of repeating the filename template <a href="https://github.com/Breakthrough/PySceneDetect/pull/595">#595</a></li>
 <li>[bugfix] <code>write_scene_list()</code> now starts the cut list row with <code>Timecode List:</code> when no <code>cut_list</code> is passed, as it does when one is passed and as <code>write_scene_list_html()</code> does</li>
 <li>[bugfix] Allow <code>-d</code>/<code>--downscale</code> on the CLI and <code>downscale</code> in the config file to be set to <code>0</code> for automatic downscaling</li>
+<li>[cli] <code>--help</code> now prints <code>[default: ...]</code> and <code>[setting: ...]</code> values as they are written in a config file (<code>merge</code>, <code>fcpx</code>, <code>yes</code>/<code>no</code> instead of <code>Mode.MERGE</code>, <code>FcpFormat.FCPX</code>, <code>True</code>/<code>on</code>), the <code>[backend-pyav]</code> <code>threading-mode</code> config value is now validated, and the <code>scenedetect.cfg</code> template matches the real config keys and defaults (<code>verbosity</code>, <code>downscale</code>, <code>default-detector</code>, <code>fade-bias</code>, <code>start-timecode</code>, OTIO <code>name</code>, and removed stale <code>filter-mode</code>/<code>luma-only</code> entries) <a href="https://github.com/Breakthrough/PySceneDetect/issues/589">#589</a></li>
 </ul>
               
             </div>
