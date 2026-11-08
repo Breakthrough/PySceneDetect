@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>PySceneDetect Documentation &#8212; PySceneDetect 0.7.3 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="_static/pyscenedetect.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/clipboard.min.js"></script>
+    <script src="_static/copybutton.js"></script>
+    <link rel="icon" href="_static/favicon.ico"/>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="scenedetect Command" href="cli.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="pyscenedetect-documentation">
+<h1>PySceneDetect Documentation<a class="headerlink" href="#pyscenedetect-documentation" title="Permalink to this heading">¶</a></h1>
+<p>PySceneDetect finds scene changes in video (fast cuts and fades) and can split the video, save
+frames, or export the scene list. Use it as the <code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> command, or as the
+<code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> Python package.</p>
+<p>Install with <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">scenedetect</span></code> (<code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">scenedetect-headless</span></code> on servers without
+GUI libraries), or download the Windows build from
+<a class="reference external" href="https://www.scenedetect.com/download/">scenedetect.com/download</a>. Splitting video requires
+<code class="docutils literal notranslate"><span class="pre">ffmpeg</span></code> (or <code class="docutils literal notranslate"><span class="pre">mkvmerge</span></code> with <code class="docutils literal notranslate"><span class="pre">split-video</span> <span class="pre">-m</span></code>); the Windows build includes <code class="docutils literal notranslate"><span class="pre">ffmpeg</span></code>.</p>
+<section id="quick-start">
+<h2>Quick Start<a class="headerlink" href="#quick-start" title="Permalink to this heading">¶</a></h2>
+<p>From the command line, find the scenes in <code class="docutils literal notranslate"><span class="pre">video.mp4</span></code> and write one clip per scene:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>scenedetect<span class="w"> </span>-i<span class="w"> </span>video.mp4<span class="w"> </span>split-video
+</pre></div>
+</div>
+<p>Add <code class="docutils literal notranslate"><span class="pre">list-scenes</span></code> for a CSV, <code class="docutils literal notranslate"><span class="pre">save-images</span></code> for still frames, or a <code class="docutils literal notranslate"><span class="pre">detect-*</span></code> command to
+pick the detector (default: <code class="docutils literal notranslate"><span class="pre">detect-adaptive</span></code>). See the <a class="reference internal" href="cli.html"><span class="doc">CLI reference</span></a>.</p>
+<p>The same from Python:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">scenedetect</span><span class="w"> </span><span class="kn">import</span> <span class="n">detect</span><span class="p">,</span> <span class="n">AdaptiveDetector</span><span class="p">,</span> <span class="n">split_video_ffmpeg</span>
+
+<span class="n">scenes</span> <span class="o">=</span> <span class="n">detect</span><span class="p">(</span><span class="s2">"video.mp4"</span><span class="p">,</span> <span class="n">AdaptiveDetector</span><span class="p">())</span>
+<span class="n">split_video_ffmpeg</span><span class="p">(</span><span class="s2">"video.mp4"</span><span class="p">,</span> <span class="n">scenes</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">scenes</span></code> is a list of <code class="docutils literal notranslate"><span class="pre">(start,</span> <span class="pre">end)</span></code> timecode pairs. More <a class="reference internal" href="examples.html"><span class="doc">Examples</span></a>, each done both
+ways, cover images, CSV output, detector tuning and more; see <a class="reference internal" href="api/scene_manager.html#scenedetect-scene-manager"><span class="std std-ref">SceneManager</span></a> for advanced workflows.</p>
+</section>
+<section id="reference">
+<h2>Reference<a class="headerlink" href="#reference" title="Permalink to this heading">¶</a></h2>
+<p>Most features exist on both sides. The <a class="reference internal" href="examples.html"><span class="doc">Examples</span></a> page shows each task done both ways,
+and every page links to its counterpart on the other side: each command to the function or
+class that does the same, and each detector to a table of its options, config file keys and
+constructor parameters.</p>
+<div class="surfaces docutils container">
+<div class="surface docutils container">
+<p class="rubric">CLI</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="cli.html"><span class="doc">scenedetect Command</span></a></p>
+<ul>
+<li><p><a class="reference internal" href="cli.html#cli-usage"><span class="std std-ref">Usage</span></a></p></li>
+<li><p><a class="reference internal" href="cli.html#cli-options"><span class="std std-ref">Options</span></a></p></li>
+<li><p><a class="reference internal" href="cli.html#cli-detectors"><span class="std std-ref">Detectors</span></a>: <a class="reference internal" href="cli.html#command-detect-adaptive"><span class="std std-ref">detect-adaptive</span></a>, <a class="reference internal" href="cli.html#command-detect-content"><span class="std std-ref">detect-content</span></a>, <a class="reference internal" href="cli.html#command-detect-hash"><span class="std std-ref">detect-hash</span></a>, <a class="reference internal" href="cli.html#command-detect-hist"><span class="std std-ref">detect-hist</span></a>, <a class="reference internal" href="cli.html#command-detect-threshold"><span class="std std-ref">detect-threshold</span></a></p></li>
+<li><p><a class="reference internal" href="cli.html#cli-commands"><span class="std std-ref">Commands</span></a>: <a class="reference internal" href="cli.html#command-list-scenes"><span class="std std-ref">list-scenes</span></a>, <a class="reference internal" href="cli.html#command-load-scenes"><span class="std std-ref">load-scenes</span></a>, <a class="reference internal" href="cli.html#command-save-edl"><span class="std std-ref">save-edl</span></a>, <a class="reference internal" href="cli.html#command-save-fcp"><span class="std std-ref">save-fcp</span></a>, <a class="reference internal" href="cli.html#command-save-html"><span class="std std-ref">save-html</span></a>, <a class="reference internal" href="cli.html#command-save-images"><span class="std std-ref">save-images</span></a>, <a class="reference internal" href="cli.html#command-save-keyframes"><span class="std std-ref">save-keyframes</span></a>, <a class="reference internal" href="cli.html#command-save-otio"><span class="std std-ref">save-otio</span></a>, <a class="reference internal" href="cli.html#command-save-qp"><span class="std std-ref">save-qp</span></a>, <a class="reference internal" href="cli.html#command-split-video"><span class="std std-ref">split-video</span></a>, <a class="reference internal" href="cli.html#command-time"><span class="std std-ref">time</span></a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="cli/config_file.html"><span class="doc">Configuration File</span></a></p></li>
+<li><p><a class="reference internal" href="cli/backends.html"><span class="doc">Video Backends</span></a></p></li>
+</ul>
+</div>
+<div class="surface docutils container">
+<p class="rubric">Python API</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="api.html"><span class="doc">scenedetect Package</span></a></p></li>
+<li><p><a class="reference internal" href="api/detectors.html"><span class="doc">Detectors</span></a>: <a class="reference internal" href="api/detectors.html#scenedetect.detectors.adaptive_detector.AdaptiveDetector" title="scenedetect.detectors.adaptive_detector.AdaptiveDetector"><code class="xref py py-class docutils literal notranslate"><span class="pre">AdaptiveDetector</span></code></a>,
+<a class="reference internal" href="api/detectors.html#scenedetect.detectors.content_detector.ContentDetector" title="scenedetect.detectors.content_detector.ContentDetector"><code class="xref py py-class docutils literal notranslate"><span class="pre">ContentDetector</span></code></a>,
+<a class="reference internal" href="api/detectors.html#scenedetect.detectors.hash_detector.HashDetector" title="scenedetect.detectors.hash_detector.HashDetector"><code class="xref py py-class docutils literal notranslate"><span class="pre">HashDetector</span></code></a>,
+<a class="reference internal" href="api/detectors.html#scenedetect.detectors.histogram_detector.HistogramDetector" title="scenedetect.detectors.histogram_detector.HistogramDetector"><code class="xref py py-class docutils literal notranslate"><span class="pre">HistogramDetector</span></code></a>,
+<a class="reference internal" href="api/detectors.html#scenedetect.detectors.threshold_detector.ThresholdDetector" title="scenedetect.detectors.threshold_detector.ThresholdDetector"><code class="xref py py-class docutils literal notranslate"><span class="pre">ThresholdDetector</span></code></a></p></li>
+<li><p><a class="reference internal" href="api/output.html"><span class="doc">Output</span></a></p></li>
+<li><p><a class="reference internal" href="api/backends.html"><span class="doc">Video Backends</span></a></p></li>
+<li><p><a class="reference internal" href="api/common.html"><span class="doc">Common</span></a></p></li>
+<li><p><a class="reference internal" href="api/scene_manager.html"><span class="doc">Scene Manager</span></a></p></li>
+<li><p><a class="reference internal" href="api/detector.html"><span class="doc">Detector Interface</span></a></p></li>
+<li><p><a class="reference internal" href="api/video_stream.html"><span class="doc">Stream Interface</span></a></p></li>
+<li><p><a class="reference internal" href="api/stats_manager.html"><span class="doc">Stats Manager</span></a></p></li>
+<li><p><a class="reference internal" href="api/platform.html"><span class="doc">Platform &amp; Logging</span></a></p></li>
+<li><p><a class="reference internal" href="api/migration_guide.html"><span class="doc">Migration Guide (v0.7)</span></a></p></li>
+</ul>
+</div>
+</div>
+<div class="toctree-wrapper compound" id="clitoc">
+</div>
+<div class="toctree-wrapper compound" id="apitoc">
+</div>
+<div class="toctree-wrapper compound" id="reftoc">
+</div>
+<p>Found a problem in the docs? Raise an issue on
+<a class="reference external" href="https://github.com/Breakthrough/PySceneDetect/issues">the PySceneDetect issue tracker</a>.
+Development happens on Github at
+<a class="reference external" href="https://github.com/Breakthrough/PySceneDetect">github.com/Breakthrough/PySceneDetect</a>.</p>
+</section>
+<section id="indices-and-tables">
+<h2>Indices and Tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</section>
+</section>
+
+
+          </div>
+              <div class="related bottom">
+                &nbsp;
+  <nav id="rellinks">
+    <ul>
+        <li>
+          <a href="cli.html" title="Next document"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> Command</a>
+          &rarr;
+        </li>
+    </ul>
+  </nav>
+              </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="#">
+    <img class="logo" src="_static/pyscenedetect_logo.png" alt="Logo" />
+    
+  </a>
+</p>
+
+
+
+<p class="blurb">Version: [0.7.3]</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=Breakthrough&repo=PySceneDetect&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+<nav class="section-switch" aria-label="Documentation section">
+  <a href="cli.html">CLI</a><span class="sep" aria-hidden="true">|</span>
+  <a href="api.html">Python API</a>
+  <span class="section-links">
+  <a href="examples.html">Examples</a>
+  </span>
+</nav>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="cli.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> Command</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="cli.html#usage">Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cli.html#options">Options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cli.html#detectors">Detectors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cli.html#commands">Commands</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="cli/config_file.html">Configuration File</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="cli/config_file.html#sample-file">Sample File</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cli/config_file.html#sections">Sections</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="cli/backends.html">Video Backends</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="cli/backends.html#opencv">OpenCV</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cli/backends.html#pyav">PyAV</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cli/backends.html#moviepy">MoviePy</a></li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/detectors.html">Detectors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/output.html">Output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/backends.html">Video Backends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/common.html">Common</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/scene_manager.html">Scene Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/detector.html">Detector Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/video_stream.html">Stream Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/stats_manager.html">Stats Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/platform.html">Platform &amp; Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/migration_guide.html">Migration Guide (v0.7)</a></li>
+</ul>
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2014, Brandon Castellano.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.0.1</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="_sources/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
