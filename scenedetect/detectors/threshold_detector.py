@@ -47,7 +47,7 @@ class ThresholdDetector(SceneDetector):
 
     def __init__(
         self,
-        threshold: float = 12,
+        threshold: float = 12.0,
         min_scene_len: TimecodeLike = 15,
         fade_bias: float = 0.0,
         add_final_scene: bool = False,
