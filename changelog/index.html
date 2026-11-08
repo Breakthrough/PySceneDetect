@@ -316,6 +316,7 @@
 <h2 id="pyscenedetect-07">PySceneDetect 0.7</h2>
 <h3 id="pyscenedetect-073-november-8-2026">PySceneDetect 0.7.3 (November 8, 2026)</h3>
 <p>PySceneDetect 0.7.3 adds scene-length based image export to <code>save-images</code>, a <code>close()</code> method and context manager support for <code>VideoStream</code>, and fixes several timing bugs: PyAV frame timing for videos without presentation timestamps, <code>save-edl</code> timecode drift at NTSC frame rates, OTIO source durations, and the last scene of variable framerate videos. Windows distributions ship updated dependencies.</p>
+<p>Thanks to @nikhiljangid120, @sungbin1015, @qwist1233-cpu, @vishal-tambi, @Rober1208, @ChandraChaan and @MuhammadBilalKhan267 for their contributions to this release.</p>
 <h4 id="cli-changes">CLI Changes</h4>
 <ul>
 <li>[feature] Add <code>-i</code>/<code>--interval</code> to <code>save-images</code> to save images based on the length of each scene: one image per <code>DURATION</code>, with <code>--min-images</code>/<code>--max-images</code> to limit the number of images per scene, e.g. <code>save-images -i 2s --max-images 10</code> (<code>interval</code>/<code>min-images</code>/<code>max-images</code> in the config file, and <code>interval</code>/<code>min_images</code>/<code>max_images</code> in <code>save_images()</code>) <a href="https://github.com/Breakthrough/PySceneDetect/issues/280">#280</a></li>
