@@ -30,10 +30,33 @@ from scenedetect.common import (
     framerate_to_fraction,
 )
 from scenedetect.platform import StrPath, get_file_name
-from scenedetect.video_stream import FrameRateUnavailable, VideoOpenFailure, VideoStream
+from scenedetect.video_stream import (
+    FrameRateUnavailable,
+    SeekError,
+    VideoOpenFailure,
+    VideoStream,
+)
 
 logger = getLogger("pyscenedetect")
 VALID_THREAD_MODES = ["NONE", "SLICE", "FRAME", "AUTO"]
+
+# FFmpeg options passed to `av.open()`. By default, PyAV enables `AVFMT_FLAG_GENPTS` (`+genpts`) on
+# every input container. For containers that only store decode timestamps (e.g. AVI), `+genpts`
+# synthesizes missing presentation timestamps (PTS) from packet decode timestamps (DTS), which are
+# in decode order rather than presentation order. When the video contains B-frames, the decoder
+# reorders frames into presentation order while keeping those decode-order PTS values attached,
+# causing `frame.pts` (and `best_effort_timestamp` on the initial frames) to jump backwards and
+# forwards. Disabling `genpts` leaves `frame.pts` as `None` on DTS-only streams so we can fall back
+# to `frame.dts` cleanly. See https://scenedetect.com/issues/590 and
+# https://github.com/PyAV-Org/PyAV/pull/2478.
+_CONTAINER_OPTIONS = {"fflags": "-genpts"}
+
+
+MAX_SEEK_PROBE_FRAMES = 32
+"""Number of frames `VideoStreamAv.seek()` decodes looking for a timestamp before concluding the
+stream has none and cannot be seeked (e.g. raw Annex-B H.264). This also caps how many leading
+frames without timestamps a file may have when `seek()` is the first call on the stream: a file
+whose first timestamp is on frame 40 can be read sequentially, but not seeked before reading."""
 
 MAX_CONSECUTIVE_DECODE_FAILURES = 8
 """Number of consecutive frame decode failures after which `VideoStreamAv.read()` gives up.
@@ -117,6 +140,19 @@ class VideoStreamAv(VideoStream):
         self._reopened = True
         self._decode_failures = 0
         self._warning_displayed = False
+        # Presentation time of `_frame` relative to the start of the stream. None until the first
+        # `read()` (and after `close()`/`reset()`).
+        self._timecode: Timecode | None = None
+        # Timestamp (and timebase) subtracted from every frame timestamp such that that frame 1 is
+        # at time 0. Decided based on the the first decoded frame with a valid timestamp. Only set
+        # once, even after `reset()` or `seek()`.
+        self._offset: int | None = None
+        self._offset_time_base: Fraction | None = None
+        # Ensures we only log a warning once per pass (until `reset()`) if positions go backwards.
+        self._warned_non_monotonic = False
+        # 1-based count of frames decoded in the current stream pass, used to estimate the position
+        # of frames without timestamps and for diagnostic logging.
+        self._frames_decoded = 0
         # True if `_io` was opened by this object (from a path) and must be closed in `close()`.
         # Set before anything below can raise so a partially constructed object is safe to finalize.
         self._owns_io = False
@@ -128,6 +164,7 @@ class VideoStreamAv(VideoStream):
                 raise ValueError(
                     f"Invalid threading mode! Must be one of: {VALID_THREAD_MODES}"
                 ) from None
+        self._threading_mode = threading_mode
 
         if not suppress_output:
             logger.debug("Restoring default ffmpeg log callbacks.")
@@ -144,11 +181,11 @@ class VideoStreamAv(VideoStream):
             else:
                 self._io = path_or_io
 
-            self._container: av.container.InputContainer = av.open(self._io)  # type: ignore[attr-defined]
-            if threading_mode is not None:
-                self._video_stream.thread_type = threading_mode
+            self._container: av.container.InputContainer = self._open_container()  # type: ignore[attr-defined]
+            if self._threading_mode is not None:
+                self._video_stream.thread_type = self._threading_mode
                 self._reopened = False
-                logger.debug("Threading mode set: %s", threading_mode)
+                logger.debug("Threading mode set: %s", self._threading_mode)
         except OSError:
             raise
         except Exception as ex:
@@ -211,6 +248,7 @@ class VideoStreamAv(VideoStream):
         # retried. The last decoded frame is dropped, since `position` is undefined once closed.
         self._closed = True
         self._frame = None
+        self._timecode = None
 
     #
     # VideoStream Methods/Properties
@@ -257,18 +295,17 @@ class VideoStreamAv(VideoStream):
 
         This can be interpreted as presentation time stamp, thus frame 1 corresponds
         to the presentation time 0.  Returns 0 even if `frame_number` is 1."""
-        if self._frame is None or self._frame.pts is None or not self._frame.time_base:
+        if self._timecode is None:
             return self.base_timecode
-        timecode = Timecode(pts=self._normalized_pts(), time_base=self._frame_time_base)
-        return FrameTimecode(timecode=timecode, fps=self.frame_rate)
+        return FrameTimecode(timecode=self._timecode, fps=self.frame_rate)
 
     @property
     def position_ms(self) -> float:
         """Current position within stream as a float of the presentation time in
         milliseconds. The first frame has a PTS of 0."""
-        if self._frame is None or self._frame.pts is None or not self._frame.time_base:
+        if self._timecode is None:
             return 0.0
-        return float(self._normalized_pts() * self._frame_time_base) * 1000.0
+        return float(self._timecode.seconds) * 1000.0
 
     @property
     def frame_number(self) -> int:
@@ -276,10 +313,9 @@ class VideoStreamAv(VideoStream):
 
         Will return 0 until the first frame is `read`. For VFR video this is an approximation
         derived from PTS * framerate; use `position` for accurate PTS-based timing."""
-        if self._frame is None or self._frame.pts is None or not self._frame.time_base:
+        if self._timecode is None:
             return 0
-        seconds = float(self._normalized_pts() * self._frame_time_base)
-        return round(seconds * float(self.frame_rate)) + 1
+        return round(float(self._timecode.seconds) * float(self.frame_rate)) + 1
 
     @property
     def rate(self) -> Fraction | None:
@@ -316,13 +352,17 @@ class VideoStreamAv(VideoStream):
         seek(0) followed by read(). If we want to seek to the 5th frame, we call seek(4) followed
         by read(), at which point frame_number will be 5.
 
-        May not be supported on all input codecs (see `is_seekable`).
+        May not be supported on all input codecs (see `is_seekable`). Elementary streams usually
+        cannot be seeked, and may raise `SeekError`, after which the stream position is undefined
+        until `reset()` is called.
 
         Arguments:
             target: Target position in video stream to seek to.
                 If float, interpreted as time in seconds.
                 If int, interpreted as frame number.
         Raises:
+            SeekError: Stream does not support seeking, target cannot be seeked to, or the video
+                could not be re-opened to read forward from the start.
             ValueError: `target` is not a valid value (i.e. it is negative), or the stream is
                 closed.
         """
@@ -331,22 +371,91 @@ class VideoStreamAv(VideoStream):
             target = FrameTimecode(target, self.frame_rate)
         if target < 0:
             raise ValueError("Target cannot be negative!")
+        if not self.is_seekable:
+            raise SeekError("Stream is not seekable.")
         beginning = target == 0
 
         target = self.base_timecode + target
         if target >= 1:
             target = target - 1
-        target_pts = (self._video_stream.start_time or 0) + int(
-            (self.base_timecode + target).seconds / _to_fraction(self._video_stream.time_base)
-        )
+        # Seeking to the start always re-opens the stream. The demuxer can only seek to keyframes
+        # that carry a timestamp, so if the first one does not (as in some MPEG-TS files), seeking
+        # the container to time 0 lands on a later keyframe instead.
+        if beginning:
+            self._reset_for_seek()
+            return
+        # The timestamp offset is anchored at the start of the stream (see `_update_timecode()`),
+        # so it must only ever be decided from frames decoded in order from the start: a seek can
+        # land on a later keyframe. While it is unknown, decode frames until one carries a
+        # timestamp. Streams without any timestamps (e.g. raw H.264) cannot be seeked, so give up
+        # after `MAX_SEEK_PROBE_FRAMES` frames. As with any failed seek, the stream position is
+        # then undefined until `reset()` is called.
+        stream_time_base = self._video_stream.time_base
+        if not stream_time_base:
+            raise SeekError("Unable to seek in stream: stream time_base is unset.")
+        if self._offset is None:
+            while self._offset is None and self._frames_decoded < MAX_SEEK_PROBE_FRAMES:
+                if self.read(decode=False) is False:
+                    break
+            if self._offset is None:
+                raise SeekError("Unable to seek in stream without timestamps.")
+        # Positions are relative to `_offset`, so the seek target must be too. For streams whose
+        # first frame has a PTS, this is the stream's `start_time`.
+        stream_time_base = _to_fraction(stream_time_base)
+        assert self._offset is not None and self._offset_time_base is not None
+        offset = self._offset
+        if offset and self._offset_time_base != stream_time_base:
+            offset = int(offset * self._offset_time_base / stream_time_base)
+        target_pts = offset + int((self.base_timecode + target).seconds / stream_time_base)
+        # TODO(https://scenedetect.com/issues/590): For some containers (e.g. MPEG-TS) whose
+        # keyframes lack timestamps, the demuxer can land past the target, or somewhere the
+        # position cannot be established. Both fall back to reading from the start of the stream
+        # (see below), which is correct but slow for distant targets; we could seek to an earlier
+        # keyframe instead.
+        try:
+            self._container.seek(target_pts, stream=self._video_stream)
+        except av.error.FFmpegError as ex:  # type: ignore[attr-defined]
+            raise SeekError(f"Unable to seek in stream: {ex}") from ex
         self._frame = None
         self._decoder = None
-        self._container.seek(target_pts, stream=self._video_stream)
-        if not beginning:
-            self.read(decode=False)
-        while self.position < target:
+        self._timecode = None
+        # Seed `_frames_decoded` with the target frame before walking forward from the keyframe,
+        # then sync it to `self.frame_number` once the walk completes.
+        self._frames_decoded = target.frame_num
+        # The demuxer normally lands on a keyframe at or before `target_pts`, but the frames
+        # decoded from there may lack timestamps, in which case their position is unknown.
+        # Read until a frame carries one to establish where we landed, leaving the position
+        # unset (rather than estimated) until then so the walk below cannot mistake an
+        # estimate for having reached the target. Frames consumed while probing cannot be
+        # given back, so if no timestamp is found within `MAX_SEEK_PROBE_FRAMES` frames, or the
+        # first one found is already past the target, read forward from the start instead.
+        # That gives the same result as a sequential read, and only happens on malformed
+        # inputs. If the end of the stream is reached before any frame is decoded, there is
+        # nothing to establish.
+        probe_limit = self._frames_decoded + MAX_SEEK_PROBE_FRAMES
+        landed = None
+        while self.read(decode=False) is not False:
+            if self._frame_has_timestamp():
+                landed = self.position
+                break
+            if self._frames_decoded >= probe_limit:
+                break
+            self._timecode = None
+        if self._frame is not None and (landed is None or landed > target):
+            logger.debug(
+                "Seek landed at %s for target %s, reading from the start instead.",
+                "unknown position" if landed is None else landed,
+                target,
+            )
+            self._reset_for_seek()
+        # Walk forward until the frame before the target has been read. `position` is 0 both
+        # before any frame is read and on the first frame, so after re-opening the stream a frame
+        # must be read before it can be compared, otherwise `seek(1)` would leave the next `read()`
+        # on the first frame.
+        while self._timecode is None or self.position < target:
             if self.read(decode=False) is False:
                 break
+        self._frames_decoded = self.frame_number
 
     def reset(self):
         """Close and re-open the VideoStream (should be equivalent to calling `seek(0)`)."""
@@ -354,8 +463,14 @@ class VideoStreamAv(VideoStream):
         self._container.close()
         self._frame = None
         self._decoder = None
+        self._timecode = None
+        self._frames_decoded = 0
+        self._warned_non_monotonic = False
         try:
-            self._container = av.open(self._path if self._path else self._io)
+            self._container = self._open_container(rewind=True)
+            if self._threading_mode is not None:
+                self._video_stream.thread_type = self._threading_mode
+                self._reopened = False
         except Exception as ex:
             raise VideoOpenFailure() from ex
 
@@ -363,16 +478,16 @@ class VideoStreamAv(VideoStream):
         self._check_open()
         consecutive_failures = 0
         while True:
-            # Reuse a persistent decoder generator so the codec's internal frame buffer (used for
-            # B-frame reordering) is never flushed prematurely. Creating a new generator each call
-            # caused the last buffered frame to be lost at EOF.
+            # Reuse the same decode generator for the lifetime of the container. Creating a new
+            # generator on each call would flush the codec's internal buffer at EOF and drop the
+            # last buffered frame.
             if self._decoder is None:
                 self._decoder = self._container.decode(video=0)
             try:
                 last_frame = self._frame
                 assert self._decoder is not None
                 self._frame = next(self._decoder)
-            # NOTE: EOFError subclasses FFmpegError, so this clause must come first.
+            # EOFError subclasses FFmpegError, so this clause must come first.
             except av.error.EOFError:  # type: ignore[attr-defined]
                 self._frame = last_frame
                 if self._handle_eof():
@@ -381,12 +496,12 @@ class VideoStreamAv(VideoStream):
             except StopIteration:
                 return False
             except av.error.FFmpegError as ex:  # type: ignore[attr-defined]
-                # `next()` raised before assignment, so `self._frame` is still the last good
-                # frame and position/frame_number are unaffected by the skipped packet.
+                # `next()` raised before assignment, so `self._frame` and `self._timecode` still
+                # reflect the last valid frame.
                 self._decode_failures += 1
                 consecutive_failures += 1
-                # The decoder generator is closed once an exception propagates through it;
-                # recreating it (next loop iteration) resumes demuxing after the bad packet.
+                # A generator cannot be resumed once an exception propagates out of it; recreating
+                # it on the next iteration continues demuxing after the corrupt packet.
                 self._decoder = None
                 if consecutive_failures >= MAX_CONSECUTIVE_DECODE_FAILURES:
                     logger.error(
@@ -401,6 +516,8 @@ class VideoStreamAv(VideoStream):
                     logger.warning("Failed to decode some frames, results may be inaccurate.")
                 continue
             assert self._frame is not None
+            self._frames_decoded += 1
+            self._update_timecode()
             return self._frame.to_ndarray(format="bgr24") if decode else True
 
     #
@@ -423,24 +540,131 @@ class VideoStreamAv(VideoStream):
         assert self._frame is not None and self._frame.time_base
         return _to_fraction(self._frame.time_base)
 
-    def _normalized_pts(self) -> int:
-        """PTS of the current frame relative to the start of the stream. Some files have a
-        nonzero stream start_time (e.g. from edit lists); other backends report the first
-        frame's presentation time as 0, so we must do the same."""
-        assert self._frame is not None and self._frame.pts is not None
-        start_time = self._video_stream.start_time or 0
-        if start_time and self._video_stream.time_base != self._frame.time_base:
-            start_time = int(
-                start_time * _to_fraction(self._video_stream.time_base) / self._frame_time_base
+    def _open_container(self, rewind: bool = False) -> av.container.InputContainer:  # type: ignore[attr-defined]
+        """Open `_io` as a PyAV container with `_CONTAINER_OPTIONS`.
+
+        All container opens (initial open, `reset()`, and `_handle_eof()`) must go through this
+        helper so container flags like `-genpts` stay applied after re-opening.
+
+        Arguments:
+            rewind: Seek `_io` back to byte 0 before opening (used when re-opening a stream).
+        """
+        if rewind and self._io.seekable():
+            self._io.seek(0)
+        return av.open(self._io, container_options=_CONTAINER_OPTIONS)  # type: ignore[attr-defined]
+
+    def _reset_for_seek(self):
+        """Call `reset()` on behalf of `seek()`, raising `SeekError` instead of `VideoOpenFailure`
+        if the video cannot be re-opened, so `seek()` only raises the exceptions it documents."""
+        try:
+            self.reset()
+        except VideoOpenFailure as ex:
+            raise SeekError("Unable to seek in stream: failed to re-open video.") from ex
+
+    def _frame_has_timestamp(self) -> bool:
+        """True if `_frame` carries a usable timestamp (a PTS or DTS, and a time base)."""
+        frame = self._frame
+        return (
+            frame is not None
+            and bool(frame.time_base)
+            and (frame.pts is not None or frame.dts is not None)
+        )
+
+    def _update_timecode(self):
+        """Update `_timecode` with the presentation time of `_frame` relative to the first frame.
+
+        Each frame is placed at its PTS, falling back to its DTS when the PTS is missing. This is
+        the same rule as OpenCV's FFmpeg backend. With `genpts` off, FFmpeg's
+        `best_effort_timestamp` gives the same result on streams whose PTS are monotonic; it
+        additionally switches to DTS once PTS has gone backwards more often than DTS. A frame with
+        neither is placed one nominal frame period after the previous frame (see
+        `_estimated_timecode()`). A warning is logged (once per pass) if a frame is placed before
+        the previous frame's position, estimated or not.
+
+        `_offset` is decided once, from the first frame that carries a timestamp. When that is
+        frame 1 and it has a PTS, the stream `start_time` is used so files with edit lists start
+        at time 0 like the other backends. Otherwise the offset anchors frame 1 at time 0 assuming
+        the frames before it were spaced at the nominal frame rate. This covers DTS-only streams
+        (e.g. AVI), whose first DTS is already past the stream start by the decoder's B-frame
+        reordering delay, and streams whose first frames carry no timestamps at all.
+        """
+        frame = self._frame
+        assert frame is not None
+        timestamp = frame.pts if frame.pts is not None else frame.dts
+        if timestamp is None or not frame.time_base:
+            self._timecode = self._estimated_timecode()
+            return
+        time_base = self._frame_time_base
+        if self._offset is None:
+            stream_time_base = self._video_stream.time_base
+            if self._frames_decoded == 1 and frame.pts is not None and stream_time_base:
+                self._offset = self._video_stream.start_time or 0
+                self._offset_time_base = _to_fraction(stream_time_base)
+            else:
+                self._offset = timestamp - round(
+                    (self._frames_decoded - 1) / (self.frame_rate * time_base)
+                )
+                self._offset_time_base = time_base
+                logger.debug(
+                    "First timestamp found on frame %d, using offset %d (time base %s).",
+                    self._frames_decoded,
+                    self._offset,
+                    time_base,
+                )
+        offset = self._offset
+        if offset and self._offset_time_base != time_base:
+            assert self._offset_time_base is not None
+            offset = int(offset * self._offset_time_base / time_base)
+        timecode = Timecode(pts=timestamp - offset, time_base=time_base)
+        # Compare against the last reported position, including estimated ones, since that is
+        # what callers see go backwards.
+        previous = self._timecode
+        if (
+            previous is not None
+            and timecode.seconds < previous.seconds
+            and not self._warned_non_monotonic
+        ):
+            # With `-genpts` set on the container, non-monotonic timestamps indicate either a
+            # genuinely malformed input or unexpected demuxer/decoder behavior.
+            self._warned_non_monotonic = True
+            logger.warning(
+                "Timestamps went backwards at frame %d (%.3fs -> %.3fs, PyAV %s); results "
+                "may be inaccurate. See https://scenedetect.com/issues/590",
+                self._frames_decoded,
+                float(previous.seconds),
+                float(timecode.seconds),
+                av.__version__,
             )
-        return self._frame.pts - start_time
+        self._timecode = timecode
+
+    def _estimated_timecode(self) -> Timecode:
+        """The position we think the next frame should be at. Use only if we get a frame without a
+        timestamp. Calculated as one (nominal) frame period from the previous frame's position, or
+        as the frame count in nominal frame periods if there is no previous position."""
+        previous = self._timecode
+        if previous is None:
+            return Timecode(pts=max(self._frames_decoded - 1, 0), time_base=1 / self.frame_rate)
+        return Timecode(
+            pts=previous.pts + self._frame_period(previous.time_base), time_base=previous.time_base
+        )
+
+    def _frame_period(self, time_base: Fraction) -> int:
+        """Duration of one frame at the nominal frame rate in `time_base` ticks (at least 1)."""
+        return max(round(1 / (self.frame_rate * time_base)), 1)
 
     def _get_duration(self) -> int:
-        """Get video duration as number of frames based on the video and set framerate."""
-        # See https://pyav.org/docs/develop/api/time.html for details on how ffmpeg/PyAV
-        # handle time calculations internally and which time base to use.
+        """Get video duration as number of frames based on the video and set framerate.
+
+        See https://pyav.org/docs/develop/api/time.html for details on how ffmpeg/PyAV
+        handle time calculations internally and which time base to use.
+        """
         assert self.frame_rate is not None, "Frame rate must be set before calling _get_duration!"
         # See if we can obtain the number of frames directly from the stream itself.
+        # TODO(https://scenedetect.com/issues/590): Some AVI files remuxed by ffmpeg set the stream
+        # rate to a high tick rate (e.g. 600/1), causing `stream.frames` to report tick count
+        # rather than actual frame count (e.g. 12012 instead of 480). OpenCV reports the same value
+        # via CAP_PROP_FRAME_COUNT, but `duration_sec * frame_rate` would be more accurate when
+        # `stream.frames` disagrees with the stream duration and codec frame rate.
         if self._video_stream.frames > 0:
             return self._video_stream.frames
         # Calculate based on the reported container duration.
@@ -473,18 +697,27 @@ class VideoStreamAv(VideoStream):
             return False
         self._reopened = True
         # Don't re-open the video if we can't seek or aren't in AUTO/FRAME thread_type mode.
-        if not self.is_seekable or self._video_stream.thread_type not in ("AUTO", "FRAME"):
+        thread_type = getattr(
+            self._video_stream.thread_type, "name", self._video_stream.thread_type
+        )
+        if not self.is_seekable or self._offset is None or thread_type not in ("AUTO", "FRAME"):
             return False
-        last_pos_secs = self.position.seconds
+        last_pos = self.position if self._timecode is not None else None
         orig_pos = self._io.tell()
         try:
-            self._io.seek(0)
-            container = av.open(self._io)
+            container = self._open_container(rewind=True)
         except:
             self._io.seek(orig_pos)
             raise
         self._container.close()
         self._container = container
         self._decoder = None
-        self.seek(last_pos_secs)
+        if last_pos is not None:
+            try:
+                # `seek(target)` positions the stream one frame before `target` so the next `read()`
+                # returns `target`. Pass `last_pos + 1` so the reopened stream lands on `last_pos`
+                # and the caller's subsequent `read()` advances to the next frame.
+                self.seek(last_pos + 1)
+            except SeekError:
+                return False
         return True

@@ -131,7 +131,8 @@ pointer (e.g. if seeking to 0, the next frame decoded will be the first frame of
 to 0-based by subtracting one. For example, if we want to seek to the first frame, we call
 seek(0) followed by read(). If we want to seek to the 5th frame, we call seek(4) followed
 by read(), at which point frame_number will be 5.</p>
-<p>May not be supported on all backend types or inputs (e.g. cameras).</p>
+<p>May not be supported on all backend types or inputs (e.g. cameras). If <cite>SeekError</cite> is
+raised, the stream position is undefined. <cite>reset()</cite> can be called to restore the stream.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>target</strong> (<em>int</em><em> | </em><em>float</em><em> | </em><em>str</em><em> | </em><a class="reference internal" href="common.html#scenedetect.common.Timecode" title="scenedetect.common.Timecode"><em>Timecode</em></a><em> | </em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a>) – Target position in video stream to seek to.
