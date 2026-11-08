@@ -1107,6 +1107,16 @@
 <li>[bugfix] Allow <code>-d</code>/<code>--downscale</code> on the CLI and <code>downscale</code> in the config file to be set to <code>0</code> for automatic downscaling</li>
 <li>[cli] <code>--help</code> now prints <code>[default: ...]</code> and <code>[setting: ...]</code> values as they are written in a config file (<code>merge</code>, <code>fcpx</code>, <code>yes</code>/<code>no</code> instead of <code>Mode.MERGE</code>, <code>FcpFormat.FCPX</code>, <code>True</code>/<code>on</code>), the <code>[backend-pyav]</code> <code>threading-mode</code> config value is now validated, and the <code>scenedetect.cfg</code> template matches the real config keys and defaults (<code>verbosity</code>, <code>downscale</code>, <code>default-detector</code>, <code>fade-bias</code>, <code>start-timecode</code>, OTIO <code>name</code>, and removed stale <code>filter-mode</code>/<code>luma-only</code> entries) <a href="https://github.com/Breakthrough/PySceneDetect/issues/589">#589</a></li>
 <li>[bugfix] <code>save-edl</code> timecodes now count frames at the nominal rate (24, 30, or 60 per timecode second for 23.976, 29.97, or 59.94 fps) as required for non-drop-frame timecode, instead of being derived from wall-clock seconds. Previously the EDL drifted by roughly 3.6 seconds per hour at these rates. <code>--start-timecode</code> is parsed the same way, so <code>-s 01:00:00:00</code> now starts the first event at <code>01:00:00:00</code>. Non-standard rates (e.g. the average rate of a VFR video) are unchanged. Thanks to @Cassian433 for the detailed report <a href="https://github.com/Breakthrough/PySceneDetect/issues/593">#593</a></li>
+<li>[bugfix] Fix <code>pyav</code> backend timing for videos that lack presentation timestamps (e.g. AVI files, elementary H.264 streams), which could lead to frame positions being out of order or stuck at zero and shifting cuts by one or more frames (<a href="https://github.com/Breakthrough/PySceneDetect/issues/590">#590</a>, <a href="https://github.com/PyAV-Org/PyAV/discussions/933">PyAV#933</a>, <a href="https://github.com/PyAV-Org/PyAV/pull/2478">PyAV#2478</a>)<ul>
+<li>Videos are now opened with FFmpeg's <code>genpts</code> flag disabled.</li>
+<li>Each frame will use the exact presentation timestamp, but if it is unavailable we now fall back to the decode timestamp to be consistent with the <code>opencv</code> backend.</li>
+<li>A frame with neither timestamp is placed one frame period after the previous frame (as the <code>moviepy</code> backend does for every frame).</li>
+<li>A one-time warning is emitted if timestamps are still detected going backwards.</li>
+<li><code>VideoStreamAv.seek()</code> now raises <code>SeekError</code> on streams that cannot be seeked (e.g. elementary streams without timestamps) instead of a backend-specific exception.</li>
+<li><code>VideoStreamAv.seek()</code> now falls back to reading from the start when the demuxer lands on a frame without a timestamp past the target, and <code>seek(0)</code> always re-opens the video, fixing wrong positions after seeking in some MPEG-TS files.</li>
+</ul>
+</li>
+<li>[api] <code>VideoStream.seek()</code> now documents that the stream position is undefined after a <code>SeekError</code> is raised, and <code>reset()</code> must be called before reading further</li>
 </ul>
               
             </div>
