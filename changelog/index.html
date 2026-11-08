@@ -1146,6 +1146,9 @@
 <hr />
 <h1 id="development">Development</h1>
 <h2 id="pyscenedetect-08-tbd">PySceneDetect 0.8 (TBD)</h2>
+<ul>
+<li>[general] The root <code>pyproject.toml</code> is now <code>scenedetect</code> again (it had a development-only <code>scenedetect-core</code> name since 0.7.1). <code>pip install -e .</code> now installs the same distribution as PyPI. The <code>[opencv]</code> and <code>[opencv-headless]</code> extras of the development config were removed because <code>opencv-python</code> is now a declared dependency <a href="https://github.com/Breakthrough/PySceneDetect/issues/558">#558</a></li>
+</ul>
               
             </div>
           </div><footer>
