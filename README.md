@@ -147,9 +147,9 @@ The tests use videos from the `resources` branch. Fetch them into `tests/resourc
 
 Then run `pytest`. The full test suite also needs `ffmpeg` and `mkvmerge`. If `ffmpeg` is not on your `PATH`, the copy bundled with `imageio-ffmpeg` (installed by `[dev]`) is used instead. Install `mkvmerge` separately, otherwise its test is skipped.
 
-A development install does not include the `scenedetect` command, so use `python -m scenedetect` instead:
+The editable install provides the `scenedetect` command (`python -m scenedetect` also works):
 
-    python -m scenedetect -i video.mp4 detect-content list-scenes
+    scenedetect -i video.mp4 detect-content list-scenes
 
 ## Code Signing
 

@@ -7,9 +7,9 @@
 #
 # Copyright (C) 2014 Brandon Castellano <http://www.bcastell.com>.
 #
-# pyproject.toml for the `scenedetect` package: the same code as scenedetect-core,
-# but bundling the opencv-python (GUI-capable) OpenCV variant, the CLI dependencies,
-# and the `scenedetect` console script. packaging/build_all.py temporarily swaps
+# pyproject.toml for the published `scenedetect` package: the root pyproject.toml
+# without its development extras, bundling the opencv-python (GUI-capable) OpenCV
+# variant, the CLI dependencies and the console script. packaging/build_all.py swaps
 # this file into the repo root and builds from there, so the code, readme, and
 # dynamic version are shared with the other variants.
 #

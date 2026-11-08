@@ -83,8 +83,6 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          # The dev extra supplies the CLI deps (click/opencv/tqdm) plus av and moviepy;
-          # a bare `pip install .` is now scenedetect-core with numpy only.
           pip install .[dev]
           pip install opentimelineio pillow psutil pytest
       - name: Run release tests

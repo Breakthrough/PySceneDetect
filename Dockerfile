@@ -27,8 +27,8 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 # Install the scenedetect-headless variant: full program (CLI + opencv-python-headless)
-# with the optional media backends. The repo root pyproject builds scenedetect-core
-# (library only, no CLI), so swap in the headless variant pyproject first.
+# with the optional media backends. The repo root pyproject is the `scenedetect`
+# variant (opencv-python), so swap in the headless variant pyproject first.
 # pyav is highly recommended for faster/more robust video decodes
 # moviepy provides an alternative video splitting backend
 RUN --mount=type=cache,target=/root/.cache/pip \

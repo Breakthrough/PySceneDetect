@@ -86,7 +86,7 @@ jobs:
           python -m scenedetect version
           python -m scenedetect -i tests/resources/testvideo.mp4 -b opencv time --end 2s
           python -m scenedetect -i tests/resources/testvideo.mp4 -b pyav time --end 2s
-          python -m pip uninstall -y scenedetect-core
+          python -m pip uninstall -y scenedetect
 
       - name: Build Package
         shell: bash
