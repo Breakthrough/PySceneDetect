@@ -262,7 +262,8 @@ class VideoStream(ABC):
         seek(0) followed by read(). If we want to seek to the 5th frame, we call seek(4) followed
         by read(), at which point frame_number will be 5.
 
-        May not be supported on all backend types or inputs (e.g. cameras).
+        May not be supported on all backend types or inputs (e.g. cameras). If `SeekError` is
+        raised, the stream position is undefined. `reset()` can be called to restore the stream.
 
         Arguments:
             target: Target position in video stream to seek to.
