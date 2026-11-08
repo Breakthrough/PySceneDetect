@@ -4,7 +4,10 @@
 ## PySceneDetect 0.7
 
 ### PySceneDetect 0.7.3 (November 8, 2026)
+
 PySceneDetect 0.7.3 adds scene-length based image export to `save-images`, a `close()` method and context manager support for `VideoStream`, and fixes several timing bugs: PyAV frame timing for videos without presentation timestamps, `save-edl` timecode drift at NTSC frame rates, OTIO source durations, and the last scene of variable framerate videos. Windows distributions ship updated dependencies.
+
+Thanks to @nikhiljangid120, @sungbin1015, @qwist1233-cpu, @vishal-tambi, @Rober1208, @ChandraChaan and @MuhammadBilalKhan267 for their contributions to this release.
 
 #### CLI Changes
 
