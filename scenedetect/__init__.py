@@ -80,7 +80,7 @@ from scenedetect.scene_manager import SceneManager
 
 # Used for module identification and when printing version & about info
 # (e.g. calling `scenedetect version` or `scenedetect about`).
-__version__ = "0.7.3-dev0"
+__version__ = "0.7.3"
 
 init_logger()
 logger = getLogger("pyscenedetect")
