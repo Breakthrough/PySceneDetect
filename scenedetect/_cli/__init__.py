@@ -1691,7 +1691,11 @@ def save_images_command(
     ctx.save_images = True
 
 
-SAVE_EDL_HELP = """Save cuts in EDL format (CMX 3600)."""
+SAVE_EDL_HELP = """Save cuts in EDL format (CMX 3600).
+
+Timecodes are non-drop-frame (HH:MM:SS:FF), counting frames at the nominal rate: 24 frames per
+timecode second at 23.976 fps, 30 at 29.97 fps, and so on.
+"""
 
 
 @click.command("save-edl", cls=Command, help=SAVE_EDL_HELP)
@@ -1736,7 +1740,8 @@ SAVE_EDL_HELP = """Save cuts in EDL format (CMX 3600)."""
     type=click.STRING,
     help=(
         "Start timecode added to every event so the EDL aligns with the source media's "
-        "on-screen timecode. Accepts SMPTE HH:MM:SS:FF or 8 digits (HHMMSSFF, e.g. 01000000)."
+        "on-screen timecode. Accepts non-drop-frame SMPTE HH:MM:SS:FF or 8 digits "
+        "(HHMMSSFF, e.g. 01000000)."
         "{}"
     ).format(USER_CONFIG.get_help_string("save-edl", "start-timecode", show_default=False)),
 )

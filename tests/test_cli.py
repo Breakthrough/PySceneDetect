@@ -1281,6 +1281,26 @@ FCM: NON-DROP FRAME
     assert output_path.read_text() == EXPECTED_EDL_OUTPUT
 
 
+def test_cli_save_edl_start_timecode_ntsc(tmp_path: Path):
+    """`save-edl -s 01:00:00:00` on a 29.97 fps video starts the first event at exactly
+    `01:00:00:00` rather than `00:59:59:29`, since EDL timecodes are non-drop-frame (#593)."""
+    exit_code, _ = invoke_cli(
+        [
+            "-i",
+            "tests/resources/testvideo.mp4",
+            "-o",
+            str(tmp_path),
+            "detect-content",
+            "save-edl",
+            "-s",
+            "01:00:00:00",
+        ]
+    )
+    assert exit_code == 0
+    content = tmp_path.joinpath("testvideo.edl").read_text()
+    assert "001  AX V     C        01:00:00:00 " in content
+
+
 def test_cli_save_otio(tmp_path: Path):
     """Test `save-otio` command."""
     exit_code, _ = invoke_cli(

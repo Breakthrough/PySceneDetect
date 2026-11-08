@@ -511,7 +511,8 @@ Options of :ref:`save-edl <command-save-edl>` (Python API: :func:`~scenedetect.o
     #title = $VIDEO_NAME
 
     # Start timecode added to every event so the EDL aligns with the source
-    # media's on-screen timecode. SMPTE HH:MM:SS:FF or 8 digits (HHMMSSFF).
+    # media's on-screen timecode. Non-drop-frame SMPTE HH:MM:SS:FF or 8 digits
+    # (HHMMSSFF).
     #start-timecode = 01:00:00:00
 
 .. _config-save-fcp:

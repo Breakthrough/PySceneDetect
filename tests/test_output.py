@@ -514,6 +514,59 @@ def test_write_scene_list_edl_with_start_timecode_out_of_range(tmp_path: Path, b
         write_scene_list_edl(tmp_path / "scenes.edl", scenes, start_timecode=bad_value)
 
 
+@pytest.mark.parametrize(
+    "fps,frames,expected",
+    [
+        # 23.976: a hard cut every 7200 frames is exactly every 5 minutes of NDF timecode (#593).
+        (Fraction(24000, 1001), [(0, 7200), (7200, 14400)], ["00:05:00:00", "00:10:00:00"]),
+        (Fraction(30000, 1001), [(0, 108000)], ["01:00:00:00"]),
+        (Fraction(60000, 1001), [(0, 216000)], ["01:00:00:00"]),
+        # Whole-number rates count the same way; frame 90000 at 25 fps is exactly one hour.
+        (Fraction(25, 1), [(0, 90000)], ["01:00:00:00"]),
+    ],
+)
+def test_write_scene_list_edl_counts_frames_at_nominal_rate(
+    tmp_path: Path, fps: Fraction, frames, expected
+):
+    """Non-drop-frame timecodes count 24/30/60 frames per timecode second at NTSC rates rather
+    than following wall-clock seconds, which drifts about 3.6 s/hour (#593)."""
+    output_path = tmp_path / "scenes.edl"
+    write_scene_list_edl(output_path, _fake_scenes(fps, frames))
+    events = [line for line in output_path.read_text().splitlines() if " AX V " in line]
+    assert [line.split()[5] for line in events] == expected
+
+
+def test_write_scene_list_edl_start_timecode_ntsc_round_trips(tmp_path: Path):
+    """A start timecode is read as non-drop-frame too, so `01:00:00:00` at 29.97 fps is written
+    back as `01:00:00:00` (previously `00:59:59:29`) (#593)."""
+    scenes = _fake_scenes(Fraction(30000, 1001), [(0, 30)])
+    output_path = tmp_path / "scenes.edl"
+    write_scene_list_edl(output_path, scenes, start_timecode="01:00:00:00")
+    assert "001  AX V     C        01:00:00:00 01:00:01:00 01:00:00:00 01:00:01:00" in (
+        output_path.read_text()
+    )
+
+
+def test_write_scene_list_edl_start_timecode_ff_bound_uses_nominal_rate():
+    """At 29.97 fps the FF field runs 00-29, matching the 30 frames per NDF timecode second."""
+    scenes = _fake_scenes(Fraction(30000, 1001), [(0, 30)])
+    write_scene_list_edl(StringIO(), scenes, start_timecode="00:00:00:29")
+    with pytest.raises(ValueError, match="FF<30"):
+        write_scene_list_edl(StringIO(), scenes, start_timecode="00:00:00:30")
+
+
+def test_write_scene_list_edl_non_standard_rate_uses_wall_clock(tmp_path: Path):
+    """Rates with no nominal frame count (here 12.5 fps) keep the wall-clock approximation."""
+    scenes = _fake_scenes(Fraction(25, 2), [(0, 12), (12, 13), (13, 25)])
+    output_path = tmp_path / "scenes.edl"
+    write_scene_list_edl(output_path, scenes, start_timecode="00:00:01:00")
+    content = output_path.read_text()
+    # The start timecode of one second is 12.5 frames, rounded to 12, shifting every event.
+    assert "001  AX V     C        00:00:00:12 00:00:01:11 00:00:00:12 00:00:01:11" in content
+    assert "002  AX V     C        00:00:01:11 00:00:02:00 00:00:01:11 00:00:02:00" in content
+    assert "003  AX V     C        00:00:02:00 00:00:02:12 00:00:02:00 00:00:02:12" in content
+
+
 def test_write_scene_list_fcpx(tmp_path: Path):
     """FCPXML output declares version 1.9, rational time strings, and an asset-clip per scene."""
     scenes = _fake_scenes(_FPS_NTSC, [(48, 96), (96, 144)])
