@@ -859,3 +859,4 @@ Development
 ## PySceneDetect 0.8 (TBD)
 
  - [general] The root `pyproject.toml` is now `scenedetect` again (it had a development-only `scenedetect-core` name since 0.7.1). `pip install -e .` now installs the same distribution as PyPI. The `[opencv]` and `[opencv-headless]` extras of the development config were removed because `opencv-python` is now a declared dependency [#558](https://github.com/Breakthrough/PySceneDetect/issues/558)
+ - [bugfix] `FrameTimecode.get_timecode()` with `use_rounding=False` now truncates instead of sometimes rounding up the last digit. Previously 0.4996 seconds with `precision=2` gave `00:00:00.50`, and 1.99997 seconds gave `00:00:01.000` instead of `00:00:01.999`. [#602](https://github.com/Breakthrough/PySceneDetect/pull/602)
