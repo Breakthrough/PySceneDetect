@@ -372,6 +372,30 @@ def test_precision():
     assert FrameTimecode(990, fps).get_timecode(precision=0, use_rounding=False) == "00:00:00"
 
 
+def test_precision_truncation():
+    """Truncating must drop the extra digits, never round up into the last digit that is kept."""
+    # 1.99996667s, e.g. a frame position from a 90 kHz time base.
+    tc = FrameTimecode(Timecode(pts=179997, time_base=Fraction(1, 90000)), Fraction(30000, 1001))
+    assert tc.get_timecode(precision=3, use_rounding=False) == "00:00:01.999"
+    assert tc.get_timecode(precision=2, use_rounding=False) == "00:00:01.99"
+    assert tc.get_timecode(precision=0, use_rounding=False) == "00:00:01"
+    assert tc.get_timecode(precision=3, use_rounding=True) == "00:00:02.000"
+
+    # Frame 911 is at 37.996s.
+    tc = FrameTimecode(911, Fraction(24000, 1001))
+    assert tc.get_timecode(precision=1, use_rounding=False) == "00:00:37.9"
+    assert tc.get_timecode(precision=1, use_rounding=True) == "00:00:38.0"
+
+    tc = FrameTimecode(59.99996, 24.0)
+    assert tc.get_timecode(use_rounding=False, nearest_frame=False) == "00:00:59.999"
+
+    # Float error must not truncate exact values down, e.g. 504 / (24000 / 1001) == 21.021.
+    tc = FrameTimecode(504, Fraction(24000, 1001))
+    assert tc.get_timecode(precision=3, use_rounding=False) == "00:00:21.021"
+    tc = FrameTimecode(61.29, 24.0)
+    assert tc.get_timecode(precision=2, use_rounding=False, nearest_frame=False) == "00:01:01.29"
+
+
 def test_rational_framerate_precision():
     """Rational framerates should round-trip frame/second conversions without drift."""
     fps = Fraction(24000, 1001)

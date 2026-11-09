@@ -455,6 +455,9 @@ class FrameTimecode:
             secs = self.frame_num / float(self.frame_rate)
         else:
             secs = self.seconds
+        if not use_rounding:
+            # Allow for float error when truncating, e.g. 0.29 * 100 == 28.999999999999996.
+            secs = math.floor(round(secs * 10**precision, 6)) / 10**precision
         hrs = int(secs / _SECONDS_PER_HOUR)
         secs -= hrs * _SECONDS_PER_HOUR
         mins = int(secs / _SECONDS_PER_MINUTE)
