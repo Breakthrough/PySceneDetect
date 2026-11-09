@@ -1,0 +1,36 @@
+name: Feature or Enhancement
+description: Submit an idea or feature request to make PySceneDetect better.
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem/Use Case
+      description: >-
+        Describe what problem you want to solve, or what use case you want to achieve. Ex. PySceneDetect does not
+        work well in cases X or Y but if it could detect Z [...], PySceneDetect is slow because of X but could be
+        faster if it did Y [...], or I need PySceneDetect to do X because of some condition Y [...].
+    validations:
+      required: true
+  - type: textarea
+    id: solutions
+    attributes:
+      label: Solutions
+      description: Discuss any potential solutions here.
+  - type: textarea
+    id: implementation
+    attributes:
+      label: Proposed Implementation
+      description: >-
+        Description of what you want to happen, and how you think the feature/enhancement should be implemented.
+        Ex. what command line options/arguments should be added to PySceneDetect, and examples of how you expect
+        them to function.
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives
+      description: List any alternative solutions or related ideas you have considered.
+  - type: textarea
+    id: examples
+    attributes:
+      label: Examples
+      description: Attach or link to any relevant videos or images.
