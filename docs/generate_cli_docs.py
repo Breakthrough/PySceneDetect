@@ -18,6 +18,9 @@ Also generates:
   file section, from `CONFIG_MAP` and the shipped template scenedetect.cfg, which must agree
   (see `check_template`).
 
+A new command or global option is documented as soon as this script is re-run. Add a row for it
+to `CONCORDANCE` to link its Python API; the script warns until it has one.
+
 Run from main repo folder as working directory."""
 
 import inspect
@@ -25,7 +28,7 @@ import os
 import re
 import sys
 import typing as ty
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from enum import Enum
 
 # Add parent folder to path so we can resolve `scenedetect` imports.
@@ -110,8 +113,10 @@ INFO_COMMAND_OVERRIDE = """
 # file reference. The reverse links (API pages -> CLI) are hand-written `.. seealso::` blocks in
 # docs/api/*.rst; `check_reverse_links` warns when one is missing for a command listed here.
 #
-# Every visible command and global option needs exactly one row (`check_concordance`); rows that
-# have neither are only needed for config file sections and keys that have no CLI option.
+# Every visible command and global option should have exactly one row, which says what its Python
+# API counterpart is (or, with no `api`, that it has none). One without a row is still documented,
+# with no claim about a Python API, and the run warns (`check_concordance`). Rows that name
+# neither are only needed for config file sections and keys that have no CLI option.
 #
 
 
@@ -122,8 +127,10 @@ class Counterpart:
     `thing` names the row for readers of this file (it is not emitted). Exactly one of `command`
     (a CLI command name), `option` (the Click parameter name of a global `scenedetect` option) or
     `cli` (free-form RST) locates the CLI side. `config` is a config file section or
-    `[section] key`, and `api` is a list of RST snippets (Sphinx roles plus optional argument
-    names); if `api` is empty, the thing is CLI only.
+    `[section] key`; leave it unset on a `command` or `option` row, where it is derived (see
+    `derived_config`), unless the config key has a different name. `api` is a list of RST
+    snippets (Sphinx roles plus optional argument names); if `api` is empty, the thing is CLI
+    only. `inferred` marks the stand-in for a command or option that has no row.
     """
 
     thing: str
@@ -132,6 +139,7 @@ class Counterpart:
     cli: str | None = None
     config: str | None = None
     api: tuple[str, ...] = ()
+    inferred: bool = False
 
 
 # Short aliases used to keep the table below readable.
@@ -148,31 +156,26 @@ CONCORDANCE: dict[str, list[Counterpart]] = {
         Counterpart(
             "Fast cuts (adaptive)",
             command="detect-adaptive",
-            config="[detect-adaptive]",
             api=(f":class:`~{_DET}.adaptive_detector.AdaptiveDetector`",),
         ),
         Counterpart(
             "Fast cuts (content)",
             command="detect-content",
-            config="[detect-content]",
             api=(f":class:`~{_DET}.content_detector.ContentDetector`",),
         ),
         Counterpart(
             "Fast cuts (perceptual hash)",
             command="detect-hash",
-            config="[detect-hash]",
             api=(f":class:`~{_DET}.hash_detector.HashDetector`",),
         ),
         Counterpart(
             "Fast cuts (histogram)",
             command="detect-hist",
-            config="[detect-hist]",
             api=(f":class:`~{_DET}.histogram_detector.HistogramDetector`",),
         ),
         Counterpart(
             "Fades in/out (threshold)",
             command="detect-threshold",
-            config="[detect-threshold]",
             api=(f":class:`~{_DET}.threshold_detector.ThresholdDetector`",),
         ),
         Counterpart(
@@ -183,43 +186,30 @@ CONCORDANCE: dict[str, list[Counterpart]] = {
         Counterpart(
             "Minimum scene length",
             option="min_scene_len",
-            config="[global] min-scene-len",
             api=(":ref:`Detector <scenedetect-detectors>` argument ``min_scene_len``",),
         ),
-        Counterpart(
-            "Drop short scenes",
-            option="drop_short_scenes",
-            config="[global] drop-short-scenes",
-        ),
-        Counterpart(
-            "Merge short last scene",
-            option="merge_last_scene",
-            config="[global] merge-last-scene",
-        ),
+        Counterpart("Drop short scenes", option="drop_short_scenes"),
+        Counterpart("Merge short last scene", option="merge_last_scene"),
     ],
     "Output": [
         Counterpart(
             "Scene list (CSV)",
             command="list-scenes",
-            config="[list-scenes]",
             api=(f":func:`~{_OUT}.write_scene_list`",),
         ),
         Counterpart(
             "Scene list (HTML)",
             command="save-html",
-            config="[save-html]",
             api=(f":func:`~{_OUT}.write_scene_list_html`",),
         ),
         Counterpart(
             "Edit decision list (EDL)",
             command="save-edl",
-            config="[save-edl]",
             api=(f":func:`~{_OUT}.write_scene_list_edl`",),
         ),
         Counterpart(
             "Final Cut Pro XML",
             command="save-fcp",
-            config="[save-fcp]",
             api=(
                 f":func:`~{_OUT}.write_scene_list_fcpx`",
                 f":func:`~{_OUT}.write_scene_list_fcp7`",
@@ -228,19 +218,16 @@ CONCORDANCE: dict[str, list[Counterpart]] = {
         Counterpart(
             "OpenTimelineIO",
             command="save-otio",
-            config="[save-otio]",
             api=(f":func:`~{_OUT}.write_scene_list_otio`",),
         ),
         Counterpart(
             "Images from each scene",
             command="save-images",
-            config="[save-images]",
             api=(f":func:`~{_OUT}.save_images`",),
         ),
         Counterpart(
             "Split video into scenes",
             command="split-video",
-            config="[split-video]",
             api=(f":func:`~{_OUT}.split_video_ffmpeg`", f":func:`~{_OUT}.split_video_mkvmerge`"),
         ),
         Counterpart(
@@ -252,28 +239,15 @@ CONCORDANCE: dict[str, list[Counterpart]] = {
         Counterpart(
             "Output directory",
             option="output",
-            config="[global] output",
             api=(
                 "``output_dir`` argument of :func:`~scenedetect.output.save_images` and "
                 ":func:`~scenedetect.output.split_video_ffmpeg`; output path argument of each "
                 "``write_scene_list*`` function",
             ),
         ),
-        Counterpart(
-            "Keyframes for x264/x265 (QP file)",
-            command="save-qp",
-            config="[save-qp]",
-        ),
-        Counterpart(
-            "Keyframes for Aegisub",
-            command="save-keyframes",
-            config="[save-keyframes]",
-        ),
-        Counterpart(
-            "Load a scene list (CSV)",
-            command="load-scenes",
-            config="[load-scenes]",
-        ),
+        Counterpart("Keyframes for x264/x265 (QP file)", command="save-qp"),
+        Counterpart("Keyframes for Aegisub", command="save-keyframes"),
+        Counterpart("Load a scene list (CSV)", command="load-scenes"),
     ],
     "Input and Processing": [
         Counterpart(
@@ -298,13 +272,11 @@ CONCORDANCE: dict[str, list[Counterpart]] = {
         Counterpart(
             "Crop",
             option="crop",
-            config="[global] crop",
             api=(f":attr:`SceneManager.crop <{_SM}.crop>`",),
         ),
         Counterpart(
             "Downscale",
             option="downscale",
-            config="[global] downscale",
             api=(
                 f":attr:`SceneManager.downscale <{_SM}.downscale>`",
                 f":attr:`SceneManager.auto_downscale <{_SM}.auto_downscale>`",
@@ -319,7 +291,6 @@ CONCORDANCE: dict[str, list[Counterpart]] = {
         Counterpart(
             "Skip frames",
             option="frame_skip",
-            config="[global] frame-skip",
             api=(f"{_DETECT_SCENES} (``frame_skip``)",),
         ),
         Counterpart(
@@ -330,16 +301,12 @@ CONCORDANCE: dict[str, list[Counterpart]] = {
                 ":func:`~scenedetect.detect` (``stats_file_path``)",
             ),
         ),
-        Counterpart(
-            "Config file path",
-            option="config",
-        ),
+        Counterpart("Config file path", option="config"),
     ],
     "Video Backends": [
         Counterpart(
             "Choose a backend",
             option="backend",
-            config="[global] backend",
             api=(
                 ":func:`~scenedetect.open_video` (``backend``)",
                 f":data:`~{_BE}.AVAILABLE_BACKENDS`",
@@ -362,7 +329,6 @@ CONCORDANCE: dict[str, list[Counterpart]] = {
         Counterpart(
             "Verbosity",
             option="verbosity",
-            config="[global] verbosity",
             api=(f"{_INIT_LOGGER} (``log_level``)",),
         ),
         Counterpart(
@@ -382,6 +348,19 @@ CONCORDANCE: dict[str, list[Counterpart]] = {
 CLI_ONLY = "*CLI only*"
 NO_API = "*no Python API equivalent*"
 API_ONLY = "*Python API only*"
+
+# Group that `check_concordance` adds inferred rows to, and the warning it prints for each.
+INFERRED_GROUP = "No row"
+MISSING_ROW = """{kind} {name!r} has no row in CONCORDANCE (docs/generate_cli_docs.py), so its \
+docs do not link to a Python API
+Add a row like this one (leave out `api` if it has no Python API):
+
+        Counterpart(
+            "<short description>",
+            {kind}="{name}",
+            api=(f":func:`~{{_OUT}}.<function>`",),
+        ),
+"""
 
 CLI_INDEX_PATH = "docs/cli_index.inc"
 
@@ -497,7 +476,9 @@ def format_config(config: str | None) -> str:
 
 
 def format_api(entry: Counterpart) -> str:
-    return ", ".join(entry.api) if entry.api else CLI_ONLY
+    if entry.api:
+        return ", ".join(entry.api)
+    return "" if entry.inferred else CLI_ONLY
 
 
 def format_cli(entry: Counterpart, options: dict[str, click.Parameter]) -> str:
@@ -515,14 +496,18 @@ def table_row(first: str, *rest: str) -> str:
 
 
 def generate_seealso(entry: Counterpart) -> StrGenerator:
-    """One-line pointer from a CLI command to its Python API and config file counterparts."""
-    api = format_api(entry) if entry.api else NO_API
-    if entry.command in DETECTOR_OPTIONS:
-        api += f" (:ref:`option table <options-{entry.command}>`)"
-    parts = [f"Python API: {api}"]
+    """One-line pointer from a CLI command to its Python API and config file counterparts. An
+    inferred row makes no claim about the Python API."""
+    parts = []
+    if not entry.inferred:
+        api = format_api(entry) if entry.api else NO_API
+        if entry.command in DETECTOR_OPTIONS:
+            api += f" (:ref:`option table <options-{entry.command}>`)"
+        parts.append(f"Python API: {api}")
     if entry.config:
         parts.append(f"Config file: {format_config(entry.config)}")
-    yield f"\n.. seealso:: {' | '.join(parts)}\n\n"
+    if parts:
+        yield f"\n.. seealso:: {' | '.join(parts)}\n\n"
 
 
 def generate_global_option_table(options: dict[str, click.Parameter]) -> StrGenerator:
@@ -537,25 +522,55 @@ def generate_global_option_table(options: dict[str, click.Parameter]) -> StrGene
     yield "\n"
 
 
+def warn(message: str):
+    """Print a warning. On GitHub Actions, its first line also annotates the run."""
+    print(f"WARNING: {message}", file=sys.stderr)
+    if os.environ.get("GITHUB_ACTIONS"):
+        print(f"::warning file=docs/generate_cli_docs.py::{message.splitlines()[0]}")
+
+
+def derived_config(entry: Counterpart, options: dict[str, click.Parameter]) -> str | None:
+    """The config file section of a command, or the `[global]` key of a global option, if it has
+    one. This is the `config` of a `command` or `option` row that leaves it unset."""
+    if entry.command:
+        return f"[{entry.command}]" if entry.command in CONFIG_MAP else None
+    option = options[entry.option]
+    assert isinstance(option, click.Option)
+    key = option_key(option)
+    return f"[global] {key}" if key in CONFIG_MAP["global"] else None
+
+
 def check_concordance(commands: list[str], options: dict[str, click.Parameter]):
-    """Every visible command and global option must have exactly one row in CONCORDANCE."""
+    """Complete `CONCORDANCE` so that every visible command and global option has exactly one row.
+
+    A row for something that is not in the CLI, or a second row for the same thing, fails the
+    run. A command or option with no row gets an inferred one and a warning: adding one to the
+    CLI does not require editing this file before its docs can be generated. Rows that leave
+    `config` unset get the derived value (see `derived_config`)."""
+    expected = {"command": [c for c in commands if c not in INFO_COMMANDS], "option": list(options)}
     problems = []
-    for kind, mapped, expected in (
-        (
-            "command",
-            [e.command for e in counterpart_entries() if e.command],
-            [c for c in commands if c not in INFO_COMMANDS],
-        ),
-        ("option", [e.option for e in counterpart_entries() if e.option], list(options)),
-    ):
-        for name in sorted(set(expected) - set(mapped)):
-            problems.append(f"{kind} {name!r} has no CONCORDANCE row: add a Counterpart(...)")
-        for name in sorted(set(mapped) - set(expected)):
+    missing = []
+    for kind, names in expected.items():
+        mapped = [getattr(e, kind) for e in counterpart_entries() if getattr(e, kind)]
+        missing += [(kind, name) for name in names if name not in mapped]
+        for name in sorted(set(mapped) - set(names)):
             problems.append(f"{kind} {name!r} is in CONCORDANCE but not in the CLI: remove it")
         for name in sorted(n for n in set(mapped) if mapped.count(n) > 1):
             problems.append(f"{kind} {name!r} has more than one CONCORDANCE row")
     if problems:
         raise SystemExit("generate_cli_docs.py: " + "; ".join(problems))
+
+    def with_config(entry: Counterpart) -> Counterpart:
+        if entry.config is None and (entry.command or entry.option):
+            return replace(entry, config=derived_config(entry, options))
+        return entry
+
+    for entries in CONCORDANCE.values():
+        entries[:] = [with_config(entry) for entry in entries]
+    for kind, name in missing:
+        entry = Counterpart(name, inferred=True, **{kind: name})
+        CONCORDANCE.setdefault(INFERRED_GROUP, []).append(with_config(entry))
+        warn(MISSING_ROW.format(kind=kind, name=name))
 
 
 def check_reverse_links():
@@ -568,7 +583,7 @@ def check_reverse_links():
                     api_rst += f.read()
     for entry in counterpart_entries():
         if entry.command and entry.api and f"<command-{entry.command}>" not in api_rst:
-            print(f"WARNING: no link to command-{entry.command} in docs/api/*.rst", file=sys.stderr)
+            warn(f"no link to command-{entry.command} in docs/api/*.rst")
 
 
 def patch_help(s: str, commands: list[str]) -> str:
