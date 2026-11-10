@@ -150,6 +150,15 @@ class CliContext:
         assert parsed is not None
         return parsed.frame_num
 
+    @staticmethod
+    def _validate_kernel_size(kernel_size: int | None) -> int | None:
+        """Reject a `--kernel-size` the detectors would raise on, so it gives a usage error."""
+        if kernel_size is not None and (kernel_size < 3 or kernel_size % 2 == 0):
+            raise click.BadParameter(
+                "Kernel size must be an odd integer >= 3.", param_hint="kernel-size"
+            )
+        return kernel_size
+
     def parse_timecode(self, value: str | None, correct_pts: bool = False) -> FrameTimecode | None:
         """Parses a user input string into a FrameTimecode assuming the given framerate. If `value`
         is None it will be passed through without processing.
@@ -359,7 +368,9 @@ class CliContext:
 
         return {
             "weights": self.config.get_value("detect-content", "weights", weights),
-            "kernel_size": self.config.get_value("detect-content", "kernel-size", kernel_size),
+            "kernel_size": self.config.get_value(
+                "detect-content", "kernel-size", self._validate_kernel_size(kernel_size)
+            ),
             "luma_only": luma_only or self.config.get_value("detect-content", "luma-only"),
             "min_scene_len": min_scene_len_frames,
             "threshold": self.config.get_value("detect-content", "threshold", threshold),
@@ -391,7 +402,9 @@ class CliContext:
         return {
             "adaptive_threshold": self.config.get_value("detect-adaptive", "threshold", threshold),
             "weights": self.config.get_value("detect-adaptive", "weights", weights),
-            "kernel_size": self.config.get_value("detect-adaptive", "kernel-size", kernel_size),
+            "kernel_size": self.config.get_value(
+                "detect-adaptive", "kernel-size", self._validate_kernel_size(kernel_size)
+            ),
             "luma_only": luma_only or self.config.get_value("detect-adaptive", "luma-only"),
             "min_content_val": self.config.get_value(
                 "detect-adaptive", "min-content-val", min_content_val
