@@ -1691,6 +1691,62 @@ def save_images_command(
     ctx.save_images = True
 
 
+SAVE_CHAPTERS_HELP = """Save scenes as chapters in FFmetadata format.
+
+The chapters can be added to a video with ffmpeg without re-encoding, e.g.:
+
+    ffmpeg -i video.mp4 -i video-Chapters.txt -map_metadata 1 -codec copy output.mp4
+"""
+
+
+@click.command("save-chapters", cls=Command, help=SAVE_CHAPTERS_HELP)
+@click.option(
+    "--filename",
+    "-f",
+    metavar="NAME",
+    default=None,
+    type=click.STRING,
+    help="Filename format to use.{}".format(
+        USER_CONFIG.get_help_string("save-chapters", "filename")
+    ),
+)
+@click.option(
+    "--title",
+    "-t",
+    metavar="NAME",
+    default=None,
+    type=click.STRING,
+    help="Chapter title format to use. Can use $SCENE_NUMBER macro.{}".format(
+        USER_CONFIG.get_help_string("save-chapters", "title")
+    ),
+)
+@click.option(
+    "--output",
+    "-o",
+    metavar="DIR",
+    type=click.Path(exists=False, dir_okay=True, writable=True, resolve_path=False),
+    help="Output directory to save chapters file to. Overrides global option -o/--output.{}".format(
+        USER_CONFIG.get_help_string("save-chapters", "output", show_default=False)
+    ),
+)
+@click.pass_context
+def save_chapters_command(
+    ctx: click.Context,
+    filename: str | None,
+    title: str | None,
+    output: str | None,
+):
+    ctx = ctx.obj
+    assert isinstance(ctx, CliContext)
+
+    save_chapters_args = {
+        "filename": ctx.config.get_value("save-chapters", "filename", filename),
+        "title": ctx.config.get_value("save-chapters", "title", title),
+        "output": ctx.config.get_value("save-chapters", "output", output),
+    }
+    ctx.add_command(cli_commands.save_chapters, save_chapters_args)
+
+
 SAVE_EDL_HELP = """Save cuts in EDL format (CMX 3600).
 
 Timecodes are non-drop-frame (HH:MM:SS:FF), counting frames at the nominal rate: 24 frames per
@@ -2001,6 +2057,7 @@ scenedetect.add_command(detect_threshold_command)
 
 # Output
 scenedetect.add_command(list_scenes_command)
+scenedetect.add_command(save_chapters_command)
 scenedetect.add_command(save_edl_command)
 scenedetect.add_command(save_html_command)
 scenedetect.add_command(save_images_command)

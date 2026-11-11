@@ -29,6 +29,7 @@ from scenedetect.output import (
     write_scene_list_edl,
     write_scene_list_fcp7,
     write_scene_list_fcpx,
+    write_scene_list_ffmetadata,
     write_scene_list_html,
     write_scene_list_otio,
 )
@@ -295,6 +296,29 @@ def split_video(
         )
     if scenes:
         logger.info("Video splitting completed, scenes written to disk.")
+
+
+def save_chapters(
+    context: CliContext,
+    scenes: SceneList,
+    cuts: CutList,
+    filename: str,
+    output: str,
+    title: str,
+):
+    """Handles the `save-chapters` command. Outputs chapters in FFmetadata format."""
+    del cuts  # We only use scene information.
+    assert context.video_stream is not None
+    video_name = context.video_stream.name
+    chapters_path = get_and_create_path(
+        Template(filename).safe_substitute(VIDEO_NAME=video_name),
+        output,
+    )
+    write_scene_list_ffmetadata(
+        output_path=chapters_path,
+        scene_list=scenes,
+        title_format=title,
+    )
 
 
 def save_edl(

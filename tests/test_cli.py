@@ -1215,6 +1215,72 @@ Scene Number,Start Frame
         assert first.readlines() == second.readlines()
 
 
+def test_cli_save_chapters(tmp_path: Path):
+    """Test `save-chapters` command."""
+    exit_code, _ = invoke_cli(
+        [
+            "-i",
+            DEFAULT_VIDEO_PATH,
+            "-o",
+            str(tmp_path),
+            "time",
+            "-s",
+            "2s",
+            "-d",
+            "4s",
+            "detect-content",
+            "save-chapters",
+        ]
+    )
+    assert exit_code == 0
+    output_path = tmp_path.joinpath(f"{DEFAULT_VIDEO_NAME}-Chapters.txt")
+    assert os.path.exists(output_path)
+    EXPECTED_CHAPTERS_OUTPUT = """;FFMETADATA1
+[CHAPTER]
+TIMEBASE=1/1000
+START=2002
+END=3754
+title=Scene 1
+[CHAPTER]
+TIMEBASE=1/1000
+START=3754
+END=6006
+title=Scene 2
+"""
+    assert output_path.read_text() == EXPECTED_CHAPTERS_OUTPUT
+
+
+def test_cli_save_chapters_with_params(tmp_path: Path):
+    """Test `save-chapters` command with the filename, title, and output options overridden."""
+    output_dir = tmp_path / "chapters"
+    exit_code, _ = invoke_cli(
+        [
+            "-i",
+            DEFAULT_VIDEO_PATH,
+            "time",
+            "-s",
+            "2s",
+            "-d",
+            "4s",
+            "detect-content",
+            "save-chapters",
+            "-f",
+            "my_chapters.txt",
+            "-t",
+            "Shot $SCENE_NUMBER",
+            "-o",
+            str(output_dir),
+        ]
+    )
+    assert exit_code == 0
+    output_path = output_dir.joinpath("my_chapters.txt")
+    assert os.path.exists(output_path)
+    content = output_path.read_text()
+    assert content.startswith(";FFMETADATA1\n")
+    assert "title=Shot 1\n" in content
+    assert "title=Shot 2\n" in content
+
+
 def test_cli_save_edl(tmp_path: Path):
     """Test `save-edl` command."""
     exit_code, _ = invoke_cli(
