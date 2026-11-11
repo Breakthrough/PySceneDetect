@@ -33,6 +33,7 @@ from scenedetect import (
 from scenedetect.output import (
     SceneMetadata,
     VideoMetadata,
+    _escape_ffmetadata,
     _open_output_file,
     is_ffmpeg_available,
     split_video_ffmpeg,
@@ -40,6 +41,7 @@ from scenedetect.output import (
     write_scene_list_edl,
     write_scene_list_fcp7,
     write_scene_list_fcpx,
+    write_scene_list_ffmetadata,
     write_scene_list_otio,
 )
 
@@ -565,6 +567,128 @@ def test_write_scene_list_edl_non_standard_rate_uses_wall_clock(tmp_path: Path):
     assert "001  AX V     C        00:00:00:12 00:00:01:11 00:00:00:12 00:00:01:11" in content
     assert "002  AX V     C        00:00:01:11 00:00:02:00 00:00:01:11 00:00:02:00" in content
     assert "003  AX V     C        00:00:02:00 00:00:02:12 00:00:02:00 00:00:02:12" in content
+
+
+def test_write_scene_list_ffmetadata(tmp_path: Path):
+    """FFmetadata output has the header and one chapter block per scene, in milliseconds."""
+    scenes = _fake_scenes(_FPS_CFR, [(0, 30), (30, 90)])
+    output_path = tmp_path / "chapters.txt"
+    write_scene_list_ffmetadata(output_path, scenes)
+
+    assert output_path.read_text() == (
+        ";FFMETADATA1\n"
+        "[CHAPTER]\nTIMEBASE=1/1000\nSTART=0\nEND=1000\ntitle=Scene 1\n"
+        "[CHAPTER]\nTIMEBASE=1/1000\nSTART=1000\nEND=3000\ntitle=Scene 2\n"
+    )
+
+
+def test_write_scene_list_ffmetadata_empty_scene_list(tmp_path: Path):
+    """An empty scene list still writes a valid FFmetadata header with no chapters."""
+    output_path = tmp_path / "chapters.txt"
+    write_scene_list_ffmetadata(output_path, [])
+    assert output_path.read_text() == ";FFMETADATA1\n"
+
+
+@pytest.mark.parametrize("target_kind", _OUTPUT_TARGET_KINDS)
+def test_write_scene_list_ffmetadata_output_target(tmp_path: Path, target_kind: str):
+    """FFmetadata output accepts a file handle, string, Path, or bytes path."""
+    scenes = _fake_scenes(_FPS_CFR, [(0, 30)])
+    output_target, read_output = _make_output_target(tmp_path, target_kind, "chapters.txt")
+    write_scene_list_ffmetadata(output_target, scenes, title_format="Tést $SCENE_NUMBER")
+    text = read_output()
+    assert text.startswith(";FFMETADATA1\n")
+    assert "title=Tést 1" in text
+    assert "\r\n" not in text
+
+
+@pytest.mark.parametrize(
+    "fps,end_frame,expected_end_ms",
+    [
+        (Fraction(24, 1), 7200, 300000),
+        (Fraction(25, 1), 7200, 288000),
+        (Fraction(30, 1), 7200, 240000),
+        (Fraction(24000, 1001), 7200, 300300),
+        (Fraction(30000, 1001), 7200, 240240),
+        (Fraction(60000, 1001), 7200, 120120),
+    ],
+)
+def test_write_scene_list_ffmetadata_frame_rates(
+    tmp_path: Path, fps: Fraction, end_frame: int, expected_end_ms: int
+):
+    """Chapter times match the exact frame time at both whole and fractional frame rates."""
+    scenes = _fake_scenes(fps, [(0, end_frame)])
+    output_path = tmp_path / "chapters.txt"
+    write_scene_list_ffmetadata(output_path, scenes)
+    assert f"END={expected_end_ms}\n" in output_path.read_text()
+
+
+def test_write_scene_list_ffmetadata_title_format(tmp_path: Path):
+    """title_format replaces $SCENE_NUMBER with the 1-based scene number."""
+    scenes = _fake_scenes(_FPS_CFR, [(0, 30), (30, 60), (60, 90)])
+    output_path = tmp_path / "chapters.txt"
+    write_scene_list_ffmetadata(output_path, scenes, title_format="Shot $SCENE_NUMBER")
+    titles = [line for line in output_path.read_text().splitlines() if line.startswith("title=")]
+    assert titles == ["title=Shot 1", "title=Shot 2", "title=Shot 3"]
+
+
+def test_write_scene_list_ffmetadata_escapes_title(tmp_path: Path):
+    """Special characters in chapter titles are escaped so ffmpeg reads them literally."""
+    scenes = _fake_scenes(_FPS_CFR, [(0, 30)])
+    output_path = tmp_path / "chapters.txt"
+    write_scene_list_ffmetadata(output_path, scenes, title_format="A=B; #$SCENE_NUMBER")
+    assert "title=A\\=B\\; \\#1\n" in output_path.read_text()
+
+
+@pytest.mark.parametrize(
+    "value,expected",
+    [
+        ("Scene 1", "Scene 1"),
+        ("a=b", "a\\=b"),
+        ("a;b", "a\\;b"),
+        ("#1", "\\#1"),
+        ("back\\slash", "back\\\\slash"),
+        ("two\nlines", "two\\\nlines"),
+        ("=;#\\", "\\=\\;\\#\\\\"),
+    ],
+)
+def test_escape_ffmetadata(value: str, expected: str):
+    """Each FFmetadata special character is escaped with a single backslash."""
+    assert _escape_ffmetadata(value) == expected
+
+
+@pytest.mark.skipif(not is_ffmpeg_available(), reason="ffmpeg is not available")
+def test_write_scene_list_ffmetadata_ffmpeg_roundtrip(test_video_file, tmp_path: Path):
+    """ffmpeg can mux the generated chapters into a video and reads them back."""
+    import subprocess
+
+    scenes = _fake_scenes(_FPS_CFR, [(0, 30), (30, 60)])
+    chapters_path = tmp_path / "chapters.txt"
+    output_path = tmp_path / "output.mp4"
+    write_scene_list_ffmetadata(chapters_path, scenes)
+    subprocess.run(
+        [
+            "ffmpeg",
+            "-v",
+            "error",
+            "-y",
+            "-i",
+            test_video_file,
+            "-i",
+            str(chapters_path),
+            "-map_metadata",
+            "1",
+            "-codec",
+            "copy",
+            str(output_path),
+        ],
+        check=True,
+    )
+    probe = subprocess.run(
+        ["ffmpeg", "-i", str(output_path)], capture_output=True, text=True, check=False
+    )
+    assert "Chapter #0:0: start 0.000000, end 1.000000" in probe.stderr
+    assert "Chapter #0:1: start 1.000000, end 2.000000" in probe.stderr
+    assert "title           : Scene 2" in probe.stderr
 
 
 def test_write_scene_list_fcpx(tmp_path: Path):
