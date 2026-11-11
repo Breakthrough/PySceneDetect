@@ -594,7 +594,7 @@ def test_write_scene_list_ffmetadata_output_target(tmp_path: Path, target_kind: 
     """FFmetadata output accepts a file handle, string, Path, or bytes path."""
     scenes = _fake_scenes(_FPS_CFR, [(0, 30)])
     output_target, read_output = _make_output_target(tmp_path, target_kind, "chapters.txt")
-    write_scene_list_ffmetadata(output_target, scenes, title_format="Tést $SCENE_NUMBER")
+    write_scene_list_ffmetadata(output_target, scenes, title_format_template="Tést $SCENE_NUMBER")
     text = read_output()
     assert text.startswith(";FFMETADATA1\n")
     assert "title=Tést 1" in text
@@ -622,11 +622,22 @@ def test_write_scene_list_ffmetadata_frame_rates(
     assert f"END={expected_end_ms}\n" in output_path.read_text()
 
 
+def test_write_scene_list_ffmetadata_rounds_up(tmp_path: Path):
+    """Chapter times round up to the next millisecond, so a chapter never starts before its scene.
+    Frame 12 at 23.976 fps is at 500.5 ms, which should be written as 501."""
+    scenes = _fake_scenes(Fraction(24000, 1001), [(0, 12), (12, 24)])
+    output_path = tmp_path / "chapters.txt"
+    write_scene_list_ffmetadata(output_path, scenes)
+    content = output_path.read_text()
+    assert "START=0\nEND=501\n" in content
+    assert "START=501\nEND=1001\n" in content
+
+
 def test_write_scene_list_ffmetadata_title_format(tmp_path: Path):
-    """title_format replaces $SCENE_NUMBER with the 1-based scene number."""
+    """title_format_template replaces $SCENE_NUMBER with the 1-based scene number."""
     scenes = _fake_scenes(_FPS_CFR, [(0, 30), (30, 60), (60, 90)])
     output_path = tmp_path / "chapters.txt"
-    write_scene_list_ffmetadata(output_path, scenes, title_format="Shot $SCENE_NUMBER")
+    write_scene_list_ffmetadata(output_path, scenes, title_format_template="Shot $SCENE_NUMBER")
     titles = [line for line in output_path.read_text().splitlines() if line.startswith("title=")]
     assert titles == ["title=Shot 1", "title=Shot 2", "title=Shot 3"]
 
@@ -635,7 +646,7 @@ def test_write_scene_list_ffmetadata_escapes_title(tmp_path: Path):
     """Special characters in chapter titles are escaped so ffmpeg reads them literally."""
     scenes = _fake_scenes(_FPS_CFR, [(0, 30)])
     output_path = tmp_path / "chapters.txt"
-    write_scene_list_ffmetadata(output_path, scenes, title_format="A=B; #$SCENE_NUMBER")
+    write_scene_list_ffmetadata(output_path, scenes, title_format_template="A=B; #$SCENE_NUMBER")
     assert "title=A\\=B\\; \\#1\n" in output_path.read_text()
 
 
@@ -648,7 +659,9 @@ def test_write_scene_list_ffmetadata_escapes_title(tmp_path: Path):
         ("#1", "\\#1"),
         ("back\\slash", "back\\\\slash"),
         ("two\nlines", "two\\\nlines"),
-        ("=;#\\", "\\=\\;\\#\\\\"),
+        ("two\r\nlines", "two\\\r\\\nlines"),
+        ("ends in \\", "ends in \\\\ "),
+        ("=;#\\", "\\=\\;\\#\\\\ "),
     ],
 )
 def test_escape_ffmetadata(value: str, expected: str):
@@ -675,7 +688,7 @@ def test_write_scene_list_ffmetadata_ffmpeg_roundtrip(test_video_file, tmp_path:
             test_video_file,
             "-i",
             str(chapters_path),
-            "-map_metadata",
+            "-map_chapters",
             "1",
             "-codec",
             "copy",

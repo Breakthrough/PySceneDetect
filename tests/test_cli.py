@@ -1267,7 +1267,7 @@ def test_cli_save_chapters_with_params(tmp_path: Path):
             "-f",
             "my_chapters.txt",
             "-t",
-            "Shot $SCENE_NUMBER",
+            "$VIDEO_NAME - Shot $SCENE_NUMBER",
             "-o",
             str(output_dir),
         ]
@@ -1277,8 +1277,8 @@ def test_cli_save_chapters_with_params(tmp_path: Path):
     assert os.path.exists(output_path)
     content = output_path.read_text()
     assert content.startswith(";FFMETADATA1\n")
-    assert "title=Shot 1\n" in content
-    assert "title=Shot 2\n" in content
+    assert f"title={DEFAULT_VIDEO_NAME} - Shot 1\n" in content
+    assert f"title={DEFAULT_VIDEO_NAME} - Shot 2\n" in content
 
 
 def test_cli_save_edl(tmp_path: Path):

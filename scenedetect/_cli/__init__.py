@@ -1695,7 +1695,7 @@ SAVE_CHAPTERS_HELP = """Save scenes as chapters in FFmetadata format.
 
 The chapters can be added to a video with ffmpeg without re-encoding, e.g.:
 
-    ffmpeg -i video.mp4 -i video-Chapters.txt -map_metadata 1 -codec copy output.mp4
+    ffmpeg -i video.mp4 -i video-Chapters.txt -map_chapters 1 -codec copy output.mp4
 """
 
 
@@ -1716,7 +1716,7 @@ The chapters can be added to a video with ffmpeg without re-encoding, e.g.:
     metavar="NAME",
     default=None,
     type=click.STRING,
-    help="Chapter title format to use. Can use $SCENE_NUMBER macro.{}".format(
+    help="Chapter title format to use. Can use $VIDEO_NAME and $SCENE_NUMBER macros.{}".format(
         USER_CONFIG.get_help_string("save-chapters", "title")
     ),
 )
