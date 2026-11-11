@@ -583,6 +583,42 @@ Options
   Default: ``"Start Frame"``
 
 
+.. _command-save-chapters:
+
+.. program:: scenedetect save-chapters
+
+
+``save-chapters``
+========================================================================
+
+Save scenes as chapters in FFmetadata format.
+
+The chapters can be added to a video with ffmpeg without re-encoding, e.g.:
+
+    ``ffmpeg -i video.mp4 -i video-Chapters.txt -map_metadata 1 -codec copy output.mp4``
+
+
+Options
+------------------------------------------------------------------------
+
+
+.. option:: -f NAME, --filename NAME
+
+  Filename format to use.
+
+  Default: ``$VIDEO_NAME-Chapters.txt``
+
+.. option:: -t NAME, --title NAME
+
+  Chapter title format to use. Can use $SCENE_NUMBER macro.
+
+  Default: ``"Scene $SCENE_NUMBER"``
+
+.. option:: -o DIR, --output DIR
+
+  Output directory to save chapters file to. Overrides global option :option:`-o/--output <scenedetect -o>`.
+
+
 .. _command-save-edl:
 
 .. program:: scenedetect save-edl

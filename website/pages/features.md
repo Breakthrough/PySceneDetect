@@ -35,6 +35,7 @@
 
 ### Output Formats
 
+ - **Chapters**: `save-chapters` command (save as FFmetadata chapters, which can be added to a video with ffmpeg)
  - **EDL**: `save-edl` command (save as edit decision list in CMX 3600 format, compatible with most editors)
  - **HTML**: `save-html` command (save HTML table that can be viewed with browser)
  - **OTIO**: `save-otio` command (save as [OpenTimelineIO](https://github.com/AcademySoftwareFoundation/OpenTimelineIO) file)
