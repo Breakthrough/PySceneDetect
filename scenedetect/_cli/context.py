@@ -23,6 +23,7 @@ from scenedetect._cli.config import (
     ConfigLoadFailure,
     ConfigRegistry,
     CropValue,
+    KernelSizeValue,
 )
 from scenedetect.common import MAX_FPS_DELTA, FrameTimecode
 from scenedetect.detector import SceneDetector
@@ -149,6 +150,19 @@ class CliContext:
         parsed = self.parse_timecode(self.config.get_value(command, "min-scene-len"))
         assert parsed is not None
         return parsed.frame_num
+
+    @staticmethod
+    def _kernel_size_value(kernel_size: int | None) -> KernelSizeValue | None:
+        """Validate `--kernel-size` like the config file does, so -1 means auto and bad values
+        give a usage error instead of a traceback."""
+        if kernel_size is None:
+            return None
+        try:
+            return KernelSizeValue(kernel_size)
+        except ValueError as ex:
+            raise click.BadParameter(
+                "Kernel size must be an odd integer >= 3, or -1 for auto.", param_hint="kernel-size"
+            ) from ex
 
     def parse_timecode(self, value: str | None, correct_pts: bool = False) -> FrameTimecode | None:
         """Parses a user input string into a FrameTimecode assuming the given framerate. If `value`
@@ -359,7 +373,9 @@ class CliContext:
 
         return {
             "weights": self.config.get_value("detect-content", "weights", weights),
-            "kernel_size": self.config.get_value("detect-content", "kernel-size", kernel_size),
+            "kernel_size": self.config.get_value(
+                "detect-content", "kernel-size", self._kernel_size_value(kernel_size)
+            ),
             "luma_only": luma_only or self.config.get_value("detect-content", "luma-only"),
             "min_scene_len": min_scene_len_frames,
             "threshold": self.config.get_value("detect-content", "threshold", threshold),
@@ -391,7 +407,9 @@ class CliContext:
         return {
             "adaptive_threshold": self.config.get_value("detect-adaptive", "threshold", threshold),
             "weights": self.config.get_value("detect-adaptive", "weights", weights),
-            "kernel_size": self.config.get_value("detect-adaptive", "kernel-size", kernel_size),
+            "kernel_size": self.config.get_value(
+                "detect-adaptive", "kernel-size", self._kernel_size_value(kernel_size)
+            ),
             "luma_only": luma_only or self.config.get_value("detect-adaptive", "luma-only"),
             "min_content_val": self.config.get_value(
                 "detect-adaptive", "min-content-val", min_content_val

@@ -424,6 +424,43 @@ def test_cli_frame_rate_aliases(option: str):
 
 
 @pytest.mark.parametrize(
+    "cli_args",
+    [
+        ["detect-content", "-k", "1"],
+        ["detect-content", "-k", "4"],
+        ["detect-content", "-k", "-3"],
+        ["detect-adaptive", "-k", "1"],
+        ["detect-adaptive", "-k", "-2"],
+    ],
+)
+def test_cli_kernel_size_rejects_invalid(cli_args: list[str]):
+    """Kernel sizes below 3 or even must be rejected with a usage error, not a traceback."""
+    exit_code, output = invoke_cli(["-i", DEFAULT_VIDEO_PATH, *cli_args, "time", "-e", "1"])
+    assert exit_code != 0
+    assert "Kernel size must be an odd integer >= 3, or -1 for auto." in output
+
+
+@pytest.mark.parametrize("command", ["detect-content", "detect-adaptive"])
+@pytest.mark.parametrize("kernel_size", ["3", "-1"])
+def test_cli_kernel_size_accepts_valid(command: str, kernel_size: str):
+    """An odd kernel size >= 3 works, and -1 means auto, the same as in a config file."""
+    exit_code, _ = invoke_cli(
+        ["-i", DEFAULT_VIDEO_PATH, command, "-k", kernel_size, "time", "-e", "1"]
+    )
+    assert exit_code == 0
+
+
+@pytest.mark.parametrize("command", ["detect-content", "detect-adaptive"])
+def test_cli_kernel_size_config_file_rejects_one(tmp_path: Path, command: str):
+    """A config file kernel-size of 1 must be rejected when loading, like other invalid sizes."""
+    config_path = tmp_path.joinpath("config.cfg")
+    config_path.write_text(f"[{command}]\nkernel-size = 1\n")
+    with pytest.raises(ConfigLoadFailure) as ex:
+        ConfigRegistry(str(config_path))
+    assert any("odd integer >= 3" in message for _, message in ex.value.init_log)
+
+
+@pytest.mark.parametrize(
     ("options", "succeeds"),
     [
         (["--frame-rate", "30.0", "--framerate", "0"], False),
