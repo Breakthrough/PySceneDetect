@@ -43,7 +43,7 @@ def main():
 
     with log_redirect:
         try:
-            run_scenedetect(context)
+            success = run_scenedetect(context)
         except KeyboardInterrupt:
             logger.info("Stopped.")
             if DEBUG_MODE:
@@ -54,6 +54,8 @@ def main():
                 raise
             logger.critical("ERROR: Unhandled exception:", exc_info=ex)
             raise SystemExit(1) from ex
+    if not success:
+        raise SystemExit(1)
 
 
 if __name__ == "__main__":

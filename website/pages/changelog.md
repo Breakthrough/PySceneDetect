@@ -859,3 +859,5 @@ Development
 ## PySceneDetect 0.8 (TBD)
 
  - [general] The root `pyproject.toml` is now `scenedetect` again (it had a development-only `scenedetect-core` name since 0.7.1). `pip install -e .` now installs the same distribution as PyPI. The `[opencv]` and `[opencv-headless]` extras of the development config were removed because `opencv-python` is now a declared dependency [#558](https://github.com/Breakthrough/PySceneDetect/issues/558)
+ - [feature] Add `--stdin` to read the input video from a pipe, e.g. `ffmpeg -i input.mp4 -c copy -f matroska - | scenedetect --stdin detect-content list-scenes`. Requires the PyAV backend. `save-html` omits images, and commands that need to seek or refer to a source file (`split-video`, `save-images`, `save-fcp`, `save-otio`, `load-scenes`, `time -s`) are not supported [#189](https://github.com/Breakthrough/PySceneDetect/issues/189) [#434](https://github.com/Breakthrough/PySceneDetect/issues/434)
+ - [bugfix] The CLI now exits with 1 when no frames could be read from the input video, or seeking to the `time -s`/`--start` time fails, instead of 0

@@ -206,6 +206,12 @@ Global options (e.g. -i/--input, -c/--config) must be specified before any comma
     help="[REQUIRED] Input video file. Image sequences and URLs are supported.",
 )
 @click.option(
+    "--stdin",
+    is_flag=True,
+    default=False,
+    help="Read the input video from standard input instead of -i/--input. Requires the pyav backend. An MP4 needs its index at the start of the file (ffmpeg -movflags +faststart), otherwise remux to MKV or MPEG-TS. Commands that need to seek in the video are not supported.",
+)
+@click.option(
     "--output",
     "-o",
     multiple=False,
@@ -336,6 +342,7 @@ Global options (e.g. -i/--input, -c/--config) must be specified before any comma
 def scenedetect(
     ctx: click.Context,
     input: str | None,
+    stdin: bool,
     output: str | None,
     stats: str | None,
     config: str | None,
@@ -356,6 +363,7 @@ def scenedetect(
 
     ctx.handle_options(
         input_path=input,
+        use_stdin=stdin,
         output=output,
         frame_rate=frame_rate,
         stats_file=stats,
@@ -372,6 +380,12 @@ def scenedetect(
         stats=stats,
         verbosity=verbosity,
     )
+
+
+def check_not_stdin(ctx: CliContext, command: str) -> None:
+    """Rejects `command` if the input is read from stdin, which cannot seek and has no path."""
+    if ctx.use_stdin:
+        raise click.UsageError(f"{command} is incompatible with --stdin.")
 
 
 def add_hidden_alias(command: click.Command, alias: str):
@@ -492,6 +506,8 @@ def time_command(
             "Only one of --duration/-d or --end/-e can be specified, not both.",
             param_hint="time",
         )
+    if start is not None:
+        check_not_stdin(ctx, "time -s/--start")
     logger.debug("Setting video time:\n    start: %s, duration: %s, end: %s", start, duration, end)
     # *NOTE*: The Python API uses 0-based frame indices, but the CLI uses 1-based indices to
     # match the default start number used by `ffmpeg` when saving frames as images. As such,
@@ -1005,6 +1021,7 @@ def load_scenes_command(ctx: click.Context, input: str | None, start_col_name: s
     ctx = ctx.obj
     assert isinstance(ctx, CliContext)
 
+    check_not_stdin(ctx, "load-scenes")
     logger.debug("Will load scenes from %s (start_col_name = %s)", input, start_col_name)
     assert ctx.scene_manager is not None
     if ctx.scene_manager.get_num_detectors() > 0:
@@ -1093,7 +1110,11 @@ def save_html_command(
     assert isinstance(ctx, CliContext)
     # Make sure a save-images command is in the pipeline for us to use the results from if we need
     # to include images.
-    include_images = not ctx.config.get_value("save-html", "no-images", no_images)
+    no_images = ctx.config.get_value("save-html", "no-images", no_images)
+    if ctx.use_stdin and not no_images:
+        logger.warning("WARNING: save-html will not include images when reading from --stdin.")
+        no_images = True
+    include_images = not no_images
     if include_images and not ctx.save_images:
         assert save_images_command.callback is not None
         save_images_command.callback()
@@ -1101,7 +1122,7 @@ def save_html_command(
         "filename": ctx.config.get_value("save-html", "filename", filename),
         "image_width": ctx.config.get_value("save-html", "image-width", image_width),
         "image_height": ctx.config.get_value("save-html", "image-height", image_height),
-        "no_images": ctx.config.get_value("save-html", "no-images", no_images),
+        "no_images": no_images,
         "show": ctx.config.get_value("save-html", "show", show),
     }
     ctx.add_command(cli_commands.save_html, save_html_args)
@@ -1330,6 +1351,7 @@ def split_video_command(
     ctx = ctx.obj
     assert isinstance(ctx, CliContext)
 
+    check_not_stdin(ctx, "split-video")
     check_split_video_requirements(use_mkvmerge=mkvmerge)
     assert ctx.video_stream is not None
     if "%" in ctx.video_stream.path or "://" in ctx.video_stream.path:
@@ -1575,6 +1597,7 @@ def save_images_command(
     assert isinstance(ctx, CliContext)
     assert ctx.video_stream is not None
 
+    check_not_stdin(ctx, "save-images")
     if "://" in ctx.video_stream.path:
         error_str = "\nThe save-images command is incompatible with URLs."
         logger.error(error_str)
@@ -1902,6 +1925,7 @@ def save_fcp_command(
     ctx = ctx.obj
     assert isinstance(ctx, CliContext)
 
+    check_not_stdin(ctx, "save-fcp")
     save_fcp_args = {
         "filename": ctx.config.get_value("save-fcp", "filename", filename),
         "format": ctx.config.get_value("save-fcp", "format", format),
@@ -1965,6 +1989,7 @@ def save_otio_command(
     ctx = ctx.obj
     assert isinstance(ctx, CliContext)
 
+    check_not_stdin(ctx, "save-otio")
     if audio and no_audio:
         raise click.BadArgumentUsage("Only one of --audio or --no-audio can be specified.")
 

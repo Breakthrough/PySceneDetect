@@ -27,18 +27,21 @@ from scenedetect.video_stream import SeekError
 logger = logging.getLogger("pyscenedetect")
 
 
-def run_scenedetect(context: CliContext):
+def run_scenedetect(context: CliContext) -> bool:
     """Perform main CLI application control logic. Run once all command-line options and
     configuration file options have been validated.
 
     Arguments:
         context: Prevalidated command-line option context to use for processing.
+
+    Returns:
+        False if scene detection failed, True otherwise.
     """
     # No input may have been specified depending on the commands/args that were used.
     logger.debug("Running controller.")
     if context.scene_manager is None:
         logger.debug("No input specified.")
-        return
+        return True
 
     # Suppress warnings when reading past EOF in MoviePy (#461).
     if VideoStreamMoviePy and isinstance(context.video_stream, VideoStreamMoviePy):
@@ -58,7 +61,7 @@ def run_scenedetect(context: CliContext):
         # Perform scene detection on input.
         result = _detect(context)
         if result is None:
-            return
+            return False
         scenes, cuts = result
         scenes = _postprocess_scene_list(context, scenes)
         # Handle -s/--stats option.
@@ -76,6 +79,7 @@ def run_scenedetect(context: CliContext):
     # Handle post-processing commands the user wants to run (see scenedetect._cli.commands).
     for handler, kwargs in context.commands:
         handler(context=context, scenes=scenes, cuts=cuts, **kwargs)
+    return True
 
 
 def _postprocess_scene_list(context: CliContext, scene_list: SceneList) -> SceneList:
@@ -140,6 +144,15 @@ def _detect(context: CliContext) -> tuple[SceneList, CutList] | None:
             "      ffmpeg -i input.mp4 -c copy -an output.mp4\n"
             "      mkvmerge -o output.mkv input.mp4\n"
             "For details, see https://scenedetect.com/faq/"
+        )
+        return None
+
+    if num_frames <= 0 and context.use_stdin:
+        logger.critical(
+            "Failed to read any frames from stdin. An MP4 needs its index at the start of the file"
+            " to be read from a pipe (ffmpeg -movflags +faststart). Otherwise, try remuxing to MKV"
+            " or MPEG-TS:\n"
+            "      ffmpeg -i input.mp4 -c copy -f matroska -\n"
         )
         return None
 
