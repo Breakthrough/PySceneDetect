@@ -859,3 +859,4 @@ Development
 ## PySceneDetect 0.8 (TBD)
 
  - [general] The root `pyproject.toml` is now `scenedetect` again (it had a development-only `scenedetect-core` name since 0.7.1). `pip install -e .` now installs the same distribution as PyPI. The `[opencv]` and `[opencv-headless]` extras of the development config were removed because `opencv-python` is now a declared dependency [#558](https://github.com/Breakthrough/PySceneDetect/issues/558)
+ - [bugfix] `--kernel-size`/`-k` values the detectors cannot use (even numbers, 1, 0 and negatives other than -1) now give a usage error instead of a traceback, and `-k -1` now means auto, like the config file. A config file with `kernel-size = 1` is now an error [#604](https://github.com/Breakthrough/PySceneDetect/issues/604)

@@ -428,14 +428,26 @@ def test_cli_frame_rate_aliases(option: str):
     [
         ["detect-content", "-k", "1"],
         ["detect-content", "-k", "4"],
+        ["detect-content", "-k", "-3"],
         ["detect-adaptive", "-k", "1"],
+        ["detect-adaptive", "-k", "-2"],
     ],
 )
 def test_cli_kernel_size_rejects_invalid(cli_args: list[str]):
     """Kernel sizes below 3 or even must be rejected with a usage error, not a traceback."""
     exit_code, output = invoke_cli(["-i", DEFAULT_VIDEO_PATH, *cli_args, "time", "-e", "1"])
     assert exit_code != 0
-    assert "Kernel size must be an odd integer >= 3." in output
+    assert "Kernel size must be an odd integer >= 3, or -1 for auto." in output
+
+
+@pytest.mark.parametrize("command", ["detect-content", "detect-adaptive"])
+@pytest.mark.parametrize("kernel_size", ["3", "-1"])
+def test_cli_kernel_size_accepts_valid(command: str, kernel_size: str):
+    """An odd kernel size >= 3 works, and -1 means auto, the same as in a config file."""
+    exit_code, _ = invoke_cli(
+        ["-i", DEFAULT_VIDEO_PATH, command, "-k", kernel_size, "time", "-e", "1"]
+    )
+    assert exit_code == 0
 
 
 @pytest.mark.parametrize("command", ["detect-content", "detect-adaptive"])
