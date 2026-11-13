@@ -7,6 +7,9 @@ updates:
       - "/.github/actions/*"  # composite actions
     schedule:
       interval: monthly
+    # Do not propose a release until it is 7 days old. This gives time to find a bad release.
+    cooldown:
+      default-days: 7
     groups:
       actions:
         patterns: ["*"]
