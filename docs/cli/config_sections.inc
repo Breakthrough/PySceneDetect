@@ -464,6 +464,43 @@ Options of :ref:`load-scenes <command-load-scenes>`.
     # Name of column used to mark scene cut points.
     #start-col-name = Start Frame
 
+.. _config-save-chapters:
+
+[save-chapters]
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Options of :ref:`save-chapters <command-save-chapters>` (Python API: :func:`~scenedetect.output.write_scene_list_ffmetadata`).
+
+.. list-table::
+   :class: config-keys
+   :header-rows: 1
+   :widths: 28 32 40
+
+   * - Key
+     - Default
+     - CLI option
+   * - ``filename``
+     - ``$VIDEO_NAME-Chapters.txt``
+     - :option:`-f/--filename <scenedetect save-chapters -f>`
+   * - ``output``
+     - *none*
+     - :option:`-o/--output <scenedetect save-chapters -o>`
+   * - ``title``
+     - ``Scene $SCENE_NUMBER``
+     - :option:`-t/--title <scenedetect save-chapters -t>`
+
+.. code-block:: ini
+
+    [save-chapters]
+    # Filename format of chapters file. Can use $VIDEO_NAME macro.
+    #filename = $VIDEO_NAME-Chapters.txt
+
+    # Folder to output chapters file to. Overrides [global] output option.
+    #output = /usr/tmp/chapters
+
+    # Title format to use for each chapter. Can use $VIDEO_NAME and $SCENE_NUMBER macros.
+    #title = Scene $SCENE_NUMBER
+
 .. _config-save-edl:
 
 [save-edl]

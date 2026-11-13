@@ -26,6 +26,7 @@ import os
 import typing as ty
 from fractions import Fraction
 from pathlib import Path
+from string import Template
 from xml.dom import minidom
 from xml.etree import ElementTree
 
@@ -472,6 +473,62 @@ def _rational_seconds(value: Fraction) -> str:
 def _frame_timecode_seconds(tc: FrameTimecode) -> Fraction:
     """Exact seconds for `tc` as a `Fraction`, derived from PTS * time base."""
     return Fraction(tc.pts) * tc.time_base
+
+
+def _escape_ffmetadata(value: str) -> str:
+    """Escape `value` for use in an FFmetadata file.
+
+    The characters ``=``, ``;``, ``#``, ``\\`` and line breaks have special meaning in FFmetadata
+    and must be preceded by a backslash. See https://ffmpeg.org/ffmpeg-formats.html#Metadata-2
+
+    If the escaped value ends in a backslash, a space is appended so the backslash can't be read
+    together with the line break that follows it.
+    """
+    for char in ("\\", "=", ";", "#", "\n", "\r"):
+        value = value.replace(char, "\\" + char)
+    if value.endswith("\\"):
+        value += " "
+    return value
+
+
+@_open_output_file("FFMETADATA")
+def write_scene_list_ffmetadata(
+    output_path: StrPath | BytePath | ty.TextIO,
+    scene_list: SceneList,
+    title_format_template: str = "Scene $SCENE_NUMBER",
+):
+    """Writes the given list of scenes to `output_path` as chapters in FFmetadata format.
+
+    The resulting file can be added to a video as chapter markers with ffmpeg, for example:
+    ``ffmpeg -i video.mp4 -i chapters.txt -map_chapters 1 -codec copy output.mp4``
+
+    Arguments:
+        output_path: Open text file or path to write the FFmetadata file to. Parent directories
+            must exist. When a path is provided, the file is closed after writing.
+        scene_list: List of scenes as pairs of FrameTimecodes denoting each scene's start/end.
+        title_format_template: Template for each chapter's title. ``$SCENE_NUMBER`` is replaced
+            with the 1-based scene number.
+    """
+    # `_open_output_file` replaces filesystem paths with writable text streams.
+    assert isinstance(output_path, _SupportsWrite)
+    output_file = output_path
+    lines = [";FFMETADATA1"]
+    for i, (start, end) in enumerate(scene_list):
+        # Chapter times are written in milliseconds from exact (PTS-based) seconds, so they don't
+        # drift on fractional frame rates like 23.976 or 29.97. Rounding up ensures a chapter never
+        # starts before the first frame of its scene (e.g. 500.5 ms is written as 501).
+        start_ms = math.ceil(_frame_timecode_seconds(start) * 1000)
+        end_ms = math.ceil(_frame_timecode_seconds(end) * 1000)
+        title = Template(title_format_template).safe_substitute(SCENE_NUMBER=i + 1)
+        lines += [
+            "[CHAPTER]",
+            "TIMEBASE=1/1000",
+            f"START={start_ms}",
+            f"END={end_ms}",
+            f"title={_escape_ffmetadata(title)}",
+        ]
+    output_file.write("\n".join(lines))
+    output_file.write("\n")
 
 
 @_open_output_file("FCPX")
