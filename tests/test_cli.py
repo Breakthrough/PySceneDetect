@@ -1804,6 +1804,7 @@ def test_cli_stdin_save_html_without_images(tmp_path: Path):
     """save-html needs to seek for images, so they should be left out when reading from stdin."""
     result = run_stdin("--stdin", "-o", str(tmp_path), "detect-content", "save-html")
     assert result.returncode == 0, result.stdout.decode(errors="replace")
+    assert b"save-html will not include images" in result.stdout
     assert (tmp_path / "stdin-Scenes.html").exists()
     assert not list(tmp_path.glob("*.jpg"))
 
@@ -1822,9 +1823,16 @@ def test_cli_stdin_with_other_backend():
     assert b"requires the pyav backend" in result.stdout
 
 
-def test_cli_stdin_terminal(monkeypatch: pytest.MonkeyPatch):
+@pytest.mark.parametrize(
+    "stdin",
+    [
+        SimpleNamespace(isatty=lambda: True),
+        None,  # No console, e.g. under pythonw.exe on Windows.
+    ],
+)
+def test_cli_stdin_terminal(monkeypatch: pytest.MonkeyPatch, stdin: SimpleNamespace | None):
     """Reading from a terminal would block forever, so it should be rejected."""
-    monkeypatch.setattr("sys.stdin", SimpleNamespace(isatty=lambda: True))
+    monkeypatch.setattr("sys.stdin", stdin)
     with pytest.raises(click.BadParameter, match="requires a video to be piped"):
         CliContext()._open_stdin_stream(frame_rate=None, backend=None)
 
@@ -1859,6 +1867,7 @@ def test_cli_stdin_incompatible_commands(command: str):
 
 def test_cli_stdin_unreadable_container():
     """An MP4 with its index at the end decodes no frames from a pipe, which shouldn't be silent."""
+    # This relies on testvideo.mp4 having its moov atom at the end of the file.
     result = run_stdin("--stdin", "detect-content", video="tests/resources/testvideo.mp4")
     assert result.returncode != 0
     assert b"Failed to read any frames from stdin" in result.stdout

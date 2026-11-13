@@ -524,7 +524,8 @@ class CliContext:
                 "--stdin requires the pyav backend. Install it with `pip install av`.",
                 param_hint="--stdin",
             )
-        if sys.stdin.isatty():
+        # sys.stdin is None if there is no console, e.g. under pythonw.exe on Windows.
+        if sys.stdin is None or sys.stdin.isatty():
             raise click.BadParameter(
                 "--stdin requires a video to be piped to the program.", param_hint="--stdin"
             )
@@ -554,9 +555,10 @@ class CliContext:
                 )
 
             # Open the video with the specified backend, loading any required config settings.
-            if self.use_stdin:
+            if input_path is None:  # --stdin
                 self.video_stream = VideoStreamAv(
-                    _PipeReader(sys.stdin.buffer),
+                    # _PipeReader only implements the part of BinaryIO that PyAV uses.
+                    ty.cast(ty.BinaryIO, _PipeReader(sys.stdin.buffer)),
                     frame_rate=frame_rate,
                     name="stdin",
                     threading_mode=self.config.get_value("backend-pyav", "threading-mode"),

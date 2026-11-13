@@ -256,6 +256,11 @@ CONCORDANCE: dict[str, list[Counterpart]] = {
             api=(":func:`~scenedetect.open_video`", ":func:`~scenedetect.detect`"),
         ),
         Counterpart(
+            "Input video from a pipe",
+            option="stdin",
+            api=(f":class:`~{_BE}.pyav.VideoStreamAv` (``path_or_io``)",),
+        ),
+        Counterpart(
             "Start, end, or duration",
             command="time",
             api=(

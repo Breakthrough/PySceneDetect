@@ -56,7 +56,7 @@ Options
 
 .. option:: --stdin
 
-  Read the input video from standard input instead of :option:`-i/--input <-i>`. Requires the pyav backend and a container that can be read from a pipe (e.g. MKV or MPEG-TS). Commands that need to seek in the video are not supported.
+  Read the input video from standard input instead of :option:`-i/--input <-i>`. Requires the pyav backend. An MP4 needs its index at the start of the file (ffmpeg -movflags +faststart), otherwise remux to MKV or MPEG-TS. Commands that need to seek in the video are not supported.
 
 .. option:: -o DIR, --output DIR
 
@@ -136,6 +136,9 @@ Global options, their config file keys, and their Python API counterparts.
    * - :option:`-i/--input <scenedetect -i>`
      -
      - :func:`~scenedetect.open_video`, :func:`~scenedetect.detect`
+   * - :option:`--stdin <scenedetect --stdin>`
+     -
+     - :class:`~scenedetect.backends.pyav.VideoStreamAv` (``path_or_io``)
    * - :option:`-o/--output <scenedetect -o>`
      - :ref:`[global] output <config-global>`
      - ``output_dir`` argument of :func:`~scenedetect.output.save_images` and :func:`~scenedetect.output.split_video_ffmpeg`; output path argument of each ``write_scene_list*`` function

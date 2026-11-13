@@ -209,7 +209,7 @@ Global options (e.g. -i/--input, -c/--config) must be specified before any comma
     "--stdin",
     is_flag=True,
     default=False,
-    help="Read the input video from standard input instead of -i/--input. Requires the pyav backend and a container that can be read from a pipe (e.g. MKV or MPEG-TS). Commands that need to seek in the video are not supported.",
+    help="Read the input video from standard input instead of -i/--input. Requires the pyav backend. An MP4 needs its index at the start of the file (ffmpeg -movflags +faststart), otherwise remux to MKV or MPEG-TS. Commands that need to seek in the video are not supported.",
 )
 @click.option(
     "--output",
@@ -385,7 +385,7 @@ def scenedetect(
 def check_not_stdin(ctx: CliContext, command: str) -> None:
     """Rejects `command` if the input is read from stdin, which cannot seek and has no path."""
     if ctx.use_stdin:
-        raise click.BadParameter(f"{command} is incompatible with --stdin.", param_hint=command)
+        raise click.UsageError(f"{command} is incompatible with --stdin.")
 
 
 def add_hidden_alias(command: click.Command, alias: str):
@@ -1110,7 +1110,10 @@ def save_html_command(
     assert isinstance(ctx, CliContext)
     # Make sure a save-images command is in the pipeline for us to use the results from if we need
     # to include images.
-    no_images = ctx.config.get_value("save-html", "no-images", no_images) or ctx.use_stdin
+    no_images = ctx.config.get_value("save-html", "no-images", no_images)
+    if ctx.use_stdin and not no_images:
+        logger.warning("WARNING: save-html will not include images when reading from --stdin.")
+        no_images = True
     include_images = not no_images
     if include_images and not ctx.save_images:
         assert save_images_command.callback is not None
