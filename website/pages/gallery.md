@@ -1,7 +1,7 @@
 
 # Project Gallery
 
-The following open-source projects use PySceneDetect in their own code.  They are listed for reference only: PySceneDetect does not endorse or maintain them, and each project is covered by its own license.
+The following open-source projects use PySceneDetect in their own code.  They are listed for reference only: PySceneDetect does not endorse or maintain them, and each project is covered by its own license.  Use them at your own risk.
 
 If you know of a project that should be listed here, feel free to [raise an issue](https://github.com/Breakthrough/PySceneDetect/issues/new/choose) with a link to where it uses PySceneDetect.  Research papers that use PySceneDetect are listed on the [Research & Literature](literature.md) page.
 
