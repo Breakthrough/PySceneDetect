@@ -30,7 +30,7 @@ The following example shows basic usage of a :class:`SceneManager`:
     scene_manager.add_detector(ContentDetector())
     # Detect all scenes in video from current position to end.
     scene_manager.detect_scenes(video)
-    # `get_scene_list` returns a list of start/end timecode pairs
+    # `get_scene_list` returns a list of start/end position pairs
     # for each scene that was found.
     scenes = scene_manager.get_scene_list()
 
@@ -38,11 +38,13 @@ An optional callback can also be invoked on each detected scene, for example:
 
 .. code:: python
 
+    import numpy
     from scenedetect import open_video, SceneManager, ContentDetector
+    from scenedetect.common import FramePosition
 
     # Callback to invoke on the first frame of every new scene detection.
-    def on_new_scene(frame_img: numpy.ndarray, frame_num: int):
-        print("New scene found at frame %d." % frame_num)
+    def on_new_scene(frame_img: numpy.ndarray, position: FramePosition):
+        print("New scene found at frame %d." % position.frame_number)
 
     video = open_video(test_video_file)
     scene_manager = SceneManager()
@@ -82,6 +84,7 @@ import sys
 import threading
 import typing as ty
 import warnings
+from fractions import Fraction
 
 import cv2
 import numpy as np
@@ -89,10 +92,11 @@ import numpy as np
 from scenedetect.common import (
     CropRegion,
     CutList,
-    FrameTimecode,
+    FramePosition,
     Interpolation,
     SceneList,
     TimecodeLike,
+    parse_frame_or_time,
 )
 from scenedetect.detector import SceneDetector
 
@@ -142,8 +146,8 @@ def compute_downscale_factor(frame_width: int, effective_width: int = DEFAULT_MI
 
 def expand_scenes_to_bounds(
     scenes: SceneList,
-    start: FrameTimecode,
-    end: FrameTimecode,
+    start: FramePosition,
+    end: FramePosition,
 ) -> SceneList:
     """Return a new scene list whose first scene starts at `start` and last scene ends at `end`.
 
@@ -152,7 +156,7 @@ def expand_scenes_to_bounds(
     outside that analysis window.
 
     Arguments:
-        scenes: List of (start, end) FrameTimecode pairs.
+        scenes: List of (start, end) FramePosition pairs.
         start: Desired start of the first scene.
         end: Desired end of the last scene.
 
@@ -170,36 +174,33 @@ def expand_scenes_to_bounds(
 
 def get_scenes_from_cuts(
     cut_list: CutList,
-    start_pos: int | FrameTimecode,
-    end_pos: int | FrameTimecode,
+    start_pos: FramePosition,
+    end_pos: FramePosition,
 ) -> SceneList:
-    """Returns a list of tuples of start/end FrameTimecodes for each scene based on a
+    """Returns a list of tuples of start/end FramePositions for each scene based on a
     list of detected scene cuts/breaks.
 
     This function is called when using the :meth:`SceneManager.get_scene_list` method.
     The scene list is generated from a cutting list (:meth:`SceneManager.get_cut_list`),
-    noting that each scene is contiguous, starting from the first to last frame of the input.
+    noting that scenes are contiguous from `start_pos` to the exclusive `end_pos`.
     If `cut_list` is empty, the resulting scene will span from `start_pos` to `end_pos`.
 
     Arguments:
-        cut_list: List of FrameTimecode objects where scene cuts/breaks occur.
-        num_frames: The number of frames, or FrameTimecode representing duration, of the video that
-            was processed (used to generate last scene's end time).
-        start_frame: The start frame or FrameTimecode of the cut list. Used to generate the first
-            scene's start time.
+        cut_list: List of FramePosition objects where scene cuts/breaks occur.
+        start_pos: Start position of the first scene.
+        end_pos: Exclusive end position of the last scene.
     Returns:
-        List of tuples in the form (start_time, end_time), where both start_time and
-        end_time are FrameTimecode objects representing the exact time/frame where each
-        scene occupies based on the input cut_list.
+        List of (start_pos, end_pos) FramePosition pairs. Each scene includes its start
+        position and excludes its end position.
     """
 
-    # Scene list, where scenes are tuples of (Start FrameTimecode, End FrameTimecode).
+    # Scene list, where scenes are tuples of (start FramePosition, end FramePosition).
     scene_list = []
     if not cut_list:
         scene_list.append((start_pos, end_pos))
         return scene_list
-    # Initialize last_cut to the first frame we processed,as it will be
-    # the start timecode for the first scene in the list.
+    # Initialize last_cut to the first frame we processed, as it will be
+    # the start position for the first scene in the list.
     last_cut = start_pos
     for cut in cut_list:
         scene_list.append((last_cut, cut))
@@ -230,7 +231,7 @@ class SceneManager:
             stats_manager: :class:`StatsManager` to bind to this `SceneManager`. Can be
                 accessed via the `stats_manager` property of the resulting object to save to disk.
         """
-        self._cutting_list: list[FrameTimecode] = []
+        self._cutting_list: list[FramePosition] = []
         self._detector_list: list[SceneDetector] = []
         # TODO(v1.0): This class should own a StatsManager instead of taking an optional one.
         # Expose a new `stats_manager` @property from the SceneManager, and either change the
@@ -241,14 +242,13 @@ class SceneManager:
         # (scenedetect.backends.concat).
         self._stats_manager: StatsManager | None = stats_manager
 
-        # Position of video that was first passed to detect_scenes.
-        self._start_pos: FrameTimecode | None = None
-        # Position of video on the last frame processed by detect_scenes.
-        self._last_pos: FrameTimecode | None = None
+        # Position of the first frame accepted for detection.
+        self._start_pos: FramePosition | None = None
+        # Position of the last frame read by detect_scenes, including skipped frames.
+        self._last_pos: FramePosition | None = None
         # Size of the decoded frames.
         self._frame_size: tuple[int, int] | None = None
         self._frame_size_errors: int = 0
-        self._base_timecode: FrameTimecode | None = None
         self._downscale: int = 1
         self._auto_downscale: bool = True
         # Interpolation method to use when downscaling. Defaults to linear interpolation
@@ -258,7 +258,7 @@ class SceneManager:
         self._exception_info = None
         self._stop = threading.Event()
 
-        self._frame_buffer: list[tuple[FrameTimecode, np.ndarray]] = []
+        self._frame_buffer: list[tuple[FramePosition, np.ndarray]] = []
         self._frame_buffer_size = 0
         self._crop = None
 
@@ -374,54 +374,56 @@ class SceneManager:
         self._detector_list.clear()
 
     def get_scene_list(self, start_in_scene: bool = False) -> SceneList:
-        """Return a list of tuples of start/end FrameTimecodes for each detected scene.
+        """Return a list of tuples of start/end FramePositions for each detected scene.
 
         Arguments:
             start_in_scene: Assume the video begins in a scene. This means that when detecting
                 fast cuts with `ContentDetector`, if no cuts are found, the resulting scene list
-                will contain a single scene spanning the entire video (instead of no scenes).
+                will contain a single scene spanning the processed range (instead of no scenes).
                 When detecting fades with `ThresholdDetector`, the beginning portion of the video
                 will always be included until the first fade-out event is detected.
 
         Returns:
-            List of tuples in the form (start_time, end_time), where both start_time and
-            end_time are FrameTimecode objects representing the exact time/frame where each
-            detected scene in the video begins and ends.
+            List of (start_pos, end_pos) FramePosition pairs with exclusive end positions.
+            The final end position advances the frame number but uses the last frame's timestamp.
         """
-        if self._base_timecode is None or self._start_pos is None or self._last_pos is None:
+        if self._start_pos is None or self._last_pos is None:
             return []
         cut_list = self._get_cutting_list()
-        scene_list = get_scenes_from_cuts(
-            cut_list=cut_list, start_pos=self._start_pos, end_pos=self._last_pos + 1
-        )
         # If we didn't actually detect any cuts, make sure the resulting scene_list is empty
         # unless start_in_scene is True.
         if not cut_list and not start_in_scene:
-            scene_list = []
-        return sorted(scene_list)
+            return []
+        # TODO: Account for the last frame's duration across backends.
+        end_pos = FramePosition(
+            timecode=self._last_pos.timecode,
+            frame_number=self._last_pos.frame_number + 1,
+        )
+        scene_list = get_scenes_from_cuts(
+            cut_list=cut_list, start_pos=self._start_pos, end_pos=end_pos
+        )
+        return scene_list
 
-    def _get_cutting_list(self) -> list[FrameTimecode]:
-        """Return a sorted list of unique frame numbers of any detected scene cuts."""
+    def _get_cutting_list(self) -> list[FramePosition]:
+        """Return unique cut positions sorted by frame number."""
         if not self._cutting_list:
             return []
         # Ensure all cuts are unique by using a set to remove all duplicates.
-        return [cut for cut in sorted(set(self._cutting_list))]
+        return sorted(set(self._cutting_list), key=lambda position: position.frame_number)
 
     def _process_frame(
         self,
-        position: FrameTimecode,
+        position: FramePosition,
         frame_im: np.ndarray,
-        callback: ty.Callable[[np.ndarray, FrameTimecode], None] | None = None,
+        callback: ty.Callable[[np.ndarray, FramePosition], None] | None = None,
     ) -> bool:
         """Add any cuts detected with the current frame to the cutting list. Returns True if any new
         cuts were detected, False otherwise."""
         new_cuts = False
-        # TODO(https://scenedetect.com/issues/283): This breaks with AdaptiveDetector as cuts differ
-        # from the frame number being processed. Allow detectors to specify the max frame lookahead
-        # they require (i.e. any event will never be more than N frames behind the current one).
+        # TODO(https://scenedetect.com/issues/283): Ensure the buffer covers delayed cuts from
+        # every detector.
         self._frame_buffer.append((position, frame_im))
-        # frame_buffer[-1] is current frame, -2 is one behind, etc
-        # so index based on cut frame should be [event_frame - (frame_num + 1)]
+        # Keep recent processed images so callbacks can match them to cut positions.
         self._frame_buffer = self._frame_buffer[-(self._frame_buffer_size + 1) :]
         for detector in self._detector_list:
             cuts = detector.process_frame(position, frame_im)
@@ -434,10 +436,10 @@ class SceneManager:
                             callback(frame, position)
         return new_cuts
 
-    def _post_process(self, timecode: FrameTimecode) -> None:
+    def _post_process(self, position: FramePosition) -> None:
         """Add remaining cuts to the cutting list, after processing the last frame."""
         for detector in self._detector_list:
-            self._cutting_list += detector.post_process(timecode)
+            self._cutting_list += detector.post_process(position)
 
     def stop(self) -> None:
         """Stop the current :meth:`detect_scenes` call, if any. Thread-safe."""
@@ -450,11 +452,11 @@ class SceneManager:
         end_time: TimecodeLike | None = None,
         frame_skip: int = 0,
         show_progress: bool = False,
-        callback: ty.Callable[[np.ndarray, FrameTimecode], None] | None = None,
+        callback: ty.Callable[[np.ndarray, FramePosition], None] | None = None,
         frame_source: VideoStream | None = None,
     ) -> int:
         """Perform scene detection on the given video using the added SceneDetectors, returning the
-        number of frames processed. Results can be obtained by calling :meth:`get_scene_list` or
+        number of frames read. Results can be obtained by calling :meth:`get_scene_list` or
         :meth:`get_cut_list`.
 
         Video decoding is performed in a background thread to allow scene detection and frame
@@ -464,22 +466,25 @@ class SceneManager:
         Arguments:
             video: VideoStream obtained from either `scenedetect.open_video`, or by creating
                 one directly (e.g. `scenedetect.backends.opencv.VideoStreamCv2`).
-            duration: Amount of time to detect from current video position. Cannot be
-                specified if `end_time` is set.
-            end_time: Time to stop processing at. Cannot be specified if `duration` is set.
+            duration: Number of frames or elapsed time to process from the next unread frame.
+                Elapsed time is measured from that frame's timestamp. Cannot be specified if
+                `end_time` is set.
+            end_time: Exclusive frame ordinal or timestamp cutoff. Frame ordinals use the video's
+                `frame_numbering`; timestamps use its timeline. Cannot be specified if `duration`
+                is set.
             frame_skip: Not recommended except for extremely high framerate videos.
                 Number of frames to skip (i.e. process every 1 in N+1 frames,
-                where N is frame_skip, processing only 1/N+1 percent of the video,
-                speeding up the detection time at the expense of accuracy).
+                where N is frame_skip), speeding up detection at the expense of accuracy.
                 `frame_skip` **must** be 0 (the default) when using a StatsManager.
             show_progress: If True, and the ``tqdm`` module is available, displays
-                a progress bar with the progress, framerate, and expected time to
-                complete processing the video frame source.
-            callback: If set, called after each scene/event detected.
+                progress in seconds for time limits and frames otherwise, with an estimated
+                time remaining when a total is known.
+            callback: If set, called with (image, FramePosition) for cuts reported during frame
+                processing whose images remain buffered.
             frame_source: [DEPRECATED] DO NOT USE. For compatibility with previous version.
                 :meta private:
         Returns:
-            int: Number of frames read and processed from the frame source.
+            int: Number of frames read, including frames skipped for detection.
         Raises:
             ValueError: `frame_skip` **must** be 0 (the default) if the SceneManager
                 was constructed with a StatsManager object.
@@ -499,11 +504,15 @@ class SceneManager:
             raise ValueError("frame_skip must be 0 when using a StatsManager.")
         if duration is not None and end_time is not None:
             raise ValueError("duration and end_time cannot be set at the same time!")
-        # TODO: These checks should be handled by the FrameTimecode constructor.
-        if duration is not None and isinstance(duration, (int, float)) and duration < 0:
-            raise ValueError("duration must be greater than or equal to 0!")
-        if end_time is not None and isinstance(end_time, (int, float)) and end_time < 0:
-            raise ValueError("end_time must be greater than or equal to 0!")
+        start_frame_num: int = video.frame_number
+        stop_at = parse_frame_or_time(end_time) if end_time is not None else None
+        length = parse_frame_or_time(duration) if duration is not None else None
+
+        if length == 0:
+            return 0
+        if isinstance(length, int):
+            stop_at = start_frame_num + 1 + length
+        duration_seconds = length if isinstance(length, Fraction) else None
 
         effective_frame_size = video.frame_size
         if self._crop:
@@ -534,26 +543,32 @@ class SceneManager:
             downscale_factor,
         )
 
-        self._base_timecode = video.base_timecode
+        total: int | Fraction | None = None
+        start_seconds: Fraction | None = None
 
-        start_frame_num: int = video.frame_number
-        if end_time is not None:
-            end_time = self._base_timecode + end_time
-        elif duration is not None:
-            end_time = (self._base_timecode + duration) + start_frame_num
+        if isinstance(stop_at, Fraction) or duration_seconds is not None:
+            next_timecode = video.peek_timecode()
+            if next_timecode is None:
+                return 0
 
-        total_frames = 0
-        if video.duration is not None:
-            if end_time is not None and end_time < video.duration:
-                total_frames = end_time - start_frame_num
-            else:
-                total_frames = video.duration.frame_num - start_frame_num
+            start_seconds = next_timecode.seconds
+            if duration_seconds is not None:
+                stop_at = start_seconds + duration_seconds
+
+            assert isinstance(stop_at, Fraction)
+            total = max(0, stop_at - start_seconds)
+        elif isinstance(stop_at, int):
+            total = max(0, stop_at - start_frame_num - 1)
+        else:
+            video_duration = video.duration
+            if video_duration is not None:
+                total = max(0, video_duration.frame_num - start_frame_num - 1)
 
         progress_bar = None
         if show_progress:
             progress_bar = tqdm(
-                total=int(total_frames),
-                unit="frames",
+                total=float(total) if isinstance(total, Fraction) else total,
+                unit="s" if start_seconds is not None else "frames",
                 desc=PROGRESS_BAR_DESCRIPTION % 0,
                 dynamic_ncols=True,
             )
@@ -562,12 +577,12 @@ class SceneManager:
         self._stop.clear()
         decode_thread = threading.Thread(
             target=SceneManager._decode_thread,
-            args=(self, video, frame_skip, downscale_factor, end_time, frame_queue),
+            args=(self, video, frame_skip, downscale_factor, stop_at, frame_queue),
             daemon=True,
         )
         decode_thread.start()
         frame_im = None
-        prev_position = None
+        progress = 0
 
         logger.info("Detecting scenes...")
         try:
@@ -584,13 +599,14 @@ class SceneManager:
                         progress_bar.set_description(
                             PROGRESS_BAR_DESCRIPTION % len(self._cutting_list), refresh=False
                         )
-                    # Increment progress bar by delta of position.frame_num instead of 1
-                    # to handle VFR video where frame count is an approximation.
-                    delta = (
-                        1 if prev_position is None else position.frame_num - prev_position.frame_num
-                    )
-                    progress_bar.update(delta)
-                    prev_position = position
+                    if start_seconds is None:
+                        completed = position.frame_number - start_frame_num
+                    else:
+                        completed = float(position.timecode.seconds - start_seconds)
+
+                    completed = max(progress, completed)
+                    progress_bar.update(completed - progress)
+                    progress = completed
         finally:
             if progress_bar is not None:
                 progress_bar.set_description(
@@ -613,8 +629,10 @@ class SceneManager:
             assert exc is not None
             raise exc.with_traceback(self._exception_info[2])
 
-        self._last_pos = video.position
-        self._post_process(video.position)
+        last_pos = video.position
+        if last_pos is not None and frame_im is not None:
+            self._last_pos = last_pos
+            self._post_process(last_pos)
 
         return video.frame_number - start_frame_num
 
@@ -623,18 +641,30 @@ class SceneManager:
         video: VideoStream,
         frame_skip: int,
         downscale_factor: float,
-        end_time: FrameTimecode,
+        stop_at: int | Fraction | None,
         out_queue: queue.Queue,
     ):
+        frames_to_skip = 0
         try:
             while not self._stop.is_set():
+                if isinstance(stop_at, int) and video.frame_number + 1 >= stop_at:
+                    break
+                if isinstance(stop_at, Fraction):
+                    next_timecode = video.peek_timecode()
+                    if next_timecode is None or next_timecode.seconds >= stop_at:
+                        break
+
+                skipping = frames_to_skip > 0
                 frame_im = None
                 # We don't do any kind of locking here since the worst-case of this being wrong
                 # is that we do some extra work, and this function should never mutate any data
                 # (all of which should be modified under the GIL).
-                frame_im = video.read()
+                frame_im = video.read(decode=not skipping)
                 if frame_im is False:
                     break
+                if skipping:
+                    frames_to_skip -= 1
+                    continue
                 assert isinstance(frame_im, np.ndarray)
                 # Verify the decoded frame size against the video container's reported
                 # resolution, and also verify that consecutive frames have the correct size.
@@ -642,7 +672,7 @@ class SceneManager:
                 if self._frame_size is None:
                     self._frame_size = decoded_size
                     if video.frame_size != decoded_size:
-                        logger.warn(
+                        logger.warning(
                             f"WARNING: Decoded frame size ({decoded_size}) does not match "
                             f" video resolution {video.frame_size}, possible corrupt input."
                         )
@@ -655,7 +685,9 @@ class SceneManager:
                             f"expected = {self._frame_size}. Video may be corrupt."
                         )
                     if self._frame_size_errors == MAX_FRAME_SIZE_ERRORS:
-                        logger.warn("WARNING: Too many errors emitted, skipping future messages.")
+                        logger.warning(
+                            "WARNING: Too many errors emitted, skipping future messages."
+                        )
                     # Skip processing frames that have an incorrect size.
                     continue
 
@@ -678,15 +710,7 @@ class SceneManager:
                     self._start_pos = video.position
 
                 out_queue.put((frame_im, video.position))
-
-                if frame_skip > 0:
-                    for _ in range(frame_skip):
-                        if not video.read(decode=False):
-                            break
-                # End time includes the presentation time of the frame, but the `position`
-                # property of a VideoStream references the beginning of the frame in time.
-                if end_time is not None and not (video.position + 1) < end_time:
-                    break
+                frames_to_skip = frame_skip
 
         # If *any* exceptions occur, we re-raise them in the main thread so that the caller of
         # detect_scenes can handle it.
@@ -699,9 +723,6 @@ class SceneManager:
             self._stop.set()
 
         finally:
-            # Handle case where start position was never set if we did not decode any frames.
-            if self._start_pos is None:
-                self._start_pos = video.position
             # Make sure main thread stops processing loop.
             out_queue.put((None, None))
 
@@ -713,20 +734,19 @@ class SceneManager:
         self,
         show_warning: bool = True,
     ) -> CutList:
-        """[DEPRECATED] Return a list of FrameTimecodes of the detected scene changes/cuts.
+        """[DEPRECATED] Return a list of FramePositions of the detected scene changes/cuts.
 
-        Unlike get_scene_list, the cutting list returns a list of FrameTimecodes representing
+        Unlike get_scene_list, the cutting list returns a list of FramePositions representing
         the point in the input video where a new scene was detected, and thus the frame
         where the input should be cut/split. The cutting list, in turn, is used to generate
         the scene list, noting that each scene is contiguous starting from the first frame
         and ending at the last frame detected.
 
         Arguments:
-            show_warning: If set to False, suppresses the error from being warned. In v0.7,
-                this will have no effect and the error will become a Python warning.
+            show_warning: If False, suppresses the deprecation warning.
 
         Returns:
-            List of FrameTimecode objects denoting the points in time where a scene change
+            List of FramePosition objects denoting the positions where a scene change
             was detected in the input video, which can also be passed to external tools
             for automated splitting of the input into individual scenes.
 

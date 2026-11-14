@@ -235,6 +235,16 @@ class VideoStreamConcat(VideoStream):
         seconds = self._offsets[self._index] + self._child_position_seconds()
         return Timecode(pts=seconds.numerator, time_base=Fraction(1, seconds.denominator))
 
+    def _open_next_source(self) -> bool:
+        if (self._index + 1) >= len(self._paths):
+            logger.debug("No more input to process.")
+            return False
+        self._finish_current_source()
+        self._index += 1
+        logger.debug("Processing complete, opening next video: %s", self._paths[self._index])
+        self._cap = self._open_source(self._index)
+        return True
+
     def _read_next_frame(self, decode: bool = True) -> np.ndarray | bool:
         """Read/decode the next frame. Returns False when all inputs have been processed.
 
@@ -249,13 +259,8 @@ class VideoStreamConcat(VideoStream):
             result = self._cap.read(decode=decode)
             if result is not False:
                 return result
-            if (self._index + 1) >= len(self._paths):
-                logger.debug("No more input to process.")
+            if not self._open_next_source():
                 return False
-            self._finish_current_source()
-            self._index += 1
-            logger.debug("Processing complete, opening next video: %s", self._paths[self._index])
-            self._cap = self._open_source(self._index)
 
     def read(self, decode: bool = True) -> np.ndarray | bool:
         result = self._read_next_frame(decode=decode)
@@ -263,6 +268,23 @@ class VideoStreamConcat(VideoStream):
             return False
         self._record_frame(self._current_timecode())
         return result
+
+    def peek_timecode(self) -> Timecode | None:
+        """Return the next frame's global timecode without recording a position."""
+        if self._pending_frame is not None:
+            return self._current_timecode()
+
+        while True:
+            timecode = self._cap.peek_timecode()
+            if timecode is not None:
+                seconds = self._offsets[self._index] + timecode.seconds
+                return Timecode(
+                    pts=seconds.numerator,
+                    time_base=Fraction(1, seconds.denominator),
+                )
+
+            if not self._open_next_source():
+                return None
 
     def seek(self, target: TimecodeLike):
         """Seek to `target` on the global timeline. Supports seeking across sources in

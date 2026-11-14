@@ -38,7 +38,7 @@ from scenedetect.common import (
     SceneList as SceneList,
     CutList as CutList,
     CropRegion as CropRegion,
-    TimecodePair as TimecodePair,
+    PositionPair as PositionPair,
     TimecodeLike as TimecodeLike,
     Interpolation as Interpolation,
 )
@@ -179,12 +179,13 @@ def detect(
             determine a better threshold value.
         show_progress: Show a progress bar with estimated time remaining. Default is False.
         start_time: Starting point in video, in the form of a timecode ``HH:MM:SS[.nnn]`` (`str`),
-            number of seconds ``123.45`` (`float`), or number of frames ``200`` (`int`).
-        end_time: Starting point in video, in the form of a timecode ``HH:MM:SS[.nnn]`` (`str`),
-            number of seconds ``123.45`` (`float`), or number of frames ``200`` (`int`).
+            number of seconds ``123.45`` (`float`), a zero-based source frame ordinal ``200``
+            (`int`), or a :class:`~scenedetect.common.Timecode`.
+        end_time: Exclusive ending point, in the same formats as `start_time`. With the default
+            relative numbering, integer limits count from zero after the start seek.
         start_in_scene: Assume the video begins in a scene. This means that when detecting
             fast cuts with `ContentDetector`, if no cuts are found, the resulting scene list
-            will contain a single scene spanning the entire video (instead of no scenes).
+            will contain a single scene spanning the processed range (instead of no scenes).
             When detecting fades with `ThresholdDetector`, the beginning portion of the video
             will always be included until the first fade-out event is detected.
         backend: Name of the backend to use for video decoding. See
@@ -193,7 +194,7 @@ def detect(
             is unavailable or fails to open the video.
 
     Returns:
-        List of scenes as pairs of (start, end) :class:`FrameTimecode` objects.
+        List of scenes as pairs of (start, end) :class:`~scenedetect.common.FramePosition` objects.
 
     Raises:
         :class:`VideoOpenFailure`: `video_path` could not be opened.
@@ -203,8 +204,7 @@ def detect(
     """
     video = open_video(video_path, backend=backend)
     if start_time is not None:
-        video.seek(FrameTimecode(start_time, video.frame_rate))
-    end_timecode = FrameTimecode(end_time, video.frame_rate) if end_time is not None else None
+        video.seek(start_time)
     # To reduce memory consumption when not required, we only add a StatsManager if we
     # need to save frame metrics to disk.
     scene_manager = SceneManager(StatsManager() if stats_file_path else None)
@@ -212,7 +212,7 @@ def detect(
     scene_manager.detect_scenes(
         video=video,
         show_progress=show_progress,
-        end_time=end_timecode,
+        end_time=end_time,
     )
     if scene_manager.stats_manager is not None and stats_file_path is not None:
         scene_manager.stats_manager.save_to_csv(csv_file=stats_file_path)

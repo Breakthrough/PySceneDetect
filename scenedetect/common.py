@@ -80,16 +80,16 @@ CropRegion = tuple[int, int, int, int]
 to source frame without downscaling.
 """
 
-CutList = list["FrameTimecode"]
-"""Type hint for a list of cuts, where each timecode represents the first frame of a new shot."""
+CutList = list["FramePosition"]
+"""Type hint for a list of cuts, where each position represents the first frame of a new shot."""
 
 FrameRate = float | Fraction
 """Type hint for a video frame rate. ``Fraction`` is the canonical exact form and should be
 preferred (e.g. ``Fraction(30000, 1001)``), while ``float`` is accepted for convenience. Floats
 will be converted to rationals at runtime via :func:`framerate_to_fraction`."""
 
-SceneList = list[tuple["FrameTimecode", "FrameTimecode"]]
-"""Type hint for a list of scenes in the form (start time, end time)."""
+SceneList = list[tuple["FramePosition", "FramePosition"]]
+"""Type hint for a list of scenes in the form (start position, end position)."""
 
 # `Timecode` is defined later in this module; using `typing.Union` with
 # string forward refs is the only form that both works at the top of the file (the PEP 604 `|`
@@ -98,8 +98,8 @@ TimecodeLike: ty.TypeAlias = ty.Union[int, float, str, "Timecode"]
 """Frame-or-time input accepted by :func:`parse_frame_or_time`: a frame number (`int`),
 seconds (`float`), a frame/seconds/clock string (`str`), or a :class:`Timecode`."""
 
-TimecodePair = tuple["FrameTimecode", "FrameTimecode"]
-"""Type hint for timecode pairs, typically representing the start/end of a scene."""
+PositionPair = tuple["FramePosition", "FramePosition"]
+"""Type hint for position pairs, typically representing the start/end of a scene."""
 
 ##
 ## Constants

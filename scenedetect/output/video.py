@@ -38,7 +38,7 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
 
-from scenedetect.common import FrameTimecode, TimecodePair
+from scenedetect.common import FrameTimecode, PositionPair
 from scenedetect.platform import (
     CommandTooLong,
     Template,
@@ -158,7 +158,7 @@ def default_formatter(template: str) -> PathFormatter:
 
 def split_video_mkvmerge(
     input_video_path: str,
-    scene_list: Sequence[TimecodePair],
+    scene_list: Sequence[PositionPair],
     output_dir: str | Path | None = None,
     output_file_template: str = "$VIDEO_NAME.mkv",
     video_name: str | None = None,
@@ -254,7 +254,7 @@ def split_video_mkvmerge(
 
 def split_video_ffmpeg(
     input_video_path: str,
-    scene_list: Sequence[TimecodePair],
+    scene_list: Sequence[PositionPair],
     output_dir: str | Path | None = None,
     output_file_template: str = "$VIDEO_NAME-Scene-$SCENE_NUMBER.mp4",
     video_name: str | None = None,

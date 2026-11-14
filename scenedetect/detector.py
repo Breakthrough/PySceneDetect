@@ -53,12 +53,12 @@ class SceneDetector(ABC):
 
     @abstractmethod
     def process_frame(
-        self, timecode: FramePosition, frame_img: numpy.ndarray
+        self, position: FramePosition, frame_img: numpy.ndarray
     ) -> list[FramePosition]:
-        """Process the next frame. `timecode` is assumed to be sequential.
+        """Process the next frame. `position.frame_number` is assumed to increase.
 
         Arguments:
-            timecode: Frame position corresponding to the frame being processed.
+            position: Frame position corresponding to the frame being processed.
             frame_img: Video frame as a 24-bit BGR image.
 
         Returns:
@@ -67,11 +67,11 @@ class SceneDetector(ABC):
 
     # Optional Methods
 
-    def post_process(self, timecode: FramePosition) -> list[FramePosition]:
+    def post_process(self, position: FramePosition) -> list[FramePosition]:
         """Called after there are no more frames to process.
 
         Arguments:
-            timecode: The last position in the video which was read.
+            position: The last position in the video which was read.
 
         Returns:
            List of frame positions where scene cuts have been detected, if any.

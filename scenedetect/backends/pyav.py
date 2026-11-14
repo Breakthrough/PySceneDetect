@@ -366,20 +366,27 @@ class VideoStreamAv(VideoStream):
             raise VideoOpenFailure() from ex
 
     def read(self, decode: bool = True) -> np.ndarray | bool:
-        while True:
-            try:
-                frame = self._decode_next_frame()
-            except av.error.EOFError:  # type: ignore[attr-defined]
-                if self._handle_eof():
-                    continue
-                return False
+        frame = self._next_frame()
+        if frame is None:
+            return False
 
-            if frame is None:
-                return False
+        result = frame.to_ndarray(format="bgr24") if decode else True
+        self._record_decoded_frame(frame)
+        return result
 
-            result = frame.to_ndarray(format="bgr24") if decode else True
-            self._record_decoded_frame(frame)
-            return result
+    def peek_timecode(self) -> Timecode | None:
+        if self._pending_frame is None:
+            self._pending_frame = self._next_frame()
+
+        frame = self._pending_frame
+        if frame is None:
+            return None
+        if frame.pts is None or frame.time_base is None:
+            raise ValueError("Decoded frame has no usable presentation timestamp.")
+        return Timecode(
+            pts=self._normalized_pts(frame),
+            time_base=frame.time_base,
+        )
 
     #
     # Private Methods/Properties
@@ -395,15 +402,25 @@ class VideoStreamAv(VideoStream):
         """PyAV `av.codec.context.CodecContext` being used."""
         return self._video_stream.codec_context
 
-    def _normalized_pts(self) -> int:
+    def _next_frame(self) -> av.VideoFrame | None:
+        """Return the next frame, attempting EOF recovery when needed."""
+        while True:
+            try:
+                return self._decode_next_frame()
+            except av.error.EOFError:  # type: ignore[attr-defined]
+                if self._handle_eof():
+                    continue
+                return None
+
+    def _normalized_pts(self, frame: av.VideoFrame) -> int:
         """PTS of the current frame relative to the start of the stream. Some files have a
         nonzero stream start_time (e.g. from edit lists); other backends report the first
         frame's presentation time as 0, so we must do the same."""
-        assert self._frame is not None and self._frame.pts is not None
+        assert frame.pts is not None and frame.time_base is not None
         start_time = self._video_stream.start_time or 0
-        if start_time and self._video_stream.time_base != self._frame.time_base:
-            start_time = int(start_time * self._video_stream.time_base / self._frame.time_base)
-        return self._frame.pts - start_time
+        if start_time and self._video_stream.time_base != frame.time_base:
+            start_time = int(start_time * self._video_stream.time_base / frame.time_base)
+        return frame.pts - start_time
 
     def _get_duration(self) -> int:
         """Get video duration as number of frames based on the video and set framerate."""
@@ -519,7 +536,7 @@ class VideoStreamAv(VideoStream):
         self._frame = frame
         self._record_frame(
             Timecode(
-                pts=self._normalized_pts(),
+                pts=self._normalized_pts(frame),
                 time_base=frame.time_base,
             )
         )

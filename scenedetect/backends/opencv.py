@@ -411,6 +411,19 @@ class VideoStreamCv2(VideoStream):
                     logger.warning("Failed to decode some frames, results may be inaccurate.")
         return has_grabbed
 
+    def peek_timecode(self) -> Timecode | None:
+        """Return the presentation time of the next frame without advancing the stream.
+
+        Returns:
+            Timecode of the next frame, or None if end of video.
+        """
+        if self._pending_grab:
+            return self.timecode
+        if not self._grab_next_frame():
+            return None
+        self._pending_grab = True
+        return self.timecode
+
 
 class VideoCaptureAdapter(VideoStream):
     """Adapter for existing VideoCapture objects. Unlike VideoStreamCv2, this class supports
@@ -474,6 +487,7 @@ class VideoCaptureAdapter(VideoStream):
         self._max_read_attempts = max_read_attempts
         self._decode_failures = 0
         self._warning_displayed = False
+        self._pending_grab = False
 
     #
     # Backend-Specific Methods/Properties
@@ -545,7 +559,10 @@ class VideoCaptureAdapter(VideoStream):
         """Not supported."""
         raise NotImplementedError("Reset is not supported.")
 
-    def read(self, decode: bool = True) -> np.ndarray | bool:
+    def _grab_next_frame(self) -> bool:
+        if self._pending_grab:
+            self._pending_grab = False
+            return True
         if not self._cap.isOpened():
             return False
         has_grabbed = self._cap.grab()
@@ -561,8 +578,10 @@ class VideoCaptureAdapter(VideoStream):
                 logger.debug("Frame failed to decode.")
                 if not self._warning_displayed and self._decode_failures > 1:
                     logger.warning("Failed to decode some frames, results may be inaccurate.")
-        # We didn't manage to grab a frame even after retrying, so just return.
-        if not has_grabbed:
+        return has_grabbed
+
+    def read(self, decode: bool = True) -> np.ndarray | bool:
+        if not self._grab_next_frame():
             return False
         # TODO: Define a timestamp policy for timed and untimed captures.
         # The FPS-derived clock below does not preserve variable frame intervals.
@@ -572,3 +591,15 @@ class VideoCaptureAdapter(VideoStream):
             success, frame = self._cap.retrieve()
             return frame if success else False
         return True
+
+    def peek_timecode(self) -> Timecode | None:
+        """Return the next frame's timestamp on the FPS-derived clock."""
+        if not self._pending_grab:
+            if not self._grab_next_frame():
+                return None
+            self._pending_grab = True
+
+        return Timecode(
+            pts=self.frame_number + 1,
+            time_base=1 / self.frame_rate,
+        )

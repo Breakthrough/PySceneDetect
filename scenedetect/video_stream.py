@@ -218,6 +218,15 @@ class VideoStream(ABC):
         ...
 
     @abstractmethod
+    def peek_timecode(self) -> Timecode | None:
+        """Return the presentation time of the next frame without advancing the stream.
+
+        Returns:
+            Timecode of the next frame, or None if end of video.
+        """
+        ...
+
+    @abstractmethod
     def reset(self) -> None:
         """Close and re-open the VideoStream (equivalent to seeking back to beginning)."""
         ...

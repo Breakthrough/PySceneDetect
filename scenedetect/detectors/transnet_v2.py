@@ -103,13 +103,7 @@ class Predictor:
                 np.stack(
                     (
                         np.full(100, None, dtype=object),
-                        np.concatenate(
-                            (
-                                np.full(25, None, dtype=object),
-                                positions[:75]
-                            ),
-                            0
-                        ),
+                        np.concatenate((np.full(25, None, dtype=object), positions[:75]), 0),
                     )
                 ),
             )

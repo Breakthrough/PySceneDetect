@@ -292,6 +292,12 @@ class VideoStreamMoviePy(VideoStream):
         self._record_frame(timecode)
         return result
 
+    def peek_timecode(self) -> Timecode | None:
+        """Return the cached frame's timestamp on the FPS-derived clock."""
+        if self._eof:
+            return None
+        return self._next_timecode
+
     def _read_next_frame(self) -> tuple[np.ndarray, Timecode] | None:
         """Return the cached image and timestamp without recording a position.
 

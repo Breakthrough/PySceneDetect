@@ -14,8 +14,8 @@
 Used by the benchmark sweep harness to amortize video decoding across multiple detector
 configurations running in parallel: one source decode feeds N consumer streams, each
 read by an independent detection thread. The source is paced by the slowest consumer
-(blocking ``put`` into bounded per-consumer queues), so peak memory is bounded by
-``n * prefetch`` frames.
+(blocking ``put`` into bounded per-consumer queues). Each consumer can also retain one
+queued frame for ``peek_timecode()`` without copying its image.
 
 Internal API (underscore-prefixed module). Not part of the public surface.
 """
@@ -29,7 +29,7 @@ from fractions import Fraction
 
 import numpy as np
 
-from scenedetect.common import FrameTimecode, TimecodeLike
+from scenedetect.common import FrameTimecode, TimecodeLike, FramePosition, Timecode
 from scenedetect.video_stream import SeekError, VideoStream
 
 _EOF = object()
@@ -63,9 +63,10 @@ class FanOutVideoStream:
         Arguments:
             source: Already-opened ``VideoStream`` to read from.
             n: Number of consumer streams to expose. Must be >= 1.
-            prefetch: Per-consumer queue depth. ``0`` is rendezvous (every frame waits
-                for every consumer to take it); 4-8 absorbs jitter between consumers
-                at the cost of up to ``n * prefetch`` resident frames.
+            prefetch: Per-consumer queue depth. ``0`` uses a one-item queue.
+                Values of 4-8 absorb jitter between consumers. Queue capacity is
+                ``n * max(1, prefetch)`` items in total. Each consumer may also hold
+                one pending item for peeking.
         """
         if n < 1:
             raise ValueError("n must be at least 1")
@@ -175,6 +176,7 @@ class _FanOutConsumer(VideoStream):
         self._parent = parent
         self._index = index
         self._eof = False
+        self._pending_item: tuple[np.ndarray, FramePosition] | None = None
 
     @property
     def path(self) -> str:
@@ -208,14 +210,24 @@ class _FanOutConsumer(VideoStream):
     def decode_failures(self) -> int:
         return self._parent._source.decode_failures
 
-    def read(self, decode: bool = True) -> np.ndarray | bool:
+    def _next_item(self) -> tuple[np.ndarray, FramePosition] | None:
+        if self._pending_item:
+            item = self._pending_item
+            self._pending_item = None
+            return item
         if self._eof:
-            return False
+            return None
         item = self._parent._queues[self._index].get()
         if item is _EOF:
             self._eof = True
             if self._parent._reader_exc is not None:
                 raise self._parent._reader_exc
+            return None
+        return item
+
+    def read(self, decode: bool = True) -> np.ndarray | bool:
+        item = self._next_item()
+        if item is None:
             return False
         frame, position = item
         self._position = position
@@ -223,6 +235,14 @@ class _FanOutConsumer(VideoStream):
         if not decode:
             return True
         return frame  # type: ignore[return-value]
+
+    def peek_timecode(self) -> Timecode | None:
+        """Return the next queued frame's timestamp without advancing this consumer's position."""
+        if self._pending_item is None:
+            self._pending_item = self._next_item()
+        if self._pending_item is None:
+            return None
+        return self._pending_item[1].timecode
 
     def reset(self) -> None:
         raise SeekError("FanOutVideoStream consumers are forward-only; reset the source instead.")
