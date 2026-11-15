@@ -29,7 +29,7 @@ from fractions import Fraction
 
 import numpy as np
 
-from scenedetect.common import FrameTimecode, TimecodeLike, FramePosition, Timecode
+from scenedetect.common import FramePosition, FrameTimecode, Timecode, TimecodeLike
 from scenedetect.video_stream import SeekError, VideoStream
 
 _EOF = object()
