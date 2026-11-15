@@ -22,20 +22,19 @@ If you already have a `cv2.VideoCapture` object you want to use for scene detect
 use a :class:`VideoCaptureAdapter <scenedetect.backends.opencv.VideoCaptureAdapter>` instead
 of a backend. This is useful when working with devices or streams, for example.
 
-===============================================================
-Video Files
-===============================================================
+.. rubric:: Video Files
+   :name: video-files
 
 Assuming we have a file `video.mp4` in our working directory, we can load it and perform scene
-detection on it using :func:`open_video`:
+detection on it using :func:`~scenedetect.open_video`:
 
 .. code:: python
 
     from scenedetect import open_video
     video = open_video("video.mp4")
 
-An optional backend from :data:`AVAILABLE_BACKENDS` can be passed to :func:`open_video`
-(e.g. `backend="opencv"`). Additional keyword arguments passed to :func:`open_video`
+An optional backend from :data:`AVAILABLE_BACKENDS` can be passed to :func:`~scenedetect.open_video`
+(e.g. `backend="opencv"`). Additional keyword arguments passed to :func:`~scenedetect.open_video`
 will be forwarded to the backend constructor. If the specified backend is unavailable, or
 loading the video fails, ``opencv`` will be tried as a fallback.
 
@@ -50,17 +49,25 @@ Lastly, to use a specific backend directly:
 In both examples above, the resulting ``video`` can be used with
 :meth:`SceneManager.detect_scenes() <scenedetect.scene_manager.SceneManager.detect_scenes>`.
 
+Backends which open a video themselves can be closed with
+:meth:`close() <scenedetect.video_stream.VideoStream.close>` to release the file handles and
+decoders they hold, or used as a context manager to close them automatically:
+
+.. code:: python
+
+    with open_video("video.mp4") as video:
+        scene_manager.detect_scenes(video=video)
+
 Multiple videos can be opened as one continuous stream by passing a list of paths to
-:func:`open_video`, which returns a
+:func:`~scenedetect.open_video`, which returns a
 :class:`VideoStreamConcat <scenedetect.backends.concat.VideoStreamConcat>`:
 
 .. code:: python
 
     video = open_video(["part1.mp4", "part2.mp4"])
 
-===============================================================
-Devices / Cameras / Pipes
-===============================================================
+.. rubric:: Devices / Cameras / Pipes
+   :name: devices-cameras-pipes
 
 You can use an existing `cv2.VideoCapture` object with the PySceneDetect API using a
 :class:`VideoCaptureAdapter <scenedetect.backends.opencv.VideoCaptureAdapter>`. For example,

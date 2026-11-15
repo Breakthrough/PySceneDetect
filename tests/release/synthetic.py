@@ -41,7 +41,7 @@ def generate_vfr_swing(output_path: str):
         "color=white:size=320x240:duration=5:rate=1",
         "-filter_complex",
         "[0:v][1:v][2:v]concat=n=3:v=1:a=0",
-        "-vsync",
+        "-fps_mode",
         "vfr",
         output_path,
     ]
@@ -61,7 +61,7 @@ def generate_vfr_pts_gap(output_path: str):
         "testsrc2=duration=5:rate=30",
         "-vf",
         "select='not(between(n,30,32))'",
-        "-vsync",
+        "-fps_mode",
         "vfr",
         output_path,
     ]

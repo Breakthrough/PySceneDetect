@@ -55,7 +55,7 @@ class ThresholdDetector(SceneDetector):
 
     def __init__(
         self,
-        threshold: float = 12,
+        threshold: float = 12.0,
         min_scene_len: TimecodeLike = 15,
         fade_bias: float = 0.0,
         add_final_scene: bool = False,
@@ -204,11 +204,13 @@ class ThresholdDetector(SceneDetector):
                 self.last_fade["type"] = "in"
                 self.last_fade["frame"] = frame
         else:
+            # Initial state: faded out if the first frame is past the threshold for `method`.
             self.last_fade["frame"] = frame
-            if frame_avg < self.threshold:
-                self.last_fade["type"] = "out"
+            if self.method == ThresholdDetector.Method.FLOOR:
+                faded_out = frame_avg < self.threshold
             else:
-                self.last_fade["type"] = "in"
+                faded_out = frame_avg >= self.threshold
+            self.last_fade["type"] = "out" if faded_out else "in"
         self.processed_frame = True
         if self.last_fade["type"] == "out":
             self._fade_positions.append(frame)

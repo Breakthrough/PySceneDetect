@@ -12,6 +12,7 @@
 """Tests for scenedetect.output module."""
 
 import json
+import logging
 import os
 import typing as ty
 from fractions import Fraction
@@ -49,7 +50,8 @@ FFMPEG_ARGS = (
 
 
 @pytest.mark.skipif(condition=not is_ffmpeg_available(), reason="ffmpeg is not available")
-def test_split_video_ffmpeg_default(tmp_path, test_movie_clip):
+def test_split_video_ffmpeg_default(tmp_path, test_movie_clip, caplog):
+    caplog.set_level(logging.INFO, logger="pyscenedetect")
     video = open_video(test_movie_clip)
     # Extract three hard-coded scenes for testing, each 30 frames.
     scenes = [
@@ -65,6 +67,8 @@ def test_split_video_ffmpeg_default(tmp_path, test_movie_clip):
     video_name = Path(test_movie_clip).stem
     entries = sorted(tmp_path.glob(f"{video_name}-Scene-*"))
     assert len(entries) == len(scenes)
+    # The log should show the output folder, not the filename template.
+    assert f"Output folder:\n  {tmp_path}" in caplog.text
 
 
 @pytest.mark.skipif(condition=not is_ffmpeg_available(), reason="ffmpeg is not available")
@@ -237,6 +241,73 @@ def test_save_images_zero_width_scene(test_video_file, tmp_path: Path):
     assert total_images == len([path for path in tmp_path.glob(image_name_glob)])
 
 
+@pytest.mark.parametrize("threading", [True, False])
+@pytest.mark.parametrize(
+    "interval,min_images,max_images,expected",
+    [
+        # Scenes are 100, 10, and 60 frames long: floor(length / 25) + 1 images each.
+        (25, 1, None, [5, 1, 3]),
+        ("25", 1, None, [5, 1, 3]),
+        (25, 2, 4, [4, 2, 3]),
+        # 1 second is 29.97 frames.
+        ("1s", 1, None, [4, 1, 3]),
+        (1.0, 1, None, [4, 1, 3]),
+    ],
+)
+def test_save_images_interval(
+    test_video_file, tmp_path: Path, threading, interval, min_images, max_images, expected
+):
+    """With `interval`, the number of images saved for each scene depends on its length."""
+    video = VideoStreamCv2(test_video_file)
+    video_fps = video.frame_rate
+    scene_list = [
+        (FrameTimecode(start, video_fps), FrameTimecode(end, video_fps))
+        for start, end in [(0, 100), (200, 210), (300, 360)]
+    ]
+    image_filenames = save_images(
+        scene_list=scene_list,
+        output_dir=tmp_path,
+        video=video,
+        interval=interval,
+        min_images=min_images,
+        max_images=max_images,
+        image_name_template="scenedetect.tempfile.$SCENE_NUMBER.$IMAGE_NUMBER",
+        threading=threading,
+    )
+    assert [len(image_filenames[scene]) for scene in sorted(image_filenames)] == expected
+    for paths in image_filenames.values():
+        for path in paths:
+            assert tmp_path.joinpath(path).exists(), f"expected {path} to exist"
+    assert sum(expected) == len(list(tmp_path.glob("scenedetect.tempfile.*.jpg")))
+
+
+@pytest.mark.parametrize(
+    "kwargs,error",
+    [
+        ({"num_images": 3, "interval": 25}, "num_images and interval cannot both be set"),
+        ({"interval": 0}, "interval must be greater than 0"),
+        ({"interval": "0s"}, "interval must be greater than 0"),
+        ({"interval": 25, "min_images": 0}, "min_images must be greater than 0"),
+        (
+            {"interval": 25, "min_images": 3, "max_images": 2},
+            "max_images must be greater than or equal to min_images",
+        ),
+        (
+            {"num_images": 3, "max_images": 2},
+            "min_images and max_images can only be used with interval",
+        ),
+        ({"min_images": 2}, "min_images and max_images can only be used with interval"),
+    ],
+)
+def test_save_images_interval_rejects_invalid_arguments(
+    test_video_file, tmp_path: Path, kwargs, error
+):
+    video = VideoStreamCv2(test_video_file)
+    scene_list = [(FrameTimecode(0, video.frame_rate), FrameTimecode(10, video.frame_rate))]
+    with pytest.raises(ValueError, match=error):
+        save_images(scene_list=scene_list, output_dir=tmp_path, video=video, **kwargs)
+
+
 #
 # Scene-list export API (EDL / FCPXML / FCP7 xmeml / OTIO)
 #
@@ -326,6 +397,16 @@ def test_write_scene_list_rejects_invalid_output_target():
     scenes = [(FrameTimecode(0, 24.0), FrameTimecode(24, 24.0))]
     with pytest.raises(TypeError, match="output_csv_file"):
         write_scene_list(ty.cast(ty.Any, object()), scenes)
+
+
+def test_write_scene_list_cut_list_row_without_cut_list():
+    """The cut list row is labelled whether the cut list is passed in or derived from the scenes."""
+    scenes = _fake_scenes(_FPS_CFR, [(0, 30), (30, 60), (60, 90)])
+    derived, explicit = StringIO(), StringIO()
+    write_scene_list(derived, scenes)
+    write_scene_list(explicit, scenes, cut_list=[scenes[1][0], scenes[2][0]])
+    assert derived.getvalue().splitlines()[0] == "Timecode List:,00:00:01.000,00:00:02.000"
+    assert derived.getvalue() == explicit.getvalue()
 
 
 def test_write_scene_list_edl(tmp_path: Path):
@@ -431,6 +512,59 @@ def test_write_scene_list_edl_with_start_timecode_out_of_range(tmp_path: Path, b
     scenes = _fake_scenes(_FPS_CFR, [(0, 30)])
     with pytest.raises(ValueError):
         write_scene_list_edl(tmp_path / "scenes.edl", scenes, start_timecode=bad_value)
+
+
+@pytest.mark.parametrize(
+    "fps,frames,expected",
+    [
+        # 23.976: a hard cut every 7200 frames is exactly every 5 minutes of NDF timecode (#593).
+        (Fraction(24000, 1001), [(0, 7200), (7200, 14400)], ["00:05:00:00", "00:10:00:00"]),
+        (Fraction(30000, 1001), [(0, 108000)], ["01:00:00:00"]),
+        (Fraction(60000, 1001), [(0, 216000)], ["01:00:00:00"]),
+        # Whole-number rates count the same way; frame 90000 at 25 fps is exactly one hour.
+        (Fraction(25, 1), [(0, 90000)], ["01:00:00:00"]),
+    ],
+)
+def test_write_scene_list_edl_counts_frames_at_nominal_rate(
+    tmp_path: Path, fps: Fraction, frames, expected
+):
+    """Non-drop-frame timecodes count 24/30/60 frames per timecode second at NTSC rates rather
+    than following wall-clock seconds, which drifts about 3.6 s/hour (#593)."""
+    output_path = tmp_path / "scenes.edl"
+    write_scene_list_edl(output_path, _fake_scenes(fps, frames))
+    events = [line for line in output_path.read_text().splitlines() if " AX V " in line]
+    assert [line.split()[5] for line in events] == expected
+
+
+def test_write_scene_list_edl_start_timecode_ntsc_round_trips(tmp_path: Path):
+    """A start timecode is read as non-drop-frame too, so `01:00:00:00` at 29.97 fps is written
+    back as `01:00:00:00` (previously `00:59:59:29`) (#593)."""
+    scenes = _fake_scenes(Fraction(30000, 1001), [(0, 30)])
+    output_path = tmp_path / "scenes.edl"
+    write_scene_list_edl(output_path, scenes, start_timecode="01:00:00:00")
+    assert "001  AX V     C        01:00:00:00 01:00:01:00 01:00:00:00 01:00:01:00" in (
+        output_path.read_text()
+    )
+
+
+def test_write_scene_list_edl_start_timecode_ff_bound_uses_nominal_rate():
+    """At 29.97 fps the FF field runs 00-29, matching the 30 frames per NDF timecode second."""
+    scenes = _fake_scenes(Fraction(30000, 1001), [(0, 30)])
+    write_scene_list_edl(StringIO(), scenes, start_timecode="00:00:00:29")
+    with pytest.raises(ValueError, match="FF<30"):
+        write_scene_list_edl(StringIO(), scenes, start_timecode="00:00:00:30")
+
+
+def test_write_scene_list_edl_non_standard_rate_uses_wall_clock(tmp_path: Path):
+    """Rates with no nominal frame count (here 12.5 fps) keep the wall-clock approximation."""
+    scenes = _fake_scenes(Fraction(25, 2), [(0, 12), (12, 13), (13, 25)])
+    output_path = tmp_path / "scenes.edl"
+    write_scene_list_edl(output_path, scenes, start_timecode="00:00:01:00")
+    content = output_path.read_text()
+    # The start timecode of one second is 12.5 frames, rounded to 12, shifting every event.
+    assert "001  AX V     C        00:00:00:12 00:00:01:11 00:00:00:12 00:00:01:11" in content
+    assert "002  AX V     C        00:00:01:11 00:00:02:00 00:00:01:11 00:00:02:00" in content
+    assert "003  AX V     C        00:00:02:00 00:00:02:12 00:00:02:00 00:00:02:12" in content
 
 
 def test_write_scene_list_fcpx(tmp_path: Path):
@@ -654,3 +788,73 @@ def test_write_scene_list_otio_output_target(tmp_path: Path, target_kind: str):
     assert "\r\n" not in text
     doc = json.loads(text)
     assert doc["OTIO_SCHEMA"] == "Timeline.1"
+
+
+@pytest.mark.parametrize("frame_rate", [_FPS_CFR, _FPS_NTSC])
+@pytest.mark.parametrize("audio", [False, True])
+@pytest.mark.parametrize("ranges", [[], [(0, 24)], [(2400, 4800)], [(24, 72), (3000, 3600)]])
+def test_write_scene_list_otio_unknown_available_range(tmp_path, frame_rate, audio, ranges):
+    """Scene ranges do not reveal the source video's full available duration."""
+    output_path = tmp_path / "scenes.otio"
+    write_scene_list_otio(
+        output_path,
+        scene_list=_fake_scenes(frame_rate, ranges),
+        video_path=tmp_path / "source.mp4",
+        frame_rate=frame_rate,
+        audio=audio,
+    )
+
+    doc = json.loads(output_path.read_text())
+    tracks = doc["tracks"]["children"]
+    assert len(tracks) == (2 if audio else 1)
+    for track in tracks:
+        assert len(track["children"]) == len(ranges)
+        for clip, (start, end) in zip(track["children"], ranges, strict=True):
+            ref = clip["media_references"]["DEFAULT_MEDIA"]
+            assert ref["available_range"] is None
+            assert clip["source_range"]["start_time"]["value"] == pytest.approx(start)
+            assert clip["source_range"]["duration"]["value"] == pytest.approx(end - start)
+
+
+@pytest.mark.parametrize("frame_rate", [_FPS_CFR, _FPS_NTSC])
+@pytest.mark.parametrize("source_frame_rate", [_FPS_CFR, _FPS_NTSC])
+@pytest.mark.parametrize("source_frames", [0, 6000])
+@pytest.mark.parametrize("audio", [False, True])
+def test_write_scene_list_otio_source_duration(
+    tmp_path, frame_rate, source_frame_rate, source_frames, audio
+):
+    """Available media duration uses the full source, not the selected scenes."""
+    source_duration = FrameTimecode(source_frames, fps=source_frame_rate)
+    ranges = [(24, 72), (120, 180)] if source_frames else [(0, 0)]
+    output_path = tmp_path / "scenes.otio"
+    write_scene_list_otio(
+        output_path,
+        scene_list=_fake_scenes(frame_rate, ranges),
+        video_path=tmp_path / "source.mp4",
+        frame_rate=frame_rate,
+        audio=audio,
+        source_duration=source_duration,
+    )
+
+    doc = json.loads(output_path.read_text())
+    fps = float(frame_rate)
+    expected_duration = round(source_duration.seconds * fps, 6)
+    tracks = doc["tracks"]["children"]
+    assert len(tracks) == (2 if audio else 1)
+    for track in tracks:
+        assert len(track["children"]) == len(ranges)
+        for clip, (start, end) in zip(track["children"], ranges, strict=True):
+            available = clip["media_references"]["DEFAULT_MEDIA"]["available_range"]
+            assert available["OTIO_SCHEMA"] == "TimeRange.1"
+            assert available["start_time"] == {
+                "OTIO_SCHEMA": "RationalTime.1",
+                "rate": fps,
+                "value": 0.0,
+            }
+            assert available["duration"] == {
+                "OTIO_SCHEMA": "RationalTime.1",
+                "rate": fps,
+                "value": expected_duration,
+            }
+            assert clip["source_range"]["start_time"]["value"] == pytest.approx(start)
+            assert clip["source_range"]["duration"]["value"] == pytest.approx(end - start)

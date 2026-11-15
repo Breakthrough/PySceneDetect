@@ -11,7 +11,6 @@
 #
 """Shared test helpers."""
 
-import contextlib
 import typing as ty
 
 from click.testing import CliRunner
@@ -24,30 +23,10 @@ from scenedetect._cli.controller import run_scenedetect
 def close_video_stream(stream: ty.Any) -> None:
     """Deterministically release a VideoStream's native resources.
 
-    `VideoStream` has no public close()/context-manager API, so tests release the
-    backend-specific handles directly. Closing while the interpreter is healthy avoids
-    ResourceWarnings (and native teardown work) at interpreter shutdown. Safe to call
-    multiple times; never raises.
+    Closing while the interpreter is healthy avoids ResourceWarnings (and native teardown
+    work) at interpreter shutdown. Safe to call multiple times, as `close()` is idempotent.
     """
-    backend = getattr(stream, "BACKEND_NAME", None)
-    if backend == "pyav":
-        # Close the decode generator first to break its cycle with the container. `_io` is
-        # the file handle backing the container (opened by the stream when given a path).
-        for attr in ("_decoder", "_container", "_io"):
-            handle = getattr(stream, attr, None)
-            if handle is not None:
-                with contextlib.suppress(Exception):
-                    handle.close()
-    elif backend == "opencv":
-        cap = getattr(stream, "_cap", None)
-        if cap is not None:
-            with contextlib.suppress(Exception):
-                cap.release()
-    elif backend == "moviepy":
-        reader = getattr(stream, "_reader", None)
-        if reader is not None:
-            with contextlib.suppress(Exception):
-                reader.close()
+    stream.close()
 
 
 def invoke_cli(args: list[str], catch_exceptions: bool = False) -> tuple[int, str]:

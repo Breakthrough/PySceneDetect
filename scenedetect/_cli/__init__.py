@@ -35,9 +35,11 @@ from scenedetect._cli.config import (
     DEFAULT_JPG_QUALITY,
     DEFAULT_WEBP_QUALITY,
     RangeValue,
+    TimecodeValue,
 )
 from scenedetect._cli.context import USER_CONFIG, CliContext, check_split_video_requirements
 from scenedetect.backends import AVAILABLE_BACKENDS
+from scenedetect.common import FrameTimecode
 from scenedetect.detectors import (
     AdaptiveDetector,
     ContentDetector,
@@ -291,7 +293,7 @@ Global options (e.g. -i/--input, -c/--config) must be specified before any comma
     metavar="N",
     type=click.INT,
     default=None,
-    help="Integer factor to downscale video by before processing. If unset, value is selected based on resolution. Set -d 1 to disable downscaling.{}".format(
+    help="Integer factor to downscale video by before processing. If unset or 0, value is selected based on resolution. Set -d 1 to disable downscaling.{}".format(
         USER_CONFIG.get_help_string("global", "downscale", show_default=False)
     ),
 )
@@ -673,8 +675,9 @@ Examples:
     "-w",
     type=(float, float, float, float),
     default=None,
+    metavar="HUE SAT LUM EDGE",
     help='Weights of 4 components ("delta_hue", "delta_sat", "delta_lum", "delta_edges") used to calculate "content_val".{}'.format(
-        USER_CONFIG.get_help_string("detect-content", "weights")
+        USER_CONFIG.get_help_string("detect-adaptive", "weights")
     ),
 )
 @click.option(
@@ -1400,6 +1403,8 @@ Examples:
 
     {scenedetect_with_video} save-images --num-images 5
 
+    {scenedetect_with_video} save-images --interval 2s --max-images 10
+
     {scenedetect_with_video} save-images --width 1024
 
     {scenedetect_with_video} save-images --filename \\$SCENE_NUMBER-img\\$IMAGE_NUMBER
@@ -1432,8 +1437,36 @@ Examples:
     metavar="N",
     default=None,
     type=click.INT,
-    help="Number of images to generate per scene. Will always include start/end frame, unless -n 1, in which case the image will be the frame at the mid-point of the scene.{}".format(
+    help="Number of images to generate per scene. Will always include start/end frame, unless -n 1, in which case the image will be the frame at the mid-point of the scene. Cannot be used with -i/--interval.{}".format(
         USER_CONFIG.get_help_string("save-images", "num-images")
+    ),
+)
+@click.option(
+    "--interval",
+    "-i",
+    metavar="DURATION",
+    default=None,
+    type=click.STRING,
+    help="Generate one image per DURATION of each scene instead of a fixed number, so longer scenes get more images. Each scene gets floor(length / DURATION) + 1 images, chosen the same way as with -n/--num-images. Use --min-images and --max-images to limit the number of images per scene. DURATION can be specified in frames (-i 24), in seconds with `s` suffix (-i 1.5s), or timecode (-i 00:00:01.500). Cannot be used with -n/--num-images.{}".format(
+        USER_CONFIG.get_help_string("save-images", "interval", show_default=False)
+    ),
+)
+@click.option(
+    "--min-images",
+    metavar="N",
+    default=None,
+    type=_click_range("save-images", "min-images"),
+    help="Minimum number of images per scene. Can only be used with -i/--interval.{}".format(
+        USER_CONFIG.get_help_string("save-images", "min-images")
+    ),
+)
+@click.option(
+    "--max-images",
+    metavar="N",
+    default=None,
+    type=_click_range("save-images", "max-images"),
+    help="Maximum number of images per scene, or 0 for no limit. Can only be used with -i/--interval.{}".format(
+        USER_CONFIG.get_help_string("save-images", "max-images")
     ),
 )
 @click.option(
@@ -1525,6 +1558,9 @@ def save_images_command(
     output: str | None = None,
     filename: str | None = None,
     num_images: int | None = None,
+    interval: str | None = None,
+    min_images: int | None = None,
+    max_images: int | None = None,
     jpeg: bool = False,
     webp: bool = False,
     quality: int | None = None,
@@ -1577,6 +1613,60 @@ def save_images_command(
         raise click.BadParameter("\n".join(error_strs), param_hint="save-images")
     output = ctx.config.get_value("save-images", "output", output)
 
+    # -n/--num-images and -i/--interval are mutually exclusive. If neither is set, use the
+    # config file, where only one of them may be set.
+    if num_images is not None and interval is not None:
+        raise click.BadParameter(
+            "Only one of -n/--num-images or -i/--interval can be set.", param_hint="save-images"
+        )
+    if interval is not None:
+        try:
+            TimecodeValue(interval)
+        except ValueError as ex:
+            raise click.BadParameter(
+                "Interval must be in frames (24), seconds (1.5s), or HH:MM:SS.",
+                param_hint="-i/--interval",
+            ) from ex
+        if FrameTimecode(timecode=interval, fps=ctx.video_stream.frame_rate).seconds <= 0:
+            raise click.BadParameter("Interval must be greater than 0.", param_hint="-i/--interval")
+    elif num_images is None:
+        if not ctx.config.is_default("save-images", "interval") and not ctx.config.is_default(
+            "save-images", "num-images"
+        ):
+            raise click.BadParameter(
+                "Only one of num-images or interval can be set in the config file.",
+                param_hint="save-images",
+            )
+        if ctx.config.is_default("save-images", "interval"):
+            num_images = ctx.config.get_value("save-images", "num-images")
+        else:
+            interval_value: str = ctx.config.get_value("save-images", "interval")
+            if FrameTimecode(timecode=interval_value, fps=ctx.video_stream.frame_rate).seconds <= 0:
+                raise click.BadParameter(
+                    "interval in the config file must be greater than 0.",
+                    param_hint="save-images",
+                )
+            interval = interval_value
+    # --min-images/--max-images only apply with an interval (from the command line or the config
+    # file). Without one, they are an error on the command line, and ignored in the config file.
+    if interval is None:
+        if min_images is not None or max_images is not None:
+            raise click.BadParameter(
+                "--min-images and --max-images can only be used with -i/--interval.",
+                param_hint="save-images",
+            )
+        min_images, max_images = 1, None
+    else:
+        min_images_value: int = ctx.config.get_value("save-images", "min-images", min_images)
+        max_images_value: int = ctx.config.get_value("save-images", "max-images", max_images)
+        if max_images_value != 0 and max_images_value < min_images_value:
+            raise click.BadParameter(
+                "max-images must be 0 (no limit) or at least min-images.",
+                param_hint="save-images",
+            )
+        # A max-images of 0 means no limit.
+        min_images, max_images = min_images_value, max_images_value or None
+
     save_images_args = {
         "encoder_param": compression if png else quality,
         "frame_margin": ctx.config.get_value("save-images", "frame-margin", frame_margin),
@@ -1584,7 +1674,10 @@ def save_images_command(
         "image_extension": image_extension,
         "filename": ctx.config.get_value("save-images", "filename", filename),
         "interpolation": scale_method,
-        "num_images": ctx.config.get_value("save-images", "num-images", num_images),
+        "interval": interval,
+        "max_images": max_images,
+        "min_images": min_images,
+        "num_images": num_images,
         "output": output,
         "scale": scale,
         "show_progress": not ctx.quiet_mode,
@@ -1598,7 +1691,11 @@ def save_images_command(
     ctx.save_images = True
 
 
-SAVE_EDL_HELP = """Save cuts in EDL format (CMX 3600)."""
+SAVE_EDL_HELP = """Save cuts in EDL format (CMX 3600).
+
+Timecodes are non-drop-frame (HH:MM:SS:FF), counting frames at the nominal rate: 24 frames per
+timecode second at 23.976 fps, 30 at 29.97 fps, and so on.
+"""
 
 
 @click.command("save-edl", cls=Command, help=SAVE_EDL_HELP)
@@ -1643,7 +1740,8 @@ SAVE_EDL_HELP = """Save cuts in EDL format (CMX 3600)."""
     type=click.STRING,
     help=(
         "Start timecode added to every event so the EDL aligns with the source media's "
-        "on-screen timecode. Accepts SMPTE HH:MM:SS:FF or 8 digits (HHMMSSFF, e.g. 01000000)."
+        "on-screen timecode. Accepts non-drop-frame SMPTE HH:MM:SS:FF or 8 digits "
+        "(HHMMSSFF, e.g. 01000000)."
         "{}"
     ).format(USER_CONFIG.get_help_string("save-edl", "start-timecode", show_default=False)),
 )

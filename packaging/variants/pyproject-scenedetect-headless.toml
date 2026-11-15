@@ -7,10 +7,10 @@
 #
 # Copyright (C) 2014 Brandon Castellano <http://www.bcastell.com>.
 #
-# pyproject.toml for the `scenedetect-headless` package: the same code as
-# scenedetect-core, but bundling the opencv-python-headless OpenCV variant (no GUI
-# libraries, for servers/containers), the CLI dependencies, and the `scenedetect`
-# console script. packaging/build_all.py temporarily swaps this file into the repo
+# pyproject.toml for the `scenedetect-headless` package: the same as the
+# `scenedetect` variant but bundling the opencv-python-headless OpenCV variant (no
+# GUI libraries, for servers/containers) with the CLI dependencies and the
+# `scenedetect` console script. packaging/build_all.py swaps this file into the repo
 # root and builds from there, so the code, readme, and dynamic version are shared
 # with the other variants.
 #

@@ -3,6 +3,81 @@
 
 ## PySceneDetect 0.7
 
+### PySceneDetect 0.7.3 (November 8, 2026)
+
+PySceneDetect 0.7.3 adds scene-length based image export to `save-images`, a `close()` method and context manager support for `VideoStream`, and fixes several timing bugs: PyAV frame timing for videos without presentation timestamps, `save-edl` timecode drift at NTSC frame rates, OTIO source durations, and the last scene of variable framerate videos. Windows distributions ship updated dependencies.
+
+Thanks to @nikhiljangid120, @sungbin1015, @qwist1233-cpu, @vishal-tambi, @Rober1208, @ChandraChaan and @MuhammadBilalKhan267 for their contributions to this release.
+
+#### CLI Changes
+
+ - [feature] Add `-i`/`--interval` to `save-images` to save images based on the length of each scene: one image per `DURATION`, with `--min-images`/`--max-images` to limit the number of images per scene, e.g. `save-images -i 2s --max-images 10` (`interval`/`min-images`/`max-images` in the config file, and `interval`/`min_images`/`max_images` in `save_images()`) [#280](https://github.com/Breakthrough/PySceneDetect/issues/280)
+ - [cli] `--help` now prints `[default: ...]` and `[setting: ...]` values as they are written in a config file (`merge`, `fcpx`, `yes`/`no` instead of `Mode.MERGE`, `FcpFormat.FCPX`, `True`/`on`), the `[backend-pyav]` `threading-mode` config value is now validated, and the `scenedetect.cfg` template matches the real config keys and defaults (`verbosity`, `downscale`, `default-detector`, `fade-bias`, `start-timecode`, OTIO `name`, and removed stale `filter-mode`/`luma-only` entries) [#589](https://github.com/Breakthrough/PySceneDetect/issues/589)
+ - [bugfix] `$VIDEO_NAME` is now derived from the path component of URL inputs, ignoring the query string and fragment (e.g. `https://host/clip.mp4?token=1.2` -> `clip`). URLs with no path use the host. Previously the query string leaked into output filenames, which fails on Windows. [#197](https://github.com/Breakthrough/PySceneDetect/issues/197)
+ - [bugfix] OTIO exports use the full source duration when provided, including from the CLI, instead of declaring a fixed 1,980-frame duration. The available range remains unspecified when the duration is unknown. Scene source ranges are unchanged. [#580](https://github.com/Breakthrough/PySceneDetect/pull/580)
+ - [bugfix] The OpenCV backend keeps `position` on the last frame after reaching the end of a VFR video, so the last scene no longer ends early (or before it starts) [#561](https://github.com/Breakthrough/PySceneDetect/issues/561)
+ - [bugfix] `save-html --no-images` now writes to the global `-o`/`--output` directory instead of the working directory [#583](https://github.com/Breakthrough/PySceneDetect/pull/583)
+ - [bugfix] `split-video` with `-o` now logs the output folder instead of repeating the filename template [#595](https://github.com/Breakthrough/PySceneDetect/pull/595)
+ - [bugfix] Allow `-d`/`--downscale` on the CLI and `downscale` in the config file to be set to `0` for automatic downscaling
+ - [bugfix] `save-edl` timecodes now count frames at the nominal rate (24, 30, or 60 per timecode second for 23.976, 29.97, or 59.94 fps) as required for non-drop-frame timecode, instead of being derived from wall-clock seconds. Previously the EDL drifted by roughly 3.6 seconds per hour at these rates. `--start-timecode` is parsed the same way, so `-s 01:00:00:00` now starts the first event at `01:00:00:00`. Non-standard rates (e.g. the average rate of a VFR video) are unchanged. Thanks to @Cassian433 for the detailed report [#593](https://github.com/Breakthrough/PySceneDetect/issues/593)
+
+#### API Changes
+
+ - [feature] `VideoStream` has a new `close()` method to release the file handles and decoders a video holds, and can be used as a context manager (`with open_video(path) as video:`) to close it automatically. Calling `close()` more than once has no effect. Once an OpenCV, PyAV, MoviePy or concatenated stream is closed, `read()`, `seek()` and `reset()` raise `ValueError`, while properties describing the video (`path`, `name`, `frame_rate`, `duration`, `frame_size`, `aspect_ratio`) remain available. The default implementation does nothing, so existing `VideoStream` subclasses are unaffected, and `VideoCaptureAdapter` leaves the caller's `VideoCapture` open [#568](https://github.com/Breakthrough/PySceneDetect/issues/568)
+ - [api] `VideoStream.seek()` now documents that the stream position is undefined after a `SeekError` is raised, and `reset()` must be called before reading further
+ - [bugfix] `VideoStreamConcat` no longer keeps its input videos open when they can't be concatenated (e.g. mismatched resolutions), and now closes each input explicitly once it is no longer needed instead of relying on garbage collection [#568](https://github.com/Breakthrough/PySceneDetect/issues/568)
+ - [bugfix] `write_scene_list()` now starts the cut list row with `Timecode List:` when no `cut_list` is passed, as it does when one is passed and as `write_scene_list_html()` does
+ - [bugfix] Fix `pyav` backend timing for videos that lack presentation timestamps (e.g. AVI files, elementary H.264 streams), which could lead to frame positions being out of order or stuck at zero and shifting cuts by one or more frames ([#590](https://github.com/Breakthrough/PySceneDetect/issues/590), [PyAV#933](https://github.com/PyAV-Org/PyAV/discussions/933), [PyAV#2478](https://github.com/PyAV-Org/PyAV/pull/2478))
+     - Videos are now opened with FFmpeg's `genpts` flag disabled.
+     - Each frame will use the exact presentation timestamp, but if it is unavailable we now fall back to the decode timestamp to be consistent with the `opencv` backend.
+     - A frame with neither timestamp is placed one frame period after the previous frame (as the `moviepy` backend does for every frame).
+     - A one-time warning is emitted if timestamps are still detected going backwards.
+     - `VideoStreamAv.seek()` now raises `SeekError` on streams that cannot be seeked (e.g. elementary streams without timestamps) instead of a backend-specific exception.
+     - `VideoStreamAv.seek()` now falls back to reading from the start when the demuxer lands on a frame without a timestamp past the target, and `seek(0)` always re-opens the video, fixing wrong positions after seeking in some MPEG-TS files.
+
+#### Packaging
+
+ - [general] Updates to Windows distributions:
+    - av 19.0.1 -> 19.0.2
+    - click 8.5.0 -> 8.5.1
+    - imageio-ffmpeg 0.6.0 -> 0.8.1
+    - pillow 12.3.0 -> 13.0.0
+    - platformdirs 4.13.0 -> 4.14.5
+
+### PySceneDetect 0.7.2 (October 11, 2026)
+
+PySceneDetect 0.7.2 ships improved defaults for the histogram and perceptual hash detectors, adds PyAV 19 support, and fixes several timing and output bugs. **Default output of `detect-hist` and `detect-hash` will change in this release due to improved default values**.
+
+#### CLI Changes
+
+ - [improvement] `HistogramDetector` (`detect-hist`) default `threshold` changed from 0.05 to 0.20 and default `bins` from 256 to 128, calibrated from the [benchmarks](https://www.scenedetect.com/benchmarks/). Output for this detector will change if you are not setting both parameters explicitly. [#559](https://github.com/Breakthrough/PySceneDetect/issues/559)
+   - Use `detect-hist -t 0.05 -b 256` or `HistogramDetector(threshold=0.05, bins=256)` to restore the previous behavior.
+ - [improvement] `HashDetector` (`detect-hash`) default `threshold` changed from 0.395 to 0.35 and default `size` from 16 to 8, calibrated from the [benchmarks](https://www.scenedetect.com/benchmarks/). Output for this detector will change if you are not setting both parameters explicitly. [#559](https://github.com/Breakthrough/PySceneDetect/issues/559)
+   - Use `detect-hash -t 0.395 -s 16` or `HashDetector(threshold=0.395, size=16)` to restore the previous behavior.
+ - [improvement] `detect-threshold` now ignores fade-outs shorter than `0.1s` by default. Use `--min-out-length 0` to restore the previous behavior. The API default remains `0` [#278](https://github.com/Breakthrough/PySceneDetect/issues/278)
+ - [feature] Added `save-keyframes` command to export detected cuts using `# keyframe format v1` for Aegisub-compatible tools [#534](https://github.com/Breakthrough/PySceneDetect/issues/534). Frame numbers are currently approximate for VFR input [#569](https://github.com/Breakthrough/PySceneDetect/issues/569)
+ - [feature] Add `--min-out-length`/`min_out_length` to `detect-threshold`/`ThresholdDetector`, which requires that fades stay below the threshold for the given duration [#278](https://github.com/Breakthrough/PySceneDetect/issues/278)
+ - [general] `-f`, `--frame-rate`, and `--framerate` are now aliases of the same CLI option, and all forms appear in help and documentation. If multiple forms are given, the last value is used [#548](https://github.com/Breakthrough/PySceneDetect/issues/548)
+ - [bugfix] Progress bar now reaches 100% when processing variable framerate (VFR) videos, with both the OpenCV and PyAV backends [#561](https://github.com/Breakthrough/PySceneDetect/issues/561)
+ - [bugfix] Fix `AdaptiveDetector` / `detect-adaptive` emitting scenes shorter than `min_scene_len` when `window_width` is large, by applying the minimum-length check to the emitted (target) frame instead of the current frame [#408](https://github.com/Breakthrough/PySceneDetect/issues/408)
+
+#### API Changes
+
+ - [api] Legacy `framerate` argument aliases in `FrameTimecode`, `open_video()`, and the video backends now emit a `DeprecationWarning`; use `frame_rate` instead. When both forms are provided, `frame_rate` takes precedence [#548](https://github.com/Breakthrough/PySceneDetect/issues/548)
+ - [api] `write_scene_list()` now also accepts a path (`str` or `pathlib.Path`) as the first argument in addition to an open file handle; paths are opened and closed automatically [#523](https://github.com/Breakthrough/PySceneDetect/issues/523)
+ - [api] Scene-list output functions for EDL, FCPXML, FCP7 XML, and OTIO now accept an open text file handle, a string path, or a `pathlib.Path`; paths are opened and closed automatically [#567](https://github.com/Breakthrough/PySceneDetect/issues/567)
+ - [bugfix] `ThresholdDetector`/`detect-threshold` with method `CEILING` now classifies the first frame with the `CEILING` rule instead of the `FLOOR` rule, which anchored a leading fade one frame late and could emit a spurious cut at the first frame (thanks @MuhammadBilalKhan267)
+ - [bugfix] Fix `min_scene_len` given in frames dropping cuts that are exactly `min_scene_len` frames apart at NTSC framerates (e.g. 29.97 fps), by comparing frame counts instead of converting to seconds [#577](https://github.com/Breakthrough/PySceneDetect/issues/577)
+ - [bugfix] Fix `TypeError` when opening videos with the `pyav` backend on PyAV 19.0 or newer (PyAV 19 is now supported)
+ - [bugfix] Fix `pyav` backend duration calculation fallback
+ - [bugfix] Fix `pyav` backend not releasing the file handle it opened when the stream is garbage collected, which emitted a `ResourceWarning` under `python -X dev` [#568](https://github.com/Breakthrough/PySceneDetect/issues/568)
+ - [bugfix] Work around an intermittent segfault on exit with the OpenCV backend on Windows when opening PNG image sequences with `opencv-python` 4.14 or 5.0 (upstream: [opencv/opencv#30017](https://github.com/opencv/opencv/issues/30017)) [#575](https://github.com/Breakthrough/PySceneDetect/issues/575)
+
+#### Packaging
+
+ - [general] The Windows distribution now bundles PyAV 19 and FFmpeg 9.0
+ - [general] The `scenedetect-core` package introduced in 0.7.1 has been discontinued, and its only release (0.7.1) yanked from PyPI. Existing `scenedetect-core` installs keep working but will not receive updates. Install either `scenedetect` or `scenedetect-headless`. [#558](https://github.com/Breakthrough/PySceneDetect/issues/558)
+
 ### PySceneDetect 0.7.1 (July 21, 2026)
 
 PySceneDetect 0.7.1 adds support for concatenating multiple videos, along with several stability and robustness fixes for the PyAV and OpenCV backends.
@@ -781,18 +856,6 @@ Both the Windows installer and portable distributions now include signed executa
 Development
 ==========================================================
 
-## PySceneDetect 0.7.2 (TBD)
+## PySceneDetect 0.8 (TBD)
 
- - [bugfix] Fix `AdaptiveDetector` / `detect-adaptive` emitting scenes shorter than `min_scene_len` when `window_width` is large, by applying the minimum-length check to the emitted (target) frame instead of the current frame [#408](https://github.com/Breakthrough/PySceneDetect/issues/408)
- - [general] The `scenedetect-core` package introduced in 0.7.1 has been discontinued, and its only release (0.7.1) yanked from PyPI: pip cannot safely support multiple packages that install the same module files, and restructuring the existing packages around a shared core would break in-place upgrades. Existing `scenedetect-core` installs keep working but will not receive updates; continue to install `scenedetect` or `scenedetect-headless` as usual.
- - [improvement] `HistogramDetector` (`detect-hist`) default `threshold` changed from 0.05 to 0.20 and default `bins` from 256 to 128, calibrated from the [benchmark sweep](https://www.scenedetect.com/benchmarks/) for significantly better accuracy. Default output for this detector will change [#559](https://github.com/Breakthrough/PySceneDetect/issues/559)
- - [improvement] `HashDetector` (`detect-hash`) default `threshold` changed from 0.395 to 0.35 and default `size` from 16 to 8, calibrated from the [benchmark sweep](https://www.scenedetect.com/benchmarks/) for better accuracy. Default output for this detector will change, including the statsfile metric key (now `hash_dist [size=8 lowpass=2]`) [#559](https://github.com/Breakthrough/PySceneDetect/issues/559)
- - [bugfix] Progress bar now reaches 100% when processing variable framerate (VFR) videos, with both the OpenCV and PyAV backends [#561](https://github.com/Breakthrough/PySceneDetect/issues/561)
- - [api] Legacy `framerate` argument aliases in `FrameTimecode`, `open_video()`, and the video backends now emit a `DeprecationWarning`; use `frame_rate` instead. When both forms are provided, `frame_rate` takes precedence [#548](https://github.com/Breakthrough/PySceneDetect/issues/548)
- - [general] `-f`, `--frame-rate`, and `--framerate` are now aliases of the same CLI option, and all forms appear in help and documentation. If multiple forms are given, the last value is used [#548](https://github.com/Breakthrough/PySceneDetect/issues/548)
- - [api] `write_scene_list()` now also accepts a path (`str` or `pathlib.Path`) as the first argument in addition to an open file handle; paths are opened and closed automatically [#523](https://github.com/Breakthrough/PySceneDetect/issues/523)
- - [api] Scene-list output functions for EDL, FCPXML, FCP7 XML, and OTIO now accept an open text file handle, a string path, or a `pathlib.Path`; paths are opened and closed automatically [#567](https://github.com/Breakthrough/PySceneDetect/issues/567)
- - [feature] Add `--min-out-length`/`min_out_length` to `detect-threshold`/`ThresholdDetector`, which ignores fades that stay below the threshold for less than the given duration [#278](https://github.com/Breakthrough/PySceneDetect/issues/278)
- - [improvement] `detect-threshold` now ignores fade-outs shorter than `0.1s` by default. Use `--min-out-length 0` to restore the previous behavior. The API default remains `0` [#278](https://github.com/Breakthrough/PySceneDetect/issues/278)
-- [feature] Added `save-keyframes` command to export detected cuts using `# keyframe format v1` for Aegisub-compatible tools [#534](https://github.com/Breakthrough/PySceneDetect/issues/534). Frame numbers are currently approximate for VFR input [#569](https://github.com/Breakthrough/PySceneDetect/issues/569)
- - [bugfix] Fix intermittent segfault on exit. Isolated to Windows builds with OpenCV 5.x when opening PNG image sequences with the `VideoStreamCv2` backend. [#575](https://github.com/Breakthrough/PySceneDetect/issues/575)
+ - [general] The root `pyproject.toml` is now `scenedetect` again (it had a development-only `scenedetect-core` name since 0.7.1). `pip install -e .` now installs the same distribution as PyPI. The `[opencv]` and `[opencv-headless]` extras of the development config were removed because `opencv-python` is now a declared dependency [#558](https://github.com/Breakthrough/PySceneDetect/issues/558)

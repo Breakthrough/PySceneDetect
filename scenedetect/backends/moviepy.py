@@ -216,6 +216,8 @@ class VideoStreamMoviePy(VideoStream):
                 time base.
         """
 
+        self._check_open()
+
         if not self.is_seekable:
             raise SeekError("Seeking is not supported for this video stream!")
 
@@ -274,6 +276,7 @@ class VideoStreamMoviePy(VideoStream):
 
     def reset(self, print_infos=False):
         """Close and re-open the VideoStream (should be equivalent to calling `seek(0)`)."""
+        self._check_open()
         self._reader.close()
         self._position = None
         self._eof = False
@@ -282,7 +285,17 @@ class VideoStreamMoviePy(VideoStream):
         )
         self._next_timecode = Timecode(pts=0, time_base=1 / self.frame_rate)
 
+    def close(self) -> None:
+        """Close the video, terminating the ffmpeg process used to decode it. Has no effect if
+        the stream is already closed. See
+        :meth:`VideoStream.close() <scenedetect.video_stream.VideoStream.close>` for details."""
+        if self._closed:
+            return
+        self._closed = True
+        self._reader.close()
+
     def read(self, decode: bool = True) -> np.ndarray | bool:
+        self._check_open()
         item = self._read_next_frame()
         if item is None:
             return False
@@ -294,6 +307,7 @@ class VideoStreamMoviePy(VideoStream):
 
     def peek_timecode(self) -> Timecode | None:
         """Return the cached frame's timestamp on the FPS-derived clock."""
+        self._check_open()
         if self._eof:
             return None
         return self._next_timecode

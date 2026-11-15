@@ -15,6 +15,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.abspath(".."))
+sys.path.insert(0, os.path.abspath("_ext"))
 
 from scenedetect import __version__ as scenedetect_version
 
@@ -38,6 +39,7 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.autodoc",
     "sphinx_copybutton",
+    "section_sidebar",  # docs/_ext: sidebar shows only the CLI or API section
 ]
 
 autoclass_content = "both"
@@ -47,6 +49,9 @@ autodoc_typehints_format = "short"
 
 add_module_names = False
 python_use_unqualified_type_names = True
+# Sidebar entries for autodoc objects show the member name only (e.g. `process_frame()`
+# instead of `AdaptiveDetector.process_frame()`) so they fit in the sidebar.
+toc_object_entries_show_parents = "hide"
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -93,6 +98,9 @@ html_favicon = "_static/favicon.ico"
 # 'searchbox.html']``.
 #
 # html_sidebars = {}
+#
+# The section tree is long, so the search box goes above it.
+html_sidebars = {"**": ["about.html", "searchbox.html", "navigation.html"]}
 
 # -- Options for HTMLHelp output ---------------------------------------------
 
@@ -170,3 +178,34 @@ html_theme_options = {
     "logo": "pyscenedetect_logo.png",
     "logo_name": False,
 }
+
+
+# Options for docs/_ext/section_sidebar.py: toctree `:name:` in index.rst -> (switch label,
+# landing page, depth for other pages in the section, depth for the current page). The
+# Examples page spans both halves, so it is its own one-page section drawn as a smaller link.
+section_sidebar_sections = {
+    "clitoc": ("CLI", "cli", 2, 3),
+    "apitoc": ("Python API", "api", 2, 4),
+    # No label: the pages of this section are drawn as a row of smaller links.
+    "reftoc": (None, None, 2, 2),
+}
+# The index page shows every labelled section; keep the API tree to page titles there (the
+# CLI tree keeps its default depth of 2, which is only 12 entries).
+section_sidebar_root_depth = {"apitoc": 1}
+
+# What each page contributes to the sidebar when it is NOT the current page: glob patterns on
+# the entry text ([] = page title only). The current page is always expanded in full.
+section_sidebar_summary = {
+    "api/common": ["FrameTimecode", "SceneList", "CutList"],
+    "api/scene_manager": ["SceneManager", "get_scenes_from_cuts()"],
+    "api/detector": ["SceneDetector"],
+    "api/video_stream": ["VideoStream"],
+    "api/stats_manager": ["StatsManager"],
+    "api/backends": ["VideoStream*"],
+    "api/platform": [],
+    "api/migration_guide": [],
+}
+# Current-page depth overrides (the section default is 4): backends lists its classes but not
+# their members, which are the same for every VideoStream; each detector's section already has
+# the class name, so listing the class and its members again under it only repeats things.
+section_sidebar_page_depth = {"api/backends": 3, "api/detectors": 2}

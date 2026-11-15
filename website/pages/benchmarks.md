@@ -21,6 +21,10 @@ Three datasets are used, chosen to cover very different content:
 
 Hard cuts, strict frame-exact matching (tolerance 0). F1 cells are shaded by score.
 
+These results were measured with the v0.7 defaults. In v0.7.2 the `HistogramDetector` and
+`HashDetector` defaults changed to the swept-best values listed under
+[Parameter sweeps](#parameter-sweeps); the tables below will be regenerated with the new defaults.
+
 ### BBC Planet Earth
 
 <table class="bm-table">
@@ -84,11 +88,11 @@ robust middle ground.
 Scored by mean hard-cut F1 at 1-frame tolerance across all three datasets:
 
 <table class="bm-table">
-<tr><th>Detector</th><th>Best mean F1</th><th>Best parameters</th><th>v0.7 default</th></tr>
-<tr><td>AdaptiveDetector</td><td class="bm-t2">76.3</td><td>adaptive_threshold=3.5, window_width=3, min_scene_len=0.6s</td><td>adaptive_threshold=3.0, window_width=2</td></tr>
-<tr><td>ContentDetector</td><td class="bm-t2">73.4</td><td>threshold=31, min_scene_len=0.6s</td><td>threshold=27</td></tr>
-<tr><td>HashDetector</td><td class="bm-t2">69.8</td><td>threshold=0.35, size=8</td><td>threshold=0.395, size=16</td></tr>
-<tr><td>HistogramDetector</td><td class="bm-t2">66.3</td><td>threshold=0.20, bins=128</td><td>threshold=0.05, bins=256</td></tr>
+<tr><th>Detector</th><th>Best mean F1</th><th>Best parameters</th><th>v0.7.2 default</th><th>v0.7 default</th></tr>
+<tr><td>AdaptiveDetector</td><td class="bm-t2">76.3</td><td>adaptive_threshold=3.5, window_width=3, min_scene_len=0.6s</td><td>adaptive_threshold=3.0, window_width=2</td><td>adaptive_threshold=3.0, window_width=2</td></tr>
+<tr><td>ContentDetector</td><td class="bm-t2">73.4</td><td>threshold=31, min_scene_len=0.6s</td><td>threshold=27</td><td>threshold=27</td></tr>
+<tr><td>HashDetector</td><td class="bm-t2">69.8</td><td>threshold=0.35, size=8</td><td>threshold=0.35, size=8</td><td>threshold=0.395, size=16</td></tr>
+<tr><td>HistogramDetector</td><td class="bm-t2">66.3</td><td>threshold=0.20, bins=128</td><td>threshold=0.20, bins=128</td><td>threshold=0.05, bins=256</td></tr>
 </table>
 
 Full per-dataset breakdowns are in

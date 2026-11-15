@@ -17,7 +17,7 @@ A configuration file path can be specified using the ``-c``/``--config`` argumen
  * Mac:
      * ``~/Library/Preferences/PySceneDetect/scenedetect.cfg``
 
-Run `scenedetect --help` to see the exact path on your system which will be used.  Values set on the command line take precedence over those set in the config file.  Most (but not all) command line parameters can be set using a configuration file, and some options can *only* be set using a config file. See the :ref:`Template <config_file Template>` below for a ``scenedetect.cfg`` file that describes each option, which you can use to create a new config file.  Note that lines starting with a ``#`` are comments and will be ignored.
+Run ``scenedetect --help`` to see the exact path on your system which will be used.  Values set on the command line take precedence over those set in the config file.  Most (but not all) command line parameters can be set using a configuration file, and some options can *only* be set using a config file. The :ref:`Sections <config_file-sections>` reference below lists every key with its default and the matching command-line option.  Note that lines starting with a ``#`` are comments and will be ignored.
 
 The syntax of a configuration file is:
 
@@ -30,7 +30,7 @@ The syntax of a configuration file is:
 
 
 =======================================================================
-Example
+Sample File
 =======================================================================
 
 .. code:: ini
@@ -54,13 +54,12 @@ Example
     num-images = 3
 
 
-.. _config_file Template:
+.. _config_file-sections:
 
 =======================================================================
-Template
+Sections
 =======================================================================
 
-This template shows every possible configuration option and default values. It can be used as a ``scenedetect.cfg`` file. You can also `download it from Github <https://raw.githubusercontent.com/Breakthrough/PySceneDetect/v0.6.4-release/scenedetect.cfg>`_.
+Every section of the config file, its keys and defaults, and the part of the ``scenedetect.cfg`` template that documents them. The complete template can be `downloaded from Github <https://github.com/Breakthrough/PySceneDetect/blob/main/scenedetect.cfg>`_ and used as a config file as-is (every key is commented out). Values shown in the template are the defaults, or an example where the default is unset.
 
-.. literalinclude:: ../../scenedetect.cfg
-   :language: ini
+.. include:: config_sections.inc

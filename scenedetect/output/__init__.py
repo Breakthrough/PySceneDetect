@@ -40,6 +40,7 @@ from scenedetect.common import (
     CutList,
     FrameTimecode,
     SceneList,
+    framerate_to_fraction,
 )
 
 # Commonly used classes/functions exported under the `scenedetect.output` namespace for brevity.
@@ -172,9 +173,10 @@ def write_scene_list(
     # If required, output the cutting list as the first row (i.e. before the header row).
     if include_cut_list:
         csv_writer.writerow(
-            ["Timecode List:", *cut_list]
-            if cut_list
-            else [start.get_timecode() for start, _ in scene_list[1:]]
+            [
+                "Timecode List:",
+                *(cut_list if cut_list else [start.get_timecode() for start, _ in scene_list[1:]]),
+            ]
         )
     csv_writer.writerow(
         [
@@ -228,8 +230,8 @@ def write_scene_list_html(
             the start times of each scene (besides the 0th scene) is used instead.
         css: String containing all the css information for the resulting html page.
         css_class: String containing the named css class
-        image_filenames: dict where key i contains a list with n elements (filenames of
-            the n saved images from that scene)
+        image_filenames: dict where key i contains a list of the filenames of the images
+            saved from that scene (the number of images can differ between scenes)
         image_width: Optional desired width of images in table in pixels
         image_height: Optional desired height of images in table in pixels
     """
@@ -332,20 +334,59 @@ def write_scene_list_html(
     page.save(output_html_filename)
 
 
+def _edl_nominal_rate(frame_rate: Fraction | float) -> int | None:
+    """Frames per timecode second when counting `frame_rate` as non-drop-frame timecode.
+
+    Returns the whole number of frames per second for whole-number rates and for NTSC-style
+    ``N * 1000/1001`` rates (24 for 23.976, 30 for 29.97, 60 for 59.94). Returns ``None`` for any
+    other rate (e.g. the average rate of a VFR source, or 12.5 fps), for which non-drop-frame
+    timecode is not defined.
+    """
+    # `framerate_to_fraction` snaps near-NTSC and whole-number floats to their canonical form.
+    canonical = framerate_to_fraction(float(frame_rate))
+    if canonical.denominator == 1:
+        return canonical.numerator
+    if canonical.denominator == 1001 and canonical.numerator % 1000 == 0:
+        return canonical.numerator // 1000
+    return None
+
+
 def _edl_timecode(timecode: FrameTimecode) -> str:
-    """Format `timecode` as ``HH:MM:SS:FF`` for a CMX 3600 EDL entry."""
-    total_seconds = timecode.seconds
+    """Format `timecode` as non-drop-frame ``HH:MM:SS:FF`` for a CMX 3600 EDL entry.
+
+    Non-drop-frame timecode counts frames at the nominal rate: a timecode second is 24 frames at
+    23.976 fps and 30 frames at 29.97 fps, so the timecode runs slightly behind wall-clock time
+    (about 3.6 seconds per hour). Rates that are neither whole numbers nor ``N * 1000/1001`` have
+    no nominal rate; for those, the timecode is derived from wall-clock seconds instead.
+    """
     frame_rate = timecode.frame_rate
     assert frame_rate is not None
-    hours = int(total_seconds // 3600)
-    minutes = int((total_seconds % 3600) // 60)
-    seconds = int(total_seconds % 60)
-    frames_part = int((total_seconds * frame_rate) % frame_rate)
+    nominal_rate = _edl_nominal_rate(frame_rate)
+    if nominal_rate is not None:
+        frames = timecode.frame_num
+        frames_part = frames % nominal_rate
+        total_seconds = frames // nominal_rate
+        hours, minutes, seconds = (
+            total_seconds // 3600,
+            (total_seconds // 60) % 60,
+            total_seconds % 60,
+        )
+    else:
+        wall_seconds = timecode.seconds
+        hours = int(wall_seconds // 3600)
+        minutes = int((wall_seconds % 3600) // 60)
+        seconds = int(wall_seconds % 60)
+        frames_part = int((wall_seconds * frame_rate) % frame_rate)
     return f"{hours:02d}:{minutes:02d}:{seconds:02d}:{frames_part:02d}"
 
 
 def _parse_edl_start_timecode(value: str, frame_rate: Fraction | float) -> int:
-    """Parse a SMPTE ``HH:MM:SS:FF`` (or 8-digit ``HHMMSSFF``) start timecode into a frame count."""
+    """Parse a SMPTE ``HH:MM:SS:FF`` (or 8-digit ``HHMMSSFF``) start timecode into a frame count.
+
+    The timecode is read as non-drop-frame, counting frames at the nominal rate when
+    `frame_rate` has one (see :func:`_edl_nominal_rate`), so it round-trips through
+    :func:`_edl_timecode`.
+    """
     stripped = value.strip()
     if ":" in stripped:
         parts = stripped.split(":")
@@ -360,12 +401,16 @@ def _parse_edl_start_timecode(value: str, frame_rate: Fraction | float) -> int:
             f"Invalid start timecode {value!r}: expected HH:MM:SS:FF or 8 digits (HHMMSSFF)."
         )
     hours, minutes, seconds, frames = (int(p) for p in parts)
-    max_frames = math.ceil(float(frame_rate))
+    nominal_rate = _edl_nominal_rate(frame_rate)
+    max_frames = nominal_rate if nominal_rate is not None else math.ceil(float(frame_rate))
     if minutes >= 60 or seconds >= 60 or frames >= max_frames:
         raise ValueError(
             f"Invalid start timecode {value!r}: MM<60, SS<60, FF<{max_frames} required."
         )
-    return round((hours * 3600 + minutes * 60 + seconds) * float(frame_rate)) + frames
+    total_seconds = hours * 3600 + minutes * 60 + seconds
+    if nominal_rate is not None:
+        return total_seconds * nominal_rate + frames
+    return round(total_seconds * float(frame_rate)) + frames
 
 
 @_open_output_file("EDL")
@@ -387,6 +432,10 @@ def write_scene_list_edl(
         start_timecode: Optional SMPTE timecode (``HH:MM:SS:FF`` or 8-digit ``HHMMSSFF``) added to
             every event so the EDL aligns with the source media's on-screen timecode. Applied to
             both source and record columns.
+
+    Timecodes are written as non-drop-frame (``FCM: NON-DROP FRAME``), counting frames at the
+    nominal rate: 24 per timecode second at 23.976 fps, 30 at 29.97 fps, and so on. Rates with no
+    nominal rate (e.g. the average rate of a VFR source) are approximated from wall-clock seconds.
     """
     # `_open_output_file` replaces filesystem paths with writable text streams.
     assert isinstance(output_path, _SupportsWrite)
@@ -656,6 +705,7 @@ def write_scene_list_otio(
     frame_rate: Fraction,
     name: str | None = None,
     audio: bool = True,
+    source_duration: FrameTimecode | None = None,
 ):
     """Writes the given list of scenes to `output_path` as an OTIO Timeline.1 JSON document.
 
@@ -670,6 +720,9 @@ def write_scene_list_otio(
             current OTIO format does not support rational timings.
         name: Timeline name. Defaults to the stem of `video_path`.
         audio: If True (default), include an audio track alongside the video track.
+        source_duration: Total duration of the source media. Written as the media reference's
+            available range so NLEs can seek into the source. If None, the available range is
+            left unspecified rather than inferred from the selected scenes.
     """
     # `_open_output_file` replaces filesystem paths with writable text streams.
     assert isinstance(output_path, _SupportsWrite)
@@ -681,6 +734,21 @@ def write_scene_list_otio(
     video_base_name = video_path.name
     video_abs_path = str(video_path.absolute())
     fps = float(frame_rate)
+    available_range = None
+    if source_duration is not None:
+        available_range = {
+            "OTIO_SCHEMA": "TimeRange.1",
+            "duration": {
+                "OTIO_SCHEMA": "RationalTime.1",
+                "rate": fps,
+                "value": round(source_duration.seconds * fps, 6),
+            },
+            "start_time": {
+                "OTIO_SCHEMA": "RationalTime.1",
+                "rate": fps,
+                "value": 0.0,
+            },
+        }
 
     # List of track mapping to resource type.
     # TODO(https://scenedetect.com/issues/497): Allow OTIO export without an audio track.
@@ -726,19 +794,7 @@ def write_scene_list_otio(
                                 "DEFAULT_MEDIA": {
                                     "OTIO_SCHEMA": "ExternalReference.1",
                                     "name": video_base_name,
-                                    "available_range": {
-                                        "OTIO_SCHEMA": "TimeRange.1",
-                                        "duration": {
-                                            "OTIO_SCHEMA": "RationalTime.1",
-                                            "rate": fps,
-                                            "value": 1980.0,
-                                        },
-                                        "start_time": {
-                                            "OTIO_SCHEMA": "RationalTime.1",
-                                            "rate": fps,
-                                            "value": 0.0,
-                                        },
-                                    },
+                                    "available_range": available_range,
                                     "available_image_bounds": None,
                                     "target_url": video_abs_path,
                                 }

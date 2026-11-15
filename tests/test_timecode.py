@@ -21,12 +21,14 @@ or string HH:MM:SS[.nnn]. timecode format.
 """
 
 # Third-Party Library Imports
+import numbers
 from fractions import Fraction
 
 import pytest
 
 # Standard Library Imports
 from scenedetect.common import MAX_FPS_DELTA, FrameTimecode, Timecode, framerate_to_fraction
+from scenedetect.detector import FlashFilter
 
 
 def test_framerate():
@@ -514,6 +516,51 @@ def test_framerate_to_fraction_non_ntsc_fallback():
     assert framerate_to_fraction(24.5) == Fraction(49, 2)
 
 
+class _StubRational:
+    """Minimal `numbers.Rational` that only exposes numerator/denominator, mirroring
+    `av.AVRational` from PyAV 19+ (which has no `__int__`, `__round__`, or `__floor__`)."""
+
+    def __init__(self, numerator: int, denominator: int):
+        self.numerator = numerator
+        self.denominator = denominator
+
+
+numbers.Rational.register(_StubRational)
+
+
+def test_framerate_to_fraction_accepts_rational():
+    """Any `numbers.Rational` (not just `Fraction`) must be converted exactly. PyAV >= 19.0
+    reports frame rates and time bases as the `av.AVRational` type."""
+    for num, den in [(30000, 1001), (24000, 1001), (25, 1)]:
+        result = framerate_to_fraction(_StubRational(num, den))  # type: ignore[arg-type]
+        assert isinstance(result, Fraction)
+        assert result == Fraction(num, den)
+    with pytest.raises(ValueError):
+        framerate_to_fraction(_StubRational(0, 1))  # type: ignore[arg-type]
+
+
+def test_frame_timecode_accepts_rational_fps():
+    tc = FrameTimecode(0, _StubRational(24000, 1001))  # type: ignore[arg-type]
+    assert isinstance(tc.frame_rate, Fraction)
+    assert tc.frame_rate == Fraction(24000, 1001)
+
+
+def test_frame_timecode_rejects_integral_fps():
+    """`int`/`bool` are also `numbers.Rational` - these must raise TypeError so a misplaced
+    frame *count* is never silently used as a frame *rate*."""
+    with pytest.raises(TypeError):
+        FrameTimecode(0, 30)  # type: ignore[arg-type]
+    with pytest.raises(TypeError):
+        FrameTimecode(0, True)  # type: ignore[arg-type]
+
+
+def test_timecode_normalizes_rational_time_base():
+    tc = Timecode(pts=1001, time_base=_StubRational(1, 30000))  # type: ignore[arg-type]
+    assert isinstance(tc.time_base, Fraction)
+    assert tc.time_base == Fraction(1, 30000)
+    assert tc.seconds == pytest.approx(1001 / 30000)
+
+
 def test_timecode_arithmetic_mixed_time_base():
     """Arithmetic with FrameTimecodes using different time_bases should work."""
     fps = Fraction(24000, 1001)
@@ -648,6 +695,68 @@ def test_min_scene_len_accepts_timecode_like():
     # ContentDetector: same.
     ContentDetector(min_scene_len=FrameTimecode(timecode=15, fps=30.0))
     ContentDetector(min_scene_len=Timecode(pts=500, time_base=Fraction(1, 1000)))
+
+
+# FlashFilter NTSC regression tests (#577). An integer `length` (frames) was converted to seconds
+# with `length / float(frame_rate)`, which can land one ulp above the true value at NTSC rates, so
+# a gap of exactly N frames failed the `>=` check and the cut was dropped. These tests feed
+# FlashFilter the exact positions a backend reports for an NTSC stream (no video file needed).
+NTSC_RATES = (
+    Fraction(30000, 1001),
+    Fraction(60000, 1001),
+)
+
+
+def _ntsc_pts_position(frame: int, fps: Fraction) -> FrameTimecode:
+    """Position of `frame` as a PTS-exact backend (e.g. PyAV) reports it.
+
+    For an NTSC rate ``num/1001`` with ``time_base = 1/num`` each frame advances exactly ``1001``
+    PTS units.
+    """
+    return FrameTimecode(Timecode(pts=frame * 1001, time_base=Fraction(1, fps.numerator)), fps)
+
+
+def _ntsc_microsecond_position(frame: int, fps: Fraction) -> FrameTimecode:
+    """Position of `frame` as the OpenCV backend reports it, rounded to whole microseconds."""
+    us = round(frame * 1_000_000 / fps)
+    return FrameTimecode(Timecode(pts=us, time_base=Fraction(1, 1_000_000)), fps)
+
+
+@pytest.mark.parametrize("fps", NTSC_RATES)
+@pytest.mark.parametrize("mode", [FlashFilter.Mode.MERGE, FlashFilter.Mode.SUPPRESS])
+def test_flashfilter_emits_cut_every_n_frames_at_ntsc(fps: Fraction, mode: FlashFilter.Mode):
+    """A cut exactly `length` frames after the previous one is kept at NTSC rates."""
+    flash_filter = FlashFilter(mode=mode, length=15)
+    emitted = []
+    for frame in range(300):
+        emitted += flash_filter.filter(
+            _ntsc_pts_position(frame, fps), above_threshold=frame > 0 and frame % 15 == 0
+        )
+    assert [t.frame_num for t in emitted] == list(range(15, 300, 15))
+
+
+@pytest.mark.parametrize("fps", NTSC_RATES)
+def test_flashfilter_keeps_exact_gap_at_ntsc(fps: Fraction):
+    """The exact N-frame gap must satisfy the minimum-length check at NTSC rates."""
+    gap = _ntsc_pts_position(115, fps) - _ntsc_pts_position(100, fps)
+    assert gap.frame_num == 15
+    assert gap >= 15
+
+
+@pytest.mark.parametrize("fps", NTSC_RATES)
+@pytest.mark.parametrize("mode", [FlashFilter.Mode.MERGE, FlashFilter.Mode.SUPPRESS])
+def test_flashfilter_keeps_cuts_on_microsecond_positions(fps: Fraction, mode: FlashFilter.Mode):
+    """OpenCV rounds positions to microseconds, so an N-frame gap can be 1 us short of N / fps.
+
+    With min_scene_len=17 on 29.97 fps (the example in #577) cuts were dropped.
+    """
+    flash_filter = FlashFilter(mode=mode, length=17)
+    emitted = []
+    for frame in range(17 * 20):
+        emitted += flash_filter.filter(
+            _ntsc_microsecond_position(frame, fps), above_threshold=frame > 0 and frame % 17 == 0
+        )
+    assert [t.frame_num for t in emitted] == list(range(17, 17 * 20, 17))
 
 
 def test_get_framerate():

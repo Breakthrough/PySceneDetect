@@ -13,9 +13,9 @@ requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "scenedetect-core"
+name = "scenedetect"
 dynamic = ["version"]
-description = "The detection pipeline for PySceneDetect (core library, minimal dependencies)."
+description = "Video scene cut/shot detection program and Python library."
 readme = { file = "packaging/package-info.rst", content-type = "text/x-rst" }
 license = "BSD-3-Clause"
 license-files = ["LICENSE"]
@@ -40,33 +40,31 @@ classifiers = [
     "Topic :: Multimedia :: Video :: Non-Linear Editor",
     "Topic :: Utilities",
 ]
-# OpenCV is required at runtime but intentionally NOT declared: any of the four
-# opencv-python* variants satisfies the library for development installs. This root
-# config (`scenedetect-core`) is used for local/dev installs only and is NOT
-# published to PyPI (0.7.1 was published briefly and yanked - layering the published
-# packages over a shared core dist is unsafe with pip; see
-# https://scenedetect.com/issues/558). The published `scenedetect` and
-# `scenedetect-headless` packages (packaging/variants/) ship the same code with a
-# concrete OpenCV variant plus the CLI dependencies.
+# This root config is the `scenedetect` package (opencv-python, the CLI dependencies and
+# the `scenedetect` console script) and is what `pip install -e .[dev]` installs for
+# development. Keep it in sync with packaging/variants/pyproject-scenedetect.toml, which
+# packaging/build_all.py swaps in for the published build; the headless variant differs
+# only in its OpenCV dependency. Do not give this file another package name: GitHub's
+# dependency graph keys the repository's package on it, and a differently named dev
+# dist co-installed with `scenedetect` double-owns the same files - `scenedetect-core`
+# (0.7.1, yanked) was that mistake; see https://scenedetect.com/issues/558.
 dependencies = [
+    # click 8.3.0 specifically is excluded per https://scenedetect.com/issues/521; 8.3.1+ are fine.
+    "click~=8.0,!=8.3.0",
     "numpy",
+    "opencv-python",
+    "platformdirs",
+    "tqdm",
 ]
 
 [project.optional-dependencies]
-opencv = ["opencv-python"]
-opencv-headless = ["opencv-python-headless"]
 pyav = ["av>=9.2"]
 moviepy = ["moviepy"]
 dev = [
     "av>=9.2",
-    # click 8.3.0 specifically is excluded per https://scenedetect.com/issues/521; 8.3.1+ are fine.
-    "click~=8.0,!=8.3.0",
     "moviepy",
-    "opencv-python",
-    "platformdirs",
     "pytest>=7.0",
     "pytest-rerunfailures",
-    "tqdm",
 ]
 docs = ["Sphinx==7.0.1", "sphinx-copybutton==0.5.2"]
 website = ["mkdocs==1.5.2", "jinja2>=3.1.6"]
@@ -77,9 +75,8 @@ Documentation = "https://www.scenedetect.com/docs/"
 Source = "https://github.com/Breakthrough/PySceneDetect"
 Issues = "https://github.com/Breakthrough/PySceneDetect/issues"
 
-# No [project.scripts]: the `scenedetect` console script is declared by the
-# scenedetect/scenedetect-headless variants (packaging/variants/) so a core
-# install stays library-only. Use `python -m scenedetect` from a core-only install.
+[project.scripts]
+scenedetect = "scenedetect.__main__:main"
 
 [tool.setuptools]
 include-package-data = true

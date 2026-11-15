@@ -1,0 +1,40 @@
+name: Python API
+description: Programmers using the `scenedetect` package.
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Describe the issue (unexpected result, exception thrown, etc...) and any relevant output.
+    validations:
+      required: true
+  - type: textarea
+    id: example
+    attributes:
+      label: Example
+      description: Include code samples that demonstrate the issue.
+      placeholder: |
+        from scenedetect import detect, ContentDetector, split_video_ffmpeg
+
+        scene_list = detect("my_video.mp4", ContentDetector())
+        split_video_ffmpeg("my_video.mp4", scene_list)
+      render: python
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: >-
+        Run `scenedetect version` and include the output. This will describe the environment/OS/platform and
+        versions of dependencies you have installed.
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: media
+    attributes:
+      label: Media/Files
+      description: >-
+        Attach or link to any files relevant to the issue, including videos (or YouTube links), scene files, stats
+        files, and log output.

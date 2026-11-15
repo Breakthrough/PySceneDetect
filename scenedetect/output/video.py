@@ -305,7 +305,7 @@ def split_video_ffmpeg(
 
     logger.info("Splitting video with ffmpeg, output path template:\n  %s", output_file_template)
     if output_dir:
-        logger.info("Output folder:\n  %s", output_file_template)
+        logger.info("Output folder:\n  %s", output_dir)
 
     if video_name is None:
         video_name = Path(input_video_path).stem

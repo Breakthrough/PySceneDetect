@@ -13,7 +13,7 @@
 
 ----------------------------------------------------------
 
-### Latest Release: v0.7.1 (July 21, 2026)
+### Latest Release: v0.7.3 (November 8, 2026)
 
 **Website**:  [scenedetect.com](https://www.scenedetect.com)
 
@@ -131,6 +131,25 @@ Please submit any bugs/issues or feature requests to [the Issue Tracker](https:/
 Pull requests are welcome and encouraged.  PySceneDetect is released under the BSD 3-Clause license, and submitted code should be compliant.
 
 For help or other issues, you can join [the official PySceneDetect Discord Server](https://discord.gg/H83HbJngk7), submit an issue/bug report [here on Github](https://github.com/Breakthrough/PySceneDetect/issues), or contact me via [my website](https://bcastell.com/about/).
+
+## Development Setup
+
+Create a virtual environment and install the project in editable mode with the development dependencies:
+
+    python -m venv .venv
+    source .venv/bin/activate      # Windows: .venv\Scripts\activate
+    pip install -e ".[dev]"
+
+The tests use videos from the `resources` branch. Fetch them into `tests/resources/` (this folder is ignored by git, so nothing gets staged):
+
+    git fetch --depth=1 https://github.com/Breakthrough/PySceneDetect.git resources
+    git restore --source=FETCH_HEAD tests/resources
+
+Then run `pytest`. The full test suite also needs `ffmpeg` and `mkvmerge`. If `ffmpeg` is not on your `PATH`, the copy bundled with `imageio-ffmpeg` (installed by `[dev]`) is used instead. Install `mkvmerge` separately, otherwise its test is skipped.
+
+The editable install provides the `scenedetect` command (`python -m scenedetect` also works):
+
+    scenedetect -i video.mp4 detect-content list-scenes
 
 ## Code Signing
 

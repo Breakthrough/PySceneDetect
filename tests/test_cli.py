@@ -36,6 +36,7 @@ import numpy as np
 import pytest
 
 import scenedetect
+from scenedetect._cli.config import ConfigLoadFailure, ConfigRegistry
 from scenedetect.output import is_ffmpeg_available, is_mkvmerge_available
 from scenedetect.platform import StrPath
 from tests.helpers import invoke_cli
@@ -131,6 +132,71 @@ def test_cli_crop_rejects_invalid():
     )
     # Negative numbers
     assert invoke_scenedetect("-i {VIDEO} --crop 0 0 -256 -256 time {TIME}", config_file=None) != 1
+
+
+@pytest.mark.parametrize(
+    ("config", "cli_args", "expected_auto", "expected_downscale"),
+    [
+        ("", [], True, 1),
+        ("", ["-d", "0"], True, 1),
+        ("", ["--downscale", "1"], False, 1),
+        ("", ["-d", "2"], False, 2),
+        ("downscale = 0", [], True, 1),
+        ("downscale = 1", [], False, 1),
+        ("downscale = 3", [], False, 3),
+        # CLI -d 0 overrides a manual downscale factor in the config file back to auto.
+        ("downscale = 3", ["-d", "0"], True, 1),
+        ("downscale = 0", ["-d", "2"], False, 2),
+    ],
+)
+def test_cli_downscale(
+    tmp_path: Path,
+    config: str,
+    cli_args: list[str],
+    expected_auto: bool,
+    expected_downscale: int,
+):
+    """Test `-d`/`--downscale` on the CLI and `downscale` in `[global]`, including `0` for auto."""
+    from click.testing import CliRunner
+
+    from scenedetect._cli import scenedetect as scenedetect_cli
+    from scenedetect._cli.context import CliContext
+    from tests.helpers import close_video_stream
+
+    config_path = tmp_path / "scenedetect.cfg"
+    config_path.write_text(f"[global]\n{config}\n")
+    context = CliContext()
+    try:
+        result = CliRunner().invoke(
+            scenedetect_cli,
+            ["-c", str(config_path), "-i", DEFAULT_VIDEO_PATH, *cli_args, "time", "-e", "1"],
+            obj=context,
+        )
+        assert result.exit_code == 0, result.output
+        assert context.scene_manager is not None
+        assert context.scene_manager.auto_downscale is expected_auto
+        assert context.scene_manager.downscale == expected_downscale
+    finally:
+        if context.video_stream is not None:
+            close_video_stream(context.video_stream)
+
+
+@pytest.mark.parametrize(
+    ("config", "cli_args"),
+    [
+        ("", ["-d", "-1"]),
+        ("downscale = -1", []),
+    ],
+)
+def test_cli_downscale_rejects_negative(tmp_path: Path, config: str, cli_args: list[str]):
+    """Negative downscale values must be rejected on both the CLI and in the config file."""
+    config_path = tmp_path / "scenedetect.cfg"
+    config_path.write_text(f"[global]\n{config}\n")
+    exit_code, output = invoke_cli(
+        ["-c", str(config_path), "-i", DEFAULT_VIDEO_PATH, *cli_args, "time", "-e", "1"]
+    )
+    assert exit_code != 0
+    assert "Downscale factor must be a positive integer >= 1!" in output
 
 
 @pytest.mark.parametrize("info_command", ["help", "about", "version"])
@@ -668,13 +734,185 @@ def test_cli_save_images_rotation(rotated_video_file, tmp_path: Path):
     assert image.shape == (1280, 544, 3)
 
 
+_TIME_AND_DETECTOR = ["time", *DEFAULT_TIME.split(), DEFAULT_DETECTOR]
+
+
+def _count_images_per_scene(path: Path) -> list[int]:
+    return [
+        len(list(path.glob(f"{DEFAULT_VIDEO_NAME}-Scene-{scene + 1:03d}-*.jpg")))
+        for scene in range(DEFAULT_NUM_SCENES)
+    ]
+
+
+def _invoke_save_images(
+    tmp_path: Path, args: list[str], config: str | None = None
+) -> tuple[int, str]:
+    """Run `save-images` with `args` in-process, using `config` as the [save-images] section of
+    the config file."""
+    config_path = tmp_path / "config.cfg"
+    config_path.write_text(f"[save-images]\n{config or ''}\n")
+    return invoke_cli(
+        [
+            "-c",
+            str(config_path),
+            "-i",
+            DEFAULT_VIDEO_PATH,
+            "-o",
+            str(tmp_path),
+            *_TIME_AND_DETECTOR,
+            "save-images",
+            *args,
+        ]
+    )
+
+
+@pytest.mark.parametrize(
+    "args,expected",
+    [
+        # The two scenes are 1.752s and 2.252s long: floor(length / 1s) + 1 images each.
+        (["-i", "1s"], [2, 3]),
+        (["-i", "1.5s"], [2, 2]),
+        (["--interval", "00:00:01.000"], [2, 3]),
+        # DURATION in frames (24 frames is about 1s here).
+        (["-i", "24"], [2, 3]),
+        # --min-images and --max-images limit the number of images per scene.
+        (["-i", "1s", "--min-images", "3"], [3, 3]),
+        (["-i", "0.5s", "--max-images", "4"], [4, 4]),
+        (["-i", "0.2s", "--min-images", "10", "--max-images", "11"], [10, 11]),
+        (["-i", "0.5s", "--max-images", "0"], [4, 5]),
+    ],
+)
+def test_cli_save_images_interval(tmp_path: Path, args: list[str], expected: list[int]):
+    """Test `save-images -i/--interval` with --min-images/--max-images."""
+    exit_code, _ = _invoke_save_images(tmp_path, args)
+    assert exit_code == 0
+    assert _count_images_per_scene(tmp_path) == expected
+
+
+@pytest.mark.parametrize(
+    "args,error",
+    [
+        (["-n", "3", "-i", "1s"], "Only one of -n/--num-images or -i/--interval can be set."),
+        (
+            ["--min-images", "2"],
+            "--min-images and --max-images can only be used with -i/--interval.",
+        ),
+        (
+            ["-n", "3", "--max-images", "2"],
+            "--min-images and --max-images can only be used with -i/--interval.",
+        ),
+        (
+            ["-i", "1s", "--min-images", "3", "--max-images", "2"],
+            "max-images must be 0 (no limit) or at least min-images.",
+        ),
+        (["-i", "1s", "--min-images", "0"], "0 is not in the range x>=1."),
+        (["-i", "1s", "--max-images", "-1"], "-1 is not in the range x>=0."),
+        (
+            ["-i", "abc"],
+            "Invalid value for -i/--interval: Interval must be in frames (24), seconds (1.5s), or HH:MM:SS.",
+        ),
+        (["-i", "0"], "Invalid value for -i/--interval: Interval must be greater than 0."),
+        (["-i", "0s"], "Invalid value for -i/--interval: Interval must be greater than 0."),
+    ],
+)
+def test_cli_save_images_interval_rejects_invalid_values(
+    tmp_path: Path, args: list[str], error: str
+):
+    exit_code, output = _invoke_save_images(tmp_path, args)
+    assert exit_code != 0
+    assert error in output
+    assert not list(tmp_path.glob("*.jpg"))
+
+
+@pytest.mark.parametrize(
+    "config,args,expected",
+    [
+        ("interval = 1s", [], [2, 3]),
+        ("interval = 1s\nmin-images = 3", [], [3, 3]),
+        ("interval = 0.5s\nmax-images = 4", [], [4, 4]),
+        # Options on the command line take precedence over the config file.
+        ("interval = 2s\nmax-images = 2", ["-i", "0.5s"], [2, 2]),
+        ("interval = 0.5s\nmax-images = 4", ["--max-images", "2"], [2, 2]),
+        ("interval = 0.5s\nmax-images = 4", ["--max-images", "0"], [4, 5]),
+        ("interval = 2s", ["--min-images", "3"], [3, 3]),
+        ("num-images = 5", ["-i", "1s"], [2, 3]),
+        # Without an interval in effect, min-images and max-images in the config file are ignored.
+        ("interval = 1s\nmin-images = 5\nmax-images = 5", ["-n", "2"], [2, 2]),
+        ("num-images = 2\nmin-images = 5", [], [2, 2]),
+    ],
+)
+def test_cli_save_images_interval_config_file(
+    tmp_path: Path, config: str, args: list[str], expected: list[int]
+):
+    """Test the `interval`, `min-images` and `max-images` options of `[save-images]`."""
+    exit_code, _ = _invoke_save_images(tmp_path, args, config=config)
+    assert exit_code == 0
+    assert _count_images_per_scene(tmp_path) == expected
+
+
+@pytest.mark.parametrize(
+    "config,args,error",
+    [
+        (
+            "num-images = 3\ninterval = 1s",
+            [],
+            "Only one of num-images or interval can be set in the config file.",
+        ),
+        (
+            "num-images = 3",
+            ["--max-images", "2"],
+            "--min-images and --max-images can only be used with -i/--interval.",
+        ),
+        (
+            "interval = 1s\nmin-images = 3\nmax-images = 2",
+            [],
+            "max-images must be 0 (no limit) or at least min-images.",
+        ),
+        ("interval = 0", [], "interval in the config file must be greater than 0."),
+        ("interval = 0s", [], "interval in the config file must be greater than 0."),
+    ],
+)
+def test_cli_save_images_interval_config_file_rejects_invalid_values(
+    tmp_path: Path, config: str, args: list[str], error: str
+):
+    exit_code, output = _invoke_save_images(tmp_path, args, config=config)
+    assert exit_code != 0
+    assert error in output
+    assert not list(tmp_path.glob("*.jpg"))
+
+
+@pytest.mark.parametrize(
+    "config,error",
+    [
+        ("interval = abc", "Timecodes must be in seconds (100.0), frames (100), or HH:MM:SS."),
+        ("min-images = 0", "Value must be an integer of at least 1."),
+        ("min-images = 1.5", "Value must be an integer of at least 1."),
+        ("min-images = x", "Value must be an integer of at least 1."),
+        ("max-images = -1", "Value must be an integer of at least 0."),
+    ],
+)
+def test_cli_save_images_interval_config_file_load_errors(tmp_path: Path, config: str, error: str):
+    config_path = tmp_path.joinpath("config.cfg")
+    config_path.write_text(f"[save-images]\n{config}\n")
+    with pytest.raises(ConfigLoadFailure) as ex:
+        ConfigRegistry(str(config_path))
+    assert any(error in message for _, message in ex.value.init_log)
+
+
 def test_cli_save_html(tmp_path: Path):
     """Test `save-html` command."""
     base_command = "-i {VIDEO} -s {STATS} time {TIME} {DETECTOR} {COMMAND}"
     assert invoke_scenedetect(base_command, COMMAND="save-html", output_dir=tmp_path) == 0
+    # The global -o option should also apply when no images are saved.
     assert (
-        invoke_scenedetect(base_command, COMMAND="save-html --no-images", output_dir=tmp_path) == 0
+        invoke_scenedetect(
+            base_command,
+            COMMAND="save-html --no-images --filename no-images.html",
+            output_dir=tmp_path,
+        )
+        == 0
     )
+    assert (tmp_path / "no-images.html").exists()
     # Ensure we can still call the now deprecated export-html command.
     assert invoke_scenedetect(base_command, COMMAND="export-html", output_dir=tmp_path) == 0
     # TODO: Check for existence of HTML & image files.
@@ -1041,6 +1279,26 @@ FCM: NON-DROP FRAME
 002  BX V     C        00:00:03:18 00:00:06:00 00:00:03:18 00:00:06:00
 """
     assert output_path.read_text() == EXPECTED_EDL_OUTPUT
+
+
+def test_cli_save_edl_start_timecode_ntsc(tmp_path: Path):
+    """`save-edl -s 01:00:00:00` on a 29.97 fps video starts the first event at exactly
+    `01:00:00:00` rather than `00:59:59:29`, since EDL timecodes are non-drop-frame (#593)."""
+    exit_code, _ = invoke_cli(
+        [
+            "-i",
+            "tests/resources/testvideo.mp4",
+            "-o",
+            str(tmp_path),
+            "detect-content",
+            "save-edl",
+            "-s",
+            "01:00:00:00",
+        ]
+    )
+    assert exit_code == 0
+    content = tmp_path.joinpath("testvideo.edl").read_text()
+    assert "001  AX V     C        01:00:00:00 " in content
 
 
 def test_cli_save_otio(tmp_path: Path):

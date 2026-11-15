@@ -38,22 +38,22 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-14, macos-latest, ubuntu-22.04, ubuntu-latest, windows-latest]
+        os: [macos-latest, ubuntu-22.04, ubuntu-latest, windows-latest]
         python-version: ["3.10", "3.11", "3.12", "3.13"]
     env:
       # Version is extracted below and used to find correct package install path.
       scenedetect_version: ""
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7.0.1
 
       - name: Setup FFmpeg
-        uses: ./.github/actions/setup-ffmpeg
+        uses: $/.github/actions/setup-ffmpeg
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7.1.0
         with:
           python-version: ${{ matrix.python-version }}
           cache: 'pip'
@@ -86,7 +86,7 @@ jobs:
           python -m scenedetect version
           python -m scenedetect -i tests/resources/testvideo.mp4 -b opencv time --end 2s
           python -m scenedetect -i tests/resources/testvideo.mp4 -b pyav time --end 2s
-          python -m pip uninstall -y scenedetect-core
+          python -m pip uninstall -y scenedetect
 
       - name: Build Package
         shell: bash
@@ -156,7 +156,7 @@ jobs:
 
       - name: Upload Package
         if: ${{ matrix.python-version == '3.13' && matrix.os == 'ubuntu-latest' }}
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: scenedetect-dist
           path: |

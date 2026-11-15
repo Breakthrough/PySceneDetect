@@ -77,6 +77,27 @@ def test_capture_adapter(test_movie_clip: str):
     assert [start.frame_num for (start, _) in scenes] == GROUND_TRUTH_CAPTURE_ADAPTER_TEST
 
 
+def test_close_releases_capture(test_movie_clip: str):
+    """`close()` must release the VideoCapture opened by the stream."""
+    stream = VideoStreamCv2(test_movie_clip)
+    capture = stream.capture
+    assert capture.isOpened()
+    stream.close()
+    assert not capture.isOpened()
+
+
+def test_capture_adapter_close_leaves_capture_open(test_movie_clip: str):
+    """The VideoCapture wrapped by a VideoCaptureAdapter belongs to the caller, so closing the
+    adapter (here by leaving a `with` block) must not release it."""
+    cap = cv2.VideoCapture(test_movie_clip)
+    try:
+        with VideoCaptureAdapter(cap) as adapter:
+            assert adapter.read() is not False
+        assert cap.isOpened()
+    finally:
+        cap.release()
+
+
 def test_capture_adapter_framerate_legacy_alias(test_movie_clip: str):
     """`framerate=` is the deprecated alias for `frame_rate=` on VideoCaptureAdapter."""
     cap = cv2.VideoCapture(test_movie_clip)

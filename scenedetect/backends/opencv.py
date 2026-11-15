@@ -65,6 +65,10 @@ def _get_capture_api(path: str) -> int:
     By default OpenCV resolves any capture backend by probing for compatibility, and tries FFmpeg
     first. Usually this fails, and it falls back gracefully to CAP_IMAGES. However, this also seems
     to cause issues on interpreter exit, as the stack trace implicates something in the ffmpeg DLL.
+
+    TODO: Remove this workaround once upstream fix ships.
+
+    https://github.com/opencv/opencv/issues/30017
     """
     is_local = not any(identifier in path for identifier in ("://", " ! "))
     if os.name == "nt" and is_local and path.lower().endswith(".png"):
@@ -174,7 +178,8 @@ class VideoStreamCv2(VideoStream):
 
         Prefer to use this property only to take ownership of the underlying cv2.VideoCapture object
         backing this object. Seeking or using the read/grab methods through this property are
-        unsupported and will leave this object in an inconsistent state.
+        unsupported and will leave this object in an inconsistent state. Closing this object (e.g.
+        by leaving a `with` block) releases the capture.
         """
         return self._cap
 
@@ -218,6 +223,8 @@ class VideoStreamCv2(VideoStream):
     @property
     def frame_size(self) -> tuple[int, int]:
         """Size of each video frame in pixels as a tuple of (width, height)."""
+        if self._closed:
+            return self._closed_frame_size
         return (
             math.trunc(self._cap.get(cv2.CAP_PROP_FRAME_WIDTH)),
             math.trunc(self._cap.get(cv2.CAP_PROP_FRAME_HEIGHT)),
@@ -228,11 +235,15 @@ class VideoStreamCv2(VideoStream):
         """Duration of the stream as a FrameTimecode, or None if non terminating."""
         if self._is_device:
             return None
+        if self._closed:
+            return self.base_timecode + math.trunc(self._closed_frame_count)
         return self.base_timecode + math.trunc(self._cap.get(cv2.CAP_PROP_FRAME_COUNT))
 
     @property
     def aspect_ratio(self) -> float:
         """Display/pixel aspect ratio as a float (1.0 represents square pixels)."""
+        if self._closed:
+            return self._closed_aspect_ratio
         return _get_aspect_ratio(self._cap)
 
     @property
@@ -242,6 +253,8 @@ class VideoStreamCv2(VideoStream):
         Video timestamps are rounded to integer microseconds from CAP_PROP_POS_MSEC.
         Image-sequence timestamps use the source image index and configured frame rate.
         """
+        if self._eof_timecode is not None:
+            return self._eof_timecode
         if self._cap.get(cv2.CAP_PROP_BACKEND) == cv2.CAP_IMAGES:
             source_index = max(0, math.trunc(self._cap.get(cv2.CAP_PROP_POS_FRAMES)) - 1)
             return Timecode(
@@ -274,6 +287,7 @@ class VideoStreamCv2(VideoStream):
             TypeError: The target type is unsupported.
             ValueError: The target is negative, non-finite, malformed, or has an invalid time base.
         """
+        self._check_open()
         if not self.is_seekable:
             raise SeekError("Cannot seek if input is a device!")
         parsed = parse_frame_or_time(target)
@@ -288,6 +302,7 @@ class VideoStreamCv2(VideoStream):
             target_time = Fraction(round(parsed * 1_000_000), 1_000_000)
             if self.frame_numbering is FrameNumbering.RELATIVE:
                 self._pending_grab = False
+                self._eof_timecode = None
                 if not self._cap.set(cv2.CAP_PROP_POS_MSEC, float(parsed * 1000)):
                     raise SeekError("Could not seek to the requested time.")
             elif self._position is not None and self._position.timecode.seconds >= target_time:
@@ -317,10 +332,26 @@ class VideoStreamCv2(VideoStream):
 
     def reset(self):
         """Reopen at the source beginning and clear the recorded position and pending frame."""
+        self._check_open()
         self._cap.release()
         self._open_capture(float(self._frame_rate))
 
+    def close(self) -> None:
+        """Close the video, releasing the underlying `cv2.VideoCapture`. Has no effect if the
+        stream is already closed. See
+        :meth:`VideoStream.close() <scenedetect.video_stream.VideoStream.close>` for details."""
+        if self._closed:
+            return
+        # A released capture no longer reports the video's properties, so record them first.
+        self._closed_frame_size = self.frame_size
+        self._closed_frame_count = self._cap.get(cv2.CAP_PROP_FRAME_COUNT)
+        self._closed_aspect_ratio = self.aspect_ratio
+        self._closed = True
+        self._pending_grab = False
+        self._cap.release()
+
     def read(self, decode: bool = True) -> np.ndarray | bool:
+        self._check_open()
         if not self._grab_next_frame():
             return False
         self._record_frame(self.timecode)
@@ -387,6 +418,7 @@ class VideoStreamCv2(VideoStream):
         self._position = None
         self._frame_rate: Fraction = framerate_to_fraction(frame_rate)
         self._pending_grab = False
+        self._eof_timecode: Timecode | None = None
         cap.set(cv2.CAP_PROP_ORIENTATION_AUTO, 1.0)  # https://github.com/opencv/opencv/issues/26795
 
     def _grab_next_frame(self) -> bool:
@@ -396,6 +428,7 @@ class VideoStreamCv2(VideoStream):
             return True
         if not self._cap.isOpened():
             return False
+        last_timecode = self.timecode
         has_grabbed = self._cap.grab()
         # If we failed to grab the frame, retry a few times if required.
         if not has_grabbed:
@@ -409,6 +442,11 @@ class VideoStreamCv2(VideoStream):
                 logger.debug("Frame failed to decode.")
                 if not self._warning_displayed and self._decode_failures > 1:
                     logger.warning("Failed to decode some frames, results may be inaccurate.")
+
+        if has_grabbed:
+            self._eof_timecode = None
+        else:
+            self._eof_timecode = last_timecode
         return has_grabbed
 
     def peek_timecode(self) -> Timecode | None:
@@ -417,6 +455,7 @@ class VideoStreamCv2(VideoStream):
         Returns:
             Timecode of the next frame, or None if end of video.
         """
+        self._check_open()
         if self._pending_grab:
             return self.timecode
         if not self._grab_next_frame():
@@ -432,6 +471,9 @@ class VideoCaptureAdapter(VideoStream):
     Ordinals and timestamps start at zero with the first frame read through this adapter,
     even if the capture was already advanced. Timestamps use frame count and frame_rate,
     not capture-provided timestamps, so variable frame intervals are not preserved.
+
+    The VideoCapture remains owned by the caller: closing the adapter (e.g. by leaving a `with`
+    block) does not release it.
     """
 
     def __init__(
@@ -594,6 +636,7 @@ class VideoCaptureAdapter(VideoStream):
 
     def peek_timecode(self) -> Timecode | None:
         """Return the next frame's timestamp on the FPS-derived clock."""
+        self._check_open()
         if not self._pending_grab:
             if not self._grab_next_frame():
                 return None

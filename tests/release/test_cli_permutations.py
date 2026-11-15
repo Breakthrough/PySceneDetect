@@ -198,8 +198,8 @@ def test_cli_save_qp_smoke(test_video_file, tmp_path):
 def test_cli_save_html_smoke(test_video_file, tmp_path):
     """save-html replaces the deprecated export-html and produces an HTML report.
 
-    Note: save-html lacks its own --output option and ignores the global -o, so the
-    file is routed via --filename with an absolute path.
+    Note: save-html lacks its own --output option, so the file is routed via --filename
+    with an absolute path.
     """
     out_html = tmp_path / "scenes.html"
     result = _run(

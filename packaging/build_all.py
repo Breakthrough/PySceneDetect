@@ -14,17 +14,17 @@
     temporarily swapping packaging/variants/pyproject-<name>.toml into the repo
     root (restored afterwards, even on failure)
 
-Both are standalone code-carrying packages built from the repo root, so they share
-the same source, readme, and dynamic version. The root pyproject.toml
-(`scenedetect-core`) is a development/local-install configuration only and is NOT
-built or published here: scenedetect-core 0.7.1 was briefly published and then
-yanked - layering packages over a shared core dist is unsafe with pip (co-installed
-variants double-own files, and converting an existing code-carrying name to a
-metapackage breaks in-place upgrades; see https://scenedetect.com/issues/558).
+Both are standalone code-carrying packages built from the repo root, so they share the same source,
+readme, and dynamic version. The root pyproject.toml is the `scenedetect` configuration plus the
+development extras, and is swapped out here so the published metadata comes from the variant files.
 
-Requires `build` (pip install build). Fails if dist/ ends up with any wheel/sdist
-besides the four expected artifacts, so clear stale build artifacts from dist/ first.
-(Other dist/ contents are ignored - e.g. dist/logo/ is tracked website assets.)
+*NOTE*: No shared "core" dist exists anymore. scenedetect-core 0.7.1 was briefly published and then
+yanked. Layering packages over a shared core dist is unsafe with pip (co-installed variants
+share file ownership, and converting an existing name to a metapackage breaks in-place upgrades).
+See https://scenedetect.com/issues/558 for details.
+
+Requires `build` (pip install build). Fails if dist/ ends up with any wheel/sdist besides the four
+expected artifacts, so clear stale build artifacts from dist/ first.
 """
 
 import ast
@@ -58,20 +58,27 @@ def build() -> None:
 def main() -> None:
     version = get_version()
 
+    variants = {
+        name: (ROOT / "packaging" / "variants" / f"pyproject-{name}.toml").read_text(
+            encoding="utf-8"
+        )
+        for name in VARIANTS
+    }
+    for name, variant in variants.items():
+        assert f'name = "{name}"' in variant, f"unexpected package name in variant {name}"
+
     original = PYPROJECT.read_text(encoding="utf-8")
-    if 'name = "scenedetect-core"' not in original:
+    # The root config is the `scenedetect` package plus the development extras, so it
+    # must name `scenedetect` and must not be a variant file left over from an
+    # interrupted build (the swap below is restored in `finally`, but a crash can skip it).
+    if 'name = "scenedetect"' not in original or original in variants.values():
         raise SystemExit(
-            "pyproject.toml is not the scenedetect-core baseline - likely left over "
-            "from an interrupted build. Restore it (e.g. `git checkout pyproject.toml`) "
-            "and re-run."
+            "pyproject.toml is not the development baseline - likely left over from an "
+            "interrupted build. Restore it (e.g. `git checkout pyproject.toml`) and re-run."
         )
 
     try:
-        for name in VARIANTS:
-            variant = (ROOT / "packaging" / "variants" / f"pyproject-{name}.toml").read_text(
-                encoding="utf-8"
-            )
-            assert f'name = "{name}"' in variant, f"unexpected package name in variant {name}"
+        for variant in variants.values():
             PYPROJECT.write_text(variant, encoding="utf-8")
             build()
     finally:

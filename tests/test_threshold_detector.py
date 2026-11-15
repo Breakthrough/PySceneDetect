@@ -75,6 +75,20 @@ def test_min_out_length_applies_to_leading_fade(out_length, expected):
     assert _detect_levels(levels, min_scene_len=0) == [round(out_length / 2)]
 
 
+@pytest.mark.parametrize("method", list(ThresholdDetector.Method))
+def test_initial_state_follows_method(method):
+    # The first frame decides whether the video starts faded out using the same comparison as
+    # every later frame. CEILING used to apply the FLOOR rule here, which anchored a leading
+    # fade one frame late and emitted a spurious cut at frame 0 when the video starts faded in.
+    starts_out = [0] * 5 + [128] * 10
+    starts_in = [128] * 5 + [0] * 5 + [128] * 10
+    if method == ThresholdDetector.Method.CEILING:
+        starts_out = [255 - level for level in starts_out]
+        starts_in = [255 - level for level in starts_in]
+    assert _detect_levels(starts_out, threshold=128, method=method, min_scene_len=0) == [2]
+    assert _detect_levels(starts_in, threshold=128, method=method, min_scene_len=0) == [7]
+
+
 @pytest.mark.parametrize("minimum", [-1, -0.5])
 def test_negative_min_out_length_rejected(minimum):
     with pytest.raises(ValueError):

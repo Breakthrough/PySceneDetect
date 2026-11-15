@@ -60,7 +60,8 @@ class AdaptiveDetector(ContentDetector):
                 (`content_val` in a statsfile, the value `threshold` is compared against).
                 If omitted, the default ContentDetector weights are used.
             luma_only: If True, only considers changes in the luminance channel of the video.
-                Equivalent to specifying `weights` as :data:`ContentDetector.LUMA_ONLY`.
+                Equivalent to specifying `weights` as
+                :attr:`~scenedetect.detectors.content_detector.ContentDetector.LUMA_ONLY_WEIGHTS`.
                 Overrides `weights` if both are set.
             kernel_size: Size of kernel to use for post edge detection filtering. If None,
                 automatically set based on video resolution.
