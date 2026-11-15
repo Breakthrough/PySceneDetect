@@ -25,10 +25,11 @@ import csv
 import os
 import os.path
 import typing as ty
+from dataclasses import dataclass
 from logging import getLogger
 from pathlib import Path
 
-from scenedetect.common import FrameTimecode
+from scenedetect.common import FramePosition, Timecode
 from scenedetect.platform import StrPath
 
 logger = getLogger("pyscenedetect")
@@ -46,6 +47,12 @@ COLUMN_NAME_TIMECODE = "Timecode"
 ##
 ## StatsManager Exceptions
 ##
+
+
+@dataclass(slots=True)
+class _FrameStats:
+    metrics: dict[str, float]
+    timecode: Timecode | None = None
 
 
 class FrameMetricRegistered(Exception):
@@ -96,22 +103,12 @@ class StatsManager:
     Only metrics consisting of `float` or `int` should be used currently.
     """
 
-    def __init__(self, base_timecode: int | FrameTimecode | None = None):
-        """Initialize a new StatsManager.
-
-        Arguments:
-            base_timecode: Timecode associated with this object. Must not be None (default value
-                will be removed in a future release).
-        """
-        # Frame metrics keyed by either an `int` frame number or a `FrameTimecode`. Both forms
-        # hash/compare to the same dict slot (`FrameTimecode.__hash__` returns `frame_num`), so
-        # public methods accept both interchangeably for the same frame.
-        self._frame_metrics: dict[int | FrameTimecode, dict[str, float]] = dict()
+    def __init__(self):
+        """Initialize a new StatsManager."""
+        # Frame metrics keyed by either an `int` frame number.
+        self._frame_metrics: dict[int, _FrameStats] = dict()
         self._metric_keys: set[str] = set()
         self._metrics_updated: bool = False  # Flag indicating if metrics require saving.
-        self._base_timecode: int | FrameTimecode | None = (
-            base_timecode  # Used for timing calculations.
-        )
 
     @property
     def metric_keys(self) -> ty.Iterable[str]:
@@ -124,7 +121,7 @@ class StatsManager:
     # TODO(https://scenedetect.com/issues/507): We should support the dictionary protocol instead
     # of using this bespoke interface. It would be useful for Pandas compatibility as well.
     def get_metrics(
-        self, timecode: int | FrameTimecode, metric_keys: ty.Iterable[str]
+        self, frame: int | FramePosition, metric_keys: ty.Iterable[str]
     ) -> list[ty.Any]:
         """Return the requested statistics/metrics for a given timecode.
 
@@ -132,25 +129,45 @@ class StatsManager:
             A list containing the requested frame metrics for the given frame number, ordered as
             they are in `metric_keys`.
         """
-        return [self._get_metric(timecode, metric_key) for metric_key in metric_keys]
+        frame_number = frame.frame_number if isinstance(frame, FramePosition) else frame
+        stats = self._frame_metrics.get(frame_number)
+        metrics = stats.metrics if stats is not None else dict()
+        return [metrics.get(metric_key) for metric_key in metric_keys]
 
-    def set_metrics(self, timecode: int | FrameTimecode, metric_kv_dict: dict[str, ty.Any]) -> None:
+    def set_metrics(self, frame: int | FramePosition, metric_kv_dict: dict[str, ty.Any]) -> None:
         """Set Metrics: Sets the provided statistics/metrics for a given frame.
 
         Arguments:
-            timecode: Timecode to set metrics for.
-            metric_kv_dict: Key value mapping of metrics to their values for `timecode`.
+            frame: Frame to set metrics for.
+            metric_kv_dict: Key value mapping of metrics to their values for `frame`.
         """
-        for metric_key in metric_kv_dict:
-            self._set_metric(timecode, metric_key, metric_kv_dict[metric_key])
+        frame_number = frame.frame_number if isinstance(frame, FramePosition) else frame
+        stats = self._frame_metrics.get(frame_number)
+        if stats is None:
+            stats = _FrameStats(metrics=dict())
+            self._metrics_updated = True
 
-    def metrics_exist(self, timecode: int | FrameTimecode, metric_keys: ty.Iterable[str]) -> bool:
+        if stats.timecode is None and isinstance(frame, FramePosition):
+            stats.timecode = frame.timecode
+            self._metrics_updated = True
+
+        for key, value in metric_kv_dict.items():
+            if key not in stats.metrics or stats.metrics[key] != value:
+                stats.metrics[key] = value
+                self._metrics_updated = True
+
+        self._frame_metrics[frame_number] = stats
+
+    def metrics_exist(self, frame: int | FramePosition, metric_keys: ty.Iterable[str]) -> bool:
         """Metrics Exist: Checks if the given metrics/stats exist for the given frame.
 
         Returns:
             bool: True if the given metric keys exist for the frame, False otherwise.
         """
-        return all([self._metric_exists(timecode, metric_key) for metric_key in metric_keys])
+        frame_number = frame.frame_number if isinstance(frame, FramePosition) else frame
+        stats = self._frame_metrics.get(frame_number)
+        metrics = stats.metrics if stats is not None else dict()
+        return all(metric_key in metrics for metric_key in metric_keys)
 
     def is_save_required(self) -> bool:
         """Is Save Required: Checks if the stats have been updated since loading.
@@ -190,16 +207,16 @@ class StatsManager:
         csv_writer = csv.writer(csv_file, lineterminator="\n")
         metric_keys = sorted(list(self._metric_keys))
         csv_writer.writerow([COLUMN_NAME_FRAME_NUMBER, COLUMN_NAME_TIMECODE, *metric_keys])
-        frame_keys = sorted(self._frame_metrics.keys())
+        frame_keys = sorted(self._frame_metrics)
         logger.info("Writing %d frames to CSV...", len(frame_keys))
-        for frame_key in frame_keys:
-            # `frame_key` may be a bare `int` if the deprecated `load_from_csv` populated the dict.
-            # Skip such rows since we cannot recover a timecode without a base framerate.
-            if not isinstance(frame_key, FrameTimecode):
-                continue
+        for frame_number in frame_keys:
+            stats = self._frame_metrics[frame_number]
             csv_writer.writerow(
-                [frame_key.frame_num + 1, frame_key.get_timecode()]
-                + [str(metric) for metric in self.get_metrics(frame_key, metric_keys)]
+                [
+                    frame_number + 1,
+                    stats.timecode.get_timecode() if stats.timecode is not None else "",
+                    *self.get_metrics(frame_number, metric_keys),
+                ]
             )
 
     @staticmethod
@@ -280,35 +297,18 @@ class StatsManager:
             # Switch from 1-based to 0-based frame numbers.
             if frame_number > 0:
                 frame_number -= 1
-            self.set_metrics(frame_number, metric_dict)
+
             for i, metric in enumerate(row[2:]):
                 if metric and metric != "None":
                     try:
-                        self._set_metric(frame_number, loaded_metrics[i], float(metric))
+                        metric_dict[loaded_metrics[i]] = float(metric)
                     except ValueError:
                         raise StatsFileCorrupt(
                             f"Corrupted value in stats file: {metric}"
                         ) from ValueError
+            self.set_metrics(frame_number, metric_dict)
             num_frames += 1
         self._metric_keys = self._metric_keys.union(set(loaded_metrics))
         logger.info("Loaded %d metrics for %d frames.", num_metrics, num_frames)
         self._metrics_updated = False
         return num_frames
-
-    # TODO: Get rid of these functions and simplify the implementation of this class.
-
-    def _get_metric(self, timecode: int | FrameTimecode, metric_key: str) -> ty.Any | None:
-        if self._metric_exists(timecode, metric_key):
-            return self._frame_metrics[timecode][metric_key]
-        return None
-
-    def _set_metric(
-        self, timecode: int | FrameTimecode, metric_key: str, metric_value: ty.Any
-    ) -> None:
-        self._metrics_updated = True
-        if timecode not in self._frame_metrics:
-            self._frame_metrics[timecode] = dict()
-        self._frame_metrics[timecode][metric_key] = metric_value
-
-    def _metric_exists(self, timecode: int | FrameTimecode, metric_key: str) -> bool:
-        return timecode in self._frame_metrics and metric_key in self._frame_metrics[timecode]

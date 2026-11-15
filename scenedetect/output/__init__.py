@@ -38,8 +38,10 @@ from scenedetect._thirdparty.simpletable import (
 )
 from scenedetect.common import (
     CutList,
+    FrameRate,
     FrameTimecode,
     SceneList,
+    Timecode,
     framerate_to_fraction,
 )
 
@@ -140,6 +142,14 @@ def _open_output_file(output_format: str) -> ty.Callable[[_F], _F]:
     return decorator
 
 
+def _format_seconds(seconds: Fraction) -> str:
+    """Format seconds to three decimal places using exact rounding."""
+    milliseconds = round(seconds * 1000)
+    whole_seconds, millis = divmod(abs(milliseconds), 1000)
+    sign = "-" if milliseconds < 0 else ""
+    return f"{sign}{whole_seconds}.{millis:03d}"
+
+
 @_open_output_file("CSV")
 def write_scene_list(
     output_csv_file: StrPath | BytePath | ty.TextIO,
@@ -154,10 +164,10 @@ def write_scene_list(
     Arguments:
         output_csv_file: Handle to open file in write mode, or a filesystem path. A path is
             opened with a context manager so the file is closed after writing.
-        scene_list: List of pairs of FrameTimecodes denoting each scene's start/end FrameTimecode.
+        scene_list: List of pairs of FramePosition denoting each scene's start/end FramePosition.
         include_cut_list: Bool indicating if the first row should include the timecodes where
             each scene starts. Should be set to False if RFC 4180 compliant CSV output is required.
-        cut_list: Optional list of FrameTimecode objects denoting the cut list (i.e. the frames
+        cut_list: Optional list of FramePosition objects denoting the cut list (i.e. the frames
             in the video that need to be split to generate individual scenes). If not specified,
             the cut list is generated using the start times of each scene following the first one.
         col_separator: Delimiter to use between values. Must be single character.
@@ -172,10 +182,11 @@ def write_scene_list(
     csv_writer = csv.writer(output_file, delimiter=col_separator, lineterminator=row_separator)
     # If required, output the cutting list as the first row (i.e. before the header row).
     if include_cut_list:
+        cuts = cut_list or [start for start, _ in scene_list[1:]]
         csv_writer.writerow(
             [
                 "Timecode List:",
-                *(cut_list if cut_list else [start.get_timecode() for start, _ in scene_list[1:]]),
+                *(cut.timecode.get_timecode() for cut in cuts),
             ]
         )
     csv_writer.writerow(
@@ -194,18 +205,22 @@ def write_scene_list(
     )
     for i, (start, end) in enumerate(scene_list):
         duration = end - start
+        duration_timecode = Timecode(
+            pts=duration.elapsed.numerator,
+            time_base=Fraction(1, duration.elapsed.denominator),
+        )
         csv_writer.writerow(
             [
                 f"{i + 1:d}",
-                f"{start.frame_num + 1:d}",
-                start.get_timecode(),
-                f"{start.seconds:.3f}",
-                f"{end.frame_num:d}",
-                end.get_timecode(),
-                f"{end.seconds:.3f}",
-                f"{duration.frame_num:d}",
-                duration.get_timecode(),
-                f"{duration.seconds:.3f}",
+                f"{start.frame_number + 1:d}",
+                start.timecode.get_timecode(),
+                _format_seconds(start.timecode.seconds),
+                f"{end.frame_number:d}",
+                end.timecode.get_timecode(),
+                _format_seconds(end.timecode.seconds),
+                f"{duration.frames:d}",
+                duration_timecode.get_timecode(),
+                _format_seconds(duration.elapsed),
             ]
         )
 
@@ -220,12 +235,12 @@ def write_scene_list_html(
     image_width: int | None = None,
     image_height: int | None = None,
 ):
-    """Writes the given list of scenes to an output file handle in html format.
+    """Writes the given list of scenes to an html file.
 
     Arguments:
         output_html_filename: filename of output html file
-        scene_list: List of pairs of FrameTimecodes denoting each scene's start/end FrameTimecode.
-        cut_list: Optional list of FrameTimecode objects denoting the cut list (i.e. the frames
+        scene_list: List of pairs of FramePosition denoting each scene's start/end FramePosition.
+        cut_list: Optional list of FramePosition objects denoting the cut list (i.e. the frames
             in the video that need to be split to generate individual scenes). If not passed,
             the start times of each scene (besides the 0th scene) is used instead.
         css: String containing all the css information for the resulting html page.
@@ -276,11 +291,9 @@ def write_scene_list_html(
         """
 
     # Output Timecode list
+    cuts = cut_list or [start for start, _ in scene_list[1:]]
     timecode_table = SimpleTable(
-        [
-            ["Timecode List:"]
-            + (cut_list if cut_list else [start.get_timecode() for start, _ in scene_list[1:]])
-        ],
+        [["Timecode List:"] + [cut.timecode.get_timecode() for cut in cuts]],
         css_class=css_class,
     )
 
@@ -299,19 +312,22 @@ def write_scene_list_html(
     ]
     for i, (start, end) in enumerate(scene_list):
         duration = end - start
+        duration_timecode = Timecode(
+            pts=duration.elapsed.numerator, time_base=Fraction(1, duration.elapsed.denominator)
+        )
 
         row = SimpleTableRow(
             [
                 f"{i + 1:d}",
-                f"{start.frame_num + 1:d}",
-                start.get_timecode(),
-                f"{start.seconds:.3f}",
-                f"{end.frame_num:d}",
-                end.get_timecode(),
-                f"{end.seconds:.3f}",
-                f"{duration.frame_num:d}",
-                duration.get_timecode(),
-                f"{duration.seconds:.3f}",
+                f"{start.frame_number + 1:d}",
+                start.timecode.get_timecode(),
+                _format_seconds(start.timecode.seconds),
+                f"{end.frame_number:d}",
+                end.timecode.get_timecode(),
+                _format_seconds(end.timecode.seconds),
+                f"{duration.frames:d}",
+                duration_timecode.get_timecode(),
+                _format_seconds(duration.elapsed),
             ]
         )
 
@@ -329,7 +345,8 @@ def write_scene_list_html(
     # Write html file
     page = HTMLPage()
     page.add_table(timecode_table)
-    page.add_table(scene_table)
+    if scene_list:
+        page.add_table(scene_table)
     page.css = css
     page.save(output_html_filename)
 
@@ -351,7 +368,7 @@ def _edl_nominal_rate(frame_rate: Fraction | float) -> int | None:
     return None
 
 
-def _edl_timecode(timecode: FrameTimecode) -> str:
+def _edl_timecode(timecode: Timecode, frame_rate: Fraction, offset_frames: int = 0) -> str:
     """Format `timecode` as non-drop-frame ``HH:MM:SS:FF`` for a CMX 3600 EDL entry.
 
     Non-drop-frame timecode counts frames at the nominal rate: a timecode second is 24 frames at
@@ -359,11 +376,9 @@ def _edl_timecode(timecode: FrameTimecode) -> str:
     (about 3.6 seconds per hour). Rates that are neither whole numbers nor ``N * 1000/1001`` have
     no nominal rate; for those, the timecode is derived from wall-clock seconds instead.
     """
-    frame_rate = timecode.frame_rate
-    assert frame_rate is not None
     nominal_rate = _edl_nominal_rate(frame_rate)
     if nominal_rate is not None:
-        frames = timecode.frame_num
+        frames = round(timecode.seconds * frame_rate) + offset_frames
         frames_part = frames % nominal_rate
         total_seconds = frames // nominal_rate
         hours, minutes, seconds = (
@@ -372,7 +387,7 @@ def _edl_timecode(timecode: FrameTimecode) -> str:
             total_seconds % 60,
         )
     else:
-        wall_seconds = timecode.seconds
+        wall_seconds = timecode.seconds + offset_frames / frame_rate
         hours = int(wall_seconds // 3600)
         minutes = int((wall_seconds % 3600) // 60)
         seconds = int(wall_seconds % 60)
@@ -420,18 +435,22 @@ def write_scene_list_edl(
     title: str = "PySceneDetect",
     reel: str = "AX",
     start_timecode: str | None = None,
+    *,
+    frame_rate: FrameRate,
 ):
     """Writes the given list of scenes to `output_path` in CMX 3600 EDL format.
 
     Arguments:
         output_path: Open text file or path to write the EDL file to. Parent directories must
             exist. When a path is provided, the file is closed after writing.
-        scene_list: List of scenes as pairs of FrameTimecodes denoting each scene's start/end.
+        scene_list: List of scenes as pairs of FramePositions denoting each scene's start/end.
         title: Title header written as ``TITLE:`` in the EDL.
         reel: Reel name used for each event. Typically 2-8 uppercase characters.
         start_timecode: Optional SMPTE timecode (``HH:MM:SS:FF`` or 8-digit ``HHMMSSFF``) added to
             every event so the EDL aligns with the source media's on-screen timecode. Applied to
             both source and record columns.
+        frame_rate: Rate used to interpret/export EDL timecodes. Must match the editor's
+            EDL import rate. VFR boundaries may be rounded to this rate's frame grid.
 
     Timecodes are written as non-drop-frame (``FCM: NON-DROP FRAME``), counting frames at the
     nominal rate: 24 per timecode second at 23.976 fps, 30 at 29.97 fps, and so on. Rates with no
@@ -439,16 +458,15 @@ def write_scene_list_edl(
     """
     # `_open_output_file` replaces filesystem paths with writable text streams.
     assert isinstance(output_path, _SupportsWrite)
+    frame_rate = framerate_to_fraction(frame_rate)
     output_file = output_path
     offset_frames = 0
     if start_timecode is not None and start_timecode.strip() and scene_list:
-        frame_rate = scene_list[0][0].frame_rate
-        assert frame_rate is not None
         offset_frames = _parse_edl_start_timecode(start_timecode, frame_rate)
     lines = [f"TITLE: {title}", "FCM: NON-DROP FRAME", ""]
     for i, (start, end) in enumerate(scene_list):
-        in_tc = _edl_timecode(start + offset_frames)
-        out_tc = _edl_timecode(end + offset_frames)
+        in_tc = _edl_timecode(start.timecode, frame_rate, offset_frames)
+        out_tc = _edl_timecode(end.timecode, frame_rate, offset_frames)
         lines.append(f"{(i + 1):03d}  {reel} V     C        {in_tc} {out_tc} {in_tc} {out_tc}")
     # `scenedetect` is imported lazily to avoid a circular import at module load.
     import scenedetect
@@ -469,11 +487,6 @@ def _rational_seconds(value: Fraction) -> str:
     return f"{value.numerator}/{value.denominator}s"
 
 
-def _frame_timecode_seconds(tc: FrameTimecode) -> Fraction:
-    """Exact seconds for `tc` as a `Fraction`, derived from PTS * time base."""
-    return Fraction(tc.pts) * tc.time_base
-
-
 @_open_output_file("FCPX")
 def write_scene_list_fcpx(
     output_path: StrPath | BytePath | ty.TextIO,
@@ -492,7 +505,7 @@ def write_scene_list_fcpx(
     Arguments:
         output_path: Open text file or path to write the FCPXML file to. Parent directories must
             exist. When a path is provided, the file is closed after writing.
-        scene_list: List of scenes as pairs of FrameTimecodes. Must not be empty.
+        scene_list: List of scenes as pairs of FramePositions. Must not be empty.
         video_path: Path to the source video file; written into the output as a ``file://`` URI.
         frame_rate: Source frame rate as a rational `Fraction` (e.g. ``Fraction(24000, 1001)``).
         frame_size: Source resolution as a ``(width, height)`` tuple in pixels.
@@ -513,9 +526,7 @@ def write_scene_list_fcpx(
     width, height = frame_size
     frame_duration = _rational_seconds(Fraction(frame_rate.denominator, frame_rate.numerator))
     src_uri = video_path.absolute().as_uri()
-    total_duration = _rational_seconds(
-        _frame_timecode_seconds(scene_list[-1][1] - scene_list[0][0])
-    )
+    total_duration = _rational_seconds((scene_list[-1][1] - scene_list[0][0]).elapsed)
 
     root = ElementTree.Element("fcpxml", version="1.9")
     resources = ElementTree.SubElement(root, "resources")
@@ -557,8 +568,8 @@ def write_scene_list_fcpx(
     spine = ElementTree.SubElement(sequence, "spine")
 
     for i, (start, end) in enumerate(scene_list):
-        scene_start = _rational_seconds(_frame_timecode_seconds(start))
-        scene_duration = _rational_seconds(_frame_timecode_seconds(end - start))
+        scene_start = _rational_seconds(start.timecode.seconds)
+        scene_duration = _rational_seconds((end - start).elapsed)
         ElementTree.SubElement(
             spine,
             "asset-clip",
@@ -594,7 +605,7 @@ def write_scene_list_fcp7(
     Arguments:
         output_path: Open text file or path to write the xmeml file to. Parent directories must
             exist. When a path is provided, the file is closed after writing.
-        scene_list: List of scenes as pairs of FrameTimecodes. Must not be empty.
+        scene_list: List of scenes as pairs of FramePositions. Must not be empty.
         video_path: Path to the source video file; written into the output as a ``file://`` URI.
         frame_rate: Source frame rate as a rational `Fraction`.
         frame_size: Source resolution as a ``(width, height)`` tuple in pixels.
@@ -621,7 +632,7 @@ def write_scene_list_fcp7(
     fps = float(frame_rate)
     ntsc = "True" if frame_rate.denominator != 1 else "False"
     duration = scene_list[-1][1] - scene_list[0][0]
-    ElementTree.SubElement(sequence, "duration").text = str(round(duration.seconds * fps))
+    ElementTree.SubElement(sequence, "duration").text = str(round(duration.elapsed * frame_rate))
 
     rate = ElementTree.SubElement(sequence, "rate")
     ElementTree.SubElement(rate, "timebase").text = str(round(fps))
@@ -646,8 +657,12 @@ def write_scene_list_fcp7(
     path_uri = video_path.absolute().as_uri()
     source_duration_frames = str(
         round(
-            (source_duration.seconds if source_duration is not None else scene_list[-1][1].seconds)
-            * fps
+            (
+                source_duration.seconds
+                if source_duration is not None
+                else scene_list[-1][1].timecode.seconds
+            )
+            * frame_rate
         )
     )
     FILE_ID = "file1"
@@ -661,10 +676,10 @@ def write_scene_list_fcp7(
         ElementTree.SubElement(clip_rate, "timebase").text = str(round(fps))
         ElementTree.SubElement(clip_rate, "ntsc").text = ntsc
         # Frame numbers relative to the declared <timebase> fps, computed from PTS seconds.
-        ElementTree.SubElement(clip, "start").text = str(round(start.seconds * fps))
-        ElementTree.SubElement(clip, "end").text = str(round(end.seconds * fps))
-        ElementTree.SubElement(clip, "in").text = str(round(start.seconds * fps))
-        ElementTree.SubElement(clip, "out").text = str(round(end.seconds * fps))
+        ElementTree.SubElement(clip, "start").text = str(round(start.timecode.seconds * frame_rate))
+        ElementTree.SubElement(clip, "end").text = str(round(end.timecode.seconds * frame_rate))
+        ElementTree.SubElement(clip, "in").text = str(round(start.timecode.seconds * frame_rate))
+        ElementTree.SubElement(clip, "out").text = str(round(end.timecode.seconds * frame_rate))
 
         # xmeml allows a single full `<file>` declaration reused via `<file id="...">` on
         # subsequent clipitems. Emit full details on the first, then self-close on the rest.
@@ -714,7 +729,7 @@ def write_scene_list_otio(
     Arguments:
         output_path: Open text file or path to write the OTIO file to. Parent directories must
             exist. When a path is provided, the file is closed after writing.
-        scene_list: List of scenes as pairs of FrameTimecodes.
+        scene_list: List of scenes as pairs of FramePositions.
         video_path: Path to the source video file; written into the output as an absolute path.
         frame_rate: Source frame rate as a rational `Fraction`. Exported as a float, as the
             current OTIO format does not support rational timings.
@@ -781,12 +796,12 @@ def write_scene_list_otio(
                                 "duration": {
                                     "OTIO_SCHEMA": "RationalTime.1",
                                     "rate": fps,
-                                    "value": round((end - start).seconds * fps, 6),
+                                    "value": float(round((end - start).elapsed * frame_rate, 6)),
                                 },
                                 "start_time": {
                                     "OTIO_SCHEMA": "RationalTime.1",
                                     "rate": fps,
-                                    "value": round(start.seconds * fps, 6),
+                                    "value": float(round(start.timecode.seconds * frame_rate, 6)),
                                 },
                             },
                             "enabled": True,

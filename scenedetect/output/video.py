@@ -36,9 +36,10 @@ import time
 import typing as ty
 from collections.abc import Sequence
 from dataclasses import dataclass
+from fractions import Fraction
 from pathlib import Path
 
-from scenedetect.common import FrameTimecode, TimecodePair
+from scenedetect.common import FramePosition, PositionPair, Timecode
 from scenedetect.platform import (
     CommandTooLong,
     Template,
@@ -115,10 +116,10 @@ class SceneMetadata:
 
     index: int
     """0-based index of this scene."""
-    start: FrameTimecode
+    start: FramePosition
     """First frame."""
-    end: FrameTimecode
-    """Last frame."""
+    end: FramePosition
+    """Exclusive end position."""
 
 
 PathFormatter = ty.Callable[[VideoMetadata, SceneMetadata], str]
@@ -140,12 +141,12 @@ def default_formatter(template: str) -> PathFormatter:
         return Template(template).safe_substitute(
             VIDEO_NAME=video.name,
             SCENE_NUMBER=format_scene_number(video, scene),
-            START_TIME=str(scene.start.get_timecode().replace(":", ";")),
-            END_TIME=str(scene.end.get_timecode().replace(":", ";")),
-            START_FRAME=str(scene.start.frame_num),
-            END_FRAME=str(scene.end.frame_num),
-            START_PTS=str(round(scene.start.seconds * 1000)),
-            END_PTS=str(round(scene.end.seconds * 1000)),
+            START_TIME=str(scene.start.timecode.get_timecode().replace(":", ";")),
+            END_TIME=str(scene.end.timecode.get_timecode().replace(":", ";")),
+            START_FRAME=str(scene.start.frame_number),
+            END_FRAME=str(scene.end.frame_number),
+            START_PTS=str(round(scene.start.timecode.seconds * 1000)),
+            END_PTS=str(round(scene.end.timecode.seconds * 1000)),
         )
 
     return formatter
@@ -158,7 +159,7 @@ def default_formatter(template: str) -> PathFormatter:
 
 def split_video_mkvmerge(
     input_video_path: str,
-    scene_list: Sequence[TimecodePair],
+    scene_list: Sequence[PositionPair],
     output_dir: str | Path | None = None,
     output_file_template: str = "$VIDEO_NAME.mkv",
     video_name: str | None = None,
@@ -169,7 +170,7 @@ def split_video_mkvmerge(
 
     Arguments:
         input_video_path: Path to the video to be split.
-        scene_list : List of scenes as pairs of FrameTimecodes denoting the start/end times.
+        scene_list : List of scenes as pairs of FramePositions denoting the start/end times.
         output_dir: Directory to output videos. If not set, output will be in working directory.
         output_file_template: Template to use for generating output files. Note that mkvmerge always
             adds the suffix "-$SCENE_NUMBER" to the output paths. Only the $VIDEO_NAME variable
@@ -222,14 +223,14 @@ def split_video_mkvmerge(
         "parts:{}".format(
             ",".join(
                 [
-                    f"{start_time.get_timecode()}-{end_time.get_timecode()}"
+                    f"{start_time.timecode.get_timecode()}-{end_time.timecode.get_timecode()}"
                     for start_time, end_time in scene_list
                 ]
             )
         ),
         input_video_path,
     ]
-    total_frames = scene_list[-1][1].frame_num - scene_list[0][0].frame_num
+    total_frames = scene_list[-1][1].frame_number - scene_list[0][0].frame_number
     processing_start_time = time.time()
     ret_val = 0
     try:
@@ -254,7 +255,7 @@ def split_video_mkvmerge(
 
 def split_video_ffmpeg(
     input_video_path: str,
-    scene_list: Sequence[TimecodePair],
+    scene_list: Sequence[PositionPair],
     output_dir: str | Path | None = None,
     output_file_template: str = "$VIDEO_NAME-Scene-$SCENE_NUMBER.mp4",
     video_name: str | None = None,
@@ -269,7 +270,7 @@ def split_video_ffmpeg(
 
     Arguments:
         input_video_path: Path to the video to be split.
-        scene_list: List of scenes (pairs of FrameTimecodes) denoting the start/end of each scene.
+        scene_list: List of scenes (pairs of FramePositions) denoting the start/end of each scene.
         output_dir: Directory to output videos. If not set, output will be in working directory.
         output_file_template: Template to use for generating output filenames.
             The following variables will be replaced in the template for each scene:
@@ -325,12 +326,15 @@ def split_video_ffmpeg(
 
     try:
         progress_bar = None
-        total_frames = scene_list[-1][1].frame_num - scene_list[0][0].frame_num
+        total_frames = scene_list[-1][1].frame_number - scene_list[0][0].frame_number
         if show_progress:
             progress_bar = tqdm(total=total_frames, unit="frame", miniters=1, dynamic_ncols=True)
         processing_start_time = time.time()
         for i, (start_time, end_time) in enumerate(scene_list):
             duration = end_time - start_time
+            duration_timecode = Timecode(
+                pts=duration.elapsed.numerator, time_base=Fraction(1, duration.elapsed.denominator)
+            )
             scene_metadata = SceneMetadata(index=i, start=start_time, end=end_time)
             output_path = Path(formatter(video_metadata, scene_metadata))
             if output_dir:
@@ -350,11 +354,11 @@ def split_video_ffmpeg(
                 "-nostdin",
                 "-y",
                 "-ss",
-                str(start_time.seconds),
+                start_time.timecode.get_timecode(precision=6),
                 "-i",
                 input_video_path,
                 "-t",
-                str(duration.seconds),
+                duration_timecode.get_timecode(precision=6),
             ]
             call_list += ffmpeg_args
             call_list += ["-sn"]
@@ -369,7 +373,7 @@ def split_video_ffmpeg(
                 logger.error("Error splitting video (ffmpeg returned %d).", ret_val)
                 break
             if progress_bar:
-                progress_bar.update(duration.frame_num)
+                progress_bar.update(duration.frames)
 
         if progress_bar:
             progress_bar.close()

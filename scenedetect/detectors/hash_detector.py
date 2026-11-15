@@ -19,7 +19,7 @@ This detector is available from the command-line interface by using the `detect-
 import cv2
 import numpy
 
-from scenedetect.common import FrameTimecode, TimecodeLike
+from scenedetect.common import FramePosition, TimecodeLike, parse_frame_or_time
 from scenedetect.detector import SceneDetector
 
 
@@ -53,12 +53,12 @@ class HashDetector(SceneDetector):
     ):
         super().__init__()
         self._threshold = threshold
-        self._min_scene_len = min_scene_len
+        self._min_scene_len = parse_frame_or_time(min_scene_len)
         self._size = size
         self._size_sq = float(size * size)
         self._factor = lowpass
         self._last_frame: numpy.ndarray | None = None
-        self._last_scene_cut: FrameTimecode | None = None
+        self._last_scene_cut: FramePosition | None = None
         self._last_hash = numpy.array([])
         self._metric_key = f"hash_dist [size={self._size} lowpass={self._factor}]"
 
@@ -66,8 +66,8 @@ class HashDetector(SceneDetector):
         return [self._metric_key]
 
     def process_frame(
-        self, timecode: FrameTimecode, frame_img: numpy.ndarray
-    ) -> list[FrameTimecode]:
+        self, position: FramePosition, frame_img: numpy.ndarray
+    ) -> list[FramePosition]:
         """Similar to ContentDetector, but using a perceptual hashing algorithm
         to calculate a hash for each frame and then calculate a hash difference
         frame to frame."""
@@ -76,7 +76,7 @@ class HashDetector(SceneDetector):
 
         # Initialize last scene cut point at the beginning of the frames of interest.
         if self._last_scene_cut is None:
-            self._last_scene_cut = timecode
+            self._last_scene_cut = position
 
         # We can only start detecting once we have a frame to compare with.
         if self._last_frame is not None:
@@ -100,17 +100,17 @@ class HashDetector(SceneDetector):
             hash_dist_norm = hash_dist / self._size_sq
 
             if self.stats_manager is not None:
-                self.stats_manager.set_metrics(timecode, {self._metric_key: hash_dist_norm})
+                self.stats_manager.set_metrics(position, {self._metric_key: hash_dist_norm})
 
             self._last_hash = curr_hash
 
             # We consider any frame over the threshold a new scene, but only if
             # the minimum scene length has been reached (otherwise it is ignored).
             if hash_dist_norm >= self._threshold and (
-                (timecode - self._last_scene_cut) >= self._min_scene_len
+                self.meets_minimum(position - self._last_scene_cut, self._min_scene_len)
             ):
-                cut_list.append(timecode)
-                self._last_scene_cut = timecode
+                cut_list.append(position)
+                self._last_scene_cut = position
 
         self._last_frame = frame_img.copy()
 

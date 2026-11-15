@@ -321,6 +321,7 @@ def save_edl(
         title=Template(title).safe_substitute(VIDEO_NAME=video_name),
         reel=reel,
         start_timecode=start_timecode,
+        frame_rate=context.video_stream.frame_rate,
     )
 
 
