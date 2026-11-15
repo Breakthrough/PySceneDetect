@@ -317,7 +317,8 @@ def save_chapters(
     write_scene_list_ffmetadata(
         output_path=chapters_path,
         scene_list=scenes,
-        title_format_template=Template(title).safe_substitute(VIDEO_NAME=video_name),
+        title_format_template=title,
+        video_name=video_name,
     )
 
 

@@ -642,6 +642,42 @@ def test_write_scene_list_ffmetadata_title_format(tmp_path: Path):
     assert titles == ["title=Shot 1", "title=Shot 2", "title=Shot 3"]
 
 
+def test_write_scene_list_ffmetadata_video_name(tmp_path: Path):
+    """$VIDEO_NAME is replaced with video_name, and left as-is when no video_name is given."""
+    scenes = _fake_scenes(_FPS_CFR, [(0, 30)])
+    output_path = tmp_path / "chapters.txt"
+    write_scene_list_ffmetadata(
+        output_path, scenes, title_format_template="$VIDEO_NAME $SCENE_NUMBER", video_name="clip"
+    )
+    assert "title=clip 1\n" in output_path.read_text()
+    write_scene_list_ffmetadata(
+        output_path, scenes, title_format_template="$VIDEO_NAME $SCENE_NUMBER"
+    )
+    assert "title=$VIDEO_NAME 1\n" in output_path.read_text()
+
+
+@pytest.mark.parametrize(
+    "template,video_name,expected_title",
+    [
+        # A video name containing a placeholder is inserted literally.
+        ("$VIDEO_NAME - $SCENE_NUMBER", "clip $SCENE_NUMBER", "clip $SCENE_NUMBER - 1"),
+        # An escaped "$$" in the template produces a literal "$" and is not substituted again.
+        ("$$SCENE_NUMBER $VIDEO_NAME", "clip", "$SCENE_NUMBER clip"),
+        ("$$VIDEO_NAME $SCENE_NUMBER", "clip", "$VIDEO_NAME 1"),
+    ],
+)
+def test_write_scene_list_ffmetadata_single_pass_substitution(
+    tmp_path: Path, template: str, video_name: str, expected_title: str
+):
+    """Placeholders are substituted in one pass, so substituted values are never re-expanded."""
+    scenes = _fake_scenes(_FPS_CFR, [(0, 30)])
+    output_path = tmp_path / "chapters.txt"
+    write_scene_list_ffmetadata(
+        output_path, scenes, title_format_template=template, video_name=video_name
+    )
+    assert f"title={expected_title}\n" in output_path.read_text()
+
+
 def test_write_scene_list_ffmetadata_escapes_title(tmp_path: Path):
     """Special characters in chapter titles are escaped so ffmpeg reads them literally."""
     scenes = _fake_scenes(_FPS_CFR, [(0, 30)])

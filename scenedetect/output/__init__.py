@@ -496,6 +496,7 @@ def write_scene_list_ffmetadata(
     output_path: StrPath | BytePath | ty.TextIO,
     scene_list: SceneList,
     title_format_template: str = "Scene $SCENE_NUMBER",
+    video_name: str | None = None,
 ):
     """Writes the given list of scenes to `output_path` as chapters in FFmetadata format.
 
@@ -507,11 +508,19 @@ def write_scene_list_ffmetadata(
             must exist. When a path is provided, the file is closed after writing.
         scene_list: List of scenes as pairs of FrameTimecodes denoting each scene's start/end.
         title_format_template: Template for each chapter's title. ``$SCENE_NUMBER`` is replaced
-            with the 1-based scene number.
+            with the 1-based scene number, and ``$VIDEO_NAME`` with `video_name` if provided.
+        video_name: Name of the video to substitute for ``$VIDEO_NAME`` in the chapter titles. If
+            not provided, ``$VIDEO_NAME`` is left as-is.
     """
     # `_open_output_file` replaces filesystem paths with writable text streams.
     assert isinstance(output_path, _SupportsWrite)
     output_file = output_path
+    title_template = Template(title_format_template)
+    # All placeholders are substituted in a single pass, so a video name containing
+    # "$SCENE_NUMBER" or an escaped "$$" in the template is never substituted twice.
+    substitutions: dict[str, ty.Any] = {}
+    if video_name is not None:
+        substitutions["VIDEO_NAME"] = video_name
     lines = [";FFMETADATA1"]
     for i, (start, end) in enumerate(scene_list):
         # Chapter times are written in milliseconds from exact (PTS-based) seconds, so they don't
@@ -519,7 +528,7 @@ def write_scene_list_ffmetadata(
         # starts before the first frame of its scene (e.g. 500.5 ms is written as 501).
         start_ms = math.ceil(_frame_timecode_seconds(start) * 1000)
         end_ms = math.ceil(_frame_timecode_seconds(end) * 1000)
-        title = Template(title_format_template).safe_substitute(SCENE_NUMBER=i + 1)
+        title = title_template.safe_substitute(substitutions, SCENE_NUMBER=i + 1)
         lines += [
             "[CHAPTER]",
             "TIMEBASE=1/1000",
