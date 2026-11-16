@@ -83,6 +83,7 @@ def _generate_timecode_list(
     frame_rate = scene_list[0][0].frame_rate
     assert frame_rate is not None
     margin_secs = FrameTimecode(timecode=frame_margin, fps=frame_rate).seconds
+    frame_secs = float(1 / frame_rate)
     result = []
     for (start, end), num_images in zip(scene_list, num_images_per_scene, strict=True):
         duration_secs = (end - start).seconds
@@ -90,6 +91,8 @@ def _generate_timecode_list(
             result.append([start] * num_images)
             continue
         segment_secs = duration_secs / num_images
+        # `end` is exclusive, so the last frame of the scene is one frame before it.
+        last_frame_secs = end.seconds - frame_secs
         timecodes = []
         for j in range(num_images):
             seg_start = start.seconds + j * segment_secs
@@ -99,10 +102,10 @@ def _generate_timecode_list(
             elif j == 0:
                 t = min(seg_start + margin_secs, seg_end)
             elif j == num_images - 1:
-                t = max(seg_end - margin_secs, seg_start)
+                t = max(last_frame_secs - margin_secs, seg_start)
             else:
                 t = (seg_start + seg_end) / 2.0
-            timecodes.append(FrameTimecode(t, fps=frame_rate))
+            timecodes.append(FrameTimecode(min(t, last_frame_secs), fps=frame_rate))
         result.append(timecodes)
     return result
 
