@@ -77,6 +77,12 @@
 </dd></dl>
 
 <dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-stdin">
+<span class="sig-name descname"><span class="pre">--stdin</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-scenedetect-stdin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read the input video from standard input instead of <a class="reference internal" href="#cmdoption-scenedetect-i"><code class="xref std std-option docutils literal notranslate"><span class="pre">-i/--input</span></code></a>. Requires the pyav backend. An MP4 needs its index at the start of the file (ffmpeg -movflags +faststart), otherwise remux to MKV or MPEG-TS. Commands that need to seek in the video are not supported.</p>
+</dd></dl>
+
+<dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-scenedetect-o">
 <span id="cmdoption-scenedetect-output"></span><span class="sig-name descname"><span class="pre">-o</span></span><span class="sig-prename descclassname"> <span class="pre">DIR</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--output</span></span><span class="sig-prename descclassname"> <span class="pre">DIR</span></span><a class="headerlink" href="#cmdoption-scenedetect-o" title="Permalink to this definition">¶</a></dt>
 <dd><p>Output directory for created files. If unset, working directory will be used. May be overridden by command options.</p>
@@ -183,59 +189,63 @@
 <td></td>
 <td><p><a class="reference internal" href="api.html#scenedetect.open_video" title="scenedetect.open_video"><code class="xref py py-func docutils literal notranslate"><span class="pre">open_video()</span></code></a>, <a class="reference internal" href="api.html#scenedetect.detect" title="scenedetect.detect"><code class="xref py py-func docutils literal notranslate"><span class="pre">detect()</span></code></a></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#cmdoption-scenedetect-o"><code class="xref std std-option docutils literal notranslate"><span class="pre">-o/--output</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#cmdoption-scenedetect-stdin"><code class="xref std std-option docutils literal notranslate"><span class="pre">--stdin</span></code></a></p></td>
+<td></td>
+<td><p><a class="reference internal" href="api/backends.html#scenedetect.backends.pyav.VideoStreamAv" title="scenedetect.backends.pyav.VideoStreamAv"><code class="xref py py-class docutils literal notranslate"><span class="pre">VideoStreamAv</span></code></a> (<code class="docutils literal notranslate"><span class="pre">path_or_io</span></code>)</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#cmdoption-scenedetect-o"><code class="xref std std-option docutils literal notranslate"><span class="pre">-o/--output</span></code></a></p></td>
 <td><p><a class="reference internal" href="cli/config_file.html#config-global"><span class="std std-ref">[global] output</span></a></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">output_dir</span></code> argument of <a class="reference internal" href="api/output.html#scenedetect.output.save_images" title="scenedetect.output.save_images"><code class="xref py py-func docutils literal notranslate"><span class="pre">save_images()</span></code></a> and <a class="reference internal" href="api/output.html#scenedetect.output.split_video_ffmpeg" title="scenedetect.output.split_video_ffmpeg"><code class="xref py py-func docutils literal notranslate"><span class="pre">split_video_ffmpeg()</span></code></a>; output path argument of each <code class="docutils literal notranslate"><span class="pre">write_scene_list*</span></code> function</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#cmdoption-scenedetect-c"><code class="xref std std-option docutils literal notranslate"><span class="pre">-c/--config</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#cmdoption-scenedetect-c"><code class="xref std std-option docutils literal notranslate"><span class="pre">-c/--config</span></code></a></p></td>
 <td></td>
 <td><p><em>CLI only</em></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#cmdoption-scenedetect-s"><code class="xref std std-option docutils literal notranslate"><span class="pre">-s/--stats</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#cmdoption-scenedetect-s"><code class="xref std std-option docutils literal notranslate"><span class="pre">-s/--stats</span></code></a></p></td>
 <td></td>
 <td><p><a class="reference internal" href="api/stats_manager.html#scenedetect.stats_manager.StatsManager" title="scenedetect.stats_manager.StatsManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">StatsManager</span></code></a>, <a class="reference internal" href="api.html#scenedetect.detect" title="scenedetect.detect"><code class="xref py py-func docutils literal notranslate"><span class="pre">detect()</span></code></a> (<code class="docutils literal notranslate"><span class="pre">stats_file_path</span></code>)</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#cmdoption-scenedetect-f"><code class="xref std std-option docutils literal notranslate"><span class="pre">-f/--frame-rate</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#cmdoption-scenedetect-f"><code class="xref std std-option docutils literal notranslate"><span class="pre">-f/--frame-rate</span></code></a></p></td>
 <td></td>
 <td><p><a class="reference internal" href="api.html#scenedetect.open_video" title="scenedetect.open_video"><code class="xref py py-func docutils literal notranslate"><span class="pre">open_video()</span></code></a> (<code class="docutils literal notranslate"><span class="pre">frame_rate</span></code>)</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#cmdoption-scenedetect-m"><code class="xref std std-option docutils literal notranslate"><span class="pre">-m/--min-scene-len</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#cmdoption-scenedetect-m"><code class="xref std std-option docutils literal notranslate"><span class="pre">-m/--min-scene-len</span></code></a></p></td>
 <td><p><a class="reference internal" href="cli/config_file.html#config-global"><span class="std std-ref">[global] min-scene-len</span></a></p></td>
 <td><p><a class="reference internal" href="api/detectors.html#scenedetect-detectors"><span class="std std-ref">Detector</span></a> argument <code class="docutils literal notranslate"><span class="pre">min_scene_len</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#cmdoption-scenedetect-drop-short-scenes"><code class="xref std std-option docutils literal notranslate"><span class="pre">--drop-short-scenes</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#cmdoption-scenedetect-drop-short-scenes"><code class="xref std std-option docutils literal notranslate"><span class="pre">--drop-short-scenes</span></code></a></p></td>
 <td><p><a class="reference internal" href="cli/config_file.html#config-global"><span class="std std-ref">[global] drop-short-scenes</span></a></p></td>
 <td><p><em>CLI only</em></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#cmdoption-scenedetect-merge-last-scene"><code class="xref std std-option docutils literal notranslate"><span class="pre">--merge-last-scene</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#cmdoption-scenedetect-merge-last-scene"><code class="xref std std-option docutils literal notranslate"><span class="pre">--merge-last-scene</span></code></a></p></td>
 <td><p><a class="reference internal" href="cli/config_file.html#config-global"><span class="std std-ref">[global] merge-last-scene</span></a></p></td>
 <td><p><em>CLI only</em></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#cmdoption-scenedetect-b"><code class="xref std std-option docutils literal notranslate"><span class="pre">-b/--backend</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#cmdoption-scenedetect-b"><code class="xref std std-option docutils literal notranslate"><span class="pre">-b/--backend</span></code></a></p></td>
 <td><p><a class="reference internal" href="cli/config_file.html#config-global"><span class="std std-ref">[global] backend</span></a></p></td>
 <td><p><a class="reference internal" href="api.html#scenedetect.open_video" title="scenedetect.open_video"><code class="xref py py-func docutils literal notranslate"><span class="pre">open_video()</span></code></a> (<code class="docutils literal notranslate"><span class="pre">backend</span></code>), <a class="reference internal" href="api/backends.html#scenedetect.backends.AVAILABLE_BACKENDS" title="scenedetect.backends.AVAILABLE_BACKENDS"><code class="xref py py-data docutils literal notranslate"><span class="pre">AVAILABLE_BACKENDS</span></code></a></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#cmdoption-scenedetect-crop"><code class="xref std std-option docutils literal notranslate"><span class="pre">--crop</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#cmdoption-scenedetect-crop"><code class="xref std std-option docutils literal notranslate"><span class="pre">--crop</span></code></a></p></td>
 <td><p><a class="reference internal" href="cli/config_file.html#config-global"><span class="std std-ref">[global] crop</span></a></p></td>
 <td><p><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.SceneManager.crop" title="scenedetect.scene_manager.SceneManager.crop"><code class="xref py py-attr docutils literal notranslate"><span class="pre">SceneManager.crop</span></code></a></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#cmdoption-scenedetect-d"><code class="xref std std-option docutils literal notranslate"><span class="pre">-d/--downscale</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#cmdoption-scenedetect-d"><code class="xref std std-option docutils literal notranslate"><span class="pre">-d/--downscale</span></code></a></p></td>
 <td><p><a class="reference internal" href="cli/config_file.html#config-global"><span class="std std-ref">[global] downscale</span></a></p></td>
 <td><p><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.SceneManager.downscale" title="scenedetect.scene_manager.SceneManager.downscale"><code class="xref py py-attr docutils literal notranslate"><span class="pre">SceneManager.downscale</span></code></a>, <a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.SceneManager.auto_downscale" title="scenedetect.scene_manager.SceneManager.auto_downscale"><code class="xref py py-attr docutils literal notranslate"><span class="pre">SceneManager.auto_downscale</span></code></a></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#cmdoption-scenedetect-fs"><code class="xref std std-option docutils literal notranslate"><span class="pre">-fs/--frame-skip</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#cmdoption-scenedetect-fs"><code class="xref std std-option docutils literal notranslate"><span class="pre">-fs/--frame-skip</span></code></a></p></td>
 <td><p><a class="reference internal" href="cli/config_file.html#config-global"><span class="std std-ref">[global] frame-skip</span></a></p></td>
 <td><p><a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.SceneManager.detect_scenes" title="scenedetect.scene_manager.SceneManager.detect_scenes"><code class="xref py py-meth docutils literal notranslate"><span class="pre">SceneManager.detect_scenes</span></code></a> (<code class="docutils literal notranslate"><span class="pre">frame_skip</span></code>)</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#cmdoption-scenedetect-v"><code class="xref std std-option docutils literal notranslate"><span class="pre">-v/--verbosity</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#cmdoption-scenedetect-v"><code class="xref std std-option docutils literal notranslate"><span class="pre">-v/--verbosity</span></code></a></p></td>
 <td><p><a class="reference internal" href="cli/config_file.html#config-global"><span class="std std-ref">[global] verbosity</span></a></p></td>
 <td><p><a class="reference internal" href="api/platform.html#scenedetect.platform.init_logger" title="scenedetect.platform.init_logger"><code class="xref py py-func docutils literal notranslate"><span class="pre">init_logger()</span></code></a> (<code class="docutils literal notranslate"><span class="pre">log_level</span></code>)</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#cmdoption-scenedetect-l"><code class="xref std std-option docutils literal notranslate"><span class="pre">-l/--logfile</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#cmdoption-scenedetect-l"><code class="xref std std-option docutils literal notranslate"><span class="pre">-l/--logfile</span></code></a></p></td>
 <td></td>
 <td><p><a class="reference internal" href="api/platform.html#scenedetect.platform.init_logger" title="scenedetect.platform.init_logger"><code class="xref py py-func docutils literal notranslate"><span class="pre">init_logger()</span></code></a> (<code class="docutils literal notranslate"><span class="pre">log_file</span></code>)</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#cmdoption-scenedetect-q"><code class="xref std std-option docutils literal notranslate"><span class="pre">-q/--quiet</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#cmdoption-scenedetect-q"><code class="xref std std-option docutils literal notranslate"><span class="pre">-q/--quiet</span></code></a></p></td>
 <td><p><a class="reference internal" href="cli/config_file.html#config-global"><span class="std std-ref">[global] verbosity</span></a></p></td>
 <td><p><a class="reference internal" href="api/platform.html#scenedetect.platform.init_logger" title="scenedetect.platform.init_logger"><code class="xref py py-func docutils literal notranslate"><span class="pre">init_logger()</span></code></a> (<code class="docutils literal notranslate"><span class="pre">show_stdout</span></code>)</p></td>
 </tr>
