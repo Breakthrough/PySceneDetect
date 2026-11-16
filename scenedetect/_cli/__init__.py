@@ -592,7 +592,7 @@ Examples:
     metavar="N",
     type=click.INT,
     default=None,
-    help="Size of kernel for expanding detected edges. Must be odd integer greater than or equal to 3. If unset, kernel size is estimated using video resolution.{}".format(
+    help="Size of kernel for expanding detected edges. Must be an odd integer >= 3, or -1 for auto size. Auto size is estimated using video resolution.{}".format(
         USER_CONFIG.get_help_string("detect-content", "kernel-size")
     ),
 )
@@ -702,7 +702,7 @@ Examples:
     is_flag=True,
     flag_value=True,
     help='Only use luma (brightness) channel. Useful for greyscale videos. Equivalent to "--weights 0 0 1 0".{}'.format(
-        USER_CONFIG.get_help_string("detect-content", "luma-only")
+        USER_CONFIG.get_help_string("detect-adaptive", "luma-only")
     ),
 )
 @click.option(
@@ -711,8 +711,8 @@ Examples:
     metavar="N",
     type=click.INT,
     default=None,
-    help="Size of kernel for expanding detected edges. Must be odd number >= 3. If unset, size is estimated using video resolution.{}".format(
-        USER_CONFIG.get_help_string("detect-content", "kernel-size")
+    help="Size of kernel for expanding detected edges. Must be an odd integer >= 3, or -1 for auto size. Auto size is estimated using video resolution.{}".format(
+        USER_CONFIG.get_help_string("detect-adaptive", "kernel-size")
     ),
 )
 @click.option(
