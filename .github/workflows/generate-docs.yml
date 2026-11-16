@@ -22,7 +22,7 @@ jobs:
       scenedetect_docs_dest: ''
 
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
 
       - name: Get Latest Version
         run: |
@@ -30,7 +30,7 @@ jobs:
           echo "scenedetect_docs_latest=$(git show origin/main:docs/LATEST_VERSION | tr -d '[:space:]')" >> "$GITHUB_ENV"
 
       - name: Set up Python 3.12
-        uses: actions/setup-python@v7
+        uses: actions/setup-python@v7.1.0
         with:
           python-version: '3.12'
           cache: 'pip'
