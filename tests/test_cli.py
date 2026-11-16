@@ -464,6 +464,47 @@ def test_cli_kernel_size_config_file_rejects_one(tmp_path: Path, command: str):
 
 
 @pytest.mark.parametrize(
+    "cli_args",
+    [
+        ["detect-adaptive", "--frame-window", "0"],
+        ["detect-adaptive", "--frame-window", "-3"],
+        ["detect-content", "save-images", "--num-images", "0"],
+        ["detect-content", "save-images", "--num-images", "-1"],
+        ["detect-content", "save-images", "--scale", "-1"],
+        ["detect-content", "save-images", "--height", "-5"],
+        ["detect-content", "save-images", "--width", "-5"],
+    ],
+)
+def test_cli_option_out_of_range(tmp_path: Path, cli_args: list[str]):
+    """Values out of an option's range must give a usage error, not a traceback."""
+    exit_code, output = invoke_cli(
+        ["-i", DEFAULT_VIDEO_PATH, "-o", str(tmp_path), "time", "-e", "1", *cli_args]
+    )
+    assert exit_code == 2
+    assert "Traceback" not in output
+    assert "Invalid value" in output
+
+
+@pytest.mark.parametrize(
+    ("command", "option"),
+    [
+        ("detect-adaptive", "frame-window = 0"),
+        ("save-images", "num-images = 0"),
+        ("save-images", "scale = -1"),
+        ("save-images", "height = -5"),
+        ("save-images", "width = -5"),
+    ],
+)
+def test_cli_config_file_option_out_of_range(tmp_path: Path, command: str, option: str):
+    """A config file value out of range must be rejected when loading."""
+    config_path = tmp_path.joinpath("config.cfg")
+    config_path.write_text(f"[{command}]\n{option}\n")
+    with pytest.raises(ConfigLoadFailure) as ex:
+        ConfigRegistry(str(config_path))
+    assert any("Value must be" in message for _, message in ex.value.init_log)
+
+
+@pytest.mark.parametrize(
     ("options", "succeeds"),
     [
         (["--frame-rate", "30.0", "--framerate", "0"], False),
