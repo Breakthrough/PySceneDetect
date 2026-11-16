@@ -308,7 +308,7 @@
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-scenedetect-detect-adaptive-k">
 <span id="cmdoption-scenedetect-detect-adaptive-kernel-size"></span><span class="sig-name descname"><span class="pre">-k</span></span><span class="sig-prename descclassname"> <span class="pre">N</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--kernel-size</span></span><span class="sig-prename descclassname"> <span class="pre">N</span></span><a class="headerlink" href="#cmdoption-scenedetect-detect-adaptive-k" title="Permalink to this definition">¶</a></dt>
-<dd><p>Size of kernel for expanding detected edges. Must be odd number &gt;= 3. If unset, size is estimated using video resolution.</p>
+<dd><p>Size of kernel for expanding detected edges. Must be an odd integer &gt;= 3, or -1 for auto size. Auto size is estimated using video resolution.</p>
 <p>Default: <code class="docutils literal notranslate"><span class="pre">auto</span></code></p>
 </dd></dl>
 
@@ -370,7 +370,7 @@
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-scenedetect-detect-content-k">
 <span id="cmdoption-scenedetect-detect-content-kernel-size"></span><span class="sig-name descname"><span class="pre">-k</span></span><span class="sig-prename descclassname"> <span class="pre">N</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--kernel-size</span></span><span class="sig-prename descclassname"> <span class="pre">N</span></span><a class="headerlink" href="#cmdoption-scenedetect-detect-content-k" title="Permalink to this definition">¶</a></dt>
-<dd><p>Size of kernel for expanding detected edges. Must be odd integer greater than or equal to 3. If unset, kernel size is estimated using video resolution.</p>
+<dd><p>Size of kernel for expanding detected edges. Must be an odd integer &gt;= 3, or -1 for auto size. Auto size is estimated using video resolution.</p>
 <p>Default: <code class="docutils literal notranslate"><span class="pre">auto</span></code></p>
 </dd></dl>
 

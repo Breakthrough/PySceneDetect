@@ -249,7 +249,7 @@ Options
 
 .. option:: -k N, --kernel-size N
 
-  Size of kernel for expanding detected edges. Must be odd number >= 3. If unset, size is estimated using video resolution.
+  Size of kernel for expanding detected edges. Must be an odd integer >= 3, or -1 for auto size. Auto size is estimated using video resolution.
 
   Default: ``auto``
 
@@ -317,7 +317,7 @@ Options
 
 .. option:: -k N, --kernel-size N
 
-  Size of kernel for expanding detected edges. Must be odd integer greater than or equal to 3. If unset, kernel size is estimated using video resolution.
+  Size of kernel for expanding detected edges. Must be an odd integer >= 3, or -1 for auto size. Auto size is estimated using video resolution.
 
   Default: ``auto``
 
