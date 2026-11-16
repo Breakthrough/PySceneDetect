@@ -1149,6 +1149,8 @@
 <ul>
 <li>[general] The root <code>pyproject.toml</code> is now <code>scenedetect</code> again (it had a development-only <code>scenedetect-core</code> name since 0.7.1). <code>pip install -e .</code> now installs the same distribution as PyPI. The <code>[opencv]</code> and <code>[opencv-headless]</code> extras of the development config were removed because <code>opencv-python</code> is now a declared dependency <a href="https://github.com/Breakthrough/PySceneDetect/issues/558">#558</a></li>
 <li>[feature] Add <code>save-chapters</code> command to save scenes as chapters in FFmetadata format, which can be added to a video with ffmpeg without re-encoding. Also available as <code>write_scene_list_ffmetadata()</code> in the <code>scenedetect.output</code> module <a href="https://github.com/Breakthrough/PySceneDetect/issues/323">#323</a></li>
+<li>[feature] Add <code>--stdin</code> to read the input video from a pipe, e.g. <code>ffmpeg -i input.mp4 -c copy -f matroska - | scenedetect --stdin detect-content list-scenes</code>. Requires the PyAV backend. <code>save-html</code> omits images, and commands that need to seek or refer to a source file (<code>split-video</code>, <code>save-images</code>, <code>save-fcp</code>, <code>save-otio</code>, <code>load-scenes</code>, <code>time -s</code>) are not supported <a href="https://github.com/Breakthrough/PySceneDetect/issues/189">#189</a> <a href="https://github.com/Breakthrough/PySceneDetect/issues/434">#434</a></li>
+<li>[bugfix] The CLI now exits with 1 when no frames could be read from the input video, or seeking to the <code>time -s</code>/<code>--start</code> time fails, instead of 0</li>
 </ul>
               
             </div>
