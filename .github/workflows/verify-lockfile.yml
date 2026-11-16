@@ -1,0 +1,43 @@
+# Verify that .github/workflows/actions.lock agrees with the workflows.
+#
+# The lockfile records the exact commit for each `uses:` reference. The runner
+# uses the recorded commit, not the commit that the tag points to at run time.
+#
+# Run `gh actions-lock` after you change a `uses:` line or add a workflow file.
+# Then commit the workflow changes and the lockfile together:
+#
+#   gh extension install github/gh-actions-lock --pin v0.4.1
+#   gh actions-lock
+name: Verify Actions Lockfile
+
+on:
+  pull_request:
+    paths:
+      - .github/**
+  push:
+    paths:
+      - .github/**
+    branches:
+      - main
+      - 'releases/**'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+
+      # Dependabot does not update this version. Update it by hand.
+      - name: Install gh-actions-lock
+        run: gh extension install github/gh-actions-lock --pin v0.4.1
+
+      - name: Verify Lockfile
+        run: gh actions-lock --verify
