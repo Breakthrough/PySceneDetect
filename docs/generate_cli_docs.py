@@ -221,6 +221,11 @@ CONCORDANCE: dict[str, list[Counterpart]] = {
             api=(f":func:`~{_OUT}.write_scene_list_otio`",),
         ),
         Counterpart(
+            "Chapters (FFmetadata)",
+            command="save-chapters",
+            api=(f":func:`~{_OUT}.write_scene_list_ffmetadata`",),
+        ),
+        Counterpart(
             "Images from each scene",
             command="save-images",
             api=(f":func:`~{_OUT}.save_images`",),

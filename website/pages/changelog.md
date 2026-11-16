@@ -859,3 +859,4 @@ Development
 ## PySceneDetect 0.8 (TBD)
 
  - [general] The root `pyproject.toml` is now `scenedetect` again (it had a development-only `scenedetect-core` name since 0.7.1). `pip install -e .` now installs the same distribution as PyPI. The `[opencv]` and `[opencv-headless]` extras of the development config were removed because `opencv-python` is now a declared dependency [#558](https://github.com/Breakthrough/PySceneDetect/issues/558)
+ - [feature] Add `save-chapters` command to save scenes as chapters in FFmetadata format, which can be added to a video with ffmpeg without re-encoding. Also available as `write_scene_list_ffmetadata()` in the `scenedetect.output` module [#323](https://github.com/Breakthrough/PySceneDetect/issues/323)

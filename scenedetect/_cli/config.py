@@ -445,6 +445,11 @@ CONFIG_MAP: ConfigDict = {
         "output": None,
         "verbosity": "info",
     },
+    "save-chapters": {
+        "filename": "$VIDEO_NAME-Chapters.txt",
+        "output": None,
+        "title": "Scene $SCENE_NUMBER",
+    },
     "save-edl": {
         "filename": "$VIDEO_NAME.edl",
         "output": None,
