@@ -626,6 +626,48 @@
 </pre></div>
 </div>
 </section>
+<section id="save-chapters">
+<span id="config-save-chapters"></span><h3>[save-chapters]<a class="headerlink" href="#save-chapters" title="Permalink to this heading">¶</a></h3>
+<p>Options of <a class="reference internal" href="../cli.html#command-save-chapters"><span class="std std-ref">save-chapters</span></a> (Python API: <a class="reference internal" href="../api/output.html#scenedetect.output.write_scene_list_ffmetadata" title="scenedetect.output.write_scene_list_ffmetadata"><code class="xref py py-func docutils literal notranslate"><span class="pre">write_scene_list_ffmetadata()</span></code></a>).</p>
+<table class="config-keys docutils align-default">
+<colgroup>
+<col style="width: 28.0%" />
+<col style="width: 32.0%" />
+<col style="width: 40.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>CLI option</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">filename</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">$VIDEO_NAME-Chapters.txt</span></code></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-save-chapters-f"><code class="xref std std-option docutils literal notranslate"><span class="pre">-f/--filename</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">output</span></code></p></td>
+<td><p><em>none</em></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-save-chapters-o"><code class="xref std std-option docutils literal notranslate"><span class="pre">-o/--output</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">title</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Scene</span> <span class="pre">$SCENE_NUMBER</span></code></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-save-chapters-t"><code class="xref std std-option docutils literal notranslate"><span class="pre">-t/--title</span></code></a></p></td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[save-chapters]</span>
+<span class="c1"># Filename format of chapters file. Can use $VIDEO_NAME macro.</span>
+<span class="c1">#filename = $VIDEO_NAME-Chapters.txt</span>
+
+<span class="c1"># Folder to output chapters file to. Overrides [global] output option.</span>
+<span class="c1">#output = /usr/tmp/chapters</span>
+
+<span class="c1"># Title format to use for each chapter. Can use $VIDEO_NAME and $SCENE_NUMBER macros.</span>
+<span class="c1">#title = Scene $SCENE_NUMBER</span>
+</pre></div>
+</div>
+</section>
 <section id="save-edl">
 <span id="config-save-edl"></span><h3>[save-edl]<a class="headerlink" href="#save-edl" title="Permalink to this heading">¶</a></h3>
 <p>Options of <a class="reference internal" href="../cli.html#command-save-edl"><span class="std std-ref">save-edl</span></a> (Python API: <a class="reference internal" href="../api/output.html#scenedetect.output.write_scene_list_edl" title="scenedetect.output.write_scene_list_edl"><code class="xref py py-func docutils literal notranslate"><span class="pre">write_scene_list_edl()</span></code></a>).</p>
@@ -1286,6 +1328,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#detect-threshold">[detect-threshold]</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#list-scenes">[list-scenes]</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#load-scenes">[load-scenes]</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#save-chapters">[save-chapters]</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#save-edl">[save-edl]</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#save-fcp">[save-fcp]</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#save-html">[save-html]</a></li>

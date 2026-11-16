@@ -217,7 +217,7 @@ the paths to the newly saved/created images.</p>
 <h2>Scene Lists<a class="headerlink" href="#scene-lists" title="Permalink to this heading">¶</a></h2>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p>CLI: <a class="reference internal" href="../cli.html#command-list-scenes"><span class="std std-ref">list-scenes</span></a> (CSV), <a class="reference internal" href="../cli.html#command-save-html"><span class="std std-ref">save-html</span></a>, <a class="reference internal" href="../cli.html#command-save-edl"><span class="std std-ref">save-edl</span></a>, <a class="reference internal" href="../cli.html#command-save-fcp"><span class="std std-ref">save-fcp</span></a>, <a class="reference internal" href="../cli.html#command-save-otio"><span class="std std-ref">save-otio</span></a></p>
+<p>CLI: <a class="reference internal" href="../cli.html#command-list-scenes"><span class="std std-ref">list-scenes</span></a> (CSV), <a class="reference internal" href="../cli.html#command-save-html"><span class="std std-ref">save-html</span></a>, <a class="reference internal" href="../cli.html#command-save-edl"><span class="std std-ref">save-edl</span></a>, <a class="reference internal" href="../cli.html#command-save-fcp"><span class="std std-ref">save-fcp</span></a>, <a class="reference internal" href="../cli.html#command-save-otio"><span class="std std-ref">save-otio</span></a>, <a class="reference internal" href="../cli.html#command-save-chapters"><span class="std std-ref">save-chapters</span></a></p>
 </div>
 <dl class="py function">
 <dt class="sig sig-object py" id="scenedetect.output.write_scene_list">
@@ -358,6 +358,27 @@ current OTIO format does not support rational timings.</p></li>
 <li><p><strong>source_duration</strong> (<a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em> | </em><em>None</em>) – Total duration of the source media. Written as the media reference’s
 available range so NLEs can seek into the source. If None, the available range is
 left unspecified rather than inferred from the selected scenes.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scenedetect.output.write_scene_list_ffmetadata">
+<span class="sig-name descname"><span class="pre">write_scene_list_ffmetadata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scene_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title_format_template</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Scene</span> <span class="pre">$SCENE_NUMBER'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">video_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.output.write_scene_list_ffmetadata" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes the given list of scenes to <cite>output_path</cite> as chapters in FFmetadata format.</p>
+<p>The resulting file can be added to a video as chapter markers with ffmpeg, for example:
+<code class="docutils literal notranslate"><span class="pre">ffmpeg</span> <span class="pre">-i</span> <span class="pre">video.mp4</span> <span class="pre">-i</span> <span class="pre">chapters.txt</span> <span class="pre">-map_chapters</span> <span class="pre">1</span> <span class="pre">-codec</span> <span class="pre">copy</span> <span class="pre">output.mp4</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>output_path</strong> (<em>str</em><em> | </em><em>PathLike</em><em>[</em><em>str</em><em>] </em><em>| </em><em>bytes</em><em> | </em><em>PathLike</em><em>[</em><em>bytes</em><em>] </em><em>| </em><em>TextIO</em>) – Open text file or path to write the FFmetadata file to. Parent directories
+must exist. When a path is provided, the file is closed after writing.</p></li>
+<li><p><strong>scene_list</strong> (<em>list</em><em>[</em><em>tuple</em><em>[</em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em>, </em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em>]</em><em>]</em>) – List of scenes as pairs of FrameTimecodes denoting each scene’s start/end.</p></li>
+<li><p><strong>title_format_template</strong> (<em>str</em>) – Template for each chapter’s title. <code class="docutils literal notranslate"><span class="pre">$SCENE_NUMBER</span></code> is replaced
+with the 1-based scene number, and <code class="docutils literal notranslate"><span class="pre">$VIDEO_NAME</span></code> with <cite>video_name</cite> if provided.</p></li>
+<li><p><strong>video_name</strong> (<em>str</em><em> | </em><em>None</em>) – Name of the video to substitute for <code class="docutils literal notranslate"><span class="pre">$VIDEO_NAME</span></code> in the chapter titles. If
+not provided, <code class="docutils literal notranslate"><span class="pre">$VIDEO_NAME</span></code> is left as-is.</p></li>
 </ul>
 </dd>
 </dl>
@@ -557,6 +578,7 @@ left unspecified rather than inferred from the selected scenes.</p></li>
 <li class="toctree-l3"><a class="reference internal" href="#scenedetect.output.write_scene_list_fcpx"><code class="docutils literal notranslate"><span class="pre">write_scene_list_fcpx()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#scenedetect.output.write_scene_list_fcp7"><code class="docutils literal notranslate"><span class="pre">write_scene_list_fcp7()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#scenedetect.output.write_scene_list_otio"><code class="docutils literal notranslate"><span class="pre">write_scene_list_otio()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scenedetect.output.write_scene_list_ffmetadata"><code class="docutils literal notranslate"><span class="pre">write_scene_list_ffmetadata()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#filename-formatting">Filename Formatting</a><ul>

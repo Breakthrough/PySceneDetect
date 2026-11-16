@@ -606,6 +606,41 @@
 
 </section>
 </section>
+<section id="save-chapters">
+<span id="command-save-chapters"></span><h3><code class="docutils literal notranslate"><span class="pre">save-chapters</span></code><a class="headerlink" href="#save-chapters" title="Permalink to this heading">¶</a></h3>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>Python API: <a class="reference internal" href="api/output.html#scenedetect.output.write_scene_list_ffmetadata" title="scenedetect.output.write_scene_list_ffmetadata"><code class="xref py py-func docutils literal notranslate"><span class="pre">write_scene_list_ffmetadata()</span></code></a> | Config file: <a class="reference internal" href="cli/config_file.html#config-save-chapters"><span class="std std-ref">[save-chapters]</span></a></p>
+</div>
+<p>Save scenes as chapters in FFmetadata format.</p>
+<p>The chapters can be added to a video with ffmpeg without re-encoding, e.g.:</p>
+<blockquote>
+<div><p><code class="docutils literal notranslate"><span class="pre">ffmpeg</span> <span class="pre">-i</span> <span class="pre">video.mp4</span> <span class="pre">-i</span> <span class="pre">video-Chapters.txt</span> <span class="pre">-map_chapters</span> <span class="pre">1</span> <span class="pre">-codec</span> <span class="pre">copy</span> <span class="pre">output.mp4</span></code></p>
+</div></blockquote>
+<section id="id14">
+<h4>Options<a class="headerlink" href="#id14" title="Permalink to this heading">¶</a></h4>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-save-chapters-f">
+<span id="cmdoption-scenedetect-save-chapters-filename"></span><span class="sig-name descname"><span class="pre">-f</span></span><span class="sig-prename descclassname"> <span class="pre">NAME</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--filename</span></span><span class="sig-prename descclassname"> <span class="pre">NAME</span></span><a class="headerlink" href="#cmdoption-scenedetect-save-chapters-f" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filename format to use.</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">$VIDEO_NAME-Chapters.txt</span></code></p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-save-chapters-t">
+<span id="cmdoption-scenedetect-save-chapters-title"></span><span class="sig-name descname"><span class="pre">-t</span></span><span class="sig-prename descclassname"> <span class="pre">NAME</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--title</span></span><span class="sig-prename descclassname"> <span class="pre">NAME</span></span><a class="headerlink" href="#cmdoption-scenedetect-save-chapters-t" title="Permalink to this definition">¶</a></dt>
+<dd><p>Chapter title format to use. Can use $VIDEO_NAME and $SCENE_NUMBER macros.</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">&quot;Scene</span> <span class="pre">$SCENE_NUMBER&quot;</span></code></p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-scenedetect-save-chapters-o">
+<span id="cmdoption-scenedetect-save-chapters-output"></span><span class="sig-name descname"><span class="pre">-o</span></span><span class="sig-prename descclassname"> <span class="pre">DIR</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--output</span></span><span class="sig-prename descclassname"> <span class="pre">DIR</span></span><a class="headerlink" href="#cmdoption-scenedetect-save-chapters-o" title="Permalink to this definition">¶</a></dt>
+<dd><p>Output directory to save chapters file to. Overrides global option <a class="reference internal" href="#cmdoption-scenedetect-o"><code class="xref std std-option docutils literal notranslate"><span class="pre">-o/--output</span></code></a>.</p>
+</dd></dl>
+
+</section>
+</section>
 <section id="save-edl">
 <span id="command-save-edl"></span><h3><code class="docutils literal notranslate"><span class="pre">save-edl</span></code><a class="headerlink" href="#save-edl" title="Permalink to this heading">¶</a></h3>
 <div class="admonition seealso">
@@ -615,8 +650,8 @@
 <p>Save cuts in EDL format (CMX 3600).</p>
 <p>Timecodes are non-drop-frame (HH:MM:SS:FF), counting frames at the nominal rate: 24 frames per
 timecode second at 23.976 fps, 30 at 29.97 fps, and so on.</p>
-<section id="id14">
-<h4>Options<a class="headerlink" href="#id14" title="Permalink to this heading">¶</a></h4>
+<section id="id15">
+<h4>Options<a class="headerlink" href="#id15" title="Permalink to this heading">¶</a></h4>
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-scenedetect-save-edl-f">
 <span id="cmdoption-scenedetect-save-edl-filename"></span><span class="sig-name descname"><span class="pre">-f</span></span><span class="sig-prename descclassname"> <span class="pre">NAME</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--filename</span></span><span class="sig-prename descclassname"> <span class="pre">NAME</span></span><a class="headerlink" href="#cmdoption-scenedetect-save-edl-f" title="Permalink to this definition">¶</a></dt>
@@ -659,8 +694,8 @@ timecode second at 23.976 fps, 30 at 29.97 fps, and so on.</p>
 <p>Python API: <a class="reference internal" href="api/output.html#scenedetect.output.write_scene_list_fcpx" title="scenedetect.output.write_scene_list_fcpx"><code class="xref py py-func docutils literal notranslate"><span class="pre">write_scene_list_fcpx()</span></code></a>, <a class="reference internal" href="api/output.html#scenedetect.output.write_scene_list_fcp7" title="scenedetect.output.write_scene_list_fcp7"><code class="xref py py-func docutils literal notranslate"><span class="pre">write_scene_list_fcp7()</span></code></a> | Config file: <a class="reference internal" href="cli/config_file.html#config-save-fcp"><span class="std std-ref">[save-fcp]</span></a></p>
 </div>
 <p>Save cuts in Final Cut Pro XML format (FCP7 xmeml or FCPX).</p>
-<section id="id15">
-<h4>Options<a class="headerlink" href="#id15" title="Permalink to this heading">¶</a></h4>
+<section id="id16">
+<h4>Options<a class="headerlink" href="#id16" title="Permalink to this heading">¶</a></h4>
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-scenedetect-save-fcp-f">
 <span id="cmdoption-scenedetect-save-fcp-filename"></span><span class="sig-name descname"><span class="pre">-f</span></span><span class="sig-prename descclassname"> <span class="pre">NAME</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--filename</span></span><span class="sig-prename descclassname"> <span class="pre">NAME</span></span><a class="headerlink" href="#cmdoption-scenedetect-save-fcp-f" title="Permalink to this definition">¶</a></dt>
@@ -691,8 +726,8 @@ timecode second at 23.976 fps, 30 at 29.97 fps, and so on.</p>
 </div>
 <p>Save scene list to HTML file.</p>
 <p>To customize image generation, specify the <a class="reference internal" href="#command-save-images"><span class="std std-ref">save-images</span></a> command before <a class="reference internal" href="#command-save-html"><span class="std std-ref">save-html</span></a>. This command always uses the result of the preceeding <a class="reference internal" href="#command-save-images"><span class="std std-ref">save-images</span></a> command, or runs it with the default config values unless <code class="docutils literal notranslate"><span class="pre">--no-images</span></code> is set.</p>
-<section id="id16">
-<h4>Options<a class="headerlink" href="#id16" title="Permalink to this heading">¶</a></h4>
+<section id="id17">
+<h4>Options<a class="headerlink" href="#id17" title="Permalink to this heading">¶</a></h4>
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-scenedetect-save-html-f">
 <span id="cmdoption-scenedetect-save-html-filename"></span><span class="sig-name descname"><span class="pre">-f</span></span><span class="sig-prename descclassname"> <span class="pre">NAME</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--filename</span></span><span class="sig-prename descclassname"> <span class="pre">NAME</span></span><a class="headerlink" href="#cmdoption-scenedetect-save-html-f" title="Permalink to this definition">¶</a></dt>
@@ -733,8 +768,8 @@ timecode second at 23.976 fps, 30 at 29.97 fps, and so on.</p>
 <p>Python API: <a class="reference internal" href="api/output.html#scenedetect.output.save_images" title="scenedetect.output.save_images"><code class="xref py py-func docutils literal notranslate"><span class="pre">save_images()</span></code></a> | Config file: <a class="reference internal" href="cli/config_file.html#config-save-images"><span class="std std-ref">[save-images]</span></a></p>
 </div>
 <p>Save images from each detected scene.</p>
-<section id="id17">
-<h4>Examples<a class="headerlink" href="#id17" title="Permalink to this heading">¶</a></h4>
+<section id="id18">
+<h4>Examples<a class="headerlink" href="#id18" title="Permalink to this heading">¶</a></h4>
 <blockquote>
 <div><p><code class="docutils literal notranslate"><span class="pre">scenedetect</span> <span class="pre">-i</span> <span class="pre">video.mp4</span> <span class="pre">save-images</span> <span class="pre">--num-images</span> <span class="pre">5</span></code></p>
 <p><code class="docutils literal notranslate"><span class="pre">scenedetect</span> <span class="pre">-i</span> <span class="pre">video.mp4</span> <span class="pre">save-images</span> <span class="pre">--interval</span> <span class="pre">2s</span> <span class="pre">--max-images</span> <span class="pre">10</span></code></p>
@@ -742,8 +777,8 @@ timecode second at 23.976 fps, 30 at 29.97 fps, and so on.</p>
 <p><code class="docutils literal notranslate"><span class="pre">scenedetect</span> <span class="pre">-i</span> <span class="pre">video.mp4</span> <span class="pre">save-images</span> <span class="pre">--filename</span> <span class="pre">\$SCENE_NUMBER-img\$IMAGE_NUMBER</span></code></p>
 </div></blockquote>
 </section>
-<section id="id18">
-<h4>Options<a class="headerlink" href="#id18" title="Permalink to this heading">¶</a></h4>
+<section id="id19">
+<h4>Options<a class="headerlink" href="#id19" title="Permalink to this heading">¶</a></h4>
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-scenedetect-save-images-o">
 <span id="cmdoption-scenedetect-save-images-output"></span><span class="sig-name descname"><span class="pre">-o</span></span><span class="sig-prename descclassname"> <span class="pre">DIR</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--output</span></span><span class="sig-prename descclassname"> <span class="pre">DIR</span></span><a class="headerlink" href="#cmdoption-scenedetect-save-images-o" title="Permalink to this definition">¶</a></dt>
@@ -851,8 +886,8 @@ timecode second at 23.976 fps, 30 at 29.97 fps, and so on.</p>
 </div>
 <p>Save detected cuts using keyframe format v1.</p>
 <p>Frame numbers are currently approximate for variable framerate (VFR) video.</p>
-<section id="id19">
-<h4>Options<a class="headerlink" href="#id19" title="Permalink to this heading">¶</a></h4>
+<section id="id20">
+<h4>Options<a class="headerlink" href="#id20" title="Permalink to this heading">¶</a></h4>
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-scenedetect-save-keyframes-f">
 <span id="cmdoption-scenedetect-save-keyframes-filename"></span><span class="sig-name descname"><span class="pre">-f</span></span><span class="sig-prename descclassname"> <span class="pre">NAME</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--filename</span></span><span class="sig-prename descclassname"> <span class="pre">NAME</span></span><a class="headerlink" href="#cmdoption-scenedetect-save-keyframes-f" title="Permalink to this definition">¶</a></dt>
@@ -876,8 +911,8 @@ timecode second at 23.976 fps, 30 at 29.97 fps, and so on.</p>
 </div>
 <p>Save cuts as an OTIO timeline.</p>
 <p>Uses the Timeline.1 schema. OTIO (OpenTimelineIO) timelines can be imported by many video editors.</p>
-<section id="id20">
-<h4>Options<a class="headerlink" href="#id20" title="Permalink to this heading">¶</a></h4>
+<section id="id21">
+<h4>Options<a class="headerlink" href="#id21" title="Permalink to this heading">¶</a></h4>
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-scenedetect-save-otio-f">
 <span id="cmdoption-scenedetect-save-otio-filename"></span><span class="sig-name descname"><span class="pre">-f</span></span><span class="sig-prename descclassname"> <span class="pre">NAME</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--filename</span></span><span class="sig-prename descclassname"> <span class="pre">NAME</span></span><a class="headerlink" href="#cmdoption-scenedetect-save-otio-f" title="Permalink to this definition">¶</a></dt>
@@ -920,8 +955,8 @@ timecode second at 23.976 fps, 30 at 29.97 fps, and so on.</p>
 </div>
 <p>Save cuts as keyframes (I-frames) for video encoding.</p>
 <p>The resulting QP file can be used with the <code class="docutils literal notranslate"><span class="pre">--qpfile</span></code> argument in x264/x265.</p>
-<section id="id21">
-<h4>Options<a class="headerlink" href="#id21" title="Permalink to this heading">¶</a></h4>
+<section id="id22">
+<h4>Options<a class="headerlink" href="#id22" title="Permalink to this heading">¶</a></h4>
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-scenedetect-save-qp-f">
 <span id="cmdoption-scenedetect-save-qp-filename"></span><span class="sig-name descname"><span class="pre">-f</span></span><span class="sig-prename descclassname"> <span class="pre">NAME</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--filename</span></span><span class="sig-prename descclassname"> <span class="pre">NAME</span></span><a class="headerlink" href="#cmdoption-scenedetect-save-qp-f" title="Permalink to this definition">¶</a></dt>
@@ -950,8 +985,8 @@ timecode second at 23.976 fps, 30 at 29.97 fps, and so on.</p>
 <p>Python API: <a class="reference internal" href="api/output.html#scenedetect.output.split_video_ffmpeg" title="scenedetect.output.split_video_ffmpeg"><code class="xref py py-func docutils literal notranslate"><span class="pre">split_video_ffmpeg()</span></code></a>, <a class="reference internal" href="api/output.html#scenedetect.output.split_video_mkvmerge" title="scenedetect.output.split_video_mkvmerge"><code class="xref py py-func docutils literal notranslate"><span class="pre">split_video_mkvmerge()</span></code></a> | Config file: <a class="reference internal" href="cli/config_file.html#config-split-video"><span class="std std-ref">[split-video]</span></a></p>
 </div>
 <p>Split input video using ffmpeg or mkvmerge.</p>
-<section id="id22">
-<h4>Examples<a class="headerlink" href="#id22" title="Permalink to this heading">¶</a></h4>
+<section id="id23">
+<h4>Examples<a class="headerlink" href="#id23" title="Permalink to this heading">¶</a></h4>
 <p>Default:</p>
 <blockquote>
 <div><p><code class="docutils literal notranslate"><span class="pre">scenedetect</span> <span class="pre">-i</span> <span class="pre">video.mp4</span> <span class="pre">split-video</span></code></p>
@@ -965,8 +1000,8 @@ timecode second at 23.976 fps, 30 at 29.97 fps, and so on.</p>
 <div><p><code class="docutils literal notranslate"><span class="pre">scenedetect</span> <span class="pre">-i</span> <span class="pre">video.mp4</span> <span class="pre">split-video</span> <span class="pre">--filename</span> <span class="pre">\$VIDEO_NAME-Clip-\$SCENE_NUMBER</span></code></p>
 </div></blockquote>
 </section>
-<section id="id23">
-<h4>Options<a class="headerlink" href="#id23" title="Permalink to this heading">¶</a></h4>
+<section id="id24">
+<h4>Options<a class="headerlink" href="#id24" title="Permalink to this heading">¶</a></h4>
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-scenedetect-split-video-o">
 <span id="cmdoption-scenedetect-split-video-output"></span><span class="sig-name descname"><span class="pre">-o</span></span><span class="sig-prename descclassname"> <span class="pre">DIR</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--output</span></span><span class="sig-prename descclassname"> <span class="pre">DIR</span></span><a class="headerlink" href="#cmdoption-scenedetect-split-video-o" title="Permalink to this definition">¶</a></dt>
@@ -1049,8 +1084,8 @@ timecode second at 23.976 fps, 30 at 29.97 fps, and so on.</p>
 <blockquote>
 <div><p><code class="docutils literal notranslate"><span class="pre">scenedetect</span> <span class="pre">-i</span> <span class="pre">video.mp4</span> <span class="pre">time</span> <span class="pre">--start</span> <span class="pre">0</span> <span class="pre">--end</span> <span class="pre">1000</span></code></p>
 </div></blockquote>
-<section id="id24">
-<h4>Options<a class="headerlink" href="#id24" title="Permalink to this heading">¶</a></h4>
+<section id="id25">
+<h4>Options<a class="headerlink" href="#id25" title="Permalink to this heading">¶</a></h4>
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-scenedetect-time-s">
 <span id="cmdoption-scenedetect-time-start"></span><span class="sig-name descname"><span class="pre">-s</span></span><span class="sig-prename descclassname"> <span class="pre">TIMECODE</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--start</span></span><span class="sig-prename descclassname"> <span class="pre">TIMECODE</span></span><a class="headerlink" href="#cmdoption-scenedetect-time-s" title="Permalink to this definition">¶</a></dt>
@@ -1164,6 +1199,7 @@ timecode second at 23.976 fps, 30 at 29.97 fps, and so on.</p>
 <li class="toctree-l2"><a class="reference internal" href="#commands">Commands</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#list-scenes"><code class="docutils literal notranslate"><span class="pre">list-scenes</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#load-scenes"><code class="docutils literal notranslate"><span class="pre">load-scenes</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#save-chapters"><code class="docutils literal notranslate"><span class="pre">save-chapters</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#save-edl"><code class="docutils literal notranslate"><span class="pre">save-edl</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#save-fcp"><code class="docutils literal notranslate"><span class="pre">save-fcp</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#save-html"><code class="docutils literal notranslate"><span class="pre">save-html</span></code></a></li>

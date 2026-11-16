@@ -182,6 +182,8 @@
       <ul>
         <li><a href="cli.html#cmdoption-scenedetect-list-scenes-f">scenedetect-list-scenes command line option</a>
 </li>
+        <li><a href="cli.html#cmdoption-scenedetect-save-chapters-f">scenedetect-save-chapters command line option</a>
+</li>
         <li><a href="cli.html#cmdoption-scenedetect-save-edl-f">scenedetect-save-edl command line option</a>
 </li>
         <li><a href="cli.html#cmdoption-scenedetect-save-fcp-f">scenedetect-save-fcp command line option</a>
@@ -433,6 +435,8 @@
 </li>
         <li><a href="cli.html#cmdoption-scenedetect-list-scenes-o">scenedetect-list-scenes command line option</a>
 </li>
+        <li><a href="cli.html#cmdoption-scenedetect-save-chapters-o">scenedetect-save-chapters command line option</a>
+</li>
         <li><a href="cli.html#cmdoption-scenedetect-save-edl-o">scenedetect-save-edl command line option</a>
 </li>
         <li><a href="cli.html#cmdoption-scenedetect-save-fcp-o">scenedetect-save-fcp command line option</a>
@@ -515,8 +519,6 @@
         <li><a href="cli.html#cmdoption-scenedetect-detect-hash-s">scenedetect-detect-hash command line option</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     --skip-cuts
 
@@ -524,6 +526,8 @@
         <li><a href="cli.html#cmdoption-scenedetect-list-scenes-s">scenedetect-list-scenes command line option</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     --start
 
@@ -571,6 +575,8 @@
     --title
 
       <ul>
+        <li><a href="cli.html#cmdoption-scenedetect-save-chapters-t">scenedetect-save-chapters command line option</a>
+</li>
         <li><a href="cli.html#cmdoption-scenedetect-save-edl-t">scenedetect-save-edl command line option</a>
 </li>
       </ul></li>
@@ -673,6 +679,8 @@
         <li><a href="cli.html#cmdoption-scenedetect-detect-threshold-f">scenedetect-detect-threshold command line option</a>
 </li>
         <li><a href="cli.html#cmdoption-scenedetect-list-scenes-f">scenedetect-list-scenes command line option</a>
+</li>
+        <li><a href="cli.html#cmdoption-scenedetect-save-chapters-f">scenedetect-save-chapters command line option</a>
 </li>
         <li><a href="cli.html#cmdoption-scenedetect-save-edl-f">scenedetect-save-edl command line option</a>
 </li>
@@ -803,6 +811,8 @@
 </li>
         <li><a href="cli.html#cmdoption-scenedetect-list-scenes-o">scenedetect-list-scenes command line option</a>
 </li>
+        <li><a href="cli.html#cmdoption-scenedetect-save-chapters-o">scenedetect-save-chapters command line option</a>
+</li>
         <li><a href="cli.html#cmdoption-scenedetect-save-edl-o">scenedetect-save-edl command line option</a>
 </li>
         <li><a href="cli.html#cmdoption-scenedetect-save-fcp-o">scenedetect-save-fcp command line option</a>
@@ -879,6 +889,8 @@
         <li><a href="cli.html#cmdoption-scenedetect-detect-hist-t">scenedetect-detect-hist command line option</a>
 </li>
         <li><a href="cli.html#cmdoption-scenedetect-detect-threshold-t">scenedetect-detect-threshold command line option</a>
+</li>
+        <li><a href="cli.html#cmdoption-scenedetect-save-chapters-t">scenedetect-save-chapters command line option</a>
 </li>
         <li><a href="cli.html#cmdoption-scenedetect-save-edl-t">scenedetect-save-edl command line option</a>
 </li>
@@ -1759,6 +1771,23 @@
 </li>
       </ul></li>
       <li>
+    scenedetect-save-chapters command line option
+
+      <ul>
+        <li><a href="cli.html#cmdoption-scenedetect-save-chapters-f">--filename</a>
+</li>
+        <li><a href="cli.html#cmdoption-scenedetect-save-chapters-o">--output</a>
+</li>
+        <li><a href="cli.html#cmdoption-scenedetect-save-chapters-t">--title</a>
+</li>
+        <li><a href="cli.html#cmdoption-scenedetect-save-chapters-f">-f</a>
+</li>
+        <li><a href="cli.html#cmdoption-scenedetect-save-chapters-o">-o</a>
+</li>
+        <li><a href="cli.html#cmdoption-scenedetect-save-chapters-t">-t</a>
+</li>
+      </ul></li>
+      <li>
     scenedetect-save-edl command line option
 
       <ul>
@@ -1823,6 +1852,8 @@
         <li><a href="cli.html#cmdoption-scenedetect-save-html-w">-w</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     scenedetect-save-images command line option
 
@@ -1884,8 +1915,6 @@
         <li><a href="cli.html#cmdoption-scenedetect-save-images-W">-W</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     scenedetect-save-keyframes command line option
 
@@ -2256,6 +2285,8 @@
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/output.html#scenedetect.output.write_scene_list_fcpx">write_scene_list_fcpx() (in module scenedetect.output)</a>
+</li>
+      <li><a href="api/output.html#scenedetect.output.write_scene_list_ffmetadata">write_scene_list_ffmetadata() (in module scenedetect.output)</a>
 </li>
       <li><a href="api/output.html#scenedetect.output.write_scene_list_html">write_scene_list_html() (in module scenedetect.output)</a>
 </li>
