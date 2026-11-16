@@ -242,15 +242,15 @@ class ScoreWeightsValue(ValidatedValue):
 
 
 class KernelSizeValue(ValidatedValue):
-    """Validator for kernel sizes (odd integer > 1, or -1 for auto size)."""
+    """Validator for kernel sizes (odd integer >= 3, or -1 for auto size)."""
 
     def __init__(self, value: int):
         self._value: int | None
         if value == -1:
             # Kernel size of -1 maps to None internally for auto-sized kernel.
             self._value = None
-        elif value < 0:
-            # Disallow other negative values.
+        elif value < 3:
+            # Disallow other negative values, 0 and 1 (detectors require an odd integer >= 3).
             raise ValueError()
         elif value % 2 == 0:
             # Disallow even values.
@@ -273,7 +273,7 @@ class KernelSizeValue(ValidatedValue):
             return KernelSizeValue(int(config_value))
         except ValueError as ex:
             raise OptionParseFailure(
-                "Value must be an odd integer greater than 1, or set to -1 for auto kernel size."
+                "Value must be an odd integer >= 3, or set to -1 for auto kernel size."
             ) from ex
 
 
