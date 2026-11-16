@@ -680,7 +680,7 @@ Examples:
     "--frame-window",
     "-f",
     metavar="VAL",
-    type=click.INT,
+    type=_click_range("detect-adaptive", "frame-window"),
     default=None,
     help="Size of window to detect deviations from mean. Represents how many frames before/after the current one to use for mean.{}".format(
         USER_CONFIG.get_help_string("detect-adaptive", "frame-window")
@@ -1458,7 +1458,7 @@ Examples:
     "-n",
     metavar="N",
     default=None,
-    type=click.INT,
+    type=_click_range("save-images", "num-images"),
     help="Number of images to generate per scene. Will always include start/end frame, unless -n 1, in which case the image will be the frame at the mid-point of the scene. Cannot be used with -i/--interval.{}".format(
         USER_CONFIG.get_help_string("save-images", "num-images")
     ),
@@ -1549,7 +1549,7 @@ Examples:
     "-s",
     metavar="S",
     default=None,
-    type=click.FLOAT,
+    type=_click_range("save-images", "scale"),
     help="Factor to scale images by. Ignored if -W/--width or -H/--height is set.{}".format(
         USER_CONFIG.get_help_string("save-images", "scale", show_default=False)
     ),
@@ -1559,7 +1559,7 @@ Examples:
     "-H",
     metavar="H",
     default=None,
-    type=click.INT,
+    type=_click_range("save-images", "height"),
     help="Height (pixels) of images.{}".format(
         USER_CONFIG.get_help_string("save-images", "height", show_default=False)
     ),
@@ -1569,7 +1569,7 @@ Examples:
     "-W",
     metavar="W",
     default=None,
-    type=click.INT,
+    type=_click_range("save-images", "width"),
     help="Width (pixels) of images.{}".format(
         USER_CONFIG.get_help_string("save-images", "width", show_default=False)
     ),
