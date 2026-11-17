@@ -13,11 +13,19 @@
 #
 import os
 import sys
+from pathlib import Path
 
 sys.path.insert(0, os.path.abspath(".."))
 sys.path.insert(0, os.path.abspath("_ext"))
 
+from doc_versions import load_doc_versions
+
 from scenedetect import __version__ as scenedetect_version
+
+_REPO_DIR = Path(__file__).resolve().parent.parent
+_psd_latest_version, _psd_doc_versions = load_doc_versions(
+    _REPO_DIR, fallback_version=scenedetect_version.split(".dev")[0]
+)
 
 # -- Project information -----------------------------------------------------
 
@@ -55,6 +63,10 @@ toc_object_entries_show_parents = "hide"
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
+
+# Treat bare single-backtick text (`scenedetect`, `ffmpeg`, parameter names in docstrings)
+# as inline code literals instead of docutils' default italic <cite> title-reference role.
+default_role = "literal"
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
@@ -156,17 +168,22 @@ texinfo_documents = [
 
 # -- Theme -------------------------------------------------
 
-# TODO: Consider switching to sphinx_material.
-
 html_theme = "alabaster"
 html_theme_options = {
-    "sidebar_width": "235px",
+    "page_width": "1080px",
+    "sidebar_width": "255px",
     "description": f"Version: [{release}]",
     "show_relbar_bottom": True,
     "show_relbar_top": False,
+    "github_button": False,
     "github_user": "Breakthrough",
     "github_repo": "PySceneDetect",
     "github_type": "star",
+    "font_family": '"Noto Sans", "Segoe UI", system-ui, -apple-system, sans-serif',
+    "head_font_family": '"Noto Sans", "Segoe UI", system-ui, -apple-system, sans-serif',
+    "code_font_family": (
+        '"JetBrains Mono", "Cascadia Code", "Cascadia Mono", "Consolas", ui-monospace, monospace'
+    ),
     "tip_bg": "#f0f6fa",
     "tip_border": "#c2dcf2",
     "hint_bg": "#f0faf0",
@@ -177,6 +194,11 @@ html_theme_options = {
     "attention_border": "#ffaaaa",
     "logo": "pyscenedetect_logo.png",
     "logo_name": False,
+}
+
+html_context = {
+    "psd_latest_version": _psd_latest_version,
+    "psd_doc_versions": _psd_doc_versions,
 }
 
 

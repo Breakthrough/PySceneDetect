@@ -4,8 +4,41 @@
 
   - :ref:`Usage <cli-usage>`
   - :ref:`Options <cli-options>`
-  - :ref:`Detectors <cli-detectors>`: :ref:`detect-adaptive <command-detect-adaptive>`, :ref:`detect-content <command-detect-content>`, :ref:`detect-hash <command-detect-hash>`, :ref:`detect-hist <command-detect-hist>`, :ref:`detect-threshold <command-detect-threshold>`
-  - :ref:`Commands <cli-commands>`: :ref:`list-scenes <command-list-scenes>`, :ref:`load-scenes <command-load-scenes>`, :ref:`save-chapters <command-save-chapters>`, :ref:`save-edl <command-save-edl>`, :ref:`save-fcp <command-save-fcp>`, :ref:`save-html <command-save-html>`, :ref:`save-images <command-save-images>`, :ref:`save-keyframes <command-save-keyframes>`, :ref:`save-otio <command-save-otio>`, :ref:`save-qp <command-save-qp>`, :ref:`split-video <command-split-video>`, :ref:`time <command-time>`
+  - :ref:`Detectors <cli-detectors>`
+
+    - **Fast Cuts**
+
+      - :ref:`detect-adaptive <command-detect-adaptive>`
+      - :ref:`detect-content <command-detect-content>`
+      - :ref:`detect-hist <command-detect-hist>`
+      - :ref:`detect-hash <command-detect-hash>`
+
+    - **Other**
+
+      - :ref:`detect-threshold <command-detect-threshold>`
+
+  - :ref:`Commands <cli-commands>`
+
+    - **Splitting & Images**
+
+      - :ref:`split-video <command-split-video>`
+      - :ref:`save-images <command-save-images>`
+
+    - **Scene Lists & Exports**
+
+      - :ref:`list-scenes <command-list-scenes>`
+      - :ref:`save-html <command-save-html>`
+      - :ref:`save-edl <command-save-edl>`
+      - :ref:`save-fcp <command-save-fcp>`
+      - :ref:`save-otio <command-save-otio>`
+      - :ref:`save-chapters <command-save-chapters>`
+      - :ref:`save-qp <command-save-qp>`
+      - :ref:`save-keyframes <command-save-keyframes>`
+
+    - **Input & Timing**
+
+      - :ref:`time <command-time>`
+      - :ref:`load-scenes <command-load-scenes>`
 
 - :doc:`cli/config_file`
 - :doc:`cli/backends`

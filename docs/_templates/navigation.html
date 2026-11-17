@@ -1,24 +1,13 @@
-{#- Per-section sidebar: `sidebar_section`, `sidebar_sections`, `sidebar_section_docs` and
-    `section_toctree()` are set by docs/_ext/section_sidebar.py. -#}
-{%- if sidebar_sections %}
-<nav class="section-switch" aria-label="{{ _('Documentation section') }}">
-  {%- for name, (label, doc, _, _) in sidebar_sections.items() if label %}
-  {%- if not loop.first %}<span class="sep" aria-hidden="true">|</span>{% endif %}
-  <a href="{{ pathto(doc) }}"{% if sidebar_section == name %} class="current" aria-current="{{ 'page' if pagename == doc else 'location' }}"{% endif %}>{{ label }}</a>
-  {%- endfor %}
-  {%- for name, (label, _, _, _) in sidebar_sections.items() if not label %}
-  <span class="section-links">
-  {%- for title, doc in sidebar_section_docs.get(name, []) %}
-  {%- if not loop.first %}<span class="sep" aria-hidden="true">|</span>{% endif %}
-  <a href="{{ pathto(doc) }}"{% if pagename == doc %} class="current" aria-current="page"{% endif %}>{{ title }}</a>
-  {%- endfor %}
-  </span>
-  {%- endfor %}
-</nav>
-{%- endif %}
+{#- Per-section sidebar: `sidebar_section`, `sidebar_sections`, and `section_toctree()`
+    are set by docs/_ext/section_sidebar.py. Top-level section links live in `.psd-topbar`. -#}
 {%- set section_tree = section_toctree() if sidebar_sections else "" %}
 {%- if section_tree %}
+<nav class="psd-sidebar-toc" aria-label="{{ _('Section navigation') }}">
+{%- if sidebar_section and not sidebar_sections[sidebar_section][0] %}
+<p class="caption" role="heading"><span class="caption-text">{{ _('On this page') }}</span></p>
+{%- endif %}
 {{ section_tree }}
+</nav>
 {%- else %}
 <h3>{{ _('Navigation') }}</h3>
 {{ toctree(maxdepth=2, includehidden=theme_sidebar_includehidden, collapse=theme_sidebar_collapse) }}

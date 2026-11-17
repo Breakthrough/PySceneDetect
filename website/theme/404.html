@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block main %}
+<main id="main-content" class="container not-found-main" tabindex="-1">
+  <div class="not-found-card">
+    <p class="not-found-code" aria-hidden="true">404</p>
+    <h1 id="404-title">Page Not Found</h1>
+    <p id="404-body">The requested page could not be found. Try searching above or return to the <a href="/">PySceneDetect homepage</a>.</p>
+  </div>
+</main>
+
+<script>
+(function() {
+  var path = window.location.pathname;
+  var pageTitle = document.getElementById("404-title");
+  var pageBody = document.getElementById("404-body");
+
+  function showRedirect(url, labelText) {
+    if (pageTitle) {
+      pageTitle.textContent = "Redirecting...";
+    }
+    if (pageBody) {
+      pageBody.textContent = "Redirecting to ";
+      var link = document.createElement("a");
+      link.href = url;
+      link.textContent = labelText;
+      pageBody.appendChild(link);
+    }
+    window.location.href = url;
+  }
+
+  // Redirect /issue(s) and /issue(s)/<id> to GitHub issues.
+  if (/^\/issues?\/?$/.test(path)) {
+    showRedirect("{{ site.repo_url }}/issues/", "GitHub issues...");
+    return;
+  }
+
+  var issueMatch = path.match(/^\/issues?\/([\w.-]+)\/*$/);
+  if (issueMatch) {
+    var issueId = issueMatch[1];
+    showRedirect(
+      "{{ site.repo_url }}/issues/" + encodeURIComponent(issueId),
+      "issue #" + issueId + " on GitHub..."
+    );
+    return;
+  }
+
+  // Redirect legacy ReadTheDocs subproject URLs (/projects/Manual/en/<ver>/<path>).
+  var manualMatch = path.match(/^\/projects\/Manual\/en\/v?([\w.-]+)(?:\/([\w./-]*))?$/);
+  if (manualMatch) {
+    var verSlug = manualMatch[1];
+    var docRest = manualMatch[2] || "";
+    var hash = window.location.hash || "";
+    showRedirect("/docs/" + verSlug + "/" + docRest + hash, "documentation...");
+  }
+})();
+</script>
+{% endblock %}

@@ -61,7 +61,7 @@ jobs:
         run: |
           sphinx-build -W --keep-going -b html docs docs/_build/html
 
-      - name: Build MkDocs Website (--strict)
+      - name: Build Website (--strict)
         shell: bash
         run: |
-          mkdocs build --strict -f website/mkdocs.yml
+          python website/build.py --strict

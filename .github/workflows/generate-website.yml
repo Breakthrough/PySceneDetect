@@ -7,7 +7,13 @@ on:
       - main
     paths:
       - 'website/**'
+      - 'docs/LATEST_VERSION'
+      - 'docs/_ext/doc_versions.py'
   workflow_dispatch:
+
+concurrency:
+  group: gh-pages
+  cancel-in-progress: false
 
 jobs:
   update_site:
@@ -27,12 +33,11 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          python -m pip install --upgrade pip build wheel virtualenv
-          pip install .[website]
+          python -m pip install "jinja2>=3.1.6" "markdown>=3.5" "pygments>=2.17"
 
       - name: Generate Website
         run: |
-          mkdocs build -f website/mkdocs.yml
+          python website/build.py --strict
 
       - name: Update Website
         run: |
@@ -49,6 +54,8 @@ jobs:
           git rm website/build/* -r -f --ignore-unmatch
           git config --global user.name github-actions
           git config --global user.email github-actions@github.com
-          git commit -a -m "[docs] @${{ github.triggering_actor }}: Generate Website" \
-            -m "Commit: ${{ github.sha }}"
-          git push
+          if ! git diff --quiet || ! git diff --cached --quiet; then
+            git commit -a -m "[docs] @${{ github.triggering_actor }}: Generate Website" \
+              -m "Commit: ${{ github.sha }}"
+            git push
+          fi

@@ -201,11 +201,11 @@ def _add_section_toctree(app: Sphinx, pagename: str, templatename, context, doct
         )
         if tree is None:
             return ""
-        # The switch and link row above the tree already name the sections; the toctree
-        # caption would only repeat them (the captions still head the global toctree used by
-        # the fallback pages and the singlehtml build).
-        for child in [c for c in tree.children if isinstance(c, nodes.title)]:
-            tree.remove(child)
+        # The top bar names the active section on section pages; keep the toctree caption only on
+        # the root page (where every section's tree is listed sequentially) and in fallback builds.
+        if pagename != app.env.config.root_doc:
+            for child in [c for c in tree.children if isinstance(c, nodes.title)]:
+                tree.remove(child)
         root_depth = app.config.section_sidebar_root_depth
         if pagename == app.env.config.root_doc and name in root_depth:
             # The root page has no current entry; one depth for every page, no summaries.

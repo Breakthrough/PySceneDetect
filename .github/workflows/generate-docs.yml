@@ -10,7 +10,12 @@ on:
       - 'docs/**'
       - 'scenedetect/**'
       - 'scenedetect.cfg'
+      - 'website/pages/docs.md'
   workflow_dispatch:
+
+concurrency:
+  group: gh-pages
+  cancel-in-progress: false
 
 jobs:
   update_docs:
@@ -92,7 +97,9 @@ jobs:
 
       - name: Commit and Push
         run: |
-          git commit -a -m "[docs] @${{ github.triggering_actor }}: Generate Documentation" \
-            -m "Source: ${{ github.ref_name }} (${{ github.sha }})" \
-            -m "Destination: ${{ env.scenedetect_docs_dest }}"
-          git push
+          if ! git diff --quiet || ! git diff --cached --quiet; then
+            git commit -a -m "[docs] @${{ github.triggering_actor }}: Generate Documentation" \
+              -m "Source: ${{ github.ref_name }} (${{ github.sha }})" \
+              -m "Destination: ${{ env.scenedetect_docs_dest }}"
+            git push
+          fi

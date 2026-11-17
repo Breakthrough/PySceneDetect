@@ -65,12 +65,41 @@ constructor parameters.
       .. rubric:: Python API
 
       - :doc:`api`
-      - :doc:`api/detectors`: :class:`~scenedetect.detectors.adaptive_detector.AdaptiveDetector`,
-        :class:`~scenedetect.detectors.content_detector.ContentDetector`,
-        :class:`~scenedetect.detectors.hash_detector.HashDetector`,
-        :class:`~scenedetect.detectors.histogram_detector.HistogramDetector`,
-        :class:`~scenedetect.detectors.threshold_detector.ThresholdDetector`
+
+        - :func:`~scenedetect.detect`
+        - :func:`~scenedetect.open_video`
+
+      - :doc:`api/detectors`
+
+        - **Fast Cuts**
+
+          - :class:`~scenedetect.detectors.adaptive_detector.AdaptiveDetector`
+          - :class:`~scenedetect.detectors.content_detector.ContentDetector`
+          - :class:`~scenedetect.detectors.histogram_detector.HistogramDetector`
+          - :class:`~scenedetect.detectors.hash_detector.HashDetector`
+
+        - **Other**
+
+          - :class:`~scenedetect.detectors.threshold_detector.ThresholdDetector`
+
       - :doc:`api/output`
+
+        - **Splitting & Images**
+
+          - :func:`~scenedetect.output.split_video_ffmpeg`
+          - :func:`~scenedetect.output.split_video_mkvmerge`
+          - :func:`~scenedetect.output.save_images`
+
+        - **Scene Lists & Exports**
+
+          - :func:`~scenedetect.output.write_scene_list`
+          - :func:`~scenedetect.output.write_scene_list_html`
+          - :func:`~scenedetect.output.write_scene_list_edl`
+          - :func:`~scenedetect.output.write_scene_list_fcpx`
+          - :func:`~scenedetect.output.write_scene_list_fcp7`
+          - :func:`~scenedetect.output.write_scene_list_otio`
+          - :func:`~scenedetect.output.write_scene_list_ffmetadata`
+
       - :doc:`api/backends`
       - :doc:`api/common`
       - :doc:`api/scene_manager`

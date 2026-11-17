@@ -845,6 +845,59 @@ def create_help() -> tuple[str, list[str]]:
     return "".join(lines), commands
 
 
+CLI_INDEX_DETECTOR_GROUPS: tuple[tuple[str, tuple[str, ...]], ...] = (
+    ("Fast Cuts", ("detect-adaptive", "detect-content", "detect-hist", "detect-hash")),
+    ("Other", ("detect-threshold",)),
+)
+
+CLI_INDEX_COMMAND_GROUPS: tuple[tuple[str, tuple[str, ...]], ...] = (
+    ("Splitting & Images", ("split-video", "save-images")),
+    (
+        "Scene Lists & Exports",
+        (
+            "list-scenes",
+            "save-html",
+            "save-edl",
+            "save-fcp",
+            "save-otio",
+            "save-chapters",
+            "save-qp",
+            "save-keyframes",
+        ),
+    ),
+    ("Input & Timing", ("time", "load-scenes")),
+)
+
+
+def _format_cli_index_groups(
+    available: list[str],
+    groups: tuple[tuple[str, tuple[str, ...]], ...],
+    indent: str = "    ",
+) -> str:
+    """Format a grouped, logically ordered nested RST bullet list of CLI command refs."""
+    available_set = set(available)
+    grouped: list[tuple[str, list[str]]] = []
+    placed: set[str] = set()
+    for label, members in groups:
+        present = [c for c in members if c in available_set]
+        if present:
+            grouped.append((label, present))
+            placed.update(present)
+    unplaced = [c for c in available if c not in placed]
+    if unplaced:
+        if grouped and grouped[-1][0] == "Other":
+            grouped[-1][1].extend(unplaced)
+        else:
+            grouped.append(("Other", unplaced))
+
+    lines: list[str] = []
+    for label, members in grouped:
+        lines.append(f"\n{indent}- **{label}**\n\n")
+        for cmd in members:
+            lines.append(f"{indent}  - :ref:`{cmd} <command-{cmd}>`\n")
+    return "".join(lines)
+
+
 def generate_cli_index(commands: list[str]) -> str:
     """Nested link list of the CLI reference, included by the index page."""
     detectors = [c for c in commands if c.startswith("detect-")]
@@ -855,13 +908,11 @@ def generate_cli_index(commands: list[str]) -> str:
             "- :doc:`scenedetect Command </cli>`\n\n",
             "  - :ref:`Usage <cli-usage>`\n",
             "  - :ref:`Options <cli-options>`\n",
-            "  - :ref:`Detectors <cli-detectors>`: "
-            + ", ".join(f":ref:`{c} <command-{c}>`" for c in detectors)
-            + "\n",
-            "  - :ref:`Commands <cli-commands>`: "
-            + ", ".join(f":ref:`{c} <command-{c}>`" for c in others)
-            + "\n\n",
-            "- :doc:`cli/config_file`\n",
+            "  - :ref:`Detectors <cli-detectors>`\n",
+            _format_cli_index_groups(detectors, CLI_INDEX_DETECTOR_GROUPS),
+            "\n  - :ref:`Commands <cli-commands>`\n",
+            _format_cli_index_groups(others, CLI_INDEX_COMMAND_GROUPS),
+            "\n- :doc:`cli/config_file`\n",
             "- :doc:`cli/backends`\n",
         ]
     )

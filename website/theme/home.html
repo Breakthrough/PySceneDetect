@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block main %}
+  <main id="main-content" class="container home-main" tabindex="-1">
+    <section class="hero" aria-labelledby="hero-heading">
+      <div class="hero-copy">
+        <a class="release-pill" href="/download/">
+          <span>Latest release</span>
+          <strong>{{ site.version }}</strong>
+          <span>&middot; {{ site.release_date_short }}</span>
+        </a>
+        <h1 id="hero-heading">Fast, frame-accurate shot &amp; scene cut detection for video.</h1>
+        <p class="hero-lead">Detect hard cuts, dissolves, and fades from the command line or Python. Automatically split footage with ffmpeg or mkvmerge, export EDL/OTIO timelines, or inspect frame-by-frame metrics.</p>
+        <div class="install-strip">
+          <span class="prompt" aria-hidden="true">$</span>
+          <code>pip install --upgrade scenedetect</code>
+          <button
+            type="button"
+            class="copy-inline-btn"
+            data-copy="pip install --upgrade scenedetect"
+            aria-label="Copy pip install command"
+          >
+            <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="9" y="9" width="13" height="13" rx="2"/>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+            </svg>
+          </button>
+        </div>
+        <div class="cta-row">
+          <a class="btn-primary" href="/cli/">
+            <span>Get Started</span>
+            <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 12h14M13 5l7 7-7 7"/>
+            </svg>
+          </a>
+          <a class="btn-secondary" href="/download/">Download (Win / Docker)</a>
+          <a class="btn-secondary" href="/docs/latest/">Reference Manual</a>
+        </div>
+      </div>
+
+      <div class="code-window">
+        <div class="code-tabs">
+          <div class="tab-group" role="tablist" aria-label="Quickstart examples">
+            {% for tab in hero_tabs %}
+            <button
+              type="button"
+              role="tab"
+              class="tab"
+              id="hero-tab-{{ tab.id }}"
+              aria-selected="{{ 'true' if loop.first else 'false' }}"
+              tabindex="{{ '0' if loop.first else '-1' }}"
+              data-hint="{{ tab.hint }}"
+            >{{ tab.label }}</button>
+            {% endfor %}
+          </div>
+          <span class="code-hint" id="hero-code-hint" aria-hidden="true">{{ hero_tabs[0].hint }}</span>
+        </div>
+
+        {% for tab in hero_tabs %}
+        <div
+          role="tabpanel"
+          class="code-panel"
+          id="hero-panel-{{ tab.id }}"
+          aria-labelledby="hero-tab-{{ tab.id }}"{% if not loop.first %} hidden{% endif %}
+        >
+          <div class="codehilite">
+            <pre class="code-body" tabindex="0"><code>{{ tab.html | safe }}</code></pre>
+          </div>
+        </div>
+        {% endfor %}
+
+        <div class="code-divider">
+          <span class="code-divider-label">Or one command in your terminal:</span>
+          <code>scenedetect -i goldeneye.mp4 split-video</code>
+        </div>
+      </div>
+    </section>
+
+    <div class="grid-3">
+      <div class="feature-card">
+        <h2>Five Benchmarked Detectors</h2>
+        <p>Adaptive, Content (HSV + edges), Perceptual Hash, Y-Channel Histogram, and Threshold detectors &mdash; evaluated against BBC Planet Earth, AutoShot, and ClipShots.</p>
+        <a class="feature-meta" href="/benchmarks/">91.6 F1 on BBC broadcast &rarr;</a>
+      </div>
+      <div class="feature-card">
+        <h2>NLE &amp; Pipeline Ready</h2>
+        <p>Export standard <code>HH:MM:SS.nnn</code> CSV cut lists, CMX 3600 EDL, OpenTimelineIO (OTIO), x264 QP files, HTML contact sheets, and boundary thumbnails.</p>
+        <a class="feature-meta" href="/features/">save-edl &middot; save-otio &middot; save-images &rarr;</a>
+      </div>
+      <div class="feature-card">
+        <h2>Pluggable Video Backends</h2>
+        <p>Decode via OpenCV out of the box, PyAV, or MoviePy. Ships as <code>scenedetect</code>, headless server wheels, signed Windows MSI, and official GHCR containers.</p>
+        <a class="feature-meta" href="/download/">Python 3.10+ &middot; Win64 &middot; Docker &rarr;</a>
+      </div>
+    </div>
+
+    <div class="home-content">
+      <article class="prose home-prose">
+        {{ page.content }}
+      </article>
+
+      <div class="quick-nav-section">
+        <h2>Explore the Documentation</h2>
+        <div class="quick-nav-grid">
+          <a class="quick-nav-card" href="/docs/">
+            <strong>Documentation Versions</strong>
+            <span>Browse stable, development, and legacy API &amp; CLI reference manuals.</span>
+          </a>
+          <a class="quick-nav-card" href="/faq/">
+            <strong>Frequently Asked Questions</strong>
+            <span>Tuning thresholds, variable framerates, stream-copy vs frame-accurate splits.</span>
+          </a>
+          <a class="quick-nav-card" href="/contributing/">
+            <strong>Bugs &amp; Contributing</strong>
+            <span>Report issues, request features, or contribute pull requests on GitHub.</span>
+          </a>
+          <a class="quick-nav-card" href="/literature/">
+            <strong>Research &amp; Literature</strong>
+            <span>Academic papers, shot-boundary methodology, and citations using PySceneDetect.</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </main>
+{% endblock %}
