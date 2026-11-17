@@ -242,6 +242,22 @@ def test_save_images_single_frame_scene_stays_in_scene(test_video_file, tmp_path
     assert image_filenames == {0: ["001.11.jpg"]}
 
 
+def test_save_images_sub_frame_scene_stays_in_scene(test_video_file, tmp_path: Path):
+    """A scene shorter than one frame (e.g. with VFR timestamps) must not yield an image from
+    before the scene starts."""
+    video = VideoStreamCv2(test_video_file)
+    start = FrameTimecode(0.5, video.frame_rate)
+    end = FrameTimecode(0.51, video.frame_rate)
+    image_filenames = save_images(
+        scene_list=[(start, end)],
+        output_dir=tmp_path,
+        video=video,
+        num_images=1,
+        image_name_template="$SCENE_NUMBER.$FRAME_NUMBER",
+    )
+    assert image_filenames == {0: [f"001.{start.frame_num}.jpg"]}
+
+
 def test_save_images_rejects_negative_margin(test_video_file, tmp_path: Path):
     video = VideoStreamCv2(test_video_file)
     scene_list = [(FrameTimecode(0, video.frame_rate), FrameTimecode(10, video.frame_rate))]

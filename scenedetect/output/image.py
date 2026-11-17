@@ -91,8 +91,9 @@ def _generate_timecode_list(
             result.append([start] * num_images)
             continue
         segment_secs = duration_secs / num_images
-        # `end` is exclusive, so the last frame of the scene is one frame before it.
-        last_frame_secs = end.seconds - frame_secs
+        # `end` is exclusive, so the last frame of the scene is one frame before it. Scenes can be
+        # shorter than one frame (e.g. VFR), so never go before the start of the scene.
+        last_frame_secs = max(end.seconds - frame_secs, start.seconds)
         timecodes = []
         for j in range(num_images):
             seg_start = start.seconds + j * segment_secs
