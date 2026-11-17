@@ -221,6 +221,11 @@ CONCORDANCE: dict[str, list[Counterpart]] = {
             api=(f":func:`~{_OUT}.write_scene_list_otio`",),
         ),
         Counterpart(
+            "Chapters (FFmetadata)",
+            command="save-chapters",
+            api=(f":func:`~{_OUT}.write_scene_list_ffmetadata`",),
+        ),
+        Counterpart(
             "Images from each scene",
             command="save-images",
             api=(f":func:`~{_OUT}.save_images`",),
@@ -254,6 +259,11 @@ CONCORDANCE: dict[str, list[Counterpart]] = {
             "Input video",
             option="input",
             api=(":func:`~scenedetect.open_video`", ":func:`~scenedetect.detect`"),
+        ),
+        Counterpart(
+            "Input video from a pipe",
+            option="stdin",
+            api=(f":class:`~{_BE}.pyav.VideoStreamAv` (``path_or_io``)",),
         ),
         Counterpart(
             "Start, end, or duration",

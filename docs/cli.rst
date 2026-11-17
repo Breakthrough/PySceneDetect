@@ -54,6 +54,10 @@ Options
 
   [REQUIRED] Input video file. Image sequences and URLs are supported.
 
+.. option:: --stdin
+
+  Read the input video from standard input instead of :option:`-i/--input <-i>`. Requires the pyav backend. An MP4 needs its index at the start of the file (ffmpeg -movflags +faststart), otherwise remux to MKV or MPEG-TS. Commands that need to seek in the video are not supported.
+
 .. option:: -o DIR, --output DIR
 
   Output directory for created files. If unset, working directory will be used. May be overridden by command options.
@@ -132,6 +136,9 @@ Global options, their config file keys, and their Python API counterparts.
    * - :option:`-i/--input <scenedetect -i>`
      -
      - :func:`~scenedetect.open_video`, :func:`~scenedetect.detect`
+   * - :option:`--stdin <scenedetect --stdin>`
+     -
+     - :class:`~scenedetect.backends.pyav.VideoStreamAv` (``path_or_io``)
    * - :option:`-o/--output <scenedetect -o>`
      - :ref:`[global] output <config-global>`
      - ``output_dir`` argument of :func:`~scenedetect.output.save_images` and :func:`~scenedetect.output.split_video_ffmpeg`; output path argument of each ``write_scene_list*`` function
@@ -242,7 +249,7 @@ Options
 
 .. option:: -k N, --kernel-size N
 
-  Size of kernel for expanding detected edges. Must be odd number >= 3. If unset, size is estimated using video resolution.
+  Size of kernel for expanding detected edges. Must be an odd integer >= 3, or -1 for auto size. Auto size is estimated using video resolution.
 
   Default: ``auto``
 
@@ -310,7 +317,7 @@ Options
 
 .. option:: -k N, --kernel-size N
 
-  Size of kernel for expanding detected edges. Must be odd integer greater than or equal to 3. If unset, kernel size is estimated using video resolution.
+  Size of kernel for expanding detected edges. Must be an odd integer >= 3, or -1 for auto size. Auto size is estimated using video resolution.
 
   Default: ``auto``
 
@@ -581,6 +588,45 @@ Options
   Name of column used to mark scene cuts.
 
   Default: ``"Start Frame"``
+
+
+.. _command-save-chapters:
+
+.. program:: scenedetect save-chapters
+
+
+``save-chapters``
+------------------------------------------------------------------------
+
+
+.. seealso:: Python API: :func:`~scenedetect.output.write_scene_list_ffmetadata` | Config file: :ref:`[save-chapters] <config-save-chapters>`
+
+Save scenes as chapters in FFmetadata format.
+
+The chapters can be added to a video with ffmpeg without re-encoding, e.g.:
+
+    ``ffmpeg -i video.mp4 -i video-Chapters.txt -map_chapters 1 -codec copy output.mp4``
+
+
+Options
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+.. option:: -f NAME, --filename NAME
+
+  Filename format to use.
+
+  Default: ``$VIDEO_NAME-Chapters.txt``
+
+.. option:: -t NAME, --title NAME
+
+  Chapter title format to use. Can use $VIDEO_NAME and $SCENE_NUMBER macros.
+
+  Default: ``"Scene $SCENE_NUMBER"``
+
+.. option:: -o DIR, --output DIR
+
+  Output directory to save chapters file to. Overrides global option :option:`-o/--output <scenedetect -o>`.
 
 
 .. _command-save-edl:

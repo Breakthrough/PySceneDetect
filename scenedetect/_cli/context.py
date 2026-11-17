@@ -12,6 +12,7 @@
 """Context of which command-line options and config settings the user provided."""
 
 import logging
+import sys
 import typing as ty
 
 import click
@@ -23,7 +24,9 @@ from scenedetect._cli.config import (
     ConfigLoadFailure,
     ConfigRegistry,
     CropValue,
+    KernelSizeValue,
 )
+from scenedetect.backends import VideoStreamAv
 from scenedetect.common import MAX_FPS_DELTA, FrameTimecode
 from scenedetect.detector import SceneDetector
 from scenedetect.detectors import (
@@ -43,6 +46,20 @@ logger = logging.getLogger("pyscenedetect")
 
 USER_CONFIG = ConfigRegistry(throw_exception=False)
 """The user config, which can be overriden by command-line. If not found, will be default config."""
+
+
+class _PipeReader:
+    """Read-only view of a pipe. Windows reports pipes as seekable, but seeking on one fails or
+    returns bogus positions, so this keeps PyAV from trying."""
+
+    def __init__(self, pipe: ty.BinaryIO):
+        self._pipe = pipe
+
+    def read(self, size: int = -1) -> bytes:
+        return self._pipe.read(size)
+
+    def seekable(self) -> bool:
+        return False
 
 
 def check_split_video_requirements(use_mkvmerge: bool) -> None:
@@ -90,6 +107,7 @@ class CliContext:
 
         # Input:
         self.video_stream: VideoStream | None = None
+        self.use_stdin: bool = False  # --stdin
         self.load_scenes_input: str | None = None  # load-scenes -i/--input
         self.load_scenes_column_name: str | None = None  # load-scenes -c/--start-col-name
         self.start_time: FrameTimecode | None = None  # time -s/--start
@@ -150,6 +168,19 @@ class CliContext:
         assert parsed is not None
         return parsed.frame_num
 
+    @staticmethod
+    def _kernel_size_value(kernel_size: int | None) -> KernelSizeValue | None:
+        """Validate `--kernel-size` like the config file does, so -1 means auto and bad values
+        give a usage error instead of a traceback."""
+        if kernel_size is None:
+            return None
+        try:
+            return KernelSizeValue(kernel_size)
+        except ValueError as ex:
+            raise click.BadParameter(
+                "Kernel size must be an odd integer >= 3, or -1 for auto.", param_hint="kernel-size"
+            ) from ex
+
     def parse_timecode(self, value: str | None, correct_pts: bool = False) -> FrameTimecode | None:
         """Parses a user input string into a FrameTimecode assuming the given framerate. If `value`
         is None it will be passed through without processing.
@@ -177,6 +208,7 @@ class CliContext:
     def handle_options(
         self,
         input_path: str | None,
+        use_stdin: bool,
         output: str | None,
         frame_rate: float | None,
         stats_file: str | None,
@@ -256,12 +288,20 @@ class CliContext:
                 param_hint="frame skip + stats file",
             )
 
+        if use_stdin and input_path is not None:
+            raise click.BadParameter(
+                "-i/--input cannot be used with --stdin.", param_hint="--stdin"
+            )
+
         # Handle case where -i/--input was not specified (e.g. for the `help` command).
-        if input_path is None:
+        if input_path is None and not use_stdin:
             return
 
         # Load the input video to obtain a time base for parsing timecodes.
-        self._open_video_stream(input_path, frame_rate, backend)
+        if use_stdin:
+            self._open_stdin_stream(frame_rate, backend)
+        else:
+            self._open_video_stream(input_path, frame_rate, backend)
 
         self.output = self.config.get_value("global", "output", output)
         if self.output:
@@ -359,7 +399,9 @@ class CliContext:
 
         return {
             "weights": self.config.get_value("detect-content", "weights", weights),
-            "kernel_size": self.config.get_value("detect-content", "kernel-size", kernel_size),
+            "kernel_size": self.config.get_value(
+                "detect-content", "kernel-size", self._kernel_size_value(kernel_size)
+            ),
             "luma_only": luma_only or self.config.get_value("detect-content", "luma-only"),
             "min_scene_len": min_scene_len_frames,
             "threshold": self.config.get_value("detect-content", "threshold", threshold),
@@ -391,7 +433,9 @@ class CliContext:
         return {
             "adaptive_threshold": self.config.get_value("detect-adaptive", "threshold", threshold),
             "weights": self.config.get_value("detect-adaptive", "weights", weights),
-            "kernel_size": self.config.get_value("detect-adaptive", "kernel-size", kernel_size),
+            "kernel_size": self.config.get_value(
+                "detect-adaptive", "kernel-size", self._kernel_size_value(kernel_size)
+            ),
             "luma_only": luma_only or self.config.get_value("detect-adaptive", "luma-only"),
             "min_content_val": self.config.get_value(
                 "detect-adaptive", "min-content-val", min_content_val
@@ -492,13 +536,28 @@ class CliContext:
         # Initialize logger with the set CLI args / user configuration.
         init_logger(log_level=curr_verbosity, show_stdout=not self.quiet_mode, log_file=logfile)
 
+    def _open_stdin_stream(self, frame_rate: float | None, backend: str | None):
+        if backend not in (None, "pyav") or VideoStreamAv is None:
+            raise click.BadParameter(
+                "--stdin requires the pyav backend. Install it with `pip install av`.",
+                param_hint="--stdin",
+            )
+        # sys.stdin is None if there is no console, e.g. under pythonw.exe on Windows.
+        if sys.stdin is None or sys.stdin.isatty():
+            raise click.BadParameter(
+                "--stdin requires a video to be piped to the program.", param_hint="--stdin"
+            )
+        self.use_stdin = True
+        self._open_video_stream(None, frame_rate, "pyav")
+
     def _open_video_stream(
         self,
-        input_path: str,
+        input_path: str | None,
         frame_rate: float | None,
         backend: str | None,
     ):
-        if "%" in input_path and backend != "opencv":
+        input_hint = "--stdin" if self.use_stdin else "-i/--input"
+        if input_path is not None and "%" in input_path and backend != "opencv":
             raise click.BadParameter(
                 "The OpenCV backend (`--backend opencv`) must be used to process image sequences.",
                 param_hint="-i/--input",
@@ -514,7 +573,16 @@ class CliContext:
                 )
 
             # Open the video with the specified backend, loading any required config settings.
-            if backend == "pyav":
+            if input_path is None:  # --stdin
+                self.video_stream = VideoStreamAv(
+                    # _PipeReader only implements the part of BinaryIO that PyAV uses.
+                    ty.cast(ty.BinaryIO, _PipeReader(sys.stdin.buffer)),
+                    frame_rate=frame_rate,
+                    name="stdin",
+                    threading_mode=self.config.get_value("backend-pyav", "threading-mode"),
+                    suppress_output=self.config.get_value("backend-pyav", "suppress-output"),
+                )
+            elif backend == "pyav":
                 self.video_stream = open_video(
                     path=input_path,
                     frame_rate=frame_rate,
@@ -558,7 +626,7 @@ class CliContext:
             raise click.BadParameter(
                 "Failed to obtain frame rate for input video. Manually specify frame rate with the"
                 " -f/--frame-rate option, or try re-encoding the file.",
-                param_hint="-i/--input",
+                param_hint=input_hint,
             ) from ex
         except VideoOpenFailure as ex:
             if DEBUG_MODE:
@@ -567,11 +635,9 @@ class CliContext:
                 "Failed to open input video{}: {}".format(
                     f" using {backend} backend" if backend else "", str(ex)
                 ),
-                param_hint="-i/--input",
+                param_hint=input_hint,
             ) from ex
         except OSError as ex:
             if DEBUG_MODE:
                 raise
-            raise click.BadParameter(
-                f"Input error:\n\n\t{ex!s}\n", param_hint="-i/--input"
-            ) from None
+            raise click.BadParameter(f"Input error:\n\n\t{ex!s}\n", param_hint=input_hint) from None

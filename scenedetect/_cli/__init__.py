@@ -206,6 +206,12 @@ Global options (e.g. -i/--input, -c/--config) must be specified before any comma
     help="[REQUIRED] Input video file. Image sequences and URLs are supported.",
 )
 @click.option(
+    "--stdin",
+    is_flag=True,
+    default=False,
+    help="Read the input video from standard input instead of -i/--input. Requires the pyav backend. An MP4 needs its index at the start of the file (ffmpeg -movflags +faststart), otherwise remux to MKV or MPEG-TS. Commands that need to seek in the video are not supported.",
+)
+@click.option(
     "--output",
     "-o",
     multiple=False,
@@ -336,6 +342,7 @@ Global options (e.g. -i/--input, -c/--config) must be specified before any comma
 def scenedetect(
     ctx: click.Context,
     input: str | None,
+    stdin: bool,
     output: str | None,
     stats: str | None,
     config: str | None,
@@ -356,6 +363,7 @@ def scenedetect(
 
     ctx.handle_options(
         input_path=input,
+        use_stdin=stdin,
         output=output,
         frame_rate=frame_rate,
         stats_file=stats,
@@ -372,6 +380,12 @@ def scenedetect(
         stats=stats,
         verbosity=verbosity,
     )
+
+
+def check_not_stdin(ctx: CliContext, command: str) -> None:
+    """Rejects `command` if the input is read from stdin, which cannot seek and has no path."""
+    if ctx.use_stdin:
+        raise click.UsageError(f"{command} is incompatible with --stdin.")
 
 
 def add_hidden_alias(command: click.Command, alias: str):
@@ -492,6 +506,8 @@ def time_command(
             "Only one of --duration/-d or --end/-e can be specified, not both.",
             param_hint="time",
         )
+    if start is not None:
+        check_not_stdin(ctx, "time -s/--start")
     logger.debug("Setting video time:\n    start: %s, duration: %s, end: %s", start, duration, end)
     # *NOTE*: The Python API uses 0-based frame indices, but the CLI uses 1-based indices to
     # match the default start number used by `ffmpeg` when saving frames as images. As such,
@@ -576,7 +592,7 @@ Examples:
     metavar="N",
     type=click.INT,
     default=None,
-    help="Size of kernel for expanding detected edges. Must be odd integer greater than or equal to 3. If unset, kernel size is estimated using video resolution.{}".format(
+    help="Size of kernel for expanding detected edges. Must be an odd integer >= 3, or -1 for auto size. Auto size is estimated using video resolution.{}".format(
         USER_CONFIG.get_help_string("detect-content", "kernel-size")
     ),
 )
@@ -664,7 +680,7 @@ Examples:
     "--frame-window",
     "-f",
     metavar="VAL",
-    type=click.INT,
+    type=_click_range("detect-adaptive", "frame-window"),
     default=None,
     help="Size of window to detect deviations from mean. Represents how many frames before/after the current one to use for mean.{}".format(
         USER_CONFIG.get_help_string("detect-adaptive", "frame-window")
@@ -686,7 +702,7 @@ Examples:
     is_flag=True,
     flag_value=True,
     help='Only use luma (brightness) channel. Useful for greyscale videos. Equivalent to "--weights 0 0 1 0".{}'.format(
-        USER_CONFIG.get_help_string("detect-content", "luma-only")
+        USER_CONFIG.get_help_string("detect-adaptive", "luma-only")
     ),
 )
 @click.option(
@@ -695,8 +711,8 @@ Examples:
     metavar="N",
     type=click.INT,
     default=None,
-    help="Size of kernel for expanding detected edges. Must be odd number >= 3. If unset, size is estimated using video resolution.{}".format(
-        USER_CONFIG.get_help_string("detect-content", "kernel-size")
+    help="Size of kernel for expanding detected edges. Must be an odd integer >= 3, or -1 for auto size. Auto size is estimated using video resolution.{}".format(
+        USER_CONFIG.get_help_string("detect-adaptive", "kernel-size")
     ),
 )
 @click.option(
@@ -1005,6 +1021,7 @@ def load_scenes_command(ctx: click.Context, input: str | None, start_col_name: s
     ctx = ctx.obj
     assert isinstance(ctx, CliContext)
 
+    check_not_stdin(ctx, "load-scenes")
     logger.debug("Will load scenes from %s (start_col_name = %s)", input, start_col_name)
     assert ctx.scene_manager is not None
     if ctx.scene_manager.get_num_detectors() > 0:
@@ -1093,7 +1110,11 @@ def save_html_command(
     assert isinstance(ctx, CliContext)
     # Make sure a save-images command is in the pipeline for us to use the results from if we need
     # to include images.
-    include_images = not ctx.config.get_value("save-html", "no-images", no_images)
+    no_images = ctx.config.get_value("save-html", "no-images", no_images)
+    if ctx.use_stdin and not no_images:
+        logger.warning("WARNING: save-html will not include images when reading from --stdin.")
+        no_images = True
+    include_images = not no_images
     if include_images and not ctx.save_images:
         assert save_images_command.callback is not None
         save_images_command.callback()
@@ -1101,7 +1122,7 @@ def save_html_command(
         "filename": ctx.config.get_value("save-html", "filename", filename),
         "image_width": ctx.config.get_value("save-html", "image-width", image_width),
         "image_height": ctx.config.get_value("save-html", "image-height", image_height),
-        "no_images": ctx.config.get_value("save-html", "no-images", no_images),
+        "no_images": no_images,
         "show": ctx.config.get_value("save-html", "show", show),
     }
     ctx.add_command(cli_commands.save_html, save_html_args)
@@ -1330,6 +1351,7 @@ def split_video_command(
     ctx = ctx.obj
     assert isinstance(ctx, CliContext)
 
+    check_not_stdin(ctx, "split-video")
     check_split_video_requirements(use_mkvmerge=mkvmerge)
     assert ctx.video_stream is not None
     if "%" in ctx.video_stream.path or "://" in ctx.video_stream.path:
@@ -1436,7 +1458,7 @@ Examples:
     "-n",
     metavar="N",
     default=None,
-    type=click.INT,
+    type=_click_range("save-images", "num-images"),
     help="Number of images to generate per scene. Will always include start/end frame, unless -n 1, in which case the image will be the frame at the mid-point of the scene. Cannot be used with -i/--interval.{}".format(
         USER_CONFIG.get_help_string("save-images", "num-images")
     ),
@@ -1527,7 +1549,7 @@ Examples:
     "-s",
     metavar="S",
     default=None,
-    type=click.FLOAT,
+    type=_click_range("save-images", "scale"),
     help="Factor to scale images by. Ignored if -W/--width or -H/--height is set.{}".format(
         USER_CONFIG.get_help_string("save-images", "scale", show_default=False)
     ),
@@ -1537,7 +1559,7 @@ Examples:
     "-H",
     metavar="H",
     default=None,
-    type=click.INT,
+    type=_click_range("save-images", "height"),
     help="Height (pixels) of images.{}".format(
         USER_CONFIG.get_help_string("save-images", "height", show_default=False)
     ),
@@ -1547,7 +1569,7 @@ Examples:
     "-W",
     metavar="W",
     default=None,
-    type=click.INT,
+    type=_click_range("save-images", "width"),
     help="Width (pixels) of images.{}".format(
         USER_CONFIG.get_help_string("save-images", "width", show_default=False)
     ),
@@ -1575,6 +1597,7 @@ def save_images_command(
     assert isinstance(ctx, CliContext)
     assert ctx.video_stream is not None
 
+    check_not_stdin(ctx, "save-images")
     if "://" in ctx.video_stream.path:
         error_str = "\nThe save-images command is incompatible with URLs."
         logger.error(error_str)
@@ -1689,6 +1712,62 @@ def save_images_command(
     # Record that we added a save-images command to the pipeline so we can allow save-html
     # to run afterwards (it is dependent on the output).
     ctx.save_images = True
+
+
+SAVE_CHAPTERS_HELP = """Save scenes as chapters in FFmetadata format.
+
+The chapters can be added to a video with ffmpeg without re-encoding, e.g.:
+
+    ffmpeg -i video.mp4 -i video-Chapters.txt -map_chapters 1 -codec copy output.mp4
+"""
+
+
+@click.command("save-chapters", cls=Command, help=SAVE_CHAPTERS_HELP)
+@click.option(
+    "--filename",
+    "-f",
+    metavar="NAME",
+    default=None,
+    type=click.STRING,
+    help="Filename format to use.{}".format(
+        USER_CONFIG.get_help_string("save-chapters", "filename")
+    ),
+)
+@click.option(
+    "--title",
+    "-t",
+    metavar="NAME",
+    default=None,
+    type=click.STRING,
+    help="Chapter title format to use. Can use $VIDEO_NAME and $SCENE_NUMBER macros.{}".format(
+        USER_CONFIG.get_help_string("save-chapters", "title")
+    ),
+)
+@click.option(
+    "--output",
+    "-o",
+    metavar="DIR",
+    type=click.Path(exists=False, dir_okay=True, writable=True, resolve_path=False),
+    help="Output directory to save chapters file to. Overrides global option -o/--output.{}".format(
+        USER_CONFIG.get_help_string("save-chapters", "output", show_default=False)
+    ),
+)
+@click.pass_context
+def save_chapters_command(
+    ctx: click.Context,
+    filename: str | None,
+    title: str | None,
+    output: str | None,
+):
+    ctx = ctx.obj
+    assert isinstance(ctx, CliContext)
+
+    save_chapters_args = {
+        "filename": ctx.config.get_value("save-chapters", "filename", filename),
+        "title": ctx.config.get_value("save-chapters", "title", title),
+        "output": ctx.config.get_value("save-chapters", "output", output),
+    }
+    ctx.add_command(cli_commands.save_chapters, save_chapters_args)
 
 
 SAVE_EDL_HELP = """Save cuts in EDL format (CMX 3600).
@@ -1902,6 +1981,7 @@ def save_fcp_command(
     ctx = ctx.obj
     assert isinstance(ctx, CliContext)
 
+    check_not_stdin(ctx, "save-fcp")
     save_fcp_args = {
         "filename": ctx.config.get_value("save-fcp", "filename", filename),
         "format": ctx.config.get_value("save-fcp", "format", format),
@@ -1965,6 +2045,7 @@ def save_otio_command(
     ctx = ctx.obj
     assert isinstance(ctx, CliContext)
 
+    check_not_stdin(ctx, "save-otio")
     if audio and no_audio:
         raise click.BadArgumentUsage("Only one of --audio or --no-audio can be specified.")
 
@@ -2001,6 +2082,7 @@ scenedetect.add_command(detect_threshold_command)
 
 # Output
 scenedetect.add_command(list_scenes_command)
+scenedetect.add_command(save_chapters_command)
 scenedetect.add_command(save_edl_command)
 scenedetect.add_command(save_html_command)
 scenedetect.add_command(save_images_command)

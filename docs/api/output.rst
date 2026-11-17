@@ -35,7 +35,7 @@ Saving Images
 Scene Lists
 -----------
 
-.. seealso:: CLI: :ref:`list-scenes <command-list-scenes>` (CSV), :ref:`save-html <command-save-html>`, :ref:`save-edl <command-save-edl>`, :ref:`save-fcp <command-save-fcp>`, :ref:`save-otio <command-save-otio>`
+.. seealso:: CLI: :ref:`list-scenes <command-list-scenes>` (CSV), :ref:`save-html <command-save-html>`, :ref:`save-edl <command-save-edl>`, :ref:`save-fcp <command-save-fcp>`, :ref:`save-otio <command-save-otio>`, :ref:`save-chapters <command-save-chapters>`
 
 .. autofunction:: scenedetect.output.write_scene_list
 
@@ -48,6 +48,8 @@ Scene Lists
 .. autofunction:: scenedetect.output.write_scene_list_fcp7
 
 .. autofunction:: scenedetect.output.write_scene_list_otio
+
+.. autofunction:: scenedetect.output.write_scene_list_ffmetadata
 
 Filename Formatting
 -------------------

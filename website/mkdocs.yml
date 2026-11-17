@@ -33,6 +33,7 @@ nav:
     - 'Bugs & Contributing': 'contributing.md'
     - 'Development & Support': 'supporting.md'
 - 'Resources':
+    - 'Project Gallery': 'gallery.md'
     - 'Similar Projects': 'similar.md'
     - 'Research & Literature': 'literature.md'
     - 'License & Copyright': 'copyright.md'

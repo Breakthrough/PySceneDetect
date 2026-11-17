@@ -242,15 +242,15 @@ class ScoreWeightsValue(ValidatedValue):
 
 
 class KernelSizeValue(ValidatedValue):
-    """Validator for kernel sizes (odd integer > 1, or -1 for auto size)."""
+    """Validator for kernel sizes (odd integer >= 3, or -1 for auto size)."""
 
     def __init__(self, value: int):
         self._value: int | None
         if value == -1:
             # Kernel size of -1 maps to None internally for auto-sized kernel.
             self._value = None
-        elif value < 0:
-            # Disallow other negative values.
+        elif value < 3:
+            # Disallow other negative values, 0 and 1 (detectors require an odd integer >= 3).
             raise ValueError()
         elif value % 2 == 0:
             # Disallow even values.
@@ -273,7 +273,7 @@ class KernelSizeValue(ValidatedValue):
             return KernelSizeValue(int(config_value))
         except ValueError as ex:
             raise OptionParseFailure(
-                "Value must be an odd integer greater than 1, or set to -1 for auto kernel size."
+                "Value must be an odd integer >= 3, or set to -1 for auto kernel size."
             ) from ex
 
 
@@ -383,7 +383,7 @@ CONFIG_MAP: ConfigDict = {
         "threading-mode": "auto",
     },
     "detect-adaptive": {
-        "frame-window": 2,
+        "frame-window": RangeValue(2, min_val=1, max_val=None),
         "kernel-size": KernelSizeValue(-1),
         "luma-only": False,
         "min-content-val": RangeValue(15.0, min_val=0.0, max_val=255.0),
@@ -445,6 +445,11 @@ CONFIG_MAP: ConfigDict = {
         "output": None,
         "verbosity": "info",
     },
+    "save-chapters": {
+        "filename": "$VIDEO_NAME-Chapters.txt",
+        "output": None,
+        "title": "Scene $SCENE_NUMBER",
+    },
     "save-edl": {
         "filename": "$VIDEO_NAME.edl",
         "output": None,
@@ -464,17 +469,17 @@ CONFIG_MAP: ConfigDict = {
         "filename": "$VIDEO_NAME-Scene-$SCENE_NUMBER-$IMAGE_NUMBER",
         "format": "jpeg",
         "frame-margin": TimecodeValue(1),
-        "height": 0,
+        "height": RangeValue(0, min_val=0, max_val=None),
         "interval": TimecodeValue(0),  # Placeholder, as there is no interval by default
         "max-images": RangeValue(0, min_val=0, max_val=None),
         "min-images": RangeValue(1, min_val=1, max_val=None),
-        "num-images": 3,
+        "num-images": RangeValue(3, min_val=1, max_val=None),
         "output": None,
         "quality": RangeValue(_PLACEHOLDER, min_val=0, max_val=100),
-        "scale": 1.0,
+        "scale": RangeValue(1.0, min_val=0.0, max_val=None),
         "scale-method": Interpolation.LINEAR,
         "threading": True,
-        "width": 0,
+        "width": RangeValue(0, min_val=0, max_val=None),
     },
     "save-otio": {
         "audio": True,

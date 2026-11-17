@@ -30,13 +30,16 @@ import subprocess
 # TODO: Missing tests for --min-scene-len and --drop-short-scenes.
 import sys
 from pathlib import Path
+from types import SimpleNamespace
 
+import click
 import cv2
 import numpy as np
 import pytest
 
 import scenedetect
 from scenedetect._cli.config import ConfigLoadFailure, ConfigRegistry
+from scenedetect._cli.context import CliContext
 from scenedetect.output import is_ffmpeg_available, is_mkvmerge_available
 from scenedetect.platform import StrPath
 from tests.helpers import invoke_cli
@@ -421,6 +424,84 @@ def test_cli_frame_rate_aliases(option: str):
         ["-i", DEFAULT_VIDEO_PATH, option, "30.0", "time", "-s", "2s", "-d", "4s"]
     )
     assert exit_code == 0
+
+
+@pytest.mark.parametrize(
+    "cli_args",
+    [
+        ["detect-content", "-k", "1"],
+        ["detect-content", "-k", "4"],
+        ["detect-content", "-k", "-3"],
+        ["detect-adaptive", "-k", "1"],
+        ["detect-adaptive", "-k", "-2"],
+    ],
+)
+def test_cli_kernel_size_rejects_invalid(cli_args: list[str]):
+    """Kernel sizes below 3 or even must be rejected with a usage error, not a traceback."""
+    exit_code, output = invoke_cli(["-i", DEFAULT_VIDEO_PATH, *cli_args, "time", "-e", "1"])
+    assert exit_code != 0
+    assert "Kernel size must be an odd integer >= 3, or -1 for auto." in output
+
+
+@pytest.mark.parametrize("command", ["detect-content", "detect-adaptive"])
+@pytest.mark.parametrize("kernel_size", ["3", "-1"])
+def test_cli_kernel_size_accepts_valid(command: str, kernel_size: str):
+    """An odd kernel size >= 3 works, and -1 means auto, the same as in a config file."""
+    exit_code, _ = invoke_cli(
+        ["-i", DEFAULT_VIDEO_PATH, command, "-k", kernel_size, "time", "-e", "1"]
+    )
+    assert exit_code == 0
+
+
+@pytest.mark.parametrize("command", ["detect-content", "detect-adaptive"])
+def test_cli_kernel_size_config_file_rejects_one(tmp_path: Path, command: str):
+    """A config file kernel-size of 1 must be rejected when loading, like other invalid sizes."""
+    config_path = tmp_path.joinpath("config.cfg")
+    config_path.write_text(f"[{command}]\nkernel-size = 1\n")
+    with pytest.raises(ConfigLoadFailure) as ex:
+        ConfigRegistry(str(config_path))
+    assert any("odd integer >= 3" in message for _, message in ex.value.init_log)
+
+
+@pytest.mark.parametrize(
+    "cli_args",
+    [
+        ["detect-adaptive", "--frame-window", "0"],
+        ["detect-adaptive", "--frame-window", "-3"],
+        ["detect-content", "save-images", "--num-images", "0"],
+        ["detect-content", "save-images", "--num-images", "-1"],
+        ["detect-content", "save-images", "--scale", "-1"],
+        ["detect-content", "save-images", "--height", "-5"],
+        ["detect-content", "save-images", "--width", "-5"],
+    ],
+)
+def test_cli_option_out_of_range(tmp_path: Path, cli_args: list[str]):
+    """Values out of an option's range must give a usage error, not a traceback."""
+    exit_code, output = invoke_cli(
+        ["-i", DEFAULT_VIDEO_PATH, "-o", str(tmp_path), "time", "-e", "1", *cli_args]
+    )
+    assert exit_code == 2
+    assert "Traceback" not in output
+    assert "Invalid value" in output
+
+
+@pytest.mark.parametrize(
+    ("command", "option"),
+    [
+        ("detect-adaptive", "frame-window = 0"),
+        ("save-images", "num-images = 0"),
+        ("save-images", "scale = -1"),
+        ("save-images", "height = -5"),
+        ("save-images", "width = -5"),
+    ],
+)
+def test_cli_config_file_option_out_of_range(tmp_path: Path, command: str, option: str):
+    """A config file value out of range must be rejected when loading."""
+    config_path = tmp_path.joinpath("config.cfg")
+    config_path.write_text(f"[{command}]\n{option}\n")
+    with pytest.raises(ConfigLoadFailure) as ex:
+        ConfigRegistry(str(config_path))
+    assert any("Value must be" in message for _, message in ex.value.init_log)
 
 
 @pytest.mark.parametrize(
@@ -1215,6 +1296,72 @@ Scene Number,Start Frame
         assert first.readlines() == second.readlines()
 
 
+def test_cli_save_chapters(tmp_path: Path):
+    """Test `save-chapters` command."""
+    exit_code, _ = invoke_cli(
+        [
+            "-i",
+            DEFAULT_VIDEO_PATH,
+            "-o",
+            str(tmp_path),
+            "time",
+            "-s",
+            "2s",
+            "-d",
+            "4s",
+            "detect-content",
+            "save-chapters",
+        ]
+    )
+    assert exit_code == 0
+    output_path = tmp_path.joinpath(f"{DEFAULT_VIDEO_NAME}-Chapters.txt")
+    assert os.path.exists(output_path)
+    EXPECTED_CHAPTERS_OUTPUT = """;FFMETADATA1
+[CHAPTER]
+TIMEBASE=1/1000
+START=2002
+END=3754
+title=Scene 1
+[CHAPTER]
+TIMEBASE=1/1000
+START=3754
+END=6006
+title=Scene 2
+"""
+    assert output_path.read_text() == EXPECTED_CHAPTERS_OUTPUT
+
+
+def test_cli_save_chapters_with_params(tmp_path: Path):
+    """Test `save-chapters` command with the filename, title, and output options overridden."""
+    output_dir = tmp_path / "chapters"
+    exit_code, _ = invoke_cli(
+        [
+            "-i",
+            DEFAULT_VIDEO_PATH,
+            "time",
+            "-s",
+            "2s",
+            "-d",
+            "4s",
+            "detect-content",
+            "save-chapters",
+            "-f",
+            "my_chapters.txt",
+            "-t",
+            "$VIDEO_NAME - Shot $SCENE_NUMBER",
+            "-o",
+            str(output_dir),
+        ]
+    )
+    assert exit_code == 0
+    output_path = output_dir.joinpath("my_chapters.txt")
+    assert os.path.exists(output_path)
+    content = output_path.read_text()
+    assert content.startswith(";FFMETADATA1\n")
+    assert f"title={DEFAULT_VIDEO_NAME} - Shot 1\n" in content
+    assert f"title={DEFAULT_VIDEO_NAME} - Shot 2\n" in content
+
+
 def test_cli_save_edl(tmp_path: Path):
     """Test `save-edl` command."""
     exit_code, _ = invoke_cli(
@@ -1755,3 +1902,125 @@ def test_cli_save_fcp_fcp7(tmp_path: Path):
     assert second_file is not None
     assert second_file.attrib["id"] == "file1"
     assert second_file.find("pathurl") is None
+
+
+# Matroska can be demuxed from a pipe, unlike an MP4 with its index at the end of the file.
+STDIN_VIDEO_PATH = "tests/resources/issue-236-split-copy.mkv"
+
+
+def run_stdin(*args: str, video: str | None = STDIN_VIDEO_PATH) -> subprocess.CompletedProcess:
+    """Runs the CLI with `video` written to stdin through a real pipe."""
+    return subprocess.run(
+        [*SCENEDETECT_CMD.split(" "), *args],
+        input=Path(video).read_bytes() if video else b"",
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+    )
+
+
+def test_cli_stdin_matches_file_input():
+    """Scenes detected from stdin should match those from the same video opened by path."""
+    command = ["detect-content", "list-scenes", "-n"]
+    piped = run_stdin("--stdin", *command)
+    assert piped.returncode == 0, piped.stdout.decode(errors="replace")
+    from_file = subprocess.run(
+        [*SCENEDETECT_CMD.split(" "), "-i", STDIN_VIDEO_PATH, "-b", "pyav", *command],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+    )
+    assert from_file.returncode == 0
+
+    def scene_rows(output: bytes) -> list[str]:
+        return [line for line in output.decode().splitlines() if line.strip().startswith("|")]
+
+    assert scene_rows(piped.stdout)
+    assert scene_rows(piped.stdout) == scene_rows(from_file.stdout)
+
+
+def test_cli_stdin_output_filename(tmp_path: Path):
+    """$VIDEO_NAME should have a usable value since there is no input path."""
+    result = run_stdin("--stdin", "-o", str(tmp_path), "detect-content", "list-scenes")
+    assert result.returncode == 0, result.stdout.decode(errors="replace")
+    assert (tmp_path / "stdin-Scenes.csv").exists()
+
+
+def test_cli_stdin_save_html_without_images(tmp_path: Path):
+    """save-html needs to seek for images, so they should be left out when reading from stdin."""
+    result = run_stdin("--stdin", "-o", str(tmp_path), "detect-content", "save-html")
+    assert result.returncode == 0, result.stdout.decode(errors="replace")
+    assert b"save-html will not include images" in result.stdout
+    assert (tmp_path / "stdin-Scenes.html").exists()
+    assert not list(tmp_path.glob("*.jpg"))
+
+
+def test_cli_stdin_with_input():
+    """--stdin and -i/--input should be mutually exclusive."""
+    result = run_stdin("--stdin", "-i", DEFAULT_VIDEO_PATH, "detect-content")
+    assert result.returncode != 0
+    assert b"cannot be used with --stdin" in result.stdout
+
+
+def test_cli_stdin_with_other_backend():
+    """--stdin is only implemented by the PyAV backend."""
+    result = run_stdin("--stdin", "-b", "opencv", "detect-content")
+    assert result.returncode != 0
+    assert b"requires the pyav backend" in result.stdout
+
+
+@pytest.mark.parametrize(
+    "stdin",
+    [
+        SimpleNamespace(isatty=lambda: True),
+        None,  # No console, e.g. under pythonw.exe on Windows.
+    ],
+)
+def test_cli_stdin_terminal(monkeypatch: pytest.MonkeyPatch, stdin: SimpleNamespace | None):
+    """Reading from a terminal would block forever, so it should be rejected."""
+    monkeypatch.setattr("sys.stdin", stdin)
+    with pytest.raises(click.BadParameter, match="requires a video to be piped"):
+        CliContext()._open_stdin_stream(frame_rate=None, backend=None)
+
+
+def test_cli_stdin_stats_file(tmp_path: Path):
+    """A stats file should be written for each frame read from stdin."""
+    result = run_stdin("--stdin", "-o", str(tmp_path), "-s", "stats.csv", "detect-content")
+    assert result.returncode == 0, result.stdout.decode(errors="replace")
+    assert len((tmp_path / "stats.csv").read_text().splitlines()) > 1
+
+
+@pytest.mark.parametrize(
+    "command",
+    [
+        "split-video",
+        "save-images",
+        "save-fcp",
+        "save-otio",
+        # The option requires a path that exists, but it's rejected before the file is parsed.
+        f"load-scenes -i {DEFAULT_CONFIG_FILE}",
+        "time -s 1s",
+    ],
+)
+def test_cli_stdin_incompatible_commands(command: str):
+    """Commands that need to seek or refer to a source file should fail before processing."""
+    result = run_stdin("--stdin", *command.split(" "))
+    assert result.returncode != 0
+    output = result.stdout.decode(errors="replace")
+    assert "incompatible with --stdin" in output
+    assert "Processed" not in output
+
+
+def test_cli_stdin_unreadable_container():
+    """An MP4 with its index at the end decodes no frames from a pipe, which shouldn't be silent."""
+    # This relies on testvideo.mp4 having its moov atom at the end of the file.
+    result = run_stdin("--stdin", "detect-content", video="tests/resources/testvideo.mp4")
+    assert result.returncode != 0
+    assert b"Failed to read any frames from stdin" in result.stdout
+
+
+def test_cli_stdin_no_data(monkeypatch: pytest.MonkeyPatch):
+    """An empty pipe should be reported as a failure to open the input."""
+    # Errors opening the input are only reported as usage errors outside of debug mode.
+    monkeypatch.setenv("SCENEDETECT_DEBUG", "")
+    result = run_stdin("--stdin", "detect-content", video=None)
+    assert result.returncode != 0
+    assert b"Invalid value for --stdin: Failed to open input video" in result.stdout
