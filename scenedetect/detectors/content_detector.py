@@ -132,6 +132,8 @@ class ContentDetector(SceneDetector):
         self._weights: ContentDetector.Components = weights
         if luma_only:
             self._weights = ContentDetector.LUMA_ONLY_WEIGHTS
+        if not any(self._weights):
+            raise ValueError("At least one weight must be non-zero.")
         self._kernel: numpy.ndarray | None = None
         if kernel_size is not None:
             if kernel_size < 3 or kernel_size % 2 == 0:

@@ -25,6 +25,7 @@ from scenedetect._cli.config import (
     ConfigRegistry,
     CropValue,
     KernelSizeValue,
+    ScoreWeightsValue,
 )
 from scenedetect.backends import VideoStreamAv
 from scenedetect.common import MAX_FPS_DELTA, FrameTimecode
@@ -180,6 +181,19 @@ class CliContext:
             raise click.BadParameter(
                 "Kernel size must be an odd integer >= 3, or -1 for auto.", param_hint="kernel-size"
             ) from ex
+
+    @staticmethod
+    def _weights_value(
+        weights: tuple[float, float, float, float] | None,
+    ) -> ContentDetector.Components | None:
+        """Validate `--weights` like the config file does, so all-zero weights give a usage error
+        instead of NaN frame scores."""
+        if weights is None:
+            return None
+        try:
+            return ScoreWeightsValue(ContentDetector.Components(*weights)).value
+        except ValueError as ex:
+            raise click.BadParameter(str(ex), param_hint="weights") from ex
 
     def parse_timecode(self, value: str | None, correct_pts: bool = False) -> FrameTimecode | None:
         """Parses a user input string into a FrameTimecode assuming the given framerate. If `value`
@@ -388,17 +402,10 @@ class CliContext:
         """Get a dict containing user options to construct a ContentDetector with."""
         min_scene_len_frames = self._resolve_min_scene_len("detect-content", min_scene_len)
 
-        if weights is not None:
-            try:
-                weights = ContentDetector.Components(*weights)
-            except ValueError as ex:
-                if DEBUG_MODE:
-                    raise
-                logger.debug(str(ex))
-                raise click.BadParameter(str(ex), param_hint="weights") from None
-
         return {
-            "weights": self.config.get_value("detect-content", "weights", weights),
+            "weights": self.config.get_value(
+                "detect-content", "weights", self._weights_value(weights)
+            ),
             "kernel_size": self.config.get_value(
                 "detect-content", "kernel-size", self._kernel_size_value(kernel_size)
             ),
@@ -422,17 +429,11 @@ class CliContext:
 
         min_scene_len_frames = self._resolve_min_scene_len("detect-adaptive", min_scene_len)
 
-        if weights is not None:
-            try:
-                weights = ContentDetector.Components(*weights)
-            except ValueError as ex:
-                if DEBUG_MODE:
-                    raise
-                logger.debug(str(ex))
-                raise click.BadParameter(str(ex), param_hint="weights") from None
         return {
             "adaptive_threshold": self.config.get_value("detect-adaptive", "threshold", threshold),
-            "weights": self.config.get_value("detect-adaptive", "weights", weights),
+            "weights": self.config.get_value(
+                "detect-adaptive", "weights", self._weights_value(weights)
+            ),
             "kernel_size": self.config.get_value(
                 "detect-adaptive", "kernel-size", self._kernel_size_value(kernel_size)
             ),

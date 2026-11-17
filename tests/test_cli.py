@@ -463,6 +463,26 @@ def test_cli_kernel_size_config_file_rejects_one(tmp_path: Path, command: str):
     assert any("odd integer >= 3" in message for _, message in ex.value.init_log)
 
 
+@pytest.mark.parametrize("command", ["detect-content", "detect-adaptive"])
+def test_cli_weights_rejects_all_zero(command: str):
+    """All-zero weights must give a usage error instead of NaN frame scores (#612)."""
+    exit_code, output = invoke_cli(
+        ["-i", DEFAULT_VIDEO_PATH, command, "-w", "0", "0", "0", "0", "time", "-e", "1"]
+    )
+    assert exit_code != 0
+    assert "At least one weight must be non-zero." in output
+
+
+@pytest.mark.parametrize("command", ["detect-content", "detect-adaptive"])
+def test_cli_weights_config_file_rejects_all_zero(tmp_path: Path, command: str):
+    """A config file with all-zero weights must be rejected when loading (#612)."""
+    config_path = tmp_path.joinpath("config.cfg")
+    config_path.write_text(f"[{command}]\nweights = 0, 0, 0, 0\n")
+    with pytest.raises(ConfigLoadFailure) as ex:
+        ConfigRegistry(str(config_path))
+    assert any("non-zero" in message for _, message in ex.value.init_log)
+
+
 @pytest.mark.parametrize(
     "cli_args",
     [

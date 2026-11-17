@@ -292,3 +292,12 @@ def test_adaptive_detector_min_scene_len_uses_target_frame():
 
     cut_frames = [cut.frame_num for cut in cuts]
     assert cut_frames == [100, 140]
+
+
+@pytest.mark.parametrize("detector_type", [ContentDetector, AdaptiveDetector])
+def test_detector_rejects_all_zero_weights(detector_type):
+    """All-zero weights would make every frame score NaN (#612)."""
+    with pytest.raises(ValueError, match="At least one weight must be non-zero"):
+        detector_type(weights=ContentDetector.Components(0.0, 0.0, 0.0, 0.0))
+    # luma_only overrides weights, so this is still valid.
+    detector_type(weights=ContentDetector.Components(0.0, 0.0, 0.0, 0.0), luma_only=True)
