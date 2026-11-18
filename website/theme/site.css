@@ -630,9 +630,66 @@
   }
 
   @media (width < 34rem) {
+    .search-trigger .kbd {
+      display: none;
+    }
+
     .search-trigger-label,
-    .search-trigger .kbd,
     .github-label {
+      position: absolute;
+      clip-path: inset(50%);
+      overflow: hidden;
+      inline-size: 1px;
+      block-size: 1px;
+      margin: -1px;
+      padding: 0;
+      border: 0;
+      white-space: nowrap;
+    }
+
+    .search-trigger,
+    .icon-link {
+      justify-content: center;
+      gap: 0;
+      padding-inline: 0.5rem;
+    }
+  }
+
+  @media (width < 28rem) {
+    .header-actions {
+      gap: 0.3rem;
+    }
+
+    .menu-button {
+      justify-content: center;
+      gap: 0;
+      padding-inline: 0.5rem;
+    }
+
+    .menu-button > span {
+      position: absolute;
+      clip-path: inset(50%);
+      overflow: hidden;
+      inline-size: 1px;
+      block-size: 1px;
+      margin: -1px;
+      padding: 0;
+      border: 0;
+      white-space: nowrap;
+    }
+  }
+
+  @media (width < 23rem) {
+    .header-inner {
+      padding-inline: 0.6rem;
+      gap: 0.35rem;
+    }
+
+    .brand-link {
+      gap: 0.4rem;
+    }
+
+    .header-actions .icon-link {
       display: none;
     }
   }
@@ -642,8 +699,8 @@
     .search-trigger,
     .theme-toggle,
     .icon-link {
-      min-block-size: 2.4rem;
-      min-inline-size: 2.4rem;
+      min-block-size: 2.75rem;
+      min-inline-size: 2.75rem;
     }
   }
 

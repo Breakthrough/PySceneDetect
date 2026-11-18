@@ -910,6 +910,10 @@ dl.py > dt.sig {
     border-inline-start: 3px solid var(--psd-brand);
     padding: 0.45rem 0.75rem;
     border-radius: 0 0.35rem 0.35rem 0;
+    overflow-wrap: anywhere;
+}
+dl.py > dt.sig span.pre {
+    white-space: pre-wrap;
 }
 table.docutils {
     border-collapse: collapse;
@@ -1007,6 +1011,15 @@ div.footer a:hover {
     }
     div.body {
         padding: 0;
+        overflow-wrap: anywhere;
+    }
+    div.body :not(pre) > code span.pre {
+        white-space: pre-wrap;
+    }
+    div.body table.docutils {
+        display: block;
+        max-inline-size: 100%;
+        overflow-x: auto;
     }
     div.sphinxsidebar {
         max-inline-size: 100%;
