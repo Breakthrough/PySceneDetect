@@ -118,6 +118,13 @@ _MINUTES_PER_HOUR = 60.0
 # e.g. 23.976 should be detected as 24000/1001, 29.97 should be detected as 30000/1001, etc.
 _NTSC_DETECTION_TOLERANCE: float = 1e-3
 
+# Number of decimal places kept when scaling seconds to the output precision before truncating,
+# e.g. 0.29 * 100 == 28.999999999999996 should truncate to 29, not 28. A double carries ~15-16
+# significant digits, so for timestamps up to a few days scaling by 10**precision leaves an error
+# around 1e-9 or less. Rounding to 6 places removes that error while still being far finer than
+# any real frame boundary, so it never moves a value that is not actually on a boundary.
+_TRUNCATION_FLOAT_DIGITS: int = 6
+
 
 ##
 ## Helpers
@@ -456,8 +463,9 @@ class FrameTimecode:
         else:
             secs = self.seconds
         if not use_rounding:
-            # Allow for float error when truncating, e.g. 0.29 * 100 == 28.999999999999996.
-            secs = math.floor(round(secs * 10**precision, 6)) / 10**precision
+            # Allow for float error when truncating (see _TRUNCATION_FLOAT_DIGITS).
+            scaled = round(secs * 10**precision, _TRUNCATION_FLOAT_DIGITS)
+            secs = math.floor(scaled) / 10**precision
         hrs = int(secs / _SECONDS_PER_HOUR)
         secs -= hrs * _SECONDS_PER_HOUR
         mins = int(secs / _SECONDS_PER_MINUTE)
