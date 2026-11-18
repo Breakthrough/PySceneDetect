@@ -204,6 +204,60 @@ def test_save_images_frame_margin_accepts_time_values(
             assert tmp_path.joinpath(path).exists()
 
 
+@pytest.mark.parametrize(("frame_margin", "expected"), [(0, [0, 50, 99]), (1, [1, 50, 98])])
+def test_save_images_frame_margin_stays_in_scene(
+    test_video_file, tmp_path: Path, frame_margin, expected
+):
+    """Scene end times are exclusive, so `frame_margin` must be applied from the last frame of the
+    scene rather than from the first frame of the next one."""
+    video = VideoStreamCv2(test_video_file)
+    video_fps = video.frame_rate
+    scene_list = [
+        (FrameTimecode(start, video_fps), FrameTimecode(end, video_fps))
+        for start, end in [(0, 100), (100, 200)]
+    ]
+    image_filenames = save_images(
+        scene_list=scene_list,
+        output_dir=tmp_path,
+        video=video,
+        num_images=3,
+        image_name_template="$SCENE_NUMBER.$IMAGE_NUMBER.$FRAME_NUMBER",
+        frame_margin=frame_margin,
+    )
+    frames = [[int(Path(path).stem.split(".")[-1]) for path in image_filenames[i]] for i in (0, 1)]
+    assert frames == [expected, [frame + 100 for frame in expected]]
+
+
+def test_save_images_single_frame_scene_stays_in_scene(test_video_file, tmp_path: Path):
+    """The image for a one-frame scene must be that frame, not the first frame of the next scene."""
+    video = VideoStreamCv2(test_video_file)
+    scene_list = [(FrameTimecode(11, video.frame_rate), FrameTimecode(12, video.frame_rate))]
+    image_filenames = save_images(
+        scene_list=scene_list,
+        output_dir=tmp_path,
+        video=video,
+        num_images=1,
+        image_name_template="$SCENE_NUMBER.$FRAME_NUMBER",
+    )
+    assert image_filenames == {0: ["001.11.jpg"]}
+
+
+def test_save_images_sub_frame_scene_stays_in_scene(test_video_file, tmp_path: Path):
+    """A scene shorter than one frame (e.g. with VFR timestamps) must not yield an image from
+    before the scene starts."""
+    video = VideoStreamCv2(test_video_file)
+    start = FrameTimecode(0.5, video.frame_rate)
+    end = FrameTimecode(0.51, video.frame_rate)
+    image_filenames = save_images(
+        scene_list=[(start, end)],
+        output_dir=tmp_path,
+        video=video,
+        num_images=1,
+        image_name_template="$SCENE_NUMBER.$FRAME_NUMBER",
+    )
+    assert image_filenames == {0: [f"001.{start.frame_num}.jpg"]}
+
+
 def test_save_images_rejects_negative_margin(test_video_file, tmp_path: Path):
     video = VideoStreamCv2(test_video_file)
     scene_list = [(FrameTimecode(0, video.frame_rate), FrameTimecode(10, video.frame_rate))]
