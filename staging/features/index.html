@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <script>try{const s=localStorage.getItem("color-scheme");if(s==="light"||s==="dark")document.querySelector('meta[name="color-scheme"]').content=s;}catch(e){}</script>
+  <title>Features | PySceneDetect</title>
+  <meta name="description" content="Fast, frame-accurate video scene cut detection and splitting tool in Python with command-line interface and API.">
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="/staging/img/favicon.ico">
+  <link rel="canonical" href="https://www.scenedetect.com/features/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,400..700;1,400..700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@600&text=PySceneDetect&display=swap">
+  <link rel="stylesheet" href="/staging/assets/site.css">
+  <script type="module" src="/staging/assets/site.js"></script>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-EWBNLVRWW0"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-EWBNLVRWW0');
+  </script>
+</head>
+<body>
+  <a class="skip-link visually-hidden" href="#main-content">Skip to main content</a>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand-link" href="/staging/" aria-label="PySceneDetect">
+        <svg
+          class="brand-mark"
+          aria-hidden="true"
+          width="34"
+          height="34"
+          viewBox="132.5 147.6 34.3 33.8"
+          fill="currentColor"
+        >
+          <path d="m 162.79836,148.30595 -26.75195,7.1034 c -1.11468,0.29597 -1.11468,0.84972 -1.11468,1.47987 0,0.63014 -0.0163,-0.0781 0,1.74004 -1.39332,0 -1.67017,1.8036 -1.67199,2.77477 -0.002,1.10991 0.27879,2.77476 1.67199,2.77476 v 15.53868 c 0,0.55495 0,0.55495 0.55734,0.55495 h 30.09596 c 0.55733,0 0.55733,0 0.55733,-0.55495 v -18.31344 c 0,-0.55495 0,-0.55495 -0.55733,-0.55495 h -22.71131 c 0,0 -0.008,0 22.15397,-5.88462 0.24588,-0.0653 0.50023,-0.3963 0.41801,-0.63608 l -1.95067,-5.68826 c -0.0833,-0.2429 -0.44761,-0.4003 -0.69667,-0.33417 z m -26.47328,12.26565 c 0.4617,1.1e-4 0.8359,0.37286 0.83582,0.8326 -7e-5,0.45962 -0.37425,0.83218 -0.83582,0.83227 -0.46172,8e-5 -0.83607,-0.37253 -0.83617,-0.83227 -9e-5,-0.45986 0.37432,-0.83268 0.83617,-0.8326 z m 4.19772,2.49729 h 2.74995 l -2.24706,3.32972 h -2.74996 z m 5.02074,0 h 2.74996 l -2.24706,3.32972 h -2.74998 z m 5.02073,0 h 2.74995 l -2.24707,3.32972 h -2.74996 z m 5.02072,0 h 2.74995 l -2.24703,3.32972 h -2.74997 z m 5.02072,0 h 2.74999 l -2.24706,3.32972 h -2.74998 z m -22.32998,6.10448 h 24.52263 v 7.76934 h -24.52263 z m -0.6491,-12.14838 2.65361,-0.71842 3.01149,2.08035 -2.65363,0.71842 z m 4.84486,-1.31166 2.65362,-0.71842 3.01147,2.08036 -2.65364,0.71842 z m 4.84484,-1.31165 2.65361,-0.71841 3.01147,2.08035 -2.65363,0.71842 z m 4.84484,-1.31165 2.65361,-0.71842 3.0115,2.08036 -2.65364,0.71841 z m 4.84483,-1.31164 2.65364,-0.71843 3.01149,2.08035 -2.65365,0.71843 z"/>
+        </svg>
+        <span class="brand-wordmark">PySceneDetect</span>
+      </a>
+
+      <nav class="site-nav" aria-label="Primary">
+        <button
+          class="menu-button"
+          type="button"
+          popovertarget="site-menu"
+          popovertargetaction="toggle"
+          aria-controls="site-menu"
+        >
+          <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M4 7h16M4 12h16M4 17h16"/>
+          </svg>
+          <span>Menu</span>
+        </button>
+
+        <ul id="site-menu" class="site-menu" popover="auto">
+          <li>
+            <a href="/staging/">Overview</a>
+          </li>
+          <li>
+            <a href="/staging/features/" aria-current="page">Features</a>
+          </li>
+          <li>
+            <a href="/staging/download/">Download</a>
+          </li>
+          <li>
+            <a href="/staging/cli/">CLI</a>
+          </li>
+          <li>
+            <a href="/staging/api/">Python API</a>
+          </li>
+          <li>
+            <a href="/staging/benchmarks/">Benchmarks</a>
+          </li>
+          <li>
+            <a href="/staging/faq/">FAQ</a>
+          </li>
+          <li>
+            <a href="/docs/latest/">
+              <span>Reference Manual</span>
+              <svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M7 17L17 7M7 7h10v10"/>
+              </svg>
+            </a>
+          </li>
+          <li class="mobile-only-nav">
+            <a href="/staging/changelog/">Changelog</a>
+          </li>
+          <li class="mobile-only-nav">
+            <a href="/staging/docs/">Documentation</a>
+          </li>
+          <li class="mobile-only-nav">
+            <a href="/staging/contributing/">Contributing</a>
+          </li>
+          <li class="mobile-only-nav">
+            <a href="/staging/supporting/">Support</a>
+          </li>
+          <li class="mobile-only-nav">
+            <a href="/staging/gallery/">Project Gallery</a>
+          </li>
+          <li class="mobile-only-nav">
+            <a href="/staging/similar/">Similar Projects</a>
+          </li>
+          <li class="mobile-only-nav">
+            <a href="/staging/literature/">Literature</a>
+          </li>
+          <li class="mobile-only-nav">
+            <a href="/staging/copyright/">License</a>
+          </li>
+          <li class="mobile-only-nav">
+            <a href="https://github.com/Breakthrough/PySceneDetect">
+              <span>GitHub</span>
+              <svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M7 17L17 7M7 7h10v10"/>
+              </svg>
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="header-actions">
+        <button
+          type="button"
+          class="search-trigger"
+        >
+          <svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="7"/>
+            <path d="m20 20-3.5-3.5"/>
+          </svg>
+          <span class="search-trigger-label">Search</span>
+          <kbd class="kbd" aria-hidden="true">Ctrl K</kbd>
+        </button>
+
+        <button type="button" class="theme-toggle">
+          <svg class="theme-option-dark" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
+          </svg>
+          <span class="visually-hidden theme-option-dark">Switch to dark theme</span>
+          <svg class="theme-option-light" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="4"/>
+            <path d="M12 2v2M12 20v2m-7.07-14.93 1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+          </svg>
+          <span class="visually-hidden theme-option-light">Switch to light theme</span>
+        </button>
+
+        <a class="icon-link" href="https://github.com/Breakthrough/PySceneDetect">
+          <svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M8 0C3.58 0 0 3.58 0 8a8 8 0 0 0 5.47 7.59c.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/>
+          </svg>
+          <span class="github-label">GitHub</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <search>
+    <dialog id="search-dialog" class="search-dialog" closedby="any" aria-label="Search PySceneDetect">
+      <form method="dialog" class="search-header">
+        <label for="search-input" class="visually-hidden">Search documentation and guides</label>
+        <svg class="search-input-icon" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="7"/>
+          <path d="m20 20-3.5-3.5"/>
+        </svg>
+        <input
+          type="search"
+          id="search-input"
+          class="search-input"
+          placeholder="Search guides, CLI, detectors, FAQ..."
+          autocomplete="off"
+          autofocus
+        >
+        <button type="submit" class="search-close" aria-label="Esc - Close search">Esc</button>
+      </form>
+      <div id="search-results" class="search-results" role="region" aria-label="Search results" aria-live="polite">
+        <p class="search-empty">Type a keyword to search across all guides, CLI options, detectors, and FAQs.</p>
+      </div>
+    </dialog>
+  </search>
+
+  <div class="docs-shell">
+    <aside class="docs-sidebar" aria-label="Site navigation">
+      <div class="side-group-title">PySceneDetect</div>
+      <ul class="side-list" role="list">
+        <li>
+          <a href="/staging/">Home</a>
+        </li>
+        <li>
+          <a href="/staging/features/" aria-current="page">Features</a>
+        </li>
+        <li>
+          <a href="/staging/download/">Download</a>
+        </li>
+        <li>
+          <a href="/staging/changelog/">Changelog</a>
+        </li>
+      </ul>
+      <div class="side-group-title">Reference</div>
+      <ul class="side-list" role="list">
+        <li>
+          <a href="/staging/docs/">Documentation</a>
+        </li>
+        <li>
+          <a href="/staging/cli/">Command-Line</a>
+        </li>
+        <li>
+          <a href="/staging/api/">Python API</a>
+        </li>
+        <li>
+          <a href="/staging/benchmarks/">Benchmarks</a>
+        </li>
+      </ul>
+      <div class="side-group-title">Support</div>
+      <ul class="side-list" role="list">
+        <li>
+          <a href="/staging/faq/">FAQ</a>
+        </li>
+        <li>
+          <a href="/staging/contributing/">Bugs &amp; Contributing</a>
+        </li>
+        <li>
+          <a href="/staging/supporting/">Development &amp; Support</a>
+        </li>
+      </ul>
+      <div class="side-group-title">Resources</div>
+      <ul class="side-list" role="list">
+        <li>
+          <a href="/staging/gallery/">Project Gallery</a>
+        </li>
+        <li>
+          <a href="/staging/similar/">Similar Projects</a>
+        </li>
+        <li>
+          <a href="/staging/literature/">Research &amp; Literature</a>
+        </li>
+        <li>
+          <a href="/staging/copyright/">License &amp; Copyright</a>
+        </li>
+      </ul>
+    </aside>
+
+    <main id="main-content" class="docs-main" tabindex="-1">
+      <article class="prose">
+        <h1 id="features">Features</h1>
+<h2 id="overview">Overview</h2>
+<div class="admonition note">
+<p class="admonition-title">Content-Aware Scene Detection</p>
+<p>Detects breaks in-between <em>content</em>, not only when the video fades to black (although a threshold mode is available as well for those cases).</p>
+</div>
+<div class="admonition important">
+<p class="admonition-title">Compatible With Many External Tools</p>
+<p>The detected scene boundaries/cuts can be exported in a variety of formats, with the default type (comma-separated <code>HH:MM:SS.nnn</code> values) being ready to copy-and-paste directly into other tools (such as <code>ffmpeg</code>, <code>mkvmerge</code>, etc.) for splitting and/or re-encoding the video.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Statistical Video Analysis</p>
+<p>Can output a spreadsheet-compatible file for analyzing trends in a particular video file, to determine the optimal threshold values to use with specific scene detection methods/algorithms.</p>
+</div>
+<div class="admonition important">
+<p class="admonition-title">Extendible and Embeddable</p>
+<p>Written in Python, and designed with an easy-to-use and extendable API, PySceneDetect is ideal for embedding into other programs, or to implement custom methods/algorithms of scene detection for specific applications (e.g. analyzing security camera footage).</p>
+</div>
+<hr />
+<h2 id="key-capabilities">Key Capabilities</h2>
+<ul>
+<li>exports timecodes in standard format (<code>HH:MM:SS.nnn</code>), comma-separated for easy copy-and-paste into external tools and analysis with spreadsheet software</li>
+<li>statistics/analysis mode to export frame-by-frame video metrics via the <code>-s [FILE]</code>/<code>--stats [FILE]</code> argument (e.g. <code>--stats metrics.csv</code>)</li>
+<li>output-suppression (quiet) mode for better automation with external scripts/programs (<code>-q</code>/<code>--quiet</code>)</li>
+<li>save an image of the first and last frame of each detected scene via the <code>save-images</code> command</li>
+<li>split the input video automatically if <code>ffmpeg</code> or <code>mkvmerge</code> is available via the <code>split-video</code> command</li>
+</ul>
+<h2 id="output-formats">Output Formats</h2>
+<ul>
+<li><strong>Chapters</strong>: <code>save-chapters</code> command (save as FFmetadata chapters, which can be added to a video with ffmpeg)</li>
+<li><strong>EDL</strong>: <code>save-edl</code> command (save as edit decision list in CMX 3600 format, compatible with most editors)</li>
+<li><strong>HTML</strong>: <code>save-html</code> command (save HTML table that can be viewed with browser)</li>
+<li><strong>OTIO</strong>: <code>save-otio</code> command (save as <a href="https://github.com/AcademySoftwareFoundation/OpenTimelineIO">OpenTimelineIO</a> file)</li>
+<li><strong>QP</strong>: <code>save-qp</code> command (can be used with x264 <code>--qpfile</code>)</li>
+</ul>
+<h2 id="detection-methods">Detection Methods</h2>
+<p>PySceneDetect implements a variety of different detection algorithms which can be used independently or combined depending on the source material being analyzed.</p>
+<ul>
+<li><strong>adaptive content scene detection</strong> (<code>detect-adaptive</code>): uses rolling average of differences in HSL colorspace combined with thresholding to detect shot changes (fast cut)</li>
+<li><strong>content-aware scene detection</strong> (<code>detect-content</code>): uses differences in HSL colorspace combined with filtering to detect shot changes (fast cut)</li>
+<li><strong>content-aware scene detection</strong> (<code>detect-hash</code>): uses perceptual hashing to determine differences between frames to find shot changes (fast cut)</li>
+<li><strong>content-aware scene detection</strong> (<code>detect-hist</code>): uses differences in histograms of Y channel of frames after conversion to YUV (fast cut)</li>
+<li><strong>threshold scene detection</strong> (<code>detect-threshold</code>): uses average frame intensity (brightness) to detect slow transitions (fade in/out)</li>
+</ul>
+<p>By default, detection methods are tuned to provide high performance during processing, while maintaining reasonable accuracy. Each detection method is configurable, and different parameters can be changed for specific use cases. See <a href="/staging/docs/">the documentation</a> for details, and <a href="/staging/benchmarks/">the benchmarks page</a> for how each detector scores on public shot-boundary-detection datasets.</p>
+<hr />
+<h2 id="version-roadmap">Version Roadmap</h2>
+<p>Future version roadmaps are now <a href="https://github.com/Breakthrough/PySceneDetect/milestones">tracked as milestones (link)</a>. Specific issues/features that are queued up for the very next release will have <a href="https://github.com/Breakthrough/PySceneDetect/issues?q=is%3Aissue+is%3Aopen+label%3A%22status%3A+backlog%22">the <code>backlog</code> tag</a>, and issues/features being worked on will have <a href="https://github.com/Breakthrough/PySceneDetect/issues?q=is%3Aissue+is%3Aopen+label%3A%22status%3A+in+progress%22">the <code>status: in progress</code> tag</a>. Also note that bug reports as well as additional feature requests can be submitted via <a href="https://github.com/Breakthrough/PySceneDetect/issues">the issue tracker</a>; read <a href="/staging/contributing/">the Bug Reports and Contributing page</a> for details.</p>
+<h3 id="planned-features">Planned Features</h3>
+<p>The following features are under consideration for future releases. Any contributions towards completing these features are most welcome (pull requests may be accepted via Github).</p>
+<ul>
+<li>graphical interface (GUI)</li>
+<li>automatic threshold detection for the current scene detection methods (or just output message indicating "Predicted Threshold: X")</li>
+<li>suppression of short-length flashes/bursts of light <a href="https://github.com/Breakthrough/PySceneDetect/issues/35">#35</a></li>
+<li>histogram-based detection algorithm in HSV/HSL color space <a href="https://github.com/Breakthrough/PySceneDetect/issues/53">#53</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Perceptual_hashing">perceptual hash</a> based scene detection (<a href="https://github.com/Breakthrough/PySceneDetect/pull/290">prototype by @wjs018 in PR#290</a>)</li>
+<li>adaptive bias for fade in/out interpolation</li>
+</ul>
+      </article>
+
+      <div class="doc-meta-bar">
+        <a class="edit-link" href="https://github.com/Breakthrough/PySceneDetect/blob/main/website/pages/features.md">
+          <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>
+          </svg>
+          <span>Edit this page on GitHub</span>
+        </a>
+      </div>
+
+      <nav class="pagination-nav" aria-label="Pagination">
+        <a class="pagination-link pagination-prev" href="/staging/">
+          <span class="pagination-hint">&larr; Previous</span>
+          <span class="pagination-title">Home</span>
+        </a>
+        <a class="pagination-link pagination-next" href="/staging/download/">
+          <span class="pagination-hint">Next &rarr;</span>
+          <span class="pagination-title">Download</span>
+        </a>
+      </nav>
+    </main>
+
+    <aside class="docs-toc" aria-label="On this page">
+      <div class="toc-sticky">
+        <div class="toc-title">On this page</div>
+        <ul class="toc-list" role="list">
+          <li>
+            <a href="#overview">Overview</a>
+          </li>
+          <li>
+            <a href="#key-capabilities">Key Capabilities</a>
+          </li>
+          <li>
+            <a href="#output-formats">Output Formats</a>
+          </li>
+          <li>
+            <a href="#detection-methods">Detection Methods</a>
+          </li>
+          <li>
+            <a href="#version-roadmap">Version Roadmap</a>
+            <ul class="toc-sublist" role="list">
+              <li><a href="#planned-features">Planned Features</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </aside>
+  </div>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <p class="footer-copy">
+        Copyright &copy; 2014 Brandon Castellano. Licensed under the
+        <a href="/staging/copyright/">BSD 3-Clause License</a>.
+      </p>
+      <ul class="footer-links" role="list">
+        <li><a href="https://github.com/Breakthrough/PySceneDetect">GitHub</a></li>
+        <li><a href="https://pypi.org/project/scenedetect/">PyPI</a></li>
+        <li><a href="/docs/latest/">Reference Manual</a></li>
+        <li><a href="/staging/changelog/">Changelog</a></li>
+        <li><a href="/staging/copyright/">License</a></li>
+      </ul>
+    </div>
+  </footer>
+</body>
+</html>

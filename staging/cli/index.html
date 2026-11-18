@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <script>try{const s=localStorage.getItem("color-scheme");if(s==="light"||s==="dark")document.querySelector('meta[name="color-scheme"]').content=s;}catch(e){}</script>
+  <title>Command-Line | PySceneDetect</title>
+  <meta name="description" content="Fast, frame-accurate video scene cut detection and splitting tool in Python with command-line interface and API.">
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="/staging/img/favicon.ico">
+  <link rel="canonical" href="https://www.scenedetect.com/cli/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,400..700;1,400..700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@600&text=PySceneDetect&display=swap">
+  <link rel="stylesheet" href="/staging/assets/site.css">
+  <script type="module" src="/staging/assets/site.js"></script>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-EWBNLVRWW0"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-EWBNLVRWW0');
+  </script>
+</head>
+<body>
+  <a class="skip-link visually-hidden" href="#main-content">Skip to main content</a>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand-link" href="/staging/" aria-label="PySceneDetect">
+        <svg
+          class="brand-mark"
+          aria-hidden="true"
+          width="34"
+          height="34"
+          viewBox="132.5 147.6 34.3 33.8"
+          fill="currentColor"
+        >
+          <path d="m 162.79836,148.30595 -26.75195,7.1034 c -1.11468,0.29597 -1.11468,0.84972 -1.11468,1.47987 0,0.63014 -0.0163,-0.0781 0,1.74004 -1.39332,0 -1.67017,1.8036 -1.67199,2.77477 -0.002,1.10991 0.27879,2.77476 1.67199,2.77476 v 15.53868 c 0,0.55495 0,0.55495 0.55734,0.55495 h 30.09596 c 0.55733,0 0.55733,0 0.55733,-0.55495 v -18.31344 c 0,-0.55495 0,-0.55495 -0.55733,-0.55495 h -22.71131 c 0,0 -0.008,0 22.15397,-5.88462 0.24588,-0.0653 0.50023,-0.3963 0.41801,-0.63608 l -1.95067,-5.68826 c -0.0833,-0.2429 -0.44761,-0.4003 -0.69667,-0.33417 z m -26.47328,12.26565 c 0.4617,1.1e-4 0.8359,0.37286 0.83582,0.8326 -7e-5,0.45962 -0.37425,0.83218 -0.83582,0.83227 -0.46172,8e-5 -0.83607,-0.37253 -0.83617,-0.83227 -9e-5,-0.45986 0.37432,-0.83268 0.83617,-0.8326 z m 4.19772,2.49729 h 2.74995 l -2.24706,3.32972 h -2.74996 z m 5.02074,0 h 2.74996 l -2.24706,3.32972 h -2.74998 z m 5.02073,0 h 2.74995 l -2.24707,3.32972 h -2.74996 z m 5.02072,0 h 2.74995 l -2.24703,3.32972 h -2.74997 z m 5.02072,0 h 2.74999 l -2.24706,3.32972 h -2.74998 z m -22.32998,6.10448 h 24.52263 v 7.76934 h -24.52263 z m -0.6491,-12.14838 2.65361,-0.71842 3.01149,2.08035 -2.65363,0.71842 z m 4.84486,-1.31166 2.65362,-0.71842 3.01147,2.08036 -2.65364,0.71842 z m 4.84484,-1.31165 2.65361,-0.71841 3.01147,2.08035 -2.65363,0.71842 z m 4.84484,-1.31165 2.65361,-0.71842 3.0115,2.08036 -2.65364,0.71841 z m 4.84483,-1.31164 2.65364,-0.71843 3.01149,2.08035 -2.65365,0.71843 z"/>
+        </svg>
+        <span class="brand-wordmark">PySceneDetect</span>
+      </a>
+
+      <nav class="site-nav" aria-label="Primary">
+        <button
+          class="menu-button"
+          type="button"
+          popovertarget="site-menu"
+          popovertargetaction="toggle"
+          aria-controls="site-menu"
+        >
+          <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M4 7h16M4 12h16M4 17h16"/>
+          </svg>
+          <span>Menu</span>
+        </button>
+
+        <ul id="site-menu" class="site-menu" popover="auto">
+          <li>
+            <a href="/staging/">Overview</a>
+          </li>
+          <li>
+            <a href="/staging/features/">Features</a>
+          </li>
+          <li>
+            <a href="/staging/download/">Download</a>
+          </li>
+          <li>
+            <a href="/staging/cli/" aria-current="page">CLI</a>
+          </li>
+          <li>
+            <a href="/staging/api/">Python API</a>
+          </li>
+          <li>
+            <a href="/staging/benchmarks/">Benchmarks</a>
+          </li>
+          <li>
+            <a href="/staging/faq/">FAQ</a>
+          </li>
+          <li>
+            <a href="/docs/latest/">
+              <span>Reference Manual</span>
+              <svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M7 17L17 7M7 7h10v10"/>
+              </svg>
+            </a>
+          </li>
+          <li class="mobile-only-nav">
+            <a href="/staging/changelog/">Changelog</a>
+          </li>
+          <li class="mobile-only-nav">
+            <a href="/staging/docs/">Documentation</a>
+          </li>
+          <li class="mobile-only-nav">
+            <a href="/staging/contributing/">Contributing</a>
+          </li>
+          <li class="mobile-only-nav">
+            <a href="/staging/supporting/">Support</a>
+          </li>
+          <li class="mobile-only-nav">
+            <a href="/staging/gallery/">Project Gallery</a>
+          </li>
+          <li class="mobile-only-nav">
+            <a href="/staging/similar/">Similar Projects</a>
+          </li>
+          <li class="mobile-only-nav">
+            <a href="/staging/literature/">Literature</a>
+          </li>
+          <li class="mobile-only-nav">
+            <a href="/staging/copyright/">License</a>
+          </li>
+          <li class="mobile-only-nav">
+            <a href="https://github.com/Breakthrough/PySceneDetect">
+              <span>GitHub</span>
+              <svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M7 17L17 7M7 7h10v10"/>
+              </svg>
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="header-actions">
+        <button
+          type="button"
+          class="search-trigger"
+        >
+          <svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="7"/>
+            <path d="m20 20-3.5-3.5"/>
+          </svg>
+          <span class="search-trigger-label">Search</span>
+          <kbd class="kbd" aria-hidden="true">Ctrl K</kbd>
+        </button>
+
+        <button type="button" class="theme-toggle">
+          <svg class="theme-option-dark" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
+          </svg>
+          <span class="visually-hidden theme-option-dark">Switch to dark theme</span>
+          <svg class="theme-option-light" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="4"/>
+            <path d="M12 2v2M12 20v2m-7.07-14.93 1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+          </svg>
+          <span class="visually-hidden theme-option-light">Switch to light theme</span>
+        </button>
+
+        <a class="icon-link" href="https://github.com/Breakthrough/PySceneDetect">
+          <svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M8 0C3.58 0 0 3.58 0 8a8 8 0 0 0 5.47 7.59c.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/>
+          </svg>
+          <span class="github-label">GitHub</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <search>
+    <dialog id="search-dialog" class="search-dialog" closedby="any" aria-label="Search PySceneDetect">
+      <form method="dialog" class="search-header">
+        <label for="search-input" class="visually-hidden">Search documentation and guides</label>
+        <svg class="search-input-icon" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="7"/>
+          <path d="m20 20-3.5-3.5"/>
+        </svg>
+        <input
+          type="search"
+          id="search-input"
+          class="search-input"
+          placeholder="Search guides, CLI, detectors, FAQ..."
+          autocomplete="off"
+          autofocus
+        >
+        <button type="submit" class="search-close" aria-label="Esc - Close search">Esc</button>
+      </form>
+      <div id="search-results" class="search-results" role="region" aria-label="Search results" aria-live="polite">
+        <p class="search-empty">Type a keyword to search across all guides, CLI options, detectors, and FAQs.</p>
+      </div>
+    </dialog>
+  </search>
+
+  <div class="docs-shell">
+    <aside class="docs-sidebar" aria-label="Site navigation">
+      <div class="side-group-title">PySceneDetect</div>
+      <ul class="side-list" role="list">
+        <li>
+          <a href="/staging/">Home</a>
+        </li>
+        <li>
+          <a href="/staging/features/">Features</a>
+        </li>
+        <li>
+          <a href="/staging/download/">Download</a>
+        </li>
+        <li>
+          <a href="/staging/changelog/">Changelog</a>
+        </li>
+      </ul>
+      <div class="side-group-title">Reference</div>
+      <ul class="side-list" role="list">
+        <li>
+          <a href="/staging/docs/">Documentation</a>
+        </li>
+        <li>
+          <a href="/staging/cli/" aria-current="page">Command-Line</a>
+        </li>
+        <li>
+          <a href="/staging/api/">Python API</a>
+        </li>
+        <li>
+          <a href="/staging/benchmarks/">Benchmarks</a>
+        </li>
+      </ul>
+      <div class="side-group-title">Support</div>
+      <ul class="side-list" role="list">
+        <li>
+          <a href="/staging/faq/">FAQ</a>
+        </li>
+        <li>
+          <a href="/staging/contributing/">Bugs &amp; Contributing</a>
+        </li>
+        <li>
+          <a href="/staging/supporting/">Development &amp; Support</a>
+        </li>
+      </ul>
+      <div class="side-group-title">Resources</div>
+      <ul class="side-list" role="list">
+        <li>
+          <a href="/staging/gallery/">Project Gallery</a>
+        </li>
+        <li>
+          <a href="/staging/similar/">Similar Projects</a>
+        </li>
+        <li>
+          <a href="/staging/literature/">Research &amp; Literature</a>
+        </li>
+        <li>
+          <a href="/staging/copyright/">License &amp; Copyright</a>
+        </li>
+      </ul>
+    </aside>
+
+    <main id="main-content" class="docs-main" tabindex="-1">
+      <article class="prose">
+        <h1 id="pyscenedetect-cli">PySceneDetect CLI</h1>
+<p>See <a href="/docs/latest/">the documentation</a> for a complete reference to the <code>scenedetect</code> command with more examples.</p>
+<h2 id="quickstart">Quickstart</h2>
+<p>Split input video on each fast cut using <code>ffmpeg</code>:</p>
+<div class="codehilite"><pre tabindex="0"><code>scenedetect<span class="w"> </span>-i<span class="w"> </span>video.mp4<span class="w"> </span>split-video
+</code></pre></div>
+
+<p>Save some frames from each cut:</p>
+<div class="codehilite"><pre tabindex="0"><code>scenedetect<span class="w"> </span>-i<span class="w"> </span>video.mp4<span class="w"> </span>save-images
+</code></pre></div>
+
+<p>Skip the first 10 seconds of the input video:</p>
+<div class="codehilite"><pre tabindex="0"><code>scenedetect<span class="w"> </span>-i<span class="w"> </span>video.mp4<span class="w"> </span><span class="nb">time</span><span class="w"> </span>-s<span class="w"> </span>10s
+</code></pre></div>
+
+<h2 id="example">Example</h2>
+<p>As a concrete example to become familiar with PySceneDetect, let's use the following short clip from the James Bond movie, GoldenEye (Copyright &copy; 1995 MGM):</p>
+<p><a href="https://www.youtube.com/watch?v=OMgIPnCnlbQ">https://www.youtube.com/watch?v=OMgIPnCnlbQ</a></p>
+<p>You can <a href="https://github.com/Breakthrough/PySceneDetect/raw/refs/heads/resources/tests/resources/goldeneye.mp4">download the clip from here</a> (right-click and save the video in your working directory as <code>goldeneye.mp4</code>).</p>
+<p>Let's split this scene into clips on each fast cut. This means we need to use content-aware detection mode (<code>detect-content</code>) or adaptive mode (<code>detect-adaptive</code>). If the video instead contains fade-in/fade-out transitions you want to find, you can use <code>detect-threshold</code> instead. If no detector is specified, <code>detect-adaptive</code> will be used by default.</p>
+<p>Let's first save a scene list in CSV format and generate some images of each scene to check the output:</p>
+<div class="codehilite"><pre tabindex="0"><code>scenedetect<span class="w"> </span>--input<span class="w"> </span>goldeneye.mp4<span class="w"> </span>detect-adaptive<span class="w"> </span>list-scenes<span class="w"> </span>save-images
+</code></pre></div>
+
+<p>Running the above command, in the working directory, you should see a file <code>goldeneye-Scenes.csv</code>, as well as individual frames for the start/middle/end of each scene starting with <code>goldeneye-Scene-001-01.jpg</code>. The results should appear as follows:</p>
+<div tabindex="0" role="region" aria-label="Example" class="table-wrapper"><table>
+<thead>
+<tr>
+<th scope="col">Scene #</th>
+<th scope="col">Start Time</th>
+<th scope="col">Preview</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>00:00:00.000</td>
+<td><img src="https://raw.githubusercontent.com/Breakthrough/PySceneDetect/resources/tests/resources/goldeneye/d-content-t-27/goldeneye-Scene-001-01.jpg" width="480" alt="GoldenEye scene 1 preview" loading="lazy"></td>
+</tr>
+<tr>
+<td>2</td>
+<td>00:00:03.754</td>
+<td><img src="https://raw.githubusercontent.com/Breakthrough/PySceneDetect/resources/tests/resources/goldeneye/d-content-t-27/goldeneye-Scene-002-01.jpg" width="480" alt="GoldenEye scene 2 preview" loading="lazy"></td>
+</tr>
+<tr>
+<td>3</td>
+<td>00:00:08.759</td>
+<td><img src="https://raw.githubusercontent.com/Breakthrough/PySceneDetect/resources/tests/resources/goldeneye/d-content-t-27/goldeneye-Scene-003-01.jpg" width="480" alt="GoldenEye scene 3 preview" loading="lazy"></td>
+</tr>
+<tr>
+<td>4</td>
+<td>00:00:10.802</td>
+<td><img src="https://raw.githubusercontent.com/Breakthrough/PySceneDetect/resources/tests/resources/goldeneye/d-content-t-27/goldeneye-Scene-004-01.jpg" width="480" alt="GoldenEye scene 4 preview" loading="lazy"></td>
+</tr>
+<tr>
+<td>5</td>
+<td>00:00:15.599</td>
+<td><img src="https://raw.githubusercontent.com/Breakthrough/PySceneDetect/resources/tests/resources/goldeneye/d-content-t-27/goldeneye-Scene-005-01.jpg" width="480" alt="GoldenEye scene 5 preview" loading="lazy"></td>
+</tr>
+<tr>
+<td>6</td>
+<td>00:00:27.110</td>
+<td><img src="https://raw.githubusercontent.com/Breakthrough/PySceneDetect/resources/tests/resources/goldeneye/d-content-t-27/goldeneye-Scene-006-01.jpg" width="480" alt="GoldenEye scene 6 preview" loading="lazy"></td>
+</tr>
+<tr>
+<td>7</td>
+<td>00:00:34.117</td>
+<td><img src="https://raw.githubusercontent.com/Breakthrough/PySceneDetect/resources/tests/resources/goldeneye/d-content-t-27/goldeneye-Scene-007-01.jpg" width="480" alt="GoldenEye scene 7 preview" loading="lazy"></td>
+</tr>
+<tr>
+<td>8</td>
+<td>00:00:36.536</td>
+<td><img src="https://raw.githubusercontent.com/Breakthrough/PySceneDetect/resources/tests/resources/goldeneye/d-content-t-27/goldeneye-Scene-008-01.jpg" width="480" alt="GoldenEye scene 8 preview" loading="lazy"></td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr>
+<td>18</td>
+<td>00:01:06.316</td>
+<td><img src="https://raw.githubusercontent.com/Breakthrough/PySceneDetect/resources/tests/resources/goldeneye/d-content-t-27/goldeneye-Scene-018-01.jpg" width="480" alt="GoldenEye scene 18 preview" loading="lazy"></td>
+</tr>
+<tr>
+<td>19</td>
+<td>00:01:10.779</td>
+<td><img src="https://raw.githubusercontent.com/Breakthrough/PySceneDetect/resources/tests/resources/goldeneye/d-content-t-27/goldeneye-Scene-019-01.jpg" width="480" alt="GoldenEye scene 19 preview" loading="lazy"></td>
+</tr>
+<tr>
+<td>20</td>
+<td>00:01:18.036</td>
+<td><img src="https://raw.githubusercontent.com/Breakthrough/PySceneDetect/resources/tests/resources/goldeneye/d-content-t-27/goldeneye-Scene-020-01.jpg" width="480" alt="GoldenEye scene 20 preview" loading="lazy"></td>
+</tr>
+<tr>
+<td>21</td>
+<td>00:01:19.913</td>
+<td><img src="https://raw.githubusercontent.com/Breakthrough/PySceneDetect/resources/tests/resources/goldeneye/d-content-t-27/goldeneye-Scene-021-01.jpg" width="480" alt="GoldenEye scene 21 preview" loading="lazy"></td>
+</tr>
+<tr>
+<td>22</td>
+<td>00:01:21.999</td>
+<td><img src="https://raw.githubusercontent.com/Breakthrough/PySceneDetect/resources/tests/resources/goldeneye/d-content-t-27/goldeneye-Scene-022-01.jpg" width="480" alt="GoldenEye scene 22 preview" loading="lazy"></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="splitting-video-into-clips">Splitting Video into Clips</h2>
+<p>The <code>split-video</code> command can be used to automatically split the input video using <code>ffmpeg</code> or <code>mkvmerge</code>. For example:</p>
+<div class="codehilite"><pre tabindex="0"><code>scenedetect<span class="w"> </span>-i<span class="w"> </span>goldeneye.mp4<span class="w"> </span>split-video
+</code></pre></div>
+
+<p>Type <code>scenedetect split-video --help</code> for a full list of options which can be specified for video splitting, including high quality mode (<code>-hq/--high-quality</code>) or copy mode (<code>-c/--copy</code>).</p>
+<p>You can also specify <code>-hq</code> / <code>--high-quality</code> to produce near lossless results, or <code>-p</code>/<code>--preset</code> and <code>-crf</code>/<code>--rate-factor</code> (call <code>scenedetect help split-video</code> for details). If either <code>-c</code>/<code>--copy</code> or <code>-m</code>/<code>--mkvmerge</code> is specified, codec copying mode is used, at the expense of frame accurate cuts. Optionally, you can also specify the x264 <code>-p</code>/<code>--preset</code> and <code>-crf</code>/<code>--rate-factor</code> (see <code>scenedetect split-video --help</code> for details).</p>
+<h2 id="detection-methods">Detection Methods</h2>
+<p>PySceneDetect can look for fades in/out using <code>detect-threshold</code> (comparing each frame to a set black level) or find fast cuts using <code>detect-content</code> (compares each frame looking for changes in content). There also is <code>detect-adaptive</code>, which uses the same scoring as <code>detect-content</code>, but compares the ratio of each frame score to its neighbors.</p>
+<p>Each mode has slightly different parameters, and is described in detail below. Most detector parameters can also be <a href="/docs/latest/cli/config_file.html">set with a config file</a>.</p>
+<p>In general, use <code>detect-threshold</code> mode if you want to detect scene boundaries using fades/cuts in/out to black. If the video uses a lot of fast cuts between content, and has no well-defined scene boundaries, you should use the <code>detect-adaptive</code> or <code>detect-content</code> modes. Once you know what detection mode to use, you can try the parameters recommended below, or generate a statistics file (using the <code>-s</code> / <code>--stats</code> flag) in order to determine the correct parameters - specifically, the proper threshold value.</p>
+<h3 id="content-aware-detection">Content-Aware Detection</h3>
+<p>Unlike threshold mode, content-aware mode looks at the <em>difference</em> between each pair of adjacent frames, triggering a scene break when this difference exceeds the threshold value.</p>
+<p>The optimal threshold can be determined by generating a stats file (<code>-s</code>), opening it with a spreadsheet editor (e.g. Excel), and examining the <code>content_val</code> column (<a href="/staging/img/goldeneye-stats.png">example</a>). This value should be very small between similar frames, and grow large when a big change in content is noticed (look at the values near frame numbers/times where you know a scene change occurs). The threshold value should be set so that most scenes fall below the threshold value, and scenes where changes occur should <em>exceed</em> the threshold value (thus triggering a scene change).</p>
+<h3 id="threshold-detection">Threshold Detection</h3>
+<p>Threshold-based mode is what most traditional scene detection programs use, which looks at the average intensity of the <em>current</em> frame, triggering a scene break when the intensity falls below the threshold (or crosses back upwards). The default threshold when using <code>detect-threshold</code> is <code>12</code> (e.g. <code>detect-threshold</code> is the same as <code>detect-threshold --threshold 12</code> when the <code>-t</code> / <code>--threshold</code> option is not supplied), which is a good value to try when detecting fade outs to black on most videos.</p>
+<div class="codehilite"><pre tabindex="0"><code>scenedetect<span class="w"> </span>-i<span class="w"> </span>my_video.mp4<span class="w"> </span>-s<span class="w"> </span>my_video.stats.csv<span class="w"> </span>detect-threshold
+</code></pre></div>
+
+<div class="codehilite"><pre tabindex="0"><code>scenedetect<span class="w"> </span>-i<span class="w"> </span>my_video.mp4<span class="w"> </span>-s<span class="w"> </span>my_video.stats.csv<span class="w"> </span>detect-threshold<span class="w"> </span>-t<span class="w"> </span><span class="m">20</span>
+</code></pre></div>
+
+<p>Using values for threshold less than <code>8</code> may cause problems with some videos, especially those encoded at lower bitrates or with limited dynamic range.</p>
+<p>The optimal threshold can be determined by generating a statsfile (<code>-s</code>), opening it with a spreadsheet editor (e.g. Excel), and examining the <code>average_rgb</code> column. These values represent the average intensity of the pixels for that particular frame (taken by averaging the R, G, and B values over the whole frame). The threshold value should be set so that the average intensity of most frames in content scenes lie above the threshold value, and scenes where scene changes/breaks occur should fall <em>under</em> the threshold value (thus triggering a scene change).</p>
+<h3 id="adaptive-detection">Adaptive Detection</h3>
+<p>The <code>detect-adaptive</code> mode compares each frame's score as calculated by <code>detect-content</code> with its neighbors. This score is what forms the <code>adaptive_ratio</code> metric in the statsfile. You can also configure the amount of neighboring frames via the <code>frame-window</code> option, as well as the minimum change in <code>content_val</code> score using <code>min-content-val</code>.</p>
+<h2 id="detection-parameters">Detection Parameters</h2>
+<p>Detectors take a variety of parameters, which can be <a href="/docs/latest/cli.html#detectors">configured via command-line</a> or by <a href="/docs/latest/cli/config_file.html">using a config file</a>. If the default parameters do not produce correct results, you can generate a stats file using the <code>-s</code> / <code>--stats</code> option.</p>
+<p>For example, with <code>detect-content</code>, if the default threshold of <code>27</code> does not produce correct results, we can determine the proper threshold by first generating a stats file:</p>
+<div class="codehilite"><pre tabindex="0"><code>scenedetect<span class="w"> </span>--input<span class="w"> </span>goldeneye.mp4<span class="w"> </span>--stats<span class="w"> </span>goldeneye.stats.csv<span class="w"> </span>detect-adaptive
+</code></pre></div>
+
+<p>We can then plot the values of the <code>content_val</code> column:</p>
+<p><img src="/staging/img/goldeneye-stats.png" alt="goldeneye.mp4 statistics graph" width="600" height="371" loading="lazy"></p>
+<p>The peaks in values correspond to the scene breaks in the input video. In some cases the threshold may need to be raised or lowered accordingly.</p>
+<h2 id="saving-image-previews-of-detected-scenes">Saving Image Previews of Detected Scenes</h2>
+<p>PySceneDetect can automatically save the beginning and ending frame of each detected scene by using the <code>save-images</code> command. If present, the first and last frames of each scene will be saved in the current working directory, using the filename of the input video.</p>
+<p>Files marked <code>00</code> represent the starting frame of the scene, and those marked <code>01</code> represent the last frame (e.g. <code>testvideo.mp4.Scene-4-01.jpg</code>). By default, two images are generated.</p>
+<p>Coming soon: If more are specified via the <code>-n</code> flag, they will start from <code>00</code> (the first frame) and be evenly spaced throughout the scene until the last frame, which will be numbered <code>N-1</code>.</p>
+<h2 id="improving-processing-speedperformance">Improving Processing Speed/Performance</h2>
+<p>The following arguments are global program options, and need to be applied before any commands (e.g. <code>detect-content</code>, <code>list-scenes</code>). They can be used to achieve performance gains for some source material with a variable loss of accuracy.</p>
+<p>Assuming the input video is of a high enough resolution, a significant performance gain can be achieved by sub-sampling (down-scaling) the input image by a specific integer factor (2x, 3x, 4x, 5x...). This is applied automatically to some degree based on the input video size, but can be overridden manually with the <code>-d</code> / <code>--downscale</code> option.</p>
+<p>This factor represents how many pixels are "skipped" in both the x- and y- directions, effectively down-scaling the image (using nearest-neighbor sampling) by the factor specified (the new resolution being <code>W/factor x H/factor</code> if the old resolution is <code>W x H</code>).</p>
+<p>Another method that can be used to gain a performance boost is frame skipping. This method, however, severely reduces frame-accurate scene cuts, so it should only be used with high FPS material (ideally &gt; 60 FPS), at low values (try not to exceed a value of <code>1</code> or <code>2</code> if using <code>-fs</code> / <code>--frame-skip</code>), in cases where this is acceptable. Using the frame skip option also disallows the use of a stats file, which offsets the speed gain if the same video needs to be processed multiple times (e.g. to determine the optimal threshold).</p>
+<p>The option still remains, however, for the set of cases where it is still required. For example, if we skip every other frame (e.g. using <code>--frame-skip 1</code>), the processing speed should roughly double.</p>
+<p>If set too large, enough frames may be skipped each time that the threshold is met during every iteration, continually triggering scene changes. This is because frame skipping essentially raises the threshold between frames in the same scene (making them more likely to appear as <em>cuts</em>) while not affecting the threshold between frames of different scenes.</p>
+<p>This makes the two harder to distinguish, and can cause additional false scene cuts to be detected. While this can be compensated for by raising the threshold value, this increases the probability of missing a real/true scene cut - thus, the use of the <code>-fs</code> / <code>--frame-skip</code> option is discouraged.</p>
+<h2 id="seeking-duration-and-setting-start-stop-times">Seeking, Duration, and Setting Start / Stop Times</h2>
+<p>Specifying the <code>time</code> command allows control over what portion of the video PySceneDetect processes. The <code>time</code> command accepts three options: start time (<code>-s</code> / <code>--start</code>), end time (<code>-e</code> / <code>--end</code>), and duration (<code>-d</code> / <code>--duration</code>). Specifying both end time and duration is redundant, and in this case, duration overrides end time. Timecodes can be given in seconds (<code>100.0</code>), frames (no decimal place, <code>100</code>), or timecode as <code>HH:MM:SS[.nnn]</code> (<code>12:34:56.789</code>).</p>
+<p>For example, let's say we have a video shot at 30 FPS, and want to analyze only the segment from the 5 to the 6.5 minute mark in the video (we want to analyze the 90 seconds [2700 frames] between 00:05:00 and 00:06:30). The following commands are all thus equivalent in this regard (assuming we are using the content detector):</p>
+<div class="codehilite"><pre tabindex="0"><code>scenedetect<span class="w"> </span>-i<span class="w"> </span>my_video.mp4<span class="w"> </span><span class="nb">time</span><span class="w"> </span>--start<span class="w"> </span><span class="m">00</span>:05:00<span class="w"> </span>--end<span class="w"> </span><span class="m">00</span>:06:30
+</code></pre></div>
+
+<div class="codehilite"><pre tabindex="0"><code>scenedetect<span class="w"> </span>-i<span class="w"> </span>my_video.mp4<span class="w"> </span><span class="nb">time</span><span class="w"> </span>--start<span class="w"> </span>300s<span class="w"> </span>--end<span class="w"> </span>390s
+</code></pre></div>
+
+<div class="codehilite"><pre tabindex="0"><code>scenedetect<span class="w"> </span>-i<span class="w"> </span>my_video.mp4<span class="w"> </span><span class="nb">time</span><span class="w"> </span>--start<span class="w"> </span>300s<span class="w"> </span>--duration<span class="w"> </span>90s
+</code></pre></div>
+
+<div class="codehilite"><pre tabindex="0"><code>scenedetect<span class="w"> </span>-i<span class="w"> </span>my_video.mp4<span class="w"> </span><span class="nb">time</span><span class="w"> </span>--start<span class="w"> </span>300s<span class="w"> </span>--duration<span class="w"> </span><span class="m">2700</span>
+</code></pre></div>
+
+<p>This demonstrates the different timecode formats, interchanging end time with duration and vice-versa, and precedence of setting duration over end time.</p>
+<h2 id="config-file">Config File</h2>
+<p>A configuration file path can be specified using the <code>-c</code>/<code>--config</code> argument. PySceneDetect also looks for a config file named <code>scenedetect.cfg</code> in one of the following locations:</p>
+<ul>
+<li>Windows:<ul>
+<li><code>C:/Users/%USERNAME%/AppData/Local/PySceneDetect/scenedetect.cfg</code></li>
+</ul>
+</li>
+<li>Linux:<ul>
+<li><code>~/.config/PySceneDetect/scenedetect.cfg</code></li>
+<li><code>$XDG_CONFIG_HOME/scenedetect.cfg</code></li>
+</ul>
+</li>
+<li>Mac:<ul>
+<li><code>~/Library/Preferences/PySceneDetect/scenedetect.cfg</code></li>
+</ul>
+</li>
+</ul>
+<p>Run <code>scenedetect --help</code> to see the exact path on your system which will be used (it will be listed under the help text for the <code>-c</code>/<code>--config</code> option). You can <a href="https://raw.githubusercontent.com/Breakthrough/PySceneDetect/v0.6.4-release/scenedetect.cfg">click here to download a <code>scenedetect.cfg</code> config file</a> to use as a template. Note that lines starting with a <code>#</code> are comments and will be ignored. The <code>scenedetect.cfg</code> template file is also available in the folder where PySceneDetect is installed.</p>
+<p>Specifying a config file path using <code>-c</code>/<code>--config</code> overrides the user config file. Specifying values on the command line will override those values in the config file.</p>
+<p>The syntax of a configuration file is:</p>
+<div class="codehilite"><pre tabindex="0"><code><span class="k">[command]</span>
+<span class="na">option_a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">value</span>
+<span class="c1">#comment</span>
+<span class="na">option_b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">1</span>
+</code></pre></div>
+
+<h3 id="example_1">Example</h3>
+<div class="codehilite"><pre tabindex="0"><code><span class="k">[global]</span>
+<span class="na">default-detector</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">detect-content</span>
+<span class="na">min-scene-len</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">0.8s</span>
+
+<span class="k">[detect-content]</span>
+<span class="na">threshold</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">32</span>
+<span class="na">weights</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">1.0 0.5 1.0 0.2</span>
+
+<span class="k">[split-video]</span>
+<span class="na">preset</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">slow</span>
+<span class="na">rate-factor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">17</span>
+<span class="c1"># Don't need to use quotes even if filename contains spaces</span>
+<span class="na">filename</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">$VIDEO_NAME-Clip-$SCENE_NUMBER</span>
+
+<span class="k">[save-images]</span>
+<span class="na">format</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">jpeg</span>
+<span class="na">quality</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">80</span>
+<span class="na">num-images</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">3</span>
+</code></pre></div>
+
+<p>See the <code>scenedetect.cfg</code> file in the location you installed PySceneDetect or <a href="https://raw.githubusercontent.com/Breakthrough/PySceneDetect/v0.6.4-release/scenedetect.cfg">download it from Github</a> for a complete listing of all configuration options.</p>
+<h2 id="video-splitting-requirements">Video Splitting Requirements</h2>
+<p>PySceneDetect can use either <code>ffmpeg</code> or <code>mkvmerge</code> to split videos automatically.</p>
+<p>By default, when specifying the <code>split-video</code> command, <code>ffmpeg</code> will be used to split the video. If the <code>-c</code>/<code>--copy</code> option is also set (e.g. <code>split-video --copy</code>), <code>mkvmerge</code> will be used to split the video instead.</p>
+<h3 id="ffmpeg">FFmpeg</h3>
+<p>You can download <code>ffmpeg</code> from: <a href="https://ffmpeg.org/download.html">https://ffmpeg.org/download.html</a></p>
+<p>Note that Linux users should use a package manager (e.g. <code>sudo apt-get install ffmpeg</code>). Windows users may require additional steps in order for PySceneDetect to detect <code>ffmpeg</code> - see the section Enabling <code>split-video</code> Support below for details.</p>
+<h3 id="mkvmerge">mkvmerge</h3>
+<p>You can download and install <code>mkvmerge</code> as part of the mkvtoolnix package from:
+<a href="https://mkvtoolnix.download/downloads.html">https://mkvtoolnix.download/downloads.html</a></p>
+<p>Note that Windows users should use the installer/setup, and Linux users should use their system package manager, otherwise PySceneDetect may not be able to find <code>mkvmerge</code>. If this is the case, see the section below to enable support for the <code>split-video --copy</code> command manually.</p>
+<h3 id="enabling-split-video-support">Enabling <code>split-video</code> Support</h3>
+<p>If PySceneDetect cannot find the respective tool installed on your system, you have three options:</p>
+<ol>
+<li>Place the tool in the same location that PySceneDetect is installed (e.g. copy and paste <code>mkvmerge.exe</code> into the same place <code>scenedetect.exe</code> is located). This is the easiest solution for most users.</li>
+<li>Add the directory where you installed <code>ffmpeg</code>/<code>mkvmerge</code> to your system's <code>PATH</code> environment variable, ensuring that you can use the <code>ffmpeg</code>/<code>mkvmerge</code> command from any terminal/command prompt. This is the best solution for advanced users.</li>
+<li>Place the tool in a location already in your system's <code>PATH</code> variable (e.g. <code>C:/Windows</code>). This is not recommended, but may be the only solution on systems without administrative rights.</li>
+</ol>
+      </article>
+
+      <div class="doc-meta-bar">
+        <a class="edit-link" href="https://github.com/Breakthrough/PySceneDetect/blob/main/website/pages/cli.md">
+          <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>
+          </svg>
+          <span>Edit this page on GitHub</span>
+        </a>
+      </div>
+
+      <nav class="pagination-nav" aria-label="Pagination">
+        <a class="pagination-link pagination-prev" href="/staging/docs/">
+          <span class="pagination-hint">&larr; Previous</span>
+          <span class="pagination-title">Documentation</span>
+        </a>
+        <a class="pagination-link pagination-next" href="/staging/api/">
+          <span class="pagination-hint">Next &rarr;</span>
+          <span class="pagination-title">Python API</span>
+        </a>
+      </nav>
+    </main>
+
+    <aside class="docs-toc" aria-label="On this page">
+      <div class="toc-sticky">
+        <div class="toc-title">On this page</div>
+        <ul class="toc-list" role="list">
+          <li>
+            <a href="#quickstart">Quickstart</a>
+          </li>
+          <li>
+            <a href="#example">Example</a>
+          </li>
+          <li>
+            <a href="#splitting-video-into-clips">Splitting Video into Clips</a>
+          </li>
+          <li>
+            <a href="#detection-methods">Detection Methods</a>
+            <ul class="toc-sublist" role="list">
+              <li><a href="#content-aware-detection">Content-Aware Detection</a></li>
+              <li><a href="#threshold-detection">Threshold Detection</a></li>
+              <li><a href="#adaptive-detection">Adaptive Detection</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="#detection-parameters">Detection Parameters</a>
+          </li>
+          <li>
+            <a href="#saving-image-previews-of-detected-scenes">Saving Image Previews of Detected Scenes</a>
+          </li>
+          <li>
+            <a href="#improving-processing-speedperformance">Improving Processing Speed/Performance</a>
+          </li>
+          <li>
+            <a href="#seeking-duration-and-setting-start-stop-times">Seeking, Duration, and Setting Start / Stop Times</a>
+          </li>
+          <li>
+            <a href="#config-file">Config File</a>
+            <ul class="toc-sublist" role="list">
+              <li><a href="#example_1">Example</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="#video-splitting-requirements">Video Splitting Requirements</a>
+            <ul class="toc-sublist" role="list">
+              <li><a href="#ffmpeg">FFmpeg</a></li>
+              <li><a href="#mkvmerge">mkvmerge</a></li>
+              <li><a href="#enabling-split-video-support">Enabling split-video Support</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </aside>
+  </div>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <p class="footer-copy">
+        Copyright &copy; 2014 Brandon Castellano. Licensed under the
+        <a href="/staging/copyright/">BSD 3-Clause License</a>.
+      </p>
+      <ul class="footer-links" role="list">
+        <li><a href="https://github.com/Breakthrough/PySceneDetect">GitHub</a></li>
+        <li><a href="https://pypi.org/project/scenedetect/">PyPI</a></li>
+        <li><a href="/docs/latest/">Reference Manual</a></li>
+        <li><a href="/staging/changelog/">Changelog</a></li>
+        <li><a href="/staging/copyright/">License</a></li>
+      </ul>
+    </div>
+  </footer>
+</body>
+</html>
