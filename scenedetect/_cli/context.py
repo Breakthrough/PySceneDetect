@@ -185,13 +185,13 @@ class CliContext:
     @staticmethod
     def _weights_value(
         weights: tuple[float, float, float, float] | None,
-    ) -> ContentDetector.Components | None:
-        """Validate `--weights` like the config file does, so all-zero weights give a usage error
+    ) -> ScoreWeightsValue | None:
+        """Validate `--weights` like the config file does, so invalid weights give a usage error
         instead of NaN frame scores."""
         if weights is None:
             return None
         try:
-            return ScoreWeightsValue(ContentDetector.Components(*weights)).value
+            return ScoreWeightsValue(ContentDetector.Components(*weights))
         except ValueError as ex:
             raise click.BadParameter(str(ex), param_hint="weights") from ex
 

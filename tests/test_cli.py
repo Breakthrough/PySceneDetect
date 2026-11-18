@@ -483,6 +483,25 @@ def test_cli_weights_config_file_rejects_all_zero(tmp_path: Path, command: str):
     assert any("non-zero" in message for _, message in ex.value.init_log)
 
 
+@pytest.mark.parametrize("command", ["detect-content", "detect-adaptive"])
+@pytest.mark.parametrize("bad_weight", ["-1", "nan", "inf"])
+def test_cli_weights_rejects_negative_or_non_finite(command: str, bad_weight: str):
+    exit_code, output = invoke_cli(
+        ["-i", DEFAULT_VIDEO_PATH, command, "-w", "1", "1", bad_weight, "0", "time", "-e", "1"]
+    )
+    assert exit_code != 0
+    assert "Weights must be finite and non-negative." in output
+
+
+@pytest.mark.parametrize("command", ["detect-content", "detect-adaptive"])
+def test_cli_weights_config_file_rejects_negative(tmp_path: Path, command: str):
+    config_path = tmp_path.joinpath("config.cfg")
+    config_path.write_text(f"[{command}]\nweights = 1, 1, -1, 0\n")
+    with pytest.raises(ConfigLoadFailure) as ex:
+        ConfigRegistry(str(config_path))
+    assert any("non-negative" in message for _, message in ex.value.init_log)
+
+
 @pytest.mark.parametrize(
     "cli_args",
     [

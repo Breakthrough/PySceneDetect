@@ -301,3 +301,10 @@ def test_detector_rejects_all_zero_weights(detector_type):
         detector_type(weights=ContentDetector.Components(0.0, 0.0, 0.0, 0.0))
     # luma_only overrides weights, so this is still valid.
     detector_type(weights=ContentDetector.Components(0.0, 0.0, 0.0, 0.0), luma_only=True)
+
+
+@pytest.mark.parametrize("detector_type", [ContentDetector, AdaptiveDetector])
+@pytest.mark.parametrize("bad_weight", [-1.0, float("nan"), float("inf")])
+def test_detector_rejects_negative_or_non_finite_weights(detector_type, bad_weight: float):
+    with pytest.raises(ValueError, match="Weights must be finite and non-negative"):
+        detector_type(weights=ContentDetector.Components(1.0, 1.0, bad_weight, 0.0))
