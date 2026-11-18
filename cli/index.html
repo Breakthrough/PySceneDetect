@@ -288,7 +288,7 @@
 <h3 id="adaptive-detection">Adaptive Detection</h3>
 <p>The <code>detect-adaptive</code> mode compares each frame's score as calculated by <code>detect-content</code> with its neighbors. This score is what forms the <code>adaptive_ratio</code> metric in the statsfile. You can also configure the amount of neighboring frames via the <code>frame-window</code> option, as well as the minimum change in <code>content_val</code> score using <code>min-content-val</code>.</p>
 <h2 id="detection-parameters">Detection Parameters</h2>
-<p>Detectors take a variety of parameters, which can be <a href="https://www.scenedetect.com/docs/latest/cli/detectors.html">configured via command-line</a> or by <a href="https://www.scenedetect.com/docs/latest/cli/config_file.html">using a config file</a>. If the default parameters do not produce correct results, you can generate a stats file using the <code>-s</code> / <code>--stats</code> option.</p>
+<p>Detectors take a variety of parameters, which can be <a href="https://www.scenedetect.com/docs/latest/cli.html#detectors">configured via command-line</a> or by <a href="https://www.scenedetect.com/docs/latest/cli/config_file.html">using a config file</a>. If the default parameters do not produce correct results, you can generate a stats file using the <code>-s</code> / <code>--stats</code> option.</p>
 <p>For example, with <code>detect-content</code>, if the default threshold of <code>27</code> does not produce correct results, we can determine the proper threshold by first generating a stats file:</p>
 <pre><code class="language-bash">scenedetect --input goldeneye.mp4 --stats goldeneye.stats.csv detect-adaptive
 </code></pre>
