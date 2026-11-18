@@ -113,7 +113,7 @@ The `detect-adaptive` mode compares each frame's score as calculated by `detect-
 
 ## Detection Parameters
 
-Detectors take a variety of parameters, which can be [configured via command-line](https://www.scenedetect.com/docs/latest/cli/detectors.html) or by [using a config file](https://www.scenedetect.com/docs/latest/cli/config_file.html). If the default parameters do not produce correct results, you can generate a stats file using the `-s` / `--stats` option.
+Detectors take a variety of parameters, which can be [configured via command-line](https://www.scenedetect.com/docs/latest/cli.html#detectors) or by [using a config file](https://www.scenedetect.com/docs/latest/cli/config_file.html). If the default parameters do not produce correct results, you can generate a stats file using the `-s` / `--stats` option.
 
 For example, with `detect-content`, if the default threshold of `27` does not produce correct results, we can determine the proper threshold by first generating a stats file:
 
